@@ -1,13 +1,5 @@
 package xiamomc.morph.events;
 
-import me.libraryaddict.disguise.DisguiseAPI;
-import me.libraryaddict.disguise.LibsDisguises;
-import me.libraryaddict.disguise.commands.utils.DisguiseCloneCommand;
-import me.libraryaddict.disguise.disguisetypes.Disguise;
-import me.libraryaddict.disguise.disguisetypes.DisguiseType;
-import me.libraryaddict.disguise.disguisetypes.MobDisguise;
-import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
-import me.libraryaddict.disguise.utilities.DisguiseUtilities;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -15,10 +7,15 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
-import xiamomc.morph.MorphPlugin;
-import xiamomc.morph.MorphUtils;
+import org.bukkit.event.player.PlayerInteractAtEntityEvent;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.event.server.TabCompleteEvent;
+import xiamomc.morph.MorphManager;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.PluginObject;
+
+import java.util.ArrayList;
+import java.util.Arrays;
 
 public class EventProcessor extends PluginObject implements Listener
 {
@@ -49,17 +46,65 @@ public class EventProcessor extends PluginObject implements Listener
         }
 
         if (killer != null)
-        {
             this.onPlayerKillEntity(killer, e.getEntity());
+    }
+
+    @EventHandler
+    public void onTabComplete(TabCompleteEvent e)
+    {
+        if (!e.getBuffer().contains("morph")) return;
+
+        var sender = e.getSender();
+        if (sender instanceof Player player)
+        {
+            var buffers = e.getBuffer().split(" ");
+
+            //Logger.warn("BUFFERS: " + Arrays.toString(buffers));
+
+            var arg = "";
+            if (buffers.length >= 2)
+                arg = buffers[1];
+
+            var isPlayerComplete = buffers[0].contains("morphplayer");
+
+            var infos = morphs.getAvaliableDisguisesFor(player)
+                    .stream().filter(c -> c.isPlayerDisguise == isPlayerComplete).toList();
+
+            var list = new ArrayList<String>();
+
+            for (var di : infos)
+            {
+                var name = isPlayerComplete ? di.playerDisguiseTargetName : di.type.getKey().asString();
+                //Logger.warn("INF: " + name + " :: BUF :" + arg + " :: START :" + name.startsWith(arg));
+                if (!name.startsWith(arg)) continue;
+
+                list.add(name);
+            }
+
+            e.setCompletions(list);
+        }
+    }
+
+    @EventHandler
+    private void onPlayerInteractEntity(PlayerInteractEntityEvent e)
+    {
+        if (e.getRightClicked() instanceof Player targetPlayer)
+        {
+            var sourcePlayer = e.getPlayer();
+
+            if (sourcePlayer.isSneaking())
+            {
+                //to be
+            }
         }
     }
 
     @Resolved
-    private MorphUtils morphUtils;
+    private MorphManager morphs;
 
     private void onPlayerKillEntity(Player player, Entity entity)
     {
-        Plugin.getSLF4JLogger().warn(entity.getType().toString());
+        //Plugin.getSLF4JLogger().warn(entity.getType().toString());
         switch (entity.getType())
         {
             case DROPPED_ITEM:
@@ -75,10 +120,11 @@ public class EventProcessor extends PluginObject implements Listener
 
             case PLAYER:
                 var targetPlayer = (Player) entity;
-                morphUtils.morph(player, targetPlayer);
+                morphs.addNewPlayerMorphToPlayer(player, targetPlayer);
+                break;
 
             default:
-                morphUtils.morph(player, entity);
+                morphs.addNewMorphToPlayer(player, entity);
                 break;
         }
     }

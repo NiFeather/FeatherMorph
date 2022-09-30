@@ -1,16 +1,6 @@
 package xiamomc.morph;
 
-import me.libraryaddict.disguise.DisguiseAPI;
-import me.libraryaddict.disguise.disguisetypes.Disguise;
-import me.libraryaddict.disguise.disguisetypes.DisguiseType;
-import me.libraryaddict.disguise.disguisetypes.FlagWatcher;
-import me.libraryaddict.disguise.disguisetypes.MobDisguise;
-import me.libraryaddict.disguise.disguisetypes.watchers.LivingWatcher;
 import org.bukkit.Bukkit;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
 import xiamomc.morph.commands.MorphCommandHelper;
 import xiamomc.morph.events.EventProcessor;
 import xiamomc.pluginbase.Command.CommandHelper;
@@ -41,7 +31,7 @@ public final class MorphPlugin extends XiaMoJavaPlugin {
 
         this.getSLF4JLogger().info("Enabling MorphPlugin");
         dependencyManager.Cache(this);
-        dependencyManager.Cache(new MorphUtils());
+        dependencyManager.Cache(new MorphManager());
 
         this.schedule(c ->
         {

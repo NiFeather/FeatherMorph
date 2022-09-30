@@ -21,10 +21,4 @@ public class MorphCommandHelper extends CommandHelper
     protected XiaMoJavaPlugin getPlugin() {
         return MorphPlugin.GetInstance();
     }
-
-    @Initializer
-    private void load()
-    {
-        Logger.warn("MCH");
-    }
 }

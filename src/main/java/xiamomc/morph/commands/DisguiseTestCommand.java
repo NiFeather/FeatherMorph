@@ -1,29 +1,64 @@
 package xiamomc.morph.commands;
 
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import xiamomc.morph.MorphPlugin;
-import xiamomc.morph.MorphUtils;
-import xiamomc.pluginbase.Annotations.Initializer;
+import xiamomc.morph.MorphManager;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Command.IPluginCommand;
 import xiamomc.pluginbase.PluginObject;
 
 public class DisguiseTestCommand extends PluginObject implements IPluginCommand {
     @Resolved
-    private MorphUtils morphUtils;
+    private MorphManager morphManager;
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args)
     {
         if (sender instanceof Player player)
         {
-            var targetEntity = player.getTargetEntity(3);
+            if (args.length >= 1)
+            {
+                var key = args[0];
+                var keyAsEntityTypeFormat = key.replace(Key.MINECRAFT_NAMESPACE + ":", "").toUpperCase();
 
-            if (targetEntity != null) morphUtils.morph(player, targetEntity);
+                if (morphManager.getAvaliableDisguisesFor(player).stream()
+                        .anyMatch(i -> i.type.toString().equals(keyAsEntityTypeFormat)))
+                {
+                    try
+                    {
+                        var type = EntityType.valueOf(keyAsEntityTypeFormat);
+
+                        var targetEntity = player.getTargetEntity(3);
+
+                        if (targetEntity != null && targetEntity.getType().equals(type))
+                            morphManager.morph(player, targetEntity);
+                        else
+                            morphManager.morph(player, type);
+
+                        sender.sendMessage(Component.translatable("成功伪装成")
+                                .append(Component.translatable(type.translationKey())));
+
+                        return true;
+                    }
+                    catch (IllegalArgumentException iae)
+                    {
+                        sender.sendMessage(Component.translatable("未能解析" + args[0], TextColor.color(255, 0, 0)));
+                    }
+                }
+                else
+                {
+                    sender.sendMessage(Component.translatable("你尚未拥有此伪装"));
+                }
+            }
+            else
+                sender.sendMessage(Component.text("你需要指定要伪装的对象"));
         }
 
         return true;
@@ -31,6 +66,6 @@ public class DisguiseTestCommand extends PluginObject implements IPluginCommand 
 
     @Override
     public String getCommandName() {
-        return "testdisg";
+        return "morph";
     }
 }

@@ -6,9 +6,9 @@ prefix: MorphPlugin
 depend: [ LibsDisguises ]
 
 commands:
-  testdisg:
-    usage: '/testdisg'
+  morph:
+    usage: '/morph'
     description: 'Try to join the game'
-  testplayer:
-    usage: '/testdisg'
+  morphplayer:
+    usage: '/morphplayer'
     description: 'Try to join the game'
