@@ -1,0 +1,14 @@
+name: MorphPlugin
+version: '${project.version}'
+main: xiamomc.morph.MorphPlugin
+api-version: 1.19
+prefix: MorphPlugin
+depend: [ LibsDisguises ]
+
+commands:
+  testdisg:
+    usage: '/testdisg'
+    description: 'Try to join the game'
+  testplayer:
+    usage: '/testdisg'
+    description: 'Try to join the game'
