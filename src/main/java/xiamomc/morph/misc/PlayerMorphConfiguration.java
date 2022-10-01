@@ -9,5 +9,5 @@ public class PlayerMorphConfiguration
 
     public ArrayList<DisguiseInfo> unlockedDisguises;
 
-    public boolean morphOnKill;
+    public boolean shownTutorialOnce;
 }

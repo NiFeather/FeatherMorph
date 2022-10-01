@@ -106,8 +106,11 @@ public class MorphManager extends MorphPluginObject
         {
             var newInstance = new PlayerMorphConfiguration();
             newInstance.uniqueId = player.getUniqueId();
-            newInstance.morphOnKill = false;
+            newInstance.shownTutorialOnce = false;
             newInstance.unlockedDisguises = new ArrayList<>();
+
+            var msg = Component.text("不知道如何使用伪装? 发送 /morphhelp 即可查看！");
+            player.sendMessage(MessageUtils.prefixes(msg));
 
             morphConfiguration.playerMorphConfigurations.add(newInstance);
             return newInstance;
@@ -374,8 +377,7 @@ public class MorphManager extends MorphPluginObject
 
         var msg = Component.translatable("你收到了来自")
                 .append(Component.text(source.getName()))
-                .append(Component.translatable("的伪装形态" +
-                        "交换请求！"));
+                .append(Component.translatable("的交换请求！"));
 
         target.sendMessage(MessageUtils.prefixes(msg));
 

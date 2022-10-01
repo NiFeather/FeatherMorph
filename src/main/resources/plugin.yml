@@ -23,4 +23,6 @@ commands:
     description: 'Try to join the game'
   unmorph:
     usage: 'todo'
+  morphhelp:
+    usage: 'todo'
 
