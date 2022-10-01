@@ -7,9 +7,9 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
+import xiamomc.morph.misc.MessageUtils;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Command.IPluginCommand;
-import xiamomc.pluginbase.PluginObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,9 +33,11 @@ public class MorphPlayerCommand extends MorphPluginObject implements IPluginComm
 
                 if (!avaliable.isPresent())
                 {
-                    sender.sendMessage(Component.translatable("你尚未拥有")
+                    var msg = Component.translatable("你尚未拥有")
                             .append(Component.text(args[0]))
-                            .append(Component.translatable("的伪装")));
+                            .append(Component.translatable("的伪装"));
+
+                    sender.sendMessage(MessageUtils.prefixes(msg));
 
                     return true;
                 }
@@ -45,11 +47,13 @@ public class MorphPlayerCommand extends MorphPluginObject implements IPluginComm
                 else
                     morphManager.morph(sourcePlayer, args[0]);
 
-                sender.sendMessage(Component.translatable("成功伪装成")
-                        .append(Component.text(args[0] + "!")));
+                var msg = Component.translatable("成功伪装成")
+                        .append(Component.text(args[0] + "!"));
+
+                sender.sendMessage(MessageUtils.prefixes(msg));
             }
             else
-                sender.sendMessage(Component.translatable("你需要指定要伪装的对象"));
+                sender.sendMessage(MessageUtils.prefixes(Component.translatable("你需要指定要伪装的对象")));
         }
 
         return true;

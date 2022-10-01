@@ -7,8 +7,8 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.MorphPluginObject;
+import xiamomc.morph.misc.MessageUtils;
 import xiamomc.pluginbase.Command.IPluginCommand;
-import xiamomc.pluginbase.PluginObject;
 
 import java.util.List;
 
@@ -32,7 +32,7 @@ public class UnMorphCommand  extends MorphPluginObject implements IPluginCommand
                 var disguise = DisguiseAPI.getDisguise(player);
                 disguise.removeDisguise(player);
 
-                player.sendMessage(Component.text("成功取消伪装"));
+                player.sendMessage(MessageUtils.prefixes(Component.text("已取消伪装")));
             }
         }
         return true;

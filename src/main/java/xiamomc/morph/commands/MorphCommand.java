@@ -10,9 +10,9 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
+import xiamomc.morph.misc.MessageUtils;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Command.IPluginCommand;
-import xiamomc.pluginbase.PluginObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,23 +45,24 @@ public class MorphCommand extends MorphPluginObject implements IPluginCommand {
                         else
                             morphManager.morph(player, type);
 
-                        sender.sendMessage(Component.translatable("成功伪装成")
-                                .append(Component.translatable(type.translationKey())));
+                        var msg = Component.translatable("成功伪装成")
+                                .append(Component.translatable(type.translationKey()));
+                        sender.sendMessage(MessageUtils.prefixes(msg));
 
                         return true;
                     }
                     catch (IllegalArgumentException iae)
                     {
-                        sender.sendMessage(Component.translatable("未能解析" + args[0], TextColor.color(255, 0, 0)));
+                        sender.sendMessage(MessageUtils.prefixes(Component.translatable("未能解析" + args[0], TextColor.color(255, 0, 0))));
                     }
                 }
                 else
                 {
-                    sender.sendMessage(Component.translatable("你尚未拥有此伪装"));
+                    sender.sendMessage(MessageUtils.prefixes(Component.translatable("你尚未拥有此伪装")));
                 }
             }
             else
-                sender.sendMessage(Component.text("你需要指定要伪装的对象"));
+                sender.sendMessage(MessageUtils.prefixes(Component.text("你需要指定要伪装的对象")));
         }
 
         return true;

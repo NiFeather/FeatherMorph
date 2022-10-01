@@ -9,18 +9,13 @@ import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
 import me.libraryaddict.disguise.disguisetypes.watchers.LivingWatcher;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import xiamomc.morph.misc.DisguiseInfo;
-import xiamomc.morph.misc.MorphConfiguration;
-import xiamomc.morph.misc.PlayerMorphConfiguration;
-import xiamomc.morph.misc.RequestInfo;
+import xiamomc.morph.misc.*;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
-import xiamomc.pluginbase.Configuration.PluginConfigManager;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -299,7 +294,7 @@ public class MorphManager extends MorphPluginObject
                 .anyMatch(i -> i.sourcePlayer.getUniqueId() == source.getUniqueId()
                         && i.targetPlayer.getUniqueId() == target.getUniqueId()))
         {
-            source.sendMessage(Component.text("你已经向" + target + "发送过一个请求了"));
+            source.sendMessage(MessageUtils.prefixes(Component.text("你已经向" + target + "发送过一个请求了")));
             return;
         }
 
@@ -310,12 +305,14 @@ public class MorphManager extends MorphPluginObject
 
         requests.add(req);
 
-        target.sendMessage(Component.translatable("你收到了来自")
+        var msg = Component.translatable("你收到了来自")
                 .append(Component.text(source.getName()))
                 .append(Component.translatable("的伪装形态" +
-                        "交换请求！")));
+                        "交换请求！"));
 
-        source.sendMessage(Component.translatable("请求已发送！对方将有1分钟的时间来接受"));
+        target.sendMessage(MessageUtils.prefixes(msg));
+
+        source.sendMessage(MessageUtils.prefixes(Component.translatable("请求已发送！对方将有1分钟的时间来接受")));
     }
 
     /**
@@ -331,7 +328,7 @@ public class MorphManager extends MorphPluginObject
 
         if (match.isEmpty())
         {
-            source.sendMessage(Component.text("未找到目标请求，可能已经过期？"));
+            source.sendMessage(MessageUtils.prefixes(Component.text("未找到目标请求，可能已经过期？")));
             return;
         }
 
@@ -341,8 +338,8 @@ public class MorphManager extends MorphPluginObject
         addNewPlayerMorphToPlayer(target, source);
         addNewPlayerMorphToPlayer(source, target);
 
-        target.sendMessage(Component.text("成功与" + source.getName() + "交换！"));
-        source.sendMessage(Component.text("成功与" + target.getName() + "交换！"));
+        target.sendMessage(MessageUtils.prefixes(Component.text("成功与" + source.getName() + "交换！")));
+        source.sendMessage(MessageUtils.prefixes(Component.text("成功与" + target.getName() + "交换！")));
     }
 
     /**
@@ -358,7 +355,9 @@ public class MorphManager extends MorphPluginObject
 
         if (match.isEmpty())
         {
-            source.sendMessage(Component.text("未找到目标请求，可能已经过期？"));
+            source.sendMessage(MessageUtils.prefixes(Component.text("未找到目标请求，可能已经过期？")));
+
+            //"未找到目标请求，可能已经过期？"
             return;
         }
 
@@ -367,8 +366,8 @@ public class MorphManager extends MorphPluginObject
 
         var msg = Component.text("请求已拒绝");
 
-        target.sendMessage(Component.text("发往" + source.getName() + "的").append(msg));
-        source.sendMessage(Component.text("来自" + target.getName() + "的").append(msg));
+        target.sendMessage(MessageUtils.prefixes(Component.text("发往" + source.getName() + "的").append(msg)));
+        source.sendMessage(MessageUtils.prefixes(Component.text("来自" + target.getName() + "的").append(msg)));
     }
 
     /**

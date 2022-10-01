@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
+import xiamomc.morph.misc.MessageUtils;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Command.IPluginCommand;
 
@@ -47,20 +48,20 @@ public class RequestSendCommand extends MorphPluginObject implements IPluginComm
 
                 if (targetPlayer == null)
                 {
-                    sourcePlayer.sendMessage(Component.text("未找到目标玩家"));
+                    sourcePlayer.sendMessage(MessageUtils.prefixes(Component.text("未找到目标玩家")));
                     return true;
                 }
 
                 if (targetPlayer.getUniqueId().equals(sourcePlayer.getUniqueId()))
                 {
-                    sourcePlayer.sendMessage(Component.text("不能给自己发请求"));
+                    sourcePlayer.sendMessage(MessageUtils.prefixes(Component.text("不能给自己发请求")));
                     return true;
                 }
 
                 if (morphs.getAvaliableDisguisesFor(sourcePlayer).stream()
                         .anyMatch(c -> c.isPlayerDisguise && c.playerDisguiseTargetName.equals(args[0])))
                 {
-                    sourcePlayer.sendMessage(Component.text("你已经有对方的伪装形态了"));
+                    sourcePlayer.sendMessage(MessageUtils.prefixes(Component.text("你已经有对方的伪装形态了")));
                     return true;
                 }
 
