@@ -18,6 +18,7 @@ import org.bukkit.entity.Player;
 import xiamomc.morph.misc.DisguiseInfo;
 import xiamomc.morph.misc.MorphConfiguration;
 import xiamomc.morph.misc.PlayerMorphConfiguration;
+import xiamomc.morph.misc.RequestInfo;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.PluginObject;
@@ -67,6 +68,8 @@ public class MorphManager extends PluginObject
         morphConfiguration = targetConfiguration;
         saveConfiguration();
     }
+
+    //region 配置
 
     private final File configurationFile = new File("/dev/shm/test");
 
@@ -121,7 +124,7 @@ public class MorphManager extends PluginObject
         }
         else return;
 
-        player.sendMessage(Component.text("你获得了")
+        player.sendMessage(Component.text("已解锁")
                 .append(Component.translatable(entity.getType().translationKey()))
                 .append(Component.text("的伪装！")));
     }
@@ -132,6 +135,8 @@ public class MorphManager extends PluginObject
 
         if (playerConfiguration.unlockedDisguises.stream().noneMatch(c -> c.equals(targtPlayer.getName())))
             playerConfiguration.unlockedDisguises.add(this.getDisguiseInfo(targtPlayer));
+        else
+            return;
 
         sourcePlayer.sendMessage(Component.text("已解锁" + targtPlayer.getName() + "的伪装！"));
 
@@ -142,6 +147,8 @@ public class MorphManager extends PluginObject
     {
         return getPlayerConfiguration(player).unlockedDisguises;
     }
+
+    //endregion 配置
 
     private void update()
     {
@@ -159,6 +166,13 @@ public class MorphManager extends PluginObject
             watcher.setSneaking(p.isSneaking() && !p.isFlying());
             watcher.setFlyingWithElytra(p.isGliding());
             watcher.setSprinting(p.isSprinting());
+        }
+
+        var requests = new ArrayList<>(this.requests);
+        for (var r : requests)
+        {
+            r.ticksRemain -= 1;
+            if (r.ticksRemain <= 0) this.requests.remove(r);
         }
 
         this.addSchedule(c -> update());
@@ -264,13 +278,92 @@ public class MorphManager extends PluginObject
 
     //endregion 玩家伪装相关
 
-    private Key entityTypeToNameSpacedID(EntityType type)
+    //region 玩家请求
+
+    private final List<RequestInfo> requests = new ArrayList<>();
+
+    /**
+     * 发起请求
+     * @param source 请求发起方
+     * @param target 请求接受方
+     */
+    public void createRequest(Player source, Player target)
     {
-        return type.getKey();
+        if (requests.stream()
+                .anyMatch(i -> i.sourcePlayer.getUniqueId() == source.getUniqueId()
+                        && i.targetPlayer.getUniqueId() == target.getUniqueId()))
+        {
+            source.sendMessage(Component.text("你已经向" + target + "发送过一个请求了"));
+            return;
+        }
+
+        var req = new RequestInfo();
+        req.sourcePlayer = source;
+        req.targetPlayer = target;
+        req.ticksRemain = 1200;
+
+        requests.add(req);
+
+        target.sendMessage(Component.translatable("你收到了来自")
+                .append(Component.text(source.getName()))
+                .append(Component.translatable("的伪装形态" +
+                        "交换请求！")));
+
+        source.sendMessage(Component.translatable("请求已发送！对方将有1分钟的时间来接受"));
     }
 
-    private EntityType nameSpacedIDToEntityType(Key key)
+    /**
+     * 接受请求
+     * @param source 请求接受方
+     * @param target 请求发起方
+     */
+    public void acceptRequest(Player source, Player target)
     {
-        return EntityType.valueOf(key.value());
+        var match = requests.stream()
+                .filter(i -> i.sourcePlayer.getUniqueId().equals(target.getUniqueId())
+                && i.targetPlayer.getUniqueId().equals(source.getUniqueId())).findFirst();
+
+        if (match.isEmpty())
+        {
+            source.sendMessage(Component.text("未找到目标请求，可能已经过期？"));
+            return;
+        }
+
+        var req = match.get();
+        req.ticksRemain = -1;
+
+        addNewPlayerMorphToPlayer(target, source);
+        addNewPlayerMorphToPlayer(source, target);
+
+        target.sendMessage(Component.text("成功与" + source.getName() + "交换！"));
+        source.sendMessage(Component.text("成功与" + target.getName() + "交换！"));
     }
+
+    /**
+     * 拒绝请求
+     * @param source 请求接受方
+     * @param target 请求发起方
+     */
+    public void denyRequest(Player source, Player target)
+    {
+        var match = requests.stream()
+                .filter(i -> i.sourcePlayer.getUniqueId().equals(target.getUniqueId())
+                        && i.targetPlayer.getUniqueId().equals(source.getUniqueId())).findFirst();
+
+        if (match.isEmpty())
+        {
+            source.sendMessage(Component.text("未找到目标请求，可能已经过期？"));
+            return;
+        }
+
+        var req = match.get();
+        req.ticksRemain = -1;
+
+        var msg = Component.text("请求已拒绝");
+
+        target.sendMessage(Component.text("发往" + source.getName() + "的").append(msg));
+        source.sendMessage(Component.text("来自" + target.getName() + "的").append(msg));
+    }
+
+    //endregion 玩家请求
 }

@@ -10,7 +10,7 @@ import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Command.IPluginCommand;
 import xiamomc.pluginbase.PluginObject;
 
-public class TestPlayerCommand extends PluginObject implements IPluginCommand {
+public class MorphPlayerCommand extends PluginObject implements IPluginCommand {
     @Resolved
     private MorphManager morphManager;
 
