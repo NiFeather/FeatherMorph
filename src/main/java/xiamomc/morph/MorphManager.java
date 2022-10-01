@@ -6,6 +6,7 @@ import me.libraryaddict.disguise.disguisetypes.Disguise;
 import me.libraryaddict.disguise.disguisetypes.DisguiseType;
 import me.libraryaddict.disguise.disguisetypes.MobDisguise;
 import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
+import me.libraryaddict.disguise.disguisetypes.watchers.ArmorStandWatcher;
 import me.libraryaddict.disguise.disguisetypes.watchers.LivingWatcher;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -28,7 +29,7 @@ public class MorphManager extends MorphPluginObject
      * 变成其他玩家的玩家
      * 因为插件限制，需要每tick更新下蹲和疾跑状态
      */
-    private final List<Player> disguisedPlayers = new ArrayList<>();
+    private final List<DisguisingInfo> disguisedPlayers = new ArrayList<>();
 
     private final List<DisguiseInfo> cachedInfos = new ArrayList<>();
 
@@ -153,20 +154,29 @@ public class MorphManager extends MorphPluginObject
 
     private void update()
     {
-        var disguisers = new ArrayList<>(disguisedPlayers);
-        for (var p : disguisers)
+        var infos = new ArrayList<>(disguisedPlayers);
+        for (var i : infos)
         {
+            var p = i.player;
+
             var disg = DisguiseAPI.getDisguise(p);
-            if (disg == null || !disg.getType().isPlayer() || !p.isOnline())
+            if (i.disguise.equals(disg))
             {
-                disguisedPlayers.remove(p);
+                disguisedPlayers.remove(i);
                 continue;
             }
 
             var watcher = disg.getWatcher();
-            watcher.setSneaking(p.isSneaking() && !p.isFlying());
-            watcher.setFlyingWithElytra(p.isGliding());
-            watcher.setSprinting(p.isSprinting());
+            if (disg.isPlayerDisguise())
+            {
+                watcher.setSneaking(p.isSneaking() && !p.isFlying());
+                watcher.setFlyingWithElytra(p.isGliding());
+                watcher.setSprinting(p.isSprinting());
+            }
+
+            var msg = Component.translatable("正伪装为").append(i.displayName);
+
+            p.sendActionBar(MessageUtils.prefixes(msg));
         }
 
         var requests = new ArrayList<>(this.requests);
@@ -211,7 +221,7 @@ public class MorphManager extends MorphPluginObject
         //如果正在看的实体和目标伪装类型一样，那么优先采用
         if (targetedEntity != null && targetedEntity.getType() == entityType && !targetedEntity.isDead())
         {
-            constructedDisguise = DisguiseAPI.constructDisguise(targetedEntity, true, false);
+            constructedDisguise = DisguiseAPI.constructDisguise(targetedEntity, true, true);
         }
         else //如果没有，则正常构建
         {
@@ -223,7 +233,7 @@ public class MorphManager extends MorphPluginObject
             constructedDisguise = new MobDisguise(DisguiseType.getType(entityType));
         }
 
-        postConstructDisguise(player, targetedEntity, constructedDisguise);
+        postConstructDisguise(player, targetedEntity, constructedDisguise, entityType, null);
 
         DisguiseAPI.disguiseEntity(player, constructedDisguise);
     }
@@ -259,6 +269,20 @@ public class MorphManager extends MorphPluginObject
 
     private void postConstructDisguise(Player sourcePlayer, Entity targetEntity, Disguise disguise)
     {
+        var type = (targetEntity == null ? null : targetEntity.getType());
+        this.postConstructDisguise(sourcePlayer, targetEntity, disguise, type, "");
+    }
+
+    /**
+     * 构建好伪装之后要做的事
+     * @param sourcePlayer 伪装的玩家
+     * @param targetEntity 伪装的目标实体
+     * @param disguise 伪装
+     * @param type 实体类型
+     * @param targetPlayerName 伪装的目标玩家名（仅在目标实体为玩家时可用）
+     */
+    private void postConstructDisguise(Player sourcePlayer, Entity targetEntity, Disguise disguise, EntityType type, String targetPlayerName)
+    {
         var watcher = disguise.getWatcher();
 
         watcher.setInvisible(false);
@@ -273,8 +297,39 @@ public class MorphManager extends MorphPluginObject
             watcher.setItemInOffHand(offHandItemStack);
         }
 
-        if (disguise.isPlayerDisguise())
-            disguisedPlayers.add(sourcePlayer);
+        if (type == EntityType.ARMOR_STAND)
+            ((ArmorStandWatcher) watcher).setShowArms(true);
+
+        DisguiseAPI.setActionBarShown(sourcePlayer, false);
+
+        var info = new DisguisingInfo();
+        info.player = sourcePlayer;
+        info.displayName = disguise.isPlayerDisguise()
+                ? Component.text((targetEntity == null ? targetPlayerName : targetEntity.getName()))
+                : Component.translatable((targetEntity == null ? type : targetEntity.getType()).translationKey());
+        info.disguise = disguise;
+
+        disguisedPlayers.add(info);
+    }
+
+    public void unMorphAll()
+    {
+        disguisedPlayers.forEach(i -> unMorph(i.player));
+    }
+
+    public void unMorph(Player player)
+    {
+        if (!DisguiseAPI.isDisguised(player)) return;
+
+        var targetInfoOptional = disguisedPlayers.stream().filter(i -> i.player.getUniqueId().equals(player.getUniqueId())).findFirst();
+        if (targetInfoOptional.isEmpty())
+            return;
+
+        var info = targetInfoOptional.get();
+        var disguise = info.disguise;
+        disguise.removeDisguise(player);
+
+        player.sendMessage(MessageUtils.prefixes(Component.text("已取消伪装")));
     }
 
     //endregion 玩家伪装相关

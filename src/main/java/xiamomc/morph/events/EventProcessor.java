@@ -8,6 +8,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.server.TabCompleteEvent;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPlugin;
@@ -76,6 +77,11 @@ public class EventProcessor extends MorphPluginObject implements Listener
                 //todo
             }
         }
+    }
+
+    @EventHandler
+    private void onPlayerJoin(PlayerJoinEvent e)
+    {
     }
 
     @Resolved

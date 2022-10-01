@@ -29,6 +29,8 @@ public final class MorphPlugin extends XiaMoJavaPlugin {
 
     private final CommandHelper<MorphPlugin> cmdHelper = new MorphCommandHelper();
 
+    private MorphManager morphManager;
+
     @Override
     public void onEnable() {
         // Plugin startup logic
@@ -36,7 +38,7 @@ public final class MorphPlugin extends XiaMoJavaPlugin {
 
         this.getSLF4JLogger().info("Enabling MorphPlugin");
         dependencyManager.Cache(this);
-        dependencyManager.Cache(new MorphManager());
+        dependencyManager.Cache(morphManager = new MorphManager());
         dependencyManager.Cache(cmdHelper);
 
         this.schedule(c ->
@@ -48,6 +50,8 @@ public final class MorphPlugin extends XiaMoJavaPlugin {
     @Override
     public void onDisable() {
         // Plugin shutdown logic
+
+        if (morphManager != null) morphManager.unMorphAll();
 
         this.getSLF4JLogger().info("Disabling MorphPlugin");
         super.onDisable();
