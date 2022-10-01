@@ -160,7 +160,7 @@ public class MorphManager extends MorphPluginObject
             var p = i.player;
 
             var disg = DisguiseAPI.getDisguise(p);
-            if (i.disguise.equals(disg))
+            if (!i.disguise.equals(disg))
             {
                 disguisedPlayers.remove(i);
                 continue;
@@ -258,58 +258,18 @@ public class MorphManager extends MorphPluginObject
         DisguiseAPI.disguiseEntity(sourcePlayer, constructedDisguise);
     }
 
+    /**
+     * 将玩家伪装成指定的玩家
+     * @param sourcePlayer 发起玩家
+     * @param targetPlayerName 目标玩家的玩家名
+     */
     public void morph(Player sourcePlayer, String targetPlayerName)
     {
         var disguise = new PlayerDisguise(targetPlayerName);
 
-        postConstructDisguise(sourcePlayer, null, disguise);
+        postConstructDisguise(sourcePlayer, null, disguise, null, targetPlayerName);
 
         DisguiseAPI.disguiseEntity(sourcePlayer, disguise);
-    }
-
-    private void postConstructDisguise(Player sourcePlayer, Entity targetEntity, Disguise disguise)
-    {
-        var type = (targetEntity == null ? null : targetEntity.getType());
-        this.postConstructDisguise(sourcePlayer, targetEntity, disguise, type, "");
-    }
-
-    /**
-     * 构建好伪装之后要做的事
-     * @param sourcePlayer 伪装的玩家
-     * @param targetEntity 伪装的目标实体
-     * @param disguise 伪装
-     * @param type 实体类型
-     * @param targetPlayerName 伪装的目标玩家名（仅在目标实体为玩家时可用）
-     */
-    private void postConstructDisguise(Player sourcePlayer, Entity targetEntity, Disguise disguise, EntityType type, String targetPlayerName)
-    {
-        var watcher = disguise.getWatcher();
-
-        watcher.setInvisible(false);
-
-        if (targetEntity instanceof LivingEntity living && living.getHealth() <= 0)
-            ((LivingWatcher)watcher).setHealth(1);
-
-        if (targetEntity instanceof Player targetPlayer)
-        {
-            var offHandItemStack = targetPlayer.getInventory().getItemInOffHand();
-
-            watcher.setItemInOffHand(offHandItemStack);
-        }
-
-        if (type == EntityType.ARMOR_STAND)
-            ((ArmorStandWatcher) watcher).setShowArms(true);
-
-        DisguiseAPI.setActionBarShown(sourcePlayer, false);
-
-        var info = new DisguisingInfo();
-        info.player = sourcePlayer;
-        info.displayName = disguise.isPlayerDisguise()
-                ? Component.text((targetEntity == null ? targetPlayerName : targetEntity.getName()))
-                : Component.translatable((targetEntity == null ? type : targetEntity.getType()).translationKey());
-        info.disguise = disguise;
-
-        disguisedPlayers.add(info);
     }
 
     public void unMorphAll()
@@ -330,6 +290,58 @@ public class MorphManager extends MorphPluginObject
         disguise.removeDisguise(player);
 
         player.sendMessage(MessageUtils.prefixes(Component.text("已取消伪装")));
+        player.sendActionBar(Component.empty());
+    }
+
+    private void postConstructDisguise(Player sourcePlayer, Entity targetEntity, Disguise disguise)
+    {
+        this.postConstructDisguise(sourcePlayer, targetEntity, disguise, null, "");
+    }
+
+    /**
+     * 构建好伪装之后要做的事
+     * @param sourcePlayer 伪装的玩家
+     * @param targetEntity 伪装的目标实体
+     * @param disguise 伪装
+     * @param type 实体类型
+     * @param targetPlayerName 伪装的目标玩家名（仅在目标实体为玩家时可用）
+     */
+    private void postConstructDisguise(Player sourcePlayer, Entity targetEntity, Disguise disguise, EntityType type, String targetPlayerName)
+    {
+        var watcher = disguise.getWatcher();
+
+        var targetType = type == null ? disguise.getType().getEntityType() : type;
+
+        watcher.setInvisible(false);
+
+        //workaround: 伪装已死亡的LivingEntity
+        if (targetEntity instanceof LivingEntity living && living.getHealth() <= 0)
+            ((LivingWatcher)watcher).setHealth(1);
+
+        //workaround: 玩家伪装副手问题
+        if (targetEntity instanceof Player targetPlayer)
+        {
+            var offHandItemStack = targetPlayer.getInventory().getItemInOffHand();
+
+            watcher.setItemInOffHand(offHandItemStack);
+        }
+
+        //盔甲架加上手臂
+        if (disguise.getType().equals(DisguiseType.ARMOR_STAND))
+            ((ArmorStandWatcher) watcher).setShowArms(true);
+
+        //禁用actionBar
+        DisguiseAPI.setActionBarShown(sourcePlayer, false);
+
+        //添加到disguisedPlayers
+        var info = new DisguisingInfo();
+        info.player = sourcePlayer;
+        info.displayName = disguise.isPlayerDisguise()
+                ? Component.text((targetEntity == null ? targetPlayerName : targetEntity.getName()))
+                : Component.translatable(targetType.translationKey());
+        info.disguise = disguise;
+
+        disguisedPlayers.add(info);
     }
 
     //endregion 玩家伪装相关

@@ -47,8 +47,8 @@ public class MorphPlayerCommand extends MorphPluginObject implements IPluginComm
                 else
                     morphManager.morph(sourcePlayer, args[0]);
 
-                var msg = Component.translatable("成功伪装成")
-                        .append(Component.text(args[0] + "!"));
+                var msg = Component.translatable("成功伪装为")
+                        .append(Component.text(args[0] + "！"));
 
                 sender.sendMessage(MessageUtils.prefixes(msg));
             }
