@@ -11,10 +11,17 @@ import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Command.IPluginCommand;
 import xiamomc.pluginbase.PluginObject;
 
+import java.util.List;
+
 public class RequestAcceptCommand extends MorphPluginObject implements IPluginCommand {
     @Override
     public String getCommandName() {
         return "acceptrequest";
+    }
+
+    @Override
+    public List<String> onTabComplete(String baseName, String[] args, CommandSender source) {
+        return List.of("");
     }
 
     @Resolved

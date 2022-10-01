@@ -14,6 +14,9 @@ import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Command.IPluginCommand;
 import xiamomc.pluginbase.PluginObject;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class MorphCommand extends MorphPluginObject implements IPluginCommand {
     @Resolved
     private MorphManager morphManager;
@@ -67,5 +70,32 @@ public class MorphCommand extends MorphPluginObject implements IPluginCommand {
     @Override
     public String getCommandName() {
         return "morph";
+    }
+
+    @Resolved
+    private MorphManager morphs;
+
+    @Override
+    public List<String> onTabComplete(String baseName, String[] args, CommandSender source)
+    {
+        var list = new ArrayList<String>();
+
+        if (source instanceof Player player) {
+            //Logger.warn("BUFFERS: " + Arrays.toString(buffers));
+
+            var arg = args[0];
+
+            var infos = morphs.getAvaliableDisguisesFor(player)
+                    .stream().filter(c -> !c.isPlayerDisguise).toList();
+
+            for (var di : infos) {
+                var name = di.type.getKey().asString();
+                if (!name.contains(arg)) continue;
+
+                list.add(name);
+            }
+        }
+
+        return list;
     }
 }

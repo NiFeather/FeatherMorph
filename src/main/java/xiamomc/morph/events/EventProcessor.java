@@ -12,6 +12,7 @@ import org.bukkit.event.server.TabCompleteEvent;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.MorphPluginObject;
+import xiamomc.morph.commands.MorphCommandHelper;
 import xiamomc.pluginbase.Annotations.Resolved;
 
 import java.util.ArrayList;
@@ -48,6 +49,9 @@ public class EventProcessor extends MorphPluginObject implements Listener
             this.onPlayerKillEntity(killer, e.getEntity());
     }
 
+    @Resolved
+    private MorphCommandHelper cmdHelper;
+
     @EventHandler
     public void onTabComplete(TabCompleteEvent e)
     {
@@ -55,57 +59,9 @@ public class EventProcessor extends MorphPluginObject implements Listener
 
         //从buffer获取指令名
         var buffers = e.getBuffer().split(" ");
-        var commandBaseName = "";
 
-        //检查是不是带命名空间的指令
-        var split = buffers[0].split(":");
-        if (split.length >= 2)
-        {
-            commandBaseName = split[1];
-
-            //检查命名空间
-            if (!split[0].equals(MorphPlugin.getMorphNameSpace())) return;
-        }
-        else commandBaseName = buffers[0];
-
-        //移除斜杠
-        commandBaseName = commandBaseName.replace("/", "");
-
-        switch (commandBaseName) {
-            case "morph", "morphplayer" ->
-            {
-                var sender = e.getSender();
-                if (sender instanceof Player player) {
-                    //Logger.warn("BUFFERS: " + Arrays.toString(buffers));
-
-                    var arg = "";
-                    if (buffers.length >= 2)
-                        arg = buffers[1];
-
-                    var isPlayerComplete = buffers[0].contains("morphplayer");
-
-                    var infos = morphs.getAvaliableDisguisesFor(player)
-                            .stream().filter(c -> c.isPlayerDisguise == isPlayerComplete).toList();
-
-                    var list = new ArrayList<String>();
-
-                    for (var di : infos) {
-                        var name = isPlayerComplete ? di.playerDisguiseTargetName : di.type.getKey().asString();
-                        //Logger.warn("INF: " + name + " :: BUF :" + arg + " :: START :" + name.startsWith(arg));
-                        if (!name.contains(arg)) continue;
-
-                        list.add(name);
-                    }
-
-                    e.setCompletions(list);
-                }
-            }
-
-            case "sendrequest", "acceptrequest", "denyrequest", "unmorph" ->
-            {
-                e.setCompletions(new ArrayList<>());
-            }
-        }
+        var result = cmdHelper.onTabComplete(buffers, e.getSender());
+        if (result != null) e.setCompletions(result);
     }
 
     @EventHandler
@@ -117,7 +73,7 @@ public class EventProcessor extends MorphPluginObject implements Listener
 
             if (sourcePlayer.isSneaking())
             {
-                //to be
+                //todo
             }
         }
     }
