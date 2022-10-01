@@ -371,5 +371,17 @@ public class MorphManager extends MorphPluginObject
         source.sendMessage(Component.text("来自" + target.getName() + "的").append(msg));
     }
 
+    /**
+     * 获取目标为player的所有请求
+     * @param player 目标玩家
+     * @return 请求列表
+     */
+    public List<RequestInfo> getAvaliableRequestFor(Player player)
+    {
+        return requests.stream()
+                .filter(t -> t.targetPlayer.getUniqueId().equals(player.getUniqueId()))
+                .toList();
+    }
+
     //endregion 玩家请求
 }

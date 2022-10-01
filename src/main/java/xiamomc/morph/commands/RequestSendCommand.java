@@ -10,8 +10,8 @@ import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Command.IPluginCommand;
-import xiamomc.pluginbase.PluginObject;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class RequestSendCommand extends MorphPluginObject implements IPluginCommand {
@@ -22,7 +22,16 @@ public class RequestSendCommand extends MorphPluginObject implements IPluginComm
 
     @Override
     public List<String> onTabComplete(String baseName, String[] args, CommandSender source) {
-        return List.of("");
+        var list = new ArrayList<String>();
+
+        if (source instanceof Player player)
+        {
+            Bukkit.getOnlinePlayers().stream()
+                    .filter(p -> !p.getUniqueId().equals(player.getUniqueId()))
+                    .forEach(p -> list.add(p.getName()));
+        }
+
+        return list;
     }
 
     @Resolved
@@ -38,7 +47,7 @@ public class RequestSendCommand extends MorphPluginObject implements IPluginComm
 
                 if (targetPlayer == null)
                 {
-                    //todo
+                    sourcePlayer.sendMessage(Component.text("未找到目标玩家"));
                     return true;
                 }
 

@@ -11,6 +11,7 @@ import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Command.IPluginCommand;
 import xiamomc.pluginbase.PluginObject;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class RequestAcceptCommand extends MorphPluginObject implements IPluginCommand {
@@ -21,7 +22,16 @@ public class RequestAcceptCommand extends MorphPluginObject implements IPluginCo
 
     @Override
     public List<String> onTabComplete(String baseName, String[] args, CommandSender source) {
-        return List.of("");
+        var list = new ArrayList<String>();
+
+        if (source instanceof Player player)
+        {
+            var reqs = morphs.getAvaliableRequestFor(player);
+
+            reqs.forEach(r -> list.add(r.sourcePlayer.getName()));
+        }
+
+        return list;
     }
 
     @Resolved
