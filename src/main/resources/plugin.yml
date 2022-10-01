@@ -3,7 +3,7 @@ version: '${project.version}'
 main: xiamomc.morph.MorphPlugin
 api-version: 1.19
 prefix: MorphPlugin
-depend: [ LibsDisguises ]
+depend: [ LibsDisguises, GSit ]
 
 commands:
   morph:

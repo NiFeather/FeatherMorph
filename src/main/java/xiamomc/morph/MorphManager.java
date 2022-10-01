@@ -2,17 +2,16 @@ package xiamomc.morph;
 
 import com.google.gson.Gson;
 import me.libraryaddict.disguise.DisguiseAPI;
-import me.libraryaddict.disguise.disguisetypes.Disguise;
-import me.libraryaddict.disguise.disguisetypes.DisguiseType;
-import me.libraryaddict.disguise.disguisetypes.MobDisguise;
-import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
+import me.libraryaddict.disguise.disguisetypes.*;
 import me.libraryaddict.disguise.disguisetypes.watchers.ArmorStandWatcher;
 import me.libraryaddict.disguise.disguisetypes.watchers.LivingWatcher;
+import me.libraryaddict.disguise.utilities.DisguiseUtilities;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.*;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.misc.*;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
@@ -346,7 +345,21 @@ public class MorphManager extends MorphPluginObject
                 : Component.translatable(targetType.translationKey());
         info.disguise = disguise;
 
+        if (sourcePlayer.getVehicle() != null)
+        {
+            info.startSitting = true;
+            sourcePlayer.sendMessage(MessageUtils.prefixes(Component.text("您将在起身后看到自己的伪装")));
+        }
+
         disguisedPlayers.add(info);
+    }
+
+    @Nullable
+    public DisguisingInfo getPlayerDisguisingInfo(Player player)
+    {
+        return this.disguisedPlayers.stream()
+                .filter(i -> i.player.getUniqueId() == player.getUniqueId())
+                .findFirst().orElse(null);
     }
 
     //endregion 玩家伪装相关

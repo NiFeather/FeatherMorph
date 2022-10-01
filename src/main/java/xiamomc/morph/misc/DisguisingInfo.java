@@ -9,4 +9,9 @@ public class DisguisingInfo
     public Player player;
     public Component displayName;
     public Disguise disguise;
+
+    /**
+     * 伪装时是否坐着
+     */
+    public boolean startSitting;
 }

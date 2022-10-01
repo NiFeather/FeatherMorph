@@ -1,5 +1,10 @@
 package xiamomc.morph.events;
 
+import com.comphenix.protocol.PacketType;
+import dev.geco.gsit.api.event.*;
+import me.libraryaddict.disguise.DisguiseAPI;
+import me.libraryaddict.disguise.disguisetypes.TargetedDisguise;
+import me.libraryaddict.disguise.utilities.DisguiseUtilities;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -7,16 +12,17 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
-import org.bukkit.event.player.PlayerInteractEntityEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 import org.bukkit.event.server.TabCompleteEvent;
+import org.spigotmc.event.entity.EntityDismountEvent;
 import xiamomc.morph.MorphManager;
-import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.commands.MorphCommandHelper;
 import xiamomc.pluginbase.Annotations.Resolved;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class EventProcessor extends MorphPluginObject implements Listener
 {
@@ -66,22 +72,76 @@ public class EventProcessor extends MorphPluginObject implements Listener
     }
 
     @EventHandler
-    private void onPlayerInteractEntity(PlayerInteractEntityEvent e)
+    public void onLeave(PlayerQuitEvent e)
     {
-        if (e.getRightClicked() instanceof Player targetPlayer)
-        {
-            var sourcePlayer = e.getPlayer();
+        gSitHandlingPlayers.remove(e.getPlayer());
+    }
 
-            if (sourcePlayer.isSneaking())
-            {
-                //todo
-            }
-        }
+    //region GSit <-> LibsDisguises workaround
+
+    @EventHandler
+    public void onEntityGetUp(EntityGetUpSitEvent e)
+    {
+        if (e.getEntity() instanceof Player player)
+            showDisguiseFor(player);
+    }
+
+    private final List<Player> gSitHandlingPlayers = new ArrayList<>();
+
+    @EventHandler
+    public void onEntitySit(EntitySitEvent e)
+    {
+        if (e.getEntity() instanceof Player player)
+            hideDisguiseFor(player);
     }
 
     @EventHandler
-    private void onPlayerJoin(PlayerJoinEvent e)
+    public void onPlayerPlayerSit(PlayerPlayerSitEvent e)
     {
+        gSitHandlingPlayers.add(e.getPlayer());
+        hideDisguiseFor(e.getPlayer());
+    }
+
+    @EventHandler
+    public void onPlayerGetUpPlayerSit(PlayerGetUpPlayerSitEvent e)
+    {
+        if (gSitHandlingPlayers.contains(e.getPlayer()))
+        {
+            showDisguiseFor(e.getPlayer());
+            gSitHandlingPlayers.remove(e.getPlayer());
+        }
+    }
+
+    //endregion  GSit <-> LibsDisguises workaround
+
+    private void hideDisguiseFor(Player player)
+    {
+        if (DisguiseAPI.isDisguised(player))
+            DisguiseUtilities.removeSelfDisguise(DisguiseAPI.getDisguise(player));
+    }
+
+    private void showDisguiseFor(Player player)
+    {
+        if (DisguiseAPI.isDisguised(player))
+          this.addSchedule(c ->
+          {
+                if (DisguiseAPI.isDisguised(player))
+                    DisguiseUtilities.setupFakeDisguise(DisguiseAPI.getDisguise(player));
+          });
+    }
+
+    @EventHandler()
+    public void onPlayerSwapOffhand(PlayerSwapHandItemsEvent e)
+    {
+        var player = e.getPlayer();
+        if (DisguiseAPI.isDisguised(player))
+        {
+            //workaround: LibsDisguises在启用selfDisguiseVisible的情况下会导致副手切换异常
+            this.addSchedule(c ->
+            {
+                if (DisguiseAPI.isDisguised(player)) player.updateInventory();
+            }, 2);
+        }
     }
 
     @Resolved
