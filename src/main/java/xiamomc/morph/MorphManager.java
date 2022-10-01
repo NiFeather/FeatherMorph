@@ -8,6 +8,7 @@ import me.libraryaddict.disguise.disguisetypes.MobDisguise;
 import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
 import me.libraryaddict.disguise.disguisetypes.watchers.LivingWatcher;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
@@ -119,7 +120,7 @@ public class MorphManager extends MorphPluginObject
         }
         else return;
 
-        player.sendMessage(Component.text("已解锁")
+        player.sendActionBar(Component.text("✔ 已解锁")
                 .append(Component.translatable(entity.getType().translationKey()))
                 .append(Component.text("的伪装！")));
     }
@@ -133,7 +134,7 @@ public class MorphManager extends MorphPluginObject
         else
             return;
 
-        sourcePlayer.sendMessage(Component.text("已解锁" + targtPlayer.getName() + "的伪装！"));
+        sourcePlayer.sendActionBar(Component.text("✔ 已解锁" + targtPlayer.getName() + "的伪装！"));
 
         saveConfiguration();
     }
