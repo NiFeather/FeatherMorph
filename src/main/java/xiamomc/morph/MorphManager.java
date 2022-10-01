@@ -10,10 +10,9 @@ import me.libraryaddict.disguise.disguisetypes.watchers.ArmorStandWatcher;
 import me.libraryaddict.disguise.disguisetypes.watchers.LivingWatcher;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
+import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.ItemStack;
 import xiamomc.morph.misc.*;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
@@ -322,12 +321,15 @@ public class MorphManager extends MorphPluginObject
             ((LivingWatcher)watcher).setHealth(1);
 
         //workaround: 玩家伪装副手问题
-        if (targetEntity instanceof Player targetPlayer)
-        {
-            var offHandItemStack = targetPlayer.getInventory().getItemInOffHand();
+        ItemStack offhandItemStack = null;
 
-            watcher.setItemInOffHand(offHandItemStack);
-        }
+        if (targetEntity instanceof Player targetPlayer)
+            offhandItemStack = targetPlayer.getInventory().getItemInOffHand();
+
+        if (targetEntity instanceof ArmorStand armorStand)
+            offhandItemStack = armorStand.getItem(EquipmentSlot.OFF_HAND);
+
+        if (offhandItemStack != null) watcher.setItemInOffHand(offhandItemStack);
 
         //盔甲架加上手臂
         if (disguise.getType().equals(DisguiseType.ARMOR_STAND))
