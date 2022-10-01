@@ -9,11 +9,12 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.MorphManager;
+import xiamomc.morph.MorphPluginObject;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Command.IPluginCommand;
 import xiamomc.pluginbase.PluginObject;
 
-public class MorphCommand extends PluginObject implements IPluginCommand {
+public class MorphCommand extends MorphPluginObject implements IPluginCommand {
     @Resolved
     private MorphManager morphManager;
 

@@ -7,11 +7,12 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.MorphManager;
+import xiamomc.morph.MorphPluginObject;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Command.IPluginCommand;
 import xiamomc.pluginbase.PluginObject;
 
-public class RequestSendCommand extends PluginObject implements IPluginCommand {
+public class RequestSendCommand extends MorphPluginObject implements IPluginCommand {
     @Override
     public String getCommandName() {
         return "sendrequest";

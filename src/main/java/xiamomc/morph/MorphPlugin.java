@@ -10,9 +10,14 @@ public final class MorphPlugin extends XiaMoJavaPlugin {
 
     private static MorphPlugin instance;
 
-    public static MorphPlugin GetInstance()
+    public static String getMorphNameSpace()
     {
-        return instance;
+        return "morph";
+    }
+
+    @Override
+    public String getNameSpace() {
+        return getMorphNameSpace();
     }
 
     public MorphPlugin()

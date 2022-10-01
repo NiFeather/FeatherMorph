@@ -7,17 +7,15 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
-import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.server.TabCompleteEvent;
 import xiamomc.morph.MorphManager;
+import xiamomc.morph.MorphPluginObject;
 import xiamomc.pluginbase.Annotations.Resolved;
-import xiamomc.pluginbase.PluginObject;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
-public class EventProcessor extends PluginObject implements Listener
+public class EventProcessor extends MorphPluginObject implements Listener
 {
     @EventHandler
     public void onEntityDeath(EntityDeathEvent e)
@@ -76,7 +74,7 @@ public class EventProcessor extends PluginObject implements Listener
             {
                 var name = isPlayerComplete ? di.playerDisguiseTargetName : di.type.getKey().asString();
                 //Logger.warn("INF: " + name + " :: BUF :" + arg + " :: START :" + name.startsWith(arg));
-                if (!name.startsWith(arg)) continue;
+                if (!name.contains(arg)) continue;
 
                 list.add(name);
             }
