@@ -23,7 +23,7 @@ public class MorphPlayerCommand extends MorphPluginObject implements IPluginComm
             if (args.length >= 1)
             {
                 var targetName = args[0];
-                var targetEntity = sourcePlayer.getTargetEntity(3);
+                var targetEntity = sourcePlayer.getTargetEntity(5);
 
                 var avaliable = morphManager.getAvaliableDisguisesFor(sourcePlayer).stream()
                         .filter(i -> targetName.equals(i.playerDisguiseTargetName)).findFirst();

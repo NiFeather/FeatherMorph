@@ -35,7 +35,7 @@ public class MorphCommand extends MorphPluginObject implements IPluginCommand {
                     {
                         var type = EntityType.valueOf(keyAsEntityTypeFormat);
 
-                        var targetEntity = player.getTargetEntity(3);
+                        var targetEntity = player.getTargetEntity(5);
 
                         if (targetEntity != null && targetEntity.getType().equals(type))
                             morphManager.morph(player, targetEntity);

@@ -12,7 +12,7 @@ public final class MorphPlugin extends XiaMoJavaPlugin {
 
     public static String getMorphNameSpace()
     {
-        return "morph";
+        return "morphplugin";
     }
 
     @Override
@@ -27,7 +27,7 @@ public final class MorphPlugin extends XiaMoJavaPlugin {
         instance = this;
     }
 
-    private CommandHelper cmdHelper = new MorphCommandHelper();
+    private final CommandHelper cmdHelper = new MorphCommandHelper();
 
     @Override
     public void onEnable() {

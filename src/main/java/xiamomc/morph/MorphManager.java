@@ -8,6 +8,7 @@ import me.libraryaddict.disguise.disguisetypes.MobDisguise;
 import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
 import me.libraryaddict.disguise.disguisetypes.watchers.LivingWatcher;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -19,6 +20,7 @@ import xiamomc.morph.misc.PlayerMorphConfiguration;
 import xiamomc.morph.misc.RequestInfo;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
+import xiamomc.pluginbase.Configuration.PluginConfigManager;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -47,22 +49,30 @@ public class MorphManager extends MorphPluginObject
     {
         this.addSchedule(c -> update());
 
-        //加载配置
+        reloadConfiguration();
+    }
+
+    private void reloadConfiguration()
+    {
+        //加载JSON配置
         MorphConfiguration targetConfiguration = null;
+        var success = false;
+
         try ( var jsonStream = new InputStreamReader(new FileInputStream(configurationFile)) )
         {
             targetConfiguration = gson.fromJson(jsonStream, MorphConfiguration.class);
+            success = true;
         }
-        catch (IOException ignored)
+        catch (IOException e)
         {
-            targetConfiguration = null;
-            Logger.warn("配置加载失败");
+            Logger.warn("无法加载JSON配置：" + e.getMessage());
+            e.printStackTrace();
         }
 
         if (targetConfiguration == null) targetConfiguration = new MorphConfiguration();
 
         morphConfiguration = targetConfiguration;
-        saveConfiguration();
+        if (success) saveConfiguration();
     }
 
     //region 配置
@@ -122,7 +132,7 @@ public class MorphManager extends MorphPluginObject
 
         player.sendActionBar(Component.text("✔ 已解锁")
                 .append(Component.translatable(entity.getType().translationKey()))
-                .append(Component.text("的伪装！")));
+                .append(Component.text("的伪装")).color(NamedTextColor.GREEN));
     }
 
     public void addNewPlayerMorphToPlayer(Player sourcePlayer, Player targtPlayer)
@@ -134,7 +144,7 @@ public class MorphManager extends MorphPluginObject
         else
             return;
 
-        sourcePlayer.sendActionBar(Component.text("✔ 已解锁" + targtPlayer.getName() + "的伪装！"));
+        sourcePlayer.sendActionBar(Component.text("✔ 已解锁" + targtPlayer.getName() + "的伪装").color(NamedTextColor.GREEN));
 
         saveConfiguration();
     }
