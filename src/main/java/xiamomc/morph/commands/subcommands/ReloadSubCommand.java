@@ -15,7 +15,7 @@ import java.util.List;
 public class ReloadSubCommand extends MorphPluginObject implements ISubCommand {
     @Override
     public List<String> onTabComplete(String[] args, CommandSender source) {
-        return List.of("aaa");
+        return null;
     }
 
     @Override
