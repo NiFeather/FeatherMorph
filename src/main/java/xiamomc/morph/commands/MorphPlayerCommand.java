@@ -1,5 +1,7 @@
 package xiamomc.morph.commands;
 
+import me.libraryaddict.disguise.DisguiseAPI;
+import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
 import net.kyori.adventure.text.Component;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -42,10 +44,21 @@ public class MorphPlayerCommand extends MorphPluginObject implements IPluginComm
                     return true;
                 }
 
-                if (targetEntity instanceof Player targetPlayer && targetPlayer.getName().equals(targetName))
-                    morphManager.morph(sourcePlayer, targetPlayer);
+                var shouldCopy = false;
+
+                //如果实体有伪装，则检查伪装是否是我们想要的类型
+                if (DisguiseAPI.isDisguised(targetEntity) && DisguiseAPI.getDisguise(targetEntity).isPlayerDisguise())
+                {
+                    var disg = (PlayerDisguise)DisguiseAPI.getDisguise(targetEntity);
+                    shouldCopy = disg.getName().equals(targetName);
+                }
+
+                if (shouldCopy)
+                    morphManager.morphCopy(sourcePlayer, targetEntity); //如果应该复制伪装，则复制给玩家
+                else if (targetEntity instanceof Player targetPlayer && targetPlayer.getName().equals(targetName))
+                    morphManager.morphEntity(sourcePlayer, targetPlayer); //否则，如果目标实体是我们想要的玩家，则伪装成目标实体
                 else
-                    morphManager.morph(sourcePlayer, args[0]);
+                    morphManager.morphPlayer(sourcePlayer, args[0]); //否则，只简单地创建玩家伪装
 
                 var msg = Component.translatable("成功伪装为")
                         .append(Component.text(args[0] + "！"));

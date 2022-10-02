@@ -1,5 +1,6 @@
 package xiamomc.morph.commands;
 
+import me.libraryaddict.disguise.DisguiseAPI;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
@@ -36,14 +37,28 @@ public class MorphCommand extends MorphPluginObject implements IPluginCommand {
                 {
                     try
                     {
+                        //目标类型
                         var type = EntityType.valueOf(keyAsEntityTypeFormat);
 
+                        //玩家正在看的实体
                         var targetEntity = player.getTargetEntity(5);
 
-                        if (targetEntity != null && targetEntity.getType().equals(type))
-                            morphManager.morph(player, targetEntity);
+                        //是否应该复制伪装
+                        var shouldCopy = false;
+
+                        //如果实体有伪装，则检查实体的伪装类型
+                        if (DisguiseAPI.isDisguised(targetEntity))
+                        {
+                            var disg = DisguiseAPI.getDisguise(targetEntity);
+                            shouldCopy = disg.getType().getEntityType().equals(type);
+                        }
+
+                        if (shouldCopy)
+                            morphManager.morphCopy(player, targetEntity); //如果应该复制伪装，则复制给玩家
+                        else if (targetEntity != null && targetEntity.getType().equals(type))
+                            morphManager.morphEntity(player, targetEntity); //否则，如果目标实体是我们想要的实体，则伪装成目标实体
                         else
-                            morphManager.morph(player, type);
+                            morphManager.morphEntityType(player, type); //否则，只简单地创建实体伪装
 
                         var msg = Component.translatable("成功伪装为")
                                 .append(Component.translatable(type.translationKey()))

@@ -216,26 +216,15 @@ public class MorphManager extends MorphPluginObject
      * @param player 目标玩家
      * @param entityType 目标实体类型
      */
-    public void morph(Player player, EntityType entityType)
+    public void morphEntityType(Player player, EntityType entityType)
     {
         var targetedEntity = player.getTargetEntity(5);
         Disguise constructedDisguise = null;
 
-        //如果正在看的实体和目标伪装类型一样，那么优先采用
-        if (targetedEntity != null && targetedEntity.getType() == entityType && !targetedEntity.isDead())
-        {
-            morph(player, targetedEntity);
-            return;
-        }
-        else //如果没有，则正常构建
-        {
-            targetedEntity = null;
+        //不要构建玩家类型的伪装
+        if (entityType == EntityType.PLAYER) return;
 
-            //不要构建玩家类型的伪装
-            if (entityType == EntityType.PLAYER) return;
-
-            constructedDisguise = new MobDisguise(DisguiseType.getType(entityType));
-        }
+        constructedDisguise = new MobDisguise(DisguiseType.getType(entityType));
 
         postConstructDisguise(player, targetedEntity, constructedDisguise, entityType, null);
 
@@ -247,22 +236,31 @@ public class MorphManager extends MorphPluginObject
      * @param sourcePlayer 目标玩家
      * @param entity 目标实体
      */
-    public void morph(Player sourcePlayer, Entity entity)
+    public void morphEntity(Player sourcePlayer, Entity entity)
     {
         Disguise draftDisguise = null;
-        var entityHasDisguise = DisguiseAPI.isDisguised(entity);
 
-        //检查目标实体有没有伪装
-        if (entityHasDisguise)
-            draftDisguise = DisguiseAPI.getDisguise(entity);
-        else
-            draftDisguise = DisguiseAPI.constructDisguise(entity);
+        draftDisguise = DisguiseAPI.constructDisguise(entity);
 
-        DisguiseAPI.disguiseEntity(sourcePlayer, draftDisguise);
-
-        //通过getDisguise获取的伪装在disguise后会创建新实例，因此需要重新获取
-        if (entityHasDisguise) draftDisguise = DisguiseAPI.getDisguise(sourcePlayer);
         postConstructDisguise(sourcePlayer, entity, draftDisguise);
+        DisguiseAPI.disguiseEntity(sourcePlayer, draftDisguise);
+    }
+
+    /**
+     * 复制目标实体的伪装给玩家
+     * @param sourcePlayer 要应用的玩家
+     * @param targetEntity 目标实体
+     */
+    public void morphCopy(Player sourcePlayer, Entity targetEntity)
+    {
+        Disguise draftDisguise = null;
+
+        if (!DisguiseAPI.isDisguised(targetEntity)) return;
+
+        DisguiseAPI.disguiseEntity(sourcePlayer, DisguiseAPI.getDisguise(targetEntity));
+        draftDisguise = DisguiseAPI.getDisguise(sourcePlayer);
+
+        postConstructDisguise(sourcePlayer, targetEntity, draftDisguise);
     }
 
     /**
@@ -270,7 +268,7 @@ public class MorphManager extends MorphPluginObject
      * @param sourcePlayer 发起玩家
      * @param targetPlayerName 目标玩家的玩家名
      */
-    public void morph(Player sourcePlayer, String targetPlayerName)
+    public void morphPlayer(Player sourcePlayer, String targetPlayerName)
     {
         var disguise = new PlayerDisguise(targetPlayerName);
 
