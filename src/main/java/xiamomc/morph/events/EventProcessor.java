@@ -1,9 +1,10 @@
 package xiamomc.morph.events;
 
-import com.comphenix.protocol.PacketType;
-import dev.geco.gsit.api.event.*;
+import dev.geco.gsit.api.event.EntityGetUpSitEvent;
+import dev.geco.gsit.api.event.EntitySitEvent;
+import dev.geco.gsit.api.event.PlayerGetUpPlayerSitEvent;
+import dev.geco.gsit.api.event.PlayerPlayerSitEvent;
 import me.libraryaddict.disguise.DisguiseAPI;
-import me.libraryaddict.disguise.disguisetypes.TargetedDisguise;
 import me.libraryaddict.disguise.utilities.DisguiseUtilities;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -12,10 +13,10 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 import org.bukkit.event.server.TabCompleteEvent;
-import org.spigotmc.event.entity.EntityDismountEvent;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.commands.MorphCommandHelper;
@@ -130,9 +131,14 @@ public class EventProcessor extends MorphPluginObject implements Listener
           });
     }
 
+    //region LibsDisguises workaround
+
     @EventHandler()
-    public void onPlayerSwapOffhand(PlayerSwapHandItemsEvent e)
+    public void onPlayerSwapHand(PlayerSwapHandItemsEvent e)
     {
+        if (e.getMainHandItem().getType().isAir() && e.getOffHandItem().getType().isAir())
+            return;
+
         var player = e.getPlayer();
         if (DisguiseAPI.isDisguised(player))
         {
@@ -143,6 +149,25 @@ public class EventProcessor extends MorphPluginObject implements Listener
             }, 2);
         }
     }
+
+    @EventHandler
+    public void onPlayerJoin(PlayerJoinEvent e)
+    {
+        var player = e.getPlayer();
+        var info = morphs.getPlayerDisguisingInfo(player);
+
+        if (info != null)
+        {
+            //重新进入后player和info.player不属于同一个实例，需要重新disguise
+            info.player = player;
+            DisguiseAPI.disguiseEntity(player, info.disguise);
+
+            //刷新Disguise
+            info.disguise = DisguiseAPI.getDisguise(player);
+        }
+    }
+
+    //endregion LibsDisguises workaround
 
     @Resolved
     private MorphManager morphs;

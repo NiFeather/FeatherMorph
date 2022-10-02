@@ -5,7 +5,6 @@ import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.disguisetypes.*;
 import me.libraryaddict.disguise.disguisetypes.watchers.ArmorStandWatcher;
 import me.libraryaddict.disguise.disguisetypes.watchers.LivingWatcher;
-import me.libraryaddict.disguise.utilities.DisguiseUtilities;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.*;
@@ -160,9 +159,12 @@ public class MorphManager extends MorphPluginObject
         {
             var p = i.player;
 
+            if (!p.isOnline()) continue;
+
             var disg = DisguiseAPI.getDisguise(p);
             if (!i.disguise.equals(disg))
             {
+                Logger.warn("removing: " + p + " :: " + i.disguise + " <-> " + disg);
                 disguisedPlayers.remove(i);
                 continue;
             }
@@ -216,13 +218,14 @@ public class MorphManager extends MorphPluginObject
      */
     public void morph(Player player, EntityType entityType)
     {
-        var targetedEntity = player.getTargetEntity(3);
+        var targetedEntity = player.getTargetEntity(5);
         Disguise constructedDisguise = null;
 
         //如果正在看的实体和目标伪装类型一样，那么优先采用
         if (targetedEntity != null && targetedEntity.getType() == entityType && !targetedEntity.isDead())
         {
-            constructedDisguise = DisguiseAPI.constructDisguise(targetedEntity, true, true);
+            morph(player, targetedEntity);
+            return;
         }
         else //如果没有，则正常构建
         {
@@ -246,17 +249,20 @@ public class MorphManager extends MorphPluginObject
      */
     public void morph(Player sourcePlayer, Entity entity)
     {
-        Disguise constructedDisguise = null;
+        Disguise draftDisguise = null;
+        var entityHasDisguise = DisguiseAPI.isDisguised(entity);
 
         //检查目标实体有没有伪装
-        if (DisguiseAPI.isDisguised(entity))
-            constructedDisguise = DisguiseAPI.getDisguise(entity);
+        if (entityHasDisguise)
+            draftDisguise = DisguiseAPI.getDisguise(entity);
         else
-            constructedDisguise = DisguiseAPI.constructDisguise(entity);
+            draftDisguise = DisguiseAPI.constructDisguise(entity);
 
-        postConstructDisguise(sourcePlayer, entity, constructedDisguise);
+        DisguiseAPI.disguiseEntity(sourcePlayer, draftDisguise);
 
-        DisguiseAPI.disguiseEntity(sourcePlayer, constructedDisguise);
+        //通过getDisguise获取的伪装在disguise后会创建新实例，因此需要重新获取
+        if (entityHasDisguise) draftDisguise = DisguiseAPI.getDisguise(sourcePlayer);
+        postConstructDisguise(sourcePlayer, entity, draftDisguise);
     }
 
     /**
@@ -341,7 +347,7 @@ public class MorphManager extends MorphPluginObject
         var info = new DisguisingInfo();
         info.player = sourcePlayer;
         info.displayName = disguise.isPlayerDisguise()
-                ? Component.text((targetEntity == null ? targetPlayerName : targetEntity.getName()))
+                ? Component.text((targetEntity == null ? targetPlayerName : ((PlayerDisguise)disguise).getName()))
                 : Component.translatable(targetType.translationKey());
         info.disguise = disguise;
 
@@ -358,7 +364,7 @@ public class MorphManager extends MorphPluginObject
     public DisguisingInfo getPlayerDisguisingInfo(Player player)
     {
         return this.disguisedPlayers.stream()
-                .filter(i -> i.player.getUniqueId() == player.getUniqueId())
+                .filter(i -> i.player.getUniqueId().equals(player.getUniqueId()))
                 .findFirst().orElse(null);
     }
 
