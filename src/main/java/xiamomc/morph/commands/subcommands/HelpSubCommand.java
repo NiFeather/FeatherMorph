@@ -1,4 +1,4 @@
-package xiamomc.morph.commands;
+package xiamomc.morph.commands.subcommands;
 
 import net.kyori.adventure.text.Component;
 import org.bukkit.command.Command;
@@ -6,19 +6,18 @@ import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.misc.MessageUtils;
-import xiamomc.pluginbase.Command.IPluginCommand;
 
 import java.util.List;
 
-public class MorphHelpCommand extends MorphPluginObject implements IPluginCommand {
+public class HelpSubCommand extends MorphPluginObject implements ISubCommand {
     @Override
-    public String getCommandName() {
-        return "morphhelp";
+    public List<String> onTabComplete(String[] args, CommandSender source) {
+        return null;
     }
 
     @Override
-    public List<String> onTabComplete(String baseName, String[] args, CommandSender source) {
-        return null;
+    public String getSubCommandName() {
+        return "help";
     }
 
     private final String[] helpMessages = new String[]
@@ -39,7 +38,13 @@ public class MorphHelpCommand extends MorphPluginObject implements IPluginComman
             };
 
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+    public String getPermissionRequirement() {
+        return null;
+    }
+
+    @Override
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull String[] args)
+    {
         for (var s : helpMessages)
         {
             sender.sendMessage(MessageUtils.prefixes(Component.text(s)));

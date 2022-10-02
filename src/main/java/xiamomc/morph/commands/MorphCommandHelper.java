@@ -17,7 +17,7 @@ public class MorphCommandHelper extends CommandHelper<MorphPlugin>
             new RequestSendCommand(),
             new RequestAcceptCommand(),
             new RequestDenyCommand(),
-            new MorphHelpCommand());
+            new MorphPluginCommand());
 
     @Override
     public List<IPluginCommand> getCommands() {

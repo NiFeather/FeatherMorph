@@ -97,6 +97,8 @@ public class MorphCommand extends MorphPluginObject implements IPluginCommand {
     {
         var list = new ArrayList<String>();
 
+        if (args.length > 1) return list;
+
         if (source instanceof Player player) {
             //Logger.warn("BUFFERS: " + Arrays.toString(buffers));
 

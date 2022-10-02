@@ -45,8 +45,10 @@ public class MorphManager extends MorphPluginObject
         reloadConfiguration();
     }
 
-    private void reloadConfiguration()
+    public void reloadConfiguration()
     {
+        unMorphAll();
+
         //加载JSON配置
         MorphConfiguration targetConfiguration = null;
         var success = false;
@@ -106,7 +108,7 @@ public class MorphManager extends MorphPluginObject
             newInstance.shownTutorialOnce = false;
             newInstance.unlockedDisguises = new ArrayList<>();
 
-            var msg = Component.text("不知道如何使用伪装? 发送 /morphhelp 即可查看！");
+            var msg = Component.text("不知道如何使用伪装? 发送 /mmorph help 即可查看！");
             player.sendMessage(MessageUtils.prefixes(msg));
 
             morphConfiguration.playerMorphConfigurations.add(newInstance);

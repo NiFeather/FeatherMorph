@@ -23,6 +23,7 @@ import xiamomc.morph.commands.MorphCommandHelper;
 import xiamomc.pluginbase.Annotations.Resolved;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class EventProcessor extends MorphPluginObject implements Listener
@@ -66,9 +67,11 @@ public class EventProcessor extends MorphPluginObject implements Listener
         if (e.isCancelled()) return;
 
         //从buffer获取指令名
-        var buffers = e.getBuffer().split(" ");
+        var buffers = new ArrayList<>(Arrays.stream(e.getBuffer().split(" ")).toList());
 
-        var result = cmdHelper.onTabComplete(buffers, e.getSender());
+        if (e.getBuffer().endsWith(" ")) buffers.add("");
+
+        var result = cmdHelper.onTabComplete(buffers.toArray(String[]::new), e.getSender());
         if (result != null) e.setCompletions(result);
     }
 

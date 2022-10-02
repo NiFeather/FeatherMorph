@@ -82,6 +82,8 @@ public class MorphPlayerCommand extends MorphPluginObject implements IPluginComm
     {
         var list = new ArrayList<String>();
 
+        if (args.length > 1) return list;
+
         if (source instanceof Player player)
         {
             var arg = args[0];
