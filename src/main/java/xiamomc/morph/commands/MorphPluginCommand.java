@@ -5,6 +5,7 @@ import xiamomc.morph.commands.subcommands.plugin.HelpSubCommand;
 import xiamomc.morph.commands.subcommands.ISubCommand;
 import xiamomc.morph.commands.subcommands.plugin.ReloadSubCommand;
 import xiamomc.morph.commands.subcommands.SubCommandHelper;
+import xiamomc.morph.commands.subcommands.plugin.ToggleSelfSubCommand;
 
 import java.util.List;
 
@@ -16,7 +17,8 @@ public class MorphPluginCommand extends SubCommandHelper<MorphPlugin> {
 
     private final List<ISubCommand> subCommands = List.of(
             new ReloadSubCommand(),
-            new HelpSubCommand()
+            new HelpSubCommand(),
+            new ToggleSelfSubCommand()
     );
 
     @Override

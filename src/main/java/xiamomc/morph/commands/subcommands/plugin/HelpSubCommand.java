@@ -36,6 +36,8 @@ public class HelpSubCommand extends MorphPluginObject implements ISubCommand {
                     "/request deny <玩家名>: 拒绝交换",
                     "\u00a7l接受交换请求后将允许双方变成对方的样子",
                     "-----------------------------",
+                    "/mmorph toggleself: 切换伪装自身可见性",
+                    "-----------------------------",
             };
 
     @Override

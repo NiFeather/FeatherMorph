@@ -96,7 +96,7 @@ public abstract class SubCommandHelper<T extends XiaMoJavaPlugin> extends Plugin
         if (cmd != null)
             return cmd.onCommand(sender, args);
         else
-            sender.sendMessage(MessageUtils.prefixes(Component.translatable("未找到改指令")).color(NamedTextColor.RED));
+            sender.sendMessage(MessageUtils.prefixes(Component.translatable("未找到该指令").color(NamedTextColor.RED)));
 
         return true;
     }
