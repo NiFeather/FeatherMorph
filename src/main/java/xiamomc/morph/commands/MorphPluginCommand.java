@@ -1,6 +1,7 @@
 package xiamomc.morph.commands;
 
 import xiamomc.morph.MorphPlugin;
+import xiamomc.morph.commands.subcommands.MorphSubCommandHandler;
 import xiamomc.morph.commands.subcommands.plugin.HelpSubCommand;
 import xiamomc.morph.commands.subcommands.plugin.ReloadSubCommand;
 import xiamomc.morph.commands.subcommands.plugin.ToggleSelfSubCommand;
@@ -9,7 +10,7 @@ import xiamomc.pluginbase.Command.SubCommandHandler;
 
 import java.util.List;
 
-public class MorphPluginCommand extends SubCommandHandler<MorphPlugin> {
+public class MorphPluginCommand extends MorphSubCommandHandler {
     @Override
     public String getCommandName() {
         return "mmorph";
@@ -32,12 +33,7 @@ public class MorphPluginCommand extends SubCommandHandler<MorphPlugin> {
     );
 
     @Override
-    protected List<ISubCommand> getSubCommands() {
+    public List<ISubCommand> getSubCommands() {
         return subCommands;
-    }
-
-    @Override
-    protected String getPluginNamespace() {
-        return MorphPlugin.getMorphNameSpace();
     }
 }

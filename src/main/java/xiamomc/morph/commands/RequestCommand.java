@@ -1,15 +1,14 @@
 package xiamomc.morph.commands;
 
-import xiamomc.morph.MorphPlugin;
+import xiamomc.morph.commands.subcommands.MorphSubCommandHandler;
 import xiamomc.morph.commands.subcommands.request.AcceptSubCommand;
 import xiamomc.morph.commands.subcommands.request.DenySubCommand;
 import xiamomc.morph.commands.subcommands.request.SendSubCommand;
 import xiamomc.pluginbase.Command.ISubCommand;
-import xiamomc.pluginbase.Command.SubCommandHandler;
 
 import java.util.List;
 
-public class RequestCommand extends SubCommandHandler<MorphPlugin>
+public class RequestCommand extends MorphSubCommandHandler
 {
     private final List<ISubCommand> subCommands = List.of(
             new SendSubCommand(),
@@ -18,7 +17,7 @@ public class RequestCommand extends SubCommandHandler<MorphPlugin>
     );
 
     @Override
-    protected List<ISubCommand> getSubCommands() {
+    public List<ISubCommand> getSubCommands() {
         return subCommands;
     }
 
@@ -35,10 +34,5 @@ public class RequestCommand extends SubCommandHandler<MorphPlugin>
     @Override
     public String getHelpMessage() {
         return "管理交换请求";
-    }
-
-    @Override
-    protected String getPluginNamespace() {
-        return MorphPlugin.getMorphNameSpace();
     }
 }
