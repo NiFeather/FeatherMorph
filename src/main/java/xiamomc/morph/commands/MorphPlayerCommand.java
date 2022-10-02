@@ -55,7 +55,7 @@ public class MorphPlayerCommand extends MorphPluginObject implements IPluginComm
 
                 if (shouldCopy)
                     morphManager.morphCopy(sourcePlayer, targetEntity); //如果应该复制伪装，则复制给玩家
-                else if (targetEntity instanceof Player targetPlayer && targetPlayer.getName().equals(targetName))
+                else if (targetEntity instanceof Player targetPlayer && targetPlayer.getName().equals(targetName) && !DisguiseAPI.isDisguised(targetEntity))
                     morphManager.morphEntity(sourcePlayer, targetPlayer); //否则，如果目标实体是我们想要的玩家，则伪装成目标实体
                 else
                     morphManager.morphPlayer(sourcePlayer, args[0]); //否则，只简单地创建玩家伪装
