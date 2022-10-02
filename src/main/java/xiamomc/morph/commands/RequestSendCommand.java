@@ -69,7 +69,7 @@ public class RequestSendCommand extends MorphPluginObject implements IPluginComm
             }
             else
             {
-                //todo
+                sender.sendMessage(MessageUtils.prefixes(Component.translatable("未指定请求要发给谁")));
             }
         }
 

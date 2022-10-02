@@ -1,5 +1,7 @@
 package xiamomc.morph.commands;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -7,6 +9,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
+import xiamomc.morph.misc.MessageUtils;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Command.IPluginCommand;
 import xiamomc.pluginbase.PluginObject;
@@ -48,7 +51,7 @@ public class RequestAcceptCommand extends MorphPluginObject implements IPluginCo
 
                 if (targetPlayer == null)
                 {
-                    //todo
+                    sender.sendMessage(MessageUtils.prefixes(Component.translatable("对方未上线或目标玩家不存在").color(NamedTextColor.RED)));
                     return true;
                 }
 
@@ -56,7 +59,7 @@ public class RequestAcceptCommand extends MorphPluginObject implements IPluginCo
             }
             else
             {
-                //todo
+                sender.sendMessage(MessageUtils.prefixes(Component.translatable("未指定要接受谁的请求").color(NamedTextColor.RED)));
             }
         }
 
