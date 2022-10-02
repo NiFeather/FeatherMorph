@@ -1,28 +1,27 @@
-package xiamomc.morph.commands;
+package xiamomc.morph.commands.subcommands.request;
 
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
-import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
+import xiamomc.morph.commands.subcommands.ISubCommand;
 import xiamomc.morph.misc.MessageUtils;
 import xiamomc.pluginbase.Annotations.Resolved;
-import xiamomc.pluginbase.Command.IPluginCommand;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
-public class RequestSendCommand extends MorphPluginObject implements IPluginCommand {
-    @Override
-    public String getCommandName() {
-        return "sendrequest";
-    }
+public class SendSubCommand extends MorphPluginObject implements ISubCommand
+{
+    @Resolved
+    private MorphManager morphs;
 
     @Override
-    public List<String> onTabComplete(String baseName, String[] args, CommandSender source) {
+    public List<String> onTabComplete(String[] args, CommandSender source) {
         var list = new ArrayList<String>();
 
         if (source instanceof Player player)
@@ -35,11 +34,18 @@ public class RequestSendCommand extends MorphPluginObject implements IPluginComm
         return list;
     }
 
-    @Resolved
-    private MorphManager morphs;
+    @Override
+    public String getSubCommandName() {
+        return "send";
+    }
 
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+    public String getPermissionRequirement() {
+        return null;
+    }
+
+    @Override
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull String[] args) {
         if (sender instanceof Player sourcePlayer)
         {
             if (args.length >= 1)

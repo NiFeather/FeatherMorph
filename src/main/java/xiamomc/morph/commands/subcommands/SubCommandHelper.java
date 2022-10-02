@@ -50,7 +50,7 @@ public abstract class SubCommandHelper<T extends XiaMoJavaPlugin> extends Plugin
 
         //Logger.warn("BUFFER: '" + Arrays.toString(args) + "'");
 
-        //如果子命令baseName不为空
+        //如果buffer长度大于等于2（有给定子命令名）
         if (args.length >= 2)
         {
             //查询匹配的子命令
@@ -64,6 +64,7 @@ public abstract class SubCommandHelper<T extends XiaMoJavaPlugin> extends Plugin
                 return result == null ? emptyStringList : result;
             }
 
+            //没有，返回空列表
             return emptyStringList;
         }
 
@@ -83,7 +84,12 @@ public abstract class SubCommandHelper<T extends XiaMoJavaPlugin> extends Plugin
     {
         String subBaseName;
 
-        subBaseName = args.length >= 1 ? args[0] : "";
+        if (args.length >= 1)
+        {
+            subBaseName = args[0];
+            args = ArrayUtils.remove(args, 0);
+        }
+        else subBaseName = "";
 
         var cmd = findSubCommandOrNull(subBaseName, getSubCommands());
 

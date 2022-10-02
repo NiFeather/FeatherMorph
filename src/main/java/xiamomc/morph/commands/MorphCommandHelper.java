@@ -14,9 +14,7 @@ public class MorphCommandHelper extends CommandHelper<MorphPlugin>
             new MorphCommand(),
             new MorphPlayerCommand(),
             new UnMorphCommand(),
-            new RequestSendCommand(),
-            new RequestAcceptCommand(),
-            new RequestDenyCommand(),
+            new RequestCommand(),
             new MorphPluginCommand());
 
     @Override

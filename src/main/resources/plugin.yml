@@ -12,13 +12,7 @@ commands:
   morphplayer:
     usage: '/morphplayer'
     description: 'Try to join the game'
-  sendrequest:
-    usage: '/morphplayer'
-    description: 'Try to join the game'
-  acceptrequest:
-    usage: '/morphplayer'
-    description: 'Try to join the game'
-  denyrequest:
+  request:
     usage: '/morphplayer'
     description: 'Try to join the game'
   unmorph:
