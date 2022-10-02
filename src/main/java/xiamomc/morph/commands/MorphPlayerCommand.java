@@ -78,15 +78,15 @@ public class MorphPlayerCommand extends MorphPluginObject implements IPluginComm
     }
 
     @Override
-    public List<String> onTabComplete(String baseName, String[] args, CommandSender source)
+    public List<String> onTabComplete(List<String> args, CommandSender source)
     {
         var list = new ArrayList<String>();
 
-        if (args.length > 1) return list;
+        if (args.size() > 1) return list;
 
         if (source instanceof Player player)
         {
-            var arg = args[0];
+            var arg = args.get(0);
 
             var infos = morphManager.getAvaliableDisguisesFor(player)
                     .stream().filter(c -> c.isPlayerDisguise).toList();
@@ -100,5 +100,15 @@ public class MorphPlayerCommand extends MorphPluginObject implements IPluginComm
         }
 
         return list;
+    }
+
+    @Override
+    public String getPermissionRequirement() {
+        return null;
+    }
+
+    @Override
+    public String getHelpMessage() {
+        return "伪装为某一玩家";
     }
 }

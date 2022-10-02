@@ -71,7 +71,7 @@ public class EventProcessor extends MorphPluginObject implements Listener
 
         if (e.getBuffer().endsWith(" ")) buffers.add("");
 
-        var result = cmdHelper.onTabComplete(buffers.toArray(String[]::new), e.getSender());
+        var result = cmdHelper.onTabComplete(buffers, e.getSender());
         if (result != null) e.setCompletions(result);
     }
 

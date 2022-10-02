@@ -6,25 +6,30 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import xiamomc.morph.commands.subcommands.ISubCommand;
 import xiamomc.morph.misc.MessageUtils;
+import xiamomc.pluginbase.Command.ISubCommand;
 
 import java.util.List;
 
 public class ToggleSelfSubCommand implements ISubCommand {
     @Override
-    public List<String> onTabComplete(String[] args, CommandSender source) {
+    public List<String> onTabComplete(List<String> args, CommandSender source) {
         return null;
     }
 
     @Override
-    public String getSubCommandName() {
+    public String getCommandName() {
         return "toggleself";
     }
 
     @Override
     public String getPermissionRequirement() {
         return null;
+    }
+
+    @Override
+    public String getHelpMessage() {
+        return "切换自身可见性";
     }
 
     @Override

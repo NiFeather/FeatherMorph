@@ -1,14 +1,11 @@
 package xiamomc.morph.commands;
 
-import me.libraryaddict.disguise.DisguiseAPI;
-import net.kyori.adventure.text.Component;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
-import xiamomc.morph.misc.MessageUtils;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Command.IPluginCommand;
 
@@ -21,8 +18,18 @@ public class UnMorphCommand  extends MorphPluginObject implements IPluginCommand
     }
 
     @Override
-    public List<String> onTabComplete(String baseName, String[] args, CommandSender source) {
-        return List.of("");
+    public List<String> onTabComplete(List<String> list, CommandSender commandSender) {
+        return null;
+    }
+
+    @Override
+    public String getPermissionRequirement() {
+        return null;
+    }
+
+    @Override
+    public String getHelpMessage() {
+        return "取消自己的伪装";
     }
 
     @Resolved

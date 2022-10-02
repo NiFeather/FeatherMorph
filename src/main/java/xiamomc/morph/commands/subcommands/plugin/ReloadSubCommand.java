@@ -2,31 +2,35 @@ package xiamomc.morph.commands.subcommands.plugin;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
-import xiamomc.morph.commands.subcommands.ISubCommand;
 import xiamomc.morph.misc.MessageUtils;
 import xiamomc.pluginbase.Annotations.Resolved;
+import xiamomc.pluginbase.Command.ISubCommand;
 
 import java.util.List;
 
 public class ReloadSubCommand extends MorphPluginObject implements ISubCommand {
     @Override
-    public List<String> onTabComplete(String[] args, CommandSender source) {
+    public List<String> onTabComplete(List<String> args, CommandSender source) {
         return null;
     }
 
     @Override
-    public String getSubCommandName() {
+    public String getCommandName() {
         return "reload";
     }
 
     @Override
     public String getPermissionRequirement() {
         return "xiamomc.morph.reload";
+    }
+
+    @Override
+    public String getHelpMessage() {
+        return "重载插件配置";
     }
 
     @Resolved

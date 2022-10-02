@@ -2,17 +2,17 @@ package xiamomc.morph.commands.subcommands.request;
 
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
+import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
-import xiamomc.morph.commands.subcommands.ISubCommand;
 import xiamomc.morph.misc.MessageUtils;
 import xiamomc.pluginbase.Annotations.Resolved;
+import xiamomc.pluginbase.Command.ISubCommand;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class SendSubCommand extends MorphPluginObject implements ISubCommand
@@ -21,7 +21,7 @@ public class SendSubCommand extends MorphPluginObject implements ISubCommand
     private MorphManager morphs;
 
     @Override
-    public List<String> onTabComplete(String[] args, CommandSender source) {
+    public List<String> onTabComplete(List<String> args, CommandSender source) {
         var list = new ArrayList<String>();
 
         if (source instanceof Player player)
@@ -35,13 +35,18 @@ public class SendSubCommand extends MorphPluginObject implements ISubCommand
     }
 
     @Override
-    public String getSubCommandName() {
+    public String getCommandName() {
         return "send";
     }
 
     @Override
     public String getPermissionRequirement() {
         return null;
+    }
+
+    @Override
+    public String getHelpMessage() {
+        return "向某一位玩家发送交换请求";
     }
 
     @Override

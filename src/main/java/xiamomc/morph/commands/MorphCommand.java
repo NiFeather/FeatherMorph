@@ -93,16 +93,16 @@ public class MorphCommand extends MorphPluginObject implements IPluginCommand {
     private MorphManager morphs;
 
     @Override
-    public List<String> onTabComplete(String baseName, String[] args, CommandSender source)
+    public List<String> onTabComplete(List<String> args, CommandSender source)
     {
         var list = new ArrayList<String>();
 
-        if (args.length > 1) return list;
+        if (args.size() > 1) return list;
 
         if (source instanceof Player player) {
             //Logger.warn("BUFFERS: " + Arrays.toString(buffers));
 
-            var arg = args[0];
+            var arg = args.get(0);
 
             var infos = morphs.getAvaliableDisguisesFor(player)
                     .stream().filter(c -> !c.isPlayerDisguise).toList();
@@ -116,5 +116,15 @@ public class MorphCommand extends MorphPluginObject implements IPluginCommand {
         }
 
         return list;
+    }
+
+    @Override
+    public String getPermissionRequirement() {
+        return null;
+    }
+
+    @Override
+    public String getHelpMessage() {
+        return "伪装成某种生物";
     }
 }
