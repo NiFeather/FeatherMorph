@@ -87,7 +87,8 @@
         <dependency>
             <groupId>com.github.XiaMoZhiShi</groupId>
             <artifactId>PluginBase</artifactId>
-            <version>0.0.3-alpha</version>
+            <version>0.0.5-alpha</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.github.Gecolay</groupId>

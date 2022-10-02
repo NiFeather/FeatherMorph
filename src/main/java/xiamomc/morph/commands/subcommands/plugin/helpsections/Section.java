@@ -1,5 +1,7 @@
 package xiamomc.morph.commands.subcommands.plugin.helpsections;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,12 +13,21 @@ public class Section
         return entries;
     }
 
-    private final String title;
-    public String getTitle(){ return title; }
+    private final String header;
+    public String getHeader(){ return header; }
 
-    public Section(String title)
+    private final String footer;
+    public String getFooter(){ return footer; }
+
+    public Section(String header, @Nullable String footer)
     {
-        this.title = title;
+        this.header = header;
+        this.footer = footer;
+    }
+
+    public Section(String header)
+    {
+        this(header, null);
     }
 
     public void add(Entry e)

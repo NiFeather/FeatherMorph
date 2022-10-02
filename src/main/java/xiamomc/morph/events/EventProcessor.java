@@ -66,12 +66,7 @@ public class EventProcessor extends MorphPluginObject implements Listener
     {
         if (e.isCancelled()) return;
 
-        //从buffer获取指令名
-        var buffers = new ArrayList<>(Arrays.stream(e.getBuffer().split(" ")).toList());
-
-        if (e.getBuffer().endsWith(" ")) buffers.add("");
-
-        var result = cmdHelper.onTabComplete(buffers, e.getSender());
+        var result = cmdHelper.onTabComplete(e.getBuffer(), e.getSender());
         if (result != null) e.setCompletions(result);
     }
 

@@ -1,12 +1,10 @@
 package xiamomc.morph.commands;
 
-import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.commands.subcommands.MorphSubCommandHandler;
 import xiamomc.morph.commands.subcommands.plugin.HelpSubCommand;
 import xiamomc.morph.commands.subcommands.plugin.ReloadSubCommand;
 import xiamomc.morph.commands.subcommands.plugin.ToggleSelfSubCommand;
 import xiamomc.pluginbase.Command.ISubCommand;
-import xiamomc.pluginbase.Command.SubCommandHandler;
 
 import java.util.List;
 
@@ -35,5 +33,11 @@ public class MorphPluginCommand extends MorphSubCommandHandler {
     @Override
     public List<ISubCommand> getSubCommands() {
         return subCommands;
+    }
+
+    private final List<String> notes = List.of("");
+    @Override
+    public List<String> getNotes() {
+        return notes;
     }
 }

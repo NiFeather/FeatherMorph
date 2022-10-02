@@ -13,10 +13,6 @@ import xiamomc.pluginbase.Command.ISubCommand;
 import java.util.List;
 
 public class ReloadSubCommand extends MorphPluginObject implements ISubCommand {
-    @Override
-    public List<String> onTabComplete(List<String> args, CommandSender source) {
-        return null;
-    }
 
     @Override
     public String getCommandName() {

@@ -11,15 +11,11 @@ import xiamomc.pluginbase.Command.IPluginCommand;
 
 import java.util.List;
 
-public class UnMorphCommand  extends MorphPluginObject implements IPluginCommand {
+public class UnMorphCommand extends MorphPluginObject implements IPluginCommand
+{
     @Override
     public String getCommandName() {
         return "unmorph";
-    }
-
-    @Override
-    public List<String> onTabComplete(List<String> list, CommandSender commandSender) {
-        return null;
     }
 
     @Override
@@ -38,9 +34,8 @@ public class UnMorphCommand  extends MorphPluginObject implements IPluginCommand
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if (sender instanceof Player player)
-        {
             morphs.unMorph(player);
-        }
+
         return true;
     }
 }

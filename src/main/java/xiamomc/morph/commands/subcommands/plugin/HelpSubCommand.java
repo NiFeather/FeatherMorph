@@ -17,10 +17,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class HelpSubCommand extends MorphPluginObject implements ISubCommand {
-    @Override
-    public List<String> onTabComplete(List<String> args, CommandSender source) {
-        return null;
-    }
 
     @Override
     public String getCommandName() {
@@ -99,7 +95,7 @@ public class HelpSubCommand extends MorphPluginObject implements ISubCommand {
             }
 
             //添加section的标题
-            list.add(section.getTitle());
+            list.add(section.getHeader());
 
             for (var entry : entries)
             {

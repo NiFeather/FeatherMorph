@@ -21,6 +21,12 @@ public class RequestCommand extends MorphSubCommandHandler
         return subCommands;
     }
 
+    private final List<String> notes = List.of("");
+    @Override
+    public List<String> getNotes() {
+        return notes;
+    }
+
     @Override
     public String getCommandName() {
         return "request";

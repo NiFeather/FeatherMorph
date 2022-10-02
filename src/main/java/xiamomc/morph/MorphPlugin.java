@@ -50,10 +50,10 @@ public final class MorphPlugin extends XiaMoJavaPlugin {
     @Override
     public void onDisable() {
         // Plugin shutdown logic
+        this.getSLF4JLogger().info("Disabling MorphPlugin");
 
         if (morphManager != null) morphManager.unMorphAll();
 
-        this.getSLF4JLogger().info("Disabling MorphPlugin");
         super.onDisable();
     }
 }
