@@ -13,6 +13,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerSwapHandItemsEvent;
@@ -23,18 +24,21 @@ import xiamomc.morph.commands.MorphCommandHelper;
 import xiamomc.pluginbase.Annotations.Resolved;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class EventProcessor extends MorphPluginObject implements Listener
 {
+    @Resolved
+    private MorphCommandHelper cmdHelper;
+
+    @Resolved
+    private MorphManager morphs;
+
     @EventHandler
     public void onEntityDeath(EntityDeathEvent e)
     {
         var entity = e.getEntity();
         var killer = entity.getKiller();
-
-        var logger = Plugin.getSLF4JLogger();
 
         //logger.warn(entity + "died by:" + killer);
 
@@ -57,9 +61,6 @@ public class EventProcessor extends MorphPluginObject implements Listener
         if (killer != null)
             this.onPlayerKillEntity(killer, e.getEntity());
     }
-
-    @Resolved
-    private MorphCommandHelper cmdHelper;
 
     @EventHandler
     public void onTabComplete(TabCompleteEvent e)
@@ -113,28 +114,16 @@ public class EventProcessor extends MorphPluginObject implements Listener
 
     //endregion  GSit <-> LibsDisguises workaround
 
-    private void hideDisguiseFor(Player player)
-    {
-        if (DisguiseAPI.isDisguised(player))
-            DisguiseUtilities.removeSelfDisguise(DisguiseAPI.getDisguise(player));
-    }
-
-    private void showDisguiseFor(Player player)
-    {
-        if (DisguiseAPI.isDisguised(player))
-          this.addSchedule(c ->
-          {
-                if (DisguiseAPI.isDisguised(player))
-                    DisguiseUtilities.setupFakeDisguise(DisguiseAPI.getDisguise(player));
-          });
-    }
-
     //region LibsDisguises workaround
 
-    @EventHandler()
+    //伪装时副手交换会desync背包
+    @EventHandler
     public void onPlayerSwapHand(PlayerSwapHandItemsEvent e)
     {
-        if (e.getMainHandItem().getType().isAir() && e.getOffHandItem().getType().isAir())
+        var mainHandIsAir = e.getMainHandItem() == null || e.getMainHandItem().getType().isAir();
+        var offHandHandIsAir = e.getOffHandItem() == null || e.getMainHandItem().getType().isAir();
+
+        if (mainHandIsAir && offHandHandIsAir)
             return;
 
         var player = e.getPlayer();
@@ -148,6 +137,7 @@ public class EventProcessor extends MorphPluginObject implements Listener
         }
     }
 
+    //非Premium版本的LibsDisguises不会为玩家保存伪装
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent e)
     {
@@ -165,10 +155,53 @@ public class EventProcessor extends MorphPluginObject implements Listener
         }
     }
 
+    //解决LibsDisguises中MonstersIgnoreDisguises会忽视PlayerDisguise的问题
+    @EventHandler
+    public void onEntityTarget(EntityTargetEvent e)
+    {
+        if (e.getTarget() == null) return;
+
+        if (e.getTarget() instanceof Player player)
+        {
+            //受到外力攻击或者其他原因时不要处理
+            switch (e.getReason())
+            {
+                case TARGET_ATTACKED_ENTITY:
+                case TARGET_ATTACKED_OWNER:
+                case OWNER_ATTACKED_TARGET:
+                case CUSTOM:
+                    return;
+
+                default:
+                    break;
+            }
+
+            //目标玩家没在伪装时不要处理
+            if (!DisguiseAPI.isDisguised(player)) return;
+
+            var disguise = DisguiseAPI.getDisguise(player);
+
+            e.setCancelled(!disguise.isPlayerDisguise());
+        }
+    }
+
     //endregion LibsDisguises workaround
 
-    @Resolved
-    private MorphManager morphs;
+    private void hideDisguiseFor(Player player)
+    {
+        if (DisguiseAPI.isDisguised(player))
+            DisguiseUtilities.removeSelfDisguise(DisguiseAPI.getDisguise(player));
+    }
+
+    private void showDisguiseFor(Player player)
+    {
+        if (DisguiseAPI.isDisguised(player))
+            this.addSchedule(c ->
+            {
+                if (DisguiseAPI.isDisguised(player))
+                    DisguiseUtilities.setupFakeDisguise(DisguiseAPI.getDisguise(player));
+            });
+    }
 
     private void onPlayerKillEntity(Player player, Entity entity)
     {

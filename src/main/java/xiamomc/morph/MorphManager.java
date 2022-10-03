@@ -172,12 +172,18 @@ public class MorphManager extends MorphPluginObject
             }
 
             var watcher = disg.getWatcher();
+
+            //workaround: 复制出来的玩家伪装会忽略下蹲等状态
             if (disg.isPlayerDisguise())
             {
                 watcher.setSneaking(p.isSneaking() && !p.isFlying());
                 watcher.setFlyingWithElytra(p.isGliding());
                 watcher.setSprinting(p.isSprinting());
             }
+
+            //workaround: 复制实体伪装时会一并复制隐身标签
+            //            会导致复制出来的伪装永久隐身
+            watcher.setInvisible(p.isInvisible());
 
             var msg = Component.translatable("正伪装为").append(i.displayName);
 
@@ -318,8 +324,6 @@ public class MorphManager extends MorphPluginObject
         var watcher = disguise.getWatcher();
 
         var targetType = type == null ? disguise.getType().getEntityType() : type;
-
-        watcher.setInvisible(false);
 
         //workaround: 伪装已死亡的LivingEntity
         if (targetEntity instanceof LivingEntity living && living.getHealth() <= 0)
