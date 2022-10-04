@@ -1,8 +1,13 @@
 package xiamomc.morph.commands.subcommands.plugin;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.commands.MorphCommandHelper;
 import xiamomc.morph.commands.subcommands.plugin.helpsections.Entry;
@@ -42,7 +47,7 @@ public class HelpSubCommand extends MorphPluginObject implements ISubCommand
     private void setupCommandSections()
     {
         //不属于任何section的指令丢到这里
-        var miscCommandSection = new Section("/ -- 插件指令");
+        var miscCommandSection = new Section("*", "/ -- 伪装、取消伪装");
 
         commandSections.add(miscCommandSection);
 
@@ -54,20 +59,55 @@ public class HelpSubCommand extends MorphPluginObject implements ISubCommand
             {
                 //此section下所有指令的父级指令
                 var parentCommandName = sch.getCommandName();
-                var section = new Section("/" + sch.getCommandName() + " -- " + sch.getHelpMessage());
+                var section = new Section(parentCommandName, "/" + parentCommandName + " ... -- " + sch.getHelpMessage());
 
                 //添加指令到section中
                 for (var sc : sch.getSubCommands())
                 {
+                    var cmd = "/" + parentCommandName + " " + sc.getCommandName() + " ";
                     section.add(new Entry(sc.getPermissionRequirement(),
-                            "/" + parentCommandName + " " + sc.getCommandName() + " : " + sc.getHelpMessage()));
+                             cmd + " : " + sc.getHelpMessage(),
+                            cmd));
                 }
 
                 commandSections.add(section);
             }
             else
-                miscCommandSection.add(new Entry(c.getPermissionRequirement(), "/" + c.getCommandName() + " : " + c.getHelpMessage()));
+                miscCommandSection.add(new Entry(c.getPermissionRequirement(),
+                        "/" + c.getCommandName() + " : " + c.getHelpMessage(),
+                        "/" + c.getCommandName() + " "));
         }
+    }
+
+    private List<Component> constructSectionMessage(CommandSender sender, Section section)
+    {
+
+        var entries = section.getEntries();
+
+        //添加section的标题
+        var list = new ArrayList<Component>(List.of(
+                Component.empty(),
+                Component.text("指令 ")
+                        .append(Component.text("/" + section.getCommandBaseName())
+                                .decorate(TextDecoration.ITALIC)
+                                .hoverEvent(HoverEvent.showText(Component.text(section.getHeader()))))
+                        .append(Component.text(" 的用法："))
+        ));
+
+        //build entry
+        for (var entry : entries)
+        {
+            var perm = entry.permission();
+
+            //如果指令不要求权限或者sender拥有此权限，添加到列表里
+            if (perm == null || sender.hasPermission(perm))
+                list.add(Component.text(entry.message())
+                        .decorate(TextDecoration.UNDERLINED)
+                        .hoverEvent(HoverEvent.showText(Component.text("点击补全")))
+                        .clickEvent(ClickEvent.suggestCommand(entry.suggestingCommand())));
+        }
+
+        return list;
     }
 
     /**
@@ -76,40 +116,18 @@ public class HelpSubCommand extends MorphPluginObject implements ISubCommand
      * @param sender 要显示给谁
      * @return 构建的帮助信息
      */
-    private List<String> constructHelpMessage(CommandSender sender)
+    private List<Component> constructHelpMessage(CommandSender sender)
     {
-        var list = new ArrayList<String>();
-        var isFirstSection = true;
+        var list = new ArrayList<Component>();
 
-        var speractor = "-------------------------";
-
+        list.add(Component.text("当前可用的指令："));
         for (var section : commandSections)
         {
-            var entries = section.getEntries();
-
-            //if (entries.stream()
-            //        .noneMatch(e -> e.getPermission() != null && sender.hasPermission(e.getPermission()))) continue;
-
-            //如果是第一个section，则额外添加一行分割线
-            if (isFirstSection)
-            {
-                list.add(speractor);
-                isFirstSection = false;
-            }
-
-            //添加section的标题
-            list.add(section.getHeader());
-
-            for (var entry : entries)
-            {
-                var perm = entry.permission();
-
-                //如果指令不要求权限或者sender拥有此权限，添加到列表里
-                if (perm == null) list.add(entry.message());
-                else if (sender.hasPermission(perm)) list.add(entry.message());
-            }
-
-            list.add(speractor);
+            list.add(Component.text(section.getHeader())
+                    .decorate(TextDecoration.UNDERLINED)
+                    .clickEvent(ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND,
+                            "/mmorph " + getCommandName() + " " + section.getCommandBaseName()))
+                    .hoverEvent(HoverEvent.showText(Component.text("点击查看"))));
         }
 
         return list;
@@ -129,10 +147,41 @@ public class HelpSubCommand extends MorphPluginObject implements ISubCommand
     }
 
     @Override
+    public @Nullable List<String> onTabComplete(List<String> args, CommandSender source)
+    {
+        var baseName = args.size() >= 1 ? args.get(0) : "";
+        var matchedSections = commandSections.stream()
+                .filter(s -> s.getCommandBaseName().toLowerCase().startsWith(baseName.toLowerCase())).toList();
+
+        var list = new ArrayList<String>();
+
+        for (var s : matchedSections)
+            list.add(s.getCommandBaseName());
+
+        return list;
+    }
+
+    @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull String[] args)
     {
+        if (args.length >= 1)
+        {
+            var matchedSection = commandSections.stream()
+                    .filter(s -> s.getCommandBaseName().equalsIgnoreCase(args[0])).findFirst();
+
+            if (matchedSection.isPresent())
+            {
+                for (var s : constructSectionMessage(sender, matchedSection.get()))
+                    sender.sendMessage(MessageUtils.prefixes(sender, s));
+            }
+            else
+                sender.sendMessage(MessageUtils.prefixes(sender, Component.translatable("未找到此章节").color(NamedTextColor.RED)));
+
+            return true;
+        }
+
         for (var s : constructHelpMessage(sender))
-            sender.sendMessage(MessageUtils.prefixes(sender, Component.text(s)));
+            sender.sendMessage(MessageUtils.prefixes(sender, s));
 
         return true;
     }

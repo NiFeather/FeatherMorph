@@ -28,15 +28,19 @@ public class Section
         return footer;
     }
 
-    public Section(String header, @Nullable String footer)
+    private final String commandBaseName;
+    public String getCommandBaseName() { return commandBaseName; }
+
+    public Section(String name, String header, @Nullable String footer)
     {
+        this.commandBaseName = name;
         this.header = header;
         this.footer = footer;
     }
 
-    public Section(String header)
+    public Section(String name, String header)
     {
-        this(header, null);
+        this(name, header, null);
     }
 
     public void add(Entry e)
