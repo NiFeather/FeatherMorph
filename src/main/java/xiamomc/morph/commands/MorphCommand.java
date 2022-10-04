@@ -105,7 +105,7 @@ public class MorphCommand extends MorphPluginObject implements IPluginCommand {
             var arg = args.get(0);
 
             var infos = morphs.getAvaliableDisguisesFor(player)
-                    .stream().filter(c -> !c.isPlayerDisguise).toList();
+                    .stream().filter(c -> !c.isPlayerDisguise()).toList();
 
             for (var di : infos) {
                 var name = di.type.getKey().asString();

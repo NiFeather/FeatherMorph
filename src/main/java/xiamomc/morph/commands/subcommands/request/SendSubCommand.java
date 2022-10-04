@@ -70,7 +70,7 @@ public class SendSubCommand extends MorphPluginObject implements ISubCommand
                 }
 
                 if (morphs.getAvaliableDisguisesFor(sourcePlayer).stream()
-                        .anyMatch(c -> c.isPlayerDisguise && c.playerDisguiseTargetName.equals(args[0])))
+                        .anyMatch(c -> c.isPlayerDisguise() && c.playerDisguiseTargetName.equals(args[0])))
                 {
                     sourcePlayer.sendMessage(MessageUtils.prefixes(Component.text("你已经有对方的伪装形态了")));
                     return true;

@@ -1,12 +1,17 @@
 package xiamomc.morph;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.disguisetypes.*;
 import me.libraryaddict.disguise.disguisetypes.watchers.ArmorStandWatcher;
 import me.libraryaddict.disguise.disguisetypes.watchers.LivingWatcher;
+import me.libraryaddict.disguise.utilities.DisguiseValues;
+import me.libraryaddict.disguise.utilities.reflection.FakeBoundingBox;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.Location;
+import org.bukkit.Particle;
 import org.bukkit.entity.*;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
@@ -32,7 +37,7 @@ public class MorphManager extends MorphPluginObject
 
     private MorphConfiguration morphConfiguration;
 
-    private final Gson gson = new Gson();
+    private final Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
 
     @Resolved
     private MorphPlugin plugin;
@@ -304,6 +309,13 @@ public class MorphManager extends MorphPluginObject
 
         player.sendMessage(MessageUtils.prefixes(Component.text("已取消伪装")));
         player.sendActionBar(Component.empty());
+
+        player.spawnParticle(Particle.EXPLOSION_NORMAL, player.getLocation(),
+                50,
+                0, player.getHeight() / 4, 0,
+                0.05);
+
+        spawnParticle(player, player.getLocation(), player.getWidth(), player.getHeight(), player.getWidth());
     }
 
     private void postConstructDisguise(Player sourcePlayer, Entity targetEntity, Disguise disguise)
@@ -362,6 +374,56 @@ public class MorphManager extends MorphPluginObject
         }
 
         disguisedPlayers.add(info);
+
+        //显示粒子
+        var cX = 0d;
+        var cZ = 0d;
+        var cY = 0d;
+
+        var values = DisguiseValues.getDisguiseValues(disguise.getType());
+
+        var location = sourcePlayer.getLocation();
+        location.setY(location.getY() + (disguise.getHeight() / 2));
+
+        if (disguise.isMobDisguise())
+        {
+            var mobDisguise = (MobDisguise)disguise;
+            FakeBoundingBox box;
+
+            if (!mobDisguise.isAdult() && values.getBabyBox() != null)
+                box = values.getBabyBox();
+            else
+                box = values.getAdultBox();
+
+            cX = box.getX();
+            cY = box.getY();
+            cZ = box.getZ();
+        }
+        else
+        {
+            cX = cZ = sourcePlayer.getWidth();
+            cY = sourcePlayer.getHeight();
+        }
+
+        spawnParticle(sourcePlayer, sourcePlayer.getLocation(), cX, cY, cZ);
+    }
+
+    private void spawnParticle(Player player, Location location, double collX, double collY, double collZ)
+    {
+        var xOffset = collX / 2;
+        var zOffset = collZ / 2;
+
+        location.setY(location.getY() + (collY / 2));
+
+        //根据碰撞箱计算粒子数量缩放
+        //缩放为碰撞箱体积的1/15，最小为1
+        var particleScale = Math.max(1, (collX * collY * collZ) / 15);
+
+        //显示粒子
+        player.spawnParticle(Particle.EXPLOSION_NORMAL, location, //类型和位置
+                (int) (25 * particleScale), //数量
+                collX * 0.6, collY / 4, collZ * 0.6, //分布空间
+                particleScale >= 10 ? 0.2 : 0.05); //速度
     }
 
     @Nullable

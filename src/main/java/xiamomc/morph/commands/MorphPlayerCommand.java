@@ -9,6 +9,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
+import xiamomc.morph.misc.DisguiseInfo;
 import xiamomc.morph.misc.MessageUtils;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Command.IPluginCommand;
@@ -86,14 +87,14 @@ public class MorphPlayerCommand extends MorphPluginObject implements IPluginComm
 
         if (source instanceof Player player)
         {
-            var arg = args.get(0);
+            var arg = args.get(0).toLowerCase();
 
             var infos = morphManager.getAvaliableDisguisesFor(player)
-                    .stream().filter(c -> c.isPlayerDisguise).toList();
+                    .stream().filter(DisguiseInfo::isPlayerDisguise).toList();
 
             for (var di : infos) {
                 var name = di.playerDisguiseTargetName;
-                if (!name.contains(arg)) continue;
+                if (!name.toLowerCase().contains(arg)) continue;
 
                 list.add(name);
             }
