@@ -47,7 +47,7 @@ public class HelpSubCommand extends MorphPluginObject implements ISubCommand
     private void setupCommandSections()
     {
         //不属于任何section的指令丢到这里
-        var miscCommandSection = new Section("*", "/ -- 伪装、取消伪装", List.of(
+        var miscCommandSection = new Section("/", "/ -- 伪装、取消伪装", List.of(
                 "伪装可以通过击杀生物或玩家获得",
                 "伪装时会优先复制视线方向5格以内的相同生物或玩家进行伪装"
         ));
@@ -141,7 +141,7 @@ public class HelpSubCommand extends MorphPluginObject implements ISubCommand
     {
         var list = new ArrayList<Component>();
 
-        list.add(Component.text("当前可用的指令："));
+        list.add(Component.text("当前可用的指令（单击补全/查看）："));
         for (var section : commandSections)
         {
             list.add(Component.text(section.getHeader())
