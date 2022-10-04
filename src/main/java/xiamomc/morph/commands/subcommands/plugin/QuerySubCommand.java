@@ -69,7 +69,7 @@ public class QuerySubCommand extends MorphPluginObject implements ISubCommand
 
                 if (info != null)
                     commandSender.sendMessage(MessageUtils.prefixes(
-                            Component.text(targetPlayer.getName() + " 正伪装为 " + info.displayName)
+                            Component.text(targetPlayer.getName() + " 正伪装为 ").append(info.displayName)
                     ));
                 else if (DisguiseAPI.isDisguised(targetPlayer))
                 {
