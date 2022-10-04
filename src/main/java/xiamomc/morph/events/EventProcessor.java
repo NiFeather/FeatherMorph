@@ -6,10 +6,7 @@ import dev.geco.gsit.api.event.PlayerGetUpPlayerSitEvent;
 import dev.geco.gsit.api.event.PlayerPlayerSitEvent;
 import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.utilities.DisguiseUtilities;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.Warden;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -22,6 +19,7 @@ import org.bukkit.event.server.TabCompleteEvent;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.commands.MorphCommandHelper;
+import xiamomc.morph.misc.EntityTypeUtils;
 import xiamomc.pluginbase.Annotations.Resolved;
 
 import java.util.ArrayList;
@@ -148,6 +146,17 @@ public class EventProcessor extends MorphPluginObject implements Listener
             //刷新Disguise
             info.disguise = DisguiseAPI.getDisguise(player);
         }
+        else if (DisguiseAPI.isDisguised(player))
+        {
+            //移除未跟踪并且属于此插件的伪装
+            var disguise = DisguiseAPI.getDisguise(player);
+
+            if (disguise.getCustomData("XIAMO_MORPH") != null)
+            {
+                Logger.warn("detected");
+                disguise.removeDisguise(player);
+            }
+        }
     }
 
     //解决LibsDisguises中MonstersIgnoreDisguises会忽视PlayerDisguise的问题
@@ -176,7 +185,25 @@ public class EventProcessor extends MorphPluginObject implements Listener
 
             var disguise = DisguiseAPI.getDisguise(player);
 
-            e.setCancelled(!disguise.isPlayerDisguise());
+            var sourceEntityType = e.getEntity().getType();
+            var disguiseEntityType = disguise.getType().getEntityType();
+
+            //检查是否要取消Target
+            boolean shouldTarget = switch (sourceEntityType) {
+                case ZOMBIE, ZOMBIE_VILLAGER, HUSK, DROWNED -> EntityTypeUtils.isZombiesHostile(disguiseEntityType);
+                case SKELETON, STRAY -> EntityTypeUtils.isGolem(disguiseEntityType) || disguise.isPlayerDisguise();
+                case PIGLIN -> EntityTypeUtils.isPiglinHostile(disguiseEntityType);
+                case PIGLIN_BRUTE -> EntityTypeUtils.isBruteHostile(disguiseEntityType);
+                case WITHER_SKELETON -> EntityTypeUtils.isWitherSkeletonHostile(disguiseEntityType);
+                case GUARDIAN , ELDER_GUARDIAN -> EntityTypeUtils.isGuardianHostile(disguiseEntityType);
+                case WITHER -> EntityTypeUtils.isWitherHostile(disguiseEntityType);
+                case PILLAGER ,VEX, ILLUSIONER, VINDICATOR, EVOKER, RAVAGER -> EntityTypeUtils.isRaiderHostile(disguiseEntityType);
+                case ENDERMAN -> disguiseEntityType == EntityType.PLAYER || disguiseEntityType == EntityType.ENDERMITE;
+                case ZOGLIN -> true;
+                default -> disguise.isPlayerDisguise();
+            };
+
+            e.setCancelled(!shouldTarget);
         }
     }
 

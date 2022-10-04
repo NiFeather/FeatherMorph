@@ -15,6 +15,7 @@ import org.bukkit.Particle;
 import org.bukkit.entity.*;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.misc.*;
 import xiamomc.pluginbase.Annotations.Initializer;
@@ -73,6 +74,11 @@ public class MorphManager extends MorphPluginObject
 
         morphConfiguration = targetConfiguration;
         if (success) saveConfiguration();
+    }
+
+    public List<DisguisingInfo> getDisguisedPlayers()
+    {
+        return new ArrayList<>(disguisedPlayers);
     }
 
     //region 配置
@@ -178,25 +184,10 @@ public class MorphManager extends MorphPluginObject
                 continue;
             }
 
-            var watcher = disg.getWatcher();
-
-            //workaround: 复制出来的玩家伪装会忽略下蹲等状态
-            if (disg.isPlayerDisguise())
-            {
-                watcher.setSneaking(p.isSneaking() && !p.isFlying());
-                watcher.setFlyingWithElytra(p.isGliding());
-                watcher.setSprinting(p.isSprinting());
-            }
-
-            //workaround: 复制实体伪装时会一并复制隐身标签
-            //            会导致复制出来的伪装永久隐身
-            watcher.setInvisible(p.isInvisible());
-
-            var msg = Component.translatable("正伪装为").append(i.displayName);
-
-            p.sendActionBar(MessageUtils.prefixes(msg));
+            updateDisguise(p, i);
         }
 
+        //更新请求
         var requests = new ArrayList<>(this.requests);
         for (var r : requests)
         {
@@ -205,6 +196,32 @@ public class MorphManager extends MorphPluginObject
         }
 
         this.addSchedule(c -> update());
+    }
+
+    /**
+     * 更新伪装状态
+     * @param player 目标玩家
+     * @param info 伪装信息
+     */
+    private void updateDisguise(@NotNull Player player, @NotNull DisguisingInfo info)
+    {
+        var disguise = info.disguise;
+        var watcher = disguise.getWatcher();
+
+        //更新actionbar信息
+        player.sendActionBar(MessageUtils.prefixes(Component.translatable("正伪装为").append(info.displayName)));
+
+        //workaround: 复制实体伪装时会一并复制隐身标签
+        //            会导致复制出来的伪装永久隐身
+        watcher.setInvisible(player.isInvisible());
+
+        //workaround: 复制出来的玩家伪装会忽略下蹲等状态
+        if (disguise.isPlayerDisguise())
+        {
+            watcher.setSneaking(player.isSneaking() && !player.isFlying());
+            watcher.setFlyingWithElytra(player.isGliding());
+            watcher.setSprinting(player.isSprinting());
+        }
     }
 
     //缓存伪装信息
@@ -343,6 +360,9 @@ public class MorphManager extends MorphPluginObject
      */
     private void postConstructDisguise(Player sourcePlayer, Entity targetEntity, Disguise disguise, EntityType type, String targetPlayerName)
     {
+        //设置自定义数据用来跟踪
+        disguise.addCustomData("XIAMO_MORPH", true);
+
         var watcher = disguise.getWatcher();
 
         var targetType = type == null ? disguise.getType().getEntityType() : type;
