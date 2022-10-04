@@ -40,7 +40,7 @@ public class MorphPluginCommand extends MorphSubCommandHandler
         return subCommands;
     }
 
-    private final List<String> notes = List.of("");
+    private final List<String> notes = List.of();
 
     @Override
     public List<String> getNotes()

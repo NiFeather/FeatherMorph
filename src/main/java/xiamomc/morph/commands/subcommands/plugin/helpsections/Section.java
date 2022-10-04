@@ -21,9 +21,10 @@ public class Section
         return header;
     }
 
-    private final String footer;
+    private final List<String> footer;
 
-    public String getFooter()
+    @Nullable
+    public List<String> getFooter()
     {
         return footer;
     }
@@ -31,7 +32,7 @@ public class Section
     private final String commandBaseName;
     public String getCommandBaseName() { return commandBaseName; }
 
-    public Section(String name, String header, @Nullable String footer)
+    public Section(String name, String header, @Nullable List<String> footer)
     {
         this.commandBaseName = name;
         this.header = header;

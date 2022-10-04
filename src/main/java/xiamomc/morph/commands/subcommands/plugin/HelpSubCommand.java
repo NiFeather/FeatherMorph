@@ -47,7 +47,10 @@ public class HelpSubCommand extends MorphPluginObject implements ISubCommand
     private void setupCommandSections()
     {
         //不属于任何section的指令丢到这里
-        var miscCommandSection = new Section("*", "/ -- 伪装、取消伪装");
+        var miscCommandSection = new Section("*", "/ -- 伪装、取消伪装", List.of(
+                "伪装可以通过击杀生物或玩家获得",
+                "伪装时会优先复制视线方向5格以内的相同生物或玩家进行伪装"
+        ));
 
         commandSections.add(miscCommandSection);
 
@@ -59,7 +62,9 @@ public class HelpSubCommand extends MorphPluginObject implements ISubCommand
             {
                 //此section下所有指令的父级指令
                 var parentCommandName = sch.getCommandName();
-                var section = new Section(parentCommandName, "/" + parentCommandName + " ... -- " + sch.getHelpMessage());
+                var section = new Section(parentCommandName,
+                        "/" + parentCommandName + " ... -- " + sch.getHelpMessage(),
+                        sch.getNotes());
 
                 //添加指令到section中
                 for (var sc : sch.getSubCommands())
@@ -106,6 +111,22 @@ public class HelpSubCommand extends MorphPluginObject implements ISubCommand
                         .hoverEvent(HoverEvent.showText(Component.text("点击补全")))
                         .clickEvent(ClickEvent.suggestCommand(entry.suggestingCommand())));
         }
+
+        if (section.getFooter() != null && section.getFooter().size() >= 1)
+        {
+            list.addAll(List.of(
+                    Component.empty(),
+                    Component.text("特别标注：")
+            ));
+
+            for (var f : section.getFooter())
+            {
+                list.add(Component.text(f)
+                        .decorate(TextDecoration.ITALIC));
+            }
+        }
+
+        list.add(Component.empty());
 
         return list;
     }

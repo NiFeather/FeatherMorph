@@ -22,7 +22,9 @@ public class RequestCommand extends MorphSubCommandHandler
         return subCommands;
     }
 
-    private final List<String> notes = List.of("");
+    private final List<String> notes = List.of(
+            "交换请求接受后双方都可以变成对方的样子"
+    );
 
     @Override
     public List<String> getNotes()
