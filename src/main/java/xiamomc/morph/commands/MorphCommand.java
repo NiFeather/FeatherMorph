@@ -63,22 +63,25 @@ public class MorphCommand extends MorphPluginObject implements IPluginCommand {
                         var msg = Component.translatable("成功伪装为")
                                 .append(Component.translatable(type.translationKey()))
                                 .append(Component.text("！"));
-                        sender.sendMessage(MessageUtils.prefixes(msg));
+                        sender.sendMessage(MessageUtils.prefixes(sender, msg));
 
                         return true;
                     }
                     catch (IllegalArgumentException iae)
                     {
-                        sender.sendMessage(MessageUtils.prefixes(Component.translatable("未能解析" + args[0], TextColor.color(255, 0, 0))));
+                        sender.sendMessage(MessageUtils.prefixes(sender,
+                                Component.translatable("未能解析" + args[0], TextColor.color(255, 0, 0))));
                     }
                 }
                 else
                 {
-                    sender.sendMessage(MessageUtils.prefixes(Component.translatable("你尚未拥有此伪装")));
+                    sender.sendMessage(MessageUtils.prefixes(sender,
+                            Component.translatable("你尚未拥有此伪装")));
                 }
             }
             else
-                sender.sendMessage(MessageUtils.prefixes(Component.text("你需要指定要伪装的对象")));
+                sender.sendMessage(MessageUtils.prefixes(sender,
+                        Component.text("你需要指定要伪装的对象")));
         }
 
         return true;

@@ -36,7 +36,7 @@ public class ToggleSelfSubCommand implements ISubCommand {
             var targetVisibility = !DisguiseAPI.isViewSelfToggled(player);
             DisguiseAPI.setViewDisguiseToggled(player, targetVisibility);
 
-            sender.sendMessage(MessageUtils.prefixes(Component.text("已切换自身可见性")
+            sender.sendMessage(MessageUtils.prefixes(sender, Component.text("已切换自身可见性")
                     .color(targetVisibility ? NamedTextColor.GREEN : NamedTextColor.RED)));
         }
         return true;

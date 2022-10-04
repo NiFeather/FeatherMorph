@@ -68,15 +68,20 @@ public class QuerySubCommand extends MorphPluginObject implements ISubCommand
                 var info = manager.getDisguiseStateFor(targetPlayer);
 
                 if (info != null)
-                    commandSender.sendMessage(MessageUtils.prefixes(
-                            Component.text(targetPlayer.getName() + " 正伪装为 ").append(info.displayName)
+                    commandSender.sendMessage(MessageUtils.prefixes(commandSender,
+                            Component.text(targetPlayer.getName() + " 正伪装为 ").append(info.getDisplayName())
                     ));
                 else if (DisguiseAPI.isDisguised(targetPlayer))
                 {
-                    commandSender.sendMessage(MessageUtils.prefixes(
+                    commandSender.sendMessage(MessageUtils.prefixes(commandSender,
                             Component.text(targetPlayer.getName() + " 正伪装为 "
                                     + DisguiseAPI.getDisguise(targetPlayer).getDisguiseName() + "（无法由Morph管理的伪装）")
                     ));
+                }
+                else
+                {
+                    commandSender.sendMessage(MessageUtils.prefixes(commandSender,
+                            Component.text(targetPlayer.getName() + " 没有伪装为任何东西")));
                 }
             }
         }

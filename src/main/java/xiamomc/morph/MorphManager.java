@@ -120,7 +120,7 @@ public class MorphManager extends MorphPluginObject
             newInstance.unlockedDisguises = new ArrayList<>();
 
             var msg = Component.text("不知道如何使用伪装? 发送 /mmorph help 即可查看！");
-            player.sendMessage(MessageUtils.prefixes(msg));
+            player.sendMessage(MessageUtils.prefixes(player, msg));
 
             morphConfiguration.playerMorphConfigurations.add(newInstance);
             return newInstance;
@@ -172,14 +172,14 @@ public class MorphManager extends MorphPluginObject
         var infos = new ArrayList<>(disguisedPlayers);
         for (var i : infos)
         {
-            var p = i.player;
+            var p = i.getPlayer();
 
             if (!p.isOnline()) continue;
 
             var disg = DisguiseAPI.getDisguise(p);
-            if (!i.disguise.equals(disg))
+            if (!i.getDisguise().equals(disg))
             {
-                Logger.warn("removing: " + p + " :: " + i.disguise + " <-> " + disg);
+                Logger.warn("removing: " + p + " :: " + i.getDisguise() + " <-> " + disg);
                 disguisedPlayers.remove(i);
                 continue;
             }
@@ -205,11 +205,11 @@ public class MorphManager extends MorphPluginObject
      */
     private void updateDisguise(@NotNull Player player, @NotNull DisguiseState info)
     {
-        var disguise = info.disguise;
+        var disguise = info.getDisguise();
         var watcher = disguise.getWatcher();
 
         //更新actionbar信息
-        player.sendActionBar(MessageUtils.prefixes(Component.translatable("正伪装为").append(info.displayName)));
+        player.sendActionBar(MessageUtils.prefixes(player, Component.translatable("正伪装为").append(info.getDisplayName())));
 
         //workaround: 复制实体伪装时会一并复制隐身标签
         //            会导致复制出来的伪装永久隐身
@@ -253,10 +253,10 @@ public class MorphManager extends MorphPluginObject
 
     private void sendMorphAcquiredNotification(Player player, Component text)
     {
-        if (disguisedPlayers.stream().noneMatch(i -> i.player.getUniqueId().equals(player.getUniqueId())))
+        if (disguisedPlayers.stream().noneMatch(i -> i.getPlayerUniqueID().equals(player.getUniqueId())))
             player.sendActionBar(text);
         else
-            player.sendMessage(MessageUtils.prefixes(text));
+            player.sendMessage(MessageUtils.prefixes(player, text));
     }
 
     //region 玩家伪装相关
@@ -332,7 +332,7 @@ public class MorphManager extends MorphPluginObject
      */
     public void unMorphAll()
     {
-        disguisedPlayers.forEach(i -> unMorph(i.player));
+        disguisedPlayers.forEach(i -> unMorph(i.getPlayer()));
     }
 
     /**
@@ -343,13 +343,13 @@ public class MorphManager extends MorphPluginObject
     {
         if (!DisguiseAPI.isDisguised(player)) return;
 
-        var targetInfoOptional = disguisedPlayers.stream().filter(i -> i.player.getUniqueId().equals(player.getUniqueId())).findFirst();
+        var targetInfoOptional = disguisedPlayers.stream().filter(i -> i.getPlayerUniqueID().equals(player.getUniqueId())).findFirst();
         if (targetInfoOptional.isEmpty())
             return;
 ;
-        targetInfoOptional.get().disguise.removeDisguise(player);
+        targetInfoOptional.get().getDisguise().removeDisguise(player);
 
-        player.sendMessage(MessageUtils.prefixes(Component.text("已取消伪装")));
+        player.sendMessage(MessageUtils.prefixes(player, Component.text("已取消伪装")));
         player.sendActionBar(Component.empty());
 
         spawnParticle(player, player.getLocation(), player.getWidth(), player.getHeight(), player.getWidth());
@@ -404,15 +404,14 @@ public class MorphManager extends MorphPluginObject
         DisguiseAPI.setActionBarShown(sourcePlayer, false);
 
         //添加到disguisedPlayers
-        var info = new DisguiseState();
-        info.player = sourcePlayer;
-        info.displayName = disguise.isPlayerDisguise()
+        var disguiseDisplayName = disguise.isPlayerDisguise()
                 ? Component.text((targetEntity == null ? targetPlayerName : ((PlayerDisguise)disguise).getName()))
                 : Component.translatable(targetType.translationKey());
-        info.disguise = disguise;
+
+        var info = new DisguiseState(sourcePlayer, disguiseDisplayName, disguise);
 
         if (sourcePlayer.getVehicle() != null)
-            sourcePlayer.sendMessage(MessageUtils.prefixes(Component.text("您将在起身后看到自己的伪装")));
+            sourcePlayer.sendMessage(MessageUtils.prefixes(sourcePlayer, Component.text("您将在起身后看到自己的伪装")));
 
         disguisedPlayers.add(info);
 
@@ -474,7 +473,7 @@ public class MorphManager extends MorphPluginObject
     public DisguiseState getDisguiseStateFor(Player player)
     {
         return this.disguisedPlayers.stream()
-                .filter(i -> i.player.getUniqueId().equals(player.getUniqueId()))
+                .filter(i -> i.getPlayerUniqueID().equals(player.getUniqueId()))
                 .findFirst().orElse(null);
     }
 
@@ -495,7 +494,7 @@ public class MorphManager extends MorphPluginObject
                 .anyMatch(i -> i.sourcePlayer.getUniqueId() == source.getUniqueId()
                         && i.targetPlayer.getUniqueId() == target.getUniqueId()))
         {
-            source.sendMessage(MessageUtils.prefixes(Component.text("你已经向" + target + "发送过一个请求了")));
+            source.sendMessage(MessageUtils.prefixes(source, Component.text("你已经向" + target + "发送过一个请求了")));
             return;
         }
 
@@ -510,9 +509,9 @@ public class MorphManager extends MorphPluginObject
                 .append(Component.text(source.getName()))
                 .append(Component.translatable("的交换请求！"));
 
-        target.sendMessage(MessageUtils.prefixes(msg));
+        target.sendMessage(MessageUtils.prefixes(target, msg));
 
-        source.sendMessage(MessageUtils.prefixes(Component.translatable("请求已发送！对方将有1分钟的时间来接受")));
+        source.sendMessage(MessageUtils.prefixes(source, Component.translatable("请求已发送！对方将有1分钟的时间来接受")));
     }
 
     /**
@@ -528,7 +527,7 @@ public class MorphManager extends MorphPluginObject
 
         if (match.isEmpty())
         {
-            source.sendMessage(MessageUtils.prefixes(Component.text("未找到目标请求，可能已经过期？")));
+            source.sendMessage(MessageUtils.prefixes(source, Component.text("未找到目标请求，可能已经过期？")));
             return;
         }
 
@@ -538,8 +537,8 @@ public class MorphManager extends MorphPluginObject
         addNewPlayerMorphToPlayer(target, source);
         addNewPlayerMorphToPlayer(source, target);
 
-        target.sendMessage(MessageUtils.prefixes(Component.text("成功与" + source.getName() + "交换！")));
-        source.sendMessage(MessageUtils.prefixes(Component.text("成功与" + target.getName() + "交换！")));
+        target.sendMessage(MessageUtils.prefixes(target, Component.text("成功与" + source.getName() + "交换！")));
+        source.sendMessage(MessageUtils.prefixes(source, Component.text("成功与" + target.getName() + "交换！")));
     }
 
     /**
@@ -555,7 +554,7 @@ public class MorphManager extends MorphPluginObject
 
         if (match.isEmpty())
         {
-            source.sendMessage(MessageUtils.prefixes(Component.text("未找到目标请求，可能已经过期？")));
+            source.sendMessage(MessageUtils.prefixes(source, Component.text("未找到目标请求，可能已经过期？")));
 
             //"未找到目标请求，可能已经过期？"
             return;
@@ -566,8 +565,8 @@ public class MorphManager extends MorphPluginObject
 
         var msg = Component.text("请求已拒绝");
 
-        target.sendMessage(MessageUtils.prefixes(Component.text("发往" + source.getName() + "的").append(msg)));
-        source.sendMessage(MessageUtils.prefixes(Component.text("来自" + target.getName() + "的").append(msg)));
+        target.sendMessage(MessageUtils.prefixes(target, Component.text("发往" + source.getName() + "的").append(msg)));
+        source.sendMessage(MessageUtils.prefixes(source, Component.text("来自" + target.getName() + "的").append(msg)));
     }
 
     /**

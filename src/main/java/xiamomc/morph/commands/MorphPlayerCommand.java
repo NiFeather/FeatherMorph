@@ -40,7 +40,7 @@ public class MorphPlayerCommand extends MorphPluginObject implements IPluginComm
                             .append(Component.text(args[0]))
                             .append(Component.translatable("的伪装"));
 
-                    sender.sendMessage(MessageUtils.prefixes(msg));
+                    sender.sendMessage(MessageUtils.prefixes(sender, msg));
 
                     return true;
                 }
@@ -64,10 +64,10 @@ public class MorphPlayerCommand extends MorphPluginObject implements IPluginComm
                 var msg = Component.translatable("成功伪装为")
                         .append(Component.text(args[0] + "！"));
 
-                sender.sendMessage(MessageUtils.prefixes(msg));
+                sender.sendMessage(MessageUtils.prefixes(sender, msg));
             }
             else
-                sender.sendMessage(MessageUtils.prefixes(Component.translatable("你需要指定要伪装的对象")));
+                sender.sendMessage(MessageUtils.prefixes(sender, Component.translatable("你需要指定要伪装的对象")));
         }
 
         return true;

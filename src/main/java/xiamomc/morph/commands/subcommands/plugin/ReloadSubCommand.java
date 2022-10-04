@@ -38,10 +38,10 @@ public class ReloadSubCommand extends MorphPluginObject implements ISubCommand {
         if (sender.hasPermission(getPermissionRequirement()))
         {
             morphManager.reloadConfiguration();
-            sender.sendMessage(MessageUtils.prefixes(Component.text("重载完成！")));
+            sender.sendMessage(MessageUtils.prefixes(sender, Component.text("重载完成！")));
         }
         else
-            sender.sendMessage(MessageUtils.prefixes(Component.text("禁止接触").color(NamedTextColor.RED)));
+            sender.sendMessage(MessageUtils.prefixes(sender, Component.text("禁止接触").color(NamedTextColor.RED)));
 
         return true;
     }

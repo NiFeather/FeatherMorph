@@ -41,14 +41,16 @@ public class QueryAllSubCommand extends MorphPluginObject implements ISubCommand
 
         if (list.size() == 0)
         {
-            commandSender.sendMessage(MessageUtils.prefixes(Component.text("目前没有人伪装成任何东西")));
+            commandSender.sendMessage(MessageUtils.prefixes(commandSender, Component.text("目前没有人伪装成任何东西")));
             return true;
         }
 
         for (var i : list)
         {
-            commandSender.sendMessage(MessageUtils.prefixes(
-                    Component.text(i.player.getName() + (i.player.isOnline() ? "" : "（离线）") + " 伪装成了 ").append(i.displayName)
+            var player = i.getPlayer();
+            commandSender.sendMessage(MessageUtils.prefixes(commandSender,
+                    Component.text(player.getName() + (player.isOnline() ? "" : "（离线）") + " 伪装成了 ")
+                            .append(i.getDisplayName())
             ));
         }
 

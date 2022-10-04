@@ -140,11 +140,11 @@ public class EventProcessor extends MorphPluginObject implements Listener
         if (info != null)
         {
             //重新进入后player和info.player不属于同一个实例，需要重新disguise
-            info.player = player;
-            DisguiseAPI.disguiseEntity(player, info.disguise);
+            info.setPlayer(player);
+            DisguiseAPI.disguiseEntity(player, info.getDisguise());
 
             //刷新Disguise
-            info.disguise = DisguiseAPI.getDisguise(player);
+            info.setDisguise(DisguiseAPI.getDisguise(player));
         }
         else if (DisguiseAPI.isDisguised(player))
         {

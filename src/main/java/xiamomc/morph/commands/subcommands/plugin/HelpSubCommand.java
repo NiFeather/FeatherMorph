@@ -127,7 +127,7 @@ public class HelpSubCommand extends MorphPluginObject implements ISubCommand {
     public boolean onCommand(@NotNull CommandSender sender, @NotNull String[] args)
     {
         for (var s : constructHelpMessage(sender))
-            sender.sendMessage(MessageUtils.prefixes(Component.text(s)));
+            sender.sendMessage(MessageUtils.prefixes(sender, Component.text(s)));
 
         return true;
     }

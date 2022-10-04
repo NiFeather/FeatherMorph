@@ -62,7 +62,8 @@ public class AcceptSubCommand extends MorphPluginObject implements ISubCommand
 
                 if (targetPlayer == null)
                 {
-                    sender.sendMessage(MessageUtils.prefixes(Component.translatable("对方未上线或目标玩家不存在").color(NamedTextColor.RED)));
+                    sender.sendMessage(MessageUtils.prefixes(sender,
+                            Component.translatable("对方未上线或目标玩家不存在").color(NamedTextColor.RED)));
                     return true;
                 }
 
@@ -70,7 +71,8 @@ public class AcceptSubCommand extends MorphPluginObject implements ISubCommand
             }
             else
             {
-                sender.sendMessage(MessageUtils.prefixes(Component.translatable("未指定要接受谁的请求").color(NamedTextColor.RED)));
+                sender.sendMessage(MessageUtils.prefixes(sender,
+                        Component.translatable("未指定要接受谁的请求").color(NamedTextColor.RED)));
             }
         }
 
