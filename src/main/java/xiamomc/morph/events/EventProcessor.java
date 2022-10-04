@@ -9,6 +9,7 @@ import me.libraryaddict.disguise.utilities.DisguiseUtilities;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Warden;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -120,12 +121,6 @@ public class EventProcessor extends MorphPluginObject implements Listener
     @EventHandler
     public void onPlayerSwapHand(PlayerSwapHandItemsEvent e)
     {
-        var mainHandIsAir = e.getMainHandItem() == null || e.getMainHandItem().getType().isAir();
-        var offHandHandIsAir = e.getOffHandItem() == null || e.getMainHandItem().getType().isAir();
-
-        if (mainHandIsAir && offHandHandIsAir)
-            return;
-
         var player = e.getPlayer();
         if (DisguiseAPI.isDisguised(player))
         {
@@ -161,7 +156,7 @@ public class EventProcessor extends MorphPluginObject implements Listener
     {
         if (e.getTarget() == null) return;
 
-        if (e.getTarget() instanceof Player player)
+        if (e.getTarget() instanceof Player player && !e.getEntity().getType().equals(EntityType.WARDEN))
         {
             //受到外力攻击或者其他原因时不要处理
             switch (e.getReason())

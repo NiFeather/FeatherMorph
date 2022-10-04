@@ -133,9 +133,10 @@ public class MorphManager extends MorphPluginObject
         }
         else return;
 
-        player.sendActionBar(Component.text("✔ 已解锁")
-                .append(Component.translatable(entity.getType().translationKey()))
-                .append(Component.text("的伪装")).color(NamedTextColor.GREEN));
+        sendMorphAcquiredNotification(player,
+                Component.text("✔ 已解锁")
+                        .append(Component.translatable(entity.getType().translationKey()))
+                        .append(Component.text("的伪装")).color(NamedTextColor.GREEN));
     }
 
     public void addNewPlayerMorphToPlayer(Player sourcePlayer, Player targtPlayer)
@@ -147,7 +148,8 @@ public class MorphManager extends MorphPluginObject
         else
             return;
 
-        sourcePlayer.sendActionBar(Component.text("✔ 已解锁" + targtPlayer.getName() + "的伪装").color(NamedTextColor.GREEN));
+        sendMorphAcquiredNotification(sourcePlayer,
+                Component.text("✔ 已解锁" + targtPlayer.getName() + "的伪装").color(NamedTextColor.GREEN));
 
         saveConfiguration();
     }
@@ -220,6 +222,14 @@ public class MorphManager extends MorphPluginObject
             cachedInfos.add(new DisguiseInfo(player.getName()));
 
         return cachedInfos.stream().filter(o -> o.equals(player.getName())).findFirst().get();
+    }
+
+    private void sendMorphAcquiredNotification(Player player, Component text)
+    {
+        if (disguisedPlayers.stream().noneMatch(i -> i.player.getUniqueId().equals(player.getUniqueId())))
+            player.sendActionBar(text);
+        else
+            player.sendMessage(MessageUtils.prefixes(text));
     }
 
     //region 玩家伪装相关
