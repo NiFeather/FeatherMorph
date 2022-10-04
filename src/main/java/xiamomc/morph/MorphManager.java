@@ -3,7 +3,10 @@ package xiamomc.morph;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import me.libraryaddict.disguise.DisguiseAPI;
-import me.libraryaddict.disguise.disguisetypes.*;
+import me.libraryaddict.disguise.disguisetypes.Disguise;
+import me.libraryaddict.disguise.disguisetypes.DisguiseType;
+import me.libraryaddict.disguise.disguisetypes.MobDisguise;
+import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
 import me.libraryaddict.disguise.disguisetypes.watchers.ArmorStandWatcher;
 import me.libraryaddict.disguise.disguisetypes.watchers.LivingWatcher;
 import me.libraryaddict.disguise.utilities.DisguiseValues;
@@ -59,7 +62,7 @@ public class MorphManager extends MorphPluginObject
         MorphConfiguration targetConfiguration = null;
         var success = false;
 
-        try ( var jsonStream = new InputStreamReader(new FileInputStream(configurationFile)) )
+        try (var jsonStream = new InputStreamReader(new FileInputStream(configurationFile)))
         {
             targetConfiguration = gson.fromJson(jsonStream, MorphConfiguration.class);
             success = true;
@@ -95,7 +98,7 @@ public class MorphManager extends MorphPluginObject
 
             configurationFile.createNewFile();
 
-            try ( var stream = new FileOutputStream(configurationFile) )
+            try (var stream = new FileOutputStream(configurationFile))
             {
                 stream.write(jsonString.getBytes(StandardCharsets.UTF_8));
             }
@@ -200,8 +203,9 @@ public class MorphManager extends MorphPluginObject
 
     /**
      * 更新伪装状态
+     *
      * @param player 目标玩家
-     * @param info 伪装信息
+     * @param info   伪装信息
      */
     private void updateDisguise(@NotNull Player player, @NotNull DisguiseState info)
     {
@@ -226,6 +230,7 @@ public class MorphManager extends MorphPluginObject
 
     /**
      * 获取包含某一EntityType的伪装信息
+     *
      * @param type 目标实体类型
      * @return 伪装信息
      */
@@ -239,6 +244,7 @@ public class MorphManager extends MorphPluginObject
 
     /**
      * 获取包含某一玩家的伪装信息
+     *
      * @param player 玩家名
      * @return 伪装信息
      * @apiNote 要获取玩家正在伪装的状态，请使用getDisguiseStateFor(player)
@@ -263,7 +269,8 @@ public class MorphManager extends MorphPluginObject
 
     /**
      * 将玩家伪装成指定的实体类型
-     * @param player 目标玩家
+     *
+     * @param player     目标玩家
      * @param entityType 目标实体类型
      */
     public void morphEntityType(Player player, EntityType entityType)
@@ -283,8 +290,9 @@ public class MorphManager extends MorphPluginObject
 
     /**
      * 将玩家伪装成指定的实体
+     *
      * @param sourcePlayer 目标玩家
-     * @param entity 目标实体
+     * @param entity       目标实体
      */
     public void morphEntity(Player sourcePlayer, Entity entity)
     {
@@ -298,6 +306,7 @@ public class MorphManager extends MorphPluginObject
 
     /**
      * 复制目标实体的伪装给玩家
+     *
      * @param sourcePlayer 要应用的玩家
      * @param targetEntity 目标实体
      */
@@ -315,7 +324,8 @@ public class MorphManager extends MorphPluginObject
 
     /**
      * 将玩家伪装成指定的玩家
-     * @param sourcePlayer 发起玩家
+     *
+     * @param sourcePlayer     发起玩家
      * @param targetPlayerName 目标玩家的玩家名
      */
     public void morphPlayer(Player sourcePlayer, String targetPlayerName)
@@ -337,6 +347,7 @@ public class MorphManager extends MorphPluginObject
 
     /**
      * 取消某一玩家的伪装
+     *
      * @param player 目标玩家
      */
     public void unMorph(Player player)
@@ -346,7 +357,6 @@ public class MorphManager extends MorphPluginObject
         var targetInfoOptional = disguisedPlayers.stream().filter(i -> i.getPlayerUniqueID().equals(player.getUniqueId())).findFirst();
         if (targetInfoOptional.isEmpty())
             return;
-;
         targetInfoOptional.get().getDisguise().removeDisguise(player);
 
         player.sendMessage(MessageUtils.prefixes(player, Component.text("已取消伪装")));
@@ -362,10 +372,11 @@ public class MorphManager extends MorphPluginObject
 
     /**
      * 构建好伪装之后要做的事
-     * @param sourcePlayer 伪装的玩家
-     * @param targetEntity 伪装的目标实体
-     * @param disguise 伪装
-     * @param type 实体类型
+     *
+     * @param sourcePlayer     伪装的玩家
+     * @param targetEntity     伪装的目标实体
+     * @param disguise         伪装
+     * @param type             实体类型
      * @param targetPlayerName 伪装的目标玩家名（仅在目标实体为玩家时可用）
      */
     private void postConstructDisguise(Player sourcePlayer, Entity targetEntity, Disguise disguise, EntityType type, String targetPlayerName)
@@ -379,7 +390,7 @@ public class MorphManager extends MorphPluginObject
 
         //workaround: 伪装已死亡的LivingEntity
         if (targetEntity instanceof LivingEntity living && living.getHealth() <= 0)
-            ((LivingWatcher)watcher).setHealth(1);
+            ((LivingWatcher) watcher).setHealth(1);
 
         //workaround: 玩家伪装副手问题
         //如果目标实体有伪装，则不要修改
@@ -405,7 +416,7 @@ public class MorphManager extends MorphPluginObject
 
         //添加到disguisedPlayers
         var disguiseDisplayName = disguise.isPlayerDisguise()
-                ? Component.text((targetEntity == null ? targetPlayerName : ((PlayerDisguise)disguise).getName()))
+                ? Component.text((targetEntity == null ? targetPlayerName : ((PlayerDisguise) disguise).getName()))
                 : Component.translatable(targetType.translationKey());
 
         var info = new DisguiseState(sourcePlayer, disguiseDisplayName, disguise);
@@ -423,7 +434,7 @@ public class MorphManager extends MorphPluginObject
         //如果伪装成生物，则按照此生物的碰撞体积来
         if (disguise.isMobDisguise())
         {
-            var mobDisguise = (MobDisguise)disguise;
+            var mobDisguise = (MobDisguise) disguise;
             FakeBoundingBox box;
 
             var values = DisguiseValues.getDisguiseValues(disguise.getType());
@@ -466,6 +477,7 @@ public class MorphManager extends MorphPluginObject
 
     /**
      * 获取某一玩家的伪装状态
+     *
      * @param player 目标玩家
      * @return 伪装状态，如果为null则表示玩家没有通过插件伪装
      */
@@ -485,6 +497,7 @@ public class MorphManager extends MorphPluginObject
 
     /**
      * 发起请求
+     *
      * @param source 请求发起方
      * @param target 请求接受方
      */
@@ -516,6 +529,7 @@ public class MorphManager extends MorphPluginObject
 
     /**
      * 接受请求
+     *
      * @param source 请求接受方
      * @param target 请求发起方
      */
@@ -523,7 +537,7 @@ public class MorphManager extends MorphPluginObject
     {
         var match = requests.stream()
                 .filter(i -> i.sourcePlayer.getUniqueId().equals(target.getUniqueId())
-                && i.targetPlayer.getUniqueId().equals(source.getUniqueId())).findFirst();
+                        && i.targetPlayer.getUniqueId().equals(source.getUniqueId())).findFirst();
 
         if (match.isEmpty())
         {
@@ -543,6 +557,7 @@ public class MorphManager extends MorphPluginObject
 
     /**
      * 拒绝请求
+     *
      * @param source 请求接受方
      * @param target 请求发起方
      */
@@ -571,6 +586,7 @@ public class MorphManager extends MorphPluginObject
 
     /**
      * 获取目标为player的所有请求
+     *
      * @param player 目标玩家
      * @return 请求列表
      */

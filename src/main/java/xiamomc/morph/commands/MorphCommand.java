@@ -18,7 +18,8 @@ import xiamomc.pluginbase.Command.IPluginCommand;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MorphCommand extends MorphPluginObject implements IPluginCommand {
+public class MorphCommand extends MorphPluginObject implements IPluginCommand
+{
     @Resolved
     private MorphManager morphManager;
 
@@ -88,7 +89,8 @@ public class MorphCommand extends MorphPluginObject implements IPluginCommand {
     }
 
     @Override
-    public String getCommandName() {
+    public String getCommandName()
+    {
         return "morph";
     }
 
@@ -102,7 +104,8 @@ public class MorphCommand extends MorphPluginObject implements IPluginCommand {
 
         if (args.size() > 1) return list;
 
-        if (source instanceof Player player) {
+        if (source instanceof Player player)
+        {
             //Logger.warn("BUFFERS: " + Arrays.toString(buffers));
 
             var arg = args.get(0);
@@ -110,7 +113,8 @@ public class MorphCommand extends MorphPluginObject implements IPluginCommand {
             var infos = morphs.getAvaliableDisguisesFor(player)
                     .stream().filter(c -> !c.isPlayerDisguise()).toList();
 
-            for (var di : infos) {
+            for (var di : infos)
+            {
                 var name = di.type.getKey().asString();
                 if (!name.toLowerCase().contains(arg.toLowerCase())) continue;
 
@@ -122,12 +126,14 @@ public class MorphCommand extends MorphPluginObject implements IPluginCommand {
     }
 
     @Override
-    public String getPermissionRequirement() {
+    public String getPermissionRequirement()
+    {
         return null;
     }
 
     @Override
-    public String getHelpMessage() {
+    public String getHelpMessage()
+    {
         return "伪装成某种生物";
     }
 }

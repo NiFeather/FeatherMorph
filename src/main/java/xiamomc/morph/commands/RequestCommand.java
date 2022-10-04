@@ -17,28 +17,34 @@ public class RequestCommand extends MorphSubCommandHandler
     );
 
     @Override
-    public List<ISubCommand> getSubCommands() {
+    public List<ISubCommand> getSubCommands()
+    {
         return subCommands;
     }
 
     private final List<String> notes = List.of("");
+
     @Override
-    public List<String> getNotes() {
+    public List<String> getNotes()
+    {
         return notes;
     }
 
     @Override
-    public String getCommandName() {
+    public String getCommandName()
+    {
         return "request";
     }
 
     @Override
-    public String getPermissionRequirement() {
+    public String getPermissionRequirement()
+    {
         return null;
     }
 
     @Override
-    public String getHelpMessage() {
+    public String getHelpMessage()
+    {
         return "管理交换请求";
     }
 }

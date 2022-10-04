@@ -8,16 +8,25 @@ import java.util.List;
 public class Section
 {
     private final List<Entry> entries = new ArrayList<>();
+
     public List<Entry> getEntries()
     {
         return entries;
     }
 
     private final String header;
-    public String getHeader(){ return header; }
+
+    public String getHeader()
+    {
+        return header;
+    }
 
     private final String footer;
-    public String getFooter(){ return footer; }
+
+    public String getFooter()
+    {
+        return footer;
+    }
 
     public Section(String header, @Nullable String footer)
     {

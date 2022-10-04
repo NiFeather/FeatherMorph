@@ -1,6 +1,5 @@
 package xiamomc.morph.commands.subcommands.plugin;
 
-import com.google.protobuf.Message;
 import net.kyori.adventure.text.Component;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
@@ -13,12 +12,14 @@ import xiamomc.pluginbase.Command.ISubCommand;
 public class QueryAllSubCommand extends MorphPluginObject implements ISubCommand
 {
     @Override
-    public String getCommandName() {
+    public String getCommandName()
+    {
         return "queryall";
     }
 
     @Override
-    public String getHelpMessage() {
+    public String getHelpMessage()
+    {
         return "列出所有正在伪装的玩家";
     }
 
@@ -35,7 +36,7 @@ public class QueryAllSubCommand extends MorphPluginObject implements ISubCommand
     public boolean onCommand(@NotNull CommandSender commandSender, @NotNull String[] strings)
     {
         //todo: can be removed when bumping PluginBase to 0.0.6
-        if(!commandSender.hasPermission(getPermissionRequirement())) return false;
+        if (!commandSender.hasPermission(getPermissionRequirement())) return false;
 
         var list = manager.getDisguisedPlayers();
 

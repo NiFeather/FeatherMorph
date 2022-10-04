@@ -17,7 +17,8 @@ import xiamomc.pluginbase.Command.IPluginCommand;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MorphPlayerCommand extends MorphPluginObject implements IPluginCommand {
+public class MorphPlayerCommand extends MorphPluginObject implements IPluginCommand
+{
     @Resolved
     private MorphManager morphManager;
 
@@ -50,7 +51,7 @@ public class MorphPlayerCommand extends MorphPluginObject implements IPluginComm
                 //如果实体有伪装，则检查伪装是否是我们想要的类型
                 if (DisguiseAPI.isDisguised(targetEntity) && DisguiseAPI.getDisguise(targetEntity).isPlayerDisguise())
                 {
-                    var disg = (PlayerDisguise)DisguiseAPI.getDisguise(targetEntity);
+                    var disg = (PlayerDisguise) DisguiseAPI.getDisguise(targetEntity);
                     shouldCopy = disg.getName().equals(targetName);
                 }
 
@@ -74,7 +75,8 @@ public class MorphPlayerCommand extends MorphPluginObject implements IPluginComm
     }
 
     @Override
-    public String getCommandName() {
+    public String getCommandName()
+    {
         return "morphplayer";
     }
 
@@ -92,7 +94,8 @@ public class MorphPlayerCommand extends MorphPluginObject implements IPluginComm
             var infos = morphManager.getAvaliableDisguisesFor(player)
                     .stream().filter(DisguiseInfo::isPlayerDisguise).toList();
 
-            for (var di : infos) {
+            for (var di : infos)
+            {
                 var name = di.playerDisguiseTargetName;
                 if (!name.toLowerCase().contains(arg.toLowerCase())) continue;
 
@@ -104,12 +107,14 @@ public class MorphPlayerCommand extends MorphPluginObject implements IPluginComm
     }
 
     @Override
-    public String getPermissionRequirement() {
+    public String getPermissionRequirement()
+    {
         return null;
     }
 
     @Override
-    public String getHelpMessage() {
+    public String getHelpMessage()
+    {
         return "伪装为某一玩家";
     }
 }

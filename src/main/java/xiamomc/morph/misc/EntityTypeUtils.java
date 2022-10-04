@@ -1,6 +1,5 @@
 package xiamomc.morph.misc;
 
-import org.bukkit.entity.Axolotl;
 import org.bukkit.entity.EntityType;
 
 public class EntityTypeUtils

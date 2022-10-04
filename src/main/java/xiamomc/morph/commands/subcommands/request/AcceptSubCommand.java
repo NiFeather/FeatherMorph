@@ -3,7 +3,6 @@ package xiamomc.morph.commands.subcommands.request;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
-import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -37,17 +36,20 @@ public class AcceptSubCommand extends MorphPluginObject implements ISubCommand
     }
 
     @Override
-    public String getCommandName() {
+    public String getCommandName()
+    {
         return "accept";
     }
 
     @Override
-    public String getPermissionRequirement() {
+    public String getPermissionRequirement()
+    {
         return null;
     }
 
     @Override
-    public String getHelpMessage() {
+    public String getHelpMessage()
+    {
         return "接受交换请求";
     }
 

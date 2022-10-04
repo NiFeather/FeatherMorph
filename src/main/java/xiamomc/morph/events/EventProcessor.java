@@ -6,7 +6,9 @@ import dev.geco.gsit.api.event.PlayerGetUpPlayerSitEvent;
 import dev.geco.gsit.api.event.PlayerPlayerSitEvent;
 import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.utilities.DisguiseUtilities;
-import org.bukkit.entity.*;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -48,7 +50,7 @@ public class EventProcessor extends MorphPluginObject implements Listener
             var lastCause = entity.getLastDamageCause();
 
             //logger.warn("cause: " + String.valueOf(lastCause));
-            if (lastCause instanceof  EntityDamageByEntityEvent damageEvent)
+            if (lastCause instanceof EntityDamageByEntityEvent damageEvent)
             {
                 var cause = damageEvent.getDamager();
 
@@ -189,19 +191,20 @@ public class EventProcessor extends MorphPluginObject implements Listener
             var disguiseEntityType = disguise.getType().getEntityType();
 
             //检查是否要取消Target
-            boolean shouldTarget = switch (sourceEntityType) {
-                case ZOMBIE, ZOMBIE_VILLAGER, HUSK, DROWNED -> EntityTypeUtils.isZombiesHostile(disguiseEntityType);
-                case SKELETON, STRAY -> EntityTypeUtils.isGolem(disguiseEntityType) || disguise.isPlayerDisguise();
-                case PIGLIN -> EntityTypeUtils.isPiglinHostile(disguiseEntityType);
-                case PIGLIN_BRUTE -> EntityTypeUtils.isBruteHostile(disguiseEntityType);
-                case WITHER_SKELETON -> EntityTypeUtils.isWitherSkeletonHostile(disguiseEntityType);
-                case GUARDIAN , ELDER_GUARDIAN -> EntityTypeUtils.isGuardianHostile(disguiseEntityType);
-                case WITHER -> EntityTypeUtils.isWitherHostile(disguiseEntityType);
-                case PILLAGER ,VEX, ILLUSIONER, VINDICATOR, EVOKER, RAVAGER -> EntityTypeUtils.isRaiderHostile(disguiseEntityType);
-                case ENDERMAN -> disguiseEntityType == EntityType.PLAYER || disguiseEntityType == EntityType.ENDERMITE;
-                case ZOGLIN -> true;
-                default -> disguise.isPlayerDisguise();
-            };
+            boolean shouldTarget = switch (sourceEntityType)
+                    {
+                        case ZOMBIE, ZOMBIE_VILLAGER, HUSK, DROWNED -> EntityTypeUtils.isZombiesHostile(disguiseEntityType);
+                        case SKELETON, STRAY -> EntityTypeUtils.isGolem(disguiseEntityType) || disguise.isPlayerDisguise();
+                        case PIGLIN -> EntityTypeUtils.isPiglinHostile(disguiseEntityType);
+                        case PIGLIN_BRUTE -> EntityTypeUtils.isBruteHostile(disguiseEntityType);
+                        case WITHER_SKELETON -> EntityTypeUtils.isWitherSkeletonHostile(disguiseEntityType);
+                        case GUARDIAN, ELDER_GUARDIAN -> EntityTypeUtils.isGuardianHostile(disguiseEntityType);
+                        case WITHER -> EntityTypeUtils.isWitherHostile(disguiseEntityType);
+                        case PILLAGER, VEX, ILLUSIONER, VINDICATOR, EVOKER, RAVAGER -> EntityTypeUtils.isRaiderHostile(disguiseEntityType);
+                        case ENDERMAN -> disguiseEntityType == EntityType.PLAYER || disguiseEntityType == EntityType.ENDERMITE;
+                        case ZOGLIN -> true;
+                        default -> disguise.isPlayerDisguise();
+                    };
 
             e.setCancelled(!shouldTarget);
         }

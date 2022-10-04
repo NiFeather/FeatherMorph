@@ -18,12 +18,14 @@ import java.util.List;
 public class QuerySubCommand extends MorphPluginObject implements ISubCommand
 {
     @Override
-    public String getCommandName() {
+    public String getCommandName()
+    {
         return "query";
     }
 
     @Override
-    public String getHelpMessage() {
+    public String getHelpMessage()
+    {
         return "检查某个玩家是否在伪装";
     }
 
@@ -57,7 +59,7 @@ public class QuerySubCommand extends MorphPluginObject implements ISubCommand
     public boolean onCommand(@NotNull CommandSender commandSender, @NotNull String[] args)
     {
         //todo: can be removed when bumping PluginBase to 0.0.6
-        if(!commandSender.hasPermission(getPermissionRequirement())) return false;
+        if (!commandSender.hasPermission(getPermissionRequirement())) return false;
 
         if (args.length >= 1)
         {

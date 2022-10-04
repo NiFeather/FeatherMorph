@@ -12,7 +12,8 @@ import xiamomc.pluginbase.Command.SubCommandHandler;
 public abstract class MorphSubCommandHandler extends SubCommandHandler<MorphPlugin>
 {
     @Override
-    protected String getPluginNamespace() {
+    protected String getPluginNamespace()
+    {
         return MorphPlugin.getMorphNameSpace();
     }
 
@@ -21,7 +22,8 @@ public abstract class MorphSubCommandHandler extends SubCommandHandler<MorphPlug
     {
         var result = super.onCommand(sender, command, label, args);
 
-        if (!result) sender.sendMessage(MessageUtils.prefixes(sender, Component.text("未找到该指令").color(NamedTextColor.RED)));
+        if (!result)
+            sender.sendMessage(MessageUtils.prefixes(sender, Component.text("未找到该指令").color(NamedTextColor.RED)));
 
         return true;
     }

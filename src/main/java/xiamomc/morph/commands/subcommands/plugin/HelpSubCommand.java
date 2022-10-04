@@ -16,10 +16,12 @@ import xiamomc.pluginbase.Command.SubCommandHandler;
 import java.util.ArrayList;
 import java.util.List;
 
-public class HelpSubCommand extends MorphPluginObject implements ISubCommand {
+public class HelpSubCommand extends MorphPluginObject implements ISubCommand
+{
 
     @Override
-    public String getCommandName() {
+    public String getCommandName()
+    {
         return "help";
     }
 
@@ -51,7 +53,7 @@ public class HelpSubCommand extends MorphPluginObject implements ISubCommand {
             if (c instanceof SubCommandHandler<?> sch)
             {
                 //此section下所有指令的父级指令
-                var parentCommandName =  sch.getCommandName();
+                var parentCommandName = sch.getCommandName();
                 var section = new Section("/" + sch.getCommandName() + " -- " + sch.getHelpMessage());
 
                 //添加指令到section中
@@ -70,6 +72,7 @@ public class HelpSubCommand extends MorphPluginObject implements ISubCommand {
 
     /**
      * 从设置的Section中构建sender的帮助信息
+     *
      * @param sender 要显示给谁
      * @return 构建的帮助信息
      */
@@ -114,12 +117,14 @@ public class HelpSubCommand extends MorphPluginObject implements ISubCommand {
 
 
     @Override
-    public String getPermissionRequirement() {
+    public String getPermissionRequirement()
+    {
         return null;
     }
 
     @Override
-    public String getHelpMessage() {
+    public String getHelpMessage()
+    {
         return "显示帮助";
     }
 

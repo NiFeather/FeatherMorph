@@ -6,19 +6,23 @@ import xiamomc.pluginbase.Command.ISubCommand;
 
 import java.util.List;
 
-public class MorphPluginCommand extends MorphSubCommandHandler {
+public class MorphPluginCommand extends MorphSubCommandHandler
+{
     @Override
-    public String getCommandName() {
+    public String getCommandName()
+    {
         return "mmorph";
     }
 
     @Override
-    public String getPermissionRequirement() {
+    public String getPermissionRequirement()
+    {
         return null;
     }
 
     @Override
-    public String getHelpMessage() {
+    public String getHelpMessage()
+    {
         return "插件指令";
     }
 
@@ -31,13 +35,16 @@ public class MorphPluginCommand extends MorphSubCommandHandler {
     );
 
     @Override
-    public List<ISubCommand> getSubCommands() {
+    public List<ISubCommand> getSubCommands()
+    {
         return subCommands;
     }
 
     private final List<String> notes = List.of("");
+
     @Override
-    public List<String> getNotes() {
+    public List<String> getNotes()
+    {
         return notes;
     }
 }

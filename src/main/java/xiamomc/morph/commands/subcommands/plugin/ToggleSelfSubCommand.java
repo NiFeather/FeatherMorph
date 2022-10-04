@@ -9,22 +9,24 @@ import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.misc.MessageUtils;
 import xiamomc.pluginbase.Command.ISubCommand;
 
-import java.util.List;
-
-public class ToggleSelfSubCommand implements ISubCommand {
+public class ToggleSelfSubCommand implements ISubCommand
+{
 
     @Override
-    public String getCommandName() {
+    public String getCommandName()
+    {
         return "toggleself";
     }
 
     @Override
-    public String getPermissionRequirement() {
+    public String getPermissionRequirement()
+    {
         return null;
     }
 
     @Override
-    public String getHelpMessage() {
+    public String getHelpMessage()
+    {
         return "切换自身可见性";
     }
 

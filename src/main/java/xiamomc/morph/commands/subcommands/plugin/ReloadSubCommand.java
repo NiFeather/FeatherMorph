@@ -10,22 +10,24 @@ import xiamomc.morph.misc.MessageUtils;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Command.ISubCommand;
 
-import java.util.List;
-
-public class ReloadSubCommand extends MorphPluginObject implements ISubCommand {
+public class ReloadSubCommand extends MorphPluginObject implements ISubCommand
+{
 
     @Override
-    public String getCommandName() {
+    public String getCommandName()
+    {
         return "reload";
     }
 
     @Override
-    public String getPermissionRequirement() {
+    public String getPermissionRequirement()
+    {
         return "xiamomc.morph.reload";
     }
 
     @Override
-    public String getHelpMessage() {
+    public String getHelpMessage()
+    {
         return "重载插件配置";
     }
 

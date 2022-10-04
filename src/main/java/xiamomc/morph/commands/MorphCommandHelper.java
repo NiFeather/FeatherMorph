@@ -18,7 +18,8 @@ public class MorphCommandHelper extends CommandHelper<MorphPlugin>
             new MorphPluginCommand());
 
     @Override
-    public List<IPluginCommand> getCommands() {
+    public List<IPluginCommand> getCommands()
+    {
         return commands;
     }
 
@@ -26,7 +27,8 @@ public class MorphCommandHelper extends CommandHelper<MorphPlugin>
     private MorphPlugin plugin;
 
     @Override
-    protected XiaMoJavaPlugin getPlugin() {
+    protected XiaMoJavaPlugin getPlugin()
+    {
         return plugin;
     }
 

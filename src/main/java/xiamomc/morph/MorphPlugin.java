@@ -6,7 +6,8 @@ import xiamomc.morph.events.EventProcessor;
 import xiamomc.pluginbase.Command.CommandHelper;
 import xiamomc.pluginbase.XiaMoJavaPlugin;
 
-public final class MorphPlugin extends XiaMoJavaPlugin {
+public final class MorphPlugin extends XiaMoJavaPlugin
+{
 
     private static MorphPlugin instance;
 
@@ -16,7 +17,8 @@ public final class MorphPlugin extends XiaMoJavaPlugin {
     }
 
     @Override
-    public String getNameSpace() {
+    public String getNameSpace()
+    {
         return getMorphNameSpace();
     }
 
@@ -32,7 +34,8 @@ public final class MorphPlugin extends XiaMoJavaPlugin {
     private MorphManager morphManager;
 
     @Override
-    public void onEnable() {
+    public void onEnable()
+    {
         // Plugin startup logic
         super.onEnable();
 
@@ -48,7 +51,8 @@ public final class MorphPlugin extends XiaMoJavaPlugin {
     }
 
     @Override
-    public void onDisable() {
+    public void onDisable()
+    {
         // Plugin shutdown logic
         this.getSLF4JLogger().info("Disabling MorphPlugin");
 
