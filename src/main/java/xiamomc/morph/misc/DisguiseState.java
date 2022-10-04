@@ -57,6 +57,9 @@ public class DisguiseState
 
     public void setDisguise(Disguise d)
     {
+        if (!DisguiseUtils.isTracing(d))
+            throw new RuntimeException("此Disguise不能由插件管理");
+
         disguise = d;
     }
 

@@ -2,6 +2,7 @@ package xiamomc.morph;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import jline.internal.Log;
 import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.disguisetypes.Disguise;
 import me.libraryaddict.disguise.disguisetypes.DisguiseType;
@@ -177,16 +178,32 @@ public class MorphManager extends MorphPluginObject
         {
             var p = i.getPlayer();
 
+            //跳过离线玩家
             if (!p.isOnline()) continue;
 
+            //检查State中的伪装和实际的是否一致
             var disg = DisguiseAPI.getDisguise(p);
-            if (!i.getDisguise().equals(disg))
+            var disgInState = i.getDisguise();
+            if (!disgInState.equals(disg))
             {
-                Logger.warn("removing: " + p + " :: " + i.getDisguise() + " <-> " + disg);
-                disguisedPlayers.remove(i);
+                if (DisguiseUtils.isTracing(disgInState))
+                {
+                    Logger.warn(p.getName() + "在State中的伪装拥有Tracing标签，但却和DisguiseAPI中获得的不一样");
+                    Logger.warn("API: " + disg + " :: State: " + disgInState);
+
+                    p.sendMessage(MessageUtils.prefixes(p, Component.translatable("更新伪装时遇到了意外，正在取消伪装")));
+                    unMorph(p);
+                }
+                else
+                {
+                    Logger.warn("removing: " + p + " :: " + i.getDisguise() + " <-> " + disg);
+                    disguisedPlayers.remove(i);
+                }
+
                 continue;
             }
 
+            //更新伪装状态
             updateDisguise(p, i);
         }
 
@@ -275,7 +292,6 @@ public class MorphManager extends MorphPluginObject
      */
     public void morphEntityType(Player player, EntityType entityType)
     {
-        var targetedEntity = player.getTargetEntity(5);
         Disguise constructedDisguise = null;
 
         //不要构建玩家类型的伪装
@@ -283,7 +299,7 @@ public class MorphManager extends MorphPluginObject
 
         constructedDisguise = new MobDisguise(DisguiseType.getType(entityType));
 
-        postConstructDisguise(player, targetedEntity, constructedDisguise, entityType, null);
+        postConstructDisguise(player, null, constructedDisguise, entityType, null);
 
         DisguiseAPI.disguiseEntity(player, constructedDisguise);
     }
@@ -342,7 +358,8 @@ public class MorphManager extends MorphPluginObject
      */
     public void unMorphAll()
     {
-        disguisedPlayers.forEach(i -> unMorph(i.getPlayer()));
+        var players = new ArrayList<>(disguisedPlayers);
+        players.forEach(i -> unMorph(i.getPlayer()));
     }
 
     /**
@@ -352,17 +369,18 @@ public class MorphManager extends MorphPluginObject
      */
     public void unMorph(Player player)
     {
-        if (!DisguiseAPI.isDisguised(player)) return;
-
         var targetInfoOptional = disguisedPlayers.stream().filter(i -> i.getPlayerUniqueID().equals(player.getUniqueId())).findFirst();
         if (targetInfoOptional.isEmpty())
             return;
+
         targetInfoOptional.get().getDisguise().removeDisguise(player);
 
         player.sendMessage(MessageUtils.prefixes(player, Component.text("已取消伪装")));
         player.sendActionBar(Component.empty());
 
         spawnParticle(player, player.getLocation(), player.getWidth(), player.getHeight(), player.getWidth());
+
+        disguisedPlayers.remove(targetInfoOptional.get());
     }
 
     private void postConstructDisguise(Player sourcePlayer, Entity targetEntity, Disguise disguise)
@@ -382,7 +400,7 @@ public class MorphManager extends MorphPluginObject
     private void postConstructDisguise(Player sourcePlayer, Entity targetEntity, Disguise disguise, EntityType type, String targetPlayerName)
     {
         //设置自定义数据用来跟踪
-        disguise.addCustomData("XIAMO_MORPH", true);
+        DisguiseUtils.addTrace(disguise);
 
         var watcher = disguise.getWatcher();
 
@@ -414,17 +432,25 @@ public class MorphManager extends MorphPluginObject
         //禁用actionBar
         DisguiseAPI.setActionBarShown(sourcePlayer, false);
 
-        //添加到disguisedPlayers
-        var disguiseDisplayName = disguise.isPlayerDisguise()
-                ? Component.text((targetEntity == null ? targetPlayerName : ((PlayerDisguise) disguise).getName()))
-                : Component.translatable(targetType.translationKey());
+        //更新或者添加DisguiseState
+        var state = getDisguiseStateFor(sourcePlayer);
 
-        var info = new DisguiseState(sourcePlayer, disguiseDisplayName, disguise);
+        if (state == null)
+        {
+            var disguiseDisplayName = disguise.isPlayerDisguise()
+                    ? Component.text((targetEntity == null ? targetPlayerName : ((PlayerDisguise) disguise).getName()))
+                    : Component.translatable(targetType.translationKey());
 
+            state = new DisguiseState(sourcePlayer, disguiseDisplayName, disguise);
+
+            disguisedPlayers.add(state);
+        }
+        else
+            state.setDisguise(disguise);
+
+        //如果伪装的时候坐着，显示提示
         if (sourcePlayer.getVehicle() != null)
             sourcePlayer.sendMessage(MessageUtils.prefixes(sourcePlayer, Component.text("您将在起身后看到自己的伪装")));
-
-        disguisedPlayers.add(info);
 
         //显示粒子
         var cX = 0d;
@@ -459,9 +485,6 @@ public class MorphManager extends MorphPluginObject
 
     private void spawnParticle(Player player, Location location, double collX, double collY, double collZ)
     {
-        var xOffset = collX / 2;
-        var zOffset = collZ / 2;
-
         location.setY(location.getY() + (collY / 2));
 
         //根据碰撞箱计算粒子数量缩放

@@ -14,6 +14,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerSwapHandItemsEvent;
@@ -21,6 +22,7 @@ import org.bukkit.event.server.TabCompleteEvent;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.commands.MorphCommandHelper;
+import xiamomc.morph.misc.DisguiseUtils;
 import xiamomc.morph.misc.EntityTypeUtils;
 import xiamomc.pluginbase.Annotations.Resolved;
 
@@ -76,6 +78,12 @@ public class EventProcessor extends MorphPluginObject implements Listener
     public void onLeave(PlayerQuitEvent e)
     {
         gSitHandlingPlayers.remove(e.getPlayer());
+    }
+
+    @EventHandler
+    public void onPlayerDeath(PlayerDeathEvent e)
+    {
+        morphs.unMorph(e.getPlayer());
     }
 
     //region GSit <-> LibsDisguises workaround
@@ -145,6 +153,9 @@ public class EventProcessor extends MorphPluginObject implements Listener
             info.setPlayer(player);
             DisguiseAPI.disguiseEntity(player, info.getDisguise());
 
+            var disguise = DisguiseAPI.getDisguise(player);
+            DisguiseUtils.addTrace(disguise);
+
             //刷新Disguise
             info.setDisguise(DisguiseAPI.getDisguise(player));
         }
@@ -153,11 +164,8 @@ public class EventProcessor extends MorphPluginObject implements Listener
             //移除未跟踪并且属于此插件的伪装
             var disguise = DisguiseAPI.getDisguise(player);
 
-            if (disguise.getCustomData("XIAMO_MORPH") != null)
-            {
-                Logger.warn("detected");
+            if (DisguiseUtils.isTracing(disguise))
                 disguise.removeDisguise(player);
-            }
         }
     }
 
