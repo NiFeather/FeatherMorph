@@ -65,7 +65,7 @@ public class QuerySubCommand extends MorphPluginObject implements ISubCommand
 
             if (targetPlayer != null)
             {
-                var info = manager.getPlayerDisguisingInfo(targetPlayer);
+                var info = manager.getDisguiseStateFor(targetPlayer);
 
                 if (info != null)
                     commandSender.sendMessage(MessageUtils.prefixes(

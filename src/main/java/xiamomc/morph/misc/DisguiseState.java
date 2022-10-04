@@ -4,14 +4,20 @@ import me.libraryaddict.disguise.disguisetypes.Disguise;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 
-public class DisguisingInfo
+public class DisguiseState
 {
+    /**
+     * 谁在伪装
+     */
     public Player player;
-    public Component displayName;
-    public Disguise disguise;
 
     /**
-     * 伪装时是否坐着
+     * 伪装的显示名称
      */
-    public boolean startSitting;
+    public Component displayName;
+
+    /**
+     * 伪装的实例
+     */
+    public Disguise disguise;
 }

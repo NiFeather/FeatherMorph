@@ -32,7 +32,7 @@ public class MorphManager extends MorphPluginObject
      * 变成其他玩家的玩家
      * 因为插件限制，需要每tick更新下蹲和疾跑状态
      */
-    private final List<DisguisingInfo> disguisedPlayers = new ArrayList<>();
+    private final List<DisguiseState> disguisedPlayers = new ArrayList<>();
 
     private final List<DisguiseInfo> cachedInfos = new ArrayList<>();
 
@@ -76,7 +76,7 @@ public class MorphManager extends MorphPluginObject
         if (success) saveConfiguration();
     }
 
-    public List<DisguisingInfo> getDisguisedPlayers()
+    public List<DisguiseState> getDisguisedPlayers()
     {
         return new ArrayList<>(disguisedPlayers);
     }
@@ -203,7 +203,7 @@ public class MorphManager extends MorphPluginObject
      * @param player 目标玩家
      * @param info 伪装信息
      */
-    private void updateDisguise(@NotNull Player player, @NotNull DisguisingInfo info)
+    private void updateDisguise(@NotNull Player player, @NotNull DisguiseState info)
     {
         var disguise = info.disguise;
         var watcher = disguise.getWatcher();
@@ -224,7 +224,11 @@ public class MorphManager extends MorphPluginObject
         }
     }
 
-    //缓存伪装信息
+    /**
+     * 获取包含某一EntityType的伪装信息
+     * @param type 目标实体类型
+     * @return 伪装信息
+     */
     public DisguiseInfo getDisguiseInfo(EntityType type)
     {
         if (this.cachedInfos.stream().noneMatch(o -> o.equals(type)))
@@ -233,6 +237,12 @@ public class MorphManager extends MorphPluginObject
         return cachedInfos.stream().filter(o -> o.equals(type)).findFirst().get();
     }
 
+    /**
+     * 获取包含某一玩家的伪装信息
+     * @param player 玩家名
+     * @return 伪装信息
+     * @apiNote 要获取玩家正在伪装的状态，请使用getDisguiseStateFor(player)
+     */
     public DisguiseInfo getDisguiseInfo(Player player)
     {
         if (this.cachedInfos.stream().noneMatch(o -> o.equals(player.getName())))
@@ -317,11 +327,18 @@ public class MorphManager extends MorphPluginObject
         DisguiseAPI.disguiseEntity(sourcePlayer, disguise);
     }
 
+    /**
+     * 取消所有玩家的伪装
+     */
     public void unMorphAll()
     {
         disguisedPlayers.forEach(i -> unMorph(i.player));
     }
 
+    /**
+     * 取消某一玩家的伪装
+     * @param player 目标玩家
+     */
     public void unMorph(Player player)
     {
         if (!DisguiseAPI.isDisguised(player)) return;
@@ -329,18 +346,11 @@ public class MorphManager extends MorphPluginObject
         var targetInfoOptional = disguisedPlayers.stream().filter(i -> i.player.getUniqueId().equals(player.getUniqueId())).findFirst();
         if (targetInfoOptional.isEmpty())
             return;
-
-        var info = targetInfoOptional.get();
-        var disguise = info.disguise;
-        disguise.removeDisguise(player);
+;
+        targetInfoOptional.get().disguise.removeDisguise(player);
 
         player.sendMessage(MessageUtils.prefixes(Component.text("已取消伪装")));
         player.sendActionBar(Component.empty());
-
-        player.spawnParticle(Particle.EXPLOSION_NORMAL, player.getLocation(),
-                50,
-                0, player.getHeight() / 4, 0,
-                0.05);
 
         spawnParticle(player, player.getLocation(), player.getWidth(), player.getHeight(), player.getWidth());
     }
@@ -372,25 +382,29 @@ public class MorphManager extends MorphPluginObject
             ((LivingWatcher)watcher).setHealth(1);
 
         //workaround: 玩家伪装副手问题
-        ItemStack offhandItemStack = null;
+        //如果目标实体有伪装，则不要修改
+        if (!DisguiseAPI.isDisguised(targetEntity))
+        {
+            ItemStack offhandItemStack = null;
 
-        if (targetEntity instanceof Player targetPlayer)
-            offhandItemStack = targetPlayer.getInventory().getItemInOffHand();
+            if (targetEntity instanceof Player targetPlayer)
+                offhandItemStack = targetPlayer.getInventory().getItemInOffHand();
 
-        if (targetEntity instanceof ArmorStand armorStand)
-            offhandItemStack = armorStand.getItem(EquipmentSlot.OFF_HAND);
+            if (targetEntity instanceof ArmorStand armorStand)
+                offhandItemStack = armorStand.getItem(EquipmentSlot.OFF_HAND);
 
-        if (offhandItemStack != null) watcher.setItemInOffHand(offhandItemStack);
+            if (offhandItemStack != null) watcher.setItemInOffHand(offhandItemStack);
 
-        //盔甲架加上手臂
-        if (disguise.getType().equals(DisguiseType.ARMOR_STAND))
-            ((ArmorStandWatcher) watcher).setShowArms(true);
+            //盔甲架加上手臂
+            if (disguise.getType().equals(DisguiseType.ARMOR_STAND))
+                ((ArmorStandWatcher) watcher).setShowArms(true);
+        }
 
         //禁用actionBar
         DisguiseAPI.setActionBarShown(sourcePlayer, false);
 
         //添加到disguisedPlayers
-        var info = new DisguisingInfo();
+        var info = new DisguiseState();
         info.player = sourcePlayer;
         info.displayName = disguise.isPlayerDisguise()
                 ? Component.text((targetEntity == null ? targetPlayerName : ((PlayerDisguise)disguise).getName()))
@@ -398,10 +412,7 @@ public class MorphManager extends MorphPluginObject
         info.disguise = disguise;
 
         if (sourcePlayer.getVehicle() != null)
-        {
-            info.startSitting = true;
             sourcePlayer.sendMessage(MessageUtils.prefixes(Component.text("您将在起身后看到自己的伪装")));
-        }
 
         disguisedPlayers.add(info);
 
@@ -410,15 +421,13 @@ public class MorphManager extends MorphPluginObject
         var cZ = 0d;
         var cY = 0d;
 
-        var values = DisguiseValues.getDisguiseValues(disguise.getType());
-
-        var location = sourcePlayer.getLocation();
-        location.setY(location.getY() + (disguise.getHeight() / 2));
-
+        //如果伪装成生物，则按照此生物的碰撞体积来
         if (disguise.isMobDisguise())
         {
             var mobDisguise = (MobDisguise)disguise;
             FakeBoundingBox box;
+
+            var values = DisguiseValues.getDisguiseValues(disguise.getType());
 
             if (!mobDisguise.isAdult() && values.getBabyBox() != null)
                 box = values.getBabyBox();
@@ -429,7 +438,7 @@ public class MorphManager extends MorphPluginObject
             cY = box.getY();
             cZ = box.getZ();
         }
-        else
+        else //否则，按玩家的碰撞体积算
         {
             cX = cZ = sourcePlayer.getWidth();
             cY = sourcePlayer.getHeight();
@@ -456,8 +465,13 @@ public class MorphManager extends MorphPluginObject
                 particleScale >= 10 ? 0.2 : 0.05); //速度
     }
 
+    /**
+     * 获取某一玩家的伪装状态
+     * @param player 目标玩家
+     * @return 伪装状态，如果为null则表示玩家没有通过插件伪装
+     */
     @Nullable
-    public DisguisingInfo getPlayerDisguisingInfo(Player player)
+    public DisguiseState getDisguiseStateFor(Player player)
     {
         return this.disguisedPlayers.stream()
                 .filter(i -> i.player.getUniqueId().equals(player.getUniqueId()))

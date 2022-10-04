@@ -135,7 +135,7 @@ public class EventProcessor extends MorphPluginObject implements Listener
     public void onPlayerJoin(PlayerJoinEvent e)
     {
         var player = e.getPlayer();
-        var info = morphs.getPlayerDisguisingInfo(player);
+        var info = morphs.getDisguiseStateFor(player);
 
         if (info != null)
         {
