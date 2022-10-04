@@ -94,7 +94,7 @@ public class MorphPlayerCommand extends MorphPluginObject implements IPluginComm
 
             for (var di : infos) {
                 var name = di.playerDisguiseTargetName;
-                if (!name.toLowerCase().contains(arg)) continue;
+                if (!name.toLowerCase().contains(arg.toLowerCase())) continue;
 
                 list.add(name);
             }

@@ -1,6 +1,5 @@
 package xiamomc.morph.commands.subcommands.plugin;
 
-import com.google.protobuf.Message;
 import me.libraryaddict.disguise.DisguiseAPI;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
@@ -12,6 +11,9 @@ import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.misc.MessageUtils;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Command.ISubCommand;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class QuerySubCommand extends MorphPluginObject implements ISubCommand
 {
@@ -29,6 +31,23 @@ public class QuerySubCommand extends MorphPluginObject implements ISubCommand
     public String getPermissionRequirement()
     {
         return "xiamomc.morph.query";
+    }
+
+    @Override
+    public List<String> onTabComplete(List<String> args, CommandSender sender)
+    {
+        var list = new ArrayList<String>();
+        if (args.size() > 1) return list;
+
+        var name = args.size() == 1 ? args.get(0) : "";
+
+        for (Player onlinePlayer : Bukkit.getOnlinePlayers())
+        {
+            var playerName = onlinePlayer.getName();
+            if (playerName.toLowerCase().startsWith(name.toLowerCase())) list.add(playerName);
+        }
+
+        return list;
     }
 
     @Resolved

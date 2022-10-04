@@ -109,7 +109,7 @@ public class MorphCommand extends MorphPluginObject implements IPluginCommand {
 
             for (var di : infos) {
                 var name = di.type.getKey().asString();
-                if (!name.contains(arg)) continue;
+                if (!name.toLowerCase().contains(arg.toLowerCase())) continue;
 
                 list.add(name);
             }
