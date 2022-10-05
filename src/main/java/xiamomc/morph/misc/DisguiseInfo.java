@@ -63,8 +63,8 @@ public class DisguiseInfo
         else return this.playerDisguiseTargetName != null;
     }
 
-    public String asString()
+    public String getKey()
     {
-        return isPlayerDisguise() ? playerDisguiseTargetName : type.getKey().asString();
+        return isPlayerDisguise() ? "player:" + playerDisguiseTargetName : type.getKey().asString();
     }
 }

@@ -66,7 +66,10 @@ public class GrantDisguiseSubCommand extends MorphPluginObject implements ISubCo
 
             //玩家
             for (var p : onlinePlayers)
-                if (p.getName().toLowerCase().contains(target.toLowerCase())) list.add(p.getName());
+            {
+                var convertedName = "player:" + p.getName();
+                if (convertedName.toLowerCase().contains(target.toLowerCase())) list.add(convertedName);
+            }
         }
 
         return list;
@@ -90,19 +93,15 @@ public class GrantDisguiseSubCommand extends MorphPluginObject implements ISubCo
         }
 
         boolean foundEntityType;
-        boolean foundPlayer;
         boolean grantSuccess = false;
         String displayKey = "???";
 
         //检查是否为生物
+        String finalTargetName = targetName;
         var avaliableType = Arrays.stream(EntityType.values())
-                .filter(t -> t != EntityType.UNKNOWN && t.getKey().asString().equals(targetName)).findFirst();
-
-        var avaliablePlayer = Bukkit.getOnlinePlayers().stream()
-                .filter(p -> p.getName().equals(targetName)).findFirst();
+                .filter(t -> t != EntityType.UNKNOWN && t.getKey().asString().equals(finalTargetName)).findFirst();
 
         foundEntityType = avaliableType.isPresent();
-        foundPlayer = avaliablePlayer.isPresent();
 
         if (foundEntityType)
         {
@@ -117,8 +116,10 @@ public class GrantDisguiseSubCommand extends MorphPluginObject implements ISubCo
             grantSuccess = morphs.grantMorphToPlayer(who, targetType);
             displayKey = targetType.translationKey();
         }
-        else if (foundPlayer)
+        else if (targetName.startsWith("player:"))
         {
+            targetName = targetName.replace("player:", "");
+
             grantSuccess = morphs.grantPlayerMorphToPlayer(who, targetName);
             displayKey = targetName;
         }

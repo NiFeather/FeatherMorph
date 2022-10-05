@@ -61,4 +61,6 @@ public interface IManagePlayerData
     public PlayerMorphConfiguration getPlayerConfiguration(Player player);
 
     public void reloadConfiguration();
+
+    public void saveConfiguration();
 }

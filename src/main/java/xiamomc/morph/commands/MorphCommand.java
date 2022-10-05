@@ -1,6 +1,7 @@
 package xiamomc.morph.commands;
 
 import me.libraryaddict.disguise.DisguiseAPI;
+import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
@@ -31,15 +32,27 @@ public class MorphCommand extends MorphPluginObject implements IPluginCommand
             if (args.length >= 1)
             {
                 var key = args[0];
-                var keyAsEntityTypeFormat = key.replace(Key.MINECRAFT_NAMESPACE + ":", "").toUpperCase();
 
-                if (morphManager.getAvaliableDisguisesFor(player).stream()
-                        .anyMatch(i -> i.type.toString().equals(keyAsEntityTypeFormat)))
+                var infoOptional = morphManager.getAvaliableDisguisesFor(player).stream()
+                        .filter(i -> i.getKey().equals(key)).findFirst();
+
+                if (infoOptional.isPresent())
                 {
                     try
                     {
+                        //获取到的伪装
+                        var info = infoOptional.get();
+
                         //目标类型
-                        var type = EntityType.valueOf(keyAsEntityTypeFormat);
+                        var type = info.type;
+
+                        if (!type.isAlive())
+                        {
+                            sender.sendMessage(MessageUtils.prefixes(sender,
+                                    Component.translatable("此ID不能被用于伪装" , TextColor.color(255, 0, 0))));
+
+                            return true;
+                        }
 
                         //玩家正在看的实体
                         var targetEntity = player.getTargetEntity(5);
@@ -51,15 +64,31 @@ public class MorphCommand extends MorphPluginObject implements IPluginCommand
                         if (DisguiseAPI.isDisguised(targetEntity))
                         {
                             var disg = DisguiseAPI.getDisguise(targetEntity);
-                            shouldCopy = disg.getType().getEntityType().equals(type);
+                            assert disg != null;
+
+                            shouldCopy = info.isPlayerDisguise()
+                                    ? disg.isPlayerDisguise() && ((PlayerDisguise) disg).getName().equals(info.playerDisguiseTargetName)
+                                    : disg.getType().getEntityType().equals(type);
                         }
 
-                        if (shouldCopy)
-                            morphManager.morphCopy(player, targetEntity); //如果应该复制伪装，则复制给玩家
-                        else if (targetEntity != null && targetEntity.getType().equals(type) && !DisguiseAPI.isDisguised(targetEntity))
-                            morphManager.morphEntity(player, targetEntity); //否则，如果目标实体是我们想要的实体，则伪装成目标实体
+                        if (info.isPlayerDisguise())
+                        {
+                            if (shouldCopy)
+                                morphManager.morphCopy(player, targetEntity); //如果应该复制伪装，则复制给玩家
+                            else if (targetEntity instanceof Player targetPlayer && targetPlayer.getName().equals(info.playerDisguiseTargetName) && !DisguiseAPI.isDisguised(targetEntity))
+                                morphManager.morphEntity(player, targetPlayer); //否则，如果目标实体是我们想要的玩家，则伪装成目标实体
+                            else
+                                morphManager.morphPlayer(player, info.playerDisguiseTargetName); //否则，只简单地创建玩家伪装
+                        }
                         else
-                            morphManager.morphEntityType(player, type); //否则，只简单地创建实体伪装
+                        {
+                            if (shouldCopy)
+                                morphManager.morphCopy(player, targetEntity); //如果应该复制伪装，则复制给玩家
+                            else if (targetEntity != null && targetEntity.getType().equals(type) && !DisguiseAPI.isDisguised(targetEntity))
+                                morphManager.morphEntity(player, targetEntity); //否则，如果目标实体是我们想要的实体，则伪装成目标实体
+                            else
+                                morphManager.morphEntityType(player, type); //否则，只简单地创建实体伪装
+                        }
 
                         var msg = Component.translatable("成功伪装为")
                                 .append(Component.translatable(type.translationKey()))
@@ -110,12 +139,11 @@ public class MorphCommand extends MorphPluginObject implements IPluginCommand
 
             var arg = args.get(0);
 
-            var infos = morphs.getAvaliableDisguisesFor(player)
-                    .stream().filter(c -> !c.isPlayerDisguise()).toList();
+            var infos = morphs.getAvaliableDisguisesFor(player);
 
             for (var di : infos)
             {
-                var name = di.type.getKey().asString();
+                var name = di.getKey();
                 if (!name.toLowerCase().contains(arg.toLowerCase())) continue;
 
                 list.add(name);

@@ -80,10 +80,24 @@ public class PlayerDataManager extends MorphPluginObject implements IManagePlaye
 
         //设置并保存
         morphConfiguration = targetConfiguration;
-        if (success) saveConfiguration();
+        if (success)
+        {
+            if (morphConfiguration.Version < targetConfigurationVersion)
+                migrate(targetConfiguration);
+
+            saveConfiguration();
+        }
     }
 
-    private void saveConfiguration()
+    private final int targetConfigurationVersion = 1;
+
+    private void migrate(MorphConfiguration configuration)
+    {
+        configuration.Version = targetConfigurationVersion;
+    }
+
+    @Override
+    public void saveConfiguration()
     {
         try
         {
@@ -119,7 +133,6 @@ public class PlayerDataManager extends MorphPluginObject implements IManagePlaye
         {
             var newInstance = new PlayerMorphConfiguration();
             newInstance.uniqueId = player.getUniqueId();
-            newInstance.shownTutorialOnce = false;
             newInstance.unlockedDisguises = new ArrayList<>();
 
             var msg = Component.text("不知道如何使用伪装? 发送 /mmorph help 即可查看！");

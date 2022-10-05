@@ -8,4 +8,7 @@ public class MorphConfiguration
 {
     @Expose
     public ArrayList<PlayerMorphConfiguration> playerMorphConfigurations = new ArrayList<>();
+
+    @Expose
+    public int Version;
 }

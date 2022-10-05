@@ -629,5 +629,11 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         data.reloadConfiguration();
     }
+
+    @Override
+    public void saveConfiguration()
+    {
+        data.saveConfiguration();
+    }
     //endregion Implementation of IManagePlayerData
 }

@@ -14,5 +14,5 @@ public class PlayerMorphConfiguration
     public ArrayList<DisguiseInfo> unlockedDisguises;
 
     @Expose
-    public boolean shownTutorialOnce;
+    public boolean shownMorphPlayerMessageOnce;
 }

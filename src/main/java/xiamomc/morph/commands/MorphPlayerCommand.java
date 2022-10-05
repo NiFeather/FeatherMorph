@@ -1,7 +1,5 @@
 package xiamomc.morph.commands;
 
-import me.libraryaddict.disguise.DisguiseAPI;
-import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
 import net.kyori.adventure.text.Component;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -27,48 +25,22 @@ public class MorphPlayerCommand extends MorphPluginObject implements IPluginComm
     {
         if (sender instanceof Player sourcePlayer)
         {
-            if (args.length >= 1)
+            var targetName = args.length >= 1 ? args[0] : "";
+
+            sourcePlayer.performCommand("morph player:" + targetName);
+
+            var config = morphManager.getPlayerConfiguration(sourcePlayer);
+
+            if (!config.shownMorphPlayerMessageOnce)
             {
-                var targetName = args[0];
-                var targetEntity = sourcePlayer.getTargetEntity(5);
+                sender.sendMessage(MessageUtils.prefixes(sender,
+                        Component.translatable("PS: morphplayer已经合并进了morph指令")));
 
-                var avaliable = morphManager.getAvaliableDisguisesFor(sourcePlayer).stream()
-                        .filter(i -> targetName.equals(i.playerDisguiseTargetName)).findFirst();
+                sender.sendMessage(MessageUtils.prefixes(sender,
+                        Component.translatable("PS: 现在执行此指令将自动转换为 /morph player:<玩家名>")));
 
-                if (!avaliable.isPresent())
-                {
-                    var msg = Component.translatable("你尚未拥有")
-                            .append(Component.text(args[0]))
-                            .append(Component.translatable("的伪装"));
-
-                    sender.sendMessage(MessageUtils.prefixes(sender, msg));
-
-                    return true;
-                }
-
-                var shouldCopy = false;
-
-                //如果实体有伪装，则检查伪装是否是我们想要的类型
-                if (DisguiseAPI.isDisguised(targetEntity) && DisguiseAPI.getDisguise(targetEntity).isPlayerDisguise())
-                {
-                    var disg = (PlayerDisguise) DisguiseAPI.getDisguise(targetEntity);
-                    shouldCopy = disg.getName().equals(targetName);
-                }
-
-                if (shouldCopy)
-                    morphManager.morphCopy(sourcePlayer, targetEntity); //如果应该复制伪装，则复制给玩家
-                else if (targetEntity instanceof Player targetPlayer && targetPlayer.getName().equals(targetName) && !DisguiseAPI.isDisguised(targetEntity))
-                    morphManager.morphEntity(sourcePlayer, targetPlayer); //否则，如果目标实体是我们想要的玩家，则伪装成目标实体
-                else
-                    morphManager.morphPlayer(sourcePlayer, args[0]); //否则，只简单地创建玩家伪装
-
-                var msg = Component.translatable("成功伪装为")
-                        .append(Component.text(args[0] + "！"));
-
-                sender.sendMessage(MessageUtils.prefixes(sender, msg));
+                config.shownMorphPlayerMessageOnce = true;
             }
-            else
-                sender.sendMessage(MessageUtils.prefixes(sender, Component.translatable("你需要指定要伪装的对象")));
         }
 
         return true;
@@ -115,6 +87,6 @@ public class MorphPlayerCommand extends MorphPluginObject implements IPluginComm
     @Override
     public String getHelpMessage()
     {
-        return "伪装为某一玩家";
+        return "等同于 /morph player:<玩家名>";
     }
 }

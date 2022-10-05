@@ -4,7 +4,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.EntityType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphManager;
@@ -14,7 +13,6 @@ import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Command.ISubCommand;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class RevokeDisguiseSubCommand extends MorphPluginObject implements ISubCommand
@@ -63,11 +61,9 @@ public class RevokeDisguiseSubCommand extends MorphPluginObject implements ISubC
 
                 for (var d : disguises)
                 {
-                    if (d.isPlayerDisguise()
-                            ? d.playerDisguiseTargetName.toLowerCase().contains(target.toLowerCase())
-                            : d.type.getKey().asString().toLowerCase().contains(target.toLowerCase()))
+                    if (d.getKey().toLowerCase().contains(target.toLowerCase()))
                     {
-                        list.add(d.asString());
+                        list.add(d.getKey());
                     }
                 }
             }
@@ -96,7 +92,7 @@ public class RevokeDisguiseSubCommand extends MorphPluginObject implements ISubC
         boolean revokeSuccess = false;
 
         var targetInfoOptional = morphs.getAvaliableDisguisesFor(who)
-                .stream().filter(i -> i.asString().equals(targetName)).findFirst();
+                .stream().filter(i -> i.getKey().equals(targetName)).findFirst();
 
         if (targetInfoOptional.isPresent())
         {
