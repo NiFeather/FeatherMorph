@@ -3,7 +3,7 @@
 
 ## 使用
 1. 访问[Actions](https://github.com/XiaMoZhiShi/MorphPlugin/actions/workflows/build.yml?query=branch%3Amaster+is%3Acompleted)下载最新构建
-2. 下载最新版本的[PluginBase](https://github.com/XiaMoZhiShi/PluginBase/releases/latest)
+2. 下载最新版本的[PluginBase](https://github.com/XiaMoZhiShi/PluginBase/releases/latest)和[LibsDisguises](https://www.spigotmc.org/resources/libs-disguises-free.81/)
 3. 丢进服务器插件目录中
 4. 重启服务器
     * 或者先加载PluginBase再加载此插件（
