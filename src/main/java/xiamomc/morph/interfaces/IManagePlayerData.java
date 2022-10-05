@@ -34,18 +34,24 @@ public interface IManagePlayerData
     public ArrayList<DisguiseInfo> getAvaliableDisguisesFor(Player player);
 
     /**
-     * 添加新的实体伪装到某一玩家
-     * @param player 要添加的玩家
-     * @param entity 要添加给player的实体
+     * 授予某一玩家某类实体的伪装
+     * @param player 要授予的玩家
+     * @param type 要添加给player的实体
+     * @return 添加是否成功（此玩家先前是否已经拥有目标伪装）
      */
-    public void addNewMorphToPlayer(Player player, Entity entity);
+    public boolean grantMorphToPlayer(Player player, EntityType type);
 
     /**
-     * 添加新的玩家伪装到某一玩家
+     * 授予某一玩家其他玩家的伪装
      * @param sourcePlayer 要添加的玩家
-     * @param targtPlayer 要添加给sourcePlayer的玩家
+     * @param targtPlayerName 要添加给sourcePlayer的玩家
+     * @return 添加是否成功（此玩家先前是否已经拥有目标伪装）
      */
-    public void addNewPlayerMorphToPlayer(Player sourcePlayer, Player targtPlayer);
+    public boolean grantPlayerMorphToPlayer(Player sourcePlayer, String targtPlayerName);
+
+    public boolean revokeMorphFromPlayer(Player player, EntityType entityType);
+
+    public boolean revokePlayerMorphFromPlayer(Player player, String playerName);
 
     /**
      * 获取玩家的伪装配置

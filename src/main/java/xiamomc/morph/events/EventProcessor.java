@@ -8,6 +8,7 @@ import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.utilities.DisguiseUtilities;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -242,28 +243,12 @@ public class EventProcessor extends MorphPluginObject implements Listener
 
     private void onPlayerKillEntity(Player player, Entity entity)
     {
-        //Plugin.getSLF4JLogger().warn(entity.getType().toString());
-        switch (entity.getType())
-        {
-            case DROPPED_ITEM:
-            case SPLASH_POTION:
-            case WITHER_SKULL:
-            case SMALL_FIREBALL:
-            case FIREBALL:
-            case ARROW:
-            case FISHING_HOOK:
-            case ITEM_FRAME:
-            case PAINTING:
-                return;
+        if (!(entity instanceof LivingEntity) && !(entity.getType() == EntityType.ARMOR_STAND))
+            return;
 
-            case PLAYER:
-                var targetPlayer = (Player) entity;
-                morphs.addNewPlayerMorphToPlayer(player, targetPlayer);
-                break;
-
-            default:
-                morphs.addNewMorphToPlayer(player, entity);
-                break;
-        }
+        if (entity instanceof Player targetPlayer)
+            morphs.grantPlayerMorphToPlayer(player, targetPlayer.getName());
+        else
+            morphs.grantMorphToPlayer(player, entity.getType());
     }
 }

@@ -3,14 +3,14 @@ package xiamomc.morph;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import xiamomc.morph.interfaces.IManagePlayerData;
-import xiamomc.morph.misc.*;
+import xiamomc.morph.misc.DisguiseInfo;
+import xiamomc.morph.misc.MessageUtils;
+import xiamomc.morph.misc.MorphConfiguration;
+import xiamomc.morph.misc.PlayerMorphConfiguration;
 import xiamomc.pluginbase.Annotations.Initializer;
-import xiamomc.pluginbase.Annotations.Resolved;
 
 import java.io.*;
 import java.net.URI;
@@ -19,6 +19,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class PlayerDataManager extends MorphPluginObject implements IManagePlayerData
 {
@@ -130,30 +131,64 @@ public class PlayerDataManager extends MorphPluginObject implements IManagePlaye
     }
 
     @Override
-    public void addNewMorphToPlayer(Player player, Entity entity)
+    public boolean grantMorphToPlayer(Player player, EntityType type)
     {
         var playerConfiguration = getPlayerConfiguration(player);
-        var info = getDisguiseInfo(entity.getType());
+        var info = getDisguiseInfo(type);
 
         if (playerConfiguration.unlockedDisguises.stream().noneMatch(c -> c.equals(info)))
         {
             playerConfiguration.unlockedDisguises.add(info);
             saveConfiguration();
         }
-        else return;
+        else return false;
+
+        return true;
     }
 
     @Override
-    public void addNewPlayerMorphToPlayer(Player sourcePlayer, Player targtPlayer)
+    public boolean grantPlayerMorphToPlayer(Player sourcePlayer, String targetPlayerName)
     {
         var playerConfiguration = getPlayerConfiguration(sourcePlayer);
 
-        if (playerConfiguration.unlockedDisguises.stream().noneMatch(c -> c.equals(targtPlayer.getName())))
-            playerConfiguration.unlockedDisguises.add(this.getDisguiseInfo(targtPlayer.getName()));
+        if (playerConfiguration.unlockedDisguises.stream().noneMatch(c -> c.equals(targetPlayerName)))
+            playerConfiguration.unlockedDisguises.add(this.getDisguiseInfo(targetPlayerName));
         else
-            return;
+            return false;
 
         saveConfiguration();
+
+        return true;
+    }
+
+    @Override
+    public boolean revokeMorphFromPlayer(Player player, EntityType entityType)
+    {
+        var avaliableDisguises = getAvaliableDisguisesFor(player);
+
+        var optional = avaliableDisguises.stream().filter(d -> d.type == entityType).findFirst();
+        if (optional.isEmpty()) return false;
+
+        getPlayerConfiguration(player).unlockedDisguises.remove(optional.get());
+        saveConfiguration();
+
+        return true;
+    }
+
+    @Override
+    public boolean revokePlayerMorphFromPlayer(Player player, String playerName)
+    {
+        var avaliableDisguises = getAvaliableDisguisesFor(player);
+
+        var optional = avaliableDisguises.stream()
+                .filter(d -> (d.isPlayerDisguise() && Objects.equals(d.playerDisguiseTargetName, playerName))).findFirst();
+
+        if (optional.isEmpty()) return false;
+
+        getPlayerConfiguration(player).unlockedDisguises.remove(optional.get());
+        saveConfiguration();
+
+        return true;
     }
 
     @Override
@@ -177,7 +212,7 @@ public class PlayerDataManager extends MorphPluginObject implements IManagePlaye
     @Override
     public ArrayList<DisguiseInfo> getAvaliableDisguisesFor(Player player)
     {
-        return getPlayerConfiguration(player).unlockedDisguises;
+        return new ArrayList<>(getPlayerConfiguration(player).unlockedDisguises);
     }
 
     //endregion Implementation of IManagePlayerData

@@ -478,8 +478,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         var req = match.get();
         req.ticksRemain = -1;
 
-        data.addNewPlayerMorphToPlayer(target, source);
-        data.addNewPlayerMorphToPlayer(source, target);
+        data.grantPlayerMorphToPlayer(target, source.getName());
+        data.grantPlayerMorphToPlayer(source, target.getName());
 
         target.sendMessage(MessageUtils.prefixes(target, Component.text("成功与" + source.getName() + "交换！")));
         source.sendMessage(MessageUtils.prefixes(source, Component.text("成功与" + target.getName() + "交换！")));
@@ -540,23 +540,72 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     }
 
     @Override
-    public void addNewMorphToPlayer(Player player, Entity entity)
+    public boolean grantMorphToPlayer(Player player, EntityType type)
     {
-        data.addNewMorphToPlayer(player, entity);
+        var val = data.grantMorphToPlayer(player, type);
 
-        sendMorphAcquiredNotification(player,
-                Component.text("✔ 已解锁")
-                        .append(Component.translatable(entity.getType().translationKey()))
-                        .append(Component.text("的伪装")).color(NamedTextColor.GREEN));
+        if (val)
+            sendMorphAcquiredNotification(player,
+                    Component.text("✔ 已解锁")
+                            .append(Component.translatable(type.translationKey()))
+                            .append(Component.text("的伪装")).color(NamedTextColor.GREEN));
+
+        return val;
     }
 
     @Override
-    public void addNewPlayerMorphToPlayer(Player sourcePlayer, Player targtPlayer)
+    public boolean grantPlayerMorphToPlayer(Player sourcePlayer, String targetPlayerName)
     {
-        data.addNewPlayerMorphToPlayer(sourcePlayer, targtPlayer);
+        var val = data.grantPlayerMorphToPlayer(sourcePlayer, targetPlayerName);
 
-        sendMorphAcquiredNotification(sourcePlayer,
-                Component.text("✔ 已解锁" + targtPlayer.getName() + "的伪装").color(NamedTextColor.GREEN));
+        if (val)
+            sendMorphAcquiredNotification(sourcePlayer,
+                    Component.text("✔ 已解锁" + targetPlayerName + "的伪装").color(NamedTextColor.GREEN));
+
+        return val;
+    }
+
+    @Override
+    public boolean revokeMorphFromPlayer(Player player, EntityType entityType)
+    {
+        var val = data.revokeMorphFromPlayer(player, entityType);
+
+        if (val)
+        {
+            var state = getDisguiseStateFor(player);
+            if (state != null && state.getDisguise().getType().getEntityType().equals(entityType))
+                unMorph(player);
+
+            sendMorphAcquiredNotification(player,
+                    Component.text("❌ 已失去")
+                            .append(Component.translatable(entityType.translationKey()))
+                            .append(Component.text("的伪装")).color(NamedTextColor.RED));
+        }
+
+        return val;
+    }
+
+    @Override
+    public boolean revokePlayerMorphFromPlayer(Player player, String playerName)
+    {
+        var val = data.revokePlayerMorphFromPlayer(player, playerName);
+
+        if (val)
+        {
+            var state = getDisguiseStateFor(player);
+
+            if (state != null
+                    && state.getDisguise().isPlayerDisguise()
+                    && ((PlayerDisguise)state.getDisguise()).getName().equals(playerName))
+            {
+                unMorph(player);
+            }
+
+            sendMorphAcquiredNotification(player,
+                    Component.text("❌ 已失去" + playerName + "的伪装").color(NamedTextColor.RED));
+        }
+
+        return val;
     }
 
     private void sendMorphAcquiredNotification(Player player, Component text)

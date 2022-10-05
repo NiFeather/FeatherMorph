@@ -31,7 +31,8 @@ public class MorphPluginCommand extends MorphSubCommandHandler
             new HelpSubCommand(),
             new ToggleSelfSubCommand(),
             new QuerySubCommand(),
-            new QueryAllSubCommand()
+            new QueryAllSubCommand(),
+            new DisguiseManageSubCommand()
     );
 
     @Override
