@@ -26,7 +26,11 @@ import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 
 import java.io.*;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,7 +44,7 @@ public class MorphManager extends MorphPluginObject
 
     private final List<DisguiseInfo> cachedInfos = new ArrayList<>();
 
-    private MorphConfiguration morphConfiguration;
+    private MorphConfiguration morphConfiguration = new MorphConfiguration();
 
     private final Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
 
@@ -48,9 +52,26 @@ public class MorphManager extends MorphPluginObject
     private MorphPlugin plugin;
 
     @Initializer
-    private void load()
+    private void load() throws IOException
     {
         this.addSchedule(c -> update());
+
+        //初始化配置文件
+        if (configurationFile == null)
+            configurationFile = new File(URI.create(plugin.getDataFolder().toURI() + "/data.json"));
+
+        if (!configurationFile.exists())
+        {
+            //创建父目录
+            if (!configurationFile.getParentFile().exists())
+                Files.createDirectories(Paths.get(configurationFile.getParentFile().toURI()));
+
+            if (!configurationFile.createNewFile())
+            {
+                Logger.error("未能创建文件，将不会加载玩家配置！");
+                return;
+            };
+        }
 
         reloadConfiguration();
     }
@@ -87,7 +108,7 @@ public class MorphManager extends MorphPluginObject
 
     //region 配置
 
-    private final File configurationFile = new File("/dev/shm/test");
+    private File configurationFile;
 
     private void saveConfiguration()
     {
@@ -97,7 +118,11 @@ public class MorphManager extends MorphPluginObject
 
             if (configurationFile.exists()) configurationFile.delete();
 
-            configurationFile.createNewFile();
+            if (!configurationFile.createNewFile())
+            {
+                Logger.error("未能创建文件，将不会加载玩家配置！");
+                return;
+            };
 
             try (var stream = new FileOutputStream(configurationFile))
             {
