@@ -82,6 +82,7 @@ public class EntityTypeUtils
                 || type == EntityType.BEE
                 || type == EntityType.BLAZE
                 || type == EntityType.GHAST
-                || type == EntityType.VEX;
+                || type == EntityType.VEX
+                || type == EntityType.PHANTOM;
     }
 }

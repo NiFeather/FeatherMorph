@@ -140,7 +140,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                     player.damage(1);
                 break;
 
-            case ZOMBIE, SKELETON, STRAY, DROWNED:
+            case ZOMBIE, SKELETON, STRAY, DROWNED, PHANTOM:
                 if (player.getEquipment().getHelmet() == null
                         && player.getWorld().isDayTime()
                         && player.getWorld().getEnvironment().equals(World.Environment.NORMAL)
@@ -283,7 +283,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         switch (type)
         {
             case ALLAY, BEE, BLAZE, VEX, BAT -> player.setFlySpeed(0.05f);
-            case GHAST -> player.setFlySpeed(0.06f);
+            case GHAST, PHANTOM -> player.setFlySpeed(0.06f);
             case ENDER_DRAGON -> player.setFlySpeed(0.15f);
             default -> player.setFlySpeed(0.1f);
         }
