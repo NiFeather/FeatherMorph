@@ -120,7 +120,7 @@ public class MorphManager extends MorphPluginObject
 
             if (!configurationFile.createNewFile())
             {
-                Logger.error("未能创建文件，将不会加载玩家配置！");
+                Logger.error("未能创建文件，将不会保存玩家配置！");
                 return;
             };
 
