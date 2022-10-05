@@ -1,8 +1,5 @@
 package xiamomc.morph;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import jline.internal.Log;
 import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.disguisetypes.Disguise;
 import me.libraryaddict.disguise.disguisetypes.DisguiseType;
@@ -14,27 +11,26 @@ import me.libraryaddict.disguise.utilities.DisguiseValues;
 import me.libraryaddict.disguise.utilities.reflection.FakeBoundingBox;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Particle;
+import org.bukkit.World;
 import org.bukkit.entity.*;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xiamomc.morph.interfaces.IManagePlayerData;
+import xiamomc.morph.interfaces.IManageRequests;
 import xiamomc.morph.misc.*;
 import xiamomc.pluginbase.Annotations.Initializer;
-import xiamomc.pluginbase.Annotations.Resolved;
 
-import java.io.*;
-import java.net.URI;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MorphManager extends MorphPluginObject
+public class MorphManager extends MorphPluginObject implements IManagePlayerData, IManageRequests
 {
     /**
      * 变成其他玩家的玩家
@@ -42,159 +38,13 @@ public class MorphManager extends MorphPluginObject
      */
     private final List<DisguiseState> disguisedPlayers = new ArrayList<>();
 
-    private final List<DisguiseInfo> cachedInfos = new ArrayList<>();
-
-    private MorphConfiguration morphConfiguration = new MorphConfiguration();
-
-    private final Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
-
-    @Resolved
-    private MorphPlugin plugin;
+    private final PlayerDataManager data = new PlayerDataManager();
 
     @Initializer
-    private void load() throws IOException
+    private void load()
     {
         this.addSchedule(c -> update());
-
-        //初始化配置文件
-        if (configurationFile == null)
-            configurationFile = new File(URI.create(plugin.getDataFolder().toURI() + "/data.json"));
-
-        if (!configurationFile.exists())
-        {
-            //创建父目录
-            if (!configurationFile.getParentFile().exists())
-                Files.createDirectories(Paths.get(configurationFile.getParentFile().toURI()));
-
-            if (!configurationFile.createNewFile())
-            {
-                Logger.error("未能创建文件，将不会加载玩家配置！");
-                return;
-            };
-        }
-
-        reloadConfiguration();
     }
-
-    public void reloadConfiguration()
-    {
-        unMorphAll();
-
-        //加载JSON配置
-        MorphConfiguration targetConfiguration = null;
-        var success = false;
-
-        try (var jsonStream = new InputStreamReader(new FileInputStream(configurationFile)))
-        {
-            targetConfiguration = gson.fromJson(jsonStream, MorphConfiguration.class);
-            success = true;
-        }
-        catch (IOException e)
-        {
-            Logger.warn("无法加载JSON配置：" + e.getMessage());
-            e.printStackTrace();
-        }
-
-        if (targetConfiguration == null) targetConfiguration = new MorphConfiguration();
-
-        morphConfiguration = targetConfiguration;
-        if (success) saveConfiguration();
-    }
-
-    public List<DisguiseState> getDisguisedPlayers()
-    {
-        return new ArrayList<>(disguisedPlayers);
-    }
-
-    //region 配置
-
-    private File configurationFile;
-
-    private void saveConfiguration()
-    {
-        try
-        {
-            var jsonString = gson.toJson(morphConfiguration);
-
-            if (configurationFile.exists()) configurationFile.delete();
-
-            if (!configurationFile.createNewFile())
-            {
-                Logger.error("未能创建文件，将不会保存玩家配置！");
-                return;
-            };
-
-            try (var stream = new FileOutputStream(configurationFile))
-            {
-                stream.write(jsonString.getBytes(StandardCharsets.UTF_8));
-            }
-        }
-        catch (Exception e)
-        {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private PlayerMorphConfiguration getPlayerConfiguration(Player player)
-    {
-        var valueOptional = morphConfiguration.playerMorphConfigurations
-                .stream().filter(c -> c.uniqueId.equals(player.getUniqueId())).findFirst();
-
-        if (valueOptional.isPresent()) return valueOptional.get();
-        else
-        {
-            var newInstance = new PlayerMorphConfiguration();
-            newInstance.uniqueId = player.getUniqueId();
-            newInstance.shownTutorialOnce = false;
-            newInstance.unlockedDisguises = new ArrayList<>();
-
-            var msg = Component.text("不知道如何使用伪装? 发送 /mmorph help 即可查看！");
-            player.sendMessage(MessageUtils.prefixes(player, msg));
-
-            morphConfiguration.playerMorphConfigurations.add(newInstance);
-            return newInstance;
-        }
-    }
-
-    public void addNewMorphToPlayer(Player player, Entity entity)
-    {
-        var playerConfiguration = getPlayerConfiguration(player);
-        var info = this.getDisguiseInfo(entity.getType());
-
-        if (playerConfiguration.unlockedDisguises.stream().noneMatch(c -> c.equals(info)))
-        {
-            playerConfiguration.unlockedDisguises.add(info);
-            saveConfiguration();
-        }
-        else return;
-
-        sendMorphAcquiredNotification(player,
-                Component.text("✔ 已解锁")
-                        .append(Component.translatable(entity.getType().translationKey()))
-                        .append(Component.text("的伪装")).color(NamedTextColor.GREEN));
-    }
-
-    public void addNewPlayerMorphToPlayer(Player sourcePlayer, Player targtPlayer)
-    {
-        var playerConfiguration = getPlayerConfiguration(sourcePlayer);
-
-        if (playerConfiguration.unlockedDisguises.stream().noneMatch(c -> c.equals(targtPlayer.getName())))
-            playerConfiguration.unlockedDisguises.add(this.getDisguiseInfo(targtPlayer));
-        else
-            return;
-
-        sendMorphAcquiredNotification(sourcePlayer,
-                Component.text("✔ 已解锁" + targtPlayer.getName() + "的伪装").color(NamedTextColor.GREEN));
-
-        saveConfiguration();
-    }
-
-    public ArrayList<DisguiseInfo> getAvaliableDisguisesFor(Player player)
-    {
-        return getPlayerConfiguration(player).unlockedDisguises;
-    }
-
-    //endregion 配置
 
     private void update()
     {
@@ -222,6 +72,8 @@ public class MorphManager extends MorphPluginObject
                 else
                 {
                     Logger.warn("removing: " + p + " :: " + i.getDisguise() + " <-> " + disg);
+                    unMorph(p);
+                    DisguiseAPI.disguiseEntity(p, disg);
                     disguisedPlayers.remove(i);
                 }
 
@@ -242,6 +94,8 @@ public class MorphManager extends MorphPluginObject
 
         this.addSchedule(c -> update());
     }
+
+    private final PotionEffect waterBreathEffect = new PotionEffect(PotionEffectType.WATER_BREATHING, 20, 0);
 
     /**
      * 更新伪装状态
@@ -268,43 +122,42 @@ public class MorphManager extends MorphPluginObject
             watcher.setFlyingWithElytra(player.isGliding());
             watcher.setSprinting(player.isSprinting());
         }
+
+        //tick伪装行为
+        var disgType = disguise.getType();
+
+        switch (disgType)
+        {
+            case COD, SALMON, PUFFERFISH, TROPICAL_FISH, SQUID, GLOW_SQUID, AXOLOTL, GUARDIAN, ELDER_GUARDIAN, DOLPHIN:
+                if (player.isInWater())
+                    player.addPotionEffect(waterBreathEffect);
+                //else
+                //    player.setRemainingAir(player.getRemainingAir() - 6);
+                break;
+
+            case ENDERMAN, BLAZE:
+                if (player.isInWaterOrRainOrBubbleColumn())
+                    player.damage(1);
+                break;
+
+            case ZOMBIE, SKELETON, STRAY, DROWNED:
+                if (player.getEquipment().getHelmet() == null
+                        && player.getWorld().isDayTime()
+                        && player.getWorld().getEnvironment().equals(World.Environment.NORMAL)
+                        && player.getLocation().getBlock().getLightFromSky() == 15)
+                {
+                    player.setFireTicks(200);
+                }
+                break;
+
+            default:
+                break;
+        }
     }
 
-    /**
-     * 获取包含某一EntityType的伪装信息
-     *
-     * @param type 目标实体类型
-     * @return 伪装信息
-     */
-    public DisguiseInfo getDisguiseInfo(EntityType type)
+    public List<DisguiseState> getDisguisedPlayers()
     {
-        if (this.cachedInfos.stream().noneMatch(o -> o.equals(type)))
-            cachedInfos.add(new DisguiseInfo(type));
-
-        return cachedInfos.stream().filter(o -> o.equals(type)).findFirst().get();
-    }
-
-    /**
-     * 获取包含某一玩家的伪装信息
-     *
-     * @param player 玩家名
-     * @return 伪装信息
-     * @apiNote 要获取玩家正在伪装的状态，请使用getDisguiseStateFor(player)
-     */
-    public DisguiseInfo getDisguiseInfo(Player player)
-    {
-        if (this.cachedInfos.stream().noneMatch(o -> o.equals(player.getName())))
-            cachedInfos.add(new DisguiseInfo(player.getName()));
-
-        return cachedInfos.stream().filter(o -> o.equals(player.getName())).findFirst().get();
-    }
-
-    private void sendMorphAcquiredNotification(Player player, Component text)
-    {
-        if (disguisedPlayers.stream().noneMatch(i -> i.getPlayerUniqueID().equals(player.getUniqueId())))
-            player.sendActionBar(text);
-        else
-            player.sendMessage(MessageUtils.prefixes(player, text));
+        return new ArrayList<>(disguisedPlayers);
     }
 
     //region 玩家伪装相关
@@ -398,14 +251,42 @@ public class MorphManager extends MorphPluginObject
         if (targetInfoOptional.isEmpty())
             return;
 
-        targetInfoOptional.get().getDisguise().removeDisguise(player);
+        var disguise = targetInfoOptional.get().getDisguise();
+        disguise.removeDisguise(player);
 
         player.sendMessage(MessageUtils.prefixes(player, Component.text("已取消伪装")));
         player.sendActionBar(Component.empty());
 
+        //取消玩家飞行
+        player.setAllowFlight(canFly(player, null));
+        player.setFlySpeed(0.1f);
+
         spawnParticle(player, player.getLocation(), player.getWidth(), player.getHeight(), player.getWidth());
 
         disguisedPlayers.remove(targetInfoOptional.get());
+    }
+
+    private boolean canFly(Player player, @Nullable Disguise disguise)
+    {
+        var gamemode = player.getGameMode();
+        var gamemodeAllowFlying = gamemode.equals(GameMode.CREATIVE) || gamemode.equals(GameMode.SPECTATOR);
+
+        if (disguise == null) return gamemodeAllowFlying;
+        else return gamemodeAllowFlying || EntityTypeUtils.canFly(disguise.getType().getEntityType());
+    }
+
+    private void setPlayerFlySpeed(Player player, EntityType type)
+    {
+        var gameMode = player.getGameMode();
+        if (type == null || gameMode.equals(GameMode.CREATIVE) || gameMode.equals(GameMode.SPECTATOR)) return;
+
+        switch (type)
+        {
+            case ALLAY, BEE, BLAZE, VEX, BAT -> player.setFlySpeed(0.05f);
+            case GHAST -> player.setFlySpeed(0.06f);
+            case ENDER_DRAGON -> player.setFlySpeed(0.15f);
+            default -> player.setFlySpeed(0.1f);
+        }
     }
 
     private void postConstructDisguise(Player sourcePlayer, Entity targetEntity, Disguise disguise)
@@ -462,11 +343,7 @@ public class MorphManager extends MorphPluginObject
 
         if (state == null)
         {
-            var disguiseDisplayName = disguise.isPlayerDisguise()
-                    ? Component.text((targetEntity == null ? targetPlayerName : ((PlayerDisguise) disguise).getName()))
-                    : Component.translatable(targetType.translationKey());
-
-            state = new DisguiseState(sourcePlayer, disguiseDisplayName, disguise);
+            state = new DisguiseState(sourcePlayer, disguise);
 
             disguisedPlayers.add(state);
         }
@@ -476,6 +353,11 @@ public class MorphManager extends MorphPluginObject
         //如果伪装的时候坐着，显示提示
         if (sourcePlayer.getVehicle() != null)
             sourcePlayer.sendMessage(MessageUtils.prefixes(sourcePlayer, Component.text("您将在起身后看到自己的伪装")));
+
+        //如果实体能飞，那么也允许玩家飞行
+        var canFly = canFly(sourcePlayer, disguise);
+        sourcePlayer.setAllowFlight(canFly);
+        setPlayerFlySpeed(sourcePlayer, canFly ? targetType : null);
 
         //显示粒子
         var cX = 0d;
@@ -539,16 +421,11 @@ public class MorphManager extends MorphPluginObject
 
     //endregion 玩家伪装相关
 
-    //region 玩家请求
+    //region Implementation of IManageRequests
 
     private final List<RequestInfo> requests = new ArrayList<>();
 
-    /**
-     * 发起请求
-     *
-     * @param source 请求发起方
-     * @param target 请求接受方
-     */
+    @Override
     public void createRequest(Player source, Player target)
     {
         if (requests.stream()
@@ -575,12 +452,7 @@ public class MorphManager extends MorphPluginObject
         source.sendMessage(MessageUtils.prefixes(source, Component.translatable("请求已发送！对方将有1分钟的时间来接受")));
     }
 
-    /**
-     * 接受请求
-     *
-     * @param source 请求接受方
-     * @param target 请求发起方
-     */
+    @Override
     public void acceptRequest(Player source, Player target)
     {
         var match = requests.stream()
@@ -596,19 +468,14 @@ public class MorphManager extends MorphPluginObject
         var req = match.get();
         req.ticksRemain = -1;
 
-        addNewPlayerMorphToPlayer(target, source);
-        addNewPlayerMorphToPlayer(source, target);
+        data.addNewPlayerMorphToPlayer(target, source);
+        data.addNewPlayerMorphToPlayer(source, target);
 
         target.sendMessage(MessageUtils.prefixes(target, Component.text("成功与" + source.getName() + "交换！")));
         source.sendMessage(MessageUtils.prefixes(source, Component.text("成功与" + target.getName() + "交换！")));
     }
 
-    /**
-     * 拒绝请求
-     *
-     * @param source 请求接受方
-     * @param target 请求发起方
-     */
+    @Override
     public void denyRequest(Player source, Player target)
     {
         var match = requests.stream()
@@ -632,12 +499,7 @@ public class MorphManager extends MorphPluginObject
         source.sendMessage(MessageUtils.prefixes(source, Component.text("来自" + target.getName() + "的").append(msg)));
     }
 
-    /**
-     * 获取目标为player的所有请求
-     *
-     * @param player 目标玩家
-     * @return 请求列表
-     */
+    @Override
     public List<RequestInfo> getAvaliableRequestFor(Player player)
     {
         return requests.stream()
@@ -645,5 +507,68 @@ public class MorphManager extends MorphPluginObject
                 .toList();
     }
 
-    //endregion 玩家请求
+    //endregion Implementation of IManageRequests
+
+    //region Implementation of IManagePlayerData
+
+    @Override
+    public DisguiseInfo getDisguiseInfo(EntityType type)
+    {
+        return data.getDisguiseInfo(type);
+    }
+
+    @Override
+    public DisguiseInfo getDisguiseInfo(String playerName)
+    {
+        return data.getDisguiseInfo(playerName);
+    }
+
+    @Override
+    public ArrayList<DisguiseInfo> getAvaliableDisguisesFor(Player player)
+    {
+        return data.getAvaliableDisguisesFor(player);
+    }
+
+    @Override
+    public void addNewMorphToPlayer(Player player, Entity entity)
+    {
+        data.addNewMorphToPlayer(player, entity);
+
+        sendMorphAcquiredNotification(player,
+                Component.text("✔ 已解锁")
+                        .append(Component.translatable(entity.getType().translationKey()))
+                        .append(Component.text("的伪装")).color(NamedTextColor.GREEN));
+    }
+
+    @Override
+    public void addNewPlayerMorphToPlayer(Player sourcePlayer, Player targtPlayer)
+    {
+        data.addNewPlayerMorphToPlayer(sourcePlayer, targtPlayer);
+
+        sendMorphAcquiredNotification(sourcePlayer,
+                Component.text("✔ 已解锁" + targtPlayer.getName() + "的伪装").color(NamedTextColor.GREEN));
+    }
+
+    private void sendMorphAcquiredNotification(Player player, Component text)
+    {
+        if (getDisguiseStateFor(player) == null)
+            player.sendActionBar(text);
+        else
+            player.sendMessage(MessageUtils.prefixes(player, text));
+    }
+
+    @Override
+    public PlayerMorphConfiguration getPlayerConfiguration(Player player)
+    {
+        return data.getPlayerConfiguration(player);
+    }
+
+    @Override
+    public void reloadConfiguration()
+    {
+        unMorphAll();
+
+        data.reloadConfiguration();
+    }
+    //endregion Implementation of IManagePlayerData
 }

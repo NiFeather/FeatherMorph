@@ -1,6 +1,7 @@
 package xiamomc.morph.misc;
 
 import me.libraryaddict.disguise.disguisetypes.Disguise;
+import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 
@@ -8,6 +9,13 @@ import java.util.UUID;
 
 public class DisguiseState
 {
+    public DisguiseState(Player player, Disguise disguiseInstance)
+    {
+        this.player = player;
+        this.playerUniqueID = player.getUniqueId();
+        this.setDisguise(disguiseInstance);
+    }
+
     /**
      * 谁在伪装
      */
@@ -38,7 +46,7 @@ public class DisguiseState
     /**
      * 伪装的显示名称
      */
-    private final Component displayName;
+    private Component displayName;
 
     public Component getDisplayName()
     {
@@ -61,13 +69,9 @@ public class DisguiseState
             throw new RuntimeException("此Disguise不能由插件管理");
 
         disguise = d;
-    }
 
-    public DisguiseState(Player player, Component displayName, Disguise disguiseInstance)
-    {
-        this.player = player;
-        this.playerUniqueID = player.getUniqueId();
-        this.disguise = disguiseInstance;
-        this.displayName = displayName;
+        displayName = d.isPlayerDisguise()
+                ? Component.text(((PlayerDisguise) d).getName())
+                : Component.translatable(d.getType().getEntityType().translationKey());
     }
 }

@@ -73,4 +73,15 @@ public class EntityTypeUtils
                 || type == EntityType.WANDERING_TRADER
                 || isGolem(type);
     }
+
+    public static boolean canFly(EntityType type)
+    {
+        return type == EntityType.ALLAY
+                || type == EntityType.ENDER_DRAGON
+                || type == EntityType.BAT
+                || type == EntityType.BEE
+                || type == EntityType.BLAZE
+                || type == EntityType.GHAST
+                || type == EntityType.VEX;
+    }
 }
