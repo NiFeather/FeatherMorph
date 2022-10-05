@@ -158,6 +158,10 @@ public class EventProcessor extends MorphPluginObject implements Listener
 
             //刷新Disguise
             info.setDisguise(DisguiseAPI.getDisguise(player));
+
+            //更新飞行能力
+            if (morphs.updateFlyingAbility(player) && player.getVelocity().getY() == 0)
+                player.setFlying(true);
         }
         else if (DisguiseAPI.isDisguised(player))
         {

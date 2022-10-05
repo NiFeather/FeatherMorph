@@ -294,6 +294,18 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         this.postConstructDisguise(sourcePlayer, targetEntity, disguise, null, "");
     }
 
+    public boolean updateFlyingAbility(Player player)
+    {
+        var state = getDisguiseStateFor(player);
+        if (state == null) return false;
+
+        var canFly = canFly(player, state.getDisguise());
+        player.setAllowFlight(canFly);
+        setPlayerFlySpeed(player, canFly ? state.getDisguise().getType().getEntityType() : null);
+
+        return canFly;
+    }
+
     /**
      * 构建好伪装之后要做的事
      *
@@ -355,9 +367,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             sourcePlayer.sendMessage(MessageUtils.prefixes(sourcePlayer, Component.text("您将在起身后看到自己的伪装")));
 
         //如果实体能飞，那么也允许玩家飞行
-        var canFly = canFly(sourcePlayer, disguise);
-        sourcePlayer.setAllowFlight(canFly);
-        setPlayerFlySpeed(sourcePlayer, canFly ? targetType : null);
+        updateFlyingAbility(sourcePlayer);
 
         //显示粒子
         var cX = 0d;
