@@ -19,7 +19,7 @@ public class MessageUtils
         list.add(Component.text("\uE30D"));
         list.addAll(Arrays.stream(c).toList());
 
-        return Component.translatable("text.hub.hint", list).color(TextColor.fromCSSHexString("#dddddd"));
+        return Component.translatable("text.hub.hint", list).color(TextColor.fromCSSHexString("#f2f2f2"));
     }
 
     public static Component prefixes(CommandSender sender, Component c)
