@@ -33,4 +33,10 @@ public class PlayerMorphConfiguration
      */
     @Expose
     public boolean shownMorphPlayerMessageOnce;
+
+    /**
+     * 是否已经显示过一次伪装技能提示？
+     */
+    @Expose
+    public boolean shownMorphAbilityHint;
 }

@@ -416,6 +416,14 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         }
 
         spawnParticle(sourcePlayer, sourcePlayer.getLocation(), cX, cY, cZ);
+
+        var config = getPlayerConfiguration(sourcePlayer);
+        if (!config.shownMorphAbilityHint)
+        {
+            sourcePlayer.sendMessage(MessageUtils.prefixes(sourcePlayer,
+                    Component.translatable("PS: 手持胡萝卜钓竿蹲下右键可以使用伪装的主动技能")));
+            config.shownMorphAbilityHint = true;
+        }
     }
 
     private void spawnParticle(Player player, Location location, double collX, double collY, double collZ)
