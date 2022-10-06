@@ -27,9 +27,9 @@ public class DisguiseManageSubCommand extends MorphPluginObject implements ISubC
     }
 
     @Override
-    public ISubCommand[] getSubCommands()
+    public List<ISubCommand> getSubCommands()
     {
-        return subCommands.toArray(ISubCommand[]::new);
+        return subCommands;
     }
 
     @Override
@@ -59,7 +59,8 @@ public class DisguiseManageSubCommand extends MorphPluginObject implements ISubC
         }
         else baseName = "";
 
-        var cmdOptional = Arrays.stream(getSubCommands()).filter(Objects::nonNull)
+        assert getSubCommands() != null;
+        var cmdOptional = getSubCommands().stream()
                 .filter(c -> c.getCommandName().equals(baseName)).findFirst();
 
         if (cmdOptional.isPresent())

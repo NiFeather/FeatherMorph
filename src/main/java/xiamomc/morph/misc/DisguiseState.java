@@ -63,6 +63,32 @@ public class DisguiseState
         return disguise;
     }
 
+    /**
+     * 伪装技能冷却
+     */
+    private int abilityCooldown = 0;
+
+    private int defaultCooldown;
+
+    public int getAbilityCooldown()
+    {
+        return abilityCooldown;
+    }
+
+    public void setAbilityCooldown(int value)
+    {
+        abilityCooldown = value;
+    }
+
+    public void resetCooldown()
+    {
+        abilityCooldown = defaultCooldown;
+    }
+    public int getDefaultCooldown()
+    {
+        return defaultCooldown;
+    }
+
     private short flag;
     public short getFlag()
     {
@@ -102,6 +128,19 @@ public class DisguiseState
 
         if (EntityTypeUtils.canFly(disgType))
             this.flag |= canFly;
+
+        //更新冷却
+        defaultCooldown = switch (disgType)
+        {
+            case ELDER_GUARDIAN -> 1200;
+            case ENDER_DRAGON -> 100;
+            case ENDERMAN, GHAST -> 40;
+            case BLAZE -> 10;
+            case SHULKER, DOLPHIN -> 80;
+            default -> 20;
+        };
+
+        abilityCooldown = 40;
     }
 
     //region flag

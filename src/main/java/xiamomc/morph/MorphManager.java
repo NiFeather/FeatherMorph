@@ -9,17 +9,18 @@ import me.libraryaddict.disguise.disguisetypes.watchers.ArmorStandWatcher;
 import me.libraryaddict.disguise.disguisetypes.watchers.LivingWatcher;
 import me.libraryaddict.disguise.utilities.DisguiseValues;
 import me.libraryaddict.disguise.utilities.reflection.FakeBoundingBox;
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Particle;
-import org.bukkit.World;
+import org.bukkit.*;
+import org.bukkit.craftbukkit.v1_19_R1.entity.CraftShulkerBullet;
 import org.bukkit.entity.*;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.checkerframework.checker.units.qual.K;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.interfaces.IManagePlayerData;
@@ -34,6 +35,7 @@ import xiamomc.pluginbase.Annotations.Initializer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class MorphManager extends MorphPluginObject implements IManagePlayerData, IManageRequests
 {
@@ -46,6 +48,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     private final PlayerDataManager data = new PlayerDataManager();
 
     private final OfflineStorageManager offlineStorage = new OfflineStorageManager();
+
+    private final MorphAbilityHandler abilityHandler = new MorphAbilityHandler();
 
     @Initializer
     private void load()
@@ -134,8 +138,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         }
 
         //tick伪装行为
-        var flag = state.getFlag();
-
         if (state.isFlagSet(DisguiseState.canBreatheUnderWater) && player.isInWaterOrRainOrBubbleColumn())
         {
             player.addPotionEffect(conduitEffect);
@@ -164,6 +166,13 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         if (state.isFlagSet(DisguiseState.alwaysNightVision))
             player.addPotionEffect(nightVisionEffect);
+
+        state.setAbilityCooldown(state.getAbilityCooldown() - 1);
+    }
+
+    public void executeDisguiseAbility(Player player)
+    {
+        abilityHandler.executeDisguiseAbility(player);
     }
 
     public List<DisguiseState> getDisguisedPlayers()

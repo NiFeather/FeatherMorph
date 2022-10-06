@@ -4,7 +4,7 @@ import me.libraryaddict.disguise.disguisetypes.Disguise;
 
 public class DisguiseUtils
 {
-    private static String customDataTagName = "XIAMO_MORPH";
+    private static final String customDataTagName = "XIAMO_MORPH";
 
     public static void addTrace(Disguise disguise)
     {

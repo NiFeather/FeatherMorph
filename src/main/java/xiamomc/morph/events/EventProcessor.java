@@ -9,20 +9,24 @@ import me.libraryaddict.disguise.utilities.DisguiseUtilities;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 import org.bukkit.event.server.TabCompleteEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.commands.MorphCommandHelper;
@@ -31,7 +35,6 @@ import xiamomc.morph.misc.EntityTypeUtils;
 import xiamomc.morph.misc.MessageUtils;
 import xiamomc.pluginbase.Annotations.Resolved;
 
-import javax.inject.Named;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -67,7 +70,8 @@ public class EventProcessor extends MorphPluginObject implements Listener
             }
         }
 
-        if (killer != null)
+        //防止获得自己的伪装
+        if (killer != null && killer != entity)
             this.onPlayerKillEntity(killer, e.getEntity());
     }
 
@@ -90,6 +94,27 @@ public class EventProcessor extends MorphPluginObject implements Listener
     public void onPlayerDeath(PlayerDeathEvent e)
     {
         morphs.unMorph(e.getPlayer());
+    }
+
+    @EventHandler
+    public void onPlayerRightClick(PlayerInteractEvent e)
+    {
+        var player = e.getPlayer();
+        var state = morphs.getDisguiseStateFor(player);
+
+        if (player.getEquipment().getItemInMainHand().getType().equals(Material.CARROT_ON_A_STICK)
+                && player.isSneaking()
+                && state != null
+                && e.getHand() == EquipmentSlot.HAND
+                && e.getAction().isRightClick())
+        {
+            if (state.getAbilityCooldown() <= 0)
+                morphs.executeDisguiseAbility(player);
+            else
+                player.sendMessage(MessageUtils.prefixes(player, Component.translatable("技能正在冷却中")
+                        .append(Component.text("(" + state.getAbilityCooldown() / 20 + "秒)"))
+                        .color(NamedTextColor.RED)));
+        }
     }
 
     //region GSit <-> LibsDisguises workaround
