@@ -136,7 +136,7 @@ public class EventProcessor extends MorphPluginObject implements Listener
             //workaround: LibsDisguises在启用selfDisguiseVisible的情况下会导致副手切换异常
             this.addSchedule(c ->
             {
-                if (DisguiseAPI.isDisguised(player)) player.updateInventory();
+                if (DisguiseAPI.isDisguised(player) && DisguiseAPI.isSelfDisguised(player)) player.updateInventory();
             }, 2);
         }
     }
@@ -146,19 +146,19 @@ public class EventProcessor extends MorphPluginObject implements Listener
     public void onPlayerJoin(PlayerJoinEvent e)
     {
         var player = e.getPlayer();
-        var info = morphs.getDisguiseStateFor(player);
+        var state = morphs.getDisguiseStateFor(player);
 
-        if (info != null)
+        if (state != null)
         {
             //重新进入后player和info.player不属于同一个实例，需要重新disguise
-            info.setPlayer(player);
-            DisguiseAPI.disguiseEntity(player, info.getDisguise());
+            state.setPlayer(player);
+            DisguiseAPI.disguiseEntity(player, state.getDisguise());
 
             var disguise = DisguiseAPI.getDisguise(player);
             DisguiseUtils.addTrace(disguise);
 
             //刷新Disguise
-            info.setDisguise(DisguiseAPI.getDisguise(player));
+            state.setDisguise(DisguiseAPI.getDisguise(player));
 
             //更新飞行能力
             if (morphs.updateFlyingAbility(player) && player.getVelocity().getY() == 0)

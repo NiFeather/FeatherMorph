@@ -96,20 +96,23 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     }
 
     private final PotionEffect waterBreathEffect = new PotionEffect(PotionEffectType.WATER_BREATHING, 20, 0);
+    private final PotionEffect conduitEffect = new PotionEffect(PotionEffectType.CONDUIT_POWER, 20, 0);
+    private final PotionEffect nightVisionEffect = new PotionEffect(PotionEffectType.NIGHT_VISION, 300, 0);
+    private final PotionEffect fireResistance = new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 20, 0);
 
     /**
      * 更新伪装状态
      *
      * @param player 目标玩家
-     * @param info   伪装信息
+     * @param state   伪装信息
      */
-    private void updateDisguise(@NotNull Player player, @NotNull DisguiseState info)
+    private void updateDisguise(@NotNull Player player, @NotNull DisguiseState state)
     {
-        var disguise = info.getDisguise();
+        var disguise = state.getDisguise();
         var watcher = disguise.getWatcher();
 
         //更新actionbar信息
-        player.sendActionBar(MessageUtils.prefixes(player, Component.translatable("正伪装为").append(info.getDisplayName())));
+        player.sendActionBar(MessageUtils.prefixes(player, Component.translatable("正伪装为").append(state.getDisplayName())));
 
         //workaround: 复制实体伪装时会一并复制隐身标签
         //            会导致复制出来的伪装永久隐身
@@ -124,35 +127,35 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         }
 
         //tick伪装行为
-        var disgType = disguise.getType();
+        var flag = state.getFlag();
 
-        switch (disgType)
+        if (state.isFlagSet(DisguiseState.canBreatheUnderWater) && player.isInWaterOrRainOrBubbleColumn())
         {
-            case COD, SALMON, PUFFERFISH, TROPICAL_FISH, SQUID, GLOW_SQUID, AXOLOTL, GUARDIAN, ELDER_GUARDIAN, DOLPHIN:
-                if (player.isInWater())
-                    player.addPotionEffect(waterBreathEffect);
-                //else
-                //    player.setRemainingAir(player.getRemainingAir() - 6);
-                break;
-
-            case ENDERMAN, BLAZE:
-                if (player.isInWaterOrRainOrBubbleColumn())
-                    player.damage(1);
-                break;
-
-            case ZOMBIE, SKELETON, STRAY, DROWNED, PHANTOM:
-                if (player.getEquipment().getHelmet() == null
-                        && player.getWorld().isDayTime()
-                        && player.getWorld().getEnvironment().equals(World.Environment.NORMAL)
-                        && player.getLocation().getBlock().getLightFromSky() == 15)
-                {
-                    player.setFireTicks(200);
-                }
-                break;
-
-            default:
-                break;
+            player.addPotionEffect(conduitEffect);
+            player.addPotionEffect(waterBreathEffect);
         }
+
+        if (state.isFlagSet(DisguiseState.hasFireResistance))
+        {
+            player.addPotionEffect(fireResistance);
+        }
+
+        if (state.isFlagSet(DisguiseState.takesDamageFromWater) && player.isInWaterOrRainOrBubbleColumn())
+        {
+            player.damage(1);
+        }
+
+        if (state.isFlagSet(DisguiseState.burnsUnderSun)
+                && player.getEquipment().getHelmet() == null
+                && player.getWorld().isDayTime()
+                && player.getWorld().getEnvironment().equals(World.Environment.NORMAL)
+                && player.getLocation().getBlock().getLightFromSky() == 15)
+        {
+            player.setFireTicks(200);
+        }
+
+        if (state.isFlagSet(DisguiseState.alwaysNightVision))
+            player.addPotionEffect(nightVisionEffect);
     }
 
     public List<DisguiseState> getDisguisedPlayers()
@@ -266,13 +269,13 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         disguisedPlayers.remove(targetInfoOptional.get());
     }
 
-    private boolean canFly(Player player, @Nullable Disguise disguise)
+    private boolean canFly(Player player, @Nullable DisguiseState state)
     {
         var gamemode = player.getGameMode();
         var gamemodeAllowFlying = gamemode.equals(GameMode.CREATIVE) || gamemode.equals(GameMode.SPECTATOR);
 
-        if (disguise == null) return gamemodeAllowFlying;
-        else return gamemodeAllowFlying || EntityTypeUtils.canFly(disguise.getType().getEntityType());
+        if (state == null) return gamemodeAllowFlying;
+        else return gamemodeAllowFlying || state.isFlagSet(DisguiseState.canFly);
     }
 
     private void setPlayerFlySpeed(Player player, EntityType type)
@@ -299,7 +302,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         var state = getDisguiseStateFor(player);
         if (state == null) return false;
 
-        var canFly = canFly(player, state.getDisguise());
+        var canFly = canFly(player, state);
         player.setAllowFlight(canFly);
         setPlayerFlySpeed(player, canFly ? state.getDisguise().getType().getEntityType() : null);
 

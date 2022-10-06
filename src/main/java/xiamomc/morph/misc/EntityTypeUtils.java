@@ -83,6 +83,52 @@ public class EntityTypeUtils
                 || type == EntityType.BLAZE
                 || type == EntityType.GHAST
                 || type == EntityType.VEX
-                || type == EntityType.PHANTOM;
+                || type == EntityType.PHANTOM
+                || type == EntityType.WITHER;
+    }
+
+    public static boolean hasFireResistance(EntityType type)
+    {
+        return type == EntityType.MAGMA_CUBE
+                || type == EntityType.BLAZE
+                || type == EntityType.WITHER_SKELETON
+                || type == EntityType.WITHER
+                || type == EntityType.STRIDER;
+    }
+
+    public static boolean takesDamageFromWater(EntityType type)
+    {
+        return type == EntityType.ENDERMAN
+                || type == EntityType.BLAZE;
+    }
+
+    public static boolean canBreatheUnderWater(EntityType type)
+    {
+        return type == EntityType.COD
+        || type == EntityType.SALMON
+        || type == EntityType.PUFFERFISH
+        || type == EntityType.TROPICAL_FISH
+        || type == EntityType.SQUID
+        || type == EntityType.GLOW_SQUID
+        || type == EntityType.AXOLOTL
+        || type == EntityType.GUARDIAN
+        || type == EntityType.ELDER_GUARDIAN
+        || type == EntityType.DOLPHIN;
+    }
+
+    public static boolean burnsUnderSun(EntityType type)
+    {
+        return type == EntityType.ZOMBIE
+                || type == EntityType.ZOMBIE_VILLAGER
+                || type == EntityType.SKELETON
+                || type == EntityType.STRAY
+                || type == EntityType.PHANTOM
+                || type == EntityType.DROWNED;
+    }
+
+    public static boolean alwaysNightVision(EntityType type)
+    {
+        return type == EntityType.BAT
+                || type == EntityType.ENDERMAN;
     }
 }
