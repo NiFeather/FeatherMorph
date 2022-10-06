@@ -93,7 +93,8 @@ public class EntityTypeUtils
                 || type == EntityType.BLAZE
                 || type == EntityType.WITHER_SKELETON
                 || type == EntityType.WITHER
-                || type == EntityType.STRIDER;
+                || type == EntityType.STRIDER
+                || type == EntityType.ZOMBIFIED_PIGLIN;
     }
 
     public static boolean takesDamageFromWater(EntityType type)
