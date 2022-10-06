@@ -181,7 +181,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         constructedDisguise = new MobDisguise(DisguiseType.getType(entityType));
 
-        postConstructDisguise(player, null, constructedDisguise, entityType, null);
+        postConstructDisguise(player, null, constructedDisguise);
 
         DisguiseAPI.disguiseEntity(player, constructedDisguise);
     }
@@ -230,7 +230,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     {
         var disguise = new PlayerDisguise(targetPlayerName);
 
-        postConstructDisguise(sourcePlayer, null, disguise, null, targetPlayerName);
+        postConstructDisguise(sourcePlayer, null, disguise);
 
         DisguiseAPI.disguiseEntity(sourcePlayer, disguise);
     }
@@ -293,11 +293,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         }
     }
 
-    private void postConstructDisguise(Player sourcePlayer, Entity targetEntity, Disguise disguise)
-    {
-        this.postConstructDisguise(sourcePlayer, targetEntity, disguise, null, "");
-    }
-
     public boolean updateFlyingAbility(Player player)
     {
         var state = getDisguiseStateFor(player);
@@ -316,17 +311,13 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
      * @param sourcePlayer     伪装的玩家
      * @param targetEntity     伪装的目标实体
      * @param disguise         伪装
-     * @param type             实体类型
-     * @param targetPlayerName 伪装的目标玩家名（仅在目标实体为玩家时可用）
      */
-    private void postConstructDisguise(Player sourcePlayer, Entity targetEntity, Disguise disguise, EntityType type, String targetPlayerName)
+    private void postConstructDisguise(Player sourcePlayer, Entity targetEntity, Disguise disguise)
     {
         //设置自定义数据用来跟踪
         DisguiseUtils.addTrace(disguise);
 
         var watcher = disguise.getWatcher();
-
-        var targetType = type == null ? disguise.getType().getEntityType() : type;
 
         //workaround: 伪装已死亡的LivingEntity
         if (targetEntity instanceof LivingEntity living && living.getHealth() <= 0)

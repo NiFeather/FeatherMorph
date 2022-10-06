@@ -63,8 +63,8 @@ public class DisguiseState
         return disguise;
     }
 
-    private int flag;
-    public int getFlag()
+    private short flag;
+    public short getFlag()
     {
         return flag;
     }
@@ -80,6 +80,7 @@ public class DisguiseState
                 ? Component.text(((PlayerDisguise) d).getName())
                 : Component.translatable(d.getType().getEntityType().translationKey());
 
+        //更新技能Flag
         this.flag = 0;
 
         var disgType = d.getType().getEntityType();
@@ -104,14 +105,14 @@ public class DisguiseState
     }
 
     //region flag
-    public static final int canBreatheUnderWater = 1 << 0;
-    public static final int hasFireResistance = 1 << 1;
-    public static final int canFly = 1 << 2;
-    public static final int burnsUnderSun = 1 << 3;
-    public static final int takesDamageFromWater = 1 << 4;
-    public static final int alwaysNightVision = 1 << 5;
+    public static final short canBreatheUnderWater = 1 << 0;
+    public static final short hasFireResistance = 1 << 1;
+    public static final short canFly = 1 << 2;
+    public static final short burnsUnderSun = 1 << 3;
+    public static final short takesDamageFromWater = 1 << 4;
+    public static final short alwaysNightVision = 1 << 5;
 
-    public boolean isFlagSet(int value)
+    public boolean isFlagSet(short value)
     {
         return (flag & value) == value;
     }
