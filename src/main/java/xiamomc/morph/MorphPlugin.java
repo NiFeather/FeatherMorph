@@ -55,10 +55,7 @@ public final class MorphPlugin extends XiaMoJavaPlugin
         // Plugin shutdown logic
 
         if (morphManager != null)
-        {
-            morphManager.unMorphAll();
-            morphManager.saveConfiguration();
-        };
+            morphManager.onPluginDisable();
 
         super.onDisable();
     }

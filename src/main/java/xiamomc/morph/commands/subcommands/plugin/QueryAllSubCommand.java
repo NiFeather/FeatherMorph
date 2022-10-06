@@ -39,8 +39,9 @@ public class QueryAllSubCommand extends MorphPluginObject implements ISubCommand
         if (!commandSender.hasPermission(getPermissionRequirement())) return false;
 
         var list = manager.getDisguisedPlayers();
+        var offlineStates = manager.getAvaliableOfflineStates();
 
-        if (list.size() == 0)
+        if (list.size() == 0 && offlineStates.size() == 0)
         {
             commandSender.sendMessage(MessageUtils.prefixes(commandSender, Component.text("目前没有人伪装成任何东西")));
             return true;
@@ -53,6 +54,12 @@ public class QueryAllSubCommand extends MorphPluginObject implements ISubCommand
                     Component.text(player.getName() + (player.isOnline() ? "" : "（离线）") + " 伪装成了 ")
                             .append(i.getDisplayName())
             ));
+        }
+
+        for (var s : offlineStates)
+        {
+            commandSender.sendMessage(MessageUtils.prefixes(commandSender,
+                    Component.text(s.playerName + "（离线存储） 伪装成了 " + s.disguiseID)));
         }
 
         return true;

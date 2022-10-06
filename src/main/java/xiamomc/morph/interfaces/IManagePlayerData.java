@@ -1,10 +1,9 @@
 package xiamomc.morph.interfaces;
 
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import xiamomc.morph.misc.DisguiseInfo;
-import xiamomc.morph.misc.PlayerMorphConfiguration;
+import xiamomc.morph.storage.playerdata.PlayerMorphConfiguration;
 
 import java.util.ArrayList;
 

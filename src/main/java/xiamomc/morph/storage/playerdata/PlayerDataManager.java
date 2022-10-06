@@ -1,15 +1,15 @@
-package xiamomc.morph;
+package xiamomc.morph.storage.playerdata;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import xiamomc.morph.MorphPlugin;
+import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.interfaces.IManagePlayerData;
 import xiamomc.morph.misc.DisguiseInfo;
 import xiamomc.morph.misc.MessageUtils;
-import xiamomc.morph.misc.MorphConfiguration;
-import xiamomc.morph.misc.PlayerMorphConfiguration;
 import xiamomc.pluginbase.Annotations.Initializer;
 
 import java.io.*;
@@ -128,11 +128,18 @@ public class PlayerDataManager extends MorphPluginObject implements IManagePlaye
         var valueOptional = morphConfiguration.playerMorphConfigurations
                 .stream().filter(c -> c.uniqueId.equals(player.getUniqueId())).findFirst();
 
-        if (valueOptional.isPresent()) return valueOptional.get();
+        if (valueOptional.isPresent())
+        {
+            var value = valueOptional.get();
+            if (value.playerName == null) value.playerName = player.getName();
+
+            return value;
+        }
         else
         {
             var newInstance = new PlayerMorphConfiguration();
             newInstance.uniqueId = player.getUniqueId();
+            newInstance.playerName = player.getName();
             newInstance.unlockedDisguises = new ArrayList<>();
 
             var msg = Component.text("不知道如何使用伪装? 发送 /mmorph help 即可查看！");

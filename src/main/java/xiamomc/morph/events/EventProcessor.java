@@ -6,6 +6,9 @@ import dev.geco.gsit.api.event.PlayerGetUpPlayerSitEvent;
 import dev.geco.gsit.api.event.PlayerPlayerSitEvent;
 import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.utilities.DisguiseUtilities;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
@@ -25,8 +28,10 @@ import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.commands.MorphCommandHelper;
 import xiamomc.morph.misc.DisguiseUtils;
 import xiamomc.morph.misc.EntityTypeUtils;
+import xiamomc.morph.misc.MessageUtils;
 import xiamomc.pluginbase.Annotations.Resolved;
 
+import javax.inject.Named;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -163,15 +168,41 @@ public class EventProcessor extends MorphPluginObject implements Listener
             //更新飞行能力
             if (morphs.updateFlyingAbility(player) && player.getVelocity().getY() == 0)
                 player.setFlying(true);
+
+            return;
         }
-        else if (DisguiseAPI.isDisguised(player))
+
+        var offlineState = morphs.getOfflineState(player);
+
+        if (offlineState == null && DisguiseAPI.isDisguised(player))
         {
-            //移除未跟踪并且属于此插件的伪装
+            //移除未跟踪，未保存并且属于此插件的伪装
             var disguise = DisguiseAPI.getDisguise(player);
 
             if (DisguiseUtils.isTracing(disguise))
                 disguise.removeDisguise(player);
         }
+        else if (offlineState != null)
+        {
+            player.sendMessage(MessageUtils.prefixes(player, Component.text("自上次离线后相关功能已被重置")));
+
+            if (morphs.disguiseFromOfflineState(player, offlineState))
+            {
+                if (offlineState.disguise != null)
+                {
+                    player.sendMessage(MessageUtils.prefixes(player, Component.text("我们正在恢复您的伪装")));
+                }
+                else
+                {
+                    player.sendMessage(MessageUtils.prefixes(player, Component.text("我们正从有限副本中恢复您的伪装")));
+                    player.sendMessage(MessageUtils.prefixes(player, Component.text("恢复后的伪装可能和之前的不一样")
+                            .decorate(TextDecoration.ITALIC)));
+                }
+            }
+            else
+                player.sendMessage(MessageUtils.prefixes(player, Component.text("我们无法恢复您的伪装 :(")
+                        .color(NamedTextColor.RED)));
+        };
     }
 
     //解决LibsDisguises中MonstersIgnoreDisguises会忽视PlayerDisguise的问题

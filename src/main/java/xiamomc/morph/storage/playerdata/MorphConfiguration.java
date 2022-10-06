@@ -1,4 +1,4 @@
-package xiamomc.morph.misc;
+package xiamomc.morph.storage.playerdata;
 
 import com.google.gson.annotations.Expose;
 

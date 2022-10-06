@@ -25,9 +25,14 @@ import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.interfaces.IManagePlayerData;
 import xiamomc.morph.interfaces.IManageRequests;
 import xiamomc.morph.misc.*;
+import xiamomc.morph.storage.offlinestore.OfflineDisguiseState;
+import xiamomc.morph.storage.offlinestore.OfflineStorageManager;
+import xiamomc.morph.storage.playerdata.PlayerDataManager;
+import xiamomc.morph.storage.playerdata.PlayerMorphConfiguration;
 import xiamomc.pluginbase.Annotations.Initializer;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class MorphManager extends MorphPluginObject implements IManagePlayerData, IManageRequests
@@ -39,6 +44,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     private final List<DisguiseState> disguisedPlayers = new ArrayList<>();
 
     private final PlayerDataManager data = new PlayerDataManager();
+
+    private final OfflineStorageManager offlineStorage = new OfflineStorageManager();
 
     @Initializer
     private void load()
@@ -228,6 +235,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
      */
     public void morphPlayer(Player sourcePlayer, String targetPlayerName)
     {
+        targetPlayerName = targetPlayerName.replace("player:", "");
+
         var disguise = new PlayerDisguise(targetPlayerName);
 
         postConstructDisguise(sourcePlayer, null, disguise);
@@ -238,10 +247,15 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     /**
      * 取消所有玩家的伪装
      */
-    public void unMorphAll()
+    public void unMorphAll(boolean ignoreOffline)
     {
         var players = new ArrayList<>(disguisedPlayers);
-        players.forEach(i -> unMorph(i.getPlayer()));
+        players.forEach(i ->
+        {
+            if (ignoreOffline && !i.getPlayer().isOnline()) return;
+
+            unMorph(i.getPlayer());
+        });
     }
 
     /**
@@ -312,7 +326,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
      * @param targetEntity     伪装的目标实体
      * @param disguise         伪装
      */
-    private void postConstructDisguise(Player sourcePlayer, Entity targetEntity, Disguise disguise)
+    private void postConstructDisguise(Player sourcePlayer, @Nullable Entity targetEntity, Disguise disguise)
     {
         //设置自定义数据用来跟踪
         DisguiseUtils.addTrace(disguise);
@@ -422,6 +436,86 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         return this.disguisedPlayers.stream()
                 .filter(i -> i.getPlayerUniqueID().equals(player.getUniqueId()))
                 .findFirst().orElse(null);
+    }
+
+    public void onPluginDisable()
+    {
+        unMorphAll(true);
+        saveConfiguration();
+
+        getDisguisedPlayers().forEach(s ->
+        {
+            if (!s.getPlayer().isOnline())
+                offlineStorage.pushDisguiseState(s);
+        });
+
+        offlineStorage.saveConfiguration();
+    }
+
+    public OfflineDisguiseState getOfflineState(Player player)
+    {
+        return offlineStorage.popDisguiseState(player.getUniqueId());
+    }
+
+    public List<OfflineDisguiseState> getAvaliableOfflineStates()
+    {
+        return offlineStorage.getAvaliableDisguiseStates();
+    }
+
+    public boolean disguiseFromOfflineState(Player player, OfflineDisguiseState state)
+    {
+        if (player.getUniqueId() == state.playerUUID)
+        {
+            Logger.error("玩家UUID与OfflineState的UUID不一致: " + player.getUniqueId() + " :: " + state.playerUUID);
+            return false;
+        }
+
+        var key = state.disguiseID;
+
+        var avaliableDisguises = getAvaliableDisguisesFor(player);
+
+        //直接还原
+        if (state.disguise != null)
+        {
+            var disguise = state.disguise;
+            DisguiseAPI.disguiseEntity(player, disguise);
+
+            postConstructDisguise(player, null, disguise);
+            return true;
+        }
+
+        //有限还原
+        if (key.startsWith("player:"))
+        {
+            //检查玩家是否还拥有目标玩家的伪装
+            if (avaliableDisguises.stream().anyMatch(i -> i.getKey().matches(key)))
+            {
+                morphPlayer(player, key);
+                return true;
+            }
+        }
+        else
+        {
+            //检查玩家是否还拥有目标类型的伪装
+            if (avaliableDisguises.stream().anyMatch(i -> i.getKey().equals(key)))
+            {
+                var types = EntityType.values();
+                EntityType targetType = null;
+
+                //寻找type
+                var aa = Arrays.stream(types)
+                        .filter(t -> !t.equals(EntityType.UNKNOWN) && t.getKey().asString().equals(key)).findFirst();
+
+                if (aa.isPresent()) targetType = aa.get();
+                else return false;
+
+                morphEntityType(player, targetType);
+
+                return true;
+            }
+        }
+
+        return false;
     }
 
     //endregion 玩家伪装相关
@@ -620,7 +714,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     @Override
     public void reloadConfiguration()
     {
-        unMorphAll();
+        unMorphAll(true);
 
         data.reloadConfiguration();
     }
