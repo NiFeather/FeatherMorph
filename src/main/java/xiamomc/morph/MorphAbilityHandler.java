@@ -4,20 +4,14 @@ import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.bukkit.Difficulty;
-import org.bukkit.GameMode;
-import org.bukkit.GameRule;
-import org.bukkit.Particle;
+import org.bukkit.*;
 import org.bukkit.entity.*;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import xiamomc.morph.misc.MessageUtils;
 import xiamomc.pluginbase.Annotations.Resolved;
 
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class MorphAbilityHandler extends MorphPluginObject
@@ -80,7 +74,7 @@ public class MorphAbilityHandler extends MorphPluginObject
             {
                 shootFireBall(player, Fireball.class);
 
-                playSoundToNearbyPlayers(player, 25,
+                playSoundToNearbyPlayers(player, 35,
                         Key.key("minecraft", "entity.ghast.shoot"), Sound.Source.HOSTILE);
 
                 state.resetCooldown();
@@ -149,7 +143,7 @@ public class MorphAbilityHandler extends MorphPluginObject
 
                 skull.setCharged(rd == 0);
 
-                playSoundToNearbyPlayers(player, 16,
+                playSoundToNearbyPlayers(player, 24,
                         Key.key("minecraft", "entity.wither.shoot"), Sound.Source.HOSTILE);
 
                 state.resetCooldown();
@@ -175,12 +169,7 @@ public class MorphAbilityHandler extends MorphPluginObject
                     return;
                 }
 
-                var players = new ArrayList<Player>();
-
-                player.getNearbyEntities(50, 50, 50).forEach(e ->
-                {
-                    if (e instanceof Player) players.add((Player) e);
-                });
+                var players = findNearbyPlayers(player, 50);
 
                 var sound = Sound.sound(Key.key("entity.elder_guardian.curse"), Sound.Source.HOSTILE, 50, 1);
                 players.forEach(p ->
@@ -206,12 +195,7 @@ public class MorphAbilityHandler extends MorphPluginObject
                     return;
                 }
 
-                var players = new ArrayList<Player>();
-
-                player.getNearbyEntities(9, 9, 9).forEach(e ->
-                {
-                    if (e instanceof Player p && p.isInWater()) players.add(p);
-                });
+                var players = findNearbyPlayers(player, 9);
 
                 players.forEach(p -> p.addPotionEffect(dolphinsGraceEffect));
             }
@@ -223,6 +207,21 @@ public class MorphAbilityHandler extends MorphPluginObject
                 sendDenyMessageToPlayer(player, Component.text("此伪装暂时没有技能"));
             }
         }
+    }
+
+    private List<Player> findNearbyPlayers(Player player, int distance)
+    {
+        var value = new ArrayList<Player>();
+
+        var loc = player.getLocation();
+
+        player.getWorld().getPlayers().forEach(p ->
+        {
+            if (p.getLocation().distance(loc) <= distance)
+                value.add(p);
+        });
+
+        return value;
     }
 
     private void sendDenyMessageToPlayer(Player player, Component text)
@@ -247,16 +246,14 @@ public class MorphAbilityHandler extends MorphPluginObject
 
     private void playSoundToNearbyPlayers(Player player, int distance, Key key, Sound.Source source)
     {
-        var filterDistance = distance + 50;
-        var players = player.getNearbyEntities(filterDistance, filterDistance, filterDistance).stream()
-                .filter(e -> e instanceof Player).toList();
+        var players = findNearbyPlayers(player, distance + 50);
+
+        var loc = player.getLocation();
 
         //volume需要根据距离判断
         var sound = Sound.sound(key, source, distance / 8f, 1f);
 
         player.playSound(sound);
-
-        var loc = player.getLocation();
 
         for (var e : players)
         {
