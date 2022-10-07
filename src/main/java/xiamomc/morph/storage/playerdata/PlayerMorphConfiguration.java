@@ -20,7 +20,7 @@ public class PlayerMorphConfiguration
      */
     @Expose
     @Nullable
-    public String playerName = "Unknown";
+    public String playerName;
 
     /**
      * 此玩家解锁的所有伪装

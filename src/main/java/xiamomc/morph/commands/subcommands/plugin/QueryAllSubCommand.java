@@ -47,10 +47,15 @@ public class QueryAllSubCommand extends MorphPluginObject implements ISubCommand
         for (var i : list)
         {
             var player = i.getPlayer();
-            commandSender.sendMessage(MessageUtils.prefixes(commandSender,
+            var msg = MessageUtils.prefixes(commandSender,
                     Component.text(player.getName() + (player.isOnline() ? "" : "（离线）") + " 伪装成了 ")
                             .append(i.getDisplayName())
-            ));
+            );
+
+            if (i.showingDefaultItems())
+                msg = msg.append(Component.translatable("（显示伪装装备）"));
+
+            commandSender.sendMessage(msg);
         }
 
         for (var s : offlineStates)

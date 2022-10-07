@@ -39,6 +39,12 @@ public class OfflineDisguiseState implements IOfflineState
     @Expose
     public boolean shouldHandlePose;
 
+    /**
+     * 是否在显示伪装物品
+     */
+    @Expose
+    public boolean showingDisguisedItems;
+
     @Nullable
     @Expose(deserialize = false, serialize = false)
     public Disguise disguise;

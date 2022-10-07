@@ -108,18 +108,7 @@ public class OfflineStorageManager extends MorphPluginObject implements IManageO
      */
     public void pushDisguiseState(DisguiseState state)
     {
-        var disguise = state.getDisguise();
-
-        var offlineState = new OfflineDisguiseState();
-        offlineState.playerUUID = state.getPlayerUniqueID();
-        offlineState.playerName = state.getPlayer().getName();
-        offlineState.disguiseID = disguise.isPlayerDisguise()
-                ? "player:" + ((PlayerDisguise) disguise).getName()
-                : disguise.getType().getEntityType().getKey().asString();
-        offlineState.disguiseData = DisguiseParser.parseToString(disguise);
-        offlineState.shouldHandlePose = state.isShouldHandlePose();
-
-        states.disguiseStates.add(offlineState);
+        states.disguiseStates.add(state.toOfflineState());
     }
 
     /**

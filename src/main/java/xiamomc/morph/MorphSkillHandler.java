@@ -8,7 +8,6 @@ import org.bukkit.*;
 import org.bukkit.entity.*;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.misc.MessageUtils;
 import xiamomc.pluginbase.Annotations.Resolved;
 
@@ -205,7 +204,7 @@ public class MorphSkillHandler extends MorphPluginObject
             case ARMOR_STAND, PLAYER ->
             {
                 state.resetCooldown();
-                var defaultShown = state.toggleDefaultArmors();
+                var defaultShown = state.toggleDisguisedItems();
 
                 manager.spawnParticle(player, player.getLocation(), player.getWidth(), player.getHeight(), player.getWidth());
 

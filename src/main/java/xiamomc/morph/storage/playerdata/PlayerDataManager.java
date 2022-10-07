@@ -89,11 +89,16 @@ public class PlayerDataManager extends MorphPluginObject implements IManagePlaye
         }
     }
 
-    private final int targetConfigurationVersion = 1;
+    private final int targetConfigurationVersion = 2;
 
     private void migrate(MorphConfiguration configuration)
     {
         configuration.Version = targetConfigurationVersion;
+
+        configuration.playerMorphConfigurations.forEach(c ->
+        {
+            if (Objects.equals(c.playerName, "Unknown")) c.playerName = null;
+        });
     }
 
     @Override

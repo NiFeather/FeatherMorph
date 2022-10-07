@@ -195,7 +195,7 @@ public class EventProcessor extends MorphPluginObject implements Listener
             DisguiseUtils.addTrace(disguise);
 
             //刷新Disguise
-            state.setDisguise(DisguiseAPI.getDisguise(player), state.isShouldHandlePose());
+            state.setDisguise(DisguiseAPI.getDisguise(player), state.shouldHandlePose());
 
             //更新飞行能力
             if (morphs.updateFlyingAbility(player) && player.getVelocity().getY() == 0)

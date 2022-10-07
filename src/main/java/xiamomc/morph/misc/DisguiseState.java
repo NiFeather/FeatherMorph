@@ -1,13 +1,17 @@
 package xiamomc.morph.misc;
 
 import me.libraryaddict.disguise.disguisetypes.Disguise;
+import me.libraryaddict.disguise.disguisetypes.FlagWatcher;
 import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
+import me.libraryaddict.disguise.utilities.parser.DisguiseParser;
 import net.kyori.adventure.text.Component;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
+import xiamomc.morph.storage.offlinestore.OfflineDisguiseState;
 
 import java.util.Arrays;
 import java.util.UUID;
@@ -117,18 +121,25 @@ public class DisguiseState
      * 要不要手动更新伪装Pose？
      */
     private boolean shouldHandlePose;
-    public boolean isShouldHandlePose()
+    public boolean shouldHandlePose()
     {
         return shouldHandlePose;
     }
 
-    public void setDisguise(Disguise d, boolean isClone)
+    /**
+     * 更新伪装
+     * @param d 目标伪装
+     * @param shouldHandlePose 是否要处理玩家Pose（或：是否为克隆的伪装）
+     */
+    public void setDisguise(Disguise d, boolean shouldHandlePose)
     {
         if (!DisguiseUtils.isTracing(d))
             throw new RuntimeException("此Disguise不能由插件管理");
 
+        if (disguise == d) return;
+
         disguise = d;
-        this.shouldHandlePose = isClone;
+        this.shouldHandlePose = shouldHandlePose;
 
         displayName = d.isPlayerDisguise()
                 ? Component.text(((PlayerDisguise) d).getName())
@@ -177,29 +188,52 @@ public class DisguiseState
 
         abilityCooldown = 40;
 
-        //重置盔甲存储
+        //重置伪装物品
         defaultArmors = emptyArmorStack;
         handItems = emptyHandItems;
 
-        //更新盔甲存储
+        supportsDisguisedItems = disgType.equals(EntityType.PLAYER) || disgType.equals(EntityType.ARMOR_STAND);
+
+        //更新伪装物品
         //只对克隆的伪装生效
-        if ((disgType.equals(EntityType.PLAYER) || disgType.equals(EntityType.ARMOR_STAND)) && isClone)
+        if (supportsDisguisedItems && shouldHandlePose)
         {
             var watcher = disguise.getWatcher();
-            defaultArmors = watcher.getArmor();
 
-            var itemInMainhand = watcher.getItemInMainHand();
-            var itemInOffhand = watcher.getItemInOffHand();
+            //设置默认盔甲
+            var disguiseArmor = watcher.getArmor();
+            defaultArmors = new ItemStack[]
+                    {
+                            itemOrAir(disguiseArmor[0]),
+                            itemOrAir(disguiseArmor[1]),
+                            itemOrAir(disguiseArmor[2]),
+                            itemOrAir(disguiseArmor[3])
+                    };
+
+            //设置默认手持物
             handItems = new ItemStack[]
             {
-                    itemInMainhand == null ? air : itemInMainhand,
-                    itemInOffhand == null ? air : itemInOffhand
+                    itemOrAir(watcher.getItemInMainHand()),
+                    itemOrAir(watcher.getItemInOffHand())
             };
 
+            //全是空的，则禁用装备显示
+            if (Arrays.stream(defaultArmors).allMatch(i -> i != null && i.getType().isAir())
+                && Arrays.stream(handItems).allMatch(i -> i != null && i.getType().isAir()))
+            {
+                defaultArmors = emptyArmorStack;
+                handItems = emptyHandItems;
+            }
+
             //开启默认装备显示或者更新显示
-            if (!showDefaultItems) toggleDefaultArmors();
+            if (!showDisguisedItems) toggleDisguisedItems();
             else updateEquipment();
         }
+    }
+
+    private ItemStack itemOrAir(ItemStack item)
+    {
+        return item == null ? air : item;
     }
 
     /**
@@ -218,36 +252,80 @@ public class DisguiseState
 
     private final ItemStack[] emptyHandItems = new ItemStack[]{ null, null };
 
-    private boolean showDefaultItems = true;
+    private boolean showDisguisedItems = true;
+
+    private boolean supportsDisguisedItems = false;
 
     /**
-     * 切换默认装备是否可见
-     * @return 是否成功？
+     * 此阶段是否支持显示伪装物品
+     * @return 是否支持
      */
-    public boolean toggleDefaultArmors()
+    public boolean supportsShowingDefaultItems()
     {
-        if (defaultArmors == null || handItems == null) throw new RuntimeException("盔甲显示对此伪装不可用");
-
-        //如果伪装没有任何默认装备，返回false
-        if (Arrays.equals(defaultArmors, emptyArmorStack)
-            && Arrays.equals(handItems, emptyHandItems)) return false;
-
-        showDefaultItems = !showDefaultItems;
-        updateEquipment();
-
-        return showDefaultItems;
+        return supportsDisguisedItems;
     }
 
     /**
-     * 更新伪装的盔甲显示
+     * 此阶段是否正在显示伪装物品
+     * @return 是否正在显示
+     */
+    public boolean showingDefaultItems()
+    {
+        return showDisguisedItems;
+    }
+
+    /**
+     * 设置是否要显示伪装物品
+     * @param value 值
+     */
+    public void setShowingDisguisedItems(boolean value)
+    {
+        if (!supportsDisguisedItems) throw new RuntimeException("伪装对此状态不可用");
+
+        //如果伪装没有任何默认装备，返回false
+        if (value && Arrays.equals(defaultArmors, emptyArmorStack)
+                  && Arrays.equals(handItems, emptyHandItems))
+        {
+            return;
+        }
+
+        var watcher = disguise.getWatcher();
+        updateEquipment(watcher, value);
+        showDisguisedItems = value;
+    }
+
+    /**
+     * 切换伪装物品是否可见
+     * @return 切换后的值
+     */
+    public boolean toggleDisguisedItems()
+    {
+        setShowingDisguisedItems(!showDisguisedItems);
+
+        return showDisguisedItems;
+    }
+
+    /**
+     * 更新伪装物品显示
      */
     private void updateEquipment()
     {
         var watcher = disguise.getWatcher();
 
-        watcher.setArmor(showDefaultItems ? defaultArmors : emptyArmorStack);
-        watcher.setItemInMainHand(showDefaultItems ? handItems[0] : emptyHandItems[0]);
-        watcher.setItemInOffHand(showDefaultItems ? handItems[1] : emptyHandItems[1]);
+        updateEquipment(watcher, showDisguisedItems);
+    }
+
+    /**
+     * 更新伪装物品显示
+     * @param watcher 伪装的Watcher
+     * @param showDefaults 是否显示默认盔甲
+     * @apiNote 此方法在将状态转换为离线存储的过程中才会直接调用，其他情况下请用不带参数的方法
+     */
+    private void updateEquipment(FlagWatcher watcher, boolean showDefaults)
+    {
+        watcher.setArmor(showDefaults ? defaultArmors : emptyArmorStack);
+        watcher.setItemInMainHand(showDefaults ? handItems[0] : emptyHandItems[0]);
+        watcher.setItemInOffHand(showDefaults ? handItems[1] : emptyHandItems[1]);
     }
 
     //region 被动技能
@@ -268,4 +346,47 @@ public class DisguiseState
         return (abilityFlag & value) == value;
     }
     //endregion abilityFlag
+
+    /**
+     * 转换为离线存储格式
+     * @return 此State的离线存储
+     */
+    public OfflineDisguiseState toOfflineState()
+    {
+        var offlineState = new OfflineDisguiseState();
+
+        offlineState.playerUUID = this.playerUniqueID;
+        offlineState.playerName = this.player.getName();
+
+        offlineState.disguiseID = disguise.isPlayerDisguise()
+                ? "player:" + ((PlayerDisguise) disguise).getName()
+                : disguise.getType().getEntityType().getKey().asString();
+
+        var newDisguise = disguise.clone();
+        updateEquipment(newDisguise.getWatcher(), true);
+
+        offlineState.disguiseData = DisguiseParser.parseToString(newDisguise);
+        offlineState.shouldHandlePose = this.shouldHandlePose;
+        offlineState.showingDisguisedItems = this.showDisguisedItems;
+
+        return offlineState;
+    }
+
+    /**
+     * 从离线存储转换为实例
+     * @param offlineState 离线存储
+     * @return DisguiseState的实例
+     */
+    public static DisguiseState fromOfflineState(OfflineDisguiseState offlineState)
+    {
+        var player = Bukkit.getPlayer(offlineState.playerUUID);
+
+        if (player == null) throw new RuntimeException("未找到与" + offlineState.playerUUID + "对应的玩家");
+
+        var state = new DisguiseState(player, offlineState.disguise, offlineState.shouldHandlePose);
+
+        state.setShowingDisguisedItems(offlineState.showingDisguisedItems);
+
+        return state;
+    }
 }

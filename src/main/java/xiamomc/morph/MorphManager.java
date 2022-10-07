@@ -132,7 +132,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         watcher.setFlyingWithElytra(player.isGliding());
 
         //workaround: 复制出来的伪装会忽略玩家Pose
-        if (state.isShouldHandlePose())
+        if (state.shouldHandlePose())
             watcher.setEntityPose(DisguiseUtils.toEntityPose(player.getPose()));
 
         //tick伪装行为
@@ -327,6 +327,11 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         return canFly;
     }
 
+    private void postConstructDisguise(DisguiseState state)
+    {
+        postConstructDisguise(state.getPlayer(), null, state.getDisguise(), state.shouldHandlePose());
+    }
+
     /**
      * 构建好伪装之后要做的事
      *
@@ -417,6 +422,9 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         spawnParticle(sourcePlayer, sourcePlayer.getLocation(), cX, cY, cZ);
 
+        //确保玩家可以根据设置看到自己的伪装
+        disguise.setSelfDisguiseVisible(DisguiseAPI.isViewSelfToggled(sourcePlayer));
+
         var config = getPlayerConfiguration(sourcePlayer);
         if (!config.shownMorphAbilityHint)
         {
@@ -494,10 +502,14 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         //直接还原
         if (offlineState.disguise != null)
         {
-            var disguise = offlineState.disguise;
-            DisguiseAPI.disguiseEntity(player, disguise);
+            DisguiseUtils.addTrace(offlineState.disguise);
 
-            postConstructDisguise(player, null, disguise, offlineState.shouldHandlePose);
+            var state = DisguiseState.fromOfflineState(offlineState);
+
+            disguisedPlayers.add(state);
+
+            DisguiseAPI.disguiseEntity(player, state.getDisguise());
+            postConstructDisguise(state);
             return true;
         }
 
