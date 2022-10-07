@@ -746,12 +746,14 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         unMorphAll(true);
 
         data.reloadConfiguration();
+        offlineStorage.reloadConfiguration();
     }
 
     @Override
     public void saveConfiguration()
     {
         data.saveConfiguration();
+        offlineStorage.reloadConfiguration();
     }
     //endregion Implementation of IManagePlayerData
 }
