@@ -262,19 +262,12 @@ public class MorphSkillHandler extends MorphPluginObject
 
     private void playSoundToNearbyPlayers(Player player, int distance, Key key, Sound.Source source)
     {
-        var players = findNearbyPlayers(player, distance + 50);
-
         var loc = player.getLocation();
 
         //volume需要根据距离判断
         var sound = Sound.sound(key, source, distance / 8f, 1f);
 
-        player.playSound(Sound.sound(key, source, 0.8f, 1f));
-
-        for (var e : players)
-        {
-            e.playSound(sound, loc.getX(), loc.getY(), loc.getZ());
-        }
+        player.getWorld().playSound(sound, loc.getX(), loc.getY(), loc.getZ());
     }
 
 }

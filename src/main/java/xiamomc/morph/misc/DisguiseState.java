@@ -5,7 +5,6 @@ import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
@@ -178,8 +177,13 @@ public class DisguiseState
 
         abilityCooldown = 40;
 
+        //重置盔甲存储
+        defaultArmors = emptyArmorStack;
+        handItems = emptyHandItems;
+
         //更新盔甲存储
-        if (disgType.equals(EntityType.PLAYER) || disgType.equals(EntityType.ARMOR_STAND))
+        //只对克隆的伪装生效
+        if ((disgType.equals(EntityType.PLAYER) || disgType.equals(EntityType.ARMOR_STAND)) && isClone)
         {
             var watcher = disguise.getWatcher();
             defaultArmors = watcher.getArmor();
@@ -192,8 +196,9 @@ public class DisguiseState
                     itemInOffhand == null ? air : itemInOffhand
             };
 
-            //更新一遍确保与目标伪装一致
-            updateEquipment();
+            //开启默认装备显示或者更新显示
+            if (!showDefaultItems) toggleDefaultArmors();
+            else updateEquipment();
         }
     }
 
@@ -209,7 +214,7 @@ public class DisguiseState
     private static final ItemStack air = new ItemStack(Material.AIR);
 
     //用null会显示玩家自己的装备
-    private final ItemStack[] fallbackArmorStack = new ItemStack[]{ null, null, null, null };
+    private final ItemStack[] emptyArmorStack = new ItemStack[]{ null, null, null, null };
 
     private final ItemStack[] emptyHandItems = new ItemStack[]{ null, null };
 
@@ -221,10 +226,10 @@ public class DisguiseState
      */
     public boolean toggleDefaultArmors()
     {
-        if (defaultArmors == null) throw new RuntimeException("默认盔甲显示对此伪装不可用");
+        if (defaultArmors == null || handItems == null) throw new RuntimeException("盔甲显示对此伪装不可用");
 
         //如果伪装没有任何默认装备，返回false
-        if (Arrays.equals(defaultArmors, fallbackArmorStack)
+        if (Arrays.equals(defaultArmors, emptyArmorStack)
             && Arrays.equals(handItems, emptyHandItems)) return false;
 
         showDefaultItems = !showDefaultItems;
@@ -240,7 +245,7 @@ public class DisguiseState
     {
         var watcher = disguise.getWatcher();
 
-        watcher.setArmor(showDefaultItems ? defaultArmors : fallbackArmorStack);
+        watcher.setArmor(showDefaultItems ? defaultArmors : emptyArmorStack);
         watcher.setItemInMainHand(showDefaultItems ? handItems[0] : emptyHandItems[0]);
         watcher.setItemInOffHand(showDefaultItems ? handItems[1] : emptyHandItems[1]);
     }
