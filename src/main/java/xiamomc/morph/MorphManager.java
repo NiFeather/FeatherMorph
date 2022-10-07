@@ -155,10 +155,11 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         }
 
         if (state.isFlagSet(DisguiseState.burnsUnderSun)
+                && player.getWorld().getEnvironment().equals(World.Environment.NORMAL)
                 && player.getEquipment().getHelmet() == null
                 && player.getWorld().isDayTime()
                 && player.getWorld().isClearWeather()
-                && player.getWorld().getEnvironment().equals(World.Environment.NORMAL)
+                && !player.isInWaterOrRainOrBubbleColumn()
                 && player.getLocation().getBlock().getLightFromSky() == 15)
         {
             player.setFireTicks(200);
