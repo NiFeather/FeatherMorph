@@ -1,11 +1,9 @@
 package xiamomc.morph.events;
 
-import dev.geco.gsit.api.event.EntityGetUpSitEvent;
-import dev.geco.gsit.api.event.EntitySitEvent;
-import dev.geco.gsit.api.event.PlayerGetUpPlayerSitEvent;
-import dev.geco.gsit.api.event.PlayerPlayerSitEvent;
+import dev.geco.gsit.api.event.*;
 import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.utilities.DisguiseUtilities;
+import me.libraryaddict.disguise.utilities.DisguiseValues;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -16,7 +14,6 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
@@ -133,6 +130,17 @@ public class EventProcessor extends MorphPluginObject implements Listener
     {
         if (e.getEntity() instanceof Player player)
             hideDisguiseFor(player);
+    }
+
+    @EventHandler
+    public void onEarlyPlayerPlayerSit(PrePlayerPlayerSitEvent e)
+    {
+        var state = morphs.getDisguiseStateFor(e.getTarget());
+
+        if (!state.getDisguise().isPlayerDisguise())
+        {
+            e.setCancelled(true);
+        }
     }
 
     @EventHandler

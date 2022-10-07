@@ -1,14 +1,15 @@
 package xiamomc.morph;
 
 import me.libraryaddict.disguise.DisguiseAPI;
-import me.libraryaddict.disguise.disguisetypes.Disguise;
-import me.libraryaddict.disguise.disguisetypes.DisguiseType;
-import me.libraryaddict.disguise.disguisetypes.MobDisguise;
-import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
+import me.libraryaddict.disguise.disguisetypes.*;
 import me.libraryaddict.disguise.disguisetypes.watchers.ArmorStandWatcher;
 import me.libraryaddict.disguise.disguisetypes.watchers.LivingWatcher;
+import me.libraryaddict.disguise.disguisetypes.watchers.PlayerWatcher;
+import me.libraryaddict.disguise.utilities.DisguiseUtilities;
 import me.libraryaddict.disguise.utilities.DisguiseValues;
+import me.libraryaddict.disguise.utilities.parser.DisguiseParser;
 import me.libraryaddict.disguise.utilities.reflection.FakeBoundingBox;
+import me.libraryaddict.disguise.utilities.watchers.DisguiseMethods;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
@@ -129,13 +130,10 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         //            会导致复制出来的伪装永久隐身
         watcher.setInvisible(player.isInvisible());
 
+        watcher.setGlowing(player.isGlowing());
+
         //workaround: 复制出来的玩家伪装会忽略下蹲等状态
-        if (disguise.isPlayerDisguise())
-        {
-            watcher.setSneaking(player.isSneaking() && !player.isFlying());
-            watcher.setFlyingWithElytra(player.isGliding());
-            watcher.setSprinting(player.isSprinting());
-        }
+        watcher.setEntityPose(DisguiseUtils.toEntityPose(player.getPose()));
 
         //tick伪装行为
         if (state.isFlagSet(DisguiseState.canBreatheUnderWater) && player.isInWaterOrRainOrBubbleColumn())
