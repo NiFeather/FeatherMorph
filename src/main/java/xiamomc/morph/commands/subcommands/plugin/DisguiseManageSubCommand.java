@@ -43,36 +43,4 @@ public class DisguiseManageSubCommand extends MorphPluginObject implements ISubC
     {
         return "管理伪装";
     }
-
-    @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull String[] args)
-    {
-        //todo: can be removed when bumping PluginBase to 0.0.7
-
-        //todo: 可以和SubCommandHandler中onCommand里面的内容合并？
-        String baseName;
-
-        if (args.length >= 1)
-        {
-            baseName = args[0];
-            args = ArrayUtils.remove(args, 0);
-        }
-        else baseName = "";
-
-        assert getSubCommands() != null;
-        var cmdOptional = getSubCommands().stream()
-                .filter(c -> c.getCommandName().equals(baseName)).findFirst();
-
-        if (cmdOptional.isPresent())
-        {
-            var cmd = cmdOptional.get();
-
-            var perm = cmd.getPermissionRequirement();
-            if (perm != null && !sender.hasPermission(perm)) return false;
-
-            return cmd.onCommand(sender, args);
-        }
-        else
-            return false;
-    }
 }

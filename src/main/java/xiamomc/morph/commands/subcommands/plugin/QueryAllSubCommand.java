@@ -35,9 +35,6 @@ public class QueryAllSubCommand extends MorphPluginObject implements ISubCommand
     @Override
     public boolean onCommand(@NotNull CommandSender commandSender, @NotNull String[] strings)
     {
-        //todo: can be removed when bumping PluginBase to 0.0.6
-        if (!commandSender.hasPermission(getPermissionRequirement())) return false;
-
         var list = manager.getDisguisedPlayers();
         var offlineStates = manager.getAvaliableOfflineStates();
 

@@ -58,9 +58,6 @@ public class QuerySubCommand extends MorphPluginObject implements ISubCommand
     @Override
     public boolean onCommand(@NotNull CommandSender commandSender, @NotNull String[] args)
     {
-        //todo: can be removed when bumping PluginBase to 0.0.6
-        if (!commandSender.hasPermission(getPermissionRequirement())) return false;
-
         if (args.length >= 1)
         {
             var targetPlayer = Bukkit.getPlayer(args[0]);

@@ -253,7 +253,7 @@ public class MorphAbilityHandler extends MorphPluginObject
         //volume需要根据距离判断
         var sound = Sound.sound(key, source, distance / 8f, 1f);
 
-        player.playSound(sound);
+        player.playSound(Sound.sound(key, source, 0.8f, 1f));
 
         for (var e : players)
         {
