@@ -70,7 +70,7 @@ public class MorphAbilityHandler extends MorphPluginObject
             {
                 shootFireBall(player, DragonFireball.class);
 
-                playSoundToNearbyPlayers(player, 50,
+                playSoundToNearbyPlayers(player, 80,
                         Key.key("minecraft", "entity.ender_dragon.shoot"), Sound.Source.HOSTILE);
 
                 state.resetCooldown();
@@ -137,6 +137,20 @@ public class MorphAbilityHandler extends MorphPluginObject
                     state.setAbilityCooldown(10);
                     return;
                 }
+
+                state.resetCooldown();
+            }
+
+            case WITHER ->
+            {
+                var skull = shootFireBall(player, WitherSkull.class);
+
+                var rd = (int) (Math.random() * 100) % 4;
+
+                skull.setCharged(rd == 0);
+
+                playSoundToNearbyPlayers(player, 16,
+                        Key.key("minecraft", "entity.wither.shoot"), Sound.Source.HOSTILE);
 
                 state.resetCooldown();
             }
@@ -233,15 +247,21 @@ public class MorphAbilityHandler extends MorphPluginObject
 
     private void playSoundToNearbyPlayers(Player player, int distance, Key key, Sound.Source source)
     {
-        var players = player.getNearbyEntities(distance, distance, distance).stream()
+        var filterDistance = distance + 50;
+        var players = player.getNearbyEntities(filterDistance, filterDistance, filterDistance).stream()
                 .filter(e -> e instanceof Player).toList();
 
-        var sound = Sound.sound(key, source, distance * 2, 1f);
+        //volume需要根据距离判断
+        var sound = Sound.sound(key, source, distance / 8f, 1f);
 
         player.playSound(sound);
 
+        var loc = player.getLocation();
+
         for (var e : players)
-            e.playSound(sound);
+        {
+            e.playSound(sound, loc.getX(), loc.getY(), loc.getZ());
+        }
     }
 
 }

@@ -135,7 +135,7 @@ public class DisguiseState
             case ELDER_GUARDIAN -> 1200;
             case ENDER_DRAGON -> 100;
             case ENDERMAN, GHAST -> 40;
-            case BLAZE -> 10;
+            case BLAZE, WITHER -> 10;
             case SHULKER, DOLPHIN -> 80;
             default -> 20;
         };
