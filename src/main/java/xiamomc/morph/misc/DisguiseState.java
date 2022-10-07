@@ -126,12 +126,18 @@ public class DisguiseState
         return shouldHandlePose;
     }
 
+    public void setDisguise(Disguise d, boolean shouldHandlePose)
+    {
+        setDisguise(d, shouldHandlePose, true);
+    }
+
     /**
      * 更新伪装
      * @param d 目标伪装
      * @param shouldHandlePose 是否要处理玩家Pose（或：是否为克隆的伪装）
+     * @param shouldRefreshDisguiseItems 要不要刷新伪装物品？
      */
-    public void setDisguise(Disguise d, boolean shouldHandlePose)
+    public void setDisguise(Disguise d, boolean shouldHandlePose, boolean shouldRefreshDisguiseItems)
     {
         if (!DisguiseUtils.isTracing(d))
             throw new RuntimeException("此Disguise不能由插件管理");
@@ -188,46 +194,49 @@ public class DisguiseState
 
         abilityCooldown = 40;
 
-        //重置伪装物品
-        defaultArmors = emptyArmorStack;
-        handItems = emptyHandItems;
-
         supportsDisguisedItems = disgType.equals(EntityType.PLAYER) || disgType.equals(EntityType.ARMOR_STAND);
 
-        //更新伪装物品
-        //只对克隆的伪装生效
-        if (supportsDisguisedItems && shouldHandlePose)
+        //重置伪装物品
+        if (shouldRefreshDisguiseItems)
         {
-            var watcher = disguise.getWatcher();
+            defaultArmors = emptyArmorStack;
+            handItems = emptyHandItems;
 
-            //设置默认盔甲
-            var disguiseArmor = watcher.getArmor();
-            defaultArmors = new ItemStack[]
-                    {
-                            itemOrAir(disguiseArmor[0]),
-                            itemOrAir(disguiseArmor[1]),
-                            itemOrAir(disguiseArmor[2]),
-                            itemOrAir(disguiseArmor[3])
-                    };
-
-            //设置默认手持物
-            handItems = new ItemStack[]
+            //更新伪装物品
+            //只对克隆的伪装生效
+            if (supportsDisguisedItems && shouldHandlePose)
             {
-                    itemOrAir(watcher.getItemInMainHand()),
-                    itemOrAir(watcher.getItemInOffHand())
-            };
+                var watcher = disguise.getWatcher();
 
-            //全是空的，则禁用装备显示
-            if (Arrays.stream(defaultArmors).allMatch(i -> i != null && i.getType().isAir())
-                && Arrays.stream(handItems).allMatch(i -> i != null && i.getType().isAir()))
-            {
-                defaultArmors = emptyArmorStack;
-                handItems = emptyHandItems;
+                //设置默认盔甲
+                var disguiseArmor = watcher.getArmor();
+                defaultArmors = new ItemStack[]
+                        {
+                                itemOrAir(disguiseArmor[0]),
+                                itemOrAir(disguiseArmor[1]),
+                                itemOrAir(disguiseArmor[2]),
+                                itemOrAir(disguiseArmor[3])
+                        };
+
+                //设置默认手持物
+                handItems = new ItemStack[]
+                        {
+                                itemOrAir(watcher.getItemInMainHand()),
+                                itemOrAir(watcher.getItemInOffHand())
+                        };
+
+                //全是空的，则禁用装备显示
+                if (Arrays.stream(defaultArmors).allMatch(i -> i != null && i.getType().isAir())
+                        && Arrays.stream(handItems).allMatch(i -> i != null && i.getType().isAir()))
+                {
+                    defaultArmors = emptyArmorStack;
+                    handItems = emptyHandItems;
+                }
+
+                //开启默认装备显示或者更新显示
+                if (!showDisguisedItems) toggleDisguisedItems();
+                else updateEquipment();
             }
-
-            //开启默认装备显示或者更新显示
-            if (!showDisguisedItems) toggleDisguisedItems();
-            else updateEquipment();
         }
     }
 
