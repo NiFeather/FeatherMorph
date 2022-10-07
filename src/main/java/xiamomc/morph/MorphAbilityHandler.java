@@ -166,6 +166,7 @@ public class MorphAbilityHandler extends MorphPluginObject
                 if (Plugin.getCurrentTick() - lastActivate < state.getDefaultCooldown())
                 {
                     sendDenyMessageToPlayer(player, Component.text("距离上次使用远古守卫者的技能不足1分钟"));
+                    state.setAbilityCooldown(20);
                     return;
                 }
 
