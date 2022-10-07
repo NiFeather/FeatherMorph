@@ -33,6 +33,12 @@ public class OfflineDisguiseState implements IOfflineState
     @Expose
     public String disguiseData;
 
+    /**
+     * 要不要手动更新Pose
+     */
+    @Expose
+    public boolean shouldHandlePose;
+
     @Nullable
     @Expose(deserialize = false, serialize = false)
     public Disguise disguise;

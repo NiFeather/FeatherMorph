@@ -9,11 +9,11 @@ import java.util.UUID;
 
 public class DisguiseState
 {
-    public DisguiseState(Player player, Disguise disguiseInstance)
+    public DisguiseState(Player player, Disguise disguiseInstance, boolean isClone)
     {
         this.player = player;
         this.playerUniqueID = player.getUniqueId();
-        this.setDisguise(disguiseInstance);
+        this.setDisguise(disguiseInstance, isClone);
     }
 
     /**
@@ -89,18 +89,31 @@ public class DisguiseState
         return defaultCooldown;
     }
 
+    /**
+     * 伪装技能Flag
+     */
     private short flag;
     public short getFlag()
     {
         return flag;
     }
 
-    public void setDisguise(Disguise d)
+    /**
+     * 要不要手动更新伪装Pose？
+     */
+    private boolean shouldHandlePose;
+    public boolean isShouldHandlePose()
+    {
+        return shouldHandlePose;
+    }
+
+    public void setDisguise(Disguise d, boolean isClone)
     {
         if (!DisguiseUtils.isTracing(d))
             throw new RuntimeException("此Disguise不能由插件管理");
 
         disguise = d;
+        this.shouldHandlePose = isClone;
 
         displayName = d.isPlayerDisguise()
                 ? Component.text(((PlayerDisguise) d).getName())

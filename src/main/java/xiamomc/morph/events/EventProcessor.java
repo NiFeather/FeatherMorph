@@ -3,7 +3,6 @@ package xiamomc.morph.events;
 import dev.geco.gsit.api.event.*;
 import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.utilities.DisguiseUtilities;
-import me.libraryaddict.disguise.utilities.DisguiseValues;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -196,7 +195,7 @@ public class EventProcessor extends MorphPluginObject implements Listener
             DisguiseUtils.addTrace(disguise);
 
             //刷新Disguise
-            state.setDisguise(DisguiseAPI.getDisguise(player));
+            state.setDisguise(DisguiseAPI.getDisguise(player), state.isShouldHandlePose());
 
             //更新飞行能力
             if (morphs.updateFlyingAbility(player) && player.getVelocity().getY() == 0)

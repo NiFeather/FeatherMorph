@@ -4,24 +4,16 @@ import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.disguisetypes.*;
 import me.libraryaddict.disguise.disguisetypes.watchers.ArmorStandWatcher;
 import me.libraryaddict.disguise.disguisetypes.watchers.LivingWatcher;
-import me.libraryaddict.disguise.disguisetypes.watchers.PlayerWatcher;
-import me.libraryaddict.disguise.utilities.DisguiseUtilities;
 import me.libraryaddict.disguise.utilities.DisguiseValues;
-import me.libraryaddict.disguise.utilities.parser.DisguiseParser;
 import me.libraryaddict.disguise.utilities.reflection.FakeBoundingBox;
-import me.libraryaddict.disguise.utilities.watchers.DisguiseMethods;
-import net.kyori.adventure.key.Key;
-import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.*;
-import org.bukkit.craftbukkit.v1_19_R1.entity.CraftShulkerBullet;
 import org.bukkit.entity.*;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import org.checkerframework.checker.units.qual.K;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.interfaces.IManagePlayerData;
@@ -36,7 +28,6 @@ import xiamomc.pluginbase.Annotations.Initializer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.Consumer;
 
 public class MorphManager extends MorphPluginObject implements IManagePlayerData, IManageRequests
 {
@@ -130,10 +121,12 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         //            会导致复制出来的伪装永久隐身
         watcher.setInvisible(player.isInvisible());
 
+        //workaround: 伪装不会主动检测玩家有没有发光
         watcher.setGlowing(player.isGlowing());
 
-        //workaround: 复制出来的玩家伪装会忽略下蹲等状态
-        watcher.setEntityPose(DisguiseUtils.toEntityPose(player.getPose()));
+        //workaround: 复制出来的伪装会忽略玩家Pose
+        if (state.isShouldHandlePose())
+            watcher.setEntityPose(DisguiseUtils.toEntityPose(player.getPose()));
 
         //tick伪装行为
         if (state.isFlagSet(DisguiseState.canBreatheUnderWater) && player.isInWaterOrRainOrBubbleColumn())
@@ -196,7 +189,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         constructedDisguise = new MobDisguise(DisguiseType.getType(entityType));
 
-        postConstructDisguise(player, null, constructedDisguise);
+        postConstructDisguise(player, null, constructedDisguise, false);
 
         DisguiseAPI.disguiseEntity(player, constructedDisguise);
     }
@@ -213,7 +206,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         draftDisguise = DisguiseAPI.constructDisguise(entity);
 
-        postConstructDisguise(sourcePlayer, entity, draftDisguise);
+        postConstructDisguise(sourcePlayer, entity, draftDisguise, true);
         DisguiseAPI.disguiseEntity(sourcePlayer, draftDisguise);
     }
 
@@ -232,7 +225,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         DisguiseAPI.disguiseEntity(sourcePlayer, DisguiseAPI.getDisguise(targetEntity));
         draftDisguise = DisguiseAPI.getDisguise(sourcePlayer);
 
-        postConstructDisguise(sourcePlayer, targetEntity, draftDisguise);
+        postConstructDisguise(sourcePlayer, targetEntity, draftDisguise, true);
     }
 
     /**
@@ -247,7 +240,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         var disguise = new PlayerDisguise(targetPlayerName);
 
-        postConstructDisguise(sourcePlayer, null, disguise);
+        postConstructDisguise(sourcePlayer, null, disguise, false);
 
         DisguiseAPI.disguiseEntity(sourcePlayer, disguise);
     }
@@ -333,8 +326,9 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
      * @param sourcePlayer     伪装的玩家
      * @param targetEntity     伪装的目标实体
      * @param disguise         伪装
+     * @param shouldHandlePose 要不要手动更新伪装Pose？
      */
-    private void postConstructDisguise(Player sourcePlayer, @Nullable Entity targetEntity, Disguise disguise)
+    private void postConstructDisguise(Player sourcePlayer, @Nullable Entity targetEntity, Disguise disguise, boolean shouldHandlePose)
     {
         //设置自定义数据用来跟踪
         DisguiseUtils.addTrace(disguise);
@@ -372,12 +366,12 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         if (state == null)
         {
-            state = new DisguiseState(sourcePlayer, disguise);
+            state = new DisguiseState(sourcePlayer, disguise, shouldHandlePose);
 
             disguisedPlayers.add(state);
         }
         else
-            state.setDisguise(disguise);
+            state.setDisguise(disguise, shouldHandlePose);
 
         //如果伪装的时候坐着，显示提示
         if (sourcePlayer.getVehicle() != null)
@@ -478,25 +472,25 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         return offlineStorage.getAvaliableDisguiseStates();
     }
 
-    public boolean disguiseFromOfflineState(Player player, OfflineDisguiseState state)
+    public boolean disguiseFromOfflineState(Player player, OfflineDisguiseState offlineState)
     {
-        if (player.getUniqueId() == state.playerUUID)
+        if (player.getUniqueId() == offlineState.playerUUID)
         {
-            Logger.error("玩家UUID与OfflineState的UUID不一致: " + player.getUniqueId() + " :: " + state.playerUUID);
+            Logger.error("玩家UUID与OfflineState的UUID不一致: " + player.getUniqueId() + " :: " + offlineState.playerUUID);
             return false;
         }
 
-        var key = state.disguiseID;
+        var key = offlineState.disguiseID;
 
         var avaliableDisguises = getAvaliableDisguisesFor(player);
 
         //直接还原
-        if (state.disguise != null)
+        if (offlineState.disguise != null)
         {
-            var disguise = state.disguise;
+            var disguise = offlineState.disguise;
             DisguiseAPI.disguiseEntity(player, disguise);
 
-            postConstructDisguise(player, null, disguise);
+            postConstructDisguise(player, null, disguise, offlineState.shouldHandlePose);
             return true;
         }
 
