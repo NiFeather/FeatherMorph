@@ -156,8 +156,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         if (state.isFlagSet(DisguiseState.burnsUnderSun)
                 && player.getEquipment().getHelmet() == null
-                && player.getWorld().isDayTime()
-                && player.getWorld().isClearWeather()
+                && !player.isInWaterOrRainOrBubbleColumn()
                 && player.getWorld().getEnvironment().equals(World.Environment.NORMAL)
                 && player.getLocation().getBlock().getLightFromSky() == 15)
         {
