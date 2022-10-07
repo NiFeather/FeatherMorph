@@ -221,6 +221,8 @@ public class MorphAbilityHandler extends MorphPluginObject
                 value.add(p);
         });
 
+        value.remove(player);
+
         return value;
     }
 
