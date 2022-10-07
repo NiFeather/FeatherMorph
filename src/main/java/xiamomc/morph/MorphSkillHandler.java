@@ -8,13 +8,14 @@ import org.bukkit.*;
 import org.bukkit.entity.*;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.misc.MessageUtils;
 import xiamomc.pluginbase.Annotations.Resolved;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class MorphAbilityHandler extends MorphPluginObject
+public class MorphSkillHandler extends MorphPluginObject
 {
     @Resolved
     private MorphManager manager;
@@ -154,7 +155,7 @@ public class MorphAbilityHandler extends MorphPluginObject
                 if (!player.isInWater())
                 {
                     state.setAbilityCooldown(20);
-                    sendDenyMessageToPlayer(player, Component.text("你需要在水里才能使用此技能"));
+                    sendDenyMessageToPlayer(player, Component.translatable("你需要在水里才能使用此技能"));
                     return;
                 }
 
@@ -165,7 +166,7 @@ public class MorphAbilityHandler extends MorphPluginObject
 
                 if (Plugin.getCurrentTick() - lastActivate < state.getDefaultCooldown())
                 {
-                    sendDenyMessageToPlayer(player, Component.text("距离上次使用远古守卫者的技能不足1分钟"));
+                    sendDenyMessageToPlayer(player, Component.translatable("距离上次使用远古守卫者的技能不足1分钟"));
                     state.setAbilityCooldown(20);
                     return;
                 }
@@ -192,7 +193,7 @@ public class MorphAbilityHandler extends MorphPluginObject
 
                 if (!player.isInWater())
                 {
-                    sendDenyMessageToPlayer(player, Component.text("你需要在水里才能使用此技能"));
+                    sendDenyMessageToPlayer(player, Component.translatable("你需要在水里才能使用此技能"));
                     return;
                 }
 
@@ -201,11 +202,23 @@ public class MorphAbilityHandler extends MorphPluginObject
                 players.forEach(p -> p.addPotionEffect(dolphinsGraceEffect));
             }
 
+            case ARMOR_STAND, PLAYER ->
+            {
+                state.resetCooldown();
+                var defaultShown = state.toggleDefaultArmors();
+
+                manager.spawnParticle(player, player.getLocation(), player.getWidth(), player.getHeight(), player.getWidth());
+
+                player.sendMessage(MessageUtils.prefixes(player, Component.translatable("正显示")
+                        .append(Component.translatable(defaultShown ? "伪装自带的" : "自己的"))
+                        .append(Component.translatable("盔甲和手持物"))));
+            }
+
             default ->
             {
                 state.setAbilityCooldown(20);
 
-                sendDenyMessageToPlayer(player, Component.text("此伪装暂时没有技能"));
+                sendDenyMessageToPlayer(player, Component.translatable("此伪装暂时没有技能"));
             }
         }
     }

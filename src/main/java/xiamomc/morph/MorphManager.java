@@ -8,6 +8,7 @@ import me.libraryaddict.disguise.utilities.DisguiseValues;
 import me.libraryaddict.disguise.utilities.reflection.FakeBoundingBox;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.*;
 import org.bukkit.entity.*;
 import org.bukkit.inventory.EquipmentSlot;
@@ -41,7 +42,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
     private final OfflineStorageManager offlineStorage = new OfflineStorageManager();
 
-    private final MorphAbilityHandler abilityHandler = new MorphAbilityHandler();
+    private final MorphSkillHandler abilityHandler = new MorphSkillHandler();
 
     @Initializer
     private void load()
@@ -115,7 +116,11 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         var watcher = disguise.getWatcher();
 
         //更新actionbar信息
-        player.sendActionBar(MessageUtils.prefixes(player, Component.translatable("正伪装为").append(state.getDisplayName())));
+        player.sendActionBar(MessageUtils.prefixes(player, Component.translatable("正伪装为")
+                .append(state.getDisplayName())
+                .color(state.hasSkill()
+                        ? (state.getAbilityCooldown() <= 0 ? TextColor.fromHexString("#8fe98d") : TextColor.fromHexString("#eeb565"))
+                        : TextColor.fromHexString("#f0f0f0"))));
 
         //workaround: 复制实体伪装时会一并复制隐身标签
         //            会导致复制出来的伪装永久隐身
@@ -131,23 +136,23 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             watcher.setEntityPose(DisguiseUtils.toEntityPose(player.getPose()));
 
         //tick伪装行为
-        if (state.isFlagSet(DisguiseState.canBreatheUnderWater) && player.isInWaterOrRainOrBubbleColumn())
+        if (state.isAbilityFlagSet(DisguiseState.canBreatheUnderWater) && player.isInWaterOrRainOrBubbleColumn())
         {
             player.addPotionEffect(conduitEffect);
             player.addPotionEffect(waterBreathEffect);
         }
 
-        if (state.isFlagSet(DisguiseState.hasFireResistance))
+        if (state.isAbilityFlagSet(DisguiseState.hasFireResistance))
         {
             player.addPotionEffect(fireResistance);
         }
 
-        if (state.isFlagSet(DisguiseState.takesDamageFromWater) && player.isInWaterOrRainOrBubbleColumn())
+        if (state.isAbilityFlagSet(DisguiseState.takesDamageFromWater) && player.isInWaterOrRainOrBubbleColumn())
         {
             player.damage(1);
         }
 
-        if (state.isFlagSet(DisguiseState.burnsUnderSun)
+        if (state.isAbilityFlagSet(DisguiseState.burnsUnderSun)
                 && player.getWorld().getEnvironment().equals(World.Environment.NORMAL)
                 && player.getEquipment().getHelmet() == null
                 && player.getWorld().isDayTime()
@@ -158,7 +163,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             player.setFireTicks(200);
         }
 
-        if (state.isFlagSet(DisguiseState.alwaysNightVision))
+        if (state.isAbilityFlagSet(DisguiseState.alwaysNightVision))
             player.addPotionEffect(nightVisionEffect);
 
         state.setAbilityCooldown(state.getAbilityCooldown() - 1);
@@ -293,7 +298,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         var gamemodeAllowFlying = gamemode.equals(GameMode.CREATIVE) || gamemode.equals(GameMode.SPECTATOR);
 
         if (state == null) return gamemodeAllowFlying;
-        else return gamemodeAllowFlying || state.isFlagSet(DisguiseState.canFly);
+        else return gamemodeAllowFlying || state.isAbilityFlagSet(DisguiseState.canFly);
     }
 
     private void setPlayerFlySpeed(Player player, EntityType type)
@@ -421,7 +426,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         }
     }
 
-    private void spawnParticle(Player player, Location location, double collX, double collY, double collZ)
+    public void spawnParticle(Player player, Location location, double collX, double collY, double collZ)
     {
         location.setY(location.getY() + (collY / 2));
 
@@ -430,7 +435,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         var particleScale = Math.max(1, (collX * collY * collZ) / 15);
 
         //显示粒子
-        player.spawnParticle(Particle.EXPLOSION_NORMAL, location, //类型和位置
+        player.getWorld().spawnParticle(Particle.EXPLOSION_NORMAL, location, //类型和位置
                 (int) (25 * particleScale), //数量
                 collX * 0.6, collY / 4, collZ * 0.6, //分布空间
                 particleScale >= 10 ? 0.2 : 0.05); //速度

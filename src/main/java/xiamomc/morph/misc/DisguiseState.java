@@ -3,8 +3,14 @@ package xiamomc.morph.misc;
 import me.libraryaddict.disguise.disguisetypes.Disguise;
 import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
 import net.kyori.adventure.text.Component;
+import org.bukkit.Material;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
 import java.util.UUID;
 
 public class DisguiseState
@@ -84,18 +90,28 @@ public class DisguiseState
     {
         abilityCooldown = defaultCooldown;
     }
+
     public int getDefaultCooldown()
     {
         return defaultCooldown;
     }
 
     /**
-     * 伪装技能Flag
+     * 伪装被动技能Flag
      */
-    private short flag;
-    public short getFlag()
+    private short abilityFlag;
+    public short getAbilityFlag()
     {
-        return flag;
+        return abilityFlag;
+    }
+
+    /**
+     * 伪装主动技能Flag
+     */
+    private boolean hasSkill;
+    public boolean hasSkill()
+    {
+        return hasSkill;
     }
 
     /**
@@ -120,27 +136,34 @@ public class DisguiseState
                 : Component.translatable(d.getType().getEntityType().translationKey());
 
         //更新技能Flag
-        this.flag = 0;
+        this.abilityFlag = 0;
 
         var disgType = d.getType().getEntityType();
 
         if (EntityTypeUtils.canBreatheUnderWater(disgType))
-            this.flag |= canBreatheUnderWater;
+            this.abilityFlag |= canBreatheUnderWater;
 
         if (EntityTypeUtils.hasFireResistance(disgType))
-            this.flag |= hasFireResistance;
+            this.abilityFlag |= hasFireResistance;
 
         if (EntityTypeUtils.takesDamageFromWater(disgType))
-            this.flag |= takesDamageFromWater;
+            this.abilityFlag |= takesDamageFromWater;
 
         if (EntityTypeUtils.burnsUnderSun(disgType))
-            this.flag |= burnsUnderSun;
+            this.abilityFlag |= burnsUnderSun;
 
         if (EntityTypeUtils.alwaysNightVision(disgType))
-            this.flag |= alwaysNightVision;
+            this.abilityFlag |= alwaysNightVision;
 
         if (EntityTypeUtils.canFly(disgType))
-            this.flag |= canFly;
+            this.abilityFlag |= canFly;
+
+        this.hasSkill = switch (disgType)
+                {
+                    case ENDERMAN, ENDER_DRAGON, GHAST, BLAZE, WITHER, PLAYER,
+                            ARMOR_STAND, CREEPER, SHULKER, ELDER_GUARDIAN, DOLPHIN -> true;
+                    default -> false;
+                };
 
         //更新冷却
         defaultCooldown = switch (disgType)
@@ -154,9 +177,75 @@ public class DisguiseState
         };
 
         abilityCooldown = 40;
+
+        //更新盔甲存储
+        if (disgType.equals(EntityType.PLAYER) || disgType.equals(EntityType.ARMOR_STAND))
+        {
+            var watcher = disguise.getWatcher();
+            defaultArmors = watcher.getArmor();
+
+            var itemInMainhand = watcher.getItemInMainHand();
+            var itemInOffhand = watcher.getItemInOffHand();
+            handItems = new ItemStack[]
+            {
+                    itemInMainhand == null ? air : itemInMainhand,
+                    itemInOffhand == null ? air : itemInOffhand
+            };
+
+            //更新一遍确保与目标伪装一致
+            updateEquipment();
+        }
     }
 
-    //region flag
+    /**
+     * 盔甲存储（适用于盔甲架和玩家伪装）
+     */
+    @Nullable
+    private ItemStack[] defaultArmors;
+
+    @Nullable
+    private ItemStack[] handItems;
+
+    private static final ItemStack air = new ItemStack(Material.AIR);
+
+    //用null会显示玩家自己的装备
+    private final ItemStack[] fallbackArmorStack = new ItemStack[]{ null, null, null, null };
+
+    private final ItemStack[] emptyHandItems = new ItemStack[]{ null, null };
+
+    private boolean showDefaultItems = true;
+
+    /**
+     * 切换默认装备是否可见
+     * @return 是否成功？
+     */
+    public boolean toggleDefaultArmors()
+    {
+        if (defaultArmors == null) throw new RuntimeException("默认盔甲显示对此伪装不可用");
+
+        //如果伪装没有任何默认装备，返回false
+        if (Arrays.equals(defaultArmors, fallbackArmorStack)
+            && Arrays.equals(handItems, emptyHandItems)) return false;
+
+        showDefaultItems = !showDefaultItems;
+        updateEquipment();
+
+        return showDefaultItems;
+    }
+
+    /**
+     * 更新伪装的盔甲显示
+     */
+    private void updateEquipment()
+    {
+        var watcher = disguise.getWatcher();
+
+        watcher.setArmor(showDefaultItems ? defaultArmors : fallbackArmorStack);
+        watcher.setItemInMainHand(showDefaultItems ? handItems[0] : emptyHandItems[0]);
+        watcher.setItemInOffHand(showDefaultItems ? handItems[1] : emptyHandItems[1]);
+    }
+
+    //region 被动技能
     public static final short canBreatheUnderWater = 1 << 0;
     public static final short hasFireResistance = 1 << 1;
     public static final short canFly = 1 << 2;
@@ -164,9 +253,14 @@ public class DisguiseState
     public static final short takesDamageFromWater = 1 << 4;
     public static final short alwaysNightVision = 1 << 5;
 
-    public boolean isFlagSet(short value)
+    /**
+     * 检查某个被动能力是否设置
+     * @param value Flag
+     * @return 是否设置
+     */
+    public boolean isAbilityFlagSet(short value)
     {
-        return (flag & value) == value;
+        return (abilityFlag & value) == value;
     }
-    //endregion flag
+    //endregion abilityFlag
 }
