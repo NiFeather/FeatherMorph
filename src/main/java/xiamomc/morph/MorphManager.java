@@ -124,6 +124,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         //workaround: 伪装不会主动检测玩家有没有发光
         watcher.setGlowing(player.isGlowing());
 
+        watcher.setFlyingWithElytra(player.isGliding());
+
         //workaround: 复制出来的伪装会忽略玩家Pose
         if (state.isShouldHandlePose())
             watcher.setEntityPose(DisguiseUtils.toEntityPose(player.getPose()));
