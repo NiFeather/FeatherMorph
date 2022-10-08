@@ -3,6 +3,7 @@ package xiamomc.morph.commands;
 import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -16,17 +17,35 @@ import xiamomc.pluginbase.Command.IPluginCommand;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class MorphCommand extends MorphPluginObject implements IPluginCommand
 {
     @Resolved
     private MorphManager morphManager;
 
+    private final Map<UUID, Long> map = new ConcurrentHashMap<>();
+
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args)
     {
         if (sender instanceof Player player)
         {
+            //伪装冷却
+            var lastMorph = map.get(player.getUniqueId());
+            var currentTick = Plugin.getCurrentTick();
+
+            if (lastMorph != null && currentTick - lastMorph <= 20)
+            {
+                sender.sendMessage(MessageUtils.prefixes(player, Component.translatable("请等一会再进行伪装").color(NamedTextColor.RED)));
+
+                return true;
+            }
+
+            map.put(player.getUniqueId(), currentTick);
+
             if (args.length >= 1)
             {
                 var key = args[0];

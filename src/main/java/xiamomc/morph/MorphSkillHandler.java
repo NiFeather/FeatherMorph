@@ -161,9 +161,7 @@ public class MorphSkillHandler extends MorphPluginObject
                 //对远古守卫者的技能进行额外限制
                 var lastActivate = elderGuardianCoolDownTraceMap.get(player.getUniqueId());
 
-                if (Objects.isNull(lastActivate)) lastActivate = -32767L;
-
-                if (Plugin.getCurrentTick() - lastActivate < state.getDefaultCooldown())
+                if (lastActivate != null && Plugin.getCurrentTick() - lastActivate < state.getDefaultCooldown())
                 {
                     sendDenyMessageToPlayer(player, Component.translatable("距离上次使用远古守卫者的技能不足1分钟"));
                     state.setAbilityCooldown(20);
