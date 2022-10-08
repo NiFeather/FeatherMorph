@@ -20,6 +20,7 @@ import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.interfaces.IManagePlayerData;
 import xiamomc.morph.interfaces.IManageRequests;
 import xiamomc.morph.misc.*;
+import xiamomc.morph.skills.*;
 import xiamomc.morph.storage.offlinestore.OfflineDisguiseState;
 import xiamomc.morph.storage.offlinestore.OfflineStorageManager;
 import xiamomc.morph.storage.playerdata.PlayerDataManager;
@@ -48,6 +49,20 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     private void load()
     {
         this.addSchedule(c -> update());
+
+        skillHandler.registerSkills(List.of(
+                new ArmorStandMorphSkill(),
+                new BlazeMorphSkill(),
+                new CreeperMorphSkill(),
+                new DolphinMorphSkill(),
+                new ElderGuardianMorphSkill(),
+                new EnderDragonMorphSkill(),
+                new EndermanMorphSkill(),
+                new GhastMorphSkill(),
+                new PlayerMorphSkill(),
+                new ShulkerMorphSkill(),
+                new WitherMorphSkill()
+        ));
     }
 
     private void update()
@@ -121,7 +136,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         //更新actionbar信息
         player.sendActionBar(MessageUtils.prefixes(player, Component.translatable("正伪装为")
                 .append(state.getDisplayName())
-                .color(state.hasSkill()
+                .color(skillHandler.hasSkill(disguise.getType().getEntityType())
                         ? (state.getAbilityCooldown() <= 0 ? TextColor.fromHexString("#8fe98d") : TextColor.fromHexString("#eeb565"))
                         : TextColor.fromHexString("#f0f0f0"))));
 

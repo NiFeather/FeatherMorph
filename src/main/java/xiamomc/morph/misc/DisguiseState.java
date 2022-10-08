@@ -77,8 +77,6 @@ public class DisguiseState
      */
     private int abilityCooldown = 0;
 
-    private int defaultCooldown;
-
     public int getAbilityCooldown()
     {
         return abilityCooldown;
@@ -89,16 +87,6 @@ public class DisguiseState
         abilityCooldown = value;
     }
 
-    public void resetCooldown()
-    {
-        abilityCooldown = defaultCooldown;
-    }
-
-    public int getDefaultCooldown()
-    {
-        return defaultCooldown;
-    }
-
     /**
      * 伪装被动技能Flag
      */
@@ -106,15 +94,6 @@ public class DisguiseState
     public short getAbilityFlag()
     {
         return abilityFlag;
-    }
-
-    /**
-     * 伪装主动技能Flag
-     */
-    private boolean hasSkill;
-    public boolean hasSkill()
-    {
-        return hasSkill;
     }
 
     /**
@@ -183,24 +162,7 @@ public class DisguiseState
         if (EntityTypeUtils.hasSpeedBoost(disgType))
             this.abilityFlag |= hasSpeedBoost;
 
-        this.hasSkill = switch (disgType)
-                {
-                    case ENDERMAN, ENDER_DRAGON, GHAST, BLAZE, WITHER, PLAYER,
-                            ARMOR_STAND, CREEPER, SHULKER, ELDER_GUARDIAN, DOLPHIN -> true;
-                    default -> false;
-                };
-
-        //更新冷却
-        defaultCooldown = switch (disgType)
-        {
-            case ELDER_GUARDIAN -> 1200;
-            case ENDER_DRAGON -> 100;
-            case ENDERMAN, GHAST -> 40;
-            case BLAZE, WITHER -> 10;
-            case SHULKER, DOLPHIN -> 80;
-            default -> 20;
-        };
-
+        //设置初始CD
         abilityCooldown = 40;
 
         supportsDisguisedItems = disgType.equals(EntityType.PLAYER) || disgType.equals(EntityType.ARMOR_STAND);
