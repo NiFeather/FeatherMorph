@@ -45,6 +45,18 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
     private final MorphSkillHandler skillHandler = new MorphSkillHandler();
 
+    private boolean allowChatOverride = false;
+
+    public boolean allowChatOverride()
+    {
+        return allowChatOverride;
+    }
+
+    public void setChatOverride(boolean val)
+    {
+        allowChatOverride = val;
+    }
+
     @Initializer
     private void load()
     {

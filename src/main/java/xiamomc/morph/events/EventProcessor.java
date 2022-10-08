@@ -1,6 +1,7 @@
 package xiamomc.morph.events;
 
 import dev.geco.gsit.api.event.*;
+import io.papermc.paper.event.player.AsyncChatEvent;
 import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.utilities.DisguiseUtilities;
 import net.kyori.adventure.text.Component;
@@ -29,6 +30,7 @@ import xiamomc.morph.commands.MorphCommandHelper;
 import xiamomc.morph.misc.DisguiseUtils;
 import xiamomc.morph.misc.EntityTypeUtils;
 import xiamomc.morph.misc.MessageUtils;
+import xiamomc.morph.misc.MorphChatRenderer;
 import xiamomc.pluginbase.Annotations.Resolved;
 
 import java.util.ArrayList;
@@ -90,6 +92,14 @@ public class EventProcessor extends MorphPluginObject implements Listener
     public void onPlayerDeath(PlayerDeathEvent e)
     {
         morphs.unMorph(e.getPlayer());
+    }
+
+    @EventHandler
+    public void onChat(AsyncChatEvent e)
+    {
+        //workaround: ChatManager与我们的聊天覆盖八字不和，只能用自己的Renderer
+        if (morphs.allowChatOverride())
+            e.renderer(new MorphChatRenderer());
     }
 
     @EventHandler

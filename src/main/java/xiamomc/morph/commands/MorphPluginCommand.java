@@ -32,7 +32,8 @@ public class MorphPluginCommand extends MorphSubCommandHandler
             new ToggleSelfSubCommand(),
             new QuerySubCommand(),
             new QueryAllSubCommand(),
-            new DisguiseManageSubCommand()
+            new DisguiseManageSubCommand(),
+            new ChatOverrideSubCommand()
     );
 
     @Override
