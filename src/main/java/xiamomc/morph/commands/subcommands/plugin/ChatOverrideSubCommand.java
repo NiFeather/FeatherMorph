@@ -37,6 +37,6 @@ public class ChatOverrideSubCommand extends MorphPluginObject implements ISubCom
     @Override
     public @Nullable String getHelpMessage()
     {
-        return "获取或设置聊天覆盖状态";
+        return "查看服务器的聊天覆盖状态";
     }
 }

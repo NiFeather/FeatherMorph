@@ -23,4 +23,6 @@ commands:
 permissions:
   xiamomc.morph.chatoverride:
     default: true
+    children:
+      xiamomc.morph.chatoverride.query: true
 
