@@ -8,9 +8,6 @@ import xiamomc.pluginbase.XiaMoJavaPlugin;
 
 public final class MorphPlugin extends XiaMoJavaPlugin
 {
-
-    private static MorphPlugin instance;
-
     public static String getMorphNameSpace()
     {
         return "morphplugin";
@@ -24,9 +21,6 @@ public final class MorphPlugin extends XiaMoJavaPlugin
 
     public MorphPlugin()
     {
-        if (instance != null) throw new RuntimeException("单实例插件");
-
-        instance = this;
     }
 
     private final CommandHelper<MorphPlugin> cmdHelper = new MorphCommandHelper();

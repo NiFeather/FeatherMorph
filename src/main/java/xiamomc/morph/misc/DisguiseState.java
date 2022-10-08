@@ -174,6 +174,15 @@ public class DisguiseState
         if (EntityTypeUtils.canFly(disgType))
             this.abilityFlag |= canFly;
 
+        if (EntityTypeUtils.hasJumpBoost(disgType))
+            this.abilityFlag |= hasJumpBoost;
+
+        if (EntityTypeUtils.hasSmallJumpBoost(disgType))
+            this.abilityFlag |= hasSmallJumpBoost;
+
+        if (EntityTypeUtils.hasSpeedBoost(disgType))
+            this.abilityFlag |= hasSpeedBoost;
+
         this.hasSkill = switch (disgType)
                 {
                     case ENDERMAN, ENDER_DRAGON, GHAST, BLAZE, WITHER, PLAYER,
@@ -346,6 +355,9 @@ public class DisguiseState
     public static final short burnsUnderSun = 1 << 3;
     public static final short takesDamageFromWater = 1 << 4;
     public static final short alwaysNightVision = 1 << 5;
+    public static final short hasJumpBoost = 1 << 6;
+    public static final short hasSmallJumpBoost = 1 << 7;
+    public static final short hasSpeedBoost = 1 << 8;
 
     /**
      * 检查某个被动能力是否设置

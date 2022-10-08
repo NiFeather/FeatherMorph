@@ -133,4 +133,19 @@ public class EntityTypeUtils
         return type == EntityType.BAT
                 || type == EntityType.ENDERMAN;
     }
+
+    public static boolean hasJumpBoost(EntityType type)
+    {
+        return type == EntityType.MAGMA_CUBE;
+    }
+
+    public static boolean hasSmallJumpBoost(EntityType type)
+    {
+        return type == EntityType.RABBIT;
+    }
+
+    public static boolean hasSpeedBoost(EntityType type)
+    {
+        return type == EntityType.HORSE;
+    }
 }

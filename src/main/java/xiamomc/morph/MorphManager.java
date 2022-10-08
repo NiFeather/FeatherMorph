@@ -42,7 +42,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
     private final OfflineStorageManager offlineStorage = new OfflineStorageManager();
 
-    private final MorphSkillHandler abilityHandler = new MorphSkillHandler();
+    private final MorphSkillHandler skillHandler = new MorphSkillHandler();
 
     @Initializer
     private void load()
@@ -103,6 +103,9 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     private final PotionEffect conduitEffect = new PotionEffect(PotionEffectType.CONDUIT_POWER, 20, 0);
     private final PotionEffect nightVisionEffect = new PotionEffect(PotionEffectType.NIGHT_VISION, 300, 0);
     private final PotionEffect fireResistance = new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 20, 0);
+    private final PotionEffect jumpBoostEffect = new PotionEffect(PotionEffectType.JUMP, 5, 1);
+    private final PotionEffect jumpBoostEffectSmall = new PotionEffect(PotionEffectType.JUMP, 5, 0);
+    private final PotionEffect speedEffect = new PotionEffect(PotionEffectType.SPEED, 5, 2);
 
     /**
      * 更新伪装状态
@@ -163,6 +166,14 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             player.setFireTicks(200);
         }
 
+        if (state.isAbilityFlagSet(DisguiseState.hasJumpBoost))
+            player.addPotionEffect(jumpBoostEffect);
+        else if (state.isAbilityFlagSet(DisguiseState.hasSmallJumpBoost))
+            player.addPotionEffect(jumpBoostEffectSmall);
+
+        if (state.isAbilityFlagSet(DisguiseState.hasSpeedBoost))
+            player.addPotionEffect(speedEffect);
+
         if (state.isAbilityFlagSet(DisguiseState.alwaysNightVision))
             player.addPotionEffect(nightVisionEffect);
 
@@ -171,7 +182,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
     public void executeDisguiseAbility(Player player)
     {
-        abilityHandler.executeDisguiseAbility(player);
+        skillHandler.executeDisguiseAbility(player);
     }
 
     public List<DisguiseState> getDisguisedPlayers()
