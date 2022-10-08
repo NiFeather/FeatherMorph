@@ -148,6 +148,8 @@ public class OfflineStorageManager extends MorphPluginObject implements IManageO
                 }
             }
 
+            saveConfiguration();
+
             return state;
         }
 

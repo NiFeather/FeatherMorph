@@ -270,7 +270,7 @@ public class DisguiseState
 
     private final ItemStack[] emptyHandItems = new ItemStack[]{ null, null };
 
-    private boolean showDisguisedItems = true;
+    private boolean showDisguisedItems = false;
 
     private boolean supportsDisguisedItems = false;
 
@@ -408,7 +408,8 @@ public class DisguiseState
 
         var state = new DisguiseState(player, offlineState.disguise, offlineState.shouldHandlePose);
 
-        state.setShowingDisguisedItems(offlineState.showingDisguisedItems);
+        if (state.supportsDisguisedItems)
+            state.setShowingDisguisedItems(offlineState.showingDisguisedItems);
 
         return state;
     }
