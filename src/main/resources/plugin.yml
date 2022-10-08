@@ -20,3 +20,7 @@ commands:
   mmorph:
     usage: 'todo'
 
+permissions:
+  xiamomc.morph.chatoverride:
+    default: true
+
