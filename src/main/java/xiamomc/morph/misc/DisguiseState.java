@@ -289,13 +289,15 @@ public class DisguiseState
      */
     public void setShowingDisguisedItems(boolean value)
     {
-        if (!supportsDisguisedItems) throw new RuntimeException("伪装对此状态不可用");
+        if (!supportsDisguisedItems) throw new RuntimeException("伪装物品对此状态不可用");
 
-        //如果伪装没有任何默认装备，返回false
+        if (showDisguisedItems == value) return;
+
+        //如果伪装没有任何默认装备，永远显示玩家自己的伪装
         if (value && Arrays.equals(defaultArmors, emptyArmorStack)
                   && Arrays.equals(handItems, emptyHandItems))
         {
-            return;
+            value = false;
         }
 
         var watcher = disguise.getWatcher();
