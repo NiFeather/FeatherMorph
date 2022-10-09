@@ -27,11 +27,14 @@ import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.abilities.AbilityFlag;
 import xiamomc.morph.commands.MorphCommandHelper;
+import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.misc.DisguiseUtils;
 import xiamomc.morph.misc.EntityTypeUtils;
 import xiamomc.morph.misc.MessageUtils;
 import xiamomc.morph.misc.MorphChatRenderer;
+import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
+import xiamomc.pluginbase.Configuration.ConfigNode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -114,6 +117,31 @@ public class EventProcessor extends MorphPluginObject implements Listener
         }
     }
 
+    @Resolved
+    private MorphConfigManager config;
+
+    private final ConfigNode allowHeadMorphNode = ConfigNode.create().Append("allowHeadMorph");
+
+    private boolean allowHeadMorph;
+    private void setAllowHeadMorph(boolean val)
+    {
+        if (allowHeadMorph == val) return;
+
+        allowHeadMorph = val;
+        config.set(allowHeadMorphNode, val);
+    }
+
+    @Initializer
+    private void load()
+    {
+        config.onConfigRefresh(c -> onConfigRefresh(), true);
+    }
+
+    private void onConfigRefresh()
+    {
+        setAllowHeadMorph(config.getOrDefault(Boolean.class, allowHeadMorphNode, true));
+    }
+
     @EventHandler
     public void onPlayerRightClick(PlayerInteractEvent e)
     {
@@ -129,6 +157,13 @@ public class EventProcessor extends MorphPluginObject implements Listener
                 //右键玩家头颅：快速伪装
                 case PLAYER_HEAD ->
                 {
+                    if (!allowHeadMorph)
+                    {
+                        player.sendMessage(MessageUtils.prefixes(player, Component.translatable("此功能已被禁用").color(NamedTextColor.RED)));
+
+                        return;
+                    }
+
                     if (!morphs.canMorph(player))
                     {
                         player.sendMessage(MessageUtils.prefixes(player, Component.translatable("请等一会再尝试伪装").color(NamedTextColor.RED)));

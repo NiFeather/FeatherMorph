@@ -6,6 +6,7 @@ import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
+import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.misc.MessageUtils;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Command.ISubCommand;
@@ -34,12 +35,17 @@ public class ReloadSubCommand extends MorphPluginObject implements ISubCommand
     @Resolved
     private MorphManager morphManager;
 
+    @Resolved
+    private MorphConfigManager config;
+
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull String[] args)
     {
         if (sender.hasPermission(getPermissionRequirement()))
         {
             morphManager.reloadConfiguration();
+            config.reload();
+
             sender.sendMessage(MessageUtils.prefixes(sender, Component.text("重载完成！")));
         }
         else

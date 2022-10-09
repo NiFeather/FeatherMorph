@@ -1,9 +1,13 @@
 package xiamomc.morph;
 
 import org.bukkit.Bukkit;
+import org.slf4j.LoggerFactory;
 import xiamomc.morph.commands.MorphCommandHelper;
+import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.events.EventProcessor;
 import xiamomc.pluginbase.Command.CommandHelper;
+import xiamomc.pluginbase.Configuration.ConfigNode;
+import xiamomc.pluginbase.Configuration.PluginConfigManager;
 import xiamomc.pluginbase.XiaMoJavaPlugin;
 
 public final class MorphPlugin extends XiaMoJavaPlugin
@@ -36,6 +40,7 @@ public final class MorphPlugin extends XiaMoJavaPlugin
         dependencyManager.Cache(this);
         dependencyManager.Cache(morphManager = new MorphManager());
         dependencyManager.Cache(cmdHelper);
+        dependencyManager.CacheAs(MorphConfigManager.class, new MorphConfigManager(this));
 
         this.schedule(c ->
         {

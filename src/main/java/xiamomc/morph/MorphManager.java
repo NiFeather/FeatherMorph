@@ -22,6 +22,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.abilities.AbilityFlag;
 import xiamomc.morph.abilities.AbilityHandler;
+import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.interfaces.IManagePlayerData;
 import xiamomc.morph.interfaces.IManageRequests;
 import xiamomc.morph.misc.*;
@@ -31,6 +32,8 @@ import xiamomc.morph.storage.offlinestore.OfflineStorageManager;
 import xiamomc.morph.storage.playerdata.PlayerDataManager;
 import xiamomc.morph.storage.playerdata.PlayerMorphConfiguration;
 import xiamomc.pluginbase.Annotations.Initializer;
+import xiamomc.pluginbase.Annotations.Resolved;
+import xiamomc.pluginbase.Configuration.ConfigNode;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -60,17 +63,26 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         return allowChatOverride;
     }
 
+    private final ConfigNode chatOverrideConfigNode = ConfigNode.create().Append("allowChatOverride");
+
     public void setChatOverride(boolean val)
     {
         allowChatOverride = val;
+
+        config.set(chatOverrideConfigNode, val);
     }
 
     //endregion 聊天覆盖
+
+    @Resolved
+    private MorphConfigManager config;
 
     @Initializer
     private void load()
     {
         this.addSchedule(c -> update());
+
+        config.onConfigRefresh(c -> this.onConfigRefresh(), true);
 
         Dependencies.Cache(abilityHandler);
 
@@ -99,6 +111,11 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         abilityHandler.registerAbility(EntityTypeUtils.hasSpeedBoost(), AbilityFlag.HAS_SPEED_BOOST);
         abilityHandler.registerAbility(EntityTypeUtils.noFallDamage(), AbilityFlag.NO_FALL_DAMAGE);
         abilityHandler.registerAbility(EntityTypeUtils.hasFeatherFalling(), AbilityFlag.HAS_FEATHER_FALLING);
+    }
+
+    private void onConfigRefresh()
+    {
+        setChatOverride(config.getOrDefault(Boolean.class, chatOverrideConfigNode, false));
     }
 
     private void update()
