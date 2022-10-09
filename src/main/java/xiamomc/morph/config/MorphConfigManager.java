@@ -12,16 +12,39 @@ public class MorphConfigManager extends PluginConfigManager
         super(plugin);
     }
 
-    public <T> T getOrDefault(Class<T> type, ConfigNode node, @Nullable T defaultValue)
+    public <T> T getOrDefault(Class<T> type, ConfigOption option, @Nullable T defaultValue)
     {
-        var val = super.get(type, node);
+        var val = get(type, option);
 
         if (val == null)
         {
-            set(node, defaultValue);
+            set(option, defaultValue);
             return defaultValue;
         }
 
         return val;
+    }
+
+    public <T> T getOrDefault(Class<T> type, ConfigOption option)
+    {
+        var val = get(type, option);
+
+        if (val == null)
+        {
+            set(option, option.defaultValue);
+            return (T) option.defaultValue;
+        }
+
+        return val;
+    }
+
+    public <T> T get(Class<T> type, ConfigOption option)
+    {
+        return get(type, option.node);
+    }
+
+    public void set(ConfigOption option, Object val)
+    {
+        this.set(option.node, val);
     }
 }

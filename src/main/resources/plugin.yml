@@ -4,6 +4,8 @@ main: xiamomc.morph.MorphPlugin
 api-version: 1.19
 prefix: MorphPlugin
 depend: [ 'LibsDisguises', 'GSit', 'PluginBase' ]
+authors:
+  - "MATRIX-feather"
 
 commands:
   morph:

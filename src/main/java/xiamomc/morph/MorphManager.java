@@ -22,6 +22,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.abilities.AbilityFlag;
 import xiamomc.morph.abilities.AbilityHandler;
+import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.interfaces.IManagePlayerData;
 import xiamomc.morph.interfaces.IManageRequests;
@@ -63,13 +64,11 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         return allowChatOverride;
     }
 
-    private final ConfigNode chatOverrideConfigNode = ConfigNode.create().Append("allowChatOverride");
-
     public void setChatOverride(boolean val)
     {
         allowChatOverride = val;
 
-        config.set(chatOverrideConfigNode, val);
+        config.set(ConfigOption.ALLOW_CHAT_OVERRIDE, val);
     }
 
     //endregion 聊天覆盖
@@ -115,7 +114,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
     private void onConfigRefresh()
     {
-        setChatOverride(config.getOrDefault(Boolean.class, chatOverrideConfigNode, false));
+        setChatOverride(config.getOrDefault(Boolean.class, ConfigOption.ALLOW_CHAT_OVERRIDE, false));
     }
 
     private void update()

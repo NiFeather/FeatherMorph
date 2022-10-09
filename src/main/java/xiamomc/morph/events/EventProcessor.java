@@ -27,6 +27,7 @@ import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.abilities.AbilityFlag;
 import xiamomc.morph.commands.MorphCommandHelper;
+import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.misc.DisguiseUtils;
 import xiamomc.morph.misc.EntityTypeUtils;
@@ -34,7 +35,6 @@ import xiamomc.morph.misc.MessageUtils;
 import xiamomc.morph.misc.MorphChatRenderer;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
-import xiamomc.pluginbase.Configuration.ConfigNode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -101,8 +101,19 @@ public class EventProcessor extends MorphPluginObject implements Listener
     public void onChat(AsyncChatEvent e)
     {
         //workaround: ChatManager与我们的聊天覆盖八字不和，只能用自己的Renderer
-        if (morphs.allowChatOverride())
+        if (morphs.allowChatOverride() && useCustomRenderer)
             e.renderer(new MorphChatRenderer());
+        else
+        {
+            var player = e.getPlayer();
+            var state = morphs.getDisguiseStateFor(player);
+
+            if (state != null && state.getDisguise().isPlayerDisguise())
+            {
+                //noinspection OverrideOnly
+                e.renderer().render(player, state.getDisplayName(), e.message(), player);
+            }
+        }
     }
 
     @EventHandler
@@ -120,16 +131,16 @@ public class EventProcessor extends MorphPluginObject implements Listener
     @Resolved
     private MorphConfigManager config;
 
-    private final ConfigNode allowHeadMorphNode = ConfigNode.create().Append("allowHeadMorph");
-
     private boolean allowHeadMorph;
     private void setAllowHeadMorph(boolean val)
     {
         if (allowHeadMorph == val) return;
 
         allowHeadMorph = val;
-        config.set(allowHeadMorphNode, val);
+        config.set(ConfigOption.ALLOW_HEAD_MORPH, val);
     }
+
+    private boolean useCustomRenderer;
 
     @Initializer
     private void load()
@@ -139,7 +150,9 @@ public class EventProcessor extends MorphPluginObject implements Listener
 
     private void onConfigRefresh()
     {
-        setAllowHeadMorph(config.getOrDefault(Boolean.class, allowHeadMorphNode, true));
+        setAllowHeadMorph(config.getOrDefault(Boolean.class, ConfigOption.ALLOW_HEAD_MORPH, true));
+
+        useCustomRenderer = config.getOrDefault(Boolean.class, ConfigOption.CHAT_OVERRIDE_USE_CUSTOM_RENDERER, true);
     }
 
     @EventHandler

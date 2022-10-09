@@ -1,10 +1,12 @@
 package xiamomc.morph;
 
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.slf4j.LoggerFactory;
 import xiamomc.morph.commands.MorphCommandHelper;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.events.EventProcessor;
+import xiamomc.morph.misc.MessageUtils;
 import xiamomc.pluginbase.Command.CommandHelper;
 import xiamomc.pluginbase.Configuration.ConfigNode;
 import xiamomc.pluginbase.Configuration.PluginConfigManager;
@@ -41,6 +43,8 @@ public final class MorphPlugin extends XiaMoJavaPlugin
         dependencyManager.Cache(morphManager = new MorphManager());
         dependencyManager.Cache(cmdHelper);
         dependencyManager.CacheAs(MorphConfigManager.class, new MorphConfigManager(this));
+        dependencyManager.Cache(new MessageUtils());
+        dependencyManager.Cache(MiniMessage.miniMessage());
 
         this.schedule(c ->
         {
