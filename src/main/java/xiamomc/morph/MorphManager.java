@@ -488,6 +488,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         DisguiseUtils.addTrace(disguise);
 
         var watcher = disguise.getWatcher();
+        var disguiseType = disguise.getType();
 
         //workaround: 伪装已死亡的LivingEntity
         if (targetEntity instanceof LivingEntity living && living.getHealth() <= 0)
@@ -516,10 +517,9 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         if (shouldHandlePose && targetEntity instanceof Player targetPlayer)
         {
             var theirDisguise = DisguiseAPI.getDisguise(targetPlayer);
-            var ourDisguiseType = disguise.getType();
 
             //如果是同类伪装，则复制盔甲
-            if (ourDisguiseType.equals(theirDisguise.getType()))
+            if (disguiseType.equals(theirDisguise.getType()))
             {
                 if (!(disguise instanceof PlayerDisguise ourPlayerDisguise) || !(theirDisguise instanceof PlayerDisguise theirPlayerDisguise)
                         || Objects.equals(ourPlayerDisguise.getName(), theirPlayerDisguise.getName()))
@@ -585,10 +585,10 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         disguise.setSelfDisguiseVisible(DisguiseAPI.isViewSelfToggled(sourcePlayer));
 
         var config = getPlayerConfiguration(sourcePlayer);
-        if (!config.shownMorphAbilityHint)
+        if (!config.shownMorphAbilityHint && skillHandler.hasSkill(disguiseType.getEntityType()))
         {
             sourcePlayer.sendMessage(MessageUtils.prefixes(sourcePlayer,
-                    Component.translatable("PS: 手持胡萝卜钓竿蹲下右键可以使用当前伪装的主动技能")));
+                    Component.translatable("小提示: 手持胡萝卜钓竿蹲下右键可以使用当前伪装的主动技能")));
             config.shownMorphAbilityHint = true;
         }
 
