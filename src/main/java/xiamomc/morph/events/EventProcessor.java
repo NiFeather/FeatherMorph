@@ -1,10 +1,12 @@
 package xiamomc.morph.events;
 
+import com.comphenix.protocol.wrappers.WrappedGameProfile;
 import dev.geco.gsit.api.event.*;
 import io.papermc.paper.event.player.AsyncChatEvent;
 import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
 import me.libraryaddict.disguise.utilities.DisguiseUtilities;
+import me.libraryaddict.disguise.utilities.reflection.ReflectionManager;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -23,6 +25,7 @@ import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 import org.bukkit.event.server.TabCompleteEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.profile.PlayerTextures;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.abilities.AbilityFlag;
@@ -38,6 +41,9 @@ import xiamomc.pluginbase.Annotations.Resolved;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class EventProcessor extends MorphPluginObject implements Listener
 {
@@ -155,6 +161,8 @@ public class EventProcessor extends MorphPluginObject implements Listener
         useCustomRenderer = config.getOrDefault(Boolean.class, ConfigOption.CHAT_OVERRIDE_USE_CUSTOM_RENDERER, true);
     }
 
+    private final Map<UUID, PlayerTextures> uuidPlayerTexturesMap = new ConcurrentHashMap<>();
+
     @EventHandler
     public void onPlayerRightClick(PlayerInteractEvent e)
     {
@@ -192,19 +200,37 @@ public class EventProcessor extends MorphPluginObject implements Listener
                         if (profile != null)
                         {
                             var name = profile.getName();
+                            var profileTexture = profile.getTextures();
+                            var playerUniqueId = player.getUniqueId();
 
                             if (state != null)
                             {
                                 var disguise = state.getDisguise();
 
-                                if (disguise.isPlayerDisguise() && ((PlayerDisguise) disguise).getName().equals(name))
+                                if (disguise instanceof PlayerDisguise playerDisguise
+                                        && playerDisguise.getName().equals(name)
+                                        && profileTexture.equals(uuidPlayerTexturesMap.get(playerUniqueId)))
                                 {
                                     morphs.unMorph(player);
+                                    uuidPlayerTexturesMap.remove(playerUniqueId);
                                     return;
                                 }
                             }
 
-                            morphs.morphEntityTypeAuto(player, "player:" + profile.getName(), player.getTargetEntity(5));
+                            if (morphs.morphEntityTypeAuto(player, "player:" + profile.getName(), player.getTargetEntity(5)))
+                            {
+                                //成功伪装后设置皮肤为头颅的皮肤
+                                var disguise = (PlayerDisguise) DisguiseAPI.getDisguise(player);
+                                var wrappedProfile = WrappedGameProfile.fromHandle(new MorphGameProfile(profile));
+
+                                var LDprofile = ReflectionManager.getGameProfileWithThisSkin(wrappedProfile.getUUID(), wrappedProfile.getName(), wrappedProfile);
+
+                                DisguiseAPI.addGameProfile(LDprofile.toString(), LDprofile);
+                                disguise.setSkin(LDprofile);
+                                DisguiseUtilities.removeGameProfile(LDprofile.toString());
+
+                                uuidPlayerTexturesMap.put(playerUniqueId, profileTexture);
+                            }
                         }
                         else
                             player.sendMessage(MessageUtils.prefixes(player, Component.text("无法使用此头颅伪装").color(NamedTextColor.RED)));

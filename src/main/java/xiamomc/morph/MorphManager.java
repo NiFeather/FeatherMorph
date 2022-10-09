@@ -334,7 +334,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                     Component.translatable("你尚未拥有此伪装")));
         }
 
-        return true;
+        return false;
     }
 
     /**
