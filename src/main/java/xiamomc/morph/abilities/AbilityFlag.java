@@ -1,0 +1,16 @@
+package xiamomc.morph.abilities;
+
+public enum AbilityFlag
+{
+    CAN_BREATHE_UNDER_WATER,
+    HAS_FIRE_RESISTANCE,
+    CAN_FLY,
+    BURNS_UNDER_SUN,
+    TAKES_DAMAGE_FROM_WATER,
+    ALWAYS_NIGHT_VISION,
+    HAS_JUMP_BOOST,
+    HAS_SMALL_JUMP_BOOST,
+    HAS_SPEED_BOOST,
+    HAS_FEATHER_FALLING,
+    NO_FALL_DAMAGE
+}

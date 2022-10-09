@@ -2,6 +2,8 @@ package xiamomc.morph.misc;
 
 import org.bukkit.entity.EntityType;
 
+import java.util.Set;
+
 public class EntityTypeUtils
 {
     public static boolean isZombiesHostile(EntityType type)
@@ -74,78 +76,66 @@ public class EntityTypeUtils
                 || isGolem(type);
     }
 
-    public static boolean canFly(EntityType type)
+    public static Set<EntityType> canFly()
     {
-        return type == EntityType.ALLAY
-                || type == EntityType.ENDER_DRAGON
-                || type == EntityType.BAT
-                || type == EntityType.BEE
-                || type == EntityType.BLAZE
-                || type == EntityType.GHAST
-                || type == EntityType.VEX
-                || type == EntityType.PHANTOM
-                || type == EntityType.WITHER;
+        return Set.of(EntityType.ALLAY, EntityType.ENDER_DRAGON,
+                EntityType.BAT, EntityType.BEE, EntityType.BLAZE,
+                EntityType.GHAST, EntityType.VEX, EntityType.PHANTOM, EntityType.WITHER);
     }
 
-    public static boolean hasFireResistance(EntityType type)
+    public static Set<EntityType> hasFireResistance()
     {
-        return type == EntityType.MAGMA_CUBE
-                || type == EntityType.BLAZE
-                || type == EntityType.WITHER_SKELETON
-                || type == EntityType.WITHER
-                || type == EntityType.STRIDER
-                || type == EntityType.ZOMBIFIED_PIGLIN
-                || type == EntityType.GHAST;
+        return Set.of(EntityType.MAGMA_CUBE, EntityType.BLAZE, EntityType.WITHER_SKELETON,
+                EntityType.WITHER, EntityType.STRIDER, EntityType.ZOMBIFIED_PIGLIN, EntityType.GHAST,
+                EntityType.WARDEN);
     }
 
-    public static boolean takesDamageFromWater(EntityType type)
+    public static Set<EntityType> takesDamageFromWater()
     {
-        return type == EntityType.ENDERMAN
-                || type == EntityType.BLAZE;
+        return Set.of(EntityType.ENDERMAN, EntityType.BLAZE);
     }
 
-    public static boolean canBreatheUnderWater(EntityType type)
+    public static Set<EntityType> canBreatheUnderWater()
     {
-        return type == EntityType.COD
-        || type == EntityType.SALMON
-        || type == EntityType.PUFFERFISH
-        || type == EntityType.TROPICAL_FISH
-        || type == EntityType.SQUID
-        || type == EntityType.GLOW_SQUID
-        || type == EntityType.AXOLOTL
-        || type == EntityType.GUARDIAN
-        || type == EntityType.ELDER_GUARDIAN
-        || type == EntityType.DOLPHIN;
+        return Set.of(EntityType.COD, EntityType.SALMON, EntityType.PUFFERFISH, EntityType.TROPICAL_FISH,
+                EntityType.SQUID, EntityType.GLOW_SQUID,
+                EntityType.AXOLOTL, EntityType.GUARDIAN, EntityType.ELDER_GUARDIAN, EntityType.DOLPHIN);
     }
 
-    public static boolean burnsUnderSun(EntityType type)
+    public static Set<EntityType> burnsUnderSun()
     {
-        return type == EntityType.ZOMBIE
-                || type == EntityType.ZOMBIE_VILLAGER
-                || type == EntityType.SKELETON
-                || type == EntityType.STRAY
-                || type == EntityType.PHANTOM
-                || type == EntityType.DROWNED;
+        return Set.of(EntityType.ZOMBIE, EntityType.ZOMBIE_VILLAGER,
+                EntityType.SKELETON, EntityType.STRAY,
+                EntityType.DROWNED, EntityType.PHANTOM);
     }
 
-    public static boolean alwaysNightVision(EntityType type)
+    public static Set<EntityType> alwaysNightVision()
     {
-        return type == EntityType.BAT
-                || type == EntityType.ENDERMAN;
+        return Set.of(EntityType.BAT, EntityType.ENDERMAN);
     }
 
-    public static boolean hasJumpBoost(EntityType type)
+    public static EntityType hasJumpBoost()
     {
-        return type == EntityType.MAGMA_CUBE;
+        return EntityType.MAGMA_CUBE;
     }
 
-    public static boolean hasSmallJumpBoost(EntityType type)
+    public static EntityType hasSmallJumpBoost()
     {
-        return type == EntityType.RABBIT;
+        return EntityType.RABBIT;
     }
 
-    public static boolean hasSpeedBoost(EntityType type)
+    public static EntityType hasSpeedBoost()
     {
-        return type == EntityType.HORSE;
+        return EntityType.HORSE;
+    }
+
+    public static EntityType noFallDamage()
+    {
+        return EntityType.IRON_GOLEM;
+    }
+
+    public static EntityType hasFeatherFalling()
+    {
+        return EntityType.CHICKEN;
     }
 }

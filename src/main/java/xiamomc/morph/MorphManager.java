@@ -1,7 +1,10 @@
 package xiamomc.morph;
 
 import me.libraryaddict.disguise.DisguiseAPI;
-import me.libraryaddict.disguise.disguisetypes.*;
+import me.libraryaddict.disguise.disguisetypes.Disguise;
+import me.libraryaddict.disguise.disguisetypes.DisguiseType;
+import me.libraryaddict.disguise.disguisetypes.MobDisguise;
+import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
 import me.libraryaddict.disguise.disguisetypes.watchers.ArmorStandWatcher;
 import me.libraryaddict.disguise.disguisetypes.watchers.LivingWatcher;
 import me.libraryaddict.disguise.utilities.DisguiseValues;
@@ -9,14 +12,16 @@ import me.libraryaddict.disguise.utilities.reflection.FakeBoundingBox;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
-import org.bukkit.*;
+import org.bukkit.GameMode;
+import org.bukkit.Location;
+import org.bukkit.Particle;
 import org.bukkit.entity.*;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xiamomc.morph.abilities.AbilityFlag;
+import xiamomc.morph.abilities.AbilityHandler;
 import xiamomc.morph.interfaces.IManagePlayerData;
 import xiamomc.morph.interfaces.IManageRequests;
 import xiamomc.morph.misc.*;
@@ -45,6 +50,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
     private final MorphSkillHandler skillHandler = new MorphSkillHandler();
 
+    private final AbilityHandler abilityHandler = new AbilityHandler();
+
     private boolean allowChatOverride = false;
 
     public boolean allowChatOverride()
@@ -62,6 +69,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     {
         this.addSchedule(c -> update());
 
+        Dependencies.Cache(abilityHandler);
+
         skillHandler.registerSkills(List.of(
                 new ArmorStandMorphSkill(),
                 new BlazeMorphSkill(),
@@ -75,6 +84,18 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 new ShulkerMorphSkill(),
                 new WitherMorphSkill()
         ));
+
+        abilityHandler.registerAbility(EntityTypeUtils.canFly(), AbilityFlag.CAN_FLY);
+        abilityHandler.registerAbility(EntityTypeUtils.hasFireResistance(), AbilityFlag.HAS_FIRE_RESISTANCE);
+        abilityHandler.registerAbility(EntityTypeUtils.takesDamageFromWater(), AbilityFlag.TAKES_DAMAGE_FROM_WATER);
+        abilityHandler.registerAbility(EntityTypeUtils.canBreatheUnderWater(), AbilityFlag.CAN_BREATHE_UNDER_WATER);
+        abilityHandler.registerAbility(EntityTypeUtils.burnsUnderSun(), AbilityFlag.BURNS_UNDER_SUN);
+        abilityHandler.registerAbility(EntityTypeUtils.alwaysNightVision(), AbilityFlag.ALWAYS_NIGHT_VISION);
+        abilityHandler.registerAbility(EntityTypeUtils.hasJumpBoost(), AbilityFlag.HAS_JUMP_BOOST);
+        abilityHandler.registerAbility(EntityTypeUtils.hasSmallJumpBoost(), AbilityFlag.HAS_SMALL_JUMP_BOOST);
+        abilityHandler.registerAbility(EntityTypeUtils.hasSpeedBoost(), AbilityFlag.HAS_SPEED_BOOST);
+        abilityHandler.registerAbility(EntityTypeUtils.noFallDamage(), AbilityFlag.NO_FALL_DAMAGE);
+        abilityHandler.registerAbility(EntityTypeUtils.hasFeatherFalling(), AbilityFlag.HAS_FEATHER_FALLING);
     }
 
     private void update()
@@ -126,14 +147,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         this.addSchedule(c -> update());
     }
 
-    private final PotionEffect waterBreathEffect = new PotionEffect(PotionEffectType.WATER_BREATHING, 20, 0);
-    private final PotionEffect conduitEffect = new PotionEffect(PotionEffectType.CONDUIT_POWER, 20, 0);
-    private final PotionEffect nightVisionEffect = new PotionEffect(PotionEffectType.NIGHT_VISION, 300, 0);
-    private final PotionEffect fireResistance = new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 20, 0);
-    private final PotionEffect jumpBoostEffect = new PotionEffect(PotionEffectType.JUMP, 5, 1);
-    private final PotionEffect jumpBoostEffectSmall = new PotionEffect(PotionEffectType.JUMP, 5, 0);
-    private final PotionEffect speedEffect = new PotionEffect(PotionEffectType.SPEED, 5, 2);
-
     /**
      * 更新伪装状态
      *
@@ -166,43 +179,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             watcher.setEntityPose(DisguiseUtils.toEntityPose(player.getPose()));
 
         //tick伪装行为
-        if (state.isAbilityFlagSet(DisguiseState.canBreatheUnderWater) && player.isInWaterOrRainOrBubbleColumn())
-        {
-            player.addPotionEffect(conduitEffect);
-            player.addPotionEffect(waterBreathEffect);
-        }
-
-        if (state.isAbilityFlagSet(DisguiseState.hasFireResistance))
-        {
-            player.addPotionEffect(fireResistance);
-        }
-
-        if (state.isAbilityFlagSet(DisguiseState.takesDamageFromWater) && player.isInWaterOrRainOrBubbleColumn())
-        {
-            player.damage(1);
-        }
-
-        if (state.isAbilityFlagSet(DisguiseState.burnsUnderSun)
-                && player.getWorld().getEnvironment().equals(World.Environment.NORMAL)
-                && player.getEquipment().getHelmet() == null
-                && player.getWorld().isDayTime()
-                && player.getWorld().isClearWeather()
-                && !player.isInWaterOrRainOrBubbleColumn()
-                && player.getLocation().getBlock().getLightFromSky() == 15)
-        {
-            player.setFireTicks(200);
-        }
-
-        if (state.isAbilityFlagSet(DisguiseState.hasJumpBoost))
-            player.addPotionEffect(jumpBoostEffect);
-        else if (state.isAbilityFlagSet(DisguiseState.hasSmallJumpBoost))
-            player.addPotionEffect(jumpBoostEffectSmall);
-
-        if (state.isAbilityFlagSet(DisguiseState.hasSpeedBoost))
-            player.addPotionEffect(speedEffect);
-
-        if (state.isAbilityFlagSet(DisguiseState.alwaysNightVision))
-            player.addPotionEffect(nightVisionEffect);
+        abilityHandler.handle(player, state);
 
         state.setAbilityCooldown(state.getAbilityCooldown() - 1);
     }
@@ -336,7 +313,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         var gamemodeAllowFlying = gamemode.equals(GameMode.CREATIVE) || gamemode.equals(GameMode.SPECTATOR);
 
         if (state == null) return gamemodeAllowFlying;
-        else return gamemodeAllowFlying || state.isAbilityFlagSet(DisguiseState.canFly);
+        else return gamemodeAllowFlying || state.isAbilityFlagSet(AbilityFlag.CAN_FLY);
     }
 
     private void setPlayerFlySpeed(Player player, EntityType type)

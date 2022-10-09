@@ -11,12 +11,17 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
+import xiamomc.morph.MorphPluginObject;
+import xiamomc.morph.abilities.AbilityFlag;
+import xiamomc.morph.abilities.AbilityHandler;
 import xiamomc.morph.storage.offlinestore.OfflineDisguiseState;
+import xiamomc.pluginbase.Annotations.Resolved;
 
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.UUID;
 
-public class DisguiseState
+public class DisguiseState extends MorphPluginObject
 {
     public DisguiseState(Player player, Disguise disguiseInstance, boolean isClone)
     {
@@ -90,8 +95,8 @@ public class DisguiseState
     /**
      * 伪装被动技能Flag
      */
-    private short abilityFlag;
-    public short getAbilityFlag()
+    private final EnumSet<AbilityFlag> abilityFlag = EnumSet.noneOf(AbilityFlag.class);
+    public EnumSet<AbilityFlag> getAbilityFlags()
     {
         return abilityFlag;
     }
@@ -109,6 +114,17 @@ public class DisguiseState
     {
         setDisguise(d, shouldHandlePose, true);
     }
+
+    public void setAbilities(@Nullable EnumSet<AbilityFlag> newAbilities)
+    {
+        abilityFlag.clear();
+
+        if (newAbilities != null)
+            abilityFlag.addAll(newAbilities);
+    }
+
+    @Resolved(shouldSolveImmediately = true)
+    private AbilityHandler abilityHandler;
 
     /**
      * 更新伪装
@@ -131,36 +147,8 @@ public class DisguiseState
                 : Component.translatable(d.getType().getEntityType().translationKey());
 
         //更新技能Flag
-        this.abilityFlag = 0;
-
         var disgType = d.getType().getEntityType();
-
-        if (EntityTypeUtils.canBreatheUnderWater(disgType))
-            this.abilityFlag |= canBreatheUnderWater;
-
-        if (EntityTypeUtils.hasFireResistance(disgType))
-            this.abilityFlag |= hasFireResistance;
-
-        if (EntityTypeUtils.takesDamageFromWater(disgType))
-            this.abilityFlag |= takesDamageFromWater;
-
-        if (EntityTypeUtils.burnsUnderSun(disgType))
-            this.abilityFlag |= burnsUnderSun;
-
-        if (EntityTypeUtils.alwaysNightVision(disgType))
-            this.abilityFlag |= alwaysNightVision;
-
-        if (EntityTypeUtils.canFly(disgType))
-            this.abilityFlag |= canFly;
-
-        if (EntityTypeUtils.hasJumpBoost(disgType))
-            this.abilityFlag |= hasJumpBoost;
-
-        if (EntityTypeUtils.hasSmallJumpBoost(disgType))
-            this.abilityFlag |= hasSmallJumpBoost;
-
-        if (EntityTypeUtils.hasSpeedBoost(disgType))
-            this.abilityFlag |= hasSpeedBoost;
+        setAbilities(abilityHandler.getFlagsFor(disgType));
 
         //设置初始CD
         abilityCooldown = 40;
@@ -311,24 +299,15 @@ public class DisguiseState
     }
 
     //region 被动技能
-    public static final short canBreatheUnderWater = 1 << 0;
-    public static final short hasFireResistance = 1 << 1;
-    public static final short canFly = 1 << 2;
-    public static final short burnsUnderSun = 1 << 3;
-    public static final short takesDamageFromWater = 1 << 4;
-    public static final short alwaysNightVision = 1 << 5;
-    public static final short hasJumpBoost = 1 << 6;
-    public static final short hasSmallJumpBoost = 1 << 7;
-    public static final short hasSpeedBoost = 1 << 8;
 
     /**
      * 检查某个被动能力是否设置
      * @param value Flag
      * @return 是否设置
      */
-    public boolean isAbilityFlagSet(short value)
+    public boolean isAbilityFlagSet(AbilityFlag value)
     {
-        return (abilityFlag & value) == value;
+        return abilityFlag.contains(value);
     }
     //endregion abilityFlag
 

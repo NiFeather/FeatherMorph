@@ -14,10 +14,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDeathEvent;
-import org.bukkit.event.entity.EntityTargetEvent;
-import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.entity.*;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -26,6 +23,7 @@ import org.bukkit.event.server.TabCompleteEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
+import xiamomc.morph.abilities.AbilityFlag;
 import xiamomc.morph.commands.MorphCommandHelper;
 import xiamomc.morph.misc.DisguiseUtils;
 import xiamomc.morph.misc.EntityTypeUtils;
@@ -100,6 +98,18 @@ public class EventProcessor extends MorphPluginObject implements Listener
         //workaround: ChatManager与我们的聊天覆盖八字不和，只能用自己的Renderer
         if (morphs.allowChatOverride())
             e.renderer(new MorphChatRenderer());
+    }
+
+    @EventHandler
+    public void onPlayerFall(EntityDamageEvent e)
+    {
+        if (e.getEntity() instanceof Player player && e.getCause().equals(EntityDamageEvent.DamageCause.FALL))
+        {
+            var state = morphs.getDisguiseStateFor(player);
+
+            if (state != null && state.isAbilityFlagSet(AbilityFlag.NO_FALL_DAMAGE))
+                e.setCancelled(true);
+        }
     }
 
     @EventHandler
