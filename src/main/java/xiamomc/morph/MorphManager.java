@@ -528,10 +528,9 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             if (disguise.getType().equals(DisguiseType.ARMOR_STAND))
                 ((ArmorStandWatcher) watcher).setShowArms(true);
         }
-
-        //如果此玩家伪装是复制的，并且目标玩家的伪装和我们的一样，那么复制他们的装备
-        if (shouldHandlePose && targetEntity instanceof Player targetPlayer)
+        else if (shouldHandlePose && targetEntity instanceof Player targetPlayer)
         {
+            //如果目标实体是玩家，并且此玩家伪装是复制的、目标玩家的伪装和我们的一样，那么复制他们的装备
             var theirDisguise = DisguiseAPI.getDisguise(targetPlayer);
 
             //如果是同类伪装，则复制盔甲
