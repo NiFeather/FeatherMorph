@@ -5,6 +5,7 @@ import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphPluginObject;
+import xiamomc.morph.commands.subcommands.plugin.management.ForceUnmorphSubCommand;
 import xiamomc.morph.commands.subcommands.plugin.management.GrantDisguiseSubCommand;
 import xiamomc.morph.commands.subcommands.plugin.management.RevokeDisguiseSubCommand;
 import xiamomc.pluginbase.Command.ISubCommand;
@@ -17,7 +18,8 @@ public class DisguiseManageSubCommand extends MorphPluginObject implements ISubC
 {
     private final List<ISubCommand> subCommands = List.of(
             new GrantDisguiseSubCommand(),
-            new RevokeDisguiseSubCommand()
+            new RevokeDisguiseSubCommand(),
+            new ForceUnmorphSubCommand()
     );
 
     @Override
