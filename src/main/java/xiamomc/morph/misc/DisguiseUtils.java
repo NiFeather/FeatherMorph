@@ -2,7 +2,13 @@ package xiamomc.morph.misc;
 
 import me.libraryaddict.disguise.disguisetypes.Disguise;
 import me.libraryaddict.disguise.disguisetypes.EntityPose;
+import me.libraryaddict.disguise.disguisetypes.FlagWatcher;
+import org.bukkit.Material;
+import org.bukkit.entity.Player;
 import org.bukkit.entity.Pose;
+import org.bukkit.inventory.ItemStack;
+
+import java.util.Arrays;
 
 public class DisguiseUtils
 {
@@ -30,5 +36,74 @@ public class DisguiseUtils
             case DYING -> EntityPose.DYING;
             default -> EntityPose.STANDING;
         };
+    }
+
+    /**
+     * 设置伪装的装备
+     * @param who 谁
+     * @param ourWatcher 自己伪装FlagWatcher
+     * @param theirWatcher 他们（who）伪装的FlagWatcher
+     */
+    public static void tryCopyArmorStack(Player who, FlagWatcher ourWatcher, FlagWatcher theirWatcher)
+    {
+        ourWatcher.setArmor(DisguiseUtils.getArmorStack(who, theirWatcher));
+
+        var handStack = DisguiseUtils.chooseStack(
+                DisguiseUtils.getHandItems(who),
+                DisguiseUtils.getHandItems(theirWatcher));
+
+        ourWatcher.setItemInMainHand(handStack[0]);
+        ourWatcher.setItemInOffHand(handStack[1]);
+    }
+
+    //获取玩家或者伪装的装备
+    public static ItemStack[] getArmorStack(Player player, FlagWatcher disguiseWatcher)
+    {
+        var playerArmorStack = player.getEquipment().getArmorContents();
+        var disguiseArmorStack = disguiseWatcher.getArmor();
+
+        var targetStack = chooseStack(playerArmorStack, disguiseArmorStack);
+
+        return new ItemStack[]
+                {
+                        itemOrAir(targetStack[0]),
+                        itemOrAir(targetStack[1]),
+                        itemOrAir(targetStack[2]),
+                        itemOrAir(targetStack[3])
+                };
+    }
+
+    public static ItemStack[] chooseStack(ItemStack[] playerStack, ItemStack[] disguiseStack)
+    {
+        return Arrays.stream(disguiseStack).allMatch(s -> s == null || s.getType().isAir())
+                ? playerStack
+                : disguiseStack;
+    }
+
+    public static ItemStack[] getHandItems(Player player)
+    {
+        var equipment = player.getEquipment();
+        return new ItemStack[]
+                {
+                        itemOrAir(equipment.getItemInMainHand()),
+                        itemOrAir(equipment.getItemInOffHand())
+                };
+    }
+
+    public static ItemStack[] getHandItems(FlagWatcher watcher)
+    {
+        var equipment = watcher.getEquipment();
+        return new ItemStack[]
+                {
+                        itemOrAir(equipment.getItemInMainHand()),
+                        itemOrAir(equipment.getItemInOffHand())
+                };
+    }
+
+    private static final ItemStack air = new ItemStack(Material.AIR);
+
+    private static ItemStack itemOrAir(ItemStack stack)
+    {
+        return stack == null ? air : stack;
     }
 }

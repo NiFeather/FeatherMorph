@@ -219,6 +219,8 @@ public class PlayerDataManager extends MorphPluginObject implements IManagePlaye
     @Override
     public DisguiseInfo getDisguiseInfo(EntityType type)
     {
+        if (type.equals(EntityType.PLAYER)) throw new IllegalArgumentException("玩家不能作为类型传入");
+
         if (this.cachedInfos.stream().noneMatch(o -> o.equals(type)))
             cachedInfos.add(new DisguiseInfo(type));
 

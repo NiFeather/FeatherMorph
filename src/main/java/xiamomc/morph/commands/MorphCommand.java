@@ -26,105 +26,22 @@ public class MorphCommand extends MorphPluginObject implements IPluginCommand
     @Resolved
     private MorphManager morphManager;
 
-    private final Map<UUID, Long> map = new ConcurrentHashMap<>();
-
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args)
     {
         if (sender instanceof Player player)
         {
             //伪装冷却
-            var lastMorph = map.get(player.getUniqueId());
-            var currentTick = Plugin.getCurrentTick();
-
-            if (lastMorph != null && currentTick - lastMorph <= 20)
+            if (!morphManager.canMorph(player))
             {
                 sender.sendMessage(MessageUtils.prefixes(player, Component.translatable("请等一会再进行伪装").color(NamedTextColor.RED)));
 
                 return true;
             }
 
-            map.put(player.getUniqueId(), currentTick);
-
             if (args.length >= 1)
             {
-                var key = args[0];
-
-                var infoOptional = morphManager.getAvaliableDisguisesFor(player).stream()
-                        .filter(i -> i.getKey().equals(key)).findFirst();
-
-                if (infoOptional.isPresent())
-                {
-                    try
-                    {
-                        //获取到的伪装
-                        var info = infoOptional.get();
-
-                        //目标类型
-                        var type = info.type;
-
-                        if (!type.isAlive())
-                        {
-                            sender.sendMessage(MessageUtils.prefixes(sender,
-                                    Component.translatable("此ID不能被用于伪装" , TextColor.color(255, 0, 0))));
-
-                            return true;
-                        }
-
-                        //玩家正在看的实体
-                        var targetEntity = player.getTargetEntity(5);
-
-                        //是否应该复制伪装
-                        var shouldCopy = false;
-
-                        //如果实体有伪装，则检查实体的伪装类型
-                        if (DisguiseAPI.isDisguised(targetEntity))
-                        {
-                            var disg = DisguiseAPI.getDisguise(targetEntity);
-                            assert disg != null;
-
-                            shouldCopy = info.isPlayerDisguise()
-                                    ? disg.isPlayerDisguise() && ((PlayerDisguise) disg).getName().equals(info.playerDisguiseTargetName)
-                                    : disg.getType().getEntityType().equals(type);
-                        }
-
-                        if (info.isPlayerDisguise())
-                        {
-                            if (shouldCopy)
-                                morphManager.morphCopy(player, targetEntity); //如果应该复制伪装，则复制给玩家
-                            else if (targetEntity instanceof Player targetPlayer && targetPlayer.getName().equals(info.playerDisguiseTargetName) && !DisguiseAPI.isDisguised(targetEntity))
-                                morphManager.morphEntity(player, targetPlayer); //否则，如果目标实体是我们想要的玩家，则伪装成目标实体
-                            else
-                                morphManager.morphPlayer(player, info.playerDisguiseTargetName); //否则，只简单地创建玩家伪装
-                        }
-                        else
-                        {
-                            if (shouldCopy)
-                                morphManager.morphCopy(player, targetEntity); //如果应该复制伪装，则复制给玩家
-                            else if (targetEntity != null && targetEntity.getType().equals(type) && !DisguiseAPI.isDisguised(targetEntity))
-                                morphManager.morphEntity(player, targetEntity); //否则，如果目标实体是我们想要的实体，则伪装成目标实体
-                            else
-                                morphManager.morphEntityType(player, type); //否则，只简单地创建实体伪装
-                        }
-
-                        var msg = Component.translatable("成功伪装为")
-                                .append(Component.translatable(type.translationKey()))
-                                .append(Component.text("！"));
-                        sender.sendMessage(MessageUtils.prefixes(sender, msg));
-
-                        return true;
-                    }
-                    catch (IllegalArgumentException iae)
-                    {
-                        sender.sendMessage(MessageUtils.prefixes(sender,
-                                Component.translatable("未能解析" + args[0], TextColor.color(255, 0, 0))));
-                    }
-                }
-                else
-                {
-                    sender.sendMessage(MessageUtils.prefixes(sender,
-                            Component.translatable("你尚未拥有此伪装")));
-                }
+                morphManager.morphEntityTypeAuto(player, args[0], player.getTargetEntity(5));
             }
             else
                 sender.sendMessage(MessageUtils.prefixes(sender,

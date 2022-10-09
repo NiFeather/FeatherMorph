@@ -3,17 +3,18 @@ package xiamomc.morph.events;
 import dev.geco.gsit.api.event.*;
 import io.papermc.paper.event.player.AsyncChatEvent;
 import me.libraryaddict.disguise.DisguiseAPI;
+import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
 import me.libraryaddict.disguise.utilities.DisguiseUtilities;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
-import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -21,6 +22,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 import org.bukkit.event.server.TabCompleteEvent;
 import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.meta.SkullMeta;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.abilities.AbilityFlag;
@@ -118,18 +120,65 @@ public class EventProcessor extends MorphPluginObject implements Listener
         var player = e.getPlayer();
         var state = morphs.getDisguiseStateFor(player);
 
-        if (player.getEquipment().getItemInMainHand().getType().equals(Material.CARROT_ON_A_STICK)
-                && player.isSneaking()
-                && state != null
-                && e.getHand() == EquipmentSlot.HAND
-                && e.getAction().isRightClick())
+        if (player.isSneaking() && e.getAction().isRightClick())
         {
-            if (state.getAbilityCooldown() <= 0)
-                morphs.executeDisguiseAbility(player);
-            else
-                player.sendMessage(MessageUtils.prefixes(player, Component.translatable("技能正在冷却中")
-                        .append(Component.text("(" + state.getAbilityCooldown() / 20 + "秒)"))
-                        .color(NamedTextColor.RED)));
+            var mainHandItem = player.getEquipment().getItemInMainHand();
+
+            switch (mainHandItem.getType())
+            {
+                //右键玩家头颅：快速伪装
+                case PLAYER_HEAD ->
+                {
+                    if (!morphs.canMorph(player))
+                    {
+                        player.sendMessage(MessageUtils.prefixes(player, Component.translatable("请等一会再尝试伪装").color(NamedTextColor.RED)));
+
+                        return;
+                    }
+
+                    if (e.getAction().equals(Action.RIGHT_CLICK_AIR))
+                    {
+                        var profile = ((SkullMeta) mainHandItem.getItemMeta()).getPlayerProfile();
+
+                        //忽略没有profile的玩家伪装
+                        if (profile != null)
+                        {
+                            var name = profile.getName();
+
+                            if (state != null)
+                            {
+                                var disguise = state.getDisguise();
+
+                                if (disguise.isPlayerDisguise() && ((PlayerDisguise) disguise).getName().equals(name))
+                                {
+                                    morphs.unMorph(player);
+                                    return;
+                                }
+                            }
+
+                            morphs.morphEntityTypeAuto(player, "player:" + profile.getName(), player.getTargetEntity(5));
+                        }
+                        else
+                            player.sendMessage(MessageUtils.prefixes(player, Component.text("无法使用此头颅伪装").color(NamedTextColor.RED)));
+
+                        morphs.updateLastPlayerMorphOperationTime(player);
+                    }
+                }
+
+                //右键胡萝卜钓竿：执行主动技能
+                case CARROT_ON_A_STICK ->
+                {
+                    if (state != null && e.getHand() == EquipmentSlot.HAND)
+                    {
+                        if (state.getAbilityCooldown() <= 0)
+                            morphs.executeDisguiseAbility(player);
+                        else
+                            player.sendMessage(MessageUtils.prefixes(player, Component.translatable("技能正在冷却中")
+                                    .append(Component.text("(" + state.getAbilityCooldown() / 20 + "秒)"))
+                                    .color(NamedTextColor.RED)));
+                    }
+                }
+            }
         }
     }
 
@@ -156,7 +205,7 @@ public class EventProcessor extends MorphPluginObject implements Listener
     {
         var state = morphs.getDisguiseStateFor(e.getTarget());
 
-        if (!state.getDisguise().isPlayerDisguise())
+        if (state != null && !state.getDisguise().isPlayerDisguise())
         {
             e.setCancelled(true);
         }

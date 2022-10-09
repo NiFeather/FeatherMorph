@@ -107,7 +107,7 @@ public class GrantDisguiseSubCommand extends MorphPluginObject implements ISubCo
         {
             var targetType = avaliableType.get();
 
-            if (!targetType.isAlive())
+            if (!targetType.isAlive() || targetType.equals(EntityType.PLAYER))
             {
                 commandSender.sendMessage(MessageUtils.prefixes(commandSender, Component.text("无效的生物ID")));
                 return true;
@@ -137,7 +137,7 @@ public class GrantDisguiseSubCommand extends MorphPluginObject implements ISubCo
                             .append(Component.translatable(displayKey))
                             .append(Component.text("的伪装给与"))
                             .append(Component.text(who.getName()))
-                            .append(Component.text("他是否已经拥有此伪装？"))
+                            .append(Component.text(", 他是否已经拥有此伪装？"))
                             .color(NamedTextColor.RED)));
         return true;
     }

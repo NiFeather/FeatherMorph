@@ -32,9 +32,8 @@ import xiamomc.morph.storage.playerdata.PlayerDataManager;
 import xiamomc.morph.storage.playerdata.PlayerMorphConfiguration;
 import xiamomc.pluginbase.Annotations.Initializer;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class MorphManager extends MorphPluginObject implements IManagePlayerData, IManageRequests
 {
@@ -52,6 +51,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
     private final AbilityHandler abilityHandler = new AbilityHandler();
 
+    //region 聊天覆盖
+
     private boolean allowChatOverride = false;
 
     public boolean allowChatOverride()
@@ -63,6 +64,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     {
         allowChatOverride = val;
     }
+
+    //endregion 聊天覆盖
 
     @Initializer
     private void load()
@@ -196,6 +199,128 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
     //region 玩家伪装相关
 
+    private final Map<UUID, Long> uuidMoprhTimeMap = new ConcurrentHashMap<>();
+
+    /**
+     * 检查某个玩家是否可以伪装
+     * @param player 玩家
+     * @return 是否可以伪装
+     */
+    public boolean canMorph(Player player)
+    {
+        return this.canMorph(player.getUniqueId());
+    }
+
+    /**
+     * 检查某个玩家是否可以伪装
+     * @param uuid 玩家UUID
+     * @return 是否可以伪装
+     */
+    public boolean canMorph(UUID uuid)
+    {
+        var val = uuidMoprhTimeMap.get(uuid);
+
+        return val == null || Plugin.getCurrentTick() - val >= 20;
+    }
+
+    /**
+     * 更新某个玩家的上次伪装操作事件
+     * @param player 要更新的玩家
+     */
+    public void updateLastPlayerMorphOperationTime(Player player)
+    {
+        uuidMoprhTimeMap.put(player.getUniqueId(), Plugin.getCurrentTick());
+    }
+
+    /**
+     * 根据传入的key自动伪装
+     * @param player 要伪装的玩家
+     * @param key key
+     * @param targetEntity 玩家正在看的实体
+     * @return 操作是否成功
+     */
+    public boolean morphEntityTypeAuto(Player player, String key, @Nullable Entity targetEntity)
+    {
+        var infoOptional = getAvaliableDisguisesFor(player).stream()
+                .filter(i -> i.getKey().equals(key)).findFirst();
+
+        if (infoOptional.isPresent())
+        {
+            try
+            {
+                //获取到的伪装
+                var info = infoOptional.get();
+
+                //目标类型
+                var type = info.type;
+
+                if (!type.isAlive())
+                {
+                    player.sendMessage(MessageUtils.prefixes(player,
+                            Component.translatable("此ID不能被用于伪装", TextColor.color(255, 0, 0))));
+
+                    return false;
+                }
+
+                //是否应该复制伪装
+                var shouldCopy = false;
+
+                //如果实体有伪装，则检查实体的伪装类型
+                if (DisguiseAPI.isDisguised(targetEntity))
+                {
+                    var disg = DisguiseAPI.getDisguise(targetEntity);
+                    assert disg != null;
+
+                    shouldCopy = info.isPlayerDisguise()
+                            ? disg.isPlayerDisguise() && ((PlayerDisguise) disg).getName().equals(info.playerDisguiseTargetName)
+                            : disg.getType().getEntityType().equals(type);
+                }
+
+                if (info.isPlayerDisguise())
+                {
+                    if (shouldCopy)
+                        morphCopy(player, targetEntity); //如果应该复制伪装，则复制给玩家
+                    else if (targetEntity instanceof Player targetPlayer && targetPlayer.getName().equals(info.playerDisguiseTargetName) && !DisguiseAPI.isDisguised(targetEntity))
+                        morphEntity(player, targetPlayer); //否则，如果目标实体是我们想要的玩家，则伪装成目标实体
+                    else
+                        morphPlayer(player, info.playerDisguiseTargetName); //否则，只简单地创建玩家伪装
+                }
+                else
+                {
+                    if (shouldCopy)
+                        morphCopy(player, targetEntity); //如果应该复制伪装，则复制给玩家
+                    else if (targetEntity != null && targetEntity.getType().equals(type) && !DisguiseAPI.isDisguised(targetEntity))
+                        morphEntity(player, targetEntity); //否则，如果目标实体是我们想要的实体，则伪装成目标实体
+                    else
+                        morphEntityType(player, type); //否则，只简单地创建实体伪装
+                }
+
+                var msg = Component.translatable("成功伪装为")
+                        .append(type == EntityType.PLAYER
+                                ? Component.text(key.replace("player:", ""))
+                                : Component.translatable(type.translationKey()))
+                        .append(Component.text("！"));
+                player.sendMessage(MessageUtils.prefixes(player, msg));
+
+                return true;
+            }
+            catch (IllegalArgumentException iae)
+            {
+                player.sendMessage(MessageUtils.prefixes(player,
+                        Component.translatable("未能解析" + key, TextColor.color(255, 0, 0))));
+
+                return false;
+            }
+        }
+        else
+        {
+            player.sendMessage(MessageUtils.prefixes(player,
+                    Component.translatable("你尚未拥有此伪装")));
+        }
+
+        return true;
+    }
+
     /**
      * 将玩家伪装成指定的实体类型
      *
@@ -305,6 +430,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         spawnParticle(player, player.getLocation(), player.getWidth(), player.getHeight(), player.getWidth());
 
         disguisedPlayers.remove(targetInfoOptional.get());
+
+        updateLastPlayerMorphOperationTime(player);
     }
 
     private boolean canFly(Player player, @Nullable DisguiseState state)
@@ -353,7 +480,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
      * @param sourcePlayer     伪装的玩家
      * @param targetEntity     伪装的目标实体
      * @param disguise         伪装
-     * @param shouldHandlePose 要不要手动更新伪装Pose？
+     * @param shouldHandlePose 要不要手动更新伪装Pose？（伪装是否为克隆）
      */
     private void postConstructDisguise(Player sourcePlayer, @Nullable Entity targetEntity, Disguise disguise, boolean shouldHandlePose)
     {
@@ -366,8 +493,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         if (targetEntity instanceof LivingEntity living && living.getHealth() <= 0)
             ((LivingWatcher) watcher).setHealth(1);
 
+        //目标实体没有伪装时要做的操作
         //workaround: 玩家伪装副手问题
-        //如果目标实体有伪装，则不要修改
         if (!DisguiseAPI.isDisguised(targetEntity))
         {
             ItemStack offhandItemStack = null;
@@ -383,6 +510,23 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             //盔甲架加上手臂
             if (disguise.getType().equals(DisguiseType.ARMOR_STAND))
                 ((ArmorStandWatcher) watcher).setShowArms(true);
+        }
+
+        //如果此玩家伪装是复制的，并且目标玩家的伪装和我们的一样，那么复制他们的装备
+        if (shouldHandlePose && targetEntity instanceof Player targetPlayer)
+        {
+            var theirDisguise = DisguiseAPI.getDisguise(targetPlayer);
+            var ourDisguiseType = disguise.getType();
+
+            //如果是同类伪装，则复制盔甲
+            if (ourDisguiseType.equals(theirDisguise.getType()))
+            {
+                if (!(disguise instanceof PlayerDisguise ourPlayerDisguise) || !(theirDisguise instanceof PlayerDisguise theirPlayerDisguise)
+                        || Objects.equals(ourPlayerDisguise.getName(), theirPlayerDisguise.getName()))
+                {
+                    DisguiseUtils.tryCopyArmorStack(targetPlayer, disguise.getWatcher(), theirDisguise.getWatcher());
+                }
+            }
         }
 
         //禁用actionBar
@@ -447,6 +591,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                     Component.translatable("PS: 手持胡萝卜钓竿蹲下右键可以使用当前伪装的主动技能")));
             config.shownMorphAbilityHint = true;
         }
+
+        updateLastPlayerMorphOperationTime(sourcePlayer);
     }
 
     public void spawnParticle(Player player, Location location, double collX, double collY, double collZ)
