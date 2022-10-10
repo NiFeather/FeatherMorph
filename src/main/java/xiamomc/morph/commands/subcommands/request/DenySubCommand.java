@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
+import xiamomc.morph.interfaces.IManageRequests;
 import xiamomc.morph.misc.MessageUtils;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Command.ISubCommand;
@@ -18,7 +19,7 @@ import java.util.List;
 public class DenySubCommand extends MorphPluginObject implements ISubCommand
 {
     @Resolved
-    private MorphManager morphs;
+    private IManageRequests requests;
 
     @Override
     public List<String> onTabComplete(List<String> args, CommandSender source)
@@ -27,7 +28,7 @@ public class DenySubCommand extends MorphPluginObject implements ISubCommand
 
         if (source instanceof Player player)
         {
-            var reqs = morphs.getAvaliableRequestFor(player);
+            var reqs = requests.getAvaliableRequestFor(player);
 
             reqs.forEach(r -> list.add(r.sourcePlayer.getName()));
         }
@@ -69,7 +70,7 @@ public class DenySubCommand extends MorphPluginObject implements ISubCommand
                     return true;
                 }
 
-                morphs.denyRequest(sourcePlayer, targetPlayer);
+                requests.denyRequest(sourcePlayer, targetPlayer);
             }
             else
             {

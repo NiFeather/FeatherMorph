@@ -6,6 +6,8 @@ import org.slf4j.LoggerFactory;
 import xiamomc.morph.commands.MorphCommandHelper;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.events.EventProcessor;
+import xiamomc.morph.interfaces.IManagePlayerData;
+import xiamomc.morph.interfaces.IManageRequests;
 import xiamomc.morph.misc.MessageUtils;
 import xiamomc.pluginbase.Command.CommandHelper;
 import xiamomc.pluginbase.Configuration.ConfigNode;
@@ -42,9 +44,12 @@ public final class MorphPlugin extends XiaMoJavaPlugin
         dependencyManager.Cache(this);
         dependencyManager.Cache(morphManager = new MorphManager());
         dependencyManager.Cache(cmdHelper);
+        dependencyManager.Cache(MiniMessage.miniMessage());;
+        dependencyManager.CacheAs(IManagePlayerData.class, morphManager);
+        dependencyManager.CacheAs(IManageRequests.class, new RequestManager());
         dependencyManager.CacheAs(MorphConfigManager.class, new MorphConfigManager(this));
+
         dependencyManager.Cache(new MessageUtils());
-        dependencyManager.Cache(MiniMessage.miniMessage());
 
         this.schedule(c ->
         {

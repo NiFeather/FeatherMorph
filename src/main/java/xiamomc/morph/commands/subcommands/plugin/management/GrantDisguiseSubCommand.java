@@ -120,6 +120,12 @@ public class GrantDisguiseSubCommand extends MorphPluginObject implements ISubCo
         {
             targetName = targetName.replace("player:", "");
 
+            if (targetName.isBlank() || targetName.isEmpty())
+            {
+                commandSender.sendMessage(MessageUtils.prefixes(commandSender, Component.text("未指定玩家名")));
+                return true;
+            }
+
             grantSuccess = morphs.grantPlayerMorphToPlayer(who, targetName);
             displayKey = targetName;
         }

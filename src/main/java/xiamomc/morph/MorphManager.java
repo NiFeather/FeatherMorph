@@ -10,8 +10,8 @@ import me.libraryaddict.disguise.disguisetypes.watchers.LivingWatcher;
 import me.libraryaddict.disguise.utilities.DisguiseValues;
 import me.libraryaddict.disguise.utilities.reflection.FakeBoundingBox;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
+import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Particle;
@@ -24,8 +24,9 @@ import xiamomc.morph.abilities.AbilityFlag;
 import xiamomc.morph.abilities.AbilityHandler;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
+import xiamomc.morph.events.PlayerMorphEvent;
+import xiamomc.morph.events.PlayerUnMorphEvent;
 import xiamomc.morph.interfaces.IManagePlayerData;
-import xiamomc.morph.interfaces.IManageRequests;
 import xiamomc.morph.misc.*;
 import xiamomc.morph.skills.*;
 import xiamomc.morph.storage.offlinestore.OfflineDisguiseState;
@@ -34,12 +35,11 @@ import xiamomc.morph.storage.playerdata.PlayerDataManager;
 import xiamomc.morph.storage.playerdata.PlayerMorphConfiguration;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
-import xiamomc.pluginbase.Configuration.ConfigNode;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class MorphManager extends MorphPluginObject implements IManagePlayerData, IManageRequests
+public class MorphManager extends MorphPluginObject implements IManagePlayerData
 {
     /**
      * 变成其他玩家的玩家
@@ -155,16 +155,10 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             updateDisguise(p, i);
         }
 
-        //更新请求
-        var requests = new ArrayList<>(this.requests);
-        for (var r : requests)
-        {
-            r.ticksRemain -= 1;
-            if (r.ticksRemain <= 0) this.requests.remove(r);
-        }
-
         this.addSchedule(c -> update());
     }
+
+    //region 玩家伪装相关
 
     /**
      * 更新伪装状态
@@ -203,17 +197,24 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         state.setAbilityCooldown(state.getAbilityCooldown() - 1);
     }
 
+    /**
+     * 使某个玩家执行伪装的主动技能
+     * @param player 目标玩家
+     */
     public void executeDisguiseAbility(Player player)
     {
         skillHandler.executeDisguiseAbility(player);
     }
 
+    /**
+     * 获取所有已伪装的玩家
+     * @return 玩家列表
+     * @apiNote 列表中的玩家可能已经离线
+     */
     public List<DisguiseState> getDisguisedPlayers()
     {
         return new ArrayList<>(disguisedPlayers);
     }
-
-    //region 玩家伪装相关
 
     private final Map<UUID, Long> uuidMoprhTimeMap = new ConcurrentHashMap<>();
 
@@ -260,6 +261,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         var infoOptional = getAvaliableDisguisesFor(player).stream()
                 .filter(i -> i.getKey().equals(key)).findFirst();
 
+        //检查有没有伪装
         if (infoOptional.isPresent())
         {
             try
@@ -292,21 +294,21 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                             : disg.getType().getEntityType().equals(type);
                 }
 
-                if (info.isPlayerDisguise())
+                if (shouldCopy)
                 {
-                    if (shouldCopy)
-                        morphCopy(player, targetEntity); //如果应该复制伪装，则复制给玩家
-                    else if (targetEntity instanceof Player targetPlayer && targetPlayer.getName().equals(info.playerDisguiseTargetName) && !DisguiseAPI.isDisguised(targetEntity))
-                        morphEntity(player, targetPlayer); //否则，如果目标实体是我们想要的玩家，则伪装成目标实体
-                    else
-                        morphPlayer(player, info.playerDisguiseTargetName); //否则，只简单地创建玩家伪装
+                    morphCopy(player, targetEntity); //如果应该复制伪装，则复制给玩家
+                }
+                else if (info.isPlayerDisguise()
+                            ? (targetEntity instanceof Player targetPlayer && targetPlayer.getName().equals(info.playerDisguiseTargetName))
+                            : (targetEntity != null && targetEntity.getType().equals(type))
+                        && !DisguiseAPI.isDisguised(targetEntity))
+                {
+                    morphEntity(player, targetEntity); //否则，如果目标实体是我们想要的实体，则伪装成目标实体
                 }
                 else
                 {
-                    if (shouldCopy)
-                        morphCopy(player, targetEntity); //如果应该复制伪装，则复制给玩家
-                    else if (targetEntity != null && targetEntity.getType().equals(type) && !DisguiseAPI.isDisguised(targetEntity))
-                        morphEntity(player, targetEntity); //否则，如果目标实体是我们想要的实体，则伪装成目标实体
+                    if (info.isPlayerDisguise())
+                        morphPlayer(player, info.playerDisguiseTargetName);
                     else
                         morphEntityType(player, type); //否则，只简单地创建实体伪装
                 }
@@ -348,7 +350,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         Disguise constructedDisguise = null;
 
         //不要构建玩家类型的伪装
-        if (entityType == EntityType.PLAYER) return;
+        if (entityType == EntityType.PLAYER) throw new IllegalArgumentException("玩家不能作为EntityType传入");
 
         constructedDisguise = new MobDisguise(DisguiseType.getType(entityType));
 
@@ -383,7 +385,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     {
         Disguise draftDisguise = null;
 
-        if (!DisguiseAPI.isDisguised(targetEntity)) return;
+        if (!DisguiseAPI.isDisguised(targetEntity)) throw new IllegalArgumentException("目标实体没有伪装");
 
         DisguiseAPI.disguiseEntity(sourcePlayer, DisguiseAPI.getDisguise(targetEntity));
         draftDisguise = DisguiseAPI.getDisguise(sourcePlayer);
@@ -448,6 +450,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         disguisedPlayers.remove(targetInfoOptional.get());
 
         updateLastPlayerMorphOperationTime(player);
+
+        Bukkit.getPluginManager().callEvent(new PlayerUnMorphEvent(player));
     }
 
     private boolean canFly(Player player, @Nullable DisguiseState state)
@@ -608,6 +612,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         }
 
         updateLastPlayerMorphOperationTime(sourcePlayer);
+
+        Bukkit.getPluginManager().callEvent(new PlayerMorphEvent(sourcePlayer, state));
     }
 
     public void spawnParticle(Player player, Location location, double collX, double collY, double collZ)
@@ -725,94 +731,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
     //endregion 玩家伪装相关
 
-    //region Implementation of IManageRequests
-
-    private final List<RequestInfo> requests = new ArrayList<>();
-
-    @Override
-    public void createRequest(Player source, Player target)
-    {
-        if (requests.stream()
-                .anyMatch(i -> i.sourcePlayer.getUniqueId() == source.getUniqueId()
-                        && i.targetPlayer.getUniqueId() == target.getUniqueId()))
-        {
-            source.sendMessage(MessageUtils.prefixes(source, Component.text("你已经向" + target + "发送过一个请求了")));
-            return;
-        }
-
-        var req = new RequestInfo();
-        req.sourcePlayer = source;
-        req.targetPlayer = target;
-        req.ticksRemain = 1200;
-
-        requests.add(req);
-
-        var msg = Component.translatable("你收到了来自")
-                .append(Component.text(source.getName()))
-                .append(Component.translatable("的交换请求！"));
-
-        target.sendMessage(MessageUtils.prefixes(target, msg));
-
-        source.sendMessage(MessageUtils.prefixes(source, Component.translatable("请求已发送！对方将有1分钟的时间来接受")));
-    }
-
-    @Override
-    public void acceptRequest(Player source, Player target)
-    {
-        var match = requests.stream()
-                .filter(i -> i.sourcePlayer.getUniqueId().equals(target.getUniqueId())
-                        && i.targetPlayer.getUniqueId().equals(source.getUniqueId())).findFirst();
-
-        if (match.isEmpty())
-        {
-            source.sendMessage(MessageUtils.prefixes(source, Component.text("未找到目标请求，可能已经过期？")));
-            return;
-        }
-
-        var req = match.get();
-        req.ticksRemain = -1;
-
-        data.grantPlayerMorphToPlayer(target, source.getName());
-        data.grantPlayerMorphToPlayer(source, target.getName());
-
-        target.sendMessage(MessageUtils.prefixes(target, Component.text("成功与" + source.getName() + "交换！")));
-        source.sendMessage(MessageUtils.prefixes(source, Component.text("成功与" + target.getName() + "交换！")));
-    }
-
-    @Override
-    public void denyRequest(Player source, Player target)
-    {
-        var match = requests.stream()
-                .filter(i -> i.sourcePlayer.getUniqueId().equals(target.getUniqueId())
-                        && i.targetPlayer.getUniqueId().equals(source.getUniqueId())).findFirst();
-
-        if (match.isEmpty())
-        {
-            source.sendMessage(MessageUtils.prefixes(source, Component.text("未找到目标请求，可能已经过期？")));
-
-            //"未找到目标请求，可能已经过期？"
-            return;
-        }
-
-        var req = match.get();
-        req.ticksRemain = -1;
-
-        var msg = Component.text("请求已拒绝");
-
-        target.sendMessage(MessageUtils.prefixes(target, Component.text("发往" + source.getName() + "的").append(msg)));
-        source.sendMessage(MessageUtils.prefixes(source, Component.text("来自" + target.getName() + "的").append(msg)));
-    }
-
-    @Override
-    public List<RequestInfo> getAvaliableRequestFor(Player player)
-    {
-        return requests.stream()
-                .filter(t -> t.targetPlayer.getUniqueId().equals(player.getUniqueId()))
-                .toList();
-    }
-
-    //endregion Implementation of IManageRequests
-
     //region Implementation of IManagePlayerData
 
     @Override
@@ -836,78 +754,25 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     @Override
     public boolean grantMorphToPlayer(Player player, EntityType type)
     {
-        var val = data.grantMorphToPlayer(player, type);
-
-        if (val)
-            sendMorphAcquiredNotification(player,
-                    Component.text("✔ 已解锁")
-                            .append(Component.translatable(type.translationKey()))
-                            .append(Component.text("的伪装")).color(NamedTextColor.GREEN));
-
-        return val;
+        return data.grantMorphToPlayer(player, type);
     }
 
     @Override
-    public boolean grantPlayerMorphToPlayer(Player sourcePlayer, String targetPlayerName)
+    public boolean grantPlayerMorphToPlayer(Player sourcePlayer, String targtPlayerName)
     {
-        var val = data.grantPlayerMorphToPlayer(sourcePlayer, targetPlayerName);
-
-        if (val)
-            sendMorphAcquiredNotification(sourcePlayer,
-                    Component.text("✔ 已解锁" + targetPlayerName + "的伪装").color(NamedTextColor.GREEN));
-
-        return val;
+        return data.grantPlayerMorphToPlayer(sourcePlayer, targtPlayerName);
     }
 
     @Override
     public boolean revokeMorphFromPlayer(Player player, EntityType entityType)
     {
-        var val = data.revokeMorphFromPlayer(player, entityType);
-
-        if (val)
-        {
-            var state = getDisguiseStateFor(player);
-            if (state != null && state.getDisguise().getType().getEntityType().equals(entityType))
-                unMorph(player);
-
-            sendMorphAcquiredNotification(player,
-                    Component.text("❌ 已失去")
-                            .append(Component.translatable(entityType.translationKey()))
-                            .append(Component.text("的伪装")).color(NamedTextColor.RED));
-        }
-
-        return val;
+        return data.revokeMorphFromPlayer(player, entityType);
     }
 
     @Override
     public boolean revokePlayerMorphFromPlayer(Player player, String playerName)
     {
-        var val = data.revokePlayerMorphFromPlayer(player, playerName);
-
-        if (val)
-        {
-            var state = getDisguiseStateFor(player);
-
-            if (state != null
-                    && state.getDisguise().isPlayerDisguise()
-                    && ((PlayerDisguise)state.getDisguise()).getName().equals(playerName))
-            {
-                unMorph(player);
-            }
-
-            sendMorphAcquiredNotification(player,
-                    Component.text("❌ 已失去" + playerName + "的伪装").color(NamedTextColor.RED));
-        }
-
-        return val;
-    }
-
-    private void sendMorphAcquiredNotification(Player player, Component text)
-    {
-        if (getDisguiseStateFor(player) == null)
-            player.sendActionBar(text);
-        else
-            player.sendMessage(MessageUtils.prefixes(player, text));
+        return data.revokePlayerMorphFromPlayer(player, playerName);
     }
 
     @Override

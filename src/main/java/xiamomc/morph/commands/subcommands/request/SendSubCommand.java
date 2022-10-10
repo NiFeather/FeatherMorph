@@ -7,6 +7,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
+import xiamomc.morph.interfaces.IManageRequests;
 import xiamomc.morph.misc.MessageUtils;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Command.ISubCommand;
@@ -16,6 +17,9 @@ import java.util.List;
 
 public class SendSubCommand extends MorphPluginObject implements ISubCommand
 {
+    @Resolved
+    private IManageRequests requests;
+
     @Resolved
     private MorphManager morphs;
 
@@ -83,7 +87,7 @@ public class SendSubCommand extends MorphPluginObject implements ISubCommand
                     return true;
                 }
 
-                morphs.createRequest(sourcePlayer, targetPlayer);
+                requests.createRequest(sourcePlayer, targetPlayer);
             }
             else
             {

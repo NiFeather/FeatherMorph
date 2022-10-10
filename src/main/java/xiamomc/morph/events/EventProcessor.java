@@ -161,6 +161,12 @@ public class EventProcessor extends MorphPluginObject implements Listener
         useCustomRenderer = config.getOrDefault(Boolean.class, ConfigOption.CHAT_OVERRIDE_USE_CUSTOM_RENDERER, true);
     }
 
+    @EventHandler
+    public void onPlayerUnMorph(PlayerUnMorphEvent e)
+    {
+        uuidPlayerTexturesMap.remove(e.getPlayer().getUniqueId());
+    }
+
     private final Map<UUID, PlayerTextures> uuidPlayerTexturesMap = new ConcurrentHashMap<>();
 
     @EventHandler
@@ -178,62 +184,65 @@ public class EventProcessor extends MorphPluginObject implements Listener
                 //右键玩家头颅：快速伪装
                 case PLAYER_HEAD ->
                 {
-                    if (!allowHeadMorph)
-                    {
-                        player.sendMessage(MessageUtils.prefixes(player, Component.translatable("此功能已被禁用").color(NamedTextColor.RED)));
-
-                        return;
-                    }
-
-                    if (!morphs.canMorph(player))
-                    {
-                        player.sendMessage(MessageUtils.prefixes(player, Component.translatable("请等一会再尝试伪装").color(NamedTextColor.RED)));
-
-                        return;
-                    }
-
                     if (e.getAction().equals(Action.RIGHT_CLICK_AIR))
                     {
                         var profile = ((SkullMeta) mainHandItem.getItemMeta()).getPlayerProfile();
 
-                        //忽略没有profile的玩家伪装
-                        if (profile != null)
+                        if (profile == null)
                         {
-                            var name = profile.getName();
-                            var profileTexture = profile.getTextures();
-                            var playerUniqueId = player.getUniqueId();
+                            player.sendMessage(MessageUtils.prefixes(player, Component.text("无效的皮肤").color(NamedTextColor.RED)));
+                            return;
+                        }
 
-                            if (state != null)
+                        if (!allowHeadMorph)
+                        {
+                            player.sendMessage(MessageUtils.prefixes(player, Component.translatable("此功能已被禁用").color(NamedTextColor.RED)));
+
+                            return;
+                        }
+
+                        if (!morphs.canMorph(player))
+                        {
+                            player.sendMessage(MessageUtils.prefixes(player, Component.translatable("请等一会再尝试伪装").color(NamedTextColor.RED)));
+
+                            return;
+                        }
+
+                        //忽略没有profile的玩家伪装
+                        var name = profile.getName();
+                        var profileTexture = profile.getTextures();
+                        var playerUniqueId = player.getUniqueId();
+
+                        //如果玩家有伪装，并且伪装的材质和Profile中的一样，那么取消伪装
+                        if (state != null)
+                        {
+                            var disguise = state.getDisguise();
+
+                            if (disguise instanceof PlayerDisguise playerDisguise
+                                    && playerDisguise.getName().equals(name)
+                                    && profileTexture.equals(uuidPlayerTexturesMap.get(playerUniqueId)))
                             {
-                                var disguise = state.getDisguise();
-
-                                if (disguise instanceof PlayerDisguise playerDisguise
-                                        && playerDisguise.getName().equals(name)
-                                        && profileTexture.equals(uuidPlayerTexturesMap.get(playerUniqueId)))
-                                {
-                                    morphs.unMorph(player);
-                                    uuidPlayerTexturesMap.remove(playerUniqueId);
-                                    return;
-                                }
-                            }
-
-                            if (morphs.morphEntityTypeAuto(player, "player:" + profile.getName(), player.getTargetEntity(5)))
-                            {
-                                //成功伪装后设置皮肤为头颅的皮肤
-                                var disguise = (PlayerDisguise) DisguiseAPI.getDisguise(player);
-                                var wrappedProfile = WrappedGameProfile.fromHandle(new MorphGameProfile(profile));
-
-                                var LDprofile = ReflectionManager.getGameProfileWithThisSkin(wrappedProfile.getUUID(), wrappedProfile.getName(), wrappedProfile);
-
-                                DisguiseAPI.addGameProfile(LDprofile.toString(), LDprofile);
-                                disguise.setSkin(LDprofile);
-                                DisguiseUtilities.removeGameProfile(LDprofile.toString());
-
-                                uuidPlayerTexturesMap.put(playerUniqueId, profileTexture);
+                                morphs.unMorph(player);
+                                return;
                             }
                         }
-                        else
-                            player.sendMessage(MessageUtils.prefixes(player, Component.text("无法使用此头颅伪装").color(NamedTextColor.RED)));
+
+                        //否则，更新或应用伪装
+                        if (morphs.morphEntityTypeAuto(player, "player:" + profile.getName(), player.getTargetEntity(5)))
+                        {
+                            //成功伪装后设置皮肤为头颅的皮肤
+                            var disguise = (PlayerDisguise) DisguiseAPI.getDisguise(player);
+                            var wrappedProfile = WrappedGameProfile.fromHandle(new MorphGameProfile(profile));
+
+                            var LDprofile = ReflectionManager.getGameProfileWithThisSkin(wrappedProfile.getUUID(), wrappedProfile.getName(), wrappedProfile);
+
+                            //LD不支持直接用profile设置皮肤，只能先存到本地设置完再移除
+                            DisguiseAPI.addGameProfile(LDprofile.toString(), LDprofile);
+                            disguise.setSkin(LDprofile);
+                            DisguiseUtilities.removeGameProfile(LDprofile.toString());
+
+                            uuidPlayerTexturesMap.put(playerUniqueId, profileTexture);
+                        }
 
                         morphs.updateLastPlayerMorphOperationTime(player);
                     }

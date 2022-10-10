@@ -2,15 +2,22 @@ package xiamomc.morph.storage.playerdata;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
+import net.bytebuddy.implementation.bind.annotation.Morph;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.Nullable;
+import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.interfaces.IManagePlayerData;
 import xiamomc.morph.misc.DisguiseInfo;
+import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.misc.MessageUtils;
 import xiamomc.pluginbase.Annotations.Initializer;
+import xiamomc.pluginbase.Annotations.Resolved;
 
 import java.io.*;
 import java.net.URI;
@@ -30,6 +37,9 @@ public class PlayerDataManager extends MorphPluginObject implements IManagePlaye
     private MorphConfiguration morphConfiguration = new MorphConfiguration();
 
     private final List<DisguiseInfo> cachedInfos = new ArrayList<>();
+
+    @Resolved
+    private MorphManager morphs;
 
     @Initializer
     private void load(MorphPlugin plugin) throws IOException
@@ -168,6 +178,11 @@ public class PlayerDataManager extends MorphPluginObject implements IManagePlaye
         }
         else return false;
 
+        sendMorphAcquiredNotification(player, morphs.getDisguiseStateFor(player),
+                Component.text("✔ 已解锁")
+                        .append(Component.translatable(type.translationKey()))
+                        .append(Component.text("的伪装")).color(NamedTextColor.GREEN));
+
         return true;
     }
 
@@ -183,6 +198,8 @@ public class PlayerDataManager extends MorphPluginObject implements IManagePlaye
 
         saveConfiguration();
 
+        sendMorphAcquiredNotification(sourcePlayer, morphs.getDisguiseStateFor(sourcePlayer),
+                Component.text("✔ 已解锁" + targetPlayerName + "的伪装").color(NamedTextColor.GREEN));
         return true;
     }
 
@@ -197,6 +214,14 @@ public class PlayerDataManager extends MorphPluginObject implements IManagePlaye
         getPlayerConfiguration(player).unlockedDisguises.remove(optional.get());
         saveConfiguration();
 
+        var state = morphs.getDisguiseStateFor(player);
+        if (state != null && state.getDisguise().getType().getEntityType().equals(entityType))
+            morphs.unMorph(player);
+
+        sendMorphAcquiredNotification(player, state,
+                Component.text("❌ 已失去")
+                        .append(Component.translatable(entityType.translationKey()))
+                        .append(Component.text("的伪装")).color(NamedTextColor.RED));
         return true;
     }
 
@@ -212,6 +237,18 @@ public class PlayerDataManager extends MorphPluginObject implements IManagePlaye
 
         getPlayerConfiguration(player).unlockedDisguises.remove(optional.get());
         saveConfiguration();
+
+        var state = morphs.getDisguiseStateFor(player);
+
+        if (state != null
+                && state.getDisguise().isPlayerDisguise()
+                && ((PlayerDisguise)state.getDisguise()).getName().equals(playerName))
+        {
+            morphs.unMorph(player);
+        }
+
+        sendMorphAcquiredNotification(player, state,
+                Component.text("❌ 已失去" + playerName + "的伪装").color(NamedTextColor.RED));
 
         return true;
     }
@@ -243,4 +280,12 @@ public class PlayerDataManager extends MorphPluginObject implements IManagePlaye
     }
 
     //endregion Implementation of IManagePlayerData
+
+    private void sendMorphAcquiredNotification(Player player, @Nullable DisguiseState state, Component text)
+    {
+        if (state == null)
+            player.sendActionBar(text);
+        else
+            player.sendMessage(MessageUtils.prefixes(player, text));
+    }
 }
