@@ -184,6 +184,20 @@ public class EventProcessor extends MorphPluginObject implements Listener
                 //右键玩家头颅：快速伪装
                 case PLAYER_HEAD ->
                 {
+                    if (!allowHeadMorph)
+                    {
+                        player.sendMessage(MessageUtils.prefixes(player, Component.translatable("此功能已被禁用").color(NamedTextColor.RED)));
+
+                        return;
+                    }
+
+                    if (!morphs.canMorph(player))
+                    {
+                        player.sendMessage(MessageUtils.prefixes(player, Component.translatable("请等一会再尝试伪装").color(NamedTextColor.RED)));
+
+                        return;
+                    }
+
                     if (e.getAction().equals(Action.RIGHT_CLICK_AIR))
                     {
                         var profile = ((SkullMeta) mainHandItem.getItemMeta()).getPlayerProfile();
@@ -191,20 +205,6 @@ public class EventProcessor extends MorphPluginObject implements Listener
                         if (profile == null)
                         {
                             player.sendMessage(MessageUtils.prefixes(player, Component.text("无效的皮肤").color(NamedTextColor.RED)));
-                            return;
-                        }
-
-                        if (!allowHeadMorph)
-                        {
-                            player.sendMessage(MessageUtils.prefixes(player, Component.translatable("此功能已被禁用").color(NamedTextColor.RED)));
-
-                            return;
-                        }
-
-                        if (!morphs.canMorph(player))
-                        {
-                            player.sendMessage(MessageUtils.prefixes(player, Component.translatable("请等一会再尝试伪装").color(NamedTextColor.RED)));
-
                             return;
                         }
 
