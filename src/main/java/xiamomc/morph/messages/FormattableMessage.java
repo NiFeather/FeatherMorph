@@ -7,9 +7,10 @@ import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Formattable;
 import java.util.List;
 
-public class FormattableMessage
+public class FormattableMessage implements Comparable<FormattableMessage>
 {
     private final String key;
 
@@ -76,5 +77,11 @@ public class FormattableMessage
         var msg = MessageStore.getInstance().get(key, defaultString);
 
         return MiniMessage.miniMessage().deserialize(msg, TagResolver.resolver(resolvers));
+    }
+
+    @Override
+    public int compareTo(@NotNull FormattableMessage formattableMessage)
+    {
+        return this.key.compareTo(formattableMessage.key);
     }
 }

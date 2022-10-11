@@ -2,12 +2,12 @@ package xiamomc.morph.messages;
 
 import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.storage.JsonBasedStorage;
-import xiamomc.pluginbase.Annotations.Initializer;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Arrays;
+import java.util.List;
+import java.util.TreeMap;
 
-public class MessageStore extends JsonBasedStorage<Map<String, String>>
+public class MessageStore extends JsonBasedStorage<TreeMap<String, String>>
 {
     public MessageStore()
     {
@@ -29,15 +29,9 @@ public class MessageStore extends JsonBasedStorage<Map<String, String>>
         {
             val = defaultValue;
             storingObject.put(key, defaultValue);
-            saveConfiguration();
         }
 
         return val;
-    }
-
-    @Initializer
-    private void load()
-    {
     }
 
     @Override
@@ -47,14 +41,61 @@ public class MessageStore extends JsonBasedStorage<Map<String, String>>
     }
 
     @Override
-    protected @NotNull Map<String, String> createDefault()
+    protected @NotNull TreeMap<String, String> createDefault()
     {
-        return new ConcurrentHashMap<>();
+        return new TreeMap<>();
     }
 
     @Override
     protected @NotNull String getDisplayName()
     {
         return "消息存储";
+    }
+
+    @Override
+    public boolean reloadConfiguration()
+    {
+        var val = super.reloadConfiguration();
+
+        addMissingStrings();
+
+        return val;
+    }
+
+    public void addMissingStrings()
+    {
+        //todo: 扫描整个messages下继承IStrings的对象，而不是用List.of暴力枚举
+        var classes = List.of(
+                CommonStrings.class,
+                MorphStrings.class,
+                RequestStrings.class,
+                SkillStrings.class
+        );
+
+        try
+        {
+            for (var c : classes)
+            {
+                var list = Arrays.stream(c.getFields()).filter(f -> f.getType().equals(FormattableMessage.class)).toList();
+
+                for (var f : list)
+                {
+                    var formattable = (FormattableMessage) f.get(null);
+
+                    var key = formattable.getKey();
+                    var defaultValue = formattable.getDefaultString();
+
+                    if (!storingObject.containsKey(key))
+                        storingObject.put(key, defaultValue);
+
+                    saveConfiguration();
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            Logger.warn(e.getMessage());
+            e.printStackTrace();
+        }
     }
 }

@@ -2,7 +2,7 @@ package xiamomc.morph.messages;
 
 import java.text.Format;
 
-public class MorphStrings
+public class MorphStrings implements IStrings
 {
     public static FormattableMessage morphSuccessString = new FormattableMessage(getKey("morph_success"),
             "成功伪装为<what>！");

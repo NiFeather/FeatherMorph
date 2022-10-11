@@ -1,6 +1,6 @@
 package xiamomc.morph.messages;
 
-public class RequestStrings
+public class RequestStrings implements IStrings
 {
     public static FormattableMessage requestSendString = new FormattableMessage(getKey("request_send"),
             "请求已发送！对方将有有1分钟的时间来接受！");

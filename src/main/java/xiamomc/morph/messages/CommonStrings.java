@@ -1,6 +1,6 @@
 package xiamomc.morph.messages;
 
-public class CommonStrings
+public class CommonStrings implements IStrings
 {
     public static FormattableMessage chatOverrideString = new FormattableMessage(getKey("chat.overridePattern"),
             "<<who>> <message>");

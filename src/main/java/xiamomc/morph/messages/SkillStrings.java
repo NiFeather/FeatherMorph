@@ -1,6 +1,6 @@
 package xiamomc.morph.messages;
 
-public class SkillStrings
+public class SkillStrings implements IStrings
 {
     public static FormattableMessage skillNotAvaliableString = new FormattableMessage(getKey("not_avaliable"),
             "<color:red>此伪装没有技能");
