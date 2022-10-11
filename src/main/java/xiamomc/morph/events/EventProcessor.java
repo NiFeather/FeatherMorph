@@ -15,6 +15,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.*;
@@ -250,16 +251,38 @@ public class EventProcessor extends MorphPluginObject implements Listener
                     }
                 }
 
-                //右键胡萝卜钓竿：执行主动技能
+                //右键胡萝卜钓竿：执行主动技能或快速变形
                 case CARROT_ON_A_STICK ->
                 {
-                    if (state != null && e.getHand() == EquipmentSlot.HAND)
+                    if (e.getHand() == EquipmentSlot.HAND)
                     {
-                        if (state.getAbilityCooldown() <= 0)
-                            morphs.executeDisguiseAbility(player);
+                        if (state != null)
+                        {
+                            if (state.getAbilityCooldown() <= 0)
+                                morphs.executeDisguiseAbility(player);
+                            else
+                                player.sendMessage(MessageUtils.prefixes(player,
+                                        SkillStrings.skillPreparing.resolve("time", state.getAbilityCooldown() / 20 + "")));
+                        }
                         else
-                            player.sendMessage(MessageUtils.prefixes(player,
-                                    SkillStrings.skillPreparing.resolve("time", state.getAbilityCooldown() / 20 + "")));
+                        {
+                            var targetedEntity = player.getTargetEntity(5);
+
+                            if (targetedEntity != null)
+                            {
+                                var disg = DisguiseAPI.getDisguise(targetedEntity);
+
+                                var targetKey = disg != null
+                                        ? (disg instanceof PlayerDisguise pd)
+                                            ? "player:" + pd.getName()
+                                            : disg.getType().getEntityType().getKey().asString()
+                                        : (targetedEntity instanceof Player targetPlayer)
+                                            ? "player:" + targetPlayer.getName()
+                                            : targetedEntity.getType().getKey().asString();
+
+                                morphs.morphEntityTypeAuto(player, targetKey, targetedEntity);
+                            }
+                        }
                     }
                 }
             }
