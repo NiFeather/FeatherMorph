@@ -9,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.interfaces.IManagePlayerData;
+import xiamomc.morph.messages.MorphStrings;
 import xiamomc.morph.misc.DisguiseInfo;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.messages.MessageUtils;
@@ -94,8 +95,7 @@ public class PlayerDataManager extends JsonBasedStorage<MorphConfiguration> impl
             newInstance.playerName = player.getName();
             newInstance.unlockedDisguises = new ArrayList<>();
 
-            var msg = Component.text("不知道如何使用伪装? 发送 /mmorph help 即可查看！");
-            player.sendMessage(MessageUtils.prefixes(player, msg));
+            player.sendMessage(MessageUtils.prefixes(player, MorphStrings.commandHintString));
 
             storingObject.playerMorphConfigurations.add(newInstance);
             return newInstance;
@@ -116,9 +116,9 @@ public class PlayerDataManager extends JsonBasedStorage<MorphConfiguration> impl
         else return false;
 
         sendMorphAcquiredNotification(player, morphs.getDisguiseStateFor(player),
-                Component.text("✔ 已解锁")
-                        .append(Component.translatable(type.translationKey()))
-                        .append(Component.text("的伪装")).color(NamedTextColor.GREEN));
+                MorphStrings.morphUnlockedString
+                        .resolve("what", Component.translatable(type.translationKey()))
+                        .toComponent());
 
         return true;
     }
@@ -136,7 +136,10 @@ public class PlayerDataManager extends JsonBasedStorage<MorphConfiguration> impl
         saveConfiguration();
 
         sendMorphAcquiredNotification(sourcePlayer, morphs.getDisguiseStateFor(sourcePlayer),
-                Component.text("✔ 已解锁" + targetPlayerName + "的伪装").color(NamedTextColor.GREEN));
+                MorphStrings.morphUnlockedString
+                        .resolve("what",targetPlayerName)
+                        .toComponent());
+
         return true;
     }
 
@@ -155,10 +158,11 @@ public class PlayerDataManager extends JsonBasedStorage<MorphConfiguration> impl
         if (state != null && state.getDisguise().getType().getEntityType().equals(entityType))
             morphs.unMorph(player);
 
-        sendMorphAcquiredNotification(player, state,
-                Component.text("❌ 已失去")
-                        .append(Component.translatable(entityType.translationKey()))
-                        .append(Component.text("的伪装")).color(NamedTextColor.RED));
+        sendMorphAcquiredNotification(player, morphs.getDisguiseStateFor(player),
+                MorphStrings.morphLockedString
+                        .resolve("what", Component.translatable(entityType.translationKey()))
+                        .toComponent());
+
         return true;
     }
 
@@ -184,8 +188,10 @@ public class PlayerDataManager extends JsonBasedStorage<MorphConfiguration> impl
             morphs.unMorph(player);
         }
 
-        sendMorphAcquiredNotification(player, state,
-                Component.text("❌ 已失去" + playerName + "的伪装").color(NamedTextColor.RED));
+        sendMorphAcquiredNotification(player, morphs.getDisguiseStateFor(player),
+                MorphStrings.morphLockedString
+                        .resolve("what", playerName)
+                        .toComponent());
 
         return true;
     }

@@ -13,6 +13,15 @@ public class MorphStrings implements IStrings
     public static FormattableMessage disguisingAsString = new FormattableMessage(getKey("disguising_as"),
             "正伪装为<what>");
 
+    public static FormattableMessage morphUnlockedString = new FormattableMessage(getKey("morph_unlocked"),
+            "<color:green>✔ 已解锁<what>的伪装！");
+
+    public static FormattableMessage morphLockedString = new FormattableMessage(getKey("morph_locked"),
+            "<color:red>❌ 已失去<what>的伪装！");
+
+    public static FormattableMessage commandHintString = new FormattableMessage(getKey("command_hint"),
+            "不知道如何使用伪装? 发送 /mmorph help 即可查看！");
+
     public static FormattableMessage disguisingWithSkillPreparingString = new FormattableMessage(getKey("disguising_as_skill_preparing"),
             "<color:#eeb565>正伪装为<what>");
 
