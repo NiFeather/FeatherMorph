@@ -4,11 +4,15 @@ import io.papermc.paper.chat.ChatRenderer;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
+import xiamomc.morph.config.ConfigOption;
+import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.pluginbase.Annotations.Resolved;
 
 public class MorphChatRenderer extends MorphPluginObject implements ChatRenderer
@@ -17,6 +21,12 @@ public class MorphChatRenderer extends MorphPluginObject implements ChatRenderer
 
     @Resolved(shouldSolveImmediately = true)
     private MorphManager morphManager;
+
+    @Resolved(shouldSolveImmediately = true)
+    private MiniMessage miniMessage;
+
+    @Resolved(shouldSolveImmediately = true)
+    private MorphConfigManager config;
 
     @Override
     public @NotNull Component render(@NotNull Player source, @NotNull Component sourceDisplayName, @NotNull Component message, @NotNull Audience viewer)
@@ -34,11 +44,19 @@ public class MorphChatRenderer extends MorphPluginObject implements ChatRenderer
                 Logger.info("正在覆盖" + source.getName() + "的消息：" + plainText);
             }
 
-            this.message = Component.text("≡ ")
-                    .append(sourceDisplayName)
-                    .append(Component.text(" » "))
-                    .append(message)
-                    .color(TextColor.fromHexString("#dddddd"));
+            try
+            {
+                var msgKey = config.getOrDefault(String.class, ConfigOption.CHAT_OVERRIDE_PATTERN);
+
+                this.message = miniMessage.deserialize(msgKey,
+                        Placeholder.component("who", sourceDisplayName),
+                        Placeholder.component("message", message));
+            }
+            catch (Throwable t)
+            {
+                Logger.warn("格式化消息时出现错误：" + t.getMessage());
+                t.printStackTrace();
+            }
         }
 
         return this.message;
