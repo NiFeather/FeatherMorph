@@ -5,6 +5,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import xiamomc.morph.messages.SkillStrings;
 
 public class DolphinMorphSkill extends MorphSkill
 {
@@ -15,7 +16,7 @@ public class DolphinMorphSkill extends MorphSkill
     {
         if (!player.isInWater())
         {
-            sendDenyMessageToPlayer(player, Component.translatable("你需要在水里才能使用此技能"));
+            sendDenyMessageToPlayer(player, SkillStrings.notInWaterString.toComponent());
             return 5;
         }
 

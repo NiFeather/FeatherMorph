@@ -2,12 +2,12 @@ package xiamomc.morph.skills;
 
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
-import net.kyori.adventure.text.Component;
 import org.bukkit.Particle;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import xiamomc.morph.messages.SkillStrings;
 
 import java.util.Map;
 import java.util.UUID;
@@ -27,7 +27,7 @@ public class ElderGuardianMorphSkill extends MorphSkill
     {
         if (!player.isInWater())
         {
-            sendDenyMessageToPlayer(player, Component.translatable("你需要在水里才能使用此技能"));
+            sendDenyMessageToPlayer(player, SkillStrings.notInWaterString.toComponent());
             return 20;
         }
 
@@ -36,7 +36,7 @@ public class ElderGuardianMorphSkill extends MorphSkill
 
         if (lastActivate != null && Plugin.getCurrentTick() - lastActivate < defaultCooldown)
         {
-            sendDenyMessageToPlayer(player, Component.translatable("距离上次使用远古守卫者的技能不足1分钟"));
+            sendDenyMessageToPlayer(player, SkillStrings.elderGuardianCoolingDownString.toComponent());
             return 20;
         }
 

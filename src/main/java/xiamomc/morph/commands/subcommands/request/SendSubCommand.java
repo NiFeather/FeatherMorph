@@ -8,7 +8,9 @@ import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.interfaces.IManageRequests;
+import xiamomc.morph.messages.CommonStrings;
 import xiamomc.morph.messages.MessageUtils;
+import xiamomc.morph.messages.RequestStrings;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Command.ISubCommand;
 
@@ -67,23 +69,20 @@ public class SendSubCommand extends MorphPluginObject implements ISubCommand
 
                 if (targetPlayer == null)
                 {
-                    sourcePlayer.sendMessage(MessageUtils.prefixes(sender,
-                            Component.text("未找到目标玩家")));
+                    sender.sendMessage(MessageUtils.prefixes(sender, CommonStrings.playerNotFoundString));
                     return true;
                 }
 
                 if (targetPlayer.getUniqueId().equals(sourcePlayer.getUniqueId()))
                 {
-                    sourcePlayer.sendMessage(MessageUtils.prefixes(sender,
-                            Component.text("不能给自己发请求")));
+                    sourcePlayer.sendMessage(MessageUtils.prefixes(sender, RequestStrings.cantSendToSelfString));
                     return true;
                 }
 
                 if (morphs.getAvaliableDisguisesFor(sourcePlayer).stream()
                         .anyMatch(c -> c.isPlayerDisguise() && c.playerDisguiseTargetName.equals(args[0])))
                 {
-                    sourcePlayer.sendMessage(MessageUtils.prefixes(sender,
-                            Component.text("你已经有对方的伪装形态了")));
+                    sourcePlayer.sendMessage(MessageUtils.prefixes(sender, RequestStrings.alreadyHaveDisguiseString));
                     return true;
                 }
 
@@ -91,8 +90,7 @@ public class SendSubCommand extends MorphPluginObject implements ISubCommand
             }
             else
             {
-                sender.sendMessage(MessageUtils.prefixes(sender,
-                        Component.translatable("未指定请求要发给谁")));
+                sender.sendMessage(MessageUtils.prefixes(sender, CommonStrings.playerNotDefinedString));
             }
         }
 

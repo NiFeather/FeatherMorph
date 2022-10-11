@@ -8,6 +8,7 @@ import org.bukkit.Difficulty;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.ShulkerBullet;
+import xiamomc.morph.messages.SkillStrings;
 
 public class ShulkerMorphSkill extends MorphSkill
 {
@@ -19,7 +20,7 @@ public class ShulkerMorphSkill extends MorphSkill
 
         if (player.getWorld().getDifficulty() == Difficulty.PEACEFUL)
         {
-            sendDenyMessageToPlayer(player, Component.text("世界难度为和平"));
+            sendDenyMessageToPlayer(player, SkillStrings.difficultyIsPeacefulString.toComponent());
             return 5;
         }
 
@@ -37,7 +38,7 @@ public class ShulkerMorphSkill extends MorphSkill
         }
         else
         {
-            sendDenyMessageToPlayer(player, Component.text("视线" + distance + "格以内没有实体").color(NamedTextColor.RED));
+            sendDenyMessageToPlayer(player, SkillStrings.noTargetString.resolve("distance", distance + "").toComponent());
             return 10;
         }
 

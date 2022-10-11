@@ -1,7 +1,6 @@
 package xiamomc.morph.messages;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.storage.JsonBasedStorage;
 import xiamomc.pluginbase.Annotations.Initializer;
 

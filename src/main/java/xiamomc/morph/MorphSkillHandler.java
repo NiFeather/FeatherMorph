@@ -7,6 +7,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import xiamomc.morph.messages.MessageUtils;
+import xiamomc.morph.messages.SkillStrings;
 import xiamomc.morph.skills.IMorphSkill;
 import xiamomc.pluginbase.Annotations.Resolved;
 
@@ -49,8 +50,7 @@ public class MorphSkillHandler extends MorphPluginObject
         {
             state.setAbilityCooldown(20);
 
-            player.sendMessage(MessageUtils.prefixes(player, Component.translatable("此伪装暂时没有技能")
-                    .color(NamedTextColor.RED)));
+            player.sendMessage(MessageUtils.prefixes(player, SkillStrings.skillNotAvaliableString));
 
             player.playSound(Sound.sound(Key.key("minecraft", "entity.villager.no"),
                     Sound.Source.PLAYER, 1f, 1f));

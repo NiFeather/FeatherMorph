@@ -1,10 +1,10 @@
 package xiamomc.morph;
 
-import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import xiamomc.morph.interfaces.IManagePlayerData;
 import xiamomc.morph.interfaces.IManageRequests;
 import xiamomc.morph.messages.MessageUtils;
+import xiamomc.morph.messages.RequestStrings;
 import xiamomc.morph.misc.RequestInfo;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
@@ -47,7 +47,7 @@ public class RequestManager extends MorphPluginObject implements IManageRequests
                 .anyMatch(i -> i.sourcePlayer.getUniqueId() == source.getUniqueId()
                         && i.targetPlayer.getUniqueId() == target.getUniqueId()))
         {
-            source.sendMessage(MessageUtils.prefixes(source, Component.text("你已经向" + target + "发送过一个请求了")));
+            source.sendMessage(MessageUtils.prefixes(source, RequestStrings.requestAlreadySentString));
             return;
         }
 
@@ -58,15 +58,17 @@ public class RequestManager extends MorphPluginObject implements IManageRequests
 
         requests.add(req);
 
-        var msg = Component.translatable("你收到了来自")
-                .append(Component.text(source.getName()))
-                .append(Component.translatable("的交换请求！"));
+        target.sendMessage(MessageUtils.prefixes(target, RequestStrings.requestReceivedString
+                .resolve("who", source.getName())));
 
-        target.sendMessage(MessageUtils.prefixes(target, msg));
-
-        source.sendMessage(MessageUtils.prefixes(source, Component.translatable("请求已发送！对方将有1分钟的时间来接受")));
+        source.sendMessage(MessageUtils.prefixes(source, RequestStrings.requestSendString));
     }
 
+    /**
+     * 接受请求
+     * @param source 请求接受方
+     * @param target 请求发起方
+     */
     @Override
     public void acceptRequest(Player source, Player target)
     {
@@ -76,7 +78,7 @@ public class RequestManager extends MorphPluginObject implements IManageRequests
 
         if (match.isEmpty())
         {
-            source.sendMessage(MessageUtils.prefixes(source, Component.text("未找到目标请求，可能已经过期？")));
+            source.sendMessage(MessageUtils.prefixes(source, RequestStrings.requestNotFound));
             return;
         }
 
@@ -86,10 +88,15 @@ public class RequestManager extends MorphPluginObject implements IManageRequests
         data.grantPlayerMorphToPlayer(target, source.getName());
         data.grantPlayerMorphToPlayer(source, target.getName());
 
-        target.sendMessage(MessageUtils.prefixes(target, Component.text("成功与" + source.getName() + "交换！")));
-        source.sendMessage(MessageUtils.prefixes(source, Component.text("成功与" + target.getName() + "交换！")));
+        target.sendMessage(MessageUtils.prefixes(target, RequestStrings.targetAcceptedString.resolve("who", source.getName())));
+        source.sendMessage(MessageUtils.prefixes(source, RequestStrings.sourceAcceptedString.resolve("who", target.getName())));
     }
 
+    /**
+     * 拒绝请求
+     * @param source 请求接受方
+     * @param target 请求发起方
+     */
     @Override
     public void denyRequest(Player source, Player target)
     {
@@ -99,7 +106,7 @@ public class RequestManager extends MorphPluginObject implements IManageRequests
 
         if (match.isEmpty())
         {
-            source.sendMessage(MessageUtils.prefixes(source, Component.text("未找到目标请求，可能已经过期？")));
+            source.sendMessage(MessageUtils.prefixes(source, RequestStrings.requestNotFound));
 
             //"未找到目标请求，可能已经过期？"
             return;
@@ -108,10 +115,8 @@ public class RequestManager extends MorphPluginObject implements IManageRequests
         var req = match.get();
         req.ticksRemain = -1;
 
-        var msg = Component.text("请求已拒绝");
-
-        target.sendMessage(MessageUtils.prefixes(target, Component.text("发往" + source.getName() + "的").append(msg)));
-        source.sendMessage(MessageUtils.prefixes(source, Component.text("来自" + target.getName() + "的").append(msg)));
+        target.sendMessage(MessageUtils.prefixes(target, RequestStrings.targetDeniedString.resolve("who", source.getName())));
+        source.sendMessage(MessageUtils.prefixes(source, RequestStrings.sourceAcceptedString.resolve("who", target.getName())));
     }
 
     @Override

@@ -34,4 +34,9 @@ public class MessageUtils extends MorphPluginObject
     {
         return prefixes(sender, new Component[]{c});
     }
+
+    public static Component prefixes(CommandSender sender, FormattableMessage formattable)
+    {
+        return prefixes(sender, formattable.toComponent());
+    }
 }

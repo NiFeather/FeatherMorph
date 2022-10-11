@@ -6,6 +6,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.MorphPlugin;
+import xiamomc.morph.messages.CommonStrings;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.pluginbase.Command.SubCommandHandler;
 
@@ -23,7 +24,7 @@ public abstract class MorphSubCommandHandler extends SubCommandHandler<MorphPlug
         var result = super.onCommand(sender, command, label, args);
 
         if (!result)
-            sender.sendMessage(MessageUtils.prefixes(sender, Component.text("未找到该指令").color(NamedTextColor.RED)));
+            sender.sendMessage(MessageUtils.prefixes(sender, CommonStrings.commandNotFoundString));
 
         return true;
     }

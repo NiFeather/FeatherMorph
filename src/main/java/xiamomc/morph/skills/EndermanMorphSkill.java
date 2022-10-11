@@ -2,9 +2,9 @@ package xiamomc.morph.skills;
 
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
-import net.kyori.adventure.text.Component;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import xiamomc.morph.messages.SkillStrings;
 
 public class EndermanMorphSkill extends MorphSkill
 {
@@ -14,7 +14,7 @@ public class EndermanMorphSkill extends MorphSkill
         var targetBlock = player.getTargetBlock(32);
         if (targetBlock == null || targetBlock.getBlockData().getMaterial().isAir())
         {
-            sendDenyMessageToPlayer(player, Component.text("目标太远或不合适"));
+            sendDenyMessageToPlayer(player, SkillStrings.targetNotSuitableString.toComponent());
             return 20;
         }
 

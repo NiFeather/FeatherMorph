@@ -32,6 +32,8 @@ import xiamomc.morph.abilities.AbilityFlag;
 import xiamomc.morph.commands.MorphCommandHelper;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
+import xiamomc.morph.messages.MorphStrings;
+import xiamomc.morph.messages.SkillStrings;
 import xiamomc.morph.misc.DisguiseUtils;
 import xiamomc.morph.misc.EntityTypeUtils;
 import xiamomc.morph.messages.MessageUtils;
@@ -186,14 +188,14 @@ public class EventProcessor extends MorphPluginObject implements Listener
                 {
                     if (!allowHeadMorph)
                     {
-                        player.sendMessage(MessageUtils.prefixes(player, Component.translatable("此功能已被禁用").color(NamedTextColor.RED)));
+                        player.sendMessage(MessageUtils.prefixes(player, MorphStrings.headDisguiseDisabledString));
 
                         return;
                     }
 
                     if (!morphs.canMorph(player))
                     {
-                        player.sendMessage(MessageUtils.prefixes(player, Component.translatable("请等一会再尝试伪装").color(NamedTextColor.RED)));
+                        player.sendMessage(MessageUtils.prefixes(player, MorphStrings.disguiseCoolingDownString));
 
                         return;
                     }
@@ -204,7 +206,7 @@ public class EventProcessor extends MorphPluginObject implements Listener
 
                         if (profile == null)
                         {
-                            player.sendMessage(MessageUtils.prefixes(player, Component.text("无效的皮肤").color(NamedTextColor.RED)));
+                            player.sendMessage(MessageUtils.prefixes(player, MorphStrings.invalidSkinString));
                             return;
                         }
 
@@ -256,9 +258,8 @@ public class EventProcessor extends MorphPluginObject implements Listener
                         if (state.getAbilityCooldown() <= 0)
                             morphs.executeDisguiseAbility(player);
                         else
-                            player.sendMessage(MessageUtils.prefixes(player, Component.translatable("技能正在冷却中")
-                                    .append(Component.text("(" + state.getAbilityCooldown() / 20 + "秒)"))
-                                    .color(NamedTextColor.RED)));
+                            player.sendMessage(MessageUtils.prefixes(player,
+                                    SkillStrings.skillPreparing.resolve("time", state.getAbilityCooldown() / 20 + "")));
                     }
                 }
             }
@@ -368,24 +369,22 @@ public class EventProcessor extends MorphPluginObject implements Listener
         }
         else if (offlineState != null)
         {
-            player.sendMessage(MessageUtils.prefixes(player, Component.text("自上次离线后相关功能已被重置")));
+            player.sendMessage(MessageUtils.prefixes(player, MorphStrings.stateRecoverReasonString));
 
             if (morphs.disguiseFromOfflineState(player, offlineState))
             {
                 if (offlineState.disguise != null)
                 {
-                    player.sendMessage(MessageUtils.prefixes(player, Component.text("我们正在恢复您的伪装")));
+                    player.sendMessage(MessageUtils.prefixes(player, MorphStrings.recoveringStateString));
                 }
                 else
                 {
-                    player.sendMessage(MessageUtils.prefixes(player, Component.text("我们正从有限副本中恢复您的伪装")));
-                    player.sendMessage(MessageUtils.prefixes(player, Component.text("恢复后的伪装可能和之前的不一样")
-                            .decorate(TextDecoration.ITALIC)));
+                    player.sendMessage(MessageUtils.prefixes(player, MorphStrings.recoveringStateLimitedString));
+                    player.sendMessage(MessageUtils.prefixes(player, MorphStrings.recoveringStateLimitedHintString));
                 }
             }
             else
-                player.sendMessage(MessageUtils.prefixes(player, Component.text("我们无法恢复您的伪装 :(")
-                        .color(NamedTextColor.RED)));
+                player.sendMessage(MessageUtils.prefixes(player, MorphStrings.recoveringFailedString));
         };
     }
 

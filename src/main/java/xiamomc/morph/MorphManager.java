@@ -28,6 +28,7 @@ import xiamomc.morph.events.PlayerMorphEvent;
 import xiamomc.morph.events.PlayerUnMorphEvent;
 import xiamomc.morph.interfaces.IManagePlayerData;
 import xiamomc.morph.messages.MessageUtils;
+import xiamomc.morph.messages.MorphStrings;
 import xiamomc.morph.misc.*;
 import xiamomc.morph.skills.*;
 import xiamomc.morph.storage.offlinestore.OfflineDisguiseState;
@@ -173,11 +174,11 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         var watcher = disguise.getWatcher();
 
         //更新actionbar信息
-        player.sendActionBar(MessageUtils.prefixes(player, Component.translatable("正伪装为")
-                .append(state.getDisplayName())
-                .color(skillHandler.hasSkill(disguise.getType().getEntityType())
-                        ? (state.getAbilityCooldown() <= 0 ? TextColor.fromHexString("#8fe98d") : TextColor.fromHexString("#eeb565"))
-                        : TextColor.fromHexString("#f0f0f0"))));
+        var msg = skillHandler.hasSkill(disguise.getType().getEntityType())
+                ? (state.getAbilityCooldown() <= 0 ? MorphStrings.disguisingWithSkillAvaliableString : MorphStrings.disguisingWithSkillPreparingString)
+                : MorphStrings.disguisingAsString;
+
+        player.sendActionBar(msg.resolve("what", state.getDisplayName()).toComponent());
 
         //workaround: 复制实体伪装时会一并复制隐身标签
         //            会导致复制出来的伪装永久隐身
@@ -275,8 +276,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
                 if (!type.isAlive())
                 {
-                    player.sendMessage(MessageUtils.prefixes(player,
-                            Component.translatable("此ID不能被用于伪装", TextColor.color(255, 0, 0))));
+                    player.sendMessage(MessageUtils.prefixes(player, MorphStrings.invalidIdentityString));
 
                     return false;
                 }
@@ -314,27 +314,26 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                         morphEntityType(player, type); //否则，只简单地创建实体伪装
                 }
 
-                var msg = Component.translatable("成功伪装为")
-                        .append(type == EntityType.PLAYER
+                var msg = MorphStrings.morphSuccessString
+                        .resolve("what", type == EntityType.PLAYER
                                 ? Component.text(key.replace("player:", ""))
-                                : Component.translatable(type.translationKey()))
-                        .append(Component.text("！"));
+                                : Component.translatable(type.translationKey()));
+
                 player.sendMessage(MessageUtils.prefixes(player, msg));
 
                 return true;
             }
             catch (IllegalArgumentException iae)
             {
-                player.sendMessage(MessageUtils.prefixes(player,
-                        Component.translatable("未能解析" + key, TextColor.color(255, 0, 0))));
+                player.sendMessage(MessageUtils.prefixes(player, MorphStrings.parseErrorString
+                        .resolve("id", key)));
 
                 return false;
             }
         }
         else
         {
-            player.sendMessage(MessageUtils.prefixes(player,
-                    Component.translatable("你尚未拥有此伪装")));
+            player.sendMessage(MessageUtils.prefixes(player, MorphStrings.morphNotOwnedString));
         }
 
         return false;
@@ -439,7 +438,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         var disguise = targetInfoOptional.get().getDisguise();
         disguise.removeDisguise(player);
 
-        player.sendMessage(MessageUtils.prefixes(player, Component.text("已取消伪装")));
+        player.sendMessage(MessageUtils.prefixes(player, MorphStrings.unMorphSuccessString));
         player.sendActionBar(Component.empty());
 
         //取消玩家飞行
@@ -554,7 +553,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         //更新或者添加DisguiseState
         var state = getDisguiseStateFor(sourcePlayer);
-
         if (state == null)
         {
             state = new DisguiseState(sourcePlayer, disguise, shouldHandlePose);
@@ -566,7 +564,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         //如果伪装的时候坐着，显示提示
         if (sourcePlayer.getVehicle() != null)
-            sourcePlayer.sendMessage(MessageUtils.prefixes(sourcePlayer, Component.text("您将在起身后看到自己的伪装")));
+            sourcePlayer.sendMessage(MessageUtils.prefixes(sourcePlayer, MorphStrings.morphVisibleAfterStandup));
 
         //如果实体能飞，那么也允许玩家飞行
         updateFlyingAbility(sourcePlayer);
@@ -607,8 +605,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         var config = getPlayerConfiguration(sourcePlayer);
         if (!config.shownMorphAbilityHint && skillHandler.hasSkill(disguiseType.getEntityType()))
         {
-            sourcePlayer.sendMessage(MessageUtils.prefixes(sourcePlayer,
-                    Component.translatable("小提示: 手持胡萝卜钓竿蹲下右键可以使用当前伪装的主动技能")));
+            sourcePlayer.sendMessage(MessageUtils.prefixes(sourcePlayer, MorphStrings.skillHintString));
             config.shownMorphAbilityHint = true;
         }
 

@@ -4,6 +4,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,13 +15,31 @@ public class FormattableMessage
 
     private final String defaultString;
 
-    public FormattableMessage(String key, String defaultString)
+    public FormattableMessage(@NotNull String key, @NotNull String defaultString)
     {
         this.defaultString = defaultString;
         this.key = key;
     }
 
     private final List<TagResolver> resolvers = new ArrayList<>();
+
+    /**
+     * 获取消息的Key
+     * @return 消息的key
+     */
+    public String getKey()
+    {
+        return key;
+    }
+
+    /**
+     * 获取消息的默认消息
+     * @return 默认消息
+     */
+    public String getDefaultString()
+    {
+        return defaultString;
+    }
 
     /**
      * 添加解析

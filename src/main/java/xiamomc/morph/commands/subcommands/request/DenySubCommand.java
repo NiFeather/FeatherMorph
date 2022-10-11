@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.interfaces.IManageRequests;
+import xiamomc.morph.messages.CommonStrings;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Command.ISubCommand;
@@ -64,8 +65,7 @@ public class DenySubCommand extends MorphPluginObject implements ISubCommand
 
                 if (targetPlayer == null)
                 {
-                    sender.sendMessage(MessageUtils.prefixes(sender,
-                            Component.translatable("对方未上线或目标玩家不存在").color(NamedTextColor.RED)));
+                    sender.sendMessage(MessageUtils.prefixes(sender, CommonStrings.playerNotFoundString));
                     return true;
                 }
 
@@ -73,8 +73,7 @@ public class DenySubCommand extends MorphPluginObject implements ISubCommand
             }
             else
             {
-                sender.sendMessage(MessageUtils.prefixes(sender,
-                        Component.translatable("未指定要拒绝谁的请求").color(NamedTextColor.RED)));
+                sender.sendMessage(MessageUtils.prefixes(sender, CommonStrings.playerNotDefinedString));
             }
         }
 

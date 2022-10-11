@@ -9,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.messages.MessageUtils;
+import xiamomc.morph.messages.MorphStrings;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Command.IPluginCommand;
 
@@ -28,7 +29,7 @@ public class MorphCommand extends MorphPluginObject implements IPluginCommand
             //伪装冷却
             if (!morphManager.canMorph(player))
             {
-                sender.sendMessage(MessageUtils.prefixes(player, Component.translatable("请等一会再进行伪装").color(NamedTextColor.RED)));
+                sender.sendMessage(MessageUtils.prefixes(player, MorphStrings.disguiseCoolingDownString));
 
                 return true;
             }
@@ -38,8 +39,7 @@ public class MorphCommand extends MorphPluginObject implements IPluginCommand
                 morphManager.morphEntityTypeAuto(player, args[0], player.getTargetEntity(5));
             }
             else
-                sender.sendMessage(MessageUtils.prefixes(sender,
-                        Component.text("你需要指定要伪装的对象")));
+                sender.sendMessage(MessageUtils.prefixes(sender, MorphStrings.disguiseNotDefinedString));
         }
 
         return true;
