@@ -3,9 +3,7 @@ package xiamomc.morph.misc;
 import io.papermc.paper.chat.ChatRenderer;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
-import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -13,6 +11,7 @@ import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
+import xiamomc.morph.messages.CommonStrings;
 import xiamomc.pluginbase.Annotations.Resolved;
 
 public class MorphChatRenderer extends MorphPluginObject implements ChatRenderer
@@ -48,9 +47,9 @@ public class MorphChatRenderer extends MorphPluginObject implements ChatRenderer
             {
                 var msgKey = config.getOrDefault(String.class, ConfigOption.CHAT_OVERRIDE_PATTERN);
 
-                this.message = miniMessage.deserialize(msgKey,
-                        Placeholder.component("who", sourceDisplayName),
-                        Placeholder.component("message", message));
+                this.message = CommonStrings.chatOverrideString
+                        .resolve("who", sourceDisplayName)
+                        .resolve("message", message).toComponent();
             }
             catch (Throwable t)
             {

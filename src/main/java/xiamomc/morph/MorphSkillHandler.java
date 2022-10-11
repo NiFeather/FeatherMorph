@@ -6,7 +6,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import xiamomc.morph.misc.MessageUtils;
+import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.skills.IMorphSkill;
 import xiamomc.pluginbase.Annotations.Resolved;
 

@@ -27,6 +27,7 @@ import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.events.PlayerMorphEvent;
 import xiamomc.morph.events.PlayerUnMorphEvent;
 import xiamomc.morph.interfaces.IManagePlayerData;
+import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.misc.*;
 import xiamomc.morph.skills.*;
 import xiamomc.morph.storage.offlinestore.OfflineDisguiseState;
@@ -782,19 +783,17 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     }
 
     @Override
-    public void reloadConfiguration()
+    public boolean reloadConfiguration()
     {
         unMorphAll(true);
 
-        data.reloadConfiguration();
-        offlineStorage.reloadConfiguration();
+        return data.reloadConfiguration() && offlineStorage.reloadConfiguration();
     }
 
     @Override
-    public void saveConfiguration()
+    public boolean saveConfiguration()
     {
-        data.saveConfiguration();
-        offlineStorage.reloadConfiguration();
+        return data.saveConfiguration() && offlineStorage.reloadConfiguration();
     }
     //endregion Implementation of IManagePlayerData
 }

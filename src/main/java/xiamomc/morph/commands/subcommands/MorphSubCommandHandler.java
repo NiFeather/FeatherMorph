@@ -6,7 +6,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.MorphPlugin;
-import xiamomc.morph.misc.MessageUtils;
+import xiamomc.morph.messages.MessageUtils;
 import xiamomc.pluginbase.Command.SubCommandHandler;
 
 public abstract class MorphSubCommandHandler extends SubCommandHandler<MorphPlugin>

@@ -12,7 +12,7 @@ import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.commands.MorphCommandHelper;
 import xiamomc.morph.commands.subcommands.plugin.helpsections.Entry;
 import xiamomc.morph.commands.subcommands.plugin.helpsections.Section;
-import xiamomc.morph.misc.MessageUtils;
+import xiamomc.morph.messages.MessageUtils;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Command.ISubCommand;

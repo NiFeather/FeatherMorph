@@ -34,7 +34,7 @@ import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.misc.DisguiseUtils;
 import xiamomc.morph.misc.EntityTypeUtils;
-import xiamomc.morph.misc.MessageUtils;
+import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.misc.MorphChatRenderer;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;

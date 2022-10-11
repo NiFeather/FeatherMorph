@@ -3,8 +3,7 @@ package xiamomc.morph.skills;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import xiamomc.morph.MorphManager;
-import xiamomc.morph.misc.MessageUtils;
-import xiamomc.pluginbase.Annotations.Initializer;
+import xiamomc.morph.messages.MessageUtils;
 import xiamomc.pluginbase.Annotations.Resolved;
 
 public abstract class InventoryMorphSkill extends MorphSkill

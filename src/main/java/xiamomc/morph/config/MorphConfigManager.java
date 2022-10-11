@@ -1,7 +1,6 @@
 package xiamomc.morph.config;
 
 import org.jetbrains.annotations.Nullable;
-import xiamomc.pluginbase.Configuration.ConfigNode;
 import xiamomc.pluginbase.Configuration.PluginConfigManager;
 import xiamomc.pluginbase.XiaMoJavaPlugin;
 
@@ -10,6 +9,15 @@ public class MorphConfigManager extends PluginConfigManager
     public MorphConfigManager(XiaMoJavaPlugin plugin)
     {
         super(plugin);
+
+        instance = this;
+    }
+
+    private static MorphConfigManager instance;
+
+    public static MorphConfigManager getInstance()
+    {
+        return instance;
     }
 
     public <T> T getOrDefault(Class<T> type, ConfigOption option, @Nullable T defaultValue)

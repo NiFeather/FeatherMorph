@@ -1,102 +1,65 @@
 package xiamomc.morph.storage.playerdata;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
-import net.bytebuddy.implementation.bind.annotation.Morph;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphManager;
-import xiamomc.morph.MorphPlugin;
-import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.interfaces.IManagePlayerData;
 import xiamomc.morph.misc.DisguiseInfo;
 import xiamomc.morph.misc.DisguiseState;
-import xiamomc.morph.misc.MessageUtils;
-import xiamomc.pluginbase.Annotations.Initializer;
+import xiamomc.morph.messages.MessageUtils;
+import xiamomc.morph.storage.JsonBasedStorage;
 import xiamomc.pluginbase.Annotations.Resolved;
 
-import java.io.*;
-import java.net.URI;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class PlayerDataManager extends MorphPluginObject implements IManagePlayerData
+public class PlayerDataManager extends JsonBasedStorage<MorphConfiguration> implements IManagePlayerData
 {
-    private File configurationFile;
-
-    private final Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
-
-    private MorphConfiguration morphConfiguration = new MorphConfiguration();
-
     private final List<DisguiseInfo> cachedInfos = new ArrayList<>();
 
     @Resolved
     private MorphManager morphs;
 
-    @Initializer
-    private void load(MorphPlugin plugin) throws IOException
+    @Override
+    protected @NotNull String getFileName()
     {
-        //初始化配置文件
-        if (configurationFile == null)
-            configurationFile = new File(URI.create(plugin.getDataFolder().toURI() + "/data.json"));
+        return "data.json";
+    }
 
-        if (!configurationFile.exists())
-        {
-            //创建父目录
-            if (!configurationFile.getParentFile().exists())
-                Files.createDirectories(Paths.get(configurationFile.getParentFile().toURI()));
+    @Override
+    protected @NotNull MorphConfiguration createDefault()
+    {
+        return new MorphConfiguration();
+    }
 
-            if (!configurationFile.createNewFile())
-            {
-                Logger.error("未能创建文件，将不会加载玩家配置！");
-                return;
-            }
-        }
-
-        reloadConfiguration();
+    @Override
+    protected @NotNull String getDisplayName()
+    {
+        return "数据存储";
     }
 
     //region Implementation of IManagePlayerData
 
     @Override
-    public void reloadConfiguration()
+    public boolean reloadConfiguration()
     {
-        //加载JSON配置
-        MorphConfiguration targetConfiguration = null;
-        var success = false;
+        var success = super.reloadConfiguration();
 
-        //从文件读取并反序列化为配置
-        try (var jsonStream = new InputStreamReader(new FileInputStream(configurationFile)))
-        {
-            targetConfiguration = gson.fromJson(jsonStream, MorphConfiguration.class);
-            success = true;
-        }
-        catch (IOException e)
-        {
-            Logger.warn("无法加载JSON配置：" + e.getMessage());
-            e.printStackTrace();
-        }
-
-        //确保targetConfiguration不是null
-        if (targetConfiguration == null) targetConfiguration = new MorphConfiguration();
-
-        //设置并保存
-        morphConfiguration = targetConfiguration;
         if (success)
         {
-            if (morphConfiguration.Version < targetConfigurationVersion)
-                migrate(targetConfiguration);
+            if (storingObject.Version < targetConfigurationVersion)
+                migrate(storingObject);
 
             saveConfiguration();
         }
+
+        return success;
     }
 
     private final int targetConfigurationVersion = 2;
@@ -112,35 +75,9 @@ public class PlayerDataManager extends MorphPluginObject implements IManagePlaye
     }
 
     @Override
-    public void saveConfiguration()
-    {
-        try
-        {
-            var jsonString = gson.toJson(morphConfiguration);
-
-            if (configurationFile.exists()) configurationFile.delete();
-
-            if (!configurationFile.createNewFile())
-            {
-                Logger.error("未能创建文件，将不会保存玩家配置！");
-                return;
-            }
-
-            try (var stream = new FileOutputStream(configurationFile))
-            {
-                stream.write(jsonString.getBytes(StandardCharsets.UTF_8));
-            }
-        }
-        catch (Exception e)
-        {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
     public PlayerMorphConfiguration getPlayerConfiguration(Player player)
     {
-        var valueOptional = morphConfiguration.playerMorphConfigurations
+        var valueOptional = storingObject.playerMorphConfigurations
                 .stream().filter(c -> c.uniqueId.equals(player.getUniqueId())).findFirst();
 
         if (valueOptional.isPresent())
@@ -160,7 +97,7 @@ public class PlayerDataManager extends MorphPluginObject implements IManagePlaye
             var msg = Component.text("不知道如何使用伪装? 发送 /mmorph help 即可查看！");
             player.sendMessage(MessageUtils.prefixes(player, msg));
 
-            morphConfiguration.playerMorphConfigurations.add(newInstance);
+            storingObject.playerMorphConfigurations.add(newInstance);
             return newInstance;
         }
     }

@@ -7,8 +7,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.Fireball;
 import org.bukkit.entity.Player;
 import xiamomc.morph.MorphPluginObject;
-import xiamomc.morph.misc.MessageUtils;
-import xiamomc.pluginbase.Annotations.Initializer;
+import xiamomc.morph.messages.MessageUtils;
 
 import java.util.ArrayList;
 import java.util.List;

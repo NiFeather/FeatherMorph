@@ -1,12 +1,10 @@
-package xiamomc.morph.misc;
+package xiamomc.morph.messages;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
-import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import xiamomc.morph.MorphPluginObject;
-import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.pluginbase.Annotations.Resolved;
 
@@ -27,8 +25,9 @@ public class MessageUtils extends MorphPluginObject
         for (var cc : c)
             finalComponent = finalComponent.append(cc);
 
-        return miniMessage.deserialize(configManager.getOrDefault(String.class, ConfigOption.MESSAGE_PATTERN),
-                Placeholder.component("message", finalComponent));
+        return CommonStrings.pluginMessageString
+                .resolve("message", finalComponent)
+                .toComponent();
     }
 
     public static Component prefixes(CommandSender sender, Component c)
