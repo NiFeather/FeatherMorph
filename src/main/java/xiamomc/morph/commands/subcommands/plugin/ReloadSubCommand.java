@@ -8,6 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.config.MorphConfigManager;
+import xiamomc.morph.messages.CommandStrings;
 import xiamomc.morph.messages.MessageStore;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.pluginbase.Annotations.Resolved;
@@ -52,10 +53,10 @@ public class ReloadSubCommand extends MorphPluginObject implements ISubCommand
             config.reload();
             messageStore.reloadConfiguration();
 
-            sender.sendMessage(MessageUtils.prefixes(sender, Component.text("重载完成！")));
+            sender.sendMessage(MessageUtils.prefixes(sender, CommandStrings.reloadCompleteMessage));
         }
         else
-            sender.sendMessage(MessageUtils.prefixes(sender, Component.text("禁止接触").color(NamedTextColor.RED)));
+            sender.sendMessage(MessageUtils.prefixes(sender, CommandStrings.noPermissionMessage));
 
         return true;
     }

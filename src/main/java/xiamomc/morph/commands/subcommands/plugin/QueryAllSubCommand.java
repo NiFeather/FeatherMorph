@@ -5,6 +5,7 @@ import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
+import xiamomc.morph.messages.CommandStrings;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Command.ISubCommand;
@@ -40,28 +41,34 @@ public class QueryAllSubCommand extends MorphPluginObject implements ISubCommand
 
         if (list.size() == 0 && offlineStates.size() == 0)
         {
-            commandSender.sendMessage(MessageUtils.prefixes(commandSender, Component.text("目前没有人伪装成任何东西")));
+            commandSender.sendMessage(MessageUtils.prefixes(commandSender, CommandStrings.qaNoBodyDisguisingString));
             return true;
         }
+
+        var msg = CommandStrings.qaDisguisedString;
 
         for (var i : list)
         {
             var player = i.getPlayer();
-            var msg = MessageUtils.prefixes(commandSender,
-                    Component.text(player.getName() + (player.isOnline() ? "" : "（离线）") + " 伪装成了 ")
-                            .append(i.getDisplayName())
-            );
+            msg.resolve("who", player.getName())
+                    .resolve("status", player.isOnline()
+                            ? CommandStrings.qaOnlineString
+                            : CommandStrings.qaOfflineString)
+                    .resolve("what", i.getDisplayName())
+                    .resolve("storage_status", i.showingDefaultItems()
+                            ? CommandStrings.qaShowingDisguisedItemsString
+                            : CommandStrings.qaNotShowingDisguisedItemsString);
 
-            if (i.showingDefaultItems())
-                msg = msg.append(Component.translatable("（显示伪装装备）"));
-
-            commandSender.sendMessage(msg);
+            commandSender.sendMessage(MessageUtils.prefixes(commandSender, msg));
         }
 
         for (var s : offlineStates)
         {
             commandSender.sendMessage(MessageUtils.prefixes(commandSender,
-                    Component.text(s.playerName + "（离线存储） 伪装成了 " + s.disguiseID)));
+                    msg.resolve("who", s.playerName)
+                            .resolve("status", CommandStrings.qaIsOfflineStoreString)
+                            .resolve("storage_status", "")
+                            .resolve("what", s.disguiseID)));
         }
 
         return true;

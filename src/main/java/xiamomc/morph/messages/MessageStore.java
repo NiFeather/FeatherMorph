@@ -69,7 +69,8 @@ public class MessageStore extends JsonBasedStorage<TreeMap<String, String>>
                 CommonStrings.class,
                 MorphStrings.class,
                 RequestStrings.class,
-                SkillStrings.class
+                SkillStrings.class,
+                CommandStrings.class
         );
 
         try

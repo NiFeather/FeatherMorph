@@ -64,6 +64,13 @@ public class MorphStrings implements IStrings
     public static FormattableMessage recoveringFailedString = new FormattableMessage(getKey("state.recovering_failed"),
             "<color:red>我们无法恢复您的伪装 :(");
 
+
+    public static FormattableMessage selfVisibleOnString = new FormattableMessage(getKey("self_visible_on"),
+            "<color:green>已切换自身可见性");
+
+    public static FormattableMessage selfVisibleOffString = new FormattableMessage(getKey("self_visible_off"),
+            "<color:red>已切换自身可见性");
+
     private static String getKey(String key)
     {
         return "morph." + key;

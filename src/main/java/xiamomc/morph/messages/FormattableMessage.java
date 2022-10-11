@@ -69,6 +69,19 @@ public class FormattableMessage implements Comparable<FormattableMessage>
     }
 
     /**
+     * 添加解析
+     * @param target 要解析的Key
+     * @param formattable 要解析的值
+     * @return 对此对象的引用
+     */
+    public FormattableMessage resolve(String target, FormattableMessage formattable)
+    {
+        resolvers.add(Placeholder.component(target, formattable.toComponent()));
+
+        return this;
+    }
+
+    /**
      * 转换为Component
      * @return 可以显示的Component
      */

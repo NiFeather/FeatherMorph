@@ -1,13 +1,13 @@
 package xiamomc.morph.commands.subcommands.plugin;
 
 import me.libraryaddict.disguise.DisguiseAPI;
-import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
+import xiamomc.morph.messages.CommandStrings;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Command.ISubCommand;
@@ -68,19 +68,25 @@ public class QuerySubCommand extends MorphPluginObject implements ISubCommand
 
                 if (info != null)
                     commandSender.sendMessage(MessageUtils.prefixes(commandSender,
-                            Component.text(targetPlayer.getName() + " 正伪装为 ").append(info.getDisplayName())
+                            CommandStrings.qDisguisedString
+                                    .resolve("who", targetPlayer.getName())
+                                    .resolve("what", info.getDisplayName())
+                                    .resolve("storage_status", info.showingDefaultItems()
+                                            ? CommandStrings.qaShowingDisguisedItemsString
+                                            : CommandStrings.qaNotShowingDisguisedItemsString)
                     ));
                 else if (DisguiseAPI.isDisguised(targetPlayer))
                 {
                     commandSender.sendMessage(MessageUtils.prefixes(commandSender,
-                            Component.text(targetPlayer.getName() + " 正伪装为 "
-                                    + DisguiseAPI.getDisguise(targetPlayer).getDisguiseName() + "（无法由Morph管理的伪装）")
+                            CommandStrings.qDisguisedUnManageableString
+                                    .resolve("who", targetPlayer.getName())
+                                    .resolve("what", DisguiseAPI.getDisguise(targetPlayer).getDisguiseName())
                     ));
                 }
                 else
                 {
                     commandSender.sendMessage(MessageUtils.prefixes(commandSender,
-                            Component.text(targetPlayer.getName() + " 没有伪装为任何东西")));
+                            CommandStrings.qNotDisguisedString.resolve("who", targetPlayer.getName())));
                 }
             }
         }

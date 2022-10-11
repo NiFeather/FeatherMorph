@@ -8,6 +8,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
+import xiamomc.morph.messages.CommandStrings;
+import xiamomc.morph.messages.CommonStrings;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Command.ISubCommand;
@@ -36,7 +38,7 @@ public class ForceUnmorphSubCommand extends MorphPluginObject implements ISubCom
     {
         if (args.length < 1)
         {
-            sender.sendMessage(MessageUtils.prefixes(sender, Component.text("未指定取消谁的伪装").color(NamedTextColor.RED)));
+            sender.sendMessage(MessageUtils.prefixes(sender, CommonStrings.playerNotDefinedString));
 
             return true;
         }
@@ -44,7 +46,7 @@ public class ForceUnmorphSubCommand extends MorphPluginObject implements ISubCom
         if (Objects.equals(args[0], "*"))
         {
             manager.unMorphAll(true);
-            sender.sendMessage(MessageUtils.prefixes(sender, Component.text("成功取消所有人的伪装！")));
+            sender.sendMessage(MessageUtils.prefixes(sender, CommandStrings.unMorphedAllString));
 
             return true;
         }
@@ -52,14 +54,15 @@ public class ForceUnmorphSubCommand extends MorphPluginObject implements ISubCom
         var player = Bukkit.getPlayer(args[0]);
         if (player == null)
         {
-            sender.sendMessage(MessageUtils.prefixes(sender, Component.text("未找到此玩家").color(NamedTextColor.RED)));
+            sender.sendMessage(MessageUtils.prefixes(sender, CommonStrings.playerNotFoundString));
 
             return true;
         }
 
         manager.unMorph(player);
 
-        sender.sendMessage(MessageUtils.prefixes(sender, Component.text("成功取消" + player.getName() + "的伪装！")));
+        sender.sendMessage(MessageUtils.prefixes(sender, CommandStrings.unMorphedSomeoneString
+                .resolve("who", player.getName())));
 
         return true;
     }

@@ -7,6 +7,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.messages.MessageUtils;
+import xiamomc.morph.messages.MorphStrings;
 import xiamomc.pluginbase.Command.ISubCommand;
 
 public class ToggleSelfSubCommand implements ISubCommand
@@ -38,8 +39,9 @@ public class ToggleSelfSubCommand implements ISubCommand
             var targetVisibility = !DisguiseAPI.isViewSelfToggled(player);
             DisguiseAPI.setViewDisguiseToggled(player, targetVisibility);
 
-            sender.sendMessage(MessageUtils.prefixes(sender, Component.text("已切换自身可见性")
-                    .color(targetVisibility ? NamedTextColor.GREEN : NamedTextColor.RED)));
+            sender.sendMessage(MessageUtils.prefixes(sender, targetVisibility
+                    ? MorphStrings.selfVisibleOnString
+                    : MorphStrings.selfVisibleOffString));
         }
         return true;
     }

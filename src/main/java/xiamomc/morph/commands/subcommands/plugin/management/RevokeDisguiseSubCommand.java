@@ -8,6 +8,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
+import xiamomc.morph.messages.CommandStrings;
+import xiamomc.morph.messages.CommonStrings;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Command.ISubCommand;
@@ -85,7 +87,7 @@ public class RevokeDisguiseSubCommand extends MorphPluginObject implements ISubC
 
         if (who == null || !who.isOnline())
         {
-            commandSender.sendMessage(MessageUtils.prefixes(commandSender, Component.text("目标玩家不存在或已离线")));
+            commandSender.sendMessage(MessageUtils.prefixes(commandSender, CommonStrings.playerNotFoundString));
             return false;
         }
 
@@ -103,22 +105,14 @@ public class RevokeDisguiseSubCommand extends MorphPluginObject implements ISubC
                     : morphs.revokeMorphFromPlayer(who, info.type);
         }
 
-        if (revokeSuccess)
-            commandSender.sendMessage(MessageUtils.prefixes(commandSender,
-                 Component.text("成功将")
-                        .append(Component.translatable(targetName))
-                        .append(Component.text("的伪装从"))
-                        .append(Component.text(who.getName()))
-                         .append(Component.text("移除"))
-                         .color(NamedTextColor.GREEN)));
-        else
-            commandSender.sendMessage(MessageUtils.prefixes(commandSender,
-                    Component.text("未能将")
-                            .append(Component.translatable(targetName))
-                            .append(Component.text("的伪装从"))
-                            .append(Component.text(who.getName()))
-                            .append(Component.text("移除"))
-                            .color(NamedTextColor.RED)));
+        var msg = revokeSuccess
+                ? CommandStrings.revokeSuccessString
+                : CommandStrings.revokeFailString;
+
+        msg.resolve("what", Component.translatable(targetName)).resolve("who", who.getName());
+
+        commandSender.sendMessage(MessageUtils.prefixes(commandSender, msg));
+
         return true;
     }
 }

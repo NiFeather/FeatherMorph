@@ -9,7 +9,10 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
+import xiamomc.morph.messages.CommandStrings;
+import xiamomc.morph.messages.CommonStrings;
 import xiamomc.morph.messages.MessageUtils;
+import xiamomc.morph.messages.MorphStrings;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Command.ISubCommand;
 
@@ -88,7 +91,7 @@ public class GrantDisguiseSubCommand extends MorphPluginObject implements ISubCo
 
         if (who == null || !who.isOnline())
         {
-            commandSender.sendMessage(MessageUtils.prefixes(commandSender, Component.text("目标玩家不存在或已离线")));
+            commandSender.sendMessage(MessageUtils.prefixes(commandSender, CommonStrings.playerNotFoundString));
             return false;
         }
 
@@ -109,7 +112,7 @@ public class GrantDisguiseSubCommand extends MorphPluginObject implements ISubCo
 
             if (!targetType.isAlive() || targetType.equals(EntityType.PLAYER))
             {
-                commandSender.sendMessage(MessageUtils.prefixes(commandSender, Component.text("无效的生物ID")));
+                commandSender.sendMessage(MessageUtils.prefixes(commandSender, MorphStrings.invalidIdentityString));
                 return true;
             }
 
@@ -122,7 +125,7 @@ public class GrantDisguiseSubCommand extends MorphPluginObject implements ISubCo
 
             if (targetName.isBlank() || targetName.isEmpty())
             {
-                commandSender.sendMessage(MessageUtils.prefixes(commandSender, Component.text("未指定玩家名")));
+                commandSender.sendMessage(MessageUtils.prefixes(commandSender, CommonStrings.playerNotDefinedString));
                 return true;
             }
 
@@ -130,21 +133,14 @@ public class GrantDisguiseSubCommand extends MorphPluginObject implements ISubCo
             displayKey = targetName;
         }
 
-        if (grantSuccess)
-            commandSender.sendMessage(MessageUtils.prefixes(commandSender,
-                 Component.text("成功将")
-                        .append(Component.translatable(displayKey))
-                        .append(Component.text("的伪装给与"))
-                        .append(Component.text(who.getName()))
-                         .color(NamedTextColor.GREEN)));
-        else
-            commandSender.sendMessage(MessageUtils.prefixes(commandSender,
-                    Component.text("未能将")
-                            .append(Component.translatable(displayKey))
-                            .append(Component.text("的伪装给与"))
-                            .append(Component.text(who.getName()))
-                            .append(Component.text(", 他是否已经拥有此伪装？"))
-                            .color(NamedTextColor.RED)));
+        var msg = grantSuccess
+                ? CommandStrings.grantSuccessString
+                : CommandStrings.grantFailString;
+
+        msg.resolve("what", Component.translatable(displayKey)).resolve("who", who.getName());
+
+        commandSender.sendMessage(MessageUtils.prefixes(commandSender, msg));
+
         return true;
     }
 }

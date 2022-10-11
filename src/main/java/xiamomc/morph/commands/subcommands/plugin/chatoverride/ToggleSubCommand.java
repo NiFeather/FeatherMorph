@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
+import xiamomc.morph.messages.CommandStrings;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Command.ISubCommand;
@@ -34,8 +35,9 @@ public class ToggleSubCommand extends MorphPluginObject implements ISubCommand
         var val = !manager.allowChatOverride();
         manager.setChatOverride(val);
 
-        sender.sendMessage(MessageUtils.prefixes(sender, Component.text("聊天覆盖已")
-                .append(Component.text(manager.allowChatOverride() ? "启用" : "禁用").decorate(TextDecoration.BOLD))));
+        sender.sendMessage(MessageUtils.prefixes(sender, manager.allowChatOverride()
+                ? CommandStrings.chatOverrideEnabledString
+                : CommandStrings.chatOverrideDisabledString));
         return true;
     }
 
