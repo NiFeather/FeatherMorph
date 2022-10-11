@@ -40,8 +40,8 @@ public class ToggleSelfSubCommand implements ISubCommand
             DisguiseAPI.setViewDisguiseToggled(player, targetVisibility);
 
             sender.sendMessage(MessageUtils.prefixes(sender, targetVisibility
-                    ? MorphStrings.selfVisibleOnString
-                    : MorphStrings.selfVisibleOffString));
+                    ? MorphStrings.selfVisibleOnString()
+                    : MorphStrings.selfVisibleOffString()));
         }
         return true;
     }

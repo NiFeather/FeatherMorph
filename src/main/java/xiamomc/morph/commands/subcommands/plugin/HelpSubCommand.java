@@ -12,6 +12,8 @@ import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.commands.MorphCommandHelper;
 import xiamomc.morph.commands.subcommands.plugin.helpsections.Entry;
 import xiamomc.morph.commands.subcommands.plugin.helpsections.Section;
+import xiamomc.morph.messages.FormattableMessage;
+import xiamomc.morph.messages.HelpStrings;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
@@ -47,9 +49,9 @@ public class HelpSubCommand extends MorphPluginObject implements ISubCommand
     private void setupCommandSections()
     {
         //不属于任何section的指令丢到这里
-        var miscCommandSection = new Section("/", "/ -- 伪装、取消伪装", List.of(
-                "伪装可以通过击杀生物或玩家获得",
-                "伪装时会优先复制视线方向5格以内的相同生物或玩家进行伪装"
+        var miscCommandSection = new Section("/", HelpStrings.morphCommandDescription(), List.of(
+                HelpStrings.morphCommandSpecialNote1(),
+                HelpStrings.morphCommandSpecialNote2()
         ));
 
         commandSections.add(miscCommandSection);
@@ -62,41 +64,46 @@ public class HelpSubCommand extends MorphPluginObject implements ISubCommand
             {
                 //此section下所有指令的父级指令
                 var parentCommandName = sch.getCommandName();
+
+                List<FormattableMessage> notes = new ArrayList<>();
+                for (var note : sch.getNotes())
+                {
+                    notes.add(new FormattableMessage(note));
+                }
+
                 var section = new Section(parentCommandName,
-                        "/" + parentCommandName + " ... -- " + sch.getHelpMessage(),
-                        sch.getNotes());
+                        new FormattableMessage(sch.getHelpMessage()),
+                        notes);
 
                 //添加指令到section中
                 for (var sc : sch.getSubCommands())
                 {
-                    var cmd = "/" + parentCommandName + " " + sc.getCommandName() + " ";
+                    var cmdName = parentCommandName + " " + sc.getCommandName() + " ";
                     section.add(new Entry(sc.getPermissionRequirement(),
-                             cmd + " : " + sc.getHelpMessage(),
-                            cmd));
+                            cmdName,
+                             sc.getHelpMessage(),
+                            "/" + cmdName));
                 }
 
                 commandSections.add(section);
             }
             else
                 miscCommandSection.add(new Entry(c.getPermissionRequirement(),
-                        "/" + c.getCommandName() + " : " + c.getHelpMessage(),
+                        c.getCommandName(),
+                        c.getHelpMessage(),
                         "/" + c.getCommandName() + " "));
         }
     }
 
     private List<Component> constructSectionMessage(CommandSender sender, Section section)
     {
-
         var entries = section.getEntries();
 
         //添加section的标题
-        var list = new ArrayList<Component>(List.of(
+        var list = new ArrayList<>(List.of(
                 Component.empty(),
-                Component.text("指令 ")
-                        .append(Component.text("/" + section.getCommandBaseName())
-                                .decorate(TextDecoration.ITALIC)
-                                .hoverEvent(HoverEvent.showText(Component.text(section.getHeader()))))
-                        .append(Component.text(" 的用法："))
+                HelpStrings.commandSectionHeaderString()
+                                .resolve("basename", section.getCommandBaseName()).toComponent()
         ));
 
         //build entry
@@ -106,22 +113,29 @@ public class HelpSubCommand extends MorphPluginObject implements ISubCommand
 
             //如果指令不要求权限或者sender拥有此权限，添加到列表里
             if (perm == null || sender.hasPermission(perm))
-                list.add(Component.text(entry.message())
+            {
+                var msg = HelpStrings.commandEntryString()
+                        .resolve("basename", entry.baseName())
+                        .resolve("description", entry.description())
+                        .toComponent()
                         .decorate(TextDecoration.UNDERLINED)
-                        .hoverEvent(HoverEvent.showText(Component.text("点击补全")))
-                        .clickEvent(ClickEvent.suggestCommand(entry.suggestingCommand())));
+                        .hoverEvent(HoverEvent.showText(HelpStrings.clickToCompleteString().toComponent()))
+                        .clickEvent(ClickEvent.suggestCommand(entry.suggestingCommand()));
+
+                list.add(msg);
+            }
         }
 
-        if (section.getFooter() != null && section.getFooter().size() >= 1)
+        if (section.getNotes() != null && section.getNotes().size() >= 1)
         {
             list.addAll(List.of(
                     Component.empty(),
-                    Component.text("特别标注：")
+                    HelpStrings.specialNoteString().toComponent()
             ));
 
-            for (var f : section.getFooter())
+            for (var f : section.getNotes())
             {
-                list.add(Component.text(f)
+                list.add(f.toComponent()
                         .decorate(TextDecoration.ITALIC));
             }
         }
@@ -141,14 +155,18 @@ public class HelpSubCommand extends MorphPluginObject implements ISubCommand
     {
         var list = new ArrayList<Component>();
 
-        list.add(Component.text("当前可用的指令（单击补全/查看）："));
+        list.add(HelpStrings.avaliableCommandHeaderString().toComponent());
         for (var section : commandSections)
         {
-            list.add(Component.text(section.getHeader())
+            var msg = HelpStrings.commandNamePatternString()
+                    .resolve("basename", section.getCommandBaseName())
+                    .resolve("description", section.getDescription())
+                    .toComponent()
                     .decorate(TextDecoration.UNDERLINED)
-                    .clickEvent(ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND,
-                            "/mmorph " + getCommandName() + " " + section.getCommandBaseName()))
-                    .hoverEvent(HoverEvent.showText(Component.text("点击查看"))));
+                    .clickEvent(ClickEvent.runCommand("/mmorph " + getCommandName() + " " + section.getCommandBaseName()))
+                    .hoverEvent(HoverEvent.showText(HelpStrings.clickToViewString().toComponent()));
+
+            list.add(msg);
         }
 
         return list;

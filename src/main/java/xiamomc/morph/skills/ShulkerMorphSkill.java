@@ -20,7 +20,7 @@ public class ShulkerMorphSkill extends MorphSkill
 
         if (player.getWorld().getDifficulty() == Difficulty.PEACEFUL)
         {
-            sendDenyMessageToPlayer(player, SkillStrings.difficultyIsPeacefulString.toComponent());
+            sendDenyMessageToPlayer(player, SkillStrings.difficultyIsPeacefulString().toComponent());
             return 5;
         }
 
@@ -38,7 +38,7 @@ public class ShulkerMorphSkill extends MorphSkill
         }
         else
         {
-            sendDenyMessageToPlayer(player, SkillStrings.noTargetString.resolve("distance", distance + "").toComponent());
+            sendDenyMessageToPlayer(player, SkillStrings.noTargetString().resolve("distance", distance + "").toComponent());
             return 10;
         }
 

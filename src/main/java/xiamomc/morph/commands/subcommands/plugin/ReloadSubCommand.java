@@ -53,10 +53,10 @@ public class ReloadSubCommand extends MorphPluginObject implements ISubCommand
             config.reload();
             messageStore.reloadConfiguration();
 
-            sender.sendMessage(MessageUtils.prefixes(sender, CommandStrings.reloadCompleteMessage));
+            sender.sendMessage(MessageUtils.prefixes(sender, CommandStrings.reloadCompleteMessage()));
         }
         else
-            sender.sendMessage(MessageUtils.prefixes(sender, CommandStrings.noPermissionMessage));
+            sender.sendMessage(MessageUtils.prefixes(sender, CommandStrings.noPermissionMessage()));
 
         return true;
     }

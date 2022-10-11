@@ -29,7 +29,7 @@ public class MorphCommand extends MorphPluginObject implements IPluginCommand
             //伪装冷却
             if (!morphManager.canMorph(player))
             {
-                sender.sendMessage(MessageUtils.prefixes(player, MorphStrings.disguiseCoolingDownString));
+                sender.sendMessage(MessageUtils.prefixes(player, MorphStrings.disguiseCoolingDownString()));
 
                 return true;
             }
@@ -39,7 +39,7 @@ public class MorphCommand extends MorphPluginObject implements IPluginCommand
                 morphManager.morphEntityTypeAuto(player, args[0], player.getTargetEntity(5));
             }
             else
-                sender.sendMessage(MessageUtils.prefixes(sender, MorphStrings.disguiseNotDefinedString));
+                sender.sendMessage(MessageUtils.prefixes(sender, MorphStrings.disguiseNotDefinedString()));
         }
 
         return true;

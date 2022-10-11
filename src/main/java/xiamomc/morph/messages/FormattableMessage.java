@@ -22,6 +22,12 @@ public class FormattableMessage implements Comparable<FormattableMessage>
         this.key = key;
     }
 
+    public FormattableMessage(String value)
+    {
+        this.key = "_";
+        this.defaultString = value;
+    }
+
     private final List<TagResolver> resolvers = new ArrayList<>();
 
     /**
@@ -87,9 +93,11 @@ public class FormattableMessage implements Comparable<FormattableMessage>
      */
     public Component toComponent()
     {
-        var msg = MessageStore.getInstance().get(key, defaultString);
+        String msg = key.equals("_") ? defaultString : MessageStore.getInstance().get(key, defaultString);
 
-        return MiniMessage.miniMessage().deserialize(msg, TagResolver.resolver(resolvers));
+        var val = MiniMessage.miniMessage().deserialize(msg, TagResolver.resolver(resolvers));
+
+        return val;
     }
 
     @Override

@@ -47,7 +47,7 @@ public class MorphChatRenderer extends MorphPluginObject implements ChatRenderer
             {
                 var msgKey = config.getOrDefault(String.class, ConfigOption.CHAT_OVERRIDE_PATTERN);
 
-                this.message = CommonStrings.chatOverrideString
+                this.message = CommonStrings.chatOverrideString()
                         .resolve("who", sourceDisplayName)
                         .resolve("message", message).toComponent();
             }

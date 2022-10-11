@@ -70,18 +70,19 @@ public class MessageStore extends JsonBasedStorage<TreeMap<String, String>>
                 MorphStrings.class,
                 RequestStrings.class,
                 SkillStrings.class,
-                CommandStrings.class
+                CommandStrings.class,
+                HelpStrings.class
         );
 
         try
         {
             for (var c : classes)
             {
-                var list = Arrays.stream(c.getFields()).filter(f -> f.getType().equals(FormattableMessage.class)).toList();
+                var methods = Arrays.stream(c.getMethods()).filter(m -> m.getReturnType().equals(FormattableMessage.class)).toList();
 
-                for (var f : list)
+                for (var m : methods)
                 {
-                    var formattable = (FormattableMessage) f.get(null);
+                    var formattable = (FormattableMessage) m.invoke(null);
 
                     var key = formattable.getKey();
                     var defaultValue = formattable.getDefaultString();

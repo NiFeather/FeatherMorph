@@ -41,23 +41,23 @@ public class QueryAllSubCommand extends MorphPluginObject implements ISubCommand
 
         if (list.size() == 0 && offlineStates.size() == 0)
         {
-            commandSender.sendMessage(MessageUtils.prefixes(commandSender, CommandStrings.qaNoBodyDisguisingString));
+            commandSender.sendMessage(MessageUtils.prefixes(commandSender, CommandStrings.qaNoBodyDisguisingString()));
             return true;
         }
 
-        var msg = CommandStrings.qaDisguisedString;
+        var msg = CommandStrings.qaDisguisedString();
 
         for (var i : list)
         {
             var player = i.getPlayer();
             msg.resolve("who", player.getName())
                     .resolve("status", player.isOnline()
-                            ? CommandStrings.qaOnlineString
-                            : CommandStrings.qaOfflineString)
+                            ? CommandStrings.qaOnlineString()
+                            : CommandStrings.qaOfflineString())
                     .resolve("what", i.getDisplayName())
                     .resolve("storage_status", i.showingDefaultItems()
-                            ? CommandStrings.qaShowingDisguisedItemsString
-                            : CommandStrings.qaNotShowingDisguisedItemsString);
+                            ? CommandStrings.qaShowingDisguisedItemsString()
+                            : CommandStrings.qaNotShowingDisguisedItemsString());
 
             commandSender.sendMessage(MessageUtils.prefixes(commandSender, msg));
         }
@@ -66,7 +66,7 @@ public class QueryAllSubCommand extends MorphPluginObject implements ISubCommand
         {
             commandSender.sendMessage(MessageUtils.prefixes(commandSender,
                     msg.resolve("who", s.playerName)
-                            .resolve("status", CommandStrings.qaIsOfflineStoreString)
+                            .resolve("status", CommandStrings.qaIsOfflineStoreString())
                             .resolve("storage_status", "")
                             .resolve("what", s.disguiseID)));
         }

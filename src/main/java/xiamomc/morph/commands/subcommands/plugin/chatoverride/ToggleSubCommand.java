@@ -36,8 +36,8 @@ public class ToggleSubCommand extends MorphPluginObject implements ISubCommand
         manager.setChatOverride(val);
 
         sender.sendMessage(MessageUtils.prefixes(sender, manager.allowChatOverride()
-                ? CommandStrings.chatOverrideEnabledString
-                : CommandStrings.chatOverrideDisabledString));
+                ? CommandStrings.chatOverrideEnabledString()
+                : CommandStrings.chatOverrideDisabledString()));
         return true;
     }
 

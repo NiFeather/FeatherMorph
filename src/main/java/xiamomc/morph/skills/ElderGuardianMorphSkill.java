@@ -27,7 +27,7 @@ public class ElderGuardianMorphSkill extends MorphSkill
     {
         if (!player.isInWater())
         {
-            sendDenyMessageToPlayer(player, SkillStrings.notInWaterString.toComponent());
+            sendDenyMessageToPlayer(player, SkillStrings.notInWaterString().toComponent());
             return 20;
         }
 
@@ -36,7 +36,7 @@ public class ElderGuardianMorphSkill extends MorphSkill
 
         if (lastActivate != null && Plugin.getCurrentTick() - lastActivate < defaultCooldown)
         {
-            sendDenyMessageToPlayer(player, SkillStrings.elderGuardianCoolingDownString.toComponent());
+            sendDenyMessageToPlayer(player, SkillStrings.elderGuardianCoolingDownString().toComponent());
             return 20;
         }
 

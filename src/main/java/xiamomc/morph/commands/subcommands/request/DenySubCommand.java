@@ -65,7 +65,7 @@ public class DenySubCommand extends MorphPluginObject implements ISubCommand
 
                 if (targetPlayer == null)
                 {
-                    sender.sendMessage(MessageUtils.prefixes(sender, CommonStrings.playerNotFoundString));
+                    sender.sendMessage(MessageUtils.prefixes(sender, CommonStrings.playerNotFoundString()));
                     return true;
                 }
 
@@ -73,7 +73,7 @@ public class DenySubCommand extends MorphPluginObject implements ISubCommand
             }
             else
             {
-                sender.sendMessage(MessageUtils.prefixes(sender, CommonStrings.playerNotDefinedString));
+                sender.sendMessage(MessageUtils.prefixes(sender, CommonStrings.playerNotDefinedString()));
             }
         }
 

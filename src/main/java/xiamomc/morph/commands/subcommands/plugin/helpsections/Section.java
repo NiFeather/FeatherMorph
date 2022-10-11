@@ -1,6 +1,7 @@
 package xiamomc.morph.commands.subcommands.plugin.helpsections;
 
 import org.jetbrains.annotations.Nullable;
+import xiamomc.morph.messages.FormattableMessage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,34 +15,29 @@ public class Section
         return entries;
     }
 
-    private final String header;
+    private final FormattableMessage description;
 
-    public String getHeader()
+    public FormattableMessage getDescription()
     {
-        return header;
+        return description;
     }
 
-    private final List<String> footer;
+    private final List<FormattableMessage> notes;
 
     @Nullable
-    public List<String> getFooter()
+    public List<FormattableMessage> getNotes()
     {
-        return footer;
+        return notes;
     }
 
     private final String commandBaseName;
     public String getCommandBaseName() { return commandBaseName; }
 
-    public Section(String name, String header, @Nullable List<String> footer)
+    public Section(String commandBaseName, FormattableMessage description, @Nullable List<FormattableMessage> notes)
     {
-        this.commandBaseName = name;
-        this.header = header;
-        this.footer = footer;
-    }
-
-    public Section(String name, String header)
-    {
-        this(name, header, null);
+        this.commandBaseName = commandBaseName;
+        this.description = description;
+        this.notes = notes;
     }
 
     public void add(Entry e)

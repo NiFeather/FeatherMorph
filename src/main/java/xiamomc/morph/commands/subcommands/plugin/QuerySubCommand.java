@@ -68,17 +68,17 @@ public class QuerySubCommand extends MorphPluginObject implements ISubCommand
 
                 if (info != null)
                     commandSender.sendMessage(MessageUtils.prefixes(commandSender,
-                            CommandStrings.qDisguisedString
+                            CommandStrings.qDisguisedString()
                                     .resolve("who", targetPlayer.getName())
                                     .resolve("what", info.getDisplayName())
                                     .resolve("storage_status", info.showingDefaultItems()
-                                            ? CommandStrings.qaShowingDisguisedItemsString
-                                            : CommandStrings.qaNotShowingDisguisedItemsString)
+                                            ? CommandStrings.qaShowingDisguisedItemsString()
+                                            : CommandStrings.qaNotShowingDisguisedItemsString())
                     ));
                 else if (DisguiseAPI.isDisguised(targetPlayer))
                 {
                     commandSender.sendMessage(MessageUtils.prefixes(commandSender,
-                            CommandStrings.qDisguisedUnManageableString
+                            CommandStrings.qDisguisedUnManageableString()
                                     .resolve("who", targetPlayer.getName())
                                     .resolve("what", DisguiseAPI.getDisguise(targetPlayer).getDisguiseName())
                     ));
@@ -86,7 +86,7 @@ public class QuerySubCommand extends MorphPluginObject implements ISubCommand
                 else
                 {
                     commandSender.sendMessage(MessageUtils.prefixes(commandSender,
-                            CommandStrings.qNotDisguisedString.resolve("who", targetPlayer.getName())));
+                            CommandStrings.qNotDisguisedString().resolve("who", targetPlayer.getName())));
                 }
             }
         }

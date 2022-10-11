@@ -175,8 +175,10 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         //更新actionbar信息
         var msg = skillHandler.hasSkill(disguise.getType().getEntityType())
-                ? (state.getAbilityCooldown() <= 0 ? MorphStrings.disguisingWithSkillAvaliableString : MorphStrings.disguisingWithSkillPreparingString)
-                : MorphStrings.disguisingAsString;
+                ? (state.getAbilityCooldown() <= 0
+                    ? MorphStrings.disguisingWithSkillAvaliableString()
+                    : MorphStrings.disguisingWithSkillPreparingString())
+                : MorphStrings.disguisingAsString();
 
         player.sendActionBar(msg.resolve("what", state.getDisplayName()).toComponent());
 
@@ -276,7 +278,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
                 if (!type.isAlive())
                 {
-                    player.sendMessage(MessageUtils.prefixes(player, MorphStrings.invalidIdentityString));
+                    player.sendMessage(MessageUtils.prefixes(player, MorphStrings.invalidIdentityString()));
 
                     return false;
                 }
@@ -314,7 +316,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                         morphEntityType(player, type); //否则，只简单地创建实体伪装
                 }
 
-                var msg = MorphStrings.morphSuccessString
+                var msg = MorphStrings.morphSuccessString()
                         .resolve("what", type == EntityType.PLAYER
                                 ? Component.text(key.replace("player:", ""))
                                 : Component.translatable(type.translationKey()));
@@ -325,7 +327,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             }
             catch (IllegalArgumentException iae)
             {
-                player.sendMessage(MessageUtils.prefixes(player, MorphStrings.parseErrorString
+                player.sendMessage(MessageUtils.prefixes(player, MorphStrings.parseErrorString()
                         .resolve("id", key)));
 
                 return false;
@@ -333,7 +335,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         }
         else
         {
-            player.sendMessage(MessageUtils.prefixes(player, MorphStrings.morphNotOwnedString));
+            player.sendMessage(MessageUtils.prefixes(player, MorphStrings.morphNotOwnedString()));
         }
 
         return false;
@@ -438,7 +440,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         var disguise = targetInfoOptional.get().getDisguise();
         disguise.removeDisguise(player);
 
-        player.sendMessage(MessageUtils.prefixes(player, MorphStrings.unMorphSuccessString));
+        player.sendMessage(MessageUtils.prefixes(player, MorphStrings.unMorphSuccessString()));
         player.sendActionBar(Component.empty());
 
         //取消玩家飞行
@@ -564,7 +566,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         //如果伪装的时候坐着，显示提示
         if (sourcePlayer.getVehicle() != null)
-            sourcePlayer.sendMessage(MessageUtils.prefixes(sourcePlayer, MorphStrings.morphVisibleAfterStandup));
+            sourcePlayer.sendMessage(MessageUtils.prefixes(sourcePlayer, MorphStrings.morphVisibleAfterStandup()));
 
         //如果实体能飞，那么也允许玩家飞行
         updateFlyingAbility(sourcePlayer);
@@ -605,7 +607,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         var config = getPlayerConfiguration(sourcePlayer);
         if (!config.shownMorphAbilityHint && skillHandler.hasSkill(disguiseType.getEntityType()))
         {
-            sourcePlayer.sendMessage(MessageUtils.prefixes(sourcePlayer, MorphStrings.skillHintString));
+            sourcePlayer.sendMessage(MessageUtils.prefixes(sourcePlayer, MorphStrings.skillHintString()));
             config.shownMorphAbilityHint = true;
         }
 

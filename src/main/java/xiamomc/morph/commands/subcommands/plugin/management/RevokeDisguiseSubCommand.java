@@ -87,7 +87,7 @@ public class RevokeDisguiseSubCommand extends MorphPluginObject implements ISubC
 
         if (who == null || !who.isOnline())
         {
-            commandSender.sendMessage(MessageUtils.prefixes(commandSender, CommonStrings.playerNotFoundString));
+            commandSender.sendMessage(MessageUtils.prefixes(commandSender, CommonStrings.playerNotFoundString()));
             return false;
         }
 
@@ -106,8 +106,8 @@ public class RevokeDisguiseSubCommand extends MorphPluginObject implements ISubC
         }
 
         var msg = revokeSuccess
-                ? CommandStrings.revokeSuccessString
-                : CommandStrings.revokeFailString;
+                ? CommandStrings.revokeSuccessString()
+                : CommandStrings.revokeFailString();
 
         msg.resolve("what", Component.translatable(targetName)).resolve("who", who.getName());
 

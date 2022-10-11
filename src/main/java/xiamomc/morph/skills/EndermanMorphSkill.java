@@ -14,7 +14,7 @@ public class EndermanMorphSkill extends MorphSkill
         var targetBlock = player.getTargetBlock(32);
         if (targetBlock == null || targetBlock.getBlockData().getMaterial().isAir())
         {
-            sendDenyMessageToPlayer(player, SkillStrings.targetNotSuitableString.toComponent());
+            sendDenyMessageToPlayer(player, SkillStrings.targetNotSuitableString().toComponent());
             return 20;
         }
 

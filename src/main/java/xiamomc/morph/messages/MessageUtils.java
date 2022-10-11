@@ -25,7 +25,7 @@ public class MessageUtils extends MorphPluginObject
         for (var cc : c)
             finalComponent = finalComponent.append(cc);
 
-        return CommonStrings.pluginMessageString
+        return CommonStrings.pluginMessageString()
                 .resolve("message", finalComponent)
                 .toComponent();
     }

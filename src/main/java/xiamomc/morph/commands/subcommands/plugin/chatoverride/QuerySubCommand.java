@@ -33,8 +33,8 @@ public class QuerySubCommand extends MorphPluginObject implements ISubCommand
     public boolean onCommand(@NotNull CommandSender sender, @NotNull String[] args)
     {
         sender.sendMessage(MessageUtils.prefixes(sender, manager.allowChatOverride()
-                ? CommandStrings.chatOverrideEnabledString
-                : CommandStrings.chatOverrideDisabledString));
+                ? CommandStrings.chatOverrideEnabledString()
+                : CommandStrings.chatOverrideDisabledString()));
 
         return true;
     }

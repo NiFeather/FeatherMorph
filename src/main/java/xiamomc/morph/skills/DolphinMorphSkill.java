@@ -16,7 +16,7 @@ public class DolphinMorphSkill extends MorphSkill
     {
         if (!player.isInWater())
         {
-            sendDenyMessageToPlayer(player, SkillStrings.notInWaterString.toComponent());
+            sendDenyMessageToPlayer(player, SkillStrings.notInWaterString().toComponent());
             return 5;
         }
 

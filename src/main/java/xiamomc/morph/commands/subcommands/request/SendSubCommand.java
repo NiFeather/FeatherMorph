@@ -69,20 +69,20 @@ public class SendSubCommand extends MorphPluginObject implements ISubCommand
 
                 if (targetPlayer == null)
                 {
-                    sender.sendMessage(MessageUtils.prefixes(sender, CommonStrings.playerNotFoundString));
+                    sender.sendMessage(MessageUtils.prefixes(sender, CommonStrings.playerNotFoundString()));
                     return true;
                 }
 
                 if (targetPlayer.getUniqueId().equals(sourcePlayer.getUniqueId()))
                 {
-                    sourcePlayer.sendMessage(MessageUtils.prefixes(sender, RequestStrings.cantSendToSelfString));
+                    sourcePlayer.sendMessage(MessageUtils.prefixes(sender, RequestStrings.cantSendToSelfString()));
                     return true;
                 }
 
                 if (morphs.getAvaliableDisguisesFor(sourcePlayer).stream()
                         .anyMatch(c -> c.isPlayerDisguise() && c.playerDisguiseTargetName.equals(args[0])))
                 {
-                    sourcePlayer.sendMessage(MessageUtils.prefixes(sender, RequestStrings.alreadyHaveDisguiseString));
+                    sourcePlayer.sendMessage(MessageUtils.prefixes(sender, RequestStrings.alreadyHaveDisguiseString()));
                     return true;
                 }
 
@@ -90,7 +90,7 @@ public class SendSubCommand extends MorphPluginObject implements ISubCommand
             }
             else
             {
-                sender.sendMessage(MessageUtils.prefixes(sender, CommonStrings.playerNotDefinedString));
+                sender.sendMessage(MessageUtils.prefixes(sender, CommonStrings.playerNotDefinedString()));
             }
         }
 

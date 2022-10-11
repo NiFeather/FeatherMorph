@@ -38,7 +38,7 @@ public class ForceUnmorphSubCommand extends MorphPluginObject implements ISubCom
     {
         if (args.length < 1)
         {
-            sender.sendMessage(MessageUtils.prefixes(sender, CommonStrings.playerNotDefinedString));
+            sender.sendMessage(MessageUtils.prefixes(sender, CommonStrings.playerNotDefinedString()));
 
             return true;
         }
@@ -46,7 +46,7 @@ public class ForceUnmorphSubCommand extends MorphPluginObject implements ISubCom
         if (Objects.equals(args[0], "*"))
         {
             manager.unMorphAll(true);
-            sender.sendMessage(MessageUtils.prefixes(sender, CommandStrings.unMorphedAllString));
+            sender.sendMessage(MessageUtils.prefixes(sender, CommandStrings.unMorphedAllString()));
 
             return true;
         }
@@ -54,14 +54,14 @@ public class ForceUnmorphSubCommand extends MorphPluginObject implements ISubCom
         var player = Bukkit.getPlayer(args[0]);
         if (player == null)
         {
-            sender.sendMessage(MessageUtils.prefixes(sender, CommonStrings.playerNotFoundString));
+            sender.sendMessage(MessageUtils.prefixes(sender, CommonStrings.playerNotFoundString()));
 
             return true;
         }
 
         manager.unMorph(player);
 
-        sender.sendMessage(MessageUtils.prefixes(sender, CommandStrings.unMorphedSomeoneString
+        sender.sendMessage(MessageUtils.prefixes(sender, CommandStrings.unMorphedSomeoneString()
                 .resolve("who", player.getName())));
 
         return true;

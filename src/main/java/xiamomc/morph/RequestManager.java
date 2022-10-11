@@ -47,7 +47,7 @@ public class RequestManager extends MorphPluginObject implements IManageRequests
                 .anyMatch(i -> i.sourcePlayer.getUniqueId() == source.getUniqueId()
                         && i.targetPlayer.getUniqueId() == target.getUniqueId()))
         {
-            source.sendMessage(MessageUtils.prefixes(source, RequestStrings.requestAlreadySentString));
+            source.sendMessage(MessageUtils.prefixes(source, RequestStrings.requestAlreadySentString()));
             return;
         }
 
@@ -58,10 +58,10 @@ public class RequestManager extends MorphPluginObject implements IManageRequests
 
         requests.add(req);
 
-        target.sendMessage(MessageUtils.prefixes(target, RequestStrings.requestReceivedString
+        target.sendMessage(MessageUtils.prefixes(target, RequestStrings.requestReceivedString()
                 .resolve("who", source.getName())));
 
-        source.sendMessage(MessageUtils.prefixes(source, RequestStrings.requestSendString));
+        source.sendMessage(MessageUtils.prefixes(source, RequestStrings.requestSendString()));
     }
 
     /**
@@ -78,7 +78,7 @@ public class RequestManager extends MorphPluginObject implements IManageRequests
 
         if (match.isEmpty())
         {
-            source.sendMessage(MessageUtils.prefixes(source, RequestStrings.requestNotFound));
+            source.sendMessage(MessageUtils.prefixes(source, RequestStrings.requestNotFound()));
             return;
         }
 
@@ -88,8 +88,8 @@ public class RequestManager extends MorphPluginObject implements IManageRequests
         data.grantPlayerMorphToPlayer(target, source.getName());
         data.grantPlayerMorphToPlayer(source, target.getName());
 
-        target.sendMessage(MessageUtils.prefixes(target, RequestStrings.targetAcceptedString.resolve("who", source.getName())));
-        source.sendMessage(MessageUtils.prefixes(source, RequestStrings.sourceAcceptedString.resolve("who", target.getName())));
+        target.sendMessage(MessageUtils.prefixes(target, RequestStrings.targetAcceptedString().resolve("who", source.getName())));
+        source.sendMessage(MessageUtils.prefixes(source, RequestStrings.sourceAcceptedString().resolve("who", target.getName())));
     }
 
     /**
@@ -106,7 +106,7 @@ public class RequestManager extends MorphPluginObject implements IManageRequests
 
         if (match.isEmpty())
         {
-            source.sendMessage(MessageUtils.prefixes(source, RequestStrings.requestNotFound));
+            source.sendMessage(MessageUtils.prefixes(source, RequestStrings.requestNotFound()));
 
             //"未找到目标请求，可能已经过期？"
             return;
@@ -115,8 +115,8 @@ public class RequestManager extends MorphPluginObject implements IManageRequests
         var req = match.get();
         req.ticksRemain = -1;
 
-        target.sendMessage(MessageUtils.prefixes(target, RequestStrings.targetDeniedString.resolve("who", source.getName())));
-        source.sendMessage(MessageUtils.prefixes(source, RequestStrings.sourceAcceptedString.resolve("who", target.getName())));
+        target.sendMessage(MessageUtils.prefixes(target, RequestStrings.targetDeniedString().resolve("who", source.getName())));
+        source.sendMessage(MessageUtils.prefixes(source, RequestStrings.sourceAcceptedString().resolve("who", target.getName())));
     }
 
     @Override

@@ -50,7 +50,7 @@ public class MorphSkillHandler extends MorphPluginObject
         {
             state.setAbilityCooldown(20);
 
-            player.sendMessage(MessageUtils.prefixes(player, SkillStrings.skillNotAvaliableString));
+            player.sendMessage(MessageUtils.prefixes(player, SkillStrings.skillNotAvaliableString()));
 
             player.playSound(Sound.sound(Key.key("minecraft", "entity.villager.no"),
                     Sound.Source.PLAYER, 1f, 1f));

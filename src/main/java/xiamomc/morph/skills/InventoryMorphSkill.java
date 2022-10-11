@@ -22,8 +22,8 @@ public abstract class InventoryMorphSkill extends MorphSkill
         manager.spawnParticle(player, player.getLocation(), player.getWidth(), player.getHeight(), player.getWidth());
 
         player.sendMessage(MessageUtils.prefixes(player, defaultShown
-                ? SkillStrings.displayingDisguiseInventoryString
-                : SkillStrings.displayingPlayerInventoryString));
+                ? SkillStrings.displayingDisguiseInventoryString()
+                : SkillStrings.displayingPlayerInventoryString()));
 
         return 20;
     }

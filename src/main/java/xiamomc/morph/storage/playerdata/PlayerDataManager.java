@@ -95,7 +95,7 @@ public class PlayerDataManager extends JsonBasedStorage<MorphConfiguration> impl
             newInstance.playerName = player.getName();
             newInstance.unlockedDisguises = new ArrayList<>();
 
-            player.sendMessage(MessageUtils.prefixes(player, MorphStrings.commandHintString));
+            player.sendMessage(MessageUtils.prefixes(player, MorphStrings.commandHintString()));
 
             storingObject.playerMorphConfigurations.add(newInstance);
             return newInstance;
@@ -116,7 +116,7 @@ public class PlayerDataManager extends JsonBasedStorage<MorphConfiguration> impl
         else return false;
 
         sendMorphAcquiredNotification(player, morphs.getDisguiseStateFor(player),
-                MorphStrings.morphUnlockedString
+                MorphStrings.morphUnlockedString()
                         .resolve("what", Component.translatable(type.translationKey()))
                         .toComponent());
 
@@ -136,7 +136,7 @@ public class PlayerDataManager extends JsonBasedStorage<MorphConfiguration> impl
         saveConfiguration();
 
         sendMorphAcquiredNotification(sourcePlayer, morphs.getDisguiseStateFor(sourcePlayer),
-                MorphStrings.morphUnlockedString
+                MorphStrings.morphUnlockedString()
                         .resolve("what",targetPlayerName)
                         .toComponent());
 
@@ -159,7 +159,7 @@ public class PlayerDataManager extends JsonBasedStorage<MorphConfiguration> impl
             morphs.unMorph(player);
 
         sendMorphAcquiredNotification(player, morphs.getDisguiseStateFor(player),
-                MorphStrings.morphLockedString
+                MorphStrings.morphLockedString()
                         .resolve("what", Component.translatable(entityType.translationKey()))
                         .toComponent());
 
@@ -189,7 +189,7 @@ public class PlayerDataManager extends JsonBasedStorage<MorphConfiguration> impl
         }
 
         sendMorphAcquiredNotification(player, morphs.getDisguiseStateFor(player),
-                MorphStrings.morphLockedString
+                MorphStrings.morphLockedString()
                         .resolve("what", playerName)
                         .toComponent());
 

@@ -189,14 +189,14 @@ public class EventProcessor extends MorphPluginObject implements Listener
                 {
                     if (!allowHeadMorph)
                     {
-                        player.sendMessage(MessageUtils.prefixes(player, MorphStrings.headDisguiseDisabledString));
+                        player.sendMessage(MessageUtils.prefixes(player, MorphStrings.headDisguiseDisabledString()));
 
                         return;
                     }
 
                     if (!morphs.canMorph(player))
                     {
-                        player.sendMessage(MessageUtils.prefixes(player, MorphStrings.disguiseCoolingDownString));
+                        player.sendMessage(MessageUtils.prefixes(player, MorphStrings.disguiseCoolingDownString()));
 
                         return;
                     }
@@ -207,7 +207,7 @@ public class EventProcessor extends MorphPluginObject implements Listener
 
                         if (profile == null)
                         {
-                            player.sendMessage(MessageUtils.prefixes(player, MorphStrings.invalidSkinString));
+                            player.sendMessage(MessageUtils.prefixes(player, MorphStrings.invalidSkinString()));
                             return;
                         }
 
@@ -262,7 +262,7 @@ public class EventProcessor extends MorphPluginObject implements Listener
                                 morphs.executeDisguiseAbility(player);
                             else
                                 player.sendMessage(MessageUtils.prefixes(player,
-                                        SkillStrings.skillPreparing.resolve("time", state.getAbilityCooldown() / 20 + "")));
+                                        SkillStrings.skillPreparing().resolve("time", state.getAbilityCooldown() / 20 + "")));
                         }
                         else
                         {
@@ -392,22 +392,22 @@ public class EventProcessor extends MorphPluginObject implements Listener
         }
         else if (offlineState != null)
         {
-            player.sendMessage(MessageUtils.prefixes(player, MorphStrings.stateRecoverReasonString));
+            player.sendMessage(MessageUtils.prefixes(player, MorphStrings.stateRecoverReasonString()));
 
             if (morphs.disguiseFromOfflineState(player, offlineState))
             {
                 if (offlineState.disguise != null)
                 {
-                    player.sendMessage(MessageUtils.prefixes(player, MorphStrings.recoveringStateString));
+                    player.sendMessage(MessageUtils.prefixes(player, MorphStrings.recoveringStateString()));
                 }
                 else
                 {
-                    player.sendMessage(MessageUtils.prefixes(player, MorphStrings.recoveringStateLimitedString));
-                    player.sendMessage(MessageUtils.prefixes(player, MorphStrings.recoveringStateLimitedHintString));
+                    player.sendMessage(MessageUtils.prefixes(player, MorphStrings.recoveringStateLimitedString()));
+                    player.sendMessage(MessageUtils.prefixes(player, MorphStrings.recoveringStateLimitedHintString()));
                 }
             }
             else
-                player.sendMessage(MessageUtils.prefixes(player, MorphStrings.recoveringFailedString));
+                player.sendMessage(MessageUtils.prefixes(player, MorphStrings.recoveringFailedString()));
         };
     }
 

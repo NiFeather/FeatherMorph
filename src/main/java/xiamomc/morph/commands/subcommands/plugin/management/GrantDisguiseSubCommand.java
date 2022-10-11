@@ -91,7 +91,7 @@ public class GrantDisguiseSubCommand extends MorphPluginObject implements ISubCo
 
         if (who == null || !who.isOnline())
         {
-            commandSender.sendMessage(MessageUtils.prefixes(commandSender, CommonStrings.playerNotFoundString));
+            commandSender.sendMessage(MessageUtils.prefixes(commandSender, CommonStrings.playerNotFoundString()));
             return false;
         }
 
@@ -112,7 +112,7 @@ public class GrantDisguiseSubCommand extends MorphPluginObject implements ISubCo
 
             if (!targetType.isAlive() || targetType.equals(EntityType.PLAYER))
             {
-                commandSender.sendMessage(MessageUtils.prefixes(commandSender, MorphStrings.invalidIdentityString));
+                commandSender.sendMessage(MessageUtils.prefixes(commandSender, MorphStrings.invalidIdentityString()));
                 return true;
             }
 
@@ -125,7 +125,7 @@ public class GrantDisguiseSubCommand extends MorphPluginObject implements ISubCo
 
             if (targetName.isBlank() || targetName.isEmpty())
             {
-                commandSender.sendMessage(MessageUtils.prefixes(commandSender, CommonStrings.playerNotDefinedString));
+                commandSender.sendMessage(MessageUtils.prefixes(commandSender, CommonStrings.playerNotDefinedString()));
                 return true;
             }
 
@@ -134,8 +134,8 @@ public class GrantDisguiseSubCommand extends MorphPluginObject implements ISubCo
         }
 
         var msg = grantSuccess
-                ? CommandStrings.grantSuccessString
-                : CommandStrings.grantFailString;
+                ? CommandStrings.grantSuccessString()
+                : CommandStrings.grantFailString();
 
         msg.resolve("what", Component.translatable(displayKey)).resolve("who", who.getName());
 

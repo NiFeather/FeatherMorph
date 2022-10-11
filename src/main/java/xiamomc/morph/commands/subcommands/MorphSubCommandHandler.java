@@ -24,7 +24,7 @@ public abstract class MorphSubCommandHandler extends SubCommandHandler<MorphPlug
         var result = super.onCommand(sender, command, label, args);
 
         if (!result)
-            sender.sendMessage(MessageUtils.prefixes(sender, CommonStrings.commandNotFoundString));
+            sender.sendMessage(MessageUtils.prefixes(sender, CommonStrings.commandNotFoundString()));
 
         return true;
     }
