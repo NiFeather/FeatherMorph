@@ -13,6 +13,9 @@ import xiamomc.pluginbase.Command.ISubCommand;
 import xiamomc.pluginbase.messages.FormattableMessage;
 import xiamomc.pluginbase.messages.MessageStore;
 
+import java.util.Arrays;
+import java.util.List;
+
 public class ReloadSubCommand extends MorphPluginObject implements ISubCommand
 {
 
@@ -23,6 +26,7 @@ public class ReloadSubCommand extends MorphPluginObject implements ISubCommand
     }
 
     @Override
+    @NotNull
     public String getPermissionRequirement()
     {
         return "xiamomc.morph.reload";
@@ -43,14 +47,46 @@ public class ReloadSubCommand extends MorphPluginObject implements ISubCommand
     @Resolved
     private MessageStore messageStore;
 
+    private final String[] subcommands = new String[]
+            {
+              "data",
+              "message"
+            };
+
+    @Override
+    public List<String> onTabComplete(List<String> args, CommandSender source)
+    {
+        if (source.hasPermission(getPermissionRequirement()) && args.size() >= 1)
+        {
+            return Arrays.stream(subcommands).filter(s -> s.startsWith(args.get(0))).toList();
+        }
+        else return null;
+    }
+
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull String[] args)
     {
         if (sender.hasPermission(getPermissionRequirement()))
         {
-            morphManager.reloadConfiguration();
-            config.reload();
-            messageStore.reloadConfiguration();
+            var reloadsData = false;
+            var reloadsMessage = false;
+            String option = args.length >= 1 ? args[0] : "*";
+
+            switch (option)
+            {
+                case "data" -> reloadsData = true;
+                case "message" -> reloadsMessage = true;
+                default -> reloadsMessage = reloadsData = true;
+            }
+
+            if (reloadsData)
+            {
+                morphManager.reloadConfiguration();
+                config.reload();
+            }
+
+            if (reloadsMessage)
+                messageStore.reloadConfiguration();
 
             sender.sendMessage(MessageUtils.prefixes(sender, CommandStrings.reloadCompleteMessage()));
         }

@@ -110,18 +110,17 @@ public class EventProcessor extends MorphPluginObject implements Listener
     public void onChat(AsyncChatEvent e)
     {
         //workaround: ChatManager与我们的聊天覆盖八字不和，只能用自己的Renderer
+        var player = e.getPlayer();
+        var state = morphs.getDisguiseStateFor(player);
+
+        if (state == null || !state.getDisguise().isPlayerDisguise()) return;
+
         if (morphs.allowChatOverride() && useCustomRenderer)
             e.renderer(new MorphChatRenderer());
         else
         {
-            var player = e.getPlayer();
-            var state = morphs.getDisguiseStateFor(player);
-
-            if (state != null && state.getDisguise().isPlayerDisguise())
-            {
-                //noinspection OverrideOnly
-                e.renderer().render(player, state.getDisplayName(), e.message(), player);
-            }
+            //noinspection OverrideOnly
+            e.renderer().render(player, state.getDisplayName(), e.message(), player);
         }
     }
 
