@@ -6,9 +6,11 @@ import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.messages.CommandStrings;
+import xiamomc.morph.messages.HelpStrings;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Command.ISubCommand;
+import xiamomc.pluginbase.messages.FormattableMessage;
 
 public class QueryAllSubCommand extends MorphPluginObject implements ISubCommand
 {
@@ -19,9 +21,9 @@ public class QueryAllSubCommand extends MorphPluginObject implements ISubCommand
     }
 
     @Override
-    public String getHelpMessage()
+    public FormattableMessage getHelpMessage()
     {
-        return "列出所有正在伪装的玩家";
+        return HelpStrings.queryAllDescription();
     }
 
     @Override

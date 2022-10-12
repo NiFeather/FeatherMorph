@@ -2,7 +2,6 @@ package xiamomc.morph.storage.playerdata;
 
 import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -13,14 +12,14 @@ import xiamomc.morph.messages.MorphStrings;
 import xiamomc.morph.misc.DisguiseInfo;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.messages.MessageUtils;
-import xiamomc.morph.storage.JsonBasedStorage;
+import xiamomc.morph.storage.MorphJsonBasedStorage;
 import xiamomc.pluginbase.Annotations.Resolved;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class PlayerDataManager extends JsonBasedStorage<MorphConfiguration> implements IManagePlayerData
+public class PlayerDataManager extends MorphJsonBasedStorage<MorphConfiguration> implements IManagePlayerData
 {
     private final List<DisguiseInfo> cachedInfos = new ArrayList<>();
 

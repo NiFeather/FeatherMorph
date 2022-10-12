@@ -6,9 +6,11 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import xiamomc.morph.messages.HelpStrings;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.MorphStrings;
 import xiamomc.pluginbase.Command.ISubCommand;
+import xiamomc.pluginbase.messages.FormattableMessage;
 
 public class ToggleSelfSubCommand implements ISubCommand
 {
@@ -26,9 +28,9 @@ public class ToggleSelfSubCommand implements ISubCommand
     }
 
     @Override
-    public String getHelpMessage()
+    public FormattableMessage getHelpMessage()
     {
-        return "切换自身可见性";
+        return HelpStrings.toggleSelfDescription();
     }
 
     @Override

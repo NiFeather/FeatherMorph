@@ -1,6 +1,8 @@
 package xiamomc.morph.commands.subcommands.plugin.helpsections;
 
-public record Entry(String permission, String baseName, String description, String suggestingCommand)
+import xiamomc.pluginbase.messages.FormattableMessage;
+
+public record Entry(String permission, String baseName, FormattableMessage description, String suggestingCommand)
 {
     @Override
     public String toString()

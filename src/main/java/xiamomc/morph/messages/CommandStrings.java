@@ -1,5 +1,8 @@
 package xiamomc.morph.messages;
 
+import xiamomc.pluginbase.messages.FormattableMessage;
+import xiamomc.pluginbase.messages.IStrings;
+
 public class CommandStrings implements IStrings
 {
     public static FormattableMessage noPermissionMessage()

@@ -2,8 +2,11 @@ package xiamomc.morph.commands;
 
 import xiamomc.morph.commands.subcommands.MorphSubCommandHandler;
 import xiamomc.morph.commands.subcommands.plugin.*;
+import xiamomc.morph.messages.HelpStrings;
 import xiamomc.pluginbase.Command.ISubCommand;
+import xiamomc.pluginbase.messages.FormattableMessage;
 
+import java.util.Formattable;
 import java.util.List;
 
 public class MorphPluginCommand extends MorphSubCommandHandler
@@ -21,9 +24,9 @@ public class MorphPluginCommand extends MorphSubCommandHandler
     }
 
     @Override
-    public String getHelpMessage()
+    public FormattableMessage getHelpMessage()
     {
-        return "插件指令";
+        return HelpStrings.mmorphDescription();
     }
 
     private final List<ISubCommand> subCommands = List.of(
@@ -42,10 +45,10 @@ public class MorphPluginCommand extends MorphSubCommandHandler
         return subCommands;
     }
 
-    private final List<String> notes = List.of();
+    private final List<FormattableMessage> notes = List.of();
 
     @Override
-    public List<String> getNotes()
+    public List<FormattableMessage> getNotes()
     {
         return notes;
     }

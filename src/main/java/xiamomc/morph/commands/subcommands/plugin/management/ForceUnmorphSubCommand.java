@@ -10,9 +10,11 @@ import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.messages.CommandStrings;
 import xiamomc.morph.messages.CommonStrings;
+import xiamomc.morph.messages.HelpStrings;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Command.ISubCommand;
+import xiamomc.pluginbase.messages.FormattableMessage;
 
 import java.util.Objects;
 
@@ -68,8 +70,8 @@ public class ForceUnmorphSubCommand extends MorphPluginObject implements ISubCom
     }
 
     @Override
-    public @Nullable String getHelpMessage()
+    public FormattableMessage getHelpMessage()
     {
-        return "取消某人的伪装";
+        return HelpStrings.manageUnmorphDescription();
     }
 }

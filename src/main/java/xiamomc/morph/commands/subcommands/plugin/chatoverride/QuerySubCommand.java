@@ -8,9 +8,11 @@ import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.messages.CommandStrings;
+import xiamomc.morph.messages.HelpStrings;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Command.ISubCommand;
+import xiamomc.pluginbase.messages.FormattableMessage;
 
 public class QuerySubCommand extends MorphPluginObject implements ISubCommand
 {
@@ -40,8 +42,8 @@ public class QuerySubCommand extends MorphPluginObject implements ISubCommand
     }
 
     @Override
-    public @Nullable String getHelpMessage()
+    public @Nullable FormattableMessage getHelpMessage()
     {
-        return "获取状态";
+        return HelpStrings.chatOverrideQueryDescription();
     }
 }

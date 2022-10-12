@@ -8,7 +8,9 @@ import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.commands.subcommands.plugin.management.ForceUnmorphSubCommand;
 import xiamomc.morph.commands.subcommands.plugin.management.GrantDisguiseSubCommand;
 import xiamomc.morph.commands.subcommands.plugin.management.RevokeDisguiseSubCommand;
+import xiamomc.morph.messages.HelpStrings;
 import xiamomc.pluginbase.Command.ISubCommand;
+import xiamomc.pluginbase.messages.FormattableMessage;
 
 import java.util.Arrays;
 import java.util.List;
@@ -41,8 +43,8 @@ public class DisguiseManageSubCommand extends MorphPluginObject implements ISubC
     }
 
     @Override
-    public @Nullable String getHelpMessage()
+    public @Nullable FormattableMessage getHelpMessage()
     {
-        return "管理伪装";
+        return HelpStrings.manageDescription();
     }
 }

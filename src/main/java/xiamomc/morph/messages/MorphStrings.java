@@ -1,5 +1,8 @@
 package xiamomc.morph.messages;
 
+import xiamomc.pluginbase.messages.FormattableMessage;
+import xiamomc.pluginbase.messages.IStrings;
+
 import java.text.Format;
 
 public class MorphStrings implements IStrings

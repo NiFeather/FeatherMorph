@@ -8,9 +8,11 @@ import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.messages.CommandStrings;
+import xiamomc.morph.messages.HelpStrings;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Command.ISubCommand;
+import xiamomc.pluginbase.messages.FormattableMessage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,9 +26,9 @@ public class QuerySubCommand extends MorphPluginObject implements ISubCommand
     }
 
     @Override
-    public String getHelpMessage()
+    public FormattableMessage getHelpMessage()
     {
-        return "检查某个玩家是否在伪装";
+        return HelpStrings.queryDescription();
     }
 
     @Override

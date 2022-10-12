@@ -9,12 +9,10 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
-import xiamomc.morph.messages.CommandStrings;
-import xiamomc.morph.messages.CommonStrings;
-import xiamomc.morph.messages.MessageUtils;
-import xiamomc.morph.messages.MorphStrings;
+import xiamomc.morph.messages.*;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Command.ISubCommand;
+import xiamomc.pluginbase.messages.FormattableMessage;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,9 +27,9 @@ public class GrantDisguiseSubCommand extends MorphPluginObject implements ISubCo
     }
 
     @Override
-    public @Nullable String getHelpMessage()
+    public FormattableMessage getHelpMessage()
     {
-        return "授予某个人某个伪装";
+        return HelpStrings.manageGrantDescription();
     }
 
     @Override

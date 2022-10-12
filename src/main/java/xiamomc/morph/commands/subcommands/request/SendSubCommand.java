@@ -9,10 +9,12 @@ import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.interfaces.IManageRequests;
 import xiamomc.morph.messages.CommonStrings;
+import xiamomc.morph.messages.HelpStrings;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.RequestStrings;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Command.ISubCommand;
+import xiamomc.pluginbase.messages.FormattableMessage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,9 +55,9 @@ public class SendSubCommand extends MorphPluginObject implements ISubCommand
     }
 
     @Override
-    public String getHelpMessage()
+    public FormattableMessage getHelpMessage()
     {
-        return "向某一位玩家发送交换请求";
+        return HelpStrings.requestSendDescription();
     }
 
     @Override

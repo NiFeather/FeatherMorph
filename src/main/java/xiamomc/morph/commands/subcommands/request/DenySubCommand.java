@@ -9,9 +9,11 @@ import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.interfaces.IManageRequests;
 import xiamomc.morph.messages.CommonStrings;
+import xiamomc.morph.messages.HelpStrings;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Command.ISubCommand;
+import xiamomc.pluginbase.messages.FormattableMessage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,9 +51,9 @@ public class DenySubCommand extends MorphPluginObject implements ISubCommand
     }
 
     @Override
-    public String getHelpMessage()
+    public FormattableMessage getHelpMessage()
     {
-        return "拒绝交换请求";
+        return HelpStrings.requestDenyDescription();
     }
 
     @Override

@@ -12,13 +12,13 @@ import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.commands.MorphCommandHelper;
 import xiamomc.morph.commands.subcommands.plugin.helpsections.Entry;
 import xiamomc.morph.commands.subcommands.plugin.helpsections.Section;
-import xiamomc.morph.messages.FormattableMessage;
 import xiamomc.morph.messages.HelpStrings;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Command.ISubCommand;
 import xiamomc.pluginbase.Command.SubCommandHandler;
+import xiamomc.pluginbase.messages.FormattableMessage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -65,14 +65,10 @@ public class HelpSubCommand extends MorphPluginObject implements ISubCommand
                 //此section下所有指令的父级指令
                 var parentCommandName = sch.getCommandName();
 
-                List<FormattableMessage> notes = new ArrayList<>();
-                for (var note : sch.getNotes())
-                {
-                    notes.add(new FormattableMessage(note));
-                }
+                List<FormattableMessage> notes = new ArrayList<>(sch.getNotes());
 
                 var section = new Section(parentCommandName,
-                        new FormattableMessage(sch.getHelpMessage()),
+                        sch.getHelpMessage(),
                         notes);
 
                 //添加指令到section中
@@ -180,9 +176,9 @@ public class HelpSubCommand extends MorphPluginObject implements ISubCommand
     }
 
     @Override
-    public String getHelpMessage()
+    public FormattableMessage getHelpMessage()
     {
-        return "显示帮助";
+        return HelpStrings.helpDescription();
     }
 
     @Override

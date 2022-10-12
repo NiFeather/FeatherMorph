@@ -5,7 +5,9 @@ import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.commands.subcommands.plugin.chatoverride.QuerySubCommand;
 import xiamomc.morph.commands.subcommands.plugin.chatoverride.ToggleSubCommand;
+import xiamomc.morph.messages.HelpStrings;
 import xiamomc.pluginbase.Command.ISubCommand;
+import xiamomc.pluginbase.messages.FormattableMessage;
 
 import java.util.List;
 
@@ -35,8 +37,8 @@ public class ChatOverrideSubCommand extends MorphPluginObject implements ISubCom
     }
 
     @Override
-    public @Nullable String getHelpMessage()
+    public FormattableMessage getHelpMessage()
     {
-        return "查看服务器的聊天覆盖状态";
+        return HelpStrings.chatOverrideDescription();
     }
 }

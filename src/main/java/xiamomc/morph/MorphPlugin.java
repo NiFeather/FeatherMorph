@@ -7,10 +7,11 @@ import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.events.EventProcessor;
 import xiamomc.morph.interfaces.IManagePlayerData;
 import xiamomc.morph.interfaces.IManageRequests;
-import xiamomc.morph.messages.MessageStore;
 import xiamomc.morph.messages.MessageUtils;
+import xiamomc.morph.messages.MorphMessageStore;
 import xiamomc.pluginbase.Command.CommandHelper;
 import xiamomc.pluginbase.XiaMoJavaPlugin;
+import xiamomc.pluginbase.messages.MessageStore;
 
 public final class MorphPlugin extends XiaMoJavaPlugin
 {
@@ -42,7 +43,7 @@ public final class MorphPlugin extends XiaMoJavaPlugin
         dependencyManager.Cache(this);
         dependencyManager.Cache(morphManager = new MorphManager());
         dependencyManager.Cache(cmdHelper);
-        dependencyManager.Cache(new MessageStore());
+        dependencyManager.CacheAs(MessageStore.class, new MorphMessageStore());
         dependencyManager.CacheAs(MiniMessage.class, MiniMessage.miniMessage());;
         dependencyManager.CacheAs(IManagePlayerData.class, morphManager);
         dependencyManager.CacheAs(IManageRequests.class, new RequestManager());

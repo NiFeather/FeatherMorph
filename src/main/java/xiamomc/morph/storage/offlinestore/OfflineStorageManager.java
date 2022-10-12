@@ -5,12 +5,12 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.interfaces.IManageOfflineStates;
 import xiamomc.morph.misc.DisguiseState;
-import xiamomc.morph.storage.JsonBasedStorage;
+import xiamomc.morph.storage.MorphJsonBasedStorage;
 
 import java.util.List;
 import java.util.UUID;
 
-public class OfflineStorageManager extends JsonBasedStorage<OfflineStates> implements IManageOfflineStates
+public class OfflineStorageManager extends MorphJsonBasedStorage<OfflineStates> implements IManageOfflineStates
 {
     @Override
     protected @NotNull String getFileName()

@@ -7,6 +7,7 @@ import org.bukkit.entity.Player;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.pluginbase.Annotations.Resolved;
+import xiamomc.pluginbase.messages.FormattableMessage;
 
 public class MessageUtils extends MorphPluginObject
 {

@@ -1,18 +1,17 @@
 package xiamomc.morph.commands.subcommands.plugin;
 
-import com.google.protobuf.Message;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.messages.CommandStrings;
-import xiamomc.morph.messages.MessageStore;
+import xiamomc.morph.messages.HelpStrings;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Command.ISubCommand;
+import xiamomc.pluginbase.messages.FormattableMessage;
+import xiamomc.pluginbase.messages.MessageStore;
 
 public class ReloadSubCommand extends MorphPluginObject implements ISubCommand
 {
@@ -30,9 +29,9 @@ public class ReloadSubCommand extends MorphPluginObject implements ISubCommand
     }
 
     @Override
-    public String getHelpMessage()
+    public FormattableMessage getHelpMessage()
     {
-        return "重载插件配置";
+        return HelpStrings.reloadDescription();
     }
 
     @Resolved

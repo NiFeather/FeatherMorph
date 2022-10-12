@@ -6,8 +6,10 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
+import xiamomc.morph.messages.HelpStrings;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Command.IPluginCommand;
+import xiamomc.pluginbase.messages.FormattableMessage;
 
 public class UnMorphCommand extends MorphPluginObject implements IPluginCommand
 {
@@ -24,9 +26,9 @@ public class UnMorphCommand extends MorphPluginObject implements IPluginCommand
     }
 
     @Override
-    public String getHelpMessage()
+    public FormattableMessage getHelpMessage()
     {
-        return "取消自己的伪装";
+        return HelpStrings.unMorphDescription();
     }
 
     @Resolved

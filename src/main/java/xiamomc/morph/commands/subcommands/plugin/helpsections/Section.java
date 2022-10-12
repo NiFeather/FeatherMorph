@@ -1,7 +1,7 @@
 package xiamomc.morph.commands.subcommands.plugin.helpsections;
 
 import org.jetbrains.annotations.Nullable;
-import xiamomc.morph.messages.FormattableMessage;
+import xiamomc.pluginbase.messages.FormattableMessage;
 
 import java.util.ArrayList;
 import java.util.List;

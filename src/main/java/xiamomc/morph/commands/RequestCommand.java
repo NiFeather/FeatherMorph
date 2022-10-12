@@ -4,8 +4,11 @@ import xiamomc.morph.commands.subcommands.MorphSubCommandHandler;
 import xiamomc.morph.commands.subcommands.request.AcceptSubCommand;
 import xiamomc.morph.commands.subcommands.request.DenySubCommand;
 import xiamomc.morph.commands.subcommands.request.SendSubCommand;
+import xiamomc.morph.messages.HelpStrings;
 import xiamomc.pluginbase.Command.ISubCommand;
+import xiamomc.pluginbase.messages.FormattableMessage;
 
+import java.util.Formattable;
 import java.util.List;
 
 public class RequestCommand extends MorphSubCommandHandler
@@ -22,12 +25,12 @@ public class RequestCommand extends MorphSubCommandHandler
         return subCommands;
     }
 
-    private final List<String> notes = List.of(
-            "交换请求接受后双方都可以变成对方的样子"
+    private final List<FormattableMessage> notes = List.of(
+            HelpStrings.requestDescriptionSpecialNote()
     );
 
     @Override
-    public List<String> getNotes()
+    public List<FormattableMessage> getNotes()
     {
         return notes;
     }
@@ -45,8 +48,8 @@ public class RequestCommand extends MorphSubCommandHandler
     }
 
     @Override
-    public String getHelpMessage()
+    public FormattableMessage getHelpMessage()
     {
-        return "管理交换请求";
+        return HelpStrings.requestDescription();
     }
 }
