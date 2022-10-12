@@ -618,6 +618,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
     public void spawnParticle(Player player, Location location, double collX, double collY, double collZ)
     {
+        if (player.getGameMode() == GameMode.SPECTATOR) return;
+
         location.setY(location.getY() + (collY / 2));
 
         //根据碰撞箱计算粒子数量缩放
