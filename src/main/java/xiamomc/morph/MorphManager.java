@@ -468,7 +468,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     private void setPlayerFlySpeed(Player player, EntityType type)
     {
         var gameMode = player.getGameMode();
-        if (type == null || gameMode.equals(GameMode.CREATIVE) || gameMode.equals(GameMode.SPECTATOR)) return;
+        if (type == null || gameMode.equals(GameMode.SPECTATOR)) return;
 
         switch (type)
         {
