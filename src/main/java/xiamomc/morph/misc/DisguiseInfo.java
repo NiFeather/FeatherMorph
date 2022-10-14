@@ -7,7 +7,7 @@ import org.bukkit.entity.EntityType;
 public class DisguiseInfo
 {
     @SerializedName("Type")
-    @Expose
+    @Expose(serialize = false)
     public EntityType type;
 
     public final boolean isPlayerDisguise()
@@ -66,5 +66,11 @@ public class DisguiseInfo
     public String getKey()
     {
         return isPlayerDisguise() ? "player:" + playerDisguiseTargetName : type.getKey().asString();
+    }
+
+    @Override
+    public String toString()
+    {
+        return "DisguiseInfo[Type=" + this.type + ", isPlayerDisguise=" + this.isPlayerDisguise() + ", targetPlayerName=" + this.playerDisguiseTargetName + "]";
     }
 }

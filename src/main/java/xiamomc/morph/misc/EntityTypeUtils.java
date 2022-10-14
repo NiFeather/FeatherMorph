@@ -1,11 +1,27 @@
 package xiamomc.morph.misc;
 
 import org.bukkit.entity.EntityType;
+import org.jetbrains.annotations.Nullable;
+import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
 import java.util.Set;
+import java.util.logging.Logger;
 
 public class EntityTypeUtils
 {
+    @Nullable
+    public static EntityType fromString(String key)
+    {
+        if (key.startsWith("player:")) return EntityType.PLAYER;
+
+        var optional = Arrays.stream(EntityType.values())
+                .filter(t -> !t.equals(EntityType.UNKNOWN) && t.getKey().asString().equals(key))
+                .findFirst();
+
+        return optional.orElse(null);
+    }
+
     public static boolean isZombiesHostile(EntityType type)
     {
         return isGolem(type)

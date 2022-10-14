@@ -24,6 +24,13 @@ public class DisguiseUtils
         return Boolean.TRUE.equals(disguise.getCustomData(customDataTagName));
     }
 
+    public static String asString(DisguiseInfo info)
+    {
+        return info.isPlayerDisguise()
+                ? "player:" + info.playerDisguiseTargetName
+                : info.type.getKey().asString();
+    }
+
     public static EntityPose toEntityPose(Pose pose)
     {
         return switch (pose)

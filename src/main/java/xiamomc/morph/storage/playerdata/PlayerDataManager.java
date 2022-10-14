@@ -4,6 +4,7 @@ import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.checkerframework.checker.units.qual.A;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphManager;
@@ -12,12 +13,11 @@ import xiamomc.morph.messages.MorphStrings;
 import xiamomc.morph.misc.DisguiseInfo;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.messages.MessageUtils;
+import xiamomc.morph.misc.EntityTypeUtils;
 import xiamomc.morph.storage.MorphJsonBasedStorage;
 import xiamomc.pluginbase.Annotations.Resolved;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class PlayerDataManager extends MorphJsonBasedStorage<MorphConfiguration> implements IManagePlayerData
 {
@@ -56,22 +56,84 @@ public class PlayerDataManager extends MorphJsonBasedStorage<MorphConfiguration>
             if (storingObject.Version < targetConfigurationVersion)
                 migrate(storingObject);
 
+            storingObject.playerMorphConfigurations.forEach(c ->
+            {
+                //要设置给c.unlockedDisguises的列表
+                var list = new ArrayList<DisguiseInfo>();
+
+                //先对原始列表排序
+                Collections.sort(c.unlockedDisguiseIdentifiers);
+
+                //然后逐个添加
+                c.unlockedDisguiseIdentifiers.forEach(i ->
+                {
+                    var type = EntityTypeUtils.fromString(i);
+
+                    if (type != null)
+                    {
+                        if (type.equals(EntityType.PLAYER))
+                            list.add(new DisguiseInfo(i.replace("player:", "")));
+                        else
+                            list.add(new DisguiseInfo(type));
+                    }
+                    else
+                        Logger.warn("未能找到和\"" + i + "\"对应的实体类型，将不会添加到" + c.playerName + "(" + c.uniqueId + ")的列表中");
+                });
+
+                //设置可用的伪装列表
+                c.unlockedDisguises = list;
+            });
+
             saveConfiguration();
         }
 
         return success;
     }
 
-    private final int targetConfigurationVersion = 2;
+    private final int targetConfigurationVersion = 3;
 
     private void migrate(MorphConfiguration configuration)
     {
-        configuration.Version = targetConfigurationVersion;
+        //1 -> 2
+        if (configuration.Version == 1)
+            configuration.playerMorphConfigurations.forEach(c ->
+            {
+                 if (Objects.equals(c.playerName, "Unknown")) c.playerName = null;
+            });
 
-        configuration.playerMorphConfigurations.forEach(c ->
-        {
-            if (Objects.equals(c.playerName, "Unknown")) c.playerName = null;
-        });
+        //2 -> 3
+        if (configuration.Version == 2)
+          configuration.playerMorphConfigurations.forEach(c ->
+          {
+              //新建ID列表
+              var list = new ArrayList<String>();
+
+              //遍历Info
+              c.unlockedDisguises.forEach(i ->
+              {
+                  //跳过无效配置
+                  if (i.type == null)
+                  {
+                      Logger.warn("发现无效的Info配置: " + i);
+                      return;
+                  }
+
+                  //检查是否为玩家伪装
+                  if (i.isPlayerDisguise())
+                      list.add("player:" + i.playerDisguiseTargetName);
+                  else
+                      list.add(i.type.getKey().asString());
+              });
+
+              //设置配置的ID列表
+              c.unlockedDisguiseIdentifiers = list;
+
+              //移除配置原有的伪装列表
+              c.unlockedDisguises = null;
+          });
+
+        //migrate完设置版本
+        configuration.Version = targetConfigurationVersion;
     }
 
     @Override
@@ -92,7 +154,7 @@ public class PlayerDataManager extends MorphJsonBasedStorage<MorphConfiguration>
             var newInstance = new PlayerMorphConfiguration();
             newInstance.uniqueId = player.getUniqueId();
             newInstance.playerName = player.getName();
-            newInstance.unlockedDisguises = new ArrayList<>();
+            newInstance.unlockedDisguiseIdentifiers = new ArrayList<>();
 
             player.sendMessage(MessageUtils.prefixes(player, MorphStrings.commandHintString()));
 
@@ -109,7 +171,7 @@ public class PlayerDataManager extends MorphJsonBasedStorage<MorphConfiguration>
 
         if (playerConfiguration.unlockedDisguises.stream().noneMatch(c -> c.equals(info)))
         {
-            playerConfiguration.unlockedDisguises.add(info);
+            playerConfiguration.addDisguise(info);
             saveConfiguration();
         }
         else return false;
@@ -128,7 +190,7 @@ public class PlayerDataManager extends MorphJsonBasedStorage<MorphConfiguration>
         var playerConfiguration = getPlayerConfiguration(sourcePlayer);
 
         if (playerConfiguration.unlockedDisguises.stream().noneMatch(c -> c.equals(targetPlayerName)))
-            playerConfiguration.unlockedDisguises.add(this.getDisguiseInfo(targetPlayerName));
+            playerConfiguration.addDisguise(this.getDisguiseInfo(targetPlayerName));
         else
             return false;
 
@@ -150,7 +212,7 @@ public class PlayerDataManager extends MorphJsonBasedStorage<MorphConfiguration>
         var optional = avaliableDisguises.stream().filter(d -> d.type == entityType).findFirst();
         if (optional.isEmpty()) return false;
 
-        getPlayerConfiguration(player).unlockedDisguises.remove(optional.get());
+        getPlayerConfiguration(player).removeDisguise(optional.get());
         saveConfiguration();
 
         var state = morphs.getDisguiseStateFor(player);
@@ -175,7 +237,7 @@ public class PlayerDataManager extends MorphJsonBasedStorage<MorphConfiguration>
 
         if (optional.isEmpty()) return false;
 
-        getPlayerConfiguration(player).unlockedDisguises.remove(optional.get());
+        getPlayerConfiguration(player).removeDisguise(optional.get());
         saveConfiguration();
 
         var state = morphs.getDisguiseStateFor(player);
