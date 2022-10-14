@@ -84,8 +84,6 @@ public class PlayerDataManager extends MorphJsonBasedStorage<MorphConfiguration>
                 c.setUnlockedDisguises(list);
                 c.lockDisguiseList();
             });
-
-            saveConfiguration();
         }
 
         return success;
