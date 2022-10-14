@@ -7,7 +7,7 @@ import org.bukkit.entity.EntityType;
 public class DisguiseInfo
 {
     @SerializedName("Type")
-    @Expose(serialize = false)
+    @Expose
     public EntityType type;
 
     public final boolean isPlayerDisguise()
