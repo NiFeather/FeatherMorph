@@ -62,10 +62,10 @@ public class PlayerDataManager extends MorphJsonBasedStorage<MorphConfiguration>
                 var list = new ArrayList<DisguiseInfo>();
 
                 //先对原始列表排序
-                Collections.sort(c.unlockedDisguiseIdentifiers);
+                Collections.sort(c.getUnlockedDisguiseIdentifiers());
 
                 //然后逐个添加
-                c.unlockedDisguiseIdentifiers.forEach(i ->
+                c.getUnlockedDisguiseIdentifiers().forEach(i ->
                 {
                     var type = EntityTypeUtils.fromString(i);
 
@@ -80,8 +80,9 @@ public class PlayerDataManager extends MorphJsonBasedStorage<MorphConfiguration>
                         Logger.warn("未能找到和\"" + i + "\"对应的实体类型，将不会添加到" + c.playerName + "(" + c.uniqueId + ")的列表中");
                 });
 
-                //设置可用的伪装列表
-                c.unlockedDisguises = list;
+                //设置可用的伪装列表并对其加锁
+                c.setUnlockedDisguises(list);
+                c.lockDisguiseList();
             });
 
             saveConfiguration();
@@ -94,14 +95,14 @@ public class PlayerDataManager extends MorphJsonBasedStorage<MorphConfiguration>
 
     private void migrate(MorphConfiguration configuration)
     {
-        //1 -> 2
+        //1 -> 2: 玩家名处理
         if (configuration.Version == 1)
             configuration.playerMorphConfigurations.forEach(c ->
             {
                  if (Objects.equals(c.playerName, "Unknown")) c.playerName = null;
             });
 
-        //2 -> 3
+        //2 -> 3: 从存储EntityType变为存储ID
         if (configuration.Version == 2)
           configuration.playerMorphConfigurations.forEach(c ->
           {
@@ -109,7 +110,7 @@ public class PlayerDataManager extends MorphJsonBasedStorage<MorphConfiguration>
               var list = new ArrayList<String>();
 
               //遍历Info
-              c.unlockedDisguises.forEach(i ->
+              c.getUnlockedDisguises().forEach(i ->
               {
                   //跳过无效配置
                   if (i.type == null)
@@ -126,10 +127,10 @@ public class PlayerDataManager extends MorphJsonBasedStorage<MorphConfiguration>
               });
 
               //设置配置的ID列表
-              c.unlockedDisguiseIdentifiers = list;
+              c.setUnlockedDisguiseIdentifiers(list);
 
               //移除配置原有的伪装列表
-              c.unlockedDisguises = null;
+              c.setUnlockedDisguises(null);
           });
 
         //migrate完设置版本
@@ -154,7 +155,6 @@ public class PlayerDataManager extends MorphJsonBasedStorage<MorphConfiguration>
             var newInstance = new PlayerMorphConfiguration();
             newInstance.uniqueId = player.getUniqueId();
             newInstance.playerName = player.getName();
-            newInstance.unlockedDisguiseIdentifiers = new ArrayList<>();
 
             player.sendMessage(MessageUtils.prefixes(player, MorphStrings.commandHintString()));
 
@@ -169,7 +169,7 @@ public class PlayerDataManager extends MorphJsonBasedStorage<MorphConfiguration>
         var playerConfiguration = getPlayerConfiguration(player);
         var info = getDisguiseInfo(type);
 
-        if (playerConfiguration.unlockedDisguises.stream().noneMatch(c -> c.equals(info)))
+        if (playerConfiguration.getUnlockedDisguises().stream().noneMatch(c -> c.equals(info)))
         {
             playerConfiguration.addDisguise(info);
             saveConfiguration();
@@ -189,7 +189,7 @@ public class PlayerDataManager extends MorphJsonBasedStorage<MorphConfiguration>
     {
         var playerConfiguration = getPlayerConfiguration(sourcePlayer);
 
-        if (playerConfiguration.unlockedDisguises.stream().noneMatch(c -> c.equals(targetPlayerName)))
+        if (playerConfiguration.getUnlockedDisguises().stream().noneMatch(c -> c.equals(targetPlayerName)))
             playerConfiguration.addDisguise(this.getDisguiseInfo(targetPlayerName));
         else
             return false;
@@ -280,7 +280,7 @@ public class PlayerDataManager extends MorphJsonBasedStorage<MorphConfiguration>
     @Override
     public ArrayList<DisguiseInfo> getAvaliableDisguisesFor(Player player)
     {
-        return new ArrayList<>(getPlayerConfiguration(player).unlockedDisguises);
+        return getPlayerConfiguration(player).getUnlockedDisguises();
     }
 
     //endregion Implementation of IManagePlayerData

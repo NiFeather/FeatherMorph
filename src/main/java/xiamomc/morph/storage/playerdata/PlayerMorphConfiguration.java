@@ -29,7 +29,31 @@ public class PlayerMorphConfiguration
      * @apiNote 移除或添加伪装请使用addDisguise和removeDisguise
      */
     @Expose(serialize = false)
-    public ArrayList<DisguiseInfo> unlockedDisguises = new ArrayList<>();
+    private ArrayList<DisguiseInfo> unlockedDisguises = new ArrayList<>();
+
+    private boolean disguiseListLocked = false;
+
+    public ArrayList<DisguiseInfo> getUnlockedDisguises()
+    {
+        return disguiseListLocked
+                ? new ArrayList<>(unlockedDisguises)
+                : unlockedDisguises;
+    }
+
+    public void setUnlockedDisguises(ArrayList<DisguiseInfo> newList)
+    {
+        if (disguiseListLocked) throw new IllegalStateException("伪装列表已被锁定，不能设置");
+
+        unlockedDisguises = newList;
+    }
+
+    /**
+     * 锁定伪装列表使之后的获取操作只能获得其副本
+     */
+    public void lockDisguiseList()
+    {
+        disguiseListLocked = true;
+    }
 
     public void addDisguise(DisguiseInfo info)
     {
@@ -47,7 +71,21 @@ public class PlayerMorphConfiguration
      * 此玩家解锁的所有伪装（原始数据）
      */
     @Expose
-    public ArrayList<String> unlockedDisguiseIdentifiers;
+    private ArrayList<String> unlockedDisguiseIdentifiers = new ArrayList<>();
+
+    public ArrayList<String> getUnlockedDisguiseIdentifiers()
+    {
+        return disguiseListLocked
+                ? new ArrayList<>(unlockedDisguiseIdentifiers)
+                : unlockedDisguiseIdentifiers;
+    }
+
+    public void setUnlockedDisguiseIdentifiers(ArrayList<String> newList)
+    {
+        if (disguiseListLocked) throw new IllegalStateException("伪装列表已被锁定，不能设置");
+
+        unlockedDisguiseIdentifiers = newList;
+    }
 
     /**
      * 是否已经显示过一次morphplayer合并的消息？
