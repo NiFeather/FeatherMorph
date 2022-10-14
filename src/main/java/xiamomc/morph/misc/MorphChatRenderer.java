@@ -21,12 +21,6 @@ public class MorphChatRenderer extends MorphPluginObject implements ChatRenderer
     @Resolved(shouldSolveImmediately = true)
     private MorphManager morphManager;
 
-    @Resolved(shouldSolveImmediately = true)
-    private MiniMessage miniMessage;
-
-    @Resolved(shouldSolveImmediately = true)
-    private MorphConfigManager config;
-
     @Override
     public @NotNull Component render(@NotNull Player source, @NotNull Component sourceDisplayName, @NotNull Component message, @NotNull Audience viewer)
     {
@@ -45,8 +39,6 @@ public class MorphChatRenderer extends MorphPluginObject implements ChatRenderer
 
             try
             {
-                var msgKey = config.getOrDefault(String.class, ConfigOption.CHAT_OVERRIDE_PATTERN);
-
                 this.message = CommonStrings.chatOverrideString()
                         .resolve("who", sourceDisplayName)
                         .resolve("message", message).toComponent();
