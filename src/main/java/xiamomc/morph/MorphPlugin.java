@@ -1,5 +1,6 @@
 package xiamomc.morph;
 
+import jline.internal.Log;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import xiamomc.morph.commands.MorphCommandHelper;
@@ -26,10 +27,6 @@ public final class MorphPlugin extends XiaMoJavaPlugin
         return getMorphNameSpace();
     }
 
-    public MorphPlugin()
-    {
-    }
-
     private final CommandHelper<MorphPlugin> cmdHelper = new MorphCommandHelper();
 
     private MorphManager morphManager;
@@ -37,20 +34,21 @@ public final class MorphPlugin extends XiaMoJavaPlugin
     @Override
     public void onEnable()
     {
-        // Plugin startup logic
         super.onEnable();
 
-        dependencyManager.Cache(this);
-        dependencyManager.Cache(morphManager = new MorphManager());
-        dependencyManager.Cache(cmdHelper);
-        dependencyManager.CacheAs(MessageStore.class, new MorphMessageStore());
-        dependencyManager.CacheAs(MiniMessage.class, MiniMessage.miniMessage());;
-        dependencyManager.CacheAs(IManagePlayerData.class, morphManager);
-        dependencyManager.CacheAs(IManageRequests.class, new RequestManager());
-        dependencyManager.CacheAs(MorphConfigManager.class, new MorphConfigManager(this));
+        //缓存依赖
+        dependencyManager.cache(this);
+        dependencyManager.cache(morphManager = new MorphManager());
+        dependencyManager.cache(cmdHelper);
+        dependencyManager.cacheAs(MessageStore.class, new MorphMessageStore());
+        dependencyManager.cacheAs(MiniMessage.class, MiniMessage.miniMessage());;
+        dependencyManager.cacheAs(IManagePlayerData.class, morphManager);
+        dependencyManager.cacheAs(IManageRequests.class, new RequestManager());
+        dependencyManager.cacheAs(MorphConfigManager.class, new MorphConfigManager(this));
 
-        dependencyManager.Cache(new MessageUtils());
+        dependencyManager.cache(new MessageUtils());
 
+        //注册EventProcessor
         this.schedule(c ->
         {
             Bukkit.getPluginManager().registerEvents(new EventProcessor(), this);
@@ -60,11 +58,19 @@ public final class MorphPlugin extends XiaMoJavaPlugin
     @Override
     public void onDisable()
     {
-        // Plugin shutdown logic
+        //调用super.onDisable后依赖管理器会被清空
+        //需要在调用前先把一些东西处理好
+        try
+        {
+            if (morphManager != null)
+                morphManager.onPluginDisable();
+        }
+        catch (Exception e)
+        {
+            logger.warn("禁用时出现问题：" + e.getMessage());
+            e.printStackTrace();
+        }
 
         super.onDisable();
-
-        if (morphManager != null)
-            morphManager.onPluginDisable();
     }
 }
