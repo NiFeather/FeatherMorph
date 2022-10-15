@@ -7,7 +7,7 @@ import xiamomc.pluginbase.messages.MessageStore;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MorphMessageStore extends MessageStore
+public class MorphMessageStore extends MessageStore<MorphPlugin>
 {
     private final List<Class<IStrings>> cachedClassList = new ArrayList<>();
 
