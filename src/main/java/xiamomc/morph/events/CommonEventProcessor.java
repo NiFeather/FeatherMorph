@@ -177,9 +177,8 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent e)
     {
-        //e.isCancelled()要求我们检查相关调用，但我们只是设置他是否要取消
-        //应该也许大概不会出现问题???
-        e.setCancelled(tryInvokeSkillOrQuickDisguise(e.getPlayer(), e.getAction()) || e.isCancelled());
+        if (tryInvokeSkillOrQuickDisguise(e.getPlayer(), e.getAction()))
+            e.setCancelled(true);
     }
 
     /**
