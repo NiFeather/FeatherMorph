@@ -14,6 +14,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.player.*;
 import org.bukkit.event.server.TabCompleteEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.profile.PlayerTextures;
 import xiamomc.morph.MorphManager;
@@ -164,20 +165,20 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
     public void onPlayerInteractAtEntity(PlayerInteractAtEntityEvent e)
     {
         if (e.getRightClicked() instanceof ArmorStand)
-            e.setCancelled(tryInvokeSkillOrQuickDisguise(e.getPlayer(), Action.RIGHT_CLICK_AIR) || e.isCancelled());
+            e.setCancelled(tryInvokeSkillOrQuickDisguise(e.getPlayer(), Action.RIGHT_CLICK_AIR, e.getHand()) || e.isCancelled());
     }
 
     @EventHandler
     public void onPlayerInteractAtEntity(PlayerInteractEntityEvent e)
     {
         if (e.getRightClicked() instanceof Allay)
-            e.setCancelled(tryInvokeSkillOrQuickDisguise(e.getPlayer(), Action.RIGHT_CLICK_AIR) || e.isCancelled());
+            e.setCancelled(tryInvokeSkillOrQuickDisguise(e.getPlayer(), Action.RIGHT_CLICK_AIR, e.getHand()) || e.isCancelled());
     }
 
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent e)
     {
-        if (tryInvokeSkillOrQuickDisguise(e.getPlayer(), e.getAction()))
+        if (tryInvokeSkillOrQuickDisguise(e.getPlayer(), e.getAction(), e.getHand()))
             e.setCancelled(true);
     }
 
@@ -187,9 +188,9 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
      * @param action 动作
      * @return 是否应该取消Interact事件
      */
-    private boolean tryInvokeSkillOrQuickDisguise(Player player, Action action)
+    private boolean tryInvokeSkillOrQuickDisguise(Player player, Action action, EquipmentSlot slot)
     {
-        if (!action.isRightClick()) return false;
+        if (!action.isRightClick() || slot != EquipmentSlot.HAND) return false;
 
         var state = morphs.getDisguiseStateFor(player);
 
