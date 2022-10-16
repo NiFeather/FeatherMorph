@@ -261,16 +261,15 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
                         DisguiseUtilities.removeGameProfile(LDprofile.toString());
 
                         uuidPlayerTexturesMap.put(playerUniqueId, profileTexture);
+                        return true;
                     }
 
                     morphs.updateLastPlayerMorphOperationTime(player);
-                    return true;
                 }
 
                 //右键胡萝卜钓竿：执行主动技能或快速变形
                 case CARROT_ON_A_STICK ->
                 {
-
                     if (state != null)
                     {
                         if (state.getAbilityCooldown() <= 0)
@@ -278,6 +277,8 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
                         else
                             player.sendMessage(MessageUtils.prefixes(player,
                                     SkillStrings.skillPreparing().resolve("time", state.getAbilityCooldown() / 20 + "")));
+
+                        return true;
                     }
                     else
                     {
@@ -296,10 +297,10 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
                                     : targetedEntity.getType().getKey().asString();
 
                             morphs.morphEntityTypeAuto(player, targetKey, targetedEntity);
+
+                            return true;
                         }
                     }
-
-                    return true;
                 }
             }
         }
