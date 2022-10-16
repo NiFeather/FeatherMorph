@@ -1,0 +1,19 @@
+root:
+  #聊天覆盖：某个玩家发言后是否要将消息显示为其伪装的玩家所发出？
+  #在公开服务器上启用此功能可能会导致非常不妙的事情吧...
+  chatOverride:
+    #启用、禁用功能
+    allowOverride: false
+    #是否使用message.json里的格式覆盖？
+    UseCustomRenderer: true
+  
+  #是否允许用玩家头快速伪装？
+  allowHeadMorph: true
+
+  #反向控制距离：当某个人变成其他玩家时，距离多少格可以控制被伪装玩家的一些动作？
+  #设置为0可以禁用某一功能，设置为-1则无距离限制
+  reverseControl:
+    #正常距离
+    normalDistance: -1
+    #免疫距离（佩戴特定物品时的可控制距离）
+    immuneDistance: 16

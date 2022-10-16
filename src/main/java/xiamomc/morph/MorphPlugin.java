@@ -1,11 +1,12 @@
 package xiamomc.morph;
 
-import jline.internal.Log;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import xiamomc.morph.commands.MorphCommandHelper;
 import xiamomc.morph.config.MorphConfigManager;
-import xiamomc.morph.events.EventProcessor;
+import xiamomc.morph.events.PlayerTracker;
+import xiamomc.morph.events.CommonEventProcessor;
+import xiamomc.morph.events.ReverseControlProcessor;
 import xiamomc.morph.interfaces.IManagePlayerData;
 import xiamomc.morph.interfaces.IManageRequests;
 import xiamomc.morph.messages.MessageUtils;
@@ -36,6 +37,8 @@ public final class MorphPlugin extends XiaMoJavaPlugin
     {
         super.onEnable();
 
+        var playerTracker = new PlayerTracker();
+
         //缓存依赖
         dependencyManager.cache(this);
         dependencyManager.cache(morphManager = new MorphManager());
@@ -45,13 +48,16 @@ public final class MorphPlugin extends XiaMoJavaPlugin
         dependencyManager.cacheAs(IManagePlayerData.class, morphManager);
         dependencyManager.cacheAs(IManageRequests.class, new RequestManager());
         dependencyManager.cacheAs(MorphConfigManager.class, new MorphConfigManager(this));
+        dependencyManager.cache(playerTracker);
 
         dependencyManager.cache(new MessageUtils());
 
         //注册EventProcessor
         this.schedule(c ->
         {
-            Bukkit.getPluginManager().registerEvents(new EventProcessor(), this);
+            Bukkit.getPluginManager().registerEvents(playerTracker, this);
+            Bukkit.getPluginManager().registerEvents(new CommonEventProcessor(), this);
+            Bukkit.getPluginManager().registerEvents(new ReverseControlProcessor(), this);
         });
     }
 
