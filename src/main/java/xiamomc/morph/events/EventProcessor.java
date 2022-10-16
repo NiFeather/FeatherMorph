@@ -19,10 +19,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.*;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.event.player.PlayerSwapHandItemsEvent;
+import org.bukkit.event.player.*;
 import org.bukkit.event.server.TabCompleteEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.meta.SkullMeta;
@@ -186,6 +183,8 @@ public class EventProcessor extends MorphPluginObject implements Listener
                 //右键玩家头颅：快速伪装
                 case PLAYER_HEAD ->
                 {
+                    if (e.getAction().equals(Action.RIGHT_CLICK_BLOCK)) return;
+
                     if (!allowHeadMorph)
                     {
                         player.sendMessage(MessageUtils.prefixes(player, MorphStrings.headDisguiseDisabledString()));
@@ -200,54 +199,51 @@ public class EventProcessor extends MorphPluginObject implements Listener
                         return;
                     }
 
-                    if (e.getAction().equals(Action.RIGHT_CLICK_AIR))
-                    {
-                        var profile = ((SkullMeta) mainHandItem.getItemMeta()).getPlayerProfile();
+                    var profile = ((SkullMeta) mainHandItem.getItemMeta()).getPlayerProfile();
 
-                        if (profile == null)
+                    if (profile == null)
+                    {
+                        player.sendMessage(MessageUtils.prefixes(player, MorphStrings.invalidSkinString()));
+                        return;
+                    }
+
+                    //忽略没有profile的玩家伪装
+                    var name = profile.getName();
+                    var profileTexture = profile.getTextures();
+                    var playerUniqueId = player.getUniqueId();
+
+                    //如果玩家有伪装，并且伪装的材质和Profile中的一样，那么取消伪装
+                    if (state != null)
+                    {
+                        var disguise = state.getDisguise();
+
+                        if (disguise instanceof PlayerDisguise playerDisguise
+                                && playerDisguise.getName().equals(name)
+                                && profileTexture.equals(uuidPlayerTexturesMap.get(playerUniqueId)))
                         {
-                            player.sendMessage(MessageUtils.prefixes(player, MorphStrings.invalidSkinString()));
+                            morphs.unMorph(player);
                             return;
                         }
-
-                        //忽略没有profile的玩家伪装
-                        var name = profile.getName();
-                        var profileTexture = profile.getTextures();
-                        var playerUniqueId = player.getUniqueId();
-
-                        //如果玩家有伪装，并且伪装的材质和Profile中的一样，那么取消伪装
-                        if (state != null)
-                        {
-                            var disguise = state.getDisguise();
-
-                            if (disguise instanceof PlayerDisguise playerDisguise
-                                    && playerDisguise.getName().equals(name)
-                                    && profileTexture.equals(uuidPlayerTexturesMap.get(playerUniqueId)))
-                            {
-                                morphs.unMorph(player);
-                                return;
-                            }
-                        }
-
-                        //否则，更新或应用伪装
-                        if (morphs.morphEntityTypeAuto(player, "player:" + profile.getName(), player.getTargetEntity(5)))
-                        {
-                            //成功伪装后设置皮肤为头颅的皮肤
-                            var disguise = (PlayerDisguise) DisguiseAPI.getDisguise(player);
-                            var wrappedProfile = WrappedGameProfile.fromHandle(new MorphGameProfile(profile));
-
-                            var LDprofile = ReflectionManager.getGameProfileWithThisSkin(wrappedProfile.getUUID(), wrappedProfile.getName(), wrappedProfile);
-
-                            //LD不支持直接用profile设置皮肤，只能先存到本地设置完再移除
-                            DisguiseAPI.addGameProfile(LDprofile.toString(), LDprofile);
-                            disguise.setSkin(LDprofile);
-                            DisguiseUtilities.removeGameProfile(LDprofile.toString());
-
-                            uuidPlayerTexturesMap.put(playerUniqueId, profileTexture);
-                        }
-
-                        morphs.updateLastPlayerMorphOperationTime(player);
                     }
+
+                    //否则，更新或应用伪装
+                    if (morphs.morphEntityTypeAuto(player, "player:" + profile.getName(), player.getTargetEntity(5)))
+                    {
+                        //成功伪装后设置皮肤为头颅的皮肤
+                        var disguise = (PlayerDisguise) DisguiseAPI.getDisguise(player);
+                        var wrappedProfile = WrappedGameProfile.fromHandle(new MorphGameProfile(profile));
+
+                        var LDprofile = ReflectionManager.getGameProfileWithThisSkin(wrappedProfile.getUUID(), wrappedProfile.getName(), wrappedProfile);
+
+                        //LD不支持直接用profile设置皮肤，只能先存到本地设置完再移除
+                        DisguiseAPI.addGameProfile(LDprofile.toString(), LDprofile);
+                        disguise.setSkin(LDprofile);
+                        DisguiseUtilities.removeGameProfile(LDprofile.toString());
+
+                        uuidPlayerTexturesMap.put(playerUniqueId, profileTexture);
+                    }
+
+                    morphs.updateLastPlayerMorphOperationTime(player);
                 }
 
                 //右键胡萝卜钓竿：执行主动技能或快速变形
