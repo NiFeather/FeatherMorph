@@ -1,12 +1,12 @@
 package xiamomc.morph.config;
 
 import org.jetbrains.annotations.Nullable;
+import xiamomc.morph.MorphPlugin;
 import xiamomc.pluginbase.Configuration.PluginConfigManager;
-import xiamomc.pluginbase.XiaMoJavaPlugin;
 
 public class MorphConfigManager extends PluginConfigManager
 {
-    public MorphConfigManager(XiaMoJavaPlugin plugin)
+    public MorphConfigManager(MorphPlugin plugin)
     {
         super(plugin);
 

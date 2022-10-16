@@ -152,6 +152,12 @@ public class MorphStrings extends AbstractMorphStrings
                 "<color:red>已切换自身可见性");
     }
 
+    public static FormattableMessage disguiseBannedString()
+    {
+        return getFormattable(getKey("disguise_banned"),
+                "<color:red>此伪装已被服务器禁用");
+    }
+
     private static String getKey(String key)
     {
         return "morph." + key;

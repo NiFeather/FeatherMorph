@@ -117,6 +117,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     private void onConfigRefresh()
     {
         setChatOverride(config.getOrDefault(Boolean.class, ConfigOption.ALLOW_CHAT_OVERRIDE, false));
+
+        bannedDisguises = config.getOrDefault(List.class, ConfigOption.BANNED_DISGUISES);
     }
 
     private void update()
@@ -253,6 +255,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         uuidMoprhTimeMap.put(player.getUniqueId(), Plugin.getCurrentTick());
     }
 
+    private List<?> bannedDisguises = new ArrayList<>();
+
     /**
      * 根据传入的key自动伪装
      * @param player 要伪装的玩家
@@ -264,6 +268,12 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     {
         var infoOptional = getAvaliableDisguisesFor(player).stream()
                 .filter(i -> i.getKey().equals(key)).findFirst();
+
+        if (bannedDisguises.contains(key))
+        {
+            player.sendMessage(MessageUtils.prefixes(player, MorphStrings.disguiseBannedString()));
+            return false;
+        }
 
         //检查有没有伪装
         if (infoOptional.isPresent())

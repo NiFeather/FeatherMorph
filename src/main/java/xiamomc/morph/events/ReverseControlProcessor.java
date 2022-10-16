@@ -100,6 +100,9 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
     @Resolved
     private PlayerTracker breakingTracker;
 
+    @Resolved
+    private MorphConfigManager config;
+
     @EventHandler
     public void onPlayerExit(PlayerQuitEvent e)
     {
@@ -183,16 +186,13 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
         }
     }
 
-    @Resolved
-    private MorphConfigManager config;
-
     private boolean playerInDistance(Player source, Player target)
     {
         var isInSameWorld = target.getWorld().equals(source.getWorld());
         var targetHelmet = target.getEquipment().getHelmet();
 
         //-1: 总是启用，0: 禁用
-        if (targetHelmet != null && targetHelmet.getType().equals(Material.GOLDEN_HELMET))
+        if (targetHelmet != null && immuneItemMaterial != null && targetHelmet.getType().equals(immuneItemMaterial))
         {
             var immuneDistance = config.getOrDefault(Integer.class, ConfigOption.REVERSE_CONTROL_DISTANCE_IMMUNE);
 
@@ -214,6 +214,24 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
     private void load()
     {
         this.addSchedule(c -> update());
+
+        config.onConfigRefresh(c -> updateImmuneItem());
+    }
+
+    private Material immuneItemMaterial;
+
+    private void updateImmuneItem()
+    {
+        var immune = config.getOrDefault(String.class, ConfigOption.REVERSE_CONTROL_IMMUNE_ITEM);
+
+        var targetOptional = Material.matchMaterial(immune);
+
+        if (targetOptional == null)
+        {
+            Logger.warn("未能找到和" + immune + "对应的免疫物品，相关功能将不会启用");
+        }
+
+        immuneItemMaterial = targetOptional;
     }
 
     private void update()
