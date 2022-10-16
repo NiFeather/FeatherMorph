@@ -7,17 +7,13 @@ import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
 import me.libraryaddict.disguise.utilities.DisguiseUtilities;
 import me.libraryaddict.disguise.utilities.reflection.ReflectionManager;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.player.*;
 import org.bukkit.event.server.TabCompleteEvent;
-import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.profile.PlayerTextures;
 import xiamomc.morph.MorphManager;
@@ -26,11 +22,11 @@ import xiamomc.morph.abilities.AbilityFlag;
 import xiamomc.morph.commands.MorphCommandHelper;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
+import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.MorphStrings;
 import xiamomc.morph.messages.SkillStrings;
 import xiamomc.morph.misc.DisguiseUtils;
 import xiamomc.morph.misc.EntityTypeUtils;
-import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.misc.MorphChatRenderer;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
@@ -165,12 +161,40 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
     private final Map<UUID, PlayerTextures> uuidPlayerTexturesMap = new ConcurrentHashMap<>();
 
     @EventHandler
-    public void onPlayerRightClick(PlayerInteractEvent e)
+    public void onPlayerInteractAtEntity(PlayerInteractAtEntityEvent e)
     {
-        var player = e.getPlayer();
+        if (e.getRightClicked() instanceof ArmorStand)
+            e.setCancelled(tryInvokeSkillOrQuickDisguise(e.getPlayer(), Action.RIGHT_CLICK_AIR) || e.isCancelled());
+    }
+
+    @EventHandler
+    public void onPlayerInteractAtEntity(PlayerInteractEntityEvent e)
+    {
+        if (e.getRightClicked() instanceof Allay)
+            e.setCancelled(tryInvokeSkillOrQuickDisguise(e.getPlayer(), Action.RIGHT_CLICK_AIR) || e.isCancelled());
+    }
+
+    @EventHandler
+    public void onPlayerInteract(PlayerInteractEvent e)
+    {
+        //e.isCancelled()要求我们检查相关调用，但我们只是设置他是否要取消
+        //应该也许大概不会出现问题???
+        e.setCancelled(tryInvokeSkillOrQuickDisguise(e.getPlayer(), e.getAction()) || e.isCancelled());
+    }
+
+    /**
+     * 尝试使用技能或快速伪装
+     * @param player 目标玩家
+     * @param action 动作
+     * @return 是否应该取消Interact事件
+     */
+    private boolean tryInvokeSkillOrQuickDisguise(Player player, Action action)
+    {
+        if (!action.isRightClick()) return false;
+
         var state = morphs.getDisguiseStateFor(player);
 
-        if (player.isSneaking() && e.getAction().isRightClick())
+        if (player.isSneaking())
         {
             var mainHandItem = player.getEquipment().getItemInMainHand();
 
@@ -179,20 +203,21 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
                 //右键玩家头颅：快速伪装
                 case PLAYER_HEAD ->
                 {
-                    if (e.getAction().equals(Action.RIGHT_CLICK_BLOCK)) return;
+                    //忽略shift点地
+                    if (action.equals(Action.RIGHT_CLICK_BLOCK)) return false;
 
                     if (!allowHeadMorph)
                     {
                         player.sendMessage(MessageUtils.prefixes(player, MorphStrings.headDisguiseDisabledString()));
 
-                        return;
+                        return true;
                     }
 
                     if (!morphs.canMorph(player))
                     {
                         player.sendMessage(MessageUtils.prefixes(player, MorphStrings.disguiseCoolingDownString()));
 
-                        return;
+                        return true;
                     }
 
                     var profile = ((SkullMeta) mainHandItem.getItemMeta()).getPlayerProfile();
@@ -200,7 +225,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
                     if (profile == null)
                     {
                         player.sendMessage(MessageUtils.prefixes(player, MorphStrings.invalidSkinString()));
-                        return;
+                        return true;
                     }
 
                     //忽略没有profile的玩家伪装
@@ -218,7 +243,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
                                 && profileTexture.equals(uuidPlayerTexturesMap.get(playerUniqueId)))
                         {
                             morphs.unMorph(player);
-                            return;
+                            return true;
                         }
                     }
 
@@ -240,44 +265,47 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
                     }
 
                     morphs.updateLastPlayerMorphOperationTime(player);
+                    return true;
                 }
 
                 //右键胡萝卜钓竿：执行主动技能或快速变形
                 case CARROT_ON_A_STICK ->
                 {
-                    if (e.getHand() == EquipmentSlot.HAND)
+
+                    if (state != null)
                     {
-                        if (state != null)
-                        {
-                            if (state.getAbilityCooldown() <= 0)
-                                morphs.executeDisguiseAbility(player);
-                            else
-                                player.sendMessage(MessageUtils.prefixes(player,
-                                        SkillStrings.skillPreparing().resolve("time", state.getAbilityCooldown() / 20 + "")));
-                        }
+                        if (state.getAbilityCooldown() <= 0)
+                            morphs.executeDisguiseAbility(player);
                         else
+                            player.sendMessage(MessageUtils.prefixes(player,
+                                    SkillStrings.skillPreparing().resolve("time", state.getAbilityCooldown() / 20 + "")));
+                    }
+                    else
+                    {
+                        var targetedEntity = player.getTargetEntity(5);
+
+                        if (targetedEntity != null)
                         {
-                            var targetedEntity = player.getTargetEntity(5);
+                            var disg = DisguiseAPI.getDisguise(targetedEntity);
 
-                            if (targetedEntity != null)
-                            {
-                                var disg = DisguiseAPI.getDisguise(targetedEntity);
+                            var targetKey = disg != null
+                                    ? (disg instanceof PlayerDisguise pd)
+                                    ? "player:" + pd.getName()
+                                    : disg.getType().getEntityType().getKey().asString()
+                                    : (targetedEntity instanceof Player targetPlayer)
+                                    ? "player:" + targetPlayer.getName()
+                                    : targetedEntity.getType().getKey().asString();
 
-                                var targetKey = disg != null
-                                        ? (disg instanceof PlayerDisguise pd)
-                                            ? "player:" + pd.getName()
-                                            : disg.getType().getEntityType().getKey().asString()
-                                        : (targetedEntity instanceof Player targetPlayer)
-                                            ? "player:" + targetPlayer.getName()
-                                            : targetedEntity.getType().getKey().asString();
-
-                                morphs.morphEntityTypeAuto(player, targetKey, targetedEntity);
-                            }
+                            morphs.morphEntityTypeAuto(player, targetKey, targetedEntity);
                         }
                     }
+
+                    return true;
                 }
             }
         }
+
+        return false;
     }
 
     //region GSit <-> LibsDisguises workaround
