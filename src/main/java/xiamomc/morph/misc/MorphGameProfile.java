@@ -1,4 +1,4 @@
-package xiamomc.morph.events;
+package xiamomc.morph.misc;
 
 import com.destroystokyo.paper.profile.PlayerProfile;
 import com.mojang.authlib.GameProfile;

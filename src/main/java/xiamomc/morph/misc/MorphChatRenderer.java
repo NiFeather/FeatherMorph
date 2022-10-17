@@ -3,14 +3,11 @@ package xiamomc.morph.misc;
 import io.papermc.paper.chat.ChatRenderer;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.MiniMessage;
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.entity.Player;
+import org.bukkit.permissions.Permissible;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
-import xiamomc.morph.config.ConfigOption;
-import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.messages.CommonStrings;
 import xiamomc.pluginbase.Annotations.Resolved;
 
@@ -18,30 +15,26 @@ public class MorphChatRenderer extends MorphPluginObject implements ChatRenderer
 {
     private Component message;
 
+    private Component messageRevealed;
+
     @Resolved(shouldSolveImmediately = true)
     private MorphManager morphManager;
 
     @Override
-    public @NotNull Component render(@NotNull Player source, @NotNull Component sourceDisplayName, @NotNull Component message, @NotNull Audience viewer)
+    public @NotNull Component render(@NotNull Player source, @NotNull Component sourceDisplayName,
+                                     @NotNull Component incomingMessage, @NotNull Audience viewer)
     {
         if (this.message == null)
         {
             var state = morphManager.getDisguiseStateFor(source);
-            if (state != null && state.getDisguise().isPlayerDisguise() && source.hasPermission("xiamomc.morph.chatoverride"))
-            {
+            if (state != null && state.getDisguise().isPlayerDisguise())
                 sourceDisplayName = state.getDisplayName();
-                var plainText = PlainTextComponentSerializer.plainText().serialize(message);
-
-                if (plainText.length() > 20) plainText = plainText.substring(0, 20) + "...";
-
-                Logger.info("正在覆盖" + source.getName() + "的消息：" + plainText);
-            }
 
             try
             {
-                this.message = CommonStrings.chatOverrideString()
-                        .resolve("who", sourceDisplayName)
-                        .resolve("message", message).toComponent();
+                this.message = buildMessage(sourceDisplayName, incomingMessage);
+
+                this.messageRevealed = buildMessage(sourceDisplayName.append(Component.text("(" + source.getName() + ")")), incomingMessage);
             }
             catch (Throwable t)
             {
@@ -50,6 +43,17 @@ public class MorphChatRenderer extends MorphPluginObject implements ChatRenderer
             }
         }
 
-        return this.message;
+        return viewer instanceof Permissible permissible
+                ? permissible.hasPermission("xiamomc.morph.chatoverride.reveal")
+                    ? this.messageRevealed
+                    : this.message
+                : this.message;
+    }
+
+    private Component buildMessage(Component displayName, Component msg)
+    {
+        return CommonStrings.chatOverrideString()
+                .resolve("who", displayName)
+                .resolve("message", msg).toComponent();
     }
 }

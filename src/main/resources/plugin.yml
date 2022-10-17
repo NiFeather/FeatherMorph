@@ -27,4 +27,5 @@ permissions:
     default: true
     children:
       xiamomc.morph.chatoverride.query: true
+      xiamomc.morph.chatoverride.reveal: op
 

@@ -31,6 +31,7 @@ import xiamomc.morph.messages.SkillStrings;
 import xiamomc.morph.misc.DisguiseUtils;
 import xiamomc.morph.misc.EntityTypeUtils;
 import xiamomc.morph.misc.MorphChatRenderer;
+import xiamomc.morph.misc.MorphGameProfile;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 
