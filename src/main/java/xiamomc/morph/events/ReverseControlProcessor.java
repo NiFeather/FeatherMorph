@@ -146,6 +146,7 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
         {
             var targetPlayer = Bukkit.getPlayer(state.getName());
             var shouldAttack = false;
+            var shouldCancelSwing = false;
 
             if (targetPlayer != null
                     && manager.getDisguiseStateFor(targetPlayer) == null
@@ -162,11 +163,13 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
                     if (!breakingTracker.playerStartingSpectating(player))
                         targetPlayer.swingMainHand();
 
-                    shouldAttack = targetEntity != null;
+                    shouldAttack = shouldCancelSwing = targetEntity != null;
                 }
                 else
                 {
                     targetPlayer.swingOffHand();
+
+                    shouldCancelSwing = targetEntity != null;
 
                     if (targetPlayer.getEquipment().getItemInMainHand().getType().isAir()
                         && targetPlayer.getEquipment().getItemInOffHand().getType().isAir())
@@ -177,11 +180,12 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
 
                 //检查玩家有没有正在破坏方块或者正在和方块互动
                 shouldAttack = shouldAttack && !breakingTracker.isPlayerInteracting(player);
+                shouldCancelSwing = shouldCancelSwing && !breakingTracker.isPlayerInteracting(player);
 
                 if (shouldAttack)
                     targetPlayer.attack(targetEntity);
 
-                e.setCancelled(e.isCancelled() || shouldAttack);
+                e.setCancelled(e.isCancelled() || shouldCancelSwing);
             }
         }
     }

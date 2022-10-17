@@ -118,7 +118,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
 
     private int cooldownOnDamage;
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onPlayerTookDamage(EntityDamageEvent e)
     {
         if (e.getEntity() instanceof Player player)
