@@ -530,7 +530,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
                         case WITHER -> EntityTypeUtils.isWitherHostile(disguiseEntityType);
                         case PILLAGER, VEX, ILLUSIONER, VINDICATOR, EVOKER, RAVAGER -> EntityTypeUtils.isRaiderHostile(disguiseEntityType);
                         case ENDERMAN -> disguiseEntityType == EntityType.PLAYER || disguiseEntityType == EntityType.ENDERMITE;
-                        case ZOGLIN -> true;
+                        case ZOGLIN -> EntityTypeUtils.isZoglinHostile(disguiseEntityType);
                         default -> disguise.isPlayerDisguise();
                     };
 

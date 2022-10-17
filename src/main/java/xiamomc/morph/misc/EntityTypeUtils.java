@@ -67,6 +67,13 @@ public class EntityTypeUtils
         //todo: 小海龟
     }
 
+    public static boolean isZoglinHostile(EntityType type)
+    {
+        return type != EntityType.CREEPER
+                && type != EntityType.GHAST
+                && type != EntityType.ZOGLIN;
+    }
+
     public static boolean isWitherHostile(EntityType type)
     {
         return type == EntityType.ZOMBIE
@@ -104,7 +111,7 @@ public class EntityTypeUtils
     {
         return Set.of(EntityType.MAGMA_CUBE, EntityType.BLAZE, EntityType.WITHER_SKELETON,
                 EntityType.WITHER, EntityType.STRIDER, EntityType.ZOMBIFIED_PIGLIN, EntityType.GHAST,
-                EntityType.WARDEN, EntityType.ENDER_DRAGON);
+                EntityType.WARDEN, EntityType.ENDER_DRAGON, EntityType.ZOGLIN);
     }
 
     public static Set<EntityType> takesDamageFromWater()
