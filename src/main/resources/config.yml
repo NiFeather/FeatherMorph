@@ -11,6 +11,11 @@ root:
   # 玩家受到伤害后技能CD将至少为下面配置的时间（单位：游戏刻）
   cooldown_on_damage: 15
 
+  # 技能物品
+  # 玩家使用技能、快速伪装、取消伪装时需要手持的物品
+  # 设置为"disabled"以禁用
+  action_item: minecraft:carrot_on_a_stick
+
   # 是否允许用玩家头快速伪装？
   allowHeadMorph: true
 
@@ -31,4 +36,4 @@ root:
   bannedDisguises: []
 
   # 不要动这个键!
-  version: 2
+  version: 3

@@ -11,6 +11,7 @@ public enum ConfigOption
     CHAT_OVERRIDE_USE_CUSTOM_RENDERER(ConfigNode.create().append("chatOverride").append("UseCustomRenderer"), true),
 
     SKILL_COOLDOWN_ON_DAMAGE(ConfigNode.create().append("cooldown_on_damage"), 15),
+    ACTION_ITEM(ConfigNode.create().append("action_item"), "minecraft:carrot_on_a_stick"),
 
     REVERSE_CONTROL_DISTANCE(ConfigNode.create().append("reverseControl").append("normalDistance"), -1),
     REVERSE_CONTROL_DISTANCE_IMMUNE(ConfigNode.create().append("reverseControl").append("immuneDistance"), 16),
@@ -18,7 +19,6 @@ public enum ConfigOption
 
     BANNED_DISGUISES(ConfigNode.create().append("bannedDisguises"), new ArrayList<String>()),
 
-    //todo: 实现配置更新
     VERSION(ConfigNode.create().append("version"), 0);
 
     public final ConfigNode node;

@@ -7,6 +7,7 @@ import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
 import me.libraryaddict.disguise.utilities.DisguiseUtilities;
 import me.libraryaddict.disguise.utilities.reflection.ReflectionManager;
+import org.bukkit.Material;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -160,6 +161,14 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
 
         useCustomRenderer = config.getOrDefault(Boolean.class, ConfigOption.CHAT_OVERRIDE_USE_CUSTOM_RENDERER, true);
         cooldownOnDamage = config.getOrDefault(Integer.class, ConfigOption.SKILL_COOLDOWN_ON_DAMAGE);
+
+        var actionItemId = config.getOrDefault(String.class, ConfigOption.ACTION_ITEM);
+        var item = Material.matchMaterial(actionItemId);
+
+        if (item == null && !actionItemId.equals("disabled"))
+            Logger.warn("未能找到和" + actionItem + "对应的物品，相关功能将不会启用");
+
+        actionItem = item;
     }
 
     @EventHandler
@@ -194,6 +203,8 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
     @Resolved
     private MorphSkillHandler skillHandler;
 
+    private Material actionItem;
+
     /**
      * 尝试使用技能或快速伪装
      * @param player 目标玩家
@@ -202,120 +213,130 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
      */
     private boolean tryInvokeSkillOrQuickDisguise(Player player, Action action, EquipmentSlot slot)
     {
-        if (!action.isRightClick() || slot != EquipmentSlot.HAND) return false;
+        if (slot != EquipmentSlot.HAND || actionItem == null) return false;
 
         var state = morphs.getDisguiseStateFor(player);
+        var mainHandItem = player.getEquipment().getItemInMainHand();
+
+        if (action.isLeftClick())
+        {
+            if (state != null
+                    && mainHandItem.getType() == actionItem
+                    && player.getEyeLocation().getDirection().getY() == -1)
+            {
+                morphs.unMorph(player);
+                return true;
+            }
+        }
+
+        if (!action.isRightClick()) return false;
 
         //同一刻内只接受一次技能
         if (skillHandler.getLastSkillTick(player) == Plugin.getCurrentTick()) return false;
 
         if (player.isSneaking())
         {
-            var mainHandItem = player.getEquipment().getItemInMainHand();
+            var mainHandItemType = mainHandItem.getType();
 
-            switch (mainHandItem.getType())
+            //右键玩家头颅：快速伪装
+            if (mainHandItemType == Material.PLAYER_HEAD)
             {
-                //右键玩家头颅：快速伪装
-                case PLAYER_HEAD ->
+                //忽略shift点地
+                if (action.equals(Action.RIGHT_CLICK_BLOCK)) return false;
+
+                if (!allowHeadMorph)
                 {
-                    //忽略shift点地
-                    if (action.equals(Action.RIGHT_CLICK_BLOCK)) return false;
+                    player.sendMessage(MessageUtils.prefixes(player, MorphStrings.headDisguiseDisabledString()));
 
-                    if (!allowHeadMorph)
-                    {
-                        player.sendMessage(MessageUtils.prefixes(player, MorphStrings.headDisguiseDisabledString()));
-
-                        return true;
-                    }
-
-                    if (!morphs.canMorph(player))
-                    {
-                        player.sendMessage(MessageUtils.prefixes(player, MorphStrings.disguiseCoolingDownString()));
-
-                        return true;
-                    }
-
-                    var profile = ((SkullMeta) mainHandItem.getItemMeta()).getPlayerProfile();
-
-                    if (profile == null)
-                    {
-                        player.sendMessage(MessageUtils.prefixes(player, MorphStrings.invalidSkinString()));
-                        return true;
-                    }
-
-                    //忽略没有profile的玩家伪装
-                    var name = profile.getName();
-                    var profileTexture = profile.getTextures();
-                    var playerUniqueId = player.getUniqueId();
-
-                    //如果玩家有伪装，并且伪装的材质和Profile中的一样，那么取消伪装
-                    if (state != null)
-                    {
-                        var disguise = state.getDisguise();
-
-                        if (disguise instanceof PlayerDisguise playerDisguise
-                                && playerDisguise.getName().equals(name)
-                                && profileTexture.equals(uuidPlayerTexturesMap.get(playerUniqueId)))
-                        {
-                            morphs.unMorph(player);
-                            return true;
-                        }
-                    }
-
-                    //否则，更新或应用伪装
-                    if (morphs.morphEntityTypeAuto(player, "player:" + profile.getName(), player.getTargetEntity(5)))
-                    {
-                        //成功伪装后设置皮肤为头颅的皮肤
-                        var disguise = (PlayerDisguise) DisguiseAPI.getDisguise(player);
-                        var wrappedProfile = WrappedGameProfile.fromHandle(new MorphGameProfile(profile));
-
-                        var LDprofile = ReflectionManager.getGameProfileWithThisSkin(wrappedProfile.getUUID(), wrappedProfile.getName(), wrappedProfile);
-
-                        //LD不支持直接用profile设置皮肤，只能先存到本地设置完再移除
-                        DisguiseAPI.addGameProfile(LDprofile.toString(), LDprofile);
-                        disguise.setSkin(LDprofile);
-                        DisguiseUtilities.removeGameProfile(LDprofile.toString());
-
-                        uuidPlayerTexturesMap.put(playerUniqueId, profileTexture);
-                        return true;
-                    }
-
-                    morphs.updateLastPlayerMorphOperationTime(player);
+                    return true;
                 }
 
-                //右键胡萝卜钓竿：执行主动技能或快速变形
-                case CARROT_ON_A_STICK ->
+                if (!morphs.canMorph(player))
                 {
-                    if (state != null)
-                    {
-                        if (state.getAbilityCooldown() <= 0)
-                            morphs.executeDisguiseAbility(player);
-                        else
-                            player.sendMessage(MessageUtils.prefixes(player,
-                                    SkillStrings.skillPreparing().resolve("time", state.getAbilityCooldown() / 20 + "")));
+                    player.sendMessage(MessageUtils.prefixes(player, MorphStrings.disguiseCoolingDownString()));
 
+                    return true;
+                }
+
+                var profile = ((SkullMeta) mainHandItem.getItemMeta()).getPlayerProfile();
+
+                if (profile == null)
+                {
+                    player.sendMessage(MessageUtils.prefixes(player, MorphStrings.invalidSkinString()));
+                    return true;
+                }
+
+                //忽略没有profile的玩家伪装
+                var name = profile.getName();
+                var profileTexture = profile.getTextures();
+                var playerUniqueId = player.getUniqueId();
+
+                //如果玩家有伪装，并且伪装的材质和Profile中的一样，那么取消伪装
+                if (state != null)
+                {
+                    var disguise = state.getDisguise();
+
+                    if (disguise instanceof PlayerDisguise playerDisguise
+                            && playerDisguise.getName().equals(name)
+                            && profileTexture.equals(uuidPlayerTexturesMap.get(playerUniqueId)))
+                    {
+                        morphs.unMorph(player);
                         return true;
                     }
+                }
+
+                //否则，更新或应用伪装
+                if (morphs.morphEntityTypeAuto(player, "player:" + profile.getName(), player.getTargetEntity(5)))
+                {
+                    //成功伪装后设置皮肤为头颅的皮肤
+                    var disguise = (PlayerDisguise) DisguiseAPI.getDisguise(player);
+                    var wrappedProfile = WrappedGameProfile.fromHandle(new MorphGameProfile(profile));
+
+                    var LDprofile = ReflectionManager.getGameProfileWithThisSkin(wrappedProfile.getUUID(), wrappedProfile.getName(), wrappedProfile);
+
+                    //LD不支持直接用profile设置皮肤，只能先存到本地设置完再移除
+                    DisguiseAPI.addGameProfile(LDprofile.toString(), LDprofile);
+                    disguise.setSkin(LDprofile);
+                    DisguiseUtilities.removeGameProfile(LDprofile.toString());
+
+                    uuidPlayerTexturesMap.put(playerUniqueId, profileTexture);
+                    return true;
+                }
+
+                morphs.updateLastPlayerMorphOperationTime(player);
+            }
+            else if (mainHandItemType == actionItem)
+            {
+                //主动技能或快速变形
+                if (state != null)
+                {
+                    if (state.getAbilityCooldown() <= 0)
+                        morphs.executeDisguiseAbility(player);
                     else
+                        player.sendMessage(MessageUtils.prefixes(player,
+                                SkillStrings.skillPreparing().resolve("time", state.getAbilityCooldown() / 20 + "")));
+
+                    return true;
+                }
+                else
+                {
+                    var targetedEntity = player.getTargetEntity(5);
+
+                    if (targetedEntity != null)
                     {
-                        var targetedEntity = player.getTargetEntity(5);
+                        var disg = DisguiseAPI.getDisguise(targetedEntity);
 
-                        if (targetedEntity != null)
-                        {
-                            var disg = DisguiseAPI.getDisguise(targetedEntity);
+                        var targetKey = disg != null
+                                ? (disg instanceof PlayerDisguise pd)
+                                ? "player:" + pd.getName()
+                                : disg.getType().getEntityType().getKey().asString()
+                                : (targetedEntity instanceof Player targetPlayer)
+                                ? "player:" + targetPlayer.getName()
+                                : targetedEntity.getType().getKey().asString();
 
-                            var targetKey = disg != null
-                                    ? (disg instanceof PlayerDisguise pd)
-                                    ? "player:" + pd.getName()
-                                    : disg.getType().getEntityType().getKey().asString()
-                                    : (targetedEntity instanceof Player targetPlayer)
-                                    ? "player:" + targetPlayer.getName()
-                                    : targetedEntity.getType().getKey().asString();
+                        morphs.morphEntityTypeAuto(player, targetKey, targetedEntity);
 
-                            morphs.morphEntityTypeAuto(player, targetKey, targetedEntity);
-
-                            return true;
-                        }
+                        return true;
                     }
                 }
             }
