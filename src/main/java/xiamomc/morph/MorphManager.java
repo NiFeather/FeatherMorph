@@ -98,7 +98,9 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 new GhastMorphSkill(),
                 new PlayerMorphSkill(),
                 new ShulkerMorphSkill(),
-                new WitherMorphSkill()
+                new WitherMorphSkill(),
+                new LlamaMorphSkill(),
+                new TraderLlamaMorphSkill()
         ));
 
         abilityHandler.registerAbility(EntityTypeUtils.canFly(), AbilityFlag.CAN_FLY);

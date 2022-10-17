@@ -6,6 +6,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.Fireball;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.messages.MessageUtils;
 
@@ -49,7 +50,7 @@ public abstract class MorphSkill extends MorphPluginObject implements IMorphSkil
                 Sound.Source.PLAYER, 1f, 1f));
     }
 
-    protected  <T extends Fireball> T shootFireBall(Player player, Class<T> fireball)
+    protected  <T extends Projectile> T shootFireBall(Player player, Class<T> fireball)
     {
         var fireBall = player.getWorld()
                 .spawn(player.getEyeLocation(), fireball);
