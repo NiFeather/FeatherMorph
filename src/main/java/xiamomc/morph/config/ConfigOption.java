@@ -10,6 +10,8 @@ public enum ConfigOption
     ALLOW_CHAT_OVERRIDE(ConfigNode.create().append("chatOverride").append("allowOverride"), false),
     CHAT_OVERRIDE_USE_CUSTOM_RENDERER(ConfigNode.create().append("chatOverride").append("UseCustomRenderer"), true),
 
+    SKILL_COOLDOWN_ON_DAMAGE(ConfigNode.create().append("cooldown_on_damage"), 15),
+
     REVERSE_CONTROL_DISTANCE(ConfigNode.create().append("reverseControl").append("normalDistance"), -1),
     REVERSE_CONTROL_DISTANCE_IMMUNE(ConfigNode.create().append("reverseControl").append("immuneDistance"), 16),
     REVERSE_CONTROL_IMMUNE_ITEM(ConfigNode.create().append("reverseControl").append("immuneItem"), "minecraft:golden_helmet"),
@@ -26,5 +28,11 @@ public enum ConfigOption
     {
         this.node = node;
         this.defaultValue = defaultValue;
+    }
+
+    @Override
+    public String toString()
+    {
+        return node.toString();
     }
 }

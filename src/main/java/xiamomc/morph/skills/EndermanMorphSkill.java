@@ -2,18 +2,25 @@ package xiamomc.morph.skills;
 
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
+import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import xiamomc.morph.messages.SkillStrings;
+
+import java.util.Set;
 
 public class EndermanMorphSkill extends MorphSkill
 {
     @Override
     public int executeSkill(Player player)
     {
-        var targetBlock = player.getTargetBlock(32);
-        if (targetBlock == null || targetBlock.getBlockData().getMaterial().isAir())
+        var targetBlock = player.getEyeLocation().getBlock().getType() == Material.WATER
+                ? player.getTargetBlock(Set.of(Material.WATER), 32) //只能从水里传到水里
+                : player.getTargetBlock(null, 32); //在空气中时阻止传送到水里
+
+        var targetMaterial = targetBlock.getBlockData().getMaterial();
+        if (targetMaterial.isAir() || targetMaterial.equals(Material.WATER))
         {
             sendDenyMessageToPlayer(player, SkillStrings.targetNotSuitableString().toComponent());
             return 20;

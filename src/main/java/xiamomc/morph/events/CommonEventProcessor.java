@@ -115,15 +115,22 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         }
     }
 
+    private int cooldownOnDamage;
+
     @EventHandler
-    public void onPlayerFall(EntityDamageEvent e)
+    public void onPlayerTookDamage(EntityDamageEvent e)
     {
-        if (e.getEntity() instanceof Player player && e.getCause().equals(EntityDamageEvent.DamageCause.FALL))
+        if (e.getEntity() instanceof Player player)
         {
             var state = morphs.getDisguiseStateFor(player);
 
-            if (state != null && state.isAbilityFlagSet(AbilityFlag.NO_FALL_DAMAGE))
-                e.setCancelled(true);
+            if (state != null)
+            {
+                if (e.getCause().equals(EntityDamageEvent.DamageCause.FALL) && state.isAbilityFlagSet(AbilityFlag.NO_FALL_DAMAGE))
+                    e.setCancelled(true);
+                else
+                    state.setAbilityCooldown(Math.max(state.getAbilityCooldown(), cooldownOnDamage));
+            }
         }
     }
 
@@ -152,6 +159,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         setAllowHeadMorph(config.getOrDefault(Boolean.class, ConfigOption.ALLOW_HEAD_MORPH, true));
 
         useCustomRenderer = config.getOrDefault(Boolean.class, ConfigOption.CHAT_OVERRIDE_USE_CUSTOM_RENDERER, true);
+        cooldownOnDamage = config.getOrDefault(Integer.class, ConfigOption.SKILL_COOLDOWN_ON_DAMAGE);
     }
 
     @EventHandler

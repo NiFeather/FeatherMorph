@@ -1,8 +1,13 @@
 package xiamomc.morph.config;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphPlugin;
+import xiamomc.pluginbase.Configuration.ConfigNode;
 import xiamomc.pluginbase.Configuration.PluginConfigManager;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class MorphConfigManager extends PluginConfigManager
 {
@@ -31,6 +36,48 @@ public class MorphConfigManager extends PluginConfigManager
         }
 
         return val;
+    }
+
+    @NotNull
+    @Override
+    public Map<ConfigNode, Object> getAllNotDefault()
+    {
+        var options = ConfigOption.values();
+        var map = new HashMap<ConfigNode, Object>();
+
+        for (var o : options)
+        {
+            var val = getOrDefault(Object.class, o);
+
+            if (!val.equals(o.defaultValue)) map.put(o.node, val);
+        }
+
+        return map;
+    }
+
+    @Override
+    public void reload()
+    {
+        super.reload();
+
+        //更新配置
+        int targetVersion = 2;
+
+        if (getOrDefault(Integer.class, ConfigOption.VERSION) < targetVersion)
+        {
+            var nonDefaults = this.getAllNotDefault();
+
+            plugin.saveResource("config.yml", true);
+            plugin.reloadConfig();
+
+            var newConfig = plugin.getConfig();
+
+            nonDefaults.forEach((n, v) -> newConfig.set(n.toString(), v));
+            newConfig.set(ConfigOption.VERSION.toString(), targetVersion);
+
+            plugin.saveConfig();
+            reload();
+        }
     }
 
     public <T> T getOrDefault(Class<T> type, ConfigOption option)

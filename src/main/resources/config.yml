@@ -6,10 +6,14 @@ root:
     allowOverride: false
     # 是否使用message.json里的格式覆盖？
     UseCustomRenderer: true
-  
+
+  # 收到伤害时的技能CD
+  # 玩家受到伤害后技能CD将至少为下面配置的时间（单位：游戏刻）
+  cooldown_on_damage: 15
+
   # 是否允许用玩家头快速伪装？
   allowHeadMorph: true
-  
+
   # 反向控制距离：当某个人变成其他玩家时，距离多少格可以控制被伪装玩家的一些动作？
   # 设置为0可以禁用某一功能，设置为-1则无距离限制
   reverseControl:
@@ -19,12 +23,12 @@ root:
     immuneDistance: 16
     # 免疫物品（当被伪装玩家佩戴此物品时将使用上方配置的距离检查）
     immuneItem: minecraft:golden_helmet
-  
+
   # 已禁用的伪装，此列表里的伪装将不会对玩家可用，例如：
   # bannedDisguises:
   # - "minecraft:allay"
   # - "player:dinnerbone"
   bannedDisguises: []
-  
+
   # 不要动这个键!
-  version: 0
+  version: 2
