@@ -96,14 +96,15 @@ public class EntityTypeUtils
     {
         return Set.of(EntityType.ALLAY, EntityType.ENDER_DRAGON,
                 EntityType.BAT, EntityType.BEE, EntityType.BLAZE,
-                EntityType.GHAST, EntityType.VEX, EntityType.PHANTOM, EntityType.WITHER);
+                EntityType.GHAST, EntityType.VEX, EntityType.PHANTOM, EntityType.WITHER,
+                EntityType.PARROT);
     }
 
     public static Set<EntityType> hasFireResistance()
     {
         return Set.of(EntityType.MAGMA_CUBE, EntityType.BLAZE, EntityType.WITHER_SKELETON,
                 EntityType.WITHER, EntityType.STRIDER, EntityType.ZOMBIFIED_PIGLIN, EntityType.GHAST,
-                EntityType.WARDEN);
+                EntityType.WARDEN, EntityType.ENDER_DRAGON);
     }
 
     public static Set<EntityType> takesDamageFromWater()
@@ -145,9 +146,24 @@ public class EntityTypeUtils
         return EntityType.HORSE;
     }
 
-    public static EntityType noFallDamage()
+    public static Set<EntityType> noFallDamage()
     {
-        return EntityType.IRON_GOLEM;
+        //列表里一些在canFly的列表里的类型本来就不会让玩家受到摔落伤害，但还是加上比较好
+        return Set.of(EntityType.IRON_GOLEM, EntityType.CAT,
+                EntityType.OCELOT, EntityType.SNOWMAN, EntityType.MAGMA_CUBE,
+                EntityType.BAT, EntityType.BLAZE, EntityType.ENDER_DRAGON,
+                EntityType.GHAST, EntityType.PARROT, EntityType.VEX,
+                EntityType.WITHER, EntityType.CHICKEN, EntityType.SHULKER);
+    }
+
+    public static EntityType reducesMagicDamage()
+    {
+        return EntityType.WITCH;
+    }
+
+    public static EntityType reducesFallDamage()
+    {
+        return EntityType.GOAT;
     }
 
     public static EntityType hasFeatherFalling()

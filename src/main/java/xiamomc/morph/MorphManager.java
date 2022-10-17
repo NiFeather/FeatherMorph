@@ -112,6 +112,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         abilityHandler.registerAbility(EntityTypeUtils.hasSpeedBoost(), AbilityFlag.HAS_SPEED_BOOST);
         abilityHandler.registerAbility(EntityTypeUtils.noFallDamage(), AbilityFlag.NO_FALL_DAMAGE);
         abilityHandler.registerAbility(EntityTypeUtils.hasFeatherFalling(), AbilityFlag.HAS_FEATHER_FALLING);
+        abilityHandler.registerAbility(EntityTypeUtils.reducesMagicDamage(), AbilityFlag.REDUCES_MAGIC_DAMAGE);
+        abilityHandler.registerAbility(EntityTypeUtils.reducesFallDamage(), AbilityFlag.REDUCES_FALL_DAMAGE);
     }
 
     private void onConfigRefresh()
@@ -482,7 +484,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         switch (type)
         {
-            case ALLAY, BEE, BLAZE, VEX, BAT -> player.setFlySpeed(0.05f);
+            case ALLAY, BEE, BLAZE, VEX, BAT, PARROT -> player.setFlySpeed(0.05f);
             case GHAST, PHANTOM -> player.setFlySpeed(0.06f);
             case ENDER_DRAGON -> player.setFlySpeed(0.15f);
             default -> player.setFlySpeed(0.1f);

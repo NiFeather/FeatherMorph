@@ -124,12 +124,30 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         if (e.getEntity() instanceof Player player)
         {
             var state = morphs.getDisguiseStateFor(player);
+            var cause = e.getCause();
 
             if (state != null)
             {
-                if (e.getCause().equals(EntityDamageEvent.DamageCause.FALL) && state.isAbilityFlagSet(AbilityFlag.NO_FALL_DAMAGE))
+                if (cause.equals(EntityDamageEvent.DamageCause.FALL))
+                {
+                    if (state.isAbilityFlagSet(AbilityFlag.NO_FALL_DAMAGE))
+                        e.setDamage(0d);
+                    else if (state.isAbilityFlagSet(AbilityFlag.REDUCES_FALL_DAMAGE))
+                        e.setDamage(Math.max(0d, e.getDamage() - 10d));
+                }
+
+                if (cause.equals(EntityDamageEvent.DamageCause.MAGIC))
+                {
+                    if (state.isAbilityFlagSet(AbilityFlag.REDUCES_MAGIC_DAMAGE))
+                        e.setDamage(e.getDamage() * 0.15d);
+
+                    //亡灵暂时无法实现，因为我们没法确定此魔法伤害是什么造成的
+                }
+
+                //如果伤害是0，那么取消事件
+                if (e.getDamage() <= 0d)
                     e.setCancelled(true);
-                else
+                else //否则，设置CD
                     state.setAbilityCooldown(Math.max(state.getAbilityCooldown(), cooldownOnDamage));
             }
         }
@@ -213,31 +231,26 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
      */
     private boolean tryInvokeSkillOrQuickDisguise(Player player, Action action, EquipmentSlot slot)
     {
-        //一段时间内内只接受一次触发
-        //传送前后会触发两次Interact，而且这两个Interact还不一定在同个Tick里
-        if (Plugin.getCurrentTick() - skillHandler.getLastSkillTick(player) <= 1) return false;
-
         if (slot != EquipmentSlot.HAND || actionItem == null) return false;
 
         var state = morphs.getDisguiseStateFor(player);
         var mainHandItem = player.getEquipment().getItemInMainHand();
+        var mainHandItemType = mainHandItem.getType();
 
         if (player.isSneaking())
         {
             if (action.isLeftClick())
             {
                 if (state != null
-                        && mainHandItem.getType() == actionItem
+                        && mainHandItemType == actionItem
                         && player.getEyeLocation().getDirection().getY() == -1)
                 {
                     morphs.unMorph(player);
                     return true;
                 }
+
+                return false;
             }
-
-            if (!action.isRightClick()) return false;
-
-            var mainHandItemType = mainHandItem.getType();
 
             //右键玩家头颅：快速伪装
             if (mainHandItemType == Material.PLAYER_HEAD)
@@ -261,13 +274,13 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
 
                 var profile = ((SkullMeta) mainHandItem.getItemMeta()).getPlayerProfile();
 
+                //忽略没有profile的玩家伪装
                 if (profile == null)
                 {
                     player.sendMessage(MessageUtils.prefixes(player, MorphStrings.invalidSkinString()));
                     return true;
                 }
 
-                //忽略没有profile的玩家伪装
                 var name = profile.getName();
                 var profileTexture = profile.getTextures();
                 var playerUniqueId = player.getUniqueId();
@@ -314,8 +327,15 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
                     if (state.getAbilityCooldown() <= 0)
                         morphs.executeDisguiseAbility(player);
                     else
+                    {
+                        //一段时间内内只接受一次右键触发
+                        //传送前后会触发两次Interact，而且这两个Interact还不一定在同个Tick里
+                        if (Plugin.getCurrentTick() - skillHandler.getLastSkillTick(player) <= 1)
+                            return true;
+
                         player.sendMessage(MessageUtils.prefixes(player,
                                 SkillStrings.skillPreparing().resolve("time", state.getAbilityCooldown() / 20 + "")));
+                    }
 
                     return true;
                 }
@@ -513,7 +533,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
                         default -> disguise.isPlayerDisguise();
                     };
 
-            e.setCancelled(!shouldTarget);
+            e.setCancelled(e.isCancelled() || !shouldTarget);
         }
     }
 
