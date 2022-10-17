@@ -70,10 +70,10 @@ public class MorphSkillHandler extends MorphPluginObject
     /**
      * 获取玩家上次使用主动技能的时间
      * @param player 目标玩家
-     * @return 上次使用主动技能的时间，如果没找到则返回Long.MIN_VALUE
+     * @return 上次使用主动技能的时间，如果没找到则返回0
      */
     public long getLastSkillTick(Player player)
     {
-        return lastSkillTickMap.getOrDefault(player.getUniqueId(), Long.MIN_VALUE);
+        return lastSkillTickMap.getOrDefault(player.getUniqueId(), 0L);
     }
 }

@@ -213,6 +213,10 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
      */
     private boolean tryInvokeSkillOrQuickDisguise(Player player, Action action, EquipmentSlot slot)
     {
+        //一段时间内内只接受一次触发
+        //传送前后会触发两次Interact，而且这两个Interact还不一定在同个Tick里
+        if (Plugin.getCurrentTick() - skillHandler.getLastSkillTick(player) <= 1) return false;
+
         if (slot != EquipmentSlot.HAND || actionItem == null) return false;
 
         var state = morphs.getDisguiseStateFor(player);
@@ -230,9 +234,6 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         }
 
         if (!action.isRightClick()) return false;
-
-        //同一刻内只接受一次技能
-        if (skillHandler.getLastSkillTick(player) == Plugin.getCurrentTick()) return false;
 
         if (player.isSneaking())
         {
