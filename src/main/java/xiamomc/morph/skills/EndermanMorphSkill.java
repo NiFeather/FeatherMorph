@@ -2,29 +2,27 @@ package xiamomc.morph.skills;
 
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
+import org.bukkit.FluidCollisionMode;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.type.Fence;
-import org.bukkit.block.data.type.Slab;
+import org.bukkit.block.data.type.Gate;
 import org.bukkit.block.data.type.Wall;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import xiamomc.morph.messages.SkillStrings;
-
-import java.util.Set;
 
 public class EndermanMorphSkill extends MorphSkill
 {
     @Override
     public int executeSkill(Player player)
     {
-        var targetBlock = player.getEyeLocation().getBlock().getType() == Material.WATER
-                ? player.getTargetBlock(Set.of(Material.WATER), 32) //只能从水里传到水里
-                : player.getTargetBlock(null, 32); //在空气中时阻止传送到水里
+        //目标方块
+        var targetBlock = player.getTargetBlockExact(32, FluidCollisionMode.ALWAYS);
 
-        var targetMaterial = targetBlock.getBlockData().getMaterial();
-        if (targetMaterial.isAir() || targetMaterial.equals(Material.WATER))
+        if (targetBlock == null
+                || targetBlock.getBlockData().getMaterial().isAir()
+                || targetBlock.getBlockData().getMaterial().equals(Material.WATER))
         {
             sendDenyMessageToPlayer(player, SkillStrings.targetNotSuitableString().toComponent());
             return 20;
@@ -36,24 +34,27 @@ public class EndermanMorphSkill extends MorphSkill
 
         var commonOffset = 0.5f;
         var xOffset = 0f;
-        var yOffset = 0f;
         var zOffset = 0f;
 
-        //获取位移
+        //获取位移并设置目的地
         assert face != null;
         xOffset = face.getModX();
         zOffset = face.getModZ();
 
-        yOffset = face == BlockFace.UP
-                ? getTopY(targetBlock, face)
-                : face.getModY();
-
+        //目标X/Z + 0.5 + 从方块朝向获取的ModX/Z
         loc.setX(loc.getX() + xOffset + commonOffset);
-        loc.setY(loc.getY() + yOffset);
         loc.setZ(loc.getZ() + zOffset + commonOffset);
 
+        //目的地
+        var destBlock = loc.getBlock();
+
+        //从目的地的方块获取应该设置的高度
+        loc.setY(getTopY(destBlock));
+
+        //设置眼睛方向
         loc.setDirection(player.getEyeLocation().getDirection());
 
+        //传送
         playSoundToNearbyPlayers(player, 10,
                 Key.key("minecraft", "entity.enderman.teleport"), Sound.Source.HOSTILE);
 
@@ -68,19 +69,16 @@ public class EndermanMorphSkill extends MorphSkill
         return 40;
     }
 
-    private float getTopY(Block block, BlockFace face)
+    private float getTopY(Block block)
     {
-        if (face != BlockFace.UP) return 0;
-
         var data = block.getBlockData();
 
-        if (data instanceof Fence || data instanceof Wall)
-            return 1.5f;
+        var val = block.getBoundingBox().getMinY() + block.getBoundingBox().getHeight();
 
-        if (data instanceof Slab slab)
-            return slab.getType() == Slab.Type.TOP ? 1 : 0.5f;
+        if (data instanceof Fence || data instanceof Wall || data instanceof Gate)
+            val += 0.5d;
 
-        return (float) block.getBoundingBox().getHeight();
+        return (float) Math.max(block.getLocation().getY(), val);
     }
 
     @Override

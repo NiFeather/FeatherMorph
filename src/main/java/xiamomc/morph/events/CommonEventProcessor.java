@@ -222,21 +222,21 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         var state = morphs.getDisguiseStateFor(player);
         var mainHandItem = player.getEquipment().getItemInMainHand();
 
-        if (action.isLeftClick())
-        {
-            if (state != null
-                    && mainHandItem.getType() == actionItem
-                    && player.getEyeLocation().getDirection().getY() == -1)
-            {
-                morphs.unMorph(player);
-                return true;
-            }
-        }
-
-        if (!action.isRightClick()) return false;
-
         if (player.isSneaking())
         {
+            if (action.isLeftClick())
+            {
+                if (state != null
+                        && mainHandItem.getType() == actionItem
+                        && player.getEyeLocation().getDirection().getY() == -1)
+                {
+                    morphs.unMorph(player);
+                    return true;
+                }
+            }
+
+            if (!action.isRightClick()) return false;
+
             var mainHandItemType = mainHandItem.getType();
 
             //右键玩家头颅：快速伪装
