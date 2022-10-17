@@ -129,20 +129,29 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
 
             if (state != null)
             {
-                if (cause.equals(EntityDamageEvent.DamageCause.FALL))
+                switch (cause)
                 {
-                    if (state.isAbilityFlagSet(AbilityFlag.NO_FALL_DAMAGE))
-                        e.setDamage(0d);
-                    else if (state.isAbilityFlagSet(AbilityFlag.REDUCES_FALL_DAMAGE))
-                        e.setDamage(Math.max(0d, e.getDamage() - 10d));
-                }
+                    case FALL ->
+                    {
+                        if (state.isAbilityFlagSet(AbilityFlag.NO_FALL_DAMAGE))
+                            e.setDamage(0d);
+                        else if (state.isAbilityFlagSet(AbilityFlag.REDUCES_FALL_DAMAGE))
+                            e.setDamage(Math.max(0d, e.getDamage() - 10d));
+                    }
 
-                if (cause.equals(EntityDamageEvent.DamageCause.MAGIC))
-                {
-                    if (state.isAbilityFlagSet(AbilityFlag.REDUCES_MAGIC_DAMAGE))
-                        e.setDamage(e.getDamage() * 0.15d);
+                    case MAGIC ->
+                    {
+                        if (state.isAbilityFlagSet(AbilityFlag.REDUCES_MAGIC_DAMAGE))
+                            e.setDamage(e.getDamage() * 0.15d);
 
-                    //亡灵暂时无法实现，因为我们没法确定此魔法伤害是什么造成的
+                        //亡灵暂时无法实现，因为我们没法确定此魔法伤害是什么造成的
+                    }
+
+                    case FREEZE ->
+                    {
+                        if (state.isAbilityFlagSet(AbilityFlag.SNOWY))
+                            e.setDamage(0d);
+                    }
                 }
 
                 //如果伤害是0，那么取消事件

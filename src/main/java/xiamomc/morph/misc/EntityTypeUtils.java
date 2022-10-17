@@ -116,7 +116,7 @@ public class EntityTypeUtils
 
     public static Set<EntityType> takesDamageFromWater()
     {
-        return Set.of(EntityType.ENDERMAN, EntityType.BLAZE);
+        return Set.of(EntityType.ENDERMAN, EntityType.BLAZE, EntityType.SNOWMAN);
     }
 
     public static Set<EntityType> canBreatheUnderWater()
@@ -176,5 +176,10 @@ public class EntityTypeUtils
     public static EntityType hasFeatherFalling()
     {
         return EntityType.CHICKEN;
+    }
+
+    public static EntityType hasSnowTrail()
+    {
+        return EntityType.SNOWMAN;
     }
 }

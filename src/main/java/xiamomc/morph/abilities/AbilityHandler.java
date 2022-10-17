@@ -1,5 +1,6 @@
 package xiamomc.morph.abilities;
 
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -68,6 +69,8 @@ public class AbilityHandler extends MorphPluginObject
 
     public void handle(Player player, DisguiseState state)
     {
+        var playerLocation = player.getLocation();
+
         if (state.isAbilityFlagSet(AbilityFlag.CAN_BREATHE_UNDER_WATER) && player.isInWaterOrRainOrBubbleColumn())
         {
             player.addPotionEffect(conduitEffect);
@@ -90,7 +93,7 @@ public class AbilityHandler extends MorphPluginObject
                 && player.getWorld().isDayTime()
                 && player.getWorld().isClearWeather()
                 && !player.isInWaterOrRainOrBubbleColumn()
-                && player.getLocation().getBlock().getLightFromSky() == 15)
+                && playerLocation.getBlock().getLightFromSky() == 15)
         {
             player.setFireTicks(200);
         }
@@ -109,5 +112,21 @@ public class AbilityHandler extends MorphPluginObject
         if (state.isAbilityFlagSet(AbilityFlag.HAS_FEATHER_FALLING))
             player.addPotionEffect(featherFallingEffect);
 
+        if (state.isAbilityFlagSet(AbilityFlag.SNOWY))
+        {
+            var block = playerLocation.getBlock();
+
+            if (block.getType().isAir()
+                    && block.canPlace(Material.SNOW.createBlockData())
+                    && block.getTemperature() <= 0.95)
+            {
+                block.setType(Material.SNOW);
+            }
+
+            player.setFreezeTicks(0);
+
+            if (playerLocation.getBlock().getTemperature() > 1.0)
+                player.setFireTicks(40);
+        }
     }
 }

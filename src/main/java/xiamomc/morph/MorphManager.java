@@ -100,7 +100,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 new ShulkerMorphSkill(),
                 new WitherMorphSkill(),
                 new LlamaMorphSkill(),
-                new TraderLlamaMorphSkill()
+                new TraderLlamaMorphSkill(),
+                new SnowGolemMorphSkill()
         ));
 
         abilityHandler.registerAbility(EntityTypeUtils.canFly(), AbilityFlag.CAN_FLY);
@@ -116,6 +117,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         abilityHandler.registerAbility(EntityTypeUtils.hasFeatherFalling(), AbilityFlag.HAS_FEATHER_FALLING);
         abilityHandler.registerAbility(EntityTypeUtils.reducesMagicDamage(), AbilityFlag.REDUCES_MAGIC_DAMAGE);
         abilityHandler.registerAbility(EntityTypeUtils.reducesFallDamage(), AbilityFlag.REDUCES_FALL_DAMAGE);
+        abilityHandler.registerAbility(EntityTypeUtils.hasSnowTrail(), AbilityFlag.SNOWY);
     }
 
     private void onConfigRefresh()
