@@ -3,7 +3,11 @@ package xiamomc.morph.skills;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.data.type.Fence;
+import org.bukkit.block.data.type.Slab;
+import org.bukkit.block.data.type.Wall;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import xiamomc.morph.messages.SkillStrings;
@@ -39,8 +43,9 @@ public class EndermanMorphSkill extends MorphSkill
         assert face != null;
         xOffset = face.getModX();
         zOffset = face.getModZ();
+
         yOffset = face == BlockFace.UP
-                ? (float) targetBlock.getBoundingBox().getHeight()
+                ? getTopY(targetBlock, face)
                 : face.getModY();
 
         loc.setX(loc.getX() + xOffset + commonOffset);
@@ -61,6 +66,21 @@ public class EndermanMorphSkill extends MorphSkill
         player.setFallDistance(0);
 
         return 40;
+    }
+
+    private float getTopY(Block block, BlockFace face)
+    {
+        if (face != BlockFace.UP) return 0;
+
+        var data = block.getBlockData();
+
+        if (data instanceof Fence || data instanceof Wall)
+            return 1.5f;
+
+        if (data instanceof Slab slab)
+            return slab.getType() == Slab.Type.TOP ? 1 : 0.5f;
+
+        return (float) block.getBoundingBox().getHeight();
     }
 
     @Override
