@@ -120,7 +120,7 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
             {
                 var targetPlayer = Bukkit.getPlayer(state.getName());
 
-                if (targetPlayer == null) return;
+                if (targetPlayer == null || playerInDistance(damager, targetPlayer)) return;
 
                 //如果伪装的玩家想攻击本体，取消事件
                 if (hurtedPlayer.equals(targetPlayer))
