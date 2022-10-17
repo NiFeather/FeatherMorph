@@ -2,17 +2,18 @@ package xiamomc.morph;
 
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.SkillStrings;
 import xiamomc.morph.skills.IMorphSkill;
+import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class MorphSkillHandler extends MorphPluginObject
@@ -34,7 +35,7 @@ public class MorphSkillHandler extends MorphPluginObject
         else throw new RuntimeException("已经注册过一个 " + type.getKey() + "的伪装技能了");
     }
 
-    public void executeDisguiseAbility(Player player)
+    public void executeDisguiseSkill(Player player)
     {
         var state = manager.getDisguiseStateFor(player);
 
@@ -45,6 +46,8 @@ public class MorphSkillHandler extends MorphPluginObject
         if (skill != null)
         {
             state.setAbilityCooldown(skill.executeSkill(player));
+
+            lastSkillTickMap.put(player.getUniqueId(), Plugin.getCurrentTick());
         }
         else
         {
@@ -60,5 +63,17 @@ public class MorphSkillHandler extends MorphPluginObject
     public boolean hasSkill(EntityType type)
     {
         return typeSkillMap.containsKey(type);
+    }
+
+    private final Map<UUID, Long> lastSkillTickMap = new ConcurrentHashMap<>();
+
+    /**
+     * 获取玩家上次使用主动技能的时间
+     * @param player 目标玩家
+     * @return 上次使用主动技能的时间，如果没找到则返回Long.MIN_VALUE
+     */
+    public long getLastSkillTick(Player player)
+    {
+        return lastSkillTickMap.getOrDefault(player.getUniqueId(), Long.MIN_VALUE);
     }
 }

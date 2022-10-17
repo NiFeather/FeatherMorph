@@ -19,6 +19,7 @@ import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.profile.PlayerTextures;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
+import xiamomc.morph.MorphSkillHandler;
 import xiamomc.morph.abilities.AbilityFlag;
 import xiamomc.morph.commands.MorphCommandHelper;
 import xiamomc.morph.config.ConfigOption;
@@ -182,6 +183,9 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
             e.setCancelled(true);
     }
 
+    @Resolved
+    private MorphSkillHandler skillHandler;
+
     /**
      * 尝试使用技能或快速伪装
      * @param player 目标玩家
@@ -193,6 +197,9 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         if (!action.isRightClick() || slot != EquipmentSlot.HAND) return false;
 
         var state = morphs.getDisguiseStateFor(player);
+
+        //同一刻内只接受一次技能
+        if (skillHandler.getLastSkillTick(player) == Plugin.getCurrentTick()) return false;
 
         if (player.isSneaking())
         {

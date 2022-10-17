@@ -10,7 +10,6 @@ import me.libraryaddict.disguise.disguisetypes.watchers.LivingWatcher;
 import me.libraryaddict.disguise.utilities.DisguiseValues;
 import me.libraryaddict.disguise.utilities.reflection.FakeBoundingBox;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -85,7 +84,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         config.onConfigRefresh(c -> this.onConfigRefresh(), true);
 
-        Dependencies.Cache(abilityHandler);
+        Dependencies.cache(abilityHandler);
+        Dependencies.cache(skillHandler);
 
         skillHandler.registerSkills(List.of(
                 new ArmorStandMorphSkill(),
@@ -209,7 +209,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
      */
     public void executeDisguiseAbility(Player player)
     {
-        skillHandler.executeDisguiseAbility(player);
+        skillHandler.executeDisguiseSkill(player);
     }
 
     /**
