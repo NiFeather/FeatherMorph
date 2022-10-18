@@ -3,7 +3,8 @@ version: '${project.version}'
 main: xiamomc.morph.MorphPlugin
 api-version: 1.19
 prefix: MorphPlugin
-depend: [ 'LibsDisguises', 'GSit', 'PluginBase' ]
+depend: [ 'LibsDisguises', 'PluginBase' ]
+softdepend: ['GSit']
 authors:
   - "MATRIX-feather"
 
@@ -27,5 +28,6 @@ permissions:
     default: true
     children:
       xiamomc.morph.chatoverride.query: true
-      xiamomc.morph.chatoverride.reveal: op
+  xiamomc.morph.chatoverride.reveal:
+      default: op
 

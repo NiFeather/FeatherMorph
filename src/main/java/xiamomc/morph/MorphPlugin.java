@@ -2,11 +2,14 @@ package xiamomc.morph;
 
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.server.PluginDisableEvent;
+import org.bukkit.event.server.PluginEnableEvent;
+import org.bukkit.plugin.PluginManager;
 import xiamomc.morph.commands.MorphCommandHelper;
 import xiamomc.morph.config.MorphConfigManager;
-import xiamomc.morph.events.PlayerTracker;
-import xiamomc.morph.events.CommonEventProcessor;
-import xiamomc.morph.events.ReverseControlProcessor;
+import xiamomc.morph.events.*;
 import xiamomc.morph.interfaces.IManagePlayerData;
 import xiamomc.morph.interfaces.IManageRequests;
 import xiamomc.morph.messages.MessageUtils;
@@ -14,6 +17,12 @@ import xiamomc.morph.messages.MorphMessageStore;
 import xiamomc.pluginbase.Command.CommandHelper;
 import xiamomc.pluginbase.XiaMoJavaPlugin;
 import xiamomc.pluginbase.messages.MessageStore;
+
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.logging.Logger;
 
 public final class MorphPlugin extends XiaMoJavaPlugin
 {
@@ -32,12 +41,18 @@ public final class MorphPlugin extends XiaMoJavaPlugin
 
     private MorphManager morphManager;
 
+    private PluginManager pluginManager;
+
     @Override
     public void onEnable()
     {
         super.onEnable();
 
+        pluginManager = Bukkit.getPluginManager();
+
         var playerTracker = new PlayerTracker();
+        var pluginEventListener = new PluginEventListener();
+        pluginEventListener.onPluginEnable(this::onPluginEnable);
 
         //缓存依赖
         dependencyManager.cache(this);
@@ -55,9 +70,16 @@ public final class MorphPlugin extends XiaMoJavaPlugin
         //注册EventProcessor
         this.schedule(c ->
         {
-            Bukkit.getPluginManager().registerEvents(playerTracker, this);
-            Bukkit.getPluginManager().registerEvents(new CommonEventProcessor(), this);
-            Bukkit.getPluginManager().registerEvents(new ReverseControlProcessor(), this);
+            registerListeners(new Listener[]
+                    {
+                            playerTracker,
+                            pluginEventListener,
+                            new CommonEventProcessor(),
+                            new ReverseControlProcessor(),
+                    });
+
+            if (pluginManager.getPlugin("GSit") != null)
+                registerListener(new GSitCompactProcessor());
         });
     }
 
@@ -78,5 +100,24 @@ public final class MorphPlugin extends XiaMoJavaPlugin
         }
 
         super.onDisable();
+    }
+
+    private void registerListeners(Listener[] listeners)
+    {
+        for (Listener l : listeners)
+        {
+            registerListener(l);
+        }
+    }
+
+    private void registerListener(Listener l)
+    {
+        pluginManager.registerEvents(l, this);
+    }
+
+    public void onPluginEnable(String name)
+    {
+        if (name.equals("GSit"))
+            registerListener(new GSitCompactProcessor());
     }
 }

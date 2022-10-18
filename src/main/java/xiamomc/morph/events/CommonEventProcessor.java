@@ -1,7 +1,6 @@
 package xiamomc.morph.events;
 
 import com.comphenix.protocol.wrappers.WrappedGameProfile;
-import dev.geco.gsit.api.event.*;
 import io.papermc.paper.event.player.AsyncChatEvent;
 import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
@@ -14,6 +13,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.player.*;
+import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.event.server.TabCompleteEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.meta.SkullMeta;
@@ -35,8 +35,6 @@ import xiamomc.morph.misc.MorphGameProfile;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -85,12 +83,6 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
 
         var result = cmdHelper.onTabComplete(e.getBuffer(), e.getSender());
         if (result != null) e.setCompletions(result);
-    }
-
-    @EventHandler
-    public void onLeave(PlayerQuitEvent e)
-    {
-        gSitHandlingPlayers.remove(e.getPlayer());
     }
 
     @EventHandler
@@ -376,54 +368,6 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         return false;
     }
 
-    //region GSit <-> LibsDisguises workaround
-
-    @EventHandler
-    public void onEntityGetUp(EntityGetUpSitEvent e)
-    {
-        if (e.getEntity() instanceof Player player)
-            showDisguiseFor(player);
-    }
-
-    private final List<Player> gSitHandlingPlayers = new ArrayList<>();
-
-    @EventHandler
-    public void onEntitySit(EntitySitEvent e)
-    {
-        if (e.getEntity() instanceof Player player)
-            hideDisguiseFor(player);
-    }
-
-    @EventHandler
-    public void onEarlyPlayerPlayerSit(PrePlayerPlayerSitEvent e)
-    {
-        var state = morphs.getDisguiseStateFor(e.getTarget());
-
-        if (state != null && !state.getDisguise().isPlayerDisguise())
-        {
-            e.setCancelled(true);
-        }
-    }
-
-    @EventHandler
-    public void onPlayerPlayerSit(PlayerPlayerSitEvent e)
-    {
-        gSitHandlingPlayers.add(e.getPlayer());
-        hideDisguiseFor(e.getPlayer());
-    }
-
-    @EventHandler
-    public void onPlayerGetUpPlayerSit(PlayerGetUpPlayerSitEvent e)
-    {
-        if (gSitHandlingPlayers.contains(e.getPlayer()))
-        {
-            showDisguiseFor(e.getPlayer());
-            gSitHandlingPlayers.remove(e.getPlayer());
-        }
-    }
-
-    //endregion  GSit <-> LibsDisguises workaround
-
     //region LibsDisguises workaround
 
     //伪装时副手交换会desync背包
@@ -548,22 +492,6 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
     }
 
     //endregion LibsDisguises workaround
-
-    private void hideDisguiseFor(Player player)
-    {
-        if (DisguiseAPI.isDisguised(player))
-            DisguiseUtilities.removeSelfDisguise(DisguiseAPI.getDisguise(player));
-    }
-
-    private void showDisguiseFor(Player player)
-    {
-        if (DisguiseAPI.isDisguised(player))
-            this.addSchedule(c ->
-            {
-                if (DisguiseAPI.isDisguised(player))
-                    DisguiseUtilities.setupFakeDisguise(DisguiseAPI.getDisguise(player));
-            });
-    }
 
     private void onPlayerKillEntity(Player player, Entity entity)
     {
