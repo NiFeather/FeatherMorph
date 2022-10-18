@@ -10,10 +10,7 @@ import me.libraryaddict.disguise.disguisetypes.watchers.LivingWatcher;
 import me.libraryaddict.disguise.utilities.DisguiseValues;
 import me.libraryaddict.disguise.utilities.reflection.FakeBoundingBox;
 import net.kyori.adventure.text.Component;
-import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Particle;
+import org.bukkit.*;
 import org.bukkit.entity.*;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
@@ -272,8 +269,11 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
      */
     public boolean morphEntityTypeAuto(Player player, String key, @Nullable Entity targetEntity)
     {
+        if (!key.contains(":")) key = NamespacedKey.MINECRAFT_NAMESPACE + ":" + key;
+
+        String finalKey = key;
         var infoOptional = getAvaliableDisguisesFor(player).stream()
-                .filter(i -> i.getKey().equals(key)).findFirst();
+                .filter(i -> i.getKey().equals(finalKey)).findFirst();
 
         if (bannedDisguises.contains(key))
         {
