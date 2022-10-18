@@ -4,12 +4,13 @@
 [Wiki](https://github.com/XiaMoZhiShi/MorphPlugin/wiki)
 
 ## 使用
-1. 访问[Actions](https://github.com/XiaMoZhiShi/MorphPlugin/actions/workflows/build.yml?query=branch%3Amaster+is%3Acompleted)下载最新构建
-2. 下载最新版本的[PluginBase](https://github.com/XiaMoZhiShi/PluginBase/releases/latest)和[LibsDisguises](https://www.spigotmc.org/resources/libs-disguises-free.81/)
-3. 丢进服务器插件目录中
-4. 重启服务器
+1. 首先你需要用[最新版本的Paper](https://papermc.io/downloads)作为你的服务端
+2. 访问[Actions](https://github.com/XiaMoZhiShi/MorphPlugin/actions/workflows/build.yml?query=branch%3Amaster+is%3Acompleted)下载最新构建
+3. 下载最新版本的[PluginBase](https://github.com/XiaMoZhiShi/PluginBase/releases/latest)和[LibsDisguises](https://www.spigotmc.org/resources/libs-disguises-free.81/)
+4. 丢进服务器插件目录中
+5. 重启服务器
     * 或者先加载PluginBase再加载此插件（
-5. Go!
+6. Go!
 
 ## 实现的功能
 - [x] 下蹲时左、右键特定物品可以快速伪装、取消伪装或者使用技能
