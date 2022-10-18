@@ -199,7 +199,6 @@ public class MorphSkillHandler extends MorphPluginObject
 
         //移除不需要的CD
         list.removeIf(i -> this.getCooldownInactive(i) <= 2);
-        uuidCooldownMap.remove(uuid);
 
         if (cdInfo != null)
             list.add(cdInfo);
