@@ -1,6 +1,8 @@
 # Morph
 基于LibsDisguises的伪装插件
 
+[Wiki](https://github.com/XiaMoZhiShi/MorphPlugin/wiki)
+
 ## 使用
 1. 访问[Actions](https://github.com/XiaMoZhiShi/MorphPlugin/actions/workflows/build.yml?query=branch%3Amaster+is%3Acompleted)下载最新构建
 2. 下载最新版本的[PluginBase](https://github.com/XiaMoZhiShi/PluginBase/releases/latest)和[LibsDisguises](https://www.spigotmc.org/resources/libs-disguises-free.81/)
@@ -26,9 +28,6 @@
     - 给与/移除某个玩家的伪装
     - 查询玩家伪装状态
     - 运行`/mmorph help mmorph`即可查看！
-
-## Wiki
-施工中
 
 ## TODO List（从上往下按优先级排列）
 - [x] 移动JSON配置到插件的配置目录下
