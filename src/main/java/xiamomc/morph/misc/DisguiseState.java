@@ -14,6 +14,7 @@ import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.abilities.AbilityFlag;
 import xiamomc.morph.abilities.AbilityHandler;
+import xiamomc.morph.skills.SkillCooldownInfo;
 import xiamomc.morph.storage.offlinestore.OfflineDisguiseState;
 import xiamomc.pluginbase.Annotations.Resolved;
 
@@ -80,16 +81,32 @@ public class DisguiseState extends MorphPluginObject
     /**
      * 伪装技能冷却
      */
-    private int abilityCooldown = 0;
+    private SkillCooldownInfo cooldownInfo;
 
-    public int getAbilityCooldown()
+    public int getSkillCooldown()
     {
-        return abilityCooldown;
+        return cooldownInfo == null ? -1 : cooldownInfo.getCooldown();
     }
 
-    public void setAbilityCooldown(int value)
+    public long getSkillLastInvoke()
     {
-        abilityCooldown = value;
+        return cooldownInfo == null ? Long.MIN_VALUE : cooldownInfo.getLastInvoke();
+    }
+
+    public void setSkillCooldown(int val)
+    {
+        if (haveCooldown())
+            cooldownInfo.setCooldown(val);
+    }
+
+    public boolean haveCooldown()
+    {
+        return cooldownInfo != null;
+    }
+
+    public void setCooldownInfo(SkillCooldownInfo info)
+    {
+        this.cooldownInfo = info;
     }
 
     /**
@@ -151,7 +168,7 @@ public class DisguiseState extends MorphPluginObject
         setAbilities(abilityHandler.getFlagsFor(disgType));
 
         //设置初始CD
-        abilityCooldown = 40;
+        //skillCooldown = 40;
 
         supportsDisguisedItems = disgType.equals(EntityType.PLAYER) || disgType.equals(EntityType.ARMOR_STAND);
 

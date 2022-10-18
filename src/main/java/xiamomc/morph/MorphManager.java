@@ -180,7 +180,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         //更新actionbar信息
         var msg = skillHandler.hasSkill(disguise.getType().getEntityType())
-                ? (state.getAbilityCooldown() <= 0
+                ? (state.getSkillCooldown() <= 0
                     ? MorphStrings.disguisingWithSkillAvaliableString()
                     : MorphStrings.disguisingWithSkillPreparingString())
                 : MorphStrings.disguisingAsString();
@@ -202,8 +202,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         //tick伪装行为
         abilityHandler.handle(player, state);
-
-        state.setAbilityCooldown(state.getAbilityCooldown() - 1);
     }
 
     /**
@@ -469,6 +467,9 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         updateLastPlayerMorphOperationTime(player);
 
+        //移除CD
+        skillHandler.switchCooldown(player.getUniqueId(), null);
+
         Bukkit.getPluginManager().callEvent(new PlayerUnMorphEvent(player));
     }
 
@@ -627,8 +628,23 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             config.shownMorphAbilityHint = true;
         }
 
+        //更新上次操作时间
         updateLastPlayerMorphOperationTime(sourcePlayer);
 
+        //设置CD信息
+        var cdInfo = skillHandler.getCooldownInfo(sourcePlayer.getUniqueId(), disguiseType.getEntityType());
+
+        if (cdInfo != null)
+        {
+            state.setCooldownInfo(cdInfo);
+            cdInfo.setCooldown(Math.max(40, state.getSkillCooldown()));
+            cdInfo.setLastInvoke(Plugin.getCurrentTick());
+        }
+
+        //切换CD
+        skillHandler.switchCooldown(sourcePlayer.getUniqueId(), cdInfo);
+
+        //调用事件
         Bukkit.getPluginManager().callEvent(new PlayerMorphEvent(sourcePlayer, state));
     }
 

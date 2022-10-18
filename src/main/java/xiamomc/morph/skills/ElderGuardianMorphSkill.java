@@ -15,12 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class ElderGuardianMorphSkill extends MorphSkill
 {
-    //who, when
-    private final Map<UUID, Long> elderGuardianCoolDownTraceMap = new ConcurrentHashMap<>();
-
     private final PotionEffect miningFatigueEffect = new PotionEffect(PotionEffectType.SLOW_DIGGING, 6000, 2);
-
-    private final int defaultCooldown = 1200;
 
     @Override
     public int executeSkill(Player player)
@@ -28,15 +23,6 @@ public class ElderGuardianMorphSkill extends MorphSkill
         if (!player.isInWater())
         {
             sendDenyMessageToPlayer(player, SkillStrings.notInWaterString().toComponent());
-            return 20;
-        }
-
-        //对远古守卫者的技能进行额外限制
-        var lastActivate = elderGuardianCoolDownTraceMap.get(player.getUniqueId());
-
-        if (lastActivate != null && Plugin.getCurrentTick() - lastActivate < defaultCooldown)
-        {
-            sendDenyMessageToPlayer(player, SkillStrings.elderGuardianCoolingDownString().toComponent());
             return 20;
         }
 
@@ -52,8 +38,7 @@ public class ElderGuardianMorphSkill extends MorphSkill
 
         player.playSound(sound);
 
-        elderGuardianCoolDownTraceMap.put(player.getUniqueId(), Plugin.getCurrentTick());
-
+        int defaultCooldown = 1200;
         return defaultCooldown;
     }
 

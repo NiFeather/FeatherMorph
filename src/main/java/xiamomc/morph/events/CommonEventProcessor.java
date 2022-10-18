@@ -6,6 +6,8 @@ import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
 import me.libraryaddict.disguise.utilities.DisguiseUtilities;
 import me.libraryaddict.disguise.utilities.reflection.ReflectionManager;
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.sound.Sound;
 import org.bukkit.Material;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
@@ -13,7 +15,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.player.*;
-import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.event.server.TabCompleteEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.meta.SkullMeta;
@@ -150,7 +151,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
                 if (e.getDamage() <= 0d)
                     e.setCancelled(true);
                 else //否则，设置CD
-                    state.setAbilityCooldown(Math.max(state.getAbilityCooldown(), cooldownOnDamage));
+                    state.setSkillCooldown(Math.max(state.getSkillCooldown(), cooldownOnDamage));
             }
         }
     }
@@ -326,17 +327,20 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
                 //主动技能或快速变形
                 if (state != null)
                 {
-                    if (state.getAbilityCooldown() <= 0)
+                    if (state.getSkillCooldown() <= 0)
                         morphs.executeDisguiseAbility(player);
                     else
                     {
                         //一段时间内内只接受一次右键触发
                         //传送前后会触发两次Interact，而且这两个Interact还不一定在同个Tick里
-                        if (Plugin.getCurrentTick() - skillHandler.getLastSkillTick(player) <= 1)
+                        if (Plugin.getCurrentTick() - skillHandler.getLastInvoke(player) <= 1)
                             return true;
 
                         player.sendMessage(MessageUtils.prefixes(player,
-                                SkillStrings.skillPreparing().resolve("time", state.getAbilityCooldown() / 20 + "")));
+                                SkillStrings.skillPreparing().resolve("time", state.getSkillCooldown() / 20 + "")));
+
+                        player.playSound(Sound.sound(Key.key("minecraft", "entity.villager.no"),
+                                Sound.Source.PLAYER, 1f, 1f));
                     }
 
                     return true;
@@ -440,6 +444,12 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
             else
                 player.sendMessage(MessageUtils.prefixes(player, MorphStrings.recoveringFailedString()));
         };
+    }
+
+    @EventHandler
+    public void onPlayerExit(PlayerQuitEvent e)
+    {
+        skillHandler.removeUnusedList(e.getPlayer());
     }
 
     //解决LibsDisguises中MonstersIgnoreDisguises会忽视PlayerDisguise的问题
