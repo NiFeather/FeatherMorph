@@ -36,6 +36,12 @@ public class OfflineStorageManager extends MorphJsonBasedStorage<OfflineStates> 
      */
     public void pushDisguiseState(DisguiseState state)
     {
+        if (storingObject.disguiseStates.stream().anyMatch(s -> s.playerUUID == state.getPlayerUniqueID()))
+        {
+            Logger.warn("将放弃存储中已有的" + state.getPlayerUniqueID() + "条目...");
+            storingObject.disguiseStates.removeIf(s -> s.playerUUID == state.getPlayerUniqueID());
+        }
+
         storingObject.disguiseStates.add(state.toOfflineState());
     }
 
