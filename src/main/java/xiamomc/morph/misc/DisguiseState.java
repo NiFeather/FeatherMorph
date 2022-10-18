@@ -344,7 +344,9 @@ public class DisguiseState extends MorphPluginObject
                 : disguise.getType().getEntityType().getKey().asString();
 
         var newDisguise = disguise.clone();
-        updateEquipment(newDisguise.getWatcher(), true);
+
+        if (supportsDisguisedItems)
+            updateEquipment(newDisguise.getWatcher(), true);
 
         offlineState.disguiseData = DisguiseParser.parseToString(newDisguise);
         offlineState.shouldHandlePose = this.shouldHandlePose;

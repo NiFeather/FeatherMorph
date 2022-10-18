@@ -818,9 +818,22 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     @Override
     public boolean reloadConfiguration()
     {
-        unMorphAll(true);
+        //重载完数据后要发到离线存储的人
+        var stateToOfflineStore = new ArrayList<DisguiseState>();
 
-        return data.reloadConfiguration() && offlineStorage.reloadConfiguration();
+        getDisguisedPlayers().forEach(s ->
+        {
+            if (!s.getPlayer().isOnline())
+                stateToOfflineStore.add(s);
+        });
+
+        unMorphAll(false);
+
+        var success = data.reloadConfiguration() && offlineStorage.reloadConfiguration();
+
+        stateToOfflineStore.forEach(offlineStorage::pushDisguiseState);
+
+        return success;
     }
 
     @Override
