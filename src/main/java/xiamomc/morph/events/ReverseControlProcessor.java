@@ -144,7 +144,7 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
             {
                 var targetPlayer = Bukkit.getPlayer(state.getName());
 
-                if (targetPlayer == null || !playerInDistance(damager, targetPlayer)) return;
+                if (!playerInDistance(damager, targetPlayer)) return;
 
                 //如果伪装的玩家想攻击本体，取消事件
                 if (e.getEntity() instanceof Player hurtedPlayer && hurtedPlayer.equals(targetPlayer))
@@ -173,8 +173,9 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
             var targetPlayer = Bukkit.getPlayer(state.getName());
             var shouldAttack = false;
 
-            if (targetPlayer != null
-                    && manager.getDisguiseStateFor(targetPlayer) == null
+            if(!playerInDistance(player, targetPlayer)) return;
+
+            if (manager.getDisguiseStateFor(targetPlayer) == null
                     && targetPlayer.getGameMode() == GameMode.SURVIVAL
                     && playerInDistance(player, targetPlayer))
             {
@@ -224,12 +225,11 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
             {
                 var targetPlayer = Bukkit.getPlayer(state.getName());
 
-                if (targetPlayer != null)
-                {
-                    var targetHand = clientHandRelativeToTarget(e.getHand(), player, targetPlayer);
-                    if (simulateInteract(targetPlayer, targetHand))
-                        targetPlayer.swingHand(targetHand);
-                }
+                if (!playerInDistance(player, targetPlayer)) return;
+
+                var targetHand = clientHandRelativeToTarget(e.getHand(), player, targetPlayer);
+                if (simulateInteract(targetPlayer, targetHand))
+                    targetPlayer.swingHand(targetHand);
             }
         }
     }
