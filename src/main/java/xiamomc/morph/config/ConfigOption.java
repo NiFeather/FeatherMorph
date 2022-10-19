@@ -18,8 +18,11 @@ public enum ConfigOption
     REVERSE_CONTROL_IMMUNE_ITEM(reverseControlNode().append("immuneItem"), "minecraft:golden_helmet"),
 
     REVERSE_BEHAVIOR_DO_SIMULATION(reverseControlBehaviorNode().append("simulate_interactions"), false),
-
-    REVRSE_BEHAVIOR_SWING_HANDS(reverseControlBehaviorNode().append("swing_hands"), true),
+    REVERSE_BEHAVIOR_SWING_HANDS(reverseControlBehaviorNode().append("swing_hands"), true),
+    REVERSE_BEHAVIOR_SNEAK(reverseControlBehaviorNode().append("sneak"), false),
+    REVERSE_BEHAVIOR_SWAP_HAND(reverseControlBehaviorNode().append("swap_hands"), false),
+    REVERSE_BEHAVIOR_DROP(reverseControlBehaviorNode().append("allow_drop"), false),
+    REVERSE_BEHAVIOR_HOTBAR(reverseControlBehaviorNode().append("hotbar"), false),
 
     BANNED_DISGUISES(ConfigNode.create().append("bannedDisguises"), new ArrayList<String>()),
 

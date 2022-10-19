@@ -1,6 +1,7 @@
 package xiamomc.morph.events;
 
 import com.destroystokyo.paper.ClientOption;
+import com.destroystokyo.paper.event.player.PlayerJumpEvent;
 import io.papermc.paper.event.player.PlayerArmSwingEvent;
 import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
 import net.minecraft.core.EnumDirection;
@@ -22,9 +23,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.*;
 import org.bukkit.inventory.EquipmentSlot;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.config.ConfigOption;
@@ -39,53 +41,60 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
 {
     private final Map<Player, PlayerDisguise> uuidDisguiseStateMap = new ConcurrentHashMap<>();
 
-    /*
-
     @EventHandler
     public void onPlayerSneak(PlayerToggleSneakEvent e)
     {
+        if (!allowSneak) return;
+
         var state = uuidDisguiseStateMap.get(e.getPlayer());
 
         if (state != null)
         {
             var player = Bukkit.getPlayer(state.getName());
 
-            if (player != null) player.setSneaking(e.isSneaking());
+            if (!playerInDistance(e.getPlayer(), player)) return;
+
+            player.setSneaking(e.isSneaking());
         }
     }
 
     @EventHandler
     public void onPlayerSwapHand(PlayerSwapHandItemsEvent e)
     {
+        if (!allowSwap) return;
+
         var state = uuidDisguiseStateMap.get(e.getPlayer());
 
         if (state != null)
         {
             var player = Bukkit.getPlayer(state.getName());
 
-            if (player != null)
-            {
-                var equipment = player.getEquipment();
+            if (!playerInDistance(e.getPlayer(), player)) return;
 
-                var mainHandItem = equipment.getItemInMainHand();
-                var offhandItem = equipment.getItemInOffHand();
+            var equipment = player.getEquipment();
 
-                equipment.setItemInMainHand(offhandItem);
-                equipment.setItemInOffHand(mainHandItem);
-            }
+            var mainHandItem = equipment.getItemInMainHand();
+            var offhandItem = equipment.getItemInOffHand();
+
+            equipment.setItemInMainHand(offhandItem);
+            equipment.setItemInOffHand(mainHandItem);
         }
     }
 
     @EventHandler
     public void onPlayerDrop(PlayerDropItemEvent e)
     {
+        if (!allowDrop) return;
+
         var state = uuidDisguiseStateMap.get(e.getPlayer());
 
         if (state != null)
         {
             var player = Bukkit.getPlayer(state.getName());
 
-            if (player != null)
+            if (!playerInDistance(e.getPlayer(), player)) return;
+
+            if (!player.getEquipment().getItemInMainHand().getType().isAir())
                 player.dropItem(false);
         }
     }
@@ -93,20 +102,19 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
     @EventHandler
     public void onHotbarChange(PlayerItemHeldEvent e)
     {
+        if (!allowHotBar) return;
+
         var state = uuidDisguiseStateMap.get(e.getPlayer());
 
         if (state != null)
         {
             var player = Bukkit.getPlayer(state.getName());
 
-            if (player != null)
-            {
-                player.getInventory().setHeldItemSlot(e.getNewSlot());
-            }
+            if (!playerInDistance(e.getPlayer(), player)) return;
+
+            player.getInventory().setHeldItemSlot(e.getNewSlot());
         }
     }
-
-    */
 
     @Resolved
     private MorphManager manager;
@@ -312,8 +320,10 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
             return true;
     }
 
-    private boolean playerInDistance(Player source, Player target)
+    private boolean playerInDistance(@NotNull Player source, @Nullable Player target)
     {
+        if (target == null) return false;
+
         var isInSameWorld = target.getWorld().equals(source.getWorld());
         var targetHelmet = target.getEquipment().getHelmet();
 
@@ -341,14 +351,17 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
     {
         this.addSchedule(c -> update());
 
-        config.onConfigRefresh(c -> onConfigUpdate());
+        config.onConfigRefresh(c -> onConfigUpdate(), true);
     }
 
     private Material immuneItemMaterial;
 
     private boolean allowSimulation;
-
     private boolean swingHands;
+    private boolean allowSneak;
+    private boolean allowSwap;
+    private boolean allowDrop;
+    private boolean allowHotBar;
 
     private void onConfigUpdate()
     {
@@ -361,7 +374,11 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
         immuneItemMaterial = targetOptional;
 
         this.allowSimulation = config.getOrDefault(Boolean.class, ConfigOption.REVERSE_BEHAVIOR_DO_SIMULATION);
-        this.swingHands = config.getOrDefault(Boolean.class, ConfigOption.REVRSE_BEHAVIOR_SWING_HANDS);
+        this.swingHands = config.getOrDefault(Boolean.class, ConfigOption.REVERSE_BEHAVIOR_SWING_HANDS);
+        this.allowSneak = config.getOrDefault(Boolean.class, ConfigOption.REVERSE_BEHAVIOR_SNEAK);
+        this.allowSwap = config.getOrDefault(Boolean.class, ConfigOption.REVERSE_BEHAVIOR_SWAP_HAND);
+        this.allowDrop = config.getOrDefault(Boolean.class, ConfigOption.REVERSE_BEHAVIOR_DROP);
+        this.allowHotBar = config.getOrDefault(Boolean.class, ConfigOption.REVERSE_BEHAVIOR_HOTBAR);
     }
 
     private void update()
