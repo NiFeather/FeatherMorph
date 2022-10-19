@@ -35,6 +35,14 @@ root:
       simulate_interactions: true
       # 是否要同步挥手？
       swing_hands: true
+      # 是否同步下蹲？
+      sneak: false
+      # 是否同步副手切换？
+      swap_hands: false
+      # 是否允许丢弃物品？
+      allow_drop: false
+      # 是否允许同步已选Hotbar槽？
+      hotbar: false
 
   # 已禁用的伪装，此列表里的伪装将不会对玩家可用，例如：
   # bannedDisguises:
@@ -43,4 +51,4 @@ root:
   bannedDisguises: []
 
   # 不要动这个键!
-  version: 3
+  version: 4
