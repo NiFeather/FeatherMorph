@@ -3,14 +3,27 @@ package xiamomc.morph.events;
 import com.destroystokyo.paper.ClientOption;
 import io.papermc.paper.event.player.PlayerArmSwingEvent;
 import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
+import net.minecraft.core.EnumDirection;
+import net.minecraft.world.EnumHand;
+import net.minecraft.world.phys.MovingObjectPositionBlock;
+import net.minecraft.world.phys.Vec3D;
 import org.bukkit.Bukkit;
+import org.bukkit.FluidCollisionMode;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
+import org.bukkit.block.BlockFace;
+import org.bukkit.craftbukkit.v1_19_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_19_R1.block.CraftBlock;
+import org.bukkit.craftbukkit.v1_19_R1.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_19_R1.entity.CraftHumanEntity;
+import org.bukkit.craftbukkit.v1_19_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_19_R1.inventory.CraftItemStack;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.player.*;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
@@ -113,6 +126,8 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
     @EventHandler
     public void onPlayerHurtPlayer(EntityDamageByEntityEvent e)
     {
+        if (!swingHands) return;
+
         if (e.getDamager() instanceof Player damager)
         {
             var state = uuidDisguiseStateMap.get(damager);
@@ -140,6 +155,8 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
     @EventHandler
     public void onPlayerSwing(PlayerArmSwingEvent e)
     {
+        if (!swingHands) return;
+
         var player = e.getPlayer();
         var state = uuidDisguiseStateMap.get(player);
 
@@ -174,6 +191,127 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
         }
     }
 
+    private EquipmentSlot clientHandRelativeToTarget(EquipmentSlot slot, Player source, Player target)
+    {
+        if (slot != EquipmentSlot.HAND && slot != EquipmentSlot.OFF_HAND)
+            throw new IllegalArgumentException();
+
+        var swingMainHand = source.getClientOption(ClientOption.MAIN_HAND)
+                .equals(target.getClientOption(ClientOption.MAIN_HAND));
+
+        return slot == EquipmentSlot.HAND
+                ? swingMainHand ? slot : EquipmentSlot.OFF_HAND
+                : swingMainHand ? EquipmentSlot.OFF_HAND : slot;
+    }
+
+    @EventHandler
+    public void onPlayerInteract(PlayerInteractEvent e)
+    {
+        if (e.getHand() == EquipmentSlot.HAND && e.getAction().isRightClick())
+        {
+            var player = e.getPlayer();
+            var state = uuidDisguiseStateMap.get(player);
+
+            if (state != null)
+            {
+                var targetPlayer = Bukkit.getPlayer(state.getName());
+
+                if (targetPlayer != null)
+                {
+                    var targetHand = clientHandRelativeToTarget(e.getHand(), player, targetPlayer);
+                    if (simulateInteract(targetPlayer, targetHand))
+                        targetPlayer.swingHand(targetHand);
+                }
+            }
+        }
+    }
+
+    //模拟玩家右键
+    private boolean simulateInteract(Player player, EquipmentSlot targetHand)
+    {
+        if (!allowSimulation) return false;
+
+        if (targetHand != EquipmentSlot.HAND && targetHand != EquipmentSlot.OFF_HAND)
+            throw new IllegalArgumentException("给定的targetHand不是主手或副手");
+
+        var targetBlock = player.getTargetBlockExact(5, FluidCollisionMode.NEVER);
+        var targetEntity = player.getTargetEntity(3);
+
+        //EntityHuman in spigot == Player in fabric mojang mappings
+        var playerHumanHandle = ((CraftHumanEntity) player).getHandle();
+        var playerHandle = ((CraftPlayer) player).getHandle();
+        var worldHandle = ((CraftWorld)player.getWorld()).getHandle();
+
+        if (targetEntity != null)
+        {
+            var entityHandle = ((CraftEntity)targetEntity).getHandle();
+
+            //实体之间的距离
+            var distance = targetEntity.getLocation().distance(player.getLocation());
+
+            //tan $angle = (x / $distance) = $tan -> x = ($distance * $tan) -> $val
+            //$height - $val -> $targetHeight
+            var angle = player.getEyeLocation().getPitch();
+            var tan = Math.tan(Math.toRadians(angle));
+            var val = targetEntity.getHeight() - distance * tan;
+
+            //todo: 计算视线与目标接触的的X、Z值
+            var vec = new Vec3D(0, val, 0);
+
+            //先试试InteractAt
+            //如果不成功，调用Interact
+            if (!entityHandle.a(playerHandle, vec, EnumHand.a).a())
+                return playerHumanHandle.a(entityHandle, EnumHand.a).a();
+            else return true;
+        }
+
+        {
+            boolean success = false;
+
+            var hand = targetHand == EquipmentSlot.HAND ? EnumHand.a : EnumHand.b;
+            var item = player.getEquipment().getItem(targetHand);
+
+            //GameMode in fabric mojang mappings
+            var mgr = playerHandle.d;
+
+            if (targetBlock != null)
+            {
+                var loc = ((CraftBlock) targetBlock).getPosition();
+
+                EnumDirection targetBlockDirection = null;
+                var bukkitFace = player.getTargetBlockFace(5);
+                bukkitFace = bukkitFace == null ? BlockFace.SELF : bukkitFace;
+
+                //BlockFace(Bukkit)转BlockFace(Minecraft)
+                switch (bukkitFace)
+                {
+                    case DOWN -> targetBlockDirection = EnumDirection.a;
+                    case UP -> targetBlockDirection = EnumDirection.b;
+                    case NORTH -> targetBlockDirection = EnumDirection.c;
+                    case SOUTH -> targetBlockDirection = EnumDirection.d;
+                    case WEST -> targetBlockDirection = EnumDirection.e;
+                    case EAST -> targetBlockDirection = EnumDirection.f;
+                    default -> Logger.error("未知的BlockFace: " + bukkitFace + ", 将不会尝试使用useItemOn");
+                }
+
+                if (targetBlockDirection != null)
+                {
+                    var moving = new MovingObjectPositionBlock(
+                            new Vec3D(targetBlock.getX(), targetBlock.getY(), targetBlock.getZ()),
+                            targetBlockDirection, loc, false);
+
+                    //ServerPlayerGameMode.useItemOn()
+                    success = mgr.a(playerHandle, worldHandle, CraftItemStack.asNMSCopy(item), hand, moving).a();
+                }
+            }
+
+            //ServerPlayerGameMode.useItem()
+            if (!success)
+                return mgr.a(playerHandle, worldHandle, CraftItemStack.asNMSCopy(item), hand).a();
+            else return true;
+        }
+    }
+
     private boolean playerInDistance(Player source, Player target)
     {
         var isInSameWorld = target.getWorld().equals(source.getWorld());
@@ -203,23 +341,27 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
     {
         this.addSchedule(c -> update());
 
-        config.onConfigRefresh(c -> updateImmuneItem());
+        config.onConfigRefresh(c -> onConfigUpdate());
     }
 
     private Material immuneItemMaterial;
 
-    private void updateImmuneItem()
+    private boolean allowSimulation;
+
+    private boolean swingHands;
+
+    private void onConfigUpdate()
     {
         var immune = config.getOrDefault(String.class, ConfigOption.REVERSE_CONTROL_IMMUNE_ITEM);
-
         var targetOptional = Material.matchMaterial(immune);
 
         if (targetOptional == null)
-        {
             Logger.warn("未能找到和" + immune + "对应的免疫物品，相关功能将不会启用");
-        }
 
         immuneItemMaterial = targetOptional;
+
+        this.allowSimulation = config.getOrDefault(Boolean.class, ConfigOption.REVERSE_BEHAVIOR_DO_SIMULATION);
+        this.swingHands = config.getOrDefault(Boolean.class, ConfigOption.REVRSE_BEHAVIOR_SWING_HANDS);
     }
 
     private void update()
