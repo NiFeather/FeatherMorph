@@ -11,6 +11,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.*;
+import org.bukkit.inventory.EquipmentSlot;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.config.ConfigOption;
@@ -112,7 +113,7 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
     @EventHandler
     public void onPlayerHurtPlayer(EntityDamageByEntityEvent e)
     {
-        if (e.getDamager() instanceof Player damager && e.getEntity() instanceof Player hurtedPlayer)
+        if (e.getDamager() instanceof Player damager)
         {
             var state = uuidDisguiseStateMap.get(damager);
 
@@ -120,10 +121,10 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
             {
                 var targetPlayer = Bukkit.getPlayer(state.getName());
 
-                if (targetPlayer == null || playerInDistance(damager, targetPlayer)) return;
+                if (targetPlayer == null || !playerInDistance(damager, targetPlayer)) return;
 
                 //如果伪装的玩家想攻击本体，取消事件
-                if (hurtedPlayer.equals(targetPlayer))
+                if (e.getEntity() instanceof Player hurtedPlayer && hurtedPlayer.equals(targetPlayer))
                     e.setCancelled(true);
 
                 var damagerLookingAt = damager.getTargetEntity(3);
@@ -146,46 +147,29 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
         {
             var targetPlayer = Bukkit.getPlayer(state.getName());
             var shouldAttack = false;
-            var shouldCancelSwing = false;
 
             if (targetPlayer != null
                     && manager.getDisguiseStateFor(targetPlayer) == null
                     && targetPlayer.getGameMode() == GameMode.SURVIVAL
                     && playerInDistance(player, targetPlayer))
             {
-                var clientMainHand = player.getClientOption(ClientOption.MAIN_HAND);
-                var targetMainHand = targetPlayer.getClientOption(ClientOption.MAIN_HAND);
+                var swingMainHand = player.getClientOption(ClientOption.MAIN_HAND)
+                        .equals(targetPlayer.getClientOption(ClientOption.MAIN_HAND));
 
                 var targetEntity = targetPlayer.getTargetEntity(3);
 
-                if (clientMainHand.equals(targetMainHand))
-                {
-                    if (!breakingTracker.playerStartingSpectating(player))
-                        targetPlayer.swingMainHand();
+                if (!breakingTracker.playerStartingSpectating(player))
+                    targetPlayer.swingHand(swingMainHand ? EquipmentSlot.HAND : EquipmentSlot.OFF_HAND);
 
-                    shouldAttack = shouldCancelSwing = targetEntity != null;
-                }
-                else
-                {
-                    targetPlayer.swingOffHand();
+                var cancelSwing = targetEntity != null && !breakingTracker.isPlayerInteracting(player);
 
-                    shouldCancelSwing = targetEntity != null;
-
-                    if (targetPlayer.getEquipment().getItemInMainHand().getType().isAir()
-                        && targetPlayer.getEquipment().getItemInOffHand().getType().isAir())
-                    {
-                        shouldAttack = targetEntity != null;
-                    }
-                }
-
-                //检查玩家有没有正在破坏方块或者正在和方块互动
-                shouldAttack = shouldAttack && !breakingTracker.isPlayerInteracting(player);
-                shouldCancelSwing = shouldCancelSwing && !breakingTracker.isPlayerInteracting(player);
+                shouldAttack = cancelSwing
+                        && (swingMainHand || targetPlayer.getEquipment().getItemInMainHand().isSimilar(targetPlayer.getEquipment().getItemInOffHand()));
 
                 if (shouldAttack)
                     targetPlayer.attack(targetEntity);
 
-                e.setCancelled(e.isCancelled() || shouldCancelSwing);
+                e.setCancelled(e.isCancelled() || cancelSwing);
             }
         }
     }

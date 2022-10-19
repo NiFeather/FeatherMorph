@@ -7,10 +7,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.player.PlayerInteractEntityEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.*;
 import org.bukkit.inventory.EquipmentSlot;
 import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.MorphPluginObject;
@@ -72,12 +69,19 @@ public class PlayerTracker extends MorphPluginObject implements Listener
         }
     }
 
+    @EventHandler
+    public void onPlayerDrop(PlayerDropItemEvent e)
+    {
+        lastInteract.put(e.getPlayer(), plugin.getCurrentTick());
+    }
+
     private final Map<Player, Long> spectatingPlayers = new ConcurrentHashMap<>();
 
     @EventHandler
     public void onPlayerStartSpectate(PlayerStartSpectatingEntityEvent e)
     {
         spectatingPlayers.put(e.getPlayer(), plugin.getCurrentTick());
+        lastInteract.put(e.getPlayer(), plugin.getCurrentTick());
     }
 
     @EventHandler
