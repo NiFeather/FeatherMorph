@@ -8,6 +8,7 @@ import me.libraryaddict.disguise.utilities.DisguiseUtilities;
 import me.libraryaddict.disguise.utilities.reflection.ReflectionManager;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
@@ -411,6 +412,9 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
             //更新飞行能力
             if (morphs.updateFlyingAbility(player) && player.getVelocity().getY() == 0)
                 player.setFlying(true);
+
+            //调用Morph事件
+            Bukkit.getPluginManager().callEvent(new PlayerMorphEvent(player, state));
 
             return;
         }
