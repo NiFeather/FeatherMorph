@@ -262,54 +262,54 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
             //如果不成功，调用Interact
             if (!entityHandle.a(playerHandle, vec, EnumHand.a).a())
                 return playerHumanHandle.a(entityHandle, EnumHand.a).a();
-            else return true;
+            else
+                return true;
         }
 
+        boolean success = false;
+
+        var hand = targetHand == EquipmentSlot.HAND ? EnumHand.a : EnumHand.b;
+        var item = player.getEquipment().getItem(targetHand);
+
+        //GameMode in fabric mojang mappings
+        var mgr = playerHandle.d;
+
+        if (targetBlock != null)
         {
-            boolean success = false;
+            var loc = ((CraftBlock) targetBlock).getPosition();
 
-            var hand = targetHand == EquipmentSlot.HAND ? EnumHand.a : EnumHand.b;
-            var item = player.getEquipment().getItem(targetHand);
+            EnumDirection targetBlockDirection = null;
+            var bukkitFace = player.getTargetBlockFace(5);
+            bukkitFace = bukkitFace == null ? BlockFace.SELF : bukkitFace;
 
-            //GameMode in fabric mojang mappings
-            var mgr = playerHandle.d;
-
-            if (targetBlock != null)
+            //BlockFace(Bukkit)转BlockFace(Minecraft)
+            switch (bukkitFace)
             {
-                var loc = ((CraftBlock) targetBlock).getPosition();
-
-                EnumDirection targetBlockDirection = null;
-                var bukkitFace = player.getTargetBlockFace(5);
-                bukkitFace = bukkitFace == null ? BlockFace.SELF : bukkitFace;
-
-                //BlockFace(Bukkit)转BlockFace(Minecraft)
-                switch (bukkitFace)
-                {
-                    case DOWN -> targetBlockDirection = EnumDirection.a;
-                    case UP -> targetBlockDirection = EnumDirection.b;
-                    case NORTH -> targetBlockDirection = EnumDirection.c;
-                    case SOUTH -> targetBlockDirection = EnumDirection.d;
-                    case WEST -> targetBlockDirection = EnumDirection.e;
-                    case EAST -> targetBlockDirection = EnumDirection.f;
-                    default -> Logger.error("未知的BlockFace: " + bukkitFace + ", 将不会尝试使用useItemOn");
-                }
-
-                if (targetBlockDirection != null)
-                {
-                    var moving = new MovingObjectPositionBlock(
-                            new Vec3D(targetBlock.getX(), targetBlock.getY(), targetBlock.getZ()),
-                            targetBlockDirection, loc, false);
-
-                    //ServerPlayerGameMode.useItemOn()
-                    success = mgr.a(playerHandle, worldHandle, CraftItemStack.asNMSCopy(item), hand, moving).a();
-                }
+                case DOWN -> targetBlockDirection = EnumDirection.a;
+                case UP -> targetBlockDirection = EnumDirection.b;
+                case NORTH -> targetBlockDirection = EnumDirection.c;
+                case SOUTH -> targetBlockDirection = EnumDirection.d;
+                case WEST -> targetBlockDirection = EnumDirection.e;
+                case EAST -> targetBlockDirection = EnumDirection.f;
+                default -> Logger.error("未知的BlockFace: " + bukkitFace + ", 将不会尝试使用useItemOn");
             }
 
-            //ServerPlayerGameMode.useItem()
-            if (!success)
-                return mgr.a(playerHandle, worldHandle, CraftItemStack.asNMSCopy(item), hand).a();
-            else return true;
+            if (targetBlockDirection != null)
+            {
+                var moving = new MovingObjectPositionBlock(
+                        new Vec3D(targetBlock.getX(), targetBlock.getY(), targetBlock.getZ()),
+                        targetBlockDirection, loc, false);
+
+                //ServerPlayerGameMode.useItemOn()
+                success = mgr.a(playerHandle, worldHandle, CraftItemStack.asNMSCopy(item), hand, moving).a();
+            }
         }
+
+        //ServerPlayerGameMode.useItem()
+        if (!success)
+            return mgr.a(playerHandle, worldHandle, CraftItemStack.asNMSCopy(item), hand).a();
+        else
+            return true;
     }
 
     private boolean playerInDistance(Player source, Player target)
