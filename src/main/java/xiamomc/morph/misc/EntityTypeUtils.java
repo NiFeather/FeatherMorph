@@ -10,7 +10,6 @@ import java.util.logging.Logger;
 
 public class EntityTypeUtils
 {
-    @Nullable
     public static EntityType fromString(String key)
     {
         if (key.startsWith("player:")) return EntityType.PLAYER;
@@ -19,7 +18,7 @@ public class EntityTypeUtils
                 .filter(t -> !t.equals(EntityType.UNKNOWN) && t.getKey().asString().equals(key))
                 .findFirst();
 
-        return optional.orElse(null);
+        return optional.orElse(EntityType.UNKNOWN);
     }
 
     public static boolean isZombiesHostile(EntityType type)

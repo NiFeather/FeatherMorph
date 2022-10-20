@@ -290,6 +290,11 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 //目标类型
                 var type = info.type;
 
+                if (type == EntityType.UNKNOWN && key.startsWith("ld:"))
+                {
+                    return morphLD(player, key);
+                }
+
                 if (!type.isAlive())
                 {
                     player.sendMessage(MessageUtils.prefixes(player, MorphStrings.invalidIdentityString()));
@@ -353,6 +358,30 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         }
 
         return false;
+    }
+
+    /**
+     * 将玩家伪装成LibsDisguises中保存的某个伪装
+     *
+     * @param player 目标玩家
+     * @param disguiseName 伪装名称
+     */
+    public boolean morphLD(Player player, String disguiseName)
+    {
+        disguiseName = disguiseName.replace("ld:", "");
+
+        var disguise = DisguiseAPI.getCustomDisguise(disguiseName);
+
+        if (disguise == null)
+        {
+            Logger.error("未能在LD中找到叫" + disguiseName + "的伪装");
+            player.sendMessage(MessageUtils.prefixes(player, MorphStrings.parseErrorString()));
+            return false;
+        }
+
+        postConstructDisguise(player, null, disguise, false);
+        DisguiseAPI.disguiseEntity(player, disguise);
+        return true;
     }
 
     /**
@@ -774,15 +803,21 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     }
 
     @Override
-    public DisguiseInfo getDisguiseInfo(String playerName)
+    public DisguiseInfo getDisguiseInfo(String rawString, boolean isPlayer)
     {
-        return data.getDisguiseInfo(playerName);
+        return data.getDisguiseInfo(rawString, isPlayer);
     }
 
     @Override
     public ArrayList<DisguiseInfo> getAvaliableDisguisesFor(Player player)
     {
         return data.getAvaliableDisguisesFor(player);
+    }
+
+    @Override
+    public boolean grantCustomMorphToPlayer(Player player, String disguiseName)
+    {
+        return data.grantCustomMorphToPlayer(player, disguiseName);
     }
 
     @Override
@@ -807,6 +842,12 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     public boolean revokePlayerMorphFromPlayer(Player player, String playerName)
     {
         return data.revokePlayerMorphFromPlayer(player, playerName);
+    }
+
+    @Override
+    public boolean revokeCustomMorphFromPlayer(Player player, String disguiseName)
+    {
+        return data.revokeCustomMorphFromPlayer(player, disguiseName);
     }
 
     @Override

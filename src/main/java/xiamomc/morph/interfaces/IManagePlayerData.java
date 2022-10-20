@@ -20,10 +20,10 @@ public interface IManagePlayerData
     /**
      * 获取包含某一玩家的玩家名的伪装信息
      *
-     * @param playerName 目标玩家名
+     * @param rawString 原始ID
      * @return 伪装信息
      */
-    public DisguiseInfo getDisguiseInfo(String playerName);
+    public DisguiseInfo getDisguiseInfo(String rawString, boolean isPlayer);
 
     /**
      * 获取某一玩家所有可用的伪装
@@ -48,9 +48,18 @@ public interface IManagePlayerData
      */
     public boolean grantPlayerMorphToPlayer(Player sourcePlayer, String targtPlayerName);
 
+    /**
+     * 授予某一玩家自定义伪装
+     * @param player 要授予的玩家
+     * @param disguiseName 自定义伪装的名称
+     * @return 添加是否成功（伪装是否可用或玩家是否已经拥有目标伪装）
+     */
+    public boolean grantCustomMorphToPlayer(Player player, String disguiseName);
+
     public boolean revokeMorphFromPlayer(Player player, EntityType entityType);
 
     public boolean revokePlayerMorphFromPlayer(Player player, String playerName);
+    public boolean revokeCustomMorphFromPlayer(Player player, String disguiseName);
 
     /**
      * 获取玩家的伪装配置

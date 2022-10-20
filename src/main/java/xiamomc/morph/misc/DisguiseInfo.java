@@ -3,6 +3,9 @@ package xiamomc.morph.misc;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import org.bukkit.entity.EntityType;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.Objects;
 
 public class DisguiseInfo
 {
@@ -10,9 +13,16 @@ public class DisguiseInfo
     @Expose(serialize = false)
     public EntityType type;
 
+    public String rawString;
+
     public final boolean isPlayerDisguise()
     {
         return type == EntityType.PLAYER;
+    }
+
+    public boolean isCustomDisguise()
+    {
+        return type == EntityType.UNKNOWN;
     }
 
     @Expose
@@ -21,12 +31,20 @@ public class DisguiseInfo
     public DisguiseInfo(EntityType type)
     {
         this.type = type;
+        this.rawString = type.getKey().asString();
     }
 
-    public DisguiseInfo(String playerName)
+    public DisguiseInfo(@NotNull String rawString, boolean isPlayerDisguise)
     {
-        this.type = EntityType.PLAYER;
-        this.playerDisguiseTargetName = playerName;
+        this.rawString = rawString;
+
+        if (isPlayerDisguise)
+        {
+            this.type = EntityType.PLAYER;
+            this.playerDisguiseTargetName = rawString;
+        }
+        else
+            this.type = EntityType.UNKNOWN;
     }
 
     @Override
@@ -50,22 +68,26 @@ public class DisguiseInfo
         return this.type.equals(type);
     }
 
-    public boolean equals(String playerName)
+    public boolean equals(String rawString)
     {
         if (!this.isValidate()) return false;
 
-        return this.isPlayerDisguise() && this.playerDisguiseTargetName.equals(playerName);
+        if (isCustomDisguise()) return this.rawString.equals(rawString);
+        else return isPlayerDisguise() && this.playerDisguiseTargetName.equals(rawString);
     }
 
     public boolean isValidate()
     {
-        if (!this.isPlayerDisguise()) return this.type != null;
-        else return this.playerDisguiseTargetName != null;
+        if (isCustomDisguise()) return rawString != null;
+        else return isPlayerDisguise() ? this.playerDisguiseTargetName != null : this.type != null;
     }
 
     public String getKey()
     {
-        return isPlayerDisguise() ? "player:" + playerDisguiseTargetName : type.getKey().asString();
+        if (!this.isValidate()) return "invalid";
+
+        if (isCustomDisguise()) return "ld:" + rawString;
+        else return isPlayerDisguise() ? "player:" + playerDisguiseTargetName : type.getKey().asString();
     }
 
     @Override

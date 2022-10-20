@@ -1,5 +1,6 @@
 package xiamomc.morph.commands.subcommands.plugin.management;
 
+import me.libraryaddict.disguise.DisguiseAPI;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
@@ -128,6 +129,19 @@ public class GrantDisguiseSubCommand extends MorphPluginObject implements ISubCo
             }
 
             grantSuccess = morphs.grantPlayerMorphToPlayer(who, targetName);
+            displayKey = targetName;
+        }
+        else if (targetName.startsWith("ld:"))
+        {
+            targetName = targetName.replace("ld:", "");
+
+            if (targetName.isBlank() || targetName.isEmpty())
+            {
+                commandSender.sendMessage(MessageUtils.prefixes(commandSender, CommonStrings.playerNotDefinedString()));
+                return true;
+            }
+
+            grantSuccess = morphs.grantCustomMorphToPlayer(who.getPlayer(), targetName);
             displayKey = targetName;
         }
 

@@ -102,7 +102,8 @@ public class RevokeDisguiseSubCommand extends MorphPluginObject implements ISubC
         {
             var info = targetInfoOptional.get();
 
-            revokeSuccess = info.isPlayerDisguise()
+            if (info.isCustomDisguise()) revokeSuccess = morphs.revokeCustomMorphFromPlayer(who, info.rawString);
+            else revokeSuccess = info.isPlayerDisguise()
                     ? morphs.revokePlayerMorphFromPlayer(who, info.playerDisguiseTargetName)
                     : morphs.revokeMorphFromPlayer(who, info.type);
         }
