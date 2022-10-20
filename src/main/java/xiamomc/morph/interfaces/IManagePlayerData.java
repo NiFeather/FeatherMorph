@@ -1,8 +1,6 @@
 package xiamomc.morph.interfaces;
 
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.checkerframework.checker.units.qual.N;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.misc.DisguiseInfo;
 import xiamomc.morph.storage.playerdata.PlayerMorphConfiguration;

@@ -2,15 +2,10 @@ package xiamomc.morph.misc;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import me.libraryaddict.disguise.disguisetypes.Disguise;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.EntityType;
-import org.checkerframework.checker.units.qual.N;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.LoggerFactory;
-
-import java.util.Objects;
-import java.util.logging.Logger;
 
 public class DisguiseInfo
 {

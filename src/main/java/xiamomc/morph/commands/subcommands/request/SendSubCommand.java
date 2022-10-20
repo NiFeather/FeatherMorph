@@ -1,6 +1,5 @@
 package xiamomc.morph.commands.subcommands.request;
 
-import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;

@@ -1,8 +1,6 @@
 package xiamomc.morph.commands.subcommands.plugin.management;
 
-import me.libraryaddict.disguise.DisguiseAPI;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.EntityType;

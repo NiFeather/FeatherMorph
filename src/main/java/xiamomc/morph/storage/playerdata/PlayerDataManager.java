@@ -1,25 +1,23 @@
 package xiamomc.morph.storage.playerdata;
 
-import me.libraryaddict.disguise.DisguiseAPI;
-import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
 import net.kyori.adventure.text.Component;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.checkerframework.checker.units.qual.A;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.interfaces.IManagePlayerData;
+import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.MorphStrings;
 import xiamomc.morph.misc.DisguiseInfo;
 import xiamomc.morph.misc.DisguiseState;
-import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.misc.DisguiseTypes;
-import xiamomc.morph.misc.EntityTypeUtils;
 import xiamomc.morph.storage.MorphJsonBasedStorage;
 import xiamomc.pluginbase.Annotations.Resolved;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 
 public class PlayerDataManager extends MorphJsonBasedStorage<MorphConfiguration> implements IManagePlayerData
 {

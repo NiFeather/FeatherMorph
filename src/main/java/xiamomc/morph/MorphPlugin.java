@@ -2,10 +2,7 @@ package xiamomc.morph;
 
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
-import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.server.PluginDisableEvent;
-import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.plugin.PluginManager;
 import xiamomc.morph.commands.MorphCommandHelper;
 import xiamomc.morph.config.MorphConfigManager;
@@ -17,12 +14,6 @@ import xiamomc.morph.messages.MorphMessageStore;
 import xiamomc.pluginbase.Command.CommandHelper;
 import xiamomc.pluginbase.XiaMoJavaPlugin;
 import xiamomc.pluginbase.messages.MessageStore;
-
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.logging.Logger;
 
 public final class MorphPlugin extends XiaMoJavaPlugin
 {

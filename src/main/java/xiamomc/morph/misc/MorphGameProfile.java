@@ -4,10 +4,6 @@ import com.destroystokyo.paper.profile.PlayerProfile;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
-import org.slf4j.ILoggerFactory;
-import org.slf4j.LoggerFactory;
-
-import java.util.UUID;
 
 public class MorphGameProfile extends GameProfile
 {

@@ -2,8 +2,6 @@ package xiamomc.morph.skills;
 
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Difficulty;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;

@@ -1,7 +1,5 @@
 package xiamomc.morph.commands.subcommands.plugin.chatoverride;
 
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

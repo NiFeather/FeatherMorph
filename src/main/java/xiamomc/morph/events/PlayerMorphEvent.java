@@ -1,6 +1,5 @@
 package xiamomc.morph.events;
 
-import me.libraryaddict.disguise.disguisetypes.Disguise;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.player.PlayerEvent;

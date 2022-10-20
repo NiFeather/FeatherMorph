@@ -8,7 +8,6 @@ import xiamomc.morph.messages.HelpStrings;
 import xiamomc.pluginbase.Command.ISubCommand;
 import xiamomc.pluginbase.messages.FormattableMessage;
 
-import java.util.Formattable;
 import java.util.List;
 
 public class RequestCommand extends MorphSubCommandHandler

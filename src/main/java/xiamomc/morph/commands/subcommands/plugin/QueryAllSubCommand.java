@@ -1,6 +1,5 @@
 package xiamomc.morph.commands.subcommands.plugin;
 
-import net.kyori.adventure.text.Component;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.MorphManager;

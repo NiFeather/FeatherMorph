@@ -1,12 +1,9 @@
 package xiamomc.morph.misc;
 
 import org.bukkit.entity.EntityType;
-import org.jetbrains.annotations.Nullable;
-import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.Set;
-import java.util.logging.Logger;
 
 public class EntityTypeUtils
 {
