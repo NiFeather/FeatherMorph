@@ -187,20 +187,23 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         player.sendActionBar(msg.resolve("what", state.getDisplayName()).toComponent());
 
-        //workaround: 复制实体伪装时会一并复制隐身标签
-        //            会导致复制出来的伪装永久隐身
-        watcher.setInvisible(player.isInvisible());
+        if (DisguiseTypes.fromId(state.getDisguiseIdentifier()) != DisguiseTypes.LD)
+        {
+            //workaround: 复制实体伪装时会一并复制隐身标签
+            //            会导致复制出来的伪装永久隐身
+            watcher.setInvisible(player.isInvisible());
 
-        //workaround: 伪装不会主动检测玩家有没有发光
-        watcher.setGlowing(player.isGlowing());
+            //workaround: 伪装不会主动检测玩家有没有发光
+            watcher.setGlowing(player.isGlowing());
 
-        watcher.setFlyingWithElytra(player.isGliding());
+            watcher.setFlyingWithElytra(player.isGliding());
 
-        //workaround: 复制出来的伪装会忽略玩家Pose
-        if (state.shouldHandlePose())
-            watcher.setEntityPose(DisguiseUtils.toEntityPose(player.getPose()));
+            //workaround: 复制出来的伪装会忽略玩家Pose
+            if (state.shouldHandlePose())
+                watcher.setEntityPose(DisguiseUtils.toEntityPose(player.getPose()));
+        }
 
-        //tick伪装行为
+        //tick被动技能
         abilityHandler.handle(player, state);
     }
 
