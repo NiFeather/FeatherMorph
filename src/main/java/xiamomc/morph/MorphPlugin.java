@@ -50,7 +50,7 @@ public final class MorphPlugin extends XiaMoJavaPlugin
         dependencyManager.cache(morphManager = new MorphManager());
         dependencyManager.cache(cmdHelper);
         dependencyManager.cacheAs(MessageStore.class, new MorphMessageStore());
-        dependencyManager.cacheAs(MiniMessage.class, MiniMessage.miniMessage());;
+        dependencyManager.cacheAs(MiniMessage.class, MiniMessage.miniMessage());
         dependencyManager.cacheAs(IManagePlayerData.class, morphManager);
         dependencyManager.cacheAs(IManageRequests.class, new RequestManager());
         dependencyManager.cacheAs(MorphConfigManager.class, new MorphConfigManager(this));

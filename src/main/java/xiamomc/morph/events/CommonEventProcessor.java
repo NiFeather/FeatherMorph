@@ -444,7 +444,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
             }
             else
                 player.sendMessage(MessageUtils.prefixes(player, MorphStrings.recoveringFailedString()));
-        };
+        }
     }
 
     @EventHandler

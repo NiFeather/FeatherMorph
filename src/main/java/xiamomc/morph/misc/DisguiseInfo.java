@@ -64,6 +64,13 @@ public class DisguiseInfo
     }
 
     @Override
+    public int hashCode()
+    {
+        var str = entityType + rawString + disguiseType;
+        return str.hashCode();
+    }
+
+    @Override
     public boolean equals(Object other)
     {
         if (!(other instanceof DisguiseInfo di)) return false;

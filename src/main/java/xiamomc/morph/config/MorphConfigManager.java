@@ -25,6 +25,19 @@ public class MorphConfigManager extends PluginConfigManager
         return instance;
     }
 
+    public <T> T getOrDefault(Class<T> type, ConfigOption option)
+    {
+        var val = get(type, option);
+
+        if (val == null)
+        {
+            set(option, option.defaultValue);
+            return (T) option.defaultValue;
+        }
+
+        return val;
+    }
+
     public <T> T getOrDefault(Class<T> type, ConfigOption option, @Nullable T defaultValue)
     {
         var val = get(type, option);
@@ -78,19 +91,6 @@ public class MorphConfigManager extends PluginConfigManager
             plugin.saveConfig();
             reload();
         }
-    }
-
-    public <T> T getOrDefault(Class<T> type, ConfigOption option)
-    {
-        var val = get(type, option);
-
-        if (val == null)
-        {
-            set(option, option.defaultValue);
-            return (T) option.defaultValue;
-        }
-
-        return val;
     }
 
     public <T> T get(Class<T> type, ConfigOption option)
