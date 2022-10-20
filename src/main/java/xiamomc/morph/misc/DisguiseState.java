@@ -190,8 +190,8 @@ public class DisguiseState extends MorphPluginObject
             handItems = emptyHandItems;
 
             //更新伪装物品
-            //只对克隆的伪装生效
-            if (supportsDisguisedItems && shouldHandlePose)
+            //只对克隆或LD的伪装生效
+            if (supportsDisguisedItems && (shouldHandlePose || DisguiseTypes.fromId(identifier) == DisguiseTypes.LD))
             {
                 var watcher = disguise.getWatcher();
 
