@@ -14,6 +14,7 @@ import xiamomc.morph.messages.MorphStrings;
 import xiamomc.morph.misc.DisguiseInfo;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.messages.MessageUtils;
+import xiamomc.morph.misc.DisguiseTypes;
 import xiamomc.morph.misc.EntityTypeUtils;
 import xiamomc.morph.storage.MorphJsonBasedStorage;
 import xiamomc.pluginbase.Annotations.Resolved;
@@ -72,12 +73,7 @@ public class PlayerDataManager extends MorphJsonBasedStorage<MorphConfiguration>
 
                     if (type != null)
                     {
-                        if (type.equals(EntityType.PLAYER))
-                            list.add(new DisguiseInfo(i.replace("player:", ""), true));
-                        else if (type.equals(EntityType.UNKNOWN))
-                            list.add(new DisguiseInfo(i.replace("ld:", ""), false));
-                        else
-                            list.add(new DisguiseInfo(type));
+                        list.add(new DisguiseInfo(i));
                     }
                     else
                         Logger.warn("未能找到和\"" + i + "\"对应的实体类型，将不会添加到" + c.playerName + "(" + c.uniqueId + ")的列表中");
@@ -114,17 +110,13 @@ public class PlayerDataManager extends MorphJsonBasedStorage<MorphConfiguration>
               c.getUnlockedDisguises().forEach(i ->
               {
                   //跳过无效配置
-                  if (i.type == null)
+                  if (i.getDisguiseType() == DisguiseTypes.UNKNOWN)
                   {
                       Logger.warn("发现无效的Info配置: " + i);
                       return;
                   }
 
-                  //检查是否为玩家伪装
-                  if (i.isPlayerDisguise())
-                      list.add("player:" + i.playerDisguiseTargetName);
-                  else
-                      list.add(i.type.getKey().asString());
+                  list.add(i.getKey());
               });
 
               //设置配置的ID列表
@@ -165,10 +157,12 @@ public class PlayerDataManager extends MorphJsonBasedStorage<MorphConfiguration>
     }
 
     @Override
-    public boolean grantMorphToPlayer(Player player, EntityType type)
+    public boolean grantMorphToPlayer(Player player, String disguiseIdentifier)
     {
         var playerConfiguration = getPlayerConfiguration(player);
-        var info = getDisguiseInfo(type);
+        var info = getDisguiseInfo(disguiseIdentifier);
+
+        if (info == null) return false;
 
         if (playerConfiguration.getUnlockedDisguises().stream().noneMatch(c -> c.equals(info)))
         {
@@ -179,157 +173,45 @@ public class PlayerDataManager extends MorphJsonBasedStorage<MorphConfiguration>
 
         sendMorphAcquiredNotification(player, morphs.getDisguiseStateFor(player),
                 MorphStrings.morphUnlockedString()
-                        .resolve("what", Component.translatable(type.translationKey()))
+                        .resolve("what", Component.translatable(info.getKey()))
                         .toComponent());
 
         return true;
     }
 
     @Override
-    public boolean grantPlayerMorphToPlayer(Player sourcePlayer, String targetPlayerName)
-    {
-        var playerConfiguration = getPlayerConfiguration(sourcePlayer);
-
-        if (playerConfiguration.getUnlockedDisguises().stream().noneMatch(c -> c.equals(targetPlayerName)))
-            playerConfiguration.addDisguise(this.getDisguiseInfo(targetPlayerName, true));
-        else
-            return false;
-
-        saveConfiguration();
-
-        sendMorphAcquiredNotification(sourcePlayer, morphs.getDisguiseStateFor(sourcePlayer),
-                MorphStrings.morphUnlockedString()
-                        .resolve("what",targetPlayerName)
-                        .toComponent());
-
-        return true;
-    }
-
-    @Override
-    public boolean grantCustomMorphToPlayer(Player player, String disguiseName)
-    {
-        var disguise = DisguiseAPI.getCustomDisguise(disguiseName);
-
-        if (disguise == null) return false;
-
-        var playerConfiguration = getPlayerConfiguration(player);
-
-        if (playerConfiguration.getUnlockedDisguises().stream().noneMatch(c -> c.equals(disguiseName)))
-            playerConfiguration.addDisguise(this.getDisguiseInfo(disguiseName, false));
-        else
-            return false;
-
-        saveConfiguration();
-
-        sendMorphAcquiredNotification(player, morphs.getDisguiseStateFor(player),
-                MorphStrings.morphUnlockedString()
-                        .resolve("what", disguiseName)
-                        .toComponent());
-
-        return true;
-    }
-
-    @Override
-    public boolean revokeMorphFromPlayer(Player player, EntityType entityType)
+    public boolean revokeMorphFromPlayer(Player player, String disguiseIdentifier)
     {
         var avaliableDisguises = getAvaliableDisguisesFor(player);
 
-        var optional = avaliableDisguises.stream().filter(d -> d.type == entityType).findFirst();
+        var optional = avaliableDisguises.stream().filter(d -> d.equals(disguiseIdentifier)).findFirst();
         if (optional.isEmpty()) return false;
 
         getPlayerConfiguration(player).removeDisguise(optional.get());
         saveConfiguration();
 
         var state = morphs.getDisguiseStateFor(player);
-        if (state != null && state.getDisguise().getType().getEntityType().equals(entityType))
+        if (state != null && optional.get().getKey().equals(state.getDisguiseIdentifier()))
             morphs.unMorph(player);
 
         sendMorphAcquiredNotification(player, morphs.getDisguiseStateFor(player),
                 MorphStrings.morphLockedString()
-                        .resolve("what", Component.translatable(entityType.translationKey()))
+                        .resolve("what", Component.translatable(optional.get().getKey()))
                         .toComponent());
 
         return true;
     }
 
     @Override
-    public boolean revokePlayerMorphFromPlayer(Player player, String playerName)
+    @Nullable
+    public DisguiseInfo getDisguiseInfo(String rawString)
     {
-        var avaliableDisguises = getAvaliableDisguisesFor(player);
+        if (DisguiseTypes.fromId(rawString) == DisguiseTypes.UNKNOWN) return null;
 
-        var optional = avaliableDisguises.stream()
-                .filter(d -> (d.isPlayerDisguise() && Objects.equals(d.playerDisguiseTargetName, playerName))).findFirst();
-
-        if (optional.isEmpty()) return false;
-
-        getPlayerConfiguration(player).removeDisguise(optional.get());
-        saveConfiguration();
-
-        var state = morphs.getDisguiseStateFor(player);
-
-        if (state != null
-                && state.getDisguise().isPlayerDisguise()
-                && ((PlayerDisguise)state.getDisguise()).getName().equals(playerName))
-        {
-            morphs.unMorph(player);
-        }
-
-        sendMorphAcquiredNotification(player, morphs.getDisguiseStateFor(player),
-                MorphStrings.morphLockedString()
-                        .resolve("what", playerName)
-                        .toComponent());
-
-        return true;
-    }
-
-    @Override
-    public boolean revokeCustomMorphFromPlayer(Player player, String disguiseName)
-    {
-        var avaliableDisguises = getAvaliableDisguisesFor(player);
-
-        var optional = avaliableDisguises.stream()
-                .filter(d -> (d.equals(disguiseName))).findFirst();
-
-        if (optional.isEmpty()) return false;
-
-        getPlayerConfiguration(player).removeDisguise(optional.get());
-        saveConfiguration();
-
-        var state = morphs.getDisguiseStateFor(player);
-
-        if (state != null
-                && state.getDisguise().isCustomDisguise()
-                && state.getDisguise().getDisguiseName().equals(disguiseName))
-        {
-            morphs.unMorph(player);
-        }
-
-        sendMorphAcquiredNotification(player, morphs.getDisguiseStateFor(player),
-                MorphStrings.morphLockedString()
-                        .resolve("what", disguiseName)
-                        .toComponent());
-
-        return true;
-    }
-
-    @Override
-    public DisguiseInfo getDisguiseInfo(EntityType type)
-    {
-        if (type.equals(EntityType.PLAYER)) throw new IllegalArgumentException("玩家不能作为类型传入");
-
-        if (this.cachedInfos.stream().noneMatch(o -> o.equals(type)))
-            cachedInfos.add(new DisguiseInfo(type));
-
-        return cachedInfos.stream().filter(o -> o.equals(type)).findFirst().get();
-    }
-
-    @Override
-    public DisguiseInfo getDisguiseInfo(String rawString, boolean isPlayer)
-    {
         if (this.cachedInfos.stream().noneMatch(o -> o.equals(rawString)))
-            cachedInfos.add(new DisguiseInfo(rawString, isPlayer));
+            cachedInfos.add(new DisguiseInfo(rawString));
 
-        return cachedInfos.stream().filter(o -> o.equals(rawString)).findFirst().get();
+        return cachedInfos.stream().filter(o -> o.equals(rawString)).findFirst().orElse(null);
     }
 
     @Override

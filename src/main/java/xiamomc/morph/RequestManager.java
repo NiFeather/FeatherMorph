@@ -5,6 +5,7 @@ import xiamomc.morph.interfaces.IManagePlayerData;
 import xiamomc.morph.interfaces.IManageRequests;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.RequestStrings;
+import xiamomc.morph.misc.DisguiseTypes;
 import xiamomc.morph.misc.RequestInfo;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
@@ -85,8 +86,8 @@ public class RequestManager extends MorphPluginObject implements IManageRequests
         var req = match.get();
         req.ticksRemain = -1;
 
-        data.grantPlayerMorphToPlayer(target, source.getName());
-        data.grantPlayerMorphToPlayer(source, target.getName());
+        data.grantMorphToPlayer(target, DisguiseTypes.PLAYER.toId(source.getName()));
+        data.grantMorphToPlayer(source, DisguiseTypes.PLAYER.toId(target.getName()));
 
         target.sendMessage(MessageUtils.prefixes(target, RequestStrings.targetAcceptedString().resolve("who", source.getName())));
         source.sendMessage(MessageUtils.prefixes(source, RequestStrings.sourceAcceptedString().resolve("who", target.getName())));

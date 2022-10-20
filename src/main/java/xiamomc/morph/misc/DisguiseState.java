@@ -24,11 +24,11 @@ import java.util.UUID;
 
 public class DisguiseState extends MorphPluginObject
 {
-    public DisguiseState(Player player, Disguise disguiseInstance, boolean isClone)
+    public DisguiseState(Player player, String id, Disguise disguiseInstance, boolean isClone)
     {
         this.player = player;
         this.playerUniqueID = player.getUniqueId();
-        this.setDisguise(disguiseInstance, isClone);
+        this.setDisguise(id, disguiseInstance, isClone);
     }
 
     /**
@@ -76,6 +76,16 @@ public class DisguiseState extends MorphPluginObject
     public Disguise getDisguise()
     {
         return disguise;
+    }
+
+    /**
+     * 伪装的ID
+     */
+    private String disguiseIdentifier = DisguiseTypes.UNKNOWN.toId("unknown");
+
+    public String getDisguiseIdentifier()
+    {
+        return disguiseIdentifier;
     }
 
     /**
@@ -127,11 +137,6 @@ public class DisguiseState extends MorphPluginObject
         return shouldHandlePose;
     }
 
-    public void setDisguise(Disguise d, boolean shouldHandlePose)
-    {
-        setDisguise(d, shouldHandlePose, true);
-    }
-
     public void setAbilities(@Nullable EnumSet<AbilityFlag> newAbilities)
     {
         abilityFlag.clear();
@@ -143,20 +148,26 @@ public class DisguiseState extends MorphPluginObject
     @Resolved(shouldSolveImmediately = true)
     private AbilityHandler abilityHandler;
 
+    public void setDisguise(String identifier, Disguise d, boolean shouldHandlePose)
+    {
+        setDisguise(identifier, d, shouldHandlePose, true);
+    }
+
     /**
      * 更新伪装
      * @param d 目标伪装
      * @param shouldHandlePose 是否要处理玩家Pose（或：是否为克隆的伪装）
      * @param shouldRefreshDisguiseItems 要不要刷新伪装物品？
      */
-    public void setDisguise(Disguise d, boolean shouldHandlePose, boolean shouldRefreshDisguiseItems)
+    public void setDisguise(String identifier, Disguise d, boolean shouldHandlePose, boolean shouldRefreshDisguiseItems)
     {
         if (!DisguiseUtils.isTracing(d))
             throw new RuntimeException("此Disguise不能由插件管理");
 
-        if (disguise == d) return;
+        if (disguise == d || identifier == null) return;
 
         disguise = d;
+        this.disguiseIdentifier = identifier;
         this.shouldHandlePose = shouldHandlePose;
 
         displayName = d.isPlayerDisguise()
@@ -339,9 +350,7 @@ public class DisguiseState extends MorphPluginObject
         offlineState.playerUUID = this.playerUniqueID;
         offlineState.playerName = this.player.getName();
 
-        offlineState.disguiseID = disguise.isPlayerDisguise()
-                ? "player:" + ((PlayerDisguise) disguise).getName()
-                : disguise.getType().getEntityType().getKey().asString();
+        offlineState.disguiseID = this.getDisguiseIdentifier();
 
         var newDisguise = disguise.clone();
 
@@ -366,7 +375,7 @@ public class DisguiseState extends MorphPluginObject
 
         if (player == null) throw new RuntimeException("未找到与" + offlineState.playerUUID + "对应的玩家");
 
-        var state = new DisguiseState(player, offlineState.disguise, offlineState.shouldHandlePose);
+        var state = new DisguiseState(player, offlineState.disguiseID, offlineState.disguise, offlineState.shouldHandlePose);
 
         if (state.supportsDisguisedItems)
             state.setShowingDisguisedItems(offlineState.showingDisguisedItems);

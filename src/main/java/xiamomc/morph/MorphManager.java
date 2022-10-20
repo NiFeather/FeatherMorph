@@ -267,7 +267,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
      */
     public boolean morphEntityTypeAuto(Player player, String key, @Nullable Entity targetEntity)
     {
-        if (!key.contains(":")) key = NamespacedKey.MINECRAFT_NAMESPACE + ":" + key;
+        if (!key.contains(":")) key = DisguiseTypes.VANILLA.toId(key);
 
         String finalKey = key;
         var infoOptional = getAvaliableDisguisesFor(player).stream()
@@ -286,59 +286,70 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             {
                 //获取到的伪装
                 var info = infoOptional.get();
+                var disguiseType = info.getDisguiseType();
 
-                //目标类型
-                var type = info.type;
-
-                if (type == EntityType.UNKNOWN && key.startsWith("ld:"))
+                if (disguiseType == DisguiseTypes.LD)
                 {
-                    return morphLD(player, key);
-                }
+                    var success = morphLD(player, key);
 
-                if (!type.isAlive())
+                    if (success)
+                    {
+                        var msg = MorphStrings.morphSuccessString()
+                                .resolve("what", info.getKey());
+
+                        player.sendMessage(MessageUtils.prefixes(player, msg));
+                    }
+
+                    return success;
+                }
+                else if (disguiseType != DisguiseTypes.UNKNOWN)
                 {
-                    player.sendMessage(MessageUtils.prefixes(player, MorphStrings.invalidIdentityString()));
+                    //目标类型
+                    var type = info.getEntityType();
 
-                    return false;
-                }
+                    if (!type.isAlive())
+                    {
+                        player.sendMessage(MessageUtils.prefixes(player, MorphStrings.invalidIdentityString()));
 
-                //是否应该复制伪装
-                var shouldCopy = false;
+                        return false;
+                    }
 
-                //如果实体有伪装，则检查实体的伪装类型
-                if (DisguiseAPI.isDisguised(targetEntity))
-                {
-                    var disg = DisguiseAPI.getDisguise(targetEntity);
-                    assert disg != null;
+                    //是否应该复制伪装
+                    var shouldCopy = false;
 
-                    shouldCopy = info.isPlayerDisguise()
-                            ? disg.isPlayerDisguise() && ((PlayerDisguise) disg).getName().equals(info.playerDisguiseTargetName)
-                            : disg.getType().getEntityType().equals(type);
-                }
+                    //如果实体有伪装，则检查实体的伪装类型
+                    if (DisguiseAPI.isDisguised(targetEntity))
+                    {
+                        var disg = DisguiseAPI.getDisguise(targetEntity);
+                        assert disg != null;
 
-                if (shouldCopy)
-                {
-                    morphCopy(player, targetEntity); //如果应该复制伪装，则复制给玩家
-                }
-                else if (info.isPlayerDisguise()
+                        shouldCopy = info.isPlayerDisguise()
+                                ? disg.isPlayerDisguise() && ((PlayerDisguise) disg).getName().equals(info.playerDisguiseTargetName)
+                                : disg.getType().getEntityType().equals(type);
+                    }
+
+                    if (shouldCopy)
+                    {
+                        morphCopy(player, targetEntity); //如果应该复制伪装，则复制给玩家
+                    }
+                    else if (info.isPlayerDisguise()
                             ? (targetEntity instanceof Player targetPlayer && targetPlayer.getName().equals(info.playerDisguiseTargetName))
                             : (targetEntity != null && targetEntity.getType().equals(type))
-                        && !DisguiseAPI.isDisguised(targetEntity))
-                {
-                    morphEntity(player, targetEntity); //否则，如果目标实体是我们想要的实体，则伪装成目标实体
-                }
-                else
-                {
-                    if (info.isPlayerDisguise())
-                        morphPlayer(player, info.playerDisguiseTargetName);
+                            && !DisguiseAPI.isDisguised(targetEntity))
+                    {
+                        morphEntity(player, targetEntity); //否则，如果目标实体是我们想要的实体，则伪装成目标实体
+                    }
                     else
-                        morphEntityType(player, type); //否则，只简单地创建实体伪装
+                    {
+                        if (info.isPlayerDisguise())
+                            morphPlayer(player, info.playerDisguiseTargetName);
+                        else
+                            morphEntityType(player, type); //否则，只简单地创建实体伪装
+                    }
                 }
 
                 var msg = MorphStrings.morphSuccessString()
-                        .resolve("what", type == EntityType.PLAYER
-                                ? Component.text(key.replace("player:", ""))
-                                : Component.translatable(type.translationKey()));
+                        .resolve("what", info.asComponent());
 
                 player.sendMessage(MessageUtils.prefixes(player, msg));
 
@@ -368,9 +379,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
      */
     public boolean morphLD(Player player, String disguiseName)
     {
-        disguiseName = disguiseName.replace("ld:", "");
-
-        var disguise = DisguiseAPI.getCustomDisguise(disguiseName);
+        var disguise = DisguiseAPI.getCustomDisguise(disguiseName.replace("ld:", ""));
 
         if (disguise == null)
         {
@@ -379,7 +388,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             return false;
         }
 
-        postConstructDisguise(player, null, disguise, false);
+        postConstructDisguise(player, null, disguiseName, disguise, false);
         DisguiseAPI.disguiseEntity(player, disguise);
         return true;
     }
@@ -399,7 +408,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         constructedDisguise = new MobDisguise(DisguiseType.getType(entityType));
 
-        postConstructDisguise(player, null, constructedDisguise, false);
+        postConstructDisguise(player, null, entityType.getKey().asString(), constructedDisguise, false);
 
         DisguiseAPI.disguiseEntity(player, constructedDisguise);
     }
@@ -416,7 +425,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         draftDisguise = DisguiseAPI.constructDisguise(entity);
 
-        postConstructDisguise(sourcePlayer, entity, draftDisguise, true);
+        postConstructDisguise(sourcePlayer, entity, entity.getType().getKey().asString(), draftDisguise, true);
         DisguiseAPI.disguiseEntity(sourcePlayer, draftDisguise);
     }
 
@@ -435,7 +444,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         DisguiseAPI.disguiseEntity(sourcePlayer, DisguiseAPI.getDisguise(targetEntity));
         draftDisguise = DisguiseAPI.getDisguise(sourcePlayer);
 
-        postConstructDisguise(sourcePlayer, targetEntity, draftDisguise, true);
+        postConstructDisguise(sourcePlayer, targetEntity, targetEntity.getType().getKey().asString(), draftDisguise, true);
     }
 
     /**
@@ -446,11 +455,9 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
      */
     public void morphPlayer(Player sourcePlayer, String targetPlayerName)
     {
-        targetPlayerName = targetPlayerName.replace("player:", "");
+        var disguise = new PlayerDisguise(targetPlayerName.replace("player:", ""));
 
-        var disguise = new PlayerDisguise(targetPlayerName);
-
-        postConstructDisguise(sourcePlayer, null, disguise, false);
+        postConstructDisguise(sourcePlayer, null, targetPlayerName, disguise, false);
 
         DisguiseAPI.disguiseEntity(sourcePlayer, disguise);
     }
@@ -539,7 +546,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
     private void postConstructDisguise(DisguiseState state)
     {
-        postConstructDisguise(state.getPlayer(), null, state.getDisguise(), state.shouldHandlePose());
+        postConstructDisguise(state.getPlayer(), null, state.getDisguiseIdentifier(), state.getDisguise(), state.shouldHandlePose());
     }
 
     /**
@@ -550,7 +557,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
      * @param disguise         伪装
      * @param shouldHandlePose 要不要手动更新伪装Pose？（伪装是否为克隆）
      */
-    private void postConstructDisguise(Player sourcePlayer, @Nullable Entity targetEntity, Disguise disguise, boolean shouldHandlePose)
+    private void postConstructDisguise(Player sourcePlayer, @Nullable Entity targetEntity, String id, Disguise disguise, boolean shouldHandlePose)
     {
         //设置自定义数据用来跟踪
         DisguiseUtils.addTrace(disguise);
@@ -603,12 +610,12 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         var state = getDisguiseStateFor(sourcePlayer);
         if (state == null)
         {
-            state = new DisguiseState(sourcePlayer, disguise, shouldHandlePose);
+            state = new DisguiseState(sourcePlayer, id, disguise, shouldHandlePose);
 
             disguisedPlayers.add(state);
         }
         else
-            state.setDisguise(disguise, shouldHandlePose);
+            state.setDisguise(id, disguise, shouldHandlePose);
 
         //如果伪装的时候坐着，显示提示
         if (sourcePlayer.getVehicle() != null)
@@ -744,8 +751,12 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         var avaliableDisguises = getAvaliableDisguisesFor(player);
 
-        //直接还原
-        if (offlineState.disguise != null)
+        var disguiseType = DisguiseTypes.fromId(key);
+
+        if (disguiseType == DisguiseTypes.UNKNOWN) return false;
+
+        //直接还原非LD的伪装
+        if (offlineState.disguise != null && disguiseType != DisguiseTypes.LD)
         {
             DisguiseUtils.addTrace(offlineState.disguise);
 
@@ -759,34 +770,10 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         }
 
         //有限还原
-        if (key.startsWith("player:"))
+        if (avaliableDisguises.stream().anyMatch(i -> i.getKey().matches(key)))
         {
-            //检查玩家是否还拥有目标玩家的伪装
-            if (avaliableDisguises.stream().anyMatch(i -> i.getKey().matches(key)))
-            {
-                morphPlayer(player, key);
-                return true;
-            }
-        }
-        else
-        {
-            //检查玩家是否还拥有目标类型的伪装
-            if (avaliableDisguises.stream().anyMatch(i -> i.getKey().equals(key)))
-            {
-                var types = EntityType.values();
-                EntityType targetType = null;
-
-                //寻找type
-                var aa = Arrays.stream(types)
-                        .filter(t -> !t.equals(EntityType.UNKNOWN) && t.getKey().asString().equals(key)).findFirst();
-
-                if (aa.isPresent()) targetType = aa.get();
-                else return false;
-
-                morphEntityType(player, targetType);
-
-                return true;
-            }
+            morphEntityTypeAuto(player, key, null);
+            return true;
         }
 
         return false;
@@ -797,15 +784,10 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     //region Implementation of IManagePlayerData
 
     @Override
-    public DisguiseInfo getDisguiseInfo(EntityType type)
+    @Nullable
+    public DisguiseInfo getDisguiseInfo(String rawString)
     {
-        return data.getDisguiseInfo(type);
-    }
-
-    @Override
-    public DisguiseInfo getDisguiseInfo(String rawString, boolean isPlayer)
-    {
-        return data.getDisguiseInfo(rawString, isPlayer);
+        return data.getDisguiseInfo(rawString);
     }
 
     @Override
@@ -815,39 +797,15 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     }
 
     @Override
-    public boolean grantCustomMorphToPlayer(Player player, String disguiseName)
+    public boolean grantMorphToPlayer(Player player, String disguiseIdentifier)
     {
-        return data.grantCustomMorphToPlayer(player, disguiseName);
+        return data.grantMorphToPlayer(player, disguiseIdentifier);
     }
 
     @Override
-    public boolean grantMorphToPlayer(Player player, EntityType type)
+    public boolean revokeMorphFromPlayer(Player player, String disguiseIdentifier)
     {
-        return data.grantMorphToPlayer(player, type);
-    }
-
-    @Override
-    public boolean grantPlayerMorphToPlayer(Player sourcePlayer, String targtPlayerName)
-    {
-        return data.grantPlayerMorphToPlayer(sourcePlayer, targtPlayerName);
-    }
-
-    @Override
-    public boolean revokeMorphFromPlayer(Player player, EntityType entityType)
-    {
-        return data.revokeMorphFromPlayer(player, entityType);
-    }
-
-    @Override
-    public boolean revokePlayerMorphFromPlayer(Player player, String playerName)
-    {
-        return data.revokePlayerMorphFromPlayer(player, playerName);
-    }
-
-    @Override
-    public boolean revokeCustomMorphFromPlayer(Player player, String disguiseName)
-    {
-        return data.revokeCustomMorphFromPlayer(player, disguiseName);
+        return data.revokeMorphFromPlayer(player, disguiseIdentifier);
     }
 
     @Override

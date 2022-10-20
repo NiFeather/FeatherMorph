@@ -115,33 +115,18 @@ public class GrantDisguiseSubCommand extends MorphPluginObject implements ISubCo
                 return true;
             }
 
-            grantSuccess = morphs.grantMorphToPlayer(who, targetType);
+            grantSuccess = morphs.grantMorphToPlayer(who, targetType.getKey().asString());
             displayKey = targetType.translationKey();
         }
-        else if (targetName.startsWith("player:"))
+        else
         {
-            targetName = targetName.replace("player:", "");
-
             if (targetName.isBlank() || targetName.isEmpty())
             {
                 commandSender.sendMessage(MessageUtils.prefixes(commandSender, CommonStrings.playerNotDefinedString()));
                 return true;
             }
 
-            grantSuccess = morphs.grantPlayerMorphToPlayer(who, targetName);
-            displayKey = targetName;
-        }
-        else if (targetName.startsWith("ld:"))
-        {
-            targetName = targetName.replace("ld:", "");
-
-            if (targetName.isBlank() || targetName.isEmpty())
-            {
-                commandSender.sendMessage(MessageUtils.prefixes(commandSender, CommonStrings.playerNotDefinedString()));
-                return true;
-            }
-
-            grantSuccess = morphs.grantCustomMorphToPlayer(who.getPlayer(), targetName);
+            grantSuccess = morphs.grantMorphToPlayer(who, targetName);
             displayKey = targetName;
         }
 

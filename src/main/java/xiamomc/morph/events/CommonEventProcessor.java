@@ -30,10 +30,7 @@ import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.MorphStrings;
 import xiamomc.morph.messages.SkillStrings;
-import xiamomc.morph.misc.DisguiseUtils;
-import xiamomc.morph.misc.EntityTypeUtils;
-import xiamomc.morph.misc.MorphChatRenderer;
-import xiamomc.morph.misc.MorphGameProfile;
+import xiamomc.morph.misc.*;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 
@@ -407,7 +404,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
             DisguiseUtils.addTrace(disguise);
 
             //刷新Disguise
-            state.setDisguise(DisguiseAPI.getDisguise(player), state.shouldHandlePose(), false);
+            state.setDisguise(state.getDisguiseIdentifier(), DisguiseAPI.getDisguise(player), state.shouldHandlePose(), false);
 
             //更新飞行能力
             if (morphs.updateFlyingAbility(player) && player.getVelocity().getY() == 0)
@@ -513,8 +510,8 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
             return;
 
         if (entity instanceof Player targetPlayer)
-            morphs.grantPlayerMorphToPlayer(player, targetPlayer.getName());
+            morphs.grantMorphToPlayer(player, DisguiseTypes.PLAYER.toId(targetPlayer.getName()));
         else
-            morphs.grantMorphToPlayer(player, entity.getType());
+            morphs.grantMorphToPlayer(player, entity.getType().getKey().asString());
     }
 }

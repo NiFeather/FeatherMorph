@@ -21,8 +21,8 @@ public class OfflineDisguiseState implements IOfflineState
     public String playerName;
 
     /**
-     * 伪装ID(minecraft:pig, player:Icalingua 这种)<br>
-     * 只会在伪装数据不可用或者构建失败时使用
+     * 伪装ID<br>
+     * 会在伪装数据不可用、构建失败或恢复伪装时使用
      */
     @Expose
     public String disguiseID;
