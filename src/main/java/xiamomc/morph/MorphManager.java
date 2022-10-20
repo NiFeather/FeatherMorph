@@ -384,7 +384,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         if (disguise == null)
         {
             Logger.error("未能在LD中找到叫" + disguiseName + "的伪装");
-            player.sendMessage(MessageUtils.prefixes(player, MorphStrings.parseErrorString()));
+            player.sendMessage(MessageUtils.prefixes(player, MorphStrings.parseErrorString().resolve("id", disguiseName)));
             return false;
         }
 
