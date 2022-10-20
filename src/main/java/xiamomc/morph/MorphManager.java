@@ -488,11 +488,13 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
      */
     public void unMorph(Player player)
     {
-        var targetInfoOptional = disguisedPlayers.stream().filter(i -> i.getPlayerUniqueID().equals(player.getUniqueId())).findFirst();
-        if (targetInfoOptional.isEmpty())
+        var state = disguisedPlayers.stream()
+                .filter(i -> i.getPlayerUniqueID().equals(player.getUniqueId())).findFirst().orElse(null);
+
+        if (state == null)
             return;
 
-        var disguise = targetInfoOptional.get().getDisguise();
+        var disguise = state.getDisguise();
         disguise.removeDisguise(player);
 
         player.sendMessage(MessageUtils.prefixes(player, MorphStrings.unMorphSuccessString()));
@@ -504,7 +506,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         spawnParticle(player, player.getLocation(), player.getWidth(), player.getHeight(), player.getWidth());
 
-        disguisedPlayers.remove(targetInfoOptional.get());
+        disguisedPlayers.remove(state);
 
         updateLastPlayerMorphOperationTime(player);
 

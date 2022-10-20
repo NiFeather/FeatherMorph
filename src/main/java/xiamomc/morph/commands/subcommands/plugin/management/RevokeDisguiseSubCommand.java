@@ -92,17 +92,10 @@ public class RevokeDisguiseSubCommand extends MorphPluginObject implements ISubC
             return false;
         }
 
-        boolean revokeSuccess = false;
+        var info = morphs.getAvaliableDisguisesFor(who)
+                .stream().filter(i -> i.getKey().equals(targetName)).findFirst().orElse(null);
 
-        var targetInfoOptional = morphs.getAvaliableDisguisesFor(who)
-                .stream().filter(i -> i.getKey().equals(targetName)).findFirst();
-
-        if (targetInfoOptional.isPresent())
-        {
-            var info = targetInfoOptional.get();
-
-            revokeSuccess = morphs.revokeMorphFromPlayer(who, info.getKey());
-        }
+        var revokeSuccess = info != null && morphs.revokeMorphFromPlayer(who, info.getKey());
 
         var msg = revokeSuccess
                 ? CommandStrings.revokeSuccessString()

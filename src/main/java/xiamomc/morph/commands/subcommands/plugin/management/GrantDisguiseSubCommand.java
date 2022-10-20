@@ -9,6 +9,7 @@ import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.messages.*;
+import xiamomc.morph.misc.DisguiseTypes;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Command.ISubCommand;
 import xiamomc.pluginbase.messages.FormattableMessage;
@@ -67,7 +68,7 @@ public class GrantDisguiseSubCommand extends MorphPluginObject implements ISubCo
             //玩家
             for (var p : onlinePlayers)
             {
-                var convertedName = "player:" + p.getName();
+                var convertedName = DisguiseTypes.PLAYER.toId(p.getName());
                 if (convertedName.toLowerCase().contains(target.toLowerCase())) list.add(convertedName);
             }
         }
@@ -92,21 +93,15 @@ public class GrantDisguiseSubCommand extends MorphPluginObject implements ISubCo
             return false;
         }
 
-        boolean foundEntityType;
-        boolean grantSuccess = false;
-        String displayKey = "???";
+        boolean grantSuccess;
+        String displayKey;
 
         //检查是否为生物
-        String finalTargetName = targetName;
-        var avaliableType = Arrays.stream(EntityType.values())
-                .filter(t -> t != EntityType.UNKNOWN && t.getKey().asString().equals(finalTargetName)).findFirst();
+        var targetType = Arrays.stream(EntityType.values())
+                .filter(t -> t != EntityType.UNKNOWN && t.getKey().asString().equals(targetName)).findFirst().orElse(null);
 
-        foundEntityType = avaliableType.isPresent();
-
-        if (foundEntityType)
+        if (targetType != null)
         {
-            var targetType = avaliableType.get();
-
             if (!targetType.isAlive() || targetType.equals(EntityType.PLAYER))
             {
                 commandSender.sendMessage(MessageUtils.prefixes(commandSender, MorphStrings.invalidIdentityString()));

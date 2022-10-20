@@ -80,14 +80,15 @@ public class MorphSkillHandler extends MorphPluginObject
         else infos = uuidInfoMap.get(uuid);
 
         //获取或创建CD
-        var cd = infos.stream().filter(i -> i.getSkill().equals(skill)).findFirst();
-        if (cd.isEmpty())
+        var cd = infos.stream()
+                .filter(i -> i.getSkill().equals(skill)).findFirst().orElse(null);
+        if (cd == null)
         {
             cdInfo = new SkillCooldownInfo(skill);
             infos.add(cdInfo);
         }
         else
-            cdInfo = cd.get();
+            cdInfo = cd;
 
         return cdInfo;
     }

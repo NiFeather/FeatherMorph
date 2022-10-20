@@ -201,12 +201,12 @@ public class HelpSubCommand extends MorphPluginObject implements ISubCommand
     {
         if (args.length >= 1)
         {
-            var matchedSection = commandSections.stream()
-                    .filter(s -> s.getCommandBaseName().equalsIgnoreCase(args[0])).findFirst();
+            var section = commandSections.stream()
+                    .filter(s -> s.getCommandBaseName().equalsIgnoreCase(args[0])).findFirst().orElse(null);
 
-            if (matchedSection.isPresent())
+            if (section != null)
             {
-                for (var s : constructSectionMessage(sender, matchedSection.get()))
+                for (var s : constructSectionMessage(sender, section))
                     sender.sendMessage(MessageUtils.prefixes(sender, s));
             }
             else
