@@ -1,7 +1,6 @@
 package xiamomc.morph.events;
 
 import com.destroystokyo.paper.ClientOption;
-import com.destroystokyo.paper.event.player.PlayerJumpEvent;
 import io.papermc.paper.event.player.PlayerArmSwingEvent;
 import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
 import net.minecraft.core.EnumDirection;
@@ -260,6 +259,10 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
             //tan $angle = (x / $distance) = $tan -> x = ($distance * $tan) -> $val
             //$height - $val -> $targetHeight
             var angle = player.getEyeLocation().getPitch();
+
+            if (angle == 90f) angle = 89.999f;
+            else if (angle == -90f) angle = -89.999f;
+
             var tan = Math.tan(Math.toRadians(angle));
             var val = targetEntity.getHeight() - distance * tan;
 
