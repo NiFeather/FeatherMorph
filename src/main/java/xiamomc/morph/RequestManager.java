@@ -73,17 +73,16 @@ public class RequestManager extends MorphPluginObject implements IManageRequests
     @Override
     public void acceptRequest(Player source, Player target)
     {
-        var match = requests.stream()
+        var req = requests.stream()
                 .filter(i -> i.sourcePlayer.getUniqueId().equals(target.getUniqueId())
-                        && i.targetPlayer.getUniqueId().equals(source.getUniqueId())).findFirst();
+                        && i.targetPlayer.getUniqueId().equals(source.getUniqueId())).findFirst().orElse(null);
 
-        if (match.isEmpty())
+        if (req == null)
         {
             source.sendMessage(MessageUtils.prefixes(source, RequestStrings.requestNotFound()));
             return;
         }
 
-        var req = match.get();
         req.ticksRemain = -1;
 
         data.grantMorphToPlayer(target, DisguiseTypes.PLAYER.toId(source.getName()));
@@ -101,11 +100,11 @@ public class RequestManager extends MorphPluginObject implements IManageRequests
     @Override
     public void denyRequest(Player source, Player target)
     {
-        var match = requests.stream()
+        var req = requests.stream()
                 .filter(i -> i.sourcePlayer.getUniqueId().equals(target.getUniqueId())
-                        && i.targetPlayer.getUniqueId().equals(source.getUniqueId())).findFirst();
+                        && i.targetPlayer.getUniqueId().equals(source.getUniqueId())).findFirst().orElse(null);
 
-        if (match.isEmpty())
+        if (req == null)
         {
             source.sendMessage(MessageUtils.prefixes(source, RequestStrings.requestNotFound()));
 
@@ -113,7 +112,6 @@ public class RequestManager extends MorphPluginObject implements IManageRequests
             return;
         }
 
-        var req = match.get();
         req.ticksRemain = -1;
 
         target.sendMessage(MessageUtils.prefixes(target, RequestStrings.targetDeniedString().resolve("who", source.getName())));

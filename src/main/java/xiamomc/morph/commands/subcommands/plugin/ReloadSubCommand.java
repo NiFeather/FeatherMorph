@@ -18,7 +18,6 @@ import java.util.List;
 
 public class ReloadSubCommand extends MorphPluginObject implements ISubCommand
 {
-
     @Override
     public String getCommandName()
     {

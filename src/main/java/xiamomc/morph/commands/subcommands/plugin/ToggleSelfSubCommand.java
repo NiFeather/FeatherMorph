@@ -14,7 +14,6 @@ import xiamomc.pluginbase.messages.FormattableMessage;
 
 public class ToggleSelfSubCommand implements ISubCommand
 {
-
     @Override
     public String getCommandName()
     {

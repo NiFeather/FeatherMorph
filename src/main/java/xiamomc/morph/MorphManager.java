@@ -273,8 +273,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         if (!key.contains(":")) key = DisguiseTypes.VANILLA.toId(key);
 
         String finalKey = key;
-        var infoOptional = getAvaliableDisguisesFor(player).stream()
-                .filter(i -> i.getKey().equals(finalKey)).findFirst();
+        var info = getAvaliableDisguisesFor(player).stream()
+                .filter(i -> i.getKey().equals(finalKey)).findFirst().orElse(null);
 
         if (bannedDisguises.contains(key))
         {
@@ -283,12 +283,11 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         }
 
         //检查有没有伪装
-        if (infoOptional.isPresent())
+        if (info != null)
         {
             try
             {
                 //获取到的伪装
-                var info = infoOptional.get();
                 var disguiseType = info.getDisguiseType();
 
                 if (disguiseType == DisguiseTypes.LD)

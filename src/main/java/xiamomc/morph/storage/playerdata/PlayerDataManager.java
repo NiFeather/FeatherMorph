@@ -63,18 +63,19 @@ public class PlayerDataManager extends MorphJsonBasedStorage<MorphConfiguration>
                 //要设置给c.unlockedDisguises的列表
                 var list = new ArrayList<DisguiseInfo>();
 
+                //原始列表
+                var unlockedDisguiseIdentifiers = c.getUnlockedDisguiseIdentifiers();
+
                 //先对原始列表排序
-                Collections.sort(c.getUnlockedDisguiseIdentifiers());
+                Collections.sort(unlockedDisguiseIdentifiers);
 
                 //然后逐个添加
-                c.getUnlockedDisguiseIdentifiers().forEach(i ->
+                unlockedDisguiseIdentifiers.forEach(i ->
                 {
-                    var type = EntityTypeUtils.fromString(i);
+                    var type = DisguiseTypes.fromId(i);
 
                     if (type != null)
-                    {
                         list.add(new DisguiseInfo(i));
-                    }
                     else
                         Logger.warn("未能找到和\"" + i + "\"对应的实体类型，将不会添加到" + c.playerName + "(" + c.uniqueId + ")的列表中");
                 });
@@ -133,12 +134,11 @@ public class PlayerDataManager extends MorphJsonBasedStorage<MorphConfiguration>
     @Override
     public PlayerMorphConfiguration getPlayerConfiguration(Player player)
     {
-        var valueOptional = storingObject.playerMorphConfigurations
-                .stream().filter(c -> c.uniqueId.equals(player.getUniqueId())).findFirst();
+        var value = storingObject.playerMorphConfigurations
+                .stream().filter(c -> c.uniqueId.equals(player.getUniqueId())).findFirst().orElse(null);
 
-        if (valueOptional.isPresent())
+        if (value != null)
         {
-            var value = valueOptional.get();
             if (value.playerName == null) value.playerName = player.getName();
 
             return value;
@@ -184,19 +184,19 @@ public class PlayerDataManager extends MorphJsonBasedStorage<MorphConfiguration>
     {
         var avaliableDisguises = getAvaliableDisguisesFor(player);
 
-        var optional = avaliableDisguises.stream().filter(d -> d.equals(disguiseIdentifier)).findFirst();
-        if (optional.isEmpty()) return false;
+        var info = avaliableDisguises.stream().filter(d -> d.equals(disguiseIdentifier)).findFirst().orElse(null);
+        if (info == null) return false;
 
-        getPlayerConfiguration(player).removeDisguise(optional.get());
+        getPlayerConfiguration(player).removeDisguise(info);
         saveConfiguration();
 
         var state = morphs.getDisguiseStateFor(player);
-        if (state != null && optional.get().getKey().equals(state.getDisguiseIdentifier()))
+        if (state != null && info.getKey().equals(state.getDisguiseIdentifier()))
             morphs.unMorph(player);
 
         sendMorphAcquiredNotification(player, morphs.getDisguiseStateFor(player),
                 MorphStrings.morphLockedString()
-                        .resolve("what", Component.translatable(optional.get().getKey()))
+                        .resolve("what", Component.translatable(info.getKey()))
                         .toComponent());
 
         return true;

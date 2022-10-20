@@ -12,13 +12,11 @@ public class EntityTypeUtils
 {
     public static EntityType fromString(String key)
     {
-        if (key.startsWith("player:")) return EntityType.PLAYER;
+        if (key.startsWith(DisguiseTypes.PLAYER.getNameSpace() + ":")) return EntityType.PLAYER;
 
-        var optional = Arrays.stream(EntityType.values())
+        return Arrays.stream(EntityType.values())
                 .filter(t -> !t.equals(EntityType.UNKNOWN) && t.getKey().asString().equals(key))
-                .findFirst();
-
-        return optional.orElse(EntityType.UNKNOWN);
+                .findFirst().orElse(EntityType.UNKNOWN);
     }
 
     public static boolean isZombiesHostile(EntityType type)

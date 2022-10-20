@@ -62,11 +62,11 @@ public class OfflineStorageManager extends MorphJsonBasedStorage<OfflineStates> 
     @Nullable
     public OfflineDisguiseState popDisguiseState(UUID uuid)
     {
-        var targetState = storingObject.disguiseStates.stream().filter(s -> s.playerUUID.equals(uuid)).findFirst();
+        var state = storingObject.disguiseStates.stream()
+                .filter(s -> s.playerUUID.equals(uuid)).findFirst().orElse(null);
 
-        if (targetState.isPresent())
+        if (state != null)
         {
-            var state = targetState.get();
             storingObject.disguiseStates.remove(state);
 
             if (state.disguiseData != null)

@@ -178,9 +178,7 @@ public class DisguiseState extends MorphPluginObject
         var disgType = d.getType().getEntityType();
         setAbilities(abilityHandler.getFlagsFor(disgType));
 
-        //设置初始CD
-        //skillCooldown = 40;
-
+        //伪装类型是否支持设置伪装物品
         supportsDisguisedItems = disgType.equals(EntityType.PLAYER) || disgType.equals(EntityType.ARMOR_STAND);
 
         //重置伪装物品
