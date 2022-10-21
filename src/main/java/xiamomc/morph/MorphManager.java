@@ -127,7 +127,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         var range = config.getOrDefault(Integer.class, ConfigOption.BOSSBAR_RANGE);
         if (range < 0)
-            range = (Bukkit.getViewDistance() - 1) * 16
+            range = (Bukkit.getViewDistance() - 1) * 16;
 
         bossbarDisplayRange = range;
     }
