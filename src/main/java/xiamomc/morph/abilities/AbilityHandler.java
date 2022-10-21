@@ -58,7 +58,6 @@ public class AbilityHandler extends MorphPluginObject
         return list;
     }
 
-    private final PotionEffect waterBreathEffect = new PotionEffect(PotionEffectType.WATER_BREATHING, 20, 0);
     private final PotionEffect conduitEffect = new PotionEffect(PotionEffectType.CONDUIT_POWER, 20, 0);
     private final PotionEffect nightVisionEffect = new PotionEffect(PotionEffectType.NIGHT_VISION, 300, 0);
     private final PotionEffect fireResistance = new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 20, 0);
@@ -74,7 +73,6 @@ public class AbilityHandler extends MorphPluginObject
         if (state.isAbilityFlagSet(AbilityFlag.CAN_BREATHE_UNDER_WATER) && player.isInWaterOrRainOrBubbleColumn())
         {
             player.addPotionEffect(conduitEffect);
-            player.addPotionEffect(waterBreathEffect);
         }
 
         if (state.isAbilityFlagSet(AbilityFlag.HAS_FIRE_RESISTANCE))
