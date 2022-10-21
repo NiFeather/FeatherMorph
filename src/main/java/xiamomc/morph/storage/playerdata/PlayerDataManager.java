@@ -171,7 +171,7 @@ public class PlayerDataManager extends MorphJsonBasedStorage<MorphConfiguration>
 
         sendMorphAcquiredNotification(player, morphs.getDisguiseStateFor(player),
                 MorphStrings.morphUnlockedString()
-                        .resolve("what", Component.translatable(info.getKey()))
+                        .resolve("what", info.asComponent())
                         .toComponent());
 
         return true;
@@ -194,7 +194,7 @@ public class PlayerDataManager extends MorphJsonBasedStorage<MorphConfiguration>
 
         sendMorphAcquiredNotification(player, morphs.getDisguiseStateFor(player),
                 MorphStrings.morphLockedString()
-                        .resolve("what", Component.translatable(info.getKey()))
+                        .resolve("what", info.asComponent())
                         .toComponent());
 
         return true;

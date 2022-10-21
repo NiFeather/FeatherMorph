@@ -7,6 +7,8 @@ import org.bukkit.entity.EntityType;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.LoggerFactory;
 
+import javax.print.DocFlavor;
+
 public class DisguiseInfo
 {
     @SerializedName("Type")
@@ -95,17 +97,27 @@ public class DisguiseInfo
         return this.disguiseType != DisguiseTypes.UNKNOWN && this.rawString.equals(rawString);
     }
 
+    /**
+     * SAN值检查
+     * @return 是否通过
+     */
     public boolean isValidate()
     {
-        return switch (this.disguiseType)
+        var typeValid = switch (this.disguiseType)
                 {
                     case PLAYER -> this.playerDisguiseTargetName != null;
                     case VANILLA -> this.entityType != null && this.entityType != EntityType.UNKNOWN;
                     case UNKNOWN -> false;
-                    default -> this.rawString != null;
+                    default -> true;
                 };
+
+        return this.rawString != null && typeValid;
     }
 
+    /**
+     * 获取可用于存储的键名
+     * @return 键名
+     */
     public String getKey()
     {
         if (!this.isValidate())
@@ -117,6 +129,10 @@ public class DisguiseInfo
         return rawString;
     }
 
+    /**
+     * 将此info转换为可以显示的Component
+     * @return Component
+     */
     public Component asComponent()
     {
         if (!this.isValidate()) return Component.text("invalid");
