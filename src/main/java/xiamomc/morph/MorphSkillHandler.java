@@ -113,9 +113,9 @@ public class MorphSkillHandler extends MorphPluginObject
      * @param info CD信息
      * @return CD值
      */
-    private int getCooldownInactive(SkillCooldownInfo info)
+    private long getCooldownInactive(SkillCooldownInfo info)
     {
-        return (int) (info.getLastInvoke() - Plugin.getCurrentTick()) + info.getCooldown();
+        return (info.getLastInvoke() - plugin.getCurrentTick()) + info.getCooldown();
     }
 
     /**
@@ -190,19 +190,18 @@ public class MorphSkillHandler extends MorphPluginObject
     {
         var uuid = player.getUniqueId();
         var list = uuidInfoMap.get(uuid);
-        SkillCooldownInfo cdInfo = null;
 
         if (list == null) return;
 
         var state = manager.getDisguiseStateFor(player);
-        if (state != null)
-            cdInfo = getCooldownInfo(uuid, state.getDisguise().getType().getEntityType());
+
+        //获取当前CD
+        SkillCooldownInfo cdInfo = state == null
+                ? null
+                : getCooldownInfo(uuid, state.getDisguise().getType().getEntityType());
 
         //移除不需要的CD
-        list.removeIf(i -> this.getCooldownInactive(i) <= 2);
-
-        if (cdInfo != null)
-            list.add(cdInfo);
+        list.removeIf(i -> i != cdInfo && this.getCooldownInactive(i) <= 2);
 
         if (list.isEmpty()) uuidInfoMap.remove(uuid);
     }

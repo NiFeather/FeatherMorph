@@ -13,7 +13,7 @@ public class SkillCooldownInfo
         return skill;
     }
 
-    private int cooldown;
+    private long cooldown;
 
     private long lastInvoke = Long.MIN_VALUE;
 
@@ -47,7 +47,7 @@ public class SkillCooldownInfo
      * 获取冷却时间
      * @return 冷却时间
      */
-    public int getCooldown()
+    public long getCooldown()
     {
         return cooldown;
     }
@@ -56,7 +56,7 @@ public class SkillCooldownInfo
      * 设置冷却时间
      * @param val 冷却时间
      */
-    public void setCooldown(int val)
+    public void setCooldown(long val)
     {
         cooldown = val;
     }

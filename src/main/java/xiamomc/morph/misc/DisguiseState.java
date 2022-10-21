@@ -93,7 +93,7 @@ public class DisguiseState extends MorphPluginObject
      */
     private SkillCooldownInfo cooldownInfo;
 
-    public int getSkillCooldown()
+    public long getSkillCooldown()
     {
         return cooldownInfo == null ? -1 : cooldownInfo.getCooldown();
     }
@@ -103,7 +103,7 @@ public class DisguiseState extends MorphPluginObject
         return cooldownInfo == null ? Long.MIN_VALUE : cooldownInfo.getLastInvoke();
     }
 
-    public void setSkillCooldown(int val)
+    public void setSkillCooldown(long val)
     {
         if (haveCooldown())
             cooldownInfo.setCooldown(val);
