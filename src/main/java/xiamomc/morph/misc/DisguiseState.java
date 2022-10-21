@@ -1,13 +1,14 @@
 package xiamomc.morph.misc;
 
-import it.unimi.dsi.fastutil.objects.AbstractObject2IntSortedMap;
 import me.libraryaddict.disguise.disguisetypes.Disguise;
 import me.libraryaddict.disguise.disguisetypes.FlagWatcher;
 import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
 import me.libraryaddict.disguise.utilities.parser.DisguiseParser;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -22,6 +23,7 @@ import xiamomc.pluginbase.Annotations.Resolved;
 
 import java.util.Arrays;
 import java.util.EnumSet;
+import java.util.Objects;
 import java.util.UUID;
 
 public class DisguiseState extends MorphPluginObject
@@ -110,6 +112,25 @@ public class DisguiseState extends MorphPluginObject
         this.bossbar = bossbar;
     }
 
+    @Nullable
+    private TextColor customGlowColor;
+
+    @Nullable
+    public TextColor getCustomGlowColor()
+    {
+        return customGlowColor;
+    }
+
+    public boolean haveCustomGlowColor()
+    {
+        return customGlowColor != null;
+    }
+
+    public void setCustomGlowColor(@Nullable TextColor color)
+    {
+        this.customGlowColor = color;
+    }
+
     /**
      * 伪装技能冷却
      */
@@ -192,9 +213,17 @@ public class DisguiseState extends MorphPluginObject
         this.disguiseIdentifier = identifier;
         this.shouldHandlePose = shouldHandlePose;
 
-        displayName = d.isPlayerDisguise()
-                ? Component.text(((PlayerDisguise) d).getName())
-                : Component.translatable(d.getType().getEntityType().translationKey());
+        var type = DisguiseTypes.fromId(identifier);
+
+        displayName = switch (type)
+                {
+                    case PLAYER -> Component.text(type.toStrippedId(identifier));
+                    case VANILLA -> Component.translatable(d.getType().getEntityType().translationKey());
+                    case LD -> Objects.equals(d.getDisguiseName(), d.getType().toReadable())
+                            ? Component.translatable(d.getType().getEntityType().translationKey())
+                            : Component.text(disguise.getDisguiseName());
+                    default -> Component.text("unknown(" + identifier + ")");
+                };
 
         //更新技能Flag
         var disgType = d.getType().getEntityType();

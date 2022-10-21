@@ -36,6 +36,8 @@ public class QuerySubCommand extends MorphPluginObject implements ISubCommand
                 ? CommandStrings.chatOverrideEnabledString()
                 : CommandStrings.chatOverrideDisabledString()));
 
+        System.gc();
+
         return true;
     }
 
