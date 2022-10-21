@@ -93,41 +93,20 @@ public class GrantDisguiseSubCommand extends MorphPluginObject implements ISubCo
             return false;
         }
 
-        boolean grantSuccess;
-        String displayKey;
+        //检查是否已知
+        var targetType = DisguiseTypes.fromId(targetName);
 
-        //检查是否为生物
-        var targetType = Arrays.stream(EntityType.values())
-                .filter(t -> t != EntityType.UNKNOWN && t.getKey().asString().equals(targetName)).findFirst().orElse(null);
-
-        if (targetType != null)
+        if (targetType == DisguiseTypes.UNKNOWN)
         {
-            if (!targetType.isAlive() || targetType.equals(EntityType.PLAYER))
-            {
-                commandSender.sendMessage(MessageUtils.prefixes(commandSender, MorphStrings.invalidIdentityString()));
-                return true;
-            }
-
-            grantSuccess = morphs.grantMorphToPlayer(who, targetType.getKey().asString());
-            displayKey = targetType.translationKey();
-        }
-        else
-        {
-            if (targetName.isBlank() || targetName.isEmpty())
-            {
-                commandSender.sendMessage(MessageUtils.prefixes(commandSender, CommonStrings.playerNotDefinedString()));
-                return true;
-            }
-
-            grantSuccess = morphs.grantMorphToPlayer(who, targetName);
-            displayKey = targetName;
+            commandSender.sendMessage(MessageUtils.prefixes(commandSender, MorphStrings.invalidIdentityString()));
+            return true;
         }
 
-        var msg = grantSuccess
+        var msg = morphs.grantMorphToPlayer(who, targetName)
                 ? CommandStrings.grantSuccessString()
                 : CommandStrings.grantFailString();
 
-        msg.resolve("what", Component.translatable(displayKey)).resolve("who", who.getName());
+        msg.resolve("what", Component.translatable(targetName)).resolve("who", who.getName());
 
         commandSender.sendMessage(MessageUtils.prefixes(commandSender, msg));
 

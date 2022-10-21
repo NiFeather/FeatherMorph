@@ -43,6 +43,9 @@ public class DisguiseInfo
         return disguiseType == DisguiseTypes.LD;
     }
 
+    /**
+     * 不带"player:"的玩家伪装名称
+     */
     @Expose
     public String playerDisguiseTargetName;
 
@@ -56,7 +59,7 @@ public class DisguiseInfo
             case PLAYER ->
             {
                 this.entityType = EntityType.PLAYER;
-                this.playerDisguiseTargetName = rawString;
+                this.playerDisguiseTargetName = disguiseType.toStrippedId(rawString);
             }
             case VANILLA -> this.entityType = EntityTypeUtils.fromString(rawString);
             default -> this.entityType = EntityType.UNKNOWN;
@@ -89,12 +92,7 @@ public class DisguiseInfo
     {
         if (!this.isValidate()) return false;
 
-        return switch (this.disguiseType)
-        {
-            case PLAYER -> this.playerDisguiseTargetName.equals(rawString);
-            case UNKNOWN -> false;
-            default -> this.rawString.equals(rawString);
-        };
+        return this.disguiseType != DisguiseTypes.UNKNOWN && this.rawString.equals(rawString);
     }
 
     public boolean isValidate()
