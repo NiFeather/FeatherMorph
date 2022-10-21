@@ -8,14 +8,14 @@ public class CommandStrings extends AbstractMorphStrings
     {
         return getFormattable(getKey("no_permission"),
                 "<color:red>禁止接触");
-    };
+    }
 
     //reload
     public static FormattableMessage reloadCompleteMessage()
     {
         return getFormattable(getKey("reload_complete"),
                 "重载完成！");
-    };
+    }
 
     //query
     public static FormattableMessage qDisguisedString()

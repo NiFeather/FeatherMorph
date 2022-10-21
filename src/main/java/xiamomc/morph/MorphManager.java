@@ -84,8 +84,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         config.onConfigRefresh(c -> this.onConfigRefresh(), true);
 
-        Dependencies.cache(abilityHandler);
-        Dependencies.cache(skillHandler);
+        dependencies.cache(abilityHandler);
+        dependencies.cache(skillHandler);
 
         skillHandler.registerSkills(List.of(
                 new ArmorStandMorphSkill(),
@@ -144,15 +144,15 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             {
                 if (DisguiseUtils.isTracing(disgInState))
                 {
-                    Logger.warn(p.getName() + "在State中的伪装拥有Tracing标签，但却和DisguiseAPI中获得的不一样");
-                    Logger.warn("API: " + disg + " :: State: " + disgInState);
+                    logger.warn(p.getName() + "在State中的伪装拥有Tracing标签，但却和DisguiseAPI中获得的不一样");
+                    logger.warn("API: " + disg + " :: State: " + disgInState);
 
                     p.sendMessage(MessageUtils.prefixes(p, Component.translatable("更新伪装时遇到了意外，正在取消伪装")));
                     unMorph(p);
                 }
                 else
                 {
-                    Logger.warn("removing: " + p + " :: " + i.getDisguise() + " <-> " + disg);
+                    logger.warn("removing: " + p + " :: " + i.getDisguise() + " <-> " + disg);
                     unMorph(p);
                     DisguiseAPI.disguiseEntity(p, disg);
                     disguisedPlayers.remove(i);
@@ -250,7 +250,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     {
         var val = uuidMoprhTimeMap.get(uuid);
 
-        return val == null || Plugin.getCurrentTick() - val >= 20;
+        return val == null || plugin.getCurrentTick() - val >= 20;
     }
 
     /**
@@ -259,7 +259,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
      */
     public void updateLastPlayerMorphOperationTime(Player player)
     {
-        uuidMoprhTimeMap.put(player.getUniqueId(), Plugin.getCurrentTick());
+        uuidMoprhTimeMap.put(player.getUniqueId(), plugin.getCurrentTick());
     }
 
     private List<?> bannedDisguises = new ArrayList<>();
@@ -388,7 +388,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         if (disguise == null)
         {
-            Logger.error("未能在LD中找到叫" + disguiseName + "的伪装");
+            logger.error("未能在LD中找到叫" + disguiseName + "的伪装");
             player.sendMessage(MessageUtils.prefixes(player, MorphStrings.parseErrorString().resolve("id", disguiseName)));
             return false;
         }
@@ -681,7 +681,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         {
             state.setCooldownInfo(cdInfo);
             cdInfo.setCooldown(Math.max(40, state.getSkillCooldown()));
-            cdInfo.setLastInvoke(Plugin.getCurrentTick());
+            cdInfo.setLastInvoke(plugin.getCurrentTick());
         }
 
         //切换CD
@@ -750,7 +750,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     {
         if (player.getUniqueId() == offlineState.playerUUID)
         {
-            Logger.error("玩家UUID与OfflineState的UUID不一致: " + player.getUniqueId() + " :: " + offlineState.playerUUID);
+            logger.error("玩家UUID与OfflineState的UUID不一致: " + player.getUniqueId() + " :: " + offlineState.playerUUID);
             return false;
         }
 

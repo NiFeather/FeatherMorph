@@ -38,7 +38,7 @@ public class OfflineStorageManager extends MorphJsonBasedStorage<OfflineStates> 
     {
         if (storingObject.disguiseStates.stream().anyMatch(s -> s.playerUUID == state.getPlayerUniqueID()))
         {
-            Logger.warn("将放弃存储中已有的" + state.getPlayerUniqueID() + "条目...");
+            logger.warn("将放弃存储中已有的" + state.getPlayerUniqueID() + "条目...");
             storingObject.disguiseStates.removeIf(s -> s.playerUUID == state.getPlayerUniqueID());
         }
 
@@ -77,7 +77,7 @@ public class OfflineStorageManager extends MorphJsonBasedStorage<OfflineStates> 
                 }
                 catch (Throwable e)
                 {
-                    Logger.warn("无法从数据创建伪装：" + e.getMessage());
+                    logger.warn("无法从数据创建伪装：" + e.getMessage());
                     e.printStackTrace();
                 }
             }

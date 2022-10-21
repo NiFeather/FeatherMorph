@@ -302,7 +302,7 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
                 case SOUTH -> targetBlockDirection = EnumDirection.d;
                 case WEST -> targetBlockDirection = EnumDirection.e;
                 case EAST -> targetBlockDirection = EnumDirection.f;
-                default -> Logger.error("未知的BlockFace: " + bukkitFace + ", 将不会尝试使用useItemOn");
+                default -> logger.error("未知的BlockFace: " + bukkitFace + ", 将不会尝试使用useItemOn");
             }
 
             if (targetBlockDirection != null)
@@ -372,7 +372,7 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
         var targetOptional = Material.matchMaterial(immune);
 
         if (targetOptional == null)
-            Logger.warn("未能找到和" + immune + "对应的免疫物品，相关功能将不会启用");
+            logger.warn("未能找到和" + immune + "对应的免疫物品，相关功能将不会启用");
 
         immuneItemMaterial = targetOptional;
 

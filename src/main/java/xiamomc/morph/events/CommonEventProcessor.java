@@ -185,7 +185,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         var item = Material.matchMaterial(actionItemId);
 
         if (item == null && !actionItemId.equals("disabled"))
-            Logger.warn("未能找到和" + actionItem + "对应的物品，相关功能将不会启用");
+            logger.warn("未能找到和" + actionItem + "对应的物品，相关功能将不会启用");
 
         actionItem = item;
     }
@@ -331,7 +331,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
                     {
                         //一段时间内内只接受一次右键触发
                         //传送前后会触发两次Interact，而且这两个Interact还不一定在同个Tick里
-                        if (Plugin.getCurrentTick() - skillHandler.getLastInvoke(player) <= 1)
+                        if (plugin.getCurrentTick() - skillHandler.getLastInvoke(player) <= 1)
                             return true;
 
                         player.sendMessage(MessageUtils.prefixes(player,

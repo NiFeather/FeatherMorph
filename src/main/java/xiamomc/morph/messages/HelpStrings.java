@@ -15,7 +15,7 @@ public class HelpStrings extends AbstractMorphStrings
     {
         return getFormattable(getKey("cmdname_pattern"),
                 "/<basename>... -- <description>");
-    };
+    }
 
     public static FormattableMessage clickToCompleteString()
     {
@@ -33,7 +33,7 @@ public class HelpStrings extends AbstractMorphStrings
     {
         return getFormattable(getKey("section_header"),
                 "指令 /<basename> 的用法：");
-    };
+    }
 
     public static FormattableMessage commandEntryString()
     {
@@ -45,7 +45,7 @@ public class HelpStrings extends AbstractMorphStrings
     {
         return getFormattable(getKey("special_note"),
                 "特别标注：");
-    };
+    }
 
     public static FormattableMessage morphCommandDescription()
     {

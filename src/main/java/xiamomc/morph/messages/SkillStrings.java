@@ -36,13 +36,6 @@ public class SkillStrings extends AbstractMorphStrings
                 "正显示伪装自带的盔甲和手持物");
     }
 
-    //远古守卫者
-    public static FormattableMessage elderGuardianCoolingDownString()
-    {
-        return getFormattable(getKey("elder_guradian_cooling_down"),
-                "远古守卫者的技能仍在准备中");
-    }
-
     //小黑
     public static FormattableMessage targetNotSuitableString()
     {

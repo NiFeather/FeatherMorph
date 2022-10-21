@@ -44,7 +44,7 @@ public class ReloadSubCommand extends MorphPluginObject implements ISubCommand
     private MorphConfigManager config;
 
     @Resolved
-    private MessageStore messageStore;
+    private MessageStore<?> messageStore;
 
     private final String[] subcommands = new String[]
             {

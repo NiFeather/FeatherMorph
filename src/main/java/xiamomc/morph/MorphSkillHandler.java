@@ -50,7 +50,7 @@ public class MorphSkillHandler extends MorphPluginObject
         {
             var cd = getCooldownInfo(player.getUniqueId(), skill);
             cd.setCooldown(skill.executeSkill(player));
-            cd.setLastInvoke(Plugin.getCurrentTick());
+            cd.setLastInvoke(plugin.getCurrentTick());
 
             if (!state.haveCooldown()) state.setCooldownInfo(cd);
         }
