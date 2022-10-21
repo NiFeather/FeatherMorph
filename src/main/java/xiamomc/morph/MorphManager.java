@@ -12,6 +12,7 @@ import me.libraryaddict.disguise.utilities.reflection.FakeBoundingBox;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.*;
 import org.bukkit.entity.*;
 import org.bukkit.inventory.EquipmentSlot;
@@ -203,7 +204,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         player.sendActionBar(msg.resolve("what", state.getDisplayName()).toComponent());
 
         var team = scoreboard.getPlayerTeam(player);
-        var playerColor = team == null ? NamedTextColor.WHITE : team.color();
+        var playerColor = (team == null || !team.hasColor()) ? NamedTextColor.WHITE : team.color();
 
         if (DisguiseTypes.fromId(state.getDisguiseIdentifier()) != DisguiseTypes.LD)
         {
