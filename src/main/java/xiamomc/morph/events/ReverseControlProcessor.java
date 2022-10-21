@@ -18,6 +18,7 @@ import org.bukkit.craftbukkit.v1_19_R1.entity.CraftEntity;
 import org.bukkit.craftbukkit.v1_19_R1.entity.CraftHumanEntity;
 import org.bukkit.craftbukkit.v1_19_R1.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_19_R1.inventory.CraftItemStack;
+import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -35,6 +36,7 @@ import xiamomc.pluginbase.Annotations.Resolved;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Predicate;
 
 public class ReverseControlProcessor extends MorphPluginObject implements Listener
 {
@@ -241,40 +243,41 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
         if (targetHand != EquipmentSlot.HAND && targetHand != EquipmentSlot.OFF_HAND)
             throw new IllegalArgumentException("给定的targetHand不是主手或副手");
 
-        var targetBlock = player.getTargetBlockExact(5, FluidCollisionMode.NEVER);
-        var targetEntity = player.getTargetEntity(3);
+        //获取正在看的方块或实体
+        var eyeLoc = player.getEyeLocation();
+        var traceResult = player.getWorld().rayTrace(eyeLoc, eyeLoc.getDirection(), 3,
+                FluidCollisionMode.ALWAYS, false, 0d, Predicate.not(Predicate.isEqual(player)));
 
-        //EntityHuman in spigot == Player in fabric mojang mappings
+        if (traceResult == null) return false;
+
+        var targetBlock = traceResult.getHitBlock();
+        var targetEntity = traceResult.getHitEntity();
+
+        //Player in fabric mojang mappings
         var playerHumanHandle = ((CraftHumanEntity) player).getHandle();
+
+        //ServerPlayer in mojang mappings
         var playerHandle = ((CraftPlayer) player).getHandle();
+
+        //ServerLevel in mojang mappings
         var worldHandle = ((CraftWorld)player.getWorld()).getHandle();
 
+        //如果目标实体不是null，则和实体互动
         if (targetEntity != null)
         {
             var entityHandle = ((CraftEntity)targetEntity).getHandle();
 
-            //实体之间的距离
-            var distance = targetEntity.getLocation().distance(player.getLocation());
+            //获取目标位置
+            var hitPos = traceResult.getHitPosition();
 
-            //tan $angle = (x / $distance) = $tan -> x = ($distance * $tan) -> $val
-            //$height - $val -> $targetHeight
-            var angle = player.getEyeLocation().getPitch();
+            //获取互动位置
+            hitPos.subtract(targetEntity.getLocation().toVector());
 
-            if (angle == 90f) angle = 89.999f;
-            else if (angle == -90f) angle = -89.999f;
-
-            var tan = Math.tan(Math.toRadians(angle));
-            var val = targetEntity.getHeight() - distance * tan;
-
-            //todo: 计算视线与目标接触的的X、Z值
-            var vec = new Vec3D(0, val, 0);
+            var vec = new Vec3D(hitPos.getX(), hitPos.getY(), hitPos.getZ());
 
             //先试试InteractAt
             //如果不成功，调用Interact
-            if (!entityHandle.a(playerHandle, vec, EnumHand.a).a())
-                return playerHumanHandle.a(entityHandle, EnumHand.a).a();
-            else
-                return true;
+            return entityHandle.a(playerHandle, vec, EnumHand.a).a() || playerHumanHandle.a(entityHandle, EnumHand.a).a();
         }
 
         boolean success = false;
