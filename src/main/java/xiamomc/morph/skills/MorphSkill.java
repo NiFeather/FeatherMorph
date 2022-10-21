@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.messages.MessageUtils;
+import xiamomc.morph.misc.DisguiseUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,19 +27,7 @@ public abstract class MorphSkill extends MorphPluginObject implements IMorphSkil
 
     protected List<Player> findNearbyPlayers(Player player, int distance)
     {
-        var value = new ArrayList<Player>();
-
-        var loc = player.getLocation();
-
-        player.getWorld().getPlayers().forEach(p ->
-        {
-            if (p.getLocation().distance(loc) <= distance)
-                value.add(p);
-        });
-
-        value.remove(player);
-
-        return value;
+        return DisguiseUtils.findNearbyPlayers(player, distance, false);
     }
 
     protected void sendDenyMessageToPlayer(Player player, Component text)

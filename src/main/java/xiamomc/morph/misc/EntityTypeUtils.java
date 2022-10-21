@@ -176,4 +176,9 @@ public class EntityTypeUtils
     {
         return EntityType.SNOWMAN;
     }
+
+    public static boolean hasBossBar(EntityType type)
+    {
+        return type == EntityType.ENDER_DRAGON || type == EntityType.WITHER;
+    }
 }

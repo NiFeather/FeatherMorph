@@ -1,9 +1,11 @@
 package xiamomc.morph.misc;
 
+import it.unimi.dsi.fastutil.objects.AbstractObject2IntSortedMap;
 import me.libraryaddict.disguise.disguisetypes.Disguise;
 import me.libraryaddict.disguise.disguisetypes.FlagWatcher;
 import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
 import me.libraryaddict.disguise.utilities.parser.DisguiseParser;
+import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -86,6 +88,26 @@ public class DisguiseState extends MorphPluginObject
     public String getDisguiseIdentifier()
     {
         return disguiseIdentifier;
+    }
+
+    /**
+     * 伪装的Bossbar
+     */
+    @Nullable
+    private BossBar bossbar;
+
+    @Nullable
+    public BossBar getBossbar()
+    {
+        return bossbar;
+    }
+
+    public void setBossbar(BossBar bossbar)
+    {
+        if (this.bossbar != null)
+            Bukkit.getOnlinePlayers().forEach(p -> p.hideBossBar(this.bossbar));
+
+        this.bossbar = bossbar;
     }
 
     /**

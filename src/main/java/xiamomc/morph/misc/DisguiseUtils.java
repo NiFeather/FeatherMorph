@@ -8,7 +8,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Pose;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class DisguiseUtils
 {
@@ -41,6 +43,31 @@ public class DisguiseUtils
             case DYING -> EntityPose.DYING;
             default -> EntityPose.STANDING;
         };
+    }
+
+    /**
+     * 获取和某一玩家附近多少格以内的所有玩家
+     * @param player 目标玩家
+     * @param distance 距离
+     * @param includeSelf 是否包括自己
+     * @return 玩家列表
+     */
+    public static List<Player> findNearbyPlayers(Player player, int distance, boolean includeSelf)
+    {
+        var value = new ArrayList<Player>();
+
+        var loc = player.getLocation();
+
+        player.getWorld().getPlayers().forEach(p ->
+        {
+            if (p.getLocation().distance(loc) <= distance)
+                value.add(p);
+        });
+
+        if (!includeSelf)
+            value.remove(player);
+
+        return value;
     }
 
     /**

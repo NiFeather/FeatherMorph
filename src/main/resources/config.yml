@@ -19,6 +19,12 @@ root:
   # 是否允许用玩家头快速伪装？
   allowHeadMorph: true
 
+  bossbar:
+    # 是否要为Boss伪装启用Bossbar?
+    enabled: true
+    # Bossbar显示范围，小于0则是 (服务器视距 - 1) * 16 格
+    range: -1
+
   reverseControl:
     # 反向控制距离：当某个人变成其他玩家时，距离多少格可以控制被伪装玩家的一些动作？
     # 设置为0可以禁用某一功能，设置为-1则无距离限制
@@ -51,4 +57,4 @@ root:
   bannedDisguises: []
 
   # 不要动这个键!
-  version: 4
+  version: 5

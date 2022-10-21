@@ -26,6 +26,9 @@ public enum ConfigOption
 
     BANNED_DISGUISES(ConfigNode.create().append("bannedDisguises"), new ArrayList<String>()),
 
+    DISPLAY_BOSSBAR(bossbarNode().append("enabled"), true),
+    BOSSBAR_RANGE(bossbarNode().append("range"), -1),
+
     VERSION(ConfigNode.create().append("version"), 0);
 
     public final ConfigNode node;
@@ -43,13 +46,18 @@ public enum ConfigOption
         return node.toString();
     }
 
-    public static ConfigNode reverseControlNode()
+    private static ConfigNode reverseControlNode()
     {
         return ConfigNode.create().append("reverseControl");
     }
 
-    public static ConfigNode reverseControlBehaviorNode()
+    private static ConfigNode reverseControlBehaviorNode()
     {
         return reverseControlNode().append("behaviors");
+    }
+
+    private static ConfigNode bossbarNode()
+    {
+        return ConfigNode.create().append("bossbar");
     }
 }

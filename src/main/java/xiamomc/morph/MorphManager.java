@@ -9,11 +9,9 @@ import me.libraryaddict.disguise.disguisetypes.watchers.ArmorStandWatcher;
 import me.libraryaddict.disguise.disguisetypes.watchers.LivingWatcher;
 import me.libraryaddict.disguise.utilities.DisguiseValues;
 import me.libraryaddict.disguise.utilities.reflection.FakeBoundingBox;
+import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
-import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Particle;
+import org.bukkit.*;
 import org.bukkit.entity.*;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
@@ -125,6 +123,13 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         setChatOverride(config.getOrDefault(Boolean.class, ConfigOption.ALLOW_CHAT_OVERRIDE, false));
 
         bannedDisguises = config.getOrDefault(List.class, ConfigOption.BANNED_DISGUISES);
+        allowBossbar = config.getOrDefault(Boolean.class, ConfigOption.DISPLAY_BOSSBAR);
+
+        var range = config.getOrDefault(Integer.class, ConfigOption.BOSSBAR_RANGE);
+        if (range < 0)
+            range = (Bukkit.getViewDistance() - 1) * 16
+
+        bossbarDisplayRange = range;
     }
 
     private void update()
@@ -208,6 +213,26 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         //tick被动技能
         abilityHandler.handle(player, state);
+
+        //tick Bossbar
+        var bossbar = state.getBossbar();
+        if (bossbar != null)
+        {
+            var playerGameMode = player.getGameMode();
+            List<Player> playersToShow = DisguiseUtils.findNearbyPlayers(player, bossbarDisplayRange, true);
+            List<Player> playersToHide = new ArrayList<>(Bukkit.getOnlinePlayers());
+
+            if (playerGameMode == GameMode.SPECTATOR)
+                playersToShow.removeIf(p -> p.getGameMode() != playerGameMode);
+
+            bossbar.progress((float) (player.getHealth() / player.getMaxHealth()));
+
+            playersToHide.removeAll(playersToShow);
+            playersToHide.remove(player);
+
+            playersToShow.forEach(p -> p.showBossBar(bossbar));
+            playersToHide.forEach(p -> p.hideBossBar(bossbar));
+        }
     }
 
     /**
@@ -263,6 +288,10 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     }
 
     private List<?> bannedDisguises = new ArrayList<>();
+
+    private boolean allowBossbar;
+
+    private int bossbarDisplayRange;
 
     /**
      * 根据传入的key自动伪装
@@ -513,6 +542,9 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         //移除CD
         skillHandler.switchCooldown(player.getUniqueId(), null);
 
+        //移除Bossbar
+        state.setBossbar(null);
+
         Bukkit.getPluginManager().callEvent(new PlayerUnMorphEvent(player));
     }
 
@@ -571,6 +603,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         var watcher = disguise.getWatcher();
         var disguiseType = disguise.getType();
+        var entityType = disguiseType.getEntityType();
 
         //workaround: 伪装已死亡的LivingEntity
         if (targetEntity instanceof LivingEntity living && living.getHealth() <= 0)
@@ -642,7 +675,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             var mobDisguise = (MobDisguise) disguise;
             FakeBoundingBox box;
 
-            var values = DisguiseValues.getDisguiseValues(disguise.getType());
+            var values = DisguiseValues.getDisguiseValues(disguiseType);
 
             if (!mobDisguise.isAdult() && values.getBabyBox() != null)
                 box = values.getBabyBox();
@@ -665,7 +698,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         disguise.setSelfDisguiseVisible(DisguiseAPI.isViewSelfToggled(sourcePlayer));
 
         var config = getPlayerConfiguration(sourcePlayer);
-        if (!config.shownMorphAbilityHint && skillHandler.hasSkill(disguiseType.getEntityType()))
+        if (!config.shownMorphAbilityHint && skillHandler.hasSkill(entityType))
         {
             sourcePlayer.sendMessage(MessageUtils.prefixes(sourcePlayer, MorphStrings.skillHintString()));
             config.shownMorphAbilityHint = true;
@@ -675,7 +708,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         updateLastPlayerMorphOperationTime(sourcePlayer);
 
         //设置CD信息
-        var cdInfo = skillHandler.getCooldownInfo(sourcePlayer.getUniqueId(), disguiseType.getEntityType());
+        var cdInfo = skillHandler.getCooldownInfo(sourcePlayer.getUniqueId(), entityType);
 
         if (cdInfo != null)
         {
@@ -686,6 +719,21 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         //切换CD
         skillHandler.switchCooldown(sourcePlayer.getUniqueId(), cdInfo);
+
+        //Bossbar
+        if (EntityTypeUtils.hasBossBar(entityType) && allowBossbar)
+        {
+            var isDragon = entityType == EntityType.ENDER_DRAGON;
+
+            var bar = BossBar.bossBar(
+                    Component.translatable(entityType.translationKey()),
+                    1f,
+                    isDragon ? BossBar.Color.PINK : BossBar.Color.PURPLE,
+                    BossBar.Overlay.PROGRESS,
+                    isDragon ? Set.of() : Set.of(BossBar.Flag.DARKEN_SCREEN));
+
+            state.setBossbar(bar);
+        }
 
         //调用事件
         Bukkit.getPluginManager().callEvent(new PlayerMorphEvent(sourcePlayer, state));
