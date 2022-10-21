@@ -451,6 +451,16 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
     public void onPlayerExit(PlayerQuitEvent e)
     {
         skillHandler.removeUnusedList(e.getPlayer());
+
+        var state = morphs.getDisguiseStateFor(e.getPlayer());
+
+        if (state != null)
+        {
+            var bossbar = state.getBossbar();
+
+            if (bossbar != null)
+                Bukkit.getOnlinePlayers().forEach(p -> p.hideBossBar(bossbar));
+        }
     }
 
     //解决LibsDisguises中MonstersIgnoreDisguises会忽视PlayerDisguise的问题
