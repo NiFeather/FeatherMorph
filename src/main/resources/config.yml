@@ -61,4 +61,4 @@ root:
   bannedDisguises: []
 
   # 不要动这个键!
-  version: 5
+  version: 6
