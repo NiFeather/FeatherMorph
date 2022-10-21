@@ -56,6 +56,13 @@ public class SkillStrings extends AbstractMorphStrings
                 "视线<distance>格以内没有实体");
     }
 
+    //苦力怕
+    public static FormattableMessage explodeFailString()
+    {
+        return getFormattable(getKey("explode_fail"),
+                "一股神秘的力量阻止了你的爆炸");
+    }
+
     private static String getKey(String key)
     {
         return "morph.skill." + key;
