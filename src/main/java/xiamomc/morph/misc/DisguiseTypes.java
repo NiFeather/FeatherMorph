@@ -36,6 +36,9 @@ public enum DisguiseTypes
     {
         var idSplited = id.split(":");
 
+        if (id.equals("minecrcaft:player"))
+            throw new IllegalArgumentException("minecraft:player不能当作id传入，请使用player:xxx");
+
         if (idSplited.length < 1) return UNKNOWN;
         else return fromNameSpace(idSplited[0]);
     }

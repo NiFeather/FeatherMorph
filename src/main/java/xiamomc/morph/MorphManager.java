@@ -493,7 +493,14 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         draftDisguise = DisguiseAPI.constructDisguise(entity);
 
-        postConstructDisguise(sourcePlayer, entity, entity.getType().getKey().asString(), draftDisguise, true);
+        String id;
+
+        if (entity instanceof Player targetPlayer)
+            id = DisguiseTypes.PLAYER.toId(targetPlayer.getName());
+        else
+            id = entity.getType().getKey().asString();
+
+        postConstructDisguise(sourcePlayer, entity, id, draftDisguise, true);
         DisguiseAPI.disguiseEntity(sourcePlayer, draftDisguise);
     }
 
@@ -512,7 +519,14 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         DisguiseAPI.disguiseEntity(sourcePlayer, DisguiseAPI.getDisguise(targetEntity));
         draftDisguise = DisguiseAPI.getDisguise(sourcePlayer);
 
-        postConstructDisguise(sourcePlayer, targetEntity, targetEntity.getType().getKey().asString(), draftDisguise, true);
+        String id;
+
+        if (draftDisguise instanceof PlayerDisguise playerDisguise)
+            id = DisguiseTypes.PLAYER.toId(playerDisguise.getName());
+        else
+            id = draftDisguise.getType().getEntityType().getKey().asString();
+
+        postConstructDisguise(sourcePlayer, targetEntity, id, draftDisguise, true);
     }
 
     /**
