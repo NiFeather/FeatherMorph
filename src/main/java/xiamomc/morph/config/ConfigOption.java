@@ -29,6 +29,8 @@ public enum ConfigOption
     DISPLAY_BOSSBAR(bossbarNode().append("enabled"), true),
     BOSSBAR_RANGE(bossbarNode().append("range"), -1),
 
+    ALLOW_LD_DISGUISES(ConfigNode.create().append("enable_ld_custom_disguises"), false),
+
     VERSION(ConfigNode.create().append("version"), 0);
 
     public final ConfigNode node;

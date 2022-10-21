@@ -19,6 +19,10 @@ root:
   # 是否允许用玩家头快速伪装？
   allowHeadMorph: true
 
+  # 是否允许使用LibsDisguises中的自定义伪装？
+  # 注：因为API限制，快速伪装无法识别某人的伪装是否为自定义伪装，可能会导致伪装复制不完整
+  enable_ld_custom_disguises: false
+
   bossbar:
     # 是否要为Boss伪装启用Bossbar?
     enabled: true

@@ -1,7 +1,6 @@
 package xiamomc.morph;
 
 import me.libraryaddict.disguise.DisguiseAPI;
-import me.libraryaddict.disguise.DisguiseConfig;
 import me.libraryaddict.disguise.disguisetypes.Disguise;
 import me.libraryaddict.disguise.disguisetypes.DisguiseType;
 import me.libraryaddict.disguise.disguisetypes.MobDisguise;
@@ -13,7 +12,6 @@ import me.libraryaddict.disguise.utilities.reflection.FakeBoundingBox;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.*;
 import org.bukkit.entity.*;
 import org.bukkit.inventory.EquipmentSlot;
@@ -128,6 +126,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         bannedDisguises = config.getOrDefault(List.class, ConfigOption.BANNED_DISGUISES);
         allowBossbar = config.getOrDefault(Boolean.class, ConfigOption.DISPLAY_BOSSBAR);
+
+        allowLDCustomDisguises = config.getOrDefault(Boolean.class, ConfigOption.ALLOW_LD_DISGUISES);
 
         var range = config.getOrDefault(Integer.class, ConfigOption.BOSSBAR_RANGE);
         if (range < 0)
@@ -308,7 +308,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     private List<?> bannedDisguises = new ArrayList<>();
 
     private boolean allowBossbar;
-
+    private boolean allowLDCustomDisguises;
     private int bossbarDisplayRange;
 
     /**
@@ -321,6 +321,15 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     public boolean morphEntityTypeAuto(Player player, String key, @Nullable Entity targetEntity)
     {
         if (!key.contains(":")) key = DisguiseTypes.VANILLA.toId(key);
+
+        if (allowLDCustomDisguises && targetEntity instanceof Player targetPlayer)
+        {
+            //查询此玩家的伪装是否是LD自定义伪装
+            var state = getDisguiseStateFor(targetPlayer);
+
+            if (state != null && DisguiseTypes.fromId(state.getDisguiseIdentifier()) == DisguiseTypes.LD)
+                key = state.getDisguiseIdentifier();
+        }
 
         String finalKey = key;
         var info = getAvaliableDisguisesFor(player).stream()
@@ -342,6 +351,12 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
                 if (disguiseType == DisguiseTypes.LD)
                 {
+                    if (!allowLDCustomDisguises)
+                    {
+                        player.sendMessage(MessageUtils.prefixes(player, MorphStrings.disguiseBannedString()));
+                        return false;
+                    }
+
                     var success = morphLD(player, key);
 
                     if (success)
