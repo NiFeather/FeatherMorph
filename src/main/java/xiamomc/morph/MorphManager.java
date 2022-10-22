@@ -243,9 +243,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
             bossbar.progress((float) (player.getHealth() / player.getMaxHealth()));
 
-            if (!state.haveCustomGlowColor())
-                bossbar.name(state.getDisplayName().color(playerColor));
-
             playersToHide.removeAll(playersToShow);
             playersToHide.remove(player);
 
@@ -694,10 +691,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         //禁用actionBar
         DisguiseAPI.setActionBarShown(sourcePlayer, false);
 
-        //workaround: Disguise#getDisguiseName()不会正常返回实体的自定义名称
-        if (targetEntity != null && targetEntity.getCustomName() != null)
-            disguise.setDisguiseName(targetEntity.getCustomName());
-
         //更新或者添加DisguiseState
         var state = getDisguiseStateFor(sourcePlayer);
         if (state == null)
@@ -708,6 +701,10 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         }
         else
             state.setDisguise(id, disguise, shouldHandlePose);
+
+        //workaround: Disguise#getDisguiseName()不会正常返回实体的自定义名称
+        if (targetEntity != null && targetEntity.customName() != null)
+            state.setDisplayName(targetEntity.customName());
 
         //如果伪装的时候坐着，显示提示
         if (sourcePlayer.getVehicle() != null)
@@ -819,7 +816,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             var isDragon = entityType == EntityType.ENDER_DRAGON;
 
             bossbar = BossBar.bossBar(
-                    state.getDisplayName().color(state.getCustomGlowColor()),
+                    state.getDisplayName(),
                     1f,
                     isDragon ? BossBar.Color.PINK : BossBar.Color.PURPLE,
                     BossBar.Overlay.PROGRESS,
