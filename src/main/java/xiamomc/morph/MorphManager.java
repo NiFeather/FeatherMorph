@@ -694,6 +694,10 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         //禁用actionBar
         DisguiseAPI.setActionBarShown(sourcePlayer, false);
 
+        //workaround: Disguise#getDisguiseName()不会正常返回实体的自定义名称
+        if (targetEntity != null && targetEntity.getCustomName() != null)
+            disguise.setDisguiseName(targetEntity.getCustomName());
+
         //更新或者添加DisguiseState
         var state = getDisguiseStateFor(sourcePlayer);
         if (state == null)

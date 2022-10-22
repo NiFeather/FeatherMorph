@@ -72,6 +72,11 @@ public class DisguiseState extends MorphPluginObject
         return displayName;
     }
 
+    public void setDisplayName(Component newName)
+    {
+        displayName = newName;
+    }
+
     /**
      * 伪装的实例
      */
@@ -218,8 +223,7 @@ public class DisguiseState extends MorphPluginObject
         displayName = switch (type)
                 {
                     case PLAYER -> Component.text(type.toStrippedId(identifier));
-                    case VANILLA -> Component.translatable(d.getType().getEntityType().translationKey());
-                    case LD -> Objects.equals(d.getDisguiseName(), d.getType().toReadable())
+                    case LD, VANILLA -> Objects.equals(d.getDisguiseName(), d.getType().toReadable())
                             ? Component.translatable(d.getType().getEntityType().translationKey())
                             : Component.text(disguise.getDisguiseName());
                     default -> Component.text("unknown(" + identifier + ")");
