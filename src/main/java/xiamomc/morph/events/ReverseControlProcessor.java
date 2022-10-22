@@ -248,10 +248,8 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
         var traceResult = player.getWorld().rayTrace(eyeLoc, eyeLoc.getDirection(), 3,
                 FluidCollisionMode.ALWAYS, false, 0d, Predicate.not(Predicate.isEqual(player)));
 
-        if (traceResult == null) return false;
-
-        var targetBlock = traceResult.getHitBlock();
-        var targetEntity = traceResult.getHitEntity();
+        var targetBlock = traceResult == null ? null : traceResult.getHitBlock();
+        var targetEntity = traceResult == null ? null : traceResult.getHitEntity();
 
         //Player in fabric mojang mappings
         var playerHumanHandle = ((CraftHumanEntity) player).getHandle();
