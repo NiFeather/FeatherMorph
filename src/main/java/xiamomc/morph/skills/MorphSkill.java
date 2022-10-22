@@ -4,6 +4,10 @@ import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.block.Block;
+import org.bukkit.block.data.type.Fence;
+import org.bukkit.block.data.type.Gate;
+import org.bukkit.block.data.type.Wall;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import xiamomc.morph.MorphPluginObject;
@@ -48,5 +52,17 @@ public abstract class MorphSkill extends MorphPluginObject implements IMorphSkil
         fireBall.setVelocity(player.getEyeLocation().getDirection().multiply(2));
 
         return fireBall;
+    }
+
+    protected float getTopY(Block block)
+    {
+        var data = block.getBlockData();
+
+        var val = block.getBoundingBox().getMinY() + block.getBoundingBox().getHeight();
+
+        if (data instanceof Fence || data instanceof Wall || data instanceof Gate)
+            val += 0.5d;
+
+        return (float) Math.max(block.getLocation().getY(), val);
     }
 }

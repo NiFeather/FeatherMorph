@@ -69,18 +69,6 @@ public class EndermanMorphSkill extends MorphSkill
         return 40;
     }
 
-    private float getTopY(Block block)
-    {
-        var data = block.getBlockData();
-
-        var val = block.getBoundingBox().getMinY() + block.getBoundingBox().getHeight();
-
-        if (data instanceof Fence || data instanceof Wall || data instanceof Gate)
-            val += 0.5d;
-
-        return (float) Math.max(block.getLocation().getY(), val);
-    }
-
     @Override
     public EntityType getType()
     {

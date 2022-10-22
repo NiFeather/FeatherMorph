@@ -102,7 +102,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 new WitherMorphSkill(),
                 new LlamaMorphSkill(),
                 new TraderLlamaMorphSkill(),
-                new SnowGolemMorphSkill()
+                new SnowGolemMorphSkill(),
+                new EvokerMorphSkill()
         ));
 
         abilityHandler.registerAbility(EntityTypeUtils.canFly(), AbilityFlag.CAN_FLY);
