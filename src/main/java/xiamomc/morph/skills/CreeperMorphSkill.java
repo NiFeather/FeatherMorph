@@ -4,7 +4,6 @@ import org.bukkit.GameMode;
 import org.bukkit.GameRule;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.SkillStrings;
 
 public class CreeperMorphSkill extends MorphSkill

@@ -4,7 +4,6 @@ import xiamomc.morph.MorphPlugin;
 import xiamomc.pluginbase.messages.IStrings;
 import xiamomc.pluginbase.messages.MessageStore;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class MorphMessageStore extends MessageStore<MorphPlugin>
