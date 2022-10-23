@@ -243,10 +243,12 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
             if (action.isLeftClick())
             {
                 if (state != null
-                        && mainHandItemType == actionItem
-                        && player.getEyeLocation().getDirection().getY() == -1)
+                        && mainHandItemType == actionItem)
                 {
-                    morphs.unMorph(player);
+                    if (player.getEyeLocation().getDirection().getY() <= -0.95)
+                        morphs.unMorph(player);
+                    else
+                        morphs.setSelfDisguiseVisible(player, !state.getSelfVisible(), true);
                     return true;
                 }
 

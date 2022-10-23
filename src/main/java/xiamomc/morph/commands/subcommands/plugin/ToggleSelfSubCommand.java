@@ -4,6 +4,7 @@ import me.libraryaddict.disguise.DisguiseAPI;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.interfaces.IManagePlayerData;
 import xiamomc.morph.messages.HelpStrings;
@@ -34,6 +35,9 @@ public class ToggleSelfSubCommand extends MorphPluginObject implements ISubComma
     }
 
     @Resolved
+    private MorphManager manager;
+
+    @Resolved
     private IManagePlayerData data;
 
     @Override
@@ -41,15 +45,7 @@ public class ToggleSelfSubCommand extends MorphPluginObject implements ISubComma
     {
         if (sender instanceof Player player)
         {
-            var config = data.getPlayerConfiguration(player);
-
-            var targetVisibility = !config.showDisguiseToSelf;
-            DisguiseAPI.setViewDisguiseToggled(player, targetVisibility);
-            config.showDisguiseToSelf = targetVisibility;
-
-            sender.sendMessage(MessageUtils.prefixes(sender, targetVisibility
-                    ? MorphStrings.selfVisibleOnString()
-                    : MorphStrings.selfVisibleOffString()));
+            manager.setSelfDisguiseVisible(player, !data.getPlayerConfiguration(player).showDisguiseToSelf, true);
         }
         return true;
     }

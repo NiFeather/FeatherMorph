@@ -650,6 +650,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         var disguiseTypeLD = disguise.getType();
         var entityType = disguiseTypeLD.getEntityType();
 
+        var config = getPlayerConfiguration(sourcePlayer);
+
         //workaround: 伪装已死亡的LivingEntity
         if (targetEntity instanceof LivingEntity living && living.getHealth() <= 0)
             ((LivingWatcher) watcher).setHealth(1);
@@ -743,10 +745,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         spawnParticle(sourcePlayer, sourcePlayer.getLocation(), cX, cY, cZ);
 
-        var config = getPlayerConfiguration(sourcePlayer);
-
         //确保玩家可以根据设置看到自己的伪装
-        disguise.setSelfDisguiseVisible(config.showDisguiseToSelf);
+        setSelfDisguiseVisible(sourcePlayer, config.showDisguiseToSelf, false);
 
         if (!config.shownMorphAbilityHint && skillHandler.hasSkill(entityType))
         {
@@ -853,6 +853,24 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 particleScale >= 10 ? 0.2 : 0.05); //速度
     }
 
+    public void setSelfDisguiseVisible(Player player, boolean value, boolean saveToConfig)
+    {
+        var state = getDisguiseStateFor(player);
+        var config = data.getPlayerConfiguration(player);
+
+        if (state != null)
+            state.setSelfVisible(value);
+
+        if (saveToConfig)
+        {
+            player.sendMessage(MessageUtils.prefixes(player, value
+                    ? MorphStrings.selfVisibleOnString()
+                    : MorphStrings.selfVisibleOffString()));
+
+            config.showDisguiseToSelf = value;
+        }
+    }
+
     /**
      * 获取某一玩家的伪装状态
      *
@@ -912,7 +930,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         {
             DisguiseUtils.addTrace(offlineState.disguise);
 
-            var state = DisguiseState.fromOfflineState(offlineState);
+            var state = DisguiseState.fromOfflineState(offlineState, data.getPlayerConfiguration(player));
 
             disguisedPlayers.add(state);
 

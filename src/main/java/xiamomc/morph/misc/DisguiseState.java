@@ -1,5 +1,6 @@
 package xiamomc.morph.misc;
 
+import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.disguisetypes.Disguise;
 import me.libraryaddict.disguise.disguisetypes.FlagWatcher;
 import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
@@ -14,11 +15,15 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
+import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.abilities.AbilityFlag;
 import xiamomc.morph.abilities.AbilityHandler;
+import xiamomc.morph.messages.MessageUtils;
+import xiamomc.morph.messages.MorphStrings;
 import xiamomc.morph.skills.SkillCooldownInfo;
 import xiamomc.morph.storage.offlinestore.OfflineDisguiseState;
+import xiamomc.morph.storage.playerdata.PlayerMorphConfiguration;
 import xiamomc.pluginbase.Annotations.Resolved;
 
 import java.util.Arrays;
@@ -60,6 +65,23 @@ public class DisguiseState extends MorphPluginObject
     public UUID getPlayerUniqueID()
     {
         return playerUniqueID;
+    }
+
+    /**
+     * 自身可见
+     */
+    private boolean selfVisible;
+
+    public boolean getSelfVisible()
+    {
+        return selfVisible;
+    }
+
+    public void setSelfVisible(boolean val)
+    {
+        DisguiseAPI.setViewDisguiseToggled(player, val);
+
+        selfVisible = val;
     }
 
     /**
@@ -422,7 +444,7 @@ public class DisguiseState extends MorphPluginObject
      * @param offlineState 离线存储
      * @return DisguiseState的实例
      */
-    public static DisguiseState fromOfflineState(OfflineDisguiseState offlineState)
+    public static DisguiseState fromOfflineState(OfflineDisguiseState offlineState, PlayerMorphConfiguration configuration)
     {
         var player = Bukkit.getPlayer(offlineState.playerUUID);
 
