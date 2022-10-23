@@ -88,6 +88,18 @@ public class PlayerMorphConfiguration
     }
 
     /**
+     * 伪装是否对自身可见？
+     */
+    @Expose
+    public boolean showDisguiseToSelf = false;
+
+    /**
+     * 是否显示过一次自身可见提示？
+     */
+    @Expose
+    public boolean shownDisplayToSelfHint = false;
+
+    /**
      * 是否已经显示过一次morphplayer合并的消息？
      */
     @Expose

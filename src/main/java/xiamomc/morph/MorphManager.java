@@ -12,7 +12,6 @@ import me.libraryaddict.disguise.utilities.reflection.FakeBoundingBox;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.*;
 import org.bukkit.entity.*;
 import org.bukkit.inventory.EquipmentSlot;
@@ -744,14 +743,21 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         spawnParticle(sourcePlayer, sourcePlayer.getLocation(), cX, cY, cZ);
 
-        //确保玩家可以根据设置看到自己的伪装
-        disguise.setSelfDisguiseVisible(DisguiseAPI.isViewSelfToggled(sourcePlayer));
-
         var config = getPlayerConfiguration(sourcePlayer);
+
+        //确保玩家可以根据设置看到自己的伪装
+        disguise.setSelfDisguiseVisible(config.showDisguiseToSelf);
+
         if (!config.shownMorphAbilityHint && skillHandler.hasSkill(entityType))
         {
             sourcePlayer.sendMessage(MessageUtils.prefixes(sourcePlayer, MorphStrings.skillHintString()));
             config.shownMorphAbilityHint = true;
+        }
+
+        if (!config.shownDisplayToSelfHint)
+        {
+            sourcePlayer.sendMessage(MessageUtils.prefixes(sourcePlayer, MorphStrings.morphVisibleAfterCommandString()));
+            config.shownDisplayToSelfHint = true;
         }
 
         //更新上次操作时间

@@ -16,6 +16,12 @@ public class MorphStrings extends AbstractMorphStrings
                 "伪装将在起身后对自己可见");
     }
 
+    public static FormattableMessage morphVisibleAfterCommandString()
+    {
+        return getFormattable(getKey("morph_visible_after_command"),
+                "伪装将在切换自身可见后对自己显示");
+    }
+
     public static FormattableMessage disguisingAsString()
     {
         return getFormattable(getKey("disguising_as"),
