@@ -4,6 +4,7 @@ import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
+import xiamomc.morph.MorphSkillHandler;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.messages.CommandStrings;
 import xiamomc.morph.messages.HelpStrings;
@@ -46,6 +47,9 @@ public class ReloadSubCommand extends MorphPluginObject implements ISubCommand
     @Resolved
     private MessageStore<?> messageStore;
 
+    @Resolved
+    private MorphSkillHandler skills;
+
     private final String[] subcommands = new String[]
             {
               "data",
@@ -82,6 +86,7 @@ public class ReloadSubCommand extends MorphPluginObject implements ISubCommand
             {
                 morphManager.reloadConfiguration();
                 config.reload();
+                skills.reloadConfiguration();
             }
 
             if (reloadsMessage)

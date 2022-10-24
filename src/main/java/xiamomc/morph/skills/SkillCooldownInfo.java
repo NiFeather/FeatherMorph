@@ -1,16 +1,18 @@
 package xiamomc.morph.skills;
 
+import org.bukkit.entity.EntityType;
+
 public class SkillCooldownInfo
 {
-    private final IMorphSkill skill;
+    private EntityType type;
 
     /**
      * 获取对应的技能
      * @return 技能
      */
-    public IMorphSkill getSkill()
+    public EntityType getEntityType()
     {
-        return skill;
+        return type;
     }
 
     private long cooldown;
@@ -61,8 +63,8 @@ public class SkillCooldownInfo
         cooldown = val;
     }
 
-    public SkillCooldownInfo(IMorphSkill skill)
+    public SkillCooldownInfo(EntityType type)
     {
-        this.skill = skill;
+        this.type = type;
     }
 }

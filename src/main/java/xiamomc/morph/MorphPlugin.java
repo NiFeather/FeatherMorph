@@ -5,6 +5,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.scoreboard.Scoreboard;
+import xiamomc.morph.abilities.AbilityHandler;
 import xiamomc.morph.commands.MorphCommandHelper;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.events.*;
@@ -35,6 +36,10 @@ public final class MorphPlugin extends XiaMoJavaPlugin
 
     private PluginManager pluginManager;
 
+    private final MorphSkillHandler skillHandler = new MorphSkillHandler();
+
+    private final AbilityHandler abilityHandler = new AbilityHandler();
+
     @Override
     public void onEnable()
     {
@@ -49,6 +54,8 @@ public final class MorphPlugin extends XiaMoJavaPlugin
         //缓存依赖
         dependencyManager.cache(this);
         dependencyManager.cache(morphManager = new MorphManager());
+        dependencyManager.cache(skillHandler);
+        dependencyManager.cache(abilityHandler);
         dependencyManager.cache(cmdHelper);
         dependencyManager.cacheAs(MessageStore.class, new MorphMessageStore());
         dependencyManager.cacheAs(MiniMessage.class, MiniMessage.miniMessage());

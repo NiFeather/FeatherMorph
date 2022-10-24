@@ -1,4 +1,4 @@
-package xiamomc.morph.skills;
+package xiamomc.morph.skills.impl;
 
 import org.bukkit.Difficulty;
 import org.bukkit.FluidCollisionMode;
@@ -8,11 +8,14 @@ import org.bukkit.entity.*;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.util.Vector;
 import xiamomc.morph.messages.SkillStrings;
+import xiamomc.morph.skills.MorphSkill;
+import xiamomc.morph.skills.SkillType;
+import xiamomc.morph.skills.configurations.SkillConfiguration;
 
-public class EvokerMorphSkill extends MorphSkill
+public class SummonFangsMorphSkill extends MorphSkill
 {
     @Override
-    public int executeSkill(Player player)
+    public int executeSkill(Player player, SkillConfiguration configuration)
     {
         var targetEntity = player.getTargetEntity(16);
 
@@ -100,12 +103,12 @@ public class EvokerMorphSkill extends MorphSkill
             }
         }
 
-        return 100;
+        return configuration.getCooldown();
     }
 
     @Override
-    public EntityType getType()
+    public SkillType getType()
     {
-        return EntityType.EVOKER;
+        return SkillType.EVOKER;
     }
 }

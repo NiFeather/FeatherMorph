@@ -4,23 +4,90 @@ import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.SkillStrings;
+import xiamomc.morph.skills.DefaultConfigGenerator;
 import xiamomc.morph.skills.IMorphSkill;
 import xiamomc.morph.skills.SkillCooldownInfo;
+import xiamomc.morph.skills.SkillType;
+import xiamomc.morph.skills.configurations.SkillConfiguration;
+import xiamomc.morph.skills.configurations.SkillConfigurationContainer;
+import xiamomc.morph.skills.impl.*;
+import xiamomc.morph.storage.MorphJsonBasedStorage;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class MorphSkillHandler extends MorphPluginObject
+public class MorphSkillHandler extends MorphJsonBasedStorage<SkillConfigurationContainer>
 {
+    private final Map<SkillConfiguration, IMorphSkill> typeSkillMap = new ConcurrentHashMap<>();
+    private final List<IMorphSkill> skills = new ArrayList<>();
+
+    //玩家 -> CD列表
+    private final Map<UUID, List<SkillCooldownInfo>> uuidInfoMap = new LinkedHashMap<>();
+
+    //玩家 -> 当前CD
+    private final Map<UUID, SkillCooldownInfo> uuidCooldownMap = new LinkedHashMap<>();
+
     @Resolved
     private MorphManager manager;
 
-    private final Map<EntityType, IMorphSkill> typeSkillMap = new ConcurrentHashMap<>();
+    public MorphSkillHandler()
+    {
+        registerSkills(List.of(
+                new ApplyEffectMorphSkill(),
+                new ExplodeMorphSkill(),
+                new InventoryMorphSkill(),
+                new LaunchProjectiveMorphSkill(),
+                new SummonFangsMorphSkill(),
+                new TeleportMorphSkill()
+        ));
+    }
+
+    @Override
+    protected @NotNull String getFileName()
+    {
+        return "skills.json";
+    }
+
+    @Override
+    protected @NotNull SkillConfigurationContainer createDefault()
+    {
+        return DefaultConfigGenerator.getDefaultConfiguration();
+    }
+
+    @Override
+    protected @NotNull String getDisplayName()
+    {
+        return "技能存储";
+    }
+
+    @Override
+    public boolean reloadConfiguration()
+    {
+        var val = super.reloadConfiguration();
+
+        try
+        {
+            typeSkillMap.clear();
+            storingObject.configurations.forEach(this::registerConfiguration);
+
+            saveConfiguration();
+        }
+        catch (Throwable e)
+        {
+            logger.error("处理配置时出现异常：" + e.getMessage());
+            typeSkillMap.clear();
+            e.printStackTrace();
+            return false;
+        }
+
+        return val;
+    }
 
     public void registerSkills(List<IMorphSkill> skills)
     {
@@ -29,13 +96,52 @@ public class MorphSkillHandler extends MorphPluginObject
 
     public void registerSkill(IMorphSkill skill)
     {
-        var type = skill.getType();
-        if (!typeSkillMap.containsKey(type)) typeSkillMap.put(type, skill);
-        else throw new RuntimeException("已经注册过一个 " + type.getKey() + "的伪装技能了");
+        if (skills.contains(skill))
+            throw new RuntimeException("已经注册过一个" + skill + "的技能了");
+
+        skills.add(skill);
+    }
+
+    public void registerConfiguration(SkillConfiguration configuration)
+    {
+        if (typeSkillMap.containsKey(configuration))
+            throw new RuntimeException("已经注册过一个" + configuration + "的配置了");
+
+        if (typeSkillMap.keySet().stream().anyMatch(c -> c.getEntityType() == configuration.getEntityType()))
+            throw new RuntimeException("已经有一个" + configuration.getEntityType() + "的技能了");
+
+        var type = configuration.getSkillType();
+        var skillOptional = skills.stream().filter(s -> s.getType().equals(type)).findFirst();
+
+        if (skillOptional.isEmpty())
+            throw new RuntimeException("找不到和" + type + "匹配的技能");
+
+        typeSkillMap.put(configuration, skillOptional.get());
+    }
+
+    @Initializer
+    private void load()
+    {
+        this.addSchedule(c -> this.update());
+    }
+
+    private void update()
+    {
+        //更新CD
+        uuidCooldownMap.forEach((u, c) -> c.setCooldown(c.getCooldown() - 1));
+        this.addSchedule(c -> this.update());
+    }
+
+    @Nullable
+    private Map.Entry<SkillConfiguration, IMorphSkill> getSkillEntry(EntityType type)
+    {
+        return typeSkillMap.entrySet().stream()
+                .filter(d -> type.equals(d.getKey().getEntityType())).findFirst().orElse(null);
     }
 
     /**
      * 让某个玩家执行伪装技能
+     *
      * @param player 目标玩家
      */
     public void executeDisguiseSkill(Player player)
@@ -44,12 +150,17 @@ public class MorphSkillHandler extends MorphPluginObject
 
         if (state == null) return;
 
-        var skill = typeSkillMap.get(state.getDisguise().getType().getEntityType());
+        var entry = getSkillEntry(state.getDisguise().getType().getEntityType());
 
-        if (skill != null)
+        if (entry != null)
         {
-            var cd = getCooldownInfo(player.getUniqueId(), skill);
-            cd.setCooldown(skill.executeSkill(player));
+            var skill = entry.getValue();
+            var config = entry.getKey();
+
+            var cd = getCooldownInfo(player.getUniqueId(), config.getEntityType());
+            assert cd != null;
+
+            cd.setCooldown(skill.executeSkill(player, config));
             cd.setLastInvoke(plugin.getCurrentTick());
 
             if (!state.haveCooldown()) state.setCooldownInfo(cd);
@@ -64,13 +175,17 @@ public class MorphSkillHandler extends MorphPluginObject
     }
 
     /**
-     * 获取某个玩家的CD信息
+     * 获取技能冷却
+     *
      * @param uuid 玩家UUID
-     * @param skill 技能
-     * @return CD信息
+     * @param type 实体类型
+     * @return 技能信息，为null则传入的实体类型是null
      */
-    public SkillCooldownInfo getCooldownInfo(UUID uuid, IMorphSkill skill)
+    @Nullable
+    public SkillCooldownInfo getCooldownInfo(UUID uuid, @Nullable EntityType type)
     {
+        if (type == null) return null;
+
         //获取cd列表
         List<SkillCooldownInfo> infos;
         SkillCooldownInfo cdInfo;
@@ -81,10 +196,11 @@ public class MorphSkillHandler extends MorphPluginObject
 
         //获取或创建CD
         var cd = infos.stream()
-                .filter(i -> i.getSkill().equals(skill)).findFirst().orElse(null);
+                .filter(i -> i.getEntityType().equals(type)).findFirst().orElse(null);
+
         if (cd == null)
         {
-            cdInfo = new SkillCooldownInfo(skill);
+            cdInfo = new SkillCooldownInfo(type);
             infos.add(cdInfo);
         }
         else
@@ -94,22 +210,8 @@ public class MorphSkillHandler extends MorphPluginObject
     }
 
     /**
-     * 获取技能冷却
-     * @param uuid 玩家UUID
-     * @param type 实体类型
-     * @return 技能信息，为null则此实体类型没有技能
-     */
-    @Nullable
-    public SkillCooldownInfo getCooldownInfo(UUID uuid, EntityType type)
-    {
-        var skill = this.typeSkillMap.getOrDefault(type, null);
-
-        if (skill == null) return null;
-        else return getCooldownInfo(uuid, skill);
-    }
-
-    /**
      * 为不活跃的CD信息计算当前刻的CD值
+     *
      * @param info CD信息
      * @return CD值
      */
@@ -120,12 +222,13 @@ public class MorphSkillHandler extends MorphPluginObject
 
     /**
      * 切换某个玩家当前需要Tick的CD
+     *
      * @param uuid 玩家UUID
      * @param info 技能信息
      */
     public void switchCooldown(UUID uuid, @Nullable SkillCooldownInfo info)
     {
-        if (info != null && getCooldownInfo(uuid, info.getSkill()) != info)
+        if (info != null && getCooldownInfo(uuid, info.getEntityType()) != info)
             throw new IllegalArgumentException("传入的Info不属于此玩家");
 
         if (info == null)
@@ -143,16 +246,27 @@ public class MorphSkillHandler extends MorphPluginObject
 
     /**
      * 某个实体类型是否有技能
+     *
      * @param type 实体类型
      * @return 是否拥有技能
      */
     public boolean hasSkill(EntityType type)
     {
-        return typeSkillMap.containsKey(type);
+        return getSkillEntry(type) != null;
+    }
+
+    public boolean hasSpeficSkill(EntityType type, SkillType skillType)
+    {
+        var entry = getSkillEntry(type);
+
+        if (entry == null) return false;
+
+        return entry.getValue().getType() == skillType;
     }
 
     /**
      * 获取上次调用
+     *
      * @param player 目标玩家
      * @return 上次调用时间
      */
@@ -163,27 +277,9 @@ public class MorphSkillHandler extends MorphPluginObject
         return info == null ? Long.MIN_VALUE : info.getLastInvoke();
     }
 
-    //玩家 -> CD列表
-    private final Map<UUID, List<SkillCooldownInfo>> uuidInfoMap = new LinkedHashMap<>();
-
-    //玩家 -> 当前CD
-    private final Map<UUID, SkillCooldownInfo> uuidCooldownMap = new LinkedHashMap<>();
-
-    @Initializer
-    private void load()
-    {
-        this.addSchedule(c -> this.update());
-    }
-
-    private void update()
-    {
-        //更新CD
-        uuidCooldownMap.forEach((u, c) -> c.setCooldown(c.getCooldown() - 1));
-        this.addSchedule(c -> this.update());
-    }
-
     /**
      * 清除某个玩家CD列表中不再需要的CD信息
+     *
      * @param player 目标玩家
      */
     public void removeUnusedList(Player player)

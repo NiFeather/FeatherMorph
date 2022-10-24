@@ -13,10 +13,10 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.entity.CreatureSpawnEvent;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.messages.MessageUtils;
+import xiamomc.morph.messages.SkillStrings;
 import xiamomc.morph.misc.DisguiseUtils;
 
 import java.util.List;
@@ -46,6 +46,12 @@ public abstract class MorphSkill extends MorphPluginObject implements IMorphSkil
                 Sound.Source.PLAYER, 1f, 1f));
     }
 
+    protected void printErrorMessage(Player player, String message)
+    {
+        logger.error(message);
+        sendDenyMessageToPlayer(player, SkillStrings.exceptionOccurredString().toComponent());
+    }
+
     /**
      * 向玩家的目标方向发射实体
      * @param player 玩家
@@ -53,16 +59,26 @@ public abstract class MorphSkill extends MorphPluginObject implements IMorphSkil
      * @return 发射的实体，如果为null则发射失败
      * @param <T> 要发射的实体类型
      */
-    @NotNull
-    protected <T extends Entity> T launchProjectile(Player player, EntityType fireball)
+    @Nullable
+    protected <T extends Entity> T launchProjectile(Player player, EntityType fireball, float multiplier)
     {
-        var fireBall = player.getWorld()
-                .spawnEntity(player.getEyeLocation(), fireball, CreatureSpawnEvent.SpawnReason.DEFAULT);
+        Entity fireBall;
+        try
+        {
+            fireBall = player.getWorld()
+                    .spawnEntity(player.getEyeLocation(), fireball, CreatureSpawnEvent.SpawnReason.DEFAULT);
+        }
+        catch (Throwable t)
+        {
+            printErrorMessage(player, "未能生成" + fireball + ": " + t.getMessage());
+            t.printStackTrace();
+            return null;
+        }
 
         if (fireBall instanceof Projectile projectile)
             projectile.setShooter(player);
 
-        fireBall.setVelocity(player.getEyeLocation().getDirection().multiply(2));
+        fireBall.setVelocity(player.getEyeLocation().getDirection().normalize().multiply(2d * multiplier));
 
         return (T) fireBall;
     }

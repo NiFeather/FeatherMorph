@@ -1,18 +1,21 @@
-package xiamomc.morph.skills;
+package xiamomc.morph.skills.impl;
 
 import org.bukkit.entity.Player;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.SkillStrings;
+import xiamomc.morph.skills.MorphSkill;
+import xiamomc.morph.skills.SkillType;
+import xiamomc.morph.skills.configurations.SkillConfiguration;
 import xiamomc.pluginbase.Annotations.Resolved;
 
-public abstract class InventoryMorphSkill extends MorphSkill
+public class InventoryMorphSkill extends MorphSkill
 {
     @Resolved
     private MorphManager manager;
 
     @Override
-    public int executeSkill(Player player)
+    public int executeSkill(Player player, SkillConfiguration configuration)
     {
         var state = manager.getDisguiseStateFor(player);
         assert state != null;
@@ -25,6 +28,12 @@ public abstract class InventoryMorphSkill extends MorphSkill
                 ? SkillStrings.displayingDisguiseInventoryString()
                 : SkillStrings.displayingPlayerInventoryString()));
 
-        return 20;
+        return configuration.getCooldown();
+    }
+
+    @Override
+    public SkillType getType()
+    {
+        return SkillType.INVENTORY;
     }
 }

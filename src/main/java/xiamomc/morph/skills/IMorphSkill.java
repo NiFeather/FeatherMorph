@@ -1,7 +1,7 @@
 package xiamomc.morph.skills;
 
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import xiamomc.morph.skills.configurations.SkillConfiguration;
 
 public interface IMorphSkill
 {
@@ -10,11 +10,11 @@ public interface IMorphSkill
      * @param player 玩家
      * @return 执行后的冷却长度
      */
-    public int executeSkill(Player player);
+    public int executeSkill(Player player, SkillConfiguration configuration);
 
     /**
-     * 获取要应用的实体类型
-     * @return 实体类型
+     * 获取要应用的技能类型
+     * @return 技能类型
      */
-    public EntityType getType();
+    public SkillType getType();
 }

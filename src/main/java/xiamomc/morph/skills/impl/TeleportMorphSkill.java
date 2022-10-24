@@ -1,17 +1,19 @@
-package xiamomc.morph.skills;
+package xiamomc.morph.skills.impl;
 
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import org.bukkit.FluidCollisionMode;
 import org.bukkit.Material;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import xiamomc.morph.messages.SkillStrings;
+import xiamomc.morph.skills.MorphSkill;
+import xiamomc.morph.skills.SkillType;
+import xiamomc.morph.skills.configurations.SkillConfiguration;
 
-public class EndermanMorphSkill extends MorphSkill
+public class TeleportMorphSkill extends MorphSkill
 {
     @Override
-    public int executeSkill(Player player)
+    public int executeSkill(Player player, SkillConfiguration configuration)
     {
         //目标方块
         var targetBlock = player.getTargetBlockExact(32, FluidCollisionMode.ALWAYS);
@@ -62,12 +64,12 @@ public class EndermanMorphSkill extends MorphSkill
         //重设下落距离
         player.setFallDistance(0);
 
-        return 40;
+        return configuration.getCooldown();
     }
 
     @Override
-    public EntityType getType()
+    public SkillType getType()
     {
-        return EntityType.ENDERMAN;
+        return SkillType.TELEPORT;
     }
 }

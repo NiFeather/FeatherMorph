@@ -15,9 +15,11 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphPluginObject;
+import xiamomc.morph.MorphSkillHandler;
 import xiamomc.morph.abilities.AbilityFlag;
 import xiamomc.morph.abilities.AbilityHandler;
 import xiamomc.morph.skills.SkillCooldownInfo;
+import xiamomc.morph.skills.SkillType;
 import xiamomc.morph.storage.offlinestore.OfflineDisguiseState;
 import xiamomc.morph.storage.playerdata.PlayerMorphConfiguration;
 import xiamomc.pluginbase.Annotations.Resolved;
@@ -224,6 +226,9 @@ public class DisguiseState extends MorphPluginObject
     @Resolved(shouldSolveImmediately = true)
     private AbilityHandler abilityHandler;
 
+    @Resolved(shouldSolveImmediately = true)
+    private MorphSkillHandler skillHandler;
+
     public void setDisguise(String identifier, Disguise d, boolean shouldHandlePose)
     {
         setDisguise(identifier, d, shouldHandlePose, true);
@@ -263,7 +268,7 @@ public class DisguiseState extends MorphPluginObject
         setAbilities(abilityHandler.getFlagsFor(disgType));
 
         //伪装类型是否支持设置伪装物品
-        supportsDisguisedItems = disgType.equals(EntityType.PLAYER) || disgType.equals(EntityType.ARMOR_STAND);
+        supportsDisguisedItems = skillHandler.hasSpeficSkill(disgType, SkillType.INVENTORY);
 
         //重置伪装物品
         if (shouldRefreshDisguiseItems)
@@ -273,7 +278,11 @@ public class DisguiseState extends MorphPluginObject
 
             //更新伪装物品
             //只对克隆或LD的伪装生效
-            if (supportsDisguisedItems && (shouldHandlePose || DisguiseTypes.fromId(identifier) == DisguiseTypes.LD))
+            if (!supportsDisguisedItems)
+            {
+                updateEquipment(disguise.getWatcher(), false);
+            }
+            else if ((shouldHandlePose || DisguiseTypes.fromId(identifier) == DisguiseTypes.LD))
             {
                 var watcher = disguise.getWatcher();
 
@@ -293,6 +302,10 @@ public class DisguiseState extends MorphPluginObject
                                 itemOrAir(watcher.getItemInMainHand()),
                                 itemOrAir(watcher.getItemInOffHand())
                         };
+
+                //workaround: 部分伪装复制装备时两个手会拥有一样的物品（虽然不是一个实例）
+                if (handItems[0].isSimilar(handItems[1]))
+                    handItems[1] = itemOrAir(null);
 
                 //全是空的，则禁用装备显示
                 if (Arrays.stream(defaultArmors).allMatch(i -> i != null && i.getType().isAir())
@@ -358,8 +371,6 @@ public class DisguiseState extends MorphPluginObject
      */
     public void setShowingDisguisedItems(boolean value)
     {
-        if (!supportsDisguisedItems) throw new RuntimeException("伪装物品对此状态不可用");
-
         if (showDisguisedItems == value) return;
 
         //如果伪装没有任何默认装备，永远显示玩家自己的伪装

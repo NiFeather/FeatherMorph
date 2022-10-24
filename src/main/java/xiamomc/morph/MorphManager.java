@@ -29,7 +29,6 @@ import xiamomc.morph.interfaces.IManagePlayerData;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.MorphStrings;
 import xiamomc.morph.misc.*;
-import xiamomc.morph.skills.*;
 import xiamomc.morph.storage.offlinestore.OfflineDisguiseState;
 import xiamomc.morph.storage.offlinestore.OfflineStorageManager;
 import xiamomc.morph.storage.playerdata.PlayerDataManager;
@@ -51,9 +50,11 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
     private final OfflineStorageManager offlineStorage = new OfflineStorageManager();
 
-    private final MorphSkillHandler skillHandler = new MorphSkillHandler();
+    @Resolved
+    private MorphSkillHandler skillHandler;
 
-    private final AbilityHandler abilityHandler = new AbilityHandler();
+    @Resolved
+    private AbilityHandler abilityHandler;
 
     //region 聊天覆盖
 
@@ -82,27 +83,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         this.addSchedule(c -> update());
 
         config.onConfigRefresh(c -> this.onConfigRefresh(), true);
-
-        dependencies.cache(abilityHandler);
-        dependencies.cache(skillHandler);
-
-        skillHandler.registerSkills(List.of(
-                new ArmorStandMorphSkill(),
-                new BlazeMorphSkill(),
-                new CreeperMorphSkill(),
-                new DolphinMorphSkill(),
-                new ElderGuardianMorphSkill(),
-                new EnderDragonMorphSkill(),
-                new EndermanMorphSkill(),
-                new GhastMorphSkill(),
-                new PlayerMorphSkill(),
-                new ShulkerMorphSkill(),
-                new WitherMorphSkill(),
-                new LlamaMorphSkill(),
-                new TraderLlamaMorphSkill(),
-                new SnowGolemMorphSkill(),
-                new EvokerMorphSkill()
-        ));
 
         abilityHandler.registerAbility(EntityTypeUtils.canFly(), AbilityFlag.CAN_FLY);
         abilityHandler.registerAbility(EntityTypeUtils.hasFireResistance(), AbilityFlag.HAS_FIRE_RESISTANCE);

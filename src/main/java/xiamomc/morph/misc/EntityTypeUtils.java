@@ -7,6 +7,13 @@ import java.util.Set;
 
 public class EntityTypeUtils
 {
+    public static EntityType fromString(String key, boolean nullWhenUnknown)
+    {
+        var val = fromString(key);
+
+        return val == EntityType.UNKNOWN ? null : val;
+    }
+
     public static EntityType fromString(String key)
     {
         if (key.startsWith(DisguiseTypes.PLAYER.getNameSpace() + ":")) return EntityType.PLAYER;
