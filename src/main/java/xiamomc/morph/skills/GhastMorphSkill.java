@@ -11,7 +11,7 @@ public class GhastMorphSkill extends MorphSkill
     @Override
     public int executeSkill(Player player)
     {
-        shootFireBall(player, Fireball.class);
+        launchProjectile(player, EntityType.FIREBALL);
 
         playSoundToNearbyPlayers(player, 35,
                 Key.key("minecraft", "entity.ghast.shoot"), Sound.Source.HOSTILE);

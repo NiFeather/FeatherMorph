@@ -10,6 +10,12 @@ public class SkillStrings extends AbstractMorphStrings
                 "<color:red>此伪装没有技能");
     }
 
+    public static FormattableMessage exceptionOccurredString()
+    {
+        return getFormattable(getKey("exception_occurred"),
+                "<color:red>执行技能时出现问题");
+    }
+
     public static FormattableMessage skillPreparing()
     {
         return getFormattable(getKey("preparing"),

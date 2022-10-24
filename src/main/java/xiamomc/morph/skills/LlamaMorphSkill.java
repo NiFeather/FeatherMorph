@@ -11,7 +11,7 @@ public class LlamaMorphSkill extends MorphSkill
     @Override
     public int executeSkill(Player player)
     {
-        shootFireBall(player, LlamaSpit.class);
+        launchProjectile(player, EntityType.LLAMA_SPIT);
 
         playSoundToNearbyPlayers(player, 8,
                 Key.key("minecraft", "entity.llama.spit"), Sound.Source.NEUTRAL);

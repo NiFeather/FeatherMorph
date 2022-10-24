@@ -11,7 +11,7 @@ public class SnowGolemMorphSkill extends MorphSkill
     @Override
     public int executeSkill(Player player)
     {
-        shootFireBall(player, Snowball.class);
+        launchProjectile(player, EntityType.SNOWBALL);
 
         playSoundToNearbyPlayers(player, 8,
                 Key.key("minecraft", "entity.snow_golem.shoot"), Sound.Source.NEUTRAL);

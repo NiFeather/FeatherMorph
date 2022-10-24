@@ -2,16 +2,18 @@ package xiamomc.morph.skills;
 
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.WitherSkull;
+import xiamomc.morph.messages.SkillStrings;
 
 public class WitherMorphSkill extends MorphSkill
 {
     @Override
     public int executeSkill(Player player)
     {
-        var skull = shootFireBall(player, WitherSkull.class);
+        var skull = (WitherSkull) launchProjectile(player, EntityType.WITHER_SKULL);
 
         var rd = (int) (Math.random() * 100) % 4;
 

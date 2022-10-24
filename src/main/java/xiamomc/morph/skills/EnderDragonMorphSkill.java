@@ -11,7 +11,7 @@ public class EnderDragonMorphSkill extends MorphSkill
     @Override
     public int executeSkill(Player player)
     {
-        shootFireBall(player, DragonFireball.class);
+        launchProjectile(player, EntityType.DRAGON_FIREBALL);
 
         playSoundToNearbyPlayers(player, 80,
                 Key.key("minecraft", "entity.ender_dragon.shoot"), Sound.Source.HOSTILE);
