@@ -43,8 +43,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class MorphManager extends MorphPluginObject implements IManagePlayerData
 {
     /**
-     * 变成其他玩家的玩家
-     * 因为插件限制，需要每tick更新下蹲和疾跑状态
+     * 已伪装的玩家
      */
     private final List<DisguiseState> disguisedPlayers = new ArrayList<>();
 

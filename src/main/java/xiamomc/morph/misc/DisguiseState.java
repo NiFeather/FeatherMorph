@@ -9,6 +9,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -102,6 +103,16 @@ public class DisguiseState extends MorphPluginObject
     public Disguise getDisguise()
     {
         return disguise;
+    }
+
+    /**
+     * 伪装的实体类型
+     */
+    private EntityType disguiseType;
+
+    public EntityType getDisguiseType()
+    {
+        return disguiseType;
     }
 
     /**
@@ -231,9 +242,10 @@ public class DisguiseState extends MorphPluginObject
 
         if (disguise == d || identifier == null) return;
 
-        disguise = d;
+        this.disguise = d;
         this.disguiseIdentifier = identifier;
         this.shouldHandlePose = shouldHandlePose;
+        this.disguiseType = d.getType().getEntityType();
 
         var type = DisguiseTypes.fromId(identifier);
 

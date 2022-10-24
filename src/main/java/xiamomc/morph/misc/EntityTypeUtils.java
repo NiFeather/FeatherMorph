@@ -93,6 +93,12 @@ public class EntityTypeUtils
                 || isGolem(type);
     }
 
+    public static boolean isWardenHostile(EntityType type)
+    {
+        return type != EntityType.ARMOR_STAND
+                && type != EntityType.WARDEN;
+    }
+
     public static Set<EntityType> canFly()
     {
         return Set.of(EntityType.ALLAY, EntityType.ENDER_DRAGON,

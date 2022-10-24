@@ -1,6 +1,7 @@
 package xiamomc.morph.events;
 
 import com.comphenix.protocol.wrappers.WrappedGameProfile;
+import io.papermc.paper.event.entity.WardenAngerChangeEvent;
 import io.papermc.paper.event.player.AsyncChatEvent;
 import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
@@ -18,6 +19,7 @@ import org.bukkit.event.entity.*;
 import org.bukkit.event.player.*;
 import org.bukkit.event.server.TabCompleteEvent;
 import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.profile.PlayerTextures;
 import xiamomc.morph.MorphManager;
@@ -201,14 +203,25 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
     @EventHandler
     public void onPlayerInteractAtEntity(PlayerInteractAtEntityEvent e)
     {
+        //workaround: 悦灵伪装右键会导致物品栏失去同步
+        if (e.getRightClicked() instanceof Player clickedPlayer)
+        {
+            var state = morphs.getDisguiseStateFor(clickedPlayer);
+
+            if (state != null && state.getDisguiseType() == EntityType.ALLAY)
+                e.setCancelled(true);
+        }
+
+        //workaround: 右键盔甲架不会触发事件、盔甲架是InteractAtEntityEvent
         if (e.getRightClicked() instanceof ArmorStand)
             e.setCancelled(tryInvokeSkillOrQuickDisguise(e.getPlayer(), Action.RIGHT_CLICK_AIR, e.getHand()) || e.isCancelled());
     }
 
     @EventHandler
-    public void onPlayerInteractAtEntity(PlayerInteractEntityEvent e)
+    public void onPlayerInteractEntity(PlayerInteractEntityEvent e)
     {
-        if (e.getRightClicked() instanceof Allay)
+        //workaround: 右键继承了InventoryHolder的实体会打开他们的物品栏而不是使用技能
+        if (e.getRightClicked() instanceof InventoryHolder)
             e.setCancelled(tryInvokeSkillOrQuickDisguise(e.getPlayer(), Action.RIGHT_CLICK_AIR, e.getHand()) || e.isCancelled());
     }
 
@@ -238,23 +251,10 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         var mainHandItem = player.getEquipment().getItemInMainHand();
         var mainHandItemType = mainHandItem.getType();
 
+        if (mainHandItemType.isAir()) return false;
+
         if (player.isSneaking())
         {
-            if (action.isLeftClick())
-            {
-                if (state != null
-                        && mainHandItemType == actionItem)
-                {
-                    if (player.getEyeLocation().getDirection().getY() <= -0.95)
-                        morphs.unMorph(player);
-                    else
-                        morphs.setSelfDisguiseVisible(player, !state.getSelfVisible(), true);
-                    return true;
-                }
-
-                return false;
-            }
-
             //右键玩家头颅：快速伪装
             if (mainHandItemType == Material.PLAYER_HEAD)
             {
@@ -327,6 +327,16 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
                 //主动技能或快速变形
                 if (state != null)
                 {
+                    if (action.isLeftClick())
+                    {
+                        if (player.getEyeLocation().getDirection().getY() <= -0.95)
+                            morphs.unMorph(player);
+                        else
+                            morphs.setSelfDisguiseVisible(player, !state.getSelfVisible(), true);
+
+                        return true;
+                    }
+
                     if (state.getSkillCooldown() <= 0)
                         morphs.executeDisguiseAbility(player);
                     else
@@ -462,6 +472,34 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
 
             if (bossbar != null)
                 Bukkit.getOnlinePlayers().forEach(p -> p.hideBossBar(bossbar));
+        }
+    }
+
+    @EventHandler
+    public void onWardenAngerChange(WardenAngerChangeEvent e)
+    {
+        if (e.getTarget() instanceof Player player)
+        {
+            //不处理愤怒值大于等于80的事件
+            if (e.getNewAnger() >= 80 || e.getOldAnger() >= 80) return;
+
+            var state = morphs.getDisguiseStateFor(player);
+
+            if (state == null || EntityTypeUtils.isWardenHostile(state.getDisguiseType())) return;
+
+            float diff = e.getNewAnger() - e.getOldAnger();
+
+            //将变动缩减为原来的25%
+            if (diff > 0)
+            {
+                diff *= 0.25;
+
+                //确保diff最小为1
+                diff = Math.max(1, diff);
+            }
+
+            //logger.warn("DIFF: " + diff + " NEW " + e.getNewAnger() + " OLD " + e.getOldAnger() + " APPLIED " + (int)(e.getOldAnger() + diff));
+            e.setNewAnger(e.getOldAnger() + (int) diff);
         }
     }
 
