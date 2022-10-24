@@ -132,6 +132,11 @@ public class MorphSkillHandler extends MorphJsonBasedStorage<SkillConfigurationC
         this.addSchedule(c -> this.update());
     }
 
+    /**
+     * 获取某个实体类型的技能和技能配置
+     * @param type 目标实体类型
+     * @return 对应的技能和技能配置，如果没找到则是null
+     */
     @Nullable
     private Map.Entry<SkillConfiguration, IMorphSkill> getSkillEntry(EntityType type)
     {
@@ -255,6 +260,12 @@ public class MorphSkillHandler extends MorphJsonBasedStorage<SkillConfigurationC
         return getSkillEntry(type) != null;
     }
 
+    /**
+     * 某个实体类型是否拥有某个特定的技能
+     * @param type 实体类型
+     * @param skillType 目标技能
+     * @return 是否拥有
+     */
     public boolean hasSpeficSkill(EntityType type, SkillType skillType)
     {
         var entry = getSkillEntry(type);
@@ -265,7 +276,7 @@ public class MorphSkillHandler extends MorphJsonBasedStorage<SkillConfigurationC
     }
 
     /**
-     * 获取上次调用
+     * 获取上次使用技能的时间
      *
      * @param player 目标玩家
      * @return 上次调用时间
