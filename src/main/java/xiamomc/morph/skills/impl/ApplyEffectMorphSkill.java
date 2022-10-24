@@ -47,7 +47,7 @@ public class ApplyEffectMorphSkill extends MorphSkill
 
         players.forEach(p ->
         {
-            p.addPotionEffect(effect, true);
+            p.addPotionEffect(effect);
             p.playSound(sound);
 
             if (effectConfig.showGuardian())
