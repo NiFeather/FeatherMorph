@@ -75,7 +75,7 @@ public class LaunchProjectiveMorphSkill extends MorphSkill
     }
 
     @Override
-    public SkillType getType()
+    public Key getIdentifier()
     {
         return SkillType.LAUNCH_PROJECTIVE;
     }

@@ -68,7 +68,7 @@ public class TeleportMorphSkill extends MorphSkill
     }
 
     @Override
-    public SkillType getType()
+    public Key getIdentifier()
     {
         return SkillType.TELEPORT;
     }

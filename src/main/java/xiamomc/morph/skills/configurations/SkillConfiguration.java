@@ -2,8 +2,12 @@ package xiamomc.morph.skills.configurations;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import net.kyori.adventure.key.Key;
 import org.bukkit.entity.EntityType;
+import org.checkerframework.checker.units.qual.K;
+import org.intellij.lang.annotations.Subst;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.LoggerFactory;
 import xiamomc.morph.misc.EntityTypeUtils;
 import xiamomc.morph.skills.SkillType;
 
@@ -13,14 +17,14 @@ public class SkillConfiguration
     {
     }
 
-    public SkillConfiguration(String mobId, int cd, SkillType type)
+    public SkillConfiguration(String mobId, int cd, Key type)
     {
         this.mobIdentifier = mobId;
         this.cooldown = cd;
-        this.skillIdentifier = type;
+        setSkillType(type);
     }
 
-    public SkillConfiguration(EntityType type, int cd, SkillType skillType)
+    public SkillConfiguration(EntityType type, int cd, Key skillType)
     {
         this(type.getKey().asString(), cd, skillType);
     }
@@ -47,12 +51,24 @@ public class SkillConfiguration
     }
 
     @Expose
-    @SerializedName("skillID")
-    private SkillType skillIdentifier;
+    @SerializedName("skillId")
+    private String rawSkillidentifier;
 
-    public SkillType getSkillType()
+    @Expose(deserialize = false, serialize = false)
+    private Key skillIdentifier;
+
+    public Key getSkillType()
     {
+        if (skillIdentifier == null)
+            skillIdentifier = rawSkillidentifier == null ? SkillType.UNKNOWN : Key.key(rawSkillidentifier);
+
         return skillIdentifier;
+    }
+
+    private void setSkillType(Key key)
+    {
+        skillIdentifier = key;
+        rawSkillidentifier = key.asString();
     }
 
     @Expose

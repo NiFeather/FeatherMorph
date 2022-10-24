@@ -1,5 +1,6 @@
 package xiamomc.morph.skills.impl;
 
+import net.kyori.adventure.key.Key;
 import org.bukkit.GameMode;
 import org.bukkit.GameRule;
 import org.bukkit.entity.Player;
@@ -37,7 +38,7 @@ public class ExplodeMorphSkill extends MorphSkill
     }
 
     @Override
-    public SkillType getType()
+    public Key getIdentifier()
     {
         return SkillType.EXPLODE;
     }

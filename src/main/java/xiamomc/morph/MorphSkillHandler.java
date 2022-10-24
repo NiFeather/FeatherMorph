@@ -99,6 +99,9 @@ public class MorphSkillHandler extends MorphJsonBasedStorage<SkillConfigurationC
         if (skills.contains(skill))
             throw new RuntimeException("已经注册过一个" + skill + "的技能了");
 
+        if (skill.getIdentifier().asString().equals(SkillType.UNKNOWN.asString()))
+            throw new IllegalArgumentException("技能ID不能是" + SkillType.UNKNOWN);
+
         skills.add(skill);
     }
 
@@ -111,7 +114,12 @@ public class MorphSkillHandler extends MorphJsonBasedStorage<SkillConfigurationC
             throw new RuntimeException("已经有一个" + configuration.getEntityType() + "的技能了");
 
         var type = configuration.getSkillType();
-        var skillOptional = skills.stream().filter(s -> s.getType().equals(type)).findFirst();
+
+        if (type.asString().equals(SkillType.UNKNOWN.asString()))
+            throw new IllegalArgumentException("配置的技能ID不能为" + type);
+
+        var skillOptional = skills.stream()
+                .filter(s -> s.getIdentifier().asString().equals(type.asString())).findFirst();
 
         if (skillOptional.isEmpty())
             throw new RuntimeException("找不到和" + type + "匹配的技能");
@@ -263,16 +271,16 @@ public class MorphSkillHandler extends MorphJsonBasedStorage<SkillConfigurationC
     /**
      * 某个实体类型是否拥有某个特定的技能
      * @param type 实体类型
-     * @param skillType 目标技能
+     * @param skillKey 目标技能的Key
      * @return 是否拥有
      */
-    public boolean hasSpeficSkill(EntityType type, SkillType skillType)
+    public boolean hasSpeficSkill(EntityType type, Key skillKey)
     {
         var entry = getSkillEntry(type);
 
         if (entry == null) return false;
 
-        return entry.getValue().getType() == skillType;
+        return entry.getValue().getIdentifier().asString().equals(skillKey.asString());
     }
 
     /**

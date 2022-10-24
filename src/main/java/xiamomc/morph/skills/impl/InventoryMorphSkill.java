@@ -1,5 +1,6 @@
 package xiamomc.morph.skills.impl;
 
+import net.kyori.adventure.key.Key;
 import org.bukkit.entity.Player;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.messages.MessageUtils;
@@ -32,7 +33,7 @@ public class InventoryMorphSkill extends MorphSkill
     }
 
     @Override
-    public SkillType getType()
+    public Key getIdentifier()
     {
         return SkillType.INVENTORY;
     }

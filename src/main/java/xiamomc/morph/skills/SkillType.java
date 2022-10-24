@@ -1,25 +1,17 @@
 package xiamomc.morph.skills;
 
-public enum SkillType
+import net.kyori.adventure.key.Key;
+
+public class SkillType
 {
-    LAUNCH_PROJECTIVE("launch_projective"),
-    TELEPORT("teleport"),
-    EVOKER("summon_fangs_or_vex"),
-    INVENTORY("fake_inventory_display"),
-    APPLY_EFFECT("apply_effect"),
-    EXPLODE("explode"),
-    NONE("none");
+    private static final String nameSpace = "morph";
 
-    private final String id;
+    public static Key INVENTORY = Key.key(nameSpace, "fake_inventory");
+    public static Key EXPLODE = Key.key(nameSpace, "explode");
+    public static Key LAUNCH_PROJECTIVE = Key.key(nameSpace, "launch_projective");
+    public static Key APPLY_EFFECT = Key.key(nameSpace, "apply_effect");
+    public static Key TELEPORT = Key.key(nameSpace, "teleport");
+    public static Key EVOKER = Key.key(nameSpace, "evoker");
 
-    private SkillType(String id)
-    {
-        this.id = id;
-    }
-
-    @Override
-    public String toString()
-    {
-        return this.id;
-    }
+    public static Key UNKNOWN = Key.key(nameSpace, "unknown");
 }

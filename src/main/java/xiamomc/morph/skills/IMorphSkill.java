@@ -1,5 +1,7 @@
 package xiamomc.morph.skills;
 
+import net.kyori.adventure.key.Key;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import xiamomc.morph.skills.configurations.SkillConfiguration;
 
@@ -13,8 +15,8 @@ public interface IMorphSkill
     public int executeSkill(Player player, SkillConfiguration configuration);
 
     /**
-     * 获取要应用的技能类型
-     * @return 技能类型
+     * 获取要应用的技能ID
+     * @return 技能ID
      */
-    public SkillType getType();
+    public Key getIdentifier();
 }

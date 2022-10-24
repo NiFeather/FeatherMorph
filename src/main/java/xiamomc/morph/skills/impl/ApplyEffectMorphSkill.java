@@ -70,7 +70,7 @@ public class ApplyEffectMorphSkill extends MorphSkill
     }
 
     @Override
-    public SkillType getType()
+    public Key getIdentifier()
     {
         return SkillType.APPLY_EFFECT;
     }

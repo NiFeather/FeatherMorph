@@ -1,5 +1,6 @@
 package xiamomc.morph.skills.impl;
 
+import net.kyori.adventure.key.Key;
 import org.bukkit.Difficulty;
 import org.bukkit.FluidCollisionMode;
 import org.bukkit.Location;
@@ -107,7 +108,7 @@ public class SummonFangsMorphSkill extends MorphSkill
     }
 
     @Override
-    public SkillType getType()
+    public Key getIdentifier()
     {
         return SkillType.EVOKER;
     }
