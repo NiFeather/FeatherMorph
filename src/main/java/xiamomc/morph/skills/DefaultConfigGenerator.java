@@ -66,10 +66,10 @@ public class DefaultConfigGenerator
 
         //药效
         addConfiguration(skills, EntityType.DOLPHIN, 180, SkillType.APPLY_EFFECT, c ->
-                c.setEffectConfiguration(new EffectConfiguration(PotionEffectType.DOLPHINS_GRACE.getKey().asString(), 0, 180, true, false, null, 0)));
+                c.setEffectConfiguration(new EffectConfiguration(PotionEffectType.DOLPHINS_GRACE.getKey().asString(), 0, 180, true, false, null, 0, 9)));
 
         addConfiguration(skills, EntityType.ELDER_GUARDIAN, 1200, SkillType.APPLY_EFFECT, c ->
-                c.setEffectConfiguration(new EffectConfiguration(PotionEffectType.SLOW_DIGGING.getKey().asString(), 2, 6000, true, true, "entity.elder_guardian.curse", 50)));
+                c.setEffectConfiguration(new EffectConfiguration(PotionEffectType.SLOW_DIGGING.getKey().asString(), 2, 6000, true, true, "entity.elder_guardian.curse", 50, 50)));
 
         //其他
         addConfiguration(skills, EntityType.CREEPER, 80, SkillType.EXPLODE, c ->

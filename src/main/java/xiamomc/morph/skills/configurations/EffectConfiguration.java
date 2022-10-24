@@ -11,7 +11,9 @@ public class EffectConfiguration
     {
     }
 
-    public EffectConfiguration(String name, int multiplier, int duration, boolean requiresWater, boolean showGuardian, @Nullable String soundName, int soundDistance)
+    public EffectConfiguration(String name, int multiplier, int duration,
+                               boolean requiresWater, boolean showGuardian,
+                               @Nullable String soundName, int soundDistance, int applyDistance)
     {
         this.name = name;
         this.multiplier = multiplier;
@@ -20,6 +22,7 @@ public class EffectConfiguration
         this.showGuardian = showGuardian;
         this.soundName = soundName;
         this.soundDistance = soundDistance;
+        this.applyDistance = applyDistance;
     }
 
     //效果名称
@@ -78,6 +81,15 @@ public class EffectConfiguration
     @Expose
     @SerializedName("sound_distance")
     private int soundDistance;
+
+    @Expose
+    @SerializedName("apply_distance")
+    private int applyDistance;
+
+    public int getApplyDistance()
+    {
+        return applyDistance;
+    }
 
     public int getSoundDistance()
     {

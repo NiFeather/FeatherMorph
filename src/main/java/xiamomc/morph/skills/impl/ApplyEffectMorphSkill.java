@@ -33,7 +33,7 @@ public class ApplyEffectMorphSkill extends MorphSkill
             return 20;
         }
 
-        var players = findNearbyPlayers(player, 50);
+        var players = findNearbyPlayers(player, effectConfig.getApplyDistance());
 
         var sound = Sound.sound(Key.key(effectConfig.getSoundName()), Sound.Source.PLAYER, effectConfig.getSoundDistance(), 1);
 
