@@ -2,6 +2,7 @@ package xiamomc.morph.skills.impl;
 
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
+import org.bukkit.NamespacedKey;
 import org.bukkit.Particle;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
@@ -46,7 +47,7 @@ public class ApplyEffectMorphSkill extends MorphSkill
 
         players.forEach(p ->
         {
-            p.addPotionEffect(effect);
+            p.addPotionEffect(effect, true);
             p.playSound(sound);
 
             if (effectConfig.showGuardian())
@@ -62,11 +63,11 @@ public class ApplyEffectMorphSkill extends MorphSkill
     {
         if (key == null) return null;
 
-        var type = PotionEffectType.getByName(key);
+        var type = PotionEffectType.getByKey(NamespacedKey.fromString(key));
 
         if (type == null) return null;
 
-        return new PotionEffect(type, duration, multiplier);
+        return new PotionEffect(type, duration, multiplier, false);
     }
 
     @Override

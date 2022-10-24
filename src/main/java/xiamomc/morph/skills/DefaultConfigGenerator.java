@@ -35,26 +35,16 @@ public class DefaultConfigGenerator
         var container = new SkillConfigurationContainer();
         var skills = container.configurations;
 
+        //伪装物品
         addConfiguration(skills, EntityType.ARMOR_STAND, 20, SkillType.INVENTORY);
         addConfiguration(skills, EntityType.PLAYER, 20, SkillType.INVENTORY);
 
+        //弹射物
         addConfiguration(skills, EntityType.BLAZE, 10, SkillType.LAUNCH_PROJECTIVE, c ->
                 c.setProjectiveConfiguration(new ProjectiveConfiguration(EntityType.SMALL_FIREBALL, 1, "entity.blaze.shoot", 8)));
 
-        addConfiguration(skills, EntityType.CREEPER, 80, SkillType.EXPLODE, c ->
-                c.setExplosionConfiguration(new ExplosionConfiguration(true, 3, false)));
-
-        addConfiguration(skills, EntityType.DOLPHIN, 180, SkillType.APPLY_EFFECT, c ->
-                c.setEffectConfiguration(new EffectConfiguration(PotionEffectType.DOLPHINS_GRACE.getName(), 0, 180, true, false, null, 0)));
-
-        addConfiguration(skills, EntityType.ELDER_GUARDIAN, 1200, SkillType.APPLY_EFFECT, c ->
-                c.setEffectConfiguration(new EffectConfiguration(PotionEffectType.SLOW_DIGGING.getName(), 2, 6000, true, true, "entity.elder_guardian.curse", 50)));
-
         addConfiguration(skills, EntityType.ENDER_DRAGON, 80, SkillType.LAUNCH_PROJECTIVE, c ->
                 c.setProjectiveConfiguration(new ProjectiveConfiguration(EntityType.DRAGON_FIREBALL, 1, "entity.ender_dragon.shoot", 80)));
-
-        addConfiguration(skills, EntityType.ENDERMAN, 40, SkillType.TELEPORT);
-        addConfiguration(skills, EntityType.EVOKER, 100, SkillType.EVOKER);
 
         addConfiguration(skills, EntityType.GHAST, 40, SkillType.LAUNCH_PROJECTIVE, c ->
                 c.setProjectiveConfiguration(new ProjectiveConfiguration(EntityType.FIREBALL, 1, "entity.ghast.shoot", 35)));
@@ -73,6 +63,20 @@ public class DefaultConfigGenerator
 
         addConfiguration(skills, EntityType.WITHER, 10, SkillType.LAUNCH_PROJECTIVE, c ->
                 c.setProjectiveConfiguration(new ProjectiveConfiguration(EntityType.WITHER_SKULL, 1, "entity.wither.shoot", 24)));
+
+        //药效
+        addConfiguration(skills, EntityType.DOLPHIN, 180, SkillType.APPLY_EFFECT, c ->
+                c.setEffectConfiguration(new EffectConfiguration(PotionEffectType.DOLPHINS_GRACE.getKey().asString(), 0, 180, true, false, null, 0)));
+
+        addConfiguration(skills, EntityType.ELDER_GUARDIAN, 1200, SkillType.APPLY_EFFECT, c ->
+                c.setEffectConfiguration(new EffectConfiguration(PotionEffectType.SLOW_DIGGING.getKey().asString(), 2, 6000, true, true, "entity.elder_guardian.curse", 50)));
+
+        //其他
+        addConfiguration(skills, EntityType.CREEPER, 80, SkillType.EXPLODE, c ->
+                c.setExplosionConfiguration(new ExplosionConfiguration(true, 3, false)));
+
+        addConfiguration(skills, EntityType.ENDERMAN, 40, SkillType.TELEPORT);
+        addConfiguration(skills, EntityType.EVOKER, 100, SkillType.EVOKER);
 
         cachedContainer = container;
         return container;
