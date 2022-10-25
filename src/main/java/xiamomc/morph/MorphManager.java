@@ -29,6 +29,8 @@ import xiamomc.morph.interfaces.IManagePlayerData;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.MorphStrings;
 import xiamomc.morph.misc.*;
+import xiamomc.morph.skills.SkillCooldownInfo;
+import xiamomc.morph.skills.SkillType;
 import xiamomc.morph.storage.offlinestore.OfflineDisguiseState;
 import xiamomc.morph.storage.offlinestore.OfflineStorageManager;
 import xiamomc.morph.storage.playerdata.PlayerDataManager;
@@ -174,7 +176,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         var watcher = disguise.getWatcher();
 
         //更新actionbar信息
-        var msg = skillHandler.hasSkill(disguise.getType().getEntityType())
+        var msg = skillHandler.hasSkill(state.getSkillIdentifier())
                 ? (state.getSkillCooldown() <= 0
                     ? MorphStrings.disguisingWithSkillAvaliableString()
                     : MorphStrings.disguisingWithSkillPreparingString())
@@ -310,7 +312,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         String finalKey = key;
         var info = getAvaliableDisguisesFor(player).stream()
-                .filter(i -> i.getKey().equals(finalKey)).findFirst().orElse(null);
+                .filter(i -> i.getIdentifier().equals(finalKey)).findFirst().orElse(null);
 
         if (bannedDisguises.contains(key))
         {
@@ -421,9 +423,11 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
      * @param player 目标玩家
      * @param disguiseName 伪装名称
      */
-    public boolean morphLD(Player player, String disguiseName)
+    public boolean morphLD(Player player, @NotNull String disguiseName)
     {
-        var disguise = DisguiseAPI.getCustomDisguise(disguiseName.replace("ld:", ""));
+        var key = DisguiseTypes.LD.toStrippedId(disguiseName);
+
+        var disguise = DisguiseAPI.getCustomDisguise(key);
 
         if (disguise == null)
         {
@@ -513,7 +517,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
      */
     public void morphPlayer(Player sourcePlayer, String targetPlayerName)
     {
-        var disguise = new PlayerDisguise(targetPlayerName.replace("player:", ""));
+        var disguise = new PlayerDisguise(DisguiseTypes.PLAYER.toStrippedId(targetPlayerName));
 
         postConstructDisguise(sourcePlayer, null, targetPlayerName, disguise, false);
 
@@ -672,16 +676,22 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         //禁用actionBar
         DisguiseAPI.setActionBarShown(sourcePlayer, false);
 
+        //技能
+        var rawIdentifierHasSkill = skillHandler.hasSkill(id) || skillHandler.hasSpeficSkill(id, SkillType.NONE);
+        var targetSkillID = rawIdentifierHasSkill ? id : entityType.getKey().asString();
+
         //更新或者添加DisguiseState
         var state = getDisguiseStateFor(sourcePlayer);
         if (state == null)
         {
-            state = new DisguiseState(sourcePlayer, id, disguise, shouldHandlePose);
+            state = new DisguiseState(sourcePlayer, id, targetSkillID, disguise, shouldHandlePose);
 
             disguisedPlayers.add(state);
         }
         else
-            state.setDisguise(id, disguise, shouldHandlePose);
+        {
+            state.setDisguise(id, targetSkillID, disguise, shouldHandlePose);
+        }
 
         //workaround: Disguise#getDisguiseName()不会正常返回实体的自定义名称
         if (targetEntity != null && targetEntity.customName() != null)
@@ -727,7 +737,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         //确保玩家可以根据设置看到自己的伪装
         setSelfDisguiseVisible(sourcePlayer, config.showDisguiseToSelf, false);
 
-        if (!config.shownMorphAbilityHint && skillHandler.hasSkill(entityType))
+        if (!config.shownMorphAbilityHint && skillHandler.hasSkill(id))
         {
             sourcePlayer.sendMessage(MessageUtils.prefixes(sourcePlayer, MorphStrings.skillHintString()));
             config.shownMorphAbilityHint = true;
@@ -742,8 +752,10 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         //更新上次操作时间
         updateLastPlayerMorphOperationTime(sourcePlayer);
 
-        //设置CD信息
-        var cdInfo = skillHandler.getCooldownInfo(sourcePlayer.getUniqueId(), entityType);
+        SkillCooldownInfo cdInfo;
+
+        //CD时间
+        cdInfo = skillHandler.getCooldownInfo(sourcePlayer.getUniqueId(), targetSkillID);
 
         if (cdInfo != null)
         {

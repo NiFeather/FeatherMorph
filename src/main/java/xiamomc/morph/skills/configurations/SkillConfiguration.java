@@ -2,12 +2,10 @@ package xiamomc.morph.skills.configurations;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import net.kyori.adventure.key.Key;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.EntityType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xiamomc.morph.misc.EntityTypeUtils;
 import xiamomc.morph.skills.SkillType;
 
 public class SkillConfiguration
@@ -18,31 +16,41 @@ public class SkillConfiguration
 
     public SkillConfiguration(String mobId, int cd, NamespacedKey type)
     {
-        this.mobIdentifier = mobId;
+        this.rawMobIdentifier = mobId;
         this.cooldown = cd;
         setSkillType(type);
     }
 
     public SkillConfiguration(EntityType type, int cd, NamespacedKey skillType)
     {
-        this(type.getKey().asString(), cd, skillType);
+        this(type.getKey(), cd, skillType);
+    }
+
+    public SkillConfiguration(NamespacedKey key, int cd, NamespacedKey skillIdentifier)
+    {
+        this.cooldown = cd;
+        setSkillType(skillIdentifier);
+        setMobIdentifier(key);
     }
 
     @Expose
     @SerializedName("mobId")
-    private String mobIdentifier;
+    private String rawMobIdentifier;
 
     /**
      * 获取目标实体类型
      *
      * @return 实体类型
      */
-    @Nullable
-    public EntityType getEntityType()
+    @NotNull
+    public String getEntityIdentifier()
     {
-        var type = EntityTypeUtils.fromString(mobIdentifier);
+        return rawMobIdentifier;
+    }
 
-        return type == EntityType.UNKNOWN ? null : type;
+    private void setMobIdentifier(NamespacedKey key)
+    {
+        this.rawMobIdentifier = key.asString();
     }
 
     @Expose
@@ -161,6 +169,6 @@ public class SkillConfiguration
     @Override
     public String toString()
     {
-        return this.mobIdentifier + "的技能配置{" + cooldown + "tick冷却, 技能类型:" + skillIdentifier + "}";
+        return this.rawMobIdentifier + "的技能配置{" + cooldown + "tick冷却, 技能类型:" + skillIdentifier + "}";
     }
 }

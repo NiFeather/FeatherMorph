@@ -3,7 +3,6 @@ package xiamomc.morph;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import org.bukkit.NamespacedKey;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -46,7 +45,8 @@ public class MorphSkillHandler extends MorphJsonBasedStorage<SkillConfigurationC
                 new InventoryMorphSkill(),
                 new LaunchProjectiveMorphSkill(),
                 new SummonFangsMorphSkill(),
-                new TeleportMorphSkill()
+                new TeleportMorphSkill(),
+                new NoneMorphSkill()
         ));
     }
 
@@ -153,15 +153,15 @@ public class MorphSkillHandler extends MorphJsonBasedStorage<SkillConfigurationC
             return false;
         }
 
-        if (typeSkillMap.keySet().stream().anyMatch(c -> c.getEntityType() == configuration.getEntityType()))
+        if (typeSkillMap.keySet().stream().anyMatch(c -> c.getEntityIdentifier().equals(configuration.getEntityIdentifier())))
         {
-            logger.error("已经有一个" + configuration.getEntityType() + "的技能了");
+            logger.error("已经有一个" + configuration.getEntityIdentifier() + "的技能了");
             return false;
         }
 
         var type = configuration.getSkillIdentifier();
 
-        if (type == null || type.equals(SkillType.UNKNOWN))
+        if (type.equals(SkillType.UNKNOWN))
         {
             logger.error(configuration + "的技能ID无效");
             return false;
@@ -200,10 +200,10 @@ public class MorphSkillHandler extends MorphJsonBasedStorage<SkillConfigurationC
      * @return 对应的技能和技能配置，如果没找到则是null
      */
     @Nullable
-    private Map.Entry<SkillConfiguration, IMorphSkill> getSkillEntry(EntityType type)
+    private Map.Entry<SkillConfiguration, IMorphSkill> getSkillEntry(String type)
     {
         return typeSkillMap.entrySet().stream()
-                .filter(d -> type.equals(d.getKey().getEntityType())).findFirst().orElse(null);
+                .filter(d -> type.equals(d.getKey().getEntityIdentifier())).findFirst().orElse(null);
     }
 
     /**
@@ -217,14 +217,14 @@ public class MorphSkillHandler extends MorphJsonBasedStorage<SkillConfigurationC
 
         if (state == null) return;
 
-        var entry = getSkillEntry(state.getDisguise().getType().getEntityType());
+        var entry = getSkillEntry(state.getSkillIdentifier());
 
-        if (entry != null)
+        if (entry != null && !entry.getKey().getSkillIdentifier().equals(SkillType.NONE))
         {
             var skill = entry.getValue();
             var config = entry.getKey();
 
-            var cd = getCooldownInfo(player.getUniqueId(), config.getEntityType());
+            var cd = getCooldownInfo(player.getUniqueId(), state.getSkillIdentifier());
             assert cd != null;
 
             cd.setCooldown(skill.executeSkill(player, config));
@@ -245,11 +245,11 @@ public class MorphSkillHandler extends MorphJsonBasedStorage<SkillConfigurationC
      * 获取技能冷却
      *
      * @param uuid 玩家UUID
-     * @param type 实体类型
+     * @param type 技能ID
      * @return 技能信息，为null则传入的实体类型是null
      */
     @Nullable
-    public SkillCooldownInfo getCooldownInfo(UUID uuid, @Nullable EntityType type)
+    public SkillCooldownInfo getCooldownInfo(UUID uuid, @Nullable String type)
     {
         if (type == null) return null;
 
@@ -263,7 +263,7 @@ public class MorphSkillHandler extends MorphJsonBasedStorage<SkillConfigurationC
 
         //获取或创建CD
         var cd = infos.stream()
-                .filter(i -> i.getEntityType().equals(type)).findFirst().orElse(null);
+                .filter(i -> i.getIdentifier().equals(type)).findFirst().orElse(null);
 
         if (cd == null)
         {
@@ -295,7 +295,7 @@ public class MorphSkillHandler extends MorphJsonBasedStorage<SkillConfigurationC
      */
     public void switchCooldown(UUID uuid, @Nullable SkillCooldownInfo info)
     {
-        if (info != null && getCooldownInfo(uuid, info.getEntityType()) != info)
+        if (info != null && getCooldownInfo(uuid, info.getIdentifier()) != info)
             throw new IllegalArgumentException("传入的Info不属于此玩家");
 
         if (info == null)
@@ -314,26 +314,28 @@ public class MorphSkillHandler extends MorphJsonBasedStorage<SkillConfigurationC
     /**
      * 某个实体类型是否有技能
      *
-     * @param type 实体类型
+     * @param id 实体ID
      * @return 是否拥有技能
      */
-    public boolean hasSkill(EntityType type)
+    public boolean hasSkill(String id)
     {
-        var entry = getSkillEntry(type);
-        return entry != null && !SkillType.NONE.equals(entry.getKey().getSkillIdentifier());
+        var entry = getSkillEntry(id);
+        return entry != null
+                && !SkillType.UNKNOWN.equals(entry.getKey().getSkillIdentifier())
+                && !SkillType.NONE.equals(entry.getKey().getSkillIdentifier());
     }
 
     /**
      * 某个实体类型是否拥有某个特定的技能
-     * @param type 实体类型
+     * @param id 实体ID
      * @param skillKey 目标技能的Key
      * @return 是否拥有
      */
-    public boolean hasSpeficSkill(EntityType type, NamespacedKey skillKey)
+    public boolean hasSpeficSkill(String id, NamespacedKey skillKey)
     {
-        var entry = getSkillEntry(type);
+        var entry = getSkillEntry(id);
 
-        if (entry == null || SkillType.NONE.equals(entry.getKey().getSkillIdentifier())) return false;
+        if (entry == null || SkillType.UNKNOWN.equals(entry.getKey().getSkillIdentifier())) return false;
 
         return entry.getValue().getIdentifier().equals(skillKey);
     }
@@ -368,7 +370,7 @@ public class MorphSkillHandler extends MorphJsonBasedStorage<SkillConfigurationC
         //获取当前CD
         SkillCooldownInfo cdInfo = state == null
                 ? null
-                : getCooldownInfo(uuid, state.getDisguise().getType().getEntityType());
+                : getCooldownInfo(uuid, state.getSkillIdentifier());
 
         //移除不需要的CD
         list.removeIf(i -> i != cdInfo && this.getCooldownInactive(i) <= 2);

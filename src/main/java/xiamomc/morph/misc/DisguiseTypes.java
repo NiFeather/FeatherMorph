@@ -43,9 +43,19 @@ public enum DisguiseTypes
         else return fromNameSpace(idSplited[0]);
     }
 
+    public static DisguiseTypes fromId(NamespacedKey key)
+    {
+        return fromId(key.asString());
+    }
+
     public String toId(String id)
     {
         return this.getNameSpace() + ":" + id;
+    }
+
+    public NamespacedKey toNamespacedKey(String id)
+    {
+        return NamespacedKey.fromString(toId(id));
     }
 
     public String toStrippedId(String rawString)

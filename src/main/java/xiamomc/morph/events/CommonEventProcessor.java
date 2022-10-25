@@ -208,7 +208,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         {
             var state = morphs.getDisguiseStateFor(clickedPlayer);
 
-            if (state != null && state.getDisguiseType() == EntityType.ALLAY)
+            if (state != null && state.getEntityType() == EntityType.ALLAY)
                 e.setCancelled(true);
         }
 
@@ -416,7 +416,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
             DisguiseUtils.addTrace(disguise);
 
             //刷新Disguise
-            state.setDisguise(state.getDisguiseIdentifier(), DisguiseAPI.getDisguise(player), state.shouldHandlePose(), false);
+            state.setDisguise(state.getDisguiseIdentifier(), state.getSkillIdentifier(), DisguiseAPI.getDisguise(player), state.shouldHandlePose(), false);
 
             //更新飞行能力
             if (morphs.updateFlyingAbility(player) && player.getVelocity().getY() == 0)
@@ -485,7 +485,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
 
             var state = morphs.getDisguiseStateFor(player);
 
-            if (state == null || EntityTypeUtils.isWardenHostile(state.getDisguiseType())) return;
+            if (state == null || EntityTypeUtils.isWardenHostile(state.getEntityType())) return;
 
             float diff = e.getNewAnger() - e.getOldAnger();
 

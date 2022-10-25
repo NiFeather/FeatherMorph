@@ -17,16 +17,27 @@ public class DisguiseInfo
 
     private final EntityType entityType;
 
+    @Deprecated
     public EntityType getEntityType()
     {
         return entityType;
     }
 
-    public final String rawString;
+    public final String rawIdentifier;
+
+    public String getIdentifier()
+    {
+        return rawIdentifier;
+    }
 
     @NotNull
     private final DisguiseTypes disguiseType;
 
+    /**
+     * 获取伪装类型（玩家、生物、LD或未知）
+     *
+     * @return 伪装类型
+     */
     @NotNull
     public DisguiseTypes getDisguiseType()
     {
@@ -49,19 +60,19 @@ public class DisguiseInfo
     @Expose
     public String playerDisguiseTargetName;
 
-    public DisguiseInfo(@NotNull String rawString)
+    public DisguiseInfo(@NotNull String rawIdentifier)
     {
-        this.rawString = rawString;
-        this.disguiseType = DisguiseTypes.fromId(rawString);
+        this.rawIdentifier = rawIdentifier;
+        this.disguiseType = DisguiseTypes.fromId(rawIdentifier);
 
         switch (disguiseType)
         {
             case PLAYER ->
             {
                 this.entityType = EntityType.PLAYER;
-                this.playerDisguiseTargetName = disguiseType.toStrippedId(rawString);
+                this.playerDisguiseTargetName = disguiseType.toStrippedId(rawIdentifier);
             }
-            case VANILLA -> this.entityType = EntityTypeUtils.fromString(rawString);
+            case VANILLA -> this.entityType = EntityTypeUtils.fromString(rawIdentifier);
             default -> this.entityType = EntityType.UNKNOWN;
         }
     }
@@ -69,7 +80,7 @@ public class DisguiseInfo
     @Override
     public int hashCode()
     {
-        var str = entityType + rawString + disguiseType;
+        var str = entityType + rawIdentifier + disguiseType;
         return str.hashCode();
     }
 
@@ -78,7 +89,7 @@ public class DisguiseInfo
     {
         if (!(other instanceof DisguiseInfo di)) return false;
 
-        return this.equals(di.rawString);
+        return this.equals(di.rawIdentifier);
     }
 
     public boolean equals(EntityType type)
@@ -92,7 +103,7 @@ public class DisguiseInfo
     {
         if (!this.isValidate()) return false;
 
-        return this.disguiseType != DisguiseTypes.UNKNOWN && this.rawString.equals(rawString);
+        return this.disguiseType != DisguiseTypes.UNKNOWN && this.rawIdentifier.equals(rawString);
     }
 
     /**
@@ -109,7 +120,7 @@ public class DisguiseInfo
                     default -> true;
                 };
 
-        return this.rawString != null && typeValid;
+        return this.rawIdentifier != null && typeValid;
     }
 
     /**
@@ -120,11 +131,11 @@ public class DisguiseInfo
     {
         if (!this.isValidate())
         {
-            LoggerFactory.getLogger("morph").warn("INVALID TYPE FOR:" + rawString);
+            LoggerFactory.getLogger("morph").warn("INVALID TYPE FOR:" + rawIdentifier);
             return "invalid";
         }
 
-        return rawString;
+        return rawIdentifier;
     }
 
     /**
@@ -138,7 +149,7 @@ public class DisguiseInfo
         if (disguiseType == DisguiseTypes.VANILLA)
             return Component.translatable(entityType.translationKey());
         else
-            return Component.text(disguiseType.toStrippedId(this.rawString));
+            return Component.text(disguiseType.toStrippedId(this.rawIdentifier));
     }
 
     @Override

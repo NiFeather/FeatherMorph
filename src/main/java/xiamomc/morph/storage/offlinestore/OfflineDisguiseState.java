@@ -28,6 +28,12 @@ public class OfflineDisguiseState implements IOfflineState
     public String disguiseID;
 
     /**
+     * 伪装技能ID
+     */
+    @Expose
+    public String skillID;
+
+    /**
      * 伪装数据，如果存在则优先使用这里的数据
      */
     @Expose
