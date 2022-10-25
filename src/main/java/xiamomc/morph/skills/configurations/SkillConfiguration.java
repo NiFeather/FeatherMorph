@@ -18,7 +18,7 @@ public class SkillConfiguration
     {
         this.identifier = mobId;
         this.cooldown = cd;
-        setSkillType(type);
+        setSkillIdentifier(type);
     }
 
     public SkillConfiguration(EntityType type, int cd, NamespacedKey skillType)
@@ -29,7 +29,7 @@ public class SkillConfiguration
     public SkillConfiguration(NamespacedKey key, int cd, NamespacedKey skillIdentifier)
     {
         this.cooldown = cd;
-        setSkillType(skillIdentifier);
+        setSkillIdentifier(skillIdentifier);
         setIdentifier(key);
     }
 
@@ -96,7 +96,13 @@ public class SkillConfiguration
         return skillIdentifier;
     }
 
-    private void setSkillType(NamespacedKey key)
+    /**
+     * 设置技能ID
+     *
+     * @apiNote 内部方法
+     * @param key ID
+     */
+    public void setSkillIdentifier(NamespacedKey key)
     {
         skillIdentifier = key;
         rawSkillidentifier = key.asString();

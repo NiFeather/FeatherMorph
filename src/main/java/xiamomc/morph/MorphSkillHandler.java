@@ -19,6 +19,7 @@ import xiamomc.morph.storage.MorphJsonBasedStorage;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 
+import javax.naming.Name;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -79,6 +80,8 @@ public class MorphSkillHandler extends MorphJsonBasedStorage<SkillConfigurationC
         return "技能存储";
     }
 
+    private final int targetVersion = 1;
+
     @Override
     public boolean reloadConfiguration()
     {
@@ -95,6 +98,9 @@ public class MorphSkillHandler extends MorphJsonBasedStorage<SkillConfigurationC
                 if (!registerConfiguration(c)) success.set(false);
             });
 
+            if (storingObject.version < targetVersion)
+                success.set(success.get() || migrate(storingObject));
+
             saveConfiguration();
         }
         catch (Throwable e)
@@ -106,9 +112,37 @@ public class MorphSkillHandler extends MorphJsonBasedStorage<SkillConfigurationC
         }
 
         if (!success.get())
-            logger.warn("不是所有配置都正确加载了，请查看log排查问题。");
+            logger.warn("重新加载时出现问题，请查看log排查原因。");
 
         return val;
+    }
+
+    private boolean migrate(SkillConfigurationContainer config)
+    {
+        logger.info("正在更新技能配置...");
+
+        try
+        {
+            //0 -> 1
+            var oldFakeInvKey = new NamespacedKey("morph", "fake_inventory");
+            config.configurations.forEach(c ->
+            {
+                if (c.getSkillIdentifier().equals(oldFakeInvKey))
+                    c.setSkillIdentifier(SkillType.INVENTORY);
+            });
+
+            config.version = targetVersion;
+
+            logger.info("已更新技能配置，即将重载存储...");
+            this.addSchedule(c -> reloadConfiguration());
+            return true;
+        }
+        catch (Throwable t)
+        {
+            logger.error("更新配置时出现问题：" + t.getMessage());
+            t.printStackTrace();
+            return false;
+        }
     }
 
     /**

@@ -9,4 +9,7 @@ public class SkillConfigurationContainer
 {
     @Expose
     public List<SkillConfiguration> configurations = new ArrayList<>();
+
+    @Expose
+    public int version;
 }
