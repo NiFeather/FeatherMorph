@@ -99,7 +99,7 @@ public class MorphSkillHandler extends MorphJsonBasedStorage<SkillConfigurationC
             });
 
             if (storingObject.version < targetVersion)
-                success.set(success.get() || migrate(storingObject));
+                success.set(migrate(storingObject) || success.get());
 
             saveConfiguration();
         }
