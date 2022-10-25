@@ -159,7 +159,7 @@ public class MorphSkillHandler extends MorphJsonBasedStorage<SkillConfigurationC
             return false;
         }
 
-        var type = configuration.getSkillType();
+        var type = configuration.getSkillIdentifier();
 
         if (type == null || type.equals(SkillType.UNKNOWN))
         {
@@ -320,7 +320,7 @@ public class MorphSkillHandler extends MorphJsonBasedStorage<SkillConfigurationC
     public boolean hasSkill(EntityType type)
     {
         var entry = getSkillEntry(type);
-        return entry != null && !SkillType.NONE.equals(entry.getKey().getSkillType());
+        return entry != null && !SkillType.NONE.equals(entry.getKey().getSkillIdentifier());
     }
 
     /**
@@ -333,7 +333,7 @@ public class MorphSkillHandler extends MorphJsonBasedStorage<SkillConfigurationC
     {
         var entry = getSkillEntry(type);
 
-        if (entry == null || SkillType.NONE.equals(entry.getKey().getSkillType())) return false;
+        if (entry == null || SkillType.NONE.equals(entry.getKey().getSkillIdentifier())) return false;
 
         return entry.getValue().getIdentifier().equals(skillKey);
     }

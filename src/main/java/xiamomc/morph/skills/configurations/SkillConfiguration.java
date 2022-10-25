@@ -5,6 +5,7 @@ import com.google.gson.annotations.SerializedName;
 import net.kyori.adventure.key.Key;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.EntityType;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.misc.EntityTypeUtils;
 import xiamomc.morph.skills.SkillType;
@@ -31,6 +32,11 @@ public class SkillConfiguration
     @SerializedName("mobId")
     private String mobIdentifier;
 
+    /**
+     * 获取目标实体类型
+     *
+     * @return 实体类型
+     */
     @Nullable
     public EntityType getEntityType()
     {
@@ -43,6 +49,11 @@ public class SkillConfiguration
     @SerializedName("skillCooldown")
     private int cooldown;
 
+    /**
+     * 获取技能的默认冷却时间
+     *
+     * @return 默认冷却时间
+     */
     public int getCooldown()
     {
         return cooldown;
@@ -55,8 +66,13 @@ public class SkillConfiguration
     @Expose(deserialize = false, serialize = false)
     private NamespacedKey skillIdentifier;
 
-    @Nullable
-    public NamespacedKey getSkillType()
+    /**
+     * 获取技能的ID
+     *
+     * @return 技能ID
+     */
+    @NotNull
+    public NamespacedKey getSkillIdentifier()
     {
         //没有配置技能ID -> NONE
         //技能ID转换出来的NameSpacedKey是null -> UNKNOWN
