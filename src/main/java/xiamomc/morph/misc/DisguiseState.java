@@ -171,6 +171,7 @@ public class DisguiseState extends MorphPluginObject
      * 获取用来执行的技能的ID
      *
      * @return 技能ID
+     * @apiNote 这个ID可能是技能ID(morph:none)或伪装ID(minecraft:allay、player:Notch、ld:SavedDisguise)中的任何一种
      */
     @Nullable
     public String getSkillIdentifier()
@@ -180,6 +181,7 @@ public class DisguiseState extends MorphPluginObject
 
     /**
      * 设置技能ID
+     *
      * @param skillID 技能ID
      */
     public void setSkillIdentifier(@Nullable String skillID)

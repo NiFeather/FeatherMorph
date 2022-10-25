@@ -16,7 +16,7 @@ public class SkillConfiguration
 
     public SkillConfiguration(String mobId, int cd, NamespacedKey type)
     {
-        this.rawMobIdentifier = mobId;
+        this.identifier = mobId;
         this.cooldown = cd;
         setSkillType(type);
     }
@@ -30,27 +30,27 @@ public class SkillConfiguration
     {
         this.cooldown = cd;
         setSkillType(skillIdentifier);
-        setMobIdentifier(key);
+        setIdentifier(key);
     }
 
     @Expose
     @SerializedName("mobId")
-    private String rawMobIdentifier;
+    private String identifier;
 
     /**
-     * 获取目标实体类型
+     * 获取和配置对应的伪装ID
      *
-     * @return 实体类型
+     * @return 伪装ID
      */
     @NotNull
-    public String getEntityIdentifier()
+    public String getIdentifier()
     {
-        return rawMobIdentifier;
+        return identifier;
     }
 
-    private void setMobIdentifier(NamespacedKey key)
+    private void setIdentifier(NamespacedKey key)
     {
-        this.rawMobIdentifier = key.asString();
+        this.identifier = key.asString();
     }
 
     @Expose
@@ -169,6 +169,6 @@ public class SkillConfiguration
     @Override
     public String toString()
     {
-        return this.rawMobIdentifier + "的技能配置{" + cooldown + "tick冷却, 技能类型:" + skillIdentifier + "}";
+        return this.identifier + "的技能配置{" + cooldown + "tick冷却, 技能类型:" + skillIdentifier + "}";
     }
 }

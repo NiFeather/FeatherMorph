@@ -25,13 +25,24 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MorphSkillHandler extends MorphJsonBasedStorage<SkillConfigurationContainer>
 {
-    private final Map<SkillConfiguration, IMorphSkill> typeSkillMap = new ConcurrentHashMap<>();
+    /**
+     * 配置 -> 技能
+     */
+    private final Map<SkillConfiguration, IMorphSkill> configToSkillMap = new ConcurrentHashMap<>();
+
+    /**
+     * 已注册的技能
+     */
     private final List<IMorphSkill> skills = new ArrayList<>();
 
-    //玩家 -> CD列表
+    /**
+     * 玩家 -> 此玩家的CD列表
+     */
     private final Map<UUID, List<SkillCooldownInfo>> uuidInfoMap = new LinkedHashMap<>();
 
-    //玩家 -> 当前CD
+    /**
+     * 玩家 -> 当前CD
+     */
     private final Map<UUID, SkillCooldownInfo> uuidCooldownMap = new LinkedHashMap<>();
 
     @Resolved
@@ -77,7 +88,7 @@ public class MorphSkillHandler extends MorphJsonBasedStorage<SkillConfigurationC
 
         try
         {
-            typeSkillMap.clear();
+            configToSkillMap.clear();
 
             storingObject.configurations.forEach(c ->
             {
@@ -89,7 +100,7 @@ public class MorphSkillHandler extends MorphJsonBasedStorage<SkillConfigurationC
         catch (Throwable e)
         {
             logger.error("处理配置时出现异常：" + e.getMessage());
-            typeSkillMap.clear();
+            configToSkillMap.clear();
             e.printStackTrace();
             return false;
         }
@@ -147,15 +158,15 @@ public class MorphSkillHandler extends MorphJsonBasedStorage<SkillConfigurationC
      */
     public boolean registerConfiguration(SkillConfiguration configuration)
     {
-        if (typeSkillMap.containsKey(configuration))
+        if (configToSkillMap.containsKey(configuration))
         {
             logger.error("已经注册过一个" + configuration + "的配置了");
             return false;
         }
 
-        if (typeSkillMap.keySet().stream().anyMatch(c -> c.getEntityIdentifier().equals(configuration.getEntityIdentifier())))
+        if (configToSkillMap.keySet().stream().anyMatch(c -> c.getIdentifier().equals(configuration.getIdentifier())))
         {
-            logger.error("已经有一个" + configuration.getEntityIdentifier() + "的技能了");
+            logger.error("已经有一个" + configuration.getIdentifier() + "的技能了");
             return false;
         }
 
@@ -176,7 +187,7 @@ public class MorphSkillHandler extends MorphJsonBasedStorage<SkillConfigurationC
             return false;
         }
 
-        typeSkillMap.put(configuration, skillOptional.get());
+        configToSkillMap.put(configuration, skillOptional.get());
 
         return true;
     }
@@ -195,15 +206,15 @@ public class MorphSkillHandler extends MorphJsonBasedStorage<SkillConfigurationC
     }
 
     /**
-     * 获取某个实体类型的技能和技能配置
-     * @param type 目标实体类型
+     * 获取某个ID对应的技能和技能配置
+     * @param identifier ID
      * @return 对应的技能和技能配置，如果没找到则是null
      */
     @Nullable
-    private Map.Entry<SkillConfiguration, IMorphSkill> getSkillEntry(String type)
+    private Map.Entry<SkillConfiguration, IMorphSkill> getSkillEntry(String identifier)
     {
-        return typeSkillMap.entrySet().stream()
-                .filter(d -> type.equals(d.getKey().getEntityIdentifier())).findFirst().orElse(null);
+        return configToSkillMap.entrySet().stream()
+                .filter(d -> identifier.equals(d.getKey().getIdentifier())).findFirst().orElse(null);
     }
 
     /**
