@@ -12,7 +12,10 @@ public class NoneMorphSkill extends MorphSkill
     @Override
     public int executeSkill(Player player, SkillConfiguration configuration)
     {
-        return 0;
+        logger.warn(configuration.getIdentifier() + "没有技能，但却被调用了executeSkill");
+        Thread.dumpStack();
+
+        return Integer.MAX_VALUE;
     }
 
     @Override
