@@ -1,7 +1,9 @@
 package xiamomc.morph.skills.impl;
 
 import net.kyori.adventure.key.Key;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.SkillStrings;
@@ -33,7 +35,7 @@ public class InventoryMorphSkill extends MorphSkill
     }
 
     @Override
-    public Key getIdentifier()
+    public @NotNull NamespacedKey getIdentifier()
     {
         return SkillType.INVENTORY;
     }

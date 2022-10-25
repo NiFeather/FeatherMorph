@@ -2,10 +2,12 @@ package xiamomc.morph.skills.impl;
 
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.ShulkerBullet;
 import org.bukkit.entity.WitherSkull;
+import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.messages.SkillStrings;
 import xiamomc.morph.misc.EntityTypeUtils;
 import xiamomc.morph.skills.MorphSkill;
@@ -75,7 +77,7 @@ public class LaunchProjectiveMorphSkill extends MorphSkill
     }
 
     @Override
-    public Key getIdentifier()
+    public @NotNull NamespacedKey getIdentifier()
     {
         return SkillType.LAUNCH_PROJECTIVE;
     }

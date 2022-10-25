@@ -3,6 +3,7 @@ package xiamomc.morph.skills;
 import net.kyori.adventure.key.Key;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.skills.configurations.SkillConfiguration;
 
 public interface IMorphSkill
@@ -18,5 +19,6 @@ public interface IMorphSkill
      * 获取要应用的技能ID
      * @return 技能ID
      */
-    public Key getIdentifier();
+    @NotNull
+    public NamespacedKey getIdentifier();
 }

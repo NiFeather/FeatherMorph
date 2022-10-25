@@ -7,6 +7,7 @@ import org.bukkit.Particle;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.messages.SkillStrings;
 import xiamomc.morph.skills.MorphSkill;
 import xiamomc.morph.skills.SkillType;
@@ -71,7 +72,7 @@ public class ApplyEffectMorphSkill extends MorphSkill
     }
 
     @Override
-    public Key getIdentifier()
+    public @NotNull NamespacedKey getIdentifier()
     {
         return SkillType.APPLY_EFFECT;
     }

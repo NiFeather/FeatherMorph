@@ -1,17 +1,18 @@
 package xiamomc.morph.skills;
 
-import net.kyori.adventure.key.Key;
+import org.bukkit.NamespacedKey;
 
 public class SkillType
 {
     private static final String nameSpace = "morph";
 
-    public static Key INVENTORY = Key.key(nameSpace, "fake_inventory");
-    public static Key EXPLODE = Key.key(nameSpace, "explode");
-    public static Key LAUNCH_PROJECTIVE = Key.key(nameSpace, "launch_projective");
-    public static Key APPLY_EFFECT = Key.key(nameSpace, "apply_effect");
-    public static Key TELEPORT = Key.key(nameSpace, "teleport");
-    public static Key EVOKER = Key.key(nameSpace, "evoker");
+    public static NamespacedKey INVENTORY = new NamespacedKey(nameSpace, "fake_inventory");
+    public static NamespacedKey EXPLODE = new NamespacedKey(nameSpace, "explode");
+    public static NamespacedKey LAUNCH_PROJECTIVE = new NamespacedKey(nameSpace, "launch_projective");
+    public static NamespacedKey APPLY_EFFECT = new NamespacedKey(nameSpace, "apply_effect");
+    public static NamespacedKey TELEPORT = new NamespacedKey(nameSpace, "teleport");
+    public static NamespacedKey EVOKER = new NamespacedKey(nameSpace, "evoker");
 
-    public static Key UNKNOWN = Key.key(nameSpace, "unknown");
+    public static NamespacedKey UNKNOWN = new NamespacedKey(nameSpace, "unknown");
+    public static NamespacedKey NONE = new NamespacedKey(nameSpace, "none");
 }

@@ -2,6 +2,7 @@ package xiamomc.morph;
 
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -21,6 +22,7 @@ import xiamomc.pluginbase.Annotations.Resolved;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MorphSkillHandler extends MorphJsonBasedStorage<SkillConfigurationContainer>
 {
@@ -71,10 +73,16 @@ public class MorphSkillHandler extends MorphJsonBasedStorage<SkillConfigurationC
     {
         var val = super.reloadConfiguration();
 
+        var success = new AtomicBoolean(true);
+
         try
         {
             typeSkillMap.clear();
-            storingObject.configurations.forEach(this::registerConfiguration);
+
+            storingObject.configurations.forEach(c ->
+            {
+                if (!registerConfiguration(c)) success.set(false);
+            });
 
             saveConfiguration();
         }
@@ -86,45 +94,91 @@ public class MorphSkillHandler extends MorphJsonBasedStorage<SkillConfigurationC
             return false;
         }
 
+        if (!success.get())
+            logger.warn("不是所有配置都正确加载了，请查看log排查问题。");
+
         return val;
     }
 
-    public void registerSkills(List<IMorphSkill> skills)
+    /**
+     * 注册一批技能
+     * @param skills 技能列表
+     * @return 所有操作是否成功
+     */
+    public boolean registerSkills(List<IMorphSkill> skills)
     {
-        skills.forEach(this::registerSkill);
+        var success = new AtomicBoolean(true);
+
+        skills.forEach(s ->
+        {
+            if (!registerSkill(s)) success.set(false);
+        });
+
+        return success.get();
     }
 
-    public void registerSkill(IMorphSkill skill)
+    /**
+     * 注册一个技能
+     * @param skill 技能
+     * @return 操作是否成功
+     */
+    public boolean registerSkill(IMorphSkill skill)
     {
         if (skills.contains(skill))
-            throw new RuntimeException("已经注册过一个" + skill + "的技能了");
+        {
+            logger.error("已经注册过一个" + skill + "的技能了");
+            return false;
+        }
 
-        if (skill.getIdentifier().asString().equals(SkillType.UNKNOWN.asString()))
-            throw new IllegalArgumentException("技能ID不能是" + SkillType.UNKNOWN);
+        if (skill.getIdentifier().equals(SkillType.UNKNOWN))
+        {
+            logger.error("技能ID不能是" + SkillType.UNKNOWN);
+            return false;
+        }
 
         skills.add(skill);
+        return true;
     }
 
-    public void registerConfiguration(SkillConfiguration configuration)
+    /**
+     * 注册一个技能配置
+     * @param configuration 要注册的配置
+     * @return 操作是否成功
+     */
+    public boolean registerConfiguration(SkillConfiguration configuration)
     {
         if (typeSkillMap.containsKey(configuration))
-            throw new RuntimeException("已经注册过一个" + configuration + "的配置了");
+        {
+            logger.error("已经注册过一个" + configuration + "的配置了");
+            return false;
+        }
 
         if (typeSkillMap.keySet().stream().anyMatch(c -> c.getEntityType() == configuration.getEntityType()))
-            throw new RuntimeException("已经有一个" + configuration.getEntityType() + "的技能了");
+        {
+            logger.error("已经有一个" + configuration.getEntityType() + "的技能了");
+            return false;
+        }
 
         var type = configuration.getSkillType();
 
-        if (type.asString().equals(SkillType.UNKNOWN.asString()))
-            throw new IllegalArgumentException("配置的技能ID不能为" + type);
+        if (type == null || type.equals(SkillType.UNKNOWN))
+        {
+            logger.error(configuration + "的技能ID无效");
+            return false;
+        }
 
         var skillOptional = skills.stream()
-                .filter(s -> s.getIdentifier().asString().equals(type.asString())).findFirst();
+                .filter(s -> s.getIdentifier().equals(type)).findFirst();
 
         if (skillOptional.isEmpty())
-            throw new RuntimeException("找不到和" + type + "匹配的技能");
+        {
+            logger.error("找不到和" + type + "匹配的技能");
+            return false;
+        }
 
         typeSkillMap.put(configuration, skillOptional.get());
+
+        return true;
     }
 
     @Initializer
@@ -265,7 +319,8 @@ public class MorphSkillHandler extends MorphJsonBasedStorage<SkillConfigurationC
      */
     public boolean hasSkill(EntityType type)
     {
-        return getSkillEntry(type) != null;
+        var entry = getSkillEntry(type);
+        return entry != null && !SkillType.NONE.equals(entry.getKey().getSkillType());
     }
 
     /**
@@ -274,13 +329,13 @@ public class MorphSkillHandler extends MorphJsonBasedStorage<SkillConfigurationC
      * @param skillKey 目标技能的Key
      * @return 是否拥有
      */
-    public boolean hasSpeficSkill(EntityType type, Key skillKey)
+    public boolean hasSpeficSkill(EntityType type, NamespacedKey skillKey)
     {
         var entry = getSkillEntry(type);
 
-        if (entry == null) return false;
+        if (entry == null || SkillType.NONE.equals(entry.getKey().getSkillType())) return false;
 
-        return entry.getValue().getIdentifier().asString().equals(skillKey.asString());
+        return entry.getValue().getIdentifier().equals(skillKey);
     }
 
     /**

@@ -3,11 +3,9 @@ package xiamomc.morph.skills.configurations;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import net.kyori.adventure.key.Key;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.EntityType;
-import org.checkerframework.checker.units.qual.K;
-import org.intellij.lang.annotations.Subst;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.LoggerFactory;
 import xiamomc.morph.misc.EntityTypeUtils;
 import xiamomc.morph.skills.SkillType;
 
@@ -17,14 +15,14 @@ public class SkillConfiguration
     {
     }
 
-    public SkillConfiguration(String mobId, int cd, Key type)
+    public SkillConfiguration(String mobId, int cd, NamespacedKey type)
     {
         this.mobIdentifier = mobId;
         this.cooldown = cd;
         setSkillType(type);
     }
 
-    public SkillConfiguration(EntityType type, int cd, Key skillType)
+    public SkillConfiguration(EntityType type, int cd, NamespacedKey skillType)
     {
         this(type.getKey().asString(), cd, skillType);
     }
@@ -55,17 +53,26 @@ public class SkillConfiguration
     private String rawSkillidentifier;
 
     @Expose(deserialize = false, serialize = false)
-    private Key skillIdentifier;
+    private NamespacedKey skillIdentifier;
 
-    public Key getSkillType()
+    @Nullable
+    public NamespacedKey getSkillType()
     {
+        //没有配置技能ID -> NONE
+        //技能ID转换出来的NameSpacedKey是null -> UNKNOWN
         if (skillIdentifier == null)
-            skillIdentifier = rawSkillidentifier == null ? SkillType.UNKNOWN : Key.key(rawSkillidentifier);
+        {
+            NamespacedKey k;
+            if (rawSkillidentifier == null) k = SkillType.NONE;
+            else k = NamespacedKey.fromString(rawSkillidentifier);
+
+            skillIdentifier = k == null ? SkillType.UNKNOWN : k;
+        }
 
         return skillIdentifier;
     }
 
-    private void setSkillType(Key key)
+    private void setSkillType(NamespacedKey key)
     {
         skillIdentifier = key;
         rawSkillidentifier = key.asString();
@@ -138,6 +145,6 @@ public class SkillConfiguration
     @Override
     public String toString()
     {
-        return "生物" + this.mobIdentifier + "的技能配置{" + cooldown + "tick冷却, 技能类型:" + skillIdentifier + "}";
+        return this.mobIdentifier + "的技能配置{" + cooldown + "tick冷却, 技能类型:" + skillIdentifier + "}";
     }
 }

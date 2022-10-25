@@ -1,6 +1,7 @@
 package xiamomc.morph.skills;
 
 import net.kyori.adventure.key.Key;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.EntityType;
 import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.Nullable;
@@ -13,7 +14,7 @@ public class DefaultConfigGenerator
 {
     private static SkillConfigurationContainer cachedContainer = null;
 
-    private static void addConfiguration(List<SkillConfiguration> targetList, EntityType entityType, int cd, Key key, @Nullable Consumer<SkillConfiguration> c)
+    private static void addConfiguration(List<SkillConfiguration> targetList, EntityType entityType, int cd, NamespacedKey key, @Nullable Consumer<SkillConfiguration> c)
     {
         var config = new SkillConfiguration(entityType, cd, key);
 
@@ -23,7 +24,7 @@ public class DefaultConfigGenerator
         targetList.add(config);
     }
 
-    private static void addConfiguration(List<SkillConfiguration> targetList, EntityType entityType, int cd, Key key)
+    private static void addConfiguration(List<SkillConfiguration> targetList, EntityType entityType, int cd, NamespacedKey key)
     {
         addConfiguration(targetList, entityType, cd, key, null);
     }

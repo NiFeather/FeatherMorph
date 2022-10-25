@@ -4,10 +4,12 @@ import net.kyori.adventure.key.Key;
 import org.bukkit.Difficulty;
 import org.bukkit.FluidCollisionMode;
 import org.bukkit.Location;
+import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.entity.*;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.util.Vector;
+import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.messages.SkillStrings;
 import xiamomc.morph.skills.MorphSkill;
 import xiamomc.morph.skills.SkillType;
@@ -108,7 +110,7 @@ public class SummonFangsMorphSkill extends MorphSkill
     }
 
     @Override
-    public Key getIdentifier()
+    public @NotNull NamespacedKey getIdentifier()
     {
         return SkillType.EVOKER;
     }

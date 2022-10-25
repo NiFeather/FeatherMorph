@@ -3,7 +3,9 @@ package xiamomc.morph.skills.impl;
 import net.kyori.adventure.key.Key;
 import org.bukkit.GameMode;
 import org.bukkit.GameRule;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.messages.SkillStrings;
 import xiamomc.morph.skills.MorphSkill;
 import xiamomc.morph.skills.SkillType;
@@ -38,7 +40,7 @@ public class ExplodeMorphSkill extends MorphSkill
     }
 
     @Override
-    public Key getIdentifier()
+    public @NotNull NamespacedKey getIdentifier()
     {
         return SkillType.EXPLODE;
     }
