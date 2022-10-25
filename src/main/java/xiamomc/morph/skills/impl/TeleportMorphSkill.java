@@ -17,8 +17,16 @@ public class TeleportMorphSkill extends MorphSkill
     @Override
     public int executeSkill(Player player, SkillConfiguration configuration)
     {
+        var teleportConfig = configuration.getTeleportConfiguration();
+
+        if (teleportConfig == null)
+        {
+            printErrorMessage(player, configuration + "没有传送设置");
+            return 10;
+        }
+
         //目标方块
-        var targetBlock = player.getTargetBlockExact(32, FluidCollisionMode.ALWAYS);
+        var targetBlock = player.getTargetBlockExact(teleportConfig.getMaxDistance(), FluidCollisionMode.ALWAYS);
 
         if (targetBlock == null
                 || targetBlock.getBlockData().getMaterial().isAir()

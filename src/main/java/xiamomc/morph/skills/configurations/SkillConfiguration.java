@@ -107,20 +107,21 @@ public class SkillConfiguration
     @SerializedName("summon")
     private SummonConfiguration summonConfiguration;
 
+    @Nullable
+    public SummonConfiguration getSummonConfiguration()
+    {
+        return summonConfiguration;
+    }
+
+    public void setSummonConfiguration(@Nullable SummonConfiguration val)
+    {
+        this.summonConfiguration = val;
+    }
+
     @Expose
     @Nullable
     @SerializedName("projective")
     private ProjectiveConfiguration projectiveConfiguration;
-
-    @Expose
-    @Nullable
-    @SerializedName("effect")
-    private EffectConfiguration effectConfiguration;
-
-    @Expose
-    @Nullable
-    @SerializedName("explosion")
-    private ExplosionConfiguration explosionConfiguration;
 
     @Nullable
     public ProjectiveConfiguration getProjectiveConfiguration()
@@ -133,6 +134,11 @@ public class SkillConfiguration
         this.projectiveConfiguration = val;
     }
 
+    @Expose
+    @Nullable
+    @SerializedName("effect")
+    private EffectConfiguration effectConfiguration;
+
     @Nullable
     public EffectConfiguration getEffectConfiguration()
     {
@@ -143,6 +149,11 @@ public class SkillConfiguration
     {
         this.effectConfiguration = val;
     }
+
+    @Expose
+    @Nullable
+    @SerializedName("explosion")
+    private ExplosionConfiguration explosionConfiguration;
 
     @Nullable
     public ExplosionConfiguration getExplosionConfiguration()
@@ -155,15 +166,20 @@ public class SkillConfiguration
         this.explosionConfiguration = val;
     }
 
+    @Expose
     @Nullable
-    public SummonConfiguration getSummonConfiguration()
+    @SerializedName("teleport")
+    private TeleportConfiguration teleportConfiguration;
+
+    @Nullable
+    public TeleportConfiguration getTeleportConfiguration()
     {
-        return summonConfiguration;
+        return teleportConfiguration;
     }
 
-    public void setSummonConfiguration(@Nullable SummonConfiguration val)
+    public void setTeleportConfiguration(@Nullable TeleportConfiguration val)
     {
-        this.summonConfiguration = val;
+        this.teleportConfiguration = val;
     }
 
     @Override

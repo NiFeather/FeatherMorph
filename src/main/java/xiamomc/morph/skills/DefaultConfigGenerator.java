@@ -76,7 +76,9 @@ public class DefaultConfigGenerator
         addConfiguration(skills, EntityType.CREEPER, 80, SkillType.EXPLODE, c ->
                 c.setExplosionConfiguration(new ExplosionConfiguration(true, 3, false)));
 
-        addConfiguration(skills, EntityType.ENDERMAN, 40, SkillType.TELEPORT);
+        addConfiguration(skills, EntityType.ENDERMAN, 40, SkillType.TELEPORT, c ->
+                c.setTeleportConfiguration(new TeleportConfiguration(32)));
+
         addConfiguration(skills, EntityType.EVOKER, 100, SkillType.EVOKER);
 
         cachedContainer = container;
