@@ -13,7 +13,6 @@ import org.bukkit.Particle;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
-import xiamomc.morph.abilities.AbilityFlag;
 import xiamomc.morph.abilities.AbilityHandler;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
@@ -95,20 +94,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 new LibsDisguisesDisguiseProvider()
         ));
 
-        abilityHandler.registerAbility(EntityTypeUtils.canFly(), AbilityFlag.CAN_FLY);
-        abilityHandler.registerAbility(EntityTypeUtils.hasFireResistance(), AbilityFlag.HAS_FIRE_RESISTANCE);
-        abilityHandler.registerAbility(EntityTypeUtils.takesDamageFromWater(), AbilityFlag.TAKES_DAMAGE_FROM_WATER);
-        abilityHandler.registerAbility(EntityTypeUtils.canBreatheUnderWater(), AbilityFlag.CAN_BREATHE_UNDER_WATER);
-        abilityHandler.registerAbility(EntityTypeUtils.burnsUnderSun(), AbilityFlag.BURNS_UNDER_SUN);
-        abilityHandler.registerAbility(EntityTypeUtils.alwaysNightVision(), AbilityFlag.ALWAYS_NIGHT_VISION);
-        abilityHandler.registerAbility(EntityTypeUtils.hasJumpBoost(), AbilityFlag.HAS_JUMP_BOOST);
-        abilityHandler.registerAbility(EntityTypeUtils.hasSmallJumpBoost(), AbilityFlag.HAS_SMALL_JUMP_BOOST);
-        abilityHandler.registerAbility(EntityTypeUtils.hasSpeedBoost(), AbilityFlag.HAS_SPEED_BOOST);
-        abilityHandler.registerAbility(EntityTypeUtils.noFallDamage(), AbilityFlag.NO_FALL_DAMAGE);
-        abilityHandler.registerAbility(EntityTypeUtils.hasFeatherFalling(), AbilityFlag.HAS_FEATHER_FALLING);
-        abilityHandler.registerAbility(EntityTypeUtils.reducesMagicDamage(), AbilityFlag.REDUCES_MAGIC_DAMAGE);
-        abilityHandler.registerAbility(EntityTypeUtils.reducesFallDamage(), AbilityFlag.REDUCES_FALL_DAMAGE);
-        abilityHandler.registerAbility(EntityTypeUtils.hasSnowTrail(), AbilityFlag.SNOWY);
     }
 
     private void onConfigRefresh()

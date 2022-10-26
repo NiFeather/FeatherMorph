@@ -6,7 +6,11 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.entity.EntityType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xiamomc.morph.abilities.IMorphAbility;
 import xiamomc.morph.skills.SkillType;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class SkillConfiguration
 {
@@ -14,18 +18,39 @@ public class SkillConfiguration
     {
     }
 
-    public SkillConfiguration(String mobId, int cd, NamespacedKey type)
+    /**
+     * 创建一个技能配置
+     *
+     * @param mobId 生物ID
+     * @param cd CD时间
+     * @param type 技能ID
+     */
+    public SkillConfiguration(String mobId, int cd, NamespacedKey skillIdentifier)
     {
         this.identifier = mobId;
         this.cooldown = cd;
-        setSkillIdentifier(type);
+        setSkillIdentifier(skillIdentifier);
     }
 
-    public SkillConfiguration(EntityType type, int cd, NamespacedKey skillType)
+    /**
+     * 创建一个技能配置
+     *
+     * @param type 生物类型
+     * @param cd CD时间
+     * @param skillIdentifier 技能ID
+     */
+    public SkillConfiguration(EntityType type, int cd, NamespacedKey skillIdentifier)
     {
-        this(type.getKey(), cd, skillType);
+        this(type.getKey(), cd, skillIdentifier);
     }
 
+    /**
+     * 创建一个技能配置
+     *
+     * @param key 生物ID
+     * @param cd CD时间
+     * @param skillIdentifier 技能ID
+     */
     public SkillConfiguration(NamespacedKey key, int cd, NamespacedKey skillIdentifier)
     {
         this.cooldown = cd;
@@ -52,6 +77,8 @@ public class SkillConfiguration
     {
         this.identifier = key.asString();
     }
+
+    //region 主动技能
 
     @Expose
     @SerializedName("skillCooldown")
@@ -187,6 +214,54 @@ public class SkillConfiguration
     {
         this.teleportConfiguration = val;
     }
+
+    //endregion
+
+    //region 被动技能
+
+    @Expose
+    @SerializedName("abilities")
+    private List<String> abilitiyIdentifiers = new ArrayList<>();
+
+    public List<String> getAbilitiyIdentifiers()
+    {
+        return abilitiyIdentifiers;
+    }
+
+    private void setAbilitiyIdentifiers(List<String> identifiers)
+    {
+        abilitiyIdentifiers.clear();
+
+        if (identifiers != null)
+            abilitiyIdentifiers.addAll(identifiers);
+    }
+
+    public void addAbilityIdentifier(NamespacedKey id)
+    {
+        var idString = id.asString();
+
+        if (abilitiyIdentifiers.stream().anyMatch(s -> s.equals(idString)))
+            return;
+
+        this.abilitiyIdentifiers.add(idString);
+    }
+
+    private final List<IMorphAbility> abilities = new ArrayList<>();
+
+    public List<IMorphAbility> getAbilities()
+    {
+        return abilities;
+    }
+
+    public void setAbilities(List<IMorphAbility> newAbilities)
+    {
+        abilities.clear();
+
+        if (newAbilities != null)
+            abilities.addAll(newAbilities);
+    }
+
+    //endregion
 
     @Override
     public String toString()

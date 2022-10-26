@@ -1,0 +1,23 @@
+package xiamomc.morph.abilities;
+
+import org.bukkit.NamespacedKey;
+
+public class AbilityType
+{
+    private static final String nameSpace = "morph";
+
+    public static final NamespacedKey CAN_FLY = new NamespacedKey(nameSpace, "can_fly");
+    public static final NamespacedKey CAN_BREATHE_UNDER_WATER = new NamespacedKey(nameSpace, "breathe_under_water");
+    public static final NamespacedKey HAS_FIRE_RESISTANCE = new NamespacedKey(nameSpace, "fire_resistance");
+    public static final NamespacedKey BURNS_UNDER_SUN = new NamespacedKey(nameSpace, "burns_under_sun");
+    public static final NamespacedKey TAKES_DAMAGE_FROM_WATER = new NamespacedKey(nameSpace, "takes_damage_from_water");
+    public static final NamespacedKey ALWAYS_NIGHT_VISION = new NamespacedKey(nameSpace, "night_vision");
+    public static final NamespacedKey HAS_JUMP_BOOST = new NamespacedKey(nameSpace, "normal_jump_boost");
+    public static final NamespacedKey HAS_SMALL_JUMP_BOOST = new NamespacedKey(nameSpace, "small_jump_boost");
+    public static final NamespacedKey HAS_SPEED_BOOST = new NamespacedKey(nameSpace, "speed");
+    public static final NamespacedKey HAS_FEATHER_FALLING = new NamespacedKey(nameSpace, "feather_falling");
+    public static final NamespacedKey NO_FALL_DAMAGE = new NamespacedKey(nameSpace, "no_fall_damage");
+    public static final NamespacedKey REDUCES_FALL_DAMAGE = new NamespacedKey(nameSpace, "reduce_fall_damage");
+    public static final NamespacedKey REDUCES_MAGIC_DAMAGE = new NamespacedKey(nameSpace, "reduce_magic_damage");
+    public static final NamespacedKey SNOWY = new NamespacedKey(nameSpace, "snowy");
+}

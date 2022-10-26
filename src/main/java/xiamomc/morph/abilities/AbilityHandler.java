@@ -1,130 +1,95 @@
 package xiamomc.morph.abilities;
 
-import org.bukkit.Material;
-import org.bukkit.World;
+import org.bukkit.Bukkit;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphPluginObject;
+import xiamomc.morph.abilities.impl.*;
 import xiamomc.morph.misc.DisguiseState;
+import xiamomc.morph.storage.skill.SkillConfigurationStore;
+import xiamomc.pluginbase.Annotations.Initializer;
+import xiamomc.pluginbase.Annotations.Resolved;
 
-import java.util.EnumSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class AbilityHandler extends MorphPluginObject
 {
-    private final Map<AbilityFlag, Set<EntityType>> typeAbilityMap = new ConcurrentHashMap<>();
+    private final List<IMorphAbility> registedAbilities = new ArrayList<>();
 
-    public AbilityHandler()
+    @Resolved
+    private SkillConfigurationStore store;
+
+    public boolean registerAbility(IMorphAbility ability)
     {
-        //初始化Map
-        for (var f : AbilityFlag.values())
-            typeAbilityMap.put(f, EnumSet.noneOf(EntityType.class));
+        if (registedAbilities.stream().anyMatch(a -> a.getIdentifier().equals(ability.getIdentifier())))
+        {
+            logger.error("已经注册过一个" + ability.getIdentifier().asString() + "的被动技能了");
+            return false;
+        }
+
+        registedAbilities.add(ability);
+        Bukkit.getPluginManager().registerEvents(ability, plugin);
+        return true;
     }
 
-    public void registerAbility(EntityType type, EnumSet<AbilityFlag> flags)
+    public boolean registerAbilities(List<IMorphAbility> abilities)
     {
-        flags.forEach(f -> this.registerAbility(type, f));
+        abilities.forEach(a -> registerAbility(a));
+        return true;
     }
 
-    public void registerAbility(Set<EntityType> types, AbilityFlag flag)
+    @Initializer
+    private void load()
     {
-        types.forEach(t -> this.registerAbility(t, flag));
-    }
-
-    public void registerAbility(EntityType type, AbilityFlag flag)
-    {
-        var targetList = typeAbilityMap.get(flag);
-
-        if (targetList.contains(type)) return;
-
-        targetList.add(type);
+        registerAbilities(List.of(
+                new BreatheUnderWaterAbility(),
+                new BurnsUnderSunAbility(),
+                new FeatherFallingAbility(),
+                new FireResistanceAbility(),
+                new FlyAbility(),
+                new JumpBoostAbility(),
+                new NightVisionAbility(),
+                new NoFallDamageAbility(),
+                new ReduceFallDamageAbility(),
+                new ReduceMagicDamageAbility(),
+                new SmallJumpBoostAbility(),
+                new SnowyAbility(),
+                new SpeedBoostAbility(),
+                new TakesDamageFromWaterAbility()
+        ));
     }
 
     @Nullable
-    public EnumSet<AbilityFlag> getFlagsFor(EntityType type)
+    public IMorphAbility getAbility(@Nullable NamespacedKey key)
     {
-        var list = EnumSet.noneOf(AbilityFlag.class);
+        if (key == null) return null;
 
-        typeAbilityMap.forEach((f, t) ->
-        {
-            if (t.contains(type)) list.add(f);
-        });
+        var val = registedAbilities.stream()
+                .filter(a -> a.getIdentifier().equals(key)).findFirst().orElse(null);
 
-        return list;
+        if (val == null)
+            logger.error("未知的被动技能: " + key.asString());
+
+        return val;
     }
 
-    private final PotionEffect conduitEffect = new PotionEffect(PotionEffectType.CONDUIT_POWER, 20, 0);
-    private final PotionEffect nightVisionEffect = new PotionEffect(PotionEffectType.NIGHT_VISION, 300, 0);
-    private final PotionEffect fireResistance = new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 20, 0);
-    private final PotionEffect jumpBoostEffect = new PotionEffect(PotionEffectType.JUMP, 5, 1);
-    private final PotionEffect jumpBoostEffectSmall = new PotionEffect(PotionEffectType.JUMP, 5, 0);
-    private final PotionEffect speedEffect = new PotionEffect(PotionEffectType.SPEED, 5, 2);
-    private final PotionEffect featherFallingEffect = new PotionEffect(PotionEffectType.SLOW_FALLING, 5, 0);
+    @Nullable
+    public List<IMorphAbility> getAbilitiesFor(EntityType type)
+    {
+        return store.getAbilityFor(type);
+    }
+
+    @Nullable
+    public List<IMorphAbility> getAbilitiesFor(String id)
+    {
+        return store.getAbilityFor(id);
+    }
 
     public void handle(Player player, DisguiseState state)
     {
-        var playerLocation = player.getLocation();
-
-        if (state.isAbilityFlagSet(AbilityFlag.CAN_BREATHE_UNDER_WATER) && player.isInWaterOrRainOrBubbleColumn())
-        {
-            player.addPotionEffect(conduitEffect);
-        }
-
-        if (state.isAbilityFlagSet(AbilityFlag.HAS_FIRE_RESISTANCE))
-        {
-            player.addPotionEffect(fireResistance);
-        }
-
-        if (state.isAbilityFlagSet(AbilityFlag.TAKES_DAMAGE_FROM_WATER) && player.isInWaterOrRainOrBubbleColumn())
-        {
-            player.damage(1);
-        }
-
-        if (state.isAbilityFlagSet(AbilityFlag.BURNS_UNDER_SUN)
-                && player.getWorld().getEnvironment().equals(World.Environment.NORMAL)
-                && player.getEquipment().getHelmet() == null
-                && player.getWorld().isDayTime()
-                && player.getWorld().isClearWeather()
-                && !player.isInWaterOrRainOrBubbleColumn()
-                && playerLocation.getBlock().getLightFromSky() == 15)
-        {
-            player.setFireTicks(200);
-        }
-
-        if (state.isAbilityFlagSet(AbilityFlag.HAS_JUMP_BOOST))
-            player.addPotionEffect(jumpBoostEffect);
-        else if (state.isAbilityFlagSet(AbilityFlag.HAS_SMALL_JUMP_BOOST))
-            player.addPotionEffect(jumpBoostEffectSmall);
-
-        if (state.isAbilityFlagSet(AbilityFlag.HAS_SPEED_BOOST))
-            player.addPotionEffect(speedEffect);
-
-        if (state.isAbilityFlagSet(AbilityFlag.ALWAYS_NIGHT_VISION))
-            player.addPotionEffect(nightVisionEffect);
-
-        if (state.isAbilityFlagSet(AbilityFlag.HAS_FEATHER_FALLING))
-            player.addPotionEffect(featherFallingEffect);
-
-        if (state.isAbilityFlagSet(AbilityFlag.SNOWY))
-        {
-            var block = playerLocation.getBlock();
-
-            if (block.getType().isAir()
-                    && block.canPlace(Material.SNOW.createBlockData())
-                    && block.getTemperature() <= 0.95)
-            {
-                block.setType(Material.SNOW);
-            }
-
-            player.setFreezeTicks(0);
-
-            if (playerLocation.getBlock().getTemperature() > 1.0)
-                player.setFireTicks(40);
-        }
+        state.getAbilities().forEach(a -> a.handle(player, state));
     }
 }

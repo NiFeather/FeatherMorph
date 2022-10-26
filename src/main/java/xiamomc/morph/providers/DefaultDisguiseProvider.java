@@ -17,7 +17,7 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scoreboard.Scoreboard;
 import org.jetbrains.annotations.Nullable;
-import xiamomc.morph.abilities.AbilityFlag;
+import xiamomc.morph.abilities.AbilityHandler;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.messages.MorphStrings;
@@ -59,15 +59,16 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
     {
         super.unMorph(player, state);
 
-        //取消玩家飞行
-        player.setAllowFlight(canFly(player, null));
-        player.setFlySpeed(0.1f);
+        state.getAbilities().forEach(a -> a.revokeFromPlayer(player, state));
 
         return true;
     }
 
     @Resolved
     private MorphSkillHandler skillHandler;
+
+    @Resolved
+    private AbilityHandler abilityHandler;
 
     @Resolved
     private Scoreboard scoreboard;
@@ -111,6 +112,13 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
             if (state.shouldHandlePose())
                 watcher.setEntityPose(DisguiseUtils.toEntityPose(player.getPose()));
         }
+
+        //被动技能
+        var abilities = abilityHandler.getAbilitiesFor(state.getSkillIdentifier());
+        state.setAbilities(abilities);
+
+        if (abilities != null)
+            abilities.forEach(a -> a.handle(player, state));
 
         //Bossbar
         var bossbar = state.getBossbar();
@@ -201,8 +209,12 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
             }
         }
 
-        //更新飞行技能
-        updateFlyingAbility(state);
+        //被动技能
+        var abilities = abilityHandler.getAbilitiesFor(state.getSkillIdentifier());
+        state.setAbilities(abilities);
+
+        if (abilities != null)
+            abilities.forEach(a -> a.applyToPlayer(state.getPlayer(), state));
 
         //发光颜色
         ChatColor glowColor = null;
@@ -261,39 +273,5 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
         }
 
         state.setBossbar(bossbar);
-    }
-
-    private boolean canFly(Player player, @Nullable DisguiseState state)
-    {
-        var gamemode = player.getGameMode();
-        var gamemodeAllowFlying = gamemode.equals(GameMode.CREATIVE) || gamemode.equals(GameMode.SPECTATOR);
-
-        if (state == null) return gamemodeAllowFlying;
-        else return gamemodeAllowFlying || state.isAbilityFlagSet(AbilityFlag.CAN_FLY);
-    }
-
-    private void setPlayerFlySpeed(Player player, EntityType type)
-    {
-        var gameMode = player.getGameMode();
-        if (type == null || gameMode.equals(GameMode.SPECTATOR)) return;
-
-        switch (type)
-        {
-            case ALLAY, BEE, BLAZE, VEX, BAT, PARROT -> player.setFlySpeed(0.05f);
-            case GHAST, PHANTOM -> player.setFlySpeed(0.06f);
-            case ENDER_DRAGON -> player.setFlySpeed(0.15f);
-            default -> player.setFlySpeed(0.1f);
-        }
-    }
-
-    public boolean updateFlyingAbility(DisguiseState state)
-    {
-        var player = state.getPlayer();
-
-        var canFly = canFly(player, state);
-        player.setAllowFlight(canFly);
-        setPlayerFlySpeed(player, canFly ? state.getDisguise().getType().getEntityType() : null);
-
-        return canFly;
     }
 }

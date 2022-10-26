@@ -9,6 +9,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -16,9 +17,10 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
+import xiamomc.morph.abilities.IMorphAbility;
+import xiamomc.morph.abilities.MorphAbility;
 import xiamomc.morph.providers.DisguiseProvider;
 import xiamomc.morph.skills.MorphSkillHandler;
-import xiamomc.morph.abilities.AbilityFlag;
 import xiamomc.morph.abilities.AbilityHandler;
 import xiamomc.morph.skills.SkillCooldownInfo;
 import xiamomc.morph.skills.SkillType;
@@ -26,10 +28,7 @@ import xiamomc.morph.storage.offlinestore.OfflineDisguiseState;
 import xiamomc.morph.storage.playerdata.PlayerMorphConfiguration;
 import xiamomc.pluginbase.Annotations.Resolved;
 
-import java.util.Arrays;
-import java.util.EnumSet;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 public class DisguiseState extends MorphPluginObject
 {
@@ -252,14 +251,37 @@ public class DisguiseState extends MorphPluginObject
         this.cooldownInfo = info;
     }
 
+    //region 被动技能
+
     /**
      * 伪装被动技能Flag
      */
-    private final EnumSet<AbilityFlag> abilityFlag = EnumSet.noneOf(AbilityFlag.class);
-    public EnumSet<AbilityFlag> getAbilityFlags()
+    private final List<IMorphAbility> abilities = new ArrayList<>();
+
+    public List<IMorphAbility> getAbilities()
     {
-        return abilityFlag;
+        return abilities;
     }
+
+    public void setAbilities(@Nullable List<IMorphAbility> newAbilities)
+    {
+        abilities.clear();
+
+        if (newAbilities != null)
+            abilities.addAll(newAbilities);
+    }
+
+    /**
+     * 检查某个被动能力是否设置
+     * @param key {@link NamespacedKey}
+     * @return 是否设置
+     */
+    public boolean containsAbility(NamespacedKey key)
+    {
+        return abilities.stream().anyMatch(a -> a.getIdentifier().equals(key));
+    }
+
+    //endregion abilityFlag
 
     /**
      * 要不要手动更新伪装Pose？
@@ -268,14 +290,6 @@ public class DisguiseState extends MorphPluginObject
     public boolean shouldHandlePose()
     {
         return shouldHandlePose;
-    }
-
-    public void setAbilities(@Nullable EnumSet<AbilityFlag> newAbilities)
-    {
-        abilityFlag.clear();
-
-        if (newAbilities != null)
-            abilityFlag.addAll(newAbilities);
     }
 
     @Resolved(shouldSolveImmediately = true)
@@ -295,7 +309,8 @@ public class DisguiseState extends MorphPluginObject
      * @param shouldHandlePose 是否要处理玩家Pose（或：是否为克隆的伪装）
      * @param shouldRefreshDisguiseItems 要不要刷新伪装物品？
      */
-    public void setDisguise(@NotNull String identifier, @NotNull String skillIdentifier, Disguise d, boolean shouldHandlePose, boolean shouldRefreshDisguiseItems)
+    public void setDisguise(@NotNull String identifier, @NotNull String skillIdentifier,
+                            Disguise d, boolean shouldHandlePose, boolean shouldRefreshDisguiseItems)
     {
         if (!DisguiseUtils.isTracing(d))
             throw new RuntimeException("此Disguise不能由插件管理");
@@ -321,7 +336,7 @@ public class DisguiseState extends MorphPluginObject
 
         //更新技能Flag
         var disgType = d.getType().getEntityType();
-        setAbilities(abilityHandler.getFlagsFor(disgType));
+        setAbilities(abilityHandler.getAbilitiesFor(disgType));
 
         //伪装类型是否支持设置伪装物品
         supportsDisguisedItems = skillHandler.hasSpeficSkill(skillIdentifier, SkillType.INVENTORY);
@@ -445,19 +460,6 @@ public class DisguiseState extends MorphPluginObject
         watcher.setItemInMainHand(showDefaults ? handItems[0] : emptyHandItems[0]);
         watcher.setItemInOffHand(showDefaults ? handItems[1] : emptyHandItems[1]);
     }
-
-    //region 被动技能
-
-    /**
-     * 检查某个被动能力是否设置
-     * @param value Flag
-     * @return 是否设置
-     */
-    public boolean isAbilityFlagSet(AbilityFlag value)
-    {
-        return abilityFlag.contains(value);
-    }
-    //endregion abilityFlag
 
     /**
      * 转换为离线存储格式

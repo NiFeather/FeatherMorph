@@ -1,7 +1,10 @@
 package xiamomc.morph.storage.skill;
 
 import org.bukkit.NamespacedKey;
+import org.bukkit.entity.EntityType;
 import org.jetbrains.annotations.NotNull;
+import xiamomc.morph.abilities.AbilityHandler;
+import xiamomc.morph.abilities.IMorphAbility;
 import xiamomc.morph.skills.MorphSkillHandler;
 import xiamomc.morph.skills.DefaultConfigGenerator;
 import xiamomc.morph.skills.IMorphSkill;
@@ -9,6 +12,8 @@ import xiamomc.morph.skills.SkillType;
 import xiamomc.morph.storage.MorphJsonBasedStorage;
 import xiamomc.pluginbase.Annotations.Resolved;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -42,7 +47,7 @@ public class SkillConfigurationStore extends MorphJsonBasedStorage<SkillConfigur
     @Override
     protected @NotNull SkillConfigurationContainer createDefault()
     {
-        return DefaultConfigGenerator.getDefaultConfiguration();
+        return DefaultConfigGenerator.getDefaultSkillConfiguration();
     }
 
     @Override
@@ -51,7 +56,13 @@ public class SkillConfigurationStore extends MorphJsonBasedStorage<SkillConfigur
         return "技能存储";
     }
 
-    private final int targetVersion = 1;
+    private final int targetVersion = 2;
+
+    @Resolved
+    private MorphSkillHandler skillHandler;
+
+    @Resolved
+    private AbilityHandler abilityHandler;
 
     @Override
     public boolean reloadConfiguration()
@@ -63,10 +74,28 @@ public class SkillConfigurationStore extends MorphJsonBasedStorage<SkillConfigur
         try
         {
             configToSkillMap.clear();
-
             storingObject.configurations.forEach(c ->
             {
                 if (!registerConfiguration(c)) success.set(false);
+
+                var abilities = new ArrayList<IMorphAbility>();
+
+                c.getAbilitiyIdentifiers().forEach(i ->
+                {
+                    var key = NamespacedKey.fromString(i);
+
+                    if (key == null)
+                        logger.error("无效的技能ID: " + i);
+
+                    var ability = abilityHandler.getAbility(key);
+
+                    if (ability != null)
+                        abilities.add(ability);
+                    else
+                        success.set(false);
+                });
+
+                c.setAbilities(abilities);
             });
 
             if (storingObject.version < targetVersion)
@@ -88,9 +117,6 @@ public class SkillConfigurationStore extends MorphJsonBasedStorage<SkillConfigur
 
         return val;
     }
-
-    @Resolved
-    private MorphSkillHandler skillHandler;
 
     /**
      * 注册一个技能配置
@@ -147,6 +173,9 @@ public class SkillConfigurationStore extends MorphJsonBasedStorage<SkillConfigur
                     c.setSkillIdentifier(SkillType.INVENTORY);
             });
 
+            //1 -> 2
+            DefaultConfigGenerator.addAbilityConfigurations(config.configurations);
+
             config.version = targetVersion;
 
             logger.info("已更新技能配置，即将重载存储...");
@@ -160,4 +189,28 @@ public class SkillConfigurationStore extends MorphJsonBasedStorage<SkillConfigur
             return false;
         }
     }
+
+    //region 被动技能
+
+    public List<IMorphAbility> getAbilityFor(String id)
+    {
+        var list = new ArrayList<IMorphAbility>();
+
+        storingObject.configurations.forEach(skillConfig ->
+        {
+            if (!skillConfig.getIdentifier().equals(id))
+                return;
+
+            list.addAll(skillConfig.getAbilities());
+        });
+
+        return list;
+    }
+
+    public List<IMorphAbility> getAbilityFor(EntityType type)
+    {
+        return getAbilityFor(type.getKey().asString());
+    }
+
+    //endregion
 }
