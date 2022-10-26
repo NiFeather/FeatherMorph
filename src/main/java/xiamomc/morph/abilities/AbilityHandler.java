@@ -58,7 +58,8 @@ public class AbilityHandler extends MorphPluginObject
                 new SmallJumpBoostAbility(),
                 new SnowyAbility(),
                 new SpeedBoostAbility(),
-                new TakesDamageFromWaterAbility()
+                new TakesDamageFromWaterAbility(),
+                new WardenLessAwareAbility()
         ));
     }
 

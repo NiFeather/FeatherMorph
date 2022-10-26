@@ -102,10 +102,9 @@ public class EntityTypeUtils
                 || isGolem(type);
     }
 
-    public static boolean isWardenHostile(EntityType type)
+    public static Set<EntityType> wardenLessAware()
     {
-        return type != EntityType.ARMOR_STAND
-                && type != EntityType.WARDEN;
+        return Set.of(EntityType.ARMOR_STAND, EntityType.WARDEN);
     }
 
     public static Set<EntityType> canFly()
