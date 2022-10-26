@@ -384,8 +384,6 @@ public class DisguiseState extends MorphPluginObject
      */
     public void setShowingDisguisedItems(boolean value)
     {
-        if (showDisguisedItems == value) return;
-
         var watcher = disguise.getWatcher();
         updateEquipment(watcher, value);
         showDisguisedItems = value;
