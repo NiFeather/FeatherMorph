@@ -18,6 +18,7 @@ public class OfflineDisguiseState implements IOfflineState
      * 玩家名（用于显示）
      */
     @Expose
+    @Nullable
     public String playerName;
 
     /**
@@ -31,12 +32,14 @@ public class OfflineDisguiseState implements IOfflineState
      * 伪装技能ID
      */
     @Expose
+    @Nullable
     public String skillID;
 
     /**
      * 伪装数据，如果存在则优先使用这里的数据
      */
     @Expose
+    @Nullable
     public String disguiseData;
 
     /**
@@ -51,7 +54,19 @@ public class OfflineDisguiseState implements IOfflineState
     @Expose
     public boolean showingDisguisedItems;
 
+    /**
+     * 伪装实例
+     */
     @Nullable
-    @Expose(deserialize = false, serialize = false)
     public Disguise disguise;
+
+    /**
+     * 检查此离线存储是否正常
+     *
+     * @return 是否正常
+     */
+    public boolean isValid()
+    {
+        return disguiseID != null && playerUUID != null;
+    }
 }

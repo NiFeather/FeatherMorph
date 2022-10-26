@@ -24,7 +24,7 @@ import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.profile.PlayerTextures;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
-import xiamomc.morph.MorphSkillHandler;
+import xiamomc.morph.skills.MorphSkillHandler;
 import xiamomc.morph.abilities.AbilityFlag;
 import xiamomc.morph.commands.MorphCommandHelper;
 import xiamomc.morph.config.ConfigOption;

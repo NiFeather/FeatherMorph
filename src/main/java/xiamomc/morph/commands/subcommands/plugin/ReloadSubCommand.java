@@ -4,11 +4,12 @@ import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
-import xiamomc.morph.MorphSkillHandler;
+import xiamomc.morph.skills.MorphSkillHandler;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.messages.CommandStrings;
 import xiamomc.morph.messages.HelpStrings;
 import xiamomc.morph.messages.MessageUtils;
+import xiamomc.morph.storage.skill.SkillConfigurationStore;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Command.ISubCommand;
 import xiamomc.pluginbase.messages.FormattableMessage;
@@ -48,7 +49,7 @@ public class ReloadSubCommand extends MorphPluginObject implements ISubCommand
     private MessageStore<?> messageStore;
 
     @Resolved
-    private MorphSkillHandler skills;
+    private SkillConfigurationStore skills;
 
     private final String[] subcommands = new String[]
             {

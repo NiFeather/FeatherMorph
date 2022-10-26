@@ -11,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.messages.SkillStrings;
 import xiamomc.morph.skills.MorphSkill;
 import xiamomc.morph.skills.SkillType;
-import xiamomc.morph.skills.configurations.SkillConfiguration;
+import xiamomc.morph.storage.skill.SkillConfiguration;
 
 public class ApplyEffectMorphSkill extends MorphSkill
 {

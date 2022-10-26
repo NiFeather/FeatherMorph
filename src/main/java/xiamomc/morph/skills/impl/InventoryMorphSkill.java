@@ -1,6 +1,5 @@
 package xiamomc.morph.skills.impl;
 
-import net.kyori.adventure.key.Key;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -9,7 +8,7 @@ import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.SkillStrings;
 import xiamomc.morph.skills.MorphSkill;
 import xiamomc.morph.skills.SkillType;
-import xiamomc.morph.skills.configurations.SkillConfiguration;
+import xiamomc.morph.storage.skill.SkillConfiguration;
 import xiamomc.pluginbase.Annotations.Resolved;
 
 public class InventoryMorphSkill extends MorphSkill

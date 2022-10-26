@@ -1,4 +1,4 @@
-package xiamomc.morph.skills.configurations;
+package xiamomc.morph.storage.skill;
 
 import com.google.gson.annotations.Expose;
 

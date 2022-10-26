@@ -13,6 +13,8 @@ import xiamomc.morph.interfaces.IManagePlayerData;
 import xiamomc.morph.interfaces.IManageRequests;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.MorphMessageStore;
+import xiamomc.morph.skills.MorphSkillHandler;
+import xiamomc.morph.storage.skill.SkillConfigurationStore;
 import xiamomc.pluginbase.Command.CommandHelper;
 import xiamomc.pluginbase.XiaMoJavaPlugin;
 import xiamomc.pluginbase.messages.MessageStore;
@@ -64,6 +66,8 @@ public final class MorphPlugin extends XiaMoJavaPlugin
         dependencyManager.cacheAs(Scoreboard.class, Bukkit.getScoreboardManager().getMainScoreboard());
         dependencyManager.cacheAs(MorphConfigManager.class, new MorphConfigManager(this));
         dependencyManager.cache(playerTracker);
+
+        dependencyManager.cache(new SkillConfigurationStore());
 
         dependencyManager.cache(new MessageUtils());
 

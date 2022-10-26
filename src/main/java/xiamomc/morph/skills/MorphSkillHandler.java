@@ -1,40 +1,39 @@
-package xiamomc.morph;
+package xiamomc.morph.skills;
 
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xiamomc.morph.MorphManager;
+import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.SkillStrings;
-import xiamomc.morph.skills.DefaultConfigGenerator;
-import xiamomc.morph.skills.IMorphSkill;
-import xiamomc.morph.skills.SkillCooldownInfo;
-import xiamomc.morph.skills.SkillType;
-import xiamomc.morph.skills.configurations.SkillConfiguration;
-import xiamomc.morph.skills.configurations.SkillConfigurationContainer;
 import xiamomc.morph.skills.impl.*;
-import xiamomc.morph.storage.MorphJsonBasedStorage;
+import xiamomc.morph.storage.skill.SkillConfiguration;
+import xiamomc.morph.storage.skill.SkillConfigurationStore;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 
-import javax.naming.Name;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class MorphSkillHandler extends MorphJsonBasedStorage<SkillConfigurationContainer>
+public class MorphSkillHandler extends MorphPluginObject
 {
-    /**
-     * 配置 -> 技能
-     */
-    private final Map<SkillConfiguration, IMorphSkill> configToSkillMap = new ConcurrentHashMap<>();
-
     /**
      * 已注册的技能
      */
     private final List<IMorphSkill> skills = new ArrayList<>();
+
+    /**
+     * 获取已注册的技能
+     *
+     * @return 技能列表
+     */
+    public List<IMorphSkill> getRegistedSkills()
+    {
+        return skills;
+    }
 
     /**
      * 玩家 -> 此玩家的CD列表
@@ -49,7 +48,11 @@ public class MorphSkillHandler extends MorphJsonBasedStorage<SkillConfigurationC
     @Resolved
     private MorphManager manager;
 
-    public MorphSkillHandler()
+    @Resolved
+    private SkillConfigurationStore store;
+
+    @Initializer
+    private void load()
     {
         registerSkills(List.of(
                 new ApplyEffectMorphSkill(),
@@ -60,89 +63,8 @@ public class MorphSkillHandler extends MorphJsonBasedStorage<SkillConfigurationC
                 new TeleportMorphSkill(),
                 new NoneMorphSkill()
         ));
-    }
 
-    @Override
-    protected @NotNull String getFileName()
-    {
-        return "skills.json";
-    }
-
-    @Override
-    protected @NotNull SkillConfigurationContainer createDefault()
-    {
-        return DefaultConfigGenerator.getDefaultConfiguration();
-    }
-
-    @Override
-    protected @NotNull String getDisplayName()
-    {
-        return "技能存储";
-    }
-
-    private final int targetVersion = 1;
-
-    @Override
-    public boolean reloadConfiguration()
-    {
-        var val = super.reloadConfiguration();
-
-        var success = new AtomicBoolean(true);
-
-        try
-        {
-            configToSkillMap.clear();
-
-            storingObject.configurations.forEach(c ->
-            {
-                if (!registerConfiguration(c)) success.set(false);
-            });
-
-            if (storingObject.version < targetVersion)
-                success.set(migrate(storingObject) || success.get());
-
-            saveConfiguration();
-        }
-        catch (Throwable e)
-        {
-            logger.error("处理配置时出现异常：" + e.getMessage());
-            configToSkillMap.clear();
-            e.printStackTrace();
-            return false;
-        }
-
-        if (!success.get())
-            logger.warn("重新加载时出现问题，请查看log排查原因。");
-
-        return val;
-    }
-
-    private boolean migrate(SkillConfigurationContainer config)
-    {
-        logger.info("正在更新技能配置...");
-
-        try
-        {
-            //0 -> 1
-            var oldFakeInvKey = new NamespacedKey("morph", "fake_inventory");
-            config.configurations.forEach(c ->
-            {
-                if (c.getSkillIdentifier().equals(oldFakeInvKey))
-                    c.setSkillIdentifier(SkillType.INVENTORY);
-            });
-
-            config.version = targetVersion;
-
-            logger.info("已更新技能配置，即将重载存储...");
-            this.addSchedule(c -> reloadConfiguration());
-            return true;
-        }
-        catch (Throwable t)
-        {
-            logger.error("更新配置时出现问题：" + t.getMessage());
-            t.printStackTrace();
-            return false;
-        }
+        this.addSchedule(c -> this.update());
     }
 
     /**
@@ -185,53 +107,6 @@ public class MorphSkillHandler extends MorphJsonBasedStorage<SkillConfigurationC
         return true;
     }
 
-    /**
-     * 注册一个技能配置
-     * @param configuration 要注册的配置
-     * @return 操作是否成功
-     */
-    public boolean registerConfiguration(SkillConfiguration configuration)
-    {
-        if (configToSkillMap.containsKey(configuration))
-        {
-            logger.error("已经注册过一个" + configuration + "的配置了");
-            return false;
-        }
-
-        if (configToSkillMap.keySet().stream().anyMatch(c -> c.getIdentifier().equals(configuration.getIdentifier())))
-        {
-            logger.error("已经有一个" + configuration.getIdentifier() + "的技能了");
-            return false;
-        }
-
-        var type = configuration.getSkillIdentifier();
-
-        if (type.equals(SkillType.UNKNOWN))
-        {
-            logger.error(configuration + "的技能ID无效");
-            return false;
-        }
-
-        var skillOptional = skills.stream()
-                .filter(s -> s.getIdentifier().equals(type)).findFirst();
-
-        if (skillOptional.isEmpty())
-        {
-            logger.error("找不到和" + type + "匹配的技能");
-            return false;
-        }
-
-        configToSkillMap.put(configuration, skillOptional.get());
-
-        return true;
-    }
-
-    @Initializer
-    private void load()
-    {
-        this.addSchedule(c -> this.update());
-    }
-
     private void update()
     {
         //更新CD
@@ -247,7 +122,9 @@ public class MorphSkillHandler extends MorphJsonBasedStorage<SkillConfigurationC
     @Nullable
     private Map.Entry<SkillConfiguration, IMorphSkill> getSkillEntry(String identifier)
     {
-        return configToSkillMap.entrySet().stream()
+        if (identifier == null) return null;
+
+        return store.getConfiguredSkills().entrySet().stream()
                 .filter(d -> identifier.equals(d.getKey().getIdentifier())).findFirst().orElse(null);
     }
 

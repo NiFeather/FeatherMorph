@@ -19,7 +19,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-public class PlayerDataManager extends MorphJsonBasedStorage<MorphConfiguration> implements IManagePlayerData
+public class PlayerDataManager extends MorphJsonBasedStorage<PlayerMorphConfigurationContainer> implements IManagePlayerData
 {
     private final List<DisguiseInfo> cachedInfos = new ArrayList<>();
 
@@ -33,9 +33,9 @@ public class PlayerDataManager extends MorphJsonBasedStorage<MorphConfiguration>
     }
 
     @Override
-    protected @NotNull MorphConfiguration createDefault()
+    protected @NotNull PlayerMorphConfigurationContainer createDefault()
     {
-        return new MorphConfiguration();
+        return new PlayerMorphConfigurationContainer();
     }
 
     @Override
@@ -89,7 +89,7 @@ public class PlayerDataManager extends MorphJsonBasedStorage<MorphConfiguration>
 
     private final int targetConfigurationVersion = 3;
 
-    private void migrate(MorphConfiguration configuration)
+    private void migrate(PlayerMorphConfigurationContainer configuration)
     {
         //1 -> 2: 玩家名处理
         if (configuration.Version == 1)

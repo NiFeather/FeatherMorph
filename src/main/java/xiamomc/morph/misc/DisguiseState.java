@@ -15,7 +15,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphPluginObject;
-import xiamomc.morph.MorphSkillHandler;
+import xiamomc.morph.skills.MorphSkillHandler;
 import xiamomc.morph.abilities.AbilityFlag;
 import xiamomc.morph.abilities.AbilityHandler;
 import xiamomc.morph.skills.SkillCooldownInfo;
@@ -263,7 +263,7 @@ public class DisguiseState extends MorphPluginObject
      * @param shouldHandlePose 是否要处理玩家Pose（或：是否为克隆的伪装）
      * @param shouldRefreshDisguiseItems 要不要刷新伪装物品？
      */
-    public void setDisguise(@NotNull String identifier, String skillIdentifier, Disguise d, boolean shouldHandlePose, boolean shouldRefreshDisguiseItems)
+    public void setDisguise(@NotNull String identifier, @NotNull String skillIdentifier, Disguise d, boolean shouldHandlePose, boolean shouldRefreshDisguiseItems)
     {
         if (!DisguiseUtils.isTracing(d))
             throw new RuntimeException("此Disguise不能由插件管理");
@@ -448,6 +448,7 @@ public class DisguiseState extends MorphPluginObject
         offlineState.playerName = this.player.getName();
 
         offlineState.disguiseID = this.getDisguiseIdentifier();
+        offlineState.skillID = this.getSkillIdentifier();
 
         var newDisguise = disguise.clone();
 
@@ -468,12 +469,15 @@ public class DisguiseState extends MorphPluginObject
      */
     public static DisguiseState fromOfflineState(OfflineDisguiseState offlineState, PlayerMorphConfiguration configuration)
     {
+        if (!offlineState.isValid())
+            throw new RuntimeException("离线存储损坏");
+
         var player = Bukkit.getPlayer(offlineState.playerUUID);
 
         if (player == null) throw new RuntimeException("未找到与" + offlineState.playerUUID + "对应的玩家");
 
         var state = new DisguiseState(player,
-                offlineState.disguiseID, offlineState.skillID,
+                offlineState.disguiseID, offlineState.skillID == null ? offlineState.disguiseID : offlineState.skillID,
                 offlineState.disguise, offlineState.shouldHandlePose);
 
         if (state.supportsDisguisedItems)

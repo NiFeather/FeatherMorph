@@ -4,7 +4,7 @@ import com.google.gson.annotations.Expose;
 
 import java.util.ArrayList;
 
-public class MorphConfiguration
+public class PlayerMorphConfigurationContainer
 {
     @Expose
     public ArrayList<PlayerMorphConfiguration> playerMorphConfigurations = new ArrayList<>();

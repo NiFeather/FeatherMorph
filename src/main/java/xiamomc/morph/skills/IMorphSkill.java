@@ -1,10 +1,9 @@
 package xiamomc.morph.skills;
 
-import net.kyori.adventure.key.Key;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import xiamomc.morph.skills.configurations.SkillConfiguration;
+import xiamomc.morph.storage.skill.SkillConfiguration;
 
 public interface IMorphSkill
 {

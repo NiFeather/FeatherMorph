@@ -1,11 +1,10 @@
 package xiamomc.morph.skills;
 
-import net.kyori.adventure.key.Key;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.EntityType;
 import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.Nullable;
-import xiamomc.morph.skills.configurations.*;
+import xiamomc.morph.storage.skill.*;
 
 import java.util.List;
 import java.util.function.Consumer;
