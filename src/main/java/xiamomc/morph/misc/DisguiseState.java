@@ -300,8 +300,7 @@ public class DisguiseState extends MorphPluginObject
             handItems = emptyHandItems;
 
             //更新伪装物品
-            //只对克隆或LD的伪装生效
-            if (supportsDisguisedItems && (shouldHandlePose || DisguiseTypes.fromId(identifier) == DisguiseTypes.LD))
+            if (supportsDisguisedItems)
             {
                 var watcher = disguise.getWatcher();
 
@@ -326,17 +325,12 @@ public class DisguiseState extends MorphPluginObject
                 if (handItems[0].isSimilar(handItems[1]))
                     handItems[1] = itemOrAir(null);
 
-                //全是空的，则禁用装备显示
-                if (Arrays.stream(defaultArmors).allMatch(i -> i != null && i.getType().isAir())
-                        && Arrays.stream(handItems).allMatch(i -> i != null && i.getType().isAir()))
-                {
-                    defaultArmors = emptyArmorStack;
-                    handItems = emptyHandItems;
-                }
+                //全是空的，则默认显示自身装备
+                var emptyEquipment = Arrays.stream(defaultArmors).allMatch(i -> i != null && i.getType().isAir())
+                        && Arrays.stream(handItems).allMatch(i -> i != null && i.getType().isAir());
 
                 //开启默认装备显示或者更新显示
-                if (!showDisguisedItems) toggleDisguisedItems();
-                else updateEquipment();
+                setShowingDisguisedItems(showDisguisedItems || !emptyEquipment);
             }
         }
     }
@@ -391,13 +385,6 @@ public class DisguiseState extends MorphPluginObject
     public void setShowingDisguisedItems(boolean value)
     {
         if (showDisguisedItems == value) return;
-
-        //如果伪装没有任何默认装备，永远显示玩家自己的伪装
-        if (value && Arrays.equals(defaultArmors, emptyArmorStack)
-                  && Arrays.equals(handItems, emptyHandItems))
-        {
-            value = false;
-        }
 
         var watcher = disguise.getWatcher();
         updateEquipment(watcher, value);
