@@ -127,6 +127,13 @@ public class DisguiseState extends MorphPluginObject
         return disguise.getType().getEntityType();
     }
 
+    private DisguiseTypes disguiseType;
+
+    public DisguiseTypes getDisguiseType()
+    {
+        return disguiseType;
+    }
+
     /**
      * 伪装的Provider
      */
@@ -301,6 +308,7 @@ public class DisguiseState extends MorphPluginObject
         setSkillIdentifier(skillIdentifier);
 
         var type = DisguiseTypes.fromId(identifier);
+        disguiseType = type;
 
         displayName = switch (type)
                 {

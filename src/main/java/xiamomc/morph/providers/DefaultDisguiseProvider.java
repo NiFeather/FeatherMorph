@@ -91,7 +91,7 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
         var team = scoreboard.getPlayerTeam(player);
         var playerColor = (team == null || !team.hasColor()) ? NamedTextColor.WHITE : team.color();
 
-        if (DisguiseTypes.fromId(state.getDisguiseIdentifier()) != DisguiseTypes.LD)
+        if (state.getDisguiseType() != DisguiseTypes.LD)
         {
             //workaround: 复制实体伪装时会一并复制隐身标签
             //            会导致复制出来的伪装永久隐身

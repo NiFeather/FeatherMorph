@@ -75,7 +75,7 @@ public abstract class DisguiseProvider extends MorphPluginObject
     {
         if (target == null) return DisguiseResult.fail();
 
-        boolean shouldCopy = false;
+        boolean shouldClone = false;
         Disguise disguise;
 
         if (DisguiseAPI.isDisguised(target))
@@ -83,33 +83,30 @@ public abstract class DisguiseProvider extends MorphPluginObject
             var disg = DisguiseAPI.getDisguise(target);
             assert disg != null;
 
-            var type = info.getEntityType();
-
-            //检查伪装ID
+            //如果玩家已伪装，则检查其目标伪装和我们想要的是否一致
             if (target instanceof Player targetPlayer)
             {
-                //查询此玩家的伪装是否是LD自定义伪装
                 var state = morphs.getDisguiseStateFor(targetPlayer);
 
                 if (state != null)
                 {
                     var key = state.getDisguiseIdentifier();
 
-                    //ID不一样则返回null
+                    //ID不一样则返回失败
                     if (!key.equals(info.getIdentifier())) return DisguiseResult.fail();
                 }
             }
 
-            shouldCopy = (info.isPlayerDisguise()
+            shouldClone = (info.isPlayerDisguise()
                     ? disg.isPlayerDisguise() && ((PlayerDisguise) disg).getName().equals(info.playerDisguiseTargetName)
-                    : disg.getType().getEntityType().equals(type));
+                    : disg.getType().getEntityType().equals(info.getEntityType()));
         }
 
-        disguise = shouldCopy
+        disguise = shouldClone
                 ? DisguiseAPI.getDisguise(target)
                 : DisguiseAPI.constructDisguise(target);
 
-        return DisguiseResult.success(disguise, shouldCopy) ;
+        return DisguiseResult.success(disguise, true) ;
     }
 
     /**

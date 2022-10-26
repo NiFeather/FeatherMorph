@@ -366,7 +366,9 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
                         String targetKey = DisguiseTypes.UNKNOWN.toId("unknown");
 
                         //查询此玩家的伪装是否是LD自定义伪装，是的话key应为此玩家的伪装id
-                        if (config.get(Boolean.class, ConfigOption.ALLOW_LD_DISGUISES) && targetedEntity instanceof Player targetPlayer)
+                        if (config.get(Boolean.class, ConfigOption.ALLOW_LD_DISGUISES)
+                                && targetedEntity instanceof Player targetPlayer
+                                && DisguiseAPI.isDisguised(targetPlayer))
                         {
                             var playerState = morphs.getDisguiseStateFor(targetPlayer);
 
