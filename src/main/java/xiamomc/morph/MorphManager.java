@@ -140,7 +140,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                     logger.warn(p.getName() + "在State中的伪装拥有Tracing标签，但却和DisguiseAPI中获得的不一样");
                     logger.warn("API: " + disg + " :: State: " + disgInState);
 
-                    p.sendMessage(MessageUtils.prefixes(p, Component.translatable("更新伪装时遇到了意外，正在取消伪装")));
+                    p.sendMessage(MessageUtils.prefixes(p, MorphStrings.errorWhileDisguising()));
                     unMorph(p);
                 }
                 else
@@ -159,7 +159,14 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             var provider = i.getProvider();
 
             if (provider != null)
-                provider.updateDisguise(p, i);
+            {
+                if (!provider.updateDisguise(p, i))
+                {
+                    p.sendMessage(MessageUtils.prefixes(p, MorphStrings.errorWhileUpdatingDisguise()));
+
+                    unMorph(p);
+                }
+            }
         });
 
         this.addSchedule(c -> update());
@@ -221,6 +228,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
     private List<?> bannedDisguises = new ArrayList<>();
 
+    //region 伪装提供器
+
     private static final List<DisguiseProvider> providers = new ArrayList<>();
 
     /**
@@ -267,14 +276,17 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         return success.get();
     }
 
+    //endregion
+
     /**
      * 根据传入的key自动伪装
+     *
      * @param player 要伪装的玩家
      * @param key key
      * @param targetEntity 玩家正在看的实体
      * @return 操作是否成功
      */
-    public boolean morphEntityTypeAuto(Player player, String key, @Nullable Entity targetEntity)
+    public boolean morph(Player player, String key, @Nullable Entity targetEntity)
     {
         if (!key.contains(":")) key = DisguiseTypes.VANILLA.toId(key);
 
@@ -284,7 +296,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         if (bannedDisguises.contains(key))
         {
-            player.sendMessage(MessageUtils.prefixes(player, MorphStrings.disguiseBannedString()));
+            player.sendMessage(MessageUtils.prefixes(player, MorphStrings.disguiseBannedOrNotSupportedString()));
             return false;
         }
 
@@ -300,7 +312,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
                 if (provider == null)
                 {
-                    player.sendMessage(MessageUtils.prefixes(player, Component.text("服务器不支持ID为" + key + "的伪装")));
+                    player.sendMessage(MessageUtils.prefixes(player, MorphStrings.disguiseBannedOrNotSupportedString()));
                     logger.error("未能找到和命名空间" + strippedKey[0] + "匹配的Provider");
                     return false;
                 }
@@ -310,7 +322,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
                     if (!result.success())
                     {
-                        player.sendMessage(MessageUtils.prefixes(player, Component.text("伪装时出现问题")));
+                        player.sendMessage(MessageUtils.prefixes(player, MorphStrings.errorWhileDisguising()));
                         logger.error(provider + "在执行伪装时出现问题");
                         return false;
                     }
@@ -623,7 +635,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         //有限还原
         if (avaliableDisguises.stream().anyMatch(i -> i.getKey().matches(key)))
         {
-            morphEntityTypeAuto(player, key, null);
+            morph(player, key, null);
             return true;
         }
 

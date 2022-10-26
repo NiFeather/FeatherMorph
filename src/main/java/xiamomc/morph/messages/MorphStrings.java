@@ -158,10 +158,22 @@ public class MorphStrings extends AbstractMorphStrings
                 "<color:red>已切换自身可见性");
     }
 
-    public static FormattableMessage disguiseBannedString()
+    public static FormattableMessage disguiseBannedOrNotSupportedString()
     {
-        return getFormattable(getKey("disguise_banned"),
-                "<color:red>此伪装已被服务器禁用");
+        return getFormattable(getKey("disguise_banned_or_not_supported"),
+                "<color:red>服务器已禁用或不支持此伪装");
+    }
+
+    public static FormattableMessage errorWhileDisguising()
+    {
+        return getFormattable(getKey("error_while_disguising"),
+                "<color:red>伪装时出现问题");
+    }
+
+    public static FormattableMessage errorWhileUpdatingDisguise()
+    {
+        return getFormattable(getKey("error_while_updating_disguise"),
+                "<color:red>更新伪装时遇到了意外，正在取消伪装");
     }
 
     private static String getKey(String key)

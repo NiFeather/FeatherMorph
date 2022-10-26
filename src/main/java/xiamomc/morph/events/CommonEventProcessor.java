@@ -303,7 +303,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
                 }
 
                 //否则，更新或应用伪装
-                if (morphs.morphEntityTypeAuto(player, "player:" + profile.getName(), player.getTargetEntity(5)))
+                if (morphs.morph(player, "player:" + profile.getName(), player.getTargetEntity(5)))
                 {
                     //成功伪装后设置皮肤为头颅的皮肤
                     var disguise = (PlayerDisguise) DisguiseAPI.getDisguise(player);
@@ -384,7 +384,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
                                         : targetedEntity.getType().getKey().asString();
                         }
 
-                        morphs.morphEntityTypeAuto(player, targetKey, targetedEntity);
+                        morphs.morph(player, targetKey, targetedEntity);
 
                         return true;
                     }

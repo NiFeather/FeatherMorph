@@ -63,9 +63,7 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
         player.setAllowFlight(canFly(player, null));
         player.setFlySpeed(0.1f);
 
-        var disguise = state.getDisguise();
-
-        return disguise.removeDisguise(player);
+        return true;
     }
 
     @Resolved
@@ -89,6 +87,7 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
 
         player.sendActionBar(msg.resolve("what", state.getDisplayName()).toComponent());
 
+        //发光颜色
         var team = scoreboard.getPlayerTeam(player);
         var playerColor = (team == null || !team.hasColor()) ? NamedTextColor.WHITE : team.color();
 
@@ -113,7 +112,7 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
                 watcher.setEntityPose(DisguiseUtils.toEntityPose(player.getPose()));
         }
 
-        //tick Bossbar
+        //Bossbar
         var bossbar = state.getBossbar();
         if (bossbar != null)
         {

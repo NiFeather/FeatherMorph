@@ -35,7 +35,7 @@ public class MorphCommand extends MorphPluginObject implements IPluginCommand
             }
 
             if (args.length >= 1)
-                morphManager.morphEntityTypeAuto(player, args[0], player.getTargetEntity(5));
+                morphManager.morph(player, args[0], player.getTargetEntity(5));
             else
                 sender.sendMessage(MessageUtils.prefixes(sender, MorphStrings.disguiseNotDefinedString()));
         }
