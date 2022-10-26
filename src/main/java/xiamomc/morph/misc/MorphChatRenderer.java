@@ -7,9 +7,11 @@ import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permissible;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.MorphManager;
+import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.messages.CommonStrings;
 import xiamomc.pluginbase.Annotations.Resolved;
+import xiamomc.pluginbase.messages.FormattableMessage;
 
 public class MorphChatRenderer extends MorphPluginObject implements ChatRenderer
 {
@@ -20,6 +22,14 @@ public class MorphChatRenderer extends MorphPluginObject implements ChatRenderer
     @Resolved(shouldSolveImmediately = true)
     private MorphManager morphManager;
 
+    public MorphChatRenderer(FormattableMessage formattable)
+    {
+        if (formattable != null)
+            this.formattable = formattable;
+    }
+
+    private FormattableMessage formattable = CommonStrings.chatOverrideString();
+
     @Override
     public @NotNull Component render(@NotNull Player source, @NotNull Component sourceDisplayName,
                                      @NotNull Component incomingMessage, @NotNull Audience viewer)
@@ -27,7 +37,8 @@ public class MorphChatRenderer extends MorphPluginObject implements ChatRenderer
         if (this.message == null)
         {
             var state = morphManager.getDisguiseStateFor(source);
-            if (state != null && state.getDisguise().isPlayerDisguise())
+
+            if (state != null)
                 sourceDisplayName = state.getDisplayName();
 
             try
@@ -52,7 +63,7 @@ public class MorphChatRenderer extends MorphPluginObject implements ChatRenderer
 
     private Component buildMessage(Component displayName, Component msg)
     {
-        return CommonStrings.chatOverrideString()
+        return new FormattableMessage(MorphPlugin.getMorphNameSpace(), formattable.getKey(), formattable.getDefaultString())
                 .resolve("who", displayName)
                 .resolve("message", msg).toComponent();
     }

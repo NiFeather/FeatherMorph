@@ -285,6 +285,12 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             return false;
         }
 
+        //提前取消所有被动
+        var state = getDisguiseStateFor(player);
+
+        if (state != null)
+            state.getAbilities().forEach(a -> a.revokeFromPlayer(player, state));
+
         //检查有没有伪装
         if (info != null)
         {
@@ -369,8 +375,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         if (state.getProvider() != null)
             state.getProvider().unMorph(player, state);
 
-        player.sendMessage(MessageUtils.prefixes(player, MorphStrings.unMorphSuccessString()));
-        player.sendActionBar(Component.empty());
+        //移除所有被动
+        state.getAbilities().forEach(a -> a.revokeFromPlayer(player, state));
 
         spawnParticle(player, player.getLocation(), player.getWidth(), player.getHeight(), player.getWidth());
 
@@ -383,6 +389,9 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         //移除Bossbar
         state.setBossbar(null);
+
+        player.sendMessage(MessageUtils.prefixes(player, MorphStrings.unMorphSuccessString()));
+        player.sendActionBar(Component.empty());
 
         Bukkit.getPluginManager().callEvent(new PlayerUnMorphEvent(player));
     }

@@ -21,4 +21,5 @@ public class AbilityType
     public static final NamespacedKey REDUCES_MAGIC_DAMAGE = new NamespacedKey(nameSpace, "reduce_magic_damage");
     public static final NamespacedKey SNOWY = new NamespacedKey(nameSpace, "snowy");
     public static final NamespacedKey WARDEN_LESS_AWARE = new NamespacedKey(nameSpace, "warden_less_aware");
+    public static final NamespacedKey CHAT_OVERRIDE = new NamespacedKey(nameSpace, "chat_override");
 }

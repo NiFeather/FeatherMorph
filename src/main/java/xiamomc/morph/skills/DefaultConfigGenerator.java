@@ -148,5 +148,7 @@ public class DefaultConfigGenerator
         addAbilityConfiguration(skills, EntityTypeUtils.hasSnowTrail(), AbilityType.SNOWY);
 
         addAbilityConfiguration(skills, EntityTypeUtils.wardenLessAware(), AbilityType.WARDEN_LESS_AWARE);
+
+        addAbilityConfiguration(skills, EntityType.PLAYER, AbilityType.CHAT_OVERRIDE);
     }
 }

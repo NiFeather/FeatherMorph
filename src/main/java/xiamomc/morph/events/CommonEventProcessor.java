@@ -92,24 +92,6 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         morphs.unMorph(e.getPlayer());
     }
 
-    @EventHandler
-    public void onChat(AsyncChatEvent e)
-    {
-        //workaround: ChatManager与我们的聊天覆盖八字不和，只能用自己的Renderer
-        var player = e.getPlayer();
-        var state = morphs.getDisguiseStateFor(player);
-
-        if (state == null || !state.getDisguise().isPlayerDisguise()) return;
-
-        if (morphs.allowChatOverride() && useCustomRenderer)
-            e.renderer(new MorphChatRenderer());
-        else
-        {
-            //noinspection OverrideOnly
-            e.renderer().render(player, state.getDisplayName(), e.message(), player);
-        }
-    }
-
     private int cooldownOnDamage;
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
@@ -140,8 +122,6 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         config.set(ConfigOption.ALLOW_HEAD_MORPH, val);
     }
 
-    private boolean useCustomRenderer;
-
     @Initializer
     private void load()
     {
@@ -152,7 +132,6 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
     {
         setAllowHeadMorph(config.getOrDefault(Boolean.class, ConfigOption.ALLOW_HEAD_MORPH, true));
 
-        useCustomRenderer = config.getOrDefault(Boolean.class, ConfigOption.CHAT_OVERRIDE_USE_CUSTOM_RENDERER, true);
         cooldownOnDamage = config.getOrDefault(Integer.class, ConfigOption.SKILL_COOLDOWN_ON_DAMAGE);
 
         var actionItemId = config.getOrDefault(String.class, ConfigOption.ACTION_ITEM);

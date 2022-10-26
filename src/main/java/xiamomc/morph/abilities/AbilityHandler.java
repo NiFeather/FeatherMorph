@@ -59,7 +59,8 @@ public class AbilityHandler extends MorphPluginObject
                 new SnowyAbility(),
                 new SpeedBoostAbility(),
                 new TakesDamageFromWaterAbility(),
-                new WardenLessAwareAbility()
+                new WardenLessAwareAbility(),
+                new ChatOverrideAbility()
         ));
     }
 

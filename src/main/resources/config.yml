@@ -4,8 +4,12 @@ root:
   chatOverride:
     # 启用、禁用功能
     allowOverride: false
-    # 是否使用message.json里的格式覆盖？
+    # 是否使用自定义消息格式？
     UseCustomRenderer: true
+    # 自定义消息格式
+    # 格式为"<伪装id>:<消息>"，消息格式和messages.json中的“common.chat.overridePattern”一致
+    # 如果这里没有配置，则插件会取messages.json中的版本使用
+    custom_patterns: []
 
   # 收到伤害时的技能CD
   # 玩家受到伤害后技能CD将至少为下面配置的时间（单位：游戏刻）
@@ -20,7 +24,8 @@ root:
   allowHeadMorph: true
 
   # 是否允许使用LibsDisguises中的自定义伪装？
-  # 注：因为API限制，快速伪装无法识别某人的伪装是否为自定义伪装，可能会导致伪装复制不完整
+  # 注：因为API限制，快速伪装无法识别某人的伪装是否为自定义伪装，
+  #    这可能会导致复制的伪装不完整
   enable_ld_custom_disguises: false
 
   bossbar:
@@ -61,4 +66,4 @@ root:
   bannedDisguises: []
 
   # 不要动这个键!
-  version: 6
+  version: 7

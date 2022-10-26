@@ -74,7 +74,7 @@ public class MorphConfigManager extends PluginConfigManager
         super.reload();
 
         //更新配置
-        int targetVersion = 6;
+        int targetVersion = 7;
 
         if (getOrDefault(Integer.class, ConfigOption.VERSION) < targetVersion)
         {
