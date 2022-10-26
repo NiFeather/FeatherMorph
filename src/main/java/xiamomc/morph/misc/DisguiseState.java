@@ -14,7 +14,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
+import xiamomc.morph.providers.DisguiseProvider;
 import xiamomc.morph.skills.MorphSkillHandler;
 import xiamomc.morph.abilities.AbilityFlag;
 import xiamomc.morph.abilities.AbilityHandler;
@@ -31,10 +33,12 @@ import java.util.UUID;
 
 public class DisguiseState extends MorphPluginObject
 {
-    public DisguiseState(Player player, @NotNull String id, @NotNull String skillId, Disguise disguiseInstance, boolean isClone)
+    public DisguiseState(Player player, @NotNull String id, @NotNull String skillId,
+                         Disguise disguiseInstance, boolean isClone, @Nullable DisguiseProvider provider)
     {
         this.player = player;
         this.playerUniqueID = player.getUniqueId();
+        this.provider = provider;
 
         this.setDisguise(id, skillId, disguiseInstance, isClone);
     }
@@ -121,6 +125,27 @@ public class DisguiseState extends MorphPluginObject
     public EntityType getEntityType()
     {
         return disguise.getType().getEntityType();
+    }
+
+    /**
+     * 伪装的Provider
+     */
+    private DisguiseProvider provider;
+
+    private boolean noProvider;
+
+    @Nullable
+    public DisguiseProvider getProvider()
+    {
+        if (provider == null && !noProvider)
+        {
+            var val = MorphManager.getProvider(this.getDisguiseIdentifier());
+
+            if (val == null) noProvider = true;
+            else provider = val;
+        }
+
+        return provider;
     }
 
     /**
@@ -402,16 +427,6 @@ public class DisguiseState extends MorphPluginObject
 
     /**
      * 更新伪装物品显示
-     */
-    private void updateEquipment()
-    {
-        var watcher = disguise.getWatcher();
-
-        updateEquipment(watcher, showDisguisedItems);
-    }
-
-    /**
-     * 更新伪装物品显示
      * @param watcher 伪装的Watcher
      * @param showDefaults 是否显示默认盔甲
      * @apiNote 此方法在将状态转换为离线存储的过程中才会直接调用，其他情况下请用不带参数的方法
@@ -478,7 +493,7 @@ public class DisguiseState extends MorphPluginObject
 
         var state = new DisguiseState(player,
                 offlineState.disguiseID, offlineState.skillID == null ? offlineState.disguiseID : offlineState.skillID,
-                offlineState.disguise, offlineState.shouldHandlePose);
+                offlineState.disguise, offlineState.shouldHandlePose, null);
 
         if (state.supportsDisguisedItems)
             state.setShowingDisguisedItems(offlineState.showingDisguisedItems);

@@ -73,7 +73,7 @@ public class PlayerDataManager extends MorphJsonBasedStorage<PlayerMorphConfigur
                     var type = DisguiseTypes.fromId(i);
 
                     if (type != null)
-                        list.add(new DisguiseInfo(i));
+                        list.add(new DisguiseInfo(i, DisguiseTypes.fromId(i)));
                     else
                         logger.warn("未能找到和\"" + i + "\"对应的实体类型，将不会添加到" + c.playerName + "(" + c.uniqueId + ")的列表中");
                 });
@@ -204,10 +204,10 @@ public class PlayerDataManager extends MorphJsonBasedStorage<PlayerMorphConfigur
     @Nullable
     public DisguiseInfo getDisguiseInfo(String rawString)
     {
-        if (DisguiseTypes.fromId(rawString) == DisguiseTypes.UNKNOWN) return null;
+       var type = DisguiseTypes.fromId(rawString);
 
         if (this.cachedInfos.stream().noneMatch(o -> o.equals(rawString)))
-            cachedInfos.add(new DisguiseInfo(rawString));
+            cachedInfos.add(new DisguiseInfo(rawString, type));
 
         return cachedInfos.stream().filter(o -> o.equals(rawString)).findFirst().orElse(null);
     }

@@ -60,10 +60,10 @@ public class DisguiseInfo
     @Expose
     public String playerDisguiseTargetName;
 
-    public DisguiseInfo(@NotNull String rawIdentifier)
+    public DisguiseInfo(@NotNull String rawIdentifier, DisguiseTypes disguiseType)
     {
         this.rawIdentifier = rawIdentifier;
-        this.disguiseType = DisguiseTypes.fromId(rawIdentifier);
+        this.disguiseType = disguiseType;
 
         switch (disguiseType)
         {
@@ -112,15 +112,7 @@ public class DisguiseInfo
      */
     public boolean isValidate()
     {
-        var typeValid = switch (this.disguiseType)
-                {
-                    case PLAYER -> this.playerDisguiseTargetName != null;
-                    case VANILLA -> this.entityType != null && this.entityType != EntityType.UNKNOWN;
-                    case UNKNOWN -> false;
-                    default -> true;
-                };
-
-        return this.rawIdentifier != null && typeValid;
+        return this.rawIdentifier != null && disguiseType != DisguiseTypes.UNKNOWN;
     }
 
     /**
@@ -130,10 +122,7 @@ public class DisguiseInfo
     public String getKey()
     {
         if (!this.isValidate())
-        {
-            LoggerFactory.getLogger("morph").warn("INVALID TYPE FOR:" + rawIdentifier);
-            return "invalid";
-        }
+            return "" + rawIdentifier;
 
         return rawIdentifier;
     }
@@ -144,7 +133,7 @@ public class DisguiseInfo
      */
     public Component asComponent()
     {
-        if (!this.isValidate()) return Component.text("invalid");
+        if (!this.isValidate()) return Component.text("" + rawIdentifier);
 
         if (disguiseType == DisguiseTypes.VANILLA)
             return Component.translatable(entityType.translationKey());

@@ -363,13 +363,26 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
                     {
                         var disg = DisguiseAPI.getDisguise(targetedEntity);
 
-                        var targetKey = disg != null
-                                ? (disg instanceof PlayerDisguise pd)
-                                ? "player:" + pd.getName()
-                                : disg.getType().getEntityType().getKey().asString()
-                                : (targetedEntity instanceof Player targetPlayer)
-                                ? "player:" + targetPlayer.getName()
-                                : targetedEntity.getType().getKey().asString();
+                        String targetKey = DisguiseTypes.UNKNOWN.toId("unknown");
+
+                        //查询此玩家的伪装是否是LD自定义伪装，是的话key应为此玩家的伪装id
+                        if (config.get(Boolean.class, ConfigOption.ALLOW_LD_DISGUISES) && targetedEntity instanceof Player targetPlayer)
+                        {
+                            var playerState = morphs.getDisguiseStateFor(targetPlayer);
+
+                            if (playerState != null && DisguiseTypes.fromId(playerState.getDisguiseIdentifier()) == DisguiseTypes.LD)
+                                targetKey = playerState.getDisguiseIdentifier();
+                        }
+                        else
+                        {
+                            targetKey = disg != null
+                                    ? (disg instanceof PlayerDisguise pd)
+                                        ? "player:" + pd.getName()
+                                        : disg.getType().getEntityType().getKey().asString()
+                                    : (targetedEntity instanceof Player targetPlayer)
+                                        ? "player:" + targetPlayer.getName()
+                                        : targetedEntity.getType().getKey().asString();
+                        }
 
                         morphs.morphEntityTypeAuto(player, targetKey, targetedEntity);
 
@@ -417,10 +430,6 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
 
             //刷新Disguise
             state.setDisguise(state.getDisguiseIdentifier(), state.getSkillIdentifier(), DisguiseAPI.getDisguise(player), state.shouldHandlePose(), false);
-
-            //更新飞行能力
-            if (morphs.updateFlyingAbility(player) && player.getVelocity().getY() == 0)
-                player.setFlying(true);
 
             //调用Morph事件
             Bukkit.getPluginManager().callEvent(new PlayerMorphEvent(player, state));

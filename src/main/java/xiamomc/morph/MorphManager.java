@@ -2,22 +2,16 @@ package xiamomc.morph;
 
 import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.disguisetypes.Disguise;
-import me.libraryaddict.disguise.disguisetypes.DisguiseType;
 import me.libraryaddict.disguise.disguisetypes.MobDisguise;
-import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
-import me.libraryaddict.disguise.disguisetypes.watchers.ArmorStandWatcher;
-import me.libraryaddict.disguise.disguisetypes.watchers.LivingWatcher;
 import me.libraryaddict.disguise.utilities.DisguiseValues;
 import me.libraryaddict.disguise.utilities.reflection.FakeBoundingBox;
-import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import org.bukkit.*;
-import org.bukkit.entity.*;
-import org.bukkit.inventory.EquipmentSlot;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.scoreboard.Scoreboard;
-import org.jetbrains.annotations.NotNull;
+import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
+import org.bukkit.Location;
+import org.bukkit.Particle;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.abilities.AbilityFlag;
 import xiamomc.morph.abilities.AbilityHandler;
@@ -29,6 +23,10 @@ import xiamomc.morph.interfaces.IManagePlayerData;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.MorphStrings;
 import xiamomc.morph.misc.*;
+import xiamomc.morph.providers.DisguiseProvider;
+import xiamomc.morph.providers.LibsDisguisesDisguiseProvider;
+import xiamomc.morph.providers.PlayerDisguiseProvider;
+import xiamomc.morph.providers.VanillaDisguiseProvider;
 import xiamomc.morph.skills.MorphSkillHandler;
 import xiamomc.morph.skills.SkillCooldownInfo;
 import xiamomc.morph.skills.SkillType;
@@ -39,8 +37,12 @@ import xiamomc.morph.storage.playerdata.PlayerMorphConfiguration;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MorphManager extends MorphPluginObject implements IManagePlayerData
 {
@@ -87,6 +89,12 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         config.onConfigRefresh(c -> this.onConfigRefresh(), true);
 
+        registerProviders(List.of(
+                new VanillaDisguiseProvider(),
+                new PlayerDisguiseProvider(),
+                new LibsDisguisesDisguiseProvider()
+        ));
+
         abilityHandler.registerAbility(EntityTypeUtils.canFly(), AbilityFlag.CAN_FLY);
         abilityHandler.registerAbility(EntityTypeUtils.hasFireResistance(), AbilityFlag.HAS_FIRE_RESISTANCE);
         abilityHandler.registerAbility(EntityTypeUtils.takesDamageFromWater(), AbilityFlag.TAKES_DAMAGE_FROM_WATER);
@@ -108,30 +116,23 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         setChatOverride(config.getOrDefault(Boolean.class, ConfigOption.ALLOW_CHAT_OVERRIDE, false));
 
         bannedDisguises = config.getOrDefault(List.class, ConfigOption.BANNED_DISGUISES);
-        allowBossbar = config.getOrDefault(Boolean.class, ConfigOption.DISPLAY_BOSSBAR);
-
-        allowLDCustomDisguises = config.getOrDefault(Boolean.class, ConfigOption.ALLOW_LD_DISGUISES);
-
-        var range = config.getOrDefault(Integer.class, ConfigOption.BOSSBAR_RANGE);
-        if (range < 0)
-            range = (Bukkit.getViewDistance() - 1) * 16;
-
-        bossbarDisplayRange = range;
     }
 
     private void update()
     {
-        var infos = new ArrayList<>(disguisedPlayers);
-        for (var i : infos)
+        var states = this.getDisguisedPlayers();
+
+        states.forEach(i ->
         {
             var p = i.getPlayer();
 
             //跳过离线玩家
-            if (!p.isOnline()) continue;
+            if (!p.isOnline()) return;
 
-            //检查State中的伪装和实际的是否一致
             var disg = DisguiseAPI.getDisguise(p);
             var disgInState = i.getDisguise();
+
+            //检查State中的伪装和实际的是否一致
             if (!disgInState.equals(disg))
             {
                 if (DisguiseUtils.isTracing(disgInState))
@@ -150,88 +151,21 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                     disguisedPlayers.remove(i);
                 }
 
-                continue;
+                return;
             }
 
-            //更新伪装状态
-            updateDisguise(p, i);
-        }
+            abilityHandler.handle(p, i);
+
+            var provider = i.getProvider();
+
+            if (provider != null)
+                provider.updateDisguise(p, i);
+        });
 
         this.addSchedule(c -> update());
     }
 
     //region 玩家伪装相关
-
-    @Resolved
-    private Scoreboard scoreboard;
-
-    /**
-     * 更新伪装状态
-     *
-     * @param player 目标玩家
-     * @param state   伪装信息
-     */
-    private void updateDisguise(@NotNull Player player, @NotNull DisguiseState state)
-    {
-        var disguise = state.getDisguise();
-        var watcher = disguise.getWatcher();
-
-        //更新actionbar信息
-        var msg = skillHandler.hasSkill(state.getSkillIdentifier())
-                ? (state.getSkillCooldown() <= 0
-                    ? MorphStrings.disguisingWithSkillAvaliableString()
-                    : MorphStrings.disguisingWithSkillPreparingString())
-                : MorphStrings.disguisingAsString();
-
-        player.sendActionBar(msg.resolve("what", state.getDisplayName()).toComponent());
-
-        var team = scoreboard.getPlayerTeam(player);
-        var playerColor = (team == null || !team.hasColor()) ? NamedTextColor.WHITE : team.color();
-
-        if (DisguiseTypes.fromId(state.getDisguiseIdentifier()) != DisguiseTypes.LD)
-        {
-            //workaround: 复制实体伪装时会一并复制隐身标签
-            //            会导致复制出来的伪装永久隐身
-            watcher.setInvisible(player.isInvisible());
-
-            //workaround: 伪装不会主动检测玩家有没有发光
-            watcher.setGlowing(player.isGlowing());
-
-            //设置发光颜色
-            if (!state.haveCustomGlowColor())
-                disguise.getWatcher().setGlowColor(ColorUtils.toChatColor(playerColor));
-
-            //设置滑翔状态
-            watcher.setFlyingWithElytra(player.isGliding());
-
-            //workaround: 复制出来的伪装会忽略玩家Pose
-            if (state.shouldHandlePose())
-                watcher.setEntityPose(DisguiseUtils.toEntityPose(player.getPose()));
-        }
-
-        //tick被动技能
-        abilityHandler.handle(player, state);
-
-        //tick Bossbar
-        var bossbar = state.getBossbar();
-        if (bossbar != null)
-        {
-            var playerGameMode = player.getGameMode();
-            List<Player> playersToShow = DisguiseUtils.findNearbyPlayers(player, bossbarDisplayRange, true);
-            List<Player> playersToHide = new ArrayList<>(Bukkit.getOnlinePlayers());
-
-            if (playerGameMode == GameMode.SPECTATOR)
-                playersToShow.removeIf(p -> p.getGameMode() != playerGameMode);
-
-            bossbar.progress((float) (player.getHealth() / player.getMaxHealth()));
-
-            playersToHide.removeAll(playersToShow);
-            playersToHide.remove(player);
-
-            playersToShow.forEach(p -> p.showBossBar(bossbar));
-            playersToHide.forEach(p -> p.hideBossBar(bossbar));
-        }
-    }
 
     /**
      * 使某个玩家执行伪装的主动技能
@@ -287,9 +221,51 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
     private List<?> bannedDisguises = new ArrayList<>();
 
-    private boolean allowBossbar;
-    private boolean allowLDCustomDisguises;
-    private int bossbarDisplayRange;
+    private static final List<DisguiseProvider> providers = new ArrayList<>();
+
+    /**
+     * 从ID获取DisguiseProvider
+     * @param id 目标ID
+     * @return 一个DisguiseProvider，若没找到或id是null则返回null
+     */
+    @Nullable
+    public static DisguiseProvider getProvider(String id)
+    {
+        if (id == null) return null;
+
+        return providers.stream().filter(p -> p.getIdentifier().equals(id)).findFirst().orElse(null);
+    }
+
+    /**
+     * 注册一个DisguiseProvider
+     * @param provider 目标Provider
+     * @return 操作是否成功
+     */
+    public boolean registerProvider(DisguiseProvider provider)
+    {
+        if (providers.stream().anyMatch(p -> p.getIdentifier().equals(provider.getIdentifier())))
+        {
+            logger.error("已经注册过一个ID为" + provider.getIdentifier() + "的Provider了");
+            return false;
+        }
+
+        providers.add(provider);
+        return true;
+    }
+
+    /**
+     * 注册一批DisguiseProvider
+     * @param providers Provider列表
+     * @return 所有操作是否成功
+     */
+    public boolean registerProviders(List<DisguiseProvider> providers)
+    {
+        AtomicBoolean success = new AtomicBoolean(false);
+
+        providers.forEach(p -> success.set(registerProvider(p) || success.get()));
+
+        return success.get();
+    }
 
     /**
      * 根据传入的key自动伪装
@@ -301,15 +277,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     public boolean morphEntityTypeAuto(Player player, String key, @Nullable Entity targetEntity)
     {
         if (!key.contains(":")) key = DisguiseTypes.VANILLA.toId(key);
-
-        if (allowLDCustomDisguises && targetEntity instanceof Player targetPlayer)
-        {
-            //查询此玩家的伪装是否是LD自定义伪装
-            var state = getDisguiseStateFor(targetPlayer);
-
-            if (state != null && DisguiseTypes.fromId(state.getDisguiseIdentifier()) == DisguiseTypes.LD)
-                key = state.getDisguiseIdentifier();
-        }
 
         String finalKey = key;
         var info = getAvaliableDisguisesFor(player).stream()
@@ -326,73 +293,30 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         {
             try
             {
-                //获取到的伪装
-                var disguiseType = info.getDisguiseType();
+                //查找provider
+                var strippedKey = key.split(":", 2);
 
-                if (disguiseType == DisguiseTypes.LD)
+                var provider = getProvider(strippedKey[0]);
+
+                if (provider == null)
                 {
-                    if (!allowLDCustomDisguises)
-                    {
-                        player.sendMessage(MessageUtils.prefixes(player, MorphStrings.disguiseBannedString()));
-                        return false;
-                    }
-
-                    var success = morphLD(player, key);
-
-                    if (success)
-                    {
-                        var msg = MorphStrings.morphSuccessString()
-                                .resolve("what", info.getKey());
-
-                        player.sendMessage(MessageUtils.prefixes(player, msg));
-                    }
-
-                    return success;
+                    player.sendMessage(MessageUtils.prefixes(player, Component.text("服务器不支持ID为" + key + "的伪装")));
+                    logger.error("未能找到和命名空间" + strippedKey[0] + "匹配的Provider");
+                    return false;
                 }
-                else if (disguiseType != DisguiseTypes.UNKNOWN)
+                else
                 {
-                    //目标类型
-                    var type = info.getEntityType();
+                    var result = provider.morph(player, info, targetEntity);
 
-                    if (!type.isAlive())
+                    if (!result.success())
                     {
-                        player.sendMessage(MessageUtils.prefixes(player, MorphStrings.invalidIdentityString()));
-
+                        player.sendMessage(MessageUtils.prefixes(player, Component.text("伪装时出现问题")));
+                        logger.error(provider + "在执行伪装时出现问题");
                         return false;
                     }
 
-                    //是否应该复制伪装
-                    var shouldCopy = false;
-
-                    //如果实体有伪装，则检查实体的伪装类型
-                    if (DisguiseAPI.isDisguised(targetEntity))
-                    {
-                        var disg = DisguiseAPI.getDisguise(targetEntity);
-                        assert disg != null;
-
-                        shouldCopy = (info.isPlayerDisguise()
-                                ? disg.isPlayerDisguise() && ((PlayerDisguise) disg).getName().equals(info.playerDisguiseTargetName)
-                                : disg.getType().getEntityType().equals(type));
-                    }
-
-                    if (shouldCopy)
-                    {
-                        morphCopy(player, targetEntity); //如果应该复制伪装，则复制给玩家
-                    }
-                    else if (info.isPlayerDisguise()
-                            ? (targetEntity instanceof Player targetPlayer && targetPlayer.getName().equals(info.playerDisguiseTargetName))
-                            : (targetEntity != null && targetEntity.getType().equals(type))
-                            && !DisguiseAPI.isDisguised(targetEntity))
-                    {
-                        morphEntity(player, targetEntity); //否则，如果目标实体是我们想要的实体，则伪装成目标实体
-                    }
-                    else
-                    {
-                        if (info.isPlayerDisguise())
-                            morphPlayer(player, info.getKey());
-                        else
-                            morphEntityType(player, type); //否则，只简单地创建实体伪装
-                    }
+                    postConstructDisguise(player, targetEntity,
+                            info.getIdentifier(), result.disguise(), result.isCopy(), provider);
                 }
 
                 var msg = MorphStrings.morphSuccessString()
@@ -416,113 +340,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         }
 
         return false;
-    }
-
-    /**
-     * 将玩家伪装成LibsDisguises中保存的某个伪装
-     *
-     * @param player 目标玩家
-     * @param disguiseName 伪装名称
-     */
-    public boolean morphLD(Player player, @NotNull String disguiseName)
-    {
-        var key = DisguiseTypes.LD.toStrippedId(disguiseName);
-
-        var disguise = DisguiseAPI.getCustomDisguise(key);
-
-        if (disguise == null)
-        {
-            logger.error("未能在LD中找到叫" + disguiseName + "的伪装");
-            player.sendMessage(MessageUtils.prefixes(player, MorphStrings.parseErrorString().resolve("id", disguiseName)));
-            return false;
-        }
-
-        postConstructDisguise(player, null, disguiseName, disguise, false);
-        DisguiseAPI.disguiseEntity(player, disguise);
-        return true;
-    }
-
-    /**
-     * 将玩家伪装成指定的实体类型
-     *
-     * @param player     目标玩家
-     * @param entityType 目标实体类型
-     */
-    public void morphEntityType(Player player, EntityType entityType)
-    {
-        Disguise constructedDisguise = null;
-
-        //不要构建玩家类型的伪装
-        if (entityType == EntityType.PLAYER) throw new IllegalArgumentException("玩家不能作为EntityType传入");
-
-        constructedDisguise = new MobDisguise(DisguiseType.getType(entityType));
-
-        postConstructDisguise(player, null, entityType.getKey().asString(), constructedDisguise, false);
-
-        DisguiseAPI.disguiseEntity(player, constructedDisguise);
-    }
-
-    /**
-     * 将玩家伪装成指定的实体
-     *
-     * @param sourcePlayer 目标玩家
-     * @param entity       目标实体
-     */
-    public void morphEntity(Player sourcePlayer, Entity entity)
-    {
-        Disguise draftDisguise = null;
-
-        draftDisguise = DisguiseAPI.constructDisguise(entity);
-
-        String id;
-
-        if (entity instanceof Player targetPlayer)
-            id = DisguiseTypes.PLAYER.toId(targetPlayer.getName());
-        else
-            id = entity.getType().getKey().asString();
-
-        postConstructDisguise(sourcePlayer, entity, id, draftDisguise, true);
-        DisguiseAPI.disguiseEntity(sourcePlayer, draftDisguise);
-    }
-
-    /**
-     * 复制目标实体的伪装给玩家
-     *
-     * @param sourcePlayer 要应用的玩家
-     * @param targetEntity 目标实体
-     */
-    public void morphCopy(Player sourcePlayer, Entity targetEntity)
-    {
-        Disguise draftDisguise = null;
-
-        if (!DisguiseAPI.isDisguised(targetEntity)) throw new IllegalArgumentException("目标实体没有伪装");
-
-        DisguiseAPI.disguiseEntity(sourcePlayer, DisguiseAPI.getDisguise(targetEntity));
-        draftDisguise = DisguiseAPI.getDisguise(sourcePlayer);
-
-        String id;
-
-        if (draftDisguise instanceof PlayerDisguise playerDisguise)
-            id = DisguiseTypes.PLAYER.toId(playerDisguise.getName());
-        else
-            id = draftDisguise.getType().getEntityType().getKey().asString();
-
-        postConstructDisguise(sourcePlayer, targetEntity, id, draftDisguise, true);
-    }
-
-    /**
-     * 将玩家伪装成指定的玩家
-     *
-     * @param sourcePlayer     发起玩家
-     * @param targetPlayerName 目标玩家的玩家名
-     */
-    public void morphPlayer(Player sourcePlayer, String targetPlayerName)
-    {
-        var disguise = new PlayerDisguise(DisguiseTypes.PLAYER.toStrippedId(targetPlayerName));
-
-        postConstructDisguise(sourcePlayer, null, targetPlayerName, disguise, false);
-
-        DisguiseAPI.disguiseEntity(sourcePlayer, disguise);
     }
 
     /**
@@ -552,15 +369,11 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         if (state == null)
             return;
 
-        var disguise = state.getDisguise();
-        disguise.removeDisguise(player);
+        if (state.getProvider() != null)
+            state.getProvider().unMorph(player, state);
 
         player.sendMessage(MessageUtils.prefixes(player, MorphStrings.unMorphSuccessString()));
         player.sendActionBar(Component.empty());
-
-        //取消玩家飞行
-        player.setAllowFlight(canFly(player, null));
-        player.setFlySpeed(0.1f);
 
         spawnParticle(player, player.getLocation(), player.getWidth(), player.getHeight(), player.getWidth());
 
@@ -577,44 +390,10 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         Bukkit.getPluginManager().callEvent(new PlayerUnMorphEvent(player));
     }
 
-    private boolean canFly(Player player, @Nullable DisguiseState state)
-    {
-        var gamemode = player.getGameMode();
-        var gamemodeAllowFlying = gamemode.equals(GameMode.CREATIVE) || gamemode.equals(GameMode.SPECTATOR);
-
-        if (state == null) return gamemodeAllowFlying;
-        else return gamemodeAllowFlying || state.isAbilityFlagSet(AbilityFlag.CAN_FLY);
-    }
-
-    private void setPlayerFlySpeed(Player player, EntityType type)
-    {
-        var gameMode = player.getGameMode();
-        if (type == null || gameMode.equals(GameMode.SPECTATOR)) return;
-
-        switch (type)
-        {
-            case ALLAY, BEE, BLAZE, VEX, BAT, PARROT -> player.setFlySpeed(0.05f);
-            case GHAST, PHANTOM -> player.setFlySpeed(0.06f);
-            case ENDER_DRAGON -> player.setFlySpeed(0.15f);
-            default -> player.setFlySpeed(0.1f);
-        }
-    }
-
-    public boolean updateFlyingAbility(Player player)
-    {
-        var state = getDisguiseStateFor(player);
-        if (state == null) return false;
-
-        var canFly = canFly(player, state);
-        player.setAllowFlight(canFly);
-        setPlayerFlySpeed(player, canFly ? state.getDisguise().getType().getEntityType() : null);
-
-        return canFly;
-    }
-
     private void postConstructDisguise(DisguiseState state)
     {
-        postConstructDisguise(state.getPlayer(), null, state.getDisguiseIdentifier(), state.getDisguise(), state.shouldHandlePose());
+        postConstructDisguise(state.getPlayer(), null,
+                state.getDisguiseIdentifier(), state.getDisguise(), state.shouldHandlePose(), state.getProvider());
     }
 
     /**
@@ -624,55 +403,19 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
      * @param targetEntity     伪装的目标实体
      * @param disguise         伪装
      * @param shouldHandlePose 要不要手动更新伪装Pose？（伪装是否为克隆）
+     * @param provider {@link DisguiseProvider}
      */
-    private void postConstructDisguise(Player sourcePlayer, @Nullable Entity targetEntity, String id, Disguise disguise, boolean shouldHandlePose)
+    private void postConstructDisguise(Player sourcePlayer, @Nullable Entity targetEntity,
+                                       String id, Disguise disguise, boolean shouldHandlePose,
+                                       @Nullable DisguiseProvider provider)
     {
         //设置自定义数据用来跟踪
         DisguiseUtils.addTrace(disguise);
 
-        var watcher = disguise.getWatcher();
         var disguiseTypeLD = disguise.getType();
         var entityType = disguiseTypeLD.getEntityType();
 
         var config = getPlayerConfiguration(sourcePlayer);
-
-        //workaround: 伪装已死亡的LivingEntity
-        if (targetEntity instanceof LivingEntity living && living.getHealth() <= 0)
-            ((LivingWatcher) watcher).setHealth(1);
-
-        //目标实体没有伪装时要做的操作
-        //workaround: 玩家伪装副手问题
-        if (!DisguiseAPI.isDisguised(targetEntity))
-        {
-            ItemStack offhandItemStack = null;
-
-            if (targetEntity instanceof Player targetPlayer)
-                offhandItemStack = targetPlayer.getInventory().getItemInOffHand();
-
-            if (targetEntity instanceof ArmorStand armorStand)
-                offhandItemStack = armorStand.getItem(EquipmentSlot.OFF_HAND);
-
-            if (offhandItemStack != null) watcher.setItemInOffHand(offhandItemStack);
-
-            //盔甲架加上手臂
-            if (disguise.getType().equals(DisguiseType.ARMOR_STAND))
-                ((ArmorStandWatcher) watcher).setShowArms(true);
-        }
-        else if (shouldHandlePose && targetEntity instanceof Player targetPlayer)
-        {
-            //如果目标实体是玩家，并且此玩家伪装是复制的、目标玩家的伪装和我们的一样，那么复制他们的装备
-            var theirDisguise = DisguiseAPI.getDisguise(targetPlayer);
-
-            //如果是同类伪装，则复制盔甲
-            if (disguiseTypeLD.equals(theirDisguise.getType()))
-            {
-                if (!(disguise instanceof PlayerDisguise ourPlayerDisguise) || !(theirDisguise instanceof PlayerDisguise theirPlayerDisguise)
-                        || Objects.equals(ourPlayerDisguise.getName(), theirPlayerDisguise.getName()))
-                {
-                    DisguiseUtils.tryCopyArmorStack(targetPlayer, disguise.getWatcher(), theirDisguise.getWatcher());
-                }
-            }
-        }
 
         //禁用actionBar
         DisguiseAPI.setActionBarShown(sourcePlayer, false);
@@ -685,7 +428,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         var state = getDisguiseStateFor(sourcePlayer);
         if (state == null)
         {
-            state = new DisguiseState(sourcePlayer, id, targetSkillID, disguise, shouldHandlePose);
+            state = new DisguiseState(sourcePlayer, id, targetSkillID, disguise, shouldHandlePose, provider);
 
             disguisedPlayers.add(state);
         }
@@ -694,6 +437,11 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             state.setDisguise(id, targetSkillID, disguise, shouldHandlePose);
         }
 
+        if (provider != null)
+            provider.postConstructDisguise(state, targetEntity);
+        else
+            logger.warn("id为" + id + "的伪装没有Provider?");
+
         //workaround: Disguise#getDisguiseName()不会正常返回实体的自定义名称
         if (targetEntity != null && targetEntity.customName() != null)
             state.setDisplayName(targetEntity.customName());
@@ -701,9 +449,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         //如果伪装的时候坐着，显示提示
         if (sourcePlayer.getVehicle() != null)
             sourcePlayer.sendMessage(MessageUtils.prefixes(sourcePlayer, MorphStrings.morphVisibleAfterStandup()));
-
-        //如果实体能飞，那么也允许玩家飞行
-        updateFlyingAbility(sourcePlayer);
 
         //显示粒子
         var cX = 0d;
@@ -767,62 +512,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         //切换CD
         skillHandler.switchCooldown(sourcePlayer.getUniqueId(), cdInfo);
-
-        //设置发光颜色
-        ChatColor glowColor = null;
-        Entity teamTargetEntity = targetEntity;
-        var disguiseID = state.getDisguiseIdentifier();
-        var morphDisguiseType = DisguiseTypes.fromId(disguiseID);
-
-        switch (morphDisguiseType)
-        {
-            //LD伪装为玩家时会自动复制他们当前的队伍到名字里
-            //为了确保一致，除非targetEntity不是null，不然尝试将teamTargetEntity设置为目标玩家
-            case PLAYER ->
-            {
-                if (teamTargetEntity == null)
-                    teamTargetEntity = Bukkit.getPlayer(DisguiseTypes.PLAYER.toStrippedId(disguiseID));
-            }
-
-            //LD的伪装直接从伪装flag里获取发光颜色
-            //只要和LD直接打交道事情就变得玄学了起来..
-            case LD ->
-            {
-                glowColor = watcher.getGlowColor();
-                teamTargetEntity = null;
-            }
-        }
-
-        //从teamTargetEntity获取发光颜色
-        if (teamTargetEntity != null)
-        {
-            var team = scoreboard.getEntityTeam(teamTargetEntity);
-
-            if (shouldHandlePose && DisguiseAPI.isDisguised(teamTargetEntity))
-                glowColor = DisguiseAPI.getDisguise(teamTargetEntity).getWatcher().getGlowColor();
-            else
-                glowColor = team == null ? null : ColorUtils.toChatColor(team.color());
-        }
-
-        state.setCustomGlowColor(ColorUtils.fromChatColor(glowColor));
-        watcher.setGlowColor(glowColor);
-
-        //设置Bossbar
-        BossBar bossbar = null;
-
-        if (EntityTypeUtils.hasBossBar(entityType) && allowBossbar)
-        {
-            var isDragon = entityType == EntityType.ENDER_DRAGON;
-
-            bossbar = BossBar.bossBar(
-                    state.getDisplayName(),
-                    1f,
-                    isDragon ? BossBar.Color.PINK : BossBar.Color.PURPLE,
-                    BossBar.Overlay.PROGRESS,
-                    isDragon ? Set.of() : Set.of(BossBar.Flag.DARKEN_SCREEN));
-        }
-
-        state.setBossbar(bossbar);
 
         //调用事件
         Bukkit.getPluginManager().callEvent(new PlayerMorphEvent(sourcePlayer, state));

@@ -1,14 +1,29 @@
 package xiamomc.morph.misc;
 
 import org.bukkit.NamespacedKey;
+import org.slf4j.LoggerFactory;
+import xiamomc.morph.MorphManager;
 
 import java.util.Arrays;
 
+/**
+ * 伪装类型
+ */
 public enum DisguiseTypes
 {
+    //原版
     VANILLA(NamespacedKey.MINECRAFT),
+
+    //玩家伪装
     PLAYER("player"),
+
+    //LD的自定义伪装
     LD("ld"),
+
+    //外部伪装
+    EXTERNAL("external"),
+
+    //未知伪装
     UNKNOWN("unknown");
 
     private final String nameSpace;
@@ -32,15 +47,25 @@ public enum DisguiseTypes
         return optional.orElse(UNKNOWN);
     }
 
+    /**
+     * 获取某个ID的伪装类型
+     * @param id 目标ID
+     * @return 伪装类型，如果找不到Provider则返回null
+     * @apiNote minecraft:player不能作为ID传入，请使用player:xxx
+     */
     public static DisguiseTypes fromId(String id)
     {
-        var idSplited = id.split(":");
-
         if (id.equals("minecrcaft:player"))
             throw new IllegalArgumentException("minecraft:player不能当作id传入，请使用player:xxx");
 
-        if (idSplited.length < 1) return UNKNOWN;
-        else return fromNameSpace(idSplited[0]);
+        var str = id + ":";
+        var idSplited = str.split(":", 3);
+        var result = fromNameSpace(idSplited[0]);
+
+        if (result == UNKNOWN && MorphManager.getProvider(idSplited[0]) != null)
+            result = EXTERNAL;
+
+        return result;
     }
 
     public static DisguiseTypes fromId(NamespacedKey key)

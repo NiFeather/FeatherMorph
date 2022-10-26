@@ -1,12 +1,14 @@
 package xiamomc.morph.misc;
 
 import org.bukkit.entity.EntityType;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.Set;
 
 public class EntityTypeUtils
 {
+    @Nullable
     public static EntityType fromString(String key, boolean nullWhenUnknown)
     {
         var val = fromString(key);
