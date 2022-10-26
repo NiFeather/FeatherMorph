@@ -60,6 +60,7 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
         super.unMorph(player, state);
 
         state.getAbilities().forEach(a -> a.revokeFromPlayer(player, state));
+        state.setAbilities(List.of());
 
         return true;
     }
