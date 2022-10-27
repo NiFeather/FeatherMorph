@@ -4,6 +4,7 @@ import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.disguisetypes.Disguise;
 import me.libraryaddict.disguise.disguisetypes.DisguiseType;
 import me.libraryaddict.disguise.disguisetypes.MobDisguise;
+import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -46,5 +47,16 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
         DisguiseAPI.disguiseEntity(player, constructedDisguise);
 
         return DisguiseResult.success(constructedDisguise, copyResult.isCopy());
+    }
+
+    @Override
+    public Component getDisplayName(String disguiseIdentifier)
+    {
+        var type = EntityTypeUtils.fromString(disguiseIdentifier, true);
+
+        if (type == null)
+            return Component.text("???");
+        else
+            return Component.translatable(type.translationKey());
     }
 }
