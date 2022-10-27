@@ -5,7 +5,6 @@ import org.bukkit.entity.Player;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.misc.DisguiseState;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public abstract class MorphAbility extends MorphPluginObject implements IMorphAbility

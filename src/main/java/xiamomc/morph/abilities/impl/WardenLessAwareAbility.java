@@ -8,7 +8,6 @@ import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.abilities.AbilityType;
 import xiamomc.morph.abilities.MorphAbility;
-import xiamomc.morph.misc.EntityTypeUtils;
 import xiamomc.pluginbase.Annotations.Resolved;
 
 public class WardenLessAwareAbility extends MorphAbility

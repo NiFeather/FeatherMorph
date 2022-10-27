@@ -12,7 +12,6 @@ import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.pluginbase.Annotations.Resolved;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class GSitCompactProcessor extends MorphPluginObject implements Listener

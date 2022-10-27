@@ -6,9 +6,6 @@ import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.misc.DisguiseInfo;
 import xiamomc.morph.storage.playerdata.PlayerMorphConfiguration;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public interface IManagePlayerData
 {
     /**

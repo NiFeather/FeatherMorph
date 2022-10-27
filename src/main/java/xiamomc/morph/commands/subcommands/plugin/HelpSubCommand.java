@@ -22,7 +22,6 @@ import xiamomc.pluginbase.Command.ISubCommand;
 import xiamomc.pluginbase.Command.SubCommandHandler;
 import xiamomc.pluginbase.messages.FormattableMessage;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class HelpSubCommand extends MorphPluginObject implements ISubCommand

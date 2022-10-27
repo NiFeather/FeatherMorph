@@ -7,7 +7,6 @@ import xiamomc.morph.MorphPlugin;
 import xiamomc.pluginbase.Configuration.ConfigNode;
 import xiamomc.pluginbase.Configuration.PluginConfigManager;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public class MorphConfigManager extends PluginConfigManager

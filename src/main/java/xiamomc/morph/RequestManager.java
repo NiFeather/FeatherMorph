@@ -11,7 +11,6 @@ import xiamomc.morph.misc.RequestInfo;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class RequestManager extends MorphPluginObject implements IManageRequests

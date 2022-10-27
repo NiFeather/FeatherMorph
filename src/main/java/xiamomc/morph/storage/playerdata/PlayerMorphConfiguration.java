@@ -2,13 +2,10 @@ package xiamomc.morph.storage.playerdata;
 
 import com.google.gson.annotations.Expose;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import it.unimi.dsi.fastutil.objects.ObjectArrays;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.misc.DisguiseInfo;
 import xiamomc.morph.misc.DisguiseUtils;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 public class PlayerMorphConfiguration

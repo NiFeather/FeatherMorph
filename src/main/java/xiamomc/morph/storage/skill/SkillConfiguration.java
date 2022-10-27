@@ -10,7 +10,6 @@ import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.abilities.IMorphAbility;
 import xiamomc.morph.skills.SkillType;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class SkillConfiguration

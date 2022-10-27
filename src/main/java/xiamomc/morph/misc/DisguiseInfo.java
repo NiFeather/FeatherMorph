@@ -6,7 +6,6 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.entity.EntityType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.LoggerFactory;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.providers.DisguiseProvider;
 
