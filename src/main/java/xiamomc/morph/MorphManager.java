@@ -227,10 +227,10 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     {
         if (id == null) return null;
 
-        id = id + ":";
-        var spiltedId = id.split(":", 2);
+        id += ":";
+        var splitedId = id.split(":", 2);
 
-        return providers.stream().filter(p -> p.getIdentifier().equals(spiltedId[0])).findFirst().orElse(null);
+        return providers.stream().filter(p -> p.getIdentifier().equals(splitedId[0])).findFirst().orElse(null);
     }
 
     /**
