@@ -1,11 +1,13 @@
 package xiamomc.morph.interfaces;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.misc.DisguiseInfo;
 import xiamomc.morph.storage.playerdata.PlayerMorphConfiguration;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public interface IManagePlayerData
 {
@@ -24,7 +26,7 @@ public interface IManagePlayerData
      * @param player 目标玩家
      * @return 目标玩家拥有的伪装
      */
-    public ArrayList<DisguiseInfo> getAvaliableDisguisesFor(Player player);
+    public ObjectArrayList<DisguiseInfo> getAvaliableDisguisesFor(Player player);
 
     /**
      * 将伪装授予某一玩家

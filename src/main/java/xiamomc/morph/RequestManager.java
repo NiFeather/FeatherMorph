@@ -1,5 +1,6 @@
 package xiamomc.morph;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.bukkit.entity.Player;
 import xiamomc.morph.interfaces.IManagePlayerData;
 import xiamomc.morph.interfaces.IManageRequests;
@@ -29,7 +30,7 @@ public class RequestManager extends MorphPluginObject implements IManageRequests
     private void update()
     {
         //更新请求
-        var requests = new ArrayList<>(this.requests);
+        var requests = new ObjectArrayList<>(this.requests);
         for (var r : requests)
         {
             r.ticksRemain -= 1;
@@ -39,7 +40,7 @@ public class RequestManager extends MorphPluginObject implements IManageRequests
         this.addSchedule(c -> update());
     }
 
-    private final List<RequestInfo> requests = new ArrayList<>();
+    private final List<RequestInfo> requests = new ObjectArrayList<>();
 
     @Override
     public void createRequest(Player source, Player target)

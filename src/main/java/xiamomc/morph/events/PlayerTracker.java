@@ -3,6 +3,7 @@ package xiamomc.morph.events;
 import com.destroystokyo.paper.event.player.PlayerStartSpectatingEntityEvent;
 import com.destroystokyo.paper.event.player.PlayerStopSpectatingEntityEvent;
 import io.papermc.paper.event.player.PlayerArmSwingEvent;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -140,8 +141,8 @@ public class PlayerTracker extends MorphPluginObject implements Listener
 
     private void update()
     {
-        var playerToRemoveFromSuspect = new ArrayList<Player>();
-        var playerToRemoveFromInteract = new ArrayList<Player>();
+        var playerToRemoveFromSuspect = new ObjectArrayList<Player>();
+        var playerToRemoveFromInteract = new ObjectArrayList<Player>();
 
         var currentTick = plugin.getCurrentTick();
 

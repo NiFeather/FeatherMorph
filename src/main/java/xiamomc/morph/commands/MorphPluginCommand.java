@@ -1,5 +1,6 @@
 package xiamomc.morph.commands;
 
+import it.unimi.dsi.fastutil.objects.ObjectList;
 import xiamomc.morph.commands.subcommands.MorphSubCommandHandler;
 import xiamomc.morph.commands.subcommands.plugin.*;
 import xiamomc.morph.messages.HelpStrings;
@@ -28,7 +29,7 @@ public class MorphPluginCommand extends MorphSubCommandHandler
         return HelpStrings.mmorphDescription();
     }
 
-    private final List<ISubCommand> subCommands = List.of(
+    private final List<ISubCommand> subCommands = ObjectList.of(
             new ReloadSubCommand(),
             new HelpSubCommand(),
             new ToggleSelfSubCommand(),

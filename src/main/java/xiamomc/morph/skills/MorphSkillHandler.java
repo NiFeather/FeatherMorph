@@ -1,5 +1,8 @@
 package xiamomc.morph.skills;
 
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import it.unimi.dsi.fastutil.objects.ObjectList;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import org.bukkit.NamespacedKey;
@@ -23,7 +26,7 @@ public class MorphSkillHandler extends MorphPluginObject
     /**
      * 已注册的技能
      */
-    private final List<IMorphSkill> skills = new ArrayList<>();
+    private final List<IMorphSkill> skills = new ObjectArrayList<>();
 
     /**
      * 获取已注册的技能
@@ -38,12 +41,12 @@ public class MorphSkillHandler extends MorphPluginObject
     /**
      * 玩家 -> 此玩家的CD列表
      */
-    private final Map<UUID, List<SkillCooldownInfo>> uuidInfoMap = new LinkedHashMap<>();
+    private final Map<UUID, List<SkillCooldownInfo>> uuidInfoMap = new Object2ObjectOpenHashMap<>();
 
     /**
      * 玩家 -> 当前CD
      */
-    private final Map<UUID, SkillCooldownInfo> uuidCooldownMap = new LinkedHashMap<>();
+    private final Map<UUID, SkillCooldownInfo> uuidCooldownMap = new Object2ObjectOpenHashMap<>();
 
     @Resolved
     private MorphManager manager;
@@ -54,7 +57,7 @@ public class MorphSkillHandler extends MorphPluginObject
     @Initializer
     private void load()
     {
-        registerSkills(List.of(
+        registerSkills(ObjectList.of(
                 new ApplyEffectMorphSkill(),
                 new ExplodeMorphSkill(),
                 new InventoryMorphSkill(),
@@ -180,7 +183,7 @@ public class MorphSkillHandler extends MorphPluginObject
         SkillCooldownInfo cdInfo;
 
         //获取或创建CD列表
-        if (!uuidInfoMap.containsKey(uuid)) uuidInfoMap.put(uuid, infos = new ArrayList<>());
+        if (!uuidInfoMap.containsKey(uuid)) uuidInfoMap.put(uuid, infos = new ObjectArrayList<>());
         else infos = uuidInfoMap.get(uuid);
 
         //获取或创建CD

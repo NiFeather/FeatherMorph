@@ -2,6 +2,7 @@ package xiamomc.morph.storage.skill;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.EntityType;
 import org.jetbrains.annotations.NotNull;
@@ -221,7 +222,7 @@ public class SkillConfiguration
 
     @Expose
     @SerializedName("abilities")
-    private List<String> abilitiyIdentifiers = new ArrayList<>();
+    private final List<String> abilitiyIdentifiers = new ObjectArrayList<>();
 
     public List<String> getAbilitiyIdentifiers()
     {
@@ -246,7 +247,7 @@ public class SkillConfiguration
         this.abilitiyIdentifiers.add(idString);
     }
 
-    private final List<IMorphAbility> abilities = new ArrayList<>();
+    private final List<IMorphAbility> abilities = new ObjectArrayList<>();
 
     public List<IMorphAbility> getAbilities()
     {

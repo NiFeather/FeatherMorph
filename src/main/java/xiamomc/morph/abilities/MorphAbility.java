@@ -1,5 +1,6 @@
 package xiamomc.morph.abilities;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.bukkit.entity.Player;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.misc.DisguiseState;
@@ -9,7 +10,7 @@ import java.util.List;
 
 public abstract class MorphAbility extends MorphPluginObject implements IMorphAbility
 {
-    protected final List<Player> appliedPlayers = new ArrayList<>();
+    protected final List<Player> appliedPlayers = new ObjectArrayList<>();
 
     @Override
     public boolean applyToPlayer(Player player, DisguiseState state)

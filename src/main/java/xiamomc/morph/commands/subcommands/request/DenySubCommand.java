@@ -1,5 +1,6 @@
 package xiamomc.morph.commands.subcommands.request;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -24,7 +25,7 @@ public class DenySubCommand extends MorphPluginObject implements ISubCommand
     @Override
     public List<String> onTabComplete(List<String> args, CommandSender source)
     {
-        var list = new ArrayList<String>();
+        var list = new ObjectArrayList<String>();
 
         if (source instanceof Player player)
         {

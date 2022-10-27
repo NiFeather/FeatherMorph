@@ -1,5 +1,6 @@
 package xiamomc.morph.misc;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.disguisetypes.Disguise;
 import me.libraryaddict.disguise.disguisetypes.FlagWatcher;
@@ -256,7 +257,7 @@ public class DisguiseState extends MorphPluginObject
     /**
      * 伪装被动技能Flag
      */
-    private final List<IMorphAbility> abilities = new ArrayList<>();
+    private final List<IMorphAbility> abilities = new ObjectArrayList<>();
 
     public List<IMorphAbility> getAbilities()
     {

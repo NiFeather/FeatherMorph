@@ -1,5 +1,6 @@
 package xiamomc.morph.misc;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import me.libraryaddict.disguise.disguisetypes.Disguise;
 import me.libraryaddict.disguise.disguisetypes.EntityPose;
 import me.libraryaddict.disguise.disguisetypes.FlagWatcher;
@@ -54,7 +55,7 @@ public class DisguiseUtils
      */
     public static List<Player> findNearbyPlayers(Player player, int distance, boolean includeSelf)
     {
-        var value = new ArrayList<Player>();
+        var value = new ObjectArrayList<Player>();
 
         var loc = player.getLocation();
 

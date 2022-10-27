@@ -1,5 +1,6 @@
 package xiamomc.morph.commands.subcommands.plugin;
 
+import it.unimi.dsi.fastutil.objects.ObjectList;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.commands.subcommands.plugin.chatoverride.QuerySubCommand;
@@ -18,7 +19,7 @@ public class ChatOverrideSubCommand extends MorphPluginObject implements ISubCom
         return "chatoverride";
     }
 
-    private final List<ISubCommand> subCommands = List.of(
+    private final List<ISubCommand> subCommands = ObjectList.of(
             new QuerySubCommand(),
             new ToggleSubCommand()
     );

@@ -1,5 +1,6 @@
 package xiamomc.morph.commands.subcommands.plugin.helpsections;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.messages.FormattableMessage;
 
@@ -8,7 +9,7 @@ import java.util.List;
 
 public class Section
 {
-    private final List<Entry> entries = new ArrayList<>();
+    private final List<Entry> entries = new ObjectArrayList<>();
 
     public List<Entry> getEntries()
     {

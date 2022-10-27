@@ -1,5 +1,6 @@
 package xiamomc.morph.misc;
 
+import it.unimi.dsi.fastutil.objects.ObjectSet;
 import org.bukkit.entity.EntityType;
 import org.jetbrains.annotations.Nullable;
 
@@ -104,12 +105,12 @@ public class EntityTypeUtils
 
     public static Set<EntityType> wardenLessAware()
     {
-        return Set.of(EntityType.ARMOR_STAND, EntityType.WARDEN);
+        return ObjectSet.of(EntityType.ARMOR_STAND, EntityType.WARDEN);
     }
 
     public static Set<EntityType> canFly()
     {
-        return Set.of(EntityType.ALLAY, EntityType.ENDER_DRAGON,
+        return ObjectSet.of(EntityType.ALLAY, EntityType.ENDER_DRAGON,
                 EntityType.BAT, EntityType.BEE, EntityType.BLAZE,
                 EntityType.GHAST, EntityType.VEX, EntityType.PHANTOM, EntityType.WITHER,
                 EntityType.PARROT);
@@ -117,33 +118,33 @@ public class EntityTypeUtils
 
     public static Set<EntityType> hasFireResistance()
     {
-        return Set.of(EntityType.MAGMA_CUBE, EntityType.BLAZE, EntityType.WITHER_SKELETON,
+        return ObjectSet.of(EntityType.MAGMA_CUBE, EntityType.BLAZE, EntityType.WITHER_SKELETON,
                 EntityType.WITHER, EntityType.STRIDER, EntityType.ZOMBIFIED_PIGLIN, EntityType.GHAST,
                 EntityType.WARDEN, EntityType.ENDER_DRAGON, EntityType.ZOGLIN);
     }
 
     public static Set<EntityType> takesDamageFromWater()
     {
-        return Set.of(EntityType.ENDERMAN, EntityType.BLAZE, EntityType.SNOWMAN);
+        return ObjectSet.of(EntityType.ENDERMAN, EntityType.BLAZE, EntityType.SNOWMAN);
     }
 
     public static Set<EntityType> canBreatheUnderWater()
     {
-        return Set.of(EntityType.COD, EntityType.SALMON, EntityType.PUFFERFISH, EntityType.TROPICAL_FISH,
+        return ObjectSet.of(EntityType.COD, EntityType.SALMON, EntityType.PUFFERFISH, EntityType.TROPICAL_FISH,
                 EntityType.SQUID, EntityType.GLOW_SQUID,
                 EntityType.AXOLOTL, EntityType.GUARDIAN, EntityType.ELDER_GUARDIAN, EntityType.DOLPHIN);
     }
 
     public static Set<EntityType> burnsUnderSun()
     {
-        return Set.of(EntityType.ZOMBIE, EntityType.ZOMBIE_VILLAGER,
+        return ObjectSet.of(EntityType.ZOMBIE, EntityType.ZOMBIE_VILLAGER,
                 EntityType.SKELETON, EntityType.STRAY,
                 EntityType.DROWNED, EntityType.PHANTOM);
     }
 
     public static Set<EntityType> alwaysNightVision()
     {
-        return Set.of(EntityType.BAT, EntityType.ENDERMAN);
+        return ObjectSet.of(EntityType.BAT, EntityType.ENDERMAN);
     }
 
     public static EntityType hasJumpBoost()
@@ -164,7 +165,7 @@ public class EntityTypeUtils
     public static Set<EntityType> noFallDamage()
     {
         //列表里一些在canFly的列表里的类型本来就不会让玩家受到摔落伤害，但还是加上比较好
-        return Set.of(EntityType.IRON_GOLEM, EntityType.CAT,
+        return ObjectSet.of(EntityType.IRON_GOLEM, EntityType.CAT,
                 EntityType.OCELOT, EntityType.SNOWMAN, EntityType.MAGMA_CUBE,
                 EntityType.BAT, EntityType.BLAZE, EntityType.ENDER_DRAGON,
                 EntityType.GHAST, EntityType.PARROT, EntityType.VEX,

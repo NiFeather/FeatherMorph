@@ -1,5 +1,6 @@
 package xiamomc.morph.events;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.server.PluginDisableEvent;
@@ -24,8 +25,8 @@ public class PluginEventListener extends MorphPluginObject implements Listener
         onEnableConsumers.forEach(c -> c.accept(e.getPlugin().getName()));
     }
 
-    private final List<Consumer<String>> onEnableConsumers = new ArrayList<>();
-    private final List<Consumer<String>> onDisableConsumers = new ArrayList<>();
+    private final List<Consumer<String>> onEnableConsumers = new ObjectArrayList<>();
+    private final List<Consumer<String>> onDisableConsumers = new ObjectArrayList<>();
 
     public void onPluginEnable(Consumer<String> c)
     {

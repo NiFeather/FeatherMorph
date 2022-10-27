@@ -1,5 +1,7 @@
 package xiamomc.morph.commands.subcommands.plugin;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import it.unimi.dsi.fastutil.objects.ObjectList;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
@@ -41,7 +43,7 @@ public class HelpSubCommand extends MorphPluginObject implements ISubCommand
     @Resolved
     private MorphCommandHelper cmdHelper;
 
-    private final List<Section> commandSections = new ArrayList<>();
+    private final List<Section> commandSections = new ObjectArrayList<>();
 
     /**
      * 设置用于构建帮助信息的Section
@@ -49,7 +51,7 @@ public class HelpSubCommand extends MorphPluginObject implements ISubCommand
     private void setupCommandSections()
     {
         //不属于任何section的指令丢到这里
-        var miscCommandSection = new Section("/", HelpStrings.morphCommandDescription(), List.of(
+        var miscCommandSection = new Section("/", HelpStrings.morphCommandDescription(), ObjectList.of(
                 HelpStrings.morphCommandSpecialNote1(),
                 HelpStrings.morphCommandSpecialNote2()
         ));
@@ -65,7 +67,7 @@ public class HelpSubCommand extends MorphPluginObject implements ISubCommand
                 //此section下所有指令的父级指令
                 var parentCommandName = sch.getCommandName();
 
-                List<FormattableMessage> notes = new ArrayList<>(sch.getNotes());
+                List<FormattableMessage> notes = new ObjectArrayList<>(sch.getNotes());
 
                 var section = new Section(parentCommandName,
                         sch.getHelpMessage(),
@@ -96,11 +98,10 @@ public class HelpSubCommand extends MorphPluginObject implements ISubCommand
         var entries = section.getEntries();
 
         //添加section的标题
-        var list = new ArrayList<>(List.of(
+        var list = ObjectArrayList.of(
                 Component.empty(),
                 HelpStrings.commandSectionHeaderString()
-                                .resolve("basename", section.getCommandBaseName()).toComponent()
-        ));
+                        .resolve("basename", section.getCommandBaseName()).toComponent());
 
         //build entry
         for (var entry : entries)
@@ -124,7 +125,7 @@ public class HelpSubCommand extends MorphPluginObject implements ISubCommand
 
         if (section.getNotes() != null && section.getNotes().size() >= 1)
         {
-            list.addAll(List.of(
+            list.addAll(ObjectList.of(
                     Component.empty(),
                     HelpStrings.specialNoteString().toComponent()
             ));
@@ -149,7 +150,7 @@ public class HelpSubCommand extends MorphPluginObject implements ISubCommand
      */
     private List<Component> constructHelpMessage(CommandSender sender)
     {
-        var list = new ArrayList<Component>();
+        var list = new ObjectArrayList<Component>();
 
         list.add(HelpStrings.avaliableCommandHeaderString().toComponent());
         for (var section : commandSections)
@@ -188,7 +189,7 @@ public class HelpSubCommand extends MorphPluginObject implements ISubCommand
         var matchedSections = commandSections.stream()
                 .filter(s -> s.getCommandBaseName().toLowerCase().startsWith(baseName.toLowerCase())).toList();
 
-        var list = new ArrayList<String>();
+        var list = new ObjectArrayList<String>();
 
         for (var s : matchedSections)
             list.add(s.getCommandBaseName());

@@ -1,6 +1,7 @@
 package xiamomc.morph.events;
 
 import dev.geco.gsit.api.event.*;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.utilities.DisguiseUtilities;
 import org.bukkit.entity.Player;
@@ -34,7 +35,7 @@ public class GSitCompactProcessor extends MorphPluginObject implements Listener
             showDisguiseFor(player);
     }
 
-    private final List<Player> gSitHandlingPlayers = new ArrayList<>();
+    private final List<Player> gSitHandlingPlayers = new ObjectArrayList<>();
 
     @EventHandler
     public void onEntitySit(EntitySitEvent e)

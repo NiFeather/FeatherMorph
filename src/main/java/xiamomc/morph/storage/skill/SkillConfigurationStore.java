@@ -1,5 +1,7 @@
 package xiamomc.morph.storage.skill;
 
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.EntityType;
 import org.jetbrains.annotations.NotNull;
@@ -26,7 +28,7 @@ public class SkillConfigurationStore extends MorphJsonBasedStorage<SkillConfigur
     /**
      * 配置 -> 技能
      */
-    private final Map<SkillConfiguration, IMorphSkill> configToSkillMap = new ConcurrentHashMap<>();
+    private final Map<SkillConfiguration, IMorphSkill> configToSkillMap = new Object2ObjectOpenHashMap<>();
 
     /**
      * 获取已配置的技能
@@ -78,7 +80,7 @@ public class SkillConfigurationStore extends MorphJsonBasedStorage<SkillConfigur
             {
                 if (!registerConfiguration(c)) success.set(false);
 
-                var abilities = new ArrayList<IMorphAbility>();
+                var abilities = new ObjectArrayList<IMorphAbility>();
 
                 c.getAbilitiyIdentifiers().forEach(i ->
                 {
@@ -194,7 +196,7 @@ public class SkillConfigurationStore extends MorphJsonBasedStorage<SkillConfigur
 
     public List<IMorphAbility> getAbilityFor(String id)
     {
-        var list = new ArrayList<IMorphAbility>();
+        var list = new ObjectArrayList<IMorphAbility>();
 
         storingObject.configurations.forEach(skillConfig ->
         {

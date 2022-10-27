@@ -1,5 +1,6 @@
 package xiamomc.morph.providers;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.disguisetypes.Disguise;
 import me.libraryaddict.disguise.disguisetypes.DisguiseType;
@@ -127,7 +128,7 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
         {
             var playerGameMode = player.getGameMode();
             List<Player> playersToShow = DisguiseUtils.findNearbyPlayers(player, bossbarDisplayRange, true);
-            List<Player> playersToHide = new ArrayList<>(Bukkit.getOnlinePlayers());
+            List<Player> playersToHide = new ObjectArrayList<>(Bukkit.getOnlinePlayers());
 
             if (playerGameMode == GameMode.SPECTATOR)
                 playersToShow.removeIf(p -> p.getGameMode() != playerGameMode);

@@ -1,5 +1,7 @@
 package xiamomc.morph;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import it.unimi.dsi.fastutil.objects.ObjectList;
 import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.disguisetypes.Disguise;
 import me.libraryaddict.disguise.disguisetypes.MobDisguise;
@@ -48,7 +50,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     /**
      * 已伪装的玩家
      */
-    private final List<DisguiseState> disguisedPlayers = new ArrayList<>();
+    private final List<DisguiseState> disguisedPlayers = new ObjectArrayList<>();
 
     private final PlayerDataManager data = new PlayerDataManager();
 
@@ -88,7 +90,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         config.onConfigRefresh(c -> this.onConfigRefresh(), true);
 
-        registerProviders(List.of(
+        registerProviders(ObjectList.of(
                 new VanillaDisguiseProvider(),
                 new PlayerDisguiseProvider(),
                 new LibsDisguisesDisguiseProvider()
@@ -175,7 +177,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
      */
     public List<DisguiseState> getDisguisedPlayers()
     {
-        return new ArrayList<>(disguisedPlayers);
+        return new ObjectArrayList<>(disguisedPlayers);
     }
 
     private final Map<UUID, Long> uuidMoprhTimeMap = new ConcurrentHashMap<>();
@@ -211,11 +213,11 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         uuidMoprhTimeMap.put(player.getUniqueId(), plugin.getCurrentTick());
     }
 
-    private List<?> bannedDisguises = new ArrayList<>();
+    private List<?> bannedDisguises = new ObjectArrayList<>();
 
     //region 伪装提供器
 
-    private static final List<DisguiseProvider> providers = new ArrayList<>();
+    private static final List<DisguiseProvider> providers = new ObjectArrayList<>();
 
     /**
      * 从ID获取DisguiseProvider
@@ -353,7 +355,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
      */
     public void unMorphAll(boolean ignoreOffline)
     {
-        var players = new ArrayList<>(disguisedPlayers);
+        var players = new ObjectArrayList<>(disguisedPlayers);
         players.forEach(i ->
         {
             if (ignoreOffline && !i.getPlayer().isOnline()) return;
@@ -651,7 +653,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     }
 
     @Override
-    public ArrayList<DisguiseInfo> getAvaliableDisguisesFor(Player player)
+    public ObjectArrayList<DisguiseInfo> getAvaliableDisguisesFor(Player player)
     {
         return data.getAvaliableDisguisesFor(player);
     }
@@ -678,7 +680,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     public boolean reloadConfiguration()
     {
         //重载完数据后要发到离线存储的人
-        var stateToOfflineStore = new ArrayList<DisguiseState>();
+        var stateToOfflineStore = new ObjectArrayList<DisguiseState>();
 
         getDisguisedPlayers().forEach(s ->
         {

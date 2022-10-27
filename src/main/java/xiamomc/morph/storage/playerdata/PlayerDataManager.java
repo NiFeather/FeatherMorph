@@ -1,5 +1,6 @@
 package xiamomc.morph.storage.playerdata;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -21,7 +22,7 @@ import java.util.Objects;
 
 public class PlayerDataManager extends MorphJsonBasedStorage<PlayerMorphConfigurationContainer> implements IManagePlayerData
 {
-    private final List<DisguiseInfo> cachedInfos = new ArrayList<>();
+    private final List<DisguiseInfo> cachedInfos = new ObjectArrayList<>();
 
     @Resolved
     private MorphManager morphs;
@@ -59,13 +60,13 @@ public class PlayerDataManager extends MorphJsonBasedStorage<PlayerMorphConfigur
             storingObject.playerMorphConfigurations.forEach(c ->
             {
                 //要设置给c.unlockedDisguises的列表
-                var list = new ArrayList<DisguiseInfo>();
+                var list = new ObjectArrayList<DisguiseInfo>();
 
                 //原始列表
                 var unlockedDisguiseIdentifiers = c.getUnlockedDisguiseIdentifiers();
 
                 //先对原始列表排序
-                Collections.sort(unlockedDisguiseIdentifiers);
+                unlockedDisguiseIdentifiers.sort(null);
 
                 //然后逐个添加
                 unlockedDisguiseIdentifiers.forEach(i ->
@@ -103,7 +104,7 @@ public class PlayerDataManager extends MorphJsonBasedStorage<PlayerMorphConfigur
           configuration.playerMorphConfigurations.forEach(c ->
           {
               //新建ID列表
-              var list = new ArrayList<String>();
+              var list = new ObjectArrayList<String>();
 
               //遍历Info
               c.getUnlockedDisguises().forEach(i ->
@@ -213,7 +214,7 @@ public class PlayerDataManager extends MorphJsonBasedStorage<PlayerMorphConfigur
     }
 
     @Override
-    public ArrayList<DisguiseInfo> getAvaliableDisguisesFor(Player player)
+    public ObjectArrayList<DisguiseInfo> getAvaliableDisguisesFor(Player player)
     {
         return getPlayerConfiguration(player).getUnlockedDisguises();
     }
