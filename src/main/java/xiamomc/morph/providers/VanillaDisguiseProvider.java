@@ -13,6 +13,7 @@ import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.misc.DisguiseInfo;
 import xiamomc.morph.misc.DisguiseTypes;
 import xiamomc.morph.misc.EntityTypeUtils;
+import xiamomc.morph.misc.MinecraftLanguageHelper;
 
 public class VanillaDisguiseProvider extends DefaultDisguiseProvider
 {
@@ -57,6 +58,6 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
         if (type == null)
             return Component.text("???");
         else
-            return Component.translatable(type.translationKey());
+            return MinecraftLanguageHelper.getComponent(type.translationKey());
     }
 }
