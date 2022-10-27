@@ -2,6 +2,7 @@ package xiamomc.morph.providers;
 
 import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.disguisetypes.Disguise;
+import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -68,5 +69,11 @@ public class LibsDisguisesDisguiseProvider extends VanillaDisguiseProvider
         super.unMorph(player, state);
 
         return false;
+    }
+
+    @Override
+    public Component getDisplayName(String disguiseIdentifier)
+    {
+        return Component.text(DisguiseTypes.LD.toStrippedId(disguiseIdentifier));
     }
 }

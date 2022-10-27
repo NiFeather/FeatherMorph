@@ -3,6 +3,7 @@ package xiamomc.morph.providers;
 import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.disguisetypes.Disguise;
 import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
+import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -117,4 +118,12 @@ public abstract class DisguiseProvider extends MorphPluginObject
     public void postConstructDisguise(DisguiseState state, @Nullable Entity targetEntity)
     {
     }
+
+    /**
+     * 获取某个伪装的显示名称
+     *
+     * @param disguiseIdentifier 伪装ID
+     * @return 显示名称
+     */
+    public abstract Component getDisplayName(String disguiseIdentifier);
 }

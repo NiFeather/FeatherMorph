@@ -321,17 +321,13 @@ public class DisguiseState extends MorphPluginObject
         this.shouldHandlePose = shouldHandlePose;
         setSkillIdentifier(skillIdentifier);
 
-        var type = DisguiseTypes.fromId(identifier);
-        disguiseType = type;
+        disguiseType = DisguiseTypes.fromId(identifier);
 
-        displayName = switch (type)
-                {
-                    case PLAYER -> Component.text(type.toStrippedId(identifier));
-                    case LD, VANILLA -> Objects.equals(d.getDisguiseName(), d.getType().toReadable())
-                            ? MinecraftLanguageHelper.getComponent(d.getType().getEntityType().translationKey())
-                            : Component.text(disguise.getDisguiseName());
-                    default -> Component.text("unknown(" + identifier + ")");
-                };
+        var provider = MorphManager.getProvider(identifier);
+
+        displayName = provider == null
+                ? Component.text(identifier)
+                : provider.getDisplayName(identifier);
 
         //更新技能Flag
         var disgType = d.getType().getEntityType();

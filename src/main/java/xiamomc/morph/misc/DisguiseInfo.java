@@ -5,6 +5,9 @@ import com.google.gson.annotations.SerializedName;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.EntityType;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import xiamomc.morph.MorphManager;
+import xiamomc.morph.providers.DisguiseProvider;
 
 public class DisguiseInfo
 {
@@ -31,6 +34,15 @@ public class DisguiseInfo
 
     @NotNull
     private final DisguiseTypes disguiseType;
+
+    @Nullable
+    private final DisguiseProvider provider;
+
+    @Nullable
+    public DisguiseProvider getProvider()
+    {
+        return provider;
+    }
 
     /**
      * 获取伪装类型（玩家、生物、LD或未知）
@@ -63,6 +75,8 @@ public class DisguiseInfo
     {
         this.rawIdentifier = rawIdentifier;
         this.disguiseType = disguiseType;
+
+        this.provider = MorphManager.getProvider(rawIdentifier);
 
         switch (disguiseType)
         {
@@ -134,9 +148,7 @@ public class DisguiseInfo
     {
         if (!this.isValidate()) return Component.text("" + rawIdentifier);
 
-        return disguiseType == DisguiseTypes.VANILLA
-                ? MinecraftLanguageHelper.getComponent(entityType.translationKey())
-                : Component.text(disguiseType.toStrippedId(this.rawIdentifier));
+        return provider == null ? Component.text(rawIdentifier) : provider.getDisplayName(rawIdentifier);
     }
 
     @Override
