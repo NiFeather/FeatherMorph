@@ -13,6 +13,7 @@ import xiamomc.morph.interfaces.IManagePlayerData;
 import xiamomc.morph.interfaces.IManageRequests;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.MorphMessageStore;
+import xiamomc.morph.misc.MinecraftLanguageHelper;
 import xiamomc.morph.skills.MorphSkillHandler;
 import xiamomc.morph.storage.skill.SkillConfigurationStore;
 import xiamomc.pluginbase.Command.CommandHelper;
@@ -41,6 +42,8 @@ public final class MorphPlugin extends XiaMoJavaPlugin
     private final MorphSkillHandler skillHandler = new MorphSkillHandler();
 
     private final AbilityHandler abilityHandler = new AbilityHandler();
+
+    private final MinecraftLanguageHelper languageHelper = new MinecraftLanguageHelper();
 
     @Override
     public void onEnable()

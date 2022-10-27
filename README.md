@@ -31,6 +31,7 @@
     - 运行`/mmorph help mmorph`即可查看！
 
 ## TODO List（从上往下按优先级排列）
+- [ ] 多语言支持？
 - [x] 移动JSON配置到插件的配置目录下
     * ~~是的这个插件到现在还在用`/dev/shm/test`当JSON配置存储（~~
       * 现在是插件目录下面的`data.json`了（

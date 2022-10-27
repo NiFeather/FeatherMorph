@@ -18,7 +18,6 @@ import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.abilities.IMorphAbility;
-import xiamomc.morph.abilities.MorphAbility;
 import xiamomc.morph.providers.DisguiseProvider;
 import xiamomc.morph.skills.MorphSkillHandler;
 import xiamomc.morph.abilities.AbilityHandler;
@@ -329,7 +328,7 @@ public class DisguiseState extends MorphPluginObject
                 {
                     case PLAYER -> Component.text(type.toStrippedId(identifier));
                     case LD, VANILLA -> Objects.equals(d.getDisguiseName(), d.getType().toReadable())
-                            ? Component.translatable(d.getType().getEntityType().translationKey())
+                            ? MinecraftLanguageHelper.getComponent(d.getType().getEntityType().translationKey())
                             : Component.text(disguise.getDisguiseName());
                     default -> Component.text("unknown(" + identifier + ")");
                 };

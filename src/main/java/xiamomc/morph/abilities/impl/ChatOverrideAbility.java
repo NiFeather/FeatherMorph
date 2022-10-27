@@ -1,12 +1,13 @@
 package xiamomc.morph.abilities.impl;
 
+import com.destroystokyo.paper.ClientOption;
 import io.papermc.paper.event.player.AsyncChatEvent;
-import net.kyori.adventure.text.Component;
+import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.MorphManager;
-import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.abilities.AbilityType;
 import xiamomc.morph.abilities.MorphAbility;
 import xiamomc.morph.config.ConfigOption;

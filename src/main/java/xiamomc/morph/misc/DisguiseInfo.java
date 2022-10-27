@@ -5,7 +5,6 @@ import com.google.gson.annotations.SerializedName;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.EntityType;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.LoggerFactory;
 
 public class DisguiseInfo
 {
@@ -135,10 +134,9 @@ public class DisguiseInfo
     {
         if (!this.isValidate()) return Component.text("" + rawIdentifier);
 
-        if (disguiseType == DisguiseTypes.VANILLA)
-            return Component.translatable(entityType.translationKey());
-        else
-            return Component.text(disguiseType.toStrippedId(this.rawIdentifier));
+        return disguiseType == DisguiseTypes.VANILLA
+                ? MinecraftLanguageHelper.getComponent(entityType.translationKey())
+                : Component.text(disguiseType.toStrippedId(this.rawIdentifier));
     }
 
     @Override

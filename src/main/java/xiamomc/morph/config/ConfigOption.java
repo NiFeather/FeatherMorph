@@ -32,6 +32,9 @@ public enum ConfigOption
 
     ALLOW_LD_DISGUISES(ConfigNode.create().append("enable_ld_custom_disguises"), false),
 
+    LANGUAGE_CODE(languageNode().append("code"), "zh_cn"),
+    LANGUAGE_ALLOW_FALLBACK(languageNode().append("cast_translatable"), true),
+
     VERSION(ConfigNode.create().append("version"), 0);
 
     public final ConfigNode node;
@@ -62,5 +65,10 @@ public enum ConfigOption
     private static ConfigNode bossbarNode()
     {
         return ConfigNode.create().append("bossbar");
+    }
+
+    private static ConfigNode languageNode()
+    {
+        return ConfigNode.create().append("language");
     }
 }
