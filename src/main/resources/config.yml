@@ -6,10 +6,6 @@ root:
     allowOverride: false
     # 是否使用自定义消息格式？
     UseCustomRenderer: true
-    # 自定义消息格式
-    # 格式为"<伪装id>:<消息>"，消息格式和messages.json中的“common.chat.overridePattern”一致
-    # 如果这里没有配置，则插件会取messages.json中的版本使用
-    custom_patterns: []
 
   # 收到伤害时的技能CD
   # 玩家受到伤害后技能CD将至少为下面配置的时间（单位：游戏刻）
@@ -66,4 +62,4 @@ root:
   bannedDisguises: []
 
   # 不要动这个键!
-  version: 7
+  version: 8
