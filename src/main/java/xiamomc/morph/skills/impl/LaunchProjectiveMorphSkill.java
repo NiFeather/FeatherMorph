@@ -12,22 +12,22 @@ import xiamomc.morph.messages.SkillStrings;
 import xiamomc.morph.misc.EntityTypeUtils;
 import xiamomc.morph.skills.MorphSkill;
 import xiamomc.morph.skills.SkillType;
+import xiamomc.morph.storage.skill.ISkillOption;
+import xiamomc.morph.storage.skill.ProjectiveConfiguration;
 import xiamomc.morph.storage.skill.SkillConfiguration;
 
-public class LaunchProjectiveMorphSkill extends MorphSkill
+public class LaunchProjectiveMorphSkill extends MorphSkill<ProjectiveConfiguration>
 {
     @Override
-    public int executeSkill(Player player, SkillConfiguration configuration)
+    public int executeSkill(Player player, SkillConfiguration configuration, ProjectiveConfiguration option)
     {
-        var projectiveConfig = configuration.getProjectiveConfiguration();
-
-        if (projectiveConfig == null)
+        if (option == null || configuration == null)
         {
             printErrorMessage(player, configuration + "没有弹射物配置");
             return 10;
         }
 
-        var type = EntityTypeUtils.fromString(projectiveConfig.getName(), true);
+        var type = EntityTypeUtils.fromString(option.getName(), true);
 
         if (type == null)
         {
@@ -36,7 +36,7 @@ public class LaunchProjectiveMorphSkill extends MorphSkill
         }
 
         Entity target = null;
-        var distanceLimit = projectiveConfig.getDistanceLimit();
+        var distanceLimit = option.getDistanceLimit();
 
         if (distanceLimit > 0)
         {
@@ -51,7 +51,7 @@ public class LaunchProjectiveMorphSkill extends MorphSkill
             }
         }
 
-        var entity = launchProjectile(player, type, projectiveConfig.getVectorMultiplier());
+        var entity = launchProjectile(player, type, option.getVectorMultiplier());
 
         //region 发射后...
 
@@ -70,8 +70,8 @@ public class LaunchProjectiveMorphSkill extends MorphSkill
 
         //endregion 发射后...
 
-        playSoundToNearbyPlayers(player, projectiveConfig.getSoundDistance(),
-                Key.key(projectiveConfig.getSoundName()), Sound.Source.PLAYER);
+        playSoundToNearbyPlayers(player, option.getSoundDistance(),
+                Key.key(option.getSoundName()), Sound.Source.PLAYER);
 
         return configuration.getCooldown();
     }
@@ -80,5 +80,13 @@ public class LaunchProjectiveMorphSkill extends MorphSkill
     public @NotNull NamespacedKey getIdentifier()
     {
         return SkillType.LAUNCH_PROJECTIVE;
+    }
+
+    private final ProjectiveConfiguration option = new ProjectiveConfiguration();
+
+    @Override
+    public ProjectiveConfiguration getOption()
+    {
+        return option;
     }
 }

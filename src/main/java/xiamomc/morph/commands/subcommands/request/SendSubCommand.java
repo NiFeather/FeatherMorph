@@ -1,5 +1,6 @@
 package xiamomc.morph.commands.subcommands.request;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -15,7 +16,6 @@ import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Command.ISubCommand;
 import xiamomc.pluginbase.messages.FormattableMessage;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class SendSubCommand extends MorphPluginObject implements ISubCommand
@@ -29,7 +29,7 @@ public class SendSubCommand extends MorphPluginObject implements ISubCommand
     @Override
     public List<String> onTabComplete(List<String> args, CommandSender source)
     {
-        var list = new ArrayList<String>();
+        var list = new ObjectArrayList<String>();
 
         if (source instanceof Player player)
         {

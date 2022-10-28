@@ -2,10 +2,14 @@ package xiamomc.morph.storage.skill;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xiamomc.morph.skills.SkillType;
 
-public class EffectConfiguration
+import java.util.Map;
+
+public class EffectConfiguration implements ISkillOption
 {
     public EffectConfiguration()
     {
@@ -94,5 +98,41 @@ public class EffectConfiguration
     public int getSoundDistance()
     {
         return soundDistance;
+    }
+
+    @Override
+    public Map<String, Object> toMap()
+    {
+        var map = new Object2ObjectOpenHashMap<String, Object>();
+
+        map.put("name", name);
+        map.put("multiplier", multiplier);
+        map.put("duration", duration);
+        map.put("acquires_water", acquiresWater);
+        map.put("show_guardian", showGuardian);
+        map.put("sound", soundName);
+        map.put("sound_distance", soundDistance);
+        map.put("apply_distance", applyDistance);
+
+        return map;
+    }
+
+    @Override
+    public EffectConfiguration fromMap(Map<String, Object> map)
+    {
+        if (map == null) return null;
+
+        var instance = new EffectConfiguration();
+
+        instance.name = (String) map.getOrDefault("name", "none");
+        instance.multiplier = (int) (double) map.getOrDefault("multiplier", 0);
+        instance.duration = (int) (double) map.getOrDefault("duration", 0);
+        instance.acquiresWater = (boolean) map.getOrDefault("acquires_water", false);
+        instance.showGuardian = (boolean) map.getOrDefault("show_guardian", false);
+        instance.soundName = (String) map.getOrDefault("sound_name", "none");
+        instance.soundDistance = (int) (double) map.getOrDefault("sound_distance", 0);
+        instance.applyDistance = (int) (double) map.getOrDefault("apply_distance", 0);
+
+        return instance;
     }
 }

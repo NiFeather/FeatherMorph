@@ -6,9 +6,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.abilities.AbilityType;
-import xiamomc.morph.abilities.MorphAbility;
 
-public class ReduceFallDamageAbility extends MorphAbility
+public class ReduceFallDamageAbility extends NoOpOptionAbility
 {
     @Override
     public @NotNull NamespacedKey getIdentifier()

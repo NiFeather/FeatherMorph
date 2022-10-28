@@ -1,5 +1,6 @@
 package xiamomc.morph.commands.subcommands.plugin.management;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -14,7 +15,6 @@ import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Command.ISubCommand;
 import xiamomc.pluginbase.messages.FormattableMessage;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class GrantDisguiseSubCommand extends MorphPluginObject implements ISubCommand
@@ -40,7 +40,7 @@ public class GrantDisguiseSubCommand extends MorphPluginObject implements ISubCo
     @Override
     public List<String> onTabComplete(List<String> args, CommandSender source)
     {
-        var list = new ArrayList<String>();
+        var list = new ObjectArrayList<String>();
         if (args.size() > 2) return list;
 
         var name = args.size() >= 1 ? args.get(0) : "";

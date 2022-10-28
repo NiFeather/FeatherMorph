@@ -1,12 +1,12 @@
 package xiamomc.morph.config;
 
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphPlugin;
 import xiamomc.pluginbase.Configuration.ConfigNode;
 import xiamomc.pluginbase.Configuration.PluginConfigManager;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public class MorphConfigManager extends PluginConfigManager
@@ -56,7 +56,7 @@ public class MorphConfigManager extends PluginConfigManager
     public Map<ConfigNode, Object> getAllNotDefault()
     {
         var options = ConfigOption.values();
-        var map = new HashMap<ConfigNode, Object>();
+        var map = new Object2ObjectOpenHashMap<ConfigNode, Object>();
 
         for (var o : options)
         {

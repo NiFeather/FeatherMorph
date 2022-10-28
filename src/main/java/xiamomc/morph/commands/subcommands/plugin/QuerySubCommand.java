@@ -1,5 +1,6 @@
 package xiamomc.morph.commands.subcommands.plugin;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import me.libraryaddict.disguise.DisguiseAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -14,7 +15,6 @@ import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Command.ISubCommand;
 import xiamomc.pluginbase.messages.FormattableMessage;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class QuerySubCommand extends MorphPluginObject implements ISubCommand
@@ -40,7 +40,7 @@ public class QuerySubCommand extends MorphPluginObject implements ISubCommand
     @Override
     public List<String> onTabComplete(List<String> args, CommandSender sender)
     {
-        var list = new ArrayList<String>();
+        var list = new ObjectArrayList<String>();
         if (args.size() > 1) return list;
 
         var name = args.size() == 1 ? args.get(0) : "";

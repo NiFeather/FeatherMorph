@@ -1,5 +1,8 @@
 package xiamomc.morph.skills;
 
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import it.unimi.dsi.fastutil.objects.ObjectList;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import org.bukkit.NamespacedKey;
@@ -10,12 +13,15 @@ import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.SkillStrings;
 import xiamomc.morph.skills.impl.*;
+import xiamomc.morph.storage.skill.ISkillOption;
 import xiamomc.morph.storage.skill.SkillConfiguration;
 import xiamomc.morph.storage.skill.SkillConfigurationStore;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MorphSkillHandler extends MorphPluginObject
@@ -23,14 +29,14 @@ public class MorphSkillHandler extends MorphPluginObject
     /**
      * 已注册的技能
      */
-    private final List<IMorphSkill> skills = new ArrayList<>();
+    private final List<IMorphSkill<?>> skills = new ObjectArrayList<>();
 
     /**
      * 获取已注册的技能
      *
      * @return 技能列表
      */
-    public List<IMorphSkill> getRegistedSkills()
+    public List<IMorphSkill<?>> getRegistedSkills()
     {
         return skills;
     }
@@ -38,12 +44,12 @@ public class MorphSkillHandler extends MorphPluginObject
     /**
      * 玩家 -> 此玩家的CD列表
      */
-    private final Map<UUID, List<SkillCooldownInfo>> uuidInfoMap = new LinkedHashMap<>();
+    private final Map<UUID, List<SkillCooldownInfo>> uuidInfoMap = new Object2ObjectOpenHashMap<>();
 
     /**
      * 玩家 -> 当前CD
      */
-    private final Map<UUID, SkillCooldownInfo> uuidCooldownMap = new LinkedHashMap<>();
+    private final Map<UUID, SkillCooldownInfo> uuidCooldownMap = new Object2ObjectOpenHashMap<>();
 
     @Resolved
     private MorphManager manager;
@@ -54,7 +60,7 @@ public class MorphSkillHandler extends MorphPluginObject
     @Initializer
     private void load()
     {
-        registerSkills(List.of(
+        registerSkills(ObjectList.of(
                 new ApplyEffectMorphSkill(),
                 new ExplodeMorphSkill(),
                 new InventoryMorphSkill(),
@@ -72,7 +78,7 @@ public class MorphSkillHandler extends MorphPluginObject
      * @param skills 技能列表
      * @return 所有操作是否成功
      */
-    public boolean registerSkills(List<IMorphSkill> skills)
+    public boolean registerSkills(List<IMorphSkill<?>> skills)
     {
         var success = new AtomicBoolean(true);
 
@@ -89,7 +95,7 @@ public class MorphSkillHandler extends MorphPluginObject
      * @param skill 技能
      * @return 操作是否成功
      */
-    public boolean registerSkill(IMorphSkill skill)
+    public boolean registerSkill(IMorphSkill<?> skill)
     {
         if (skills.contains(skill))
         {
@@ -104,6 +110,7 @@ public class MorphSkillHandler extends MorphPluginObject
         }
 
         skills.add(skill);
+
         return true;
     }
 
@@ -120,7 +127,7 @@ public class MorphSkillHandler extends MorphPluginObject
      * @return 对应的技能和技能配置，如果没找到则是null
      */
     @Nullable
-    private Map.Entry<SkillConfiguration, IMorphSkill> getSkillEntry(String identifier)
+    private Map.Entry<SkillConfiguration, IMorphSkill<?>> getSkillEntry(String identifier)
     {
         if (identifier == null) return null;
 
@@ -146,10 +153,29 @@ public class MorphSkillHandler extends MorphPluginObject
             var skill = entry.getValue();
             var config = entry.getKey();
 
+            ISkillOption option;
+
+            try
+            {
+                option = skill.getOption().fromMap(config.getSkillOptions(skill));
+            }
+            catch (Throwable t)
+            {
+                if (t instanceof ClassCastException)
+                    logger.error(config.getIdentifier() + " -> " + skill.getIdentifier() + "的配置存在问题，请检查其技能设置。");
+                else
+                    logger.error("解析技能设置时出现未知问题");
+
+                t.printStackTrace();
+
+                player.sendMessage(MessageUtils.prefixes(player, SkillStrings.exceptionOccurredString()));
+                return;
+            }
+
             var cd = getCooldownInfo(player.getUniqueId(), state.getSkillIdentifier());
             assert cd != null;
 
-            cd.setCooldown(skill.executeSkill(player, config));
+            cd.setCooldown(skill.executeSkillGeneric(player, config, option));
             cd.setLastInvoke(plugin.getCurrentTick());
 
             if (!state.haveCooldown()) state.setCooldownInfo(cd);
@@ -180,7 +206,7 @@ public class MorphSkillHandler extends MorphPluginObject
         SkillCooldownInfo cdInfo;
 
         //获取或创建CD列表
-        if (!uuidInfoMap.containsKey(uuid)) uuidInfoMap.put(uuid, infos = new ArrayList<>());
+        if (!uuidInfoMap.containsKey(uuid)) uuidInfoMap.put(uuid, infos = new ObjectArrayList<>());
         else infos = uuidInfoMap.get(uuid);
 
         //获取或创建CD

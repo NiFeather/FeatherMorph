@@ -1,5 +1,6 @@
 package xiamomc.morph.commands;
 
+import it.unimi.dsi.fastutil.objects.ObjectList;
 import xiamomc.morph.commands.subcommands.MorphSubCommandHandler;
 import xiamomc.morph.commands.subcommands.request.AcceptSubCommand;
 import xiamomc.morph.commands.subcommands.request.DenySubCommand;
@@ -12,7 +13,7 @@ import java.util.List;
 
 public class RequestCommand extends MorphSubCommandHandler
 {
-    private final List<ISubCommand> subCommands = List.of(
+    private final List<ISubCommand> subCommands = ObjectList.of(
             new SendSubCommand(),
             new AcceptSubCommand(),
             new DenySubCommand()
@@ -24,7 +25,7 @@ public class RequestCommand extends MorphSubCommandHandler
         return subCommands;
     }
 
-    private final List<FormattableMessage> notes = List.of(
+    private final List<FormattableMessage> notes = ObjectList.of(
             HelpStrings.requestDescriptionSpecialNote()
     );
 

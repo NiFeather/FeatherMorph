@@ -1,5 +1,6 @@
 package xiamomc.morph.commands;
 
+import it.unimi.dsi.fastutil.objects.ObjectList;
 import xiamomc.morph.MorphPlugin;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Command.CommandHelper;
@@ -10,7 +11,7 @@ import java.util.List;
 
 public class MorphCommandHelper extends CommandHelper<MorphPlugin>
 {
-    private final List<IPluginCommand> commands = List.of(
+    private final List<IPluginCommand> commands = ObjectList.of(
             new MorphCommand(),
             new MorphPlayerCommand(),
             new UnMorphCommand(),

@@ -1,39 +1,39 @@
 package xiamomc.morph.storage.skill;
 
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.EntityType;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.abilities.AbilityHandler;
 import xiamomc.morph.abilities.IMorphAbility;
-import xiamomc.morph.skills.MorphSkillHandler;
 import xiamomc.morph.skills.DefaultConfigGenerator;
 import xiamomc.morph.skills.IMorphSkill;
+import xiamomc.morph.skills.MorphSkillHandler;
 import xiamomc.morph.skills.SkillType;
 import xiamomc.morph.storage.MorphJsonBasedStorage;
 import xiamomc.pluginbase.Annotations.Resolved;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * 技能配置存储，有关技能执行、注册技能请查看{@link MorphSkillHandler}
+ * 技能配置存储，有关技能执行、注册技能请查看{@link MorphSkillHandler} 和 {@link AbilityHandler}
  */
 public class SkillConfigurationStore extends MorphJsonBasedStorage<SkillConfigurationContainer>
 {
     /**
      * 配置 -> 技能
      */
-    private final Map<SkillConfiguration, IMorphSkill> configToSkillMap = new ConcurrentHashMap<>();
+    private final Map<SkillConfiguration, IMorphSkill<?>> configToSkillMap = new Object2ObjectOpenHashMap<>();
 
     /**
      * 获取已配置的技能
      *
      * @return 配置 -> 技能表
      */
-    public Map<SkillConfiguration, IMorphSkill> getConfiguredSkills()
+    public Map<SkillConfiguration, IMorphSkill<?>> getConfiguredSkills()
     {
         return configToSkillMap;
     }
@@ -56,7 +56,7 @@ public class SkillConfigurationStore extends MorphJsonBasedStorage<SkillConfigur
         return "技能存储";
     }
 
-    private final int targetVersion = 4;
+    private final int targetVersion = 6;
 
     @Resolved
     private MorphSkillHandler skillHandler;
@@ -69,47 +69,57 @@ public class SkillConfigurationStore extends MorphJsonBasedStorage<SkillConfigur
     {
         var val = super.reloadConfiguration();
 
-        var success = new AtomicBoolean(true);
+        var success = new AtomicBoolean(val);
 
-        try
+        if (val)
         {
-            configToSkillMap.clear();
-            storingObject.configurations.forEach(c ->
+            try
             {
-                if (!registerConfiguration(c)) success.set(false);
+                configToSkillMap.clear();
+                abilityHandler.getRegistedAbilities().forEach(IMorphAbility::clearOptions);
 
-                var abilities = new ArrayList<IMorphAbility>();
-
-                c.getAbilitiyIdentifiers().forEach(i ->
+                storingObject.configurations.forEach(c ->
                 {
-                    var key = NamespacedKey.fromString(i);
+                    if (!registerConfiguration(c)) success.set(false);
 
-                    if (key == null)
-                        logger.error("无效的技能ID: " + i);
+                    var abilities = new ObjectArrayList<IMorphAbility<?>>();
 
-                    var ability = abilityHandler.getAbility(key);
+                    c.getAbilitiyIdentifiers().forEach(i ->
+                    {
+                        var key = NamespacedKey.fromString(i);
 
-                    if (ability != null)
-                        abilities.add(ability);
-                    else
-                        success.set(false);
+                        if (key == null)
+                            logger.error("无效的技能ID: " + i);
+
+                        var ability = abilityHandler.getAbility(key);
+
+                        if (ability != null)
+                        {
+                            abilities.add(ability);
+
+                            if (!ability.setOptionGeneric(c.getIdentifier(), c.getAbilityOptions(ability)))
+                                success.set(false);
+                        }
+                        else
+                            success.set(false);
+                    });
+
+                    c.setAbilities(abilities);
                 });
 
-                c.setAbilities(abilities);
-            });
+                if (storingObject.version < targetVersion)
+                    success.set(migrate(storingObject) || success.get());
 
-            if (storingObject.version < targetVersion)
-                success.set(migrate(storingObject) || success.get());
+                saveConfiguration();
+            }
+            catch (Throwable t)
+            {
+                logger.error("处理配置时出现异常：" + t.getMessage());
+                t.printStackTrace();
 
-            saveConfiguration();
-        }
-        catch (Throwable t)
-        {
-            logger.error("处理配置时出现异常：" + t.getMessage());
-            t.printStackTrace();
-
-            configToSkillMap.clear();
-            return false;
+                configToSkillMap.clear();
+                return false;
+            }
         }
 
         if (!success.get())
@@ -176,6 +186,20 @@ public class SkillConfigurationStore extends MorphJsonBasedStorage<SkillConfigur
             //1 -> 2
             DefaultConfigGenerator.addAbilityConfigurations(config.configurations);
 
+            //-> 5
+            config.configurations.forEach(c ->
+            {
+                var effect = c.getEffectConfiguration();
+                var projective = c.getProjectiveConfiguration();
+                var explosion = c.getExplosionConfiguration();
+                var teleport = c.getTeleportConfiguration();
+
+                c.setOption(SkillType.TELEPORT.asString(), teleport);
+                c.setOption(SkillType.APPLY_EFFECT.asString(), effect);
+                c.setOption(SkillType.LAUNCH_PROJECTIVE.asString(), projective);
+                c.setOption(SkillType.EXPLODE.asString(), explosion);
+            });
+
             config.version = targetVersion;
 
             logger.info("已更新技能配置，即将重载存储...");
@@ -192,9 +216,15 @@ public class SkillConfigurationStore extends MorphJsonBasedStorage<SkillConfigur
 
     //region 被动技能
 
-    public List<IMorphAbility> getAbilityFor(String id)
+    /**
+     * 为某个伪装ID获取被动技能
+     *
+     * @param id 伪装ID
+     * @return 被动技能列表
+     */
+    public List<IMorphAbility<?>> getAbilityFor(String id)
     {
-        var list = new ArrayList<IMorphAbility>();
+        var list = new ObjectArrayList<IMorphAbility<?>>();
 
         storingObject.configurations.forEach(skillConfig ->
         {
@@ -207,7 +237,7 @@ public class SkillConfigurationStore extends MorphJsonBasedStorage<SkillConfigur
         return list;
     }
 
-    public List<IMorphAbility> getAbilityFor(EntityType type)
+    public List<IMorphAbility<?>> getAbilityFor(EntityType type)
     {
         return getAbilityFor(type.getKey().asString());
     }

@@ -1,5 +1,6 @@
 package xiamomc.morph.providers;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.disguisetypes.Disguise;
 import me.libraryaddict.disguise.disguisetypes.DisguiseType;
@@ -26,7 +27,6 @@ import xiamomc.morph.skills.MorphSkillHandler;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -114,20 +114,13 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
                 watcher.setEntityPose(DisguiseUtils.toEntityPose(player.getPose()));
         }
 
-        //被动技能
-        var abilities = abilityHandler.getAbilitiesFor(state.getSkillIdentifier());
-        state.setAbilities(abilities);
-
-        if (abilities != null)
-            abilities.forEach(a -> a.handle(player, state));
-
         //Bossbar
         var bossbar = state.getBossbar();
         if (bossbar != null)
         {
             var playerGameMode = player.getGameMode();
             List<Player> playersToShow = DisguiseUtils.findNearbyPlayers(player, bossbarDisplayRange, true);
-            List<Player> playersToHide = new ArrayList<>(Bukkit.getOnlinePlayers());
+            List<Player> playersToHide = new ObjectArrayList<>(Bukkit.getOnlinePlayers());
 
             if (playerGameMode == GameMode.SPECTATOR)
                 playersToShow.removeIf(p -> p.getGameMode() != playerGameMode);

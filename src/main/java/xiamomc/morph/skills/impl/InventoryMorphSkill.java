@@ -8,16 +8,18 @@ import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.SkillStrings;
 import xiamomc.morph.skills.MorphSkill;
 import xiamomc.morph.skills.SkillType;
+import xiamomc.morph.storage.skill.ISkillOption;
+import xiamomc.morph.storage.skill.NoOpConfiguration;
 import xiamomc.morph.storage.skill.SkillConfiguration;
 import xiamomc.pluginbase.Annotations.Resolved;
 
-public class InventoryMorphSkill extends MorphSkill
+public class InventoryMorphSkill extends MorphSkill<NoOpConfiguration>
 {
     @Resolved
     private MorphManager manager;
 
     @Override
-    public int executeSkill(Player player, SkillConfiguration configuration)
+    public int executeSkill(Player player, SkillConfiguration configuration, NoOpConfiguration option)
     {
         var state = manager.getDisguiseStateFor(player);
         assert state != null;
@@ -37,5 +39,13 @@ public class InventoryMorphSkill extends MorphSkill
     public @NotNull NamespacedKey getIdentifier()
     {
         return SkillType.INVENTORY;
+    }
+
+    private final NoOpConfiguration option = new NoOpConfiguration();
+
+    @Override
+    public NoOpConfiguration getOption()
+    {
+        return option;
     }
 }

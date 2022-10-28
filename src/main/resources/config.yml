@@ -6,10 +6,6 @@ root:
     allowOverride: false
     # 是否使用自定义消息格式？
     UseCustomRenderer: true
-    # 自定义消息格式
-    # 格式为"<伪装id>:<消息>"，消息格式和messages.json中的“common.chat.overridePattern”一致
-    # 如果这里没有配置，则插件会取messages.json中的版本使用
-    custom_patterns: []
 
   # 语言
   language:

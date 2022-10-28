@@ -18,10 +18,12 @@ import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.SkillStrings;
 import xiamomc.morph.misc.DisguiseUtils;
+import xiamomc.morph.storage.skill.ISkillOption;
+import xiamomc.morph.storage.skill.SkillConfiguration;
 
 import java.util.List;
 
-public abstract class MorphSkill extends MorphPluginObject implements IMorphSkill
+public abstract class MorphSkill<T extends ISkillOption> extends MorphPluginObject implements IMorphSkill<T>
 {
     protected void playSoundToNearbyPlayers(Player player, int distance, Key key, Sound.Source source)
     {

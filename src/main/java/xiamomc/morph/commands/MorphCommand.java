@@ -1,5 +1,6 @@
 package xiamomc.morph.commands;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -13,7 +14,6 @@ import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Command.IPluginCommand;
 import xiamomc.pluginbase.messages.FormattableMessage;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class MorphCommand extends MorphPluginObject implements IPluginCommand
@@ -55,7 +55,7 @@ public class MorphCommand extends MorphPluginObject implements IPluginCommand
     @Override
     public List<String> onTabComplete(List<String> args, CommandSender source)
     {
-        var list = new ArrayList<String>();
+        var list = new ObjectArrayList<String>();
 
         if (args.size() > 1) return list;
 

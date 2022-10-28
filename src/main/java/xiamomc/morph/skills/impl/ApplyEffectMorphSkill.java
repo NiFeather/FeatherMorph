@@ -9,40 +9,45 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.messages.SkillStrings;
+import xiamomc.morph.skills.IMorphSkill;
 import xiamomc.morph.skills.MorphSkill;
 import xiamomc.morph.skills.SkillType;
+import xiamomc.morph.storage.skill.EffectConfiguration;
+import xiamomc.morph.storage.skill.ISkillOption;
 import xiamomc.morph.storage.skill.SkillConfiguration;
 
-public class ApplyEffectMorphSkill extends MorphSkill
+public class ApplyEffectMorphSkill extends MorphSkill<EffectConfiguration>
 {
     private final PotionEffect miningFatigueEffect = new PotionEffect(PotionEffectType.SLOW_DIGGING, 6000, 2);
 
     @Override
-    public int executeSkill(Player player, SkillConfiguration config)
+    public int executeSkill(Player player, SkillConfiguration configuration, EffectConfiguration option)
     {
-        var effectConfig = config.getEffectConfiguration();
-
-        if (effectConfig == null)
+        if (option == null || configuration == null)
         {
-            printErrorMessage(player, config + "没有设置药水效果");
+            printErrorMessage(player, configuration + "没有设置药水效果");
             return 10;
         }
 
-        if (effectConfig.acquiresWater() && !player.isInWater())
+        if (option.acquiresWater() && !player.isInWater())
         {
             sendDenyMessageToPlayer(player, SkillStrings.notInWaterString().toComponent());
             return 20;
         }
 
-        var players = findNearbyPlayers(player, effectConfig.getApplyDistance());
+        var players = findNearbyPlayers(player, option.getApplyDistance());
 
-        var sound = Sound.sound(Key.key(effectConfig.getSoundName()), Sound.Source.PLAYER, effectConfig.getSoundDistance(), 1);
+        var sound = Sound.sound(Key.key(option.getSoundName()), Sound.Source.PLAYER, option.getSoundDistance(), 1);
 
-        var effect = getEffect(effectConfig.getName(), effectConfig.getDuration(), effectConfig.getMultiplier());
+        var effect = getEffect(
+                option.getName(),
+                option.getDuration(),
+                option.getMultiplier()
+        );
 
         if (effect == null)
         {
-            printErrorMessage(player, config + "设置了无效的药水效果");
+            printErrorMessage(player, configuration + "设置了无效的药水效果");
             return 10;
         }
 
@@ -51,13 +56,13 @@ public class ApplyEffectMorphSkill extends MorphSkill
             p.addPotionEffect(effect);
             p.playSound(sound);
 
-            if (effectConfig.showGuardian())
+            if (option.showGuardian())
                 p.spawnParticle(Particle.MOB_APPEARANCE, p.getLocation(), 1);
         });
 
         player.playSound(sound);
 
-        return config.getCooldown();
+        return configuration.getCooldown();
     }
 
     private PotionEffect getEffect(String key, int duration, int multiplier)
@@ -75,5 +80,13 @@ public class ApplyEffectMorphSkill extends MorphSkill
     public @NotNull NamespacedKey getIdentifier()
     {
         return SkillType.APPLY_EFFECT;
+    }
+
+    private final EffectConfiguration option = new EffectConfiguration();
+
+    @Override
+    public EffectConfiguration getOption()
+    {
+        return option;
     }
 }

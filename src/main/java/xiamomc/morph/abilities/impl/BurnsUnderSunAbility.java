@@ -5,10 +5,9 @@ import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.abilities.AbilityType;
-import xiamomc.morph.abilities.MorphAbility;
 import xiamomc.morph.misc.DisguiseState;
 
-public class BurnsUnderSunAbility extends MorphAbility
+public class BurnsUnderSunAbility extends NoOpOptionAbility
 {
     @Override
     public @NotNull NamespacedKey getIdentifier()

@@ -1,5 +1,7 @@
 package xiamomc.morph.abilities;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import it.unimi.dsi.fastutil.objects.ObjectList;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.EntityType;
@@ -12,17 +14,23 @@ import xiamomc.morph.storage.skill.SkillConfigurationStore;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class AbilityHandler extends MorphPluginObject
 {
-    private final List<IMorphAbility> registedAbilities = new ArrayList<>();
+    private final List<IMorphAbility<?>> registedAbilities = new ObjectArrayList<>();
 
     @Resolved
     private SkillConfigurationStore store;
 
-    public boolean registerAbility(IMorphAbility ability)
+    /**
+     * 注册一个被动技能
+     *
+     * @param ability 技能ID
+     * @return 操作是否成功
+     */
+    public boolean registerAbility(IMorphAbility<?> ability)
     {
         if (registedAbilities.stream().anyMatch(a -> a.getIdentifier().equals(ability.getIdentifier())))
         {
@@ -35,16 +43,39 @@ public class AbilityHandler extends MorphPluginObject
         return true;
     }
 
-    public boolean registerAbilities(List<IMorphAbility> abilities)
+    /**
+     * 获取所有已注册的被动
+     *
+     * @return 被动技能列表
+     */
+    public List<IMorphAbility<?>> getRegistedAbilities()
     {
-        abilities.forEach(a -> registerAbility(a));
-        return true;
+        return new ObjectArrayList<>(registedAbilities);
+    }
+
+    /**
+     * 注册一批被动技能
+     *
+     * @param abilities ID列表
+     * @return 操作是否成功
+     */
+    public boolean registerAbilities(List<IMorphAbility<?>> abilities)
+    {
+        var success = new AtomicBoolean(false);
+
+        abilities.forEach(a ->
+        {
+            if (!registerAbility(a))
+                success.set(false);
+        });
+
+        return success.get();
     }
 
     @Initializer
     private void load()
     {
-        registerAbilities(List.of(
+        registerAbilities(ObjectList.of(
                 new BreatheUnderWaterAbility(),
                 new BurnsUnderSunAbility(),
                 new FeatherFallingAbility(),
@@ -65,7 +96,7 @@ public class AbilityHandler extends MorphPluginObject
     }
 
     @Nullable
-    public IMorphAbility getAbility(@Nullable NamespacedKey key)
+    public IMorphAbility<?> getAbility(@Nullable NamespacedKey key)
     {
         if (key == null) return null;
 
@@ -79,13 +110,13 @@ public class AbilityHandler extends MorphPluginObject
     }
 
     @Nullable
-    public List<IMorphAbility> getAbilitiesFor(EntityType type)
+    public List<IMorphAbility<?>> getAbilitiesFor(EntityType type)
     {
         return store.getAbilityFor(type);
     }
 
     @Nullable
-    public List<IMorphAbility> getAbilitiesFor(String id)
+    public List<IMorphAbility<?>> getAbilitiesFor(String id)
     {
         return store.getAbilityFor(id);
     }

@@ -10,23 +10,25 @@ import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.messages.SkillStrings;
 import xiamomc.morph.skills.MorphSkill;
 import xiamomc.morph.skills.SkillType;
+import xiamomc.morph.storage.skill.ISkillOption;
 import xiamomc.morph.storage.skill.SkillConfiguration;
+import xiamomc.morph.storage.skill.TeleportConfiguration;
 
-public class TeleportMorphSkill extends MorphSkill
+public class TeleportMorphSkill extends MorphSkill<TeleportConfiguration>
 {
     @Override
-    public int executeSkill(Player player, SkillConfiguration configuration)
+    public int executeSkill(Player player, SkillConfiguration configuration, TeleportConfiguration option)
     {
-        var teleportConfig = configuration.getTeleportConfiguration();
-
-        if (teleportConfig == null)
+        if (option == null)
         {
             printErrorMessage(player, configuration + "没有传送设置");
             return 10;
         }
 
         //目标方块
-        var targetBlock = player.getTargetBlockExact(teleportConfig.getMaxDistance(), FluidCollisionMode.ALWAYS);
+        var targetBlock = player.getTargetBlockExact(
+                option.getMaxDistance(),
+                FluidCollisionMode.ALWAYS);
 
         if (targetBlock == null
                 || targetBlock.getBlockData().getMaterial().isAir()
@@ -81,5 +83,13 @@ public class TeleportMorphSkill extends MorphSkill
     public @NotNull NamespacedKey getIdentifier()
     {
         return SkillType.TELEPORT;
+    }
+
+    private final TeleportConfiguration option = new TeleportConfiguration();
+
+    @Override
+    public TeleportConfiguration getOption()
+    {
+        return option;
     }
 }

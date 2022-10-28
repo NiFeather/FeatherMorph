@@ -1,5 +1,6 @@
 package xiamomc.morph.misc;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.disguisetypes.Disguise;
 import me.libraryaddict.disguise.disguisetypes.FlagWatcher;
@@ -17,17 +18,19 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
+import xiamomc.morph.abilities.AbilityHandler;
 import xiamomc.morph.abilities.IMorphAbility;
 import xiamomc.morph.providers.DisguiseProvider;
 import xiamomc.morph.skills.MorphSkillHandler;
-import xiamomc.morph.abilities.AbilityHandler;
 import xiamomc.morph.skills.SkillCooldownInfo;
 import xiamomc.morph.skills.SkillType;
 import xiamomc.morph.storage.offlinestore.OfflineDisguiseState;
 import xiamomc.morph.storage.playerdata.PlayerMorphConfiguration;
 import xiamomc.pluginbase.Annotations.Resolved;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
 
 public class DisguiseState extends MorphPluginObject
 {
@@ -255,14 +258,14 @@ public class DisguiseState extends MorphPluginObject
     /**
      * 伪装被动技能Flag
      */
-    private final List<IMorphAbility> abilities = new ArrayList<>();
+    private final List<IMorphAbility<?>> abilities = new ObjectArrayList<>();
 
-    public List<IMorphAbility> getAbilities()
+    public List<IMorphAbility<?>> getAbilities()
     {
         return abilities;
     }
 
-    public void setAbilities(@Nullable List<IMorphAbility> newAbilities)
+    public void setAbilities(@Nullable List<IMorphAbility<?>> newAbilities)
     {
         abilities.clear();
 

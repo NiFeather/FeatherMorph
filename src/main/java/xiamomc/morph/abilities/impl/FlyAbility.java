@@ -1,15 +1,20 @@
 package xiamomc.morph.abilities.impl;
 
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.bukkit.GameMode;
 import org.bukkit.NamespacedKey;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.abilities.AbilityType;
 import xiamomc.morph.abilities.MorphAbility;
+import xiamomc.morph.abilities.options.FlyOption;
 import xiamomc.morph.misc.DisguiseState;
+import xiamomc.morph.storage.skill.ISkillOption;
 
-public class FlyAbility extends MorphAbility
+import java.util.Map;
+
+public class FlyAbility extends MorphAbility<FlyOption>
 {
     @Override
     public @NotNull NamespacedKey getIdentifier()
@@ -41,18 +46,42 @@ public class FlyAbility extends MorphAbility
         return true;
     }
 
-    private void setPlayerFlySpeed(Player player, EntityType type)
-    {
-        var gameMode = player.getGameMode();
-        if (type == null || gameMode.equals(GameMode.SPECTATOR)) return;
+    private final Map<String, FlyOption> options = new Object2ObjectOpenHashMap<>();
 
-        switch (type)
-        {
-            case ALLAY, BEE, BLAZE, VEX, BAT, PARROT -> player.setFlySpeed(0.05f);
-            case GHAST, PHANTOM -> player.setFlySpeed(0.06f);
-            case ENDER_DRAGON -> player.setFlySpeed(0.15f);
-            default -> player.setFlySpeed(0.1f);
-        }
+    private final FlyOption option = new FlyOption();
+
+    @Override
+    public ISkillOption getOption()
+    {
+        return option;
+    }
+
+    @Override
+    public boolean setOption(@NotNull String disguiseIdentifier, @Nullable FlyOption option)
+    {
+        if (option == null) return false;
+
+        options.put(disguiseIdentifier, option);
+
+        return true;
+    }
+
+    @Override
+    public void clearOptions()
+    {
+        options.clear();
+    }
+
+    private float getTargetFlySpeed(String identifier)
+    {
+        if (identifier == null) return 0;
+
+        var value = options.get(identifier);
+
+        if (value != null)
+            return value.getFlyingSpeed();
+        else
+            return 0;
     }
 
     public boolean updateFlyingAbility(DisguiseState state)
@@ -60,7 +89,18 @@ public class FlyAbility extends MorphAbility
         var player = state.getPlayer();
 
         player.setAllowFlight(true);
-        setPlayerFlySpeed(player, state.getDisguise().getType().getEntityType());
+
+        if (player.getGameMode() != GameMode.SPECTATOR)
+        {
+            float speed;
+
+            speed = getTargetFlySpeed(state.getDisguiseIdentifier());
+
+            if (speed == 0)
+                speed=  getTargetFlySpeed(state.getSkillIdentifier());
+
+            player.setFlySpeed(speed);
+        }
 
         return true;
     }

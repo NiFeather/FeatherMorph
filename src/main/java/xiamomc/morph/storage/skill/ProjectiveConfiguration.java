@@ -2,9 +2,13 @@ package xiamomc.morph.storage.skill;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.bukkit.entity.EntityType;
+import xiamomc.morph.skills.SkillType;
 
-public class ProjectiveConfiguration
+import java.util.Map;
+
+public class ProjectiveConfiguration implements ISkillOption
 {
     public ProjectiveConfiguration()
     {
@@ -32,6 +36,36 @@ public class ProjectiveConfiguration
     public ProjectiveConfiguration(EntityType entityType, float multiplier, String soundName, int soundDistance, int distanceLimit)
     {
         this(entityType.getKey().asString(), multiplier, soundName, soundDistance, distanceLimit);
+    }
+
+    @Override
+    public Map<String, Object> toMap()
+    {
+        var map = new Object2ObjectOpenHashMap<String, Object>();
+
+        map.put("name", name);
+        map.put("speed_multiplier", multiplier);
+        map.put("sound_name", soundName);
+        map.put("sound_distance", soundDistance);
+        map.put("max_target_distance", distanceLimit);
+
+        return map;
+    }
+
+    @Override
+    public ProjectiveConfiguration fromMap(Map<String, Object> map)
+    {
+        if (map == null) return null;
+
+        var instance = new ProjectiveConfiguration();
+
+        instance.name = (String) map.getOrDefault("name", "");
+        instance.multiplier = (float) (double) map.getOrDefault("speed_multiplier", 1f);
+        instance.soundName = (String) map.getOrDefault("sound_name", "");
+        instance.soundDistance = (int) (double) map.getOrDefault("sound_distance", 0);
+        instance.distanceLimit = (int) (double) map.getOrDefault("max_target_distance", 0);
+
+        return instance;
     }
 
     @Expose
