@@ -18,9 +18,6 @@ public class WardenLessAwareAbility extends MorphAbility
         return AbilityType.WARDEN_LESS_AWARE;
     }
 
-    @Resolved
-    private MorphManager morphs;
-
     @EventHandler
     public void onWardenAngerChange(WardenAngerChangeEvent e)
     {

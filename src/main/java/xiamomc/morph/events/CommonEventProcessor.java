@@ -290,7 +290,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
                     }
 
                     if (state.getSkillCooldown() <= 0)
-                        morphs.executeDisguiseAbility(player);
+                        morphs.executeDisguiseSkill(player);
                     else
                     {
                         //一段时间内内只接受一次右键触发

@@ -5,6 +5,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.misc.DisguiseState;
+import xiamomc.morph.storage.skill.ISkillOption;
 
 import java.util.List;
 

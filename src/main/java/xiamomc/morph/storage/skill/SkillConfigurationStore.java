@@ -69,47 +69,50 @@ public class SkillConfigurationStore extends MorphJsonBasedStorage<SkillConfigur
     {
         var val = super.reloadConfiguration();
 
-        var success = new AtomicBoolean(true);
+        var success = new AtomicBoolean(val);
 
-        try
+        if (val)
         {
-            configToSkillMap.clear();
-            storingObject.configurations.forEach(c ->
+            try
             {
-                if (!registerConfiguration(c)) success.set(false);
-
-                var abilities = new ObjectArrayList<IMorphAbility>();
-
-                c.getAbilitiyIdentifiers().forEach(i ->
+                configToSkillMap.clear();
+                storingObject.configurations.forEach(c ->
                 {
-                    var key = NamespacedKey.fromString(i);
+                    if (!registerConfiguration(c)) success.set(false);
 
-                    if (key == null)
-                        logger.error("无效的技能ID: " + i);
+                    var abilities = new ObjectArrayList<IMorphAbility>();
 
-                    var ability = abilityHandler.getAbility(key);
+                    c.getAbilitiyIdentifiers().forEach(i ->
+                    {
+                        var key = NamespacedKey.fromString(i);
 
-                    if (ability != null)
-                        abilities.add(ability);
-                    else
-                        success.set(false);
+                        if (key == null)
+                            logger.error("无效的技能ID: " + i);
+
+                        var ability = abilityHandler.getAbility(key);
+
+                        if (ability != null)
+                            abilities.add(ability);
+                        else
+                            success.set(false);
+                    });
+
+                    c.setAbilities(abilities);
                 });
 
-                c.setAbilities(abilities);
-            });
+                if (storingObject.version < targetVersion)
+                    success.set(migrate(storingObject) || success.get());
 
-            if (storingObject.version < targetVersion)
-                success.set(migrate(storingObject) || success.get());
+                saveConfiguration();
+            }
+            catch (Throwable t)
+            {
+                logger.error("处理配置时出现异常：" + t.getMessage());
+                t.printStackTrace();
 
-            saveConfiguration();
-        }
-        catch (Throwable t)
-        {
-            logger.error("处理配置时出现异常：" + t.getMessage());
-            t.printStackTrace();
-
-            configToSkillMap.clear();
-            return false;
+                configToSkillMap.clear();
+                return false;
+            }
         }
 
         if (!success.get())

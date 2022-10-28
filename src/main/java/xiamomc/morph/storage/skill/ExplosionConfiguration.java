@@ -1,8 +1,12 @@
 package xiamomc.morph.storage.skill;
 
 import com.google.gson.annotations.Expose;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import xiamomc.morph.skills.SkillType;
 
-public class ExplosionConfiguration
+import java.util.Map;
+
+public class ExplosionConfiguration implements ISkillOption
 {
     public ExplosionConfiguration()
     {
@@ -37,5 +41,31 @@ public class ExplosionConfiguration
     public boolean setsFire()
     {
         return setsFire;
+    }
+
+    @Override
+    public Map<String, Object> toMap()
+    {
+        var map = new Object2ObjectOpenHashMap<String, Object>();
+
+        map.put("kills_self", killsSelf);
+        map.put("strength", strength);
+        map.put("sets_fire", setsFire);
+
+        return map;
+    }
+
+    @Override
+    public ExplosionConfiguration fromMap(Map<String, Object> map)
+    {
+        if (map == null) return null;
+
+        var instance = new ExplosionConfiguration();
+
+        instance.killsSelf = (boolean) map.getOrDefault("kills_self", true);
+        instance.strength = (int) (double) map.getOrDefault("strength", 3);
+        instance.setsFire = (boolean) map.getOrDefault("sets_fire", false);
+
+        return instance;
     }
 }

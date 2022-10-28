@@ -15,12 +15,14 @@ import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.messages.SkillStrings;
 import xiamomc.morph.skills.MorphSkill;
 import xiamomc.morph.skills.SkillType;
+import xiamomc.morph.storage.skill.ISkillOption;
+import xiamomc.morph.storage.skill.NoOpConfiguration;
 import xiamomc.morph.storage.skill.SkillConfiguration;
 
-public class SummonFangsMorphSkill extends MorphSkill
+public class SummonFangsMorphSkill extends MorphSkill<NoOpConfiguration>
 {
     @Override
-    public int executeSkill(Player player, SkillConfiguration configuration)
+    public int executeSkill(Player player, SkillConfiguration configuration, NoOpConfiguration option)
     {
         var targetEntity = player.getTargetEntity(16);
 
@@ -115,5 +117,13 @@ public class SummonFangsMorphSkill extends MorphSkill
     public @NotNull NamespacedKey getIdentifier()
     {
         return SkillType.EVOKER;
+    }
+
+    private final NoOpConfiguration option = new NoOpConfiguration();
+
+    @Override
+    public NoOpConfiguration getOption()
+    {
+        return option;
     }
 }

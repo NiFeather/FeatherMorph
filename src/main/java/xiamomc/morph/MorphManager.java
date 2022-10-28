@@ -167,7 +167,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
      * 使某个玩家执行伪装的主动技能
      * @param player 目标玩家
      */
-    public void executeDisguiseAbility(Player player)
+    public void executeDisguiseSkill(Player player)
     {
         skillHandler.executeDisguiseSkill(player);
     }

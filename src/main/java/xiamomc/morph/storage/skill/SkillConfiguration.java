@@ -2,15 +2,18 @@ package xiamomc.morph.storage.skill;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.EntityType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.abilities.IMorphAbility;
+import xiamomc.morph.skills.IMorphSkill;
 import xiamomc.morph.skills.SkillType;
 
 import java.util.List;
+import java.util.Map;
 
 public class SkillConfiguration
 {
@@ -23,7 +26,7 @@ public class SkillConfiguration
      *
      * @param mobId 生物ID
      * @param cd CD时间
-     * @param type 技能ID
+     * @param skillIdentifier 技能ID
      */
     public SkillConfiguration(String mobId, int cd, NamespacedKey skillIdentifier)
     {
@@ -135,87 +138,7 @@ public class SkillConfiguration
         rawSkillidentifier = key.asString();
     }
 
-    @Expose
-    @Nullable
-    @SerializedName("summon")
-    private SummonConfiguration summonConfiguration;
-
-    @Nullable
-    public SummonConfiguration getSummonConfiguration()
-    {
-        return summonConfiguration;
-    }
-
-    public void setSummonConfiguration(@Nullable SummonConfiguration val)
-    {
-        this.summonConfiguration = val;
-    }
-
-    @Expose
-    @Nullable
-    @SerializedName("projective")
-    private ProjectiveConfiguration projectiveConfiguration;
-
-    @Nullable
-    public ProjectiveConfiguration getProjectiveConfiguration()
-    {
-        return projectiveConfiguration;
-    }
-
-    public void setProjectiveConfiguration(@Nullable ProjectiveConfiguration val)
-    {
-        this.projectiveConfiguration = val;
-    }
-
-    @Expose
-    @Nullable
-    @SerializedName("effect")
-    private EffectConfiguration effectConfiguration;
-
-    @Nullable
-    public EffectConfiguration getEffectConfiguration()
-    {
-        return effectConfiguration;
-    }
-
-    public void setEffectConfiguration(@Nullable EffectConfiguration val)
-    {
-        this.effectConfiguration = val;
-    }
-
-    @Expose
-    @Nullable
-    @SerializedName("explosion")
-    private ExplosionConfiguration explosionConfiguration;
-
-    @Nullable
-    public ExplosionConfiguration getExplosionConfiguration()
-    {
-        return explosionConfiguration;
-    }
-
-    public void setExplosionConfiguration(@Nullable ExplosionConfiguration val)
-    {
-        this.explosionConfiguration = val;
-    }
-
-    @Expose
-    @Nullable
-    @SerializedName("teleport")
-    private TeleportConfiguration teleportConfiguration;
-
-    @Nullable
-    public TeleportConfiguration getTeleportConfiguration()
-    {
-        return teleportConfiguration;
-    }
-
-    public void setTeleportConfiguration(@Nullable TeleportConfiguration val)
-    {
-        this.teleportConfiguration = val;
-    }
-
-    //endregion
+    //endregion 主动技能
 
     //region 被动技能
 
@@ -262,6 +185,60 @@ public class SkillConfiguration
     }
 
     //endregion
+
+    //region 技能设置
+
+    @Expose
+    @Nullable
+    @SerializedName("settings")
+    private Object2ObjectOpenHashMap<String, Map<String, Object>> options = new Object2ObjectOpenHashMap<>();
+
+    /**
+     * 获取某个主动技能的技能设置
+     *
+     * @param skill 目标技能
+     * @return 技能设置Map
+     */
+    @Nullable
+    public Map<String, Object> getSkillOptions(IMorphSkill<?> skill)
+    {
+        if (options == null || skill == null) return null;
+
+        return options.get(skill.getIdentifier().asString());
+    }
+
+    /**
+     * 获取某个技能的原始设置
+     *
+     * @param ability 被动技能
+     * @return 技能设置Map
+     */
+    @Nullable
+    public Map<String, Object> getRawOptions(IMorphAbility ability)
+    {
+        if (options == null || ability == null) return null;
+
+        return options.get(ability.getIdentifier().asString());
+    }
+
+    /**
+     * 添加一个技能设置用于存储
+     *
+     * @param identifier 技能ID
+     * @param option 目标设置
+     */
+    public void addOption(NamespacedKey identifier, ISkillOption option)
+    {
+        this.setSkillOption(identifier.asString(), option.toMap());
+    }
+
+    public void setSkillOption(String identifier, Map<String, Object> map)
+    {
+        if (options != null)
+            this.options.put(identifier, map);
+    }
+
+    //endregion 技能设置
 
     @Override
     public String toString()

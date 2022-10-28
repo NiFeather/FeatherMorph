@@ -11,8 +11,10 @@ import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.messages.MessageUtils;
+import xiamomc.morph.messages.MorphStrings;
 import xiamomc.morph.messages.SkillStrings;
 import xiamomc.morph.skills.impl.*;
+import xiamomc.morph.storage.skill.ISkillOption;
 import xiamomc.morph.storage.skill.SkillConfiguration;
 import xiamomc.morph.storage.skill.SkillConfigurationStore;
 import xiamomc.pluginbase.Annotations.Initializer;
@@ -109,6 +111,7 @@ public class MorphSkillHandler extends MorphPluginObject
         }
 
         skills.add(skill);
+
         return true;
     }
 
@@ -151,10 +154,32 @@ public class MorphSkillHandler extends MorphPluginObject
             var skill = entry.getValue();
             var config = entry.getKey();
 
+            ISkillOption option;
+
+            try
+            {
+                option = skill.getOption().fromMap(config.getSkillOptions(skill));
+            }
+            catch (Throwable t)
+            {
+                if (t instanceof ClassCastException)
+                {
+                    logger.error(config.getIdentifier() + " -> " + skill.getIdentifier() + "的配置存在问题，请检查其技能设置。");
+                }
+                else
+                {
+                    logger.error("解析技能设置时出现未知问题: " + t.getMessage());
+                    t.printStackTrace();
+                }
+
+                player.sendMessage(MessageUtils.prefixes(player, SkillStrings.exceptionOccurredString()));
+                return;
+            }
+
             var cd = getCooldownInfo(player.getUniqueId(), state.getSkillIdentifier());
             assert cd != null;
 
-            cd.setCooldown(skill.executeSkill(player, config));
+            cd.setCooldown(skill.executeSkill(player, config, option));
             cd.setLastInvoke(plugin.getCurrentTick());
 
             if (!state.haveCooldown()) state.setCooldownInfo(cd);
