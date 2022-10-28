@@ -5,6 +5,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.abilities.AbilityType;
+import xiamomc.morph.abilities.options.FlyOption;
 import xiamomc.morph.misc.EntityTypeUtils;
 import xiamomc.morph.storage.skill.*;
 
@@ -54,7 +55,9 @@ public class DefaultConfigGenerator
         return addSkillConfiguration(targetList, entityType, cd, key, null);
     }
 
-    private static void addAbilityConfiguration(List<SkillConfiguration> targetList, EntityType entityType, NamespacedKey key)
+    private static void addAbilityConfiguration(List<SkillConfiguration> targetList,
+                                                EntityType entityType, NamespacedKey key,
+                                                @Nullable Consumer<SkillConfiguration> consumer)
     {
         var cfg = targetList.stream()
                 .filter(c -> c.getIdentifier().equals(entityType.getKey().asString())).findFirst().orElse(null);
@@ -62,12 +65,29 @@ public class DefaultConfigGenerator
         if (cfg == null)
             cfg = addSkillConfiguration(targetList, entityType, 0, SkillType.NONE);
 
+        if (consumer != null)
+            consumer.accept(cfg);
+
         cfg.addAbilityIdentifier(key);
     }
 
-    private static void addAbilityConfiguration(List<SkillConfiguration> targetList, Set<EntityType> entityTypes, NamespacedKey key)
+    private static void addAbilityConfiguration(List<SkillConfiguration> targetList,
+                                                EntityType entityType, NamespacedKey key)
     {
-        entityTypes.forEach(t -> addAbilityConfiguration(targetList, t, key));
+        addAbilityConfiguration(targetList, entityType, key, null);
+    }
+
+    private static void addAbilityConfiguration(List<SkillConfiguration> targetList,
+                                                Set<EntityType> entityTypes, NamespacedKey key,
+                                                @Nullable Consumer<SkillConfiguration> consumer)
+    {
+        entityTypes.forEach(t -> addAbilityConfiguration(targetList, t, key, consumer));
+    }
+
+    private static void addAbilityConfiguration(List<SkillConfiguration> targetList,
+                                                Set<EntityType> entityTypes, NamespacedKey key)
+    {
+        addAbilityConfiguration(targetList, entityTypes, key, null);
     }
 
     public static SkillConfigurationContainer getDefaultSkillConfiguration()
@@ -130,7 +150,12 @@ public class DefaultConfigGenerator
 
     public static void addAbilityConfigurations(List<SkillConfiguration> skills)
     {
-        addAbilityConfiguration(skills, EntityTypeUtils.canFly(), AbilityType.CAN_FLY);
+        addAbilityConfiguration(skills, EntityTypeUtils.canFly(), AbilityType.CAN_FLY, c ->
+        {
+            c.setOption(AbilityType.CAN_FLY.asString(),
+                    new FlyOption(EntityTypeUtils.getDefaultFlyingSpeed(EntityTypeUtils.fromString(c.getIdentifier()))));
+        });
+
         addAbilityConfiguration(skills, EntityTypeUtils.hasFireResistance(), AbilityType.HAS_FIRE_RESISTANCE);
         addAbilityConfiguration(skills, EntityTypeUtils.takesDamageFromWater(), AbilityType.TAKES_DAMAGE_FROM_WATER);
         addAbilityConfiguration(skills, EntityTypeUtils.canBreatheUnderWater(), AbilityType.CAN_BREATHE_UNDER_WATER);

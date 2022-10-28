@@ -196,4 +196,17 @@ public class EntityTypeUtils
     {
         return type == EntityType.ENDER_DRAGON || type == EntityType.WITHER;
     }
+
+    public static float getDefaultFlyingSpeed(@Nullable EntityType type)
+    {
+        if (type == null) return 0.1f;
+
+        return switch (type)
+        {
+            case ALLAY, BEE, BLAZE, VEX, BAT, PARROT -> 0.05f;
+            case GHAST, PHANTOM -> 0.06f;
+            case ENDER_DRAGON -> 0.15f;
+            default -> 0.1f;
+        };
+    }
 }
