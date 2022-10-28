@@ -8,7 +8,6 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.entity.EntityType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.LoggerFactory;
 import xiamomc.morph.abilities.IMorphAbility;
 import xiamomc.morph.skills.IMorphSkill;
 import xiamomc.morph.skills.SkillType;
@@ -238,13 +237,19 @@ public class SkillConfiguration
      */
     public void addOption(NamespacedKey identifier, ISkillOption option)
     {
-        this.setSkillOption(identifier.asString(), option.toMap());
+        this.setOption(identifier.asString(), option.toMap());
     }
 
-    public void setSkillOption(String identifier, Map<String, Object> map)
+    public void setOption(String identifier, Map<String, Object> map)
     {
         if (options != null)
             this.options.put(identifier, map);
+    }
+
+    public void setOption(String identifier, ISkillOption option)
+    {
+        if (options != null && option != null)
+            setOption(identifier, option.toMap());
     }
 
     //endregion 技能设置
@@ -253,5 +258,46 @@ public class SkillConfiguration
     public String toString()
     {
         return this.identifier + "的技能配置{" + cooldown + "tick冷却, 技能类型:" + skillIdentifier + "}";
+    }
+
+
+    @Expose(serialize = false)
+    @SerializedName("projective")
+    private ProjectiveConfiguration projectiveConfiguration;
+
+    @Deprecated
+    public ProjectiveConfiguration getProjectiveConfiguration()
+    {
+        return projectiveConfiguration;
+    }
+
+    @Expose(serialize = false)
+    @SerializedName("effect")
+    private EffectConfiguration effectConfiguration;
+
+    @Deprecated
+    public EffectConfiguration getEffectConfiguration()
+    {
+        return effectConfiguration;
+    }
+
+    @Expose(serialize = false)
+    @SerializedName("explosion")
+    private ExplosionConfiguration explosionConfiguration;
+
+    @Deprecated
+    public ExplosionConfiguration getExplosionConfiguration()
+    {
+        return explosionConfiguration;
+    }
+
+    @Expose(serialize = false)
+    @SerializedName("teleport")
+    private TeleportConfiguration teleportConfiguration;
+
+    @Deprecated
+    public TeleportConfiguration getTeleportConfiguration()
+    {
+        return teleportConfiguration;
     }
 }

@@ -56,7 +56,7 @@ public class SkillConfigurationStore extends MorphJsonBasedStorage<SkillConfigur
         return "技能存储";
     }
 
-    private final int targetVersion = 4;
+    private final int targetVersion = 5;
 
     @Resolved
     private MorphSkillHandler skillHandler;
@@ -185,6 +185,20 @@ public class SkillConfigurationStore extends MorphJsonBasedStorage<SkillConfigur
 
             //1 -> 2
             DefaultConfigGenerator.addAbilityConfigurations(config.configurations);
+
+            //-> 5
+            config.configurations.forEach(c ->
+            {
+                var effect = c.getEffectConfiguration();
+                var projective = c.getProjectiveConfiguration();
+                var explosion = c.getExplosionConfiguration();
+                var teleport = c.getTeleportConfiguration();
+
+                c.setOption(SkillType.TELEPORT.asString(), teleport);
+                c.setOption(SkillType.APPLY_EFFECT.asString(), effect);
+                c.setOption(SkillType.LAUNCH_PROJECTIVE.asString(), projective);
+                c.setOption(SkillType.EXPLODE.asString(), explosion);
+            });
 
             config.version = targetVersion;
 
