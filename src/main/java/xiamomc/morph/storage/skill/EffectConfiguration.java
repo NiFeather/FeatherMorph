@@ -130,8 +130,8 @@ public class EffectConfiguration implements ISkillOption
         instance.acquiresWater = (boolean) map.getOrDefault("acquires_water", false);
         instance.showGuardian = (boolean) map.getOrDefault("show_guardian", false);
         instance.soundName = (String) map.getOrDefault("sound_name", "none");
-        instance.soundDistance = (int) map.getOrDefault("sound_distance", 0);
-        instance.applyDistance = (int) map.getOrDefault("apply_distance", 0);
+        instance.soundDistance = (int) (double) map.getOrDefault("sound_distance", 0);
+        instance.applyDistance = (int) (double) map.getOrDefault("apply_distance", 0);
 
         return instance;
     }

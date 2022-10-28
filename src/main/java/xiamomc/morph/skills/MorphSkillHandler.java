@@ -162,14 +162,11 @@ public class MorphSkillHandler extends MorphPluginObject
             catch (Throwable t)
             {
                 if (t instanceof ClassCastException)
-                {
                     logger.error(config.getIdentifier() + " -> " + skill.getIdentifier() + "的配置存在问题，请检查其技能设置。");
-                }
                 else
-                {
-                    logger.error("解析技能设置时出现未知问题: " + t.getMessage());
-                    t.printStackTrace();
-                }
+                    logger.error("解析技能设置时出现未知问题");
+
+                t.printStackTrace();
 
                 player.sendMessage(MessageUtils.prefixes(player, SkillStrings.exceptionOccurredString()));
                 return;
