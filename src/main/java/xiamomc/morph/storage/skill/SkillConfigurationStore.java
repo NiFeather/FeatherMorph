@@ -76,7 +76,7 @@ public class SkillConfigurationStore extends MorphJsonBasedStorage<SkillConfigur
             try
             {
                 configToSkillMap.clear();
-                abilityHandler.getRegistedAbilities().forEach(IMorphAbility::clearOptions);
+                abilityHandler.clearAbilities();
 
                 storingObject.configurations.forEach(c ->
                 {
@@ -103,11 +103,9 @@ public class SkillConfigurationStore extends MorphJsonBasedStorage<SkillConfigur
                                 success.set(false);
                             }
                         }
-                        else
-                            success.set(false);
                     });
 
-                    c.setAbilities(abilities);
+                    abilityHandler.setAbilities(c, abilities);
                 });
 
                 if (storingObject.version < targetVersion)
@@ -225,34 +223,4 @@ public class SkillConfigurationStore extends MorphJsonBasedStorage<SkillConfigur
             return false;
         }
     }
-
-    //region 被动技能
-
-    /**
-     * 为某个伪装ID获取被动技能
-     *
-     * @param id 伪装ID
-     * @return 被动技能列表
-     */
-    public List<IMorphAbility<?>> getAbilityFor(String id)
-    {
-        var list = new ObjectArrayList<IMorphAbility<?>>();
-
-        storingObject.configurations.forEach(skillConfig ->
-        {
-            if (!skillConfig.getIdentifier().equals(id))
-                return;
-
-            list.addAll(skillConfig.getAbilities());
-        });
-
-        return list;
-    }
-
-    public List<IMorphAbility<?>> getAbilityFor(EntityType type)
-    {
-        return getAbilityFor(type.getKey().asString());
-    }
-
-    //endregion
 }

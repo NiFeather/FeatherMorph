@@ -244,6 +244,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
      */
     public boolean registerProvider(DisguiseProvider provider)
     {
+        logger.info("注册伪装提供器：" + provider.getIdentifier());
+
         if (providers.stream().anyMatch(p -> p.getIdentifier().equals(provider.getIdentifier())))
         {
             logger.error("已经注册过一个ID为" + provider.getIdentifier() + "的Provider了");
