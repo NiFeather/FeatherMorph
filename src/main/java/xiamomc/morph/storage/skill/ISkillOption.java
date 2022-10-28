@@ -4,6 +4,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 
+/**
+ * 技能设置
+ */
 public interface ISkillOption
 {
     /**

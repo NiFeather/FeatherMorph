@@ -72,6 +72,25 @@ public interface IMorphAbility<T extends ISkillOption> extends Listener
     public boolean setOption(@NotNull String disguiseIdentifier, @Nullable T option);
 
     /**
+     * @apiNote 内部轮子
+     */
+    public default boolean setOptionGeneric(String disguiseIdentifier, ISkillOption option)
+    {
+        T castedOption;
+
+        try
+        {
+            castedOption = (T) option;
+        }
+        catch (ClassCastException e)
+        {
+            return false;
+        }
+
+        return setOption(disguiseIdentifier, castedOption);
+    }
+
+    /**
      * 清除此被动的所有设置
      */
     public void clearOptions();

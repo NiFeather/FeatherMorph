@@ -11,7 +11,6 @@ import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.messages.MessageUtils;
-import xiamomc.morph.messages.MorphStrings;
 import xiamomc.morph.messages.SkillStrings;
 import xiamomc.morph.skills.impl.*;
 import xiamomc.morph.storage.skill.ISkillOption;
@@ -30,14 +29,14 @@ public class MorphSkillHandler extends MorphPluginObject
     /**
      * 已注册的技能
      */
-    private final List<IMorphSkill> skills = new ObjectArrayList<>();
+    private final List<IMorphSkill<?>> skills = new ObjectArrayList<>();
 
     /**
      * 获取已注册的技能
      *
      * @return 技能列表
      */
-    public List<IMorphSkill> getRegistedSkills()
+    public List<IMorphSkill<?>> getRegistedSkills()
     {
         return skills;
     }
@@ -79,7 +78,7 @@ public class MorphSkillHandler extends MorphPluginObject
      * @param skills 技能列表
      * @return 所有操作是否成功
      */
-    public boolean registerSkills(List<IMorphSkill> skills)
+    public boolean registerSkills(List<IMorphSkill<?>> skills)
     {
         var success = new AtomicBoolean(true);
 
@@ -96,7 +95,7 @@ public class MorphSkillHandler extends MorphPluginObject
      * @param skill 技能
      * @return 操作是否成功
      */
-    public boolean registerSkill(IMorphSkill skill)
+    public boolean registerSkill(IMorphSkill<?> skill)
     {
         if (skills.contains(skill))
         {
@@ -128,7 +127,7 @@ public class MorphSkillHandler extends MorphPluginObject
      * @return 对应的技能和技能配置，如果没找到则是null
      */
     @Nullable
-    private Map.Entry<SkillConfiguration, IMorphSkill> getSkillEntry(String identifier)
+    private Map.Entry<SkillConfiguration, IMorphSkill<?>> getSkillEntry(String identifier)
     {
         if (identifier == null) return null;
 
@@ -179,7 +178,7 @@ public class MorphSkillHandler extends MorphPluginObject
             var cd = getCooldownInfo(player.getUniqueId(), state.getSkillIdentifier());
             assert cd != null;
 
-            cd.setCooldown(skill.executeSkill(player, config, option));
+            cd.setCooldown(skill.executeSkillGeneric(player, config, option));
             cd.setLastInvoke(plugin.getCurrentTick());
 
             if (!state.haveCooldown()) state.setCooldownInfo(cd);

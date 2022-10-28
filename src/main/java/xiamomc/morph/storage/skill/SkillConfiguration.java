@@ -170,14 +170,14 @@ public class SkillConfiguration
         this.abilitiyIdentifiers.add(idString);
     }
 
-    private final List<IMorphAbility> abilities = new ObjectArrayList<>();
+    private final List<IMorphAbility<?>> abilities = new ObjectArrayList<>();
 
-    public List<IMorphAbility> getAbilities()
+    public List<IMorphAbility<?>> getAbilities()
     {
         return abilities;
     }
 
-    public void setAbilities(List<IMorphAbility> newAbilities)
+    public void setAbilities(List<IMorphAbility<?>> newAbilities)
     {
         abilities.clear();
 

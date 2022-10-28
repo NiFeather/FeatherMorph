@@ -258,14 +258,14 @@ public class DisguiseState extends MorphPluginObject
     /**
      * 伪装被动技能Flag
      */
-    private final List<IMorphAbility> abilities = new ObjectArrayList<>();
+    private final List<IMorphAbility<?>> abilities = new ObjectArrayList<>();
 
-    public List<IMorphAbility> getAbilities()
+    public List<IMorphAbility<?>> getAbilities()
     {
         return abilities;
     }
 
-    public void setAbilities(@Nullable List<IMorphAbility> newAbilities)
+    public void setAbilities(@Nullable List<IMorphAbility<?>> newAbilities)
     {
         abilities.clear();
 

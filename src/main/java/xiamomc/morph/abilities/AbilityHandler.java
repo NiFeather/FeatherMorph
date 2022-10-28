@@ -19,7 +19,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class AbilityHandler extends MorphPluginObject
 {
-    private final List<IMorphAbility> registedAbilities = new ObjectArrayList<>();
+    private final List<IMorphAbility<?>> registedAbilities = new ObjectArrayList<>();
 
     @Resolved
     private SkillConfigurationStore store;
@@ -30,7 +30,7 @@ public class AbilityHandler extends MorphPluginObject
      * @param ability 技能ID
      * @return 操作是否成功
      */
-    public boolean registerAbility(IMorphAbility ability)
+    public boolean registerAbility(IMorphAbility<?> ability)
     {
         if (registedAbilities.stream().anyMatch(a -> a.getIdentifier().equals(ability.getIdentifier())))
         {
@@ -48,7 +48,7 @@ public class AbilityHandler extends MorphPluginObject
      *
      * @return 被动技能列表
      */
-    public List<IMorphAbility> getRegistedAbilities()
+    public List<IMorphAbility<?>> getRegistedAbilities()
     {
         return new ObjectArrayList<>(registedAbilities);
     }
@@ -59,7 +59,7 @@ public class AbilityHandler extends MorphPluginObject
      * @param abilities ID列表
      * @return 操作是否成功
      */
-    public boolean registerAbilities(List<IMorphAbility> abilities)
+    public boolean registerAbilities(List<IMorphAbility<?>> abilities)
     {
         var success = new AtomicBoolean(false);
 
@@ -96,7 +96,7 @@ public class AbilityHandler extends MorphPluginObject
     }
 
     @Nullable
-    public IMorphAbility getAbility(@Nullable NamespacedKey key)
+    public IMorphAbility<?> getAbility(@Nullable NamespacedKey key)
     {
         if (key == null) return null;
 
@@ -110,13 +110,13 @@ public class AbilityHandler extends MorphPluginObject
     }
 
     @Nullable
-    public List<IMorphAbility> getAbilitiesFor(EntityType type)
+    public List<IMorphAbility<?>> getAbilitiesFor(EntityType type)
     {
         return store.getAbilityFor(type);
     }
 
     @Nullable
-    public List<IMorphAbility> getAbilitiesFor(String id)
+    public List<IMorphAbility<?>> getAbilitiesFor(String id)
     {
         return store.getAbilityFor(id);
     }

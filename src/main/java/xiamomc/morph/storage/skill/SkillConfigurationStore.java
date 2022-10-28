@@ -19,21 +19,21 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * 技能配置存储，有关技能执行、注册技能请查看{@link MorphSkillHandler}
+ * 技能配置存储，有关技能执行、注册技能请查看{@link MorphSkillHandler} 和 {@link AbilityHandler}
  */
 public class SkillConfigurationStore extends MorphJsonBasedStorage<SkillConfigurationContainer>
 {
     /**
      * 配置 -> 技能
      */
-    private final Map<SkillConfiguration, IMorphSkill> configToSkillMap = new Object2ObjectOpenHashMap<>();
+    private final Map<SkillConfiguration, IMorphSkill<?>> configToSkillMap = new Object2ObjectOpenHashMap<>();
 
     /**
      * 获取已配置的技能
      *
      * @return 配置 -> 技能表
      */
-    public Map<SkillConfiguration, IMorphSkill> getConfiguredSkills()
+    public Map<SkillConfiguration, IMorphSkill<?>> getConfiguredSkills()
     {
         return configToSkillMap;
     }
@@ -82,7 +82,7 @@ public class SkillConfigurationStore extends MorphJsonBasedStorage<SkillConfigur
                 {
                     if (!registerConfiguration(c)) success.set(false);
 
-                    var abilities = new ObjectArrayList<IMorphAbility>();
+                    var abilities = new ObjectArrayList<IMorphAbility<?>>();
 
                     c.getAbilitiyIdentifiers().forEach(i ->
                     {
@@ -97,7 +97,7 @@ public class SkillConfigurationStore extends MorphJsonBasedStorage<SkillConfigur
                         {
                             abilities.add(ability);
 
-                            if (!ability.setOption(c.getIdentifier(), c.getAbilityOptions(ability)))
+                            if (!ability.setOptionGeneric(c.getIdentifier(), c.getAbilityOptions(ability)))
                                 success.set(false);
                         }
                         else
@@ -208,9 +208,9 @@ public class SkillConfigurationStore extends MorphJsonBasedStorage<SkillConfigur
      * @param id 伪装ID
      * @return 被动技能列表
      */
-    public List<IMorphAbility> getAbilityFor(String id)
+    public List<IMorphAbility<?>> getAbilityFor(String id)
     {
-        var list = new ObjectArrayList<IMorphAbility>();
+        var list = new ObjectArrayList<IMorphAbility<?>>();
 
         storingObject.configurations.forEach(skillConfig ->
         {
@@ -223,7 +223,7 @@ public class SkillConfigurationStore extends MorphJsonBasedStorage<SkillConfigur
         return list;
     }
 
-    public List<IMorphAbility> getAbilityFor(EntityType type)
+    public List<IMorphAbility<?>> getAbilityFor(EntityType type)
     {
         return getAbilityFor(type.getKey().asString());
     }
