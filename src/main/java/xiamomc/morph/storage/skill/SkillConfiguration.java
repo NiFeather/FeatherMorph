@@ -8,6 +8,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.entity.EntityType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.LoggerFactory;
 import xiamomc.morph.abilities.IMorphAbility;
 import xiamomc.morph.skills.IMorphSkill;
 import xiamomc.morph.skills.SkillType;
@@ -207,6 +208,14 @@ public class SkillConfiguration
         return options.get(skill.getIdentifier().asString());
     }
 
+    @Nullable
+    public ISkillOption getAbilityOptions(IMorphAbility<?> ability)
+    {
+        if (options == null || ability == null) return null;
+
+        return ability.getOption().fromMap(options.get(ability.getIdentifier().asString()));
+    }
+
     /**
      * 获取某个技能的原始设置
      *
@@ -214,7 +223,7 @@ public class SkillConfiguration
      * @return 技能设置Map
      */
     @Nullable
-    public Map<String, Object> getRawOptions(IMorphAbility ability)
+    public Map<String, Object> getRawOptions(IMorphAbility<?> ability)
     {
         if (options == null || ability == null) return null;
 

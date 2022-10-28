@@ -76,6 +76,8 @@ public class SkillConfigurationStore extends MorphJsonBasedStorage<SkillConfigur
             try
             {
                 configToSkillMap.clear();
+                abilityHandler.getRegistedAbilities().forEach(IMorphAbility::clearOptions);
+
                 storingObject.configurations.forEach(c ->
                 {
                     if (!registerConfiguration(c)) success.set(false);
@@ -92,7 +94,12 @@ public class SkillConfigurationStore extends MorphJsonBasedStorage<SkillConfigur
                         var ability = abilityHandler.getAbility(key);
 
                         if (ability != null)
+                        {
                             abilities.add(ability);
+
+                            if (!ability.setOption(c.getIdentifier(), c.getAbilityOptions(ability)))
+                                success.set(false);
+                        }
                         else
                             success.set(false);
                     });
@@ -195,6 +202,12 @@ public class SkillConfigurationStore extends MorphJsonBasedStorage<SkillConfigur
 
     //region 被动技能
 
+    /**
+     * 为某个伪装ID获取被动技能
+     *
+     * @param id 伪装ID
+     * @return 被动技能列表
+     */
     public List<IMorphAbility> getAbilityFor(String id)
     {
         var list = new ObjectArrayList<IMorphAbility>();

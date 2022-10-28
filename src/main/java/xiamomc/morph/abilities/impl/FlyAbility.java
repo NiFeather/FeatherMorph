@@ -6,10 +6,9 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.abilities.AbilityType;
-import xiamomc.morph.abilities.MorphAbility;
 import xiamomc.morph.misc.DisguiseState;
 
-public class FlyAbility extends MorphAbility
+public class FlyAbility extends NoOpOptionAbility
 {
     @Override
     public @NotNull NamespacedKey getIdentifier()

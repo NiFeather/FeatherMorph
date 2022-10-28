@@ -114,13 +114,6 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
                 watcher.setEntityPose(DisguiseUtils.toEntityPose(player.getPose()));
         }
 
-        //被动技能
-        var abilities = abilityHandler.getAbilitiesFor(state.getSkillIdentifier());
-        state.setAbilities(abilities);
-
-        if (abilities != null)
-            abilities.forEach(a -> a.handle(player, state));
-
         //Bossbar
         var bossbar = state.getBossbar();
         if (bossbar != null)

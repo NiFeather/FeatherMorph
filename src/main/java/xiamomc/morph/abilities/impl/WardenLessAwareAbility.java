@@ -5,12 +5,9 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.jetbrains.annotations.NotNull;
-import xiamomc.morph.MorphManager;
 import xiamomc.morph.abilities.AbilityType;
-import xiamomc.morph.abilities.MorphAbility;
-import xiamomc.pluginbase.Annotations.Resolved;
 
-public class WardenLessAwareAbility extends MorphAbility
+public class WardenLessAwareAbility extends NoOpOptionAbility
 {
     @Override
     public @NotNull NamespacedKey getIdentifier()

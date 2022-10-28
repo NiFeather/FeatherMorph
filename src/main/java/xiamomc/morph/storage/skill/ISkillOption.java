@@ -21,5 +21,5 @@ public interface ISkillOption
      * @return 实例
      */
     @Nullable
-    ISkillOption fromMap(Map<String, Object> map);
+    ISkillOption fromMap(@Nullable Map<String, Object> map);
 }

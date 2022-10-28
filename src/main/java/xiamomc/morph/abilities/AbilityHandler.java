@@ -44,6 +44,16 @@ public class AbilityHandler extends MorphPluginObject
     }
 
     /**
+     * 获取所有已注册的被动
+     *
+     * @return 被动技能列表
+     */
+    public List<IMorphAbility> getRegistedAbilities()
+    {
+        return new ObjectArrayList<>(registedAbilities);
+    }
+
+    /**
      * 注册一批被动技能
      *
      * @param abilities ID列表
