@@ -259,6 +259,12 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
         //ServerLevel in mojang mappings
         var worldHandle = ((CraftWorld)player.getWorld()).getHandle();
 
+        //GameMode in fabric mojang mappings
+        var mgr = playerHandle.d;
+
+        var hand = targetHand == EquipmentSlot.HAND ? EnumHand.a : EnumHand.b;
+        var item = player.getEquipment().getItem(targetHand);
+
         //如果目标实体不是null，则和实体互动
         if (targetEntity != null)
         {
@@ -274,16 +280,13 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
 
             //先试试InteractAt
             //如果不成功，调用Interact
-            return entityHandle.a(playerHandle, vec, EnumHand.a).a() || playerHumanHandle.a(entityHandle, EnumHand.a).a();
+            //最后试试useItem
+            return entityHandle.a(playerHandle, vec, EnumHand.a).a()
+                    || playerHumanHandle.a(entityHandle, EnumHand.a).a()
+                    || mgr.a(playerHandle, worldHandle, CraftItemStack.asNMSCopy(item), hand).a();
         }
 
         boolean success = false;
-
-        var hand = targetHand == EquipmentSlot.HAND ? EnumHand.a : EnumHand.b;
-        var item = player.getEquipment().getItem(targetHand);
-
-        //GameMode in fabric mojang mappings
-        var mgr = playerHandle.d;
 
         if (targetBlock != null)
         {
