@@ -1,18 +1,14 @@
 package xiamomc.morph.abilities.impl;
 
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.bukkit.GameMode;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.abilities.AbilityType;
 import xiamomc.morph.abilities.MorphAbility;
 import xiamomc.morph.abilities.options.FlyOption;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.storage.skill.ISkillOption;
-
-import java.util.Map;
 
 public class FlyAbility extends MorphAbility<FlyOption>
 {
@@ -46,30 +42,10 @@ public class FlyAbility extends MorphAbility<FlyOption>
         return true;
     }
 
-    private final Map<String, FlyOption> options = new Object2ObjectOpenHashMap<>();
-
-    private final FlyOption option = new FlyOption();
-
     @Override
-    public ISkillOption getOption()
+    protected ISkillOption createOption()
     {
-        return option;
-    }
-
-    @Override
-    public boolean setOption(@NotNull String disguiseIdentifier, @Nullable FlyOption option)
-    {
-        if (option == null) return false;
-
-        options.put(disguiseIdentifier, option);
-
-        return true;
-    }
-
-    @Override
-    public void clearOptions()
-    {
-        options.clear();
+        return new FlyOption();
     }
 
     private float getTargetFlySpeed(String identifier)
@@ -92,12 +68,10 @@ public class FlyAbility extends MorphAbility<FlyOption>
 
         if (player.getGameMode() != GameMode.SPECTATOR)
         {
-            float speed;
-
-            speed = getTargetFlySpeed(state.getDisguiseIdentifier());
-
-            if (speed == 0)
-                speed=  getTargetFlySpeed(state.getSkillIdentifier());
+            float speed = getOr(
+                    getTargetFlySpeed(state.getDisguiseIdentifier()),
+                    s -> s == 0f,
+                    getTargetFlySpeed(state.getSkillIdentifier()));
 
             player.setFlySpeed(speed);
         }

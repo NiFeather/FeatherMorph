@@ -1,13 +1,13 @@
 package xiamomc.morph.abilities.impl;
 
 import org.bukkit.NamespacedKey;
-import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.abilities.AbilityType;
+import xiamomc.morph.abilities.options.ReduceDamageOption;
+import xiamomc.morph.storage.skill.ISkillOption;
 
-public class ReduceFallDamageAbility extends NoOpOptionAbility
+public class ReduceFallDamageAbility extends DamageReducingAbility<ReduceDamageOption>
 {
     @Override
     public @NotNull NamespacedKey getIdentifier()
@@ -15,13 +15,15 @@ public class ReduceFallDamageAbility extends NoOpOptionAbility
         return AbilityType.REDUCES_FALL_DAMAGE;
     }
 
-    @EventHandler(ignoreCancelled = true)
-    public void onPlayerTookDamage(EntityDamageEvent e)
+    @Override
+    protected ISkillOption createOption()
     {
-        if (e.getEntity() instanceof Player player && appliedPlayers.contains(player))
-        {
-            if (e.getCause() == EntityDamageEvent.DamageCause.FALL)
-                e.setDamage(Math.max(0d, e.getDamage() - 10d));
-        }
+        return new ReduceDamageOption();
+    }
+
+    @Override
+    protected EntityDamageEvent.DamageCause getTargetCause()
+    {
+        return EntityDamageEvent.DamageCause.FALL;
     }
 }

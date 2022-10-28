@@ -56,7 +56,7 @@ public class SkillConfigurationStore extends MorphJsonBasedStorage<SkillConfigur
         return "技能存储";
     }
 
-    private final int targetVersion = 6;
+    private final int targetVersion = 7;
 
     @Resolved
     private MorphSkillHandler skillHandler;
@@ -98,7 +98,10 @@ public class SkillConfigurationStore extends MorphJsonBasedStorage<SkillConfigur
                             abilities.add(ability);
 
                             if (!ability.setOptionGeneric(c.getIdentifier(), c.getAbilityOptions(ability)))
+                            {
+                                logger.warn("无法为" + c.getIdentifier() + " -> " + ability.getIdentifier() + "添加技能设置");
                                 success.set(false);
+                            }
                         }
                         else
                             success.set(false);
@@ -175,30 +178,39 @@ public class SkillConfigurationStore extends MorphJsonBasedStorage<SkillConfigur
 
         try
         {
-            //0 -> 1
-            var oldFakeInvKey = new NamespacedKey("morph", "fake_inventory");
-            config.configurations.forEach(c ->
-            {
-                if (c.getSkillIdentifier().equals(oldFakeInvKey))
-                    c.setSkillIdentifier(SkillType.INVENTORY);
-            });
+            var version = config.version;
 
-            //1 -> 2
+            //1: fake_inventory改名fake_equip
+            if (version < 1)
+            {
+                var oldFakeInvKey = new NamespacedKey("morph", "fake_inventory");
+                config.configurations.forEach(c ->
+                {
+                    if (c.getSkillIdentifier().equals(oldFakeInvKey))
+                        c.setSkillIdentifier(SkillType.INVENTORY);
+                });
+            }
+
+            //5: 技能设置迁移到settings中
+            if (version < 5)
+            {
+                config.configurations.forEach(c ->
+                {
+                    var effect = c.getEffectConfiguration();
+                    var projective = c.getProjectiveConfiguration();
+                    var explosion = c.getExplosionConfiguration();
+                    var teleport = c.getTeleportConfiguration();
+
+                    c.setOption(SkillType.TELEPORT.asString(), teleport);
+                    c.setOption(SkillType.APPLY_EFFECT.asString(), effect);
+                    c.setOption(SkillType.LAUNCH_PROJECTIVE.asString(), projective);
+                    c.setOption(SkillType.EXPLODE.asString(), explosion);
+                });
+            }
+
+            //更新默认设置
             DefaultConfigGenerator.addAbilityConfigurations(config.configurations);
-
-            //-> 5
-            config.configurations.forEach(c ->
-            {
-                var effect = c.getEffectConfiguration();
-                var projective = c.getProjectiveConfiguration();
-                var explosion = c.getExplosionConfiguration();
-                var teleport = c.getTeleportConfiguration();
-
-                c.setOption(SkillType.TELEPORT.asString(), teleport);
-                c.setOption(SkillType.APPLY_EFFECT.asString(), effect);
-                c.setOption(SkillType.LAUNCH_PROJECTIVE.asString(), projective);
-                c.setOption(SkillType.EXPLODE.asString(), explosion);
-            });
+            DefaultConfigGenerator.addSkillConfigurations(config.configurations);
 
             config.version = targetVersion;
 

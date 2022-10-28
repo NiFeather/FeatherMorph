@@ -6,7 +6,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.abilities.AbilityType;
-import xiamomc.morph.storage.skill.NoOpConfiguration;
 
 public class NoFallDamageAbility extends NoOpOptionAbility
 {
@@ -22,7 +21,7 @@ public class NoFallDamageAbility extends NoOpOptionAbility
         if (e.getEntity() instanceof Player player && appliedPlayers.contains(player))
         {
             if (e.getCause() == EntityDamageEvent.DamageCause.FALL)
-                e.setDamage(0d);
+                e.setCancelled(true);
         }
     }
 }

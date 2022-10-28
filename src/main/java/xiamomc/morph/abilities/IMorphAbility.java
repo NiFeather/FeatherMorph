@@ -5,6 +5,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.storage.skill.ISkillOption;
 
@@ -73,10 +75,14 @@ public interface IMorphAbility<T extends ISkillOption> extends Listener
 
     /**
      * @apiNote 内部轮子
+     * @return option是否可以cast为目标option，为null则返回true并略过，反之返回setOption的结果
      */
     public default boolean setOptionGeneric(String disguiseIdentifier, ISkillOption option)
     {
         T castedOption;
+
+        if (option == null)
+            return true;
 
         try
         {
@@ -84,6 +90,8 @@ public interface IMorphAbility<T extends ISkillOption> extends Listener
         }
         catch (ClassCastException e)
         {
+            LoggerFactory.getLogger("morph").error("添加设置时出现问题: " + e.getMessage());
+            e.printStackTrace();
             return false;
         }
 

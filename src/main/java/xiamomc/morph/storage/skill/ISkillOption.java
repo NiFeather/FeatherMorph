@@ -1,5 +1,6 @@
 package xiamomc.morph.storage.skill;
 
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
@@ -16,6 +17,17 @@ public interface ISkillOption
      * @apiNote Map中的所有对象都必须可序列化为JSON
      */
     Map<String, Object> toMap();
+
+    /**
+     * 获取技能设置的默认值
+     *
+     * @return 默认值
+     */
+    default Map<String, Object> getDefault()
+    {
+        return new Object2ObjectOpenHashMap<>();
+    }
+
 
     /**
      * 从Map创建一个新实例
