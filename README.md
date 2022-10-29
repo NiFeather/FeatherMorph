@@ -5,7 +5,7 @@
 
 ## 使用
 1. 首先你需要用[最新版本的Paper](https://papermc.io/downloads)作为你的服务端
-2. 访问[Actions](https://github.com/XiaMoZhiShi/MorphPlugin/actions/workflows/build.yml?query=branch%3Amaster+is%3Acompleted)下载最新构建
+2. 访问[Releases](https://github.com/XiaMoZhiShi/MorphPlugin/releases/latest)下载最新版本或前往[Actions](https://github.com/XiaMoZhiShi/MorphPlugin/actions/workflows/build.yml?query=branch%3Amaster+is%3Acompleted)下载最新构建
 3. 下载最新版本的[PluginBase](https://github.com/XiaMoZhiShi/PluginBase/releases/latest)和[LibsDisguises](https://www.spigotmc.org/resources/libs-disguises-free.81/)
 4. 丢进服务器插件目录中
 5. 重启服务器
