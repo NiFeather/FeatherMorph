@@ -211,7 +211,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
             if (mainHandItemType == Material.PLAYER_HEAD)
             {
                 //忽略shift点地
-                if (action.equals(Action.RIGHT_CLICK_BLOCK)) return false;
+                if (action.equals(Action.RIGHT_CLICK_BLOCK) || action.isLeftClick()) return false;
 
                 if (!allowHeadMorph)
                 {
@@ -255,7 +255,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
                 }
 
                 //否则，更新或应用伪装
-                if (morphs.morph(player, "player:" + profile.getName(), player.getTargetEntity(5)))
+                if (morphs.morph(player, DisguiseTypes.PLAYER.toId(profile.getName()), player.getTargetEntity(5)))
                 {
                     //成功伪装后设置皮肤为头颅的皮肤
                     var disguise = (PlayerDisguise) DisguiseAPI.getDisguise(player);
@@ -315,27 +315,25 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
                     {
                         var disg = DisguiseAPI.getDisguise(targetedEntity);
 
-                        String targetKey = DisguiseTypes.UNKNOWN.toId("unknown");
+                        String targetKey;
 
-                        //查询此玩家的伪装是否是LD自定义伪装，是的话key应为此玩家的伪装id
-                        if (config.get(Boolean.class, ConfigOption.ALLOW_LD_DISGUISES)
-                                && targetedEntity instanceof Player targetPlayer
-                                && DisguiseAPI.isDisguised(targetPlayer))
+                        if (targetedEntity instanceof Player targetPlayer)
                         {
                             var playerState = morphs.getDisguiseStateFor(targetPlayer);
 
-                            if (playerState != null && DisguiseTypes.fromId(playerState.getDisguiseIdentifier()) == DisguiseTypes.LD)
-                                targetKey = playerState.getDisguiseIdentifier();
+                            //目标实体是玩家：玩家伪装ID > 玩家名
+                            targetKey = playerState != null
+                                    ? playerState.getDisguiseIdentifier()
+                                    : DisguiseTypes.PLAYER.toId(targetPlayer.getName());
                         }
                         else
                         {
+                            //否则：伪装ID > 伪装类型 > 生物类型
                             targetKey = disg != null
                                     ? (disg instanceof PlayerDisguise pd)
-                                        ? "player:" + pd.getName()
+                                        ? DisguiseTypes.PLAYER.toId(pd.getName())
                                         : disg.getType().getEntityType().getKey().asString()
-                                    : (targetedEntity instanceof Player targetPlayer)
-                                        ? "player:" + targetPlayer.getName()
-                                        : targetedEntity.getType().getKey().asString();
+                                    : targetedEntity.getType().getKey().asString();
                         }
 
                         morphs.morph(player, targetKey, targetedEntity);

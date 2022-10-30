@@ -2,11 +2,13 @@ package xiamomc.morph.providers;
 
 import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.disguisetypes.Disguise;
+import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xiamomc.morph.MorphManager;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.messages.MessageUtils;
@@ -15,6 +17,7 @@ import xiamomc.morph.misc.DisguiseInfo;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.misc.DisguiseTypes;
 import xiamomc.pluginbase.Annotations.Initializer;
+import xiamomc.pluginbase.Annotations.Resolved;
 
 public class LibsDisguisesDisguiseProvider extends VanillaDisguiseProvider
 {
@@ -60,6 +63,25 @@ public class LibsDisguisesDisguiseProvider extends VanillaDisguiseProvider
         DisguiseAPI.disguiseEntity(player, disguise);
 
         return DisguiseResult.success(disguise);
+    }
+
+    @Resolved
+    private MorphManager morphs;
+
+    @Override
+    protected boolean canConstruct(DisguiseInfo info, Entity targetEntity, @Nullable DisguiseState theirState)
+    {
+        return theirState != null && theirState.getDisguiseIdentifier().equals(info.getIdentifier());
+    }
+
+    @Override
+    protected boolean canCopyDisguise(DisguiseInfo info, Entity targetEntity,
+                                      @Nullable DisguiseState theirState, @NotNull Disguise theirDisguise)
+    {
+        if (theirState != null)
+            return theirState.getDisguiseIdentifier().equals(info.getIdentifier());
+
+        return false;
     }
 
     @Override

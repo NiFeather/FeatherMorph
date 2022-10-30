@@ -10,10 +10,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xiamomc.morph.misc.DisguiseInfo;
-import xiamomc.morph.misc.DisguiseTypes;
-import xiamomc.morph.misc.EntityTypeUtils;
-import xiamomc.morph.misc.MinecraftLanguageHelper;
+import xiamomc.morph.misc.*;
 
 public class VanillaDisguiseProvider extends DefaultDisguiseProvider
 {
@@ -48,6 +45,21 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
         DisguiseAPI.disguiseEntity(player, constructedDisguise);
 
         return DisguiseResult.success(constructedDisguise, copyResult.isCopy());
+    }
+
+    @Override
+    protected boolean canConstruct(DisguiseInfo info, Entity targetEntity, DisguiseState state)
+    {
+        return state != null
+                ? state.getDisguise().getType().getEntityType().equals(info.getEntityType())
+                : targetEntity.getType().equals(info.getEntityType());
+    }
+
+    @Override
+    protected boolean canCopyDisguise(DisguiseInfo info, Entity targetEntity,
+                                      @Nullable DisguiseState theirDisguiseState, @NotNull Disguise theirDisguise)
+    {
+        return theirDisguise.getType().getEntityType().equals(info.getEntityType());
     }
 
     @Override

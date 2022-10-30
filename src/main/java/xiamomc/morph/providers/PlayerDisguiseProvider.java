@@ -1,6 +1,7 @@
 package xiamomc.morph.providers;
 
 import me.libraryaddict.disguise.DisguiseAPI;
+import me.libraryaddict.disguise.disguisetypes.Disguise;
 import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Entity;
@@ -33,6 +34,33 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
         DisguiseAPI.disguiseEntity(player, disguise);
 
         return DisguiseResult.success(disguise, result.isCopy());
+    }
+
+    @Override
+    protected boolean canConstruct(DisguiseInfo info, Entity targetEntity, @Nullable DisguiseState theirState)
+    {
+        if (theirState != null)
+        {
+            var type = DisguiseTypes.fromId(theirState.getDisguiseIdentifier());
+
+            return type == DisguiseTypes.PLAYER
+                    && type.toStrippedId(theirState.getDisguiseIdentifier()).equals(info.playerDisguiseTargetName);
+        }
+
+        if (!(targetEntity instanceof Player targetPlayer))
+            return false;
+
+        return targetPlayer.getName().equals(info.playerDisguiseTargetName);
+    }
+
+    @Override
+    protected boolean canCopyDisguise(DisguiseInfo info, Entity targetEntity,
+                                      @Nullable DisguiseState theirState, @NotNull Disguise theirDisguise)
+    {
+        if (theirDisguise instanceof PlayerDisguise playerDisguise)
+            return playerDisguise.getName().equals(info.playerDisguiseTargetName);
+
+        return false;
     }
 
     @Override
