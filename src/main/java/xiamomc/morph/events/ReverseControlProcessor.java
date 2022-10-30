@@ -2,6 +2,8 @@ package xiamomc.morph.events;
 
 import com.destroystokyo.paper.ClientOption;
 import io.papermc.paper.event.player.PlayerArmSwingEvent;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
 import net.minecraft.core.EnumDirection;
 import net.minecraft.world.EnumHand;
@@ -18,12 +20,15 @@ import org.bukkit.craftbukkit.v1_19_R1.entity.CraftEntity;
 import org.bukkit.craftbukkit.v1_19_R1.entity.CraftHumanEntity;
 import org.bukkit.craftbukkit.v1_19_R1.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_19_R1.inventory.CraftItemStack;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphManager;
@@ -33,6 +38,7 @@ import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
@@ -228,14 +234,14 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
                 if (!playerInDistance(player, targetPlayer)) return;
 
                 var targetHand = clientHandRelativeToTarget(e.getHand(), player, targetPlayer);
-                if (simulateInteract(targetPlayer, targetHand))
+                if (simulateRightClick(targetPlayer, targetHand))
                     targetPlayer.swingHand(targetHand);
             }
         }
     }
 
     //模拟玩家右键
-    private boolean simulateInteract(Player player, EquipmentSlot targetHand)
+    private boolean simulateRightClick(Player player, EquipmentSlot targetHand)
     {
         if (!allowSimulation) return false;
 
@@ -265,6 +271,8 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
         var hand = targetHand == EquipmentSlot.HAND ? EnumHand.a : EnumHand.b;
         var item = player.getEquipment().getItem(targetHand);
 
+        var pluginManager = Bukkit.getPluginManager();
+
         //如果目标实体不是null，则和实体互动
         if (targetEntity != null)
         {
@@ -281,9 +289,19 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
             //先试试InteractAt
             //如果不成功，调用Interact
             //最后试试useItem
-            return entityHandle.a(playerHandle, vec, EnumHand.a).a()
-                    || playerHumanHandle.a(entityHandle, EnumHand.a).a()
-                    || mgr.a(playerHandle, worldHandle, CraftItemStack.asNMSCopy(item), hand).a();
+            var interactEntityEvent = new PlayerInteractEntityEvent(player, targetEntity);
+            var interactAtEvent = new PlayerInteractAtEntityEvent(player, targetEntity, hitPos);
+            pluginManager.callEvent(interactEntityEvent);
+            pluginManager.callEvent(interactAtEvent);
+
+            if (!interactAtEvent.isCancelled() && !interactEntityEvent.isCancelled())
+            {
+                return entityHandle.a(playerHandle, vec, EnumHand.a).a()
+                        || playerHumanHandle.a(entityHandle, EnumHand.a).a()
+                        || mgr.a(playerHandle, worldHandle, CraftItemStack.asNMSCopy(item), hand).a();
+            }
+            else
+                return false;
         }
 
         boolean success = false;
@@ -314,21 +332,33 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
                         new Vec3D(targetBlock.getX(), targetBlock.getY(), targetBlock.getZ()),
                         targetBlockDirection, loc, false);
 
+                var event = new PlayerInteractEvent(player, Action.RIGHT_CLICK_BLOCK, item, targetBlock, bukkitFace);
+                pluginManager.callEvent(event);
+
                 //ServerPlayerGameMode.useItemOn()
-                success = mgr.a(playerHandle, worldHandle, CraftItemStack.asNMSCopy(item), hand, moving).a();
+                if (!event.isCancelled())
+                    success = mgr.a(playerHandle, worldHandle, CraftItemStack.asNMSCopy(item), hand, moving).a();
             }
         }
 
         //ServerPlayerGameMode.useItem()
         if (!success)
-            return mgr.a(playerHandle, worldHandle, CraftItemStack.asNMSCopy(item), hand).a();
+        {
+            var event = new PlayerInteractEvent(player, Action.RIGHT_CLICK_AIR, item, null, BlockFace.SELF);
+            pluginManager.callEvent(event);
+
+            if (!event.isCancelled())
+                return mgr.a(playerHandle, worldHandle, CraftItemStack.asNMSCopy(item), hand).a();
+            else
+                return false;
+        }
         else
             return true;
     }
 
     private boolean playerInDistance(@NotNull Player source, @Nullable Player target)
     {
-        if (target == null) return false;
+        if (target == null || DisguiseAPI.isDisguised(target)) return false;
 
         var isInSameWorld = target.getWorld().equals(source.getWorld());
         var targetHelmet = target.getEquipment().getHelmet();
