@@ -97,6 +97,8 @@ public class MorphSkillHandler extends MorphPluginObject
      */
     public boolean registerSkill(IMorphSkill<?> skill)
     {
+        logger.info("注册技能：" + skill.getIdentifier().asString());
+
         if (skills.contains(skill))
         {
             logger.error("已经注册过一个" + skill + "的技能了");

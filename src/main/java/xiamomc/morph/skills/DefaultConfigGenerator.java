@@ -6,6 +6,7 @@ import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.abilities.AbilityType;
 import xiamomc.morph.abilities.options.FlyOption;
+import xiamomc.morph.abilities.options.ReduceDamageOption;
 import xiamomc.morph.misc.EntityTypeUtils;
 import xiamomc.morph.storage.skill.*;
 
@@ -97,6 +98,15 @@ public class DefaultConfigGenerator
         var container = new SkillConfigurationContainer();
         var skills = container.configurations;
 
+        addSkillConfigurations(skills);
+        addAbilityConfigurations(skills);
+
+        cachedContainer = container;
+        return container;
+    }
+
+    public static void addSkillConfigurations(List<SkillConfiguration> skills)
+    {
         //伪装物品
         addSkillConfiguration(skills, EntityType.ARMOR_STAND, 20, SkillType.INVENTORY);
         addSkillConfiguration(skills, EntityType.PLAYER, 20, SkillType.INVENTORY);
@@ -141,11 +151,6 @@ public class DefaultConfigGenerator
                 c.addOption(SkillType.TELEPORT, new TeleportConfiguration(32)));
 
         addSkillConfiguration(skills, EntityType.EVOKER, 100, SkillType.EVOKER);
-
-        addAbilityConfigurations(skills);
-
-        cachedContainer = container;
-        return container;
     }
 
     public static void addAbilityConfigurations(List<SkillConfiguration> skills)
@@ -166,8 +171,18 @@ public class DefaultConfigGenerator
         addAbilityConfiguration(skills, EntityTypeUtils.hasSpeedBoost(), AbilityType.HAS_SPEED_BOOST);
         addAbilityConfiguration(skills, EntityTypeUtils.noFallDamage(), AbilityType.NO_FALL_DAMAGE);
         addAbilityConfiguration(skills, EntityTypeUtils.hasFeatherFalling(), AbilityType.HAS_FEATHER_FALLING);
-        addAbilityConfiguration(skills, EntityTypeUtils.reducesMagicDamage(), AbilityType.REDUCES_MAGIC_DAMAGE);
-        addAbilityConfiguration(skills, EntityTypeUtils.reducesFallDamage(), AbilityType.REDUCES_FALL_DAMAGE);
+
+        addAbilityConfiguration(skills, EntityTypeUtils.reducesMagicDamage(), AbilityType.REDUCES_MAGIC_DAMAGE, c ->
+        {
+            c.setOption(AbilityType.REDUCES_MAGIC_DAMAGE.asString(),
+                    new ReduceDamageOption(0.15d, true));
+        });
+
+        addAbilityConfiguration(skills, EntityTypeUtils.reducesFallDamage(), AbilityType.REDUCES_FALL_DAMAGE, c ->
+        {
+            c.setOption(AbilityType.REDUCES_FALL_DAMAGE.asString(),
+                    new ReduceDamageOption(10));
+        });
         addAbilityConfiguration(skills, EntityTypeUtils.hasSnowTrail(), AbilityType.SNOWY);
 
         addAbilityConfiguration(skills, EntityTypeUtils.wardenLessAware(), AbilityType.WARDEN_LESS_AWARE);
