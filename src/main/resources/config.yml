@@ -9,7 +9,7 @@ root:
 
   # 语言
   language:
-    # 插件语言
+    # 目标Minecraft语言
     # 目前只支持向玩家发送对应语言的生物名称
     code: zh_cn
 

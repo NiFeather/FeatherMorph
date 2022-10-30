@@ -3,21 +3,20 @@ package xiamomc.morph.misc;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import net.kyori.adventure.text.Component;
-import org.asynchttpclient.AsyncCompletionHandler;
-import org.asynchttpclient.AsyncHttpClient;
-import org.asynchttpclient.Dsl;
-import org.asynchttpclient.Response;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.pluginbase.Annotations.Initializer;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.InputStreamReader;
+import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.ProxySelector;
 import java.net.URI;
+import java.net.URL;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.function.Consumer;
 
@@ -29,14 +28,10 @@ public class MinecraftLanguageHelper extends MorphPluginObject
     @Initializer
     private void load(MorphConfigManager config)
     {
-        var dslConfig = Dsl.config()
-                .setUseProxyProperties(true)
-                .setUseProxySelector(true)
-                .setConnectTimeout(3000)
-                .setReadTimeout(3000)
-                .setRequestTimeout(3000);
-
-        http = Dsl.asyncHttpClient(dslConfig);
+        http = HttpClient.newBuilder()
+                .connectTimeout(Duration.ofSeconds(3))
+                .proxy(ProxySelector.getDefault())
+                .build();
 
         config.onConfigRefresh(c ->
         {
@@ -79,7 +74,7 @@ public class MinecraftLanguageHelper extends MorphPluginObject
             .disableHtmlEscaping()
             .create();
 
-    private AsyncHttpClient http;
+    private HttpClient http;
 
     private final String langDirUri = plugin.getDataFolder().toURI() + "/mclang";
     private final File langDir = new File(URI.create(langDirUri));
@@ -176,52 +171,70 @@ public class MinecraftLanguageHelper extends MorphPluginObject
             }
         }
 
-        try
-        {
             var targetFile = new File(URI.create(langDirUri + "/" + languageName + ".json"));
 
             if (targetFile.exists() && !overWrite)
                 return;
 
-            var req = http.prepareGet(urlPattern + languageName + ".json");
-
-            req.setReadTimeout(3000);
-            req.setRequestTimeout(3000);
-
-            req.execute(new RequestHandler(s ->
+            this.addSchedule(c ->
             {
-                try (var stream = new FileOutputStream(targetFile))
+                try
                 {
-                    stream.write(s.getBytes());
+                    var req = new URL(urlPattern + languageName + ".json");
+                    var con = (HttpURLConnection) req.openConnection();
+
+                    con.setRequestMethod("GET");
+                    con.setInstanceFollowRedirects(true);
+                    con.setReadTimeout(3000);
+                    con.setConnectTimeout(3000);
+
+                    String str;
+                    StringBuilder builder = new StringBuilder();
+                    var reader = new BufferedReader(new InputStreamReader(con.getInputStream()));
+
+                    while ((str = reader.readLine()) != null)
+                        builder.append(str).append("\n");
+
+                    var success = con.getResponseCode() == 200;
+
+                    con.disconnect();
+
+                    if (success)
+                    {
+                        try (var stream = new FileOutputStream(targetFile))
+                        {
+                            stream.write(builder.toString().getBytes());
+                            logger.info("成功下载" + languageName + "的语言文件！");
+                        }
+                        catch (Throwable t)
+                        {
+                            logger.error("未能写入语言资源：" + t.getMessage());
+                            t.printStackTrace();
+
+                            if (onFail != null)
+                                onFail.accept(null);
+                        }
+
+                        if (onSuccess != null)
+                            onSuccess.accept(null);
+                    }
+                    else
+                    {
+                        logger.warn("未能下载语言文件：" + con.getResponseCode() + " :: " + con.getRequestMethod());
+
+                        if (onFail != null)
+                            onFail.accept(null);
+                    }
                 }
                 catch (Throwable t)
                 {
-                    logger.error("未能写入语言资源：" + t.getMessage());
+                    logger.error("无法创建请求: " + t.getMessage());
                     t.printStackTrace();
 
                     if (onFail != null)
                         onFail.accept(null);
                 }
-
-                if (onSuccess != null)
-                    onSuccess.accept(null);
-            }, t ->
-            {
-                logger.warn("FAIL! " + t.getMessage());
-                t.printStackTrace();
-
-                if (onFail != null)
-                    onFail.accept(null);
-            }));
-        }
-        catch (Throwable t)
-        {
-            logger.error("http failed: " + t.getMessage());
-            t.printStackTrace();
-
-            if (onFail != null)
-                onFail.accept(null);
-        }
+            }, 1, true);
     }
 
     /**
@@ -263,41 +276,6 @@ public class MinecraftLanguageHelper extends MorphPluginObject
             return allowTranslatable
                     ? Component.translatable(key)
                     : Component.text(key);
-        }
-    }
-
-    private static class RequestHandler extends AsyncCompletionHandler<String>
-    {
-        public RequestHandler(@Nullable Consumer<String> onSuccess, @Nullable Consumer<Throwable> onFail)
-        {
-            this.onFail = onFail;
-            this.onSuccess = onSuccess;
-        }
-
-        @Nullable
-        private final Consumer<String> onSuccess;
-
-        @Nullable
-        private final Consumer<Throwable> onFail;
-
-        @Override
-        public String onCompleted(Response response)
-        {
-            var resp = response.getResponseBody();
-
-            if (onSuccess != null)
-                onSuccess.accept(response.getResponseBody());
-
-            return resp;
-        }
-
-        @Override
-        public void onThrowable(Throwable t)
-        {
-            super.onThrowable(t);
-
-            if (onFail != null)
-                onFail.accept(t);
         }
     }
 }
