@@ -16,6 +16,7 @@ public enum ConfigOption
     REVERSE_CONTROL_DISTANCE(reverseControlNode().append("normalDistance"), -1),
     REVERSE_CONTROL_DISTANCE_IMMUNE(reverseControlNode().append("immuneDistance"), 16),
     REVERSE_CONTROL_IMMUNE_ITEM(reverseControlNode().append("immuneItem"), "minecraft:golden_helmet"),
+    REVERSE_IGNORE_DISGUISED(reverseControlNode().append("ignore_disguised"), true),
 
     REVERSE_BEHAVIOR_DO_SIMULATION(reverseControlBehaviorNode().append("simulate_interactions"), false),
     REVERSE_BEHAVIOR_SWING_HANDS(reverseControlBehaviorNode().append("swing_hands"), true),

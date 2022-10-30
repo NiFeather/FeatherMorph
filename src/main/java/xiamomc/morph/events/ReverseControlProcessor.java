@@ -181,8 +181,7 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
 
             if(!playerInDistance(player, targetPlayer)) return;
 
-            if (manager.getDisguiseStateFor(targetPlayer) == null
-                    && targetPlayer.getGameMode() == GameMode.SURVIVAL
+            if (targetPlayer.getGameMode() == GameMode.SURVIVAL
                     && playerInDistance(player, targetPlayer))
             {
                 var swingMainHand = player.getClientOption(ClientOption.MAIN_HAND)
@@ -358,7 +357,7 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
 
     private boolean playerInDistance(@NotNull Player source, @Nullable Player target)
     {
-        if (target == null || DisguiseAPI.isDisguised(target)) return false;
+        if (target == null || (DisguiseAPI.isDisguised(target) && ignoreDisguised)) return false;
 
         var isInSameWorld = target.getWorld().equals(source.getWorld());
         var targetHelmet = target.getEquipment().getHelmet();
@@ -398,6 +397,7 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
     private boolean allowSwap;
     private boolean allowDrop;
     private boolean allowHotBar;
+    private boolean ignoreDisguised;
 
     private void onConfigUpdate()
     {
@@ -415,6 +415,7 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
         this.allowSwap = config.getOrDefault(Boolean.class, ConfigOption.REVERSE_BEHAVIOR_SWAP_HAND);
         this.allowDrop = config.getOrDefault(Boolean.class, ConfigOption.REVERSE_BEHAVIOR_DROP);
         this.allowHotBar = config.getOrDefault(Boolean.class, ConfigOption.REVERSE_BEHAVIOR_HOTBAR);
+        this.ignoreDisguised = config.getOrDefault(Boolean.class, ConfigOption.REVERSE_IGNORE_DISGUISED);
     }
 
     private void update()
