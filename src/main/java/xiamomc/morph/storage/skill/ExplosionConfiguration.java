@@ -62,9 +62,9 @@ public class ExplosionConfiguration implements ISkillOption
 
         var instance = new ExplosionConfiguration();
 
-        instance.killsSelf = (boolean) map.getOrDefault("kills_self", true);
-        instance.strength = (int) (double) map.getOrDefault("strength", 3);
-        instance.setsFire = (boolean) map.getOrDefault("sets_fire", false);
+        instance.killsSelf = tryGet(map, "kills_self", true);
+        instance.strength = tryGetInt(map, "strength", 3);
+        instance.setsFire = tryGet(map, "sets_fire", false);
 
         return instance;
     }

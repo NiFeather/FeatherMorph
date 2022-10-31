@@ -5,6 +5,7 @@ import com.google.gson.annotations.SerializedName;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.LoggerFactory;
 import xiamomc.morph.skills.SkillType;
 
 import java.util.Map;
@@ -124,14 +125,15 @@ public class EffectConfiguration implements ISkillOption
 
         var instance = new EffectConfiguration();
 
-        instance.name = (String) map.getOrDefault("name", "none");
-        instance.multiplier = (int) (double) map.getOrDefault("multiplier", 0);
-        instance.duration = (int) (double) map.getOrDefault("duration", 0);
-        instance.acquiresWater = (boolean) map.getOrDefault("acquires_water", false);
-        instance.showGuardian = (boolean) map.getOrDefault("show_guardian", false);
-        instance.soundName = (String) map.getOrDefault("sound_name", "none");
-        instance.soundDistance = (int) (double) map.getOrDefault("sound_distance", 0);
-        instance.applyDistance = (int) (double) map.getOrDefault("apply_distance", 0);
+        instance.name = "" + map.getOrDefault("name", "none");
+        instance.acquiresWater = tryGet(map, "acquires_water", false);
+        instance.showGuardian = tryGet(map, "show_guardian", false);
+        instance.soundName = "" + map.getOrDefault("sound_name", "none");
+
+        instance.multiplier = tryGetInt(map, "multiplier", 0);
+        instance.duration = tryGetInt(map, "duration", 0);
+        instance.soundDistance = tryGetInt(map, "sound_distance", 0);
+        instance.applyDistance = tryGetInt(map, "apply_distance", 0);
 
         return instance;
     }

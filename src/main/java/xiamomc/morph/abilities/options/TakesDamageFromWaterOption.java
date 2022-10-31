@@ -36,7 +36,7 @@ public class TakesDamageFromWaterOption implements ISkillOption
 
         var instance = new TakesDamageFromWaterOption();
 
-        instance.damageAmount = (double) map.get("damage");
+        instance.damageAmount = tryGet(map, "damage", 0d);
 
         return instance;
     }

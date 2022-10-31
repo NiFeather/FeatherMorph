@@ -42,7 +42,7 @@ public class ChatOverrideOption implements ISkillOption
 
         var instance = new ChatOverrideOption();
 
-        instance.messagePattern = (String) map.getOrDefault("message_pattern", null);
+        instance.messagePattern = "" + map.getOrDefault("message_pattern", null);
 
         return instance;
     }

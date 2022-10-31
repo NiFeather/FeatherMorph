@@ -2,6 +2,7 @@ package xiamomc.morph.abilities.options;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.LoggerFactory;
 import xiamomc.morph.storage.skill.ISkillOption;
 
 import java.util.Map;
@@ -41,16 +42,7 @@ public class FlyOption implements ISkillOption
 
         var instance = new FlyOption();
 
-        var spd = map.get("fly_speed");
-        float speed;
-
-        if (spd instanceof Double d)
-            speed = d.floatValue();
-        else if (spd instanceof Float f)
-            speed = f;
-        else speed = 0f;
-
-        instance.flyingSpeed = speed;
+        instance.flyingSpeed = tryGetFloat(map, "fly_speed", 0);
 
         return instance;
     }

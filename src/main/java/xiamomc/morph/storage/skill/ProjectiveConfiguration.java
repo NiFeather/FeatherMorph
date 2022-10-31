@@ -59,11 +59,12 @@ public class ProjectiveConfiguration implements ISkillOption
 
         var instance = new ProjectiveConfiguration();
 
-        instance.name = (String) map.getOrDefault("name", "");
-        instance.multiplier = (float) (double) map.getOrDefault("speed_multiplier", 1f);
-        instance.soundName = (String) map.getOrDefault("sound_name", "");
-        instance.soundDistance = (int) (double) map.getOrDefault("sound_distance", 0);
-        instance.distanceLimit = (int) (double) map.getOrDefault("max_target_distance", 0);
+        instance.name = "" + map.getOrDefault("name", "");
+        instance.soundName = "" + map.getOrDefault("sound_name", "");
+
+        instance.multiplier = tryGetFloat(map, "speed_multiplier", 1f);
+        instance.soundDistance = tryGetInt(map, "sound_distance", 0);
+        instance.distanceLimit = tryGetInt(map, "max_target_distance", 0);
 
         return instance;
     }

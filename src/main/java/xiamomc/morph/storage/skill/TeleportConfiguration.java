@@ -44,7 +44,7 @@ public class TeleportConfiguration implements ISkillOption
 
         var instance = new TeleportConfiguration();
 
-        instance.maxDistance = (int) (double) map.getOrDefault("max_distance", 32);
+        instance.maxDistance = tryGetInt(map, "max_distance", 32);
 
         return instance;
     }

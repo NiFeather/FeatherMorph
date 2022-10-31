@@ -65,49 +65,24 @@ public class BossbarOption implements ISkillOption
     {
         if (map == null) return null;
 
-        //color
-        var colorName = (String) map.getOrDefault("color", "white");
-
-        var color = BossBar.Color.NAMES.value(colorName);
-        if (color == null) color = BossBar.Color.WHITE;
-
         //flag
         var flags = new ObjectArraySet<BossBar.Flag>();
-        var rawFlags = (List<?>) map.get("flags");
+        var rawFlags = tryGet(map, "flags", ObjectArraySet.of());
 
-        if (rawFlags != null)
+        rawFlags.forEach(o ->
         {
-            rawFlags.forEach(o ->
-            {
-                if (!(o instanceof String str)) return;
+            if (!(o instanceof String str)) return;
 
-                var matchingFlag = BossBar.Flag.NAMES.value(str);
-                if (matchingFlag != null) flags.add(matchingFlag);
-            });
-        }
+            var matchingFlag = BossBar.Flag.NAMES.value(str);
+            if (matchingFlag != null) flags.add(matchingFlag);
+        });
 
-        //type
-        var rawOverlay = (String) map.getOrDefault("style", "progress");
-        var overlay = BossBar.Overlay.NAMES.value(rawOverlay);
-        overlay = overlay == null ? BossBar.Overlay.PROGRESS : overlay;
+        var color = tryGet(map, "color", BossBar.Color.WHITE, o -> BossBar.Color.NAMES.value("" + o));
+        var style = tryGet(map, "style", BossBar.Overlay.PROGRESS, o -> BossBar.Overlay.NAMES.value("" + o));
+        var title = "" + map.getOrDefault("name", "<name>");
+        int distance = tryGetInt(map, "distance", -1);
 
-        //title
-        var title = (String) map.getOrDefault("name", "<name>");
-
-        //distance
-        int distance;
-        var rawDistance = "" + map.getOrDefault("distance", "-1");
-
-        try
-        {
-            distance = Double.valueOf(rawDistance).intValue();
-        }
-        catch (Throwable t)
-        {
-            distance = -1;
-        }
-
-        return new BossbarOption(new BossbarCreateOption(title, color, overlay, flags), distance);
+        return new BossbarOption(new BossbarCreateOption(title, color, style, flags), distance);
     }
 
     public record BossbarCreateOption(String name, BossBar.Color color, BossBar.Overlay overlay, Set<BossBar.Flag> flags)

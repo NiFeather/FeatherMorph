@@ -59,8 +59,8 @@ public class ReduceDamageOption implements ISkillOption
 
         var instance = createInstance();
 
-        instance.isPercentage = (boolean) map.get("is_percentage");
-        instance.reduceAmount = (double) map.get("amount");
+        instance.isPercentage = tryGet(map, "is_percentage", false);
+        instance.reduceAmount = tryGet(map, "amount", 0d);
 
         return instance;
     }
