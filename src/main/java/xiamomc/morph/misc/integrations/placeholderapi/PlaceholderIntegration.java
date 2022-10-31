@@ -5,7 +5,6 @@ import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.LoggerFactory;
 import xiamomc.morph.misc.integrations.placeholderapi.builtin.AvaliableDisguisesProvider;
 import xiamomc.morph.misc.integrations.placeholderapi.builtin.StateNameProvider;
 import xiamomc.pluginbase.Managers.DependencyManager;
@@ -14,17 +13,15 @@ import java.util.List;
 
 public class PlaceholderIntegration extends PlaceholderExpansion
 {
+    private static final List<IPlaceholderProvider> providers = new ObjectArrayList<>();
+
     public PlaceholderIntegration(DependencyManager depManager)
     {
-        this.depManager = depManager;
-
-        providers.addAll(ObjectArrayList.of(
+        addPlaceholders(ObjectArrayList.of(
                 new StateNameProvider(),
                 new AvaliableDisguisesProvider()
         ));
     }
-
-    private final DependencyManager depManager;
 
     @Override
     public @NotNull String getIdentifier()
@@ -44,24 +41,26 @@ public class PlaceholderIntegration extends PlaceholderExpansion
         return "0.4.1";
     }
 
-    private static final List<IPlaceholderProvider> providers = new ObjectArrayList<>();
+    private void addPlaceholders(List<IPlaceholderProvider> providerList)
+    {
+        providerList.forEach(this::addPlaceholderProvider);
+    }
 
     /**
      * 添加一个Placeholder提供器
      * @param provider Placeholder提供器
      * @return 操作是否成功（是否已经注册过一个相同ID和匹配模式的提供器）
      */
-    public static boolean addPlaceholderProvider(IPlaceholderProvider provider)
+    public boolean addPlaceholderProvider(IPlaceholderProvider provider)
     {
         if (providers.stream().anyMatch(p -> providerEquals(p, provider)))
             return false;
 
-        LoggerFactory.getLogger("morph").info("注册Placeholder提供器: " + provider.getPlaceholderIdentifier());
         providers.add(0, provider);
         return true;
     }
 
-    private static boolean providerEquals(IPlaceholderProvider source, IPlaceholderProvider target)
+    private boolean providerEquals(IPlaceholderProvider source, IPlaceholderProvider target)
     {
         if (source == null || target == null) return false;
 
