@@ -75,13 +75,16 @@ public class BossbarOption implements ISkillOption
         var flags = new ObjectArraySet<BossBar.Flag>();
         var rawFlags = (List<?>) map.get("flags");
 
-        rawFlags.forEach(o ->
+        if (rawFlags != null)
         {
-            if (!(o instanceof String str)) return;
+            rawFlags.forEach(o ->
+            {
+                if (!(o instanceof String str)) return;
 
-            var matchingFlag = BossBar.Flag.NAMES.value(str);
-            if (matchingFlag != null) flags.add(matchingFlag);
-        });
+                var matchingFlag = BossBar.Flag.NAMES.value(str);
+                if (matchingFlag != null) flags.add(matchingFlag);
+            });
+        }
 
         //type
         var rawOverlay = (String) map.get("style");
@@ -93,7 +96,18 @@ public class BossbarOption implements ISkillOption
         title = title == null ? "<name>" : title;
 
         //distance
-        var distance = ((Double) Double.parseDouble("" + map.get("distance"))).intValue();
+        int distance;
+        var rawDistance = "" + map.get("distance");
+
+        try
+        {
+            if (rawDistance.equalsIgnoreCase("null")) distance = -1;
+            else distance = ((Double) Double.parseDouble(rawDistance)).intValue();
+        }
+        catch (Throwable t)
+        {
+            distance = -1;
+        }
 
         return new BossbarOption(new BossbarCreateOption(title, color, overlay, flags), distance);
     }
