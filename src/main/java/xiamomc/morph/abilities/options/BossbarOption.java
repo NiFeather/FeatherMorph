@@ -66,9 +66,9 @@ public class BossbarOption implements ISkillOption
         if (map == null) return null;
 
         //color
-        var colorName = (String) map.get("color");
+        var colorName = (String) map.getOrDefault("color", "white");
 
-        var color = BossBar.Color.NAMES.value(colorName == null ? "" : colorName);
+        var color = BossBar.Color.NAMES.value(colorName);
         if (color == null) color = BossBar.Color.WHITE;
 
         //flag
@@ -87,22 +87,20 @@ public class BossbarOption implements ISkillOption
         }
 
         //type
-        var rawOverlay = (String) map.get("style");
-        var overlay = BossBar.Overlay.NAMES.value(rawOverlay == null ? "progress" : rawOverlay);
+        var rawOverlay = (String) map.getOrDefault("style", "progress");
+        var overlay = BossBar.Overlay.NAMES.value(rawOverlay);
         overlay = overlay == null ? BossBar.Overlay.PROGRESS : overlay;
 
         //title
-        var title = (String) map.get("name");
-        title = title == null ? "<name>" : title;
+        var title = (String) map.getOrDefault("name", "<name>");
 
         //distance
         int distance;
-        var rawDistance = "" + map.get("distance");
+        var rawDistance = "" + map.getOrDefault("distance", "-1");
 
         try
         {
-            if (rawDistance.equalsIgnoreCase("null")) distance = -1;
-            else distance = ((Double) Double.parseDouble(rawDistance)).intValue();
+            distance = Double.valueOf(rawDistance).intValue();
         }
         catch (Throwable t)
         {
