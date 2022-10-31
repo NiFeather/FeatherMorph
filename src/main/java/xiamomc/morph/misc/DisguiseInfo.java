@@ -4,6 +4,7 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.EntityType;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphManager;
@@ -19,7 +20,7 @@ public class DisguiseInfo
 
     private final EntityType entityType;
 
-    @Deprecated
+    @ApiStatus.Internal
     public EntityType getEntityType()
     {
         return entityType;
@@ -140,15 +141,22 @@ public class DisguiseInfo
         return rawIdentifier;
     }
 
+    private Component display;
+
     /**
      * 将此info转换为可以显示的Component
      * @return Component
      */
     public Component asComponent()
     {
-        if (!this.isValidate()) return Component.text("" + rawIdentifier);
+        if (display == null)
+            display = isValidate()
+                    ? provider == null
+                        ? Component.text(rawIdentifier)
+                        : provider.getDisplayName(rawIdentifier)
+                    : Component.text("" + rawIdentifier);
 
-        return provider == null ? Component.text(rawIdentifier) : provider.getDisplayName(rawIdentifier);
+        return display;
     }
 
     @Override

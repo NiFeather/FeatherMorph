@@ -1,4 +1,4 @@
-package xiamomc.morph.events;
+package xiamomc.morph.misc.integrations.gsit;
 
 import dev.geco.gsit.api.event.*;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;

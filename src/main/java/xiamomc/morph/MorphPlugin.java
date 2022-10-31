@@ -3,6 +3,7 @@ package xiamomc.morph;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.event.Listener;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.scoreboard.Scoreboard;
 import xiamomc.morph.abilities.AbilityHandler;
@@ -14,6 +15,8 @@ import xiamomc.morph.interfaces.IManageRequests;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.MorphMessageStore;
 import xiamomc.morph.misc.MinecraftLanguageHelper;
+import xiamomc.morph.misc.integrations.gsit.GSitCompactProcessor;
+import xiamomc.morph.misc.integrations.placeholderapi.PlaceholderIntegration;
 import xiamomc.morph.skills.MorphSkillHandler;
 import xiamomc.morph.storage.skill.SkillConfigurationStore;
 import xiamomc.pluginbase.Command.CommandHelper;
@@ -44,6 +47,8 @@ public final class MorphPlugin extends XiaMoJavaPlugin
     private final AbilityHandler abilityHandler = new AbilityHandler();
 
     private final MinecraftLanguageHelper languageHelper = new MinecraftLanguageHelper();
+
+    private PlaceholderIntegration placeholderIntegration;
 
     @Override
     public void onEnable()
@@ -85,8 +90,8 @@ public final class MorphPlugin extends XiaMoJavaPlugin
                             new ReverseControlProcessor(),
                     });
 
-            if (pluginManager.getPlugin("GSit") != null)
-                registerListener(new GSitCompactProcessor());
+            for (Plugin plugin : pluginManager.getPlugins())
+                onPluginEnable(plugin.getName());
         });
     }
 
@@ -99,6 +104,9 @@ public final class MorphPlugin extends XiaMoJavaPlugin
         {
             if (morphManager != null)
                 morphManager.onPluginDisable();
+
+            if (placeholderIntegration != null)
+                placeholderIntegration.unregister();
         }
         catch (Exception e)
         {
@@ -124,7 +132,18 @@ public final class MorphPlugin extends XiaMoJavaPlugin
 
     public void onPluginEnable(String name)
     {
-        if (name.equals("GSit"))
-            registerListener(new GSitCompactProcessor());
+        switch (name)
+        {
+            case "GSit" ->
+            {
+                registerListener(new GSitCompactProcessor());
+            }
+
+            case "PlaceholderAPI" ->
+            {
+                placeholderIntegration = new PlaceholderIntegration(dependencyManager);
+                placeholderIntegration.register();
+            }
+        }
     }
 }

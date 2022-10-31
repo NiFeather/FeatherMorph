@@ -2,6 +2,7 @@ package xiamomc.morph.skills;
 
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.SkillStrings;
@@ -22,6 +23,7 @@ public interface IMorphSkill<T extends ISkillOption>
     /**
      * 内部轮子
      */
+    @ApiStatus.Internal
     public default int executeSkillGeneric(Player player, SkillConfiguration config, ISkillOption option)
     {
         T castedOption;

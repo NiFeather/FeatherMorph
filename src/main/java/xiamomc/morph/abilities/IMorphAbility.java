@@ -3,6 +3,7 @@ package xiamomc.morph.abilities;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -77,6 +78,7 @@ public interface IMorphAbility<T extends ISkillOption> extends Listener
      * @apiNote 内部轮子
      * @return option是否可以cast为目标option，为null则返回true并略过，反之返回setOption的结果
      */
+    @ApiStatus.Internal
     public default boolean setOptionGeneric(String disguiseIdentifier, ISkillOption option)
     {
         T castedOption;
