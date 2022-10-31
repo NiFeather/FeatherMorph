@@ -1,0 +1,139 @@
+package xiamomc.morph.abilities.impl;
+
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.kyori.adventure.bossbar.BossBar;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
+import org.bukkit.NamespacedKey;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
+import xiamomc.morph.abilities.AbilityType;
+import xiamomc.morph.abilities.MorphAbility;
+import xiamomc.morph.abilities.options.BossbarOption;
+import xiamomc.morph.config.ConfigOption;
+import xiamomc.morph.config.MorphConfigManager;
+import xiamomc.morph.misc.DisguiseState;
+import xiamomc.morph.misc.DisguiseUtils;
+import xiamomc.morph.storage.skill.ISkillOption;
+import xiamomc.pluginbase.Annotations.Initializer;
+
+import java.util.List;
+import java.util.Objects;
+
+public class BossbarAbility extends MorphAbility<BossbarOption>
+{
+    private boolean allowBossbar;
+
+    @Initializer
+    private void load(MorphConfigManager configManager)
+    {
+        configManager.onConfigRefresh(c ->
+        {
+            allowBossbar = configManager.get(Boolean.class, ConfigOption.DISPLAY_BOSSBAR);
+        }, true);
+    }
+
+    @Override
+    public @NotNull NamespacedKey getIdentifier()
+    {
+        return AbilityType.BOSSBAR;
+    }
+
+    @Override
+    protected ISkillOption createOption()
+    {
+        return new BossbarOption();
+    }
+
+    @Override
+    public boolean revokeFromPlayer(Player player, DisguiseState state)
+    {
+        if (super.revokeFromPlayer(player, state))
+        {
+            state.setBossbar(null);
+            return true;
+        }
+
+        return false;
+    }
+
+    @Override
+    public boolean applyToPlayer(Player player, DisguiseState state)
+    {
+        if (super.applyToPlayer(player, state))
+        {
+            if (!allowBossbar) return true;
+
+            var option = getOr(
+                    options.get(state.getDisguiseIdentifier()),
+                    Objects::nonNull,
+                    options.get(state.getSkillIdentifier())
+            );
+
+            if (option == null) return false;
+
+            var createOption = option.getCreateOption();
+            var title = MiniMessage.miniMessage().deserialize(createOption.name(),
+                    Placeholder.component("name", state.getDisplayName()));
+
+            state.setBossbar(BossBar.bossBar(
+                    title,
+                    1f,
+                    createOption.color(),
+                    createOption.overlay(),
+                    createOption.flags()
+            ));
+        }
+
+        return false;
+    }
+
+    @Override
+    public boolean handle(Player player, DisguiseState state)
+    {
+        if (super.handle(player, state))
+        {
+            if (appliedPlayers.contains(player))
+            {
+                var option = getOr(
+                        options.get(state.getDisguiseIdentifier()),
+                        Objects::nonNull,
+                        options.get(state.getSkillIdentifier())
+                );
+
+                if (option == null) return false;
+
+                var bossbar = state.getBossbar();
+                if (bossbar != null)
+                {
+                    var distance = option.getApplyDistance();
+
+                    if (distance < 0)
+                        distance = (Bukkit.getViewDistance() - 1) * 16;
+
+                    var playerGameMode = player.getGameMode();
+                    List<Player> playersToShow = DisguiseUtils.findNearbyPlayers(player, distance, true);
+                    List<Player> playersToHide = new ObjectArrayList<>(Bukkit.getOnlinePlayers());
+
+                    if (playerGameMode == GameMode.SPECTATOR)
+                        playersToShow.removeIf(p -> p.getGameMode() != playerGameMode);
+
+                    bossbar.progress((float) (player.getHealth() / player.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue()));
+
+                    playersToHide.removeAll(playersToShow);
+                    playersToHide.remove(player);
+
+                    playersToShow.forEach(p -> p.showBossBar(bossbar));
+                    playersToHide.forEach(p -> p.hideBossBar(bossbar));
+                }
+
+                return true;
+            }
+        }
+
+        return false;
+    }
+}

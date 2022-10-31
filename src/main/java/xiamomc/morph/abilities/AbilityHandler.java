@@ -125,7 +125,8 @@ public class AbilityHandler extends MorphPluginObject
                 new SpeedBoostAbility(),
                 new TakesDamageFromWaterAbility(),
                 new WardenLessAwareAbility(),
-                new ChatOverrideAbility()
+                new ChatOverrideAbility(),
+                new BossbarAbility()
         ));
 
         initalizeDone = true;

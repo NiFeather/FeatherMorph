@@ -41,7 +41,16 @@ public class FlyOption implements ISkillOption
 
         var instance = new FlyOption();
 
-        instance.flyingSpeed = (float) (double) map.get("fly_speed");
+        var spd = map.get("fly_speed");
+        float speed;
+
+        if (spd instanceof Double d)
+            speed = d.floatValue();
+        else if (spd instanceof Float f)
+            speed = f;
+        else speed = 0f;
+
+        instance.flyingSpeed = speed;
 
         return instance;
     }

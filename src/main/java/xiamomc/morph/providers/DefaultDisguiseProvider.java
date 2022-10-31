@@ -36,24 +36,6 @@ import java.util.Set;
  */
 public abstract class DefaultDisguiseProvider extends DisguiseProvider
 {
-    private boolean allowBossbar;
-    private int bossbarDisplayRange;
-
-    @Initializer
-    private void load(MorphConfigManager configManager)
-    {
-        configManager.onConfigRefresh(c ->
-        {
-            allowBossbar = configManager.get(Boolean.class, ConfigOption.DISPLAY_BOSSBAR);
-
-            var range = configManager.getOrDefault(Integer.class, ConfigOption.BOSSBAR_RANGE);
-            if (range < 0)
-                range = (Bukkit.getViewDistance() - 1) * 16;
-
-            bossbarDisplayRange = range;
-        }, true);
-    }
-
     @Override
     public boolean unMorph(Player player, DisguiseState state)
     {
@@ -112,26 +94,6 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
             //workaround: 复制出来的伪装会忽略玩家Pose
             if (state.shouldHandlePose())
                 watcher.setEntityPose(DisguiseUtils.toEntityPose(player.getPose()));
-        }
-
-        //Bossbar
-        var bossbar = state.getBossbar();
-        if (bossbar != null)
-        {
-            var playerGameMode = player.getGameMode();
-            List<Player> playersToShow = DisguiseUtils.findNearbyPlayers(player, bossbarDisplayRange, true);
-            List<Player> playersToHide = new ObjectArrayList<>(Bukkit.getOnlinePlayers());
-
-            if (playerGameMode == GameMode.SPECTATOR)
-                playersToShow.removeIf(p -> p.getGameMode() != playerGameMode);
-
-            bossbar.progress((float) (player.getHealth() / player.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue()));
-
-            playersToHide.removeAll(playersToShow);
-            playersToHide.remove(player);
-
-            playersToShow.forEach(p -> p.showBossBar(bossbar));
-            playersToHide.forEach(p -> p.hideBossBar(bossbar));
         }
 
         return true;
@@ -250,22 +212,5 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
         //设置发光颜色
         state.setCustomGlowColor(ColorUtils.fromChatColor(glowColor));
         watcher.setGlowColor(glowColor);
-
-        //设置Bossbar
-        BossBar bossbar = null;
-
-        if (EntityTypeUtils.hasBossBar(entityType) && allowBossbar)
-        {
-            var isDragon = entityType == EntityType.ENDER_DRAGON;
-
-            bossbar = BossBar.bossBar(
-                    state.getDisplayName(),
-                    1f,
-                    isDragon ? BossBar.Color.PINK : BossBar.Color.PURPLE,
-                    BossBar.Overlay.PROGRESS,
-                    isDragon ? Set.of() : Set.of(BossBar.Flag.DARKEN_SCREEN));
-        }
-
-        state.setBossbar(bossbar);
     }
 }

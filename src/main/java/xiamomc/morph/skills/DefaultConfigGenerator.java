@@ -1,10 +1,14 @@
 package xiamomc.morph.skills;
 
+import it.unimi.dsi.fastutil.objects.ObjectArraySet;
+import net.kyori.adventure.bossbar.BossBar;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.EntityType;
 import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.LoggerFactory;
 import xiamomc.morph.abilities.AbilityType;
+import xiamomc.morph.abilities.options.BossbarOption;
 import xiamomc.morph.abilities.options.FlyOption;
 import xiamomc.morph.abilities.options.ReduceDamageOption;
 import xiamomc.morph.misc.EntityTypeUtils;
@@ -31,12 +35,20 @@ public class DefaultConfigGenerator
     private static SkillConfiguration addSkillConfiguration(List<SkillConfiguration> targetList, EntityType entityType,
                                                             int cd, NamespacedKey key, @Nullable Consumer<SkillConfiguration> c)
     {
-        var config = new SkillConfiguration(entityType, cd, key);
+        var cfg = targetList.stream()
+                .filter(configuration -> configuration.getIdentifier().equals(entityType.getKey().asString()))
+                .findFirst().orElse(null);
+
+        SkillConfiguration config;
+
+        if (cfg == null) config = new SkillConfiguration(entityType, cd, key);
+        else config = cfg;
 
         if (c != null)
             c.accept(config);
 
-        targetList.add(config);
+        if (cfg == null)
+            targetList.add(config);
 
         return config;
     }
@@ -183,10 +195,23 @@ public class DefaultConfigGenerator
             c.setOption(AbilityType.REDUCES_FALL_DAMAGE.asString(),
                     new ReduceDamageOption(10));
         });
+
         addAbilityConfiguration(skills, EntityTypeUtils.hasSnowTrail(), AbilityType.SNOWY);
 
         addAbilityConfiguration(skills, EntityTypeUtils.wardenLessAware(), AbilityType.WARDEN_LESS_AWARE);
 
         addAbilityConfiguration(skills, EntityType.PLAYER, AbilityType.CHAT_OVERRIDE);
+
+        addAbilityConfiguration(skills, EntityType.WITHER, AbilityType.BOSSBAR, c ->
+        {
+            c.setOption(AbilityType.BOSSBAR.asString(),
+                    new BossbarOption(new BossbarOption.BossbarCreateOption("<name>", BossBar.Color.PURPLE, BossBar.Overlay.PROGRESS, Set.of(BossBar.Flag.DARKEN_SCREEN)), 80));
+        });
+
+        addAbilityConfiguration(skills, EntityType.ENDER_DRAGON, AbilityType.BOSSBAR, c ->
+        {
+            c.setOption(AbilityType.BOSSBAR.asString(),
+                    new BossbarOption(new BossbarOption.BossbarCreateOption("<name>", BossBar.Color.PINK, BossBar.Overlay.PROGRESS, Set.of()), -1));
+        });
     }
 }

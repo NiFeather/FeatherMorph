@@ -28,7 +28,6 @@ public enum ConfigOption
     BANNED_DISGUISES(ConfigNode.create().append("bannedDisguises"), new ArrayList<String>()),
 
     DISPLAY_BOSSBAR(bossbarNode().append("enabled"), true),
-    BOSSBAR_RANGE(bossbarNode().append("range"), -1),
 
     ALLOW_LD_DISGUISES(ConfigNode.create().append("enable_ld_custom_disguises"), false),
 
