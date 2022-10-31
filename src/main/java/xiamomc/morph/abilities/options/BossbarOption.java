@@ -10,6 +10,7 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.LoggerFactory;
 import xiamomc.morph.storage.skill.ISkillOption;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -67,7 +68,7 @@ public class BossbarOption implements ISkillOption
 
         //flag
         var flags = new ObjectArraySet<BossBar.Flag>();
-        var rawFlags = tryGet(map, "flags", ObjectArraySet.of());
+        var rawFlags = tryGet(map, "flags", new ArrayList<>());
 
         rawFlags.forEach(o ->
         {
