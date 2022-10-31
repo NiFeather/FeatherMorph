@@ -210,7 +210,7 @@ public class HelpSubCommand extends MorphPluginObject implements ISubCommand
                     sender.sendMessage(MessageUtils.prefixes(sender, s));
             }
             else
-                sender.sendMessage(MessageUtils.prefixes(sender, Component.translatable("未找到此章节").color(NamedTextColor.RED)));
+                sender.sendMessage(MessageUtils.prefixes(sender, HelpStrings.sectionNotFoundString()));
 
             return true;
         }

@@ -105,7 +105,7 @@ public class GrantDisguiseSubCommand extends MorphPluginObject implements ISubCo
                 ? CommandStrings.grantSuccessString()
                 : CommandStrings.grantFailString();
 
-        msg.resolve("what", Component.translatable(targetName)).resolve("who", who.getName());
+        msg.resolve("what", Component.text(targetName)).resolve("who", who.getName());
 
         commandSender.sendMessage(MessageUtils.prefixes(commandSender, msg));
 

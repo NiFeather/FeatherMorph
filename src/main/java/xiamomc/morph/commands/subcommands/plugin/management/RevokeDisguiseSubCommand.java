@@ -101,7 +101,7 @@ public class RevokeDisguiseSubCommand extends MorphPluginObject implements ISubC
                 ? CommandStrings.revokeSuccessString()
                 : CommandStrings.revokeFailString();
 
-        msg.resolve("what", Component.translatable(targetName)).resolve("who", who.getName());
+        msg.resolve("what", Component.text(targetName)).resolve("who", who.getName());
 
         commandSender.sendMessage(MessageUtils.prefixes(commandSender, msg));
 

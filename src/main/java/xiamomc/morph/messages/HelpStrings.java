@@ -2,6 +2,8 @@ package xiamomc.morph.messages;
 
 import xiamomc.pluginbase.messages.FormattableMessage;
 
+import java.text.Format;
+
 public class HelpStrings extends AbstractMorphStrings
 {
     //help
@@ -45,6 +47,12 @@ public class HelpStrings extends AbstractMorphStrings
     {
         return getFormattable(getKey("special_note"),
                 "特别标注：");
+    }
+
+    public static FormattableMessage sectionNotFoundString()
+    {
+        return getFormattable(getKey("section_not_found"),
+                "<color:red> 未找到此章节");
     }
 
     public static FormattableMessage morphCommandDescription()

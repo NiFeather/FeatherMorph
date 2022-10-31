@@ -11,6 +11,7 @@ import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.messages.HelpStrings;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.misc.DisguiseInfo;
+import xiamomc.morph.misc.DisguiseTypes;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Command.IPluginCommand;
 import xiamomc.pluginbase.messages.FormattableMessage;
@@ -29,20 +30,7 @@ public class MorphPlayerCommand extends MorphPluginObject implements IPluginComm
         {
             var targetName = args.length >= 1 ? args[0] : "";
 
-            sourcePlayer.performCommand("morph player:" + targetName);
-
-            var config = morphManager.getPlayerConfiguration(sourcePlayer);
-
-            if (!config.shownMorphPlayerMessageOnce)
-            {
-                sender.sendMessage(MessageUtils.prefixes(sender,
-                        Component.translatable("PS: morphplayer已经合并进了morph指令")));
-
-                sender.sendMessage(MessageUtils.prefixes(sender,
-                        Component.translatable("PS: 现在执行此指令将自动转换为 /morph player:<玩家名>")));
-
-                config.shownMorphPlayerMessageOnce = true;
-            }
+            sourcePlayer.performCommand("morph" + " " + DisguiseTypes.PLAYER.toId(targetName));
         }
 
         return true;
