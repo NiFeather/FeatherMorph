@@ -23,7 +23,6 @@
         - 相关设置可以在[配置](./src/main/resources/config.yml#L24)中看到
 - [x] 几乎每一条消息都可自定义
     - 支持[MiniMessage消息格式！](https://docs.adventure.kyori.net/minimessage/index.html)
-        - *但最好不要用`gradient`和`rainbow`这两个Tag，目前会有兼容性问题*
     - *剩下的那些不支持的都是控制台报错*
 - [x] 方便地管理每个人的伪装
     - 给与/移除某个玩家的伪装
