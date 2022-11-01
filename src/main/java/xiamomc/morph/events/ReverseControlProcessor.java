@@ -250,7 +250,7 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
         //获取正在看的方块或实体
         var eyeLoc = player.getEyeLocation();
         var traceResult = player.getWorld().rayTrace(eyeLoc, eyeLoc.getDirection(), 3,
-                FluidCollisionMode.ALWAYS, false, 0d, Predicate.not(Predicate.isEqual(player)));
+                FluidCollisionMode.NEVER, false, 0d, Predicate.not(Predicate.isEqual(player)));
 
         var targetBlock = traceResult == null ? null : traceResult.getHitBlock();
         var targetEntity = traceResult == null ? null : traceResult.getHitEntity();
