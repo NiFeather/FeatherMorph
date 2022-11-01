@@ -43,11 +43,17 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class CommonEventProcessor extends MorphPluginObject implements Listener
 {
-    @Resolved
+    @Resolved(shouldSolveImmediately = true)
     private MorphCommandHelper cmdHelper;
 
-    @Resolved
+    @Resolved(shouldSolveImmediately = true)
     private MorphManager morphs;
+
+    @Resolved(shouldSolveImmediately = true)
+    private MorphConfigManager config;
+
+    @Resolved(shouldSolveImmediately = true)
+    private MorphSkillHandler skillHandler;
 
     @EventHandler
     public void onEntityDeath(EntityDeathEvent e)
@@ -110,9 +116,6 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
             }
         }
     }
-
-    @Resolved
-    private MorphConfigManager config;
 
     private boolean allowHeadMorph;
     private void setAllowHeadMorph(boolean val)
@@ -183,9 +186,6 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         if (tryInvokeSkillOrQuickDisguise(e.getPlayer(), e.getAction(), e.getHand()))
             e.setCancelled(true);
     }
-
-    @Resolved
-    private MorphSkillHandler skillHandler;
 
     private Material actionItem;
 

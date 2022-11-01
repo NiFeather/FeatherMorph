@@ -122,13 +122,10 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
         }
     }
 
-    @Resolved
-    private MorphManager manager;
-
-    @Resolved
+    @Resolved(shouldSolveImmediately = true)
     private PlayerTracker breakingTracker;
 
-    @Resolved
+    @Resolved(shouldSolveImmediately = true)
     private MorphConfigManager config;
 
     @EventHandler

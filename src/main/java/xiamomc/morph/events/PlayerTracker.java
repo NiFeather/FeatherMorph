@@ -10,10 +10,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.EquipmentSlot;
-import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.pluginbase.Annotations.Initializer;
-import xiamomc.pluginbase.Annotations.Resolved;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -29,9 +27,6 @@ public class PlayerTracker extends MorphPluginObject implements Listener
      * 玩家上次互动时间
      */
     private final Map<Player, Long> lastInteract = new ConcurrentHashMap<>();
-
-    @Resolved
-    private MorphPlugin plugin;
 
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent e)
