@@ -104,9 +104,6 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
     }
 
     @Resolved(shouldSolveImmediately = true)
-    private PlayerTracker breakingTracker;
-
-    @Resolved(shouldSolveImmediately = true)
     private MorphConfigManager config;
 
     @EventHandler
@@ -216,8 +213,18 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
     @Resolved
     private PlayerOperationSimulator operationSimulator;
 
+    /**
+     * 模拟玩家操作
+     *
+     * @param action 操作类型
+     * @param targetPlayer 目标玩家
+     * @param hand 左、右手
+     * @return 操作是否成功
+     */
     private boolean simulateOperation(Action action, Player targetPlayer, EquipmentSlot hand)
     {
+        if (!allowSimulation) return false;
+
         if (action.isRightClick())
         {
             if (operationSimulator.simulateRightClick(targetPlayer, hand))

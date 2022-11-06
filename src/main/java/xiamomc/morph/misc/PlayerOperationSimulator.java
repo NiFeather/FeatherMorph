@@ -51,7 +51,7 @@ public class PlayerOperationSimulator extends MorphPluginObject
             }
 
             //移除不需要的Info
-            if (currentTick - i.getLastUpdate() >= 20)
+            if (currentTick - i.getLastUpdate() >= 100)
             {
                 i.setProgress(-1, currentTick);
 
