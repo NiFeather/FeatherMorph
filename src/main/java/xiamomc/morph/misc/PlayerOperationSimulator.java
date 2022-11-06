@@ -139,11 +139,7 @@ public class PlayerOperationSimulator extends MorphPluginObject
         var val = destroyHandler.getProgress();
         val += delta;
 
-        if (destroyHandler.setProgress(val, plugin.getCurrentTick()))
-        {
-            if (val > 1f)
-                player.breakBlock(targetBlock);
-        }
+        destroyHandler.setProgress(val, plugin.getCurrentTick());
 
         return true;
     }

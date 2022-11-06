@@ -9,6 +9,7 @@ import org.bukkit.craftbukkit.v1_19_R1.block.CraftBlock;
 import org.bukkit.craftbukkit.v1_19_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class BlockDestroyHandler
@@ -21,10 +22,12 @@ public class BlockDestroyHandler
         changeBlock(block);
     }
 
+    private Player player;
     private EntityPlayer nmsPlayer;
 
     private void setPlayer(Player player)
     {
+        this.player = player;
         this.nmsPlayer = ((CraftPlayer) player).getHandle();
     }
 
@@ -77,9 +80,12 @@ public class BlockDestroyHandler
                     newProgress > 1f ? -1 : (int)(newProgress * 10F) - 1);
         }
 
+        //进度大于1，视为破坏方块
         if (progress > 1)
         {
             lastDestroy = currentTick;
+            player.breakBlock(block);
+
             changeBlock(null);
         }
 
