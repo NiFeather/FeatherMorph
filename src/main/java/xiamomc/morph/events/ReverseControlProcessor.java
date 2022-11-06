@@ -1,7 +1,6 @@
 package xiamomc.morph.events;
 
 import io.papermc.paper.event.player.PlayerArmSwingEvent;
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
 import org.bukkit.Bukkit;
@@ -131,16 +130,26 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
 
                 if (!playerInDistance(damager, targetPlayer)) return;
 
-                //如果伪装的玩家想攻击本体，取消事件
+                //如果伪装的玩家想攻击本体，取消事件并模拟左键
                 if (e.getEntity() instanceof Player hurtedPlayer && hurtedPlayer.equals(targetPlayer))
+                {
+                    simulateOperation(Action.LEFT_CLICK_AIR, targetPlayer, EquipmentSlot.HAND);
+
                     e.setCancelled(true);
+
+                    return;
+                }
 
                 var damagerLookingAt = damager.getTargetEntity(3);
                 var playerLookingAt = targetPlayer.getTargetEntity(3);
 
-                //如果伪装的玩家想攻击的实体和被伪装的玩家一样，取消事件
+                //如果伪装的玩家想攻击的实体和被伪装的玩家一样，模拟左键并取消事件
                 if (damagerLookingAt != null && damagerLookingAt.equals(playerLookingAt))
+                {
+                    simulateOperation(Action.LEFT_CLICK_AIR, targetPlayer, EquipmentSlot.HAND);
+
                     e.setCancelled(true);
+                }
             }
         }
     }
@@ -160,19 +169,27 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
         {
             var targetPlayer = Bukkit.getPlayer(state);
 
-            var lastAction = playerActionMap.get(player);
+            if (targetPlayer == null) return;
+
+            var lastAction = tracker.getLastInteractAction(player);
 
             if (lastAction == null) return;
 
             if (!tracker.isPlayerInteractingAnything(player))
                 simulateOperation(lastAction, targetPlayer, EquipmentSlot.HAND);
+
+            //如果玩家在被控玩家一定范围以内，被控玩家有目标实体，并且玩家没有目标实体，那么取消挥手动画
+            if (Math.abs(targetPlayer.getLocation().distanceSquared(player.getLocation())) <= 6)
+            {
+                var theirTarget = targetPlayer.getTargetEntity(3);
+                var ourTarget = player.getTargetEntity(3);
+
+                if (theirTarget != null
+                        && (ourTarget == null || ourTarget == targetPlayer || ourTarget == theirTarget))
+                    e.setCancelled(true);
+            }
         }
     }
-
-    /**
-     * 玩家 -> 上次交互时的动作（左/右键）
-     */
-    private final Map<Player, Action> playerActionMap = new Object2ObjectOpenHashMap<>();
 
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent e)
@@ -190,7 +207,6 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
 
                 //todo: 实现副手动作
                 var targetHand = EquipmentSlot.HAND;
-                playerActionMap.put(player, e.getAction());
 
                 simulateOperation(e.getAction(), targetPlayer, targetHand);
             }
@@ -200,18 +216,26 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
     @Resolved
     private PlayerOperationSimulator operationSimulator;
 
-    private void simulateOperation(Action action, Player targetPlayer, EquipmentSlot hand)
+    private boolean simulateOperation(Action action, Player targetPlayer, EquipmentSlot hand)
     {
         if (action.isRightClick())
         {
             if (operationSimulator.simulateRightClick(targetPlayer, hand))
-                targetPlayer.swingMainHand();
+            {
+                targetPlayer.swingHand(hand);
+                return true;
+            }
         }
         else
         {
             if (operationSimulator.simulateLeftClick(targetPlayer, hand))
-                targetPlayer.swingMainHand();
+            {
+                targetPlayer.swingHand(hand);
+                return true;
+            }
         }
+
+        return false;
     }
 
     private boolean playerInDistance(@NotNull Player source, @Nullable Player target)

@@ -6,16 +6,23 @@ import io.papermc.paper.event.player.PlayerArmSwingEvent;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.EquipmentSlot;
+import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.pluginbase.Annotations.Initializer;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * 玩家互动跟踪器
+ */
 public class PlayerTracker extends MorphPluginObject implements Listener
 {
     /**
@@ -26,36 +33,57 @@ public class PlayerTracker extends MorphPluginObject implements Listener
     /**
      * 玩家上次左/右键的时间
      */
-    private final Map<Player, Long> lastInteract = new ConcurrentHashMap<>();
+    private final Map<Player, Long> lastInteractTime = new ConcurrentHashMap<>();
 
-    @EventHandler
+    /**
+     * 玩家上次互动的动作类型
+     */
+    private final Map<Player, Action> lastInteractAction = new ConcurrentHashMap<>();
+
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerInteract(PlayerInteractEvent e)
     {
-        if (e.hasBlock())
+        var player = e.getPlayer();
+
+        lastInteractTime.put(player, plugin.getCurrentTick());
+        lastInteractAction.put(player, e.getAction());
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onEntityDamagedByEntity(EntityDamageByEntityEvent e)
+    {
+        if (e.getDamager() instanceof Player player)
         {
-            lastInteract.put(e.getPlayer(), plugin.getCurrentTick());
+            lastInteractTime.put(player, plugin.getCurrentTick());
+            lastInteractAction.put(player, Action.LEFT_CLICK_AIR);
         }
     }
 
-    @EventHandler
-    public void onPlayerInteractWithEntity(PlayerInteractEntityEvent e)
-    {
-        lastInteract.put(e.getPlayer(), plugin.getCurrentTick());
-    }
-
-    @EventHandler
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerInteractEntity(PlayerInteractEntityEvent e)
     {
-        lastInteract.put(e.getPlayer(), plugin.getCurrentTick());
+        var player = e.getPlayer();
+
+        lastInteractTime.put(player, plugin.getCurrentTick());
+        lastInteractAction.put(player, Action.RIGHT_CLICK_AIR);
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onPlayerInteractAtEntity(PlayerInteractAtEntityEvent e)
+    {
+        var player = e.getPlayer();
+
+        lastInteractTime.put(player, plugin.getCurrentTick());
+        lastInteractAction.put(player, Action.RIGHT_CLICK_AIR);
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onBlockBreak(BlockBreakEvent e)
     {
         breakingSuspectList.remove(e.getPlayer());
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerSwing(PlayerArmSwingEvent e)
     {
         var player = e.getPlayer();
@@ -67,28 +95,34 @@ public class PlayerTracker extends MorphPluginObject implements Listener
             breakingSuspectList.put(player, plugin.getCurrentTick());
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerDrop(PlayerDropItemEvent e)
     {
-        lastInteract.put(e.getPlayer(), plugin.getCurrentTick());
+        var player = e.getPlayer();
+
+        lastInteractTime.remove(player);
+        lastInteractAction.remove(player);
     }
 
     private final Map<Player, Long> spectatingPlayers = new ConcurrentHashMap<>();
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerStartSpectate(PlayerStartSpectatingEntityEvent e)
     {
-        spectatingPlayers.put(e.getPlayer(), plugin.getCurrentTick());
-        lastInteract.put(e.getPlayer(), plugin.getCurrentTick());
+        var player = e.getPlayer();
+
+        spectatingPlayers.put(player, plugin.getCurrentTick());
+        lastInteractTime.put(player, plugin.getCurrentTick());
+        lastInteractAction.put(player, Action.LEFT_CLICK_AIR);
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerStopSpectate(PlayerStopSpectatingEntityEvent e)
     {
         spectatingPlayers.remove(e.getPlayer());
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerJoin(PlayerJoinEvent e)
     {
         var player = e.getPlayer();
@@ -97,11 +131,14 @@ public class PlayerTracker extends MorphPluginObject implements Listener
             spectatingPlayers.remove(player);
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerExit(PlayerQuitEvent e)
     {
-        lastInteract.remove(e.getPlayer());
-        breakingSuspectList.remove(e.getPlayer());
+        var player = e.getPlayer();
+
+        lastInteractAction.remove(player);
+        lastInteractTime.remove(player);
+        breakingSuspectList.remove(player);
     }
 
     @Initializer
@@ -131,7 +168,13 @@ public class PlayerTracker extends MorphPluginObject implements Listener
      */
     public boolean isPlayerInteractingAnything(Player player)
     {
-        return plugin.getCurrentTick() - lastInteract.getOrDefault(player, plugin.getCurrentTick()) <= 0;
+        return plugin.getCurrentTick() - lastInteractTime.getOrDefault(player, plugin.getCurrentTick()) <= 0;
+    }
+
+    @Nullable
+    public Action getLastInteractAction(Player player)
+    {
+        return lastInteractAction.get(player);
     }
 
     private void update()
