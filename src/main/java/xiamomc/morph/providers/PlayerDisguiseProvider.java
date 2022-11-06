@@ -4,6 +4,7 @@ import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.disguisetypes.Disguise;
 import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
 import net.kyori.adventure.text.Component;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -72,6 +73,16 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
     @Override
     public Component getDisplayName(String disguiseIdentifier)
     {
-        return Component.text(DisguiseTypes.PLAYER.toStrippedId(disguiseIdentifier));
+        //尝试获取玩家的显示名称
+        Component finalName;
+        var playerName = DisguiseTypes.PLAYER.toStrippedId(disguiseIdentifier);
+        var player = Bukkit.getPlayer(playerName);
+
+        if (player != null)
+            finalName = player.displayName();
+        else
+            finalName = Component.text(playerName);
+
+        return finalName;
     }
 }
