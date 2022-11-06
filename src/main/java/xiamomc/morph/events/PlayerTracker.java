@@ -24,7 +24,7 @@ public class PlayerTracker extends MorphPluginObject implements Listener
     private final Map<Player, Long> breakingSuspectList = new ConcurrentHashMap<>();
 
     /**
-     * 玩家上次互动时间
+     * 玩家上次左/右键的时间
      */
     private final Map<Player, Long> lastInteract = new ConcurrentHashMap<>();
 
@@ -44,6 +44,12 @@ public class PlayerTracker extends MorphPluginObject implements Listener
     }
 
     @EventHandler
+    public void onPlayerInteractEntity(PlayerInteractEntityEvent e)
+    {
+        lastInteract.put(e.getPlayer(), plugin.getCurrentTick());
+    }
+
+    @EventHandler
     public void onBlockBreak(BlockBreakEvent e)
     {
         breakingSuspectList.remove(e.getPlayer());
@@ -57,11 +63,8 @@ public class PlayerTracker extends MorphPluginObject implements Listener
         if (!e.getHand().equals(EquipmentSlot.HAND)) return;
 
         //更新玩家破坏时间
-        if (lastInteract.containsKey(player) || breakingSuspectList.containsKey(player))
-        {
-            lastInteract.put(player, plugin.getCurrentTick());
+        if (breakingSuspectList.containsKey(player))
             breakingSuspectList.put(player, plugin.getCurrentTick());
-        }
     }
 
     @EventHandler
@@ -121,22 +124,19 @@ public class PlayerTracker extends MorphPluginObject implements Listener
     }
 
     /**
-     * 玩家是否在这一刻和方块互动?
+     * 玩家这一刻是否在和任何东西互动?
+     *
      * @param player 要查询的玩家
      * @return 是否在和方块互动
      */
-    public boolean isPlayerInteracting(Player player)
+    public boolean isPlayerInteractingAnything(Player player)
     {
-        //是否上次互动在这一刻，并且可能在和方块互动？
-
-        return plugin.getCurrentTick() - lastInteract.getOrDefault(player, plugin.getCurrentTick()) <= 0
-                && breakingSuspectList.containsKey(player);
+        return plugin.getCurrentTick() - lastInteract.getOrDefault(player, plugin.getCurrentTick()) <= 0;
     }
 
     private void update()
     {
         var playerToRemoveFromSuspect = new ObjectArrayList<Player>();
-        var playerToRemoveFromInteract = new ObjectArrayList<Player>();
 
         var currentTick = plugin.getCurrentTick();
 
@@ -145,13 +145,7 @@ public class PlayerTracker extends MorphPluginObject implements Listener
             if (currentTick - l > 2) playerToRemoveFromSuspect.add(p);
         });
 
-        lastInteract.forEach((p, l) ->
-        {
-            if (currentTick - l > 2) playerToRemoveFromInteract.add(p);
-        });
-
         playerToRemoveFromSuspect.forEach(breakingSuspectList::remove);
-        playerToRemoveFromInteract.forEach(lastInteract::remove);
 
         this.addSchedule(c -> update());
     }

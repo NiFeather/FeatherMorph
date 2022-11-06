@@ -15,6 +15,7 @@ import xiamomc.morph.interfaces.IManageRequests;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.MorphMessageStore;
 import xiamomc.morph.misc.MinecraftLanguageHelper;
+import xiamomc.morph.misc.PlayerOperationSimulator;
 import xiamomc.morph.misc.integrations.gsit.GSitCompactProcessor;
 import xiamomc.morph.misc.integrations.placeholderapi.PlaceholderIntegration;
 import xiamomc.morph.skills.MorphSkillHandler;
@@ -78,6 +79,8 @@ public final class MorphPlugin extends XiaMoJavaPlugin
         dependencyManager.cache(new SkillConfigurationStore());
 
         dependencyManager.cache(new MessageUtils());
+
+        dependencyManager.cache(new PlayerOperationSimulator());
 
         //注册EventProcessor
         this.schedule(c ->

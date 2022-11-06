@@ -1,26 +1,11 @@
 package xiamomc.morph.events;
 
-import com.destroystokyo.paper.ClientOption;
 import io.papermc.paper.event.player.PlayerArmSwingEvent;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
-import net.minecraft.core.EnumDirection;
-import net.minecraft.world.EnumHand;
-import net.minecraft.world.phys.MovingObjectPositionBlock;
-import net.minecraft.world.phys.Vec3D;
 import org.bukkit.Bukkit;
-import org.bukkit.FluidCollisionMode;
-import org.bukkit.GameMode;
 import org.bukkit.Material;
-import org.bukkit.block.BlockFace;
-import org.bukkit.craftbukkit.v1_19_R1.CraftWorld;
-import org.bukkit.craftbukkit.v1_19_R1.block.CraftBlock;
-import org.bukkit.craftbukkit.v1_19_R1.entity.CraftEntity;
-import org.bukkit.craftbukkit.v1_19_R1.entity.CraftHumanEntity;
-import org.bukkit.craftbukkit.v1_19_R1.entity.CraftPlayer;
-import org.bukkit.craftbukkit.v1_19_R1.inventory.CraftItemStack;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -28,20 +13,17 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.EquipmentSlot;
-import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
+import xiamomc.morph.misc.PlayerOperationSimulator;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Predicate;
 
 public class ReverseControlProcessor extends MorphPluginObject implements Listener
 {
@@ -163,6 +145,9 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
         }
     }
 
+    @Resolved
+    private PlayerTracker tracker;
+
     @EventHandler
     public void onPlayerSwing(PlayerArmSwingEvent e)
     {
@@ -174,51 +159,25 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
         if (state != null)
         {
             var targetPlayer = Bukkit.getPlayer(state);
-            var shouldAttack = false;
 
-            if(!playerInDistance(player, targetPlayer)) return;
+            var lastAction = playerActionMap.get(player);
 
-            if (targetPlayer.getGameMode() == GameMode.SURVIVAL
-                    && playerInDistance(player, targetPlayer))
-            {
-                var swingMainHand = player.getClientOption(ClientOption.MAIN_HAND)
-                        .equals(targetPlayer.getClientOption(ClientOption.MAIN_HAND));
+            if (lastAction == null) return;
 
-                var targetEntity = targetPlayer.getTargetEntity(3);
-
-                if (!breakingTracker.playerStartingSpectating(player))
-                    targetPlayer.swingHand(swingMainHand ? EquipmentSlot.HAND : EquipmentSlot.OFF_HAND);
-
-                var cancelSwing = targetEntity != null && !breakingTracker.isPlayerInteracting(player);
-
-                shouldAttack = cancelSwing
-                        && (swingMainHand || targetPlayer.getEquipment().getItemInMainHand().isSimilar(targetPlayer.getEquipment().getItemInOffHand()));
-
-                if (shouldAttack)
-                    targetPlayer.attack(targetEntity);
-
-                e.setCancelled(e.isCancelled() || cancelSwing);
-            }
+            if (!tracker.isPlayerInteractingAnything(player))
+                simulateOperation(lastAction, targetPlayer, EquipmentSlot.HAND);
         }
     }
 
-    private EquipmentSlot clientHandRelativeToTarget(EquipmentSlot slot, Player source, Player target)
-    {
-        if (slot != EquipmentSlot.HAND && slot != EquipmentSlot.OFF_HAND)
-            throw new IllegalArgumentException();
-
-        var swingMainHand = source.getClientOption(ClientOption.MAIN_HAND)
-                .equals(target.getClientOption(ClientOption.MAIN_HAND));
-
-        return slot == EquipmentSlot.HAND
-                ? swingMainHand ? slot : EquipmentSlot.OFF_HAND
-                : swingMainHand ? EquipmentSlot.OFF_HAND : slot;
-    }
+    /**
+     * 玩家 -> 上次交互时的动作（左/右键）
+     */
+    private final Map<Player, Action> playerActionMap = new Object2ObjectOpenHashMap<>();
 
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent e)
     {
-        if (e.getHand() == EquipmentSlot.HAND && e.getAction().isRightClick())
+        if (e.getHand() == EquipmentSlot.HAND)
         {
             var player = e.getPlayer();
             var state = uuidDisguiseStateMap.get(player);
@@ -229,127 +188,30 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
 
                 if (!playerInDistance(player, targetPlayer)) return;
 
-                var targetHand = clientHandRelativeToTarget(e.getHand(), player, targetPlayer);
-                if (simulateRightClick(targetPlayer, targetHand))
-                    targetPlayer.swingHand(targetHand);
+                //todo: 实现副手动作
+                var targetHand = EquipmentSlot.HAND;
+                playerActionMap.put(player, e.getAction());
+
+                simulateOperation(e.getAction(), targetPlayer, targetHand);
             }
         }
     }
 
-    //模拟玩家右键
-    private boolean simulateRightClick(Player player, EquipmentSlot targetHand)
+    @Resolved
+    private PlayerOperationSimulator operationSimulator;
+
+    private void simulateOperation(Action action, Player targetPlayer, EquipmentSlot hand)
     {
-        if (!allowSimulation) return false;
-
-        if (targetHand != EquipmentSlot.HAND && targetHand != EquipmentSlot.OFF_HAND)
-            throw new IllegalArgumentException("给定的targetHand不是主手或副手");
-
-        //获取正在看的方块或实体
-        var eyeLoc = player.getEyeLocation();
-        var traceResult = player.getWorld().rayTrace(eyeLoc, eyeLoc.getDirection(), 3,
-                FluidCollisionMode.NEVER, false, 0d, Predicate.not(Predicate.isEqual(player)));
-
-        var targetBlock = traceResult == null ? null : traceResult.getHitBlock();
-        var targetEntity = traceResult == null ? null : traceResult.getHitEntity();
-
-        //Player in fabric mojang mappings
-        var playerHumanHandle = ((CraftHumanEntity) player).getHandle();
-
-        //ServerPlayer in mojang mappings
-        var playerHandle = ((CraftPlayer) player).getHandle();
-
-        //ServerLevel in mojang mappings
-        var worldHandle = ((CraftWorld)player.getWorld()).getHandle();
-
-        //GameMode in fabric mojang mappings
-        var mgr = playerHandle.d;
-
-        var hand = targetHand == EquipmentSlot.HAND ? EnumHand.a : EnumHand.b;
-        var item = player.getEquipment().getItem(targetHand);
-
-        var pluginManager = Bukkit.getPluginManager();
-
-        //如果目标实体不是null，则和实体互动
-        if (targetEntity != null)
+        if (action.isRightClick())
         {
-            var entityHandle = ((CraftEntity)targetEntity).getHandle();
-
-            //获取目标位置
-            var hitPos = traceResult.getHitPosition();
-
-            //获取互动位置
-            hitPos.subtract(targetEntity.getLocation().toVector());
-
-            var vec = new Vec3D(hitPos.getX(), hitPos.getY(), hitPos.getZ());
-
-            //先试试InteractAt
-            //如果不成功，调用Interact
-            //最后试试useItem
-            var interactEntityEvent = new PlayerInteractEntityEvent(player, targetEntity);
-            var interactAtEvent = new PlayerInteractAtEntityEvent(player, targetEntity, hitPos);
-            pluginManager.callEvent(interactEntityEvent);
-            pluginManager.callEvent(interactAtEvent);
-
-            if (!interactAtEvent.isCancelled() && !interactEntityEvent.isCancelled())
-            {
-                return entityHandle.a(playerHandle, vec, EnumHand.a).a()
-                        || playerHumanHandle.a(entityHandle, EnumHand.a).a()
-                        || mgr.a(playerHandle, worldHandle, CraftItemStack.asNMSCopy(item), hand).a();
-            }
-            else
-                return false;
-        }
-
-        boolean success = false;
-
-        if (targetBlock != null)
-        {
-            var loc = ((CraftBlock) targetBlock).getPosition();
-
-            EnumDirection targetBlockDirection = null;
-            var bukkitFace = player.getTargetBlockFace(5);
-            bukkitFace = bukkitFace == null ? BlockFace.SELF : bukkitFace;
-
-            //BlockFace(Bukkit)转BlockFace(Minecraft)
-            switch (bukkitFace)
-            {
-                case DOWN -> targetBlockDirection = EnumDirection.a;
-                case UP -> targetBlockDirection = EnumDirection.b;
-                case NORTH -> targetBlockDirection = EnumDirection.c;
-                case SOUTH -> targetBlockDirection = EnumDirection.d;
-                case WEST -> targetBlockDirection = EnumDirection.e;
-                case EAST -> targetBlockDirection = EnumDirection.f;
-                default -> logger.error("未知的BlockFace: " + bukkitFace + ", 将不会尝试使用useItemOn");
-            }
-
-            if (targetBlockDirection != null)
-            {
-                var moving = new MovingObjectPositionBlock(
-                        new Vec3D(targetBlock.getX(), targetBlock.getY(), targetBlock.getZ()),
-                        targetBlockDirection, loc, false);
-
-                var event = new PlayerInteractEvent(player, Action.RIGHT_CLICK_BLOCK, item, targetBlock, bukkitFace);
-                pluginManager.callEvent(event);
-
-                //ServerPlayerGameMode.useItemOn()
-                if (!event.isCancelled())
-                    success = mgr.a(playerHandle, worldHandle, CraftItemStack.asNMSCopy(item), hand, moving).a();
-            }
-        }
-
-        //ServerPlayerGameMode.useItem()
-        if (!success)
-        {
-            var event = new PlayerInteractEvent(player, Action.RIGHT_CLICK_AIR, item, null, BlockFace.SELF);
-            pluginManager.callEvent(event);
-
-            if (!event.isCancelled())
-                return mgr.a(playerHandle, worldHandle, CraftItemStack.asNMSCopy(item), hand).a();
-            else
-                return false;
+            if (operationSimulator.simulateRightClick(targetPlayer, hand))
+                targetPlayer.swingMainHand();
         }
         else
-            return true;
+        {
+            if (operationSimulator.simulateLeftClick(targetPlayer, hand))
+                targetPlayer.swingMainHand();
+        }
     }
 
     private boolean playerInDistance(@NotNull Player source, @Nullable Player target)
