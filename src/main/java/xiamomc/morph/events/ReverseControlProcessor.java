@@ -17,6 +17,7 @@ import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
+import xiamomc.morph.misc.DisguiseTypes;
 import xiamomc.morph.misc.PlayerOperationSimulator;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
@@ -333,10 +334,11 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
     @EventHandler
     public void onPlayerMorph(PlayerMorphEvent e)
     {
-        if (e.getState().getDisguise().isPlayerDisguise())
-        {
-            uuidDisguiseStateMap.put(e.getPlayer(), ((PlayerDisguise)e.getState().getDisguise()).getName());
-        }
+        var state = e.getState();
+        var id = state.getDisguiseIdentifier();
+
+        if (DisguiseTypes.fromId(id) == DisguiseTypes.PLAYER)
+            uuidDisguiseStateMap.put(e.getPlayer(), DisguiseTypes.PLAYER.toStrippedId(id));
     }
 
     @EventHandler
