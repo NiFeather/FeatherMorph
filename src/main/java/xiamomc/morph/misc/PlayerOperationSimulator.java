@@ -21,6 +21,8 @@ import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import xiamomc.morph.MorphPluginObject;
+import xiamomc.morph.config.ConfigOption;
+import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.pluginbase.Annotations.Initializer;
 
 import java.util.Map;
@@ -31,10 +33,17 @@ public class PlayerOperationSimulator extends MorphPluginObject
     private final Map<Player, BlockDestroyHandler> playerHandlerMap = new Object2ObjectOpenHashMap<>();
 
     @Initializer
-    private void load()
+    private void load(MorphConfigManager config)
     {
         this.addSchedule(c -> update(), 1);
+
+        config.onConfigRefresh(c ->
+        {
+            destroyTimeout = config.getOrDefault(Integer.class, ConfigOption.REVERSE_DESTROY_TIMEOUT);
+        }, true);
     }
+
+    private int destroyTimeout = 40;
 
     private void update()
     {
@@ -51,7 +60,7 @@ public class PlayerOperationSimulator extends MorphPluginObject
             }
 
             //移除不需要的Info
-            if (currentTick - i.getLastUpdate() >= 100)
+            if (currentTick - i.getLastUpdate() >= destroyTimeout)
             {
                 i.setProgress(-1, currentTick);
 

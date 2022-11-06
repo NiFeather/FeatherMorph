@@ -115,7 +115,7 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
     @EventHandler
     public void onPlayerHurtPlayer(EntityDamageByEntityEvent e)
     {
-        if (!swingHands) return;
+        if (!allowSimulation) return;
 
         if (e.getDamager() instanceof Player damager)
         {
@@ -157,7 +157,7 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
     @EventHandler
     public void onPlayerSwing(PlayerArmSwingEvent e)
     {
-        if (!swingHands) return;
+        if (!allowSimulation) return;
 
         var player = e.getPlayer();
         var state = uuidDisguiseStateMap.get(player);
@@ -282,7 +282,6 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
     private Material immuneItemMaterial;
 
     private boolean allowSimulation;
-    private boolean swingHands;
     private boolean allowSneak;
     private boolean allowSwap;
     private boolean allowDrop;
@@ -300,7 +299,6 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
         immuneItemMaterial = targetOptional;
 
         this.allowSimulation = config.getOrDefault(Boolean.class, ConfigOption.REVERSE_BEHAVIOR_DO_SIMULATION);
-        this.swingHands = config.getOrDefault(Boolean.class, ConfigOption.REVERSE_BEHAVIOR_SWING_HANDS);
         this.allowSneak = config.getOrDefault(Boolean.class, ConfigOption.REVERSE_BEHAVIOR_SNEAK);
         this.allowSwap = config.getOrDefault(Boolean.class, ConfigOption.REVERSE_BEHAVIOR_SWAP_HAND);
         this.allowDrop = config.getOrDefault(Boolean.class, ConfigOption.REVERSE_BEHAVIOR_DROP);
