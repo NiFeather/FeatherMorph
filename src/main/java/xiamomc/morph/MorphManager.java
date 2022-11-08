@@ -40,6 +40,7 @@ import xiamomc.morph.storage.playerdata.PlayerDataManager;
 import xiamomc.morph.storage.playerdata.PlayerMorphConfiguration;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
+import xiamomc.pluginbase.Configuration.Bindable;
 
 import java.util.List;
 import java.util.Map;
@@ -64,24 +65,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     @Resolved
     private AbilityHandler abilityHandler;
 
-    //region 聊天覆盖
-
-    private boolean allowChatOverride = false;
-
-    public boolean allowChatOverride()
-    {
-        return allowChatOverride;
-    }
-
-    public void setChatOverride(boolean val)
-    {
-        allowChatOverride = val;
-
-        config.set(ConfigOption.ALLOW_CHAT_OVERRIDE, val);
-    }
-
-    //endregion 聊天覆盖
-
     @Resolved
     private MorphConfigManager config;
 
@@ -90,21 +73,13 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     {
         this.addSchedule(c -> update());
 
-        config.onConfigRefresh(c -> this.onConfigRefresh(), true);
+        bannedDisguises = config.getBindable(List.class, ConfigOption.BANNED_DISGUISES.node);
 
         registerProviders(ObjectList.of(
                 new VanillaDisguiseProvider(),
                 new PlayerDisguiseProvider(),
                 new LibsDisguisesDisguiseProvider()
         ));
-
-    }
-
-    private void onConfigRefresh()
-    {
-        setChatOverride(config.getOrDefault(Boolean.class, ConfigOption.ALLOW_CHAT_OVERRIDE, false));
-
-        bannedDisguises = config.getOrDefault(List.class, ConfigOption.BANNED_DISGUISES);
     }
 
     private void update()
@@ -215,7 +190,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         uuidMoprhTimeMap.put(player.getUniqueId(), plugin.getCurrentTick());
     }
 
-    private List<?> bannedDisguises = new ObjectArrayList<>();
+    private Bindable<List> bannedDisguises;
 
     //region 伪装提供器
 
@@ -288,7 +263,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         var info = getAvaliableDisguisesFor(player).stream()
                 .filter(i -> i.getIdentifier().equals(finalKey)).findFirst().orElse(null);
 
-        if (bannedDisguises.contains(key))
+        var banned = bannedDisguises.get();
+        if (banned != null && banned.contains(key))
         {
             player.sendMessage(MessageUtils.prefixes(player, MorphStrings.disguiseBannedOrNotSupportedString()));
             return false;

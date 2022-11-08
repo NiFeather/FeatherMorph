@@ -19,11 +19,13 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.BeaconInventory;
 import org.bukkit.inventory.EquipmentSlot;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.pluginbase.Annotations.Initializer;
+import xiamomc.pluginbase.Configuration.Bindable;
 
 import java.util.Map;
 import java.util.function.Predicate;
@@ -37,13 +39,10 @@ public class PlayerOperationSimulator extends MorphPluginObject
     {
         this.addSchedule(c -> update(), 1);
 
-        config.onConfigRefresh(c ->
-        {
-            destroyTimeout = config.getOrDefault(Integer.class, ConfigOption.REVERSE_DESTROY_TIMEOUT);
-        }, true);
+        config.bind(destroyTimeout, ConfigOption.REVERSE_DESTROY_TIMEOUT);
     }
 
-    private int destroyTimeout = 40;
+    private final Bindable<Integer> destroyTimeout = new Bindable<>(40);
 
     private void update()
     {
@@ -60,7 +59,7 @@ public class PlayerOperationSimulator extends MorphPluginObject
             }
 
             //移除不需要的Info
-            if (currentTick - i.getLastUpdate() >= destroyTimeout)
+            if (currentTick - i.getLastUpdate() >= destroyTimeout.get())
             {
                 i.setProgress(-1, currentTick);
 

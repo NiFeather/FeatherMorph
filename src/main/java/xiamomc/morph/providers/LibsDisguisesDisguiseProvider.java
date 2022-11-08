@@ -18,18 +18,16 @@ import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.misc.DisguiseTypes;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
+import xiamomc.pluginbase.Configuration.Bindable;
 
 public class LibsDisguisesDisguiseProvider extends VanillaDisguiseProvider
 {
-    private boolean allowLD;
+    private final Bindable<Boolean> allowLD = new Bindable<>(false);
 
     @Initializer
     private void load(MorphConfigManager configManager)
     {
-        configManager.onConfigRefresh(c ->
-        {
-            allowLD = configManager.get(Boolean.class, ConfigOption.ALLOW_LD_DISGUISES);
-        }, true);
+        configManager.bind(allowLD, ConfigOption.ALLOW_LD_DISGUISES);
     }
 
     @Override
@@ -41,7 +39,7 @@ public class LibsDisguisesDisguiseProvider extends VanillaDisguiseProvider
     @Override
     public @NotNull DisguiseResult morph(Player player, DisguiseInfo disguiseInfo, @Nullable Entity targetEntity)
     {
-        if (!allowLD)
+        if (!allowLD.get())
         {
             return DisguiseResult.fail();
         }

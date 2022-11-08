@@ -1,10 +1,8 @@
 package xiamomc.morph.abilities.impl;
 
-import com.destroystokyo.paper.ClientOption;
 import io.papermc.paper.event.player.AsyncChatEvent;
 import org.bukkit.NamespacedKey;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.player.PlayerJoinEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphManager;
@@ -17,6 +15,7 @@ import xiamomc.morph.misc.MorphChatRenderer;
 import xiamomc.morph.storage.skill.ISkillOption;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
+import xiamomc.pluginbase.Configuration.Bindable;
 import xiamomc.pluginbase.messages.FormattableMessage;
 
 import java.util.Objects;
@@ -39,13 +38,12 @@ public class ChatOverrideAbility extends MorphAbility<ChatOverrideOption>
     @Initializer
     private void load(MorphConfigManager config)
     {
-        config.onConfigRefresh(c ->
-        {
-            useCustomRenderer = config.getOrDefault(Boolean.class, ConfigOption.CHAT_OVERRIDE_USE_CUSTOM_RENDERER, true);
-        }, true);
+        config.bind(allowChatOverride, ConfigOption.ALLOW_CHAT_OVERRIDE);
+        config.bind(useCustomRenderer, ConfigOption.CHAT_OVERRIDE_USE_CUSTOM_RENDERER);
     }
 
-    private boolean useCustomRenderer;
+    private final Bindable<Boolean> useCustomRenderer = new Bindable<>(false);
+    private final Bindable<Boolean> allowChatOverride = new Bindable<>(false);
 
     @Resolved
     private MorphManager morphs;
@@ -53,6 +51,10 @@ public class ChatOverrideAbility extends MorphAbility<ChatOverrideOption>
     @EventHandler
     public void onChat(AsyncChatEvent e)
     {
+        if (!allowChatOverride.get()) return;
+
+        logger.info("ChatOverride :: val:" + allowChatOverride.get());
+
         var player = e.getPlayer();
 
         if (!appliedPlayers.contains(player)) return;
@@ -66,7 +68,7 @@ public class ChatOverrideAbility extends MorphAbility<ChatOverrideOption>
                 Objects::nonNull,
                 getFormattableMessage(state.getSkillIdentifier()));
 
-        if (useCustomRenderer)
+        if (useCustomRenderer.get())
             e.renderer(new MorphChatRenderer(formattable));
         else
         {

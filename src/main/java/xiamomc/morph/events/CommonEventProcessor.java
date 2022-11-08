@@ -36,6 +36,7 @@ import xiamomc.morph.misc.MorphGameProfile;
 import xiamomc.morph.skills.MorphSkillHandler;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
+import xiamomc.pluginbase.Configuration.Bindable;
 
 import java.util.Map;
 import java.util.UUID;
@@ -99,7 +100,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         morphs.unMorph(e.getPlayer());
     }
 
-    private int cooldownOnDamage;
+    private final Bindable<Integer> cooldownOnDamage = new Bindable<>(0);
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
     public void onPlayerTookDamage(EntityDamageEvent e)
@@ -112,7 +113,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
             {
                 //如果伤害是0，那么取消事件
                 if (e.getDamage() > 0d)
-                    state.setSkillCooldown(Math.max(state.getSkillCooldown(), cooldownOnDamage));
+                    state.setSkillCooldown(Math.max(state.getSkillCooldown(), cooldownOnDamage.get()));
             }
         }
     }
@@ -129,22 +130,22 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
     @Initializer
     private void load()
     {
-        config.onConfigRefresh(c -> onConfigRefresh(), true);
-    }
+        config.bind(cooldownOnDamage, ConfigOption.SKILL_COOLDOWN_ON_DAMAGE);
 
-    private void onConfigRefresh()
-    {
-        setAllowHeadMorph(config.getOrDefault(Boolean.class, ConfigOption.ALLOW_HEAD_MORPH, true));
+        var allowHeadMorph = config.getBindable(Boolean.class, ConfigOption.ALLOW_HEAD_MORPH);
+        allowHeadMorph.onValueChanged((o, n) -> setAllowHeadMorph(n), true);
 
-        cooldownOnDamage = config.getOrDefault(Integer.class, ConfigOption.SKILL_COOLDOWN_ON_DAMAGE);
+        var actionItemId = config.getBindable(String.class, ConfigOption.ACTION_ITEM);
+        actionItemId.onValueChanged((o, n) ->
+        {
+            var item = Material.matchMaterial(n);
+            var disabled = "disabled";
 
-        var actionItemId = config.getOrDefault(String.class, ConfigOption.ACTION_ITEM);
-        var item = Material.matchMaterial(actionItemId);
+            if (item == null || disabled.equals(n))
+                logger.warn("未能找到和" + actionItem + "对应的物品，相关功能将不会启用");
 
-        if (item == null && !actionItemId.equals("disabled"))
-            logger.warn("未能找到和" + actionItem + "对应的物品，相关功能将不会启用");
-
-        actionItem = item;
+            actionItem = item;
+        }, true);
     }
 
     @EventHandler

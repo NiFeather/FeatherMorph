@@ -3,7 +3,9 @@ package xiamomc.morph.config;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.LoggerFactory;
 import xiamomc.morph.MorphPlugin;
+import xiamomc.pluginbase.Configuration.Bindable;
 import xiamomc.pluginbase.Configuration.ConfigNode;
 import xiamomc.pluginbase.Configuration.PluginConfigManager;
 
@@ -66,6 +68,30 @@ public class MorphConfigManager extends PluginConfigManager
         }
 
         return map;
+    }
+
+
+    public <T> Bindable<T> getBindable(Class<T> type, ConfigOption option)
+    {
+        if (type.isInstance(option.defaultValue))
+            return getBindable(type, option, (T)option.defaultValue);
+
+        throw new IllegalArgumentException(option + "的类型和" + type + "不兼容");
+    }
+
+    public <T> void bind(Bindable<T> bindable, ConfigOption option)
+    {
+        var bb = this.getBindable(option.defaultValue.getClass(), option);
+
+        if (bindable.getClass().isInstance(bb))
+            bindable.bindTo((Bindable<T>) bb);
+        else
+            throw new IllegalArgumentException("尝试将一个Bindable绑定在不兼容的配置(" + option + ")上");
+    }
+
+    public <T> Bindable<T> getBindable(Class<T> type, ConfigOption path, T defaultValue)
+    {
+        return super.getBindable(type, path.node, defaultValue);
     }
 
     @Override

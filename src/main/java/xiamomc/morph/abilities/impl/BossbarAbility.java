@@ -19,21 +19,19 @@ import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.misc.DisguiseUtils;
 import xiamomc.morph.storage.skill.ISkillOption;
 import xiamomc.pluginbase.Annotations.Initializer;
+import xiamomc.pluginbase.Configuration.Bindable;
 
 import java.util.List;
 import java.util.Objects;
 
 public class BossbarAbility extends MorphAbility<BossbarOption>
 {
-    private boolean allowBossbar;
+    private Bindable<Boolean> allowBossbar;
 
     @Initializer
     private void load(MorphConfigManager configManager)
     {
-        configManager.onConfigRefresh(c ->
-        {
-            allowBossbar = configManager.get(Boolean.class, ConfigOption.DISPLAY_BOSSBAR);
-        }, true);
+        allowBossbar = configManager.getBindable(Boolean.class, ConfigOption.DISPLAY_BOSSBAR);
     }
 
     @Override
@@ -65,7 +63,7 @@ public class BossbarAbility extends MorphAbility<BossbarOption>
     {
         if (super.applyToPlayer(player, state))
         {
-            if (!allowBossbar) return true;
+            if (!allowBossbar.get()) return true;
 
             var option = getOr(
                     options.get(state.getDisguiseIdentifier()),

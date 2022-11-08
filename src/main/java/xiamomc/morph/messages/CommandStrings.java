@@ -116,17 +116,17 @@ public class CommandStrings extends AbstractMorphStrings
                 "成功取消所有人的伪装！");
     }
 
-    //chatoverride
-    public static FormattableMessage chatOverrideEnabledString()
+    //options
+    public static FormattableMessage optionSetString()
     {
-        return getFormattable(getKey("chat_override_enabled"),
-                "聊天覆盖已<bold>启用");
+        return getFormattable(getKey("option_set"),
+                "已将选项<what>设置为<value>");
     }
 
-    public static FormattableMessage chatOverrideDisabledString()
+    public static FormattableMessage optionValueString()
     {
-        return getFormattable(getKey("chat_override_disabled"),
-                "聊天覆盖已<bold>禁用");
+        return getFormattable(getKey("option_get"),
+                "<what>已设置为<value>");
     }
 
     private static String getKey(String key)

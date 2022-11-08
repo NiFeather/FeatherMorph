@@ -23,6 +23,11 @@ public class MessageUtils extends MorphPluginObject
                 .toComponent();
     }
 
+    public static Component prefixes(CommandSender sender, String str)
+    {
+        return prefixes(sender, Component.text(str));
+    }
+
     public static Component prefixes(CommandSender sender, Component c)
     {
         return prefixes(sender, new Component[]{c});

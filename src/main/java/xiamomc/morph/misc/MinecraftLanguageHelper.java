@@ -8,6 +8,7 @@ import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.pluginbase.Annotations.Initializer;
+import xiamomc.pluginbase.Configuration.Bindable;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -33,18 +34,15 @@ public class MinecraftLanguageHelper extends MorphPluginObject
                 .proxy(ProxySelector.getDefault())
                 .build();
 
-        config.onConfigRefresh(c ->
-        {
-            localeCode = config.getOrDefault(String.class, ConfigOption.LANGUAGE_CODE);
-            allowTranslatable = config.getOrDefault(Boolean.class, ConfigOption.LANGUAGE_ALLOW_FALLBACK);
+        config.bind(localeCode, ConfigOption.LANGUAGE_CODE);
+        config.bind(allowTranslatable, ConfigOption.LANGUAGE_ALLOW_FALLBACK);
 
-            switchLanguage(localeCode);
-        }, true);
+        localeCode.onValueChanged((o, n) -> switchLanguage(n), true);
 
         initializeFallbackLanguage(false);
     }
 
-    private static boolean allowTranslatable;
+    private static Bindable<Boolean> allowTranslatable = new Bindable<>(false);
 
     private void initializeFallbackLanguage(boolean isRetry)
     {
@@ -64,7 +62,7 @@ public class MinecraftLanguageHelper extends MorphPluginObject
         }, null);
     }
 
-    private String localeCode;
+    private Bindable<String> localeCode = new Bindable<>("en_us");
 
     private final String urlPattern = "https://raw.githubusercontent.com/InventivetalentDev/minecraft-assets/1.19.2/assets/minecraft/lang/";
 
@@ -273,7 +271,7 @@ public class MinecraftLanguageHelper extends MorphPluginObject
         }
         else
         {
-            return allowTranslatable
+            return allowTranslatable.get()
                     ? Component.translatable(key)
                     : Component.text(key);
         }

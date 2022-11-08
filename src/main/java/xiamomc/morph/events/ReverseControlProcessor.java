@@ -21,6 +21,7 @@ import xiamomc.morph.misc.DisguiseTypes;
 import xiamomc.morph.misc.PlayerOperationSimulator;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
+import xiamomc.pluginbase.Configuration.Bindable;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -32,7 +33,7 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
     @EventHandler
     public void onPlayerSneak(PlayerToggleSneakEvent e)
     {
-        if (!allowSneak) return;
+        if (!allowSneak.get()) return;
 
         var state = uuidDisguiseStateMap.get(e.getPlayer());
 
@@ -49,7 +50,7 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
     @EventHandler
     public void onPlayerSwapHand(PlayerSwapHandItemsEvent e)
     {
-        if (!allowSwap) return;
+        if (!allowSwap.get()) return;
 
         var state = uuidDisguiseStateMap.get(e.getPlayer());
 
@@ -72,7 +73,7 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
     @EventHandler
     public void onPlayerDrop(PlayerDropItemEvent e)
     {
-        if (!allowDrop) return;
+        if (!allowDrop.get()) return;
 
         var state = uuidDisguiseStateMap.get(e.getPlayer());
 
@@ -90,7 +91,7 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
     @EventHandler
     public void onHotbarChange(PlayerItemHeldEvent e)
     {
-        if (!allowHotBar) return;
+        if (!allowHotBar.get()) return;
 
         var state = uuidDisguiseStateMap.get(e.getPlayer());
 
@@ -116,7 +117,7 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
     @EventHandler
     public void onPlayerHurtPlayer(EntityDamageByEntityEvent e)
     {
-        if (!allowSimulation) return;
+        if (!allowSimulation.get()) return;
 
         if (e.getDamager() instanceof Player damager)
         {
@@ -158,7 +159,7 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
     @EventHandler
     public void onPlayerSwing(PlayerArmSwingEvent e)
     {
-        if (!allowSimulation) return;
+        if (!allowSimulation.get()) return;
 
         var player = e.getPlayer();
         var state = uuidDisguiseStateMap.get(player);
@@ -224,7 +225,7 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
      */
     private boolean simulateOperation(Action action, Player targetPlayer, EquipmentSlot hand)
     {
-        if (!allowSimulation) return false;
+        if (!allowSimulation.get()) return false;
 
         if (action.isRightClick())
         {
@@ -248,7 +249,7 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
 
     private boolean playerInDistance(@NotNull Player source, @Nullable Player target)
     {
-        if (target == null || (DisguiseAPI.isDisguised(target) && ignoreDisguised)) return false;
+        if (target == null || (DisguiseAPI.isDisguised(target) && ignoreDisguised.get())) return false;
 
         var isInSameWorld = target.getWorld().equals(source.getWorld());
         var targetHelmet = target.getEquipment().getHelmet();
@@ -272,39 +273,37 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
         }
     }
 
+    private Material immuneItemMaterial;
+
+    private final Bindable<Boolean> allowSimulation = new Bindable<>(false);
+    private final Bindable<Boolean> allowSneak = new Bindable<>(false);
+    private final Bindable<Boolean> allowSwap = new Bindable<>(false);
+    private final Bindable<Boolean> allowDrop = new Bindable<>(false);
+    private final Bindable<Boolean> allowHotBar = new Bindable<>(false);
+    private final Bindable<Boolean> ignoreDisguised = new Bindable<>(false);
+
     @Initializer
     private void load()
     {
         this.addSchedule(c -> update());
 
-        config.onConfigRefresh(c -> onConfigUpdate(), true);
-    }
+        var immuneItem = config.getBindable(String.class, ConfigOption.REVERSE_CONTROL_IMMUNE_ITEM);
+        immuneItem.onValueChanged((o, immune) ->
+        {
+            var targetOptional = Material.matchMaterial(immune);
 
-    private Material immuneItemMaterial;
+            if (targetOptional == null)
+                logger.warn("未能找到和" + immune + "对应的免疫物品，相关功能将不会启用");
 
-    private boolean allowSimulation;
-    private boolean allowSneak;
-    private boolean allowSwap;
-    private boolean allowDrop;
-    private boolean allowHotBar;
-    private boolean ignoreDisguised;
+            immuneItemMaterial = targetOptional;
+        }, true);
 
-    private void onConfigUpdate()
-    {
-        var immune = config.getOrDefault(String.class, ConfigOption.REVERSE_CONTROL_IMMUNE_ITEM);
-        var targetOptional = Material.matchMaterial(immune);
-
-        if (targetOptional == null)
-            logger.warn("未能找到和" + immune + "对应的免疫物品，相关功能将不会启用");
-
-        immuneItemMaterial = targetOptional;
-
-        this.allowSimulation = config.getOrDefault(Boolean.class, ConfigOption.REVERSE_BEHAVIOR_DO_SIMULATION);
-        this.allowSneak = config.getOrDefault(Boolean.class, ConfigOption.REVERSE_BEHAVIOR_SNEAK);
-        this.allowSwap = config.getOrDefault(Boolean.class, ConfigOption.REVERSE_BEHAVIOR_SWAP_HAND);
-        this.allowDrop = config.getOrDefault(Boolean.class, ConfigOption.REVERSE_BEHAVIOR_DROP);
-        this.allowHotBar = config.getOrDefault(Boolean.class, ConfigOption.REVERSE_BEHAVIOR_HOTBAR);
-        this.ignoreDisguised = config.getOrDefault(Boolean.class, ConfigOption.REVERSE_IGNORE_DISGUISED);
+        config.bind(allowSimulation, ConfigOption.REVERSE_BEHAVIOR_DO_SIMULATION);
+        config.bind(allowSneak, ConfigOption.REVERSE_BEHAVIOR_SNEAK);
+        config.bind(allowSwap, ConfigOption.REVERSE_BEHAVIOR_SWAP_HAND);
+        config.bind(allowDrop, ConfigOption.REVERSE_BEHAVIOR_DROP);
+        config.bind(allowHotBar, ConfigOption.REVERSE_BEHAVIOR_HOTBAR);
+        config.bind(ignoreDisguised, ConfigOption.REVERSE_IGNORE_DISGUISED);
     }
 
     private void update()
