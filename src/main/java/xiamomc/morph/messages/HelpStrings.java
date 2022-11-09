@@ -1,6 +1,6 @@
 package xiamomc.morph.messages;
 
-import xiamomc.pluginbase.messages.FormattableMessage;
+import xiamomc.pluginbase.Messages.FormattableMessage;
 
 import java.text.Format;
 

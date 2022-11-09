@@ -19,7 +19,7 @@ import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.misc.DisguiseUtils;
 import xiamomc.morph.storage.skill.ISkillOption;
 import xiamomc.pluginbase.Annotations.Initializer;
-import xiamomc.pluginbase.Configuration.Bindable;
+import xiamomc.pluginbase.Bindables.Bindable;
 
 import java.util.List;
 import java.util.Objects;

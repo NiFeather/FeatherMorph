@@ -36,7 +36,7 @@ import xiamomc.morph.misc.MorphGameProfile;
 import xiamomc.morph.skills.MorphSkillHandler;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
-import xiamomc.pluginbase.Configuration.Bindable;
+import xiamomc.pluginbase.Bindables.Bindable;
 
 import java.util.Map;
 import java.util.UUID;

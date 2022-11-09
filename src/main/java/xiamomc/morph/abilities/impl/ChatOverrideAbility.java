@@ -15,8 +15,8 @@ import xiamomc.morph.misc.MorphChatRenderer;
 import xiamomc.morph.storage.skill.ISkillOption;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
-import xiamomc.pluginbase.Configuration.Bindable;
-import xiamomc.pluginbase.messages.FormattableMessage;
+import xiamomc.pluginbase.Bindables.Bindable;
+import xiamomc.pluginbase.Messages.FormattableMessage;
 
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
@@ -52,8 +52,6 @@ public class ChatOverrideAbility extends MorphAbility<ChatOverrideOption>
     public void onChat(AsyncChatEvent e)
     {
         if (!allowChatOverride.get()) return;
-
-        logger.info("ChatOverride :: val:" + allowChatOverride.get());
 
         var player = e.getPlayer();
 

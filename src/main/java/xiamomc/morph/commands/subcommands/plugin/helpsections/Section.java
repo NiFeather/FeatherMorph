@@ -2,7 +2,7 @@ package xiamomc.morph.commands.subcommands.plugin.helpsections;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.jetbrains.annotations.Nullable;
-import xiamomc.pluginbase.messages.FormattableMessage;
+import xiamomc.pluginbase.Messages.FormattableMessage;
 
 import java.util.List;
 

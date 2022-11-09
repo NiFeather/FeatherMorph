@@ -2,8 +2,8 @@ package xiamomc.morph.messages;
 
 import it.unimi.dsi.fastutil.objects.ObjectList;
 import xiamomc.morph.MorphPlugin;
-import xiamomc.pluginbase.messages.IStrings;
-import xiamomc.pluginbase.messages.MessageStore;
+import xiamomc.pluginbase.Messages.IStrings;
+import xiamomc.pluginbase.Messages.MessageStore;
 
 import java.util.List;
 

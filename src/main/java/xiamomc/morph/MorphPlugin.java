@@ -22,7 +22,7 @@ import xiamomc.morph.skills.MorphSkillHandler;
 import xiamomc.morph.storage.skill.SkillConfigurationStore;
 import xiamomc.pluginbase.Command.CommandHelper;
 import xiamomc.pluginbase.XiaMoJavaPlugin;
-import xiamomc.pluginbase.messages.MessageStore;
+import xiamomc.pluginbase.Messages.MessageStore;
 
 public final class MorphPlugin extends XiaMoJavaPlugin
 {

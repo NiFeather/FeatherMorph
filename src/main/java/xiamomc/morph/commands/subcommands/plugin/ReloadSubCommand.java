@@ -11,8 +11,8 @@ import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.storage.skill.SkillConfigurationStore;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Command.ISubCommand;
-import xiamomc.pluginbase.messages.FormattableMessage;
-import xiamomc.pluginbase.messages.MessageStore;
+import xiamomc.pluginbase.Messages.FormattableMessage;
+import xiamomc.pluginbase.Messages.MessageStore;
 
 import java.util.Arrays;
 import java.util.List;

@@ -40,7 +40,7 @@ import xiamomc.morph.storage.playerdata.PlayerDataManager;
 import xiamomc.morph.storage.playerdata.PlayerMorphConfiguration;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
-import xiamomc.pluginbase.Configuration.Bindable;
+import xiamomc.pluginbase.Bindables.Bindable;
 
 import java.util.List;
 import java.util.Map;

@@ -11,7 +11,7 @@ import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.messages.CommonStrings;
 import xiamomc.pluginbase.Annotations.Resolved;
-import xiamomc.pluginbase.messages.FormattableMessage;
+import xiamomc.pluginbase.Messages.FormattableMessage;
 
 public class MorphChatRenderer extends MorphPluginObject implements ChatRenderer
 {

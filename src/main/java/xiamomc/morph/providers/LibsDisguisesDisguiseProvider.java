@@ -18,7 +18,7 @@ import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.misc.DisguiseTypes;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
-import xiamomc.pluginbase.Configuration.Bindable;
+import xiamomc.pluginbase.Bindables.Bindable;
 
 public class LibsDisguisesDisguiseProvider extends VanillaDisguiseProvider
 {

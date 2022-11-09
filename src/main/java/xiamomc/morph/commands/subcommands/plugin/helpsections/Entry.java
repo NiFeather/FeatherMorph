@@ -1,6 +1,6 @@
 package xiamomc.morph.commands.subcommands.plugin.helpsections;
 
-import xiamomc.pluginbase.messages.FormattableMessage;
+import xiamomc.pluginbase.Messages.FormattableMessage;
 
 public record Entry(String permission, String baseName, FormattableMessage description, String suggestingCommand)
 {

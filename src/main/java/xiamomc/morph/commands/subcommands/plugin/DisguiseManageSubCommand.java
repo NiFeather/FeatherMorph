@@ -9,7 +9,7 @@ import xiamomc.morph.commands.subcommands.plugin.management.GrantDisguiseSubComm
 import xiamomc.morph.commands.subcommands.plugin.management.RevokeDisguiseSubCommand;
 import xiamomc.morph.messages.HelpStrings;
 import xiamomc.pluginbase.Command.ISubCommand;
-import xiamomc.pluginbase.messages.FormattableMessage;
+import xiamomc.pluginbase.Messages.FormattableMessage;
 
 import java.util.List;
 

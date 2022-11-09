@@ -25,7 +25,7 @@ import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.pluginbase.Annotations.Initializer;
-import xiamomc.pluginbase.Configuration.Bindable;
+import xiamomc.pluginbase.Bindables.Bindable;
 
 import java.util.Map;
 import java.util.function.Predicate;

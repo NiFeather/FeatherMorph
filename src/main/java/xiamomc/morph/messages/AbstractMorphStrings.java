@@ -1,8 +1,8 @@
 package xiamomc.morph.messages;
 
 import xiamomc.morph.MorphPlugin;
-import xiamomc.pluginbase.messages.FormattableMessage;
-import xiamomc.pluginbase.messages.IStrings;
+import xiamomc.pluginbase.Messages.FormattableMessage;
+import xiamomc.pluginbase.Messages.IStrings;
 
 public abstract class AbstractMorphStrings implements IStrings
 {

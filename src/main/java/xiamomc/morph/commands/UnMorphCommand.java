@@ -9,7 +9,7 @@ import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.messages.HelpStrings;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Command.IPluginCommand;
-import xiamomc.pluginbase.messages.FormattableMessage;
+import xiamomc.pluginbase.Messages.FormattableMessage;
 
 public class UnMorphCommand extends MorphPluginObject implements IPluginCommand
 {
