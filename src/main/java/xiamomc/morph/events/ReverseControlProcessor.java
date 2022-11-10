@@ -75,16 +75,21 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
     {
         if (!allowDrop.get()) return;
 
+        var player = e.getPlayer();
         var state = uuidDisguiseStateMap.get(e.getPlayer());
 
         if (state != null)
         {
-            var player = Bukkit.getPlayer(state);
+            var target = Bukkit.getPlayer(state);
 
-            if (!playerInDistance(e.getPlayer(), player)) return;
+            if (!playerInDistance(player, target) || !player.isSneaking()) return;
 
-            if (!player.getEquipment().getItemInMainHand().getType().isAir())
-                player.dropItem(false);
+            if (!target.getEquipment().getItemInMainHand().getType().isAir())
+            {
+                target.dropItem(false);
+                target.swingHand(EquipmentSlot.HAND);
+                e.setCancelled(true);
+            }
         }
     }
 
