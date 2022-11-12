@@ -1,5 +1,6 @@
 package xiamomc.morph.commands.subcommands.plugin.management;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
@@ -14,6 +15,7 @@ import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Command.ISubCommand;
 import xiamomc.pluginbase.Messages.FormattableMessage;
 
+import java.util.List;
 import java.util.Objects;
 
 public class ForceUnmorphSubCommand extends MorphPluginObject implements ISubCommand
@@ -32,6 +34,22 @@ public class ForceUnmorphSubCommand extends MorphPluginObject implements ISubCom
 
     @Resolved
     private MorphManager manager;
+
+    @Override
+    public @Nullable List<String> onTabComplete(List<String> args, CommandSender source)
+    {
+        var list = new ObjectArrayList<String>();
+        if (args.size() > 1) return list;
+
+        var name = args.get(0);
+
+        var onlinePlayers = Bukkit.getOnlinePlayers();
+
+        for (var p : onlinePlayers)
+            if (p.getName().toLowerCase().contains(name.toLowerCase())) list.add(p.getName());
+
+        return list;
+    }
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, String[] args)
