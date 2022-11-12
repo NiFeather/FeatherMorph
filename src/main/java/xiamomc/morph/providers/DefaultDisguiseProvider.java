@@ -1,34 +1,32 @@
 package xiamomc.morph.providers;
 
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.disguisetypes.Disguise;
 import me.libraryaddict.disguise.disguisetypes.DisguiseType;
 import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
 import me.libraryaddict.disguise.disguisetypes.watchers.ArmorStandWatcher;
 import me.libraryaddict.disguise.disguisetypes.watchers.LivingWatcher;
-import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.GameMode;
-import org.bukkit.attribute.Attribute;
-import org.bukkit.entity.*;
+import org.bukkit.entity.ArmorStand;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scoreboard.Scoreboard;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.abilities.AbilityHandler;
-import xiamomc.morph.config.ConfigOption;
-import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.messages.MorphStrings;
-import xiamomc.morph.misc.*;
+import xiamomc.morph.misc.DisguiseState;
+import xiamomc.morph.misc.DisguiseTypes;
+import xiamomc.morph.misc.DisguiseUtils;
 import xiamomc.morph.skills.MorphSkillHandler;
-import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
+import xiamomc.pluginbase.ColorUtils;
 
 import java.util.List;
-import java.util.Set;
 
 /**
  * 提供一个默认的DisguiseProvider
@@ -104,7 +102,6 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
     {
         var watcher = state.getDisguise().getWatcher();
         var disguiseTypeLD = state.getDisguise().getType();
-        var entityType = disguiseTypeLD.getEntityType();
 
         var disguise = state.getDisguise();
 
