@@ -6,9 +6,11 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.LoggerFactory;
 import xiamomc.morph.MorphPlugin;
 import xiamomc.pluginbase.Bindables.Bindable;
+import xiamomc.pluginbase.Bindables.BindableList;
 import xiamomc.pluginbase.Configuration.ConfigNode;
 import xiamomc.pluginbase.Configuration.PluginConfigManager;
 
+import java.util.List;
 import java.util.Map;
 
 public class MorphConfigManager extends PluginConfigManager
@@ -70,6 +72,19 @@ public class MorphConfigManager extends PluginConfigManager
         return map;
     }
 
+    public <T> BindableList<T> getBindableList(Class<T> type, ConfigOption option)
+    {
+        var originalBindable = getBindable(List.class, option.node, List.of());
+        var list = new BindableList<T>(originalBindable.get());
+
+        originalBindable.onValueChanged((o, n) ->
+        {
+            list.clear();
+            list.addAll(n);
+        });
+
+        return list;
+    }
 
     public <T> Bindable<T> getBindable(Class<T> type, ConfigOption option)
     {

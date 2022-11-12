@@ -41,6 +41,7 @@ import xiamomc.morph.storage.playerdata.PlayerMorphConfiguration;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
+import xiamomc.pluginbase.Bindables.BindableList;
 
 import java.util.List;
 import java.util.Map;
@@ -73,7 +74,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     {
         this.addSchedule(c -> update());
 
-        bannedDisguises = config.getBindable(List.class, ConfigOption.BANNED_DISGUISES.node);
+        bannedDisguises = config.getBindableList(String.class, ConfigOption.BANNED_DISGUISES);
 
         registerProviders(ObjectList.of(
                 new VanillaDisguiseProvider(),
@@ -190,7 +191,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         uuidMoprhTimeMap.put(player.getUniqueId(), plugin.getCurrentTick());
     }
 
-    private Bindable<List> bannedDisguises;
+    private BindableList<String> bannedDisguises;
 
     //region 伪装提供器
 
@@ -268,8 +269,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         var info = getAvaliableDisguisesFor(player).stream()
                 .filter(i -> i.getIdentifier().equals(finalKey)).findFirst().orElse(null);
 
-        var banned = bannedDisguises.get();
-        if (banned != null && banned.contains(key))
+        if (bannedDisguises.contains(key))
         {
             player.sendMessage(MessageUtils.prefixes(player, MorphStrings.disguiseBannedOrNotSupportedString()));
             return false;
