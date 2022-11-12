@@ -4,6 +4,7 @@ import org.bukkit.GameMode;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.abilities.AbilityType;
 import xiamomc.morph.abilities.MorphAbility;
 import xiamomc.morph.abilities.options.FlyOption;
@@ -50,14 +51,14 @@ public class FlyAbility extends MorphAbility<FlyOption>
 
     private float getTargetFlySpeed(String identifier)
     {
-        if (identifier == null) return 0;
+        if (identifier == null) return Float.NaN;
 
         var value = options.get(identifier);
 
         if (value != null)
             return value.getFlyingSpeed();
         else
-            return 0;
+            return Float.NaN;
     }
 
     public boolean updateFlyingAbility(DisguiseState state)
@@ -70,10 +71,10 @@ public class FlyAbility extends MorphAbility<FlyOption>
         {
             float speed = getOr(
                     getTargetFlySpeed(state.getDisguiseIdentifier()),
-                    s -> s == 0f,
+                    s -> !Float.isNaN(s),
                     getTargetFlySpeed(state.getSkillIdentifier()));
 
-            player.setFlySpeed(speed);
+            player.setFlySpeed(Float.isNaN(speed) ? 0f : speed);
         }
 
         return true;

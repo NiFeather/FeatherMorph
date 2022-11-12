@@ -45,7 +45,6 @@ public abstract class MorphAbility<T extends ISkillOption> extends MorphPluginOb
      * @param fallbackValue 后备值
      * @return 若value满足判断条件，则返回value，否则返回fallbackValue
      */
-    @Nullable
     protected <R> R getOr(R value, Predicate<R> p, R fallbackValue)
     {
         if (p.test(value))
