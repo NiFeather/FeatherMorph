@@ -13,6 +13,8 @@ import xiamomc.morph.misc.DisguiseInfo;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.pluginbase.Annotations.Resolved;
 
+import java.util.List;
+
 public abstract class DisguiseProvider extends MorphPluginObject
 {
     /**
@@ -22,6 +24,12 @@ public abstract class DisguiseProvider extends MorphPluginObject
      */
     @NotNull
     public abstract String getIdentifier();
+
+    /**
+     * Gets all available disguise identifiers for this provider
+     * @return A list containing available disguise identifiers for this provider
+     */
+    public abstract List<String> getAllAvailableDisguises();
 
     /**
      * 为某个玩家应用或更新伪装

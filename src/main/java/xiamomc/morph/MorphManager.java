@@ -196,6 +196,11 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
     private static final List<DisguiseProvider> providers = new ObjectArrayList<>();
 
+    public static List<DisguiseProvider> getProviders()
+    {
+        return new ObjectArrayList<>(providers);
+    }
+
     /**
      * 从ID获取DisguiseProvider
      * @param id 目标ID

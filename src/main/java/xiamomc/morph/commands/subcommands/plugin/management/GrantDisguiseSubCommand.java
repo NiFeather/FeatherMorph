@@ -55,20 +55,14 @@ public class GrantDisguiseSubCommand extends MorphPluginObject implements ISubCo
         }
         else if (args.size() == 2) //size == 2: 补全生物和玩家
         {
-            //生物
-            for (var eT : EntityType.values())
-            {
-                if (eT == EntityType.UNKNOWN) continue;
+            var targetLowerCase = target.toLowerCase();
 
-                var key = eT.getKey().asString();
-                if (key.toLowerCase().contains(target.toLowerCase())) list.add(key);
-            }
-
-            //玩家
-            for (var p : onlinePlayers)
+            for (var p : MorphManager.getProviders())
             {
-                var convertedName = DisguiseTypes.PLAYER.toId(p.getName());
-                if (convertedName.toLowerCase().contains(target.toLowerCase())) list.add(convertedName);
+                p.getAllAvailableDisguises().forEach(s ->
+                {
+                    if (s.toLowerCase().contains(targetLowerCase)) list.add(s);
+                });
             }
         }
 
@@ -93,9 +87,9 @@ public class GrantDisguiseSubCommand extends MorphPluginObject implements ISubCo
         }
 
         //检查是否已知
-        var targetType = DisguiseTypes.fromId(targetName);
+        var provider = MorphManager.getProvider(strings[1]);
 
-        if (targetType == DisguiseTypes.UNKNOWN)
+        if (provider == null)
         {
             commandSender.sendMessage(MessageUtils.prefixes(commandSender, MorphStrings.invalidIdentityString()));
             return true;

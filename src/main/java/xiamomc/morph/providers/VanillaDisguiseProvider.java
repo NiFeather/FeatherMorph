@@ -1,5 +1,6 @@
 package xiamomc.morph.providers;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.disguisetypes.Disguise;
 import me.libraryaddict.disguise.disguisetypes.DisguiseType;
@@ -12,12 +13,38 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.misc.*;
 
+import java.util.List;
+
 public class VanillaDisguiseProvider extends DefaultDisguiseProvider
 {
     @Override
     public @NotNull String getIdentifier()
     {
         return DisguiseTypes.VANILLA.getNameSpace();
+    }
+
+    public VanillaDisguiseProvider()
+    {
+        var list = new ObjectArrayList<String>();
+
+        for (var eT : EntityType.values())
+        {
+            if (eT == EntityType.UNKNOWN) continue;
+
+            list.add(eT.getKey().asString());
+        }
+
+        list.removeIf(s -> s.equals("minecraft:player"));
+
+        vanillaIdentifiers = list;
+    }
+
+    private final List<String> vanillaIdentifiers;
+
+    @Override
+    public List<String> getAllAvailableDisguises()
+    {
+        return vanillaIdentifiers;
     }
 
     @Override

@@ -1,8 +1,11 @@
 package xiamomc.morph.providers;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import me.libraryaddict.disguise.DisguiseAPI;
+import me.libraryaddict.disguise.DisguiseConfig;
 import me.libraryaddict.disguise.disguisetypes.Disguise;
 import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
+import me.libraryaddict.disguise.utilities.DisguiseUtilities;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -20,6 +23,8 @@ import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
 
+import java.util.List;
+
 public class LibsDisguisesDisguiseProvider extends VanillaDisguiseProvider
 {
     private final Bindable<Boolean> allowLD = new Bindable<>(false);
@@ -28,6 +33,19 @@ public class LibsDisguisesDisguiseProvider extends VanillaDisguiseProvider
     private void load(MorphConfigManager configManager)
     {
         configManager.bind(allowLD, ConfigOption.ALLOW_LD_DISGUISES);
+    }
+
+    @Override
+    public List<String> getAllAvailableDisguises()
+    {
+        var list = new ObjectArrayList<String>();
+
+        DisguiseConfig.getCustomDisguises().forEach((p, s) ->
+        {
+            list.add(DisguiseTypes.LD.toId(p.toReadable()));
+        });
+
+        return list;
     }
 
     @Override

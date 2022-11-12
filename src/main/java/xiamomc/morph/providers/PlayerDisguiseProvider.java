@@ -1,5 +1,6 @@
 package xiamomc.morph.providers;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.disguisetypes.Disguise;
 import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
@@ -12,6 +13,8 @@ import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.misc.DisguiseInfo;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.misc.DisguiseTypes;
+
+import java.util.List;
 
 public class PlayerDisguiseProvider extends DefaultDisguiseProvider
 {
@@ -35,6 +38,17 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
         DisguiseAPI.disguiseEntity(player, disguise);
 
         return DisguiseResult.success(disguise, result.isCopy());
+    }
+
+    @Override
+    public List<String> getAllAvailableDisguises()
+    {
+        var onlinePlayers = Bukkit.getOnlinePlayers();
+
+        var list = new ObjectArrayList<String>();
+        onlinePlayers.forEach(p -> list.add(DisguiseTypes.PLAYER.toId(p.getName())));
+
+        return list;
     }
 
     @Override
