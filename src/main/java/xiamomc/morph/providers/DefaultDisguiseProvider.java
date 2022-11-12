@@ -24,7 +24,7 @@ import xiamomc.morph.misc.DisguiseTypes;
 import xiamomc.morph.misc.DisguiseUtils;
 import xiamomc.morph.skills.MorphSkillHandler;
 import xiamomc.pluginbase.Annotations.Resolved;
-import xiamomc.pluginbase.ColorUtils;
+import xiamomc.morph.misc.ColorUtils;
 
 import java.util.List;
 
