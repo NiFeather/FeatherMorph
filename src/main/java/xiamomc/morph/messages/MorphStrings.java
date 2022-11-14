@@ -77,6 +77,12 @@ public class MorphStrings extends AbstractMorphStrings
                 "<color:red>此ID不能用于伪装");
     }
 
+    public static FormattableMessage noSuchLocalDisguiseString()
+    {
+        return getFormattable(getKey("no_such_local_disguise"),
+                "<color:red>未找到和此ID匹配的本地伪装");
+    }
+
     public static FormattableMessage parseErrorString()
     {
         return getFormattable(getKey("parse_error"),

@@ -18,7 +18,7 @@ import xiamomc.pluginbase.Annotations.Resolved;
 import java.util.List;
 import java.util.Objects;
 
-public class PlayerDataManager extends MorphJsonBasedStorage<PlayerMorphConfigurationContainer> implements IManagePlayerData
+public class PlayerDataStore extends MorphJsonBasedStorage<PlayerMorphConfigurationContainer> implements IManagePlayerData
 {
     private final List<DisguiseInfo> cachedInfos = new ObjectArrayList<>();
 
@@ -86,19 +86,19 @@ public class PlayerDataManager extends MorphJsonBasedStorage<PlayerMorphConfigur
         return success;
     }
 
-    private final int targetConfigurationVersion = 3;
+    private final int targetConfigurationVersion = 4;
 
     private void migrate(PlayerMorphConfigurationContainer configuration)
     {
         //1 -> 2: 玩家名处理
-        if (configuration.Version == 1)
+        if (configuration.Version < 2)
             configuration.playerMorphConfigurations.forEach(c ->
             {
                  if (Objects.equals(c.playerName, "Unknown")) c.playerName = null;
             });
 
         //2 -> 3: 从存储EntityType变为存储ID
-        if (configuration.Version == 2)
+        if (configuration.Version < 3)
           configuration.playerMorphConfigurations.forEach(c ->
           {
               //新建ID列表
@@ -123,6 +123,23 @@ public class PlayerDataManager extends MorphJsonBasedStorage<PlayerMorphConfigur
               //移除配置原有的伪装列表
               c.setUnlockedDisguises(null);
           });
+
+        //3 -> 4: LD的ID从`ld`改为`local`
+        if(configuration.Version < 4)
+        {
+            configuration.playerMorphConfigurations.forEach(c ->
+            {
+                var list = new ObjectArrayList<String>();
+
+                c.getUnlockedDisguiseIdentifiers().forEach(s ->
+                {
+                    if (!s.startsWith("ld:")) list.add(s);
+                    else list.add(s.replaceFirst("ld:", "local:"));
+                });
+
+                c.setUnlockedDisguiseIdentifiers(list);
+            });
+        }
 
         //migrate完设置版本
         configuration.Version = targetConfigurationVersion;

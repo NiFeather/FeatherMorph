@@ -28,7 +28,7 @@ import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.misc.DisguiseTypes;
 import xiamomc.morph.misc.DisguiseUtils;
 import xiamomc.morph.providers.DisguiseProvider;
-import xiamomc.morph.providers.LibsDisguisesDisguiseProvider;
+import xiamomc.morph.providers.LocalDisguiseProvider;
 import xiamomc.morph.providers.PlayerDisguiseProvider;
 import xiamomc.morph.providers.VanillaDisguiseProvider;
 import xiamomc.morph.skills.MorphSkillHandler;
@@ -36,11 +36,10 @@ import xiamomc.morph.skills.SkillCooldownInfo;
 import xiamomc.morph.skills.SkillType;
 import xiamomc.morph.storage.offlinestore.OfflineDisguiseState;
 import xiamomc.morph.storage.offlinestore.OfflineStorageManager;
-import xiamomc.morph.storage.playerdata.PlayerDataManager;
+import xiamomc.morph.storage.playerdata.PlayerDataStore;
 import xiamomc.morph.storage.playerdata.PlayerMorphConfiguration;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
-import xiamomc.pluginbase.Bindables.Bindable;
 import xiamomc.pluginbase.Bindables.BindableList;
 
 import java.util.List;
@@ -56,7 +55,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
      */
     private final List<DisguiseState> disguisedPlayers = new ObjectArrayList<>();
 
-    private final PlayerDataManager data = new PlayerDataManager();
+    private final PlayerDataStore data = new PlayerDataStore();
 
     private final OfflineStorageManager offlineStorage = new OfflineStorageManager();
 
@@ -79,7 +78,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         registerProviders(ObjectList.of(
                 new VanillaDisguiseProvider(),
                 new PlayerDisguiseProvider(),
-                new LibsDisguisesDisguiseProvider()
+                new LocalDisguiseProvider()
         ));
     }
 

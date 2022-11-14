@@ -17,7 +17,7 @@ public enum DisguiseTypes
     PLAYER("player"),
 
     //LD的自定义伪装
-    LD("ld"),
+    LD("local"),
 
     //外部伪装
     EXTERNAL("external"),

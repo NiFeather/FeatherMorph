@@ -4,14 +4,11 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.DisguiseConfig;
 import me.libraryaddict.disguise.disguisetypes.Disguise;
-import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
-import me.libraryaddict.disguise.utilities.DisguiseUtilities;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xiamomc.morph.MorphManager;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.messages.MessageUtils;
@@ -20,12 +17,11 @@ import xiamomc.morph.misc.DisguiseInfo;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.misc.DisguiseTypes;
 import xiamomc.pluginbase.Annotations.Initializer;
-import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
 
 import java.util.List;
 
-public class LibsDisguisesDisguiseProvider extends VanillaDisguiseProvider
+public class LocalDisguiseProvider extends VanillaDisguiseProvider
 {
     private final Bindable<Boolean> allowLD = new Bindable<>(false);
 
@@ -72,7 +68,7 @@ public class LibsDisguisesDisguiseProvider extends VanillaDisguiseProvider
         if (disguise == null)
         {
             logger.error("未能找到叫" + id + "的伪装");
-            player.sendMessage(MessageUtils.prefixes(player, MorphStrings.parseErrorString().resolve("id", id)));
+            player.sendMessage(MessageUtils.prefixes(player, MorphStrings.noSuchLocalDisguiseString().resolve("id", id)));
             return DisguiseResult.fail();
         }
 
@@ -80,9 +76,6 @@ public class LibsDisguisesDisguiseProvider extends VanillaDisguiseProvider
 
         return DisguiseResult.success(disguise);
     }
-
-    @Resolved
-    private MorphManager morphs;
 
     @Override
     protected boolean canConstruct(DisguiseInfo info, Entity targetEntity, @Nullable DisguiseState theirState)

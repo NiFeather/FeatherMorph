@@ -61,7 +61,7 @@ public class DisguiseInfo
         return disguiseType == DisguiseTypes.PLAYER;
     }
 
-    public boolean isCustomDisguise()
+    public boolean isLocalDisguise()
     {
         return disguiseType == DisguiseTypes.LD;
     }
