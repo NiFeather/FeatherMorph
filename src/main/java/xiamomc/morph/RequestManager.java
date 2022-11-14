@@ -4,10 +4,12 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.bukkit.entity.Player;
 import xiamomc.morph.interfaces.IManagePlayerData;
 import xiamomc.morph.interfaces.IManageRequests;
+import xiamomc.morph.messages.CommandStrings;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.RequestStrings;
 import xiamomc.morph.misc.DisguiseTypes;
 import xiamomc.morph.misc.RequestInfo;
+import xiamomc.morph.misc.permissions.CommonPermissions;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 
@@ -44,6 +46,12 @@ public class RequestManager extends MorphPluginObject implements IManageRequests
     @Override
     public void createRequest(Player source, Player target)
     {
+        if (!source.hasPermission(CommonPermissions.SEND_REQUEST))
+        {
+            source.sendMessage(MessageUtils.prefixes(source, CommandStrings.noPermissionMessage()));
+            return;
+        }
+
         if (requests.stream()
                 .anyMatch(i -> i.sourcePlayer.getUniqueId() == source.getUniqueId()
                         && i.targetPlayer.getUniqueId() == target.getUniqueId()))
@@ -73,6 +81,12 @@ public class RequestManager extends MorphPluginObject implements IManageRequests
     @Override
     public void acceptRequest(Player source, Player target)
     {
+        if (!source.hasPermission(CommonPermissions.ACCEPT_REQUEST))
+        {
+            source.sendMessage(MessageUtils.prefixes(source, CommandStrings.noPermissionMessage()));
+            return;
+        }
+
         var req = requests.stream()
                 .filter(i -> i.sourcePlayer.getUniqueId().equals(target.getUniqueId())
                         && i.targetPlayer.getUniqueId().equals(source.getUniqueId())).findFirst().orElse(null);
@@ -100,6 +114,12 @@ public class RequestManager extends MorphPluginObject implements IManageRequests
     @Override
     public void denyRequest(Player source, Player target)
     {
+        if (!source.hasPermission(CommonPermissions.DENY_REQUEST))
+        {
+            source.sendMessage(MessageUtils.prefixes(source, CommandStrings.noPermissionMessage()));
+            return;
+        }
+
         var req = requests.stream()
                 .filter(i -> i.sourcePlayer.getUniqueId().equals(target.getUniqueId())
                         && i.targetPlayer.getUniqueId().equals(source.getUniqueId())).findFirst().orElse(null);

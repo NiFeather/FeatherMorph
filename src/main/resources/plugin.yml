@@ -24,10 +24,25 @@ commands:
     usage: 'todo'
 
 permissions:
+  xiamomc.morph.morph:
+    default: true
+    description: "Whether someone can disguise."
+  xiamomc.morph.unmorph:
+    default: true
+    description: "Whether someone can cancel their disguise."
+  xiamomc.morph.reverse:
+    default: true
+    description: "Whether reverse control is avaliable for this player/group."
+  xiamomc.morph.headmorph:
+    default: true
+    description: "Whether someone is allowed to use player head to disguise if avaliable."
   xiamomc.morph.chatoverride:
     default: true
-    children:
-      xiamomc.morph.chatoverride.query: true
-  xiamomc.morph.chatoverride.reveal:
-      default: op
+    description: "Whether chat override is avaliable for this player/group."
+  xiamomc.morph.request.send:
+    default: true
+  xiamomc.morph.request.accept:
+    default: true
+  xiamomc.morph.request.deny:
+    default: true
 

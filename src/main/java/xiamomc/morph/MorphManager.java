@@ -21,12 +21,14 @@ import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.events.PlayerMorphEvent;
 import xiamomc.morph.events.PlayerUnMorphEvent;
 import xiamomc.morph.interfaces.IManagePlayerData;
+import xiamomc.morph.messages.CommandStrings;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.MorphStrings;
 import xiamomc.morph.misc.DisguiseInfo;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.misc.DisguiseTypes;
 import xiamomc.morph.misc.DisguiseUtils;
+import xiamomc.morph.misc.permissions.CommonPermissions;
 import xiamomc.morph.providers.DisguiseProvider;
 import xiamomc.morph.providers.LocalDisguiseProvider;
 import xiamomc.morph.providers.PlayerDisguiseProvider;
@@ -252,16 +254,29 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
     //endregion
 
+    public boolean morph(Player player, String key, @Nullable Entity targetEntity)
+    {
+        return this.morph(player, key, targetEntity, false);
+    }
+
     /**
      * 根据传入的key自动伪装
      *
      * @param player 要伪装的玩家
      * @param key key
      * @param targetEntity 玩家正在看的实体
+     * @param bypassPermission 是否绕过权限检查
      * @return 操作是否成功
      */
-    public boolean morph(Player player, String key, @Nullable Entity targetEntity)
+    public boolean morph(Player player, String key, @Nullable Entity targetEntity, boolean bypassPermission)
     {
+        if (!bypassPermission && !player.hasPermission(CommonPermissions.MORPH))
+        {
+            player.sendMessage(MessageUtils.prefixes(player, CommandStrings.noPermissionMessage()));
+
+            return false;
+        }
+
         if (!key.contains(":")) key = DisguiseTypes.VANILLA.toId(key);
 
         String finalKey = key;

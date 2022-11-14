@@ -10,8 +10,10 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
+import xiamomc.morph.messages.CommandStrings;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.SkillStrings;
+import xiamomc.morph.misc.permissions.CommonPermissions;
 import xiamomc.morph.skills.impl.*;
 import xiamomc.morph.storage.skill.ISkillOption;
 import xiamomc.morph.storage.skill.SkillConfiguration;
@@ -137,13 +139,25 @@ public class MorphSkillHandler extends MorphPluginObject
                 .filter(d -> identifier.equals(d.getKey().getIdentifier())).findFirst().orElse(null);
     }
 
+    public void executeDisguiseSkill(Player player)
+    {
+        this.executeDisguiseSkill(player, false);
+    }
+
     /**
      * 让某个玩家执行伪装技能
      *
      * @param player 目标玩家
      */
-    public void executeDisguiseSkill(Player player)
+    public void executeDisguiseSkill(Player player, boolean bypassPermission)
     {
+        if (!bypassPermission && !player.hasPermission(CommonPermissions.SKILL))
+        {
+            player.sendMessage(MessageUtils.prefixes(player, CommandStrings.noPermissionMessage()));
+
+            return;
+        }
+
         var state = manager.getDisguiseStateFor(player);
 
         if (state == null) return;

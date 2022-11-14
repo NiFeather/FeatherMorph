@@ -19,6 +19,7 @@ import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.misc.DisguiseTypes;
 import xiamomc.morph.misc.PlayerOperationSimulator;
+import xiamomc.morph.misc.permissions.CommonPermissions;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
@@ -173,7 +174,7 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
         {
             var targetPlayer = Bukkit.getPlayer(state);
 
-            if (targetPlayer == null) return;
+            if (!playerInDistance(player, targetPlayer)) return;
 
             var lastAction = tracker.getLastInteractAction(player);
 
@@ -255,6 +256,8 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
     private boolean playerInDistance(@NotNull Player source, @Nullable Player target)
     {
         if (target == null || (DisguiseAPI.isDisguised(target) && ignoreDisguised.get())) return false;
+
+        if (!source.hasPermission(CommonPermissions.REVERSE)) return false;
 
         var isInSameWorld = target.getWorld().equals(source.getWorld());
         var targetHelmet = target.getEquipment().getHelmet();

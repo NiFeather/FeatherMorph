@@ -12,6 +12,7 @@ import xiamomc.morph.abilities.options.ChatOverrideOption;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.misc.MorphChatRenderer;
+import xiamomc.morph.misc.permissions.CommonPermissions;
 import xiamomc.morph.storage.skill.ISkillOption;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
@@ -55,7 +56,7 @@ public class ChatOverrideAbility extends MorphAbility<ChatOverrideOption>
 
         var player = e.getPlayer();
 
-        if (!appliedPlayers.contains(player)) return;
+        if (!appliedPlayers.contains(player) || !player.hasPermission(CommonPermissions.CHAT_OVERRIDE)) return;
 
         var state = morphs.getDisguiseStateFor(player);
         assert state != null;

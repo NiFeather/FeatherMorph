@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.messages.HelpStrings;
+import xiamomc.morph.misc.permissions.CommonPermissions;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Command.IPluginCommand;
 import xiamomc.pluginbase.Messages.FormattableMessage;
@@ -22,7 +23,7 @@ public class UnMorphCommand extends MorphPluginObject implements IPluginCommand
     @Override
     public String getPermissionRequirement()
     {
-        return null;
+        return CommonPermissions.UNMORPH;
     }
 
     @Override

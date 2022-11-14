@@ -26,6 +26,7 @@ import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.commands.MorphCommandHelper;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
+import xiamomc.morph.messages.CommandStrings;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.MorphStrings;
 import xiamomc.morph.messages.SkillStrings;
@@ -33,6 +34,7 @@ import xiamomc.morph.misc.DisguiseTypes;
 import xiamomc.morph.misc.DisguiseUtils;
 import xiamomc.morph.misc.EntityTypeUtils;
 import xiamomc.morph.misc.MorphGameProfile;
+import xiamomc.morph.misc.permissions.CommonPermissions;
 import xiamomc.morph.skills.MorphSkillHandler;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
@@ -211,6 +213,13 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
             //右键玩家头颅：快速伪装
             if (mainHandItemType == Material.PLAYER_HEAD)
             {
+                if (!player.hasPermission(CommonPermissions.HEAD_MORPH))
+                {
+                    player.sendMessage(MessageUtils.prefixes(player, CommandStrings.noPermissionMessage()));
+
+                    return true;
+                }
+
                 //忽略shift点地
                 if (action.equals(Action.RIGHT_CLICK_BLOCK) || action.isLeftClick()) return false;
 
