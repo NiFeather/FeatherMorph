@@ -343,6 +343,8 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
 
         if (DisguiseTypes.fromId(id) == DisguiseTypes.PLAYER)
             uuidDisguiseStateMap.put(e.getPlayer(), DisguiseTypes.PLAYER.toStrippedId(id));
+        else
+            uuidDisguiseStateMap.remove(e.getPlayer());
     }
 
     @EventHandler
