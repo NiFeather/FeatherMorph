@@ -124,7 +124,7 @@ public class SkillConfigurationStore extends MorphJsonBasedStorage<SkillConfigur
         }
 
         if (!success.get())
-            logger.warn("重新加载时出现问题，请查看log排查原因。");
+            logger.warn("重新加载时出现问题，一些配置将不会被添加，请查看日志排查原因。");
 
         return val;
     }
