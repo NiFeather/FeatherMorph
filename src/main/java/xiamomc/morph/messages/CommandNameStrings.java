@@ -11,7 +11,7 @@ public class CommandNameStrings extends AbstractMorphStrings
 
     public static FormattableMessage allowLDDisguiseString()
     {
-        return getFormattable(getKey("allow_ld"), "LibsDisguise自定义伪装支持");
+        return getFormattable(getKey("allow_ld"), "本地伪装支持");
     }
 
     public static FormattableMessage headMorphString()
@@ -56,6 +56,6 @@ public class CommandNameStrings extends AbstractMorphStrings
 
     private static String getKey(String key)
     {
-        return "commands.name." + key;
+        return "commands.option.name." + key;
     }
 }

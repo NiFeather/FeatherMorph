@@ -108,6 +108,6 @@ public class OptionSubCommand extends MorphPluginObject implements ISubCommand
     @Override
     public FormattableMessage getHelpMessage()
     {
-        return HelpStrings.chatOverrideDescription();
+        return HelpStrings.pluginOptionDescription();
     }
 }

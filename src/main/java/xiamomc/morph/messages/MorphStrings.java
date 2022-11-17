@@ -67,7 +67,7 @@ public class MorphStrings extends AbstractMorphStrings
     public static FormattableMessage skillHintString()
     {
         return getFormattable(getKey("skill_hint"),
-                "小提示: 手持胡萝卜钓竿蹲下右键可以使用当前伪装的主动技能");
+                "小提示: 手持胡萝卜钓竿下蹲使用可以激活当前伪装的主动技能");
     }
 
 
@@ -155,13 +155,13 @@ public class MorphStrings extends AbstractMorphStrings
     public static FormattableMessage selfVisibleOnString()
     {
         return getFormattable(getKey("self_visible_on"),
-                "<color:green>已切换自身可见性");
+                "<color:green>已切换自身可见");
     }
 
     public static FormattableMessage selfVisibleOffString()
     {
         return getFormattable(getKey("self_visible_off"),
-                "<color:red>已切换自身可见性");
+                "<color:red>已切换自身可见");
     }
 
     public static FormattableMessage disguiseBannedOrNotSupportedString()
@@ -179,7 +179,7 @@ public class MorphStrings extends AbstractMorphStrings
     public static FormattableMessage errorWhileUpdatingDisguise()
     {
         return getFormattable(getKey("error_while_updating_disguise"),
-                "<color:red>更新伪装时遇到了意外，正在取消伪装");
+                "<color:red>更新伪装状态时遇到了意外，正在取消伪装");
     }
 
     private static String getKey(String key)

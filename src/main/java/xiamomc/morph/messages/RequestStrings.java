@@ -22,6 +22,18 @@ public class RequestStrings extends AbstractMorphStrings
                 "你收到了来自<who>的请求！");
     }
 
+    public static FormattableMessage requestReceivedAcceptString()
+    {
+        return getFormattable(getKey("request_received_accept"),
+                "发送 /request accept <who> 来接受请求");
+    }
+
+    public static FormattableMessage requestReceivedDenyString()
+    {
+        return getFormattable(getKey("request_received_deny"),
+                "发送 /request deny <who> 即可拒绝请求");
+    }
+
 
     /**
      * 发起方的接受消息

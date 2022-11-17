@@ -2,8 +2,6 @@ package xiamomc.morph.messages;
 
 import xiamomc.pluginbase.Messages.FormattableMessage;
 
-import java.text.Format;
-
 public class HelpStrings extends AbstractMorphStrings
 {
     //help
@@ -139,7 +137,7 @@ public class HelpStrings extends AbstractMorphStrings
     public static FormattableMessage toggleSelfDescription()
     {
         return getFormattable(getKey("description_toggle_self"),
-                "切换自身可见性");
+                "切换自身可见");
     }
 
     public static FormattableMessage queryDescription()
@@ -184,22 +182,10 @@ public class HelpStrings extends AbstractMorphStrings
                 "强制取消某人的伪装");
     }
 
-    public static FormattableMessage chatOverrideDescription()
+    public static FormattableMessage pluginOptionDescription()
     {
-        return getFormattable(getKey("description_chatoverride"),
-                "查看服务器的聊天覆盖状态");
-    }
-
-    public static FormattableMessage chatOverrideQueryDescription()
-    {
-        return getFormattable(getKey("description_chatoverride_query"),
-                "查询当前覆盖状态");
-    }
-
-    public static FormattableMessage chatOverrideToggleDescription()
-    {
-        return getFormattable(getKey("description_chatoverride_toggle"),
-                "切换当前覆盖状态");
+        return getFormattable(getKey("description_plugin_option"),
+                "查询、设置插件选项");
     }
 
     private static String getKey(String key)

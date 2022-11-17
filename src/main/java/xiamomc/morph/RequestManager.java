@@ -70,6 +70,12 @@ public class RequestManager extends MorphPluginObject implements IManageRequests
         target.sendMessage(MessageUtils.prefixes(target, RequestStrings.requestReceivedString()
                 .resolve("who", source.getName())));
 
+        target.sendMessage(MessageUtils.prefixes(target, RequestStrings.requestReceivedAcceptString()
+                .resolve("who", source.getName())));
+
+        target.sendMessage(MessageUtils.prefixes(target, RequestStrings.requestReceivedDenyString()
+                .resolve("who", source.getName())));
+
         source.sendMessage(MessageUtils.prefixes(source, RequestStrings.requestSendString()));
     }
 
