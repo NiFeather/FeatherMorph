@@ -254,16 +254,42 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
     //endregion
 
+    /**
+     * 通过给定的key来决定要伪装还是取消伪装。
+     * 如果伪装ID和给定的ID一致，则取消伪装，反之进行伪装。
+     *
+     * @param player 目标玩家
+     * @param key 伪装ID
+     * @param targetEntity 目标实体（如果有）
+     */
+    public void morphOrUnMorph(Player player, String key, @Nullable Entity targetEntity)
+    {
+        var state = this.getDisguiseStateFor(player);
+
+        if (state != null && state.getDisguiseIdentifier().equals(key))
+            unMorph(player);
+        else
+            morph(player, key, targetEntity);
+    }
+
+    /**
+     * 伪装某一玩家
+     *
+     * @param player 目标玩家
+     * @param key 伪装ID
+     * @param targetEntity 目标实体（如果有）
+     * @return 操作是否成功
+     */
     public boolean morph(Player player, String key, @Nullable Entity targetEntity)
     {
         return this.morph(player, key, targetEntity, false);
     }
 
     /**
-     * 根据传入的key自动伪装
+     * 伪装某一玩家
      *
      * @param player 要伪装的玩家
-     * @param key key
+     * @param key 伪装ID
      * @param targetEntity 玩家正在看的实体
      * @param bypassPermission 是否绕过权限检查
      * @return 操作是否成功

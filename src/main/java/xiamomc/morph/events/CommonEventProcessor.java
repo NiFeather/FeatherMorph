@@ -211,7 +211,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         if (player.isSneaking())
         {
             //右键玩家头颅：快速伪装
-            if (mainHandItemType == Material.PLAYER_HEAD)
+            if (DisguiseUtils.validForHeadMorph(mainHandItemType))
             {
                 if (!player.hasPermission(CommonPermissions.HEAD_MORPH))
                 {
@@ -237,49 +237,73 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
                     return true;
                 }
 
-                var profile = ((SkullMeta) mainHandItem.getItemMeta()).getPlayerProfile();
+                var targetEntity = player.getTargetEntity(5);
 
-                //忽略没有profile的玩家伪装
-                if (profile == null)
+                switch (mainHandItemType)
                 {
-                    player.sendMessage(MessageUtils.prefixes(player, MorphStrings.invalidSkinString()));
-                    return true;
-                }
-
-                var name = profile.getName();
-                var profileTexture = profile.getTextures();
-                var playerUniqueId = player.getUniqueId();
-
-                //如果玩家有伪装，并且伪装的材质和Profile中的一样，那么取消伪装
-                if (state != null)
-                {
-                    var disguise = state.getDisguise();
-
-                    if (disguise instanceof PlayerDisguise playerDisguise
-                            && playerDisguise.getName().equals(name)
-                            && profileTexture.equals(uuidPlayerTexturesMap.get(playerUniqueId)))
+                    case DRAGON_HEAD ->
                     {
-                        morphs.unMorph(player);
-                        return true;
+                        morphs.morphOrUnMorph(player, EntityType.ENDER_DRAGON.getKey().asString(), targetEntity);
                     }
-                }
+                    case ZOMBIE_HEAD ->
+                    {
+                        morphs.morphOrUnMorph(player, EntityType.ZOMBIE.getKey().asString(), targetEntity);
+                    }
+                    case SKELETON_SKULL ->
+                    {
+                        morphs.morphOrUnMorph(player, EntityType.SKELETON.getKey().asString(), targetEntity);
+                    }
+                    case WITHER_SKELETON_SKULL ->
+                    {
+                        morphs.morphOrUnMorph(player, EntityType.WITHER_SKELETON.getKey().asString(), targetEntity);
+                    }
+                    case PLAYER_HEAD ->
+                    {
+                        var profile = ((SkullMeta) mainHandItem.getItemMeta()).getPlayerProfile();
 
-                //否则，更新或应用伪装
-                if (morphs.morph(player, DisguiseTypes.PLAYER.toId(profile.getName()), player.getTargetEntity(5)))
-                {
-                    //成功伪装后设置皮肤为头颅的皮肤
-                    var disguise = (PlayerDisguise) DisguiseAPI.getDisguise(player);
-                    var wrappedProfile = WrappedGameProfile.fromHandle(new MorphGameProfile(profile));
+                        //忽略没有profile的玩家伪装
+                        if (profile == null)
+                        {
+                            player.sendMessage(MessageUtils.prefixes(player, MorphStrings.invalidSkinString()));
+                            return true;
+                        }
 
-                    var LDprofile = ReflectionManager.getGameProfileWithThisSkin(wrappedProfile.getUUID(), wrappedProfile.getName(), wrappedProfile);
+                        var name = profile.getName();
+                        var profileTexture = profile.getTextures();
+                        var playerUniqueId = player.getUniqueId();
 
-                    //LD不支持直接用profile设置皮肤，只能先存到本地设置完再移除
-                    DisguiseAPI.addGameProfile(LDprofile.toString(), LDprofile);
-                    disguise.setSkin(LDprofile);
-                    DisguiseUtilities.removeGameProfile(LDprofile.toString());
+                        //如果玩家有伪装，并且伪装的材质和Profile中的一样，那么取消伪装
+                        if (state != null)
+                        {
+                            var disguise = state.getDisguise();
 
-                    uuidPlayerTexturesMap.put(playerUniqueId, profileTexture);
-                    return true;
+                            if (disguise instanceof PlayerDisguise playerDisguise
+                                    && playerDisguise.getName().equals(name)
+                                    && profileTexture.equals(uuidPlayerTexturesMap.get(playerUniqueId)))
+                            {
+                                morphs.unMorph(player);
+                                return true;
+                            }
+                        }
+
+                        //否则，更新或应用伪装
+                        if (morphs.morph(player, DisguiseTypes.PLAYER.toId(profile.getName()), targetEntity))
+                        {
+                            //成功伪装后设置皮肤为头颅的皮肤
+                            var disguise = (PlayerDisguise) DisguiseAPI.getDisguise(player);
+                            var wrappedProfile = WrappedGameProfile.fromHandle(new MorphGameProfile(profile));
+
+                            var LDprofile = ReflectionManager.getGameProfileWithThisSkin(wrappedProfile.getUUID(), wrappedProfile.getName(), wrappedProfile);
+
+                            //LD不支持直接用profile设置皮肤，只能先存到本地设置完再移除
+                            DisguiseAPI.addGameProfile(LDprofile.toString(), LDprofile);
+                            disguise.setSkin(LDprofile);
+                            DisguiseUtilities.removeGameProfile(LDprofile.toString());
+
+                            uuidPlayerTexturesMap.put(playerUniqueId, profileTexture);
+                            return true;
+                        }
+                    }
                 }
 
                 morphs.updateLastPlayerMorphOperationTime(player);

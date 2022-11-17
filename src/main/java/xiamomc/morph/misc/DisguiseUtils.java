@@ -45,6 +45,15 @@ public class DisguiseUtils
         };
     }
 
+    public static boolean validForHeadMorph(Material material)
+    {
+        return material == Material.DRAGON_HEAD
+                || material == Material.PLAYER_HEAD
+                || material == Material.ZOMBIE_HEAD
+                || material == Material.SKELETON_SKULL
+                || material == Material.WITHER_SKELETON_SKULL;
+    }
+
     /**
      * 获取和某一玩家附近多少格以内的所有玩家
      * @param player 目标玩家
