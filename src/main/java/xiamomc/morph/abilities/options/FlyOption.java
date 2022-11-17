@@ -42,7 +42,7 @@ public class FlyOption implements ISkillOption
 
         var instance = new FlyOption();
 
-        instance.flyingSpeed = tryGetFloat(map, "fly_speed", 0);
+        instance.flyingSpeed = tryGetFloat(map, "fly_speed", Float.NaN);
 
         return instance;
     }
