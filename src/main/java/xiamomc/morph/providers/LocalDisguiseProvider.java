@@ -104,6 +104,13 @@ public class LocalDisguiseProvider extends VanillaDisguiseProvider
     @Override
     public Component getDisplayName(String disguiseIdentifier)
     {
-        return Component.text(DisguiseTypes.LD.toStrippedId(disguiseIdentifier));
+        var ldID = DisguiseTypes.LD.toStrippedId(disguiseIdentifier);
+
+        var disg = DisguiseAPI.getCustomDisguise(ldID);
+
+        if (disg != null)
+            return Component.text(disg.getType().toReadable().equals(disg.getDisguiseName()) ? ldID : disg.getDisguiseName());
+
+        return Component.text(ldID);
     }
 }
