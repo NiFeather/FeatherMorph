@@ -5,10 +5,11 @@ import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.disguisetypes.Disguise;
 import me.libraryaddict.disguise.disguisetypes.DisguiseType;
 import me.libraryaddict.disguise.disguisetypes.MobDisguise;
+import me.libraryaddict.disguise.disguisetypes.VillagerData;
+import me.libraryaddict.disguise.disguisetypes.watchers.CatWatcher;
+import me.libraryaddict.disguise.disguisetypes.watchers.VillagerWatcher;
 import net.kyori.adventure.text.Component;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.misc.*;
@@ -72,6 +73,37 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
         DisguiseAPI.disguiseEntity(player, constructedDisguise);
 
         return DisguiseResult.success(constructedDisguise, copyResult.isCopy());
+    }
+
+    @Override
+    public void postConstructDisguise(DisguiseState state, @Nullable Entity targetEntity)
+    {
+        super.postConstructDisguise(state, targetEntity);
+
+        if (targetEntity != null)
+        {
+            var disguise = state.getDisguise();
+
+            switch (targetEntity.getType())
+            {
+                case CAT ->
+                {
+                    var watcher = (CatWatcher) disguise.getWatcher();
+                    var cat = (Cat) targetEntity;
+
+                    watcher.setType(cat.getCatType());
+                }
+
+                case VILLAGER ->
+                {
+                    var watcher = (VillagerWatcher) disguise.getWatcher();
+                    var villager = (Villager) targetEntity;
+
+                    watcher.setVillagerData(new VillagerData(villager.getVillagerType(),
+                            villager.getProfession(), villager.getVillagerLevel()));
+                }
+            }
+        }
     }
 
     @Override
