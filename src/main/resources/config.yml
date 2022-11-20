@@ -26,6 +26,9 @@ root:
   # 设置为"disabled"以禁用
   action_item: minecraft:carrot_on_a_stick
 
+  # 是否要在玩家死亡时取消他们的伪装？
+  unmorph_on_death: true
+
   # 是否允许用玩家头快速伪装？
   allowHeadMorph: true
 
@@ -74,4 +77,4 @@ root:
   bannedDisguises: []
 
   # 不要动这个键!
-  version: 9
+  version: 10

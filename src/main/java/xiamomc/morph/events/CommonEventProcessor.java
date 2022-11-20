@@ -58,6 +58,9 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
     @Resolved(shouldSolveImmediately = true)
     private MorphSkillHandler skillHandler;
 
+
+    private Bindable<Boolean> unMorphOnDeath;
+
     @EventHandler
     public void onEntityDeath(EntityDeathEvent e)
     {
@@ -99,7 +102,8 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
     @EventHandler
     public void onPlayerDeath(PlayerDeathEvent e)
     {
-        morphs.unMorph(e.getPlayer(), true);
+        if (unMorphOnDeath.get())
+            morphs.unMorph(e.getPlayer(), true);
     }
 
     private final Bindable<Integer> cooldownOnDamage = new Bindable<>(0);
@@ -136,6 +140,8 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
 
         var allowHeadMorph = config.getBindable(Boolean.class, ConfigOption.ALLOW_HEAD_MORPH);
         allowHeadMorph.onValueChanged((o, n) -> setAllowHeadMorph(n), true);
+
+        unMorphOnDeath = config.getBindable(Boolean.class, ConfigOption.UNMORPH_ON_DEATH);
 
         var actionItemId = config.getBindable(String.class, ConfigOption.ACTION_ITEM);
         actionItemId.onValueChanged((o, n) ->

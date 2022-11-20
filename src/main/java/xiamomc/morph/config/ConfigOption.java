@@ -13,6 +13,8 @@ public enum ConfigOption
     SKILL_COOLDOWN_ON_DAMAGE(ConfigNode.create().append("cooldown_on_damage"), 15),
     ACTION_ITEM(ConfigNode.create().append("action_item"), "minecraft:carrot_on_a_stick"),
 
+    UNMORPH_ON_DEATH(ConfigNode.create().append("unmorph_on_death"), true),
+
     REVERSE_CONTROL_DISTANCE(reverseControlNode().append("normalDistance"), -1),
     REVERSE_CONTROL_DISTANCE_IMMUNE(reverseControlNode().append("immuneDistance"), 16),
     REVERSE_CONTROL_IMMUNE_ITEM(reverseControlNode().append("immuneItem"), "minecraft:golden_helmet"),

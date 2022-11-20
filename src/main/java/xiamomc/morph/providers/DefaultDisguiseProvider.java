@@ -105,6 +105,8 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
 
         var disguise = state.getDisguise();
 
+        disguise.setKeepDisguiseOnPlayerDeath(true);
+
         //workaround: 伪装已死亡的LivingEntity
         if (targetEntity instanceof LivingEntity living && living.getHealth() <= 0)
             ((LivingWatcher) watcher).setHealth(1);
