@@ -19,7 +19,6 @@ import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.SkillStrings;
 import xiamomc.morph.misc.DisguiseUtils;
 import xiamomc.morph.storage.skill.ISkillOption;
-import xiamomc.morph.storage.skill.SkillConfiguration;
 
 import java.util.List;
 
@@ -59,10 +58,10 @@ public abstract class MorphSkill<T extends ISkillOption> extends MorphPluginObje
      * @param player 玩家
      * @param fireball 实体
      * @return 发射的实体，如果为null则发射失败
-     * @param <T> 要发射的实体类型
+     * @param <E> 发射出去的实体
      */
     @Nullable
-    protected <T extends Entity> T launchProjectile(Player player, EntityType fireball, float multiplier)
+    protected <E extends Entity> E launchProjectile(Player player, EntityType fireball, float multiplier)
     {
         Entity fireBall;
         try
@@ -82,7 +81,7 @@ public abstract class MorphSkill<T extends ISkillOption> extends MorphPluginObje
 
         fireBall.setVelocity(player.getEyeLocation().getDirection().normalize().multiply(2d * multiplier));
 
-        return (T) fireBall;
+        return (E) fireBall;
     }
 
     protected float getTopY(Block block)

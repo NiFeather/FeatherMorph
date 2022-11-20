@@ -18,8 +18,6 @@ import xiamomc.morph.storage.skill.SkillConfiguration;
 
 public class ApplyEffectMorphSkill extends MorphSkill<EffectConfiguration>
 {
-    private final PotionEffect miningFatigueEffect = new PotionEffect(PotionEffectType.SLOW_DIGGING, 6000, 2);
-
     @Override
     public int executeSkill(Player player, SkillConfiguration configuration, EffectConfiguration option)
     {
