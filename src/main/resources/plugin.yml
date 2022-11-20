@@ -33,6 +33,9 @@ permissions:
   xiamomc.morph.reverse:
     default: true
     description: "Whether reverse control is avaliable for this player/group."
+  xiamomc.morph.skill:
+    default: true
+    description: "Whether reverse control is avaliable for this player/group."
   xiamomc.morph.headmorph:
     default: true
     description: "Whether someone is allowed to use player head to disguise if avaliable."

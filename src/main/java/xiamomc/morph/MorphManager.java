@@ -107,12 +107,12 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                     logger.warn("API: " + disg + " :: State: " + disgInState);
 
                     p.sendMessage(MessageUtils.prefixes(p, MorphStrings.errorWhileDisguising()));
-                    unMorph(p);
+                    unMorph(p, true);
                 }
                 else
                 {
                     logger.warn("removing: " + p + " :: " + i.getDisguise() + " <-> " + disg);
-                    unMorph(p);
+                    unMorph(p, true);
                     DisguiseAPI.disguiseEntity(p, disg);
                     disguisedPlayers.remove(i);
                 }
@@ -130,7 +130,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 {
                     p.sendMessage(MessageUtils.prefixes(p, MorphStrings.errorWhileUpdatingDisguise()));
 
-                    unMorph(p);
+                    unMorph(p, true);
                 }
             }
         });
@@ -385,8 +385,13 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         {
             if (ignoreOffline && !i.getPlayer().isOnline()) return;
 
-            unMorph(i.getPlayer());
+            unMorph(i.getPlayer(), true);
         });
+    }
+
+    public void unMorph(Player player)
+    {
+        this.unMorph(player, false);
     }
 
     /**
@@ -394,8 +399,15 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
      *
      * @param player 目标玩家
      */
-    public void unMorph(Player player)
+    public void unMorph(Player player, boolean bypassPermission)
     {
+        if (!bypassPermission && !player.hasPermission(CommonPermissions.UNMORPH))
+        {
+            player.sendMessage(MessageUtils.prefixes(player, CommandStrings.noPermissionMessage()));
+
+            return;
+        }
+
         var state = disguisedPlayers.stream()
                 .filter(i -> i.getPlayerUniqueID().equals(player.getUniqueId())).findFirst().orElse(null);
 

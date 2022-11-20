@@ -99,7 +99,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
     @EventHandler
     public void onPlayerDeath(PlayerDeathEvent e)
     {
-        morphs.unMorph(e.getPlayer());
+        morphs.unMorph(e.getPlayer(), true);
     }
 
     private final Bindable<Integer> cooldownOnDamage = new Bindable<>(0);

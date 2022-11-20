@@ -206,7 +206,7 @@ public class PlayerDataStore extends MorphJsonBasedStorage<PlayerMorphConfigurat
 
         var state = morphs.getDisguiseStateFor(player);
         if (state != null && info.getKey().equals(state.getDisguiseIdentifier()))
-            morphs.unMorph(player);
+            morphs.unMorph(player, true);
 
         sendMorphAcquiredNotification(player, morphs.getDisguiseStateFor(player),
                 MorphStrings.morphLockedString()

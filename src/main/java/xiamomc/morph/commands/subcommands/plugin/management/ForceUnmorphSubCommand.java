@@ -77,7 +77,7 @@ public class ForceUnmorphSubCommand extends MorphPluginObject implements ISubCom
             return true;
         }
 
-        manager.unMorph(player);
+        manager.unMorph(player, true);
 
         sender.sendMessage(MessageUtils.prefixes(sender, CommandStrings.unMorphedSomeoneString()
                 .resolve("who", player.getName())));
