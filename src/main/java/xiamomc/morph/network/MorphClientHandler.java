@@ -8,7 +8,10 @@ import org.sqlite.Collation;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.MorphPluginObject;
+import xiamomc.morph.config.ConfigOption;
+import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.pluginbase.Annotations.Initializer;
+import xiamomc.pluginbase.Bindables.Bindable;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -17,11 +20,15 @@ import java.util.List;
 
 public class MorphClientHandler extends MorphPluginObject
 {
+    private final Bindable<Boolean> allowClient = new Bindable<>(false);
+
     @Initializer
-    private void load(MorphPlugin plugin, MorphManager manager)
+    private void load(MorphPlugin plugin, MorphManager manager, MorphConfigManager configManager)
     {
         Bukkit.getMessenger().registerIncomingPluginChannel(plugin, initializeChannel, (cN, player, data) ->
         {
+            if (!allowClient.get()) return;
+
             player.sendPluginMessage(plugin, initializeChannel, "".getBytes());
 
             clientPlayers.add(player);
@@ -30,6 +37,8 @@ public class MorphClientHandler extends MorphPluginObject
         var apiVersionBytes = ByteBuffer.allocate(4).putInt(plugin.clientApiVersion).array();
         Bukkit.getMessenger().registerIncomingPluginChannel(plugin, versionChannel, (cN, player, data) ->
         {
+            if (!allowClient.get()) return;
+
             if (!clientPlayers.contains(player)) return;
 
             player.sendPluginMessage(plugin, versionChannel, apiVersionBytes);
@@ -37,6 +46,8 @@ public class MorphClientHandler extends MorphPluginObject
 
         Bukkit.getMessenger().registerIncomingPluginChannel(plugin, commandChannel, (cN, player, data) ->
         {
+            if (!allowClient.get()) return;
+
             if (!clientPlayers.contains(player)) return;
 
             var str = new String(data, StandardCharsets.UTF_8).split(" ", 2);
@@ -99,6 +110,22 @@ public class MorphClientHandler extends MorphPluginObject
         Bukkit.getMessenger().registerOutgoingPluginChannel(plugin, initializeChannel);
         Bukkit.getMessenger().registerOutgoingPluginChannel(plugin, versionChannel);
         Bukkit.getMessenger().registerOutgoingPluginChannel(plugin, commandChannel);
+
+        configManager.bind(allowClient, ConfigOption.ALLOW_CLIENT);
+
+        allowClient.onValueChanged((o, n) ->
+        {
+            var players = Bukkit.getOnlinePlayers();
+
+            if (n)
+                this.sendReAuth(players);
+            else
+            {
+                this.sendUnAuth(players);
+                initialzedPlayers.removeAll(players);
+                clientPlayers.removeAll(players);
+            }
+        });
     }
 
     private final List<Player> initialzedPlayers = new ObjectArrayList<>();
@@ -107,6 +134,8 @@ public class MorphClientHandler extends MorphPluginObject
 
     public void refreshPlayerClientMorphs(List<String> identifiers, Player player)
     {
+        if (!allowClient.get()) return;
+
         var additBuilder = new StringBuilder();
 
         additBuilder.append("query").append(" ").append("set").append(" ");
@@ -119,6 +148,8 @@ public class MorphClientHandler extends MorphPluginObject
 
     public void sendDiff(@Nullable List<String> addits, @Nullable List<String> removal, Player player)
     {
+        if (!allowClient.get()) return;
+
         if (addits != null)
         {
             var additBuilder = new StringBuilder();
@@ -146,6 +177,8 @@ public class MorphClientHandler extends MorphPluginObject
 
     public void updateCurrentIdentifier(Player player, String str)
     {
+        if (!allowClient.get()) return;
+
         var builder = new StringBuilder();
 
         builder.append("current");
@@ -163,6 +196,8 @@ public class MorphClientHandler extends MorphPluginObject
 
     public void sendReAuth(Collection<? extends Player> players)
     {
+        if (!allowClient.get()) return;
+
         players.forEach(p -> p.sendPluginMessage(plugin, commandChannel, "reauth".getBytes()));
     }
 

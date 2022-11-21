@@ -15,6 +15,8 @@ public enum ConfigOption
 
     UNMORPH_ON_DEATH(ConfigNode.create().append("unmorph_on_death"), true),
 
+    ALLOW_CLIENT(ConfigNode.create().append("allow_client_mod"), true),
+
     REVERSE_CONTROL_DISTANCE(reverseControlNode().append("normalDistance"), -1),
     REVERSE_CONTROL_DISTANCE_IMMUNE(reverseControlNode().append("immuneDistance"), 16),
     REVERSE_CONTROL_IMMUNE_ITEM(reverseControlNode().append("immuneItem"), "minecraft:golden_helmet"),
