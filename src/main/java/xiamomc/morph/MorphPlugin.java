@@ -103,6 +103,8 @@ public final class MorphPlugin extends XiaMoJavaPlugin
 
             for (Plugin plugin : pluginManager.getPlugins())
                 onPluginEnable(plugin.getName());
+
+            clientHandler.sendReAuth(Bukkit.getOnlinePlayers());
         });
     }
 

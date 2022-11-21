@@ -4,6 +4,7 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
+import org.sqlite.Collation;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.MorphPluginObject;
@@ -11,6 +12,7 @@ import xiamomc.pluginbase.Annotations.Initializer;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.Collection;
 import java.util.List;
 
 public class MorphClientHandler extends MorphPluginObject
@@ -157,6 +159,16 @@ public class MorphClientHandler extends MorphPluginObject
     public void unInitializePlayer(Player player)
     {
         this.clientPlayers.remove(player);
+    }
+
+    public void sendReAuth(Collection<? extends Player> players)
+    {
+        players.forEach(p -> p.sendPluginMessage(plugin, commandChannel, "reauth".getBytes()));
+    }
+
+    public void sendUnAuth(Collection<? extends Player> players)
+    {
+        players.forEach(p -> p.sendPluginMessage(plugin, commandChannel, "unauth".getBytes()));
     }
 
     private static final String nameSpace = MorphPlugin.getMorphNameSpace();
