@@ -82,6 +82,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         this.addSchedule(c -> update());
 
         bannedDisguises = config.getBindableList(String.class, ConfigOption.BANNED_DISGUISES);
+        config.bind(allowHeadMorph, ConfigOption.ALLOW_HEAD_MORPH);
 
         registerProviders(ObjectList.of(
                 new VanillaDisguiseProvider(),

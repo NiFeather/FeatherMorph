@@ -49,7 +49,13 @@ public class MorphClientHandler extends MorphPluginObject
 
             switch (baseCommand)
             {
-                case "skill" -> manager.executeDisguiseSkill(player);
+                case "skill" ->
+                {
+                    var state = manager.getDisguiseStateFor(player);
+
+                    if (state != null && state.getSkillCooldown() <= 0)
+                        manager.executeDisguiseSkill(player);
+                }
                 case "unmorph" -> manager.unMorph(player);
                 case "toggleself" -> manager.setSelfDisguiseVisible(player, !manager.getPlayerConfiguration(player).showDisguiseToSelf, true);
                 case "morph" ->

@@ -125,22 +125,10 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         }
     }
 
-    private boolean allowHeadMorph;
-    private void setAllowHeadMorph(boolean val)
-    {
-        if (allowHeadMorph == val) return;
-
-        allowHeadMorph = val;
-        config.set(ConfigOption.ALLOW_HEAD_MORPH, val);
-    }
-
     @Initializer
     private void load()
     {
         config.bind(cooldownOnDamage, ConfigOption.SKILL_COOLDOWN_ON_DAMAGE);
-
-        var allowHeadMorph = config.getBindable(Boolean.class, ConfigOption.ALLOW_HEAD_MORPH);
-        allowHeadMorph.onValueChanged((o, n) -> setAllowHeadMorph(n), true);
 
         unMorphOnDeath = config.getBindable(Boolean.class, ConfigOption.UNMORPH_ON_DEATH);
 
