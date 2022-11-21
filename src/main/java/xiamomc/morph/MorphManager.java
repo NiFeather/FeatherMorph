@@ -1,19 +1,26 @@
 package xiamomc.morph;
 
+import com.comphenix.protocol.wrappers.WrappedGameProfile;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
 import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.disguisetypes.Disguise;
 import me.libraryaddict.disguise.disguisetypes.MobDisguise;
+import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
+import me.libraryaddict.disguise.utilities.DisguiseUtilities;
 import me.libraryaddict.disguise.utilities.DisguiseValues;
 import me.libraryaddict.disguise.utilities.reflection.FakeBoundingBox;
+import me.libraryaddict.disguise.utilities.reflection.ReflectionManager;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.profile.PlayerTextures;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.abilities.AbilityHandler;
 import xiamomc.morph.config.ConfigOption;
@@ -24,11 +31,9 @@ import xiamomc.morph.interfaces.IManagePlayerData;
 import xiamomc.morph.messages.CommandStrings;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.MorphStrings;
-import xiamomc.morph.misc.DisguiseInfo;
-import xiamomc.morph.misc.DisguiseState;
-import xiamomc.morph.misc.DisguiseTypes;
-import xiamomc.morph.misc.DisguiseUtils;
+import xiamomc.morph.misc.*;
 import xiamomc.morph.misc.permissions.CommonPermissions;
+import xiamomc.morph.network.MorphClientHandler;
 import xiamomc.morph.providers.DisguiseProvider;
 import xiamomc.morph.providers.LocalDisguiseProvider;
 import xiamomc.morph.providers.PlayerDisguiseProvider;
@@ -42,6 +47,7 @@ import xiamomc.morph.storage.playerdata.PlayerDataStore;
 import xiamomc.morph.storage.playerdata.PlayerMorphConfiguration;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
+import xiamomc.pluginbase.Bindables.Bindable;
 import xiamomc.pluginbase.Bindables.BindableList;
 
 import java.util.List;
@@ -254,6 +260,149 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
     //endregion
 
+    private final Bindable<Boolean> allowHeadMorph = new Bindable<>();
+
+    private final Map<UUID, PlayerTextures> uuidPlayerTexturesMap = new ConcurrentHashMap<>();
+
+    public boolean doQuickDisguise(Player player)
+    {
+        var state = this.getDisguiseStateFor(player);
+        var mainHandItem = player.getEquipment().getItemInMainHand();
+        var mainHandItemType = mainHandItem.getType();
+
+        //右键玩家头颅：快速伪装
+        if (DisguiseUtils.validForHeadMorph(mainHandItemType))
+        {
+            if (!player.hasPermission(CommonPermissions.HEAD_MORPH))
+            {
+                player.sendMessage(MessageUtils.prefixes(player, CommandStrings.noPermissionMessage()));
+
+                return true;
+            }
+
+            if (!allowHeadMorph.get())
+            {
+                player.sendMessage(MessageUtils.prefixes(player, MorphStrings.headDisguiseDisabledString()));
+
+                return true;
+            }
+
+            if (!canMorph(player))
+            {
+                player.sendMessage(MessageUtils.prefixes(player, MorphStrings.disguiseCoolingDownString()));
+
+                return true;
+            }
+
+            var targetEntity = player.getTargetEntity(5);
+
+            switch (mainHandItemType)
+            {
+                case DRAGON_HEAD ->
+                {
+                    morphOrUnMorph(player, EntityType.ENDER_DRAGON.getKey().asString(), targetEntity);
+                }
+                case ZOMBIE_HEAD ->
+                {
+                    morphOrUnMorph(player, EntityType.ZOMBIE.getKey().asString(), targetEntity);
+                }
+                case SKELETON_SKULL ->
+                {
+                    morphOrUnMorph(player, EntityType.SKELETON.getKey().asString(), targetEntity);
+                }
+                case WITHER_SKELETON_SKULL ->
+                {
+                    morphOrUnMorph(player, EntityType.WITHER_SKELETON.getKey().asString(), targetEntity);
+                }
+                case PLAYER_HEAD ->
+                {
+                    var profile = ((SkullMeta) mainHandItem.getItemMeta()).getPlayerProfile();
+
+                    //忽略没有profile的玩家伪装
+                    if (profile == null)
+                    {
+                        player.sendMessage(MessageUtils.prefixes(player, MorphStrings.invalidSkinString()));
+                        return true;
+                    }
+
+                    var name = profile.getName();
+                    var profileTexture = profile.getTextures();
+                    var playerUniqueId = player.getUniqueId();
+
+                    //如果玩家有伪装，并且伪装的材质和Profile中的一样，那么取消伪装
+                    if (state != null)
+                    {
+                        var disguise = state.getDisguise();
+
+                        if (disguise instanceof PlayerDisguise playerDisguise
+                                && playerDisguise.getName().equals(name)
+                                && profileTexture.equals(uuidPlayerTexturesMap.get(playerUniqueId)))
+                        {
+                            unMorph(player);
+                            return true;
+                        }
+                    }
+
+                    //否则，更新或应用伪装
+                    if (morph(player, DisguiseTypes.PLAYER.toId(profile.getName()), targetEntity))
+                    {
+                        //成功伪装后设置皮肤为头颅的皮肤
+                        var disguise = (PlayerDisguise) DisguiseAPI.getDisguise(player);
+                        var wrappedProfile = WrappedGameProfile.fromHandle(new MorphGameProfile(profile));
+
+                        var LDprofile = ReflectionManager.getGameProfileWithThisSkin(wrappedProfile.getUUID(), wrappedProfile.getName(), wrappedProfile);
+
+                        //LD不支持直接用profile设置皮肤，只能先存到本地设置完再移除
+                        DisguiseAPI.addGameProfile(LDprofile.toString(), LDprofile);
+                        disguise.setSkin(LDprofile);
+                        DisguiseUtilities.removeGameProfile(LDprofile.toString());
+
+                        uuidPlayerTexturesMap.put(playerUniqueId, profileTexture);
+                        return true;
+                    }
+                }
+            }
+
+            updateLastPlayerMorphOperationTime(player);
+        }
+        else
+        {
+            var targetedEntity = player.getTargetEntity(5);
+
+            if (targetedEntity != null)
+            {
+                var disg = DisguiseAPI.getDisguise(targetedEntity);
+
+                String targetKey;
+
+                if (targetedEntity instanceof Player targetPlayer)
+                {
+                    var playerState = this.getDisguiseStateFor(targetPlayer);
+
+                    //目标实体是玩家：玩家伪装ID > 玩家名
+                    targetKey = playerState != null
+                            ? playerState.getDisguiseIdentifier()
+                            : DisguiseTypes.PLAYER.toId(targetPlayer.getName());
+                }
+                else
+                {
+                    //否则：伪装ID > 伪装类型 > 生物类型
+                    targetKey = disg != null
+                            ? (disg instanceof PlayerDisguise pd)
+                            ? DisguiseTypes.PLAYER.toId(pd.getName())
+                            : disg.getType().getEntityType().getKey().asString()
+                            : targetedEntity.getType().getKey().asString();
+                }
+
+                morph(player, targetKey, targetedEntity);
+
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     /**
      * 通过给定的key来决定要伪装还是取消伪装。
      * 如果伪装ID和给定的ID一致，则取消伪装，反之进行伪装。
@@ -434,6 +583,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         player.sendMessage(MessageUtils.prefixes(player, MorphStrings.unMorphSuccessString()));
         player.sendActionBar(Component.empty());
+
+        uuidPlayerTexturesMap.remove(player.getUniqueId());
 
         Bukkit.getPluginManager().callEvent(new PlayerUnMorphEvent(player));
     }
@@ -680,6 +831,9 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
     //endregion 玩家伪装相关
 
+    @Resolved
+    private MorphClientHandler clientHandler;
+
     //region Implementation of IManagePlayerData
 
     @Override
@@ -698,12 +852,14 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     @Override
     public boolean grantMorphToPlayer(Player player, String disguiseIdentifier)
     {
+        clientHandler.sendDiff(List.of(disguiseIdentifier), null, player);
         return data.grantMorphToPlayer(player, disguiseIdentifier);
     }
 
     @Override
     public boolean revokeMorphFromPlayer(Player player, String disguiseIdentifier)
     {
+        clientHandler.sendDiff(null, List.of(disguiseIdentifier), player);
         return data.revokeMorphFromPlayer(player, disguiseIdentifier);
     }
 
@@ -730,6 +886,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         var success = data.reloadConfiguration() && offlineStorage.reloadConfiguration();
 
         stateToOfflineStore.forEach(offlineStorage::pushDisguiseState);
+
+        Bukkit.getOnlinePlayers().forEach(p -> clientHandler.refreshPlayerClientMorphs(this.getPlayerConfiguration(p).getUnlockedDisguiseIdentifiers(), p));
 
         return success;
     }
