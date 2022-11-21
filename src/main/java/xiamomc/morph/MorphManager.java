@@ -187,7 +187,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     {
         var val = uuidMoprhTimeMap.get(uuid);
 
-        return val == null || plugin.getCurrentTick() - val >= 20;
+        return val == null || plugin.getCurrentTick() - val >= 4;
     }
 
     /**
@@ -507,6 +507,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
                 player.sendMessage(MessageUtils.prefixes(player, msg));
 
+                clientHandler.updateCurrentIdentifier(player, key);
+
                 return true;
             }
             catch (IllegalArgumentException iae)
@@ -586,6 +588,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         player.sendActionBar(Component.empty());
 
         uuidPlayerTexturesMap.remove(player.getUniqueId());
+
+        clientHandler.updateCurrentIdentifier(player, null);
 
         Bukkit.getPluginManager().callEvent(new PlayerUnMorphEvent(player));
     }

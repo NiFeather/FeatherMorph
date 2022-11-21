@@ -20,26 +20,22 @@ public class MorphClientHandler extends MorphPluginObject
     {
         Bukkit.getMessenger().registerIncomingPluginChannel(plugin, initializeChannel, (cN, player, data) ->
         {
-            if (initializedPlayers.contains(player))
-            {
-                player.sendPluginMessage(plugin, initializeChannel, "no".getBytes());
-            }
-            else
-            {
-                var list = manager.getPlayerConfiguration(player).getUnlockedDisguiseIdentifiers();
-                this.refreshPlayerClientMorphs(list, player);
-            }
+            player.sendPluginMessage(plugin, initializeChannel, "".getBytes());
+
+            clientPlayers.add(player);
         });
 
         var apiVersionBytes = ByteBuffer.allocate(4).putInt(plugin.clientApiVersion).array();
         Bukkit.getMessenger().registerIncomingPluginChannel(plugin, versionChannel, (cN, player, data) ->
         {
+            if (!clientPlayers.contains(player)) return;
+
             player.sendPluginMessage(plugin, versionChannel, apiVersionBytes);
         });
 
-        Bukkit.getMessenger().registerIncomingPluginChannel(plugin, abilityChannel, (cN, player, data) ->
+        Bukkit.getMessenger().registerIncomingPluginChannel(plugin, commandChannel, (cN, player, data) ->
         {
-            if (noOpPlayers.contains(player)) return;
+            if (!clientPlayers.contains(player)) return;
 
             var str = new String(data, StandardCharsets.UTF_8).split(" ", 2);
 
@@ -56,7 +52,13 @@ public class MorphClientHandler extends MorphPluginObject
                     if (state != null && state.getSkillCooldown() <= 0)
                         manager.executeDisguiseSkill(player);
                 }
-                case "unmorph" -> manager.unMorph(player);
+                case "unmorph" ->
+                {
+                    if (manager.getDisguiseStateFor(player) != null)
+                        manager.unMorph(player);
+                    else
+                        player.sendPluginMessage(plugin, commandChannel, "deny morph".getBytes());
+                }
                 case "toggleself" -> manager.setSelfDisguiseVisible(player, !manager.getPlayerConfiguration(player).showDisguiseToSelf, true);
                 case "morph" ->
                 {
@@ -66,23 +68,40 @@ public class MorphClientHandler extends MorphPluginObject
 
                         if (manager.canMorph(player))
                             manager.morph(player, subCommands, player.getTargetEntity(5));
+                        else
+                            player.sendPluginMessage(plugin, commandChannel, "deny morph".getBytes());
                     }
                     else
                     {
                         manager.doQuickDisguise(player);
                     }
                 }
-            }
+                case "initial" ->
+                {
+                    if (initialzedPlayers.contains(player))
+                        return;
 
-            noOpPlayers.add(player);
+                    var list = manager.getPlayerConfiguration(player).getUnlockedDisguiseIdentifiers();
+                    this.refreshPlayerClientMorphs(list, player);
+
+                    var state = manager.getDisguiseStateFor(player);
+
+                    if (state != null)
+                        updateCurrentIdentifier(player, state.getDisguiseIdentifier());
+
+                    initialzedPlayers.add(player);
+                }
+            }
         });
 
         Bukkit.getMessenger().registerOutgoingPluginChannel(plugin, initializeChannel);
         Bukkit.getMessenger().registerOutgoingPluginChannel(plugin, versionChannel);
-        Bukkit.getMessenger().registerOutgoingPluginChannel(plugin, abilityChannel);
-
-        this.addSchedule(c -> update());
+        Bukkit.getMessenger().registerOutgoingPluginChannel(plugin, commandChannel);
     }
+
+    private final List<Player> initialzedPlayers = new ObjectArrayList<>();
+
+    private final List<Player> clientPlayers = new ObjectArrayList<>();
 
     public void refreshPlayerClientMorphs(List<String> identifiers, Player player)
     {
@@ -93,7 +112,7 @@ public class MorphClientHandler extends MorphPluginObject
         for (var s : identifiers)
             additBuilder.append(s).append(" ");
 
-        player.sendPluginMessage(plugin, abilityChannel, additBuilder.toString().getBytes());
+        player.sendPluginMessage(plugin, commandChannel, additBuilder.toString().getBytes());
     }
 
     public void sendDiff(@Nullable List<String> addits, @Nullable List<String> removal, Player player)
@@ -107,7 +126,7 @@ public class MorphClientHandler extends MorphPluginObject
             for (var s : addits)
                 additBuilder.append(s).append(" ");
 
-            player.sendPluginMessage(plugin, abilityChannel, additBuilder.toString().getBytes());
+            player.sendPluginMessage(plugin, commandChannel, additBuilder.toString().getBytes());
         }
 
         if (removal != null)
@@ -119,28 +138,30 @@ public class MorphClientHandler extends MorphPluginObject
             for (var rs : removal)
                 removalBuilder.append(rs).append(" ");
 
-            player.sendPluginMessage(plugin, abilityChannel, removalBuilder.toString().getBytes());
+            player.sendPluginMessage(plugin, commandChannel, removalBuilder.toString().getBytes());
         }
     }
 
-    private final List<Player> noOpPlayers = new ObjectArrayList<>();
+    public void updateCurrentIdentifier(Player player, String str)
+    {
+        var builder = new StringBuilder();
 
-    private final List<Player> initializedPlayers = new ObjectArrayList<>();
+        builder.append("current");
+
+        if (str != null)
+            builder.append(" ").append(str);
+
+        player.sendPluginMessage(plugin, commandChannel, builder.toString().getBytes());
+    }
 
     public void unInitializePlayer(Player player)
     {
-        this.initializedPlayers.remove(player);
-    }
-
-    private void update()
-    {
-        noOpPlayers.clear();
-        this.addSchedule(c -> update());
+        this.clientPlayers.remove(player);
     }
 
     private static final String nameSpace = MorphPlugin.getMorphNameSpace();
 
     public static final String initializeChannel = nameSpace + ":init";
     public static final String versionChannel = nameSpace + ":version";
-    public static final String abilityChannel = nameSpace + ":commands";
+    public static final String commandChannel = nameSpace + ":commands";
 }

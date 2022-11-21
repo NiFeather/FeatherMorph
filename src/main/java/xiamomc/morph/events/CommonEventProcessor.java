@@ -7,6 +7,7 @@ import me.libraryaddict.disguise.utilities.DisguiseUtilities;
 import me.libraryaddict.disguise.utilities.reflection.ReflectionManager;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.*;
@@ -264,8 +265,6 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
     {
         var player = e.getPlayer();
         var state = morphs.getDisguiseStateFor(player);
-
-        this.addSchedule(c -> player.sendPluginMessage(plugin, MorphClientHandler.initializeChannel, "".getBytes()), 10);
 
         if (state != null)
         {
