@@ -117,14 +117,13 @@ public class MorphClientHandler extends MorphPluginObject
         {
             var players = Bukkit.getOnlinePlayers();
 
+            initialzedPlayers.removeAll(players);
+            clientPlayers.removeAll(players);
+
             if (n)
                 this.sendReAuth(players);
             else
-            {
                 this.sendUnAuth(players);
-                initialzedPlayers.removeAll(players);
-                clientPlayers.removeAll(players);
-            }
         });
     }
 
