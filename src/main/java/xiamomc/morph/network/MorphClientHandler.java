@@ -4,7 +4,6 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
-import org.sqlite.Collation;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.MorphPluginObject;
@@ -21,6 +20,7 @@ import java.util.List;
 public class MorphClientHandler extends MorphPluginObject
 {
     private final Bindable<Boolean> allowClient = new Bindable<>(false);
+    private final Bindable<Boolean> logPackets = new Bindable<>(false);
 
     @Initializer
     private void load(MorphPlugin plugin, MorphManager manager, MorphConfigManager configManager)
@@ -28,6 +28,9 @@ public class MorphClientHandler extends MorphPluginObject
         Bukkit.getMessenger().registerIncomingPluginChannel(plugin, initializeChannel, (cN, player, data) ->
         {
             if (!allowClient.get()) return;
+
+            if (logPackets.get())
+                logger.info("收到了来自" + player.getName() + "的初始化消息：" + new String(data, StandardCharsets.UTF_8));
 
             player.sendPluginMessage(plugin, initializeChannel, "".getBytes());
 
@@ -41,6 +44,9 @@ public class MorphClientHandler extends MorphPluginObject
 
             if (!clientPlayers.contains(player)) return;
 
+            if (logPackets.get())
+                logger.info("收到了来自" + player.getName() + "的API请求：" + new String(data, StandardCharsets.UTF_8));
+
             player.sendPluginMessage(plugin, versionChannel, apiVersionBytes);
         });
 
@@ -49,6 +55,9 @@ public class MorphClientHandler extends MorphPluginObject
             if (!allowClient.get()) return;
 
             if (!clientPlayers.contains(player)) return;
+
+            if (logPackets.get())
+                logger.info("在" + cN + "收到了来自" + player.getName() + "的服务端指令：" + new String(data, StandardCharsets.UTF_8));
 
             var str = new String(data, StandardCharsets.UTF_8).split(" ", 2);
 
@@ -112,6 +121,7 @@ public class MorphClientHandler extends MorphPluginObject
         Bukkit.getMessenger().registerOutgoingPluginChannel(plugin, commandChannel);
 
         configManager.bind(allowClient, ConfigOption.ALLOW_CLIENT);
+        configManager.bind(logPackets, ConfigOption.LOG_INCOMING_PACKETS);
 
         allowClient.onValueChanged((o, n) ->
         {
