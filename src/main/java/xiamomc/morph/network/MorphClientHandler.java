@@ -79,7 +79,7 @@ public class MorphClientHandler extends MorphPluginObject
                     if (manager.getDisguiseStateFor(player) != null)
                         manager.unMorph(player);
                     else
-                        player.sendPluginMessage(plugin, commandChannel, "deny morph".getBytes());
+                        sendClientCommand(player, ClientCommands.denyOperationCommand("morph"));
                 }
                 case "toggleself" -> manager.setSelfDisguiseVisible(player, !manager.getPlayerConfiguration(player).showDisguiseToSelf, true);
                 case "morph" ->
@@ -91,7 +91,7 @@ public class MorphClientHandler extends MorphPluginObject
                         if (manager.canMorph(player))
                             manager.morph(player, subCommands, player.getTargetEntity(5));
                         else
-                            player.sendPluginMessage(plugin, commandChannel, "deny morph".getBytes());
+                            sendClientCommand(player, ClientCommands.denyOperationCommand("morph"));
                     }
                     else
                     {
@@ -103,7 +103,8 @@ public class MorphClientHandler extends MorphPluginObject
                     if (initialzedPlayers.contains(player))
                         return;
 
-                    var list = manager.getPlayerConfiguration(player).getUnlockedDisguiseIdentifiers();
+                    var config = manager.getPlayerConfiguration(player);
+                    var list = config.getUnlockedDisguiseIdentifiers();
                     this.refreshPlayerClientMorphs(list, player);
 
                     var state = manager.getDisguiseStateFor(player);
@@ -111,6 +112,7 @@ public class MorphClientHandler extends MorphPluginObject
                     if (state != null)
                         updateCurrentIdentifier(player, state.getDisguiseIdentifier());
 
+                    sendClientCommand(player, ClientCommands.setToggleSelfCommand(config.showDisguiseToSelf));
                     initialzedPlayers.add(player);
                 }
             }
@@ -152,7 +154,7 @@ public class MorphClientHandler extends MorphPluginObject
         for (var s : identifiers)
             additBuilder.append(s).append(" ");
 
-        player.sendPluginMessage(plugin, commandChannel, additBuilder.toString().getBytes());
+        sendClientCommand(player, additBuilder.toString());
     }
 
     public void sendDiff(@Nullable List<String> addits, @Nullable List<String> removal, Player player)
@@ -168,7 +170,7 @@ public class MorphClientHandler extends MorphPluginObject
             for (var s : addits)
                 additBuilder.append(s).append(" ");
 
-            player.sendPluginMessage(plugin, commandChannel, additBuilder.toString().getBytes());
+            sendClientCommand(player, additBuilder.toString());
         }
 
         if (removal != null)
@@ -180,7 +182,7 @@ public class MorphClientHandler extends MorphPluginObject
             for (var rs : removal)
                 removalBuilder.append(rs).append(" ");
 
-            player.sendPluginMessage(plugin, commandChannel, removalBuilder.toString().getBytes());
+            sendClientCommand(player, removalBuilder.toString());
         }
     }
 
@@ -195,7 +197,7 @@ public class MorphClientHandler extends MorphPluginObject
         if (str != null)
             builder.append(" ").append(str);
 
-        player.sendPluginMessage(plugin, commandChannel, builder.toString().getBytes());
+        sendClientCommand(player, builder.toString());
     }
 
     public void unInitializePlayer(Player player)
@@ -207,12 +209,26 @@ public class MorphClientHandler extends MorphPluginObject
     {
         if (!allowClient.get()) return;
 
-        players.forEach(p -> p.sendPluginMessage(plugin, commandChannel, "reauth".getBytes()));
+        players.forEach(p -> sendClientCommand(p, "reauth"));
     }
 
     public void sendUnAuth(Collection<? extends Player> players)
     {
-        players.forEach(p -> p.sendPluginMessage(plugin, commandChannel, "unauth".getBytes()));
+        players.forEach(p -> sendClientCommand(p, "unauth", true));
+    }
+
+    private void sendClientCommand(Player player, String cmd, boolean overrideClientSetting)
+    {
+        if (cmd == null || cmd.isEmpty() || cmd.isBlank()) return;
+
+        if (!allowClient.get() && !overrideClientSetting) return;
+
+        player.sendPluginMessage(plugin, commandChannel, cmd.getBytes());
+    }
+
+    public void sendClientCommand(Player player, String cmd)
+    {
+        this.sendClientCommand(player, cmd, false);
     }
 
     private static final String nameSpace = MorphPlugin.getMorphNameSpace();

@@ -33,6 +33,7 @@ import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.MorphStrings;
 import xiamomc.morph.misc.*;
 import xiamomc.morph.misc.permissions.CommonPermissions;
+import xiamomc.morph.network.ClientCommands;
 import xiamomc.morph.network.MorphClientHandler;
 import xiamomc.morph.providers.DisguiseProvider;
 import xiamomc.morph.providers.LocalDisguiseProvider;
@@ -746,6 +747,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         if (state != null)
             state.setSelfVisible(value);
+
+        clientHandler.sendClientCommand(player, ClientCommands.setToggleSelfCommand(value));
 
         if (saveToConfig)
         {
