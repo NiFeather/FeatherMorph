@@ -51,6 +51,29 @@ public abstract class DisguiseProvider extends MorphPluginObject
     public abstract boolean updateDisguise(Player player, DisguiseState state);
 
     /**
+     * 获取某个伪装的初始化指令
+     * @param state 目标伪装
+     * @return 要对客户端发送的指令列表
+     */
+    @NotNull
+    public abstract List<String> getInitialSyncCommands(DisguiseState state);
+
+    /**
+     * 获取某个伪装的客户端预览ID
+     * @param state 目标伪装
+     * @return ID
+     */
+    public String getSelfViewIdentifier(DisguiseState state)
+    {
+        return state.getDisguiseIdentifier();
+    }
+
+    public boolean validForClient(DisguiseState state)
+    {
+        return false;
+    }
+
+    /**
      * 取消某个玩家的伪装
      * @param player 目标玩家
      * @return 操作是否成功

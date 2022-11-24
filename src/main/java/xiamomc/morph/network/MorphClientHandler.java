@@ -304,6 +304,7 @@ public class MorphClientHandler extends MorphPluginObject
 
     public void sendClientCommand(Player player, String cmd)
     {
+        logger.info("SENGING PACKET TO " + player.getName() + ": " + cmd);
         this.sendClientCommand(player, cmd, false);
     }
 

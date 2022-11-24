@@ -143,7 +143,7 @@ public class DisguiseUtils
 
     private static final ItemStack air = new ItemStack(Material.AIR);
 
-    private static ItemStack itemOrAir(ItemStack stack)
+    public static ItemStack itemOrAir(ItemStack stack)
     {
         return stack == null ? air : stack;
     }

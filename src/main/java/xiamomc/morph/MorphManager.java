@@ -35,10 +35,7 @@ import xiamomc.morph.misc.*;
 import xiamomc.morph.misc.permissions.CommonPermissions;
 import xiamomc.morph.network.ClientCommands;
 import xiamomc.morph.network.MorphClientHandler;
-import xiamomc.morph.providers.DisguiseProvider;
-import xiamomc.morph.providers.LocalDisguiseProvider;
-import xiamomc.morph.providers.PlayerDisguiseProvider;
-import xiamomc.morph.providers.VanillaDisguiseProvider;
+import xiamomc.morph.providers.*;
 import xiamomc.morph.skills.MorphSkillHandler;
 import xiamomc.morph.skills.SkillCooldownInfo;
 import xiamomc.morph.skills.SkillType;
@@ -77,6 +74,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     @Resolved
     private MorphConfigManager config;
 
+    private static final DisguiseProvider fallbackProvider = new FallbackProvider();
+
     @Initializer
     private void load()
     {
@@ -88,7 +87,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         registerProviders(ObjectList.of(
                 new VanillaDisguiseProvider(),
                 new PlayerDisguiseProvider(),
-                new LocalDisguiseProvider()
+                new LocalDisguiseProvider(),
+                fallbackProvider
         ));
     }
 
@@ -216,7 +216,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
      * @param id 目标ID
      * @return 一个DisguiseProvider，若没找到或id是null则返回null
      */
-    @Nullable
     public static DisguiseProvider getProvider(String id)
     {
         if (id == null) return null;
@@ -224,7 +223,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         id += ":";
         var splitedId = id.split(":", 2);
 
-        return providers.stream().filter(p -> p.getIdentifier().equals(splitedId[0])).findFirst().orElse(null);
+        return providers.stream().filter(p -> p.getIdentifier().equals(splitedId[0])).findFirst().orElse(fallbackProvider);
     }
 
     /**
@@ -591,7 +590,10 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         uuidPlayerTexturesMap.remove(player.getUniqueId());
 
         if (plugin.isEnabled())
+        {
             clientHandler.updateCurrentIdentifier(player, null);
+            clientHandler.sendClientCommand(player, "set selfview " + null);
+        }
 
         Bukkit.getPluginManager().callEvent(new PlayerUnMorphEvent(player));
     }
@@ -687,7 +689,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         spawnParticle(sourcePlayer, sourcePlayer.getLocation(), cX, cY, cZ);
 
         //确保玩家可以根据设置看到自己的伪装
-        var selfView = (!clientHandler.getPlayerOption(sourcePlayer).isClientSideSelfView() || state.getDisguiseType() != DisguiseTypes.VANILLA)
+        var selfView = (!clientHandler.getPlayerOption(sourcePlayer).isClientSideSelfView() || !state.getProvider().validForClient(state))
                         && config.showDisguiseToSelf;
         state.setSelfVisible(selfView);
 
@@ -752,7 +754,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         var state = getDisguiseStateFor(player);
         var config = data.getPlayerConfiguration(player);
 
-        if (state != null && (!skipState || state.getDisguiseType() != DisguiseTypes.VANILLA))
+        if (state != null && (!skipState || !state.getProvider().validForClient(state)))
             state.setSelfVisible(value);
 
         if (!noClientCommand)

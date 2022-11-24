@@ -6,14 +6,18 @@ import me.libraryaddict.disguise.disguisetypes.Disguise;
 import me.libraryaddict.disguise.disguisetypes.DisguiseType;
 import me.libraryaddict.disguise.disguisetypes.MobDisguise;
 import me.libraryaddict.disguise.disguisetypes.VillagerData;
+import me.libraryaddict.disguise.disguisetypes.watchers.ArmorStandWatcher;
 import me.libraryaddict.disguise.disguisetypes.watchers.CatWatcher;
 import me.libraryaddict.disguise.disguisetypes.watchers.VillagerWatcher;
+import me.libraryaddict.disguise.disguisetypes.watchers.ZombieWatcher;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.misc.*;
+import xiamomc.morph.skills.SkillType;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class VanillaDisguiseProvider extends DefaultDisguiseProvider
@@ -104,6 +108,12 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
                 }
             }
         }
+    }
+
+    @Override
+    public boolean validForClient(DisguiseState state)
+    {
+        return true;
     }
 
     @Override

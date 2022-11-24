@@ -21,6 +21,7 @@ import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.abilities.AbilityHandler;
 import xiamomc.morph.abilities.IMorphAbility;
 import xiamomc.morph.providers.DisguiseProvider;
+import xiamomc.morph.skills.IMorphSkill;
 import xiamomc.morph.skills.MorphSkillHandler;
 import xiamomc.morph.skills.SkillCooldownInfo;
 import xiamomc.morph.skills.SkillType;
@@ -142,7 +143,7 @@ public class DisguiseState extends MorphPluginObject
 
     private boolean noProvider;
 
-    @Nullable
+    @NotNull
     public DisguiseProvider getProvider()
     {
         if (provider == null && !noProvider)
@@ -220,6 +221,22 @@ public class DisguiseState extends MorphPluginObject
     public void setSkillIdentifier(@Nullable String skillID)
     {
         this.skillIdentifier = skillID;
+    }
+
+    private IMorphSkill<?> skill;
+
+    public void setSkill(IMorphSkill<?> s)
+    {
+        if (this.skill != null) skill.onDeEquip(this);
+
+        this.skill = s;
+        s.onInitialEquip(this);
+    }
+
+    @Nullable
+    public IMorphSkill<?> getSkill()
+    {
+        return skill;
     }
 
     /**

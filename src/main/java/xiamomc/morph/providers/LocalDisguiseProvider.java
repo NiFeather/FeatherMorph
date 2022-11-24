@@ -113,4 +113,16 @@ public class LocalDisguiseProvider extends VanillaDisguiseProvider
 
         return Component.text(ldID);
     }
+
+    @Override
+    public boolean validForClient(DisguiseState state)
+    {
+        return true;
+    }
+
+    @Override
+    public String getSelfViewIdentifier(DisguiseState state)
+    {
+        return state.getEntityType().getKey().asString();
+    }
 }

@@ -1,5 +1,9 @@
 package xiamomc.morph.providers;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.mojang.serialization.JsonOps;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.disguisetypes.Disguise;
 import me.libraryaddict.disguise.disguisetypes.DisguiseType;
@@ -9,6 +13,7 @@ import me.libraryaddict.disguise.disguisetypes.watchers.LivingWatcher;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.craftbukkit.v1_19_R1.inventory.CraftItemStack;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -16,17 +21,24 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scoreboard.Scoreboard;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.abilities.AbilityHandler;
 import xiamomc.morph.messages.MorphStrings;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.misc.DisguiseTypes;
 import xiamomc.morph.misc.DisguiseUtils;
+import xiamomc.morph.network.MorphClientHandler;
 import xiamomc.morph.skills.MorphSkillHandler;
+import xiamomc.morph.skills.SkillType;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.morph.misc.ColorUtils;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.List;
+
+import static xiamomc.morph.misc.DisguiseUtils.itemOrAir;
 
 /**
  * 提供一个默认的DisguiseProvider
@@ -95,6 +107,54 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
         }
 
         return true;
+    }
+
+    @NotNull
+    @Override
+    public List<String> getInitialSyncCommands(DisguiseState state)
+    {
+        logger.info("SID: " + state.getSkillIdentifier() + " :: DID: " + state.getDisguiseIdentifier());
+        if (skillHandler.hasSpeficSkill(state.getSkillIdentifier(), SkillType.INVENTORY))
+        {
+            var watcher = state.getDisguise().getWatcher();
+
+            var eqiupment = watcher.getEquipment();
+
+            return ObjectArrayList.of(
+                    "set equip mainhand "
+                            + itemToStr(eqiupment.getItemInMainHand()),
+                    "set equip offhand "
+                            + itemToStr(eqiupment.getItemInOffHand()),
+                    "set equip helmet "
+                            + itemToStr(eqiupment.getHelmet()),
+                    "set equip chestplate "
+                            + itemToStr(eqiupment.getChestplate()),
+                    "set equip leggings "
+                            + itemToStr(eqiupment.getLeggings()),
+                    "set equip boots "
+                            + itemToStr(eqiupment.getBoots())
+            );
+        }
+
+        return List.of();
+    }
+
+    private String itemToStr(ItemStack stack)
+    {
+        var item = itemOrAir(stack);
+
+        //CODEC
+        var nmsCodec = net.minecraft.world.item.ItemStack.a;
+        var json = nmsCodec.encode(CraftItemStack.asNMSCopy(item), JsonOps.INSTANCE, JsonOps.INSTANCE.empty())
+                .result();
+
+        var gson = new Gson();
+        if (json.isPresent())
+        {
+            return gson.toJson(json.get());
+        }
+
+        return "";
     }
 
     @Override
@@ -171,6 +231,10 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
         if (abilities != null)
             abilities.forEach(a -> a.applyToPlayer(state.getPlayer(), state));
 
+        //主动技能
+        var skill = skillHandler.getSkill(state.getSkillIdentifier());
+        state.setSkill(skill);
+
         //发光颜色
         ChatColor glowColor = null;
         Entity teamTargetEntity = targetEntity;
@@ -211,5 +275,13 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
         //设置发光颜色
         state.setCustomGlowColor(ColorUtils.fromChatColor(glowColor));
         watcher.setGlowColor(glowColor);
+
+        //初始化客户端指令
+        clientHandler.sendClientCommand(state.getPlayer(), "set selfview " + getSelfViewIdentifier(state));
+
+        getInitialSyncCommands(state).forEach(s -> clientHandler.sendClientCommand(state.getPlayer(), s));
     }
+
+    @Resolved
+    private MorphClientHandler clientHandler;
 }
