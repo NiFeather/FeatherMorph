@@ -687,7 +687,9 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         spawnParticle(sourcePlayer, sourcePlayer.getLocation(), cX, cY, cZ);
 
         //确保玩家可以根据设置看到自己的伪装
-        setSelfDisguiseVisible(sourcePlayer, config.showDisguiseToSelf, false);
+        var selfView = (!clientHandler.getPlayerOption(sourcePlayer).isClientSideSelfView() || state.getDisguiseType() != DisguiseTypes.VANILLA)
+                        && config.showDisguiseToSelf;
+        state.setSelfVisible(selfView);
 
         if (!config.shownMorphAbilityHint && skillHandler.hasSkill(id))
         {
@@ -740,15 +742,21 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 particleScale >= 10 ? 0.2 : 0.05); //速度
     }
 
-    public void setSelfDisguiseVisible(Player player, boolean value, boolean saveToConfig)
+    public void setSelfDisguiseVisible(Player player, boolean val, boolean saveToConfig)
+    {
+        this.setSelfDisguiseVisible(player, val, saveToConfig, clientHandler.getPlayerOption(player).isClientSideSelfView(), false);
+    }
+
+    public void setSelfDisguiseVisible(Player player, boolean value, boolean saveToConfig, boolean skipState, boolean noClientCommand)
     {
         var state = getDisguiseStateFor(player);
         var config = data.getPlayerConfiguration(player);
 
-        if (state != null)
+        if (state != null && (!skipState || state.getDisguiseType() != DisguiseTypes.VANILLA))
             state.setSelfVisible(value);
 
-        clientHandler.sendClientCommand(player, ClientCommands.setToggleSelfCommand(value));
+        if (!noClientCommand)
+            clientHandler.sendClientCommand(player, ClientCommands.setToggleSelfCommand(value));
 
         if (saveToConfig)
         {

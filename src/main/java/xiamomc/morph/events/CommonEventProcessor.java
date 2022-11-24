@@ -278,6 +278,10 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
             //刷新Disguise
             state.setDisguise(state.getDisguiseIdentifier(), state.getSkillIdentifier(), DisguiseAPI.getDisguise(player), state.shouldHandlePose(), false);
 
+            //刷新被动
+            var abilities = state.getAbilities();
+            abilities.forEach(a -> a.applyToPlayer(state.getPlayer(), state));
+
             //调用Morph事件
             Bukkit.getPluginManager().callEvent(new PlayerMorphEvent(player, state));
 

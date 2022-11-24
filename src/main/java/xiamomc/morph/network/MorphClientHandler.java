@@ -1,5 +1,7 @@
 package xiamomc.morph.network;
 
+import com.destroystokyo.paper.ClientOption;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -16,6 +18,8 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 public class MorphClientHandler extends MorphPluginObject
 {
@@ -81,7 +85,38 @@ public class MorphClientHandler extends MorphPluginObject
                     else
                         sendClientCommand(player, ClientCommands.denyOperationCommand("morph"));
                 }
-                case "toggleself" -> manager.setSelfDisguiseVisible(player, !manager.getPlayerConfiguration(player).showDisguiseToSelf, true);
+                case "toggleself" ->
+                {
+                    if (str.length != 2) return;
+
+                    var subData = str[1].split(" ");
+
+                    if (subData.length < 1) return;
+
+                    //获取客户端选项
+                    var playerOption = getPlayerOption(player);
+                    var playerConfig = manager.getPlayerConfiguration(player);
+
+                    if (subData[0].equals("client"))
+                    {
+                        if (subData.length < 2) return;
+
+                        var isClient = Boolean.parseBoolean(subData[1]);
+
+                        playerOption.setClientSideSelfView(isClient);
+
+                        //如果客户端打开了本地预览，则隐藏伪装，否则显示伪装
+                        var state = manager.getDisguiseStateFor(player);
+                        if (state != null) state.setSelfVisible(!isClient && playerConfig.showDisguiseToSelf);
+                    }
+                    else
+                    {
+                        var val = Boolean.parseBoolean(subData[0]);
+
+                        if (val == playerConfig.showDisguiseToSelf) return;
+                        manager.setSelfDisguiseVisible(player, val, true, playerOption.isClientSideSelfView(), false);
+                    }
+                }
                 case "morph" ->
                 {
                     if (str.length == 2)
@@ -115,6 +150,27 @@ public class MorphClientHandler extends MorphPluginObject
                     sendClientCommand(player, ClientCommands.setToggleSelfCommand(config.showDisguiseToSelf));
                     initialzedPlayers.add(player);
                 }
+                case "option" ->
+                {
+                    if (str.length < 2) return;
+
+                    var node = str[1].split(" ", 2);
+
+                    if (node.length < 2) return;
+
+                    var baseName = node[0];
+                    var value = node[1];
+
+                    switch (baseName)
+                    {
+                        case "clientview" ->
+                        {
+                            var val = Boolean.parseBoolean(value);
+
+                            this.getPlayerOption(player).setClientSideSelfView(val);
+                        }
+                    }
+                }
             }
         });
 
@@ -137,6 +193,21 @@ public class MorphClientHandler extends MorphPluginObject
             else
                 this.sendUnAuth(players);
         });
+    }
+
+    private final Map<UUID, MorphClientOptions> playerOptionMap = new Object2ObjectOpenHashMap<>();
+
+    public MorphClientOptions getPlayerOption(Player player)
+    {
+        var uuid = player.getUniqueId();
+        var option = playerOptionMap.getOrDefault(uuid, null);
+
+        if (option != null) return option;
+
+        option = new MorphClientOptions(player);
+        playerOptionMap.put(uuid, option);
+
+        return option;
     }
 
     private final List<Player> initialzedPlayers = new ObjectArrayList<>();
@@ -203,6 +274,7 @@ public class MorphClientHandler extends MorphPluginObject
     public void unInitializePlayer(Player player)
     {
         this.clientPlayers.remove(player);
+        this.playerOptionMap.clear();
     }
 
     public void sendReAuth(Collection<? extends Player> players)
