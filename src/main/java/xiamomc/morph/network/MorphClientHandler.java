@@ -286,7 +286,11 @@ public class MorphClientHandler extends MorphPluginObject
 
     public void sendUnAuth(Collection<? extends Player> players)
     {
-        players.forEach(p -> sendClientCommand(p, "unauth", true));
+        players.forEach(p ->
+        {
+            sendClientCommand(p, "unauth", true);
+            unInitializePlayer(p);
+        });
     }
 
     private void sendClientCommand(Player player, String cmd, boolean overrideClientSetting)
