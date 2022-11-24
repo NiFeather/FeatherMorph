@@ -481,6 +481,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
                 var provider = getProvider(strippedKey[0]);
 
+                DisguiseState outComingState = null;
+
                 if (provider == null)
                 {
                     player.sendMessage(MessageUtils.prefixes(player, MorphStrings.disguiseBannedOrNotSupportedString()));
@@ -498,7 +500,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                         return false;
                     }
 
-                    postConstructDisguise(player, targetEntity,
+                    outComingState = postConstructDisguise(player, targetEntity,
                             info.getIdentifier(), result.disguise(), result.isCopy(), provider);
                 }
 
@@ -508,6 +510,17 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 player.sendMessage(MessageUtils.prefixes(player, msg));
 
                 clientHandler.updateCurrentIdentifier(player, key);
+
+                //初始化客户端指令
+                clientHandler.sendClientCommand(player, "set selfview " + provider.getSelfViewIdentifier(outComingState));
+
+                provider.getInitialSyncCommands(outComingState).forEach(s -> clientHandler.sendClientCommand(player, s));
+
+                //初始化nbt
+                var compound = provider.getNbtCompound(outComingState, targetEntity);
+
+                if (compound != null)
+                    clientHandler.sendClientCommand(player, "set nbt " + compound);
 
                 return true;
             }
@@ -613,7 +626,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
      * @param shouldHandlePose 要不要手动更新伪装Pose？（伪装是否为克隆）
      * @param provider {@link DisguiseProvider}
      */
-    private void postConstructDisguise(Player sourcePlayer, @Nullable Entity targetEntity,
+    private DisguiseState postConstructDisguise(Player sourcePlayer, @Nullable Entity targetEntity,
                                        String id, Disguise disguise, boolean shouldHandlePose,
                                        @Nullable DisguiseProvider provider)
     {
@@ -725,6 +738,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         //调用事件
         Bukkit.getPluginManager().callEvent(new PlayerMorphEvent(sourcePlayer, state));
+
+        return state;
     }
 
     public void spawnParticle(Player player, Location location, double collX, double collY, double collZ)

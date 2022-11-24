@@ -1,8 +1,16 @@
 package xiamomc.morph.providers;
 
+import com.google.gson.Gson;
+import com.mojang.serialization.JsonOps;
 import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.disguisetypes.Disguise;
 import net.kyori.adventure.text.Component;
+import net.minecraft.nbt.GameProfileSerializer;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.server.commands.data.CommandDataAccessorEntity;
+import net.minecraft.world.level.block.entity.TileEntityBeehive;
+import org.bukkit.craftbukkit.v1_19_R1.block.impl.CraftSkullPlayer;
+import org.bukkit.craftbukkit.v1_19_R1.entity.CraftLivingEntity;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -71,6 +79,29 @@ public abstract class DisguiseProvider extends MorphPluginObject
     public boolean validForClient(DisguiseState state)
     {
         return false;
+    }
+
+    @Nullable
+    public String getNbtCompound(DisguiseState state, Entity targetEntity)
+    {
+        if (targetEntity instanceof CraftLivingEntity craftEntity)
+        {
+            //nms
+            var compund = new NBTTagCompound();
+
+            var nmsEntity = craftEntity.getHandle();
+
+            var entityDataObject = new CommandDataAccessorEntity(nmsEntity);
+
+            compund = entityDataObject.a();
+
+            var str = GameProfileSerializer.d(compund);
+
+            str = str.replace("\n", "");
+            return str;
+        }
+
+        return null;
     }
 
     /**

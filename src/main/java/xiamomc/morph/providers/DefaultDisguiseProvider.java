@@ -11,8 +11,10 @@ import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
 import me.libraryaddict.disguise.disguisetypes.watchers.ArmorStandWatcher;
 import me.libraryaddict.disguise.disguisetypes.watchers.LivingWatcher;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.minecraft.nbt.NBTTagCompound;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.craftbukkit.v1_19_R1.entity.CraftLivingEntity;
 import org.bukkit.craftbukkit.v1_19_R1.inventory.CraftItemStack;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
@@ -275,11 +277,6 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
         //设置发光颜色
         state.setCustomGlowColor(ColorUtils.fromChatColor(glowColor));
         watcher.setGlowColor(glowColor);
-
-        //初始化客户端指令
-        clientHandler.sendClientCommand(state.getPlayer(), "set selfview " + getSelfViewIdentifier(state));
-
-        getInitialSyncCommands(state).forEach(s -> clientHandler.sendClientCommand(state.getPlayer(), s));
     }
 
     @Resolved

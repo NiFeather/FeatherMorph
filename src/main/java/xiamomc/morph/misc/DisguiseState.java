@@ -230,7 +230,8 @@ public class DisguiseState extends MorphPluginObject
         if (this.skill != null) skill.onDeEquip(this);
 
         this.skill = s;
-        s.onInitialEquip(this);
+
+        if (s != null) s.onInitialEquip(this);
     }
 
     @Nullable
