@@ -84,7 +84,8 @@ public abstract class DisguiseProvider extends MorphPluginObject
     @Nullable
     public String getNbtCompound(DisguiseState state, Entity targetEntity)
     {
-        if (targetEntity instanceof CraftLivingEntity craftEntity)
+        if (targetEntity instanceof CraftLivingEntity craftEntity
+            && canConstruct(getMorphManager().getDisguiseInfo(state.getDisguiseIdentifier()), targetEntity, null))
         {
             //nms
             var compund = new NBTTagCompound();
