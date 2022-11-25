@@ -1,7 +1,6 @@
 package xiamomc.morph.providers;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.mojang.serialization.JsonOps;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import me.libraryaddict.disguise.DisguiseAPI;
@@ -11,10 +10,8 @@ import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
 import me.libraryaddict.disguise.disguisetypes.watchers.ArmorStandWatcher;
 import me.libraryaddict.disguise.disguisetypes.watchers.LivingWatcher;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.minecraft.nbt.NBTTagCompound;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.craftbukkit.v1_19_R1.entity.CraftLivingEntity;
 import org.bukkit.craftbukkit.v1_19_R1.inventory.CraftItemStack;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
@@ -27,6 +24,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.abilities.AbilityHandler;
 import xiamomc.morph.messages.MorphStrings;
+import xiamomc.morph.misc.ColorUtils;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.misc.DisguiseTypes;
 import xiamomc.morph.misc.DisguiseUtils;
@@ -34,10 +32,7 @@ import xiamomc.morph.network.MorphClientHandler;
 import xiamomc.morph.skills.MorphSkillHandler;
 import xiamomc.morph.skills.SkillType;
 import xiamomc.pluginbase.Annotations.Resolved;
-import xiamomc.morph.misc.ColorUtils;
 
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.List;
 
 import static xiamomc.morph.misc.DisguiseUtils.itemOrAir;
@@ -229,13 +224,6 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
         //被动技能
         var abilities = abilityHandler.getAbilitiesFor(state.getSkillIdentifier());
         state.setAbilities(abilities);
-
-        if (abilities != null)
-            abilities.forEach(a -> a.applyToPlayer(state.getPlayer(), state));
-
-        //主动技能
-        var skill = skillHandler.getSkill(state.getSkillIdentifier());
-        state.setSkill(skill);
 
         //发光颜色
         ChatColor glowColor = null;

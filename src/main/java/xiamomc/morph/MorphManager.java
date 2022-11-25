@@ -511,6 +511,17 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
                 clientHandler.updateCurrentIdentifier(player, key);
 
+                //主动技能
+                var skill = skillHandler.getSkill(outComingState.getSkillIdentifier());
+                outComingState.setSkill(skill);
+
+                var abilities = outComingState.getAbilities();
+                if (abilities != null)
+                {
+                    var finalOutComingState = outComingState;
+                    abilities.forEach(a -> a.applyToPlayer(player, finalOutComingState));
+                }
+
                 //初始化客户端指令
                 clientHandler.sendClientCommand(player, "set selfview " + provider.getSelfViewIdentifier(outComingState));
 
