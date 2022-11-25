@@ -145,19 +145,9 @@ public class DisguiseState extends MorphPluginObject
      */
     private DisguiseProvider provider;
 
-    private boolean noProvider;
-
     @NotNull
     public DisguiseProvider getProvider()
     {
-        if (provider == null && !noProvider)
-        {
-            var val = MorphManager.getProvider(this.getDisguiseIdentifier());
-
-            if (val == null) noProvider = true;
-            else provider = val;
-        }
-
         return provider;
     }
 
@@ -365,6 +355,8 @@ public class DisguiseState extends MorphPluginObject
         disguiseType = DisguiseTypes.fromId(identifier);
 
         var provider = MorphManager.getProvider(identifier);
+
+        this.provider = provider;
 
         displayName = provider == null
                 ? Component.text(identifier)

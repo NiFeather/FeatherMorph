@@ -192,6 +192,9 @@ public class MorphClientHandler extends MorphPluginObject
                             var val = Boolean.parseBoolean(value);
 
                             this.getPlayerOption(player).setClientSideSelfView(val);
+
+                            var state = manager.getDisguiseStateFor(player);
+                            if (state != null) state.setSelfVisible(!val);
                         }
                     }
                 }

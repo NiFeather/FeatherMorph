@@ -749,9 +749,9 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         spawnParticle(sourcePlayer, sourcePlayer.getLocation(), cX, cY, cZ);
 
         //确保玩家可以根据设置看到自己的伪装
-        var selfView = (!clientHandler.getPlayerOption(sourcePlayer).isClientSideSelfView() || !state.getProvider().validForClient(state))
+        var serverSideSelfView = (!clientHandler.getPlayerOption(sourcePlayer).isClientSideSelfView() || !state.getProvider().validForClient(state))
                         && config.showDisguiseToSelf;
-        state.setSelfVisible(selfView);
+        state.setSelfVisible(serverSideSelfView);
 
         if (!config.shownMorphAbilityHint && skillHandler.hasSkill(id))
         {
