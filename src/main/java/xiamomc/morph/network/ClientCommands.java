@@ -12,6 +12,16 @@ public class ClientCommands
         return setBase + " toggleself " + val;
     }
 
+    public static String setSelfViewCommand(String identifier)
+    {
+        return setBase + " selfview " + identifier;
+    }
+
+    public static String setNbtCommand(String nbtString)
+    {
+        return setBase + " nbt " + nbtString;
+    }
+
     private static final String denyBase = "deny";
 
     public static String denyOperationCommand(String operationName)

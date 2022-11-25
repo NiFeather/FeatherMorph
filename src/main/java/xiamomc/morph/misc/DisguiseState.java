@@ -8,11 +8,14 @@ import me.libraryaddict.disguise.utilities.parser.DisguiseParser;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
+import net.minecraft.world.level.levelgen.structure.structures.SwampHutStructure;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -36,13 +39,14 @@ import java.util.UUID;
 public class DisguiseState extends MorphPluginObject
 {
     public DisguiseState(Player player, @NotNull String id, @NotNull String skillId,
-                         Disguise disguiseInstance, boolean isClone, @Nullable DisguiseProvider provider)
+                         Disguise disguiseInstance, boolean isClone, @Nullable DisguiseProvider provider,
+                         @Nullable EntityEquipment targetEquipment)
     {
         this.player = player;
         this.playerUniqueID = player.getUniqueId();
         this.provider = provider;
 
-        this.setDisguise(id, skillId, disguiseInstance, isClone);
+        this.setDisguise(id, skillId, disguiseInstance, isClone, targetEquipment);
     }
 
     /**
@@ -318,9 +322,23 @@ public class DisguiseState extends MorphPluginObject
     @Resolved(shouldSolveImmediately = true)
     private MorphSkillHandler skillHandler;
 
-    public void setDisguise(@NotNull String identifier, @NotNull String skillIdentifier, Disguise d, boolean shouldHandlePose)
+    public void setDisguise(@NotNull String identifier, @NotNull String skillIdentifier, Disguise d, boolean shouldHandlePose, @Nullable EntityEquipment equipment)
     {
-        setDisguise(identifier, skillIdentifier, d, shouldHandlePose, true);
+        setDisguise(identifier, skillIdentifier, d, shouldHandlePose, true, equipment);
+    }
+
+    private String cachedNbtString = "{}";
+
+    public String getCachedNbtString()
+    {
+        return cachedNbtString;
+    }
+
+    public void setCachedNbtString(String newNbt)
+    {
+        if (newNbt == null || newNbt.isEmpty() || newNbt.isBlank()) newNbt = "{}";
+
+        this.cachedNbtString = newNbt;
     }
 
     /**
@@ -328,9 +346,11 @@ public class DisguiseState extends MorphPluginObject
      * @param d 目标伪装
      * @param shouldHandlePose 是否要处理玩家Pose（或：是否为克隆的伪装）
      * @param shouldRefreshDisguiseItems 要不要刷新伪装物品？
+     * @param targetEquipment 要使用的equipment，没有则从伪装获取
      */
     public void setDisguise(@NotNull String identifier, @NotNull String skillIdentifier,
-                            Disguise d, boolean shouldHandlePose, boolean shouldRefreshDisguiseItems)
+                            Disguise d, boolean shouldHandlePose, boolean shouldRefreshDisguiseItems,
+                            @Nullable EntityEquipment targetEquipment)
     {
         if (!DisguiseUtils.isTracing(d))
             throw new RuntimeException("此Disguise不能由插件管理");
@@ -360,7 +380,7 @@ public class DisguiseState extends MorphPluginObject
         //重置伪装物品
         if (shouldRefreshDisguiseItems)
         {
-            defaultArmors = emptyArmorStack;
+            disguiseArmors = emptyArmorStack;
             handItems = emptyHandItems;
 
             //更新伪装物品
@@ -368,21 +388,22 @@ public class DisguiseState extends MorphPluginObject
             {
                 var watcher = disguise.getWatcher();
 
+                EntityEquipment equipment = targetEquipment != null ? targetEquipment : watcher.getEquipment();
+
                 //设置默认盔甲
-                var disguiseArmor = watcher.getArmor();
-                defaultArmors = new ItemStack[]
+                disguiseArmors = new ItemStack[]
                         {
-                                itemOrAir(disguiseArmor[0]),
-                                itemOrAir(disguiseArmor[1]),
-                                itemOrAir(disguiseArmor[2]),
-                                itemOrAir(disguiseArmor[3])
+                                itemOrAir(equipment.getBoots()),
+                                itemOrAir(equipment.getLeggings()),
+                                itemOrAir(equipment.getChestplate()),
+                                itemOrAir(equipment.getHelmet())
                         };
 
                 //设置默认手持物
                 handItems = new ItemStack[]
                         {
-                                itemOrAir(watcher.getItemInMainHand()),
-                                itemOrAir(watcher.getItemInOffHand())
+                                itemOrAir(equipment.getItemInMainHand()),
+                                itemOrAir(equipment.getItemInOffHand())
                         };
 
                 //workaround: 部分伪装复制装备时两个手会拥有一样的物品（虽然不是一个实例）
@@ -390,7 +411,7 @@ public class DisguiseState extends MorphPluginObject
                     handItems[1] = itemOrAir(null);
 
                 //全是空的，则默认显示自身装备
-                var emptyEquipment = Arrays.stream(defaultArmors).allMatch(i -> i != null && i.getType().isAir())
+                var emptyEquipment = Arrays.stream(disguiseArmors).allMatch(i -> i != null && i.getType().isAir())
                         && Arrays.stream(handItems).allMatch(i -> i != null && i.getType().isAir());
 
                 //开启默认装备显示或者更新显示
@@ -408,7 +429,7 @@ public class DisguiseState extends MorphPluginObject
      * 盔甲存储（适用于盔甲架和玩家伪装）
      */
     @Nullable
-    private ItemStack[] defaultArmors;
+    private ItemStack[] disguiseArmors;
 
     @Nullable
     private ItemStack[] handItems;
@@ -453,6 +474,21 @@ public class DisguiseState extends MorphPluginObject
         showDisguisedItems = value;
     }
 
+    public EntityEquipment getDisguisedItems()
+    {
+        var eq = new DisguiseEquipment();
+
+        var targetStack = disguiseArmors == null
+                    ? new ItemStack[]{itemOrAir(null), itemOrAir(null), itemOrAir(null), itemOrAir(null)}
+                    : disguiseArmors;
+
+        eq.setArmorContents(targetStack);
+        eq.setItemInHand(handItems[0]);
+        eq.setItemInOffHand(handItems[1]);
+
+        return eq;
+    }
+
     /**
      * 切换伪装物品是否可见
      * @return 切换后的值
@@ -472,7 +508,7 @@ public class DisguiseState extends MorphPluginObject
      */
     private void updateEquipment(FlagWatcher watcher, boolean showDefaults)
     {
-        watcher.setArmor(showDefaults ? defaultArmors : emptyArmorStack);
+        watcher.setArmor(showDefaults ? disguiseArmors : emptyArmorStack);
         watcher.setItemInMainHand(showDefaults ? handItems[0] : emptyHandItems[0]);
         watcher.setItemInOffHand(showDefaults ? handItems[1] : emptyHandItems[1]);
     }
@@ -517,9 +553,10 @@ public class DisguiseState extends MorphPluginObject
 
         if (player == null) throw new RuntimeException("未找到与" + offlineState.playerUUID + "对应的玩家");
 
+        //todo: 实现伪装装备保存和读取
         var state = new DisguiseState(player,
                 offlineState.disguiseID, offlineState.skillID == null ? offlineState.disguiseID : offlineState.skillID,
-                offlineState.disguise, offlineState.shouldHandlePose, null);
+                offlineState.disguise, offlineState.shouldHandlePose, null, null);
 
         if (state.supportsDisguisedItems)
             state.setShowingDisguisedItems(offlineState.showingDisguisedItems);

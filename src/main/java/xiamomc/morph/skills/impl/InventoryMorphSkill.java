@@ -51,6 +51,14 @@ public class InventoryMorphSkill extends MorphSkill<NoOpConfiguration>
     }
 
     @Override
+    public void onClientinit(DisguiseState state)
+    {
+        clientHandler.sendClientCommand(state.getPlayer(), "set fake_equip " + state.toggleDisguisedItems());
+
+        super.onClientinit(state);
+    }
+
+    @Override
     public void onDeEquip(DisguiseState state)
     {
         clientHandler.sendClientCommand(state.getPlayer(), "set fake_equip " + false);

@@ -266,6 +266,8 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         var player = e.getPlayer();
         var state = morphs.getDisguiseStateFor(player);
 
+        clientHandler.markPlayerReady(player);
+
         if (state != null)
         {
             //重新进入后player和info.player不属于同一个实例，需要重新disguise
@@ -276,11 +278,19 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
             DisguiseUtils.addTrace(disguise);
 
             //刷新Disguise
-            state.setDisguise(state.getDisguiseIdentifier(), state.getSkillIdentifier(), DisguiseAPI.getDisguise(player), state.shouldHandlePose(), false);
+            state.setDisguise(state.getDisguiseIdentifier(),
+                    state.getSkillIdentifier(), DisguiseAPI.getDisguise(player), state.shouldHandlePose(), false,
+                    state.getDisguisedItems());
 
             //刷新被动
             var abilities = state.getAbilities();
             abilities.forEach(a -> a.applyToPlayer(state.getPlayer(), state));
+
+            //刷新主动
+            var skill = state.getSkill();
+
+            if (skill != null)
+                skill.onInitialEquip(state);
 
             //调用Morph事件
             Bukkit.getPluginManager().callEvent(new PlayerMorphEvent(player, state));

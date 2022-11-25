@@ -1,10 +1,15 @@
 package xiamomc.morph.network;
 
-import com.destroystokyo.paper.ClientOption;
+import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.minecraft.network.PacketDataSerializer;
+import net.minecraft.network.protocol.game.PacketPlayOutCustomPayload;
+import net.minecraft.resources.MinecraftKey;
 import org.bukkit.Bukkit;
+import org.bukkit.craftbukkit.v1_19_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.messaging.StandardMessenger;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPlugin;
@@ -20,11 +25,23 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 public class MorphClientHandler extends MorphPluginObject
 {
     private final Bindable<Boolean> allowClient = new Bindable<>(false);
     private final Bindable<Boolean> logPackets = new Bindable<>(false);
+
+    //部分来自 CraftPlayer#sendPluginMessage(), 在我们搞清楚到底为什么服务端会吞包之前先这样
+    private void sendPacket(String channel, Player player, byte[] message)
+    {
+        StandardMessenger.validatePluginMessage(Bukkit.getServer().getMessenger(), plugin, channel, message);
+
+        var nmsPlayer = ((CraftPlayer) player).getHandle();
+
+        var packet = new PacketPlayOutCustomPayload(new MinecraftKey(channel), new PacketDataSerializer(Unpooled.wrappedBuffer(message)));
+        nmsPlayer.b.a(packet);
+    }
 
     @Initializer
     private void load(MorphPlugin plugin, MorphManager manager, MorphConfigManager configManager)
@@ -36,7 +53,7 @@ public class MorphClientHandler extends MorphPluginObject
             if (logPackets.get())
                 logger.info("收到了来自" + player.getName() + "的初始化消息：" + new String(data, StandardCharsets.UTF_8));
 
-            player.sendPluginMessage(plugin, initializeChannel, "".getBytes());
+            this.sendPacket(initializeChannel, player, "".getBytes());
 
             clientPlayers.add(player);
         });
@@ -51,7 +68,7 @@ public class MorphClientHandler extends MorphPluginObject
             if (logPackets.get())
                 logger.info("收到了来自" + player.getName() + "的API请求：" + new String(data, StandardCharsets.UTF_8));
 
-            player.sendPluginMessage(plugin, versionChannel, apiVersionBytes);
+            this.sendPacket(versionChannel, player, apiVersionBytes);
         });
 
         Bukkit.getMessenger().registerIncomingPluginChannel(plugin, commandChannel, (cN, player, data) ->
@@ -135,20 +152,27 @@ public class MorphClientHandler extends MorphPluginObject
                 }
                 case "initial" ->
                 {
-                    if (initialzedPlayers.contains(player))
-                        return;
+                    if (playerStateMap.getOrDefault(player, null) != ConnectionState.JOINED)
+                        playerStateMap.put(player, ConnectionState.CONNECTING);
 
-                    var config = manager.getPlayerConfiguration(player);
-                    var list = config.getUnlockedDisguiseIdentifiers();
-                    this.refreshPlayerClientMorphs(list, player);
+                    //等待玩家加入再发包
+                    this.waitUntilReady(player, c ->
+                    {
+                        if (initialzedPlayers.contains(player))
+                            return;
 
-                    var state = manager.getDisguiseStateFor(player);
+                        var config = manager.getPlayerConfiguration(player);
+                        var list = config.getUnlockedDisguiseIdentifiers();
+                        this.refreshPlayerClientMorphs(list, player);
 
-                    if (state != null)
-                        updateCurrentIdentifier(player, state.getDisguiseIdentifier());
+                        var state = manager.getDisguiseStateFor(player);
 
-                    sendClientCommand(player, ClientCommands.setToggleSelfCommand(config.showDisguiseToSelf));
-                    initialzedPlayers.add(player);
+                        if (state != null)
+                            manager.refreshClientState(state);
+
+                        sendClientCommand(player, ClientCommands.setToggleSelfCommand(config.showDisguiseToSelf));
+                        initialzedPlayers.add(player);
+                    });
                 }
                 case "option" ->
                 {
@@ -193,7 +217,39 @@ public class MorphClientHandler extends MorphPluginObject
             else
                 this.sendUnAuth(players);
         });
+
+        Bukkit.getOnlinePlayers().forEach(p -> playerStateMap.put(p, ConnectionState.JOINED));
     }
+
+    //region wait until ready
+    private void waitUntilReady(Player player, Consumer<?> c)
+    {
+        var bool = playerStateMap.getOrDefault(player, null);
+
+        if (bool == null)
+        {
+            //logger.info("should remove for " + player.getName());
+            return;
+        }
+
+        if (bool == ConnectionState.JOINED)
+        {
+            c.accept(null);
+        }
+        else
+        {
+            //logger.info(player.getName() + " not ready! " + bool);
+            this.addSchedule(cc -> waitUntilReady(player, c));
+        }
+    }
+
+    private final Map<Player, ConnectionState> playerStateMap = new Object2ObjectOpenHashMap<>();
+
+    public void markPlayerReady(Player player)
+    {
+        playerStateMap.put(player, ConnectionState.JOINED);
+    }
+    //endregion
 
     private final Map<UUID, MorphClientOptions> playerOptionMap = new Object2ObjectOpenHashMap<>();
 
@@ -275,6 +331,7 @@ public class MorphClientHandler extends MorphPluginObject
     {
         this.clientPlayers.remove(player);
         this.playerOptionMap.clear();
+        playerStateMap.remove(player);
     }
 
     public void sendReAuth(Collection<? extends Player> players)
@@ -299,12 +356,12 @@ public class MorphClientHandler extends MorphPluginObject
 
         if (!allowClient.get() && !overrideClientSetting) return;
 
-        player.sendPluginMessage(plugin, commandChannel, cmd.getBytes());
+        this.sendPacket(commandChannel, player, cmd.getBytes());
     }
 
     public void sendClientCommand(Player player, String cmd)
     {
-        //logger.info("SENGING PACKET TO " + player.getName() + ": " + cmd);
+        logger.info("SENGING PACKET TO " + player.getName() + ": " + cmd);
         this.sendClientCommand(player, cmd, false);
     }
 

@@ -28,6 +28,10 @@ public interface IMorphSkill<T extends ISkillOption>
     {
     }
 
+    public default void onClientinit(DisguiseState state)
+    {
+    }
+
     public default void onDeEquip(DisguiseState state)
     {
     }

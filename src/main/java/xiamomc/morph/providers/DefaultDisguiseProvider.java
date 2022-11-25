@@ -113,9 +113,7 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
         logger.info("SID: " + state.getSkillIdentifier() + " :: DID: " + state.getDisguiseIdentifier());
         if (skillHandler.hasSpeficSkill(state.getSkillIdentifier(), SkillType.INVENTORY))
         {
-            var watcher = state.getDisguise().getWatcher();
-
-            var eqiupment = watcher.getEquipment();
+            var eqiupment = state.getDisguisedItems();
 
             return ObjectArrayList.of(
                     "set equip mainhand "

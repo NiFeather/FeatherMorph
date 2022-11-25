@@ -32,6 +32,10 @@ public interface IMorphAbility<T extends ISkillOption> extends Listener
      */
     public boolean applyToPlayer(Player player, DisguiseState state);
 
+    public default void onClientInit(DisguiseState state)
+    {
+    }
+
     /**
      * 更新某个玩家的被动技能
      *

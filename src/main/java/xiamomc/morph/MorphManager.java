@@ -18,7 +18,9 @@ import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.profile.PlayerTextures;
 import org.jetbrains.annotations.Nullable;
@@ -523,7 +525,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 }
 
                 //初始化客户端指令
-                clientHandler.sendClientCommand(player, "set selfview " + provider.getSelfViewIdentifier(outComingState));
+                clientHandler.sendClientCommand(player, ClientCommands.setSelfViewCommand(provider.getSelfViewIdentifier(outComingState)));
 
                 provider.getInitialSyncCommands(outComingState).forEach(s -> clientHandler.sendClientCommand(player, s));
 
@@ -531,7 +533,10 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 var compound = provider.getNbtCompound(outComingState, targetEntity);
 
                 if (compound != null)
-                    clientHandler.sendClientCommand(player, "set nbt " + compound);
+                {
+                    outComingState.setCachedNbtString(compound);
+                    clientHandler.sendClientCommand(player, ClientCommands.setNbtCommand(compound));
+                }
 
                 return true;
             }
@@ -549,6 +554,31 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         }
 
         return false;
+    }
+
+    public void refreshClientState(DisguiseState state)
+    {
+        logger.info("refresh client state");
+        var player = state.getPlayer();
+
+        clientHandler.updateCurrentIdentifier(player, state.getDisguiseIdentifier());
+        clientHandler.sendClientCommand(player, ClientCommands.setNbtCommand(state.getCachedNbtString()));
+        clientHandler.sendClientCommand(player, ClientCommands.setSelfViewCommand(state.getProvider().getSelfViewIdentifier(state)));
+
+        //刷新主动
+        var skill = state.getSkill();
+
+        if (skill != null)
+            skill.onClientinit(state);
+
+        //刷新被动
+        var abilities = state.getAbilities();
+
+        if (abilities != null)
+            abilities.forEach(a -> a.onClientInit(state));
+
+        //和客户端同步数据
+        state.getProvider().getInitialSyncCommands(state).forEach(c -> clientHandler.sendClientCommand(player, c));
     }
 
     /**
@@ -658,15 +688,21 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         //更新或者添加DisguiseState
         var state = getDisguiseStateFor(sourcePlayer);
+
+        EntityEquipment equipment = null;
+
+        if (targetEntity != null)
+            equipment = ((LivingEntity) targetEntity).getEquipment();
+
         if (state == null)
         {
-            state = new DisguiseState(sourcePlayer, id, targetSkillID, disguise, shouldHandlePose, provider);
+            state = new DisguiseState(sourcePlayer, id, targetSkillID, disguise, shouldHandlePose, provider, equipment);
 
             disguisedPlayers.add(state);
         }
         else
         {
-            state.setDisguise(id, targetSkillID, disguise, shouldHandlePose);
+            state.setDisguise(id, targetSkillID, disguise, shouldHandlePose, equipment);
         }
 
         if (provider != null)
