@@ -122,7 +122,7 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
     }
 
     @Override
-    protected boolean canConstruct(DisguiseInfo info, Entity targetEntity, DisguiseState state)
+    public boolean canConstruct(DisguiseInfo info, Entity targetEntity, DisguiseState state)
     {
         return state != null
                 ? state.getDisguise().getType().getEntityType().equals(info.getEntityType())

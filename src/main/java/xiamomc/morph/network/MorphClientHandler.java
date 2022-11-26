@@ -335,13 +335,18 @@ public class MorphClientHandler extends MorphPluginObject
         this.clientPlayers.remove(player);
         this.playerOptionMap.clear();
         playerStateMap.remove(player);
+        initialzedPlayers.remove(player);
     }
 
     public void sendReAuth(Collection<? extends Player> players)
     {
         if (!allowClient.get()) return;
 
-        players.forEach(p -> sendClientCommand(p, "reauth"));
+        players.forEach(p ->
+        {
+            playerStateMap.put(p, ConnectionState.JOINED);
+            sendClientCommand(p, "reauth");
+        });
     }
 
     public void sendUnAuth(Collection<? extends Player> players)

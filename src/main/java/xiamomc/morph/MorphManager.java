@@ -23,6 +23,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.profile.PlayerTextures;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.abilities.AbilityHandler;
 import xiamomc.morph.config.ConfigOption;
@@ -121,7 +122,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 }
                 else
                 {
-                    logger.warn("removing: " + p + " :: " + i.getDisguise() + " <-> " + disg);
+                    logger.warn("正在移除非Morph生成的伪装: " + p + " :: " + i.getDisguise() + " <-> " + disg);
                     unMorph(p, true);
                     DisguiseAPI.disguiseEntity(p, disg);
                     disguisedPlayers.remove(i);
@@ -132,16 +133,11 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
             abilityHandler.handle(p, i);
 
-            var provider = i.getProvider();
-
-            if (provider != null)
+            if (! i.getProvider().updateDisguise(p, i))
             {
-                if (!provider.updateDisguise(p, i))
-                {
-                    p.sendMessage(MessageUtils.prefixes(p, MorphStrings.errorWhileUpdatingDisguise()));
+                p.sendMessage(MessageUtils.prefixes(p, MorphStrings.errorWhileUpdatingDisguise()));
 
-                    unMorph(p, true);
-                }
+                unMorph(p, true);
             }
         });
 
@@ -620,8 +616,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         if (state == null)
             return;
 
-        if (state.getProvider() != null)
-            state.getProvider().unMorph(player, state);
+        state.getProvider().unMorph(player, state);
 
         //移除所有被动
         state.getAbilities().forEach(a -> a.revokeFromPlayer(player, state));
@@ -669,7 +664,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
      */
     private DisguiseState postConstructDisguise(Player sourcePlayer, @Nullable Entity targetEntity,
                                        String id, Disguise disguise, boolean shouldHandlePose,
-                                       @Nullable DisguiseProvider provider)
+                                       @NotNull DisguiseProvider provider)
     {
         //设置自定义数据用来跟踪
         DisguiseUtils.addTrace(disguise);
@@ -691,7 +686,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         EntityEquipment equipment = null;
 
-        if (targetEntity != null)
+        if (targetEntity != null && provider.canConstruct(getDisguiseInfo(id), targetEntity, getDisguiseStateFor(targetEntity)))
             equipment = ((LivingEntity) targetEntity).getEquipment();
 
         if (state == null)
@@ -705,7 +700,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             state.setDisguise(id, targetSkillID, disguise, shouldHandlePose, equipment);
         }
 
-        if (provider != null)
+        if (provider != fallbackProvider)
             provider.postConstructDisguise(state, targetEntity);
         else
             logger.warn("id为" + id + "的伪装没有Provider?");
@@ -844,6 +839,13 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         return this.disguisedPlayers.stream()
                 .filter(i -> i.getPlayerUniqueID().equals(player.getUniqueId()))
                 .findFirst().orElse(null);
+    }
+
+    public DisguiseState getDisguiseStateFor(Entity entity)
+    {
+        if (!(entity instanceof Player player)) return null;
+
+        return getDisguiseStateFor(player);
     }
 
     public void onPluginDisable()

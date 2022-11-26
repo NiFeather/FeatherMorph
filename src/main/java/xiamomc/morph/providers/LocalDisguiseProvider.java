@@ -80,7 +80,7 @@ public class LocalDisguiseProvider extends VanillaDisguiseProvider
     }
 
     @Override
-    protected boolean canConstruct(DisguiseInfo info, Entity targetEntity, @Nullable DisguiseState theirState)
+    public boolean canConstruct(DisguiseInfo info, Entity targetEntity, @Nullable DisguiseState theirState)
     {
         return theirState != null && theirState.getDisguiseIdentifier().equals(info.getIdentifier());
     }

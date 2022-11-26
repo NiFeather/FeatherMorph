@@ -52,7 +52,7 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
     }
 
     @Override
-    protected boolean canConstruct(DisguiseInfo info, Entity targetEntity, @Nullable DisguiseState theirState)
+    public boolean canConstruct(DisguiseInfo info, Entity targetEntity, @Nullable DisguiseState theirState)
     {
         if (theirState != null)
         {
@@ -76,6 +76,22 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
             return playerDisguise.getName().equals(info.playerDisguiseTargetName);
 
         return false;
+    }
+
+    @Override
+    public boolean validForClient(DisguiseState state)
+    {
+        return true;
+    }
+
+    @Override
+    public @Nullable String getNbtCompound(DisguiseState state, Entity targetEntity)
+    {
+        if (!(targetEntity instanceof Player targetPlayer)) return null;
+
+        if (!targetPlayer.getName().equals(DisguiseTypes.PLAYER.toStrippedId(state.getDisguiseIdentifier()))) return null;
+
+        return super.getNbtCompound(state, targetEntity);
     }
 
     @Override
