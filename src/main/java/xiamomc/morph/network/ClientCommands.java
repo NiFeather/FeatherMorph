@@ -22,6 +22,11 @@ public class ClientCommands
         return setBase + " nbt " + nbtString;
     }
 
+    public static String setProfileCommand(String nbtString)
+    {
+        return setBase + " profile " + nbtString;
+    }
+
     private static final String denyBase = "deny";
 
     public static String denyOperationCommand(String operationName)

@@ -1,6 +1,7 @@
 package xiamomc.morph;
 
 import com.comphenix.protocol.wrappers.WrappedGameProfile;
+import com.destroystokyo.paper.profile.PlayerProfile;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
 import me.libraryaddict.disguise.DisguiseAPI;
@@ -563,6 +564,9 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         //和客户端同步数据
         state.getProvider().getInitialSyncCommands(state).forEach(c -> clientHandler.sendClientCommand(player, c));
+
+        if (state.haveProfile())
+            clientHandler.sendClientCommand(player, ClientCommands.setProfileCommand(state.getProfileNbtString()));
     }
 
     /**

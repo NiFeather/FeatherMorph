@@ -8,6 +8,8 @@ import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
 import me.libraryaddict.disguise.utilities.DisguiseUtilities;
 import me.libraryaddict.disguise.utilities.reflection.ReflectionManager;
 import net.kyori.adventure.text.Component;
+import net.minecraft.nbt.GameProfileSerializer;
+import net.minecraft.nbt.NBTTagCompound;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
@@ -66,9 +68,11 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
             return;
         }
 
+        var gameProfile = new MorphGameProfile(profile);
+
         //成功伪装后设置皮肤为头颅的皮肤
         var disguise = (PlayerDisguise) state.getDisguise();
-        var wrappedProfile = WrappedGameProfile.fromHandle(new MorphGameProfile(profile));
+        var wrappedProfile = WrappedGameProfile.fromHandle(gameProfile);
 
         var LDprofile = ReflectionManager.getGameProfileWithThisSkin(wrappedProfile.getUUID(), wrappedProfile.getName(), wrappedProfile);
 
@@ -76,6 +80,10 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
         DisguiseAPI.addGameProfile(LDprofile.toString(), LDprofile);
         disguise.setSkin(LDprofile);
         DisguiseUtilities.removeGameProfile(LDprofile.toString());
+
+        var compound = new NBTTagCompound();
+        GameProfileSerializer.a(compound, gameProfile);
+        state.setCachedProfileNbtString(compound.toString());
     }
 
     @Override

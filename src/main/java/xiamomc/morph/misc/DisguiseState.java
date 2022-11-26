@@ -317,6 +317,8 @@ public class DisguiseState extends MorphPluginObject
         setDisguise(identifier, skillIdentifier, d, shouldHandlePose, true, equipment);
     }
 
+    //region NBT
+
     private String cachedNbtString = "{}";
 
     public String getCachedNbtString()
@@ -330,6 +332,31 @@ public class DisguiseState extends MorphPluginObject
 
         this.cachedNbtString = newNbt;
     }
+
+    //endregion
+
+    //region ProfileNBT
+
+    private String cachedProfileNbtString = "{}";
+
+    public String getProfileNbtString()
+    {
+        return cachedProfileNbtString;
+    }
+
+    public void setCachedProfileNbtString(String newNbt)
+    {
+        if (newNbt == null || newNbt.isEmpty() || newNbt.isBlank()) newNbt = "{}";
+
+        this.cachedProfileNbtString = newNbt;
+    }
+
+    public boolean haveProfile()
+    {
+        return !cachedProfileNbtString.equals("{}");
+    }
+
+    //endregion ProfileNBT
 
     /**
      * 更新伪装
@@ -346,6 +373,9 @@ public class DisguiseState extends MorphPluginObject
             throw new RuntimeException("此Disguise不能由插件管理");
 
         if (disguise == d) return;
+
+        setCachedProfileNbtString(null);
+        setCachedNbtString(null);
 
         this.disguise = d;
         this.disguiseIdentifier = identifier;
