@@ -1,18 +1,26 @@
 package xiamomc.morph.providers;
 
+import com.comphenix.protocol.wrappers.WrappedGameProfile;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.disguisetypes.Disguise;
 import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
+import me.libraryaddict.disguise.utilities.DisguiseUtilities;
+import me.libraryaddict.disguise.utilities.reflection.ReflectionManager;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.meta.SkullMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xiamomc.morph.messages.MessageUtils;
+import xiamomc.morph.messages.MorphStrings;
 import xiamomc.morph.misc.DisguiseInfo;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.misc.DisguiseTypes;
+import xiamomc.morph.misc.MorphGameProfile;
 
 import java.util.List;
 
@@ -38,6 +46,36 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
         DisguiseAPI.disguiseEntity(player, disguise);
 
         return DisguiseResult.success(disguise, result.isCopy());
+    }
+
+    @Override
+    public void postConstructDisguise(DisguiseState state, @Nullable Entity targetEntity)
+    {
+        super.postConstructDisguise(state, targetEntity);
+
+        var mainHandItem = state.getPlayer().getItemInHand();
+
+        if (mainHandItem.getType() != Material.PLAYER_HEAD) return;
+
+        var profile = ((SkullMeta) mainHandItem.getItemMeta()).getPlayerProfile();
+        var player = state.getPlayer();
+
+        if (profile == null)
+        {
+            player.sendMessage(MessageUtils.prefixes(player, MorphStrings.invalidSkinString()));
+            return;
+        }
+
+        //成功伪装后设置皮肤为头颅的皮肤
+        var disguise = (PlayerDisguise) state.getDisguise();
+        var wrappedProfile = WrappedGameProfile.fromHandle(new MorphGameProfile(profile));
+
+        var LDprofile = ReflectionManager.getGameProfileWithThisSkin(wrappedProfile.getUUID(), wrappedProfile.getName(), wrappedProfile);
+
+        //LD不支持直接用profile设置皮肤，只能先存到本地设置完再移除
+        DisguiseAPI.addGameProfile(LDprofile.toString(), LDprofile);
+        disguise.setSkin(LDprofile);
+        DisguiseUtilities.removeGameProfile(LDprofile.toString());
     }
 
     @Override

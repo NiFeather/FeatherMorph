@@ -21,6 +21,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.EntityEquipment;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.profile.PlayerTextures;
 import org.jetbrains.annotations.NotNull;
@@ -343,22 +344,9 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                     }
 
                     //否则，更新或应用伪装
-                    if (morph(player, DisguiseTypes.PLAYER.toId(profile.getName()), targetEntity))
-                    {
-                        //成功伪装后设置皮肤为头颅的皮肤
-                        var disguise = (PlayerDisguise) DisguiseAPI.getDisguise(player);
-                        var wrappedProfile = WrappedGameProfile.fromHandle(new MorphGameProfile(profile));
+                    morph(player, DisguiseTypes.PLAYER.toId(profile.getName()), targetEntity);
 
-                        var LDprofile = ReflectionManager.getGameProfileWithThisSkin(wrappedProfile.getUUID(), wrappedProfile.getName(), wrappedProfile);
-
-                        //LD不支持直接用profile设置皮肤，只能先存到本地设置完再移除
-                        DisguiseAPI.addGameProfile(LDprofile.toString(), LDprofile);
-                        disguise.setSkin(LDprofile);
-                        DisguiseUtilities.removeGameProfile(LDprofile.toString());
-
-                        uuidPlayerTexturesMap.put(playerUniqueId, profileTexture);
-                        return true;
-                    }
+                    uuidPlayerTexturesMap.put(playerUniqueId, profileTexture);
                 }
             }
 
