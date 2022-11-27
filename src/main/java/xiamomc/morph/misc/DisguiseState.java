@@ -312,11 +312,6 @@ public class DisguiseState extends MorphPluginObject
     @Resolved(shouldSolveImmediately = true)
     private MorphSkillHandler skillHandler;
 
-    public void setDisguise(@NotNull String identifier, @NotNull String skillIdentifier, Disguise d, boolean shouldHandlePose, @Nullable EntityEquipment equipment)
-    {
-        setDisguise(identifier, skillIdentifier, d, shouldHandlePose, true, equipment);
-    }
-
     //region NBT
 
     private String cachedNbtString = "{}";
@@ -357,6 +352,11 @@ public class DisguiseState extends MorphPluginObject
     }
 
     //endregion ProfileNBT
+
+    public void setDisguise(@NotNull String identifier, @NotNull String skillIdentifier, Disguise d, boolean shouldHandlePose, @Nullable EntityEquipment equipment)
+    {
+        setDisguise(identifier, skillIdentifier, d, shouldHandlePose, true, equipment);
+    }
 
     /**
      * 更新伪装
