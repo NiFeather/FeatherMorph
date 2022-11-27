@@ -523,6 +523,10 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                     clientHandler.sendClientCommand(player, ClientCommands.setNbtCommand(compound));
                 }
 
+                //设置Profile
+                if (outComingState.haveProfile())
+                    clientHandler.sendClientCommand(player, ClientCommands.setProfileCommand(outComingState.getProfileNbtString()));
+
                 return true;
             }
             catch (IllegalArgumentException iae)

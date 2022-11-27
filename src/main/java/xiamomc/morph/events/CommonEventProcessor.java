@@ -278,9 +278,15 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
             DisguiseUtils.addTrace(disguise);
 
             //刷新Disguise
+            var nbt = state.getCachedNbtString();
+            var profile = state.getProfileNbtString();
+
             state.setDisguise(state.getDisguiseIdentifier(),
                     state.getSkillIdentifier(), DisguiseAPI.getDisguise(player), state.shouldHandlePose(), false,
                     state.getDisguisedItems());
+
+            state.setCachedNbtString(nbt);
+            state.setCachedProfileNbtString(profile);
 
             //刷新被动
             var abilities = state.getAbilities();

@@ -23,6 +23,9 @@ import xiamomc.morph.misc.DisguiseInfo;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.misc.DisguiseTypes;
 import xiamomc.morph.misc.MorphGameProfile;
+import xiamomc.morph.network.ClientCommands;
+import xiamomc.morph.network.MorphClientHandler;
+import xiamomc.pluginbase.Annotations.Resolved;
 
 import java.util.List;
 
