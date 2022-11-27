@@ -17,6 +17,7 @@ import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.pluginbase.Annotations.Initializer;
+import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
 
 import java.nio.ByteBuffer;
@@ -43,8 +44,11 @@ public class MorphClientHandler extends MorphPluginObject
         nmsPlayer.b.a(packet);
     }
 
+    @Resolved
+    private MorphManager manager;
+
     @Initializer
-    private void load(MorphPlugin plugin, MorphManager manager, MorphConfigManager configManager)
+    private void load(MorphPlugin plugin, MorphConfigManager configManager)
     {
         Bukkit.getMessenger().registerIncomingPluginChannel(plugin, initializeChannel, (cN, player, data) ->
         {
@@ -336,6 +340,10 @@ public class MorphClientHandler extends MorphPluginObject
         this.playerOptionMap.clear();
         playerStateMap.remove(player);
         initialzedPlayers.remove(player);
+
+        var playerConfig = manager.getPlayerConfiguration(player);
+        var state = manager.getDisguiseStateFor(player);
+        if (state != null) state.setSelfVisible(playerConfig.showDisguiseToSelf);
     }
 
     public void sendReAuth(Collection<? extends Player> players)
