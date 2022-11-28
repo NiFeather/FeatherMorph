@@ -1,19 +1,29 @@
 package xiamomc.morph;
 
+import com.comphenix.protocol.wrappers.WrappedGameProfile;
+import com.destroystokyo.paper.profile.PlayerProfile;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
 import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.disguisetypes.Disguise;
 import me.libraryaddict.disguise.disguisetypes.MobDisguise;
+import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
+import me.libraryaddict.disguise.utilities.DisguiseUtilities;
 import me.libraryaddict.disguise.utilities.DisguiseValues;
 import me.libraryaddict.disguise.utilities.reflection.FakeBoundingBox;
+import me.libraryaddict.disguise.utilities.reflection.ReflectionManager;
 import net.kyori.adventure.text.Component;
-import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Particle;
+import org.bukkit.*;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.EntityEquipment;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.profile.PlayerTextures;
+import org.checkerframework.checker.units.qual.N;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.abilities.AbilityHandler;
 import xiamomc.morph.config.ConfigOption;
@@ -24,15 +34,11 @@ import xiamomc.morph.interfaces.IManagePlayerData;
 import xiamomc.morph.messages.CommandStrings;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.MorphStrings;
-import xiamomc.morph.misc.DisguiseInfo;
-import xiamomc.morph.misc.DisguiseState;
-import xiamomc.morph.misc.DisguiseTypes;
-import xiamomc.morph.misc.DisguiseUtils;
+import xiamomc.morph.misc.*;
 import xiamomc.morph.misc.permissions.CommonPermissions;
-import xiamomc.morph.providers.DisguiseProvider;
-import xiamomc.morph.providers.LocalDisguiseProvider;
-import xiamomc.morph.providers.PlayerDisguiseProvider;
-import xiamomc.morph.providers.VanillaDisguiseProvider;
+import xiamomc.morph.network.ClientCommands;
+import xiamomc.morph.network.MorphClientHandler;
+import xiamomc.morph.providers.*;
 import xiamomc.morph.skills.MorphSkillHandler;
 import xiamomc.morph.skills.SkillCooldownInfo;
 import xiamomc.morph.skills.SkillType;
@@ -42,6 +48,7 @@ import xiamomc.morph.storage.playerdata.PlayerDataStore;
 import xiamomc.morph.storage.playerdata.PlayerMorphConfiguration;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
+import xiamomc.pluginbase.Bindables.Bindable;
 import xiamomc.pluginbase.Bindables.BindableList;
 
 import java.util.List;
@@ -70,17 +77,21 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     @Resolved
     private MorphConfigManager config;
 
+    private static final DisguiseProvider fallbackProvider = new FallbackProvider();
+
     @Initializer
     private void load()
     {
         this.addSchedule(c -> update());
 
         bannedDisguises = config.getBindableList(String.class, ConfigOption.BANNED_DISGUISES);
+        config.bind(allowHeadMorph, ConfigOption.ALLOW_HEAD_MORPH);
 
         registerProviders(ObjectList.of(
                 new VanillaDisguiseProvider(),
                 new PlayerDisguiseProvider(),
-                new LocalDisguiseProvider()
+                new LocalDisguiseProvider(),
+                fallbackProvider
         ));
     }
 
@@ -111,7 +122,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 }
                 else
                 {
-                    logger.warn("removing: " + p + " :: " + i.getDisguise() + " <-> " + disg);
+                    logger.warn("正在移除非Morph生成的伪装: " + p + " :: " + i.getDisguise() + " <-> " + disg);
                     unMorph(p, true);
                     DisguiseAPI.disguiseEntity(p, disg);
                     disguisedPlayers.remove(i);
@@ -122,16 +133,11 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
             abilityHandler.handle(p, i);
 
-            var provider = i.getProvider();
-
-            if (provider != null)
+            if (! i.getProvider().updateDisguise(p, i))
             {
-                if (!provider.updateDisguise(p, i))
-                {
-                    p.sendMessage(MessageUtils.prefixes(p, MorphStrings.errorWhileUpdatingDisguise()));
+                p.sendMessage(MessageUtils.prefixes(p, MorphStrings.errorWhileUpdatingDisguise()));
 
-                    unMorph(p, true);
-                }
+                unMorph(p, true);
             }
         });
 
@@ -180,7 +186,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     {
         var val = uuidMoprhTimeMap.get(uuid);
 
-        return val == null || plugin.getCurrentTick() - val >= 20;
+        return val == null || plugin.getCurrentTick() - val >= 4;
     }
 
     /**
@@ -208,7 +214,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
      * @param id 目标ID
      * @return 一个DisguiseProvider，若没找到或id是null则返回null
      */
-    @Nullable
     public static DisguiseProvider getProvider(String id)
     {
         if (id == null) return null;
@@ -216,7 +221,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         id += ":";
         var splitedId = id.split(":", 2);
 
-        return providers.stream().filter(p -> p.getIdentifier().equals(splitedId[0])).findFirst().orElse(null);
+        return providers.stream().filter(p -> p.getIdentifier().equals(splitedId[0])).findFirst().orElse(fallbackProvider);
     }
 
     /**
@@ -253,6 +258,139 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     }
 
     //endregion
+
+    private final Bindable<Boolean> allowHeadMorph = new Bindable<>();
+
+    private final Map<UUID, PlayerTextures> uuidPlayerTexturesMap = new ConcurrentHashMap<>();
+
+    public boolean doQuickDisguise(Player player, @Nullable Material actionItem)
+    {
+        var state = this.getDisguiseStateFor(player);
+        var mainHandItem = player.getEquipment().getItemInMainHand();
+        var mainHandItemType = mainHandItem.getType();
+
+        //右键玩家头颅：快速伪装
+        if (DisguiseUtils.validForHeadMorph(mainHandItemType))
+        {
+            if (!player.hasPermission(CommonPermissions.HEAD_MORPH))
+            {
+                player.sendMessage(MessageUtils.prefixes(player, CommandStrings.noPermissionMessage()));
+
+                return true;
+            }
+
+            if (!allowHeadMorph.get())
+            {
+                player.sendMessage(MessageUtils.prefixes(player, MorphStrings.headDisguiseDisabledString()));
+
+                return true;
+            }
+
+            if (!canMorph(player))
+            {
+                player.sendMessage(MessageUtils.prefixes(player, MorphStrings.disguiseCoolingDownString()));
+
+                return true;
+            }
+
+            var targetEntity = player.getTargetEntity(5);
+
+            switch (mainHandItemType)
+            {
+                case DRAGON_HEAD ->
+                {
+                    morphOrUnMorph(player, EntityType.ENDER_DRAGON.getKey().asString(), targetEntity);
+                }
+                case ZOMBIE_HEAD ->
+                {
+                    morphOrUnMorph(player, EntityType.ZOMBIE.getKey().asString(), targetEntity);
+                }
+                case SKELETON_SKULL ->
+                {
+                    morphOrUnMorph(player, EntityType.SKELETON.getKey().asString(), targetEntity);
+                }
+                case WITHER_SKELETON_SKULL ->
+                {
+                    morphOrUnMorph(player, EntityType.WITHER_SKELETON.getKey().asString(), targetEntity);
+                }
+                case PLAYER_HEAD ->
+                {
+                    var profile = ((SkullMeta) mainHandItem.getItemMeta()).getPlayerProfile();
+
+                    //忽略没有profile的玩家伪装
+                    if (profile == null)
+                    {
+                        player.sendMessage(MessageUtils.prefixes(player, MorphStrings.invalidSkinString()));
+                        return true;
+                    }
+
+                    var name = profile.getName();
+                    var profileTexture = profile.getTextures();
+                    var playerUniqueId = player.getUniqueId();
+
+                    //如果玩家有伪装，并且伪装的材质和Profile中的一样，那么取消伪装
+                    if (state != null)
+                    {
+                        var disguise = state.getDisguise();
+
+                        if (disguise instanceof PlayerDisguise playerDisguise
+                                && playerDisguise.getName().equals(name)
+                                && profileTexture.equals(uuidPlayerTexturesMap.get(playerUniqueId)))
+                        {
+                            unMorph(player);
+                            return true;
+                        }
+                    }
+
+                    //否则，更新或应用伪装
+                    morph(player, DisguiseTypes.PLAYER.toId(profile.getName()), targetEntity);
+
+                    uuidPlayerTexturesMap.put(playerUniqueId, profileTexture);
+                }
+            }
+
+            updateLastPlayerMorphOperationTime(player);
+        }
+        else
+        {
+            if (actionItem != null && !mainHandItemType.equals(actionItem))
+                return false;
+
+            var targetedEntity = player.getTargetEntity(5);
+
+            if (targetedEntity != null)
+            {
+                var disg = DisguiseAPI.getDisguise(targetedEntity);
+
+                String targetKey;
+
+                if (targetedEntity instanceof Player targetPlayer)
+                {
+                    var playerState = this.getDisguiseStateFor(targetPlayer);
+
+                    //目标实体是玩家：玩家伪装ID > 玩家名
+                    targetKey = playerState != null
+                            ? playerState.getDisguiseIdentifier()
+                            : DisguiseTypes.PLAYER.toId(targetPlayer.getName());
+                }
+                else
+                {
+                    //否则：伪装ID > 伪装类型 > 生物类型
+                    targetKey = disg != null
+                            ? (disg instanceof PlayerDisguise pd)
+                            ? DisguiseTypes.PLAYER.toId(pd.getName())
+                            : disg.getType().getEntityType().getKey().asString()
+                            : targetedEntity.getType().getKey().asString();
+                }
+
+                morph(player, targetKey, targetedEntity);
+
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     /**
      * 通过给定的key来决定要伪装还是取消伪装。
@@ -331,6 +469,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
                 var provider = getProvider(strippedKey[0]);
 
+                DisguiseState outComingState = null;
+
                 if (provider == null)
                 {
                     player.sendMessage(MessageUtils.prefixes(player, MorphStrings.disguiseBannedOrNotSupportedString()));
@@ -348,7 +488,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                         return false;
                     }
 
-                    postConstructDisguise(player, targetEntity,
+                    outComingState = postConstructDisguise(player, targetEntity,
                             info.getIdentifier(), result.disguise(), result.isCopy(), provider);
                 }
 
@@ -356,6 +496,37 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                         .resolve("what", info.asComponent());
 
                 player.sendMessage(MessageUtils.prefixes(player, msg));
+
+                clientHandler.updateCurrentIdentifier(player, key);
+
+                //主动技能
+                var skill = skillHandler.getSkill(outComingState.getSkillIdentifier());
+                outComingState.setSkill(skill);
+
+                var abilities = outComingState.getAbilities();
+                if (abilities != null)
+                {
+                    var finalOutComingState = outComingState;
+                    abilities.forEach(a -> a.applyToPlayer(player, finalOutComingState));
+                }
+
+                //初始化客户端指令
+                clientHandler.sendClientCommand(player, ClientCommands.setSelfViewCommand(provider.getSelfViewIdentifier(outComingState)));
+
+                provider.getInitialSyncCommands(outComingState).forEach(s -> clientHandler.sendClientCommand(player, s));
+
+                //初始化nbt
+                var compound = provider.getNbtCompound(outComingState, targetEntity);
+
+                if (compound != null)
+                {
+                    outComingState.setCachedNbtString(compound);
+                    clientHandler.sendClientCommand(player, ClientCommands.setNbtCommand(compound));
+                }
+
+                //设置Profile
+                if (outComingState.haveProfile())
+                    clientHandler.sendClientCommand(player, ClientCommands.setProfileCommand(outComingState.getProfileNbtString()));
 
                 return true;
             }
@@ -373,6 +544,34 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         }
 
         return false;
+    }
+
+    public void refreshClientState(DisguiseState state)
+    {
+        logger.info("refresh client state");
+        var player = state.getPlayer();
+
+        clientHandler.updateCurrentIdentifier(player, state.getDisguiseIdentifier());
+        clientHandler.sendClientCommand(player, ClientCommands.setNbtCommand(state.getCachedNbtString()));
+        clientHandler.sendClientCommand(player, ClientCommands.setSelfViewCommand(state.getProvider().getSelfViewIdentifier(state)));
+
+        //刷新主动
+        var skill = state.getSkill();
+
+        if (skill != null)
+            skill.onClientinit(state);
+
+        //刷新被动
+        var abilities = state.getAbilities();
+
+        if (abilities != null)
+            abilities.forEach(a -> a.onClientInit(state));
+
+        //和客户端同步数据
+        state.getProvider().getInitialSyncCommands(state).forEach(c -> clientHandler.sendClientCommand(player, c));
+
+        if (state.haveProfile())
+            clientHandler.sendClientCommand(player, ClientCommands.setProfileCommand(state.getProfileNbtString()));
     }
 
     /**
@@ -414,8 +613,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         if (state == null)
             return;
 
-        if (state.getProvider() != null)
-            state.getProvider().unMorph(player, state);
+        state.getProvider().unMorph(player, state);
 
         //移除所有被动
         state.getAbilities().forEach(a -> a.revokeFromPlayer(player, state));
@@ -435,6 +633,14 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         player.sendMessage(MessageUtils.prefixes(player, MorphStrings.unMorphSuccessString()));
         player.sendActionBar(Component.empty());
 
+        uuidPlayerTexturesMap.remove(player.getUniqueId());
+
+        if (plugin.isEnabled())
+        {
+            clientHandler.updateCurrentIdentifier(player, null);
+            clientHandler.sendClientCommand(player, "set selfview " + null);
+        }
+
         Bukkit.getPluginManager().callEvent(new PlayerUnMorphEvent(player));
     }
 
@@ -453,9 +659,9 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
      * @param shouldHandlePose 要不要手动更新伪装Pose？（伪装是否为克隆）
      * @param provider {@link DisguiseProvider}
      */
-    private void postConstructDisguise(Player sourcePlayer, @Nullable Entity targetEntity,
+    private DisguiseState postConstructDisguise(Player sourcePlayer, @Nullable Entity targetEntity,
                                        String id, Disguise disguise, boolean shouldHandlePose,
-                                       @Nullable DisguiseProvider provider)
+                                       @NotNull DisguiseProvider provider)
     {
         //设置自定义数据用来跟踪
         DisguiseUtils.addTrace(disguise);
@@ -474,18 +680,24 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         //更新或者添加DisguiseState
         var state = getDisguiseStateFor(sourcePlayer);
+
+        EntityEquipment equipment = null;
+
+        if (targetEntity != null && provider.canConstruct(getDisguiseInfo(id), targetEntity, getDisguiseStateFor(targetEntity)))
+            equipment = ((LivingEntity) targetEntity).getEquipment();
+
         if (state == null)
         {
-            state = new DisguiseState(sourcePlayer, id, targetSkillID, disguise, shouldHandlePose, provider);
+            state = new DisguiseState(sourcePlayer, id, targetSkillID, disguise, shouldHandlePose, provider, equipment);
 
             disguisedPlayers.add(state);
         }
         else
         {
-            state.setDisguise(id, targetSkillID, disguise, shouldHandlePose);
+            state.setDisguise(id, targetSkillID, disguise, shouldHandlePose, equipment);
         }
 
-        if (provider != null)
+        if (provider != fallbackProvider)
             provider.postConstructDisguise(state, targetEntity);
         else
             logger.warn("id为" + id + "的伪装没有Provider?");
@@ -529,7 +741,9 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         spawnParticle(sourcePlayer, sourcePlayer.getLocation(), cX, cY, cZ);
 
         //确保玩家可以根据设置看到自己的伪装
-        setSelfDisguiseVisible(sourcePlayer, config.showDisguiseToSelf, false);
+        var serverSideSelfView = (!clientHandler.getPlayerOption(sourcePlayer).isClientSideSelfView() || !state.getProvider().validForClient(state))
+                        && config.showDisguiseToSelf;
+        state.setSelfVisible(serverSideSelfView);
 
         if (!config.shownMorphAbilityHint && skillHandler.hasSkill(id))
         {
@@ -563,6 +777,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         //调用事件
         Bukkit.getPluginManager().callEvent(new PlayerMorphEvent(sourcePlayer, state));
+
+        return state;
     }
 
     public void spawnParticle(Player player, Location location, double collX, double collY, double collZ)
@@ -582,13 +798,21 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 particleScale >= 10 ? 0.2 : 0.05); //速度
     }
 
-    public void setSelfDisguiseVisible(Player player, boolean value, boolean saveToConfig)
+    public void setSelfDisguiseVisible(Player player, boolean val, boolean saveToConfig)
+    {
+        this.setSelfDisguiseVisible(player, val, saveToConfig, clientHandler.getPlayerOption(player).isClientSideSelfView(), false);
+    }
+
+    public void setSelfDisguiseVisible(Player player, boolean value, boolean saveToConfig, boolean skipState, boolean noClientCommand)
     {
         var state = getDisguiseStateFor(player);
         var config = data.getPlayerConfiguration(player);
 
-        if (state != null)
+        if (state != null && (!skipState || !state.getProvider().validForClient(state)))
             state.setSelfVisible(value);
+
+        if (!noClientCommand)
+            clientHandler.sendClientCommand(player, ClientCommands.setToggleSelfCommand(value));
 
         if (saveToConfig)
         {
@@ -612,6 +836,13 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         return this.disguisedPlayers.stream()
                 .filter(i -> i.getPlayerUniqueID().equals(player.getUniqueId()))
                 .findFirst().orElse(null);
+    }
+
+    public DisguiseState getDisguiseStateFor(Entity entity)
+    {
+        if (!(entity instanceof Player player)) return null;
+
+        return getDisguiseStateFor(player);
     }
 
     public void onPluginDisable()
@@ -680,6 +911,9 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
     //endregion 玩家伪装相关
 
+    @Resolved
+    private MorphClientHandler clientHandler;
+
     //region Implementation of IManagePlayerData
 
     @Override
@@ -698,12 +932,14 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     @Override
     public boolean grantMorphToPlayer(Player player, String disguiseIdentifier)
     {
+        clientHandler.sendDiff(List.of(disguiseIdentifier), null, player);
         return data.grantMorphToPlayer(player, disguiseIdentifier);
     }
 
     @Override
     public boolean revokeMorphFromPlayer(Player player, String disguiseIdentifier)
     {
+        clientHandler.sendDiff(null, List.of(disguiseIdentifier), player);
         return data.revokeMorphFromPlayer(player, disguiseIdentifier);
     }
 
@@ -730,6 +966,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         var success = data.reloadConfiguration() && offlineStorage.reloadConfiguration();
 
         stateToOfflineStore.forEach(offlineStorage::pushDisguiseState);
+
+        Bukkit.getOnlinePlayers().forEach(p -> clientHandler.refreshPlayerClientMorphs(this.getPlayerConfiguration(p).getUnlockedDisguiseIdentifiers(), p));
 
         return success;
     }

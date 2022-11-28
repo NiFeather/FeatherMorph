@@ -1,19 +1,28 @@
 package xiamomc.morph.providers;
 
+import com.google.gson.Gson;
+import com.mojang.serialization.JsonOps;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.disguisetypes.Disguise;
 import me.libraryaddict.disguise.disguisetypes.DisguiseType;
 import me.libraryaddict.disguise.disguisetypes.MobDisguise;
 import me.libraryaddict.disguise.disguisetypes.VillagerData;
+import me.libraryaddict.disguise.disguisetypes.watchers.ArmorStandWatcher;
 import me.libraryaddict.disguise.disguisetypes.watchers.CatWatcher;
 import me.libraryaddict.disguise.disguisetypes.watchers.VillagerWatcher;
+import me.libraryaddict.disguise.disguisetypes.watchers.ZombieWatcher;
 import net.kyori.adventure.text.Component;
+import net.minecraft.nbt.NBTTagCompound;
+import org.bukkit.craftbukkit.v1_19_R1.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_19_R1.entity.CraftLivingEntity;
 import org.bukkit.entity.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.misc.*;
+import xiamomc.morph.skills.SkillType;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class VanillaDisguiseProvider extends DefaultDisguiseProvider
@@ -107,7 +116,13 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
     }
 
     @Override
-    protected boolean canConstruct(DisguiseInfo info, Entity targetEntity, DisguiseState state)
+    public boolean validForClient(DisguiseState state)
+    {
+        return true;
+    }
+
+    @Override
+    public boolean canConstruct(DisguiseInfo info, Entity targetEntity, DisguiseState state)
     {
         return state != null
                 ? state.getDisguise().getType().getEntityType().equals(info.getEntityType())

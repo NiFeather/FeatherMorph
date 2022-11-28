@@ -18,6 +18,7 @@ import xiamomc.morph.misc.MinecraftLanguageHelper;
 import xiamomc.morph.misc.PlayerOperationSimulator;
 import xiamomc.morph.misc.integrations.gsit.GSitCompactProcessor;
 import xiamomc.morph.misc.integrations.placeholderapi.PlaceholderIntegration;
+import xiamomc.morph.network.MorphClientHandler;
 import xiamomc.morph.skills.MorphSkillHandler;
 import xiamomc.morph.storage.skill.SkillConfigurationStore;
 import xiamomc.pluginbase.Command.CommandHelper;
@@ -30,6 +31,8 @@ public final class MorphPlugin extends XiaMoJavaPlugin
     {
         return "morphplugin";
     }
+
+    public final int clientApiVersion = 1;
 
     @Override
     public String getNameSpace()
@@ -51,12 +54,16 @@ public final class MorphPlugin extends XiaMoJavaPlugin
 
     private PlaceholderIntegration placeholderIntegration;
 
+    private MorphClientHandler clientHandler;
+
     @Override
     public void onEnable()
     {
         super.onEnable();
 
         pluginManager = Bukkit.getPluginManager();
+
+        clientHandler = new MorphClientHandler();
 
         var playerTracker = new PlayerTracker();
         var pluginEventListener = new PluginEventListener();
@@ -68,6 +75,7 @@ public final class MorphPlugin extends XiaMoJavaPlugin
         dependencyManager.cache(skillHandler);
         dependencyManager.cache(abilityHandler);
         dependencyManager.cache(cmdHelper);
+        dependencyManager.cache(clientHandler);
         dependencyManager.cacheAs(MessageStore.class, new MorphMessageStore());
         dependencyManager.cacheAs(MiniMessage.class, MiniMessage.miniMessage());
         dependencyManager.cacheAs(IManagePlayerData.class, morphManager);
@@ -95,6 +103,8 @@ public final class MorphPlugin extends XiaMoJavaPlugin
 
             for (Plugin plugin : pluginManager.getPlugins())
                 onPluginEnable(plugin.getName());
+
+            clientHandler.sendReAuth(Bukkit.getOnlinePlayers());
         });
     }
 

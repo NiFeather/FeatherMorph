@@ -3,6 +3,10 @@ package xiamomc.morph.providers;
 import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.disguisetypes.Disguise;
 import net.kyori.adventure.text.Component;
+import net.minecraft.nbt.GameProfileSerializer;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.server.commands.data.CommandDataAccessorEntity;
+import org.bukkit.craftbukkit.v1_19_R1.entity.CraftLivingEntity;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -49,6 +53,95 @@ public abstract class DisguiseProvider extends MorphPluginObject
      * @return 操作是否成功
      */
     public abstract boolean updateDisguise(Player player, DisguiseState state);
+
+    /**
+     * 获取某个伪装的初始化指令
+     * @param state 目标伪装
+     * @return 要对客户端发送的指令列表
+     */
+    @NotNull
+    public abstract List<String> getInitialSyncCommands(DisguiseState state);
+
+    /**
+     * 获取某个伪装的客户端预览ID
+     * @param state 目标伪装
+     * @return ID
+     */
+    public String getSelfViewIdentifier(DisguiseState state)
+    {
+        return state.getDisguiseIdentifier();
+    }
+
+    public boolean validForClient(DisguiseState state)
+    {
+        return false;
+    }
+
+    @Nullable
+    public String getNbtCompound(DisguiseState state, Entity targetEntity)
+    {
+        if (targetEntity instanceof CraftLivingEntity craftEntity
+            && canConstruct(getMorphManager().getDisguiseInfo(state.getDisguiseIdentifier()), targetEntity, null))
+        {
+            //nms
+            var compund = new NBTTagCompound();
+
+            var nmsEntity = craftEntity.getHandle();
+
+            var entityDataObject = new CommandDataAccessorEntity(nmsEntity);
+
+            //剔除不需要的nbt
+            compund = cullNBT(entityDataObject.a());
+
+            var str = GameProfileSerializer.d(compund);
+
+            str = str.replace("\n", "");
+            return str;
+        }
+
+        return null;
+    }
+
+    protected NBTTagCompound cullNBT(NBTTagCompound compound)
+    {
+        //compound.r() -> NBTCompound#remove()
+
+        //common
+        compound.r("UUID");
+        compound.r("data");
+        compound.r("Brain");
+        compound.r("Motion");
+        compound.r("palette");
+        compound.r("Attributes");
+        compound.r("Invulnerable");
+        compound.r("DisabledSlots");
+
+        //armor stand
+        compound.r("ArmorItems");
+        compound.r("HandItems");
+
+        //player
+        compound.r("Tags");
+        compound.r("bukkit");
+        compound.r("recipes");
+        compound.r("Inventory");
+        compound.r("abilities");
+        compound.r("recipeBook");
+        compound.r("EnderItems");
+        compound.r("BukkitValues");
+        compound.r("warden_spawn_tracker");
+        compound.r("previousPlayerGameType");
+
+        //paper, bukkit, spigot
+        compound.r("Paper");
+        compound.r("Paper.Origin");
+        compound.r("Paper.OriginWorld");
+        compound.r("Paper.SpawnReason");
+        compound.r("Spigot.ticksLived");
+        compound.r("Bukkit.updateLevel");
+
+        return compound;
+    }
 
     /**
      * 取消某个玩家的伪装
@@ -126,7 +219,7 @@ public abstract class DisguiseProvider extends MorphPluginObject
      * @param theirState 他们的{@link DisguiseState}，为null则代表他们不是玩家或没有通过MorphPlugin伪装
      * @return 是否允许此操作
      */
-    protected abstract boolean canConstruct(DisguiseInfo info, Entity targetEntity,
+    public abstract boolean canConstruct(DisguiseInfo info, Entity targetEntity,
                                             @Nullable DisguiseState theirState);
 
     /**

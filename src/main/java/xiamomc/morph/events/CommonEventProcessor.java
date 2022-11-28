@@ -7,6 +7,7 @@ import me.libraryaddict.disguise.utilities.DisguiseUtilities;
 import me.libraryaddict.disguise.utilities.reflection.ReflectionManager;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.*;
@@ -35,6 +36,7 @@ import xiamomc.morph.misc.DisguiseUtils;
 import xiamomc.morph.misc.EntityTypeUtils;
 import xiamomc.morph.misc.MorphGameProfile;
 import xiamomc.morph.misc.permissions.CommonPermissions;
+import xiamomc.morph.network.MorphClientHandler;
 import xiamomc.morph.skills.MorphSkillHandler;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
@@ -124,22 +126,10 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         }
     }
 
-    private boolean allowHeadMorph;
-    private void setAllowHeadMorph(boolean val)
-    {
-        if (allowHeadMorph == val) return;
-
-        allowHeadMorph = val;
-        config.set(ConfigOption.ALLOW_HEAD_MORPH, val);
-    }
-
     @Initializer
     private void load()
     {
         config.bind(cooldownOnDamage, ConfigOption.SKILL_COOLDOWN_ON_DAMAGE);
-
-        var allowHeadMorph = config.getBindable(Boolean.class, ConfigOption.ALLOW_HEAD_MORPH);
-        allowHeadMorph.onValueChanged((o, n) -> setAllowHeadMorph(n), true);
 
         unMorphOnDeath = config.getBindable(Boolean.class, ConfigOption.UNMORPH_ON_DEATH);
 
@@ -155,14 +145,6 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
             actionItem = item;
         }, true);
     }
-
-    @EventHandler
-    public void onPlayerUnMorph(PlayerUnMorphEvent e)
-    {
-        uuidPlayerTexturesMap.remove(e.getPlayer().getUniqueId());
-    }
-
-    private final Map<UUID, PlayerTextures> uuidPlayerTexturesMap = new ConcurrentHashMap<>();
 
     @EventHandler
     public void onPlayerInteractAtEntity(PlayerInteractAtEntityEvent e)
@@ -217,102 +199,9 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         if (player.isSneaking())
         {
             //右键玩家头颅：快速伪装
-            if (DisguiseUtils.validForHeadMorph(mainHandItemType))
+            if (!action.equals(Action.RIGHT_CLICK_BLOCK) && !action.isLeftClick() && morphs.doQuickDisguise(player, actionItem))
             {
-                if (!player.hasPermission(CommonPermissions.HEAD_MORPH))
-                {
-                    player.sendMessage(MessageUtils.prefixes(player, CommandStrings.noPermissionMessage()));
-
-                    return true;
-                }
-
-                //忽略shift点地
-                if (action.equals(Action.RIGHT_CLICK_BLOCK) || action.isLeftClick()) return false;
-
-                if (!allowHeadMorph)
-                {
-                    player.sendMessage(MessageUtils.prefixes(player, MorphStrings.headDisguiseDisabledString()));
-
-                    return true;
-                }
-
-                if (!morphs.canMorph(player))
-                {
-                    player.sendMessage(MessageUtils.prefixes(player, MorphStrings.disguiseCoolingDownString()));
-
-                    return true;
-                }
-
-                var targetEntity = player.getTargetEntity(5);
-
-                switch (mainHandItemType)
-                {
-                    case DRAGON_HEAD ->
-                    {
-                        morphs.morphOrUnMorph(player, EntityType.ENDER_DRAGON.getKey().asString(), targetEntity);
-                    }
-                    case ZOMBIE_HEAD ->
-                    {
-                        morphs.morphOrUnMorph(player, EntityType.ZOMBIE.getKey().asString(), targetEntity);
-                    }
-                    case SKELETON_SKULL ->
-                    {
-                        morphs.morphOrUnMorph(player, EntityType.SKELETON.getKey().asString(), targetEntity);
-                    }
-                    case WITHER_SKELETON_SKULL ->
-                    {
-                        morphs.morphOrUnMorph(player, EntityType.WITHER_SKELETON.getKey().asString(), targetEntity);
-                    }
-                    case PLAYER_HEAD ->
-                    {
-                        var profile = ((SkullMeta) mainHandItem.getItemMeta()).getPlayerProfile();
-
-                        //忽略没有profile的玩家伪装
-                        if (profile == null)
-                        {
-                            player.sendMessage(MessageUtils.prefixes(player, MorphStrings.invalidSkinString()));
-                            return true;
-                        }
-
-                        var name = profile.getName();
-                        var profileTexture = profile.getTextures();
-                        var playerUniqueId = player.getUniqueId();
-
-                        //如果玩家有伪装，并且伪装的材质和Profile中的一样，那么取消伪装
-                        if (state != null)
-                        {
-                            var disguise = state.getDisguise();
-
-                            if (disguise instanceof PlayerDisguise playerDisguise
-                                    && playerDisguise.getName().equals(name)
-                                    && profileTexture.equals(uuidPlayerTexturesMap.get(playerUniqueId)))
-                            {
-                                morphs.unMorph(player);
-                                return true;
-                            }
-                        }
-
-                        //否则，更新或应用伪装
-                        if (morphs.morph(player, DisguiseTypes.PLAYER.toId(profile.getName()), targetEntity))
-                        {
-                            //成功伪装后设置皮肤为头颅的皮肤
-                            var disguise = (PlayerDisguise) DisguiseAPI.getDisguise(player);
-                            var wrappedProfile = WrappedGameProfile.fromHandle(new MorphGameProfile(profile));
-
-                            var LDprofile = ReflectionManager.getGameProfileWithThisSkin(wrappedProfile.getUUID(), wrappedProfile.getName(), wrappedProfile);
-
-                            //LD不支持直接用profile设置皮肤，只能先存到本地设置完再移除
-                            DisguiseAPI.addGameProfile(LDprofile.toString(), LDprofile);
-                            disguise.setSkin(LDprofile);
-                            DisguiseUtilities.removeGameProfile(LDprofile.toString());
-
-                            uuidPlayerTexturesMap.put(playerUniqueId, profileTexture);
-                            return true;
-                        }
-                    }
-                }
-
-                morphs.updateLastPlayerMorphOperationTime(player);
+                return true;
             }
             else if (mainHandItemType == actionItem)
             {
@@ -347,40 +236,6 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
 
                     return true;
                 }
-                else
-                {
-                    var targetedEntity = player.getTargetEntity(5);
-
-                    if (targetedEntity != null)
-                    {
-                        var disg = DisguiseAPI.getDisguise(targetedEntity);
-
-                        String targetKey;
-
-                        if (targetedEntity instanceof Player targetPlayer)
-                        {
-                            var playerState = morphs.getDisguiseStateFor(targetPlayer);
-
-                            //目标实体是玩家：玩家伪装ID > 玩家名
-                            targetKey = playerState != null
-                                    ? playerState.getDisguiseIdentifier()
-                                    : DisguiseTypes.PLAYER.toId(targetPlayer.getName());
-                        }
-                        else
-                        {
-                            //否则：伪装ID > 伪装类型 > 生物类型
-                            targetKey = disg != null
-                                    ? (disg instanceof PlayerDisguise pd)
-                                        ? DisguiseTypes.PLAYER.toId(pd.getName())
-                                        : disg.getType().getEntityType().getKey().asString()
-                                    : targetedEntity.getType().getKey().asString();
-                        }
-
-                        morphs.morph(player, targetKey, targetedEntity);
-
-                        return true;
-                    }
-                }
             }
         }
 
@@ -411,6 +266,8 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         var player = e.getPlayer();
         var state = morphs.getDisguiseStateFor(player);
 
+        clientHandler.markPlayerReady(player);
+
         if (state != null)
         {
             //重新进入后player和info.player不属于同一个实例，需要重新disguise
@@ -421,7 +278,25 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
             DisguiseUtils.addTrace(disguise);
 
             //刷新Disguise
-            state.setDisguise(state.getDisguiseIdentifier(), state.getSkillIdentifier(), DisguiseAPI.getDisguise(player), state.shouldHandlePose(), false);
+            var nbt = state.getCachedNbtString();
+            var profile = state.getProfileNbtString();
+
+            state.setDisguise(state.getDisguiseIdentifier(),
+                    state.getSkillIdentifier(), DisguiseAPI.getDisguise(player), state.shouldHandlePose(), false,
+                    state.getDisguisedItems());
+
+            state.setCachedNbtString(nbt);
+            state.setCachedProfileNbtString(profile);
+
+            //刷新被动
+            var abilities = state.getAbilities();
+            abilities.forEach(a -> a.applyToPlayer(state.getPlayer(), state));
+
+            //刷新主动
+            var skill = state.getSkill();
+
+            if (skill != null)
+                skill.onInitialEquip(state);
 
             //调用Morph事件
             Bukkit.getPluginManager().callEvent(new PlayerMorphEvent(player, state));
@@ -460,9 +335,13 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         }
     }
 
+    @Resolved
+    private MorphClientHandler clientHandler;
+
     @EventHandler
     public void onPlayerExit(PlayerQuitEvent e)
     {
+        clientHandler.unInitializePlayer(e.getPlayer());
         skillHandler.removeUnusedList(e.getPlayer());
 
         var state = morphs.getDisguiseStateFor(e.getPlayer());

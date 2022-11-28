@@ -4,6 +4,8 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.DisguiseConfig;
 import me.libraryaddict.disguise.disguisetypes.Disguise;
+import me.libraryaddict.disguise.disguisetypes.watchers.LivingWatcher;
+import me.libraryaddict.disguise.utilities.DisguiseUtilities;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -78,7 +80,7 @@ public class LocalDisguiseProvider extends VanillaDisguiseProvider
     }
 
     @Override
-    protected boolean canConstruct(DisguiseInfo info, Entity targetEntity, @Nullable DisguiseState theirState)
+    public boolean canConstruct(DisguiseInfo info, Entity targetEntity, @Nullable DisguiseState theirState)
     {
         return theirState != null && theirState.getDisguiseIdentifier().equals(info.getIdentifier());
     }
@@ -112,5 +114,17 @@ public class LocalDisguiseProvider extends VanillaDisguiseProvider
             return Component.text(disg.getType().toReadable().equals(disg.getDisguiseName()) ? ldID : disg.getDisguiseName());
 
         return Component.text(ldID);
+    }
+
+    @Override
+    public boolean validForClient(DisguiseState state)
+    {
+        return false;
+    }
+
+    @Override
+    public String getSelfViewIdentifier(DisguiseState state)
+    {
+        return state.getEntityType().getKey().asString();
     }
 }

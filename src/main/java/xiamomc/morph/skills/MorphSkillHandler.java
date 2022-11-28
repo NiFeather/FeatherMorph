@@ -139,6 +139,14 @@ public class MorphSkillHandler extends MorphPluginObject
                 .filter(d -> identifier.equals(d.getKey().getIdentifier())).findFirst().orElse(null);
     }
 
+    public IMorphSkill<?> getSkill(String identifier)
+    {
+        var entry = getSkillEntry(identifier);
+
+        if (entry != null) return entry.getValue();
+        else return null;
+    }
+
     public void executeDisguiseSkill(Player player)
     {
         this.executeDisguiseSkill(player, false);

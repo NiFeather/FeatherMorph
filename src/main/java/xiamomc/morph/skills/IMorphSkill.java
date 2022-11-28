@@ -1,11 +1,15 @@
 package xiamomc.morph.skills;
 
 import org.bukkit.NamespacedKey;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.SkillStrings;
+import xiamomc.morph.misc.DisguiseState;
+import xiamomc.morph.misc.DisguiseTypes;
+import xiamomc.morph.providers.DisguiseProvider;
 import xiamomc.morph.storage.skill.ISkillOption;
 import xiamomc.morph.storage.skill.SkillConfiguration;
 
@@ -19,6 +23,18 @@ public interface IMorphSkill<T extends ISkillOption>
      * @return 执行后的冷却长度
      */
     public int executeSkill(Player player, SkillConfiguration configuration, T option);
+
+    public default void onInitialEquip(DisguiseState state)
+    {
+    }
+
+    public default void onClientinit(DisguiseState state)
+    {
+    }
+
+    public default void onDeEquip(DisguiseState state)
+    {
+    }
 
     /**
      * 内部轮子
