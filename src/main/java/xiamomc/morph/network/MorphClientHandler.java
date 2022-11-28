@@ -151,7 +151,7 @@ public class MorphClientHandler extends MorphPluginObject
                     }
                     else
                     {
-                        manager.doQuickDisguise(player);
+                        manager.doQuickDisguise(player, null);
                     }
                 }
                 case "initial" ->

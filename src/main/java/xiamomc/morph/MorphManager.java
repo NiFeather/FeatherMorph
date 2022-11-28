@@ -13,10 +13,7 @@ import me.libraryaddict.disguise.utilities.DisguiseValues;
 import me.libraryaddict.disguise.utilities.reflection.FakeBoundingBox;
 import me.libraryaddict.disguise.utilities.reflection.ReflectionManager;
 import net.kyori.adventure.text.Component;
-import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Particle;
+import org.bukkit.*;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
@@ -25,6 +22,7 @@ import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.profile.PlayerTextures;
+import org.checkerframework.checker.units.qual.N;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.abilities.AbilityHandler;
@@ -265,7 +263,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
     private final Map<UUID, PlayerTextures> uuidPlayerTexturesMap = new ConcurrentHashMap<>();
 
-    public boolean doQuickDisguise(Player player)
+    public boolean doQuickDisguise(Player player, @Nullable Material actionItem)
     {
         var state = this.getDisguiseStateFor(player);
         var mainHandItem = player.getEquipment().getItemInMainHand();
@@ -355,6 +353,9 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         }
         else
         {
+            if (actionItem != null && !mainHandItemType.equals(actionItem))
+                return false;
+
             var targetedEntity = player.getTargetEntity(5);
 
             if (targetedEntity != null)

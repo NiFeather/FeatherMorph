@@ -199,7 +199,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         if (player.isSneaking())
         {
             //右键玩家头颅：快速伪装
-            if (!action.equals(Action.RIGHT_CLICK_BLOCK) && !action.isLeftClick() && morphs.doQuickDisguise(player))
+            if (!action.equals(Action.RIGHT_CLICK_BLOCK) && !action.isLeftClick() && morphs.doQuickDisguise(player, actionItem))
             {
                 return true;
             }
