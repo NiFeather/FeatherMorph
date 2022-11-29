@@ -1,6 +1,8 @@
 package xiamomc.morph.providers;
 
 import com.comphenix.protocol.wrappers.WrappedGameProfile;
+import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.properties.Property;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.disguisetypes.Disguise;
@@ -60,36 +62,58 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
 
         var mainHandItem = state.getPlayer().getItemInHand();
 
-        if (mainHandItem.getType() != Material.PLAYER_HEAD) return;
-
-        var profile = ((SkullMeta) mainHandItem.getItemMeta()).getPlayerProfile();
-        var player = state.getPlayer();
-
-        if (profile == null)
-        {
-            player.sendMessage(MessageUtils.prefixes(player, MorphStrings.invalidSkinString()));
-            return;
-        }
-
-        var gameProfile = new MorphGameProfile(profile);
-
-        if (gameProfile.getName().equals(DisguiseTypes.PLAYER.toStrippedId(state.getDisguiseIdentifier())))
-        {
-            //成功伪装后设置皮肤为头颅的皮肤
-            var disguise = (PlayerDisguise) state.getDisguise();
-            var wrappedProfile = WrappedGameProfile.fromHandle(gameProfile);
-
-            var LDprofile = ReflectionManager.getGameProfileWithThisSkin(wrappedProfile.getUUID(), wrappedProfile.getName(), wrappedProfile);
-
-            //LD不支持直接用profile设置皮肤，只能先存到本地设置完再移除
-            DisguiseAPI.addGameProfile(LDprofile.toString(), LDprofile);
-            disguise.setSkin(LDprofile);
-            DisguiseUtilities.removeGameProfile(LDprofile.toString());
-        }
-
         var compound = new NBTTagCompound();
-        GameProfileSerializer.a(compound, gameProfile);
-        state.setCachedProfileNbtString(compound.toString());
+        MorphGameProfile gameProfile = null;
+
+        //存在玩家头颅，优先从头颅获取profile
+        if (mainHandItem.getType() == Material.PLAYER_HEAD)
+        {
+            var profile = ((SkullMeta) mainHandItem.getItemMeta()).getPlayerProfile();
+            var player = state.getPlayer();
+
+            if (profile == null)
+            {
+                player.sendMessage(MessageUtils.prefixes(player, MorphStrings.invalidSkinString()));
+                return;
+            }
+
+            gameProfile = new MorphGameProfile(profile);
+
+            if (gameProfile.getName().equals(DisguiseTypes.PLAYER.toStrippedId(state.getDisguiseIdentifier())))
+            {
+                //成功伪装后设置皮肤为头颅的皮肤
+                var disguise = (PlayerDisguise) state.getDisguise();
+                var wrappedProfile = WrappedGameProfile.fromHandle(gameProfile);
+
+                var LDprofile = ReflectionManager.getGameProfileWithThisSkin(wrappedProfile.getUUID(), wrappedProfile.getName(), wrappedProfile);
+
+                //LD不支持直接用profile设置皮肤，只能先存到本地设置完再移除
+                DisguiseAPI.addGameProfile(LDprofile.toString(), LDprofile);
+                disguise.setSkin(LDprofile);
+                DisguiseUtilities.removeGameProfile(LDprofile.toString());
+            }
+        }
+
+        //如果没有，则尝试从伪装获取
+        if (gameProfile == null)
+        {
+            var watcher = ((PlayerDisguise) state.getDisguise()).getWatcher();
+
+            var profile = watcher.getSkin().getHandle();
+
+            if (profile instanceof GameProfile gProfile)
+            {
+                gameProfile = new MorphGameProfile(gProfile);
+                gameProfile.setName(DisguiseTypes.PLAYER.toStrippedId(state.getDisguiseIdentifier()));
+            }
+        }
+
+        //若最后profile不为null，设置state的profile和nbt
+        if (gameProfile != null)
+        {
+            GameProfileSerializer.a(compound, gameProfile);
+            state.setCachedProfileNbtString(compound.toString());
+        }
     }
 
     @Override

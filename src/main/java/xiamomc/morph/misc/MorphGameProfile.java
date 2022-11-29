@@ -19,10 +19,39 @@ public class MorphGameProfile extends GameProfile
     {
         super(profile.getId(), profile.getName());
 
+        this.name = profile.getName();
+
         profile.getProperties().forEach(p ->
         {
             map.put(p.getName(), new Property(p.getName(), p.getValue(), p.getSignature()));
         });
+    }
+
+    private String name;
+
+    public MorphGameProfile(GameProfile profile)
+    {
+        super(profile.getId(), profile.getName());
+
+        this.name = profile.getName();
+
+        profile.getProperties().forEach((s, p) ->
+        {
+            map.put(p.getName(), new Property(p.getName(), p.getValue(), p.getSignature()));
+        });
+    }
+
+    @Override
+    public String getName()
+    {
+        return name != null ? name : super.getName();
+    }
+
+    public void setName(String str)
+    {
+        if (str == null || str.isBlank() || str.isEmpty()) return;
+
+        this.name = str;
     }
 
     private final PropertyMap map = new PropertyMap();
