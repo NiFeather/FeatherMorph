@@ -168,18 +168,6 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
 
         if (!DisguiseAPI.isDisguised(targetEntity))
         {
-            //workaround: LibsDisguises在为实体构建伪装时会把主手的物品复制到副手上，不管目标实体副手拿着什么东西。
-            //            复制的伪装暂时不用处理。
-            ItemStack offhandItemStack = null;
-
-            if (targetEntity instanceof Player targetPlayer)
-                offhandItemStack = targetPlayer.getInventory().getItemInOffHand();
-
-            if (targetEntity instanceof ArmorStand armorStand)
-                offhandItemStack = armorStand.getItem(EquipmentSlot.OFF_HAND);
-
-            if (offhandItemStack != null) watcher.setItemInOffHand(offhandItemStack);
-
             //盔甲架加上手臂
             if (disguise.getType().equals(DisguiseType.ARMOR_STAND))
                 ((ArmorStandWatcher) watcher).setShowArms(true);

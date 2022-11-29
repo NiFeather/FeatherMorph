@@ -408,9 +408,7 @@ public class DisguiseState extends MorphPluginObject
             //更新伪装物品
             if (supportsDisguisedItems)
             {
-                var watcher = disguise.getWatcher();
-
-                EntityEquipment equipment = targetEquipment != null ? targetEquipment : watcher.getEquipment();
+                EntityEquipment equipment = targetEquipment != null ? targetEquipment : new DisguiseEquipment();
 
                 //设置默认盔甲
                 disguiseArmors = new ItemStack[]
