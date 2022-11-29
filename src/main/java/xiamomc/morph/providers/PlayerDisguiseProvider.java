@@ -73,16 +73,19 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
 
         var gameProfile = new MorphGameProfile(profile);
 
-        //成功伪装后设置皮肤为头颅的皮肤
-        var disguise = (PlayerDisguise) state.getDisguise();
-        var wrappedProfile = WrappedGameProfile.fromHandle(gameProfile);
+        if (gameProfile.getName().equals(DisguiseTypes.PLAYER.toStrippedId(state.getDisguiseIdentifier())))
+        {
+            //成功伪装后设置皮肤为头颅的皮肤
+            var disguise = (PlayerDisguise) state.getDisguise();
+            var wrappedProfile = WrappedGameProfile.fromHandle(gameProfile);
 
-        var LDprofile = ReflectionManager.getGameProfileWithThisSkin(wrappedProfile.getUUID(), wrappedProfile.getName(), wrappedProfile);
+            var LDprofile = ReflectionManager.getGameProfileWithThisSkin(wrappedProfile.getUUID(), wrappedProfile.getName(), wrappedProfile);
 
-        //LD不支持直接用profile设置皮肤，只能先存到本地设置完再移除
-        DisguiseAPI.addGameProfile(LDprofile.toString(), LDprofile);
-        disguise.setSkin(LDprofile);
-        DisguiseUtilities.removeGameProfile(LDprofile.toString());
+            //LD不支持直接用profile设置皮肤，只能先存到本地设置完再移除
+            DisguiseAPI.addGameProfile(LDprofile.toString(), LDprofile);
+            disguise.setSkin(LDprofile);
+            DisguiseUtilities.removeGameProfile(LDprofile.toString());
+        }
 
         var compound = new NBTTagCompound();
         GameProfileSerializer.a(compound, gameProfile);
