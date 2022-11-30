@@ -31,11 +31,15 @@ import java.util.function.Consumer;
 public class MorphClientHandler extends MorphPluginObject
 {
     private final Bindable<Boolean> allowClient = new Bindable<>(false);
-    private final Bindable<Boolean> logPackets = new Bindable<>(false);
+    private final Bindable<Boolean> logInComingPackets = new Bindable<>(false);
+    private final Bindable<Boolean> logOutGoingPackets = new Bindable<>(false);
 
     //部分来自 CraftPlayer#sendPluginMessage(), 在我们搞清楚到底为什么服务端会吞包之前先这样
     private void sendPacket(String channel, Player player, byte[] message)
     {
+        if (logOutGoingPackets.get())
+            logger.info(channel + " :: " + player.getName() + " -> " + new String(message, StandardCharsets.UTF_8));
+
         StandardMessenger.validatePluginMessage(Bukkit.getServer().getMessenger(), plugin, channel, message);
 
         var nmsPlayer = ((CraftPlayer) player).getHandle();
@@ -54,7 +58,7 @@ public class MorphClientHandler extends MorphPluginObject
         {
             if (!allowClient.get()) return;
 
-            if (logPackets.get())
+            if (logInComingPackets.get())
                 logger.info("收到了来自" + player.getName() + "的初始化消息：" + new String(data, StandardCharsets.UTF_8));
 
             this.sendPacket(initializeChannel, player, "".getBytes());
@@ -69,7 +73,7 @@ public class MorphClientHandler extends MorphPluginObject
 
             if (!clientPlayers.contains(player)) return;
 
-            if (logPackets.get())
+            if (logInComingPackets.get())
                 logger.info("收到了来自" + player.getName() + "的API请求：" + new String(data, StandardCharsets.UTF_8));
 
             this.sendPacket(versionChannel, player, apiVersionBytes);
@@ -81,7 +85,7 @@ public class MorphClientHandler extends MorphPluginObject
 
             if (!clientPlayers.contains(player)) return;
 
-            if (logPackets.get())
+            if (logInComingPackets.get())
                 logger.info("在" + cN + "收到了来自" + player.getName() + "的服务端指令：" + new String(data, StandardCharsets.UTF_8));
 
             var str = new String(data, StandardCharsets.UTF_8).split(" ", 2);
@@ -162,7 +166,7 @@ public class MorphClientHandler extends MorphPluginObject
                     //等待玩家加入再发包
                     this.waitUntilReady(player, c ->
                     {
-                        if (initialzedPlayers.contains(player))
+                        if (initializedPlayers.contains(player))
                             return;
 
                         var config = manager.getPlayerConfiguration(player);
@@ -175,7 +179,7 @@ public class MorphClientHandler extends MorphPluginObject
                             manager.refreshClientState(state);
 
                         sendClientCommand(player, ClientCommands.setToggleSelfCommand(config.showDisguiseToSelf));
-                        initialzedPlayers.add(player);
+                        initializedPlayers.add(player);
                     });
                 }
                 case "option" ->
@@ -210,13 +214,14 @@ public class MorphClientHandler extends MorphPluginObject
         Bukkit.getMessenger().registerOutgoingPluginChannel(plugin, commandChannel);
 
         configManager.bind(allowClient, ConfigOption.ALLOW_CLIENT);
-        configManager.bind(logPackets, ConfigOption.LOG_INCOMING_PACKETS);
+        configManager.bind(logInComingPackets, ConfigOption.LOG_INCOMING_PACKETS);
+        configManager.bind(logOutGoingPackets, ConfigOption.LOG_OUTGOING_PACKETS);
 
         allowClient.onValueChanged((o, n) ->
         {
             var players = Bukkit.getOnlinePlayers();
 
-            initialzedPlayers.removeAll(players);
+            initializedPlayers.removeAll(players);
             clientPlayers.removeAll(players);
 
             if (n)
@@ -260,6 +265,11 @@ public class MorphClientHandler extends MorphPluginObject
 
     private final Map<UUID, MorphClientOptions> playerOptionMap = new Object2ObjectOpenHashMap<>();
 
+    /**
+     * 获取某一玩家的客户端选项
+     * @param player 目标玩家
+     * @return 此玩家的客户端选项
+     */
     public MorphClientOptions getPlayerOption(Player player)
     {
         var uuid = player.getUniqueId();
@@ -273,10 +283,39 @@ public class MorphClientHandler extends MorphPluginObject
         return option;
     }
 
-    private final List<Player> initialzedPlayers = new ObjectArrayList<>();
+    private final List<Player> initializedPlayers = new ObjectArrayList<>();
 
     private final List<Player> clientPlayers = new ObjectArrayList<>();
 
+    /**
+     * 检查某个玩家是否使用客户端加入
+     *
+     * @param player 目标玩家
+     * @return 玩家是否使用客户端加入
+     * @apiNote 此API只能检查客户端是否已连接，检查初始化状态请使用 {@link MorphClientHandler#clientInitialized(Player)}
+     */
+    public boolean clientConnected(Player player)
+    {
+        return clientPlayers.contains(player);
+    }
+
+    /**
+     * 检查某个玩家的客户端是否已初始化
+     *
+     * @param player 目标玩家
+     * @return 此玩家的客户端是否已初始化
+     */
+    public boolean clientInitialized(Player player)
+    {
+        return initializedPlayers.contains(player);
+    }
+
+    /**
+     * 刷新某个玩家的客户端的伪装列表
+     *
+     * @param identifiers 伪装列表
+     * @param player 目标玩家
+     */
     public void refreshPlayerClientMorphs(List<String> identifiers, Player player)
     {
         if (!allowClient.get()) return;
@@ -291,6 +330,13 @@ public class MorphClientHandler extends MorphPluginObject
         sendClientCommand(player, additBuilder.toString());
     }
 
+    /**
+     * 向某个玩家的客户端发送差异信息
+     *
+     * @param addits 添加
+     * @param removal 删除
+     * @param player 目标玩家
+     */
     public void sendDiff(@Nullable List<String> addits, @Nullable List<String> removal, Player player)
     {
         if (!allowClient.get()) return;
@@ -320,6 +366,12 @@ public class MorphClientHandler extends MorphPluginObject
         }
     }
 
+    /**
+     * 更新某一玩家客户端的当前伪装
+     *
+     * @param player 目标玩家
+     * @param str 伪装ID
+     */
     public void updateCurrentIdentifier(Player player, String str)
     {
         if (!allowClient.get()) return;
@@ -334,18 +386,28 @@ public class MorphClientHandler extends MorphPluginObject
         sendClientCommand(player, builder.toString());
     }
 
+    /**
+     * 反初始化玩家
+     *
+     * @param player 目标玩家
+     */
     public void unInitializePlayer(Player player)
     {
         this.clientPlayers.remove(player);
         this.playerOptionMap.clear();
         playerStateMap.remove(player);
-        initialzedPlayers.remove(player);
+        initializedPlayers.remove(player);
 
         var playerConfig = manager.getPlayerConfiguration(player);
         var state = manager.getDisguiseStateFor(player);
         if (state != null) state.setSelfVisible(playerConfig.showDisguiseToSelf);
     }
 
+    /**
+     * 向列表中的玩家客户端发送reauth指令
+     *
+     * @param players 玩家列表
+     */
     public void sendReAuth(Collection<? extends Player> players)
     {
         if (!allowClient.get()) return;
@@ -357,6 +419,11 @@ public class MorphClientHandler extends MorphPluginObject
         });
     }
 
+    /**
+     * 向列表中的玩家客户端发送unauth指令
+     *
+     * @param players 玩家列表
+     */
     public void sendUnAuth(Collection<? extends Player> players)
     {
         players.forEach(p ->
@@ -375,9 +442,14 @@ public class MorphClientHandler extends MorphPluginObject
         this.sendPacket(commandChannel, player, cmd.getBytes());
     }
 
+    /**
+     * 向某一玩家的客户端发送指令
+     *
+     * @param player 目标玩家
+     * @param cmd 指令内容
+     */
     public void sendClientCommand(Player player, String cmd)
     {
-        logger.info("SENGING PACKET TO " + player.getName() + ": " + cmd);
         this.sendClientCommand(player, cmd, false);
     }
 

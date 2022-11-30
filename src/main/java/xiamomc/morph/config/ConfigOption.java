@@ -18,6 +18,7 @@ public enum ConfigOption
     ALLOW_CLIENT(clientNode().append("allow_client_mod"), true),
 
     LOG_INCOMING_PACKETS(clientNode().append("log_incoming_packets"), false),
+    LOG_OUTGOING_PACKETS(clientNode().append("log_outgoing_packets"), false),
 
     REVERSE_CONTROL_DISTANCE(reverseControlNode().append("normalDistance"), -1),
     REVERSE_CONTROL_DISTANCE_IMMUNE(reverseControlNode().append("immuneDistance"), 16),
