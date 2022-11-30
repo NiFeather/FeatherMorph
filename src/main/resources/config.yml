@@ -76,5 +76,14 @@ root:
   # - "player:dinnerbone"
   bannedDisguises: []
 
+  # 客户端集成选项
+  client:
+    # 是否允许客户端集成？
+    allow_client_mod: true
+    # 是否记录客户端发来的包？
+    log_incoming_packets: false
+    # 是否记录发送给客户端的包？
+    log_outgoing_packets: false
+
   # 不要动这个键!
-  version: 10
+  version: 11
