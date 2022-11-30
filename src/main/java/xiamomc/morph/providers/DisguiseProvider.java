@@ -3,8 +3,7 @@ package xiamomc.morph.providers;
 import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.disguisetypes.Disguise;
 import net.kyori.adventure.text.Component;
-import net.minecraft.nbt.GameProfileSerializer;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.*;
 import net.minecraft.server.commands.data.CommandDataAccessorEntity;
 import org.bukkit.craftbukkit.v1_19_R1.entity.CraftLivingEntity;
 import org.bukkit.entity.Entity;
@@ -93,10 +92,11 @@ public abstract class DisguiseProvider extends MorphPluginObject
             //剔除不需要的nbt
             compund = cullNBT(entityDataObject.a());
 
-            var str = GameProfileSerializer.d(compund);
+            //StringNbtWriter
+            var visitor = new StringTagVisitor();
 
-            str = str.replace("\n", "");
-            return str;
+            //StringNbtWriter#apply(NbtElement)
+            return visitor.a((NBTBase) compund);
         }
 
         return null;
@@ -139,6 +139,16 @@ public abstract class DisguiseProvider extends MorphPluginObject
         compound.r("Paper.SpawnReason");
         compound.r("Spigot.ticksLived");
         compound.r("Bukkit.updateLevel");
+        compound.r("Bukkit.Aware");
+
+        //villager
+        compound.r("Offers");
+
+        //misc
+        compound.r("Pos");
+        compound.r("WorldUUIDLeast");
+        compound.r("WorldUUIDMost");
+        compound.r("Rotation");
 
         return compound;
     }
