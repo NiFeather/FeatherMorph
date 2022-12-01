@@ -15,6 +15,7 @@ import org.bukkit.craftbukkit.v1_19_R1.entity.CraftHumanEntity;
 import org.bukkit.craftbukkit.v1_19_R1.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_19_R1.inventory.CraftItemStack;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
@@ -265,7 +266,7 @@ public class PlayerOperationSimulator extends MorphPluginObject
             var event = new PlayerInteractEvent(player, Action.RIGHT_CLICK_AIR, item, null, BlockFace.SELF);
             pluginManager.callEvent(event);
 
-            if (!event.isCancelled())
+            if (event.useItemInHand() != Event.Result.DENY)
                 return mgr.a(playerHandle, worldHandle, CraftItemStack.asNMSCopy(item), hand).a();
             else
                 return false;
