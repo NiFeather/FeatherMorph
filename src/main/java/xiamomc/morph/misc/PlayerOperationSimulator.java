@@ -71,6 +71,9 @@ public class PlayerOperationSimulator extends MorphPluginObject
         this.addSchedule(c -> update(), 5);
     }
 
+    private final float blockReachDistance = 4.5f;
+    private final float entityReachDistance = 3f;
+
     /**
      * 模拟玩家左键
      *
@@ -94,7 +97,7 @@ public class PlayerOperationSimulator extends MorphPluginObject
 
         //获取正在看的方块或实体
         var eyeLoc = player.getEyeLocation();
-        var traceResult = player.getWorld().rayTrace(eyeLoc, eyeLoc.getDirection(), 4.5,
+        var traceResult = player.getWorld().rayTrace(eyeLoc, eyeLoc.getDirection(), blockReachDistance,
                 FluidCollisionMode.NEVER, false, 0d, Predicate.not(Predicate.isEqual(player)));
 
         var targetBlock = traceResult == null ? null : traceResult.getHitBlock();
@@ -108,7 +111,7 @@ public class PlayerOperationSimulator extends MorphPluginObject
 
         if (targetEntity != null)
         {
-            if (player.getLocation().distance(targetEntity.getLocation()) > 3)
+            if (player.getLocation().distance(targetEntity.getLocation()) > entityReachDistance)
                 return true;
 
             player.attack(targetEntity);
@@ -169,11 +172,14 @@ public class PlayerOperationSimulator extends MorphPluginObject
 
         //获取正在看的方块或实体
         var eyeLoc = player.getEyeLocation();
-        var traceResult = player.getWorld().rayTrace(eyeLoc, eyeLoc.getDirection(), 3,
+        var traceResult = player.getWorld().rayTrace(eyeLoc, eyeLoc.getDirection(), blockReachDistance,
                 FluidCollisionMode.NEVER, false, 0d, Predicate.not(Predicate.isEqual(player)));
 
         var targetBlock = traceResult == null ? null : traceResult.getHitBlock();
         var targetEntity = traceResult == null ? null : traceResult.getHitEntity();
+
+        if (targetEntity != null && targetEntity.getLocation().distance(player.getLocation()) > entityReachDistance)
+            targetEntity = null;
 
         //Player in fabric mojang mappings
         var playerHumanHandle = ((CraftHumanEntity) player).getHandle();
@@ -255,7 +261,7 @@ public class PlayerOperationSimulator extends MorphPluginObject
                 pluginManager.callEvent(event);
 
                 //ServerPlayerGameMode.useItemOn()
-                if (!event.isCancelled())
+                if (event.useInteractedBlock() != Event.Result.DENY)
                     success = mgr.a(playerHandle, worldHandle, CraftItemStack.asNMSCopy(item), hand, moving).a();
             }
         }
