@@ -66,7 +66,7 @@ public class SendSubCommand extends MorphPluginObject implements ISubCommand
         {
             if (args.length >= 1)
             {
-                var targetPlayer = Bukkit.getPlayer(args[0]);
+                var targetPlayer = Bukkit.getPlayerExact(args[0]);
 
                 if (targetPlayer == null)
                 {

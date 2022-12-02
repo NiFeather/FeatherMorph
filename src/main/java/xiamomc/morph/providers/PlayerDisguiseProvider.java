@@ -182,7 +182,7 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
         //尝试获取玩家的显示名称
         Component finalName;
         var playerName = DisguiseTypes.PLAYER.toStrippedId(disguiseIdentifier);
-        var player = Bukkit.getPlayer(playerName);
+        var player = Bukkit.getPlayerExact(playerName);
 
         if (player != null)
             finalName = player.displayName();

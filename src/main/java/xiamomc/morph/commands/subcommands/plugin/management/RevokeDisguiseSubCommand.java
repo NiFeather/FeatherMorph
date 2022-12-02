@@ -56,7 +56,7 @@ public class RevokeDisguiseSubCommand extends MorphPluginObject implements ISubC
         }
         else if (args.size() == 2) //size == 2: 补全拥有的伪装
         {
-            var player = Bukkit.getPlayer(name);
+            var player = Bukkit.getPlayerExact(name);
 
             if (player != null)
             {
@@ -83,7 +83,7 @@ public class RevokeDisguiseSubCommand extends MorphPluginObject implements ISubC
     {
         if (strings.length != 2) return false;
 
-        var who = Bukkit.getPlayer(strings[0]);
+        var who = Bukkit.getPlayerExact(strings[0]);
         var targetName = strings[1];
 
         if (who == null || !who.isOnline())

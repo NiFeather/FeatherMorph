@@ -224,7 +224,7 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
             case PLAYER ->
             {
                 if (teamTargetEntity == null)
-                    teamTargetEntity = Bukkit.getPlayer(DisguiseTypes.PLAYER.toStrippedId(disguiseID));
+                    teamTargetEntity = Bukkit.getPlayerExact(DisguiseTypes.PLAYER.toStrippedId(disguiseID));
             }
 
             //LD的伪装直接从伪装flag里获取发光颜色

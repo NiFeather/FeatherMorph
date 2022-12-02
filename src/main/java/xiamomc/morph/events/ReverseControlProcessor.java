@@ -45,7 +45,7 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
 
         if (state != null)
         {
-            var player = Bukkit.getPlayer(state);
+            var player = Bukkit.getPlayerExact(state);
 
             if (!playerInDistance(e.getPlayer(), player) || player.isSneaking() == e.isSneaking()) return;
 
@@ -63,7 +63,7 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
 
         if (state != null)
         {
-            var player = Bukkit.getPlayer(state);
+            var player = Bukkit.getPlayerExact(state);
 
             if (!playerInDistance(e.getPlayer(), player)) return;
 
@@ -87,7 +87,7 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
 
         if (state != null)
         {
-            var target = Bukkit.getPlayer(state);
+            var target = Bukkit.getPlayerExact(state);
 
             if (!playerInDistance(player, target) || !player.isSneaking()) return;
 
@@ -109,7 +109,7 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
 
         if (state != null)
         {
-            var player = Bukkit.getPlayer(state);
+            var player = Bukkit.getPlayerExact(state);
 
             if (!playerInDistance(e.getPlayer(), player)) return;
 
@@ -137,7 +137,7 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
 
             if (state != null)
             {
-                var targetPlayer = Bukkit.getPlayer(state);
+                var targetPlayer = Bukkit.getPlayerExact(state);
 
                 if (!playerInDistance(damager, targetPlayer)) return;
 
@@ -178,7 +178,7 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
 
         if (state != null)
         {
-            var targetPlayer = Bukkit.getPlayer(state);
+            var targetPlayer = Bukkit.getPlayerExact(state);
 
             if (!playerInDistance(player, targetPlayer)) return;
 
@@ -212,7 +212,7 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
 
             if (state != null)
             {
-                var targetPlayer = Bukkit.getPlayer(state);
+                var targetPlayer = Bukkit.getPlayerExact(state);
 
                 if (!playerInDistance(player, targetPlayer)) return;
 
@@ -326,7 +326,7 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
 
         uuidDisguiseStateMap.forEach((p, d) ->
         {
-            var targetPlayer = Bukkit.getPlayer(d.getName());
+            var targetPlayer = Bukkit.getPlayerExact(d.getName());
 
             if (targetPlayer != null)
             {

@@ -77,7 +77,7 @@ public class GrantDisguiseSubCommand extends MorphPluginObject implements ISubCo
     {
         if (strings.length != 2) return false;
 
-        var who = Bukkit.getPlayer(strings[0]);
+        var who = Bukkit.getPlayerExact(strings[0]);
         var targetName = strings[1];
 
         if (who == null || !who.isOnline())

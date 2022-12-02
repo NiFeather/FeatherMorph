@@ -69,7 +69,7 @@ public class ForceUnmorphSubCommand extends MorphPluginObject implements ISubCom
             return true;
         }
 
-        var player = Bukkit.getPlayer(args[0]);
+        var player = Bukkit.getPlayerExact(args[0]);
         if (player == null)
         {
             sender.sendMessage(MessageUtils.prefixes(sender, CommonStrings.playerNotFoundString()));
