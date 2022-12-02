@@ -20,6 +20,8 @@ import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.misc.DisguiseTypes;
 import xiamomc.morph.misc.PlayerOperationSimulator;
 import xiamomc.morph.misc.permissions.CommonPermissions;
+import xiamomc.morph.network.ClientCommands;
+import xiamomc.morph.network.MorphClientHandler;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
@@ -30,6 +32,9 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ReverseControlProcessor extends MorphPluginObject implements Listener
 {
     private final Map<Player, String> uuidDisguiseStateMap = new ConcurrentHashMap<>();
+
+    @Resolved
+    private MorphClientHandler clientHandler;
 
     @EventHandler
     public void onPlayerSneak(PlayerToggleSneakEvent e)
@@ -42,9 +47,10 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
         {
             var player = Bukkit.getPlayer(state);
 
-            if (!playerInDistance(e.getPlayer(), player)) return;
+            if (!playerInDistance(e.getPlayer(), player) || player.isSneaking() == e.isSneaking()) return;
 
             player.setSneaking(e.isSneaking());
+            clientHandler.sendClientCommand(player, ClientCommands.setSneaking(e.isSneaking()));
         }
     }
 

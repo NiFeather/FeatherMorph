@@ -27,6 +27,11 @@ public class ClientCommands
         return setBase + " profile " + nbtString;
     }
 
+    public static String setSneaking(boolean value)
+    {
+        return setBase + " sneaking " + value;
+    }
+
     private static final String denyBase = "deny";
 
     public static String denyOperationCommand(String operationName)
