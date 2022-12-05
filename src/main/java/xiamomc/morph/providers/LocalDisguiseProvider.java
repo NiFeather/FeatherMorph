@@ -125,6 +125,6 @@ public class LocalDisguiseProvider extends VanillaDisguiseProvider
     @Override
     public String getSelfViewIdentifier(DisguiseState state)
     {
-        return state.getEntityType().getKey().asString();
+        return "";
     }
 }

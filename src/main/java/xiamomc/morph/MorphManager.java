@@ -504,23 +504,26 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                     abilities.forEach(a -> a.applyToPlayer(player, finalOutComingState));
                 }
 
-                //初始化客户端指令
-                clientHandler.sendClientCommand(player, ClientCommands.setSelfViewCommand(provider.getSelfViewIdentifier(outComingState)));
-
-                provider.getInitialSyncCommands(outComingState).forEach(s -> clientHandler.sendClientCommand(player, s));
-
-                //初始化nbt
-                var compound = provider.getNbtCompound(outComingState, targetEntity);
-
-                if (compound != null)
+                //如果此伪装可以同步给客户端，那么初始化客户端状态
+                if (provider.validForClient(state))
                 {
-                    outComingState.setCachedNbtString(compound);
-                    clientHandler.sendClientCommand(player, ClientCommands.setNbtCommand(compound));
-                }
+                    clientHandler.sendClientCommand(player, ClientCommands.setSelfViewCommand(provider.getSelfViewIdentifier(outComingState)));
 
-                //设置Profile
-                if (outComingState.haveProfile())
-                    clientHandler.sendClientCommand(player, ClientCommands.setProfileCommand(outComingState.getProfileNbtString()));
+                    provider.getInitialSyncCommands(outComingState).forEach(s -> clientHandler.sendClientCommand(player, s));
+
+                    //初始化nbt
+                    var compound = provider.getNbtCompound(outComingState, targetEntity);
+
+                    if (compound != null)
+                    {
+                        outComingState.setCachedNbtString(compound);
+                        clientHandler.sendClientCommand(player, ClientCommands.setNbtCommand(compound));
+                    }
+
+                    //设置Profile
+                    if (outComingState.haveProfile())
+                        clientHandler.sendClientCommand(player, ClientCommands.setProfileCommand(outComingState.getProfileNbtString()));
+                }
 
                 return true;
             }
@@ -745,7 +748,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         spawnParticle(sourcePlayer, sourcePlayer.getLocation(), cX, cY, cZ);
 
         //确保玩家可以根据设置看到自己的伪装
-        var serverSideSelfView = (!clientHandler.getPlayerOption(sourcePlayer).isClientSideSelfView() || !state.getProvider().validForClient(state))
+        var serverSideSelfView = (!clientHandler.getPlayerOption(sourcePlayer).isClientSideSelfView() || !provider.validForClient(state))
                         && config.showDisguiseToSelf;
         state.setSelfVisible(serverSideSelfView);
 
