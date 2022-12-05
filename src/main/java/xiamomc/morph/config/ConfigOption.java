@@ -13,6 +13,8 @@ public enum ConfigOption
     SKILL_COOLDOWN_ON_DAMAGE(ConfigNode.create().append("cooldown_on_damage"), 15),
     ACTION_ITEM(ConfigNode.create().append("action_item"), "minecraft:carrot_on_a_stick"),
 
+    ARMORSTAND_SHOW_ARMS(ConfigNode.create().append("armorstand_show_arms"), true),
+
     UNMORPH_ON_DEATH(ConfigNode.create().append("unmorph_on_death"), true),
 
     ALLOW_CLIENT(clientNode().append("allow_client_mod"), true),

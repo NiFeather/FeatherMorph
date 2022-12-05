@@ -1,7 +1,5 @@
 package xiamomc.morph.providers;
 
-import com.google.gson.Gson;
-import com.mojang.serialization.JsonOps;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.disguisetypes.Disguise;
@@ -11,18 +9,17 @@ import me.libraryaddict.disguise.disguisetypes.VillagerData;
 import me.libraryaddict.disguise.disguisetypes.watchers.ArmorStandWatcher;
 import me.libraryaddict.disguise.disguisetypes.watchers.CatWatcher;
 import me.libraryaddict.disguise.disguisetypes.watchers.VillagerWatcher;
-import me.libraryaddict.disguise.disguisetypes.watchers.ZombieWatcher;
 import net.kyori.adventure.text.Component;
 import net.minecraft.nbt.NBTTagCompound;
-import org.bukkit.craftbukkit.v1_19_R1.entity.CraftEntity;
-import org.bukkit.craftbukkit.v1_19_R1.entity.CraftLivingEntity;
 import org.bukkit.entity.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xiamomc.morph.config.ConfigOption;
+import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.misc.*;
-import xiamomc.morph.skills.SkillType;
+import xiamomc.pluginbase.Annotations.Initializer;
+import xiamomc.pluginbase.Bindables.Bindable;
 
-import java.util.Arrays;
 import java.util.List;
 
 public class VanillaDisguiseProvider extends DefaultDisguiseProvider
@@ -84,15 +81,30 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
         return DisguiseResult.success(constructedDisguise, copyResult.isCopy());
     }
 
+    private final Bindable<Boolean> armorStandShowArms = new Bindable<>(false);
+
+    @Initializer
+    private void load(MorphConfigManager configManager)
+    {
+        configManager.bind(armorStandShowArms, ConfigOption.ARMORSTAND_SHOW_ARMS);
+    }
+
     @Override
     public void postConstructDisguise(DisguiseState state, @Nullable Entity targetEntity)
     {
         super.postConstructDisguise(state, targetEntity);
 
+        var disguise = state.getDisguise();
+
+        if (!DisguiseAPI.isDisguised(targetEntity))
+        {
+            //盔甲架加上手臂
+            if (disguise.getType().equals(DisguiseType.ARMOR_STAND) && armorStandShowArms.get())
+                ((ArmorStandWatcher) disguise.getWatcher()).setShowArms(true);
+        }
+
         if (targetEntity != null)
         {
-            var disguise = state.getDisguise();
-
             switch (targetEntity.getType())
             {
                 case CAT ->
@@ -116,16 +128,36 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
     }
 
     @Override
+    public @Nullable String getNbtCompound(DisguiseState state, Entity targetEntity)
+    {
+        var info = getMorphManager().getDisguiseInfo(state.getDisguiseIdentifier());
+
+        var rawCompound = targetEntity != null && canConstruct(info, targetEntity, null)
+                ? NbtUtils.getRawTagCompound(targetEntity)
+                : new NBTTagCompound();
+
+        //NbtCompound#putBoolean()
+        if (rawCompound != null
+                && state.getEntityType().equals(EntityType.ARMOR_STAND)
+                && rawCompound.c("ShowArms") == null)
+        {
+            rawCompound.a("ShowArms", armorStandShowArms.get());
+        }
+
+        return NbtUtils.getCompoundString(cullNBT(rawCompound));
+    }
+
+    @Override
     public boolean validForClient(DisguiseState state)
     {
         return true;
     }
 
     @Override
-    public boolean canConstruct(DisguiseInfo info, Entity targetEntity, DisguiseState state)
+    public boolean canConstruct(DisguiseInfo info, Entity targetEntity, DisguiseState theirState)
     {
-        return state != null
-                ? state.getDisguise().getType().getEntityType().equals(info.getEntityType())
+        return theirState != null
+                ? theirState.getDisguise().getType().getEntityType().equals(info.getEntityType())
                 : targetEntity.getType().equals(info.getEntityType());
     }
 

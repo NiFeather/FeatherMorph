@@ -4,7 +4,6 @@ import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.disguisetypes.Disguise;
 import net.kyori.adventure.text.Component;
 import net.minecraft.nbt.*;
-import net.minecraft.server.commands.data.CommandDataAccessorEntity;
 import org.bukkit.craftbukkit.v1_19_R1.entity.CraftLivingEntity;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -14,6 +13,7 @@ import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.misc.DisguiseInfo;
 import xiamomc.morph.misc.DisguiseState;
+import xiamomc.morph.misc.NbtUtils;
 import xiamomc.pluginbase.Annotations.Resolved;
 
 import java.util.List;
@@ -79,24 +79,12 @@ public abstract class DisguiseProvider extends MorphPluginObject
     @Nullable
     public String getNbtCompound(DisguiseState state, Entity targetEntity)
     {
-        if (targetEntity instanceof CraftLivingEntity craftEntity
+        if (targetEntity instanceof CraftLivingEntity
             && canConstruct(getMorphManager().getDisguiseInfo(state.getDisguiseIdentifier()), targetEntity, null))
         {
-            //nms
-            var compund = new NBTTagCompound();
+            var rawCompound = NbtUtils.getRawTagCompound(targetEntity);
 
-            var nmsEntity = craftEntity.getHandle();
-
-            var entityDataObject = new CommandDataAccessorEntity(nmsEntity);
-
-            //剔除不需要的nbt
-            compund = cullNBT(entityDataObject.a());
-
-            //StringNbtWriter
-            var visitor = new StringTagVisitor();
-
-            //StringNbtWriter#apply(NbtElement)
-            return visitor.a((NBTBase) compund);
+            return NbtUtils.getCompoundString(cullNBT(rawCompound));
         }
 
         return null;
@@ -104,6 +92,8 @@ public abstract class DisguiseProvider extends MorphPluginObject
 
     protected NBTTagCompound cullNBT(NBTTagCompound compound)
     {
+        if (compound == null) return null;
+
         //compound.r() -> NBTCompound#remove()
 
         //common

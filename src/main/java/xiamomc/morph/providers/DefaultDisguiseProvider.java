@@ -23,6 +23,8 @@ import org.bukkit.scoreboard.Scoreboard;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.abilities.AbilityHandler;
+import xiamomc.morph.config.ConfigOption;
+import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.messages.MorphStrings;
 import xiamomc.morph.misc.ColorUtils;
 import xiamomc.morph.misc.DisguiseState;
@@ -31,7 +33,9 @@ import xiamomc.morph.misc.DisguiseUtils;
 import xiamomc.morph.network.MorphClientHandler;
 import xiamomc.morph.skills.MorphSkillHandler;
 import xiamomc.morph.skills.SkillType;
+import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
+import xiamomc.pluginbase.Bindables.Bindable;
 
 import java.util.List;
 
@@ -166,13 +170,7 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
         if (targetEntity instanceof LivingEntity living && living.getHealth() <= 0)
             ((LivingWatcher) watcher).setHealth(1);
 
-        if (!DisguiseAPI.isDisguised(targetEntity))
-        {
-            //盔甲架加上手臂
-            if (disguise.getType().equals(DisguiseType.ARMOR_STAND))
-                ((ArmorStandWatcher) watcher).setShowArms(true);
-        }
-        else if (state.shouldHandlePose() && targetEntity instanceof Player targetPlayer)
+        if (state.shouldHandlePose() && targetEntity instanceof Player targetPlayer)
         {
             //如果目标实体是玩家，并且此玩家的伪装类型和我们的一样，那么复制他们的装备
             var theirState = getMorphManager().getDisguiseStateFor(targetPlayer);
