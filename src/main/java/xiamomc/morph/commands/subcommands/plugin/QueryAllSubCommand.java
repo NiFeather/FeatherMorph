@@ -56,7 +56,7 @@ public class QueryAllSubCommand extends MorphPluginObject implements ISubCommand
                             ? CommandStrings.qaOnlineString()
                             : CommandStrings.qaOfflineString())
                     .resolve("what", i.getDisplayName())
-                    .resolve("storage_status", i.showingDefaultItems()
+                    .resolve("storage_status", i.showingDisguisedItems()
                             ? CommandStrings.qaShowingDisguisedItemsString()
                             : CommandStrings.qaNotShowingDisguisedItemsString());
 

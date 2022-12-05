@@ -10,7 +10,6 @@ import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.network.MorphClientHandler;
 import xiamomc.morph.skills.MorphSkill;
 import xiamomc.morph.skills.SkillType;
-import xiamomc.morph.storage.skill.ISkillOption;
 import xiamomc.morph.storage.skill.NoOpConfiguration;
 import xiamomc.morph.storage.skill.SkillConfiguration;
 import xiamomc.pluginbase.Annotations.Resolved;
@@ -45,7 +44,7 @@ public class InventoryMorphSkill extends MorphSkill<NoOpConfiguration>
     @Override
     public void onInitialEquip(DisguiseState state)
     {
-        clientHandler.sendClientCommand(state.getPlayer(), "set fake_equip " + state.showingDefaultItems());
+        clientHandler.sendClientCommand(state.getPlayer(), "set fake_equip " + state.showingDisguisedItems());
 
         super.onInitialEquip(state);
     }
@@ -53,7 +52,7 @@ public class InventoryMorphSkill extends MorphSkill<NoOpConfiguration>
     @Override
     public void onClientinit(DisguiseState state)
     {
-        clientHandler.sendClientCommand(state.getPlayer(), "set fake_equip " + state.showingDefaultItems());
+        clientHandler.sendClientCommand(state.getPlayer(), "set fake_equip " + state.showingDisguisedItems());
 
         super.onClientinit(state);
     }

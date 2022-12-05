@@ -1,17 +1,13 @@
 package xiamomc.morph;
 
-import com.comphenix.protocol.wrappers.WrappedGameProfile;
-import com.destroystokyo.paper.profile.PlayerProfile;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
 import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.disguisetypes.Disguise;
 import me.libraryaddict.disguise.disguisetypes.MobDisguise;
 import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
-import me.libraryaddict.disguise.utilities.DisguiseUtilities;
 import me.libraryaddict.disguise.utilities.DisguiseValues;
 import me.libraryaddict.disguise.utilities.reflection.FakeBoundingBox;
-import me.libraryaddict.disguise.utilities.reflection.ReflectionManager;
 import net.kyori.adventure.text.Component;
 import org.bukkit.*;
 import org.bukkit.entity.Entity;
@@ -19,10 +15,8 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.EntityEquipment;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.profile.PlayerTextures;
-import org.checkerframework.checker.units.qual.N;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.abilities.AbilityHandler;
@@ -683,8 +677,18 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         EntityEquipment equipment = null;
 
-        if (targetEntity != null && provider.canConstruct(getDisguiseInfo(id), targetEntity, getDisguiseStateFor(targetEntity)))
-            equipment = ((LivingEntity) targetEntity).getEquipment();
+        var theirState = getDisguiseStateFor(targetEntity);
+        if (targetEntity != null && provider.canConstruct(getDisguiseInfo(id), targetEntity, theirState))
+        {
+            if (theirState != null)
+            {
+                equipment = theirState.showingDisguisedItems()
+                        ? theirState.getDisguisedItems()
+                        : ((LivingEntity) targetEntity).getEquipment();
+            }
+            else
+                equipment = ((LivingEntity) targetEntity).getEquipment();
+        }
 
         if (state == null)
         {

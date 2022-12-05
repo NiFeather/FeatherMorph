@@ -8,11 +8,9 @@ import me.libraryaddict.disguise.utilities.parser.DisguiseParser;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
-import net.minecraft.world.level.levelgen.structure.structures.SwampHutStructure;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.EntityEquipment;
@@ -478,7 +476,7 @@ public class DisguiseState extends MorphPluginObject
      * 此阶段是否正在显示伪装物品
      * @return 是否正在显示
      */
-    public boolean showingDefaultItems()
+    public boolean showingDisguisedItems()
     {
         return showDisguisedItems;
     }

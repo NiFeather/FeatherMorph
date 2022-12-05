@@ -73,7 +73,7 @@ public class QuerySubCommand extends MorphPluginObject implements ISubCommand
                             CommandStrings.qDisguisedString()
                                     .resolve("who", targetPlayer.getName())
                                     .resolve("what", info.getDisplayName())
-                                    .resolve("storage_status", info.showingDefaultItems()
+                                    .resolve("storage_status", info.showingDisguisedItems()
                                             ? CommandStrings.qaShowingDisguisedItemsString()
                                             : CommandStrings.qaNotShowingDisguisedItemsString())
                     ));
