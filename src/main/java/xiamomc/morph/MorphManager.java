@@ -533,6 +533,9 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 player.sendMessage(MessageUtils.prefixes(player, MorphStrings.parseErrorString()
                         .resolve("id", key)));
 
+                logger.error("无法解析 " + key + ": " + iae.getMessage());
+                iae.printStackTrace();
+
                 return false;
             }
         }

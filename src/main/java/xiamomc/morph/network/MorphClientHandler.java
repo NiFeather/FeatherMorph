@@ -7,7 +7,7 @@ import net.minecraft.network.PacketDataSerializer;
 import net.minecraft.network.protocol.game.PacketPlayOutCustomPayload;
 import net.minecraft.resources.MinecraftKey;
 import org.bukkit.Bukkit;
-import org.bukkit.craftbukkit.v1_19_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_19_R2.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.messaging.StandardMessenger;
 import org.jetbrains.annotations.Nullable;

@@ -4,9 +4,9 @@ import net.minecraft.server.level.EntityPlayer;
 import net.minecraft.server.level.WorldServer;
 import net.minecraft.world.level.block.state.IBlockData;
 import org.bukkit.block.Block;
-import org.bukkit.craftbukkit.v1_19_R1.CraftWorld;
-import org.bukkit.craftbukkit.v1_19_R1.block.CraftBlock;
-import org.bukkit.craftbukkit.v1_19_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_19_R2.CraftWorld;
+import org.bukkit.craftbukkit.v1_19_R2.block.CraftBlock;
+import org.bukkit.craftbukkit.v1_19_R2.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -72,10 +72,10 @@ public class BlockDestroyHandler
         if (block != null)
         {
             //ServerWorld#setBlockBreakingInfo(int entityId, BlockPos pos, int progress)
-            //nmsPlayer.aa() -> Entity#getId()
+            //nmsPlayer.ah() -> Entity#getId()
             //
             //进度大于1时设置破坏进度为-1避免客户端显示问题
-            nmsWorld.a(nmsPlayer.aa(),
+            nmsWorld.a(nmsPlayer.ah(),
                     ((CraftBlock) block).getPosition(),
                     newProgress > 1f ? -1 : (int)(newProgress * 10F) - 1);
         }
