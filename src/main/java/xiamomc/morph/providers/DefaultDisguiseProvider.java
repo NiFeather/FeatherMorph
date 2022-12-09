@@ -12,11 +12,13 @@ import me.libraryaddict.disguise.disguisetypes.watchers.LivingWatcher;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_19_R1.inventory.CraftItemStack;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scoreboard.Scoreboard;
@@ -37,6 +39,7 @@ import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static xiamomc.morph.misc.DisguiseUtils.itemOrAir;
@@ -114,28 +117,44 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
     @Override
     public List<String> getInitialSyncCommands(DisguiseState state)
     {
-        logger.info("SID: " + state.getSkillIdentifier() + " :: DID: " + state.getDisguiseIdentifier());
+        //logger.info("SID: " + state.getSkillIdentifier() + " :: DID: " + state.getDisguiseIdentifier());
         if (skillHandler.hasSpeficSkill(state.getSkillIdentifier(), SkillType.INVENTORY))
         {
             var eqiupment = state.getDisguisedItems();
 
-            return ObjectArrayList.of(
-                    "set equip mainhand "
-                            + itemToStr(eqiupment.getItemInMainHand()),
-                    "set equip offhand "
-                            + itemToStr(eqiupment.getItemInOffHand()),
-                    "set equip helmet "
-                            + itemToStr(eqiupment.getHelmet()),
-                    "set equip chestplate "
-                            + itemToStr(eqiupment.getChestplate()),
-                    "set equip leggings "
-                            + itemToStr(eqiupment.getLeggings()),
-                    "set equip boots "
-                            + itemToStr(eqiupment.getBoots())
-            );
+            var list = new ObjectArrayList<String>();
+
+            this.addIfPresents(eqiupment, list, EquipmentSlot.HAND);
+            this.addIfPresents(eqiupment, list, EquipmentSlot.OFF_HAND);
+            this.addIfPresents(eqiupment, list, EquipmentSlot.HEAD);
+            this.addIfPresents(eqiupment, list, EquipmentSlot.CHEST);
+            this.addIfPresents(eqiupment, list, EquipmentSlot.LEGS);
+            this.addIfPresents(eqiupment, list, EquipmentSlot.FEET);
+
+            return list;
         }
 
         return List.of();
+    }
+
+    private void addIfPresents(EntityEquipment equipment, ObjectArrayList<String> list, EquipmentSlot slot)
+    {
+        var item = equipment.getItem(slot);
+
+        if (item.getType() != Material.AIR)
+        {
+            var slotName = switch (slot)
+            {
+                case HAND -> "mainhand";
+                case HEAD -> "helmet";
+                case CHEST -> "chestplate";
+                case LEGS -> "leggings";
+                case FEET -> "boots";
+                default -> slot.name().toLowerCase();
+            };
+
+            list.add("set equip " + slotName + " " + itemToStr(item));
+        }
     }
 
     private String itemToStr(ItemStack stack)
