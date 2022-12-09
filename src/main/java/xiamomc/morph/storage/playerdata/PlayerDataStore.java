@@ -163,8 +163,6 @@ public class PlayerDataStore extends MorphJsonBasedStorage<PlayerMorphConfigurat
             newInstance.uniqueId = player.getUniqueId();
             newInstance.playerName = player.getName();
 
-            player.sendMessage(MessageUtils.prefixes(player, MorphStrings.commandHintString()));
-
             storingObject.playerMorphConfigurations.add(newInstance);
             return newInstance;
         }

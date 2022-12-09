@@ -27,10 +27,7 @@ import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.commands.MorphCommandHelper;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
-import xiamomc.morph.messages.CommandStrings;
-import xiamomc.morph.messages.MessageUtils;
-import xiamomc.morph.messages.MorphStrings;
-import xiamomc.morph.messages.SkillStrings;
+import xiamomc.morph.messages.*;
 import xiamomc.morph.misc.DisguiseTypes;
 import xiamomc.morph.misc.DisguiseUtils;
 import xiamomc.morph.misc.EntityTypeUtils;
@@ -267,6 +264,22 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         var state = morphs.getDisguiseStateFor(player);
 
         clientHandler.markPlayerReady(player);
+
+        if (clientHandler.clientConnected(player))
+        {
+            var config = morphs.getPlayerConfiguration(player);
+
+            if (!config.shownMorphClientHint && config.getUnlockedDisguiseIdentifiers().size() > 0)
+                this.addSchedule(c ->
+                {
+                    if (player.isOnline() && !config.shownMorphClientHint)
+                    {
+                        player.sendMessage(MessageUtils.prefixes(player, HintStrings.firstGrantClientHintString()));
+
+                        config.shownMorphClientHint = true;
+                    }
+                }, 20 * 3);
+        }
 
         if (state != null)
         {

@@ -16,7 +16,8 @@ public class MorphMessageStore extends MessageStore<MorphPlugin>
             MorphStrings.class,
             RequestStrings.class,
             SkillStrings.class,
-            CommandNameStrings.class
+            CommandNameStrings.class,
+            HintStrings.class
     );
 
     @Override

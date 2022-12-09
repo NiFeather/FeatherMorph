@@ -110,4 +110,13 @@ public class PlayerMorphConfiguration
      */
     @Expose
     public boolean shownMorphAbilityHint;
+
+    @Expose
+    public boolean shownClientSkillHint;
+
+    @Expose
+    public boolean shownMorphHint;
+
+    @Expose
+    public boolean shownMorphClientHint;
 }

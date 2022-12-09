@@ -13,6 +13,7 @@ import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.messages.CommandStrings;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.SkillStrings;
+import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.misc.permissions.CommonPermissions;
 import xiamomc.morph.skills.impl.*;
 import xiamomc.morph.storage.skill.ISkillOption;

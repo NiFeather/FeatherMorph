@@ -26,6 +26,7 @@ import xiamomc.morph.events.PlayerMorphEvent;
 import xiamomc.morph.events.PlayerUnMorphEvent;
 import xiamomc.morph.interfaces.IManagePlayerData;
 import xiamomc.morph.messages.CommandStrings;
+import xiamomc.morph.messages.HintStrings;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.MorphStrings;
 import xiamomc.morph.misc.*;
@@ -752,15 +753,28 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                         && config.showDisguiseToSelf;
         state.setSelfVisible(serverSideSelfView);
 
-        if (!config.shownMorphAbilityHint && skillHandler.hasSkill(id))
+        var isClientPlayer = clientHandler.clientConnected(sourcePlayer);
+
+        if (state.getSkill() != null)
         {
-            sourcePlayer.sendMessage(MessageUtils.prefixes(sourcePlayer, MorphStrings.skillHintString()));
-            config.shownMorphAbilityHint = true;
+            if (isClientPlayer)
+            {
+                if (!config.shownClientSkillHint)
+                {
+                    sourcePlayer.sendMessage(MessageUtils.prefixes(sourcePlayer, HintStrings.clientSkillString()));
+                    config.shownClientSkillHint = true;
+                }
+            }
+            else if (!config.shownMorphAbilityHint)
+            {
+                sourcePlayer.sendMessage(MessageUtils.prefixes(sourcePlayer, HintStrings.skillString()));
+                config.shownMorphAbilityHint = true;
+            }
         }
 
-        if (!config.shownDisplayToSelfHint)
+        if (!config.shownDisplayToSelfHint && !isClientPlayer)
         {
-            sourcePlayer.sendMessage(MessageUtils.prefixes(sourcePlayer, MorphStrings.morphVisibleAfterCommandString()));
+            sourcePlayer.sendMessage(MessageUtils.prefixes(sourcePlayer, HintStrings.morphVisibleAfterCommandString()));
             config.shownDisplayToSelfHint = true;
         }
 
@@ -939,15 +953,41 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     @Override
     public boolean grantMorphToPlayer(Player player, String disguiseIdentifier)
     {
-        clientHandler.sendDiff(List.of(disguiseIdentifier), null, player);
-        return data.grantMorphToPlayer(player, disguiseIdentifier);
+        var success = data.grantMorphToPlayer(player, disguiseIdentifier);
+
+        if (success)
+        {
+            clientHandler.sendDiff(List.of(disguiseIdentifier), null, player);
+
+            var config = data.getPlayerConfiguration(player);
+
+            if (clientHandler.clientConnected(player))
+            {
+                if (!config.shownMorphClientHint)
+                {
+                    player.sendMessage(MessageUtils.prefixes(player, HintStrings.firstGrantClientHintString()));
+                    config.shownMorphClientHint = true;
+                }
+            }
+            else if (!config.shownMorphHint)
+            {
+                player.sendMessage(MessageUtils.prefixes(player, HintStrings.firstGrantHintString()));
+                config.shownMorphHint = true;
+            }
+        }
+
+        return success;
     }
 
     @Override
     public boolean revokeMorphFromPlayer(Player player, String disguiseIdentifier)
     {
-        clientHandler.sendDiff(null, List.of(disguiseIdentifier), player);
-        return data.revokeMorphFromPlayer(player, disguiseIdentifier);
+        var success = data.revokeMorphFromPlayer(player, disguiseIdentifier);
+
+        if (success)
+            clientHandler.sendDiff(null, List.of(disguiseIdentifier), player);
+
+        return success;
     }
 
     @Override

@@ -16,12 +16,6 @@ public class MorphStrings extends AbstractMorphStrings
                 "伪装将在起身后对自己可见");
     }
 
-    public static FormattableMessage morphVisibleAfterCommandString()
-    {
-        return getFormattable(getKey("morph_visible_after_command"),
-                "伪装将在切换自身可见后对自己显示");
-    }
-
     public static FormattableMessage disguisingAsString()
     {
         return getFormattable(getKey("disguising_as"),
@@ -40,12 +34,6 @@ public class MorphStrings extends AbstractMorphStrings
                 "<color:red>❌ 已失去<what>的伪装！");
     }
 
-    public static FormattableMessage commandHintString()
-    {
-        return getFormattable(getKey("command_hint"),
-                "不知道如何使用伪装? 发送 /mmorph help 即可查看！");
-    }
-
     public static FormattableMessage disguisingWithSkillPreparingString()
     {
         return getFormattable(getKey("disguising_as_skill_preparing"),
@@ -62,12 +50,6 @@ public class MorphStrings extends AbstractMorphStrings
     {
         return getFormattable(getKey("unmorph_success"),
                 "已取消伪装");
-    }
-
-    public static FormattableMessage skillHintString()
-    {
-        return getFormattable(getKey("skill_hint"),
-                "小提示: 手持胡萝卜钓竿下蹲使用可以激活当前伪装的主动技能");
     }
 
 
