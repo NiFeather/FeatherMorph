@@ -9,6 +9,8 @@ import me.libraryaddict.disguise.disguisetypes.VillagerData;
 import me.libraryaddict.disguise.disguisetypes.watchers.ArmorStandWatcher;
 import me.libraryaddict.disguise.disguisetypes.watchers.CatWatcher;
 import me.libraryaddict.disguise.disguisetypes.watchers.VillagerWatcher;
+import me.libraryaddict.disguise.utilities.reflection.ReflectionManager;
+import me.libraryaddict.disguise.utilities.reflection.ReflectionManagerAbstract;
 import net.kyori.adventure.text.Component;
 import net.minecraft.nbt.NBTTagCompound;
 import org.bukkit.entity.*;
