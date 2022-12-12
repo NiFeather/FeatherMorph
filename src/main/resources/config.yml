@@ -26,6 +26,9 @@ root:
   # 设置为"disabled"以禁用
   action_item: minecraft:carrot_on_a_stick
 
+  # 盔甲架伪装是否要默认附加手臂？
+  armorstand_show_arms: true
+
   # 是否要在玩家死亡时取消他们的伪装？
   unmorph_on_death: true
 
@@ -86,4 +89,4 @@ root:
     log_outgoing_packets: false
 
   # 不要动这个键!
-  version: 11
+  version: 12
