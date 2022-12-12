@@ -392,7 +392,15 @@ public class DisguiseState extends MorphPluginObject
 
         //更新技能Flag
         var disgType = d.getType().getEntityType();
-        setAbilities(abilityHandler.getAbilitiesFor(disgType));
+
+        var abilities = abilityHandler.getAbilitiesFor(disgType);
+        if (abilities != null)
+        {
+            setAbilities(abilities);
+            abilities.forEach(a -> a.applyToPlayer(player, this));
+        }
+
+        setSkill(skillHandler.getSkill(this.getSkillIdentifier()));
 
         //伪装类型是否支持设置伪装物品
         supportsDisguisedItems = skillHandler.hasSpeficSkill(skillIdentifier, SkillType.INVENTORY);
@@ -553,6 +561,8 @@ public class DisguiseState extends MorphPluginObject
         offlineState.disguiseData = DisguiseParser.parseToString(newDisguise);
         offlineState.shouldHandlePose = this.shouldHandlePose;
         offlineState.showingDisguisedItems = this.showDisguisedItems;
+        offlineState.nbtString = this.cachedNbtString;
+        offlineState.profileString = this.cachedProfileNbtString;
 
         return offlineState;
     }
@@ -575,6 +585,9 @@ public class DisguiseState extends MorphPluginObject
         var state = new DisguiseState(player,
                 offlineState.disguiseID, offlineState.skillID == null ? offlineState.disguiseID : offlineState.skillID,
                 offlineState.disguise, offlineState.shouldHandlePose, null, null);
+
+        state.setCachedProfileNbtString(offlineState.profileString);
+        state.setCachedNbtString(offlineState.nbtString);
 
         if (state.supportsDisguisedItems)
             state.setShowingDisguisedItems(offlineState.showingDisguisedItems);

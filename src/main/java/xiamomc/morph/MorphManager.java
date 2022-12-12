@@ -88,6 +88,23 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 new LocalDisguiseProvider(),
                 fallbackProvider
         ));
+
+        //延迟1tick等待其他组件初始化
+        this.addSchedule(c ->
+        {
+            Bukkit.getOnlinePlayers().forEach(p ->
+            {
+                var offlineState = offlineStorage.popDisguiseState(p.getUniqueId());
+
+                if (offlineState != null)
+                {
+                    p.sendMessage(MessageUtils.prefixes(p, MorphStrings.recoverString()));
+
+                    if (!this.disguiseFromOfflineState(p, offlineState))
+                        p.sendMessage(MessageUtils.prefixes(p, MorphStrings.recoveringFailedString()));
+                }
+            });
+        });
     }
 
     private void update()
@@ -483,6 +500,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                         return false;
                     }
 
+                    clientHandler.updateCurrentIdentifier(player, key);
+
                     outComingState = postConstructDisguise(player, targetEntity,
                             info.getIdentifier(), result.disguise(), result.isCopy(), provider);
                 }
@@ -491,19 +510,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                         .resolve("what", info.asComponent());
 
                 player.sendMessage(MessageUtils.prefixes(player, msg));
-
-                clientHandler.updateCurrentIdentifier(player, key);
-
-                //主动技能
-                var skill = skillHandler.getSkill(outComingState.getSkillIdentifier());
-                outComingState.setSkill(skill);
-
-                var abilities = outComingState.getAbilities();
-                if (abilities != null)
-                {
-                    var finalOutComingState = outComingState;
-                    abilities.forEach(a -> a.applyToPlayer(player, finalOutComingState));
-                }
 
                 //如果此伪装可以同步给客户端，那么初始化客户端状态
                 if (provider.validForClient(state))
@@ -549,7 +555,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
     public void refreshClientState(DisguiseState state)
     {
-        logger.info("refresh client state");
         var player = state.getPlayer();
 
         clientHandler.updateCurrentIdentifier(player, state.getDisguiseIdentifier());
@@ -571,6 +576,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         //和客户端同步数据
         state.getProvider().getInitialSyncCommands(state).forEach(c -> clientHandler.sendClientCommand(player, c));
 
+        //Profile
         if (state.haveProfile())
             clientHandler.sendClientCommand(player, ClientCommands.setProfileCommand(state.getProfileNbtString()));
     }
@@ -639,7 +645,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         if (plugin.isEnabled())
         {
             clientHandler.updateCurrentIdentifier(player, null);
-            clientHandler.sendClientCommand(player, "set selfview " + null);
+            clientHandler.sendClientCommand(player, ClientCommands.setSelfViewCommand(null));
         }
 
         Bukkit.getPluginManager().callEvent(new PlayerUnMorphEvent(player));
@@ -661,8 +667,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
      * @param provider {@link DisguiseProvider}
      */
     private DisguiseState postConstructDisguise(Player sourcePlayer, @Nullable Entity targetEntity,
-                                       String id, Disguise disguise, boolean shouldHandlePose,
-                                       @NotNull DisguiseProvider provider)
+                                                String id, Disguise disguise, boolean shouldHandlePose,
+                                                @NotNull DisguiseProvider provider)
     {
         //设置自定义数据用来跟踪
         DisguiseUtils.addTrace(disguise);
@@ -753,7 +759,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         //确保玩家可以根据设置看到自己的伪装
         var serverSideSelfView = (!clientHandler.getPlayerOption(sourcePlayer).isClientSideSelfView() || !provider.validForClient(state))
-                        && config.showDisguiseToSelf;
+                && config.showDisguiseToSelf;
         state.setSelfVisible(serverSideSelfView);
 
         var isClientPlayer = clientHandler.clientConnected(sourcePlayer);
@@ -871,14 +877,10 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
     public void onPluginDisable()
     {
+        disguisedPlayers.forEach(offlineStorage::pushDisguiseState);
+
         unMorphAll(true);
         saveConfiguration();
-
-        getDisguisedPlayers().forEach(s ->
-        {
-            if (!s.getPlayer().isOnline())
-                offlineStorage.pushDisguiseState(s);
-        });
 
         offlineStorage.saveConfiguration();
     }
@@ -893,6 +895,15 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         return offlineStorage.getAvaliableDisguiseStates();
     }
 
+    private void disguiseFromState(DisguiseState state)
+    {
+        if (!disguisedPlayers.contains(state))
+            disguisedPlayers.add(state);
+
+        DisguiseAPI.disguiseEntity(state.getPlayer(), state.getDisguise());
+        postConstructDisguise(state);
+    }
+
     public boolean disguiseFromOfflineState(Player player, OfflineDisguiseState offlineState)
     {
         if (player.getUniqueId() == offlineState.playerUUID)
@@ -903,7 +914,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         var key = offlineState.disguiseID;
 
-        var avaliableDisguises = getAvaliableDisguisesFor(player);
+        if (bannedDisguises.contains(key) || !getPlayerConfiguration(player).getUnlockedDisguiseIdentifiers().contains(key))
+            return false;
 
         var disguiseType = DisguiseTypes.fromId(key);
 
@@ -916,21 +928,13 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
             var state = DisguiseState.fromOfflineState(offlineState, data.getPlayerConfiguration(player));
 
-            disguisedPlayers.add(state);
-
-            DisguiseAPI.disguiseEntity(player, state.getDisguise());
-            postConstructDisguise(state);
+            this.disguiseFromState(state);
             return true;
         }
 
         //有限还原
-        if (avaliableDisguises.stream().anyMatch(i -> i.getKey().matches(key)))
-        {
-            morph(player, key, null);
-            return true;
-        }
-
-        return false;
+        morph(player, key, null);
+        return true;
     }
 
     //endregion 玩家伪装相关
@@ -1005,17 +1009,44 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         //重载完数据后要发到离线存储的人
         var stateToOfflineStore = new ObjectArrayList<DisguiseState>();
 
-        getDisguisedPlayers().forEach(s ->
+        disguisedPlayers.forEach(s ->
         {
             if (!s.getPlayer().isOnline())
                 stateToOfflineStore.add(s);
         });
+
+        disguisedPlayers.removeAll(stateToOfflineStore);
+        var stateToRecover = getDisguisedPlayers();
 
         unMorphAll(false);
 
         var success = data.reloadConfiguration() && offlineStorage.reloadConfiguration();
 
         stateToOfflineStore.forEach(offlineStorage::pushDisguiseState);
+
+        //重载完成后恢复玩家伪装
+        stateToRecover.forEach(s ->
+        {
+            var player = s.getPlayer();
+            var config = this.getPlayerConfiguration(player);
+
+            if (!this.bannedDisguises.contains(s.getDisguiseIdentifier()) && config.getUnlockedDisguiseIdentifiers().contains(s.getDisguiseIdentifier()))
+            {
+                var disguiseClone = s.getDisguise().clone();
+                DisguiseUtils.addTrace(disguiseClone);
+
+                s.setDisguise(s.getDisguiseIdentifier(), s.getSkillIdentifier(), disguiseClone,
+                        s.shouldHandlePose(), true, s.getDisguisedItems());
+
+                disguiseFromState(s);
+                postConstructDisguise(s);
+                refreshClientState(s);
+
+                player.sendMessage(MessageUtils.prefixes(player, MorphStrings.recoverString()));
+            }
+            else
+                unMorph(player, true);
+        });
 
         Bukkit.getOnlinePlayers().forEach(p -> clientHandler.refreshPlayerClientMorphs(this.getPlayerConfiguration(p).getUnlockedDisguiseIdentifiers(), p));
 
@@ -1025,7 +1056,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     @Override
     public boolean saveConfiguration()
     {
-        return data.saveConfiguration() && offlineStorage.reloadConfiguration();
+        return data.saveConfiguration() && offlineStorage.saveConfiguration();
     }
     //endregion Implementation of IManagePlayerData
 }
