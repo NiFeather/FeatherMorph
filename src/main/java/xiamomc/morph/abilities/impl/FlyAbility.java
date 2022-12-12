@@ -3,13 +3,17 @@ package xiamomc.morph.abilities.impl;
 import org.bukkit.GameMode;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.player.PlayerGameModeChangeEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xiamomc.morph.MorphManager;
 import xiamomc.morph.abilities.AbilityType;
 import xiamomc.morph.abilities.MorphAbility;
 import xiamomc.morph.abilities.options.FlyOption;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.storage.skill.ISkillOption;
+import xiamomc.pluginbase.Annotations.Resolved;
 
 public class FlyAbility extends MorphAbility<FlyOption>
 {
@@ -78,5 +82,39 @@ public class FlyAbility extends MorphAbility<FlyOption>
         }
 
         return true;
+    }
+
+    @Resolved
+    private MorphManager manager;
+
+    @EventHandler
+    public void onGameModeChange(PlayerGameModeChangeEvent e)
+    {
+        var player = e.getPlayer();
+        if (!this.appliedPlayers.contains(player)) return;
+
+        var state = manager.getDisguiseStateFor(player);
+
+        if (state != null)
+        {
+            var flying = player.isFlying();
+
+            //立即更新状态不会生效，需要延迟1tick再进行
+            this.addSchedule(c ->
+            {
+                if (appliedPlayers.contains(player))
+                {
+                    this.updateFlyingAbility(state);
+
+                    if (flying)
+                        player.setFlying(true);
+                }
+            });
+        }
+        else
+        {
+            logger.warn(player.getName() + "有应用飞行被动，但其伪装状态是null");
+            this.appliedPlayers.remove(player);
+        }
     }
 }
