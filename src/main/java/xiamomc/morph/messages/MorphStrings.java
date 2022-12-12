@@ -103,6 +103,12 @@ public class MorphStrings extends AbstractMorphStrings
     }
 
 
+    public static FormattableMessage recoverString()
+    {
+        return getFormattable(getKey("state.recover_online"),
+                "相关功能已重置，正在恢复您的伪装...");
+    }
+
     public static FormattableMessage stateRecoverReasonString()
     {
         return getFormattable(getKey("state.recover_reason"),
