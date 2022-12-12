@@ -38,7 +38,60 @@ public class PlayerTracker extends MorphPluginObject implements Listener
     /**
      * 玩家上次互动的动作类型
      */
-    private final Map<Player, Action> lastInteractAction = new ConcurrentHashMap<>();
+    private final Map<Player, InteractType> lastInteractAction = new ConcurrentHashMap<>();
+
+    public enum InteractType
+    {
+        LEFT_CLICK_AIR,
+        LEFT_CLICK_ENTITY,
+        LEFT_CLICK_BLOCK,
+
+        RIGHT_CLICK_AIR,
+        RIGHT_CLICK_ENTITY,
+        RIGHT_CLICK_BLOCK;
+
+        public Action toBukkitAction()
+        {
+            return switch (this)
+            {
+                case LEFT_CLICK_AIR, LEFT_CLICK_ENTITY -> Action.LEFT_CLICK_AIR;
+                case LEFT_CLICK_BLOCK -> Action.LEFT_CLICK_BLOCK;
+
+                case RIGHT_CLICK_AIR, RIGHT_CLICK_ENTITY -> Action.RIGHT_CLICK_AIR;
+                case RIGHT_CLICK_BLOCK -> Action.RIGHT_CLICK_BLOCK;
+
+                default -> throw new RuntimeException(this + " 不能转化为任何一个已知的 BukkitAction");
+            };
+        }
+
+        public static InteractType fromBukkitAction(Action action)
+        {
+            return switch (action)
+                    {
+                        case RIGHT_CLICK_AIR -> InteractType.RIGHT_CLICK_AIR;
+                        case RIGHT_CLICK_BLOCK -> InteractType.RIGHT_CLICK_BLOCK;
+                        case LEFT_CLICK_AIR -> InteractType.LEFT_CLICK_AIR;
+                        case LEFT_CLICK_BLOCK -> InteractType.LEFT_CLICK_BLOCK;
+
+                        default -> throw new RuntimeException(action + " 不能转化为任何一个已知的 InteractType");
+                    };
+        }
+
+        public boolean isInteractAnything()
+        {
+            return this != RIGHT_CLICK_AIR && this != LEFT_CLICK_AIR;
+        }
+
+        public boolean isLeftClick()
+        {
+            return this == LEFT_CLICK_ENTITY || this == LEFT_CLICK_AIR || this == LEFT_CLICK_BLOCK;
+        }
+
+        public boolean isRightClick()
+        {
+            return this == RIGHT_CLICK_BLOCK || this == RIGHT_CLICK_AIR || this == RIGHT_CLICK_ENTITY;
+        }
+    }
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerInteract(PlayerInteractEvent e)
@@ -46,7 +99,7 @@ public class PlayerTracker extends MorphPluginObject implements Listener
         var player = e.getPlayer();
 
         lastInteractTime.put(player, plugin.getCurrentTick());
-        lastInteractAction.put(player, e.getAction());
+        lastInteractAction.put(player, InteractType.fromBukkitAction(e.getAction()));
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
@@ -55,7 +108,7 @@ public class PlayerTracker extends MorphPluginObject implements Listener
         if (e.getDamager() instanceof Player player)
         {
             lastInteractTime.put(player, plugin.getCurrentTick());
-            lastInteractAction.put(player, Action.LEFT_CLICK_AIR);
+            lastInteractAction.put(player, InteractType.LEFT_CLICK_ENTITY);
         }
     }
 
@@ -65,7 +118,7 @@ public class PlayerTracker extends MorphPluginObject implements Listener
         var player = e.getPlayer();
 
         lastInteractTime.put(player, plugin.getCurrentTick());
-        lastInteractAction.put(player, Action.RIGHT_CLICK_AIR);
+        lastInteractAction.put(player, InteractType.RIGHT_CLICK_ENTITY);
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
@@ -74,7 +127,7 @@ public class PlayerTracker extends MorphPluginObject implements Listener
         var player = e.getPlayer();
 
         lastInteractTime.put(player, plugin.getCurrentTick());
-        lastInteractAction.put(player, Action.RIGHT_CLICK_AIR);
+        lastInteractAction.put(player, InteractType.RIGHT_CLICK_ENTITY);
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
@@ -113,7 +166,7 @@ public class PlayerTracker extends MorphPluginObject implements Listener
 
         spectatingPlayers.put(player, plugin.getCurrentTick());
         lastInteractTime.put(player, plugin.getCurrentTick());
-        lastInteractAction.put(player, Action.LEFT_CLICK_AIR);
+        lastInteractAction.put(player, InteractType.LEFT_CLICK_ENTITY);
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
@@ -163,16 +216,26 @@ public class PlayerTracker extends MorphPluginObject implements Listener
     /**
      * 玩家这一刻是否在和任何东西互动?
      *
+     * 开始旁观、和实体互动、{@link PlayerInteractEvent}
+     *
      * @param player 要查询的玩家
      * @return 是否在和方块互动
      */
     public boolean isPlayerInteractingAnything(Player player)
     {
-        return plugin.getCurrentTick() - lastInteractTime.getOrDefault(player, plugin.getCurrentTick()) <= 0;
+        var interactingThisTick = plugin.getCurrentTick() - lastInteractTime.getOrDefault(player, plugin.getCurrentTick()) <= 0;
+
+        if (!interactingThisTick) return false;
+
+        var lastAction = this.getLastInteractAction(player);
+
+        if (lastAction == null) return interactingThisTick;
+
+        return lastAction.isInteractAnything();
     }
 
     @Nullable
-    public Action getLastInteractAction(Player player)
+    public InteractType getLastInteractAction(Player player)
     {
         return lastInteractAction.get(player);
     }
