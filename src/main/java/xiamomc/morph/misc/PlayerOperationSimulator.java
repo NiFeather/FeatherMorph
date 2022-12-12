@@ -2,28 +2,35 @@ package xiamomc.morph.misc;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.core.EnumDirection;
+import net.minecraft.server.level.EntityPlayer;
+import net.minecraft.server.level.PlayerInteractManager;
+import net.minecraft.server.level.WorldServer;
 import net.minecraft.world.EnumHand;
 import net.minecraft.world.phys.MovingObjectPositionBlock;
 import net.minecraft.world.phys.Vec3D;
 import org.bukkit.Bukkit;
 import org.bukkit.FluidCollisionMode;
 import org.bukkit.GameMode;
+import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.craftbukkit.v1_19_R2.CraftWorld;
 import org.bukkit.craftbukkit.v1_19_R2.block.CraftBlock;
 import org.bukkit.craftbukkit.v1_19_R2.entity.CraftEntity;
-import org.bukkit.craftbukkit.v1_19_R2.entity.CraftHumanEntity;
 import org.bukkit.craftbukkit.v1_19_R2.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_19_R2.inventory.CraftItemStack;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.BeaconInventory;
 import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.util.RayTraceResult;
+import org.bukkit.util.Vector;
+import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
@@ -31,7 +38,6 @@ import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Bindables.Bindable;
 
 import java.util.Map;
-import java.util.function.Predicate;
 
 public class PlayerOperationSimulator extends MorphPluginObject
 {
@@ -86,7 +92,7 @@ public class PlayerOperationSimulator extends MorphPluginObject
                     if (e instanceof Player p)
                         return e != player && p.getGameMode() != GameMode.SPECTATOR;
                     else
-                        return e != player;
+                        return true;
                 });
     }
 
@@ -94,22 +100,15 @@ public class PlayerOperationSimulator extends MorphPluginObject
      * 模拟玩家左键
      *
      * @param player 目标玩家
-     * @param targetHand 目标手（主手/副手）
-     * @return 操作是否成功
+     * @return 操作执行结果
      */
-    public boolean simulateLeftClick(Player player, EquipmentSlot targetHand)
+    public SimulateResult simulateLeftClick(Player player)
     {
-        if (targetHand != EquipmentSlot.HAND && targetHand != EquipmentSlot.OFF_HAND)
-            throw new IllegalArgumentException("The given slot is neither MainHand or OffHand");
-
         //logger.warn("模拟左键！");
         //Thread.dumpStack();
 
-        if (targetHand == EquipmentSlot.OFF_HAND)
-        {
-            //副手模拟未实现
-            return false;
-        }
+        //格挡时不要执行动作
+        if (player.isBlocking()) return SimulateResult.fail();
 
         //获取正在看的方块或实体
         var traceResult = this.rayTrace(player);
@@ -129,15 +128,24 @@ public class PlayerOperationSimulator extends MorphPluginObject
         if (targetEntity != null)
         {
             if (player.getLocation().distance(targetEntity.getLocation()) > entityReachDistance)
-                return true;
+                return SimulateResult.success(EquipmentSlot.HAND);
 
             player.attack(targetEntity);
 
-            return true;
+            return SimulateResult.success(EquipmentSlot.HAND);
         }
 
+        //对着空气空挥
         if (targetBlock == null)
-            return true;
+            return SimulateResult.success(EquipmentSlot.HAND);
+
+        //冒险模式，并且无法破坏目标方块 -> 操作成功(空挥)
+        if (player.getGameMode() == GameMode.ADVENTURE)
+        {
+            var meta = player.getEquipment().getItemInMainHand().getItemMeta();
+            if (meta == null || !meta.getDestroyableKeys().contains(targetBlock.getBlockData().getMaterial().getKey()))
+                return SimulateResult.success(EquipmentSlot.HAND);
+        }
 
         //初始化destoryInfo
         if (destroyHandler == null)
@@ -170,21 +178,17 @@ public class PlayerOperationSimulator extends MorphPluginObject
 
         destroyHandler.setProgress(val, plugin.getCurrentTick());
 
-        return true;
+        return SimulateResult.success(EquipmentSlot.HAND);
     }
 
     /**
      * 模拟玩家右键
      *
      * @param player 目标玩家
-     * @param targetHand 目标手（主手/副手）
      * @return 操作是否成功
      */
-    public boolean simulateRightClick(Player player, EquipmentSlot targetHand)
+    public SimulateResult simulateRightClick(Player player)
     {
-        if (targetHand != EquipmentSlot.HAND && targetHand != EquipmentSlot.OFF_HAND)
-            throw new IllegalArgumentException("The given slot is neither MainHand or OffHand");
-
         //logger.warn("正在模拟右键！");
 
         //获取正在看的方块或实体
@@ -196,55 +200,24 @@ public class PlayerOperationSimulator extends MorphPluginObject
         if (targetEntity != null && targetEntity.getLocation().distance(player.getLocation()) > entityReachDistance)
             targetEntity = null;
 
-        //Player in fabric mojang mappings
-        var playerHumanHandle = ((CraftHumanEntity) player).getHandle();
-
-        //ServerPlayer in mojang mappings
-        var playerHandle = ((CraftPlayer) player).getHandle();
-
-        //ServerLevel in mojang mappings
-        var worldHandle = ((CraftWorld)player.getWorld()).getHandle();
-
-        //GameMode in fabric mojang mappings
-        var mgr = playerHandle.d;
-
-        var hand = targetHand == EquipmentSlot.HAND ? EnumHand.a : EnumHand.b;
-        var item = player.getEquipment().getItem(targetHand);
-
-        var pluginManager = Bukkit.getPluginManager();
+        var itemInMainHand = player.getEquipment().getItem(EquipmentSlot.HAND);
+        var itemInOffHand = player.getEquipment().getItem(EquipmentSlot.OFF_HAND);
 
         //如果目标实体不是null，则和实体互动
         if (targetEntity != null)
         {
-            var entityHandle = ((CraftEntity)targetEntity).getHandle();
-
             //获取目标位置
             var hitPos = traceResult.getHitPosition();
 
             //获取互动位置
             hitPos.subtract(targetEntity.getLocation().toVector());
 
-            var vec = new Vec3D(hitPos.getX(), hitPos.getY(), hitPos.getZ());
+            if (this.tryUseItemOnEntity(player, targetEntity, itemInMainHand, EnumHand.a, hitPos))
+                return SimulateResult.success(EquipmentSlot.HAND);
 
-            //先试试InteractAt
-            //如果不成功，调用Interact
-            //最后试试useItem
-            var interactEntityEvent = new PlayerInteractEntityEvent(player, targetEntity);
-            var interactAtEvent = new PlayerInteractAtEntityEvent(player, targetEntity, hitPos);
-            pluginManager.callEvent(interactEntityEvent);
-            pluginManager.callEvent(interactAtEvent);
-
-            if (!interactAtEvent.isCancelled() && !interactEntityEvent.isCancelled())
-            {
-                return entityHandle.a(playerHandle, vec, EnumHand.a).a()
-                        || playerHumanHandle.a(entityHandle, EnumHand.a).a()
-                        || mgr.a(playerHandle, worldHandle, CraftItemStack.asNMSCopy(item), hand).a();
-            }
-            else
-                return false;
+            return SimulateResult.of(this.tryUseItemOnEntity(player, targetEntity, itemInOffHand, EnumHand.b, hitPos),
+                                     EquipmentSlot.OFF_HAND);
         }
-
-        boolean success = false;
 
         if (targetBlock != null)
         {
@@ -272,28 +245,179 @@ public class PlayerOperationSimulator extends MorphPluginObject
                         new Vec3D(targetBlock.getX(), targetBlock.getY(), targetBlock.getZ()),
                         targetBlockDirection, loc, false);
 
-                var event = new PlayerInteractEvent(player, Action.RIGHT_CLICK_BLOCK, item, targetBlock, bukkitFace);
-                pluginManager.callEvent(event);
-
-                //ServerPlayerGameMode.useItemOn()
-                if (event.useInteractedBlock() != Event.Result.DENY)
-                    success = mgr.a(playerHandle, worldHandle, CraftItemStack.asNMSCopy(item), hand, moving).a();
+                if (this.tryUseItemOnBlock(player, targetBlock, bukkitFace, itemInMainHand, EnumHand.a, moving))
+                {
+                    return SimulateResult.success(EquipmentSlot.HAND);
+                }
+                else if (this.tryUseItemOnBlock(player, targetBlock, bukkitFace, itemInOffHand, EnumHand.b, moving))
+                {
+                    return SimulateResult.success(EquipmentSlot.OFF_HAND);
+                }
             }
         }
 
-        //ServerPlayerGameMode.useItem()
-        if (!success)
-        {
-            var event = new PlayerInteractEvent(player, Action.RIGHT_CLICK_AIR, item, null, BlockFace.SELF);
-            pluginManager.callEvent(event);
+        if (this.tryUseItemOnSelf(player, itemInMainHand, EnumHand.a))
+            return SimulateResult.success(EquipmentSlot.HAND);
+        else if (this.tryUseItemOnSelf(player, itemInOffHand, EnumHand.b))
+            return SimulateResult.success(EquipmentSlot.OFF_HAND);
 
-            if (event.useItemInHand() != Event.Result.DENY)
-                return mgr.a(playerHandle, worldHandle, CraftItemStack.asNMSCopy(item), hand).a();
-            else
-                return false;
-        }
-        else
-            return true;
+        return SimulateResult.fail();
     }
 
+    private final PluginManager pluginManager = Bukkit.getPluginManager();
+
+    /**
+     * 尝试使某个玩家使用某个物品
+     *
+     * @param player 目标玩家
+     * @param bukkitItem 物品
+     * @param hand 要使用的 {@link EnumHand}
+     * @return 操作是否成功
+     */
+    private boolean tryUseItemOnSelf(Player player, ItemStack bukkitItem, EnumHand hand)
+    {
+        var event = new PlayerInteractEvent(player, Action.RIGHT_CLICK_AIR, bukkitItem, null, BlockFace.SELF);
+        pluginManager.callEvent(event);
+
+        if (event.useItemInHand() != Event.Result.DENY)
+        {
+            var record = NmsRecord.of(player);
+            var manager = record.interactManager;
+
+            //ServerPlayerGameMode.useItem()
+            return manager.a(record.nmsPlayer, record.nmsWorld, CraftItemStack.asNMSCopy(bukkitItem), hand).a();
+        }
+
+        return false;
+    }
+
+    /**
+     * 尝试使某个玩家对某个方块使用某个物品
+     *
+     * @param player 目标玩家
+     * @param targetBlock 目标方块
+     * @param bukkitFace 朝向
+     * @param bukkitItem 物品
+     * @param nmsHand 要使用的 {@link EnumHand}
+     * @param moving 要提供给NMS方法的 {@link MovingObjectPositionBlock}
+     * @return 操作是否成功
+     */
+    private boolean tryUseItemOnBlock(Player player, Block targetBlock, BlockFace bukkitFace,
+                                      ItemStack bukkitItem, EnumHand nmsHand,
+                                      MovingObjectPositionBlock moving)
+    {
+        var event = new PlayerInteractEvent(player, Action.RIGHT_CLICK_BLOCK, bukkitItem, targetBlock, bukkitFace);
+        pluginManager.callEvent(event);
+
+        if (event.useInteractedBlock() != Event.Result.DENY)
+        {
+            var record = NmsRecord.of(player);
+
+            //GameMode in fabric mojang mappings
+            PlayerInteractManager manager = record.interactManager;
+
+            return manager.a(record.nmsPlayer, record.nmsWorld, CraftItemStack.asNMSCopy(bukkitItem), nmsHand, moving).a();
+        }
+
+        return false;
+    }
+
+    /**
+     * 尝试使某个玩家在某个实体上使用某个物品
+     *
+     * @param player 目标玩家
+     * @param targetEntity 目标实体
+     * @param bukkitItem 物品
+     * @param hand 要使用的 {@link EnumHand}
+     * @param hitPos 用于提供给{@link PlayerInteractAtEntityEvent}的位置
+     * @return 操作是否成功
+     */
+    private boolean tryUseItemOnEntity(Player player, Entity targetEntity, ItemStack bukkitItem, EnumHand hand, Vector hitPos)
+    {
+        var interactEntityEvent = new PlayerInteractEntityEvent(player, targetEntity);
+        var interactAtEvent = new PlayerInteractAtEntityEvent(player, targetEntity, hitPos);
+        pluginManager.callEvent(interactEntityEvent);
+        pluginManager.callEvent(interactAtEvent);
+
+        //先试试InteractAt
+        //如果不成功，调用Interact
+        //最后试试useItem
+        if (!interactAtEvent.isCancelled() && !interactEntityEvent.isCancelled())
+        {
+            var record = NmsRecord.of(player, targetEntity);
+
+            //EntityPlayer -> ServerPlayer in mojang mappings
+            var playerHandle = record.nmsPlayer;
+
+            //ServerLevel in mojang mappings
+            var worldHandle = record.nmsWorld;
+            var entityHandle = record.nmsEntity;
+            var manager = record.interactManager;
+
+            var vec = new Vec3D(hitPos.getX(), hitPos.getY(), hitPos.getZ());
+
+            assert entityHandle != null;
+            return entityHandle.a(playerHandle, vec, hand).a()
+                    || playerHandle.a(entityHandle, hand).a()
+                    || manager.a(playerHandle, worldHandle, CraftItemStack.asNMSCopy(bukkitItem), hand).a();
+        }
+
+        return false;
+    }
+
+    /**
+     * 操作模拟结果
+     *
+     * @param success 是否成功
+     * @param hand 与 {@link EnumHand} 对应的 {@link EquipmentSlot}
+     */
+    public record SimulateResult(boolean success, EquipmentSlot hand)
+    {
+        public static SimulateResult success(EquipmentSlot hand)
+        {
+            return of(true, hand);
+        }
+
+        public static SimulateResult fail()
+        {
+            return of(false, null);
+        }
+
+        public static SimulateResult of(boolean success, EquipmentSlot hand)
+        {
+            return new SimulateResult(success, hand);
+        }
+    }
+
+    /**
+     * NMS Record for a player
+     *
+     * @param nmsPlayer ServerPlayer in fabric mojang mappings
+     * @param nmsWorld ServerLevel in fabric mojang mappings
+     * @param nmsEntity ??? in fabric mojang mappings
+     * @param interactManager GameMode in fabric mojang mappings
+     */
+    private record NmsRecord(EntityPlayer nmsPlayer, WorldServer nmsWorld,
+                             @Nullable net.minecraft.world.entity.Entity nmsEntity,
+                             PlayerInteractManager interactManager)
+    {
+        public static NmsRecord of(Player player)
+        {
+            var craftPlayer = (CraftPlayer) player;
+
+            return new NmsRecord(craftPlayer.getHandle(), ((CraftWorld) craftPlayer.getWorld()).getHandle(),
+                    null, craftPlayer.getHandle().d);
+        }
+
+        public static NmsRecord of(Player player, @Nullable Entity targetEntity)
+        {
+            if (targetEntity == null) return of(player);
+
+            var craftPlayer = (CraftPlayer) player;
+            var craftEntity = (CraftEntity) targetEntity;
+
+            return new NmsRecord(craftPlayer.getHandle(), ((CraftWorld) craftPlayer.getWorld()).getHandle(),
+                    craftEntity.getHandle(), craftPlayer.getHandle().d);
+        }
+    }
 }
