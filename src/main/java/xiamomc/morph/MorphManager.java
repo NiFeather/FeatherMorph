@@ -1032,21 +1032,11 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
             if (!this.bannedDisguises.contains(s.getDisguiseIdentifier()) && config.getUnlockedDisguiseIdentifiers().contains(s.getDisguiseIdentifier()))
             {
-                var disguiseClone = s.getDisguise().clone();
-                DisguiseUtils.addTrace(disguiseClone);
+                var newState = s.createCopy();
 
-                var nbt = s.getCachedNbtString();
-                var profile = s.getProfileNbtString();
-
-                s.setDisguise(s.getDisguiseIdentifier(), s.getSkillIdentifier(), disguiseClone,
-                        s.shouldHandlePose(), true, s.getDisguisedItems());
-
-                s.setCachedNbtString(nbt);
-                s.setCachedProfileNbtString(profile);
-
-                disguiseFromState(s);
-                postConstructDisguise(s);
-                refreshClientState(s);
+                disguiseFromState(newState);
+                postConstructDisguise(newState);
+                refreshClientState(newState);
 
                 player.sendMessage(MessageUtils.prefixes(player, MorphStrings.recoverString()));
             }

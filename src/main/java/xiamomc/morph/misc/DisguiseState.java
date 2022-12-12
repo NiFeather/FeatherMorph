@@ -4,6 +4,7 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.disguisetypes.Disguise;
 import me.libraryaddict.disguise.disguisetypes.FlagWatcher;
+import me.libraryaddict.disguise.utilities.DisguiseUtilities;
 import me.libraryaddict.disguise.utilities.parser.DisguiseParser;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
@@ -537,6 +538,20 @@ public class DisguiseState extends MorphPluginObject
         watcher.setArmor(showDefaults ? disguiseArmors : emptyArmorStack);
         watcher.setItemInMainHand(showDefaults ? handItems[0] : emptyHandItems[0]);
         watcher.setItemInOffHand(showDefaults ? handItems[1] : emptyHandItems[1]);
+    }
+
+    public DisguiseState createCopy()
+    {
+        var disguise = this.disguise.clone();
+        DisguiseUtils.addTrace(disguise);
+
+        var state = new DisguiseState(player, this.disguiseIdentifier, this.skillIdentifier,
+                disguise, shouldHandlePose, provider, getDisguisedItems());
+
+        state.setCachedProfileNbtString(this.cachedProfileNbtString);
+        state.setCachedNbtString(this.cachedNbtString);
+
+        return state;
     }
 
     /**

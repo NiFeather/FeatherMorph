@@ -2,6 +2,7 @@ package xiamomc.morph.abilities.impl;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.kyori.adventure.bossbar.BossBar;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.Bukkit;
@@ -74,11 +75,9 @@ public class BossbarAbility extends MorphAbility<BossbarOption>
             if (option == null) return false;
 
             var createOption = option.getCreateOption();
-            var title = MiniMessage.miniMessage().deserialize(createOption.name(),
-                    Placeholder.component("name", state.getDisplayName()));
 
             state.setBossbar(BossBar.bossBar(
-                    title,
+                    this.getBossbarName(state, option),
                     1f,
                     createOption.color(),
                     createOption.overlay(),
@@ -120,6 +119,7 @@ public class BossbarAbility extends MorphAbility<BossbarOption>
                         playersToShow.removeIf(p -> p.getGameMode() != playerGameMode);
 
                     bossbar.progress((float) (player.getHealth() / player.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue()));
+                    bossbar.name(this.getBossbarName(state, option));
 
                     playersToHide.removeAll(playersToShow);
                     playersToHide.remove(player);
@@ -133,5 +133,12 @@ public class BossbarAbility extends MorphAbility<BossbarOption>
         }
 
         return false;
+    }
+
+    private Component getBossbarName(DisguiseState state, BossbarOption option)
+    {
+        return MiniMessage.miniMessage().deserialize(option.getCreateOption().name(),
+                Placeholder.component("name", state.getDisplayName()),
+                Placeholder.component("who", state.getPlayer().displayName()));
     }
 }

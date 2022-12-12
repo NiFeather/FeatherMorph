@@ -84,9 +84,9 @@ public class ReloadSubCommand extends MorphPluginObject implements ISubCommand
 
             if (reloadsData)
             {
-                morphManager.reloadConfiguration();
                 config.reload();
                 skills.reloadConfiguration();
+                morphManager.reloadConfiguration();
             }
 
             if (reloadsMessage)
