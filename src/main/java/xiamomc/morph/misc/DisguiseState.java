@@ -390,18 +390,6 @@ public class DisguiseState extends MorphPluginObject
                 ? Component.text(identifier)
                 : provider.getDisplayName(identifier);
 
-        //更新技能Flag
-        var disgType = d.getType().getEntityType();
-
-        var abilities = abilityHandler.getAbilitiesFor(disgType);
-        if (abilities != null)
-        {
-            setAbilities(abilities);
-            abilities.forEach(a -> a.applyToPlayer(player, this));
-        }
-
-        setSkill(skillHandler.getSkill(this.getSkillIdentifier()));
-
         //伪装类型是否支持设置伪装物品
         supportsDisguisedItems = skillHandler.hasSpeficSkill(skillIdentifier, SkillType.INVENTORY);
 
@@ -444,6 +432,18 @@ public class DisguiseState extends MorphPluginObject
                 setShowingDisguisedItems(showDisguisedItems || !emptyEquipment);
             }
         }
+
+        //更新技能Flag
+        var disgType = d.getType().getEntityType();
+
+        var abilities = abilityHandler.getAbilitiesFor(disgType);
+        if (abilities != null)
+        {
+            setAbilities(abilities);
+            abilities.forEach(a -> a.applyToPlayer(player, this));
+        }
+
+        setSkill(skillHandler.getSkill(this.getSkillIdentifier()));
     }
 
     private ItemStack itemOrAir(ItemStack item)

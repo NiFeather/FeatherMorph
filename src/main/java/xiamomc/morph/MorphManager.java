@@ -1035,8 +1035,14 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 var disguiseClone = s.getDisguise().clone();
                 DisguiseUtils.addTrace(disguiseClone);
 
+                var nbt = s.getCachedNbtString();
+                var profile = s.getProfileNbtString();
+
                 s.setDisguise(s.getDisguiseIdentifier(), s.getSkillIdentifier(), disguiseClone,
                         s.shouldHandlePose(), true, s.getDisguisedItems());
+
+                s.setCachedNbtString(nbt);
+                s.setCachedProfileNbtString(profile);
 
                 disguiseFromState(s);
                 postConstructDisguise(s);
