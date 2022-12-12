@@ -135,8 +135,17 @@ public class PlayerOperationSimulator extends MorphPluginObject
             return SimulateResult.success(EquipmentSlot.HAND);
         }
 
+        //对着空气空挥
         if (targetBlock == null)
             return SimulateResult.success(EquipmentSlot.HAND);
+
+        //冒险模式，并且无法破坏目标方块 -> 操作成功(空挥)
+        if (player.getGameMode() == GameMode.ADVENTURE)
+        {
+            var meta = player.getEquipment().getItemInMainHand().getItemMeta();
+            if (meta == null || !meta.getDestroyableKeys().contains(targetBlock.getBlockData().getMaterial().getKey()))
+                return SimulateResult.success(EquipmentSlot.HAND);
+        }
 
         //初始化destoryInfo
         if (destroyHandler == null)
