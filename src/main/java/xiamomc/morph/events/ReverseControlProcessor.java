@@ -145,7 +145,7 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
                 //如果伪装的玩家想攻击本体，取消事件并模拟左键
                 if (e.getEntity() instanceof Player hurtedPlayer && hurtedPlayer.equals(targetPlayer))
                 {
-                    simulateOperation(Action.LEFT_CLICK_AIR, targetPlayer, EquipmentSlot.HAND);
+                    simulateOperation(Action.LEFT_CLICK_AIR, targetPlayer);
 
                     e.setCancelled(true);
 
@@ -158,7 +158,7 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
                 //如果伪装的玩家想攻击的实体和被伪装的玩家一样，模拟左键并取消事件
                 if (damagerLookingAt != null && damagerLookingAt.equals(playerLookingAt))
                 {
-                    simulateOperation(Action.LEFT_CLICK_AIR, targetPlayer, EquipmentSlot.HAND);
+                    simulateOperation(Action.LEFT_CLICK_AIR, targetPlayer);
 
                     e.setCancelled(true);
                 }
@@ -196,7 +196,7 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
                         lastAction = PlayerTracker.InteractType.LEFT_CLICK_BLOCK;
                 }
 
-                simulateOperation(lastAction.toBukkitAction(), targetPlayer, EquipmentSlot.HAND);
+                simulateOperation(lastAction.toBukkitAction(), targetPlayer);
             }
 
             //如果玩家在被控玩家一定范围以内，被控玩家有目标实体，并且玩家没有目标实体，那么取消挥手动画
@@ -226,10 +226,7 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
 
                 if (!playerInDistance(player, targetPlayer)) return;
 
-                //todo: 实现副手动作
-                var targetHand = EquipmentSlot.HAND;
-
-                simulateOperation(e.getAction(), targetPlayer, targetHand);
+                simulateOperation(e.getAction(), targetPlayer);
             }
         }
     }
@@ -242,28 +239,20 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
      *
      * @param action 操作类型
      * @param targetPlayer 目标玩家
-     * @param hand 左、右手
      * @return 操作是否成功
      */
-    private boolean simulateOperation(Action action, Player targetPlayer, EquipmentSlot hand)
+    private boolean simulateOperation(Action action, Player targetPlayer)
     {
         if (!allowSimulation.get()) return false;
 
-        if (action.isRightClick())
+        var result = action.isRightClick()
+                ? operationSimulator.simulateRightClick(targetPlayer)
+                : operationSimulator.simulateLeftClick(targetPlayer);
+
+        if (result.success())
         {
-            if (operationSimulator.simulateRightClick(targetPlayer, hand))
-            {
-                targetPlayer.swingHand(hand);
-                return true;
-            }
-        }
-        else
-        {
-            if (operationSimulator.simulateLeftClick(targetPlayer, hand))
-            {
-                targetPlayer.swingHand(hand);
-                return true;
-            }
+            targetPlayer.swingHand(result.hand());
+            return true;
         }
 
         return false;
