@@ -7,6 +7,7 @@ import net.minecraft.world.phys.MovingObjectPositionBlock;
 import net.minecraft.world.phys.Vec3D;
 import org.bukkit.Bukkit;
 import org.bukkit.FluidCollisionMode;
+import org.bukkit.GameMode;
 import org.bukkit.block.BlockFace;
 import org.bukkit.craftbukkit.v1_19_R1.CraftWorld;
 import org.bukkit.craftbukkit.v1_19_R1.block.CraftBlock;
@@ -22,6 +23,7 @@ import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.BeaconInventory;
 import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.util.RayTraceResult;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
@@ -74,6 +76,20 @@ public class PlayerOperationSimulator extends MorphPluginObject
     private final float blockReachDistance = 4.5f;
     private final float entityReachDistance = 3f;
 
+    private RayTraceResult rayTrace(Player player)
+    {
+        var eyeLoc = player.getEyeLocation();
+
+        return player.getWorld().rayTrace(eyeLoc, eyeLoc.getDirection(), blockReachDistance,
+                FluidCollisionMode.NEVER, false, 0d, e ->
+                {
+                    if (e instanceof Player p)
+                        return e != player && p.getGameMode() != GameMode.SPECTATOR;
+                    else
+                        return e != player;
+                });
+    }
+
     /**
      * 模拟玩家左键
      *
@@ -96,12 +112,13 @@ public class PlayerOperationSimulator extends MorphPluginObject
         }
 
         //获取正在看的方块或实体
-        var eyeLoc = player.getEyeLocation();
-        var traceResult = player.getWorld().rayTrace(eyeLoc, eyeLoc.getDirection(), blockReachDistance,
-                FluidCollisionMode.NEVER, false, 0d, Predicate.not(Predicate.isEqual(player)));
+        var traceResult = this.rayTrace(player);
 
         var targetBlock = traceResult == null ? null : traceResult.getHitBlock();
         var targetEntity = traceResult == null ? null : traceResult.getHitEntity();
+
+        if (targetEntity != null && targetEntity.getLocation().distanceSquared(player.getLocation()) > entityReachDistance)
+            targetEntity = null;
 
         //获取方块破坏信息
         var destroyHandler = playerHandlerMap.getOrDefault(player, null);
@@ -171,9 +188,7 @@ public class PlayerOperationSimulator extends MorphPluginObject
         //logger.warn("正在模拟右键！");
 
         //获取正在看的方块或实体
-        var eyeLoc = player.getEyeLocation();
-        var traceResult = player.getWorld().rayTrace(eyeLoc, eyeLoc.getDirection(), blockReachDistance,
-                FluidCollisionMode.NEVER, false, 0d, Predicate.not(Predicate.isEqual(player)));
+        var traceResult = this.rayTrace(player);
 
         var targetBlock = traceResult == null ? null : traceResult.getHitBlock();
         var targetEntity = traceResult == null ? null : traceResult.getHitEntity();
