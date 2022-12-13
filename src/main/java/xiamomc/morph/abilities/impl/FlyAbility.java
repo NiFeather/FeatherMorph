@@ -78,7 +78,12 @@ public class FlyAbility extends MorphAbility<FlyOption>
                     s -> !Float.isNaN(s),
                     getTargetFlySpeed(state.getSkillIdentifier()));
 
-            player.setFlySpeed(Float.isNaN(speed) ? 0.1f : speed);
+            speed = Float.isNaN(speed) ? 0.1f : speed;
+
+            if (speed > 1f) speed = 1;
+            else if (speed < -1f) speed = -1;
+
+            player.setFlySpeed(speed);
         }
 
         return true;
