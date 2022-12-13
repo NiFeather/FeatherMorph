@@ -25,7 +25,7 @@ public class RequestManager extends MorphPluginObject implements IManageRequests
     @Initializer
     private void load()
     {
-        this.addSchedule(c -> update());
+        this.addSchedule(this::update);
     }
 
     private void update()
@@ -38,7 +38,7 @@ public class RequestManager extends MorphPluginObject implements IManageRequests
             if (r.ticksRemain <= 0) this.requests.remove(r);
         }
 
-        this.addSchedule(c -> update());
+        this.addSchedule(this::update);
     }
 
     private final List<RequestInfo> requests = new ObjectArrayList<>();

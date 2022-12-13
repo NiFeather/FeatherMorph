@@ -298,7 +298,7 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
     @Initializer
     private void load()
     {
-        this.addSchedule(c -> update());
+        this.addSchedule(this::update);
 
         var immuneItem = config.getBindable(String.class, ConfigOption.REVERSE_CONTROL_IMMUNE_ITEM);
         immuneItem.onValueChanged((o, immune) ->
@@ -340,7 +340,7 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
 
         */
 
-        this.addSchedule(c -> update());
+        this.addSchedule(this::update);
     }
 
     @EventHandler

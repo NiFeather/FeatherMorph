@@ -197,7 +197,7 @@ public class PlayerTracker extends MorphPluginObject implements Listener
     @Initializer
     private void load()
     {
-        this.addSchedule(c -> update());
+        this.addSchedule(this::update);
     }
 
     /**
@@ -253,6 +253,6 @@ public class PlayerTracker extends MorphPluginObject implements Listener
 
         playerToRemoveFromSuspect.forEach(breakingSuspectList::remove);
 
-        this.addSchedule(c -> update());
+        this.addSchedule(this::update);
     }
 }

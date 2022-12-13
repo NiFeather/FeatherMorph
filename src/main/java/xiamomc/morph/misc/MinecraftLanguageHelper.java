@@ -174,7 +174,7 @@ public class MinecraftLanguageHelper extends MorphPluginObject
             if (targetFile.exists() && !overWrite)
                 return;
 
-            this.addSchedule(c ->
+            this.addSchedule(() ->
             {
                 try
                 {

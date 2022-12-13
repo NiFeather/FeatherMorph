@@ -80,7 +80,7 @@ public class GSitCompactProcessor extends MorphPluginObject implements Listener
     private void showDisguiseFor(Player player)
     {
         if (DisguiseAPI.isDisguised(player))
-            this.addSchedule(c ->
+            this.addSchedule(() ->
             {
                 if (DisguiseAPI.isDisguised(player))
                     DisguiseUtilities.setupFakeDisguise(DisguiseAPI.getDisguise(player));

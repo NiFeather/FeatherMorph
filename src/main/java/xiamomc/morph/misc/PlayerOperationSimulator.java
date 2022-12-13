@@ -46,7 +46,7 @@ public class PlayerOperationSimulator extends MorphPluginObject
     @Initializer
     private void load(MorphConfigManager config)
     {
-        this.addSchedule(c -> update(), 1);
+        this.addSchedule(this::update);
 
         config.bind(destroyTimeout, ConfigOption.REVERSE_DESTROY_TIMEOUT);
     }
@@ -76,7 +76,7 @@ public class PlayerOperationSimulator extends MorphPluginObject
             }
         });
 
-        this.addSchedule(c -> update(), 5);
+        this.addSchedule(this::update, 5);
     }
 
     private final float blockReachDistance = 4.5f;

@@ -77,7 +77,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     @Initializer
     private void load()
     {
-        this.addSchedule(c -> update());
+        this.addSchedule(this::update);
 
         bannedDisguises = config.getBindableList(String.class, ConfigOption.BANNED_DISGUISES);
         config.bind(allowHeadMorph, ConfigOption.ALLOW_HEAD_MORPH);
@@ -90,7 +90,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         ));
 
         //延迟1tick等待其他组件初始化
-        this.addSchedule(c ->
+        this.addSchedule(() ->
         {
             Bukkit.getOnlinePlayers().forEach(p ->
             {
@@ -153,7 +153,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             }
         });
 
-        this.addSchedule(c -> update());
+        this.addSchedule(this::update);
     }
 
     //region 玩家伪装相关

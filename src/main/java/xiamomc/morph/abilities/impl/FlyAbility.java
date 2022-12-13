@@ -105,7 +105,7 @@ public class FlyAbility extends MorphAbility<FlyOption>
             var flying = player.isFlying();
 
             //立即更新状态不会生效，需要延迟1tick再进行
-            this.addSchedule(c ->
+            this.addSchedule(() ->
             {
                 if (appliedPlayers.contains(player))
                 {
