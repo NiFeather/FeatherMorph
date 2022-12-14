@@ -877,9 +877,13 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
     public void onPluginDisable()
     {
-        disguisedPlayers.forEach(offlineStorage::pushDisguiseState);
+        getDisguisedPlayers().forEach(s ->
+        {
+            if (!s.getPlayer().isOnline())
+                offlineStorage.pushDisguiseState(s);
+        });
 
-        unMorphAll(true);
+        unMorphAll(false);
         saveConfiguration();
 
         offlineStorage.saveConfiguration();
