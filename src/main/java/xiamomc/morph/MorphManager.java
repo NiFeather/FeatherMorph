@@ -625,11 +625,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         uuidPlayerTexturesMap.remove(player.getUniqueId());
 
-        if (plugin.isEnabled())
-        {
-            clientHandler.updateCurrentIdentifier(player, null);
-            clientHandler.sendClientCommand(player, ClientCommands.setSelfViewCommand(null));
-        }
+        clientHandler.updateCurrentIdentifier(player, null);
+        clientHandler.sendClientCommand(player, ClientCommands.setSelfViewCommand(null));
 
         Bukkit.getPluginManager().callEvent(new PlayerUnMorphEvent(player));
     }

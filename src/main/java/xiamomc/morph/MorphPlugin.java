@@ -120,6 +120,9 @@ public final class MorphPlugin extends XiaMoJavaPlugin
 
             if (placeholderIntegration != null)
                 placeholderIntegration.unregister();
+
+            if (clientHandler != null)
+                clientHandler.getClientPlayers().forEach(clientHandler::unInitializePlayer);
         }
         catch (Exception e)
         {

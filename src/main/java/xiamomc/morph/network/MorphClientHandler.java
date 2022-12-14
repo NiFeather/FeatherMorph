@@ -9,6 +9,8 @@ import net.minecraft.resources.MinecraftKey;
 import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.v1_19_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.messaging.MessageTooLargeException;
+import org.bukkit.plugin.messaging.Messenger;
 import org.bukkit.plugin.messaging.StandardMessenger;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphManager;
@@ -37,10 +39,14 @@ public class MorphClientHandler extends MorphPluginObject
     //部分来自 CraftPlayer#sendPluginMessage(), 在我们搞清楚到底为什么服务端会吞包之前先这样
     private void sendPacket(String channel, Player player, byte[] message)
     {
+        if (channel == null || player == null || message == null)
+            throw new IllegalArgumentException("频道、玩家或消息是null");
+
+        if (message.length > Messenger.MAX_MESSAGE_SIZE)
+            throw new MessageTooLargeException();
+
         if (logOutGoingPackets.get())
             logger.info(channel + " :: " + player.getName() + " -> " + new String(message, StandardCharsets.UTF_8));
-
-        StandardMessenger.validatePluginMessage(Bukkit.getServer().getMessenger(), plugin, channel, message);
 
         var nmsPlayer = ((CraftPlayer) player).getHandle();
 
@@ -286,6 +292,11 @@ public class MorphClientHandler extends MorphPluginObject
     private final List<Player> initializedPlayers = new ObjectArrayList<>();
 
     private final List<Player> clientPlayers = new ObjectArrayList<>();
+
+    public List<Player> getClientPlayers()
+    {
+        return new ObjectArrayList<>(clientPlayers);
+    }
 
     /**
      * 检查某个玩家是否使用客户端加入
