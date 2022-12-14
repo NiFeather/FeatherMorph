@@ -88,23 +88,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 new LocalDisguiseProvider(),
                 fallbackProvider
         ));
-
-        //延迟1tick等待其他组件初始化
-        this.addSchedule(() ->
-        {
-            Bukkit.getOnlinePlayers().forEach(p ->
-            {
-                var offlineState = offlineStorage.popDisguiseState(p.getUniqueId());
-
-                if (offlineState != null)
-                {
-                    p.sendMessage(MessageUtils.prefixes(p, MorphStrings.recoverString()));
-
-                    if (!this.disguiseFromOfflineState(p, offlineState))
-                        p.sendMessage(MessageUtils.prefixes(p, MorphStrings.recoveringFailedString()));
-                }
-            });
-        });
     }
 
     private void update()
@@ -879,7 +862,10 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     {
         getDisguisedPlayers().forEach(s ->
         {
-            if (!s.getPlayer().isOnline())
+            var player = s.getPlayer();
+
+            player.sendMessage(MessageUtils.prefixes(player, MorphStrings.resetString()));
+            if (!player.isOnline())
                 offlineStorage.pushDisguiseState(s);
         });
 
