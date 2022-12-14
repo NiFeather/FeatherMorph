@@ -249,7 +249,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         if (DisguiseAPI.isDisguised(player))
         {
             //workaround: LibsDisguises在启用selfDisguiseVisible的情况下会导致副手切换异常
-            this.addSchedule(c ->
+            this.addSchedule(() ->
             {
                 if (DisguiseAPI.isDisguised(player) && DisguiseAPI.isSelfDisguised(player)) player.updateInventory();
             }, 2);
@@ -270,7 +270,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
             var config = morphs.getPlayerConfiguration(player);
 
             if (!config.shownMorphClientHint && config.getUnlockedDisguiseIdentifiers().size() > 0)
-                this.addSchedule(c ->
+                this.addSchedule(() ->
                 {
                     if (player.isOnline() && !config.shownMorphClientHint)
                     {

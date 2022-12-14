@@ -164,7 +164,7 @@ public class MorphClientHandler extends MorphPluginObject
                         playerStateMap.put(player, ConnectionState.CONNECTING);
 
                     //等待玩家加入再发包
-                    this.waitUntilReady(player, c ->
+                    this.waitUntilReady(player, () ->
                     {
                         if (initializedPlayers.contains(player))
                             return;
@@ -234,7 +234,7 @@ public class MorphClientHandler extends MorphPluginObject
     }
 
     //region wait until ready
-    private void waitUntilReady(Player player, Consumer<?> c)
+    private void waitUntilReady(Player player, Runnable r)
     {
         var bool = playerStateMap.getOrDefault(player, null);
 
@@ -246,12 +246,12 @@ public class MorphClientHandler extends MorphPluginObject
 
         if (bool == ConnectionState.JOINED)
         {
-            c.accept(null);
+            r.run();
         }
         else
         {
             //logger.info(player.getName() + " not ready! " + bool);
-            this.addSchedule(cc -> waitUntilReady(player, c));
+            this.addSchedule(() -> waitUntilReady(player, r));
         }
     }
 

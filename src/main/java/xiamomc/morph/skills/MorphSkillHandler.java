@@ -73,7 +73,7 @@ public class MorphSkillHandler extends MorphPluginObject
                 new NoneMorphSkill()
         ));
 
-        this.addSchedule(c -> this.update());
+        this.addSchedule(this::update);
     }
 
     /**
@@ -123,7 +123,7 @@ public class MorphSkillHandler extends MorphPluginObject
     {
         //更新CD
         uuidCooldownMap.forEach((u, c) -> c.setCooldown(c.getCooldown() - 1));
-        this.addSchedule(c -> this.update());
+        this.addSchedule(this::update);
     }
 
     /**

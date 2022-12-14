@@ -213,7 +213,7 @@ public class SkillConfigurationStore extends MorphJsonBasedStorage<SkillConfigur
             config.version = targetVersion;
 
             logger.info("已更新技能配置，即将重载存储...");
-            this.addSchedule(c -> reloadConfiguration());
+            this.addSchedule(this::reloadConfiguration);
             return true;
         }
         catch (Throwable t)

@@ -78,7 +78,12 @@ public class FlyAbility extends MorphAbility<FlyOption>
                     s -> !Float.isNaN(s),
                     getTargetFlySpeed(state.getSkillIdentifier()));
 
-            player.setFlySpeed(Float.isNaN(speed) ? 0.1f : speed);
+            speed = Float.isNaN(speed) ? 0.1f : speed;
+
+            if (speed > 1f) speed = 1;
+            else if (speed < -1f) speed = -1;
+
+            player.setFlySpeed(speed);
         }
 
         return true;
@@ -100,7 +105,7 @@ public class FlyAbility extends MorphAbility<FlyOption>
             var flying = player.isFlying();
 
             //立即更新状态不会生效，需要延迟1tick再进行
-            this.addSchedule(c ->
+            this.addSchedule(() ->
             {
                 if (appliedPlayers.contains(player))
                 {

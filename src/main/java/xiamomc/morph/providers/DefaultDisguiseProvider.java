@@ -28,7 +28,6 @@ import xiamomc.morph.abilities.AbilityHandler;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.messages.MorphStrings;
-import xiamomc.morph.misc.ColorUtils;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.misc.DisguiseTypes;
 import xiamomc.morph.misc.DisguiseUtils;
@@ -38,6 +37,7 @@ import xiamomc.morph.skills.SkillType;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
+import xiamomc.pluginbase.Utilities.ColorUtils;
 
 import java.util.ArrayList;
 import java.util.List;

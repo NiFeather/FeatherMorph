@@ -205,13 +205,13 @@ public class DefaultConfigGenerator
         addAbilityConfiguration(skills, EntityType.WITHER, AbilityType.BOSSBAR, c ->
         {
             c.setOption(AbilityType.BOSSBAR.asString(),
-                    new BossbarOption(new BossbarOption.BossbarCreateOption("<name>", BossBar.Color.PURPLE, BossBar.Overlay.PROGRESS, Set.of(BossBar.Flag.DARKEN_SCREEN)), 80));
+                    new BossbarOption(new BossbarOption.BossbarCreateOption("<name> (<who>)", BossBar.Color.PURPLE, BossBar.Overlay.PROGRESS, Set.of(BossBar.Flag.DARKEN_SCREEN)), 80));
         });
 
         addAbilityConfiguration(skills, EntityType.ENDER_DRAGON, AbilityType.BOSSBAR, c ->
         {
             c.setOption(AbilityType.BOSSBAR.asString(),
-                    new BossbarOption(new BossbarOption.BossbarCreateOption("<name>", BossBar.Color.PINK, BossBar.Overlay.PROGRESS, Set.of()), -1));
+                    new BossbarOption(new BossbarOption.BossbarCreateOption("<name> (<who>)", BossBar.Color.PINK, BossBar.Overlay.PROGRESS, Set.of()), -1));
         });
     }
 }

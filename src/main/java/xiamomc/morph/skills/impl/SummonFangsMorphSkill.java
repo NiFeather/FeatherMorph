@@ -102,7 +102,7 @@ public class SummonFangsMorphSkill extends MorphSkill<NoOpConfiguration>
                 oldLocation = location.clone();
 
                 //添加到计划任务
-                this.addSchedule(c ->
+                this.addSchedule(() ->
                 {
                     var fang = world.spawn(loc, EvokerFangs.class, CreatureSpawnEvent.SpawnReason.CUSTOM);
                     fang.setOwner(player);

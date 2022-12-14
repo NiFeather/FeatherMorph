@@ -102,6 +102,11 @@ public class MorphStrings extends AbstractMorphStrings
                 "<color:red>无效的皮肤");
     }
 
+    public static FormattableMessage resetString()
+    {
+        return getFormattable(getKey("state.reset"),
+                "相关功能已禁用，正在取消您的伪装...");
+    }
 
     public static FormattableMessage recoverString()
     {
