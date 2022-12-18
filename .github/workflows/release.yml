@@ -1,6 +1,6 @@
 name: CI
 
-on: [push]
+on: [release]
 
 jobs:
   build:
@@ -21,7 +21,7 @@ jobs:
       - name: Build with Maven
         run: mvn --batch-mode --update-snapshots package
       - name: Upload artifact
-        uses: actions/upload-artifact@v2
+        uses: AButler/upload-release-assets@v2.0
         with:
-          name: Artifact
-          path: target/morph*.jar
+          files: 'target/morph*.jar'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
