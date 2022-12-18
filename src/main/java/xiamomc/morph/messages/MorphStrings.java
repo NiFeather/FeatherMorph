@@ -175,6 +175,12 @@ public class MorphStrings extends AbstractMorphStrings
                 "<color:red>更新伪装状态时遇到了意外，正在取消伪装");
     }
 
+    public static FormattableMessage clientVersionMismatchString()
+    {
+        return getFormattable(getKey("client_version_mismatch"),
+                "<color:red>客户端版本不匹配，将不会启用增强功能！");
+    }
+
     private static String getKey(String key)
     {
         return "morph." + key;

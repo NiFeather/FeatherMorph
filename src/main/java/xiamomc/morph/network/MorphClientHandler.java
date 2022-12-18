@@ -11,24 +11,21 @@ import org.bukkit.craftbukkit.v1_19_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.messaging.MessageTooLargeException;
 import org.bukkit.plugin.messaging.Messenger;
-import org.bukkit.plugin.messaging.StandardMessenger;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
+import xiamomc.morph.messages.MessageUtils;
+import xiamomc.morph.messages.MorphStrings;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.function.Consumer;
+import java.util.*;
 
 public class MorphClientHandler extends MorphPluginObject
 {
@@ -54,6 +51,16 @@ public class MorphClientHandler extends MorphPluginObject
         nmsPlayer.b.a(packet);
     }
 
+    /**
+     * 服务端的接口版本
+     */
+    public final int targetApiVersion = 2;
+
+    /**
+     * 最低能接受的客户端接口版本
+     */
+    public final int minimumApiVersion = 1;
+
     @Resolved
     private MorphManager manager;
 
@@ -62,25 +69,49 @@ public class MorphClientHandler extends MorphPluginObject
     {
         Bukkit.getMessenger().registerIncomingPluginChannel(plugin, initializeChannel, (cN, player, data) ->
         {
-            if (!allowClient.get()) return;
+            if (!allowClient.get() || this.getPlayerConnectionState(player).greaterThan(InitializeState.HANDSHAKE)) return;
 
             if (logInComingPackets.get())
                 logger.info("收到了来自" + player.getName() + "的初始化消息：" + new String(data, StandardCharsets.UTF_8));
 
             this.sendPacket(initializeChannel, player, "".getBytes());
 
-            clientPlayers.add(player);
+            playerConnectionStates.put(player, InitializeState.HANDSHAKE);
         });
 
-        var apiVersionBytes = ByteBuffer.allocate(4).putInt(plugin.clientApiVersion).array();
+        var apiVersionBytes = ByteBuffer.allocate(4).putInt(targetApiVersion).array();
         Bukkit.getMessenger().registerIncomingPluginChannel(plugin, versionChannel, (cN, player, data) ->
         {
             if (!allowClient.get()) return;
 
-            if (!clientPlayers.contains(player)) return;
+            var connectionState = this.getPlayerConnectionState(player);
+
+            //初始化之前忽略API请求
+            if (connectionState.worseThan(InitializeState.HANDSHAKE)) return;
+
+            var str = new String(data, StandardCharsets.UTF_8);
 
             if (logInComingPackets.get())
-                logger.info("收到了来自" + player.getName() + "的API请求：" + new String(data, StandardCharsets.UTF_8));
+                logger.info("收到了来自" + player.getName() + "的API请求：" + str);
+
+            //尝试获取api版本
+            var clientVersion = Integer.getInteger(str);
+
+            //没有版本，默认为1
+            if (clientVersion == null) clientVersion = 1;
+
+            //如果客户端版本低于最低能接受的版本，拒绝初始化
+            if (clientVersion < minimumApiVersion)
+            {
+                unInitializePlayer(player);
+
+                player.sendMessage(MessageUtils.prefixes(player, MorphStrings.clientVersionMismatchString()));
+                logger.info(player.getName() + "使用了不支持的客户端版本：" + clientVersion + "(此服务器要求至少为" + targetApiVersion + ")");
+                return;
+            }
+
+            this.getPlayerOption(player).clientApiVersion = clientVersion;
+            playerConnectionStates.put(player, InitializeState.API_CHECKED);
 
             this.sendPacket(versionChannel, player, apiVersionBytes);
         });
@@ -89,7 +120,8 @@ public class MorphClientHandler extends MorphPluginObject
         {
             if (!allowClient.get()) return;
 
-            if (!clientPlayers.contains(player)) return;
+            //在API检查完成之前忽略客户端的所有指令
+            if (this.getPlayerConnectionState(player).worseThan(InitializeState.API_CHECKED)) return;
 
             if (logInComingPackets.get())
                 logger.info("在" + cN + "收到了来自" + player.getName() + "的服务端指令：" + new String(data, StandardCharsets.UTF_8));
@@ -166,13 +198,18 @@ public class MorphClientHandler extends MorphPluginObject
                 }
                 case "initial" ->
                 {
+                    //检查一遍玩家有没有初始化完成，如果有则忽略此指令
+                    if (this.clientInitialized(player))
+                        return;
+
                     if (playerStateMap.getOrDefault(player, null) != ConnectionState.JOINED)
                         playerStateMap.put(player, ConnectionState.CONNECTING);
 
                     //等待玩家加入再发包
                     this.waitUntilReady(player, () ->
                     {
-                        if (initializedPlayers.contains(player))
+                        //再检查一遍玩家有没有初始化完成
+                        if (this.clientInitialized(player))
                             return;
 
                         var config = manager.getPlayerConfiguration(player);
@@ -185,7 +222,7 @@ public class MorphClientHandler extends MorphPluginObject
                             manager.refreshClientState(state);
 
                         sendClientCommand(player, ClientCommands.setToggleSelfCommand(config.showDisguiseToSelf));
-                        initializedPlayers.add(player);
+                        playerConnectionStates.put(player, InitializeState.DONE);
                     });
                 }
                 case "option" ->
@@ -226,9 +263,7 @@ public class MorphClientHandler extends MorphPluginObject
         allowClient.onValueChanged((o, n) ->
         {
             var players = Bukkit.getOnlinePlayers();
-
-            initializedPlayers.removeAll(players);
-            clientPlayers.removeAll(players);
+            players.forEach(this::unInitializePlayer);
 
             if (n)
                 this.sendReAuth(players);
@@ -289,13 +324,65 @@ public class MorphClientHandler extends MorphPluginObject
         return option;
     }
 
-    private final List<Player> initializedPlayers = new ObjectArrayList<>();
-
-    private final List<Player> clientPlayers = new ObjectArrayList<>();
+    private final Map<Player, InitializeState> playerConnectionStates = new Object2ObjectOpenHashMap<>();
 
     public List<Player> getClientPlayers()
     {
-        return new ObjectArrayList<>(clientPlayers);
+        return new ObjectArrayList<>(playerConnectionStates.keySet());
+    }
+
+    /**
+     * 获取玩家的连接状态
+     *
+     * @param player 目标玩家
+     * @return {@link InitializeState}, 客户端未连接或初始化被中断时返回 {@link InitializeState#NOT_CONNECTED}
+     */
+    public InitializeState getPlayerConnectionState(Player player)
+    {
+        return playerConnectionStates.getOrDefault(player, InitializeState.NOT_CONNECTED);
+    }
+
+    /**
+     * 客户端的初始化状态
+     */
+    public enum InitializeState
+    {
+        /**
+         * 客户端未连接或初始化被中断
+         */
+        NOT_CONNECTED(-1),
+
+        /**
+         * 接收到初始化指令，但还没做更进一步的交流
+         */
+        HANDSHAKE(0),
+
+        /**
+         * 获取到客户端的API版本，但尚未收到客户端的初始化指令
+         */
+        API_CHECKED(1),
+
+        /**
+         * 所有初始化操作均已完成
+         */
+        DONE(2);
+
+        private final int val;
+
+        InitializeState(int value)
+        {
+            this.val = value;
+        }
+
+        public boolean greaterThan(InitializeState other)
+        {
+            return this.val > other.val;
+        }
+
+        public boolean worseThan(InitializeState other)
+        {
+            return this.val < other.val;
+        }
     }
 
     /**
@@ -307,7 +394,7 @@ public class MorphClientHandler extends MorphPluginObject
      */
     public boolean clientConnected(Player player)
     {
-        return clientPlayers.contains(player);
+        return this.getPlayerConnectionState(player).greaterThan(InitializeState.NOT_CONNECTED);
     }
 
     /**
@@ -318,7 +405,7 @@ public class MorphClientHandler extends MorphPluginObject
      */
     public boolean clientInitialized(Player player)
     {
-        return initializedPlayers.contains(player);
+        return playerConnectionStates.getOrDefault(player, null) == InitializeState.DONE;
     }
 
     /**
@@ -404,10 +491,9 @@ public class MorphClientHandler extends MorphPluginObject
      */
     public void unInitializePlayer(Player player)
     {
-        this.clientPlayers.remove(player);
         this.playerOptionMap.clear();
         playerStateMap.remove(player);
-        initializedPlayers.remove(player);
+        playerConnectionStates.remove(player);
 
         var playerConfig = manager.getPlayerConfiguration(player);
         var state = manager.getDisguiseStateFor(player);
