@@ -6,7 +6,7 @@
 
     <groupId>xiamomc.morph</groupId>
     <artifactId>morph</artifactId>
-    <version>0.7.1</version>
+    <version>0.7.2</version>
     <packaging>jar</packaging>
 
     <name>Morph</name>

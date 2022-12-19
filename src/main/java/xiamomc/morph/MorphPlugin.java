@@ -32,8 +32,6 @@ public final class MorphPlugin extends XiaMoJavaPlugin
         return "morphplugin";
     }
 
-    public final int clientApiVersion = 1;
-
     @Override
     public String getNameSpace()
     {
