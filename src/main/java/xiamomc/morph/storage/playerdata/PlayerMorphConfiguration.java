@@ -119,4 +119,7 @@ public class PlayerMorphConfiguration
 
     @Expose
     public boolean shownMorphClientHint;
+
+    @Expose
+    public boolean shownClientSuggestionMessage;
 }

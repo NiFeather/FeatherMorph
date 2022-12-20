@@ -761,6 +761,14 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             }
         }
 
+        if (!config.shownClientSuggestionMessage && !isClientPlayer)
+        {
+            sourcePlayer.sendMessage(MessageUtils.prefixes(sourcePlayer, HintStrings.clientSuggestionStringA()));
+            sourcePlayer.sendMessage(MessageUtils.prefixes(sourcePlayer, HintStrings.clientSuggestionStringB()));
+
+            config.shownClientSuggestionMessage = true;
+        }
+
         if (!config.shownDisplayToSelfHint && !isClientPlayer)
         {
             sourcePlayer.sendMessage(MessageUtils.prefixes(sourcePlayer, HintStrings.morphVisibleAfterCommandString()));
