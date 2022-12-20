@@ -1,13 +1,11 @@
 package xiamomc.morph.misc;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import net.minecraft.core.EnumDirection;
-import net.minecraft.server.level.EntityPlayer;
-import net.minecraft.server.level.PlayerInteractManager;
-import net.minecraft.server.level.WorldServer;
-import net.minecraft.world.EnumHand;
-import net.minecraft.world.phys.MovingObjectPositionBlock;
-import net.minecraft.world.phys.Vec3D;
+import net.minecraft.core.Direction;
+import net.minecraft.server.level.*;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 import org.bukkit.Bukkit;
 import org.bukkit.FluidCollisionMode;
 import org.bukkit.GameMode;
@@ -16,9 +14,11 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.craftbukkit.v1_19_R2.CraftWorld;
 import org.bukkit.craftbukkit.v1_19_R2.block.CraftBlock;
 import org.bukkit.craftbukkit.v1_19_R2.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_19_R2.entity.CraftHumanEntity;
 import org.bukkit.craftbukkit.v1_19_R2.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_19_R2.inventory.CraftItemStack;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.block.Action;
@@ -167,10 +167,10 @@ public class PlayerOperationSimulator extends MorphPluginObject
         assert nmsWorld != null;
 
         //AbstractBlockState#onBlockBreakStart(World world, BlockPos pos, PlayerEntity player)
-        nmsBlock.a(nmsWorld, ((CraftBlock) targetBlock).getPosition(), nmsPlayer);
+        nmsBlock.attack(nmsWorld, ((CraftBlock) targetBlock).getPosition(), nmsPlayer);
 
         //AbstractBlockState#calcBlockBreakingDelta(PlayerEntity player, BlockView world, BlockPos pos)
-        var delta = nmsBlock.a(nmsPlayer, nmsWorld, ((CraftBlock) targetBlock).getPosition());
+        var delta = nmsBlock.getDestroyProgress(nmsPlayer, nmsWorld, ((CraftBlock) targetBlock).getPosition());
 
         //设置破坏进度
         var val = destroyHandler.getProgress();
@@ -212,10 +212,10 @@ public class PlayerOperationSimulator extends MorphPluginObject
             //获取互动位置
             hitPos.subtract(targetEntity.getLocation().toVector());
 
-            if (this.tryUseItemOnEntity(player, targetEntity, itemInMainHand, EnumHand.a, hitPos))
+            if (this.tryUseItemOnEntity(player, targetEntity, itemInMainHand, InteractionHand.MAIN_HAND, hitPos))
                 return SimulateResult.success(EquipmentSlot.HAND);
 
-            return SimulateResult.of(this.tryUseItemOnEntity(player, targetEntity, itemInOffHand, EnumHand.b, hitPos),
+            return SimulateResult.of(this.tryUseItemOnEntity(player, targetEntity, itemInOffHand, InteractionHand.OFF_HAND, hitPos),
                                      EquipmentSlot.OFF_HAND);
         }
 
@@ -223,42 +223,42 @@ public class PlayerOperationSimulator extends MorphPluginObject
         {
             var loc = ((CraftBlock) targetBlock).getPosition();
 
-            EnumDirection targetBlockDirection = null;
+            Direction targetBlockDirection = null;
             var bukkitFace = player.getTargetBlockFace(5);
             bukkitFace = bukkitFace == null ? BlockFace.SELF : bukkitFace;
 
             //BlockFace(Bukkit)转BlockFace(Minecraft)
             switch (bukkitFace)
             {
-                case DOWN -> targetBlockDirection = EnumDirection.a;
-                case UP -> targetBlockDirection = EnumDirection.b;
-                case NORTH -> targetBlockDirection = EnumDirection.c;
-                case SOUTH -> targetBlockDirection = EnumDirection.d;
-                case WEST -> targetBlockDirection = EnumDirection.e;
-                case EAST -> targetBlockDirection = EnumDirection.f;
+                case DOWN -> targetBlockDirection = Direction.DOWN;
+                case UP -> targetBlockDirection = Direction.UP;
+                case NORTH -> targetBlockDirection = Direction.NORTH;
+                case SOUTH -> targetBlockDirection = Direction.SOUTH;
+                case WEST -> targetBlockDirection = Direction.WEST;
+                case EAST -> targetBlockDirection = Direction.EAST;
                 default -> logger.error("Unknown BlockFace: " + bukkitFace + ", will not attempt 'useItemOn'!");
             }
 
             if (targetBlockDirection != null)
             {
-                var moving = new MovingObjectPositionBlock(
-                        new Vec3D(targetBlock.getX(), targetBlock.getY(), targetBlock.getZ()),
+                var moving = new BlockHitResult(
+                        new Vec3(targetBlock.getX(), targetBlock.getY(), targetBlock.getZ()),
                         targetBlockDirection, loc, false);
 
-                if (this.tryUseItemOnBlock(player, targetBlock, bukkitFace, itemInMainHand, EnumHand.a, moving))
+                if (this.tryUseItemOnBlock(player, targetBlock, bukkitFace, itemInMainHand, InteractionHand.MAIN_HAND, moving))
                 {
                     return SimulateResult.success(EquipmentSlot.HAND);
                 }
-                else if (this.tryUseItemOnBlock(player, targetBlock, bukkitFace, itemInOffHand, EnumHand.b, moving))
+                else if (this.tryUseItemOnBlock(player, targetBlock, bukkitFace, itemInOffHand, InteractionHand.MAIN_HAND, moving))
                 {
                     return SimulateResult.success(EquipmentSlot.OFF_HAND);
                 }
             }
         }
 
-        if (this.tryUseItemOnSelf(player, itemInMainHand, EnumHand.a))
+        if (this.tryUseItemOnSelf(player, itemInMainHand, InteractionHand.MAIN_HAND))
             return SimulateResult.success(EquipmentSlot.HAND);
-        else if (this.tryUseItemOnSelf(player, itemInOffHand, EnumHand.b))
+        else if (this.tryUseItemOnSelf(player, itemInOffHand, InteractionHand.OFF_HAND))
             return SimulateResult.success(EquipmentSlot.OFF_HAND);
 
         return SimulateResult.fail();
@@ -271,10 +271,10 @@ public class PlayerOperationSimulator extends MorphPluginObject
      *
      * @param player 目标玩家
      * @param bukkitItem 物品
-     * @param hand 要使用的 {@link EnumHand}
+     * @param hand 要使用的 {@link InteractionHand}
      * @return 操作是否成功
      */
-    private boolean tryUseItemOnSelf(Player player, ItemStack bukkitItem, EnumHand hand)
+    private boolean tryUseItemOnSelf(Player player, ItemStack bukkitItem, InteractionHand hand)
     {
         var event = new PlayerInteractEvent(player, Action.RIGHT_CLICK_AIR, bukkitItem, null, BlockFace.SELF);
         pluginManager.callEvent(event);
@@ -285,7 +285,7 @@ public class PlayerOperationSimulator extends MorphPluginObject
             var manager = record.interactManager;
 
             //ServerPlayerGameMode.useItem()
-            return manager.a(record.nmsPlayer, record.nmsWorld, CraftItemStack.asNMSCopy(bukkitItem), hand).a();
+            return manager.useItem(record.nmsPlayer, record.nmsWorld, CraftItemStack.asNMSCopy(bukkitItem), hand).shouldSwing();
         }
 
         return false;
@@ -298,13 +298,13 @@ public class PlayerOperationSimulator extends MorphPluginObject
      * @param targetBlock 目标方块
      * @param bukkitFace 朝向
      * @param bukkitItem 物品
-     * @param nmsHand 要使用的 {@link EnumHand}
-     * @param moving 要提供给NMS方法的 {@link MovingObjectPositionBlock}
+     * @param nmsHand 要使用的 {@link InteractionHand}
+     * @param moving 要提供给NMS方法的 {@link BlockHitResult}
      * @return 操作是否成功
      */
     private boolean tryUseItemOnBlock(Player player, Block targetBlock, BlockFace bukkitFace,
-                                      ItemStack bukkitItem, EnumHand nmsHand,
-                                      MovingObjectPositionBlock moving)
+                                      ItemStack bukkitItem, InteractionHand nmsHand,
+                                      BlockHitResult moving)
     {
         var event = new PlayerInteractEvent(player, Action.RIGHT_CLICK_BLOCK, bukkitItem, targetBlock, bukkitFace);
         pluginManager.callEvent(event);
@@ -313,10 +313,9 @@ public class PlayerOperationSimulator extends MorphPluginObject
         {
             var record = NmsRecord.of(player);
 
-            //GameMode in fabric mojang mappings
-            PlayerInteractManager manager = record.interactManager;
+            ServerPlayerGameMode manager = record.interactManager;
 
-            return manager.a(record.nmsPlayer, record.nmsWorld, CraftItemStack.asNMSCopy(bukkitItem), nmsHand, moving).a();
+            return manager.useItemOn(record.nmsPlayer, record.nmsWorld, CraftItemStack.asNMSCopy(bukkitItem), nmsHand, moving).shouldSwing();
         }
 
         return false;
@@ -328,11 +327,11 @@ public class PlayerOperationSimulator extends MorphPluginObject
      * @param player 目标玩家
      * @param targetEntity 目标实体
      * @param bukkitItem 物品
-     * @param hand 要使用的 {@link EnumHand}
+     * @param hand 要使用的 {@link InteractionHand}
      * @param hitPos 用于提供给{@link PlayerInteractAtEntityEvent}的位置
      * @return 操作是否成功
      */
-    private boolean tryUseItemOnEntity(Player player, Entity targetEntity, ItemStack bukkitItem, EnumHand hand, Vector hitPos)
+    private boolean tryUseItemOnEntity(Player player, Entity targetEntity, ItemStack bukkitItem, InteractionHand hand, Vector hitPos)
     {
         var interactEntityEvent = new PlayerInteractEntityEvent(player, targetEntity);
         var interactAtEvent = new PlayerInteractAtEntityEvent(player, targetEntity, hitPos);
@@ -340,7 +339,7 @@ public class PlayerOperationSimulator extends MorphPluginObject
         pluginManager.callEvent(interactAtEvent);
 
         //先试试InteractAt
-        //如果不成功，调用Interact
+        //如果不成功，调用InteractOn
         //最后试试useItem
         if (!interactAtEvent.isCancelled() && !interactEntityEvent.isCancelled())
         {
@@ -354,12 +353,12 @@ public class PlayerOperationSimulator extends MorphPluginObject
             var entityHandle = record.nmsEntity;
             var manager = record.interactManager;
 
-            var vec = new Vec3D(hitPos.getX(), hitPos.getY(), hitPos.getZ());
+            var vec = new Vec3(hitPos.getX(), hitPos.getY(), hitPos.getZ());
 
             assert entityHandle != null;
-            return entityHandle.a(playerHandle, vec, hand).a()
-                    || playerHandle.a(entityHandle, hand).a()
-                    || manager.a(playerHandle, worldHandle, CraftItemStack.asNMSCopy(bukkitItem), hand).a();
+            return entityHandle.interactAt(playerHandle, vec, hand).shouldSwing()
+                    || playerHandle.interactOn(entityHandle, hand).shouldSwing()
+                    || manager.useItem(playerHandle, worldHandle, CraftItemStack.asNMSCopy(bukkitItem), hand).shouldSwing();
         }
 
         return false;
@@ -369,7 +368,7 @@ public class PlayerOperationSimulator extends MorphPluginObject
      * 操作模拟结果
      *
      * @param success 是否成功
-     * @param hand 与 {@link EnumHand} 对应的 {@link EquipmentSlot}
+     * @param hand 与 {@link InteractionHand} 对应的 {@link EquipmentSlot}
      */
     public record SimulateResult(boolean success, EquipmentSlot hand)
     {
@@ -397,16 +396,16 @@ public class PlayerOperationSimulator extends MorphPluginObject
      * @param nmsEntity ??? in fabric mojang mappings
      * @param interactManager GameMode in fabric mojang mappings
      */
-    private record NmsRecord(EntityPlayer nmsPlayer, WorldServer nmsWorld,
+    private record NmsRecord(ServerPlayer nmsPlayer, ServerLevel nmsWorld,
                              @Nullable net.minecraft.world.entity.Entity nmsEntity,
-                             PlayerInteractManager interactManager)
+                             ServerPlayerGameMode interactManager)
     {
         public static NmsRecord of(Player player)
         {
             var craftPlayer = (CraftPlayer) player;
 
             return new NmsRecord(craftPlayer.getHandle(), ((CraftWorld) craftPlayer.getWorld()).getHandle(),
-                    null, craftPlayer.getHandle().d);
+                    null, craftPlayer.getHandle().gameMode);
         }
 
         public static NmsRecord of(Player player, @Nullable Entity targetEntity)
@@ -417,7 +416,7 @@ public class PlayerOperationSimulator extends MorphPluginObject
             var craftEntity = (CraftEntity) targetEntity;
 
             return new NmsRecord(craftPlayer.getHandle(), ((CraftWorld) craftPlayer.getWorld()).getHandle(),
-                    craftEntity.getHandle(), craftPlayer.getHandle().d);
+                    craftEntity.getHandle(), craftPlayer.getHandle().gameMode);
         }
     }
 }

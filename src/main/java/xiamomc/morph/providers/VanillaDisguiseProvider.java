@@ -12,6 +12,7 @@ import me.libraryaddict.disguise.disguisetypes.watchers.VillagerWatcher;
 import me.libraryaddict.disguise.utilities.reflection.ReflectionManager;
 import me.libraryaddict.disguise.utilities.reflection.ReflectionManagerAbstract;
 import net.kyori.adventure.text.Component;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NBTTagCompound;
 import org.bukkit.entity.*;
 import org.jetbrains.annotations.NotNull;
@@ -136,14 +137,14 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
 
         var rawCompound = targetEntity != null && canConstruct(info, targetEntity, null)
                 ? NbtUtils.getRawTagCompound(targetEntity)
-                : new NBTTagCompound();
+                : new CompoundTag();
 
         //NbtCompound#putBoolean()
         if (rawCompound != null
                 && state.getEntityType().equals(EntityType.ARMOR_STAND)
-                && rawCompound.c("ShowArms") == null)
+                && rawCompound.get("ShowArms") == null)
         {
-            rawCompound.a("ShowArms", armorStandShowArms.get());
+            rawCompound.putBoolean("ShowArms", armorStandShowArms.get());
         }
 
         return NbtUtils.getCompoundString(cullNBT(rawCompound));

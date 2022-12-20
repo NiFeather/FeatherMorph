@@ -1,16 +1,14 @@
 package xiamomc.morph.misc;
 
-import net.minecraft.server.level.EntityPlayer;
-import net.minecraft.server.level.WorldServer;
-import net.minecraft.world.level.block.state.IBlockData;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.block.state.BlockState;
 import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.v1_19_R2.CraftWorld;
 import org.bukkit.craftbukkit.v1_19_R2.block.CraftBlock;
 import org.bukkit.craftbukkit.v1_19_R2.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class BlockDestroyHandler
 {
@@ -23,7 +21,7 @@ public class BlockDestroyHandler
     }
 
     private Player player;
-    private EntityPlayer nmsPlayer;
+    private ServerPlayer nmsPlayer;
 
     private void setPlayer(Player player)
     {
@@ -75,7 +73,7 @@ public class BlockDestroyHandler
             //nmsPlayer.ah() -> Entity#getId()
             //
             //进度大于1时设置破坏进度为-1避免客户端显示问题
-            nmsWorld.a(nmsPlayer.ah(),
+            nmsWorld.destroyBlockProgress(nmsPlayer.getId(),
                     ((CraftBlock) block).getPosition(),
                     newProgress > 1f ? -1 : (int)(newProgress * 10F) - 1);
         }
@@ -116,32 +114,28 @@ public class BlockDestroyHandler
         return block;
     }
 
-    private WorldServer nmsWorld;
+    private ServerLevel nmsWorld;
 
     /**
      * 获取NMS世界
      *
-     * @return 如果方块为null，则返回null，否则返回{@link WorldServer}
-     * @apiNote <a href="https://maven.quiltmc.org/repository/release/org/quiltmc/quilt-mappings/1.19+build.1/quilt-mappings-1.19+build.1-javadoc.jar/net/minecraft/server/world/ServerWorld.html">
-     *     WorldServer在Quilt mappings中的样子</a>，或许能帮助你查找想要的方法。
+     * @return 如果方块为null，则返回null，否则返回{@link ServerLevel}
      */
     @Nullable
-    public WorldServer getNmsWorld()
+    public ServerLevel getNmsWorld()
     {
         return nmsWorld;
     }
 
-    private IBlockData nmsBlock;
+    private BlockState nmsBlock;
 
     /**
      * 获取NMS方块
      *
-     * @return 如果方块为null，则返回null，否则返回{@link IBlockData}
-     * @apiNote <a href="https://maven.quiltmc.org/repository/release/org/quiltmc/quilt-mappings/1.19+build.1/quilt-mappings-1.19+build.1-javadoc.jar/net/minecraft/block/AbstractBlock.AbstractBlockState.html">
-     *     IBlockData在Quilt mappings中的样子</a>，或许能帮助你查找想要的方法。
+     * @return 如果方块为null，则返回null，否则返回{@link BlockState}
      */
     @Nullable
-    public IBlockData getNmsBlock()
+    public BlockState getNmsBlock()
     {
         return nmsBlock;
     }

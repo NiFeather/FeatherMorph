@@ -29,3 +29,14 @@
     - 给与/移除某个玩家的伪装
     - 查询玩家伪装状态
     - 运行`/mmorph help mmorph`即可查看！
+
+## 构建
+```bash
+#!/usr/bin/env bash
+git clone https://github.com/XiaMoZhiShi/MorphPlugin
+cd MorphPlugin
+
+./gradlew reobfJar
+```
+
+生成的文件将位于`build/libs`中，`morph-x.x.x.jar`就是构建出来的插件。

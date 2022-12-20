@@ -18,8 +18,8 @@ jobs:
         with:
           path: ~/.m2
           key: 1145141919810
-      - name: Build with Maven
-        run: mvn --batch-mode --update-snapshots package
+      - name: Build with Gradle
+        run: ./gradlew reobfJar
       - name: Upload artifact
         uses: actions/upload-artifact@v2
         with:

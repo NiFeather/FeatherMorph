@@ -48,7 +48,7 @@ public class MorphClientHandler extends MorphPluginObject
         var nmsPlayer = ((CraftPlayer) player).getHandle();
 
         var packet = new PacketPlayOutCustomPayload(new MinecraftKey(channel), new PacketDataSerializer(Unpooled.wrappedBuffer(message)));
-        nmsPlayer.b.a(packet);
+        nmsPlayer.connection.send(packet);
     }
 
     /**

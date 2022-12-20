@@ -90,55 +90,55 @@ public abstract class DisguiseProvider extends MorphPluginObject
         return null;
     }
 
-    protected NBTTagCompound cullNBT(NBTTagCompound compound)
+    protected CompoundTag cullNBT(CompoundTag compound)
     {
         if (compound == null) return null;
 
         //compound.r() -> NBTCompound#remove()
 
         //common
-        compound.r("UUID");
-        compound.r("data");
-        compound.r("Brain");
-        compound.r("Motion");
-        compound.r("palette");
-        compound.r("Attributes");
-        compound.r("Invulnerable");
-        compound.r("DisabledSlots");
+        compound.remove("UUID");
+        compound.remove("data");
+        compound.remove("Brain");
+        compound.remove("Motion");
+        compound.remove("palette");
+        compound.remove("Attributes");
+        compound.remove("Invulnerable");
+        compound.remove("DisabledSlots");
 
         //armor stand
-        compound.r("ArmorItems");
-        compound.r("HandItems");
+        compound.remove("ArmorItems");
+        compound.remove("HandItems");
 
         //player
-        compound.r("Tags");
-        compound.r("bukkit");
-        compound.r("recipes");
-        compound.r("Inventory");
-        compound.r("abilities");
-        compound.r("recipeBook");
-        compound.r("EnderItems");
-        compound.r("BukkitValues");
-        compound.r("warden_spawn_tracker");
-        compound.r("previousPlayerGameType");
+        compound.remove("Tags");
+        compound.remove("bukkit");
+        compound.remove("recipes");
+        compound.remove("Inventory");
+        compound.remove("abilities");
+        compound.remove("recipeBook");
+        compound.remove("EnderItems");
+        compound.remove("BukkitValues");
+        compound.remove("warden_spawn_tracker");
+        compound.remove("previousPlayerGameType");
 
         //paper, bukkit, spigot
-        compound.r("Paper");
-        compound.r("Paper.Origin");
-        compound.r("Paper.OriginWorld");
-        compound.r("Paper.SpawnReason");
-        compound.r("Spigot.ticksLived");
-        compound.r("Bukkit.updateLevel");
-        compound.r("Bukkit.Aware");
+        compound.remove("Paper");
+        compound.remove("Paper.Origin");
+        compound.remove("Paper.OriginWorld");
+        compound.remove("Paper.SpawnReason");
+        compound.remove("Spigot.ticksLived");
+        compound.remove("Bukkit.updateLevel");
+        compound.remove("Bukkit.Aware");
 
         //villager
-        compound.r("Offers");
+        compound.remove("Offers");
 
         //misc
-        compound.r("Pos");
-        compound.r("WorldUUIDLeast");
-        compound.r("WorldUUIDMost");
-        compound.r("Rotation");
+        compound.remove("Pos");
+        compound.remove("WorldUUIDLeast");
+        compound.remove("WorldUUIDMost");
+        compound.remove("Rotation");
 
         return compound;
     }

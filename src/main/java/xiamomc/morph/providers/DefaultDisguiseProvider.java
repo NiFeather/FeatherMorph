@@ -162,7 +162,7 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
         var item = itemOrAir(stack);
 
         //CODEC
-        var nmsCodec = net.minecraft.world.item.ItemStack.a;
+        var nmsCodec = net.minecraft.world.item.ItemStack.CODEC;
         var json = nmsCodec.encode(CraftItemStack.asNMSCopy(item), JsonOps.INSTANCE, JsonOps.INSTANCE.empty())
                 .result();
 
