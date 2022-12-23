@@ -1,6 +1,7 @@
 package xiamomc.morph.events;
 
 import com.comphenix.protocol.wrappers.WrappedGameProfile;
+import com.destroystokyo.paper.event.player.PlayerPostRespawnEvent;
 import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
 import me.libraryaddict.disguise.utilities.DisguiseUtilities;
@@ -103,6 +104,22 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
     {
         if (unMorphOnDeath.get())
             morphs.unMorph(e.getPlayer(), true);
+    }
+
+    @EventHandler
+    public void onPlayerRespawn(PlayerPostRespawnEvent e)
+    {
+        var player = e.getPlayer();
+
+        var state = morphs.getDisguiseStateFor(e.getPlayer());
+        if (state != null)
+        {
+            state.getAbilities().forEach(a -> a.applyToPlayer(player, state));
+
+            var skill = state.getSkill();
+            if (skill != null)
+                skill.onInitialEquip(state);
+        }
     }
 
     private final Bindable<Integer> cooldownOnDamage = new Bindable<>(0);
