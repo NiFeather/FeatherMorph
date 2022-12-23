@@ -216,7 +216,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         id += ":";
         var splitedId = id.split(":", 2);
 
-        return providers.stream().filter(p -> p.getIdentifier().equals(splitedId[0])).findFirst().orElse(fallbackProvider);
+        return providers.stream().filter(p -> p.getNameSpace().equals(splitedId[0])).findFirst().orElse(fallbackProvider);
     }
 
     /**
@@ -226,11 +226,17 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
      */
     public boolean registerProvider(DisguiseProvider provider)
     {
-        logger.info("注册伪装提供器：" + provider.getIdentifier());
+        logger.info("注册伪装提供器：" + provider.getNameSpace());
 
-        if (providers.stream().anyMatch(p -> p.getIdentifier().equals(provider.getIdentifier())))
+        if (provider.getNameSpace().contains(":"))
         {
-            logger.error("已经注册过一个ID为" + provider.getIdentifier() + "的Provider了");
+            logger.error("伪装提供器的命名空间不能包含“:”");
+            return false;
+        }
+
+        if (providers.stream().anyMatch(p -> p.getNameSpace().equals(provider.getNameSpace())))
+        {
+            logger.error("已经注册过一个ID为" + provider.getNameSpace() + "的Provider了");
             return false;
         }
 

@@ -15,9 +15,9 @@ import java.util.List;
 public class FallbackProvider extends DefaultDisguiseProvider
 {
     @Override
-    public @NotNull String getIdentifier()
+    public @NotNull String getNameSpace()
     {
-        return "morph:fallback";
+        return "fallback";
     }
 
     @Override

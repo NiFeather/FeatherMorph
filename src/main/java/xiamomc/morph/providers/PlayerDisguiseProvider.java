@@ -34,7 +34,7 @@ import java.util.List;
 public class PlayerDisguiseProvider extends DefaultDisguiseProvider
 {
     @Override
-    public @NotNull String getIdentifier()
+    public @NotNull String getNameSpace()
     {
         return DisguiseTypes.PLAYER.getNameSpace();
     }

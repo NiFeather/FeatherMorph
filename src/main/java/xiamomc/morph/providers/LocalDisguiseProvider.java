@@ -47,7 +47,7 @@ public class LocalDisguiseProvider extends VanillaDisguiseProvider
     }
 
     @Override
-    public @NotNull String getIdentifier()
+    public @NotNull String getNameSpace()
     {
         return DisguiseTypes.LD.getNameSpace();
     }

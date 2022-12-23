@@ -21,12 +21,12 @@ import java.util.List;
 public abstract class DisguiseProvider extends MorphPluginObject
 {
     /**
-     * 获取此DisguiseProvider的ID，此ID将被用于判断某个伪装是否属于此Provider
+     * 获取此DisguiseProvider的命名空间，此命名空间将被用于判断某个伪装是否属于此Provider
      *
-     * @return ID
+     * @return 此DisguiseProvider的命名空间
      */
     @NotNull
-    public abstract String getIdentifier();
+    public abstract String getNameSpace();
 
     /**
      * Gets all available disguise identifiers for this provider
