@@ -146,7 +146,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
     @EventHandler
     public void onPlayerInteractAtEntity(PlayerInteractAtEntityEvent e)
     {
-        //workaround: 悦灵伪装右键会导致物品栏失去同步
+        //workaround: 对悦灵的伪装右键会导致物品栏失去同步
         if (e.getRightClicked() instanceof Player clickedPlayer)
         {
             var state = morphs.getDisguiseStateFor(clickedPlayer);
@@ -164,7 +164,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
     public void onPlayerInteractEntity(PlayerInteractEntityEvent e)
     {
         //workaround: 右键继承了InventoryHolder的实体会打开他们的物品栏而不是使用技能
-        if (e.getRightClicked() instanceof InventoryHolder)
+        if (e.getRightClicked() instanceof InventoryHolder && e.getRightClicked().getType() != EntityType.PLAYER)
             e.setCancelled(tryInvokeSkillOrQuickDisguise(e.getPlayer(), Action.RIGHT_CLICK_AIR, e.getHand()) || e.isCancelled());
     }
 
