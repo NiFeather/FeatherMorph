@@ -182,19 +182,14 @@ public class MorphClientHandler extends MorphPluginObject
                 }
                 case "morph" ->
                 {
-                    if (str.length == 2)
-                    {
-                        var subCommands = str[1];
+                    String id = str.length == 2 ? str[1] : "";
 
-                        if (manager.canMorph(player))
-                            manager.morph(player, subCommands, player.getTargetEntity(5));
-                        else
-                            sendClientCommand(player, ClientCommands.denyOperationCommand("morph"));
-                    }
-                    else
-                    {
+                    if (id.isEmpty() || id.isBlank())
                         manager.doQuickDisguise(player, null);
-                    }
+                    else if (manager.canMorph(player))
+                        manager.morph(player, id, player.getTargetEntity(5));
+                    else
+                        sendClientCommand(player, ClientCommands.denyOperationCommand("morph"));
                 }
                 case "initial" ->
                 {
