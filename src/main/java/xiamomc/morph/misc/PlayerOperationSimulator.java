@@ -249,7 +249,7 @@ public class PlayerOperationSimulator extends MorphPluginObject
                 {
                     return SimulateResult.success(EquipmentSlot.HAND);
                 }
-                else if (this.tryUseItemOnBlock(player, targetBlock, bukkitFace, itemInOffHand, InteractionHand.MAIN_HAND, moving))
+                else if (this.tryUseItemOnBlock(player, targetBlock, bukkitFace, itemInOffHand, InteractionHand.OFF_HAND, moving))
                 {
                     return SimulateResult.success(EquipmentSlot.OFF_HAND);
                 }
