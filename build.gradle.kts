@@ -41,6 +41,10 @@ dependencies {
     paperDevBundle("${project.property("minecraft_version")}")
 
     compileOnly("LibsDisguises:LibsDisguises:${project.property("ld_version")}")
+    {
+        exclude("org.spigotmc", "spigot-api")
+        exclude("org.spigotmc", "spigot")
+    }
     compileOnly("com.github.XiaMoZhiShi:PluginBase:${project.property("pluginbase_version")}")
     compileOnly("com.github.Gecolay:GSit:${project.property("gsit_version")}")
     compileOnly("me.clip:placeholderapi:${project.property("papi_version")}")

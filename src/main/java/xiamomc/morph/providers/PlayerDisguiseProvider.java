@@ -2,7 +2,6 @@ package xiamomc.morph.providers;
 
 import com.comphenix.protocol.wrappers.WrappedGameProfile;
 import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.properties.Property;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.disguisetypes.Disguise;
@@ -10,8 +9,8 @@ import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
 import me.libraryaddict.disguise.utilities.DisguiseUtilities;
 import me.libraryaddict.disguise.utilities.reflection.ReflectionManager;
 import net.kyori.adventure.text.Component;
-import net.minecraft.nbt.GameProfileSerializer;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
@@ -25,9 +24,6 @@ import xiamomc.morph.misc.DisguiseInfo;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.misc.DisguiseTypes;
 import xiamomc.morph.misc.MorphGameProfile;
-import xiamomc.morph.network.ClientCommands;
-import xiamomc.morph.network.MorphClientHandler;
-import xiamomc.pluginbase.Annotations.Resolved;
 
 import java.util.List;
 
@@ -62,7 +58,7 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
 
         var mainHandItem = state.getPlayer().getItemInHand();
 
-        var compound = new NBTTagCompound();
+        var compound = new CompoundTag();
         MorphGameProfile gameProfile = null;
 
         //存在玩家头颅，优先从头颅获取profile
@@ -111,7 +107,7 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
         //若最后profile不为null，设置state的profile和nbt
         if (gameProfile != null)
         {
-            GameProfileSerializer.a(compound, gameProfile);
+            NbtUtils.writeGameProfile(compound, gameProfile);
             state.setCachedProfileNbtString(compound.toString());
         }
     }
