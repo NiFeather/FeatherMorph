@@ -68,7 +68,7 @@ public class BossbarOption implements ISkillOption
 
         //flag
         var flags = new ObjectArraySet<BossBar.Flag>();
-        var rawFlags = tryGet(map, "flags", new ArrayList<>());
+        var rawFlags = tryGet(map, "flags", List.class);
 
         rawFlags.forEach(o ->
         {

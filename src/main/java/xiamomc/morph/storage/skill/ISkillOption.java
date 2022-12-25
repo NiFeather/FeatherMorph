@@ -61,6 +61,11 @@ public interface ISkillOption
         });
     }
 
+    default <T> T tryGet(Map<String, Object> map, String key, Class<T> tClass)
+    {
+        return tryGet(map, key, null, tClass::cast);
+    }
+
     /**
      * 尝试从map中获取值
      *
