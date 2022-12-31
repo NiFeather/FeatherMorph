@@ -397,6 +397,9 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
             switch (e.getReason())
             {
                 case TARGET_ATTACKED_ENTITY:
+                case TARGET_ATTACKED_NEARBY_ENTITY:
+                case REINFORCEMENT_TARGET:
+                case FOLLOW_LEADER:
                 case TARGET_ATTACKED_OWNER:
                 case OWNER_ATTACKED_TARGET:
                 case CUSTOM:
