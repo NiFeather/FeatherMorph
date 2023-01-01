@@ -5,6 +5,7 @@ import net.kyori.adventure.sound.Sound;
 import org.bukkit.FluidCollisionMode;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.messages.SkillStrings;
@@ -45,11 +46,13 @@ public class TeleportMorphSkill extends MorphSkill<TeleportConfiguration>
         var commonOffset = 0.5f;
         var xOffset = 0f;
         var zOffset = 0f;
+        var yOffset = 0f;
 
         //获取位移并设置目的地
         assert face != null;
         xOffset = face.getModX();
         zOffset = face.getModZ();
+        yOffset = face.getModY();
 
         //目标X/Z + 0.5 + 从方块朝向获取的ModX/Z
         loc.setX(loc.getX() + xOffset + commonOffset);
@@ -59,7 +62,7 @@ public class TeleportMorphSkill extends MorphSkill<TeleportConfiguration>
         var destBlock = loc.getBlock();
 
         //从目的地的方块获取应该设置的高度
-        loc.setY(getTopY(destBlock));
+        loc.setY(face == BlockFace.DOWN ? loc.getY() + yOffset : getTopY(destBlock));
 
         //设置眼睛方向
         loc.setDirection(player.getEyeLocation().getDirection());
