@@ -64,6 +64,7 @@ public class PlayerTracker extends MorphPluginObject implements Listener
             };
         }
 
+        @Nullable
         public static InteractType fromBukkitAction(Action action)
         {
             return switch (action)
@@ -73,7 +74,7 @@ public class PlayerTracker extends MorphPluginObject implements Listener
                         case LEFT_CLICK_AIR -> InteractType.LEFT_CLICK_AIR;
                         case LEFT_CLICK_BLOCK -> InteractType.LEFT_CLICK_BLOCK;
 
-                        default -> throw new RuntimeException(action + " 不能转化为任何一个已知的 InteractType");
+                        default -> null;
                     };
         }
 
@@ -98,8 +99,13 @@ public class PlayerTracker extends MorphPluginObject implements Listener
     {
         var player = e.getPlayer();
 
-        lastInteractTime.put(player, plugin.getCurrentTick());
-        lastInteractAction.put(player, InteractType.fromBukkitAction(e.getAction()));
+        var interactType = InteractType.fromBukkitAction(e.getAction());
+
+        if (interactType != null)
+        {
+            lastInteractTime.put(player, plugin.getCurrentTick());
+            lastInteractAction.put(player, interactType);
+        }
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
