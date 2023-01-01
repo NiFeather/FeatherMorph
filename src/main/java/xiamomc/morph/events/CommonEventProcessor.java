@@ -385,6 +385,28 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         }
     }
 
+    @EventHandler
+    public void onPlayerWorldChange(PlayerChangedWorldEvent e)
+    {
+        var player = e.getPlayer();
+        var state = morphs.getDisguiseStateFor(player);
+
+        if (state != null)
+        {
+            //刷新主动
+            var skill = state.getSkill();
+
+            if (skill != null)
+                skill.onInitialEquip(state);
+
+            //刷新被动
+            var abilities = state.getAbilities();
+
+            if (abilities != null)
+                abilities.forEach(a -> a.applyToPlayer(player, state));
+        }
+    }
+
     //解决LibsDisguises中MonstersIgnoreDisguises会忽视PlayerDisguise的问题
     @EventHandler
     public void onEntityTarget(EntityTargetEvent e)
