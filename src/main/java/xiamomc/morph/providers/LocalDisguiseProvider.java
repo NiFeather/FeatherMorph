@@ -57,6 +57,7 @@ public class LocalDisguiseProvider extends VanillaDisguiseProvider
     {
         if (!allowLD.get())
         {
+            player.sendMessage(MessageUtils.prefixes(player, MorphStrings.disguiseBannedOrNotSupportedString()));
             return DisguiseResult.fail();
         }
 

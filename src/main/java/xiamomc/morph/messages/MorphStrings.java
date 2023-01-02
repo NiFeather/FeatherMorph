@@ -160,7 +160,7 @@ public class MorphStrings extends AbstractMorphStrings
     public static FormattableMessage disguiseBannedOrNotSupportedString()
     {
         return getFormattable(getKey("disguise_banned_or_not_supported"),
-                "<color:red>服务器已禁用或不支持此伪装");
+                "<color:red>服务器不支持或已禁用此伪装");
     }
 
     public static FormattableMessage errorWhileDisguising()

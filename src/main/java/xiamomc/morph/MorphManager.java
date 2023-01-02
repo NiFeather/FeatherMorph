@@ -195,6 +195,11 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
     private BindableList<String> bannedDisguises;
 
+    public BindableList<String> getBannedDisguises()
+    {
+        return bannedDisguises;
+    }
+
     //region 伪装提供器
 
     private static final List<DisguiseProvider> providers = new ObjectArrayList<>();

@@ -38,6 +38,12 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
     @Override
     public @NotNull DisguiseResult morph(Player player, DisguiseInfo disguiseInfo, @Nullable Entity targetEntity)
     {
+        if (getMorphManager().getBannedDisguises().contains("minecraft:player"))
+        {
+            player.sendMessage(MessageUtils.prefixes(player, MorphStrings.disguiseBannedOrNotSupportedString()));
+            return DisguiseResult.fail();
+        }
+
         var id = disguiseInfo.getIdentifier();
 
         if (DisguiseTypes.fromId(id) != DisguiseTypes.PLAYER)
