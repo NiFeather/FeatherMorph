@@ -56,7 +56,7 @@ public class SonicBoomMorphSkill extends DelayedMorphSkill<NoOpConfiguration>
 
         for (int i = 1; i < maxDistance; i++)
         {
-            var locNew = location.add(direction.clone().multiply(i));
+            var locNew = location.clone().add(direction.clone().multiply(i));
 
             if (entity != null && entity.getLocation().distance(player.getLocation()) <= i)
             {
@@ -72,7 +72,7 @@ public class SonicBoomMorphSkill extends DelayedMorphSkill<NoOpConfiguration>
                         direction.getY() * d,
                         direction.getZ() * e, nmsPlayer); // Paper
 
-                break;
+                entity = null;
             }
 
             world.spawnParticle(Particle.SONIC_BOOM, locNew.getX(), locNew.getY(), locNew.getZ(), 1, null);
