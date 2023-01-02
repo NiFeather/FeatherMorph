@@ -39,7 +39,7 @@ public class ForceUnmorphSubCommand extends MorphPluginObject implements ISubCom
     public @Nullable List<String> onTabComplete(List<String> args, CommandSender source)
     {
         var list = new ObjectArrayList<String>();
-        if (args.size() > 1) return list;
+        if (args.size() != 1) return list;
 
         var name = args.get(0);
 

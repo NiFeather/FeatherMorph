@@ -4,6 +4,7 @@ import it.unimi.dsi.fastutil.objects.ObjectList;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphPluginObject;
+import xiamomc.morph.commands.subcommands.plugin.management.ForceMorphSubCommand;
 import xiamomc.morph.commands.subcommands.plugin.management.ForceUnmorphSubCommand;
 import xiamomc.morph.commands.subcommands.plugin.management.GrantDisguiseSubCommand;
 import xiamomc.morph.commands.subcommands.plugin.management.RevokeDisguiseSubCommand;
@@ -18,7 +19,8 @@ public class DisguiseManageSubCommand extends MorphPluginObject implements ISubC
     private final List<ISubCommand> subCommands = ObjectList.of(
             new GrantDisguiseSubCommand(),
             new RevokeDisguiseSubCommand(),
-            new ForceUnmorphSubCommand()
+            new ForceUnmorphSubCommand(),
+            new ForceMorphSubCommand()
     );
 
     @Override

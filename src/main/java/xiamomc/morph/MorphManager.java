@@ -426,7 +426,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
      */
     public boolean morph(Player player, String key, @Nullable Entity targetEntity)
     {
-        return this.morph(player, key, targetEntity, false);
+        return this.morph(player, key, targetEntity, false, false);
     }
 
     /**
@@ -436,9 +436,11 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
      * @param key 伪装ID
      * @param targetEntity 玩家正在看的实体
      * @param bypassPermission 是否绕过权限检查
+     * @param bypassAvailableCheck 是否绕过持有检查
      * @return 操作是否成功
      */
-    public boolean morph(Player player, String key, @Nullable Entity targetEntity, boolean bypassPermission)
+    public boolean morph(Player player, String key, @Nullable Entity targetEntity,
+                         boolean bypassPermission, boolean bypassAvailableCheck)
     {
         if (!bypassPermission && !player.hasPermission(CommonPermissions.MORPH))
         {
@@ -450,8 +452,17 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         if (!key.contains(":")) key = DisguiseTypes.VANILLA.toId(key);
 
         String finalKey = key;
-        var info = getAvaliableDisguisesFor(player).stream()
-                .filter(i -> i.getIdentifier().equals(finalKey)).findFirst().orElse(null);
+        DisguiseInfo info = null;
+
+        if (!bypassAvailableCheck)
+        {
+            info = getAvaliableDisguisesFor(player).stream()
+                    .filter(i -> i.getIdentifier().equals(finalKey)).findFirst().orElse(null);
+        }
+        else if (!key.equals("minecraft:player"))
+        {
+            info = new DisguiseInfo(key, DisguiseTypes.fromId(key));
+        }
 
         if (bannedDisguises.contains(key))
         {
