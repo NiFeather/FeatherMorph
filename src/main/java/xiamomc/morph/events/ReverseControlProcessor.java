@@ -2,7 +2,6 @@ package xiamomc.morph.events;
 
 import io.papermc.paper.event.player.PlayerArmSwingEvent;
 import me.libraryaddict.disguise.DisguiseAPI;
-import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -187,17 +186,16 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
 
             if (lastAction == null) return;
 
-            if (!tracker.isPlayerInteractingAnything(player))
+            //旁观者模式下左键方块不会产生Interact事件，我们得猜这个玩家现在是左键还是右键
+            if (player.getGameMode() == GameMode.SPECTATOR)
             {
-                //旁观者模式下左键方块不会产生Interact事件，我们得猜这个玩家现在是左键还是右键
-                if (player.getGameMode() == GameMode.SPECTATOR)
-                {
-                    if (lastAction.isRightClick())
-                        lastAction = PlayerTracker.InteractType.LEFT_CLICK_BLOCK;
-                }
-
-                simulateOperation(lastAction.toBukkitAction(), targetPlayer);
+                if (lastAction.isRightClick())
+                    lastAction = PlayerTracker.InteractType.LEFT_CLICK_BLOCK;
             }
+
+            //避免重复镜像
+            if (!tracker.interactingThisTick(player))
+                simulateOperation(lastAction.toBukkitAction(), targetPlayer);
 
             //如果玩家在被控玩家一定范围以内，被控玩家有目标实体，并且玩家没有目标实体，那么取消挥手动画
             if (Math.abs(targetPlayer.getLocation().distanceSquared(player.getLocation())) <= 6)

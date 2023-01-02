@@ -116,7 +116,7 @@ public class PlayerOperationSimulator extends MorphPluginObject
         var targetBlock = traceResult == null ? null : traceResult.getHitBlock();
         var targetEntity = traceResult == null ? null : traceResult.getHitEntity();
 
-        if (targetEntity != null && targetEntity.getLocation().distanceSquared(player.getLocation()) > entityReachDistance)
+        if (targetEntity != null && targetEntity.getLocation().distance(player.getLocation()) > entityReachDistance)
             targetEntity = null;
 
         //获取方块破坏信息

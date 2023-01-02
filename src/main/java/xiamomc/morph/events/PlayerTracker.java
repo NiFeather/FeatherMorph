@@ -221,23 +221,32 @@ public class PlayerTracker extends MorphPluginObject implements Listener
 
     /**
      * 玩家这一刻是否在和任何东西互动?
-     *
+     * <p>
      * 开始旁观、和实体互动、{@link PlayerInteractEvent}
      *
      * @param player 要查询的玩家
      * @return 是否在和方块互动
      */
-    public boolean isPlayerInteractingAnything(Player player)
+    public boolean interactingAnything(Player player)
     {
-        var interactingThisTick = plugin.getCurrentTick() - lastInteractTime.getOrDefault(player, plugin.getCurrentTick()) <= 0;
-
-        if (!interactingThisTick) return false;
+        if (!interactingThisTick(player)) return false;
 
         var lastAction = this.getLastInteractAction(player);
 
-        if (lastAction == null) return interactingThisTick;
+        if (lastAction == null) return false;
 
         return lastAction.isInteractAnything();
+    }
+
+    /**
+     * 玩家这一刻是否有触发任何交互？
+     *
+     * @param player 要查询的玩家
+     * @return 是否在这一刻触发了任何交互事件
+     */
+    public boolean interactingThisTick(Player player)
+    {
+        return plugin.getCurrentTick() - lastInteractTime.getOrDefault(player, plugin.getCurrentTick()) <= 0;
     }
 
     @Nullable
