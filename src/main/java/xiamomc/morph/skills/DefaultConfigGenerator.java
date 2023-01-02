@@ -12,6 +12,7 @@ import xiamomc.morph.abilities.options.BossbarOption;
 import xiamomc.morph.abilities.options.FlyOption;
 import xiamomc.morph.abilities.options.ReduceDamageOption;
 import xiamomc.morph.misc.EntityTypeUtils;
+import xiamomc.morph.skills.impl.SonicBoomMorphSkill;
 import xiamomc.morph.storage.skill.*;
 
 import java.util.List;
@@ -161,6 +162,8 @@ public class DefaultConfigGenerator
 
         addSkillConfiguration(skills, EntityType.ENDERMAN, 40, SkillType.TELEPORT, c ->
                 c.addOption(SkillType.TELEPORT, new TeleportConfiguration(32)));
+
+        addSkillConfiguration(skills, EntityType.WARDEN, SonicBoomMorphSkill.defaultCooldown, SkillType.SONIC_BOOM);
 
         addSkillConfiguration(skills, EntityType.EVOKER, 100, SkillType.EVOKER);
     }

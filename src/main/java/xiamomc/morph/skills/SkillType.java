@@ -12,6 +12,7 @@ public class SkillType
     public static final NamespacedKey APPLY_EFFECT = new NamespacedKey(nameSpace, "apply_effect");
     public static final NamespacedKey TELEPORT = new NamespacedKey(nameSpace, "teleport");
     public static final NamespacedKey EVOKER = new NamespacedKey(nameSpace, "evoker");
+    public static final NamespacedKey SONIC_BOOM = new NamespacedKey(nameSpace, "sonic_boom");
 
     public static final NamespacedKey UNKNOWN = new NamespacedKey(nameSpace, "unknown");
     public static final NamespacedKey NONE = new NamespacedKey(nameSpace, "none");

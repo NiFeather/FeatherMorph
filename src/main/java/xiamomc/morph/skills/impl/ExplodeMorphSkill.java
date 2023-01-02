@@ -1,8 +1,11 @@
 package xiamomc.morph.skills.impl;
 
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.level.Explosion;
 import org.bukkit.GameMode;
 import org.bukkit.GameRule;
 import org.bukkit.NamespacedKey;
+import org.bukkit.craftbukkit.v1_19_R2.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.messages.SkillStrings;
@@ -35,7 +38,10 @@ public class ExplodeMorphSkill extends MorphSkill<ExplosionConfiguration>
         }
 
         if (killsSelf && !(player.getGameMode() == GameMode.CREATIVE))
-            player.setHealth(0d);
+        {
+            var nmsPlayer = ((CraftPlayer) player).getHandle();
+            nmsPlayer.hurt(DamageSource.explosion(nmsPlayer, nmsPlayer), nmsPlayer.getHealth() + 20);
+        }
 
         return configuration.getCooldown();
     }

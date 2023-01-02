@@ -19,4 +19,6 @@ public class NoOpConfiguration implements ISkillOption
     {
         return new NoOpConfiguration();
     }
+
+    public static NoOpConfiguration instance = new NoOpConfiguration();
 }

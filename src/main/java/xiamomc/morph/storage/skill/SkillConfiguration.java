@@ -97,6 +97,11 @@ public class SkillConfiguration
         return cooldown;
     }
 
+    public void setCooldown(int newCd)
+    {
+        this.cooldown = newCd;
+    }
+
     @Expose
     @SerializedName("skillId")
     private String rawSkillidentifier;

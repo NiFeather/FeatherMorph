@@ -11,6 +11,7 @@ import xiamomc.morph.skills.DefaultConfigGenerator;
 import xiamomc.morph.skills.IMorphSkill;
 import xiamomc.morph.skills.MorphSkillHandler;
 import xiamomc.morph.skills.SkillType;
+import xiamomc.morph.skills.impl.SonicBoomMorphSkill;
 import xiamomc.morph.storage.MorphJsonBasedStorage;
 import xiamomc.pluginbase.Annotations.Resolved;
 
@@ -56,7 +57,7 @@ public class SkillConfigurationStore extends MorphJsonBasedStorage<SkillConfigur
         return "技能存储";
     }
 
-    private final int targetVersion = 8;
+    private final int targetVersion = 9;
 
     @Resolved
     private MorphSkillHandler skillHandler;
@@ -204,6 +205,20 @@ public class SkillConfigurationStore extends MorphJsonBasedStorage<SkillConfigur
                     c.setOption(SkillType.LAUNCH_PROJECTIVE.asString(), projective);
                     c.setOption(SkillType.EXPLODE.asString(), explosion);
                 });
+            }
+
+            //9: 实现Warden的音爆技能
+            if (version < 9)
+            {
+                var targetConfig = config.configurations.stream()
+                        .filter(s -> s != null && s.getIdentifier().equals(EntityType.WARDEN.getKey().asString()))
+                        .findFirst().orElse(null);
+
+                if (targetConfig != null && targetConfig.getSkillIdentifier().equals(SkillType.NONE))
+                {
+                    targetConfig.setSkillIdentifier(SkillType.SONIC_BOOM);
+                    targetConfig.setCooldown(SonicBoomMorphSkill.defaultCooldown);
+                }
             }
 
             //更新默认设置
