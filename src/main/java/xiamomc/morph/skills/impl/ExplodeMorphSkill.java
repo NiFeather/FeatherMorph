@@ -40,7 +40,7 @@ public class ExplodeMorphSkill extends MorphSkill<ExplosionConfiguration>
         if (killsSelf && !(player.getGameMode() == GameMode.CREATIVE))
         {
             var nmsPlayer = ((CraftPlayer) player).getHandle();
-            nmsPlayer.hurt(DamageSource.explosion(nmsPlayer, nmsPlayer), nmsPlayer.getHealth() + 20);
+            nmsPlayer.hurt(DamageSource.explosion(nmsPlayer, null), nmsPlayer.getHealth() + 20);
         }
 
         return configuration.getCooldown();
