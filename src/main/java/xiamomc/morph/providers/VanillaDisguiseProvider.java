@@ -11,6 +11,7 @@ import me.libraryaddict.disguise.disguisetypes.watchers.CatWatcher;
 import me.libraryaddict.disguise.disguisetypes.watchers.VillagerWatcher;
 import net.kyori.adventure.text.Component;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.TagParser;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.attribute.AttributeModifier;
@@ -228,7 +229,23 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
                 ? NbtUtils.getRawTagCompound(targetEntity)
                 : new CompoundTag();
 
-        //NbtCompound#putBoolean()
+        var theirDisguise = getMorphManager().getDisguiseStateFor(targetEntity);
+
+        if (theirDisguise != null)
+        {
+            var theirNbtString = theirDisguise.getCachedNbtString();
+
+            try
+            {
+                rawCompound = TagParser.parseTag(theirNbtString);
+            }
+            catch (Throwable t)
+            {
+                logger.error("无法复制目标伪装的NBT标签：" + t.getMessage());
+                t.printStackTrace();
+            }
+        }
+
         if (rawCompound != null
                 && state.getEntityType().equals(EntityType.ARMOR_STAND)
                 && rawCompound.get("ShowArms") == null)
