@@ -4,7 +4,6 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.disguisetypes.Disguise;
 import me.libraryaddict.disguise.disguisetypes.FlagWatcher;
-import me.libraryaddict.disguise.utilities.DisguiseUtilities;
 import me.libraryaddict.disguise.utilities.parser.DisguiseParser;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
@@ -78,18 +77,18 @@ public class DisguiseState extends MorphPluginObject
     /**
      * 自身可见
      */
-    private boolean selfVisible;
+    private boolean serverSideSelfVisible;
 
-    public boolean getSelfVisible()
+    public boolean getServerSideSelfVisible()
     {
-        return selfVisible;
+        return serverSideSelfVisible;
     }
 
-    public void setSelfVisible(boolean val)
+    public void setServerSideSelfVisible(boolean val)
     {
         DisguiseAPI.setViewDisguiseToggled(player, val);
 
-        selfVisible = val;
+        serverSideSelfVisible = val;
     }
 
     /**

@@ -170,7 +170,7 @@ public class MorphClientHandler extends MorphPluginObject
 
                         //如果客户端打开了本地预览，则隐藏伪装，否则显示伪装
                         var state = manager.getDisguiseStateFor(player);
-                        if (state != null) state.setSelfVisible(!isClient && playerConfig.showDisguiseToSelf);
+                        if (state != null) state.setServerSideSelfVisible(!isClient && playerConfig.showDisguiseToSelf);
                     }
                     else
                     {
@@ -240,7 +240,7 @@ public class MorphClientHandler extends MorphPluginObject
                             this.getPlayerOption(player).setClientSideSelfView(val);
 
                             var state = manager.getDisguiseStateFor(player);
-                            if (state != null) state.setSelfVisible(!val);
+                            if (state != null) state.setServerSideSelfVisible(!val);
                         }
                     }
                 }
@@ -492,7 +492,7 @@ public class MorphClientHandler extends MorphPluginObject
 
         var playerConfig = manager.getPlayerConfiguration(player);
         var state = manager.getDisguiseStateFor(player);
-        if (state != null) state.setSelfVisible(playerConfig.showDisguiseToSelf);
+        if (state != null) state.setServerSideSelfVisible(playerConfig.showDisguiseToSelf);
     }
 
     /**

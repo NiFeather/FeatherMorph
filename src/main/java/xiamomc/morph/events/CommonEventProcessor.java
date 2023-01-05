@@ -1,14 +1,9 @@
 package xiamomc.morph.events;
 
-import com.comphenix.protocol.wrappers.WrappedGameProfile;
 import com.destroystokyo.paper.event.player.PlayerPostRespawnEvent;
 import me.libraryaddict.disguise.DisguiseAPI;
-import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
-import me.libraryaddict.disguise.utilities.DisguiseUtilities;
-import me.libraryaddict.disguise.utilities.reflection.ReflectionManager;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.*;
@@ -21,8 +16,6 @@ import org.bukkit.event.player.*;
 import org.bukkit.event.server.TabCompleteEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.InventoryHolder;
-import org.bukkit.inventory.meta.SkullMeta;
-import org.bukkit.profile.PlayerTextures;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.commands.MorphCommandHelper;
@@ -32,17 +25,11 @@ import xiamomc.morph.messages.*;
 import xiamomc.morph.misc.DisguiseTypes;
 import xiamomc.morph.misc.DisguiseUtils;
 import xiamomc.morph.misc.EntityTypeUtils;
-import xiamomc.morph.misc.MorphGameProfile;
-import xiamomc.morph.misc.permissions.CommonPermissions;
 import xiamomc.morph.network.MorphClientHandler;
 import xiamomc.morph.skills.MorphSkillHandler;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
-
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class CommonEventProcessor extends MorphPluginObject implements Listener
 {
@@ -227,7 +214,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
                         if (player.getEyeLocation().getDirection().getY() <= -0.95)
                             morphs.unMorph(player);
                         else
-                            morphs.setSelfDisguiseVisible(player, !state.getSelfVisible(), true);
+                            morphs.setSelfDisguiseVisible(player, state.getServerSideSelfVisible(), true);
 
                         return true;
                     }
