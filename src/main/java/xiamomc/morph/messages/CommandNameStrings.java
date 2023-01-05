@@ -16,7 +16,7 @@ public class CommandNameStrings extends AbstractMorphStrings
 
     public static FormattableMessage headMorphString()
     {
-        return getFormattable(getKey("head_morph"), "头颅快速伪装");
+        return getFormattable(getKey("head_morph"), "头颅伪装");
     }
 
     public static FormattableMessage chatOverrideString()

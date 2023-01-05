@@ -25,12 +25,38 @@ public class FlyOption implements ISkillOption
         return flyingSpeed;
     }
 
+    private float hungerConsumeMultiplier;
+
+    public float getHungerConsumeMultiplier()
+    {
+        return hungerConsumeMultiplier;
+    }
+
+    public void setHungerConsumeMultiplier(float newVal)
+    {
+        hungerConsumeMultiplier = newVal;
+    }
+
+    private int minimumHunger;
+
+    public int getMinimumHunger()
+    {
+        return minimumHunger;
+    }
+
+    public void setMinimumHunger(int newVal)
+    {
+        minimumHunger = newVal;
+    }
+
     @Override
     public Map<String, Object> toMap()
     {
         var map = new Object2ObjectOpenHashMap<String, Object>();
 
         map.put("fly_speed", flyingSpeed);
+        map.put("hunger_consume_multiplier", hungerConsumeMultiplier);
+        map.put("minimum_hunger", minimumHunger);
 
         return map;
     }
@@ -43,6 +69,10 @@ public class FlyOption implements ISkillOption
         var instance = new FlyOption();
 
         instance.flyingSpeed = tryGetFloat(map, "fly_speed", Float.NaN);
+        instance.hungerConsumeMultiplier = tryGetFloat(map, "hunger_consume_multiplier", 1f);
+        instance.minimumHunger = tryGetInt(map, "minimum_hunger", 6);
+
+        instance.hungerConsumeMultiplier = Math.max(0, instance.hungerConsumeMultiplier);
 
         return instance;
     }

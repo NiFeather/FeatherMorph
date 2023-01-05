@@ -2,17 +2,16 @@ package xiamomc.morph.abilities.impl;
 
 import org.bukkit.GameMode;
 import org.bukkit.NamespacedKey;
+import org.bukkit.craftbukkit.v1_19_R2.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerGameModeChangeEvent;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.abilities.AbilityType;
 import xiamomc.morph.abilities.MorphAbility;
 import xiamomc.morph.abilities.options.FlyOption;
 import xiamomc.morph.misc.DisguiseState;
-import xiamomc.morph.storage.skill.ISkillOption;
 import xiamomc.pluginbase.Annotations.Resolved;
 
 public class FlyAbility extends MorphAbility<FlyOption>
@@ -32,6 +31,36 @@ public class FlyAbility extends MorphAbility<FlyOption>
     }
 
     @Override
+    public boolean handle(Player player, DisguiseState state)
+    {
+        if (player.getGameMode() != GameMode.CREATIVE && player.getGameMode() != GameMode.SPECTATOR)
+        {
+            var nmsPlayer = ((CraftPlayer) player).getHandle();
+            var config = options.get(state.getDisguiseIdentifier());
+
+            var data = nmsPlayer.getFoodData();
+            var allowFlight = data.foodLevel > config.getMinimumHunger();
+
+            if (player.isFlying())
+            {
+                data.addExhaustion(0.005f * config.getHungerConsumeMultiplier());
+
+                if (!allowFlight)
+                {
+                    player.setAllowFlight(false);
+                    player.setFlying(false);
+                }
+            }
+            else if (allowFlight)
+            {
+                player.setAllowFlight(true);
+            }
+        }
+
+        return super.handle(player, state);
+    }
+
+    @Override
     public boolean revokeFromPlayer(Player player, DisguiseState state)
     {
         super.revokeFromPlayer(player, state);
@@ -48,7 +77,7 @@ public class FlyAbility extends MorphAbility<FlyOption>
     }
 
     @Override
-    protected ISkillOption createOption()
+    protected FlyOption createOption()
     {
         return new FlyOption();
     }

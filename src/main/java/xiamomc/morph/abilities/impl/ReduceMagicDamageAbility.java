@@ -16,7 +16,7 @@ public class ReduceMagicDamageAbility extends DamageReducingAbility<ReduceDamage
     }
 
     @Override
-    protected ISkillOption createOption()
+    protected ReduceDamageOption createOption()
     {
         return new ReduceDamageOption();
     }

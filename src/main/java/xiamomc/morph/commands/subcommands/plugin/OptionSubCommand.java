@@ -37,6 +37,8 @@ public class OptionSubCommand extends MorphPluginObject implements ISubCommand
 
         subCommands.add(getToggle("allow_client_mods", ConfigOption.ALLOW_CLIENT, "client"));
 
+        subCommands.add(getToggle("piglin_brute_ignore_disguises", ConfigOption.PIGLIN_BRUTE_IGNORE_DISGUISES, "piglin_brute_ignore_disguises"));
+
         subCommands.add(getToggle("headmorph", ConfigOption.ALLOW_HEAD_MORPH, "headmorph", CommandNameStrings.headMorphString()));
 
         subCommands.add(getToggle("chatoverride", ConfigOption.ALLOW_CHAT_OVERRIDE, "chatoverride", CommandNameStrings.chatOverrideString()));

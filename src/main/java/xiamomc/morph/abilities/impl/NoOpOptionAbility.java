@@ -7,7 +7,7 @@ import xiamomc.morph.storage.skill.NoOpConfiguration;
 public abstract class NoOpOptionAbility extends MorphAbility<NoOpConfiguration>
 {
     @Override
-    protected ISkillOption createOption()
+    protected NoOpConfiguration createOption()
     {
         return new NoOpConfiguration();
     }

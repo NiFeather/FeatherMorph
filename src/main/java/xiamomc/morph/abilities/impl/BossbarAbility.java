@@ -42,7 +42,7 @@ public class BossbarAbility extends MorphAbility<BossbarOption>
     }
 
     @Override
-    protected ISkillOption createOption()
+    protected BossbarOption createOption()
     {
         return new BossbarOption();
     }

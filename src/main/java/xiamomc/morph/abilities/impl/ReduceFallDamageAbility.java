@@ -16,7 +16,7 @@ public class ReduceFallDamageAbility extends DamageReducingAbility<ReduceDamageO
     }
 
     @Override
-    protected ISkillOption createOption()
+    protected ReduceDamageOption createOption()
     {
         return new ReduceDamageOption();
     }

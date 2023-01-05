@@ -36,6 +36,8 @@ public enum ConfigOption
 
     BANNED_DISGUISES(ConfigNode.create().append("bannedDisguises"), new ArrayList<String>()),
 
+    PIGLIN_BRUTE_IGNORE_DISGUISES(ConfigNode.create().append("piglin_brute_ignore_disguises"), true),
+
     DISPLAY_BOSSBAR(bossbarNode().append("enabled"), true),
 
     ALLOW_LD_DISGUISES(ConfigNode.create().append("enable_ld_custom_disguises"), false),

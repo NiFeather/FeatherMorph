@@ -53,12 +53,12 @@ public abstract class MorphAbility<T extends ISkillOption> extends MorphPluginOb
             return fallbackValue;
     }
 
-    protected abstract ISkillOption createOption();
+    protected abstract T createOption();
 
-    private final ISkillOption option = createOption();
+    private final T option = createOption();
 
     @Override
-    public ISkillOption getOption()
+    public T getOption()
     {
         return option;
     }

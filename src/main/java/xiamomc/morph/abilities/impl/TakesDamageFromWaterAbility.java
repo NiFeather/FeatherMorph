@@ -36,7 +36,7 @@ public class TakesDamageFromWaterAbility extends MorphAbility<TakesDamageFromWat
     }
 
     @Override
-    protected ISkillOption createOption()
+    protected TakesDamageFromWaterOption createOption()
     {
         return new TakesDamageFromWaterOption();
     }

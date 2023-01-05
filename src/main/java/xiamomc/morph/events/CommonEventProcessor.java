@@ -110,6 +110,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
     }
 
     private final Bindable<Integer> cooldownOnDamage = new Bindable<>(0);
+    private final Bindable<Boolean> bruteIgnoreDisguises = new Bindable<>(true);
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
     public void onPlayerTookDamage(EntityDamageEvent e)
@@ -131,6 +132,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
     private void load()
     {
         config.bind(cooldownOnDamage, ConfigOption.SKILL_COOLDOWN_ON_DAMAGE);
+        config.bind(bruteIgnoreDisguises, ConfigOption.PIGLIN_BRUTE_IGNORE_DISGUISES);
 
         unMorphOnDeath = config.getBindable(Boolean.class, ConfigOption.UNMORPH_ON_DEATH);
 
@@ -399,6 +401,9 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
     public void onEntityTarget(EntityTargetEvent e)
     {
         if (e.getTarget() == null) return;
+
+        if (e.getEntity().getType() == EntityType.PIGLIN_BRUTE && bruteIgnoreDisguises.get())
+            return;
 
         if (e.getTarget() instanceof Player player && !e.getEntity().getType().equals(EntityType.WARDEN))
         {

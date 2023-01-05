@@ -32,8 +32,11 @@ root:
   # 是否要在玩家死亡时取消他们的伪装？
   unmorph_on_death: true
 
-  # 是否允许用玩家头快速伪装？
+  # 是否允许通过头颅进行伪装？
   allowHeadMorph: true
+
+  # 猪灵蛮兵是否要忽略伪装？
+  piglin_brute_ignore_disguises: true
 
   # 是否允许使用LibsDisguises的本地伪装
   # PS: 本地伪装就是你通过`/savedisg`保存的伪装
@@ -59,7 +62,7 @@ root:
     # 模拟方块摧毁时，要经过多久没操作再重置摧毁进度？（单位：游戏刻）
     # 太小的值可能在延迟或网络不稳定时导致进度被频繁重置
     destroy_timeout: 20
-    # 行为：开启或禁用反向控制的某一功能
+    # 行为：开启或禁用某一功能的镜像
     # 聊天覆盖在上方"chatOverride"中
     behaviors:
       # 是否要模拟操作？

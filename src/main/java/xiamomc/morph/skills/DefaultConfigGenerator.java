@@ -3,6 +3,7 @@ package xiamomc.morph.skills;
 import it.unimi.dsi.fastutil.objects.ObjectArraySet;
 import net.kyori.adventure.bossbar.BossBar;
 import org.bukkit.NamespacedKey;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.Nullable;
@@ -172,8 +173,12 @@ public class DefaultConfigGenerator
     {
         addAbilityConfiguration(skills, EntityTypeUtils.canFly(), AbilityType.CAN_FLY, c ->
         {
-            c.setOption(AbilityType.CAN_FLY.asString(),
-                    new FlyOption(EntityTypeUtils.getDefaultFlyingSpeed(EntityTypeUtils.fromString(c.getIdentifier()))));
+            var option = new FlyOption(EntityTypeUtils.getDefaultFlyingSpeed(EntityTypeUtils.fromString(c.getIdentifier())));
+
+            option.setMinimumHunger(6);
+            option.setHungerConsumeMultiplier(Math.min(option.getFlyingSpeed() / 0.05f, 2));
+
+            c.setOption(AbilityType.CAN_FLY.asString(), option);
         });
 
         addAbilityConfiguration(skills, EntityTypeUtils.hasFireResistance(), AbilityType.HAS_FIRE_RESISTANCE);
