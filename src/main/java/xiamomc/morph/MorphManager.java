@@ -854,7 +854,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             return clientHandler.getPlayerOption(player).isClientSideSelfView();
 
         var config = data.getPlayerConfiguration(player);
-        return (!clientHandler.getPlayerOption(player).isClientSideSelfView() || !state.getProvider().validForClient(state))
+        return (clientHandler.getPlayerOption(player).isClientSideSelfView() && state.getProvider().validForClient(state))
                 && config.showDisguiseToSelf;
     }
 
