@@ -38,6 +38,13 @@ root:
   # 猪灵蛮兵是否要忽略伪装？
   piglin_brute_ignore_disguises: true
 
+  # 生命值缩放
+  health_scale:
+    # 是否启用此功能？
+    enabled: true
+    # 缩放的最大生命值
+    max_health: 60
+
   # 是否允许使用LibsDisguises的本地伪装
   # PS: 本地伪装就是你通过`/savedisg`保存的伪装
   # PS: 因为API限制，快速伪装无法识别某人的伪装是否为自定义伪装，
@@ -92,4 +99,4 @@ root:
     log_outgoing_packets: false
 
   # 不要动这个键!
-  version: 12
+  version: 13

@@ -38,7 +38,7 @@ public enum ConfigOption
 
     PIGLIN_BRUTE_IGNORE_DISGUISES(ConfigNode.create().append("piglin_brute_ignore_disguises"), true),
     HEALTH_SCALE(healthScaleNode().append("enabled"), true),
-    HEALTH_SCALE_MAX_HEALTH(healthScaleNode().append("health"), 60),
+    HEALTH_SCALE_MAX_HEALTH(healthScaleNode().append("max_health"), 60),
 
     DISPLAY_BOSSBAR(bossbarNode().append("enabled"), true),
 
