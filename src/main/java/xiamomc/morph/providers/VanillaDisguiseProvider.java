@@ -11,16 +11,24 @@ import me.libraryaddict.disguise.disguisetypes.watchers.CatWatcher;
 import me.libraryaddict.disguise.disguisetypes.watchers.VillagerWatcher;
 import net.kyori.adventure.text.Component;
 import net.minecraft.nbt.CompoundTag;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeInstance;
+import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.*;
+import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.checkerframework.checker.units.qual.A;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.w3c.dom.Attr;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.misc.*;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Bindables.Bindable;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class VanillaDisguiseProvider extends DefaultDisguiseProvider
 {
@@ -82,11 +90,15 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
     }
 
     private final Bindable<Boolean> armorStandShowArms = new Bindable<>(false);
+    private final Bindable<Boolean> doHealthScale = new Bindable<>(true);
+    private final Bindable<Integer> healthCap = new Bindable<>(60);
 
     @Initializer
     private void load(MorphConfigManager configManager)
     {
         configManager.bind(armorStandShowArms, ConfigOption.ARMORSTAND_SHOW_ARMS);
+        configManager.bind(doHealthScale, ConfigOption.HEALTH_SCALE);
+        configManager.bind(healthCap, ConfigOption.HEALTH_SCALE_MAX_HEALTH);
     }
 
     @Override
@@ -109,22 +121,102 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
             {
                 case CAT ->
                 {
-                    var watcher = (CatWatcher) disguise.getWatcher();
-                    var cat = (Cat) targetEntity;
+                    if (disguise.getType() == DisguiseType.CAT)
+                    {
+                        var watcher = (CatWatcher) disguise.getWatcher();
+                        var cat = (Cat) targetEntity;
 
-                    watcher.setType(cat.getCatType());
+                        watcher.setType(cat.getCatType());
+                    }
                 }
 
                 case VILLAGER ->
                 {
-                    var watcher = (VillagerWatcher) disguise.getWatcher();
-                    var villager = (Villager) targetEntity;
+                    if (disguise.getType() == DisguiseType.VILLAGER)
+                    {
+                        var watcher = (VillagerWatcher) disguise.getWatcher();
+                        var villager = (Villager) targetEntity;
 
-                    watcher.setVillagerData(new VillagerData(villager.getVillagerType(),
-                            villager.getProfession(), villager.getVillagerLevel()));
+                        watcher.setVillagerData(new VillagerData(villager.getVillagerType(),
+                                villager.getProfession(), villager.getVillagerLevel()));
+                    }
                 }
             }
         }
+
+        if (doHealthScale.get())
+        {
+            var player = state.getPlayer();
+            var loc = player.getLocation();
+            loc.setY(-8192);
+
+            removeAllHealthModifiers(player);
+
+            var entityClazz = state.getEntityType().getEntityClass();
+            if (entityClazz != null)
+            {
+                var entity = state.getPlayer().getWorld().spawn(loc, entityClazz, CreatureSpawnEvent.SpawnReason.CUSTOM);
+
+                if (entity instanceof LivingEntity living)
+                {
+                    var mobMaxHealth = living.getAttribute(Attribute.GENERIC_MAX_HEALTH).getBaseValue();
+                    var playerAttribute = player.getAttribute(Attribute.GENERIC_MAX_HEALTH);
+
+                    assert playerAttribute != null;
+                    var diff = mobMaxHealth - playerAttribute.getBaseValue();
+
+                    //确保血量不会超过上限
+                    if (playerAttribute.getBaseValue() + diff > healthCap.get())
+                        diff = healthCap.get() - playerAttribute.getBaseValue();
+
+                    //缩放生命值
+                    double finalDiff = diff;
+                    this.executeThenScaleHealth(player, playerAttribute, () ->
+                    {
+                        var modifier = new AttributeModifier(modifierName, finalDiff, AttributeModifier.Operation.ADD_NUMBER);
+                        playerAttribute.addModifier(modifier);
+                    });
+                }
+
+                entity.remove();
+            }
+        }
+    }
+
+    private final String modifierName = "MorphModifier";
+
+    private void executeThenScaleHealth(Player player, AttributeInstance attributeInstance, Runnable runnable)
+    {
+        var currentPercent = player.getHealth() / attributeInstance.getValue();
+
+        runnable.run();
+
+        player.setHealth(attributeInstance.getValue() * currentPercent);
+    }
+
+    private void removeAllHealthModifiers(Player player)
+    {
+        var attribute = player.getAttribute(Attribute.GENERIC_MAX_HEALTH);
+        assert attribute != null;
+
+        this.executeThenScaleHealth(player, attribute, () ->
+        {
+            attribute.getModifiers().stream()
+                    .filter(m -> m.getName().equals(modifierName)).collect(Collectors.toSet())
+                    .forEach(attribute::removeModifier);
+        });
+    }
+
+    @Override
+    public boolean unMorph(Player player, DisguiseState state)
+    {
+        if (super.unMorph(player, state))
+        {
+            removeAllHealthModifiers(player);
+            return true;
+        }
+        else
+            return false;
     }
 
     @Override
