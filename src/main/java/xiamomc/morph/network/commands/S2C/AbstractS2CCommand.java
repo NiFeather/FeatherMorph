@@ -1,14 +1,12 @@
 package xiamomc.morph.network.commands.S2C;
 
-import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xiamomc.morph.MorphPluginObject;
 
 import java.util.Arrays;
 import java.util.List;
 
-public abstract class AbstractS2CCommand<T> extends MorphPluginObject
+public abstract class AbstractS2CCommand<T>
 {
     public AbstractS2CCommand(T argument)
     {
@@ -31,7 +29,7 @@ public abstract class AbstractS2CCommand<T> extends MorphPluginObject
 
     public abstract String getBaseName();
 
-    public void onCommand(Player player, String[] arguments) { }
+    public void onCommand(String[] arguments) { }
 
     public String buildCommand()
     {

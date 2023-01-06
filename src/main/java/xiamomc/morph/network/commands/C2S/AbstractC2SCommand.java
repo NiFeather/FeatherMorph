@@ -1,6 +1,5 @@
 package xiamomc.morph.network.commands.C2S;
 
-import net.minecraft.server.MinecraftServer;
 import org.bukkit.entity.Player;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
