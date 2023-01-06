@@ -26,6 +26,8 @@ import xiamomc.morph.misc.DisguiseTypes;
 import xiamomc.morph.misc.DisguiseUtils;
 import xiamomc.morph.misc.EntityTypeUtils;
 import xiamomc.morph.network.MorphClientHandler;
+import xiamomc.morph.network.commands.S2C.S2CSetEquipCommand;
+import xiamomc.morph.network.commands.S2C.S2CSwapCommand;
 import xiamomc.morph.skills.MorphSkillHandler;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
@@ -280,12 +282,12 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
 
                 if (clientHandler.clientVersionCheck(player, 3))
                 {
-                    clientHandler.sendClientCommand(player, "swap");
+                    clientHandler.sendClientCommand(player, new S2CSwapCommand());
                 }
                 else
                 {
-                    clientHandler.sendClientCommand(player, "set equip mainhand " + itemToStr(mainHand));
-                    clientHandler.sendClientCommand(player, "set equip off_hand " + itemToStr(offHand));
+                    clientHandler.sendClientCommand(player, new S2CSetEquipCommand(mainHand, EquipmentSlot.HAND));
+                    clientHandler.sendClientCommand(player, new S2CSetEquipCommand(offHand, EquipmentSlot.OFF_HAND));
                 }
 
                 this.addSchedule(() ->

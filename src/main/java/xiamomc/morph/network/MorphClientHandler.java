@@ -11,6 +11,7 @@ import org.bukkit.craftbukkit.v1_19_R2.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.messaging.MessageTooLargeException;
 import org.bukkit.plugin.messaging.Messenger;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPlugin;
@@ -19,6 +20,8 @@ import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.MorphStrings;
+import xiamomc.morph.network.commands.C2S.*;
+import xiamomc.morph.network.commands.S2C.*;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
@@ -64,9 +67,19 @@ public class MorphClientHandler extends MorphPluginObject
     @Resolved
     private MorphManager manager;
 
+    private final List<AbstractC2SCommand> c2SCommands = new ObjectArrayList<>();
+
     @Initializer
     private void load(MorphPlugin plugin, MorphConfigManager configManager)
     {
+        Collections.addAll(c2SCommands,
+                new C2SInitialCommand(playerStateMap, playerConnectionStates),
+                new C2SMorphCommand(),
+                new C2SOptionCommand(),
+                new C2SSkillCommand(),
+                new C2SToggleSelfCommand(),
+                new C2SUnmorphCommand());
+
         Bukkit.getMessenger().registerIncomingPluginChannel(plugin, initializeChannel, (cN, player, data) ->
         {
             if (!allowClient.get() || this.getPlayerConnectionState(player).greaterThan(InitializeState.HANDSHAKE)) return;
@@ -131,120 +144,14 @@ public class MorphClientHandler extends MorphPluginObject
             if (str.length < 1) return;
 
             var baseCommand = str[0];
+            var c2sCommand = c2SCommands.stream()
+                    .filter(c -> c.getBaseName().equals(baseCommand))
+                    .findFirst().orElse(null);
 
-            switch (baseCommand)
-            {
-                case "skill" ->
-                {
-                    var state = manager.getDisguiseStateFor(player);
-
-                    if (state != null && state.getSkillCooldown() <= 0)
-                        manager.executeDisguiseSkill(player);
-                }
-                case "unmorph" ->
-                {
-                    if (manager.getDisguiseStateFor(player) != null)
-                        manager.unMorph(player);
-                    else
-                        sendClientCommand(player, ClientCommands.denyOperationCommand("morph"));
-                }
-                case "toggleself" ->
-                {
-                    if (str.length != 2) return;
-
-                    var subData = str[1].split(" ");
-
-                    if (subData.length < 1) return;
-
-                    //获取客户端选项
-                    var playerOption = getPlayerOption(player);
-                    var playerConfig = manager.getPlayerConfiguration(player);
-
-                    if (subData[0].equals("client"))
-                    {
-                        if (subData.length < 2) return;
-
-                        var isClient = Boolean.parseBoolean(subData[1]);
-
-                        playerOption.setClientSideSelfView(isClient);
-
-                        //如果客户端打开了本地预览，则隐藏伪装，否则显示伪装
-                        var state = manager.getDisguiseStateFor(player);
-                        if (state != null) state.setServerSideSelfVisible(!isClient && playerConfig.showDisguiseToSelf);
-                    }
-                    else
-                    {
-                        var val = Boolean.parseBoolean(subData[0]);
-
-                        if (val == playerConfig.showDisguiseToSelf) return;
-                        manager.setSelfDisguiseVisible(player, val, true, playerOption.isClientSideSelfView(), false);
-                    }
-                }
-                case "morph" ->
-                {
-                    String id = str.length == 2 ? str[1] : "";
-
-                    if (id.isEmpty() || id.isBlank())
-                        manager.doQuickDisguise(player, null);
-                    else if (manager.canMorph(player))
-                        manager.morph(player, id, player.getTargetEntity(5));
-                    else
-                        sendClientCommand(player, ClientCommands.denyOperationCommand("morph"));
-                }
-                case "initial" ->
-                {
-                    //检查一遍玩家有没有初始化完成，如果有则忽略此指令
-                    if (this.clientInitialized(player))
-                        return;
-
-                    if (playerStateMap.getOrDefault(player, null) != ConnectionState.JOINED)
-                        playerStateMap.put(player, ConnectionState.CONNECTING);
-
-                    //等待玩家加入再发包
-                    this.waitUntilReady(player, () ->
-                    {
-                        //再检查一遍玩家有没有初始化完成
-                        if (this.clientInitialized(player))
-                            return;
-
-                        var config = manager.getPlayerConfiguration(player);
-                        var list = config.getUnlockedDisguiseIdentifiers();
-                        this.refreshPlayerClientMorphs(list, player);
-
-                        var state = manager.getDisguiseStateFor(player);
-
-                        if (state != null)
-                            manager.refreshClientState(state);
-
-                        sendClientCommand(player, ClientCommands.setToggleSelfCommand(config.showDisguiseToSelf));
-                        playerConnectionStates.put(player, InitializeState.DONE);
-                    });
-                }
-                case "option" ->
-                {
-                    if (str.length < 2) return;
-
-                    var node = str[1].split(" ", 2);
-
-                    if (node.length < 2) return;
-
-                    var baseName = node[0];
-                    var value = node[1];
-
-                    switch (baseName)
-                    {
-                        case "clientview" ->
-                        {
-                            var val = Boolean.parseBoolean(value);
-
-                            this.getPlayerOption(player).setClientSideSelfView(val);
-
-                            var state = manager.getDisguiseStateFor(player);
-                            if (state != null) state.setServerSideSelfVisible(!val);
-                        }
-                    }
-                }
-            }
+            if (c2sCommand != null)
+                c2sCommand.onCommand(player, str);
+            else
+                logger.warn("未知的服务端指令：" + baseCommand);
         });
 
         Bukkit.getMessenger().registerOutgoingPluginChannel(plugin, initializeChannel);
@@ -270,7 +177,8 @@ public class MorphClientHandler extends MorphPluginObject
     }
 
     //region wait until ready
-    private void waitUntilReady(Player player, Runnable r)
+    @ApiStatus.Internal
+    public void waitUntilReady(Player player, Runnable r)
     {
         var bool = playerStateMap.getOrDefault(player, null);
 
@@ -343,49 +251,6 @@ public class MorphClientHandler extends MorphPluginObject
     }
 
     /**
-     * 客户端的初始化状态
-     */
-    public enum InitializeState
-    {
-        /**
-         * 客户端未连接或初始化被中断
-         */
-        NOT_CONNECTED(-1),
-
-        /**
-         * 接收到初始化指令，但还没做更进一步的交流
-         */
-        HANDSHAKE(0),
-
-        /**
-         * 获取到客户端的API版本，但尚未收到客户端的初始化指令
-         */
-        API_CHECKED(1),
-
-        /**
-         * 所有初始化操作均已完成
-         */
-        DONE(2);
-
-        private final int val;
-
-        InitializeState(int value)
-        {
-            this.val = value;
-        }
-
-        public boolean greaterThan(InitializeState other)
-        {
-            return this.val > other.val;
-        }
-
-        public boolean worseThan(InitializeState other)
-        {
-            return this.val < other.val;
-        }
-    }
-
-    /**
      * 检查某个玩家是否使用客户端加入
      *
      * @param player 目标玩家
@@ -418,14 +283,7 @@ public class MorphClientHandler extends MorphPluginObject
     {
         if (!allowClient.get()) return;
 
-        var additBuilder = new StringBuilder();
-
-        additBuilder.append("query").append(" ").append("set").append(" ");
-
-        for (var s : identifiers)
-            additBuilder.append(s).append(" ");
-
-        sendClientCommand(player, additBuilder.toString());
+        sendClientCommand(player, new S2CQuerySetCommand(identifiers.toArray(new String[]{})));
     }
 
     /**
@@ -440,28 +298,10 @@ public class MorphClientHandler extends MorphPluginObject
         if (!allowClient.get()) return;
 
         if (addits != null)
-        {
-            var additBuilder = new StringBuilder();
-
-            additBuilder.append("query").append(" ").append("add").append(" ");
-
-            for (var s : addits)
-                additBuilder.append(s).append(" ");
-
-            sendClientCommand(player, additBuilder.toString());
-        }
+            sendClientCommand(player, new S2CQueryAddCommand(addits.toArray(new String[]{})));
 
         if (removal != null)
-        {
-            var removalBuilder = new StringBuilder();
-
-            removalBuilder.append("query").append(" ").append("remove").append(" ");
-
-            for (var rs : removal)
-                removalBuilder.append(rs).append(" ");
-
-            sendClientCommand(player, removalBuilder.toString());
-        }
+            sendClientCommand(player, new S2CQueryRemoveCommand(removal.toArray(new String[]{})));
     }
 
     /**
@@ -474,14 +314,7 @@ public class MorphClientHandler extends MorphPluginObject
     {
         if (!allowClient.get()) return;
 
-        var builder = new StringBuilder();
-
-        builder.append("current");
-
-        if (str != null)
-            builder.append(" ").append(str);
-
-        sendClientCommand(player, builder.toString());
+        sendClientCommand(player, new S2CCurrentCommand(str));
     }
 
     /**
@@ -512,7 +345,7 @@ public class MorphClientHandler extends MorphPluginObject
         players.forEach(p ->
         {
             playerStateMap.put(p, ConnectionState.JOINED);
-            sendClientCommand(p, "reauth");
+            sendClientCommand(p, new S2CReAuthCommand());
         });
     }
 
@@ -525,13 +358,14 @@ public class MorphClientHandler extends MorphPluginObject
     {
         players.forEach(p ->
         {
-            sendClientCommand(p, "unauth", true);
+            sendClientCommand(p, new S2CUnAuthCommand(), true);
             unInitializePlayer(p);
         });
     }
 
-    private void sendClientCommand(Player player, String cmd, boolean overrideClientSetting)
+    private void sendClientCommand(Player player, AbstractS2CCommand<?> command, boolean overrideClientSetting)
     {
+        var cmd = command.buildCommand();
         if (cmd == null || cmd.isEmpty() || cmd.isBlank()) return;
 
         if (!allowClient.get() && !overrideClientSetting) return;
@@ -543,11 +377,11 @@ public class MorphClientHandler extends MorphPluginObject
      * 向某一玩家的客户端发送指令
      *
      * @param player 目标玩家
-     * @param cmd 指令内容
+     * @param command 要发送的指令
      */
-    public void sendClientCommand(Player player, String cmd)
+    public <T> void sendClientCommand(Player player, AbstractS2CCommand<T> command)
     {
-        this.sendClientCommand(player, cmd, false);
+        this.sendClientCommand(player, command, false);
     }
 
     private static final String nameSpace = MorphPlugin.getMorphNameSpace();

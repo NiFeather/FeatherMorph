@@ -221,7 +221,7 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
     }
 
     @Override
-    public @Nullable String getNbtCompound(DisguiseState state, Entity targetEntity)
+    public @Nullable CompoundTag getNbtCompound(DisguiseState state, Entity targetEntity)
     {
         var info = getMorphManager().getDisguiseInfo(state.getDisguiseIdentifier());
 
@@ -253,7 +253,7 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
             rawCompound.putBoolean("ShowArms", armorStandShowArms.get());
         }
 
-        return NbtUtils.getCompoundString(cullNBT(rawCompound));
+        return cullNBT(rawCompound);
     }
 
     @Override

@@ -31,8 +31,8 @@ import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.MorphStrings;
 import xiamomc.morph.misc.*;
 import xiamomc.morph.misc.permissions.CommonPermissions;
-import xiamomc.morph.network.ClientCommands;
 import xiamomc.morph.network.MorphClientHandler;
+import xiamomc.morph.network.commands.S2C.*;
 import xiamomc.morph.providers.*;
 import xiamomc.morph.skills.MorphSkillHandler;
 import xiamomc.morph.skills.SkillCooldownInfo;
@@ -519,7 +519,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 //如果此伪装可以同步给客户端，那么初始化客户端状态
                 if (provider.validForClient(state))
                 {
-                    clientHandler.sendClientCommand(player, ClientCommands.setSelfViewCommand(provider.getSelfViewIdentifier(outComingState)));
+                    clientHandler.sendClientCommand(player, new S2CSetSelfViewCommand(provider.getSelfViewIdentifier(outComingState)));
 
                     provider.getInitialSyncCommands(outComingState).forEach(s -> clientHandler.sendClientCommand(player, s));
 
@@ -528,13 +528,13 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
                     if (compound != null)
                     {
-                        outComingState.setCachedNbtString(compound);
-                        clientHandler.sendClientCommand(player, ClientCommands.setNbtCommand(compound));
+                        outComingState.setCachedNbtString(NbtUtils.getCompoundString(compound));
+                        clientHandler.sendClientCommand(player, new S2CSetNbtCommand(compound));
                     }
 
                     //设置Profile
                     if (outComingState.haveProfile())
-                        clientHandler.sendClientCommand(player, ClientCommands.setProfileCommand(outComingState.getProfileNbtString()));
+                        clientHandler.sendClientCommand(player, new S2CSetProfileCommand(outComingState.getProfileNbtString()));
                 }
 
                 return true;
@@ -563,8 +563,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         var player = state.getPlayer();
 
         clientHandler.updateCurrentIdentifier(player, state.getDisguiseIdentifier());
-        clientHandler.sendClientCommand(player, ClientCommands.setNbtCommand(state.getCachedNbtString()));
-        clientHandler.sendClientCommand(player, ClientCommands.setSelfViewCommand(state.getProvider().getSelfViewIdentifier(state)));
+        clientHandler.sendClientCommand(player, new S2CSetSNbtCommand(state.getCachedNbtString()));
+        clientHandler.sendClientCommand(player, new S2CSetSelfViewCommand(state.getProvider().getSelfViewIdentifier(state)));
 
         //刷新主动
         var skill = state.getSkill();
@@ -583,7 +583,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         //Profile
         if (state.haveProfile())
-            clientHandler.sendClientCommand(player, ClientCommands.setProfileCommand(state.getProfileNbtString()));
+            clientHandler.sendClientCommand(player, new S2CSetProfileCommand(state.getProfileNbtString()));
     }
 
     /**
@@ -648,7 +648,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         uuidPlayerTexturesMap.remove(player.getUniqueId());
 
         clientHandler.updateCurrentIdentifier(player, null);
-        clientHandler.sendClientCommand(player, ClientCommands.setSelfViewCommand(null));
+        clientHandler.sendClientCommand(player, new S2CSetSelfViewCommand(null));
 
         Bukkit.getPluginManager().callEvent(new PlayerUnMorphEvent(player));
     }
@@ -871,7 +871,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         }
 
         if (!noClientCommand)
-            clientHandler.sendClientCommand(player, ClientCommands.setToggleSelfCommand(value));
+            clientHandler.sendClientCommand(player, new S2CSetToggleSelfCommand(value));
 
         if (saveToConfig)
         {

@@ -1,48 +1,37 @@
 package xiamomc.morph.providers;
 
-import com.google.gson.Gson;
-import com.mojang.serialization.JsonOps;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.disguisetypes.Disguise;
 import me.libraryaddict.disguise.disguisetypes.DisguiseType;
 import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
-import me.libraryaddict.disguise.disguisetypes.watchers.ArmorStandWatcher;
 import me.libraryaddict.disguise.disguisetypes.watchers.LivingWatcher;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_19_R2.inventory.CraftItemStack;
-import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.EquipmentSlot;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.scoreboard.Scoreboard;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.abilities.AbilityHandler;
-import xiamomc.morph.config.ConfigOption;
-import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.messages.MorphStrings;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.misc.DisguiseTypes;
 import xiamomc.morph.misc.DisguiseUtils;
-import xiamomc.morph.network.MorphClientHandler;
+import xiamomc.morph.network.commands.S2C.AbstractS2CCommand;
+import xiamomc.morph.network.commands.S2C.S2CSetEquipCommand;
 import xiamomc.morph.skills.MorphSkillHandler;
 import xiamomc.morph.skills.SkillType;
-import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
-import xiamomc.pluginbase.Bindables.Bindable;
 import xiamomc.pluginbase.Utilities.ColorUtils;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import static xiamomc.morph.misc.ItemUtils.itemOrAir;
 import static xiamomc.morph.misc.ItemUtils.itemToStr;
 
 /**
@@ -114,16 +103,16 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
         return true;
     }
 
-    @NotNull
     @Override
-    public List<String> getInitialSyncCommands(DisguiseState state)
+    @NotNull
+    public List<AbstractS2CCommand<?>> getInitialSyncCommands(DisguiseState state)
     {
         //logger.info("SID: " + state.getSkillIdentifier() + " :: DID: " + state.getDisguiseIdentifier());
         if (skillHandler.hasSpeficSkill(state.getSkillIdentifier(), SkillType.INVENTORY))
         {
             var eqiupment = state.getDisguisedItems();
 
-            var list = new ObjectArrayList<String>();
+            var list = new ObjectArrayList<AbstractS2CCommand<?>>();
 
             this.addIfPresents(eqiupment, list, EquipmentSlot.HAND);
             this.addIfPresents(eqiupment, list, EquipmentSlot.OFF_HAND);
@@ -138,24 +127,12 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
         return List.of();
     }
 
-    private void addIfPresents(EntityEquipment equipment, ObjectArrayList<String> list, EquipmentSlot slot)
+    private void addIfPresents(EntityEquipment equipment, ObjectArrayList<AbstractS2CCommand<?>> list, EquipmentSlot slot)
     {
         var item = equipment.getItem(slot);
 
         if (item.getType() != Material.AIR)
-        {
-            var slotName = switch (slot)
-            {
-                case HAND -> "mainhand";
-                case HEAD -> "helmet";
-                case CHEST -> "chestplate";
-                case LEGS -> "leggings";
-                case FEET -> "boots";
-                default -> slot.name().toLowerCase();
-            };
-
-            list.add("set equip " + slotName + " " + itemToStr(item));
-        }
+            list.add(new S2CSetEquipCommand(item, slot));
     }
 
     @Override

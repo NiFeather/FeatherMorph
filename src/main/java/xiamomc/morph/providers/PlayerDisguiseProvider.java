@@ -163,7 +163,7 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
     }
 
     @Override
-    public @Nullable String getNbtCompound(DisguiseState state, Entity targetEntity)
+    public @Nullable CompoundTag getNbtCompound(DisguiseState state, Entity targetEntity)
     {
         if (!(targetEntity instanceof Player targetPlayer)) return null;
 

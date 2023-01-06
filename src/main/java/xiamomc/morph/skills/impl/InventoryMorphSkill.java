@@ -8,6 +8,7 @@ import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.SkillStrings;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.network.MorphClientHandler;
+import xiamomc.morph.network.commands.S2C.S2CSetFakeEquipCommand;
 import xiamomc.morph.skills.MorphSkill;
 import xiamomc.morph.skills.SkillType;
 import xiamomc.morph.storage.skill.NoOpConfiguration;
@@ -32,7 +33,7 @@ public class InventoryMorphSkill extends MorphSkill<NoOpConfiguration>
 
         manager.spawnParticle(player, player.getLocation(), player.getWidth(), player.getHeight(), player.getWidth());
 
-        clientHandler.sendClientCommand(player, "set fake_equip " + defaultShown);
+        clientHandler.sendClientCommand(player, new S2CSetFakeEquipCommand(defaultShown));
 
         player.sendMessage(MessageUtils.prefixes(player, defaultShown
                 ? SkillStrings.displayingDisguiseInventoryString()
@@ -44,7 +45,7 @@ public class InventoryMorphSkill extends MorphSkill<NoOpConfiguration>
     @Override
     public void onInitialEquip(DisguiseState state)
     {
-        clientHandler.sendClientCommand(state.getPlayer(), "set fake_equip " + state.showingDisguisedItems());
+        clientHandler.sendClientCommand(state.getPlayer(), new S2CSetFakeEquipCommand(state.showingDisguisedItems()));
 
         super.onInitialEquip(state);
     }
@@ -52,7 +53,7 @@ public class InventoryMorphSkill extends MorphSkill<NoOpConfiguration>
     @Override
     public void onClientinit(DisguiseState state)
     {
-        clientHandler.sendClientCommand(state.getPlayer(), "set fake_equip " + state.showingDisguisedItems());
+        clientHandler.sendClientCommand(state.getPlayer(), new S2CSetFakeEquipCommand(state.showingDisguisedItems()));
 
         super.onClientinit(state);
     }
@@ -60,7 +61,7 @@ public class InventoryMorphSkill extends MorphSkill<NoOpConfiguration>
     @Override
     public void onDeEquip(DisguiseState state)
     {
-        clientHandler.sendClientCommand(state.getPlayer(), "set fake_equip " + false);
+        clientHandler.sendClientCommand(state.getPlayer(), new S2CSetFakeEquipCommand(false));
 
         super.onDeEquip(state);
     }
