@@ -34,6 +34,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+import static xiamomc.morph.misc.DisguiseUtils.itemOrAir;
+
 public class DisguiseState extends MorphPluginObject
 {
     public DisguiseState(Player player, @NotNull String id, @NotNull String skillId,
@@ -446,11 +448,6 @@ public class DisguiseState extends MorphPluginObject
         setSkill(skillHandler.getSkill(this.getSkillIdentifier()));
     }
 
-    private ItemStack itemOrAir(ItemStack item)
-    {
-        return item == null ? air : item;
-    }
-
     /**
      * 盔甲存储（适用于盔甲架和玩家伪装）
      */
@@ -459,8 +456,6 @@ public class DisguiseState extends MorphPluginObject
 
     @Nullable
     private ItemStack[] handItems;
-
-    private static final ItemStack air = new ItemStack(Material.AIR);
 
     //用null会显示玩家自己的装备
     private final ItemStack[] emptyArmorStack = new ItemStack[]{ null, null, null, null };
@@ -513,6 +508,18 @@ public class DisguiseState extends MorphPluginObject
         eq.setItemInOffHand(handItems[1]);
 
         return eq;
+    }
+
+    public void swapHands()
+    {
+        if (handItems != null && handItems.length == 2)
+        {
+            var mainHand = handItems[0];
+            var offHand = handItems[1];
+
+            handItems[0] = offHand;
+            handItems[1] = mainHand;
+        }
     }
 
     /**

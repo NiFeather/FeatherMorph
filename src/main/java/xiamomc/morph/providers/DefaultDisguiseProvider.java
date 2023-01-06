@@ -42,7 +42,8 @@ import xiamomc.pluginbase.Utilities.ColorUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-import static xiamomc.morph.misc.DisguiseUtils.itemOrAir;
+import static xiamomc.morph.misc.ItemUtils.itemOrAir;
+import static xiamomc.morph.misc.ItemUtils.itemToStr;
 
 /**
  * 提供一个默认的DisguiseProvider
@@ -157,24 +158,6 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
         }
     }
 
-    private String itemToStr(ItemStack stack)
-    {
-        var item = itemOrAir(stack);
-
-        //CODEC
-        var nmsCodec = net.minecraft.world.item.ItemStack.CODEC;
-        var json = nmsCodec.encode(CraftItemStack.asNMSCopy(item), JsonOps.INSTANCE, JsonOps.INSTANCE.empty())
-                .result();
-
-        var gson = new Gson();
-        if (json.isPresent())
-        {
-            return gson.toJson(json.get());
-        }
-
-        return "";
-    }
-
     @Override
     public void postConstructDisguise(DisguiseState state, @Nullable Entity targetEntity)
     {
@@ -269,7 +252,4 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
         state.setCustomGlowColor(ColorUtils.fromChatColor(glowColor));
         watcher.setGlowColor(glowColor);
     }
-
-    @Resolved
-    private MorphClientHandler clientHandler;
 }

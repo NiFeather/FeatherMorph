@@ -31,6 +31,9 @@ import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
 
+import static xiamomc.morph.misc.DisguiseUtils.itemOrAir;
+import static xiamomc.morph.misc.ItemUtils.itemToStr;
+
 public class CommonEventProcessor extends MorphPluginObject implements Listener
 {
     @Resolved(shouldSolveImmediately = true)
@@ -247,18 +250,58 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
 
     //region LibsDisguises workaround
 
-    //伪装时副手交换会desync背包
-    @EventHandler
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerSwapHand(PlayerSwapHandItemsEvent e)
     {
         var player = e.getPlayer();
-        if (DisguiseAPI.isDisguised(player))
+        var state = morphs.getDisguiseStateFor(player);
+
+        if (state != null)
         {
-            //workaround: LibsDisguises在启用selfDisguiseVisible的情况下会导致副手切换异常
-            this.addSchedule(() ->
+            //workaround: 启用服务端预览的情况下会造成物品栏desync
+            if (state.getServerSideSelfVisible())
             {
-                if (DisguiseAPI.isDisguised(player) && DisguiseAPI.isSelfDisguised(player)) player.updateInventory();
-            }, 2);
+                this.addSchedule(() ->
+                {
+                    if (DisguiseAPI.isDisguised(player) && DisguiseAPI.isSelfDisguised(player))
+                        player.updateInventory();
+                }, 2);
+            }
+
+            //workaround: 交换副手后伪装有概率在左右手显示同一个物品
+            if (state.showingDisguisedItems())
+            {
+                var disguise = state.getDisguise();
+                state.swapHands();
+                var equip = state.getDisguisedItems();
+
+                var mainHand = itemOrAir(equip.getItemInMainHand());
+                var offHand = itemOrAir(equip.getItemInOffHand());
+
+                if (clientHandler.clientVersionCheck(player, 3))
+                {
+                    clientHandler.sendClientCommand(player, "swap");
+                }
+                else
+                {
+                    clientHandler.sendClientCommand(player, "set equip mainhand " + itemToStr(mainHand));
+                    clientHandler.sendClientCommand(player, "set equip off_hand " + itemToStr(offHand));
+                }
+
+                this.addSchedule(() ->
+                {
+                    if (!state.showingDisguisedItems() || state.getDisguise() != disguise) return;
+
+                    var watcher = state.getDisguise().getWatcher();
+
+                    var air = itemOrAir(null);
+                    watcher.setItemInMainHand(air);
+                    watcher.setItemInOffHand(air);
+
+                    watcher.setItemInMainHand(mainHand);
+                    watcher.setItemInOffHand(offHand);
+                }, 2);
+            }
         }
     }
 

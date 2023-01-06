@@ -122,7 +122,7 @@ public abstract class DisguiseProvider extends MorphPluginObject
         compound.remove("warden_spawn_tracker");
         compound.remove("previousPlayerGameType");
 
-        //paper, bukkit, spigot
+        //paper, bukkit, spigot, purpur
         compound.remove("Paper");
         compound.remove("Paper.Origin");
         compound.remove("Paper.OriginWorld");
@@ -130,6 +130,8 @@ public abstract class DisguiseProvider extends MorphPluginObject
         compound.remove("Spigot.ticksLived");
         compound.remove("Bukkit.updateLevel");
         compound.remove("Bukkit.Aware");
+        compound.remove("Purpur.ShouldBurnInDay");
+        compound.remove("Purpur.ticksSinceLastInteraction");
 
         //villager
         compound.remove("Offers");
@@ -139,6 +141,7 @@ public abstract class DisguiseProvider extends MorphPluginObject
         compound.remove("WorldUUIDLeast");
         compound.remove("WorldUUIDMost");
         compound.remove("Rotation");
+        compound.remove("listener");
 
         return compound;
     }

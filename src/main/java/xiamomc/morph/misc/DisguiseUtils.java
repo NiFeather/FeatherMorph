@@ -141,10 +141,8 @@ public class DisguiseUtils
                 };
     }
 
-    private static final ItemStack air = new ItemStack(Material.AIR);
-
     public static ItemStack itemOrAir(ItemStack stack)
     {
-        return stack == null ? air : stack;
+        return ItemUtils.itemOrAir(stack);
     }
 }

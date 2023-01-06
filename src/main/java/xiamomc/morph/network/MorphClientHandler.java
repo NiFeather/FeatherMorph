@@ -54,7 +54,7 @@ public class MorphClientHandler extends MorphPluginObject
     /**
      * 服务端的接口版本
      */
-    public final int targetApiVersion = 2;
+    public final int targetApiVersion = 3;
 
     /**
      * 最低能接受的客户端接口版本
@@ -317,6 +317,11 @@ public class MorphClientHandler extends MorphPluginObject
         playerOptionMap.put(uuid, option);
 
         return option;
+    }
+
+    public boolean clientVersionCheck(Player player, int version)
+    {
+        return this.getPlayerOption(player).clientApiVersion >= version;
     }
 
     private final Map<Player, InitializeState> playerConnectionStates = new Object2ObjectOpenHashMap<>();
