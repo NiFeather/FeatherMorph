@@ -324,7 +324,7 @@ public class MorphClientHandler extends MorphPluginObject
      */
     public void unInitializePlayer(Player player)
     {
-        this.playerOptionMap.clear();
+        playerOptionMap.remove(player.getUniqueId());
         playerStateMap.remove(player);
         playerConnectionStates.remove(player);
 

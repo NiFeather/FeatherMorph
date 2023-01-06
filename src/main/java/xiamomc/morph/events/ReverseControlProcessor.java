@@ -198,7 +198,8 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
                 simulateOperation(lastAction.toBukkitAction(), targetPlayer);
 
             //如果玩家在被控玩家一定范围以内，被控玩家有目标实体，并且玩家没有目标实体，那么取消挥手动画
-            if (Math.abs(targetPlayer.getLocation().distanceSquared(player.getLocation())) <= 6)
+            if (targetPlayer.getLocation().getWorld() == player.getLocation().getWorld()
+                && Math.abs(targetPlayer.getLocation().distanceSquared(player.getLocation())) <= 6)
             {
                 var theirTarget = targetPlayer.getTargetEntity(3);
                 var ourTarget = player.getTargetEntity(3);

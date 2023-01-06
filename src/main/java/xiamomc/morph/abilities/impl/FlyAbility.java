@@ -51,7 +51,7 @@ public class FlyAbility extends MorphAbility<FlyOption>
                     player.setFlying(false);
                 }
             }
-            else if (allowFlight)
+            else if (allowFlight && !player.getAllowFlight())
             {
                 player.setAllowFlight(true);
             }
