@@ -13,7 +13,7 @@ public class CommonStrings extends AbstractMorphStrings
     public static FormattableMessage pluginMessageString()
     {
         return getFormattable(getKey("plugin.messagePattern"),
-                "[Yamp] <message>");
+                "<color:#dddddd>≡ FeatherMorph » <message>");
     }
 
     public static FormattableMessage playerNotFoundString()

@@ -67,8 +67,8 @@ bukkit {
     depend = listOf("LibsDisguises", "PluginBase")
     softDepend = listOf("GSit", "PlaceholderAPI")
     version = "${project.property("project_version")}"
-    prefix = "MorphPlugin"
-    name = "MorphPlugin"
+    prefix = "FeatherMorph"
+    name = "FeatherMorph"
 
     commands {
         register("morph")
@@ -77,7 +77,7 @@ bukkit {
 
         register("request")
 
-        register("mmorph")
+        register("feathermorph")
     }
 
     val permissionRoot = "xiamomc.morph."
@@ -105,6 +105,10 @@ publishing {
     publications.create<MavenPublication>("maven") {
         from(components["java"])
     }
+}
+
+tasks.build {
+    dependsOn(tasks.reobfJar)
 }
 
 tasks.withType<JavaCompile>() {

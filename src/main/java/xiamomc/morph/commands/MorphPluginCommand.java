@@ -14,7 +14,7 @@ public class MorphPluginCommand extends MorphSubCommandHandler
     @Override
     public String getCommandName()
     {
-        return "mmorph";
+        return "feathermorph";
     }
 
     @Override

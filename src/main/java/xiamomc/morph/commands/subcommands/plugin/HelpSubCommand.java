@@ -159,7 +159,7 @@ public class HelpSubCommand extends MorphPluginObject implements ISubCommand
                     .resolve("description", section.getDescription())
                     .toComponent()
                     .decorate(TextDecoration.UNDERLINED)
-                    .clickEvent(ClickEvent.runCommand("/mmorph " + getCommandName() + " " + section.getCommandBaseName()))
+                    .clickEvent(ClickEvent.runCommand("/feathermorph " + getCommandName() + " " + section.getCommandBaseName()))
                     .hoverEvent(HoverEvent.showText(HelpStrings.clickToViewString().toComponent()));
 
             list.add(msg);

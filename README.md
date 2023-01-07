@@ -20,14 +20,14 @@
     - 启用聊天覆盖后伪装成任意玩家，你在公屏发出的消息将不会显示你为所有者（不会显示是你发的）
         - 但控制台和拥有相关权限的人仍然可以看到是谁真正发的消息
     - 伪装为玩家后还可以在一定范围内控制被伪装的玩家的一些动作
-        - 相关设置可以在[配置](./src/main/resources/config.yml#L42)中看到
+        - 相关设置可以在[配置](./src/main/resources/config.yml#L58)中看到
 - [x] 几乎每一条消息都可自定义
     - 支持[MiniMessage消息格式！](https://docs.adventure.kyori.net/minimessage/index.html)
     - *剩下的那些不支持的都是控制台报错*
 - [x] 方便地管理每个人的伪装
     - 给与/移除某个玩家的伪装
     - 查询玩家伪装状态
-    - 运行`/mmorph help mmorph`即可查看！
+    - 运行`/feathermorph help feathermorph`即可查看！
 
 ## 构建
 ```bash
@@ -35,7 +35,7 @@
 git clone https://github.com/XiaMoZhiShi/MorphPlugin
 cd MorphPlugin
 
-./gradlew reobfJar
+./gradlew build
 ```
 
-生成的文件将位于`build/libs`中，`morph-x.x.x.jar`就是构建出来的插件。
+生成的文件将位于`build/libs`中，`FeatherMorph-x.x.x.jar`就是构建出来的插件。

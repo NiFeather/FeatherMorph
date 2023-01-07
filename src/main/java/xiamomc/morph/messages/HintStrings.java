@@ -25,7 +25,7 @@ public class HintStrings extends AbstractMorphStrings
     public static FormattableMessage firstGrantHintString()
     {
         return getFormattable(getKey("command_hint"),
-                "小提示：发送 /mmorph help 可以查看伪装的相关用法。");
+                "小提示：发送 /feathermorph help 可以查看伪装的相关用法。");
     }
 
     public static FormattableMessage firstGrantClientHintString()

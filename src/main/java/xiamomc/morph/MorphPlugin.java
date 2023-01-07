@@ -89,7 +89,7 @@ public final class MorphPlugin extends XiaMoJavaPlugin
         dependencyManager.cache(new PlayerOperationSimulator());
 
         //注册EventProcessor
-        this.schedule(c ->
+        this.schedule(() ->
         {
             registerListeners(new Listener[]
                     {
