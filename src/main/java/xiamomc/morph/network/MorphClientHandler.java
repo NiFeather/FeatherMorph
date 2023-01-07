@@ -108,10 +108,15 @@ public class MorphClientHandler extends MorphPluginObject
                 logger.info("收到了来自" + player.getName() + "的API请求：" + str);
 
             //尝试获取api版本
-            var clientVersion = Integer.getInteger(str);
+            int clientVersion = 1;
 
-            //没有版本，默认为1
-            if (clientVersion == null) clientVersion = 1;
+            try
+            {
+                clientVersion = Integer.parseInt(str);
+            }
+            catch (Throwable ignored)
+            {
+            }
 
             //如果客户端版本低于最低能接受的版本，拒绝初始化
             if (clientVersion < minimumApiVersion)
@@ -122,6 +127,8 @@ public class MorphClientHandler extends MorphPluginObject
                 logger.info(player.getName() + "使用了不支持的客户端版本：" + clientVersion + "(此服务器要求至少为" + targetApiVersion + ")");
                 return;
             }
+
+            logger.info(player.getName() + "的客户端版本是" + clientVersion);
 
             this.getPlayerOption(player).clientApiVersion = clientVersion;
             playerConnectionStates.put(player, InitializeState.API_CHECKED);
