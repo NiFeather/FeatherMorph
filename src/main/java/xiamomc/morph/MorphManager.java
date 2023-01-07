@@ -760,7 +760,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         spawnParticle(sourcePlayer, sourcePlayer.getLocation(), cX, cY, cZ);
 
         //确保玩家可以根据设置看到自己的伪装
-        state.setServerSideSelfVisible(!this.isClientSideViewing(sourcePlayer));
+        state.setServerSideSelfVisible(config.showDisguiseToSelf && !this.clientViewAvailable(sourcePlayer));
 
         var isClientPlayer = clientHandler.clientConnected(sourcePlayer);
 
@@ -842,20 +842,23 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     }
 
     /**
-     * 某个玩家是否正在应用客户端预览？
+     * 客户端预览是否可用？
      * @param player 目标玩家
      * @return 正在伪装时返回客户端预览是否可用并已启用，没在伪装时返回玩家的客户端设置
      */
-    public boolean isClientSideViewing(Player player)
+    public boolean clientViewAvailable(Player player)
     {
         var state = this.getDisguiseStateFor(player);
 
         if (state == null)
             return clientHandler.getPlayerOption(player).isClientSideSelfView();
 
-        var config = data.getPlayerConfiguration(player);
-        return (clientHandler.getPlayerOption(player).isClientSideSelfView() && state.getProvider().validForClient(state))
-                && config.showDisguiseToSelf;
+        //logger.warn(player.getName() + " SV "
+        //            + " Option? " + clientHandler.getPlayerOption(player).isClientSideSelfView()
+        //            + " StateValid? " + state.getProvider().validForClient(state));
+
+        return clientHandler.getPlayerOption(player).isClientSideSelfView()
+                && state.getProvider().validForClient(state);
     }
 
     public void setSelfDisguiseVisible(Player player, boolean value, boolean saveToConfig, boolean dontSetServerSide, boolean noClientCommand)
@@ -866,7 +869,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         if (state != null)
         {
             //如果客户端预览启用，则不要调整服务端预览
-            if (!dontSetServerSide && !isClientSideViewing(player))
+            if (!dontSetServerSide && !clientViewAvailable(player))
                 state.setServerSideSelfVisible(value);
         }
 
