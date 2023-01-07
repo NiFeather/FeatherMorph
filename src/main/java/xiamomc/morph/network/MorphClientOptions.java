@@ -27,4 +27,9 @@ public class MorphClientOptions
     {
         clientSideSelfView = newVal;
     }
+
+    /**
+     * 是否在HUD上显示当前伪装?
+     */
+    public boolean displayDisguiseOnHUD = true;
 }

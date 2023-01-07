@@ -23,6 +23,7 @@ import xiamomc.morph.messages.MorphStrings;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.misc.DisguiseTypes;
 import xiamomc.morph.misc.DisguiseUtils;
+import xiamomc.morph.network.MorphClientHandler;
 import xiamomc.morph.network.commands.S2C.AbstractS2CCommand;
 import xiamomc.morph.network.commands.S2C.S2CSetEquipCommand;
 import xiamomc.morph.skills.MorphSkillHandler;
@@ -31,8 +32,6 @@ import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Utilities.ColorUtils;
 
 import java.util.List;
-
-import static xiamomc.morph.misc.ItemUtils.itemToStr;
 
 /**
  * 提供一个默认的DisguiseProvider
@@ -60,20 +59,27 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
     @Resolved
     private Scoreboard scoreboard;
 
+    @Resolved
+    private MorphClientHandler clientHandler;
+
     @Override
     public boolean updateDisguise(Player player, DisguiseState state)
     {
         var disguise = state.getDisguise();
         var watcher = disguise.getWatcher();
+        var option = clientHandler.getPlayerOption(player);
 
-        //更新actionbar信息
-        var msg = state.haveSkill()
-                ? (state.getSkillCooldown() <= 0
+        if (option.displayDisguiseOnHUD)
+        {
+            //更新actionbar信息
+            var msg = state.haveSkill()
+                    ? (state.getSkillCooldown() <= 0
                     ? MorphStrings.disguisingWithSkillAvaliableString()
                     : MorphStrings.disguisingWithSkillPreparingString())
-                : MorphStrings.disguisingAsString();
+                    : MorphStrings.disguisingAsString();
 
-        player.sendActionBar(msg.resolve("what", state.getDisplayName()).toComponent());
+            player.sendActionBar(msg.resolve("what", state.getDisplayName()).toComponent());
+        }
 
         //发光颜色
         var team = scoreboard.getPlayerTeam(player);

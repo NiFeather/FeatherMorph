@@ -1,5 +1,6 @@
 package xiamomc.morph.network.commands.C2S;
 
+import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 
 public class C2SOptionCommand extends AbstractC2SCommand
@@ -32,6 +33,17 @@ public class C2SOptionCommand extends AbstractC2SCommand
 
                 var state = morphManager().getDisguiseStateFor(player);
                 if (state != null) state.setServerSideSelfVisible(!val);
+            }
+            case "hud" ->
+            {
+                var val = Boolean.parseBoolean(value);
+                var option = clientHandler().getPlayerOption(player);
+
+                if (option.displayDisguiseOnHUD != val)
+                {
+                    clientHandler().getPlayerOption(player).displayDisguiseOnHUD = Boolean.parseBoolean(value);
+                    player.sendActionBar(Component.empty());
+                }
             }
         }
     }
