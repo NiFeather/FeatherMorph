@@ -67,7 +67,7 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
         var watcher = disguise.getWatcher();
 
         //更新actionbar信息
-        var msg = skillHandler.hasSkill(state.getSkillIdentifier())
+        var msg = state.getSkill() != null
                 ? (state.getSkillCooldown() <= 0
                     ? MorphStrings.disguisingWithSkillAvaliableString()
                     : MorphStrings.disguisingWithSkillPreparingString())
@@ -83,21 +83,29 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
         {
             //workaround: 复制实体伪装时会一并复制隐身标签
             //            会导致复制出来的伪装永久隐身
-            watcher.setInvisible(player.isInvisible());
+            if (watcher.isInvisible() != player.isInvisible())
+                watcher.setInvisible(player.isInvisible());
 
             //workaround: 伪装不会主动检测玩家有没有发光
-            watcher.setGlowing(player.isGlowing());
+            if (watcher.isGlowing() != player.isGlowing())
+                watcher.setGlowing(player.isGlowing());
 
             //设置发光颜色
             if (!state.haveCustomGlowColor())
                 disguise.getWatcher().setGlowColor(ColorUtils.toChatColor(playerColor));
 
             //设置滑翔状态
-            watcher.setFlyingWithElytra(player.isGliding());
+            if (watcher.isFlyingWithElytra() != player.isGliding())
+                watcher.setFlyingWithElytra(player.isGliding());
 
             //workaround: 复制出来的伪装会忽略玩家Pose
             if (state.shouldHandlePose())
-                watcher.setEntityPose(DisguiseUtils.toEntityPose(player.getPose()));
+            {
+                var pose = DisguiseUtils.toEntityPose(player.getPose());
+
+                if (watcher.getEntityPose() != pose)
+                    watcher.setEntityPose(pose);
+            }
         }
 
         return true;

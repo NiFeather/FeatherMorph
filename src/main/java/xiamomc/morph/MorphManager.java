@@ -128,7 +128,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
             abilityHandler.handle(p, i);
 
-            if (! i.getProvider().updateDisguise(p, i))
+            if (!i.getProvider().updateDisguise(p, i))
             {
                 p.sendMessage(MessageUtils.prefixes(p, MorphStrings.errorWhileUpdatingDisguise()));
 
