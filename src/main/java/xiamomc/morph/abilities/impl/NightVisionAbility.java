@@ -22,4 +22,10 @@ public class NightVisionAbility extends EffectMorphAbility
     {
         return nightVisionEffect;
     }
+
+    @Override
+    protected int getRefreshInterval()
+    {
+        return 40;
+    }
 }
