@@ -5,6 +5,7 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
+import org.bukkit.GameMode;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
@@ -174,7 +175,7 @@ public class MorphSkillHandler extends MorphPluginObject
 
         var entry = getSkillEntry(state.getSkillIdentifier());
 
-        if (entry != null && !entry.getKey().getSkillIdentifier().equals(SkillType.NONE))
+        if (entry != null && !entry.getKey().getSkillIdentifier().equals(SkillType.NONE) && player.getGameMode() != GameMode.SPECTATOR)
         {
             var skill = entry.getValue();
             var config = entry.getKey();
