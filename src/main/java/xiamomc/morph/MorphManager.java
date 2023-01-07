@@ -17,6 +17,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.profile.PlayerTextures;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.abilities.AbilityHandler;
@@ -195,6 +196,10 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
     private BindableList<String> bannedDisguises;
 
+    /**
+     * 内部轮子，检查某个伪装是否被禁用建议使用 {@link MorphManager#disguiseDisabled(String)}
+     */
+    @ApiStatus.Internal
     public BindableList<String> getBannedDisguises()
     {
         return bannedDisguises;
@@ -464,7 +469,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             info = new DisguiseInfo(key, DisguiseTypes.fromId(key));
         }
 
-        if (bannedDisguises.contains(key))
+        if (disguiseDisabled(key))
         {
             player.sendMessage(MessageUtils.prefixes(player, MorphStrings.disguiseBannedOrNotSupportedString()));
             return false;
@@ -556,6 +561,22 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         }
 
         return false;
+    }
+
+    /**
+     * 检查某个伪装是否已被禁用
+     * @param key 伪装ID
+     * @return 此伪装是否已被禁用
+     */
+    public boolean disguiseDisabled(String key)
+    {
+        if (bannedDisguises.contains(key)) return true;
+
+        var splitKey = key.split(":", 2);
+
+        if (splitKey.length == 0) return false;
+
+        return bannedDisguises.contains(splitKey[0] + ":any");
     }
 
     public void refreshClientState(DisguiseState state)
@@ -953,7 +974,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         var key = offlineState.disguiseID;
 
-        if (bannedDisguises.contains(key) || !getPlayerConfiguration(player).getUnlockedDisguiseIdentifiers().contains(key))
+        if (disguiseDisabled(key) || !getPlayerConfiguration(player).getUnlockedDisguiseIdentifiers().contains(key))
             return false;
 
         var disguiseType = DisguiseTypes.fromId(key);
@@ -1069,7 +1090,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             var player = s.getPlayer();
             var config = this.getPlayerConfiguration(player);
 
-            if (!this.bannedDisguises.contains(s.getDisguiseIdentifier()) && config.getUnlockedDisguiseIdentifiers().contains(s.getDisguiseIdentifier()))
+            if (!disguiseDisabled(s.getDisguiseIdentifier()) && config.getUnlockedDisguiseIdentifiers().contains(s.getDisguiseIdentifier()))
             {
                 var newState = s.createCopy();
 
