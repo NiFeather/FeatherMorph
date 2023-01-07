@@ -67,7 +67,7 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
         var watcher = disguise.getWatcher();
 
         //更新actionbar信息
-        var msg = state.getSkill() != null
+        var msg = state.haveSkill()
                 ? (state.getSkillCooldown() <= 0
                     ? MorphStrings.disguisingWithSkillAvaliableString()
                     : MorphStrings.disguisingWithSkillPreparingString())

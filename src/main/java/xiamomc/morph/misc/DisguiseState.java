@@ -26,6 +26,7 @@ import xiamomc.morph.skills.IMorphSkill;
 import xiamomc.morph.skills.MorphSkillHandler;
 import xiamomc.morph.skills.SkillCooldownInfo;
 import xiamomc.morph.skills.SkillType;
+import xiamomc.morph.skills.impl.NoneMorphSkill;
 import xiamomc.morph.storage.offlinestore.OfflineDisguiseState;
 import xiamomc.morph.storage.playerdata.PlayerMorphConfiguration;
 import xiamomc.pluginbase.Annotations.Resolved;
@@ -232,6 +233,11 @@ public class DisguiseState extends MorphPluginObject
     public IMorphSkill<?> getSkill()
     {
         return skill;
+    }
+
+    public boolean haveSkill()
+    {
+        return !(skill instanceof NoneMorphSkill);
     }
 
     /**

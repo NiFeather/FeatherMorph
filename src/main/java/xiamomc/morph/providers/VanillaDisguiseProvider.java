@@ -87,6 +87,9 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
 
         DisguiseAPI.disguiseEntity(player, constructedDisguise);
 
+        if (entityType.equals(EntityType.BAT))
+            constructedDisguise.getWatcher().setYModifier(-1.6f);
+
         return DisguiseResult.success(constructedDisguise, copyResult.isCopy());
     }
 
