@@ -475,11 +475,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             return false;
         }
 
-        //提前取消所有被动
         var state = getDisguiseStateFor(player);
-
-        if (state != null)
-            state.getAbilities().forEach(a -> a.revokeFromPlayer(player, state));
 
         //检查有没有伪装
         if (info != null)
@@ -508,6 +504,18 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                         player.sendMessage(MessageUtils.prefixes(player, MorphStrings.errorWhileDisguising()));
                         logger.error(provider + "在执行伪装时出现问题");
                         return false;
+                    }
+
+                    //取消上个State的伪装
+                    if (state != null)
+                    {
+                        state.getProvider().unMorph(player, state);
+                        state.getAbilities().forEach(a -> a.revokeFromPlayer(player, state));
+
+                        var skill = state.getSkill();
+
+                        if (skill != null)
+                            skill.onDeEquip(state);
                     }
 
                     clientHandler.updateCurrentIdentifier(player, key);
