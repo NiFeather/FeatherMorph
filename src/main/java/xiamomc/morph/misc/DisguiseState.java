@@ -21,6 +21,8 @@ import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.abilities.AbilityHandler;
 import xiamomc.morph.abilities.IMorphAbility;
+import xiamomc.morph.network.MorphClientHandler;
+import xiamomc.morph.network.commands.S2C.S2CSetSkillCooldownCommand;
 import xiamomc.morph.providers.DisguiseProvider;
 import xiamomc.morph.skills.IMorphSkill;
 import xiamomc.morph.skills.MorphSkillHandler;
@@ -258,7 +260,12 @@ public class DisguiseState extends MorphPluginObject
     public void setSkillCooldown(long val)
     {
         if (haveCooldown())
+        {
             cooldownInfo.setCooldown(val);
+
+            if (clientHandler.clientVersionCheck(player, 3))
+                clientHandler.sendClientCommand(player, new S2CSetSkillCooldownCommand(val));
+        }
     }
 
     public boolean haveCooldown()
@@ -269,6 +276,9 @@ public class DisguiseState extends MorphPluginObject
     public void setCooldownInfo(SkillCooldownInfo info)
     {
         this.cooldownInfo = info;
+
+        if (clientHandler.clientVersionCheck(player, 3))
+            clientHandler.sendClientCommand(player, new S2CSetSkillCooldownCommand(info.getCooldown()));
     }
 
     //region 被动技能
@@ -317,6 +327,9 @@ public class DisguiseState extends MorphPluginObject
 
     @Resolved(shouldSolveImmediately = true)
     private MorphSkillHandler skillHandler;
+
+    @Resolved(shouldSolveImmediately = true)
+    private MorphClientHandler clientHandler;
 
     //region NBT
 

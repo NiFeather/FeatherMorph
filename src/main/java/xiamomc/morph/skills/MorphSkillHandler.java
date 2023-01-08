@@ -14,8 +14,9 @@ import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.messages.CommandStrings;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.SkillStrings;
-import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.misc.permissions.CommonPermissions;
+import xiamomc.morph.network.MorphClientHandler;
+import xiamomc.morph.network.commands.S2C.S2CSetSkillCooldownCommand;
 import xiamomc.morph.skills.impl.*;
 import xiamomc.morph.storage.skill.ISkillOption;
 import xiamomc.morph.storage.skill.SkillConfiguration;
@@ -60,6 +61,9 @@ public class MorphSkillHandler extends MorphPluginObject
 
     @Resolved
     private SkillConfigurationStore store;
+
+    @Resolved
+    private MorphClientHandler clientHandler;
 
     @Initializer
     private void load()
@@ -199,13 +203,14 @@ public class MorphSkillHandler extends MorphPluginObject
                 return;
             }
 
-            var cd = getCooldownInfo(player.getUniqueId(), state.getSkillIdentifier());
-            assert cd != null;
+            var cdInfo = getCooldownInfo(player.getUniqueId(), state.getSkillIdentifier());
+            assert cdInfo != null;
 
-            cd.setCooldown(skill.executeSkillGeneric(player, config, option));
-            cd.setLastInvoke(plugin.getCurrentTick());
+            var cd = skill.executeSkillGeneric(player, config, option);
+            cdInfo.setLastInvoke(plugin.getCurrentTick());
 
-            if (!state.haveCooldown()) state.setCooldownInfo(cd);
+            if (!state.haveCooldown()) state.setCooldownInfo(cdInfo);
+            else state.setSkillCooldown(cd);
         }
         else
         {

@@ -834,9 +834,9 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         if (cdInfo != null)
         {
-            state.setCooldownInfo(cdInfo);
             cdInfo.setCooldown(Math.max(40, state.getSkillCooldown()));
             cdInfo.setLastInvoke(plugin.getCurrentTick());
+            state.setCooldownInfo(cdInfo);
         }
 
         //切换CD
