@@ -74,8 +74,8 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
             //更新actionbar信息
             var msg = state.haveSkill()
                     ? (state.getSkillCooldown() <= 0
-                    ? MorphStrings.disguisingWithSkillAvaliableString()
-                    : MorphStrings.disguisingWithSkillPreparingString())
+                        ? MorphStrings.disguisingWithSkillAvaliableString()
+                        : MorphStrings.disguisingWithSkillPreparingString())
                     : MorphStrings.disguisingAsString();
 
             player.sendActionBar(msg.resolve("what", state.getDisplayName()).toComponent());
@@ -121,8 +121,8 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
     @NotNull
     public List<AbstractS2CCommand<?>> getInitialSyncCommands(DisguiseState state)
     {
-        //logger.info("SID: " + state.getSkillIdentifier() + " :: DID: " + state.getDisguiseIdentifier());
-        if (skillHandler.hasSpeficSkill(state.getSkillIdentifier(), SkillType.INVENTORY))
+        //logger.info("SID: " + state.getSkillLookupIdentifier() + " :: DID: " + state.getDisguiseIdentifier());
+        if (skillHandler.hasSpeficSkill(state.getSkillLookupIdentifier(), SkillType.INVENTORY))
         {
             var eqiupment = state.getDisguisedItems();
 
@@ -199,7 +199,7 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
         }
 
         //被动技能
-        var abilities = abilityHandler.getAbilitiesFor(state.getSkillIdentifier());
+        var abilities = abilityHandler.getAbilitiesFor(state.getSkillLookupIdentifier());
         state.setAbilities(abilities);
 
         //发光颜色

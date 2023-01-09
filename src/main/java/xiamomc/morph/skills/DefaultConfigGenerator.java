@@ -1,13 +1,12 @@
 package xiamomc.morph.skills;
 
-import it.unimi.dsi.fastutil.objects.ObjectArraySet;
 import net.kyori.adventure.bossbar.BossBar;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.LoggerFactory;
+import xiamomc.morph.MorphManager;
 import xiamomc.morph.abilities.AbilityType;
 import xiamomc.morph.abilities.options.BossbarOption;
 import xiamomc.morph.abilities.options.FlyOption;
@@ -28,22 +27,22 @@ public class DefaultConfigGenerator
      * 添加一个技能配置
      *
      * @param targetList 目标列表
-     * @param entityType 实体类型
+     * @param mobId 实体ID
      * @param cd CD时间
-     * @param key 技能ID
+     * @param skillIdentifier 技能ID
      * @param c 针对此{@link SkillConfiguration}的操作
      * @return 技能配置
      */
-    private static SkillConfiguration addSkillConfiguration(List<SkillConfiguration> targetList, EntityType entityType,
-                                                            int cd, NamespacedKey key, @Nullable Consumer<SkillConfiguration> c)
+    private static SkillConfiguration addSkillConfiguration(List<SkillConfiguration> targetList, String mobId,
+                                                            int cd, NamespacedKey skillIdentifier, @Nullable Consumer<SkillConfiguration> c)
     {
         var cfg = targetList.stream()
-                .filter(configuration -> configuration.getIdentifier().equals(entityType.getKey().asString()))
+                .filter(configuration -> configuration.getIdentifier().equals(mobId))
                 .findFirst().orElse(null);
 
         SkillConfiguration config;
 
-        if (cfg == null) config = new SkillConfiguration(entityType, cd, key);
+        if (cfg == null) config = new SkillConfiguration(mobId, cd, skillIdentifier);
         else config = cfg;
 
         if (c != null)
@@ -55,35 +54,48 @@ public class DefaultConfigGenerator
         return config;
     }
 
+    private static SkillConfiguration addSkillConfiguration(List<SkillConfiguration> targetList, EntityType entityType,
+                                                            int cd, NamespacedKey skillIdentifier, @Nullable Consumer<SkillConfiguration> c)
+    {
+        return addSkillConfiguration(targetList, entityType.getKey().asString(), cd, skillIdentifier, c);
+    }
+
     /**
      * 添加一个技能配置
      *
      * @param targetList 目标列表
      * @param entityType 实体类型
      * @param cd CD时间
-     * @param key 技能ID
+     * @param skillIdentifier 技能ID
      * @return 技能配置
      */
     private static SkillConfiguration addSkillConfiguration(List<SkillConfiguration> targetList, EntityType entityType,
-                                                            int cd, NamespacedKey key)
+                                                            int cd, NamespacedKey skillIdentifier)
     {
-        return addSkillConfiguration(targetList, entityType, cd, key, null);
+        return addSkillConfiguration(targetList, entityType, cd, skillIdentifier, null);
+    }
+
+    private static void addAbilityConfiguration(List<SkillConfiguration> targetList,
+                                                String mobId, NamespacedKey key,
+                                                @Nullable Consumer<SkillConfiguration> consumer)
+    {
+        var cfg = targetList.stream()
+                .filter(c -> c.getIdentifier().equals(mobId)).findFirst().orElse(null);
+
+        if (cfg == null)
+            cfg = addSkillConfiguration(targetList, mobId, 0, SkillType.NONE, null);
+
+        if (consumer != null)
+            consumer.accept(cfg);
+
+        cfg.addAbilityIdentifier(key);
     }
 
     private static void addAbilityConfiguration(List<SkillConfiguration> targetList,
                                                 EntityType entityType, NamespacedKey key,
                                                 @Nullable Consumer<SkillConfiguration> consumer)
     {
-        var cfg = targetList.stream()
-                .filter(c -> c.getIdentifier().equals(entityType.getKey().asString())).findFirst().orElse(null);
-
-        if (cfg == null)
-            cfg = addSkillConfiguration(targetList, entityType, 0, SkillType.NONE);
-
-        if (consumer != null)
-            consumer.accept(cfg);
-
-        cfg.addAbilityIdentifier(key);
+        addAbilityConfiguration(targetList, entityType.getKey().asString(), key, consumer);
     }
 
     private static void addAbilityConfiguration(List<SkillConfiguration> targetList,
@@ -123,7 +135,7 @@ public class DefaultConfigGenerator
     {
         //伪装物品
         addSkillConfiguration(skills, EntityType.ARMOR_STAND, 20, SkillType.INVENTORY);
-        addSkillConfiguration(skills, EntityType.PLAYER, 20, SkillType.INVENTORY);
+        addSkillConfiguration(skills, "player:" + MorphManager.disguiseFallbackName, 20, SkillType.INVENTORY, null);
 
         //弹射物
         addSkillConfiguration(skills, EntityType.BLAZE, 10, SkillType.LAUNCH_PROJECTIVE, c ->
@@ -208,7 +220,7 @@ public class DefaultConfigGenerator
 
         addAbilityConfiguration(skills, EntityTypeUtils.wardenLessAware(), AbilityType.WARDEN_LESS_AWARE);
 
-        addAbilityConfiguration(skills, EntityType.PLAYER, AbilityType.CHAT_OVERRIDE);
+        addAbilityConfiguration(skills, "player:" + MorphManager.disguiseFallbackName, AbilityType.CHAT_OVERRIDE, null);
 
         addAbilityConfiguration(skills, EntityType.WITHER, AbilityType.BOSSBAR, c ->
         {

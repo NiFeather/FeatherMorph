@@ -9,8 +9,10 @@ import xiamomc.morph.storage.skill.ISkillOption;
 import xiamomc.morph.storage.skill.NoOpConfiguration;
 import xiamomc.morph.storage.skill.SkillConfiguration;
 
-public class NoneMorphSkill extends MorphSkill<NoOpConfiguration>
+public final class NoneMorphSkill extends MorphSkill<NoOpConfiguration>
 {
+    public static final NoneMorphSkill instance = new NoneMorphSkill();
+
     @Override
     public int executeSkill(Player player, SkillConfiguration configuration, NoOpConfiguration option)
     {

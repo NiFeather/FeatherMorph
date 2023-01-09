@@ -30,7 +30,7 @@ public abstract class DamageReducingAbility<T extends ReduceDamageOption> extend
                 var dmgOption = getOr(
                         options.get(state.getDisguiseIdentifier()),
                         Objects::nonNull,
-                        options.get(state.getSkillIdentifier())
+                        options.get(state.getSkillLookupIdentifier())
                 );
 
                 if(dmgOption != null)

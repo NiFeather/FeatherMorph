@@ -76,9 +76,14 @@ public class SkillConfiguration
         return identifier;
     }
 
-    private void setIdentifier(NamespacedKey key)
+    public void setIdentifier(NamespacedKey key)
     {
         this.identifier = key.asString();
+    }
+
+    public void setIdentifier(String id)
+    {
+        this.identifier = id;
     }
 
     //region 主动技能

@@ -75,6 +75,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
     private static final DisguiseProvider fallbackProvider = new FallbackProvider();
 
+    public static final String disguiseFallbackName = "@default";
+
     @Initializer
     private void load()
     {
@@ -708,16 +710,11 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         DisguiseUtils.addTrace(disguise);
 
         var disguiseTypeLD = disguise.getType();
-        var entityType = disguiseTypeLD.getEntityType();
 
         var config = getPlayerConfiguration(sourcePlayer);
 
         //禁用actionBar
         DisguiseAPI.setActionBarShown(sourcePlayer, false);
-
-        //技能
-        var rawIdentifierHasSkill = skillHandler.hasSkill(id) || skillHandler.hasSpeficSkill(id, SkillType.NONE);
-        var targetSkillID = rawIdentifierHasSkill ? id : entityType.getKey().asString();
 
         //更新或者添加DisguiseState
         var state = getDisguiseStateFor(sourcePlayer);
@@ -737,6 +734,10 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 equipment = ((LivingEntity) targetEntity).getEquipment();
         }
 
+        //技能
+        var rawIdentifierHasSkill = skillHandler.hasSkill(id) || skillHandler.hasSpeficSkill(id, SkillType.NONE);
+        var targetSkillID = rawIdentifierHasSkill ? id : provider.getNameSpace() + ":" + MorphManager.disguiseFallbackName;
+
         if (state == null)
         {
             state = new DisguiseState(sourcePlayer, id, targetSkillID, disguise, shouldHandlePose, provider, equipment);
@@ -751,14 +752,14 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         if (provider != fallbackProvider)
             provider.postConstructDisguise(state, targetEntity);
         else
-            logger.warn("id为" + id + "的伪装没有Provider?");
+            logger.warn("id为 " + id + " 的伪装没有Provider?");
 
         //workaround: Disguise#getDisguiseName()不会正常返回实体的自定义名称
         if (targetEntity != null && targetEntity.customName() != null)
             state.setDisplayName(targetEntity.customName());
 
         //如果伪装的时候坐着，显示提示
-        if (sourcePlayer.getVehicle() != null)
+        if (sourcePlayer.getVehicle() != null && !clientHandler.clientInitialized(sourcePlayer))
             sourcePlayer.sendMessage(MessageUtils.prefixes(sourcePlayer, MorphStrings.morphVisibleAfterStandup()));
 
         //显示粒子

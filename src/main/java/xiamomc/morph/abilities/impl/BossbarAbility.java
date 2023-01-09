@@ -18,7 +18,6 @@ import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.misc.DisguiseUtils;
-import xiamomc.morph.storage.skill.ISkillOption;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Bindables.Bindable;
 
@@ -69,7 +68,7 @@ public class BossbarAbility extends MorphAbility<BossbarOption>
             var option = getOr(
                     options.get(state.getDisguiseIdentifier()),
                     Objects::nonNull,
-                    options.get(state.getSkillIdentifier())
+                    options.get(state.getSkillLookupIdentifier())
             );
 
             if (option == null) return false;
@@ -98,7 +97,7 @@ public class BossbarAbility extends MorphAbility<BossbarOption>
                 var option = getOr(
                         options.get(state.getDisguiseIdentifier()),
                         Objects::nonNull,
-                        options.get(state.getSkillIdentifier())
+                        options.get(state.getSkillLookupIdentifier())
                 );
 
                 if (option == null) return false;

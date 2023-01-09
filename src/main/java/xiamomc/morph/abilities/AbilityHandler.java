@@ -8,6 +8,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
+import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.abilities.impl.*;
 import xiamomc.morph.misc.DisguiseState;
@@ -156,18 +157,29 @@ public class AbilityHandler extends MorphPluginObject
      */
     public List<IMorphAbility<?>> getAbilitiesFor(String id)
     {
+        return this.getAbilitiesFor(id, false);
+    }
+
+    public List<IMorphAbility<?>> getAbilitiesFor(String id, boolean noFallback)
+    {
         var entry = configToAbilitiesMap.entrySet().stream()
                 .filter(s -> s.getKey().getIdentifier().equals(id)).findFirst().orElse(null);
 
         if (entry != null)
+        {
             return entry.getValue();
-        else
-            return null;
-    }
+        }
+        else if (!noFallback)
+        {
+            var idSpilt = id.split(":", 2);
+            if (idSpilt.length < 1) return null;
 
-    public List<IMorphAbility<?>> getAbilitiesFor(EntityType type)
-    {
-        return getAbilitiesFor(type.getKey().asString());
+            var idNew = idSpilt[0] + ":" + MorphManager.disguiseFallbackName;
+
+            return getAbilitiesFor(idNew, true);
+        }
+
+        return null;
     }
 
     public void setAbilities(SkillConfiguration configuration, List<IMorphAbility<?>> abilities)

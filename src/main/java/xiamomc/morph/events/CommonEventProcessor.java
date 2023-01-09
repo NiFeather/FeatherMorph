@@ -34,7 +34,6 @@ import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
 
 import static xiamomc.morph.misc.DisguiseUtils.itemOrAir;
-import static xiamomc.morph.misc.ItemUtils.itemToStr;
 
 public class CommonEventProcessor extends MorphPluginObject implements Listener
 {
@@ -346,7 +345,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
             var profile = state.getProfileNbtString();
 
             state.setDisguise(state.getDisguiseIdentifier(),
-                    state.getSkillIdentifier(), DisguiseAPI.getDisguise(player), state.shouldHandlePose(), false,
+                    state.getSkillLookupIdentifier(), DisguiseAPI.getDisguise(player), state.shouldHandlePose(), false,
                     state.getDisguisedItems());
 
             state.setCachedNbtString(nbt);

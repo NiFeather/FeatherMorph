@@ -105,7 +105,7 @@ public class FlyAbility extends MorphAbility<FlyOption>
             float speed = getOr(
                     getTargetFlySpeed(state.getDisguiseIdentifier()),
                     s -> !Float.isNaN(s),
-                    getTargetFlySpeed(state.getSkillIdentifier()));
+                    getTargetFlySpeed(state.getSkillLookupIdentifier()));
 
             speed = Float.isNaN(speed) ? 0.1f : speed;
 

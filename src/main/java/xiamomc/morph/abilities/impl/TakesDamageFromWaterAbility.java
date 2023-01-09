@@ -7,7 +7,6 @@ import xiamomc.morph.abilities.AbilityType;
 import xiamomc.morph.abilities.MorphAbility;
 import xiamomc.morph.abilities.options.TakesDamageFromWaterOption;
 import xiamomc.morph.misc.DisguiseState;
-import xiamomc.morph.storage.skill.ISkillOption;
 
 import java.util.Objects;
 
@@ -27,7 +26,7 @@ public class TakesDamageFromWaterAbility extends MorphAbility<TakesDamageFromWat
             var dmgOption = getOr(
                     options.get(state.getDisguiseIdentifier()),
                     Objects::nonNull,
-                    options.get(state.getSkillIdentifier()));
+                    options.get(state.getSkillLookupIdentifier()));
 
             player.damage(dmgOption == null ? 1d : dmgOption.getDamageAmount());
         }

@@ -57,7 +57,7 @@ public class SkillConfigurationStore extends MorphJsonBasedStorage<SkillConfigur
         return "技能存储";
     }
 
-    private final int targetVersion = 10;
+    private final int targetVersion = 11;
 
     @Resolved
     private MorphSkillHandler skillHandler;
@@ -219,6 +219,15 @@ public class SkillConfigurationStore extends MorphJsonBasedStorage<SkillConfigur
                     targetConfig.setSkillIdentifier(SkillType.SONIC_BOOM);
                     targetConfig.setCooldown(SonicBoomMorphSkill.defaultCooldown);
                 }
+            }
+
+            //11: 调整fallback机制
+            if (version < 11)
+            {
+                config.configurations.stream()
+                        .filter(s -> s.getIdentifier().equals(EntityType.PLAYER.getKey().asString()))
+                        .findFirst().ifPresent(targetConfig -> targetConfig.setIdentifier("player:@default"));
+
             }
 
             //更新默认设置

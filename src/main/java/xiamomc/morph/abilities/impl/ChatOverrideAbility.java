@@ -13,7 +13,6 @@ import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.misc.MorphChatRenderer;
 import xiamomc.morph.misc.permissions.CommonPermissions;
-import xiamomc.morph.storage.skill.ISkillOption;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
@@ -65,7 +64,7 @@ public class ChatOverrideAbility extends MorphAbility<ChatOverrideOption>
         var formattable = getOr(
                 getFormattableMessage(state.getDisguiseIdentifier()),
                 Objects::nonNull,
-                getFormattableMessage(state.getSkillIdentifier()));
+                getFormattableMessage(state.getSkillLookupIdentifier()));
 
         if (useCustomRenderer.get())
             e.renderer(new MorphChatRenderer(formattable));

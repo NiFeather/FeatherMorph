@@ -8,6 +8,7 @@ import net.kyori.adventure.sound.Sound;
 import org.bukkit.GameMode;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
@@ -15,8 +16,6 @@ import xiamomc.morph.messages.CommandStrings;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.SkillStrings;
 import xiamomc.morph.misc.permissions.CommonPermissions;
-import xiamomc.morph.network.MorphClientHandler;
-import xiamomc.morph.network.commands.S2C.S2CSetSkillCooldownCommand;
 import xiamomc.morph.skills.impl.*;
 import xiamomc.morph.storage.skill.ISkillOption;
 import xiamomc.morph.storage.skill.SkillConfiguration;
@@ -73,7 +72,7 @@ public class MorphSkillHandler extends MorphPluginObject
                 new SummonFangsMorphSkill(),
                 new TeleportMorphSkill(),
                 new SonicBoomMorphSkill(),
-                new NoneMorphSkill()
+                NoneMorphSkill.instance
         ));
 
         this.addSchedule(this::update);
@@ -143,12 +142,20 @@ public class MorphSkillHandler extends MorphPluginObject
                 .filter(d -> identifier.equals(d.getKey().getIdentifier())).findFirst().orElse(null);
     }
 
+    /**
+     * 获取和identifier匹配的技能
+     *
+     * @param identifier 技能ID
+     * @return {@link IMorphSkill}
+     * @apiNote 如果未找到则返回 {@link NoneMorphSkill#instance}
+     */
+    @NotNull
     public IMorphSkill<?> getSkill(String identifier)
     {
         var entry = getSkillEntry(identifier);
 
         if (entry != null) return entry.getValue();
-        else return null;
+        else return NoneMorphSkill.instance;
     }
 
     public void executeDisguiseSkill(Player player)
@@ -174,7 +181,7 @@ public class MorphSkillHandler extends MorphPluginObject
 
         if (state == null) return;
 
-        var entry = getSkillEntry(state.getSkillIdentifier());
+        var entry = getSkillEntry(state.getSkillLookupIdentifier());
 
         if (entry != null && !entry.getKey().getSkillIdentifier().equals(SkillType.NONE) && player.getGameMode() != GameMode.SPECTATOR)
         {
@@ -200,7 +207,7 @@ public class MorphSkillHandler extends MorphPluginObject
                 return;
             }
 
-            var cdInfo = getCooldownInfo(player.getUniqueId(), state.getSkillIdentifier());
+            var cdInfo = getCooldownInfo(player.getUniqueId(), state.getSkillLookupIdentifier());
             assert cdInfo != null;
 
             var cd = skill.executeSkillGeneric(player, config, option);
@@ -347,7 +354,7 @@ public class MorphSkillHandler extends MorphPluginObject
         //获取当前CD
         SkillCooldownInfo cdInfo = state == null
                 ? null
-                : getCooldownInfo(uuid, state.getSkillIdentifier());
+                : getCooldownInfo(uuid, state.getSkillLookupIdentifier());
 
         //移除不需要的CD
         list.removeIf(i -> i != cdInfo && this.getCooldownInactive(i) <= 2);
