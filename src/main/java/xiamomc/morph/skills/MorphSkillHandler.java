@@ -62,9 +62,6 @@ public class MorphSkillHandler extends MorphPluginObject
     @Resolved
     private SkillConfigurationStore store;
 
-    @Resolved
-    private MorphClientHandler clientHandler;
-
     @Initializer
     private void load()
     {

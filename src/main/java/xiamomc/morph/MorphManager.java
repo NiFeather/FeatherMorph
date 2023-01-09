@@ -599,7 +599,10 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         var skill = state.getSkill();
 
         if (skill != null)
+        {
+            state.setSkillCooldown(state.getSkillCooldown());
             skill.onClientinit(state);
+        }
 
         //刷新被动
         var abilities = state.getAbilities();
