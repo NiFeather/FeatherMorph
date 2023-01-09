@@ -15,7 +15,7 @@ public class FireResistanceAbility extends EffectMorphAbility
         return AbilityType.HAS_FIRE_RESISTANCE;
     }
 
-    private final PotionEffect fireResistance = new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 20, 0);
+    private final PotionEffect fireResistance = new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 20, 0, true, false);
 
     @Override
     protected PotionEffect getEffect()

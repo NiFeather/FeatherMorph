@@ -15,7 +15,7 @@ public class SpeedBoostAbility extends EffectMorphAbility
         return AbilityType.HAS_SPEED_BOOST;
     }
 
-    private final PotionEffect speedEffect = new PotionEffect(PotionEffectType.SPEED, 11, 2);
+    private final PotionEffect speedEffect = new PotionEffect(PotionEffectType.SPEED, 11, 2, true, false);
 
     @Override
     protected PotionEffect getEffect()

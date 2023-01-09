@@ -15,7 +15,7 @@ public class FeatherFallingAbility extends EffectMorphAbility
         return AbilityType.HAS_FEATHER_FALLING;
     }
 
-    private final PotionEffect featherFallingEffect = new PotionEffect(PotionEffectType.SLOW_FALLING, 5, 0);
+    private final PotionEffect featherFallingEffect = new PotionEffect(PotionEffectType.SLOW_FALLING, 5, 0, true, false);
 
     @Override
     protected PotionEffect getEffect()
