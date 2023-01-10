@@ -12,6 +12,7 @@ import org.bukkit.entity.Vex;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
+import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.SkillStrings;
 import xiamomc.morph.skills.MorphSkill;
 import xiamomc.morph.skills.SkillType;
@@ -33,7 +34,10 @@ public class SummonFangsMorphSkill extends MorphSkill<NoOpConfiguration>
         {
             if (world.getDifficulty() == Difficulty.PEACEFUL)
             {
-                sendDenyMessageToPlayer(player, SkillStrings.difficultyIsPeacefulString().toComponent());
+                sendDenyMessageToPlayer(player, SkillStrings.difficultyIsPeacefulString()
+                        .withLocale(MessageUtils.getLocale(player))
+                        .toComponent(null));
+
                 return 10;
             }
 

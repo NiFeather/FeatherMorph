@@ -8,6 +8,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.SkillStrings;
 import xiamomc.morph.skills.MorphSkill;
 import xiamomc.morph.skills.SkillType;
@@ -35,7 +36,10 @@ public class TeleportMorphSkill extends MorphSkill<TeleportConfiguration>
                 || targetBlock.getBlockData().getMaterial().isAir()
                 || targetBlock.getBlockData().getMaterial().equals(Material.WATER))
         {
-            sendDenyMessageToPlayer(player, SkillStrings.targetNotSuitableString().toComponent());
+            sendDenyMessageToPlayer(player, SkillStrings.targetNotSuitableString()
+                    .withLocale(MessageUtils.getLocale(player))
+                    .toComponent(null));
+
             return 20;
         }
 

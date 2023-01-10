@@ -63,6 +63,10 @@ public class QuerySubCommand extends MorphPluginObject implements ISubCommand
         if (args.length >= 1)
         {
             var targetPlayer = Bukkit.getPlayerExact(args[0]);
+            String locale = null;
+
+            if (commandSender instanceof Player player)
+                locale = player.locale().toLanguageTag();
 
             if (targetPlayer != null)
             {
@@ -71,16 +75,20 @@ public class QuerySubCommand extends MorphPluginObject implements ISubCommand
                 if (info != null)
                     commandSender.sendMessage(MessageUtils.prefixes(commandSender,
                             CommandStrings.qDisguisedString()
+                                    .withLocale(locale)
                                     .resolve("who", targetPlayer.getName())
                                     .resolve("what", info.getDisplayName())
-                                    .resolve("storage_status", info.showingDisguisedItems()
-                                            ? CommandStrings.qaShowingDisguisedItemsString()
-                                            : CommandStrings.qaNotShowingDisguisedItemsString())
+                                    .resolve("storage_status",
+                                            info.showingDisguisedItems()
+                                                    ? CommandStrings.qaShowingDisguisedItemsString()
+                                                    : CommandStrings.qaNotShowingDisguisedItemsString(),
+                                            null)
                     ));
                 else if (DisguiseAPI.isDisguised(targetPlayer))
                 {
                     commandSender.sendMessage(MessageUtils.prefixes(commandSender,
                             CommandStrings.qDisguisedUnManageableString()
+                                    .withLocale(locale)
                                     .resolve("who", targetPlayer.getName())
                                     .resolve("what", DisguiseAPI.getDisguise(targetPlayer).getDisguiseName())
                     ));

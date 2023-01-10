@@ -21,6 +21,7 @@ import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.abilities.AbilityHandler;
 import xiamomc.morph.abilities.IMorphAbility;
+import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.network.MorphClientHandler;
 import xiamomc.morph.network.commands.S2C.S2CSetSkillCooldownCommand;
 import xiamomc.morph.providers.DisguiseProvider;
@@ -431,7 +432,7 @@ public class DisguiseState extends MorphPluginObject
         var provider = MorphManager.getProvider(identifier);
 
         this.provider = provider;
-        displayName = provider.getDisplayName(identifier);
+        displayName = provider.getDisplayName(identifier, MessageUtils.getLocale(player));
 
         //伪装类型是否支持设置伪装物品
         supportsDisguisedItems = skillHandler.hasSpeficSkill(skillIdentifier, SkillType.INVENTORY);

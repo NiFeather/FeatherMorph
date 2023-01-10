@@ -7,6 +7,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.craftbukkit.v1_19_R2.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.SkillStrings;
 import xiamomc.morph.skills.MorphSkill;
 import xiamomc.morph.skills.SkillType;
@@ -31,7 +32,10 @@ public class ExplodeMorphSkill extends MorphSkill<ExplosionConfiguration>
         if (!player.getWorld().createExplosion(player, strength, setsFire,
                 Boolean.TRUE.equals(player.getWorld().getGameRuleValue(GameRule.MOB_GRIEFING))))
         {
-            sendDenyMessageToPlayer(player, SkillStrings.explodeFailString().toComponent());
+            sendDenyMessageToPlayer(player, SkillStrings.explodeFailString()
+                    .withLocale(MessageUtils.getLocale(player))
+                    .toComponent(null));
+
             return 20;
         }
 

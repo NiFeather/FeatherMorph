@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.ShulkerBullet;
 import org.bukkit.entity.WitherSkull;
 import org.jetbrains.annotations.NotNull;
+import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.SkillStrings;
 import xiamomc.morph.misc.EntityTypeUtils;
 import xiamomc.morph.skills.MorphSkill;
@@ -45,7 +46,9 @@ public class LaunchProjectiveMorphSkill extends MorphSkill<ProjectiveConfigurati
             if (target == null)
             {
                 sendDenyMessageToPlayer(player, SkillStrings.noTargetString()
-                        .resolve("distance", "" + distanceLimit).toComponent());
+                        .withLocale(MessageUtils.getLocale(player))
+                        .resolve("distance", "" + distanceLimit)
+                        .toComponent(null));
 
                 return 10;
             }

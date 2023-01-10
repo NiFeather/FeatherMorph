@@ -1,5 +1,6 @@
 package xiamomc.morph.misc;
 
+import com.mojang.brigadier.Message;
 import io.papermc.paper.chat.ChatRenderer;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
@@ -10,6 +11,7 @@ import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.messages.CommonStrings;
+import xiamomc.morph.messages.MessageUtils;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Messages.FormattableMessage;
 
@@ -43,9 +45,9 @@ public class MorphChatRenderer extends MorphPluginObject implements ChatRenderer
 
             try
             {
-                this.message = buildMessage(sourceDisplayName, incomingMessage);
+                this.message = buildMessage(sourceDisplayName, incomingMessage, source);
 
-                this.messageRevealed = buildMessage(sourceDisplayName.append(Component.text("(" + source.getName() + ")")), incomingMessage);
+                this.messageRevealed = buildMessage(sourceDisplayName.append(Component.text("(" + source.getName() + ")")), incomingMessage, source);
             }
             catch (Throwable t)
             {
@@ -61,10 +63,14 @@ public class MorphChatRenderer extends MorphPluginObject implements ChatRenderer
                 : this.message;
     }
 
-    private Component buildMessage(Component displayName, Component msg)
+    private Component buildMessage(Component displayName, Component msg, Player player)
     {
+        var locale = MessageUtils.getLocale(player);
+
         return new FormattableMessage(MorphPlugin.getMorphNameSpace(), formattable.getKey(), formattable.getDefaultString())
+                .withLocale(locale)
                 .resolve("who", displayName)
-                .resolve("message", msg).toComponent();
+                .resolve("message", msg)
+                .toComponent(null);
     }
 }

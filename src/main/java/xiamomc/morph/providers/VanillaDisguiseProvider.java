@@ -17,17 +17,16 @@ import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.*;
 import org.bukkit.event.entity.CreatureSpawnEvent;
-import org.checkerframework.checker.units.qual.A;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.w3c.dom.Attr;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
+import xiamomc.morph.messages.vanilla.VanillaMessageStore;
 import xiamomc.morph.misc.*;
 import xiamomc.pluginbase.Annotations.Initializer;
+import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -280,14 +279,17 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
         return theirDisguise.getType().getEntityType().equals(info.getEntityType());
     }
 
+    @Resolved
+    private VanillaMessageStore vanillaMessageStore;
+
     @Override
-    public Component getDisplayName(String disguiseIdentifier)
+    public Component getDisplayName(String disguiseIdentifier, String locale)
     {
         var type = EntityTypeUtils.fromString(disguiseIdentifier, true);
 
         if (type == null)
             return Component.text("???");
         else
-            return MinecraftLanguageHelper.getComponent(type.translationKey());
+            return vanillaMessageStore.getComponent(type.translationKey(), null, locale);
     }
 }

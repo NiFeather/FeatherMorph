@@ -22,6 +22,7 @@ import xiamomc.morph.commands.MorphCommandHelper;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.messages.*;
+import xiamomc.morph.messages.vanilla.VanillaMessageStore;
 import xiamomc.morph.misc.DisguiseTypes;
 import xiamomc.morph.misc.DisguiseUtils;
 import xiamomc.morph.misc.EntityTypeUtils;
@@ -48,6 +49,9 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
 
     @Resolved(shouldSolveImmediately = true)
     private MorphSkillHandler skillHandler;
+
+    @Resolved(shouldSolveImmediately = true)
+    private VanillaMessageStore vanillaMessageStore;
 
 
     private Bindable<Boolean> unMorphOnDeath;
@@ -314,6 +318,12 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         var state = morphs.getDisguiseStateFor(player);
 
         clientHandler.markPlayerReady(player);
+
+        this.addSchedule(() ->
+        {
+            if (player.isOnline())
+                vanillaMessageStore.getOrCreateSubStore(MessageUtils.getLocale(player));
+        }, 3);
 
         if (clientHandler.clientConnected(player))
         {

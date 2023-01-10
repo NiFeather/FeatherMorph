@@ -19,6 +19,7 @@ import org.bukkit.scoreboard.Scoreboard;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.abilities.AbilityHandler;
+import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.MorphStrings;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.misc.DisguiseTypes;
@@ -71,6 +72,8 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
 
         if (option.displayDisguiseOnHUD)
         {
+            var locale = MessageUtils.getLocale(player);
+
             //更新actionbar信息
             var msg = state.haveSkill()
                     ? (state.getSkillCooldown() <= 0
@@ -78,7 +81,7 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
                         : MorphStrings.disguisingWithSkillPreparingString())
                     : MorphStrings.disguisingAsString();
 
-            player.sendActionBar(msg.resolve("what", state.getDisplayName()).toComponent());
+            player.sendActionBar(msg.withLocale(locale).resolve("what", state.getDisplayName()).toComponent(null));
         }
 
         //发光颜色

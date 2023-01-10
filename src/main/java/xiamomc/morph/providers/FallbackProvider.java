@@ -45,8 +45,8 @@ public class FallbackProvider extends DefaultDisguiseProvider
     }
 
     @Override
-    public Component getDisplayName(String disguiseIdentifier)
+    public Component getDisplayName(String disguiseIdentifier, String locale)
     {
-        return Component.empty();
+        return Component.text("???");
     }
 }

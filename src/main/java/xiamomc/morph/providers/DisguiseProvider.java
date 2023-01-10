@@ -252,7 +252,8 @@ public abstract class DisguiseProvider extends MorphPluginObject
      * 获取某个伪装的显示名称
      *
      * @param disguiseIdentifier 伪装ID
+     * @param locale 显示名称的目标语言
      * @return 显示名称
      */
-    public abstract Component getDisplayName(String disguiseIdentifier);
+    public abstract Component getDisplayName(String disguiseIdentifier, @Nullable String locale);
 }

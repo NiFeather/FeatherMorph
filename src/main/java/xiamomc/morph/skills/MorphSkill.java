@@ -50,7 +50,9 @@ public abstract class MorphSkill<T extends ISkillOption> extends MorphPluginObje
     protected void printErrorMessage(Player player, String message)
     {
         logger.error(message);
-        sendDenyMessageToPlayer(player, SkillStrings.exceptionOccurredString().toComponent());
+
+        sendDenyMessageToPlayer(player, SkillStrings.exceptionOccurredString()
+                .withLocale(MessageUtils.getLocale(player)).toComponent(null));
     }
 
     /**

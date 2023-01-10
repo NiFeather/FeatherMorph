@@ -526,8 +526,11 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                             info.getIdentifier(), result.disguise(), result.isCopy(), provider);
                 }
 
+                var playerLocale = MessageUtils.getLocale(player);
+
                 var msg = MorphStrings.morphSuccessString()
-                        .resolve("what", info.asComponent());
+                        .withLocale(playerLocale)
+                        .resolve("what", info.asComponent(playerLocale));
 
                 player.sendMessage(MessageUtils.prefixes(player, msg));
 
@@ -676,7 +679,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         //移除Bossbar
         state.setBossbar(null);
 
-        player.sendMessage(MessageUtils.prefixes(player, MorphStrings.unMorphSuccessString()));
+        player.sendMessage(MessageUtils.prefixes(player, MorphStrings.unMorphSuccessString().withLocale(MessageUtils.getLocale(player))));
         player.sendActionBar(Component.empty());
 
         uuidPlayerTexturesMap.remove(player.getUniqueId());

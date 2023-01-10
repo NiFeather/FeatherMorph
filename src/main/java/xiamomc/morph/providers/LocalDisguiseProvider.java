@@ -105,7 +105,7 @@ public class LocalDisguiseProvider extends VanillaDisguiseProvider
     }
 
     @Override
-    public Component getDisplayName(String disguiseIdentifier)
+    public Component getDisplayName(String disguiseIdentifier, String locale)
     {
         var ldID = DisguiseTypes.LD.toStrippedId(disguiseIdentifier);
 

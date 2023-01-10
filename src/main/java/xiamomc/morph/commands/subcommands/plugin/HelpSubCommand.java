@@ -95,12 +95,13 @@ public class HelpSubCommand extends MorphPluginObject implements ISubCommand
     private List<Component> constructSectionMessage(CommandSender sender, Section section)
     {
         var entries = section.getEntries();
+        var locale = MessageUtils.getLocale(sender);
 
         //添加section的标题
         var list = ObjectArrayList.of(
                 Component.empty(),
                 HelpStrings.commandSectionHeaderString()
-                        .resolve("basename", section.getCommandBaseName()).toComponent());
+                        .resolve("basename", section.getCommandBaseName()).toComponent(locale));
 
         //build entry
         for (var entry : entries)
@@ -111,11 +112,12 @@ public class HelpSubCommand extends MorphPluginObject implements ISubCommand
             if (perm == null || sender.hasPermission(perm))
             {
                 var msg = HelpStrings.commandEntryString()
+                        .withLocale(locale)
                         .resolve("basename", entry.baseName())
-                        .resolve("description", entry.description())
-                        .toComponent()
+                        .resolve("description", entry.description(), null)
+                        .toComponent(null)
                         .decorate(TextDecoration.UNDERLINED)
-                        .hoverEvent(HoverEvent.showText(HelpStrings.clickToCompleteString().toComponent()))
+                        .hoverEvent(HoverEvent.showText(HelpStrings.clickToCompleteString().toComponent(locale)))
                         .clickEvent(ClickEvent.suggestCommand(entry.suggestingCommand()));
 
                 list.add(msg);
@@ -126,12 +128,12 @@ public class HelpSubCommand extends MorphPluginObject implements ISubCommand
         {
             list.addAll(ObjectList.of(
                     Component.empty(),
-                    HelpStrings.specialNoteString().toComponent()
+                    HelpStrings.specialNoteString().toComponent(locale)
             ));
 
             for (var f : section.getNotes())
             {
-                list.add(f.toComponent()
+                list.add(f.toComponent(locale)
                         .decorate(TextDecoration.ITALIC));
             }
         }
@@ -150,17 +152,19 @@ public class HelpSubCommand extends MorphPluginObject implements ISubCommand
     private List<Component> constructHelpMessage(CommandSender sender)
     {
         var list = new ObjectArrayList<Component>();
+        var locale = MessageUtils.getLocale(sender);
 
-        list.add(HelpStrings.avaliableCommandHeaderString().toComponent());
+        list.add(HelpStrings.avaliableCommandHeaderString().toComponent(locale));
         for (var section : commandSections)
         {
             var msg = HelpStrings.commandNamePatternString()
+                    .withLocale(locale)
                     .resolve("basename", section.getCommandBaseName())
-                    .resolve("description", section.getDescription())
-                    .toComponent()
+                    .resolve("description", section.getDescription(), null)
+                    .toComponent(locale)
                     .decorate(TextDecoration.UNDERLINED)
                     .clickEvent(ClickEvent.runCommand("/feathermorph " + getCommandName() + " " + section.getCommandBaseName()))
-                    .hoverEvent(HoverEvent.showText(HelpStrings.clickToViewString().toComponent()));
+                    .hoverEvent(HoverEvent.showText(HelpStrings.clickToViewString().toComponent(locale)));
 
             list.add(msg);
         }
@@ -210,7 +214,7 @@ public class HelpSubCommand extends MorphPluginObject implements ISubCommand
                     sender.sendMessage(MessageUtils.prefixes(sender, s));
             }
             else
-                sender.sendMessage(MessageUtils.prefixes(sender, HelpStrings.sectionNotFoundString()));
+                sender.sendMessage(MessageUtils.prefixes(sender, HelpStrings.sectionNotFoundString().withLocale(MessageUtils.getLocale(sender))));
 
             return true;
         }

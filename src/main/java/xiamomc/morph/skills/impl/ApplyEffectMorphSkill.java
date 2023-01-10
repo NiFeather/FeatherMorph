@@ -1,5 +1,6 @@
 package xiamomc.morph.skills.impl;
 
+import com.mojang.brigadier.Message;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import org.bukkit.NamespacedKey;
@@ -8,6 +9,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.NotNull;
+import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.SkillStrings;
 import xiamomc.morph.skills.IMorphSkill;
 import xiamomc.morph.skills.MorphSkill;
@@ -29,7 +31,10 @@ public class ApplyEffectMorphSkill extends MorphSkill<EffectConfiguration>
 
         if (option.acquiresWater() && !player.isInWater())
         {
-            sendDenyMessageToPlayer(player, SkillStrings.notInWaterString().toComponent());
+            sendDenyMessageToPlayer(player, SkillStrings.notInWaterString()
+                    .withLocale(MessageUtils.getLocale(player))
+                    .toComponent(null));
+
             return 20;
         }
 

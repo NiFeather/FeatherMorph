@@ -47,18 +47,20 @@ public class QueryAllSubCommand extends MorphPluginObject implements ISubCommand
         }
 
         var msg = CommandStrings.qaDisguisedString();
+        var locale = MessageUtils.getLocale(commandSender);
 
         for (var i : list)
         {
             var player = i.getPlayer();
-            msg.resolve("who", player.getName())
+            msg.withLocale(locale)
+                    .resolve("who", player.getName())
                     .resolve("status", player.isOnline()
                             ? CommandStrings.qaOnlineString()
-                            : CommandStrings.qaOfflineString())
-                    .resolve("what", i.getDisplayName())
+                            : CommandStrings.qaOfflineString(), null)
+                    .resolve("what", i.getDisguiseIdentifier())
                     .resolve("storage_status", i.showingDisguisedItems()
                             ? CommandStrings.qaShowingDisguisedItemsString()
-                            : CommandStrings.qaNotShowingDisguisedItemsString());
+                            : CommandStrings.qaNotShowingDisguisedItemsString(), null);
 
             commandSender.sendMessage(MessageUtils.prefixes(commandSender, msg));
         }
@@ -66,8 +68,9 @@ public class QueryAllSubCommand extends MorphPluginObject implements ISubCommand
         for (var s : offlineStates)
         {
             commandSender.sendMessage(MessageUtils.prefixes(commandSender,
-                    msg.resolve("who", s.playerName)
-                            .resolve("status", CommandStrings.qaIsOfflineStoreString())
+                    msg.withLocale(locale)
+                            .resolve("who", s.playerName)
+                            .resolve("status", CommandStrings.qaIsOfflineStoreString(), null)
                             .resolve("storage_status", "")
                             .resolve("what", s.disguiseID)));
         }

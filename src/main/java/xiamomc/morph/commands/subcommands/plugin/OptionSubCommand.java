@@ -68,6 +68,9 @@ public class OptionSubCommand extends MorphPluginObject implements ISubCommand
                 {
                     boolean newVal;
 
+                    var locale = MessageUtils.getLocale(sender);
+                    targetDisplay.withLocale(locale);
+
                     if (args.length >= 1)
                     {
                         var arg = args[0];
@@ -83,7 +86,8 @@ public class OptionSubCommand extends MorphPluginObject implements ISubCommand
                     {
                         sender.sendMessage(MessageUtils.prefixes(sender,
                                 CommandStrings.optionValueString()
-                                        .resolve("what", targetDisplay)
+                                        .withLocale(locale)
+                                        .resolve("what", targetDisplay, null)
                                         .resolve("value", config.get(Boolean.class, option) + "")));
                         return true;
                     }
@@ -92,7 +96,8 @@ public class OptionSubCommand extends MorphPluginObject implements ISubCommand
 
                     sender.sendMessage(MessageUtils.prefixes(sender,
                             CommandStrings.optionSetString()
-                                    .resolve("what", targetDisplay)
+                                    .withLocale(locale)
+                                    .resolve("what", targetDisplay, null)
                                     .resolve("value", newVal + "")));
                     return true;
                 })

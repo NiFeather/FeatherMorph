@@ -9,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.providers.DisguiseProvider;
+import xiamomc.pluginbase.Messages.FormattableMessage;
 
 public class DisguiseInfo
 {
@@ -141,22 +142,26 @@ public class DisguiseInfo
         return rawIdentifier;
     }
 
-    private Component display;
-
     /**
      * 将此info转换为可以显示的Component
      * @return Component
      */
     public Component asComponent()
     {
-        if (display == null)
-            display = isValidate()
+        return isValidate()
                     ? provider == null
                         ? Component.text(rawIdentifier)
-                        : provider.getDisplayName(rawIdentifier)
+                        : provider.getDisplayName(rawIdentifier, null)
                     : Component.text("" + rawIdentifier);
+    }
 
-        return display;
+    public Component asComponent(String locale)
+    {
+        return isValidate()
+                    ? provider == null
+                        ? Component.text(rawIdentifier)
+                        : provider.getDisplayName(rawIdentifier, locale)
+                    : Component.text("" + rawIdentifier);
     }
 
     @Override

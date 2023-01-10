@@ -179,7 +179,7 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
     }
 
     @Override
-    public Component getDisplayName(String disguiseIdentifier)
+    public Component getDisplayName(String disguiseIdentifier, String locale)
     {
         //尝试获取玩家的显示名称
         Component finalName;

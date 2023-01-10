@@ -14,7 +14,7 @@ import xiamomc.morph.interfaces.IManagePlayerData;
 import xiamomc.morph.interfaces.IManageRequests;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.MorphMessageStore;
-import xiamomc.morph.misc.MinecraftLanguageHelper;
+import xiamomc.morph.messages.vanilla.VanillaMessageStore;
 import xiamomc.morph.misc.PlayerOperationSimulator;
 import xiamomc.morph.misc.integrations.gsit.GSitCompactProcessor;
 import xiamomc.morph.misc.integrations.placeholderapi.PlaceholderIntegration;
@@ -48,7 +48,7 @@ public final class MorphPlugin extends XiaMoJavaPlugin
 
     private final AbilityHandler abilityHandler = new AbilityHandler();
 
-    private final MinecraftLanguageHelper languageHelper = new MinecraftLanguageHelper();
+    private final VanillaMessageStore languageHelper = new VanillaMessageStore();
 
     private PlaceholderIntegration placeholderIntegration;
 
@@ -74,6 +74,8 @@ public final class MorphPlugin extends XiaMoJavaPlugin
         dependencyManager.cache(abilityHandler);
         dependencyManager.cache(cmdHelper);
         dependencyManager.cache(clientHandler);
+        dependencyManager.cache(languageHelper);
+
         dependencyManager.cacheAs(MessageStore.class, new MorphMessageStore());
         dependencyManager.cacheAs(MiniMessage.class, MiniMessage.miniMessage());
         dependencyManager.cacheAs(IManagePlayerData.class, morphManager);

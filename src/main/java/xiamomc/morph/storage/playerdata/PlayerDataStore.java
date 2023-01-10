@@ -186,7 +186,7 @@ public class PlayerDataStore extends MorphJsonBasedStorage<PlayerMorphConfigurat
         sendMorphAcquiredNotification(player, morphs.getDisguiseStateFor(player),
                 MorphStrings.morphUnlockedString()
                         .resolve("what", info.asComponent())
-                        .toComponent());
+                        .toComponent(player.locale().toLanguageTag()));
 
         return true;
     }
@@ -209,7 +209,7 @@ public class PlayerDataStore extends MorphJsonBasedStorage<PlayerMorphConfigurat
         sendMorphAcquiredNotification(player, morphs.getDisguiseStateFor(player),
                 MorphStrings.morphLockedString()
                         .resolve("what", info.asComponent())
-                        .toComponent());
+                        .toComponent(player.locale().toLanguageTag()));
 
         return true;
     }
