@@ -1,6 +1,7 @@
 package xiamomc.morph.events;
 
 import com.destroystokyo.paper.ClientOption;
+import com.destroystokyo.paper.event.player.PlayerClientOptionsChangeEvent;
 import com.destroystokyo.paper.event.player.PlayerPostRespawnEvent;
 import me.libraryaddict.disguise.DisguiseAPI;
 import net.kyori.adventure.key.Key;
@@ -311,6 +312,25 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         }
     }
 
+    @EventHandler
+    public void onClientOptionChanged(PlayerClientOptionsChangeEvent e)
+    {
+        var locale = e.getLocale();
+        vanillaMessageStore.getOrCreateSubStore(locale);
+
+        if (e.hasLocaleChanged())
+        {
+            var player = e.getPlayer();
+            var state = morphs.getDisguiseStateFor(player);
+
+            if (state != null)
+            {
+                var displayName = state.getProvider().getDisplayName(state.getDisguiseIdentifier(), locale);
+                state.setDisplayName(displayName);
+            }
+        }
+    }
+
     //非Premium版本的LibsDisguises不会为玩家保存伪装
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent e)
@@ -319,12 +339,6 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         var state = morphs.getDisguiseStateFor(player);
 
         clientHandler.markPlayerReady(player);
-
-        this.addSchedule(() ->
-        {
-            if (player.isOnline())
-                vanillaMessageStore.getOrCreateSubStore(MessageUtils.getLocale(player));
-        }, 3);
 
         if (clientHandler.clientConnected(player))
         {

@@ -72,7 +72,7 @@ public abstract class BasicVanillaMessageStore extends MessageStore<MorphPlugin>
 
         targetFile.delete();
 
-        if (targetFile.exists())
+        if (targetFile.exists() && !storingObject.isEmpty())
             return;
 
         this.addSchedule(() ->

@@ -145,7 +145,9 @@ public class DisguiseInfo
     /**
      * 将此info转换为可以显示的Component
      * @return Component
+     * @deprecated 请使用 {@link DisguiseInfo#asComponent(String)}
      */
+    @Deprecated
     public Component asComponent()
     {
         return isValidate()

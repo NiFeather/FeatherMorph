@@ -66,7 +66,7 @@ public class QuerySubCommand extends MorphPluginObject implements ISubCommand
             String locale = null;
 
             if (commandSender instanceof Player player)
-                locale = player.locale().toLanguageTag();
+                locale = MessageUtils.getLocale(player);
 
             if (targetPlayer != null)
             {
@@ -77,7 +77,7 @@ public class QuerySubCommand extends MorphPluginObject implements ISubCommand
                             CommandStrings.qDisguisedString()
                                     .withLocale(locale)
                                     .resolve("who", targetPlayer.getName())
-                                    .resolve("what", info.getDisplayName())
+                                    .resolve("what", info.getDisguiseIdentifier())
                                     .resolve("storage_status",
                                             info.showingDisguisedItems()
                                                     ? CommandStrings.qaShowingDisguisedItemsString()

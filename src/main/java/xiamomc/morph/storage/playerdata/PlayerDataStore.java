@@ -183,10 +183,13 @@ public class PlayerDataStore extends MorphJsonBasedStorage<PlayerMorphConfigurat
         }
         else return false;
 
+        var locale = MessageUtils.getLocale(player);
+
         sendMorphAcquiredNotification(player, morphs.getDisguiseStateFor(player),
                 MorphStrings.morphUnlockedString()
-                        .resolve("what", info.asComponent())
-                        .toComponent(player.locale().toLanguageTag()));
+                        .withLocale(locale)
+                        .resolve("what", info.asComponent(locale))
+                        .toComponent(locale));
 
         return true;
     }
@@ -206,10 +209,12 @@ public class PlayerDataStore extends MorphJsonBasedStorage<PlayerMorphConfigurat
         if (state != null && info.getKey().equals(state.getDisguiseIdentifier()))
             morphs.unMorph(player, true);
 
+        var locale = MessageUtils.getLocale(player);
         sendMorphAcquiredNotification(player, morphs.getDisguiseStateFor(player),
                 MorphStrings.morphLockedString()
-                        .resolve("what", info.asComponent())
-                        .toComponent(player.locale().toLanguageTag()));
+                        .withLocale(locale)
+                        .resolve("what", info.asComponent(locale))
+                        .toComponent());
 
         return true;
     }

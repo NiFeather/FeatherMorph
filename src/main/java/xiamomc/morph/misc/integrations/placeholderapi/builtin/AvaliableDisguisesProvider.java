@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.interfaces.IManagePlayerData;
+import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.misc.integrations.placeholderapi.IPlaceholderProvider;
 import xiamomc.morph.misc.integrations.placeholderapi.MatchMode;
 import xiamomc.pluginbase.Annotations.Resolved;
@@ -28,11 +29,13 @@ public class AvaliableDisguisesProvider extends MorphPluginObject implements IPl
         var builder = new StringBuilder();
         var list = data.getAvaliableDisguisesFor(player);
 
+        var locale = MessageUtils.getLocale(player);
+
         if (type.equalsIgnoreCase("_name"))
         {
             list.forEach(i ->
             {
-                builder.append(PlainTextComponentSerializer.plainText().serialize(i.asComponent()));
+                builder.append(PlainTextComponentSerializer.plainText().serialize(i.asComponent(locale)));
 
                 if (list.iterator().hasNext())
                     builder.append(", ");
