@@ -2,6 +2,7 @@ package xiamomc.morph.messages;
 
 import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.MorphPlugin;
+import xiamomc.morph.utilities.PluginAssetUtils;
 import xiamomc.pluginbase.Messages.IStrings;
 import xiamomc.pluginbase.Messages.MessageStore;
 
@@ -26,11 +27,33 @@ public class MorphMessageSubStore extends MessageStore<MorphPlugin>
     @Override
     public void addMissingStrings()
     {
-        parentStore.getAllMessages().forEach((key, msg) ->
+        //从插件资源获取
+        var path = PluginAssetUtils.langPath(locale);
+        var asset = PluginAssetUtils.getFileStrings(path);
+
+        if (!asset.isEmpty() && !asset.isBlank())
         {
-            if (!storingObject.containsKey(key))
-                storingObject.put(key, msg);
-        });
+            try
+            {
+                var defaults = createGson().fromJson(asset, this.storingObject.getClass());
+                defaults.forEach((o1, o2) ->
+                {
+                    if (o1 instanceof String key
+                            && !storingObject.containsKey(key)
+                            && o2 instanceof String msg)
+                    {
+                        storingObject.put(key, msg);
+                    }
+                });
+            }
+            catch (Throwable t)
+            {
+                logger.error("更新" + locale + "的默认语言时出现问题：" + t.getMessage());
+                t.printStackTrace();
+            }
+        }
+
+        saveConfiguration();
     }
 
     @Override
