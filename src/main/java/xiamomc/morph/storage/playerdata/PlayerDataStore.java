@@ -212,9 +212,8 @@ public class PlayerDataStore extends MorphJsonBasedStorage<PlayerMorphConfigurat
         var locale = MessageUtils.getLocale(player);
         sendMorphAcquiredNotification(player, morphs.getDisguiseStateFor(player),
                 MorphStrings.morphLockedString()
-                        .withLocale(locale)
                         .resolve("what", info.asComponent(locale))
-                        .toComponent());
+                        .toComponent(locale));
 
         return true;
     }
