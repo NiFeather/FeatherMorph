@@ -9,6 +9,7 @@ import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
+import xiamomc.pluginbase.Bindables.Bindable;
 import xiamomc.pluginbase.Managers.DependencyManager;
 import xiamomc.pluginbase.Messages.FormattableMessage;
 
@@ -51,6 +52,9 @@ public class MessageUtils extends MorphPluginObject
     @NotNull
     public static String getLocale(Player player)
     {
+        if (isSingleLanguage())
+            return getServerLocale();
+
         return player.locale().toLanguageTag().replace('-', '_').toLowerCase();
     }
 
@@ -63,32 +67,43 @@ public class MessageUtils extends MorphPluginObject
 
     private static MorphConfigManager configManager;
 
-    private static MorphConfigManager getConfigManager()
+    private static void initializeConfigManager()
     {
-        if (configManager != null)
-            return configManager;
+        if (configManager != null) return;
 
         var depMgr = DependencyManager.getInstance(MorphPlugin.getMorphNameSpace());
         var config = depMgr.get(MorphConfigManager.class);
 
-        configManager = config;
+        if (config != null)
+        {
+            config.bind(serverLocale, ConfigOption.LANGUAGE_CODE);
+            config.bind(singleLanguage, ConfigOption.SINGLE_LANGUAGE);
+        }
 
-        return config;
+        configManager = config;
     }
 
-    @Nullable
+    private final static Bindable<String> serverLocale = new Bindable<>("zh_cn");
+    private final static Bindable<Boolean> singleLanguage = new Bindable<>(false);
+
     private static String getServerLocale()
     {
-        var config = getConfigManager();
+        initializeConfigManager();
 
-        if (config == null) return null;
-        else return config.getOrDefault(String.class, ConfigOption.LANGUAGE_CODE);
+        return serverLocale.get();
+    }
+
+    private static boolean isSingleLanguage()
+    {
+        initializeConfigManager();
+
+        return singleLanguage.get();
     }
 
     @Nullable
     public static String getLocale(CommandSender sender)
     {
-        if (sender instanceof Player player)
+        if (sender instanceof Player player && !isSingleLanguage())
             return getLocale(player);
         else
             return getServerLocale();

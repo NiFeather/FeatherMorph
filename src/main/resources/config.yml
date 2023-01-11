@@ -9,13 +9,13 @@ root:
 
   # 语言
   language:
-    # 目标Minecraft语言
-    # 目前只支持向玩家发送对应语言的生物名称
+    # 服务器语言
+    # 将影响控制台输出、Bossbar名称以及本地化fallback过程
     code: zh_cn
 
-    # 如果没有语言可用，是否要转换为translatable让客户端自行翻译？
-    # 注：translatable和消息中的“<rainbow>”、“<gradient>”不兼容
-    cast_translatable: true
+    # 是否启用单语言模式？
+    # 启用后将强制使用服务器设定的语言配置
+    single_language: false
 
   # 收到伤害时的技能CD
   # 玩家受到伤害后技能CD将至少为下面配置的时间（单位：游戏刻）

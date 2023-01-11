@@ -38,7 +38,6 @@ public class VanillaMessageStore extends BasicVanillaMessageStore
     private void load(MorphConfigManager config)
     {
         config.bind(localeCode, ConfigOption.LANGUAGE_CODE);
-        config.bind(allowTranslatable, ConfigOption.LANGUAGE_ALLOW_FALLBACK);
 
         localeCode.onValueChanged((o, n) ->
         {
@@ -47,8 +46,6 @@ public class VanillaMessageStore extends BasicVanillaMessageStore
             this.getOrCreateSubStore(n);
         }, true);
     }
-
-    private static Bindable<Boolean> allowTranslatable = new Bindable<>(false);
 
     private Bindable<String> localeCode = new Bindable<>("en_us");
 

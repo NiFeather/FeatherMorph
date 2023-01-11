@@ -8,7 +8,9 @@ import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
+import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
+import xiamomc.pluginbase.Bindables.Bindable;
 import xiamomc.pluginbase.Messages.IStrings;
 import xiamomc.pluginbase.Messages.MessageStore;
 
@@ -32,6 +34,14 @@ public class MorphMessageStore extends MessageStore<MorphPlugin>
     );
 
     private final Map<String, MorphMessageSubStore> subStores = new Object2ObjectOpenHashMap<>();
+
+    private final Bindable<String> defaultLanguage = new Bindable<>();
+
+    @Initializer
+    private void load(MorphConfigManager config)
+    {
+        config.bind(defaultLanguage, ConfigOption.LANGUAGE_CODE);
+    }
 
     private MorphMessageSubStore getOrCreateSubStore(String locale)
     {
@@ -70,8 +80,11 @@ public class MorphMessageStore extends MessageStore<MorphPlugin>
         if (locale == null)
             logger.warn("Resolving message key " + key + " for null locale");
 
+        var overrideMsg = getOrCreateSubStore("override").get(key, null, null);
+        if (overrideMsg != null) return overrideMsg;
+
         if (locale == null || locale.isBlank() || locale.isEmpty())
-            return super.get(key, defaultValue, null);
+            locale = defaultLanguage.get();
 
         var store = this.getOrCreateSubStore(locale);
 

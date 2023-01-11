@@ -45,7 +45,8 @@ public enum ConfigOption
     ALLOW_LD_DISGUISES(ConfigNode.create().append("enable_ld_custom_disguises"), false),
 
     LANGUAGE_CODE(languageNode().append("code"), "zh_cn"),
-    LANGUAGE_ALLOW_FALLBACK(languageNode().append("cast_translatable"), true),
+    //LANGUAGE_ALLOW_FALLBACK(languageNode().append("cast_translatable"), true),
+    SINGLE_LANGUAGE(languageNode().append("single_language"), false),
 
     VERSION(ConfigNode.create().append("version"), 0);
 
