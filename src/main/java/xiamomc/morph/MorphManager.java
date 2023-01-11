@@ -754,7 +754,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         //workaround: Disguise#getDisguiseName()不会正常返回实体的自定义名称
         if (targetEntity != null && targetEntity.customName() != null)
-            state.setDisplayName(targetEntity.customName());
+            state.setPlayerDisplayName(targetEntity.customName());
 
         //如果伪装的时候坐着，显示提示
         if (sourcePlayer.getVehicle() != null && !clientHandler.clientInitialized(sourcePlayer))

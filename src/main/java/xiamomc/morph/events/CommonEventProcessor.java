@@ -1,6 +1,5 @@
 package xiamomc.morph.events;
 
-import com.destroystokyo.paper.ClientOption;
 import com.destroystokyo.paper.event.player.PlayerClientOptionsChangeEvent;
 import com.destroystokyo.paper.event.player.PlayerPostRespawnEvent;
 import me.libraryaddict.disguise.DisguiseAPI;
@@ -326,7 +325,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
             if (state != null)
             {
                 var displayName = state.getProvider().getDisplayName(state.getDisguiseIdentifier(), locale);
-                state.setDisplayName(displayName);
+                state.setPlayerDisplayName(displayName);
             }
         }
     }

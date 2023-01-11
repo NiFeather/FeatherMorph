@@ -36,7 +36,7 @@ public class StateNameProvider extends MorphPluginObject implements IPlaceholder
         else if (type.equalsIgnoreCase("_name"))
         {
             return state != null
-                    ? PlainTextComponentSerializer.plainText().serialize(state.getDisplayName())
+                    ? PlainTextComponentSerializer.plainText().serialize(state.getPlayerDisplayName())
                     : "无";
         }
 

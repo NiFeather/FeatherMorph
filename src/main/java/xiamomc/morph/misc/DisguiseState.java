@@ -21,6 +21,8 @@ import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.abilities.AbilityHandler;
 import xiamomc.morph.abilities.IMorphAbility;
+import xiamomc.morph.config.ConfigOption;
+import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.network.MorphClientHandler;
 import xiamomc.morph.network.commands.S2C.S2CSetSkillCooldownCommand;
@@ -100,16 +102,28 @@ public class DisguiseState extends MorphPluginObject
     /**
      * 伪装的显示名称
      */
-    private Component displayName;
+    private Component playerDisplayName;
 
-    public Component getDisplayName()
+    public Component getPlayerDisplayName()
     {
-        return displayName;
+        return playerDisplayName;
     }
 
-    public void setDisplayName(Component newName)
+    public void setPlayerDisplayName(Component newName)
     {
-        displayName = newName;
+        playerDisplayName = newName;
+    }
+
+    private Component serverDisplayName;
+
+    public Component getServerDisplayName()
+    {
+        return serverDisplayName;
+    }
+
+    public void setServerDisplayName(Component newName)
+    {
+        serverDisplayName = newName;
     }
 
     /**
@@ -412,6 +426,9 @@ public class DisguiseState extends MorphPluginObject
         setDisguise(identifier, skillIdentifier, d, shouldHandlePose, true, equipment);
     }
 
+    @Resolved(shouldSolveImmediately = true)
+    private MorphConfigManager config;
+
     /**
      * 设置伪装
      * @param identifier 伪装ID
@@ -443,7 +460,8 @@ public class DisguiseState extends MorphPluginObject
         var provider = MorphManager.getProvider(identifier);
 
         this.provider = provider;
-        displayName = provider.getDisplayName(identifier, MessageUtils.getLocale(player));
+        playerDisplayName = provider.getDisplayName(identifier, MessageUtils.getLocale(player));
+        serverDisplayName = provider.getDisplayName(identifier, config.get(String.class, ConfigOption.LANGUAGE_CODE));
 
         //伪装类型是否支持设置伪装物品
         supportsDisguisedItems = skillHandler.hasSpeficSkill(skillIdentifier, SkillType.INVENTORY);

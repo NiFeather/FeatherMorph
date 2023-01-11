@@ -1,6 +1,5 @@
 package xiamomc.morph.misc;
 
-import com.mojang.brigadier.Message;
 import io.papermc.paper.chat.ChatRenderer;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
@@ -41,7 +40,7 @@ public class MorphChatRenderer extends MorphPluginObject implements ChatRenderer
             var state = morphManager.getDisguiseStateFor(source);
 
             if (state != null)
-                sourceDisplayName = state.getDisplayName();
+                sourceDisplayName = state.getPlayerDisplayName();
 
             try
             {

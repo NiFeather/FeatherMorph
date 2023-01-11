@@ -137,7 +137,7 @@ public class BossbarAbility extends MorphAbility<BossbarOption>
     private Component getBossbarName(DisguiseState state, BossbarOption option)
     {
         return MiniMessage.miniMessage().deserialize(option.getCreateOption().name(),
-                Placeholder.component("name", state.getDisplayName()),
+                Placeholder.component("name", state.getServerDisplayName()),
                 Placeholder.component("who", state.getPlayer().displayName()));
     }
 }

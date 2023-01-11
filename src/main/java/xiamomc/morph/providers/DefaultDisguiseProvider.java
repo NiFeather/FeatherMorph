@@ -81,7 +81,7 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
                         : MorphStrings.disguisingWithSkillPreparingString())
                     : MorphStrings.disguisingAsString();
 
-            player.sendActionBar(msg.withLocale(locale).resolve("what", state.getDisplayName()).toComponent(null));
+            player.sendActionBar(msg.withLocale(locale).resolve("what", state.getPlayerDisplayName()).toComponent(null));
         }
 
         //发光颜色
@@ -238,9 +238,15 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
 
             //如果伪装是复制来的，并且目标实体有伪装，则将颜色设置为他们伪装的发光颜色
             if (state.shouldHandlePose() && DisguiseAPI.isDisguised(teamTargetEntity))
+            {
                 glowColor = DisguiseAPI.getDisguise(teamTargetEntity).getWatcher().getGlowColor();
+            }
             else
-                glowColor = team == null ? null : ColorUtils.toChatColor(team.color()); //否则，尝试设置成我们自己的
+            {
+                var color = team == null ? null : (team.hasColor() ? team.color() : null);
+
+                glowColor = ColorUtils.toChatColor(color); //否则，尝试设置成我们自己的
+            }
         }
 
         //设置发光颜色
