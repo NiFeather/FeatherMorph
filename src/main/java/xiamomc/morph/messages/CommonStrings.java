@@ -4,9 +4,9 @@ import xiamomc.pluginbase.Messages.FormattableMessage;
 
 public class CommonStrings extends AbstractMorphStrings
 {
-    public static FormattableMessage chatOverrideString()
+    public static FormattableMessage chatOverrideDefaultPattern()
     {
-        return getFormattable(getKey("chat.overridePattern"),
+        return getFormattable(getKey("chat.overrideDefaultPattern"),
                 "<<who>> <message>");
     }
 

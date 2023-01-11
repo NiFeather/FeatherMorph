@@ -29,7 +29,7 @@ public class MorphChatRenderer extends MorphPluginObject implements ChatRenderer
             this.formattable = formattable;
     }
 
-    private FormattableMessage formattable = CommonStrings.chatOverrideString();
+    private FormattableMessage formattable = CommonStrings.chatOverrideDefaultPattern();
 
     @Override
     public @NotNull Component render(@NotNull Player source, @NotNull Component sourceDisplayName,
