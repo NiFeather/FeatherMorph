@@ -22,6 +22,8 @@ public abstract class MorphAbility<T extends ISkillOption> extends MorphPluginOb
     {
         synchronized (appliedPlayers)
         {
+            if (appliedPlayers.contains(player)) return true;
+
             appliedPlayers.add(player);
         }
 

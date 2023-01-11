@@ -25,9 +25,10 @@ public class FlyAbility extends MorphAbility<FlyOption>
     @Override
     public boolean applyToPlayer(Player player, DisguiseState state)
     {
-        super.applyToPlayer(player, state);
-
-        return updateFlyingAbility(state);
+        if (super.applyToPlayer(player, state))
+            return updateFlyingAbility(state);
+        else
+            return false;
     }
 
     @Override
