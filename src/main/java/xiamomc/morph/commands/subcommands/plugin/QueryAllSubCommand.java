@@ -37,7 +37,7 @@ public class QueryAllSubCommand extends MorphPluginObject implements ISubCommand
     @Override
     public boolean onCommand(@NotNull CommandSender commandSender, @NotNull String[] strings)
     {
-        var list = manager.getDisguisedPlayers();
+        var list = manager.getDisguiseStates();
         var offlineStates = manager.getAvaliableOfflineStates();
 
         if (list.size() == 0 && offlineStates.size() == 0)

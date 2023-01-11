@@ -1,5 +1,6 @@
 package xiamomc.morph.events;
 
+import com.destroystokyo.paper.ClientOption;
 import com.destroystokyo.paper.event.player.PlayerPostRespawnEvent;
 import me.libraryaddict.disguise.DisguiseAPI;
 import net.kyori.adventure.key.Key;
@@ -360,16 +361,6 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
 
             state.setCachedNbtString(nbt);
             state.setCachedProfileNbtString(profile);
-
-            //刷新被动
-            var abilities = state.getAbilities();
-            abilities.forEach(a -> a.applyToPlayer(state.getPlayer(), state));
-
-            //刷新主动
-            var skill = state.getSkill();
-
-            if (skill != null)
-                skill.onInitialEquip(state);
 
             //调用Morph事件
             Bukkit.getPluginManager().callEvent(new PlayerMorphEvent(player, state));

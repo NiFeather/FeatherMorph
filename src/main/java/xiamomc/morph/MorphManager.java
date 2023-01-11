@@ -55,10 +55,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MorphManager extends MorphPluginObject implements IManagePlayerData
 {
-    /**
-     * 已伪装的玩家
-     */
-    private final List<DisguiseState> disguisedPlayers = new ObjectArrayList<>();
+    private final List<DisguiseState> disguiseStates = new ObjectArrayList<>();
 
     private final PlayerDataStore data = new PlayerDataStore();
 
@@ -95,7 +92,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
     private void update()
     {
-        var states = this.getDisguisedPlayers();
+        var states = this.getDisguiseStates();
 
         states.forEach(i ->
         {
@@ -123,7 +120,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                     logger.warn("正在移除非Morph生成的伪装: " + p + " :: " + i.getDisguise() + " <-> " + disg);
                     unMorph(p, true);
                     DisguiseAPI.disguiseEntity(p, disg);
-                    disguisedPlayers.remove(i);
+                    disguiseStates.remove(i);
                 }
 
                 return;
@@ -158,9 +155,9 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
      * @return 玩家列表
      * @apiNote 列表中的玩家可能已经离线
      */
-    public List<DisguiseState> getDisguisedPlayers()
+    public List<DisguiseState> getDisguiseStates()
     {
-        return new ObjectArrayList<>(disguisedPlayers);
+        return new ObjectArrayList<>(disguiseStates);
     }
 
     private final Map<UUID, Long> uuidMoprhTimeMap = new ConcurrentHashMap<>();
@@ -508,16 +505,13 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                         return false;
                     }
 
-                    //取消上个State的伪装
+                    //重置上个State的伪装
                     if (state != null)
                     {
                         state.getProvider().unMorph(player, state);
-                        state.getAbilities().forEach(a -> a.revokeFromPlayer(player, state));
+                        state.setAbilities(List.of());
 
-                        var skill = state.getSkill();
-
-                        if (skill != null)
-                            skill.onDeEquip(state);
+                        state.setSkill(null);
                     }
 
                     clientHandler.updateCurrentIdentifier(player, key);
@@ -628,7 +622,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
      */
     public void unMorphAll(boolean ignoreOffline)
     {
-        var players = new ObjectArrayList<>(disguisedPlayers);
+        var players = new ObjectArrayList<>(disguiseStates);
         players.forEach(i ->
         {
             if (ignoreOffline && !i.getPlayer().isOnline()) return;
@@ -656,7 +650,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             return;
         }
 
-        var state = disguisedPlayers.stream()
+        var state = disguiseStates.stream()
                 .filter(i -> i.getPlayerUniqueID().equals(player.getUniqueId())).findFirst().orElse(null);
 
         if (state == null)
@@ -664,12 +658,13 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         state.getProvider().unMorph(player, state);
 
-        //移除所有被动
-        state.getAbilities().forEach(a -> a.revokeFromPlayer(player, state));
+        //移除所有技能
+        state.setAbilities(List.of());
+        state.setSkill(null);
 
         spawnParticle(player, player.getLocation(), player.getWidth(), player.getHeight(), player.getWidth());
 
-        disguisedPlayers.remove(state);
+        disguiseStates.remove(state);
 
         updateLastPlayerMorphOperationTime(player);
 
@@ -745,7 +740,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         {
             state = new DisguiseState(sourcePlayer, id, targetSkillID, disguise, shouldHandlePose, provider, equipment);
 
-            disguisedPlayers.add(state);
+            disguiseStates.add(state);
         }
         else
         {
@@ -931,7 +926,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     @Nullable
     public DisguiseState getDisguiseStateFor(Player player)
     {
-        return this.disguisedPlayers.stream()
+        return this.disguiseStates.stream()
                 .filter(i -> i.getPlayerUniqueID().equals(player.getUniqueId()))
                 .findFirst().orElse(null);
     }
@@ -945,7 +940,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
     public void onPluginDisable()
     {
-        getDisguisedPlayers().forEach(s ->
+        getDisguiseStates().forEach(s ->
         {
             var player = s.getPlayer();
 
@@ -972,8 +967,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
     private void disguiseFromState(DisguiseState state)
     {
-        if (!disguisedPlayers.contains(state))
-            disguisedPlayers.add(state);
+        if (!disguiseStates.contains(state))
+            disguiseStates.add(state);
 
         DisguiseAPI.disguiseEntity(state.getPlayer(), state.getDisguise());
         postConstructDisguise(state);
@@ -1084,14 +1079,14 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         //重载完数据后要发到离线存储的人
         var stateToOfflineStore = new ObjectArrayList<DisguiseState>();
 
-        disguisedPlayers.forEach(s ->
+        disguiseStates.forEach(s ->
         {
             if (!s.getPlayer().isOnline())
                 stateToOfflineStore.add(s);
         });
 
-        disguisedPlayers.removeAll(stateToOfflineStore);
-        var stateToRecover = getDisguisedPlayers();
+        disguiseStates.removeAll(stateToOfflineStore);
+        var stateToRecover = getDisguiseStates();
 
         unMorphAll(false);
 

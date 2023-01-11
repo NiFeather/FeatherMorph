@@ -310,6 +310,7 @@ public class DisguiseState extends MorphPluginObject
 
     public void setAbilities(@Nullable List<IMorphAbility<?>> newAbilities)
     {
+        abilities.forEach(a -> a.revokeFromPlayer(player, this));
         abilities.clear();
 
         if (newAbilities != null)
