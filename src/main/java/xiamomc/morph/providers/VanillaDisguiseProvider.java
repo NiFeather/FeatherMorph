@@ -194,7 +194,8 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
 
         runnable.run();
 
-        player.setHealth(attributeInstance.getValue() * currentPercent);
+        if (player.getHealth() > 0)
+            player.setHealth(attributeInstance.getValue() * currentPercent);
     }
 
     private void removeAllHealthModifiers(Player player)
