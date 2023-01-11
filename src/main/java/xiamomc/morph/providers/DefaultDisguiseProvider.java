@@ -204,6 +204,7 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
         //被动技能
         var abilities = abilityHandler.getAbilitiesFor(state.getSkillLookupIdentifier());
         state.setAbilities(abilities);
+        state.setSkill(skillHandler.getSkill(state.getSkillLookupIdentifier()));
 
         //发光颜色
         ChatColor glowColor = null;

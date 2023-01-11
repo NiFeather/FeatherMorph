@@ -314,7 +314,17 @@ public class DisguiseState extends MorphPluginObject
         abilities.clear();
 
         if (newAbilities != null)
+        {
             abilities.addAll(newAbilities);
+            newAbilities.forEach(a -> a.applyToPlayer(player, this));
+        }
+    }
+
+    @ApiStatus.Internal
+    public void refreshSkills()
+    {
+        this.abilities.forEach(a -> a.applyToPlayer(player, this));
+        this.skill.onInitialEquip(this);
     }
 
     /**
@@ -477,16 +487,6 @@ public class DisguiseState extends MorphPluginObject
                 setShowingDisguisedItems(showDisguisedItems || !emptyEquipment);
             }
         }
-
-        //更新技能Flag
-        var abilities = abilityHandler.getAbilitiesFor(identifier);
-        if (abilities != null)
-        {
-            setAbilities(abilities);
-            abilities.forEach(a -> a.applyToPlayer(player, this));
-        }
-
-        setSkill(skillHandler.getSkill(this.getSkillLookupIdentifier()));
     }
 
     /**

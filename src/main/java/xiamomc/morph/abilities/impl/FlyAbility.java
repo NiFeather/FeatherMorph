@@ -37,7 +37,7 @@ public class FlyAbility extends MorphAbility<FlyOption>
         if (player.getGameMode() != GameMode.CREATIVE && player.getGameMode() != GameMode.SPECTATOR)
         {
             var nmsPlayer = ((CraftPlayer) player).getHandle();
-            var config = options.get(state.getDisguiseIdentifier());
+            var config = options.get(state.getSkillLookupIdentifier());
 
             var data = nmsPlayer.getFoodData();
             var allowFlight = data.foodLevel > config.getMinimumHunger();
@@ -103,10 +103,7 @@ public class FlyAbility extends MorphAbility<FlyOption>
 
         if (player.getGameMode() != GameMode.SPECTATOR)
         {
-            float speed = getOr(
-                    getTargetFlySpeed(state.getDisguiseIdentifier()),
-                    s -> !Float.isNaN(s),
-                    getTargetFlySpeed(state.getSkillLookupIdentifier()));
+            float speed = getTargetFlySpeed(state.getSkillLookupIdentifier());
 
             speed = Float.isNaN(speed) ? 0.1f : speed;
 

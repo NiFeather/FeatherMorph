@@ -376,6 +376,8 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
             state.setCachedNbtString(nbt);
             state.setCachedProfileNbtString(profile);
 
+            state.refreshSkills();
+
             //调用Morph事件
             Bukkit.getPluginManager().callEvent(new PlayerMorphEvent(player, state));
 
