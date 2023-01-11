@@ -10,10 +10,9 @@ import org.bukkit.entity.WitherSkull;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.SkillStrings;
-import xiamomc.morph.misc.EntityTypeUtils;
+import xiamomc.morph.utilities.EntityTypeUtils;
 import xiamomc.morph.skills.MorphSkill;
 import xiamomc.morph.skills.SkillType;
-import xiamomc.morph.storage.skill.ISkillOption;
 import xiamomc.morph.storage.skill.ProjectiveConfiguration;
 import xiamomc.morph.storage.skill.SkillConfiguration;
 

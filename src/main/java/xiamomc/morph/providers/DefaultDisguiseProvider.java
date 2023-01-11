@@ -23,7 +23,7 @@ import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.MorphStrings;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.misc.DisguiseTypes;
-import xiamomc.morph.misc.DisguiseUtils;
+import xiamomc.morph.utilities.DisguiseUtils;
 import xiamomc.morph.network.MorphClientHandler;
 import xiamomc.morph.network.commands.S2C.AbstractS2CCommand;
 import xiamomc.morph.network.commands.S2C.S2CSetEquipCommand;

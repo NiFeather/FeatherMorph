@@ -1,4 +1,4 @@
-package xiamomc.morph.misc;
+package xiamomc.morph.utilities;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.StringTagVisitor;

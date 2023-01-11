@@ -34,13 +34,14 @@ import xiamomc.morph.skills.SkillType;
 import xiamomc.morph.skills.impl.NoneMorphSkill;
 import xiamomc.morph.storage.offlinestore.OfflineDisguiseState;
 import xiamomc.morph.storage.playerdata.PlayerMorphConfiguration;
+import xiamomc.morph.utilities.DisguiseUtils;
 import xiamomc.pluginbase.Annotations.Resolved;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static xiamomc.morph.misc.DisguiseUtils.itemOrAir;
+import static xiamomc.morph.utilities.DisguiseUtils.itemOrAir;
 
 public class DisguiseState extends MorphPluginObject
 {

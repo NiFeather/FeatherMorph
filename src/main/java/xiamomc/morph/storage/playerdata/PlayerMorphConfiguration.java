@@ -4,7 +4,7 @@ import com.google.gson.annotations.Expose;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.misc.DisguiseInfo;
-import xiamomc.morph.misc.DisguiseUtils;
+import xiamomc.morph.utilities.DisguiseUtils;
 
 import java.util.UUID;
 

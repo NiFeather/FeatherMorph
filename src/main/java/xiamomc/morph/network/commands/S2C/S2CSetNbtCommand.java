@@ -1,7 +1,7 @@
 package xiamomc.morph.network.commands.S2C;
 
 import net.minecraft.nbt.CompoundTag;
-import xiamomc.morph.misc.NbtUtils;
+import xiamomc.morph.utilities.NbtUtils;
 
 public class S2CSetNbtCommand extends S2CSetCommand<CompoundTag>
 {

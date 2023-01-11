@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.providers.DisguiseProvider;
-import xiamomc.pluginbase.Messages.FormattableMessage;
+import xiamomc.morph.utilities.EntityTypeUtils;
 
 public class DisguiseInfo
 {

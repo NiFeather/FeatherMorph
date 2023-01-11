@@ -42,6 +42,8 @@ import xiamomc.morph.storage.offlinestore.OfflineDisguiseState;
 import xiamomc.morph.storage.offlinestore.OfflineStorageManager;
 import xiamomc.morph.storage.playerdata.PlayerDataStore;
 import xiamomc.morph.storage.playerdata.PlayerMorphConfiguration;
+import xiamomc.morph.utilities.DisguiseUtils;
+import xiamomc.morph.utilities.NbtUtils;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;

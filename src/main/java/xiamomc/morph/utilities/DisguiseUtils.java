@@ -1,4 +1,4 @@
-package xiamomc.morph.misc;
+package xiamomc.morph.utilities;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import me.libraryaddict.disguise.disguisetypes.Disguise;
@@ -8,6 +8,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Pose;
 import org.bukkit.inventory.ItemStack;
+import xiamomc.morph.misc.DisguiseInfo;
 
 import java.util.Arrays;
 import java.util.List;

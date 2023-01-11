@@ -17,7 +17,7 @@ import xiamomc.morph.abilities.options.BossbarOption;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.misc.DisguiseState;
-import xiamomc.morph.misc.DisguiseUtils;
+import xiamomc.morph.utilities.DisguiseUtils;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Bindables.Bindable;
 

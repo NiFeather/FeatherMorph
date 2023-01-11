@@ -2,7 +2,7 @@ package xiamomc.morph.network.commands.S2C;
 
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
-import xiamomc.morph.misc.ItemUtils;
+import xiamomc.morph.utilities.ItemUtils;
 
 public class S2CSetEquipCommand extends S2CSetCommand<ItemStack>
 {

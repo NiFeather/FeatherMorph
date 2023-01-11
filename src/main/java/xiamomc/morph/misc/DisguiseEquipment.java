@@ -1,7 +1,6 @@
 package xiamomc.morph.misc;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import me.libraryaddict.disguise.utilities.DisguiseUtilities;
 import org.apache.commons.lang3.NotImplementedException;
 import org.bukkit.entity.Entity;
 import org.bukkit.inventory.EntityEquipment;
@@ -9,8 +8,8 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xiamomc.morph.utilities.DisguiseUtils;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 

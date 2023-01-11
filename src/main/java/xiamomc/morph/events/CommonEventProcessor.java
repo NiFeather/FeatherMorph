@@ -25,8 +25,8 @@ import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.messages.*;
 import xiamomc.morph.messages.vanilla.VanillaMessageStore;
 import xiamomc.morph.misc.DisguiseTypes;
-import xiamomc.morph.misc.DisguiseUtils;
-import xiamomc.morph.misc.EntityTypeUtils;
+import xiamomc.morph.utilities.DisguiseUtils;
+import xiamomc.morph.utilities.EntityTypeUtils;
 import xiamomc.morph.network.MorphClientHandler;
 import xiamomc.morph.network.commands.S2C.S2CSetEquipCommand;
 import xiamomc.morph.network.commands.S2C.S2CSwapCommand;
@@ -35,7 +35,7 @@ import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
 
-import static xiamomc.morph.misc.DisguiseUtils.itemOrAir;
+import static xiamomc.morph.utilities.DisguiseUtils.itemOrAir;
 
 public class CommonEventProcessor extends MorphPluginObject implements Listener
 {

@@ -1,8 +1,5 @@
 package xiamomc.morph.network.commands.S2C;
 
-import net.minecraft.nbt.CompoundTag;
-import xiamomc.morph.misc.NbtUtils;
-
 public class S2CSetSNbtCommand extends S2CSetCommand<String>
 {
     public S2CSetSNbtCommand(String tag)

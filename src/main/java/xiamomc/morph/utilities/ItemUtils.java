@@ -1,4 +1,4 @@
-package xiamomc.morph.misc;
+package xiamomc.morph.utilities;
 
 import com.google.gson.Gson;
 import com.mojang.serialization.JsonOps;

@@ -2,7 +2,7 @@ package xiamomc.morph.storage.skill;
 
 import com.google.gson.annotations.Expose;
 import org.bukkit.entity.EntityType;
-import xiamomc.morph.misc.EntityTypeUtils;
+import xiamomc.morph.utilities.EntityTypeUtils;
 
 public class SummonConfiguration
 {

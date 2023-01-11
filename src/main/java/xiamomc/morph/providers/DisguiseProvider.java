@@ -4,7 +4,6 @@ import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.disguisetypes.Disguise;
 import net.kyori.adventure.text.Component;
 import net.minecraft.nbt.*;
-import net.minecraft.server.commands.TagCommand;
 import org.bukkit.craftbukkit.v1_19_R2.entity.CraftLivingEntity;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -14,7 +13,7 @@ import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.misc.DisguiseInfo;
 import xiamomc.morph.misc.DisguiseState;
-import xiamomc.morph.misc.NbtUtils;
+import xiamomc.morph.utilities.NbtUtils;
 import xiamomc.morph.network.commands.S2C.AbstractS2CCommand;
 import xiamomc.pluginbase.Annotations.Resolved;
 

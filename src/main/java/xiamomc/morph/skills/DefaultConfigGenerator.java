@@ -2,7 +2,6 @@ package xiamomc.morph.skills;
 
 import net.kyori.adventure.bossbar.BossBar;
 import org.bukkit.NamespacedKey;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.Nullable;
@@ -11,7 +10,7 @@ import xiamomc.morph.abilities.AbilityType;
 import xiamomc.morph.abilities.options.BossbarOption;
 import xiamomc.morph.abilities.options.FlyOption;
 import xiamomc.morph.abilities.options.ReduceDamageOption;
-import xiamomc.morph.misc.EntityTypeUtils;
+import xiamomc.morph.utilities.EntityTypeUtils;
 import xiamomc.morph.skills.impl.SonicBoomMorphSkill;
 import xiamomc.morph.storage.skill.*;
 

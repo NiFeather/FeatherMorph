@@ -1,8 +1,9 @@
-package xiamomc.morph.misc;
+package xiamomc.morph.utilities;
 
 import it.unimi.dsi.fastutil.objects.ObjectSet;
 import org.bukkit.entity.EntityType;
 import org.jetbrains.annotations.Nullable;
+import xiamomc.morph.misc.DisguiseTypes;
 
 import java.util.Arrays;
 import java.util.Set;
