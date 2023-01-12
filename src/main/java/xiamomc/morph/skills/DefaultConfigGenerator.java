@@ -143,9 +143,6 @@ public class DefaultConfigGenerator
         addSkillConfiguration(skills, EntityType.ENDER_DRAGON, 80, SkillType.LAUNCH_PROJECTIVE, c ->
                 c.addOption(SkillType.LAUNCH_PROJECTIVE, new ProjectiveConfiguration(EntityType.DRAGON_FIREBALL, 1, "entity.ender_dragon.shoot", 80)));
 
-        addSkillConfiguration(skills, EntityType.GHAST, 40, SkillType.LAUNCH_PROJECTIVE, c ->
-                c.addOption(SkillType.LAUNCH_PROJECTIVE, new ProjectiveConfiguration(EntityType.FIREBALL, 1, "entity.ghast.shoot", 35)));
-
         addSkillConfiguration(skills, EntityType.LLAMA, 25, SkillType.LAUNCH_PROJECTIVE, c ->
                 c.addOption(SkillType.LAUNCH_PROJECTIVE, new ProjectiveConfiguration(EntityType.LLAMA_SPIT, 1, "entity.llama.spit", 8)));
 
@@ -160,6 +157,9 @@ public class DefaultConfigGenerator
 
         addSkillConfiguration(skills, EntityType.WITHER, 10, SkillType.LAUNCH_PROJECTIVE, c ->
                 c.addOption(SkillType.LAUNCH_PROJECTIVE, new ProjectiveConfiguration(EntityType.WITHER_SKULL, 1, "entity.wither.shoot", 24)));
+
+        addSkillConfiguration(skills, EntityType.GHAST, 40, SkillType.GHAST, c ->
+                c.addOption(SkillType.GHAST, new ProjectiveConfiguration(EntityType.FIREBALL, 1, "entity.ghast.shoot", 35)));
 
         //药效
         addSkillConfiguration(skills, EntityType.DOLPHIN, 180, SkillType.APPLY_EFFECT, c ->
@@ -189,7 +189,7 @@ public class DefaultConfigGenerator
             option.setMinimumHunger(6);
             option.setHungerConsumeMultiplier(Math.min(option.getFlyingSpeed() / 0.05f, 2));
 
-            c.setOption(AbilityType.CAN_FLY.asString(), option);
+            c.addOption(AbilityType.CAN_FLY, option);
         });
 
         addAbilityConfiguration(skills, EntityTypeUtils.hasFireResistance(), AbilityType.HAS_FIRE_RESISTANCE);
@@ -205,13 +205,13 @@ public class DefaultConfigGenerator
 
         addAbilityConfiguration(skills, EntityTypeUtils.reducesMagicDamage(), AbilityType.REDUCES_MAGIC_DAMAGE, c ->
         {
-            c.setOption(AbilityType.REDUCES_MAGIC_DAMAGE.asString(),
+            c.addOption(AbilityType.REDUCES_MAGIC_DAMAGE,
                     new ReduceDamageOption(0.15d, true));
         });
 
         addAbilityConfiguration(skills, EntityTypeUtils.reducesFallDamage(), AbilityType.REDUCES_FALL_DAMAGE, c ->
         {
-            c.setOption(AbilityType.REDUCES_FALL_DAMAGE.asString(),
+            c.addOption(AbilityType.REDUCES_FALL_DAMAGE,
                     new ReduceDamageOption(10));
         });
 
@@ -223,13 +223,13 @@ public class DefaultConfigGenerator
 
         addAbilityConfiguration(skills, EntityType.WITHER, AbilityType.BOSSBAR, c ->
         {
-            c.setOption(AbilityType.BOSSBAR.asString(),
+            c.addOption(AbilityType.BOSSBAR,
                     new BossbarOption(new BossbarOption.BossbarCreateOption("<name> (<who>)", BossBar.Color.PURPLE, BossBar.Overlay.PROGRESS, Set.of(BossBar.Flag.DARKEN_SCREEN)), 80));
         });
 
         addAbilityConfiguration(skills, EntityType.ENDER_DRAGON, AbilityType.BOSSBAR, c ->
         {
-            c.setOption(AbilityType.BOSSBAR.asString(),
+            c.addOption(AbilityType.BOSSBAR,
                     new BossbarOption(new BossbarOption.BossbarCreateOption("<name> (<who>)", BossBar.Color.PINK, BossBar.Overlay.PROGRESS, Set.of()), -1));
         });
 

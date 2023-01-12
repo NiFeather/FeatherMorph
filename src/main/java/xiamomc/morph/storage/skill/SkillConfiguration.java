@@ -224,6 +224,22 @@ public class SkillConfiguration
         return options.get(ability.getIdentifier().asString());
     }
 
+    public boolean moveOption(NamespacedKey oldIdentifier, NamespacedKey newIdentifier)
+    {
+        if (options == null) return false;
+
+        var option = options.getOrDefault(oldIdentifier.asString(), null);
+        if (option != null)
+        {
+            options.remove(oldIdentifier.asString());
+            options.put(newIdentifier.asString(), option);
+
+            return true;
+        }
+
+        return false;
+    }
+
     /**
      * 添加一个技能设置用于存储
      *
@@ -232,7 +248,21 @@ public class SkillConfiguration
      */
     public void addOption(NamespacedKey identifier, ISkillOption option)
     {
-        this.setOption(identifier.asString(), option.toMap());
+        Map<String, Object> currentOptionMap = null;
+
+        if (options != null)
+            currentOptionMap = options.getOrDefault(identifier.asString(), null);
+
+        if (currentOptionMap != null)
+        {
+            var map = option.toMap();
+
+            map.forEach(currentOptionMap::putIfAbsent);
+        }
+        else
+        {
+            this.setOption(identifier.asString(), option.toMap());
+        }
     }
 
     public void setOption(String identifier, Map<String, Object> map)

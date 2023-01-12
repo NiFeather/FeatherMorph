@@ -4,6 +4,7 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.bukkit.entity.EntityType;
+import org.jetbrains.annotations.Contract;
 import xiamomc.morph.skills.SkillType;
 
 import java.util.Map;
@@ -53,6 +54,7 @@ public class ProjectiveConfiguration implements ISkillOption
     }
 
     @Override
+    @Contract("null -> null; !null -> !null")
     public ProjectiveConfiguration fromMap(Map<String, Object> map)
     {
         if (map == null) return null;

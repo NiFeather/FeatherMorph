@@ -11,6 +11,7 @@ import xiamomc.morph.skills.DefaultConfigGenerator;
 import xiamomc.morph.skills.IMorphSkill;
 import xiamomc.morph.skills.MorphSkillHandler;
 import xiamomc.morph.skills.SkillType;
+import xiamomc.morph.skills.impl.LaunchProjectiveMorphSkill;
 import xiamomc.morph.skills.impl.SonicBoomMorphSkill;
 import xiamomc.morph.storage.MorphJsonBasedStorage;
 import xiamomc.pluginbase.Annotations.Resolved;
@@ -228,6 +229,22 @@ public class SkillConfigurationStore extends MorphJsonBasedStorage<SkillConfigur
                         .filter(s -> s.getIdentifier().equals(EntityType.PLAYER.getKey().asString()))
                         .findFirst().ifPresent(targetConfig -> targetConfig.setIdentifier("player:@default"));
 
+            }
+
+            if (version < 12)
+            {
+                var targetConfig = config.configurations.stream()
+                        .filter(s -> s != null && s.getIdentifier().equals(EntityType.GHAST.getKey().asString()))
+                        .findFirst().orElse(null);
+
+                if (targetConfig != null)
+                {
+                    if (targetConfig.getSkillIdentifier().equals(SkillType.LAUNCH_PROJECTIVE))
+                    {
+                        targetConfig.setSkillIdentifier(SkillType.GHAST);
+                        targetConfig.moveOption(SkillType.LAUNCH_PROJECTIVE, SkillType.GHAST);
+                    }
+                }
             }
 
             //更新默认设置

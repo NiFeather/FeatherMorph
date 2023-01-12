@@ -72,6 +72,7 @@ public class MorphSkillHandler extends MorphPluginObject
                 new SummonFangsMorphSkill(),
                 new TeleportMorphSkill(),
                 new SonicBoomMorphSkill(),
+                new GhastMorphSkill(),
                 NoneMorphSkill.instance
         ));
 

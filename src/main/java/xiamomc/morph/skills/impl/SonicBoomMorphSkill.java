@@ -16,27 +16,28 @@ import xiamomc.morph.storage.skill.SkillConfiguration;
 
 public class SonicBoomMorphSkill extends DelayedMorphSkill<NoOpConfiguration>
 {
+    //1.7s + 3s
+    public static int defaultCooldown = 34 + 20 * 3;
+
     @Override
-    public int executeSkill(Player player, SkillConfiguration configuration, NoOpConfiguration option)
+    protected ExecuteResult preExecute(Player player, SkillConfiguration configuration, NoOpConfiguration option)
     {
-        if (option == null || configuration == null)
-        {
-            printErrorMessage(player, configuration + "没有对SonicBoom进行配置");
-            return 10;
-        }
+        super.preExecute(player, configuration, option);
 
         playSoundToNearbyPlayers(player, 160,
                 Key.key("minecraft", "entity.warden.sonic_charge"), Sound.Source.HOSTILE);
 
-        this.addDelayedSkillSchedule(player, () -> executeSonic(player), 34);
-
-        return configuration.getCooldown();
+        return super.preExecute(player, configuration, option);
     }
 
-    //1.7s + 3s
-    public static int defaultCooldown = 34 + 20 * 3;
+    @Override
+    protected int getExecuteDelay()
+    {
+        return 34;
+    }
 
-    private void executeSonic(Player player)
+    @Override
+    protected void executeDelayedSkill(Player player, SkillConfiguration configuration, NoOpConfiguration option)
     {
         var location = player.getEyeLocation().toVector();
         var direction = player.getEyeLocation().getDirection();
