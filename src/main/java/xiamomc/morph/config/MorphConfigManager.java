@@ -11,6 +11,7 @@ import xiamomc.pluginbase.Configuration.ConfigNode;
 import xiamomc.pluginbase.Configuration.PluginConfigManager;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public class MorphConfigManager extends PluginConfigManager
@@ -115,9 +116,11 @@ public class MorphConfigManager extends PluginConfigManager
         super.reload();
 
         //更新配置
-        int targetVersion = 13;
+        int targetVersion = 14;
 
-        if (getOrDefault(Integer.class, ConfigOption.VERSION) < targetVersion)
+        var configVersion = getOrDefault(Integer.class, ConfigOption.VERSION);
+
+        if (configVersion < targetVersion)
         {
             var nonDefaults = this.getAllNotDefault();
 
@@ -127,6 +130,14 @@ public class MorphConfigManager extends PluginConfigManager
             var newConfig = plugin.getConfig();
 
             nonDefaults.forEach((n, v) -> newConfig.set(n.toString(), v));
+
+            //初次加载
+            if (configVersion < 1)
+            {
+                var locale = Locale.getDefault().toLanguageTag().replace('-', '_').toLowerCase();
+                newConfig.set(ConfigOption.LANGUAGE_CODE.toString(), locale);
+            }
+
             newConfig.set(ConfigOption.VERSION.toString(), targetVersion);
 
             plugin.saveConfig();

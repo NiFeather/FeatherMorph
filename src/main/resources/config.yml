@@ -10,12 +10,14 @@ root:
   # 语言
   language:
     # 服务器语言
-    # 将影响控制台输出、Bossbar名称以及本地化fallback过程
-    code: zh_cn
+    # 这将影响游戏内消息以及Bossbar名称
+    code: en_us
 
     # 是否启用单语言模式？
-    # 启用后将强制使用服务器设定的语言配置
-    single_language: false
+    # 启用后，任何游戏内消息都将强制使用服务器设定的语言配置
+    # 禁用后，插件将根据客户端的语言设定向玩家发送消息
+    # 部分功能不受此选项影响
+    single_language: true
 
   # 收到伤害时的技能CD
   # 玩家受到伤害后技能CD将至少为下面配置的时间（单位：游戏刻）
@@ -99,4 +101,4 @@ root:
     log_outgoing_packets: false
 
   # 不要动这个键!
-  version: 13
+  version: 14

@@ -46,7 +46,7 @@ public enum ConfigOption
 
     LANGUAGE_CODE(languageNode().append("code"), "zh_cn"),
     //LANGUAGE_ALLOW_FALLBACK(languageNode().append("cast_translatable"), true),
-    SINGLE_LANGUAGE(languageNode().append("single_language"), false),
+    SINGLE_LANGUAGE(languageNode().append("single_language"), true),
 
     VERSION(ConfigNode.create().append("version"), 0);
 

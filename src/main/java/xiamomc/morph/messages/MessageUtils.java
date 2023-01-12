@@ -84,7 +84,7 @@ public class MessageUtils extends MorphPluginObject
     }
 
     private final static Bindable<String> serverLocale = new Bindable<>("zh_cn");
-    private final static Bindable<Boolean> singleLanguage = new Bindable<>(false);
+    private final static Bindable<Boolean> singleLanguage = new Bindable<>(true);
 
     private static String getServerLocale()
     {
