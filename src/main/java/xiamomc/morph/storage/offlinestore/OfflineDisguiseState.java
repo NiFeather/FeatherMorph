@@ -66,6 +66,9 @@ public class OfflineDisguiseState implements IOfflineState
     @Expose
     public String profileString;
 
+    @Expose
+    public String customName;
+
     /**
      * 伪装实例
      */

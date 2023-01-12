@@ -979,35 +979,45 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
     public boolean disguiseFromOfflineState(Player player, OfflineDisguiseState offlineState)
     {
-        if (player.getUniqueId() == offlineState.playerUUID)
+        try
         {
-            logger.error("玩家UUID与OfflineState的UUID不一致: " + player.getUniqueId() + " :: " + offlineState.playerUUID);
-            return false;
-        }
+            if (player.getUniqueId() == offlineState.playerUUID)
+            {
+                logger.error("玩家UUID与OfflineState的UUID不一致: " + player.getUniqueId() + " :: " + offlineState.playerUUID);
+                return false;
+            }
 
-        var key = offlineState.disguiseID;
+            var key = offlineState.disguiseID;
 
-        if (disguiseDisabled(key) || !getPlayerConfiguration(player).getUnlockedDisguiseIdentifiers().contains(key))
-            return false;
+            if (disguiseDisabled(key) || !getPlayerConfiguration(player).getUnlockedDisguiseIdentifiers().contains(key))
+                return false;
 
-        var disguiseType = DisguiseTypes.fromId(key);
+            var disguiseType = DisguiseTypes.fromId(key);
 
-        if (disguiseType == DisguiseTypes.UNKNOWN) return false;
+            if (disguiseType == DisguiseTypes.UNKNOWN) return false;
 
-        //直接还原非LD的伪装
-        if (offlineState.disguise != null && disguiseType != DisguiseTypes.LD)
-        {
-            DisguiseUtils.addTrace(offlineState.disguise);
+            //直接还原非LD的伪装
+            if (offlineState.disguise != null && disguiseType != DisguiseTypes.LD)
+            {
+                DisguiseUtils.addTrace(offlineState.disguise);
 
-            var state = DisguiseState.fromOfflineState(offlineState, data.getPlayerConfiguration(player));
+                var state = DisguiseState.fromOfflineState(offlineState, data.getPlayerConfiguration(player));
 
-            this.disguiseFromState(state);
+                this.disguiseFromState(state);
+                return true;
+            }
+
+            //有限还原
+            morph(player, key, null);
             return true;
         }
+        catch (Throwable t)
+        {
+            logger.error("无法从OfflineState还原伪装：" + t.getMessage());
+            t.printStackTrace();
+        }
 
-        //有限还原
-        morph(player, key, null);
-        return true;
+        return false;
     }
 
     //endregion 玩家伪装相关

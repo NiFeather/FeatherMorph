@@ -8,6 +8,9 @@ import me.libraryaddict.disguise.utilities.parser.DisguiseParser;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.serializer.ComponentSerializer;
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.EntityType;
@@ -673,6 +676,9 @@ public class DisguiseState extends MorphPluginObject
         offlineState.nbtString = this.cachedNbtString;
         offlineState.profileString = this.cachedProfileNbtString;
 
+        if (entityCustomName != null)
+            offlineState.customName = GsonComponentSerializer.gson().serialize(entityCustomName);
+
         return offlineState;
     }
 
@@ -698,6 +704,14 @@ public class DisguiseState extends MorphPluginObject
 
         state.setCachedProfileNbtString(offlineState.profileString);
         state.setCachedNbtString(offlineState.nbtString);
+
+        if (offlineState.customName != null)
+        {
+            var component = GsonComponentSerializer.gson().deserialize(offlineState.customName);
+
+            state.entityCustomName = component;
+            state.setDisplayName(component);
+        }
 
         if (state.supportsDisguisedItems)
             state.setShowingDisguisedItems(offlineState.showingDisguisedItems);
