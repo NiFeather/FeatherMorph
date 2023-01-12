@@ -598,12 +598,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         //刷新主动
         var skill = state.getSkill();
-
-        if (skill != null)
-        {
-            state.setSkillCooldown(state.getSkillCooldown());
-            skill.onClientinit(state);
-        }
+        state.setSkillCooldown(state.getSkillCooldown());
+        skill.onClientinit(state);
 
         //刷新被动
         var abilities = state.getAbilities();
@@ -749,14 +745,19 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             state.setDisguise(id, targetSkillID, disguise, shouldHandlePose, equipment);
         }
 
+        //workaround: Disguise#getDisguiseName()不会正常返回实体的自定义名称
+        if (targetEntity != null && targetEntity.customName() != null)
+        {
+            var name = targetEntity.customName();
+
+            state.entityCustomName = name;
+            state.setDisplayName(name);
+        }
+
         if (provider != fallbackProvider)
             provider.postConstructDisguise(state, targetEntity);
         else
             logger.warn("id为 " + id + " 的伪装没有Provider?");
-
-        //workaround: Disguise#getDisguiseName()不会正常返回实体的自定义名称
-        if (targetEntity != null && targetEntity.customName() != null)
-            state.setPlayerDisplayName(targetEntity.customName());
 
         //如果伪装的时候坐着，显示提示
         if (sourcePlayer.getVehicle() != null && !clientHandler.clientInitialized(sourcePlayer))

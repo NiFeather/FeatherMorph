@@ -101,31 +101,52 @@ public class DisguiseState extends MorphPluginObject
     }
 
     /**
-     * 伪装的显示名称
+     * 此伪装面向玩家自己的显示名称。
      */
-    private Component playerDisplayName;
+    private Component playerDisplay;
 
-    public Component getPlayerDisplayName()
+    /**
+     * 获取此伪装面向玩家自己的显示名称
+     * @return {@link DisguiseState#playerDisplay}
+     * @apiNote 对于要显示到服务器公屏上的内容，请使用 {@link DisguiseState#getServerDisplay()}
+     */
+    public Component getPlayerDisplay()
     {
-        return playerDisplayName;
+        return playerDisplay;
     }
 
-    public void setPlayerDisplayName(Component newName)
+    public void setPlayerDisplay(Component newName)
     {
-        playerDisplayName = newName;
+        playerDisplay = newName == null ? Component.empty() : newName;
     }
 
-    private Component serverDisplayName;
+    /**
+     * 此伪装面向服务器其他人的显示名称
+     */
+    private Component serverDisplay;
 
-    public Component getServerDisplayName()
+    /**
+     * 获取此伪装面向服务器其他人的显示名称
+     * @return {@link DisguiseState#serverDisplay}
+     * @apiNote 对于要显示给玩家自己的内容，请使用 {@link DisguiseState#getPlayerDisplay()}
+     */
+    public Component getServerDisplay()
     {
-        return serverDisplayName;
+        return serverDisplay;
     }
 
-    public void setServerDisplayName(Component newName)
+    public void setServerDisplay(Component newName)
     {
-        serverDisplayName = newName;
+        serverDisplay = newName == null ? Component.empty() : newName;
     }
+
+    public void setDisplayName(Component newName)
+    {
+        setPlayerDisplay(newName);
+        setServerDisplay(newName);
+    }
+
+    public Component entityCustomName;
 
     /**
      * 伪装的实例
@@ -451,6 +472,8 @@ public class DisguiseState extends MorphPluginObject
         setCachedProfileNbtString(null);
         setCachedNbtString(null);
 
+        this.entityCustomName = null;
+
         this.disguise = d;
         this.disguiseIdentifier = identifier;
         this.shouldHandlePose = shouldHandlePose;
@@ -461,8 +484,8 @@ public class DisguiseState extends MorphPluginObject
         var provider = MorphManager.getProvider(identifier);
 
         this.provider = provider;
-        playerDisplayName = provider.getDisplayName(identifier, MessageUtils.getLocale(player));
-        serverDisplayName = provider.getDisplayName(identifier, config.get(String.class, ConfigOption.LANGUAGE_CODE));
+        playerDisplay = provider.getDisplayName(identifier, MessageUtils.getLocale(player));
+        serverDisplay = provider.getDisplayName(identifier, config.get(String.class, ConfigOption.LANGUAGE_CODE));
 
         //伪装类型是否支持设置伪装物品
         supportsDisguisedItems = skillHandler.hasSpeficSkill(skillIdentifier, SkillType.INVENTORY);

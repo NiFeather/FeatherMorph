@@ -81,7 +81,7 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
                         : MorphStrings.disguisingWithSkillPreparingString())
                     : MorphStrings.disguisingAsString();
 
-            player.sendActionBar(msg.withLocale(locale).resolve("what", state.getPlayerDisplayName()).toComponent(null));
+            player.sendActionBar(msg.withLocale(locale).resolve("what", state.getPlayerDisplay()).toComponent(null));
         }
 
         //发光颜色

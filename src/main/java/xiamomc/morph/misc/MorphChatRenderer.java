@@ -40,7 +40,7 @@ public class MorphChatRenderer extends MorphPluginObject implements ChatRenderer
             var state = morphManager.getDisguiseStateFor(source);
 
             if (state != null)
-                sourceDisplayName = state.getPlayerDisplayName();
+                sourceDisplayName = state.getServerDisplay();
 
             try
             {
