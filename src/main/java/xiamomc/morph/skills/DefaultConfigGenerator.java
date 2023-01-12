@@ -10,6 +10,7 @@ import xiamomc.morph.abilities.AbilityType;
 import xiamomc.morph.abilities.options.BossbarOption;
 import xiamomc.morph.abilities.options.FlyOption;
 import xiamomc.morph.abilities.options.ReduceDamageOption;
+import xiamomc.morph.skills.impl.GhastMorphSkill;
 import xiamomc.morph.utilities.EntityTypeUtils;
 import xiamomc.morph.skills.impl.SonicBoomMorphSkill;
 import xiamomc.morph.storage.skill.*;
@@ -158,7 +159,7 @@ public class DefaultConfigGenerator
         addSkillConfiguration(skills, EntityType.WITHER, 10, SkillType.LAUNCH_PROJECTIVE, c ->
                 c.addOption(SkillType.LAUNCH_PROJECTIVE, new ProjectiveConfiguration(EntityType.WITHER_SKULL, 1, "entity.wither.shoot", 24)));
 
-        addSkillConfiguration(skills, EntityType.GHAST, 40, SkillType.GHAST, c ->
+        addSkillConfiguration(skills, EntityType.GHAST, GhastMorphSkill.executeDelay + 40, SkillType.GHAST, c ->
                 c.addOption(SkillType.GHAST, new ProjectiveConfiguration(EntityType.FIREBALL, 1, "entity.ghast.shoot", 35)));
 
         //药效

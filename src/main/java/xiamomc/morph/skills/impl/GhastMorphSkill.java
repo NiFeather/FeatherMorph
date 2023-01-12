@@ -81,10 +81,12 @@ public class GhastMorphSkill extends DelayedMorphSkill<ProjectiveConfiguration>
         return super.preExecute(player, configuration, option);
     }
 
+    public static final int executeDelay = 16;
+
     @Override
     protected int getExecuteDelay()
     {
-        return 16;
+        return executeDelay;
     }
 
     @Override

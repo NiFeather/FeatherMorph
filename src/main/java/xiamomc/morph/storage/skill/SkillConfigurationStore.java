@@ -11,6 +11,7 @@ import xiamomc.morph.skills.DefaultConfigGenerator;
 import xiamomc.morph.skills.IMorphSkill;
 import xiamomc.morph.skills.MorphSkillHandler;
 import xiamomc.morph.skills.SkillType;
+import xiamomc.morph.skills.impl.GhastMorphSkill;
 import xiamomc.morph.skills.impl.LaunchProjectiveMorphSkill;
 import xiamomc.morph.skills.impl.SonicBoomMorphSkill;
 import xiamomc.morph.storage.MorphJsonBasedStorage;
@@ -241,6 +242,9 @@ public class SkillConfigurationStore extends MorphJsonBasedStorage<SkillConfigur
                 {
                     if (targetConfig.getSkillIdentifier().equals(SkillType.LAUNCH_PROJECTIVE))
                     {
+                        if (targetConfig.getCooldown() == 40)
+                            targetConfig.setCooldown(GhastMorphSkill.executeDelay + 40);
+
                         targetConfig.setSkillIdentifier(SkillType.GHAST);
                         targetConfig.moveOption(SkillType.LAUNCH_PROJECTIVE, SkillType.GHAST);
                     }
