@@ -322,7 +322,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
             var player = e.getPlayer();
             var state = morphs.getDisguiseStateFor(player);
 
-            if (state != null)
+            if (state != null && state.entityCustomName == null)
             {
                 var displayName = state.getProvider().getDisplayName(state.getDisguiseIdentifier(), locale);
                 state.setPlayerDisplay(displayName);
@@ -378,7 +378,10 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
             state.setCachedProfileNbtString(profile);
 
             if (customName != null)
+            {
+                state.entityCustomName = customName;
                 state.setDisplayName(customName);
+            }
 
             state.refreshSkills();
 
