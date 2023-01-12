@@ -232,5 +232,7 @@ public class DefaultConfigGenerator
             c.setOption(AbilityType.BOSSBAR.asString(),
                     new BossbarOption(new BossbarOption.BossbarCreateOption("<name> (<who>)", BossBar.Color.PINK, BossBar.Overlay.PROGRESS, Set.of()), -1));
         });
+
+        addAbilityConfiguration(skills, EntityType.FOX, AbilityType.NO_SWEET_BUSH_DAMAGE);
     }
 }

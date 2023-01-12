@@ -23,4 +23,5 @@ public class AbilityType
     public static final NamespacedKey WARDEN_LESS_AWARE = new NamespacedKey(nameSpace, "warden_less_aware");
     public static final NamespacedKey CHAT_OVERRIDE = new NamespacedKey(nameSpace, "chat_override");
     public static final NamespacedKey BOSSBAR = new NamespacedKey(nameSpace, "bossbar");
+    public static final NamespacedKey NO_SWEET_BUSH_DAMAGE = new NamespacedKey(nameSpace, "no_sweet_bush_damage");
 }

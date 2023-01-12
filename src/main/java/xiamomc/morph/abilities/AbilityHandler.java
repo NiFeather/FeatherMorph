@@ -5,7 +5,6 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphManager;
@@ -127,7 +126,8 @@ public class AbilityHandler extends MorphPluginObject
                 new TakesDamageFromWaterAbility(),
                 new WardenLessAwareAbility(),
                 new ChatOverrideAbility(),
-                new BossbarAbility()
+                new BossbarAbility(),
+                new NoSweetBushDamageAbility()
         ));
 
         initalizeDone = true;
