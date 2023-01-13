@@ -45,13 +45,15 @@ public class MorphChatRenderer extends MorphPluginObject implements ChatRenderer
             try
             {
                 this.message = buildMessage(sourceDisplayName, incomingMessage, source);
-
                 this.messageRevealed = buildMessage(sourceDisplayName.append(Component.text("(" + source.getName() + ")")), incomingMessage, source);
             }
             catch (Throwable t)
             {
                 logger.error("格式化消息时出现错误：" + t.getMessage());
                 t.printStackTrace();
+
+                this.message = this.message == null ? Component.empty() : this.message;
+                this.messageRevealed = this.messageRevealed == null ? Component.empty() : this.messageRevealed;
             }
         }
 
@@ -70,6 +72,6 @@ public class MorphChatRenderer extends MorphPluginObject implements ChatRenderer
                 .withLocale(locale)
                 .resolve("who", displayName)
                 .resolve("message", msg)
-                .toComponent(null);
+                .toComponent();
     }
 }
