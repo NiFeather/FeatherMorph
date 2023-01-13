@@ -23,8 +23,6 @@ public enum ConfigOption
     LOG_OUTGOING_PACKETS(clientNode().append("log_outgoing_packets"), false),
 
     REVERSE_CONTROL_DISTANCE(reverseControlNode().append("normalDistance"), -1),
-    REVERSE_CONTROL_DISTANCE_IMMUNE(reverseControlNode().append("immuneDistance"), 16),
-    REVERSE_CONTROL_IMMUNE_ITEM(reverseControlNode().append("immuneItem"), "minecraft:golden_helmet"),
     REVERSE_IGNORE_DISGUISED(reverseControlNode().append("ignore_disguised"), true),
     REVERSE_DESTROY_TIMEOUT(reverseControlNode().append("destroy_timeout"), 40),
 

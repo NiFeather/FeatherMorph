@@ -1,104 +1,114 @@
+#FeatherMorph plugin options
 root:
-  # 聊天覆盖：某个玩家发言后是否要将消息显示为其伪装的玩家所发出？
-  # 在公开服务器上启用此功能可能会导致非常不妙的事情吧...
+
+  # ChatOverride options
   chatOverride:
-    # 启用、禁用功能
+    # Enable ChatOverride?
+    # Once enabled, we will attempt to change someone's chat message to a configured content if they disguised as something.
+    # The "morph:chat_override" ability needs to be added to disguise's abilities in order to activate this feature.
     allowOverride: false
-    # 是否使用自定义消息格式？
+
+    # Should we try to override existing chat plugin?
+    # This will make sure that the owner name can be changed correctly, but may cause compatibility issues.
     UseCustomRenderer: true
 
-  # 语言
+  # Language options
   language:
-    # 服务器语言
-    # 这将影响游戏内消息以及Bossbar名称
+    # Sets the default language for plugin
+    # This will affect most ingame messages and bossbar title
     code: en_us
 
-    # 是否启用单语言模式？
-    # 启用后，任何游戏内消息都将强制使用服务器设定的语言配置
-    # 禁用后，插件将根据客户端的语言设定向玩家发送消息
-    # 部分功能不受此选项影响
+    # Enable single-language mode?
+    # Once enabled, all ingame messages will be forced to use default language.
+    # Otherwise, we will send ingame messages depend on which language the player uses.
+    # Some features may not be affected by this option.
     single_language: true
 
-  # 收到伤害时的技能CD
-  # 玩家受到伤害后技能CD将至少为下面配置的时间（单位：游戏刻）
+  # Skill cooldown on damage.
+  # Defines how many ticks should a player wait at least before they activate the skill again when they get damaged.
   cooldown_on_damage: 15
 
-  # 技能物品
-  # 玩家使用技能、快速伪装、取消伪装时需要手持的物品
-  # 设置为"disabled"以禁用
+  # Action item
+  # Defines which item should player use to disguise/undisguise or activate skill.
   action_item: minecraft:carrot_on_a_stick
 
-  # 盔甲架伪装是否要默认附加手臂？
+  # Should we make Armor Stand disguises show arms by default?
   armorstand_show_arms: true
 
-  # 是否要在玩家死亡时取消他们的伪装？
+  # Should players undisguise themselves on death?
   unmorph_on_death: true
 
-  # 是否允许通过头颅进行伪装？
+  # Should we allow players disguise themselves by using skulls/heads?
   allowHeadMorph: true
 
-  # 猪灵蛮兵是否要忽略伪装？
+  # Should piglin brutes ignore player's disguise?
   piglin_brute_ignore_disguises: true
 
-  # 生命值缩放
+  # Health scale options
   health_scale:
-    # 是否启用此功能？
+    # Enable health scale?
+    # Once enabled, we will attempt to scale player's base health depending on their disguise type.
+    # Only affects vanilla disguises.
     enabled: true
-    # 缩放的最大生命值
+
+    # Maximum base health
+    # Will cap player base health to the configured value if they exceed it.
     max_health: 60
 
-  # 是否允许使用LibsDisguises的本地伪装
-  # PS: 本地伪装就是你通过`/savedisg`保存的伪装
-  # PS: 因为API限制，快速伪装无法识别某人的伪装是否为自定义伪装，
-  #     这可能会导致复制的伪装不完整
+  # Should we allow local disguises from LibsDisguises?
+  # PS: Local disguise are disguises you save by `/savedisg`
+  # PS: Due to API limitations, we can't figure out whether someone's disguise is a custom disguise.
+  #     This may cause issues when coping disguise.
   enable_ld_custom_disguises: false
 
+  # Bossbar options
   bossbar:
-    # 是否允许显示Bossbar?
+    # Should we display bossbars to players?
+    # Disable this will also disable the bossbar ability for all disguises.
     enabled: true
 
+ # InteractionMirror options
   reverseControl:
-    # 反向控制距离：当某个人变成其他玩家时，距离多少格可以控制被伪装玩家的一些动作？
-    # 设置为0可以禁用某一功能，设置为-1则无距离限制
-    # 正常距离
+    # Maximum affect distance
+    # How far should we find for the target player to mirror?
+    # Set to 0 to disable this feature, or -1 to disable the limit.
     normalDistance: -1
-    # 免疫距离（佩戴特定物品时的可控制距离）
-    immuneDistance: 16
-    # 免疫物品（当被伪装玩家佩戴此物品时将使用上方配置的距离检查）
-    immuneItem: minecraft:golden_helmet
-    # 目标玩家伪装时是否忽略？
+
+    # Should we ignore disguised players when finding target?
     ignore_disguised: true
-    # 模拟方块摧毁时，要经过多久没操作再重置摧毁进度？（单位：游戏刻）
-    # 太小的值可能在延迟或网络不稳定时导致进度被频繁重置
+
+    # Block destroy timeout
+    # How many ticks should we wait to reset progress when simulating block destroy if there's no operation?
+    # Values that are too small may cause the progress to reset repeatedly with a bad network.
     destroy_timeout: 20
-    # 行为：开启或禁用某一功能的镜像
-    # 聊天覆盖在上方"chatOverride"中
+
+    # Behavior options
     behaviors:
-      # 是否要模拟操作？
+      # Should we sync interact state？
       simulate_interactions: true
-      # 是否同步下蹲？
+      # Should we enable sneaking control？
       sneak: false
-      # 是否同步副手切换？
+      # Should we enable Swaphand control？
       swap_hands: false
-      # 是否允许丢弃物品？
+      # Should we enable drop control？
       allow_drop: false
-      # 是否允许同步已选Hotbar槽？
+      # Should we sync selected hotbar slot number？
       hotbar: false
 
-  # 已禁用的伪装，此列表里的伪装将不会对玩家可用，例如：
-  # bannedDisguises:
-  # - "minecraft:allay"
-  # - "player:dinnerbone"
+  # Banned disguises
+  # Disguises in this list won't be available in-game for anyone.
   bannedDisguises: []
 
-  # 客户端集成选项
+  # Client integration options
   client:
-    # 是否允许客户端集成？
+    # Should we allow client integrations？
     allow_client_mod: true
-    # 是否记录客户端发来的包？
+
+    # Should we log packets coming from the client？
     log_incoming_packets: false
-    # 是否记录发送给客户端的包？
+
+    # Should we log packets sending to the client？
     log_outgoing_packets: false
 
-  # 不要动这个键!
+  # Do not touch unless you know what you're doing!
   version: 14

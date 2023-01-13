@@ -264,28 +264,12 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
         if (!source.hasPermission(CommonPermissions.REVERSE)) return false;
 
         var isInSameWorld = target.getWorld().equals(source.getWorld());
-        var targetHelmet = target.getEquipment().getHelmet();
+        var normalDistance = config.getOrDefault(Integer.class, ConfigOption.REVERSE_CONTROL_DISTANCE);
 
-        //-1: 总是启用，0: 禁用
-        if (targetHelmet != null && immuneItemMaterial != null && targetHelmet.getType().equals(immuneItemMaterial))
-        {
-            var immuneDistance = config.getOrDefault(Integer.class, ConfigOption.REVERSE_CONTROL_DISTANCE_IMMUNE);
-
-            //immuneDistance为-1，总是启用，为0则禁用
-            return immuneDistance == -1
-                    || (immuneDistance != 0 && isInSameWorld && target.getLocation().distance(source.getLocation()) <= immuneDistance);
-        }
-        else
-        {
-            var normalDistance = config.getOrDefault(Integer.class, ConfigOption.REVERSE_CONTROL_DISTANCE);
-
-            //normalDistance为-1，总是启用，为0则禁用
-            return normalDistance == -1
-                    || (normalDistance != 0 && isInSameWorld && target.getLocation().distance(source.getLocation()) <= normalDistance);
-        }
+        //normalDistance为-1，总是启用，为0则禁用
+        return normalDistance == -1
+                || (normalDistance != 0 && isInSameWorld && target.getLocation().distance(source.getLocation()) <= normalDistance);
     }
-
-    private Material immuneItemMaterial;
 
     private final Bindable<Boolean> allowSimulation = new Bindable<>(false);
     private final Bindable<Boolean> allowSneak = new Bindable<>(false);
@@ -298,17 +282,6 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
     private void load()
     {
         this.addSchedule(this::update);
-
-        var immuneItem = config.getBindable(String.class, ConfigOption.REVERSE_CONTROL_IMMUNE_ITEM);
-        immuneItem.onValueChanged((o, immune) ->
-        {
-            var targetOptional = Material.matchMaterial(immune);
-
-            if (targetOptional == null)
-                logger.warn("未能找到和" + immune + "对应的免疫物品，相关功能将不会启用");
-
-            immuneItemMaterial = targetOptional;
-        }, true);
 
         config.bind(allowSimulation, ConfigOption.REVERSE_BEHAVIOR_DO_SIMULATION);
         config.bind(allowSneak, ConfigOption.REVERSE_BEHAVIOR_SNEAK);
