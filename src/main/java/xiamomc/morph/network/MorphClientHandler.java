@@ -60,7 +60,7 @@ public class MorphClientHandler extends MorphPluginObject
     /**
      * 服务端的接口版本
      */
-    public final int targetApiVersion = 4;
+    public final int targetApiVersion = 3;
 
     /**
      * 最低能接受的客户端接口版本
