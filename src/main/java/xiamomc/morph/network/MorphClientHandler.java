@@ -3,6 +3,7 @@ package xiamomc.morph.network;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.kyori.adventure.text.Component;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.game.ClientboundCustomPayloadPacket;
 import net.minecraft.resources.ResourceLocation;
@@ -35,6 +36,8 @@ public class MorphClientHandler extends MorphPluginObject
     private final Bindable<Boolean> allowClient = new Bindable<>(false);
     private final Bindable<Boolean> logInComingPackets = new Bindable<>(false);
     private final Bindable<Boolean> logOutGoingPackets = new Bindable<>(false);
+    private final Bindable<Boolean> forceClient = new Bindable<>(false);
+    private final Bindable<Boolean> forceTargetVersion = new Bindable<>(false);
 
     //部分来自 CraftPlayer#sendPluginMessage(), 在我们搞清楚到底为什么服务端会吞包之前先这样
     private void sendPacket(String channel, Player player, byte[] message)
@@ -57,7 +60,7 @@ public class MorphClientHandler extends MorphPluginObject
     /**
      * 服务端的接口版本
      */
-    public final int targetApiVersion = 3;
+    public final int targetApiVersion = 4;
 
     /**
      * 最低能接受的客户端接口版本
@@ -118,13 +121,28 @@ public class MorphClientHandler extends MorphPluginObject
             {
             }
 
-            //如果客户端版本低于最低能接受的版本，拒绝初始化
-            if (clientVersion < minimumApiVersion)
+            var minimumApiVersion = this.minimumApiVersion;
+
+            if (forceTargetVersion.get()) minimumApiVersion = targetApiVersion;
+
+            //如果客户端版本低于最低能接受的版本或高于当前版本，拒绝初始化
+            if (clientVersion < minimumApiVersion || clientVersion > targetApiVersion)
             {
                 unInitializePlayer(player);
 
                 player.sendMessage(MessageUtils.prefixes(player, MorphStrings.clientVersionMismatchString()));
                 logger.info(player.getName() + "使用了不支持的客户端版本：" + clientVersion + "(此服务器要求至少为" + targetApiVersion + ")");
+
+                var msg = forceTargetVersion.get() ? MorphStrings.clientVersionMismatchKickString() : MorphStrings.clientVersionMismatchString();
+                msg.withLocale(MessageUtils.getLocale(player))
+                        .resolve("<minimum_version>", Component.text(minimumApiVersion))
+                        .resolve("<player_version>", Component.text(clientVersion));
+
+                if (forceTargetVersion.get())
+                    player.kick(MessageUtils.prefixes(player, MorphStrings.clientVersionMismatchKickString()));
+                else
+                    player.sendMessage(MessageUtils.prefixes(player, MorphStrings.clientVersionMismatchString()));
+
                 return;
             }
 
@@ -166,6 +184,9 @@ public class MorphClientHandler extends MorphPluginObject
         Bukkit.getMessenger().registerOutgoingPluginChannel(plugin, commandChannel);
 
         configManager.bind(allowClient, ConfigOption.ALLOW_CLIENT);
+        //configManager.bind(forceClient, ConfigOption.FORCE_CLIENT);
+        configManager.bind(forceTargetVersion, ConfigOption.FORCE_TARGET_VERSION);
+
         configManager.bind(logInComingPackets, ConfigOption.LOG_INCOMING_PACKETS);
         configManager.bind(logOutGoingPackets, ConfigOption.LOG_OUTGOING_PACKETS);
 

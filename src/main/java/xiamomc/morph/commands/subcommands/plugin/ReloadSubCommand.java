@@ -1,13 +1,17 @@
 package xiamomc.morph.commands.subcommands.plugin;
 
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
+import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.messages.CommandStrings;
 import xiamomc.morph.messages.HelpStrings;
 import xiamomc.morph.messages.MessageUtils;
+import xiamomc.morph.network.MorphClientHandler;
+import xiamomc.morph.network.commands.S2C.S2CReAuthCommand;
 import xiamomc.morph.storage.skill.SkillConfigurationStore;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Command.ISubCommand;
@@ -66,6 +70,9 @@ public class ReloadSubCommand extends MorphPluginObject implements ISubCommand
         else return null;
     }
 
+    @Resolved
+    private MorphClientHandler clientHandler;
+
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull String[] args)
     {
@@ -91,6 +98,12 @@ public class ReloadSubCommand extends MorphPluginObject implements ISubCommand
 
             if (reloadsMessage)
                 messageStore.reloadConfiguration();
+
+            if (config.get(Boolean.class, ConfigOption.FORCE_TARGET_VERSION))
+            {
+                clientHandler.sendUnAuth(Bukkit.getOnlinePlayers());
+                clientHandler.sendReAuth(Bukkit.getOnlinePlayers());
+            }
 
             sender.sendMessage(MessageUtils.prefixes(sender, CommandStrings.reloadCompleteMessage()));
         }

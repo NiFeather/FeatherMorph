@@ -178,7 +178,13 @@ public class MorphStrings extends AbstractMorphStrings
     public static FormattableMessage clientVersionMismatchString()
     {
         return getFormattable(getKey("client_version_mismatch"),
-                "<color:red>客户端版本不匹配，将不会启用增强功能！");
+                "<color:red>客户端模组版本不匹配，将不会启用增强功能！");
+    }
+
+    public static FormattableMessage clientVersionMismatchKickString()
+    {
+        return getFormattable(getKey("client_version_mismatch_kick"),
+                "<color:red>客户端模组版本不匹配");
     }
 
     private static String getKey(String key)

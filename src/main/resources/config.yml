@@ -84,15 +84,19 @@ root:
 
     # Behavior options
     behaviors:
-      # Should we sync interact state？
+      # Should we enable interaction control?
       simulate_interactions: true
-      # Should we enable sneaking control？
+
+      # Should we enable sneaking control?
       sneak: false
-      # Should we enable Swaphand control？
+
+      # Should we enable swapping control?
       swap_hands: false
-      # Should we enable drop control？
+
+      # Should we enable drop control?
       allow_drop: false
-      # Should we sync selected hotbar slot number？
+
+      # Should we enable hotbar control?
       hotbar: false
 
   # Banned disguises
@@ -101,13 +105,17 @@ root:
 
   # Client integration options
   client:
-    # Should we allow client integrations？
+    # Should we allow client integrations?
     allow_client_mod: true
 
-    # Should we log packets coming from the client？
+    # Should we log packets coming from the client?
     log_incoming_packets: false
 
-    # Should we log packets sending to the client？
+    # Should we kick players if their client mod doesn't match our API version?
+    # Note: Players may have their own mod implementing our API, so don't treat this as an anti-cheat feature.
+    force_version: false
+
+    # Should we log packets sending to the client?
     log_outgoing_packets: false
 
   # Do not touch unless you know what you're doing!

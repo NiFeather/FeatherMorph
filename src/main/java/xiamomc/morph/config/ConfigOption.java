@@ -18,6 +18,8 @@ public enum ConfigOption
     UNMORPH_ON_DEATH(ConfigNode.create().append("unmorph_on_death"), true),
 
     ALLOW_CLIENT(clientNode().append("allow_client_mod"), true),
+    //FORCE_CLIENT(clientNode().append("force_client"), false),
+    FORCE_TARGET_VERSION(clientNode().append("force_version"), false),
 
     LOG_INCOMING_PACKETS(clientNode().append("log_incoming_packets"), false),
     LOG_OUTGOING_PACKETS(clientNode().append("log_outgoing_packets"), false),
