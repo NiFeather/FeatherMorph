@@ -33,5 +33,13 @@ public class ItemUtils
         return "{\"id\":\"minecraft:air\",\"Count\":1}";
     }
 
+    public static boolean noSwingType(Material type)
+    {
+        return type == Material.SHIELD
+                || type == Material.BOW || type == Material.CROSSBOW
+                || type == Material.TRIDENT
+                || type == Material.POTION;
+    }
+
     private static final ItemStack air = new ItemStack(Material.AIR);
 }

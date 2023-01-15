@@ -10,6 +10,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.EquipmentSlot;
 import org.jetbrains.annotations.NotNull;
@@ -22,6 +23,7 @@ import xiamomc.morph.misc.PlayerOperationSimulator;
 import xiamomc.morph.misc.permissions.CommonPermissions;
 import xiamomc.morph.network.MorphClientHandler;
 import xiamomc.morph.network.commands.S2C.S2CSetSneakingCommand;
+import xiamomc.morph.utilities.ItemUtils;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
@@ -244,13 +246,18 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
     {
         if (!allowSimulation.get()) return false;
 
-        var result = action.isRightClick()
+        var isRightClick = action.isRightClick();
+        var result = isRightClick
                 ? operationSimulator.simulateRightClick(targetPlayer)
                 : operationSimulator.simulateLeftClick(targetPlayer);
 
         if (result.success())
         {
-            targetPlayer.swingHand(result.hand());
+            var itemInUse = targetPlayer.getEquipment().getItem(result.hand()).getType();
+
+            if (!isRightClick || !ItemUtils.noSwingType(itemInUse))
+                targetPlayer.swingHand(result.hand());
+
             return true;
         }
 
@@ -259,9 +266,15 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
 
     private boolean playerInDistance(@NotNull Player source, @Nullable Player target)
     {
-        if (target == null || (DisguiseAPI.isDisguised(target) && ignoreDisguised.get())) return false;
-
-        if (!source.hasPermission(CommonPermissions.REVERSE)) return false;
+        if (target == null
+                || (DisguiseAPI.isDisguised(target) && ignoreDisguised.get())
+                || !source.hasPermission(CommonPermissions.REVERSE)
+                || target.hasPermission(CommonPermissions.REVERSE_IMMUNE)
+                || target.getOpenInventory().getType() != InventoryType.CRAFTING
+                || target.isSleeping())
+        {
+            return false;
+        }
 
         var isInSameWorld = target.getWorld().equals(source.getWorld());
         var normalDistance = config.getOrDefault(Integer.class, ConfigOption.REVERSE_CONTROL_DISTANCE);

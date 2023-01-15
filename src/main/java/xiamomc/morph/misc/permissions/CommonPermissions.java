@@ -17,4 +17,5 @@ public class CommonPermissions
     public final static String CHAT_OVERRIDE = PERM_ROOT + "chatoverride";
 
     public final static String REVERSE = PERM_ROOT + "reverse";
+    public final static String REVERSE_IMMUNE = PERM_ROOT + "reverse.immune";
 }

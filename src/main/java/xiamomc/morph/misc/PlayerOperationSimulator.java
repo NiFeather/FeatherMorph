@@ -110,6 +110,10 @@ public class PlayerOperationSimulator extends MorphPluginObject
         //格挡时不要执行动作
         if (player.isBlocking()) return SimulateResult.fail();
 
+        var nmsPlayer = ((CraftPlayer)player).getHandle();
+        if (nmsPlayer.isUsingItem())
+            return SimulateResult.fail();
+
         //获取正在看的方块或实体
         var traceResult = this.rayTrace(player);
 
@@ -161,7 +165,6 @@ public class PlayerOperationSimulator extends MorphPluginObject
         //NMS
         var nmsWorld = destroyHandler.getNmsWorld();
         var nmsBlock = destroyHandler.getNmsBlock();
-        var nmsPlayer = ((CraftPlayer) player).getHandle();
 
         assert nmsBlock != null;
         assert nmsWorld != null;
@@ -190,6 +193,13 @@ public class PlayerOperationSimulator extends MorphPluginObject
     public SimulateResult simulateRightClick(Player player)
     {
         //logger.warn("正在模拟右键！");
+
+        var nmsPlayer = ((CraftPlayer)player).getHandle();
+        if (nmsPlayer.isUsingItem())
+        {
+            nmsPlayer.releaseUsingItem();
+            return SimulateResult.fail();
+        }
 
         //获取正在看的方块或实体
         var traceResult = this.rayTrace(player);

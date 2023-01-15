@@ -54,7 +54,6 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
     @Resolved(shouldSolveImmediately = true)
     private VanillaMessageStore vanillaMessageStore;
 
-
     private Bindable<Boolean> unMorphOnDeath;
 
     @EventHandler
@@ -113,8 +112,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
             state.getAbilities().forEach(a -> a.applyToPlayer(player, state));
 
             var skill = state.getSkill();
-            if (skill != null)
-                skill.onInitialEquip(state);
+            skill.onInitialEquip(state);
         }
     }
 
@@ -452,9 +450,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         {
             //刷新主动
             var skill = state.getSkill();
-
-            if (skill != null)
-                skill.onInitialEquip(state);
+            skill.onInitialEquip(state);
 
             //刷新被动
             var abilities = state.getAbilities();
@@ -478,17 +474,14 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
             //受到外力攻击或者其他原因时不要处理
             switch (e.getReason())
             {
-                case TARGET_ATTACKED_ENTITY:
-                case TARGET_ATTACKED_NEARBY_ENTITY:
-                case REINFORCEMENT_TARGET:
-                case FOLLOW_LEADER:
-                case TARGET_ATTACKED_OWNER:
-                case OWNER_ATTACKED_TARGET:
-                case CUSTOM:
+                case TARGET_ATTACKED_ENTITY, TARGET_ATTACKED_NEARBY_ENTITY,
+                        REINFORCEMENT_TARGET, FOLLOW_LEADER,
+                        TARGET_ATTACKED_OWNER, OWNER_ATTACKED_TARGET, CUSTOM ->
+                {
                     return;
+                }
 
-                default:
-                    break;
+                default -> {}
             }
 
             //目标玩家没在伪装时不要处理
