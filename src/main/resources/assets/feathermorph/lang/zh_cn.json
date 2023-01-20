@@ -69,7 +69,7 @@
   "hint.command_hint": "小提示：发送 /feathermorph help 可以查看伪装的相关用法。",
   "hint.command_hint_client": "小提示：按<key:key.morphclient.morph>键可以打开伪装界面。",
   "hint.morph_visible_after_command": "伪装将在切换自身可见后对自己显示",
-  "hint.skill_hint": "小提示: 手持胡萝卜钓竿下蹲使用可以激活当前伪装的主动技能",
+  "hint.skill_hint": "小提示: 手持<item>下蹲使用可以激活当前伪装的主动技能",
   "hint.skill_hint_client": "小提示：按下<key:key.morphclient.skill>键可以激活当前伪装的主动技能",
   "morph.client_version_mismatch": "<color:red>客户端模组版本不匹配，将不会启用增强功能！",
   "morph.client_version_mismatch_kick": "<color:red>客户端模组版本不匹配",

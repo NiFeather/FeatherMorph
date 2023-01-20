@@ -13,7 +13,7 @@ public class HintStrings extends AbstractMorphStrings
     public static FormattableMessage skillString()
     {
         return getFormattable(getKey("skill_hint"),
-                "小提示: 手持胡萝卜钓竿下蹲使用可以激活当前伪装的主动技能");
+                "小提示: 手持<item>下蹲使用可以激活当前伪装的主动技能");
     }
 
     public static FormattableMessage clientSkillString()

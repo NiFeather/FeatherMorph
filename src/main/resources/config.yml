@@ -30,7 +30,7 @@ root:
 
   # Action item
   # Defines which item should player use to disguise/undisguise or activate skill.
-  action_item: minecraft:carrot_on_a_stick
+  action_item: minecraft:feather
 
   # Should we make Armor Stand disguises show arms by default?
   armorstand_show_arms: true

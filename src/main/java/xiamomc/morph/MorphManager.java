@@ -26,10 +26,8 @@ import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.events.PlayerMorphEvent;
 import xiamomc.morph.events.PlayerUnMorphEvent;
 import xiamomc.morph.interfaces.IManagePlayerData;
-import xiamomc.morph.messages.CommandStrings;
-import xiamomc.morph.messages.HintStrings;
-import xiamomc.morph.messages.MessageUtils;
-import xiamomc.morph.messages.MorphStrings;
+import xiamomc.morph.messages.*;
+import xiamomc.morph.messages.vanilla.VanillaMessageStore;
 import xiamomc.morph.misc.*;
 import xiamomc.morph.misc.permissions.CommonPermissions;
 import xiamomc.morph.network.MorphClientHandler;
@@ -48,6 +46,7 @@ import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
 import xiamomc.pluginbase.Bindables.BindableList;
+import xiamomc.pluginbase.Messages.MessageStore;
 
 import java.util.List;
 import java.util.Map;
@@ -76,6 +75,12 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
     public static final String disguiseFallbackName = "@default";
 
+    private Material actionItem;
+    public Material getActionItem()
+    {
+        return actionItem;
+    }
+
     @Initializer
     private void load()
     {
@@ -90,6 +95,18 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 new LocalDisguiseProvider(),
                 fallbackProvider
         ));
+
+        var actionItemId = config.getBindable(String.class, ConfigOption.ACTION_ITEM);
+        actionItemId.onValueChanged((o, n) ->
+        {
+            var item = Material.matchMaterial(n);
+            var disabled = "disabled";
+
+            if (item == null && !disabled.equals(n))
+                logger.warn("Cannot find any item that matches \"" + n + "\", some related features may not work!");
+
+            actionItem = item;
+        }, true);
     }
 
     private void update()
@@ -689,6 +706,9 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 state.getDisguiseIdentifier(), state.getDisguise(), state.shouldHandlePose(), state.getProvider());
     }
 
+    @Resolved
+    private VanillaMessageStore messageStore;
+
     /**
      * 构建好伪装之后要做的事
      *
@@ -798,21 +818,23 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         var isClientPlayer = clientHandler.clientConnected(sourcePlayer);
 
-        if (state.getSkill() != null)
+        if (isClientPlayer)
         {
-            if (isClientPlayer)
+            if (!config.shownClientSkillHint)
             {
-                if (!config.shownClientSkillHint)
-                {
-                    sourcePlayer.sendMessage(MessageUtils.prefixes(sourcePlayer, HintStrings.clientSkillString()));
-                    config.shownClientSkillHint = true;
-                }
+                sourcePlayer.sendMessage(MessageUtils.prefixes(sourcePlayer, HintStrings.clientSkillString()));
+                config.shownClientSkillHint = true;
             }
-            else if (!config.shownMorphAbilityHint)
-            {
-                sourcePlayer.sendMessage(MessageUtils.prefixes(sourcePlayer, HintStrings.skillString()));
-                config.shownMorphAbilityHint = true;
-            }
+        }
+        else if (!config.shownServerSkillHint && actionItem != null)
+        {
+            var locale = MessageUtils.getLocale(sourcePlayer);
+            var msg = HintStrings.skillString()
+                    .withLocale(locale)
+                    .resolve("item", messageStore.get(actionItem.translationKey(), "???", locale));
+
+            sourcePlayer.sendMessage(MessageUtils.prefixes(sourcePlayer, msg));
+            config.shownServerSkillHint = true;
         }
 
         if (!config.shownClientSuggestionMessage && !isClientPlayer)

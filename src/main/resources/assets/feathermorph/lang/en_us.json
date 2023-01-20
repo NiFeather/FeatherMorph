@@ -69,7 +69,7 @@
   "hint.command_hint": "Hint: You can send <underlined>/feathermorph help</underlined> to learn how to use disguises",
   "hint.command_hint_client": "Hint: Press <key:key.morphclient.morph> to open disguise select screen",
   "hint.morph_visible_after_command": "Disguise will be visible after toggling SelfView",
-  "hint.skill_hint": "Hint: You can activate skill by using Carrot on a Stick while sneaking",
+  "hint.skill_hint": "Hint: You can activate skill by using <item> while sneaking",
   "hint.skill_hint_client": "Hint: Press <key:key.morphclient.skill> to activate disguise skill",
   "morph.client_version_mismatch": "<color:red>Client mod version mismatch, unable to activate enhanced features!",
   "morph.client_version_mismatch_kick": "<color:red>Client mod version mismatch",

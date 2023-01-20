@@ -142,18 +142,6 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         config.bind(bruteIgnoreDisguises, ConfigOption.PIGLIN_BRUTE_IGNORE_DISGUISES);
 
         unMorphOnDeath = config.getBindable(Boolean.class, ConfigOption.UNMORPH_ON_DEATH);
-
-        var actionItemId = config.getBindable(String.class, ConfigOption.ACTION_ITEM);
-        actionItemId.onValueChanged((o, n) ->
-        {
-            var item = Material.matchMaterial(n);
-            var disabled = "disabled";
-
-            if (item == null || disabled.equals(n))
-                logger.warn("未能找到和" + actionItem + "对应的物品，相关功能将不会启用");
-
-            actionItem = item;
-        }, true);
     }
 
     @EventHandler
@@ -188,8 +176,6 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
             e.setCancelled(true);
     }
 
-    private Material actionItem;
-
     /**
      * 尝试使用技能或快速伪装
      * @param player 目标玩家
@@ -198,6 +184,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
      */
     private boolean tryInvokeSkillOrQuickDisguise(Player player, Action action, EquipmentSlot slot)
     {
+        var actionItem = morphs.getActionItem();
         if (slot != EquipmentSlot.HAND || actionItem == null) return false;
 
         var state = morphs.getDisguiseStateFor(player);

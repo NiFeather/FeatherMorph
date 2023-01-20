@@ -99,17 +99,8 @@ public class PlayerMorphConfiguration
     @Expose
     public boolean shownDisplayToSelfHint = false;
 
-    /**
-     * 是否已经显示过一次morphplayer合并的消息？
-     */
     @Expose
-    public boolean shownMorphPlayerMessageOnce;
-
-    /**
-     * 是否已经显示过一次伪装技能提示？
-     */
-    @Expose
-    public boolean shownMorphAbilityHint;
+    public boolean shownServerSkillHint;
 
     @Expose
     public boolean shownClientSkillHint;
