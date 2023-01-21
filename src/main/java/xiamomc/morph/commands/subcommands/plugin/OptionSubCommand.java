@@ -45,12 +45,12 @@ public class OptionSubCommand extends MorphPluginObject implements ISubCommand
 
         subCommands.add(getToggle("armorstand_show_arms", ConfigOption.ARMORSTAND_SHOW_ARMS, "armorstand_show_arms"));
 
-        subCommands.add(getToggle("reverse_interaction", ConfigOption.MIRROR_BEHAVIOR_DO_SIMULATION, "reverse.interaction", CommandNameStrings.reverseInteractionString()));
-        subCommands.add(getToggle("reverse_sneak", ConfigOption.MIRROR_BEHAVIOR_SNEAK, "reverse.sneak", CommandNameStrings.reverseSneakString()));
-        subCommands.add(getToggle("reverse_swaphand", ConfigOption.MIRROR_BEHAVIOR_SWAP_HAND, "reverse.swaphand", CommandNameStrings.reverseSwapHandString()));
-        subCommands.add(getToggle("reverse_drop", ConfigOption.MIRROR_BEHAVIOR_DROP, "reverse.drop", CommandNameStrings.reverseDropString()));
-        subCommands.add(getToggle("reverse_hotbar", ConfigOption.MIRROR_BEHAVIOR_HOTBAR, "reverse.hotbar", CommandNameStrings.reverseHotbar()));
-        subCommands.add(getToggle("reverse_ignore_disguised", ConfigOption.MIRROR_IGNORE_DISGUISED, "reverse.ignore_disguised", CommandNameStrings.reverseIgnoreDisguised()));
+        subCommands.add(getToggle("mirror_interaction", ConfigOption.MIRROR_BEHAVIOR_DO_SIMULATION, "mirror.interaction", CommandNameStrings.mirrorInteractionString()));
+        subCommands.add(getToggle("mirror_sneak", ConfigOption.MIRROR_BEHAVIOR_SNEAK, "mirror.sneak", CommandNameStrings.mirrorSneakString()));
+        subCommands.add(getToggle("mirror_swaphand", ConfigOption.MIRROR_BEHAVIOR_SWAP_HAND, "mirror.swaphand", CommandNameStrings.mirrorSwapHandString()));
+        subCommands.add(getToggle("mirror_drop", ConfigOption.MIRROR_BEHAVIOR_DROP, "mirror.drop", CommandNameStrings.mirrorDropString()));
+        subCommands.add(getToggle("mirror_hotbar", ConfigOption.MIRROR_BEHAVIOR_HOTBAR, "mirror.hotbar", CommandNameStrings.mirrorHotbar()));
+        subCommands.add(getToggle("mirror_ignore_disguised", ConfigOption.MIRROR_IGNORE_DISGUISED, "mirror.ignore_disguised", CommandNameStrings.mirrorIgnoreDisguised()));
     }
 
     private ISubCommand getToggle(String name, ConfigOption option, String perm)

@@ -30,7 +30,7 @@ import xiamomc.pluginbase.Bindables.Bindable;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class ReverseControlProcessor extends MorphPluginObject implements Listener
+public class InteractionMirrorProcessor extends MorphPluginObject implements Listener
 {
     private final Map<Player, String> uuidDisguiseStateMap = new ConcurrentHashMap<>();
 
@@ -267,8 +267,8 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
     {
         if (target == null
                 || (DisguiseAPI.isDisguised(target) && ignoreDisguised.get())
-                || !source.hasPermission(CommonPermissions.REVERSE)
-                || target.hasPermission(CommonPermissions.REVERSE_IMMUNE)
+                || !source.hasPermission(CommonPermissions.MIRROR)
+                || target.hasPermission(CommonPermissions.MIRROR_IMMUNE)
                 || target.getOpenInventory().getType() != InventoryType.CRAFTING
                 || target.isSleeping())
         {

@@ -24,34 +24,34 @@ public class CommandNameStrings extends AbstractMorphStrings
         return getFormattable(getKey("chatoverride"), "聊天覆盖");
     }
 
-    public static FormattableMessage reverseInteractionString()
+    public static FormattableMessage mirrorInteractionString()
     {
-        return getFormattable(getKey("reverse_interaction"), "交互控制");
+        return getFormattable(getKey("mirror_interaction"), "交互控制");
     }
 
-    public static FormattableMessage reverseSneakString()
+    public static FormattableMessage mirrorSneakString()
     {
-        return getFormattable(getKey("reverse_sneak"), "潜行控制");
+        return getFormattable(getKey("mirror_sneak"), "潜行控制");
     }
 
-    public static FormattableMessage reverseSwapHandString()
+    public static FormattableMessage mirrorSwapHandString()
     {
-        return getFormattable(getKey("reverse_swaphand"), "副手交换控制");
+        return getFormattable(getKey("mirror_swaphand"), "副手交换控制");
     }
 
-    public static FormattableMessage reverseDropString()
+    public static FormattableMessage mirrorDropString()
     {
-        return getFormattable(getKey("reverse_drop"), "丢弃控制");
+        return getFormattable(getKey("mirror_drop"), "丢弃控制");
     }
 
-    public static FormattableMessage reverseHotbar()
+    public static FormattableMessage mirrorHotbar()
     {
-        return getFormattable(getKey("reverse_hotbar"), "快捷栏控制");
+        return getFormattable(getKey("mirror_hotbar"), "快捷栏控制");
     }
 
-    public static FormattableMessage reverseIgnoreDisguised()
+    public static FormattableMessage mirrorIgnoreDisguised()
     {
-        return getFormattable(getKey("reverse_ignore_disguised"), "使反向控制忽略已伪装的目标");
+        return getFormattable(getKey("mirror_ignore_disguised"), "使反向控制忽略已伪装的目标");
     }
 
     private static String getKey(String key)

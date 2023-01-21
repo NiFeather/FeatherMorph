@@ -97,7 +97,7 @@ public final class MorphPlugin extends XiaMoJavaPlugin
                     {
                             playerTracker,
                             pluginEventListener,
-                            new ReverseControlProcessor(),
+                            new InteractionMirrorProcessor(),
                             new CommonEventProcessor(),
                     });
 
