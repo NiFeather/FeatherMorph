@@ -107,7 +107,7 @@ public class GhastMorphSkill extends DelayedMorphSkill<ProjectiveConfiguration>
         if (type != null)
         {
             playSoundToNearbyPlayers(player, option.getSoundDistance(), Key.key(option.getSoundName()), Sound.Source.HOSTILE);
-            launchProjectile(player, type, 1);
+            launchProjectile(player, type, option.getVectorMultiplier());
         }
     }
 }

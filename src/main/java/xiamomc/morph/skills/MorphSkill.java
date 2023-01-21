@@ -81,7 +81,7 @@ public abstract class MorphSkill<T extends ISkillOption> extends MorphPluginObje
         if (fireBall instanceof Projectile projectile)
             projectile.setShooter(player);
 
-        fireBall.setVelocity(player.getEyeLocation().getDirection().normalize().multiply(2d * multiplier));
+        fireBall.setVelocity(player.getEyeLocation().getDirection().normalize().multiply(1.4d * multiplier));
 
         return (E) fireBall;
     }
