@@ -22,7 +22,7 @@ root:
     # Once enabled, all ingame messages will be forced to use default language.
     # Otherwise, we will send ingame messages depend on which language the player uses.
     # Some features may not be affected by this option.
-    single_language: true
+    single_language: false
 
   # Skill cooldown on damage.
   # Defines how many ticks should a player wait at least before they activate the skill again when they get damaged.
