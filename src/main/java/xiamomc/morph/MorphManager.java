@@ -92,18 +92,18 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         registerProviders(ObjectList.of(
                 new VanillaDisguiseProvider(),
                 new PlayerDisguiseProvider(),
-                new LocalDisguiseProvider(),
+                //new LocalDisguiseProvider(),
                 fallbackProvider
         ));
 
-        var actionItemId = config.getBindable(String.class, ConfigOption.ACTION_ITEM);
+        var actionItemId = config.getBindable(String.class, ConfigOption.SKILL_ITEM);
         actionItemId.onValueChanged((o, n) ->
         {
             var item = Material.matchMaterial(n);
             var disabled = "disabled";
 
             if (item == null && !disabled.equals(n))
-                logger.warn("Cannot find any item that matches \"" + n + "\", some related features may not work!");
+                logger.warn("Cannot find any item that matches \"" + n + "\" to set for the skill item, some related features may not work!");
 
             actionItem = item;
         }, true);

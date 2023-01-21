@@ -11,7 +11,10 @@ public enum ConfigOption
     CHAT_OVERRIDE_USE_CUSTOM_RENDERER(ConfigNode.create().append("chatOverride").append("UseCustomRenderer"), true),
 
     SKILL_COOLDOWN_ON_DAMAGE(ConfigNode.create().append("cooldown_on_damage"), 15),
-    ACTION_ITEM(ConfigNode.create().append("action_item"), "minecraft:carrot_on_a_stick"),
+
+    @Deprecated
+    ACTION_ITEM(ConfigNode.create().append("action_item"), ""),
+    SKILL_ITEM(ConfigNode.create().append("skill_item"), "minecraft:feather"),
 
     ARMORSTAND_SHOW_ARMS(ConfigNode.create().append("armorstand_show_arms"), true),
 
@@ -24,15 +27,15 @@ public enum ConfigOption
     LOG_INCOMING_PACKETS(clientNode().append("log_incoming_packets"), false),
     LOG_OUTGOING_PACKETS(clientNode().append("log_outgoing_packets"), false),
 
-    REVERSE_CONTROL_DISTANCE(reverseControlNode().append("normalDistance"), -1),
-    REVERSE_IGNORE_DISGUISED(reverseControlNode().append("ignore_disguised"), true),
-    REVERSE_DESTROY_TIMEOUT(reverseControlNode().append("destroy_timeout"), 40),
+    MIRROR_CONTROL_DISTANCE(interactionMirrorNode().append("normalDistance"), -1),
+    MIRROR_IGNORE_DISGUISED(interactionMirrorNode().append("ignore_disguised"), true),
+    MIRROR_DESTROY_TIMEOUT(interactionMirrorNode().append("destroy_timeout"), 40),
 
-    REVERSE_BEHAVIOR_DO_SIMULATION(reverseControlBehaviorNode().append("simulate_interactions"), false),
-    REVERSE_BEHAVIOR_SNEAK(reverseControlBehaviorNode().append("sneak"), false),
-    REVERSE_BEHAVIOR_SWAP_HAND(reverseControlBehaviorNode().append("swap_hands"), false),
-    REVERSE_BEHAVIOR_DROP(reverseControlBehaviorNode().append("allow_drop"), false),
-    REVERSE_BEHAVIOR_HOTBAR(reverseControlBehaviorNode().append("hotbar"), false),
+    MIRROR_BEHAVIOR_DO_SIMULATION(interactionMirrorBehaviorNode().append("simulate_interactions"), true),
+    MIRROR_BEHAVIOR_SNEAK(interactionMirrorBehaviorNode().append("sneak"), true),
+    MIRROR_BEHAVIOR_SWAP_HAND(interactionMirrorBehaviorNode().append("swap_hands"), false),
+    MIRROR_BEHAVIOR_DROP(interactionMirrorBehaviorNode().append("allow_drop"), false),
+    MIRROR_BEHAVIOR_HOTBAR(interactionMirrorBehaviorNode().append("hotbar"), false),
 
     BANNED_DISGUISES(ConfigNode.create().append("bannedDisguises"), new ArrayList<String>()),
 
@@ -65,14 +68,14 @@ public enum ConfigOption
         return node.toString();
     }
 
-    private static ConfigNode reverseControlNode()
+    public static ConfigNode interactionMirrorNode()
     {
-        return ConfigNode.create().append("reverseControl");
+        return ConfigNode.create().append("interactionMirror");
     }
 
-    private static ConfigNode reverseControlBehaviorNode()
+    private static ConfigNode interactionMirrorBehaviorNode()
     {
-        return reverseControlNode().append("behaviors");
+        return interactionMirrorNode().append("behaviors");
     }
 
     private static ConfigNode bossbarNode()

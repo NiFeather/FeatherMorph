@@ -117,7 +117,7 @@ public class MorphConfigManager extends PluginConfigManager
         super.reload();
 
         //更新配置
-        int targetVersion = 14;
+        int targetVersion = 15;
 
         var configVersion = getOrDefault(Integer.class, ConfigOption.VERSION);
 
@@ -137,6 +137,14 @@ public class MorphConfigManager extends PluginConfigManager
             {
                 var locale = Locale.getDefault().toLanguageTag().replace('-', '_').toLowerCase();
                 newConfig.set(ConfigOption.LANGUAGE_CODE.toString(), locale);
+            }
+
+            if (configVersion < 15)
+            {
+                //skill item
+                //noinspection deprecation
+                var oldSkillItem = get(String.class, ConfigOption.ACTION_ITEM);
+                newConfig.set(ConfigOption.SKILL_ITEM.toString(), oldSkillItem);
             }
 
             newConfig.set(ConfigOption.VERSION.toString(), targetVersion);

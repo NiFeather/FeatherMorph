@@ -28,9 +28,9 @@ root:
   # Defines how many ticks should a player wait at least before they activate the skill again when they get damaged.
   cooldown_on_damage: 15
 
-  # Action item
+  # Skill item
   # Defines which item should player use to disguise/undisguise or activate skill.
-  action_item: minecraft:feather
+  skill_item: minecraft:feather
 
   # Should we make Armor Stand disguises show arms by default?
   armorstand_show_arms: true
@@ -52,14 +52,8 @@ root:
     enabled: true
 
     # Maximum base health
-    # Will cap player base health to the configured value if they exceed it.
+    # We will try to cap the player's base health to the configured value if they exceed it.
     max_health: 60
-
-  # Should we allow local disguises from LibsDisguises?
-  # PS: Local disguise are disguises you save by `/savedisg`
-  # PS: Due to API limitations, we can't figure out whether someone's disguise is a custom disguise.
-  #     This may cause issues when coping disguise.
-  enable_ld_custom_disguises: false
 
   # Bossbar options
   bossbar:
@@ -67,8 +61,8 @@ root:
     # Disable this will also disable the bossbar ability for all disguises.
     enabled: true
 
- # InteractionMirror options
-  reverseControl:
+  # InteractionMirror options
+  interactionMirror:
     # Maximum affect distance
     # How far should we find for the target player to mirror?
     # Set to 0 to disable this feature, or -1 to disable the limit.
@@ -88,7 +82,7 @@ root:
       simulate_interactions: true
 
       # Should we enable sneaking control?
-      sneak: false
+      sneak: true
 
       # Should we enable swapping control?
       swap_hands: false
@@ -119,4 +113,4 @@ root:
     log_outgoing_packets: false
 
   # Do not touch unless you know what you're doing!
-  version: 14
+  version: 15

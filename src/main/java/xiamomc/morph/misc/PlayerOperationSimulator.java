@@ -14,11 +14,9 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.craftbukkit.v1_19_R2.CraftWorld;
 import org.bukkit.craftbukkit.v1_19_R2.block.CraftBlock;
 import org.bukkit.craftbukkit.v1_19_R2.entity.CraftEntity;
-import org.bukkit.craftbukkit.v1_19_R2.entity.CraftHumanEntity;
 import org.bukkit.craftbukkit.v1_19_R2.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_19_R2.inventory.CraftItemStack;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.block.Action;
@@ -48,7 +46,7 @@ public class PlayerOperationSimulator extends MorphPluginObject
     {
         this.addSchedule(this::update);
 
-        config.bind(destroyTimeout, ConfigOption.REVERSE_DESTROY_TIMEOUT);
+        config.bind(destroyTimeout, ConfigOption.MIRROR_DESTROY_TIMEOUT);
     }
 
     private final Bindable<Integer> destroyTimeout = new Bindable<>(40);

@@ -33,7 +33,7 @@ public class OptionSubCommand extends MorphPluginObject implements ISubCommand
 
         subCommands.add(getToggle("unmorph_on_death", ConfigOption.UNMORPH_ON_DEATH, "unmorph_on_death"));
 
-        subCommands.add(getToggle("allow_local_disguise", ConfigOption.ALLOW_LD_DISGUISES, "ld", CommandNameStrings.allowLDDisguiseString()));
+        //subCommands.add(getToggle("allow_local_disguise", ConfigOption.ALLOW_LD_DISGUISES, "ld", CommandNameStrings.allowLDDisguiseString()));
 
         subCommands.add(getToggle("allow_client_mods", ConfigOption.ALLOW_CLIENT, "client"));
 
@@ -45,12 +45,12 @@ public class OptionSubCommand extends MorphPluginObject implements ISubCommand
 
         subCommands.add(getToggle("armorstand_show_arms", ConfigOption.ARMORSTAND_SHOW_ARMS, "armorstand_show_arms"));
 
-        subCommands.add(getToggle("reverse_interaction", ConfigOption.REVERSE_BEHAVIOR_DO_SIMULATION, "reverse.interaction", CommandNameStrings.reverseInteractionString()));
-        subCommands.add(getToggle("reverse_sneak", ConfigOption.REVERSE_BEHAVIOR_SNEAK, "reverse.sneak", CommandNameStrings.reverseSneakString()));
-        subCommands.add(getToggle("reverse_swaphand", ConfigOption.REVERSE_BEHAVIOR_SWAP_HAND, "reverse.swaphand", CommandNameStrings.reverseSwapHandString()));
-        subCommands.add(getToggle("reverse_drop", ConfigOption.REVERSE_BEHAVIOR_DROP, "reverse.drop", CommandNameStrings.reverseDropString()));
-        subCommands.add(getToggle("reverse_hotbar", ConfigOption.REVERSE_BEHAVIOR_HOTBAR, "reverse.hotbar", CommandNameStrings.reverseHotbar()));
-        subCommands.add(getToggle("reverse_ignore_disguised", ConfigOption.REVERSE_IGNORE_DISGUISED, "reverse.ignore_disguised", CommandNameStrings.reverseIgnoreDisguised()));
+        subCommands.add(getToggle("reverse_interaction", ConfigOption.MIRROR_BEHAVIOR_DO_SIMULATION, "reverse.interaction", CommandNameStrings.reverseInteractionString()));
+        subCommands.add(getToggle("reverse_sneak", ConfigOption.MIRROR_BEHAVIOR_SNEAK, "reverse.sneak", CommandNameStrings.reverseSneakString()));
+        subCommands.add(getToggle("reverse_swaphand", ConfigOption.MIRROR_BEHAVIOR_SWAP_HAND, "reverse.swaphand", CommandNameStrings.reverseSwapHandString()));
+        subCommands.add(getToggle("reverse_drop", ConfigOption.MIRROR_BEHAVIOR_DROP, "reverse.drop", CommandNameStrings.reverseDropString()));
+        subCommands.add(getToggle("reverse_hotbar", ConfigOption.MIRROR_BEHAVIOR_HOTBAR, "reverse.hotbar", CommandNameStrings.reverseHotbar()));
+        subCommands.add(getToggle("reverse_ignore_disguised", ConfigOption.MIRROR_IGNORE_DISGUISED, "reverse.ignore_disguised", CommandNameStrings.reverseIgnoreDisguised()));
     }
 
     private ISubCommand getToggle(String name, ConfigOption option, String perm)

@@ -4,7 +4,6 @@ import io.papermc.paper.event.player.PlayerArmSwingEvent;
 import me.libraryaddict.disguise.DisguiseAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -277,7 +276,7 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
         }
 
         var isInSameWorld = target.getWorld().equals(source.getWorld());
-        var normalDistance = config.getOrDefault(Integer.class, ConfigOption.REVERSE_CONTROL_DISTANCE);
+        var normalDistance = config.getOrDefault(Integer.class, ConfigOption.MIRROR_CONTROL_DISTANCE);
 
         //normalDistance为-1，总是启用，为0则禁用
         return normalDistance == -1
@@ -296,12 +295,12 @@ public class ReverseControlProcessor extends MorphPluginObject implements Listen
     {
         this.addSchedule(this::update);
 
-        config.bind(allowSimulation, ConfigOption.REVERSE_BEHAVIOR_DO_SIMULATION);
-        config.bind(allowSneak, ConfigOption.REVERSE_BEHAVIOR_SNEAK);
-        config.bind(allowSwap, ConfigOption.REVERSE_BEHAVIOR_SWAP_HAND);
-        config.bind(allowDrop, ConfigOption.REVERSE_BEHAVIOR_DROP);
-        config.bind(allowHotBar, ConfigOption.REVERSE_BEHAVIOR_HOTBAR);
-        config.bind(ignoreDisguised, ConfigOption.REVERSE_IGNORE_DISGUISED);
+        config.bind(allowSimulation, ConfigOption.MIRROR_BEHAVIOR_DO_SIMULATION);
+        config.bind(allowSneak, ConfigOption.MIRROR_BEHAVIOR_SNEAK);
+        config.bind(allowSwap, ConfigOption.MIRROR_BEHAVIOR_SWAP_HAND);
+        config.bind(allowDrop, ConfigOption.MIRROR_BEHAVIOR_DROP);
+        config.bind(allowHotBar, ConfigOption.MIRROR_BEHAVIOR_HOTBAR);
+        config.bind(ignoreDisguised, ConfigOption.MIRROR_IGNORE_DISGUISED);
     }
 
     private void update()
