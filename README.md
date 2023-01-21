@@ -9,7 +9,7 @@
 
 # FeatherMorph
 
-一个基于LibsDisguises打造的变形插件。
+一个旨在提供诸多开箱即用功能的变形插件。
 
 ### 功能
 - [x] 最基础的伪装功能
@@ -20,8 +20,8 @@
 ### 依赖关系
 FeatherMorph至少需要下面这些依赖才能运行：
 - Paper或基于Paper的1.19.3服务器
-- [PluginBase](https://github.com/XiaMoZhiShi/PluginBase/releases/latest)
-- [LibsDisguises](https://ci.md-5.net/job/LibsDisguises/) [^ld]
+- [PluginBase](https://github.com/XiaMoZhiShi/PluginBase/releases/latest) >= 0.0.25
+- [LibsDisguises](https://ci.md-5.net/job/LibsDisguises/) >= #1154 [^ld]
 
 [^ld]: 我们建议使用Jenkins上版本至少为#1154的构建，Spigot页面上的最新版本并不支持1.19.3。目前LibsDisguises在1.19.3上有些伪装暂不支持在服务端显示自身可见。
 

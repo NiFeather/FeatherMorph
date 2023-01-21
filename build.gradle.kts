@@ -56,7 +56,7 @@ dependencies {
 
 group = "xiamomc.morph"
 version = "${project.property("project_version")}"
-description = "Morph"
+description = "A morph plugin that aims to provide many features out-of-the-box"
 java.sourceCompatibility = JavaVersion.VERSION_17
 
 bukkit {
