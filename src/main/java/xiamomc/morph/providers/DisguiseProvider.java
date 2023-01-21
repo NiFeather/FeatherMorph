@@ -139,6 +139,7 @@ public abstract class DisguiseProvider extends MorphPluginObject
 
         //misc
         compound.remove("Pos");
+        compound.remove("Owner");
         compound.remove("WorldUUIDLeast");
         compound.remove("WorldUUIDMost");
         compound.remove("Rotation");

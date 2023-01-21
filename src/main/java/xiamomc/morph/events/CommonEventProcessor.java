@@ -3,6 +3,7 @@ package xiamomc.morph.events;
 import com.destroystokyo.paper.event.player.PlayerClientOptionsChangeEvent;
 import com.destroystokyo.paper.event.player.PlayerPostRespawnEvent;
 import me.libraryaddict.disguise.DisguiseAPI;
+import me.libraryaddict.disguise.disguisetypes.watchers.AbstractHorseWatcher;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import org.bukkit.Bukkit;
@@ -152,8 +153,20 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         {
             var state = morphs.getDisguiseStateFor(clickedPlayer);
 
-            if (state != null && state.getEntityType() == EntityType.ALLAY)
-                e.setCancelled(true);
+            if (state != null)
+            {
+                if (state.getEntityType() == EntityType.ALLAY)
+                    e.setCancelled(true);
+
+                if (state.getDisguise().getWatcher() instanceof AbstractHorseWatcher watcher)
+                {
+                    var slot = e.getHand();
+                    var item = e.getPlayer().getEquipment().getItem(slot);
+
+                    if (item.getType() == Material.SADDLE)
+                        watcher.setSaddled(true);
+                }
+            }
         }
 
         //workaround: 右键盔甲架不会触发事件、盔甲架是InteractAtEntityEvent

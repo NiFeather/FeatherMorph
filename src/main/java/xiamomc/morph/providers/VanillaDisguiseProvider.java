@@ -6,9 +6,7 @@ import me.libraryaddict.disguise.disguisetypes.Disguise;
 import me.libraryaddict.disguise.disguisetypes.DisguiseType;
 import me.libraryaddict.disguise.disguisetypes.MobDisguise;
 import me.libraryaddict.disguise.disguisetypes.VillagerData;
-import me.libraryaddict.disguise.disguisetypes.watchers.ArmorStandWatcher;
-import me.libraryaddict.disguise.disguisetypes.watchers.CatWatcher;
-import me.libraryaddict.disguise.disguisetypes.watchers.VillagerWatcher;
+import me.libraryaddict.disguise.disguisetypes.watchers.*;
 import net.kyori.adventure.text.Component;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.TagParser;
@@ -22,7 +20,9 @@ import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.messages.vanilla.VanillaMessageStore;
-import xiamomc.morph.misc.*;
+import xiamomc.morph.misc.DisguiseInfo;
+import xiamomc.morph.misc.DisguiseState;
+import xiamomc.morph.misc.DisguiseTypes;
 import xiamomc.morph.utilities.EntityTypeUtils;
 import xiamomc.morph.utilities.NbtUtils;
 import xiamomc.pluginbase.Annotations.Initializer;
@@ -234,6 +234,8 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
                 ? NbtUtils.getRawTagCompound(targetEntity)
                 : new CompoundTag();
 
+        if (rawCompound == null) rawCompound = new CompoundTag();
+
         var theirDisguise = getMorphManager().getDisguiseStateFor(targetEntity);
 
         if (theirDisguise != null)
@@ -251,11 +253,30 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
             }
         }
 
-        if (rawCompound != null
-                && state.getEntityType().equals(EntityType.ARMOR_STAND)
+        if (state.getEntityType().equals(EntityType.ARMOR_STAND)
                 && rawCompound.get("ShowArms") == null)
         {
             rawCompound.putBoolean("ShowArms", armorStandShowArms.get());
+        }
+
+        if (targetEntity == null)
+        {
+            var watcher = state.getDisguise().getWatcher();
+            switch (state.getEntityType())
+            {
+                case SLIME, MAGMA_CUBE ->
+                {
+                    var size = ((SlimeWatcher) watcher).getSize() - 1;
+                    rawCompound.putInt("Size", size);
+                }
+
+                case HORSE ->
+                {
+                    var color = ((HorseWatcher) watcher).getColor().ordinal();
+                    var style = ((HorseWatcher) watcher).getStyle().ordinal();
+                    rawCompound.putInt("Variant", color | style << 8);
+                }
+            }
         }
 
         return cullNBT(rawCompound);

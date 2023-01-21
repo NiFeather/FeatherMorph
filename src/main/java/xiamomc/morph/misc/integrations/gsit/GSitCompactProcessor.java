@@ -3,6 +3,7 @@ package xiamomc.morph.misc.integrations.gsit;
 import dev.geco.gsit.api.event.*;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import me.libraryaddict.disguise.DisguiseAPI;
+import me.libraryaddict.disguise.disguisetypes.watchers.AbstractHorseWatcher;
 import me.libraryaddict.disguise.utilities.DisguiseUtilities;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -50,7 +51,17 @@ public class GSitCompactProcessor extends MorphPluginObject implements Listener
 
         if (state != null && !state.getDisguise().isPlayerDisguise())
         {
-            e.setCancelled(true);
+            var disguise = state.getDisguise();
+
+            if (disguise.getWatcher() instanceof AbstractHorseWatcher horseWatcher)
+            {
+                if (!horseWatcher.isSaddled())
+                    e.setCancelled(true);
+            }
+            else if (!disguise.isPlayerDisguise())
+            {
+                e.setCancelled(true);
+            }
         }
     }
 
