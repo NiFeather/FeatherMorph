@@ -165,6 +165,8 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
 
                     if (item.getType() == Material.SADDLE)
                         watcher.setSaddled(true);
+                    else if (item.getType() != Material.AIR)
+                        e.setCancelled(true);
                 }
             }
         }
