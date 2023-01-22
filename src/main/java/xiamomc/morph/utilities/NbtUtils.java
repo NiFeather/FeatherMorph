@@ -57,7 +57,7 @@ public class NbtUtils
             "Xp.*", "food.*",
 
             //Misc
-            "Death.*"
+            "Death.*", "Spawn.*"
     );
 
     public static List<String> defaultBlacklistedTags = List.of(
@@ -79,6 +79,6 @@ public class NbtUtils
             //Misc
             "Pos", "Owner", "WorldUUIDLeast", "WorldUUIDMost",
             "Rotation", "listener", "ActiveEffects", "ArmorDropChances",
-            "PersistenceRequired"
+            "PersistenceRequired", "SelectedItem"
     );
 }

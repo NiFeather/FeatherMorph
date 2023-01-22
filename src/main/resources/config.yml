@@ -110,6 +110,7 @@ root:
       - Xp.*
       - food.*
       - Death.*
+      - Spawn.*
 
     # Names
     # Any tag with one of these names in this list will not send to the client.
@@ -148,6 +149,7 @@ root:
       - ActiveEffects
       - ArmorDropChances
       - PersistenceRequired
+      - SelectedItem
 
   # Client integration options
   client:

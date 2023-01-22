@@ -52,7 +52,7 @@ public enum ConfigOption
     //LANGUAGE_ALLOW_FALLBACK(languageNode().append("cast_translatable"), true),
     SINGLE_LANGUAGE(languageNode().append("single_language"), true),
 
-    BLACKLIST_PATTERNS(nbtBlacklistNode().append("patterns"),  NbtUtils.defaultBlacklistedPatterns),
+    BLACKLIST_PATTERNS(nbtBlacklistNode().append("patterns"), NbtUtils.defaultBlacklistedPatterns),
 
     BLACKLIST_TAGS(nbtBlacklistNode().append("names"), NbtUtils.defaultBlacklistedTags),
 

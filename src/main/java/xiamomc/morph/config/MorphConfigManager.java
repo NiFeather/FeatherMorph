@@ -3,17 +3,13 @@ package xiamomc.morph.config;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.LoggerFactory;
 import xiamomc.morph.MorphPlugin;
-import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
 import xiamomc.pluginbase.Bindables.BindableList;
 import xiamomc.pluginbase.Configuration.ConfigNode;
 import xiamomc.pluginbase.Configuration.PluginConfigManager;
 
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 public class MorphConfigManager extends PluginConfigManager
 {
@@ -140,7 +136,39 @@ public class MorphConfigManager extends PluginConfigManager
 
             var newConfig = plugin.getConfig();
 
-            nonDefaults.forEach((n, v) -> newConfig.set(n.toString(), v));
+            nonDefaults.forEach((n, v) ->
+            {
+                //noinspection rawtypes
+                if (v instanceof Collection collection)
+                {
+                    var matching = Arrays.stream(ConfigOption.values())
+                            .filter(option -> option.node.toString().equals(n.toString()))
+                            .findFirst().orElse(null);
+
+                    if (matching != null)
+                    {
+                        Collection<?> defaultVal = null;
+
+                        if (matching.defaultValue instanceof Collection<?> c1)
+                            defaultVal = c1;
+
+                        if (defaultVal != null)
+                        {
+                            defaultVal.forEach(c ->
+                            {
+                                if (!collection.contains(c))
+                                    collection.add(c);
+                            });
+                        }
+
+                        newConfig.set(n.toString(), v);
+                    }
+                }
+                else
+                {
+                    newConfig.set(n.toString(), v);
+                }
+            });
 
             //初次加载
             if (configVersion < 1)
