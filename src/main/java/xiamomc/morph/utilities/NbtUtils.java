@@ -1,5 +1,6 @@
 package xiamomc.morph.utilities;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.StringTagVisitor;
 import net.minecraft.nbt.Tag;
@@ -7,6 +8,8 @@ import net.minecraft.server.commands.data.EntityDataAccessor;
 import org.bukkit.craftbukkit.v1_19_R2.entity.CraftEntity;
 import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
 
 public class NbtUtils
 {
@@ -45,4 +48,37 @@ public class NbtUtils
         //StringNbtWriter#apply(NbtElement)
         return visitor.visit(compound);
     }
+
+    public static List<String> defaultBlacklistedPatterns = List.of(
+            //Common
+            "[pP]urpur.*", "[pP]aper.*", "[sS]pigot.*", "[bB]ukkit.*",
+
+            //Player
+            "Xp.*", "food.*",
+
+            //Misc
+            "Death.*"
+    );
+
+    public static List<String> defaultBlacklistedTags = List.of(
+            //Common
+            "UUID", "data", "Brain", "Motion", "palette", "Attributes",
+            "Invulnerable",
+
+            //Armor stand
+            "DisabledSlots", "ArmorItems", "HandItems",
+
+            //Player
+            "Tags", "recipes", "Inventory", "abilities", "recipeBook",
+            "EnderItems", "warden_spawn_tracker", "previousPlayerGameType",
+            "LastDeathLocation", "playerGameType", "seenCredits", "Score",
+
+            //Villager
+            "Offers", "LastRestock", "RestocksToday",
+
+            //Misc
+            "Pos", "Owner", "WorldUUIDLeast", "WorldUUIDMost",
+            "Rotation", "listener", "ActiveEffects", "ArmorDropChances",
+            "PersistenceRequired"
+    );
 }

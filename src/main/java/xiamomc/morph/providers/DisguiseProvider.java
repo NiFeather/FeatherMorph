@@ -1,5 +1,6 @@
 package xiamomc.morph.providers;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.disguisetypes.Disguise;
 import net.kyori.adventure.text.Component;
@@ -11,13 +12,18 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
+import xiamomc.morph.config.ConfigOption;
+import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.misc.DisguiseInfo;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.utilities.NbtUtils;
 import xiamomc.morph.network.commands.S2C.AbstractS2CCommand;
+import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
+import xiamomc.pluginbase.Bindables.BindableList;
 
 import java.util.List;
+import java.util.regex.Pattern;
 
 public abstract class DisguiseProvider extends MorphPluginObject
 {
@@ -91,60 +97,42 @@ public abstract class DisguiseProvider extends MorphPluginObject
         return null;
     }
 
+    private static final BindableList<String> blackListTags = new BindableList<>();
+    private static final BindableList<String> blackListPatterns = new BindableList<>();
+    private static boolean bindableInitialized;
+
+    @Initializer
+    private void load(MorphConfigManager configManager)
+    {
+        if (!bindableInitialized)
+        {
+            configManager.bind(blackListTags, ConfigOption.BLACKLIST_TAGS);
+            configManager.bind(blackListPatterns, ConfigOption.BLACKLIST_PATTERNS);
+
+            bindableInitialized = true;
+        }
+    }
+
     protected CompoundTag cullNBT(CompoundTag compound)
     {
         if (compound == null) return null;
 
         //compound.r() -> NBTCompound#remove()
 
-        //common
-        compound.remove("UUID");
-        compound.remove("data");
-        compound.remove("Brain");
-        compound.remove("Motion");
-        compound.remove("palette");
-        compound.remove("Attributes");
-        compound.remove("Invulnerable");
-        compound.remove("DisabledSlots");
+        blackListTags.forEach(compound::remove);
 
-        //armor stand
-        compound.remove("ArmorItems");
-        compound.remove("HandItems");
+        var toRemove = new ObjectArrayList<String>();
 
-        //player
-        compound.remove("Tags");
-        compound.remove("bukkit");
-        compound.remove("recipes");
-        compound.remove("Inventory");
-        compound.remove("abilities");
-        compound.remove("recipeBook");
-        compound.remove("EnderItems");
-        compound.remove("BukkitValues");
-        compound.remove("warden_spawn_tracker");
-        compound.remove("previousPlayerGameType");
+        blackListPatterns.forEach(pattern ->
+        {
+            compound.tags.keySet().forEach(id ->
+            {
+                if (Pattern.matches(pattern, id))
+                    toRemove.add(id);
+            });
+        });
 
-        //paper, bukkit, spigot, purpur
-        compound.remove("Paper");
-        compound.remove("Paper.Origin");
-        compound.remove("Paper.OriginWorld");
-        compound.remove("Paper.SpawnReason");
-        compound.remove("Spigot.ticksLived");
-        compound.remove("Bukkit.updateLevel");
-        compound.remove("Bukkit.Aware");
-        compound.remove("Purpur.ShouldBurnInDay");
-        compound.remove("Purpur.ticksSinceLastInteraction");
-
-        //villager
-        compound.remove("Offers");
-
-        //misc
-        compound.remove("Pos");
-        compound.remove("Owner");
-        compound.remove("WorldUUIDLeast");
-        compound.remove("WorldUUIDMost");
-        compound.remove("Rotation");
-        compound.remove("listener");
-
+        toRemove.forEach(compound::remove);
         return compound;
     }
 

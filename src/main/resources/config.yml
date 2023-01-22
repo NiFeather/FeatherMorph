@@ -97,6 +97,58 @@ root:
   # Disguises in this list won't be available in-game for anyone.
   bannedDisguises: []
 
+  # NBT blacklist options
+  # Defines tags that should not be sent to the client when syncing disguise states.
+  nbt_blacklist:
+    # Patterns
+    # Any tag that matches one of these patterns will not send to the client.
+    patterns:
+      - '[pP]urpur.*'
+      - '[pP]aper.*'
+      - '[sS]pigot.*'
+      - '[bB]ukkit.*'
+      - Xp.*
+      - food.*
+      - Death.*
+
+    # Names
+    # Any tag with one of these names in this list will not send to the client.
+    names:
+      - UUID
+      - data
+      - Brain
+      - Motion
+      - palette
+      - Attributes
+      - Invulnerable
+      - DisabledSlots
+      - ArmorItems
+      - HandItems
+      - Tags
+      - recipes
+      - Inventory
+      - abilities
+      - recipeBook
+      - EnderItems
+      - warden_spawn_tracker
+      - previousPlayerGameType
+      - LastDeathLocation
+      - playerGameType
+      - seenCredits
+      - Score
+      - Offers
+      - LastRestock
+      - RestocksToday
+      - Pos
+      - Owner
+      - WorldUUIDLeast
+      - WorldUUIDMost
+      - Rotation
+      - listener
+      - ActiveEffects
+      - ArmorDropChances
+      - PersistenceRequired
+
   # Client integration options
   client:
     # Should we allow client integrations?
@@ -113,4 +165,4 @@ root:
     log_outgoing_packets: false
 
   # Do not touch unless you know what you're doing!
-  version: 15
+  version: 16

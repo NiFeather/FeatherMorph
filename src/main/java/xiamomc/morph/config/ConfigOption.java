@@ -1,5 +1,6 @@
 package xiamomc.morph.config;
 
+import xiamomc.morph.utilities.NbtUtils;
 import xiamomc.pluginbase.Configuration.ConfigNode;
 
 import java.util.ArrayList;
@@ -13,7 +14,7 @@ public enum ConfigOption
     SKILL_COOLDOWN_ON_DAMAGE(ConfigNode.create().append("cooldown_on_damage"), 15),
 
     @Deprecated
-    ACTION_ITEM(ConfigNode.create().append("action_item"), ""),
+    ACTION_ITEM(ConfigNode.create().append("action_item"), "", true),
     SKILL_ITEM(ConfigNode.create().append("skill_item"), "minecraft:feather"),
 
     ARMORSTAND_SHOW_ARMS(ConfigNode.create().append("armorstand_show_arms"), true),
@@ -45,21 +46,32 @@ public enum ConfigOption
 
     DISPLAY_BOSSBAR(bossbarNode().append("enabled"), true),
 
-    ALLOW_LD_DISGUISES(ConfigNode.create().append("enable_ld_custom_disguises"), false),
+    ALLOW_LD_DISGUISES(ConfigNode.create().append("enable_ld_custom_disguises"), false, true),
 
     LANGUAGE_CODE(languageNode().append("code"), "zh_cn"),
     //LANGUAGE_ALLOW_FALLBACK(languageNode().append("cast_translatable"), true),
     SINGLE_LANGUAGE(languageNode().append("single_language"), true),
 
+    BLACKLIST_PATTERNS(nbtBlacklistNode().append("patterns"),  NbtUtils.defaultBlacklistedPatterns),
+
+    BLACKLIST_TAGS(nbtBlacklistNode().append("names"), NbtUtils.defaultBlacklistedTags),
+
     VERSION(ConfigNode.create().append("version"), 0);
 
     public final ConfigNode node;
     public final Object defaultValue;
+    public final boolean excludeFromInit;
 
-    private ConfigOption(ConfigNode node, Object defaultValue)
+    private ConfigOption(ConfigNode node, Object defaultValue, boolean excludeFromInit)
     {
         this.node = node;
         this.defaultValue = defaultValue;
+        this.excludeFromInit = excludeFromInit;
+    }
+
+    private ConfigOption(ConfigNode node, Object defaultValue)
+    {
+        this(node, defaultValue, false);
     }
 
     @Override
@@ -71,6 +83,11 @@ public enum ConfigOption
     public static ConfigNode interactionMirrorNode()
     {
         return ConfigNode.create().append("interactionMirror");
+    }
+
+    private static ConfigNode nbtBlacklistNode()
+    {
+        return ConfigNode.create().append("nbt_blacklist");
     }
 
     private static ConfigNode interactionMirrorBehaviorNode()

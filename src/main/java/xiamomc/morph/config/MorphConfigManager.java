@@ -74,7 +74,7 @@ public class MorphConfigManager extends PluginConfigManager
         return map;
     }
 
-    public <T> BindableList<T> getBindableList(Class<T> type, ConfigOption option)
+    public <T> BindableList<T> getBindableList(ConfigOption option)
     {
         var originalBindable = getBindable(List.class, option.node, List.of());
         var list = new BindableList<T>(originalBindable.get());
@@ -106,6 +106,16 @@ public class MorphConfigManager extends PluginConfigManager
             throw new IllegalArgumentException("尝试将一个Bindable绑定在不兼容的配置(" + option + ")上");
     }
 
+    public <T> void bind(BindableList<T> bindable, ConfigOption option)
+    {
+        var bb = this.getBindableList(option);
+
+        if (bindable.getClass().isInstance(bb))
+            bindable.bindTo((BindableList<T>) bb);
+        else
+            throw new IllegalArgumentException("尝试将一个Bindable绑定在不兼容的配置(" + option + ")上");
+    }
+
     public <T> Bindable<T> getBindable(Class<T> type, ConfigOption path, T defaultValue)
     {
         return super.getBindable(type, path.node, defaultValue);
@@ -117,7 +127,7 @@ public class MorphConfigManager extends PluginConfigManager
         super.reload();
 
         //更新配置
-        int targetVersion = 15;
+        int targetVersion = 16;
 
         var configVersion = getOrDefault(Integer.class, ConfigOption.VERSION);
 
