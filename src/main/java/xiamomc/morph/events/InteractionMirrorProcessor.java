@@ -128,7 +128,7 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
     }
 
     @EventHandler
-    public void onPlayerHurtPlayer(EntityDamageByEntityEvent e)
+    public void onPlayerHurtEntity(EntityDamageByEntityEvent e)
     {
         if (!allowSimulation.get()) return;
 
@@ -142,11 +142,11 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
 
                 if (!playerInDistance(damager, targetPlayer)) return;
 
+                simulateOperation(Action.LEFT_CLICK_AIR, targetPlayer);
+
                 //如果伪装的玩家想攻击本体，取消事件并模拟左键
                 if (e.getEntity() instanceof Player hurtedPlayer && hurtedPlayer.equals(targetPlayer))
                 {
-                    simulateOperation(Action.LEFT_CLICK_AIR, targetPlayer);
-
                     e.setCancelled(true);
 
                     return;
@@ -157,11 +157,7 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
 
                 //如果伪装的玩家想攻击的实体和被伪装的玩家一样，模拟左键并取消事件
                 if (damagerLookingAt != null && damagerLookingAt.equals(playerLookingAt))
-                {
-                    simulateOperation(Action.LEFT_CLICK_AIR, targetPlayer);
-
                     e.setCancelled(true);
-                }
             }
         }
     }
