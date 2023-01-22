@@ -62,6 +62,8 @@ public class MorphConfigManager extends PluginConfigManager
 
         for (var o : options)
         {
+            if (o.excludeFromInit) continue;
+
             var val = getOrDefault(Object.class, o);
 
             if (!val.equals(o.defaultValue)) map.put(o.node, val);

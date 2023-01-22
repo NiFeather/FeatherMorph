@@ -46,9 +46,10 @@ public enum ConfigOption
 
     DISPLAY_BOSSBAR(bossbarNode().append("enabled"), true),
 
+    @Deprecated
     ALLOW_LD_DISGUISES(ConfigNode.create().append("enable_ld_custom_disguises"), false, true),
 
-    LANGUAGE_CODE(languageNode().append("code"), "zh_cn"),
+    LANGUAGE_CODE(languageNode().append("code"), "en_us"),
     //LANGUAGE_ALLOW_FALLBACK(languageNode().append("cast_translatable"), true),
     SINGLE_LANGUAGE(languageNode().append("single_language"), true),
 
