@@ -259,7 +259,7 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
             rawCompound.putBoolean("ShowArms", armorStandShowArms.get());
         }
 
-        if (targetEntity == null)
+        if (targetEntity == null || targetEntity.getType() != state.getEntityType())
         {
             var watcher = state.getDisguise().getWatcher();
             switch (state.getEntityType())
@@ -275,6 +275,66 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
                     var color = ((HorseWatcher) watcher).getColor().ordinal();
                     var style = ((HorseWatcher) watcher).getStyle().ordinal();
                     rawCompound.putInt("Variant", color | style << 8);
+                }
+
+                case PARROT ->
+                {
+                    var variant = ((ParrotWatcher) watcher).getVariant().ordinal();
+                    rawCompound.putInt("Variant", variant);
+                }
+
+                case CAT ->
+                {
+                    var variant = ((CatWatcher) watcher).getType().getKey().asString();
+                    rawCompound.putString("variant", variant);
+                }
+
+                case TROPICAL_FISH ->
+                {
+                    var variant = ((TropicalFishWatcher) watcher).getVariant();
+
+                    rawCompound.putInt("Variant", variant);
+                }
+
+                case RABBIT ->
+                {
+                    var type = ((RabbitWatcher) watcher).getType().getTypeId();
+                    rawCompound.putInt("RabbitType", type);
+                }
+
+                case FOX ->
+                {
+                    var foxType = ((FoxWatcher) watcher).getType().name().toLowerCase();
+                    rawCompound.putString("Type", foxType);
+                }
+
+                case FROG ->
+                {
+                    var variant = ((FrogWatcher) watcher).getVariant().getKey().asString();
+                    rawCompound.putString("variant", variant);
+                }
+
+                case GOAT ->
+                {
+                    var goatWatcher = ((GoatWatcher) watcher);
+
+                    var hasLeftHorn = goatWatcher.hasLeftHorn();
+                    var hasRightHorn = goatWatcher.hasRightHorn();
+                    var isScreaming = goatWatcher.isScreaming();
+
+                    rawCompound.putBoolean("HasLeftHorn", hasLeftHorn);
+                    rawCompound.putBoolean("HasRightHorn", hasRightHorn);
+                    rawCompound.putBoolean("IsScreamingGoat", isScreaming);
+                }
+
+                case PANDA ->
+                {
+                    var pandaWatcher = ((PandaWatcher) watcher);
+                    var mainGene = pandaWatcher.getMainGene();
+                    var hiddenGene = pandaWatcher.getHiddenGene();
+
+                    rawCompound.putString("MainGene", mainGene.toString().toLowerCase());
+                    rawCompound.putString("HiddenGene", hiddenGene.toString().toLowerCase());
                 }
             }
         }
