@@ -11,6 +11,7 @@ plugins {
     id("io.papermc.paperweight.userdev") version "1.4.0"
     id("xyz.jpenilla.run-paper") version "2.0.1" // Adds runServer and runMojangMappedServer tasks for testing
     id("net.minecrell.plugin-yml.bukkit") version "0.5.2" // Generates plugin.yml
+    id("com.github.johnrengelman.shadow") version "7.1.2" // Shadow PluginBase
 }
 
 repositories {
@@ -49,7 +50,8 @@ dependencies {
         exclude("org.spigotmc", "spigot-api")
         exclude("org.spigotmc", "spigot")
     }
-    compileOnly("com.github.XiaMoZhiShi:PluginBase:${project.property("pluginbase_version")}")
+
+    implementation("com.github.XiaMoZhiShi:PluginBase:${project.property("pluginbase_version")}")
     compileOnly("com.github.Gecolay:GSit:${project.property("gsit_version")}")
     compileOnly("me.clip:placeholderapi:${project.property("papi_version")}")
 }
@@ -88,7 +90,7 @@ bukkit {
         register(permissionRoot + "headmorph")
 
         register(permissionRoot + "skill")
-        register(permissionRoot + "reverse")
+        register(permissionRoot + "mirror")
         register(permissionRoot + "chatoverride")
 
         register(permissionRoot + "request.send")
@@ -108,7 +110,12 @@ publishing {
 }
 
 tasks.build {
-    dependsOn(tasks.reobfJar)
+    dependsOn(tasks.shadowJar, tasks.reobfJar)
+}
+
+tasks.shadowJar {
+    minimize()
+    relocate("xiamomc.pluginbase", "xiamomc.morph.shaded.pluginbase")
 }
 
 tasks.withType<JavaCompile>() {
