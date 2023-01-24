@@ -765,6 +765,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             state.setDisguise(id, targetSkillID, disguise, shouldHandlePose, equipment);
         }
 
+        state.getDisguise().setTallDisguisesVisible(true);
+
         //workaround: Disguise#getDisguiseName()不会正常返回实体的自定义名称
         if (targetEntity != null && targetEntity.customName() != null)
         {
