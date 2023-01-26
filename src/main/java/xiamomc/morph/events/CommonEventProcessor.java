@@ -3,6 +3,7 @@ package xiamomc.morph.events;
 import com.destroystokyo.paper.event.player.PlayerClientOptionsChangeEvent;
 import com.destroystokyo.paper.event.player.PlayerPostRespawnEvent;
 import me.libraryaddict.disguise.DisguiseAPI;
+import me.libraryaddict.disguise.DisguiseConfig;
 import me.libraryaddict.disguise.disguisetypes.watchers.AbstractHorseWatcher;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
@@ -357,9 +358,15 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
 
         if (state != null)
         {
+            var playerNameType = DisguiseConfig.getPlayerNameType();
+            if (playerNameType != DisguiseConfig.PlayerNameType.VANILLA)
+                DisguiseConfig.setPlayerNameType(DisguiseConfig.PlayerNameType.VANILLA);
+
             //重新进入后player和info.player不属于同一个实例，需要重新disguise
             state.setPlayer(player);
             DisguiseAPI.disguiseEntity(player, state.getDisguise());
+
+            DisguiseConfig.setPlayerNameType(playerNameType);
 
             var disguise = DisguiseAPI.getDisguise(player);
             DisguiseUtils.addTrace(disguise);
