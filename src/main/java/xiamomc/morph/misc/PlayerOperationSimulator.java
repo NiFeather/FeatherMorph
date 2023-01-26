@@ -404,7 +404,7 @@ public class PlayerOperationSimulator extends MorphPluginObject
      * @param nmsEntity ??? in fabric mojang mappings
      * @param interactManager GameMode in fabric mojang mappings
      */
-    private record NmsRecord(ServerPlayer nmsPlayer, ServerLevel nmsWorld,
+    public record NmsRecord(ServerPlayer nmsPlayer, ServerLevel nmsWorld,
                              @Nullable net.minecraft.world.entity.Entity nmsEntity,
                              ServerPlayerGameMode interactManager)
     {

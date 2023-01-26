@@ -33,12 +33,20 @@ public class ItemUtils
         return "{\"id\":\"minecraft:air\",\"Count\":1}";
     }
 
-    public static boolean noSwingType(Material type)
+    /**
+     * Check if the given {@link Material} is a continuous usable type (have consuming animation).
+     * @param type {@link Material}
+     * @return True if this type is continuous usable.
+     */
+    public static boolean isContinuousUsable(Material type)
     {
-        return type == Material.SHIELD
-                || type == Material.BOW || type == Material.CROSSBOW
+        return type == Material.BOW
+                || type == Material.CROSSBOW
                 || type == Material.TRIDENT
-                || type == Material.POTION;
+                || type == Material.SHIELD
+                || type == Material.POTION
+                || type == Material.MILK_BUCKET
+                || type.isEdible();
     }
 
     private static final ItemStack air = new ItemStack(Material.AIR);

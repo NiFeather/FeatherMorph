@@ -1,9 +1,14 @@
 package xiamomc.morph.events;
 
 import io.papermc.paper.event.player.PlayerArmSwingEvent;
+import io.papermc.paper.event.player.PlayerStopUsingItemEvent;
+import it.unimi.dsi.fastutil.objects.Object2BooleanArrayMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectArraySet;
 import me.libraryaddict.disguise.DisguiseAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -28,6 +33,7 @@ import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class InteractionMirrorProcessor extends MorphPluginObject implements Listener
@@ -128,6 +134,31 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
     }
 
     @EventHandler
+    public void onPlayerStopUsingItem(PlayerStopUsingItemEvent e)
+    {
+        var player = e.getPlayer();
+        var state = uuidDisguiseStateMap.get(player);
+
+        if (state != null)
+        {
+            var targetPlayer = Bukkit.getPlayerExact(state);
+
+            if (!playerInDistance(player, targetPlayer)) return;
+
+            //如果目标玩家正在使用的物品和我们当前释放的物品一样，并且释放的物品拥有使用动画，那么调用releaseUsingItem
+            var ourHandItem = e.getItem().getType();
+            var nmsPlayer = PlayerOperationSimulator.NmsRecord.of(targetPlayer).nmsPlayer();
+
+            if (nmsPlayer.isUsingItem()
+                    && ItemUtils.isContinuousUsable(ourHandItem)
+                    && nmsPlayer.getUseItem().getBukkitStack().getType() == ourHandItem)
+            {
+                nmsPlayer.releaseUsingItem();
+            }
+        }
+    }
+
+    @EventHandler
     public void onPlayerHurtEntity(EntityDamageByEntityEvent e)
     {
         if (!allowSimulation.get()) return;
@@ -208,22 +239,42 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
         }
     }
 
+    private final Map<Player, Action> lastRightClick = new Object2ObjectOpenHashMap<>();
+
+    private boolean isDuplicatedRightClick(Player player)
+    {
+        var lastAction = lastRightClick.getOrDefault(player, null);
+
+        return lastAction != null && lastAction.isRightClick();
+    }
+
+    private void updateLastAction(Player player, Action action)
+    {
+        lastRightClick.put(player, action);
+    }
+
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent e)
     {
-        if (e.getHand() == EquipmentSlot.HAND)
+        var player = e.getPlayer();
+        var action = e.getAction();
+
+        //Sometimes right click fires PlayerInteractEvent for both left and right hand.
+        //This prevents us from simulating the same operation twice.
+        if (isDuplicatedRightClick(player))
+            return;
+
+        updateLastAction(player, action);
+
+        var state = uuidDisguiseStateMap.get(player);
+
+        if (state != null)
         {
-            var player = e.getPlayer();
-            var state = uuidDisguiseStateMap.get(player);
+            var targetPlayer = Bukkit.getPlayerExact(state);
 
-            if (state != null)
-            {
-                var targetPlayer = Bukkit.getPlayerExact(state);
+            if (!playerInDistance(player, targetPlayer)) return;
 
-                if (!playerInDistance(player, targetPlayer)) return;
-
-                simulateOperation(e.getAction(), targetPlayer);
-            }
+            simulateOperation(e.getAction(), targetPlayer);
         }
     }
 
@@ -250,7 +301,7 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
         {
             var itemInUse = targetPlayer.getEquipment().getItem(result.hand()).getType();
 
-            if (!isRightClick || !ItemUtils.noSwingType(itemInUse))
+            if (!isRightClick || !ItemUtils.isContinuousUsable(itemInUse))
                 targetPlayer.swingHand(result.hand());
 
             return true;
@@ -321,6 +372,7 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
         */
 
         this.addSchedule(this::update);
+        lastRightClick.clear();
     }
 
     @EventHandler
