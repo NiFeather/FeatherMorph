@@ -359,7 +359,8 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         if (state != null)
         {
             var playerNameType = DisguiseConfig.getPlayerNameType();
-            if (playerNameType != DisguiseConfig.PlayerNameType.VANILLA)
+
+            if (state.getDisguiseType() == DisguiseTypes.PLAYER && playerNameType != DisguiseConfig.PlayerNameType.VANILLA)
                 DisguiseConfig.setPlayerNameType(DisguiseConfig.PlayerNameType.VANILLA);
 
             //重新进入后player和info.player不属于同一个实例，需要重新disguise
