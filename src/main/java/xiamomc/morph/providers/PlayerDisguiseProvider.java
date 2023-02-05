@@ -4,7 +4,6 @@ import com.comphenix.protocol.wrappers.WrappedGameProfile;
 import com.mojang.authlib.GameProfile;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import me.libraryaddict.disguise.DisguiseAPI;
-import me.libraryaddict.disguise.DisguiseConfig;
 import me.libraryaddict.disguise.disguisetypes.Disguise;
 import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
 import me.libraryaddict.disguise.utilities.DisguiseUtilities;
@@ -51,10 +50,6 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
         if (DisguiseTypes.fromId(id) != DisguiseTypes.PLAYER)
             return DisguiseResult.fail();
 
-        var playerNameType = DisguiseConfig.getPlayerNameType();
-        if (playerNameType != DisguiseConfig.PlayerNameType.VANILLA)
-            DisguiseConfig.setPlayerNameType(DisguiseConfig.PlayerNameType.VANILLA);
-
         var result = getCopy(disguiseInfo, targetEntity);
         var disguise = result.success()
                 ? (PlayerDisguise) result.disguise()
@@ -87,7 +82,6 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
         }
 
         DisguiseAPI.disguiseEntity(player, disguise);
-        DisguiseConfig.setPlayerNameType(playerNameType);
 
         return DisguiseResult.success(disguise, result.isCopy());
     }
