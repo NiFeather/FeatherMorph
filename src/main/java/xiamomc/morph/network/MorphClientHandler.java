@@ -152,13 +152,13 @@ public class MorphClientHandler extends MorphPluginObject
 
                 var msg = forceTargetVersion.get() ? MorphStrings.clientVersionMismatchKickString() : MorphStrings.clientVersionMismatchString();
                 msg.withLocale(MessageUtils.getLocale(player))
-                        .resolve("<minimum_version>", Component.text(minimumApiVersion))
-                        .resolve("<player_version>", Component.text(clientVersion));
+                        .resolve("minimum_version", Component.text(minimumApiVersion))
+                        .resolve("player_version", Component.text(clientVersion));
 
                 if (forceTargetVersion.get())
-                    player.kick(MessageUtils.prefixes(player, MorphStrings.clientVersionMismatchKickString()));
+                    player.kick(msg.toComponent());
                 else
-                    player.sendMessage(MessageUtils.prefixes(player, MorphStrings.clientVersionMismatchString()));
+                    player.sendMessage(msg.toComponent());
 
                 return;
             }
