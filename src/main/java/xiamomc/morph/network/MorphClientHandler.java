@@ -49,7 +49,7 @@ public class MorphClientHandler extends MorphPluginObject
             throw new MessageTooLargeException();
 
         if (logOutGoingPackets.get())
-            logger.info(channel + " :: " + player.getName() + " -> " + new String(message, StandardCharsets.UTF_8));
+            logPacket(true, player, channel, message);
 
         var nmsPlayer = ((CraftPlayer) player).getHandle();
 
@@ -72,6 +72,23 @@ public class MorphClientHandler extends MorphPluginObject
 
     private final List<AbstractC2SCommand> c2SCommands = new ObjectArrayList<>();
 
+    private void logPacket(boolean isOutGoingPacket, Player player, String channel, byte[] data)
+    {
+        this.logPacket(isOutGoingPacket, player, channel, new String(data, StandardCharsets.UTF_8));
+    }
+
+    private void logPacket(boolean isOutGoingPacket, Player player, String channel, String data)
+    {
+        var arrow = isOutGoingPacket ? " -> " : " <- ";
+
+        String builder = channel + arrow
+                + player.getName()
+                + " :: "
+                + "'" + data + "'";
+
+        logger.info(builder);
+    }
+
     @Initializer
     private void load(MorphPlugin plugin, MorphConfigManager configManager)
     {
@@ -88,7 +105,7 @@ public class MorphClientHandler extends MorphPluginObject
             if (!allowClient.get() || this.getPlayerConnectionState(player).greaterThan(InitializeState.HANDSHAKE)) return;
 
             if (logInComingPackets.get())
-                logger.info("收到了来自" + player.getName() + "的初始化消息：" + new String(data, StandardCharsets.UTF_8));
+                logPacket(false, player, initializeChannel, data);
 
             this.sendPacket(initializeChannel, player, "".getBytes());
 
@@ -108,7 +125,7 @@ public class MorphClientHandler extends MorphPluginObject
             var str = new String(data, StandardCharsets.UTF_8);
 
             if (logInComingPackets.get())
-                logger.info("收到了来自" + player.getName() + "的API请求：" + str);
+                logPacket(false, player, versionChannel, str);
 
             //尝试获取api版本
             int clientVersion = 1;
@@ -131,7 +148,7 @@ public class MorphClientHandler extends MorphPluginObject
                 unInitializePlayer(player);
 
                 player.sendMessage(MessageUtils.prefixes(player, MorphStrings.clientVersionMismatchString()));
-                logger.info(player.getName() + "使用了不支持的客户端版本：" + clientVersion + "(此服务器要求至少为" + targetApiVersion + ")");
+                logger.info(player.getName() + " joined with incompatible client API version: " + clientVersion + "(This server requires at least " + targetApiVersion + ")");
 
                 var msg = forceTargetVersion.get() ? MorphStrings.clientVersionMismatchKickString() : MorphStrings.clientVersionMismatchString();
                 msg.withLocale(MessageUtils.getLocale(player))
@@ -146,7 +163,7 @@ public class MorphClientHandler extends MorphPluginObject
                 return;
             }
 
-            logger.info(player.getName() + "的客户端版本是" + clientVersion);
+            logger.info(player.getName() + " joined with API version " + clientVersion);
 
             this.getPlayerOption(player).clientApiVersion = clientVersion;
             playerConnectionStates.put(player, InitializeState.API_CHECKED);
@@ -162,7 +179,7 @@ public class MorphClientHandler extends MorphPluginObject
             if (this.getPlayerConnectionState(player).worseThan(InitializeState.API_CHECKED)) return;
 
             if (logInComingPackets.get())
-                logger.info("在" + cN + "收到了来自" + player.getName() + "的服务端指令：" + new String(data, StandardCharsets.UTF_8));
+                logPacket(false, player, commandChannel, data);
 
             var str = new String(data, StandardCharsets.UTF_8).split(" ", 2);
 
@@ -176,7 +193,7 @@ public class MorphClientHandler extends MorphPluginObject
             if (c2sCommand != null)
                 c2sCommand.onCommand(player, str);
             else
-                logger.warn("未知的服务端指令：" + baseCommand);
+                logger.warn("Unknown server command: " + baseCommand);
         });
 
         Bukkit.getMessenger().registerOutgoingPluginChannel(plugin, initializeChannel);
