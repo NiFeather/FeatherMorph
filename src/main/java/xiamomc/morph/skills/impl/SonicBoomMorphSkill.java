@@ -11,7 +11,7 @@ import org.bukkit.craftbukkit.v1_19_R2.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.skills.SkillType;
-import xiamomc.morph.storage.skill.NoOpConfiguration;
+import xiamomc.morph.skills.options.NoOpConfiguration;
 import xiamomc.morph.storage.skill.SkillConfiguration;
 
 public class SonicBoomMorphSkill extends DelayedMorphSkill<NoOpConfiguration>

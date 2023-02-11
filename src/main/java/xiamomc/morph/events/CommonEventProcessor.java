@@ -26,6 +26,7 @@ import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.messages.*;
 import xiamomc.morph.messages.vanilla.VanillaMessageStore;
 import xiamomc.morph.misc.DisguiseTypes;
+import xiamomc.morph.misc.PlayerOperationSimulator;
 import xiamomc.morph.utilities.DisguiseUtils;
 import xiamomc.morph.utilities.EntityTypeUtils;
 import xiamomc.morph.network.MorphClientHandler;

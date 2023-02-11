@@ -127,7 +127,8 @@ public class AbilityHandler extends MorphPluginObject
                 new WardenLessAwareAbility(),
                 new ChatOverrideAbility(),
                 new BossbarAbility(),
-                new NoSweetBushDamageAbility()
+                new NoSweetBushDamageAbility(),
+                new AttributeModifyingAbility()
         ));
 
         initalizeDone = true;

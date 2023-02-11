@@ -1,5 +1,7 @@
 package xiamomc.morph.abilities.options;
 
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.LoggerFactory;
@@ -18,14 +20,18 @@ public class FlyOption implements ISkillOption
         this.flyingSpeed = speed;
     }
 
-    private float flyingSpeed;
+    @Expose
+    @SerializedName("fly_speed")
+    private float flyingSpeed = Float.NaN;
 
     public float getFlyingSpeed()
     {
         return flyingSpeed;
     }
 
-    private float hungerConsumeMultiplier;
+    @Expose
+    @SerializedName("hunger_consume_multiplier")
+    private float hungerConsumeMultiplier = 1f;
 
     public float getHungerConsumeMultiplier()
     {
@@ -37,7 +43,9 @@ public class FlyOption implements ISkillOption
         hungerConsumeMultiplier = newVal;
     }
 
-    private int minimumHunger;
+    @Expose
+    @SerializedName("minimum_hunger")
+    private int minimumHunger = 6;
 
     public int getMinimumHunger()
     {
@@ -50,30 +58,8 @@ public class FlyOption implements ISkillOption
     }
 
     @Override
-    public Map<String, Object> toMap()
+    public boolean isValid()
     {
-        var map = new Object2ObjectOpenHashMap<String, Object>();
-
-        map.put("fly_speed", flyingSpeed);
-        map.put("hunger_consume_multiplier", hungerConsumeMultiplier);
-        map.put("minimum_hunger", minimumHunger);
-
-        return map;
-    }
-
-    @Override
-    public @Nullable ISkillOption fromMap(@Nullable Map<String, Object> map)
-    {
-        if (map == null) return null;
-
-        var instance = new FlyOption();
-
-        instance.flyingSpeed = tryGetFloat(map, "fly_speed", Float.NaN);
-        instance.hungerConsumeMultiplier = tryGetFloat(map, "hunger_consume_multiplier", 1f);
-        instance.minimumHunger = tryGetInt(map, "minimum_hunger", 6);
-
-        instance.hungerConsumeMultiplier = Math.max(0, instance.hungerConsumeMultiplier);
-
-        return instance;
+        return !Float.isNaN(hungerConsumeMultiplier) && !Float.isNaN(flyingSpeed);
     }
 }

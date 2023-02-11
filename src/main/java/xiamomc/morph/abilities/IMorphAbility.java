@@ -6,7 +6,6 @@ import org.bukkit.event.Listener;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.storage.skill.ISkillOption;
@@ -69,7 +68,7 @@ public interface IMorphAbility<T extends ISkillOption> extends Listener
      *
      * @return {@link ISkillOption}
      */
-    public ISkillOption getOption();
+    public ISkillOption getDefaultOption();
 
     /**
      * 为某个伪装添加设置{@link ISkillOption}

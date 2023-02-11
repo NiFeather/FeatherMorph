@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.abilities.AbilityType;
 import xiamomc.morph.abilities.EffectMorphAbility;
 
+@Deprecated
 public class SpeedBoostAbility extends EffectMorphAbility
 {
     @Override

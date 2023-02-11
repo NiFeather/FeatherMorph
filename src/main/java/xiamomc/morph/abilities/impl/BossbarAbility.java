@@ -65,11 +65,7 @@ public class BossbarAbility extends MorphAbility<BossbarOption>
         {
             if (!allowBossbar.get()) return true;
 
-            var option = getOr(
-                    options.get(state.getDisguiseIdentifier()),
-                    Objects::nonNull,
-                    options.get(state.getSkillLookupIdentifier())
-            );
+            var option = this.getOptionFor(state);
 
             if (option == null) return false;
 
@@ -94,11 +90,7 @@ public class BossbarAbility extends MorphAbility<BossbarOption>
         {
             if (appliedPlayers.contains(player))
             {
-                var option = getOr(
-                        options.get(state.getDisguiseIdentifier()),
-                        Objects::nonNull,
-                        options.get(state.getSkillLookupIdentifier())
-                );
+                var option = this.getOptionFor(state);
 
                 if (option == null) return false;
 

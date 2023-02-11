@@ -1,6 +1,7 @@
 package xiamomc.morph.abilities.impl;
 
 import io.papermc.paper.event.player.AsyncChatEvent;
+import me.libraryaddict.disguise.disguisetypes.Disguise;
 import org.bukkit.NamespacedKey;
 import org.bukkit.event.EventHandler;
 import org.jetbrains.annotations.NotNull;
@@ -11,6 +12,7 @@ import xiamomc.morph.abilities.MorphAbility;
 import xiamomc.morph.abilities.options.ChatOverrideOption;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
+import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.misc.MorphChatRenderer;
 import xiamomc.morph.misc.permissions.CommonPermissions;
 import xiamomc.pluginbase.Annotations.Initializer;
@@ -61,10 +63,7 @@ public class ChatOverrideAbility extends MorphAbility<ChatOverrideOption>
         assert state != null;
 
         //先从id获取，再fallback到技能ID
-        var formattable = getOr(
-                getFormattableMessage(state.getDisguiseIdentifier()),
-                Objects::nonNull,
-                getFormattableMessage(state.getSkillLookupIdentifier()));
+        var formattable = this.getFormattableMessage(state);
 
         if (useCustomRenderer.get())
             e.renderer(new MorphChatRenderer(formattable));
@@ -76,11 +75,11 @@ public class ChatOverrideAbility extends MorphAbility<ChatOverrideOption>
     }
 
     @Nullable
-    private FormattableMessage getFormattableMessage(String identifier)
+    private FormattableMessage getFormattableMessage(DisguiseState state)
     {
         var targetString = new AtomicReference<FormattableMessage>();
 
-        var p = options.get(identifier);
+        var p = this.getOptionFor(state);
 
         if (p != null)
             targetString.set(new FormattableMessage(plugin, p.getMessagePattern()));

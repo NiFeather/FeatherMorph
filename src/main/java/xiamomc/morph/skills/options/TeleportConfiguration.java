@@ -1,9 +1,9 @@
-package xiamomc.morph.storage.skill;
+package xiamomc.morph.skills.options;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import xiamomc.morph.skills.SkillType;
+import xiamomc.morph.storage.skill.ISkillOption;
 
 import java.util.Map;
 
@@ -28,24 +28,8 @@ public class TeleportConfiguration implements ISkillOption
     }
 
     @Override
-    public Map<String, Object> toMap()
+    public boolean isValid()
     {
-        var map = new Object2ObjectOpenHashMap<String, Object>();
-
-        map.put("max_distance", (int)maxDistance);
-
-        return map;
-    }
-
-    @Override
-    public TeleportConfiguration fromMap(Map<String, Object> map)
-    {
-        if (map == null) return null;
-
-        var instance = new TeleportConfiguration();
-
-        instance.maxDistance = tryGetInt(map, "max_distance", 32);
-
-        return instance;
+        return true;
     }
 }

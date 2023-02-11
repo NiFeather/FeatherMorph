@@ -11,7 +11,7 @@ import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.SkillStrings;
 import xiamomc.morph.skills.MorphSkill;
 import xiamomc.morph.skills.SkillType;
-import xiamomc.morph.storage.skill.ExplosionConfiguration;
+import xiamomc.morph.skills.options.ExplosionConfiguration;
 import xiamomc.morph.storage.skill.SkillConfiguration;
 
 public class ExplodeMorphSkill extends MorphSkill<ExplosionConfiguration>

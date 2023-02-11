@@ -6,6 +6,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.entity.EntityType;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.abilities.AbilityHandler;
+import xiamomc.morph.abilities.AbilityType;
 import xiamomc.morph.abilities.IMorphAbility;
 import xiamomc.morph.skills.DefaultConfigGenerator;
 import xiamomc.morph.skills.IMorphSkill;
@@ -59,7 +60,7 @@ public class SkillConfigurationStore extends MorphJsonBasedStorage<SkillConfigur
         return "技能存储";
     }
 
-    private final int targetVersion = 12;
+    private final int targetVersion = 13;
 
     @Resolved
     private MorphSkillHandler skillHandler;
@@ -232,6 +233,7 @@ public class SkillConfigurationStore extends MorphJsonBasedStorage<SkillConfigur
 
             }
 
+            //恶魂的技能变成延迟释放
             if (version < 12)
             {
                 var targetConfig = config.configurations.stream()
@@ -248,6 +250,20 @@ public class SkillConfigurationStore extends MorphJsonBasedStorage<SkillConfigur
                         targetConfig.setSkillIdentifier(SkillType.GHAST);
                         targetConfig.moveOption(SkillType.LAUNCH_PROJECTIVE, SkillType.GHAST);
                     }
+                }
+            }
+
+            //马匹被动改成更改属性
+            if (version < 13)
+            {
+                var targetConfig= config.configurations.stream()
+                        .filter(s -> s != null && s.getIdentifier().equals(EntityType.HORSE.getKey().asString()))
+                        .findFirst().orElse(null);
+
+                if (targetConfig != null)
+                {
+                    var targetIdentifier = AbilityType.HAS_SPEED_BOOST.asString();
+                    targetConfig.getAbilitiyIdentifiers().removeIf(s -> s.equals(targetIdentifier));
                 }
             }
 

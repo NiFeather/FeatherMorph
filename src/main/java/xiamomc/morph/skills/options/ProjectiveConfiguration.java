@@ -1,11 +1,11 @@
-package xiamomc.morph.storage.skill;
+package xiamomc.morph.skills.options;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.bukkit.entity.EntityType;
 import org.jetbrains.annotations.Contract;
-import xiamomc.morph.skills.SkillType;
+import xiamomc.morph.storage.skill.ISkillOption;
 
 import java.util.Map;
 
@@ -39,38 +39,6 @@ public class ProjectiveConfiguration implements ISkillOption
         this(entityType.getKey().asString(), multiplier, soundName, soundDistance, distanceLimit);
     }
 
-    @Override
-    public Map<String, Object> toMap()
-    {
-        var map = new Object2ObjectOpenHashMap<String, Object>();
-
-        map.put("name", name);
-        map.put("speed_multiplier", multiplier);
-        map.put("sound_name", soundName);
-        map.put("sound_distance", soundDistance);
-        map.put("max_target_distance", distanceLimit);
-
-        return map;
-    }
-
-    @Override
-    @Contract("null -> null; !null -> !null")
-    public ProjectiveConfiguration fromMap(Map<String, Object> map)
-    {
-        if (map == null) return null;
-
-        var instance = new ProjectiveConfiguration();
-
-        instance.name = "" + map.getOrDefault("name", "");
-        instance.soundName = "" + map.getOrDefault("sound_name", "");
-
-        instance.multiplier = tryGetFloat(map, "speed_multiplier", 1f);
-        instance.soundDistance = tryGetInt(map, "sound_distance", 0);
-        instance.distanceLimit = tryGetInt(map, "max_target_distance", 0);
-
-        return instance;
-    }
-
     @Expose
     private String name;
 
@@ -81,7 +49,7 @@ public class ProjectiveConfiguration implements ISkillOption
 
     @Expose
     @SerializedName("speed_multiplier")
-    private float multiplier;
+    private float multiplier = 1f;
 
     public float getVectorMultiplier()
     {
@@ -113,5 +81,11 @@ public class ProjectiveConfiguration implements ISkillOption
     public int getDistanceLimit()
     {
         return distanceLimit;
+    }
+
+    @Override
+    public boolean isValid()
+    {
+        return true;
     }
 }

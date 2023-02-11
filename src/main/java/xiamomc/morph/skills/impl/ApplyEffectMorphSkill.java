@@ -1,6 +1,5 @@
 package xiamomc.morph.skills.impl;
 
-import com.mojang.brigadier.Message;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import org.bukkit.NamespacedKey;
@@ -11,11 +10,9 @@ import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.SkillStrings;
-import xiamomc.morph.skills.IMorphSkill;
 import xiamomc.morph.skills.MorphSkill;
 import xiamomc.morph.skills.SkillType;
-import xiamomc.morph.storage.skill.EffectConfiguration;
-import xiamomc.morph.storage.skill.ISkillOption;
+import xiamomc.morph.skills.options.EffectConfiguration;
 import xiamomc.morph.storage.skill.SkillConfiguration;
 
 public class ApplyEffectMorphSkill extends MorphSkill<EffectConfiguration>

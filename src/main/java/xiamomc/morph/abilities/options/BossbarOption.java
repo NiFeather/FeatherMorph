@@ -41,6 +41,12 @@ public class BossbarOption implements ISkillOption
     }
 
     @Override
+    public boolean isValid()
+    {
+        return true;
+    }
+
+    @Override
     public Map<String, Object> toMap()
     {
         var map = new Object2ObjectOpenHashMap<String, Object>();
@@ -70,7 +76,7 @@ public class BossbarOption implements ISkillOption
         var flags = new ObjectArraySet<BossBar.Flag>();
         var rawFlags = tryGet(map, "flags", List.class);
 
-        rawFlags.forEach(o ->
+        if (rawFlags != null) rawFlags.forEach(o ->
         {
             if (!(o instanceof String str)) return;
 

@@ -1,8 +1,7 @@
-package xiamomc.morph.storage.skill;
+package xiamomc.morph.skills.options;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import xiamomc.morph.skills.IMorphSkill;
-import xiamomc.morph.skills.SkillType;
+import xiamomc.morph.storage.skill.ISkillOption;
 
 import java.util.Map;
 
@@ -21,4 +20,15 @@ public class NoOpConfiguration implements ISkillOption
     }
 
     public static NoOpConfiguration instance = new NoOpConfiguration();
+
+    /**
+     * 检查此Option是否合法
+     *
+     * @return 此Option是否合法
+     */
+    @Override
+    public boolean isValid()
+    {
+        return true;
+    }
 }

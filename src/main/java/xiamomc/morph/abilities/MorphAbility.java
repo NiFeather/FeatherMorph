@@ -11,6 +11,7 @@ import xiamomc.morph.storage.skill.ISkillOption;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Predicate;
 
 public abstract class MorphAbility<T extends ISkillOption> extends MorphPluginObject implements IMorphAbility<T>
@@ -68,9 +69,24 @@ public abstract class MorphAbility<T extends ISkillOption> extends MorphPluginOb
     private final T option = createOption();
 
     @Override
-    public T getOption()
+    public T getDefaultOption()
     {
         return option;
+    }
+
+    /**
+     * 获取和目标{@link DisguiseState}对应的技能配置
+     * @param state {@link DisguiseState}
+     * @return 和此 {@link DisguiseState}对应的技能配置
+     */
+    @Nullable
+    protected T getOptionFor(DisguiseState state)
+    {
+        return getOr(
+                options.get(state.getDisguiseIdentifier()),
+                Objects::nonNull,
+                options.get(state.getSkillLookupIdentifier())
+        );
     }
 
     protected final Map<String, T> options = new Object2ObjectOpenHashMap<>();

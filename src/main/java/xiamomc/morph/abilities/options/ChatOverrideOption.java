@@ -1,5 +1,7 @@
 package xiamomc.morph.abilities.options;
 
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.abilities.impl.ChatOverrideAbility;
@@ -18,7 +20,9 @@ public class ChatOverrideOption implements ISkillOption
         this.messagePattern = messagePattern;
     }
 
-    private String messagePattern;
+    @Expose
+    @SerializedName("message_pattern")
+    private String messagePattern = "[<who>] <message>";
 
     public String getMessagePattern()
     {
@@ -26,24 +30,8 @@ public class ChatOverrideOption implements ISkillOption
     }
 
     @Override
-    public Map<String, Object> toMap()
+    public boolean isValid()
     {
-        var map = new Object2ObjectOpenHashMap<String, Object>();
-
-        map.put("message_pattern", messagePattern);
-
-        return map;
-    }
-
-    @Override
-    public @Nullable ISkillOption fromMap(@Nullable Map<String, Object> map)
-    {
-        if (map == null) return null;
-
-        var instance = new ChatOverrideOption();
-
-        instance.messagePattern = "" + map.getOrDefault("message_pattern", null);
-
-        return instance;
+        return true;
     }
 }

@@ -1,4 +1,4 @@
-package xiamomc.morph.storage.skill;
+package xiamomc.morph.skills.options;
 
 import com.google.gson.annotations.Expose;
 import org.bukkit.entity.EntityType;

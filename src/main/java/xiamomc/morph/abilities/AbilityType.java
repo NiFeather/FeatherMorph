@@ -14,7 +14,10 @@ public class AbilityType
     public static final NamespacedKey ALWAYS_NIGHT_VISION = new NamespacedKey(nameSpace, "night_vision");
     public static final NamespacedKey HAS_JUMP_BOOST = new NamespacedKey(nameSpace, "normal_jump_boost");
     public static final NamespacedKey HAS_SMALL_JUMP_BOOST = new NamespacedKey(nameSpace, "small_jump_boost");
+
+    @Deprecated
     public static final NamespacedKey HAS_SPEED_BOOST = new NamespacedKey(nameSpace, "speed");
+
     public static final NamespacedKey HAS_FEATHER_FALLING = new NamespacedKey(nameSpace, "feather_falling");
     public static final NamespacedKey NO_FALL_DAMAGE = new NamespacedKey(nameSpace, "no_fall_damage");
     public static final NamespacedKey REDUCES_FALL_DAMAGE = new NamespacedKey(nameSpace, "reduce_fall_damage");
@@ -24,4 +27,5 @@ public class AbilityType
     public static final NamespacedKey CHAT_OVERRIDE = new NamespacedKey(nameSpace, "chat_override");
     public static final NamespacedKey BOSSBAR = new NamespacedKey(nameSpace, "bossbar");
     public static final NamespacedKey NO_SWEET_BUSH_DAMAGE = new NamespacedKey(nameSpace, "no_sweet_bush_damage");
+    public static final NamespacedKey ATTRIBUTE = new NamespacedKey(nameSpace, "attribute_modify");
 }

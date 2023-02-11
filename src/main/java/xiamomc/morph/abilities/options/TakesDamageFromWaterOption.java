@@ -1,5 +1,7 @@
 package xiamomc.morph.abilities.options;
 
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.storage.skill.ISkillOption;
@@ -12,32 +14,13 @@ public class TakesDamageFromWaterOption implements ISkillOption
     {
     }
 
-    private double damageAmount = 0d;
-
-    public double getDamageAmount()
-    {
-        return damageAmount;
-    }
+    @Expose
+    @SerializedName("damage")
+    public double damageAmount = 1d;
 
     @Override
-    public Map<String, Object> toMap()
+    public boolean isValid()
     {
-        var map = new Object2ObjectOpenHashMap<String, Object>();
-
-        map.put("damage", damageAmount);
-
-        return map;
-    }
-
-    @Override
-    public @Nullable ISkillOption fromMap(@Nullable Map<String, Object> map)
-    {
-        if (map == null) return null;
-
-        var instance = new TakesDamageFromWaterOption();
-
-        instance.damageAmount = tryGet(map, "damage", 0d);
-
-        return instance;
+        return !Double.isNaN(damageAmount);
     }
 }

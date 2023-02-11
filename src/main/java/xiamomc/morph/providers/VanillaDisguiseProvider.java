@@ -188,7 +188,7 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
         }
     }
 
-    private final String modifierName = "MorphModifier";
+    private final String modifierName = "FeatherMorphVDP_Modifier";
 
     private void executeThenScaleHealth(Player player, AttributeInstance attributeInstance, Runnable runnable)
     {
@@ -197,7 +197,7 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
         runnable.run();
 
         if (player.getHealth() > 0)
-            player.setHealth(attributeInstance.getValue() * currentPercent);
+            player.setHealth(Math.min(player.getMaxHealth(), attributeInstance.getValue() * currentPercent));
     }
 
     private void removeAllHealthModifiers(Player player)

@@ -11,7 +11,7 @@ import xiamomc.morph.network.MorphClientHandler;
 import xiamomc.morph.network.commands.S2C.S2CSetFakeEquipCommand;
 import xiamomc.morph.skills.MorphSkill;
 import xiamomc.morph.skills.SkillType;
-import xiamomc.morph.storage.skill.NoOpConfiguration;
+import xiamomc.morph.skills.options.NoOpConfiguration;
 import xiamomc.morph.storage.skill.SkillConfiguration;
 import xiamomc.pluginbase.Annotations.Resolved;
 

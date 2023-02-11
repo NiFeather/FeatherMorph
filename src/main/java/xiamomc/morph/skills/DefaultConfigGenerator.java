@@ -2,15 +2,21 @@ package xiamomc.morph.skills;
 
 import net.kyori.adventure.bossbar.BossBar;
 import org.bukkit.NamespacedKey;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.EntityType;
 import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.abilities.AbilityType;
+import xiamomc.morph.abilities.options.AttributeModifyOption;
 import xiamomc.morph.abilities.options.BossbarOption;
 import xiamomc.morph.abilities.options.FlyOption;
 import xiamomc.morph.abilities.options.ReduceDamageOption;
 import xiamomc.morph.skills.impl.GhastMorphSkill;
+import xiamomc.morph.skills.options.EffectConfiguration;
+import xiamomc.morph.skills.options.ExplosionConfiguration;
+import xiamomc.morph.skills.options.ProjectiveConfiguration;
+import xiamomc.morph.skills.options.TeleportConfiguration;
 import xiamomc.morph.utilities.EntityTypeUtils;
 import xiamomc.morph.skills.impl.SonicBoomMorphSkill;
 import xiamomc.morph.storage.skill.*;
@@ -200,9 +206,20 @@ public class DefaultConfigGenerator
         addAbilityConfiguration(skills, EntityTypeUtils.alwaysNightVision(), AbilityType.ALWAYS_NIGHT_VISION);
         addAbilityConfiguration(skills, EntityTypeUtils.hasJumpBoost(), AbilityType.HAS_JUMP_BOOST);
         addAbilityConfiguration(skills, EntityTypeUtils.hasSmallJumpBoost(), AbilityType.HAS_SMALL_JUMP_BOOST);
-        addAbilityConfiguration(skills, EntityTypeUtils.hasSpeedBoost(), AbilityType.HAS_SPEED_BOOST);
         addAbilityConfiguration(skills, EntityTypeUtils.noFallDamage(), AbilityType.NO_FALL_DAMAGE);
         addAbilityConfiguration(skills, EntityTypeUtils.hasFeatherFalling(), AbilityType.HAS_FEATHER_FALLING);
+
+        addAbilityConfiguration(skills, EntityType.HORSE, AbilityType.ATTRIBUTE, c ->
+        {
+            c.addOption(AbilityType.ATTRIBUTE,
+                    AttributeModifyOption.from(Attribute.GENERIC_MOVEMENT_SPEED, AttributeModifyOption.OperationType.multiply_base, 0.5d));
+        });
+
+        addAbilityConfiguration(skills, EntityType.IRON_GOLEM, AbilityType.ATTRIBUTE, c ->
+        {
+            c.addOption(AbilityType.ATTRIBUTE,
+                    AttributeModifyOption.from(Attribute.GENERIC_MOVEMENT_SPEED, AttributeModifyOption.OperationType.multiply_base, -0.6d));
+        });
 
         addAbilityConfiguration(skills, EntityTypeUtils.reducesMagicDamage(), AbilityType.REDUCES_MAGIC_DAMAGE, c ->
         {

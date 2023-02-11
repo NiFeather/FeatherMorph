@@ -1,5 +1,7 @@
 package xiamomc.morph.abilities.options;
 
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.storage.skill.ISkillOption;
@@ -8,7 +10,12 @@ import java.util.Map;
 
 public class ReduceDamageOption implements ISkillOption
 {
+    @Expose
+    @SerializedName("amount")
     private double reduceAmount = 0d;
+
+    @Expose
+    @SerializedName("is_percentage")
     private boolean isPercentage = false;
 
     public ReduceDamageOption()
@@ -36,32 +43,14 @@ public class ReduceDamageOption implements ISkillOption
         return isPercentage;
     }
 
-    @Override
-    public Map<String, Object> toMap()
-    {
-        var map = new Object2ObjectOpenHashMap<String, Object>();
-
-        map.put("amount", reduceAmount);
-        map.put("is_percentage", isPercentage);
-
-        return map;
-    }
-
     protected ReduceDamageOption createInstance()
     {
         return new ReduceDamageOption();
     }
 
     @Override
-    public @Nullable ISkillOption fromMap(@Nullable Map<String, Object> map)
+    public boolean isValid()
     {
-        if (map == null) return null;
-
-        var instance = createInstance();
-
-        instance.isPercentage = tryGet(map, "is_percentage", false);
-        instance.reduceAmount = tryGet(map, "amount", 0d);
-
-        return instance;
+        return !Double.isNaN(reduceAmount);
     }
 }

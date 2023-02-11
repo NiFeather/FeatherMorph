@@ -1,12 +1,11 @@
-package xiamomc.morph.storage.skill;
+package xiamomc.morph.skills.options;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.LoggerFactory;
-import xiamomc.morph.skills.SkillType;
+import xiamomc.morph.storage.skill.ISkillOption;
 
 import java.util.Map;
 
@@ -56,6 +55,7 @@ public class EffectConfiguration implements ISkillOption
     }
 
     @Expose
+    @SerializedName("acquires_water")
     private boolean acquiresWater;
 
     public boolean acquiresWater()
@@ -64,7 +64,7 @@ public class EffectConfiguration implements ISkillOption
     }
 
     @Expose
-    @SerializedName("showGuardian")
+    @SerializedName("show_guardian")
     private boolean showGuardian;
 
     public boolean showGuardian()
@@ -101,40 +101,14 @@ public class EffectConfiguration implements ISkillOption
         return soundDistance;
     }
 
+    /**
+     * 检查此Option是否合法
+     *
+     * @return 此Option是否合法
+     */
     @Override
-    public Map<String, Object> toMap()
+    public boolean isValid()
     {
-        var map = new Object2ObjectOpenHashMap<String, Object>();
-
-        map.put("name", name);
-        map.put("multiplier", multiplier);
-        map.put("duration", duration);
-        map.put("acquires_water", acquiresWater);
-        map.put("show_guardian", showGuardian);
-        map.put("sound", soundName);
-        map.put("sound_distance", soundDistance);
-        map.put("apply_distance", applyDistance);
-
-        return map;
-    }
-
-    @Override
-    public EffectConfiguration fromMap(Map<String, Object> map)
-    {
-        if (map == null) return null;
-
-        var instance = new EffectConfiguration();
-
-        instance.name = "" + map.getOrDefault("name", "none");
-        instance.acquiresWater = tryGet(map, "acquires_water", false);
-        instance.showGuardian = tryGet(map, "show_guardian", false);
-        instance.soundName = "" + map.getOrDefault("sound_name", "none");
-
-        instance.multiplier = tryGetInt(map, "multiplier", 0);
-        instance.duration = tryGetInt(map, "duration", 0);
-        instance.soundDistance = tryGetInt(map, "sound_distance", 0);
-        instance.applyDistance = tryGetInt(map, "apply_distance", 0);
-
-        return instance;
+        return true;
     }
 }

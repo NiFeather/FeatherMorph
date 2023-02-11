@@ -11,6 +11,10 @@ import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.abilities.IMorphAbility;
 import xiamomc.morph.skills.IMorphSkill;
 import xiamomc.morph.skills.SkillType;
+import xiamomc.morph.skills.options.EffectConfiguration;
+import xiamomc.morph.skills.options.ExplosionConfiguration;
+import xiamomc.morph.skills.options.ProjectiveConfiguration;
+import xiamomc.morph.skills.options.TeleportConfiguration;
 
 import java.util.List;
 import java.util.Map;
@@ -207,7 +211,7 @@ public class SkillConfiguration
     {
         if (options == null || ability == null) return null;
 
-        return ability.getOption().fromMap(options.get(ability.getIdentifier().asString()));
+        return ability.getDefaultOption().fromMap(options.get(ability.getIdentifier().asString()));
     }
 
     /**

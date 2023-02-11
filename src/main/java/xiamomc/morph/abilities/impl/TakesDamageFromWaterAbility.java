@@ -23,12 +23,9 @@ public class TakesDamageFromWaterAbility extends MorphAbility<TakesDamageFromWat
     {
         if (player.isInWaterOrRainOrBubbleColumn())
         {
-            var dmgOption = getOr(
-                    options.get(state.getDisguiseIdentifier()),
-                    Objects::nonNull,
-                    options.get(state.getSkillLookupIdentifier()));
+            var dmgOption = this.getOptionFor(state);
 
-            player.damage(dmgOption == null ? 1d : dmgOption.getDamageAmount());
+            player.damage(dmgOption == null ? 1d : dmgOption.damageAmount);
         }
 
         return true;

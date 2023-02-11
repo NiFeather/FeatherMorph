@@ -1,8 +1,7 @@
 package xiamomc.morph.abilities.impl;
 
 import xiamomc.morph.abilities.MorphAbility;
-import xiamomc.morph.storage.skill.ISkillOption;
-import xiamomc.morph.storage.skill.NoOpConfiguration;
+import xiamomc.morph.skills.options.NoOpConfiguration;
 
 public abstract class NoOpOptionAbility extends MorphAbility<NoOpConfiguration>
 {

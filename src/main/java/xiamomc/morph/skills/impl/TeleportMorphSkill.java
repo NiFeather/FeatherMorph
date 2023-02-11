@@ -12,9 +12,8 @@ import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.SkillStrings;
 import xiamomc.morph.skills.MorphSkill;
 import xiamomc.morph.skills.SkillType;
-import xiamomc.morph.storage.skill.ISkillOption;
 import xiamomc.morph.storage.skill.SkillConfiguration;
-import xiamomc.morph.storage.skill.TeleportConfiguration;
+import xiamomc.morph.skills.options.TeleportConfiguration;
 
 public class TeleportMorphSkill extends MorphSkill<TeleportConfiguration>
 {

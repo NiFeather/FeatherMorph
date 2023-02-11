@@ -27,11 +27,7 @@ public abstract class DamageReducingAbility<T extends ReduceDamageOption> extend
                 var state = morphs.getDisguiseStateFor(player);
                 assert state != null;
 
-                var dmgOption = getOr(
-                        options.get(state.getDisguiseIdentifier()),
-                        Objects::nonNull,
-                        options.get(state.getSkillLookupIdentifier())
-                );
+                var dmgOption = this.getOptionFor(state);
 
                 if(dmgOption != null)
                 {
