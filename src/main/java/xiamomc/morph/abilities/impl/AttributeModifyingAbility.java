@@ -101,7 +101,7 @@ public class AttributeModifyingAbility extends MorphAbility<AttributeModifyOptio
         }
 
         var attribute = Arrays.stream(Attribute.values())
-                .filter(a -> a.getKey().asString().equals(option.attributeName))
+                .filter(a -> a.getKey().equals(NamespacedKey.fromString(option.attributeName)))
                 .findFirst().orElse(null); //(option.attributeName);
 
         if (attribute == null)
