@@ -1,5 +1,6 @@
 package xiamomc.morph.config;
 
+import xiamomc.morph.events.InteractionMirrorProcessor;
 import xiamomc.morph.utilities.NbtUtils;
 import xiamomc.pluginbase.Configuration.ConfigNode;
 
@@ -37,6 +38,8 @@ public enum ConfigOption
     MIRROR_BEHAVIOR_SWAP_HAND(interactionMirrorBehaviorNode().append("swap_hands"), false),
     MIRROR_BEHAVIOR_DROP(interactionMirrorBehaviorNode().append("allow_drop"), false),
     MIRROR_BEHAVIOR_HOTBAR(interactionMirrorBehaviorNode().append("hotbar"), false),
+
+    MIRROR_SELECTION_MODE(interactionMirrorNode().append("selection_mode"), InteractionMirrorProcessor.InteractionMirrorSelectionMode.BY_NAME),
 
     BANNED_DISGUISES(ConfigNode.create().append("bannedDisguises"), new ArrayList<String>()),
 

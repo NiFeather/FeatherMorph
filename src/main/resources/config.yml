@@ -76,6 +76,13 @@ root:
     # Values that are too small may cause the progress to reset repeatedly with a bad network.
     destroy_timeout: 20
 
+    # Selection mode
+    # How should we search for the target player to mirror?
+    # by_name: Search for the specific player who matches our disguised name.
+    # by_sight: Search for the nearest player who matches our disguise target within 5 blocks in sight.
+    #           A player disguised as our target can also be selected.
+    selection_mode: by_name
+
     # Behavior options
     behaviors:
       # Should we enable interaction control?

@@ -105,6 +105,9 @@ public class PlayerTracker extends MorphPluginObject implements Listener
         {
             lastInteractTime.put(player, plugin.getCurrentTick());
             lastInteractAction.put(player, interactType);
+
+            if (interactType.isLeftClick() && e.getClickedBlock() != null)
+                breakingSuspectList.put(player, plugin.getCurrentTick());
         }
     }
 
@@ -253,6 +256,11 @@ public class PlayerTracker extends MorphPluginObject implements Listener
     public InteractType getLastInteractAction(Player player)
     {
         return lastInteractAction.get(player);
+    }
+
+    public boolean isBreakingSuspect(Player player)
+    {
+        return plugin.getCurrentTick() - breakingSuspectList.getOrDefault(player, -1L) <= 0;
     }
 
     private void update()

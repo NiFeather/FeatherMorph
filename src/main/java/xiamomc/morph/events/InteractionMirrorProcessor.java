@@ -2,13 +2,11 @@ package xiamomc.morph.events;
 
 import io.papermc.paper.event.player.PlayerArmSwingEvent;
 import io.papermc.paper.event.player.PlayerStopUsingItemEvent;
-import it.unimi.dsi.fastutil.objects.Object2BooleanArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.objects.ObjectArraySet;
 import me.libraryaddict.disguise.DisguiseAPI;
+import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -19,6 +17,7 @@ import org.bukkit.event.player.*;
 import org.bukkit.inventory.EquipmentSlot;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
@@ -33,7 +32,6 @@ import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
 
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class InteractionMirrorProcessor extends MorphPluginObject implements Listener
@@ -48,13 +46,13 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
     {
         if (!allowSneak.get()) return;
 
-        var state = uuidDisguiseStateMap.get(e.getPlayer());
+        var targetName = uuidDisguiseStateMap.get(e.getPlayer());
 
-        if (state != null)
+        if (targetName != null)
         {
-            var player = Bukkit.getPlayerExact(state);
+            var player = getPlayer(e.getPlayer(), targetName);
 
-            if (!playerInDistance(e.getPlayer(), player) || player.isSneaking() == e.isSneaking()) return;
+            if (!playerInDistance(e.getPlayer(), player, targetName) || player.isSneaking() == e.isSneaking()) return;
 
             player.setSneaking(e.isSneaking());
             clientHandler.sendClientCommand(player, new S2CSetSneakingCommand(e.isSneaking()));
@@ -66,13 +64,13 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
     {
         if (!allowSwap.get()) return;
 
-        var state = uuidDisguiseStateMap.get(e.getPlayer());
+        var targetName = uuidDisguiseStateMap.get(e.getPlayer());
 
-        if (state != null)
+        if (targetName != null)
         {
-            var player = Bukkit.getPlayerExact(state);
+            var player = getPlayer(e.getPlayer(), targetName);
 
-            if (!playerInDistance(e.getPlayer(), player)) return;
+            if (!playerInDistance(e.getPlayer(), player, targetName)) return;
 
             var equipment = player.getEquipment();
 
@@ -90,13 +88,13 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
         if (!allowDrop.get()) return;
 
         var player = e.getPlayer();
-        var state = uuidDisguiseStateMap.get(e.getPlayer());
+        var targetName = uuidDisguiseStateMap.get(e.getPlayer());
 
-        if (state != null)
+        if (targetName != null)
         {
-            var target = Bukkit.getPlayerExact(state);
+            var target = getPlayer(player, targetName);
 
-            if (!playerInDistance(player, target) || !player.isSneaking()) return;
+            if (!playerInDistance(player, target, targetName) || !player.isSneaking()) return;
 
             if (!target.getEquipment().getItemInMainHand().getType().isAir())
             {
@@ -112,13 +110,13 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
     {
         if (!allowHotBar.get()) return;
 
-        var state = uuidDisguiseStateMap.get(e.getPlayer());
+        var targetName = uuidDisguiseStateMap.get(e.getPlayer());
 
-        if (state != null)
+        if (targetName != null)
         {
-            var player = Bukkit.getPlayerExact(state);
+            var player = getPlayer(e.getPlayer(), targetName);
 
-            if (!playerInDistance(e.getPlayer(), player)) return;
+            if (!playerInDistance(e.getPlayer(), player, targetName)) return;
 
             player.getInventory().setHeldItemSlot(e.getNewSlot());
         }
@@ -137,13 +135,13 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
     public void onPlayerStopUsingItem(PlayerStopUsingItemEvent e)
     {
         var player = e.getPlayer();
-        var state = uuidDisguiseStateMap.get(player);
+        var targetName = uuidDisguiseStateMap.get(player);
 
-        if (state != null)
+        if (targetName != null)
         {
-            var targetPlayer = Bukkit.getPlayerExact(state);
+            var targetPlayer = getPlayer(player, targetName);
 
-            if (!playerInDistance(player, targetPlayer)) return;
+            if (!playerInDistance(player, targetPlayer, targetName)) return;
 
             //如果目标玩家正在使用的物品和我们当前释放的物品一样，并且释放的物品拥有使用动画，那么调用releaseUsingItem
             var ourHandItem = e.getItem().getType();
@@ -165,13 +163,13 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
 
         if (e.getDamager() instanceof Player damager)
         {
-            var state = uuidDisguiseStateMap.get(damager);
+            var targetName = uuidDisguiseStateMap.get(damager);
 
-            if (state != null)
+            if (targetName != null)
             {
-                var targetPlayer = Bukkit.getPlayerExact(state);
+                var targetPlayer = getPlayer(damager, targetName);
 
-                if (!playerInDistance(damager, targetPlayer)) return;
+                if (!playerInDistance(damager, targetPlayer, targetName)) return;
 
                 simulateOperation(Action.LEFT_CLICK_AIR, targetPlayer);
 
@@ -202,15 +200,19 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
         if (!allowSimulation.get()) return;
 
         var player = e.getPlayer();
-        var state = uuidDisguiseStateMap.get(player);
+        var targetName = uuidDisguiseStateMap.get(player);
 
-        if (state != null)
+        if (targetName != null)
         {
-            var targetPlayer = Bukkit.getPlayerExact(state);
+            var targetPlayer = getPlayer(player, targetName);
 
-            if (!playerInDistance(player, targetPlayer)) return;
+            if (!playerInDistance(player, targetPlayer, targetName)) return;
 
             var lastAction = tracker.getLastInteractAction(player);
+
+            //有Swing没Interact，默认左键
+            if (!tracker.interactingThisTick(player) && !tracker.isBreakingSuspect(player))
+                lastAction = PlayerTracker.InteractType.LEFT_CLICK_AIR;
 
             if (lastAction == null) return;
 
@@ -221,7 +223,7 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
                     lastAction = PlayerTracker.InteractType.LEFT_CLICK_BLOCK;
             }
 
-            //避免重复镜像
+            //检查玩家在此tick内是否存在互动以避免重复镜像
             if (!tracker.interactingThisTick(player))
                 simulateOperation(lastAction.toBukkitAction(), targetPlayer);
 
@@ -266,13 +268,13 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
 
         updateLastAction(player, action);
 
-        var state = uuidDisguiseStateMap.get(player);
+        var targetName = uuidDisguiseStateMap.get(player);
 
-        if (state != null)
+        if (targetName != null)
         {
-            var targetPlayer = Bukkit.getPlayerExact(state);
+            var targetPlayer = getPlayer(player, targetName);
 
-            if (!playerInDistance(player, targetPlayer)) return;
+            if (!playerInDistance(player, targetPlayer, targetName)) return;
 
             simulateOperation(e.getAction(), targetPlayer);
         }
@@ -291,6 +293,7 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
     private boolean simulateOperation(Action action, Player targetPlayer)
     {
         if (!allowSimulation.get()) return false;
+        targetPlayer.addScoreboardTag(ignoreTag);
 
         var isRightClick = action.isRightClick();
         var result = isRightClick
@@ -304,16 +307,67 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
             if (!isRightClick || !ItemUtils.isContinuousUsable(itemInUse))
                 targetPlayer.swingHand(result.hand());
 
+            targetPlayer.removeScoreboardTag(ignoreTag);
             return true;
         }
 
+        targetPlayer.removeScoreboardTag(ignoreTag);
         return false;
     }
 
-    private boolean playerInDistance(@NotNull Player source, @Nullable Player target)
+    public static class InteractionMirrorSelectionMode
+    {
+        public static final String BY_NAME = "BY_NAME";
+        public static final String BY_SIGHT = "BY_SIGHT";
+    }
+
+    @Resolved
+    private MorphManager manager;
+
+    private final String ignoreTag = "FMIGNORE";
+
+    private Player getPlayer(Player player, String targetName)
+    {
+        if (selectionMode.get().equalsIgnoreCase(InteractionMirrorSelectionMode.BY_SIGHT))
+        {
+            var targetEntity = player.getTargetEntity(5);
+
+            if (!(targetEntity instanceof Player targetPlayer)) return null;
+
+            if (targetPlayer.getName().equals(targetName)) return targetPlayer;
+
+            var state = manager.getDisguiseStateFor(targetPlayer);
+            if (state != null && state.getDisguiseIdentifier().equals("player:" + targetName))
+                return targetPlayer;
+
+            return null;
+        }
+        else
+        {
+            return Bukkit.getPlayerExact(targetName);
+        }
+    }
+
+    private boolean match(Player targetPlayer, String targetName)
+    {
+        if (ignoreDisguised.get()) return true;
+
+        var disguise = DisguiseAPI.getDisguise(targetPlayer);
+
+        if (disguise instanceof PlayerDisguise playerDisguise)
+            return playerDisguise.getName().equals(targetName);
+
+        return disguise == null && targetPlayer.getName().equals(targetName);
+    }
+
+    private boolean playerInDistance(@NotNull Player source, @Nullable Player target, String targetName)
     {
         if (target == null
-                || (DisguiseAPI.isDisguised(target) && ignoreDisguised.get())
+                || (selectionMode.get().equalsIgnoreCase(InteractionMirrorSelectionMode.BY_NAME)
+                        ? ignoreDisguised.get() && DisguiseAPI.isDisguised(target)
+                        : !match(target, targetName))
+                || target.getScoreboardTags().contains(ignoreTag)
+                || source.getScoreboardTags().contains(ignoreTag)
                 || !source.hasPermission(CommonPermissions.MIRROR)
                 || target.hasPermission(CommonPermissions.MIRROR_IMMUNE)
                 || target.getOpenInventory().getType() != InventoryType.CRAFTING
@@ -336,6 +390,7 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
     private final Bindable<Boolean> allowDrop = new Bindable<>(false);
     private final Bindable<Boolean> allowHotBar = new Bindable<>(false);
     private final Bindable<Boolean> ignoreDisguised = new Bindable<>(false);
+    private final Bindable<String> selectionMode = new Bindable<>(InteractionMirrorSelectionMode.BY_NAME);
 
     @Initializer
     private void load()
@@ -348,6 +403,8 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
         config.bind(allowDrop, ConfigOption.MIRROR_BEHAVIOR_DROP);
         config.bind(allowHotBar, ConfigOption.MIRROR_BEHAVIOR_HOTBAR);
         config.bind(ignoreDisguised, ConfigOption.MIRROR_IGNORE_DISGUISED);
+
+        config.bind(selectionMode, ConfigOption.MIRROR_SELECTION_MODE);
     }
 
     private void update()
