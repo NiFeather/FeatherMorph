@@ -252,10 +252,7 @@ public class SkillConfiguration
      */
     public void addOption(NamespacedKey identifier, ISkillOption option)
     {
-        Map<String, Object> currentOptionMap = null;
-
-        if (options != null)
-            currentOptionMap = options.getOrDefault(identifier.asString(), null);
+        Map<String, Object> currentOptionMap = options == null ? null : options.getOrDefault(identifier.asString(), null);
 
         if (currentOptionMap != null)
         {

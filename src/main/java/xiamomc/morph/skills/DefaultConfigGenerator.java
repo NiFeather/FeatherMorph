@@ -218,7 +218,17 @@ public class DefaultConfigGenerator
         addAbilityConfiguration(skills, EntityType.IRON_GOLEM, AbilityType.ATTRIBUTE, c ->
         {
             c.addOption(AbilityType.ATTRIBUTE,
-                    AttributeModifyOption.from(Attribute.GENERIC_MOVEMENT_SPEED, AttributeModifyOption.OperationType.multiply_base, -0.6d));
+                    AttributeModifyOption
+                            .from(Attribute.GENERIC_MOVEMENT_SPEED, AttributeModifyOption.OperationType.multiply_base, -0.6)
+                            .with(Attribute.GENERIC_KNOCKBACK_RESISTANCE, AttributeModifyOption.OperationType.add, 1d));
+        });
+
+        addAbilityConfiguration(skills, EntityType.WARDEN, AbilityType.ATTRIBUTE, c ->
+        {
+            c.addOption(AbilityType.ATTRIBUTE,
+                    AttributeModifyOption
+                            .from(Attribute.GENERIC_MOVEMENT_SPEED, AttributeModifyOption.OperationType.multiply_base, -0.6)
+                            .with(Attribute.GENERIC_KNOCKBACK_RESISTANCE, AttributeModifyOption.OperationType.add, 1d));
         });
 
         addAbilityConfiguration(skills, EntityTypeUtils.reducesMagicDamage(), AbilityType.REDUCES_MAGIC_DAMAGE, c ->

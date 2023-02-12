@@ -17,7 +17,7 @@ public class S2CQueryAddCommand extends S2CQueryCommand<String>
     @Override
     public String getBaseName()
     {
-        return "add";
+        return "with";
     }
 
     @Override

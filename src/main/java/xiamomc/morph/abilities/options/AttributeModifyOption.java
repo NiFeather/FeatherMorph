@@ -11,6 +11,7 @@ import xiamomc.morph.storage.skill.ISkillOption;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class AttributeModifyOption implements ISkillOption
 {
@@ -37,6 +38,29 @@ public class AttributeModifyOption implements ISkillOption
         return instance;
     }
 
+    public AttributeModifyOption with(Attribute attribute, OperationType operationType, double value)
+    {
+        var info = new AttributeInfo();
+
+        info.attributeName = attribute.key().asString();
+        info.operationType = operationType;
+        info.value = value;
+
+        try
+        {
+            this.modifiers.add(info);
+        }
+        catch (Throwable ignored)
+        {
+            var list = new ObjectArrayList<>(modifiers);
+            list.add(info);
+
+            this.modifiers = list;
+        }
+
+        return this;
+    }
+
     @Override
     public ISkillOption fromMap(@Nullable Map<String, Object> map)
     {
@@ -61,6 +85,16 @@ public class AttributeModifyOption implements ISkillOption
         });
 
         return instance;
+    }
+
+    @Override
+    public boolean equals(Object obj)
+    {
+        if (obj == null) return false;
+
+        if (!(obj instanceof AttributeModifyOption option)) return false;
+
+        return this.modifiers.equals(option.modifiers);
     }
 
     public enum OperationType
@@ -106,6 +140,18 @@ public class AttributeModifyOption implements ISkillOption
         public String toString()
         {
             return "AttributeInfo{name=%s, type=%s, value=%s}".formatted(attributeName, operationType, value);
+        }
+
+        @Override
+        public boolean equals(Object obj)
+        {
+            if (obj == null) return false;
+
+            if (!(obj instanceof AttributeInfo info)) return false;
+
+            return this.value == info.value
+                    && Objects.equals(this.attributeName, info.attributeName)
+                    && this.operationType == info.operationType;
         }
     }
 }
