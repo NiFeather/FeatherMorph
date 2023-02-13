@@ -79,7 +79,8 @@ bukkit {
 
         register("request")
 
-        register("feathermorph")
+        val featherMorphCommand = register("feathermorph").get()
+        featherMorphCommand.aliases = listOf("fm");
     }
 
     val permissionRoot = "xiamomc.morph."

@@ -17,6 +17,14 @@ public class MorphPluginCommand extends MorphSubCommandHandler
         return "feathermorph";
     }
 
+    private final List<String> aliases = List.of("fm");
+
+    @Override
+    public List<String> getAliases()
+    {
+        return aliases;
+    }
+
     @Override
     public String getPermissionRequirement()
     {
