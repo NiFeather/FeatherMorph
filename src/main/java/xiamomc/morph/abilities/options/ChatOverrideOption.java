@@ -15,15 +15,17 @@ public class ChatOverrideOption implements ISkillOption
     {
     }
 
-    public ChatOverrideOption(String messagePattern)
+    public ChatOverrideOption(@Nullable String messagePattern)
     {
         this.messagePattern = messagePattern;
     }
 
     @Expose
+    @Nullable
     @SerializedName("message_pattern")
-    private String messagePattern = "[<who>] <message>";
+    private String messagePattern;
 
+    @Nullable
     public String getMessagePattern()
     {
         return messagePattern;

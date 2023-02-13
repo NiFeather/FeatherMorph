@@ -167,7 +167,9 @@ root:
     log_incoming_packets: false
 
     # Should we kick players if their client mod doesn't match our API version?
-    # Note: Players may have their own mod implementing our API, so don't treat this as an anti-cheat feature.
+    #
+    # Note: This only checks player who joined with the client mod.
+    #       Players may have their own mod implementing our API, so don't treat this as an anti-cheat feature.
     force_version: false
 
     # Should we log packets sending to the client?

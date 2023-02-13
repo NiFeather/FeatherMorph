@@ -12,6 +12,9 @@ import xiamomc.morph.abilities.MorphAbility;
 import xiamomc.morph.abilities.options.ChatOverrideOption;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
+import xiamomc.morph.messages.CommonStrings;
+import xiamomc.morph.messages.MessageUtils;
+import xiamomc.morph.messages.MorphMessageStore;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.misc.MorphChatRenderer;
 import xiamomc.morph.misc.permissions.CommonPermissions;
@@ -19,12 +22,15 @@ import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
 import xiamomc.pluginbase.Messages.FormattableMessage;
+import xiamomc.pluginbase.Messages.MessageStore;
 
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class ChatOverrideAbility extends MorphAbility<ChatOverrideOption>
 {
+    private String defaultMessage;
+
     @Override
     public @NotNull NamespacedKey getIdentifier()
     {
@@ -38,10 +44,12 @@ public class ChatOverrideAbility extends MorphAbility<ChatOverrideOption>
     }
 
     @Initializer
-    private void load(MorphConfigManager config)
+    private void load(MorphConfigManager config, MessageStore<?> messageStore)
     {
         config.bind(allowChatOverride, ConfigOption.ALLOW_CHAT_OVERRIDE);
         config.bind(useCustomRenderer, ConfigOption.CHAT_OVERRIDE_USE_CUSTOM_RENDERER);
+
+        this.defaultMessage = messageStore.get(CommonStrings.chatOverrideDefaultPattern().getKey(), null, MessageUtils.getServerLocale());
     }
 
     private final Bindable<Boolean> useCustomRenderer = new Bindable<>(false);
@@ -82,7 +90,13 @@ public class ChatOverrideAbility extends MorphAbility<ChatOverrideOption>
         var p = this.getOptionFor(state);
 
         if (p != null)
-            targetString.set(new FormattableMessage(plugin, p.getMessagePattern()));
+        {
+            var pattern = p.getMessagePattern();
+
+            if (pattern == null) pattern = defaultMessage;
+
+            targetString.set(new FormattableMessage(plugin, pattern));
+        }
 
         return targetString.get();
     }
