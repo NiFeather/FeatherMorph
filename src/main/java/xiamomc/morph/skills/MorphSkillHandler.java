@@ -211,7 +211,7 @@ public class MorphSkillHandler extends MorphPluginObject
             var cdInfo = getCooldownInfo(player.getUniqueId(), state.getSkillLookupIdentifier());
             assert cdInfo != null;
 
-            var cd = skill.executeSkillGeneric(player, config, option);
+            var cd = skill.executeSkillGeneric(player, state, config, option);
             cdInfo.setLastInvoke(plugin.getCurrentTick());
 
             if (!state.haveCooldown()) state.setCooldownInfo(cdInfo);

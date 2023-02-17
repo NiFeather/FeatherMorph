@@ -10,7 +10,9 @@ import org.bukkit.craftbukkit.v1_19_R2.entity.CraftLivingEntity;
 import org.bukkit.craftbukkit.v1_19_R2.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.skills.SkillType;
+import xiamomc.morph.skills.options.ExplosionConfiguration;
 import xiamomc.morph.skills.options.NoOpConfiguration;
 import xiamomc.morph.storage.skill.SkillConfiguration;
 
@@ -20,24 +22,22 @@ public class SonicBoomMorphSkill extends DelayedMorphSkill<NoOpConfiguration>
     public static int defaultCooldown = 34 + 20 * 3;
 
     @Override
-    protected ExecuteResult preExecute(Player player, SkillConfiguration configuration, NoOpConfiguration option)
+    protected ExecuteResult preExecute(Player player, DisguiseState state, SkillConfiguration configuration, NoOpConfiguration option)
     {
-        super.preExecute(player, configuration, option);
-
         playSoundToNearbyPlayers(player, 160,
                 Key.key("minecraft", "entity.warden.sonic_charge"), Sound.Source.HOSTILE);
 
-        return super.preExecute(player, configuration, option);
+        return super.preExecute(player, state, configuration, option);
     }
 
     @Override
-    protected int getExecuteDelay()
+    protected int getExecuteDelay(SkillConfiguration configuration, NoOpConfiguration option)
     {
         return 34;
     }
 
     @Override
-    protected void executeDelayedSkill(Player player, SkillConfiguration configuration, NoOpConfiguration option)
+    protected void executeDelayedSkill(Player player, DisguiseState state, SkillConfiguration configuration, NoOpConfiguration option)
     {
         var location = player.getEyeLocation().toVector();
         var direction = player.getEyeLocation().getDirection();

@@ -18,11 +18,12 @@ public interface IMorphSkill<T extends ISkillOption>
     /**
      * 执行伪装的主动技能
      * @param player 玩家
+     * @param state {@link DisguiseState}
      * @param configuration 此技能的整体配置，包括ID、冷却等
      * @param option 此技能的详细设置
      * @return 执行后的冷却长度
      */
-    public int executeSkill(Player player, SkillConfiguration configuration, T option);
+    public int executeSkill(Player player, DisguiseState state, SkillConfiguration configuration, T option);
 
     public default void onInitialEquip(DisguiseState state)
     {
@@ -40,7 +41,7 @@ public interface IMorphSkill<T extends ISkillOption>
      * 内部轮子
      */
     @ApiStatus.Internal
-    public default int executeSkillGeneric(Player player, SkillConfiguration config, ISkillOption option)
+    public default int executeSkillGeneric(Player player, DisguiseState state, SkillConfiguration config, ISkillOption option)
     {
         T castedOption;
 
@@ -54,7 +55,7 @@ public interface IMorphSkill<T extends ISkillOption>
             return 20;
         }
 
-        return executeSkill(player, config, castedOption);
+        return executeSkill(player, state, config, castedOption);
     }
 
     /**

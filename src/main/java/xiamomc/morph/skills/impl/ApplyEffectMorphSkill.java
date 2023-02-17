@@ -10,6 +10,7 @@ import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.SkillStrings;
+import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.skills.MorphSkill;
 import xiamomc.morph.skills.SkillType;
 import xiamomc.morph.skills.options.EffectConfiguration;
@@ -18,7 +19,7 @@ import xiamomc.morph.storage.skill.SkillConfiguration;
 public class ApplyEffectMorphSkill extends MorphSkill<EffectConfiguration>
 {
     @Override
-    public int executeSkill(Player player, SkillConfiguration configuration, EffectConfiguration option)
+    public int executeSkill(Player player, DisguiseState state, SkillConfiguration configuration, EffectConfiguration option)
     {
         if (option == null || configuration == null)
         {

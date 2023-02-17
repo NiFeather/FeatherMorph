@@ -15,6 +15,8 @@ import java.util.List;
 
 public class DisguiseUtils
 {
+    public static int GHAST_EXECUTE_DELAY = 16;
+
     private static final String customDataTagName = "XIAMO_MORPH";
 
     public static void addTrace(Disguise disguise)

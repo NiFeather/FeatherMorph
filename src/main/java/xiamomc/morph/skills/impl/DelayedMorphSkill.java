@@ -19,7 +19,7 @@ public abstract class DelayedMorphSkill<T extends ISkillOption> extends MorphSki
     private MorphManager manager;
 
     @Override
-    public final int executeSkill(Player player, SkillConfiguration configuration, T option)
+    public final int executeSkill(Player player, DisguiseState state, SkillConfiguration configuration, T option)
     {
         if (option == null || configuration == null)
         {
@@ -27,30 +27,36 @@ public abstract class DelayedMorphSkill<T extends ISkillOption> extends MorphSki
             return 10;
         }
 
-        var result = this.preExecute(player, configuration, option);
+        var result = this.preExecute(player, state, configuration, option);
 
         if (result.success)
-            this.addDelayedSkillSchedule(player, () -> executeDelayedSkill(player, configuration, option), getExecuteDelay());
+            this.addDelayedSkillSchedule(player, () -> executeDelayedSkill(player, state, configuration, option), getExecuteDelay(configuration, option));
         else
             printErrorMessage(player, "执行技能时出现问题");
 
         return configuration.getCooldown();
     }
 
-    protected ExecuteResult preExecute(Player player, SkillConfiguration configuration, T option)
+    protected ExecuteResult preExecute(Player player, DisguiseState state, SkillConfiguration configuration, T option)
     {
         return ExecuteResult.success(configuration.getCooldown());
     }
 
-    protected abstract int getExecuteDelay();
+    protected abstract int getExecuteDelay(SkillConfiguration configuration, T option);
 
-    protected abstract void executeDelayedSkill(Player player, SkillConfiguration configuration, T option);
+    protected abstract void executeDelayedSkill(Player player, DisguiseState state, SkillConfiguration configuration, T option);
 
     protected void addDelayedSkillSchedule(Player player, Runnable execution, int delay)
     {
         var state = manager.getDisguiseStateFor(player);
 
         if (state == null) return;
+
+        if (delay <= 0)
+        {
+            execution.run();
+            return;
+        }
 
         this.addSchedule(() ->
         {

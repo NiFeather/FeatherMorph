@@ -10,6 +10,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.SkillStrings;
+import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.skills.MorphSkill;
 import xiamomc.morph.skills.SkillType;
 import xiamomc.morph.storage.skill.SkillConfiguration;
@@ -18,7 +19,7 @@ import xiamomc.morph.skills.options.TeleportConfiguration;
 public class TeleportMorphSkill extends MorphSkill<TeleportConfiguration>
 {
     @Override
-    public int executeSkill(Player player, SkillConfiguration configuration, TeleportConfiguration option)
+    public int executeSkill(Player player, DisguiseState state, SkillConfiguration configuration, TeleportConfiguration option)
     {
         if (option == null)
         {

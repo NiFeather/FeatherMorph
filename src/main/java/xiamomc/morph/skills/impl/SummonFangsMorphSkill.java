@@ -14,6 +14,7 @@ import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.SkillStrings;
+import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.skills.MorphSkill;
 import xiamomc.morph.skills.SkillType;
 import xiamomc.morph.skills.options.NoOpConfiguration;
@@ -22,7 +23,7 @@ import xiamomc.morph.storage.skill.SkillConfiguration;
 public class SummonFangsMorphSkill extends MorphSkill<NoOpConfiguration>
 {
     @Override
-    public int executeSkill(Player player, SkillConfiguration configuration, NoOpConfiguration option)
+    public int executeSkill(Player player, DisguiseState state, SkillConfiguration configuration, NoOpConfiguration option)
     {
         var targetEntity = player.getTargetEntity(16);
 

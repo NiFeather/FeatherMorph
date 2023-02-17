@@ -12,10 +12,12 @@ import xiamomc.morph.skills.DefaultConfigGenerator;
 import xiamomc.morph.skills.IMorphSkill;
 import xiamomc.morph.skills.MorphSkillHandler;
 import xiamomc.morph.skills.SkillType;
+import xiamomc.morph.skills.impl.ExplodeMorphSkill;
 import xiamomc.morph.skills.impl.GhastMorphSkill;
 import xiamomc.morph.skills.impl.LaunchProjectiveMorphSkill;
 import xiamomc.morph.skills.impl.SonicBoomMorphSkill;
 import xiamomc.morph.storage.MorphJsonBasedStorage;
+import xiamomc.morph.utilities.DisguiseUtils;
 import xiamomc.pluginbase.Annotations.Resolved;
 
 import java.util.List;
@@ -60,7 +62,7 @@ public class SkillConfigurationStore extends MorphJsonBasedStorage<SkillConfigur
         return "技能存储";
     }
 
-    private final int targetVersion = 13;
+    private final int targetVersion = 14;
 
     @Resolved
     private MorphSkillHandler skillHandler;
@@ -245,7 +247,7 @@ public class SkillConfigurationStore extends MorphJsonBasedStorage<SkillConfigur
                     if (targetConfig.getSkillIdentifier().equals(SkillType.LAUNCH_PROJECTIVE))
                     {
                         if (targetConfig.getCooldown() == 40)
-                            targetConfig.setCooldown(GhastMorphSkill.executeDelay + 40);
+                            targetConfig.setCooldown(DisguiseUtils.GHAST_EXECUTE_DELAY + 40);
 
                         targetConfig.setSkillIdentifier(SkillType.GHAST);
                         targetConfig.moveOption(SkillType.LAUNCH_PROJECTIVE, SkillType.GHAST);
@@ -264,6 +266,27 @@ public class SkillConfigurationStore extends MorphJsonBasedStorage<SkillConfigur
                 {
                     var targetIdentifier = AbilityType.HAS_SPEED_BOOST.asString();
                     targetConfig.getAbilitiyIdentifiers().removeIf(s -> s.equals(targetIdentifier));
+                }
+            }
+
+            //恶魂的技能合并到弹射物中
+            if (version < 14)
+            {
+                var ghastConfig = config.configurations.stream()
+                        .filter(s -> s != null && s.getIdentifier().equals(EntityType.GHAST.getKey().asString()))
+                        .findFirst().orElse(null);
+
+                if (ghastConfig != null)
+                {
+                    ghastConfig.moveOption(SkillType.GHAST, SkillType.LAUNCH_PROJECTIVE);
+                    ghastConfig.setSkillIdentifier(SkillType.LAUNCH_PROJECTIVE);
+
+                    var option = ghastConfig.getSkillOptions(new LaunchProjectiveMorphSkill());
+                    if (option != null)
+                    {
+                        option.put("delay", DisguiseUtils.GHAST_EXECUTE_DELAY);
+                        option.put("warning_sound_name", "entity.ghast.warn");
+                    }
                 }
             }
 

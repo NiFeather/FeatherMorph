@@ -12,11 +12,11 @@ import xiamomc.morph.abilities.options.AttributeModifyOption;
 import xiamomc.morph.abilities.options.BossbarOption;
 import xiamomc.morph.abilities.options.FlyOption;
 import xiamomc.morph.abilities.options.ReduceDamageOption;
-import xiamomc.morph.skills.impl.GhastMorphSkill;
 import xiamomc.morph.skills.options.EffectConfiguration;
 import xiamomc.morph.skills.options.ExplosionConfiguration;
 import xiamomc.morph.skills.options.ProjectiveConfiguration;
 import xiamomc.morph.skills.options.TeleportConfiguration;
+import xiamomc.morph.utilities.DisguiseUtils;
 import xiamomc.morph.utilities.EntityTypeUtils;
 import xiamomc.morph.skills.impl.SonicBoomMorphSkill;
 import xiamomc.morph.storage.skill.*;
@@ -165,8 +165,10 @@ public class DefaultConfigGenerator
         addSkillConfiguration(skills, EntityType.WITHER, 10, SkillType.LAUNCH_PROJECTIVE, c ->
                 c.addOption(SkillType.LAUNCH_PROJECTIVE, new ProjectiveConfiguration(EntityType.WITHER_SKULL, 1, "entity.wither.shoot", 24)));
 
-        addSkillConfiguration(skills, EntityType.GHAST, GhastMorphSkill.executeDelay + 40, SkillType.GHAST, c ->
-                c.addOption(SkillType.GHAST, new ProjectiveConfiguration(EntityType.FIREBALL, 1, "entity.ghast.shoot", 35)));
+        addSkillConfiguration(skills, EntityType.GHAST, DisguiseUtils.GHAST_EXECUTE_DELAY + 40, SkillType.GHAST, c ->
+                c.addOption(SkillType.LAUNCH_PROJECTIVE, new ProjectiveConfiguration(EntityType.FIREBALL, 1, "entity.ghast.shoot", 35)
+                        .withDelay(DisguiseUtils.GHAST_EXECUTE_DELAY)
+                        .withWarningSound("entity.ghast.warn")));
 
         //药效
         addSkillConfiguration(skills, EntityType.DOLPHIN, 180, SkillType.APPLY_EFFECT, c ->
@@ -177,7 +179,7 @@ public class DefaultConfigGenerator
 
         //其他
         addSkillConfiguration(skills, EntityType.CREEPER, 80, SkillType.EXPLODE, c ->
-                c.addOption(SkillType.EXPLODE, new ExplosionConfiguration(true, 3, false)));
+                c.addOption(SkillType.EXPLODE, new ExplosionConfiguration(true, 3, false, 30)));
 
         addSkillConfiguration(skills, EntityType.ENDERMAN, 40, SkillType.TELEPORT, c ->
                 c.addOption(SkillType.TELEPORT, new TeleportConfiguration(32)));

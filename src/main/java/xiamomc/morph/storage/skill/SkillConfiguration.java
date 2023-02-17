@@ -283,7 +283,7 @@ public class SkillConfiguration
     @Override
     public String toString()
     {
-        return this.identifier + "的技能配置{" + cooldown + "tick冷却, 技能类型:" + skillIdentifier + "}";
+        return "Skill configuration for disguise " + this.identifier;
     }
 
 

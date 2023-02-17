@@ -1,39 +1,75 @@
 package xiamomc.morph.skills.impl;
 
+import me.libraryaddict.disguise.disguisetypes.watchers.GhastWatcher;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import org.bukkit.NamespacedKey;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.ShulkerBullet;
-import org.bukkit.entity.WitherSkull;
+import org.bukkit.entity.*;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.SkillStrings;
+import xiamomc.morph.misc.DisguiseState;
+import xiamomc.morph.network.MorphClientHandler;
+import xiamomc.morph.network.commands.S2C.S2CSetAggressiveCommand;
 import xiamomc.morph.utilities.EntityTypeUtils;
 import xiamomc.morph.skills.MorphSkill;
 import xiamomc.morph.skills.SkillType;
 import xiamomc.morph.skills.options.ProjectiveConfiguration;
 import xiamomc.morph.storage.skill.SkillConfiguration;
+import xiamomc.pluginbase.Annotations.Resolved;
 
-public class LaunchProjectiveMorphSkill extends MorphSkill<ProjectiveConfiguration>
+public class LaunchProjectiveMorphSkill extends DelayedMorphSkill<ProjectiveConfiguration>
 {
     @Override
-    public int executeSkill(Player player, SkillConfiguration configuration, ProjectiveConfiguration option)
+    protected int getExecuteDelay(SkillConfiguration configuration, ProjectiveConfiguration option)
+    {
+        return option.executeDelay;
+    }
+
+    @Resolved
+    private MorphClientHandler clientHandler;
+
+    @Override
+    protected ExecuteResult preExecute(Player player, DisguiseState state, SkillConfiguration configuration, ProjectiveConfiguration option)
     {
         if (option == null || configuration == null)
         {
-            printErrorMessage(player, configuration + "没有弹射物配置");
-            return 10;
+            printErrorMessage(player, configuration + " doesn't seems to have a valid projective configuration");
+            return ExecuteResult.fail(10);
         }
 
         var type = EntityTypeUtils.fromString(option.getName(), true);
 
         if (type == null)
         {
-            printErrorMessage(player, "没有为" + configuration + "配置要发射的实体");
-            return 10;
+            printErrorMessage(player, "Invalid projective entity for configuration " + configuration.getIdentifier());
+            return ExecuteResult.fail(10);
         }
+
+        playSoundToNearbyPlayers(player, option.getSoundDistance(),
+                Key.key(option.getPreLaunchSoundName()), Sound.Source.HOSTILE);
+
+        if (state.getEntityType() == EntityType.GHAST)
+        {
+            var watcher = (GhastWatcher) state.getDisguise().getWatcher();
+            watcher.setAggressive(true);
+            clientHandler.sendClientCommand(player, new S2CSetAggressiveCommand(true));
+        }
+
+        return super.preExecute(player, state, configuration, option);
+    }
+
+    @Override
+    protected void executeDelayedSkill(Player player, DisguiseState state, SkillConfiguration configuration, ProjectiveConfiguration option)
+    {
+        if (state.getEntityType() == EntityType.GHAST)
+        {
+            var watcher = (GhastWatcher) state.getDisguise().getWatcher();
+            watcher.setAggressive(false);
+            clientHandler.sendClientCommand(player, new S2CSetAggressiveCommand(false));
+        }
+
+        var type = EntityTypeUtils.fromString(option.getName(), true);
 
         Entity target = null;
         var distanceLimit = option.getDistanceLimit();
@@ -49,7 +85,7 @@ public class LaunchProjectiveMorphSkill extends MorphSkill<ProjectiveConfigurati
                         .resolve("distance", "" + distanceLimit)
                         .toComponent(null));
 
-                return 10;
+                return;
             }
         }
 
@@ -74,8 +110,6 @@ public class LaunchProjectiveMorphSkill extends MorphSkill<ProjectiveConfigurati
 
         playSoundToNearbyPlayers(player, option.getSoundDistance(),
                 Key.key(option.getSoundName()), Sound.Source.PLAYER);
-
-        return configuration.getCooldown();
     }
 
     @Override

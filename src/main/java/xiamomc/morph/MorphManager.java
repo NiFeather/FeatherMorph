@@ -46,7 +46,6 @@ import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
 import xiamomc.pluginbase.Bindables.BindableList;
-import xiamomc.pluginbase.Messages.MessageStore;
 
 import java.util.List;
 import java.util.Map;
@@ -747,7 +746,9 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                         : ((LivingEntity) targetEntity).getEquipment();
             }
             else
+            {
                 equipment = ((LivingEntity) targetEntity).getEquipment();
+            }
         }
 
         //技能

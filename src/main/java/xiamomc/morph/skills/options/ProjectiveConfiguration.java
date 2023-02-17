@@ -2,12 +2,8 @@ package xiamomc.morph.skills.options;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.bukkit.entity.EntityType;
-import org.jetbrains.annotations.Contract;
 import xiamomc.morph.storage.skill.ISkillOption;
-
-import java.util.Map;
 
 public class ProjectiveConfiguration implements ISkillOption
 {
@@ -39,6 +35,18 @@ public class ProjectiveConfiguration implements ISkillOption
         this(entityType.getKey().asString(), multiplier, soundName, soundDistance, distanceLimit);
     }
 
+    public ProjectiveConfiguration withDelay(int delay)
+    {
+        this.executeDelay = delay;
+        return this;
+    }
+
+    public ProjectiveConfiguration withWarningSound(String soundName)
+    {
+        this.preLaunchSoundName = soundName;
+        return this;
+    }
+
     @Expose
     private String name;
 
@@ -54,6 +62,15 @@ public class ProjectiveConfiguration implements ISkillOption
     public float getVectorMultiplier()
     {
         return multiplier;
+    }
+
+    @Expose
+    @SerializedName("warning_sound_name")
+    private String preLaunchSoundName;
+
+    public String getPreLaunchSoundName()
+    {
+        return preLaunchSoundName == null ? "" : preLaunchSoundName;
     }
 
     @Expose
@@ -77,6 +94,10 @@ public class ProjectiveConfiguration implements ISkillOption
     @Expose
     @SerializedName("max_target_distance")
     private int distanceLimit;
+
+    @Expose
+    @SerializedName("delay")
+    public int executeDelay;
 
     public int getDistanceLimit()
     {

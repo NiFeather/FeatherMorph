@@ -24,11 +24,8 @@ public class InventoryMorphSkill extends MorphSkill<NoOpConfiguration>
     private MorphClientHandler clientHandler;
 
     @Override
-    public int executeSkill(Player player, SkillConfiguration configuration, NoOpConfiguration option)
+    public int executeSkill(Player player, DisguiseState state, SkillConfiguration configuration, NoOpConfiguration option)
     {
-        var state = manager.getDisguiseStateFor(player);
-        assert state != null;
-
         var defaultShown = state.toggleDisguisedItems();
 
         manager.spawnParticle(player, player.getLocation(), player.getWidth(), player.getHeight(), player.getWidth());

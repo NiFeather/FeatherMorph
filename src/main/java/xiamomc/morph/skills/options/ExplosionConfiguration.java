@@ -2,10 +2,7 @@ package xiamomc.morph.skills.options;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import xiamomc.morph.storage.skill.ISkillOption;
-
-import java.util.Map;
 
 public class ExplosionConfiguration implements ISkillOption
 {
@@ -13,16 +10,21 @@ public class ExplosionConfiguration implements ISkillOption
     {
     }
 
-    public ExplosionConfiguration(boolean killsSelf, int strength, boolean setsFire)
+    public ExplosionConfiguration(boolean killsSelf, int strength, boolean setsFire, int delay)
     {
         this.killsSelf = killsSelf;
         this.strength = strength;
         this.setsFire = setsFire;
+        this.executeDelay = delay;
     }
 
     @Expose
     @SerializedName("kills_self")
     private boolean killsSelf = true;
+
+    @Expose
+    @SerializedName("delay")
+    public int executeDelay = 30;
 
     public boolean killsSelf()
     {
