@@ -10,6 +10,8 @@ import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.messages.CommandStrings;
 import xiamomc.morph.messages.HelpStrings;
 import xiamomc.morph.messages.MessageUtils;
+import xiamomc.morph.messages.vanilla.VanillaMessageStore;
+import xiamomc.morph.messages.vanilla.VanillaMessageSubStore;
 import xiamomc.morph.network.MorphClientHandler;
 import xiamomc.morph.network.commands.S2C.S2CReAuthCommand;
 import xiamomc.morph.storage.skill.SkillConfigurationStore;
@@ -50,6 +52,9 @@ public class ReloadSubCommand extends MorphPluginObject implements ISubCommand
 
     @Resolved
     private MessageStore<?> messageStore;
+
+    @Resolved
+    private VanillaMessageStore vanillaMessageStore;
 
     @Resolved
     private SkillConfigurationStore skills;
@@ -97,7 +102,10 @@ public class ReloadSubCommand extends MorphPluginObject implements ISubCommand
             }
 
             if (reloadsMessage)
+            {
                 messageStore.reloadConfiguration();
+                vanillaMessageStore.reloadConfiguration();
+            }
 
             if (config.get(Boolean.class, ConfigOption.FORCE_TARGET_VERSION))
             {

@@ -79,6 +79,14 @@ public class VanillaMessageStore extends BasicVanillaMessageStore
     }
 
     @Override
+    public boolean reloadConfiguration()
+    {
+        this.subStores.clear();
+
+        return super.reloadConfiguration();
+    }
+
+    @Override
     protected @NotNull String getLocaleCode()
     {
         return serverLocale.get();

@@ -48,7 +48,7 @@ public final class MorphPlugin extends XiaMoJavaPlugin
 
     private final AbilityHandler abilityHandler = new AbilityHandler();
 
-    private final VanillaMessageStore languageHelper = new VanillaMessageStore();
+    private final VanillaMessageStore vanillaMessageStore = new VanillaMessageStore();
 
     private PlaceholderIntegration placeholderIntegration;
 
@@ -74,7 +74,7 @@ public final class MorphPlugin extends XiaMoJavaPlugin
         dependencyManager.cache(abilityHandler);
         dependencyManager.cache(cmdHelper);
         dependencyManager.cache(clientHandler);
-        dependencyManager.cache(languageHelper);
+        dependencyManager.cache(vanillaMessageStore);
 
         dependencyManager.cacheAs(MessageStore.class, new MorphMessageStore());
         dependencyManager.cacheAs(MiniMessage.class, MiniMessage.miniMessage());

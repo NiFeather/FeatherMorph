@@ -54,7 +54,7 @@ public abstract class BasicVanillaMessageStore extends MessageStore<MorphPlugin>
 
     protected void downloadLanguage()
     {
-        logger.info("Downloading Minecraft localization for language '" + getLocaleCode() + "'...");
+        logger.info("Downloading Minecraft localization for language " + getLocaleCode() + "...");
 
         if (!langDir.exists())
         {
@@ -118,7 +118,7 @@ public abstract class BasicVanillaMessageStore extends MessageStore<MorphPlugin>
             }
             catch (Throwable t)
             {
-                logger.error("Unable to create request for locale " + getLocaleCode() + ": " + t.getMessage());
+                logger.error("Unable to create request for language " + getLocaleCode() + ": " + t.getMessage());
             }
         }, 0, true);
     }
