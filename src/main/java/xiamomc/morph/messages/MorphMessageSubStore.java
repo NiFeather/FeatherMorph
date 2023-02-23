@@ -48,7 +48,7 @@ public class MorphMessageSubStore extends MessageStore<MorphPlugin>
             }
             catch (Throwable t)
             {
-                logger.error("更新" + locale + "的默认语言时出现问题：" + t.getMessage());
+                logger.error("Error occurred while updating localization for locale '" + locale + "': " + t.getMessage());
                 t.printStackTrace();
             }
         }

@@ -2,7 +2,6 @@ package xiamomc.morph.messages.vanilla;
 
 import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.MorphPlugin;
-import xiamomc.morph.messages.MorphMessageStore;
 import xiamomc.pluginbase.Messages.IStrings;
 import xiamomc.pluginbase.Messages.MessageStore;
 
@@ -55,7 +54,7 @@ public abstract class BasicVanillaMessageStore extends MessageStore<MorphPlugin>
 
     protected void downloadLanguage()
     {
-        logger.info("正在准备" + getLocaleCode() + "的语言文件...");
+        logger.info("Downloading Minecraft localization for language '" + getLocaleCode() + "'...");
 
         if (!langDir.exists())
         {
@@ -63,7 +62,7 @@ public abstract class BasicVanillaMessageStore extends MessageStore<MorphPlugin>
 
             if (!result)
             {
-                logger.error("未能创建" + langDir + ", 无法下载语言文件");
+                logger.error("Unable to create directory '" + langDir + "', download cancelled.");
                 return;
             }
         }
@@ -104,22 +103,22 @@ public abstract class BasicVanillaMessageStore extends MessageStore<MorphPlugin>
                     {
                         stream.write(builder.toString().getBytes());
                         this.addSchedule(this::reloadConfiguration);
-                        logger.info("成功下载" + getLocaleCode() + "的语言文件！");
+                        logger.info("Successfully downloaded Minecraft localization for language " + getLocaleCode() + "!");
                     }
                     catch (Throwable t)
                     {
-                        logger.error("未能写入" + getLocaleCode() + "的语言资源：" + t.getMessage());
+                        logger.error("Error occurred while writing data for language " + getLocaleCode() + ": " + t.getMessage());
                         t.printStackTrace();
                     }
                 }
                 else
                 {
-                    logger.warn("未能下载" + getLocaleCode() +"的语言文件：" + con.getResponseCode() + " :: " + con.getRequestMethod());
+                    logger.warn("Unable to download Minecraft localization for language" + getLocaleCode() + ": " + con.getResponseCode() + " :: " + con.getRequestMethod());
                 }
             }
             catch (Throwable t)
             {
-                logger.error("无法为" + getLocaleCode() + "创建请求: " + t.getMessage());
+                logger.error("Unable to create request for locale " + getLocaleCode() + ": " + t.getMessage());
             }
         }, 0, true);
     }

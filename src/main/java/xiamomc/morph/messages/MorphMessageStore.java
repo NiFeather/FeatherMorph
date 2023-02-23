@@ -1,7 +1,6 @@
 package xiamomc.morph.messages;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -9,13 +8,10 @@ import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.pluginbase.Annotations.Initializer;
-import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
 import xiamomc.pluginbase.Messages.IStrings;
 import xiamomc.pluginbase.Messages.MessageStore;
 
-import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -35,17 +31,17 @@ public class MorphMessageStore extends MessageStore<MorphPlugin>
 
     private final Map<String, MorphMessageSubStore> subStores = new Object2ObjectOpenHashMap<>();
 
-    private final Bindable<String> defaultLanguage = new Bindable<>();
+    private final Bindable<String> serverLanguage = new Bindable<>();
 
     @Initializer
     private void load(MorphConfigManager config)
     {
-        config.bind(defaultLanguage, ConfigOption.LANGUAGE_CODE);
+        config.bind(serverLanguage, ConfigOption.LANGUAGE_CODE);
     }
 
     private MorphMessageSubStore getOrCreateSubStore(String locale)
     {
-        MorphMessageSubStore store = null;
+        MorphMessageSubStore store;
 
         synchronized (subStores)
         {
@@ -77,18 +73,21 @@ public class MorphMessageStore extends MessageStore<MorphPlugin>
     @Override
     public String get(String key, @Nullable String defaultValue, @Nullable String locale)
     {
-        if (locale == null)
-            logger.warn("Resolving message key " + key + " for null locale");
+        if (locale == null || locale.isBlank() || locale.isEmpty())
+        {
+            logger.warn("Resolving message key " + key + " for null or empty locale");
+            locale = serverLanguage.get();
+        }
 
         var overrideMsg = getOrCreateSubStore("override").get(key, null, null);
         if (overrideMsg != null) return overrideMsg;
 
-        if (locale == null || locale.isBlank() || locale.isEmpty())
-            locale = defaultLanguage.get();
-
         var store = this.getOrCreateSubStore(locale);
 
-        return store.get(key, defaultValue, locale);
+        var localeMsg = store.get(key, null, locale);
+        if (localeMsg != null) return localeMsg;
+
+        return this.getOrCreateSubStore(serverLanguage.get()).get(key, defaultValue, serverLanguage.get());
     }
 
     @Override
