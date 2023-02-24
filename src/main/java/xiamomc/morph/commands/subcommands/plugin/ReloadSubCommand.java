@@ -99,18 +99,18 @@ public class ReloadSubCommand extends MorphPluginObject implements ISubCommand
                 config.reload();
                 skills.reloadConfiguration();
                 morphManager.reloadConfiguration();
+
+                if (config.get(Boolean.class, ConfigOption.FORCE_TARGET_VERSION))
+                {
+                    clientHandler.sendUnAuth(Bukkit.getOnlinePlayers());
+                    clientHandler.sendReAuth(Bukkit.getOnlinePlayers());
+                }
             }
 
             if (reloadsMessage)
             {
                 messageStore.reloadConfiguration();
                 vanillaMessageStore.reloadConfiguration();
-            }
-
-            if (config.get(Boolean.class, ConfigOption.FORCE_TARGET_VERSION))
-            {
-                clientHandler.sendUnAuth(Bukkit.getOnlinePlayers());
-                clientHandler.sendReAuth(Bukkit.getOnlinePlayers());
             }
 
             sender.sendMessage(MessageUtils.prefixes(sender, CommandStrings.reloadCompleteMessage()));
