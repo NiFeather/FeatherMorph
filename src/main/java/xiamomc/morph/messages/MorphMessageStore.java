@@ -1,6 +1,7 @@
 package xiamomc.morph.messages;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -73,21 +74,29 @@ public class MorphMessageStore extends MessageStore<MorphPlugin>
     @Override
     public String get(String key, @Nullable String defaultValue, @Nullable String locale)
     {
+        var serverLanguage = this.serverLanguage.get();
+
         if (locale == null || locale.isBlank() || locale.isEmpty())
         {
             logger.warn("Resolving message key " + key + " for null or empty locale");
-            locale = serverLanguage.get();
+            locale = serverLanguage;
         }
 
-        var overrideMsg = getOrCreateSubStore("override").get(key, null, null);
-        if (overrideMsg != null) return overrideMsg;
+        var messageStores = ObjectArrayList.of(
+                this.getOrCreateSubStore("override"),
+                this.getOrCreateSubStore(locale)
+        );
 
-        var store = this.getOrCreateSubStore(locale);
+        if (!locale.equals(serverLanguage))
+            messageStores.add(this.getOrCreateSubStore(serverLanguage));
 
-        var localeMsg = store.get(key, null, locale);
-        if (localeMsg != null) return localeMsg;
+        for (var store : messageStores)
+        {
+            var msg = store.get(key, null, null);
+            if (msg != null) return msg;
+        }
 
-        return this.getOrCreateSubStore(serverLanguage.get()).get(key, defaultValue, serverLanguage.get());
+        return super.get(key, defaultValue == null ? "%s@%s".formatted(key, locale) : defaultValue, null);
     }
 
     @Override
