@@ -135,8 +135,7 @@ public class MorphMessageStore extends MessageStore<MorphPlugin>
         if (!locale.equals(serverLanguage))
             messageStores.add(this.getOrCreateSubStore(serverLanguage));
 
-        if (!locale.contains("zh"))
-            messageStores.add(this.getOrCreateSubStore("en_us"));
+        messageStores.add(this.getOrCreateSubStore("en_us"));
 
         for (var store : messageStores)
         {
