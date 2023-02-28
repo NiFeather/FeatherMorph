@@ -3,6 +3,7 @@ package xiamomc.morph.messages;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphPlugin;
@@ -13,6 +14,9 @@ import xiamomc.pluginbase.Bindables.Bindable;
 import xiamomc.pluginbase.Messages.IStrings;
 import xiamomc.pluginbase.Messages.MessageStore;
 
+import java.io.File;
+import java.net.URI;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -34,9 +38,50 @@ public class MorphMessageStore extends MessageStore<MorphPlugin>
 
     private final Bindable<String> serverLanguage = new Bindable<>();
 
+    public File getFile(String relativePath, boolean nullIfNotFound)
+    {
+        if (relativePath == null || relativePath.isBlank() || relativePath.isEmpty()) return null;
+
+        var dataFolder = plugin.getDataFolder().toURI();
+        var file = new File(URI.create("" + dataFolder + "/" + relativePath));
+
+        if (!nullIfNotFound) return file;
+
+        if (file.exists()) return file;
+        return null;
+    }
+
+    @Nullable
+    @Contract("null -> null; !null -> !null")
+    public String getAbsolutePath(String relativePath)
+    {
+        if (relativePath == null || relativePath.isBlank() || relativePath.isEmpty()) return null;
+
+        return plugin.getDataFolder().toURI().getPath() + "/" + relativePath;
+    }
+
     @Initializer
     private void load(MorphConfigManager config)
     {
+        var legacyDefaultFile = this.getFile("messages/default.json", true);
+
+        if (legacyDefaultFile != null)
+        {
+            var targetFile = this.getFile(this.getFileName(), false);
+
+            if (targetFile.exists()) targetFile.delete();
+
+            try
+            {
+                Files.move(legacyDefaultFile.toPath(), targetFile.toPath());
+                this.addSchedule(super::reloadConfiguration);
+            }
+            catch (Throwable t)
+            {
+                logger.error("Unable to update builtin message store: %s".formatted(t));
+            }
+        }
+
         config.bind(serverLanguage, ConfigOption.LANGUAGE_CODE);
     }
 
@@ -68,7 +113,7 @@ public class MorphMessageStore extends MessageStore<MorphPlugin>
     @Override
     protected @NotNull String getFileName()
     {
-        return "messages/default.json";
+        return "messages/template.json";
     }
 
     @Override
@@ -90,13 +135,16 @@ public class MorphMessageStore extends MessageStore<MorphPlugin>
         if (!locale.equals(serverLanguage))
             messageStores.add(this.getOrCreateSubStore(serverLanguage));
 
+        if (!locale.contains("zh"))
+            messageStores.add(this.getOrCreateSubStore("en_us"));
+
         for (var store : messageStores)
         {
             var msg = store.get(key, null, null);
             if (msg != null) return msg;
         }
 
-        return super.get(key, defaultValue == null ? "%s@%s".formatted(key, locale) : defaultValue, null);
+        return defaultValue == null ? "%s@%s".formatted(key, locale) : defaultValue;
     }
 
     @Override
