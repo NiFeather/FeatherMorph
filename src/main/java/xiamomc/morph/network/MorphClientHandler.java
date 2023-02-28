@@ -107,9 +107,9 @@ public class MorphClientHandler extends MorphPluginObject
             if (logInComingPackets.get())
                 logPacket(false, player, initializeChannel, data);
 
-            this.sendPacket(initializeChannel, player, "".getBytes());
-
             playerConnectionStates.put(player, InitializeState.HANDSHAKE);
+
+            this.sendPacket(initializeChannel, player, "".getBytes());
         });
 
         var apiVersionBytes = ByteBuffer.allocate(4).putInt(targetApiVersion).array();
@@ -390,7 +390,9 @@ public class MorphClientHandler extends MorphPluginObject
         players.forEach(p ->
         {
             playerStateMap.put(p, ConnectionState.JOINED);
-            sendClientCommand(p, new S2CReAuthCommand());
+            playerConnectionStates.put(p, InitializeState.NOT_CONNECTED);
+
+            sendClientCommand(p, new S2CReAuthCommand(), true);
         });
     }
 
@@ -413,7 +415,7 @@ public class MorphClientHandler extends MorphPluginObject
         var cmd = command.buildCommand();
         if (cmd == null || cmd.isEmpty() || cmd.isBlank()) return;
 
-        if (!allowClient.get() && !overrideClientSetting) return;
+        if ((!allowClient.get() || !this.clientConnected(player)) && !overrideClientSetting) return;
 
         this.sendPacket(commandChannel, player, cmd.getBytes());
     }

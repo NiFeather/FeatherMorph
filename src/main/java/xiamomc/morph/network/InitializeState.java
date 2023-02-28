@@ -8,7 +8,9 @@ public enum InitializeState
     /**
      * 客户端未连接或初始化被中断
      */
-    NOT_CONNECTED(-1),
+    NOT_CONNECTED(-2),
+
+    PENDING(-1),
 
     /**
      * 接收到初始化指令，但还没做更进一步的交流

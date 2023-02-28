@@ -42,7 +42,7 @@ public class ExplodeMorphSkill extends DelayedMorphSkill<ExplosionConfiguration>
         if (state.getEntityType() == EntityType.CREEPER)
         {
             ((CreeperWatcher)state.getDisguise().getWatcher()).setIgnited(true);
-            clientHandler.sendClientCommand(player, new S2CSetSNbtCommand("{\"ignited\": true}"));
+            clientHandler.sendClientCommand(player, new S2CSetSNbtCommand("{\"ignited\": true, \"Fuse\": 30}"));
         }
 
         return super.preExecute(player, state, configuration, option);
