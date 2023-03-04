@@ -5,12 +5,35 @@ import com.mojang.serialization.JsonOps;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_19_R2.inventory.CraftItemStack;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.Arrays;
 
 public class ItemUtils
 {
+    private static final ItemStack air = new ItemStack(Material.AIR, 1);
+
     public static ItemStack itemOrAir(ItemStack stack)
     {
-        return stack == null ? air : stack;
+        return stack == null ? air.clone() : stack;
+    }
+
+    public static ItemStack asCopy(@NotNull ItemStack stack)
+    {
+        return stack.clone();
+    }
+
+    public static ItemStack[] asCopy(ItemStack... stacks)
+    {
+        var array = new ItemStack[stacks.length];
+
+        for (int i = 0; i < stacks.length; i++)
+        {
+            var stack = stacks[i];
+            array[i] = stack != null ? stack.clone() : null;
+        }
+
+        return array;
     }
 
     public static String itemToStr(ItemStack stack)
@@ -48,6 +71,4 @@ public class ItemUtils
                 || type == Material.MILK_BUCKET
                 || type.isEdible();
     }
-
-    private static final ItemStack air = new ItemStack(Material.AIR);
 }

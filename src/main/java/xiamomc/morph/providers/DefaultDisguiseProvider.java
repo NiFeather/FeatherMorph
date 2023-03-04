@@ -135,6 +135,7 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
 
             this.addIfPresents(eqiupment, list, EquipmentSlot.HAND);
             this.addIfPresents(eqiupment, list, EquipmentSlot.OFF_HAND);
+
             this.addIfPresents(eqiupment, list, EquipmentSlot.HEAD);
             this.addIfPresents(eqiupment, list, EquipmentSlot.CHEST);
             this.addIfPresents(eqiupment, list, EquipmentSlot.LEGS);
@@ -157,51 +158,14 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
     @Override
     public void postConstructDisguise(DisguiseState state, @Nullable Entity targetEntity)
     {
-        var watcher = state.getDisguise().getWatcher();
-        var disguiseTypeLD = state.getDisguise().getType();
-
         var disguise = state.getDisguise();
+        var watcher = disguise.getWatcher();
 
         disguise.setKeepDisguiseOnPlayerDeath(true);
 
         //workaround: 伪装已死亡的LivingEntity
         if (targetEntity instanceof LivingEntity living && living.getHealth() <= 0)
             ((LivingWatcher) watcher).setHealth(1);
-
-        if (state.shouldHandlePose() && targetEntity instanceof Player targetPlayer)
-        {
-            //如果目标实体是玩家，并且此玩家的伪装类型和我们的一样，那么复制他们的装备
-            var theirState = getMorphManager().getDisguiseStateFor(targetPlayer);
-
-            Disguise theirDisguise;
-
-            //优先从DisguiseState判断是否为同类
-            if (theirState != null)
-            {
-                theirDisguise = theirState.getDisguise();
-
-                if (theirState.getDisguiseIdentifier().equals(state.getDisguiseIdentifier()))
-                    DisguiseUtils.tryCopyArmorStack(targetPlayer, disguise.getWatcher(), theirDisguise.getWatcher());
-            }
-            else
-            {
-                theirDisguise = DisguiseAPI.getDisguise(targetPlayer);
-
-                //不是玩家伪装，判断类型是否一样
-                //否则，判断双方伪装的名称是否一致
-                if (disguiseTypeLD != DisguiseType.PLAYER)
-                {
-                    if (disguiseTypeLD.equals(theirDisguise.getType()))
-                        DisguiseUtils.tryCopyArmorStack(targetPlayer, disguise.getWatcher(), theirDisguise.getWatcher());
-                }
-                else if (theirDisguise instanceof PlayerDisguise theirPlayerDisguise
-                            && disguise instanceof PlayerDisguise ourPlayerDisguise
-                            && theirPlayerDisguise.getName().equals(ourPlayerDisguise.getName()))
-                {
-                    DisguiseUtils.tryCopyArmorStack(targetPlayer, disguise.getWatcher(), theirDisguise.getWatcher());
-                }
-            }
-        }
 
         //被动技能
         var abilities = abilityHandler.getAbilitiesFor(state.getSkillLookupIdentifier());

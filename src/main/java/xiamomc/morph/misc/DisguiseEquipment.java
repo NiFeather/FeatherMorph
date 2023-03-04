@@ -1,6 +1,5 @@
 package xiamomc.morph.misc;
 
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.apache.commons.lang3.NotImplementedException;
 import org.bukkit.entity.Entity;
 import org.bukkit.inventory.EntityEquipment;
@@ -9,18 +8,18 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.utilities.DisguiseUtils;
+import xiamomc.morph.utilities.ItemUtils;
 
-import java.util.List;
-import java.util.Map;
+import java.util.Arrays;
 
 public class DisguiseEquipment implements EntityEquipment
 {
-    private final Map<EquipmentSlot, ItemStack> itemStackMap = new Object2ObjectOpenHashMap<>();
+    private final ItemStack[] itemStacks = new ItemStack[EquipmentSlot.values().length];
 
     @Override
     public void setItem(@NotNull EquipmentSlot slot, @Nullable ItemStack item)
     {
-        itemStackMap.put(slot, item);
+        itemStacks[slot.ordinal()] = item;
     }
 
     @Override
@@ -29,10 +28,23 @@ public class DisguiseEquipment implements EntityEquipment
         this.setItem(slot, item);
     }
 
+    public void setHandItems(@Nullable ItemStack... stacks)
+    {
+        if (stacks == null)
+        {
+            setItemInHand(null);
+            setItemInOffHand(null);
+            return;
+        }
+
+        setItemInMainHand(stacks.length >= 1 ? stacks[0] : null);
+        setItemInOffHand(stacks.length >= 2 ? stacks[1] : null);
+    }
+
     @Override
     public @NotNull ItemStack getItem(@NotNull EquipmentSlot slot)
     {
-        return DisguiseUtils.itemOrAir(itemStackMap.get(slot));
+        return DisguiseUtils.itemOrAir(itemStacks[slot.ordinal()]);
     }
 
     @Override
@@ -158,27 +170,39 @@ public class DisguiseEquipment implements EntityEquipment
     @Override
     public ItemStack @NotNull [] getArmorContents()
     {
-        return (ItemStack[]) List.of(
-                getHelmet(),
-                getChestplate(),
-                getLeggings(),
-                getBoots()
-        ).toArray();
+        return new ItemStack[]
+                {
+                        getBoots(),
+                        getLeggings(),
+                        getChestplate(),
+                        getHelmet(),
+                };
     }
 
     @Override
     public void setArmorContents(@NotNull ItemStack[] items)
     {
-        this.setHelmet(items[3]);
-        this.setChestplate(items[2]);
-        this.setLeggings(items[1]);
-        this.setBoots(items[0]);
+        var air = ItemUtils.itemOrAir(null);
+
+        this.setBoots(items.length >= 1 ? items[0] : air);
+        this.setLeggings(items.length >= 2 ? items[1] : air);
+        this.setChestplate(items.length >= 3 ? items[2] : air);
+        this.setHelmet(items.length >= 4 ? items[3] : air);
+    }
+
+    public ItemStack @NotNull [] getHandItems()
+    {
+        return new ItemStack[]
+                {
+                        getItemInMainHand(),
+                        getItemInOffHand()
+                };
     }
 
     @Override
     public void clear()
     {
-        itemStackMap.clear();
+        Arrays.fill(itemStacks, null);
     }
 
     @Override
