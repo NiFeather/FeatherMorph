@@ -8,10 +8,7 @@ import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.abilities.AbilityType;
-import xiamomc.morph.abilities.options.AttributeModifyOption;
-import xiamomc.morph.abilities.options.BossbarOption;
-import xiamomc.morph.abilities.options.FlyOption;
-import xiamomc.morph.abilities.options.ReduceDamageOption;
+import xiamomc.morph.abilities.options.*;
 import xiamomc.morph.skills.options.EffectConfiguration;
 import xiamomc.morph.skills.options.ExplosionConfiguration;
 import xiamomc.morph.skills.options.ProjectiveConfiguration;
@@ -261,6 +258,12 @@ public class DefaultConfigGenerator
         {
             c.addOption(AbilityType.BOSSBAR,
                     new BossbarOption(new BossbarOption.BossbarCreateOption("<name> (<who>)", BossBar.Color.PINK, BossBar.Overlay.PROGRESS, Set.of()), -1));
+        });
+
+        addAbilityConfiguration(skills, EntityType.ENDER_DRAGON, AbilityType.HEALS_FROM_ENTITY, c ->
+        {
+            c.addOption(AbilityType.HEALS_FROM_ENTITY,
+                    new HealsFromEntityOption());
         });
 
         addAbilityConfiguration(skills, EntityType.FOX, AbilityType.NO_SWEET_BUSH_DAMAGE);

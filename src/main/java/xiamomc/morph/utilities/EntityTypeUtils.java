@@ -1,11 +1,20 @@
 package xiamomc.morph.utilities;
 
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.Marker;
+import net.minecraft.world.entity.MobSpawnType;
+import org.bukkit.Bukkit;
+import org.bukkit.craftbukkit.v1_19_R2.CraftWorld;
 import org.bukkit.entity.EntityType;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.misc.DisguiseTypes;
 
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Set;
 
 public class EntityTypeUtils
@@ -25,6 +34,36 @@ public class EntityTypeUtils
         return Arrays.stream(EntityType.values())
                 .filter(t -> !t.equals(EntityType.UNKNOWN) && t.getKey().asString().equals(key))
                 .findFirst().orElse(EntityType.UNKNOWN);
+    }
+
+    private static final Map<EntityType, Class<? extends Entity>> nmsClassMap = new Object2ObjectOpenHashMap<>();
+
+    @Nullable
+    public static Class<? extends Entity> getNmsClass(@NotNull EntityType type)
+    {
+        if (nmsClassMap.containsKey(type))
+            return nmsClassMap.getOrDefault(type, null);
+
+        var nmsType = net.minecraft.world.entity.EntityType.byString(type.key().asString())
+                .orElse(null);
+
+        if (nmsType == null)
+        {
+            nmsClassMap.put(type, null);
+            return null;
+        }
+
+        var serverWorld = ((CraftWorld) Bukkit.getWorlds().get(0)).getHandle();
+        var entity = nmsType.create(serverWorld, null, e -> e.remove(Entity.RemovalReason.DISCARDED), BlockPos.ZERO, MobSpawnType.COMMAND, false, false);
+
+        if (entity == null)
+        {
+            nmsClassMap.put(type, null);
+            return null;
+        }
+
+        nmsClassMap.put(type, entity.getClass());
+        return entity.getClass();
     }
 
     public static boolean isZombiesHostile(EntityType type)

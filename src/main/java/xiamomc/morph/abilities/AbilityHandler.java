@@ -128,7 +128,8 @@ public class AbilityHandler extends MorphPluginObject
                 new ChatOverrideAbility(),
                 new BossbarAbility(),
                 new NoSweetBushDamageAbility(),
-                new AttributeModifyingAbility()
+                new AttributeModifyingAbility(),
+                new HealsFromEntityAbility()
         ));
 
         initalizeDone = true;
@@ -194,8 +195,17 @@ public class AbilityHandler extends MorphPluginObject
         registedAbilities.forEach(IMorphAbility::clearOptions);
     }
 
-    public void handle(Player player, DisguiseState state)
+    public boolean handle(Player player, DisguiseState state)
     {
-        state.getAbilities().forEach(a -> a.handle(player, state));
+        for (IMorphAbility<?> a : state.getAbilities())
+        {
+            if (a.handle(player, state)) continue;
+
+            logger.warn("Error occurred while updating abilities");
+            Thread.dumpStack();
+            return false;
+        }
+
+        return true;
     }
 }

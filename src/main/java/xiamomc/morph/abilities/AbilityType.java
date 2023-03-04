@@ -28,4 +28,5 @@ public class AbilityType
     public static final NamespacedKey BOSSBAR = new NamespacedKey(nameSpace, "bossbar");
     public static final NamespacedKey NO_SWEET_BUSH_DAMAGE = new NamespacedKey(nameSpace, "no_sweet_bush_damage");
     public static final NamespacedKey ATTRIBUTE = new NamespacedKey(nameSpace, "attribute_modify");
+    public static final NamespacedKey HEALS_FROM_ENTITY = new NamespacedKey(nameSpace, "heals_from_entity");
 }

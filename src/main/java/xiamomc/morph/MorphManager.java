@@ -144,7 +144,12 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 return;
             }
 
-            abilityHandler.handle(p, i);
+            if (!abilityHandler.handle(p, i))
+            {
+                p.sendMessage(MessageUtils.prefixes(p, MorphStrings.errorWhileUpdatingDisguise()));
+
+                unMorph(p, true);
+            }
 
             if (!i.getProvider().updateDisguise(p, i))
             {

@@ -8,9 +8,8 @@ import me.libraryaddict.disguise.utilities.parser.DisguiseParser;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
-import net.kyori.adventure.text.serializer.ComponentSerializer;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import net.minecraft.world.entity.Entity;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.EntityType;
@@ -213,6 +212,8 @@ public class DisguiseState extends MorphPluginObject
 
         this.bossbar = bossbar;
     }
+
+    public Entity beamTarget;
 
     @Nullable
     private TextColor customGlowColor;
