@@ -9,9 +9,12 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.IndirectEntityDamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import org.bukkit.NamespacedKey;
 import org.bukkit.craftbukkit.v1_19_R2.entity.CraftEntity;
+import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.jetbrains.annotations.NotNull;
@@ -96,8 +99,17 @@ public class HealsFromEntityAbility extends MorphAbility<HealsFromEntityOption>
                 if (lastDamageCause instanceof EntityDamageByEntityEvent entityDamageByEntityEvent)
                 {
                     var damager = ((CraftEntity)entityDamageByEntityEvent.getDamager()).getHandle();
+
+                    if (entityDamageByEntityEvent.getDamager() instanceof Projectile projectile)
+                    {
+                        var source = projectile.getShooter();
+
+                        if (source instanceof CraftEntity craftEntity)
+                            damager = craftEntity.getHandle();
+                    }
+
                     var source = ExplosionClass.create(entity, damager);
-                    nmsRecord.nmsPlayer().hurt(source, 10);
+                    nmsRecord.nmsPlayer().hurt(source, option.damageWhenDestroyed);
                 }
 
                 if (state.beamTarget == entity)

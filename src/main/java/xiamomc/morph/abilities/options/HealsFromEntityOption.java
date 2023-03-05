@@ -15,26 +15,39 @@ public class HealsFromEntityOption implements ISkillOption
     public boolean isValid()
     {
         return maxPercentage <= 1d && Float.isFinite(damageWhenDestroyed)
-                && Double.isFinite(healAmount) && Double.isFinite(distance);
+                && Double.isFinite(healAmount) && Double.isFinite(distance) && entityIdentifier != null;
     }
 
     @Expose
     @SerializedName("max_percentage")
-    public double maxPercentage = 1.0d;
+    public double maxPercentage;
 
     @Expose
     @SerializedName("damage_when_destroyed")
-    public float damageWhenDestroyed = 10f;
+    public float damageWhenDestroyed;
 
     @Expose
     @SerializedName("amount")
-    public double healAmount = 0.05d;
+    public double healAmount;
 
     @Expose
     @SerializedName("distance")
-    public double distance = 32d;
+    public double distance;
 
     @Expose
     @SerializedName("entity_type")
-    public String entityIdentifier = "minecraft:end_crystal";
+    public String entityIdentifier;
+
+    public HealsFromEntityOption()
+    {
+    }
+
+    public HealsFromEntityOption(double maxPercentage, float damageWhenDestroyed, double healAmount, double distance, String entityIdentifier)
+    {
+        this.maxPercentage = maxPercentage;
+        this.damageWhenDestroyed = damageWhenDestroyed;
+        this.healAmount = healAmount;
+        this.distance = distance;
+        this.entityIdentifier = entityIdentifier;
+    }
 }

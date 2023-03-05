@@ -263,7 +263,7 @@ public class DefaultConfigGenerator
         addAbilityConfiguration(skills, EntityType.ENDER_DRAGON, AbilityType.HEALS_FROM_ENTITY, c ->
         {
             c.addOption(AbilityType.HEALS_FROM_ENTITY,
-                    new HealsFromEntityOption());
+                    new HealsFromEntityOption(1, 10, 0.05d, 32d, EntityType.ENDER_CRYSTAL.key().asString()));
         });
 
         addAbilityConfiguration(skills, EntityType.FOX, AbilityType.NO_SWEET_BUSH_DAMAGE);
