@@ -6,13 +6,16 @@ import net.minecraft.nbt.DoubleTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.IndirectEntityDamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import org.bukkit.NamespacedKey;
 import org.bukkit.craftbukkit.v1_19_R2.entity.CraftEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.abilities.AbilityType;
 import xiamomc.morph.abilities.MorphAbility;
 import xiamomc.morph.abilities.options.HealsFromEntityOption;
@@ -93,7 +96,7 @@ public class HealsFromEntityAbility extends MorphAbility<HealsFromEntityOption>
                 if (lastDamageCause instanceof EntityDamageByEntityEvent entityDamageByEntityEvent)
                 {
                     var damager = ((CraftEntity)entityDamageByEntityEvent.getDamager()).getHandle();
-                    var source = DamageSource.explosion(entity, damager);
+                    var source = ExplosionClass.create(entity, damager);
                     nmsRecord.nmsPlayer().hurt(source, 10);
                 }
 
@@ -123,6 +126,30 @@ public class HealsFromEntityAbility extends MorphAbility<HealsFromEntityOption>
         }
 
         return true;
+    }
+
+    private static class ExplosionClass extends IndirectEntityDamageSource
+    {
+        protected ExplosionClass(String name, Entity explosion, @Nullable Entity cause)
+        {
+            super(name, explosion, cause);
+
+            this.bypassArmor();
+            this.bypassEnchantments();
+            this.bypassMagic();
+
+            this.setExplosion();
+        }
+
+        public static ExplosionClass create(Entity explosion, Entity cause)
+        {
+            return new ExplosionClass("explosion.player", explosion, cause);
+        }
+
+        public static ExplosionClass create(Entity explosion)
+        {
+            return new ExplosionClass("explosion", explosion, null);
+        }
     }
 
     @Override
