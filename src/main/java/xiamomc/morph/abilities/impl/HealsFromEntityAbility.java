@@ -88,9 +88,10 @@ public class HealsFromEntityAbility extends MorphAbility<HealsFromEntityOption>
             if (entity.isAlive())
             {
                 var maxHealth = player.getMaxHealth();
+                var playerHealth = player.getHealth();
 
-                if (player.getHealth() / maxHealth < option.maxPercentage)
-                    player.setHealth(Math.min(maxHealth, player.getHealth() + option.healAmount));
+                if (playerHealth > 0 && playerHealth / maxHealth < option.maxPercentage)
+                    player.setHealth(Math.min(maxHealth, playerHealth + option.healAmount));
             }
             else
             {
@@ -119,7 +120,7 @@ public class HealsFromEntityAbility extends MorphAbility<HealsFromEntityOption>
 
         if (random.nextInt(10) == 0)
         {
-            var nmsType = getEntityType(option.entityIdentifier);
+            var nmsType = EntityTypeUtils.getNmsType(state.getEntityType());
 
             if (nmsType == null)
             {

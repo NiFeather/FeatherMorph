@@ -39,6 +39,13 @@ public class EntityTypeUtils
     private static final Map<EntityType, Class<? extends Entity>> nmsClassMap = new Object2ObjectOpenHashMap<>();
 
     @Nullable
+    public static net.minecraft.world.entity.EntityType<?> getNmsType(@NotNull EntityType bukkitType)
+    {
+        return net.minecraft.world.entity.EntityType.byString(bukkitType.key().asString())
+                .orElse(null);
+    }
+
+    @Nullable
     public static Class<? extends Entity> getNmsClass(@NotNull EntityType type)
     {
         if (nmsClassMap.containsKey(type))
