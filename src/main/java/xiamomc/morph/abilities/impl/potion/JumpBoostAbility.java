@@ -1,4 +1,4 @@
-package xiamomc.morph.abilities.impl;
+package xiamomc.morph.abilities.impl.potion;
 
 import org.bukkit.NamespacedKey;
 import org.bukkit.potion.PotionEffect;
@@ -7,19 +7,19 @@ import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.abilities.AbilityType;
 import xiamomc.morph.abilities.EffectMorphAbility;
 
-public class FireResistanceAbility extends EffectMorphAbility
+public class JumpBoostAbility extends EffectMorphAbility
 {
     @Override
     public @NotNull NamespacedKey getIdentifier()
     {
-        return AbilityType.HAS_FIRE_RESISTANCE;
+        return AbilityType.HAS_JUMP_BOOST;
     }
 
-    private final PotionEffect fireResistance = new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 20, 0, true, false);
+    private final PotionEffect jumpBoostEffect = new PotionEffect(PotionEffectType.JUMP, 5, 1, true, false);
 
     @Override
     protected PotionEffect getEffect()
     {
-        return fireResistance;
+        return jumpBoostEffect;
     }
 }

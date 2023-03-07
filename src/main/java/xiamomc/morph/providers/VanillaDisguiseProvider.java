@@ -76,7 +76,7 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
 
         if (entityType == null || entityType == EntityType.PLAYER || !entityType.isAlive())
         {
-            logger.error("无效的生物类型: " + identifier + "(" + entityType + ")");
+            logger.error("Illegal mob type: " + identifier + "(" + entityType + ")");
             return DisguiseResult.fail();
         }
 
@@ -248,7 +248,7 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
             }
             catch (Throwable t)
             {
-                logger.error("无法复制目标伪装的NBT标签：" + t.getMessage());
+                logger.error("Unable to copy NBT Tag from disguise: " + t.getMessage());
                 t.printStackTrace();
             }
         }

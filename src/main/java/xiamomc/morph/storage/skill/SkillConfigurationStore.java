@@ -95,7 +95,7 @@ public class SkillConfigurationStore extends MorphJsonBasedStorage<SkillConfigur
                         var key = NamespacedKey.fromString(i);
 
                         if (key == null)
-                            logger.error("无效的技能ID: " + i);
+                            logger.error("Invalid skill identifier: " + i);
 
                         var ability = abilityHandler.getAbility(key);
 
@@ -105,7 +105,7 @@ public class SkillConfigurationStore extends MorphJsonBasedStorage<SkillConfigur
 
                             if (!ability.setOptionGeneric(c.getIdentifier(), c.getAbilityOptions(ability)))
                             {
-                                logger.warn("无法为" + c.getIdentifier() + " -> " + ability.getIdentifier() + "添加技能设置");
+                                logger.warn("Unable to add skill configuration" + c.getIdentifier() + " -> " + ability.getIdentifier());
                                 success.set(false);
                             }
                         }
@@ -121,7 +121,7 @@ public class SkillConfigurationStore extends MorphJsonBasedStorage<SkillConfigur
             }
             catch (Throwable t)
             {
-                logger.error("处理配置时出现异常：" + t.getMessage());
+                logger.error("Error occurred while processing skill configurations：" + t.getMessage());
                 t.printStackTrace();
 
                 configToSkillMap.clear();
@@ -130,7 +130,7 @@ public class SkillConfigurationStore extends MorphJsonBasedStorage<SkillConfigur
         }
 
         if (!success.get())
-            logger.warn("重新加载时出现问题，一些配置将不会被添加，请查看日志排查原因。");
+            logger.warn("We met some problem reloading, some configurations may not be added.");
 
         return val;
     }
@@ -143,14 +143,11 @@ public class SkillConfigurationStore extends MorphJsonBasedStorage<SkillConfigur
     public boolean registerConfiguration(SkillConfiguration configuration)
     {
         if (configToSkillMap.containsKey(configuration))
-        {
-            logger.error("已经注册过一个" + configuration + "的配置了");
-            return false;
-        }
+            return true;
 
         if (configToSkillMap.keySet().stream().anyMatch(c -> c.getIdentifier().equals(configuration.getIdentifier())))
         {
-            logger.error("已经有一个" + configuration.getIdentifier() + "的技能了");
+            logger.error("Another configuration instance already registered as " + configuration.getIdentifier() + "!");
             return false;
         }
 
@@ -158,7 +155,7 @@ public class SkillConfigurationStore extends MorphJsonBasedStorage<SkillConfigur
 
         if (type.equals(SkillType.UNKNOWN))
         {
-            logger.error(configuration + "的技能ID无效");
+            logger.error(configuration + " has an invalid skill identifier");
             return false;
         }
 
@@ -167,7 +164,7 @@ public class SkillConfigurationStore extends MorphJsonBasedStorage<SkillConfigur
 
         if (skillOptional.isEmpty())
         {
-            logger.error("找不到和" + type + "匹配的技能");
+            logger.error("Unable to find any skill that matches the identifier: " + type.asString());
             return false;
         }
 
@@ -178,7 +175,7 @@ public class SkillConfigurationStore extends MorphJsonBasedStorage<SkillConfigur
 
     private boolean migrate(SkillConfigurationContainer config)
     {
-        logger.info("正在更新技能配置...");
+        logger.info("Updating skill configurations...");
 
         try
         {
@@ -296,13 +293,13 @@ public class SkillConfigurationStore extends MorphJsonBasedStorage<SkillConfigur
 
             config.version = targetVersion;
 
-            logger.info("已更新技能配置，即将重载存储...");
+            logger.info("Done! Reloading skill configurations...");
             this.addSchedule(this::reloadConfiguration);
             return true;
         }
         catch (Throwable t)
         {
-            logger.error("更新配置时出现问题：" + t.getMessage());
+            logger.error("Error occurred while updating skill configuration: " + t.getMessage());
             t.printStackTrace();
             return false;
         }

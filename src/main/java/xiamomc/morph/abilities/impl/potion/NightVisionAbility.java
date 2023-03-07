@@ -1,4 +1,4 @@
-package xiamomc.morph.abilities.impl;
+package xiamomc.morph.abilities.impl.potion;
 
 import org.bukkit.NamespacedKey;
 import org.bukkit.potion.PotionEffect;
@@ -7,19 +7,25 @@ import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.abilities.AbilityType;
 import xiamomc.morph.abilities.EffectMorphAbility;
 
-public class BreatheUnderWaterAbility extends EffectMorphAbility
+public class NightVisionAbility extends EffectMorphAbility
 {
     @Override
     public @NotNull NamespacedKey getIdentifier()
     {
-        return AbilityType.CAN_BREATHE_UNDER_WATER;
+        return AbilityType.ALWAYS_NIGHT_VISION;
     }
 
-    private final PotionEffect conduitEffect = new PotionEffect(PotionEffectType.CONDUIT_POWER, 20, 0, true, false);
+    private final PotionEffect nightVisionEffect = new PotionEffect(PotionEffectType.NIGHT_VISION, 300, 0);
 
     @Override
     protected PotionEffect getEffect()
     {
-        return conduitEffect;
+        return nightVisionEffect;
+    }
+
+    @Override
+    protected int getRefreshInterval()
+    {
+        return 40;
     }
 }

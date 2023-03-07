@@ -74,7 +74,7 @@ public class PlayerDataStore extends MorphJsonBasedStorage<PlayerMorphConfigurat
                     if (type != null)
                         list.add(new DisguiseInfo(i, DisguiseTypes.fromId(i)));
                     else
-                        logger.warn("未能找到和\"" + i + "\"对应的实体类型，将不会添加到" + c.playerName + "(" + c.uniqueId + ")的列表中");
+                        logger.warn("Unknown entity identifier: " + i);
                 });
 
                 //设置可用的伪装列表并对其加锁
@@ -110,7 +110,7 @@ public class PlayerDataStore extends MorphJsonBasedStorage<PlayerMorphConfigurat
                   //跳过无效配置
                   if (i.getDisguiseType() == DisguiseTypes.UNKNOWN)
                   {
-                      logger.warn("发现无效的Info配置: " + i);
+                      logger.warn("Invalid entity identifier: " + i);
                       return;
                   }
 

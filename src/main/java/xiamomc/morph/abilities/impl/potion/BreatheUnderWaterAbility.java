@@ -1,4 +1,4 @@
-package xiamomc.morph.abilities.impl;
+package xiamomc.morph.abilities.impl.potion;
 
 import org.bukkit.NamespacedKey;
 import org.bukkit.potion.PotionEffect;
@@ -7,20 +7,19 @@ import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.abilities.AbilityType;
 import xiamomc.morph.abilities.EffectMorphAbility;
 
-@Deprecated
-public class SpeedBoostAbility extends EffectMorphAbility
+public class BreatheUnderWaterAbility extends EffectMorphAbility
 {
     @Override
     public @NotNull NamespacedKey getIdentifier()
     {
-        return AbilityType.HAS_SPEED_BOOST;
+        return AbilityType.CAN_BREATHE_UNDER_WATER;
     }
 
-    private final PotionEffect speedEffect = new PotionEffect(PotionEffectType.SPEED, 11, 2, true, false);
+    private final PotionEffect conduitEffect = new PotionEffect(PotionEffectType.CONDUIT_POWER, 20, 0, true, false);
 
     @Override
     protected PotionEffect getEffect()
     {
-        return speedEffect;
+        return conduitEffect;
     }
 }

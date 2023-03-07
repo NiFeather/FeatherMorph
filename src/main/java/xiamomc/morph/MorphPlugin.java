@@ -132,7 +132,7 @@ public final class MorphPlugin extends XiaMoJavaPlugin
         }
         catch (Exception e)
         {
-            logger.warn("禁用时出现问题：" + e.getMessage());
+            logger.warn("Error occurred while disabling: " + e.getMessage());
             e.printStackTrace();
         }
 

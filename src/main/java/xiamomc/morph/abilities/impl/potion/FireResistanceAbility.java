@@ -1,4 +1,4 @@
-package xiamomc.morph.abilities.impl;
+package xiamomc.morph.abilities.impl.potion;
 
 import org.bukkit.NamespacedKey;
 import org.bukkit.potion.PotionEffect;
@@ -7,19 +7,19 @@ import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.abilities.AbilityType;
 import xiamomc.morph.abilities.EffectMorphAbility;
 
-public class FeatherFallingAbility extends EffectMorphAbility
+public class FireResistanceAbility extends EffectMorphAbility
 {
     @Override
     public @NotNull NamespacedKey getIdentifier()
     {
-        return AbilityType.HAS_FEATHER_FALLING;
+        return AbilityType.HAS_FIRE_RESISTANCE;
     }
 
-    private final PotionEffect featherFallingEffect = new PotionEffect(PotionEffectType.SLOW_FALLING, 5, 0, true, false);
+    private final PotionEffect fireResistance = new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 20, 0, true, false);
 
     @Override
     protected PotionEffect getEffect()
     {
-        return featherFallingEffect;
+        return fireResistance;
     }
 }

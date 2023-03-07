@@ -103,17 +103,17 @@ public class MorphSkillHandler extends MorphPluginObject
      */
     public boolean registerSkill(IMorphSkill<?> skill)
     {
-        logger.info("注册技能：" + skill.getIdentifier().asString());
+        logger.info("Registering skill: " + skill.getIdentifier().asString());
 
         if (skills.contains(skill))
         {
-            logger.error("已经注册过一个" + skill + "的技能了");
+            logger.error("Another skill instance has already registered as " + skill.getIdentifier().asString() + " !");
             return false;
         }
 
         if (skill.getIdentifier().equals(SkillType.UNKNOWN))
         {
-            logger.error("技能ID不能是" + SkillType.UNKNOWN);
+            logger.error("Illegal skill identifier: " + SkillType.UNKNOWN);
             return false;
         }
 
@@ -198,9 +198,9 @@ public class MorphSkillHandler extends MorphPluginObject
             catch (Throwable t)
             {
                 if (t instanceof ClassCastException)
-                    logger.error(config.getIdentifier() + " -> " + skill.getIdentifier() + "的配置存在问题，请检查其技能设置。");
+                    logger.error(config.getIdentifier() + " -> " + skill.getIdentifier() + " has an invalid setting, please check your skill configurations.");
                 else
-                    logger.error("解析技能设置时出现未知问题");
+                    logger.error("Error occurred while parsing skill configuration");
 
                 t.printStackTrace();
 

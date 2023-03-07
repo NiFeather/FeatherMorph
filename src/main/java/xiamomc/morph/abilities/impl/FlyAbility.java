@@ -145,7 +145,7 @@ public class FlyAbility extends MorphAbility<FlyOption>
         }
         else
         {
-            logger.warn(player.getName() + "有应用飞行被动，但其伪装状态是null");
+            logger.warn(player.getName() + " have fly ability applied, but its DisguiseState is null?");
             this.appliedPlayers.remove(player);
         }
     }

@@ -49,7 +49,7 @@ public class MorphChatRenderer extends MorphPluginObject implements ChatRenderer
             }
             catch (Throwable t)
             {
-                logger.error("格式化消息时出现错误：" + t.getMessage());
+                logger.error("Error occurred while formatting message: " + t.getMessage());
                 t.printStackTrace();
 
                 this.message = this.message == null ? Component.empty() : this.message;

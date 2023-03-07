@@ -1,6 +1,7 @@
 package xiamomc.morph.utilities;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.mojang.serialization.JsonOps;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_19_R2.inventory.CraftItemStack;
@@ -36,6 +37,10 @@ public class ItemUtils
         return array;
     }
 
+    private static final Gson gson = new GsonBuilder()
+            .disableHtmlEscaping()
+            .create();
+
     public static String itemToStr(ItemStack stack)
     {
         var item = ItemUtils.itemOrAir(stack);
@@ -49,7 +54,6 @@ public class ItemUtils
 
         if (json.isPresent())
         {
-            var gson = new Gson();
             return gson.toJson(json.get());
         }
 

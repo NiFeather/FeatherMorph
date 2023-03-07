@@ -235,7 +235,7 @@ public interface ISkillOption
         catch (Throwable t)
         {
             var logger = MorphPlugin.getInstance(MorphPlugin.getMorphNameSpace()).getSLF4JLogger();
-            logger.warn("无法解析设置键 " + key + ": " + t.getMessage());
+            logger.warn("Unable to parse key '%s': %s".formatted(key, t.getMessage()));
             t.printStackTrace();
 
             value = null;

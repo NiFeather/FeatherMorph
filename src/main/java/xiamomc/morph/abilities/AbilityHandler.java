@@ -10,6 +10,7 @@ import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.abilities.impl.*;
+import xiamomc.morph.abilities.impl.potion.*;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.storage.skill.SkillConfiguration;
 import xiamomc.morph.storage.skill.SkillConfigurationStore;
@@ -37,11 +38,11 @@ public class AbilityHandler extends MorphPluginObject
      */
     public boolean registerAbility(IMorphAbility<?> ability)
     {
-        logger.info("注册被动技能：" + ability.getIdentifier().asString());
+        logger.info("Registering ability: " + ability.getIdentifier().asString());
 
         if (registedAbilities.stream().anyMatch(a -> a.getIdentifier().equals(ability.getIdentifier())))
         {
-            logger.error("已经注册过一个" + ability.getIdentifier().asString() + "的被动技能了");
+            logger.error("Another ability instance has already registered as " + ability.getIdentifier().asString() + "!");
             return false;
         }
 
@@ -52,11 +53,11 @@ public class AbilityHandler extends MorphPluginObject
         if (initalizeDone)
         {
             //添加设置
-            store.getConfiguredSkills().forEach((c, s) ->
+            store.getConfiguredSkills().forEach((configuration, skill) ->
             {
-                if (!ability.setOptionGeneric(c.getIdentifier(), c.getAbilityOptions(ability)))
+                if (!ability.setOptionGeneric(configuration.getIdentifier(), configuration.getAbilityOptions(ability)))
                 {
-                    logger.warn("无法为" + c.getIdentifier() + " -> " + ability.getIdentifier() + "添加技能设置");
+                    logger.warn("Unable to initialize skill configuration for " + configuration.getIdentifier() + " -> " + ability.getIdentifier());
                 }
             });
 
@@ -144,7 +145,7 @@ public class AbilityHandler extends MorphPluginObject
                 .filter(a -> a.getIdentifier().equals(key)).findFirst().orElse(null);
 
         if (val == null)
-            logger.warn("未知的被动技能: " + key.asString());
+            logger.warn("Unknown ability: " + key.asString());
 
         return val;
     }

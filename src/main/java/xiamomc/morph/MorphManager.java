@@ -258,17 +258,17 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
      */
     public boolean registerProvider(DisguiseProvider provider)
     {
-        logger.info("注册伪装提供器：" + provider.getNameSpace());
+        logger.info("Registering disguise provider: " + provider.getNameSpace());
 
         if (provider.getNameSpace().contains(":"))
         {
-            logger.error("伪装提供器的命名空间不能包含“:”");
+            logger.error("Illegal character found in namespace: ':'");
             return false;
         }
 
         if (providers.stream().anyMatch(p -> p.getNameSpace().equals(provider.getNameSpace())))
         {
-            logger.error("已经注册过一个ID为" + provider.getNameSpace() + "的Provider了");
+            logger.error("Another provider instance already registered as " + provider.getNameSpace() + " !");
             return false;
         }
 
@@ -514,7 +514,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 if (provider == null)
                 {
                     player.sendMessage(MessageUtils.prefixes(player, MorphStrings.disguiseBannedOrNotSupportedString()));
-                    logger.error("未能找到和命名空间" + strippedKey[0] + "匹配的Provider");
+                    logger.error("Unable to find any provider that matches the identifier '%s'".formatted(strippedKey[0]));
                     return false;
                 }
                 else
@@ -524,7 +524,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                     if (!result.success())
                     {
                         player.sendMessage(MessageUtils.prefixes(player, MorphStrings.errorWhileDisguising()));
-                        logger.error(provider + "在执行伪装时出现问题");
+                        logger.error("Unable to apply disguise for player with provider " + provider);
                         return false;
                     }
 
@@ -579,7 +579,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 player.sendMessage(MessageUtils.prefixes(player, MorphStrings.parseErrorString()
                         .resolve("id", key)));
 
-                logger.error("无法解析 " + key + ": " + iae.getMessage());
+                logger.error("Unable to parse key " + key + ": " + iae.getMessage());
                 iae.printStackTrace();
 
                 return false;
@@ -785,7 +785,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         if (provider != fallbackProvider)
             provider.postConstructDisguise(state, targetEntity);
         else
-            logger.warn("id为 " + id + " 的伪装没有Provider?");
+            logger.warn("A disguise with id '%s' don't have a matching provider?".formatted(id));
 
         //如果伪装的时候坐着，显示提示
         if (sourcePlayer.getVehicle() != null && !clientHandler.clientInitialized(sourcePlayer))
@@ -1013,7 +1013,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         {
             if (player.getUniqueId() == offlineState.playerUUID)
             {
-                logger.error("玩家UUID与OfflineState的UUID不一致: " + player.getUniqueId() + " :: " + offlineState.playerUUID);
+                logger.error("OfflineState UUID mismatch: %s <-> %s".formatted(player.getUniqueId(), offlineState.playerUUID));
                 return false;
             }
 
@@ -1043,7 +1043,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         }
         catch (Throwable t)
         {
-            logger.error("无法从OfflineState还原伪装：" + t.getMessage());
+            logger.error("Unable to recover disguise from OfflineState: " + t.getMessage());
             t.printStackTrace();
         }
 
