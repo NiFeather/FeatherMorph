@@ -70,6 +70,16 @@ public class HealsFromEntityAbility extends MorphAbility<HealsFromEntityOption>
     }
 
     @Override
+    public boolean revokeFromPlayer(Player player, DisguiseState state)
+    {
+        if (!super.revokeFromPlayer(player, state)) return false;
+
+        state.beamTarget = null;
+
+        return true;
+    }
+
+    @Override
     public boolean handle(Player player, DisguiseState state)
     {
         //Validate option
