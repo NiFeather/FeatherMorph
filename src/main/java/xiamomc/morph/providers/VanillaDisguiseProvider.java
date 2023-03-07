@@ -46,7 +46,7 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
 
         for (var eT : EntityType.values())
         {
-            if (eT == EntityType.UNKNOWN) continue;
+            if (eT == EntityType.UNKNOWN || !eT.isAlive()) continue;
 
             list.add(eT.getKey().asString());
         }
