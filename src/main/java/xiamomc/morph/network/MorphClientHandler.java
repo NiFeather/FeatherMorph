@@ -369,6 +369,8 @@ public class MorphClientHandler extends MorphPluginObject
      */
     public void unInitializePlayer(Player player)
     {
+        sendClientCommand(player, new S2CUnAuthCommand());
+
         playerOptionMap.remove(player.getUniqueId());
         playerStateMap.remove(player);
         playerConnectionStates.remove(player);
