@@ -157,13 +157,14 @@ public class PlayerTracker extends MorphPluginObject implements Listener
             breakingSuspectList.put(player, plugin.getCurrentTick());
     }
 
+    private final Map<Player, Long> playerDropTrackingMap = new ConcurrentHashMap<>();
+
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerDrop(PlayerDropItemEvent e)
     {
         var player = e.getPlayer();
 
-        lastInteractTime.remove(player);
-        lastInteractAction.remove(player);
+        playerDropTrackingMap.put(player, plugin.getCurrentTick());
     }
 
     private final Map<Player, Long> spectatingPlayers = new ConcurrentHashMap<>();
@@ -201,6 +202,7 @@ public class PlayerTracker extends MorphPluginObject implements Listener
         lastInteractAction.remove(player);
         lastInteractTime.remove(player);
         breakingSuspectList.remove(player);
+        playerDropTrackingMap.remove(player);
     }
 
     @Initializer
@@ -249,7 +251,21 @@ public class PlayerTracker extends MorphPluginObject implements Listener
      */
     public boolean interactingThisTick(Player player)
     {
-        return plugin.getCurrentTick() - lastInteractTime.getOrDefault(player, plugin.getCurrentTick()) <= 0;
+        var tick = plugin.getCurrentTick();
+
+        return tick - lastInteractTime.getOrDefault(player, --tick) <= 0L;
+    }
+
+    /**
+     * 玩家这一刻是否在丢弃物品？
+     * @param player 要查询的玩家
+     * @return 此玩家是否在这一刻丢弃了物品
+     */
+    public boolean droppingItemThisTick(Player player)
+    {
+        var tick = plugin.getCurrentTick();
+
+        return tick - playerDropTrackingMap.getOrDefault(player, --tick) <= 0L;
     }
 
     @Nullable

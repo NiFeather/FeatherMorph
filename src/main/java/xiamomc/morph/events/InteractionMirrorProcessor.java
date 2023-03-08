@@ -3,6 +3,7 @@ package xiamomc.morph.events;
 import io.papermc.paper.event.player.PlayerArmSwingEvent;
 import io.papermc.paper.event.player.PlayerStopUsingItemEvent;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
 import org.bukkit.Bukkit;
@@ -31,6 +32,7 @@ import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -208,10 +210,13 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
 
             if (!playerInDistance(player, targetPlayer, targetName)) return;
 
+            if (tracker.droppingItemThisTick(player))
+                return;
+
             var lastAction = tracker.getLastInteractAction(player);
 
-            //有Swing没Interact，默认左键
-            if (!tracker.interactingThisTick(player) && !tracker.isBreakingSuspect(player))
+            //如果此时玩家没有触发Interaction, 那么默认设置为左键空气
+            if (!tracker.interactingThisTick(player))
                 lastAction = PlayerTracker.InteractType.LEFT_CLICK_AIR;
 
             if (lastAction == null) return;
@@ -283,6 +288,8 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
     @Resolved
     private PlayerOperationSimulator operationSimulator;
 
+    private final List<Player> ignoredPlayers = new ObjectArrayList<>();
+
     /**
      * 模拟玩家操作
      *
@@ -293,7 +300,9 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
     private boolean simulateOperation(Action action, Player targetPlayer)
     {
         if (!allowSimulation.get()) return false;
-        targetPlayer.addScoreboardTag(ignoreTag);
+
+        if (ignoredPlayers.contains(targetPlayer) || tracker.interactingThisTick(targetPlayer)) return false;
+        ignoredPlayers.add(targetPlayer);
 
         var isRightClick = action.isRightClick();
         var result = isRightClick
@@ -307,11 +316,9 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
             if (!isRightClick || !ItemUtils.isContinuousUsable(itemInUse))
                 targetPlayer.swingHand(result.hand());
 
-            targetPlayer.removeScoreboardTag(ignoreTag);
             return true;
         }
 
-        targetPlayer.removeScoreboardTag(ignoreTag);
         return false;
     }
 
@@ -323,8 +330,6 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
 
     @Resolved
     private MorphManager manager;
-
-    private final String ignoreTag = "FMIGNORE";
 
     private Player getPlayer(Player player, String targetName)
     {
@@ -366,8 +371,7 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
                 || (selectionMode.get().equalsIgnoreCase(InteractionMirrorSelectionMode.BY_NAME)
                         ? ignoreDisguised.get() && DisguiseAPI.isDisguised(target)
                         : !match(target, targetName))
-                || target.getScoreboardTags().contains(ignoreTag)
-                || source.getScoreboardTags().contains(ignoreTag)
+                || ignoredPlayers.contains(target) || ignoredPlayers.contains(source)
                 || !source.hasPermission(CommonPermissions.MIRROR)
                 || target.hasPermission(CommonPermissions.MIRROR_IMMUNE)
                 || target.getOpenInventory().getType() != InventoryType.CRAFTING
@@ -430,6 +434,7 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
 
         this.addSchedule(this::update);
         lastRightClick.clear();
+        ignoredPlayers.clear();
     }
 
     @EventHandler
