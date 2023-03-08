@@ -281,6 +281,8 @@ public class PlayerTracker extends MorphPluginObject implements Listener
 
     private void update()
     {
+        this.addSchedule(this::update);
+
         var playerToRemoveFromSuspect = new ObjectArrayList<Player>();
 
         var currentTick = plugin.getCurrentTick();
@@ -291,7 +293,5 @@ public class PlayerTracker extends MorphPluginObject implements Listener
         });
 
         playerToRemoveFromSuspect.forEach(breakingSuspectList::remove);
-
-        this.addSchedule(this::update);
     }
 }

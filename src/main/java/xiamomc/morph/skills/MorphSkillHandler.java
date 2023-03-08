@@ -124,9 +124,10 @@ public class MorphSkillHandler extends MorphPluginObject
 
     private void update()
     {
+        this.addSchedule(this::update);
+
         //更新CD
         uuidCooldownMap.forEach((u, c) -> c.setCooldown(c.getCooldown() - 1));
-        this.addSchedule(this::update);
     }
 
     /**

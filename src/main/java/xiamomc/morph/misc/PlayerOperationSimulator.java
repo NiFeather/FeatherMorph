@@ -53,6 +53,8 @@ public class PlayerOperationSimulator extends MorphPluginObject
 
     private void update()
     {
+        this.addSchedule(this::update, 5);
+
         var list = new Object2ObjectOpenHashMap<>(playerHandlerMap);
 
         var currentTick = plugin.getCurrentTick();
@@ -73,8 +75,6 @@ public class PlayerOperationSimulator extends MorphPluginObject
                 playerHandlerMap.remove(p);
             }
         });
-
-        this.addSchedule(this::update, 5);
     }
 
     private final float blockReachDistance = 4.5f;

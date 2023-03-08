@@ -110,6 +110,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
     private void update()
     {
+        this.addSchedule(this::update);
+
         var states = this.getDisguiseStates();
 
         states.forEach(i ->
@@ -158,8 +160,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 unMorph(p, true);
             }
         });
-
-        this.addSchedule(this::update);
     }
 
     //region 玩家伪装相关

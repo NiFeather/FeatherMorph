@@ -30,6 +30,8 @@ public class RequestManager extends MorphPluginObject implements IManageRequests
 
     private void update()
     {
+        this.addSchedule(this::update);
+
         //更新请求
         var requests = new ObjectArrayList<>(this.requests);
         for (var r : requests)
@@ -37,8 +39,6 @@ public class RequestManager extends MorphPluginObject implements IManageRequests
             r.ticksRemain -= 1;
             if (r.ticksRemain <= 0) this.requests.remove(r);
         }
-
-        this.addSchedule(this::update);
     }
 
     private final List<RequestInfo> requests = new ObjectArrayList<>();
