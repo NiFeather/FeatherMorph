@@ -6,6 +6,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Marker;
 import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.player.Player;
 import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.v1_19_R2.CraftWorld;
 import org.bukkit.entity.EntityType;
@@ -37,6 +38,11 @@ public class EntityTypeUtils
     }
 
     private static final Map<EntityType, Class<? extends Entity>> nmsClassMap = new Object2ObjectOpenHashMap<>();
+
+    static
+    {
+        nmsClassMap.put(EntityType.PLAYER, Player.class);
+    }
 
     @Nullable
     public static net.minecraft.world.entity.EntityType<?> getNmsType(@NotNull EntityType bukkitType)
