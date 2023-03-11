@@ -168,6 +168,12 @@ public class HealsFromEntityAbility extends MorphAbility<HealsFromEntityOption>
             this.bypassMagic();
         }
 
+        @Override
+        public boolean scalesWithDifficulty()
+        {
+            return false;
+        }
+
         public static ExplosionClass magic(Entity magic, Entity cause)
         {
             var source = new ExplosionClass("indirectMagic", magic, cause);
