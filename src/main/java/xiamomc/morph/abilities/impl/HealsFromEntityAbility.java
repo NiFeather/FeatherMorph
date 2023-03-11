@@ -140,10 +140,10 @@ public class HealsFromEntityAbility extends MorphAbility<HealsFromEntityOption>
 
             var prevEntity = state.beamTarget;
             var newEntity = findEntity(nmsRecord, nmsType, option.distance, EntityTypeUtils.fromString(option.entityIdentifier));
+            state.beamTarget = newEntity;
 
             if (prevEntity != newEntity && state.getEntityType() == org.bukkit.entity.EntityType.ENDER_DRAGON)
             {
-                state.beamTarget = newEntity;
                 clientHandler.sendClientCommand(player, this.getBeamCommand(state));
             }
         }
