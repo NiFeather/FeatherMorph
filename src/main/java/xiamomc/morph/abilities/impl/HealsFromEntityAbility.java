@@ -202,8 +202,10 @@ public class HealsFromEntityAbility extends MorphAbility<HealsFromEntityOption>
     @Override
     public void onClientInit(DisguiseState state)
     {
-        clientHandler.sendClientCommand(state.getPlayer(), getBeamCommand(state));
         super.onClientInit(state);
+
+        if (state.getEntityType() == org.bukkit.entity.EntityType.ENDER_DRAGON)
+            clientHandler.sendClientCommand(state.getPlayer(), getBeamCommand(state));
     }
 
     public S2CSetNbtCommand getBeamCommand(DisguiseState state)
