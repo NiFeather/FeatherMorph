@@ -119,7 +119,10 @@ public class HealsFromEntityAbility extends MorphAbility<HealsFromEntityOption>
                             damager = craftEntity.getHandle();
                     }
 
-                    var source = ExplosionClass.create(entity, damager);
+                    var source = entity.getType() == EntityType.END_CRYSTAL
+                            ? ExplosionClass.explosion(entity, damager)
+                            : ExplosionClass.magic(entity, damager);
+
                     nmsRecord.nmsPlayer().hurt(source, option.damageWhenDestroyed);
                 }
 
@@ -139,12 +142,15 @@ public class HealsFromEntityAbility extends MorphAbility<HealsFromEntityOption>
             }
 
             var prevEntity = state.beamTarget;
-            var newEntity = findEntity(nmsRecord, nmsType, option.distance, EntityTypeUtils.fromString(option.entityIdentifier));
-            state.beamTarget = newEntity;
 
-            if (prevEntity != newEntity && state.getEntityType() == org.bukkit.entity.EntityType.ENDER_DRAGON)
+            var newEntity = findEntity(nmsRecord, nmsType, option.distance, EntityTypeUtils.fromString(option.entityIdentifier));
+
+            if (prevEntity != newEntity)
             {
-                clientHandler.sendClientCommand(player, this.getBeamCommand(state));
+                state.beamTarget = newEntity;
+
+                if (state.getEntityType() == org.bukkit.entity.EntityType.ENDER_DRAGON)
+                    clientHandler.sendClientCommand(player, this.getBeamCommand(state));
             }
         }
 
@@ -160,18 +166,30 @@ public class HealsFromEntityAbility extends MorphAbility<HealsFromEntityOption>
             this.bypassArmor();
             this.bypassEnchantments();
             this.bypassMagic();
-
-            this.setExplosion();
         }
 
-        public static ExplosionClass create(Entity explosion, Entity cause)
+        public static ExplosionClass magic(Entity magic, Entity cause)
         {
-            return new ExplosionClass("explosion.player", explosion, cause);
+            var source = new ExplosionClass("indirectMagic", magic, cause);
+            source.setMagic();
+
+            return source;
         }
 
-        public static ExplosionClass create(Entity explosion)
+        public static ExplosionClass expolosion(Entity explosion, Entity cause)
         {
-            return new ExplosionClass("explosion", explosion, null);
+            var source = new ExplosionClass("explosion.player", explosion, cause);
+            source.setExplosion();
+
+            return source;
+        }
+
+        public static ExplosionClass explosion(Entity explosion)
+        {
+            var source = new ExplosionClass("explosion", explosion, null);
+            source.setExplosion();
+
+            return source;
         }
     }
 
@@ -207,7 +225,8 @@ public class HealsFromEntityAbility extends MorphAbility<HealsFromEntityOption>
 
             if (classType == null) return null;
 
-            var entities = world.getEntitiesOfClass(classType, boundingBox.inflate(expand));
+            var entities = world.getEntitiesOfClass(classType, boundingBox.inflate(expand), e ->
+                    e.isAlive() && !e.isSpectator());
 
             Entity targetEntity = null;
             double distance = Double.MAX_VALUE;
