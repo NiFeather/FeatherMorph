@@ -187,16 +187,8 @@ public class HealsFromEntityAbility extends MorphAbility<HealsFromEntityOption>
         var entity = state.beamTarget;
 
         var compound = new CompoundTag();
-        var list = new ListTag();
 
-        if (entity != null)
-        {
-            list.add(0, DoubleTag.valueOf(entity.getX()));
-            list.add(1, DoubleTag.valueOf(entity.getY()));
-            list.add(2, DoubleTag.valueOf(entity.getZ()));
-        }
-
-        compound.put("BeamTarget", list);
+        compound.putInt("BeamTarget", entity != null ? entity.getId() : 0);
 
         return new S2CSetNbtCommand(compound);
     }
