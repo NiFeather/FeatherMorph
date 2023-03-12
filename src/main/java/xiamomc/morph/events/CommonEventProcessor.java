@@ -363,6 +363,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
             DisguiseAPI.disguiseEntity(player, state.getDisguise());
 
             var disguise = DisguiseAPI.getDisguise(player);
+            disguise.setKeepDisguiseOnPlayerDeath(true);
             DisguiseUtils.addTrace(disguise);
 
             //刷新Disguise
@@ -372,7 +373,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
             var customName = state.entityCustomName;
 
             state.setDisguise(state.getDisguiseIdentifier(),
-                    state.getSkillLookupIdentifier(), DisguiseAPI.getDisguise(player), state.shouldHandlePose(), false,
+                    state.getSkillLookupIdentifier(), disguise, state.shouldHandlePose(), false,
                     state.getDisguisedItems());
 
             state.setCachedNbtString(nbt);
