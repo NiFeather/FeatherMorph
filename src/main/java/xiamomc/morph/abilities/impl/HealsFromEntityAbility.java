@@ -182,7 +182,8 @@ public class HealsFromEntityAbility extends MorphAbility<HealsFromEntityOption>
             return source;
         }
 
-        public static ExplosionClass expolosion(Entity explosion, Entity cause)
+        @NotNull
+        public static ExplosionClass explosion(Entity explosion, Entity cause)
         {
             var source = new ExplosionClass("explosion.player", explosion, cause);
             source.setExplosion();
