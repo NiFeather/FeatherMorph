@@ -1,5 +1,14 @@
 package xiamomc.morph.misc.integrations.gsit;
 
+import xiamomc.morph.MorphPluginObject;
+
+public class GSitCompactProcessor extends MorphPluginObject
+{
+}
+
+/*
+package xiamomc.morph.misc.integrations.gsit;
+
 import dev.geco.gsit.api.event.*;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import me.libraryaddict.disguise.DisguiseAPI;
@@ -100,3 +109,4 @@ public class GSitCompactProcessor extends MorphPluginObject implements Listener
 
     //endregion  GSit <-> LibsDisguises workaround
 }
+*/

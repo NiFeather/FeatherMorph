@@ -5,7 +5,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.StringTagVisitor;
 import net.minecraft.nbt.Tag;
 import net.minecraft.server.commands.data.EntityDataAccessor;
-import org.bukkit.craftbukkit.v1_19_R2.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_19_R3.entity.CraftEntity;
 import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.Nullable;
 

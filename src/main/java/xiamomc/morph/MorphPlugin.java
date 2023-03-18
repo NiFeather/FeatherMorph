@@ -158,7 +158,8 @@ public final class MorphPlugin extends XiaMoJavaPlugin
         {
             case "GSit" ->
             {
-                registerListener(new GSitCompactProcessor());
+                //Not available on jitpack
+                //registerListener(new GSitCompactProcessor());
             }
 
             case "PlaceholderAPI" ->

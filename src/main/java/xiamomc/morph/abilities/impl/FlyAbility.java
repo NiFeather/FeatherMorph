@@ -2,7 +2,7 @@ package xiamomc.morph.abilities.impl;
 
 import org.bukkit.GameMode;
 import org.bukkit.NamespacedKey;
-import org.bukkit.craftbukkit.v1_19_R2.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_19_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerGameModeChangeEvent;

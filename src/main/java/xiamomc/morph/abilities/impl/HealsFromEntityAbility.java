@@ -1,17 +1,19 @@
 package xiamomc.morph.abilities.impl;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import net.minecraft.core.Holder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.DoubleTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.damagesource.IndirectEntityDamageSource;
+import net.minecraft.world.damagesource.DamageSources;
+import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import org.bukkit.NamespacedKey;
-import org.bukkit.craftbukkit.v1_19_R2.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_19_R3.entity.CraftEntity;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
@@ -119,9 +121,11 @@ public class HealsFromEntityAbility extends MorphAbility<HealsFromEntityOption>
                             damager = craftEntity.getHandle();
                     }
 
+                    var sources = nmsRecord.nmsWorld().damageSources();
+
                     var source = entity.getType() == EntityType.END_CRYSTAL
-                            ? ExplosionClass.explosion(entity, damager)
-                            : ExplosionClass.magic(entity, damager);
+                            ? ExplosionClass.create(sources.magic(), entity, damager)
+                            : ExplosionClass.create(sources.explosion(null), entity, damager);
 
                     nmsRecord.nmsPlayer().hurt(source, option.damageWhenDestroyed);
                 }
@@ -157,15 +161,15 @@ public class HealsFromEntityAbility extends MorphAbility<HealsFromEntityOption>
         return true;
     }
 
-    private static class ExplosionClass extends IndirectEntityDamageSource
+    private static class ExplosionClass extends DamageSource
     {
-        protected ExplosionClass(String name, Entity explosion, @Nullable Entity cause)
+        protected ExplosionClass(Holder<DamageType> typeHolder, Entity explosion, @Nullable Entity cause)
         {
-            super(name, explosion, cause);
+            super(typeHolder, explosion, cause);
 
-            this.bypassArmor();
-            this.bypassEnchantments();
-            this.bypassMagic();
+            //this.bypassArmor();
+            //this.bypassEnchantments();
+            //this.bypassMagic();
         }
 
         @Override
@@ -174,29 +178,11 @@ public class HealsFromEntityAbility extends MorphAbility<HealsFromEntityOption>
             return false;
         }
 
-        public static ExplosionClass magic(Entity magic, Entity cause)
+        public static ExplosionClass create(DamageSource damageSource, Entity source, Entity cause)
         {
-            var source = new ExplosionClass("indirectMagic", magic, cause);
-            source.setMagic();
+            var instance = new ExplosionClass(damageSource.typeHolder(), source, cause);
 
-            return source;
-        }
-
-        @NotNull
-        public static ExplosionClass explosion(Entity explosion, Entity cause)
-        {
-            var source = new ExplosionClass("explosion.player", explosion, cause);
-            source.setExplosion();
-
-            return source;
-        }
-
-        public static ExplosionClass explosion(Entity explosion)
-        {
-            var source = new ExplosionClass("explosion", explosion, null);
-            source.setExplosion();
-
-            return source;
+            return instance;
         }
     }
 

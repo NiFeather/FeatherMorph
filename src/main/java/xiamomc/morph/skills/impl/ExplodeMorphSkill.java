@@ -5,7 +5,8 @@ import net.minecraft.world.damagesource.DamageSource;
 import org.bukkit.GameMode;
 import org.bukkit.GameRule;
 import org.bukkit.NamespacedKey;
-import org.bukkit.craftbukkit.v1_19_R2.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_19_R3.CraftWorld;
+import org.bukkit.craftbukkit.v1_19_R3.entity.CraftPlayer;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -74,8 +75,9 @@ public class ExplodeMorphSkill extends DelayedMorphSkill<ExplosionConfiguration>
         if (killsSelf && !(player.getGameMode() == GameMode.CREATIVE))
         {
             var nmsPlayer = ((CraftPlayer) player).getHandle();
+            var source = ((CraftWorld) player.getWorld()).getHandle().damageSources().explosion(nmsPlayer, null);
 
-            nmsPlayer.hurt(DamageSource.explosion(nmsPlayer, null), 1);
+            nmsPlayer.hurt(source, 1);
             player.setHealth(0);
         }
     }
