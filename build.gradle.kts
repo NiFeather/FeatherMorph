@@ -66,7 +66,7 @@ bukkit {
     main = "xiamomc.morph.MorphPlugin"
     apiVersion = "1.19"
     authors = listOf("MATRIX-feather")
-    depend = listOf("LibsDisguises", "PluginBase")
+    depend = listOf("LibsDisguises")
     softDepend = listOf("GSit", "PlaceholderAPI")
     version = "${project.property("project_version")}"
     prefix = "FeatherMorph"
