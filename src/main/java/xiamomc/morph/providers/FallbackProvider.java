@@ -21,6 +21,12 @@ public class FallbackProvider extends DefaultDisguiseProvider
     }
 
     @Override
+    public boolean isValid(String rawIdentifier)
+    {
+        return false;
+    }
+
+    @Override
     public List<String> getAllAvailableDisguises()
     {
         return List.of();

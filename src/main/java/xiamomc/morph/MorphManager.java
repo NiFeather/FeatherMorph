@@ -517,6 +517,11 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                     logger.error("Unable to find any provider that matches the identifier '%s'".formatted(strippedKey[0]));
                     return false;
                 }
+                else if (!provider.isValid(finalKey))
+                {
+                    player.sendMessage(MessageUtils.prefixes(player, MorphStrings.invalidIdentityString()));
+                    return false;
+                }
                 else
                 {
                     var result = provider.morph(player, info, targetEntity);

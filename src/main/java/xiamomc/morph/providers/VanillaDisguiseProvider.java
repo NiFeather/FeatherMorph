@@ -40,6 +40,12 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
         return DisguiseTypes.VANILLA.getNameSpace();
     }
 
+    @Override
+    public boolean isValid(String rawIdentifier)
+    {
+        return getAllAvailableDisguises().contains(rawIdentifier);
+    }
+
     public VanillaDisguiseProvider()
     {
         var list = new ObjectArrayList<String>();
