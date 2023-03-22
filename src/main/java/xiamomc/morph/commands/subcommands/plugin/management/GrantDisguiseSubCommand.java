@@ -89,7 +89,7 @@ public class GrantDisguiseSubCommand extends MorphPluginObject implements ISubCo
         //检查是否已知
         var provider = MorphManager.getProvider(strings[1]);
 
-        if (provider == null || !provider.getAllAvailableDisguises().contains(strings[1]))
+        if (provider == null || !provider.isValid(strings[1]))
         {
             commandSender.sendMessage(MessageUtils.prefixes(commandSender, MorphStrings.invalidIdentityString()));
             return true;

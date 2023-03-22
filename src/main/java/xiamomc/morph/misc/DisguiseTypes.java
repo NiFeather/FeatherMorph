@@ -54,8 +54,9 @@ public enum DisguiseTypes
      */
     public static DisguiseTypes fromId(String id)
     {
+        //将minecraft:player视作外部伪装
         if (id.equals("minecrcaft:player"))
-            throw new IllegalArgumentException("minecraft:player不能当作id传入，请使用player:xxx");
+            return DisguiseTypes.EXTERNAL;
 
         var str = id + ":";
         var idSplited = str.split(":", 3);

@@ -36,6 +36,13 @@ public abstract class DisguiseProvider extends MorphPluginObject
     public abstract String getNameSpace();
 
     /**
+     * 某个伪装ID是否已知
+     * @param rawIdentifier 伪装ID
+     * @return 此ID是否已知
+     */
+    public abstract boolean isValid(String rawIdentifier);
+
+    /**
      * Gets all available disguise identifiers for this provider
      * @return A list containing available disguise identifiers for this provider
      */

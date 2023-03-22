@@ -37,6 +37,12 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
     }
 
     @Override
+    public boolean isValid(String rawIdentifier)
+    {
+        return DisguiseTypes.fromId(rawIdentifier) == DisguiseTypes.PLAYER;
+    }
+
+    @Override
     public @NotNull DisguiseResult morph(Player player, DisguiseInfo disguiseInfo, @Nullable Entity targetEntity)
     {
         if (getMorphManager().getBannedDisguises().contains("minecraft:player"))
