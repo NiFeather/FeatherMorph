@@ -52,7 +52,7 @@ dependencies {
     }
 
     implementation("com.github.XiaMoZhiShi:PluginBase:${project.property("pluginbase_version")}")
-    //compileOnly("com.github.Gecolay:GSit:${project.property("gsit_version")}")
+    compileOnly("com.github.Gecolay:GSit:${project.property("gsit_version")}")
     compileOnly("me.clip:placeholderapi:${project.property("papi_version")}")
 }
 
