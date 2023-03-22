@@ -6,13 +6,13 @@ import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.scoreboard.Scoreboard;
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.abilities.AbilityHandler;
 import xiamomc.morph.commands.MorphCommandHelper;
 import xiamomc.morph.config.MorphConfigManager;
-import xiamomc.morph.events.*;
+import xiamomc.morph.events.CommonEventProcessor;
+import xiamomc.morph.events.InteractionMirrorProcessor;
+import xiamomc.morph.events.PlayerTracker;
+import xiamomc.morph.events.PluginEventListener;
 import xiamomc.morph.interfaces.IManagePlayerData;
 import xiamomc.morph.interfaces.IManageRequests;
 import xiamomc.morph.messages.MessageUtils;
@@ -25,11 +25,8 @@ import xiamomc.morph.network.MorphClientHandler;
 import xiamomc.morph.skills.MorphSkillHandler;
 import xiamomc.morph.storage.skill.SkillConfigurationStore;
 import xiamomc.pluginbase.Command.CommandHelper;
-import xiamomc.pluginbase.XiaMoJavaPlugin;
 import xiamomc.pluginbase.Messages.MessageStore;
-
-import java.io.File;
-import java.net.URI;
+import xiamomc.pluginbase.XiaMoJavaPlugin;
 
 public final class MorphPlugin extends XiaMoJavaPlugin
 {
@@ -158,8 +155,7 @@ public final class MorphPlugin extends XiaMoJavaPlugin
         {
             case "GSit" ->
             {
-                //Not available on jitpack
-                //registerListener(new GSitCompactProcessor());
+                registerListener(new GSitCompactProcessor());
             }
 
             case "PlaceholderAPI" ->
