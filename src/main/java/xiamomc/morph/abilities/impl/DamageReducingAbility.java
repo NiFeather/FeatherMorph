@@ -8,8 +8,6 @@ import xiamomc.morph.abilities.MorphAbility;
 import xiamomc.morph.abilities.options.ReduceDamageOption;
 import xiamomc.pluginbase.Annotations.Resolved;
 
-import java.util.Objects;
-
 public abstract class DamageReducingAbility<T extends ReduceDamageOption> extends MorphAbility<T>
 {
     protected abstract EntityDamageEvent.DamageCause getTargetCause();

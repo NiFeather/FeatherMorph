@@ -1,7 +1,5 @@
 package xiamomc.morph.network.commands.S2C;
 
-import java.util.Arrays;
-
 public class S2CQuerySetCommand extends S2CQueryCommand<String>
 {
     public S2CQuerySetCommand(String... arguments)

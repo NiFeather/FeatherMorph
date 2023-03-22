@@ -1,10 +1,6 @@
 package xiamomc.morph.misc;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import me.libraryaddict.disguise.DisguiseAPI;
-import me.libraryaddict.disguise.disguisetypes.Disguise;
-import me.libraryaddict.disguise.disguisetypes.FlagWatcher;
-import me.libraryaddict.disguise.utilities.parser.DisguiseParser;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
@@ -23,6 +19,7 @@ import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.abilities.AbilityHandler;
 import xiamomc.morph.abilities.IMorphAbility;
+import xiamomc.morph.backends.DisguiseWrapper;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.messages.MessageUtils;
@@ -49,7 +46,7 @@ import static xiamomc.morph.utilities.DisguiseUtils.itemOrAir;
 public class DisguiseState extends MorphPluginObject
 {
     public DisguiseState(Player player, @NotNull String id, @NotNull String skillId,
-                         Disguise disguiseInstance, boolean isClone, @NotNull DisguiseProvider provider,
+                         DisguiseWrapper<?> disguiseInstance, boolean isClone, @NotNull DisguiseProvider provider,
                          @Nullable EntityEquipment targetEquipment)
     {
         this.player = player;
@@ -98,8 +95,7 @@ public class DisguiseState extends MorphPluginObject
 
     public void setServerSideSelfVisible(boolean val)
     {
-        DisguiseAPI.setViewDisguiseToggled(player, val);
-
+        disguise.toggleServerSelfView(val);
         serverSideSelfVisible = val;
     }
 
@@ -154,9 +150,9 @@ public class DisguiseState extends MorphPluginObject
     /**
      * 伪装的实例
      */
-    private Disguise disguise;
+    private DisguiseWrapper<?> disguise;
 
-    public Disguise getDisguise()
+    public DisguiseWrapper<?> getDisguise()
     {
         return disguise;
     }
@@ -173,7 +169,7 @@ public class DisguiseState extends MorphPluginObject
 
     public EntityType getEntityType()
     {
-        return disguise.getType().getEntityType();
+        return disguise.getEntityType();
     }
 
     private DisguiseTypes disguiseType;
@@ -448,7 +444,7 @@ public class DisguiseState extends MorphPluginObject
      * @param equipment 要使用的equipment，没有则从伪装获取
      */
     public void setDisguise(@NotNull String identifier, @NotNull String skillIdentifier,
-                            Disguise d, boolean shouldHandlePose, @Nullable EntityEquipment equipment)
+                            DisguiseWrapper<?> d, boolean shouldHandlePose, @Nullable EntityEquipment equipment)
     {
         setDisguise(identifier, skillIdentifier, d, shouldHandlePose, true, equipment);
     }
@@ -466,7 +462,7 @@ public class DisguiseState extends MorphPluginObject
      * @param targetEquipment 要使用的equipment，没有则从伪装获取
      */
     public void setDisguise(@NotNull String identifier, @NotNull String skillIdentifier,
-                            Disguise d, boolean shouldHandlePose, boolean shouldRefreshDisguiseItems,
+                            DisguiseWrapper<?> d, boolean shouldHandlePose, boolean shouldRefreshDisguiseItems,
                             @Nullable EntityEquipment targetEquipment)
     {
         if (!DisguiseUtils.isTracing(d))
@@ -503,7 +499,7 @@ public class DisguiseState extends MorphPluginObject
             //更新伪装物品
             if (supportsDisguisedItems)
             {
-                EntityEquipment equipment = targetEquipment != null ? targetEquipment : disguise.getWatcher().getEquipment();
+                EntityEquipment equipment = targetEquipment != null ? targetEquipment : disguise.getDisplayingEquipments();
 
                 //设置默认盔甲
                 var armors = new ItemStack[]
@@ -571,8 +567,7 @@ public class DisguiseState extends MorphPluginObject
      */
     public void setShowingDisguisedItems(boolean value)
     {
-        var watcher = disguise.getWatcher();
-        updateEquipment(watcher, value);
+        updateEquipment(value);
         showDisguisedItems = value;
     }
 
@@ -619,17 +614,19 @@ public class DisguiseState extends MorphPluginObject
 
     /**
      * 更新伪装物品显示
-     * @param watcher 伪装的Watcher
      * @param showDisguised 是否显示默认盔甲
      * @apiNote 此方法在将状态转换为离线存储的过程中才会直接调用，其他情况下请用不带参数的方法
      */
-    private void updateEquipment(FlagWatcher watcher, boolean showDisguised)
+    private void updateEquipment(boolean showDisguised)
     {
         var handItems = disguiseEquipments.getHandItems();
 
-        watcher.setArmor(showDisguised ? disguiseEquipments.getArmorContents() : emptyArmorStack);
-        watcher.setItemInMainHand(showDisguised ? handItems[0] : null);
-        watcher.setItemInOffHand(showDisguised ? handItems[1] : null);
+        var eq = new DisguiseEquipment();
+        eq.setArmorContents(showDisguised ? disguiseEquipments.getArmorContents() : emptyArmorStack);
+        eq.setItemInMainHand(showDisguised ? handItems[0] : null);
+        eq.setItemInOffHand(showDisguised ? handItems[1] : null);
+
+        disguise.setDisplayingEquipments(eq);
     }
 
     public DisguiseState createCopy()
@@ -663,9 +660,9 @@ public class DisguiseState extends MorphPluginObject
         var newDisguise = disguise.clone();
 
         if (supportsDisguisedItems)
-            updateEquipment(newDisguise.getWatcher(), true);
+            updateEquipment(true);
 
-        offlineState.disguiseData = DisguiseParser.parseToString(newDisguise);
+        offlineState.disguiseData = newDisguise.serializeDisguiseData();
         offlineState.shouldHandlePose = this.shouldHandlePose;
         offlineState.showingDisguisedItems = this.showDisguisedItems;
         offlineState.nbtString = this.cachedNbtString;
@@ -694,7 +691,7 @@ public class DisguiseState extends MorphPluginObject
         //todo: 实现伪装装备保存和读取
         var state = new DisguiseState(player,
                 offlineState.disguiseID, offlineState.skillID == null ? offlineState.disguiseID : offlineState.skillID,
-                offlineState.disguise, offlineState.shouldHandlePose, MorphManager.getProvider(offlineState.disguiseID),
+                null, offlineState.shouldHandlePose, MorphManager.getProvider(offlineState.disguiseID),
                 null);
 
         state.setCachedProfileNbtString(offlineState.profileString);

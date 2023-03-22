@@ -1,22 +1,20 @@
 package xiamomc.morph.providers;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import me.libraryaddict.disguise.DisguiseAPI;
-import me.libraryaddict.disguise.disguisetypes.Disguise;
-import me.libraryaddict.disguise.disguisetypes.DisguiseType;
-import me.libraryaddict.disguise.disguisetypes.MobDisguise;
-import me.libraryaddict.disguise.disguisetypes.VillagerData;
-import me.libraryaddict.disguise.disguisetypes.watchers.*;
 import net.kyori.adventure.text.Component;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.TagParser;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.attribute.AttributeModifier;
-import org.bukkit.entity.*;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xiamomc.morph.backends.DisguiseWrapper;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.messages.vanilla.VanillaMessageStore;
@@ -76,7 +74,8 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
     {
         var identifier = disguiseInfo.getIdentifier();
 
-        Disguise constructedDisguise;
+        DisguiseWrapper<?> constructedDisguise;
+        var backend = getMorphManager().getCurrentBackend();
 
         var entityType = EntityTypeUtils.fromString(identifier, true);
 
@@ -90,12 +89,9 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
 
         constructedDisguise = copyResult.success()
                 ? copyResult.disguise()
-                : new MobDisguise(DisguiseType.getType(entityType));
+                : backend.createInstance(null, entityType);
 
-        DisguiseAPI.disguiseEntity(player, constructedDisguise);
-
-        if (entityType.equals(EntityType.BAT))
-            constructedDisguise.getWatcher().setYModifier(-1.6f);
+        backend.disguise(player, constructedDisguise);
 
         return DisguiseResult.success(constructedDisguise, copyResult.isCopy());
     }
@@ -118,41 +114,13 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
         super.postConstructDisguise(state, targetEntity);
 
         var disguise = state.getDisguise();
+        var backend = getMorphManager().getCurrentBackend();
 
-        if (!DisguiseAPI.isDisguised(targetEntity))
+        if (!backend.isDisguised(targetEntity))
         {
             //盔甲架加上手臂
-            if (disguise.getType().equals(DisguiseType.ARMOR_STAND) && armorStandShowArms.get())
-                ((ArmorStandWatcher) disguise.getWatcher()).setShowArms(true);
-        }
-
-        if (targetEntity != null)
-        {
-            switch (targetEntity.getType())
-            {
-                case CAT ->
-                {
-                    if (disguise.getType() == DisguiseType.CAT)
-                    {
-                        var watcher = (CatWatcher) disguise.getWatcher();
-                        var cat = (Cat) targetEntity;
-
-                        watcher.setType(cat.getCatType());
-                    }
-                }
-
-                case VILLAGER ->
-                {
-                    if (disguise.getType() == DisguiseType.VILLAGER)
-                    {
-                        var watcher = (VillagerWatcher) disguise.getWatcher();
-                        var villager = (Villager) targetEntity;
-
-                        watcher.setVillagerData(new VillagerData(villager.getVillagerType(),
-                                villager.getProfession(), villager.getVillagerLevel()));
-                    }
-                }
-            }
+            if (disguise.getEntityType().equals(EntityType.ARMOR_STAND) && armorStandShowArms.get())
+                disguise.showArms(true);
         }
 
         if (doHealthScale.get())
@@ -266,84 +234,7 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
         }
 
         if (targetEntity == null || targetEntity.getType() != state.getEntityType())
-        {
-            var watcher = state.getDisguise().getWatcher();
-            switch (state.getEntityType())
-            {
-                case SLIME, MAGMA_CUBE ->
-                {
-                    var size = ((SlimeWatcher) watcher).getSize() - 1;
-                    rawCompound.putInt("Size", size);
-                }
-
-                case HORSE ->
-                {
-                    var color = ((HorseWatcher) watcher).getColor().ordinal();
-                    var style = ((HorseWatcher) watcher).getStyle().ordinal();
-                    rawCompound.putInt("Variant", color | style << 8);
-                }
-
-                case PARROT ->
-                {
-                    var variant = ((ParrotWatcher) watcher).getVariant().ordinal();
-                    rawCompound.putInt("Variant", variant);
-                }
-
-                case CAT ->
-                {
-                    var variant = ((CatWatcher) watcher).getType().getKey().asString();
-                    rawCompound.putString("variant", variant);
-                }
-
-                case TROPICAL_FISH ->
-                {
-                    var variant = ((TropicalFishWatcher) watcher).getVariant();
-
-                    rawCompound.putInt("Variant", variant);
-                }
-
-                case RABBIT ->
-                {
-                    var type = ((RabbitWatcher) watcher).getType().getTypeId();
-                    rawCompound.putInt("RabbitType", type);
-                }
-
-                case FOX ->
-                {
-                    var foxType = ((FoxWatcher) watcher).getType().name().toLowerCase();
-                    rawCompound.putString("Type", foxType);
-                }
-
-                case FROG ->
-                {
-                    var variant = ((FrogWatcher) watcher).getVariant().getKey().asString();
-                    rawCompound.putString("variant", variant);
-                }
-
-                case GOAT ->
-                {
-                    var goatWatcher = ((GoatWatcher) watcher);
-
-                    var hasLeftHorn = goatWatcher.hasLeftHorn();
-                    var hasRightHorn = goatWatcher.hasRightHorn();
-                    var isScreaming = goatWatcher.isScreaming();
-
-                    rawCompound.putBoolean("HasLeftHorn", hasLeftHorn);
-                    rawCompound.putBoolean("HasRightHorn", hasRightHorn);
-                    rawCompound.putBoolean("IsScreamingGoat", isScreaming);
-                }
-
-                case PANDA ->
-                {
-                    var pandaWatcher = ((PandaWatcher) watcher);
-                    var mainGene = pandaWatcher.getMainGene();
-                    var hiddenGene = pandaWatcher.getHiddenGene();
-
-                    rawCompound.putString("MainGene", mainGene.toString().toLowerCase());
-                    rawCompound.putString("HiddenGene", hiddenGene.toString().toLowerCase());
-                }
-            }
-        }
+            state.getDisguise().initializeCompound(rawCompound);
 
         return cullNBT(rawCompound);
     }
@@ -358,15 +249,15 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
     public boolean canConstruct(DisguiseInfo info, Entity targetEntity, DisguiseState theirState)
     {
         return theirState != null
-                ? theirState.getDisguise().getType().getEntityType().equals(info.getEntityType())
+                ? theirState.getDisguise().getEntityType().equals(info.getEntityType())
                 : targetEntity.getType().equals(info.getEntityType());
     }
 
     @Override
     protected boolean canCopyDisguise(DisguiseInfo info, Entity targetEntity,
-                                      @Nullable DisguiseState theirDisguiseState, @NotNull Disguise theirDisguise)
+                                      @Nullable DisguiseState theirDisguiseState, @NotNull DisguiseWrapper<?> theirDisguise)
     {
-        return theirDisguise.getType().getEntityType().equals(info.getEntityType());
+        return theirDisguise.getEntityType().equals(info.getEntityType());
     }
 
     @Resolved

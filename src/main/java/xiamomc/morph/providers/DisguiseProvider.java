@@ -1,10 +1,8 @@
 package xiamomc.morph.providers;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import me.libraryaddict.disguise.DisguiseAPI;
-import me.libraryaddict.disguise.disguisetypes.Disguise;
 import net.kyori.adventure.text.Component;
-import net.minecraft.nbt.*;
+import net.minecraft.nbt.CompoundTag;
 import org.bukkit.craftbukkit.v1_19_R3.entity.CraftLivingEntity;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -12,12 +10,13 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
+import xiamomc.morph.backends.DisguiseWrapper;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.misc.DisguiseInfo;
 import xiamomc.morph.misc.DisguiseState;
-import xiamomc.morph.utilities.NbtUtils;
 import xiamomc.morph.network.commands.S2C.AbstractS2CCommand;
+import xiamomc.morph.utilities.NbtUtils;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.BindableList;
@@ -150,9 +149,7 @@ public abstract class DisguiseProvider extends MorphPluginObject
      */
     public boolean unMorph(Player player, DisguiseState state)
     {
-        var disguise = state.getDisguise();
-
-        return disguise.removeDisguise(player);
+        return morphs.getCurrentBackend().unDisguise(player);
     }
 
     @Resolved
@@ -177,13 +174,15 @@ public abstract class DisguiseProvider extends MorphPluginObject
 
         boolean shouldClone = false;
 
-        Disguise ourDisguise = null;
-        Disguise theirDisguise = null;
+        DisguiseWrapper<?> ourDisguise = null;
+        DisguiseWrapper<?> theirDisguise = null;
         DisguiseState state = null;
 
-        if (DisguiseAPI.isDisguised(target))
+        var backend = morphs.getCurrentBackend();
+
+        if (backend.isDisguised(target))
         {
-            theirDisguise = DisguiseAPI.getDisguise(target);
+            theirDisguise = backend.getDisguise(target);
 
             //如果玩家已伪装，则检查其目标伪装和我们想要的是否一致
             if (target instanceof Player targetPlayer)
@@ -203,8 +202,8 @@ public abstract class DisguiseProvider extends MorphPluginObject
         }
 
         ourDisguise = shouldClone
-                ? DisguiseAPI.getDisguise(target).clone()
-                : canConstruct(info, target, state) ? DisguiseAPI.constructDisguise(target) : null;
+                ? backend.getDisguise(target).clone()
+                : canConstruct(info, target, state) ? backend.createInstance(null, target) : null;
 
         return ourDisguise == null
                 ? DisguiseResult.fail()
@@ -232,7 +231,7 @@ public abstract class DisguiseProvider extends MorphPluginObject
      * @return 是否允许此操作
      */
     protected abstract boolean canCopyDisguise(DisguiseInfo info, Entity targetEntity,
-                                               @Nullable DisguiseState theirState, @NotNull Disguise theirDisguise);
+                                               @Nullable DisguiseState theirState, @NotNull DisguiseWrapper<?> theirDisguise);
 
     /**
      * 伪装后要做的事

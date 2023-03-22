@@ -1,7 +1,5 @@
 package xiamomc.morph.skills.impl;
 
-import me.libraryaddict.disguise.disguisetypes.watchers.CreeperWatcher;
-import net.minecraft.world.damagesource.DamageSource;
 import org.bukkit.GameMode;
 import org.bukkit.GameRule;
 import org.bukkit.NamespacedKey;
@@ -42,7 +40,7 @@ public class ExplodeMorphSkill extends DelayedMorphSkill<ExplosionConfiguration>
 
         if (state.getEntityType() == EntityType.CREEPER)
         {
-            ((CreeperWatcher)state.getDisguise().getWatcher()).setIgnited(true);
+            state.getDisguise().setAggresive(true);
             clientHandler.sendClientCommand(player, new S2CSetSNbtCommand("{\"ignited\": true, \"Fuse\": 30}"));
         }
 
@@ -68,7 +66,7 @@ public class ExplodeMorphSkill extends DelayedMorphSkill<ExplosionConfiguration>
 
         if (state.getEntityType() == EntityType.CREEPER)
         {
-            ((CreeperWatcher)state.getDisguise().getWatcher()).setIgnited(false);
+            state.getDisguise().setAggresive(false);
             clientHandler.sendClientCommand(player, new S2CSetSNbtCommand("{\"ignited\": false, \"Fuse\": 0}"));
         }
 

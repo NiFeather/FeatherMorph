@@ -1,7 +1,6 @@
 package xiamomc.morph.abilities.impl;
 
 import io.papermc.paper.event.player.AsyncChatEvent;
-import me.libraryaddict.disguise.disguisetypes.Disguise;
 import org.bukkit.NamespacedKey;
 import org.bukkit.event.EventHandler;
 import org.jetbrains.annotations.NotNull;
@@ -14,7 +13,6 @@ import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.messages.CommonStrings;
 import xiamomc.morph.messages.MessageUtils;
-import xiamomc.morph.messages.MorphMessageStore;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.misc.MorphChatRenderer;
 import xiamomc.morph.misc.permissions.CommonPermissions;
@@ -24,7 +22,6 @@ import xiamomc.pluginbase.Bindables.Bindable;
 import xiamomc.pluginbase.Messages.FormattableMessage;
 import xiamomc.pluginbase.Messages.MessageStore;
 
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class ChatOverrideAbility extends MorphAbility<ChatOverrideOption>

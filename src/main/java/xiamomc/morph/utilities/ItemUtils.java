@@ -8,8 +8,6 @@ import org.bukkit.craftbukkit.v1_19_R3.inventory.CraftItemStack;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Arrays;
-
 public class ItemUtils
 {
     private static final ItemStack air = new ItemStack(Material.AIR, 1);

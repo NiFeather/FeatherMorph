@@ -4,7 +4,6 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.Marker;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.player.Player;
 import org.bukkit.Bukkit;
@@ -243,6 +242,12 @@ public class EntityTypeUtils
     public static EntityType hasSnowTrail()
     {
         return EntityType.SNOWMAN;
+    }
+
+    public static boolean saddleable(EntityType type)
+    {
+        return type == EntityType.HORSE || type == EntityType.MULE || type == EntityType.DONKEY
+                || type == EntityType.CAMEL || type == EntityType.SKELETON_HORSE || type == EntityType.ZOMBIE_HORSE;
     }
 
     public static boolean hasBossBar(EntityType type)

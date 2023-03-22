@@ -3,7 +3,6 @@ package xiamomc.morph.events;
 import com.destroystokyo.paper.event.player.PlayerClientOptionsChangeEvent;
 import com.destroystokyo.paper.event.player.PlayerPostRespawnEvent;
 import me.libraryaddict.disguise.DisguiseAPI;
-import me.libraryaddict.disguise.disguisetypes.watchers.AbstractHorseWatcher;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import org.bukkit.Bukkit;
@@ -20,19 +19,22 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.InventoryHolder;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
+import xiamomc.morph.backends.libsdisg.LibsDisguiseWrapper;
 import xiamomc.morph.commands.MorphCommandHelper;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
-import xiamomc.morph.messages.*;
+import xiamomc.morph.messages.HintStrings;
+import xiamomc.morph.messages.MessageUtils;
+import xiamomc.morph.messages.MorphStrings;
+import xiamomc.morph.messages.SkillStrings;
 import xiamomc.morph.messages.vanilla.VanillaMessageStore;
 import xiamomc.morph.misc.DisguiseTypes;
-import xiamomc.morph.misc.PlayerOperationSimulator;
-import xiamomc.morph.utilities.DisguiseUtils;
-import xiamomc.morph.utilities.EntityTypeUtils;
 import xiamomc.morph.network.MorphClientHandler;
 import xiamomc.morph.network.commands.S2C.S2CSetEquipCommand;
 import xiamomc.morph.network.commands.S2C.S2CSwapCommand;
 import xiamomc.morph.skills.MorphSkillHandler;
+import xiamomc.morph.utilities.DisguiseUtils;
+import xiamomc.morph.utilities.EntityTypeUtils;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
@@ -159,13 +161,13 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
                 if (state.getEntityType() == EntityType.ALLAY)
                     e.setCancelled(true);
 
-                if (state.getDisguise().getWatcher() instanceof AbstractHorseWatcher watcher)
+                if (EntityTypeUtils.saddleable(state.getDisguise().getEntityType()))
                 {
                     var slot = e.getHand();
                     var item = e.getPlayer().getEquipment().getItem(slot);
 
                     if (item.getType() == Material.SADDLE)
-                        watcher.setSaddled(true);
+                        state.getDisguise().setSaddled(true);
                     else if (item.getType() != Material.AIR)
                         e.setCancelled(true);
                 }
@@ -270,8 +272,11 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
             {
                 this.addSchedule(() ->
                 {
-                    if (DisguiseAPI.isDisguised(player) && DisguiseAPI.isSelfDisguised(player))
-                        player.updateInventory();
+                    if (state.getDisguise() instanceof LibsDisguiseWrapper)
+                    {
+                        if (DisguiseAPI.isDisguised(player) && DisguiseAPI.isSelfDisguised(player))
+                            player.updateInventory();
+                    }
                 }, 2);
             }
 
@@ -299,14 +304,16 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
                 {
                     if (!state.showingDisguisedItems() || state.getDisguise() != disguise) return;
 
-                    var watcher = state.getDisguise().getWatcher();
-
                     var air = itemOrAir(null);
-                    watcher.setItemInMainHand(air);
-                    watcher.setItemInOffHand(air);
+                    var equipment = state.getDisguise().getDisplayingEquipments();
 
-                    watcher.setItemInMainHand(mainHand);
-                    watcher.setItemInOffHand(offHand);
+                    equipment.setItemInMainHand(air);
+                    equipment.setItemInOffHand(air);
+                    disguise.setDisplayingEquipments(equipment);
+
+                    equipment.setItemInMainHand(mainHand);
+                    equipment.setItemInOffHand(offHand);
+                    disguise.setDisplayingEquipments(equipment);
                 }, 2);
             }
         }
@@ -360,10 +367,10 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         {
             //重新进入后player和info.player不属于同一个实例，需要重新disguise
             state.setPlayer(player);
-            DisguiseAPI.disguiseEntity(player, state.getDisguise());
+            var backend = morphs.getCurrentBackend();
+            backend.disguise(player, state.getDisguise());
 
-            var disguise = DisguiseAPI.getDisguise(player);
-            disguise.setKeepDisguiseOnPlayerDeath(true);
+            var disguise = state.getDisguise();
             DisguiseUtils.addTrace(disguise);
 
             //刷新Disguise
@@ -394,14 +401,15 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         }
 
         var offlineState = morphs.getOfflineState(player);
+        var backend = morphs.getCurrentBackend();
 
-        if (offlineState == null && DisguiseAPI.isDisguised(player))
+        if (offlineState == null && backend.isDisguised(player))
         {
             //移除未跟踪，未保存并且属于此插件的伪装
-            var disguise = DisguiseAPI.getDisguise(player);
+            var disguise = backend.getDisguise(player);
 
             if (DisguiseUtils.isTracing(disguise))
-                disguise.removeDisguise(player);
+                backend.unDisguise(player);
         }
         else if (offlineState != null)
         {
@@ -409,7 +417,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
 
             if (morphs.disguiseFromOfflineState(player, offlineState))
             {
-                if (offlineState.disguise != null)
+                if (false) //offlineState.disguise != null
                 {
                     player.sendMessage(MessageUtils.prefixes(player, MorphStrings.recoveringStateString()));
                 }

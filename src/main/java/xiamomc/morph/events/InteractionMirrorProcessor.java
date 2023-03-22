@@ -4,8 +4,6 @@ import io.papermc.paper.event.player.PlayerArmSwingEvent;
 import io.papermc.paper.event.player.PlayerStopUsingItemEvent;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import me.libraryaddict.disguise.DisguiseAPI;
-import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
@@ -357,19 +355,22 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
     {
         if (ignoreDisguised.get()) return true;
 
-        var disguise = DisguiseAPI.getDisguise(targetPlayer);
+        var backend = manager.getCurrentBackend();
+        var disguise = backend.getDisguise(targetPlayer);
 
-        if (disguise instanceof PlayerDisguise playerDisguise)
-            return playerDisguise.getName().equals(targetName);
+        if (disguise != null && disguise.isPlayerDisguise())
+            return disguise.getDisguiseName().equals(targetName);
 
         return disguise == null && targetPlayer.getName().equals(targetName);
     }
 
     private boolean playerInDistance(@NotNull Player source, @Nullable Player target, String targetName)
     {
+        var backend = manager.getCurrentBackend();
+
         if (target == null
                 || (selectionMode.get().equalsIgnoreCase(InteractionMirrorSelectionMode.BY_NAME)
-                        ? ignoreDisguised.get() && DisguiseAPI.isDisguised(target)
+                        ? ignoreDisguised.get() && backend.isDisguised(target)
                         : !match(target, targetName))
                 || ignoredPlayers.contains(target) || ignoredPlayers.contains(source)
                 || !source.hasPermission(CommonPermissions.MIRROR)

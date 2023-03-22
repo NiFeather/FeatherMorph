@@ -1,6 +1,5 @@
 package xiamomc.morph.storage.offlinestore;
 
-import me.libraryaddict.disguise.utilities.parser.DisguiseParser;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.interfaces.IManageOfflineStates;
@@ -73,7 +72,8 @@ public class OfflineStorageManager extends MorphJsonBasedStorage<OfflineStateCon
             {
                 try
                 {
-                    state.disguise = DisguiseParser.parseDisguise(state.disguiseData);
+                    //todo: 是否要保留离线伪装?
+                    //state.disguise = DisguiseParser.parseDisguise(state.disguiseData);
                 }
                 catch (Throwable e)
                 {

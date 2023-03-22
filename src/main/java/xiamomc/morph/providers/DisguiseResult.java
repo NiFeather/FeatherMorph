@@ -1,21 +1,21 @@
 package xiamomc.morph.providers;
 
-import me.libraryaddict.disguise.disguisetypes.Disguise;
 import org.jetbrains.annotations.Nullable;
+import xiamomc.morph.backends.DisguiseWrapper;
 
-public record DisguiseResult(@Nullable Disguise disguise, boolean success, boolean isCopy)
+public record DisguiseResult(@Nullable DisguiseWrapper<?> disguise, boolean success, boolean isCopy)
 {
     public static DisguiseResult fail()
     {
         return new DisguiseResult(null ,false, false);
     }
 
-    public static DisguiseResult success(Disguise disguise, boolean isCopy)
+    public static DisguiseResult success(DisguiseWrapper<?> disguise, boolean isCopy)
     {
         return new DisguiseResult(disguise, true, isCopy);
     }
 
-    public static DisguiseResult success(Disguise disguise)
+    public static DisguiseResult success(DisguiseWrapper<?> disguise)
     {
         return new DisguiseResult(disguise, true, false);
     }

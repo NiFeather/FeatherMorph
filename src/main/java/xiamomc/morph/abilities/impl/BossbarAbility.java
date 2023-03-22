@@ -22,7 +22,6 @@ import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Bindables.Bindable;
 
 import java.util.List;
-import java.util.Objects;
 
 public class BossbarAbility extends MorphAbility<BossbarOption>
 {

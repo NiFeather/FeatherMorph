@@ -2,12 +2,6 @@ package xiamomc.morph;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
-import me.libraryaddict.disguise.DisguiseAPI;
-import me.libraryaddict.disguise.disguisetypes.Disguise;
-import me.libraryaddict.disguise.disguisetypes.MobDisguise;
-import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
-import me.libraryaddict.disguise.utilities.DisguiseValues;
-import me.libraryaddict.disguise.utilities.reflection.FakeBoundingBox;
 import net.kyori.adventure.text.Component;
 import org.bukkit.*;
 import org.bukkit.entity.Entity;
@@ -17,22 +11,35 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.profile.PlayerTextures;
+import org.bukkit.util.BoundingBox;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.abilities.AbilityHandler;
+import xiamomc.morph.backends.DisguiseBackend;
+import xiamomc.morph.backends.DisguiseWrapper;
+import xiamomc.morph.backends.fallback.NilBackend;
+import xiamomc.morph.backends.libsdisg.LibsBackend;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.events.PlayerMorphEvent;
 import xiamomc.morph.events.PlayerUnMorphEvent;
 import xiamomc.morph.interfaces.IManagePlayerData;
-import xiamomc.morph.messages.*;
+import xiamomc.morph.messages.CommandStrings;
+import xiamomc.morph.messages.HintStrings;
+import xiamomc.morph.messages.MessageUtils;
+import xiamomc.morph.messages.MorphStrings;
 import xiamomc.morph.messages.vanilla.VanillaMessageStore;
-import xiamomc.morph.misc.*;
+import xiamomc.morph.misc.DisguiseInfo;
+import xiamomc.morph.misc.DisguiseState;
+import xiamomc.morph.misc.DisguiseTypes;
 import xiamomc.morph.misc.permissions.CommonPermissions;
 import xiamomc.morph.network.MorphClientHandler;
 import xiamomc.morph.network.commands.S2C.*;
-import xiamomc.morph.providers.*;
+import xiamomc.morph.providers.DisguiseProvider;
+import xiamomc.morph.providers.FallbackProvider;
+import xiamomc.morph.providers.PlayerDisguiseProvider;
+import xiamomc.morph.providers.VanillaDisguiseProvider;
 import xiamomc.morph.skills.MorphSkillHandler;
 import xiamomc.morph.skills.SkillCooldownInfo;
 import xiamomc.morph.skills.SkillType;
@@ -74,6 +81,13 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
     public static final String disguiseFallbackName = "@default";
 
+    private DisguiseBackend<?, ?> currentBackend = new NilBackend();
+
+    public DisguiseBackend<?, ?> getCurrentBackend()
+    {
+        return currentBackend;
+    }
+
     private Material actionItem;
     public Material getActionItem()
     {
@@ -84,6 +98,21 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     private void load()
     {
         this.addSchedule(this::update);
+
+        try
+        {
+            this.currentBackend = new LibsBackend();
+        }
+        catch (Throwable t)
+        {
+            logger.error("Unable to initialize LibsDisguise as our disguise backend, please check your server setup!");
+            logger.error("Initializing NilBackend, DISPLAYING DISGUISES WILL NOT BE SUPPORTED THIS RUN!");
+            logger.error("If you believe this is an error, please consider reporting this issue to our GitHub: https://github.com/XiaMoZhiShi/MorphPlugin/issues");
+
+            t.printStackTrace();
+        }
+
+        logger.info("Using backend: %s".formatted(currentBackend));
 
         bannedDisguises = config.getBindableList(ConfigOption.BANNED_DISGUISES);
         config.bind(allowHeadMorph, ConfigOption.ALLOW_HEAD_MORPH);
@@ -120,31 +149,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
             //跳过离线玩家
             if (!p.isOnline()) return;
-
-            var disg = DisguiseAPI.getDisguise(p);
-            var disgInState = i.getDisguise();
-
-            //检查State中的伪装和实际的是否一致
-            if (!disgInState.equals(disg))
-            {
-                if (DisguiseUtils.isTracing(disgInState))
-                {
-                    logger.warn(p.getName() + "在State中的伪装拥有Tracing标签，但却和DisguiseAPI中获得的不一样");
-                    logger.warn("API: " + disg + " :: State: " + disgInState);
-
-                    p.sendMessage(MessageUtils.prefixes(p, MorphStrings.errorWhileDisguising()));
-                    unMorph(p, true);
-                }
-                else
-                {
-                    logger.warn("正在移除非Morph生成的伪装: " + p + " :: " + i.getDisguise() + " <-> " + disg);
-                    unMorph(p, true);
-                    DisguiseAPI.disguiseEntity(p, disg);
-                    disguiseStates.remove(i);
-                }
-
-                return;
-            }
 
             if (!abilityHandler.handle(p, i))
             {
@@ -366,8 +370,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                     {
                         var disguise = state.getDisguise();
 
-                        if (disguise instanceof PlayerDisguise playerDisguise
-                                && playerDisguise.getName().equals(name)
+                        if (disguise.isPlayerDisguise()
+                                && disguise.getDisguiseName().equals(name)
                                 && profileTexture.equals(uuidPlayerTexturesMap.get(playerUniqueId)))
                         {
                             unMorph(player);
@@ -393,7 +397,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
             if (targetedEntity != null)
             {
-                var disg = DisguiseAPI.getDisguise(targetedEntity);
+                var disg = currentBackend.getDisguise(targetedEntity);
 
                 String targetKey;
 
@@ -410,9 +414,9 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 {
                     //否则：伪装ID > 伪装类型 > 生物类型
                     targetKey = disg != null
-                            ? (disg instanceof PlayerDisguise pd)
-                            ? DisguiseTypes.PLAYER.toId(pd.getName())
-                            : disg.getType().getEntityType().getKey().asString()
+                            ? disg.isPlayerDisguise()
+                                ? DisguiseTypes.PLAYER.toId(disg.getDisguiseName())
+                                : disg.getEntityType().getKey().asString()
                             : targetedEntity.getType().getKey().asString();
                 }
 
@@ -728,18 +732,13 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
      * @param provider {@link DisguiseProvider}
      */
     private DisguiseState postConstructDisguise(Player sourcePlayer, @Nullable Entity targetEntity,
-                                                String id, Disguise disguise, boolean shouldHandlePose,
+                                                String id, DisguiseWrapper<?> disguise, boolean shouldHandlePose,
                                                 @NotNull DisguiseProvider provider)
     {
         //设置自定义数据用来跟踪
         DisguiseUtils.addTrace(disguise);
 
-        var disguiseTypeLD = disguise.getType();
-
         var config = getPlayerConfiguration(sourcePlayer);
-
-        //禁用actionBar
-        DisguiseAPI.setActionBarShown(sourcePlayer, false);
 
         //更新或者添加DisguiseState
         var state = getDisguiseStateFor(sourcePlayer);
@@ -776,8 +775,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             state.setDisguise(id, targetSkillID, disguise, shouldHandlePose, equipment);
         }
 
-        state.getDisguise().setTallDisguisesVisible(true);
-
         //workaround: Disguise#getDisguiseName()不会正常返回实体的自定义名称
         if (targetEntity != null && targetEntity.customName() != null)
         {
@@ -792,6 +789,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         else
             logger.warn("A disguise with id '%s' don't have a matching provider?".formatted(id));
 
+        disguise.onPostConstructDisguise(state, targetEntity);
+
         //如果伪装的时候坐着，显示提示
         if (sourcePlayer.getVehicle() != null && !clientHandler.clientInitialized(sourcePlayer))
             sourcePlayer.sendMessage(MessageUtils.prefixes(sourcePlayer, MorphStrings.morphVisibleAfterStandup()));
@@ -804,19 +803,11 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         //如果伪装成生物，则按照此生物的碰撞体积来
         if (disguise.isMobDisguise())
         {
-            var mobDisguise = (MobDisguise) disguise;
-            FakeBoundingBox box;
+            BoundingBox box = disguise.getBoundingBox();
 
-            var values = DisguiseValues.getDisguiseValues(disguiseTypeLD);
-
-            if (!mobDisguise.isAdult() && values.getBabyBox() != null)
-                box = values.getBabyBox();
-            else
-                box = values.getAdultBox();
-
-            cX = box.getX();
-            cY = box.getY();
-            cZ = box.getZ();
+            cX = box.getWidthX();
+            cY = box.getHeight();
+            cZ = box.getWidthZ();
         }
         else //否则，按玩家的碰撞体积算
         {
@@ -1008,7 +999,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         if (!disguiseStates.contains(state))
             disguiseStates.add(state);
 
-        DisguiseAPI.disguiseEntity(state.getPlayer(), state.getDisguise());
+        currentBackend.disguise(state.getPlayer(), state.getDisguise());
         postConstructDisguise(state);
     }
 
@@ -1031,6 +1022,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
             if (disguiseType == DisguiseTypes.UNKNOWN) return false;
 
+            //todo: 考虑是否要保留离线伪装的恢复
+            /*
             //直接还原非LD的伪装
             if (offlineState.disguise != null && disguiseType != DisguiseTypes.LD)
             {
@@ -1041,6 +1034,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 this.disguiseFromState(state);
                 return true;
             }
+            */
 
             //有限还原
             morph(player, key, null);

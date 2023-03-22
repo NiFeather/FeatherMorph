@@ -1,13 +1,6 @@
 package xiamomc.morph.providers;
 
-import com.comphenix.protocol.wrappers.WrappedGameProfile;
-import com.mojang.authlib.GameProfile;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import me.libraryaddict.disguise.DisguiseAPI;
-import me.libraryaddict.disguise.disguisetypes.Disguise;
-import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
-import me.libraryaddict.disguise.utilities.DisguiseUtilities;
-import me.libraryaddict.disguise.utilities.reflection.ReflectionManager;
 import net.kyori.adventure.text.Component;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
@@ -19,6 +12,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xiamomc.morph.backends.DisguiseWrapper;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.MorphStrings;
 import xiamomc.morph.misc.DisguiseInfo;
@@ -52,14 +46,15 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
         }
 
         var id = disguiseInfo.getIdentifier();
+        var backend = getMorphManager().getCurrentBackend();
 
         if (DisguiseTypes.fromId(id) != DisguiseTypes.PLAYER)
             return DisguiseResult.fail();
 
         var result = getCopy(disguiseInfo, targetEntity);
         var disguise = result.success()
-                ? (PlayerDisguise) result.disguise()
-                : new PlayerDisguise(disguiseInfo.playerDisguiseTargetName);
+                ? result.disguise()
+                : backend.createPlayerInstance(null, disguiseInfo.playerDisguiseTargetName);
 
         var mainHandItem = player.getEquipment().getItemInMainHand();
 
@@ -76,18 +71,10 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
 
             //如果玩家头和目标伪装ID一致，那么设置伪装皮肤
             if (gameProfile.getName().equals(DisguiseTypes.PLAYER.toStrippedId(id)))
-            {
-                var wrappedProfile = WrappedGameProfile.fromHandle(gameProfile);
-                var LDprofile = ReflectionManager.getGameProfileWithThisSkin(wrappedProfile.getUUID(), wrappedProfile.getName(), wrappedProfile);
-
-                //LD不支持直接用profile设置皮肤，只能先存到本地设置完再移除
-                DisguiseAPI.addGameProfile(LDprofile.toString(), LDprofile);
-                disguise.setSkin(LDprofile);
-                DisguiseUtilities.removeGameProfile(LDprofile.toString());
-            }
+                disguise.applySkin(gameProfile);
         }
 
-        DisguiseAPI.disguiseEntity(player, disguise);
+        backend.disguise(player, disguise);
 
         return DisguiseResult.success(disguise, result.isCopy());
     }
@@ -97,12 +84,11 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
     {
         super.postConstructDisguise(state, targetEntity);
 
-        var watcher = ((PlayerDisguise) state.getDisguise()).getWatcher();
-        var profile = watcher.getSkin().getHandle();
+        var profile = state.getDisguise().getSkin();
 
-        if (profile instanceof GameProfile gProfile)
+        if (profile != null)
         {
-            var gameProfile = new MorphGameProfile(gProfile);
+            var gameProfile = new MorphGameProfile(profile);
             var compound = new CompoundTag();
 
             gameProfile.setName(DisguiseTypes.PLAYER.toStrippedId(state.getDisguiseIdentifier()));
@@ -152,12 +138,9 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
 
     @Override
     protected boolean canCopyDisguise(DisguiseInfo info, Entity targetEntity,
-                                      @Nullable DisguiseState theirState, @NotNull Disguise theirDisguise)
+                                      @Nullable DisguiseState theirState, @NotNull DisguiseWrapper<?> theirDisguise)
     {
-        if (theirDisguise instanceof PlayerDisguise playerDisguise)
-            return playerDisguise.getName().equals(info.playerDisguiseTargetName);
-
-        return false;
+        return theirDisguise.getDisguiseName().equals(info.playerDisguiseTargetName) && theirDisguise.isPlayerDisguise();
     }
 
     @Override

@@ -3,7 +3,6 @@ package xiamomc.morph.misc.integrations.gsit;
 import dev.geco.gsit.api.event.*;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import me.libraryaddict.disguise.DisguiseAPI;
-import me.libraryaddict.disguise.disguisetypes.watchers.AbstractHorseWatcher;
 import me.libraryaddict.disguise.utilities.DisguiseUtilities;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -11,6 +10,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
+import xiamomc.morph.backends.libsdisg.LibsBackend;
+import xiamomc.morph.utilities.EntityTypeUtils;
 import xiamomc.pluginbase.Annotations.Resolved;
 
 import java.util.List;
@@ -53,9 +54,9 @@ public class GSitCompactProcessor extends MorphPluginObject implements Listener
         {
             var disguise = state.getDisguise();
 
-            if (disguise.getWatcher() instanceof AbstractHorseWatcher horseWatcher)
+            if (EntityTypeUtils.saddleable(disguise.getEntityType()))
             {
-                if (!horseWatcher.isSaddled())
+                if (!disguise.isSaddled())
                     e.setCancelled(true);
             }
             else if (!disguise.isPlayerDisguise())
@@ -84,12 +85,16 @@ public class GSitCompactProcessor extends MorphPluginObject implements Listener
 
     private void hideDisguiseFor(Player player)
     {
+        if (!(morphs.getCurrentBackend() instanceof LibsBackend)) return;
+
         if (DisguiseAPI.isDisguised(player))
             DisguiseUtilities.removeSelfDisguise(DisguiseAPI.getDisguise(player));
     }
 
     private void showDisguiseFor(Player player)
     {
+        if (!(morphs.getCurrentBackend() instanceof LibsBackend)) return;
+
         if (DisguiseAPI.isDisguised(player))
             this.addSchedule(() ->
             {

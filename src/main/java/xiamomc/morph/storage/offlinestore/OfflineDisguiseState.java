@@ -1,7 +1,6 @@
 package xiamomc.morph.storage.offlinestore;
 
 import com.google.gson.annotations.Expose;
-import me.libraryaddict.disguise.disguisetypes.Disguise;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
@@ -68,12 +67,6 @@ public class OfflineDisguiseState implements IOfflineState
 
     @Expose
     public String customName;
-
-    /**
-     * 伪装实例
-     */
-    @Nullable
-    public Disguise disguise;
 
     /**
      * 检查此离线存储是否正常

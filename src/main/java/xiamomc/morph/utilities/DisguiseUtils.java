@@ -1,13 +1,13 @@
 package xiamomc.morph.utilities;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import me.libraryaddict.disguise.disguisetypes.Disguise;
 import me.libraryaddict.disguise.disguisetypes.EntityPose;
 import me.libraryaddict.disguise.disguisetypes.FlagWatcher;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Pose;
 import org.bukkit.inventory.ItemStack;
+import xiamomc.morph.backends.DisguiseWrapper;
 import xiamomc.morph.misc.DisguiseInfo;
 
 import java.util.Arrays;
@@ -19,12 +19,12 @@ public class DisguiseUtils
 
     private static final String customDataTagName = "XIAMO_MORPH";
 
-    public static void addTrace(Disguise disguise)
+    public static void addTrace(DisguiseWrapper<?> disguise)
     {
         disguise.addCustomData(customDataTagName, true);
     }
 
-    public static boolean isTracing(Disguise disguise)
+    public static boolean isTracing(DisguiseWrapper<?> disguise)
     {
         return Boolean.TRUE.equals(disguise.getCustomData(customDataTagName));
     }
@@ -34,7 +34,7 @@ public class DisguiseUtils
         return info.getKey();
     }
 
-    public static EntityPose toEntityPose(Pose pose)
+    public static EntityPose toLibsEntityPose(Pose pose)
     {
         return switch (pose)
         {
@@ -88,9 +88,9 @@ public class DisguiseUtils
      * @param ourWatcher 自己伪装FlagWatcher
      * @param theirWatcher 他们（who）伪装的FlagWatcher
      */
-    public static void tryCopyArmorStack(Player who, FlagWatcher ourWatcher, FlagWatcher theirWatcher)
+    public static void tryCopyLDArmorStack(Player who, FlagWatcher ourWatcher, FlagWatcher theirWatcher)
     {
-        ourWatcher.setArmor(DisguiseUtils.getArmorStack(who, theirWatcher));
+        ourWatcher.setArmor(DisguiseUtils.getLDArmorStack(who, theirWatcher));
 
         var handStack = DisguiseUtils.chooseStack(
                 DisguiseUtils.getHandItems(who),
@@ -101,7 +101,7 @@ public class DisguiseUtils
     }
 
     //获取玩家或者伪装的装备
-    public static ItemStack[] getArmorStack(Player player, FlagWatcher disguiseWatcher)
+    public static ItemStack[] getLDArmorStack(Player player, FlagWatcher disguiseWatcher)
     {
         var playerArmorStack = player.getEquipment().getArmorContents();
         var disguiseArmorStack = disguiseWatcher.getArmor();

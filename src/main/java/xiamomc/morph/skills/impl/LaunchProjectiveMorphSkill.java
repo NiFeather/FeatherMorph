@@ -1,6 +1,5 @@
 package xiamomc.morph.skills.impl;
 
-import me.libraryaddict.disguise.disguisetypes.watchers.GhastWatcher;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import org.bukkit.NamespacedKey;
@@ -11,11 +10,10 @@ import xiamomc.morph.messages.SkillStrings;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.network.MorphClientHandler;
 import xiamomc.morph.network.commands.S2C.S2CSetAggressiveCommand;
-import xiamomc.morph.utilities.EntityTypeUtils;
-import xiamomc.morph.skills.MorphSkill;
 import xiamomc.morph.skills.SkillType;
 import xiamomc.morph.skills.options.ProjectiveConfiguration;
 import xiamomc.morph.storage.skill.SkillConfiguration;
+import xiamomc.morph.utilities.EntityTypeUtils;
 import xiamomc.pluginbase.Annotations.Resolved;
 
 public class LaunchProjectiveMorphSkill extends DelayedMorphSkill<ProjectiveConfiguration>
@@ -51,8 +49,7 @@ public class LaunchProjectiveMorphSkill extends DelayedMorphSkill<ProjectiveConf
 
         if (state.getEntityType() == EntityType.GHAST)
         {
-            var watcher = (GhastWatcher) state.getDisguise().getWatcher();
-            watcher.setAggressive(true);
+            state.getDisguise().setAggresive(true);
             clientHandler.sendClientCommand(player, new S2CSetAggressiveCommand(true));
         }
 
@@ -64,8 +61,7 @@ public class LaunchProjectiveMorphSkill extends DelayedMorphSkill<ProjectiveConf
     {
         if (state.getEntityType() == EntityType.GHAST)
         {
-            var watcher = (GhastWatcher) state.getDisguise().getWatcher();
-            watcher.setAggressive(false);
+            state.getDisguise().setAggresive(false);
             clientHandler.sendClientCommand(player, new S2CSetAggressiveCommand(false));
         }
 

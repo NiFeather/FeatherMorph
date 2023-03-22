@@ -9,14 +9,15 @@ import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.abilities.AbilityType;
 import xiamomc.morph.abilities.options.*;
+import xiamomc.morph.skills.impl.SonicBoomMorphSkill;
 import xiamomc.morph.skills.options.EffectConfiguration;
 import xiamomc.morph.skills.options.ExplosionConfiguration;
 import xiamomc.morph.skills.options.ProjectiveConfiguration;
 import xiamomc.morph.skills.options.TeleportConfiguration;
+import xiamomc.morph.storage.skill.SkillConfiguration;
+import xiamomc.morph.storage.skill.SkillConfigurationContainer;
 import xiamomc.morph.utilities.DisguiseUtils;
 import xiamomc.morph.utilities.EntityTypeUtils;
-import xiamomc.morph.skills.impl.SonicBoomMorphSkill;
-import xiamomc.morph.storage.skill.*;
 
 import java.util.List;
 import java.util.Set;

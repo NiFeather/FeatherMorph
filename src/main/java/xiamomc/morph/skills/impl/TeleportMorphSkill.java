@@ -13,8 +13,8 @@ import xiamomc.morph.messages.SkillStrings;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.skills.MorphSkill;
 import xiamomc.morph.skills.SkillType;
-import xiamomc.morph.storage.skill.SkillConfiguration;
 import xiamomc.morph.skills.options.TeleportConfiguration;
+import xiamomc.morph.storage.skill.SkillConfiguration;
 
 public class TeleportMorphSkill extends MorphSkill<TeleportConfiguration>
 {

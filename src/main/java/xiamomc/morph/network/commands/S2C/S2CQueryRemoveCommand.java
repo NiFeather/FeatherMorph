@@ -1,7 +1,5 @@
 package xiamomc.morph.network.commands.S2C;
 
-import java.util.Arrays;
-
 public class S2CQueryRemoveCommand extends S2CQueryCommand<String>
 {
     public S2CQueryRemoveCommand(String... args)

@@ -3,7 +3,6 @@ package xiamomc.morph.network.commands.C2S;
 import org.bukkit.entity.Player;
 import xiamomc.morph.network.ConnectionState;
 import xiamomc.morph.network.InitializeState;
-import xiamomc.morph.network.MorphClientHandler;
 import xiamomc.morph.network.commands.S2C.S2CSetToggleSelfCommand;
 
 import java.util.Map;
