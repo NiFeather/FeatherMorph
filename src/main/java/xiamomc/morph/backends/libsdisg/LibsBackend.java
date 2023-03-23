@@ -19,6 +19,11 @@ import java.util.Map;
 
 public class LibsBackend extends DisguiseBackend<Disguise, LibsDisguiseWrapper>
 {
+    public LibsBackend() throws NoClassDefFoundError
+    {
+    }
+
+
     @Override
     public DisguiseWrapper<Disguise> createInstance(Player player, @NotNull Entity targetEntity)
     {

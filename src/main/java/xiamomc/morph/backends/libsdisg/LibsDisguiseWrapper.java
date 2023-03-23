@@ -230,8 +230,7 @@ public class LibsDisguiseWrapper extends DisguiseWrapper<Disguise>
     @Override
     public void updateDisplay(boolean isClone, DisguiseState state, Player player)
     {
-        var disg = DisguiseAPI.getDisguise(player);
-        if (!disg.equals(this.instance))
+        if (!this.instance.equals(DisguiseAPI.getDisguise(player)))
         {
             this.instance = instance.clone();
             DisguiseAPI.disguiseEntity(player, this.instance);

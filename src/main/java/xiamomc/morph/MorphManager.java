@@ -104,10 +104,15 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         {
             this.currentBackend = new LibsBackend();
         }
+        catch (NoClassDefFoundError e)
+        {
+            logger.error("Unable to initialize LibsDisguises as our disguise backend because it's not installed on the server.");
+            logger.error("Initializing NilBackend, displaying disguises at the server side will not be supported this run.");
+        }
         catch (Throwable t)
         {
             logger.error("Unable to initialize LibsDisguise as our disguise backend, please check your server setup!");
-            logger.error("Initializing NilBackend, DISPLAYING DISGUISES WILL NOT BE SUPPORTED THIS RUN!");
+            logger.error("Initializing NilBackend, displaying disguises at the server side will not be supported this run.");
             logger.error("If you believe this is an error, please consider reporting this issue to our GitHub: https://github.com/XiaMoZhiShi/MorphPlugin/issues");
 
             t.printStackTrace();
