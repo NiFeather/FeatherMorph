@@ -78,7 +78,7 @@ public class MorphMessageStore extends MessageStore<MorphPlugin>
             }
             catch (Throwable t)
             {
-                logger.error("Unable to update builtin message store: %s".formatted(t));
+                logger.error("Unable to updateDisplay builtin message store: %s".formatted(t));
             }
         }
 

@@ -2,8 +2,10 @@ package xiamomc.morph.backends.fallback;
 
 import com.mojang.authlib.GameProfile;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import net.minecraft.nbt.CompoundTag;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.EntityType;
+import org.checkerframework.checker.units.qual.C;
 
 import java.util.Map;
 
@@ -27,6 +29,8 @@ public class NilDisguise implements Cloneable
 
     public GameProfile profile;
 
+    public final CompoundTag compoundTag = new CompoundTag();
+
     @Override
     protected NilDisguise clone()
     {
@@ -48,7 +52,7 @@ public class NilDisguise implements Cloneable
         obj.saddled = this.saddled;
         obj.profile = this.profile;
 
-        System.out.printf("Cloning %s profile %s to %s profile %s%n", this, this.profile, obj, obj.profile);
+        obj.compoundTag.merge(this.compoundTag);
 
         obj.customData.putAll(this.customData);
 

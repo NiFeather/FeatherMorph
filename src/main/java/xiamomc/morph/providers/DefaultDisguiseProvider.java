@@ -75,7 +75,7 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
             player.sendActionBar(msg.withLocale(locale).resolve("what", state.getPlayerDisplay()).toComponent(null));
         }
 
-        disguise.update(state.getDisguiseType() != DisguiseTypes.LD, state, player);
+        disguise.updateDisplay(state.getDisguiseType() != DisguiseTypes.LD, state, player);
 
         return true;
     }

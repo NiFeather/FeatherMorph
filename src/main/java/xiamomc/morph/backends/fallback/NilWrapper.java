@@ -2,6 +2,8 @@ package xiamomc.morph.backends.fallback;
 
 import com.mojang.authlib.GameProfile;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.TagType;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -10,6 +12,8 @@ import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.util.BoundingBox;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.backends.DisguiseWrapper;
 import xiamomc.morph.misc.DisguiseEquipment;
 import xiamomc.morph.misc.DisguiseState;
@@ -22,6 +26,42 @@ public class NilWrapper extends DisguiseWrapper<NilDisguise>
     }
 
     private final DisguiseEquipment equipment = new DisguiseEquipment();
+
+    @Override
+    public void mergeCompound(CompoundTag compoundTag)
+    {
+        this.instance.compoundTag.merge(compoundTag);
+    }
+
+    @Override
+    public CompoundTag getCompound()
+    {
+        return instance.compoundTag.copy();
+    }
+
+    @Nullable
+    @Override
+    public <R extends Tag> R getTag(@NotNull String path, TagType<R> type)
+    {
+        try
+        {
+            var obj = instance.compoundTag.get(path);
+
+            if (obj != null && obj.getType() == type)
+                return (R) obj;
+
+            return null;
+        }
+        catch (Throwable t)
+        {
+            logger.error("Unable to read NBT '%s' from instance:".formatted(path));
+            t.printStackTrace();
+
+            return null;
+        }
+    }
+
+    private static final Logger logger = MorphPlugin.getInstance(MorphPlugin.getMorphNameSpace()).getSLF4JLogger();
 
     @Override
     public EntityEquipment getDisplayingEquipments()
@@ -139,13 +179,7 @@ public class NilWrapper extends DisguiseWrapper<NilDisguise>
     }
 
     @Override
-    public void update(boolean isClone, DisguiseState state, Player player)
-    {
-
-    }
-
-    @Override
-    public void initializeCompound(CompoundTag rootCompound)
+    public void updateDisplay(boolean isClone, DisguiseState state, Player player)
     {
     }
 

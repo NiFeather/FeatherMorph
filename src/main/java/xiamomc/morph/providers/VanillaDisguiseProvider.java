@@ -234,7 +234,7 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
         }
 
         if (targetEntity == null || targetEntity.getType() != state.getEntityType())
-            state.getDisguise().initializeCompound(rawCompound);
+            rawCompound.merge(state.getDisguise().getCompound());
 
         return cullNBT(rawCompound);
     }

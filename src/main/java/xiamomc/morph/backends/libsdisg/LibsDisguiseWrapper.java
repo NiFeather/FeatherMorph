@@ -12,6 +12,8 @@ import me.libraryaddict.disguise.utilities.reflection.FakeBoundingBox;
 import me.libraryaddict.disguise.utilities.reflection.ReflectionManager;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.TagType;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.*;
@@ -20,6 +22,8 @@ import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.util.BoundingBox;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.backends.DisguiseWrapper;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.utilities.DisguiseUtils;
@@ -48,6 +52,8 @@ public class LibsDisguiseWrapper extends DisguiseWrapper<Disguise>
         watcher.setArmor(newEquipment.getArmorContents());
         watcher.setItemInMainHand(newEquipment.getItemInMainHand());
         watcher.setItemInOffHand(newEquipment.getItemInOffHand());
+
+        invalidateCompound();
     }
 
     @Override
@@ -71,7 +77,10 @@ public class LibsDisguiseWrapper extends DisguiseWrapper<Disguise>
     @Override
     public DisguiseWrapper<Disguise> clone()
     {
-        return new LibsDisguiseWrapper(instance.clone());
+        var newWrapper = new LibsDisguiseWrapper(instance.clone());
+        newWrapper.compoundTag.merge(this.compoundTag);
+
+        return newWrapper;
     }
 
     /**
@@ -92,6 +101,8 @@ public class LibsDisguiseWrapper extends DisguiseWrapper<Disguise>
             playerDisguise.setName(name);
         else
             instance.setDisguiseName(name);
+
+        invalidateCompound();
     }
 
     @Override
@@ -159,11 +170,15 @@ public class LibsDisguiseWrapper extends DisguiseWrapper<Disguise>
         DisguiseAPI.addGameProfile(LDprofile.toString(), LDprofile);
         playerDisguise.setSkin(LDprofile);
         DisguiseUtilities.removeGameProfile(LDprofile.toString());
+
+        invalidateCompound();
     }
 
     @Override
     public void onPostConstructDisguise(DisguiseState state, @Nullable Entity targetEntity)
     {
+        invalidateCompound();
+
         //workaround: 伪装已死亡的LivingEntity
         if (watcher instanceof LivingWatcher livingWatcher && livingWatcher.getHealth() <= 0)
             livingWatcher.setHealth(1);
@@ -213,7 +228,7 @@ public class LibsDisguiseWrapper extends DisguiseWrapper<Disguise>
     private final Scoreboard scoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
 
     @Override
-    public void update(boolean isClone, DisguiseState state, Player player)
+    public void updateDisplay(boolean isClone, DisguiseState state, Player player)
     {
         var disg = DisguiseAPI.getDisguise(player);
         if (!disg.equals(this.instance))
@@ -255,9 +270,27 @@ public class LibsDisguiseWrapper extends DisguiseWrapper<Disguise>
         }
     }
 
-    @Override
-    public void initializeCompound(CompoundTag rawCompound)
+    private final CompoundTag compoundTag = new CompoundTag();
+    private CompoundTag mixedTag = new CompoundTag();
+    private boolean tagValid;
+
+    private void invalidateCompound()
     {
+        this.tagValid = false;
+    }
+
+    @Override
+    public void mergeCompound(CompoundTag compoundTag)
+    {
+        this.compoundTag.merge(compoundTag);
+        invalidateCompound();
+    }
+
+    @Override
+    public CompoundTag getCompound()
+    {
+        var compoundTag = this.compoundTag.copy();
+
         //todo: 将这些东西移动回VanillaDisguiseProvider，找个合适的方法来从外部获取伪装的NBT数据
         var watcher = instance.getWatcher();
         switch (getEntityType())
@@ -265,51 +298,51 @@ public class LibsDisguiseWrapper extends DisguiseWrapper<Disguise>
             case SLIME, MAGMA_CUBE ->
             {
                 var size = ((SlimeWatcher) watcher).getSize() - 1;
-                rawCompound.putInt("Size", size);
+                compoundTag.putInt("Size", size);
             }
 
             case HORSE ->
             {
                 var color = ((HorseWatcher) watcher).getColor().ordinal();
                 var style = ((HorseWatcher) watcher).getStyle().ordinal();
-                rawCompound.putInt("Variant", color | style << 8);
+                compoundTag.putInt("Variant", color | style << 8);
             }
 
             case PARROT ->
             {
                 var variant = ((ParrotWatcher) watcher).getVariant().ordinal();
-                rawCompound.putInt("Variant", variant);
+                compoundTag.putInt("Variant", variant);
             }
 
             case CAT ->
             {
                 var variant = ((CatWatcher) watcher).getType().getKey().asString();
-                rawCompound.putString("variant", variant);
+                compoundTag.putString("variant", variant);
             }
 
             case TROPICAL_FISH ->
             {
                 var variant = ((TropicalFishWatcher) watcher).getVariant();
 
-                rawCompound.putInt("Variant", variant);
+                compoundTag.putInt("Variant", variant);
             }
 
             case RABBIT ->
             {
                 var type = ((RabbitWatcher) watcher).getType().getTypeId();
-                rawCompound.putInt("RabbitType", type);
+                compoundTag.putInt("RabbitType", type);
             }
 
             case FOX ->
             {
                 var foxType = ((FoxWatcher) watcher).getType().name().toLowerCase();
-                rawCompound.putString("Type", foxType);
+                compoundTag.putString("Type", foxType);
             }
 
             case FROG ->
             {
                 var variant = ((FrogWatcher) watcher).getVariant().getKey().asString();
-                rawCompound.putString("variant", variant);
+                compoundTag.putString("variant", variant);
             }
 
             case GOAT ->
@@ -320,9 +353,9 @@ public class LibsDisguiseWrapper extends DisguiseWrapper<Disguise>
                 var hasRightHorn = goatWatcher.hasRightHorn();
                 var isScreaming = goatWatcher.isScreaming();
 
-                rawCompound.putBoolean("HasLeftHorn", hasLeftHorn);
-                rawCompound.putBoolean("HasRightHorn", hasRightHorn);
-                rawCompound.putBoolean("IsScreamingGoat", isScreaming);
+                compoundTag.putBoolean("HasLeftHorn", hasLeftHorn);
+                compoundTag.putBoolean("HasRightHorn", hasRightHorn);
+                compoundTag.putBoolean("IsScreamingGoat", isScreaming);
             }
 
             case PANDA ->
@@ -331,17 +364,48 @@ public class LibsDisguiseWrapper extends DisguiseWrapper<Disguise>
                 var mainGene = pandaWatcher.getMainGene();
                 var hiddenGene = pandaWatcher.getHiddenGene();
 
-                rawCompound.putString("MainGene", mainGene.toString().toLowerCase());
-                rawCompound.putString("HiddenGene", hiddenGene.toString().toLowerCase());
+                compoundTag.putString("MainGene", mainGene.toString().toLowerCase());
+                compoundTag.putString("HiddenGene", hiddenGene.toString().toLowerCase());
             }
         }
+
+        this.tagValid = true;
+        this.mixedTag = compoundTag;
+
+        return compoundTag.copy();
     }
+
+    @Nullable
+    @Override
+    public <R extends Tag> R getTag(String path, TagType<R> type)
+    {
+        try
+        {
+            var obj = (tagValid ? this.mixedTag : getCompound()).get(path);
+
+            if (obj != null && obj.getType() == type)
+                return (R) obj;
+
+            return null;
+        }
+        catch (Throwable t)
+        {
+            logger.error("Unable to read NBT '%s' from instance:".formatted(path));
+            t.printStackTrace();
+
+            return null;
+        }
+    }
+
+    private static final Logger logger = MorphPlugin.getInstance(MorphPlugin.getMorphNameSpace()).getSLF4JLogger();
 
     @Override
     public void showArms(boolean showarms)
     {
         if (instance.getWatcher() instanceof ArmorStandWatcher armorStandWatcher)
             armorStandWatcher.setShowArms(showarms);
+
+        invalidateCompound();
     }
 
     @Override
@@ -349,6 +413,8 @@ public class LibsDisguiseWrapper extends DisguiseWrapper<Disguise>
     {
         if (instance.getWatcher() instanceof AbstractHorseWatcher horseWatcher)
             horseWatcher.setSaddled(saddled);
+
+        invalidateCompound();
     }
 
     @Override
@@ -356,6 +422,8 @@ public class LibsDisguiseWrapper extends DisguiseWrapper<Disguise>
     {
         if (instance.getWatcher() instanceof AbstractHorseWatcher horseWatcher)
             return horseWatcher.isSaddled();
+
+        invalidateCompound();
 
         return false;
     }
@@ -371,5 +439,7 @@ public class LibsDisguiseWrapper extends DisguiseWrapper<Disguise>
         {
             ghastWatcher.setAggressive(aggresive);
         }
+
+        invalidateCompound();
     }
 }

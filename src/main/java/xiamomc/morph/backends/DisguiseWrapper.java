@@ -2,6 +2,8 @@ package xiamomc.morph.backends;
 
 import com.mojang.authlib.GameProfile;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.TagType;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -77,9 +79,18 @@ public abstract class DisguiseWrapper<T>
 
     public abstract String serializeDisguiseData();
 
-    public abstract void update(boolean isClone, DisguiseState state, Player player);
+    public abstract void updateDisplay(boolean isClone, DisguiseState state, Player player);
 
-    public abstract void initializeCompound(CompoundTag rootCompound);
+    public abstract void mergeCompound(CompoundTag compound);
+
+    @Nullable
+    public abstract <R extends Tag> R getTag(String path, TagType<R> type);
+
+    /**
+     * Returns a copy of the existing compound.
+     * @return
+     */
+    public abstract CompoundTag getCompound();
 
     //region Temp
 
