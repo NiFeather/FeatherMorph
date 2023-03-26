@@ -51,6 +51,8 @@ dependencies {
         exclude("org.spigotmc", "spigot")
     }
 
+    implementation("org.bstats:bstats-bukkit:${project.property("bstats_version")}");
+
     implementation("com.github.XiaMoZhiShi:PluginBase:${project.property("pluginbase_version")}")
     compileOnly("com.github.Gecolay:GSit:${project.property("gsit_version")}")
     compileOnly("me.clip:placeholderapi:${project.property("papi_version")}")
@@ -117,6 +119,7 @@ tasks.build {
 tasks.shadowJar {
     minimize()
     relocate("xiamomc.pluginbase", "xiamomc.morph.shaded.pluginbase")
+    relocate("org.bstats", "xiamomc.morph.shaded.bstats")
 }
 
 tasks.withType<JavaCompile>() {

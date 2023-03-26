@@ -1,6 +1,7 @@
 package xiamomc.morph;
 
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
@@ -57,10 +58,14 @@ public final class MorphPlugin extends XiaMoJavaPlugin
 
     private MorphClientHandler clientHandler;
 
+    private Metrics metrics;
+
     @Override
     public void onEnable()
     {
         super.onEnable();
+
+        this.metrics = new Metrics(this, 18062);
 
         pluginManager = Bukkit.getPluginManager();
 
@@ -126,6 +131,9 @@ public final class MorphPlugin extends XiaMoJavaPlugin
 
             if (clientHandler != null)
                 clientHandler.getClientPlayers().forEach(clientHandler::unInitializePlayer);
+
+            if (metrics != null)
+                metrics.shutdown();
         }
         catch (Exception e)
         {
