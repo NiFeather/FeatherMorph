@@ -469,11 +469,18 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     public boolean morph(Player player, String key, @Nullable Entity targetEntity,
                          boolean bypassPermission, boolean bypassAvailableCheck)
     {
-        if (!bypassPermission && !player.hasPermission(CommonPermissions.MORPH))
+        if (!bypassPermission)
         {
-            player.sendMessage(MessageUtils.prefixes(player, CommandStrings.noPermissionMessage()));
+            var childNode = CommonPermissions.MORPH + ".as." + key.replace(":", ".");
+            var hasPerm = player.hasPermission(CommonPermissions.MORPH)
+                    && (!player.isPermissionSet(childNode) || player.hasPermission(childNode));
 
-            return false;
+            if (!hasPerm)
+            {
+                player.sendMessage(MessageUtils.prefixes(player, CommandStrings.noPermissionMessage()));
+
+                return false;
+            }
         }
 
         if (!key.contains(":")) key = DisguiseTypes.VANILLA.toId(key);
