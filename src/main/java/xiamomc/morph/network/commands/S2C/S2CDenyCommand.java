@@ -1,5 +1,6 @@
 package xiamomc.morph.network.commands.S2C;
 
+@Deprecated(forRemoval = true)
 public class S2CDenyCommand extends AbstractS2CCommand<String>
 {
     public S2CDenyCommand(String argument)

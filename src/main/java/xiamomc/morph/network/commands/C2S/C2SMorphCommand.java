@@ -21,7 +21,5 @@ public class C2SMorphCommand extends AbstractC2SCommand
             manager.doQuickDisguise(player, null);
         else if (manager.canMorph(player))
             manager.morph(player, id, player.getTargetEntity(5));
-        else
-            clientHandler().sendClientCommand(player, new S2CDenyCommand("morph"));
     }
 }
