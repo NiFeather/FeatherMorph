@@ -9,7 +9,7 @@ import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.SkillStrings;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.network.server.MorphClientHandler;
-import xiamomc.morph.network.server.commands.S2C.S2CSetAggressiveCommand;
+import xiamomc.morph.network.commands.S2C.set.S2CSetAggressiveCommand;
 import xiamomc.morph.skills.SkillType;
 import xiamomc.morph.skills.options.ProjectiveConfiguration;
 import xiamomc.morph.storage.skill.SkillConfiguration;

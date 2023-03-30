@@ -24,7 +24,7 @@ import xiamomc.morph.misc.DisguiseTypes;
 import xiamomc.morph.misc.PlayerOperationSimulator;
 import xiamomc.morph.misc.permissions.CommonPermissions;
 import xiamomc.morph.network.server.MorphClientHandler;
-import xiamomc.morph.network.server.commands.S2C.S2CSetSneakingCommand;
+import xiamomc.morph.network.commands.S2C.set.S2CSetSneakingCommand;
 import xiamomc.morph.utilities.ItemUtils;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;

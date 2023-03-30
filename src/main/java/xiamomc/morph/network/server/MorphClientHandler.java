@@ -21,11 +21,14 @@ import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.MorphStrings;
+import xiamomc.morph.messages.SkillStrings;
 import xiamomc.morph.network.*;
+import xiamomc.morph.network.commands.C2S.*;
 import xiamomc.morph.network.commands.CommandRegistries;
 import xiamomc.morph.network.commands.S2C.*;
-import xiamomc.morph.network.server.commands.C2S.*;
-import xiamomc.morph.network.server.commands.S2C.*;
+import xiamomc.morph.network.commands.S2C.query.QueryType;
+import xiamomc.morph.network.commands.S2C.query.S2CQueryCommand;
+import xiamomc.morph.network.commands.S2C.set.S2CSetSelfViewingCommand;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
@@ -91,19 +94,19 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
         logger.info(builder);
     }
 
-    private final CommandRegistries<Player> registries = new CommandRegistries<>();
+    private final CommandRegistries registries = new CommandRegistries();
 
     @Initializer
     private void load(MorphPlugin plugin, MorphConfigManager configManager)
     {
         Constants.initialize(true);
 
-        registries.register(new C2SInitialCommand(playerStateMap, playerConnectionStates),
-                new C2SMorphCommand(),
-                new C2SOptionCommand(),
-                new C2SSkillCommand(),
-                new C2SToggleSelfCommand(),
-                new C2SUnmorphCommand());
+        registries.registerC2S(C2SCommandNames.Initial, a -> new C2SInitialCommand())
+                .registerC2S(C2SCommandNames.Morph, C2SMorphCommand::new)
+                .registerC2S(C2SCommandNames.Skill, a -> new C2SSkillCommand())
+                .registerC2S(C2SCommandNames.Option, C2SOptionCommand::fromString)
+                .registerC2S(C2SCommandNames.ToggleSelf, a -> new C2SToggleSelfCommand(C2SToggleSelfCommand.SelfViewMode.fromString(a)))
+                .registerC2S(C2SCommandNames.Unmorph, a -> new C2SUnmorphCommand());
 
         Bukkit.getMessenger().registerIncomingPluginChannel(plugin, initializeChannel, (cN, player, data) ->
         {
@@ -191,10 +194,13 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
             if (str.length < 1) return;
 
             var baseCommand = str[0];
-            var c2sCommand = registries.getC2SCommand(baseCommand);
+            var c2sCommand = registries.createC2SCommand(baseCommand, str.length == 2 ? str[1] : "");
 
             if (c2sCommand != null)
-                c2sCommand.onCommand(player, str.length == 2 ? str[1] : "");
+            {
+                c2sCommand.setOwner(player);
+                c2sCommand.onCommand(this);
+            }
             else
                 logger.warn("Unknown server command: " + baseCommand);
         });
@@ -308,7 +314,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
     {
         if (!allowClient.get()) return;
 
-        this.sendCommand(player, new S2CQuerySetCommand(identifiers.toArray(new String[]{})));
+        this.sendCommand(player, new S2CQueryCommand(QueryType.SET, identifiers.toArray(new String[]{})));
     }
 
     /**
@@ -323,10 +329,10 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
         if (!allowClient.get()) return;
 
         if (addits != null)
-            this.sendCommand(player, new S2CQueryAddCommand(addits.toArray(new String[]{})));
+            this.sendCommand(player, new S2CQueryCommand(QueryType.ADD, addits.toArray(new String[]{})));
 
         if (removal != null)
-            this.sendCommand(player, new S2CQueryRemoveCommand(removal.toArray(new String[]{})));
+            this.sendCommand(player, new S2CQueryCommand(QueryType.REMOVE, removal.toArray(new String[]{})));
     }
 
     /**
@@ -477,5 +483,126 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
     public boolean sendCommand(Player player, AbstractS2CCommand<?> basicS2CCommand)
     {
         return this.sendCommand(player, basicS2CCommand, false);
+    }
+
+    @Override
+    public void onInitialCommand(C2SInitialCommand c2SInitialCommand)
+    {
+        Player player = c2SInitialCommand.getOwner();
+
+        if (this.clientInitialized(player)) return;
+
+        if (playerStateMap.getOrDefault(player, null) != ConnectionState.JOINED)
+            playerStateMap.put(player, ConnectionState.CONNECTING);
+
+        this.waitUntilReady(player, () ->
+        {
+            //再检查一遍玩家有没有初始化完成
+            if (clientInitialized(player))
+                return;
+
+            var config = manager.getPlayerConfiguration(player);
+            var list = config.getUnlockedDisguiseIdentifiers();
+            refreshPlayerClientMorphs(list, player);
+
+            var state = manager.getDisguiseStateFor(player);
+
+            if (state != null)
+                manager.refreshClientState(state);
+
+            sendCommand(player, new S2CSetSelfViewingCommand(config.showDisguiseToSelf));
+            playerConnectionStates.put(player, InitializeState.DONE);
+        });
+    }
+
+    @Override
+    public void onMorphCommand(C2SMorphCommand c2SMorphCommand)
+    {
+        Player player = c2SMorphCommand.getOwner();
+        var id = c2SMorphCommand.getArgumentAt(0, "");
+
+        if (id.isEmpty() || id.isBlank())
+            manager.doQuickDisguise(player, null);
+        else if (manager.canMorph(player))
+            manager.morph(player, id, player.getTargetEntity(5));
+    }
+
+    @Override
+    public void onOptionCommand(C2SOptionCommand c2SOptionCommand)
+    {
+        var option = c2SOptionCommand.getOption();
+        Player player = c2SOptionCommand.getOwner();
+
+        switch (option)
+        {
+            case CLIENTVIEW ->
+            {
+                var val = Boolean.parseBoolean(c2SOptionCommand.getValue());
+                this.getPlayerOption(player, true).setClientSideSelfView(val);
+
+                var state = manager.getDisguiseStateFor(player);
+                if (state != null) state.setServerSideSelfVisible(!val);
+            }
+
+            case HUD ->
+            {
+                var val = Boolean.parseBoolean(c2SOptionCommand.getValue());
+                this.getPlayerOption(player, true).displayDisguiseOnHUD = val;
+
+                if (!val) player.sendActionBar(Component.empty());
+            }
+        }
+    }
+
+    @Override
+    public void onSkillCommand(C2SSkillCommand c2SSkillCommand)
+    {
+        manager.executeDisguiseSkill(c2SSkillCommand.getOwner());
+    }
+
+    @Override
+    public void onToggleSelfCommand(C2SToggleSelfCommand c2SToggleSelfCommand)
+    {
+        Player player = c2SToggleSelfCommand.getOwner();
+
+        var playerOption = this.getPlayerOption(player, true);
+        var playerConfig = manager.getPlayerConfiguration(player);
+
+        switch (c2SToggleSelfCommand.getSelfViewMode())
+        {
+            case ON ->
+            {
+                if (playerConfig.showDisguiseToSelf) return;
+                manager.setSelfDisguiseVisible(player, true, true, playerOption.displayDisguiseOnHUD, false);
+            }
+
+            case OFF ->
+            {
+                if (!playerConfig.showDisguiseToSelf) return;
+                manager.setSelfDisguiseVisible(player, false, true, playerOption.displayDisguiseOnHUD, false);
+            }
+
+            case CLIENT_ON ->
+            {
+                var state = manager.getDisguiseStateFor(player);
+
+                if (state != null)
+                    state.setServerSideSelfVisible(false);
+            }
+
+            case CLIENT_OFF ->
+            {
+                var state = manager.getDisguiseStateFor(player);
+
+                if (state != null)
+                    state.setServerSideSelfVisible(true);
+            }
+        }
+    }
+
+    @Override
+    public void onUnmorphCommand(C2SUnmorphCommand c2SUnmorphCommand)
+    {
+        manager.unMorph(c2SUnmorphCommand.getOwner());
     }
 }

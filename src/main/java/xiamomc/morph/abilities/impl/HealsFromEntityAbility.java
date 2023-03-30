@@ -17,10 +17,12 @@ import xiamomc.morph.abilities.MorphAbility;
 import xiamomc.morph.abilities.options.HealsFromEntityOption;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.misc.PlayerOperationSimulator;
+import xiamomc.morph.network.commands.S2C.set.S2CSetSNbtCommand;
 import xiamomc.morph.network.server.MorphClientHandler;
-import xiamomc.morph.network.server.commands.S2C.S2CSetNbtCommand;
+import xiamomc.morph.network.commands.S2C.set.S2CSetNbtCommand;
 import xiamomc.morph.utilities.DamageSourceUtils;
 import xiamomc.morph.utilities.EntityTypeUtils;
+import xiamomc.morph.utilities.NbtUtils;
 import xiamomc.pluginbase.Annotations.Resolved;
 
 import java.util.Map;
@@ -163,7 +165,7 @@ public class HealsFromEntityAbility extends MorphAbility<HealsFromEntityOption>
             clientHandler.sendCommand(state.getPlayer(), getBeamCommand(state));
     }
 
-    public S2CSetNbtCommand getBeamCommand(DisguiseState state)
+    public S2CSetSNbtCommand getBeamCommand(DisguiseState state)
     {
         var entity = state.beamTarget;
 
@@ -171,7 +173,7 @@ public class HealsFromEntityAbility extends MorphAbility<HealsFromEntityOption>
 
         compound.putInt("BeamTarget", entity != null ? entity.getId() : 0);
 
-        return new S2CSetNbtCommand(compound);
+        return new S2CSetSNbtCommand(NbtUtils.getCompoundString(compound));
     }
 
     private Entity findEntity(PlayerOperationSimulator.NmsRecord record, EntityType<?> nmsType, double expand, org.bukkit.entity.EntityType bukkitType)

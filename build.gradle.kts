@@ -51,10 +51,17 @@ dependencies {
         exclude("org.spigotmc", "spigot")
     }
 
-    implementation("org.bstats:bstats-bukkit:${project.property("bstats_version")}");
-    implementation("com.github.XiaMoZhiShi:feathermorph-protocols:${project.property("protocols_version")}")
+    implementation("org.bstats:bstats-bukkit:${project.property("bstats_version")}")
+    {
+        exclude("com.google.code.gson", "gson")
+    }
 
+    implementation("com.github.XiaMoZhiShi:feathermorph-protocols:${project.property("protocols_version")}")
     implementation("com.github.XiaMoZhiShi:PluginBase:${project.property("pluginbase_version")}")
+    {
+        exclude("com.google.code.gson", "gson")
+    }
+
     compileOnly("com.github.Gecolay:GSit:${project.property("gsit_version")}")
     compileOnly("me.clip:placeholderapi:${project.property("papi_version")}")
 }

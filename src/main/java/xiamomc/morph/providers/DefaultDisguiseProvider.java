@@ -18,7 +18,7 @@ import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.misc.DisguiseTypes;
 import xiamomc.morph.network.server.MorphClientHandler;
 import xiamomc.morph.network.commands.S2C.AbstractS2CCommand;
-import xiamomc.morph.network.server.commands.S2C.S2CSetEquipCommand;
+import xiamomc.morph.network.server.ServerSetEquipCommand;
 import xiamomc.morph.skills.MorphSkillHandler;
 import xiamomc.morph.skills.SkillType;
 import xiamomc.pluginbase.Annotations.Resolved;
@@ -110,7 +110,7 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
         var item = equipment.getItem(slot);
 
         if (item.getType() != Material.AIR)
-            list.add(new S2CSetEquipCommand(item, slot));
+            list.add(new ServerSetEquipCommand(item, slot));
     }
 
     @Override

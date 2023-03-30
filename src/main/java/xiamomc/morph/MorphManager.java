@@ -34,8 +34,11 @@ import xiamomc.morph.misc.DisguiseInfo;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.misc.DisguiseTypes;
 import xiamomc.morph.misc.permissions.CommonPermissions;
+import xiamomc.morph.network.commands.S2C.set.S2CSetProfileCommand;
+import xiamomc.morph.network.commands.S2C.set.S2CSetSNbtCommand;
+import xiamomc.morph.network.commands.S2C.set.S2CSetSelfViewIdentifierCommand;
+import xiamomc.morph.network.commands.S2C.set.S2CSetSelfViewingCommand;
 import xiamomc.morph.network.server.MorphClientHandler;
-import xiamomc.morph.network.server.commands.S2C.*;
 import xiamomc.morph.providers.DisguiseProvider;
 import xiamomc.morph.providers.FallbackProvider;
 import xiamomc.morph.providers.PlayerDisguiseProvider;
@@ -575,7 +578,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 //如果此伪装可以同步给客户端，那么初始化客户端状态
                 if (provider.validForClient(state))
                 {
-                    clientHandler.sendCommand(player, new S2CSetSelfViewCommand(provider.getSelfViewIdentifier(outComingState)));
+                    clientHandler.sendCommand(player, new S2CSetSelfViewIdentifierCommand(provider.getSelfViewIdentifier(outComingState)));
 
                     provider.getInitialSyncCommands(outComingState).forEach(s -> clientHandler.sendCommand(player, s));
 
@@ -585,7 +588,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                     if (compound != null)
                     {
                         outComingState.setCachedNbtString(NbtUtils.getCompoundString(compound));
-                        clientHandler.sendCommand(player, new S2CSetNbtCommand(compound));
+                        clientHandler.sendCommand(player, new S2CSetSNbtCommand(outComingState.getCachedNbtString()));
                     }
 
                     //设置Profile
@@ -636,7 +639,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         clientHandler.updateCurrentIdentifier(player, state.getDisguiseIdentifier());
         clientHandler.sendCommand(player, new S2CSetSNbtCommand(state.getCachedNbtString()));
-        clientHandler.sendCommand(player, new S2CSetSelfViewCommand(state.getProvider().getSelfViewIdentifier(state)));
+        clientHandler.sendCommand(player, new S2CSetSelfViewIdentifierCommand(state.getProvider().getSelfViewIdentifier(state)));
 
         //刷新主动
         var skill = state.getSkill();
@@ -720,7 +723,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         uuidPlayerTexturesMap.remove(player.getUniqueId());
 
         clientHandler.updateCurrentIdentifier(player, null);
-        clientHandler.sendCommand(player, new S2CSetSelfViewCommand(null));
+        clientHandler.sendCommand(player, new S2CSetSelfViewIdentifierCommand(null));
 
         Bukkit.getPluginManager().callEvent(new PlayerUnMorphEvent(player));
     }
@@ -946,7 +949,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         }
 
         if (!noClientCommand)
-            clientHandler.sendCommand(player, new S2CSetToggleSelfCommand(value));
+            clientHandler.sendCommand(player, new S2CSetSelfViewingCommand(value));
 
         if (saveToConfig)
         {
