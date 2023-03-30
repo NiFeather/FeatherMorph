@@ -11,8 +11,8 @@ import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.SkillStrings;
 import xiamomc.morph.misc.DisguiseState;
-import xiamomc.morph.network.MorphClientHandler;
-import xiamomc.morph.network.commands.S2C.S2CSetSNbtCommand;
+import xiamomc.morph.network.server.MorphClientHandler;
+import xiamomc.morph.network.server.commands.S2C.S2CSetSNbtCommand;
 import xiamomc.morph.skills.SkillType;
 import xiamomc.morph.skills.options.ExplosionConfiguration;
 import xiamomc.morph.storage.skill.SkillConfiguration;
@@ -41,7 +41,7 @@ public class ExplodeMorphSkill extends DelayedMorphSkill<ExplosionConfiguration>
         if (state.getEntityType() == EntityType.CREEPER)
         {
             state.getDisguise().setAggresive(true);
-            clientHandler.sendClientCommand(player, new S2CSetSNbtCommand("{\"ignited\": true, \"Fuse\": 30}"));
+            clientHandler.sendCommand(player, new S2CSetSNbtCommand("{\"ignited\": true, \"Fuse\": 30}"));
         }
 
         return super.preExecute(player, state, configuration, option);
@@ -67,7 +67,7 @@ public class ExplodeMorphSkill extends DelayedMorphSkill<ExplosionConfiguration>
         if (state.getEntityType() == EntityType.CREEPER)
         {
             state.getDisguise().setAggresive(false);
-            clientHandler.sendClientCommand(player, new S2CSetSNbtCommand("{\"ignited\": false, \"Fuse\": 0}"));
+            clientHandler.sendCommand(player, new S2CSetSNbtCommand("{\"ignited\": false, \"Fuse\": 0}"));
         }
 
         if (killsSelf && !(player.getGameMode() == GameMode.CREATIVE))

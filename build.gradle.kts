@@ -52,6 +52,7 @@ dependencies {
     }
 
     implementation("org.bstats:bstats-bukkit:${project.property("bstats_version")}");
+    implementation("com.github.XiaMoZhiShi:feathermorph-protocols:${project.property("protocols_version")}")
 
     implementation("com.github.XiaMoZhiShi:PluginBase:${project.property("pluginbase_version")}")
     compileOnly("com.github.Gecolay:GSit:${project.property("gsit_version")}")

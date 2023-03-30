@@ -16,9 +16,9 @@ import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.MorphStrings;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.misc.DisguiseTypes;
-import xiamomc.morph.network.MorphClientHandler;
+import xiamomc.morph.network.server.MorphClientHandler;
 import xiamomc.morph.network.commands.S2C.AbstractS2CCommand;
-import xiamomc.morph.network.commands.S2C.S2CSetEquipCommand;
+import xiamomc.morph.network.server.commands.S2C.S2CSetEquipCommand;
 import xiamomc.morph.skills.MorphSkillHandler;
 import xiamomc.morph.skills.SkillType;
 import xiamomc.pluginbase.Annotations.Resolved;
@@ -59,7 +59,7 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
     public boolean updateDisguise(Player player, DisguiseState state)
     {
         var disguise = state.getDisguise();
-        var option = clientHandler.getPlayerOption(player);
+        var option = clientHandler.getPlayerOption(player, true);
 
         if (option.displayDisguiseOnHUD)
         {

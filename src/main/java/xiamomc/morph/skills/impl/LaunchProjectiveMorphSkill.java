@@ -8,8 +8,8 @@ import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.SkillStrings;
 import xiamomc.morph.misc.DisguiseState;
-import xiamomc.morph.network.MorphClientHandler;
-import xiamomc.morph.network.commands.S2C.S2CSetAggressiveCommand;
+import xiamomc.morph.network.server.MorphClientHandler;
+import xiamomc.morph.network.server.commands.S2C.S2CSetAggressiveCommand;
 import xiamomc.morph.skills.SkillType;
 import xiamomc.morph.skills.options.ProjectiveConfiguration;
 import xiamomc.morph.storage.skill.SkillConfiguration;
@@ -50,7 +50,7 @@ public class LaunchProjectiveMorphSkill extends DelayedMorphSkill<ProjectiveConf
         if (state.getEntityType() == EntityType.GHAST)
         {
             state.getDisguise().setAggresive(true);
-            clientHandler.sendClientCommand(player, new S2CSetAggressiveCommand(true));
+            clientHandler.sendCommand(player, new S2CSetAggressiveCommand(true));
         }
 
         return super.preExecute(player, state, configuration, option);
@@ -62,7 +62,7 @@ public class LaunchProjectiveMorphSkill extends DelayedMorphSkill<ProjectiveConf
         if (state.getEntityType() == EntityType.GHAST)
         {
             state.getDisguise().setAggresive(false);
-            clientHandler.sendClientCommand(player, new S2CSetAggressiveCommand(false));
+            clientHandler.sendCommand(player, new S2CSetAggressiveCommand(false));
         }
 
         var type = EntityTypeUtils.fromString(option.getName(), true);

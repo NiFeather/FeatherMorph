@@ -11,7 +11,7 @@ import xiamomc.morph.messages.CommandStrings;
 import xiamomc.morph.messages.HelpStrings;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.vanilla.VanillaMessageStore;
-import xiamomc.morph.network.MorphClientHandler;
+import xiamomc.morph.network.server.MorphClientHandler;
 import xiamomc.morph.storage.skill.SkillConfigurationStore;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Command.ISubCommand;

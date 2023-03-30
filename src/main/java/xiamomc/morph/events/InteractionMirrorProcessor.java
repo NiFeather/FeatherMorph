@@ -23,8 +23,8 @@ import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.misc.DisguiseTypes;
 import xiamomc.morph.misc.PlayerOperationSimulator;
 import xiamomc.morph.misc.permissions.CommonPermissions;
-import xiamomc.morph.network.MorphClientHandler;
-import xiamomc.morph.network.commands.S2C.S2CSetSneakingCommand;
+import xiamomc.morph.network.server.MorphClientHandler;
+import xiamomc.morph.network.server.commands.S2C.S2CSetSneakingCommand;
 import xiamomc.morph.utilities.ItemUtils;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
@@ -55,7 +55,7 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
             if (!playerInDistance(e.getPlayer(), player, targetName) || player.isSneaking() == e.isSneaking()) return;
 
             player.setSneaking(e.isSneaking());
-            clientHandler.sendClientCommand(player, new S2CSetSneakingCommand(e.isSneaking()));
+            clientHandler.sendCommand(player, new S2CSetSneakingCommand(e.isSneaking()));
         }
     }
 

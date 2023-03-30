@@ -29,9 +29,9 @@ import xiamomc.morph.messages.MorphStrings;
 import xiamomc.morph.messages.SkillStrings;
 import xiamomc.morph.messages.vanilla.VanillaMessageStore;
 import xiamomc.morph.misc.DisguiseTypes;
-import xiamomc.morph.network.MorphClientHandler;
-import xiamomc.morph.network.commands.S2C.S2CSetEquipCommand;
-import xiamomc.morph.network.commands.S2C.S2CSwapCommand;
+import xiamomc.morph.network.server.MorphClientHandler;
+import xiamomc.morph.network.server.commands.S2C.S2CSetEquipCommand;
+import xiamomc.morph.network.server.commands.S2C.S2CSwapCommand;
 import xiamomc.morph.skills.MorphSkillHandler;
 import xiamomc.morph.utilities.DisguiseUtils;
 import xiamomc.morph.utilities.EntityTypeUtils;
@@ -292,12 +292,12 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
 
                 if (clientHandler.clientVersionCheck(player, 3))
                 {
-                    clientHandler.sendClientCommand(player, new S2CSwapCommand());
+                    clientHandler.sendCommand(player, new S2CSwapCommand());
                 }
                 else
                 {
-                    clientHandler.sendClientCommand(player, new S2CSetEquipCommand(mainHand, EquipmentSlot.HAND));
-                    clientHandler.sendClientCommand(player, new S2CSetEquipCommand(offHand, EquipmentSlot.OFF_HAND));
+                    clientHandler.sendCommand(player, new S2CSetEquipCommand(mainHand, EquipmentSlot.HAND));
+                    clientHandler.sendCommand(player, new S2CSetEquipCommand(offHand, EquipmentSlot.OFF_HAND));
                 }
 
                 this.addSchedule(() ->
@@ -432,7 +432,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         }
     }
 
-    @Resolved
+    @Resolved(shouldSolveImmediately = true)
     private MorphClientHandler clientHandler;
 
     @EventHandler

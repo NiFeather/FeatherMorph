@@ -22,7 +22,7 @@ import xiamomc.morph.messages.vanilla.VanillaMessageStore;
 import xiamomc.morph.misc.PlayerOperationSimulator;
 import xiamomc.morph.misc.integrations.gsit.GSitCompactProcessor;
 import xiamomc.morph.misc.integrations.placeholderapi.PlaceholderIntegration;
-import xiamomc.morph.network.MorphClientHandler;
+import xiamomc.morph.network.server.MorphClientHandler;
 import xiamomc.morph.skills.MorphSkillHandler;
 import xiamomc.morph.storage.skill.SkillConfigurationStore;
 import xiamomc.pluginbase.Command.CommandHelper;
@@ -130,7 +130,7 @@ public final class MorphPlugin extends XiaMoJavaPlugin
                 placeholderIntegration.unregister();
 
             if (clientHandler != null)
-                clientHandler.getClientPlayers().forEach(clientHandler::unInitializePlayer);
+                clientHandler.getConnectedPlayers().forEach(clientHandler::disconnect);
 
             if (metrics != null)
                 metrics.shutdown();

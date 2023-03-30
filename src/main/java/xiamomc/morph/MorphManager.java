@@ -3,7 +3,6 @@ package xiamomc.morph;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
 import net.kyori.adventure.text.Component;
-import net.minecraft.nbt.*;
 import org.bukkit.*;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -35,8 +34,8 @@ import xiamomc.morph.misc.DisguiseInfo;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.misc.DisguiseTypes;
 import xiamomc.morph.misc.permissions.CommonPermissions;
-import xiamomc.morph.network.MorphClientHandler;
-import xiamomc.morph.network.commands.S2C.*;
+import xiamomc.morph.network.server.MorphClientHandler;
+import xiamomc.morph.network.server.commands.S2C.*;
 import xiamomc.morph.providers.DisguiseProvider;
 import xiamomc.morph.providers.FallbackProvider;
 import xiamomc.morph.providers.PlayerDisguiseProvider;
@@ -576,9 +575,9 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 //如果此伪装可以同步给客户端，那么初始化客户端状态
                 if (provider.validForClient(state))
                 {
-                    clientHandler.sendClientCommand(player, new S2CSetSelfViewCommand(provider.getSelfViewIdentifier(outComingState)));
+                    clientHandler.sendCommand(player, new S2CSetSelfViewCommand(provider.getSelfViewIdentifier(outComingState)));
 
-                    provider.getInitialSyncCommands(outComingState).forEach(s -> clientHandler.sendClientCommand(player, s));
+                    provider.getInitialSyncCommands(outComingState).forEach(s -> clientHandler.sendCommand(player, s));
 
                     //初始化nbt
                     var compound = provider.getNbtCompound(outComingState, targetEntity);
@@ -586,12 +585,12 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                     if (compound != null)
                     {
                         outComingState.setCachedNbtString(NbtUtils.getCompoundString(compound));
-                        clientHandler.sendClientCommand(player, new S2CSetNbtCommand(compound));
+                        clientHandler.sendCommand(player, new S2CSetNbtCommand(compound));
                     }
 
                     //设置Profile
                     if (outComingState.haveProfile())
-                        clientHandler.sendClientCommand(player, new S2CSetProfileCommand(outComingState.getProfileNbtString()));
+                        clientHandler.sendCommand(player, new S2CSetProfileCommand(outComingState.getProfileNbtString()));
                 }
 
                 return true;
@@ -636,8 +635,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         var player = state.getPlayer();
 
         clientHandler.updateCurrentIdentifier(player, state.getDisguiseIdentifier());
-        clientHandler.sendClientCommand(player, new S2CSetSNbtCommand(state.getCachedNbtString()));
-        clientHandler.sendClientCommand(player, new S2CSetSelfViewCommand(state.getProvider().getSelfViewIdentifier(state)));
+        clientHandler.sendCommand(player, new S2CSetSNbtCommand(state.getCachedNbtString()));
+        clientHandler.sendCommand(player, new S2CSetSelfViewCommand(state.getProvider().getSelfViewIdentifier(state)));
 
         //刷新主动
         var skill = state.getSkill();
@@ -651,11 +650,11 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             abilities.forEach(a -> a.onClientInit(state));
 
         //和客户端同步数据
-        state.getProvider().getInitialSyncCommands(state).forEach(c -> clientHandler.sendClientCommand(player, c));
+        state.getProvider().getInitialSyncCommands(state).forEach(c -> clientHandler.sendCommand(player, c));
 
         //Profile
         if (state.haveProfile())
-            clientHandler.sendClientCommand(player, new S2CSetProfileCommand(state.getProfileNbtString()));
+            clientHandler.sendCommand(player, new S2CSetProfileCommand(state.getProfileNbtString()));
     }
 
     /**
@@ -721,7 +720,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         uuidPlayerTexturesMap.remove(player.getUniqueId());
 
         clientHandler.updateCurrentIdentifier(player, null);
-        clientHandler.sendClientCommand(player, new S2CSetSelfViewCommand(null));
+        clientHandler.sendCommand(player, new S2CSetSelfViewCommand(null));
 
         Bukkit.getPluginManager().callEvent(new PlayerUnMorphEvent(player));
     }
@@ -947,7 +946,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         }
 
         if (!noClientCommand)
-            clientHandler.sendClientCommand(player, new S2CSetToggleSelfCommand(value));
+            clientHandler.sendCommand(player, new S2CSetToggleSelfCommand(value));
 
         if (saveToConfig)
         {

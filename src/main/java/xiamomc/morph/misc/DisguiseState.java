@@ -23,8 +23,8 @@ import xiamomc.morph.backends.DisguiseWrapper;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.messages.MessageUtils;
-import xiamomc.morph.network.MorphClientHandler;
-import xiamomc.morph.network.commands.S2C.S2CSetSkillCooldownCommand;
+import xiamomc.morph.network.server.MorphClientHandler;
+import xiamomc.morph.network.server.commands.S2C.S2CSetSkillCooldownCommand;
 import xiamomc.morph.providers.DisguiseProvider;
 import xiamomc.morph.skills.IMorphSkill;
 import xiamomc.morph.skills.MorphSkillHandler;
@@ -316,7 +316,7 @@ public class DisguiseState extends MorphPluginObject
             cooldownInfo.setCooldown(val);
 
             if (clientHandler.clientVersionCheck(player, 3))
-                clientHandler.sendClientCommand(player, new S2CSetSkillCooldownCommand(val));
+                clientHandler.sendCommand(player, new S2CSetSkillCooldownCommand(val));
         }
     }
 
@@ -330,7 +330,7 @@ public class DisguiseState extends MorphPluginObject
         this.cooldownInfo = info;
 
         if (clientHandler.clientVersionCheck(player, 3))
-            clientHandler.sendClientCommand(player, new S2CSetSkillCooldownCommand(info.getCooldown()));
+            clientHandler.sendCommand(player, new S2CSetSkillCooldownCommand(info.getCooldown()));
     }
 
     //region 被动技能

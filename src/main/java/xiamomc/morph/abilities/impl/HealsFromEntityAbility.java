@@ -17,8 +17,8 @@ import xiamomc.morph.abilities.MorphAbility;
 import xiamomc.morph.abilities.options.HealsFromEntityOption;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.misc.PlayerOperationSimulator;
-import xiamomc.morph.network.MorphClientHandler;
-import xiamomc.morph.network.commands.S2C.S2CSetNbtCommand;
+import xiamomc.morph.network.server.MorphClientHandler;
+import xiamomc.morph.network.server.commands.S2C.S2CSetNbtCommand;
 import xiamomc.morph.utilities.DamageSourceUtils;
 import xiamomc.morph.utilities.EntityTypeUtils;
 import xiamomc.pluginbase.Annotations.Resolved;
@@ -147,7 +147,7 @@ public class HealsFromEntityAbility extends MorphAbility<HealsFromEntityOption>
                 state.beamTarget = newEntity;
 
                 if (state.getEntityType() == org.bukkit.entity.EntityType.ENDER_DRAGON)
-                    clientHandler.sendClientCommand(player, this.getBeamCommand(state));
+                    clientHandler.sendCommand(player, this.getBeamCommand(state));
             }
         }
 
@@ -160,7 +160,7 @@ public class HealsFromEntityAbility extends MorphAbility<HealsFromEntityOption>
         super.onClientInit(state);
 
         if (state.getEntityType() == org.bukkit.entity.EntityType.ENDER_DRAGON)
-            clientHandler.sendClientCommand(state.getPlayer(), getBeamCommand(state));
+            clientHandler.sendCommand(state.getPlayer(), getBeamCommand(state));
     }
 
     public S2CSetNbtCommand getBeamCommand(DisguiseState state)
