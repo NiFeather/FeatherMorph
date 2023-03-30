@@ -921,16 +921,16 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     public boolean clientViewAvailable(Player player)
     {
         var state = this.getDisguiseStateFor(player);
+        var playerOption = clientHandler.getPlayerOption(player, true);
 
         if (state == null)
-            return clientHandler.getPlayerOption(player).isClientSideSelfView();
+            return playerOption.isClientSideSelfView();
 
         //logger.warn(player.getName() + " SV "
         //            + " Option? " + clientHandler.getPlayerOption(player).isClientSideSelfView()
         //            + " StateValid? " + state.getProvider().validForClient(state));
 
-        return clientHandler.getPlayerOption(player).isClientSideSelfView()
-                && state.getProvider().validForClient(state);
+        return playerOption.isClientSideSelfView() && state.getProvider().validForClient(state);
     }
 
     public void setSelfDisguiseVisible(Player player, boolean value, boolean saveToConfig, boolean dontSetServerSide, boolean noClientCommand)
