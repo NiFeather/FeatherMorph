@@ -543,15 +543,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 }
                 else
                 {
-                    var result = provider.morph(player, info, targetEntity);
-
-                    if (!result.success())
-                    {
-                        player.sendMessage(MessageUtils.prefixes(player, MorphStrings.errorWhileDisguising()));
-                        logger.error("Unable to apply disguise for player with provider " + provider);
-                        return false;
-                    }
-
                     //重置上个State的伪装
                     if (state != null)
                     {
@@ -559,6 +550,15 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                         state.setAbilities(List.of());
 
                         state.setSkill(null);
+                    }
+
+                    var result = provider.morph(player, info, targetEntity);
+
+                    if (!result.success())
+                    {
+                        player.sendMessage(MessageUtils.prefixes(player, MorphStrings.errorWhileDisguising()));
+                        logger.error("Unable to apply disguise for player with provider " + provider);
+                        return false;
                     }
 
                     clientHandler.updateCurrentIdentifier(player, key);
