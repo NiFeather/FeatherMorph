@@ -5,6 +5,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.utilities.DisguiseUtils;
@@ -41,10 +42,17 @@ public class DisguiseEquipment implements EntityEquipment
         setItemInOffHand(stacks.length >= 2 ? stacks[1] : null);
     }
 
+    public boolean allowNull = false;
+
+    /**
+     * Nullable if {@link DisguiseEquipment#allowNull} is true.
+     * @param slot the slot to get the ItemStack
+     * @return An {@link ItemStack}
+     */
     @Override
-    public @NotNull ItemStack getItem(@NotNull EquipmentSlot slot)
+    public @Nullable ItemStack getItem(@NotNull EquipmentSlot slot)
     {
-        return DisguiseUtils.itemOrAir(itemStacks[slot.ordinal()]);
+        return allowNull ? itemStacks[slot.ordinal()] : DisguiseUtils.itemOrAir(itemStacks[slot.ordinal()]);
     }
 
     @Override

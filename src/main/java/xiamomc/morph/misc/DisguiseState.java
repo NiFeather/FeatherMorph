@@ -625,6 +625,7 @@ public class DisguiseState extends MorphPluginObject
         eq.setArmorContents(showDisguised ? disguiseEquipments.getArmorContents() : emptyArmorStack);
         eq.setItemInMainHand(showDisguised ? handItems[0] : null);
         eq.setItemInOffHand(showDisguised ? handItems[1] : null);
+        eq.allowNull = true;
 
         disguise.setDisplayingEquipments(eq);
     }
