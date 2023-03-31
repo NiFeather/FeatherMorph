@@ -56,7 +56,11 @@ dependencies {
         exclude("com.google.code.gson", "gson")
     }
 
-    implementation("com.github.XiaMoZhiShi:feathermorph-protocols:${project.property("protocols_version")}")
+    val protocolVersion = if (project.property("protocols_use_local_build") == "true")
+        project.property("protocols_local_version")
+        else project.property("protocols_version");
+
+    implementation("com.github.XiaMoZhiShi:feathermorph-protocols:${protocolVersion}")
     implementation("com.github.XiaMoZhiShi:PluginBase:${project.property("pluginbase_version")}")
     {
         exclude("com.google.code.gson", "gson")
