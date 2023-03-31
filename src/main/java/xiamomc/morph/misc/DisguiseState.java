@@ -528,6 +528,7 @@ public class DisguiseState extends MorphPluginObject
                 var emptyEquipment = Arrays.stream(armors).allMatch(i -> i != null && i.getType().isAir())
                         && Arrays.stream(handItems).allMatch(i -> i != null && i.getType().isAir());
 
+                disguiseEquipments.allowNull = true;
                 disguiseEquipments.setArmorContents(armors);
                 disguiseEquipments.setHandItems(handItems);
 
