@@ -5,22 +5,22 @@ root:
   chatOverride:
     # Enable ChatOverride?
     # Once enabled, we will attempt to change someone's chat message to a configured content if they disguised as something.
-    # The "morph:chat_override" ability needs to be added to disguise's abilities in order to activate this feature.
+    # The "morph:chat_override" ability needs to be added to disguise's abilities to activate this feature.
     allowOverride: false
 
-    # Should we try to override existing chat plugin?
-    # This will make sure that the owner name can be changed correctly, but may cause compatibility issues.
+    # Should we try to override any existing chat plugin?
+    # This will make sure that the player's name can be changed in most situations but may cause compatibility issues.
     UseCustomRenderer: true
 
   # Language options
   language:
-    # Sets the default language for plugin
+    # Sets the default language for the plugin
     # This will affect most ingame messages and bossbar title
     code: en_us
 
     # Enable single-language mode?
-    # Once enabled, all ingame messages will be forced to use default language.
-    # Otherwise, we will send ingame messages depend on which language the player uses.
+    # Once enabled, all ingame messages will be forced to use the default language.
+    # Otherwise, we will send ingame messages depending on which language the player uses.
     # Some features may not be affected by this option.
     single_language: false
 
@@ -28,12 +28,12 @@ root:
   # Defines how many ticks should a player wait at least before they activate the skill again when they get damaged.
   cooldown_on_damage: 15
 
-  # Modify player's bounding box depends on the disguise
+  # Modify players' bounding box depending on their disguise
   # HIGHLY EXPERIMENTAL, EXPECT GLITCHES AND CONFLICTS WITH ANTI-CHEAT PLUGINS!
   modify_bounding_boxes: false
 
   # Skill item
-  # Defines which item should player use to disguise/undisguise or activate skill.
+  # Defines which item should players use to disguise/undisguise or activate skills.
   skill_item: minecraft:feather
 
   # Should we make Armor Stand disguises show arms by default?
@@ -42,16 +42,16 @@ root:
   # Should players undisguise themselves on death?
   unmorph_on_death: true
 
-  # Should we allow players disguise themselves by using skulls/heads?
+  # Should we allow players to disguise themselves by using skulls/heads?
   allowHeadMorph: true
 
-  # Should piglin brutes ignore player's disguise?
+  # Should piglin brutes ignore players' disguises?
   piglin_brute_ignore_disguises: true
 
   # Health scale options
   health_scale:
     # Enable health scale?
-    # Once enabled, we will attempt to scale player's base health depending on their disguise type.
+    # Once enabled, we will attempt to scale players' base health depending on their disguise type.
     # Only affects vanilla disguises.
     enabled: true
 
@@ -72,7 +72,7 @@ root:
     # Set to 0 to disable this feature, or -1 to disable the limit.
     normalDistance: -1
 
-    # Should we ignore disguised players when finding target?
+    # Should we ignore disguised players when finding a target?
     ignore_disguised: true
 
     # Block destroy timeout
@@ -172,11 +172,11 @@ root:
 
     # Should we kick players if their client mod doesn't match our API version?
     #
-    # Note: This only checks player who joined with the client mod.
-    #       Players may have their own mod implementing our API, so don't treat this as an anti-cheat feature.
+    # Note: This only checks the player who joined with the client mod.
+    #       Players may have their mod implementing our API, so don't treat this as an anti-cheat feature.
     force_version: false
 
-    # Should we log packets sending to the client?
+    # Should we log packets sent to the client?
     log_outgoing_packets: false
 
   # Do not touch unless you know what you're doing!
