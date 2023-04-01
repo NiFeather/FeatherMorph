@@ -20,6 +20,8 @@ public enum ConfigOption
 
     ARMORSTAND_SHOW_ARMS(ConfigNode.create().append("armorstand_show_arms"), true),
 
+    MODIFY_BOUNDING_BOX(ConfigNode.create().append("modify_bounding_boxes"), false),
+
     UNMORPH_ON_DEATH(ConfigNode.create().append("unmorph_on_death"), true),
 
     ALLOW_CLIENT(clientNode().append("allow_client_mod"), true),

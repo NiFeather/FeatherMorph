@@ -21,8 +21,10 @@ import xiamomc.morph.messages.vanilla.VanillaMessageStore;
 import xiamomc.morph.misc.DisguiseInfo;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.misc.DisguiseTypes;
+import xiamomc.morph.misc.PlayerOperationSimulator;
 import xiamomc.morph.utilities.EntityTypeUtils;
 import xiamomc.morph.utilities.NbtUtils;
+import xiamomc.morph.utilities.ReflectionUtils;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
@@ -91,14 +93,72 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
                 ? copyResult.disguise()
                 : backend.createInstance(null, entityType);
 
-        backend.disguise(player, constructedDisguise);
+        var backendSuccess = backend.disguise(player, constructedDisguise);
+
+        if (!backendSuccess) return DisguiseResult.fail();
+
+        if (modifyBoundingBoxes.get())
+            this.tryModifyPlayerDimensions(player, backend.getDisguise(player));
 
         return DisguiseResult.success(constructedDisguise, copyResult.isCopy());
+    }
+
+    private void resetPlayerDimensions(Player player)
+    {
+        var nmsPlayer = PlayerOperationSimulator.NmsRecord.of(player).nmsPlayer();
+
+        var targetField = ReflectionUtils.getPlayerDimensionsField(nmsPlayer);
+
+        if (targetField != null)
+        {
+            try
+            {
+                var dimension = net.minecraft.world.entity.player.Player.STANDING_DIMENSIONS;
+
+                targetField.setAccessible(true);
+                targetField.set(nmsPlayer, dimension);
+
+                nmsPlayer.refreshDimensions();
+            }
+            catch (Throwable t)
+            {
+                logger.error("Unable to reset player's bounding box: " + t.getMessage());
+                t.printStackTrace();
+            }
+        }
+    }
+
+    private void tryModifyPlayerDimensions(Player player, DisguiseWrapper<?> wrapper)
+    {
+        var nmsPlayer = PlayerOperationSimulator.NmsRecord.of(player).nmsPlayer();
+
+        //Find dimensions
+        var targetField = ReflectionUtils.getPlayerDimensionsField(nmsPlayer);
+
+        if (targetField != null)
+        {
+            try
+            {
+                var box = wrapper.getBoundingBoxAt(nmsPlayer.getX(), nmsPlayer.getY(), nmsPlayer.getZ());
+                var dimensions = wrapper.getDimensions();
+
+                targetField.setAccessible(true);
+                targetField.set(nmsPlayer, dimensions);
+
+                nmsPlayer.setBoundingBox(box);
+            }
+            catch (Throwable t)
+            {
+                logger.warn("Unable to modify player's bounding box: " + t.getMessage());
+                t.printStackTrace();
+            }
+        }
     }
 
     private final Bindable<Boolean> armorStandShowArms = new Bindable<>(false);
     private final Bindable<Boolean> doHealthScale = new Bindable<>(true);
     private final Bindable<Integer> healthCap = new Bindable<>(60);
+    private final Bindable<Boolean> modifyBoundingBoxes = new Bindable<>(false);
 
     @Initializer
     private void load(MorphConfigManager configManager)
@@ -106,6 +166,21 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
         configManager.bind(armorStandShowArms, ConfigOption.ARMORSTAND_SHOW_ARMS);
         configManager.bind(doHealthScale, ConfigOption.HEALTH_SCALE);
         configManager.bind(healthCap, ConfigOption.HEALTH_SCALE_MAX_HEALTH);
+        configManager.bind(modifyBoundingBoxes, ConfigOption.MODIFY_BOUNDING_BOX);
+    }
+
+    @Override
+    public boolean updateDisguise(Player player, DisguiseState state)
+    {
+        if (super.updateDisguise(player, state))
+        {
+            if (modifyBoundingBoxes.get())
+                tryModifyPlayerDimensions(player, state.getDisguise());
+
+            return true;
+        }
+        else
+            return false;
     }
 
     @Override
@@ -193,6 +268,7 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
         if (super.unMorph(player, state))
         {
             removeAllHealthModifiers(player);
+            resetPlayerDimensions(player);
             return true;
         }
         else

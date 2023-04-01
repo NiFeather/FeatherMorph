@@ -28,6 +28,10 @@ root:
   # Defines how many ticks should a player wait at least before they activate the skill again when they get damaged.
   cooldown_on_damage: 15
 
+  # Modify player's bounding box depends on the disguise
+  # HIGHLY EXPERIMENTAL, EXPECT GLITCHES AND CONFLICTS WITH ANTI-CHEAT PLUGINS!
+  modify_bounding_boxes: false
+
   # Skill item
   # Defines which item should player use to disguise/undisguise or activate skill.
   skill_item: minecraft:feather
@@ -176,4 +180,4 @@ root:
     log_outgoing_packets: false
 
   # Do not touch unless you know what you're doing!
-  version: 17
+  version: 18

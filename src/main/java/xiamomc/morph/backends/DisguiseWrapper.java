@@ -4,6 +4,8 @@ import com.mojang.authlib.GameProfile;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.TagType;
+import net.minecraft.world.entity.EntityDimensions;
+import net.minecraft.world.phys.AABB;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -13,6 +15,7 @@ import org.bukkit.util.BoundingBox;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.misc.DisguiseState;
+import xiamomc.morph.utilities.EntityTypeUtils;
 import xiamomc.pluginbase.Exceptions.NullDependencyException;
 
 public abstract class DisguiseWrapper<T>
@@ -62,6 +65,20 @@ public abstract class DisguiseWrapper<T>
     }
 
     public abstract BoundingBox getBoundingBox();
+
+    public AABB getBoundingBoxAt(double x, double y, double z)
+    {
+        return this.getDimensions().makeBoundingBox(x, y, z);
+    }
+
+    public EntityDimensions getDimensions()
+    {
+        var nmsType = EntityTypeUtils.getNmsType(this.getEntityType());
+        if (nmsType != null)
+            return nmsType.getDimensions();
+
+        throw new RuntimeException("Unable to get NMS type for %s".formatted(this.getEntityType()));
+    }
 
     public abstract void setGlowingColor(ChatColor glowingColor);
     public abstract void setGlowing(boolean glowing);
