@@ -21,6 +21,7 @@ import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.misc.DisguiseTypes;
+import xiamomc.morph.misc.NmsRecord;
 import xiamomc.morph.misc.PlayerOperationSimulator;
 import xiamomc.morph.misc.permissions.CommonPermissions;
 import xiamomc.morph.network.server.MorphClientHandler;
@@ -145,7 +146,7 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
 
             //如果目标玩家正在使用的物品和我们当前释放的物品一样，并且释放的物品拥有使用动画，那么调用releaseUsingItem
             var ourHandItem = e.getItem().getType();
-            var nmsPlayer = PlayerOperationSimulator.NmsRecord.of(targetPlayer).nmsPlayer();
+            var nmsPlayer = NmsRecord.ofPlayer(targetPlayer);
 
             if (nmsPlayer.isUsingItem()
                     && ItemUtils.isContinuousUsable(ourHandItem)

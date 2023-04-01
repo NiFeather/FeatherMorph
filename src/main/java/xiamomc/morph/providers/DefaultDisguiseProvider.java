@@ -22,6 +22,7 @@ import xiamomc.morph.network.server.ServerSetEquipCommand;
 import xiamomc.morph.skills.MorphSkillHandler;
 import xiamomc.morph.skills.SkillType;
 import xiamomc.pluginbase.Annotations.Resolved;
+import xiamomc.pluginbase.Messages.MessageStore;
 import xiamomc.pluginbase.Utilities.ColorUtils;
 
 import java.util.List;
@@ -55,24 +56,29 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
     @Resolved
     private MorphClientHandler clientHandler;
 
+    @Resolved
+    private MessageStore<?> messageStore;
+
     @Override
     public boolean updateDisguise(Player player, DisguiseState state)
     {
         var disguise = state.getDisguise();
         var option = clientHandler.getPlayerOption(player, true);
 
-        if (option.displayDisguiseOnHUD)
+        var haveSkill = state.haveSkill();
+
+        if (option.displayDisguiseOnHUD && plugin.getCurrentTick() % (haveSkill ? 2 : 5) == 0)
         {
             var locale = MessageUtils.getLocale(player);
 
             //更新actionbar信息
-            var msg = state.haveSkill()
+            var msg = haveSkill
                     ? (state.getSkillCooldown() <= 0
                         ? MorphStrings.disguisingWithSkillAvaliableString()
                         : MorphStrings.disguisingWithSkillPreparingString())
                     : MorphStrings.disguisingAsString();
 
-            player.sendActionBar(msg.withLocale(locale).resolve("what", state.getPlayerDisplay()).toComponent(null));
+            player.sendActionBar(msg.resolve("what", state.getPlayerDisplay()).toComponent(locale, messageStore));
         }
 
         disguise.updateDisplay(state.getDisguiseType() != DisguiseTypes.LD, state, player);

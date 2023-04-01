@@ -50,6 +50,9 @@ public class ReflectionUtils
 
         playerDimensionFieldMap.put(player, field);
 
+        if (field != null)
+            field.setAccessible(true);
+
         return field;
     }
 
@@ -66,6 +69,9 @@ public class ReflectionUtils
         field = ReflectionUtils.getFields(player, float.class, true)
                 .stream().filter(f -> !Modifier.isStatic(f.getModifiers()) && Modifier.isPrivate(f.getModifiers()) && f.getName().equals(playerEyeHeightFieldName))
                 .findFirst().orElse(null);
+
+        if (field != null)
+            field.setAccessible(true);
 
         playerEHFieldMap.put(player, field);
         return field;

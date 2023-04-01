@@ -18,10 +18,7 @@ import xiamomc.morph.backends.DisguiseWrapper;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.messages.vanilla.VanillaMessageStore;
-import xiamomc.morph.misc.DisguiseInfo;
-import xiamomc.morph.misc.DisguiseState;
-import xiamomc.morph.misc.DisguiseTypes;
-import xiamomc.morph.misc.PlayerOperationSimulator;
+import xiamomc.morph.misc.*;
 import xiamomc.morph.utilities.EntityTypeUtils;
 import xiamomc.morph.utilities.NbtUtils;
 import xiamomc.morph.utilities.ReflectionUtils;
@@ -106,7 +103,7 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
 
     private void resetPlayerDimensions(Player player)
     {
-        var nmsPlayer = PlayerOperationSimulator.NmsRecord.of(player).nmsPlayer();
+        var nmsPlayer = NmsRecord.ofPlayer(player);
 
         var targetField = ReflectionUtils.getPlayerDimensionsField(nmsPlayer);
 
@@ -131,7 +128,7 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
 
     private void tryModifyPlayerDimensions(Player player, DisguiseWrapper<?> wrapper)
     {
-        var nmsPlayer = PlayerOperationSimulator.NmsRecord.of(player).nmsPlayer();
+        var nmsPlayer = NmsRecord.ofPlayer(player);
 
         //Find dimensions
         var targetField = ReflectionUtils.getPlayerDimensionsField(nmsPlayer);
@@ -143,18 +140,14 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
                 var box = wrapper.getBoundingBoxAt(nmsPlayer.getX(), nmsPlayer.getY(), nmsPlayer.getZ());
                 var dimensions = wrapper.getDimensions();
 
-                targetField.setAccessible(true);
                 targetField.set(nmsPlayer, dimensions);
 
                 nmsPlayer.setBoundingBox(box);
 
-                var eyeHeightField = ReflectionUtils.getPlayerEyeHeightField(PlayerOperationSimulator.NmsRecord.of(player).nmsPlayer());
+                var eyeHeightField = ReflectionUtils.getPlayerEyeHeightField(NmsRecord.ofPlayer(player));
 
                 if (eyeHeightField != null)
-                {
-                    eyeHeightField.setAccessible(true);
                     eyeHeightField.set(nmsPlayer, dimensions.height * 0.85F);
-                }
             }
             catch (Throwable t)
             {

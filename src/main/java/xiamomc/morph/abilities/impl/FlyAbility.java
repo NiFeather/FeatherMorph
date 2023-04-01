@@ -34,7 +34,8 @@ public class FlyAbility extends MorphAbility<FlyOption>
     @Override
     public boolean handle(Player player, DisguiseState state)
     {
-        if (player.getGameMode() != GameMode.CREATIVE && player.getGameMode() != GameMode.SPECTATOR)
+        var gameMode = player.getGameMode();
+        if (gameMode != GameMode.CREATIVE && gameMode != GameMode.SPECTATOR)
         {
             var nmsPlayer = ((CraftPlayer) player).getHandle();
             var config = options.get(state.getSkillLookupIdentifier());

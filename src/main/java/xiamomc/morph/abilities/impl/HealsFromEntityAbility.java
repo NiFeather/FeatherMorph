@@ -16,6 +16,7 @@ import xiamomc.morph.abilities.AbilityType;
 import xiamomc.morph.abilities.MorphAbility;
 import xiamomc.morph.abilities.options.HealsFromEntityOption;
 import xiamomc.morph.misc.DisguiseState;
+import xiamomc.morph.misc.NmsRecord;
 import xiamomc.morph.misc.PlayerOperationSimulator;
 import xiamomc.morph.network.commands.S2C.set.S2CSetSNbtCommand;
 import xiamomc.morph.network.server.MorphClientHandler;
@@ -86,7 +87,7 @@ public class HealsFromEntityAbility extends MorphAbility<HealsFromEntityOption>
         if (option == null || !option.isValid()) return false;
 
         //Find or refresh entity
-        var nmsRecord = PlayerOperationSimulator.NmsRecord.of(player);
+        var nmsRecord = NmsRecord.of(player);
 
         if (state.beamTarget != null)
         {
@@ -176,7 +177,7 @@ public class HealsFromEntityAbility extends MorphAbility<HealsFromEntityOption>
         return new S2CSetSNbtCommand(NbtUtils.getCompoundString(compound));
     }
 
-    private Entity findEntity(PlayerOperationSimulator.NmsRecord record, EntityType<?> nmsType, double expand, org.bukkit.entity.EntityType bukkitType)
+    private Entity findEntity(NmsRecord record, EntityType<?> nmsType, double expand, org.bukkit.entity.EntityType bukkitType)
     {
         try
         {

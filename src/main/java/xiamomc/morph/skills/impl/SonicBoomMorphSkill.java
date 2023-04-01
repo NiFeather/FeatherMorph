@@ -10,6 +10,7 @@ import org.bukkit.craftbukkit.v1_19_R3.entity.CraftLivingEntity;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.misc.DisguiseState;
+import xiamomc.morph.misc.NmsRecord;
 import xiamomc.morph.misc.PlayerOperationSimulator;
 import xiamomc.morph.skills.SkillType;
 import xiamomc.morph.skills.options.NoOpConfiguration;
@@ -61,7 +62,7 @@ public class SonicBoomMorphSkill extends DelayedMorphSkill<NoOpConfiguration>
 
             if (entity != null && entity.getLocation().distance(player.getLocation()) <= i)
             {
-                var record = PlayerOperationSimulator.NmsRecord.of(player, entity);
+                var record = NmsRecord.of(player, entity);
                 var nmsPlayer = record.nmsPlayer();
                 var nmsEntity = (LivingEntity)record.nmsEntity();
                 var sources = record.nmsWorld().damageSources();

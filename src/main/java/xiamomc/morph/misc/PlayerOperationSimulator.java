@@ -292,10 +292,10 @@ public class PlayerOperationSimulator extends MorphPluginObject
         if (event.useItemInHand() != Event.Result.DENY)
         {
             var record = NmsRecord.of(player);
-            var manager = record.interactManager;
+            var manager = record.interactManager();
 
             //ServerPlayerGameMode.useItem()
-            return manager.useItem(record.nmsPlayer, record.nmsWorld, CraftItemStack.asNMSCopy(bukkitItem), hand).consumesAction();
+            return manager.useItem(record.nmsPlayer(), record.nmsWorld(), CraftItemStack.asNMSCopy(bukkitItem), hand).consumesAction();
         }
 
         return false;
@@ -323,9 +323,9 @@ public class PlayerOperationSimulator extends MorphPluginObject
         {
             var record = NmsRecord.of(player);
 
-            ServerPlayerGameMode manager = record.interactManager;
+            ServerPlayerGameMode manager = record.interactManager();
 
-            return manager.useItemOn(record.nmsPlayer, record.nmsWorld, CraftItemStack.asNMSCopy(bukkitItem), nmsHand, moving).consumesAction();
+            return manager.useItemOn(record.nmsPlayer(), record.nmsWorld(), CraftItemStack.asNMSCopy(bukkitItem), nmsHand, moving).consumesAction();
         }
 
         return false;
@@ -356,12 +356,12 @@ public class PlayerOperationSimulator extends MorphPluginObject
             var record = NmsRecord.of(player, targetEntity);
 
             //EntityPlayer -> ServerPlayer in mojang mappings
-            var playerHandle = record.nmsPlayer;
+            var playerHandle = record.nmsPlayer();
 
             //ServerLevel in mojang mappings
-            var worldHandle = record.nmsWorld;
-            var entityHandle = record.nmsEntity;
-            var manager = record.interactManager;
+            var worldHandle = record.nmsWorld();
+            var entityHandle = record.nmsEntity();
+            var manager = record.interactManager();
 
             var vec = new Vec3(hitPos.getX(), hitPos.getY(), hitPos.getZ());
 
@@ -395,38 +395,6 @@ public class PlayerOperationSimulator extends MorphPluginObject
         public static SimulateResult of(boolean success, EquipmentSlot hand)
         {
             return new SimulateResult(success, hand);
-        }
-    }
-
-    /**
-     * NMS Record for a player
-     *
-     * @param nmsPlayer ServerPlayer in fabric mojang mappings
-     * @param nmsWorld ServerLevel in fabric mojang mappings
-     * @param nmsEntity ??? in fabric mojang mappings
-     * @param interactManager GameMode in fabric mojang mappings
-     */
-    public record NmsRecord(ServerPlayer nmsPlayer, ServerLevel nmsWorld,
-                             @Nullable net.minecraft.world.entity.Entity nmsEntity,
-                             ServerPlayerGameMode interactManager)
-    {
-        public static NmsRecord of(Player player)
-        {
-            var craftPlayer = (CraftPlayer) player;
-
-            return new NmsRecord(craftPlayer.getHandle(), ((CraftWorld) craftPlayer.getWorld()).getHandle(),
-                    null, craftPlayer.getHandle().gameMode);
-        }
-
-        public static NmsRecord of(Player player, @Nullable Entity targetEntity)
-        {
-            if (targetEntity == null) return of(player);
-
-            var craftPlayer = (CraftPlayer) player;
-            var craftEntity = (CraftEntity) targetEntity;
-
-            return new NmsRecord(craftPlayer.getHandle(), ((CraftWorld) craftPlayer.getWorld()).getHandle(),
-                    craftEntity.getHandle(), craftPlayer.getHandle().gameMode);
         }
     }
 }
