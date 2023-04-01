@@ -29,6 +29,7 @@ import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
 
+import java.sql.Ref;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -146,6 +147,14 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
                 targetField.set(nmsPlayer, dimensions);
 
                 nmsPlayer.setBoundingBox(box);
+
+                var eyeHeightField = ReflectionUtils.getPlayerEyeHeightField(PlayerOperationSimulator.NmsRecord.of(player).nmsPlayer());
+
+                if (eyeHeightField != null)
+                {
+                    eyeHeightField.setAccessible(true);
+                    eyeHeightField.set(nmsPlayer, dimensions.height * 0.85F);
+                }
             }
             catch (Throwable t)
             {
@@ -176,6 +185,9 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
         {
             if (modifyBoundingBoxes.get())
                 tryModifyPlayerDimensions(player, state.getDisguise());
+
+            if (plugin.getCurrentTick() % 20 == 0)
+                ReflectionUtils.cleanCaches();
 
             return true;
         }

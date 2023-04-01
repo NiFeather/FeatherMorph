@@ -71,13 +71,23 @@ public abstract class DisguiseWrapper<T>
         return this.getDimensions().makeBoundingBox(x, y, z);
     }
 
+    private EntityDimensions dimensions;
+
     public EntityDimensions getDimensions()
     {
-        var nmsType = EntityTypeUtils.getNmsType(this.getEntityType());
-        if (nmsType != null)
-            return nmsType.getDimensions();
+        EntityDimensions dims = this.dimensions;
+        if (dims != null) return dims;
 
-        throw new RuntimeException("Unable to get NMS type for %s".formatted(this.getEntityType()));
+        var nmsType = EntityTypeUtils.getNmsType(this.getEntityType());
+
+        if (nmsType != null)
+            dims = nmsType.getDimensions();
+        else
+            throw new RuntimeException("Unable to get NMS type for %s".formatted(this.getEntityType()));
+
+        this.dimensions = dims;
+
+        return dims;
     }
 
     public abstract void setGlowingColor(ChatColor glowingColor);
