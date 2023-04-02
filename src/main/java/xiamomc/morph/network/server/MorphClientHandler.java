@@ -95,6 +95,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
     }
 
     private final CommandRegistries registries = new CommandRegistries();
+    private final Bindable<Boolean> modifyBoundingBoxes = new Bindable<>(false);
 
     @Initializer
     private void load(MorphPlugin plugin, MorphConfigManager configManager)
@@ -215,6 +216,8 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
 
         configManager.bind(logInComingPackets, ConfigOption.LOG_INCOMING_PACKETS);
         configManager.bind(logOutGoingPackets, ConfigOption.LOG_OUTGOING_PACKETS);
+
+        configManager.bind(modifyBoundingBoxes, ConfigOption.MODIFY_BOUNDING_BOX);
 
         allowClient.onValueChanged((o, n) ->
         {
@@ -573,17 +576,19 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
             case ON ->
             {
                 if (playerConfig.showDisguiseToSelf) return;
-                manager.setSelfDisguiseVisible(player, true, true, playerOption.displayDisguiseOnHUD, false);
+                manager.setSelfDisguiseVisible(player, true, true, false, false);
             }
 
             case OFF ->
             {
                 if (!playerConfig.showDisguiseToSelf) return;
-                manager.setSelfDisguiseVisible(player, false, true, playerOption.displayDisguiseOnHUD, false);
+                manager.setSelfDisguiseVisible(player, false, true, false, false);
             }
 
             case CLIENT_ON ->
             {
+                playerOption.setClientSideSelfView(true);
+
                 var state = manager.getDisguiseStateFor(player);
 
                 if (state != null)
@@ -592,6 +597,8 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
 
             case CLIENT_OFF ->
             {
+                playerOption.setClientSideSelfView(false);
+
                 var state = manager.getDisguiseStateFor(player);
 
                 if (state != null)

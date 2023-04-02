@@ -95,66 +95,7 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
 
         if (!backendSuccess) return DisguiseResult.fail();
 
-        if (modifyBoundingBoxes.get())
-            this.tryModifyPlayerDimensions(player, backend.getDisguise(player));
-
         return DisguiseResult.success(constructedDisguise, copyResult.isCopy());
-    }
-
-    private void resetPlayerDimensions(Player player)
-    {
-        var nmsPlayer = NmsRecord.ofPlayer(player);
-
-        var targetField = ReflectionUtils.getPlayerDimensionsField(nmsPlayer);
-
-        if (targetField != null)
-        {
-            try
-            {
-                var dimension = net.minecraft.world.entity.player.Player.STANDING_DIMENSIONS;
-
-                targetField.setAccessible(true);
-                targetField.set(nmsPlayer, dimension);
-
-                nmsPlayer.refreshDimensions();
-            }
-            catch (Throwable t)
-            {
-                logger.error("Unable to reset player's bounding box: " + t.getMessage());
-                t.printStackTrace();
-            }
-        }
-    }
-
-    private void tryModifyPlayerDimensions(Player player, DisguiseWrapper<?> wrapper)
-    {
-        var nmsPlayer = NmsRecord.ofPlayer(player);
-
-        //Find dimensions
-        var targetField = ReflectionUtils.getPlayerDimensionsField(nmsPlayer);
-
-        if (targetField != null)
-        {
-            try
-            {
-                var box = wrapper.getBoundingBoxAt(nmsPlayer.getX(), nmsPlayer.getY(), nmsPlayer.getZ());
-                var dimensions = wrapper.getDimensions();
-
-                targetField.set(nmsPlayer, dimensions);
-
-                nmsPlayer.setBoundingBox(box);
-
-                var eyeHeightField = ReflectionUtils.getPlayerEyeHeightField(NmsRecord.ofPlayer(player));
-
-                if (eyeHeightField != null)
-                    eyeHeightField.set(nmsPlayer, dimensions.height * 0.85F);
-            }
-            catch (Throwable t)
-            {
-                logger.warn("Unable to modify player's bounding box: " + t.getMessage());
-                t.printStackTrace();
-            }
-        }
     }
 
     private final Bindable<Boolean> armorStandShowArms = new Bindable<>(false);
@@ -238,6 +179,68 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
                 }
 
                 entity.remove();
+            }
+        }
+
+        if (modifyBoundingBoxes.get())
+        {
+            var player = state.getPlayer();
+            this.tryModifyPlayerDimensions(player, backend.getDisguise(player));
+        }
+    }
+
+    private void resetPlayerDimensions(Player player)
+    {
+        var nmsPlayer = NmsRecord.ofPlayer(player);
+
+        var targetField = ReflectionUtils.getPlayerDimensionsField(nmsPlayer);
+
+        if (targetField != null)
+        {
+            try
+            {
+                var dimension = net.minecraft.world.entity.player.Player.STANDING_DIMENSIONS;
+
+                targetField.setAccessible(true);
+                targetField.set(nmsPlayer, dimension);
+
+                nmsPlayer.refreshDimensions();
+            }
+            catch (Throwable t)
+            {
+                logger.error("Unable to reset player's bounding box: " + t.getMessage());
+                t.printStackTrace();
+            }
+        }
+    }
+
+    private void tryModifyPlayerDimensions(Player player, DisguiseWrapper<?> wrapper)
+    {
+        var nmsPlayer = NmsRecord.ofPlayer(player);
+
+        //Find dimensions
+        var targetField = ReflectionUtils.getPlayerDimensionsField(nmsPlayer);
+
+        if (targetField != null)
+        {
+            try
+            {
+                var box = wrapper.getBoundingBoxAt(nmsPlayer.getX(), nmsPlayer.getY(), nmsPlayer.getZ());
+                var dimensions = wrapper.getDimensions();
+
+                targetField.set(nmsPlayer, dimensions);
+
+                nmsPlayer.setBoundingBox(box);
+
+                var eyeHeightField = ReflectionUtils.getPlayerEyeHeightField(NmsRecord.ofPlayer(player));
+
+                if (eyeHeightField != null)
+                    eyeHeightField.set(nmsPlayer, dimensions.height * 0.85F);
+            }
+            catch (Throwable t)
+            {
+                logger.warn("Unable to modify player's bounding box: " + t.getMessage());
+                t.printStackTrace();
             }
         }
     }
