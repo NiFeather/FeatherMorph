@@ -1162,7 +1162,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 var newState = s.createCopy();
 
                 disguiseFromState(newState);
-                postConstructDisguise(newState);
                 refreshClientState(newState);
 
                 player.sendMessage(MessageUtils.prefixes(player, MorphStrings.recoverString()));

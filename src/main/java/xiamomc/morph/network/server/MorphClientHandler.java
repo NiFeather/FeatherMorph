@@ -28,6 +28,7 @@ import xiamomc.morph.network.commands.CommandRegistries;
 import xiamomc.morph.network.commands.S2C.*;
 import xiamomc.morph.network.commands.S2C.query.QueryType;
 import xiamomc.morph.network.commands.S2C.query.S2CQueryCommand;
+import xiamomc.morph.network.commands.S2C.set.S2CSetModifyBoundingBoxCommand;
 import xiamomc.morph.network.commands.S2C.set.S2CSetSelfViewingCommand;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
@@ -218,6 +219,12 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
         configManager.bind(logOutGoingPackets, ConfigOption.LOG_OUTGOING_PACKETS);
 
         configManager.bind(modifyBoundingBoxes, ConfigOption.MODIFY_BOUNDING_BOX);
+
+        modifyBoundingBoxes.onValueChanged((o, n) ->
+        {
+            var players = Bukkit.getOnlinePlayers();
+            players.forEach(p -> sendCommand(p, new S2CSetModifyBoundingBoxCommand(n)));
+        });
 
         allowClient.onValueChanged((o, n) ->
         {
@@ -514,6 +521,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
                 manager.refreshClientState(state);
 
             sendCommand(player, new S2CSetSelfViewingCommand(config.showDisguiseToSelf));
+            sendCommand(player, new S2CSetModifyBoundingBoxCommand(modifyBoundingBoxes.get()));
             playerConnectionStates.put(player, InitializeState.DONE);
         });
     }

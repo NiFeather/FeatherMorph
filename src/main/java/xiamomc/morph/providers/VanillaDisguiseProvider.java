@@ -19,6 +19,8 @@ import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.messages.vanilla.VanillaMessageStore;
 import xiamomc.morph.misc.*;
+import xiamomc.morph.network.commands.S2C.set.S2CSetModifyBoundingBoxCommand;
+import xiamomc.morph.network.server.MorphClientHandler;
 import xiamomc.morph.utilities.EntityTypeUtils;
 import xiamomc.morph.utilities.NbtUtils;
 import xiamomc.morph.utilities.ReflectionUtils;
@@ -144,9 +146,9 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
                 disguise.showArms(true);
         }
 
+        var player = state.getPlayer();
         if (doHealthScale.get())
         {
-            var player = state.getPlayer();
             var loc = player.getLocation();
             loc.setY(-8192);
 
@@ -183,10 +185,7 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
         }
 
         if (modifyBoundingBoxes.get())
-        {
-            var player = state.getPlayer();
             this.tryModifyPlayerDimensions(player, backend.getDisguise(player));
-        }
     }
 
     private void resetPlayerDimensions(Player player)
