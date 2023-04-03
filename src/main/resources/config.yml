@@ -29,7 +29,8 @@ root:
   cooldown_on_damage: 15
 
   # Modify players' bounding box depending on their disguise
-  # Experimental feature, expect glitches and conflicts with anti-cheats!
+  # Experimental feature, slight glitches may occur when flying around.
+  # Incompatible with anti-cheats!
   modify_bounding_boxes: false
 
   # Skill item
