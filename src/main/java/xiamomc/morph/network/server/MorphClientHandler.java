@@ -37,6 +37,7 @@ import xiamomc.pluginbase.Bindables.Bindable;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MorphClientHandler extends MorphPluginObject implements BasicClientHandler<Player>
 {
@@ -226,6 +227,9 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
             players.forEach(p -> sendCommand(p, new S2CSetModifyBoundingBoxCommand(n)));
         });
 
+        forceTargetVersion.onValueChanged((o, n) -> scheduleReAuthPlayers());
+        modifyBoundingBoxes.onValueChanged((o, n) -> scheduleReAuthPlayers());
+
         allowClient.onValueChanged((o, n) ->
         {
             var players = Bukkit.getOnlinePlayers();
@@ -238,6 +242,33 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
         });
 
         Bukkit.getOnlinePlayers().forEach(p -> playerStateMap.put(p, ConnectionState.JOINED));
+    }
+
+    private final AtomicBoolean scheduledReauthPlayers = new AtomicBoolean(false);
+
+    private void scheduleReAuthPlayers()
+    {
+        synchronized (scheduledReauthPlayers)
+        {
+            if (scheduledReauthPlayers.get()) return;
+            scheduledReauthPlayers.set(true);
+        }
+
+        this.addSchedule(() ->
+        {
+            if (!scheduledReauthPlayers.get()) return;
+
+            scheduledReauthPlayers.set(false);
+            reAuthPlayers();
+        });
+    }
+
+    private void reAuthPlayers()
+    {
+        var players = Bukkit.getOnlinePlayers();
+
+        sendUnAuth(players);
+        sendReAuth(players);
     }
 
     //region wait until ready

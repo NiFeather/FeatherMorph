@@ -4,6 +4,7 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.kyori.adventure.text.Component;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.TagParser;
+import org.bukkit.Bukkit;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.attribute.AttributeModifier;
@@ -112,6 +113,12 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
         configManager.bind(doHealthScale, ConfigOption.HEALTH_SCALE);
         configManager.bind(healthCap, ConfigOption.HEALTH_SCALE_MAX_HEALTH);
         configManager.bind(modifyBoundingBoxes, ConfigOption.MODIFY_BOUNDING_BOX);
+
+        modifyBoundingBoxes.onValueChanged((o, n) ->
+        {
+            if (o && !n)
+                Bukkit.getOnlinePlayers().forEach(p -> NmsRecord.ofPlayer(p).refreshDimensions());
+        });
     }
 
     @Override

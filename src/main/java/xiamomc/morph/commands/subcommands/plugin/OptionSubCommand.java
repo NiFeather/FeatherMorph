@@ -43,6 +43,10 @@ public class OptionSubCommand extends MorphPluginObject implements ISubCommand
 
         subCommands.add(getToggle("chatoverride", ConfigOption.ALLOW_CHAT_OVERRIDE, "chatoverride", CommandNameStrings.chatOverrideString()));
 
+        subCommands.add(getToggle("modify_bounding_boxes", ConfigOption.MODIFY_BOUNDING_BOX, "modify_boxes"));
+
+        subCommands.add(getToggle("force_protocol_version", ConfigOption.FORCE_TARGET_VERSION, "force_protocol_version"));
+
         subCommands.add(getToggle("armorstand_show_arms", ConfigOption.ARMORSTAND_SHOW_ARMS, "armorstand_show_arms"));
 
         subCommands.add(getToggle("mirror_interaction", ConfigOption.MIRROR_BEHAVIOR_DO_SIMULATION, "mirror.interaction", CommandNameStrings.mirrorInteractionString()));
