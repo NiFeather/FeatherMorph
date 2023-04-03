@@ -432,11 +432,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
      */
     public void sendUnAuth(Collection<? extends Player> players)
     {
-        players.forEach(p ->
-        {
-            sendCommand(p, new S2CUnAuthCommand(), true);
-            unInitializePlayer(p);
-        });
+        players.forEach(this::unInitializePlayer);
     }
 
     private static final String nameSpace = MorphPlugin.getMorphNameSpace();
