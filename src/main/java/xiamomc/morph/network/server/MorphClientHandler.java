@@ -158,7 +158,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
                 unInitializePlayer(player);
 
                 player.sendMessage(MessageUtils.prefixes(player, MorphStrings.clientVersionMismatchString()));
-                logger.info(player.getName() + " joined with incompatible client API version: " + clientVersion + "(This server requires at least " + targetApiVersion + ")");
+                logger.info(player.getName() + " joined with incompatible client API version: " + clientVersion + " (This server requires " + targetApiVersion + ")");
 
                 var msg = forceTargetVersion.get() ? MorphStrings.clientVersionMismatchKickString() : MorphStrings.clientVersionMismatchString();
                 msg.withLocale(MessageUtils.getLocale(player))
