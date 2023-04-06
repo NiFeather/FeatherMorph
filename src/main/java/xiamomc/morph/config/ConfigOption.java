@@ -9,7 +9,7 @@ import java.util.ArrayList;
 public enum ConfigOption
 {
     ALLOW_HEAD_MORPH(ConfigNode.create().append("allowHeadMorph"), true),
-    ALLOW_CHAT_OVERRIDE(ConfigNode.create().append("chatOverride").append("allowOverride"), false),
+    ALLOW_CHAT_OVERRIDE(ConfigNode.create().append("chatOverride").append("allowOverride"), true),
     CHAT_OVERRIDE_USE_CUSTOM_RENDERER(ConfigNode.create().append("chatOverride").append("UseCustomRenderer"), true),
 
     SKILL_COOLDOWN_ON_DAMAGE(ConfigNode.create().append("cooldown_on_damage"), 15),

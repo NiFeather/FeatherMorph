@@ -6,7 +6,7 @@ root:
     # Enable ChatOverride?
     # Once enabled, we will attempt to change someone's chat message to a configured content if they disguised as something.
     # The "morph:chat_override" ability needs to be added to disguise's abilities to activate this feature.
-    allowOverride: false
+    allowOverride: true
 
     # Should we try to override any existing chat plugin?
     # This will make sure that the player's name can be changed in most situations but may cause compatibility issues.

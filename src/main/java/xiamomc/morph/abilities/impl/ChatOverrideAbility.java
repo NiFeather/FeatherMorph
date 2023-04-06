@@ -50,7 +50,7 @@ public class ChatOverrideAbility extends MorphAbility<ChatOverrideOption>
     }
 
     private final Bindable<Boolean> useCustomRenderer = new Bindable<>(false);
-    private final Bindable<Boolean> allowChatOverride = new Bindable<>(false);
+    private final Bindable<Boolean> allowChatOverride = new Bindable<>(true);
 
     @Resolved
     private MorphManager morphs;
