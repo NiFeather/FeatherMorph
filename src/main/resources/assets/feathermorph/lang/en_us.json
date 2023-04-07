@@ -93,7 +93,7 @@
   "morph.parse_error": "<color:red>Invalid disguise identifier: <id>",
   "morph.self_visible_off": "<color:red>Toggled SelfView off",
   "morph.self_visible_on": "<color:green>Toggled SelfView on",
-  "morph.skill.difficulty_is_peaceful": "This dosen't work because difficulty is Peaceful",
+  "morph.skill.difficulty_is_peaceful": "This doesn't work because the difficulty is Peaceful",
   "morph.skill.exception_occurred": "<color:red>An error occurred while activating the skill",
   "morph.skill.explode_fail": "Some mystery source denied your power",
   "morph.skill.no_target": "There's no entity within <distance> blocks in sight",
