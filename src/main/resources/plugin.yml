@@ -1,0 +1,42 @@
+name: FeatherMorph
+version: 0.10.0.05
+main: xiamomc.morph.MorphPlugin
+description: A morph plugin that aims to provide many features out-of-the-box
+load: POSTWORLD
+authors:
+ - MATRIX-feather
+prefix: FeatherMorph
+folia-supported: true
+
+commands:
+  feathermorph:
+    aliases:
+     - fm
+  morph: {}
+  morphplayer: {}
+  request: {}
+  unmorph: {}
+permissions:
+  xiamomc.morph.chatoverride:
+    default: "true"
+  xiamomc.morph.headmorph:
+    default: "true"
+  xiamomc.morph.mirror:
+    default: "true"
+  xiamomc.morph.morph:
+    default: "true"
+  xiamomc.morph.request.accept:
+    default: "true"
+  xiamomc.morph.request.deny:
+    default: "true"
+  xiamomc.morph.request.send:
+    default: "true"
+  xiamomc.morph.skill:
+    default: "true"
+  xiamomc.morph.unmorph:
+    default: "true"
+api-version: 1.19
+softdepend:
+ - LibsDisguises
+ - GSit
+ - PlaceholderAPI

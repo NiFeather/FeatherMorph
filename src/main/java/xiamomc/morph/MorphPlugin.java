@@ -61,6 +61,18 @@ public final class MorphPlugin extends XiaMoJavaPlugin
     private Metrics metrics;
 
     @Override
+    protected void scheduleMainLoop(Runnable r)
+    {
+        Bukkit.getServer().getGlobalRegionScheduler().runAtFixedRate(this, c -> r.run(), 1, 1);
+    }
+
+    @Override
+    protected void runAsync(Runnable r)
+    {
+        Bukkit.getAsyncScheduler().runNow(this, c -> r.run());
+    }
+
+    @Override
     public void onEnable()
     {
         super.onEnable();
