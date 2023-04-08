@@ -14,7 +14,7 @@ public abstract class EffectMorphAbility extends NoOpOptionAbility
     public boolean handle(Player player, DisguiseState state)
     {
         if (plugin.getCurrentTick() % this.refreshInterval == 0)
-            player.addPotionEffect(getEffect());
+            morphPlugin().runOnEntity(player, () -> player.addPotionEffect(getEffect()));
 
         return true;
     }
@@ -24,7 +24,7 @@ public abstract class EffectMorphAbility extends NoOpOptionAbility
     {
         if (super.applyToPlayer(player, state))
         {
-            player.addPotionEffect(getEffect());
+            morphPlugin().runOnEntity(player, () -> player.addPotionEffect(getEffect()));
             return true;
         }
         else

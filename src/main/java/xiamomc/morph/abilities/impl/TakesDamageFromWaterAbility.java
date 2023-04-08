@@ -19,12 +19,17 @@ public class TakesDamageFromWaterAbility extends MorphAbility<TakesDamageFromWat
     @Override
     public boolean handle(Player player, DisguiseState state)
     {
-        if (player.isInWaterOrRainOrBubbleColumn())
-        {
-            var dmgOption = this.getOptionFor(state);
+        var dmgOption = this.getOptionFor(state);
 
-            player.damage(dmgOption == null ? 1d : dmgOption.damageAmount);
-        }
+        if (dmgOption == null) return false;
+
+        player.getScheduler().run(morphPlugin(), r ->
+        {
+            if (player.isInWaterOrRainOrBubbleColumn())
+            {
+                player.damage(dmgOption.damageAmount);
+            }
+        }, null);
 
         return true;
     }

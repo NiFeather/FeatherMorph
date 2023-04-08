@@ -11,6 +11,7 @@ import org.bukkit.craftbukkit.v1_19_R3.CraftWorld;
 import org.bukkit.entity.EntityType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.misc.DisguiseTypes;
 
 import java.util.Arrays;
@@ -66,16 +67,17 @@ public class EntityTypeUtils
         }
 
         var serverWorld = ((CraftWorld) Bukkit.getWorlds().get(0)).getHandle();
-        var entity = nmsType.create(serverWorld, null, e -> e.remove(Entity.RemovalReason.DISCARDED), BlockPos.ZERO, MobSpawnType.COMMAND, false, false);
-
-        if (entity == null)
+        Bukkit.getRegionScheduler().run(MorphPlugin.getInstance(MorphPlugin.getMorphNameSpace()), Bukkit.getWorlds().get(0), 0, 0, r ->
         {
-            nmsClassMap.put(type, null);
-            return null;
-        }
+            var entity = nmsType.create(serverWorld, null, e -> e.remove(Entity.RemovalReason.DISCARDED), BlockPos.ZERO, MobSpawnType.COMMAND, false, false);
 
-        nmsClassMap.put(type, entity.getClass());
-        return entity.getClass();
+            if (entity == null)
+                nmsClassMap.put(type, null);
+            else
+                nmsClassMap.put(type, entity.getClass());
+        });
+
+        return null;
     }
 
     public static boolean isZombiesHostile(EntityType type)

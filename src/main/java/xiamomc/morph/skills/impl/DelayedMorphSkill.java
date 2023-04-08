@@ -61,8 +61,10 @@ public abstract class DelayedMorphSkill<T extends ISkillOption> extends MorphSki
 
             //检查伪装是否为同一个实例（玩家是否更改了伪装）
             if (currentState != null && currentState.getDisguise() == state.getDisguise())
-                execution.run();
-        }, delay);
+            {
+                player.getScheduler().runDelayed(morphPlugin(), r -> execution.run(), null, 1);
+            }
+        }, delay - 1);
     }
 
     protected record ExecuteResult(boolean success, int cd)

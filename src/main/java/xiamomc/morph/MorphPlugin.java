@@ -3,6 +3,7 @@ package xiamomc.morph;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Entity;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
@@ -28,6 +29,8 @@ import xiamomc.morph.storage.skill.SkillConfigurationStore;
 import xiamomc.pluginbase.Command.CommandHelper;
 import xiamomc.pluginbase.Messages.MessageStore;
 import xiamomc.pluginbase.XiaMoJavaPlugin;
+
+import java.util.concurrent.atomic.AtomicLong;
 
 public final class MorphPlugin extends XiaMoJavaPlugin
 {
@@ -60,16 +63,31 @@ public final class MorphPlugin extends XiaMoJavaPlugin
 
     private Metrics metrics;
 
+    private final AtomicLong atomicCurrentTick = new AtomicLong(0);
+
     @Override
-    protected void scheduleMainLoop(Runnable r)
+    public void startMainLoop(Runnable r)
     {
         Bukkit.getServer().getGlobalRegionScheduler().runAtFixedRate(this, c -> r.run(), 1, 1);
     }
 
     @Override
-    protected void runAsync(Runnable r)
+    public void runAsync(Runnable r)
     {
         Bukkit.getAsyncScheduler().runNow(this, c -> r.run());
+    }
+
+    public void runOnEntity(Entity entity, Runnable r)
+    {
+        this.runOnEntity(entity, r, null);
+    }
+
+    public void runOnEntity(Entity entity, Runnable r, Runnable retired)
+    {
+        entity.getScheduler().run(this, c -> r.run(), () ->
+        {
+            if (retired != null) retired.run();
+        });
     }
 
     @Override
@@ -126,6 +144,24 @@ public final class MorphPlugin extends XiaMoJavaPlugin
 
             clientHandler.sendReAuth(Bukkit.getOnlinePlayers());
         });
+
+        this.schedule(this::update);
+    }
+
+    private void update()
+    {
+        this.schedule(this::update);
+
+        synchronized (atomicCurrentTick)
+        {
+            atomicCurrentTick.incrementAndGet();
+        }
+    }
+
+    @Override
+    public long getCurrentTick()
+    {
+        return atomicCurrentTick.get();
     }
 
     @Override
