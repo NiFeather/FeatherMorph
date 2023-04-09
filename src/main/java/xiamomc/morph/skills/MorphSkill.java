@@ -4,6 +4,7 @@ import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.type.Fence;
 import org.bukkit.block.data.type.Gate;
@@ -13,6 +14,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.checkerframework.checker.units.qual.K;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.messages.MessageUtils;
@@ -21,6 +23,7 @@ import xiamomc.morph.storage.skill.ISkillOption;
 import xiamomc.morph.utilities.DisguiseUtils;
 
 import java.util.List;
+import java.util.Locale;
 
 public abstract class MorphSkill<T extends ISkillOption> extends MorphPluginObject implements IMorphSkill<T>
 {
@@ -28,6 +31,11 @@ public abstract class MorphSkill<T extends ISkillOption> extends MorphPluginObje
     {
         var loc = player.getLocation();
 
+        this.playSoundToNearbyPlayers(player, loc, distance, key, source);
+    }
+
+    protected void playSoundToNearbyPlayers(Player player, Location loc, int distance, Key key, Sound.Source source)
+    {
         //volume需要根据距离判断
         var sound = Sound.sound(key, source, distance / 8f, 1f);
 

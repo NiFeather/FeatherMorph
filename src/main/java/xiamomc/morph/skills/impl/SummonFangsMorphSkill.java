@@ -25,6 +25,7 @@ public class SummonFangsMorphSkill extends MorphSkill<NoOpConfiguration>
     @Override
     public int executeSkill(Player player, DisguiseState state, SkillConfiguration configuration, NoOpConfiguration option)
     {
+        var playerScheduler = player.getScheduler();
         var targetEntity = player.getTargetEntity(16);
 
         var summonVex = targetEntity != null && targetEntity.getLocation().distance(player.getLocation()) > 8;
@@ -48,12 +49,15 @@ public class SummonFangsMorphSkill extends MorphSkill<NoOpConfiguration>
 
             for (int i = 0; i < targetAmount; i++)
             {
-                var vex  = world.spawn(location, Vex.class, CreatureSpawnEvent.SpawnReason.NATURAL);
+                player.getScheduler().run(morphPlugin(), r ->
+                {
+                    var vex  = world.spawn(location, Vex.class, CreatureSpawnEvent.SpawnReason.NATURAL);
 
-                if (shouldTarget)
-                    vex.setTarget((LivingEntity) targetEntity);
+                    if (shouldTarget)
+                        vex.setTarget((LivingEntity) targetEntity);
 
-                vex.setPersistent(false);
+                    vex.setPersistent(false);
+                }, null);
             }
         }
         else
@@ -106,11 +110,11 @@ public class SummonFangsMorphSkill extends MorphSkill<NoOpConfiguration>
                 oldLocation = location.clone();
 
                 //添加到计划任务
-                this.addSchedule(() ->
+                playerScheduler.runDelayed(morphPlugin(), r ->
                 {
                     var fang = world.spawn(loc, EvokerFangs.class, CreatureSpawnEvent.SpawnReason.CUSTOM);
                     fang.setOwner(player);
-                }, i);
+                }, null, 1 + i);
             }
         }
 
