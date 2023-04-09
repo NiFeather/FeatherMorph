@@ -53,7 +53,7 @@ public class MorphSkillHandler extends MorphPluginObject
     /**
      * 玩家 -> 当前CD
      */
-    private final Map<UUID, SkillCooldownInfo> uuidCooldownMap = new Object2ObjectOpenHashMap<>();
+    private final Map<UUID, SkillCooldownInfo> activeCooldownMap = new Object2ObjectOpenHashMap<>();
 
     @Resolved
     private MorphManager manager;
@@ -127,7 +127,7 @@ public class MorphSkillHandler extends MorphPluginObject
         this.addSchedule(this::update);
 
         //更新CD
-        uuidCooldownMap.forEach((u, c) -> c.setCooldown(c.getCooldown() - 1));
+        activeCooldownMap.forEach((u, c) -> c.setCooldown(c.getCooldown() - 1));
     }
 
     /**
@@ -231,13 +231,13 @@ public class MorphSkillHandler extends MorphPluginObject
      * 获取技能冷却
      *
      * @param uuid 玩家UUID
-     * @param type 技能ID
+     * @param disguiseIdentifier 技能ID
      * @return 技能信息，为null则传入的实体类型是null
      */
     @Nullable
-    public SkillCooldownInfo getCooldownInfo(UUID uuid, @Nullable String type)
+    public SkillCooldownInfo getCooldownInfo(UUID uuid, @Nullable String disguiseIdentifier)
     {
-        if (type == null) return null;
+        if (disguiseIdentifier == null) return null;
 
         //获取cd列表
         List<SkillCooldownInfo> infos;
@@ -249,11 +249,11 @@ public class MorphSkillHandler extends MorphPluginObject
 
         //获取或创建CD
         var cd = infos.stream()
-                .filter(i -> i.getIdentifier().equals(type)).findFirst().orElse(null);
+                .filter(i -> i.getIdentifier().equals(disguiseIdentifier)).findFirst().orElse(null);
 
         if (cd == null)
         {
-            cdInfo = new SkillCooldownInfo(type);
+            cdInfo = new SkillCooldownInfo(disguiseIdentifier);
             infos.add(cdInfo);
         }
         else
@@ -286,14 +286,14 @@ public class MorphSkillHandler extends MorphPluginObject
 
         if (info == null)
         {
-            uuidCooldownMap.remove(uuid);
+            activeCooldownMap.remove(uuid);
         }
         else
         {
             if (info.skillInvokedOnce())
                 info.setCooldown(this.getCooldownInactive(info));
 
-            uuidCooldownMap.put(uuid, info);
+            activeCooldownMap.put(uuid, info);
         }
     }
 
@@ -334,7 +334,7 @@ public class MorphSkillHandler extends MorphPluginObject
      */
     public long getLastInvoke(Player player)
     {
-        var info = uuidCooldownMap.getOrDefault(player.getUniqueId(), null);
+        var info = activeCooldownMap.getOrDefault(player.getUniqueId(), null);
 
         return info == null ? Long.MIN_VALUE : info.getLastInvoke();
     }
