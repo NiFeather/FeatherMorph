@@ -146,6 +146,15 @@ public class MorphMessageStore extends MessageStore<MorphPlugin>
         return defaultValue == null ? "%s@%s".formatted(key, locale) : defaultValue;
     }
 
+    public boolean reloadOverwriteNonDefault()
+    {
+        this.oWNonDef = true;
+
+        return reloadConfiguration();
+    }
+
+    private boolean oWNonDef;
+
     @Override
     public boolean reloadConfiguration()
     {
@@ -153,8 +162,13 @@ public class MorphMessageStore extends MessageStore<MorphPlugin>
 
         subStores.forEach((l, s) ->
         {
+            if (oWNonDef)
+                s.overWriteNonDefaultAfterReload();
+
             if (!s.reloadConfiguration()) allSuccess.set(false);
         });
+
+        oWNonDef = false;
 
         return super.reloadConfiguration() && allSuccess.get();
     }

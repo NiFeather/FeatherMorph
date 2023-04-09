@@ -1,5 +1,6 @@
 package xiamomc.morph.commands.subcommands.plugin;
 
+import it.unimi.dsi.fastutil.objects.ObjectImmutableList;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
@@ -7,9 +8,7 @@ import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
-import xiamomc.morph.messages.CommandStrings;
-import xiamomc.morph.messages.HelpStrings;
-import xiamomc.morph.messages.MessageUtils;
+import xiamomc.morph.messages.*;
 import xiamomc.morph.messages.vanilla.VanillaMessageStore;
 import xiamomc.morph.network.server.MorphClientHandler;
 import xiamomc.morph.storage.skill.SkillConfigurationStore;
@@ -57,20 +56,15 @@ public class ReloadSubCommand extends MorphPluginObject implements ISubCommand
     @Resolved
     private SkillConfigurationStore skills;
 
-    private final String[] subcommands = new String[]
-            {
-              "data",
-              "message"
-            };
+    private final List<String> subcommands = ObjectImmutableList.of("data", "message", "update_message");
 
     @Override
     public List<String> onTabComplete(List<String> args, CommandSender source)
     {
         if (source.hasPermission(getPermissionRequirement()) && args.size() >= 1)
-        {
-            return Arrays.stream(subcommands).filter(s -> s.startsWith(args.get(0))).toList();
-        }
-        else return null;
+            return subcommands.stream().filter(s -> s.startsWith(args.get(0))).toList();
+        else
+            return null;
     }
 
     @Resolved
@@ -83,12 +77,14 @@ public class ReloadSubCommand extends MorphPluginObject implements ISubCommand
         {
             var reloadsData = false;
             var reloadsMessage = false;
+            var reloadOverwriteNonDefMsg = false;
             String option = args.length >= 1 ? args[0] : "*";
 
             switch (option)
             {
                 case "data" -> reloadsData = true;
                 case "message" -> reloadsMessage = true;
+                case "reset_loaded_messages" -> reloadsMessage = reloadOverwriteNonDefMsg = true;
                 default -> reloadsMessage = reloadsData = true;
             }
 
@@ -101,7 +97,11 @@ public class ReloadSubCommand extends MorphPluginObject implements ISubCommand
 
             if (reloadsMessage)
             {
-                messageStore.reloadConfiguration();
+                if (reloadOverwriteNonDefMsg && messageStore instanceof MorphMessageStore morphMessageStore)
+                    morphMessageStore.reloadOverwriteNonDefault();
+                else
+                    messageStore.reloadConfiguration();
+
                 vanillaMessageStore.reloadConfiguration();
             }
 
