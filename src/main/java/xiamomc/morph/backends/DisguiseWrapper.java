@@ -16,7 +16,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.utilities.EntityTypeUtils;
-import xiamomc.pluginbase.Exceptions.NullDependencyException;
 
 public abstract class DisguiseWrapper<T>
 {
@@ -24,26 +23,52 @@ public abstract class DisguiseWrapper<T>
 
     public DisguiseWrapper(@NotNull T instance)
     {
-        if (instance == null)
-            throw new NullDependencyException("A disguise instance cannot be null");
-
         this.instance = instance;
     }
 
+    /**
+     * Gets the underlying disguise instance
+     * @return The underlying disguise instance
+     */
     public T getInstance()
     {
         return instance;
     }
 
+    /**
+     * Gets current displaying equipment
+     * @return A {@link EntityEquipment} that presents the current displaying equipment
+     */
     public abstract EntityEquipment getDisplayingEquipments();
-    public abstract void setDisplayingEquipments(EntityEquipment newEquipment);
 
-    public abstract void toggleServerSelfView(boolean enabled);
+    /**
+     * Sets displaying equipment to the giving value
+     * @param newEquipment A {@link EntityEquipment} that presents the new equipment
+     */
+    public abstract void setDisplayingEquipments(@NotNull EntityEquipment newEquipment);
 
+    /**
+     * Sets the state of server-side SelfView for the underlying disguise instance
+     * @param enabled Whether server-side SelfView should be turned on
+     */
+    public abstract void setServerSelfView(boolean enabled);
+
+    /**
+     * Gets current entity type for this wrapper
+     * @return A value that presents the current {@link EntityType}.
+     */
     public abstract EntityType getEntityType();
 
+    /**
+     * Clone the underlying disguise instance
+     * @return A new instance cloned from the underlying disguise
+     */
     public abstract T copyInstance();
 
+    /**
+     * Clone this wrapper
+     * @return A new wrapper cloned from this instance, everything in the new instance should not have any reference with this wrapper
+     */
     public abstract DisguiseWrapper<T> clone();
 
     /**
@@ -52,20 +77,42 @@ public abstract class DisguiseWrapper<T>
      */
     public abstract String getDisguiseName();
 
+    /**
+     * 设置此伪装的名称
+     * @param name 要设置的伪装名称
+     */
     public abstract void setDisguiseName(String name);
 
+    /**
+     * Checks whether the underlying disguise is a player disguise
+     * @return A value that presents whether the underlying disguise is a player disguise
+     */
     public boolean isPlayerDisguise()
     {
         return getEntityType() == EntityType.PLAYER;
     }
 
+    /**
+     * Checks whether the underlying disguise is a mob disguise
+     * @return A value that presents whether the underlying disguise is a mob disguise (e.g. Not a player disguise)
+     */
     public boolean isMobDisguise()
     {
         return getEntityType().isAlive() && getEntityType() != EntityType.PLAYER;
     }
 
+    /**
+     * Gets a {@link BoundingBox} matching the current disguise
+     * @return A {@link BoundingBox} matching the current disguise
+     * @deprecated We use {@link DisguiseWrapper#getDimensions()} or {@link DisguiseWrapper#getBoundingBoxAt(double, double, double)} now
+     */
+    @Deprecated
     public abstract BoundingBox getBoundingBox();
 
+    /**
+     * Gets a {@link AABB} matching the current disguise at an exact position
+     * @return A {@link AABB} matching the current disguise at the exact position
+     */
     public AABB getBoundingBoxAt(double x, double y, double z)
     {
         return this.getDimensions().makeBoundingBox(x, y, z);
@@ -73,6 +120,10 @@ public abstract class DisguiseWrapper<T>
 
     private EntityDimensions dimensions;
 
+    /**
+     * Gets the dimensions of the current disguise
+     * @return A value of {@link EntityDimensions} matching the current disguise
+     */
     public EntityDimensions getDimensions()
     {
         EntityDimensions dims = this.dimensions;
@@ -91,31 +142,83 @@ public abstract class DisguiseWrapper<T>
     }
 
     public abstract void setGlowingColor(ChatColor glowingColor);
-    public abstract void setGlowing(boolean glowing);
+
     public abstract ChatColor getGlowingColor();
 
+    /**
+     * @deprecated No longer used
+     */
+    @Deprecated
+    public abstract void setGlowing(boolean glowing);
+
+    /**
+     * Adds a custom data to the underlying instance
+     * @param key Name
+     * @param data Value
+     */
     public abstract void addCustomData(String key, Object data);
+
+    /**
+     * Gets a custom value from the underlying instance
+     * @param key Name
+     * @return A value matching the provided key, null if not found
+     */
+    @Nullable
     public abstract Object getCustomData(String key);
 
+    /**
+     * Applies a skin to the underlying player instance
+     * @param profile {@link GameProfile}
+     * @apiNote This shouldn't do anything if disguise entity type is not {@link EntityType#PLAYER}
+     */
     public abstract void applySkin(GameProfile profile);
 
+    /**
+     * Gets current skin from the underlying player instance
+     * @return {@link GameProfile}, null if not set or not available
+     */
     @Nullable
     public abstract GameProfile getSkin();
 
+    /**
+     * Actions when we finished constructing disguise
+     * @param state A {@link DisguiseState} that handles the current wrapper
+     * @param targetEntity The targeted entity (If there is any)
+     */
     public abstract void onPostConstructDisguise(DisguiseState state, @Nullable Entity targetEntity);
 
+    /**
+     * Serialize data for the current disguise instance
+     * @return A string that can be de-serialized to the current disguise instance.<br>
+     *         Return an empty string if de-serializing is not supported.
+     */
     public abstract String serializeDisguiseData();
 
-    public abstract void updateDisplay(boolean isClone, DisguiseState state, Player player);
+    /**
+     * Updates the underlying disguise instance
+     * @param isClone Whether this disguise is cloned from another entity or disguise
+     * @param state {@link DisguiseState}
+     * @param player The player who owns the provided state
+     */
+    public abstract void update(boolean isClone, DisguiseState state, Player player);
 
+    /**
+     * Merge NBT to the underlying instance
+     * @param compound {@link CompoundTag}
+     */
     public abstract void mergeCompound(CompoundTag compound);
 
+    /**
+     * Gets a value from current compound
+     * @param path NBT Path
+     * @param type {@link TagType}, check {@link net.minecraft.nbt.TagTypes} for more information
+     * @return A NBT tag, null if not found
+     */
     @Nullable
     public abstract <R extends Tag> R getTag(String path, TagType<R> type);
 
     /**
      * Returns a copy of the existing compound.
-     * @return
      */
     public abstract CompoundTag getCompound();
 
@@ -134,7 +237,7 @@ public abstract class DisguiseWrapper<T>
         return false;
     }
 
-    public void setAggresive(boolean aggresive)
+    public void setAggressive(boolean aggressive)
     {
     }
 

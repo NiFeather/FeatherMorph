@@ -44,7 +44,7 @@ public class FallbackProvider extends DefaultDisguiseProvider
     }
 
     @Override
-    protected boolean canCopyDisguise(DisguiseInfo info, Entity targetEntity, @Nullable DisguiseState theirState, @NotNull DisguiseWrapper<?> theirDisguise)
+    protected boolean canCloneDisguise(DisguiseInfo info, Entity targetEntity, @NotNull DisguiseState theirState, @NotNull DisguiseWrapper<?> theirDisguise)
     {
         return false;
     }

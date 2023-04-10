@@ -14,7 +14,7 @@ import java.util.Map;
 public class NilBackend extends DisguiseBackend<NilDisguise, NilWrapper>
 {
     @Override
-    public DisguiseWrapper<NilDisguise> createInstance(Player player, @NotNull Entity targetEntity)
+    public DisguiseWrapper<NilDisguise> createInstance(@NotNull Entity targetEntity)
     {
         var wrapper = new NilWrapper(new NilDisguise(targetEntity.getType()));
         wrapper.setDisguiseName(targetEntity.getName());
@@ -23,13 +23,13 @@ public class NilBackend extends DisguiseBackend<NilDisguise, NilWrapper>
     }
 
     @Override
-    public DisguiseWrapper<NilDisguise> createInstance(Player player, EntityType entityType)
+    public DisguiseWrapper<NilDisguise> createInstance(EntityType entityType)
     {
         return new NilWrapper(new NilDisguise(entityType));
     }
 
     @Override
-    public DisguiseWrapper<NilDisguise> createPlayerInstance(Player player, String targetPlayerName)
+    public DisguiseWrapper<NilDisguise> createPlayerInstance(String targetPlayerName)
     {
         var wrapper = new NilWrapper(new NilDisguise(EntityType.PLAYER));
         wrapper.setDisguiseName(targetPlayerName);
@@ -38,7 +38,7 @@ public class NilBackend extends DisguiseBackend<NilDisguise, NilWrapper>
     }
 
     @Override
-    public DisguiseWrapper<NilDisguise> fromOfflineString(@Nullable Player player, String offlineStr)
+    public DisguiseWrapper<NilDisguise> fromOfflineString(String offlineStr)
     {
         return null;
     }

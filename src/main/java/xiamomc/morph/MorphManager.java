@@ -818,11 +818,10 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         //如果伪装成生物，则按照此生物的碰撞体积来
         if (disguise.isMobDisguise())
         {
-            BoundingBox box = disguise.getBoundingBox();
+            var box = disguise.getDimensions();
 
-            cX = box.getWidthX();
-            cY = box.getHeight();
-            cZ = box.getWidthZ();
+            cX = cZ = box.width;
+            cY = box.height;
         }
         else //否则，按玩家的碰撞体积算
         {
@@ -975,6 +974,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 .findFirst().orElse(null);
     }
 
+    @Nullable
     public DisguiseState getDisguiseStateFor(Entity entity)
     {
         if (!(entity instanceof Player player)) return null;

@@ -51,10 +51,10 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
         if (DisguiseTypes.fromId(id) != DisguiseTypes.PLAYER)
             return DisguiseResult.fail();
 
-        var result = getCopy(disguiseInfo, targetEntity);
+        var result = constructFromEntity(disguiseInfo, targetEntity);
         var disguise = result.success()
                 ? result.disguise()
-                : backend.createPlayerInstance(null, disguiseInfo.playerDisguiseTargetName);
+                : backend.createPlayerInstance(disguiseInfo.playerDisguiseTargetName);
 
         var mainHandItem = player.getEquipment().getItemInMainHand();
 
@@ -137,8 +137,8 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
     }
 
     @Override
-    protected boolean canCopyDisguise(DisguiseInfo info, Entity targetEntity,
-                                      @Nullable DisguiseState theirState, @NotNull DisguiseWrapper<?> theirDisguise)
+    protected boolean canCloneDisguise(DisguiseInfo info, Entity targetEntity,
+                                       @NotNull DisguiseState theirState, @NotNull DisguiseWrapper<?> theirDisguise)
     {
         return theirDisguise.getDisguiseName().equals(info.playerDisguiseTargetName) && theirDisguise.isPlayerDisguise();
     }

@@ -88,8 +88,8 @@ public class LocalDisguiseProvider extends VanillaDisguiseProvider
     }
 
     @Override
-    protected boolean canCopyDisguise(DisguiseInfo info, Entity targetEntity,
-                                      @Nullable DisguiseState theirState, @NotNull DisguiseWrapper<?> theirDisguise)
+    protected boolean canCloneDisguise(DisguiseInfo info, Entity targetEntity,
+                                       @NotNull DisguiseState theirState, @NotNull DisguiseWrapper<?> theirDisguise)
     {
         if (theirState != null)
             return theirState.getDisguiseIdentifier().equals(info.getIdentifier());

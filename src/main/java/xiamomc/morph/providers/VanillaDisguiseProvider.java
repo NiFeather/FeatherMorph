@@ -20,8 +20,6 @@ import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.messages.vanilla.VanillaMessageStore;
 import xiamomc.morph.misc.*;
-import xiamomc.morph.network.commands.S2C.set.S2CSetModifyBoundingBoxCommand;
-import xiamomc.morph.network.server.MorphClientHandler;
 import xiamomc.morph.utilities.EntityTypeUtils;
 import xiamomc.morph.utilities.NbtUtils;
 import xiamomc.morph.utilities.ReflectionUtils;
@@ -29,7 +27,6 @@ import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
 
-import java.sql.Ref;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -88,11 +85,11 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
             return DisguiseResult.fail();
         }
 
-        var copyResult = getCopy(disguiseInfo, targetEntity);
+        var copyResult = constructFromEntity(disguiseInfo, targetEntity);
 
         constructedDisguise = copyResult.success()
                 ? copyResult.disguise()
-                : backend.createInstance(null, entityType);
+                : backend.createInstance(entityType);
 
         var backendSuccess = backend.disguise(player, constructedDisguise);
 
@@ -344,8 +341,8 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
     }
 
     @Override
-    protected boolean canCopyDisguise(DisguiseInfo info, Entity targetEntity,
-                                      @Nullable DisguiseState theirDisguiseState, @NotNull DisguiseWrapper<?> theirDisguise)
+    protected boolean canCloneDisguise(DisguiseInfo info, Entity targetEntity,
+                                       @NotNull DisguiseState theirDisguiseState, @NotNull DisguiseWrapper<?> theirDisguise)
     {
         return theirDisguise.getEntityType().equals(info.getEntityType());
     }

@@ -25,7 +25,7 @@ public class LibsBackend extends DisguiseBackend<Disguise, LibsDisguiseWrapper>
 
 
     @Override
-    public DisguiseWrapper<Disguise> createInstance(Player player, @NotNull Entity targetEntity)
+    public DisguiseWrapper<Disguise> createInstance(@NotNull Entity targetEntity)
     {
         var instance = DisguiseAPI.constructDisguise(targetEntity);
         //DisguiseAPI.disguiseEntity(player, instance);
@@ -34,7 +34,7 @@ public class LibsBackend extends DisguiseBackend<Disguise, LibsDisguiseWrapper>
     }
 
     @Override
-    public DisguiseWrapper<Disguise> createInstance(Player player, EntityType entityType)
+    public DisguiseWrapper<Disguise> createInstance(EntityType entityType)
     {
         var instance = new MobDisguise(DisguiseType.getType(entityType));
         //DisguiseAPI.disguiseEntity(player, instance);
@@ -43,7 +43,7 @@ public class LibsBackend extends DisguiseBackend<Disguise, LibsDisguiseWrapper>
     }
 
     @Override
-    public DisguiseWrapper<Disguise> createPlayerInstance(Player player, String playerName)
+    public DisguiseWrapper<Disguise> createPlayerInstance(String playerName)
     {
         var instance = new PlayerDisguise(playerName);
         //DisguiseAPI.disguiseEntity(player, instance);
@@ -52,7 +52,7 @@ public class LibsBackend extends DisguiseBackend<Disguise, LibsDisguiseWrapper>
     }
 
     @Override
-    public DisguiseWrapper<Disguise> fromOfflineString(@Nullable Player player, String offlineStr)
+    public DisguiseWrapper<Disguise> fromOfflineString(String offlineStr)
     {
         try
         {

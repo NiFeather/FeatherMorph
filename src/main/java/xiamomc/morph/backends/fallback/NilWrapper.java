@@ -4,8 +4,6 @@ import com.mojang.authlib.GameProfile;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.TagType;
-import net.minecraft.world.entity.EntityDimensions;
-import net.minecraft.world.phys.AABB;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -19,7 +17,6 @@ import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.backends.DisguiseWrapper;
 import xiamomc.morph.misc.DisguiseEquipment;
 import xiamomc.morph.misc.DisguiseState;
-import xiamomc.morph.utilities.EntityTypeUtils;
 
 public class NilWrapper extends DisguiseWrapper<NilDisguise>
 {
@@ -73,7 +70,7 @@ public class NilWrapper extends DisguiseWrapper<NilDisguise>
     }
 
     @Override
-    public void setDisplayingEquipments(EntityEquipment newEquipment)
+    public void setDisplayingEquipments(@NotNull EntityEquipment newEquipment)
     {
         this.equipment.setArmorContents(newEquipment.getArmorContents());
 
@@ -81,7 +78,7 @@ public class NilWrapper extends DisguiseWrapper<NilDisguise>
     }
 
     @Override
-    public void toggleServerSelfView(boolean enabled)
+    public void setServerSelfView(boolean enabled)
     {
     }
 
@@ -158,21 +155,20 @@ public class NilWrapper extends DisguiseWrapper<NilDisguise>
     @Override
     public void applySkin(GameProfile profile)
     {
-        System.out.println(this + " Appling Skin " + instance + " :: " +  profile);
+        if (this.getEntityType() != EntityType.PLAYER) return;
+
         this.instance.profile = profile;
     }
 
     @Override
     public @Nullable GameProfile getSkin()
     {
-        System.out.println(this + " Returning " + instance + " :: " + instance.profile);
         return instance.profile;
     }
 
     @Override
     public void onPostConstructDisguise(DisguiseState state, @Nullable Entity targetEntity)
     {
-
     }
 
     @Override
@@ -182,7 +178,7 @@ public class NilWrapper extends DisguiseWrapper<NilDisguise>
     }
 
     @Override
-    public void updateDisplay(boolean isClone, DisguiseState state, Player player)
+    public void update(boolean isClone, DisguiseState state, Player player)
     {
     }
 

@@ -95,7 +95,7 @@ public class DisguiseState extends MorphPluginObject
 
     public void setServerSideSelfVisible(boolean val)
     {
-        disguise.toggleServerSelfView(val);
+        disguise.setServerSelfView(val);
         serverSideSelfVisible = val;
     }
 

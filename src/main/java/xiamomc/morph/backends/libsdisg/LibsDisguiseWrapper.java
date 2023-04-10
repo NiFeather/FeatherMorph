@@ -47,7 +47,7 @@ public class LibsDisguiseWrapper extends DisguiseWrapper<Disguise>
     }
 
     @Override
-    public void setDisplayingEquipments(EntityEquipment newEquipment)
+    public void setDisplayingEquipments(@NotNull EntityEquipment newEquipment)
     {
         watcher.setArmor(newEquipment.getArmorContents());
         watcher.setItemInMainHand(newEquipment.getItemInMainHand());
@@ -57,7 +57,7 @@ public class LibsDisguiseWrapper extends DisguiseWrapper<Disguise>
     }
 
     @Override
-    public void toggleServerSelfView(boolean enabled)
+    public void setServerSelfView(boolean enabled)
     {
         instance.setSelfDisguiseVisible(enabled);
     }
@@ -228,7 +228,7 @@ public class LibsDisguiseWrapper extends DisguiseWrapper<Disguise>
     private final Scoreboard scoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
 
     @Override
-    public void updateDisplay(boolean isClone, DisguiseState state, Player player)
+    public void update(boolean isClone, DisguiseState state, Player player)
     {
         if (!this.instance.equals(DisguiseAPI.getDisguise(player)))
         {
@@ -428,15 +428,15 @@ public class LibsDisguiseWrapper extends DisguiseWrapper<Disguise>
     }
 
     @Override
-    public void setAggresive(boolean aggresive)
+    public void setAggressive(boolean aggressive)
     {
         if (watcher instanceof CreeperWatcher creeperWatcher)
         {
-            creeperWatcher.setIgnited(aggresive);
+            creeperWatcher.setIgnited(aggressive);
         }
         else if (watcher instanceof GhastWatcher ghastWatcher)
         {
-            ghastWatcher.setAggressive(aggresive);
+            ghastWatcher.setAggressive(aggressive);
         }
 
         invalidateCompound();

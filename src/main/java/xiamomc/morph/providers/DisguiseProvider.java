@@ -161,49 +161,38 @@ public abstract class DisguiseProvider extends MorphPluginObject
     }
 
     /**
-     * 获取某一实体的伪装
+     * 从某一实体构建伪装
      *
      * @param info 伪装信息
      * @param target 目标实体
-     * @return 一个DisguiseResult，其isCopy永远为true。
+     * @return 一个包含伪装Wrapper的 {@link DisguiseResult}, 失败时返回 {@link DisguiseResult#FAIL}
      */
     @NotNull
-    protected DisguiseResult getCopy(DisguiseInfo info, @Nullable Entity target)
+    protected DisguiseResult constructFromEntity(DisguiseInfo info, @Nullable Entity target)
     {
         if (target == null) return DisguiseResult.fail();
 
-        boolean shouldClone = false;
-
-        DisguiseWrapper<?> ourDisguise = null;
-        DisguiseWrapper<?> theirDisguise = null;
-        DisguiseState state = null;
+        boolean allowClone = false;
 
         var backend = morphs.getCurrentBackend();
 
-        if (backend.isDisguised(target))
+        DisguiseWrapper<?> ourDisguise;
+        DisguiseWrapper<?> theirDisguise = backend.getDisguise(target);
+        DisguiseState theirState = morphs.getDisguiseStateFor(target);
+
+        if (theirState != null && theirDisguise != null)
         {
-            theirDisguise = backend.getDisguise(target);
+            var key = theirState.getDisguiseIdentifier();
 
-            //如果玩家已伪装，则检查其目标伪装和我们想要的是否一致
-            if (target instanceof Player targetPlayer)
-            {
-                state = morphs.getDisguiseStateFor(targetPlayer);
+            //ID不一样则返回失败
+            if (!key.equals(info.getIdentifier())) return DisguiseResult.fail();
 
-                if (state != null)
-                {
-                    var key = state.getDisguiseIdentifier();
-
-                    //ID不一样则返回失败
-                    if (!key.equals(info.getIdentifier())) return DisguiseResult.fail();
-                }
-            }
-
-            shouldClone = canCopyDisguise(info, target, state, theirDisguise);
+            allowClone = canCloneDisguise(info, target, theirState, theirDisguise);
         }
 
-        ourDisguise = shouldClone
-                ? backend.getDisguise(target).clone()
-                : canConstruct(info, target, state) ? backend.createInstance(null, target) : null;
+        ourDisguise = allowClone
+                ? theirDisguise.clone()
+                : canConstruct(info, target, theirState) ? backend.createInstance(target) : null;
 
         return ourDisguise == null
                 ? DisguiseResult.fail()
@@ -211,18 +200,18 @@ public abstract class DisguiseProvider extends MorphPluginObject
     }
 
     /**
-     * 如果不能复制，那么我们是否可以构建某个实体的伪装?
+     * 我们是否可以通过给定的{@link DisguiseInfo}来从某个实体构建伪装?
      *
      * @param info {@link DisguiseInfo}
      * @param targetEntity 目标实体
      * @param theirState 他们的{@link DisguiseState}，为null则代表他们不是玩家或没有通过MorphPlugin伪装
-     * @return 是否允许此操作
+     * @return 是否允许此操作，如果theirState不为null则优先检查theirState是否和传入的info相匹配
      */
     public abstract boolean canConstruct(DisguiseInfo info, Entity targetEntity,
                                             @Nullable DisguiseState theirState);
 
     /**
-     * 是否可以复制某个实体的伪装?
+     * 是否可以克隆某个实体现有的伪装?
      *
      * @param info {@link DisguiseInfo}
      * @param targetEntity 目标实体
@@ -230,8 +219,8 @@ public abstract class DisguiseProvider extends MorphPluginObject
      * @param theirState 他们的{@link DisguiseState}，为null则代表他们不是玩家或没有通过MorphPlugin伪装
      * @return 是否允许此操作
      */
-    protected abstract boolean canCopyDisguise(DisguiseInfo info, Entity targetEntity,
-                                               @Nullable DisguiseState theirState, @NotNull DisguiseWrapper<?> theirDisguise);
+    protected abstract boolean canCloneDisguise(DisguiseInfo info, Entity targetEntity,
+                                                @NotNull DisguiseState theirState, @NotNull DisguiseWrapper<?> theirDisguise);
 
     /**
      * 伪装后要做的事

@@ -49,7 +49,7 @@ public class LaunchProjectiveMorphSkill extends DelayedMorphSkill<ProjectiveConf
 
         if (state.getEntityType() == EntityType.GHAST)
         {
-            state.getDisguise().setAggresive(true);
+            state.getDisguise().setAggressive(true);
             clientHandler.sendCommand(player, new S2CSetAggressiveCommand(true));
         }
 
@@ -61,7 +61,7 @@ public class LaunchProjectiveMorphSkill extends DelayedMorphSkill<ProjectiveConf
     {
         if (state.getEntityType() == EntityType.GHAST)
         {
-            state.getDisguise().setAggresive(false);
+            state.getDisguise().setAggressive(false);
             clientHandler.sendCommand(player, new S2CSetAggressiveCommand(false));
         }
 
