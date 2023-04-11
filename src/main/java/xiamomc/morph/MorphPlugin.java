@@ -75,7 +75,6 @@ public final class MorphPlugin extends XiaMoJavaPlugin
 
         var playerTracker = new PlayerTracker();
         var pluginEventListener = new PluginEventListener();
-        mirrorProcessor = new InteractionMirrorProcessor();
 
         pluginEventListener.onPluginEnable(this::onPluginEnable);
 
@@ -101,6 +100,8 @@ public final class MorphPlugin extends XiaMoJavaPlugin
         dependencyManager.cache(new MessageUtils());
 
         dependencyManager.cache(new PlayerOperationSimulator());
+
+        mirrorProcessor = new InteractionMirrorProcessor();
 
         //注册EventProcessor
         this.schedule(() ->
