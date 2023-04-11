@@ -14,6 +14,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.EquipmentSlot;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphManager;
@@ -26,13 +27,18 @@ import xiamomc.morph.misc.PlayerOperationSimulator;
 import xiamomc.morph.misc.permissions.CommonPermissions;
 import xiamomc.morph.network.server.MorphClientHandler;
 import xiamomc.morph.network.commands.S2C.set.S2CSetSneakingCommand;
+import xiamomc.morph.storage.mirrorlogging.MirrorSingleEntry;
+import xiamomc.morph.storage.mirrorlogging.OperationType;
 import xiamomc.morph.utilities.ItemUtils;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
 
-import java.util.List;
-import java.util.Map;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.net.URI;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class InteractionMirrorProcessor extends MorphPluginObject implements Listener
@@ -51,12 +57,14 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
 
         if (targetName != null)
         {
-            var player = getPlayer(e.getPlayer(), targetName);
+            var targetPlayer = getPlayer(e.getPlayer(), targetName);
 
-            if (!playerInDistance(e.getPlayer(), player, targetName) || player.isSneaking() == e.isSneaking()) return;
+            if (!playerInDistance(e.getPlayer(), targetPlayer, targetName) || targetPlayer.isSneaking() == e.isSneaking()) return;
 
-            player.setSneaking(e.isSneaking());
-            clientHandler.sendCommand(player, new S2CSetSneakingCommand(e.isSneaking()));
+            targetPlayer.setSneaking(e.isSneaking());
+            clientHandler.sendCommand(targetPlayer, new S2CSetSneakingCommand(e.isSneaking()));
+
+            logOperation(e.getPlayer(), targetPlayer, OperationType.ToggleSneak);
         }
     }
 
@@ -69,17 +77,19 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
 
         if (targetName != null)
         {
-            var player = getPlayer(e.getPlayer(), targetName);
+            var targetPlayer = getPlayer(e.getPlayer(), targetName);
 
-            if (!playerInDistance(e.getPlayer(), player, targetName)) return;
+            if (!playerInDistance(e.getPlayer(), targetPlayer, targetName)) return;
 
-            var equipment = player.getEquipment();
+            var equipment = targetPlayer.getEquipment();
 
             var mainHandItem = equipment.getItemInMainHand();
             var offhandItem = equipment.getItemInOffHand();
 
             equipment.setItemInMainHand(offhandItem);
             equipment.setItemInOffHand(mainHandItem);
+
+            logOperation(e.getPlayer(), targetPlayer, OperationType.SwapHand);
         }
     }
 
@@ -101,6 +111,8 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
             {
                 target.dropItem(false);
                 target.swingHand(EquipmentSlot.HAND);
+
+                logOperation(player, target, OperationType.ItemDrop);
                 e.setCancelled(true);
             }
         }
@@ -115,11 +127,13 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
 
         if (targetName != null)
         {
-            var player = getPlayer(e.getPlayer(), targetName);
+            var player = e.getPlayer();
+            var targetPlayer = getPlayer(player, targetName);
 
-            if (!playerInDistance(e.getPlayer(), player, targetName)) return;
+            if (!playerInDistance(player, targetPlayer, targetName)) return;
 
-            player.getInventory().setHeldItemSlot(e.getNewSlot());
+            targetPlayer.getInventory().setHeldItemSlot(e.getNewSlot());
+            logOperation(player, targetPlayer, OperationType.HotbarChange);
         }
     }
 
@@ -153,6 +167,7 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
                     && nmsPlayer.getUseItem().getBukkitStack().getType() == ourHandItem)
             {
                 nmsPlayer.releaseUsingItem();
+                logOperation(player, targetPlayer, OperationType.ReleaseUsingItem);
             }
         }
     }
@@ -173,6 +188,7 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
                 if (!playerInDistance(damager, targetPlayer, targetName)) return;
 
                 simulateOperation(Action.LEFT_CLICK_AIR, targetPlayer);
+                logOperation(damager, targetPlayer, OperationType.LeftClick);
 
                 //如果伪装的玩家想攻击本体，取消事件并模拟左键
                 if (e.getEntity() instanceof Player hurtedPlayer && hurtedPlayer.equals(targetPlayer))
@@ -229,7 +245,10 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
 
             //检查玩家在此tick内是否存在互动以避免重复镜像
             if (!tracker.interactingThisTick(player))
+            {
                 simulateOperation(lastAction.toBukkitAction(), targetPlayer);
+                logOperation(player, targetPlayer, lastAction.isLeftClick() ? OperationType.LeftClick : OperationType.RightClick);
+            }
 
             //如果玩家在被控玩家一定范围以内，被控玩家有目标实体，并且玩家没有目标实体，那么取消挥手动画
             if (targetPlayer.getLocation().getWorld() == player.getLocation().getWorld()
@@ -281,6 +300,7 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
             if (!playerInDistance(player, targetPlayer, targetName)) return;
 
             simulateOperation(e.getAction(), targetPlayer);
+            logOperation(player, targetPlayer, e.getAction().isLeftClick() ? OperationType.LeftClick : OperationType.RightClick);
         }
     }
 
@@ -365,6 +385,7 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
         return disguise == null && targetPlayer.getName().equals(targetName);
     }
 
+    @Contract("_, null, _ -> false; _, !null, _ -> _")
     private boolean playerInDistance(@NotNull Player source, @Nullable Player target, String targetName)
     {
         var backend = manager.getCurrentBackend();
@@ -437,6 +458,9 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
         this.addSchedule(this::update);
         lastRightClick.clear();
         ignoredPlayers.clear();
+
+        if (plugin.getCurrentTick() % (5 * 20) == 0)
+            pushToLoggingBase();
     }
 
     @EventHandler
@@ -456,4 +480,119 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
     {
         uuidDisguiseStateMap.remove(e.getPlayer());
     }
+
+    //region Operation Logging
+
+    private final Map<Player, Stack<MirrorSingleEntry>> tempEntries = new Object2ObjectOpenHashMap<>();
+
+    private File plainTextFile;
+
+    private boolean noOperationSinceLastPush;
+
+    private void aaa()
+    {
+        var dataFolderUri = this.plugin.getDataFolder().toURI();
+        this.plainTextFile = new File(URI.create("" + dataFolderUri + "/mirror_history.log"));
+
+        if (!this.plainTextFile.exists())
+        {
+            try
+            {
+                this.plainTextFile.createNewFile();
+            }
+            catch (Throwable ignore)
+            {
+                ignore.printStackTrace();
+            }
+        }
+    }
+
+    public void pushToLoggingBase()
+    {
+        if (plainTextFile == null)
+            aaa();
+
+        synchronized (tempEntries)
+        {
+            var dateFormat = new SimpleDateFormat("MM/dd HH:mm:ss");
+
+            if (tempEntries.isEmpty())
+            {
+                noOperationSinceLastPush = true;
+                return;
+            }
+
+            noOperationSinceLastPush = true;
+
+            tempEntries.forEach((p, s) ->
+            {
+                try (var stream = new FileOutputStream(this.plainTextFile, true))
+                {
+                    for (var entry : s)
+                    {
+                        String msg = "";
+                        if (noOperationSinceLastPush) msg += "\n";
+
+                        msg += "[%s] %s(%s) triggered operation %s for player %s repeating %s time(s).\n"
+                                .formatted(dateFormat.format(new Date(entry.timeMills())),
+                                        entry.playerName(), entry.uuid(), entry.operationType(),
+                                        entry.targetPlayerName(), entry.repeatingTimes());
+
+                        noOperationSinceLastPush = false;
+
+                        stream.write(msg.getBytes());
+                    }
+                }
+                catch (Throwable throwable)
+                {
+                    throwable.printStackTrace();
+                }
+            });
+
+            this.tempEntries.clear();
+        }
+    }
+
+    @NotNull
+    private MirrorSingleEntry getOrCreateEntryFor(Player player, Player targetPlayer, OperationType type)
+    {
+        synchronized (tempEntries)
+        {
+            var playerStack = tempEntries.getOrDefault(player, null);
+
+            if (playerStack == null)
+            {
+                playerStack = new Stack<>();
+                tempEntries.put(player, playerStack);
+            }
+
+            MirrorSingleEntry entry = null;
+
+            if (playerStack.size() > 0)
+            {
+                var peek = playerStack.peek();
+                if (peek.uuid().equals(player.getUniqueId().toString())
+                        && peek.targetPlayerName().equals(targetPlayer.getName())
+                        && peek.operationType() == type)
+                {
+                    entry = peek;
+                }
+            }
+
+            if (entry != null) return entry;
+
+            entry = new MirrorSingleEntry(player.getName(), player.getUniqueId().toString(), targetPlayer.getName(), type, 0, System.currentTimeMillis());
+            playerStack.push(entry);
+
+            return entry;
+        }
+    }
+
+    private void logOperation(Player source, Player targetPlayer, OperationType type)
+    {
+        var entry = getOrCreateEntryFor(source, targetPlayer, type);
+        entry.increaseRepeatingTimes();
+    }
+
+    //endregion Operation Logging
 }
