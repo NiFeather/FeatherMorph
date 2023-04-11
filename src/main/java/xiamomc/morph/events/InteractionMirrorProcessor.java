@@ -59,7 +59,7 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
         {
             var targetPlayer = getPlayer(e.getPlayer(), targetName);
 
-            if (!playerInDistance(e.getPlayer(), targetPlayer, targetName) || targetPlayer.isSneaking() == e.isSneaking()) return;
+            if (!playerInDistance(e.getPlayer(), targetPlayer, targetName, true) || targetPlayer.isSneaking() == e.isSneaking()) return;
 
             targetPlayer.setSneaking(e.isSneaking());
             clientHandler.sendCommand(targetPlayer, new S2CSetSneakingCommand(e.isSneaking()));
@@ -385,8 +385,14 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
         return disguise == null && targetPlayer.getName().equals(targetName);
     }
 
-    @Contract("_, null, _ -> false; _, !null, _ -> _")
+    @Contract("_, null, _-> false; _, !null, _ -> _")
     private boolean playerInDistance(@NotNull Player source, @Nullable Player target, String targetName)
+    {
+        return playerInDistance(source, target, targetName, false);
+    }
+
+    @Contract("_, null, _, _ -> false; _, !null, _, _ -> _")
+    private boolean playerInDistance(@NotNull Player source, @Nullable Player target, String targetName, boolean dontCheckWhetherIgnored)
     {
         var backend = manager.getCurrentBackend();
 
@@ -394,7 +400,7 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
                 || (selectionMode.get().equalsIgnoreCase(InteractionMirrorSelectionMode.BY_NAME)
                         ? ignoreDisguised.get() && backend.isDisguised(target)
                         : !match(target, targetName))
-                || ignoredPlayers.contains(target) || ignoredPlayers.contains(source)
+                || (!dontCheckWhetherIgnored && (ignoredPlayers.contains(target) || ignoredPlayers.contains(source)))
                 || !source.hasPermission(CommonPermissions.MIRROR)
                 || target.hasPermission(CommonPermissions.MIRROR_IMMUNE)
                 || target.getOpenInventory().getType() != InventoryType.CRAFTING
@@ -459,7 +465,7 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
         lastRightClick.clear();
         ignoredPlayers.clear();
 
-        if (plugin.getCurrentTick() % (5 * 20) == 0)
+        if (plugin.getCurrentTick() % (30 * 20) == 0)
             pushToLoggingBase();
     }
 
@@ -533,9 +539,9 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
                         String msg = "";
                         if (noOperationSinceLastPush) msg += "\n";
 
-                        msg += "[%s] %s(%s) triggered operation %s for player %s repeating %s time(s).\n"
+                        msg += "[%s] %s triggered operation %s for player %s repeating %s time(s).\n"
                                 .formatted(dateFormat.format(new Date(entry.timeMills())),
-                                        entry.playerName(), entry.uuid(), entry.operationType(),
+                                        entry.playerName(), entry.operationType(),
                                         entry.targetPlayerName(), entry.repeatingTimes());
 
                         noOperationSinceLastPush = false;

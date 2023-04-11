@@ -60,6 +60,8 @@ public final class MorphPlugin extends XiaMoJavaPlugin
 
     private Metrics metrics;
 
+    private InteractionMirrorProcessor mirrorProcessor;
+
     @Override
     public void onEnable()
     {
@@ -73,6 +75,8 @@ public final class MorphPlugin extends XiaMoJavaPlugin
 
         var playerTracker = new PlayerTracker();
         var pluginEventListener = new PluginEventListener();
+        mirrorProcessor = new InteractionMirrorProcessor();
+
         pluginEventListener.onPluginEnable(this::onPluginEnable);
 
         //缓存依赖
@@ -105,7 +109,7 @@ public final class MorphPlugin extends XiaMoJavaPlugin
                     {
                             playerTracker,
                             pluginEventListener,
-                            new InteractionMirrorProcessor(),
+                            mirrorProcessor,
                             new CommonEventProcessor(),
                     });
 
@@ -134,6 +138,9 @@ public final class MorphPlugin extends XiaMoJavaPlugin
 
             if (metrics != null)
                 metrics.shutdown();
+
+            if (mirrorProcessor != null)
+                mirrorProcessor.pushToLoggingBase();
         }
         catch (Exception e)
         {
