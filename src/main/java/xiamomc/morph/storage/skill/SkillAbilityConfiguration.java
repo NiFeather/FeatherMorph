@@ -19,9 +19,9 @@ import xiamomc.morph.skills.options.TeleportConfiguration;
 import java.util.List;
 import java.util.Map;
 
-public class SkillConfiguration
+public class SkillAbilityConfiguration
 {
-    public SkillConfiguration()
+    public SkillAbilityConfiguration()
     {
     }
 
@@ -32,7 +32,7 @@ public class SkillConfiguration
      * @param cd CD时间
      * @param skillIdentifier 技能ID
      */
-    public SkillConfiguration(String mobId, int cd, NamespacedKey skillIdentifier)
+    public SkillAbilityConfiguration(String mobId, int cd, NamespacedKey skillIdentifier)
     {
         this.identifier = mobId;
         this.cooldown = cd;
@@ -46,7 +46,7 @@ public class SkillConfiguration
      * @param cd CD时间
      * @param skillIdentifier 技能ID
      */
-    public SkillConfiguration(EntityType type, int cd, NamespacedKey skillIdentifier)
+    public SkillAbilityConfiguration(EntityType type, int cd, NamespacedKey skillIdentifier)
     {
         this(type.getKey(), cd, skillIdentifier);
     }
@@ -58,7 +58,7 @@ public class SkillConfiguration
      * @param cd CD时间
      * @param skillIdentifier 技能ID
      */
-    public SkillConfiguration(NamespacedKey key, int cd, NamespacedKey skillIdentifier)
+    public SkillAbilityConfiguration(NamespacedKey key, int cd, NamespacedKey skillIdentifier)
     {
         this.cooldown = cd;
         setSkillIdentifier(skillIdentifier);

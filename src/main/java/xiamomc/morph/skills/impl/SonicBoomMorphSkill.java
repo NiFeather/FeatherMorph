@@ -11,10 +11,9 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.misc.NmsRecord;
-import xiamomc.morph.misc.PlayerOperationSimulator;
 import xiamomc.morph.skills.SkillType;
 import xiamomc.morph.skills.options.NoOpConfiguration;
-import xiamomc.morph.storage.skill.SkillConfiguration;
+import xiamomc.morph.storage.skill.SkillAbilityConfiguration;
 import xiamomc.morph.utilities.DamageSourceUtils;
 
 public class SonicBoomMorphSkill extends DelayedMorphSkill<NoOpConfiguration>
@@ -23,7 +22,7 @@ public class SonicBoomMorphSkill extends DelayedMorphSkill<NoOpConfiguration>
     public static int defaultCooldown = 34 + 20 * 3;
 
     @Override
-    protected ExecuteResult preExecute(Player player, DisguiseState state, SkillConfiguration configuration, NoOpConfiguration option)
+    protected ExecuteResult preExecute(Player player, DisguiseState state, SkillAbilityConfiguration configuration, NoOpConfiguration option)
     {
         playSoundToNearbyPlayers(player, 160,
                 Key.key("minecraft", "entity.warden.sonic_charge"), Sound.Source.HOSTILE);
@@ -32,13 +31,13 @@ public class SonicBoomMorphSkill extends DelayedMorphSkill<NoOpConfiguration>
     }
 
     @Override
-    protected int getExecuteDelay(SkillConfiguration configuration, NoOpConfiguration option)
+    protected int getExecuteDelay(SkillAbilityConfiguration configuration, NoOpConfiguration option)
     {
         return 34;
     }
 
     @Override
-    protected void executeDelayedSkill(Player player, DisguiseState state, SkillConfiguration configuration, NoOpConfiguration option)
+    protected void executeDelayedSkill(Player player, DisguiseState state, SkillAbilityConfiguration configuration, NoOpConfiguration option)
     {
         var location = player.getEyeLocation().toVector();
         var direction = player.getEyeLocation().getDirection();

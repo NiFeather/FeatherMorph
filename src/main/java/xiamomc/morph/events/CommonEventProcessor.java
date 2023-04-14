@@ -19,6 +19,8 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.InventoryHolder;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
+import xiamomc.morph.events.api.gameplay.PlayerJoinedWithDisguiseEvent;
+import xiamomc.morph.events.api.gameplay.PlayerMorphEvent;
 import xiamomc.morph.backends.libsdisg.LibsDisguiseWrapper;
 import xiamomc.morph.commands.MorphCommandHelper;
 import xiamomc.morph.config.ConfigOption;
@@ -395,7 +397,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
             state.refreshSkills();
 
             //调用Morph事件
-            Bukkit.getPluginManager().callEvent(new PlayerMorphEvent(player, state));
+            Bukkit.getPluginManager().callEvent(new PlayerJoinedWithDisguiseEvent(player, state));
 
             return;
         }

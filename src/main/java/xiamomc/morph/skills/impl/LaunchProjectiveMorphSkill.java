@@ -12,14 +12,14 @@ import xiamomc.morph.network.server.MorphClientHandler;
 import xiamomc.morph.network.commands.S2C.set.S2CSetAggressiveCommand;
 import xiamomc.morph.skills.SkillType;
 import xiamomc.morph.skills.options.ProjectiveConfiguration;
-import xiamomc.morph.storage.skill.SkillConfiguration;
+import xiamomc.morph.storage.skill.SkillAbilityConfiguration;
 import xiamomc.morph.utilities.EntityTypeUtils;
 import xiamomc.pluginbase.Annotations.Resolved;
 
 public class LaunchProjectiveMorphSkill extends DelayedMorphSkill<ProjectiveConfiguration>
 {
     @Override
-    protected int getExecuteDelay(SkillConfiguration configuration, ProjectiveConfiguration option)
+    protected int getExecuteDelay(SkillAbilityConfiguration configuration, ProjectiveConfiguration option)
     {
         return option.executeDelay;
     }
@@ -28,7 +28,7 @@ public class LaunchProjectiveMorphSkill extends DelayedMorphSkill<ProjectiveConf
     private MorphClientHandler clientHandler;
 
     @Override
-    protected ExecuteResult preExecute(Player player, DisguiseState state, SkillConfiguration configuration, ProjectiveConfiguration option)
+    protected ExecuteResult preExecute(Player player, DisguiseState state, SkillAbilityConfiguration configuration, ProjectiveConfiguration option)
     {
         if (option == null || configuration == null)
         {
@@ -57,7 +57,7 @@ public class LaunchProjectiveMorphSkill extends DelayedMorphSkill<ProjectiveConf
     }
 
     @Override
-    protected void executeDelayedSkill(Player player, DisguiseState state, SkillConfiguration configuration, ProjectiveConfiguration option)
+    protected void executeDelayedSkill(Player player, DisguiseState state, SkillAbilityConfiguration configuration, ProjectiveConfiguration option)
     {
         if (state.getEntityType() == EntityType.GHAST)
         {

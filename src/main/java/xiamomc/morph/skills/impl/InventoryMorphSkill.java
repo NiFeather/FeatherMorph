@@ -12,7 +12,7 @@ import xiamomc.morph.network.server.MorphClientHandler;
 import xiamomc.morph.skills.MorphSkill;
 import xiamomc.morph.skills.SkillType;
 import xiamomc.morph.skills.options.NoOpConfiguration;
-import xiamomc.morph.storage.skill.SkillConfiguration;
+import xiamomc.morph.storage.skill.SkillAbilityConfiguration;
 import xiamomc.pluginbase.Annotations.Resolved;
 
 public class InventoryMorphSkill extends MorphSkill<NoOpConfiguration>
@@ -24,7 +24,7 @@ public class InventoryMorphSkill extends MorphSkill<NoOpConfiguration>
     private MorphClientHandler clientHandler;
 
     @Override
-    public int executeSkill(Player player, DisguiseState state, SkillConfiguration configuration, NoOpConfiguration option)
+    public int executeSkill(Player player, DisguiseState state, SkillAbilityConfiguration configuration, NoOpConfiguration option)
     {
         var defaultShown = state.toggleDisguisedItems();
 

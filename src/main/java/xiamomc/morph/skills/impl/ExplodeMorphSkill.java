@@ -15,13 +15,13 @@ import xiamomc.morph.network.server.MorphClientHandler;
 import xiamomc.morph.network.commands.S2C.set.S2CSetSNbtCommand;
 import xiamomc.morph.skills.SkillType;
 import xiamomc.morph.skills.options.ExplosionConfiguration;
-import xiamomc.morph.storage.skill.SkillConfiguration;
+import xiamomc.morph.storage.skill.SkillAbilityConfiguration;
 import xiamomc.pluginbase.Annotations.Resolved;
 
 public class ExplodeMorphSkill extends DelayedMorphSkill<ExplosionConfiguration>
 {
     @Override
-    protected int getExecuteDelay(SkillConfiguration configuration, ExplosionConfiguration option)
+    protected int getExecuteDelay(SkillAbilityConfiguration configuration, ExplosionConfiguration option)
     {
         return option.executeDelay;
     }
@@ -30,7 +30,7 @@ public class ExplodeMorphSkill extends DelayedMorphSkill<ExplosionConfiguration>
     private MorphClientHandler clientHandler;
 
     @Override
-    protected ExecuteResult preExecute(Player player, DisguiseState state, SkillConfiguration configuration, ExplosionConfiguration option)
+    protected ExecuteResult preExecute(Player player, DisguiseState state, SkillAbilityConfiguration configuration, ExplosionConfiguration option)
     {
         if (option == null)
         {
@@ -48,7 +48,7 @@ public class ExplodeMorphSkill extends DelayedMorphSkill<ExplosionConfiguration>
     }
 
     @Override
-    protected void executeDelayedSkill(Player player, DisguiseState state, SkillConfiguration configuration, ExplosionConfiguration option)
+    protected void executeDelayedSkill(Player player, DisguiseState state, SkillAbilityConfiguration configuration, ExplosionConfiguration option)
     {
         var strength = option.getStrength();
         var setsFire = option.setsFire();

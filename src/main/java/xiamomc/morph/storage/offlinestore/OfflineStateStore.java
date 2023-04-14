@@ -9,7 +9,7 @@ import xiamomc.morph.storage.MorphJsonBasedStorage;
 import java.util.List;
 import java.util.UUID;
 
-public class OfflineStorageManager extends MorphJsonBasedStorage<OfflineStateContainer> implements IManageOfflineStates
+public class OfflineStateStore extends MorphJsonBasedStorage<OfflineStateContainer> implements IManageOfflineStates
 {
     @Override
     protected @NotNull String getFileName()

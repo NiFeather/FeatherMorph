@@ -18,12 +18,12 @@ import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.skills.MorphSkill;
 import xiamomc.morph.skills.SkillType;
 import xiamomc.morph.skills.options.NoOpConfiguration;
-import xiamomc.morph.storage.skill.SkillConfiguration;
+import xiamomc.morph.storage.skill.SkillAbilityConfiguration;
 
 public class SummonFangsMorphSkill extends MorphSkill<NoOpConfiguration>
 {
     @Override
-    public int executeSkill(Player player, DisguiseState state, SkillConfiguration configuration, NoOpConfiguration option)
+    public int executeSkill(Player player, DisguiseState state, SkillAbilityConfiguration configuration, NoOpConfiguration option)
     {
         var targetEntity = player.getTargetEntity(16);
 

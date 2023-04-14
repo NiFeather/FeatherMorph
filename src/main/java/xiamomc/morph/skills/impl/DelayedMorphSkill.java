@@ -5,7 +5,7 @@ import xiamomc.morph.MorphManager;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.skills.MorphSkill;
 import xiamomc.morph.storage.skill.ISkillOption;
-import xiamomc.morph.storage.skill.SkillConfiguration;
+import xiamomc.morph.storage.skill.SkillAbilityConfiguration;
 import xiamomc.pluginbase.Annotations.Resolved;
 
 public abstract class DelayedMorphSkill<T extends ISkillOption> extends MorphSkill<T>
@@ -14,7 +14,7 @@ public abstract class DelayedMorphSkill<T extends ISkillOption> extends MorphSki
     private MorphManager manager;
 
     @Override
-    public final int executeSkill(Player player, DisguiseState state, SkillConfiguration configuration, T option)
+    public final int executeSkill(Player player, DisguiseState state, SkillAbilityConfiguration configuration, T option)
     {
         if (option == null || configuration == null)
         {
@@ -32,14 +32,14 @@ public abstract class DelayedMorphSkill<T extends ISkillOption> extends MorphSki
         return configuration.getCooldown();
     }
 
-    protected ExecuteResult preExecute(Player player, DisguiseState state, SkillConfiguration configuration, T option)
+    protected ExecuteResult preExecute(Player player, DisguiseState state, SkillAbilityConfiguration configuration, T option)
     {
         return ExecuteResult.success(configuration.getCooldown());
     }
 
-    protected abstract int getExecuteDelay(SkillConfiguration configuration, T option);
+    protected abstract int getExecuteDelay(SkillAbilityConfiguration configuration, T option);
 
-    protected abstract void executeDelayedSkill(Player player, DisguiseState state, SkillConfiguration configuration, T option);
+    protected abstract void executeDelayedSkill(Player player, DisguiseState state, SkillAbilityConfiguration configuration, T option);
 
     protected void addDelayedSkillSchedule(Player player, Runnable execution, int delay)
     {

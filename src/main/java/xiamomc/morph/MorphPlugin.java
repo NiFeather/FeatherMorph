@@ -24,7 +24,7 @@ import xiamomc.morph.misc.integrations.gsit.GSitCompactProcessor;
 import xiamomc.morph.misc.integrations.placeholderapi.PlaceholderIntegration;
 import xiamomc.morph.network.server.MorphClientHandler;
 import xiamomc.morph.skills.MorphSkillHandler;
-import xiamomc.morph.storage.skill.SkillConfigurationStore;
+import xiamomc.morph.storage.skill.SkillAbilityConfigurationStore;
 import xiamomc.pluginbase.Command.CommandHelper;
 import xiamomc.pluginbase.Messages.MessageStore;
 import xiamomc.pluginbase.XiaMoJavaPlugin;
@@ -95,7 +95,7 @@ public final class MorphPlugin extends XiaMoJavaPlugin
         dependencyManager.cacheAs(MorphConfigManager.class, new MorphConfigManager(this));
         dependencyManager.cache(playerTracker);
 
-        dependencyManager.cache(new SkillConfigurationStore());
+        dependencyManager.cache(new SkillAbilityConfigurationStore());
 
         dependencyManager.cache(new MessageUtils());
 

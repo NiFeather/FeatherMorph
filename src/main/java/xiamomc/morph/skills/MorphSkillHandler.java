@@ -5,6 +5,7 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
+import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
@@ -12,14 +13,16 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
+import xiamomc.morph.events.api.gameplay.PlayerExecuteSkillEvent;
+import xiamomc.morph.events.api.lifecycle.SkillsFinishedInitializeEvent;
 import xiamomc.morph.messages.CommandStrings;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.SkillStrings;
 import xiamomc.morph.misc.permissions.CommonPermissions;
 import xiamomc.morph.skills.impl.*;
 import xiamomc.morph.storage.skill.ISkillOption;
-import xiamomc.morph.storage.skill.SkillConfiguration;
-import xiamomc.morph.storage.skill.SkillConfigurationStore;
+import xiamomc.morph.storage.skill.SkillAbilityConfiguration;
+import xiamomc.morph.storage.skill.SkillAbilityConfigurationStore;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 
@@ -59,7 +62,7 @@ public class MorphSkillHandler extends MorphPluginObject
     private MorphManager manager;
 
     @Resolved
-    private SkillConfigurationStore store;
+    private SkillAbilityConfigurationStore store;
 
     @Initializer
     private void load()
@@ -77,6 +80,8 @@ public class MorphSkillHandler extends MorphPluginObject
         ));
 
         this.addSchedule(this::update);
+
+        Bukkit.getPluginManager().callEvent(new SkillsFinishedInitializeEvent(this));
     }
 
     /**
@@ -136,7 +141,7 @@ public class MorphSkillHandler extends MorphPluginObject
      * @return 对应的技能和技能配置，如果没找到则是null
      */
     @Nullable
-    private Map.Entry<SkillConfiguration, IMorphSkill<?>> getSkillEntry(String identifier)
+    private Map.Entry<SkillAbilityConfiguration, IMorphSkill<?>> getSkillEntry(String identifier)
     {
         if (identifier == null) return null;
 
@@ -187,6 +192,14 @@ public class MorphSkillHandler extends MorphPluginObject
 
         if (entry != null && !entry.getKey().getSkillIdentifier().equals(SkillType.NONE) && player.getGameMode() != GameMode.SPECTATOR)
         {
+            var event = new PlayerExecuteSkillEvent(player, state);
+            Bukkit.getPluginManager().callEvent(event);
+            if (event.isCancelled())
+            {
+                state.setSkillCooldown(5);
+                return;
+            }
+
             var skill = entry.getValue();
             var config = entry.getKey();
 

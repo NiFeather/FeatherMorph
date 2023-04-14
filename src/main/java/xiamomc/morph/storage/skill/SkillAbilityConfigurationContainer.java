@@ -5,10 +5,10 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 
 import java.util.List;
 
-public class SkillConfigurationContainer
+public class SkillAbilityConfigurationContainer
 {
     @Expose
-    public List<SkillConfiguration> configurations = new ObjectArrayList<>();
+    public List<SkillAbilityConfiguration> configurations = new ObjectArrayList<>();
 
     @Expose
     public int version;

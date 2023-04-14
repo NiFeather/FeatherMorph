@@ -11,9 +11,10 @@ import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.abilities.impl.*;
 import xiamomc.morph.abilities.impl.potion.*;
+import xiamomc.morph.events.api.lifecycle.AbilitiesFinishedInitializeEvent;
 import xiamomc.morph.misc.DisguiseState;
-import xiamomc.morph.storage.skill.SkillConfiguration;
-import xiamomc.morph.storage.skill.SkillConfigurationStore;
+import xiamomc.morph.storage.skill.SkillAbilityConfiguration;
+import xiamomc.morph.storage.skill.SkillAbilityConfigurationStore;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 
@@ -26,7 +27,7 @@ public class AbilityHandler extends MorphPluginObject
     private final List<IMorphAbility<?>> registedAbilities = new ObjectArrayList<>();
 
     @Resolved
-    private SkillConfigurationStore store;
+    private SkillAbilityConfigurationStore store;
 
     private boolean initalizeDone;
 
@@ -134,6 +135,8 @@ public class AbilityHandler extends MorphPluginObject
         ));
 
         initalizeDone = true;
+
+        Bukkit.getPluginManager().callEvent(new AbilitiesFinishedInitializeEvent(this));
     }
 
     @Nullable
@@ -150,7 +153,7 @@ public class AbilityHandler extends MorphPluginObject
         return val;
     }
 
-    private final Map<SkillConfiguration, List<IMorphAbility<?>>> configToAbilitiesMap = new Object2ObjectOpenHashMap<>();
+    private final Map<SkillAbilityConfiguration, List<IMorphAbility<?>>> configToAbilitiesMap = new Object2ObjectOpenHashMap<>();
 
     /**
      * 为某个伪装ID获取被动技能
@@ -185,7 +188,7 @@ public class AbilityHandler extends MorphPluginObject
         return null;
     }
 
-    public void setAbilities(SkillConfiguration configuration, List<IMorphAbility<?>> abilities)
+    public void setAbilities(SkillAbilityConfiguration configuration, List<IMorphAbility<?>> abilities)
     {
         configToAbilitiesMap.put(configuration, abilities);
     }

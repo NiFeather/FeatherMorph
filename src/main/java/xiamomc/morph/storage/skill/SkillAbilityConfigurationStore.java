@@ -24,19 +24,19 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * 技能配置存储，有关技能执行、注册技能请查看{@link MorphSkillHandler} 和 {@link AbilityHandler}
  */
-public class SkillConfigurationStore extends MorphJsonBasedStorage<SkillConfigurationContainer>
+public class SkillAbilityConfigurationStore extends MorphJsonBasedStorage<SkillAbilityConfigurationContainer>
 {
     /**
      * 配置 -> 技能
      */
-    private final Map<SkillConfiguration, IMorphSkill<?>> configToSkillMap = new Object2ObjectOpenHashMap<>();
+    private final Map<SkillAbilityConfiguration, IMorphSkill<?>> configToSkillMap = new Object2ObjectOpenHashMap<>();
 
     /**
      * 获取已配置的技能
      *
      * @return 配置 -> 技能表
      */
-    public Map<SkillConfiguration, IMorphSkill<?>> getConfiguredSkills()
+    public Map<SkillAbilityConfiguration, IMorphSkill<?>> getConfiguredSkills()
     {
         return configToSkillMap;
     }
@@ -48,7 +48,7 @@ public class SkillConfigurationStore extends MorphJsonBasedStorage<SkillConfigur
     }
 
     @Override
-    protected @NotNull SkillConfigurationContainer createDefault()
+    protected @NotNull SkillAbilityConfigurationContainer createDefault()
     {
         return DefaultConfigGenerator.getDefaultSkillConfiguration();
     }
@@ -137,7 +137,7 @@ public class SkillConfigurationStore extends MorphJsonBasedStorage<SkillConfigur
      * @param configuration 要注册的配置
      * @return 操作是否成功
      */
-    public boolean registerConfiguration(SkillConfiguration configuration)
+    public boolean registerConfiguration(SkillAbilityConfiguration configuration)
     {
         if (configToSkillMap.containsKey(configuration))
             return true;
@@ -170,7 +170,7 @@ public class SkillConfigurationStore extends MorphJsonBasedStorage<SkillConfigur
         return true;
     }
 
-    private boolean migrate(SkillConfigurationContainer config)
+    private boolean migrate(SkillAbilityConfigurationContainer config)
     {
         logger.info("Updating skill configurations...");
 

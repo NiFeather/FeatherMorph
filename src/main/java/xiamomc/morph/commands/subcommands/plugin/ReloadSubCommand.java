@@ -1,23 +1,20 @@
 package xiamomc.morph.commands.subcommands.plugin;
 
 import it.unimi.dsi.fastutil.objects.ObjectImmutableList;
-import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
-import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.messages.*;
 import xiamomc.morph.messages.vanilla.VanillaMessageStore;
 import xiamomc.morph.network.server.MorphClientHandler;
-import xiamomc.morph.storage.skill.SkillConfigurationStore;
+import xiamomc.morph.storage.skill.SkillAbilityConfigurationStore;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Command.ISubCommand;
 import xiamomc.pluginbase.Messages.FormattableMessage;
 import xiamomc.pluginbase.Messages.MessageStore;
 
-import java.util.Arrays;
 import java.util.List;
 
 public class ReloadSubCommand extends MorphPluginObject implements ISubCommand
@@ -54,7 +51,7 @@ public class ReloadSubCommand extends MorphPluginObject implements ISubCommand
     private VanillaMessageStore vanillaMessageStore;
 
     @Resolved
-    private SkillConfigurationStore skills;
+    private SkillAbilityConfigurationStore skills;
 
     private final List<String> subcommands = ObjectImmutableList.of("data", "message", "update_message");
 

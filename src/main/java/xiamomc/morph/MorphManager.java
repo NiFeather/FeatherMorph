@@ -11,19 +11,19 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.profile.PlayerTextures;
-import org.bukkit.util.BoundingBox;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.abilities.AbilityHandler;
+import xiamomc.morph.events.api.lifecycle.ManagerFinishedInitializeEvent;
 import xiamomc.morph.backends.DisguiseBackend;
 import xiamomc.morph.backends.DisguiseWrapper;
 import xiamomc.morph.backends.fallback.NilBackend;
 import xiamomc.morph.backends.libsdisg.LibsBackend;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
-import xiamomc.morph.events.PlayerMorphEvent;
-import xiamomc.morph.events.PlayerUnMorphEvent;
+import xiamomc.morph.events.api.gameplay.PlayerMorphEvent;
+import xiamomc.morph.events.api.gameplay.PlayerUnMorphEvent;
 import xiamomc.morph.interfaces.IManagePlayerData;
 import xiamomc.morph.messages.CommandStrings;
 import xiamomc.morph.messages.HintStrings;
@@ -47,7 +47,7 @@ import xiamomc.morph.skills.MorphSkillHandler;
 import xiamomc.morph.skills.SkillCooldownInfo;
 import xiamomc.morph.skills.SkillType;
 import xiamomc.morph.storage.offlinestore.OfflineDisguiseState;
-import xiamomc.morph.storage.offlinestore.OfflineStorageManager;
+import xiamomc.morph.storage.offlinestore.OfflineStateStore;
 import xiamomc.morph.storage.playerdata.PlayerDataStore;
 import xiamomc.morph.storage.playerdata.PlayerMorphConfiguration;
 import xiamomc.morph.utilities.DisguiseUtils;
@@ -69,7 +69,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
     private final PlayerDataStore data = new PlayerDataStore();
 
-    private final OfflineStorageManager offlineStorage = new OfflineStorageManager();
+    private final OfflineStateStore offlineStorage = new OfflineStateStore();
 
     @Resolved
     private MorphSkillHandler skillHandler;
@@ -143,6 +143,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
             actionItem = item;
         }, true);
+
+        Bukkit.getPluginManager().callEvent(new ManagerFinishedInitializeEvent(this));
     }
 
     private void update()

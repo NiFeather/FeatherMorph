@@ -1,4 +1,4 @@
-package xiamomc.morph.events;
+package xiamomc.morph.events.api.gameplay;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
@@ -6,18 +6,19 @@ import org.bukkit.event.player.PlayerEvent;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.misc.DisguiseState;
 
-public class PlayerMorphEvent extends PlayerEvent
+public class PlayerJoinedWithDisguiseEvent extends PlayerEvent
 {
     private static final HandlerList handlers = new HandlerList();
 
-    private final DisguiseState state;
+    public final DisguiseState state;
 
     /**
-     * 会在玩家进行伪装、更换伪装或带State加入时触发
+     * 会在带有 {@link DisguiseState} 的玩家加入时触发
+     *
      * @param who 玩家
      * @param state 玩家的{@link DisguiseState}
      */
-    public PlayerMorphEvent(@NotNull Player who, @NotNull DisguiseState state)
+    public PlayerJoinedWithDisguiseEvent(@NotNull Player who, @NotNull DisguiseState state)
     {
         super(who);
 
