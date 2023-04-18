@@ -6,6 +6,7 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -55,13 +56,14 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
     {
         if (!allowSneak.get()) return;
 
-        var targetName = uuidDisguiseStateMap.get(e.getPlayer());
+        var player = e.getPlayer();
+        var targetName = uuidDisguiseStateMap.get(player);
 
         if (targetName != null)
         {
-            var targetPlayer = getPlayer(e.getPlayer(), targetName);
+            var targetPlayer = getPlayer(player, targetName);
 
-            if (!playerInDistance(e.getPlayer(), targetPlayer, targetName, true) || targetPlayer.isSneaking() == e.isSneaking()) return;
+            if (!playerInDistance(player, targetPlayer, targetName, true) || targetPlayer.isSneaking() == e.isSneaking()) return;
 
             targetPlayer.setSneaking(e.isSneaking());
             clientHandler.sendCommand(targetPlayer, new S2CSetSneakingCommand(e.isSneaking()));
@@ -79,9 +81,10 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
 
         if (targetName != null)
         {
-            var targetPlayer = getPlayer(e.getPlayer(), targetName);
+            var player = e.getPlayer();
+            var targetPlayer = getPlayer(player, targetName);
 
-            if (!playerInDistance(e.getPlayer(), targetPlayer, targetName)) return;
+            if (!playerInDistance(player, targetPlayer, targetName)) return;
 
             var equipment = targetPlayer.getEquipment();
 
@@ -91,7 +94,7 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
             equipment.setItemInMainHand(offhandItem);
             equipment.setItemInOffHand(mainHandItem);
 
-            logOperation(e.getPlayer(), targetPlayer, OperationType.SwapHand);
+            logOperation(player, targetPlayer, OperationType.SwapHand);
         }
     }
 
@@ -189,7 +192,7 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
 
                 if (!playerInDistance(damager, targetPlayer, targetName)) return;
 
-                simulateOperation(Action.LEFT_CLICK_AIR, targetPlayer);
+                simulateOperation(Action.LEFT_CLICK_AIR, targetPlayer, damager);
                 logOperation(damager, targetPlayer, OperationType.LeftClick);
 
                 //如果伪装的玩家想攻击本体，取消事件并模拟左键
@@ -214,7 +217,7 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
     private PlayerTracker tracker;
 
     @EventHandler
-    public void onPlayerSwing(PlayerArmSwingEvent e)
+    public synchronized void onPlayerSwing(PlayerArmSwingEvent e)
     {
         if (!allowSimulation.get()) return;
 
@@ -248,20 +251,8 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
             //检查玩家在此tick内是否存在互动以避免重复镜像
             if (!tracker.interactingThisTick(player))
             {
-                simulateOperation(lastAction.toBukkitAction(), targetPlayer);
+                simulateOperation(lastAction.toBukkitAction(), targetPlayer, player);
                 logOperation(player, targetPlayer, lastAction.isLeftClick() ? OperationType.LeftClick : OperationType.RightClick);
-            }
-
-            //如果玩家在被控玩家一定范围以内，被控玩家有目标实体，并且玩家没有目标实体，那么取消挥手动画
-            if (targetPlayer.getLocation().getWorld() == player.getLocation().getWorld()
-                && Math.abs(targetPlayer.getLocation().distanceSquared(player.getLocation())) <= 6)
-            {
-                var theirTarget = targetPlayer.getTargetEntity(3);
-                var ourTarget = player.getTargetEntity(3);
-
-                if (theirTarget != null
-                        && (ourTarget == null || ourTarget == targetPlayer || ourTarget == theirTarget))
-                    e.setCancelled(true);
             }
         }
     }
@@ -301,7 +292,7 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
 
             if (!playerInDistance(player, targetPlayer, targetName)) return;
 
-            simulateOperation(e.getAction(), targetPlayer);
+            simulateOperation(e.getAction(), targetPlayer, player);
             logOperation(player, targetPlayer, e.getAction().isLeftClick() ? OperationType.LeftClick : OperationType.RightClick);
         }
     }
@@ -318,12 +309,13 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
      * @param targetPlayer 目标玩家
      * @return 操作是否成功
      */
-    private boolean simulateOperation(Action action, Player targetPlayer)
+    private boolean simulateOperation(Action action, Player targetPlayer, Player source)
     {
         if (!allowSimulation.get()) return false;
 
-        if (ignoredPlayers.contains(targetPlayer) || tracker.interactingThisTick(targetPlayer)) return false;
+        if (ignoredPlayers.contains(source) || ignoredPlayers.contains(targetPlayer) || tracker.interactingThisTick(targetPlayer)) return false;
         ignoredPlayers.add(targetPlayer);
+        ignoredPlayers.add(source);
 
         var isRightClick = action.isRightClick();
         var result = isRightClick
@@ -334,7 +326,7 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
         {
             var itemInUse = targetPlayer.getEquipment().getItem(result.hand()).getType();
 
-            if (!isRightClick || !ItemUtils.isContinuousUsable(itemInUse))
+            if ((!isRightClick || !ItemUtils.isContinuousUsable(itemInUse)))
                 targetPlayer.swingHand(result.hand());
 
             return true;
@@ -500,7 +492,7 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
     private void aaa()
     {
         var dataFolderUri = this.plugin.getDataFolder().toURI();
-        this.plainTextFile = new File(URI.create("" + dataFolderUri + "/mirror_history.log"));
+        this.plainTextFile = new File(URI.create(dataFolderUri + "/mirror_history.log"));
 
         if (!this.plainTextFile.exists())
         {
@@ -508,9 +500,9 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
             {
                 this.plainTextFile.createNewFile();
             }
-            catch (Throwable ignore)
+            catch (Throwable t)
             {
-                ignore.printStackTrace();
+                t.printStackTrace();
             }
         }
     }

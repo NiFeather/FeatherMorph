@@ -760,6 +760,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         //更新或者添加DisguiseState
         var state = getDisguiseStateFor(sourcePlayer);
 
+        //获取此伪装将用来显示的目标装备
         EntityEquipment equipment = null;
 
         var theirState = getDisguiseStateFor(targetEntity);
@@ -809,27 +810,15 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         disguise.onPostConstructDisguise(state, targetEntity);
 
         //如果伪装的时候坐着，显示提示
-        if (sourcePlayer.getVehicle() != null && !clientHandler.clientInitialized(sourcePlayer))
+        if (sourcePlayer.getVehicle() != null && !clientHandler.clientConnected(sourcePlayer))
             sourcePlayer.sendMessage(MessageUtils.prefixes(sourcePlayer, MorphStrings.morphVisibleAfterStandup()));
 
         //显示粒子
-        var cX = 0d;
-        var cZ = 0d;
-        var cY = 0d;
+        double cX, cY, cZ;
 
-        //如果伪装成生物，则按照此生物的碰撞体积来
-        if (disguise.isMobDisguise())
-        {
-            var box = disguise.getDimensions();
-
-            cX = cZ = box.width;
-            cY = box.height;
-        }
-        else //否则，按玩家的碰撞体积算
-        {
-            cX = cZ = sourcePlayer.getWidth();
-            cY = sourcePlayer.getHeight();
-        }
+        var box = disguise.getDimensions();
+        cX = cZ = box.width;
+        cY = box.height;
 
         spawnParticle(sourcePlayer, sourcePlayer.getLocation(), cX, cY, cZ);
 
@@ -846,29 +835,32 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 config.shownClientSkillHint = true;
             }
         }
-        else if (!config.shownServerSkillHint && actionItem != null)
+        else
         {
-            var locale = MessageUtils.getLocale(sourcePlayer);
-            var msg = HintStrings.skillString()
-                    .withLocale(locale)
-                    .resolve("item", messageStore.get(actionItem.translationKey(), "???", locale));
+            if (!config.shownServerSkillHint && actionItem != null)
+            {
+                var locale = MessageUtils.getLocale(sourcePlayer);
+                var msg = HintStrings.skillString()
+                        .withLocale(locale)
+                        .resolve("item", messageStore.get(actionItem.translationKey(), "???", locale));
 
-            sourcePlayer.sendMessage(MessageUtils.prefixes(sourcePlayer, msg));
-            config.shownServerSkillHint = true;
-        }
+                sourcePlayer.sendMessage(MessageUtils.prefixes(sourcePlayer, msg));
+                config.shownServerSkillHint = true;
+            }
 
-        if (!config.shownClientSuggestionMessage && !isClientPlayer)
-        {
-            sourcePlayer.sendMessage(MessageUtils.prefixes(sourcePlayer, HintStrings.clientSuggestionStringA()));
-            sourcePlayer.sendMessage(MessageUtils.prefixes(sourcePlayer, HintStrings.clientSuggestionStringB()));
+            if (!config.shownClientSuggestionMessage)
+            {
+                sourcePlayer.sendMessage(MessageUtils.prefixes(sourcePlayer, HintStrings.clientSuggestionStringA()));
+                sourcePlayer.sendMessage(MessageUtils.prefixes(sourcePlayer, HintStrings.clientSuggestionStringB()));
 
-            config.shownClientSuggestionMessage = true;
-        }
+                config.shownClientSuggestionMessage = true;
+            }
 
-        if (!config.shownDisplayToSelfHint && !isClientPlayer)
-        {
-            sourcePlayer.sendMessage(MessageUtils.prefixes(sourcePlayer, HintStrings.morphVisibleAfterCommandString()));
-            config.shownDisplayToSelfHint = true;
+            if (!config.shownDisplayToSelfHint)
+            {
+                sourcePlayer.sendMessage(MessageUtils.prefixes(sourcePlayer, HintStrings.morphVisibleAfterCommandString()));
+                config.shownDisplayToSelfHint = true;
+            }
         }
 
         //更新上次操作时间
@@ -878,12 +870,12 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         //获取与技能对应的CDInfo
         cdInfo = skillHandler.getCooldownInfo(sourcePlayer.getUniqueId(), id);
+        state.setCooldownInfo(cdInfo);
 
         if (cdInfo != null)
         {
             cdInfo.setCooldown(Math.max(40, cdInfo.getCooldown()));
             cdInfo.setLastInvoke(plugin.getCurrentTick());
-            state.setCooldownInfo(cdInfo);
         }
 
         //切换CD

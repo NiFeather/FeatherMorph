@@ -297,6 +297,7 @@ public class DisguiseState extends MorphPluginObject
     /**
      * 伪装技能冷却
      */
+    @Nullable
     private SkillCooldownInfo cooldownInfo;
 
     public long getSkillCooldown()
@@ -325,11 +326,11 @@ public class DisguiseState extends MorphPluginObject
         return cooldownInfo != null;
     }
 
-    public void setCooldownInfo(SkillCooldownInfo info)
+    public void setCooldownInfo(@Nullable SkillCooldownInfo info)
     {
         this.cooldownInfo = info;
 
-        if (clientHandler.clientVersionCheck(player, 3))
+        if (info != null && clientHandler.clientVersionCheck(player, 3))
             clientHandler.sendCommand(player, new S2CSetSkillCooldownCommand(info.getCooldown()));
     }
 
