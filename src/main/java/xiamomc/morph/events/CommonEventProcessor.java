@@ -213,50 +213,42 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
 
         if (mainHandItemType.isAir()) return false;
 
-        if (player.isSneaking())
+        //右键玩家头颅：快速伪装
+        if (player.isSneaking() && !action.equals(Action.RIGHT_CLICK_BLOCK) && !action.isLeftClick() && morphs.doQuickDisguise(player, actionItem))
+            return true;
+
+        if (mainHandItemType != actionItem || state == null) return false;
+
+        //激活技能或取消伪装
+        if (action.isLeftClick())
         {
-            //右键玩家头颅：快速伪装
-            if (!action.equals(Action.RIGHT_CLICK_BLOCK) && !action.isLeftClick() && morphs.doQuickDisguise(player, actionItem))
-            {
-                return true;
-            }
-            else if (mainHandItemType == actionItem)
-            {
-                //主动技能或快速变形
-                if (state != null)
-                {
-                    if (action.isLeftClick())
-                    {
-                        if (player.getEyeLocation().getDirection().getY() <= -0.95)
-                            morphs.unMorph(player);
-                        else
-                            morphs.setSelfDisguiseVisible(player, state.getServerSideSelfVisible(), true);
+            if (player.getEyeLocation().getDirection().getY() <= -0.95)
+                morphs.unMorph(player);
+            else
+                morphs.setSelfDisguiseVisible(player, !state.isSelfViewing(), true);
 
-                        return true;
-                    }
-
-                    if (state.getSkillCooldown() <= 0)
-                        morphs.executeDisguiseSkill(player);
-                    else
-                    {
-                        //一段时间内内只接受一次右键触发
-                        //传送前后会触发两次Interact，而且这两个Interact还不一定在同个Tick里
-                        if (plugin.getCurrentTick() - skillHandler.getLastInvoke(player) <= 1)
-                            return true;
-
-                        player.sendMessage(MessageUtils.prefixes(player,
-                                SkillStrings.skillPreparing().resolve("time", state.getSkillCooldown() / 20 + "")));
-
-                        player.playSound(Sound.sound(Key.key("minecraft", "entity.villager.no"),
-                                Sound.Source.PLAYER, 1f, 1f));
-                    }
-
-                    return true;
-                }
-            }
+            return true;
         }
 
-        return false;
+        if (state.getSkillCooldown() <= 0)
+        {
+            morphs.executeDisguiseSkill(player);
+        }
+        else
+        {
+            //一段时间内内只接受一次右键触发
+            //传送前后会触发两次Interact，而且这两个Interact还不一定在同个Tick里
+            if (plugin.getCurrentTick() - skillHandler.getLastInvoke(player) <= 1)
+                return true;
+
+            player.sendMessage(MessageUtils.prefixes(player,
+                    SkillStrings.skillPreparing().resolve("time", state.getSkillCooldown() / 20 + "")));
+
+            player.playSound(Sound.sound(Key.key("minecraft", "entity.villager.no"),
+                    Sound.Source.PLAYER, 1f, 1f));
+        }
+
+        return true;
     }
 
     //region LibsDisguises workaround

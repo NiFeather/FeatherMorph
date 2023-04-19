@@ -742,134 +742,136 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     /**
      * 构建好伪装之后要做的事
      *
-     * @param sourcePlayer     伪装的玩家
-     * @param targetEntity     伪装的目标实体
-     * @param disguise         伪装
+     * @param player     伪装的玩家
+     * @param targetedEntity     伪装的目标实体
+     * @param disguiseWrapper         伪装
      * @param shouldHandlePose 要不要手动更新伪装Pose？（伪装是否为克隆）
      * @param provider {@link DisguiseProvider}
      */
-    private DisguiseState postConstructDisguise(Player sourcePlayer, @Nullable Entity targetEntity,
-                                                String id, DisguiseWrapper<?> disguise, boolean shouldHandlePose,
+    private DisguiseState postConstructDisguise(Player player, @Nullable Entity targetedEntity,
+                                                String disguiseIdentifier, DisguiseWrapper<?> disguiseWrapper, boolean shouldHandlePose,
                                                 @NotNull DisguiseProvider provider)
     {
         //设置自定义数据用来跟踪
-        DisguiseUtils.addTrace(disguise);
+        DisguiseUtils.addTrace(disguiseWrapper);
 
-        var config = getPlayerConfiguration(sourcePlayer);
+        var playerMorphConfig = getPlayerConfiguration(player);
 
         //更新或者添加DisguiseState
-        var state = getDisguiseStateFor(sourcePlayer);
+        var state = getDisguiseStateFor(player);
 
         //获取此伪装将用来显示的目标装备
         EntityEquipment equipment = null;
 
-        var theirState = getDisguiseStateFor(targetEntity);
-        if (targetEntity != null && provider.canConstruct(getDisguiseInfo(id), targetEntity, theirState))
+        var theirState = getDisguiseStateFor(targetedEntity);
+        if (targetedEntity != null && provider.canConstruct(getDisguiseInfo(disguiseIdentifier), targetedEntity, theirState))
         {
             if (theirState != null)
             {
                 equipment = theirState.showingDisguisedItems()
                         ? theirState.getDisguisedItems()
-                        : ((LivingEntity) targetEntity).getEquipment();
+                        : ((LivingEntity) targetedEntity).getEquipment();
             }
             else
             {
-                equipment = ((LivingEntity) targetEntity).getEquipment();
+                equipment = ((LivingEntity) targetedEntity).getEquipment();
             }
         }
 
         //技能
-        var rawIdentifierHasSkill = skillHandler.hasSkill(id) || skillHandler.hasSpeficSkill(id, SkillType.NONE);
-        var targetSkillID = rawIdentifierHasSkill ? id : provider.getNameSpace() + ":" + MorphManager.disguiseFallbackName;
+        var rawIdentifierHasSkill = skillHandler.hasSkill(disguiseIdentifier) || skillHandler.hasSpeficSkill(disguiseIdentifier, SkillType.NONE);
+        var targetSkillID = rawIdentifierHasSkill ? disguiseIdentifier : provider.getNameSpace() + ":" + MorphManager.disguiseFallbackName;
 
         if (state == null)
         {
-            state = new DisguiseState(sourcePlayer, id, targetSkillID, disguise, shouldHandlePose, provider, equipment);
+            state = new DisguiseState(player, disguiseIdentifier, targetSkillID,
+                    disguiseWrapper, shouldHandlePose, provider, equipment,
+                    clientHandler.getPlayerOption(player, true), playerMorphConfig);
 
             disguiseStates.add(state);
         }
         else
         {
-            state.setDisguise(id, targetSkillID, disguise, shouldHandlePose, equipment);
+            state.setDisguise(disguiseIdentifier, targetSkillID, disguiseWrapper, shouldHandlePose, equipment);
         }
 
         //workaround: Disguise#getDisguiseName()不会正常返回实体的自定义名称
-        if (targetEntity != null && targetEntity.customName() != null)
+        if (targetedEntity != null && targetedEntity.customName() != null)
         {
-            var name = targetEntity.customName();
+            var name = targetedEntity.customName();
 
             state.entityCustomName = name;
             state.setDisplayName(name);
         }
 
         if (provider != fallbackProvider)
-            provider.postConstructDisguise(state, targetEntity);
+            provider.postConstructDisguise(state, targetedEntity);
         else
-            logger.warn("A disguise with id '%s' don't have a matching provider?".formatted(id));
+            logger.warn("A disguise with id '%s' don't have a matching provider?".formatted(disguiseIdentifier));
 
-        disguise.onPostConstructDisguise(state, targetEntity);
+        disguiseWrapper.onPostConstructDisguise(state, targetedEntity);
 
         //如果伪装的时候坐着，显示提示
-        if (sourcePlayer.getVehicle() != null && !clientHandler.clientConnected(sourcePlayer))
-            sourcePlayer.sendMessage(MessageUtils.prefixes(sourcePlayer, MorphStrings.morphVisibleAfterStandup()));
+        if (player.getVehicle() != null && !clientHandler.clientConnected(player))
+            player.sendMessage(MessageUtils.prefixes(player, MorphStrings.morphVisibleAfterStandup()));
 
         //显示粒子
         double cX, cY, cZ;
 
-        var box = disguise.getDimensions();
+        var box = disguiseWrapper.getDimensions();
         cX = cZ = box.width;
         cY = box.height;
 
-        spawnParticle(sourcePlayer, sourcePlayer.getLocation(), cX, cY, cZ);
+        spawnParticle(player, player.getLocation(), cX, cY, cZ);
 
         //确保玩家可以根据设置看到自己的伪装
-        state.setServerSideSelfVisible(config.showDisguiseToSelf && !this.clientViewAvailable(sourcePlayer));
+        state.setServerSideSelfVisible(playerMorphConfig.showDisguiseToSelf && !this.clientViewAvailable(player));
 
-        var isClientPlayer = clientHandler.clientConnected(sourcePlayer);
+        var isClientPlayer = clientHandler.clientConnected(player);
 
         if (isClientPlayer)
         {
-            if (!config.shownClientSkillHint)
+            if (!playerMorphConfig.shownClientSkillHint)
             {
-                sourcePlayer.sendMessage(MessageUtils.prefixes(sourcePlayer, HintStrings.clientSkillString()));
-                config.shownClientSkillHint = true;
+                player.sendMessage(MessageUtils.prefixes(player, HintStrings.clientSkillString()));
+                playerMorphConfig.shownClientSkillHint = true;
             }
         }
         else
         {
-            if (!config.shownServerSkillHint && actionItem != null)
+            if (!playerMorphConfig.shownServerSkillHint && actionItem != null)
             {
-                var locale = MessageUtils.getLocale(sourcePlayer);
+                var locale = MessageUtils.getLocale(player);
                 var msg = HintStrings.skillString()
                         .withLocale(locale)
                         .resolve("item", messageStore.get(actionItem.translationKey(), "???", locale));
 
-                sourcePlayer.sendMessage(MessageUtils.prefixes(sourcePlayer, msg));
-                config.shownServerSkillHint = true;
+                player.sendMessage(MessageUtils.prefixes(player, msg));
+                playerMorphConfig.shownServerSkillHint = true;
             }
 
-            if (!config.shownClientSuggestionMessage)
+            if (!playerMorphConfig.shownClientSuggestionMessage)
             {
-                sourcePlayer.sendMessage(MessageUtils.prefixes(sourcePlayer, HintStrings.clientSuggestionStringA()));
-                sourcePlayer.sendMessage(MessageUtils.prefixes(sourcePlayer, HintStrings.clientSuggestionStringB()));
+                player.sendMessage(MessageUtils.prefixes(player, HintStrings.clientSuggestionStringA()));
+                player.sendMessage(MessageUtils.prefixes(player, HintStrings.clientSuggestionStringB()));
 
-                config.shownClientSuggestionMessage = true;
+                playerMorphConfig.shownClientSuggestionMessage = true;
             }
 
-            if (!config.shownDisplayToSelfHint)
+            if (!playerMorphConfig.shownDisplayToSelfHint)
             {
-                sourcePlayer.sendMessage(MessageUtils.prefixes(sourcePlayer, HintStrings.morphVisibleAfterCommandString()));
-                config.shownDisplayToSelfHint = true;
+                player.sendMessage(MessageUtils.prefixes(player, HintStrings.morphVisibleAfterCommandString()));
+                playerMorphConfig.shownDisplayToSelfHint = true;
             }
         }
 
         //更新上次操作时间
-        updateLastPlayerMorphOperationTime(sourcePlayer);
+        updateLastPlayerMorphOperationTime(player);
 
         SkillCooldownInfo cdInfo;
 
         //获取与技能对应的CDInfo
-        cdInfo = skillHandler.getCooldownInfo(sourcePlayer.getUniqueId(), id);
+        cdInfo = skillHandler.getCooldownInfo(player.getUniqueId(), disguiseIdentifier);
         state.setCooldownInfo(cdInfo);
 
         if (cdInfo != null)
@@ -879,10 +881,10 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         }
 
         //切换CD
-        skillHandler.switchCooldown(sourcePlayer.getUniqueId(), cdInfo);
+        skillHandler.switchCooldown(player.getUniqueId(), cdInfo);
 
         //调用事件
-        Bukkit.getPluginManager().callEvent(new PlayerMorphEvent(sourcePlayer, state));
+        Bukkit.getPluginManager().callEvent(new PlayerMorphEvent(player, state));
 
         return state;
     }
@@ -904,11 +906,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 particleScale >= 10 ? 0.2 : 0.05); //速度
     }
 
-    public void setSelfDisguiseVisible(Player player, boolean val, boolean saveToConfig)
-    {
-        this.setSelfDisguiseVisible(player, val, saveToConfig, clientHandler.getPlayerOption(player).isClientSideSelfView(), false);
-    }
-
     /**
      * 客户端预览是否可用？
      * @param player 目标玩家
@@ -927,6 +924,11 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         //            + " StateValid? " + state.getProvider().validForClient(state));
 
         return playerOption.isClientSideSelfView() && state.getProvider().validForClient(state);
+    }
+
+    public void setSelfDisguiseVisible(Player player, boolean val, boolean saveToConfig)
+    {
+        this.setSelfDisguiseVisible(player, val, saveToConfig, clientHandler.getPlayerOption(player, true).isClientSideSelfView(), false);
     }
 
     public void setSelfDisguiseVisible(Player player, boolean value, boolean saveToConfig, boolean dontSetServerSide, boolean noClientCommand)

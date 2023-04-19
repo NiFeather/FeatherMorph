@@ -23,6 +23,7 @@ import xiamomc.morph.backends.DisguiseWrapper;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.messages.MessageUtils;
+import xiamomc.morph.network.PlayerOptions;
 import xiamomc.morph.network.server.MorphClientHandler;
 import xiamomc.morph.network.commands.S2C.set.S2CSetSkillCooldownCommand;
 import xiamomc.morph.providers.DisguiseProvider;
@@ -47,14 +48,21 @@ public class DisguiseState extends MorphPluginObject
 {
     public DisguiseState(Player player, @NotNull String id, @NotNull String skillId,
                          DisguiseWrapper<?> disguiseInstance, boolean isClone, @NotNull DisguiseProvider provider,
-                         @Nullable EntityEquipment targetEquipment)
+                         @Nullable EntityEquipment targetEquipment, @NotNull PlayerOptions<Player> playerOptions,
+                         @NotNull PlayerMorphConfiguration playerMorphConfiguration)
     {
         this.player = player;
         this.playerUniqueID = player.getUniqueId();
         this.provider = provider;
+        this.playerOptions = playerOptions;
+        this.morphConfiguration = playerMorphConfiguration;
 
         this.setDisguise(id, skillId, disguiseInstance, isClone, targetEquipment);
     }
+
+    private final PlayerOptions<Player> playerOptions;
+
+    private final PlayerMorphConfiguration morphConfiguration;
 
     /**
      * 谁在伪装
@@ -91,6 +99,16 @@ public class DisguiseState extends MorphPluginObject
     public boolean getServerSideSelfVisible()
     {
         return serverSideSelfVisible;
+    }
+
+    public boolean isClientSideSelfViewing()
+    {
+        return playerOptions.isClientSideSelfView();
+    }
+
+    public boolean isSelfViewing()
+    {
+        return playerOptions.isClientSideSelfView() ? morphConfiguration.showDisguiseToSelf : serverSideSelfVisible;
     }
 
     public void setServerSideSelfVisible(boolean val)
@@ -638,7 +656,7 @@ public class DisguiseState extends MorphPluginObject
         DisguiseUtils.addTrace(disguise);
 
         var state = new DisguiseState(player, this.disguiseIdentifier, this.skillLookupIdentifier,
-                disguise, shouldHandlePose, provider, getDisguisedItems());
+                disguise, shouldHandlePose, provider, getDisguisedItems(), this.playerOptions, morphConfiguration);
 
         state.setCachedProfileNbtString(this.cachedProfileNbtString);
         state.setCachedNbtString(this.cachedNbtString);
@@ -682,7 +700,7 @@ public class DisguiseState extends MorphPluginObject
      * @param offlineState 离线存储
      * @return DisguiseState的实例
      */
-    public static DisguiseState fromOfflineState(OfflineDisguiseState offlineState, PlayerMorphConfiguration configuration)
+    public static DisguiseState fromOfflineState(OfflineDisguiseState offlineState, PlayerOptions<Player> playerOptions, PlayerMorphConfiguration playerMorphConfiguration)
     {
         if (!offlineState.isValid())
             throw new RuntimeException("离线存储损坏");
@@ -695,7 +713,7 @@ public class DisguiseState extends MorphPluginObject
         var state = new DisguiseState(player,
                 offlineState.disguiseID, offlineState.skillID == null ? offlineState.disguiseID : offlineState.skillID,
                 null, offlineState.shouldHandlePose, MorphManager.getProvider(offlineState.disguiseID),
-                null);
+                null, playerOptions, playerMorphConfiguration);
 
         state.setCachedProfileNbtString(offlineState.profileString);
         state.setCachedNbtString(offlineState.nbtString);
