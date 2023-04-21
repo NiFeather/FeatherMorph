@@ -41,6 +41,8 @@ public enum ConfigOption
     MIRROR_BEHAVIOR_DROP(interactionMirrorBehaviorNode().append("allow_drop"), false),
     MIRROR_BEHAVIOR_HOTBAR(interactionMirrorBehaviorNode().append("hotbar"), false),
 
+    MIRROR_LOG_OPERATION(interactionMirrorNode().append("log_operations"), false),
+
     MIRROR_SELECTION_MODE(interactionMirrorNode().append("selection_mode"), InteractionMirrorProcessor.InteractionMirrorSelectionMode.BY_NAME),
 
     BANNED_DISGUISES(ConfigNode.create().append("bannedDisguises"), new ArrayList<String>()),

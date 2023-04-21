@@ -418,6 +418,7 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
     private final Bindable<Boolean> allowHotBar = new Bindable<>(false);
     private final Bindable<Boolean> ignoreDisguised = new Bindable<>(false);
     private final Bindable<String> selectionMode = new Bindable<>(InteractionMirrorSelectionMode.BY_NAME);
+    private final Bindable<Boolean> logOperations = new Bindable<>(false);
 
     @Initializer
     private void load()
@@ -432,6 +433,8 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
         config.bind(ignoreDisguised, ConfigOption.MIRROR_IGNORE_DISGUISED);
 
         config.bind(selectionMode, ConfigOption.MIRROR_SELECTION_MODE);
+
+        config.bind(logOperations, ConfigOption.MIRROR_LOG_OPERATION);
     }
 
     private void update()
@@ -590,6 +593,8 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
 
     private void logOperation(Player source, Player targetPlayer, OperationType type)
     {
+        if (!logOperations.get()) return;
+
         var entry = getOrCreateEntryFor(source, targetPlayer, type);
         entry.increaseRepeatingTimes();
     }

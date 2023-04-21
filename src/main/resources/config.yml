@@ -88,6 +88,11 @@ root:
     #           A player disguised as our target can also be selected.
     selection_mode: by_name
 
+    # Log operations
+    # Should we log any InteractionMirror operations performed by players?
+    # Logs can be found in mirror_history.log
+    log_operations: false
+
     # Behavior options
     behaviors:
       # Should we enable interaction control?
@@ -181,4 +186,4 @@ root:
     log_outgoing_packets: false
 
   # Do not touch unless you know what you're doing!
-  version: 18
+  version: 19
