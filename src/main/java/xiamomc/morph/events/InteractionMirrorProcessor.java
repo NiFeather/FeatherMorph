@@ -228,22 +228,20 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
         {
             var targetPlayer = getPlayer(player, targetName);
 
-            if (targetPlayer == null) return;
+            if (!playerInDistance(player, targetPlayer, targetName)) return;
 
             if (targetPlayer.getLocation().getWorld() == player.getLocation().getWorld()
-                && Math.abs(targetPlayer.getLocation().distanceSquared(player.getLocation())) <= 6)
+                    && Math.abs(targetPlayer.getLocation().distanceSquared(player.getLocation())) <= 6)
             {
                 var theirTarget = targetPlayer.getTargetEntity(3);
                 var ourTarget = player.getTargetEntity(3);
 
-                if (ourTarget != null &&
-                        (theirTarget == null || ourTarget == targetPlayer || ourTarget == theirTarget))
+                if ((ourTarget != null || theirTarget != null)
+                        && (ourTarget == targetPlayer || ourTarget == theirTarget || theirTarget == player))
                 {
                     e.setCancelled(true);
                 }
             }
-
-            if (!playerInDistance(player, targetPlayer, targetName)) return;
 
             if (tracker.droppingItemThisTick(player))
                 return;
@@ -266,6 +264,7 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
             //检查玩家在此tick内是否存在互动以避免重复镜像
             if (!tracker.interactingThisTick(player))
             {
+                ignoredPlayers.add(player);
                 simulateOperation(lastAction.toBukkitAction(), targetPlayer, player);
                 logOperation(player, targetPlayer, lastAction.isLeftClick() ? OperationType.LeftClick : OperationType.RightClick);
             }
@@ -328,9 +327,8 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
     {
         if (!allowSimulation.get()) return false;
 
-        if (ignoredPlayers.contains(source) || ignoredPlayers.contains(targetPlayer) || tracker.interactingThisTick(targetPlayer)) return false;
+        if (ignoredPlayers.contains(targetPlayer) || tracker.interactingThisTick(targetPlayer)) return false;
         ignoredPlayers.add(targetPlayer);
-        ignoredPlayers.add(source);
 
         var isRightClick = action.isRightClick();
         var result = isRightClick
@@ -409,7 +407,7 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
                 || (selectionMode.get().equalsIgnoreCase(InteractionMirrorSelectionMode.BY_NAME)
                         ? ignoreDisguised.get() && backend.isDisguised(target)
                         : !match(target, targetName))
-                || (!dontCheckWhetherIgnored && (ignoredPlayers.contains(target) || ignoredPlayers.contains(source)))
+                || (!dontCheckWhetherIgnored && (ignoredPlayers.contains(target)))
                 || !source.hasPermission(CommonPermissions.MIRROR)
                 || target.hasPermission(CommonPermissions.MIRROR_IMMUNE)
                 || target.getOpenInventory().getType() != InventoryType.CRAFTING
