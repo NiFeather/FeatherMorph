@@ -138,8 +138,14 @@ public abstract class DisguiseWrapper<T>
 
         this.dimensions = dims;
 
+        if (getEntityType() != EntityType.SLIME && getEntityType() != EntityType.MAGMA_CUBE) return dims;
+
+        this.dimensions = dims = EntityDimensions.fixed(0.51F * getSlimeDimensionScale(), 0.51F * getSlimeDimensionScale());
+
         return dims;
     }
+
+    protected abstract float getSlimeDimensionScale();
 
     public abstract void setGlowingColor(ChatColor glowingColor);
 

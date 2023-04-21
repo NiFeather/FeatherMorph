@@ -15,6 +15,9 @@ public class NilDisguise implements Cloneable
     {
         this.type = type;
         this.name = type.translationKey();
+
+        if (type == EntityType.SLIME || type == EntityType.MAGMA_CUBE)
+            this.compoundTag.putInt("Size", 4);
     }
 
     public EntityType type;

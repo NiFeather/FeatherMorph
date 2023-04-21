@@ -121,6 +121,13 @@ public class LibsDisguiseWrapper extends DisguiseWrapper<Disguise>
     }
 
     @Override
+    protected float getSlimeDimensionScale()
+    {
+        if (!(watcher instanceof SlimeWatcher slimeWatcher)) return 1;
+        return slimeWatcher.getSize();
+    }
+
+    @Override
     public void setGlowingColor(ChatColor glowingColor)
     {
         watcher.setGlowColor(glowingColor);

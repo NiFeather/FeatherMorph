@@ -124,6 +124,12 @@ public class NilWrapper extends DisguiseWrapper<NilDisguise>
     }
 
     @Override
+    protected float getSlimeDimensionScale()
+    {
+        return 4;
+    }
+
+    @Override
     public void setGlowingColor(ChatColor glowingColor)
     {
         instance.glowingColor = glowingColor;
