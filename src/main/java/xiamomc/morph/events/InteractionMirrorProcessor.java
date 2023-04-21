@@ -228,6 +228,21 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
         {
             var targetPlayer = getPlayer(player, targetName);
 
+            if (targetPlayer == null) return;
+
+            if (targetPlayer.getLocation().getWorld() == player.getLocation().getWorld()
+                && Math.abs(targetPlayer.getLocation().distanceSquared(player.getLocation())) <= 6)
+            {
+                var theirTarget = targetPlayer.getTargetEntity(3);
+                var ourTarget = player.getTargetEntity(3);
+
+                if (ourTarget != null &&
+                        (theirTarget == null || ourTarget == targetPlayer || ourTarget == theirTarget))
+                {
+                    e.setCancelled(true);
+                }
+            }
+
             if (!playerInDistance(player, targetPlayer, targetName)) return;
 
             if (tracker.droppingItemThisTick(player))
