@@ -211,10 +211,10 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         var mainHandItem = player.getEquipment().getItemInMainHand();
         var mainHandItemType = mainHandItem.getType();
 
-        if (mainHandItemType.isAir()) return false;
+        if (mainHandItemType.isAir() || !player.isSneaking()) return false;
 
         //右键玩家头颅：快速伪装
-        if (player.isSneaking() && !action.equals(Action.RIGHT_CLICK_BLOCK) && !action.isLeftClick() && morphs.doQuickDisguise(player, actionItem))
+        if (!action.equals(Action.RIGHT_CLICK_BLOCK) && !action.isLeftClick() && morphs.doQuickDisguise(player, actionItem))
             return true;
 
         if (mainHandItemType != actionItem || state == null) return false;
