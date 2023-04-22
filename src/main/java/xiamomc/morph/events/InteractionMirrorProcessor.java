@@ -203,8 +203,8 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
                     return;
                 }
 
-                var damagerLookingAt = damager.getTargetEntity(3);
-                var playerLookingAt = targetPlayer.getTargetEntity(3);
+                var damagerLookingAt = damager.getTargetEntity(5);
+                var playerLookingAt = targetPlayer.getTargetEntity(5);
 
                 //如果伪装的玩家想攻击的实体和被伪装的玩家一样，模拟左键并取消事件
                 if (damagerLookingAt != null && damagerLookingAt.equals(playerLookingAt))
