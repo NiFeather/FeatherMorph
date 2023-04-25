@@ -41,6 +41,7 @@ import xiamomc.pluginbase.Bindables.Bindable;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -559,11 +560,11 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
             if (tempEntries.isEmpty())
                 return;
 
-            tempEntries.forEach((p, s) ->
+            try (var stream = new FileOutputStream(this.loggingTargetFile, true))
             {
-                try (var stream = new FileOutputStream(this.loggingTargetFile, true))
+                tempEntries.forEach((p, stack) ->
                 {
-                    for (var entry : s)
+                    for (var entry : stack)
                     {
                         String msg = "";
 
@@ -572,14 +573,23 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
                                         entry.playerName(), entry.operationType(),
                                         entry.targetPlayerName(), entry.repeatingTimes());
 
-                        stream.write(msg.getBytes());
+                        try
+                        {
+                            stream.write(msg.getBytes());
+                        }
+                        catch (IOException e)
+                        {
+                            logger.error("Error occurred while saving logs: " + e.getLocalizedMessage());
+                            e.printStackTrace();
+                        }
                     }
-                }
-                catch (Throwable throwable)
-                {
-                    throwable.printStackTrace();
-                }
-            });
+                });
+            }
+            catch (Throwable throwable)
+            {
+                logger.error("Error occurred while saving logs: " + throwable.getLocalizedMessage());
+                throwable.printStackTrace();
+            }
 
             this.tempEntries.clear();
         }
