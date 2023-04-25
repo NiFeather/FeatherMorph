@@ -31,6 +31,7 @@ import xiamomc.morph.misc.PlayerOperationSimulator;
 import xiamomc.morph.misc.permissions.CommonPermissions;
 import xiamomc.morph.network.server.MorphClientHandler;
 import xiamomc.morph.network.commands.S2C.set.S2CSetSneakingCommand;
+import xiamomc.morph.storage.DirectoryStorage;
 import xiamomc.morph.storage.mirrorlogging.MirrorSingleEntry;
 import xiamomc.morph.storage.mirrorlogging.OperationType;
 import xiamomc.morph.utilities.ItemUtils;
@@ -40,7 +41,6 @@ import xiamomc.pluginbase.Bindables.Bindable;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.net.URI;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -479,7 +479,7 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
         lastRightClick.clear();
         ignoredPlayers.clear();
 
-        if (plugin.getCurrentTick() % (30 * 20) == 0)
+        if (plugin.getCurrentTick() % (5 * 20) == 0)
             pushToLoggingBase();
     }
 
@@ -523,62 +523,54 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
 
     //region Operation Logging
 
+    private final DirectoryStorage logStore = new DirectoryStorage("logs");
+
     private final Map<Player, Stack<MirrorSingleEntry>> tempEntries = new Object2ObjectOpenHashMap<>();
 
-    private File plainTextFile;
+    private final SimpleDateFormat logFileTimeFormat = new SimpleDateFormat("yyyy-MM-dd");
 
-    private boolean noOperationSinceLastPush;
+    private File loggingTargetFile;
 
-    private void aaa()
+    private String currentLogDate = "0000-00-00";
+
+    private void updateTargetFile()
     {
-        var dataFolderUri = this.plugin.getDataFolder().toURI();
-        this.plainTextFile = new File(URI.create(dataFolderUri + "/mirror_history.log"));
+        var currentDate = logFileTimeFormat.format(new Date(System.currentTimeMillis()));
+        var createNew = !currentDate.equals(currentLogDate);
 
-        if (!this.plainTextFile.exists())
-        {
-            try
-            {
-                this.plainTextFile.createNewFile();
-            }
-            catch (Throwable t)
-            {
-                t.printStackTrace();
-            }
-        }
+        if (!createNew) return;
+
+        this.currentLogDate = currentDate;
+        this.loggingTargetFile = logStore.getFile("mirror-%s.log".formatted(currentDate), true);
     }
 
     public void pushToLoggingBase()
     {
-        if (plainTextFile == null)
-            aaa();
+        if (logStore.initializeFailed())
+            return;
+
+        if (loggingTargetFile == null)
+            updateTargetFile();
 
         synchronized (tempEntries)
         {
-            var dateFormat = new SimpleDateFormat("MM/dd HH:mm:ss");
+            var dateFormat = new SimpleDateFormat("HH:mm:ss");
 
             if (tempEntries.isEmpty())
-            {
-                noOperationSinceLastPush = true;
                 return;
-            }
-
-            noOperationSinceLastPush = true;
 
             tempEntries.forEach((p, s) ->
             {
-                try (var stream = new FileOutputStream(this.plainTextFile, true))
+                try (var stream = new FileOutputStream(this.loggingTargetFile, true))
                 {
                     for (var entry : s)
                     {
                         String msg = "";
-                        if (noOperationSinceLastPush) msg += "\n";
 
                         msg += "[%s] %s triggered operation %s for player %s repeating %s time(s).\n"
                                 .formatted(dateFormat.format(new Date(entry.timeMills())),
                                         entry.playerName(), entry.operationType(),
                                         entry.targetPlayerName(), entry.repeatingTimes());
-
-                        noOperationSinceLastPush = false;
 
                         stream.write(msg.getBytes());
                     }

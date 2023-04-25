@@ -7,6 +7,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.scoreboard.Scoreboard;
+import org.jetbrains.annotations.ApiStatus;
 import xiamomc.morph.abilities.AbilityHandler;
 import xiamomc.morph.commands.MorphCommandHelper;
 import xiamomc.morph.config.MorphConfigManager;
@@ -119,6 +120,15 @@ public final class MorphPlugin extends XiaMoJavaPlugin
 
             clientHandler.sendReAuth(Bukkit.getOnlinePlayers());
         });
+    }
+
+    @ApiStatus.Internal
+    public void crash(Throwable t)
+    {
+        logger.error(t.getLocalizedMessage());
+        t.printStackTrace();
+
+        this.onDisable();
     }
 
     @Override
