@@ -49,7 +49,7 @@ public abstract class DisguiseBackend<TInstance, TWrapper extends DisguiseWrappe
     /**
      * Gets the wrapper that handles the target entity's disguise instance
      * @param target The entity to lookup
-     * @return The wrapper that handles the entity's disguise. Null if not found
+     * @return The wrapper that handles the entity's disguise. Null if it's not disguised.
      */
     @Nullable
     public abstract TWrapper getDisguise(Entity target);

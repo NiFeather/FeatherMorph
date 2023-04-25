@@ -82,7 +82,7 @@ public class LibsBackend extends DisguiseBackend<Disguise, LibsDisguiseWrapper>
     @Override
     public boolean isDisguised(Entity target)
     {
-        return DisguiseAPI.isDisguised(target);
+        return playerLibsDisguiseWrapperMap.containsKey(target);
     }
 
     private final Map<Player, LibsDisguiseWrapper> playerLibsDisguiseWrapperMap = new Object2ObjectOpenHashMap<>();
