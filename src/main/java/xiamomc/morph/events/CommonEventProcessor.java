@@ -407,22 +407,24 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         }
         else if (offlineState != null)
         {
-            player.sendMessage(MessageUtils.prefixes(player, MorphStrings.stateRecoverReasonString()));
+            var serverLocale = MessageUtils.getServerLocale();
+
+            player.sendMessage(MessageUtils.prefixes(player, MorphStrings.stateRecoverReasonString().withLocale(serverLocale)));
 
             if (morphs.disguiseFromOfflineState(player, offlineState))
             {
                 if (false) //offlineState.disguise != null
                 {
-                    player.sendMessage(MessageUtils.prefixes(player, MorphStrings.recoveringStateString()));
+                    player.sendMessage(MessageUtils.prefixes(player, MorphStrings.recoveringStateString().withLocale(serverLocale)));
                 }
                 else
                 {
-                    player.sendMessage(MessageUtils.prefixes(player, MorphStrings.recoveringStateLimitedString()));
-                    player.sendMessage(MessageUtils.prefixes(player, MorphStrings.recoveringStateLimitedHintString()));
+                    player.sendMessage(MessageUtils.prefixes(player, MorphStrings.recoveringStateLimitedString().withLocale(serverLocale)));
+                    player.sendMessage(MessageUtils.prefixes(player, MorphStrings.recoveringStateLimitedHintString().withLocale(serverLocale)));
                 }
             }
             else
-                player.sendMessage(MessageUtils.prefixes(player, MorphStrings.recoveringFailedString()));
+                player.sendMessage(MessageUtils.prefixes(player, MorphStrings.recoveringFailedString().withLocale(MessageUtils.getServerLocale())));
         }
     }
 
