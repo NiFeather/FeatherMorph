@@ -456,6 +456,7 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
     private final Bindable<Boolean> ignoreDisguised = new Bindable<>(false);
     private final Bindable<String> selectionMode = new Bindable<>(InteractionMirrorSelectionMode.BY_NAME);
     private final Bindable<Boolean> logOperations = new Bindable<>(false);
+    private final Bindable<Integer> cleanUpDate = new Bindable<>(3);
 
     @Initializer
     private void load()
@@ -472,6 +473,7 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
         config.bind(selectionMode, ConfigOption.MIRROR_SELECTION_MODE);
 
         config.bind(logOperations, ConfigOption.MIRROR_LOG_OPERATION);
+        config.bind(cleanUpDate, ConfigOption.MIRROR_LOG_CLEANUP_DATE);
     }
 
     private void update()
@@ -534,15 +536,71 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
 
     private String currentLogDate = "0000-00-00";
 
+    private void cleanUpLogFiles(int days)
+    {
+        if (days <= 0) return;
+
+        var files = logStore.getFiles("mirror-[0-9]{4}-[0-9]{2}-[0-9]{2}.log");
+        var calendar = Calendar.getInstance();
+        calendar.add(Calendar.DATE, -days);
+
+        //todo: Replace this with a nicer implementation
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+
+        var targetDate = calendar.getTime();
+
+        for (File file : files)
+        {
+            //[0:mirror] [1:YYYY] [2:MM] [3:dd] [4:.log]
+            var splitName = file.getName().split("-");
+            var formattedName = "%s-%s-%s".formatted(splitName[1], splitName[2], splitName[3]);
+
+            if (formattedName.equals(currentLogDate)) continue;
+
+            Date date;
+
+            try
+            {
+                date = logFileTimeFormat.parse(formattedName);
+            }
+            catch (Throwable t)
+            {
+                logger.error("Unable to determine creation date for InteractionMirror log file '%s': '%s'".formatted(file.getName(), t.getLocalizedMessage()));
+                t.printStackTrace();
+                continue;
+            }
+
+            if (date.after(targetDate)) continue;
+
+            try
+            {
+                logger.info("Removing InteractionMirror log '%s' as it's older than %s day(s)".formatted(file.getName(), days));
+
+                if (!file.delete())
+                    logger.warn("Unable to remove file: Unknown error");
+            }
+            catch (Throwable t)
+            {
+                logger.error("Unable to remove file: %s".formatted(t.getLocalizedMessage()));
+                t.printStackTrace();
+            }
+        }
+    }
+
     private void updateTargetFile()
     {
-        var currentDate = logFileTimeFormat.format(new Date(System.currentTimeMillis()));
-        var createNew = !currentDate.equals(currentLogDate);
+        cleanUpLogFiles(cleanUpDate.get());
+
+        var targetLogDate = logFileTimeFormat.format(new Date(System.currentTimeMillis()));
+        var createNew = !targetLogDate.equals(currentLogDate);
 
         if (!createNew) return;
 
-        this.currentLogDate = currentDate;
-        this.loggingTargetFile = logStore.getFile("mirror-%s.log".formatted(currentDate), true);
+        this.currentLogDate = targetLogDate;
+        this.loggingTargetFile = logStore.getFile("mirror-%s.log".formatted(targetLogDate), true);
     }
 
     public void pushToLoggingBase()

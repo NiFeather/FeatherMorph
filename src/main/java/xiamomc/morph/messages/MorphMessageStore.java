@@ -31,7 +31,8 @@ public class MorphMessageStore extends MessageStore<MorphPlugin>
             RequestStrings.class,
             SkillStrings.class,
             CommandNameStrings.class,
-            HintStrings.class
+            HintStrings.class,
+            TypesString.class
     );
 
     private final Map<String, MorphMessageSubStore> subStores = new Object2ObjectOpenHashMap<>();

@@ -1,4 +1,10 @@
 {
+  "commands.illegal_argument": "Illegal argument: <detail>",
+  "commands.illegal_argument.type_error": "The type for this argument should be <type>",
+  "types.double": "Double",
+  "types.float": "Float",
+  "types.int": "Integer",
+  "types.string": "String",
   "commands.manage_grant_fail": "<color:red>Couldn't grant disguise '<what>' to <who>, do they already have this disguise?",
   "commands.manage_grant_success": "<color:green>Granted disguise '<what>' to <who>",
   "commands.manage_revoke_fail": "<color:red>Couldn't revoke disguise '<what>' from <who>",

@@ -93,6 +93,10 @@ root:
     # Logs can be found in mirror_history.log
     log_operations: false
 
+    # Delete logs that are older than the configured days
+    # Set to 0 to disable this feature.
+    log_cleanup: 7
+
     # Behavior options
     behaviors:
       # Should we enable interaction control?
@@ -186,4 +190,4 @@ root:
     log_outgoing_packets: false
 
   # Do not touch unless you know what you're doing!
-  version: 19
+  version: 20

@@ -2,14 +2,12 @@ package xiamomc.morph.commands.subcommands.plugin;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.commands.subcommands.SubCommandGenerator;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
-import xiamomc.morph.messages.CommandNameStrings;
-import xiamomc.morph.messages.CommandStrings;
-import xiamomc.morph.messages.HelpStrings;
-import xiamomc.morph.messages.MessageUtils;
+import xiamomc.morph.messages.*;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Command.ISubCommand;
 import xiamomc.pluginbase.Messages.FormattableMessage;
@@ -56,6 +54,59 @@ public class OptionSubCommand extends MorphPluginObject implements ISubCommand
         subCommands.add(getToggle("mirror_hotbar", ConfigOption.MIRROR_BEHAVIOR_HOTBAR, "mirror.hotbar", CommandNameStrings.mirrorHotbar()));
         subCommands.add(getToggle("mirror_ignore_disguised", ConfigOption.MIRROR_IGNORE_DISGUISED, "mirror.ignore_disguised", CommandNameStrings.mirrorIgnoreDisguised()));
         subCommands.add(getToggle("mirror_log_operations", ConfigOption.MIRROR_LOG_OPERATION, "mirror.log_operations"));
+        subCommands.add(getInteger("mirror_log_cleanup", ConfigOption.MIRROR_LOG_CLEANUP_DATE, "mirror.log_operations"));
+    }
+
+    private ISubCommand getInteger(String name, ConfigOption option, String perm)
+    {
+        return getInteger(name, option, perm, null);
+    }
+
+    private ISubCommand getInteger(String name, ConfigOption option, String perm, @Nullable FormattableMessage displayName)
+    {
+        var targetDisplay = displayName == null ? new FormattableMessage(plugin, name) : displayName;
+
+        return SubCommandGenerator.command()
+                .setName(name)
+                .setPerm("xiamomc.morph.toggle." + perm)
+                .setExec((sender, args) ->
+                {
+                    if (args.length < 1)
+                    {
+                        sender.sendMessage(MessageUtils.prefixes(sender,
+                                CommandStrings.optionValueString()
+                                        .withLocale(MessageUtils.getLocale(sender))
+                                        .resolve("what", targetDisplay, null)
+                                        .resolve("value", config.get(Integer.class, option) + "")));
+
+                        return true;
+                    }
+
+                    int value = -1;
+
+                    try
+                    {
+                        value = Integer.parseInt(args[0]);
+                    }
+                    catch (Throwable ignored)
+                    {
+                        sender.sendMessage(MessageUtils.prefixes(sender,
+                                CommandStrings.argumentTypeErrorString()
+                                        .withLocale(MessageUtils.getLocale(sender))
+                                        .resolve("type", TypesString.typeInteger())));
+
+                        return true;
+                    }
+
+                    config.set(option, value);
+
+                    sender.sendMessage(MessageUtils.prefixes(sender,
+                            CommandStrings.optionSetString()
+                                    .withLocale(MessageUtils.getLocale(sender))
+                                    .resolve("what", targetDisplay, null)
+                                    .resolve("value", value + "")));
+                    return true;
+                });
     }
 
     private ISubCommand getToggle(String name, ConfigOption option, String perm)
@@ -63,7 +114,7 @@ public class OptionSubCommand extends MorphPluginObject implements ISubCommand
         return getToggle(name, option, perm, null);
     }
 
-    private ISubCommand getToggle(String name, ConfigOption option, String perm, FormattableMessage displayName)
+    private ISubCommand getToggle(String name, ConfigOption option, String perm, @Nullable FormattableMessage displayName)
     {
         var targetDisplay = displayName == null ? new FormattableMessage(plugin, name) : displayName;
 

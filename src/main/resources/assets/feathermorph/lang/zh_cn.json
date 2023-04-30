@@ -1,4 +1,10 @@
 {
+  "commands.illegal_argument": "无效的参数: <detail>",
+  "commands.illegal_argument.type_error": "参数类型应为<type>",
+  "types.double": "双精度浮点",
+  "types.float": "单精度浮点",
+  "types.int": "整数",
+  "types.string": "字符串",
   "commands.manage_grant_fail": "<color:red>未能将<what>的伪装给与<who>，他是否已经拥有此伪装？",
   "commands.manage_grant_success": "<color:green>成功将<what>的伪装给与<who>",
   "commands.manage_revoke_fail": "<color:red>未能将<what>的伪装从<who>移除",

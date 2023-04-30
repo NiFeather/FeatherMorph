@@ -129,6 +129,22 @@ public class CommandStrings extends AbstractMorphStrings
                 "<what>已设置为<value>");
     }
 
+    //region Illegal arguments
+
+    public static FormattableMessage illegalArgumentString()
+    {
+        return getFormattable(getKey("illegal_argument"),
+                "无效的参数: <detail>");
+    }
+
+    public static FormattableMessage argumentTypeErrorString()
+    {
+        return getFormattable(getKey("illegal_argument.type_error"),
+                "参数类型应为<type>");
+    }
+
+    //endregion Illegal arguments
+
     private static String getKey(String key)
     {
         return "commands." + key;
