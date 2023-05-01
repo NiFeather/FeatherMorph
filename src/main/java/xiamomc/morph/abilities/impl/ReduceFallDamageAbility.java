@@ -15,7 +15,7 @@ public class ReduceFallDamageAbility extends DamageReducingAbility<ReduceDamageO
     }
 
     @Override
-    protected ReduceDamageOption createOption()
+    protected @NotNull ReduceDamageOption createOption()
     {
         return new ReduceDamageOption();
     }

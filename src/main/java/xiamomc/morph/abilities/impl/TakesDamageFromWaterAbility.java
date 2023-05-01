@@ -30,7 +30,7 @@ public class TakesDamageFromWaterAbility extends MorphAbility<TakesDamageFromWat
     }
 
     @Override
-    protected TakesDamageFromWaterOption createOption()
+    protected @NotNull TakesDamageFromWaterOption createOption()
     {
         return new TakesDamageFromWaterOption();
     }

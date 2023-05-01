@@ -223,6 +223,11 @@ public class DefaultConfigGenerator
                             .with(Attribute.GENERIC_KNOCKBACK_RESISTANCE, AttributeModifyOption.OperationType.add, 1d));
         });
 
+        addAbilityConfiguration(skills, EntityType.IRON_GOLEM, AbilityType.EXTRA_KNOCKBACK, c ->
+        {
+            c.addOption(AbilityType.EXTRA_KNOCKBACK, ExtraKnockbackOption.from(0, 0.4D, 0));
+        });
+
         addAbilityConfiguration(skills, EntityType.WARDEN, AbilityType.ATTRIBUTE, c ->
         {
             c.addOption(AbilityType.ATTRIBUTE,

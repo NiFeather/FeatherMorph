@@ -35,7 +35,7 @@ public class ChatOverrideAbility extends MorphAbility<ChatOverrideOption>
     }
 
     @Override
-    protected ChatOverrideOption createOption()
+    protected @NotNull ChatOverrideOption createOption()
     {
         return new ChatOverrideOption();
     }

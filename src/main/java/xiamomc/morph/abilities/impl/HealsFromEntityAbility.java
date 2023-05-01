@@ -17,10 +17,8 @@ import xiamomc.morph.abilities.MorphAbility;
 import xiamomc.morph.abilities.options.HealsFromEntityOption;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.misc.NmsRecord;
-import xiamomc.morph.misc.PlayerOperationSimulator;
 import xiamomc.morph.network.commands.S2C.set.S2CSetSNbtCommand;
 import xiamomc.morph.network.server.MorphClientHandler;
-import xiamomc.morph.network.commands.S2C.set.S2CSetNbtCommand;
 import xiamomc.morph.utilities.DamageSourceUtils;
 import xiamomc.morph.utilities.EntityTypeUtils;
 import xiamomc.morph.utilities.NbtUtils;
@@ -42,7 +40,7 @@ public class HealsFromEntityAbility extends MorphAbility<HealsFromEntityOption>
     }
 
     @Override
-    protected HealsFromEntityOption createOption()
+    protected @NotNull HealsFromEntityOption createOption()
     {
         return new HealsFromEntityOption();
     }

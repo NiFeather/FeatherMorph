@@ -64,11 +64,13 @@ public abstract class MorphAbility<T extends ISkillOption> extends MorphPluginOb
             return fallbackValue;
     }
 
+    @NotNull
     protected abstract T createOption();
 
     private final T option = createOption();
 
     @Override
+    @NotNull
     public T getDefaultOption()
     {
         return option;

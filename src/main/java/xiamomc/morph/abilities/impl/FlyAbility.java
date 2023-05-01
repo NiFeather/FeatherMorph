@@ -79,7 +79,7 @@ public class FlyAbility extends MorphAbility<FlyOption>
     }
 
     @Override
-    protected FlyOption createOption()
+    protected @NotNull FlyOption createOption()
     {
         return new FlyOption();
     }

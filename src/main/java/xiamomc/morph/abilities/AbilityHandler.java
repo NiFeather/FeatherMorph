@@ -131,7 +131,8 @@ public class AbilityHandler extends MorphPluginObject
                 new BossbarAbility(),
                 new NoSweetBushDamageAbility(),
                 new AttributeModifyingAbility(),
-                new HealsFromEntityAbility()
+                new HealsFromEntityAbility(),
+                new ExtraKnockbackAbility()
         ));
 
         initalizeDone = true;

@@ -40,7 +40,7 @@ public class BossbarAbility extends MorphAbility<BossbarOption>
     }
 
     @Override
-    protected BossbarOption createOption()
+    protected @NotNull BossbarOption createOption()
     {
         return new BossbarOption();
     }
