@@ -435,7 +435,8 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
                 || !source.hasPermission(CommonPermissions.MIRROR) //检查来源是否有权限进行操控
                 || target.hasPermission(CommonPermissions.MIRROR_IMMUNE) //检查目标是否免疫操控
                 || target.getOpenInventory().getType() != InventoryType.CRAFTING //检查目标是否正和容器互动
-                || target.isSleeping()) //检查目标是否正在睡觉
+                || target.isSleeping() //检查目标是否正在睡觉
+                || target.isDead()) //检查目标是否已经死亡
         {
             return false;
         }
