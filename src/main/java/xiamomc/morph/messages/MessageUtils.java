@@ -1,5 +1,6 @@
 package xiamomc.morph.messages;
 
+import com.destroystokyo.paper.ClientOption;
 import net.kyori.adventure.text.Component;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -9,6 +10,7 @@ import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
+import xiamomc.morph.misc.NmsRecord;
 import xiamomc.pluginbase.Bindables.Bindable;
 import xiamomc.pluginbase.Managers.DependencyManager;
 import xiamomc.pluginbase.Messages.FormattableMessage;
@@ -55,7 +57,9 @@ public class MessageUtils extends MorphPluginObject
         if (isSingleLanguage())
             return getServerLocale();
 
-        return player.locale().toLanguageTag().replace('-', '_').toLowerCase();
+        var nmsLocale = NmsRecord.ofPlayer(player).locale;
+
+        return nmsLocale == null ? getServerLocale() : nmsLocale.toLowerCase().replace('-', '_');
     }
 
     @NotNull

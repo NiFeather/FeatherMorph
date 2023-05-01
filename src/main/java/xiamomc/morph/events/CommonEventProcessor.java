@@ -31,6 +31,7 @@ import xiamomc.morph.messages.MorphStrings;
 import xiamomc.morph.messages.SkillStrings;
 import xiamomc.morph.messages.vanilla.VanillaMessageStore;
 import xiamomc.morph.misc.DisguiseTypes;
+import xiamomc.morph.misc.NmsRecord;
 import xiamomc.morph.network.server.MorphClientHandler;
 import xiamomc.morph.network.commands.S2C.S2CSwapCommand;
 import xiamomc.morph.network.server.ServerSetEquipCommand;
@@ -407,24 +408,22 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         }
         else if (offlineState != null)
         {
-            var serverLocale = MessageUtils.getServerLocale();
-
-            player.sendMessage(MessageUtils.prefixes(player, MorphStrings.stateRecoverReasonString().withLocale(serverLocale)));
+            player.sendMessage(MessageUtils.prefixes(player, MorphStrings.stateRecoverReasonString()));
 
             if (morphs.disguiseFromOfflineState(player, offlineState))
             {
                 if (false) //offlineState.disguise != null
                 {
-                    player.sendMessage(MessageUtils.prefixes(player, MorphStrings.recoveringStateString().withLocale(serverLocale)));
+                    player.sendMessage(MessageUtils.prefixes(player, MorphStrings.recoveringStateString()));
                 }
                 else
                 {
-                    player.sendMessage(MessageUtils.prefixes(player, MorphStrings.recoveringStateLimitedString().withLocale(serverLocale)));
-                    player.sendMessage(MessageUtils.prefixes(player, MorphStrings.recoveringStateLimitedHintString().withLocale(serverLocale)));
+                    player.sendMessage(MessageUtils.prefixes(player, MorphStrings.recoveringStateLimitedString()));
+                    player.sendMessage(MessageUtils.prefixes(player, MorphStrings.recoveringStateLimitedHintString()));
                 }
             }
             else
-                player.sendMessage(MessageUtils.prefixes(player, MorphStrings.recoveringFailedString().withLocale(MessageUtils.getServerLocale())));
+                player.sendMessage(MessageUtils.prefixes(player, MorphStrings.recoveringFailedString()));
         }
     }
 
