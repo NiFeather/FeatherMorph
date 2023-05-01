@@ -13,11 +13,7 @@ jobs:
         with:
           java-version: '17'
           distribution: 'adopt'
-      - name: Cache Maven packages
-        uses: actions/cache@v3
-        with:
-          path: ~/.m2
-          key: 1145141919810
+          cache: 'gradle'
       - name: Build with Gradle
         run: ./gradlew reobfJar
       - name: Upload artifact
