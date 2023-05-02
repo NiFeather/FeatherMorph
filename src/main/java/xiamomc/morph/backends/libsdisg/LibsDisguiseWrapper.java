@@ -105,6 +105,7 @@ public class LibsDisguiseWrapper extends DisguiseWrapper<Disguise>
         invalidateCompound();
     }
 
+    @Deprecated
     @Override
     public BoundingBox getBoundingBox()
     {

@@ -117,6 +117,7 @@ public class NilWrapper extends DisguiseWrapper<NilDisguise>
         this.instance.name = name;
     }
 
+    @Deprecated
     @Override
     public BoundingBox getBoundingBox()
     {
