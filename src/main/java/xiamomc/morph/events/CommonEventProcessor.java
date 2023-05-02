@@ -20,9 +20,8 @@ import org.bukkit.inventory.InventoryHolder;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.events.api.gameplay.PlayerJoinedWithDisguiseEvent;
-import xiamomc.morph.events.api.gameplay.PlayerMorphEvent;
 import xiamomc.morph.backends.libsdisg.LibsDisguiseWrapper;
-import xiamomc.morph.commands.MorphCommandHelper;
+import xiamomc.morph.commands.MorphCommandManager;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.messages.HintStrings;
@@ -31,7 +30,6 @@ import xiamomc.morph.messages.MorphStrings;
 import xiamomc.morph.messages.SkillStrings;
 import xiamomc.morph.messages.vanilla.VanillaMessageStore;
 import xiamomc.morph.misc.DisguiseTypes;
-import xiamomc.morph.misc.NmsRecord;
 import xiamomc.morph.network.server.MorphClientHandler;
 import xiamomc.morph.network.commands.S2C.S2CSwapCommand;
 import xiamomc.morph.network.server.ServerSetEquipCommand;
@@ -47,7 +45,7 @@ import static xiamomc.morph.utilities.DisguiseUtils.itemOrAir;
 public class CommonEventProcessor extends MorphPluginObject implements Listener
 {
     @Resolved(shouldSolveImmediately = true)
-    private MorphCommandHelper cmdHelper;
+    private MorphCommandManager cmdHelper;
 
     @Resolved(shouldSolveImmediately = true)
     private MorphManager morphs;

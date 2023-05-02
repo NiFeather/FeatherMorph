@@ -8,7 +8,7 @@ import net.minecrell.pluginyml.bukkit.BukkitPluginDescription
 plugins {
     java
     `maven-publish`
-    id("io.papermc.paperweight.userdev") version "1.4.0"
+    id("io.papermc.paperweight.userdev") version "1.5.5"
     id("xyz.jpenilla.run-paper") version "2.0.1" // Adds runServer and runMojangMappedServer tasks for testing
     id("net.minecrell.plugin-yml.bukkit") version "0.5.2" // Generates plugin.yml
     id("com.github.johnrengelman.shadow") version "7.1.2" // Shadow PluginBase

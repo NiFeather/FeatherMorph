@@ -9,7 +9,7 @@ import xiamomc.pluginbase.XiaMoJavaPlugin;
 
 import java.util.List;
 
-public class MorphCommandHelper extends CommandHelper<MorphPlugin>
+public class MorphCommandManager extends CommandHelper<MorphPlugin>
 {
     private final List<IPluginCommand> commands = ObjectList.of(
             new MorphCommand(),

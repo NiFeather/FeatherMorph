@@ -9,7 +9,7 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.scoreboard.Scoreboard;
 import org.jetbrains.annotations.ApiStatus;
 import xiamomc.morph.abilities.AbilityHandler;
-import xiamomc.morph.commands.MorphCommandHelper;
+import xiamomc.morph.commands.MorphCommandManager;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.events.CommonEventProcessor;
 import xiamomc.morph.events.InteractionMirrorProcessor;
@@ -43,7 +43,7 @@ public final class MorphPlugin extends XiaMoJavaPlugin
         return getMorphNameSpace();
     }
 
-    private final CommandHelper<MorphPlugin> cmdHelper = new MorphCommandHelper();
+    private final CommandHelper<MorphPlugin> cmdHelper = new MorphCommandManager();
 
     private MorphManager morphManager;
 
