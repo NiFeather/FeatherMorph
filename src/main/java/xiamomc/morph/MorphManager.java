@@ -81,7 +81,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     @Resolved
     private MorphConfigManager config;
 
-    private static final DisguiseProvider fallbackProvider = new FallbackProvider();
+    public static final DisguiseProvider fallbackProvider = new FallbackProvider();
 
     public static final String disguiseFallbackName = "@default";
 
@@ -256,6 +256,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
      * @param id 目标ID
      * @return 一个DisguiseProvider，若没找到或id是null则返回null
      */
+    @NotNull
     public static DisguiseProvider getProvider(String id)
     {
         if (id == null) return null;

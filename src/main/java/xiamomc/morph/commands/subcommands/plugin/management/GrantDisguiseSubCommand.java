@@ -9,6 +9,7 @@ import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.messages.*;
+import xiamomc.morph.providers.FallbackProvider;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Command.ISubCommand;
 import xiamomc.pluginbase.Messages.FormattableMessage;
@@ -84,10 +85,13 @@ public class GrantDisguiseSubCommand extends MorphPluginObject implements ISubCo
             return false;
         }
 
-        //检查是否已知
-        var provider = MorphManager.getProvider(strings[1]);
+        if (!targetName.contains(":"))
+            targetName = "minecraft:" + targetName;
 
-        if (provider == null || !provider.isValid(strings[1]))
+        //检查是否已知
+        var provider = MorphManager.getProvider(targetName);
+
+        if (!provider.isValid(targetName))
         {
             commandSender.sendMessage(MessageUtils.prefixes(commandSender, MorphStrings.invalidIdentityString()));
             return true;
