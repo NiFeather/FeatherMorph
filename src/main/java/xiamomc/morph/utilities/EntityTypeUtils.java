@@ -78,6 +78,27 @@ public class EntityTypeUtils
         return entity.getClass();
     }
 
+    public static boolean ageable(EntityType type)
+    {
+        return switch (type)
+        {
+            case COW, SHEEP, BEE, CAMEL, CAT, CHICKEN, DONKEY,
+                    FOX, GOAT, HORSE, LLAMA, MUSHROOM_COW, MULE,
+                    OCELOT, PANDA, PIG, POLAR_BEAR, RABBIT, SNIFFER, TURTLE, WOLF,
+                    HOGLIN, ZOMBIE, ZOMBIE_VILLAGER, PIGLIN, HUSK, DROWNED-> true;
+
+            default -> false;
+        };
+    }
+
+    public static boolean isZombie(EntityType type)
+    {
+        return type == EntityType.ZOMBIE
+                || type == EntityType.ZOMBIE_VILLAGER
+                || type == EntityType.DROWNED
+                || type == EntityType.HUSK;
+    }
+
     public static boolean isZombiesHostile(EntityType type)
     {
         return isGolem(type)

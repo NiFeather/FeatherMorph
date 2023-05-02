@@ -591,6 +591,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                     {
                         outComingState.setCachedNbtString(NbtUtils.getCompoundString(compound));
                         clientHandler.sendCommand(player, new S2CSetSNbtCommand(outComingState.getCachedNbtString()));
+
+                        outComingState.getDisguise().mergeCompound(compound);
                     }
 
                     //设置Profile

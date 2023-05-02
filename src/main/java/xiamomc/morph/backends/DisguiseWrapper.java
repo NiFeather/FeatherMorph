@@ -4,6 +4,8 @@ import com.mojang.authlib.GameProfile;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.TagType;
+import net.minecraft.tags.EntityTypeTags;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.phys.AABB;
 import org.bukkit.ChatColor;
@@ -16,6 +18,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.utilities.EntityTypeUtils;
+import xiamomc.morph.utilities.NbtUtils;
 
 public abstract class DisguiseWrapper<T>
 {
@@ -120,14 +123,11 @@ public abstract class DisguiseWrapper<T>
 
     private EntityDimensions dimensions;
 
-    /**
-     * Gets the dimensions of the current disguise
-     * @return A value of {@link EntityDimensions} matching the current disguise
-     */
-    public EntityDimensions getDimensions()
+    private void ensureDimensionPresent()
     {
-        EntityDimensions dims = this.dimensions;
-        if (dims != null) return dims;
+        if (dimensions != null) return;
+
+        EntityDimensions dims;
 
         var nmsType = EntityTypeUtils.getNmsType(this.getEntityType());
 
@@ -138,11 +138,45 @@ public abstract class DisguiseWrapper<T>
 
         this.dimensions = dims;
 
-        if (getEntityType() != EntityType.SLIME && getEntityType() != EntityType.MAGMA_CUBE) return dims;
+        if (getEntityType() != EntityType.SLIME && getEntityType() != EntityType.MAGMA_CUBE) return;
 
         this.dimensions = dims = EntityDimensions.fixed(0.51F * getSlimeDimensionScale(), 0.51F * getSlimeDimensionScale());
+    }
 
-        return dims;
+    /**
+     * Gets the dimensions of the current disguise
+     * @return A value of {@link EntityDimensions} matching the current disguise
+     */
+    public EntityDimensions getDimensions()
+    {
+        ensureDimensionPresent();
+        return isBaby() ? dimensions.scale(getBabyScale()) : dimensions;
+    }
+
+    private float getBabyScale()
+    {
+        if (this.getEntityType() == EntityType.TURTLE) return 0.3F;
+        else return 0.5F;
+    }
+
+    private Boolean ageable = null;
+
+    protected boolean isBaby()
+    {
+        var type = getEntityType();
+
+        if (ageable == null) ageable = EntityTypeUtils.ageable(type);
+
+        if (!ageable) return false;
+
+        var compound = getCompound();
+
+        if (EntityTypeUtils.isZombie(type) || type == EntityType.PIGLIN)
+            return compound.getBoolean("IsBaby");
+
+        var val = compound.getInt("Age");
+
+        return val < 0;
     }
 
     protected abstract float getSlimeDimensionScale();

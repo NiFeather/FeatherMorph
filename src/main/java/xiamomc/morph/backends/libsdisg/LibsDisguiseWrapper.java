@@ -27,6 +27,7 @@ import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.backends.DisguiseWrapper;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.utilities.DisguiseUtils;
+import xiamomc.morph.utilities.NbtUtils;
 import xiamomc.pluginbase.Utilities.ColorUtils;
 
 public class LibsDisguiseWrapper extends DisguiseWrapper<Disguise>
@@ -296,6 +297,8 @@ public class LibsDisguiseWrapper extends DisguiseWrapper<Disguise>
     @Override
     public CompoundTag getCompound()
     {
+        if (tagValid) return mixedTag;
+
         var compoundTag = this.compoundTag.copy();
 
         //todo: 将这些东西移动回VanillaDisguiseProvider，找个合适的方法来从外部获取伪装的NBT数据
