@@ -199,7 +199,7 @@ public class EntityTypeUtils
 
     public static Set<EntityType> takesDamageFromWater()
     {
-        return ObjectSet.of(EntityType.ENDERMAN, EntityType.BLAZE, EntityType.SNOWMAN);
+        return ObjectSet.of(EntityType.ENDERMAN, EntityType.BLAZE, EntityType.SNOWMAN, EntityType.STRIDER);
     }
 
     public static Set<EntityType> canBreatheUnderWater()
