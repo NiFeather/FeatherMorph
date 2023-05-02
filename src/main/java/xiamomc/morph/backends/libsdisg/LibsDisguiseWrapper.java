@@ -122,6 +122,14 @@ public class LibsDisguiseWrapper extends DisguiseWrapper<Disguise>
         return new BoundingBox(0, 0, 0, box.getX(), box.getY(), box.getZ());
     }
 
+    private boolean isBaby;
+
+    @Override
+    protected boolean isBaby()
+    {
+        return isBaby;
+    }
+
     @Override
     protected float getSlimeDimensionScale()
     {
@@ -291,6 +299,8 @@ public class LibsDisguiseWrapper extends DisguiseWrapper<Disguise>
     public void mergeCompound(CompoundTag compoundTag)
     {
         this.compoundTag.merge(compoundTag);
+        this.isBaby = NbtUtils.isBabyForType(getEntityType(), compoundTag);
+
         invalidateCompound();
     }
 

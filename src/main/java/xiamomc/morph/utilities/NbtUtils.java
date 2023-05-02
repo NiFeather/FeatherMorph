@@ -5,6 +5,7 @@ import net.minecraft.nbt.StringTagVisitor;
 import net.minecraft.server.commands.data.EntityDataAccessor;
 import org.bukkit.craftbukkit.v1_19_R3.entity.CraftEntity;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -45,6 +46,20 @@ public class NbtUtils
 
         //StringNbtWriter#apply(NbtElement)
         return visitor.visit(compound);
+    }
+
+    public static boolean isBabyForType(EntityType type, CompoundTag compoundTag)
+    {
+        var ageable = EntityTypeUtils.ageable(type);
+
+        if (!ageable) return false;
+
+        if (EntityTypeUtils.isZombie(type) || type == EntityType.PIGLIN)
+            return compoundTag.getBoolean("IsBaby");
+
+        var val = compoundTag.getInt("Age");
+
+        return val < 0;
     }
 
     public static List<String> defaultBlacklistedPatterns = List.of(

@@ -34,6 +34,8 @@ public class NilDisguise implements Cloneable
 
     public final CompoundTag compoundTag = new CompoundTag();
 
+    public boolean isBaby;
+
     @Override
     protected NilDisguise clone()
     {
@@ -58,6 +60,8 @@ public class NilDisguise implements Cloneable
         obj.compoundTag.merge(this.compoundTag);
 
         obj.customData.putAll(this.customData);
+
+        obj.isBaby = this.isBaby;
 
         return obj;
     }

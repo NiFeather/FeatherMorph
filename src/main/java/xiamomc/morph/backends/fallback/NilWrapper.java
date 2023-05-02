@@ -17,6 +17,7 @@ import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.backends.DisguiseWrapper;
 import xiamomc.morph.misc.DisguiseEquipment;
 import xiamomc.morph.misc.DisguiseState;
+import xiamomc.morph.utilities.NbtUtils;
 
 public class NilWrapper extends DisguiseWrapper<NilDisguise>
 {
@@ -31,6 +32,7 @@ public class NilWrapper extends DisguiseWrapper<NilDisguise>
     public void mergeCompound(CompoundTag compoundTag)
     {
         this.instance.compoundTag.merge(compoundTag);
+        this.instance.isBaby = NbtUtils.isBabyForType(getEntityType(), compoundTag);
     }
 
     @Override
@@ -122,6 +124,12 @@ public class NilWrapper extends DisguiseWrapper<NilDisguise>
     public BoundingBox getBoundingBox()
     {
         return new BoundingBox();
+    }
+
+    @Override
+    protected boolean isBaby()
+    {
+        return instance.isBaby;
     }
 
     @Override

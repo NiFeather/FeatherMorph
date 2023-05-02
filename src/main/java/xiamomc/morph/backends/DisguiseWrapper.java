@@ -154,23 +154,7 @@ public abstract class DisguiseWrapper<T>
 
     private Boolean ageable = null;
 
-    protected boolean isBaby()
-    {
-        var type = getEntityType();
-
-        if (ageable == null) ageable = EntityTypeUtils.ageable(type);
-
-        if (!ageable) return false;
-
-        var compound = getCompound();
-
-        if (EntityTypeUtils.isZombie(type) || type == EntityType.PIGLIN)
-            return compound.getBoolean("IsBaby");
-
-        var val = compound.getInt("Age");
-
-        return val < 0;
-    }
+    protected abstract boolean isBaby();
 
     protected abstract float getSlimeDimensionScale();
 
