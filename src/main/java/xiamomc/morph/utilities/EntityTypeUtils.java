@@ -78,14 +78,15 @@ public class EntityTypeUtils
         return entity.getClass();
     }
 
-    public static boolean ageable(EntityType type)
+    public static boolean hasBabyVariant(EntityType type)
     {
         return switch (type)
         {
             case COW, SHEEP, BEE, CAMEL, CAT, CHICKEN, DONKEY,
-                    FOX, GOAT, HORSE, LLAMA, MUSHROOM_COW, MULE,
+                    FOX, GOAT, HORSE, LLAMA, MUSHROOM_COW, MULE, TRADER_LLAMA, VILLAGER,
                     OCELOT, PANDA, PIG, POLAR_BEAR, RABBIT, SNIFFER, TURTLE, WOLF,
-                    HOGLIN, ZOMBIE, ZOMBIE_VILLAGER, PIGLIN, HUSK, DROWNED-> true;
+                    HOGLIN, ZOMBIE, ZOMBIE_VILLAGER, PIGLIN, HUSK, DROWNED, ZOMBIFIED_PIGLIN, STRIDER,
+                    SKELETON_HORSE, ZOMBIE_HORSE, ZOGLIN-> true;
 
             default -> false;
         };

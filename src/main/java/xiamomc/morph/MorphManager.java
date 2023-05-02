@@ -710,7 +710,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         state.setAbilities(List.of());
         state.setSkill(null);
 
-        spawnParticle(player, player.getLocation(), player.getWidth(), player.getHeight(), player.getWidth());
+        if (player.isOnline())
+            spawnParticle(player, player.getLocation(), player.getWidth(), player.getHeight(), player.getWidth());
 
         disguiseStates.remove(state);
 

@@ -83,7 +83,7 @@ public class NbtUtils
 
     public static boolean isBabyForType(EntityType type, CompoundTag compoundTag)
     {
-        var ageable = EntityTypeUtils.ageable(type);
+        var ageable = EntityTypeUtils.hasBabyVariant(type);
 
         if (!ageable) return false;
 
