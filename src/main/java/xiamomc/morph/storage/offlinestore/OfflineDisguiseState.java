@@ -28,13 +28,6 @@ public class OfflineDisguiseState implements IOfflineState
     public String disguiseID;
 
     /**
-     * 伪装技能ID
-     */
-    @Expose
-    @Nullable
-    public String skillID;
-
-    /**
      * 伪装数据，如果存在则优先使用这里的数据
      */
     @Expose
@@ -42,22 +35,16 @@ public class OfflineDisguiseState implements IOfflineState
     public String disguiseData;
 
     /**
-     * 要不要手动更新Pose
-     */
-    @Expose
-    public boolean shouldHandlePose;
-
-    /**
      * 是否在显示伪装物品
      */
     @Expose
-    public boolean showingDisguisedItems;
+    public boolean displayingDisguisedItems;
 
     /**
      * 伪装的NBT数据（如果有）
      */
     @Expose
-    public String nbtString;
+    public String snbt;
 
     /**
      * 伪装的{@link com.mojang.authlib.GameProfile}数据（如果有）

@@ -10,6 +10,12 @@ import xiamomc.morph.MorphPluginObject;
 public abstract class DisguiseBackend<TInstance, TWrapper extends DisguiseWrapper<TInstance>> extends MorphPluginObject
 {
     /**
+     * Gets the identifier of this backend.
+     * @return An identifier of this backend.
+     */
+    public abstract String getIdentifier();
+
+    /**
      * Creates a disguise from the giving entity
      * @param targetEntity The entity used to construct disguise
      * @return A wrapper that handles the constructed disguise
@@ -29,8 +35,6 @@ public abstract class DisguiseBackend<TInstance, TWrapper extends DisguiseWrappe
      * @return A wrapper that handles the constructed disguise
      */
     public abstract DisguiseWrapper<TInstance> createPlayerInstance(String targetPlayerName);
-
-    public abstract DisguiseWrapper<TInstance> fromOfflineString(String offlineStr);
 
     /**
      * Creates a disguise instance directly from the entity
@@ -69,4 +73,23 @@ public abstract class DisguiseBackend<TInstance, TWrapper extends DisguiseWrappe
      * @return Whether the operation was successful
      */
     public abstract boolean unDisguise(Player player);
+
+    /**
+     * Deserialize a wrapper instance from the giving parameter
+     * @param offlineParameter The parameter to deserialize
+     * @return A wrapper that presents the giving parameter.
+     *         null if invalid or illegal
+     * @apiNote The format for the input string is undefined and may looks like one of these three formats: "id|content", "id|*empty*", "*empty*"
+     */
+    @Nullable
+    public abstract TWrapper fromOfflineSave(String offlineParameter);
+
+    /**
+     * Serialize a wrapper instance to a string that can be saved in the Offline Storage
+     * @param wrapper The target wrapper to save
+     * @return A serialized string that can be deserialized to a wrapper in the future.
+     *         Null if the giving wrapper is not supported by this backend.
+     */
+    @Nullable
+    public abstract String toOfflineSave(DisguiseWrapper<?> wrapper);
 }

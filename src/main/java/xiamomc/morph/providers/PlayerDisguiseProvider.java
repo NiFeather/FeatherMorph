@@ -89,7 +89,7 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
         if (profile != null)
         {
             var gameProfile = new MorphGameProfile(profile);
-            var compound = new CompoundTag();
+            var compound = xiamomc.morph.utilities.NbtUtils.toCompoundTag(state.getCachedNbtString(), false);
 
             gameProfile.setName(DisguiseTypes.PLAYER.toStrippedId(state.getDisguiseIdentifier()));
 

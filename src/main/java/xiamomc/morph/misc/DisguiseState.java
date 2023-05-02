@@ -36,6 +36,7 @@ import xiamomc.morph.storage.offlinestore.OfflineDisguiseState;
 import xiamomc.morph.storage.playerdata.PlayerMorphConfiguration;
 import xiamomc.morph.utilities.DisguiseUtils;
 import xiamomc.morph.utilities.ItemUtils;
+import xiamomc.morph.utilities.NbtUtils;
 import xiamomc.pluginbase.Annotations.Resolved;
 
 import java.util.Arrays;
@@ -47,7 +48,7 @@ import static xiamomc.morph.utilities.DisguiseUtils.itemOrAir;
 public class DisguiseState extends MorphPluginObject
 {
     public DisguiseState(Player player, @NotNull String id, @NotNull String skillId,
-                         DisguiseWrapper<?> disguiseInstance, boolean isClone, @NotNull DisguiseProvider provider,
+                         @NotNull DisguiseWrapper<?> disguiseInstance, boolean isClone, @NotNull DisguiseProvider provider,
                          @Nullable EntityEquipment targetEquipment, @NotNull PlayerOptions<Player> playerOptions,
                          @NotNull PlayerMorphConfiguration playerMorphConfiguration)
     {
@@ -463,7 +464,7 @@ public class DisguiseState extends MorphPluginObject
      * @param equipment 要使用的equipment，没有则从伪装获取
      */
     public void setDisguise(@NotNull String identifier, @NotNull String skillIdentifier,
-                            DisguiseWrapper<?> d, boolean shouldHandlePose, @Nullable EntityEquipment equipment)
+                            @NotNull DisguiseWrapper<?> d, boolean shouldHandlePose, @Nullable EntityEquipment equipment)
     {
         setDisguise(identifier, skillIdentifier, d, shouldHandlePose, true, equipment);
     }
@@ -481,12 +482,9 @@ public class DisguiseState extends MorphPluginObject
      * @param targetEquipment 要使用的equipment，没有则从伪装获取
      */
     public void setDisguise(@NotNull String identifier, @NotNull String skillIdentifier,
-                            DisguiseWrapper<?> d, boolean shouldHandlePose, boolean shouldRefreshDisguiseItems,
+                            @NotNull DisguiseWrapper<?> d, boolean shouldHandlePose, boolean shouldRefreshDisguiseItems,
                             @Nullable EntityEquipment targetEquipment)
     {
-        if (!DisguiseUtils.isTracing(d))
-            throw new RuntimeException("此Disguise不能由插件管理");
-
         if (disguise == d) return;
 
         setCachedProfileNbtString(null);
@@ -653,81 +651,12 @@ public class DisguiseState extends MorphPluginObject
     public DisguiseState createCopy()
     {
         var disguise = this.disguise.clone();
-        DisguiseUtils.addTrace(disguise);
 
         var state = new DisguiseState(player, this.disguiseIdentifier, this.skillLookupIdentifier,
                 disguise, shouldHandlePose, provider, getDisguisedItems(), this.playerOptions, morphConfiguration);
 
         state.setCachedProfileNbtString(this.cachedProfileNbtString);
         state.setCachedNbtString(this.cachedNbtString);
-
-        return state;
-    }
-
-    /**
-     * 转换为离线存储格式
-     * @return 此State的离线存储
-     */
-    public OfflineDisguiseState toOfflineState()
-    {
-        var offlineState = new OfflineDisguiseState();
-
-        offlineState.playerUUID = this.playerUniqueID;
-        offlineState.playerName = this.player.getName();
-
-        offlineState.disguiseID = this.getDisguiseIdentifier();
-        offlineState.skillID = this.getSkillLookupIdentifier();
-
-        var newDisguise = disguise.clone();
-
-        if (supportsDisguisedItems)
-            updateEquipment(true);
-
-        offlineState.disguiseData = newDisguise.serializeDisguiseData();
-        offlineState.shouldHandlePose = this.shouldHandlePose;
-        offlineState.showingDisguisedItems = this.showDisguisedItems;
-        offlineState.nbtString = this.cachedNbtString;
-        offlineState.profileString = this.cachedProfileNbtString;
-
-        if (entityCustomName != null)
-            offlineState.customName = GsonComponentSerializer.gson().serialize(entityCustomName);
-
-        return offlineState;
-    }
-
-    /**
-     * 从离线存储转换为实例
-     * @param offlineState 离线存储
-     * @return DisguiseState的实例
-     */
-    public static DisguiseState fromOfflineState(OfflineDisguiseState offlineState, PlayerOptions<Player> playerOptions, PlayerMorphConfiguration playerMorphConfiguration)
-    {
-        if (!offlineState.isValid())
-            throw new RuntimeException("离线存储损坏");
-
-        var player = Bukkit.getPlayer(offlineState.playerUUID);
-
-        if (player == null) throw new RuntimeException("未找到与" + offlineState.playerUUID + "对应的玩家");
-
-        //todo: 实现伪装装备保存和读取
-        var state = new DisguiseState(player,
-                offlineState.disguiseID, offlineState.skillID == null ? offlineState.disguiseID : offlineState.skillID,
-                null, offlineState.shouldHandlePose, MorphManager.getProvider(offlineState.disguiseID),
-                null, playerOptions, playerMorphConfiguration);
-
-        state.setCachedProfileNbtString(offlineState.profileString);
-        state.setCachedNbtString(offlineState.nbtString);
-
-        if (offlineState.customName != null)
-        {
-            var component = GsonComponentSerializer.gson().deserialize(offlineState.customName);
-
-            state.entityCustomName = component;
-            state.setDisplayName(component);
-        }
-
-        if (state.supportsDisguisedItems)
-            state.setShowingDisguisedItems(offlineState.showingDisguisedItems);
 
         return state;
     }

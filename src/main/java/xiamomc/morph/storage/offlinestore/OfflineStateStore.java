@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.interfaces.IManageOfflineStates;
 import xiamomc.morph.misc.DisguiseState;
+import xiamomc.morph.misc.DisguiseStateGenerator;
 import xiamomc.morph.storage.MorphJsonBasedStorage;
 
 import java.util.List;
@@ -41,7 +42,7 @@ public class OfflineStateStore extends MorphJsonBasedStorage<OfflineStateContain
             storingObject.disguiseStates.removeIf(s -> s.playerUUID == state.getPlayerUniqueID());
         }
 
-        storingObject.disguiseStates.add(state.toOfflineState());
+        storingObject.disguiseStates.add(DisguiseStateGenerator.toOfflineState(state));
     }
 
     /**

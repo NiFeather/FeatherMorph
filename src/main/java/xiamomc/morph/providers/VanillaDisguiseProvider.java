@@ -293,7 +293,7 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
 
         var rawCompound = targetEntity != null && canConstruct(info, targetEntity, null)
                 ? NbtUtils.getRawTagCompound(targetEntity)
-                : new CompoundTag();
+                : NbtUtils.toCompoundTag(state.getCachedNbtString());
 
         if (rawCompound == null) rawCompound = new CompoundTag();
 

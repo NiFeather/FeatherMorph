@@ -7,6 +7,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Pose;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.backends.DisguiseWrapper;
 import xiamomc.morph.misc.DisguiseInfo;
 
@@ -18,16 +19,6 @@ public class DisguiseUtils
     public static int GHAST_EXECUTE_DELAY = 16;
 
     private static final String customDataTagName = "XIAMO_MORPH";
-
-    public static void addTrace(DisguiseWrapper<?> disguise)
-    {
-        disguise.addCustomData(customDataTagName, true);
-    }
-
-    public static boolean isTracing(DisguiseWrapper<?> disguise)
-    {
-        return Boolean.TRUE.equals(disguise.getCustomData(customDataTagName));
-    }
 
     public static String asString(DisguiseInfo info)
     {

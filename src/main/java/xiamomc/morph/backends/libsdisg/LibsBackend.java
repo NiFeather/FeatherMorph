@@ -24,13 +24,24 @@ public class LibsBackend extends DisguiseBackend<Disguise, LibsDisguiseWrapper>
     }
 
 
+    /**
+     * Gets the identifier of this backend.
+     *
+     * @return An identifier of this backend.
+     */
+    @Override
+    public String getIdentifier()
+    {
+        return "ld";
+    }
+
     @Override
     public DisguiseWrapper<Disguise> createInstance(@NotNull Entity targetEntity)
     {
         var instance = DisguiseAPI.constructDisguise(targetEntity);
         //DisguiseAPI.disguiseEntity(player, instance);
 
-        return new LibsDisguiseWrapper(instance);
+        return new LibsDisguiseWrapper(instance, this);
     }
 
     @Override
@@ -39,7 +50,7 @@ public class LibsBackend extends DisguiseBackend<Disguise, LibsDisguiseWrapper>
         var instance = new MobDisguise(DisguiseType.getType(entityType));
         //DisguiseAPI.disguiseEntity(player, instance);
 
-        return new LibsDisguiseWrapper(instance);
+        return new LibsDisguiseWrapper(instance, this);
     }
 
     @Override
@@ -48,29 +59,12 @@ public class LibsBackend extends DisguiseBackend<Disguise, LibsDisguiseWrapper>
         var instance = new PlayerDisguise(playerName);
         //DisguiseAPI.disguiseEntity(player, instance);
 
-        return new LibsDisguiseWrapper(instance);
-    }
-
-    @Override
-    public DisguiseWrapper<Disguise> fromOfflineString(String offlineStr)
-    {
-        try
-        {
-            var disg = DisguiseParser.parseDisguise(offlineStr);
-            return new LibsDisguiseWrapper(disg);
-        }
-        catch (Throwable t)
-        {
-            logger.error("Unable to parse from offline string: %s".formatted(t.getMessage()));
-            t.printStackTrace();
-
-            return null;
-        }
+        return new LibsDisguiseWrapper(instance, this);
     }
 
     public DisguiseWrapper<Disguise> createInstanceDirect(Disguise disguise)
     {
-        return new LibsDisguiseWrapper(disguise);
+        return new LibsDisguiseWrapper(disguise, this);
     }
 
     @Override
@@ -132,5 +126,56 @@ public class LibsBackend extends DisguiseBackend<Disguise, LibsDisguiseWrapper>
         }
 
         return true;
+    }
+
+    /**
+     * Deserialize a wrapper instance from the giving parameter
+     *
+     * @param offlineParameter The parameter to deserialize
+     * @return A wrapper that presents the giving parameter.
+     * null if invalid or illegal
+     */
+    @Override
+    public @Nullable LibsDisguiseWrapper fromOfflineSave(String offlineParameter)
+    {
+        var strSpilt = offlineParameter.split("\\|", 2);
+
+        if (strSpilt.length < 2) return null;
+
+        if (!strSpilt[0].equals(getIdentifier()))
+        {
+            logger.info("Trying to deserialize a empty save: '%s'".formatted(offlineParameter));
+            return null;
+        }
+
+        try
+        {
+            var disg = DisguiseParser.parseDisguise(strSpilt[1]);
+            return new LibsDisguiseWrapper(disg, this);
+        }
+        catch (Throwable t)
+        {
+            logger.error("Unable to parse from offline string: %s".formatted(t.getMessage()));
+            t.printStackTrace();
+
+            return null;
+        }
+    }
+
+    /**
+     * Serialize a wrapper instance to a string that can be saved in the Offline Storage
+     *
+     * @param wrapper The target wrapper to save
+     * @return A serialized string that can be deserialized to a wrapper in the future.
+     * Null if the giving wrapper is not supported by this backend.
+     */
+    @Override
+    public @Nullable String toOfflineSave(DisguiseWrapper<?> wrapper)
+    {
+        if (!(wrapper instanceof LibsDisguiseWrapper libsDisguiseWrapper)) return null;
+
+        var disguise = libsDisguiseWrapper.getInstance();
+
+        return DisguiseParser.parseToString(disguise);
     }
 }

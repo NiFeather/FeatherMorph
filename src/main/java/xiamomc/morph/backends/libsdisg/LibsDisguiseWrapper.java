@@ -24,6 +24,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import xiamomc.morph.MorphPlugin;
+import xiamomc.morph.backends.DisguiseBackend;
 import xiamomc.morph.backends.DisguiseWrapper;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.utilities.DisguiseUtils;
@@ -32,9 +33,9 @@ import xiamomc.pluginbase.Utilities.ColorUtils;
 
 public class LibsDisguiseWrapper extends DisguiseWrapper<Disguise>
 {
-    public LibsDisguiseWrapper(@NotNull Disguise instance)
+    public LibsDisguiseWrapper(@NotNull Disguise instance, LibsBackend backend)
     {
-        super(instance);
+        super(instance, backend);
 
         this.watcher = instance.getWatcher();
     }
@@ -78,7 +79,7 @@ public class LibsDisguiseWrapper extends DisguiseWrapper<Disguise>
     @Override
     public DisguiseWrapper<Disguise> clone()
     {
-        var newWrapper = new LibsDisguiseWrapper(instance.clone());
+        var newWrapper = new LibsDisguiseWrapper(instance.clone(), (LibsBackend) getBackend());
         newWrapper.compoundTag.merge(this.compoundTag);
 
         return newWrapper;
@@ -237,11 +238,6 @@ public class LibsDisguiseWrapper extends DisguiseWrapper<Disguise>
         instance.setKeepDisguiseOnPlayerDeath(true);
     }
 
-    @Override
-    public String serializeDisguiseData()
-    {
-        return DisguiseParser.parseToString(instance);
-    }
     private final Scoreboard scoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
 
     @Override

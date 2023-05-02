@@ -364,7 +364,6 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
             backend.disguise(player, state.getDisguise());
 
             var disguise = state.getDisguise();
-            DisguiseUtils.addTrace(disguise);
 
             //刷新Disguise
             var nbt = state.getCachedNbtString();
@@ -394,31 +393,21 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         }
 
         var offlineState = morphs.getOfflineState(player);
-        var backend = morphs.getCurrentBackend();
 
-        if (offlineState == null && backend.isDisguised(player))
-        {
-            //移除未跟踪，未保存并且属于此插件的伪装
-            var disguise = backend.getDisguise(player);
-
-            if (DisguiseUtils.isTracing(disguise))
-                backend.unDisguise(player);
-        }
-        else if (offlineState != null)
+        if (offlineState != null)
         {
             player.sendMessage(MessageUtils.prefixes(player, MorphStrings.stateRecoverReasonString()));
 
-            if (morphs.disguiseFromOfflineState(player, offlineState))
+            var result = morphs.disguiseFromOfflineState(player, offlineState);
+
+            if (result == 0)
             {
-                if (false) //offlineState.disguise != null
-                {
-                    player.sendMessage(MessageUtils.prefixes(player, MorphStrings.recoveringStateString()));
-                }
-                else
-                {
-                    player.sendMessage(MessageUtils.prefixes(player, MorphStrings.recoveringStateLimitedString()));
-                    player.sendMessage(MessageUtils.prefixes(player, MorphStrings.recoveringStateLimitedHintString()));
-                }
+                player.sendMessage(MessageUtils.prefixes(player, MorphStrings.recoveringStateString()));
+            }
+            else if (result == 1)
+            {
+                player.sendMessage(MessageUtils.prefixes(player, MorphStrings.recoveringStateLimitedString()));
+                player.sendMessage(MessageUtils.prefixes(player, MorphStrings.recoveringStateLimitedHintString()));
             }
             else
                 player.sendMessage(MessageUtils.prefixes(player, MorphStrings.recoveringFailedString()));

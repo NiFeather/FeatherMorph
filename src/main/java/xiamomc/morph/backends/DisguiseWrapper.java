@@ -24,9 +24,10 @@ public abstract class DisguiseWrapper<T>
 {
     protected T instance;
 
-    public DisguiseWrapper(@NotNull T instance)
+    public DisguiseWrapper(@NotNull T instance, DisguiseBackend<T, ? extends DisguiseWrapper<T>> backend)
     {
         this.instance = instance;
+        this.backend = backend;
     }
 
     /**
@@ -36,6 +37,13 @@ public abstract class DisguiseWrapper<T>
     public T getInstance()
     {
         return instance;
+    }
+
+    private final DisguiseBackend<T, ? extends DisguiseWrapper<T>> backend;
+
+    public DisguiseBackend<T, ? extends DisguiseWrapper<T>> getBackend()
+    {
+        return backend;
     }
 
     /**
@@ -203,13 +211,6 @@ public abstract class DisguiseWrapper<T>
      * @param targetEntity The targeted entity (If there is any)
      */
     public abstract void onPostConstructDisguise(DisguiseState state, @Nullable Entity targetEntity);
-
-    /**
-     * Serialize data for the current disguise instance
-     * @return A string that can be de-serialized to the current disguise instance.<br>
-     *         Return an empty string if de-serializing is not supported.
-     */
-    public abstract String serializeDisguiseData();
 
     /**
      * Updates the underlying disguise instance

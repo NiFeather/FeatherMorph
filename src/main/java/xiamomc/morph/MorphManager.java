@@ -32,6 +32,7 @@ import xiamomc.morph.messages.MorphStrings;
 import xiamomc.morph.messages.vanilla.VanillaMessageStore;
 import xiamomc.morph.misc.DisguiseInfo;
 import xiamomc.morph.misc.DisguiseState;
+import xiamomc.morph.misc.DisguiseStateGenerator;
 import xiamomc.morph.misc.DisguiseTypes;
 import xiamomc.morph.misc.permissions.CommonPermissions;
 import xiamomc.morph.network.commands.S2C.set.S2CSetProfileCommand;
@@ -754,9 +755,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                                                 String disguiseIdentifier, DisguiseWrapper<?> disguiseWrapper, boolean shouldHandlePose,
                                                 @NotNull DisguiseProvider provider)
     {
-        //设置自定义数据用来跟踪
-        DisguiseUtils.addTrace(disguiseWrapper);
-
         var playerMorphConfig = getPlayerConfiguration(player);
 
         //更新或者添加DisguiseState
@@ -1016,42 +1014,50 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         postConstructDisguise(state);
     }
 
-    public boolean disguiseFromOfflineState(Player player, OfflineDisguiseState offlineState)
+    /**
+     *
+     * @param player
+     * @param offlineState
+     * @return -1: Fail<br/>
+     *         0: Success<br/>
+     *         1: Success(Limited copy)<br/>
+     */
+    public int disguiseFromOfflineState(Player player, OfflineDisguiseState offlineState)
     {
         try
         {
             if (player.getUniqueId() == offlineState.playerUUID)
             {
                 logger.error("OfflineState UUID mismatch: %s <-> %s".formatted(player.getUniqueId(), offlineState.playerUUID));
-                return false;
+                return -1;
             }
 
             var key = offlineState.disguiseID;
 
             if (disguiseDisabled(key) || !getPlayerConfiguration(player).getUnlockedDisguiseIdentifiers().contains(key))
-                return false;
+                return -1;
 
             var disguiseType = DisguiseTypes.fromId(key);
 
-            if (disguiseType == DisguiseTypes.UNKNOWN) return false;
+            if (disguiseType == DisguiseTypes.UNKNOWN) return -1;
 
-            //todo: 考虑是否要保留离线伪装的恢复
-            /*
             //直接还原非LD的伪装
-            if (offlineState.disguise != null && disguiseType != DisguiseTypes.LD)
+            if (disguiseType != DisguiseTypes.LD)
             {
-                DisguiseUtils.addTrace(offlineState.disguise);
+                var state = DisguiseStateGenerator.fromOfflineState(offlineState,
+                        clientHandler.getPlayerOption(player, true), getPlayerConfiguration(player), skillHandler, currentBackend);
 
-                var state = DisguiseState.fromOfflineState(offlineState, data.getPlayerConfiguration(player));
+                if (state != null)
+                {
+                    this.disguiseFromState(state);
 
-                this.disguiseFromState(state);
-                return true;
+                    return 0;
+                }
             }
-            */
 
             //有限还原
             morph(player, key, null);
-            return true;
+            return 1;
         }
         catch (Throwable t)
         {
@@ -1059,7 +1065,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             t.printStackTrace();
         }
 
-        return false;
+        return -1;
     }
 
     //endregion 玩家伪装相关

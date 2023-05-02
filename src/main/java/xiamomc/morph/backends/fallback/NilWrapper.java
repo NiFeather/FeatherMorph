@@ -14,6 +14,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import xiamomc.morph.MorphPlugin;
+import xiamomc.morph.backends.DisguiseBackend;
 import xiamomc.morph.backends.DisguiseWrapper;
 import xiamomc.morph.misc.DisguiseEquipment;
 import xiamomc.morph.misc.DisguiseState;
@@ -21,9 +22,9 @@ import xiamomc.morph.utilities.NbtUtils;
 
 public class NilWrapper extends DisguiseWrapper<NilDisguise>
 {
-    public NilWrapper(@NotNull NilDisguise instance)
+    public NilWrapper(@NotNull NilDisguise instance, NilBackend backend)
     {
-        super(instance);
+        super(instance, backend);
     }
 
     private final DisguiseEquipment equipment = new DisguiseEquipment();
@@ -99,7 +100,7 @@ public class NilWrapper extends DisguiseWrapper<NilDisguise>
     @Override
     public DisguiseWrapper<NilDisguise> clone()
     {
-        return new NilWrapper(this.copyInstance());
+        return new NilWrapper(this.copyInstance(), (NilBackend) getBackend());
     }
 
     /**
@@ -184,12 +185,6 @@ public class NilWrapper extends DisguiseWrapper<NilDisguise>
     @Override
     public void onPostConstructDisguise(DisguiseState state, @Nullable Entity targetEntity)
     {
-    }
-
-    @Override
-    public String serializeDisguiseData()
-    {
-        return "";
     }
 
     @Override

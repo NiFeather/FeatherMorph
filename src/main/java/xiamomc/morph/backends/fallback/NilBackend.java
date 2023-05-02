@@ -8,15 +8,27 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.backends.DisguiseBackend;
 import xiamomc.morph.backends.DisguiseWrapper;
+import xiamomc.morph.utilities.NbtUtils;
 
 import java.util.Map;
 
 public class NilBackend extends DisguiseBackend<NilDisguise, NilWrapper>
 {
+    /**
+     * Gets the identifier of this backend.
+     *
+     * @return An identifier of this backend.
+     */
+    @Override
+    public String getIdentifier()
+    {
+        return "nil";
+    }
+
     @Override
     public DisguiseWrapper<NilDisguise> createInstance(@NotNull Entity targetEntity)
     {
-        var wrapper = new NilWrapper(new NilDisguise(targetEntity.getType()));
+        var wrapper = new NilWrapper(new NilDisguise(targetEntity.getType()), this);
         wrapper.setDisguiseName(targetEntity.getName());
 
         return wrapper;
@@ -25,22 +37,16 @@ public class NilBackend extends DisguiseBackend<NilDisguise, NilWrapper>
     @Override
     public DisguiseWrapper<NilDisguise> createInstance(EntityType entityType)
     {
-        return new NilWrapper(new NilDisguise(entityType));
+        return new NilWrapper(new NilDisguise(entityType), this);
     }
 
     @Override
     public DisguiseWrapper<NilDisguise> createPlayerInstance(String targetPlayerName)
     {
-        var wrapper = new NilWrapper(new NilDisguise(EntityType.PLAYER));
+        var wrapper = new NilWrapper(new NilDisguise(EntityType.PLAYER), this);
         wrapper.setDisguiseName(targetPlayerName);
 
         return wrapper;
-    }
-
-    @Override
-    public DisguiseWrapper<NilDisguise> fromOfflineString(String offlineStr)
-    {
-        return null;
     }
 
     @Override
@@ -82,5 +88,31 @@ public class NilBackend extends DisguiseBackend<NilDisguise, NilWrapper>
         playerFallbackWrapperMap.remove(player);
 
         return true;
+    }
+
+    /**
+     * Deserialize a wrapper instance from the giving parameter
+     *
+     * @param offlineParameter The parameter to deserialize
+     * @return A wrapper that presents the giving parameter.
+     * null if invalid or illegal
+     */
+    @Override
+    public @Nullable NilWrapper fromOfflineSave(String offlineParameter)
+    {
+        return null;
+    }
+
+    /**
+     * Serialize a wrapper instance to a string that can be saved in the Offline Storage
+     *
+     * @param wrapper The target wrapper to save
+     * @return A serialized string that can be deserialized to a wrapper in the future.
+     * Null if the giving wrapper is not supported by this backend.
+     */
+    @Override
+    public @Nullable String toOfflineSave(DisguiseWrapper<?> wrapper)
+    {
+        return null;
     }
 }
