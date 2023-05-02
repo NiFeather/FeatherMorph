@@ -127,20 +127,16 @@ public abstract class DisguiseWrapper<T>
     {
         if (dimensions != null) return;
 
-        EntityDimensions dims;
-
         var nmsType = EntityTypeUtils.getNmsType(this.getEntityType());
 
         if (nmsType != null)
-            dims = nmsType.getDimensions();
+            this.dimensions = nmsType.getDimensions();
         else
             throw new RuntimeException("Unable to get NMS type for %s".formatted(this.getEntityType()));
 
-        this.dimensions = dims;
-
         if (getEntityType() != EntityType.SLIME && getEntityType() != EntityType.MAGMA_CUBE) return;
 
-        this.dimensions = dims = EntityDimensions.fixed(0.51F * getSlimeDimensionScale(), 0.51F * getSlimeDimensionScale());
+        this.dimensions = EntityDimensions.fixed(0.51F * getSlimeDimensionScale(), 0.51F * getSlimeDimensionScale());
     }
 
     /**
@@ -150,13 +146,10 @@ public abstract class DisguiseWrapper<T>
     public EntityDimensions getDimensions()
     {
         ensureDimensionPresent();
-        return isBaby() ? dimensions.scale(getBabyScale()) : dimensions;
-    }
 
-    private float getBabyScale()
-    {
-        if (this.getEntityType() == EntityType.TURTLE) return 0.3F;
-        else return 0.5F;
+        return isBaby()
+                ? dimensions.scale(this.getEntityType() == EntityType.TURTLE ? 0.3F : 0.5F)
+                : dimensions;
     }
 
     private Boolean ageable = null;
