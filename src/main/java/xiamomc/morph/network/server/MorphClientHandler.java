@@ -56,6 +56,8 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
         if (message.length > Messenger.MAX_MESSAGE_SIZE)
             throw new MessageTooLargeException();
 
+        if (!player.isOnline()) return;
+
         if (logOutGoingPackets.get())
             logPacket(true, player, channel, message);
 

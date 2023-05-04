@@ -35,10 +35,7 @@ import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.misc.DisguiseStateGenerator;
 import xiamomc.morph.misc.DisguiseTypes;
 import xiamomc.morph.misc.permissions.CommonPermissions;
-import xiamomc.morph.network.commands.S2C.set.S2CSetProfileCommand;
-import xiamomc.morph.network.commands.S2C.set.S2CSetSNbtCommand;
-import xiamomc.morph.network.commands.S2C.set.S2CSetSelfViewIdentifierCommand;
-import xiamomc.morph.network.commands.S2C.set.S2CSetSelfViewingCommand;
+import xiamomc.morph.network.commands.S2C.set.*;
 import xiamomc.morph.network.server.MorphClientHandler;
 import xiamomc.morph.providers.DisguiseProvider;
 import xiamomc.morph.providers.FallbackProvider;
@@ -664,6 +661,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         //Profile
         if (state.haveProfile())
             clientHandler.sendCommand(player, new S2CSetProfileCommand(state.getProfileNbtString()));
+
+        clientHandler.sendCommand(player, new S2CSetDisplayingFakeEquipCommand(state.showingDisguisedItems()));
     }
 
     /**
