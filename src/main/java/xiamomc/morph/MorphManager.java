@@ -515,7 +515,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             return false;
         }
 
-        var state = getDisguiseStateFor(player);
+        var currentState = getDisguiseStateFor(player);
 
         //检查有没有伪装
         if (info != null)
@@ -542,15 +542,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 }
                 else
                 {
-                    //重置上个State的伪装
-                    if (state != null)
-                    {
-                        state.getProvider().unMorph(player, state);
-                        state.setAbilities(List.of());
-
-                        state.setSkill(null);
-                    }
-
                     var result = provider.makeWrapper(player, info, targetEntity);
 
                     if (!result.success())
@@ -558,6 +549,15 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                         player.sendMessage(MessageUtils.prefixes(player, MorphStrings.errorWhileDisguising()));
                         logger.error("Unable to apply disguise for player with provider " + provider);
                         return false;
+                    }
+
+                    //重置上个State的伪装
+                    if (currentState != null)
+                    {
+                        currentState.getProvider().unMorph(player, currentState);
+                        currentState.setAbilities(List.of());
+
+                        currentState.setSkill(null);
                     }
 
                     var backendSuccess = currentBackend.disguise(player, result.wrapperInstance());
@@ -582,7 +582,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 player.sendMessage(MessageUtils.prefixes(player, msg));
 
                 //如果此伪装可以同步给客户端，那么初始化客户端状态
-                if (provider.validForClient(state))
+                if (provider.validForClient(outComingState))
                 {
                     clientHandler.sendCommand(player, new S2CSetSelfViewIdentifierCommand(provider.getSelfViewIdentifier(outComingState)));
 
