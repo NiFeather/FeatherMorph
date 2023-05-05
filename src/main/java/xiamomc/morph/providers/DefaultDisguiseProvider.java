@@ -179,7 +179,8 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
             //如果伪装是复制来的，并且目标实体有伪装，则将颜色设置为他们伪装的发光颜色
             if (state.shouldHandlePose() && backend.isDisguised(teamTargetEntity))
             {
-                glowColor = backend.getDisguise(teamTargetEntity).getGlowingColor();
+                //backend.isDisguised -> backend.getWrapper != null
+                glowColor = backend.getWrapper(teamTargetEntity).getGlowingColor();
             }
             else
             {

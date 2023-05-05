@@ -56,7 +56,7 @@ public abstract class DisguiseBackend<TInstance, TWrapper extends DisguiseWrappe
      * @return The wrapper that handles the entity's disguise. Null if it's not disguised.
      */
     @Nullable
-    public abstract TWrapper getDisguise(Entity target);
+    public abstract TWrapper getWrapper(Entity target);
 
     /**
      * 将某一玩家伪装成给定Wrapper中的实例

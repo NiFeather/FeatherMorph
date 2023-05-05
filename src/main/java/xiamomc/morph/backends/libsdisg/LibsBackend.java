@@ -116,7 +116,7 @@ public class LibsBackend extends DisguiseBackend<Disguise, LibsDisguiseWrapper>
     private final Map<Player, LibsDisguiseWrapper> playerLibsDisguiseWrapperMap = new Object2ObjectOpenHashMap<>();
 
     @Override
-    public LibsDisguiseWrapper getDisguise(Entity target)
+    public LibsDisguiseWrapper getWrapper(Entity target)
     {
         if (!(target instanceof Player player)) return null;
 

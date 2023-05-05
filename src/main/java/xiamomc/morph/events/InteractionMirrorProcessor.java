@@ -398,12 +398,12 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
         if (ignoreDisguised.get()) return true;
 
         var backend = manager.getCurrentBackend();
-        var disguise = backend.getDisguise(targetPlayer);
+        var theirDisguise = backend.getWrapper(targetPlayer);
 
-        if (disguise != null && disguise.isPlayerDisguise())
-            return disguise.getDisguiseName().equals(targetName);
+        if (theirDisguise != null && theirDisguise.isPlayerDisguise())
+            return theirDisguise.getDisguiseName().equals(targetName);
 
-        return disguise == null && targetPlayer.getName().equals(targetName);
+        return theirDisguise == null && targetPlayer.getName().equals(targetName);
     }
 
     /**

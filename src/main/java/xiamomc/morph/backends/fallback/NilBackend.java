@@ -62,7 +62,7 @@ public class NilBackend extends DisguiseBackend<NilDisguise, NilWrapper>
     }
 
     @Override
-    public NilWrapper getDisguise(Entity target)
+    public NilWrapper getWrapper(Entity target)
     {
         if (!(target instanceof Player player)) return null;
 

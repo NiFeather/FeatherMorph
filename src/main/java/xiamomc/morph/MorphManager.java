@@ -404,7 +404,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
             if (targetedEntity != null)
             {
-                var disg = currentBackend.getDisguise(targetedEntity);
+                var disg = currentBackend.getWrapper(targetedEntity);
 
                 String targetKey;
 

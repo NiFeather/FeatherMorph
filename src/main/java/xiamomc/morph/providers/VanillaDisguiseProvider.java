@@ -185,7 +185,7 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
         }
 
         if (modifyBoundingBoxes.get())
-            this.tryModifyPlayerDimensions(player, backend.getDisguise(player));
+            this.tryModifyPlayerDimensions(player, state.getDisguiseWrapper());
     }
 
     private void resetPlayerDimensions(Player player)
