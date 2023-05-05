@@ -53,7 +53,7 @@ public class LocalDisguiseProvider extends VanillaDisguiseProvider
     }
 
     @Override
-    public @NotNull DisguiseResult morph(Player player, DisguiseInfo disguiseInfo, @Nullable Entity targetEntity)
+    public @NotNull DisguiseResult makeWrapper(Player player, DisguiseInfo disguiseInfo, @Nullable Entity targetEntity)
     {
         if (!allowLD.get())
         {

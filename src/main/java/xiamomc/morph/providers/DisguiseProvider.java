@@ -48,14 +48,14 @@ public abstract class DisguiseProvider extends MorphPluginObject
     public abstract List<String> getAllAvailableDisguises();
 
     /**
-     * 为某个玩家应用或更新伪装
+     * 为目标玩家构建一个用于伪装的 {@link DisguiseWrapper}
+     *
      * @param player 目标玩家
      * @param disguiseInfo 伪装ID
      * @param targetEntity 玩家的目标实体(如果有), 可用来判断是否要复制伪装
-     * @return 操作结果
      */
     @NotNull
-    public abstract DisguiseResult morph(Player player, DisguiseInfo disguiseInfo, @Nullable Entity targetEntity);
+    public abstract DisguiseResult makeWrapper(Player player, DisguiseInfo disguiseInfo, @Nullable Entity targetEntity);
 
     /**
      * 更新某个伪装的状态

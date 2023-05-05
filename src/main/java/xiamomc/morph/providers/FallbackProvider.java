@@ -32,7 +32,7 @@ public class FallbackProvider extends DefaultDisguiseProvider
     }
 
     @Override
-    public @NotNull DisguiseResult morph(Player player, DisguiseInfo disguiseInfo, @Nullable Entity targetEntity)
+    public @NotNull DisguiseResult makeWrapper(Player player, DisguiseInfo disguiseInfo, @Nullable Entity targetEntity)
     {
         return DisguiseResult.fail();
     }

@@ -4,11 +4,11 @@ import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.backends.DisguiseWrapper;
 
 /**
- * @param disguise
- * @param success
+ * @param wrapperInstance Wrapper实例，在失败时为空
+ * @param success 操作是否成功
  * @param isCopy 此伪装是否克隆自其他实体或其他玩家的伪装
  */
-public record DisguiseResult(@Nullable DisguiseWrapper<?> disguise, boolean success, boolean isCopy)
+public record DisguiseResult(@Nullable DisguiseWrapper<?> wrapperInstance, boolean success, boolean isCopy)
 {
     public static final DisguiseResult FAIL = new DisguiseResult(null, false, false);
 

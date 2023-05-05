@@ -13,6 +13,10 @@ public enum DisguiseTypes
     //原版
     VANILLA(NamespacedKey.MINECRAFT),
 
+    ITEM_DISPLAY("item_display"),
+
+    BLOCK_DISPLAY("block_display"),
+
     //玩家伪装
     PLAYER("player"),
 

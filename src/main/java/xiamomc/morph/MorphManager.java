@@ -37,10 +37,7 @@ import xiamomc.morph.misc.DisguiseTypes;
 import xiamomc.morph.misc.permissions.CommonPermissions;
 import xiamomc.morph.network.commands.S2C.set.*;
 import xiamomc.morph.network.server.MorphClientHandler;
-import xiamomc.morph.providers.DisguiseProvider;
-import xiamomc.morph.providers.FallbackProvider;
-import xiamomc.morph.providers.PlayerDisguiseProvider;
-import xiamomc.morph.providers.VanillaDisguiseProvider;
+import xiamomc.morph.providers.*;
 import xiamomc.morph.skills.MorphSkillHandler;
 import xiamomc.morph.skills.SkillCooldownInfo;
 import xiamomc.morph.skills.SkillType;
@@ -126,6 +123,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         registerProviders(ObjectList.of(
                 new VanillaDisguiseProvider(),
                 new PlayerDisguiseProvider(),
+                //new ItemDisplayProvider(),
                 //new LocalDisguiseProvider(),
                 fallbackProvider
         ));
@@ -377,7 +375,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                     //如果玩家有伪装，并且伪装的材质和Profile中的一样，那么取消伪装
                     if (state != null)
                     {
-                        var disguise = state.getDisguise();
+                        var disguise = state.getDisguiseWrapper();
 
                         if (disguise.isPlayerDisguise()
                                 && disguise.getDisguiseName().equals(name)
@@ -531,7 +529,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
                 DisguiseState outComingState = null;
 
-                if (provider == null)
+                if (provider == MorphManager.fallbackProvider)
                 {
                     player.sendMessage(MessageUtils.prefixes(player, MorphStrings.disguiseBannedOrNotSupportedString()));
                     logger.error("Unable to find any provider that matches the identifier '%s'".formatted(strippedKey[0]));
@@ -553,7 +551,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                         state.setSkill(null);
                     }
 
-                    var result = provider.morph(player, info, targetEntity);
+                    var result = provider.makeWrapper(player, info, targetEntity);
 
                     if (!result.success())
                     {
@@ -562,10 +560,17 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                         return false;
                     }
 
+                    var backendSuccess = currentBackend.disguise(player, result.wrapperInstance());
+                    if (!backendSuccess)
+                    {
+                        player.sendMessage(MessageUtils.prefixes(player, MorphStrings.errorWhileDisguising()));
+                        return false;
+                    }
+
                     clientHandler.updateCurrentIdentifier(player, key);
 
                     outComingState = postConstructDisguise(player, targetEntity,
-                            info.getIdentifier(), result.disguise(), result.isCopy(), provider);
+                            info.getIdentifier(), result.wrapperInstance(), result.isCopy(), provider);
                 }
 
                 var playerLocale = MessageUtils.getLocale(player);
@@ -591,7 +596,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                         outComingState.setCachedNbtString(NbtUtils.getCompoundString(compound));
                         clientHandler.sendCommand(player, new S2CSetSNbtCommand(outComingState.getCachedNbtString()));
 
-                        outComingState.getDisguise().mergeCompound(compound);
+                        outComingState.getDisguiseWrapper().mergeCompound(compound);
                     }
 
                     //设置Profile
@@ -636,6 +641,10 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         return bannedDisguises.contains(splitKey[0] + ":any");
     }
 
+    /**
+     * 向客户端发送一组用于同步伪装状态的指令
+     * @param state {@link DisguiseState}
+     */
     public void refreshClientState(DisguiseState state)
     {
         var player = state.getPlayer();
@@ -737,7 +746,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     private void postConstructDisguise(DisguiseState state)
     {
         postConstructDisguise(state.getPlayer(), null,
-                state.getDisguiseIdentifier(), state.getDisguise(), state.shouldHandlePose(), state.getProvider());
+                state.getDisguiseIdentifier(), state.getDisguiseWrapper(), state.shouldHandlePose(), state.getProvider());
     }
 
     @Resolved
@@ -1006,12 +1015,12 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         return offlineStorage.getAvaliableDisguiseStates();
     }
 
-    private void disguiseFromState(DisguiseState state)
+    public void disguiseFromState(DisguiseState state)
     {
         if (!disguiseStates.contains(state))
             disguiseStates.add(state);
 
-        currentBackend.disguise(state.getPlayer(), state.getDisguise());
+        currentBackend.disguise(state.getPlayer(), state.getDisguiseWrapper());
         postConstructDisguise(state);
     }
 

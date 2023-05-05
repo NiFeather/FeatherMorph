@@ -5,14 +5,11 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.backends.DisguiseBackend;
-import xiamomc.morph.backends.DisguiseWrapper;
 import xiamomc.morph.network.PlayerOptions;
 import xiamomc.morph.skills.MorphSkillHandler;
 import xiamomc.morph.skills.SkillType;
 import xiamomc.morph.storage.offlinestore.OfflineDisguiseState;
 import xiamomc.morph.storage.playerdata.PlayerMorphConfiguration;
-import xiamomc.morph.utilities.DisguiseUtils;
-import xiamomc.morph.utilities.EntityTypeUtils;
 import xiamomc.morph.utilities.NbtUtils;
 
 public class DisguiseStateGenerator
@@ -26,7 +23,7 @@ public class DisguiseStateGenerator
 
         offlineState.disguiseID = state.getDisguiseIdentifier();
 
-        var newDisguise = state.getDisguise().clone();
+        var newDisguise = state.getDisguiseWrapper().clone();
         var backend = newDisguise.getBackend();
 
         offlineState.disguiseData = "%s|%s".formatted(backend.getIdentifier(), backend.toOfflineSave(newDisguise));
@@ -81,7 +78,7 @@ public class DisguiseStateGenerator
 
         var compound = NbtUtils.toCompoundTag(offlineState.snbt);
         if (compound != null)
-            state.getDisguise().mergeCompound(compound);
+            state.getDisguiseWrapper().mergeCompound(compound);
 
         //设置显示名称
         if (offlineState.customName != null)

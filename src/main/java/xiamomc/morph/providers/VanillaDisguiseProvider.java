@@ -70,12 +70,12 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
 
     @Override
     @NotNull
-    public DisguiseResult morph(Player player, DisguiseInfo disguiseInfo, @Nullable Entity targetEntity)
+    public DisguiseResult makeWrapper(Player player, DisguiseInfo disguiseInfo, @Nullable Entity targetEntity)
     {
         var identifier = disguiseInfo.getIdentifier();
 
         DisguiseWrapper<?> constructedDisguise;
-        var backend = getMorphManager().getCurrentBackend();
+        var backend = getBackend();
 
         var entityType = EntityTypeUtils.fromString(identifier, true);
 
@@ -88,12 +88,8 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
         var copyResult = constructFromEntity(disguiseInfo, targetEntity);
 
         constructedDisguise = copyResult.success()
-                ? copyResult.disguise()
+                ? copyResult.wrapperInstance()
                 : backend.createInstance(entityType);
-
-        var backendSuccess = backend.disguise(player, constructedDisguise);
-
-        if (!backendSuccess) return DisguiseResult.fail();
 
         return DisguiseResult.success(constructedDisguise, copyResult.isCopy());
     }
@@ -124,7 +120,7 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
         if (super.updateDisguise(player, state))
         {
             if (modifyBoundingBoxes.get())
-                tryModifyPlayerDimensions(player, state.getDisguise());
+                tryModifyPlayerDimensions(player, state.getDisguiseWrapper());
 
             if (plugin.getCurrentTick() % 20 == 0)
                 ReflectionUtils.cleanCaches();
@@ -140,7 +136,7 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
     {
         super.postConstructDisguise(state, targetEntity);
 
-        var disguise = state.getDisguise();
+        var disguise = state.getDisguiseWrapper();
         var backend = getMorphManager().getCurrentBackend();
 
         if (!backend.isDisguised(targetEntity))
@@ -321,7 +317,7 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
         }
 
         if (targetEntity == null || targetEntity.getType() != state.getEntityType())
-            rawCompound.merge(state.getDisguise().getCompound());
+            rawCompound.merge(state.getDisguiseWrapper().getCompound());
 
         return cullNBT(rawCompound);
     }
@@ -336,7 +332,7 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
     public boolean canConstruct(DisguiseInfo info, Entity targetEntity, DisguiseState theirState)
     {
         return theirState != null
-                ? theirState.getDisguise().getEntityType().equals(info.getEntityType())
+                ? theirState.getDisguiseWrapper().getEntityType().equals(info.getEntityType())
                 : targetEntity.getType().equals(info.getEntityType());
     }
 

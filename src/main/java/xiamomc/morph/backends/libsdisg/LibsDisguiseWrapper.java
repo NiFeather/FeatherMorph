@@ -7,7 +7,6 @@ import me.libraryaddict.disguise.disguisetypes.*;
 import me.libraryaddict.disguise.disguisetypes.watchers.*;
 import me.libraryaddict.disguise.utilities.DisguiseUtilities;
 import me.libraryaddict.disguise.utilities.DisguiseValues;
-import me.libraryaddict.disguise.utilities.parser.DisguiseParser;
 import me.libraryaddict.disguise.utilities.reflection.FakeBoundingBox;
 import me.libraryaddict.disguise.utilities.reflection.ReflectionManager;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -24,12 +23,13 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import xiamomc.morph.MorphPlugin;
-import xiamomc.morph.backends.DisguiseBackend;
 import xiamomc.morph.backends.DisguiseWrapper;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.utilities.DisguiseUtils;
 import xiamomc.morph.utilities.NbtUtils;
 import xiamomc.pluginbase.Utilities.ColorUtils;
+
+import java.util.function.BiConsumer;
 
 public class LibsDisguiseWrapper extends DisguiseWrapper<Disguise>
 {
@@ -240,14 +240,17 @@ public class LibsDisguiseWrapper extends DisguiseWrapper<Disguise>
 
     private final Scoreboard scoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
 
+    public BiConsumer<FlagWatcher, Player> preUpdate;
+
     @Override
     public void update(boolean isClone, DisguiseState state, Player player)
     {
-        if (!this.instance.equals(DisguiseAPI.getDisguise(player)))
-        {
-            this.instance = instance.clone();
-            DisguiseAPI.disguiseEntity(player, this.instance);
-        }
+        var ldInstance = DisguiseAPI.getDisguise(player);
+        if (this.instance != ldInstance)
+            throw new RuntimeException("Current disguise instance from LibsDisguises '%s' does not match the one saved in our wrapper '%s'".formatted(ldInstance, this.instance));
+
+        if (preUpdate != null)
+            preUpdate.accept(watcher, player);
 
         //对克隆的伪装手动更新一些属性
         if (!isClone) return;

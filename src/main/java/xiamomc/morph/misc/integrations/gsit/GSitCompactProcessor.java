@@ -50,9 +50,9 @@ public class GSitCompactProcessor extends MorphPluginObject implements Listener
     {
         var state = morphs.getDisguiseStateFor(e.getTarget());
 
-        if (state != null && !state.getDisguise().isPlayerDisguise())
+        if (state != null && !state.getDisguiseWrapper().isPlayerDisguise())
         {
-            var disguise = state.getDisguise();
+            var disguise = state.getDisguiseWrapper();
 
             if (EntityTypeUtils.saddleable(disguise.getEntityType()))
             {

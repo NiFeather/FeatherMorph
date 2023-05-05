@@ -12,6 +12,7 @@ import org.bukkit.scoreboard.Scoreboard;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.abilities.AbilityHandler;
+import xiamomc.morph.backends.DisguiseBackend;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.MorphStrings;
 import xiamomc.morph.misc.DisguiseState;
@@ -59,10 +60,15 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
     @Resolved
     private MessageStore<?> messageStore;
 
+    protected DisguiseBackend<?, ?> getBackend()
+    {
+        return getMorphManager().getCurrentBackend();
+    }
+
     @Override
     public boolean updateDisguise(Player player, DisguiseState state)
     {
-        var disguise = state.getDisguise();
+        var disguise = state.getDisguiseWrapper();
         var option = clientHandler.getPlayerOption(player, true);
 
         var haveSkill = state.haveSkill();
@@ -81,7 +87,17 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
             player.sendActionBar(msg.resolve("what", state.getPlayerDisplay()).toComponent(locale, messageStore));
         }
 
-        disguise.update(state.getDisguiseType() != DisguiseTypes.LD, state, player);
+        try
+        {
+            disguise.update(state.getDisguiseType() != DisguiseTypes.LD, state, player);
+        }
+        catch (Throwable t)
+        {
+            logger.error("Error occurred while updating disguise!");
+            t.printStackTrace();
+
+            return false;
+        }
 
         return true;
     }
@@ -122,7 +138,7 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
     @Override
     public void postConstructDisguise(DisguiseState state, @Nullable Entity targetEntity)
     {
-        var disguise = state.getDisguise();
+        var disguise = state.getDisguiseWrapper();
         var backend = getMorphManager().getCurrentBackend();
 
         //被动技能

@@ -37,7 +37,7 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
     }
 
     @Override
-    public @NotNull DisguiseResult morph(Player player, DisguiseInfo disguiseInfo, @Nullable Entity targetEntity)
+    public @NotNull DisguiseResult makeWrapper(Player player, DisguiseInfo disguiseInfo, @Nullable Entity targetEntity)
     {
         if (getMorphManager().getBannedDisguises().contains("minecraft:player"))
         {
@@ -46,14 +46,14 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
         }
 
         var id = disguiseInfo.getIdentifier();
-        var backend = getMorphManager().getCurrentBackend();
+        var backend = getBackend();
 
         if (DisguiseTypes.fromId(id) != DisguiseTypes.PLAYER)
             return DisguiseResult.fail();
 
         var result = constructFromEntity(disguiseInfo, targetEntity);
         var disguise = result.success()
-                ? result.disguise()
+                ? result.wrapperInstance()
                 : backend.createPlayerInstance(disguiseInfo.playerDisguiseTargetName);
 
         var mainHandItem = player.getEquipment().getItemInMainHand();
@@ -74,8 +74,6 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
                 disguise.applySkin(gameProfile);
         }
 
-        backend.disguise(player, disguise);
-
         return DisguiseResult.success(disguise, result.isCopy());
     }
 
@@ -84,7 +82,7 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
     {
         super.postConstructDisguise(state, targetEntity);
 
-        var profile = state.getDisguise().getSkin();
+        var profile = state.getDisguiseWrapper().getSkin();
 
         if (profile != null)
         {

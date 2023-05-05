@@ -2,16 +2,19 @@ package xiamomc.morph.backends.libsdisg;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import me.libraryaddict.disguise.DisguiseAPI;
-import me.libraryaddict.disguise.disguisetypes.Disguise;
-import me.libraryaddict.disguise.disguisetypes.DisguiseType;
-import me.libraryaddict.disguise.disguisetypes.MobDisguise;
-import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
+import me.libraryaddict.disguise.disguisetypes.*;
+import me.libraryaddict.disguise.disguisetypes.watchers.ItemDisplayWatcher;
 import me.libraryaddict.disguise.utilities.parser.DisguiseParser;
+import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.ItemDisplay;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector3f;
 import xiamomc.morph.backends.DisguiseBackend;
 import xiamomc.morph.backends.DisguiseWrapper;
 
@@ -35,11 +38,44 @@ public class LibsBackend extends DisguiseBackend<Disguise, LibsDisguiseWrapper>
         return "ld";
     }
 
+    /**
+     * 实验中
+     */
+    @ApiStatus.Experimental
+    @ApiStatus.Internal
+    public DisguiseWrapper<Disguise> createItemDisplay(Material material)
+    {
+        Disguise instance = new MiscDisguise(DisguiseType.ITEM_DISPLAY);
+
+        if (material.isAir()) material = Material.STONE;
+
+        var watcher = ((ItemDisplayWatcher) instance.getWatcher());
+        var defaultStack = new ItemStack(material);
+
+        watcher.setItemStack(defaultStack);
+        watcher.setItemDisplayTransform(ItemDisplay.ItemDisplayTransform.NONE);
+        watcher.setYModifier(0.5f);
+        watcher.setScale(new Vector3f(20, 20, 20));
+
+        var wrapper = new LibsDisguiseWrapper(instance, this);
+        wrapper.preUpdate = (w, player) ->
+        {
+            var item = watcher.getItemStack();
+            var newStack = player.getEquipment().getItemInMainHand();
+
+            if (newStack.getType().isAir()) newStack = defaultStack;
+
+            if (!item.isSimilar(newStack))
+                watcher.setItemStack(newStack);
+        };
+
+        return wrapper;
+    }
+
     @Override
     public DisguiseWrapper<Disguise> createInstance(@NotNull Entity targetEntity)
     {
         var instance = DisguiseAPI.constructDisguise(targetEntity);
-        //DisguiseAPI.disguiseEntity(player, instance);
 
         return new LibsDisguiseWrapper(instance, this);
     }
@@ -48,7 +84,6 @@ public class LibsBackend extends DisguiseBackend<Disguise, LibsDisguiseWrapper>
     public DisguiseWrapper<Disguise> createInstance(EntityType entityType)
     {
         var instance = new MobDisguise(DisguiseType.getType(entityType));
-        //DisguiseAPI.disguiseEntity(player, instance);
 
         return new LibsDisguiseWrapper(instance, this);
     }
@@ -57,7 +92,6 @@ public class LibsBackend extends DisguiseBackend<Disguise, LibsDisguiseWrapper>
     public DisguiseWrapper<Disguise> createPlayerInstance(String playerName)
     {
         var instance = new PlayerDisguise(playerName);
-        //DisguiseAPI.disguiseEntity(player, instance);
 
         return new LibsDisguiseWrapper(instance, this);
     }
@@ -70,7 +104,7 @@ public class LibsBackend extends DisguiseBackend<Disguise, LibsDisguiseWrapper>
     @Override
     public Disguise createRawInstance(Entity entity)
     {
-        return null;
+        return DisguiseAPI.constructDisguise(entity);
     }
 
     @Override
@@ -122,10 +156,11 @@ public class LibsBackend extends DisguiseBackend<Disguise, LibsDisguiseWrapper>
         if (wrapper != null)
         {
             playerLibsDisguiseWrapperMap.remove(player);
+
             return wrapper.getInstance().removeDisguise();
         }
 
-        return true;
+        return false;
     }
 
     /**

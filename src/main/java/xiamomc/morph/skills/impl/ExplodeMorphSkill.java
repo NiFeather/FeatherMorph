@@ -40,7 +40,7 @@ public class ExplodeMorphSkill extends DelayedMorphSkill<ExplosionConfiguration>
 
         if (state.getEntityType() == EntityType.CREEPER)
         {
-            state.getDisguise().setAggressive(true);
+            state.getDisguiseWrapper().setAggressive(true);
             clientHandler.sendCommand(player, new S2CSetSNbtCommand("{\"ignited\": true, \"Fuse\": 30}"));
         }
 
@@ -66,7 +66,7 @@ public class ExplodeMorphSkill extends DelayedMorphSkill<ExplosionConfiguration>
 
         if (state.getEntityType() == EntityType.CREEPER)
         {
-            state.getDisguise().setAggressive(false);
+            state.getDisguiseWrapper().setAggressive(false);
             clientHandler.sendCommand(player, new S2CSetSNbtCommand("{\"ignited\": false, \"Fuse\": 0}"));
         }
 

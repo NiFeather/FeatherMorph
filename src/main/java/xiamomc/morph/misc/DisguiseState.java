@@ -4,7 +4,6 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
-import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.minecraft.world.entity.Entity;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
@@ -32,11 +31,8 @@ import xiamomc.morph.skills.MorphSkillHandler;
 import xiamomc.morph.skills.SkillCooldownInfo;
 import xiamomc.morph.skills.SkillType;
 import xiamomc.morph.skills.impl.NoneMorphSkill;
-import xiamomc.morph.storage.offlinestore.OfflineDisguiseState;
 import xiamomc.morph.storage.playerdata.PlayerMorphConfiguration;
-import xiamomc.morph.utilities.DisguiseUtils;
 import xiamomc.morph.utilities.ItemUtils;
-import xiamomc.morph.utilities.NbtUtils;
 import xiamomc.pluginbase.Annotations.Resolved;
 
 import java.util.Arrays;
@@ -114,7 +110,7 @@ public class DisguiseState extends MorphPluginObject
 
     public void setServerSideSelfVisible(boolean val)
     {
-        disguise.setServerSelfView(val);
+        disguiseWrapper.setServerSelfView(val);
         serverSideSelfVisible = val;
     }
 
@@ -169,11 +165,11 @@ public class DisguiseState extends MorphPluginObject
     /**
      * 伪装的实例
      */
-    private DisguiseWrapper<?> disguise;
+    private DisguiseWrapper<?> disguiseWrapper;
 
-    public DisguiseWrapper<?> getDisguise()
+    public DisguiseWrapper<?> getDisguiseWrapper()
     {
-        return disguise;
+        return disguiseWrapper;
     }
 
     /**
@@ -188,7 +184,7 @@ public class DisguiseState extends MorphPluginObject
 
     public EntityType getEntityType()
     {
-        return disguise.getEntityType();
+        return disguiseWrapper.getEntityType();
     }
 
     private DisguiseTypes disguiseType;
@@ -476,23 +472,23 @@ public class DisguiseState extends MorphPluginObject
      * 设置伪装
      * @param identifier 伪装ID
      * @param skillIdentifier 技能ID
-     * @param d 目标伪装
+     * @param wrapper 目标伪装
      * @param shouldHandlePose 是否要处理玩家Pose（或：是否为克隆的伪装）
      * @param shouldRefreshDisguiseItems 要不要刷新伪装物品？
      * @param targetEquipment 要使用的equipment，没有则从伪装获取
      */
     public void setDisguise(@NotNull String identifier, @NotNull String skillIdentifier,
-                            @NotNull DisguiseWrapper<?> d, boolean shouldHandlePose, boolean shouldRefreshDisguiseItems,
+                            @NotNull DisguiseWrapper<?> wrapper, boolean shouldHandlePose, boolean shouldRefreshDisguiseItems,
                             @Nullable EntityEquipment targetEquipment)
     {
-        if (disguise == d) return;
+        if (disguiseWrapper == wrapper) return;
 
         setCachedProfileNbtString(null);
         setCachedNbtString(null);
 
         this.entityCustomName = null;
 
-        this.disguise = d;
+        this.disguiseWrapper = wrapper;
         this.disguiseIdentifier = identifier;
         this.shouldHandlePose = shouldHandlePose;
         setSkillLookupIdentifier(skillIdentifier);
@@ -516,7 +512,7 @@ public class DisguiseState extends MorphPluginObject
             //更新伪装物品
             if (supportsDisguisedItems)
             {
-                EntityEquipment equipment = targetEquipment != null ? targetEquipment : disguise.getDisplayingEquipments();
+                EntityEquipment equipment = targetEquipment != null ? targetEquipment : disguiseWrapper.getDisplayingEquipments();
 
                 //设置默认盔甲
                 var armors = new ItemStack[]
@@ -645,12 +641,12 @@ public class DisguiseState extends MorphPluginObject
         eq.setItemInOffHand(showDisguised ? handItems[1] : null);
         eq.allowNull = true;
 
-        disguise.setDisplayingEquipments(eq);
+        disguiseWrapper.setDisplayingEquipments(eq);
     }
 
     public DisguiseState createCopy()
     {
-        var disguise = this.disguise.clone();
+        var disguise = this.disguiseWrapper.clone();
 
         var state = new DisguiseState(player, this.disguiseIdentifier, this.skillLookupIdentifier,
                 disguise, shouldHandlePose, provider, getDisguisedItems(), this.playerOptions, morphConfiguration);

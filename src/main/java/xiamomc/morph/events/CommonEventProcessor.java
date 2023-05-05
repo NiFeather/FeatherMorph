@@ -34,7 +34,6 @@ import xiamomc.morph.network.server.MorphClientHandler;
 import xiamomc.morph.network.commands.S2C.S2CSwapCommand;
 import xiamomc.morph.network.server.ServerSetEquipCommand;
 import xiamomc.morph.skills.MorphSkillHandler;
-import xiamomc.morph.utilities.DisguiseUtils;
 import xiamomc.morph.utilities.EntityTypeUtils;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
@@ -162,13 +161,13 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
                 if (state.getEntityType() == EntityType.ALLAY)
                     e.setCancelled(true);
 
-                if (EntityTypeUtils.saddleable(state.getDisguise().getEntityType()))
+                if (EntityTypeUtils.saddleable(state.getDisguiseWrapper().getEntityType()))
                 {
                     var slot = e.getHand();
                     var item = e.getPlayer().getEquipment().getItem(slot);
 
                     if (item.getType() == Material.SADDLE)
-                        state.getDisguise().setSaddled(true);
+                        state.getDisguiseWrapper().setSaddled(true);
                     else if (item.getType() != Material.AIR)
                         e.setCancelled(true);
                 }
@@ -265,7 +264,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
             {
                 this.addSchedule(() ->
                 {
-                    if (state.getDisguise() instanceof LibsDisguiseWrapper)
+                    if (state.getDisguiseWrapper() instanceof LibsDisguiseWrapper)
                     {
                         if (DisguiseAPI.isDisguised(player) && DisguiseAPI.isSelfDisguised(player))
                             player.updateInventory();
@@ -276,7 +275,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
             //workaround: 交换副手后伪装有概率在左右手显示同一个物品
             if (state.showingDisguisedItems())
             {
-                var disguise = state.getDisguise();
+                var disguise = state.getDisguiseWrapper();
                 state.swapHands();
                 var equip = state.getDisguisedItems();
 
@@ -295,10 +294,10 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
 
                 this.addSchedule(() ->
                 {
-                    if (!state.showingDisguisedItems() || state.getDisguise() != disguise) return;
+                    if (!state.showingDisguisedItems() || state.getDisguiseWrapper() != disguise) return;
 
                     var air = itemOrAir(null);
-                    var equipment = state.getDisguise().getDisplayingEquipments();
+                    var equipment = state.getDisguiseWrapper().getDisplayingEquipments();
 
                     equipment.setItemInMainHand(air);
                     equipment.setItemInOffHand(air);
@@ -340,6 +339,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
 
         clientHandler.markPlayerReady(player);
 
+        //如果玩家是第一次用客户端连接，那么等待3秒向其发送提示
         if (clientHandler.clientConnected(player))
         {
             var config = morphs.getPlayerConfiguration(player);
@@ -361,18 +361,18 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
             //重新进入后player和info.player不属于同一个实例，需要重新disguise
             state.setPlayer(player);
             var backend = morphs.getCurrentBackend();
-            backend.disguise(player, state.getDisguise());
 
-            var disguise = state.getDisguise();
+            //刷新伪装
+            var wrapper = state.getDisguiseWrapper().clone();
+            backend.disguise(player, wrapper);
 
-            //刷新Disguise
             var nbt = state.getCachedNbtString();
             var profile = state.getProfileNbtString();
 
             var customName = state.entityCustomName;
 
             state.setDisguise(state.getDisguiseIdentifier(),
-                    state.getSkillLookupIdentifier(), disguise, state.shouldHandlePose(), false,
+                    state.getSkillLookupIdentifier(), wrapper, state.shouldHandlePose(), false,
                     state.getDisguisedItems());
 
             state.setCachedNbtString(nbt);
@@ -489,7 +489,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         //目标玩家没在伪装时不要处理
         if (state == null) return;
 
-        var disguise = state.getDisguise();
+        var disguise = state.getDisguiseWrapper();
         var disguiseEntityType = state.getEntityType();
 
         //检查是否要取消Target
