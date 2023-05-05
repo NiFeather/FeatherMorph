@@ -4,6 +4,7 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.backends.DisguiseWrapper;
@@ -14,6 +15,7 @@ import xiamomc.morph.misc.DisguiseTypes;
 
 import java.util.List;
 
+@ApiStatus.Experimental
 public class ItemDisplayProvider extends DefaultDisguiseProvider
 {
     /**
