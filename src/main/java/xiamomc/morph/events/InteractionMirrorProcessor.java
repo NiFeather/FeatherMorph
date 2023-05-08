@@ -59,19 +59,16 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
         if (!allowSneak.get()) return;
 
         var player = e.getPlayer();
-        var targetName = mirrorMap.get(player);
 
-        if (targetName != null)
-        {
-            var targetPlayer = getPlayer(player, targetName);
+        var playerInf = getPlayer(player);
+        var targetPlayer = playerInf.target;
 
-            if (!playerInDistance(player, targetPlayer, targetName, true) || targetPlayer.isSneaking() == e.isSneaking()) return;
+        if (!playerInDistance(player, playerInf, true) || targetPlayer.isSneaking() == e.isSneaking()) return;
 
-            targetPlayer.setSneaking(e.isSneaking());
-            clientHandler.sendCommand(targetPlayer, new S2CSetSneakingCommand(e.isSneaking()));
+        targetPlayer.setSneaking(e.isSneaking());
+        clientHandler.sendCommand(targetPlayer, new S2CSetSneakingCommand(e.isSneaking()));
 
-            logOperation(e.getPlayer(), targetPlayer, OperationType.ToggleSneak);
-        }
+        logOperation(e.getPlayer(), targetPlayer, OperationType.ToggleSneak);
     }
 
     @EventHandler
@@ -79,25 +76,23 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
     {
         if (!allowSwap.get()) return;
 
-        var targetName = mirrorMap.get(e.getPlayer());
+        var player = e.getPlayer();
+        var playerInf = getPlayer(player);
 
-        if (targetName != null)
-        {
-            var player = e.getPlayer();
-            var targetPlayer = getPlayer(player, targetName);
+        if (!playerInDistance(player, playerInf)) return;
 
-            if (!playerInDistance(player, targetPlayer, targetName)) return;
+        var targetPlayer = playerInf.target;
+        assert targetPlayer != null;
 
-            var equipment = targetPlayer.getEquipment();
+        var equipment = targetPlayer.getEquipment();
 
-            var mainHandItem = equipment.getItemInMainHand();
-            var offhandItem = equipment.getItemInOffHand();
+        var mainHandItem = equipment.getItemInMainHand();
+        var offhandItem = equipment.getItemInOffHand();
 
-            equipment.setItemInMainHand(offhandItem);
-            equipment.setItemInOffHand(mainHandItem);
+        equipment.setItemInMainHand(offhandItem);
+        equipment.setItemInOffHand(mainHandItem);
 
-            logOperation(player, targetPlayer, OperationType.SwapHand);
-        }
+        logOperation(player, targetPlayer, OperationType.SwapHand);
     }
 
     @EventHandler
@@ -106,22 +101,20 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
         if (!allowDrop.get()) return;
 
         var player = e.getPlayer();
-        var targetName = mirrorMap.get(e.getPlayer());
+        var playerInf = getPlayer(player);
 
-        if (targetName != null)
+        if (!playerInDistance(player, playerInf) || !player.isSneaking()) return;
+
+        var target = playerInf.target;
+        assert target != null;
+
+        if (!target.getEquipment().getItemInMainHand().getType().isAir())
         {
-            var target = getPlayer(player, targetName);
+            target.dropItem(false);
+            target.swingHand(EquipmentSlot.HAND);
 
-            if (!playerInDistance(player, target, targetName) || !player.isSneaking()) return;
-
-            if (!target.getEquipment().getItemInMainHand().getType().isAir())
-            {
-                target.dropItem(false);
-                target.swingHand(EquipmentSlot.HAND);
-
-                logOperation(player, target, OperationType.ItemDrop);
-                e.setCancelled(true);
-            }
+            logOperation(player, target, OperationType.ItemDrop);
+            e.setCancelled(true);
         }
     }
 
@@ -130,18 +123,16 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
     {
         if (!allowHotBar.get()) return;
 
-        var targetName = mirrorMap.get(e.getPlayer());
+        var player = e.getPlayer();
+        var inf = getPlayer(player);
 
-        if (targetName != null)
-        {
-            var player = e.getPlayer();
-            var targetPlayer = getPlayer(player, targetName);
+        if (!playerInDistance(player, inf)) return;
 
-            if (!playerInDistance(player, targetPlayer, targetName)) return;
+        var targetPlayer = inf.target;
+        assert targetPlayer != null;
 
-            targetPlayer.getInventory().setHeldItemSlot(e.getNewSlot());
-            logOperation(player, targetPlayer, OperationType.HotbarChange);
-        }
+        targetPlayer.getInventory().setHeldItemSlot(e.getNewSlot());
+        logOperation(player, targetPlayer, OperationType.HotbarChange);
     }
 
     @Resolved(shouldSolveImmediately = true)
@@ -151,25 +142,23 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
     public void onPlayerStopUsingItem(PlayerStopUsingItemEvent e)
     {
         var player = e.getPlayer();
-        var targetName = mirrorMap.get(player);
+        var inf = getPlayer(player);
 
-        if (targetName != null)
+        if (!playerInDistance(player, inf)) return;
+
+        var targetPlayer = inf.target;
+        assert targetPlayer != null;
+
+        //如果目标玩家正在使用的物品和我们当前释放的物品一样，并且释放的物品拥有使用动画，那么调用releaseUsingItem
+        var ourHandItem = e.getItem().getType();
+        var nmsPlayer = NmsRecord.ofPlayer(targetPlayer);
+
+        if (nmsPlayer.isUsingItem()
+                && ItemUtils.isContinuousUsable(ourHandItem)
+                && nmsPlayer.getUseItem().getBukkitStack().getType() == ourHandItem)
         {
-            var targetPlayer = getPlayer(player, targetName);
-
-            if (!playerInDistance(player, targetPlayer, targetName)) return;
-
-            //如果目标玩家正在使用的物品和我们当前释放的物品一样，并且释放的物品拥有使用动画，那么调用releaseUsingItem
-            var ourHandItem = e.getItem().getType();
-            var nmsPlayer = NmsRecord.ofPlayer(targetPlayer);
-
-            if (nmsPlayer.isUsingItem()
-                    && ItemUtils.isContinuousUsable(ourHandItem)
-                    && nmsPlayer.getUseItem().getBukkitStack().getType() == ourHandItem)
-            {
-                nmsPlayer.releaseUsingItem();
-                logOperation(player, targetPlayer, OperationType.ReleaseUsingItem);
-            }
+            nmsPlayer.releaseUsingItem();
+            logOperation(player, targetPlayer, OperationType.ReleaseUsingItem);
         }
     }
 
@@ -180,32 +169,30 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
 
         if (e.getDamager() instanceof Player damager)
         {
-            var targetName = mirrorMap.get(damager);
+            var inf = getPlayer(damager);
 
-            if (targetName != null)
+            if (!playerInDistance(damager, inf)) return;
+
+            var targetPlayer = inf.target;
+            assert targetPlayer != null;
+
+            simulateOperation(Action.LEFT_CLICK_AIR, targetPlayer, damager);
+            logOperation(damager, targetPlayer, OperationType.LeftClick);
+
+            //如果伪装的玩家想攻击本体，取消事件
+            if (e.getEntity() instanceof Player hurtedPlayer && hurtedPlayer.equals(targetPlayer))
             {
-                var targetPlayer = getPlayer(damager, targetName);
+                e.setCancelled(true);
 
-                if (!playerInDistance(damager, targetPlayer, targetName)) return;
-
-                simulateOperation(Action.LEFT_CLICK_AIR, targetPlayer, damager);
-                logOperation(damager, targetPlayer, OperationType.LeftClick);
-
-                //如果伪装的玩家想攻击本体，取消事件
-                if (e.getEntity() instanceof Player hurtedPlayer && hurtedPlayer.equals(targetPlayer))
-                {
-                    e.setCancelled(true);
-
-                    return;
-                }
-
-                var damagerLookingAt = damager.getTargetEntity(5);
-                var playerLookingAt = targetPlayer.getTargetEntity(5);
-
-                //如果伪装的玩家想攻击的实体和被伪装的玩家一样，模拟左键并取消事件
-                if (damagerLookingAt != null && damagerLookingAt.equals(playerLookingAt))
-                    e.setCancelled(true);
+                return;
             }
+
+            var damagerLookingAt = damager.getTargetEntity(5);
+            var playerLookingAt = targetPlayer.getTargetEntity(5);
+
+            //如果伪装的玩家想攻击的实体和被伪装的玩家一样，模拟左键并取消事件
+            if (damagerLookingAt != null && damagerLookingAt.equals(playerLookingAt))
+                e.setCancelled(true);
         }
     }
 
@@ -218,55 +205,50 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
         if (!allowSimulation.get()) return;
 
         var player = e.getPlayer();
-        var targetName = mirrorMap.get(player);
 
-        if (targetName != null)
+        var inf = getPlayer(player);
+        var targetPlayer = inf.target;
+        if (targetPlayer == null) return;
+
+        if (targetPlayer.getLocation().getWorld() == player.getLocation().getWorld()
+                && Math.abs(targetPlayer.getLocation().distanceSquared(player.getLocation())) <= 6)
         {
-            var targetPlayer = getPlayer(player, targetName);
+            var theirTarget = targetPlayer.getTargetEntity(5);
+            var ourTarget = player.getTargetEntity(5);
 
-            if (targetPlayer == null) return;
-
-            if (targetPlayer.getLocation().getWorld() == player.getLocation().getWorld()
-                    && Math.abs(targetPlayer.getLocation().distanceSquared(player.getLocation())) <= 6
-                    && passesDisguisingCheck(targetPlayer))
+            if ((ourTarget != null || theirTarget != null)
+                    && (ourTarget == targetPlayer || ourTarget == theirTarget || theirTarget == player))
             {
-                var theirTarget = targetPlayer.getTargetEntity(5);
-                var ourTarget = player.getTargetEntity(5);
-
-                if ((ourTarget != null || theirTarget != null)
-                        && (ourTarget == targetPlayer || ourTarget == theirTarget || theirTarget == player))
-                {
-                    e.setCancelled(true);
-                }
+                e.setCancelled(true);
             }
+        }
 
-            if (!playerInDistance(player, targetPlayer, targetName)) return;
+        if (!playerInDistance(player, inf)) return;
 
-            if (tracker.droppingItemThisTick(player))
-                return;
+        if (tracker.droppingItemThisTick(player))
+            return;
 
-            var lastAction = tracker.getLastInteractAction(player);
+        var lastAction = tracker.getLastInteractAction(player);
 
-            //如果此时玩家没有触发Interaction, 那么默认设置为左键空气
-            if (!tracker.interactingThisTick(player))
-                lastAction = PlayerTracker.InteractType.LEFT_CLICK_AIR;
+        //如果此时玩家没有触发Interaction, 那么默认设置为左键空气
+        if (!tracker.interactingThisTick(player))
+            lastAction = PlayerTracker.InteractType.LEFT_CLICK_AIR;
 
-            if (lastAction == null) return;
+        if (lastAction == null) return;
 
-            //旁观者模式下左键方块不会产生Interact事件，我们得猜这个玩家现在是左键还是右键
-            if (player.getGameMode() == GameMode.SPECTATOR)
-            {
-                if (lastAction.isRightClick())
-                    lastAction = PlayerTracker.InteractType.LEFT_CLICK_BLOCK;
-            }
+        //旁观者模式下左键方块不会产生Interact事件，我们得猜这个玩家现在是左键还是右键
+        if (player.getGameMode() == GameMode.SPECTATOR)
+        {
+            if (lastAction.isRightClick())
+                lastAction = PlayerTracker.InteractType.LEFT_CLICK_BLOCK;
+        }
 
-            //检查玩家在此tick内是否存在互动以避免重复镜像
-            if (!tracker.interactingThisTick(player))
-            {
-                ignoredPlayers.add(player);
-                simulateOperation(lastAction.toBukkitAction(), targetPlayer, player);
-                logOperation(player, targetPlayer, lastAction.isLeftClick() ? OperationType.LeftClick : OperationType.RightClick);
-            }
+        //检查玩家在此tick内是否存在互动以避免重复镜像
+        if (!tracker.interactingThisTick(player))
+        {
+            ignoredPlayers.add(player);
+            simulateOperation(lastAction.toBukkitAction(), targetPlayer, player);
+            logOperation(player, targetPlayer, lastAction.isLeftClick() ? OperationType.LeftClick : OperationType.RightClick);
         }
     }
 
@@ -297,17 +279,15 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
 
         updateLastAction(player, action);
 
-        var targetName = mirrorMap.get(player);
+        var inf = getPlayer(player);
 
-        if (targetName != null)
-        {
-            var targetPlayer = getPlayer(player, targetName);
+        if (!playerInDistance(player, inf)) return;
 
-            if (!playerInDistance(player, targetPlayer, targetName)) return;
+        var targetPlayer = inf.target;
+        assert targetPlayer != null;
 
-            simulateOperation(e.getAction(), targetPlayer, player);
-            logOperation(player, targetPlayer, e.getAction().isLeftClick() ? OperationType.LeftClick : OperationType.RightClick);
-        }
+        simulateOperation(e.getAction(), targetPlayer, player);
+        logOperation(player, targetPlayer, e.getAction().isLeftClick() ? OperationType.LeftClick : OperationType.RightClick);
     }
 
     @Resolved
@@ -328,6 +308,7 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
 
         if (ignoredPlayers.contains(targetPlayer) || tracker.interactingThisTick(targetPlayer)) return false;
         ignoredPlayers.add(targetPlayer);
+        ignoredPlayers.add(source);
 
         var isRightClick = action.isRightClick();
         var result = isRightClick
@@ -356,33 +337,43 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
     @Resolved
     private MorphManager manager;
 
+    public record PlayerInfo(@Nullable Player target, @NotNull String targetName)
+    {
+        public static final String notSetStr = "~NOTSET";
+    }
+
     /**
      * Search for a player that matches the target name.
      * @param player The {@link Player} who triggered this operation
-     * @param targetName The name to search
      * @return A player who matches the target name
      * @apiNote If {@link ConfigOption#MIRROR_SELECTION_MODE} is set to {@link InteractionMirrorSelectionMode#BY_SIGHT},
      *          the returned value might be a player who disguised as our searching target.
      */
-    private Player getPlayer(Player player, String targetName)
+    @NotNull
+    private PlayerInfo getPlayer(Player player)
     {
+        var targetName = mirrorMap.getOrDefault(player, null);
+        if (targetName == null) return new PlayerInfo(null, PlayerInfo.notSetStr);
+
         if (selectionMode.get().equalsIgnoreCase(InteractionMirrorSelectionMode.BY_SIGHT))
         {
             var targetEntity = player.getTargetEntity(5);
 
-            if (!(targetEntity instanceof Player targetPlayer)) return null;
+            if (!(targetEntity instanceof Player targetPlayer))
+                return new PlayerInfo(null, targetName);
 
-            if (targetPlayer.getName().equals(targetName)) return targetPlayer;
+            if (targetPlayer.getName().equals(targetName))
+                return new PlayerInfo(targetPlayer, targetName);
 
             var state = manager.getDisguiseStateFor(targetPlayer);
             if (state != null && state.getDisguiseIdentifier().equals("player:" + targetName))
-                return targetPlayer;
+                return new PlayerInfo(targetPlayer, targetName);
 
-            return null;
+            return new PlayerInfo(null, targetName);
         }
         else
         {
-            return Bukkit.getPlayerExact(targetName);
+            return new PlayerInfo(Bukkit.getPlayerExact(targetName), targetName);
         }
     }
 
@@ -412,16 +403,20 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
      * @return True if this player is not disguised or {@link ConfigOption#MIRROR_IGNORE_DISGUISED} is on,
      *         otherwise false.
      */
-    private boolean passesDisguisingCheck(Player player)
+    private boolean playerNotDisguised(Player player)
     {
-        //ignoreDisguised.get() ? true : !isDisguised;
+        //ignoreDisguised.get() ? false : !isDisguised;
         return !ignoreDisguised.get() || !manager.getCurrentBackend().isDisguised(player);
     }
 
-    @Contract("_, null, _-> false; _, !null, _ -> _")
-    private boolean playerInDistance(@NotNull Player source, @Nullable Player target, String targetName)
+    private boolean playerInDistance(Player source, PlayerInfo inf)
     {
-        return playerInDistance(source, target, targetName, false);
+        return playerInDistance(source, inf.target, inf.targetName, false);
+    }
+
+    private boolean playerInDistance(Player source, PlayerInfo inf, boolean noCheckIgnored)
+    {
+        return playerInDistance(source, inf.target, inf.targetName, noCheckIgnored);
     }
 
     @Contract("_, null, _, _ -> false; _, !null, _, _ -> _")
@@ -429,7 +424,7 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
     {
         if (target == null
                 || (selectionMode.get().equalsIgnoreCase(InteractionMirrorSelectionMode.BY_NAME)
-                        ? !passesDisguisingCheck(target) //BY_NAME: 检查目标是否
+                        ? !playerNotDisguised(target) //BY_NAME: 检查目标是否
                         : !match(target, targetName)) //BY_SIGHT: 检查目标或目标伪装是否满足操控条件
                 || (!dontCheckWhetherIgnored && ignoredPlayers.contains(target)) //避免爆栈
                 || !source.hasPermission(CommonPermissions.MIRROR) //检查来源是否有权限进行操控
