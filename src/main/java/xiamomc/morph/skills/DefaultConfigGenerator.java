@@ -177,7 +177,7 @@ public class DefaultConfigGenerator
 
         //其他
         addSkillConfiguration(skills, EntityType.CREEPER, 80, SkillType.EXPLODE, c ->
-                c.addOption(SkillType.EXPLODE, new ExplosionConfiguration(true, 3, false, 30)));
+                c.addOption(SkillType.EXPLODE, new ExplosionConfiguration(true, 3, false, 30, "entity.creeper.primed")));
 
         addSkillConfiguration(skills, EntityType.ENDERMAN, 40, SkillType.TELEPORT, c ->
                 c.addOption(SkillType.TELEPORT, new TeleportConfiguration(32)));

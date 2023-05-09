@@ -1,5 +1,7 @@
 package xiamomc.morph.skills.impl;
 
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.sound.Sound;
 import org.bukkit.GameMode;
 import org.bukkit.GameRule;
 import org.bukkit.NamespacedKey;
@@ -43,6 +45,9 @@ public class ExplodeMorphSkill extends DelayedMorphSkill<ExplosionConfiguration>
             state.getDisguiseWrapper().setAggressive(true);
             clientHandler.sendCommand(player, new S2CSetSNbtCommand("{\"ignited\": true, \"Fuse\": 30}"));
         }
+
+        playSoundToNearbyPlayers(player, 16,
+                Key.key(option.getPrimedSound()), Sound.Source.HOSTILE);
 
         return super.preExecute(player, state, configuration, option);
     }
