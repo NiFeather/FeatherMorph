@@ -132,6 +132,8 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
 
             if (state != null)
             {
+                state.getDisguiseWrapper().resetAmbientSoundInterval();
+
                 //如果伤害是0，那么取消事件
                 if (e.getDamage() > 0d)
                     state.setSkillCooldown(Math.max(state.getSkillCooldown(), cooldownOnDamage.get()));
