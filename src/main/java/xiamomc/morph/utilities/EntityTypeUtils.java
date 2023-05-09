@@ -1,9 +1,13 @@
 package xiamomc.morph.utilities;
 
+import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
 import net.minecraft.core.BlockPos;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.player.Player;
 import org.bukkit.Bukkit;
@@ -37,10 +41,41 @@ public class EntityTypeUtils
     }
 
     private static final Map<EntityType, Class<? extends Entity>> nmsClassMap = new Object2ObjectOpenHashMap<>();
+    private static final Map<EntityType, SoundInfo> typeSoundMap = new Object2ObjectArrayMap<>();
 
     static
     {
         nmsClassMap.put(EntityType.PLAYER, Player.class);
+        typeSoundMap.put(EntityType.BEE, new SoundInfo(SoundEvents.BEE_LOOP, 120, 1));
+    }
+
+    public record SoundInfo(@Nullable SoundEvent sound, int interval, float volume)
+    {
+    }
+
+    @NotNull
+    public static SoundInfo getSoundEvent(EntityType bukkitType)
+    {
+        var cache = typeSoundMap.getOrDefault(bukkitType, null);
+        if (cache != null) return cache;
+
+        var nmsType = getNmsType(bukkitType);
+
+        var serverWorld = ((CraftWorld) Bukkit.getWorlds().get(0)).getHandle();
+        var entity = nmsType.create(serverWorld, null, e -> e.remove(Entity.RemovalReason.DISCARDED), BlockPos.ZERO, MobSpawnType.COMMAND, false, false);
+
+        if (entity instanceof Mob mob)
+        {
+            var sound = mob.getAmbientSound0();
+            var interval = mob.getAmbientSoundInterval();
+
+            var rec = new SoundInfo(sound, interval, mob.getSoundVolume());
+            typeSoundMap.put(bukkitType, rec);
+
+            return rec;
+        }
+
+        return new SoundInfo(null, Integer.MAX_VALUE, 1);
     }
 
     @Nullable
@@ -53,8 +88,8 @@ public class EntityTypeUtils
     @Nullable
     public static Class<? extends Entity> getNmsClass(@NotNull EntityType type)
     {
-        if (nmsClassMap.containsKey(type))
-            return nmsClassMap.getOrDefault(type, null);
+        var cache = nmsClassMap.getOrDefault(type, null);
+        if (cache != null) return cache;
 
         var nmsType = net.minecraft.world.entity.EntityType.byString(type.key().asString())
                 .orElse(null);

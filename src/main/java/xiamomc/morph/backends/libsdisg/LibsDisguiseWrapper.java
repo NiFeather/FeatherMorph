@@ -9,16 +9,21 @@ import me.libraryaddict.disguise.utilities.DisguiseUtilities;
 import me.libraryaddict.disguise.utilities.DisguiseValues;
 import me.libraryaddict.disguise.utilities.reflection.FakeBoundingBox;
 import me.libraryaddict.disguise.utilities.reflection.ReflectionManager;
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.TagType;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.*;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.util.BoundingBox;
+import org.intellij.lang.annotations.Subst;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -26,19 +31,25 @@ import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.backends.DisguiseWrapper;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.utilities.DisguiseUtils;
+import xiamomc.morph.utilities.EntityTypeUtils;
 import xiamomc.morph.utilities.NbtUtils;
+import xiamomc.morph.utilities.SoundUtils;
 import xiamomc.pluginbase.Utilities.ColorUtils;
+import xiamomc.pluginbase.XiaMoJavaPlugin;
 
 import java.util.function.BiConsumer;
 
 public class LibsDisguiseWrapper extends DisguiseWrapper<Disguise>
 {
-    public LibsDisguiseWrapper(@NotNull Disguise instance, LibsBackend backend)
+    public LibsDisguiseWrapper(@NotNull Disguise instance, LibsBackend backend, XiaMoJavaPlugin plugin)
     {
         super(instance, backend);
 
         this.watcher = instance.getWatcher();
+        this.plugin = plugin;
     }
+
+    private final XiaMoJavaPlugin plugin;
 
     private final FlagWatcher watcher;
 
@@ -79,7 +90,7 @@ public class LibsDisguiseWrapper extends DisguiseWrapper<Disguise>
     @Override
     public DisguiseWrapper<Disguise> clone()
     {
-        var newWrapper = new LibsDisguiseWrapper(instance.clone(), (LibsBackend) getBackend());
+        var newWrapper = new LibsDisguiseWrapper(instance.clone(), (LibsBackend) getBackend(), plugin);
         newWrapper.compoundTag.merge(this.compoundTag);
 
         return newWrapper;
@@ -192,6 +203,7 @@ public class LibsDisguiseWrapper extends DisguiseWrapper<Disguise>
         invalidateCompound();
     }
 
+    @SuppressWarnings("PatternValidation")
     @Override
     public void onPostConstructDisguise(DisguiseState state, @Nullable Entity targetEntity)
     {
@@ -236,11 +248,37 @@ public class LibsDisguiseWrapper extends DisguiseWrapper<Disguise>
         }
 
         instance.setKeepDisguiseOnPlayerDeath(true);
+
+        var entityType = getEntityType();
+        var soundEvent = EntityTypeUtils.getSoundEvent(entityType);
+
+        var sound = soundEvent.sound();
+        if (sound == null) return;
+
+        this.ambientInterval = soundEvent.interval();
+        var resLoc = sound.getLocation();
+
+        this.ambientSoundPrimary = Sound.sound().source(Sound.Source.PLAYER).volume(soundEvent.volume()).pitch(1F)
+                .type(Key.key(resLoc.getNamespace(), resLoc.getPath())).build();
+
+        if (entityType == EntityType.ALLAY)
+        {
+            var allaySecondary = SoundEvents.ALLAY_AMBIENT_WITH_ITEM;
+            var secSi = new EntityTypeUtils.SoundInfo(allaySecondary, ambientInterval, soundEvent.volume());
+            this.ambientSoundSecondary = SoundUtils.toBukkitSound(secSi);
+        }
+
+        this.createTime = plugin.getCurrentTick();
     }
 
     private final Scoreboard scoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
 
     public BiConsumer<FlagWatcher, Player> preUpdate;
+
+    public int ambientInterval = 0;
+    public Sound ambientSoundPrimary;
+    public Sound ambientSoundSecondary;
+    private long createTime;
 
     @Override
     public void update(boolean isClone, DisguiseState state, Player player)
@@ -251,6 +289,23 @@ public class LibsDisguiseWrapper extends DisguiseWrapper<Disguise>
 
         if (preUpdate != null)
             preUpdate.accept(watcher, player);
+
+        if (ambientInterval != 0 && (createTime - plugin.getCurrentTick()) % ambientInterval == 0 && !player.isSneaking())
+        {
+            var loc = player.getLocation();
+            boolean playSecondary = false;
+
+            if (getEntityType() == EntityType.ALLAY)
+            {
+                var eq = player.getEquipment();
+                if (!eq.getItemInMainHand().getType().isAir()) playSecondary = true;
+            }
+
+            Sound sound = playSecondary ? ambientSoundSecondary : ambientSoundPrimary;
+
+            if (sound != null)
+                player.getWorld().playSound(sound, loc.getX(), loc.getY(), loc.getZ());
+        }
 
         //对克隆的伪装手动更新一些属性
         if (!isClone) return;
@@ -416,7 +471,7 @@ public class LibsDisguiseWrapper extends DisguiseWrapper<Disguise>
         }
     }
 
-    private static final Logger logger = MorphPlugin.getInstance(MorphPlugin.getMorphNameSpace()).getSLF4JLogger();
+    private static final Logger logger = MorphPlugin.getInstance().getSLF4JLogger();
 
     @Override
     public void showArms(boolean showarms)

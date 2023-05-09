@@ -64,7 +64,7 @@ public class NilWrapper extends DisguiseWrapper<NilDisguise>
         }
     }
 
-    private static final Logger logger = MorphPlugin.getInstance(MorphPlugin.getMorphNameSpace()).getSLF4JLogger();
+    private static final Logger logger = MorphPlugin.getInstance().getSLF4JLogger();
 
     @Override
     public EntityEquipment getDisplayingEquipments()

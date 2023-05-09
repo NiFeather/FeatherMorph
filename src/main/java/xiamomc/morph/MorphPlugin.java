@@ -32,6 +32,23 @@ import xiamomc.pluginbase.XiaMoJavaPlugin;
 
 public final class MorphPlugin extends XiaMoJavaPlugin
 {
+    private static MorphPlugin instance;
+
+    /**
+     * 仅当当前对象无法继承MorphPluginObject或不需要完全继承MorphPluginObject时使用
+     * @return 插件的实例
+     */
+    @Deprecated
+    public static MorphPlugin getInstance()
+    {
+        return instance;
+    }
+
+    public MorphPlugin()
+    {
+        instance = this;
+    }
+
     public static String getMorphNameSpace()
     {
         return "morphplugin";
