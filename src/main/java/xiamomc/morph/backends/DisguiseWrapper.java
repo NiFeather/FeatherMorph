@@ -254,6 +254,8 @@ public abstract class DisguiseWrapper<T>
 
     //region Temp
 
+    public abstract void resetAmbientSoundInterval();
+
     public void showArms(boolean showarms)
     {
     }

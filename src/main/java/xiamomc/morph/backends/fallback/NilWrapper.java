@@ -42,6 +42,11 @@ public class NilWrapper extends DisguiseWrapper<NilDisguise>
         return instance.compoundTag.copy();
     }
 
+    @Override
+    public void resetAmbientSoundInterval()
+    {
+    }
+
     @Nullable
     @Override
     public <R extends Tag> R getTag(@NotNull String path, TagType<R> type)

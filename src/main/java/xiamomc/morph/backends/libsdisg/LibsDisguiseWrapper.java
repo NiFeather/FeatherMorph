@@ -267,8 +267,6 @@ public class LibsDisguiseWrapper extends DisguiseWrapper<Disguise>
             var secSi = new EntityTypeUtils.SoundInfo(allaySecondary, ambientInterval, soundEvent.volume());
             this.ambientSoundSecondary = SoundUtils.toBukkitSound(secSi);
         }
-
-        this.createTime = plugin.getCurrentTick();
     }
 
     private final Scoreboard scoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
@@ -278,7 +276,13 @@ public class LibsDisguiseWrapper extends DisguiseWrapper<Disguise>
     public int ambientInterval = 0;
     public Sound ambientSoundPrimary;
     public Sound ambientSoundSecondary;
-    private long createTime;
+    private int soundTime;
+
+    @Override
+    public void resetAmbientSoundInterval()
+    {
+        soundTime = 0;
+    }
 
     @Override
     public void update(boolean isClone, DisguiseState state, Player player)
@@ -290,7 +294,7 @@ public class LibsDisguiseWrapper extends DisguiseWrapper<Disguise>
         if (preUpdate != null)
             preUpdate.accept(watcher, player);
 
-        if (ambientInterval != 0 && (createTime - plugin.getCurrentTick()) % ambientInterval == 0 && !player.isSneaking())
+        if (ambientInterval != 0 && soundTime == ambientInterval && !player.isSneaking())
         {
             var loc = player.getLocation();
             boolean playSecondary = false;
@@ -306,6 +310,8 @@ public class LibsDisguiseWrapper extends DisguiseWrapper<Disguise>
             if (sound != null)
                 player.getWorld().playSound(sound, loc.getX(), loc.getY(), loc.getZ());
         }
+
+        soundTime++;
 
         //对克隆的伪装手动更新一些属性
         if (!isClone) return;
