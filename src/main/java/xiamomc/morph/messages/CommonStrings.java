@@ -7,7 +7,7 @@ public class CommonStrings extends AbstractMorphStrings
     public static FormattableMessage chatOverrideDefaultPattern()
     {
         return getFormattable(getKey("chat.overrideDefaultPattern"),
-                "<<who>> <message>");
+                "~DEPRECATED, SEE CONFIG.YML");
     }
 
     public static FormattableMessage pluginMessageString()

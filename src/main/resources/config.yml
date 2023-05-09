@@ -12,6 +12,9 @@ root:
     # This will make sure that the player's name can be changed in most situations but may cause compatibility issues.
     UseCustomRenderer: true
 
+    # The default pattern for ChatOverride
+    default_pattern: <<who>> <message>
+
   # Language options
   language:
     # Sets the default language for the plugin
@@ -190,4 +193,4 @@ root:
     log_outgoing_packets: false
 
   # Do not touch unless you know what you're doing!
-  version: 20
+  version: 21

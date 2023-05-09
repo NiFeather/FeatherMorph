@@ -35,7 +35,6 @@
   "commands.reload_complete": "Reload complete!",
   "commands.unmorph_all_success": "Successfully undisguised everyone!",
   "commands.unmorph_someone_success": "Undisguised <who> Successfully!",
-  "common.chat.overrideDefaultPattern": "<<who>> <message>",
   "common.command_not_found": "<color:red>Command not found",
   "common.player_not_defined": "<color:red>No player specified",
   "common.player_not_found": "<color:red>No such player or they are offline",

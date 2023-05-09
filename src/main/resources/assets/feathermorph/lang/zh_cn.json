@@ -35,7 +35,6 @@
   "commands.reload_complete": "重载完成！",
   "commands.unmorph_all_success": "成功取消所有人的伪装！",
   "commands.unmorph_someone_success": "成功取消<who>的伪装！",
-  "common.chat.overrideDefaultPattern": "<<who>> <message>",
   "common.command_not_found": "<color:red>未找到此指令",
   "common.player_not_defined": "<color:red>未指定玩家",
   "common.player_not_found": "<color:red>未找到目标玩家或对方已离线",

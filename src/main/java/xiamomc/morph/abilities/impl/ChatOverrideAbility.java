@@ -26,8 +26,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class ChatOverrideAbility extends MorphAbility<ChatOverrideOption>
 {
-    private String defaultMessage;
-
     @Override
     public @NotNull NamespacedKey getIdentifier()
     {
@@ -45,8 +43,6 @@ public class ChatOverrideAbility extends MorphAbility<ChatOverrideOption>
     {
         config.bind(allowChatOverride, ConfigOption.ALLOW_CHAT_OVERRIDE);
         config.bind(useCustomRenderer, ConfigOption.CHAT_OVERRIDE_USE_CUSTOM_RENDERER);
-
-        this.defaultMessage = messageStore.get(CommonStrings.chatOverrideDefaultPattern().getKey(), null, MessageUtils.getServerLocale());
     }
 
     private final Bindable<Boolean> useCustomRenderer = new Bindable<>(false);
@@ -90,7 +86,7 @@ public class ChatOverrideAbility extends MorphAbility<ChatOverrideOption>
         {
             var pattern = p.getMessagePattern();
 
-            if (pattern == null) pattern = defaultMessage;
+            if (pattern == null) return null;
 
             targetString.set(new FormattableMessage(plugin, pattern));
         }

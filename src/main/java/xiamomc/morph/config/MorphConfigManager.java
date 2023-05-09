@@ -4,10 +4,14 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphPlugin;
+import xiamomc.morph.messages.CommonStrings;
+import xiamomc.morph.messages.MessageUtils;
 import xiamomc.pluginbase.Bindables.Bindable;
 import xiamomc.pluginbase.Bindables.BindableList;
 import xiamomc.pluginbase.Configuration.ConfigNode;
 import xiamomc.pluginbase.Configuration.PluginConfigManager;
+import xiamomc.pluginbase.Managers.DependencyManager;
+import xiamomc.pluginbase.Messages.MessageStore;
 
 import java.util.*;
 
@@ -125,7 +129,7 @@ public class MorphConfigManager extends PluginConfigManager
         super.reload();
 
         //更新配置
-        int targetVersion = 20;
+        int targetVersion = 21;
 
         var configVersion = getOrDefault(Integer.class, ConfigOption.VERSION);
 
@@ -172,7 +176,7 @@ public class MorphConfigManager extends PluginConfigManager
                 }
             });
 
-            //初次加载
+            // 初次加载
             if (configVersion < 1)
             {
                 var locale = Locale.getDefault().toLanguageTag().replace('-', '_').toLowerCase();
@@ -185,6 +189,23 @@ public class MorphConfigManager extends PluginConfigManager
                 //noinspection deprecation
                 var oldSkillItem = get(String.class, ConfigOption.ACTION_ITEM);
                 newConfig.set(ConfigOption.SKILL_ITEM.toString(), oldSkillItem);
+            }
+
+            // ChatOverride消息的配置从messages迁移到config.yml中
+            if (configVersion < 21)
+            {
+                var depMgr = DependencyManager.getInstance(plugin.getNameSpace());
+                var messageStore = depMgr.get(MessageStore.class);
+                boolean requireCache = depMgr.get(this.getClass(), false) == null;
+
+                if (requireCache)
+                    depMgr.cache(this);
+
+                var msg = messageStore.get(CommonStrings.chatOverrideDefaultPattern().getKey(), (String)ConfigOption.CHAT_OVERRIDE_DEFAULT_PATTERN.defaultValue, MessageUtils.getServerLocale());
+                newConfig.set(ConfigOption.CHAT_OVERRIDE_DEFAULT_PATTERN.toString(), msg);
+
+                if (requireCache)
+                    depMgr.unCache(this);
             }
 
             newConfig.set(ConfigOption.VERSION.toString(), targetVersion);
