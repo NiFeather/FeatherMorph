@@ -564,7 +564,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
         if (id.isEmpty() || id.isBlank())
             manager.doQuickDisguise(player, null);
         else if (manager.canMorph(player))
-            manager.morph(player, id, player.getTargetEntity(5));
+            manager.morph(player, player, id, player.getTargetEntity(5));
     }
 
     @Override

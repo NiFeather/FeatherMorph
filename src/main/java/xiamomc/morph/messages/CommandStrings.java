@@ -104,6 +104,12 @@ public class CommandStrings extends AbstractMorphStrings
                 "<color:red>未能将<what>的伪装给与<who>，他是否已经拥有此伪装？");
     }
 
+    public static FormattableMessage morphedSomeoneString()
+    {
+        return getFormattable(getKey("morph_someone_success"),
+                "成功将<who>伪装为<what>！");
+    }
+
     public static FormattableMessage unMorphedSomeoneString()
     {
         return getFormattable(getKey("unmorph_someone_success"),

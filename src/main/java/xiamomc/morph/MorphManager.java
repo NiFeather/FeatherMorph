@@ -4,6 +4,7 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
 import net.kyori.adventure.text.Component;
 import org.bukkit.*;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
@@ -387,7 +388,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                     }
 
                     //否则，更新或应用伪装
-                    morph(player, DisguiseTypes.PLAYER.toId(profile.getName()), targetEntity);
+                    morph(player, player, DisguiseTypes.PLAYER.toId(profile.getName()), targetEntity);
 
                     uuidPlayerTexturesMap.put(playerUniqueId, profileTexture);
                 }
@@ -427,7 +428,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                             : targetedEntity.getType().getKey().asString();
                 }
 
-                morph(player, targetKey, targetedEntity);
+                morph(player, player, targetKey, targetedEntity);
 
                 return true;
             }
@@ -451,25 +452,27 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         if (state != null && state.getDisguiseIdentifier().equals(key))
             unMorph(player);
         else
-            morph(player, key, targetEntity);
+            morph(player, player, key, targetEntity);
     }
 
     /**
      * 伪装某一玩家
      *
+     * @param source 伪装发起方
      * @param player 目标玩家
      * @param key 伪装ID
      * @param targetEntity 目标实体（如果有）
      * @return 操作是否成功
      */
-    public boolean morph(Player player, String key, @Nullable Entity targetEntity)
+    public boolean morph(CommandSender source, Player player, String key, @Nullable Entity targetEntity)
     {
-        return this.morph(player, key, targetEntity, false, false);
+        return this.morph(source, player, key, targetEntity, false, false);
     }
 
     /**
      * 伪装某一玩家
      *
+     * @param source 发起方
      * @param player 要伪装的玩家
      * @param key 伪装ID
      * @param targetEntity 玩家正在看的实体
@@ -477,9 +480,11 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
      * @param bypassAvailableCheck 是否绕过持有检查
      * @return 操作是否成功
      */
-    public boolean morph(Player player, String key, @Nullable Entity targetEntity,
+    public boolean morph(CommandSender source, Player player, String key, @Nullable Entity targetEntity,
                          boolean bypassPermission, boolean bypassAvailableCheck)
     {
+        var isDirect = source == player;
+
         if (!bypassPermission)
         {
             var childNode = CommonPermissions.MORPH + ".as." + key.replace(":", ".");
@@ -488,7 +493,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
             if (!hasPerm)
             {
-                player.sendMessage(MessageUtils.prefixes(player, CommandStrings.noPermissionMessage()));
+                source.sendMessage(MessageUtils.prefixes(source, CommandStrings.noPermissionMessage()));
 
                 return false;
             }
@@ -511,7 +516,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         if (disguiseDisabled(key))
         {
-            player.sendMessage(MessageUtils.prefixes(player, MorphStrings.disguiseBannedOrNotSupportedString()));
+            source.sendMessage(MessageUtils.prefixes(source, MorphStrings.disguiseBannedOrNotSupportedString()));
             return false;
         }
 
@@ -531,13 +536,13 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
                 if (provider == MorphManager.fallbackProvider)
                 {
-                    player.sendMessage(MessageUtils.prefixes(player, MorphStrings.disguiseBannedOrNotSupportedString()));
+                    source.sendMessage(MessageUtils.prefixes(source, MorphStrings.disguiseBannedOrNotSupportedString()));
                     logger.error("Unable to find any provider that matches the identifier '%s'".formatted(strippedKey[0]));
                     return false;
                 }
                 else if (!provider.isValid(finalKey))
                 {
-                    player.sendMessage(MessageUtils.prefixes(player, MorphStrings.invalidIdentityString()));
+                    source.sendMessage(MessageUtils.prefixes(source, MorphStrings.invalidIdentityString()));
                     return false;
                 }
                 else
@@ -546,7 +551,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
                     if (!result.success())
                     {
-                        player.sendMessage(MessageUtils.prefixes(player, MorphStrings.errorWhileDisguising()));
+                        source.sendMessage(MessageUtils.prefixes(source, MorphStrings.errorWhileDisguising()));
                         logger.error("Unable to apply disguise for player with provider " + provider);
                         return false;
                     }
@@ -563,7 +568,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                     var backendSuccess = currentBackend.disguise(player, result.wrapperInstance());
                     if (!backendSuccess)
                     {
-                        player.sendMessage(MessageUtils.prefixes(player, MorphStrings.errorWhileDisguising()));
+                        source.sendMessage(MessageUtils.prefixes(source, MorphStrings.errorWhileDisguising()));
                         return false;
                     }
 
@@ -573,13 +578,14 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                             info.getIdentifier(), result.wrapperInstance(), result.isCopy(), provider);
                 }
 
-                var playerLocale = MessageUtils.getLocale(player);
+                var playerLocale = MessageUtils.getLocale(source);
 
-                var msg = MorphStrings.morphSuccessString()
+                var msg = (isDirect ? MorphStrings.morphSuccessString() : CommandStrings.morphedSomeoneString())
                         .withLocale(playerLocale)
+                        .resolve("who", player.getName())
                         .resolve("what", info.asComponent(playerLocale));
 
-                player.sendMessage(MessageUtils.prefixes(player, msg));
+                source.sendMessage(MessageUtils.prefixes(source, msg));
 
                 //如果此伪装可以同步给客户端，那么初始化客户端状态
                 if (provider.validForClient(outComingState))
@@ -608,7 +614,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             }
             catch (IllegalArgumentException iae)
             {
-                player.sendMessage(MessageUtils.prefixes(player, MorphStrings.parseErrorString()
+                source.sendMessage(MessageUtils.prefixes(source, MorphStrings.parseErrorString()
                         .resolve("id", key)));
 
                 logger.error("Unable to parse key " + key + ": " + iae.getMessage());
@@ -619,7 +625,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         }
         else
         {
-            player.sendMessage(MessageUtils.prefixes(player, MorphStrings.morphNotOwnedString()));
+            source.sendMessage(MessageUtils.prefixes(source, MorphStrings.morphNotOwnedString()));
         }
 
         return false;
@@ -1066,7 +1072,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             }
 
             //有限还原
-            morph(player, key, null);
+            morph(player, player, key, null);
             return 1;
         }
         catch (Throwable t)

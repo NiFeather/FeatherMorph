@@ -84,22 +84,13 @@ public class ForceMorphSubCommand extends MorphPluginObject implements ISubComma
         //检查是否已知
         var provider = MorphManager.getProvider(strings[1]);
 
-        if (provider == null)
+        if (provider == MorphManager.fallbackProvider)
         {
             commandSender.sendMessage(MessageUtils.prefixes(commandSender, MorphStrings.invalidIdentityString()));
             return true;
         }
 
-        FormattableMessage msg;
-
-        if (manager.morph(who, targetName, who.getTargetEntity(3), true, true))
-            msg = MorphStrings.morphSuccessString();
-        else
-            msg = MorphStrings.errorWhileDisguising();
-
-        msg.resolve("what", Component.text(targetName)).resolve("who", who.getName());
-        commandSender.sendMessage(MessageUtils.prefixes(commandSender, msg));
-
+        manager.morph(commandSender, who, targetName, who.getTargetEntity(3), true, true);
         return true;
     }
 
