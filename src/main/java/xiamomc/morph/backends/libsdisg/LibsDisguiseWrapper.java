@@ -41,15 +41,12 @@ import java.util.function.BiConsumer;
 
 public class LibsDisguiseWrapper extends DisguiseWrapper<Disguise>
 {
-    public LibsDisguiseWrapper(@NotNull Disguise instance, LibsBackend backend, XiaMoJavaPlugin plugin)
+    public LibsDisguiseWrapper(@NotNull Disguise instance, LibsBackend backend)
     {
         super(instance, backend);
 
         this.watcher = instance.getWatcher();
-        this.plugin = plugin;
     }
-
-    private final XiaMoJavaPlugin plugin;
 
     private final FlagWatcher watcher;
 
@@ -90,7 +87,7 @@ public class LibsDisguiseWrapper extends DisguiseWrapper<Disguise>
     @Override
     public DisguiseWrapper<Disguise> clone()
     {
-        var newWrapper = new LibsDisguiseWrapper(instance.clone(), (LibsBackend) getBackend(), plugin);
+        var newWrapper = new LibsDisguiseWrapper(instance.clone(), (LibsBackend) getBackend());
         newWrapper.compoundTag.merge(this.compoundTag);
 
         return newWrapper;
@@ -289,7 +286,11 @@ public class LibsDisguiseWrapper extends DisguiseWrapper<Disguise>
     {
         var ldInstance = DisguiseAPI.getDisguise(player);
         if (this.instance != ldInstance)
+        {
+            if (player.isDead()) return;
+
             throw new RuntimeException("Current disguise instance from LibsDisguises '%s' does not match the one saved in our wrapper '%s'".formatted(ldInstance, this.instance));
+        }
 
         if (preUpdate != null)
             preUpdate.accept(watcher, player);

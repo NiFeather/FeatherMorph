@@ -57,7 +57,7 @@ public class LibsBackend extends DisguiseBackend<Disguise, LibsDisguiseWrapper>
         watcher.setYModifier(0.5f);
         watcher.setScale(new Vector3f(20, 20, 20));
 
-        var wrapper = new LibsDisguiseWrapper(instance, this, plugin);
+        var wrapper = new LibsDisguiseWrapper(instance, this);
         wrapper.preUpdate = (w, player) ->
         {
             var item = watcher.getItemStack();
@@ -77,7 +77,7 @@ public class LibsBackend extends DisguiseBackend<Disguise, LibsDisguiseWrapper>
     {
         var instance = DisguiseAPI.constructDisguise(targetEntity);
 
-        return new LibsDisguiseWrapper(instance, this, plugin);
+        return new LibsDisguiseWrapper(instance, this);
     }
 
     @Override
@@ -85,7 +85,7 @@ public class LibsBackend extends DisguiseBackend<Disguise, LibsDisguiseWrapper>
     {
         var instance = new MobDisguise(DisguiseType.getType(entityType));
 
-        return new LibsDisguiseWrapper(instance, this, plugin);
+        return new LibsDisguiseWrapper(instance, this);
     }
 
     @Override
@@ -93,12 +93,12 @@ public class LibsBackend extends DisguiseBackend<Disguise, LibsDisguiseWrapper>
     {
         var instance = new PlayerDisguise(playerName);
 
-        return new LibsDisguiseWrapper(instance, this, plugin);
+        return new LibsDisguiseWrapper(instance, this);
     }
 
     public DisguiseWrapper<Disguise> createInstanceDirect(Disguise disguise)
     {
-        return new LibsDisguiseWrapper(disguise, this, plugin);
+        return new LibsDisguiseWrapper(disguise, this);
     }
 
     @Override
@@ -186,7 +186,7 @@ public class LibsBackend extends DisguiseBackend<Disguise, LibsDisguiseWrapper>
         try
         {
             var disg = DisguiseParser.parseDisguise(strSpilt[1]);
-            return new LibsDisguiseWrapper(disg, this, plugin);
+            return new LibsDisguiseWrapper(disg, this);
         }
         catch (Throwable t)
         {
