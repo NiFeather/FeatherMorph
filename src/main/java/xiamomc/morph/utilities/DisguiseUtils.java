@@ -1,8 +1,11 @@
 package xiamomc.morph.utilities;
 
+import com.google.common.base.Predicates;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import me.libraryaddict.disguise.disguisetypes.EntityPose;
 import me.libraryaddict.disguise.disguisetypes.FlagWatcher;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Pose;
@@ -10,9 +13,11 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.backends.DisguiseWrapper;
 import xiamomc.morph.misc.DisguiseInfo;
+import xiamomc.morph.misc.NmsRecord;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Predicate;
 
 public class DisguiseUtils
 {
@@ -60,7 +65,6 @@ public class DisguiseUtils
         var value = new ObjectArrayList<Player>();
 
         var loc = player.getLocation();
-
         player.getWorld().getPlayers().forEach(p ->
         {
             if (p.getLocation().distance(loc) <= distance)

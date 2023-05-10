@@ -182,8 +182,7 @@ public class HealsFromEntityAbility extends MorphAbility<HealsFromEntityOption>
             var world = record.nmsWorld();
             var player = record.nmsPlayer();
 
-            var boundingBox = nmsType.getDimensions()
-                    .makeBoundingBox(player.position());
+            var boundingBox = nmsType.getDimensions().makeBoundingBox(player.position());
 
             Class<? extends Entity> classType = EntityTypeUtils.getNmsClass(bukkitType);
 

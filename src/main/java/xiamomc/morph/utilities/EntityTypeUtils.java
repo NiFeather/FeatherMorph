@@ -47,6 +47,7 @@ public class EntityTypeUtils
     {
         nmsClassMap.put(EntityType.PLAYER, Player.class);
         typeSoundMap.put(EntityType.BEE, new SoundInfo(SoundEvents.BEE_LOOP, 120, 1));
+        typeSoundMap.put(EntityType.ENDER_DRAGON, new SoundInfo(SoundEvents.ENDER_DRAGON_AMBIENT, 100, 5));
     }
 
     public record SoundInfo(@Nullable SoundEvent sound, int interval, float volume)

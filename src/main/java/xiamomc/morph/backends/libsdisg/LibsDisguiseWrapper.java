@@ -295,7 +295,9 @@ public class LibsDisguiseWrapper extends DisguiseWrapper<Disguise>
         if (preUpdate != null)
             preUpdate.accept(watcher, player);
 
-        if (ambientInterval != 0 && soundTime == ambientInterval && !player.isSneaking())
+        soundTime++;
+
+        if (ambientInterval != 0 && soundTime >= ambientInterval && !player.isSneaking())
         {
             var loc = player.getLocation();
             boolean playSecondary = false;
@@ -310,15 +312,12 @@ public class LibsDisguiseWrapper extends DisguiseWrapper<Disguise>
 
             if (sound != null)
                 player.getWorld().playSound(sound, loc.getX(), loc.getY(), loc.getZ());
-        }
 
-        soundTime++;
+            soundTime = 0;
+        }
 
         //对克隆的伪装手动更新一些属性
         if (!isClone) return;
-
-        var team = scoreboard.getPlayerTeam(player);
-        var playerColor = (team == null || !team.hasColor()) ? NamedTextColor.WHITE : team.color();
 
         //workaround: 复制实体伪装时会一并复制隐身标签
         //            会导致复制出来的伪装永久隐身
@@ -331,7 +330,12 @@ public class LibsDisguiseWrapper extends DisguiseWrapper<Disguise>
 
         //设置发光颜色
         if (!state.haveCustomGlowColor())
+        {
+            var team = scoreboard.getPlayerTeam(player);
+            var playerColor = (team == null || !team.hasColor()) ? NamedTextColor.WHITE : team.color();
+
             watcher.setGlowColor(ColorUtils.toChatColor(playerColor));
+        }
 
         //设置滑翔状态
         if (watcher.isFlyingWithElytra() != player.isGliding())

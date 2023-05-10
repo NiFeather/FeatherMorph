@@ -87,7 +87,7 @@ public class BossbarAbility extends MorphAbility<BossbarOption>
     {
         if (super.handle(player, state))
         {
-            if (appliedPlayers.contains(player))
+            if (appliedPlayers.contains(player) && plugin.getCurrentTick() % 4 == 0)
             {
                 var option = this.getOptionFor(state);
 
@@ -117,9 +117,9 @@ public class BossbarAbility extends MorphAbility<BossbarOption>
                     playersToShow.forEach(p -> p.showBossBar(bossbar));
                     playersToHide.forEach(p -> p.hideBossBar(bossbar));
                 }
-
-                return true;
             }
+
+            return true;
         }
 
         return false;
