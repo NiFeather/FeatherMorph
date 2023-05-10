@@ -32,4 +32,5 @@ public class AbilityType
     public static final NamespacedKey ATTRIBUTE = new NamespacedKey(nameSpace, "attribute_modify");
     public static final NamespacedKey HEALS_FROM_ENTITY = new NamespacedKey(nameSpace, "heals_from_entity");
     public static final NamespacedKey EXTRA_KNOCKBACK = new NamespacedKey(nameSpace, "extra_knockback");
+    public static final NamespacedKey DRYOUT_IN_AIR = new NamespacedKey(nameSpace, "dryout_in_air");
 }

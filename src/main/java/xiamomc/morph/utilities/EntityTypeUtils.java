@@ -242,6 +242,14 @@ public class EntityTypeUtils
         return ObjectSet.of(EntityType.COD, EntityType.SALMON, EntityType.PUFFERFISH, EntityType.TROPICAL_FISH,
                 EntityType.SQUID, EntityType.GLOW_SQUID,
                 EntityType.AXOLOTL, EntityType.GUARDIAN, EntityType.ELDER_GUARDIAN, EntityType.DOLPHIN,
+                EntityType.TADPOLE, EntityType.DROWNED);
+    }
+
+    public static Set<EntityType> dryOutInAir()
+    {
+        return ObjectSet.of(EntityType.COD, EntityType.SALMON, EntityType.PUFFERFISH, EntityType.TROPICAL_FISH,
+                EntityType.SQUID, EntityType.GLOW_SQUID,
+                EntityType.AXOLOTL, EntityType.GUARDIAN, EntityType.ELDER_GUARDIAN, EntityType.DOLPHIN,
                 EntityType.TADPOLE);
     }
 

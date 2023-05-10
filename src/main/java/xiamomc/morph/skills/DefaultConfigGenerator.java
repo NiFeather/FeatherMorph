@@ -7,6 +7,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphManager;
+import xiamomc.morph.abilities.AbilityHandler;
 import xiamomc.morph.abilities.AbilityType;
 import xiamomc.morph.abilities.options.*;
 import xiamomc.morph.skills.impl.SonicBoomMorphSkill;
@@ -202,12 +203,18 @@ public class DefaultConfigGenerator
         addAbilityConfiguration(skills, EntityTypeUtils.hasFireResistance(), AbilityType.HAS_FIRE_RESISTANCE);
         addAbilityConfiguration(skills, EntityTypeUtils.takesDamageFromWater(), AbilityType.TAKES_DAMAGE_FROM_WATER);
         addAbilityConfiguration(skills, EntityTypeUtils.canBreatheUnderWater(), AbilityType.CAN_BREATHE_UNDER_WATER);
+        addAbilityConfiguration(skills, EntityTypeUtils.dryOutInAir(), AbilityType.DRYOUT_IN_AIR);
         addAbilityConfiguration(skills, EntityTypeUtils.burnsUnderSun(), AbilityType.BURNS_UNDER_SUN);
         addAbilityConfiguration(skills, EntityTypeUtils.alwaysNightVision(), AbilityType.ALWAYS_NIGHT_VISION);
         addAbilityConfiguration(skills, EntityTypeUtils.hasJumpBoost(), AbilityType.HAS_JUMP_BOOST);
         addAbilityConfiguration(skills, EntityTypeUtils.hasSmallJumpBoost(), AbilityType.HAS_SMALL_JUMP_BOOST);
         addAbilityConfiguration(skills, EntityTypeUtils.noFallDamage(), AbilityType.NO_FALL_DAMAGE);
         addAbilityConfiguration(skills, EntityTypeUtils.hasFeatherFalling(), AbilityType.HAS_FEATHER_FALLING);
+
+        addAbilityConfiguration(skills, EntityType.AXOLOTL, AbilityType.DRYOUT_IN_AIR, c ->
+        {
+            c.addOption(AbilityType.DRYOUT_IN_AIR, new DryoutAbilityOption(false));
+        });
 
         addAbilityConfiguration(skills, EntityType.HORSE, AbilityType.ATTRIBUTE, c ->
         {
