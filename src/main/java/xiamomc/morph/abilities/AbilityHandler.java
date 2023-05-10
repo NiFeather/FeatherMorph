@@ -39,11 +39,11 @@ public class AbilityHandler extends MorphPluginObject
      */
     public boolean registerAbility(IMorphAbility<?> ability)
     {
-        logger.info("Registering ability: " + ability.getIdentifier().asString());
+        //logger.info("Registering ability: " + ability.getIdentifier().asString());
 
         if (registedAbilities.stream().anyMatch(a -> a.getIdentifier().equals(ability.getIdentifier())))
         {
-            logger.error("Another ability instance has already registered as " + ability.getIdentifier().asString() + "!");
+            logger.error("Can't register ability: Another ability instance has already registered as " + ability.getIdentifier().asString() + "!");
             return false;
         }
 

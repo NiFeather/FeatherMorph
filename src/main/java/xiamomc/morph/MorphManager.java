@@ -270,17 +270,17 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
      */
     public boolean registerProvider(DisguiseProvider provider)
     {
-        logger.info("Registering disguise provider: " + provider.getNameSpace());
+        //logger.info("Registering disguise provider: " + provider.getNameSpace());
 
         if (provider.getNameSpace().contains(":"))
         {
-            logger.error("Illegal character found in namespace: ':'");
+            logger.error("Can't register disguise provider: Illegal character found in namespace: ':'");
             return false;
         }
 
         if (providers.stream().anyMatch(p -> p.getNameSpace().equals(provider.getNameSpace())))
         {
-            logger.error("Another provider instance already registered as " + provider.getNameSpace() + " !");
+            logger.error("Can't register disguise provider: Another provider instance already registered as " + provider.getNameSpace() + " !");
             return false;
         }
 

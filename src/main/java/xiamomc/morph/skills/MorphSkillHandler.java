@@ -108,17 +108,17 @@ public class MorphSkillHandler extends MorphPluginObject
      */
     public boolean registerSkill(IMorphSkill<?> skill)
     {
-        logger.info("Registering skill: " + skill.getIdentifier().asString());
+        //logger.info("Registering skill: " + skill.getIdentifier().asString());
 
         if (skills.contains(skill))
         {
-            logger.error("Another skill instance has already registered as " + skill.getIdentifier().asString() + " !");
+            logger.error("Can't register skill: Another skill instance has already registered as " + skill.getIdentifier().asString() + " !");
             return false;
         }
 
         if (skill.getIdentifier().equals(SkillType.UNKNOWN))
         {
-            logger.error("Illegal skill identifier: " + SkillType.UNKNOWN);
+            logger.error("Can't register skill: Illegal skill identifier: " + SkillType.UNKNOWN);
             return false;
         }
 
