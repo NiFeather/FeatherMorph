@@ -51,7 +51,15 @@ public class ForceMorphSubCommand extends MorphPluginObject implements ISubComma
         }
         else if (args.size() == 2)
         {
-            list.add("<id>");
+            var targetLowerCase = args.get(1).toLowerCase();
+
+            for (var p : MorphManager.getProviders())
+            {
+                p.getAllAvailableDisguises().forEach(s ->
+                {
+                    if (s.toLowerCase().contains(targetLowerCase)) list.add(s);
+                });
+            }
         }
 
         return list;
