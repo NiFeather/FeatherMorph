@@ -8,6 +8,8 @@ import java.util.ArrayList;
 
 public enum ConfigOption
 {
+    PLUGIN_PREFIX(ConfigNode.create().append("message_pattern"), "<color:#dddddd>≡ FM » <message>"),
+
     ALLOW_HEAD_MORPH(ConfigNode.create().append("allowHeadMorph"), true),
     ALLOW_CHAT_OVERRIDE(ConfigNode.create().append("chatOverride").append("allowOverride"), true),
     CHAT_OVERRIDE_USE_CUSTOM_RENDERER(ConfigNode.create().append("chatOverride").append("UseCustomRenderer"), true),

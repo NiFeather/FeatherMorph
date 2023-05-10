@@ -38,7 +38,6 @@
   "common.command_not_found": "<color:red>未找到此指令",
   "common.player_not_defined": "<color:red>未指定玩家",
   "common.player_not_found": "<color:red>未找到目标玩家或对方已离线",
-  "common.plugin.messagePattern": "<color:#dddddd>≡ FM » <message>",
   "help.avaliable_cmd_header": "当前可用的指令（单击补全/查看）",
   "help.click_to_complete": "点击补全",
   "help.click_to_view": "点击查看",

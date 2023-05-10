@@ -38,7 +38,6 @@
   "common.command_not_found": "<color:red>Command not found",
   "common.player_not_defined": "<color:red>No player specified",
   "common.player_not_found": "<color:red>No such player or they are offline",
-  "common.plugin.messagePattern": "<color:#dddddd>≡ FM » <message>",
   "help.avaliable_cmd_header": "Available commands (Click to send/check)",
   "help.click_to_complete": "Click to complete",
   "help.click_to_view": "Click to check",

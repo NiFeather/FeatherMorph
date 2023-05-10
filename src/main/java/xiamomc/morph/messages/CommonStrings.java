@@ -4,16 +4,18 @@ import xiamomc.pluginbase.Messages.FormattableMessage;
 
 public class CommonStrings extends AbstractMorphStrings
 {
+    @Deprecated
     public static FormattableMessage chatOverrideDefaultPattern()
     {
         return getFormattable(getKey("chat.overrideDefaultPattern"),
                 "~DEPRECATED, SEE CONFIG.YML");
     }
 
+    @Deprecated
     public static FormattableMessage pluginMessageString()
     {
         return getFormattable(getKey("plugin.messagePattern"),
-                "<color:#dddddd>≡ FM » <message>");
+                "~DEPRECATED, SEE CONFIG.YML");
     }
 
     public static FormattableMessage playerNotFoundString()

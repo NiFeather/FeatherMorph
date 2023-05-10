@@ -204,6 +204,9 @@ public class MorphConfigManager extends PluginConfigManager
                 var msg = messageStore.get(CommonStrings.chatOverrideDefaultPattern().getKey(), (String)ConfigOption.CHAT_OVERRIDE_DEFAULT_PATTERN.defaultValue, MessageUtils.getServerLocale());
                 newConfig.set(ConfigOption.CHAT_OVERRIDE_DEFAULT_PATTERN.toString(), msg);
 
+                var pluginPrefix = messageStore.get(CommonStrings.pluginMessageString().getKey(), (String)ConfigOption.PLUGIN_PREFIX.defaultValue, MessageUtils.getServerLocale());
+                newConfig.set(ConfigOption.PLUGIN_PREFIX.toString(), pluginPrefix);
+
                 if (requireCache)
                     depMgr.unCache(this);
             }

@@ -1,6 +1,9 @@
 #FeatherMorph plugin options
 root:
 
+  # The message pattern used for this plugin to display messages for players
+  message_pattern: <color:#dddddd>≡ FM » <message>
+
   # ChatOverride options
   chatOverride:
     # Enable ChatOverride?
