@@ -44,8 +44,8 @@ public abstract class DisguiseProvider extends MorphPluginObject
     /**
      * Gets all available disguise identifiers for this provider
      * @return A list containing available disguise identifiers for this provider
-     * @apiNote The returned values should start with the namespace of this provider<br/>
-     *          For example: `minecraft:ghast`
+     * @apiNote The returned values may not contain the namespace of this provider.<br/>
+     *          For example: `minecraft:ghast` should be `ghast`
      */
     public abstract List<String> getAllAvailableDisguises();
 

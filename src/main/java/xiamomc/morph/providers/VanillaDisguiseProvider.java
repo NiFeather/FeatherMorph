@@ -41,7 +41,8 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
     @Override
     public boolean isValid(String rawIdentifier)
     {
-        return getAllAvailableDisguises().contains(rawIdentifier);
+        var idStripped = DisguiseTypes.VANILLA.toStrippedId(rawIdentifier);
+        return getAllAvailableDisguises().contains(idStripped);
     }
 
     public VanillaDisguiseProvider()
@@ -52,10 +53,10 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
         {
             if (eT == EntityType.UNKNOWN || !eT.isAlive()) continue;
 
-            list.add(eT.getKey().asString());
+            list.add(eT.getKey().getKey());
         }
 
-        list.removeIf(s -> s.equals("minecraft:player"));
+        list.removeIf(s -> s.equals("player"));
 
         vanillaIdentifiers = list;
     }

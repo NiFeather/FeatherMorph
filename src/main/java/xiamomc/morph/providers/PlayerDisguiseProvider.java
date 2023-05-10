@@ -112,7 +112,7 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
         var onlinePlayers = Bukkit.getOnlinePlayers();
 
         var list = new ObjectArrayList<String>();
-        onlinePlayers.forEach(p -> list.add(DisguiseTypes.PLAYER.toId(p.getName())));
+        onlinePlayers.forEach(p -> list.add(p.getName()));
 
         return list;
     }

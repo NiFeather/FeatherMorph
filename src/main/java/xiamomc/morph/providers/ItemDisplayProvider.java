@@ -57,7 +57,7 @@ public class ItemDisplayProvider extends DefaultDisguiseProvider
     @Override
     public List<String> getAllAvailableDisguises()
     {
-        return List.of(DisguiseTypes.ITEM_DISPLAY.toId("dragon_head"));
+        return List.of("dragon_head");
     }
 
     /**
