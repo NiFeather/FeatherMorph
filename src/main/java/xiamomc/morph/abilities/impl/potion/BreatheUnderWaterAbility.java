@@ -47,8 +47,6 @@ public class BreatheUnderWaterAbility extends EffectMorphAbility
         air -= nmsPlayer.isInWater() ? (-5) : 5;
         air = clamp(-20, nmsPlayer.getMaxAirSupply(), air);
 
-        nmsPlayer.setAirSupply(air);
-
         if (air <= -20)
         {
             nmsPlayer.hurt(nmsPlayer.getLevel().damageSources().dryOut(), 2);
