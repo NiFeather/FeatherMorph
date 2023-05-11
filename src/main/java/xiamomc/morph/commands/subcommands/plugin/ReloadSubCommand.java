@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.config.MorphConfigManager;
+import xiamomc.morph.events.api.lifecycle.ConfigurationReloadEvent;
 import xiamomc.morph.messages.*;
 import xiamomc.morph.messages.vanilla.VanillaMessageStore;
 import xiamomc.morph.network.server.MorphClientHandler;
@@ -101,6 +102,9 @@ public class ReloadSubCommand extends MorphPluginObject implements ISubCommand
 
                 vanillaMessageStore.reloadConfiguration();
             }
+
+            var event = new ConfigurationReloadEvent(reloadsData, reloadsMessage);
+            event.callEvent();
 
             sender.sendMessage(MessageUtils.prefixes(sender, CommandStrings.reloadCompleteMessage()));
         }
