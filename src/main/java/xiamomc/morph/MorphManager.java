@@ -587,27 +587,27 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
                 source.sendMessage(MessageUtils.prefixes(source, msg));
 
+                //初始化nbt
+                var compound = provider.getNbtCompound(outComingState, targetEntity);
+
+                if (compound != null)
+                {
+                    outComingState.setCachedNbtString(NbtUtils.getCompoundString(compound));
+                    clientHandler.sendCommand(player, new S2CSetSNbtCommand(outComingState.getCachedNbtString()));
+
+                    outComingState.getDisguiseWrapper().mergeCompound(compound);
+                }
+
+                //设置Profile
+                if (outComingState.haveProfile())
+                    clientHandler.sendCommand(player, new S2CSetProfileCommand(outComingState.getProfileNbtString()));
+
                 //如果此伪装可以同步给客户端，那么初始化客户端状态
                 if (provider.validForClient(outComingState))
                 {
                     clientHandler.sendCommand(player, new S2CSetSelfViewIdentifierCommand(provider.getSelfViewIdentifier(outComingState)));
 
                     provider.getInitialSyncCommands(outComingState).forEach(s -> clientHandler.sendCommand(player, s));
-
-                    //初始化nbt
-                    var compound = provider.getNbtCompound(outComingState, targetEntity);
-
-                    if (compound != null)
-                    {
-                        outComingState.setCachedNbtString(NbtUtils.getCompoundString(compound));
-                        clientHandler.sendCommand(player, new S2CSetSNbtCommand(outComingState.getCachedNbtString()));
-
-                        outComingState.getDisguiseWrapper().mergeCompound(compound);
-                    }
-
-                    //设置Profile
-                    if (outComingState.haveProfile())
-                        clientHandler.sendCommand(player, new S2CSetProfileCommand(outComingState.getProfileNbtString()));
                 }
 
                 return true;

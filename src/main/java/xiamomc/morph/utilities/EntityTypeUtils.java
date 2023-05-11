@@ -6,6 +6,7 @@ import it.unimi.dsi.fastutil.objects.ObjectSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
@@ -46,11 +47,11 @@ public class EntityTypeUtils
     static
     {
         nmsClassMap.put(EntityType.PLAYER, Player.class);
-        typeSoundMap.put(EntityType.BEE, new SoundInfo(SoundEvents.BEE_LOOP, 120, 1));
-        typeSoundMap.put(EntityType.ENDER_DRAGON, new SoundInfo(SoundEvents.ENDER_DRAGON_AMBIENT, 100, 5));
+        typeSoundMap.put(EntityType.BEE, new SoundInfo(SoundEvents.BEE_LOOP, SoundSource.NEUTRAL, 120, 1));
+        typeSoundMap.put(EntityType.ENDER_DRAGON, new SoundInfo(SoundEvents.ENDER_DRAGON_AMBIENT, SoundSource.HOSTILE,100, 5));
     }
 
-    public record SoundInfo(@Nullable SoundEvent sound, int interval, float volume)
+    public record SoundInfo(@Nullable SoundEvent sound, SoundSource source, int interval, float volume)
     {
     }
 
@@ -67,16 +68,17 @@ public class EntityTypeUtils
 
         if (entity instanceof Mob mob)
         {
+            var source = mob.getSoundSource();
             var sound = mob.getAmbientSound0();
             var interval = mob.getAmbientSoundInterval();
 
-            var rec = new SoundInfo(sound, interval, mob.getSoundVolume());
+            var rec = new SoundInfo(sound, source, interval, mob.getSoundVolume());
             typeSoundMap.put(bukkitType, rec);
 
             return rec;
         }
 
-        return new SoundInfo(null, Integer.MAX_VALUE, 1);
+        return new SoundInfo(null, SoundSource.PLAYERS, Integer.MAX_VALUE, 1);
     }
 
     @Nullable

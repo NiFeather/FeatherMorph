@@ -84,6 +84,9 @@ public class HealsFromEntityAbility extends MorphAbility<HealsFromEntityOption>
 
         if (option == null || !option.isValid()) return false;
 
+        if (option.entityType == null)
+            option.entityType = EntityTypeUtils.fromString(option.entityIdentifier);
+
         //Find or refresh entity
         var nmsRecord = NmsRecord.of(player);
 
@@ -141,7 +144,7 @@ public class HealsFromEntityAbility extends MorphAbility<HealsFromEntityOption>
 
             var prevEntity = state.beamTarget;
 
-            var newEntity = findEntity(nmsRecord, nmsType, option.distance, EntityTypeUtils.fromString(option.entityIdentifier));
+            var newEntity = findEntity(nmsRecord, nmsType, option.distance, option.entityType);
 
             if (prevEntity != newEntity)
             {

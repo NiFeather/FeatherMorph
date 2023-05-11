@@ -17,6 +17,7 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.TagType;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.*;
@@ -28,6 +29,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import xiamomc.morph.MorphPlugin;
+import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.backends.DisguiseWrapper;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.utilities.DisguiseUtils;
@@ -246,6 +248,11 @@ public class LibsDisguiseWrapper extends DisguiseWrapper<Disguise>
 
         instance.setKeepDisguiseOnPlayerDeath(true);
 
+        initializeSounds();
+    }
+
+    private void initializeSounds()
+    {
         var entityType = getEntityType();
         var soundEvent = EntityTypeUtils.getSoundEvent(entityType);
 
@@ -253,16 +260,15 @@ public class LibsDisguiseWrapper extends DisguiseWrapper<Disguise>
         if (sound == null) return;
 
         this.ambientInterval = soundEvent.interval();
-        var resLoc = sound.getLocation();
+        var pitch = isBaby() ? 1.5F : 1F;
 
-        this.ambientSoundPrimary = Sound.sound().source(Sound.Source.PLAYER).volume(soundEvent.volume()).pitch(1F)
-                .type(Key.key(resLoc.getNamespace(), resLoc.getPath())).build();
+        this.ambientSoundPrimary = SoundUtils.toBukkitSound(soundEvent, pitch);
 
         if (entityType == EntityType.ALLAY)
         {
             var allaySecondary = SoundEvents.ALLAY_AMBIENT_WITH_ITEM;
-            var secSi = new EntityTypeUtils.SoundInfo(allaySecondary, ambientInterval, soundEvent.volume());
-            this.ambientSoundSecondary = SoundUtils.toBukkitSound(secSi);
+            var secSi = new EntityTypeUtils.SoundInfo(allaySecondary, SoundSource.NEUTRAL, ambientInterval, soundEvent.volume());
+            this.ambientSoundSecondary = SoundUtils.toBukkitSound(secSi, pitch);
         }
     }
 
@@ -358,6 +364,7 @@ public class LibsDisguiseWrapper extends DisguiseWrapper<Disguise>
     private void invalidateCompound()
     {
         this.tagValid = false;
+        MorphPlugin.getInstance().schedule(this::initializeSounds);
     }
 
     @Override
