@@ -17,8 +17,10 @@ import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.MorphPluginObject;
+import xiamomc.morph.RequestManager;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
+import xiamomc.morph.interfaces.IManageRequests;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.MorphStrings;
 import xiamomc.morph.messages.SkillStrings;
@@ -111,7 +113,8 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
                 .registerC2S(C2SCommandNames.Skill, a -> new C2SSkillCommand())
                 .registerC2S(C2SCommandNames.Option, C2SOptionCommand::fromString)
                 .registerC2S(C2SCommandNames.ToggleSelf, a -> new C2SToggleSelfCommand(C2SToggleSelfCommand.SelfViewMode.fromString(a)))
-                .registerC2S(C2SCommandNames.Unmorph, a -> new C2SUnmorphCommand());
+                .registerC2S(C2SCommandNames.Unmorph, a -> new C2SUnmorphCommand())
+                .registerC2S(C2SCommandNames.Request, C2SRequestCommand::new);
 
         Bukkit.getMessenger().registerIncomingPluginChannel(plugin, initializeChannel, (cN, player, data) ->
         {
@@ -648,5 +651,30 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
     public void onUnmorphCommand(C2SUnmorphCommand c2SUnmorphCommand)
     {
         manager.unMorph(c2SUnmorphCommand.getOwner());
+    }
+
+    @Resolved
+    private IManageRequests requestManager;
+
+    @Override
+    public void onRequestCommand(C2SRequestCommand c2SRequestCommand)
+    {
+        Player player = c2SRequestCommand.getOwner();
+        var target = c2SRequestCommand.targetRequestName;
+        var deceison = c2SRequestCommand.decision;
+
+        if (target.equalsIgnoreCase("unknown") || deceison == C2SRequestCommand.Decision.UNKNOWN)
+        {
+            logger.warn("Received an invalid request response");
+            return;
+        }
+
+        var targetPlayer = Bukkit.getPlayerExact(target);
+        if (targetPlayer == null) return;
+
+        if (deceison == C2SRequestCommand.Decision.ACCEPT)
+            requestManager.acceptRequest(player, targetPlayer);
+        else
+            requestManager.denyRequest(player, targetPlayer);
     }
 }
