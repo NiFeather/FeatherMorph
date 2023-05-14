@@ -89,6 +89,8 @@ public class SkillAbilityConfigurationStore extends MorphJsonBasedStorage<SkillA
 
                     c.getAbilitiyIdentifiers().forEach(i ->
                     {
+                        if (i.isEmpty()) return;
+
                         var key = NamespacedKey.fromString(i);
 
                         if (key == null)
