@@ -60,7 +60,7 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
 
         var player = e.getPlayer();
 
-        var playerInf = getPlayer(player);
+        var playerInf = getMirrorTarget(player);
         var targetPlayer = playerInf.target;
 
         if (!playerInDistance(player, playerInf, true) || targetPlayer.isSneaking() == e.isSneaking()) return;
@@ -77,7 +77,7 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
         if (!allowSwap.get()) return;
 
         var player = e.getPlayer();
-        var playerInf = getPlayer(player);
+        var playerInf = getMirrorTarget(player);
 
         if (!playerInDistance(player, playerInf)) return;
 
@@ -101,7 +101,7 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
         if (!allowDrop.get()) return;
 
         var player = e.getPlayer();
-        var playerInf = getPlayer(player);
+        var playerInf = getMirrorTarget(player);
 
         if (!playerInDistance(player, playerInf) || !player.isSneaking()) return;
 
@@ -124,7 +124,7 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
         if (!allowHotBar.get()) return;
 
         var player = e.getPlayer();
-        var inf = getPlayer(player);
+        var inf = getMirrorTarget(player);
 
         if (!playerInDistance(player, inf)) return;
 
@@ -142,7 +142,7 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
     public void onPlayerStopUsingItem(PlayerStopUsingItemEvent e)
     {
         var player = e.getPlayer();
-        var inf = getPlayer(player);
+        var inf = getMirrorTarget(player);
 
         if (!playerInDistance(player, inf)) return;
 
@@ -169,7 +169,7 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
 
         if (e.getDamager() instanceof Player damager)
         {
-            var inf = getPlayer(damager);
+            var inf = getMirrorTarget(damager);
 
             if (!playerInDistance(damager, inf)) return;
 
@@ -206,7 +206,7 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
 
         var player = e.getPlayer();
 
-        var inf = getPlayer(player);
+        var inf = getMirrorTarget(player);
         var targetPlayer = inf.target;
         if (targetPlayer == null) return;
 
@@ -279,7 +279,7 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
 
         updateLastAction(player, action);
 
-        var inf = getPlayer(player);
+        var inf = getMirrorTarget(player);
 
         if (!playerInDistance(player, inf)) return;
 
@@ -288,6 +288,26 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
 
         simulateOperation(e.getAction(), targetPlayer, player);
         logOperation(player, targetPlayer, e.getAction().isLeftClick() ? OperationType.LeftClick : OperationType.RightClick);
+    }
+
+    @EventHandler
+    public void onPlayerInteractAtEntity(PlayerInteractAtEntityEvent e)
+    {
+        var player = e.getPlayer();
+        if (isDuplicatedRightClick(player)) return;
+
+        var equipment = e.getPlayer().getEquipment();
+        if (!equipment.getItem(e.getHand()).getType().isAir()) return;
+
+        var inf = getMirrorTarget(player);
+        updateLastAction(player, Action.RIGHT_CLICK_AIR);
+
+        if (!playerInDistance(player, inf)) return;
+        var targetPlayer = inf.target;
+        assert targetPlayer != null;
+
+        simulateOperation(Action.RIGHT_CLICK_AIR, targetPlayer, player);
+        logOperation(player, targetPlayer, OperationType.RightClick);
     }
 
     @Resolved
@@ -350,7 +370,7 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
      *          the returned value might be a player who disguised as our searching target.
      */
     @NotNull
-    private PlayerInfo getPlayer(Player player)
+    private PlayerInfo getMirrorTarget(Player player)
     {
         var targetName = mirrorMap.getOrDefault(player, null);
         if (targetName == null) return new PlayerInfo(null, PlayerInfo.notSetStr);
