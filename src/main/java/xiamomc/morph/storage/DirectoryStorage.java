@@ -1,7 +1,6 @@
 package xiamomc.morph.storage;
 
 import org.jetbrains.annotations.Nullable;
-import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.MorphPluginObject;
 
 import java.io.File;
@@ -26,11 +25,13 @@ public class DirectoryStorage extends MorphPluginObject
         return new File(path).getAbsoluteFile().toURI();
     }
 
+    private final String separator = "/"; //FileSystems.getDefault().getSeparator();
+
     public DirectoryStorage(String directoryBaseName)
     {
         this.directoryBaseName = directoryBaseName;
         this.pluginStorageBaseUri = this.plugin.getDataFolder().getAbsoluteFile().toURI();
-        this.absoluteDirectoryPath = this.getAbsoulteURI(pluginStorageBaseUri.getPath() + "/" + directoryBaseName);
+        this.absoluteDirectoryPath = this.getAbsoulteURI(pluginStorageBaseUri.getPath() + separator + directoryBaseName);
 
         var dirFile = new File(absoluteDirectoryPath);
         if (!dirFile.exists())
@@ -77,10 +78,10 @@ public class DirectoryStorage extends MorphPluginObject
 
     public File getDirectory(String relativePath, boolean createIfNotExist)
     {
-        var file = new File(this.getAbsoulteURI(absoluteDirectoryPath.getPath() + "/" + relativePath));
+        var file = new File(this.getAbsoulteURI(absoluteDirectoryPath.getPath() + separator + relativePath));
 
-        if (!file.getAbsolutePath().contains(absoluteDirectoryPath.getPath()))
-            throw new RuntimeException("Trying to access a file that does not belongs to this plugin");
+        if (!file.toPath().toUri().getPath().startsWith(absoluteDirectoryPath.getPath()))
+            throw new RuntimeException("Trying to access a file that does not belongs to this plugin: %s".formatted(file.toURI()));
 
         if (!file.exists() && createIfNotExist)
         {
@@ -108,10 +109,10 @@ public class DirectoryStorage extends MorphPluginObject
     @Nullable
     public File getFile(String fileName, boolean createIfNotExist)
     {
-        var file = new File(this.getAbsoulteURI(absoluteDirectoryPath.getPath() + "/" + fileName));
+        var file = new File(this.getAbsoulteURI(absoluteDirectoryPath.getPath() + separator + fileName));
 
-        if (!file.getAbsolutePath().contains(absoluteDirectoryPath.getPath()))
-            throw new RuntimeException("Trying to access a file that does not belongs to this plugin");
+        if (!file.toPath().toUri().getPath().startsWith(absoluteDirectoryPath.getPath()))
+            throw new RuntimeException("Trying to access a file that does not belongs to this plugin: %s".formatted(file.toURI()));
 
         if (!file.exists() && createIfNotExist)
         {
