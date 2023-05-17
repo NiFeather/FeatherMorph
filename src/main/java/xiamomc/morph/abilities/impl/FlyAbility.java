@@ -1,5 +1,6 @@
 package xiamomc.morph.abilities.impl;
 
+import org.bukkit.GameEvent;
 import org.bukkit.GameMode;
 import org.bukkit.NamespacedKey;
 import org.bukkit.craftbukkit.v1_19_R3.entity.CraftPlayer;
@@ -46,6 +47,9 @@ public class FlyAbility extends MorphAbility<FlyOption>
             if (player.isFlying())
             {
                 data.addExhaustion(0.005f * config.getHungerConsumeMultiplier());
+
+                if (player.getTicksLived() % 5 == 0)
+                    player.getWorld().sendGameEvent(player, GameEvent.FLAP, player.getLocation().toVector());
 
                 if (!allowFlight)
                 {
