@@ -18,6 +18,7 @@ import net.minecraft.nbt.TagType;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.level.GameType;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.*;
@@ -32,6 +33,7 @@ import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.backends.DisguiseWrapper;
 import xiamomc.morph.misc.DisguiseState;
+import xiamomc.morph.misc.NmsRecord;
 import xiamomc.morph.utilities.DisguiseUtils;
 import xiamomc.morph.utilities.EntityTypeUtils;
 import xiamomc.morph.utilities.NbtUtils;
@@ -39,6 +41,7 @@ import xiamomc.morph.utilities.SoundUtils;
 import xiamomc.pluginbase.Utilities.ColorUtils;
 import xiamomc.pluginbase.XiaMoJavaPlugin;
 
+import java.util.Random;
 import java.util.function.BiConsumer;
 
 public class LibsDisguiseWrapper extends DisguiseWrapper<Disguise>
@@ -91,6 +94,10 @@ public class LibsDisguiseWrapper extends DisguiseWrapper<Disguise>
     {
         var newWrapper = new LibsDisguiseWrapper(instance.clone(), (LibsBackend) getBackend());
         newWrapper.compoundTag.merge(this.compoundTag);
+
+        newWrapper.ambientInterval = this.ambientInterval;
+        newWrapper.ambientSoundPrimary = this.ambientSoundPrimary;
+        newWrapper.ambientSoundSecondary = this.ambientSoundSecondary;
 
         return newWrapper;
     }
@@ -287,6 +294,10 @@ public class LibsDisguiseWrapper extends DisguiseWrapper<Disguise>
         soundTime = 0;
     }
 
+    private final Random random = new Random();
+
+    private net.minecraft.world.entity.player.Player nmsPlayer;
+
     @Override
     public void update(boolean isClone, DisguiseState state, Player player)
     {
@@ -297,6 +308,9 @@ public class LibsDisguiseWrapper extends DisguiseWrapper<Disguise>
 
             throw new RuntimeException("Current disguise instance from LibsDisguises '%s' does not match the one saved in our wrapper '%s'".formatted(ldInstance, this.instance));
         }
+
+        if (nmsPlayer == null)
+            nmsPlayer = NmsRecord.ofPlayer(player);
 
         if (preUpdate != null)
             preUpdate.accept(watcher, player);
@@ -316,10 +330,17 @@ public class LibsDisguiseWrapper extends DisguiseWrapper<Disguise>
 
             Sound sound = playSecondary ? ambientSoundSecondary : ambientSoundPrimary;
 
-            if (sound != null)
-                player.getWorld().playSound(sound, loc.getX(), loc.getY(), loc.getZ());
+            var isSpectator = nmsPlayer.isSpectator();
 
-            soundTime = 0;
+            // 和原版行为保持一致, 并且不要为旁观者播放音效:
+            // net.minecraft.world.entity.Mob#baseTick()
+            if (isSpectator)
+                soundTime = -ambientInterval;
+            else if (sound != null && random.nextInt(1000) < soundTime)
+            {
+                soundTime = -ambientInterval;
+                player.getWorld().playSound(sound, loc.getX(), loc.getY(), loc.getZ());
+            }
         }
 
         //对克隆的伪装手动更新一些属性
