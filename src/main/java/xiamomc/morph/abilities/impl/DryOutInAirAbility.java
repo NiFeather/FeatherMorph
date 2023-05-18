@@ -8,6 +8,7 @@ import xiamomc.morph.abilities.MorphAbility;
 import xiamomc.morph.abilities.options.DryoutAbilityOption;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.misc.NmsRecord;
+import xiamomc.morph.utilities.DamageSourceUtils;
 
 public class DryOutInAirAbility extends MorphAbility<DryoutAbilityOption>
 {
@@ -51,7 +52,10 @@ public class DryOutInAirAbility extends MorphAbility<DryoutAbilityOption>
 
         if (air <= -20)
         {
-            nmsPlayer.hurt(nmsPlayer.getLevel().damageSources().dryOut(), 2);
+            var sr = DamageSourceUtils.toNotScalable(nmsPlayer.level.damageSources().dryOut())
+                            .bypassEverything();
+
+            nmsPlayer.hurt(sr, 2);
             air = 0;
         }
 
