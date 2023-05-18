@@ -68,6 +68,8 @@ public enum ConfigOption
 
     BLACKLIST_TAGS(nbtBlacklistNode().append("names"), NbtUtils.defaultBlacklistedTags),
 
+    AMBIENT_FREQUENCY(ambientSoundNode().append("frequency"), 1D),
+
     VERSION(ConfigNode.create().append("version"), 0);
 
     public final ConfigNode node;
@@ -124,5 +126,9 @@ public enum ConfigOption
     private static ConfigNode healthScaleNode()
     {
         return ConfigNode.create().append("health_scale");
+    }
+    private static ConfigNode ambientSoundNode()
+    {
+        return ConfigNode.create().append("ambient_sounds");
     }
 }

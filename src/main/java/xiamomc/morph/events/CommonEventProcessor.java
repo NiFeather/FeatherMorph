@@ -365,8 +365,11 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
             var backend = morphs.getCurrentBackend();
 
             //刷新伪装
+            var oldWrapper = state.getDisguiseWrapper();
             var wrapper = state.getDisguiseWrapper().clone();
             backend.disguise(player, wrapper);
+
+            oldWrapper.dispose();
 
             var nbt = state.getCachedNbtString();
             var profile = state.getProfileNbtString();

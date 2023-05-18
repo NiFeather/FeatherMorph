@@ -1180,6 +1180,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             if (!disguiseDisabled(s.getDisguiseIdentifier()) && config.getUnlockedDisguiseIdentifiers().contains(s.getDisguiseIdentifier()))
             {
                 var newState = s.createCopy();
+                s.dispose();
 
                 disguiseFromState(newState);
                 refreshClientState(newState);

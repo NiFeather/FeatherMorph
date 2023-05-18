@@ -656,4 +656,9 @@ public class DisguiseState extends MorphPluginObject
 
         return state;
     }
+
+    public void dispose()
+    {
+        this.disguiseWrapper.dispose();
+    }
 }

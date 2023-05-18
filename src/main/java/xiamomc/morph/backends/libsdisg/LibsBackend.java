@@ -156,6 +156,7 @@ public class LibsBackend extends DisguiseBackend<Disguise, LibsDisguiseWrapper>
         if (wrapper != null)
         {
             playerLibsDisguiseWrapperMap.remove(player);
+            wrapper.dispose();
 
             return wrapper.getInstance().removeDisguise();
         }

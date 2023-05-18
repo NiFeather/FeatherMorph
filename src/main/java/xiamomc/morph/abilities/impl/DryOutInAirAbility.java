@@ -9,6 +9,7 @@ import xiamomc.morph.abilities.options.DryoutAbilityOption;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.misc.NmsRecord;
 import xiamomc.morph.utilities.DamageSourceUtils;
+import xiamomc.morph.utilities.MathUtils;
 
 public class DryOutInAirAbility extends MorphAbility<DryoutAbilityOption>
 {
@@ -36,11 +37,6 @@ public class DryOutInAirAbility extends MorphAbility<DryoutAbilityOption>
         return new DryoutAbilityOption();
     }
 
-    private int clamp(int min, int max, int val)
-    {
-        return val > max ? max : (val < min ? min : val);
-    }
-
     private void updateOxygen(Player player, DryoutAbilityOption option)
     {
         var nmsPlayer = NmsRecord.ofPlayer(player);
@@ -48,7 +44,7 @@ public class DryOutInAirAbility extends MorphAbility<DryoutAbilityOption>
 
         //LivingEntity#increaseAirSupply()
         air -= (option.includeRain ? nmsPlayer.isInWater() : nmsPlayer.isInWaterOrRain()) ? (-5) : 5;
-        air = clamp(-20, nmsPlayer.getMaxAirSupply(), air);
+        air = MathUtils.clamp(-20, nmsPlayer.getMaxAirSupply(), air);
 
         if (air <= -20)
         {

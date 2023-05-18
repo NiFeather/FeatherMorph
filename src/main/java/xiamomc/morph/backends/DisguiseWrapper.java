@@ -14,6 +14,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.util.BoundingBox;
+import org.checkerframework.checker.index.qual.PolyUpperBound;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.misc.DisguiseState;
@@ -251,6 +252,13 @@ public abstract class DisguiseWrapper<T>
      * Returns a copy of the existing compound.
      */
     public abstract CompoundTag getCompound();
+
+    /**
+     * Dispose this wrapper
+     */
+    public void dispose()
+    {
+    }
 
     //region Temp
 

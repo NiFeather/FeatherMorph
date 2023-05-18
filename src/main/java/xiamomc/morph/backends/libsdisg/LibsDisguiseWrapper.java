@@ -9,37 +9,31 @@ import me.libraryaddict.disguise.utilities.DisguiseUtilities;
 import me.libraryaddict.disguise.utilities.DisguiseValues;
 import me.libraryaddict.disguise.utilities.reflection.FakeBoundingBox;
 import me.libraryaddict.disguise.utilities.reflection.ReflectionManager;
-import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.TagType;
-import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.level.GameType;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.*;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.util.BoundingBox;
-import org.intellij.lang.annotations.Subst;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import xiamomc.morph.MorphPlugin;
-import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.backends.DisguiseWrapper;
+import xiamomc.morph.config.ConfigOption;
+import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.misc.NmsRecord;
-import xiamomc.morph.utilities.DisguiseUtils;
-import xiamomc.morph.utilities.EntityTypeUtils;
-import xiamomc.morph.utilities.NbtUtils;
-import xiamomc.morph.utilities.SoundUtils;
+import xiamomc.morph.utilities.*;
+import xiamomc.pluginbase.Managers.DependencyManager;
 import xiamomc.pluginbase.Utilities.ColorUtils;
-import xiamomc.pluginbase.XiaMoJavaPlugin;
 
 import java.util.Random;
 import java.util.function.BiConsumer;
@@ -51,6 +45,11 @@ public class LibsDisguiseWrapper extends DisguiseWrapper<Disguise>
         super(instance, backend);
 
         this.watcher = instance.getWatcher();
+        var depMgr = DependencyManager.getInstance(MorphPlugin.getMorphNameSpace());
+        var config = depMgr.get(MorphConfigManager.class, true);
+
+        if (config == null) return;
+        soundFrequency = MathUtils.clamp(0, 20, config.getBindable(Double.class, ConfigOption.AMBIENT_FREQUENCY).get());
     }
 
     private final FlagWatcher watcher;
@@ -298,6 +297,8 @@ public class LibsDisguiseWrapper extends DisguiseWrapper<Disguise>
 
     private net.minecraft.world.entity.player.Player nmsPlayer;
 
+    private double soundFrequency = 0D;
+
     @Override
     public void update(boolean isClone, DisguiseState state, Player player)
     {
@@ -317,7 +318,13 @@ public class LibsDisguiseWrapper extends DisguiseWrapper<Disguise>
 
         soundTime++;
 
-        if (ambientInterval != 0 && soundTime >= ambientInterval && !player.isSneaking())
+        // Java中浮点数除以0是正或负无穷
+        // 因为soundFrequency永远大于等于0，而分子是1，因此frequencyScale的最大值是正无穷
+        // 除非soundTime最后也加到了大于等于正无穷，否则不需要额外的判断，但这真的会发生吗（
+        double frequencyScale = 1.0D / soundFrequency;
+
+        //logger.info("Sound: %s <-- %s(%s) --> %s".formatted(soundTime, frequency, soundFrequency, ambientInterval * frequency));
+        if (ambientInterval != 0 && soundTime >= ambientInterval * frequencyScale && !player.isSneaking())
         {
             var loc = player.getLocation();
             boolean playSecondary = false;
@@ -335,10 +342,12 @@ public class LibsDisguiseWrapper extends DisguiseWrapper<Disguise>
             // 和原版行为保持一致, 并且不要为旁观者播放音效:
             // net.minecraft.world.entity.Mob#baseTick()
             if (isSpectator)
-                soundTime = -ambientInterval;
-            else if (sound != null && random.nextInt(1000) < soundTime)
             {
-                soundTime = -ambientInterval;
+                soundTime = -(int)(ambientInterval * frequencyScale);
+            }
+            else if (sound != null && random.nextInt((int)(1000 * frequencyScale)) < soundTime)
+            {
+                soundTime = -(int)(ambientInterval * frequencyScale);
                 player.getWorld().playSound(sound, loc.getX(), loc.getY(), loc.getZ());
             }
         }
