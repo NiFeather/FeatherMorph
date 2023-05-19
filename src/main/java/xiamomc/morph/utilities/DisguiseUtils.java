@@ -50,7 +50,8 @@ public class DisguiseUtils
                 || material == Material.PLAYER_HEAD
                 || material == Material.ZOMBIE_HEAD
                 || material == Material.SKELETON_SKULL
-                || material == Material.WITHER_SKELETON_SKULL;
+                || material == Material.WITHER_SKELETON_SKULL
+                || material == Material.PIGLIN_HEAD;
     }
 
     /**

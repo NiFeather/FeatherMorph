@@ -55,10 +55,10 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
         if (channel == null || player == null || message == null)
             throw new IllegalArgumentException("频道、玩家或消息是null");
 
+        if (!player.isOnline()) return;
+
         if (message.length > Messenger.MAX_MESSAGE_SIZE)
             throw new MessageTooLargeException();
-
-        if (!player.isOnline()) return;
 
         if (logOutGoingPackets.get())
             logPacket(true, player, channel, message);
@@ -565,7 +565,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
         var id = c2SMorphCommand.getArgumentAt(0, "");
 
         if (id.isEmpty() || id.isBlank())
-            manager.doQuickDisguise(player, null);
+            manager.doQuickDisguise(player);
         else if (manager.canMorph(player))
             manager.morph(player, player, id, player.getTargetEntity(5));
     }
