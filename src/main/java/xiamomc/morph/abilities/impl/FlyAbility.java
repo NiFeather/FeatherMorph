@@ -101,7 +101,7 @@ public class FlyAbility extends MorphAbility<FlyOption>
                 {
                     var old = new Vec3(nmsPlayer.xOld, nmsPlayer.yOld, nmsPlayer.zOld);
                     var cur = nmsPlayer.position();
-                    var delta = Math.max(idleConsumption, cur.distanceTo(old));
+                    var delta = Math.max(idleConsumption * config.getHungerConsumeMultiplier(), cur.distanceTo(old));
                     exhaustion = handleMovementForSpeed(delta);
                 }
                 else
