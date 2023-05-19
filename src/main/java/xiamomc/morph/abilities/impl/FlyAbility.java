@@ -49,10 +49,13 @@ public class FlyAbility extends MorphAbility<FlyOption>
 
         configManager.getBindable(Boolean.class, ConfigOption.FLYABILITY_USE_INSTANTSPEED).onValueChanged((o, n) ->
                 useInstantSpeed = n, true);
+
+        configManager.getBindable(Boolean.class, ConfigOption.FLYABILITY_IDLE_CONSUME).onValueChanged((o, n) ->
+                idleConsumption = n ? 0.1D : 0D, true);
     }
 
     private boolean useInstantSpeed = true;
-
+    private double idleConsumption = 0.1D;
     private float exhaustionBase = 0.005f;
 
     private boolean started = false;
@@ -98,11 +101,8 @@ public class FlyAbility extends MorphAbility<FlyOption>
                 {
                     var old = new Vec3(nmsPlayer.xOld, nmsPlayer.yOld, nmsPlayer.zOld);
                     var cur = nmsPlayer.position();
-                    var delta = Math.max(0D, cur.distanceTo(old));
+                    var delta = Math.max(idleConsumption, cur.distanceTo(old));
                     exhaustion = handleMovementForSpeed(delta);
-
-                    //if (delta > 0)
-                    //    logger.info("Delta: %.5f, SpdConv: %.5f, Mult: %.5f, Val: %.5f, Now: %s".formatted(delta, ba, movementMultiplier, exhaustionBase * movementMultiplier, data.getExhaustionLevel()));
                 }
                 else
                     exhaustion = handleMovementLegacy(config, player);
@@ -134,6 +134,10 @@ public class FlyAbility extends MorphAbility<FlyOption>
     {
         var movementBase = 0.25f;// * config.getHungerConsumeMultiplier();
         var movementMultiplier = (float)movementDelta / movementBase; //(5.1f * config.getFlyingSpeed());
+
+        //if (movementDelta > 0)
+        //    logger.info("Delta: %.5f, SpdConv: %.5f, Mult: %.5f, Val: %.5f, Now: %s".formatted(movementDelta, 0.25f, movementMultiplier, exhaustionBase * movementMultiplier, 0));
+
         return exhaustionBase * movementMultiplier;
     }
 

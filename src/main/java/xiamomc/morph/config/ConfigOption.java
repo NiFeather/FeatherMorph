@@ -56,8 +56,10 @@ public enum ConfigOption
     HEALTH_SCALE_MAX_HEALTH(healthScaleNode().append("max_health"), 60),
 
     DISPLAY_BOSSBAR(bossbarNode().append("enabled"), true),
-    FLYABILITY_EXHAUSTION_BASE(ConfigNode.create().append("flying").append("exhaustion_base"), 0.005),
-    FLYABILITY_USE_INSTANTSPEED(ConfigNode.create().append("flying").append("use_instant_speed"), true),
+
+    FLYABILITY_EXHAUSTION_BASE(flyAbilityNode().append("exhaustion_base"), 0.005),
+    FLYABILITY_USE_INSTANTSPEED(flyAbilityNode().append("use_instant_speed"), true),
+    FLYABILITY_IDLE_CONSUME(flyAbilityNode().append("idle_consumption"), true),
 
     @Deprecated
     ALLOW_LD_DISGUISES(ConfigNode.create().append("enable_ld_custom_disguises"), false, true),
@@ -132,5 +134,9 @@ public enum ConfigOption
     private static ConfigNode ambientSoundNode()
     {
         return ConfigNode.create().append("ambient_sounds");
+    }
+    private static ConfigNode flyAbilityNode()
+    {
+        return ConfigNode.create().append("flying");
     }
 }
