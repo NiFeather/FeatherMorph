@@ -16,6 +16,7 @@ import xiamomc.morph.skills.impl.LaunchProjectiveMorphSkill;
 import xiamomc.morph.skills.impl.SonicBoomMorphSkill;
 import xiamomc.morph.storage.MorphJsonBasedStorage;
 import xiamomc.morph.utilities.DisguiseUtils;
+import xiamomc.morph.utilities.EntityTypeUtils;
 import xiamomc.pluginbase.Annotations.Resolved;
 
 import java.util.Map;
@@ -59,7 +60,7 @@ public class SkillAbilityConfigurationStore extends MorphJsonBasedStorage<SkillA
         return "技能存储";
     }
 
-    private final int targetVersion = 18;
+    private final int targetVersion = 19;
 
     @Resolved
     private MorphSkillHandler skillHandler;
@@ -283,6 +284,16 @@ public class SkillAbilityConfigurationStore extends MorphJsonBasedStorage<SkillA
                         option.put("delay", DisguiseUtils.GHAST_EXECUTE_DELAY);
                         option.put("warning_sound_name", "entity.ghast.warn");
                     }
+                }
+            }
+
+            //一些拥有飞行被动的伪装同时也拥有免疫摔落伤害的被动
+            if (version < 19)
+            {
+                for (EntityType entityType : EntityTypeUtils.noFallDamage1())
+                {
+                    config.configurations.stream().filter(s -> s != null && s.getIdentifier().equals(entityType.getKey().asString()))
+                            .findFirst().ifPresent(cfg -> cfg.getAbilitiyIdentifiers().removeIf(s -> s.equals(AbilityType.NO_FALL_DAMAGE.asString())));
                 }
             }
 

@@ -285,12 +285,16 @@ public class EntityTypeUtils
 
     public static Set<EntityType> noFallDamage()
     {
-        //列表里一些在canFly的列表里的类型本来就不会让玩家受到摔落伤害，但还是加上比较好
         return ObjectSet.of(EntityType.IRON_GOLEM, EntityType.CAT,
                 EntityType.OCELOT, EntityType.SNOWMAN, EntityType.MAGMA_CUBE,
-                EntityType.BAT, EntityType.BLAZE, EntityType.ENDER_DRAGON,
+                EntityType.CHICKEN, EntityType.SHULKER);
+    }
+
+    public static Set<EntityType> noFallDamage1()
+    {
+        return ObjectSet.of(EntityType.BAT, EntityType.BLAZE, EntityType.ENDER_DRAGON,
                 EntityType.GHAST, EntityType.PARROT, EntityType.VEX,
-                EntityType.WITHER, EntityType.CHICKEN, EntityType.SHULKER);
+                EntityType.WITHER);
     }
 
     public static EntityType reducesMagicDamage()

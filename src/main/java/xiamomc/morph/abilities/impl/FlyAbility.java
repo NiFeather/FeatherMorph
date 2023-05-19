@@ -46,21 +46,18 @@ public class FlyAbility extends MorphAbility<FlyOption>
 
             if (player.isFlying())
             {
-                data.addExhaustion(0.005f * config.getHungerConsumeMultiplier());
+                data.addExhaustion(0.005f * config.getHungerConsumeMultiplier() * (player.isSprinting() ? 1.3F : 1));
 
                 if (player.getTicksLived() % 5 == 0)
                     player.getWorld().sendGameEvent(player, GameEvent.FLAP, player.getLocation().toVector());
 
                 if (!allowFlight)
-                {
-                    player.setAllowFlight(false);
                     player.setFlying(false);
-                }
             }
-            else if (allowFlight && !player.getAllowFlight())
-            {
-                player.setAllowFlight(true);
-            }
+
+            var playerCanFly = nmsPlayer.getAbilities().mayfly;
+            if (playerCanFly != allowFlight)
+                player.setAllowFlight(allowFlight);
         }
 
         return super.handle(player, state);
