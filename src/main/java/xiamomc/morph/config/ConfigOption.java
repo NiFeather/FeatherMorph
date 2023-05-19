@@ -56,6 +56,8 @@ public enum ConfigOption
     HEALTH_SCALE_MAX_HEALTH(healthScaleNode().append("max_health"), 60),
 
     DISPLAY_BOSSBAR(bossbarNode().append("enabled"), true),
+    FLYABILITY_EXHAUSTION_BASE(ConfigNode.create().append("flying").append("exhaustion_base"), 0.005),
+    FLYABILITY_USE_INSTANTSPEED(ConfigNode.create().append("flying").append("use_instant_speed"), true),
 
     @Deprecated
     ALLOW_LD_DISGUISES(ConfigNode.create().append("enable_ld_custom_disguises"), false, true),

@@ -72,6 +72,16 @@ root:
     # Disable this will also disable the bossbar ability for all disguises.
     enabled: true
 
+  # Fly ability options
+  flying:
+    # The base exhaustion per tick for flying
+    exhaustion_base: 0.005
+
+    # Consume player's Hunger based on their instant speed?
+    # More accurate but slower
+    # Consumes about 1 food level (Half of a drumstick) per 200 blocks when exhaustion_base is set to 0.005
+    use_instant_speed: true
+
   # InteractionMirror options
   interactionMirror:
     # Maximum affect distance
