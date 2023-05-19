@@ -42,8 +42,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly("io.papermc.paper:paper-api:${project.property("minecraft_version")}")
-    paperDevBundle("${project.property("minecraft_version")}")
+    paperweight.paperDevBundle("${project.property("minecraft_version")}")
 
     compileOnly("LibsDisguises:LibsDisguises:${project.property("ld_version")}")
     {

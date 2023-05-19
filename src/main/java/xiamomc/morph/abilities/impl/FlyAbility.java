@@ -99,9 +99,17 @@ public class FlyAbility extends MorphAbility<FlyOption>
 
                 if (useInstantSpeed)
                 {
-                    var old = new Vec3(nmsPlayer.xOld, nmsPlayer.yOld, nmsPlayer.zOld);
-                    var cur = nmsPlayer.position();
-                    var delta = Math.max(idleConsumption * config.getHungerConsumeMultiplier(), cur.distanceTo(old));
+                    double delta;
+
+                    if (player.getVehicle() == null)
+                    {
+                        var old = new Vec3(nmsPlayer.xOld, nmsPlayer.yOld, nmsPlayer.zOld);
+                        var cur = nmsPlayer.position();
+                        delta = Math.max(idleConsumption * config.getHungerConsumeMultiplier(), cur.distanceTo(old));
+                    }
+                    else
+                        delta = 0;
+
                     exhaustion = handleMovementForSpeed(delta);
                 }
                 else
