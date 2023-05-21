@@ -36,6 +36,7 @@ import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.misc.DisguiseStateGenerator;
 import xiamomc.morph.misc.DisguiseTypes;
 import xiamomc.morph.misc.permissions.CommonPermissions;
+import xiamomc.morph.network.commands.S2C.S2CCurrentCommand;
 import xiamomc.morph.network.commands.S2C.set.*;
 import xiamomc.morph.network.server.MorphClientHandler;
 import xiamomc.morph.providers.*;
@@ -317,9 +318,9 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
      * @param player 发起玩家
      * @return 操作是否成功
      */
-    public boolean doQuickDisguise(Player player)
+    public boolean doQuickDisguise(Player player, boolean ignoreActionItem)
     {
-        var actionItem = getActionItem();
+        var actionItem = ignoreActionItem ? null : getActionItem();
         var state = this.getDisguiseStateFor(player);
         var mainHandItem = player.getEquipment().getItemInMainHand();
         var mainHandItemType = mainHandItem.getType();
@@ -557,14 +558,17 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 // 从Provider获取此伪装的Wrapper
                 var result = provider.makeWrapper(player, info, targetEntity);
 
+                var currentState = getDisguiseStateFor(player);
+
                 if (!result.success())
                 {
-                    source.sendMessage(MessageUtils.prefixes(source, MorphStrings.errorWhileDisguising()));
-                    logger.error("Unable to apply disguise for player with provider " + provider);
+                    if (!result.failedCollisionCheck())
+                    {
+                        source.sendMessage(MessageUtils.prefixes(source, MorphStrings.errorWhileDisguising()));
+                        logger.error("Unable to apply disguise for player with provider " + provider);
+                    }
                     return false;
                 }
-
-                var currentState = getDisguiseStateFor(player);
 
                 // 重置上个State的伪装
                 if (currentState != null)
@@ -583,11 +587,12 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                     return false;
                 }
 
+                // 向客户端更新当前伪装ID
+                // 因为下面postConstruct有初始化技能的操作，因此在这里更新
+                clientHandler.updateCurrentIdentifier(player, key);
+
                 outComingState = postConstructDisguise(player, targetEntity,
                         info.getIdentifier(), result.wrapperInstance(), result.isCopy(), provider);
-
-                // 向客户端更新当前伪装ID
-                clientHandler.updateCurrentIdentifier(player, key);
             }
 
             // 初始化nbt
@@ -602,10 +607,10 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             // 如果此伪装可以同步给客户端，那么初始化客户端状态
             if (provider.validForClient(outComingState))
             {
-                clientHandler.sendCommand(player, new S2CSetSelfViewIdentifierCommand(provider.getSelfViewIdentifier(outComingState)));
-
-                provider.getInitialSyncCommands(outComingState).forEach(s -> clientHandler.sendCommand(player, s));
                 clientHandler.sendCommand(player, new S2CSetSNbtCommand(outComingState.getCachedNbtString()));
+
+                clientHandler.sendCommand(player, new S2CSetSelfViewIdentifierCommand(provider.getSelfViewIdentifier(outComingState)));
+                provider.getInitialSyncCommands(outComingState).forEach(s -> clientHandler.sendCommand(player, s));
 
                 // 设置Profile
                 if (outComingState.haveProfile())
@@ -631,6 +636,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
             logger.error("Unable to parse key " + key + ": " + iae.getMessage());
             iae.printStackTrace();
+
+            unMorph(player);
 
             return false;
         }

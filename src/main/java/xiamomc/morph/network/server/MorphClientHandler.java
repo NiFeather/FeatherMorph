@@ -30,6 +30,8 @@ import xiamomc.morph.network.commands.CommandRegistries;
 import xiamomc.morph.network.commands.S2C.*;
 import xiamomc.morph.network.commands.S2C.query.QueryType;
 import xiamomc.morph.network.commands.S2C.query.S2CQueryCommand;
+import xiamomc.morph.network.commands.S2C.set.S2CSetDisplayingFakeEquipCommand;
+import xiamomc.morph.network.commands.S2C.set.S2CSetFakeEquipCommand;
 import xiamomc.morph.network.commands.S2C.set.S2CSetModifyBoundingBoxCommand;
 import xiamomc.morph.network.commands.S2C.set.S2CSetSelfViewingCommand;
 import xiamomc.pluginbase.Annotations.Initializer;
@@ -565,7 +567,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
         var id = c2SMorphCommand.getArgumentAt(0, "");
 
         if (id.isEmpty() || id.isBlank())
-            manager.doQuickDisguise(player);
+            manager.doQuickDisguise(player, true);
         else if (manager.canMorph(player))
             manager.morph(player, player, id, player.getTargetEntity(5));
     }

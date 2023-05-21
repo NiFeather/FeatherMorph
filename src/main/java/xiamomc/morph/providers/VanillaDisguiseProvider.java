@@ -1,5 +1,6 @@
 package xiamomc.morph.providers;
 
+import io.papermc.paper.util.CollisionUtil;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.kyori.adventure.text.Component;
 import net.minecraft.nbt.CompoundTag;
@@ -18,6 +19,8 @@ import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.backends.DisguiseWrapper;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
+import xiamomc.morph.messages.MessageUtils;
+import xiamomc.morph.messages.MorphStrings;
 import xiamomc.morph.messages.vanilla.VanillaMessageStore;
 import xiamomc.morph.misc.DisguiseInfo;
 import xiamomc.morph.misc.DisguiseState;
@@ -92,8 +95,21 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
         var copyResult = constructFromEntity(disguiseInfo, targetEntity);
 
         constructedDisguise = copyResult.success()
-                ? copyResult.wrapperInstance()
+                ? copyResult.wrapperInstance() //copyResult.success() -> wrapperInstance() != null
                 : backend.createInstance(entityType);
+
+        if (modifyBoundingBoxes.get())
+        {
+            var loc = player.getLocation();
+            var box = constructedDisguise.getBoundingBoxAt(loc.x(), loc.y(), loc.z());
+
+            var hasCollision = CollisionUtil.getCollisionsForBlocksOrWorldBorder(NmsRecord.ofPlayer(player).level, null, box, null, false, false, true, true, null);
+            if (hasCollision)
+            {
+                player.sendMessage(MessageUtils.prefixes(player, MorphStrings.noEnoughSpaceString()));
+                return DisguiseResult.FAILED_COLLISION;
+            }
+        }
 
         return DisguiseResult.success(constructedDisguise, copyResult.isCopy());
     }
