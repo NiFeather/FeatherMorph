@@ -3,12 +3,12 @@ package xiamomc.morph.backends.libsdisg;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.disguisetypes.*;
-import me.libraryaddict.disguise.disguisetypes.watchers.ItemDisplayWatcher;
+//import me.libraryaddict.disguise.disguisetypes.watchers.ItemDisplayWatcher;
 import me.libraryaddict.disguise.utilities.parser.DisguiseParser;
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
-import org.bukkit.entity.ItemDisplay;
+//import org.bukkit.entity.ItemDisplay;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
@@ -41,6 +41,8 @@ public class LibsBackend extends DisguiseBackend<Disguise, LibsDisguiseWrapper>
     /**
      * 实验中
      */
+
+    /*
     @ApiStatus.Experimental
     @ApiStatus.Internal
     public DisguiseWrapper<Disguise> createItemDisplay(Material material)
@@ -70,7 +72,7 @@ public class LibsBackend extends DisguiseBackend<Disguise, LibsDisguiseWrapper>
         };
 
         return wrapper;
-    }
+    } */
 
     @Override
     public DisguiseWrapper<Disguise> createInstance(@NotNull Entity targetEntity)

@@ -71,6 +71,9 @@ public class ItemDisplayProvider extends DefaultDisguiseProvider
     @Override
     public @NotNull DisguiseResult makeWrapper(Player player, DisguiseInfo disguiseInfo, @Nullable Entity targetEntity)
     {
+        return DisguiseResult.FAIL;
+
+        /*
         var currentBackend = getBackend();
 
         if (!(currentBackend instanceof LibsBackend backend))
@@ -85,6 +88,7 @@ public class ItemDisplayProvider extends DefaultDisguiseProvider
         var wrapper = backend.createItemDisplay(material);
 
         return DisguiseResult.success(wrapper);
+         */
     }
 
     @Override

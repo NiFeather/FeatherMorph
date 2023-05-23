@@ -12,7 +12,7 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.player.Player;
 import org.bukkit.Bukkit;
-import org.bukkit.craftbukkit.v1_19_R3.CraftWorld;
+import org.bukkit.craftbukkit.v1_19_R2.CraftWorld;
 import org.bukkit.entity.EntityType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -122,7 +122,7 @@ public class EntityTypeUtils
         {
             case COW, SHEEP, BEE, CAMEL, CAT, CHICKEN, DONKEY,
                     FOX, GOAT, HORSE, LLAMA, MUSHROOM_COW, MULE, TRADER_LLAMA, VILLAGER,
-                    OCELOT, PANDA, PIG, POLAR_BEAR, RABBIT, SNIFFER, TURTLE, WOLF,
+                    OCELOT, PANDA, PIG, POLAR_BEAR, RABBIT, TURTLE, WOLF,
                     HOGLIN, ZOMBIE, ZOMBIE_VILLAGER, PIGLIN, HUSK, DROWNED, ZOMBIFIED_PIGLIN, STRIDER,
                     SKELETON_HORSE, ZOMBIE_HORSE, ZOGLIN-> true;
 

@@ -3,6 +3,8 @@ package xiamomc.morph.abilities.impl;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+
+import net.minecraft.world.damagesource.DamageSource;
 import xiamomc.morph.abilities.AbilityType;
 import xiamomc.morph.abilities.MorphAbility;
 import xiamomc.morph.abilities.options.DryoutAbilityOption;
@@ -48,7 +50,7 @@ public class DryOutInAirAbility extends MorphAbility<DryoutAbilityOption>
 
         if (air <= -20)
         {
-            var sr = DamageSourceUtils.toNotScalable(nmsPlayer.level.damageSources().dryOut())
+            var sr = DamageSourceUtils.toNotScalable(DamageSource.DRY_OUT)
                             .bypassEverything();
 
             nmsPlayer.hurt(sr, 2);

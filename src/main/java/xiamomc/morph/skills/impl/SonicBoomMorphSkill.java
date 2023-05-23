@@ -2,11 +2,12 @@ package xiamomc.morph.skills.impl;
 
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Particle;
-import org.bukkit.craftbukkit.v1_19_R3.entity.CraftLivingEntity;
+import org.bukkit.craftbukkit.v1_19_R2.entity.CraftLivingEntity;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.misc.DisguiseState;
@@ -64,9 +65,8 @@ public class SonicBoomMorphSkill extends DelayedMorphSkill<NoOpConfiguration>
                 var record = NmsRecord.of(player, entity);
                 var nmsPlayer = record.nmsPlayer();
                 var nmsEntity = (LivingEntity)record.nmsEntity();
-                var sources = record.nmsWorld().damageSources();
 
-                nmsEntity.hurt(DamageSourceUtils.toNotScalable(sources.sonicBoom(nmsPlayer)), 10.0F);
+                nmsEntity.hurt(DamageSourceUtils.toNotScalable(DamageSource.sonicBoom(nmsPlayer)), 10.0F);
 
                 //From SonicBoom
                 double d = 0.5D * (1.0D - nmsEntity.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE));

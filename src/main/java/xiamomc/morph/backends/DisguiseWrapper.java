@@ -137,6 +137,7 @@ public abstract class DisguiseWrapper<T>
         if (dimensions != null) return;
 
         // 2023/5/5: ItemDisplayProvider
+        /*
         if (getEntityType() == EntityType.BLOCK_DISPLAY)
         {
             this.dimensions = EntityDimensions.fixed(1, 1);
@@ -146,7 +147,7 @@ public abstract class DisguiseWrapper<T>
         {
             this.dimensions = EntityDimensions.fixed(0.3f, 0.3f);
             return;
-        }
+        }*/
 
         var nmsType = EntityTypeUtils.getNmsType(this.getEntityType());
 

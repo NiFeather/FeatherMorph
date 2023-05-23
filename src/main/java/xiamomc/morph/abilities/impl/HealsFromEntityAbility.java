@@ -7,7 +7,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import org.bukkit.NamespacedKey;
-import org.bukkit.craftbukkit.v1_19_R3.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_19_R2.entity.CraftEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -22,6 +22,7 @@ import xiamomc.morph.network.server.MorphClientHandler;
 import xiamomc.morph.utilities.DamageSourceUtils;
 import xiamomc.morph.utilities.EntityTypeUtils;
 import xiamomc.morph.utilities.NbtUtils;
+import xiamomc.morph.utilities.DamageSourceUtils.NotScalableDamageSource;
 import xiamomc.pluginbase.Annotations.Resolved;
 
 import java.util.Map;
@@ -117,11 +118,9 @@ public class HealsFromEntityAbility extends MorphAbility<HealsFromEntityOption>
                             damager = craftEntity.getHandle();
                     }
 
-                    var sources = nmsRecord.nmsWorld().damageSources();
-
                     var source = entity.getType() == EntityType.END_CRYSTAL
-                            ? sources.explosion(entity, damager)
-                            : new DamageSource(sources.magic().typeHolder(), entity, damager);
+                            ? DamageSource.explosion(entity, damager)
+                            : new NotScalableDamageSource(DamageSource.MAGIC, entity, damager);
 
                     source = DamageSourceUtils.toNotScalable(source).bypassEverything().noSourceLocation();
                     nmsRecord.nmsPlayer().hurt(source, option.damageWhenDestroyed);
