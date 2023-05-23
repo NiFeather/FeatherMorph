@@ -49,7 +49,7 @@ public class LibsDisguiseWrapper extends DisguiseWrapper<Disguise>
         var config = depMgr.get(MorphConfigManager.class, true);
 
         if (config == null) return;
-        soundFrequency = MathUtils.clamp(0, 20, config.getBindable(Double.class, ConfigOption.AMBIENT_FREQUENCY).get());
+        soundFrequency = MathUtils.clamp(0, 2, config.getBindable(Double.class, ConfigOption.AMBIENT_FREQUENCY).get());
     }
 
     private final FlagWatcher watcher;
