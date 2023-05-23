@@ -57,8 +57,7 @@ public enum ConfigOption
 
     DISPLAY_BOSSBAR(bossbarNode().append("enabled"), true),
 
-    FLYABILITY_EXHAUSTION_BASE(flyAbilityNode().append("exhaustion_base"), 0.005),
-    FLYABILITY_USE_INSTANTSPEED(flyAbilityNode().append("use_instant_speed"), true),
+    FLYABILITY_EXHAUSTION_BASE(flyAbilityNode().append("exhaustion_base"), 200d),
     FLYABILITY_IDLE_CONSUME(flyAbilityNode().append("idle_consumption"), true),
 
     @Deprecated
