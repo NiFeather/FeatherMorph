@@ -8,8 +8,6 @@ import xiamomc.morph.abilities.MorphAbility;
 import xiamomc.morph.abilities.options.TakesDamageFromWaterOption;
 import xiamomc.morph.misc.DisguiseState;
 
-import java.util.Objects;
-
 public class TakesDamageFromWaterAbility extends MorphAbility<TakesDamageFromWaterOption>
 {
     @Override
@@ -32,7 +30,7 @@ public class TakesDamageFromWaterAbility extends MorphAbility<TakesDamageFromWat
     }
 
     @Override
-    protected TakesDamageFromWaterOption createOption()
+    protected @NotNull TakesDamageFromWaterOption createOption()
     {
         return new TakesDamageFromWaterOption();
     }

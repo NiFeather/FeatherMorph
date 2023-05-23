@@ -4,13 +4,13 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.DisguiseConfig;
 import me.libraryaddict.disguise.disguisetypes.Disguise;
-import me.libraryaddict.disguise.disguisetypes.watchers.LivingWatcher;
-import me.libraryaddict.disguise.utilities.DisguiseUtilities;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xiamomc.morph.backends.DisguiseWrapper;
+import xiamomc.morph.backends.libsdisg.LibsBackend;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.messages.MessageUtils;
@@ -53,7 +53,7 @@ public class LocalDisguiseProvider extends VanillaDisguiseProvider
     }
 
     @Override
-    public @NotNull DisguiseResult morph(Player player, DisguiseInfo disguiseInfo, @Nullable Entity targetEntity)
+    public @NotNull DisguiseResult makeWrapper(Player player, DisguiseInfo disguiseInfo, @Nullable Entity targetEntity)
     {
         if (!allowLD.get())
         {
@@ -77,7 +77,8 @@ public class LocalDisguiseProvider extends VanillaDisguiseProvider
 
         DisguiseAPI.disguiseEntity(player, disguise);
 
-        return DisguiseResult.success(disguise);
+        var ldBackend = new LibsBackend();
+        return DisguiseResult.success(ldBackend.createInstanceDirect(disguise));
     }
 
     @Override
@@ -87,8 +88,8 @@ public class LocalDisguiseProvider extends VanillaDisguiseProvider
     }
 
     @Override
-    protected boolean canCopyDisguise(DisguiseInfo info, Entity targetEntity,
-                                      @Nullable DisguiseState theirState, @NotNull Disguise theirDisguise)
+    protected boolean canCloneDisguise(DisguiseInfo info, Entity targetEntity,
+                                       @NotNull DisguiseState theirState, @NotNull DisguiseWrapper<?> theirDisguise)
     {
         if (theirState != null)
             return theirState.getDisguiseIdentifier().equals(info.getIdentifier());

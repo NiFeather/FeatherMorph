@@ -29,7 +29,7 @@ public class AttributeModifyingAbility extends MorphAbility<AttributeModifyOptio
     }
 
     @Override
-    protected AttributeModifyOption createOption()
+    protected @NotNull AttributeModifyOption createOption()
     {
         return new AttributeModifyOption();
     }

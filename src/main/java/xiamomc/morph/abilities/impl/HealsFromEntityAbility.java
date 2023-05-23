@@ -2,31 +2,26 @@ package xiamomc.morph.abilities.impl;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.DoubleTag;
-import net.minecraft.nbt.ListTag;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.damagesource.IndirectEntityDamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
 import org.bukkit.NamespacedKey;
-import org.bukkit.craftbukkit.v1_19_R2.entity.CraftEntity;
-import org.bukkit.entity.Arrow;
+import org.bukkit.craftbukkit.v1_19_R3.entity.CraftEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.abilities.AbilityType;
 import xiamomc.morph.abilities.MorphAbility;
 import xiamomc.morph.abilities.options.HealsFromEntityOption;
 import xiamomc.morph.misc.DisguiseState;
-import xiamomc.morph.misc.PlayerOperationSimulator;
-import xiamomc.morph.network.MorphClientHandler;
-import xiamomc.morph.network.commands.S2C.S2CSetNbtCommand;
+import xiamomc.morph.misc.NmsRecord;
+import xiamomc.morph.network.commands.S2C.set.S2CSetSNbtCommand;
+import xiamomc.morph.network.server.MorphClientHandler;
+import xiamomc.morph.utilities.DamageSourceUtils;
 import xiamomc.morph.utilities.EntityTypeUtils;
+import xiamomc.morph.utilities.NbtUtils;
 import xiamomc.pluginbase.Annotations.Resolved;
 
 import java.util.Map;
@@ -45,7 +40,7 @@ public class HealsFromEntityAbility extends MorphAbility<HealsFromEntityOption>
     }
 
     @Override
-    protected HealsFromEntityOption createOption()
+    protected @NotNull HealsFromEntityOption createOption()
     {
         return new HealsFromEntityOption();
     }
@@ -89,8 +84,11 @@ public class HealsFromEntityAbility extends MorphAbility<HealsFromEntityOption>
 
         if (option == null || !option.isValid()) return false;
 
+        if (option.entityType == null)
+            option.entityType = EntityTypeUtils.fromString(option.entityIdentifier);
+
         //Find or refresh entity
-        var nmsRecord = PlayerOperationSimulator.NmsRecord.of(player);
+        var nmsRecord = NmsRecord.of(player);
 
         if (state.beamTarget != null)
         {
@@ -119,10 +117,13 @@ public class HealsFromEntityAbility extends MorphAbility<HealsFromEntityOption>
                             damager = craftEntity.getHandle();
                     }
 
-                    var source = entity.getType() == EntityType.END_CRYSTAL
-                            ? ExplosionClass.explosion(entity, damager)
-                            : ExplosionClass.magic(entity, damager);
+                    var sources = nmsRecord.nmsWorld().damageSources();
 
+                    var source = entity.getType() == EntityType.END_CRYSTAL
+                            ? sources.explosion(entity, damager)
+                            : new DamageSource(sources.magic().typeHolder(), entity, damager);
+
+                    source = DamageSourceUtils.toNotScalable(source).bypassEverything().noSourceLocation();
                     nmsRecord.nmsPlayer().hurt(source, option.damageWhenDestroyed);
                 }
 
@@ -143,61 +144,18 @@ public class HealsFromEntityAbility extends MorphAbility<HealsFromEntityOption>
 
             var prevEntity = state.beamTarget;
 
-            var newEntity = findEntity(nmsRecord, nmsType, option.distance, EntityTypeUtils.fromString(option.entityIdentifier));
+            var newEntity = findEntity(nmsRecord, nmsType, option.distance, option.entityType);
 
             if (prevEntity != newEntity)
             {
                 state.beamTarget = newEntity;
 
                 if (state.getEntityType() == org.bukkit.entity.EntityType.ENDER_DRAGON)
-                    clientHandler.sendClientCommand(player, this.getBeamCommand(state));
+                    clientHandler.sendCommand(player, this.getBeamCommand(state));
             }
         }
 
         return true;
-    }
-
-    private static class ExplosionClass extends IndirectEntityDamageSource
-    {
-        protected ExplosionClass(String name, Entity explosion, @Nullable Entity cause)
-        {
-            super(name, explosion, cause);
-
-            this.bypassArmor();
-            this.bypassEnchantments();
-            this.bypassMagic();
-        }
-
-        @Override
-        public boolean scalesWithDifficulty()
-        {
-            return false;
-        }
-
-        public static ExplosionClass magic(Entity magic, Entity cause)
-        {
-            var source = new ExplosionClass("indirectMagic", magic, cause);
-            source.setMagic();
-
-            return source;
-        }
-
-        @NotNull
-        public static ExplosionClass explosion(Entity explosion, Entity cause)
-        {
-            var source = new ExplosionClass("explosion.player", explosion, cause);
-            source.setExplosion();
-
-            return source;
-        }
-
-        public static ExplosionClass explosion(Entity explosion)
-        {
-            var source = new ExplosionClass("explosion", explosion, null);
-            source.setExplosion();
-
-            return source;
-        }
     }
 
     @Override
@@ -206,10 +164,10 @@ public class HealsFromEntityAbility extends MorphAbility<HealsFromEntityOption>
         super.onClientInit(state);
 
         if (state.getEntityType() == org.bukkit.entity.EntityType.ENDER_DRAGON)
-            clientHandler.sendClientCommand(state.getPlayer(), getBeamCommand(state));
+            clientHandler.sendCommand(state.getPlayer(), getBeamCommand(state));
     }
 
-    public S2CSetNbtCommand getBeamCommand(DisguiseState state)
+    public S2CSetSNbtCommand getBeamCommand(DisguiseState state)
     {
         var entity = state.beamTarget;
 
@@ -217,18 +175,17 @@ public class HealsFromEntityAbility extends MorphAbility<HealsFromEntityOption>
 
         compound.putInt("BeamTarget", entity != null ? entity.getId() : 0);
 
-        return new S2CSetNbtCommand(compound);
+        return new S2CSetSNbtCommand(NbtUtils.getCompoundString(compound));
     }
 
-    private Entity findEntity(PlayerOperationSimulator.NmsRecord record, EntityType<?> nmsType, double expand, org.bukkit.entity.EntityType bukkitType)
+    private Entity findEntity(NmsRecord record, EntityType<?> nmsType, double expand, org.bukkit.entity.EntityType bukkitType)
     {
         try
         {
             var world = record.nmsWorld();
             var player = record.nmsPlayer();
 
-            var boundingBox = nmsType.getDimensions()
-                    .makeBoundingBox(player.position());
+            var boundingBox = nmsType.getDimensions().makeBoundingBox(player.position());
 
             Class<? extends Entity> classType = EntityTypeUtils.getNmsClass(bukkitType);
 

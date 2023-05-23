@@ -1,12 +1,15 @@
 package xiamomc.morph.messages;
 
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.utilities.PluginAssetUtils;
+import xiamomc.pluginbase.Bindables.Bindable;
 import xiamomc.pluginbase.Messages.IStrings;
 import xiamomc.pluginbase.Messages.MessageStore;
 
 import java.util.List;
+import java.util.Map;
 
 public class MorphMessageSubStore extends MessageStore<MorphPlugin>
 {
@@ -16,6 +19,11 @@ public class MorphMessageSubStore extends MessageStore<MorphPlugin>
         this.strings = strings;
 
         this.parentStore = parentStore;
+
+        var path = PluginAssetUtils.langPath(locale);
+        var asset = PluginAssetUtils.getFileStrings(path);
+
+        assets = createGson().fromJson(asset, this.storingObject.getClass());
     }
 
     private final List<Class<? extends IStrings>> strings;
@@ -23,6 +31,15 @@ public class MorphMessageSubStore extends MessageStore<MorphPlugin>
     private final String locale;
 
     private final MorphMessageStore parentStore;
+
+    public void overWriteNonDefaultAfterReload()
+    {
+        this.overwriteNonDef = true;
+    }
+
+    private boolean overwriteNonDef;
+
+    private final Map<String, String> assets;
 
     @Override
     public void addMissingStrings()
@@ -38,11 +55,11 @@ public class MorphMessageSubStore extends MessageStore<MorphPlugin>
                 var defaults = createGson().fromJson(asset, this.storingObject.getClass());
                 defaults.forEach((o1, o2) ->
                 {
-                    if (o1 instanceof String key
-                            && !storingObject.containsKey(key)
-                            && o2 instanceof String msg)
+                    if (o1 instanceof String key && o2 instanceof String msg)
                     {
-                        storingObject.put(key, msg);
+                        if (!storingObject.containsKey(key)
+                                || (overwriteNonDef && !storingObject.getOrDefault(key, "").equals(msg)))
+                            storingObject.put(key, msg);
                     }
                 });
             }

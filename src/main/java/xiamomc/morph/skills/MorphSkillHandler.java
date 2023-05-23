@@ -5,6 +5,7 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
+import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
@@ -12,14 +13,16 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
+import xiamomc.morph.events.api.gameplay.PlayerExecuteSkillEvent;
+import xiamomc.morph.events.api.lifecycle.SkillsFinishedInitializeEvent;
 import xiamomc.morph.messages.CommandStrings;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.SkillStrings;
 import xiamomc.morph.misc.permissions.CommonPermissions;
 import xiamomc.morph.skills.impl.*;
 import xiamomc.morph.storage.skill.ISkillOption;
-import xiamomc.morph.storage.skill.SkillConfiguration;
-import xiamomc.morph.storage.skill.SkillConfigurationStore;
+import xiamomc.morph.storage.skill.SkillAbilityConfiguration;
+import xiamomc.morph.storage.skill.SkillAbilityConfigurationStore;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 
@@ -53,13 +56,13 @@ public class MorphSkillHandler extends MorphPluginObject
     /**
      * 玩家 -> 当前CD
      */
-    private final Map<UUID, SkillCooldownInfo> uuidCooldownMap = new Object2ObjectOpenHashMap<>();
+    private final Map<UUID, SkillCooldownInfo> activeCooldownMap = new Object2ObjectOpenHashMap<>();
 
     @Resolved
     private MorphManager manager;
 
     @Resolved
-    private SkillConfigurationStore store;
+    private SkillAbilityConfigurationStore store;
 
     @Initializer
     private void load()
@@ -77,6 +80,8 @@ public class MorphSkillHandler extends MorphPluginObject
         ));
 
         this.addSchedule(this::update);
+
+        Bukkit.getPluginManager().callEvent(new SkillsFinishedInitializeEvent(this));
     }
 
     /**
@@ -103,17 +108,17 @@ public class MorphSkillHandler extends MorphPluginObject
      */
     public boolean registerSkill(IMorphSkill<?> skill)
     {
-        logger.info("Registering skill: " + skill.getIdentifier().asString());
+        //logger.info("Registering skill: " + skill.getIdentifier().asString());
 
         if (skills.contains(skill))
         {
-            logger.error("Another skill instance has already registered as " + skill.getIdentifier().asString() + " !");
+            logger.error("Can't register skill: Another skill instance has already registered as " + skill.getIdentifier().asString() + " !");
             return false;
         }
 
         if (skill.getIdentifier().equals(SkillType.UNKNOWN))
         {
-            logger.error("Illegal skill identifier: " + SkillType.UNKNOWN);
+            logger.error("Can't register skill: Illegal skill identifier: " + SkillType.UNKNOWN);
             return false;
         }
 
@@ -127,7 +132,7 @@ public class MorphSkillHandler extends MorphPluginObject
         this.addSchedule(this::update);
 
         //更新CD
-        uuidCooldownMap.forEach((u, c) -> c.setCooldown(c.getCooldown() - 1));
+        activeCooldownMap.forEach((u, c) -> c.setCooldown(c.getCooldown() - 1));
     }
 
     /**
@@ -136,7 +141,7 @@ public class MorphSkillHandler extends MorphPluginObject
      * @return 对应的技能和技能配置，如果没找到则是null
      */
     @Nullable
-    private Map.Entry<SkillConfiguration, IMorphSkill<?>> getSkillEntry(String identifier)
+    private Map.Entry<SkillAbilityConfiguration, IMorphSkill<?>> getSkillEntry(String identifier)
     {
         if (identifier == null) return null;
 
@@ -187,6 +192,14 @@ public class MorphSkillHandler extends MorphPluginObject
 
         if (entry != null && !entry.getKey().getSkillIdentifier().equals(SkillType.NONE) && player.getGameMode() != GameMode.SPECTATOR)
         {
+            var event = new PlayerExecuteSkillEvent(player, state);
+            Bukkit.getPluginManager().callEvent(event);
+            if (event.isCancelled())
+            {
+                state.setSkillCooldown(5);
+                return;
+            }
+
             var skill = entry.getValue();
             var config = entry.getKey();
 
@@ -215,6 +228,8 @@ public class MorphSkillHandler extends MorphPluginObject
             var cd = skill.executeSkillGeneric(player, state, config, option);
             cdInfo.setLastInvoke(plugin.getCurrentTick());
 
+            state.getDisguiseWrapper().resetAmbientSoundInterval();
+
             if (!state.haveCooldown()) state.setCooldownInfo(cdInfo);
             else state.setSkillCooldown(cd);
         }
@@ -231,13 +246,13 @@ public class MorphSkillHandler extends MorphPluginObject
      * 获取技能冷却
      *
      * @param uuid 玩家UUID
-     * @param type 技能ID
+     * @param disguiseIdentifier 技能ID
      * @return 技能信息，为null则传入的实体类型是null
      */
     @Nullable
-    public SkillCooldownInfo getCooldownInfo(UUID uuid, @Nullable String type)
+    public SkillCooldownInfo getCooldownInfo(UUID uuid, @Nullable String disguiseIdentifier)
     {
-        if (type == null) return null;
+        if (disguiseIdentifier == null) return null;
 
         //获取cd列表
         List<SkillCooldownInfo> infos;
@@ -249,11 +264,11 @@ public class MorphSkillHandler extends MorphPluginObject
 
         //获取或创建CD
         var cd = infos.stream()
-                .filter(i -> i.getIdentifier().equals(type)).findFirst().orElse(null);
+                .filter(i -> i.getIdentifier().equals(disguiseIdentifier)).findFirst().orElse(null);
 
         if (cd == null)
         {
-            cdInfo = new SkillCooldownInfo(type);
+            cdInfo = new SkillCooldownInfo(disguiseIdentifier);
             infos.add(cdInfo);
         }
         else
@@ -286,14 +301,14 @@ public class MorphSkillHandler extends MorphPluginObject
 
         if (info == null)
         {
-            uuidCooldownMap.remove(uuid);
+            activeCooldownMap.remove(uuid);
         }
         else
         {
             if (info.skillInvokedOnce())
                 info.setCooldown(this.getCooldownInactive(info));
 
-            uuidCooldownMap.put(uuid, info);
+            activeCooldownMap.put(uuid, info);
         }
     }
 
@@ -334,7 +349,7 @@ public class MorphSkillHandler extends MorphPluginObject
      */
     public long getLastInvoke(Player player)
     {
-        var info = uuidCooldownMap.getOrDefault(player.getUniqueId(), null);
+        var info = activeCooldownMap.getOrDefault(player.getUniqueId(), null);
 
         return info == null ? Long.MIN_VALUE : info.getLastInvoke();
     }

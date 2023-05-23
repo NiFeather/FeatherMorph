@@ -3,7 +3,6 @@ package xiamomc.morph.events;
 import com.destroystokyo.paper.event.player.PlayerClientOptionsChangeEvent;
 import com.destroystokyo.paper.event.player.PlayerPostRespawnEvent;
 import me.libraryaddict.disguise.DisguiseAPI;
-import me.libraryaddict.disguise.disguisetypes.watchers.AbstractHorseWatcher;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import org.bukkit.Bukkit;
@@ -20,19 +19,22 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.InventoryHolder;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
-import xiamomc.morph.commands.MorphCommandHelper;
+import xiamomc.morph.events.api.gameplay.PlayerJoinedWithDisguiseEvent;
+import xiamomc.morph.backends.libsdisg.LibsDisguiseWrapper;
+import xiamomc.morph.commands.MorphCommandManager;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
-import xiamomc.morph.messages.*;
+import xiamomc.morph.messages.HintStrings;
+import xiamomc.morph.messages.MessageUtils;
+import xiamomc.morph.messages.MorphStrings;
+import xiamomc.morph.messages.SkillStrings;
 import xiamomc.morph.messages.vanilla.VanillaMessageStore;
 import xiamomc.morph.misc.DisguiseTypes;
-import xiamomc.morph.misc.PlayerOperationSimulator;
-import xiamomc.morph.utilities.DisguiseUtils;
-import xiamomc.morph.utilities.EntityTypeUtils;
-import xiamomc.morph.network.MorphClientHandler;
-import xiamomc.morph.network.commands.S2C.S2CSetEquipCommand;
+import xiamomc.morph.network.server.MorphClientHandler;
 import xiamomc.morph.network.commands.S2C.S2CSwapCommand;
+import xiamomc.morph.network.server.ServerSetEquipCommand;
 import xiamomc.morph.skills.MorphSkillHandler;
+import xiamomc.morph.utilities.EntityTypeUtils;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
@@ -42,7 +44,7 @@ import static xiamomc.morph.utilities.DisguiseUtils.itemOrAir;
 public class CommonEventProcessor extends MorphPluginObject implements Listener
 {
     @Resolved(shouldSolveImmediately = true)
-    private MorphCommandHelper cmdHelper;
+    private MorphCommandManager cmdHelper;
 
     @Resolved(shouldSolveImmediately = true)
     private MorphManager morphs;
@@ -130,6 +132,8 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
 
             if (state != null)
             {
+                state.getDisguiseWrapper().resetAmbientSoundInterval();
+
                 //如果伤害是0，那么取消事件
                 if (e.getDamage() > 0d)
                     state.setSkillCooldown(Math.max(state.getSkillCooldown(), cooldownOnDamage.get()));
@@ -159,13 +163,13 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
                 if (state.getEntityType() == EntityType.ALLAY)
                     e.setCancelled(true);
 
-                if (state.getDisguise().getWatcher() instanceof AbstractHorseWatcher watcher)
+                if (EntityTypeUtils.saddleable(state.getDisguiseWrapper().getEntityType()))
                 {
                     var slot = e.getHand();
                     var item = e.getPlayer().getEquipment().getItem(slot);
 
                     if (item.getType() == Material.SADDLE)
-                        watcher.setSaddled(true);
+                        state.getDisguiseWrapper().setSaddled(true);
                     else if (item.getType() != Material.AIR)
                         e.setCancelled(true);
                 }
@@ -207,52 +211,44 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         var mainHandItem = player.getEquipment().getItemInMainHand();
         var mainHandItemType = mainHandItem.getType();
 
-        if (mainHandItemType.isAir()) return false;
+        if (mainHandItemType.isAir() || !player.isSneaking()) return false;
 
-        if (player.isSneaking())
+        //右键玩家头颅：快速伪装
+        if (!action.equals(Action.RIGHT_CLICK_BLOCK) && !action.isLeftClick() && morphs.doQuickDisguise(player, false))
+            return true;
+
+        if (mainHandItemType != actionItem || state == null) return false;
+
+        //激活技能或取消伪装
+        if (action.isLeftClick())
         {
-            //右键玩家头颅：快速伪装
-            if (!action.equals(Action.RIGHT_CLICK_BLOCK) && !action.isLeftClick() && morphs.doQuickDisguise(player, actionItem))
-            {
-                return true;
-            }
-            else if (mainHandItemType == actionItem)
-            {
-                //主动技能或快速变形
-                if (state != null)
-                {
-                    if (action.isLeftClick())
-                    {
-                        if (player.getEyeLocation().getDirection().getY() <= -0.95)
-                            morphs.unMorph(player);
-                        else
-                            morphs.setSelfDisguiseVisible(player, state.getServerSideSelfVisible(), true);
+            if (player.getEyeLocation().getDirection().getY() <= -0.95)
+                morphs.unMorph(player);
+            else
+                morphs.setSelfDisguiseVisible(player, !state.isSelfViewing(), true);
 
-                        return true;
-                    }
-
-                    if (state.getSkillCooldown() <= 0)
-                        morphs.executeDisguiseSkill(player);
-                    else
-                    {
-                        //一段时间内内只接受一次右键触发
-                        //传送前后会触发两次Interact，而且这两个Interact还不一定在同个Tick里
-                        if (plugin.getCurrentTick() - skillHandler.getLastInvoke(player) <= 1)
-                            return true;
-
-                        player.sendMessage(MessageUtils.prefixes(player,
-                                SkillStrings.skillPreparing().resolve("time", state.getSkillCooldown() / 20 + "")));
-
-                        player.playSound(Sound.sound(Key.key("minecraft", "entity.villager.no"),
-                                Sound.Source.PLAYER, 1f, 1f));
-                    }
-
-                    return true;
-                }
-            }
+            return true;
         }
 
-        return false;
+        if (state.getSkillCooldown() <= 0)
+        {
+            morphs.executeDisguiseSkill(player);
+        }
+        else
+        {
+            //一段时间内内只接受一次右键触发
+            //传送前后会触发两次Interact，而且这两个Interact还不一定在同个Tick里
+            if (plugin.getCurrentTick() - skillHandler.getLastInvoke(player) <= 1)
+                return true;
+
+            player.sendMessage(MessageUtils.prefixes(player,
+                    SkillStrings.skillPreparing().resolve("time", state.getSkillCooldown() / 20 + "")));
+
+            player.playSound(Sound.sound(Key.key("minecraft", "entity.villager.no"),
+                    Sound.Source.PLAYER, 1f, 1f));
+        }
+
+        return true;
     }
 
     //region LibsDisguises workaround
@@ -270,15 +266,18 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
             {
                 this.addSchedule(() ->
                 {
-                    if (DisguiseAPI.isDisguised(player) && DisguiseAPI.isSelfDisguised(player))
-                        player.updateInventory();
+                    if (state.getDisguiseWrapper() instanceof LibsDisguiseWrapper)
+                    {
+                        if (DisguiseAPI.isDisguised(player) && DisguiseAPI.isSelfDisguised(player))
+                            player.updateInventory();
+                    }
                 }, 2);
             }
 
             //workaround: 交换副手后伪装有概率在左右手显示同一个物品
             if (state.showingDisguisedItems())
             {
-                var disguise = state.getDisguise();
+                var disguise = state.getDisguiseWrapper();
                 state.swapHands();
                 var equip = state.getDisguisedItems();
 
@@ -287,26 +286,28 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
 
                 if (clientHandler.clientVersionCheck(player, 3))
                 {
-                    clientHandler.sendClientCommand(player, new S2CSwapCommand());
+                    clientHandler.sendCommand(player, new S2CSwapCommand());
                 }
                 else
                 {
-                    clientHandler.sendClientCommand(player, new S2CSetEquipCommand(mainHand, EquipmentSlot.HAND));
-                    clientHandler.sendClientCommand(player, new S2CSetEquipCommand(offHand, EquipmentSlot.OFF_HAND));
+                    clientHandler.sendCommand(player, new ServerSetEquipCommand(mainHand, EquipmentSlot.HAND));
+                    clientHandler.sendCommand(player, new ServerSetEquipCommand(offHand, EquipmentSlot.OFF_HAND));
                 }
 
                 this.addSchedule(() ->
                 {
-                    if (!state.showingDisguisedItems() || state.getDisguise() != disguise) return;
-
-                    var watcher = state.getDisguise().getWatcher();
+                    if (!state.showingDisguisedItems() || state.getDisguiseWrapper() != disguise) return;
 
                     var air = itemOrAir(null);
-                    watcher.setItemInMainHand(air);
-                    watcher.setItemInOffHand(air);
+                    var equipment = state.getDisguiseWrapper().getDisplayingEquipments();
 
-                    watcher.setItemInMainHand(mainHand);
-                    watcher.setItemInOffHand(offHand);
+                    equipment.setItemInMainHand(air);
+                    equipment.setItemInOffHand(air);
+                    disguise.setDisplayingEquipments(equipment);
+
+                    equipment.setItemInMainHand(mainHand);
+                    equipment.setItemInOffHand(offHand);
+                    disguise.setDisplayingEquipments(equipment);
                 }, 2);
             }
         }
@@ -340,6 +341,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
 
         clientHandler.markPlayerReady(player);
 
+        //如果玩家是第一次用客户端连接，那么等待3秒向其发送提示
         if (clientHandler.clientConnected(player))
         {
             var config = morphs.getPlayerConfiguration(player);
@@ -360,20 +362,22 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         {
             //重新进入后player和info.player不属于同一个实例，需要重新disguise
             state.setPlayer(player);
-            DisguiseAPI.disguiseEntity(player, state.getDisguise());
+            var backend = morphs.getCurrentBackend();
 
-            var disguise = DisguiseAPI.getDisguise(player);
-            disguise.setKeepDisguiseOnPlayerDeath(true);
-            DisguiseUtils.addTrace(disguise);
+            //刷新伪装
+            var oldWrapper = state.getDisguiseWrapper();
+            var wrapper = state.getDisguiseWrapper().clone();
+            backend.disguise(player, wrapper);
 
-            //刷新Disguise
+            oldWrapper.dispose();
+
             var nbt = state.getCachedNbtString();
             var profile = state.getProfileNbtString();
 
             var customName = state.entityCustomName;
 
             state.setDisguise(state.getDisguiseIdentifier(),
-                    state.getSkillLookupIdentifier(), disguise, state.shouldHandlePose(), false,
+                    state.getSkillLookupIdentifier(), wrapper, state.shouldHandlePose(), false,
                     state.getDisguisedItems());
 
             state.setCachedNbtString(nbt);
@@ -388,43 +392,34 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
             state.refreshSkills();
 
             //调用Morph事件
-            Bukkit.getPluginManager().callEvent(new PlayerMorphEvent(player, state));
+            Bukkit.getPluginManager().callEvent(new PlayerJoinedWithDisguiseEvent(player, state));
 
             return;
         }
 
         var offlineState = morphs.getOfflineState(player);
 
-        if (offlineState == null && DisguiseAPI.isDisguised(player))
-        {
-            //移除未跟踪，未保存并且属于此插件的伪装
-            var disguise = DisguiseAPI.getDisguise(player);
-
-            if (DisguiseUtils.isTracing(disguise))
-                disguise.removeDisguise(player);
-        }
-        else if (offlineState != null)
+        if (offlineState != null)
         {
             player.sendMessage(MessageUtils.prefixes(player, MorphStrings.stateRecoverReasonString()));
 
-            if (morphs.disguiseFromOfflineState(player, offlineState))
+            var result = morphs.disguiseFromOfflineState(player, offlineState);
+
+            if (result == 0)
             {
-                if (offlineState.disguise != null)
-                {
-                    player.sendMessage(MessageUtils.prefixes(player, MorphStrings.recoveringStateString()));
-                }
-                else
-                {
-                    player.sendMessage(MessageUtils.prefixes(player, MorphStrings.recoveringStateLimitedString()));
-                    player.sendMessage(MessageUtils.prefixes(player, MorphStrings.recoveringStateLimitedHintString()));
-                }
+                player.sendMessage(MessageUtils.prefixes(player, MorphStrings.recoveringStateString()));
+            }
+            else if (result == 1)
+            {
+                player.sendMessage(MessageUtils.prefixes(player, MorphStrings.recoveringStateLimitedString()));
+                player.sendMessage(MessageUtils.prefixes(player, MorphStrings.recoveringStateLimitedHintString()));
             }
             else
                 player.sendMessage(MessageUtils.prefixes(player, MorphStrings.recoveringFailedString()));
         }
     }
 
-    @Resolved
+    @Resolved(shouldSolveImmediately = true)
     private MorphClientHandler clientHandler;
 
     @EventHandler
@@ -499,7 +494,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         //目标玩家没在伪装时不要处理
         if (state == null) return;
 
-        var disguise = state.getDisguise();
+        var disguise = state.getDisguiseWrapper();
         var disguiseEntityType = state.getEntityType();
 
         //检查是否要取消Target

@@ -1,17 +1,10 @@
 package xiamomc.morph.providers;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import me.libraryaddict.disguise.DisguiseAPI;
-import me.libraryaddict.disguise.disguisetypes.Disguise;
-import me.libraryaddict.disguise.disguisetypes.DisguiseType;
-import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
-import me.libraryaddict.disguise.disguisetypes.watchers.LivingWatcher;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.EquipmentSlot;
@@ -19,19 +12,18 @@ import org.bukkit.scoreboard.Scoreboard;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.abilities.AbilityHandler;
-import xiamomc.morph.abilities.AbilityType;
-import xiamomc.morph.abilities.impl.HealsFromEntityAbility;
+import xiamomc.morph.backends.DisguiseBackend;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.MorphStrings;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.misc.DisguiseTypes;
-import xiamomc.morph.utilities.DisguiseUtils;
-import xiamomc.morph.network.MorphClientHandler;
+import xiamomc.morph.network.server.MorphClientHandler;
 import xiamomc.morph.network.commands.S2C.AbstractS2CCommand;
-import xiamomc.morph.network.commands.S2C.S2CSetEquipCommand;
+import xiamomc.morph.network.server.ServerSetEquipCommand;
 import xiamomc.morph.skills.MorphSkillHandler;
 import xiamomc.morph.skills.SkillType;
 import xiamomc.pluginbase.Annotations.Resolved;
+import xiamomc.pluginbase.Messages.MessageStore;
 import xiamomc.pluginbase.Utilities.ColorUtils;
 
 import java.util.List;
@@ -65,58 +57,46 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
     @Resolved
     private MorphClientHandler clientHandler;
 
+    @Resolved
+    private MessageStore<?> messageStore;
+
+    protected DisguiseBackend<?, ?> getBackend()
+    {
+        return getMorphManager().getCurrentBackend();
+    }
+
     @Override
     public boolean updateDisguise(Player player, DisguiseState state)
     {
-        var disguise = state.getDisguise();
-        var watcher = disguise.getWatcher();
-        var option = clientHandler.getPlayerOption(player);
+        var disguise = state.getDisguiseWrapper();
+        var option = clientHandler.getPlayerOption(player, true);
 
-        if (option.displayDisguiseOnHUD)
+        var haveSkill = state.haveSkill();
+
+        if (option.displayDisguiseOnHUD && plugin.getCurrentTick() % (haveSkill ? 2 : 5) == 0)
         {
             var locale = MessageUtils.getLocale(player);
 
             //更新actionbar信息
-            var msg = state.haveSkill()
+            var msg = haveSkill
                     ? (state.getSkillCooldown() <= 0
                         ? MorphStrings.disguisingWithSkillAvaliableString()
                         : MorphStrings.disguisingWithSkillPreparingString())
                     : MorphStrings.disguisingAsString();
 
-            player.sendActionBar(msg.withLocale(locale).resolve("what", state.getPlayerDisplay()).toComponent(null));
+            player.sendActionBar(msg.resolve("what", state.getPlayerDisplay()).toComponent(locale, messageStore));
         }
 
-        //发光颜色
-        var team = scoreboard.getPlayerTeam(player);
-        var playerColor = (team == null || !team.hasColor()) ? NamedTextColor.WHITE : team.color();
-
-        if (state.getDisguiseType() != DisguiseTypes.LD)
+        try
         {
-            //workaround: 复制实体伪装时会一并复制隐身标签
-            //            会导致复制出来的伪装永久隐身
-            if (watcher.isInvisible() != player.isInvisible())
-                watcher.setInvisible(player.isInvisible());
+            disguise.update(state.getDisguiseType() != DisguiseTypes.LD, state, player);
+        }
+        catch (Throwable t)
+        {
+            logger.error("Error occurred while updating disguise!");
+            t.printStackTrace();
 
-            //workaround: 伪装不会主动检测玩家有没有发光
-            if (watcher.isGlowing() != player.isGlowing())
-                watcher.setGlowing(player.isGlowing());
-
-            //设置发光颜色
-            if (!state.haveCustomGlowColor())
-                disguise.getWatcher().setGlowColor(ColorUtils.toChatColor(playerColor));
-
-            //设置滑翔状态
-            if (watcher.isFlyingWithElytra() != player.isGliding())
-                watcher.setFlyingWithElytra(player.isGliding());
-
-            //workaround: 复制出来的伪装会忽略玩家Pose
-            if (state.shouldHandlePose())
-            {
-                var pose = DisguiseUtils.toEntityPose(player.getPose());
-
-                if (watcher.getEntityPose() != pose)
-                    watcher.setEntityPose(pose);
-            }
+            return false;
         }
 
         return true;
@@ -152,20 +132,14 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
         var item = equipment.getItem(slot);
 
         if (item.getType() != Material.AIR)
-            list.add(new S2CSetEquipCommand(item, slot));
+            list.add(new ServerSetEquipCommand(item, slot));
     }
 
     @Override
     public void postConstructDisguise(DisguiseState state, @Nullable Entity targetEntity)
     {
-        var disguise = state.getDisguise();
-        var watcher = disguise.getWatcher();
-
-        disguise.setKeepDisguiseOnPlayerDeath(true);
-
-        //workaround: 伪装已死亡的LivingEntity
-        if (targetEntity instanceof LivingEntity living && living.getHealth() <= 0)
-            ((LivingWatcher) watcher).setHealth(1);
+        var disguise = state.getDisguiseWrapper();
+        var backend = getMorphManager().getCurrentBackend();
 
         //被动技能
         var abilities = abilityHandler.getAbilitiesFor(state.getSkillLookupIdentifier());
@@ -192,7 +166,7 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
             //只要和LD直接打交道事情就变得玄学了起来..
             case LD ->
             {
-                glowColor = watcher.getGlowColor();
+                glowColor = disguise.getGlowingColor();
                 teamTargetEntity = null;
             }
         }
@@ -203,9 +177,10 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
             var team = scoreboard.getEntityTeam(teamTargetEntity);
 
             //如果伪装是复制来的，并且目标实体有伪装，则将颜色设置为他们伪装的发光颜色
-            if (state.shouldHandlePose() && DisguiseAPI.isDisguised(teamTargetEntity))
+            if (state.shouldHandlePose() && backend.isDisguised(teamTargetEntity))
             {
-                glowColor = DisguiseAPI.getDisguise(teamTargetEntity).getWatcher().getGlowColor();
+                //backend.isDisguised -> backend.getWrapper != null
+                glowColor = backend.getWrapper(teamTargetEntity).getGlowingColor();
             }
             else
             {
@@ -217,6 +192,6 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
 
         //设置发光颜色
         state.setCustomGlowColor(ColorUtils.fromChatColor(glowColor));
-        watcher.setGlowColor(glowColor);
+        disguise.setGlowingColor(glowColor);
     }
 }

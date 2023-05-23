@@ -1,17 +1,14 @@
 package xiamomc.morph.skills;
 
 import org.bukkit.NamespacedKey;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.SkillStrings;
 import xiamomc.morph.misc.DisguiseState;
-import xiamomc.morph.misc.DisguiseTypes;
-import xiamomc.morph.providers.DisguiseProvider;
 import xiamomc.morph.storage.skill.ISkillOption;
-import xiamomc.morph.storage.skill.SkillConfiguration;
+import xiamomc.morph.storage.skill.SkillAbilityConfiguration;
 
 public interface IMorphSkill<T extends ISkillOption>
 {
@@ -23,16 +20,28 @@ public interface IMorphSkill<T extends ISkillOption>
      * @param option 此技能的详细设置
      * @return 执行后的冷却长度
      */
-    public int executeSkill(Player player, DisguiseState state, SkillConfiguration configuration, T option);
+    public int executeSkill(Player player, DisguiseState state, SkillAbilityConfiguration configuration, T option);
 
+    /**
+     * Called when this skill gets equipped
+     * @param state {@link DisguiseState}
+     */
     public default void onInitialEquip(DisguiseState state)
     {
     }
 
+    /**
+     * Called when a player's client mod gets initialized
+     * @param state {@link DisguiseState}
+     */
     public default void onClientinit(DisguiseState state)
     {
     }
 
+    /**
+     * Called when this skill gets de-equipped
+     * @param state {@link DisguiseState}
+     */
     public default void onDeEquip(DisguiseState state)
     {
     }
@@ -41,7 +50,7 @@ public interface IMorphSkill<T extends ISkillOption>
      * 内部轮子
      */
     @ApiStatus.Internal
-    public default int executeSkillGeneric(Player player, DisguiseState state, SkillConfiguration config, ISkillOption option)
+    public default int executeSkillGeneric(Player player, DisguiseState state, SkillAbilityConfiguration config, ISkillOption option)
     {
         T castedOption;
 

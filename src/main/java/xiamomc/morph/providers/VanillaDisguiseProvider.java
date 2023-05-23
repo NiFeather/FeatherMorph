@@ -1,30 +1,34 @@
 package xiamomc.morph.providers;
 
+import io.papermc.paper.util.CollisionUtil;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import me.libraryaddict.disguise.DisguiseAPI;
-import me.libraryaddict.disguise.disguisetypes.Disguise;
-import me.libraryaddict.disguise.disguisetypes.DisguiseType;
-import me.libraryaddict.disguise.disguisetypes.MobDisguise;
-import me.libraryaddict.disguise.disguisetypes.VillagerData;
-import me.libraryaddict.disguise.disguisetypes.watchers.*;
 import net.kyori.adventure.text.Component;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.TagParser;
+import org.bukkit.Bukkit;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.attribute.AttributeModifier;
-import org.bukkit.entity.*;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xiamomc.morph.backends.DisguiseWrapper;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
+import xiamomc.morph.messages.MessageUtils;
+import xiamomc.morph.messages.MorphStrings;
 import xiamomc.morph.messages.vanilla.VanillaMessageStore;
 import xiamomc.morph.misc.DisguiseInfo;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.misc.DisguiseTypes;
+import xiamomc.morph.misc.NmsRecord;
 import xiamomc.morph.utilities.EntityTypeUtils;
 import xiamomc.morph.utilities.NbtUtils;
+import xiamomc.morph.utilities.ReflectionUtils;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
@@ -43,7 +47,8 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
     @Override
     public boolean isValid(String rawIdentifier)
     {
-        return getAllAvailableDisguises().contains(rawIdentifier);
+        var idStripped = DisguiseTypes.VANILLA.toStrippedId(rawIdentifier);
+        return getAllAvailableDisguises().contains(idStripped);
     }
 
     public VanillaDisguiseProvider()
@@ -54,10 +59,10 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
         {
             if (eT == EntityType.UNKNOWN || !eT.isAlive()) continue;
 
-            list.add(eT.getKey().asString());
+            list.add(eT.getKey().getKey());
         }
 
-        list.removeIf(s -> s.equals("minecraft:player"));
+        list.removeIf(s -> s.equals("player"));
 
         vanillaIdentifiers = list;
     }
@@ -72,11 +77,12 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
 
     @Override
     @NotNull
-    public DisguiseResult morph(Player player, DisguiseInfo disguiseInfo, @Nullable Entity targetEntity)
+    public DisguiseResult makeWrapper(Player player, DisguiseInfo disguiseInfo, @Nullable Entity targetEntity)
     {
         var identifier = disguiseInfo.getIdentifier();
 
-        Disguise constructedDisguise;
+        DisguiseWrapper<?> constructedDisguise;
+        var backend = getBackend();
 
         var entityType = EntityTypeUtils.fromString(identifier, true);
 
@@ -86,16 +92,24 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
             return DisguiseResult.fail();
         }
 
-        var copyResult = getCopy(disguiseInfo, targetEntity);
+        var copyResult = constructFromEntity(disguiseInfo, targetEntity);
 
         constructedDisguise = copyResult.success()
-                ? copyResult.disguise()
-                : new MobDisguise(DisguiseType.getType(entityType));
+                ? copyResult.wrapperInstance() //copyResult.success() -> wrapperInstance() != null
+                : backend.createInstance(entityType);
 
-        DisguiseAPI.disguiseEntity(player, constructedDisguise);
+        if (modifyBoundingBoxes.get())
+        {
+            var loc = player.getLocation();
+            var box = constructedDisguise.getBoundingBoxAt(loc.x(), loc.y(), loc.z());
 
-        if (entityType.equals(EntityType.BAT))
-            constructedDisguise.getWatcher().setYModifier(-1.6f);
+            var hasCollision = CollisionUtil.getCollisionsForBlocksOrWorldBorder(NmsRecord.ofPlayer(player).level, null, box, null, false, false, true, true, null);
+            if (hasCollision)
+            {
+                player.sendMessage(MessageUtils.prefixes(player, MorphStrings.noEnoughSpaceString()));
+                return DisguiseResult.FAILED_COLLISION;
+            }
+        }
 
         return DisguiseResult.success(constructedDisguise, copyResult.isCopy());
     }
@@ -103,6 +117,7 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
     private final Bindable<Boolean> armorStandShowArms = new Bindable<>(false);
     private final Bindable<Boolean> doHealthScale = new Bindable<>(true);
     private final Bindable<Integer> healthCap = new Bindable<>(60);
+    private final Bindable<Boolean> modifyBoundingBoxes = new Bindable<>(false);
 
     @Initializer
     private void load(MorphConfigManager configManager)
@@ -110,6 +125,30 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
         configManager.bind(armorStandShowArms, ConfigOption.ARMORSTAND_SHOW_ARMS);
         configManager.bind(doHealthScale, ConfigOption.HEALTH_SCALE);
         configManager.bind(healthCap, ConfigOption.HEALTH_SCALE_MAX_HEALTH);
+        configManager.bind(modifyBoundingBoxes, ConfigOption.MODIFY_BOUNDING_BOX);
+
+        modifyBoundingBoxes.onValueChanged((o, n) ->
+        {
+            if (o && !n)
+                Bukkit.getOnlinePlayers().forEach(p -> NmsRecord.ofPlayer(p).refreshDimensions());
+        });
+    }
+
+    @Override
+    public boolean updateDisguise(Player player, DisguiseState state)
+    {
+        if (super.updateDisguise(player, state))
+        {
+            if (modifyBoundingBoxes.get())
+                tryModifyPlayerDimensions(player, state.getDisguiseWrapper());
+
+            if (plugin.getCurrentTick() % 20 == 0)
+                ReflectionUtils.cleanCaches();
+
+            return true;
+        }
+        else
+            return false;
     }
 
     @Override
@@ -117,47 +156,19 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
     {
         super.postConstructDisguise(state, targetEntity);
 
-        var disguise = state.getDisguise();
+        var disguise = state.getDisguiseWrapper();
+        var backend = getMorphManager().getCurrentBackend();
 
-        if (!DisguiseAPI.isDisguised(targetEntity))
+        if (!backend.isDisguised(targetEntity))
         {
             //盔甲架加上手臂
-            if (disguise.getType().equals(DisguiseType.ARMOR_STAND) && armorStandShowArms.get())
-                ((ArmorStandWatcher) disguise.getWatcher()).setShowArms(true);
+            if (disguise.getEntityType().equals(EntityType.ARMOR_STAND) && armorStandShowArms.get())
+                disguise.showArms(true);
         }
 
-        if (targetEntity != null)
-        {
-            switch (targetEntity.getType())
-            {
-                case CAT ->
-                {
-                    if (disguise.getType() == DisguiseType.CAT)
-                    {
-                        var watcher = (CatWatcher) disguise.getWatcher();
-                        var cat = (Cat) targetEntity;
-
-                        watcher.setType(cat.getCatType());
-                    }
-                }
-
-                case VILLAGER ->
-                {
-                    if (disguise.getType() == DisguiseType.VILLAGER)
-                    {
-                        var watcher = (VillagerWatcher) disguise.getWatcher();
-                        var villager = (Villager) targetEntity;
-
-                        watcher.setVillagerData(new VillagerData(villager.getVillagerType(),
-                                villager.getProfession(), villager.getVillagerLevel()));
-                    }
-                }
-            }
-        }
-
+        var player = state.getPlayer();
         if (doHealthScale.get())
         {
-            var player = state.getPlayer();
             var loc = player.getLocation();
             loc.setY(-8192);
 
@@ -190,6 +201,65 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
                 }
 
                 entity.remove();
+            }
+        }
+
+        if (modifyBoundingBoxes.get())
+            this.tryModifyPlayerDimensions(player, state.getDisguiseWrapper());
+    }
+
+    private void resetPlayerDimensions(Player player)
+    {
+        var nmsPlayer = NmsRecord.ofPlayer(player);
+
+        var targetField = ReflectionUtils.getPlayerDimensionsField(nmsPlayer);
+
+        if (targetField != null)
+        {
+            try
+            {
+                var dimension = net.minecraft.world.entity.player.Player.STANDING_DIMENSIONS;
+
+                targetField.setAccessible(true);
+                targetField.set(nmsPlayer, dimension);
+
+                nmsPlayer.refreshDimensions();
+            }
+            catch (Throwable t)
+            {
+                logger.error("Unable to reset player's bounding box: " + t.getMessage());
+                t.printStackTrace();
+            }
+        }
+    }
+
+    private void tryModifyPlayerDimensions(Player player, DisguiseWrapper<?> wrapper)
+    {
+        var nmsPlayer = NmsRecord.ofPlayer(player);
+
+        //Find dimensions
+        var targetField = ReflectionUtils.getPlayerDimensionsField(nmsPlayer);
+
+        if (targetField != null)
+        {
+            try
+            {
+                var box = wrapper.getBoundingBoxAt(nmsPlayer.getX(), nmsPlayer.getY(), nmsPlayer.getZ());
+                var dimensions = wrapper.getDimensions();
+
+                targetField.set(nmsPlayer, dimensions);
+
+                nmsPlayer.setBoundingBox(box);
+
+                var eyeHeightField = ReflectionUtils.getPlayerEyeHeightField(NmsRecord.ofPlayer(player));
+
+                if (eyeHeightField != null)
+                    eyeHeightField.set(nmsPlayer, dimensions.height * 0.85F);
+            }
+            catch (Throwable t)
+            {
+                logger.warn("Unable to modify player's bounding box: " + t.getMessage());
+                t.printStackTrace();
             }
         }
     }
@@ -225,6 +295,7 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
         if (super.unMorph(player, state))
         {
             removeAllHealthModifiers(player);
+            resetPlayerDimensions(player);
             return true;
         }
         else
@@ -238,7 +309,7 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
 
         var rawCompound = targetEntity != null && canConstruct(info, targetEntity, null)
                 ? NbtUtils.getRawTagCompound(targetEntity)
-                : new CompoundTag();
+                : NbtUtils.toCompoundTag(state.getCachedNbtString());
 
         if (rawCompound == null) rawCompound = new CompoundTag();
 
@@ -266,84 +337,7 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
         }
 
         if (targetEntity == null || targetEntity.getType() != state.getEntityType())
-        {
-            var watcher = state.getDisguise().getWatcher();
-            switch (state.getEntityType())
-            {
-                case SLIME, MAGMA_CUBE ->
-                {
-                    var size = ((SlimeWatcher) watcher).getSize() - 1;
-                    rawCompound.putInt("Size", size);
-                }
-
-                case HORSE ->
-                {
-                    var color = ((HorseWatcher) watcher).getColor().ordinal();
-                    var style = ((HorseWatcher) watcher).getStyle().ordinal();
-                    rawCompound.putInt("Variant", color | style << 8);
-                }
-
-                case PARROT ->
-                {
-                    var variant = ((ParrotWatcher) watcher).getVariant().ordinal();
-                    rawCompound.putInt("Variant", variant);
-                }
-
-                case CAT ->
-                {
-                    var variant = ((CatWatcher) watcher).getType().getKey().asString();
-                    rawCompound.putString("variant", variant);
-                }
-
-                case TROPICAL_FISH ->
-                {
-                    var variant = ((TropicalFishWatcher) watcher).getVariant();
-
-                    rawCompound.putInt("Variant", variant);
-                }
-
-                case RABBIT ->
-                {
-                    var type = ((RabbitWatcher) watcher).getType().getTypeId();
-                    rawCompound.putInt("RabbitType", type);
-                }
-
-                case FOX ->
-                {
-                    var foxType = ((FoxWatcher) watcher).getType().name().toLowerCase();
-                    rawCompound.putString("Type", foxType);
-                }
-
-                case FROG ->
-                {
-                    var variant = ((FrogWatcher) watcher).getVariant().getKey().asString();
-                    rawCompound.putString("variant", variant);
-                }
-
-                case GOAT ->
-                {
-                    var goatWatcher = ((GoatWatcher) watcher);
-
-                    var hasLeftHorn = goatWatcher.hasLeftHorn();
-                    var hasRightHorn = goatWatcher.hasRightHorn();
-                    var isScreaming = goatWatcher.isScreaming();
-
-                    rawCompound.putBoolean("HasLeftHorn", hasLeftHorn);
-                    rawCompound.putBoolean("HasRightHorn", hasRightHorn);
-                    rawCompound.putBoolean("IsScreamingGoat", isScreaming);
-                }
-
-                case PANDA ->
-                {
-                    var pandaWatcher = ((PandaWatcher) watcher);
-                    var mainGene = pandaWatcher.getMainGene();
-                    var hiddenGene = pandaWatcher.getHiddenGene();
-
-                    rawCompound.putString("MainGene", mainGene.toString().toLowerCase());
-                    rawCompound.putString("HiddenGene", hiddenGene.toString().toLowerCase());
-                }
-            }
-        }
+            rawCompound.merge(state.getDisguiseWrapper().getCompound());
 
         return cullNBT(rawCompound);
     }
@@ -358,15 +352,15 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
     public boolean canConstruct(DisguiseInfo info, Entity targetEntity, DisguiseState theirState)
     {
         return theirState != null
-                ? theirState.getDisguise().getType().getEntityType().equals(info.getEntityType())
+                ? theirState.getDisguiseWrapper().getEntityType().equals(info.getEntityType())
                 : targetEntity.getType().equals(info.getEntityType());
     }
 
     @Override
-    protected boolean canCopyDisguise(DisguiseInfo info, Entity targetEntity,
-                                      @Nullable DisguiseState theirDisguiseState, @NotNull Disguise theirDisguise)
+    protected boolean canCloneDisguise(DisguiseInfo info, Entity targetEntity,
+                                       @NotNull DisguiseState theirDisguiseState, @NotNull DisguiseWrapper<?> theirDisguise)
     {
-        return theirDisguise.getType().getEntityType().equals(info.getEntityType());
+        return theirDisguise.getEntityType().equals(info.getEntityType());
     }
 
     @Resolved

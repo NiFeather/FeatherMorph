@@ -8,9 +8,12 @@ import java.util.ArrayList;
 
 public enum ConfigOption
 {
+    PLUGIN_PREFIX(ConfigNode.create().append("message_pattern"), "<color:#dddddd>≡ FM » <message>"),
+
     ALLOW_HEAD_MORPH(ConfigNode.create().append("allowHeadMorph"), true),
-    ALLOW_CHAT_OVERRIDE(ConfigNode.create().append("chatOverride").append("allowOverride"), false),
+    ALLOW_CHAT_OVERRIDE(ConfigNode.create().append("chatOverride").append("allowOverride"), true),
     CHAT_OVERRIDE_USE_CUSTOM_RENDERER(ConfigNode.create().append("chatOverride").append("UseCustomRenderer"), true),
+    CHAT_OVERRIDE_DEFAULT_PATTERN(ConfigNode.create().append("chatOverride").append("default_pattern"), "<<who>> <message>"),
 
     SKILL_COOLDOWN_ON_DAMAGE(ConfigNode.create().append("cooldown_on_damage"), 15),
 
@@ -19,6 +22,8 @@ public enum ConfigOption
     SKILL_ITEM(ConfigNode.create().append("skill_item"), "minecraft:feather"),
 
     ARMORSTAND_SHOW_ARMS(ConfigNode.create().append("armorstand_show_arms"), true),
+
+    MODIFY_BOUNDING_BOX(ConfigNode.create().append("modify_bounding_boxes"), false),
 
     UNMORPH_ON_DEATH(ConfigNode.create().append("unmorph_on_death"), true),
 
@@ -39,6 +44,9 @@ public enum ConfigOption
     MIRROR_BEHAVIOR_DROP(interactionMirrorBehaviorNode().append("allow_drop"), false),
     MIRROR_BEHAVIOR_HOTBAR(interactionMirrorBehaviorNode().append("hotbar"), false),
 
+    MIRROR_LOG_OPERATION(interactionMirrorNode().append("log_operations"), false),
+    MIRROR_LOG_CLEANUP_DATE(interactionMirrorNode().append("log_cleanup"), 7),
+
     MIRROR_SELECTION_MODE(interactionMirrorNode().append("selection_mode"), InteractionMirrorProcessor.InteractionMirrorSelectionMode.BY_NAME),
 
     BANNED_DISGUISES(ConfigNode.create().append("bannedDisguises"), new ArrayList<String>()),
@@ -48,6 +56,10 @@ public enum ConfigOption
     HEALTH_SCALE_MAX_HEALTH(healthScaleNode().append("max_health"), 60),
 
     DISPLAY_BOSSBAR(bossbarNode().append("enabled"), true),
+
+    FLYABILITY_EXHAUSTION_BASE(flyAbilityNode().append("exhaustion_base"), 0.005),
+    FLYABILITY_USE_INSTANTSPEED(flyAbilityNode().append("use_instant_speed"), true),
+    FLYABILITY_IDLE_CONSUME(flyAbilityNode().append("idle_consumption"), true),
 
     @Deprecated
     ALLOW_LD_DISGUISES(ConfigNode.create().append("enable_ld_custom_disguises"), false, true),
@@ -59,6 +71,8 @@ public enum ConfigOption
     BLACKLIST_PATTERNS(nbtBlacklistNode().append("patterns"), NbtUtils.defaultBlacklistedPatterns),
 
     BLACKLIST_TAGS(nbtBlacklistNode().append("names"), NbtUtils.defaultBlacklistedTags),
+
+    AMBIENT_FREQUENCY(ambientSoundNode().append("frequency"), 1D),
 
     VERSION(ConfigNode.create().append("version"), 0);
 
@@ -116,5 +130,13 @@ public enum ConfigOption
     private static ConfigNode healthScaleNode()
     {
         return ConfigNode.create().append("health_scale");
+    }
+    private static ConfigNode ambientSoundNode()
+    {
+        return ConfigNode.create().append("ambient_sounds");
+    }
+    private static ConfigNode flyAbilityNode()
+    {
+        return ConfigNode.create().append("flying");
     }
 }

@@ -187,6 +187,12 @@ public class MorphStrings extends AbstractMorphStrings
                 "<color:red>客户端模组版本不匹配");
     }
 
+    public static FormattableMessage noEnoughSpaceString()
+    {
+        return getFormattable(getKey("no_enough_space"),
+                "<color:red>空间太过狭小，无法进行伪装！");
+    }
+
     private static String getKey(String key)
     {
         return "morph." + key;

@@ -1,18 +1,20 @@
 package xiamomc.morph;
 
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.scoreboard.Scoreboard;
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.ApiStatus;
 import xiamomc.morph.abilities.AbilityHandler;
-import xiamomc.morph.commands.MorphCommandHelper;
+import xiamomc.morph.commands.MorphCommandManager;
 import xiamomc.morph.config.MorphConfigManager;
-import xiamomc.morph.events.*;
+import xiamomc.morph.events.CommonEventProcessor;
+import xiamomc.morph.events.InteractionMirrorProcessor;
+import xiamomc.morph.events.PlayerTracker;
+import xiamomc.morph.events.PluginEventListener;
 import xiamomc.morph.interfaces.IManagePlayerData;
 import xiamomc.morph.interfaces.IManageRequests;
 import xiamomc.morph.messages.MessageUtils;
@@ -21,18 +23,32 @@ import xiamomc.morph.messages.vanilla.VanillaMessageStore;
 import xiamomc.morph.misc.PlayerOperationSimulator;
 import xiamomc.morph.misc.integrations.gsit.GSitCompactProcessor;
 import xiamomc.morph.misc.integrations.placeholderapi.PlaceholderIntegration;
-import xiamomc.morph.network.MorphClientHandler;
+import xiamomc.morph.network.server.MorphClientHandler;
 import xiamomc.morph.skills.MorphSkillHandler;
-import xiamomc.morph.storage.skill.SkillConfigurationStore;
+import xiamomc.morph.storage.skill.SkillAbilityConfigurationStore;
 import xiamomc.pluginbase.Command.CommandHelper;
-import xiamomc.pluginbase.XiaMoJavaPlugin;
 import xiamomc.pluginbase.Messages.MessageStore;
-
-import java.io.File;
-import java.net.URI;
+import xiamomc.pluginbase.XiaMoJavaPlugin;
 
 public final class MorphPlugin extends XiaMoJavaPlugin
 {
+    private static MorphPlugin instance;
+
+    /**
+     * 仅当当前对象无法继承MorphPluginObject或不需要完全继承MorphPluginObject时使用
+     * @return 插件的实例
+     */
+    @Deprecated
+    public static MorphPlugin getInstance()
+    {
+        return instance;
+    }
+
+    public MorphPlugin()
+    {
+        instance = this;
+    }
+
     public static String getMorphNameSpace()
     {
         return "morphplugin";
@@ -44,7 +60,7 @@ public final class MorphPlugin extends XiaMoJavaPlugin
         return getMorphNameSpace();
     }
 
-    private final CommandHelper<MorphPlugin> cmdHelper = new MorphCommandHelper();
+    private final CommandHelper<MorphPlugin> cmdHelper = new MorphCommandManager();
 
     private MorphManager morphManager;
 
@@ -60,10 +76,16 @@ public final class MorphPlugin extends XiaMoJavaPlugin
 
     private MorphClientHandler clientHandler;
 
+    private Metrics metrics;
+
+    private InteractionMirrorProcessor mirrorProcessor;
+
     @Override
     public void onEnable()
     {
         super.onEnable();
+
+        this.metrics = new Metrics(this, 18062);
 
         pluginManager = Bukkit.getPluginManager();
 
@@ -71,6 +93,7 @@ public final class MorphPlugin extends XiaMoJavaPlugin
 
         var playerTracker = new PlayerTracker();
         var pluginEventListener = new PluginEventListener();
+
         pluginEventListener.onPluginEnable(this::onPluginEnable);
 
         //缓存依赖
@@ -90,11 +113,13 @@ public final class MorphPlugin extends XiaMoJavaPlugin
         dependencyManager.cacheAs(MorphConfigManager.class, new MorphConfigManager(this));
         dependencyManager.cache(playerTracker);
 
-        dependencyManager.cache(new SkillConfigurationStore());
+        dependencyManager.cache(new SkillAbilityConfigurationStore());
 
         dependencyManager.cache(new MessageUtils());
 
         dependencyManager.cache(new PlayerOperationSimulator());
+
+        mirrorProcessor = new InteractionMirrorProcessor();
 
         //注册EventProcessor
         this.schedule(() ->
@@ -103,7 +128,7 @@ public final class MorphPlugin extends XiaMoJavaPlugin
                     {
                             playerTracker,
                             pluginEventListener,
-                            new InteractionMirrorProcessor(),
+                            mirrorProcessor,
                             new CommonEventProcessor(),
                     });
 
@@ -112,6 +137,15 @@ public final class MorphPlugin extends XiaMoJavaPlugin
 
             clientHandler.sendReAuth(Bukkit.getOnlinePlayers());
         });
+    }
+
+    @ApiStatus.Internal
+    public void crash(Throwable t)
+    {
+        logger.error(t.getLocalizedMessage());
+        t.printStackTrace();
+
+        this.onDisable();
     }
 
     @Override
@@ -128,7 +162,13 @@ public final class MorphPlugin extends XiaMoJavaPlugin
                 placeholderIntegration.unregister();
 
             if (clientHandler != null)
-                clientHandler.getClientPlayers().forEach(clientHandler::unInitializePlayer);
+                clientHandler.getConnectedPlayers().forEach(clientHandler::disconnect);
+
+            if (metrics != null)
+                metrics.shutdown();
+
+            if (mirrorProcessor != null)
+                mirrorProcessor.pushToLoggingBase();
         }
         catch (Exception e)
         {

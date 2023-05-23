@@ -17,8 +17,8 @@ import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.SkillStrings;
-import xiamomc.morph.utilities.DisguiseUtils;
 import xiamomc.morph.storage.skill.ISkillOption;
+import xiamomc.morph.utilities.DisguiseUtils;
 
 import java.util.List;
 

@@ -1,14 +1,18 @@
 package xiamomc.morph.utilities;
 
+import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
 import net.minecraft.core.BlockPos;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.Marker;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.player.Player;
 import org.bukkit.Bukkit;
-import org.bukkit.craftbukkit.v1_19_R2.CraftWorld;
+import org.bukkit.craftbukkit.v1_19_R3.CraftWorld;
 import org.bukkit.entity.EntityType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -38,10 +42,43 @@ public class EntityTypeUtils
     }
 
     private static final Map<EntityType, Class<? extends Entity>> nmsClassMap = new Object2ObjectOpenHashMap<>();
+    private static final Map<EntityType, SoundInfo> typeSoundMap = new Object2ObjectArrayMap<>();
 
     static
     {
         nmsClassMap.put(EntityType.PLAYER, Player.class);
+        typeSoundMap.put(EntityType.BEE, new SoundInfo(SoundEvents.BEE_LOOP, SoundSource.NEUTRAL, 120, 1));
+        typeSoundMap.put(EntityType.ENDER_DRAGON, new SoundInfo(SoundEvents.ENDER_DRAGON_AMBIENT, SoundSource.HOSTILE,100, 5));
+    }
+
+    public record SoundInfo(@Nullable SoundEvent sound, SoundSource source, int interval, float volume)
+    {
+    }
+
+    @NotNull
+    public static SoundInfo getSoundEvent(EntityType bukkitType)
+    {
+        var cache = typeSoundMap.getOrDefault(bukkitType, null);
+        if (cache != null) return cache;
+
+        var nmsType = getNmsType(bukkitType);
+
+        var serverWorld = ((CraftWorld) Bukkit.getWorlds().get(0)).getHandle();
+        var entity = nmsType.create(serverWorld, null, e -> e.remove(Entity.RemovalReason.DISCARDED), BlockPos.ZERO, MobSpawnType.COMMAND, false, false);
+
+        if (entity instanceof Mob mob)
+        {
+            var source = mob.getSoundSource();
+            var sound = mob.getAmbientSound0();
+            var interval = mob.getAmbientSoundInterval();
+
+            var rec = new SoundInfo(sound, source, interval, mob.getSoundVolume());
+            typeSoundMap.put(bukkitType, rec);
+
+            return rec;
+        }
+
+        return new SoundInfo(null, SoundSource.PLAYERS, Integer.MAX_VALUE, 1);
     }
 
     @Nullable
@@ -54,8 +91,8 @@ public class EntityTypeUtils
     @Nullable
     public static Class<? extends Entity> getNmsClass(@NotNull EntityType type)
     {
-        if (nmsClassMap.containsKey(type))
-            return nmsClassMap.getOrDefault(type, null);
+        var cache = nmsClassMap.getOrDefault(type, null);
+        if (cache != null) return cache;
 
         var nmsType = net.minecraft.world.entity.EntityType.byString(type.key().asString())
                 .orElse(null);
@@ -77,6 +114,28 @@ public class EntityTypeUtils
 
         nmsClassMap.put(type, entity.getClass());
         return entity.getClass();
+    }
+
+    public static boolean hasBabyVariant(EntityType type)
+    {
+        return switch (type)
+        {
+            case COW, SHEEP, BEE, CAMEL, CAT, CHICKEN, DONKEY,
+                    FOX, GOAT, HORSE, LLAMA, MUSHROOM_COW, MULE, TRADER_LLAMA, VILLAGER,
+                    OCELOT, PANDA, PIG, POLAR_BEAR, RABBIT, SNIFFER, TURTLE, WOLF,
+                    HOGLIN, ZOMBIE, ZOMBIE_VILLAGER, PIGLIN, HUSK, DROWNED, ZOMBIFIED_PIGLIN, STRIDER,
+                    SKELETON_HORSE, ZOMBIE_HORSE, ZOGLIN-> true;
+
+            default -> false;
+        };
+    }
+
+    public static boolean isZombie(EntityType type)
+    {
+        return type == EntityType.ZOMBIE
+                || type == EntityType.ZOMBIE_VILLAGER
+                || type == EntityType.DROWNED
+                || type == EntityType.HUSK;
     }
 
     public static boolean isZombiesHostile(EntityType type)
@@ -178,14 +237,23 @@ public class EntityTypeUtils
 
     public static Set<EntityType> takesDamageFromWater()
     {
-        return ObjectSet.of(EntityType.ENDERMAN, EntityType.BLAZE, EntityType.SNOWMAN);
+        return ObjectSet.of(EntityType.ENDERMAN, EntityType.BLAZE, EntityType.SNOWMAN, EntityType.STRIDER);
     }
 
     public static Set<EntityType> canBreatheUnderWater()
     {
         return ObjectSet.of(EntityType.COD, EntityType.SALMON, EntityType.PUFFERFISH, EntityType.TROPICAL_FISH,
                 EntityType.SQUID, EntityType.GLOW_SQUID,
-                EntityType.AXOLOTL, EntityType.GUARDIAN, EntityType.ELDER_GUARDIAN, EntityType.DOLPHIN);
+                EntityType.AXOLOTL, EntityType.GUARDIAN, EntityType.ELDER_GUARDIAN, EntityType.DOLPHIN,
+                EntityType.TADPOLE, EntityType.DROWNED);
+    }
+
+    public static Set<EntityType> dryOutInAir()
+    {
+        return ObjectSet.of(EntityType.COD, EntityType.SALMON, EntityType.PUFFERFISH, EntityType.TROPICAL_FISH,
+                EntityType.SQUID, EntityType.GLOW_SQUID,
+                EntityType.AXOLOTL, EntityType.GUARDIAN, EntityType.ELDER_GUARDIAN, EntityType.DOLPHIN,
+                EntityType.TADPOLE);
     }
 
     public static Set<EntityType> burnsUnderSun()
@@ -217,12 +285,16 @@ public class EntityTypeUtils
 
     public static Set<EntityType> noFallDamage()
     {
-        //列表里一些在canFly的列表里的类型本来就不会让玩家受到摔落伤害，但还是加上比较好
         return ObjectSet.of(EntityType.IRON_GOLEM, EntityType.CAT,
                 EntityType.OCELOT, EntityType.SNOWMAN, EntityType.MAGMA_CUBE,
-                EntityType.BAT, EntityType.BLAZE, EntityType.ENDER_DRAGON,
+                EntityType.CHICKEN, EntityType.SHULKER);
+    }
+
+    public static Set<EntityType> noFallDamage1()
+    {
+        return ObjectSet.of(EntityType.BAT, EntityType.BLAZE, EntityType.ENDER_DRAGON,
                 EntityType.GHAST, EntityType.PARROT, EntityType.VEX,
-                EntityType.WITHER, EntityType.CHICKEN, EntityType.SHULKER);
+                EntityType.WITHER);
     }
 
     public static EntityType reducesMagicDamage()
@@ -243,6 +315,12 @@ public class EntityTypeUtils
     public static EntityType hasSnowTrail()
     {
         return EntityType.SNOWMAN;
+    }
+
+    public static boolean saddleable(EntityType type)
+    {
+        return type == EntityType.HORSE || type == EntityType.MULE || type == EntityType.DONKEY
+                || type == EntityType.CAMEL || type == EntityType.SKELETON_HORSE || type == EntityType.ZOMBIE_HORSE;
     }
 
     public static boolean hasBossBar(EntityType type)

@@ -104,6 +104,12 @@ public class CommandStrings extends AbstractMorphStrings
                 "<color:red>未能将<what>的伪装给与<who>，他是否已经拥有此伪装？");
     }
 
+    public static FormattableMessage morphedSomeoneString()
+    {
+        return getFormattable(getKey("morph_someone_success"),
+                "成功将<who>伪装为<what>！");
+    }
+
     public static FormattableMessage unMorphedSomeoneString()
     {
         return getFormattable(getKey("unmorph_someone_success"),
@@ -128,6 +134,22 @@ public class CommandStrings extends AbstractMorphStrings
         return getFormattable(getKey("option_get"),
                 "<what>已设置为<value>");
     }
+
+    //region Illegal arguments
+
+    public static FormattableMessage illegalArgumentString()
+    {
+        return getFormattable(getKey("illegal_argument"),
+                "无效的参数: <detail>");
+    }
+
+    public static FormattableMessage argumentTypeErrorString()
+    {
+        return getFormattable(getKey("illegal_argument.type_error"),
+                "参数类型应为<type>");
+    }
+
+    //endregion Illegal arguments
 
     private static String getKey(String key)
     {

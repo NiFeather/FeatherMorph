@@ -2,6 +2,8 @@ package xiamomc.morph.abilities.options;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import org.bukkit.entity.EntityType;
+import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.storage.skill.ISkillOption;
 
 public class HealsFromEntityOption implements ISkillOption
@@ -37,6 +39,9 @@ public class HealsFromEntityOption implements ISkillOption
     @Expose
     @SerializedName("entity_type")
     public String entityIdentifier;
+
+    @Nullable
+    public EntityType entityType;
 
     public HealsFromEntityOption()
     {

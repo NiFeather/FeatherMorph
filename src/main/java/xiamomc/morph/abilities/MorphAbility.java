@@ -48,27 +48,13 @@ public abstract class MorphAbility<T extends ISkillOption> extends MorphPluginOb
         return appliedPlayers;
     }
 
-    /**
-     * 根据情况返回特定的值
-     *
-     * @param value 首选值
-     * @param p 判断条件
-     * @param fallbackValue 后备值
-     * @return 若value满足判断条件，则返回value，否则返回fallbackValue
-     */
-    protected <R> R getOr(R value, Predicate<R> p, R fallbackValue)
-    {
-        if (p.test(value))
-            return value;
-        else
-            return fallbackValue;
-    }
-
+    @NotNull
     protected abstract T createOption();
 
     private final T option = createOption();
 
     @Override
+    @NotNull
     public T getDefaultOption()
     {
         return option;
@@ -83,10 +69,33 @@ public abstract class MorphAbility<T extends ISkillOption> extends MorphPluginOb
     protected T getOptionFor(DisguiseState state)
     {
         return getOr(
-                options.get(state.getDisguiseIdentifier()),
+                () -> options.get(state.getDisguiseIdentifier()),
                 Objects::nonNull,
-                options.get(state.getSkillLookupIdentifier())
+                () -> options.get(state.getSkillLookupIdentifier())
         );
+    }
+
+    public interface Returner<R>
+    {
+        R apply();
+    }
+
+    /**
+     * 根据情况返回特定的值
+     *
+     * @param value 首选值
+     * @param p 判断条件
+     * @param fallbackValue 后备值
+     * @return 若value满足判断条件，则返回value，否则返回fallbackValue
+     */
+    protected <R> R getOr(Returner<R> value, Predicate<R> p, Returner<R> fallbackValue)
+    {
+        var val = value.apply();
+
+        if (p.test(val))
+            return val;
+        else
+            return fallbackValue.apply();
     }
 
     protected final Map<String, T> options = new Object2ObjectOpenHashMap<>();

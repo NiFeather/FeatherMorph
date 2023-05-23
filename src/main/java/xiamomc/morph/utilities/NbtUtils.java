@@ -1,12 +1,13 @@
 package xiamomc.morph.utilities;
 
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.StringTagVisitor;
-import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.TagParser;
 import net.minecraft.server.commands.data.EntityDataAccessor;
-import org.bukkit.craftbukkit.v1_19_R2.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_19_R3.entity.CraftEntity;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -47,6 +48,51 @@ public class NbtUtils
 
         //StringNbtWriter#apply(NbtElement)
         return visitor.visit(compound);
+    }
+
+    /**
+     *
+     * @param input The input NBT string
+     * @return Null if invalid of illegal
+     */
+    @Nullable
+    public static CompoundTag toCompoundTag(@Nullable String input)
+    {
+        if (input == null || input.isEmpty()) return null;
+
+        try
+        {
+            return TagParser.parseTag(input);
+        }
+        catch (Throwable t)
+        {
+            return null;
+        }
+    }
+
+    @Nullable
+    @Contract("_, false -> !null; _, true -> _")
+    public static CompoundTag toCompoundTag(@Nullable String input, boolean nullIfInvalid)
+    {
+        var result = toCompoundTag(input);
+
+        if (result != null) return result;
+
+        return nullIfInvalid ? null : new CompoundTag();
+    }
+
+    public static boolean isBabyForType(EntityType type, CompoundTag compoundTag)
+    {
+        var ageable = EntityTypeUtils.hasBabyVariant(type);
+
+        if (!ageable) return false;
+
+        if (EntityTypeUtils.isZombie(type) || type == EntityType.PIGLIN)
+            return compoundTag.getBoolean("IsBaby");
+
+        var val = compoundTag.getInt("Age");
+
+        return val < 0;
     }
 
     public static List<String> defaultBlacklistedPatterns = List.of(

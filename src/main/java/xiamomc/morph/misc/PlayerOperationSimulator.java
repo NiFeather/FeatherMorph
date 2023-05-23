@@ -2,7 +2,7 @@ package xiamomc.morph.misc;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.core.Direction;
-import net.minecraft.server.level.*;
+import net.minecraft.server.level.ServerPlayerGameMode;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
@@ -11,11 +11,9 @@ import org.bukkit.FluidCollisionMode;
 import org.bukkit.GameMode;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.craftbukkit.v1_19_R2.CraftWorld;
-import org.bukkit.craftbukkit.v1_19_R2.block.CraftBlock;
-import org.bukkit.craftbukkit.v1_19_R2.entity.CraftEntity;
-import org.bukkit.craftbukkit.v1_19_R2.entity.CraftPlayer;
-import org.bukkit.craftbukkit.v1_19_R2.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_19_R3.block.CraftBlock;
+import org.bukkit.craftbukkit.v1_19_R3.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_19_R3.inventory.CraftItemStack;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
@@ -28,7 +26,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
-import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
@@ -124,9 +121,11 @@ public class PlayerOperationSimulator extends MorphPluginObject
         //获取方块破坏信息
         var destroyHandler = playerHandlerMap.getOrDefault(player, null);
 
+        //如果此时没有目标方块，那么移除此破坏信息的目标
         if ((targetBlock == null || targetEntity != null) && destroyHandler != null)
             destroyHandler.changeBlock(null);
 
+        //如果目标实体不为null，则攻击该实体
         if (targetEntity != null)
         {
             if (player.getLocation().distance(targetEntity.getLocation()) > entityReachDistance)
@@ -227,6 +226,7 @@ public class PlayerOperationSimulator extends MorphPluginObject
                                      EquipmentSlot.OFF_HAND);
         }
 
+        //尝试和方块互动
         if (targetBlock != null)
         {
             var loc = ((CraftBlock) targetBlock).getPosition();
@@ -253,14 +253,10 @@ public class PlayerOperationSimulator extends MorphPluginObject
                         new Vec3(targetBlock.getX(), targetBlock.getY(), targetBlock.getZ()),
                         targetBlockDirection, loc, false);
 
-                if (this.tryUseItemOnBlock(player, targetBlock, bukkitFace, itemInMainHand, InteractionHand.MAIN_HAND, moving))
-                {
-                    return SimulateResult.success(EquipmentSlot.HAND);
-                }
-                else if (this.tryUseItemOnBlock(player, targetBlock, bukkitFace, itemInOffHand, InteractionHand.OFF_HAND, moving))
-                {
-                    return SimulateResult.success(EquipmentSlot.OFF_HAND);
-                }
+                if (this.tryUseItemOnBlock(player, itemInMainHand, InteractionHand.MAIN_HAND, moving))
+                    return SimulateResult.success(EquipmentSlot.HAND, true);
+                else if (this.tryUseItemOnBlock(player, itemInOffHand, InteractionHand.OFF_HAND, moving))
+                    return SimulateResult.success(EquipmentSlot.OFF_HAND, true);
             }
         }
 
@@ -290,10 +286,10 @@ public class PlayerOperationSimulator extends MorphPluginObject
         if (event.useItemInHand() != Event.Result.DENY)
         {
             var record = NmsRecord.of(player);
-            var manager = record.interactManager;
+            var manager = record.interactManager();
 
             //ServerPlayerGameMode.useItem()
-            return manager.useItem(record.nmsPlayer, record.nmsWorld, CraftItemStack.asNMSCopy(bukkitItem), hand).consumesAction();
+            return manager.useItem(record.nmsPlayer(), record.nmsWorld(), CraftItemStack.asNMSCopy(bukkitItem), hand).shouldAwardStats();
         }
 
         return false;
@@ -303,30 +299,21 @@ public class PlayerOperationSimulator extends MorphPluginObject
      * 尝试使某个玩家对某个方块使用某个物品
      *
      * @param player 目标玩家
-     * @param targetBlock 目标方块
-     * @param bukkitFace 朝向
      * @param bukkitItem 物品
      * @param nmsHand 要使用的 {@link InteractionHand}
      * @param moving 要提供给NMS方法的 {@link BlockHitResult}
      * @return 操作是否成功
      */
-    private boolean tryUseItemOnBlock(Player player, Block targetBlock, BlockFace bukkitFace,
+    private boolean tryUseItemOnBlock(Player player,
                                       ItemStack bukkitItem, InteractionHand nmsHand,
                                       BlockHitResult moving)
     {
-        var event = new PlayerInteractEvent(player, Action.RIGHT_CLICK_BLOCK, bukkitItem, targetBlock, bukkitFace);
-        pluginManager.callEvent(event);
+        var record = NmsRecord.of(player);
 
-        if (event.useInteractedBlock() != Event.Result.DENY)
-        {
-            var record = NmsRecord.of(player);
+        ServerPlayerGameMode manager = record.interactManager();
 
-            ServerPlayerGameMode manager = record.interactManager;
-
-            return manager.useItemOn(record.nmsPlayer, record.nmsWorld, CraftItemStack.asNMSCopy(bukkitItem), nmsHand, moving).consumesAction();
-        }
-
-        return false;
+        //ServerPlayerGameMode里已经调用了PlayerInteractEvent，因此不需要再重复调用一遍
+        return manager.useItemOn(record.nmsPlayer(), record.nmsWorld(), CraftItemStack.asNMSCopy(bukkitItem), nmsHand, moving).shouldAwardStats();
     }
 
     /**
@@ -354,19 +341,19 @@ public class PlayerOperationSimulator extends MorphPluginObject
             var record = NmsRecord.of(player, targetEntity);
 
             //EntityPlayer -> ServerPlayer in mojang mappings
-            var playerHandle = record.nmsPlayer;
+            var playerHandle = record.nmsPlayer();
 
             //ServerLevel in mojang mappings
-            var worldHandle = record.nmsWorld;
-            var entityHandle = record.nmsEntity;
-            var manager = record.interactManager;
+            var worldHandle = record.nmsWorld();
+            var entityHandle = record.nmsEntity();
+            var manager = record.interactManager();
 
             var vec = new Vec3(hitPos.getX(), hitPos.getY(), hitPos.getZ());
 
             assert entityHandle != null;
-            return entityHandle.interactAt(playerHandle, vec, hand).consumesAction()
-                    || playerHandle.interactOn(entityHandle, hand).consumesAction()
-                    || manager.useItem(playerHandle, worldHandle, CraftItemStack.asNMSCopy(bukkitItem), hand).consumesAction();
+            return entityHandle.interactAt(playerHandle, vec, hand).shouldAwardStats()
+                    || playerHandle.interactOn(entityHandle, hand).shouldAwardStats()
+                    || manager.useItem(playerHandle, worldHandle, CraftItemStack.asNMSCopy(bukkitItem), hand).shouldAwardStats();
         }
 
         return false;
@@ -378,11 +365,15 @@ public class PlayerOperationSimulator extends MorphPluginObject
      * @param success 是否成功
      * @param hand 与 {@link InteractionHand} 对应的 {@link EquipmentSlot}
      */
-    public record SimulateResult(boolean success, EquipmentSlot hand)
+    public record SimulateResult(boolean success, EquipmentSlot hand, boolean forceSwing)
     {
         public static SimulateResult success(EquipmentSlot hand)
         {
             return of(true, hand);
+        }
+        public static SimulateResult success(EquipmentSlot hand, boolean clickedOnBlock)
+        {
+            return of(true, hand, clickedOnBlock);
         }
 
         public static SimulateResult fail()
@@ -392,39 +383,12 @@ public class PlayerOperationSimulator extends MorphPluginObject
 
         public static SimulateResult of(boolean success, EquipmentSlot hand)
         {
-            return new SimulateResult(success, hand);
-        }
-    }
-
-    /**
-     * NMS Record for a player
-     *
-     * @param nmsPlayer ServerPlayer in fabric mojang mappings
-     * @param nmsWorld ServerLevel in fabric mojang mappings
-     * @param nmsEntity ??? in fabric mojang mappings
-     * @param interactManager GameMode in fabric mojang mappings
-     */
-    public record NmsRecord(ServerPlayer nmsPlayer, ServerLevel nmsWorld,
-                             @Nullable net.minecraft.world.entity.Entity nmsEntity,
-                             ServerPlayerGameMode interactManager)
-    {
-        public static NmsRecord of(Player player)
-        {
-            var craftPlayer = (CraftPlayer) player;
-
-            return new NmsRecord(craftPlayer.getHandle(), ((CraftWorld) craftPlayer.getWorld()).getHandle(),
-                    null, craftPlayer.getHandle().gameMode);
+            return new SimulateResult(success, hand, false);
         }
 
-        public static NmsRecord of(Player player, @Nullable Entity targetEntity)
+        public static SimulateResult of(boolean success, EquipmentSlot hand, boolean clickedOnBlock)
         {
-            if (targetEntity == null) return of(player);
-
-            var craftPlayer = (CraftPlayer) player;
-            var craftEntity = (CraftEntity) targetEntity;
-
-            return new NmsRecord(craftPlayer.getHandle(), ((CraftWorld) craftPlayer.getWorld()).getHandle(),
-                    craftEntity.getHandle(), craftPlayer.getHandle().gameMode);
+            return new SimulateResult(success, hand, clickedOnBlock);
         }
     }
 }

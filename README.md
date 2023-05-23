@@ -9,12 +9,13 @@
 
 # FeatherMorph
 
-一个旨在提供诸多开箱即用功能的变形插件。
+[[English](./README_en.md)]
+
+一个适用于Paper的变形插件。
 
 ### 功能
-- [x] 最基础的伪装功能
-- [x] 玩家伪装、操作镜像与聊天覆盖
 - [x] 生物技能
+- [x] 玩家伪装、操作镜像与聊天覆盖
 - [x] **支持[客户端模组](https://github.com/XiaMoZhiShi/MorphPluginClient)**
 
 ### 依赖关系

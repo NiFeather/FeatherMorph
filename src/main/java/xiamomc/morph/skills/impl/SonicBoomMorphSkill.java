@@ -2,19 +2,19 @@ package xiamomc.morph.skills.impl;
 
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
-import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Particle;
-import org.bukkit.craftbukkit.v1_19_R2.entity.CraftLivingEntity;
-import org.bukkit.craftbukkit.v1_19_R2.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_19_R3.entity.CraftLivingEntity;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.misc.DisguiseState;
+import xiamomc.morph.misc.NmsRecord;
 import xiamomc.morph.skills.SkillType;
-import xiamomc.morph.skills.options.ExplosionConfiguration;
 import xiamomc.morph.skills.options.NoOpConfiguration;
-import xiamomc.morph.storage.skill.SkillConfiguration;
+import xiamomc.morph.storage.skill.SkillAbilityConfiguration;
+import xiamomc.morph.utilities.DamageSourceUtils;
 
 public class SonicBoomMorphSkill extends DelayedMorphSkill<NoOpConfiguration>
 {
@@ -22,7 +22,7 @@ public class SonicBoomMorphSkill extends DelayedMorphSkill<NoOpConfiguration>
     public static int defaultCooldown = 34 + 20 * 3;
 
     @Override
-    protected ExecuteResult preExecute(Player player, DisguiseState state, SkillConfiguration configuration, NoOpConfiguration option)
+    protected ExecuteResult preExecute(Player player, DisguiseState state, SkillAbilityConfiguration configuration, NoOpConfiguration option)
     {
         playSoundToNearbyPlayers(player, 160,
                 Key.key("minecraft", "entity.warden.sonic_charge"), Sound.Source.HOSTILE);
@@ -31,13 +31,13 @@ public class SonicBoomMorphSkill extends DelayedMorphSkill<NoOpConfiguration>
     }
 
     @Override
-    protected int getExecuteDelay(SkillConfiguration configuration, NoOpConfiguration option)
+    protected int getExecuteDelay(SkillAbilityConfiguration configuration, NoOpConfiguration option)
     {
         return 34;
     }
 
     @Override
-    protected void executeDelayedSkill(Player player, DisguiseState state, SkillConfiguration configuration, NoOpConfiguration option)
+    protected void executeDelayedSkill(Player player, DisguiseState state, SkillAbilityConfiguration configuration, NoOpConfiguration option)
     {
         var location = player.getEyeLocation().toVector();
         var direction = player.getEyeLocation().getDirection();
@@ -61,10 +61,12 @@ public class SonicBoomMorphSkill extends DelayedMorphSkill<NoOpConfiguration>
 
             if (entity != null && entity.getLocation().distance(player.getLocation()) <= i)
             {
-                var nmsPlayer = ((CraftPlayer) player).getHandle();
-                var nmsEntity = entity.getHandle();
+                var record = NmsRecord.of(player, entity);
+                var nmsPlayer = record.nmsPlayer();
+                var nmsEntity = (LivingEntity)record.nmsEntity();
+                var sources = record.nmsWorld().damageSources();
 
-                nmsEntity.hurt(DamageSource.sonicBoom(nmsPlayer), 10.0F);
+                nmsEntity.hurt(DamageSourceUtils.toNotScalable(sources.sonicBoom(nmsPlayer)), 10.0F);
 
                 //From SonicBoom
                 double d = 0.5D * (1.0D - nmsEntity.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE));

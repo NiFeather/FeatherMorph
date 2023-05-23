@@ -22,7 +22,6 @@ import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Bindables.Bindable;
 
 import java.util.List;
-import java.util.Objects;
 
 public class BossbarAbility extends MorphAbility<BossbarOption>
 {
@@ -41,7 +40,7 @@ public class BossbarAbility extends MorphAbility<BossbarOption>
     }
 
     @Override
-    protected BossbarOption createOption()
+    protected @NotNull BossbarOption createOption()
     {
         return new BossbarOption();
     }
@@ -88,7 +87,7 @@ public class BossbarAbility extends MorphAbility<BossbarOption>
     {
         if (super.handle(player, state))
         {
-            if (appliedPlayers.contains(player))
+            if (appliedPlayers.contains(player) && plugin.getCurrentTick() % 4 == 0)
             {
                 var option = this.getOptionFor(state);
 
@@ -118,9 +117,9 @@ public class BossbarAbility extends MorphAbility<BossbarOption>
                     playersToShow.forEach(p -> p.showBossBar(bossbar));
                     playersToHide.forEach(p -> p.hideBossBar(bossbar));
                 }
-
-                return true;
             }
+
+            return true;
         }
 
         return false;

@@ -5,13 +5,12 @@ import it.unimi.dsi.fastutil.objects.ObjectList;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphPluginObject;
-import xiamomc.morph.commands.MorphCommandHelper;
+import xiamomc.morph.commands.MorphCommandManager;
 import xiamomc.morph.commands.subcommands.plugin.helpsections.Entry;
 import xiamomc.morph.commands.subcommands.plugin.helpsections.Section;
 import xiamomc.morph.messages.HelpStrings;
@@ -40,7 +39,7 @@ public class HelpSubCommand extends MorphPluginObject implements ISubCommand
     }
 
     @Resolved
-    private MorphCommandHelper cmdHelper;
+    private MorphCommandManager cmdHelper;
 
     private final List<Section> commandSections = new ObjectArrayList<>();
 

@@ -7,16 +7,18 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphManager;
+import xiamomc.morph.abilities.AbilityHandler;
 import xiamomc.morph.abilities.AbilityType;
 import xiamomc.morph.abilities.options.*;
+import xiamomc.morph.skills.impl.SonicBoomMorphSkill;
 import xiamomc.morph.skills.options.EffectConfiguration;
 import xiamomc.morph.skills.options.ExplosionConfiguration;
 import xiamomc.morph.skills.options.ProjectiveConfiguration;
 import xiamomc.morph.skills.options.TeleportConfiguration;
+import xiamomc.morph.storage.skill.SkillAbilityConfiguration;
+import xiamomc.morph.storage.skill.SkillAbilityConfigurationContainer;
 import xiamomc.morph.utilities.DisguiseUtils;
 import xiamomc.morph.utilities.EntityTypeUtils;
-import xiamomc.morph.skills.impl.SonicBoomMorphSkill;
-import xiamomc.morph.storage.skill.*;
 
 import java.util.List;
 import java.util.Set;
@@ -24,7 +26,7 @@ import java.util.function.Consumer;
 
 public class DefaultConfigGenerator
 {
-    private static SkillConfigurationContainer cachedContainer = null;
+    private static SkillAbilityConfigurationContainer cachedContainer = null;
 
     /**
      * 添加一个技能配置
@@ -33,19 +35,19 @@ public class DefaultConfigGenerator
      * @param mobId 实体ID
      * @param cd CD时间
      * @param skillIdentifier 技能ID
-     * @param c 针对此{@link SkillConfiguration}的操作
+     * @param c 针对此{@link SkillAbilityConfiguration}的操作
      * @return 技能配置
      */
-    private static SkillConfiguration addSkillConfiguration(List<SkillConfiguration> targetList, String mobId,
-                                                            int cd, NamespacedKey skillIdentifier, @Nullable Consumer<SkillConfiguration> c)
+    private static SkillAbilityConfiguration addSkillConfiguration(List<SkillAbilityConfiguration> targetList, String mobId,
+                                                                   int cd, NamespacedKey skillIdentifier, @Nullable Consumer<SkillAbilityConfiguration> c)
     {
         var cfg = targetList.stream()
                 .filter(configuration -> configuration.getIdentifier().equals(mobId))
                 .findFirst().orElse(null);
 
-        SkillConfiguration config;
+        SkillAbilityConfiguration config;
 
-        if (cfg == null) config = new SkillConfiguration(mobId, cd, skillIdentifier);
+        if (cfg == null) config = new SkillAbilityConfiguration(mobId, cd, skillIdentifier);
         else config = cfg;
 
         if (c != null)
@@ -57,8 +59,8 @@ public class DefaultConfigGenerator
         return config;
     }
 
-    private static SkillConfiguration addSkillConfiguration(List<SkillConfiguration> targetList, EntityType entityType,
-                                                            int cd, NamespacedKey skillIdentifier, @Nullable Consumer<SkillConfiguration> c)
+    private static SkillAbilityConfiguration addSkillConfiguration(List<SkillAbilityConfiguration> targetList, EntityType entityType,
+                                                                   int cd, NamespacedKey skillIdentifier, @Nullable Consumer<SkillAbilityConfiguration> c)
     {
         return addSkillConfiguration(targetList, entityType.getKey().asString(), cd, skillIdentifier, c);
     }
@@ -72,15 +74,15 @@ public class DefaultConfigGenerator
      * @param skillIdentifier 技能ID
      * @return 技能配置
      */
-    private static SkillConfiguration addSkillConfiguration(List<SkillConfiguration> targetList, EntityType entityType,
-                                                            int cd, NamespacedKey skillIdentifier)
+    private static SkillAbilityConfiguration addSkillConfiguration(List<SkillAbilityConfiguration> targetList, EntityType entityType,
+                                                                   int cd, NamespacedKey skillIdentifier)
     {
         return addSkillConfiguration(targetList, entityType, cd, skillIdentifier, null);
     }
 
-    private static void addAbilityConfiguration(List<SkillConfiguration> targetList,
+    private static void addAbilityConfiguration(List<SkillAbilityConfiguration> targetList,
                                                 String mobId, NamespacedKey key,
-                                                @Nullable Consumer<SkillConfiguration> consumer)
+                                                @Nullable Consumer<SkillAbilityConfiguration> consumer)
     {
         var cfg = targetList.stream()
                 .filter(c -> c.getIdentifier().equals(mobId)).findFirst().orElse(null);
@@ -94,37 +96,37 @@ public class DefaultConfigGenerator
         cfg.addAbilityIdentifier(key);
     }
 
-    private static void addAbilityConfiguration(List<SkillConfiguration> targetList,
+    private static void addAbilityConfiguration(List<SkillAbilityConfiguration> targetList,
                                                 EntityType entityType, NamespacedKey key,
-                                                @Nullable Consumer<SkillConfiguration> consumer)
+                                                @Nullable Consumer<SkillAbilityConfiguration> consumer)
     {
         addAbilityConfiguration(targetList, entityType.getKey().asString(), key, consumer);
     }
 
-    private static void addAbilityConfiguration(List<SkillConfiguration> targetList,
+    private static void addAbilityConfiguration(List<SkillAbilityConfiguration> targetList,
                                                 EntityType entityType, NamespacedKey key)
     {
         addAbilityConfiguration(targetList, entityType, key, null);
     }
 
-    private static void addAbilityConfiguration(List<SkillConfiguration> targetList,
+    private static void addAbilityConfiguration(List<SkillAbilityConfiguration> targetList,
                                                 Set<EntityType> entityTypes, NamespacedKey key,
-                                                @Nullable Consumer<SkillConfiguration> consumer)
+                                                @Nullable Consumer<SkillAbilityConfiguration> consumer)
     {
         entityTypes.forEach(t -> addAbilityConfiguration(targetList, t, key, consumer));
     }
 
-    private static void addAbilityConfiguration(List<SkillConfiguration> targetList,
+    private static void addAbilityConfiguration(List<SkillAbilityConfiguration> targetList,
                                                 Set<EntityType> entityTypes, NamespacedKey key)
     {
         addAbilityConfiguration(targetList, entityTypes, key, null);
     }
 
-    public static SkillConfigurationContainer getDefaultSkillConfiguration()
+    public static SkillAbilityConfigurationContainer getDefaultSkillConfiguration()
     {
         if (cachedContainer != null) return cachedContainer;
 
-        var container = new SkillConfigurationContainer();
+        var container = new SkillAbilityConfigurationContainer();
         var skills = container.configurations;
 
         addSkillConfigurations(skills);
@@ -134,7 +136,7 @@ public class DefaultConfigGenerator
         return container;
     }
 
-    public static void addSkillConfigurations(List<SkillConfiguration> skills)
+    public static void addSkillConfigurations(List<SkillAbilityConfiguration> skills)
     {
         //伪装物品
         addSkillConfiguration(skills, EntityType.ARMOR_STAND, 20, SkillType.INVENTORY);
@@ -176,7 +178,7 @@ public class DefaultConfigGenerator
 
         //其他
         addSkillConfiguration(skills, EntityType.CREEPER, 80, SkillType.EXPLODE, c ->
-                c.addOption(SkillType.EXPLODE, new ExplosionConfiguration(true, 3, false, 30)));
+                c.addOption(SkillType.EXPLODE, new ExplosionConfiguration(true, 3, false, 30, "entity.creeper.primed")));
 
         addSkillConfiguration(skills, EntityType.ENDERMAN, 40, SkillType.TELEPORT, c ->
                 c.addOption(SkillType.TELEPORT, new TeleportConfiguration(32)));
@@ -186,7 +188,7 @@ public class DefaultConfigGenerator
         addSkillConfiguration(skills, EntityType.EVOKER, 100, SkillType.EVOKER);
     }
 
-    public static void addAbilityConfigurations(List<SkillConfiguration> skills)
+    public static void addAbilityConfigurations(List<SkillAbilityConfiguration> skills)
     {
         addAbilityConfiguration(skills, EntityTypeUtils.canFly(), AbilityType.CAN_FLY, c ->
         {
@@ -201,12 +203,18 @@ public class DefaultConfigGenerator
         addAbilityConfiguration(skills, EntityTypeUtils.hasFireResistance(), AbilityType.HAS_FIRE_RESISTANCE);
         addAbilityConfiguration(skills, EntityTypeUtils.takesDamageFromWater(), AbilityType.TAKES_DAMAGE_FROM_WATER);
         addAbilityConfiguration(skills, EntityTypeUtils.canBreatheUnderWater(), AbilityType.CAN_BREATHE_UNDER_WATER);
+        addAbilityConfiguration(skills, EntityTypeUtils.dryOutInAir(), AbilityType.DRYOUT_IN_AIR);
         addAbilityConfiguration(skills, EntityTypeUtils.burnsUnderSun(), AbilityType.BURNS_UNDER_SUN);
         addAbilityConfiguration(skills, EntityTypeUtils.alwaysNightVision(), AbilityType.ALWAYS_NIGHT_VISION);
         addAbilityConfiguration(skills, EntityTypeUtils.hasJumpBoost(), AbilityType.HAS_JUMP_BOOST);
         addAbilityConfiguration(skills, EntityTypeUtils.hasSmallJumpBoost(), AbilityType.HAS_SMALL_JUMP_BOOST);
         addAbilityConfiguration(skills, EntityTypeUtils.noFallDamage(), AbilityType.NO_FALL_DAMAGE);
         addAbilityConfiguration(skills, EntityTypeUtils.hasFeatherFalling(), AbilityType.HAS_FEATHER_FALLING);
+
+        addAbilityConfiguration(skills, EntityType.AXOLOTL, AbilityType.DRYOUT_IN_AIR, c ->
+        {
+            c.addOption(AbilityType.DRYOUT_IN_AIR, new DryoutAbilityOption(false));
+        });
 
         addAbilityConfiguration(skills, EntityType.HORSE, AbilityType.ATTRIBUTE, c ->
         {
@@ -220,6 +228,11 @@ public class DefaultConfigGenerator
                     AttributeModifyOption
                             .from(Attribute.GENERIC_MOVEMENT_SPEED, AttributeModifyOption.OperationType.multiply_base, -0.6)
                             .with(Attribute.GENERIC_KNOCKBACK_RESISTANCE, AttributeModifyOption.OperationType.add, 1d));
+        });
+
+        addAbilityConfiguration(skills, EntityType.IRON_GOLEM, AbilityType.EXTRA_KNOCKBACK, c ->
+        {
+            c.addOption(AbilityType.EXTRA_KNOCKBACK, ExtraKnockbackOption.from(0, 0.4D, 0));
         });
 
         addAbilityConfiguration(skills, EntityType.WARDEN, AbilityType.ATTRIBUTE, c ->

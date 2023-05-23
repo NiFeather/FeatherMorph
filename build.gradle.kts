@@ -8,7 +8,7 @@ import net.minecrell.pluginyml.bukkit.BukkitPluginDescription
 plugins {
     java
     `maven-publish`
-    id("io.papermc.paperweight.userdev") version "1.4.0"
+    id("io.papermc.paperweight.userdev") version "1.5.5"
     id("xyz.jpenilla.run-paper") version "2.0.1" // Adds runServer and runMojangMappedServer tasks for testing
     id("net.minecrell.plugin-yml.bukkit") version "0.5.2" // Generates plugin.yml
     id("com.github.johnrengelman.shadow") version "7.1.2" // Shadow PluginBase
@@ -42,8 +42,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly("io.papermc.paper:paper-api:${project.property("minecraft_version")}")
-    paperDevBundle("${project.property("minecraft_version")}")
+    paperweight.paperDevBundle("${project.property("minecraft_version")}")
 
     compileOnly("LibsDisguises:LibsDisguises:${project.property("ld_version")}")
     {
@@ -51,7 +50,21 @@ dependencies {
         exclude("org.spigotmc", "spigot")
     }
 
+    implementation("org.bstats:bstats-bukkit:${project.property("bstats_version")}")
+    {
+        exclude("com.google.code.gson", "gson")
+    }
+
+    val protocolVersion = if (project.property("protocols_use_local_build") == "true")
+        project.property("protocols_local_version")
+        else project.property("protocols_version");
+
+    implementation("com.github.XiaMoZhiShi:feathermorph-protocols:${protocolVersion}")
     implementation("com.github.XiaMoZhiShi:PluginBase:${project.property("pluginbase_version")}")
+    {
+        exclude("com.google.code.gson", "gson")
+    }
+
     compileOnly("com.github.Gecolay:GSit:${project.property("gsit_version")}")
     compileOnly("me.clip:placeholderapi:${project.property("papi_version")}")
 }
@@ -66,8 +79,8 @@ bukkit {
     main = "xiamomc.morph.MorphPlugin"
     apiVersion = "1.19"
     authors = listOf("MATRIX-feather")
-    depend = listOf("LibsDisguises")
-    softDepend = listOf("GSit", "PlaceholderAPI")
+    depend = listOf()
+    softDepend = listOf("LibsDisguises", "GSit", "PlaceholderAPI")
     version = "${project.property("project_version")}"
     prefix = "FeatherMorph"
     name = "FeatherMorph"
@@ -117,6 +130,7 @@ tasks.build {
 tasks.shadowJar {
     minimize()
     relocate("xiamomc.pluginbase", "xiamomc.morph.shaded.pluginbase")
+    relocate("org.bstats", "xiamomc.morph.shaded.bstats")
 }
 
 tasks.withType<JavaCompile>() {

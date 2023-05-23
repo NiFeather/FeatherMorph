@@ -27,6 +27,7 @@ public class DisguiseInfo
         return entityType;
     }
 
+    @NotNull
     public final String rawIdentifier;
 
     public String getIdentifier()
@@ -102,14 +103,14 @@ public class DisguiseInfo
 
     public boolean equals(EntityType type)
     {
-        if (!this.isValidate()) return false;
+        if (!this.isValid()) return false;
 
         return this.entityType.equals(type);
     }
 
     public boolean equals(String rawString)
     {
-        if (!this.isValidate()) return false;
+        if (!this.isValid()) return false;
 
         return this.disguiseType != DisguiseTypes.UNKNOWN && this.rawIdentifier.equals(rawString);
     }
@@ -118,9 +119,9 @@ public class DisguiseInfo
      * SAN值检查
      * @return 是否通过
      */
-    public boolean isValidate()
+    public boolean isValid()
     {
-        return this.rawIdentifier != null && disguiseType != DisguiseTypes.UNKNOWN;
+        return disguiseType != DisguiseTypes.UNKNOWN;
     }
 
     /**
@@ -129,8 +130,8 @@ public class DisguiseInfo
      */
     public String getKey()
     {
-        if (!this.isValidate())
-            return "" + rawIdentifier;
+        if (!this.isValid())
+            return rawIdentifier;
 
         return rawIdentifier;
     }
@@ -143,20 +144,20 @@ public class DisguiseInfo
     @Deprecated
     public Component asComponent()
     {
-        return isValidate()
+        return isValid()
                     ? provider == null
                         ? Component.text(rawIdentifier)
                         : provider.getDisplayName(rawIdentifier, null)
-                    : Component.text("" + rawIdentifier);
+                    : Component.text(rawIdentifier);
     }
 
     public Component asComponent(String locale)
     {
-        return isValidate()
+        return isValid()
                     ? provider == null
                         ? Component.text(rawIdentifier)
                         : provider.getDisplayName(rawIdentifier, locale)
-                    : Component.text("" + rawIdentifier);
+                    : Component.text(rawIdentifier);
     }
 
     @Override

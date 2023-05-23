@@ -1,23 +1,22 @@
 package xiamomc.morph.providers;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import me.libraryaddict.disguise.DisguiseAPI;
-import me.libraryaddict.disguise.disguisetypes.Disguise;
 import net.kyori.adventure.text.Component;
-import net.minecraft.nbt.*;
-import org.bukkit.craftbukkit.v1_19_R2.entity.CraftLivingEntity;
+import net.minecraft.nbt.CompoundTag;
+import org.bukkit.craftbukkit.v1_19_R3.entity.CraftLivingEntity;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
+import xiamomc.morph.backends.DisguiseWrapper;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.misc.DisguiseInfo;
 import xiamomc.morph.misc.DisguiseState;
-import xiamomc.morph.utilities.NbtUtils;
 import xiamomc.morph.network.commands.S2C.AbstractS2CCommand;
+import xiamomc.morph.utilities.NbtUtils;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.BindableList;
@@ -45,18 +44,20 @@ public abstract class DisguiseProvider extends MorphPluginObject
     /**
      * Gets all available disguise identifiers for this provider
      * @return A list containing available disguise identifiers for this provider
+     * @apiNote The returned values may not contain the namespace of this provider.<br/>
+     *          For example: `minecraft:ghast` should be `ghast`
      */
     public abstract List<String> getAllAvailableDisguises();
 
     /**
-     * 为某个玩家应用或更新伪装
+     * 为目标玩家构建一个用于伪装的 {@link DisguiseWrapper}
+     *
      * @param player 目标玩家
      * @param disguiseInfo 伪装ID
      * @param targetEntity 玩家的目标实体(如果有), 可用来判断是否要复制伪装
-     * @return 操作结果
      */
     @NotNull
-    public abstract DisguiseResult morph(Player player, DisguiseInfo disguiseInfo, @Nullable Entity targetEntity);
+    public abstract DisguiseResult makeWrapper(Player player, DisguiseInfo disguiseInfo, @Nullable Entity targetEntity);
 
     /**
      * 更新某个伪装的状态
@@ -150,9 +151,7 @@ public abstract class DisguiseProvider extends MorphPluginObject
      */
     public boolean unMorph(Player player, DisguiseState state)
     {
-        var disguise = state.getDisguise();
-
-        return disguise.removeDisguise(player);
+        return morphs.getCurrentBackend().unDisguise(player);
     }
 
     @Resolved
@@ -164,47 +163,38 @@ public abstract class DisguiseProvider extends MorphPluginObject
     }
 
     /**
-     * 获取某一实体的伪装
+     * 从某一实体构建伪装
      *
      * @param info 伪装信息
      * @param target 目标实体
-     * @return 一个DisguiseResult，其isCopy永远为true。
+     * @return 一个包含伪装Wrapper的 {@link DisguiseResult}, 失败时返回 {@link DisguiseResult#FAIL}
      */
     @NotNull
-    protected DisguiseResult getCopy(DisguiseInfo info, @Nullable Entity target)
+    protected DisguiseResult constructFromEntity(DisguiseInfo info, @Nullable Entity target)
     {
         if (target == null) return DisguiseResult.fail();
 
-        boolean shouldClone = false;
+        boolean allowClone = false;
 
-        Disguise ourDisguise = null;
-        Disguise theirDisguise = null;
-        DisguiseState state = null;
+        var backend = morphs.getCurrentBackend();
 
-        if (DisguiseAPI.isDisguised(target))
+        DisguiseWrapper<?> ourDisguise;
+        DisguiseWrapper<?> theirDisguise = backend.getWrapper(target);
+        DisguiseState theirState = morphs.getDisguiseStateFor(target);
+
+        if (theirState != null && theirDisguise != null)
         {
-            theirDisguise = DisguiseAPI.getDisguise(target);
+            var key = theirState.getDisguiseIdentifier();
 
-            //如果玩家已伪装，则检查其目标伪装和我们想要的是否一致
-            if (target instanceof Player targetPlayer)
-            {
-                state = morphs.getDisguiseStateFor(targetPlayer);
+            //ID不一样则返回失败
+            if (!key.equals(info.getIdentifier())) return DisguiseResult.fail();
 
-                if (state != null)
-                {
-                    var key = state.getDisguiseIdentifier();
-
-                    //ID不一样则返回失败
-                    if (!key.equals(info.getIdentifier())) return DisguiseResult.fail();
-                }
-            }
-
-            shouldClone = canCopyDisguise(info, target, state, theirDisguise);
+            allowClone = canCloneDisguise(info, target, theirState, theirDisguise);
         }
 
-        ourDisguise = shouldClone
-                ? DisguiseAPI.getDisguise(target).clone()
-                : canConstruct(info, target, state) ? DisguiseAPI.constructDisguise(target) : null;
+        ourDisguise = allowClone
+                ? theirDisguise.clone()
+                : canConstruct(info, target, theirState) ? backend.createInstance(target) : null;
 
         return ourDisguise == null
                 ? DisguiseResult.fail()
@@ -212,18 +202,18 @@ public abstract class DisguiseProvider extends MorphPluginObject
     }
 
     /**
-     * 如果不能复制，那么我们是否可以构建某个实体的伪装?
+     * 我们是否可以通过给定的{@link DisguiseInfo}来从某个实体构建伪装?
      *
      * @param info {@link DisguiseInfo}
      * @param targetEntity 目标实体
      * @param theirState 他们的{@link DisguiseState}，为null则代表他们不是玩家或没有通过MorphPlugin伪装
-     * @return 是否允许此操作
+     * @return 是否允许此操作，如果theirState不为null则优先检查theirState是否和传入的info相匹配
      */
     public abstract boolean canConstruct(DisguiseInfo info, Entity targetEntity,
                                             @Nullable DisguiseState theirState);
 
     /**
-     * 是否可以复制某个实体的伪装?
+     * 是否可以克隆某个实体现有的伪装?
      *
      * @param info {@link DisguiseInfo}
      * @param targetEntity 目标实体
@@ -231,8 +221,8 @@ public abstract class DisguiseProvider extends MorphPluginObject
      * @param theirState 他们的{@link DisguiseState}，为null则代表他们不是玩家或没有通过MorphPlugin伪装
      * @return 是否允许此操作
      */
-    protected abstract boolean canCopyDisguise(DisguiseInfo info, Entity targetEntity,
-                                               @Nullable DisguiseState theirState, @NotNull Disguise theirDisguise);
+    protected abstract boolean canCloneDisguise(DisguiseInfo info, Entity targetEntity,
+                                                @NotNull DisguiseState theirState, @NotNull DisguiseWrapper<?> theirDisguise);
 
     /**
      * 伪装后要做的事

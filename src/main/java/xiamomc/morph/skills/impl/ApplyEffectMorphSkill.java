@@ -14,12 +14,12 @@ import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.skills.MorphSkill;
 import xiamomc.morph.skills.SkillType;
 import xiamomc.morph.skills.options.EffectConfiguration;
-import xiamomc.morph.storage.skill.SkillConfiguration;
+import xiamomc.morph.storage.skill.SkillAbilityConfiguration;
 
 public class ApplyEffectMorphSkill extends MorphSkill<EffectConfiguration>
 {
     @Override
-    public int executeSkill(Player player, DisguiseState state, SkillConfiguration configuration, EffectConfiguration option)
+    public int executeSkill(Player player, DisguiseState state, SkillAbilityConfiguration configuration, EffectConfiguration option)
     {
         if (option == null || configuration == null)
         {

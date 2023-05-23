@@ -1,6 +1,5 @@
 package xiamomc.morph.skills.impl;
 
-import me.libraryaddict.disguise.disguisetypes.watchers.GhastWatcher;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import org.bukkit.NamespacedKey;
@@ -9,19 +8,18 @@ import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.SkillStrings;
 import xiamomc.morph.misc.DisguiseState;
-import xiamomc.morph.network.MorphClientHandler;
-import xiamomc.morph.network.commands.S2C.S2CSetAggressiveCommand;
-import xiamomc.morph.utilities.EntityTypeUtils;
-import xiamomc.morph.skills.MorphSkill;
+import xiamomc.morph.network.server.MorphClientHandler;
+import xiamomc.morph.network.commands.S2C.set.S2CSetAggressiveCommand;
 import xiamomc.morph.skills.SkillType;
 import xiamomc.morph.skills.options.ProjectiveConfiguration;
-import xiamomc.morph.storage.skill.SkillConfiguration;
+import xiamomc.morph.storage.skill.SkillAbilityConfiguration;
+import xiamomc.morph.utilities.EntityTypeUtils;
 import xiamomc.pluginbase.Annotations.Resolved;
 
 public class LaunchProjectiveMorphSkill extends DelayedMorphSkill<ProjectiveConfiguration>
 {
     @Override
-    protected int getExecuteDelay(SkillConfiguration configuration, ProjectiveConfiguration option)
+    protected int getExecuteDelay(SkillAbilityConfiguration configuration, ProjectiveConfiguration option)
     {
         return option.executeDelay;
     }
@@ -30,7 +28,7 @@ public class LaunchProjectiveMorphSkill extends DelayedMorphSkill<ProjectiveConf
     private MorphClientHandler clientHandler;
 
     @Override
-    protected ExecuteResult preExecute(Player player, DisguiseState state, SkillConfiguration configuration, ProjectiveConfiguration option)
+    protected ExecuteResult preExecute(Player player, DisguiseState state, SkillAbilityConfiguration configuration, ProjectiveConfiguration option)
     {
         if (option == null || configuration == null)
         {
@@ -51,22 +49,20 @@ public class LaunchProjectiveMorphSkill extends DelayedMorphSkill<ProjectiveConf
 
         if (state.getEntityType() == EntityType.GHAST)
         {
-            var watcher = (GhastWatcher) state.getDisguise().getWatcher();
-            watcher.setAggressive(true);
-            clientHandler.sendClientCommand(player, new S2CSetAggressiveCommand(true));
+            state.getDisguiseWrapper().setAggressive(true);
+            clientHandler.sendCommand(player, new S2CSetAggressiveCommand(true));
         }
 
         return super.preExecute(player, state, configuration, option);
     }
 
     @Override
-    protected void executeDelayedSkill(Player player, DisguiseState state, SkillConfiguration configuration, ProjectiveConfiguration option)
+    protected void executeDelayedSkill(Player player, DisguiseState state, SkillAbilityConfiguration configuration, ProjectiveConfiguration option)
     {
         if (state.getEntityType() == EntityType.GHAST)
         {
-            var watcher = (GhastWatcher) state.getDisguise().getWatcher();
-            watcher.setAggressive(false);
-            clientHandler.sendClientCommand(player, new S2CSetAggressiveCommand(false));
+            state.getDisguiseWrapper().setAggressive(false);
+            clientHandler.sendCommand(player, new S2CSetAggressiveCommand(false));
         }
 
         var type = EntityTypeUtils.fromString(option.getName(), true);

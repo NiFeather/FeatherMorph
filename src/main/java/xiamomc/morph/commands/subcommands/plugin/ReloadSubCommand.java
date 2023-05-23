@@ -1,26 +1,21 @@
 package xiamomc.morph.commands.subcommands.plugin;
 
-import org.bukkit.Bukkit;
+import it.unimi.dsi.fastutil.objects.ObjectImmutableList;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
-import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
-import xiamomc.morph.messages.CommandStrings;
-import xiamomc.morph.messages.HelpStrings;
-import xiamomc.morph.messages.MessageUtils;
+import xiamomc.morph.events.api.lifecycle.ConfigurationReloadEvent;
+import xiamomc.morph.messages.*;
 import xiamomc.morph.messages.vanilla.VanillaMessageStore;
-import xiamomc.morph.messages.vanilla.VanillaMessageSubStore;
-import xiamomc.morph.network.MorphClientHandler;
-import xiamomc.morph.network.commands.S2C.S2CReAuthCommand;
-import xiamomc.morph.storage.skill.SkillConfigurationStore;
+import xiamomc.morph.network.server.MorphClientHandler;
+import xiamomc.morph.storage.skill.SkillAbilityConfigurationStore;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Command.ISubCommand;
 import xiamomc.pluginbase.Messages.FormattableMessage;
 import xiamomc.pluginbase.Messages.MessageStore;
 
-import java.util.Arrays;
 import java.util.List;
 
 public class ReloadSubCommand extends MorphPluginObject implements ISubCommand
@@ -57,22 +52,17 @@ public class ReloadSubCommand extends MorphPluginObject implements ISubCommand
     private VanillaMessageStore vanillaMessageStore;
 
     @Resolved
-    private SkillConfigurationStore skills;
+    private SkillAbilityConfigurationStore skills;
 
-    private final String[] subcommands = new String[]
-            {
-              "data",
-              "message"
-            };
+    private final List<String> subcommands = ObjectImmutableList.of("data", "message", "update_message");
 
     @Override
     public List<String> onTabComplete(List<String> args, CommandSender source)
     {
         if (source.hasPermission(getPermissionRequirement()) && args.size() >= 1)
-        {
-            return Arrays.stream(subcommands).filter(s -> s.startsWith(args.get(0))).toList();
-        }
-        else return null;
+            return subcommands.stream().filter(s -> s.startsWith(args.get(0))).toList();
+        else
+            return null;
     }
 
     @Resolved
@@ -85,12 +75,14 @@ public class ReloadSubCommand extends MorphPluginObject implements ISubCommand
         {
             var reloadsData = false;
             var reloadsMessage = false;
+            var reloadOverwriteNonDefMsg = false;
             String option = args.length >= 1 ? args[0] : "*";
 
             switch (option)
             {
                 case "data" -> reloadsData = true;
                 case "message" -> reloadsMessage = true;
+                case "reset_loaded_messages" -> reloadsMessage = reloadOverwriteNonDefMsg = true;
                 default -> reloadsMessage = reloadsData = true;
             }
 
@@ -99,19 +91,20 @@ public class ReloadSubCommand extends MorphPluginObject implements ISubCommand
                 config.reload();
                 skills.reloadConfiguration();
                 morphManager.reloadConfiguration();
-
-                if (config.get(Boolean.class, ConfigOption.FORCE_TARGET_VERSION))
-                {
-                    clientHandler.sendUnAuth(Bukkit.getOnlinePlayers());
-                    clientHandler.sendReAuth(Bukkit.getOnlinePlayers());
-                }
             }
 
             if (reloadsMessage)
             {
-                messageStore.reloadConfiguration();
+                if (reloadOverwriteNonDefMsg && messageStore instanceof MorphMessageStore morphMessageStore)
+                    morphMessageStore.reloadOverwriteNonDefault();
+                else
+                    messageStore.reloadConfiguration();
+
                 vanillaMessageStore.reloadConfiguration();
             }
+
+            var event = new ConfigurationReloadEvent(reloadsData, reloadsMessage);
+            event.callEvent();
 
             sender.sendMessage(MessageUtils.prefixes(sender, CommandStrings.reloadCompleteMessage()));
         }

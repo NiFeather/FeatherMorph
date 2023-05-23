@@ -1,7 +1,6 @@
 package xiamomc.morph.abilities.impl;
 
 import io.papermc.paper.event.player.AsyncChatEvent;
-import me.libraryaddict.disguise.disguisetypes.Disguise;
 import org.bukkit.NamespacedKey;
 import org.bukkit.event.EventHandler;
 import org.jetbrains.annotations.NotNull;
@@ -14,7 +13,6 @@ import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.messages.CommonStrings;
 import xiamomc.morph.messages.MessageUtils;
-import xiamomc.morph.messages.MorphMessageStore;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.misc.MorphChatRenderer;
 import xiamomc.morph.misc.permissions.CommonPermissions;
@@ -24,13 +22,10 @@ import xiamomc.pluginbase.Bindables.Bindable;
 import xiamomc.pluginbase.Messages.FormattableMessage;
 import xiamomc.pluginbase.Messages.MessageStore;
 
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class ChatOverrideAbility extends MorphAbility<ChatOverrideOption>
 {
-    private String defaultMessage;
-
     @Override
     public @NotNull NamespacedKey getIdentifier()
     {
@@ -38,7 +33,7 @@ public class ChatOverrideAbility extends MorphAbility<ChatOverrideOption>
     }
 
     @Override
-    protected ChatOverrideOption createOption()
+    protected @NotNull ChatOverrideOption createOption()
     {
         return new ChatOverrideOption();
     }
@@ -48,12 +43,10 @@ public class ChatOverrideAbility extends MorphAbility<ChatOverrideOption>
     {
         config.bind(allowChatOverride, ConfigOption.ALLOW_CHAT_OVERRIDE);
         config.bind(useCustomRenderer, ConfigOption.CHAT_OVERRIDE_USE_CUSTOM_RENDERER);
-
-        this.defaultMessage = messageStore.get(CommonStrings.chatOverrideDefaultPattern().getKey(), null, MessageUtils.getServerLocale());
     }
 
     private final Bindable<Boolean> useCustomRenderer = new Bindable<>(false);
-    private final Bindable<Boolean> allowChatOverride = new Bindable<>(false);
+    private final Bindable<Boolean> allowChatOverride = new Bindable<>(true);
 
     @Resolved
     private MorphManager morphs;
@@ -93,7 +86,7 @@ public class ChatOverrideAbility extends MorphAbility<ChatOverrideOption>
         {
             var pattern = p.getMessagePattern();
 
-            if (pattern == null) pattern = defaultMessage;
+            if (pattern == null) return null;
 
             targetString.set(new FormattableMessage(plugin, pattern));
         }

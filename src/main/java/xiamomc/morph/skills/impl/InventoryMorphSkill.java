@@ -7,12 +7,12 @@ import xiamomc.morph.MorphManager;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.SkillStrings;
 import xiamomc.morph.misc.DisguiseState;
-import xiamomc.morph.network.MorphClientHandler;
-import xiamomc.morph.network.commands.S2C.S2CSetFakeEquipCommand;
+import xiamomc.morph.network.commands.S2C.set.S2CSetDisplayingFakeEquipCommand;
+import xiamomc.morph.network.server.MorphClientHandler;
 import xiamomc.morph.skills.MorphSkill;
 import xiamomc.morph.skills.SkillType;
 import xiamomc.morph.skills.options.NoOpConfiguration;
-import xiamomc.morph.storage.skill.SkillConfiguration;
+import xiamomc.morph.storage.skill.SkillAbilityConfiguration;
 import xiamomc.pluginbase.Annotations.Resolved;
 
 public class InventoryMorphSkill extends MorphSkill<NoOpConfiguration>
@@ -24,13 +24,13 @@ public class InventoryMorphSkill extends MorphSkill<NoOpConfiguration>
     private MorphClientHandler clientHandler;
 
     @Override
-    public int executeSkill(Player player, DisguiseState state, SkillConfiguration configuration, NoOpConfiguration option)
+    public int executeSkill(Player player, DisguiseState state, SkillAbilityConfiguration configuration, NoOpConfiguration option)
     {
         var defaultShown = state.toggleDisguisedItems();
 
         manager.spawnParticle(player, player.getLocation(), player.getWidth(), player.getHeight(), player.getWidth());
 
-        clientHandler.sendClientCommand(player, new S2CSetFakeEquipCommand(defaultShown));
+        clientHandler.sendCommand(player, new S2CSetDisplayingFakeEquipCommand(defaultShown));
 
         player.sendMessage(MessageUtils.prefixes(player, defaultShown
                 ? SkillStrings.displayingDisguiseInventoryString()
@@ -42,7 +42,7 @@ public class InventoryMorphSkill extends MorphSkill<NoOpConfiguration>
     @Override
     public void onInitialEquip(DisguiseState state)
     {
-        clientHandler.sendClientCommand(state.getPlayer(), new S2CSetFakeEquipCommand(state.showingDisguisedItems()));
+        clientHandler.sendCommand(state.getPlayer(), new S2CSetDisplayingFakeEquipCommand(state.showingDisguisedItems()));
 
         super.onInitialEquip(state);
     }
@@ -50,7 +50,7 @@ public class InventoryMorphSkill extends MorphSkill<NoOpConfiguration>
     @Override
     public void onClientinit(DisguiseState state)
     {
-        clientHandler.sendClientCommand(state.getPlayer(), new S2CSetFakeEquipCommand(state.showingDisguisedItems()));
+        clientHandler.sendCommand(state.getPlayer(), new S2CSetDisplayingFakeEquipCommand(state.showingDisguisedItems()));
 
         super.onClientinit(state);
     }
@@ -58,7 +58,7 @@ public class InventoryMorphSkill extends MorphSkill<NoOpConfiguration>
     @Override
     public void onDeEquip(DisguiseState state)
     {
-        clientHandler.sendClientCommand(state.getPlayer(), new S2CSetFakeEquipCommand(false));
+        clientHandler.sendCommand(state.getPlayer(), new S2CSetDisplayingFakeEquipCommand(false));
 
         super.onDeEquip(state);
     }

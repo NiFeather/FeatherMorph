@@ -1,14 +1,13 @@
 package xiamomc.morph.providers;
 
-import me.libraryaddict.disguise.disguisetypes.Disguise;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xiamomc.morph.backends.DisguiseWrapper;
 import xiamomc.morph.misc.DisguiseInfo;
 import xiamomc.morph.misc.DisguiseState;
-import xiamomc.morph.misc.DisguiseTypes;
 
 import java.util.List;
 
@@ -33,7 +32,7 @@ public class FallbackProvider extends DefaultDisguiseProvider
     }
 
     @Override
-    public @NotNull DisguiseResult morph(Player player, DisguiseInfo disguiseInfo, @Nullable Entity targetEntity)
+    public @NotNull DisguiseResult makeWrapper(Player player, DisguiseInfo disguiseInfo, @Nullable Entity targetEntity)
     {
         return DisguiseResult.fail();
     }
@@ -45,7 +44,7 @@ public class FallbackProvider extends DefaultDisguiseProvider
     }
 
     @Override
-    protected boolean canCopyDisguise(DisguiseInfo info, Entity targetEntity, @Nullable DisguiseState theirState, @NotNull Disguise theirDisguise)
+    protected boolean canCloneDisguise(DisguiseInfo info, Entity targetEntity, @NotNull DisguiseState theirState, @NotNull DisguiseWrapper<?> theirDisguise)
     {
         return false;
     }

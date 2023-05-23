@@ -10,12 +10,14 @@ public class ExplosionConfiguration implements ISkillOption
     {
     }
 
-    public ExplosionConfiguration(boolean killsSelf, int strength, boolean setsFire, int delay)
+    public ExplosionConfiguration(boolean killsSelf, int strength, boolean setsFire, int delay, String primedSound)
     {
         this.killsSelf = killsSelf;
         this.strength = strength;
         this.setsFire = setsFire;
         this.executeDelay = delay;
+
+        this.primedSound = primedSound;
     }
 
     @Expose
@@ -46,6 +48,15 @@ public class ExplosionConfiguration implements ISkillOption
     public boolean setsFire()
     {
         return setsFire;
+    }
+
+    @Expose
+    @SerializedName("primed_sound")
+    public String primedSound;
+
+    public String getPrimedSound()
+    {
+        return primedSound == null ? "" : primedSound;
     }
 
     @Override
