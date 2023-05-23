@@ -209,8 +209,12 @@ public final class MorphPlugin extends XiaMoJavaPlugin
         }
     }
 
+    /**
+     * Can be removed in PluginBase 0.0.30
+     */
     @Override
-    public boolean acceptSchedules() {
+    public boolean acceptSchedules()
+    {
         return true;
     }
 }
