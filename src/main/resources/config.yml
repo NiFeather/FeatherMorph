@@ -74,16 +74,18 @@ root:
 
   # Fly ability options
   flying:
-    # The base exhaustion per tick for flying
-    exhaustion_base: 0.005
+    # The base distance for Hunger consumption.
+    # Players' Hunger will drop one level (Half of a drumstick) once they have traveled this far.
+    exhaustion_base: 200
 
-    # Consume player's Hunger based on their instant speed?
-    # More accurate but slower
-    # Consumes about one food level (Half of a drumstick) per 200 blocks when exhaustion_base is set to 0.005
-    use_instant_speed: true
-
-    # Add a minimal consumption limit as an "Idle consumption" for players.
+    # Add a minimal consumption limit (20% of the configured consumption speed) as an "Idle consumption" for players per tick.
     idle_consumption: true
+
+  # Ambient sound options
+  ambient_sounds:
+    # The frequency for this plugin to play ambient sounds for disguises.
+    # Set to 0 to disable
+    frequency: 1.0
 
   # InteractionMirror options
   interactionMirror:

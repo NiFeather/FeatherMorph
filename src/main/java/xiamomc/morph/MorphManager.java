@@ -910,14 +910,11 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         SkillCooldownInfo cdInfo;
 
         //获取与技能对应的CDInfo
-        cdInfo = skillHandler.getCooldownInfo(player.getUniqueId(), disguiseIdentifier);
+        cdInfo = skillHandler.getCooldownInfo(player.getUniqueId(), state.getSkillLookupIdentifier());
         state.setCooldownInfo(cdInfo);
 
-        if (cdInfo != null)
-        {
-            cdInfo.setCooldown(Math.max(40, cdInfo.getCooldown()));
-            cdInfo.setLastInvoke(plugin.getCurrentTick());
-        }
+        state.setSkillCooldown(Math.max(40, cdInfo.getCooldown()));
+        cdInfo.setLastInvoke(plugin.getCurrentTick());
 
         // 切换CD
         skillHandler.switchCooldown(player.getUniqueId(), cdInfo);

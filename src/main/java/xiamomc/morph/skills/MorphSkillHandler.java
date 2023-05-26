@@ -192,6 +192,20 @@ public class MorphSkillHandler extends MorphPluginObject
 
         if (entry != null && !entry.getKey().getSkillIdentifier().equals(SkillType.NONE) && player.getGameMode() != GameMode.SPECTATOR)
         {
+            var cdInfo = getCooldownInfo(player.getUniqueId(), state.getSkillLookupIdentifier());
+            assert cdInfo != null;
+
+            if (cdInfo.getCooldown() > 0)
+            {
+                player.sendMessage(MessageUtils.prefixes(player,
+                        SkillStrings.skillPreparing().resolve("time", state.getSkillCooldown() / 20 + "")));
+    
+                player.playSound(Sound.sound(Key.key("minecraft", "entity.villager.no"),
+                        Sound.Source.PLAYER, 1f, 1f));
+
+                return;
+            }
+
             var event = new PlayerExecuteSkillEvent(player, state);
             Bukkit.getPluginManager().callEvent(event);
             if (event.isCancelled())
@@ -221,9 +235,6 @@ public class MorphSkillHandler extends MorphPluginObject
                 player.sendMessage(MessageUtils.prefixes(player, SkillStrings.exceptionOccurredString()));
                 return;
             }
-
-            var cdInfo = getCooldownInfo(player.getUniqueId(), state.getSkillLookupIdentifier());
-            assert cdInfo != null;
 
             var cd = skill.executeSkillGeneric(player, state, config, option);
             cdInfo.setLastInvoke(plugin.getCurrentTick());
