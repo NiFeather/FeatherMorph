@@ -23,7 +23,11 @@ public enum ConfigOption
 
     ARMORSTAND_SHOW_ARMS(ConfigNode.create().append("armorstand_show_arms"), true),
 
-    MODIFY_BOUNDING_BOX(ConfigNode.create().append("modify_bounding_boxes"), false),
+    MODIFY_BOUNDING_BOX(boundingBoxNode().append("modify_boxes"), false),
+    CHECK_AVAILABLE_SPACE(boundingBoxNode().append("check_space"), true),
+
+    @Deprecated
+    MODIFY_BOUNDING_BOX_LEGACY(ConfigNode.create().append("modify_bounding_boxes"), false),
 
     UNMORPH_ON_DEATH(ConfigNode.create().append("unmorph_on_death"), true),
 
@@ -137,5 +141,9 @@ public enum ConfigOption
     private static ConfigNode flyAbilityNode()
     {
         return ConfigNode.create().append("flying");
+    }
+    private static ConfigNode boundingBoxNode()
+    {
+        return ConfigNode.create().append("bounding_boxes");
     }
 }

@@ -67,6 +67,28 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
         vanillaIdentifiers = list;
     }
 
+    private final Bindable<Boolean> armorStandShowArms = new Bindable<>(false);
+    private final Bindable<Boolean> doHealthScale = new Bindable<>(true);
+    private final Bindable<Integer> healthCap = new Bindable<>(60);
+    private final Bindable<Boolean> modifyBoundingBoxes = new Bindable<>(false);
+    private final Bindable<Boolean> checkSpaceBoundingBox = new Bindable<>(true);
+
+    @Initializer
+    private void load(MorphConfigManager configManager)
+    {
+        configManager.bind(armorStandShowArms, ConfigOption.ARMORSTAND_SHOW_ARMS);
+        configManager.bind(doHealthScale, ConfigOption.HEALTH_SCALE);
+        configManager.bind(healthCap, ConfigOption.HEALTH_SCALE_MAX_HEALTH);
+        configManager.bind(modifyBoundingBoxes, ConfigOption.MODIFY_BOUNDING_BOX);
+        configManager.bind(checkSpaceBoundingBox, ConfigOption.CHECK_AVAILABLE_SPACE);
+
+        modifyBoundingBoxes.onValueChanged((o, n) ->
+        {
+            if (o && !n)
+                Bukkit.getOnlinePlayers().forEach(p -> NmsRecord.ofPlayer(p).refreshDimensions());
+        });
+    }
+
     private final List<String> vanillaIdentifiers;
 
     @Override
@@ -98,7 +120,8 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
                 ? copyResult.wrapperInstance() //copyResult.success() -> wrapperInstance() != null
                 : backend.createInstance(entityType);
 
-        if (modifyBoundingBoxes.get())
+        // 检查是否有足够的空间
+        if (modifyBoundingBoxes.get() && checkSpaceBoundingBox.get())
         {
             var loc = player.getLocation();
             var box = constructedDisguise.getBoundingBoxAt(loc.x(), loc.y(), loc.z());
@@ -112,26 +135,6 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
         }
 
         return DisguiseResult.success(constructedDisguise, copyResult.isCopy());
-    }
-
-    private final Bindable<Boolean> armorStandShowArms = new Bindable<>(false);
-    private final Bindable<Boolean> doHealthScale = new Bindable<>(true);
-    private final Bindable<Integer> healthCap = new Bindable<>(60);
-    private final Bindable<Boolean> modifyBoundingBoxes = new Bindable<>(false);
-
-    @Initializer
-    private void load(MorphConfigManager configManager)
-    {
-        configManager.bind(armorStandShowArms, ConfigOption.ARMORSTAND_SHOW_ARMS);
-        configManager.bind(doHealthScale, ConfigOption.HEALTH_SCALE);
-        configManager.bind(healthCap, ConfigOption.HEALTH_SCALE_MAX_HEALTH);
-        configManager.bind(modifyBoundingBoxes, ConfigOption.MODIFY_BOUNDING_BOX);
-
-        modifyBoundingBoxes.onValueChanged((o, n) ->
-        {
-            if (o && !n)
-                Bukkit.getOnlinePlayers().forEach(p -> NmsRecord.ofPlayer(p).refreshDimensions());
-        });
     }
 
     @Override

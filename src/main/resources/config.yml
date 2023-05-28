@@ -34,10 +34,15 @@ root:
   # Defines how many ticks should a player wait at least before they activate the skill again when they get damaged.
   cooldown_on_damage: 15
 
-  # Modify players' bounding box depending on their disguise
-  # Experimental feature, slight glitches may occur when flying around.
-  # Incompatible with anti-cheats!
-  modify_bounding_boxes: false
+  # Bounding box options
+  bounding_boxes:
+    # Modify players' bounding box depending on their disguise?
+    # Experimental feature, slight glitches may occur when flying around.
+    # Incompatible with anti-cheats!
+    modify_boxes: false
+
+    # Should we check if there is enough space to disguise?
+    check_space: true
 
   # Skill item
   # Defines which item should players use to disguise/undisguise or activate skills.
@@ -211,4 +216,4 @@ root:
     log_outgoing_packets: false
 
   # Do not touch unless you know what you're doing!
-  version: 22
+  version: 23
