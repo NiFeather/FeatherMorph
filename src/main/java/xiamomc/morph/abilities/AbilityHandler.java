@@ -10,6 +10,7 @@ import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.abilities.impl.*;
+import xiamomc.morph.abilities.impl.onAttack.PotionOnAttackAbility;
 import xiamomc.morph.abilities.impl.potion.*;
 import xiamomc.morph.events.api.lifecycle.AbilitiesFinishedInitializeEvent;
 import xiamomc.morph.misc.DisguiseState;
@@ -133,7 +134,8 @@ public class AbilityHandler extends MorphPluginObject
                 new AttributeModifyingAbility(),
                 new HealsFromEntityAbility(),
                 new ExtraKnockbackAbility(),
-                new DryOutInAirAbility()
+                new DryOutInAirAbility(),
+                new PotionOnAttackAbility()
         ));
 
         initalizeDone = true;

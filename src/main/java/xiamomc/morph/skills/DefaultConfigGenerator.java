@@ -279,5 +279,17 @@ public class DefaultConfigGenerator
         });
 
         addAbilityConfiguration(skills, EntityType.FOX, AbilityType.NO_SWEET_BUSH_DAMAGE);
+
+        addAbilityConfiguration(skills, EntityType.WITHER_SKELETON, AbilityType.POTION_ON_ATTACK, c ->
+        {
+            c.addOption(AbilityType.POTION_ON_ATTACK,
+                    PotionEffectOption.from(PotionEffectType.WITHER, 10 * 20, 0));
+        });
+
+        addAbilityConfiguration(skills, EntityType.HUSK, AbilityType.POTION_ON_ATTACK, c ->
+        {
+            c.addOption(AbilityType.POTION_ON_ATTACK,
+                    PotionEffectOption.from(PotionEffectType.HUNGER, 7 * 2 * 20, 0));
+        });
     }
 }
