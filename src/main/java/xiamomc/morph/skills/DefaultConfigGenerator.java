@@ -292,6 +292,12 @@ public class DefaultConfigGenerator
                     PotionEffectOption.from(PotionEffectType.HUNGER, 7 * 2 * 20, 0));
         });
 
+        addAbilityConfiguration(skills, EntityType.CAVE_SPIDER, AbilityType.POTION_ON_ATTACK, c ->
+        {
+            c.addOption(AbilityType.POTION_ON_ATTACK,
+                    PotionEffectOption.from(PotionEffectType.POISON, 10 * 20, 0));
+        });
+
         addAbilityConfiguration(skills, EntityTypeUtils.spider(), AbilityType.SPIDER);
     }
 }
