@@ -1,4 +1,4 @@
-package xiamomc.morph.abilities.impl;
+package xiamomc.morph.abilities.impl.onAttack;
 
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -11,11 +11,12 @@ import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.abilities.AbilityType;
 import xiamomc.morph.abilities.MorphAbility;
+import xiamomc.morph.abilities.impl.OnAttackAbility;
 import xiamomc.morph.abilities.options.ExtraKnockbackOption;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.pluginbase.Annotations.Resolved;
 
-public class ExtraKnockbackAbility extends MorphAbility<ExtraKnockbackOption>
+public class ExtraKnockbackAbility extends OnAttackAbility<ExtraKnockbackOption>
 {
     /**
      * 获取此被动技能的ID
@@ -52,14 +53,9 @@ public class ExtraKnockbackAbility extends MorphAbility<ExtraKnockbackOption>
     @Resolved(shouldSolveImmediately = true)
     private MorphManager manager;
 
-    @EventHandler(ignoreCancelled = true)
-    private void onPlayerDamage(EntityDamageByEntityEvent e)
+    @Override
+    protected void apply(org.bukkit.entity.LivingEntity damaged, Player player)
     {
-        if (!(e.getDamager() instanceof Player player)) return;
-
-        if (!this.appliedPlayers.contains(player)) return;
-
-        var damaged = e.getEntity();
         var nmsDamaged = ((CraftEntity)damaged).getHandle();
 
         var state = manager.getDisguiseStateFor(player);
@@ -88,14 +84,6 @@ public class ExtraKnockbackAbility extends MorphAbility<ExtraKnockbackOption>
         nmsDamaged.setOnGround(false);
         nmsDamaged.setDeltaMovement(movement);
         nmsDamaged.hasImpulse = true;
-
-        /*
-        logger.info("VECTOR: %s".formatted(nmsDamaged.getDeltaMovement()));
-        this.addSchedule(() ->
-        {
-            logger.info("SCHED VECTOR: %s".formatted(nmsDamaged.getDeltaMovement()));
-        });
-        */
     }
 
     private static final ExtraKnockbackOption defaultOption = ExtraKnockbackOption.from(0, 0.4D, 0);

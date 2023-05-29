@@ -249,7 +249,7 @@ public class DisguiseState extends MorphPluginObject
     /**
      * 技能查询ID
      */
-    private String skillLookupIdentifier = "minecraft:@default";
+    private String skillLookupIdentifier = "minecraft:" + MorphManager.disguiseFallbackName;
 
     /**
      * 获取用于查询技能的ID

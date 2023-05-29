@@ -10,6 +10,8 @@ import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.abilities.impl.*;
+import xiamomc.morph.abilities.impl.onAttack.ExtraKnockbackAbility;
+import xiamomc.morph.abilities.impl.onAttack.PotionOnAttackAbility;
 import xiamomc.morph.abilities.impl.potion.*;
 import xiamomc.morph.events.api.lifecycle.AbilitiesFinishedInitializeEvent;
 import xiamomc.morph.misc.DisguiseState;
@@ -133,7 +135,9 @@ public class AbilityHandler extends MorphPluginObject
                 new AttributeModifyingAbility(),
                 new HealsFromEntityAbility(),
                 new ExtraKnockbackAbility(),
-                new DryOutInAirAbility()
+                new DryOutInAirAbility(),
+                new PotionOnAttackAbility(),
+                new SpiderAbility()
         ));
 
         initalizeDone = true;
@@ -205,7 +209,7 @@ public class AbilityHandler extends MorphPluginObject
     {
         for (IMorphAbility<?> a : state.getAbilities())
         {
-            if (a.handle(player, state)) continue;
+            if (!a.optionValid() || a.handle(player, state)) continue;
 
             logger.warn("Error occurred while updating abilities");
             Thread.dumpStack();

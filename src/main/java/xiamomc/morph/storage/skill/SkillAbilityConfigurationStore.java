@@ -5,6 +5,7 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.EntityType;
 import org.jetbrains.annotations.NotNull;
+import xiamomc.morph.MorphManager;
 import xiamomc.morph.abilities.AbilityHandler;
 import xiamomc.morph.abilities.AbilityType;
 import xiamomc.morph.abilities.IMorphAbility;
@@ -60,7 +61,7 @@ public class SkillAbilityConfigurationStore extends MorphJsonBasedStorage<SkillA
         return "技能存储";
     }
 
-    private final int targetVersion = 19;
+    private final int targetVersion = 20;
 
     @Resolved
     private MorphSkillHandler skillHandler;
@@ -228,7 +229,7 @@ public class SkillAbilityConfigurationStore extends MorphJsonBasedStorage<SkillA
             {
                 config.configurations.stream()
                         .filter(s -> s.getIdentifier().equals(EntityType.PLAYER.getKey().asString()))
-                        .findFirst().ifPresent(targetConfig -> targetConfig.setIdentifier("player:@default"));
+                        .findFirst().ifPresent(targetConfig -> targetConfig.setIdentifier("player:" + MorphManager.disguiseFallbackName));
 
             }
 
