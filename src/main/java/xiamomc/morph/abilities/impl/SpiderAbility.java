@@ -1,6 +1,6 @@
 package xiamomc.morph.abilities.impl;
 
-import org.bukkit.FluidCollisionMode;
+import io.papermc.paper.util.CollisionUtil;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
@@ -37,46 +37,22 @@ public class SpiderAbility extends NoOpOptionAbility
     @Override
     public boolean handle(Player player, DisguiseState state)
     {
-        if (player.isSneaking())
+        var boundingBox = NmsRecord.ofPlayer(player).getBoundingBox().inflate(0.1f, 0, 0.1f);
+        var level = NmsRecord.ofPlayer(player).level;
+
+        // 检查是否存在碰撞
+        var bb = CollisionUtil.getCollisionsForBlocksOrWorldBorder(level, null,
+                boundingBox, null, false, false, false, true, null);
+
+        var bbBorder = CollisionUtil.getCollisionsForBlocksOrWorldBorder(level, null,
+                boundingBox, null, false, false, true, true, null);
+
+        var hasCollision = bb || bbBorder;
+
+        if (hasCollision)
         {
-            var direction = player.getEyeLocation().getDirection().normalize();
-
-            var boundingBox = NmsRecord.ofPlayer(player).getBoundingBox().inflate(0.1f);
-
-            var distance = boundingBox.getXsize() / 2 + 0.51f;
-
-            //获取方块
-            var hitResult = player.getWorld().rayTraceBlocks(player.getLocation(),
-                            new Vector(direction.getX(), 0, direction.getZ()),
-                            distance,
-                            FluidCollisionMode.NEVER);
-
-            //第一遍没有，翻转180度再试一遍
-            if (hitResult == null)
-                hitResult = player.getWorld().rayTraceBlocks(player.getLocation(),
-                        new Vector(-direction.getX(), 0, -direction.getZ()),
-                        distance,
-                        FluidCollisionMode.NEVER);
-
-            if (hitResult == null) return true;
-
-            var block = hitResult.getHitBlock();
-            if (block == null) return true;
-
-            //检查是否有和方块碰撞
-            var blockBox = block.getBoundingBox();
-            boolean intersects = boundingBox.intersects(
-                    blockBox.getMinX(),
-                    blockBox.getMinY(),
-                    blockBox.getMinZ(),
-
-                    blockBox.getMaxX(),
-                    blockBox.getMaxY(),
-                    blockBox.getMaxZ()
-            );
-
-            if (intersects)
-                player.setVelocity(new Vector(0, 0.1f, 0));
+            var velocity = player.getVelocity();
+            player.setVelocity(new Vector(velocity.getX(), Math.min(0.15f, velocity.getY() + 0.15f), velocity.getZ()));
         }
 
         return true;
