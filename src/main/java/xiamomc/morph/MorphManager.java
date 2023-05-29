@@ -666,7 +666,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         if (splitKey.length == 0) return false;
 
-        return bannedDisguises.contains(splitKey[0] + ":any");
+        return bannedDisguises.contains(splitKey[0] + ":" + disguiseFallbackName);
     }
 
     /**
