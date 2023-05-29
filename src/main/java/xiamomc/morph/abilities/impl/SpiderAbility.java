@@ -37,9 +37,9 @@ public class SpiderAbility extends NoOpOptionAbility
     @Override
     public boolean handle(Player player, DisguiseState state)
     {
-        if (player.isInWater()) return true;
+        if (player.isInWater() || player.isSneaking()) return true;
 
-        var boundingBox = NmsRecord.ofPlayer(player).getBoundingBox().inflate(0.1f, 0, 0.1f);
+        var boundingBox = NmsRecord.ofPlayer(player).getBoundingBox().inflate(0.02f, 0, 0.02f);
         var level = NmsRecord.ofPlayer(player).level;
 
         // 检查是否存在碰撞
