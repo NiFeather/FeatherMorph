@@ -14,7 +14,6 @@ import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.events.CommonEventProcessor;
 import xiamomc.morph.events.InteractionMirrorProcessor;
 import xiamomc.morph.events.PlayerTracker;
-import xiamomc.morph.events.PluginEventListener;
 import xiamomc.morph.interfaces.IManagePlayerData;
 import xiamomc.morph.interfaces.IManageRequests;
 import xiamomc.morph.messages.MessageUtils;
@@ -60,17 +59,17 @@ public final class MorphPlugin extends XiaMoJavaPlugin
         return getMorphNameSpace();
     }
 
-    private final CommandHelper<MorphPlugin> cmdHelper = new MorphCommandManager();
+    private CommandHelper<MorphPlugin> cmdHelper;
 
     private MorphManager morphManager;
 
     private PluginManager pluginManager;
 
-    private final MorphSkillHandler skillHandler = new MorphSkillHandler();
+    private MorphSkillHandler skillHandler;
 
-    private final AbilityHandler abilityHandler = new AbilityHandler();
+    private AbilityHandler abilityHandler;
 
-    private final VanillaMessageStore vanillaMessageStore = new VanillaMessageStore();
+    private VanillaMessageStore vanillaMessageStore;
 
     private PlaceholderIntegration placeholderIntegration;
 
@@ -89,21 +88,25 @@ public final class MorphPlugin extends XiaMoJavaPlugin
 
         pluginManager = Bukkit.getPluginManager();
 
-        clientHandler = new MorphClientHandler();
-
         var playerTracker = new PlayerTracker();
-        var pluginEventListener = new PluginEventListener();
 
-        pluginEventListener.onPluginEnable(this::onPluginEnable);
+        softDeps.setHandle("GSit", s -> this.registerListener(new GSitCompactProcessor()), true);
+        softDeps.setHandle("PlaceholderAPI", p ->
+        {
+            placeholderIntegration = new PlaceholderIntegration(dependencyManager);
+            placeholderIntegration.register();
+        }, true);
 
         //缓存依赖
         dependencyManager.cache(this);
         dependencyManager.cache(morphManager = new MorphManager());
-        dependencyManager.cache(skillHandler);
-        dependencyManager.cache(abilityHandler);
-        dependencyManager.cache(cmdHelper);
-        dependencyManager.cache(clientHandler);
-        dependencyManager.cache(vanillaMessageStore);
+        dependencyManager.cache(skillHandler = new MorphSkillHandler());
+        dependencyManager.cache(abilityHandler = new AbilityHandler());
+        dependencyManager.cache(cmdHelper = new MorphCommandManager());
+
+        dependencyManager.cache(clientHandler = new MorphClientHandler());
+
+        dependencyManager.cache(vanillaMessageStore = new VanillaMessageStore());
 
         dependencyManager.cacheAs(MessageStore.class, new MorphMessageStore());
         dependencyManager.cacheAs(MiniMessage.class, MiniMessage.miniMessage());
@@ -127,13 +130,9 @@ public final class MorphPlugin extends XiaMoJavaPlugin
             registerListeners(new Listener[]
                     {
                             playerTracker,
-                            pluginEventListener,
                             mirrorProcessor,
                             new CommonEventProcessor(),
                     });
-
-            for (Plugin plugin : pluginManager.getPlugins())
-                onPluginEnable(plugin.getName());
 
             clientHandler.sendReAuth(Bukkit.getOnlinePlayers());
         });
@@ -190,23 +189,6 @@ public final class MorphPlugin extends XiaMoJavaPlugin
     private void registerListener(Listener l)
     {
         pluginManager.registerEvents(l, this);
-    }
-
-    public void onPluginEnable(String name)
-    {
-        switch (name)
-        {
-            case "GSit" ->
-            {
-                registerListener(new GSitCompactProcessor());
-            }
-
-            case "PlaceholderAPI" ->
-            {
-                placeholderIntegration = new PlaceholderIntegration(dependencyManager);
-                placeholderIntegration.register();
-            }
-        }
     }
 
     /**

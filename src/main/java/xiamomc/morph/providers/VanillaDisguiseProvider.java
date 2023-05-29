@@ -243,27 +243,28 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
         //Find dimensions
         var targetField = ReflectionUtils.getPlayerDimensionsField(nmsPlayer);
 
-        if (targetField != null)
+        if (targetField == null) return;
+
+        try
         {
-            try
-            {
-                var box = wrapper.getBoundingBoxAt(nmsPlayer.getX(), nmsPlayer.getY(), nmsPlayer.getZ());
-                var dimensions = wrapper.getDimensions();
+            var box = wrapper.getBoundingBoxAt(nmsPlayer.getX(), nmsPlayer.getY(), nmsPlayer.getZ());
+            var dimensions = wrapper.getDimensions();
 
-                targetField.set(nmsPlayer, dimensions);
+            // Update dimensions
+            targetField.set(nmsPlayer, dimensions);
 
-                nmsPlayer.setBoundingBox(box);
+            nmsPlayer.setBoundingBox(box);
 
-                var eyeHeightField = ReflectionUtils.getPlayerEyeHeightField(NmsRecord.ofPlayer(player));
+            // Update eye height
+            var eyeHeightField = ReflectionUtils.getPlayerEyeHeightField(NmsRecord.ofPlayer(player));
 
-                if (eyeHeightField != null)
-                    eyeHeightField.set(nmsPlayer, dimensions.height * 0.85F);
-            }
-            catch (Throwable t)
-            {
-                logger.warn("Unable to modify player's bounding box: " + t.getMessage());
-                t.printStackTrace();
-            }
+            if (eyeHeightField != null)
+                eyeHeightField.set(nmsPlayer, dimensions.height * 0.85F);
+        }
+        catch (Throwable t)
+        {
+            logger.warn("Unable to modify player's bounding box: " + t.getMessage());
+            t.printStackTrace();
         }
     }
 
