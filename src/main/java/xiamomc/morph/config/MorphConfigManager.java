@@ -129,7 +129,7 @@ public class MorphConfigManager extends PluginConfigManager
         super.reload();
 
         //更新配置
-        int targetVersion = 21;
+        int targetVersion = 23;
 
         var configVersion = getOrDefault(Integer.class, ConfigOption.VERSION);
 
@@ -188,7 +188,9 @@ public class MorphConfigManager extends PluginConfigManager
                 //skill item
                 //noinspection deprecation
                 var oldSkillItem = get(String.class, ConfigOption.ACTION_ITEM);
-                newConfig.set(ConfigOption.SKILL_ITEM.toString(), oldSkillItem);
+
+                if (oldSkillItem != null)
+                    newConfig.set(ConfigOption.SKILL_ITEM.toString(), oldSkillItem);
             }
 
             // ChatOverride消息的配置从messages迁移到config.yml中
@@ -209,6 +211,14 @@ public class MorphConfigManager extends PluginConfigManager
 
                 if (requireCache)
                     depMgr.unCache(this);
+            }
+
+            if (configVersion < 23)
+            {
+                var val = get(Boolean.class, ConfigOption.MODIFY_BOUNDING_BOX_LEGACY);
+
+                if (val != null)
+                    newConfig.set(ConfigOption.MODIFY_BOUNDING_BOX.toString(), val);
             }
 
             newConfig.set(ConfigOption.VERSION.toString(), targetVersion);
