@@ -1,18 +1,15 @@
 package xiamomc.morph.abilities.impl;
 
-import org.bukkit.NamespacedKey;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.abilities.MorphAbility;
 import xiamomc.morph.storage.skill.ISkillOption;
 
 public abstract class OnAttackAbility<T extends ISkillOption> extends MorphAbility<T>
 {
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onEntityDamagedByEntity(EntityDamageByEntityEvent e)
     {
         if (!(e.getDamager() instanceof Player player)) return;

@@ -10,6 +10,7 @@ import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.abilities.impl.*;
+import xiamomc.morph.abilities.impl.onAttack.ExtraKnockbackAbility;
 import xiamomc.morph.abilities.impl.onAttack.PotionOnAttackAbility;
 import xiamomc.morph.abilities.impl.potion.*;
 import xiamomc.morph.events.api.lifecycle.AbilitiesFinishedInitializeEvent;
