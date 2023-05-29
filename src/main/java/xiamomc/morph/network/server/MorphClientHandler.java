@@ -108,7 +108,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
     @Initializer
     private void load(MorphPlugin plugin, MorphConfigManager configManager)
     {
-        Constants.initialize(true);
+        // Constants.initialize(true);
 
         registries.registerC2S(C2SCommandNames.Initial, a -> new C2SInitialCommand())
                 .registerC2S(C2SCommandNames.Morph, C2SMorphCommand::new)

@@ -641,7 +641,16 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
             return false;
         }
+        catch (Throwable t)
+        {
+            source.sendMessage(MessageUtils.prefixes(source, MorphStrings.errorWhileDisguising()));
 
+            logger.error("Error while disguising: %s".formatted(t.getMessage()));
+            t.printStackTrace();
+
+            unMorph(player);
+            return false;
+        }
     }
 
     /**
@@ -1030,6 +1039,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         saveConfiguration();
 
         offlineStorage.saveConfiguration();
+
+        providers.clear();
     }
 
     public OfflineDisguiseState getOfflineState(Player player)
