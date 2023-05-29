@@ -136,7 +136,8 @@ public class AbilityHandler extends MorphPluginObject
                 new HealsFromEntityAbility(),
                 new ExtraKnockbackAbility(),
                 new DryOutInAirAbility(),
-                new PotionOnAttackAbility()
+                new PotionOnAttackAbility(),
+                new SpiderAbility()
         ));
 
         initalizeDone = true;

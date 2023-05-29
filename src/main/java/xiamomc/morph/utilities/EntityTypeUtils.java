@@ -263,6 +263,11 @@ public class EntityTypeUtils
                 EntityType.DROWNED, EntityType.PHANTOM);
     }
 
+    public static Set<EntityType> spider()
+    {
+        return ObjectSet.of(EntityType.SPIDER, EntityType.CAVE_SPIDER);
+    }
+
     public static Set<EntityType> alwaysNightVision()
     {
         return ObjectSet.of(EntityType.BAT, EntityType.ENDERMAN);
