@@ -207,7 +207,7 @@ public class AbilityHandler extends MorphPluginObject
     {
         for (IMorphAbility<?> a : state.getAbilities())
         {
-            if (a.handle(player, state)) continue;
+            if (!a.optionValid() || a.handle(player, state)) continue;
 
             logger.warn("Error occurred while updating abilities");
             Thread.dumpStack();

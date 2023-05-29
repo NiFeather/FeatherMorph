@@ -18,6 +18,17 @@ public abstract class MorphAbility<T extends ISkillOption> extends MorphPluginOb
 {
     protected final List<Player> appliedPlayers = new ObjectArrayList<>();
 
+    protected boolean requireValidOption()
+    {
+        return false;
+    }
+
+    private boolean optionValid = true;
+    public boolean optionValid()
+    {
+        return optionValid;
+    }
+
     @Override
     public boolean applyToPlayer(Player player, DisguiseState state)
     {
@@ -28,7 +39,19 @@ public abstract class MorphAbility<T extends ISkillOption> extends MorphPluginOb
             appliedPlayers.add(player);
         }
 
-        return true;
+        if (!requireValidOption()) return true;
+
+        var option = this.getOptionFor(state);
+        if (option != null && option.isValid()) return true;
+
+        logger.error("Disguise '%s' does not have a valid configuration for ability %s, not processing...".formatted(state.getDisguiseIdentifier(), getIdentifier()));
+        synchronized (appliedPlayers)
+        {
+            appliedPlayers.remove(player);
+            optionValid = false;
+        }
+
+        return false;
     }
 
     @Override

@@ -48,6 +48,11 @@ public interface IMorphAbility<T extends ISkillOption> extends Listener
     }
 
     /**
+     * 此被动技能的设定是否合法
+     */
+    public boolean optionValid();
+
+    /**
      * 取消应用某个玩家
      *
      * @param player 目标玩家

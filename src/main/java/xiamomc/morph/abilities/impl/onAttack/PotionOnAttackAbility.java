@@ -11,6 +11,7 @@ import xiamomc.morph.MorphManager;
 import xiamomc.morph.abilities.AbilityType;
 import xiamomc.morph.abilities.impl.OnAttackAbility;
 import xiamomc.morph.abilities.options.PotionEffectOption;
+import xiamomc.morph.misc.DisguiseState;
 import xiamomc.pluginbase.Annotations.Resolved;
 
 public class PotionOnAttackAbility extends OnAttackAbility<PotionEffectOption>
@@ -34,6 +35,12 @@ public class PotionOnAttackAbility extends OnAttackAbility<PotionEffectOption>
 
     @Resolved
     private MorphManager manager;
+
+    @Override
+    protected boolean requireValidOption()
+    {
+        return true;
+    }
 
     @Override
     protected void apply(LivingEntity hurt, Player source)
