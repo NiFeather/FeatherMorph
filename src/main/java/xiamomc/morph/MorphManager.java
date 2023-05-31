@@ -618,8 +618,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                     clientHandler.sendCommand(player, new S2CSetProfileCommand(outComingState.getProfileNbtString()));
             }
 
-            if (outComingState.containsAbility(AbilityType.SPIDER))
-                clientHandler.sendCommand(player, new S2CSetSpiderCommand(true));
+            // if (outComingState.containsAbility(AbilityType.SPIDER))
+            //    clientHandler.sendCommand(player, new S2CSetSpiderCommand(true));
 
             // 返回消息
             var playerLocale = MessageUtils.getLocale(source);
