@@ -16,6 +16,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.abilities.AbilityHandler;
+import xiamomc.morph.abilities.AbilityType;
 import xiamomc.morph.events.api.lifecycle.ManagerFinishedInitializeEvent;
 import xiamomc.morph.backends.DisguiseBackend;
 import xiamomc.morph.backends.DisguiseWrapper;
@@ -616,6 +617,9 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 if (outComingState.haveProfile())
                     clientHandler.sendCommand(player, new S2CSetProfileCommand(outComingState.getProfileNbtString()));
             }
+
+            if (outComingState.containsAbility(AbilityType.SPIDER))
+                clientHandler.sendCommand(player, new S2CSetSpiderCommand(true));
 
             // 返回消息
             var playerLocale = MessageUtils.getLocale(source);
