@@ -127,5 +127,13 @@
   "requests.request_received": "你收到了来自<who>的请求！",
   "requests.request_received_accept": "发送 /request accept <who> 来接受请求",
   "requests.request_received_deny": "发送 /request deny <who> 即可拒绝请求",
-  "requests.request_send": "请求已发送！对方将有有1分钟的时间来接受！"
+  "requests.request_send": "请求已发送！对方将有有1分钟的时间来接受！",
+  "stat.version": "FeatherMorph <version> by <author> (协议版本 v<proto>)",
+  "stat.backend": "当前后端: <backend>",
+  "stat.providers": "已注册伪装构建器: <count>",
+  "stat.banned_disguises": "已禁用伪装: <count>",
+  "stat.abilities": "已注册本能: <count>",
+  "stat.skills": "已注册技能: <count>",
+  "stat.active_clients": "当前活动的客户端连接: <count>",
+  "stat.active_disguises": "已激活伪装: <count>/<max>"
 }

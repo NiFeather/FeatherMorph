@@ -127,5 +127,13 @@
   "requests.request_received": "You received a request from <who>!",
   "requests.request_received_accept": "Send /request accept <who> to accept the request",
   "requests.request_received_deny": "Send /request deny <who> to deny the request",
-  "requests.request_send": "Request sent! They have 1 minute to accept!"
+  "requests.request_send": "Request sent! They have 1 minute to accept!",
+  "stat.version": "FeatherMorph <version> by <author> (Implementing protocol v<proto>)",
+  "stat.backend": "Current Backend: <backend>",
+  "stat.providers": "Registered Disguise Providers: <count>",
+  "stat.banned_disguises": "Banned Disguises: <count>",
+  "stat.abilities": "Registered Abilities: <count>",
+  "stat.skills": "Registered Skills: <count>",
+  "stat.active_clients": "Active client connections: <count>",
+  "stat.active_disguises": "Active Disguises: <count>/<max>"
 }
