@@ -191,7 +191,7 @@ public class HelpStrings extends AbstractMorphStrings
     public static FormattableMessage statDescription()
     {
         return getFormattable(getKey("stat"),
-                "查询插件当前状态");
+                "查询插件当前的统计数据");
     }
 
     private static String getKey(String key)
