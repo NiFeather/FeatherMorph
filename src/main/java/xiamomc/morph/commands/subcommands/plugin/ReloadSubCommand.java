@@ -82,7 +82,7 @@ public class ReloadSubCommand extends MorphPluginObject implements ISubCommand
             {
                 case "data" -> reloadsData = true;
                 case "message" -> reloadsMessage = true;
-                case "reset_loaded_messages" -> reloadsMessage = reloadOverwriteNonDefMsg = true;
+                case "update_message" -> reloadsMessage = reloadOverwriteNonDefMsg = true;
                 default -> reloadsMessage = reloadsData = true;
             }
 

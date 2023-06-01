@@ -69,6 +69,7 @@
   "help.section_header": "指令 /<basename> 的用法：",
   "help.section_not_found": "<color:red> 未找到此章节",
   "help.special_note": "特别标注：",
+  "help.stat": "查询插件当前的统计数据",
   "hint.client_suggestion_message_1": "小提示：我们推荐使用客户端模组来获得更好的体验",
   "hint.client_suggestion_message_2": "小提示：更多信息请询问服务器管理员",
   "hint.command_hint": "小提示：发送 /feathermorph help 可以查看伪装的相关用法。",
@@ -127,5 +128,13 @@
   "requests.request_received": "你收到了来自<who>的请求！",
   "requests.request_received_accept": "发送 /request accept <who> 来接受请求",
   "requests.request_received_deny": "发送 /request deny <who> 即可拒绝请求",
-  "requests.request_send": "请求已发送！对方将有有1分钟的时间来接受！"
+  "requests.request_send": "请求已发送！对方将有有1分钟的时间来接受！",
+  "stat.version": "FeatherMorph <version> by <author> (协议版本 v<proto>)",
+  "stat.backend": "当前后端: <backend>",
+  "stat.providers": "已注册伪装构建器: <count>",
+  "stat.banned_disguises": "已禁用伪装: <count>",
+  "stat.abilities": "已注册本能: <count>",
+  "stat.skills": "已注册技能: <count>",
+  "stat.active_clients": "当前活动的客户端连接: <count>",
+  "stat.active_disguises": "已激活伪装: <count>/<max>"
 }
