@@ -3,7 +3,6 @@ package xiamomc.morph.utilities;
 import com.google.common.base.Predicates;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import me.libraryaddict.disguise.disguisetypes.EntityPose;
-import me.libraryaddict.disguise.disguisetypes.FlagWatcher;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import org.bukkit.Material;
@@ -78,41 +77,6 @@ public class DisguiseUtils
         return value;
     }
 
-    /**
-     * 设置伪装的装备
-     * @param who 谁
-     * @param ourWatcher 自己伪装FlagWatcher
-     * @param theirWatcher 他们（who）伪装的FlagWatcher
-     */
-    public static void tryCopyLDArmorStack(Player who, FlagWatcher ourWatcher, FlagWatcher theirWatcher)
-    {
-        ourWatcher.setArmor(DisguiseUtils.getLDArmorStack(who, theirWatcher));
-
-        var handStack = DisguiseUtils.chooseStack(
-                DisguiseUtils.getHandItems(who),
-                DisguiseUtils.getHandItems(theirWatcher));
-
-        ourWatcher.setItemInMainHand(handStack[0]);
-        ourWatcher.setItemInOffHand(handStack[1]);
-    }
-
-    //获取玩家或者伪装的装备
-    public static ItemStack[] getLDArmorStack(Player player, FlagWatcher disguiseWatcher)
-    {
-        var playerArmorStack = player.getEquipment().getArmorContents();
-        var disguiseArmorStack = disguiseWatcher.getArmor();
-
-        var targetStack = chooseStack(playerArmorStack, disguiseArmorStack);
-
-        return new ItemStack[]
-                {
-                        itemOrAir(targetStack[0]),
-                        itemOrAir(targetStack[1]),
-                        itemOrAir(targetStack[2]),
-                        itemOrAir(targetStack[3])
-                };
-    }
-
     public static ItemStack[] chooseStack(ItemStack[] playerStack, ItemStack[] disguiseStack)
     {
         return Arrays.stream(disguiseStack).allMatch(s -> s == null || s.getType().isAir())
@@ -123,16 +87,6 @@ public class DisguiseUtils
     public static ItemStack[] getHandItems(Player player)
     {
         var equipment = player.getEquipment();
-        return new ItemStack[]
-                {
-                        itemOrAir(equipment.getItemInMainHand()),
-                        itemOrAir(equipment.getItemInOffHand())
-                };
-    }
-
-    public static ItemStack[] getHandItems(FlagWatcher watcher)
-    {
-        var equipment = watcher.getEquipment();
         return new ItemStack[]
                 {
                         itemOrAir(equipment.getItemInMainHand()),

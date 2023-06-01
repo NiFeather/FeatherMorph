@@ -1,7 +1,6 @@
 package xiamomc.morph.commands.subcommands.plugin;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import me.libraryaddict.disguise.DisguiseAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -70,27 +69,20 @@ public class QuerySubCommand extends MorphPluginObject implements ISubCommand
 
             if (targetPlayer != null)
             {
-                var info = manager.getDisguiseStateFor(targetPlayer);
+                var state = manager.getDisguiseStateFor(targetPlayer);
 
-                if (info != null)
+                if (state != null)
+                {
                     commandSender.sendMessage(MessageUtils.prefixes(commandSender,
                             CommandStrings.qDisguisedString()
                                     .withLocale(locale)
                                     .resolve("who", targetPlayer.getName())
-                                    .resolve("what", info.getDisguiseIdentifier())
+                                    .resolve("what", state.getDisguiseIdentifier())
                                     .resolve("storage_status",
-                                            info.showingDisguisedItems()
+                                            state.showingDisguisedItems()
                                                     ? CommandStrings.qaShowingDisguisedItemsString()
                                                     : CommandStrings.qaNotShowingDisguisedItemsString(),
                                             null)
-                    ));
-                else if (DisguiseAPI.isDisguised(targetPlayer))
-                {
-                    commandSender.sendMessage(MessageUtils.prefixes(commandSender,
-                            CommandStrings.qDisguisedUnManageableString()
-                                    .withLocale(locale)
-                                    .resolve("who", targetPlayer.getName())
-                                    .resolve("what", DisguiseAPI.getDisguise(targetPlayer).getDisguiseName())
                     ));
                 }
                 else
