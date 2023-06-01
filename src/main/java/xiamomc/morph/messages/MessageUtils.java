@@ -1,12 +1,10 @@
 package xiamomc.morph.messages;
 
-import com.destroystokyo.paper.ClientOption;
 import net.kyori.adventure.text.Component;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.config.ConfigOption;

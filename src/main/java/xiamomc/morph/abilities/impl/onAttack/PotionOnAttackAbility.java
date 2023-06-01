@@ -1,7 +1,6 @@
 package xiamomc.morph.abilities.impl.onAttack;
 
 import org.bukkit.NamespacedKey;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
@@ -11,7 +10,6 @@ import xiamomc.morph.MorphManager;
 import xiamomc.morph.abilities.AbilityType;
 import xiamomc.morph.abilities.impl.OnAttackAbility;
 import xiamomc.morph.abilities.options.PotionEffectOption;
-import xiamomc.morph.misc.DisguiseState;
 import xiamomc.pluginbase.Annotations.Resolved;
 
 public class PotionOnAttackAbility extends OnAttackAbility<PotionEffectOption>

@@ -4,8 +4,6 @@ import com.mojang.authlib.GameProfile;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.TagType;
-import net.minecraft.tags.EntityTypeTags;
-import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.phys.AABB;
 import org.bukkit.ChatColor;
@@ -14,12 +12,10 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.util.BoundingBox;
-import org.checkerframework.checker.index.qual.PolyUpperBound;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.utilities.EntityTypeUtils;
-import xiamomc.morph.utilities.NbtUtils;
 
 public abstract class DisguiseWrapper<T>
 {

@@ -1,10 +1,8 @@
 package xiamomc.morph.messages;
 
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.utilities.PluginAssetUtils;
-import xiamomc.pluginbase.Bindables.Bindable;
 import xiamomc.pluginbase.Messages.IStrings;
 import xiamomc.pluginbase.Messages.MessageStore;
 

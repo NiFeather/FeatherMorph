@@ -8,7 +8,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.backends.DisguiseBackend;
 import xiamomc.morph.backends.DisguiseWrapper;
-import xiamomc.morph.utilities.NbtUtils;
 
 import java.util.Map;
 

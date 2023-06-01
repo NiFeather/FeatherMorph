@@ -14,7 +14,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import xiamomc.morph.MorphPlugin;
-import xiamomc.morph.backends.DisguiseBackend;
 import xiamomc.morph.backends.DisguiseWrapper;
 import xiamomc.morph.misc.DisguiseEquipment;
 import xiamomc.morph.misc.DisguiseState;

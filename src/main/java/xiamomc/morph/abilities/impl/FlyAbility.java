@@ -9,13 +9,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerGameModeChangeEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
-import org.checkerframework.checker.units.qual.degrees;
 import org.jetbrains.annotations.NotNull;
-import org.joml.Vector3d;
-import org.joml.Vector3f;
-
-import com.google.gson.ExclusionStrategy;
-
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.abilities.AbilityType;
 import xiamomc.morph.abilities.MorphAbility;
@@ -23,10 +17,8 @@ import xiamomc.morph.abilities.options.FlyOption;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.misc.DisguiseState;
-import xiamomc.morph.misc.NmsRecord;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
-import xiamomc.pluginbase.Bindables.Bindable;
 
 public class FlyAbility extends MorphAbility<FlyOption>
 {

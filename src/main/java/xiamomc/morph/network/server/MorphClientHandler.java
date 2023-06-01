@@ -17,21 +17,20 @@ import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.MorphPluginObject;
-import xiamomc.morph.RequestManager;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.interfaces.IManageRequests;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.MorphStrings;
-import xiamomc.morph.messages.SkillStrings;
 import xiamomc.morph.network.*;
 import xiamomc.morph.network.commands.C2S.*;
 import xiamomc.morph.network.commands.CommandRegistries;
-import xiamomc.morph.network.commands.S2C.*;
+import xiamomc.morph.network.commands.S2C.AbstractS2CCommand;
+import xiamomc.morph.network.commands.S2C.S2CCurrentCommand;
+import xiamomc.morph.network.commands.S2C.S2CReAuthCommand;
+import xiamomc.morph.network.commands.S2C.S2CUnAuthCommand;
 import xiamomc.morph.network.commands.S2C.query.QueryType;
 import xiamomc.morph.network.commands.S2C.query.S2CQueryCommand;
-import xiamomc.morph.network.commands.S2C.set.S2CSetDisplayingFakeEquipCommand;
-import xiamomc.morph.network.commands.S2C.set.S2CSetFakeEquipCommand;
 import xiamomc.morph.network.commands.S2C.set.S2CSetModifyBoundingBoxCommand;
 import xiamomc.morph.network.commands.S2C.set.S2CSetSelfViewingCommand;
 import xiamomc.pluginbase.Annotations.Initializer;
@@ -40,7 +39,10 @@ import xiamomc.pluginbase.Bindables.Bindable;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MorphClientHandler extends MorphPluginObject implements BasicClientHandler<Player>
