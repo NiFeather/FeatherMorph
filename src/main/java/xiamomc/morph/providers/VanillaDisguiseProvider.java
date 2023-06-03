@@ -5,10 +5,14 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.kyori.adventure.text.Component;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.TagParser;
+import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import org.bukkit.Bukkit;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.attribute.AttributeModifier;
+import org.bukkit.craftbukkit.v1_19_R3.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_19_R3.entity.CraftLivingEntity;
+import org.bukkit.craftbukkit.v1_19_R3.entity.CraftMob;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
@@ -26,6 +30,7 @@ import xiamomc.morph.misc.DisguiseInfo;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.misc.DisguiseTypes;
 import xiamomc.morph.misc.NmsRecord;
+import xiamomc.morph.utilities.EntityTargetingHelper;
 import xiamomc.morph.utilities.EntityTypeUtils;
 import xiamomc.morph.utilities.NbtUtils;
 import xiamomc.morph.utilities.ReflectionUtils;
@@ -148,11 +153,17 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
             if (plugin.getCurrentTick() % 20 == 0)
                 ReflectionUtils.cleanCaches();
 
+            // var nearByEntities = player.getNearbyEntities(12, 12, 12);
+            // targetingHelper.entity(nearByEntities);
+
             return true;
         }
         else
             return false;
     }
+
+    private final EntityTargetingHelper targetingHelper = new EntityTargetingHelper();
+
 
     @Override
     public void postConstructDisguise(DisguiseState state, @Nullable Entity targetEntity)

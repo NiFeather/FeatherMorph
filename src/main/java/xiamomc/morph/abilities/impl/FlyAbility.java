@@ -19,6 +19,7 @@ import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
+import xiamomc.pluginbase.Bindables.Bindable;
 
 public class FlyAbility extends MorphAbility<FlyOption>
 {
