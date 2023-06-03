@@ -1,7 +1,6 @@
 package xiamomc.morph.commands.subcommands.plugin.management;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;

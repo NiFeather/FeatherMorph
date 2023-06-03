@@ -4,7 +4,6 @@ import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.abilities.AbilityHandler;
-import xiamomc.morph.skills.MorphSkillHandler;
 
 public class AbilitiesFinishedInitializeEvent extends Event
 {

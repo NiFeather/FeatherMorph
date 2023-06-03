@@ -133,7 +133,7 @@
   "stat.backend": "当前后端: <backend>",
   "stat.providers": "已注册伪装构建器: <count>",
   "stat.banned_disguises": "已禁用伪装: <count>",
-  "stat.abilities": "已注册本能: <count>",
+  "stat.abilities": "已注册天赋: <count>",
   "stat.skills": "已注册技能: <count>",
   "stat.active_clients": "当前活动的客户端连接: <count>",
   "stat.active_disguises": "已激活伪装: <count>/<max>"

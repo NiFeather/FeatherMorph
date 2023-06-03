@@ -1,9 +1,6 @@
 package xiamomc.morph.abilities;
 
 import org.bukkit.NamespacedKey;
-import org.checkerframework.checker.units.qual.N;
-
-import javax.naming.Name;
 
 public class AbilityType
 {

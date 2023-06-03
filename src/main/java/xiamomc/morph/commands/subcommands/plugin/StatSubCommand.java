@@ -57,7 +57,7 @@ public class StatSubCommand extends MorphPluginObject implements ISubCommand
         var msg = new FormattableMessage[]
                 {
                         StatStrings.versionString()
-                                .resolve("version", plugin.getPluginMeta().getVersion())
+                                .resolve("version", plugin.getDescription().getVersion())
                                 .resolve("author", authors)
                                 .resolve("proto", String.valueOf(clientHandler.targetApiVersion)),
 

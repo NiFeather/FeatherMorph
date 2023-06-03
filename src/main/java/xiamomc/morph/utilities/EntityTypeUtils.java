@@ -10,9 +10,12 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Player;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_19_R2.CraftWorld;
+import org.bukkit.craftbukkit.v1_19_R2.entity.CraftEntity;
 import org.bukkit.entity.EntityType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -136,6 +139,12 @@ public class EntityTypeUtils
                 || type == EntityType.ZOMBIE_VILLAGER
                 || type == EntityType.DROWNED
                 || type == EntityType.HUSK;
+    }
+
+    public static boolean isSkeleton(EntityType type)
+    {
+        return type == EntityType.SKELETON
+                || type == EntityType.STRAY;
     }
 
     public static boolean isZombiesHostile(EntityType type)
@@ -344,5 +353,28 @@ public class EntityTypeUtils
             case ENDER_DRAGON -> 0.15f;
             default -> 0.1f;
         };
+    }
+
+    private static final Map<EntityType, Boolean> isEnemyMap = new Object2ObjectArrayMap<>();
+
+    private static final Location spawnLocation = new Location(null, 0d, -4096d, 0d);
+
+    public static boolean isEnemy(EntityType type)
+    {
+        var cache = isEnemyMap.getOrDefault(type, null);
+        if (cache != null) return cache;
+
+        if (type.getEntityClass() == null) return false;
+
+        var world = Bukkit.getWorlds().stream().findFirst().orElse(null);
+        if (world == null) return false;
+
+        var entity = world.spawn(spawnLocation, type.getEntityClass());
+        var isEnemy = entity instanceof Enemy;
+
+        ((CraftEntity) entity).getHandle().discard();
+
+        isEnemyMap.put(type, isEnemy);
+        return isEnemy;
     }
 }

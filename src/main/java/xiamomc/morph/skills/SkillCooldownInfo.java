@@ -1,7 +1,5 @@
 package xiamomc.morph.skills;
 
-import org.slf4j.LoggerFactory;
-
 public class SkillCooldownInfo
 {
     private final String id;
