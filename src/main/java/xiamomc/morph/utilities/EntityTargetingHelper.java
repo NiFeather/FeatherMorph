@@ -8,10 +8,11 @@ import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.WrappedGoal;
 import net.minecraft.world.entity.player.Player;
+import org.bukkit.craftbukkit.v1_19_R3.entity.CraftAnimals;
 import org.bukkit.craftbukkit.v1_19_R3.entity.CraftMob;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Shulker;
+import org.bukkit.entity.Mob;
 import org.bukkit.event.entity.EntityTargetEvent;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
@@ -31,24 +32,27 @@ public class EntityTargetingHelper extends MorphPluginObject
         }
     }
 
-    private final Map<CraftMob, GoalRecord> entityGoalMap = new Object2ObjectArrayMap<>();
+    private final Map<Mob, GoalRecord> entityGoalMap = new Object2ObjectArrayMap<>();
 
     /**
      * 为map中的所有实体恢复之前的AvoidGoal
      */
     public void recoverGoal()
     {
-        var toRemove = new ObjectArrayList<CraftMob>();
-        entityGoalMap.forEach((craftMob, goal) ->
+        var toRemove = new ObjectArrayList<Mob>();
+        entityGoalMap.forEach((mob, goal) ->
         {
             // 跳过已死亡的实体
-            if (craftMob.isDead())
+            if (mob.isDead())
             {
-                toRemove.add(craftMob);
+                toRemove.add(mob);
                 return;
             }
 
-            var nmsMob = craftMob.getHandle();
+            var nmsMob = mob instanceof CraftMob craftMob ? craftMob.getHandle() : null;
+            if (nmsMob == null) return;
+
+            logger.info("Checking %s" + nmsMob);
 
             // 如果其目标不为null并且目标未死亡，则跳过
             if (nmsMob.getTarget() != null && !nmsMob.getTarget().isDeadOrDying()) return;
@@ -57,7 +61,7 @@ public class EntityTargetingHelper extends MorphPluginObject
             nmsMob.setTarget(null, EntityTargetEvent.TargetReason.CUSTOM, true);
             nmsMob.goalSelector.addGoal(goal.priority, goal.goal);
             nmsMob.goalSelector.removeGoal(goal.replacingGoal);
-            toRemove.add(craftMob);
+            toRemove.add(mob);
         });
 
         if (toRemove.size() > 0)
@@ -84,18 +88,20 @@ public class EntityTargetingHelper extends MorphPluginObject
 
     public void entity(List<Entity> entities)
     {
-        entities.removeIf(e -> !(e instanceof CraftMob));
+        entities.removeIf(e -> !(e instanceof Mob));
         entities.forEach(e -> this.entitySingle((CraftMob) e));
     }
 
     /**
      * 为目标生物应用自定义AvoidGoal并寻找目标
-     * @param craftMob 目标生物
+     * @param mob 目标生物
      */
-    public void entitySingle(CraftMob craftMob)
+    public void entitySingle(Mob mob)
     {
         // 如果实体已有攻击目标，则不做处理
-        var nmsMob = craftMob.getHandle();
+        var nmsMob = mob instanceof CraftMob craftMob ? craftMob.getHandle() : null;
+
+        if (nmsMob == null) return;
         if (nmsMob.getTarget() != null) return;
 
         var trackingRange = 16;
@@ -106,14 +112,17 @@ public class EntityTargetingHelper extends MorphPluginObject
         for (var nmsPlayer : nearByPlayers)
         {
             // 跳过非生存玩家
-            if (!nmsPlayer.gameMode.isSurvival()) continue;
+            if (!nmsPlayer.gameMode.isSurvival())
+                continue;
 
             // 跳过没有伪装的玩家
             var state = morphs.getDisguiseStateFor(nmsPlayer.getBukkitEntity());
-            if (state == null) continue;
+            if (state == null)
+                continue;
 
             // 如果生物类型和伪装类型不敌对，则跳过
-            if (!this.hostiles(craftMob.getType(), state.getEntityType())) continue;
+            if (!this.hostiles(mob.getType(), state.getEntityType()))
+                continue;
 
             // 设置攻击目标
             nmsMob.setTarget(nmsPlayer, EntityTargetEvent.TargetReason.CUSTOM, true);
@@ -150,7 +159,7 @@ public class EntityTargetingHelper extends MorphPluginObject
                         goalFound = g;
                         priority = g.getPriority();
 
-                        entityGoalMap.put(craftMob, GoalRecord.of(avoidEntityGoal, g.getPriority(), replacingGoal));
+                        entityGoalMap.put(mob, GoalRecord.of(avoidEntityGoal, g.getPriority(), replacingGoal));
                     }
                 }
                 catch (Throwable throwable)
@@ -205,7 +214,23 @@ public class EntityTargetingHelper extends MorphPluginObject
 
             case FOX -> targetType == EntityType.CHICKEN || targetType == EntityType.RABBIT
                     || targetType == EntityType.COD || targetType == EntityType.SALMON
-                    || targetType == EntityType.TROPICAL_FISH;
+                    || targetType == EntityType.TROPICAL_FISH || targetType == EntityType.PUFFERFISH;
+
+            case CAT -> targetType == EntityType.CHICKEN || targetType == EntityType.RABBIT;
+
+            case WOLF -> EntityTypeUtils.isSkeleton(targetType) || targetType == EntityType.RABBIT
+                    || targetType == EntityType.LLAMA || targetType == EntityType.SHEEP
+                    || targetType == EntityType.FOX;
+
+            case GUARDIAN, ELDER_GUARDIAN -> targetType == EntityType.AXOLOTL || targetType == EntityType.SQUID
+                    || targetType == EntityType.GLOW_SQUID;
+
+            // Doesn't work for somehow
+            case AXOLOTL -> targetType == EntityType.SQUID || targetType == EntityType.GLOW_SQUID
+                    || targetType == EntityType.GUARDIAN || targetType == EntityType.ELDER_GUARDIAN
+                    || targetType == EntityType.TADPOLE || targetType == EntityType.DROWNED
+                    || targetType == EntityType.COD || targetType == EntityType.SALMON
+                    || targetType == EntityType.TROPICAL_FISH || targetType == EntityType.PUFFERFISH;
 
             default -> false;
         };

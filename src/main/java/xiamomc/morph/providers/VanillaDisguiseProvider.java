@@ -153,8 +153,11 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
             if (plugin.getCurrentTick() % 20 == 0)
                 ReflectionUtils.cleanCaches();
 
-            // var nearByEntities = player.getNearbyEntities(12, 12, 12);
-            // targetingHelper.entity(nearByEntities);
+            if (plugin.getCurrentTick() % 5 == 0)
+            {
+                var nearByEntities = player.getNearbyEntities(12, 12, 12);
+                targetingHelper.entity(nearByEntities);
+            }
 
             return true;
         }
