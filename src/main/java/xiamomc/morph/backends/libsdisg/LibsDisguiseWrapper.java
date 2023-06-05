@@ -489,6 +489,24 @@ public class LibsDisguiseWrapper extends DisguiseWrapper<Disguise>
                 compoundTag.putString("MainGene", mainGene.toString().toLowerCase());
                 compoundTag.putString("HiddenGene", hiddenGene.toString().toLowerCase());
             }
+
+            case VILLAGER ->
+            {
+                if (!compoundTag.contains("VillagerData"))
+                {
+                    var villagerData = ((VillagerWatcher) watcher).getVillagerData();
+                    var profession = villagerData.getProfession();
+                    var type = villagerData.getType();
+                    var level = villagerData.getLevel();
+
+                    var compound = new CompoundTag();
+                    compound.putInt("level", level);
+                    compound.putString("profession", profession.getKey().asString());
+                    compound.putString("type", type.getKey().asString());
+
+                    compoundTag.put("VillagerData", compound);
+                }
+            }
         }
 
         this.tagValid = true;
