@@ -52,12 +52,9 @@ public class EntityTargetingHelper extends MorphPluginObject
             var nmsMob = mob instanceof CraftMob craftMob ? craftMob.getHandle() : null;
             if (nmsMob == null) return;
 
-            logger.info("Checking %s" + nmsMob);
-
             // 如果其目标不为null并且目标未死亡，则跳过
             if (nmsMob.getTarget() != null && !nmsMob.getTarget().isDeadOrDying()) return;
 
-            logger.info("Recovering %s for %s".formatted(goal.goal, nmsMob));
             nmsMob.setTarget(null, EntityTargetEvent.TargetReason.CUSTOM, true);
             nmsMob.goalSelector.addGoal(goal.priority, goal.goal);
             nmsMob.goalSelector.removeGoal(goal.replacingGoal);
