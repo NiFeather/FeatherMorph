@@ -152,7 +152,7 @@ public class EntityTargetingHelper extends MorphPluginObject
                     // 类型符合，标记移除此Goal
                     if (v == Player.class)
                     {
-                        replacingGoal = new FeatherMorphAvoidPlayerGoal((PathfinderMob) nmsMob, LivingEntity.class, 16, 1.6D, 1.4D);
+                        replacingGoal = new FeatherMorphAvoidPlayerGoal((PathfinderMob) nmsMob, Player.class, 16, 1.6D, 1.4D);
                         goalFound = g;
                         priority = g.getPriority();
 
@@ -177,9 +177,9 @@ public class EntityTargetingHelper extends MorphPluginObject
         }
     }
 
-    private class FeatherMorphAvoidPlayerGoal extends AvoidEntityGoal<LivingEntity>
+    private class FeatherMorphAvoidPlayerGoal extends AvoidEntityGoal<Player>
     {
-        public FeatherMorphAvoidPlayerGoal(PathfinderMob mob, Class<LivingEntity> fleeFromType, float distance, double slowSpeed, double fastSpeed)
+        public FeatherMorphAvoidPlayerGoal(PathfinderMob mob, Class<Player> fleeFromType, float distance, double slowSpeed, double fastSpeed)
         {
             super(mob, fleeFromType, distance, slowSpeed, fastSpeed);
         }
@@ -191,7 +191,8 @@ public class EntityTargetingHelper extends MorphPluginObject
         public boolean canUse()
         {
             var superCanUse = super.canUse();
-            if (this.toAvoid == null || !(toAvoid.getBukkitEntity() instanceof org.bukkit.entity.Player bukkitPlayer)) return superCanUse;
+            if (this.toAvoid == null || !(toAvoid.getBukkitEntity() instanceof org.bukkit.entity.Player bukkitPlayer))
+                return superCanUse;
 
             var state = EntityTargetingHelper.this.morphs.getDisguiseStateFor(bukkitPlayer);
             return state == null;
@@ -207,7 +208,7 @@ public class EntityTargetingHelper extends MorphPluginObject
     {
         return switch (sourceType)
         {
-            case IRON_GOLEM -> EntityTypeUtils.isEnemy(targetType) && targetType != EntityType.CREEPER;
+            case IRON_GOLEM, SNOWMAN -> EntityTypeUtils.isEnemy(targetType) && targetType != EntityType.CREEPER;
 
             case FOX -> targetType == EntityType.CHICKEN || targetType == EntityType.RABBIT
                     || targetType == EntityType.COD || targetType == EntityType.SALMON
