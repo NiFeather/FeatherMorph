@@ -8,8 +8,8 @@ import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.WrappedGoal;
 import net.minecraft.world.entity.player.Player;
-import org.bukkit.craftbukkit.v1_19_R3.entity.CraftAnimals;
-import org.bukkit.craftbukkit.v1_19_R3.entity.CraftMob;
+import org.bukkit.craftbukkit.v1_20_R1.entity.CraftAnimals;
+import org.bukkit.craftbukkit.v1_20_R1.entity.CraftMob;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Mob;
@@ -103,7 +103,7 @@ public class EntityTargetingHelper extends MorphPluginObject
 
         var trackingRange = 16;
         var loc = nmsMob.position();
-        var nearByPlayers = nmsMob.level.getNearbyPlayers(nmsMob, loc.x, loc.y, loc.z, trackingRange, null);
+        var nearByPlayers = nmsMob.level().getNearbyPlayers(nmsMob, loc.x, loc.y, loc.z, trackingRange, null);
 
         // 遍历附近的玩家来寻找目标
         for (var nmsPlayer : nearByPlayers)

@@ -10,9 +10,9 @@ import org.bukkit.Bukkit;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.attribute.AttributeModifier;
-import org.bukkit.craftbukkit.v1_19_R3.entity.CraftEntity;
-import org.bukkit.craftbukkit.v1_19_R3.entity.CraftLivingEntity;
-import org.bukkit.craftbukkit.v1_19_R3.entity.CraftMob;
+import org.bukkit.craftbukkit.v1_20_R1.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_20_R1.entity.CraftLivingEntity;
+import org.bukkit.craftbukkit.v1_20_R1.entity.CraftMob;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
@@ -131,7 +131,7 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
             var loc = player.getLocation();
             var box = constructedDisguise.getBoundingBoxAt(loc.x(), loc.y(), loc.z());
 
-            var hasCollision = CollisionUtil.getCollisionsForBlocksOrWorldBorder(NmsRecord.ofPlayer(player).level, null, box, null, false, false, true, true, null);
+            var hasCollision = CollisionUtil.getCollisionsForBlocksOrWorldBorder(NmsRecord.ofPlayer(player).level(), null, box, null, false, false, true, true, null);
             if (hasCollision)
             {
                 player.sendMessage(MessageUtils.prefixes(player, MorphStrings.noEnoughSpaceString()));

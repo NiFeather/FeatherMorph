@@ -40,7 +40,7 @@ public class SpiderAbility extends NoOpOptionAbility
         if (player.isInWater() || player.isSneaking()) return true;
 
         var boundingBox = NmsRecord.ofPlayer(player).getBoundingBox().inflate(0.02f, 0, 0.02f);
-        var level = NmsRecord.ofPlayer(player).level;
+        var level = NmsRecord.ofPlayer(player).level();
 
         // 检查是否存在碰撞
         var bb = CollisionUtil.getCollisionsForBlocksOrWorldBorder(level, null,

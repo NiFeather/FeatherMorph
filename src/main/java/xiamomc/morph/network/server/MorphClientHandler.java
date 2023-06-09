@@ -8,7 +8,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.game.ClientboundCustomPayloadPacket;
 import net.minecraft.resources.ResourceLocation;
 import org.bukkit.Bukkit;
-import org.bukkit.craftbukkit.v1_19_R3.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_20_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.messaging.MessageTooLargeException;
 import org.bukkit.plugin.messaging.Messenger;
@@ -167,9 +167,6 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
             if (clientVersion < minimumApiVersion || clientVersion > Constants.PROTOCOL_VERSION)
             {
                 unInitializePlayer(player);
-
-                var deps = DependencyManager.getInstance(MorphPlugin.getMorphNameSpace());
-                deps.get
 
                 //player.sendMessage(MessageUtils.prefixes(player, MorphStrings.clientVersionMismatchString()));
                 logger.info(player.getName() + " joined with incompatible client API version: " + clientVersion + " (This server requires " + targetApiVersion + ")");
