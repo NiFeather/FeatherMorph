@@ -10,23 +10,33 @@ import java.util.Arrays;
  */
 public enum DisguiseTypes
 {
-    //原版
+    /**
+     * 原版伪装
+     */
     VANILLA(NamespacedKey.MINECRAFT),
 
     ITEM_DISPLAY("item_display"),
 
     BLOCK_DISPLAY("block_display"),
 
-    //玩家伪装
+    /**
+     * 玩家伪装
+     */
     PLAYER("player"),
 
-    //LD的自定义伪装
+    /**
+     * LibsDisguise的本地伪装
+     */
     LD("local"),
 
-    //外部伪装
+    /**
+     * 外部伪装，可能由其他插件构建
+     */
     EXTERNAL("external"),
 
-    //未知伪装
+    /**
+     * 未知类型或未指定类型
+     */
     UNKNOWN("unknown");
 
     private final String nameSpace;

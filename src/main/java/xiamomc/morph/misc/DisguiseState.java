@@ -163,20 +163,24 @@ public class DisguiseState extends MorphPluginObject
     public Component entityCustomName;
 
     /**
-     * 伪装的实例
+     * 伪装的{@link DisguiseWrapper}实例
      */
     private DisguiseWrapper<?> disguiseWrapper;
 
+    /**
+     * 获取此State的伪装Wrapper
+     */
     public DisguiseWrapper<?> getDisguiseWrapper()
     {
         return disguiseWrapper;
     }
 
-    /**
-     * 伪装的ID
-     */
+    // 伪装ID
     private String disguiseIdentifier = SkillType.UNKNOWN.asString();
 
+    /**
+     * 获取此伪装的ID
+     */
     public String getDisguiseIdentifier()
     {
         return disguiseIdentifier;
@@ -189,13 +193,16 @@ public class DisguiseState extends MorphPluginObject
 
     private DisguiseTypes disguiseType;
 
+    /**
+     * 获取此伪装的{@link DisguiseTypes}
+     */
     public DisguiseTypes getDisguiseType()
     {
         return disguiseType;
     }
 
     /**
-     * 伪装的Provider
+     * 伪装的构建器（提供器）
      */
     private DisguiseProvider provider;
 

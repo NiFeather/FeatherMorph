@@ -36,6 +36,7 @@ import xiamomc.morph.network.commands.S2C.set.S2CSetSelfViewingCommand;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
+import xiamomc.pluginbase.Managers.DependencyManager;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -167,7 +168,10 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
             {
                 unInitializePlayer(player);
 
-                player.sendMessage(MessageUtils.prefixes(player, MorphStrings.clientVersionMismatchString()));
+                var deps = DependencyManager.getInstance(MorphPlugin.getMorphNameSpace());
+                deps.get
+
+                //player.sendMessage(MessageUtils.prefixes(player, MorphStrings.clientVersionMismatchString()));
                 logger.info(player.getName() + " joined with incompatible client API version: " + clientVersion + " (This server requires " + targetApiVersion + ")");
 
                 var msg = forceTargetVersion.get() ? MorphStrings.clientVersionMismatchKickString() : MorphStrings.clientVersionMismatchString();
