@@ -6,6 +6,7 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.TagType;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.phys.AABB;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -17,6 +18,10 @@ import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.utilities.EntityTypeUtils;
 
+/**
+ * A wrapper that holds the underlying disguise instance
+ * @param <T> Type of the disguise instance
+ */
 public abstract class DisguiseWrapper<T>
 {
     protected T instance;
