@@ -58,7 +58,7 @@ public class ReflectionUtils
 
     private static final Map<ServerPlayer, Field> playerEHFieldMap = new Object2ObjectOpenHashMap<>();
 
-    private static final String playerEyeHeightFieldName = "bf";
+    private static final String playerEyeHeightFieldName = "bi";
 
     @Nullable
     public static Field getPlayerEyeHeightField(ServerPlayer player)

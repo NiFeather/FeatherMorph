@@ -55,6 +55,7 @@ public class EntityTargetingHelper extends MorphPluginObject
             // 如果其目标不为null并且目标未死亡，则跳过
             if (nmsMob.getTarget() != null && !nmsMob.getTarget().isDeadOrDying()) return;
 
+            //logger.info("Recover E %s goal %s".formatted(nmsMob, goal.goal));
             nmsMob.setTarget(null, EntityTargetEvent.TargetReason.CUSTOM, true);
             nmsMob.goalSelector.addGoal(goal.priority, goal.goal);
             nmsMob.goalSelector.removeGoal(goal.replacingGoal);
@@ -121,6 +122,7 @@ public class EntityTargetingHelper extends MorphPluginObject
             if (!this.hostiles(mob.getType(), state.getEntityType()))
                 continue;
 
+            //logger.info("Set E %s target %s".formatted(nmsMob, nmsPlayer));
             // 设置攻击目标
             nmsMob.setTarget(nmsPlayer, EntityTargetEvent.TargetReason.CUSTOM, true);
 
@@ -173,6 +175,7 @@ public class EntityTargetingHelper extends MorphPluginObject
             if (replacingGoal != null)
                 goals.addGoal(priority, replacingGoal);
 
+            //logger.info("Set E %s goal %s".formatted(nmsMob, replacingGoal));
             break;
         }
     }
