@@ -15,6 +15,7 @@ import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.util.BoundingBox;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xiamomc.morph.misc.CollisionBoxRecord;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.utilities.EntityTypeUtils;
 
@@ -129,6 +130,16 @@ public abstract class DisguiseWrapper<T>
     public AABB getBoundingBoxAt(double x, double y, double z)
     {
         return this.getDimensions().makeBoundingBox(x, y, z);
+    }
+
+    /**
+     * Alternative method of {@link DisguiseWrapper#getBoundingBoxAt(double, double, double)}
+     * <br>
+     * Can be used if a plugin doesn't have an NMS dependency set.
+     */
+    public CollisionBoxRecord getBoundingBoxAtAlternative(double x, double y, double z)
+    {
+        return CollisionBoxRecord.fromAABB(getBoundingBoxAt(x, y, z));
     }
 
     private EntityDimensions dimensions;
