@@ -13,6 +13,7 @@ import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.events.CommonEventProcessor;
 import xiamomc.morph.events.InteractionMirrorProcessor;
 import xiamomc.morph.events.PlayerTracker;
+import xiamomc.morph.events.RevealingEventProcessor;
 import xiamomc.morph.interfaces.IManagePlayerData;
 import xiamomc.morph.interfaces.IManageRequests;
 import xiamomc.morph.messages.MessageUtils;
@@ -102,6 +103,7 @@ public final class MorphPlugin extends XiaMoJavaPlugin
         dependencyManager.cache(skillHandler = new MorphSkillHandler());
         dependencyManager.cache(abilityHandler = new AbilityHandler());
         dependencyManager.cache(cmdHelper = new MorphCommandManager());
+        dependencyManager.cache(new RevealingHandler());
 
         dependencyManager.cache(clientHandler = new MorphClientHandler());
 
@@ -131,6 +133,7 @@ public final class MorphPlugin extends XiaMoJavaPlugin
                             playerTracker,
                             mirrorProcessor,
                             new CommonEventProcessor(),
+                            new RevealingEventProcessor()
                     });
 
             clientHandler.sendReAuth(Bukkit.getOnlinePlayers());

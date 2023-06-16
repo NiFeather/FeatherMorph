@@ -36,7 +36,6 @@ import xiamomc.morph.network.commands.S2C.set.S2CSetSelfViewingCommand;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
-import xiamomc.pluginbase.Managers.DependencyManager;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -121,7 +120,10 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
                 .registerC2S(C2SCommandNames.Unmorph, a -> new C2SUnmorphCommand())
                 .registerC2S(C2SCommandNames.Request, C2SRequestCommand::new);
 
-        Bukkit.getMessenger().registerIncomingPluginChannel(plugin, initializeChannel, (cN, player, data) ->
+        var messenger = Bukkit.getMessenger();
+
+        // 注册init频道处理
+        messenger.registerIncomingPluginChannel(plugin, initializeChannel, (cN, player, data) ->
         {
             if (!allowClient.get() || this.getPlayerConnectionState(player).greaterThan(InitializeState.HANDSHAKE)) return;
 
@@ -133,8 +135,9 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
             this.sendPacket(initializeChannel, player, "".getBytes());
         });
 
+        // 注册api频道处理
         var apiVersionBytes = ByteBuffer.allocate(4).putInt(targetApiVersion).array();
-        Bukkit.getMessenger().registerIncomingPluginChannel(plugin, versionChannel, (cN, player, data) ->
+        messenger.registerIncomingPluginChannel(plugin, versionChannel, (cN, player, data) ->
         {
             if (!allowClient.get()) return;
 
@@ -192,7 +195,8 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
             this.sendPacket(versionChannel, player, apiVersionBytes);
         });
 
-        Bukkit.getMessenger().registerIncomingPluginChannel(plugin, commandChannel, (cN, player, data) ->
+        // 注册command频道处理
+        messenger.registerIncomingPluginChannel(plugin, commandChannel, (cN, player, data) ->
         {
             if (!allowClient.get()) return;
 
@@ -218,9 +222,10 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
                 logger.warn("Unknown server command: " + baseCommand);
         });
 
-        Bukkit.getMessenger().registerOutgoingPluginChannel(plugin, initializeChannel);
-        Bukkit.getMessenger().registerOutgoingPluginChannel(plugin, versionChannel);
-        Bukkit.getMessenger().registerOutgoingPluginChannel(plugin, commandChannel);
+        // 注册outgoing频道
+        messenger.registerOutgoingPluginChannel(plugin, initializeChannel);
+        messenger.registerOutgoingPluginChannel(plugin, versionChannel);
+        messenger.registerOutgoingPluginChannel(plugin, commandChannel);
 
         configManager.bind(allowClient, ConfigOption.ALLOW_CLIENT);
         //configManager.bind(forceClient, ConfigOption.FORCE_CLIENT);
@@ -256,32 +261,8 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
 
     private final AtomicBoolean scheduledReauthPlayers = new AtomicBoolean(false);
 
-    private void scheduleReAuthPlayers()
-    {
-        synchronized (scheduledReauthPlayers)
-        {
-            if (scheduledReauthPlayers.get()) return;
-            scheduledReauthPlayers.set(true);
-        }
-
-        this.addSchedule(() ->
-        {
-            if (!scheduledReauthPlayers.get()) return;
-
-            scheduledReauthPlayers.set(false);
-            reAuthPlayers();
-        });
-    }
-
-    private void reAuthPlayers()
-    {
-        var players = Bukkit.getOnlinePlayers();
-
-        sendUnAuth(players);
-        sendReAuth(players);
-    }
-
     //region wait until ready
+
     @ApiStatus.Internal
     public void waitUntilReady(Player player, Runnable r)
     {
@@ -310,50 +291,12 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
     {
         playerStateMap.put(player, ConnectionState.JOINED);
     }
+
     //endregion
 
     private final Map<UUID, PlayerOptions<Player>> playerOptionMap = new Object2ObjectOpenHashMap<>();
 
-    public boolean clientVersionCheck(Player player, int version)
-    {
-        return getPlayerVersion(player) >= version;
-    }
-
     private final Map<Player, InitializeState> playerConnectionStates = new Object2ObjectOpenHashMap<>();
-
-    /**
-     * 获取玩家的连接状态
-     *
-     * @param player 目标玩家
-     * @return {@link InitializeState}, 客户端未连接或初始化被中断时返回 {@link InitializeState#NOT_CONNECTED}
-     */
-    public InitializeState getPlayerConnectionState(Player player)
-    {
-        return playerConnectionStates.getOrDefault(player, InitializeState.NOT_CONNECTED);
-    }
-
-    /**
-     * 检查某个玩家是否使用客户端加入
-     *
-     * @param player 目标玩家
-     * @return 玩家是否使用客户端加入
-     * @apiNote 此API只能检查客户端是否已连接，检查初始化状态请使用 {@link MorphClientHandler#clientInitialized(Player)}
-     */
-    public boolean clientConnected(Player player)
-    {
-        return this.getPlayerConnectionState(player).greaterThan(InitializeState.NOT_CONNECTED);
-    }
-
-    /**
-     * 检查某个玩家的客户端是否已初始化
-     *
-     * @param player 目标玩家
-     * @return 此玩家的客户端是否已初始化
-     */
-    public boolean clientInitialized(Player player)
-    {
-        return playerConnectionStates.getOrDefault(player, null) == InitializeState.DONE;
-    }
 
     /**
      * 刷新某个玩家的客户端的伪装列表
@@ -397,6 +340,33 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
         if (!allowClient.get()) return;
 
         this.sendCommand(player, new S2CCurrentCommand(str));
+    }
+
+    //region Auth/UnAuth/ReAuth
+
+    private void scheduleReAuthPlayers()
+    {
+        synchronized (scheduledReauthPlayers)
+        {
+            if (scheduledReauthPlayers.get()) return;
+            scheduledReauthPlayers.set(true);
+        }
+
+        this.addSchedule(() ->
+        {
+            if (!scheduledReauthPlayers.get()) return;
+
+            scheduledReauthPlayers.set(false);
+            reAuthPlayers();
+        });
+    }
+
+    private void reAuthPlayers()
+    {
+        var players = Bukkit.getOnlinePlayers();
+
+        sendUnAuth(players);
+        sendReAuth(players);
     }
 
     /**
@@ -445,11 +415,54 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
         players.forEach(this::unInitializePlayer);
     }
 
+    //endregion Auth/UnAuth
+
     private static final String nameSpace = MorphPlugin.getMorphNameSpace();
 
     public static final String initializeChannel = nameSpace + ":init";
     public static final String versionChannel = nameSpace + ":version";
     public static final String commandChannel = nameSpace + ":commands";
+
+    //region Player Status/Properties/Option
+
+    public boolean isFutureClientProtocol(Player player, int version)
+    {
+        return getPlayerVersion(player) >= version;
+    }
+
+    /**
+     * 获取玩家的连接状态
+     *
+     * @param player 目标玩家
+     * @return {@link InitializeState}, 客户端未连接或初始化被中断时返回 {@link InitializeState#NOT_CONNECTED}
+     */
+    public InitializeState getPlayerConnectionState(Player player)
+    {
+        return playerConnectionStates.getOrDefault(player, InitializeState.NOT_CONNECTED);
+    }
+
+    /**
+     * 检查某个玩家是否使用客户端加入
+     *
+     * @param player 目标玩家
+     * @return 玩家是否使用客户端加入
+     * @apiNote 此API只能检查客户端是否已连接，检查初始化状态请使用 {@link MorphClientHandler#clientInitialized(Player)}
+     */
+    public boolean clientConnected(Player player)
+    {
+        return this.getPlayerConnectionState(player).greaterThan(InitializeState.NOT_CONNECTED);
+    }
+
+    /**
+     * 检查某个玩家的客户端是否已初始化
+     *
+     * @param player 目标玩家
+     * @return 此玩家的客户端是否已初始化
+     */
+    public boolean clientInitialized(Player player)
+    {
+        return playerConnectionStates.getOrDefault(player, null) == InitializeState.DONE;
+    }
 
     private final PlayerOptions<Player> nilRecord = new PlayerOptions<Player>(null);
 
@@ -486,12 +499,6 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
     }
 
     @Override
-    public List<Player> getConnectedPlayers()
-    {
-        return new ObjectArrayList<>(playerConnectionStates.keySet());
-    }
-
-    @Override
     public InitializeState getInitializeState(Player player)
     {
         return playerConnectionStates.getOrDefault(player, InitializeState.NOT_CONNECTED);
@@ -510,17 +517,25 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
     }
 
     @Override
+    public List<Player> getConnectedPlayers()
+    {
+        return new ObjectArrayList<>(playerConnectionStates.keySet());
+    }
+
+    //endregion Player Status/Option
+
+    @Override
     public void disconnect(Player player)
     {
         unInitializePlayer(player);
     }
 
-    private boolean sendCommand(Player player, AbstractS2CCommand<?> command, boolean overrideClientSetting)
+    private boolean sendCommand(Player player, AbstractS2CCommand<?> command, boolean forceSend)
     {
         var cmd = command.buildCommand();
         if (cmd == null || cmd.isEmpty() || cmd.isBlank()) return false;
 
-        if ((!allowClient.get() || !this.clientConnected(player)) && !overrideClientSetting) return false;
+        if ((!allowClient.get() || !this.clientConnected(player)) && !forceSend) return false;
 
         this.sendPacket(commandChannel, player, cmd.getBytes());
         return true;
@@ -531,6 +546,8 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
     {
         return this.sendCommand(player, basicS2CCommand, false);
     }
+
+    //region C2S(Serverbound) commands
 
     @Override
     public void onInitialCommand(C2SInitialCommand c2SInitialCommand)
@@ -682,4 +699,6 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
         else
             requestManager.denyRequest(player, targetPlayer);
     }
+
+    //endregion C2S(Serverbound) commands
 }

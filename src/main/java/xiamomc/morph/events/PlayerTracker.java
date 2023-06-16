@@ -3,6 +3,7 @@ package xiamomc.morph.events;
 import com.destroystokyo.paper.event.player.PlayerStartSpectatingEntityEvent;
 import com.destroystokyo.paper.event.player.PlayerStopSpectatingEntityEvent;
 import io.papermc.paper.event.player.PlayerArmSwingEvent;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -17,6 +18,7 @@ import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.pluginbase.Annotations.Initializer;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -39,6 +41,23 @@ public class PlayerTracker extends MorphPluginObject implements Listener
      * 玩家上次互动的动作类型
      */
     private final Map<Player, InteractType> lastInteractAction = new ConcurrentHashMap<>();
+
+    private void updateLastAction(Player player, Action action)
+    {
+        var pl = lastRightClick.getOrDefault(player, null);
+        lastRightClick.put(player, action);
+
+        if (pl == action && action.isRightClick())
+            duplicatedRCs.add(player);
+    }
+
+    private final Map<Player, Action> lastRightClick = new Object2ObjectOpenHashMap<>();
+    private final List<Player> duplicatedRCs = new ObjectArrayList<>();
+
+    public boolean isDuplicatedRightClick(Player player)
+    {
+        return duplicatedRCs.contains(player);
+    }
 
     public enum InteractType
     {
@@ -101,6 +120,8 @@ public class PlayerTracker extends MorphPluginObject implements Listener
 
         var interactType = InteractType.fromBukkitAction(e.getAction());
 
+        updateLastAction(player, e.getAction());
+
         if (interactType != null)
         {
             lastInteractTime.put(player, plugin.getCurrentTick());
@@ -134,6 +155,7 @@ public class PlayerTracker extends MorphPluginObject implements Listener
     public void onPlayerInteractAtEntity(PlayerInteractAtEntityEvent e)
     {
         var player = e.getPlayer();
+        updateLastAction(player, Action.RIGHT_CLICK_AIR);
 
         lastInteractTime.put(player, plugin.getCurrentTick());
         lastInteractAction.put(player, InteractType.RIGHT_CLICK_ENTITY);
@@ -286,6 +308,9 @@ public class PlayerTracker extends MorphPluginObject implements Listener
         var playerToRemoveFromSuspect = new ObjectArrayList<Player>();
 
         var currentTick = plugin.getCurrentTick();
+
+        lastRightClick.clear();
+        duplicatedRCs.clear();
 
         breakingSuspectList.forEach((p, l) ->
         {

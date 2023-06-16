@@ -2,6 +2,7 @@ package xiamomc.morph.events;
 
 import com.destroystokyo.paper.event.player.PlayerClientOptionsChangeEvent;
 import com.destroystokyo.paper.event.player.PlayerPostRespawnEvent;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import me.libraryaddict.disguise.DisguiseAPI;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
@@ -12,6 +13,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.player.*;
 import org.bukkit.event.server.TabCompleteEvent;
@@ -19,6 +21,7 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.InventoryHolder;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
+import xiamomc.morph.RevealingHandler;
 import xiamomc.morph.backends.libsdisg.LibsDisguiseWrapper;
 import xiamomc.morph.commands.MorphCommandManager;
 import xiamomc.morph.config.ConfigOption;
@@ -39,6 +42,9 @@ import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
 
+import java.util.List;
+import java.util.Random;
+
 import static xiamomc.morph.utilities.DisguiseUtils.itemOrAir;
 
 public class CommonEventProcessor extends MorphPluginObject implements Listener
@@ -57,6 +63,9 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
 
     @Resolved(shouldSolveImmediately = true)
     private VanillaMessageStore vanillaMessageStore;
+
+    @Resolved(shouldSolveImmediately = true)
+    private RevealingHandler revealingHandler;
 
     private Bindable<Boolean> unMorphOnDeath;
 
@@ -148,6 +157,14 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         config.bind(bruteIgnoreDisguises, ConfigOption.PIGLIN_BRUTE_IGNORE_DISGUISES);
 
         unMorphOnDeath = config.getBindable(Boolean.class, ConfigOption.UNMORPH_ON_DEATH);
+        this.addSchedule(this::update);
+    }
+
+    private void update()
+    {
+        this.addSchedule(this::update);
+        susIncreasedPlayers.clear();
+        playersMinedGoldBlocks.clear();
     }
 
     @EventHandler
@@ -284,7 +301,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
                 var mainHand = itemOrAir(equip.getItemInMainHand());
                 var offHand = itemOrAir(equip.getItemInOffHand());
 
-                if (clientHandler.clientVersionCheck(player, 3))
+                if (clientHandler.isFutureClientProtocol(player, 3))
                 {
                     clientHandler.sendCommand(player, new S2CSwapCommand());
                 }
@@ -459,8 +476,23 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         }
     }
 
-    //解决LibsDisguises中MonstersIgnoreDisguises会忽视PlayerDisguise的问题
+    private final Random random = new Random();
+
+    private final List<Player> susIncreasedPlayers = new ObjectArrayList<>();
+
     @EventHandler
+    public void onBlockBreak(BlockBreakEvent e)
+    {
+        var state = morphs.getDisguiseStateFor(e.getPlayer());
+        if (state == null) return;
+
+        if (e.getBlock().getType().equals(Material.GOLD_BLOCK))
+            playersMinedGoldBlocks.add(e.getPlayer());
+    }
+
+    private final List<Player> playersMinedGoldBlocks = new ObjectArrayList<>();
+
+    @EventHandler(ignoreCancelled = true)
     public void onEntityTarget(EntityTargetEvent e)
     {
         if (e.getTarget() == null) return;
@@ -471,6 +503,9 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
             return;
 
         if (sourceEntityType == EntityType.WARDEN || !(e.getTarget() instanceof Player player))
+            return;
+
+        if (sourceEntityType == EntityType.PIGLIN && playersMinedGoldBlocks.contains(player))
             return;
 
         if (e.getEntity().getLastDamageCause() instanceof EntityDamageByEntityEvent edbee && edbee.getDamager() == player)
@@ -502,7 +537,10 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
                 {
                     case ZOMBIE, ZOMBIE_VILLAGER, HUSK, DROWNED -> EntityTypeUtils.isZombiesHostile(disguiseEntityType);
                     case SKELETON, STRAY -> EntityTypeUtils.isGolem(disguiseEntityType) || disguise.isPlayerDisguise();
-                    case PIGLIN -> EntityTypeUtils.isPiglinHostile(disguiseEntityType);
+                    case PIGLIN ->
+                    {
+                        yield EntityTypeUtils.isPiglinHostile(disguiseEntityType);
+                    }
                     case PIGLIN_BRUTE -> EntityTypeUtils.isBruteHostile(disguiseEntityType);
                     case WITHER_SKELETON -> EntityTypeUtils.isWitherSkeletonHostile(disguiseEntityType);
                     case GUARDIAN, ELDER_GUARDIAN -> EntityTypeUtils.isGuardianHostile(disguiseEntityType);
@@ -513,10 +551,32 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
                     default -> disguise.isPlayerDisguise();
                 };
 
+        // 根据揭示值判定要不要允许生物攻击玩家
+        var revealingState = revealingHandler.getRevealingState(player);
+        var revealingLevel = revealingState.getRevealingLevel();
+
+        if (!susIncreasedPlayers.contains(player))
+        {
+            revealingState.addBaseValue(RevealingHandler.RevealingDiffs.ON_MOB_TARGET);
+            susIncreasedPlayers.add(player);
+        }
+
+        // 如果伪装揭示值已满，则不要处理此事件
+        // 否则，生物将有 ((val - 30) * 0.25)% 的概率target玩家，如果target失败，则加1点揭示值
+        if (revealingLevel == RevealingHandler.RevealingLevel.REVEALED)
+        {
+            shouldTarget = true;
+        }
+        else if (revealingLevel == RevealingHandler.RevealingLevel.SUSPECT)
+        {
+            var rdv = random.nextInt(0, 100);
+
+            logger.info("RDV " + rdv + " <= " + (revealingState.getBaseValue() - 30) + "?");
+            shouldTarget = shouldTarget || rdv * 4 <= revealingState.getBaseValue() - 30;
+        }
+
         e.setCancelled(e.isCancelled() || !shouldTarget);
     }
-
-    //endregion LibsDisguises workaround
 
     private void onPlayerKillEntity(Player player, Entity entity)
     {

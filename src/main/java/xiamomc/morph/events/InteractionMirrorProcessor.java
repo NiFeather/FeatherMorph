@@ -252,20 +252,6 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
         }
     }
 
-    private final Map<Player, Action> lastRightClick = new Object2ObjectOpenHashMap<>();
-
-    private boolean isDuplicatedRightClick(Player player)
-    {
-        var lastAction = lastRightClick.getOrDefault(player, null);
-
-        return lastAction != null && lastAction.isRightClick();
-    }
-
-    private void updateLastAction(Player player, Action action)
-    {
-        lastRightClick.put(player, action);
-    }
-
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent e)
     {
@@ -274,10 +260,8 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
 
         //Sometimes right click fires PlayerInteractEvent for both left and right hand.
         //This prevents us from simulating the same operation twice.
-        if (isDuplicatedRightClick(player))
+        if (tracker.isDuplicatedRightClick(player))
             return;
-
-        updateLastAction(player, action);
 
         var inf = getMirrorTarget(player);
 
@@ -294,13 +278,12 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
     public void onPlayerInteractAtEntity(PlayerInteractAtEntityEvent e)
     {
         var player = e.getPlayer();
-        if (isDuplicatedRightClick(player)) return;
+        if (tracker.isDuplicatedRightClick(player)) return;
 
         var equipment = e.getPlayer().getEquipment();
         if (!equipment.getItem(e.getHand()).getType().isAir()) return;
 
         var inf = getMirrorTarget(player);
-        updateLastAction(player, Action.RIGHT_CLICK_AIR);
 
         if (!playerInDistance(player, inf)) return;
         var targetPlayer = inf.target;
@@ -495,7 +478,6 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
     private void update()
     {
         this.addSchedule(this::update);
-        lastRightClick.clear();
         ignoredPlayers.clear();
 
         if (plugin.getCurrentTick() % (5 * 20) == 0)

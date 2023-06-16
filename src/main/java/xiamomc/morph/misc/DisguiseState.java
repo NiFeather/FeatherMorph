@@ -338,7 +338,7 @@ public class DisguiseState extends MorphPluginObject
         {
             cooldownInfo.setCooldown(val);
 
-            if (clientHandler.clientVersionCheck(player, 3))
+            if (clientHandler.isFutureClientProtocol(player, 3))
                 clientHandler.sendCommand(player, new S2CSetSkillCooldownCommand(val));
         }
     }
@@ -352,7 +352,7 @@ public class DisguiseState extends MorphPluginObject
     {
         this.cooldownInfo = info;
 
-        if (info != null && clientHandler.clientVersionCheck(player, 3))
+        if (info != null && clientHandler.isFutureClientProtocol(player, 3))
             clientHandler.sendCommand(player, new S2CSetSkillCooldownCommand(info.getCooldown()));
     }
 
