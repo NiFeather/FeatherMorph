@@ -562,7 +562,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         }
 
         // 如果伪装揭示值已满，则不要处理此事件
-        // 否则，生物将有 ((val - 30) * 0.25)% 的概率target玩家，如果target失败，则加1点揭示值
+        // 否则，生物将有 ((val - 20) * 0.35)% 的概率target玩家，如果target失败，则加1点揭示值
         if (revealingLevel == RevealingHandler.RevealingLevel.REVEALED)
         {
             shouldTarget = true;
@@ -571,8 +571,8 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         {
             var rdv = random.nextInt(0, 100);
 
-            logger.info("RDV " + rdv + " <= " + (revealingState.getBaseValue() - 30) + "?");
-            shouldTarget = shouldTarget || rdv * 4 <= revealingState.getBaseValue() - 30;
+            //logger.info("RDV " + rdv + " <= " + (revealingState.getBaseValue() - 20) + "?");
+            shouldTarget = shouldTarget || (rdv / 0.35) <= revealingState.getBaseValue() - 20;
         }
 
         e.setCancelled(e.isCancelled() || !shouldTarget);

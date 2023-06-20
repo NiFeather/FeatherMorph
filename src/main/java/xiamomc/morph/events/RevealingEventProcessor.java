@@ -11,9 +11,11 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
@@ -32,6 +34,12 @@ public class RevealingEventProcessor extends MorphPluginObject implements Listen
     @Resolved(shouldSolveImmediately = true)
     private PlayerTracker tracker;
 
+    @EventHandler
+    public void onPlayerJoin(PlayerJoinEvent e)
+    {
+        handler.updateStatePlayerInstance(e.getPlayer());
+    }
+
     @EventHandler(ignoreCancelled = true)
     public void onPlayerInteract(PlayerInteractEvent e)
     {
@@ -43,6 +51,15 @@ public class RevealingEventProcessor extends MorphPluginObject implements Listen
 
         var revealingState = handler.getRevealingState(player);
         revealingState.addBaseValue(RevealingHandler.RevealingDiffs.INTERACT);
+    }
+
+    @EventHandler
+    public void onPlayerDeath(EntityDeathEvent e)
+    {
+        if (!(e.getEntity() instanceof Player player)) return;
+
+        var revState = handler.getRevealingState(player);
+        revState.setBaseValue(0);
     }
 
     @EventHandler
@@ -104,7 +121,8 @@ public class RevealingEventProcessor extends MorphPluginObject implements Listen
                 if (!(entity instanceof CraftMob craftMob)) continue;
                 if (craftMob.getHandle().getTarget() == nmsPlayer)
                 {
-                    revealingState.setBaseValue(RevealingHandler.RevealingDiffs.ALREADY_TARGETED);
+                    var base = revealingState.getBaseValue();
+                    revealingState.setBaseValue(Math.max(base, RevealingHandler.RevealingDiffs.ALREADY_TARGETED));
                     break;
                 }
             }

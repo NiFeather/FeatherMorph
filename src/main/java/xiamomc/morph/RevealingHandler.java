@@ -12,6 +12,7 @@ import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
 
 import java.util.Map;
+import java.util.Objects;
 
 public class RevealingHandler extends MorphPluginObject
 {
@@ -29,6 +30,21 @@ public class RevealingHandler extends MorphPluginObject
     public float getRevealingValue(Player player)
     {
         return this.getRevealingState(player).getBaseValue();
+    }
+
+    public void updateStatePlayerInstance(Player newInstance)
+    {
+        var match = playerRevealingStateMap.keySet().stream()
+                .filter(k -> k.getName().equals(newInstance.getName()))
+                .findFirst().orElse(null);
+
+        if (match == null) return;
+
+        var state = playerRevealingStateMap.get(match);
+        state.player = newInstance;
+
+        playerRevealingStateMap.remove(match);
+        playerRevealingStateMap.put(newInstance, state);
     }
 
     public RevealingState getRevealingState(Player player)
@@ -61,11 +77,13 @@ public class RevealingHandler extends MorphPluginObject
         {
             //每两秒衰减1点
             if (decay)
-                state.addBaseValue(RevealingDiffs.NATURAL_DECAY, true);
+                state.addBaseValue((state.bindingState == null ? 2 : 1) * RevealingDiffs.NATURAL_DECAY, true);
 
             //否则，如果等级小于怀疑等级的50%，增加0.01
             //if (state.getBaseValue() < RevealingLevel.SUSPECT.val * 0.2f)
             //    state.addBaseValue(RevealingDiffs.NATURAL_INCREASEMENT);
+
+            state.notifyUpdates();
         }
     }
 
@@ -75,13 +93,18 @@ public class RevealingHandler extends MorphPluginObject
     public static class RevealingState extends MorphPluginObject
     {
         //和此State对应的玩家
-        private final Player player;
+        private Player player;
 
         public DisguiseState bindingState;
+
+        private boolean baseValueChanged = false;
 
         public RevealingState(Player player)
         {
             this.player = player;
+
+            // bug: float和int的0之间需要用equals???
+            baseValue.onValueChanged((o, n) -> { this.baseValueChanged = !Objects.equals(o, n); });
         }
 
         /**
@@ -121,8 +144,6 @@ public class RevealingHandler extends MorphPluginObject
 
             this.baseValue.set(newVal);
             this.revealingLevel = null;
-
-            clientHandler.sendCommand(player, new S2CSetRevealingCommand(newVal));
         }
 
         public void addBaseValue(float diff)
@@ -148,6 +169,14 @@ public class RevealingHandler extends MorphPluginObject
             this.setBaseValue(newLv.getValue());
             this.revealingLevel = newLv;
         }
+
+        public void notifyUpdates()
+        {
+            if (!baseValueChanged) return;
+
+            clientHandler.sendCommand(player, new S2CSetRevealingCommand(baseValue.get()));
+            baseValueChanged = false;
+        }
     }
 
     /**
@@ -156,7 +185,7 @@ public class RevealingHandler extends MorphPluginObject
     public enum RevealingLevel
     {
         NORMAL(0),
-        SUSPECT(30),
+        SUSPECT(20),
         REVEALED(80);
 
         private final float val;

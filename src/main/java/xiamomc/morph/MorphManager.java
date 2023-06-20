@@ -779,6 +779,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         clientHandler.updateCurrentIdentifier(player, null);
         clientHandler.sendCommand(player, new S2CSetSelfViewIdentifierCommand(null));
+        clientHandler.sendCommand(player, new S2CSetRevealingCommand(0));
 
         player.sendMessage(MessageUtils.prefixes(player, MorphStrings.unMorphSuccessString().withLocale(MessageUtils.getLocale(player))));
         player.sendActionBar(Component.empty());
