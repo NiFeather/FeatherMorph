@@ -272,6 +272,8 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
         var player = e.getPlayer();
         var action = e.getAction();
 
+        if (action == Action.PHYSICAL) return;
+
         //Sometimes right click fires PlayerInteractEvent for both left and right hand.
         //This prevents us from simulating the same operation twice.
         if (isDuplicatedRightClick(player))
