@@ -12,6 +12,7 @@ import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.messages.MessageUtils;
+import xiamomc.morph.misc.permissions.CommonPermissions;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Messages.FormattableMessage;
 
@@ -68,12 +69,31 @@ public class MorphChatRenderer extends MorphPluginObject implements ChatRenderer
             }
         }
 
-        return viewer instanceof Permissible permissible
-                ? permissible.hasPermission("xiamomc.morph.chatoverride.reveal")
-                    ? this.messageRevealed
-                    : this.message
+        // var v = viewer.toString();
+        // var p = (viewer instanceof Permissible permissible ? "%s".formatted(permissible.hasPermission(CommonPermissions.CHAT_OVERRIDE_REVEAL)) : "NOTAPERM");
+
+        // logger.info("V" + v + " P " + p);
+
+        if (!(viewer instanceof Permissible permissible))
+        {
+            if (!incompatableChat)
+            {
+                logger.warn("It seems that this server is using a chat plugin that doesn't compatible with us.");
+                logger.warn("ChatOverride will not work for this situation and will always show the revealed message.");
+                logger.warn("");
+                logger.warn("If you believe this is an error, please open an issue on our GitHub repository!");
+            }
+
+            incompatableChat = true;
+            return messageRevealed;
+        }
+
+        return permissible.hasPermission(CommonPermissions.CHAT_OVERRIDE_REVEAL)
+                ? this.messageRevealed
                 : this.message;
     }
+
+    private static boolean incompatableChat = false;
 
     private Component buildMessage(Component displayName, Component msg, Player player)
     {
