@@ -15,6 +15,7 @@ public class CommonPermissions
     public final static String HEAD_MORPH = PERM_ROOT + "headmorph";
 
     public final static String CHAT_OVERRIDE = PERM_ROOT + "chatoverride";
+    public final static String CHAT_OVERRIDE_REVEAL = CHAT_OVERRIDE + ".reveal";
 
     public final static String MIRROR = PERM_ROOT + "mirror";
     public final static String MIRROR_IMMUNE = PERM_ROOT + "mirror.immune";

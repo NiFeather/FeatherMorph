@@ -135,7 +135,7 @@ public class LibsBackend extends DisguiseBackend<Disguise, LibsDisguiseWrapper>
             DisguiseAPI.disguiseEntity(player, wrapper.getInstance());
 
             if (wrapper.getEntityType().equals(EntityType.BAT))
-                wrapper.getInstance().getWatcher().setYModifier(-1.6f);
+                wrapper.getInstance().getWatcher().setYModifier(-0.8f);
 
             return true;
         }

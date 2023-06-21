@@ -15,6 +15,7 @@ import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.util.BoundingBox;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xiamomc.morph.misc.CollisionBoxRecord;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.utilities.EntityTypeUtils;
 
@@ -125,10 +126,31 @@ public abstract class DisguiseWrapper<T>
     /**
      * Gets a {@link AABB} matching the current disguise at an exact position
      * @return A {@link AABB} matching the current disguise at the exact position
+     * @apiNote This doesn't check whether bounding box modification is enabled and will always present value from the modified one.
      */
     public AABB getBoundingBoxAt(double x, double y, double z)
     {
         return this.getDimensions().makeBoundingBox(x, y, z);
+    }
+
+    /**
+     * Alternative method of {@link DisguiseWrapper#getBoundingBoxAt(double, double, double)}
+     * <br>
+     * Can be used if a plugin doesn't have an NMS dependency set.
+     * @apiNote This doesn't check whether bounding box modification is enabled and will always present value from the modified one.
+     */
+    public CollisionBoxRecord getBoundingBoxAtAlternative(double x, double y, double z)
+    {
+        return CollisionBoxRecord.fromAABB(getBoundingBoxAt(x, y, z));
+    }
+
+    /**
+     * Gets the excepted eye height for the bounding box of this disguise.
+     * @apiNote This doesn't check whether bounding box modification is enabled and will always present value from the modified one.
+     */
+    public double getExceptingEyeHeight()
+    {
+        return getDimensions().height * 0.85;
     }
 
     private EntityDimensions dimensions;
