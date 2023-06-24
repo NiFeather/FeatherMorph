@@ -165,9 +165,10 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         this.addSchedule(this::update);
 
         if (plugin.getCurrentTick() % 8 == 0)
+        {
+            playersMinedGoldBlocks.clear();
             susIncreasedPlayers.clear();
-
-        playersMinedGoldBlocks.clear();
+        }
     }
 
     @EventHandler
