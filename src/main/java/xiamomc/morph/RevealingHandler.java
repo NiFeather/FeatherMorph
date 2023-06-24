@@ -77,7 +77,7 @@ public class RevealingHandler extends MorphPluginObject
         {
             //每两秒衰减1点
             if (decay)
-                state.addBaseValue((state.bindingState == null ? 2 : 1) * RevealingDiffs.NATURAL_DECAY, true);
+                state.addBaseValue((state.bindingState == null ? 2 : 1) * RevealingDiffs.NATURAL_INCREASEMENT, true);
 
             //否则，如果等级小于怀疑等级的50%，增加0.01
             //if (state.getBaseValue() < RevealingLevel.SUSPECT.val * 0.2f)
@@ -237,12 +237,12 @@ public class RevealingHandler extends MorphPluginObject
         /**
          * 自然衰减
          */
-        public static final float NATURAL_DECAY = -(NATURAL_DIFFBASE * 0.5f) / 5;
+        public static final float NATURAL_DECAY = 0.25f;
 
         /**
          * 自然递增
          */
-        public static final float NATURAL_INCREASEMENT = (NATURAL_DIFFBASE / 40) * 2;
+        public static final float NATURAL_INCREASEMENT = -(NATURAL_DIFFBASE * 0.5f) / 5;
 
         /**
          * 被生物注意
@@ -254,15 +254,17 @@ public class RevealingHandler extends MorphPluginObject
          */
         public static final float ON_DAMAGE = 1.5f;
 
+        public static final float DEAL_DAMAGE = ON_DAMAGE / 4;
+
         /**
          * 和任意方块互动
          */
-        public static final float INTERACT = 1f;
+        public static final float INTERACT = 0.8f;
 
         /**
          * 和任意实体互动
          */
-        public static final float INTERACT_ENTITY = 1f;
+        public static final float INTERACT_ENTITY = 0.8f;
 
         /**
          * 破坏金块（猪灵）
@@ -272,12 +274,12 @@ public class RevealingHandler extends MorphPluginObject
         /**
          * 主动破坏方块
          */
-        public static final float BLOCK_BREAK = 1.4f;
+        public static final float BLOCK_BREAK = 0.9f;
 
         /**
          * 主动放置方块
          */
-        public static final float BLOCK_PLACE = 1.4f;
+        public static final float BLOCK_PLACE = 0.9f;
 
         /**
          * 变形时已经被生物当作目标

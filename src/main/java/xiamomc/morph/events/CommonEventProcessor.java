@@ -163,7 +163,10 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
     private void update()
     {
         this.addSchedule(this::update);
-        susIncreasedPlayers.clear();
+
+        if (plugin.getCurrentTick() % 8 == 0)
+            susIncreasedPlayers.clear();
+
         playersMinedGoldBlocks.clear();
     }
 

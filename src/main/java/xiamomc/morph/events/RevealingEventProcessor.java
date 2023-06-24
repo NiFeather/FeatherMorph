@@ -85,7 +85,7 @@ public class RevealingEventProcessor extends MorphPluginObject implements Listen
 
         var revState = handler.getRevealingState(player);
 
-        revState.addBaseValue(RevealingHandler.RevealingDiffs.ON_DAMAGE);
+        revState.addBaseValue(RevealingHandler.RevealingDiffs.DEAL_DAMAGE);
     }
 
     @EventHandler
