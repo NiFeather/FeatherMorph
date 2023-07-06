@@ -741,6 +741,9 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
     public static final NilCommandSource nilCommandSource = new NilCommandSource();
 
+    @Resolved
+    private RevealingHandler revealingHandler;
+
     /**
      * 取消某一玩家的伪装
      *
@@ -792,7 +795,9 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         clientHandler.updateCurrentIdentifier(player, null);
         clientHandler.sendCommand(player, new S2CSetSelfViewIdentifierCommand(null));
-        clientHandler.sendCommand(player, new S2CSetRevealingCommand(0));
+
+        var revLevel = revealingHandler.getRevealingState(player).getBaseValue();
+        clientHandler.sendCommand(player, new S2CSetRevealingCommand(revLevel));
 
         source.sendMessage(MessageUtils.prefixes(player, MorphStrings.unMorphSuccessString().withLocale(MessageUtils.getLocale(player))));
         player.sendActionBar(Component.empty());

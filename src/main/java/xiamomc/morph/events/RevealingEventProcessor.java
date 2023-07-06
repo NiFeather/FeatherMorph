@@ -23,6 +23,7 @@ import xiamomc.morph.RevealingHandler;
 import xiamomc.morph.events.api.gameplay.PlayerMorphEvent;
 import xiamomc.morph.events.api.gameplay.PlayerUnMorphEvent;
 import xiamomc.morph.misc.DisguiseState;
+import xiamomc.morph.misc.DisguiseTypes;
 import xiamomc.morph.misc.NmsRecord;
 import xiamomc.pluginbase.Annotations.Resolved;
 
@@ -50,6 +51,8 @@ public class RevealingEventProcessor extends MorphPluginObject implements Listen
         if (tracker.isDuplicatedRightClick(player)) return;
 
         var revealingState = handler.getRevealingState(player);
+        if (revealingState.bindingState.getDisguiseType() == DisguiseTypes.PLAYER) return;
+
         revealingState.addBaseValue(RevealingHandler.RevealingDiffs.INTERACT);
     }
 
@@ -66,6 +69,8 @@ public class RevealingEventProcessor extends MorphPluginObject implements Listen
     public void onInteractEntity(PlayerInteractEntityEvent e)
     {
         var revState = handler.getRevealingState(e.getPlayer());
+
+        if (revState.bindingState.getDisguiseType() == DisguiseTypes.PLAYER) return;
         revState.addBaseValue(RevealingHandler.RevealingDiffs.INTERACT_ENTITY);
     }
 
@@ -75,6 +80,8 @@ public class RevealingEventProcessor extends MorphPluginObject implements Listen
         if (!(e.getEntity() instanceof Player player)) return;
 
         var revState = handler.getRevealingState(player);
+
+        if (revState.bindingState.getDisguiseType() == DisguiseTypes.PLAYER) return;
         revState.addBaseValue(RevealingHandler.RevealingDiffs.ON_DAMAGE);
     }
 
@@ -85,6 +92,7 @@ public class RevealingEventProcessor extends MorphPluginObject implements Listen
 
         var revState = handler.getRevealingState(player);
 
+        if (revState.bindingState.getDisguiseType() == DisguiseTypes.PLAYER) return;
         revState.addBaseValue(RevealingHandler.RevealingDiffs.DEAL_DAMAGE);
     }
 
@@ -93,6 +101,8 @@ public class RevealingEventProcessor extends MorphPluginObject implements Listen
     {
         // 玩家破坏方块 -> 揭示值+5
         var revealingState = handler.getRevealingState(e.getPlayer());
+
+        if (revealingState.bindingState.getDisguiseType() == DisguiseTypes.PLAYER) return;
         revealingState.addBaseValue(RevealingHandler.RevealingDiffs.BLOCK_BREAK);
     }
 
@@ -100,6 +110,8 @@ public class RevealingEventProcessor extends MorphPluginObject implements Listen
     public void onBlockPlace(BlockPlaceEvent e)
     {
         var revealingState = handler.getRevealingState(e.getPlayer());
+
+        if (revealingState.bindingState.getDisguiseType() == DisguiseTypes.PLAYER) return;
         revealingState.addBaseValue(RevealingHandler.RevealingDiffs.BLOCK_PLACE);
     }
 
@@ -111,6 +123,9 @@ public class RevealingEventProcessor extends MorphPluginObject implements Listen
         var nmsPlayer = NmsRecord.ofPlayer(player);
 
         var revealingState = this.handler.getRevealingState(player);
+        revealingState.bindingState = e.getState();
+
+        if (revealingState.bindingState.getDisguiseType() == DisguiseTypes.PLAYER) return;
         revealingState.addBaseValue(RevealingHandler.RevealingLevel.SUSPECT.getValue() * 0.1f, true);
 
         if (!mobsNearby.isEmpty())
@@ -127,8 +142,6 @@ public class RevealingEventProcessor extends MorphPluginObject implements Listen
                 }
             }
         }
-
-        revealingState.bindingState = e.getState();
     }
 
     @EventHandler
