@@ -193,6 +193,12 @@ public class MorphStrings extends AbstractMorphStrings
                 "<color:red>空间太过狭小，无法进行伪装！");
     }
 
+    public static FormattableMessage speedingDetectedString()
+    {
+        return getFormattable(getKey("speeding"),
+                "检测到可能的超速驾驶，正在取消伪装...");
+    }
+
     private static String getKey(String key)
     {
         return "morph." + key;

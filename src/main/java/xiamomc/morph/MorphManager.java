@@ -31,10 +31,7 @@ import xiamomc.morph.messages.HintStrings;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.MorphStrings;
 import xiamomc.morph.messages.vanilla.VanillaMessageStore;
-import xiamomc.morph.misc.DisguiseInfo;
-import xiamomc.morph.misc.DisguiseState;
-import xiamomc.morph.misc.DisguiseStateGenerator;
-import xiamomc.morph.misc.DisguiseTypes;
+import xiamomc.morph.misc.*;
 import xiamomc.morph.misc.permissions.CommonPermissions;
 import xiamomc.morph.network.commands.S2C.set.*;
 import xiamomc.morph.network.server.MorphClientHandler;
@@ -167,14 +164,14 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             {
                 p.sendMessage(MessageUtils.prefixes(p, MorphStrings.errorWhileUpdatingDisguise()));
 
-                unMorph(p, true);
+                unMorph(nilCommandSource, p, true);
             }
 
             if (!i.getProvider().updateDisguise(p, i))
             {
                 p.sendMessage(MessageUtils.prefixes(p, MorphStrings.errorWhileUpdatingDisguise()));
 
-                unMorph(p, true);
+                unMorph(nilCommandSource, p, true);
             }
         });
     }
@@ -728,7 +725,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
      */
     public void unMorph(Player player)
     {
-        this.unMorph(player, false);
+        this.unMorph(player, player, false);
     }
 
     /**
@@ -739,10 +736,26 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
      */
     public void unMorph(Player player, boolean bypassPermission)
     {
+        this.unMorph(player, player, bypassPermission);
+    }
+
+    public static final NilCommandSource nilCommandSource = new NilCommandSource();
+
+    /**
+     * 取消某一玩家的伪装
+     *
+     * @param player 目标玩家
+     * @param bypassPermission 是否绕过权限检查（强制取消伪装）
+     * @param source 消息要发送的目标来源
+     */
+    public void unMorph(CommandSender source, Player player, boolean bypassPermission)
+    {
+        source = source == null ? nilCommandSource : source;
+
         // 检查玩家是否可以通过指令或客户端取消伪装
         if (!bypassPermission && !player.hasPermission(CommonPermissions.UNMORPH))
         {
-            player.sendMessage(MessageUtils.prefixes(player, CommandStrings.noPermissionMessage()));
+            source.sendMessage(MessageUtils.prefixes(player, CommandStrings.noPermissionMessage()));
 
             return;
         }
@@ -781,7 +794,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         clientHandler.sendCommand(player, new S2CSetSelfViewIdentifierCommand(null));
         clientHandler.sendCommand(player, new S2CSetRevealingCommand(0));
 
-        player.sendMessage(MessageUtils.prefixes(player, MorphStrings.unMorphSuccessString().withLocale(MessageUtils.getLocale(player))));
+        source.sendMessage(MessageUtils.prefixes(player, MorphStrings.unMorphSuccessString().withLocale(MessageUtils.getLocale(player))));
         player.sendActionBar(Component.empty());
 
         Bukkit.getPluginManager().callEvent(new PlayerUnMorphEvent(player));
@@ -1223,7 +1236,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 player.sendMessage(MessageUtils.prefixes(player, MorphStrings.recoverString()));
             }
             else
-                unMorph(player, true);
+                unMorph(nilCommandSource, player, true);
         });
 
         Bukkit.getOnlinePlayers().forEach(p -> clientHandler.refreshPlayerClientMorphs(this.getPlayerConfiguration(p).getUnlockedDisguiseIdentifiers(), p));

@@ -1,5 +1,6 @@
 package xiamomc.morph.abilities.impl;
 
+import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.world.phys.Vec3;
 import org.bukkit.GameEvent;
 import org.bukkit.GameMode;
@@ -20,6 +21,8 @@ import xiamomc.morph.misc.DisguiseState;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
+
+import java.util.Map;
 
 public class FlyAbility extends MorphAbility<FlyOption>
 {
@@ -110,11 +113,6 @@ public class FlyAbility extends MorphAbility<FlyOption>
         return (float)exhaustionScaled * movementMultiplier;
     }
 
-    @EventHandler
-    private void onPlayerMove(PlayerMoveEvent e)
-    {
-    }
-
     @Override
     public boolean revokeFromPlayer(Player player, DisguiseState state)
     {
@@ -167,6 +165,9 @@ public class FlyAbility extends MorphAbility<FlyOption>
             player.setFlySpeed(speed);
         }
 
+        if (doBasicAntiCheat.get())
+            playerLastUpdateTick.put(player, plugin.getCurrentTick());
+
         return true;
     }
 
@@ -203,4 +204,58 @@ public class FlyAbility extends MorphAbility<FlyOption>
             this.appliedPlayers.remove(player);
         }
     }
+
+    //region Basic Anti Cheat
+
+    private final Bindable<Boolean> doBasicAntiCheat = new Bindable<>(false);
+
+    private final Map<Player, Long> playerLastUpdateTick = new Object2ObjectArrayMap<>();
+
+    @EventHandler
+    private void onPlayerMove(PlayerMoveEvent e)
+    {
+        if (!doBasicAntiCheat.get()) return;
+
+        var player = e.getPlayer();
+
+        if (!player.isFlying()) return;
+        if (!appliedPlayers.contains(player)) return;
+
+        var distanceDelta = e.getFrom().distance(e.getTo());
+        if (distanceDelta == 0)
+        {
+            playerLastUpdateTick.put(player, plugin.getCurrentTick());
+
+            return;
+        }
+
+        var c = 11.536;
+        var spd = getTargetFlySpeed(manager.getDisguiseStateFor(player).getDisguiseIdentifier());
+
+        // Calculate time diff and get ticks
+        var currentTick = plugin.getCurrentTick();
+        var tickDiff = 1; //Math.max(1, currentTick - playerLastUpdateTick.getOrDefault(player, currentTick));
+
+        if (player.isRiptiding())
+            c *= 5.4;
+
+        if (player.isGliding())
+            c *= 1.5;
+
+        var threshold = spd * c * tickDiff + 0.01;
+        var diff = Math.abs(spd * c - distanceDelta);
+        if (diff > threshold)
+
+        {
+            logger.info("Canceling disguise for player %s.".formatted(player.getName()));
+
+            player.teleport(e.getFrom());
+            manager.unMorph(MorphManager.nilCommandSource, player, true);
+        }
+
+        // 设置上次更新
+        playerLastUpdateTick.put(player, plugin.getCurrentTick());
+    }
+
+    //endregion
 }
