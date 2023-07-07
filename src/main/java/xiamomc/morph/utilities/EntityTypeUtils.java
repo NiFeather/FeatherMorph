@@ -362,6 +362,8 @@ public class EntityTypeUtils
 
     public static boolean isEnemy(EntityType type)
     {
+        if (type == EntityType.PLAYER) return false;
+
         var cache = isEnemyMap.getOrDefault(type, null);
         if (cache != null) return cache;
 
