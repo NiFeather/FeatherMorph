@@ -32,11 +32,42 @@ public class EntityTargetingHelper extends MorphPluginObject
 
     private final Map<Mob, GoalRecord> entityGoalMap = new Object2ObjectArrayMap<>();
 
+    private final Map<net.minecraft.world.entity.Mob, Player> affectMobsAndPlayers = new Object2ObjectArrayMap<>();
+
     /**
      * 为map中的所有实体恢复之前的AvoidGoal
      */
     public void recoverGoal()
     {
+        var toRemoveFromAffect = new ObjectArrayList<net.minecraft.world.entity.Mob>();
+
+        affectMobsAndPlayers.forEach((nmsMob, nmsPlayer) ->
+        {
+            var mob = nmsMob.getBukkitMob();
+            var player = nmsPlayer.getBukkitEntity();
+            var state = morphs.getDisguiseStateFor(player);
+
+            EntityType entityType = state == null ? EntityType.PLAYER : state.getEntityType();
+
+            var isHostile = this.hostiles(mob.getType(), entityType);
+            var mobTarget = nmsMob.getTarget();
+
+            if (!isHostile && nmsPlayer.equals(mobTarget))
+            {
+                mob.setTarget(null);
+                toRemoveFromAffect.add(nmsMob);
+            }
+
+            if (mob.getTarget() == null)
+                toRemoveFromAffect.add(nmsMob);
+        });
+
+        if (toRemoveFromAffect.size() > 0)
+        {
+            for (var o : toRemoveFromAffect)
+                affectMobsAndPlayers.remove(o);
+        }
+
         var toRemove = new ObjectArrayList<Mob>();
         entityGoalMap.forEach((mob, goal) ->
         {
@@ -64,6 +95,8 @@ public class EntityTargetingHelper extends MorphPluginObject
         {
             for (var o : toRemove)
                 entityGoalMap.remove(o);
+
+            toRemove.clear();
         }
     }
 
@@ -123,6 +156,7 @@ public class EntityTargetingHelper extends MorphPluginObject
             //logger.info("Set E %s target %s".formatted(nmsMob, nmsPlayer));
             // 设置攻击目标
             nmsMob.setTarget(nmsPlayer, EntityTargetEvent.TargetReason.CUSTOM, true);
+            affectMobsAndPlayers.put(nmsMob, nmsPlayer);
 
             // 修改Goals已避免AvoidEntityGoal和攻击目标冲突
             var goals = nmsMob.goalSelector;

@@ -94,4 +94,10 @@ public class StatSubCommand extends MorphPluginObject implements ISubCommand
     {
         return new FormattableMessage(plugin, str);
     }
+    
+    @Override
+    public String getPermissionRequirement()
+    {
+        return "xiamomc.morph.stat";
+    }
 }
