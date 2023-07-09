@@ -95,7 +95,13 @@ public class RevealingHandler extends MorphPluginObject
         //和此State对应的玩家
         private Player player;
 
+        @Nullable
         public DisguiseState bindingState;
+
+        public boolean haveBindingState()
+        {
+            return bindingState != null;
+        }
 
         private boolean baseValueChanged = false;
 

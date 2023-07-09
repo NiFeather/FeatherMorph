@@ -45,12 +45,15 @@ public class RevealingEventProcessor extends MorphPluginObject implements Listen
     public void onPlayerInteract(PlayerInteractEvent e)
     {
         if (!e.hasBlock()) return;
+        if (e.getClickedBlock() == null) return;
+
         if (!e.getClickedBlock().getType().isInteractable()) return;
 
         var player = e.getPlayer();
         if (tracker.isDuplicatedRightClick(player)) return;
 
         var revealingState = handler.getRevealingState(player);
+        if (!revealingState.haveBindingState()) return;
         if (revealingState.bindingState.getDisguiseType() == DisguiseTypes.PLAYER) return;
 
         revealingState.addBaseValue(RevealingHandler.RevealingDiffs.INTERACT);
@@ -70,6 +73,7 @@ public class RevealingEventProcessor extends MorphPluginObject implements Listen
     {
         var revState = handler.getRevealingState(e.getPlayer());
 
+        if (!revState.haveBindingState()) return;
         if (revState.bindingState.getDisguiseType() == DisguiseTypes.PLAYER) return;
         revState.addBaseValue(RevealingHandler.RevealingDiffs.INTERACT_ENTITY);
     }
@@ -81,6 +85,7 @@ public class RevealingEventProcessor extends MorphPluginObject implements Listen
 
         var revState = handler.getRevealingState(player);
 
+        if (!revState.haveBindingState()) return;
         if (revState.bindingState.getDisguiseType() == DisguiseTypes.PLAYER) return;
         revState.addBaseValue(RevealingHandler.RevealingDiffs.ON_DAMAGE);
     }
@@ -92,6 +97,7 @@ public class RevealingEventProcessor extends MorphPluginObject implements Listen
 
         var revState = handler.getRevealingState(player);
 
+        if (!revState.haveBindingState()) return;
         if (revState.bindingState.getDisguiseType() == DisguiseTypes.PLAYER) return;
         revState.addBaseValue(RevealingHandler.RevealingDiffs.DEAL_DAMAGE);
     }
@@ -102,6 +108,7 @@ public class RevealingEventProcessor extends MorphPluginObject implements Listen
         // 玩家破坏方块 -> 揭示值+5
         var revealingState = handler.getRevealingState(e.getPlayer());
 
+        if (!revealingState.haveBindingState()) return;
         if (revealingState.bindingState.getDisguiseType() == DisguiseTypes.PLAYER) return;
         revealingState.addBaseValue(RevealingHandler.RevealingDiffs.BLOCK_BREAK);
     }
@@ -111,6 +118,7 @@ public class RevealingEventProcessor extends MorphPluginObject implements Listen
     {
         var revealingState = handler.getRevealingState(e.getPlayer());
 
+        if (!revealingState.haveBindingState()) return;
         if (revealingState.bindingState.getDisguiseType() == DisguiseTypes.PLAYER) return;
         revealingState.addBaseValue(RevealingHandler.RevealingDiffs.BLOCK_PLACE);
     }
