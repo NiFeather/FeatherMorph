@@ -55,6 +55,8 @@ public class OptionSubCommand extends MorphPluginObject implements ISubCommand
         subCommands.add(getToggle("mirror_ignore_disguised", ConfigOption.MIRROR_IGNORE_DISGUISED, "mirror.ignore_disguised", CommandNameStrings.mirrorIgnoreDisguised()));
         subCommands.add(getToggle("mirror_log_operations", ConfigOption.MIRROR_LOG_OPERATION, "mirror.log_operations"));
         subCommands.add(getInteger("mirror_log_cleanup", ConfigOption.MIRROR_LOG_CLEANUP_DATE, "mirror.log_operations"));
+        subCommands.add(getToggle("do_simple_anticheat", ConfigOption.DO_SIMPLE_ANTICHEAT, "do_simple_anticheat"));
+        subCommands.add(getToggle("debug_output", ConfigOption.DEBUG_OUTPUT, "debug_output"));
     }
 
     private ISubCommand getInteger(String name, ConfigOption option, String perm)

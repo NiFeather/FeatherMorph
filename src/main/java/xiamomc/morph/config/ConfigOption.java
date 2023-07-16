@@ -77,6 +77,10 @@ public enum ConfigOption
 
     AMBIENT_FREQUENCY(ambientSoundNode().append("frequency"), 1D),
 
+    DO_SIMPLE_ANTICHEAT(ConfigNode.create().append("do_simple_anticheat"), true),
+
+    DEBUG_OUTPUT(ConfigNode.create().append("debug_output"), false),
+
     VERSION(ConfigNode.create().append("version"), 0);
 
     public final ConfigNode node;

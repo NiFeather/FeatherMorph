@@ -25,6 +25,7 @@ import xiamomc.morph.misc.integrations.placeholderapi.PlaceholderIntegration;
 import xiamomc.morph.network.server.MorphClientHandler;
 import xiamomc.morph.skills.MorphSkillHandler;
 import xiamomc.morph.storage.skill.SkillAbilityConfigurationStore;
+import xiamomc.morph.transforms.Transformer;
 import xiamomc.pluginbase.Command.CommandHelper;
 import xiamomc.pluginbase.Messages.MessageStore;
 import xiamomc.pluginbase.XiaMoJavaPlugin;
@@ -104,6 +105,7 @@ public final class MorphPlugin extends XiaMoJavaPlugin
         dependencyManager.cache(abilityHandler = new AbilityHandler());
         dependencyManager.cache(cmdHelper = new MorphCommandManager());
         dependencyManager.cache(new RevealingHandler());
+        dependencyManager.cache(new Transformer());
 
         dependencyManager.cache(clientHandler = new MorphClientHandler());
 

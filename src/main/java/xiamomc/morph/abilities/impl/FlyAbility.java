@@ -1,15 +1,19 @@
 package xiamomc.morph.abilities.impl;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.world.phys.Vec3;
 import org.bukkit.GameEvent;
 import org.bukkit.GameMode;
+import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.craftbukkit.v1_20_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerGameModeChangeEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.event.player.PlayerToggleFlightEvent;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.abilities.AbilityType;
@@ -17,15 +21,30 @@ import xiamomc.morph.abilities.MorphAbility;
 import xiamomc.morph.abilities.options.FlyOption;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
+import xiamomc.morph.flycheck.FlyCheckHandler;
 import xiamomc.morph.misc.DisguiseState;
+import xiamomc.morph.utilities.MathUtils;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
 
+import java.util.List;
 import java.util.Map;
 
 public class FlyAbility extends MorphAbility<FlyOption>
 {
+    public FlyAbility()
+    {
+        flyCheckHandler = new FlyCheckHandler(this);
+    }
+
+    public List<Player> getAppliedPlayers()
+    {
+        return List.copyOf(this.appliedPlayers);
+    }
+
+    private final FlyCheckHandler flyCheckHandler;
+
     @Override
     public @NotNull NamespacedKey getIdentifier()
     {
@@ -36,7 +55,10 @@ public class FlyAbility extends MorphAbility<FlyOption>
     public boolean applyToPlayer(Player player, DisguiseState state)
     {
         if (super.applyToPlayer(player, state))
+        {
+            flyCheckHandler.setLastLegalLocation(player, player.getLocation(), false);
             return updateFlyingAbility(state);
+        }
         else
             return false;
     }
@@ -52,6 +74,8 @@ public class FlyAbility extends MorphAbility<FlyOption>
 
         configManager.getBindable(Boolean.class, ConfigOption.FLYABILITY_IDLE_CONSUME).onValueChanged((o, n) ->
                 idleConsumption = n ? 0.1D : 0D, true);
+
+        configManager.bind(doBasicAntiCheat, ConfigOption.DO_SIMPLE_ANTICHEAT);
     }
 
     private final float exhaustionBase = 0.005f;
@@ -113,6 +137,13 @@ public class FlyAbility extends MorphAbility<FlyOption>
         return (float)exhaustionScaled * movementMultiplier;
     }
 
+    @EventHandler
+    public void onToggleFlight(PlayerToggleFlightEvent e)
+    {
+        if (e.isFlying())
+            flyCheckHandler.setLastLegalLocation(e.getPlayer(), e.getPlayer().getLocation(), true);
+    }
+
     @Override
     public boolean revokeFromPlayer(Player player, DisguiseState state)
     {
@@ -135,7 +166,7 @@ public class FlyAbility extends MorphAbility<FlyOption>
         return new FlyOption();
     }
 
-    private float getTargetFlySpeed(String identifier)
+    public float getTargetFlySpeed(String identifier)
     {
         if (identifier == null) return Float.NaN;
 
@@ -164,9 +195,6 @@ public class FlyAbility extends MorphAbility<FlyOption>
 
             player.setFlySpeed(speed);
         }
-
-        if (doBasicAntiCheat.get())
-            playerLastUpdateTick.put(player, plugin.getCurrentTick());
 
         return true;
     }
@@ -207,54 +235,28 @@ public class FlyAbility extends MorphAbility<FlyOption>
 
     //region Basic Anti Cheat
 
-    private final Bindable<Boolean> doBasicAntiCheat = new Bindable<>(false);
+    private final Bindable<Boolean> doBasicAntiCheat = new Bindable<>(true);
 
-    private final Map<Player, Long> playerLastUpdateTick = new Object2ObjectArrayMap<>();
+    @EventHandler(ignoreCancelled = true)
+    private void onTeleport(PlayerTeleportEvent e)
+    {
+        if (!doBasicAntiCheat.get()) return;
 
-    @EventHandler
+        if (!appliedPlayers.contains(e.getPlayer())) return;
+
+        flyCheckHandler.setLastLegalLocation(e.getPlayer(), e.getTo(), true);
+    }
+
+    @EventHandler(ignoreCancelled = true)
     private void onPlayerMove(PlayerMoveEvent e)
     {
         if (!doBasicAntiCheat.get()) return;
 
         var player = e.getPlayer();
-
         if (!player.isFlying()) return;
         if (!appliedPlayers.contains(player)) return;
 
-        var distanceDelta = e.getFrom().distance(e.getTo());
-        if (distanceDelta == 0)
-        {
-            playerLastUpdateTick.put(player, plugin.getCurrentTick());
-
-            return;
-        }
-
-        var c = 11.536;
-        var spd = getTargetFlySpeed(manager.getDisguiseStateFor(player).getDisguiseIdentifier());
-
-        // Calculate time diff and get ticks
-        var currentTick = plugin.getCurrentTick();
-        var tickDiff = 1; //Math.max(1, currentTick - playerLastUpdateTick.getOrDefault(player, currentTick));
-
-        if (player.isRiptiding())
-            c *= 5.4;
-
-        if (player.isGliding())
-            c *= 1.5;
-
-        var threshold = spd * c * tickDiff + 0.01;
-        var diff = Math.abs(spd * c - distanceDelta);
-        if (diff > threshold)
-
-        {
-            logger.info("Canceling disguise for player %s.".formatted(player.getName()));
-
-            player.teleport(e.getFrom());
-            manager.unMorph(MorphManager.nilCommandSource, player, true);
-        }
-
-        // 设置上次更新
-        playerLastUpdateTick.put(player, plugin.getCurrentTick());
+        flyCheckHandler.doCheck(e);
     }
 
     //endregion
