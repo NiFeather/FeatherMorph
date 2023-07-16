@@ -30,7 +30,7 @@ public class FlyCheckHandler extends MorphPluginObject
         this.bindingFlyAbility = flyAbility;
     }
 
-    private final Map<Player, PlayerFlyRec> playerFlyMeta = new Object2ObjectArrayMap<>();
+    private final Map<Player, PlayerFlyMeta> playerFlyMeta = new Object2ObjectArrayMap<>();
 
     @Initializer
     private void load(MorphConfigManager configManager)
@@ -49,6 +49,8 @@ public class FlyCheckHandler extends MorphPluginObject
         var toRemove = new ObjectArrayList<Player>();
 
         movementCheckTick++;
+
+        timeLastUpdate = System.currentTimeMillis();
 
         playerFlyMeta.forEach((player, meta) ->
         {
@@ -84,8 +86,9 @@ public class FlyCheckHandler extends MorphPluginObject
 
             if (!doAdvancedCheck)
                 meta.distanceTravelled = 0d;
-        });
 
+            meta.eventDuplicates = 0;
+        });
 
         if (movementCheckTick >= movementCheckInterval.get())
             movementCheckTick = 0;
@@ -99,13 +102,15 @@ public class FlyCheckHandler extends MorphPluginObject
         //region Tick Player
     }
 
+    private long timeLastUpdate = 0L;
+
     private boolean doAdvancedCheck = false;
     private int movementCheckTick = 0;
     private final Bindable<Integer> movementCheckInterval = new Bindable<>(5);
 
-    private static class PlayerFlyRec
+    private static class PlayerFlyMeta
     {
-        public PlayerFlyRec(Player player)
+        public PlayerFlyMeta(Player player)
         {
             bindingPlayer = player;
         }
@@ -126,8 +131,8 @@ public class FlyCheckHandler extends MorphPluginObject
         public boolean wasSprinting = false;
         public int ignoreNext = 0;
 
-        public long lastTimeDiff = 0L;
-        public long thisTimeDiff = 0L;
+        public int eventDuplicates = 0;
+        public long lastTrigger = 0L;
 
         /**
          * 玩家上次移动的时间
@@ -154,6 +159,11 @@ public class FlyCheckHandler extends MorphPluginObject
          */
         @Nullable
         public Location lastLegalLocation;
+
+        /**
+         * 玩家没有移动事件的时长
+         */
+        public int ticksNoMovementEvent = 0;
 
         // 最后一次移动的属性
         public boolean lastMoveHasHorizonal = false;
@@ -190,7 +200,7 @@ public class FlyCheckHandler extends MorphPluginObject
 
     public void setLastLegalLocation(Player player, Location loc, boolean ignoreNextMovement)
     {
-        var meta = playerFlyMeta.getOrDefault(player, new PlayerFlyRec(player));
+        var meta = playerFlyMeta.getOrDefault(player, new PlayerFlyMeta(player));
         meta.lastLegalLocation = loc;
 
         if (ignoreNextMovement)
@@ -202,9 +212,10 @@ public class FlyCheckHandler extends MorphPluginObject
         var player = e.getPlayer();
         var meta = playerFlyMeta.getOrDefault(player, null);
 
+        // 提前设置和检查meta属性
         if (meta == null)
         {
-            meta = new PlayerFlyRec(player);
+            meta = new PlayerFlyMeta(player);
             playerFlyMeta.put(player, meta);
         }
 
@@ -219,7 +230,11 @@ public class FlyCheckHandler extends MorphPluginObject
 
         var distanceDelta = e.getFrom().distance(e.getTo());
         //var travelled = meta.distanceTravelled + distanceDelta; //因为mc的奇特原因注释掉了
-        var travelled = distanceDelta;
+        var travelled = meta.distanceTravelled + distanceDelta;
+
+        // 忽略静止不动的移动数据
+        if (travelled == 0)
+            return;
 
         // Base multiplier
         var hasHorizonal = (e.getFrom().x() - e.getTo().x() != 0) || (e.getFrom().z() - e.getTo().z() != 0);
@@ -228,20 +243,32 @@ public class FlyCheckHandler extends MorphPluginObject
         meta.lastMoveHasHorizonal = hasHorizonal;
         meta.lastMoveHasVertical = hasVertical;
 
-        //tick move
+        // 计算移动
         var c = 0d;
 
+        // 设置meta中的移动属性
         if (meta.lastMoveHasHorizonal) c += 5.4406;
         if (meta.lastMoveHasVertical) c += meta.lastMoveHasHorizonal ? 1.1704 : 3.75;
 
         var playerSprinting = player.isSprinting();
-        meta.isSprinting = playerSprinting;
 
+        // 设置meta中的疾行属性
+        meta.isSprinting = playerSprinting;
+        if (playerSprinting)
+        {
+            if (!meta.isSprinting) meta.tickStartedSprint = plugin.getCurrentTick();
+            meta.tickLastSprint = plugin.getCurrentTick();
+        }
+
+        // 玩家取消疾行：缓慢降低飞行速度倍率到正常水平
         if (meta.isSprinting != meta.wasSprinting)
         {
             //logger.info("Do change transform");
-            Transformer.transform(meta.flyMult, playerSprinting ? 1d : 0d, (playerSprinting ? 0 : 50) * 50L, playerSprinting ? Easing.Plain : Easing.Plain);
+            Transformer.transform(meta.flyMult, playerSprinting ? 1d : 0d, (playerSprinting ? 0 : 50) * 50L, Easing.Plain);
         }
+
+        // 将乘数乘以飞行倍率
+        c *= Math.max(1, 2 * meta.flyMult.get());
 
         if (player.isRiptiding())
         {
@@ -250,19 +277,21 @@ public class FlyCheckHandler extends MorphPluginObject
             c *= 9.4;
         }
 
-        c *= Math.max(1, 2 * meta.flyMult.get());
-
+        // 如果玩家任意vector不等于0，那么隔5tick再检查
         //if (MathUtils.vectorNotZero(player.getVelocity()))
-        //    meta.ignoreNext += 5;
+        //{
+            //meta.ignoreNext = Math.max(meta.ignoreNext, 5);
+            //return;
+        //}
 
+        // 获取配置的飞行速度
         var spd = bindingFlyAbility.getTargetFlySpeed(manager.getDisguiseStateFor(player).getDisguiseIdentifier());
-        // The max distance per tick a player can travel
+
+        // 取得此玩家在1tick内最多可以飞行的距离
         var threshold = spd * c * 1;
 
+        // 增加meta中我们期望的速度
         meta.expectedMovementDistance += threshold;
-
-        if (travelled == 0)
-            return;
 
         //check
 
@@ -271,27 +300,21 @@ public class FlyCheckHandler extends MorphPluginObject
         //var vertMax = spd * 3.75;
         //var hav = spd * 6.611;
 
-        if (playerSprinting)
-        {
-            if (!meta.isSprinting) meta.tickStartedSprint = plugin.getCurrentTick();
-            meta.tickLastSprint = plugin.getCurrentTick();
-        }
-
-        meta.isSprinting = playerSprinting;
-
-        var timeDiff = 50;
+        // timeDiff: 事件到来时和上次更新的时差
+        // tickDiff: 事件到来时和上次更新的Tick差距（ 四舍五入 ）
+        var timeDiff = System.currentTimeMillis() - timeLastUpdate;
         var tickDiff = Math.max(1, Math.round((float) timeDiff / 50L));
 
-        meta.lastTimeDiff = meta.thisTimeDiff;
-        meta.thisTimeDiff = timeDiff;
-
-        // <3 Minecraft
-        if (meta.thisTimeDiff - meta.lastTimeDiff < 20)
+        // 如果一个tick内触发了多次，那么增加tickDiff
+        var currrentTick = plugin.getCurrentTick();
+        if (meta.lastTrigger == currrentTick)
         {
-            tickDiff = Math.max(2, tickDiff);
-            meta.ignoreNext++;
+            meta.eventDuplicates++;
+            tickDiff += meta.eventDuplicates;
+            //meta.ignoreNext++;
         }
 
+        meta.lastTrigger = plugin.getCurrentTick();
 
         var diff = travelled - threshold ; //Math.abs(travelled - spd * c);
 
