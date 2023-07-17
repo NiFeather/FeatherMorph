@@ -20,12 +20,16 @@ import org.bukkit.inventory.EquipmentSlot;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.RevealingHandler;
+import xiamomc.morph.config.ConfigOption;
+import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.events.api.gameplay.PlayerMorphEvent;
 import xiamomc.morph.events.api.gameplay.PlayerUnMorphEvent;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.misc.DisguiseTypes;
 import xiamomc.morph.misc.NmsRecord;
+import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
+import xiamomc.pluginbase.Bindables.Bindable;
 
 public class RevealingEventProcessor extends MorphPluginObject implements Listener
 {
@@ -34,6 +38,14 @@ public class RevealingEventProcessor extends MorphPluginObject implements Listen
 
     @Resolved(shouldSolveImmediately = true)
     private PlayerTracker tracker;
+
+    private final Bindable<Boolean> doRevealing = new Bindable<>(true);
+
+    @Initializer
+    private void load(MorphConfigManager configManager)
+    {
+        configManager.bind(doRevealing, ConfigOption.REVEALING);
+    }
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent e)
@@ -46,6 +58,7 @@ public class RevealingEventProcessor extends MorphPluginObject implements Listen
     {
         if (!e.hasBlock()) return;
         if (e.getClickedBlock() == null) return;
+        if (!doRevealing.get()) return;
 
         if (!e.getClickedBlock().getType().isInteractable()) return;
 
@@ -71,6 +84,7 @@ public class RevealingEventProcessor extends MorphPluginObject implements Listen
     @EventHandler
     public void onInteractEntity(PlayerInteractEntityEvent e)
     {
+        if (!doRevealing.get()) return;
         var revState = handler.getRevealingState(e.getPlayer());
 
         if (!revState.haveBindingState()) return;
@@ -81,6 +95,7 @@ public class RevealingEventProcessor extends MorphPluginObject implements Listen
     @EventHandler
     public void onPlayerDamage(EntityDamageEvent e)
     {
+        if (!doRevealing.get()) return;
         if (!(e.getEntity() instanceof Player player)) return;
 
         var revState = handler.getRevealingState(player);
@@ -93,6 +108,7 @@ public class RevealingEventProcessor extends MorphPluginObject implements Listen
     @EventHandler
     public void onPlayerDamageEntities(EntityDamageByEntityEvent e)
     {
+        if (!doRevealing.get()) return;
         if (!(e.getDamager() instanceof Player player)) return;
 
         var revState = handler.getRevealingState(player);
@@ -105,6 +121,8 @@ public class RevealingEventProcessor extends MorphPluginObject implements Listen
     @EventHandler
     public void onBlockBreak(BlockBreakEvent e)
     {
+        if (!doRevealing.get()) return;
+
         // 玩家破坏方块 -> 揭示值+5
         var revealingState = handler.getRevealingState(e.getPlayer());
 
@@ -116,6 +134,7 @@ public class RevealingEventProcessor extends MorphPluginObject implements Listen
     @EventHandler
     public void onBlockPlace(BlockPlaceEvent e)
     {
+        if (!doRevealing.get()) return;
         var revealingState = handler.getRevealingState(e.getPlayer());
 
         if (!revealingState.haveBindingState()) return;
@@ -126,6 +145,8 @@ public class RevealingEventProcessor extends MorphPluginObject implements Listen
     @EventHandler
     public void onPlayerMorph(PlayerMorphEvent e)
     {
+        if (!doRevealing.get()) return;
+
         var player = e.getPlayer();
         var mobsNearby = player.getNearbyEntities(16, 16, 16);
         var nmsPlayer = NmsRecord.ofPlayer(player);

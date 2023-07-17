@@ -30,6 +30,30 @@ root:
     # Some features may not be affected by this option.
     single_language: false
 
+  # Should we enable the "Disguise Revealing" feature?
+  # For more information, please check: https://modrinth.com/plugin/feathermorph/version/0.12.3-1
+  revealing: true
+
+  # Should we do simple anti-cheat check on flying players?
+  # Please note that this feature is still in alpha state and may have false positives with a bad network or tps.
+  # If you encountering drag-backs flying around, please first consider disable this!
+  #
+  # And we can't do anything with this simply because we don't have enough technique to fix this :(
+  do_simple_anticheat: true
+
+  # Debug output for the simple anti-cheat feature
+  # The output message may looks like this:
+  # A 0.xxxxx T 0.xxxxx D 0.xxxxx, F x.x GT xxx Sys xxx TIMEDIFF xx TICKDIFF xx
+  # A: Player's actual movement
+  # T: The movement that we expected
+  # D: Difference between these values
+  # F: Sprint multiplier, applies on the "T" value
+  # GT: Current game tick since this plugin has started
+  # Sys: System time in millisecond(System.currentTimeMills() output)
+  # TIMEDIFF: The time after last server tick
+  # TICKDIFF: "TIMEDIFF" / 50
+  debug_output: false
+
   # Skill cooldown on damage.
   # Defines how many ticks should a player wait at least before they activate the skill again when they get damaged.
   cooldown_on_damage: 15
@@ -216,4 +240,4 @@ root:
     log_outgoing_packets: false
 
   # Do not touch unless you know what you're doing!
-  version: 23
+  version: 24

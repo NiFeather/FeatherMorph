@@ -150,11 +150,14 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         }
     }
 
+    private final Bindable<Boolean> doRevealing = new Bindable<>(true);
+
     @Initializer
     private void load()
     {
         config.bind(cooldownOnDamage, ConfigOption.SKILL_COOLDOWN_ON_DAMAGE);
         config.bind(bruteIgnoreDisguises, ConfigOption.PIGLIN_BRUTE_IGNORE_DISGUISES);
+        config.bind(doRevealing, ConfigOption.REVEALING);
 
         unMorphOnDeath = config.getBindable(Boolean.class, ConfigOption.UNMORPH_ON_DEATH);
         this.addSchedule(this::update);
@@ -559,7 +562,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         var revealingState = revealingHandler.getRevealingState(player);
         var revealingLevel = revealingState.getRevealingLevel();
 
-        if (!susIncreasedPlayers.contains(player))
+        if (!susIncreasedPlayers.contains(player) && doRevealing.get())
         {
             revealingState.addBaseValue(RevealingHandler.RevealingDiffs.ON_MOB_TARGET);
             susIncreasedPlayers.add(player);

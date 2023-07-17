@@ -81,6 +81,8 @@ public enum ConfigOption
 
     DEBUG_OUTPUT(ConfigNode.create().append("debug_output"), false),
 
+    REVEALING(ConfigNode.create().append("revealing"), true),
+
     VERSION(ConfigNode.create().append("version"), 0);
 
     public final ConfigNode node;
