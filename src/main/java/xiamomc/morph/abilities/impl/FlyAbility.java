@@ -75,7 +75,7 @@ public class FlyAbility extends MorphAbility<FlyOption>
         configManager.getBindable(Boolean.class, ConfigOption.FLYABILITY_IDLE_CONSUME).onValueChanged((o, n) ->
                 idleConsumption = n ? 0.1D : 0D, true);
 
-        configManager.bind(doBasicAntiCheat, ConfigOption.DO_SIMPLE_ANTICHEAT);
+        configManager.bind(doBasicAntiCheat, ConfigOption.CHECK_SPEEDING);
     }
 
     private final float exhaustionBase = 0.005f;

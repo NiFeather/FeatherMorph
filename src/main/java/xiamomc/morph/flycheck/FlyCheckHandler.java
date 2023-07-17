@@ -264,7 +264,7 @@ public class FlyCheckHandler extends MorphPluginObject
         if (meta.isSprinting != meta.wasSprinting)
         {
             //logger.info("Do change transform");
-            Transformer.transform(meta.flyMult, playerSprinting ? 1d : 0d, (playerSprinting ? 0 : 50) * 50L, Easing.Plain);
+            Transformer.transform(meta.flyMult, playerSprinting ? 1d : 0d, (playerSprinting ? 0 : 55) * 50L, Easing.Plain);
         }
 
         // 将乘数乘以飞行倍率

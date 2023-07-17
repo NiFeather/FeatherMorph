@@ -77,7 +77,7 @@ public enum ConfigOption
 
     AMBIENT_FREQUENCY(ambientSoundNode().append("frequency"), 1D),
 
-    DO_SIMPLE_ANTICHEAT(ConfigNode.create().append("do_simple_anticheat"), true),
+    CHECK_SPEEDING(ConfigNode.create().append("check_speeding"), false),
 
     DEBUG_OUTPUT(ConfigNode.create().append("debug_output"), false),
 

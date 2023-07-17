@@ -34,15 +34,18 @@ root:
   # For more information, please check: https://modrinth.com/plugin/feathermorph/version/0.12.3-1
   revealing: true
 
-  # Should we do simple anti-cheat check on flying players?
-  # Please note that this feature is still in alpha state and may have false positives with a bad network or tps.
-  # If you encountering drag-backs flying around, please first consider disable this!
+  # !! EXPERIMENTAL FEATURE !!
   #
-  # And we can't do anything with this simply because we don't have enough technique to fix this :(
-  do_simple_anticheat: true
+  # Should we check if someone is speeding flying?
+  # Once detected it will be dragged back to the last legal location.
+  #
+  # We only suggest this if your server doesn't have an anti-cheat plugin that checks this.
+  # This feature is still in the alpha state and may have false positives with an unstable network or bad tps.
+  # And we can only hardly do anything with this :(
+  check_speeding: false
 
-  # Debug output for the simple anti-cheat feature
-  # The output message may looks like this:
+  # Debug output for the Speeding Check feature
+  # The output message may look like this:
   # A 0.xxxxx T 0.xxxxx D 0.xxxxx, F x.x GT xxx Sys xxx TIMEDIFF xx TICKDIFF xx
   # A: Player's actual movement
   # T: The movement that we expected
@@ -50,7 +53,7 @@ root:
   # F: Sprint multiplier, applies on the "T" value
   # GT: Current game tick since this plugin has started
   # Sys: System time in millisecond(System.currentTimeMills() output)
-  # TIMEDIFF: The time after last server tick
+  # TIMEDIFF: The time after the last server tick
   # TICKDIFF: "TIMEDIFF" / 50
   debug_output: false
 
