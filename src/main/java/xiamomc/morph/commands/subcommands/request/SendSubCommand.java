@@ -62,38 +62,37 @@ public class SendSubCommand extends MorphPluginObject implements ISubCommand
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull String[] args)
     {
-        if (sender instanceof Player sourcePlayer)
+        if (!(sender instanceof Player sourcePlayer))
+            return true;
+
+        if (args.length < 1)
         {
-            if (args.length >= 1)
-            {
-                var targetPlayer = Bukkit.getPlayerExact(args[0]);
-
-                if (targetPlayer == null)
-                {
-                    sender.sendMessage(MessageUtils.prefixes(sender, CommonStrings.playerNotFoundString()));
-                    return true;
-                }
-
-                if (targetPlayer.getUniqueId().equals(sourcePlayer.getUniqueId()))
-                {
-                    sourcePlayer.sendMessage(MessageUtils.prefixes(sender, RequestStrings.cantSendToSelfString()));
-                    return true;
-                }
-
-                if (morphs.getAvaliableDisguisesFor(sourcePlayer).stream()
-                        .anyMatch(c -> c.isPlayerDisguise() && c.playerDisguiseTargetName.equals(args[0])))
-                {
-                    sourcePlayer.sendMessage(MessageUtils.prefixes(sender, RequestStrings.alreadyHaveDisguiseString()));
-                    return true;
-                }
-
-                requests.createRequest(sourcePlayer, targetPlayer);
-            }
-            else
-            {
-                sender.sendMessage(MessageUtils.prefixes(sender, CommonStrings.playerNotDefinedString()));
-            }
+            sender.sendMessage(MessageUtils.prefixes(sender, CommonStrings.playerNotDefinedString()));
+            return true;
         }
+
+        var targetPlayer = Bukkit.getPlayerExact(args[0]);
+
+        if (targetPlayer == null)
+        {
+            sender.sendMessage(MessageUtils.prefixes(sender, CommonStrings.playerNotFoundString()));
+            return true;
+        }
+
+        if (targetPlayer.getUniqueId().equals(sourcePlayer.getUniqueId()))
+        {
+            sourcePlayer.sendMessage(MessageUtils.prefixes(sender, RequestStrings.cantSendToSelfString()));
+            return true;
+        }
+
+        if (morphs.getAvaliableDisguisesFor(sourcePlayer).stream()
+                .anyMatch(c -> c.isPlayerDisguise() && c.playerDisguiseTargetName.equals(args[0])))
+        {
+            sourcePlayer.sendMessage(MessageUtils.prefixes(sender, RequestStrings.alreadyHaveDisguiseString()));
+            return true;
+        }
+
+        requests.createRequest(sourcePlayer, targetPlayer);
 
         return true;
     }

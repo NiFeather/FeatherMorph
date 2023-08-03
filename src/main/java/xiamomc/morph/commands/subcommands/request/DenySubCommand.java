@@ -57,25 +57,24 @@ public class DenySubCommand extends MorphPluginObject implements ISubCommand
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull String[] args)
     {
-        if (sender instanceof Player sourcePlayer)
+        if (!(sender instanceof Player sourcePlayer))
+            return true;
+
+        if (args.length < 1)
         {
-            if (args.length >= 1)
-            {
-                var targetPlayer = Bukkit.getPlayerExact(args[0]);
-
-                if (targetPlayer == null)
-                {
-                    sender.sendMessage(MessageUtils.prefixes(sender, CommonStrings.playerNotFoundString()));
-                    return true;
-                }
-
-                requests.denyRequest(sourcePlayer, targetPlayer);
-            }
-            else
-            {
-                sender.sendMessage(MessageUtils.prefixes(sender, CommonStrings.playerNotDefinedString()));
-            }
+            sender.sendMessage(MessageUtils.prefixes(sender, CommonStrings.playerNotDefinedString()));
+            return true;
         }
+
+        var targetPlayer = Bukkit.getPlayerExact(args[0]);
+
+        if (targetPlayer == null)
+        {
+            sender.sendMessage(MessageUtils.prefixes(sender, CommonStrings.playerNotFoundString()));
+            return true;
+        }
+
+        requests.denyRequest(sourcePlayer, targetPlayer);
 
         return true;
     }
