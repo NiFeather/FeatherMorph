@@ -34,6 +34,7 @@ import xiamomc.morph.network.server.MorphClientHandler;
 import xiamomc.morph.storage.DirectoryStorage;
 import xiamomc.morph.storage.mirrorlogging.MirrorSingleEntry;
 import xiamomc.morph.storage.mirrorlogging.OperationType;
+import xiamomc.morph.utilities.DisguiseUtils;
 import xiamomc.morph.utilities.ItemUtils;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
@@ -210,8 +211,11 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
         var targetPlayer = inf.target;
         if (targetPlayer == null) return;
 
+        var playerInDistance = playerInDistance(player, inf, true);
+
         if (targetPlayer.getLocation().getWorld() == player.getLocation().getWorld()
-                && Math.abs(targetPlayer.getLocation().distanceSquared(player.getLocation())) <= 6)
+                && Math.abs(targetPlayer.getLocation().distance(player.getLocation())) <= 6
+                && playerInDistance)
         {
             var theirTarget = targetPlayer.getTargetEntity(5);
             var ourTarget = player.getTargetEntity(5);
@@ -223,7 +227,7 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
             }
         }
 
-        if (!playerInDistance(player, inf)) return;
+        if (!playerInDistance || ignoredPlayers.contains(targetPlayer)) return;
 
         if (tracker.droppingItemThisTick(player))
             return;
@@ -436,7 +440,8 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
                 || target.hasPermission(CommonPermissions.MIRROR_IMMUNE) //检查目标是否免疫操控
                 || target.getOpenInventory().getType() != InventoryType.CRAFTING //检查目标是否正和容器互动
                 || target.isSleeping() //检查目标是否正在睡觉
-                || target.isDead()) //检查目标是否已经死亡
+                || target.isDead() //检查目标是否已经死亡
+                || !DisguiseUtils.gameModeMirrorable(target)) //检查目标游戏模式是否满足操控条件
         {
             return false;
         }

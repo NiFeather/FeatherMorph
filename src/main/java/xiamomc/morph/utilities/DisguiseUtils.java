@@ -7,6 +7,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Pose;
 import org.bukkit.inventory.ItemStack;
 import xiamomc.morph.misc.DisguiseInfo;
+import xiamomc.morph.misc.NmsRecord;
 
 import java.util.Arrays;
 import java.util.List;
@@ -90,5 +91,11 @@ public class DisguiseUtils
     public static ItemStack itemOrAir(ItemStack stack)
     {
         return ItemUtils.itemOrAir(stack);
+    }
+
+    public static boolean gameModeMirrorable(Player player)
+    {
+        var nmsPlayerMode = NmsRecord.ofPlayer(player).gameMode;
+        return nmsPlayerMode.isSurvival();
     }
 }
