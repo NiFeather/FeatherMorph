@@ -185,6 +185,8 @@ public class DefaultConfigGenerator
         addSkillConfiguration(skills, EntityType.WARDEN, SonicBoomMorphSkill.defaultCooldown, SkillType.SONIC_BOOM);
 
         addSkillConfiguration(skills, EntityType.EVOKER, 100, SkillType.EVOKER);
+
+        addSkillConfiguration(skills, EntityType.WITCH, 80, SkillType.WITCH);
     }
 
     public static void addAbilityConfigurations(List<SkillAbilityConfiguration> skills)

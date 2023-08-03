@@ -126,7 +126,7 @@ public class SummonFangsMorphSkill extends MorphSkill<NoOpConfiguration>
     private final NoOpConfiguration option = new NoOpConfiguration();
 
     @Override
-    public NoOpConfiguration getOption()
+    public NoOpConfiguration getOptionInstance()
     {
         return option;
     }

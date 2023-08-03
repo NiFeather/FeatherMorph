@@ -95,7 +95,7 @@ public class TeleportMorphSkill extends MorphSkill<TeleportConfiguration>
     private final TeleportConfiguration option = new TeleportConfiguration();
 
     @Override
-    public TeleportConfiguration getOption()
+    public TeleportConfiguration getOptionInstance()
     {
         return option;
     }

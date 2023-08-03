@@ -89,7 +89,7 @@ public class SonicBoomMorphSkill extends DelayedMorphSkill<NoOpConfiguration>
     }
 
     @Override
-    public NoOpConfiguration getOption()
+    public NoOpConfiguration getOptionInstance()
     {
         return NoOpConfiguration.instance;
     }

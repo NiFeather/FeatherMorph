@@ -75,6 +75,8 @@ public class MorphSkillHandler extends MorphPluginObject
                 new SummonFangsMorphSkill(),
                 new TeleportMorphSkill(),
                 new SonicBoomMorphSkill(),
+                new SplashPotionSkill(),
+
                 new GhastMorphSkill(),
                 NoneMorphSkill.instance
         ));
@@ -221,7 +223,7 @@ public class MorphSkillHandler extends MorphPluginObject
 
             try
             {
-                option = skill.getOption().fromMap(config.getSkillOptions(skill));
+                option = skill.getOptionInstance().fromMap(config.getSkillOptions(skill));
             }
             catch (Throwable t)
             {

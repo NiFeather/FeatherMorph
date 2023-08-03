@@ -117,7 +117,7 @@ public class LaunchProjectiveMorphSkill extends DelayedMorphSkill<ProjectiveConf
     private final ProjectiveConfiguration option = new ProjectiveConfiguration();
 
     @Override
-    public ProjectiveConfiguration getOption()
+    public ProjectiveConfiguration getOptionInstance()
     {
         return option;
     }

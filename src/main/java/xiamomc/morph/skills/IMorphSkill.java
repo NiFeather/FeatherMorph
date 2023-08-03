@@ -79,5 +79,5 @@ public interface IMorphSkill<T extends ISkillOption>
      *
      * @return {@link ISkillOption}
      */
-    public T getOption();
+    public T getOptionInstance();
 }

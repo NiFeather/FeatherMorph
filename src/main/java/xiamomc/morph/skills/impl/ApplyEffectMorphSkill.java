@@ -86,7 +86,7 @@ public class ApplyEffectMorphSkill extends MorphSkill<EffectConfiguration>
     private final EffectConfiguration option = new EffectConfiguration();
 
     @Override
-    public EffectConfiguration getOption()
+    public EffectConfiguration getOptionInstance()
     {
         return option;
     }

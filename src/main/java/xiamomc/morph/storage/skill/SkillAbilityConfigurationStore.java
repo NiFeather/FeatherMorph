@@ -5,6 +5,7 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.EntityType;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.abilities.AbilityHandler;
 import xiamomc.morph.abilities.AbilityType;
@@ -61,7 +62,7 @@ public class SkillAbilityConfigurationStore extends MorphJsonBasedStorage<SkillA
         return "技能存储";
     }
 
-    private final int targetVersion = 20;
+    private final int targetVersion = 21;
 
     @Resolved
     private MorphSkillHandler skillHandler;
@@ -213,9 +214,7 @@ public class SkillAbilityConfigurationStore extends MorphJsonBasedStorage<SkillA
             //9: 实现Warden的音爆技能
             if (version < 9)
             {
-                var targetConfig = config.configurations.stream()
-                        .filter(s -> s != null && s.getIdentifier().equals(EntityType.WARDEN.getKey().asString()))
-                        .findFirst().orElse(null);
+                var targetConfig = getConfigFor(EntityType.WARDEN, config);
 
                 if (targetConfig != null && targetConfig.getSkillIdentifier().equals(SkillType.NONE))
                 {
@@ -236,9 +235,7 @@ public class SkillAbilityConfigurationStore extends MorphJsonBasedStorage<SkillA
             //恶魂的技能变成延迟释放
             if (version < 12)
             {
-                var targetConfig = config.configurations.stream()
-                        .filter(s -> s != null && s.getIdentifier().equals(EntityType.GHAST.getKey().asString()))
-                        .findFirst().orElse(null);
+                var targetConfig = getConfigFor(EntityType.GHAST, config);
 
                 if (targetConfig != null)
                 {
@@ -256,9 +253,7 @@ public class SkillAbilityConfigurationStore extends MorphJsonBasedStorage<SkillA
             //马匹被动改成更改属性
             if (version < 13)
             {
-                var targetConfig= config.configurations.stream()
-                        .filter(s -> s != null && s.getIdentifier().equals(EntityType.HORSE.getKey().asString()))
-                        .findFirst().orElse(null);
+                var targetConfig= getConfigFor(EntityType.HORSE, config);
 
                 if (targetConfig != null)
                 {
@@ -270,9 +265,7 @@ public class SkillAbilityConfigurationStore extends MorphJsonBasedStorage<SkillA
             //恶魂的技能合并到弹射物中
             if (version < 14)
             {
-                var ghastConfig = config.configurations.stream()
-                        .filter(s -> s != null && s.getIdentifier().equals(EntityType.GHAST.getKey().asString()))
-                        .findFirst().orElse(null);
+                var ghastConfig = getConfigFor(EntityType.GHAST, config);
 
                 if (ghastConfig != null)
                 {
@@ -298,6 +291,21 @@ public class SkillAbilityConfigurationStore extends MorphJsonBasedStorage<SkillA
                 }
             }
 
+            //实现了女巫的抛掷技能
+            if (version < 21)
+            {
+                var option = getConfigFor(EntityType.WITCH, config);
+
+                if (option != null)
+                {
+                    if (option.getSkillIdentifier().equals(SkillType.NONE))
+                    {
+                        option.setSkillIdentifier(SkillType.WITCH);
+                        option.setCooldown(80);
+                    }
+                }
+            }
+
             //更新默认设置
             DefaultConfigGenerator.addAbilityConfigurations(config.configurations);
             DefaultConfigGenerator.addSkillConfigurations(config.configurations);
@@ -314,5 +322,19 @@ public class SkillAbilityConfigurationStore extends MorphJsonBasedStorage<SkillA
             t.printStackTrace();
             return false;
         }
+    }
+
+    @Nullable
+    private SkillAbilityConfiguration getConfigFor(String id, SkillAbilityConfigurationContainer config)
+    {
+        return config.configurations.stream()
+                .filter(s -> s != null && s.getIdentifier().equals(EntityType.WITCH.getKey().asString()))
+                .findFirst().orElse(null);
+    }
+
+    @Nullable
+    private SkillAbilityConfiguration getConfigFor(EntityType type, SkillAbilityConfigurationContainer config)
+    {
+        return getConfigFor(type.getKey().asString(), config);
     }
 }

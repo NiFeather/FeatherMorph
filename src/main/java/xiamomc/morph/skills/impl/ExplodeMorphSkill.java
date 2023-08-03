@@ -94,7 +94,7 @@ public class ExplodeMorphSkill extends DelayedMorphSkill<ExplosionConfiguration>
     private final ExplosionConfiguration option = new ExplosionConfiguration();
 
     @Override
-    public ExplosionConfiguration getOption()
+    public ExplosionConfiguration getOptionInstance()
     {
         return option;
     }
