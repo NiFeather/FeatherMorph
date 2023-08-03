@@ -77,9 +77,8 @@ public enum ConfigOption
 
     AMBIENT_FREQUENCY(ambientSoundNode().append("frequency"), 1D),
 
-    CHECK_SPEEDING(ConfigNode.create().append("check_speeding"), false),
-
-    DEBUG_OUTPUT(ConfigNode.create().append("debug_output"), false),
+    @Deprecated
+    DEBUG_OUTPUT(ConfigNode.create().append("debug_output"), false, true),
 
     REVEALING(ConfigNode.create().append("revealing"), true),
 

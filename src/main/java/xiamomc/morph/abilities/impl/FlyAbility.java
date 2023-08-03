@@ -74,8 +74,6 @@ public class FlyAbility extends MorphAbility<FlyOption>
 
         configManager.getBindable(Boolean.class, ConfigOption.FLYABILITY_IDLE_CONSUME).onValueChanged((o, n) ->
                 idleConsumption = n ? 0.1D : 0D, true);
-
-        configManager.bind(doBasicAntiCheat, ConfigOption.CHECK_SPEEDING);
     }
 
     private final float exhaustionBase = 0.005f;
@@ -235,13 +233,9 @@ public class FlyAbility extends MorphAbility<FlyOption>
 
     //region Basic Anti Cheat
 
-    private final Bindable<Boolean> doBasicAntiCheat = new Bindable<>(true);
-
     @EventHandler(ignoreCancelled = true)
     private void onTeleport(PlayerTeleportEvent e)
     {
-        if (!doBasicAntiCheat.get()) return;
-
         if (!appliedPlayers.contains(e.getPlayer())) return;
 
         flyCheckHandler.setLastLegalLocation(e.getPlayer(), e.getTo(), true);
@@ -250,8 +244,6 @@ public class FlyAbility extends MorphAbility<FlyOption>
     @EventHandler(ignoreCancelled = true)
     private void onPlayerMove(PlayerMoveEvent e)
     {
-        if (!doBasicAntiCheat.get()) return;
-
         var player = e.getPlayer();
         if (!player.isFlying()) return;
         if (!appliedPlayers.contains(player)) return;
