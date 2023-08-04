@@ -1,8 +1,10 @@
 package xiamomc.morph.skills.impl;
 
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.alchemy.PotionUtils;
+import net.minecraft.world.item.alchemy.Potions;
 import org.bukkit.Color;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Sound;
@@ -50,11 +52,18 @@ public class SplashPotionSkill extends MorphSkill<NoOpConfiguration>
         }
 
         var meta = thrownPotion.getPotionMeta();
-        var info = validTypes[random.nextInt(0, validTypes.length - 1)];
+        var info = validTypes[random.nextInt(0, validTypes.length)];
         var potionEffect = new PotionEffect(info.type, info.duration, info.amplifier, false, true);
         meta.addCustomEffect(potionEffect, true);
 
-        var color = PotionUtils.getColor(Potion.byName(info.type.getKey().asString()));
+        var targetPotion = Potion.byName(info.type.getKey().asString());
+
+        if (info.type == PotionEffectType.HEAL)
+            targetPotion = Potions.HEALING;
+        else if (info.type == PotionEffectType.HARM)
+            targetPotion = Potions.HARMING;
+
+        var color = PotionUtils.getColor(targetPotion);
         meta.setColor(Color.fromRGB(color));
 
         thrownPotion.setPotionMeta(meta);
@@ -66,12 +75,12 @@ public class SplashPotionSkill extends MorphSkill<NoOpConfiguration>
 
     private final PotionInfo[] validTypes = new PotionInfo[]
     {
-            PotionInfo.of(PotionEffectType.REGENERATION, 1, 0),
-            PotionInfo.of(PotionEffectType.HEAL, 45 * 20, 0),
+            PotionInfo.of(PotionEffectType.REGENERATION, 45 * 20, 0),
+            PotionInfo.of(PotionEffectType.HEAL, 20, 0),
             PotionInfo.of(PotionEffectType.SLOW, 90 * 20, 0),
             PotionInfo.of(PotionEffectType.POISON, 45 * 20, 0),
             PotionInfo.of(PotionEffectType.WEAKNESS, 90 * 20, 0),
-            PotionInfo.of(PotionEffectType.HARM, 1, 0)
+            PotionInfo.of(PotionEffectType.HARM, 20, 0)
     };
 
     private record PotionInfo(PotionEffectType type, int duration, int amplifier)
