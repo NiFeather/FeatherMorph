@@ -21,7 +21,6 @@ import xiamomc.morph.abilities.MorphAbility;
 import xiamomc.morph.abilities.options.FlyOption;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
-import xiamomc.morph.flycheck.FlyCheckHandler;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.utilities.MathUtils;
 import xiamomc.pluginbase.Annotations.Initializer;
@@ -35,15 +34,12 @@ public class FlyAbility extends MorphAbility<FlyOption>
 {
     public FlyAbility()
     {
-        flyCheckHandler = new FlyCheckHandler(this);
     }
 
     public List<Player> getAppliedPlayers()
     {
         return List.copyOf(this.appliedPlayers);
     }
-
-    private final FlyCheckHandler flyCheckHandler;
 
     @Override
     public @NotNull NamespacedKey getIdentifier()
@@ -56,7 +52,6 @@ public class FlyAbility extends MorphAbility<FlyOption>
     {
         if (super.applyToPlayer(player, state))
         {
-            flyCheckHandler.setLastLegalLocation(player, player.getLocation(), false);
             return updateFlyingAbility(state);
         }
         else
@@ -133,13 +128,6 @@ public class FlyAbility extends MorphAbility<FlyOption>
         var movementMultiplier = (float)movementDelta / movementBase; //(5.1f * config.getFlyingSpeed());
 
         return (float)exhaustionScaled * movementMultiplier;
-    }
-
-    @EventHandler
-    public void onToggleFlight(PlayerToggleFlightEvent e)
-    {
-        if (e.isFlying())
-            flyCheckHandler.setLastLegalLocation(e.getPlayer(), e.getPlayer().getLocation(), true);
     }
 
     @Override
@@ -230,26 +218,4 @@ public class FlyAbility extends MorphAbility<FlyOption>
             this.appliedPlayers.remove(player);
         }
     }
-
-    //region Basic Anti Cheat
-
-    @EventHandler(ignoreCancelled = true)
-    private void onTeleport(PlayerTeleportEvent e)
-    {
-        if (!appliedPlayers.contains(e.getPlayer())) return;
-
-        flyCheckHandler.setLastLegalLocation(e.getPlayer(), e.getTo(), true);
-    }
-
-    @EventHandler(ignoreCancelled = true)
-    private void onPlayerMove(PlayerMoveEvent e)
-    {
-        var player = e.getPlayer();
-        if (!player.isFlying()) return;
-        if (!appliedPlayers.contains(player)) return;
-
-        flyCheckHandler.doCheck(e);
-    }
-
-    //endregion
 }
