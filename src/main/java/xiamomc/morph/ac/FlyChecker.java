@@ -102,6 +102,9 @@ public class FlyChecker extends MorphPluginObject
         public boolean isSprinting = false;
         public boolean wasSprinting = false;
 
+        public boolean isUsingRiptide = false;
+        public boolean wasUsingRiptide = false;
+
         public long lastTrigger = 0L;
 
         /**
@@ -143,6 +146,8 @@ public class FlyChecker extends MorphPluginObject
         }
 
         public final Recorder<Double> flyMult = new Recorder<>(0d);
+
+        public final Recorder<Double> riptideMult = new Recorder<>(0d);
 
         public boolean recorderNotFinal()
         {
@@ -223,19 +228,15 @@ public class FlyChecker extends MorphPluginObject
         // 将乘数乘以飞行倍率
         maxMovement *= (1 + meta.flyMult.get() + (playerSprinting && hasHorizonal && hasVertical ? -0.25 : 0));
 
-        if (player.isRiptiding())
-        {
-            //workaround: After riptide there is a process to slow down.
-            //edit: Changed to 9.4 and <3 Mojang for not making f**king anti-cheat for their game.
-            maxMovement *= 9.4;
-        }
+        // 激流
+        var riptiding = player.isRiptiding();
+        meta.wasUsingRiptide = meta.isUsingRiptide;
+        meta.isUsingRiptide = riptiding;
 
-        // 如果玩家任意vector不等于0，那么隔5tick再检查
-        //if (MathUtils.vectorNotZero(player.getVelocity()))
-        //{
-        //meta.ignoreNext = Math.max(meta.ignoreNext, 5);
-        //return;
-        //}
+        if (meta.wasUsingRiptide != meta.isUsingRiptide)
+            Transformer.transform(meta.riptideMult, riptiding ? 9.4d : 0d, (riptiding ? 0 : 55) * 50L, Easing.Plain);
+
+        maxMovement *= Math.max(1, meta.flyMult.get());
 
         // 获取配置的飞行速度
         var spd = bindingFlyAbility.getTargetFlySpeed(manager.getDisguiseStateFor(player).getDisguiseIdentifier());

@@ -19,6 +19,7 @@ import xiamomc.morph.ac.FramedFlyChecker;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.misc.DisguiseState;
+import xiamomc.morph.misc.NmsRecord;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
@@ -228,20 +229,21 @@ public class FlyAbility extends MorphAbility<FlyOption>
 
     private final Bindable<Boolean> checkSpeeding = new Bindable<>(false);
 
-    private void updateLastLegal(PlayerEvent e, boolean ignoreNext)
+    private void updateLastLegal(PlayerEvent e)
     {
         var player = e.getPlayer();
         if (!this.appliedPlayers.contains(player)) return;
 
-        flyChecker.setLastLegalLocation(player, player.getLocation(), ignoreNext);
+        flyChecker.setLastLegalLocation(player, player.getLocation(), false);
     }
 
     @EventHandler
     public void onToggleFly(PlayerToggleFlightEvent e)
     {
         if (!checkSpeeding.get()) return;
+        if (!e.isFlying()) return;
 
-        updateLastLegal(e, true);
+        updateLastLegal(e);
     }
 
     public boolean ignoreNextTeleport;
@@ -257,7 +259,7 @@ public class FlyAbility extends MorphAbility<FlyOption>
             return;
         }
 
-        updateLastLegal(e, false);
+        updateLastLegal(e);
     }
 
     @EventHandler
@@ -266,6 +268,7 @@ public class FlyAbility extends MorphAbility<FlyOption>
         if (!checkSpeeding.get()) return;
 
         var player = e.getPlayer();
+        if (!NmsRecord.ofPlayer(player).gameMode.isSurvival()) return;
         if (!this.appliedPlayers.contains(player)) return;
         if (!e.getPlayer().isFlying()) return;
 

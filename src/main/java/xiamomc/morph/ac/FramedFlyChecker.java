@@ -12,7 +12,6 @@ import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.transforms.Recorder;
-import xiamomc.morph.transforms.TransformUtils;
 import xiamomc.morph.transforms.Transformer;
 import xiamomc.morph.transforms.easings.Easing;
 import xiamomc.pluginbase.Annotations.Initializer;
@@ -61,10 +60,6 @@ public class FramedFlyChecker extends MorphPluginObject
             var susVL = meta.suspectVL;
             meta.suspectVL = Math.max(0, susVL - 0.1d);
 
-            // 设置疾跑属性
-            meta.wasSprinting = meta.isSprinting;
-            meta.isSprinting = player.isSprinting();
-
             //暂时禁用
             if (movementCheckTick >= movementCheckInterval.get())
             {
@@ -81,7 +76,7 @@ public class FramedFlyChecker extends MorphPluginObject
                     if (f.hasHorz) moveMult += 5.4406;
                     if (f.hasVert) moveMult += f.hasHorz ? 1.1704 : 3.75;
 
-                    moveMult *= (1 + f.flyMult);
+                    moveMult *= (1 + f.speedMult);
 
                     maxMovement += (f.flySpeed * moveMult) + 0.015;
                     meta.distanceTravelled += f.distance;
@@ -91,7 +86,7 @@ public class FramedFlyChecker extends MorphPluginObject
                         var debugLine = "帧#%s: 本次 %.5f 已过 %.5f  阈值 %.5f 差异 %.5f 疾跑倍率 %s"
                                 .formatted(meta.frames.indexOf(f), f.distance, meta.distanceTravelled,
                                         maxMovement,
-                                        meta.distanceTravelled - maxMovement, f.flyMult);
+                                        meta.distanceTravelled - maxMovement, f.speedMult);
 
                         if (meta.distanceTravelled - maxMovement > 0.015)
                             logger.warn(debugLine);
@@ -144,20 +139,20 @@ public class FramedFlyChecker extends MorphPluginObject
         public final boolean isSprint;
         public final double distance;
 
-        public final double flyMult;
+        public final double speedMult;
 
         public final double flySpeed;
 
         public final long timestamp;
 
-        public PlayerFrame(boolean hasHorz, boolean hasVert, boolean isSprint, double distance, double flySpeed, double flyMult, long timestamp)
+        public PlayerFrame(boolean hasHorz, boolean hasVert, boolean isSprint, double distance, double flySpeed, double speedMult, long timestamp)
         {
             this.hasHorz = hasHorz;
             this.hasVert = hasVert;
             this.isSprint = isSprint;
             this.distance = distance;
 
-            this.flyMult = flyMult;
+            this.speedMult = speedMult;
             this.flySpeed = flySpeed;
 
             this.timestamp = timestamp;
@@ -194,6 +189,9 @@ public class FramedFlyChecker extends MorphPluginObject
         public boolean isSprinting = false;
         public boolean wasSprinting = false;
 
+        public boolean isUsingRiptide = false;
+        public boolean wasUsingRiptide = false;
+
         /**
          * 玩家上次移动的时间
          */
@@ -216,6 +214,7 @@ public class FramedFlyChecker extends MorphPluginObject
         public Location lastLegalLocation;
 
         public final Recorder<Double> flyMult = new Recorder<>(0d);
+        public final Recorder<Double> riptideMult = new Recorder<>(0d);
     }
 
     @Resolved(shouldSolveImmediately = true)
@@ -268,19 +267,24 @@ public class FramedFlyChecker extends MorphPluginObject
         var playerSprinting = player.isSprinting();
 
         // 设置meta中的疾行属性
+        meta.wasSprinting = meta.isSprinting;
         meta.isSprinting = playerSprinting;
 
         // 根据疾行调整预期速度的倍率
         if (meta.isSprinting != meta.wasSprinting)
-        {
-            //logger.info("Do change transform");
             Transformer.transform(meta.flyMult, playerSprinting ? 1d : 0d, (playerSprinting ? 5 : 55) * 50L, Easing.Plain);
-        }
+
+        var riptiding = player.isRiptiding();
+        meta.wasUsingRiptide = meta.isUsingRiptide;
+        meta.isUsingRiptide = riptiding;
+
+        if (meta.wasUsingRiptide != meta.isUsingRiptide)
+            Transformer.transform(meta.riptideMult, riptiding ? 3d : 0d, (riptiding ? 0 : 55) * 50L, Easing.Plain);
 
         var spd = bindingFlyAbility.getTargetFlySpeed(manager.getDisguiseStateFor(player).getDisguiseIdentifier());
 
         // 写入Frame
-        var frame = new PlayerFrame(hasHorizonal, hasVertical, player.isSprinting(), distanceDelta, spd, meta.flyMult.get(), System.currentTimeMillis());
+        var frame = new PlayerFrame(hasHorizonal, hasVertical, player.isSprinting(), distanceDelta, spd, meta.flyMult.get() + meta.riptideMult.get(), System.currentTimeMillis());
         meta.frames.add(frame);
     }
 }
