@@ -80,6 +80,9 @@ public enum ConfigOption
     @Deprecated
     DEBUG_OUTPUT(ConfigNode.create().append("debug_output"), false, true),
 
+    @Deprecated
+    DO_SPEEDING_CHECK(ConfigNode.create().append("do_speeding_check"), true, true),
+
     REVEALING(ConfigNode.create().append("revealing"), true),
 
     VERSION(ConfigNode.create().append("version"), 0);

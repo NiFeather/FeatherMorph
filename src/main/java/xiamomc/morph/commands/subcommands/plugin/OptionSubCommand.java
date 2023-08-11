@@ -56,6 +56,7 @@ public class OptionSubCommand extends MorphPluginObject implements ISubCommand
         subCommands.add(getToggle("mirror_log_operations", ConfigOption.MIRROR_LOG_OPERATION, "mirror.log_operations"));
         subCommands.add(getInteger("mirror_log_cleanup", ConfigOption.MIRROR_LOG_CLEANUP_DATE, "mirror.log_operations"));
         subCommands.add(getToggle("debug_output", ConfigOption.DEBUG_OUTPUT, "debug_output"));
+        subCommands.add(getToggle("debug_speeding", ConfigOption.DO_SPEEDING_CHECK, "do_speeding_check"));
         subCommands.add(getToggle("revealing", ConfigOption.REVEALING, "revealing"));
     }
 
