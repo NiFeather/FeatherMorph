@@ -57,6 +57,9 @@ public class OptionSubCommand extends MorphPluginObject implements ISubCommand
         subCommands.add(getInteger("mirror_log_cleanup", ConfigOption.MIRROR_LOG_CLEANUP_DATE, "mirror.log_operations"));
         subCommands.add(getToggle("debug_output", ConfigOption.DEBUG_OUTPUT, "debug_output"));
         subCommands.add(getToggle("revealing", ConfigOption.REVEALING, "revealing"));
+
+        subCommands.add(getToggle("check_update", ConfigOption.CHECK_UPDATE, "check_update"));
+        subCommands.add(getToggle("allow_acquire_morphs", ConfigOption.ALLOW_ACQUIRE_MORPHS, "allow_acquire_morphs"));
     }
 
     private ISubCommand getDouble(String name, ConfigOption option, String perm, @Nullable FormattableMessage displayName)
