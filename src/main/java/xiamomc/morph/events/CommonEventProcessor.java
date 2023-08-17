@@ -152,12 +152,15 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
 
     private final Bindable<Boolean> doRevealing = new Bindable<>(true);
 
+    private final Bindable<Boolean> allowAcquireMorphs = new Bindable<>(false);
+
     @Initializer
     private void load()
     {
         config.bind(cooldownOnDamage, ConfigOption.SKILL_COOLDOWN_ON_DAMAGE);
         config.bind(bruteIgnoreDisguises, ConfigOption.PIGLIN_BRUTE_IGNORE_DISGUISES);
         config.bind(doRevealing, ConfigOption.REVEALING);
+        config.bind(allowAcquireMorphs, ConfigOption.ALLOW_ACQUIRE_MORPHS);
 
         unMorphOnDeath = config.getBindable(Boolean.class, ConfigOption.UNMORPH_ON_DEATH);
         this.addSchedule(this::update);
@@ -588,6 +591,9 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
     private void onPlayerKillEntity(Player player, Entity entity)
     {
         if (!(entity instanceof LivingEntity) && !(entity.getType() == EntityType.ARMOR_STAND))
+            return;
+
+        if (!allowAcquireMorphs.get())
             return;
 
         if (entity instanceof Player targetPlayer)

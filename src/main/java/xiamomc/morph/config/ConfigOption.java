@@ -84,6 +84,8 @@ public enum ConfigOption
 
     CHECK_UPDATE(ConfigNode.create().append("check_update"), true),
 
+    ALLOW_ACQUIRE_MORPHS(ConfigNode.create().append("allow_acquire_morphs"), true),
+
     VERSION(ConfigNode.create().append("version"), 0);
 
     public final ConfigNode node;

@@ -123,6 +123,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         bannedDisguises = config.getBindableList(ConfigOption.BANNED_DISGUISES);
         config.bind(allowHeadMorph, ConfigOption.ALLOW_HEAD_MORPH);
+        config.bind(allowAcquireMorph, ConfigOption.ALLOW_ACQUIRE_MORPHS);
 
         registerProviders(ObjectList.of(
                 new VanillaDisguiseProvider(),
@@ -307,7 +308,9 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
     //endregion
 
-    private final Bindable<Boolean> allowHeadMorph = new Bindable<>();
+    private final Bindable<Boolean> allowHeadMorph = new Bindable<>(true);
+
+    private final Bindable<Boolean> allowAcquireMorph = new Bindable<>(true);
 
     private final Map<UUID, PlayerTextures> uuidPlayerTexturesMap = new ConcurrentHashMap<>();
 

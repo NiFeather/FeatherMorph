@@ -7,6 +7,9 @@ root:
   # Should we check updates automatically?
   check_update: true
 
+  # Allow players acquire morphs by killing mobs and other players?
+  allow_acquire_morphs: true
+
   # ChatOverride options
   chatOverride:
     # Enable ChatOverride?
