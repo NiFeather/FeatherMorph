@@ -1201,7 +1201,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     }
 
     @Override
-    public PlayerMorphConfiguration getPlayerConfiguration(Player player)
+    public PlayerMorphConfiguration getPlayerConfiguration(OfflinePlayer player)
     {
         return data.getPlayerConfiguration(player);
     }
