@@ -59,6 +59,8 @@ dependencies {
         project.property("protocols_local_version")
         else project.property("protocols_version");
 
+    implementation("org.apache.httpcomponents.client5:httpclient5:5.2.1")
+
     implementation("com.github.XiaMoZhiShi:feathermorph-protocols:${protocolVersion}")
     implementation("com.github.XiaMoZhiShi:PluginBase:${project.property("pluginbase_version")}")
     {

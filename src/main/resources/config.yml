@@ -4,6 +4,9 @@ root:
   # The message pattern used for this plugin to display messages for players
   message_pattern: <color:#dddddd>≡ FM » <message>
 
+  # Should we check updates automatically?
+  check_update: true
+
   # ChatOverride options
   chatOverride:
     # Enable ChatOverride?

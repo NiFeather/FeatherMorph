@@ -82,6 +82,8 @@ public enum ConfigOption
 
     REVEALING(ConfigNode.create().append("revealing"), true),
 
+    CHECK_UPDATE(ConfigNode.create().append("check_update"), true),
+
     VERSION(ConfigNode.create().append("version"), 0);
 
     public final ConfigNode node;
