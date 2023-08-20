@@ -80,6 +80,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
     public static final String disguiseFallbackName = "@default";
 
+    public static final String forcedDisguiseNoneId = "@none";
+
     private DisguiseBackend<?, ?> currentBackend = new NilBackend();
 
     public DisguiseBackend<?, ?> getCurrentBackend()

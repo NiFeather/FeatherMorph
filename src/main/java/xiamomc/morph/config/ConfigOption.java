@@ -1,5 +1,6 @@
 package xiamomc.morph.config;
 
+import xiamomc.morph.MorphManager;
 import xiamomc.morph.events.InteractionMirrorProcessor;
 import xiamomc.morph.utilities.NbtUtils;
 import xiamomc.pluginbase.Configuration.ConfigNode;
@@ -85,6 +86,8 @@ public enum ConfigOption
     CHECK_UPDATE(ConfigNode.create().append("check_update"), true),
 
     ALLOW_ACQUIRE_MORPHS(ConfigNode.create().append("allow_acquire_morphs"), true),
+
+    FORCED_DISGUISE(ConfigNode.create().append("forced_disguise"), MorphManager.forcedDisguiseNoneId),
 
     VERSION(ConfigNode.create().append("version"), 0);
 

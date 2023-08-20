@@ -11,10 +11,7 @@ import org.jetbrains.annotations.ApiStatus;
 import xiamomc.morph.abilities.AbilityHandler;
 import xiamomc.morph.commands.MorphCommandManager;
 import xiamomc.morph.config.MorphConfigManager;
-import xiamomc.morph.events.CommonEventProcessor;
-import xiamomc.morph.events.InteractionMirrorProcessor;
-import xiamomc.morph.events.PlayerTracker;
-import xiamomc.morph.events.RevealingEventProcessor;
+import xiamomc.morph.events.*;
 import xiamomc.morph.interfaces.IManagePlayerData;
 import xiamomc.morph.interfaces.IManageRequests;
 import xiamomc.morph.messages.MessageUtils;
@@ -151,7 +148,8 @@ public final class MorphPlugin extends XiaMoJavaPlugin
                             playerTracker,
                             mirrorProcessor,
                             new CommonEventProcessor(),
-                            new RevealingEventProcessor()
+                            new RevealingEventProcessor(),
+                            new ForcedDisguiseProcessor()
                     });
 
             clientHandler.sendReAuth(Bukkit.getOnlinePlayers());

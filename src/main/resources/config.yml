@@ -10,6 +10,10 @@ root:
   # Allow players acquire morphs by killing mobs and other players?
   allow_acquire_morphs: true
 
+  # Disguise as the id given below when they join the server.
+  # If an invalid ID is provided, this option may not take place.
+  forced_disguise: @none
+
   # ChatOverride options
   chatOverride:
     # Enable ChatOverride?
