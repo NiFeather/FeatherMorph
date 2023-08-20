@@ -10,7 +10,6 @@ import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.events.api.gameplay.PlayerUnMorphEvent;
-import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
 
@@ -18,7 +17,7 @@ public class ForcedDisguiseProcessor extends MorphPluginObject implements Listen
 {
     public ForcedDisguiseProcessor()
     {
-        dddd.onValueChanged((o, n) ->
+        forcedId.onValueChanged((o, n) ->
         {
             doForcedDisguise.set(!n.equals(MorphManager.forcedDisguiseNoneId));
 
@@ -26,14 +25,14 @@ public class ForcedDisguiseProcessor extends MorphPluginObject implements Listen
             {
                 logger.info("Config changed, re-disguising players...");
                 var players = Bukkit.getOnlinePlayers();
-                players.forEach(this::doDisguise);
+                players.forEach(p -> this.doDisguise(p, n));
             }
         }, true);
 
-        config.bind(dddd, ConfigOption.FORCED_DISGUISE);
+        config.bind(forcedId, ConfigOption.FORCED_DISGUISE);
     }
 
-    private final Bindable<String> dddd = new Bindable<>(MorphManager.forcedDisguiseNoneId);
+    private final Bindable<String> forcedId = new Bindable<>(MorphManager.forcedDisguiseNoneId);
 
     private final Bindable<Boolean> doForcedDisguise = new Bindable<>(false);
 
@@ -47,12 +46,11 @@ public class ForcedDisguiseProcessor extends MorphPluginObject implements Listen
     public void onJoin(PlayerJoinEvent e)
     {
         if (doForcedDisguise.get())
-            doDisguise(e.getPlayer());
+            doDisguise(e.getPlayer(), forcedId.get());
     }
 
-    private void doDisguise(Player player)
+    private void doDisguise(Player player, String targetId)
     {
-        var targetId = dddd.get();
         logger.info("Trying to disguise %s as %s".formatted(player.getName(), targetId));
 
         var success = manager.morph(Bukkit.getConsoleSender(), player, targetId,
@@ -71,7 +69,7 @@ public class ForcedDisguiseProcessor extends MorphPluginObject implements Listen
             var player = e.getPlayer();
 
             logger.info("%s undisguised themselves, re-disguising...".formatted(player.getName()));
-            doDisguise(player);
+            doDisguise(player, forcedId.get());
         }
     }
 }
