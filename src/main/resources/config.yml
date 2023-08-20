@@ -12,7 +12,7 @@ root:
 
   # Disguise as the id given below when they join the server.
   # If an invalid ID is provided, this option may not take place.
-  forced_disguise: @none
+  forced_disguise: "@none"
 
   # ChatOverride options
   chatOverride:
