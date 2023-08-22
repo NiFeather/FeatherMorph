@@ -22,14 +22,13 @@ import xiamomc.morph.backends.fallback.NilBackend;
 import xiamomc.morph.backends.libsdisg.LibsBackend;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
+import xiamomc.morph.events.api.gameplay.PlayerMorphEarlyEvent;
 import xiamomc.morph.events.api.gameplay.PlayerMorphEvent;
+import xiamomc.morph.events.api.gameplay.PlayerUnMorphEarlyEvent;
 import xiamomc.morph.events.api.gameplay.PlayerUnMorphEvent;
 import xiamomc.morph.events.api.lifecycle.ManagerFinishedInitializeEvent;
 import xiamomc.morph.interfaces.IManagePlayerData;
-import xiamomc.morph.messages.CommandStrings;
-import xiamomc.morph.messages.HintStrings;
-import xiamomc.morph.messages.MessageUtils;
-import xiamomc.morph.messages.MorphStrings;
+import xiamomc.morph.messages.*;
 import xiamomc.morph.messages.vanilla.VanillaMessageStore;
 import xiamomc.morph.misc.*;
 import xiamomc.morph.misc.permissions.CommonPermissions;
@@ -392,9 +391,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                     }
 
                     //否则，更新或应用伪装
-                    morph(player, player, DisguiseTypes.PLAYER.toId(profile.getName()), targetEntity);
-
-                    uuidPlayerTexturesMap.put(playerUniqueId, profileTexture);
+                    if (morph(player, player, DisguiseTypes.PLAYER.toId(profile.getName()), targetEntity))
+                        uuidPlayerTexturesMap.put(playerUniqueId, profileTexture);
                 }
             }
 
@@ -571,6 +569,14 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                         source.sendMessage(MessageUtils.prefixes(source, MorphStrings.errorWhileDisguising()));
                         logger.error("Unable to apply disguise for player with provider " + provider);
                     }
+                    return false;
+                }
+
+                // 调用早期事件
+                var earlyEventPassed = new PlayerMorphEarlyEvent(player, currentState, key).callEvent();
+                if (!earlyEventPassed)
+                {
+                    source.sendMessage(MessageUtils.prefixes(source, MorphStrings.operationCancelledString()));
                     return false;
                 }
 
@@ -774,6 +780,15 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         if (state == null)
             return;
 
+        // 调用早期事件
+        var earlyEventPassed = new PlayerUnMorphEarlyEvent(player, state).callEvent();
+        if (!earlyEventPassed)
+        {
+            source.sendMessage(MessageUtils.prefixes(source, MorphStrings.operationCancelledString()));
+
+            return;
+        }
+
         // 后端的取消操作在Provider里，因此调用Provider的unMorph()
         state.getProvider().unMorph(player, state);
 
@@ -958,7 +973,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         skillHandler.switchCooldown(player.getUniqueId(), cdInfo);
 
         // 调用事件
-        Bukkit.getPluginManager().callEvent(new PlayerMorphEvent(player, state));
+        new PlayerMorphEvent(player, state).callEvent();
 
         return state;
     }

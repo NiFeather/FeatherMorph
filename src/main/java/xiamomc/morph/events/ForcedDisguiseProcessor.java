@@ -9,14 +9,21 @@ import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
+import xiamomc.morph.events.api.gameplay.PlayerMorphEarlyEvent;
+import xiamomc.morph.events.api.gameplay.PlayerMorphEvent;
+import xiamomc.morph.events.api.gameplay.PlayerUnMorphEarlyEvent;
 import xiamomc.morph.events.api.gameplay.PlayerUnMorphEvent;
+import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
 
 public class ForcedDisguiseProcessor extends MorphPluginObject implements Listener
 {
-    public ForcedDisguiseProcessor()
+    @Initializer
+    private void load()
     {
+        config.bind(forcedId, ConfigOption.FORCED_DISGUISE);
+
         forcedId.onValueChanged((o, n) ->
         {
             doForcedDisguise.set(!n.equals(MorphManager.forcedDisguiseNoneId));
@@ -28,8 +35,6 @@ public class ForcedDisguiseProcessor extends MorphPluginObject implements Listen
                 players.forEach(p -> this.doDisguise(p, n));
             }
         }, true);
-
-        config.bind(forcedId, ConfigOption.FORCED_DISGUISE);
     }
 
     private final Bindable<String> forcedId = new Bindable<>(MorphManager.forcedDisguiseNoneId);
@@ -62,14 +67,25 @@ public class ForcedDisguiseProcessor extends MorphPluginObject implements Listen
     }
 
     @EventHandler
-    public void onUnmorph(PlayerUnMorphEvent e)
+    public void onUnmorph(PlayerUnMorphEarlyEvent e)
     {
-        if (doForcedDisguise.get())
-        {
-            var player = e.getPlayer();
+        if (!doForcedDisguise.get()) return;
 
-            logger.info("%s undisguised themselves, re-disguising...".formatted(player.getName()));
-            doDisguise(player, forcedId.get());
-        }
+        e.setCancelled(true);
+        //var player = e.getPlayer();
+
+        //logger.info("%s undisguised themselves, re-disguising...".formatted(player.getName()));
+        //doDisguise(player, forcedId.get());
+    }
+
+    @EventHandler
+    public void onMorph(PlayerMorphEarlyEvent e)
+    {
+        if (!doForcedDisguise.get()) return;
+
+        var id = e.getTargetId();
+        if (id.equals(forcedId.get())) return;
+
+        e.setCancelled(true);
     }
 }
