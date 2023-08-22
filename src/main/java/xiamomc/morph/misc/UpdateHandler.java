@@ -54,8 +54,8 @@ public class UpdateHandler extends MorphPluginObject
 
     private void update()
     {
-        // 每半小时检查一次更新
-        this.addSchedule(this::update, 30 * 60 * 20);
+        // 每三小时检查一次更新
+        this.addSchedule(this::update, 3 * 60 * 60 * 20);
 
         if (checkUpdate.get())
             this.checkUpdate(true);
