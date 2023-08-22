@@ -301,5 +301,7 @@ public class DefaultConfigGenerator
         });
 
         addAbilityConfiguration(skills, EntityTypeUtils.spider(), AbilityType.SPIDER);
+
+        addAbilityConfiguration(skills, EntityType.TURTLE, AbilityType.CAN_BREATHE_UNDER_WATER);
     }
 }
