@@ -263,6 +263,27 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
 
     //region wait until ready
 
+    public void waitUntilConnected(Player player, Runnable r)
+    {
+        var bool = playerConnectionStates.getOrDefault(player, null);
+
+        if (bool == null)
+        {
+            //logger.info("should remove for " + player.getName());
+            return;
+        }
+
+        if (bool == InitializeState.DONE)
+        {
+            r.run();
+        }
+        else
+        {
+            //logger.info(player.getName() + " not ready! " + bool);
+            this.addSchedule(() -> waitUntilConnected(player, r));
+        }
+    }
+
     @ApiStatus.Internal
     public void waitUntilReady(Player player, Runnable r)
     {

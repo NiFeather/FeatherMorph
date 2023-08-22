@@ -33,7 +33,9 @@ import xiamomc.morph.messages.MorphStrings;
 import xiamomc.morph.messages.SkillStrings;
 import xiamomc.morph.messages.vanilla.VanillaMessageStore;
 import xiamomc.morph.misc.DisguiseTypes;
+import xiamomc.morph.misc.permissions.CommonPermissions;
 import xiamomc.morph.network.commands.S2C.S2CSwapCommand;
+import xiamomc.morph.network.commands.S2C.map.S2CMapRemoveCommand;
 import xiamomc.morph.network.server.MorphClientHandler;
 import xiamomc.morph.network.server.ServerSetEquipCommand;
 import xiamomc.morph.skills.MorphSkillHandler;
@@ -385,6 +387,15 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
                 }, 20 * 3);
         }
 
+        this.addSchedule(() ->
+        {
+            if (player.hasPermission(CommonPermissions.DISGUISE_REVEALING))
+            {
+                clientHandler.waitUntilConnected(player, () ->
+                        clientHandler.sendCommand(player, morphs.genMapCommand()));
+            }
+        }, 4);
+
         if (state != null)
         {
             //重新进入后player和info.player不属于同一个实例，需要重新disguise
@@ -456,14 +467,22 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         skillHandler.removeUnusedList(e.getPlayer());
 
         var state = morphs.getDisguiseStateFor(e.getPlayer());
+        var players = Bukkit.getOnlinePlayers();
 
         if (state != null)
         {
             var bossbar = state.getBossbar();
 
             if (bossbar != null)
-                Bukkit.getOnlinePlayers().forEach(p -> p.hideBossBar(bossbar));
+                players.forEach(p -> p.hideBossBar(bossbar));
         }
+
+        var targets = players.stream()
+                .filter(p -> p.hasPermission(CommonPermissions.DISGUISE_REVEALING))
+                .toList();
+
+        var cmd = new S2CMapRemoveCommand(e.getPlayer().getEntityId());
+        targets.forEach(p -> clientHandler.sendCommand(p, cmd));
     }
 
     @EventHandler

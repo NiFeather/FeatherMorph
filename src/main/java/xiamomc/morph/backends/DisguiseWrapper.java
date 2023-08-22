@@ -19,6 +19,8 @@ import xiamomc.morph.misc.CollisionBoxRecord;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.utilities.EntityTypeUtils;
 
+import java.util.UUID;
+
 /**
  * A wrapper that holds the underlying disguise instance
  * @param <T> Type of the disguise instance
@@ -275,6 +277,12 @@ public abstract class DisguiseWrapper<T>
      * Returns a copy of the existing compound.
      */
     public abstract CompoundTag getCompound();
+
+    /**
+     * Gets network id of this disguise displayed to other players
+     * @return The network id of this disguise
+     */
+    public abstract int getNetworkEntityId();
 
     /**
      * Dispose this wrapper

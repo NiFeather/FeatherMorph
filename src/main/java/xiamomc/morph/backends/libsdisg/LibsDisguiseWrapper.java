@@ -36,6 +36,7 @@ import xiamomc.pluginbase.Managers.DependencyManager;
 import xiamomc.pluginbase.Utilities.ColorUtils;
 
 import java.util.Random;
+import java.util.UUID;
 import java.util.function.BiConsumer;
 
 public class LibsDisguiseWrapper extends DisguiseWrapper<Disguise>
@@ -513,6 +514,17 @@ public class LibsDisguiseWrapper extends DisguiseWrapper<Disguise>
         this.mixedTag = compoundTag;
 
         return compoundTag.copy();
+    }
+
+    /**
+     * Gets network id of this disguise displayed to other players
+     *
+     * @return The network id of this disguise
+     */
+    @Override
+    public int getNetworkEntityId()
+    {
+        return nmsPlayer.getId();
     }
 
     @Nullable

@@ -32,6 +32,9 @@ import xiamomc.morph.messages.*;
 import xiamomc.morph.messages.vanilla.VanillaMessageStore;
 import xiamomc.morph.misc.*;
 import xiamomc.morph.misc.permissions.CommonPermissions;
+import xiamomc.morph.network.commands.S2C.map.S2CMapCommand;
+import xiamomc.morph.network.commands.S2C.map.S2CMapRemoveCommand;
+import xiamomc.morph.network.commands.S2C.map.S2CPartialMapCommand;
 import xiamomc.morph.network.commands.S2C.set.*;
 import xiamomc.morph.network.server.MorphClientHandler;
 import xiamomc.morph.providers.DisguiseProvider;
@@ -52,6 +55,7 @@ import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
 import xiamomc.pluginbase.Bindables.BindableList;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -640,6 +644,14 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
             source.sendMessage(MessageUtils.prefixes(source, msg));
 
+            // 创建映射
+            var cmd = genPartialMapCommand(outComingState);
+            var target = Bukkit.getOnlinePlayers().stream()
+                    .filter(p -> p.hasPermission(CommonPermissions.DISGUISE_REVEALING))
+                    .toList();
+
+            target.forEach(p -> clientHandler.sendCommand(p, cmd));
+
             return true;
         }
         catch (IllegalArgumentException iae)
@@ -664,6 +676,45 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             unMorph(player);
             return false;
         }
+    }
+
+    public S2CMapCommand genMapCommand()
+    {
+        var map = new HashMap<Integer, String>();
+        for (DisguiseState disguiseState : this.disguiseStates)
+        {
+            var player = disguiseState.getPlayer();
+            map.put(player.getEntityId(), player.getName());
+        }
+
+        var cmd = new S2CMapCommand(map);
+        return cmd;
+    }
+
+    public S2CPartialMapCommand genMapAsPartialCommand()
+    {
+        var map = new HashMap<Integer, String>();
+        for (DisguiseState disguiseState : this.disguiseStates)
+        {
+            var player = disguiseState.getPlayer();
+            map.put(player.getEntityId(), player.getName());
+        }
+
+        var cmd = new S2CPartialMapCommand(map);
+        return cmd;
+    }
+
+    public S2CPartialMapCommand genPartialMapCommand(DisguiseState... diff)
+    {
+        var map = new HashMap<Integer, String>();
+        for (DisguiseState disguiseState : diff)
+        {
+            var player = disguiseState.getPlayer();
+            map.put(player.getEntityId(), player.getName());
+        }
+
+        var cmd = new S2CPartialMapCommand(map);
+        return cmd;
     }
 
     /**
@@ -822,7 +873,14 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         source.sendMessage(MessageUtils.prefixes(player, MorphStrings.unMorphSuccessString().withLocale(MessageUtils.getLocale(player))));
         player.sendActionBar(Component.empty());
 
-        Bukkit.getPluginManager().callEvent(new PlayerUnMorphEvent(player));
+        new PlayerUnMorphEvent(player).callEvent();
+
+        var target = Bukkit.getOnlinePlayers().stream()
+                .filter(p -> p.hasPermission(CommonPermissions.DISGUISE_REVEALING))
+                .toList();
+
+        var cmd = new S2CMapRemoveCommand(player.getEntityId());
+        target.forEach(p -> clientHandler.sendCommand(p, cmd));
     }
 
     @Resolved
