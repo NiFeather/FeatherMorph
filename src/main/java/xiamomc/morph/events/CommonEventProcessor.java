@@ -387,15 +387,6 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
                 }, 20 * 3);
         }
 
-        this.addSchedule(() ->
-        {
-            if (player.hasPermission(CommonPermissions.DISGUISE_REVEALING))
-            {
-                clientHandler.waitUntilConnected(player, () ->
-                        this.addSchedule(() -> clientHandler.sendCommand(player, morphs.genMapCommand()), 2));
-            }
-        }, 3);
-
         if (state != null)
         {
             //重新进入后player和info.player不属于同一个实例，需要重新disguise
