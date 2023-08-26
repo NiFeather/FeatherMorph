@@ -371,11 +371,12 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
             if (!(targetEntity instanceof Player targetPlayer))
                 return new PlayerInfo(null, targetName);
 
-            if (targetPlayer.getName().equals(targetName))
+            var state = manager.getDisguiseStateFor(targetPlayer);
+
+            if (state != null && state.getDisguiseIdentifier().equals("player:" + targetName))
                 return new PlayerInfo(targetPlayer, targetName);
 
-            var state = manager.getDisguiseStateFor(targetPlayer);
-            if (state != null && state.getDisguiseIdentifier().equals("player:" + targetName))
+            if (targetPlayer.getName().equals(targetName) && state == null)
                 return new PlayerInfo(targetPlayer, targetName);
 
             return new PlayerInfo(null, targetName);
