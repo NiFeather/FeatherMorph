@@ -420,8 +420,10 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
 
             state.refreshSkills();
 
+            morphs.sendCommandToRevealablePlayers(morphs.genPartialMapCommand(state));
+
             //调用Morph事件
-            Bukkit.getPluginManager().callEvent(new PlayerJoinedWithDisguiseEvent(player, state));
+            new PlayerJoinedWithDisguiseEvent(player, state).callEvent();
 
             return;
         }

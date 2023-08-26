@@ -32,6 +32,7 @@ import xiamomc.morph.messages.*;
 import xiamomc.morph.messages.vanilla.VanillaMessageStore;
 import xiamomc.morph.misc.*;
 import xiamomc.morph.misc.permissions.CommonPermissions;
+import xiamomc.morph.network.commands.S2C.AbstractS2CCommand;
 import xiamomc.morph.network.commands.S2C.map.S2CMapCommand;
 import xiamomc.morph.network.commands.S2C.map.S2CMapRemoveCommand;
 import xiamomc.morph.network.commands.S2C.map.S2CPartialMapCommand;
@@ -644,13 +645,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
             source.sendMessage(MessageUtils.prefixes(source, msg));
 
-            // 创建映射
-            var cmd = genPartialMapCommand(outComingState);
-            var target = Bukkit.getOnlinePlayers().stream()
-                    .filter(p -> p.hasPermission(CommonPermissions.DISGUISE_REVEALING))
-                    .toList();
-
-            target.forEach(p -> clientHandler.sendCommand(p, cmd));
+            // 向管理员发送map消息
+            sendCommandToRevealablePlayers(genPartialMapCommand(outComingState));
 
             return true;
         }
@@ -678,6 +674,16 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         }
     }
 
+    public void sendCommandToRevealablePlayers(AbstractS2CCommand<?> cmd)
+    {
+        var target = Bukkit.getOnlinePlayers().stream()
+                .filter(p -> p.hasPermission(CommonPermissions.DISGUISE_REVEALING))
+                .toList();
+
+        target.forEach(p -> clientHandler.sendCommand(p, cmd));
+
+    }
+
     public S2CMapCommand genMapCommand()
     {
         var map = new HashMap<Integer, String>();
@@ -688,19 +694,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         }
 
         var cmd = new S2CMapCommand(map);
-        return cmd;
-    }
-
-    public S2CPartialMapCommand genMapAsPartialCommand()
-    {
-        var map = new HashMap<Integer, String>();
-        for (DisguiseState disguiseState : this.disguiseStates)
-        {
-            var player = disguiseState.getPlayer();
-            map.put(player.getEntityId(), player.getName());
-        }
-
-        var cmd = new S2CPartialMapCommand(map);
         return cmd;
     }
 
@@ -875,12 +868,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         new PlayerUnMorphEvent(player).callEvent();
 
-        var target = Bukkit.getOnlinePlayers().stream()
-                .filter(p -> p.hasPermission(CommonPermissions.DISGUISE_REVEALING))
-                .toList();
-
-        var cmd = new S2CMapRemoveCommand(player.getEntityId());
-        target.forEach(p -> clientHandler.sendCommand(p, cmd));
+        sendCommandToRevealablePlayers(new S2CMapRemoveCommand(player.getEntityId()));
     }
 
     @Resolved
