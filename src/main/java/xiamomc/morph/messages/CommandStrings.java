@@ -137,7 +137,7 @@ public class CommandStrings extends AbstractMorphStrings
 
     public static FormattableMessage lookupFilterCommand()
     {
-        return getFormattable(getKey("lookup)filter"),
+        return getFormattable(getKey("lookup_filter"),
                 "根据筛选条件找到了以下伪装：");
     }
 
