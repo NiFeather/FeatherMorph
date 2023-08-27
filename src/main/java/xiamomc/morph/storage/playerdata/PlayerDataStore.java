@@ -2,6 +2,7 @@ package xiamomc.morph.storage.playerdata;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.kyori.adventure.text.Component;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -146,7 +147,7 @@ public class PlayerDataStore extends MorphJsonBasedStorage<PlayerMorphConfigurat
     }
 
     @Override
-    public PlayerMorphConfiguration getPlayerConfiguration(Player player)
+    public PlayerMorphConfiguration getPlayerConfiguration(OfflinePlayer player)
     {
         var value = storingObject.playerMorphConfigurations
                 .stream().filter(c -> c.uniqueId.equals(player.getUniqueId())).findFirst().orElse(null);

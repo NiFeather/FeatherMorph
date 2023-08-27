@@ -19,6 +19,8 @@ import xiamomc.morph.misc.DisguiseEquipment;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.utilities.NbtUtils;
 
+import java.util.UUID;
+
 public class NilWrapper extends DisguiseWrapper<NilDisguise>
 {
     public NilWrapper(@NotNull NilDisguise instance, NilBackend backend)
@@ -39,6 +41,19 @@ public class NilWrapper extends DisguiseWrapper<NilDisguise>
     public CompoundTag getCompound()
     {
         return instance.compoundTag.copy();
+    }
+
+    private static final UUID nilUUID = UUID.fromString("0-0-0-0-0");
+
+    /**
+     * Gets network id of this disguise displayed to other players
+     *
+     * @return The network id of this disguise
+     */
+    @Override
+    public int getNetworkEntityId()
+    {
+        return -1;
     }
 
     @Override

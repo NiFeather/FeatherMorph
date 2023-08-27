@@ -135,6 +135,12 @@ public class CommandStrings extends AbstractMorphStrings
                 "<what>已设置为<value>");
     }
 
+    public static FormattableMessage lookupFilterCommand()
+    {
+        return getFormattable(getKey("lookup_filter"),
+                "根据筛选条件找到了以下伪装：");
+    }
+
     //region Illegal arguments
 
     public static FormattableMessage illegalArgumentString()

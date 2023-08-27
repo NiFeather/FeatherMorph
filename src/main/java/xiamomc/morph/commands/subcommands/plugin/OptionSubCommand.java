@@ -58,6 +58,55 @@ public class OptionSubCommand extends MorphPluginObject implements ISubCommand
         subCommands.add(getToggle("debug_output", ConfigOption.DEBUG_OUTPUT, "debug_output"));
         subCommands.add(getToggle("debug_speeding", ConfigOption.DO_SPEEDING_CHECK, "do_speeding_check"));
         subCommands.add(getToggle("revealing", ConfigOption.REVEALING, "revealing"));
+
+        subCommands.add(getToggle("check_update", ConfigOption.CHECK_UPDATE, "check_update"));
+        subCommands.add(getToggle("allow_acquire_morphs", ConfigOption.ALLOW_ACQUIRE_MORPHS, "allow_acquire_morphs"));
+    }
+
+    private ISubCommand getDouble(String name, ConfigOption option, String perm, @Nullable FormattableMessage displayName)
+    {
+        var targetDisplayName = displayName == null ? new FormattableMessage(plugin, name) : displayName;
+        return SubCommandGenerator.command()
+                .setName(name)
+                .setPerm("xiamomc.morph.toggle." + perm)
+                .setExec((sender, args) ->
+                {
+                    if (args.length < 1)
+                    {
+                        sender.sendMessage(MessageUtils.prefixes(sender,
+                                CommandStrings.optionValueString()
+                                        .withLocale(MessageUtils.getLocale(sender))
+                                        .resolve("what", targetDisplayName, null)
+                                        .resolve("value", config.get(Integer.class, option) + "")));
+
+                        return true;
+                    }
+
+                    double value = -1;
+
+                    try
+                    {
+                        value = Double.parseDouble(args[0]);
+                    }
+                    catch (Throwable ignored)
+                    {
+                        sender.sendMessage(MessageUtils.prefixes(sender,
+                                CommandStrings.argumentTypeErrorString()
+                                        .withLocale(MessageUtils.getLocale(sender))
+                                        .resolve("type", TypesString.typeInteger())));
+
+                        return true;
+                    }
+
+                    config.set(option, value);
+
+                    sender.sendMessage(MessageUtils.prefixes(sender,
+                            CommandStrings.optionSetString()
+                                    .withLocale(MessageUtils.getLocale(sender))
+                                    .resolve("what", targetDisplayName, null)
+                                    .resolve("value", value + "")));
+                    return true;
+                });
     }
 
     private ISubCommand getInteger(String name, ConfigOption option, String perm)

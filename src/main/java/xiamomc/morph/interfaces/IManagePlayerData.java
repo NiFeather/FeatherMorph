@@ -1,6 +1,7 @@
 package xiamomc.morph.interfaces;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.misc.DisguiseInfo;
@@ -46,7 +47,7 @@ public interface IManagePlayerData
      * @param player 目标玩家
      * @return 伪装信息
      */
-    public PlayerMorphConfiguration getPlayerConfiguration(Player player);
+    public PlayerMorphConfiguration getPlayerConfiguration(OfflinePlayer player);
 
     public boolean reloadConfiguration();
 

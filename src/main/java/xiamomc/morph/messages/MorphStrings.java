@@ -199,6 +199,12 @@ public class MorphStrings extends AbstractMorphStrings
                 "检测到可能的超速驾驶，正在取消伪装...");
     }
 
+    public static FormattableMessage operationCancelledString()
+    {
+        return getFormattable(getKey("operation_cancelled"),
+                "<red>操作被其他来源取消");
+    }
+
     private static String getKey(String key)
     {
         return "morph." + key;

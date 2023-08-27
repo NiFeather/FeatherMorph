@@ -371,45 +371,31 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
             if (!(targetEntity instanceof Player targetPlayer))
                 return new PlayerInfo(null, targetName);
 
-            if (targetPlayer.getName().equals(targetName))
+            var state = manager.getDisguiseStateFor(targetPlayer);
+
+            if (state != null && state.getDisguiseIdentifier().equals("player:" + targetName))
                 return new PlayerInfo(targetPlayer, targetName);
 
-            var state = manager.getDisguiseStateFor(targetPlayer);
-            if (state != null && state.getDisguiseIdentifier().equals("player:" + targetName))
+            if (targetPlayer.getName().equals(targetName) && state == null)
                 return new PlayerInfo(targetPlayer, targetName);
 
             return new PlayerInfo(null, targetName);
         }
         else
         {
-            return new PlayerInfo(Bukkit.getPlayerExact(targetName), targetName);
+            var targetPlayer = Bukkit.getPlayerExact(targetName);
+
+            if (targetPlayer == null || !playerNotDisguised(targetPlayer))
+                return new PlayerInfo(null, targetName);
+
+            return new PlayerInfo(targetPlayer, targetName);
         }
-    }
-
-    /**
-     * Checks if the target is suit for InteractionMirror
-     * @param targetPlayer The {@link Player} to check
-     * @param targetName Target name
-     * @return True if the target player is who we're finding, or it disguised as our target player,
-     *         otherwise False.
-     */
-    private boolean match(Player targetPlayer, String targetName)
-    {
-        if (ignoreDisguised.get()) return true;
-
-        var backend = manager.getCurrentBackend();
-        var theirDisguise = backend.getWrapper(targetPlayer);
-
-        if (theirDisguise != null && theirDisguise.isPlayerDisguise())
-            return theirDisguise.getDisguiseName().equals(targetName);
-
-        return theirDisguise == null && targetPlayer.getName().equals(targetName);
     }
 
     /**
      * Check whether this player passes the disguise check for InteractionMirror
      * @param player The {@link Player} to check
-     * @return True if this player is not disguised or {@link ConfigOption#MIRROR_IGNORE_DISGUISED} is on,
+     * @return True if this player is not disguised or {@link ConfigOption#MIRROR_IGNORE_DISGUISED} is off,
      *         otherwise false.
      */
     private boolean playerNotDisguised(Player player)
@@ -420,21 +406,18 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
 
     private boolean playerInDistance(Player source, PlayerInfo inf)
     {
-        return playerInDistance(source, inf.target, inf.targetName, false);
+        return playerInDistance(source, inf.target, false);
     }
 
     private boolean playerInDistance(Player source, PlayerInfo inf, boolean noCheckIgnored)
     {
-        return playerInDistance(source, inf.target, inf.targetName, noCheckIgnored);
+        return playerInDistance(source, inf.target, noCheckIgnored);
     }
 
-    @Contract("_, null, _, _ -> false; _, !null, _, _ -> _")
-    private boolean playerInDistance(@NotNull Player source, @Nullable Player target, String targetName, boolean dontCheckWhetherIgnored)
+    @Contract("_, null, _ -> false; _, !null, _ -> _")
+    private boolean playerInDistance(@NotNull Player source, @Nullable Player target, boolean dontCheckWhetherIgnored)
     {
         if (target == null
-                || (selectionMode.get().equalsIgnoreCase(InteractionMirrorSelectionMode.BY_NAME)
-                        ? !playerNotDisguised(target) //BY_NAME: 检查目标是否
-                        : !match(target, targetName)) //BY_SIGHT: 检查目标或目标伪装是否满足操控条件
                 || (!dontCheckWhetherIgnored && ignoredPlayers.contains(target)) //避免爆栈
                 || !source.hasPermission(CommonPermissions.MIRROR) //检查来源是否有权限进行操控
                 || target.hasPermission(CommonPermissions.MIRROR_IMMUNE) //检查目标是否免疫操控

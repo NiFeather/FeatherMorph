@@ -22,6 +22,7 @@ import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.interfaces.IManageRequests;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.MorphStrings;
+import xiamomc.morph.misc.permissions.CommonPermissions;
 import xiamomc.morph.network.*;
 import xiamomc.morph.network.commands.C2S.*;
 import xiamomc.morph.network.commands.CommandRegistries;
@@ -262,6 +263,27 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
     private final AtomicBoolean scheduledReauthPlayers = new AtomicBoolean(false);
 
     //region wait until ready
+
+    public void waitUntilConnected(Player player, Runnable r)
+    {
+        var bool = playerConnectionStates.getOrDefault(player, null);
+
+        if (bool == null)
+        {
+            //logger.info("should remove for " + player.getName());
+            return;
+        }
+
+        if (bool == InitializeState.DONE)
+        {
+            r.run();
+        }
+        else
+        {
+            //logger.info(player.getName() + " not ready! " + bool);
+            this.addSchedule(() -> waitUntilConnected(player, r));
+        }
+    }
 
     @ApiStatus.Internal
     public void waitUntilReady(Player player, Runnable r)
@@ -576,6 +598,10 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
 
             sendCommand(player, new S2CSetSelfViewingCommand(config.showDisguiseToSelf));
             sendCommand(player, new S2CSetModifyBoundingBoxCommand(modifyBoundingBoxes.get()));
+
+            if (player.hasPermission(CommonPermissions.DISGUISE_REVEALING))
+                sendCommand(player, manager.genMapCommand());
+
             playerConnectionStates.put(player, InitializeState.DONE);
         });
     }

@@ -22,17 +22,20 @@ import xiamomc.morph.backends.fallback.NilBackend;
 import xiamomc.morph.backends.libsdisg.LibsBackend;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
+import xiamomc.morph.events.api.gameplay.PlayerMorphEarlyEvent;
 import xiamomc.morph.events.api.gameplay.PlayerMorphEvent;
+import xiamomc.morph.events.api.gameplay.PlayerUnMorphEarlyEvent;
 import xiamomc.morph.events.api.gameplay.PlayerUnMorphEvent;
 import xiamomc.morph.events.api.lifecycle.ManagerFinishedInitializeEvent;
 import xiamomc.morph.interfaces.IManagePlayerData;
-import xiamomc.morph.messages.CommandStrings;
-import xiamomc.morph.messages.HintStrings;
-import xiamomc.morph.messages.MessageUtils;
-import xiamomc.morph.messages.MorphStrings;
+import xiamomc.morph.messages.*;
 import xiamomc.morph.messages.vanilla.VanillaMessageStore;
 import xiamomc.morph.misc.*;
 import xiamomc.morph.misc.permissions.CommonPermissions;
+import xiamomc.morph.network.commands.S2C.AbstractS2CCommand;
+import xiamomc.morph.network.commands.S2C.map.S2CMapCommand;
+import xiamomc.morph.network.commands.S2C.map.S2CMapRemoveCommand;
+import xiamomc.morph.network.commands.S2C.map.S2CPartialMapCommand;
 import xiamomc.morph.network.commands.S2C.set.*;
 import xiamomc.morph.network.server.MorphClientHandler;
 import xiamomc.morph.providers.DisguiseProvider;
@@ -53,6 +56,7 @@ import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
 import xiamomc.pluginbase.Bindables.BindableList;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -79,6 +83,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     public static final DisguiseProvider fallbackProvider = new FallbackProvider();
 
     public static final String disguiseFallbackName = "@default";
+
+    public static final String forcedDisguiseNoneId = "@none";
 
     private DisguiseBackend<?, ?> currentBackend = new NilBackend();
 
@@ -123,6 +129,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         bannedDisguises = config.getBindableList(ConfigOption.BANNED_DISGUISES);
         config.bind(allowHeadMorph, ConfigOption.ALLOW_HEAD_MORPH);
+        config.bind(allowAcquireMorph, ConfigOption.ALLOW_ACQUIRE_MORPHS);
 
         registerProviders(ObjectList.of(
                 new VanillaDisguiseProvider(),
@@ -307,7 +314,9 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
     //endregion
 
-    private final Bindable<Boolean> allowHeadMorph = new Bindable<>();
+    private final Bindable<Boolean> allowHeadMorph = new Bindable<>(true);
+
+    private final Bindable<Boolean> allowAcquireMorph = new Bindable<>(true);
 
     private final Map<UUID, PlayerTextures> uuidPlayerTexturesMap = new ConcurrentHashMap<>();
 
@@ -387,9 +396,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                     }
 
                     //否则，更新或应用伪装
-                    morph(player, player, DisguiseTypes.PLAYER.toId(profile.getName()), targetEntity);
-
-                    uuidPlayerTexturesMap.put(playerUniqueId, profileTexture);
+                    if (morph(player, player, DisguiseTypes.PLAYER.toId(profile.getName()), targetEntity))
+                        uuidPlayerTexturesMap.put(playerUniqueId, profileTexture);
                 }
             }
 
@@ -569,6 +577,14 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                     return false;
                 }
 
+                // 调用早期事件
+                var earlyEventPassed = new PlayerMorphEarlyEvent(player, currentState, key).callEvent();
+                if (!earlyEventPassed)
+                {
+                    source.sendMessage(MessageUtils.prefixes(source, MorphStrings.operationCancelledString()));
+                    return false;
+                }
+
                 // 重置上个State的伪装
                 if (currentState != null)
                 {
@@ -629,6 +645,9 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
             source.sendMessage(MessageUtils.prefixes(source, msg));
 
+            // 向管理员发送map消息
+            sendCommandToRevealablePlayers(genPartialMapCommand(outComingState));
+
             return true;
         }
         catch (IllegalArgumentException iae)
@@ -653,6 +672,42 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             unMorph(player);
             return false;
         }
+    }
+
+    public void sendCommandToRevealablePlayers(AbstractS2CCommand<?> cmd)
+    {
+        var target = Bukkit.getOnlinePlayers().stream()
+                .filter(p -> p.hasPermission(CommonPermissions.DISGUISE_REVEALING))
+                .toList();
+
+        target.forEach(p -> clientHandler.sendCommand(p, cmd));
+
+    }
+
+    public S2CMapCommand genMapCommand()
+    {
+        var map = new HashMap<Integer, String>();
+        for (DisguiseState disguiseState : this.disguiseStates)
+        {
+            var player = disguiseState.getPlayer();
+            map.put(player.getEntityId(), player.getName());
+        }
+
+        var cmd = new S2CMapCommand(map);
+        return cmd;
+    }
+
+    public S2CPartialMapCommand genPartialMapCommand(DisguiseState... diff)
+    {
+        var map = new HashMap<Integer, String>();
+        for (DisguiseState disguiseState : diff)
+        {
+            var player = disguiseState.getPlayer();
+            map.put(player.getEntityId(), player.getName());
+        }
+
+        var cmd = new S2CPartialMapCommand(map);
+        return cmd;
     }
 
     /**
@@ -769,6 +824,15 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         if (state == null)
             return;
 
+        // 调用早期事件
+        var earlyEventPassed = new PlayerUnMorphEarlyEvent(player, state).callEvent();
+        if (!earlyEventPassed)
+        {
+            source.sendMessage(MessageUtils.prefixes(source, MorphStrings.operationCancelledString()));
+
+            return;
+        }
+
         // 后端的取消操作在Provider里，因此调用Provider的unMorph()
         state.getProvider().unMorph(player, state);
 
@@ -802,7 +866,9 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         source.sendMessage(MessageUtils.prefixes(player, MorphStrings.unMorphSuccessString().withLocale(MessageUtils.getLocale(player))));
         player.sendActionBar(Component.empty());
 
-        Bukkit.getPluginManager().callEvent(new PlayerUnMorphEvent(player));
+        new PlayerUnMorphEvent(player).callEvent();
+
+        sendCommandToRevealablePlayers(new S2CMapRemoveCommand(player.getEntityId()));
     }
 
     @Resolved
@@ -953,7 +1019,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         skillHandler.switchCooldown(player.getUniqueId(), cdInfo);
 
         // 调用事件
-        Bukkit.getPluginManager().callEvent(new PlayerMorphEvent(player, state));
+        new PlayerMorphEvent(player, state).callEvent();
 
         return state;
     }
@@ -1198,7 +1264,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     }
 
     @Override
-    public PlayerMorphConfiguration getPlayerConfiguration(Player player)
+    public PlayerMorphConfiguration getPlayerConfiguration(OfflinePlayer player)
     {
         return data.getPlayerConfiguration(player);
     }

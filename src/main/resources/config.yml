@@ -4,6 +4,16 @@ root:
   # The message pattern used for this plugin to display messages for players
   message_pattern: <color:#dddddd>≡ FM » <message>
 
+  # Should we check updates automatically?
+  check_update: true
+
+  # Allow players acquire morphs by killing mobs and other players?
+  allow_acquire_morphs: true
+
+  # Disguise as the id given below when they join the server.
+  # If an invalid ID is provided, this option may not take place.
+  forced_disguise: "@none"
+
   # ChatOverride options
   chatOverride:
     # Enable ChatOverride?

@@ -33,7 +33,9 @@ import xiamomc.morph.messages.MorphStrings;
 import xiamomc.morph.messages.SkillStrings;
 import xiamomc.morph.messages.vanilla.VanillaMessageStore;
 import xiamomc.morph.misc.DisguiseTypes;
+import xiamomc.morph.misc.permissions.CommonPermissions;
 import xiamomc.morph.network.commands.S2C.S2CSwapCommand;
+import xiamomc.morph.network.commands.S2C.map.S2CMapRemoveCommand;
 import xiamomc.morph.network.server.MorphClientHandler;
 import xiamomc.morph.network.server.ServerSetEquipCommand;
 import xiamomc.morph.skills.MorphSkillHandler;
@@ -152,12 +154,15 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
 
     private final Bindable<Boolean> doRevealing = new Bindable<>(true);
 
+    private final Bindable<Boolean> allowAcquireMorphs = new Bindable<>(false);
+
     @Initializer
     private void load()
     {
         config.bind(cooldownOnDamage, ConfigOption.SKILL_COOLDOWN_ON_DAMAGE);
         config.bind(bruteIgnoreDisguises, ConfigOption.PIGLIN_BRUTE_IGNORE_DISGUISES);
         config.bind(doRevealing, ConfigOption.REVEALING);
+        config.bind(allowAcquireMorphs, ConfigOption.ALLOW_ACQUIRE_MORPHS);
 
         unMorphOnDeath = config.getBindable(Boolean.class, ConfigOption.UNMORPH_ON_DEATH);
         this.addSchedule(this::update);
@@ -415,8 +420,10 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
 
             state.refreshSkills();
 
+            morphs.sendCommandToRevealablePlayers(morphs.genPartialMapCommand(state));
+
             //调用Morph事件
-            Bukkit.getPluginManager().callEvent(new PlayerJoinedWithDisguiseEvent(player, state));
+            new PlayerJoinedWithDisguiseEvent(player, state).callEvent();
 
             return;
         }
@@ -453,14 +460,22 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         skillHandler.removeUnusedList(e.getPlayer());
 
         var state = morphs.getDisguiseStateFor(e.getPlayer());
+        var players = Bukkit.getOnlinePlayers();
 
         if (state != null)
         {
             var bossbar = state.getBossbar();
 
             if (bossbar != null)
-                Bukkit.getOnlinePlayers().forEach(p -> p.hideBossBar(bossbar));
+                players.forEach(p -> p.hideBossBar(bossbar));
         }
+
+        var targets = players.stream()
+                .filter(p -> p.hasPermission(CommonPermissions.DISGUISE_REVEALING))
+                .toList();
+
+        var cmd = new S2CMapRemoveCommand(e.getPlayer().getEntityId());
+        targets.forEach(p -> clientHandler.sendCommand(p, cmd));
     }
 
     @EventHandler
@@ -588,6 +603,9 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
     private void onPlayerKillEntity(Player player, Entity entity)
     {
         if (!(entity instanceof LivingEntity) && !(entity.getType() == EntityType.ARMOR_STAND))
+            return;
+
+        if (!allowAcquireMorphs.get())
             return;
 
         if (entity instanceof Player targetPlayer)

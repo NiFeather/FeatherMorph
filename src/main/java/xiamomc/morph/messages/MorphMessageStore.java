@@ -33,7 +33,8 @@ public class MorphMessageStore extends MessageStore<MorphPlugin>
             CommandNameStrings.class,
             HintStrings.class,
             TypesString.class,
-            StatStrings.class
+            StatStrings.class,
+            UpdateStrings.class
     );
 
     private final Map<String, MorphMessageSubStore> subStores = new Object2ObjectOpenHashMap<>();
