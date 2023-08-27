@@ -113,7 +113,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
     public void onPlayerDeath(PlayerDeathEvent e)
     {
         if (unMorphOnDeath.get())
-            morphs.unMorph(e.getPlayer(), true);
+            morphs.unMorph(e.getPlayer(), e.getPlayer(), true, true);
     }
 
     @EventHandler

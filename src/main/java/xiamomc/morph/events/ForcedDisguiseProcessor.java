@@ -31,8 +31,11 @@ public class ForcedDisguiseProcessor extends MorphPluginObject implements Listen
             if (doForcedDisguise.get())
             {
                 logger.info("Config changed, re-disguising players...");
-                var players = Bukkit.getOnlinePlayers();
-                players.forEach(p -> this.doDisguise(p, n));
+                this.addSchedule(() ->
+                {
+                    var players = Bukkit.getOnlinePlayers();
+                    players.forEach(p -> this.doDisguise(p, n));
+                });
             }
         }, true);
     }
@@ -57,6 +60,11 @@ public class ForcedDisguiseProcessor extends MorphPluginObject implements Listen
     private void doDisguise(Player player, String targetId)
     {
         logger.info("Trying to disguise %s as %s".formatted(player.getName(), targetId));
+
+        var state = manager.getDisguiseStateFor(player);
+
+        if (state != null)
+            manager.unMorph(Bukkit.getConsoleSender(), player, true, true);
 
         var success = manager.morph(Bukkit.getConsoleSender(), player, targetId,
                 null,

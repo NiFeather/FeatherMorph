@@ -171,14 +171,14 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             {
                 p.sendMessage(MessageUtils.prefixes(p, MorphStrings.errorWhileUpdatingDisguise()));
 
-                unMorph(nilCommandSource, p, true);
+                unMorph(nilCommandSource, p, true, true);
             }
 
             if (!i.getProvider().updateDisguise(p, i))
             {
                 p.sendMessage(MessageUtils.prefixes(p, MorphStrings.errorWhileUpdatingDisguise()));
 
-                unMorph(nilCommandSource, p, true);
+                unMorph(nilCommandSource, p, true, true);
             }
         });
     }
@@ -769,7 +769,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         {
             if (ignoreOffline && !i.getPlayer().isOnline()) return;
 
-            unMorph(i.getPlayer(), true);
+            unMorph(i.getPlayer(), i.getPlayer(), true, true);
         });
     }
 
@@ -780,7 +780,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
      */
     public void unMorph(Player player)
     {
-        this.unMorph(player, player, false);
+        this.unMorph(player, player, false, false);
     }
 
     /**
@@ -791,7 +791,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
      */
     public void unMorph(Player player, boolean bypassPermission)
     {
-        this.unMorph(player, player, bypassPermission);
+        this.unMorph(player, player, bypassPermission, false);
     }
 
     public static final NilCommandSource nilCommandSource = new NilCommandSource();
@@ -806,7 +806,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
      * @param bypassPermission 是否绕过权限检查（强制取消伪装）
      * @param source 消息要发送的目标来源
      */
-    public void unMorph(CommandSender source, Player player, boolean bypassPermission)
+    public void unMorph(CommandSender source, Player player, boolean bypassPermission, boolean forceUnmorph)
     {
         source = source == null ? nilCommandSource : source;
 
@@ -825,8 +825,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             return;
 
         // 调用早期事件
-        var earlyEventPassed = new PlayerUnMorphEarlyEvent(player, state).callEvent();
-        if (!earlyEventPassed)
+        var earlyEventPassed = new PlayerUnMorphEarlyEvent(player, state, forceUnmorph).callEvent();
+        if (!earlyEventPassed && !forceUnmorph)
         {
             source.sendMessage(MessageUtils.prefixes(source, MorphStrings.operationCancelledString()));
 
@@ -1307,7 +1307,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 player.sendMessage(MessageUtils.prefixes(player, MorphStrings.recoverString()));
             }
             else
-                unMorph(nilCommandSource, player, true);
+                unMorph(nilCommandSource, player, true, true);
         });
 
         Bukkit.getOnlinePlayers().forEach(p -> clientHandler.refreshPlayerClientMorphs(this.getPlayerConfiguration(p).getUnlockedDisguiseIdentifiers(), p));
