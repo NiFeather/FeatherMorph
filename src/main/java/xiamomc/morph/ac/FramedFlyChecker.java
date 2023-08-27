@@ -21,7 +21,7 @@ import xiamomc.pluginbase.Bindables.Bindable;
 import java.util.List;
 import java.util.Map;
 
-public class FramedFlyChecker extends MorphPluginObject
+public class FramedFlyChecker extends MorphPluginObject implements IFlyChecker
 {
     private final xiamomc.morph.abilities.impl.FlyAbility bindingFlyAbility;
 
@@ -227,6 +227,12 @@ public class FramedFlyChecker extends MorphPluginObject
 
         if (ignoreNextMovement)
             meta.ignoreNext += 5;
+    }
+
+    @Override
+    public void dropMeta(Player player)
+    {
+        playerFlyMeta.remove(player);
     }
 
     private final boolean doNewCheck = true;

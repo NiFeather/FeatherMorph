@@ -1,14 +1,15 @@
 package xiamomc.morph.transforms;
 
+import xiamomc.morph.transforms.clock.IClock;
 import xiamomc.morph.transforms.easings.Easing;
 
 public class GenericTransform<TValue> extends Transform<TValue>
 {
     public Recorder<TValue> val;
 
-    protected GenericTransform(Recorder<TValue> recorder, long startTime, long duration, TValue endValue, Easing easing)
+    protected GenericTransform(Recorder<TValue> recorder, long startTime, long duration, TValue endValue, Easing easing, IClock clock)
     {
-        super(startTime, duration, recorder.get(), endValue, easing);
+        super(startTime, duration, recorder.get(), endValue, easing, clock);
 
         this.val = recorder;
     }

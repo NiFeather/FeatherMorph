@@ -1,14 +1,17 @@
 package xiamomc.morph.transforms;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import xiamomc.morph.transforms.clock.IClock;
+import xiamomc.morph.transforms.clock.SystemClock;
 import xiamomc.morph.transforms.easings.Easing;
 
 import java.util.List;
 
 public abstract class Transform<TValue>
 {
-    protected Transform(long startTime, long duration, TValue startValue, TValue endValue, Easing easing)
+    protected Transform(long startTime, long duration, TValue startValue, TValue endValue, Easing easing, IClock clock)
     {
+        this.clock = clock;
         this.update(startTime, duration, startValue, endValue, easing);
     }
 
@@ -37,6 +40,8 @@ public abstract class Transform<TValue>
     public Easing easing;
 
     public boolean aborted;
+
+    public final IClock clock;
 
     /**
      * Applies a time point to this transformation

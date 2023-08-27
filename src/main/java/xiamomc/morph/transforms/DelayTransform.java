@@ -1,12 +1,13 @@
 package xiamomc.morph.transforms;
 
+import xiamomc.morph.transforms.clock.IClock;
 import xiamomc.morph.transforms.easings.Easing;
 
 public class DelayTransform extends Transform<Long>
 {
-    protected DelayTransform(long startTime, long duration)
+    protected DelayTransform(long startTime, long duration, IClock clock)
     {
-        super(startTime, duration, 0L, 100L, Easing.Plain);
+        super(startTime, duration, 0L, 100L, Easing.Plain, clock);
     }
 
     /**

@@ -14,8 +14,8 @@ import xiamomc.morph.MorphManager;
 import xiamomc.morph.abilities.AbilityType;
 import xiamomc.morph.abilities.MorphAbility;
 import xiamomc.morph.abilities.options.FlyOption;
-import xiamomc.morph.ac.FlyChecker;
-import xiamomc.morph.ac.FramedFlyChecker;
+import xiamomc.morph.ac.IFlyChecker;
+import xiamomc.morph.ac.SingleFlyChecker;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.misc.DisguiseState;
@@ -31,10 +31,10 @@ public class FlyAbility extends MorphAbility<FlyOption>
 {
     public FlyAbility()
     {
-        flyChecker = new FlyChecker(this);
+        flyChecker = new SingleFlyChecker(this);
     }
 
-    private final FlyChecker flyChecker;
+    private final IFlyChecker flyChecker;
 
     public List<Player> getAppliedPlayers()
     {
@@ -246,6 +246,14 @@ public class FlyAbility extends MorphAbility<FlyOption>
         updateLastLegal(e);
     }
 
+    @EventHandler
+    public void onQuit(PlayerQuitEvent e)
+    {
+        if (!checkSpeeding.get()) return;
+
+        flyChecker.dropMeta(e.getPlayer());
+    }
+
     public boolean ignoreNextTeleport;
 
     @EventHandler
@@ -272,9 +280,9 @@ public class FlyAbility extends MorphAbility<FlyOption>
         if (!this.appliedPlayers.contains(player)) return;
         if (!e.getPlayer().isFlying()) return;
 
-        flyChecker.onEvent(e);
+        //flyChecker.onEvent(e);
 
-        if (true) return;
+        if (false) return;
 
         if (freezeFrame == 0)
         {

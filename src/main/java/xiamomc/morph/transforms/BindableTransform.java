@@ -1,5 +1,6 @@
 package xiamomc.morph.transforms;
 
+import xiamomc.morph.transforms.clock.IClock;
 import xiamomc.morph.transforms.easings.Easing;
 import xiamomc.pluginbase.Bindables.Bindable;
 
@@ -7,9 +8,9 @@ public class BindableTransform<TValue> extends Transform<TValue>
 {
     public final Bindable<TValue> bindable;
 
-    protected BindableTransform(Bindable<TValue> bindable, long startTime, long duration, TValue endValue, Easing easing)
+    protected BindableTransform(Bindable<TValue> bindable, long startTime, long duration, TValue endValue, Easing easing, IClock clock)
     {
-        super(startTime, duration, bindable.get(), endValue, easing);
+        super(startTime, duration, bindable.get(), endValue, easing, clock);
 
         this.bindable = bindable;
     }
