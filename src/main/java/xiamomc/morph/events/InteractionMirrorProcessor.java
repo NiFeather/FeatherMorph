@@ -3,7 +3,6 @@ package xiamomc.morph.events;
 import io.papermc.paper.event.player.PlayerArmSwingEvent;
 import io.papermc.paper.event.player.PlayerStopUsingItemEvent;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
@@ -64,7 +63,7 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
         var playerInf = getMirrorTarget(player);
         var targetPlayer = playerInf.target;
 
-        if (!playerInDistance(player, playerInf, true) || targetPlayer.isSneaking() == e.isSneaking()) return;
+        if (!playerInDistance(player, playerInf) || targetPlayer.isSneaking() == e.isSneaking()) return;
 
         targetPlayer.setSneaking(e.isSneaking());
         clientHandler.sendCommand(targetPlayer, new S2CSetSneakingCommand(e.isSneaking()));
@@ -211,7 +210,7 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
         var targetPlayer = inf.target;
         if (targetPlayer == null) return;
 
-        var playerInDistance = playerInDistance(player, inf, true);
+        var playerInDistance = playerInDistance(player, inf);
 
         if (targetPlayer.getLocation().getWorld() == player.getLocation().getWorld()
                 && Math.abs(targetPlayer.getLocation().distance(player.getLocation())) <= 6
@@ -227,7 +226,7 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
             }
         }
 
-        if (!playerInDistance || ignoredPlayers.contains(targetPlayer)) return;
+        if (!playerInDistance || simStack.contains(targetPlayer)) return;
 
         if (tracker.droppingItemThisTick(player))
             return;
@@ -248,12 +247,10 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
         }
 
         //检查玩家在此tick内是否存在互动以避免重复镜像
-        if (!tracker.interactingThisTick(player))
-        {
-            ignoredPlayers.add(player);
-            simulateOperation(lastAction.toBukkitAction(), targetPlayer, player);
-            logOperation(player, targetPlayer, lastAction.isLeftClick() ? OperationType.LeftClick : OperationType.RightClick);
-        }
+        if (tracker.interactingThisTick(player)) return;
+
+        simulateOperation(lastAction.toBukkitAction(), targetPlayer, player);
+        logOperation(player, targetPlayer, lastAction.isLeftClick() ? OperationType.LeftClick : OperationType.RightClick);
     }
 
     @EventHandler
@@ -302,7 +299,7 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
     @Resolved
     private PlayerOperationSimulator operationSimulator;
 
-    private final List<Player> ignoredPlayers = new ObjectArrayList<>();
+    private final Stack<Player> simStack = new Stack<>();
 
     /**
      * 模拟玩家操作
@@ -315,26 +312,51 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
     {
         if (!allowSimulation.get()) return false;
 
-        if (ignoredPlayers.contains(targetPlayer) || tracker.interactingThisTick(targetPlayer)) return false;
-        ignoredPlayers.add(targetPlayer);
-        ignoredPlayers.add(source);
+        if (simStack.contains(targetPlayer) || tracker.interactingThisTick(targetPlayer)) return false;
+        simStack.push(source);
 
         var isRightClick = action.isRightClick();
         var result = isRightClick
                 ? operationSimulator.simulateRightClick(targetPlayer)
                 : operationSimulator.simulateLeftClick(targetPlayer);
 
+        boolean success = false;
+
         if (result.success())
         {
             var itemInUse = targetPlayer.getEquipment().getItem(result.hand()).getType();
 
             if (!isRightClick || !ItemUtils.isContinuousUsable(itemInUse) || result.forceSwing())
-                targetPlayer.swingHand(result.hand());
+            {
+                //如果栈上最后的玩家不是目标，那么使其挥手
+                if (!simStack.empty() && !simStack.peek().equals(targetPlayer))
+                    targetPlayer.swingHand(result.hand());
+            }
 
-            return true;
+            success = true;
         }
 
-        return false;
+        // 清空Stack
+        var nextEntity = targetPlayer.getTargetEntity(5);
+        if (nextEntity instanceof Player player)
+        {
+            //by_name: 直接清空
+            //by_sight: 如果下个不是目标，那么清空
+            var mode = selectionMode.get();
+            if (mode.equalsIgnoreCase(InteractionMirrorSelectionMode.BY_NAME)) simStack.clear();
+            else
+            {
+                var nextSelection = getMirrorTarget(targetPlayer);
+                if (!player.equals(nextSelection.target))
+                    simStack.clear();
+            }
+
+            //如果不成功，同样清空栈
+            if (!result.success())
+                simStack.clear();
+        }
+
+        return success;
     }
 
     public static class InteractionMirrorSelectionMode
@@ -364,6 +386,8 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
         var targetName = mirrorMap.getOrDefault(player, null);
         if (targetName == null) return new PlayerInfo(null, PlayerInfo.notSetStr);
 
+        PlayerInfo info;
+
         if (selectionMode.get().equalsIgnoreCase(InteractionMirrorSelectionMode.BY_SIGHT))
         {
             var targetEntity = player.getTargetEntity(5);
@@ -374,22 +398,27 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
             var state = manager.getDisguiseStateFor(targetPlayer);
 
             if (state != null && state.getDisguiseIdentifier().equals("player:" + targetName))
-                return new PlayerInfo(targetPlayer, targetName);
-
-            if (targetPlayer.getName().equals(targetName) && state == null)
-                return new PlayerInfo(targetPlayer, targetName);
-
-            return new PlayerInfo(null, targetName);
+                info = new PlayerInfo(targetPlayer, targetName);
+            else if (targetPlayer.getName().equals(targetName) && state == null)
+                info = new PlayerInfo(targetPlayer, targetName);
+            else
+                info = new PlayerInfo(null, targetName);
         }
         else
         {
             var targetPlayer = Bukkit.getPlayerExact(targetName);
 
             if (targetPlayer == null || !playerNotDisguised(targetPlayer))
-                return new PlayerInfo(null, targetName);
-
-            return new PlayerInfo(targetPlayer, targetName);
+                info = new PlayerInfo(null, targetName);
+            else
+                info = new PlayerInfo(targetPlayer, targetName);
         }
+
+        //忽略在交互栈上的玩家
+        if (simStack.contains(info.target))
+            info = new PlayerInfo(null, targetName);
+
+        return info;
     }
 
     /**
@@ -406,19 +435,13 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
 
     private boolean playerInDistance(Player source, PlayerInfo inf)
     {
-        return playerInDistance(source, inf.target, false);
+        return playerInDistance(source, inf.target);
     }
 
-    private boolean playerInDistance(Player source, PlayerInfo inf, boolean noCheckIgnored)
-    {
-        return playerInDistance(source, inf.target, noCheckIgnored);
-    }
-
-    @Contract("_, null, _ -> false; _, !null, _ -> _")
-    private boolean playerInDistance(@NotNull Player source, @Nullable Player target, boolean dontCheckWhetherIgnored)
+    @Contract("_, null-> false; _, !null -> _")
+    private boolean playerInDistance(@NotNull Player source, @Nullable Player target)
     {
         if (target == null
-                || (!dontCheckWhetherIgnored && ignoredPlayers.contains(target)) //避免爆栈
                 || !source.hasPermission(CommonPermissions.MIRROR) //检查来源是否有权限进行操控
                 || target.hasPermission(CommonPermissions.MIRROR_IMMUNE) //检查目标是否免疫操控
                 || target.getOpenInventory().getType() != InventoryType.CRAFTING //检查目标是否正和容器互动
@@ -468,7 +491,6 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
     private void update()
     {
         this.addSchedule(this::update);
-        ignoredPlayers.clear();
 
         if (plugin.getCurrentTick() % (5 * 20) == 0)
             pushToLoggingBase();
@@ -544,6 +566,8 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
         {
             //[0:mirror] [1:YYYY] [2:MM] [3:dd] [4:.log]
             var splitName = file.getName().split("-");
+            if (splitName.length < 4) continue;
+
             var formattedName = "%s-%s-%s".formatted(splitName[1], splitName[2], splitName[3]);
 
             if (formattedName.equals(currentLogDate)) continue;
