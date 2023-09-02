@@ -7,12 +7,15 @@ import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.commands.subcommands.SubCommandGenerator;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
+import xiamomc.morph.events.InteractionMirrorProcessor;
 import xiamomc.morph.messages.*;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Command.ISubCommand;
+import xiamomc.pluginbase.Exceptions.NullDependencyException;
 import xiamomc.pluginbase.Messages.FormattableMessage;
 
 import java.util.List;
+import java.util.function.Function;
 
 public class OptionSubCommand extends MorphPluginObject implements ISubCommand
 {
@@ -47,6 +50,7 @@ public class OptionSubCommand extends MorphPluginObject implements ISubCommand
 
         subCommands.add(getToggle("armorstand_show_arms", ConfigOption.ARMORSTAND_SHOW_ARMS, "armorstand_show_arms"));
 
+        subCommands.add(getMirrorMode("mirror_mode", ConfigOption.MIRROR_SELECTION_MODE, "mirror_mode", null));
         subCommands.add(getToggle("mirror_interaction", ConfigOption.MIRROR_BEHAVIOR_DO_SIMULATION, "mirror.interaction", CommandNameStrings.mirrorInteractionString()));
         subCommands.add(getToggle("mirror_sneak", ConfigOption.MIRROR_BEHAVIOR_SNEAK, "mirror.sneak", CommandNameStrings.mirrorSneakString()));
         subCommands.add(getToggle("mirror_swaphand", ConfigOption.MIRROR_BEHAVIOR_SWAP_HAND, "mirror.swaphand", CommandNameStrings.mirrorSwapHandString()));
@@ -55,16 +59,33 @@ public class OptionSubCommand extends MorphPluginObject implements ISubCommand
         subCommands.add(getToggle("mirror_ignore_disguised", ConfigOption.MIRROR_IGNORE_DISGUISED, "mirror.ignore_disguised", CommandNameStrings.mirrorIgnoreDisguised()));
         subCommands.add(getToggle("mirror_log_operations", ConfigOption.MIRROR_LOG_OPERATION, "mirror.log_operations"));
         subCommands.add(getInteger("mirror_log_cleanup", ConfigOption.MIRROR_LOG_CLEANUP_DATE, "mirror.log_operations"));
+
         subCommands.add(getToggle("debug_output", ConfigOption.DEBUG_OUTPUT, "debug_output"));
         subCommands.add(getToggle("revealing", ConfigOption.REVEALING, "revealing"));
 
         subCommands.add(getToggle("check_update", ConfigOption.CHECK_UPDATE, "check_update"));
         subCommands.add(getToggle("allow_acquire_morphs", ConfigOption.ALLOW_ACQUIRE_MORPHS, "allow_acquire_morphs"));
+
+        subCommands.add(getToggle("log_outgoing_packets", ConfigOption.LOG_OUTGOING_PACKETS, "log_outgoing_packets"));
+        subCommands.add(getToggle("log_incoming_packets", ConfigOption.LOG_INCOMING_PACKETS, "log_incoming_packets"));
+
+        subCommands.add(getToggle("allow_acquire_morphs", ConfigOption.ALLOW_ACQUIRE_MORPHS, "allow_acquire_morphs"));
     }
 
-    private ISubCommand getDouble(String name, ConfigOption option, String perm, @Nullable FormattableMessage displayName)
+    private <T> ISubCommand getGeneric(String name, ConfigOption option, String perm,
+                                       @Nullable FormattableMessage displayName, Class<T> targetClass,
+                                       Function<String, T> func, String typeName)
     {
-        var targetDisplayName = displayName == null ? new FormattableMessage(plugin, name) : displayName;
+        return getGeneric(name, option, perm,
+                displayName, targetClass, func, new FormattableMessage(plugin, typeName));
+    }
+
+    private <T> ISubCommand getGeneric(String name, ConfigOption option, String perm,
+                                   @Nullable FormattableMessage displayName, Class<T> targetClass,
+                                   Function<String, T> func, FormattableMessage typeName)
+    {
+        var targetDisplay = displayName == null ? new FormattableMessage(plugin, name) : displayName;
+
         return SubCommandGenerator.command()
                 .setName(name)
                 .setPerm("xiamomc.morph.toggle." + perm)
@@ -75,24 +96,27 @@ public class OptionSubCommand extends MorphPluginObject implements ISubCommand
                         sender.sendMessage(MessageUtils.prefixes(sender,
                                 CommandStrings.optionValueString()
                                         .withLocale(MessageUtils.getLocale(sender))
-                                        .resolve("what", targetDisplayName, null)
-                                        .resolve("value", config.get(Integer.class, option) + "")));
+                                        .resolve("what", targetDisplay, null)
+                                        .resolve("value", config.get(targetClass, option) + "")));
 
                         return true;
                     }
 
-                    double value = -1;
+                    T value = null;
 
                     try
                     {
-                        value = Double.parseDouble(args[0]);
+                        value = func.apply(args[0]);
+
+                        if (value == null)
+                            throw new NullDependencyException("");
                     }
                     catch (Throwable ignored)
                     {
                         sender.sendMessage(MessageUtils.prefixes(sender,
                                 CommandStrings.argumentTypeErrorString()
                                         .withLocale(MessageUtils.getLocale(sender))
-                                        .resolve("type", TypesString.typeInteger())));
+                                        .resolve("type", typeName)));
 
                         return true;
                     }
@@ -102,10 +126,33 @@ public class OptionSubCommand extends MorphPluginObject implements ISubCommand
                     sender.sendMessage(MessageUtils.prefixes(sender,
                             CommandStrings.optionSetString()
                                     .withLocale(MessageUtils.getLocale(sender))
-                                    .resolve("what", targetDisplayName, null)
+                                    .resolve("what", targetDisplay, null)
                                     .resolve("value", value + "")));
                     return true;
                 });
+    }
+
+    private ISubCommand getMirrorMode(String name, ConfigOption option, String perm, @Nullable FormattableMessage displayName)
+    {
+        return getGeneric(name, option, perm, displayName, String.class, enumName ->
+        {
+            String value = null;
+
+            var byName = InteractionMirrorProcessor.InteractionMirrorSelectionMode.BY_NAME.toLowerCase();
+            var bySight = InteractionMirrorProcessor.InteractionMirrorSelectionMode.BY_SIGHT.toLowerCase();
+
+            if (enumName.equalsIgnoreCase(byName))
+                value = byName;
+            else if (enumName.equalsIgnoreCase(bySight))
+                value = bySight;
+
+            return value;
+        }, "by_sight/by_name");
+    }
+
+    private ISubCommand getDouble(String name, ConfigOption option, String perm, @Nullable FormattableMessage displayName)
+    {
+        return getGeneric(name, option, perm, displayName, Double.class, Double::parseDouble, TypesString.typeDouble());
     }
 
     private ISubCommand getInteger(String name, ConfigOption option, String perm)
@@ -115,49 +162,7 @@ public class OptionSubCommand extends MorphPluginObject implements ISubCommand
 
     private ISubCommand getInteger(String name, ConfigOption option, String perm, @Nullable FormattableMessage displayName)
     {
-        var targetDisplay = displayName == null ? new FormattableMessage(plugin, name) : displayName;
-
-        return SubCommandGenerator.command()
-                .setName(name)
-                .setPerm("xiamomc.morph.toggle." + perm)
-                .setExec((sender, args) ->
-                {
-                    if (args.length < 1)
-                    {
-                        sender.sendMessage(MessageUtils.prefixes(sender,
-                                CommandStrings.optionValueString()
-                                        .withLocale(MessageUtils.getLocale(sender))
-                                        .resolve("what", targetDisplay, null)
-                                        .resolve("value", config.get(Integer.class, option) + "")));
-
-                        return true;
-                    }
-
-                    int value = -1;
-
-                    try
-                    {
-                        value = Integer.parseInt(args[0]);
-                    }
-                    catch (Throwable ignored)
-                    {
-                        sender.sendMessage(MessageUtils.prefixes(sender,
-                                CommandStrings.argumentTypeErrorString()
-                                        .withLocale(MessageUtils.getLocale(sender))
-                                        .resolve("type", TypesString.typeInteger())));
-
-                        return true;
-                    }
-
-                    config.set(option, value);
-
-                    sender.sendMessage(MessageUtils.prefixes(sender,
-                            CommandStrings.optionSetString()
-                                    .withLocale(MessageUtils.getLocale(sender))
-                                    .resolve("what", targetDisplay, null)
-                                    .resolve("value", value + "")));
-                    return true;
-                });
+        return getGeneric(name, option, perm, displayName, Integer.class, Integer::parseInt, TypesString.typeInteger());
     }
 
     private ISubCommand getToggle(String name, ConfigOption option, String perm)
@@ -167,48 +172,17 @@ public class OptionSubCommand extends MorphPluginObject implements ISubCommand
 
     private ISubCommand getToggle(String name, ConfigOption option, String perm, @Nullable FormattableMessage displayName)
     {
-        var targetDisplay = displayName == null ? new FormattableMessage(plugin, name) : displayName;
+        return getGeneric(name, option, perm, displayName, Boolean.class, this::parseBoolean, "true/false");
+    }
 
-        return SubCommandGenerator.command()
-                .setName(name)
-                .setExec((sender, args) ->
-                {
-                    boolean newVal;
-
-                    var locale = MessageUtils.getLocale(sender);
-                    targetDisplay.withLocale(locale);
-
-                    if (args.length >= 1)
-                    {
-                        var arg = args[0];
-
-                        newVal = "true".equalsIgnoreCase(arg)
-                                || "t".equalsIgnoreCase(arg)
-                                || "on".equalsIgnoreCase(arg)
-                                || "1".equalsIgnoreCase(arg)
-                                || "enable".equalsIgnoreCase(arg)
-                                || "enabled".equalsIgnoreCase(arg);
-                    }
-                    else
-                    {
-                        sender.sendMessage(MessageUtils.prefixes(sender,
-                                CommandStrings.optionValueString()
-                                        .withLocale(locale)
-                                        .resolve("what", targetDisplay, null)
-                                        .resolve("value", config.get(Boolean.class, option) + "")));
-                        return true;
-                    }
-
-                    config.set(option, newVal);
-
-                    sender.sendMessage(MessageUtils.prefixes(sender,
-                            CommandStrings.optionSetString()
-                                    .withLocale(locale)
-                                    .resolve("what", targetDisplay, null)
-                                    .resolve("value", newVal + "")));
-                    return true;
-                })
-                .setPerm("xiamomc.morph.toggle." + perm);
+    private boolean parseBoolean(String input)
+    {
+        return "true".equalsIgnoreCase(input)
+                || "t".equalsIgnoreCase(input)
+                || "on".equalsIgnoreCase(input)
+                || "1".equalsIgnoreCase(input)
+                || "enable".equalsIgnoreCase(input)
+                || "enabled".equalsIgnoreCase(input);
     }
 
     private final List<ISubCommand> subCommands = new ObjectArrayList<>();
