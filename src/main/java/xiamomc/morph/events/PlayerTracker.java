@@ -37,6 +37,19 @@ public class PlayerTracker extends MorphPluginObject implements Listener
      */
     private final Map<Player, Long> lastInteractTime = new ConcurrentHashMap<>();
 
+    public long getLastInteractTime(@Nullable Player player)
+    {
+        if (player == null) return 0L;
+
+        return lastInteractTime.getOrDefault(player, 0L);
+    }
+
+    public boolean interactingLastTick(@Nullable Player player)
+    {
+        var current = plugin.getCurrentTick();
+        return current - getLastInteractTime(player) <= 1L;
+    }
+
     /**
      * 玩家上次互动的动作类型
      */

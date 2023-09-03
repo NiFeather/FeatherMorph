@@ -299,7 +299,77 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
     @Resolved
     private PlayerOperationSimulator operationSimulator;
 
+    /**
+     * 某一模拟进程内的模拟顺序
+     */
     private final Stack<Player> simStack = new Stack<>();
+
+    private void clearStackIfPossible(Player player, boolean forceClear)
+    {
+        //logger.info("Call clear if possible");
+        //如果不成功，同样清空栈
+        if (forceClear)
+        {
+            //logger.info("Force clear");
+            simStack.clear();
+            return;
+        }
+
+        // 清空Stack
+        var targetedEntity = player.getTargetEntity(5);
+        if (targetedEntity instanceof Player targetedPlayer)
+        {
+            //by_name: 直接清空
+            //by_sight: 如果下个不是目标，那么清空
+            var mode = selectionMode.get();
+            if (mode.equalsIgnoreCase(InteractionMirrorSelectionMode.BY_NAME))
+            {
+                simStack.clear();
+            }
+            else
+            {
+                //logger.info("Is by sight");
+                var nextSelection = getMirrorTarget(player);
+                //logger.info("Next sel:" + nextSelection);
+
+                // 如果玩家面向的目标不是下一个mirror对象，那么清空栈
+                if (!targetedPlayer.equals(nextSelection.target))
+                {
+                    //logger.info("Target not equal, clear");
+                    simStack.clear();
+                    return;
+                }
+
+                var targetPlayerTarget = targetedPlayer.getTargetEntity(5);
+
+                //if (debugOutput.get())
+                //    logger.info("Target player target:" + targetPlayerTarget);
+
+                // 如果面向的玩家没有面向任何东西，那么也清空栈
+                if (targetPlayerTarget == null)
+                {
+                    //logger.info("Null target clear");
+                    simStack.clear();
+                    return;
+                }
+
+                // 如果玩家面向的目标也在面向自己，那么清空栈
+                if (player.equals(targetPlayerTarget))
+                {
+                    //logger.info("Circular clear");
+                    simStack.clear();
+                    return;
+                }
+
+                //logger.info("All passes failed");
+            }
+        }
+        else
+        {
+            //logger.info("Outside Null target clear");
+            simStack.clear();
+        }
+    }
 
     /**
      * 模拟玩家操作
@@ -312,8 +382,21 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
     {
         if (!allowSimulation.get()) return false;
 
+        // 如果栈内包含目标玩家，或者此玩家这个tick已经和环境互动过了一次，那么忽略此操作
         if (simStack.contains(targetPlayer) || tracker.interactingThisTick(targetPlayer)) return false;
+
+        // 向栈推送此玩家
         simStack.push(source);
+
+        if (debugOutput.get())
+        {
+            var builder = new StringBuilder();
+
+            simStack.forEach(p -> builder.append(p.getName()).append(" -> "));
+            builder.append("[Not Contained] ").append(targetPlayer.getName());
+
+            logger.info("SimStack: %s :: Tick %s".formatted(builder, plugin.getCurrentTick()));
+        }
 
         var isRightClick = action.isRightClick();
         var result = isRightClick
@@ -336,25 +419,7 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
             success = true;
         }
 
-        // 清空Stack
-        var nextEntity = targetPlayer.getTargetEntity(5);
-        if (nextEntity instanceof Player player)
-        {
-            //by_name: 直接清空
-            //by_sight: 如果下个不是目标，那么清空
-            var mode = selectionMode.get();
-            if (mode.equalsIgnoreCase(InteractionMirrorSelectionMode.BY_NAME)) simStack.clear();
-            else
-            {
-                var nextSelection = getMirrorTarget(targetPlayer);
-                if (!player.equals(nextSelection.target))
-                    simStack.clear();
-            }
-
-            //如果不成功，同样清空栈
-            if (!result.success())
-                simStack.clear();
-        }
+        clearStackIfPossible(targetPlayer, !result.success());
 
         return success;
     }
@@ -469,6 +534,7 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
     private final Bindable<String> selectionMode = new Bindable<>(InteractionMirrorSelectionMode.BY_NAME);
     private final Bindable<Boolean> logOperations = new Bindable<>(false);
     private final Bindable<Integer> cleanUpDate = new Bindable<>(3);
+    private final Bindable<Boolean> debugOutput = new Bindable<>(false);
 
     @Initializer
     private void load()
@@ -486,6 +552,8 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
 
         config.bind(logOperations, ConfigOption.MIRROR_LOG_OPERATION);
         config.bind(cleanUpDate, ConfigOption.MIRROR_LOG_CLEANUP_DATE);
+
+        config.bind(debugOutput, ConfigOption.DEBUG_OUTPUT);
     }
 
     private void update()
