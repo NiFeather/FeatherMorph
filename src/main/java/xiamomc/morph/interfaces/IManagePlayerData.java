@@ -4,8 +4,8 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
-import xiamomc.morph.misc.DisguiseInfo;
-import xiamomc.morph.storage.playerdata.PlayerMorphConfiguration;
+import xiamomc.morph.misc.DisguiseMeta;
+import xiamomc.morph.storage.playerdata.PlayerMeta;
 
 public interface IManagePlayerData
 {
@@ -17,14 +17,14 @@ public interface IManagePlayerData
      * @apiNote 如果原始ID不是有效ID，则会返回null
      */
     @Nullable
-    public DisguiseInfo getDisguiseInfo(String rawString);
+    public DisguiseMeta getDisguiseMeta(String rawString);
 
     /**
      * 获取某一玩家所有可用的伪装
      * @param player 目标玩家
      * @return 目标玩家拥有的伪装
      */
-    public ObjectArrayList<DisguiseInfo> getAvaliableDisguisesFor(Player player);
+    public ObjectArrayList<DisguiseMeta> getAvaliableDisguisesFor(Player player);
 
     /**
      * 将伪装授予某一玩家
@@ -47,7 +47,7 @@ public interface IManagePlayerData
      * @param player 目标玩家
      * @return 伪装信息
      */
-    public PlayerMorphConfiguration getPlayerConfiguration(OfflinePlayer player);
+    public PlayerMeta getPlayerMeta(OfflinePlayer player);
 
     public boolean reloadConfiguration();
 

@@ -44,7 +44,7 @@ public class BlockDestroyHandler
     /**
      * 设置当前方块的破坏进度
      *
-     * @param newProgress 新进度
+     * @param newProgress 新进度 (0 ~ 1)
      * @param currentTick 当前Tick
      * @return 操作是否成功
      */
@@ -69,25 +69,33 @@ public class BlockDestroyHandler
 
         if (block != null)
         {
-            //ServerWorld#setBlockBreakingInfo(int entityId, BlockPos pos, int progress)
-            //nmsPlayer.ah() -> Entity#getId()
-            //
+            newProgress = newProgress > 1f ? -1 : newProgress;
+
             //进度大于1时设置破坏进度为-1避免客户端显示问题
             nmsWorld.destroyBlockProgress(nmsPlayer.getId(),
                     ((CraftBlock) block).getPosition(),
-                    newProgress > 1f ? -1 : (int)(newProgress * 10F) - 1);
+                    clamp(-1, 100, (int)(newProgress * 10F) - 1));
         }
 
         //进度大于1，视为破坏方块
         if (progress > 1)
         {
             lastDestroy = currentTick;
-            player.breakBlock(block);
+
+            if (block != null)
+                player.breakBlock(block);
 
             changeBlock(null);
         }
 
         return true;
+    }
+
+    private int clamp(int min, int max, int val)
+    {
+        return val < min
+                ? min
+                : Math.min(val, max);
     }
 
     /**

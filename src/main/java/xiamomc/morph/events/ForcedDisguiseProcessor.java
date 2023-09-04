@@ -13,6 +13,7 @@ import xiamomc.morph.events.api.gameplay.PlayerMorphEarlyEvent;
 import xiamomc.morph.events.api.gameplay.PlayerMorphEvent;
 import xiamomc.morph.events.api.gameplay.PlayerUnMorphEarlyEvent;
 import xiamomc.morph.events.api.gameplay.PlayerUnMorphEvent;
+import xiamomc.morph.misc.MorphParameters;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
@@ -66,9 +67,9 @@ public class ForcedDisguiseProcessor extends MorphPluginObject implements Listen
         if (state != null)
             manager.unMorph(Bukkit.getConsoleSender(), player, true, true);
 
-        var success = manager.morph(Bukkit.getConsoleSender(), player, targetId,
-                null,
-                true, true);
+        var success = manager.morph(Bukkit.getConsoleSender(), player,
+                targetId, null,
+                MorphParameters.create().setBypassAvailableCheck(true).setBypassPermission(true));
 
         if (!success)
             logger.error("Unable to disguise %s as %s".formatted(player.getName(), targetId));

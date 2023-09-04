@@ -63,7 +63,7 @@ public abstract class DisguiseBackend<TInstance, TWrapper extends DisguiseWrappe
      * @param player 目标玩家
      * @param wrapper 目标Wrapper
      * @return 操作是否成功
-     * @apiNote 传入的wrapper可能不是此后端产出的Wrapper
+     * @apiNote 传入的wrapper可能不是此后端产出的Wrapper，需要对其进行验证
      */
     public abstract boolean disguise(Player player, DisguiseWrapper<?> wrapper);
 

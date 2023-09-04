@@ -15,7 +15,7 @@ import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.backends.DisguiseWrapper;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.MorphStrings;
-import xiamomc.morph.misc.DisguiseInfo;
+import xiamomc.morph.misc.DisguiseMeta;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.misc.DisguiseTypes;
 import xiamomc.morph.misc.MorphGameProfile;
@@ -37,7 +37,7 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
     }
 
     @Override
-    public @NotNull DisguiseResult makeWrapper(Player player, DisguiseInfo disguiseInfo, @Nullable Entity targetEntity)
+    public @NotNull DisguiseResult makeWrapper(Player player, DisguiseMeta disguiseMeta, @Nullable Entity targetEntity)
     {
         if (getMorphManager().getBannedDisguises().contains("minecraft:player"))
         {
@@ -45,16 +45,16 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
             return DisguiseResult.fail();
         }
 
-        var id = disguiseInfo.getIdentifier();
+        var id = disguiseMeta.getIdentifier();
         var backend = getBackend();
 
         if (DisguiseTypes.fromId(id) != DisguiseTypes.PLAYER)
             return DisguiseResult.fail();
 
-        var result = constructFromEntity(disguiseInfo, targetEntity);
+        var result = constructFromEntity(disguiseMeta, targetEntity);
         var disguise = result.success()
                 ? result.wrapperInstance()
-                : backend.createPlayerInstance(disguiseInfo.playerDisguiseTargetName);
+                : backend.createPlayerInstance(disguiseMeta.playerDisguiseTargetName);
 
         var mainHandItem = player.getEquipment().getItemInMainHand();
 
@@ -118,7 +118,7 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
     }
 
     @Override
-    public boolean canConstruct(DisguiseInfo info, Entity targetEntity, @Nullable DisguiseState theirState)
+    public boolean canConstruct(DisguiseMeta info, Entity targetEntity, @Nullable DisguiseState theirState)
     {
         if (theirState != null)
         {
@@ -135,7 +135,7 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
     }
 
     @Override
-    protected boolean canCloneDisguise(DisguiseInfo info, Entity targetEntity,
+    protected boolean canCloneDisguise(DisguiseMeta info, Entity targetEntity,
                                        @NotNull DisguiseState theirState, @NotNull DisguiseWrapper<?> theirDisguise)
     {
         return theirDisguise.getDisguiseName().equals(info.playerDisguiseTargetName) && theirDisguise.isPlayerDisguise();

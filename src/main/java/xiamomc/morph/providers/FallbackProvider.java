@@ -6,7 +6,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.backends.DisguiseWrapper;
-import xiamomc.morph.misc.DisguiseInfo;
+import xiamomc.morph.misc.DisguiseMeta;
 import xiamomc.morph.misc.DisguiseState;
 
 import java.util.List;
@@ -32,19 +32,19 @@ public class FallbackProvider extends DefaultDisguiseProvider
     }
 
     @Override
-    public @NotNull DisguiseResult makeWrapper(Player player, DisguiseInfo disguiseInfo, @Nullable Entity targetEntity)
+    public @NotNull DisguiseResult makeWrapper(Player player, DisguiseMeta disguiseMeta, @Nullable Entity targetEntity)
     {
         return DisguiseResult.fail();
     }
 
     @Override
-    public boolean canConstruct(DisguiseInfo info, Entity targetEntity, @Nullable DisguiseState theirState)
+    public boolean canConstruct(DisguiseMeta info, Entity targetEntity, @Nullable DisguiseState theirState)
     {
         return false;
     }
 
     @Override
-    protected boolean canCloneDisguise(DisguiseInfo info, Entity targetEntity, @NotNull DisguiseState theirState, @NotNull DisguiseWrapper<?> theirDisguise)
+    protected boolean canCloneDisguise(DisguiseMeta info, Entity targetEntity, @NotNull DisguiseState theirState, @NotNull DisguiseWrapper<?> theirDisguise)
     {
         return false;
     }

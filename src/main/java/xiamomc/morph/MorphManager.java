@@ -48,7 +48,7 @@ import xiamomc.morph.skills.SkillType;
 import xiamomc.morph.storage.offlinestore.OfflineDisguiseState;
 import xiamomc.morph.storage.offlinestore.OfflineStateStore;
 import xiamomc.morph.storage.playerdata.PlayerDataStore;
-import xiamomc.morph.storage.playerdata.PlayerMorphConfiguration;
+import xiamomc.morph.storage.playerdata.PlayerMeta;
 import xiamomc.morph.utilities.DisguiseUtils;
 import xiamomc.morph.utilities.NbtUtils;
 import xiamomc.pluginbase.Annotations.Initializer;
@@ -471,9 +471,28 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
      * @param targetEntity 目标实体（如果有）
      * @return 操作是否成功
      */
-    public boolean morph(CommandSender source, Player player, String key, @Nullable Entity targetEntity)
+    public boolean morph(CommandSender source, Player player,
+                         String key, @Nullable Entity targetEntity)
     {
-        return this.morph(source, player, key, targetEntity, false, false);
+        return this.morph(source, player, key, targetEntity, MorphParameters.create());
+    }
+
+    /**
+     * 伪装某一玩家
+     *
+     * @param source 伪装发起方
+     * @param player 目标玩家
+     * @param key 伪装ID
+     * @param targetEntity 目标实体（如果有）
+     * @param forceExecute 是否强制执行
+     * @return 操作是否成功
+     */
+    public boolean morph(CommandSender source, Player player,
+                         String key, @Nullable Entity targetEntity,
+                         boolean forceExecute)
+    {
+        var parameters = MorphParameters.create().setForceExecute(forceExecute);
+        return this.morph(source, player, key, targetEntity, parameters);
     }
 
     /**
@@ -483,17 +502,21 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
      * @param player 要伪装的玩家
      * @param key 伪装ID
      * @param targetEntity 玩家正在看的实体
-     * @param bypassPermission 是否绕过权限检查
-     * @param bypassAvailableCheck 是否绕过持有检查
+     * @param parameters {@link MorphParameters}
      * @return 操作是否成功
      */
-    public boolean morph(CommandSender source, Player player, String key, @Nullable Entity targetEntity,
-                         boolean bypassPermission, boolean bypassAvailableCheck)
+    public boolean morph(@Nullable CommandSender source, Player player,
+                         String key, @Nullable Entity targetEntity,
+                         MorphParameters parameters)
     {
+        // 确保source不为null
+        source = source == null ? nilCommandSource : source;
+
+        // 消息源是否为玩家自己
         var isDirect = source == player;
 
         // 检查玩家是否拥有此伪装的权限
-        if (!bypassPermission)
+        if (!parameters.bypassPermission)
         {
             // 1.玩家是否可以通过指令或客户端伪装
             // 2.玩家是否可以通过此ID伪装；若没有设置，则默认为允许
@@ -520,9 +543,9 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         }
 
         // 检查是否拥有此伪装
-        DisguiseInfo info = null;
+        DisguiseMeta info = null;
 
-        if (!bypassAvailableCheck)
+        if (!parameters.bypassAvailableCheck)
         {
             String finalKey = key;
             info = getAvaliableDisguisesFor(player).stream()
@@ -530,7 +553,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         }
         else if (!key.equals("minecraft:player")) // 禁止不带参数的玩家伪装
         {
-            info = new DisguiseInfo(key, DisguiseTypes.fromId(key));
+            info = new DisguiseMeta(key, DisguiseTypes.fromId(key));
         }
 
         if (info == null)
@@ -572,14 +595,14 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                     if (!result.failedCollisionCheck())
                     {
                         source.sendMessage(MessageUtils.prefixes(source, MorphStrings.errorWhileDisguising()));
-                        logger.error("Unable to apply disguise for player with provider " + provider);
+                        logger.error("Unable to get disguise for player with provider " + provider);
                     }
                     return false;
                 }
 
                 // 调用早期事件
-                var earlyEventPassed = new PlayerMorphEarlyEvent(player, currentState, key).callEvent();
-                if (!earlyEventPassed)
+                var earlyEventPassed = new PlayerMorphEarlyEvent(player, currentState, key, parameters.forceExecute).callEvent();
+                if (!parameters.forceExecute && !earlyEventPassed)
                 {
                     source.sendMessage(MessageUtils.prefixes(source, MorphStrings.operationCancelledString()));
                     return false;
@@ -587,12 +610,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
                 // 重置上个State的伪装
                 if (currentState != null)
-                {
-                    currentState.getProvider().unMorph(player, currentState);
-                    currentState.setAbilities(List.of());
-
-                    currentState.setSkill(null);
-                }
+                    currentState.reset();
 
                 // 交由后端来为玩家套上伪装
                 var backendSuccess = currentBackend.disguise(player, result.wrapperInstance());
@@ -608,7 +626,16 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
                 outComingState = postConstructDisguise(player, targetEntity,
                         info.getIdentifier(), result.wrapperInstance(), result.isCopy(), provider);
+
+                // 解除对currentState的引用
+                currentState = null;
             }
+
+            // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+            //
+            // note: 从这里开始对玩家伪装状态的引用应使用 outComingState 而不是 currentState
+            //
+            // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
             // 初始化nbt
             var compound = provider.getNbtCompound(outComingState, targetEntity);
@@ -631,9 +658,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 if (outComingState.haveProfile())
                     clientHandler.sendCommand(player, new S2CSetProfileCommand(outComingState.getProfileNbtString()));
             }
-
-            // if (outComingState.containsAbility(AbilityType.SPIDER))
-            //    clientHandler.sendCommand(player, new S2CSetSpiderCommand(true));
 
             // 返回消息
             var playerLocale = MessageUtils.getLocale(source);
@@ -674,6 +698,10 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         }
     }
 
+    /**
+     * 将某一客户端指令发送给所有拥有橙字显示权限的玩家
+     * @param cmd 目标指令
+     */
     public void sendCommandToRevealablePlayers(AbstractS2CCommand<?> cmd)
     {
         var target = Bukkit.getOnlinePlayers().stream()
@@ -681,9 +709,11 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 .toList();
 
         target.forEach(p -> clientHandler.sendCommand(p, cmd));
-
     }
 
+    /**
+     * 生成用于橙字显示的map指令
+     */
     public S2CMapCommand genMapCommand()
     {
         var map = new HashMap<Integer, String>();
@@ -693,10 +723,13 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             map.put(player.getEntityId(), player.getName());
         }
 
-        var cmd = new S2CMapCommand(map);
-        return cmd;
+        return new S2CMapCommand(map);
     }
 
+    /**
+     * 生成用于橙字显示的部分map(mapp)指令
+     * @param diff 用于生成的伪装状态
+     */
     public S2CPartialMapCommand genPartialMapCommand(DisguiseState... diff)
     {
         var map = new HashMap<Integer, String>();
@@ -706,8 +739,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             map.put(player.getEntityId(), player.getName());
         }
 
-        var cmd = new S2CPartialMapCommand(map);
-        return cmd;
+        return new S2CPartialMapCommand(map);
     }
 
     /**
@@ -803,11 +835,15 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
      * 取消某一玩家的伪装
      *
      * @param player 目标玩家
-     * @param bypassPermission 是否绕过权限检查（强制取消伪装）
+     * @param bypassPermission 是否绕过权限检查
      * @param source 消息要发送的目标来源
+     * @param forceUnmorph 是否强制执行操作
+     *
+     * @apiNote 如果 forceUnmorph 不为 true，则此操作可以被其他来源取消
      */
-    public void unMorph(CommandSender source, Player player, boolean bypassPermission, boolean forceUnmorph)
+    public void unMorph(@Nullable CommandSender source, Player player, boolean bypassPermission, boolean forceUnmorph)
     {
+        // 确保source不为null
         source = source == null ? nilCommandSource : source;
 
         // 检查玩家是否可以通过指令或客户端取消伪装
@@ -818,9 +854,11 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             return;
         }
 
+        // 获取当前伪装状态
         var state = disguiseStates.stream()
                 .filter(i -> i.getPlayerUniqueID().equals(player.getUniqueId())).findFirst().orElse(null);
 
+        // 如果当前没有状态，则不做任何事
         if (state == null)
             return;
 
@@ -834,16 +872,16 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         }
 
         // 后端的取消操作在Provider里，因此调用Provider的unMorph()
-        state.getProvider().unMorph(player, state);
+        // state.getProvider().unMorph(player, state);
 
-        // 移除所有技能
-        state.setAbilities(List.of());
-        state.setSkill(null);
+        // 重置此State
+        state.reset();
 
         // 如果玩家在线，则生成粒子
         if (player.isOnline())
             spawnParticle(player, player.getLocation(), player.getWidth(), player.getHeight(), player.getWidth());
 
+        // 从disguiseStates里移除此状态
         disguiseStates.remove(state);
 
         // 更新最后操作时间
@@ -855,19 +893,24 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         // 移除Bossbar
         state.setBossbar(null);
 
+        // 从材质map中移除此玩家
         uuidPlayerTexturesMap.remove(player.getUniqueId());
 
+        // 向客户端同步伪装属性
         clientHandler.updateCurrentIdentifier(player, null);
         clientHandler.sendCommand(player, new S2CSetSelfViewIdentifierCommand(null));
 
         var revLevel = revealingHandler.getRevealingState(player).getBaseValue();
         clientHandler.sendCommand(player, new S2CSetRevealingCommand(revLevel));
 
+        //发送消息以及重置actionbar
         source.sendMessage(MessageUtils.prefixes(player, MorphStrings.unMorphSuccessString().withLocale(MessageUtils.getLocale(player))));
         player.sendActionBar(Component.empty());
 
+        // 调用事件
         new PlayerUnMorphEvent(player).callEvent();
 
+        // 向管理员发送map移除指令
         sendCommandToRevealablePlayers(new S2CMapRemoveCommand(player.getEntityId()));
     }
 
@@ -893,13 +936,13 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                                                 String disguiseIdentifier, DisguiseWrapper<?> disguiseWrapper, boolean shouldHandlePose,
                                                 @NotNull DisguiseProvider provider)
     {
-        var playerMorphConfig = getPlayerConfiguration(player);
+        var playerMorphConfig = getPlayerMeta(player);
 
         // 获取此伪装将用来显示的目标装备
         EntityEquipment equipment = null;
 
         var theirState = getDisguiseStateFor(targetedEntity);
-        if (targetedEntity != null && provider.canConstruct(getDisguiseInfo(disguiseIdentifier), targetedEntity, theirState))
+        if (targetedEntity != null && provider.canConstruct(getDisguiseMeta(disguiseIdentifier), targetedEntity, theirState))
         {
             if (theirState != null)
             {
@@ -1070,7 +1113,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     public void setSelfDisguiseVisible(Player player, boolean value, boolean saveToConfig, boolean dontSetServerSide, boolean noClientCommand)
     {
         var state = getDisguiseStateFor(player);
-        var config = data.getPlayerConfiguration(player);
+        var config = data.getPlayerMeta(player);
 
         if (state != null)
         {
@@ -1172,7 +1215,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
             var key = offlineState.disguiseID;
 
-            if (disguiseDisabled(key) || !getPlayerConfiguration(player).getUnlockedDisguiseIdentifiers().contains(key))
+            if (disguiseDisabled(key) || !getPlayerMeta(player).getUnlockedDisguiseIdentifiers().contains(key))
                 return -1;
 
             var disguiseType = DisguiseTypes.fromId(key);
@@ -1183,7 +1226,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             if (disguiseType != DisguiseTypes.LD)
             {
                 var state = DisguiseStateGenerator.fromOfflineState(offlineState,
-                        clientHandler.getPlayerOption(player, true), getPlayerConfiguration(player), skillHandler, currentBackend);
+                        clientHandler.getPlayerOption(player, true), getPlayerMeta(player), skillHandler, currentBackend);
 
                 if (state != null)
                 {
@@ -1212,13 +1255,13 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
     @Override
     @Nullable
-    public DisguiseInfo getDisguiseInfo(String rawString)
+    public DisguiseMeta getDisguiseMeta(String rawString)
     {
-        return data.getDisguiseInfo(rawString);
+        return data.getDisguiseMeta(rawString);
     }
 
     @Override
-    public ObjectArrayList<DisguiseInfo> getAvaliableDisguisesFor(Player player)
+    public ObjectArrayList<DisguiseMeta> getAvaliableDisguisesFor(Player player)
     {
         return data.getAvaliableDisguisesFor(player);
     }
@@ -1232,7 +1275,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         {
             clientHandler.sendDiff(List.of(disguiseIdentifier), null, player);
 
-            var config = data.getPlayerConfiguration(player);
+            var config = data.getPlayerMeta(player);
 
             if (clientHandler.clientConnected(player))
             {
@@ -1264,9 +1307,9 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     }
 
     @Override
-    public PlayerMorphConfiguration getPlayerConfiguration(OfflinePlayer player)
+    public PlayerMeta getPlayerMeta(OfflinePlayer player)
     {
-        return data.getPlayerConfiguration(player);
+        return data.getPlayerMeta(player);
     }
 
     @Override
@@ -1294,7 +1337,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         stateToRecover.forEach(s ->
         {
             var player = s.getPlayer();
-            var config = this.getPlayerConfiguration(player);
+            var config = this.getPlayerMeta(player);
 
             if (!disguiseDisabled(s.getDisguiseIdentifier()) && config.getUnlockedDisguiseIdentifiers().contains(s.getDisguiseIdentifier()))
             {
@@ -1310,7 +1353,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 unMorph(nilCommandSource, player, true, true);
         });
 
-        Bukkit.getOnlinePlayers().forEach(p -> clientHandler.refreshPlayerClientMorphs(this.getPlayerConfiguration(p).getUnlockedDisguiseIdentifiers(), p));
+        Bukkit.getOnlinePlayers().forEach(p -> clientHandler.refreshPlayerClientMorphs(this.getPlayerMeta(p).getUnlockedDisguiseIdentifiers(), p));
 
         return success;
     }

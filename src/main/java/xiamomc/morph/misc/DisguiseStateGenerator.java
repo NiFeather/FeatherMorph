@@ -9,7 +9,7 @@ import xiamomc.morph.network.PlayerOptions;
 import xiamomc.morph.skills.MorphSkillHandler;
 import xiamomc.morph.skills.SkillType;
 import xiamomc.morph.storage.offlinestore.OfflineDisguiseState;
-import xiamomc.morph.storage.playerdata.PlayerMorphConfiguration;
+import xiamomc.morph.storage.playerdata.PlayerMeta;
 import xiamomc.morph.utilities.NbtUtils;
 
 public class DisguiseStateGenerator
@@ -43,7 +43,7 @@ public class DisguiseStateGenerator
      * @return DisguiseState的实例
      */
     public static DisguiseState fromOfflineState(OfflineDisguiseState offlineState,
-                                                 PlayerOptions<Player> playerOptions, PlayerMorphConfiguration playerMorphConfiguration,
+                                                 PlayerOptions<Player> playerOptions, PlayerMeta playerMeta,
                                                  MorphSkillHandler skillHandler, DisguiseBackend<?, ?> backend)
     {
         if (!offlineState.isValid())
@@ -70,7 +70,7 @@ public class DisguiseStateGenerator
         var state = new DisguiseState(player,
                 disguiseIdentifier, targetSkillID,
                 wrapper, true, provider,
-                null, playerOptions, playerMorphConfiguration);
+                null, playerOptions, playerMeta);
 
         //设置NBT和Profile
         state.setCachedProfileNbtString(offlineState.profileString);

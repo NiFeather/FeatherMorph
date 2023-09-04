@@ -42,7 +42,7 @@ public class ToggleSelfSubCommand extends MorphPluginObject implements ISubComma
     {
         if (sender instanceof Player player)
         {
-            manager.setSelfDisguiseVisible(player, !data.getPlayerConfiguration(player).showDisguiseToSelf, true);
+            manager.setSelfDisguiseVisible(player, !data.getPlayerMeta(player).showDisguiseToSelf, true);
         }
         return true;
     }

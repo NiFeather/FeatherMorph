@@ -44,7 +44,7 @@ public class LookupSubCommand extends MorphPluginObject implements ISubCommand
         var offlinePlayer = Bukkit.getOfflinePlayer(targetLookupName);
         var targetLookupKey = args.length >= 2 ? args[1] : "any";
 
-        var configuration = manager.getPlayerConfiguration(offlinePlayer);
+        var configuration = manager.getPlayerMeta(offlinePlayer);
 
         List<String> matches;
 

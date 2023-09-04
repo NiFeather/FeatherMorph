@@ -373,7 +373,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         //如果玩家是第一次用客户端连接，那么等待3秒向其发送提示
         if (clientHandler.clientConnected(player))
         {
-            var config = morphs.getPlayerConfiguration(player);
+            var config = morphs.getPlayerMeta(player);
 
             if (!config.shownMorphClientHint && config.getUnlockedDisguiseIdentifiers().size() > 0)
                 this.addSchedule(() ->

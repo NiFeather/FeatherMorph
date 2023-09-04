@@ -76,7 +76,7 @@ public enum DisguiseTypes
         var idSplited = str.split(":", 3);
         var result = fromNameSpace(idSplited[0]);
 
-        if (result == UNKNOWN && MorphManager.getProvider(idSplited[0]) != null)
+        if (result == UNKNOWN)
             result = EXTERNAL;
 
         return result;

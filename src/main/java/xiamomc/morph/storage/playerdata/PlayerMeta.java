@@ -3,12 +3,12 @@ package xiamomc.morph.storage.playerdata;
 import com.google.gson.annotations.Expose;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.jetbrains.annotations.Nullable;
-import xiamomc.morph.misc.DisguiseInfo;
+import xiamomc.morph.misc.DisguiseMeta;
 import xiamomc.morph.utilities.DisguiseUtils;
 
 import java.util.UUID;
 
-public class PlayerMorphConfiguration
+public class PlayerMeta
 {
     /**
      * 玩家的UUID
@@ -29,18 +29,18 @@ public class PlayerMorphConfiguration
      * @apiNote 移除或添加伪装请使用addDisguise和removeDisguise
      */
     @Expose(serialize = false)
-    private ObjectArrayList<DisguiseInfo> unlockedDisguises = new ObjectArrayList<>();
+    private ObjectArrayList<DisguiseMeta> unlockedDisguises = new ObjectArrayList<>();
 
     private boolean disguiseListLocked = false;
 
-    public ObjectArrayList<DisguiseInfo> getUnlockedDisguises()
+    public ObjectArrayList<DisguiseMeta> getUnlockedDisguises()
     {
         return disguiseListLocked
                 ? new ObjectArrayList<>(unlockedDisguises)
                 : unlockedDisguises;
     }
 
-    public void setUnlockedDisguises(ObjectArrayList<DisguiseInfo> newList)
+    public void setUnlockedDisguises(ObjectArrayList<DisguiseMeta> newList)
     {
         if (disguiseListLocked) throw new IllegalStateException("伪装列表已被锁定，不能设置");
 
@@ -55,13 +55,13 @@ public class PlayerMorphConfiguration
         disguiseListLocked = true;
     }
 
-    public void addDisguise(DisguiseInfo info)
+    public void addDisguise(DisguiseMeta info)
     {
         unlockedDisguiseIdentifiers.add(DisguiseUtils.asString(info));
         unlockedDisguises.add(info);
     }
 
-    public void removeDisguise(DisguiseInfo info)
+    public void removeDisguise(DisguiseMeta info)
     {
         unlockedDisguiseIdentifiers.remove(DisguiseUtils.asString(info));
         unlockedDisguises.remove(info);

@@ -16,17 +16,21 @@ public class PlayerMorphEarlyEvent extends PlayerEvent implements Cancellable
 
     public final String targetId;
 
+    public final boolean isForce;
+
     /**
      * 会在玩家正式进行伪装或更换伪装前触发
      * @param who 玩家
-     * @param state 玩家的{@link DisguiseState}
+     * @param state 玩家的{@link DisguiseState}，如果有
+     * @param isForce 此操作是否为强制执行，若为true则无法取消
      */
-    public PlayerMorphEarlyEvent(@NotNull Player who, @Nullable DisguiseState state, @NotNull String targetId)
+    public PlayerMorphEarlyEvent(@NotNull Player who, @Nullable DisguiseState state, @NotNull String targetId, boolean isForce)
     {
         super(who);
 
         this.targetId = targetId;
         this.state = state;
+        this.isForce = isForce;
     }
 
     public @NotNull String getTargetId()

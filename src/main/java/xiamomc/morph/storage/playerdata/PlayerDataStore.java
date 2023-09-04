@@ -10,7 +10,7 @@ import xiamomc.morph.MorphManager;
 import xiamomc.morph.interfaces.IManagePlayerData;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.MorphStrings;
-import xiamomc.morph.misc.DisguiseInfo;
+import xiamomc.morph.misc.DisguiseMeta;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.misc.DisguiseTypes;
 import xiamomc.morph.storage.MorphJsonBasedStorage;
@@ -19,9 +19,9 @@ import xiamomc.pluginbase.Annotations.Resolved;
 import java.util.List;
 import java.util.Objects;
 
-public class PlayerDataStore extends MorphJsonBasedStorage<PlayerMorphConfigurationContainer> implements IManagePlayerData
+public class PlayerDataStore extends MorphJsonBasedStorage<PlayerMetaContainer> implements IManagePlayerData
 {
-    private final List<DisguiseInfo> cachedInfos = new ObjectArrayList<>();
+    private final List<DisguiseMeta> cachedMetas = new ObjectArrayList<>();
 
     @Resolved
     private MorphManager morphs;
@@ -33,9 +33,9 @@ public class PlayerDataStore extends MorphJsonBasedStorage<PlayerMorphConfigurat
     }
 
     @Override
-    protected @NotNull PlayerMorphConfigurationContainer createDefault()
+    protected @NotNull PlayerMetaContainer createDefault()
     {
-        return new PlayerMorphConfigurationContainer();
+        return new PlayerMetaContainer();
     }
 
     @Override
@@ -51,84 +51,87 @@ public class PlayerDataStore extends MorphJsonBasedStorage<PlayerMorphConfigurat
     {
         var success = super.reloadConfiguration();
 
-        if (success)
+        if (!success) return false;
+
+        if (storingObject.Version < targetConfigurationVersion)
+            migrate(storingObject);
+
+        storingObject.playerMetas.forEach(c ->
         {
-            if (storingObject.Version < targetConfigurationVersion)
-                migrate(storingObject);
+            //要设置给c.unlockedDisguises的列表
+            var list = new ObjectArrayList<DisguiseMeta>();
 
-            storingObject.playerMorphConfigurations.forEach(c ->
+            //原始列表
+            var unlockedDisguiseIdentifiers = c.getUnlockedDisguiseIdentifiers();
+
+            //先对原始列表排序
+            unlockedDisguiseIdentifiers.sort(null);
+
+            //然后逐个添加
+            unlockedDisguiseIdentifiers.forEach(i ->
             {
-                //要设置给c.unlockedDisguises的列表
-                var list = new ObjectArrayList<DisguiseInfo>();
+                var type = DisguiseTypes.fromId(i);
 
-                //原始列表
-                var unlockedDisguiseIdentifiers = c.getUnlockedDisguiseIdentifiers();
-
-                //先对原始列表排序
-                unlockedDisguiseIdentifiers.sort(null);
-
-                //然后逐个添加
-                unlockedDisguiseIdentifiers.forEach(i ->
-                {
-                    var type = DisguiseTypes.fromId(i);
-
-                    if (type != null)
-                        list.add(new DisguiseInfo(i, DisguiseTypes.fromId(i)));
-                    else
-                        logger.warn("Unknown entity identifier: " + i);
-                });
-
-                //设置可用的伪装列表并对其加锁
-                c.setUnlockedDisguises(list);
-                c.lockDisguiseList();
+                if (type != null)
+                    list.add(new DisguiseMeta(i, DisguiseTypes.fromId(i)));
+                else
+                    logger.warn("Unknown entity identifier: " + i);
             });
-        }
 
-        return success;
+            //设置可用的伪装列表并对其加锁
+            c.setUnlockedDisguises(list);
+            c.lockDisguiseList();
+        });
+
+        return true;
     }
 
     private final int targetConfigurationVersion = 4;
 
-    private void migrate(PlayerMorphConfigurationContainer configuration)
+    private void migrate(PlayerMetaContainer configuration)
     {
         //1 -> 2: 玩家名处理
         if (configuration.Version < 2)
-            configuration.playerMorphConfigurations.forEach(c ->
+        {
+            configuration.playerMetas.forEach(c ->
             {
-                 if (Objects.equals(c.playerName, "Unknown")) c.playerName = null;
+                if (Objects.equals(c.playerName, "Unknown")) c.playerName = null;
             });
+        }
 
         //2 -> 3: 从存储EntityType变为存储ID
         if (configuration.Version < 3)
-          configuration.playerMorphConfigurations.forEach(c ->
-          {
-              //新建ID列表
-              var list = new ObjectArrayList<String>();
+        {
+            configuration.playerMetas.forEach(c ->
+            {
+                //新建ID列表
+                var list = new ObjectArrayList<String>();
 
-              //遍历Info
-              c.getUnlockedDisguises().forEach(i ->
-              {
-                  //跳过无效配置
-                  if (i.getDisguiseType() == DisguiseTypes.UNKNOWN)
-                  {
-                      logger.warn("Invalid entity identifier: " + i);
-                      return;
-                  }
+                //遍历Info
+                c.getUnlockedDisguises().forEach(i ->
+                {
+                    //跳过无效配置
+                    if (i.getDisguiseType() == DisguiseTypes.UNKNOWN)
+                    {
+                        logger.warn("Invalid entity identifier: " + i);
+                        return;
+                    }
 
-                  list.add(i.getKey());
-              });
+                    list.add(i.getKey());
+                });
 
-              //设置配置的ID列表
-              c.setUnlockedDisguiseIdentifiers(list);
+                //设置配置的ID列表
+                c.setUnlockedDisguiseIdentifiers(list);
 
-              //移除配置原有的伪装列表
-              c.setUnlockedDisguises(null);
-          });
+                //移除配置原有的伪装列表
+                c.setUnlockedDisguises(null);
+            });
+        }
 
         //3 -> 4: LD的ID从`ld`改为`local`
         if(configuration.Version < 4)
         {
-            configuration.playerMorphConfigurations.forEach(c ->
+            configuration.playerMetas.forEach(c ->
             {
                 var list = new ObjectArrayList<String>();
 
@@ -147,9 +150,9 @@ public class PlayerDataStore extends MorphJsonBasedStorage<PlayerMorphConfigurat
     }
 
     @Override
-    public PlayerMorphConfiguration getPlayerConfiguration(OfflinePlayer player)
+    public PlayerMeta getPlayerMeta(OfflinePlayer player)
     {
-        var value = storingObject.playerMorphConfigurations
+        var value = storingObject.playerMetas
                 .stream().filter(c -> c.uniqueId.equals(player.getUniqueId())).findFirst().orElse(null);
 
         if (value != null)
@@ -160,11 +163,11 @@ public class PlayerDataStore extends MorphJsonBasedStorage<PlayerMorphConfigurat
         }
         else
         {
-            var newInstance = new PlayerMorphConfiguration();
+            var newInstance = new PlayerMeta();
             newInstance.uniqueId = player.getUniqueId();
             newInstance.playerName = player.getName();
 
-            storingObject.playerMorphConfigurations.add(newInstance);
+            storingObject.playerMetas.add(newInstance);
             return newInstance;
         }
     }
@@ -172,14 +175,14 @@ public class PlayerDataStore extends MorphJsonBasedStorage<PlayerMorphConfigurat
     @Override
     public boolean grantMorphToPlayer(Player player, String disguiseIdentifier)
     {
-        var playerConfiguration = getPlayerConfiguration(player);
-        var info = getDisguiseInfo(disguiseIdentifier);
+        var playerConfiguration = getPlayerMeta(player);
+        var meta = getDisguiseMeta(disguiseIdentifier);
 
-        if (info == null) return false;
+        if (meta == null) return false;
 
-        if (playerConfiguration.getUnlockedDisguises().stream().noneMatch(c -> c.equals(info)))
+        if (playerConfiguration.getUnlockedDisguises().stream().noneMatch(c -> c.equals(meta)))
         {
-            playerConfiguration.addDisguise(info);
+            playerConfiguration.addDisguise(meta);
             saveConfiguration();
         }
         else return false;
@@ -189,7 +192,7 @@ public class PlayerDataStore extends MorphJsonBasedStorage<PlayerMorphConfigurat
         sendMorphAcquiredNotification(player, morphs.getDisguiseStateFor(player),
                 MorphStrings.morphUnlockedString()
                         .withLocale(locale)
-                        .resolve("what", info.asComponent(locale))
+                        .resolve("what", meta.asComponent(locale))
                         .toComponent(locale));
 
         return true;
@@ -200,20 +203,20 @@ public class PlayerDataStore extends MorphJsonBasedStorage<PlayerMorphConfigurat
     {
         var avaliableDisguises = getAvaliableDisguisesFor(player);
 
-        var info = avaliableDisguises.stream().filter(d -> d.equals(disguiseIdentifier)).findFirst().orElse(null);
-        if (info == null) return false;
+        var meta = avaliableDisguises.stream().filter(d -> d.equals(disguiseIdentifier)).findFirst().orElse(null);
+        if (meta == null) return false;
 
-        getPlayerConfiguration(player).removeDisguise(info);
+        getPlayerMeta(player).removeDisguise(meta);
         saveConfiguration();
 
         var state = morphs.getDisguiseStateFor(player);
-        if (state != null && info.getKey().equals(state.getDisguiseIdentifier()))
+        if (state != null && meta.getKey().equals(state.getDisguiseIdentifier()))
             morphs.unMorph(player, true);
 
         var locale = MessageUtils.getLocale(player);
         sendMorphAcquiredNotification(player, morphs.getDisguiseStateFor(player),
                 MorphStrings.morphLockedString()
-                        .resolve("what", info.asComponent(locale))
+                        .resolve("what", meta.asComponent(locale))
                         .toComponent(locale));
 
         return true;
@@ -221,20 +224,20 @@ public class PlayerDataStore extends MorphJsonBasedStorage<PlayerMorphConfigurat
 
     @Override
     @Nullable
-    public DisguiseInfo getDisguiseInfo(String rawString)
+    public DisguiseMeta getDisguiseMeta(String rawString)
     {
        var type = DisguiseTypes.fromId(rawString);
 
-        if (this.cachedInfos.stream().noneMatch(o -> o.equals(rawString)))
-            cachedInfos.add(new DisguiseInfo(rawString, type));
+        if (this.cachedMetas.stream().noneMatch(o -> o.equals(rawString)))
+            cachedMetas.add(new DisguiseMeta(rawString, type));
 
-        return cachedInfos.stream().filter(o -> o.equals(rawString)).findFirst().orElse(null);
+        return cachedMetas.stream().filter(o -> o.equals(rawString)).findFirst().orElse(null);
     }
 
     @Override
-    public ObjectArrayList<DisguiseInfo> getAvaliableDisguisesFor(Player player)
+    public ObjectArrayList<DisguiseMeta> getAvaliableDisguisesFor(Player player)
     {
-        return getPlayerConfiguration(player).getUnlockedDisguises();
+        return getPlayerMeta(player).getUnlockedDisguises();
     }
 
     //endregion Implementation of IManagePlayerData

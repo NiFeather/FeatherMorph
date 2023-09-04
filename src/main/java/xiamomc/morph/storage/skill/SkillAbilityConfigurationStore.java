@@ -77,64 +77,62 @@ public class SkillAbilityConfigurationStore extends MorphJsonBasedStorage<SkillA
 
         var success = new AtomicBoolean(val);
 
-        if (val)
-        {
-            try
-            {
-                configToSkillMap.clear();
-                abilityHandler.clearAbilities();
-
-                storingObject.configurations.forEach(c ->
-                {
-                    if (!registerConfiguration(c)) success.set(false);
-
-                    var abilities = new ObjectArrayList<IMorphAbility<?>>();
-
-                    c.getAbilitiyIdentifiers().forEach(i ->
-                    {
-                        if (i.isEmpty()) return;
-
-                        var key = NamespacedKey.fromString(i);
-
-                        if (key == null)
-                            logger.error("Invalid skill identifier: " + i);
-
-                        var ability = abilityHandler.getAbility(key);
-
-                        if (ability != null)
-                        {
-                            abilities.add(ability);
-
-                            if (!ability.setOptionGeneric(c.getIdentifier(), c.getAbilityOptions(ability)))
-                            {
-                                logger.warn("Unable to add skill configuration" + c.getIdentifier() + " -> " + ability.getIdentifier());
-                                success.set(false);
-                            }
-                        }
-                    });
-
-                    abilityHandler.setAbilities(c, abilities);
-                });
-
-                if (storingObject.version < targetVersion)
-                    success.set(migrate(storingObject) || success.get());
-
-                saveConfiguration();
-            }
-            catch (Throwable t)
-            {
-                logger.error("Error occurred while processing skill configurations：" + t.getMessage());
-                t.printStackTrace();
-
-                configToSkillMap.clear();
-                return false;
-            }
-        }
-
         if (!success.get())
             logger.warn("We met some problem reloading, some configurations may not be added.");
 
-        return val;
+        if (!val) return false;
+
+        try
+        {
+            configToSkillMap.clear();
+            abilityHandler.clearAbilities();
+
+            storingObject.configurations.forEach(c ->
+            {
+                if (!registerConfiguration(c)) success.set(false);
+
+                var abilities = new ObjectArrayList<IMorphAbility<?>>();
+
+                c.getAbilitiyIdentifiers().forEach(i ->
+                {
+                    if (i.isEmpty()) return;
+
+                    var key = NamespacedKey.fromString(i);
+
+                    if (key == null)
+                        logger.error("Invalid skill identifier: " + i);
+
+                    var ability = abilityHandler.getAbility(key);
+
+                    if (ability == null) return;
+
+                    abilities.add(ability);
+
+                    if (!ability.setOptionGeneric(c.getIdentifier(), c.getAbilityOptions(ability)))
+                    {
+                        logger.warn("Unable to add skill configuration" + c.getIdentifier() + " -> " + ability.getIdentifier());
+                        success.set(false);
+                    }
+                });
+
+                abilityHandler.setAbilities(c, abilities);
+            });
+
+            if (storingObject.version < targetVersion)
+                success.set(migrate(storingObject) || success.get());
+
+            saveConfiguration();
+        }
+        catch (Throwable t)
+        {
+            logger.error("Error occurred while processing skill configurations：" + t.getMessage());
+            t.printStackTrace();
+
+            configToSkillMap.clear();
+            return false;
+        }
+
+        return true;
     }
 
     /**

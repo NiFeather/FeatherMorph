@@ -28,7 +28,7 @@ public class AcceptSubCommand extends MorphPluginObject implements ISubCommand
 
         if (source instanceof Player player)
         {
-            var reqs = requests.getAvaliableRequestFor(player);
+            var reqs = requests.getAvailableRequestsFor(player);
 
             reqs.forEach(r -> list.add(r.sourcePlayer.getName()));
         }

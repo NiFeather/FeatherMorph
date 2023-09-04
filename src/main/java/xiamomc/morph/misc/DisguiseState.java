@@ -31,7 +31,7 @@ import xiamomc.morph.skills.MorphSkillHandler;
 import xiamomc.morph.skills.SkillCooldownInfo;
 import xiamomc.morph.skills.SkillType;
 import xiamomc.morph.skills.impl.NoneMorphSkill;
-import xiamomc.morph.storage.playerdata.PlayerMorphConfiguration;
+import xiamomc.morph.storage.playerdata.PlayerMeta;
 import xiamomc.morph.utilities.ItemUtils;
 import xiamomc.pluginbase.Annotations.Resolved;
 
@@ -46,20 +46,20 @@ public class DisguiseState extends MorphPluginObject
     public DisguiseState(Player player, @NotNull String id, @NotNull String skillId,
                          @NotNull DisguiseWrapper<?> disguiseInstance, boolean isClone, @NotNull DisguiseProvider provider,
                          @Nullable EntityEquipment targetEquipment, @NotNull PlayerOptions<Player> playerOptions,
-                         @NotNull PlayerMorphConfiguration playerMorphConfiguration)
+                         @NotNull PlayerMeta playerMeta)
     {
         this.player = player;
         this.playerUniqueID = player.getUniqueId();
         this.provider = provider;
         this.playerOptions = playerOptions;
-        this.morphConfiguration = playerMorphConfiguration;
+        this.morphConfiguration = playerMeta;
 
         this.setDisguise(id, skillId, disguiseInstance, isClone, targetEquipment);
     }
 
     private final PlayerOptions<Player> playerOptions;
 
-    private final PlayerMorphConfiguration morphConfiguration;
+    private final PlayerMeta morphConfiguration;
 
     /**
      * 谁在伪装
@@ -667,5 +667,13 @@ public class DisguiseState extends MorphPluginObject
     public void dispose()
     {
         this.disguiseWrapper.dispose();
+    }
+
+    public void reset()
+    {
+        this.provider.unMorph(player, this);
+
+        this.setAbilities(List.of());
+        this.setSkill(null);
     }
 }

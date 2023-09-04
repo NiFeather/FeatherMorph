@@ -11,6 +11,7 @@ import xiamomc.morph.messages.CommonStrings;
 import xiamomc.morph.messages.HelpStrings;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.MorphStrings;
+import xiamomc.morph.misc.MorphParameters;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Command.ISubCommand;
 import xiamomc.pluginbase.Messages.FormattableMessage;
@@ -80,7 +81,13 @@ public class ForceMorphSubCommand extends MorphPluginObject implements ISubComma
             return false;
         }
 
-        manager.morph(commandSender, who, targetName, who.getTargetEntity(3), true, true);
+        var parameters = MorphParameters
+                            .create()
+                            .setForceExecute(true)
+                            .setBypassAvailableCheck(true)
+                            .setBypassPermission(true);
+
+        manager.morph(commandSender, who, targetName, who.getTargetEntity(3), parameters);
         return true;
     }
 

@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.messages.HelpStrings;
-import xiamomc.morph.misc.DisguiseInfo;
+import xiamomc.morph.misc.DisguiseMeta;
 import xiamomc.morph.misc.DisguiseTypes;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Command.IPluginCommand;
@@ -52,7 +52,7 @@ public class MorphPlayerCommand extends MorphPluginObject implements IPluginComm
             var arg = args.get(0).toLowerCase();
 
             var infos = morphManager.getAvaliableDisguisesFor(player)
-                    .stream().filter(DisguiseInfo::isPlayerDisguise).toList();
+                    .stream().filter(DisguiseMeta::isPlayerDisguise).toList();
 
             for (var di : infos)
             {

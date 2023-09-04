@@ -11,7 +11,7 @@ import xiamomc.morph.MorphManager;
 import xiamomc.morph.providers.DisguiseProvider;
 import xiamomc.morph.utilities.EntityTypeUtils;
 
-public class DisguiseInfo
+public class DisguiseMeta
 {
     @SerializedName("Type")
     @Expose(serialize = false)
@@ -74,7 +74,7 @@ public class DisguiseInfo
     @Expose
     public String playerDisguiseTargetName;
 
-    public DisguiseInfo(@NotNull String rawIdentifier, DisguiseTypes disguiseType)
+    public DisguiseMeta(@NotNull String rawIdentifier, DisguiseTypes disguiseType)
     {
         this.rawIdentifier = rawIdentifier;
         this.disguiseType = disguiseType;
@@ -96,7 +96,7 @@ public class DisguiseInfo
     @Override
     public boolean equals(Object other)
     {
-        if (!(other instanceof DisguiseInfo di)) return false;
+        if (!(other instanceof DisguiseMeta di)) return false;
 
         return this.equals(di.rawIdentifier);
     }
@@ -139,7 +139,7 @@ public class DisguiseInfo
     /**
      * 将此info转换为可以显示的Component
      * @return Component
-     * @deprecated 请使用 {@link DisguiseInfo#asComponent(String)}
+     * @deprecated 请使用 {@link DisguiseMeta#asComponent(String)}
      */
     @Deprecated
     public Component asComponent()
@@ -163,6 +163,6 @@ public class DisguiseInfo
     @Override
     public String toString()
     {
-        return "DisguiseInfo[Type=" + this.entityType + ", DisguiseType=" + this.getDisguiseType() + ", targetPlayerName=" + this.playerDisguiseTargetName + "]";
+        return "DisguiseMeta[Type=" + this.entityType + ", DisguiseType=" + this.getDisguiseType() + ", targetPlayerName=" + this.playerDisguiseTargetName + "]";
     }
 }

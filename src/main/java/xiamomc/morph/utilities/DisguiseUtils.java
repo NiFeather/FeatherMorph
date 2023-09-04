@@ -6,7 +6,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Pose;
 import org.bukkit.inventory.ItemStack;
-import xiamomc.morph.misc.DisguiseInfo;
+import xiamomc.morph.misc.DisguiseMeta;
 import xiamomc.morph.misc.NmsRecord;
 
 import java.util.Arrays;
@@ -18,7 +18,7 @@ public class DisguiseUtils
 
     private static final String customDataTagName = "XIAMO_MORPH";
 
-    public static String asString(DisguiseInfo info)
+    public static String asString(DisguiseMeta info)
     {
         return info.getKey();
     }

@@ -37,5 +37,5 @@ public interface IManageRequests
      * @param player 目标玩家
      * @return 请求列表
      */
-    public List<RequestInfo> getAvaliableRequestFor(Player player);
+    public List<RequestInfo> getAvailableRequestsFor(Player player);
 }

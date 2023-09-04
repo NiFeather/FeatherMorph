@@ -172,7 +172,7 @@ public class RequestManager extends MorphPluginObject implements IManageRequests
     }
 
     @Override
-    public List<RequestInfo> getAvaliableRequestFor(Player player)
+    public List<RequestInfo> getAvailableRequestsFor(Player player)
     {
         return requests.stream()
                 .filter(t -> t.targetPlayer.getUniqueId().equals(player.getUniqueId()))

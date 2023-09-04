@@ -404,7 +404,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
         playerStateMap.remove(player);
         playerConnectionStates.remove(player);
 
-        var playerConfig = manager.getPlayerConfiguration(player);
+        var playerConfig = manager.getPlayerMeta(player);
         var state = manager.getDisguiseStateFor(player);
         if (state != null) state.setServerSideSelfVisible(playerConfig.showDisguiseToSelf);
     }
@@ -587,7 +587,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
             if (clientInitialized(player))
                 return;
 
-            var config = manager.getPlayerConfiguration(player);
+            var config = manager.getPlayerMeta(player);
             var list = config.getUnlockedDisguiseIdentifiers();
             refreshPlayerClientMorphs(list, player);
 
@@ -657,7 +657,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
         Player player = c2SToggleSelfCommand.getOwner();
 
         var playerOption = this.getPlayerOption(player, true);
-        var playerConfig = manager.getPlayerConfiguration(player);
+        var playerConfig = manager.getPlayerMeta(player);
 
         switch (c2SToggleSelfCommand.getSelfViewMode())
         {

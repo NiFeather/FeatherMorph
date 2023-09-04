@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.backends.DisguiseWrapper;
 import xiamomc.morph.backends.libsdisg.LibsBackend;
-import xiamomc.morph.misc.DisguiseInfo;
+import xiamomc.morph.misc.DisguiseMeta;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.misc.DisguiseTypes;
 
@@ -64,12 +64,12 @@ public class ItemDisplayProvider extends DefaultDisguiseProvider
      * 为某个玩家创建 {@link DisguiseWrapper}
      *
      * @param player       目标玩家
-     * @param disguiseInfo 伪装ID
+     * @param disguiseMeta 伪装ID
      * @param targetEntity 玩家的目标实体(如果有), 可用来判断是否要复制伪装
      * @return 操作结果
      */
     @Override
-    public @NotNull DisguiseResult makeWrapper(Player player, DisguiseInfo disguiseInfo, @Nullable Entity targetEntity)
+    public @NotNull DisguiseResult makeWrapper(Player player, DisguiseMeta disguiseMeta, @Nullable Entity targetEntity)
     {
         var currentBackend = getBackend();
 
@@ -79,7 +79,7 @@ public class ItemDisplayProvider extends DefaultDisguiseProvider
             return DisguiseResult.fail();
         }
 
-        var material = getMaterialFromId(disguiseInfo.rawIdentifier);
+        var material = getMaterialFromId(disguiseMeta.rawIdentifier);
         if (material == null) return DisguiseResult.fail();
 
         var wrapper = backend.createItemDisplay(material);
@@ -94,15 +94,15 @@ public class ItemDisplayProvider extends DefaultDisguiseProvider
     }
 
     /**
-     * 我们是否可以通过给定的{@link DisguiseInfo}来从某个实体构建伪装?
+     * 我们是否可以通过给定的{@link DisguiseMeta}来从某个实体构建伪装?
      *
-     * @param info         {@link DisguiseInfo}
+     * @param info         {@link DisguiseMeta}
      * @param targetEntity 目标实体
      * @param theirState   他们的{@link DisguiseState}，为null则代表他们不是玩家或没有通过MorphPlugin伪装
      * @return 是否允许此操作，如果theirState不为null则优先检查theirState是否和传入的info相匹配
      */
     @Override
-    public boolean canConstruct(DisguiseInfo info, Entity targetEntity, @Nullable DisguiseState theirState)
+    public boolean canConstruct(DisguiseMeta info, Entity targetEntity, @Nullable DisguiseState theirState)
     {
         return false;
     }
@@ -110,14 +110,14 @@ public class ItemDisplayProvider extends DefaultDisguiseProvider
     /**
      * 是否可以克隆某个实体现有的伪装?
      *
-     * @param info          {@link DisguiseInfo}
+     * @param info          {@link DisguiseMeta}
      * @param targetEntity  目标实体
      * @param theirState    他们的{@link DisguiseState}，为null则代表他们不是玩家或没有通过MorphPlugin伪装
      * @param theirDisguise 他们目前应用的伪装
      * @return 是否允许此操作
      */
     @Override
-    protected boolean canCloneDisguise(DisguiseInfo info, Entity targetEntity, @NotNull DisguiseState theirState, @NotNull DisguiseWrapper<?> theirDisguise)
+    protected boolean canCloneDisguise(DisguiseMeta info, Entity targetEntity, @NotNull DisguiseState theirState, @NotNull DisguiseWrapper<?> theirDisguise)
     {
         return false;
     }

@@ -14,6 +14,7 @@ public class PlayerUnMorphEarlyEvent extends PlayerEvent implements Cancellable
     /**
      * 会在取消伪装的早期处理过程中触发，此时玩家尚未正式取消伪装
      * @param who 玩家
+     * @param isForceUnmorph 此操作是否为强制执行，若为true则无法取消
      */
     public PlayerUnMorphEarlyEvent(@NotNull Player who, @NotNull DisguiseState state, boolean isForceUnmorph)
     {

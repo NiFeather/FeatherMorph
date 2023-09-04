@@ -13,7 +13,7 @@ import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.backends.DisguiseWrapper;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
-import xiamomc.morph.misc.DisguiseInfo;
+import xiamomc.morph.misc.DisguiseMeta;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.network.commands.S2C.AbstractS2CCommand;
 import xiamomc.morph.utilities.NbtUtils;
@@ -53,11 +53,11 @@ public abstract class DisguiseProvider extends MorphPluginObject
      * 为目标玩家构建一个用于伪装的 {@link DisguiseWrapper}
      *
      * @param player 目标玩家
-     * @param disguiseInfo 伪装ID
+     * @param disguiseMeta 伪装ID
      * @param targetEntity 玩家的目标实体(如果有), 可用来判断是否要复制伪装
      */
     @NotNull
-    public abstract DisguiseResult makeWrapper(Player player, DisguiseInfo disguiseInfo, @Nullable Entity targetEntity);
+    public abstract DisguiseResult makeWrapper(Player player, DisguiseMeta disguiseMeta, @Nullable Entity targetEntity);
 
     /**
      * 更新某个伪装的状态
@@ -95,7 +95,7 @@ public abstract class DisguiseProvider extends MorphPluginObject
     public CompoundTag getNbtCompound(DisguiseState state, Entity targetEntity)
     {
         if (targetEntity instanceof CraftLivingEntity
-            && canConstruct(getMorphManager().getDisguiseInfo(state.getDisguiseIdentifier()), targetEntity, null))
+            && canConstruct(getMorphManager().getDisguiseMeta(state.getDisguiseIdentifier()), targetEntity, null))
         {
             var rawCompound = NbtUtils.getRawTagCompound(targetEntity);
 
@@ -170,7 +170,7 @@ public abstract class DisguiseProvider extends MorphPluginObject
      * @return 一个包含伪装Wrapper的 {@link DisguiseResult}, 失败时返回 {@link DisguiseResult#FAIL}
      */
     @NotNull
-    protected DisguiseResult constructFromEntity(DisguiseInfo info, @Nullable Entity target)
+    protected DisguiseResult constructFromEntity(DisguiseMeta info, @Nullable Entity target)
     {
         if (target == null) return DisguiseResult.fail();
 
@@ -202,26 +202,26 @@ public abstract class DisguiseProvider extends MorphPluginObject
     }
 
     /**
-     * 我们是否可以通过给定的{@link DisguiseInfo}来从某个实体构建伪装?
+     * 我们是否可以通过给定的{@link DisguiseMeta}来从某个实体构建伪装?
      *
-     * @param info {@link DisguiseInfo}
+     * @param info {@link DisguiseMeta}
      * @param targetEntity 目标实体
      * @param theirState 他们的{@link DisguiseState}，为null则代表他们不是玩家或没有通过MorphPlugin伪装
      * @return 是否允许此操作，如果theirState不为null则优先检查theirState是否和传入的info相匹配
      */
-    public abstract boolean canConstruct(DisguiseInfo info, Entity targetEntity,
-                                            @Nullable DisguiseState theirState);
+    public abstract boolean canConstruct(DisguiseMeta info, Entity targetEntity,
+                                         @Nullable DisguiseState theirState);
 
     /**
      * 是否可以克隆某个实体现有的伪装?
      *
-     * @param info {@link DisguiseInfo}
+     * @param info {@link DisguiseMeta}
      * @param targetEntity 目标实体
      * @param theirDisguise 他们目前应用的伪装
      * @param theirState 他们的{@link DisguiseState}，为null则代表他们不是玩家或没有通过MorphPlugin伪装
      * @return 是否允许此操作
      */
-    protected abstract boolean canCloneDisguise(DisguiseInfo info, Entity targetEntity,
+    protected abstract boolean canCloneDisguise(DisguiseMeta info, Entity targetEntity,
                                                 @NotNull DisguiseState theirState, @NotNull DisguiseWrapper<?> theirDisguise);
 
     /**

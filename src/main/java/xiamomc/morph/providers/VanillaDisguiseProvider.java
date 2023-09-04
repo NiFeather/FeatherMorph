@@ -5,14 +5,10 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.kyori.adventure.text.Component;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.TagParser;
-import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import org.bukkit.Bukkit;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.attribute.AttributeModifier;
-import org.bukkit.craftbukkit.v1_20_R1.entity.CraftEntity;
-import org.bukkit.craftbukkit.v1_20_R1.entity.CraftLivingEntity;
-import org.bukkit.craftbukkit.v1_20_R1.entity.CraftMob;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
@@ -26,7 +22,7 @@ import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.MorphStrings;
 import xiamomc.morph.messages.vanilla.VanillaMessageStore;
-import xiamomc.morph.misc.DisguiseInfo;
+import xiamomc.morph.misc.DisguiseMeta;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.misc.DisguiseTypes;
 import xiamomc.morph.misc.NmsRecord;
@@ -104,9 +100,9 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
 
     @Override
     @NotNull
-    public DisguiseResult makeWrapper(Player player, DisguiseInfo disguiseInfo, @Nullable Entity targetEntity)
+    public DisguiseResult makeWrapper(Player player, DisguiseMeta disguiseMeta, @Nullable Entity targetEntity)
     {
-        var identifier = disguiseInfo.getIdentifier();
+        var identifier = disguiseMeta.getIdentifier();
 
         DisguiseWrapper<?> constructedDisguise;
         var backend = getBackend();
@@ -119,7 +115,7 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
             return DisguiseResult.fail();
         }
 
-        var copyResult = constructFromEntity(disguiseInfo, targetEntity);
+        var copyResult = constructFromEntity(disguiseMeta, targetEntity);
 
         constructedDisguise = copyResult.success()
                 ? copyResult.wrapperInstance() //copyResult.success() -> wrapperInstance() != null
@@ -323,7 +319,7 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
     @Override
     public @Nullable CompoundTag getNbtCompound(DisguiseState state, Entity targetEntity)
     {
-        var info = getMorphManager().getDisguiseInfo(state.getDisguiseIdentifier());
+        var info = getMorphManager().getDisguiseMeta(state.getDisguiseIdentifier());
 
         var rawCompound = targetEntity != null && canConstruct(info, targetEntity, null)
                 ? NbtUtils.getRawTagCompound(targetEntity)
@@ -367,7 +363,7 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
     }
 
     @Override
-    public boolean canConstruct(DisguiseInfo info, Entity targetEntity, DisguiseState theirState)
+    public boolean canConstruct(DisguiseMeta info, Entity targetEntity, DisguiseState theirState)
     {
         return theirState != null
                 ? theirState.getDisguiseWrapper().getEntityType().equals(info.getEntityType())
@@ -375,7 +371,7 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
     }
 
     @Override
-    protected boolean canCloneDisguise(DisguiseInfo info, Entity targetEntity,
+    protected boolean canCloneDisguise(DisguiseMeta info, Entity targetEntity,
                                        @NotNull DisguiseState theirDisguiseState, @NotNull DisguiseWrapper<?> theirDisguise)
     {
         return theirDisguise.getEntityType().equals(info.getEntityType());
