@@ -2,12 +2,14 @@ package xiamomc.morph.commands.subcommands.plugin;
 
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.commands.MorphPluginCommand;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.UpdateStrings;
 import xiamomc.morph.misc.UpdateHandler;
+import xiamomc.morph.misc.permissions.CommonPermissions;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Command.ISubCommand;
 import xiamomc.pluginbase.Messages.FormattableMessage;
@@ -18,6 +20,12 @@ public class CheckUpdateSubCommand extends MorphPluginObject implements ISubComm
     public @NotNull String getCommandName()
     {
         return "check_update";
+    }
+
+    @Override
+    public @Nullable String getPermissionRequirement()
+    {
+        return CommonPermissions.CHECK_UPDATE;
     }
 
     /**
@@ -39,7 +47,7 @@ public class CheckUpdateSubCommand extends MorphPluginObject implements ISubComm
     {
         sender.sendMessage(MessageUtils.prefixes(sender, UpdateStrings.checkingUpdate()));
         handler.checkUpdate(true, result ->
-                this.onRequestFinish(result, sender));
+                this.onRequestFinish(result, sender), sender);
 
         return true;
     }

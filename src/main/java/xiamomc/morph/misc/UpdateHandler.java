@@ -12,6 +12,8 @@ import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.core5.net.URIBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
+import org.bukkit.craftbukkit.v1_20_R1.command.ServerCommandSender;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.MorphPluginObject;
@@ -19,6 +21,7 @@ import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.UpdateStrings;
+import xiamomc.morph.misc.permissions.CommonPermissions;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
@@ -58,15 +61,15 @@ public class UpdateHandler extends MorphPluginObject
         this.addSchedule(this::update, 3 * 60 * 60 * 20);
 
         if (checkUpdate.get())
-            this.checkUpdate(true);
+            this.checkUpdate(true, null);
     }
 
-    public void checkUpdate(boolean sendMessages)
+    public void checkUpdate(boolean sendMessages, @Nullable CommandSender forwardTarget)
     {
-        this.checkUpdate(sendMessages, null);
+        this.checkUpdate(sendMessages, null, forwardTarget);
     }
 
-    public void checkUpdate(boolean sendMessages, @Nullable Consumer<CheckResult> onFinish)
+    public void checkUpdate(boolean sendMessages, @Nullable Consumer<CheckResult> onFinish, @Nullable CommandSender forwardTarget)
     {
         if (this.sched != null)
         {
@@ -75,10 +78,10 @@ public class UpdateHandler extends MorphPluginObject
         }
 
         //Run async
-        this.sched = this.addSchedule(() -> doCheckUpdate(sendMessages, onFinish), 0, true);
+        this.sched = this.addSchedule(() -> doCheckUpdate(sendMessages, onFinish, forwardTarget), 0, true);
     }
 
-    private void doCheckUpdate(boolean sendMessages, @Nullable Consumer<CheckResult> onFinish)
+    private void doCheckUpdate(boolean sendMessages, @Nullable Consumer<CheckResult> onFinish, @Nullable CommandSender forwardTarget)
     {
         logger.info("Checking updates...");
         updateAvailable = false;
@@ -118,12 +121,11 @@ public class UpdateHandler extends MorphPluginObject
                 return;
             }
 
-            this.onUpdateReqFinish(response, reqId, sendMessages, onFinish);
+            this.onUpdateReqFinish(response, reqId, sendMessages, onFinish, forwardTarget);
         }
         catch (Throwable t)
         {
             this.onUpdateReqFail(t, reqId, onFinish);
-
 
             if (onFinish != null)
                 onFinish.accept(CheckResult.FAIL);
@@ -142,7 +144,9 @@ public class UpdateHandler extends MorphPluginObject
         e.printStackTrace();
     }
 
-    private void onUpdateReqFinish(CloseableHttpResponse response, int reqId, boolean sendMessages, @Nullable Consumer<CheckResult> onFinish)
+    private void onUpdateReqFinish(CloseableHttpResponse response, int reqId,
+                                   boolean sendMessages, @Nullable Consumer<CheckResult> onFinish,
+                                   @Nullable CommandSender forwardTarget)
     {
         if (this.requestId.get() != reqId)
             return;
@@ -194,12 +198,21 @@ public class UpdateHandler extends MorphPluginObject
             var serverOps = Bukkit.getOperators();
             var sendTargets = new ObjectArrayList<CommandSender>();
 
-            serverOps.forEach(offlinePlayer ->
+            if (forwardTarget == null)
             {
-                var onlinePlayer = offlinePlayer.getPlayer();
-                if (onlinePlayer != null)
-                    sendTargets.add(onlinePlayer);
-            });
+                serverOps.forEach(offlinePlayer ->
+                {
+                    var onlinePlayer = offlinePlayer.getPlayer();
+                    if (onlinePlayer != null && onlinePlayer.hasPermission(CommonPermissions.CHECK_UPDATE))
+                        sendTargets.add(onlinePlayer);
+                });
+            }
+            else
+            {
+                if (!(forwardTarget instanceof ServerCommandSender || forwardTarget instanceof ConsoleCommandSender))
+                    sendTargets.add(forwardTarget);
+            }
+
             sendTargets.add(Bukkit.getConsoleSender());
 
             this.msgPrimary = UpdateStrings.newVersionAvailable()

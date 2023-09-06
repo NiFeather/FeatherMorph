@@ -21,4 +21,6 @@ public class CommonPermissions
     public final static String MIRROR_IMMUNE = PERM_ROOT + "mirror.immune";
 
     public final static String DISGUISE_REVEALING = PERM_ROOT + "disguise_revealing";
+
+    public final static String CHECK_UPDATE = PERM_ROOT + "check_update";
 }
