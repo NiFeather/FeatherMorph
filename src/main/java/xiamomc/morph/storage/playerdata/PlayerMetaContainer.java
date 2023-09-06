@@ -9,6 +9,7 @@ import java.util.List;
 public class PlayerMetaContainer
 {
     @Expose
+    @SerializedName("playerMorphConfigurations")
     public List<PlayerMeta> playerMetas = new ObjectArrayList<>();
 
     @Expose
