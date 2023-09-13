@@ -42,7 +42,7 @@ root:
 
   # Should we enable the "Disguise Revealing" feature?
   # For more information, please check: https://modrinth.com/plugin/feathermorph/version/0.12.3-1
-  revealing: true
+  revealing: false
 
   # Skill cooldown on damage.
   # Defines how many ticks should a player wait at least before they activate the skill again when they get damaged.

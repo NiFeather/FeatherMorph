@@ -81,7 +81,7 @@ public enum ConfigOption
     @Deprecated
     DEBUG_OUTPUT(ConfigNode.create().append("debug_output"), false, true),
 
-    REVEALING(ConfigNode.create().append("revealing"), true),
+    REVEALING(ConfigNode.create().append("revealing"), false),
 
     CHECK_UPDATE(ConfigNode.create().append("check_update"), true),
 
