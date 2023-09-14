@@ -89,6 +89,8 @@ public enum ConfigOption
 
     FORCED_DISGUISE(ConfigNode.create().append("forced_disguise"), MorphManager.forcedDisguiseNoneId),
 
+    ALLOW_FLIGHT(ConfigNode.create().append("allow_flight"), true),
+
     VERSION(ConfigNode.create().append("version"), 0);
 
     public final ConfigNode node;

@@ -1,10 +1,7 @@
 package xiamomc.morph.events;
 
-import org.bukkit.craftbukkit.v1_20_R1.entity.CraftLivingEntity;
 import org.bukkit.craftbukkit.v1_20_R1.entity.CraftMob;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -12,19 +9,15 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
-import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.inventory.EquipmentSlot;
-import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.RevealingHandler;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.events.api.gameplay.PlayerMorphEvent;
 import xiamomc.morph.events.api.gameplay.PlayerUnMorphEvent;
-import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.misc.DisguiseTypes;
 import xiamomc.morph.misc.NmsRecord;
 import xiamomc.pluginbase.Annotations.Initializer;
@@ -102,7 +95,7 @@ public class RevealingEventProcessor extends MorphPluginObject implements Listen
 
         if (!revState.haveBindingState()) return;
         if (revState.bindingState.getDisguiseType() == DisguiseTypes.PLAYER) return;
-        revState.addBaseValue(RevealingHandler.RevealingDiffs.ON_DAMAGE);
+        revState.addBaseValue(RevealingHandler.RevealingDiffs.TAKE_DAMAGE);
     }
 
     @EventHandler

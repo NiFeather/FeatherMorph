@@ -69,7 +69,11 @@ public class FlyAbility extends MorphAbility<FlyOption>
 
         configManager.getBindable(Boolean.class, ConfigOption.FLYABILITY_IDLE_CONSUME).onValueChanged((o, n) ->
                 idleConsumption = n ? 0.1D : 0D, true);
+
+        configManager.bind(allowFlight, ConfigOption.ALLOW_FLIGHT);
     }
+
+    private final Bindable<Boolean> allowFlight = new Bindable<>(true);
 
     private final float exhaustionBase = 0.005f;
     private double idleConsumption = 0.25F * 0.2;
@@ -79,45 +83,45 @@ public class FlyAbility extends MorphAbility<FlyOption>
     public boolean handle(Player player, DisguiseState state)
     {
         var gameMode = player.getGameMode();
-        if (gameMode != GameMode.CREATIVE && gameMode != GameMode.SPECTATOR)
+        if (gameMode == GameMode.CREATIVE || gameMode == GameMode.SPECTATOR)
+            return super.handle(player, state);
+
+        var nmsPlayer = ((CraftPlayer) player).getHandle();
+        var config = options.get(state.getSkillLookupIdentifier());
+
+        var data = nmsPlayer.getFoodData();
+        var allowFlight = this.allowFlight.get() && data.foodLevel > config.getMinimumHunger();
+
+        if (player.isFlying())
         {
-            var nmsPlayer = ((CraftPlayer) player).getHandle();
-            var config = options.get(state.getSkillLookupIdentifier());
+            float exhaustion;
 
-            var data = nmsPlayer.getFoodData();
-            var allowFlight = data.foodLevel > config.getMinimumHunger();
+            double delta;
 
-            if (player.isFlying())
+            // 当玩家骑乘实体时不要计算位移
+            if (player.getVehicle() == null)
             {
-                float exhaustion;
-
-                double delta;
-
-                // 当玩家骑乘实体时不要计算位移
-                if (player.getVehicle() == null)
-                {
-                    var old = new Vec3(nmsPlayer.xOld, nmsPlayer.yOld, nmsPlayer.zOld);
-                    var cur = nmsPlayer.position();
-                    delta = Math.max(idleConsumption, cur.distanceTo(old));
-                }
-                else
-                    delta = 0;
-
-                exhaustion = handleMovementForSpeed(delta);
-
-                data.addExhaustion(exhaustion);
-
-                if (player.getTicksLived() % 5 == 0)
-                    player.getWorld().sendGameEvent(player, GameEvent.FLAP, player.getLocation().toVector());
-
-                if (!allowFlight)
-                    player.setFlying(false);
+                var old = new Vec3(nmsPlayer.xOld, nmsPlayer.yOld, nmsPlayer.zOld);
+                var cur = nmsPlayer.position();
+                delta = Math.max(idleConsumption, cur.distanceTo(old));
             }
+            else
+                delta = 0;
 
-            var playerCanFly = nmsPlayer.getAbilities().mayfly;
-            if (playerCanFly != allowFlight)
-                player.setAllowFlight(allowFlight);
+            exhaustion = handleMovementForSpeed(delta);
+
+            data.addExhaustion(exhaustion);
+
+            if (player.getTicksLived() % 5 == 0)
+                player.getWorld().sendGameEvent(player, GameEvent.FLAP, player.getLocation().toVector());
+
+            if (!allowFlight)
+                player.setFlying(false);
         }
+
+        var playerCanFly = nmsPlayer.getAbilities().mayfly;
+        if (playerCanFly != allowFlight)
+            player.setAllowFlight(allowFlight);
 
         return super.handle(player, state);
     }

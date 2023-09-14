@@ -10,6 +10,9 @@ root:
   # Allow players acquire morphs by killing mobs and other players?
   allow_acquire_morphs: true
 
+  # Allow players to fly if they disguised as a mob that can fly?
+  allow_flight: true
+
   # Disguise as the id given below when they join the server.
   # If an invalid ID is provided, this option may not take place.
   forced_disguise: "@none"
@@ -230,4 +233,4 @@ root:
     log_outgoing_packets: false
 
   # Do not touch unless you know what you're doing!
-  version: 24
+  version: 26

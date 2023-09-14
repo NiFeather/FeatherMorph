@@ -190,7 +190,7 @@ public class RevealingHandler extends MorphPluginObject
      */
     public enum RevealingLevel
     {
-        NORMAL(0),
+        SAFE(0),
         SUSPECT(20),
         REVEALED(80);
 
@@ -228,8 +228,8 @@ public class RevealingHandler extends MorphPluginObject
             var keyArray = valueLevelMap.keySet().stream()
                     .filter(f -> val > f).toList();
 
-            return keyArray.size() == 0 ? NORMAL : valueLevelMap
-                    .getOrDefault(keyArray.get(keyArray.size() - 1), NORMAL);
+            return keyArray.size() == 0 ? SAFE : valueLevelMap
+                    .getOrDefault(keyArray.get(keyArray.size() - 1), SAFE);
         }
     }
 
@@ -248,7 +248,7 @@ public class RevealingHandler extends MorphPluginObject
         /**
          * 自然递增
          */
-        public static final float NATURAL_INCREASEMENT = -(NATURAL_DIFFBASE * 0.5f) / 5;
+        public static final float NATURAL_INCREASEMENT = -NATURAL_DIFFBASE / 10;
 
         /**
          * 被生物注意
@@ -258,34 +258,29 @@ public class RevealingHandler extends MorphPluginObject
         /**
          * 受伤
          */
-        public static final float ON_DAMAGE = 1.5f;
+        public static final float TAKE_DAMAGE = 1.5f;
 
-        public static final float DEAL_DAMAGE = ON_DAMAGE / 4;
+        public static final float DEAL_DAMAGE = TAKE_DAMAGE / 4;
 
         /**
          * 和任意方块互动
          */
-        public static final float INTERACT = 0.8f;
+        public static final float INTERACT = 0.4f;
 
         /**
          * 和任意实体互动
          */
-        public static final float INTERACT_ENTITY = 0.8f;
-
-        /**
-         * 破坏金块（猪灵）
-         */
-        public static final int BREAK_GOLD_BLOCK = 20;
+        public static final float INTERACT_ENTITY = 0.4f;
 
         /**
          * 主动破坏方块
          */
-        public static final float BLOCK_BREAK = 0.9f;
+        public static final float BLOCK_BREAK = 0.45f;
 
         /**
          * 主动放置方块
          */
-        public static final float BLOCK_PLACE = 0.9f;
+        public static final float BLOCK_PLACE = 0.45f;
 
         /**
          * 变形时已经被生物当作目标
