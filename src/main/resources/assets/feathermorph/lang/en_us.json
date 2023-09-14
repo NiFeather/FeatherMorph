@@ -119,6 +119,8 @@
   "morph.state.reset": "Some feature has been reset, we are now canceling your disguise...",
   "morph.unmorph_success": "Undisguised",
   "morph.operation_cancelled": "<red>Operation cancelled by other sources",
+  "morph.disguise_revealed": " (Revealed)",
+  "morph.partial_damaged": " (Partial Revealed)",
   "update.msg_header_footer": "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-",
   "update.checking_update": "Checking update...",
   "update.new_version_available": "A newer version of FeatherMorph has been released！(<current> -> <origin>)",

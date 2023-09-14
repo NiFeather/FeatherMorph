@@ -205,6 +205,18 @@ public class MorphStrings extends AbstractMorphStrings
                 "<red>操作被其他来源取消");
     }
 
+    public static FormattableMessage revealed()
+    {
+        return getFormattable(getKey("disguise_revealed"),
+                "（伪装已暴露）");
+    }
+
+    public static FormattableMessage partialRevealed()
+    {
+        return getFormattable(getKey("partial_damaged"),
+                "（部分暴露）");
+    }
+
     private static String getKey(String key)
     {
         return "morph." + key;

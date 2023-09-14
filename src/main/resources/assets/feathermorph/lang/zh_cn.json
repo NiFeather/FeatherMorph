@@ -119,6 +119,8 @@
   "morph.state.reset": "相关功能已禁用，正在取消您的伪装...",
   "morph.unmorph_success": "已取消伪装",
   "morph.operation_cancelled": "<red>操作被其他来源取消",
+  "morph.disguise_revealed": "（已暴露）",
+  "morph.partial_damaged": "（部分暴露）",
   "update.msg_header_footer": "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-",
   "update.checking_update": "检查更新中...",
   "update.new_version_available": "FeatherMorph有新版本辣！(<current> -> <origin>)",

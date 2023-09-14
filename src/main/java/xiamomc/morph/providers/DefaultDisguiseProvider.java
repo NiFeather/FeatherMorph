@@ -1,6 +1,7 @@
 package xiamomc.morph.providers;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -11,6 +12,7 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.scoreboard.Scoreboard;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xiamomc.morph.RevealingHandler;
 import xiamomc.morph.abilities.AbilityHandler;
 import xiamomc.morph.backends.DisguiseBackend;
 import xiamomc.morph.messages.MessageUtils;
@@ -60,6 +62,9 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
     @Resolved
     private MessageStore<?> messageStore;
 
+    @Resolved
+    private RevealingHandler revealingHandler;
+
     protected DisguiseBackend<?, ?> getBackend()
     {
         return getMorphManager().getCurrentBackend();
@@ -84,7 +89,15 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
                         : MorphStrings.disguisingWithSkillPreparingString())
                     : MorphStrings.disguisingAsString();
 
-            player.sendActionBar(msg.resolve("what", state.getPlayerDisplay()).toComponent(locale, messageStore));
+            var revLevel = revealingHandler.getRevealingLevel(player);
+            var disguiseRevealed = revLevel == RevealingHandler.RevealingLevel.REVEALED || revLevel == RevealingHandler.RevealingLevel.SUSPECT;
+            var display = disguiseRevealed
+                    ? Component.empty()
+                        .append(state.getPlayerDisplay())
+                        .append((revLevel == RevealingHandler.RevealingLevel.REVEALED ? MorphStrings.revealed() : MorphStrings.partialRevealed()).toComponent(locale))
+                    : state.getPlayerDisplay();
+
+            player.sendActionBar(msg.resolve("what", display).toComponent(locale, messageStore));
         }
 
         try

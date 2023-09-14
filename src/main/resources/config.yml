@@ -44,8 +44,14 @@ root:
     single_language: false
 
   # Should we enable the "Disguise Revealing" feature?
+  #
+  # This was made to nerf the ability for players to not get targeted by hostile mobs.
+  # Once enabled, they will get "revealed" to mobs and lose the ability to ignore by mobs, if they make too many actions.
+  #
+  # Requires client integration
+  #
   # For more information, please check: https://modrinth.com/plugin/feathermorph/version/0.12.3-1
-  revealing: false
+  revealing: true
 
   # Skill cooldown on damage.
   # Defines how many ticks should a player wait at least before they activate the skill again when they get damaged.
