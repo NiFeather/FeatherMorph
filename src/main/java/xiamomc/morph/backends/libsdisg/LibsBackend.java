@@ -43,19 +43,19 @@ public class LibsBackend extends DisguiseBackend<Disguise, LibsDisguiseWrapper>
      */
     @ApiStatus.Experimental
     @ApiStatus.Internal
-    public DisguiseWrapper<Disguise> createItemDisplay(Material material)
+    public DisguiseWrapper<Disguise> createItemDisplay(Material defaultMaterial, int scale)
     {
         Disguise instance = new MiscDisguise(DisguiseType.ITEM_DISPLAY);
 
-        if (material.isAir()) material = Material.STONE;
+        if (defaultMaterial.isAir()) defaultMaterial = Material.STONE;
 
         var watcher = ((ItemDisplayWatcher) instance.getWatcher());
-        var defaultStack = new ItemStack(material);
+        var defaultStack = new ItemStack(defaultMaterial);
 
         watcher.setItemStack(defaultStack);
         watcher.setItemDisplayTransform(ItemDisplay.ItemDisplayTransform.NONE);
-        watcher.setYModifier(0.5f);
-        watcher.setScale(new Vector3f(20, 20, 20));
+        watcher.setYModifier(scale / 2f);
+        watcher.setScale(new Vector3f(scale, scale, scale));
 
         var wrapper = new LibsDisguiseWrapper(instance, this);
         wrapper.preUpdate = (w, player) ->
@@ -67,6 +67,9 @@ public class LibsBackend extends DisguiseBackend<Disguise, LibsDisguiseWrapper>
 
             if (!item.isSimilar(newStack))
                 watcher.setItemStack(newStack);
+
+            watcher.setPitchLock(-player.getPitch());
+            watcher.setYawLock(180 + player.getYaw());
         };
 
         return wrapper;

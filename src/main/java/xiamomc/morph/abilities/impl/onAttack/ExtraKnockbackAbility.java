@@ -26,12 +26,6 @@ public class ExtraKnockbackAbility extends OnAttackAbility<ExtraKnockbackOption>
         return AbilityType.EXTRA_KNOCKBACK;
     }
 
-    @Override
-    public void onClientInit(DisguiseState state)
-    {
-        super.onClientInit(state);
-    }
-
     /*
     @EventHandler
     private void onGolemDmg(EntityDamageByEntityEvent e)

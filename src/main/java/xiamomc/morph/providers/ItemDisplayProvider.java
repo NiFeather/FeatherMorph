@@ -38,7 +38,8 @@ public class ItemDisplayProvider extends DefaultDisguiseProvider
     @Override
     public boolean isValid(String rawIdentifier)
     {
-        return getMaterialFromId(rawIdentifier) != null;
+        var idStripped = DisguiseTypes.ITEM_DISPLAY.toStrippedId(rawIdentifier);
+        return idStripped.startsWith("item@");
     }
 
     @Nullable
@@ -57,7 +58,15 @@ public class ItemDisplayProvider extends DefaultDisguiseProvider
     @Override
     public List<String> getAllAvailableDisguises()
     {
-        return List.of("dragon_head");
+        return List.of(
+                "item@1x",
+                "item@2x",
+                "item@3x",
+                "item@4x",
+                "item@5x",
+                "item@10x",
+                "item@20x"
+        );
     }
 
     /**
@@ -79,12 +88,27 @@ public class ItemDisplayProvider extends DefaultDisguiseProvider
             return DisguiseResult.fail();
         }
 
-        var material = getMaterialFromId(disguiseMeta.rawIdentifier);
-        if (material == null) return DisguiseResult.fail();
+        //var material = getMaterialFromId(disguiseMeta.rawIdentifier);
+        //if (material == null) return DisguiseResult.fail();
 
-        var wrapper = backend.createItemDisplay(material);
+        var idSplit = disguiseMeta.rawIdentifier.split("@");
+        int scale = idSplit.length >= 2 ? getScaleFrom(idSplit[1]) : 1;
+        var wrapper = backend.createItemDisplay(Material.AIR, scale);
 
         return DisguiseResult.success(wrapper);
+    }
+
+    private int getScaleFrom(String arg)
+    {
+        try
+        {
+            return Integer.parseInt(arg.replace("x", ""));
+        }
+        catch (Throwable t)
+        {
+            logger.warn("Unable to parse scale parameter from input: '%s'".formatted(arg));
+            return 1;
+        }
     }
 
     @Override
