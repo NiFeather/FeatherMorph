@@ -418,7 +418,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
                 state.setDisplayName(customName);
             }
 
-            state.refreshSkills();
+            state.refreshSkillsAbilities();
 
             morphs.sendCommandToRevealablePlayers(morphs.genPartialMapCommand(state));
 

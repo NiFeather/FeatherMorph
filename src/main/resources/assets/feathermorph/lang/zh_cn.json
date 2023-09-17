@@ -134,7 +134,7 @@
   "requests.request_denied": "来自<who>的请求已拒绝！",
   "requests.request_denied_target": "发往<who>的请求已拒绝！",
   "requests.request_not_found": "未找到目标请求，可能已经过期？",
-  "requests.request_received": "你收到了来自<who>的请求！",
+  "requests.request_received": "<who>想要变成你未伪装时的样子！",
   "requests.request_received_accept": "发送 /request accept <who> 来接受请求",
   "requests.request_received_deny": "发送 /request deny <who> 即可拒绝请求",
   "requests.request_send": "请求已发送！对方将有有1分钟的时间来接受！",

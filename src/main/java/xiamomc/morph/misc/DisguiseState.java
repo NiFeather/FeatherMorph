@@ -381,7 +381,7 @@ public class DisguiseState extends MorphPluginObject
     }
 
     @ApiStatus.Internal
-    public void refreshSkills()
+    public void refreshSkillsAbilities()
     {
         this.abilities.forEach(a -> a.applyToPlayer(player, this));
         this.skill.onInitialEquip(this);

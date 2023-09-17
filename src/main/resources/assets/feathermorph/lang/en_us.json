@@ -134,7 +134,7 @@
   "requests.request_denied": "Denied <who>'s request!",
   "requests.request_denied_target": "<who> denied your request!",
   "requests.request_not_found": "No such request, maybe it's expired?",
-  "requests.request_received": "You received a request from <who>!",
+  "requests.request_received": "<who> wants to disguise as your undisguised appearance!",
   "requests.request_received_accept": "Send /request accept <who> to accept the request",
   "requests.request_received_deny": "Send /request deny <who> to deny the request",
   "requests.request_send": "Request sent! They have 1 minute to accept!",
