@@ -2,13 +2,16 @@ package xiamomc.morph.commands.subcommands.plugin.management;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.kyori.adventure.text.Component;
+import net.minecraft.server.commands.PlaceCommand;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.messages.*;
+import xiamomc.morph.misc.DisguiseTypes;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Command.ISubCommand;
 import xiamomc.pluginbase.Messages.FormattableMessage;
@@ -63,6 +66,8 @@ public class GrantDisguiseSubCommand extends MorphPluginObject implements ISubCo
                     var str = ns + ":" + s;
                     if (str.toLowerCase().contains(targetLowerCase)) list.add(str);
                 });
+
+                list.add(ns + ":" + "@all");
             }
         }
 
@@ -92,12 +97,27 @@ public class GrantDisguiseSubCommand extends MorphPluginObject implements ISubCo
         //检查是否已知
         var provider = MorphManager.getProvider(targetName);
 
-        if (!provider.isValid(targetName))
+        var nameType = DisguiseTypes.fromId(targetName);
+        if (nameType.toStrippedId(targetName).equals("@all"))
+        {
+            var allDisg = provider.getAllAvailableDisguises();
+            allDisg.forEach(id -> grantDisguise(who, nameType.toId(id), commandSender));
+
+            return true;
+        }
+        else if (!provider.isValid(targetName))
         {
             commandSender.sendMessage(MessageUtils.prefixes(commandSender, MorphStrings.invalidIdentityString()));
             return true;
         }
 
+        grantDisguise(who, targetName, commandSender);
+
+        return true;
+    }
+
+    private void grantDisguise(Player who, String targetName, CommandSender commandSender)
+    {
         var msg = morphs.grantMorphToPlayer(who, targetName)
                 ? CommandStrings.grantSuccessString()
                 : CommandStrings.grantFailString();
@@ -106,6 +126,5 @@ public class GrantDisguiseSubCommand extends MorphPluginObject implements ISubCo
 
         commandSender.sendMessage(MessageUtils.prefixes(commandSender, msg));
 
-        return true;
     }
 }
