@@ -60,6 +60,8 @@ public class GrantDisguiseSubCommand extends MorphPluginObject implements ISubCo
 
             for (var p : MorphManager.getProviders())
             {
+                if (p == MorphManager.fallbackProvider) continue;
+
                 var ns = p.getNameSpace();
                 p.getAllAvailableDisguises().forEach(s ->
                 {
