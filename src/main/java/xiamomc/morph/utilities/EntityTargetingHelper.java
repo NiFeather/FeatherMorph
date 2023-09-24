@@ -2,12 +2,15 @@ package xiamomc.morph.utilities;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.WrappedGoal;
+import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.player.Player;
-import org.bukkit.craftbukkit.v1_20_R1.entity.CraftMob;
+import net.minecraft.world.phys.AABB;
+import org.bukkit.craftbukkit.v1_20_R2.entity.CraftMob;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Mob;
@@ -134,12 +137,14 @@ public class EntityTargetingHelper extends MorphPluginObject
         if (nmsMob.getTarget() != null) return;
 
         var trackingRange = 16;
-        var loc = nmsMob.position();
-        var nearByPlayers = nmsMob.level().getNearbyPlayers(nmsMob, loc.x, loc.y, loc.z, trackingRange, null);
+        var locAABB = nmsMob.getBoundingBox();
+        var nearByPlayers = nmsMob.level().getNearbyPlayers(TargetingConditions.DEFAULT, nmsMob, locAABB.expandTowards(trackingRange, trackingRange, trackingRange));
 
         // 遍历附近的玩家来寻找目标
-        for (var nmsPlayer : nearByPlayers)
+        for (Player abstractPlayer : nearByPlayers)
         {
+            if (!(abstractPlayer instanceof ServerPlayer nmsPlayer)) continue;
+
             // 跳过非生存玩家
             if (!nmsPlayer.gameMode.isSurvival())
                 continue;

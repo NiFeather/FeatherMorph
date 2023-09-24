@@ -1,6 +1,7 @@
 package xiamomc.morph.abilities.impl;
 
 import io.papermc.paper.util.CollisionUtil;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
@@ -12,6 +13,8 @@ import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.misc.NmsRecord;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Bindables.Bindable;
+
+import java.util.List;
 
 public class SpiderAbility extends NoOpOptionAbility
 {
@@ -44,10 +47,10 @@ public class SpiderAbility extends NoOpOptionAbility
 
         // 检查是否存在碰撞
         var bb = CollisionUtil.getCollisionsForBlocksOrWorldBorder(level, null,
-                boundingBox, null, false, false, false, true, null);
+                boundingBox, new ObjectArrayList<>(), new ObjectArrayList<>(), CollisionUtil.COLLISION_FLAG_CHECK_BORDER, null);
 
         var bbBorder = CollisionUtil.getCollisionsForBlocksOrWorldBorder(level, null,
-                boundingBox, null, false, false, true, true, null);
+                boundingBox, new ObjectArrayList<>(), new ObjectArrayList<>(), CollisionUtil.COLLISION_FLAG_CHECK_ONLY, null);
 
         var hasCollision = bb || bbBorder;
 

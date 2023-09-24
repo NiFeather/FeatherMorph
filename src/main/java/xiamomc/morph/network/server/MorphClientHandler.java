@@ -5,10 +5,10 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.kyori.adventure.text.Component;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.protocol.game.ClientboundCustomPayloadPacket;
+import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
 import net.minecraft.resources.ResourceLocation;
 import org.bukkit.Bukkit;
-import org.bukkit.craftbukkit.v1_20_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_20_R2.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.messaging.MessageTooLargeException;
 import org.bukkit.plugin.messaging.Messenger;
@@ -62,16 +62,10 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
 
         if (!player.isOnline()) return;
 
-        if (message.length > Messenger.MAX_MESSAGE_SIZE)
-            throw new MessageTooLargeException();
-
         if (logOutGoingPackets.get())
             logPacket(true, player, channel, message);
 
-        var nmsPlayer = ((CraftPlayer) player).getHandle();
-
-        var packet = new ClientboundCustomPayloadPacket(new ResourceLocation(channel), new FriendlyByteBuf(Unpooled.wrappedBuffer(message)));
-        nmsPlayer.connection.send(packet);
+        player.sendPluginMessage(plugin, channel, message);
     }
 
     /**

@@ -127,7 +127,10 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
             var loc = player.getLocation();
             var box = constructedDisguise.getBoundingBoxAt(loc.x(), loc.y(), loc.z());
 
-            var hasCollision = CollisionUtil.getCollisionsForBlocksOrWorldBorder(NmsRecord.ofPlayer(player).level(), null, box, null, false, false, true, true, null);
+            var hasCollision = CollisionUtil.getCollisionsForBlocksOrWorldBorder(
+                    NmsRecord.ofPlayer(player).level(), null, box,
+                    new ObjectArrayList<>(), new ObjectArrayList<>(), CollisionUtil.COLLISION_FLAG_CHECK_BORDER, null);
+
             if (hasCollision)
             {
                 player.sendMessage(MessageUtils.prefixes(player, MorphStrings.noEnoughSpaceString()));
@@ -267,9 +270,7 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
 
             // Update eye height
             var eyeHeightField = ReflectionUtils.getPlayerEyeHeightField(NmsRecord.ofPlayer(player));
-
-            if (eyeHeightField != null)
-                eyeHeightField.set(nmsPlayer, dimensions.height * 0.85F);
+            eyeHeightField.set(nmsPlayer, dimensions.height * 0.85F);
         }
         catch (Throwable t)
         {

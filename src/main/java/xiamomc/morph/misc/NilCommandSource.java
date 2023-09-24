@@ -4,7 +4,7 @@ import net.kyori.adventure.identity.Identified;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
-import org.bukkit.craftbukkit.v1_20_R1.command.ServerCommandSender;
+import org.bukkit.craftbukkit.v1_20_R2.command.ServerCommandSender;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.permissions.PermissionAttachmentInfo;

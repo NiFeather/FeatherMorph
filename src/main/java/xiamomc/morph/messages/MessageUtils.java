@@ -74,7 +74,7 @@ public class MessageUtils extends MorphPluginObject
         if (isSingleLanguage())
             return getServerLocale();
 
-        var nmsLocale = NmsRecord.ofPlayer(player).locale;
+        var nmsLocale = NmsRecord.ofPlayer(player).language;
 
         return nmsLocale == null ? getServerLocale() : nmsLocale.toLowerCase().replace('-', '_');
     }

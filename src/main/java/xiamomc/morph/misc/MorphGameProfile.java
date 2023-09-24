@@ -37,7 +37,7 @@ public class MorphGameProfile extends GameProfile
 
         profile.getProperties().forEach((s, p) ->
         {
-            map.put(p.getName(), new Property(p.getName(), p.getValue(), p.getSignature()));
+            map.put(p.name(), new Property(p.name(), p.value(), p.signature()));
         });
     }
 
