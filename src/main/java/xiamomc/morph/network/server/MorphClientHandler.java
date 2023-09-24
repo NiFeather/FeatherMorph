@@ -6,6 +6,7 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.kyori.adventure.text.Component;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.v1_20_R2.entity.CraftPlayer;
@@ -13,6 +14,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.messaging.MessageTooLargeException;
 import org.bukkit.plugin.messaging.Messenger;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPlugin;
@@ -22,6 +24,7 @@ import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.interfaces.IManageRequests;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.MorphStrings;
+import xiamomc.morph.misc.NmsRecord;
 import xiamomc.morph.misc.permissions.CommonPermissions;
 import xiamomc.morph.network.*;
 import xiamomc.morph.network.commands.C2S.*;
@@ -54,18 +57,41 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
     private final Bindable<Boolean> forceClient = new Bindable<>(false);
     private final Bindable<Boolean> forceTargetVersion = new Bindable<>(false);
 
+    private record MorphCustomPacketPayload(ResourceLocation channel, byte[] data) implements CustomPacketPayload
+    {
+        @Override
+        public void write(FriendlyByteBuf buf)
+        {
+            buf.writeBytes(data);
+        }
+
+        @Override
+        @NotNull
+        public ResourceLocation id()
+        {
+            return channel;
+        }
+    }
+
     //部分来自 CraftPlayer#sendPluginMessage(), 在我们搞清楚到底为什么服务端会吞包之前先这样
     private void sendPacket(String channel, Player player, byte[] message)
     {
         if (channel == null || player == null || message == null)
-            throw new IllegalArgumentException("频道、玩家或消息是null");
+            throw new IllegalArgumentException("Null channel/player/message");
 
         if (!player.isOnline()) return;
+
+        if (message.length > Messenger.MAX_MESSAGE_SIZE)
+            throw new MessageTooLargeException(Messenger.MAX_MESSAGE_SIZE);
 
         if (logOutGoingPackets.get())
             logPacket(true, player, channel, message);
 
-        player.sendPluginMessage(plugin, channel, message);
+        var nmsPlayer = NmsRecord.ofPlayer(player);
+
+        var payload = new MorphCustomPacketPayload(new ResourceLocation(channel), message);
+        var packet = new ClientboundCustomPayloadPacket(payload);
+        nmsPlayer.connection.send(packet);
     }
 
     /**
