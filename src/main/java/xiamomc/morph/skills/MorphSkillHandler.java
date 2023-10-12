@@ -17,6 +17,7 @@ import xiamomc.morph.events.api.gameplay.PlayerExecuteSkillEvent;
 import xiamomc.morph.events.api.lifecycle.SkillsFinishedInitializeEvent;
 import xiamomc.morph.messages.CommandStrings;
 import xiamomc.morph.messages.MessageUtils;
+import xiamomc.morph.messages.MorphStrings;
 import xiamomc.morph.messages.SkillStrings;
 import xiamomc.morph.misc.permissions.CommonPermissions;
 import xiamomc.morph.skills.impl.*;
@@ -209,9 +210,11 @@ public class MorphSkillHandler extends MorphPluginObject
             }
 
             var event = new PlayerExecuteSkillEvent(player, state);
-            Bukkit.getPluginManager().callEvent(event);
+            event.callEvent();
+
             if (event.isCancelled())
             {
+                player.sendMessage(MessageUtils.prefixes(player, MorphStrings.operationCancelledString()));
                 state.setSkillCooldown(5);
                 return;
             }
