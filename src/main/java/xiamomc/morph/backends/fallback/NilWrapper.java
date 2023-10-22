@@ -35,6 +35,9 @@ public class NilWrapper extends DisguiseWrapper<NilDisguise>
     {
         this.instance.compoundTag.merge(compoundTag);
         this.instance.isBaby = NbtUtils.isBabyForType(getEntityType(), compoundTag);
+
+        if (this.getEntityType() == EntityType.MAGMA_CUBE || this.getEntityType() == EntityType.SLIME)
+            resetDimensions();
     }
 
     @Override
@@ -139,23 +142,10 @@ public class NilWrapper extends DisguiseWrapper<NilDisguise>
         this.instance.name = name;
     }
 
-    @Deprecated
-    @Override
-    public BoundingBox getBoundingBox()
-    {
-        return new BoundingBox();
-    }
-
     @Override
     protected boolean isBaby()
     {
         return instance.isBaby;
-    }
-
-    @Override
-    protected float getSlimeDimensionScale()
-    {
-        return 4;
     }
 
     @Override

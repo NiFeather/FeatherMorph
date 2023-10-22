@@ -35,6 +35,8 @@ import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 public class VanillaDisguiseProvider extends DefaultDisguiseProvider
@@ -121,9 +123,30 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
                 ? copyResult.wrapperInstance() //copyResult.success() -> wrapperInstance() != null
                 : backend.createInstance(entityType);
 
+        // Make IDE happy
+        Objects.requireNonNull(constructedDisguise);
+
         // 检查是否有足够的空间
         if (modifyBoundingBoxes.get() && checkSpaceBoundingBox.get())
         {
+            //手动指定史莱姆和岩浆怪的大小
+            if (entityType == EntityType.SLIME || entityType == EntityType.MAGMA_CUBE)
+            {
+                var canCons = canConstruct(disguiseMeta, targetEntity, null);
+
+                if (canCons)
+                {
+                    var size = targetEntity != null
+                                    ? NbtUtils.getRawTagCompound(targetEntity).getInt("Size")
+                                    : new Random().nextInt(1, 4);
+
+                    var initialTag = new CompoundTag();
+
+                    initialTag.putInt("Size", size);
+                    constructedDisguise.mergeCompound(initialTag);
+                }
+            }
+
             var loc = player.getLocation();
             var box = constructedDisguise.getBoundingBoxAt(loc.x(), loc.y(), loc.z());
 
@@ -364,11 +387,11 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
     }
 
     @Override
-    public boolean canConstruct(DisguiseMeta info, Entity targetEntity, DisguiseState theirState)
+    public boolean canConstruct(DisguiseMeta info, @Nullable Entity targetEntity, DisguiseState theirState)
     {
         return theirState != null
                 ? theirState.getDisguiseWrapper().getEntityType().equals(info.getEntityType())
-                : targetEntity.getType().equals(info.getEntityType());
+                : targetEntity == null || targetEntity.getType().equals(info.getEntityType());
     }
 
     @Override

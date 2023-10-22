@@ -123,35 +123,12 @@ public class LibsDisguiseWrapper extends DisguiseWrapper<Disguise>
         invalidateCompound();
     }
 
-    @Deprecated
-    @Override
-    public BoundingBox getBoundingBox()
-    {
-        FakeBoundingBox box;
-        var mobDisguise = (MobDisguise) instance;
-        var values = DisguiseValues.getDisguiseValues(instance.getType());
-
-        if (!mobDisguise.isAdult() && values.getBabyBox() != null)
-            box = values.getBabyBox();
-        else
-            box = values.getAdultBox();
-
-        return new BoundingBox(0, 0, 0, box.getX(), box.getY(), box.getZ());
-    }
-
     private boolean isBaby;
 
     @Override
     protected boolean isBaby()
     {
         return isBaby;
-    }
-
-    @Override
-    protected float getSlimeDimensionScale()
-    {
-        if (!(watcher instanceof SlimeWatcher slimeWatcher)) return 1;
-        return slimeWatcher.getSize();
     }
 
     @Override
@@ -404,6 +381,17 @@ public class LibsDisguiseWrapper extends DisguiseWrapper<Disguise>
         this.isBaby = NbtUtils.isBabyForType(getEntityType(), compoundTag);
 
         invalidateCompound();
+
+        var watcher = instance.getWatcher();
+        switch (getEntityType())
+        {
+            case SLIME, MAGMA_CUBE ->
+            {
+                var size = compoundTag.getInt("Size");
+                ((SlimeWatcher)watcher).setSize(size + 1);
+                resetDimensions();
+            }
+        }
     }
 
     @Override

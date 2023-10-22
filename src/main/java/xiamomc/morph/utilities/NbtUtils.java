@@ -8,6 +8,7 @@ import org.bukkit.craftbukkit.v1_20_R2.entity.CraftEntity;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -19,7 +20,7 @@ public class NbtUtils
      * @param entity 目标实体
      * @return 此实体的NBT数据，当实体为null或不为 {@link CraftEntity} 的实例时返回null
      */
-    @Nullable
+    @NotNull
     public static CompoundTag getRawTagCompound(Entity entity)
     {
         if (entity instanceof CraftEntity craftEntity)
@@ -31,7 +32,7 @@ public class NbtUtils
             return entityDataObject.getData();
         }
 
-        return null;
+        return new CompoundTag();
     }
 
     /**

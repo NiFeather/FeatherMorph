@@ -115,14 +115,6 @@ public abstract class DisguiseWrapper<T>
     }
 
     /**
-     * Gets a {@link BoundingBox} matching the current disguise
-     * @return A {@link BoundingBox} matching the current disguise
-     * @deprecated We use {@link DisguiseWrapper#getDimensions()} or {@link DisguiseWrapper#getBoundingBoxAt(double, double, double)} now
-     */
-    @Deprecated
-    public abstract BoundingBox getBoundingBox();
-
-    /**
      * Gets a {@link AABB} matching the current disguise at an exact position
      * @return A {@link AABB} matching the current disguise at the exact position
      * @apiNote This doesn't check whether bounding box modification is enabled and will always present value from the modified one.
@@ -154,6 +146,14 @@ public abstract class DisguiseWrapper<T>
 
     private EntityDimensions dimensions;
 
+    /**
+     * 重置此Wrapper已缓存的Dimensions
+     */
+    protected void resetDimensions()
+    {
+        this.dimensions = null;
+    }
+
     private void ensureDimensionPresent()
     {
         if (dimensions != null) return;
@@ -179,7 +179,8 @@ public abstract class DisguiseWrapper<T>
 
         if (getEntityType() != EntityType.SLIME && getEntityType() != EntityType.MAGMA_CUBE) return;
 
-        this.dimensions = EntityDimensions.fixed(0.51F * getSlimeDimensionScale(), 0.51F * getSlimeDimensionScale());
+        var dimScale = getSlimeDimensionScale();
+        this.dimensions = EntityDimensions.fixed(0.51F * dimScale, 0.51F * dimScale);
     }
 
     /**
@@ -195,11 +196,12 @@ public abstract class DisguiseWrapper<T>
                 : dimensions;
     }
 
-    private Boolean ageable = null;
-
     protected abstract boolean isBaby();
 
-    protected abstract float getSlimeDimensionScale();
+    protected float getSlimeDimensionScale()
+    {
+        return Math.max(1, getCompound().getInt("Size"));
+    }
 
     public abstract void setGlowingColor(ChatColor glowingColor);
 
