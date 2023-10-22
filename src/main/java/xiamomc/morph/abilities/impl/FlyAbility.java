@@ -16,6 +16,7 @@ import xiamomc.morph.abilities.options.FlyOption;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.misc.DisguiseState;
+import xiamomc.morph.misc.NmsRecord;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
@@ -89,6 +90,14 @@ public class FlyAbility extends MorphAbility<FlyOption>
             float exhaustion;
 
             double delta;
+
+            // 检查玩家飞行速度是否正确
+            if (plugin.getCurrentTick() % 10 == 0)
+            {
+                var configSpeed = config.getFlyingSpeed();
+                if (player.getFlySpeed() != configSpeed && NmsRecord.ofPlayer(player).gameMode.isSurvival())
+                    player.setFlySpeed(configSpeed);
+            }
 
             // 当玩家骑乘实体时不要计算位移
             if (player.getVehicle() == null)
