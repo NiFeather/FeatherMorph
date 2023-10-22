@@ -75,10 +75,11 @@ public class TeleportMorphSkill extends MorphSkill<TeleportConfiguration>
         playSoundToNearbyPlayers(player, 10,
                 Key.key("minecraft", "entity.enderman.teleport"), Sound.Source.HOSTILE);
 
-        player.teleport(loc);
-
-        playSoundToNearbyPlayers(player, 10,
-                Key.key("minecraft", "entity.enderman.teleport"), Sound.Source.HOSTILE);
+        player.teleportAsync(loc).thenRun(() ->
+        {
+            playSoundToNearbyPlayers(player, 10,
+                    Key.key("minecraft", "entity.enderman.teleport"), Sound.Source.HOSTILE);
+        });
 
         //重设下落距离
         player.setFallDistance(0);

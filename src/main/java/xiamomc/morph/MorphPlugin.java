@@ -217,4 +217,16 @@ public final class MorphPlugin extends XiaMoJavaPlugin
     {
         return true;
     }
+
+    @Override
+    public void startMainLoop(Runnable r)
+    {
+        Bukkit.getGlobalRegionScheduler().runAtFixedRate(this, o -> r.run(), 1, 1);
+    }
+
+    @Override
+    public void runAsync(Runnable r)
+    {
+        Bukkit.getAsyncScheduler().runNow(this, o -> r.run());
+    }
 }

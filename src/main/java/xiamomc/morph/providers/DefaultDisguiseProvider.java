@@ -12,6 +12,7 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.scoreboard.Scoreboard;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xiamomc.morph.MorphManager;
 import xiamomc.morph.RevealingHandler;
 import xiamomc.morph.abilities.AbilityHandler;
 import xiamomc.morph.backends.DisguiseBackend;
@@ -24,6 +25,7 @@ import xiamomc.morph.network.server.MorphClientHandler;
 import xiamomc.morph.network.server.ServerSetEquipCommand;
 import xiamomc.morph.skills.MorphSkillHandler;
 import xiamomc.morph.skills.SkillType;
+import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Messages.MessageStore;
 import xiamomc.pluginbase.Utilities.ColorUtils;
@@ -152,7 +154,7 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
     public void postConstructDisguise(DisguiseState state, @Nullable Entity targetEntity)
     {
         var disguise = state.getDisguiseWrapper();
-        var backend = getMorphManager().getCurrentBackend();
+        var backend = getBackend();
 
         //被动技能
         var abilities = abilityHandler.getAbilitiesFor(state.getSkillLookupIdentifier());
