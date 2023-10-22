@@ -14,8 +14,6 @@ import xiamomc.morph.misc.NmsRecord;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Bindables.Bindable;
 
-import java.util.List;
-
 public class SpiderAbility extends NoOpOptionAbility
 {
     private final Bindable<Boolean> modifyBox = new Bindable<>(false);

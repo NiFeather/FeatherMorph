@@ -36,7 +36,6 @@ import xiamomc.pluginbase.Managers.DependencyManager;
 import xiamomc.pluginbase.Utilities.ColorUtils;
 
 import java.util.Random;
-import java.util.UUID;
 import java.util.function.BiConsumer;
 
 public class LibsDisguiseWrapper extends DisguiseWrapper<Disguise>

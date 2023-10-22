@@ -2,8 +2,6 @@ package xiamomc.morph.messages;
 
 import xiamomc.pluginbase.Messages.FormattableMessage;
 
-import java.text.Format;
-
 public class UpdateStrings extends AbstractMorphStrings
 {
     public static FormattableMessage messageHeaderFooter()

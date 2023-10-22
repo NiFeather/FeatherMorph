@@ -4,7 +4,6 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EntityDimensions;
-import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Exceptions.NullDependencyException;
 
 import java.lang.reflect.Field;

@@ -1,19 +1,8 @@
 package xiamomc.morph.misc;
 
-import net.kyori.adventure.identity.Identified;
 import net.kyori.adventure.text.Component;
-import org.bukkit.Server;
-import org.bukkit.command.CommandSender;
 import org.bukkit.craftbukkit.v1_20_R2.command.ServerCommandSender;
-import org.bukkit.permissions.Permission;
-import org.bukkit.permissions.PermissionAttachment;
-import org.bukkit.permissions.PermissionAttachmentInfo;
-import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
-import java.util.Set;
-import java.util.UUID;
 
 public final class NilCommandSource extends ServerCommandSender
 {

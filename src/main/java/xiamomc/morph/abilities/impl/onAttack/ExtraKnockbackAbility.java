@@ -10,7 +10,6 @@ import xiamomc.morph.MorphManager;
 import xiamomc.morph.abilities.AbilityType;
 import xiamomc.morph.abilities.impl.OnAttackAbility;
 import xiamomc.morph.abilities.options.ExtraKnockbackOption;
-import xiamomc.morph.misc.DisguiseState;
 import xiamomc.pluginbase.Annotations.Resolved;
 
 public class ExtraKnockbackAbility extends OnAttackAbility<ExtraKnockbackOption>
