@@ -22,6 +22,7 @@ import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.interfaces.IManageRequests;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.MorphStrings;
+import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.misc.NmsRecord;
 import xiamomc.morph.misc.permissions.CommonPermissions;
 import xiamomc.morph.network.*;
@@ -31,10 +32,13 @@ import xiamomc.morph.network.commands.S2C.AbstractS2CCommand;
 import xiamomc.morph.network.commands.S2C.S2CCurrentCommand;
 import xiamomc.morph.network.commands.S2C.S2CReAuthCommand;
 import xiamomc.morph.network.commands.S2C.S2CUnAuthCommand;
+import xiamomc.morph.network.commands.S2C.clientrender.S2CRenderMapMetaCommand;
+import xiamomc.morph.network.commands.S2C.clientrender.S2CRenderMeta;
 import xiamomc.morph.network.commands.S2C.query.QueryType;
 import xiamomc.morph.network.commands.S2C.query.S2CQueryCommand;
 import xiamomc.morph.network.commands.S2C.set.S2CSetModifyBoundingBoxCommand;
 import xiamomc.morph.network.commands.S2C.set.S2CSetSelfViewingCommand;
+import xiamomc.morph.utilities.MapMetaUtils;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
@@ -310,7 +314,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
 
         if (bool == null)
         {
-            //logger.info("should remove for " + player.getName());
+            logger.info("should remove for " + player.getName());
             return;
         }
 
@@ -619,6 +623,27 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
 
             if (player.hasPermission(CommonPermissions.DISGUISE_REVEALING))
                 sendCommand(player, manager.genMapCommand());
+
+            if (manager.isUsingNilServerBackend())
+                sendCommand(player, manager.genRenderSyncCommand());
+
+            logger.info("READY!");
+            var disguises = manager.getDisguiseStates();
+            for (DisguiseState bindingState : disguises)
+            {
+                logger.info("STATE! " + bindingState);
+                var bindingPlayer = bindingState.getPlayer();
+
+                var meta = new S2CRenderMeta(bindingPlayer.getEntityId());
+                meta.profileCompound = bindingState.getProfileNbtString();
+                meta.sNbt = bindingState.getCachedNbtString();
+                meta.showOverridedEquipment = bindingState.showingDisguisedItems();
+                meta.overridedEquipment = MapMetaUtils.toPacketEquipment(bindingState.getDisguisedItems());
+
+                var packet = new S2CRenderMapMetaCommand(meta);
+                this.sendCommand(player, packet);
+                logger.info("SEND! " + packet);
+            }
 
             playerConnectionStates.put(player, InitializeState.DONE);
         });

@@ -36,6 +36,7 @@ import xiamomc.morph.messages.vanilla.VanillaMessageStore;
 import xiamomc.morph.misc.*;
 import xiamomc.morph.misc.permissions.CommonPermissions;
 import xiamomc.morph.network.commands.S2C.AbstractS2CCommand;
+import xiamomc.morph.network.commands.S2C.clientrender.*;
 import xiamomc.morph.network.commands.S2C.map.S2CMapCommand;
 import xiamomc.morph.network.commands.S2C.map.S2CMapRemoveCommand;
 import xiamomc.morph.network.commands.S2C.map.S2CPartialMapCommand;
@@ -53,6 +54,7 @@ import xiamomc.morph.storage.offlinestore.OfflineStateStore;
 import xiamomc.morph.storage.playerdata.PlayerDataStore;
 import xiamomc.morph.storage.playerdata.PlayerMeta;
 import xiamomc.morph.utilities.DisguiseUtils;
+import xiamomc.morph.utilities.MapMetaUtils;
 import xiamomc.morph.utilities.NbtUtils;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
@@ -83,13 +85,18 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     @Resolved
     private MorphConfigManager config;
 
+    @Resolved
+    private NetworkingHelper networkingHelper;
+
     public static final DisguiseProvider fallbackProvider = new FallbackProvider();
 
     public static final String disguiseFallbackName = "@default";
 
     public static final String forcedDisguiseNoneId = "@none";
 
-    private DisguiseBackend<?, ?> currentBackend = new NilBackend();
+    private final NilBackend nilBackend = new NilBackend();
+
+    private DisguiseBackend<?, ?> currentBackend = nilBackend;
 
     public DisguiseBackend<?, ?> getCurrentBackend()
     {
@@ -112,17 +119,20 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         try
         {
+            if (1+1==2)
+                throw new NoClassDefFoundError();
+
             this.currentBackend = new LibsBackend();
         }
         catch (NoClassDefFoundError e)
         {
             logger.error("Unable to initialize LibsDisguises as our disguise backend because it's not installed on the server.");
-            logger.error("Initializing NilBackend, displaying disguises at the server side will not be supported this run.");
+            logger.error("Using NilBackend, displaying disguises at the server side will not be supported this run.");
         }
         catch (Throwable t)
         {
             logger.error("Unable to initialize LibsDisguise as our disguise backend, please check your server setup!");
-            logger.error("Initializing NilBackend, displaying disguises at the server side will not be supported this run.");
+            logger.error("Using NilBackend, displaying disguises at the server side will not be supported this run.");
             logger.error("If you believe this is an error, please consider reporting this issue to our GitHub: https://github.com/XiaMoZhiShi/MorphPlugin/issues");
 
             t.printStackTrace();
@@ -573,16 +583,18 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
             var provider = getProvider(strippedKey[0]);
 
-            DisguiseState outComingState = null;
+            DisguiseState outComingState;
 
             if (provider == MorphManager.fallbackProvider)
             {
+                outComingState = null;
                 source.sendMessage(MessageUtils.prefixes(source, MorphStrings.disguiseBannedOrNotSupportedString()));
                 logger.error("Unable to find any provider that matches the identifier '%s'".formatted(strippedKey[0]));
                 return false;
             }
             else if (!provider.isValid(key))
             {
+                outComingState = null;
                 source.sendMessage(MessageUtils.prefixes(source, MorphStrings.invalidIdentityString()));
                 return false;
             }
@@ -673,7 +685,22 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             source.sendMessage(MessageUtils.prefixes(source, msg));
 
             // 向管理员发送map消息
-            sendCommandToRevealablePlayers(genPartialMapCommand(outComingState));
+            networkingHelper.sendCommandToRevealablePlayers(genPartialMapCommand(outComingState));
+
+            //发送元数据
+            if (isUsingNilServerBackend())
+            {
+                networkingHelper.sendCommandToAllPlayers(new S2CRenderMapAddCommand(outComingState.getPlayer().getEntityId(), outComingState.getDisguiseIdentifier()));
+
+                var meta = new S2CRenderMeta(player.getEntityId());
+                meta.profileCompound = outComingState.getProfileNbtString();
+                meta.sNbt = outComingState.getCachedNbtString();
+                meta.showOverridedEquipment = outComingState.showingDisguisedItems();
+                meta.overridedEquipment = MapMetaUtils.toPacketEquipment(outComingState.getDisguisedItems());
+
+                var packet = new S2CRenderMapMetaCommand(meta);
+                networkingHelper.sendCommandToAllPlayers(packet);
+            }
 
             return true;
         }
@@ -701,18 +728,12 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         }
     }
 
-    /**
-     * 将某一客户端指令发送给所有拥有橙字显示权限的玩家
-     * @param cmd 目标指令
-     */
-    public void sendCommandToRevealablePlayers(AbstractS2CCommand<?> cmd)
+    public boolean isUsingNilServerBackend()
     {
-        var target = Bukkit.getOnlinePlayers().stream()
-                .filter(p -> p.hasPermission(CommonPermissions.DISGUISE_REVEALING))
-                .toList();
-
-        target.forEach(p -> clientHandler.sendCommand(p, cmd));
+        return currentBackend == nilBackend;
     }
+
+    //region Command generating
 
     /**
      * 生成用于橙字显示的map指令
@@ -729,21 +750,33 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         return new S2CMapCommand(map);
     }
 
+    public S2CRenderMapSyncCommand genRenderSyncCommand()
+    {
+        var map = new HashMap<Integer, String>();
+        for (DisguiseState disguiseState : this.disguiseStates)
+        {
+            var player = disguiseState.getPlayer();
+            map.put(player.getEntityId(), disguiseState.getDisguiseIdentifier());
+        }
+
+        return S2CRenderMapSyncCommand.of(map);
+    }
+
     /**
      * 生成用于橙字显示的部分map(mapp)指令
      * @param diff 用于生成的伪装状态
      */
     public S2CPartialMapCommand genPartialMapCommand(DisguiseState... diff)
     {
-        var map = new HashMap<Integer, String>();
-        for (DisguiseState disguiseState : diff)
-        {
-            var player = disguiseState.getPlayer();
-            map.put(player.getEntityId(), player.getName());
-        }
-
-        return new S2CPartialMapCommand(map);
+        return networkingHelper.genPartialMapCommand(diff);
     }
+
+    public S2CRenderMapAddCommand genClientRenderAddCommand(DisguiseState diff)
+    {
+        return networkingHelper.genClientRenderAddCommand(diff);
+    }
+
+    //endregion Command generating
 
     /**
      * 检查某个伪装是否已被禁用
@@ -914,7 +947,10 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         new PlayerUnMorphEvent(player).callEvent();
 
         // 向管理员发送map移除指令
-        sendCommandToRevealablePlayers(new S2CMapRemoveCommand(player.getEntityId()));
+        networkingHelper.sendCommandToRevealablePlayers(new S2CMapRemoveCommand(player.getEntityId()));
+
+        if (isUsingNilServerBackend())
+            networkingHelper.sendCommandToAllPlayers(new S2CRenderMapRemoveCommand(player.getEntityId()));
     }
 
     @Resolved
