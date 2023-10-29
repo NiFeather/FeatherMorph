@@ -49,6 +49,10 @@ public class DefaultConfigGenerator
         if (cfg == null) config = new SkillAbilityConfiguration(mobId, cd, skillIdentifier);
         else config = cfg;
 
+        config.setCooldown(cd);
+        config.setSkillIdentifier(skillIdentifier);
+        config.setIdentifier(mobId);
+
         if (c != null)
             c.accept(config);
 
