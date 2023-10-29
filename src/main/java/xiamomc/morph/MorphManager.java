@@ -131,7 +131,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         registerProviders(ObjectList.of(
                 new VanillaDisguiseProvider(),
                 new PlayerDisguiseProvider(),
-                new ItemDisplayProvider(),
+                //new ItemDisplayProvider(),
                 //new LocalDisguiseProvider(),
                 fallbackProvider
         ));
