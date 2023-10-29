@@ -157,6 +157,25 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         Bukkit.getPluginManager().callEvent(new ManagerFinishedInitializeEvent(this));
     }
 
+    private void perPlayerUpdate(Player bindingPlayer, DisguiseState state)
+    {
+        if (!bindingPlayer.isOnline()) return;
+
+        if (!abilityHandler.handle(bindingPlayer, state))
+        {
+            bindingPlayer.sendMessage(MessageUtils.prefixes(bindingPlayer, MorphStrings.errorWhileUpdatingDisguise()));
+
+            unMorph(nilCommandSource, bindingPlayer, true, true);
+        }
+
+        if (!state.getProvider().updateDisguise(bindingPlayer, state))
+        {
+            bindingPlayer.sendMessage(MessageUtils.prefixes(bindingPlayer, MorphStrings.errorWhileUpdatingDisguise()));
+
+            unMorph(nilCommandSource, bindingPlayer, true, true);
+        }
+    }
+
     private void update()
     {
         this.addSchedule(this::update);
@@ -167,22 +186,9 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         {
             var p = i.getPlayer();
 
-            //跳过离线玩家
             if (!p.isOnline()) return;
 
-            if (!abilityHandler.handle(p, i))
-            {
-                p.sendMessage(MessageUtils.prefixes(p, MorphStrings.errorWhileUpdatingDisguise()));
-
-                unMorph(nilCommandSource, p, true, true);
-            }
-
-            if (!i.getProvider().updateDisguise(p, i))
-            {
-                p.sendMessage(MessageUtils.prefixes(p, MorphStrings.errorWhileUpdatingDisguise()));
-
-                unMorph(nilCommandSource, p, true, true);
-            }
+            this.scheduleOn(p, () -> this.perPlayerUpdate(p, i));
         });
     }
 
