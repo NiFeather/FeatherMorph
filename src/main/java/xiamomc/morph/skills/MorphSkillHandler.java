@@ -78,7 +78,6 @@ public class MorphSkillHandler extends MorphPluginObject
                 new SonicBoomMorphSkill(),
                 new SplashPotionSkill(),
 
-                new GhastMorphSkill(),
                 NoneMorphSkill.instance
         ));
 

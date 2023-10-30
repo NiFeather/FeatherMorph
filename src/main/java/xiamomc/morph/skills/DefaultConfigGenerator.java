@@ -49,6 +49,10 @@ public class DefaultConfigGenerator
         if (cfg == null) config = new SkillAbilityConfiguration(mobId, cd, skillIdentifier);
         else config = cfg;
 
+        config.setCooldown(cd);
+        config.setSkillIdentifier(skillIdentifier);
+        config.setIdentifier(mobId);
+
         if (c != null)
             c.accept(config);
 
@@ -163,7 +167,7 @@ public class DefaultConfigGenerator
         addSkillConfiguration(skills, EntityType.WITHER, 10, SkillType.LAUNCH_PROJECTIVE, c ->
                 c.addOption(SkillType.LAUNCH_PROJECTIVE, new ProjectiveConfiguration(EntityType.WITHER_SKULL, 1, "entity.wither.shoot", 24)));
 
-        addSkillConfiguration(skills, EntityType.GHAST, DisguiseUtils.GHAST_EXECUTE_DELAY + 40, SkillType.GHAST, c ->
+        addSkillConfiguration(skills, EntityType.GHAST, DisguiseUtils.GHAST_EXECUTE_DELAY + 40, SkillType.LAUNCH_PROJECTIVE, c ->
                 c.addOption(SkillType.LAUNCH_PROJECTIVE, new ProjectiveConfiguration(EntityType.FIREBALL, 1, "entity.ghast.shoot", 35)
                         .withDelay(DisguiseUtils.GHAST_EXECUTE_DELAY)
                         .withWarningSound("entity.ghast.warn")));

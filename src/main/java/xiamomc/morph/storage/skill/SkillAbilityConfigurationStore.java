@@ -230,24 +230,6 @@ public class SkillAbilityConfigurationStore extends MorphJsonBasedStorage<SkillA
 
             }
 
-            //恶魂的技能变成延迟释放
-            if (version < 12)
-            {
-                var targetConfig = getConfigFor(EntityType.GHAST, config);
-
-                if (targetConfig != null)
-                {
-                    if (targetConfig.getSkillIdentifier().equals(SkillType.LAUNCH_PROJECTIVE))
-                    {
-                        if (targetConfig.getCooldown() == 40)
-                            targetConfig.setCooldown(DisguiseUtils.GHAST_EXECUTE_DELAY + 40);
-
-                        targetConfig.setSkillIdentifier(SkillType.GHAST);
-                        targetConfig.moveOption(SkillType.LAUNCH_PROJECTIVE, SkillType.GHAST);
-                    }
-                }
-            }
-
             //马匹被动改成更改属性
             if (version < 13)
             {
@@ -267,6 +249,7 @@ public class SkillAbilityConfigurationStore extends MorphJsonBasedStorage<SkillA
 
                 if (ghastConfig != null)
                 {
+                    //noinspection removal
                     ghastConfig.moveOption(SkillType.GHAST, SkillType.LAUNCH_PROJECTIVE);
                     ghastConfig.setSkillIdentifier(SkillType.LAUNCH_PROJECTIVE);
 
