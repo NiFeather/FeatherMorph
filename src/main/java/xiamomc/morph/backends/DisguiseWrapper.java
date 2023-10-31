@@ -195,7 +195,7 @@ public abstract class DisguiseWrapper<TInstance>
                 : dimensions;
     }
 
-    protected abstract boolean isBaby();
+    public abstract boolean isBaby();
 
     protected float getSlimeDimensionScale()
     {
@@ -290,8 +290,6 @@ public abstract class DisguiseWrapper<TInstance>
     }
 
     //region Temp
-
-    public abstract void resetAmbientSoundInterval();
 
     public void showArms(boolean showarms)
     {

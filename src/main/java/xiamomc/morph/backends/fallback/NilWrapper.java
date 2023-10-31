@@ -59,11 +59,6 @@ public class NilWrapper extends DisguiseWrapper<NilDisguise>
         return -1;
     }
 
-    @Override
-    public void resetAmbientSoundInterval()
-    {
-    }
-
     @Nullable
     @Override
     public <R extends Tag> R getTag(@NotNull String path, TagType<R> type)
@@ -143,7 +138,7 @@ public class NilWrapper extends DisguiseWrapper<NilDisguise>
     }
 
     @Override
-    protected boolean isBaby()
+    public boolean isBaby()
     {
         return instance.isBaby;
     }

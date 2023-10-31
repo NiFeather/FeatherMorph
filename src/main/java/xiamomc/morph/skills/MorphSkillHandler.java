@@ -243,7 +243,7 @@ public class MorphSkillHandler extends MorphPluginObject
             var cd = skill.executeSkillGeneric(player, state, config, option);
             cdInfo.setLastInvoke(plugin.getCurrentTick());
 
-            state.getDisguiseWrapper().resetAmbientSoundInterval();
+            state.getSoundHandler().resetAmbientSoundInterval();
 
             if (!state.haveCooldown()) state.setCooldownInfo(cdInfo);
             else state.setSkillCooldown(cd);
