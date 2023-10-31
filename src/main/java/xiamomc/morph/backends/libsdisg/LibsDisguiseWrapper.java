@@ -49,7 +49,6 @@ public class LibsDisguiseWrapper extends DisguiseWrapper<Disguise>
         var config = depMgr.get(MorphConfigManager.class, true);
 
         if (config == null) return;
-        soundFrequency = MathUtils.clamp(0, 2, config.getBindable(Double.class, ConfigOption.AMBIENT_FREQUENCY).get());
     }
 
     private final FlagWatcher watcher;
@@ -94,10 +93,6 @@ public class LibsDisguiseWrapper extends DisguiseWrapper<Disguise>
         var newWrapper = new LibsDisguiseWrapper(instance.clone(), (LibsBackend) getBackend());
         newWrapper.compoundTag.merge(this.compoundTag);
 
-        newWrapper.ambientInterval = this.ambientInterval;
-        newWrapper.ambientSoundPrimary = this.ambientSoundPrimary;
-        newWrapper.ambientSoundSecondary = this.ambientSoundSecondary;
-
         return newWrapper;
     }
 
@@ -126,7 +121,7 @@ public class LibsDisguiseWrapper extends DisguiseWrapper<Disguise>
     private boolean isBaby;
 
     @Override
-    protected boolean isBaby()
+    public boolean isBaby()
     {
         return isBaby;
     }
@@ -230,51 +225,15 @@ public class LibsDisguiseWrapper extends DisguiseWrapper<Disguise>
         }
 
         instance.setKeepDisguiseOnPlayerDeath(true);
-
-        initializeSounds();
-    }
-
-    private void initializeSounds()
-    {
-        var entityType = getEntityType();
-        var soundEvent = EntityTypeUtils.getSoundEvent(entityType);
-
-        var sound = soundEvent.sound();
-        if (sound == null) return;
-
-        this.ambientInterval = soundEvent.interval();
-        var pitch = isBaby() ? 1.5F : 1F;
-
-        this.ambientSoundPrimary = SoundUtils.toBukkitSound(soundEvent, pitch);
-
-        if (entityType == EntityType.ALLAY)
-        {
-            var allaySecondary = SoundEvents.ALLAY_AMBIENT_WITH_ITEM;
-            var secSi = new EntityTypeUtils.SoundInfo(allaySecondary, SoundSource.NEUTRAL, ambientInterval, soundEvent.volume());
-            this.ambientSoundSecondary = SoundUtils.toBukkitSound(secSi, pitch);
-        }
     }
 
     private final Scoreboard scoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
 
     public BiConsumer<FlagWatcher, Player> preUpdate;
 
-    public int ambientInterval = 0;
-    public Sound ambientSoundPrimary;
-    public Sound ambientSoundSecondary;
-    private int soundTime;
-
-    @Override
-    public void resetAmbientSoundInterval()
-    {
-        soundTime = 0;
-    }
-
     private final Random random = new Random();
 
     private net.minecraft.world.entity.player.Player nmsPlayer;
-
-    private double soundFrequency = 0D;
 
     @Override
     public void update(boolean isClone, DisguiseState state, Player player)
@@ -292,42 +251,6 @@ public class LibsDisguiseWrapper extends DisguiseWrapper<Disguise>
 
         if (preUpdate != null)
             preUpdate.accept(watcher, player);
-
-        soundTime++;
-
-        // Java中浮点数除以0是正或负无穷
-        // 因为soundFrequency永远大于等于0，而分子是1，因此frequencyScale的最大值是正无穷
-        // 除非soundTime最后也加到了大于等于正无穷，否则不需要额外的判断，但这真的会发生吗（
-        double frequencyScale = 1.0D / soundFrequency;
-
-        //logger.info("Sound: %s <-- %s(%s) --> %s".formatted(soundTime, frequency, soundFrequency, ambientInterval * frequency));
-        if (ambientInterval != 0 && soundTime >= ambientInterval * frequencyScale && !player.isSneaking())
-        {
-            var loc = player.getLocation();
-            boolean playSecondary = false;
-
-            if (getEntityType() == EntityType.ALLAY)
-            {
-                var eq = player.getEquipment();
-                if (!eq.getItemInMainHand().getType().isAir()) playSecondary = true;
-            }
-
-            Sound sound = playSecondary ? ambientSoundSecondary : ambientSoundPrimary;
-
-            var isSpectator = nmsPlayer.isSpectator();
-
-            // 和原版行为保持一致, 并且不要为旁观者播放音效:
-            // net.minecraft.world.entity.Mob#baseTick()
-            if (isSpectator)
-            {
-                soundTime = -(int)(ambientInterval * frequencyScale);
-            }
-            else if (sound != null && random.nextInt((int)(1000 * frequencyScale)) < soundTime)
-            {
-                soundTime = -(int)(ambientInterval * frequencyScale);
-                player.getWorld().playSound(sound, loc.getX(), loc.getY(), loc.getZ());
-            }
-        }
 
         //对克隆的伪装手动更新一些属性
         if (!isClone) return;
@@ -371,7 +294,6 @@ public class LibsDisguiseWrapper extends DisguiseWrapper<Disguise>
     private void invalidateCompound()
     {
         this.tagValid = false;
-        MorphPlugin.getInstance().schedule(this::initializeSounds);
     }
 
     @Override

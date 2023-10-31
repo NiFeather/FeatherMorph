@@ -11,7 +11,6 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.EntityEquipment;
-import org.bukkit.util.BoundingBox;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.misc.CollisionBoxRecord;
@@ -20,13 +19,13 @@ import xiamomc.morph.utilities.EntityTypeUtils;
 
 /**
  * A wrapper that holds the underlying disguise instance
- * @param <T> Type of the disguise instance
+ * @param <TInstance> Type of the disguise instance
  */
-public abstract class DisguiseWrapper<T>
+public abstract class DisguiseWrapper<TInstance>
 {
-    protected T instance;
+    protected TInstance instance;
 
-    public DisguiseWrapper(@NotNull T instance, DisguiseBackend<T, ? extends DisguiseWrapper<T>> backend)
+    public DisguiseWrapper(@NotNull TInstance instance, DisguiseBackend<TInstance, ? extends DisguiseWrapper<TInstance>> backend)
     {
         this.instance = instance;
         this.backend = backend;
@@ -36,14 +35,14 @@ public abstract class DisguiseWrapper<T>
      * Gets the underlying disguise instance
      * @return The underlying disguise instance
      */
-    public T getInstance()
+    public TInstance getInstance()
     {
         return instance;
     }
 
-    private final DisguiseBackend<T, ? extends DisguiseWrapper<T>> backend;
+    private final DisguiseBackend<TInstance, ? extends DisguiseWrapper<TInstance>> backend;
 
-    public DisguiseBackend<T, ? extends DisguiseWrapper<T>> getBackend()
+    public DisguiseBackend<TInstance, ? extends DisguiseWrapper<TInstance>> getBackend()
     {
         return backend;
     }
@@ -76,13 +75,13 @@ public abstract class DisguiseWrapper<T>
      * Clone the underlying disguise instance
      * @return A new instance cloned from the underlying disguise
      */
-    public abstract T copyInstance();
+    public abstract TInstance copyInstance();
 
     /**
      * Clone this wrapper
      * @return A new wrapper cloned from this instance, everything in the new instance should not have any reference with this wrapper
      */
-    public abstract DisguiseWrapper<T> clone();
+    public abstract DisguiseWrapper<TInstance> clone();
 
     /**
      * 返回此伪装的名称
@@ -196,7 +195,7 @@ public abstract class DisguiseWrapper<T>
                 : dimensions;
     }
 
-    protected abstract boolean isBaby();
+    public abstract boolean isBaby();
 
     protected float getSlimeDimensionScale()
     {
@@ -291,8 +290,6 @@ public abstract class DisguiseWrapper<T>
     }
 
     //region Temp
-
-    public abstract void resetAmbientSoundInterval();
 
     public void showArms(boolean showarms)
     {

@@ -2,8 +2,11 @@ package xiamomc.morph.misc;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.kyori.adventure.bossbar.BossBar;
+import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
@@ -32,11 +35,15 @@ import xiamomc.morph.skills.SkillCooldownInfo;
 import xiamomc.morph.skills.SkillType;
 import xiamomc.morph.skills.impl.NoneMorphSkill;
 import xiamomc.morph.storage.playerdata.PlayerMeta;
+import xiamomc.morph.utilities.EntityTypeUtils;
 import xiamomc.morph.utilities.ItemUtils;
+import xiamomc.morph.utilities.MathUtils;
+import xiamomc.morph.utilities.SoundUtils;
 import xiamomc.pluginbase.Annotations.Resolved;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
 
 import static xiamomc.morph.utilities.DisguiseUtils.itemOrAir;
@@ -53,6 +60,8 @@ public class DisguiseState extends MorphPluginObject
         this.provider = provider;
         this.playerOptions = playerOptions;
         this.morphConfiguration = playerMeta;
+
+        this.soundHandler = new SoundHandler(player);
 
         this.setDisguise(id, skillId, disguiseInstance, isClone, targetEquipment);
     }
@@ -409,9 +418,6 @@ public class DisguiseState extends MorphPluginObject
     }
 
     @Resolved(shouldSolveImmediately = true)
-    private AbilityHandler abilityHandler;
-
-    @Resolved(shouldSolveImmediately = true)
     private MorphSkillHandler skillHandler;
 
     @Resolved(shouldSolveImmediately = true)
@@ -510,6 +516,9 @@ public class DisguiseState extends MorphPluginObject
 
         //伪装类型是否支持设置伪装物品
         supportsDisguisedItems = skillHandler.hasSpeficSkill(skillIdentifier, SkillType.INVENTORY);
+
+        //设置声音
+        this.soundHandler.refreshSounds(getEntityType(), wrapper.isBaby());
 
         //重置伪装物品
         if (shouldRefreshDisguiseItems)
@@ -632,6 +641,116 @@ public class DisguiseState extends MorphPluginObject
     }
 
     private final ItemStack[] emptyArmorStack = new ItemStack[]{ null, null, null, null };
+
+    //region Sound Handling
+
+    private final SoundHandler soundHandler;
+
+    public SoundHandler getSoundHandler()
+    {
+        return soundHandler;
+    }
+
+    public static class SoundHandler
+    {
+        public int ambientInterval = 0;
+        public Sound ambientSoundPrimary;
+        public Sound ambientSoundSecondary;
+        private int soundTime;
+        private double soundFrequency = 0D;
+
+        public void resetAmbientSoundInterval()
+        {
+            soundTime = 0;
+        }
+
+        private final Player bindingPlayer;
+
+        @Nullable
+        private EntityType entityType;
+
+        @NotNull
+        private EntityType getEntityType()
+        {
+            return entityType == null ? EntityType.PLAYER : entityType;
+        }
+
+        public SoundHandler(Player bindingPlayer)
+        {
+            this.bindingPlayer = bindingPlayer;
+        }
+
+        public void update()
+        {
+            soundTime++;
+
+            // Java中浮点数除以0是正或负无穷
+            // 因为soundFrequency永远大于等于0，而分子是1，因此frequencyScale的最大值是正无穷
+            // 除非soundTime最后也加到了大于等于正无穷，否则不需要额外的判断，但这真的会发生吗（
+            double frequencyScale = 1.0D / soundFrequency;
+
+            //logger.info("Sound: %s <-- %s(%s) --> %s".formatted(soundTime, frequency, soundFrequency, ambientInterval * frequency));
+            if (ambientInterval != 0 && soundTime >= ambientInterval * frequencyScale && !bindingPlayer.isSneaking())
+            {
+                var loc = bindingPlayer.getLocation();
+                boolean playSecondary = false;
+
+                if (getEntityType() == EntityType.ALLAY)
+                {
+                    var eq = bindingPlayer.getEquipment();
+                    if (!eq.getItemInMainHand().getType().isAir()) playSecondary = true;
+                }
+
+                Sound sound = playSecondary ? ambientSoundSecondary : ambientSoundPrimary;
+
+                var nmsPlayer = NmsRecord.ofPlayer(bindingPlayer);
+                var isSpectator = nmsPlayer.isSpectator();
+
+                // 和原版行为保持一致, 并且不要为旁观者播放音效:
+                // net.minecraft.world.entity.Mob#baseTick()
+                if (isSpectator)
+                {
+                    soundTime = -(int)(ambientInterval * frequencyScale);
+                }
+                else if (sound != null && random.nextInt((int)(1000 * frequencyScale)) < soundTime)
+                {
+                    soundTime = -(int)(ambientInterval * frequencyScale);
+                    bindingPlayer.getWorld().playSound(sound, loc.getX(), loc.getY(), loc.getZ());
+                }
+            }
+        }
+
+        private final Random random = new Random();
+
+        private final MorphConfigManager config = MorphConfigManager.getInstance();
+
+        public void refreshSounds(EntityType entityType, boolean isBaby)
+        {
+            this.entityType = entityType;
+
+            soundFrequency = MathUtils.clamp(0, 2, config.getBindable(Double.class, ConfigOption.AMBIENT_FREQUENCY).get());
+
+            var soundEvent = EntityTypeUtils.getSoundEvent(entityType);
+
+            var sound = soundEvent.sound();
+            if (sound == null) return;
+
+            this.ambientInterval = soundEvent.interval();
+            var pitch = isBaby ? 1.5F : 1F;
+
+            this.ambientSoundPrimary = SoundUtils.toBukkitSound(soundEvent, pitch);
+
+            if (entityType == EntityType.ALLAY)
+            {
+                var allaySecondary = SoundEvents.ALLAY_AMBIENT_WITH_ITEM;
+                var secSi = new EntityTypeUtils.SoundInfo(allaySecondary, SoundSource.NEUTRAL, ambientInterval, soundEvent.volume());
+                this.ambientSoundSecondary = SoundUtils.toBukkitSound(secSi, pitch);
+            }
+        }
+
+    }
+
+    //endregion Sound Handling
 
     /**
      * 更新伪装物品显示
