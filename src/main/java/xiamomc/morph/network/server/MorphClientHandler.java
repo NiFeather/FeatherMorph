@@ -23,6 +23,7 @@ import xiamomc.morph.interfaces.IManageRequests;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.MorphStrings;
 import xiamomc.morph.misc.DisguiseState;
+import xiamomc.morph.misc.NetworkingHelper;
 import xiamomc.morph.misc.NmsRecord;
 import xiamomc.morph.misc.permissions.CommonPermissions;
 import xiamomc.morph.network.*;
@@ -32,13 +33,10 @@ import xiamomc.morph.network.commands.S2C.AbstractS2CCommand;
 import xiamomc.morph.network.commands.S2C.S2CCurrentCommand;
 import xiamomc.morph.network.commands.S2C.S2CReAuthCommand;
 import xiamomc.morph.network.commands.S2C.S2CUnAuthCommand;
-import xiamomc.morph.network.commands.S2C.clientrender.S2CRenderMapMetaCommand;
-import xiamomc.morph.network.commands.S2C.clientrender.S2CRenderMeta;
 import xiamomc.morph.network.commands.S2C.query.QueryType;
 import xiamomc.morph.network.commands.S2C.query.S2CQueryCommand;
 import xiamomc.morph.network.commands.S2C.set.S2CSetModifyBoundingBoxCommand;
 import xiamomc.morph.network.commands.S2C.set.S2CSetSelfViewingCommand;
-import xiamomc.morph.utilities.MapMetaUtils;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
@@ -624,7 +622,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
             if (player.hasPermission(CommonPermissions.DISGUISE_REVEALING))
                 sendCommand(player, manager.genMapCommand());
 
-            if (manager.isUsingNilServerBackend())
+            if (manager.isUsingClientRenderer())
                 sendCommand(player, manager.genRenderSyncCommand());
 
             logger.info("READY!");
@@ -634,13 +632,10 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
                 logger.info("STATE! " + bindingState);
                 var bindingPlayer = bindingState.getPlayer();
 
-                var meta = new S2CRenderMeta(bindingPlayer.getEntityId());
-                meta.profileCompound = bindingState.getProfileNbtString();
-                meta.sNbt = bindingState.getCachedNbtString();
-                meta.showOverridedEquipment = bindingState.showingDisguisedItems();
-                meta.overridedEquipment = MapMetaUtils.toPacketEquipment(bindingState.getDisguisedItems());
+                var packet = networkingHelper.prepareMeta(bindingPlayer)
+                        .forDisguiseState(bindingState)
+                        .build();
 
-                var packet = new S2CRenderMapMetaCommand(meta);
                 this.sendCommand(player, packet);
                 logger.info("SEND! " + packet);
             }
@@ -746,6 +741,9 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
 
     @Resolved
     private IManageRequests requestManager;
+
+    @Resolved
+    private NetworkingHelper networkingHelper;
 
     @Override
     public void onRequestCommand(C2SRequestCommand c2SRequestCommand)

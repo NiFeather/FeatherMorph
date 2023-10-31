@@ -33,24 +33,19 @@ import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.MorphStrings;
 import xiamomc.morph.messages.SkillStrings;
 import xiamomc.morph.messages.vanilla.VanillaMessageStore;
-import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.misc.DisguiseTypes;
 import xiamomc.morph.misc.NetworkingHelper;
 import xiamomc.morph.misc.permissions.CommonPermissions;
 import xiamomc.morph.network.commands.S2C.S2CSwapCommand;
-import xiamomc.morph.network.commands.S2C.clientrender.S2CRenderMapMetaCommand;
-import xiamomc.morph.network.commands.S2C.clientrender.S2CRenderMeta;
 import xiamomc.morph.network.commands.S2C.map.S2CMapRemoveCommand;
 import xiamomc.morph.network.server.MorphClientHandler;
 import xiamomc.morph.network.server.ServerSetEquipCommand;
 import xiamomc.morph.skills.MorphSkillHandler;
 import xiamomc.morph.utilities.EntityTypeUtils;
-import xiamomc.morph.utilities.MapMetaUtils;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -449,7 +444,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
 
             networkingHelper.sendCommandToRevealablePlayers(morphs.genPartialMapCommand(state));
 
-            if (morphs.isUsingNilServerBackend())
+            if (morphs.isUsingClientRenderer())
                 networkingHelper.sendCommandToAllPlayers(morphs.genClientRenderAddCommand(state));
 
             //调用Morph事件

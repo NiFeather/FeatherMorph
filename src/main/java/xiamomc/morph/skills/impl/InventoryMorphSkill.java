@@ -8,8 +8,6 @@ import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.SkillStrings;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.misc.NetworkingHelper;
-import xiamomc.morph.network.commands.S2C.clientrender.S2CRenderMapMetaCommand;
-import xiamomc.morph.network.commands.S2C.clientrender.S2CRenderMeta;
 import xiamomc.morph.network.commands.S2C.set.S2CSetDisplayingFakeEquipCommand;
 import xiamomc.morph.network.server.MorphClientHandler;
 import xiamomc.morph.skills.MorphSkill;
@@ -39,6 +37,14 @@ public class InventoryMorphSkill extends MorphSkill<NoOpConfiguration>
                 ? SkillStrings.displayingDisguiseInventoryString()
                 : SkillStrings.displayingPlayerInventoryString()));
 
+        //发送元数据
+        if (manager.isUsingClientRenderer())
+        {
+            networkingHelper.prepareMeta(state.getPlayer())
+                    .setDisguiseEquipmentShown(defaultShown)
+                    .send();
+        }
+
         return configuration.getCooldown();
     }
 
@@ -51,12 +57,11 @@ public class InventoryMorphSkill extends MorphSkill<NoOpConfiguration>
         clientHandler.sendCommand(state.getPlayer(), new S2CSetDisplayingFakeEquipCommand(state.showingDisguisedItems()));
 
         //发送元数据
-        if (manager.isUsingNilServerBackend())
+        if (manager.isUsingClientRenderer())
         {
-            var meta = new S2CRenderMeta(state.getPlayer().getEntityId());
-            meta.showOverridedEquipment = state.showingDisguisedItems();
-            var packet = new S2CRenderMapMetaCommand(meta);
-            networkingHelper.sendCommandToAllPlayers(packet);
+            networkingHelper.prepareMeta(state.getPlayer())
+                    .setDisguiseEquipmentShown(state.showingDisguisedItems())
+                    .send();
         }
 
         super.onInitialEquip(state);

@@ -35,7 +35,6 @@ import xiamomc.morph.messages.MorphStrings;
 import xiamomc.morph.messages.vanilla.VanillaMessageStore;
 import xiamomc.morph.misc.*;
 import xiamomc.morph.misc.permissions.CommonPermissions;
-import xiamomc.morph.network.commands.S2C.AbstractS2CCommand;
 import xiamomc.morph.network.commands.S2C.clientrender.*;
 import xiamomc.morph.network.commands.S2C.map.S2CMapCommand;
 import xiamomc.morph.network.commands.S2C.map.S2CMapRemoveCommand;
@@ -54,7 +53,6 @@ import xiamomc.morph.storage.offlinestore.OfflineStateStore;
 import xiamomc.morph.storage.playerdata.PlayerDataStore;
 import xiamomc.morph.storage.playerdata.PlayerMeta;
 import xiamomc.morph.utilities.DisguiseUtils;
-import xiamomc.morph.utilities.MapMetaUtils;
 import xiamomc.morph.utilities.NbtUtils;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
@@ -688,18 +686,13 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             networkingHelper.sendCommandToRevealablePlayers(genPartialMapCommand(outComingState));
 
             //发送元数据
-            if (isUsingNilServerBackend())
+            if (isUsingClientRenderer())
             {
                 networkingHelper.sendCommandToAllPlayers(new S2CRenderMapAddCommand(outComingState.getPlayer().getEntityId(), outComingState.getDisguiseIdentifier()));
 
-                var meta = new S2CRenderMeta(player.getEntityId());
-                meta.profileCompound = outComingState.getProfileNbtString();
-                meta.sNbt = outComingState.getCachedNbtString();
-                meta.showOverridedEquipment = outComingState.showingDisguisedItems();
-                meta.overridedEquipment = MapMetaUtils.toPacketEquipment(outComingState.getDisguisedItems());
-
-                var packet = new S2CRenderMapMetaCommand(meta);
-                networkingHelper.sendCommandToAllPlayers(packet);
+                networkingHelper.prepareMeta(player)
+                        .forDisguiseState(outComingState)
+                        .send();
             }
 
             return true;
@@ -728,7 +721,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         }
     }
 
-    public boolean isUsingNilServerBackend()
+    public boolean isUsingClientRenderer()
     {
         return currentBackend == nilBackend;
     }
@@ -949,7 +942,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         // 向管理员发送map移除指令
         networkingHelper.sendCommandToRevealablePlayers(new S2CMapRemoveCommand(player.getEntityId()));
 
-        if (isUsingNilServerBackend())
+        if (isUsingClientRenderer())
             networkingHelper.sendCommandToAllPlayers(new S2CRenderMapRemoveCommand(player.getEntityId()));
     }
 
