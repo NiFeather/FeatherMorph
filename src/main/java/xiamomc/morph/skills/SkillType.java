@@ -13,7 +13,10 @@ public class SkillType
     public static final NamespacedKey TELEPORT = new NamespacedKey(nameSpace, "teleport");
     public static final NamespacedKey EVOKER = new NamespacedKey(nameSpace, "evoker");
     public static final NamespacedKey SONIC_BOOM = new NamespacedKey(nameSpace, "sonic_boom");
+
+    @Deprecated(forRemoval = true)
     public static final NamespacedKey GHAST = new NamespacedKey(nameSpace, "launch_projective_ghast");
+
     public static final NamespacedKey WITCH = new NamespacedKey(nameSpace, "witch");
 
     public static final NamespacedKey UNKNOWN = new NamespacedKey(nameSpace, "unknown");

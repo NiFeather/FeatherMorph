@@ -174,6 +174,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
             unMorph(nilCommandSource, bindingPlayer, true, true);
         }
+
+        state.getSoundHandler().update();
     }
 
     private void update()
