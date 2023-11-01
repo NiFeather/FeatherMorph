@@ -188,7 +188,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
             if (!p.isOnline()) return;
 
-            this.scheduleOn(p, () -> this.perPlayerUpdate(p, i));
+            this.scheduleOn(p, () -> this.perPlayerUpdate(p, i), 0);
         });
     }
 

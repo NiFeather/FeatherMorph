@@ -53,7 +53,7 @@ public abstract class DelayedMorphSkill<T extends ISkillOption> extends MorphSki
             return;
         }
 
-        this.addSchedule(() ->
+        this.scheduleOn(player, () ->
         {
             if (!player.isOnline()) return;
 

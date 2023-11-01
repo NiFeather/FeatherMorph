@@ -10,7 +10,7 @@ plugins {
     `maven-publish`
     id("io.papermc.paperweight.userdev") version "1.5.5"
     id("xyz.jpenilla.run-paper") version "2.0.1" // Adds runServer and runMojangMappedServer tasks for testing
-    id("net.minecrell.plugin-yml.bukkit") version "0.5.2" // Generates plugin.yml
+    id("net.minecrell.plugin-yml.bukkit") version "0.6.0" // Generates plugin.yml
     id("com.github.johnrengelman.shadow") version "7.1.2" // Shadow PluginBase
 }
 
@@ -86,6 +86,7 @@ bukkit {
     version = "${project.property("project_version")}"
     prefix = "FeatherMorph"
     name = "FeatherMorph"
+    foliaSupported = true
 
     commands {
         register("morph")
