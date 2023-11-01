@@ -19,11 +19,14 @@ import org.bukkit.entity.Enemy;
 import org.bukkit.entity.EntityType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.misc.DisguiseTypes;
+import xiamomc.pluginbase.Exceptions.NullDependencyException;
 
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class EntityTypeUtils
 {
@@ -64,21 +67,34 @@ public class EntityTypeUtils
         var cache = typeSoundMap.getOrDefault(bukkitType, null);
         if (cache != null) return cache;
 
-        var nmsType = getNmsType(bukkitType);
-
-        var serverWorld = ((CraftWorld) Bukkit.getWorlds().get(0)).getHandle();
-        var entity = nmsType.create(serverWorld, null, e -> e.remove(Entity.RemovalReason.DISCARDED), BlockPos.ZERO, MobSpawnType.COMMAND, false, false);
-
-        if (entity instanceof Mob mob)
+        try
         {
-            var source = mob.getSoundSource();
-            var sound = mob.getAmbientSound0();
-            var interval = mob.getAmbientSoundInterval();
+            var nmsType = getNmsType(bukkitType);
+            if (nmsType == null)
+                throw new NullPointerException("Null NMSType for BukkitType " + bukkitType);
 
-            var rec = new SoundInfo(sound, source, interval, mob.getSoundVolume());
-            typeSoundMap.put(bukkitType, rec);
+            var serverWorld = ((CraftWorld) Bukkit.getWorlds().get(0)).getHandle();
 
-            return rec;
+            AtomicReference<Entity> entity = new AtomicReference<>();
+            Bukkit.getRegionScheduler().execute(MorphPlugin.getInstance(), Bukkit.getWorlds().get(0), 0, 0, () ->
+                    entity.set(nmsType.create(serverWorld, null, e -> e.remove(Entity.RemovalReason.DISCARDED), BlockPos.ZERO, MobSpawnType.COMMAND, false, false)));
+
+            if (entity.get() instanceof Mob mob)
+            {
+                var source = mob.getSoundSource();
+                var sound = mob.getAmbientSound0();
+                var interval = mob.getAmbientSoundInterval();
+
+                var rec = new SoundInfo(sound, source, interval, mob.getSoundVolume());
+                typeSoundMap.put(bukkitType, rec);
+
+                return rec;
+            }
+        }
+        catch (Throwable t)
+        {
+            MorphPlugin.getInstance().getSLF4JLogger().error("Unable to get SoundInfo for " + bukkitType);
+            t.printStackTrace();
         }
 
         return new SoundInfo(null, SoundSource.PLAYERS, Integer.MAX_VALUE, 1);
