@@ -1,5 +1,6 @@
 package xiamomc.morph.commands.subcommands.plugin;
 
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -53,6 +54,9 @@ public class CheckUpdateSubCommand extends MorphPluginObject implements ISubComm
     private void onRequestFinish(UpdateHandler.CheckResult result, CommandSender sender)
     {
         if (result == UpdateHandler.CheckResult.ALREADY_LATEST)
-            sender.sendMessage(MessageUtils.prefixes(sender, UpdateStrings.noNewVersionAvailable()));
+        {
+            var msg = UpdateStrings.noNewVersionAvailable().resolve("mc_version", Bukkit.getMinecraftVersion());
+            sender.sendMessage(MessageUtils.prefixes(sender, msg));
+        }
     }
 }

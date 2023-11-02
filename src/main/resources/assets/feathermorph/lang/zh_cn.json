@@ -124,7 +124,7 @@
   "update.msg_header_footer": "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-",
   "update.checking_update": "检查更新中...",
   "update.new_version_available": "FeatherMorph有新版本辣！(<current> -> <origin>)",
-  "update.no_new_ver_available": "FeatherMorph已是最新版本",
+  "update.no_new_ver_available": "FeatherMorph已是<mc_version>上的最新版本",
   "update.update_here": "在此更新：<url>",
   "requests.already_have_disguise": "<color:red>你已经有对方的形态了",
   "requests.cant_send_to_self": "<color:red>你不能给自己发请求",

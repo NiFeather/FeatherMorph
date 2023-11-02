@@ -200,7 +200,7 @@ public class UpdateHandler extends MorphPluginObject
 
             if (currentVersion.equals(latestVersion))
             {
-                logger.info("Already on the latest version");
+                logger.info("Already on the latest version for " + Bukkit.getMinecraftVersion());
 
                 if (onFinish != null)
                     onFinish.accept(CheckResult.ALREADY_LATEST);
