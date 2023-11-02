@@ -18,7 +18,7 @@ import xiamomc.morph.messages.MorphMessageStore;
 import xiamomc.morph.messages.vanilla.VanillaMessageStore;
 import xiamomc.morph.misc.NetworkingHelper;
 import xiamomc.morph.misc.PlayerOperationSimulator;
-import xiamomc.morph.misc.UpdateHandler;
+import xiamomc.morph.updates.UpdateHandler;
 import xiamomc.morph.misc.integrations.gsit.GSitCompactProcessor;
 import xiamomc.morph.misc.integrations.placeholderapi.PlaceholderIntegration;
 import xiamomc.morph.network.server.MorphClientHandler;
