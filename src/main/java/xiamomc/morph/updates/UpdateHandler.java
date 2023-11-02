@@ -1,4 +1,4 @@
-package xiamomc.morph.misc;
+package xiamomc.morph.updates;
 
 import com.google.gson.GsonBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
@@ -155,14 +155,29 @@ public class UpdateHandler extends MorphPluginObject
             var responseStr = EntityUtils.toString(response.getEntity());
             var gson = new GsonBuilder().create();
             var versionList = gson.fromJson(responseStr, ArrayList.class);
-            var objFirst = versionList.stream().findFirst().orElse(null);
-
-            if (!(objFirst instanceof Map<?, ?> map))
+            var metaList = new ObjectArrayList<SingleUpdateInfoMeta>();
+            for (Object o : versionList)
             {
-                if (objFirst == null)
-                    logger.error("Unable to check update: This version of Minecraft is not listed yet.");
+                if (o instanceof Map<?,?> map)
+                    metaList.add(SingleUpdateInfoMeta.fromMap(map));
                 else
-                    logger.error("Unable to check update: Origin server sent an unknown response");
+                    logger.warn("Cant deserialize element to SingleUpdateInfoMeta: Not a map (" + o + ")");
+            }
+
+            var loader = Platforms.fromName(Bukkit.getName());
+            var matchMeta = metaList.stream()
+                    .filter(m ->
+                    {
+                        var supportedLoaders = m.supportedLoaders;
+                        if (supportedLoaders == null) return false;
+
+                        return supportedLoaders.stream().anyMatch(s -> s.equalsIgnoreCase(loader.getImplName()));
+                    }).findFirst().orElse(null);
+
+            if (matchMeta == null)
+            {
+                logger.error("Unable to check update: This version of Minecraft is not listed yet, or your server '%s' is not supported"
+                        .formatted(loader.getImplName()));
 
                 if (onFinish != null)
                     onFinish.accept(CheckResult.FAIL);
@@ -171,19 +186,18 @@ public class UpdateHandler extends MorphPluginObject
             }
 
             var currentVersion = plugin.getPluginMeta().getVersion();
-            var latestVersion = (String) map.getOrDefault("version_number", null);
+            var latestVersion = matchMeta.versionNumber;
             if (latestVersion == null)
             {
                 if (onFinish != null)
                     onFinish.accept(CheckResult.FAIL);
 
-                throw new NullDependencyException("Null version number from response: " + map);
+                throw new NullDependencyException("Null version number from response: " + gson.toJson(matchMeta));
             }
 
             if (currentVersion.equals(latestVersion))
             {
                 logger.info("Already on the latest version");
-
 
                 if (onFinish != null)
                     onFinish.accept(CheckResult.ALREADY_LATEST);

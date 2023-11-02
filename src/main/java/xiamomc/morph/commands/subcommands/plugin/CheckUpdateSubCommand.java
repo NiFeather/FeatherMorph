@@ -6,7 +6,7 @@ import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.UpdateStrings;
-import xiamomc.morph.misc.UpdateHandler;
+import xiamomc.morph.updates.UpdateHandler;
 import xiamomc.morph.misc.permissions.CommonPermissions;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Command.ISubCommand;
