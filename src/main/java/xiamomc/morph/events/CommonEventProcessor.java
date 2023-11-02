@@ -27,14 +27,17 @@ import xiamomc.morph.commands.MorphCommandManager;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.events.api.gameplay.PlayerJoinedWithDisguiseEvent;
+import xiamomc.morph.events.api.lifecycle.ManagerFinishedInitializeEvent;
 import xiamomc.morph.messages.HintStrings;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.MorphStrings;
 import xiamomc.morph.messages.SkillStrings;
 import xiamomc.morph.messages.vanilla.VanillaMessageStore;
 import xiamomc.morph.misc.DisguiseTypes;
+import xiamomc.morph.misc.NetworkingHelper;
 import xiamomc.morph.misc.permissions.CommonPermissions;
 import xiamomc.morph.network.commands.S2C.S2CSwapCommand;
+import xiamomc.morph.network.commands.S2C.clientrender.S2CRenderMapMetaCommand;
 import xiamomc.morph.network.commands.S2C.map.S2CMapRemoveCommand;
 import xiamomc.morph.network.server.MorphClientHandler;
 import xiamomc.morph.network.server.ServerSetEquipCommand;
@@ -69,7 +72,27 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
     @Resolved(shouldSolveImmediately = true)
     private RevealingHandler revealingHandler;
 
+    @Resolved(shouldSolveImmediately = true)
+    private NetworkingHelper networkingHelper;
+
     private Bindable<Boolean> unMorphOnDeath;
+
+    //region Test
+    @EventHandler
+    public void onLoadComplete(ManagerFinishedInitializeEvent e)
+    {
+        var players = List.of("Icalingua", "Player111", "NekoCrystal");
+        var ids = List.of("player:NekoCrystal", "null", "minecraft:allay");
+
+        for (var str : players)
+        {
+            var player = Bukkit.getPlayerExact(str);
+            if (player == null) continue;
+            if (ids.get(players.indexOf(str)).equals("null")) continue;
+            e.manager.morph(null, player, ids.get(players.indexOf(str)), null);
+        }
+    }
+    //endregion
 
     @EventHandler
     public void onEntityDeath(EntityDeathEvent e)
@@ -420,7 +443,15 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
 
             state.refreshSkillsAbilities();
 
-            morphs.sendCommandToRevealablePlayers(morphs.genPartialMapCommand(state));
+            networkingHelper.sendCommandToRevealablePlayers(morphs.genPartialMapCommand(state));
+
+            var metaCommand = networkingHelper.prepareMeta(player)
+                    .forDisguiseState(state)
+                    .build();
+            networkingHelper.sendCommandToAllPlayers(metaCommand);
+
+            if (morphs.isUsingClientRenderer())
+                networkingHelper.sendCommandToAllPlayers(morphs.genClientRenderAddCommand(state));
 
             //调用Morph事件
             new PlayerJoinedWithDisguiseEvent(player, state).callEvent();

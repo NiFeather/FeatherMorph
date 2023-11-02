@@ -22,6 +22,8 @@ import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.interfaces.IManageRequests;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.MorphStrings;
+import xiamomc.morph.misc.DisguiseState;
+import xiamomc.morph.misc.NetworkingHelper;
 import xiamomc.morph.misc.NmsRecord;
 import xiamomc.morph.misc.permissions.CommonPermissions;
 import xiamomc.morph.network.*;
@@ -310,7 +312,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
 
         if (bool == null)
         {
-            //logger.info("should remove for " + player.getName());
+            logger.info("should remove for " + player.getName());
             return;
         }
 
@@ -620,6 +622,24 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
             if (player.hasPermission(CommonPermissions.DISGUISE_REVEALING))
                 sendCommand(player, manager.genMapCommand());
 
+            if (manager.isUsingClientRenderer())
+                sendCommand(player, manager.genRenderSyncCommand());
+
+            logger.info("READY!");
+            var disguises = manager.getDisguiseStates();
+            for (DisguiseState bindingState : disguises)
+            {
+                logger.info("STATE! " + bindingState);
+                var bindingPlayer = bindingState.getPlayer();
+
+                var packet = networkingHelper.prepareMeta(bindingPlayer)
+                        .forDisguiseState(bindingState)
+                        .build();
+
+                this.sendCommand(player, packet);
+                logger.info("SEND! " + packet);
+            }
+
             playerConnectionStates.put(player, InitializeState.DONE);
         });
     }
@@ -721,6 +741,9 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
 
     @Resolved
     private IManageRequests requestManager;
+
+    @Resolved
+    private NetworkingHelper networkingHelper;
 
     @Override
     public void onRequestCommand(C2SRequestCommand c2SRequestCommand)

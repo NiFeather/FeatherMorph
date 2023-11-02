@@ -16,6 +16,7 @@ import xiamomc.morph.interfaces.IManageRequests;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.MorphMessageStore;
 import xiamomc.morph.messages.vanilla.VanillaMessageStore;
+import xiamomc.morph.misc.NetworkingHelper;
 import xiamomc.morph.misc.PlayerOperationSimulator;
 import xiamomc.morph.updates.UpdateHandler;
 import xiamomc.morph.misc.integrations.gsit.GSitCompactProcessor;
@@ -100,6 +101,7 @@ public final class MorphPlugin extends XiaMoJavaPlugin
 
         //缓存依赖
         dependencyManager.cache(this);
+        dependencyManager.cache(new NetworkingHelper());
         dependencyManager.cache(morphManager = new MorphManager());
         dependencyManager.cache(skillHandler = new MorphSkillHandler());
         dependencyManager.cache(abilityHandler = new AbilityHandler());

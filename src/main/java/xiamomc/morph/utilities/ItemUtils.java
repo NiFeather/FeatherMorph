@@ -58,6 +58,17 @@ public class ItemUtils
         return "{\"id\":\"minecraft:air\",\"Count\":1}";
     }
 
+    public static String getItemCompound(ItemStack stack)
+    {
+        var item = ItemUtils.itemOrAir(stack);
+
+        if (stack.getType().isAir()) return "{}";
+
+        var nmsCopy = CraftItemStack.asNMSCopy(item);
+
+        return NbtUtils.getCompoundString(nmsCopy.getTag());
+    }
+
     /**
      * Check if the given {@link Material} is a continuous usable type (have consuming animation).
      * @param type {@link Material}
