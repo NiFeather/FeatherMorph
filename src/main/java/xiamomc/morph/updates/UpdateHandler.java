@@ -171,7 +171,10 @@ public class UpdateHandler extends MorphPluginObject
                         var supportedLoaders = m.supportedLoaders;
                         if (supportedLoaders == null) return false;
 
-                        return supportedLoaders.stream().anyMatch(s -> s.equalsIgnoreCase(loader.getImplName()));
+                        var isRelease = "Release".equalsIgnoreCase(m.versionType);
+                        var loaderMatch = supportedLoaders.stream().anyMatch(s -> s.equalsIgnoreCase(loader.getImplName()));
+
+                        return isRelease && loaderMatch;
                     }).findFirst().orElse(null);
 
             if (matchMeta == null)
