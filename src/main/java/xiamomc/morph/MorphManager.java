@@ -117,9 +117,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         try
         {
-            if (1+1==2)
-                throw new NoClassDefFoundError();
-
             this.currentBackend = new LibsBackend();
         }
         catch (NoClassDefFoundError e)
@@ -141,6 +138,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         bannedDisguises = config.getBindableList(ConfigOption.BANNED_DISGUISES);
         config.bind(allowHeadMorph, ConfigOption.ALLOW_HEAD_MORPH);
         config.bind(allowAcquireMorph, ConfigOption.ALLOW_ACQUIRE_MORPHS);
+        config.bind(useClientRenderer, ConfigOption.USE_CLIENT_RENDERER);
 
         registerProviders(ObjectList.of(
                 new VanillaDisguiseProvider(),
@@ -336,6 +334,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     private final Bindable<Boolean> allowHeadMorph = new Bindable<>(true);
 
     private final Bindable<Boolean> allowAcquireMorph = new Bindable<>(true);
+    private final Bindable<Boolean> useClientRenderer = new Bindable<>(false);
 
     private final Map<UUID, PlayerTextures> uuidPlayerTexturesMap = new ConcurrentHashMap<>();
 
@@ -731,7 +730,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
     public boolean isUsingClientRenderer()
     {
-        return currentBackend == nilBackend;
+        return currentBackend == nilBackend && useClientRenderer.get();
     }
 
     //region Command generating

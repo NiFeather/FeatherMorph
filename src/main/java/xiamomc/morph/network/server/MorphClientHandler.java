@@ -127,6 +127,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
 
     private final CommandRegistries registries = new CommandRegistries();
     private final Bindable<Boolean> modifyBoundingBoxes = new Bindable<>(false);
+    private final Bindable<Boolean> useClientRenderer = new Bindable<>(false);
 
     @Initializer
     private void load(MorphPlugin plugin, MorphConfigManager configManager)
@@ -257,6 +258,8 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
 
         configManager.bind(modifyBoundingBoxes, ConfigOption.MODIFY_BOUNDING_BOX);
 
+        configManager.bind(useClientRenderer, ConfigOption.USE_CLIENT_RENDERER);
+
         modifyBoundingBoxes.onValueChanged((o, n) ->
         {
             var players = Bukkit.getOnlinePlayers();
@@ -265,6 +268,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
 
         forceTargetVersion.onValueChanged((o, n) -> scheduleReAuthPlayers());
         modifyBoundingBoxes.onValueChanged((o, n) -> scheduleReAuthPlayers());
+        useClientRenderer.onValueChanged((o, n) -> scheduleReAuthPlayers());
 
         allowClient.onValueChanged((o, n) ->
         {
@@ -623,21 +627,20 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
                 sendCommand(player, manager.genMapCommand());
 
             if (manager.isUsingClientRenderer())
+            {
                 sendCommand(player, manager.genRenderSyncCommand());
 
-            logger.info("READY!");
-            var disguises = manager.getDisguiseStates();
-            for (DisguiseState bindingState : disguises)
-            {
-                logger.info("STATE! " + bindingState);
-                var bindingPlayer = bindingState.getPlayer();
+                var disguises = manager.getDisguiseStates();
+                for (DisguiseState bindingState : disguises)
+                {
+                    var bindingPlayer = bindingState.getPlayer();
 
-                var packet = networkingHelper.prepareMeta(bindingPlayer)
-                        .forDisguiseState(bindingState)
-                        .build();
+                    var packet = networkingHelper.prepareMeta(bindingPlayer)
+                            .forDisguiseState(bindingState)
+                            .build();
 
-                this.sendCommand(player, packet);
-                logger.info("SEND! " + packet);
+                    this.sendCommand(player, packet);
+                }
             }
 
             playerConnectionStates.put(player, InitializeState.DONE);

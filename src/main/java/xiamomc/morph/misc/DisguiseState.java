@@ -19,7 +19,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
-import xiamomc.morph.abilities.AbilityHandler;
 import xiamomc.morph.abilities.IMorphAbility;
 import xiamomc.morph.backends.DisguiseWrapper;
 import xiamomc.morph.config.ConfigOption;
@@ -518,7 +517,7 @@ public class DisguiseState extends MorphPluginObject
         supportsDisguisedItems = skillHandler.hasSpeficSkill(skillIdentifier, SkillType.INVENTORY);
 
         //设置声音
-        this.soundHandler.refreshSounds(getEntityType(), wrapper.isBaby());
+        this.soundHandler.refreshSounds(wrapper.getEntityType(), wrapper.isBaby());
 
         //重置伪装物品
         if (shouldRefreshDisguiseItems)
@@ -659,7 +658,7 @@ public class DisguiseState extends MorphPluginObject
         private int soundTime;
         private double soundFrequency = 0D;
 
-        public void resetAmbientSoundInterval()
+        public void resetSoundTime()
         {
             soundTime = 0;
         }
@@ -724,8 +723,18 @@ public class DisguiseState extends MorphPluginObject
 
         private final MorphConfigManager config = MorphConfigManager.getInstance();
 
+        public void resetSound()
+        {
+            ambientSoundPrimary = null;
+            ambientSoundSecondary = null;
+            ambientInterval = 0;
+            resetSoundTime();
+        }
+
         public void refreshSounds(EntityType entityType, boolean isBaby)
         {
+            resetSound();
+
             this.entityType = entityType;
 
             soundFrequency = MathUtils.clamp(0, 2, config.getBindable(Double.class, ConfigOption.AMBIENT_FREQUENCY).get());
