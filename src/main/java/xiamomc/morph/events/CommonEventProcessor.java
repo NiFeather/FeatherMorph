@@ -76,23 +76,6 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
 
     private Bindable<Boolean> unMorphOnDeath;
 
-    //region Test
-    @EventHandler
-    public void onLoadComplete(ManagerFinishedInitializeEvent e)
-    {
-        var players = List.of("Icalingua", "Player111", "NekoCrystal");
-        var ids = List.of("player:NekoCrystal", "null", "minecraft:allay");
-
-        for (var str : players)
-        {
-            var player = Bukkit.getPlayerExact(str);
-            if (player == null) continue;
-            if (ids.get(players.indexOf(str)).equals("null")) continue;
-            e.manager.morph(null, player, ids.get(players.indexOf(str)), null);
-        }
-    }
-    //endregion
-
     @EventHandler
     public void onEntityDeath(EntityDeathEvent e)
     {
