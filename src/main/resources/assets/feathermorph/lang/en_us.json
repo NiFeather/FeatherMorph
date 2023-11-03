@@ -124,7 +124,7 @@
   "update.msg_header_footer": "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-",
   "update.checking_update": "Checking update...",
   "update.new_version_available": "A newer version of FeatherMorph has been released！(<current> -> <origin>)",
-  "update.no_new_ver_available": "You're already on the latest version",
+  "update.no_new_ver_available": "You're already on the latest version for <mc_version>",
   "update.update_here": "Update here: <url>",
   "requests.already_have_disguise": "<color:red>You already have their disguise!",
   "requests.cant_send_to_self": "<color:red>You can't send requests to yourself",
