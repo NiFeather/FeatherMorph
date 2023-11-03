@@ -188,9 +188,10 @@ public class UpdateHandler extends MorphPluginObject
                 return;
             }
 
-            var currentVersion = plugin.getPluginMeta().getVersion();
-            var latestVersion = matchMeta.versionNumber;
-            if (latestVersion == null)
+            var currentVersion = VersionHandling.toVersionInfo(plugin.getPluginMeta().getVersion());
+            var latestVersion = VersionHandling.toVersionInfo(matchMeta.versionNumber);
+
+            if (latestVersion.isInvalid())
             {
                 if (onFinish != null)
                     onFinish.accept(CheckResult.FAIL);
@@ -201,6 +202,16 @@ public class UpdateHandler extends MorphPluginObject
             if (currentVersion.equals(latestVersion))
             {
                 logger.info("Already on the latest version for " + Bukkit.getMinecraftVersion());
+
+                if (onFinish != null)
+                    onFinish.accept(CheckResult.ALREADY_LATEST);
+
+                return;
+            }
+
+            if (latestVersion.compare(currentVersion) == VersionHandling.CompareResult.OLDER)
+            {
+                logger.info("Your version is newer than released for %s!".formatted(Bukkit.getMinecraftVersion()));
 
                 if (onFinish != null)
                     onFinish.accept(CheckResult.ALREADY_LATEST);
@@ -230,8 +241,9 @@ public class UpdateHandler extends MorphPluginObject
             sendTargets.add(Bukkit.getConsoleSender());
 
             this.msgPrimary = UpdateStrings.newVersionAvailable()
-                    .resolve("current", currentVersion)
-                    .resolve("origin", latestVersion);
+                    .resolve("current", currentVersion.toString())
+                    .resolve("origin", latestVersion.toString());
+
             this.msgSecondary = UpdateStrings.update_here()
                     .resolve("url", "https://modrinth.com/plugin/feathermorph");
 
