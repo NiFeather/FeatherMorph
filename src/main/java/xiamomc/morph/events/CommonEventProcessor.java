@@ -37,7 +37,6 @@ import xiamomc.morph.misc.DisguiseTypes;
 import xiamomc.morph.misc.NetworkingHelper;
 import xiamomc.morph.misc.permissions.CommonPermissions;
 import xiamomc.morph.network.commands.S2C.S2CSwapCommand;
-import xiamomc.morph.network.commands.S2C.clientrender.S2CRenderMapMetaCommand;
 import xiamomc.morph.network.commands.S2C.map.S2CMapRemoveCommand;
 import xiamomc.morph.network.server.MorphClientHandler;
 import xiamomc.morph.network.server.ServerSetEquipCommand;
@@ -166,7 +165,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
 
             if (state != null)
             {
-                state.getSoundHandler().resetAmbientSoundInterval();
+                state.getSoundHandler().resetSoundTime();
 
                 //如果伤害是0，那么取消事件
                 if (e.getDamage() > 0d)
