@@ -238,5 +238,9 @@ root:
     # Should we log packets sent to the client?
     log_outgoing_packets: false
 
+    # Make clients render other players' disguises when LibsDisguises is not present?
+    # Requires the client to implement the v11 protocol
+    client_renderer: true
+
   # Do not touch unless you know what you're doing!
-  version: 26
+  version: 27

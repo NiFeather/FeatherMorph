@@ -444,13 +444,15 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
 
             networkingHelper.sendCommandToRevealablePlayers(morphs.genPartialMapCommand(state));
 
-            var metaCommand = networkingHelper.prepareMeta(player)
-                    .forDisguiseState(state)
-                    .build();
-            networkingHelper.sendCommandToAllPlayers(metaCommand);
-
             if (morphs.isUsingClientRenderer())
+            {
                 networkingHelper.sendCommandToAllPlayers(morphs.genClientRenderAddCommand(state));
+
+                var metaCommand = networkingHelper.prepareMeta(player)
+                        .forDisguiseState(state)
+                        .build();
+                networkingHelper.sendCommandToAllPlayers(metaCommand);
+            }
 
             //调用Morph事件
             new PlayerJoinedWithDisguiseEvent(player, state).callEvent();

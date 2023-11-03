@@ -39,6 +39,8 @@ public enum ConfigOption
     LOG_INCOMING_PACKETS(clientNode().append("log_incoming_packets"), false),
     LOG_OUTGOING_PACKETS(clientNode().append("log_outgoing_packets"), false),
 
+    USE_CLIENT_RENDERER(clientNode().append("client_renderer"), true),
+
     MIRROR_CONTROL_DISTANCE(interactionMirrorNode().append("normalDistance"), -1),
     MIRROR_IGNORE_DISGUISED(interactionMirrorNode().append("ignore_disguised"), true),
     MIRROR_DESTROY_TIMEOUT(interactionMirrorNode().append("destroy_timeout"), 40),

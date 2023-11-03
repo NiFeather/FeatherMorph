@@ -72,6 +72,8 @@ public class OptionSubCommand extends MorphPluginObject implements ISubCommand
         subCommands.add(getToggle("allow_acquire_morphs", ConfigOption.ALLOW_ACQUIRE_MORPHS, "allow_acquire_morphs"));
 
         subCommands.add(getToggle("allow_flight", ConfigOption.ALLOW_FLIGHT, "allow_flight"));
+
+        subCommands.add(getToggle("client_renderer", ConfigOption.USE_CLIENT_RENDERER, "client_renderer"));
     }
 
     private <T> ISubCommand getGeneric(String name, ConfigOption option, String perm,
