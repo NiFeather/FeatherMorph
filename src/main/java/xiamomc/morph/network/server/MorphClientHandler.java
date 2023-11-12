@@ -316,7 +316,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
 
         if (bool == null)
         {
-            logger.info("should remove for " + player.getName());
+            //logger.info("should remove for " + player.getName());
             return;
         }
 

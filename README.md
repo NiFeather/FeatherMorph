@@ -9,7 +9,7 @@
 
 # FeatherMorph
 
-[[English](./README_en.md)]
+[[English](./README_en.md)] [[Modrinth](https://modrinth.com/plugin/feathermorph)]
 
 一个适用于Paper的变形插件。
 
@@ -20,7 +20,7 @@
 
 ### 依赖关系
 FeatherMorph至少需要下面这些依赖才能运行：
-- Paper或基于Paper的1.19.3服务器
+- 一个Paper或基于Paper的服务器
 - [LibsDisguises](https://www.spigotmc.org/resources/libs-disguises-free.81/) >= 10.0.32 <!--[^ld]-->
 
 <!-- [^ld]: 我们建议使用Jenkins上版本至少为#1154的构建，Spigot页面上的最新版本并不支持1.19.3。-->
@@ -32,8 +32,8 @@ FeatherMorph至少需要下面这些依赖才能运行：
 ### 构建
 ```bash
 #!/usr/bin/env bash
-git clone https://github.com/XiaMoZhiShi/MorphPlugin
-cd MorphPlugin
+git clone https://github.com/XiaMoZhiShi/FeatherMorph
+cd FeatherMorph
 
 ./gradlew build --no-daemon
 ```
