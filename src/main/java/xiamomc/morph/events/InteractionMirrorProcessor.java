@@ -7,7 +7,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -204,7 +203,7 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
     private PlayerTracker tracker;
 
     /**
-     * todo: SwingEvent应当只响应方块破坏
+     * todo: SwingEvent应当只相应方块破坏
      */
     @EventHandler
     public void onPlayerSwing(PlayerArmSwingEvent e)
@@ -265,7 +264,7 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
         logOperation(player, targetPlayer, lastAction.isLeftClick() ? OperationType.LeftClick : OperationType.RightClick);
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler
     public void onPlayerInteract(PlayerInteractEvent e)
     {
         var player = e.getPlayer();
@@ -295,7 +294,7 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
         logOperation(player, targetPlayer, e.getAction().isLeftClick() ? OperationType.LeftClick : OperationType.RightClick);
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler
     public void onPlayerInteractAtEntity(PlayerInteractAtEntityEvent e)
     {
         var player = e.getPlayer();
