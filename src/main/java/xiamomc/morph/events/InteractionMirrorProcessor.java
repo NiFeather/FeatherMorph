@@ -276,11 +276,17 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
         //Sometimes right click fires PlayerInteractEvent for both left and right hand.
         //This prevents us from simulating the same operation twice.
         if (tracker.isDuplicatedRightClick(player))
+        {
+            if (debugOutput.get())
+                logger.info("Interact, Duplicated RC " + System.currentTimeMillis());
+
             return;
+        }
 
         var inf = getMirrorTarget(player);
 
-        if (!playerInDistance(player, inf)) return;
+        if (!playerInDistance(player, inf))
+            return;
 
         var targetPlayer = inf.target;
         assert targetPlayer != null;
@@ -293,10 +299,23 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
     public void onPlayerInteractAtEntity(PlayerInteractAtEntityEvent e)
     {
         var player = e.getPlayer();
-        if (tracker.isDuplicatedRightClick(player)) return;
+        if (tracker.isDuplicatedRightClick(player))
+        {
+            logger.info("InteractAt, Duplicated RC: " + System.currentTimeMillis());
+            return;
+        }
+
+/*
+        // No idea why this is here, let's comment-out for now.
+        // 2023-11-13
 
         var equipment = e.getPlayer().getEquipment();
-        if (!equipment.getItem(e.getHand()).getType().isAir()) return;
+        if (!equipment.getItem(e.getHand()).getType().isAir())
+        {
+            logger.info("InteractAt, Item not air");
+            return;
+        }
+*/
 
         var inf = getMirrorTarget(player);
 
