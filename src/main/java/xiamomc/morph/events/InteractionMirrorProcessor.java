@@ -202,6 +202,9 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
     @Resolved
     private PlayerTracker tracker;
 
+    /**
+     * todo: SwingEvent应当只相应方块破坏
+     */
     @EventHandler
     public void onPlayerSwing(PlayerArmSwingEvent e)
     {
@@ -215,6 +218,7 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
 
         var playerInDistance = playerInDistance(player, inf);
 
+        //取消一定条件下源玩家的挥手动画
         if (targetPlayer.getLocation().getWorld() == player.getLocation().getWorld()
                 && Math.abs(targetPlayer.getLocation().distance(player.getLocation())) <= 6
                 && playerInDistance)
@@ -231,8 +235,15 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
 
         if (!playerInDistance || simStack.contains(targetPlayer)) return;
 
-        if (tracker.droppingItemThisTick(player))
+        //若源玩家正在丢出物品，不要处理
+        //若源玩家没有在破坏方块，不要处理
+        //检查玩家在此tick内是否存在互动以避免重复镜像
+        if (tracker.droppingItemThisTick(player)
+            || !tracker.isBreakingSuspect(player)
+            || tracker.interactingThisTick(player))
+        {
             return;
+        }
 
         var lastAction = tracker.getLastInteractAction(player);
 
@@ -248,9 +259,6 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
             if (lastAction.isRightClick())
                 lastAction = PlayerTracker.InteractType.LEFT_CLICK_BLOCK;
         }
-
-        //检查玩家在此tick内是否存在互动以避免重复镜像
-        if (tracker.interactingThisTick(player)) return;
 
         simulateOperation(lastAction.toBukkitAction(), targetPlayer, player);
         logOperation(player, targetPlayer, lastAction.isLeftClick() ? OperationType.LeftClick : OperationType.RightClick);
@@ -318,59 +326,57 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
             return;
         }
 
-        // 清空Stack
+        // 如果目标实体不是玩家，那么清空simStack
         var targetedEntity = player.getTargetEntity(5);
-        if (targetedEntity instanceof Player targetedPlayer)
+        if (!(targetedEntity instanceof Player targetedPlayer))
         {
-            //by_name: 直接清空
-            //by_sight: 如果下个不是目标，那么清空
-            var mode = selectionMode.get();
-            if (mode.equalsIgnoreCase(InteractionMirrorSelectionMode.BY_NAME))
-            {
-                simStack.clear();
-            }
-            else
-            {
-                //logger.info("Is by sight");
-                var nextSelection = getMirrorTarget(player);
-                //logger.info("Next sel:" + nextSelection);
+            simStack.clear();
+            return;
+        }
 
-                // 如果玩家面向的目标不是下一个mirror对象，那么清空栈
-                if (!targetedPlayer.equals(nextSelection.target))
-                {
-                    //logger.info("Target not equal, clear");
-                    simStack.clear();
-                    return;
-                }
-
-                var targetPlayerTarget = targetedPlayer.getTargetEntity(5);
-
-                //if (debugOutput.get())
-                //    logger.info("Target player target:" + targetPlayerTarget);
-
-                // 如果面向的玩家没有面向任何东西，那么也清空栈
-                if (targetPlayerTarget == null)
-                {
-                    //logger.info("Null target clear");
-                    simStack.clear();
-                    return;
-                }
-
-                // 如果玩家面向的目标也在面向自己，那么清空栈
-                if (player.equals(targetPlayerTarget))
-                {
-                    //logger.info("Circular clear");
-                    simStack.clear();
-                    return;
-                }
-
-                //logger.info("All passes failed");
-            }
+        //by_name: 直接清空
+        //by_sight: 如果下个不是目标，那么清空
+        var mode = selectionMode.get();
+        if (mode.equalsIgnoreCase(InteractionMirrorSelectionMode.BY_NAME))
+        {
+            simStack.clear();
         }
         else
         {
-            //logger.info("Outside Null target clear");
-            simStack.clear();
+            //logger.info("Is by sight");
+            var nextSelection = getMirrorTarget(player);
+            //logger.info("Next sel:" + nextSelection);
+
+            // 如果玩家面向的目标不是下一个mirror对象，那么清空栈
+            if (!targetedPlayer.equals(nextSelection.target))
+            {
+                //logger.info("Target not equal, clear");
+                simStack.clear();
+                return;
+            }
+
+            var targetPlayerTarget = targetedPlayer.getTargetEntity(5);
+
+            //if (debugOutput.get())
+            //    logger.info("Target player target:" + targetPlayerTarget);
+
+            // 如果面向的玩家没有面向任何东西，那么也清空栈
+            if (targetPlayerTarget == null)
+            {
+                //logger.info("Null target clear");
+                simStack.clear();
+                return;
+            }
+
+            // 如果玩家面向的目标也在面向自己，那么清空栈
+            if (player.equals(targetPlayerTarget))
+            {
+                //logger.info("Circular clear");
+                simStack.clear();
+                return;
+            }
+
+            //logger.info("All passes failed");
         }
     }
 

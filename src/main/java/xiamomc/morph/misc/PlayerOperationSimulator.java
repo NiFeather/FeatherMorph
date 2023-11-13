@@ -32,6 +32,7 @@ import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Bindables.Bindable;
 
 import java.util.Map;
+import java.util.Objects;
 
 public class PlayerOperationSimulator extends MorphPluginObject
 {
@@ -114,16 +115,18 @@ public class PlayerOperationSimulator extends MorphPluginObject
         var targetBlock = traceResult == null ? null : traceResult.getHitBlock();
         var targetEntity = traceResult == null ? null : traceResult.getHitEntity();
 
+        // 忽略超过实体reach范围的实体
         if (targetEntity != null && targetEntity.getLocation().distance(player.getLocation()) > entityReachDistance)
             targetEntity = null;
 
         //获取方块破坏信息
         var destroyHandler = playerHandlerMap.getOrDefault(player, null);
 
-        //如果此时没有目标方块，那么移除此破坏信息的目标
+        //如果视野内有实体或者不再存在目标方块，那么使destroyHandler重置进度
         if ((targetBlock == null || targetEntity != null) && destroyHandler != null)
             destroyHandler.changeBlock(null);
 
+        //优先攻击实体
         //如果目标实体不为null，则攻击该实体
         if (targetEntity != null)
         {
@@ -135,17 +138,26 @@ public class PlayerOperationSimulator extends MorphPluginObject
             return SimulateResult.success(EquipmentSlot.HAND);
         }
 
-        //对着空气空挥
+        //没有实体也没有方块，视为对着空气空挥
+        //此时不要做任何事情，只返回success来允许播放挥手动画
         if (targetBlock == null)
             return SimulateResult.success(EquipmentSlot.HAND);
 
-        //冒险模式，并且无法破坏目标方块 -> 操作成功(空挥)
+        //如果玩家处于冒险模式并且无法破坏目标方块，也不要做任何事情，只返回success来允许播放动画
         if (player.getGameMode() == GameMode.ADVENTURE)
         {
-            var meta = player.getEquipment().getItemInMainHand().getItemMeta();
+            var meta = Objects.requireNonNull(player.getEquipment(), "Null equipment?")
+                    .getItemInMainHand().getItemMeta();
+
             if (meta == null || !meta.getDestroyableKeys().contains(targetBlock.getBlockData().getMaterial().getKey()))
                 return SimulateResult.success(EquipmentSlot.HAND);
         }
+
+        //=-=-=-=-=-=-=-=-=-=-=-=
+        //
+        // 在此开始对方块的处理
+        //
+        //=-=-=-=-=-=-=-=-=-=-=-=
 
         //初始化destoryInfo
         if (destroyHandler == null)
@@ -218,6 +230,7 @@ public class PlayerOperationSimulator extends MorphPluginObject
             //获取互动位置
             hitPos.subtract(targetEntity.getLocation().toVector());
 
+            //轮流尝试左右手
             if (this.tryUseItemOnEntity(player, targetEntity, itemInMainHand, InteractionHand.MAIN_HAND, hitPos))
                 return SimulateResult.success(EquipmentSlot.HAND);
 
