@@ -300,7 +300,9 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
         var player = e.getPlayer();
         if (tracker.isDuplicatedRightClick(player))
         {
-            logger.info("InteractAt, Duplicated RC: " + System.currentTimeMillis());
+            if (debugOutput.get())
+                logger.info("InteractAt, Duplicated RC: " + System.currentTimeMillis());
+
             return;
         }
 
