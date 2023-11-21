@@ -173,7 +173,7 @@ public class LibsDisguiseWrapper extends DisguiseWrapper<Disguise>
         var LDprofile = ReflectionManager.getGameProfileWithThisSkin(wrappedProfile.getUUID(), wrappedProfile.getName(), wrappedProfile);
 
         //LD不支持直接用profile设置皮肤，只能先存到本地设置完再移除
-        DisguiseAPI.addGameProfile(LDprofile.toString(), LDprofile);
+        DisguiseAPI.addGameProfile("fm_" + LDprofile.hashCode(), LDprofile);
         playerDisguise.setSkin(LDprofile);
         DisguiseUtilities.removeGameProfile(LDprofile.toString());
 
