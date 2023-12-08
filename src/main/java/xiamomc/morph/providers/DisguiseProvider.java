@@ -114,8 +114,8 @@ public abstract class DisguiseProvider extends MorphPluginObject
     {
         if (!bindableInitialized)
         {
-            configManager.bind(blackListTags, ConfigOption.BLACKLIST_TAGS);
-            configManager.bind(blackListPatterns, ConfigOption.BLACKLIST_PATTERNS);
+            configManager.bind(String.class, blackListTags, ConfigOption.BLACKLIST_TAGS);
+            configManager.bind(String.class, blackListPatterns, ConfigOption.BLACKLIST_PATTERNS);
 
             bindableInitialized = true;
         }
