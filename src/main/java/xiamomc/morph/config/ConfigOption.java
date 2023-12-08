@@ -93,6 +93,8 @@ public enum ConfigOption
 
     ALLOW_FLIGHT(ConfigNode.create().append("allow_flight"), true),
 
+    NOFLY_WORLDS(ConfigNode.create().append("nofly_worlds"), new ArrayList<String>()),
+
     VERSION(ConfigNode.create().append("version"), 0);
 
     public final ConfigNode node;

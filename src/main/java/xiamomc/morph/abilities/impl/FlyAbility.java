@@ -20,6 +20,7 @@ import xiamomc.morph.misc.NmsRecord;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
+import xiamomc.pluginbase.Bindables.BindableList;
 
 import java.util.List;
 
@@ -51,6 +52,8 @@ public class FlyAbility extends MorphAbility<FlyOption>
             return false;
     }
 
+    private final BindableList<String> noFlyWorlds = new BindableList<>();
+
     @Initializer
     private void load(MorphConfigManager configManager)
     {
@@ -59,6 +62,8 @@ public class FlyAbility extends MorphAbility<FlyOption>
             var scale = ((double)ConfigOption.FLYABILITY_EXHAUSTION_BASE.defaultValue / n);
             this.exhaustionScaled = exhaustionBase * scale;
         }, true);
+
+        configManager.bind(String.class, noFlyWorlds, ConfigOption.NOFLY_WORLDS);
 
         configManager.getBindable(Boolean.class, ConfigOption.FLYABILITY_IDLE_CONSUME).onValueChanged((o, n) ->
                 idleConsumption = n ? 0.1D : 0D, true);
@@ -75,6 +80,8 @@ public class FlyAbility extends MorphAbility<FlyOption>
     @Override
     public boolean handle(Player player, DisguiseState state)
     {
+        if (plugin.getCurrentTick() % 4 != 0) return true;
+
         var gameMode = player.getGameMode();
         if (gameMode == GameMode.CREATIVE || gameMode == GameMode.SPECTATOR)
             return super.handle(player, state);
@@ -83,7 +90,9 @@ public class FlyAbility extends MorphAbility<FlyOption>
         var config = options.get(state.getSkillLookupIdentifier());
 
         var data = nmsPlayer.getFoodData();
-        var allowFlight = this.allowFlight.get() && data.foodLevel > config.getMinimumHunger();
+        var allowFlight = this.allowFlight.get()
+                && data.foodLevel > config.getMinimumHunger()
+                && !noFlyWorlds.contains(player.getWorld().getName());
 
         if (player.isFlying())
         {

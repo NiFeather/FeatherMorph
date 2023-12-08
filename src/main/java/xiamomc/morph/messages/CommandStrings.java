@@ -157,6 +157,46 @@ public class CommandStrings extends AbstractMorphStrings
 
     //endregion Illegal arguments
 
+    //region Lists
+
+    public static FormattableMessage listNoEnoughArguments()
+    {
+        return getFormattable(getKey("not_enough_arguments"),
+                "参数不足");
+    }
+
+    public static FormattableMessage listAddSuccess()
+    {
+        return getFormattable(getKey("list_add_success"),
+                "成功添加<value>到<option>");
+    }
+
+    public static FormattableMessage listAddFailUnknown()
+    {
+        return getFormattable(getKey("list_add_fail_unknown"),
+                "未能添加<value>到<option>，可能是类型不对");
+    }
+
+    public static FormattableMessage listRemoveSuccess()
+    {
+        return getFormattable(getKey("list_remove_success"),
+                "成功从<option>移除<value>");
+    }
+
+    public static FormattableMessage listRemoveFailUnknown()
+    {
+        return getFormattable(getKey("list_remove_fail_unknown"),
+                "未能移除<value>，可能是其不在列表中");
+    }
+
+    public static FormattableMessage unknownOperation()
+    {
+        return getFormattable(getKey("unknown_operation"),
+                "未知操作：<operation>");
+    }
+
+    //endregion Lists
+
     private static String getKey(String key)
     {
         return "commands." + key;

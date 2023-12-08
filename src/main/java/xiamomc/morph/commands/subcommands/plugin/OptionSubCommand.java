@@ -9,6 +9,7 @@ import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.events.InteractionMirrorProcessor;
 import xiamomc.morph.messages.*;
+import xiamomc.morph.utilities.BindableUtils;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Command.ISubCommand;
 import xiamomc.pluginbase.Exceptions.NullDependencyException;
@@ -76,6 +77,9 @@ public class OptionSubCommand extends MorphPluginObject implements ISubCommand
         subCommands.add(getToggle("client_renderer", ConfigOption.USE_CLIENT_RENDERER, "client_renderer"));
 
         subCommands.add(getList("banned_disguises", ConfigOption.BANNED_DISGUISES, "banned_disguises", null));
+        subCommands.add(getList("nofly_worlds", ConfigOption.NOFLY_WORLDS, "nofly_worlds", null));
+        subCommands.add(getList("blacklist_tags", ConfigOption.BLACKLIST_TAGS, "blacklist_tags", null));
+        subCommands.add(getList("blacklist_nbt_pattern", ConfigOption.BLACKLIST_PATTERNS, "blacklist_patterns", null));
     }
 
     private <T> ISubCommand getGeneric(String name, ConfigOption option, String perm,
@@ -100,7 +104,7 @@ public class OptionSubCommand extends MorphPluginObject implements ISubCommand
                 {
                     if (args.length < 1)
                     {
-                        var displayValue = bindableList.toString();
+                        var displayValue = BindableUtils.bindableListToString(bindableList);
                         sender.sendMessage(MessageUtils.prefixes(sender,
                                 CommandStrings.optionValueString()
                                         .withLocale(MessageUtils.getLocale(sender))
@@ -112,7 +116,10 @@ public class OptionSubCommand extends MorphPluginObject implements ISubCommand
 
                     if (args.length < 2)
                     {
-                        sender.sendMessage(MessageUtils.prefixes(sender, "参数数量不对"));
+                        sender.sendMessage(MessageUtils.prefixes(sender,
+                                CommandStrings.listNoEnoughArguments()
+                                        .withLocale(MessageUtils.getLocale(sender))));
+
                         return true;
                     }
 
@@ -124,15 +131,32 @@ public class OptionSubCommand extends MorphPluginObject implements ISubCommand
                         {
                             bindableList.add(value);
 
-                            //bug: bindableList的add和remove方法永远返回true
+                            //workaround: List的add方法传入非null时永远返回true
                             if (bindableList.contains(value))
-                                sender.sendMessage(MessageUtils.prefixes(sender, "成功添加" + value));
+                            {
+                                sender.sendMessage(MessageUtils.prefixes(sender,
+                                        CommandStrings.listAddSuccess()
+                                                .withLocale(MessageUtils.getLocale(sender))
+                                                .resolve("value", value)
+                                                .resolve("option", optionName)));
+                            }
                             else
-                                sender.sendMessage(MessageUtils.prefixes(sender, "未能添加" + value + ", 可能是类型不对"));
+                            {
+                                sender.sendMessage(MessageUtils.prefixes(sender,
+                                        CommandStrings.listAddFailUnknown()
+                                                .withLocale(MessageUtils.getLocale(sender))
+                                                .resolve("value", value)
+                                                .resolve("option", optionName)));
+                            }
                         }
                         catch (Throwable t)
                         {
-                            sender.sendMessage(MessageUtils.prefixes(sender, "未能添加" + value + ", 可能是类型不对"));
+                            sender.sendMessage(MessageUtils.prefixes(sender,
+                                    CommandStrings.listAddFailUnknown()
+                                            .withLocale(MessageUtils.getLocale(sender))
+                                            .resolve("value", value)
+                                            .resolve("option", optionName)));
+
                             logger.error("Error adding option to bindable list: " + t.getMessage());
                         }
 
@@ -141,18 +165,34 @@ public class OptionSubCommand extends MorphPluginObject implements ISubCommand
                     else if (operation.equalsIgnoreCase("remove"))
                     {
                         var value = args[1];
-                        bindableList.remove(value);
+                        var listChanged = bindableList.remove(value);
 
-                        if (!bindableList.contains(value))
-                            sender.sendMessage(MessageUtils.prefixes(sender, "成功移除" + value));
+                        if (listChanged)
+                        {
+                            sender.sendMessage(MessageUtils.prefixes(sender,
+                                    CommandStrings.listRemoveSuccess()
+                                            .withLocale(MessageUtils.getLocale(sender))
+                                            .resolve("value", value)
+                                            .resolve("option", optionName)));
+                        }
                         else
-                            sender.sendMessage(MessageUtils.prefixes(sender, "未能移除" + value + ", 可能是其不在列表中"));
+                        {
+                            sender.sendMessage(MessageUtils.prefixes(sender,
+                                    CommandStrings.listRemoveFailUnknown()
+                                            .withLocale(MessageUtils.getLocale(sender))
+                                            .resolve("value", value)
+                                            .resolve("option", optionName)));
+                        }
 
                         return true;
                     }
                     else
                     {
-                        sender.sendMessage(MessageUtils.prefixes(sender, "未知操作: " + operation));
+                        sender.sendMessage(MessageUtils.prefixes(sender,
+                                CommandStrings.unknownOperation()
+                                .withLocale(MessageUtils.getLocale(sender))
+                                .resolve("operation", operation)));
+
                         return true;
                     }
                 });
