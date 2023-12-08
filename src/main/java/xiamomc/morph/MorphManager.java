@@ -135,7 +135,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         logger.info("Using backend: %s".formatted(currentBackend));
 
-        bannedDisguises = config.getBindableList(ConfigOption.BANNED_DISGUISES);
+        bannedDisguises = config.getBindableList(String.class, ConfigOption.BANNED_DISGUISES);
         config.bind(allowHeadMorph, ConfigOption.ALLOW_HEAD_MORPH);
         config.bind(allowAcquireMorph, ConfigOption.ALLOW_ACQUIRE_MORPHS);
         config.bind(useClientRenderer, ConfigOption.USE_CLIENT_RENDERER);

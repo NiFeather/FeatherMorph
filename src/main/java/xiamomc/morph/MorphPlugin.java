@@ -105,7 +105,6 @@ public final class MorphPlugin extends XiaMoJavaPlugin
         dependencyManager.cache(morphManager = new MorphManager());
         dependencyManager.cache(skillHandler = new MorphSkillHandler());
         dependencyManager.cache(abilityHandler = new AbilityHandler());
-        dependencyManager.cache(cmdHelper = new MorphCommandManager());
         dependencyManager.cache(new RevealingHandler());
         dependencyManager.cache(new Transformer());
 
@@ -120,6 +119,8 @@ public final class MorphPlugin extends XiaMoJavaPlugin
         dependencyManager.cacheAs(Scoreboard.class, Bukkit.getScoreboardManager().getMainScoreboard());
         dependencyManager.cacheAs(MorphConfigManager.class, new MorphConfigManager(this));
         dependencyManager.cache(playerTracker);
+
+        dependencyManager.cache(cmdHelper = new MorphCommandManager());
 
         dependencyManager.cache(new SkillAbilityConfigurationStore());
 

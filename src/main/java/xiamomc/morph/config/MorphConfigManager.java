@@ -76,16 +76,37 @@ public class MorphConfigManager extends PluginConfigManager
         return map;
     }
 
-    public <T> BindableList<T> getBindableList(ConfigOption option)
-    {
-        var originalBindable = getBindable(List.class, option.node, List.of());
-        var list = new BindableList<T>(originalBindable.get());
+    private Map<String, BindableList<?>> bindableLists;
 
-        originalBindable.onValueChanged((o, n) ->
+    public <T> BindableList<T> getBindableList(Class<T> clazz, ConfigOption option)
+    {
+        ensureBindableListNotNull();
+
+        //System.out.println("GET LIST " + option.toString());
+
+        var val = bindableLists.getOrDefault(option.toString(), null);
+        if (val != null)
         {
-            list.clear();
-            list.addAll(n);
-        });
+            //System.out.println("FIND EXISTING LIST, RETURNING " + val);
+            return (BindableList<T>) val;
+        }
+
+        List<?> originalList = backendConfig.getList(option.toString(), new ArrayList<T>());
+        originalList.removeIf(listVal -> !clazz.isInstance(listVal)); //Don't work for somehow
+
+        var list = new BindableList<T>();
+        list.addAll((List<T>)originalList);
+
+        list.onListChanged((diffList, reason) ->
+        {
+            //System.out.println("LIST CHANGED: " + diffList + " WITH REASON " + reason);
+            backendConfig.set(option.toString(), list);
+            save();
+        }, true);
+
+        bindableLists.put(option.toString(), list);
+
+        //System.out.println("RETURN " + list);
 
         return list;
     }
@@ -108,12 +129,12 @@ public class MorphConfigManager extends PluginConfigManager
             throw new IllegalArgumentException("尝试将一个Bindable绑定在不兼容的配置(" + option + ")上");
     }
 
-    public <T> void bind(BindableList<T> bindable, ConfigOption option)
+    public <T> void bind(Class<T> clazz, BindableList<T> bindable, ConfigOption option)
     {
-        var bb = this.getBindableList(option);
+        var bb = this.getBindableList(clazz, option);
 
         if (bindable.getClass().isInstance(bb))
-            bindable.bindTo((BindableList<T>) bb);
+            bindable.bindTo(bb);
         else
             throw new IllegalArgumentException("尝试将一个Bindable绑定在不兼容的配置(" + option + ")上");
     }
@@ -123,10 +144,24 @@ public class MorphConfigManager extends PluginConfigManager
         return super.getBindable(type, path.node, defaultValue);
     }
 
+    private void ensureBindableListNotNull()
+    {
+        if (bindableLists == null)
+            bindableLists = new Object2ObjectOpenHashMap<>();
+    }
+
     @Override
     public void reload()
     {
         super.reload();
+
+        ensureBindableListNotNull();
+        bindableLists.forEach((node, list) ->
+        {
+            var configList = backendConfig.getList(node);
+            list.clear();
+            list.addAllInternal(configList);
+        });
 
         //更新配置
         int targetVersion = 27;

@@ -25,7 +25,7 @@ public class OptionSubCommand extends MorphPluginObject implements ISubCommand
         return "option";
     }
 
-    @Resolved
+    @Resolved(shouldSolveImmediately = true)
     private MorphConfigManager config;
 
     public OptionSubCommand()
@@ -74,6 +74,8 @@ public class OptionSubCommand extends MorphPluginObject implements ISubCommand
         subCommands.add(getToggle("allow_flight", ConfigOption.ALLOW_FLIGHT, "allow_flight"));
 
         subCommands.add(getToggle("client_renderer", ConfigOption.USE_CLIENT_RENDERER, "client_renderer"));
+
+        subCommands.add(getList("banned_disguises", ConfigOption.BANNED_DISGUISES, "banned_disguises", null));
     }
 
     private <T> ISubCommand getGeneric(String name, ConfigOption option, String perm,
@@ -82,6 +84,78 @@ public class OptionSubCommand extends MorphPluginObject implements ISubCommand
     {
         return getGeneric(name, option, perm,
                 displayName, targetClass, func, new FormattableMessage(plugin, typeName));
+    }
+
+    private ISubCommand getList(String optionName, ConfigOption option, String perm,
+                                    @Nullable FormattableMessage displayName)
+    {
+        var targetDisplay = displayName == null ? new FormattableMessage(plugin, optionName) : displayName;
+
+        var bindableList = config.getBindableList(String.class, option);
+
+        return SubCommandGenerator.command()
+                .setName(optionName)
+                .setPerm("xiamomc.morph.toggle." + perm)
+                .setExec((sender, args) ->
+                {
+                    if (args.length < 1)
+                    {
+                        var displayValue = bindableList.toString();
+                        sender.sendMessage(MessageUtils.prefixes(sender,
+                                CommandStrings.optionValueString()
+                                        .withLocale(MessageUtils.getLocale(sender))
+                                        .resolve("what", targetDisplay, null)
+                                        .resolve("value", displayValue)));
+
+                        return true;
+                    }
+
+                    if (args.length < 2)
+                    {
+                        sender.sendMessage(MessageUtils.prefixes(sender, "参数数量不对"));
+                        return true;
+                    }
+
+                    var operation = args[0];
+                    if (operation.equalsIgnoreCase("add"))
+                    {
+                        var value = args[1];
+                        try
+                        {
+                            bindableList.add(value);
+
+                            //bug: bindableList的add和remove方法永远返回true
+                            if (bindableList.contains(value))
+                                sender.sendMessage(MessageUtils.prefixes(sender, "成功添加" + value));
+                            else
+                                sender.sendMessage(MessageUtils.prefixes(sender, "未能添加" + value + ", 可能是类型不对"));
+                        }
+                        catch (Throwable t)
+                        {
+                            sender.sendMessage(MessageUtils.prefixes(sender, "未能添加" + value + ", 可能是类型不对"));
+                            logger.error("Error adding option to bindable list: " + t.getMessage());
+                        }
+
+                        return true;
+                    }
+                    else if (operation.equalsIgnoreCase("remove"))
+                    {
+                        var value = args[1];
+                        bindableList.remove(value);
+
+                        if (!bindableList.contains(value))
+                            sender.sendMessage(MessageUtils.prefixes(sender, "成功移除" + value));
+                        else
+                            sender.sendMessage(MessageUtils.prefixes(sender, "未能移除" + value + ", 可能是其不在列表中"));
+
+                        return true;
+                    }
+                    else
+                    {
+                        sender.sendMessage(MessageUtils.prefixes(sender, "未知操作: " + operation));
+                        return true;
+                    }
+                });
     }
 
     private <T> ISubCommand getGeneric(String name, ConfigOption option, String perm,
