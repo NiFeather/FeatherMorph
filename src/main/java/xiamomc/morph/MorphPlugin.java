@@ -115,9 +115,6 @@ public final class MorphPlugin extends XiaMoJavaPlugin
             this.registerListener(new ResidenceEventProcessor());
         }, true);
 
-        var plugins = Bukkit.getPluginManager().getPlugins();
-        logger.info(Arrays.toString(plugins));
-
         //缓存依赖
         dependencyManager.cache(this);
         dependencyManager.cache(new NetworkingHelper());
