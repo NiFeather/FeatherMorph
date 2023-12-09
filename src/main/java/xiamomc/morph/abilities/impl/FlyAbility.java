@@ -1,5 +1,7 @@
 package xiamomc.morph.abilities.impl;
 
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.world.phys.Vec3;
 import org.bukkit.GameEvent;
 import org.bukkit.GameMode;
@@ -23,6 +25,8 @@ import xiamomc.pluginbase.Bindables.Bindable;
 import xiamomc.pluginbase.Bindables.BindableList;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Stack;
 
 public class FlyAbility extends MorphAbility<FlyOption>
 {
@@ -80,7 +84,7 @@ public class FlyAbility extends MorphAbility<FlyOption>
     @Override
     public boolean handle(Player player, DisguiseState state)
     {
-        if (plugin.getCurrentTick() % 4 != 0) return true;
+        if (plugin.getCurrentTick() % 2 != 0) return true;
 
         var gameMode = player.getGameMode();
         if (gameMode == GameMode.CREATIVE || gameMode == GameMode.SPECTATOR)
@@ -92,7 +96,8 @@ public class FlyAbility extends MorphAbility<FlyOption>
         var data = nmsPlayer.getFoodData();
         var allowFlight = this.allowFlight.get()
                 && data.foodLevel > config.getMinimumHunger()
-                && !noFlyWorlds.contains(player.getWorld().getName());
+                && !noFlyWorlds.contains(player.getWorld().getName())
+                && !playerBlocked(player);
 
         if (player.isFlying())
         {
@@ -231,5 +236,32 @@ public class FlyAbility extends MorphAbility<FlyOption>
             logger.warn(player.getName() + " have fly ability applied, but its DisguiseState is null?");
             this.appliedPlayers.remove(player);
         }
+    }
+
+    private static final Map<Player, Stack<Object>> blockedPlayersMap = new Object2ObjectOpenHashMap<>();
+
+    public static boolean playerBlocked(Player player)
+    {
+        var stack = blockedPlayersMap.getOrDefault(player, null);
+        return stack != null && !stack.isEmpty();
+    }
+
+    public static void blockPlayer(Player player, Object requestSource)
+    {
+        var stack = blockedPlayersMap.getOrDefault(player, null);
+        if (stack == null)
+        {
+            stack = new Stack<>();
+            blockedPlayersMap.put(player, stack);
+        }
+
+        if (!stack.contains(requestSource))
+            stack.push(requestSource);
+    }
+
+    public static void unBlockPlayer(Player player, Object requestSource)
+    {
+        var stack = blockedPlayersMap.getOrDefault(player, new Stack<>());
+        stack.remove(requestSource);
     }
 }

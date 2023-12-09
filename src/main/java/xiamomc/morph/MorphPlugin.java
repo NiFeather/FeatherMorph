@@ -18,6 +18,7 @@ import xiamomc.morph.messages.MorphMessageStore;
 import xiamomc.morph.messages.vanilla.VanillaMessageStore;
 import xiamomc.morph.misc.NetworkingHelper;
 import xiamomc.morph.misc.PlayerOperationSimulator;
+import xiamomc.morph.misc.integrations.residence.ResidenceEventProcessor;
 import xiamomc.morph.updates.UpdateHandler;
 import xiamomc.morph.misc.integrations.gsit.GSitCompactProcessor;
 import xiamomc.morph.misc.integrations.placeholderapi.PlaceholderIntegration;
@@ -28,6 +29,8 @@ import xiamomc.morph.transforms.Transformer;
 import xiamomc.pluginbase.Command.CommandHelper;
 import xiamomc.pluginbase.Messages.MessageStore;
 import xiamomc.pluginbase.XiaMoJavaPlugin;
+
+import java.util.Arrays;
 
 public final class MorphPlugin extends XiaMoJavaPlugin
 {
@@ -89,15 +92,31 @@ public final class MorphPlugin extends XiaMoJavaPlugin
         this.metrics = new Metrics(this, 18062);
 
         pluginManager = Bukkit.getPluginManager();
+        this.registerListener(softDeps);
 
         var playerTracker = new PlayerTracker();
 
-        softDeps.setHandle("GSit", s -> this.registerListener(new GSitCompactProcessor()), true);
+        softDeps.setHandle("GSit", s ->
+        {
+            logger.info("GSit detected, applying integrations...");
+            this.registerListener(new GSitCompactProcessor());
+        }, true);
+
         softDeps.setHandle("PlaceholderAPI", p ->
         {
+            logger.info("Registering Placeholders...");
             placeholderIntegration = new PlaceholderIntegration(dependencyManager);
             placeholderIntegration.register();
         }, true);
+
+        softDeps.setHandle("Residence", r ->
+        {
+            logger.info("Residence detected, applying integrations...");
+            this.registerListener(new ResidenceEventProcessor());
+        }, true);
+
+        var plugins = Bukkit.getPluginManager().getPlugins();
+        logger.info(Arrays.toString(plugins));
 
         //缓存依赖
         dependencyManager.cache(this);
