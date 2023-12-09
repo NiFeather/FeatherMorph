@@ -15,7 +15,7 @@ jobs:
           distribution: 'adopt'
           cache: 'gradle'
       - name: Build with Gradle
-        run: ./gradlew reobfJar
+        run: ./gradlew build
       - name: Upload artifact
         uses: actions/upload-artifact@v2
         with:
