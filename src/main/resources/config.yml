@@ -109,6 +109,9 @@ root:
     # Add a minimal consumption limit (20% of the configured consumption speed) as an "Idle consumption" for players per tick.
     idle_consumption: true
 
+  # Disable Fly Ability in the following worlds
+  nofly_worlds: []
+
   # Ambient sound options
   ambient_sounds:
     # The frequency for this plugin to play ambient sounds for disguises.
@@ -243,4 +246,4 @@ root:
     client_renderer: true
 
   # Do not touch unless you know what you're doing!
-  version: 27
+  version: 28

@@ -236,10 +236,8 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
         if (!playerInDistance || simStack.contains(targetPlayer)) return;
 
         //若源玩家正在丢出物品，不要处理
-        //若源玩家没有在破坏方块，不要处理
         //检查玩家在此tick内是否存在互动以避免重复镜像
         if (tracker.droppingItemThisTick(player)
-            || !tracker.isBreakingSuspect(player)
             || tracker.interactingThisTick(player))
         {
             return;
