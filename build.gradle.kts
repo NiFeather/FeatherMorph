@@ -50,6 +50,9 @@ dependencies {
         exclude("org.spigotmc", "spigot")
     }
 
+    compileOnly(files("libs/CMILib1.4.3.5.jar"))
+    compileOnly(files("libs/Residence5.1.4.0.jar"))
+
     implementation("org.bstats:bstats-bukkit:${project.property("bstats_version")}")
     {
         exclude("com.google.code.gson", "gson")
