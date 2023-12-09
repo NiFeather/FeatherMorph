@@ -18,7 +18,7 @@ jobs:
           distribution: 'adopt'
           cache: 'gradle'
       - name: Build with Gradle
-        run: ./gradlew reobfJar
+        run: ./gradlew build
       - name: Upload artifact
         uses: AButler/upload-release-assets@v2.0
         with:
