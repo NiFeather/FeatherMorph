@@ -187,9 +187,11 @@ public class MorphPacketListener extends MorphPluginObject implements PacketList
         {
             logger.info("Building player info packet!");
 
-            //todo: Get random UUID from world, not player
             Objects.requireNonNull(parameters.gameProfile(), "Null game profile!");
             var gameProfile = new MorphGameProfile(parameters.gameProfile());
+
+            //todo: Get random UUID from world, not player
+            //玩家在客户端的UUID会根据其GameProfile中的UUID设定，我们需要避免伪装的UUID和某一玩家自己的UUID冲突
             gameProfile.setUUID(UUID.randomUUID());
 
             //Minecraft需要在生成玩家实体前先发送PlayerInfoUpdate消息
