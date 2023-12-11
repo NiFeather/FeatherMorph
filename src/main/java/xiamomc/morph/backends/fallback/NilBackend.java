@@ -55,7 +55,7 @@ public class NilBackend extends DisguiseBackend<NilDisguise, NilWrapper>
     }
 
     @Override
-    public boolean isDisguised(Entity target)
+    public boolean isDisguised(@Nullable Entity target)
     {
         return playerFallbackWrapperMap.containsKey(target);
     }
