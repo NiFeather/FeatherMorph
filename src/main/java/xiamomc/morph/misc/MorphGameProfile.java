@@ -5,6 +5,9 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
 
+import java.util.Objects;
+import java.util.UUID;
+
 public class MorphGameProfile extends GameProfile
 {
     /**
@@ -28,11 +31,13 @@ public class MorphGameProfile extends GameProfile
     }
 
     private String name;
+    private UUID uuid;
 
     public MorphGameProfile(GameProfile profile)
     {
         super(profile.getId(), profile.getName());
 
+        this.uuid = profile.getId();
         this.name = profile.getName();
 
         profile.getProperties().forEach((s, p) ->
@@ -52,6 +57,17 @@ public class MorphGameProfile extends GameProfile
         if (str == null || str.isBlank() || str.isEmpty()) return;
 
         this.name = str;
+    }
+
+    public void setUUID(UUID newuuid)
+    {
+        this.uuid = newuuid;
+    }
+
+    @Override
+    public UUID getId()
+    {
+        return uuid;
     }
 
     private final PropertyMap map = new PropertyMap();
