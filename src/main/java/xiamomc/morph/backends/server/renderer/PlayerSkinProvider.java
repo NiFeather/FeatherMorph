@@ -5,9 +5,11 @@ import com.mojang.authlib.yggdrasil.ProfileResult;
 import net.minecraft.Util;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.players.GameProfileCache;
+import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.pluginbase.Annotations.Initializer;
 
+import java.io.File;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -27,7 +29,9 @@ public class PlayerSkinProvider extends MorphPluginObject
     @Initializer
     private void load()
     {
-        userCache = MinecraftServer.getServer().getProfileCache();
+        var server = MinecraftServer.getServer();
+        //userCache = new GameProfileCache(server.getProfileRepository(), new File("/dev/null"));
+        //userCache.setExecutor(server);
     }
 
     public CompletableFuture<Optional<GameProfile>> fetchSkinFromProfile(GameProfile profile)
@@ -50,7 +54,9 @@ public class PlayerSkinProvider extends MorphPluginObject
     public CompletableFuture<Optional<GameProfile>> fetchSkin(String profileName)
     {
         var server = MinecraftServer.getServer();
-        var userCache = server.getProfileCache();
+        var userCache = this.userCache == null
+                        ? server.getProfileCache()
+                        : this.userCache; //new GameProfileCache(server.getProfileRepository(), new File("/dev/null"));
 
         if (userCache == null) return CompletableFuture.completedFuture(Optional.empty());
         else

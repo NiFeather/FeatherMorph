@@ -7,26 +7,19 @@ import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.events.PacketListener;
 import com.comphenix.protocol.injector.GamePhase;
-import com.comphenix.protocol.wrappers.WrappedDataWatcher;
 import com.mojang.authlib.GameProfile;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.minecraft.Util;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
-import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.packs.repository.Pack;
+import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.GameType;
-import net.minecraft.world.phys.Vec3;
-import org.apache.commons.lang.NotImplementedException;
 import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.v1_20_R2.entity.CraftPlayer;
-import org.bukkit.entity.Display;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
@@ -35,7 +28,6 @@ import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.backends.server.renderer.PlayerSkinProvider;
-import xiamomc.morph.misc.MorphGameProfile;
 import xiamomc.morph.misc.NmsRecord;
 import xiamomc.morph.utilities.EntityTypeUtils;
 import xiamomc.pluginbase.Annotations.Resolved;
@@ -49,8 +41,6 @@ public class MorphPacketListener extends MorphPluginObject implements PacketList
     private MorphManager morphManager;
 
     private final Map<UUID, RegistryParameters> uuidEntityTypeMap = new Object2ObjectOpenHashMap<>();
-
-    private final PlayerSkinProvider playerSkinProvider = PlayerSkinProvider.getInstance();
 
     public void unregister(Player player)
     {
@@ -224,8 +214,13 @@ public class MorphPacketListener extends MorphPluginObject implements PacketList
         );
 
         var spawnPacket = PacketContainer.fromPacket(packetAdd);
+
         spawnPacket.setMeta("fm", true);
         packets.add(spawnPacket);
+
+        var equipmentPacket = new ClientboundSetEquipmentPacket(player.getEntityId(),
+                ProtocolEquipment.toPairs(player.getEquipment()));
+        packets.add(PacketContainer.fromPacket(equipmentPacket));
 
         return packets;
     }
@@ -271,7 +266,7 @@ public class MorphPacketListener extends MorphPluginObject implements PacketList
             if (gameProfile == null)
             {
                 scheduleRefreshPlayerDisplay(player, parameters.playerDisguiseName);
-                gameProfile = new GameProfile(UUID.randomUUID(), parameters.playerDisguiseName);
+                gameProfile = new GameProfile(Util.NIL_UUID, parameters.playerDisguiseName);
             }
         }
 
@@ -318,25 +313,6 @@ public class MorphPacketListener extends MorphPluginObject implements PacketList
                 && originalPacket.getType() == EntityType.PLAYER)
         {
             onEntityAddPacket(originalPacket, packetEvent);
-
-/*
-            var newPacket = new ClientboundAddEntityPacket(
-                    originalPacket.getId(),
-                    originalPacket.getUUID(),
-                    originalPacket.getX(),
-                    originalPacket.getY(),
-                    originalPacket.getZ(),
-                    originalPacket.getXRot(),
-                    originalPacket.getYRot(),
-                    EntityType.ALLAY,
-                    originalPacket.getData(),
-                    Vec3.ZERO,
-                    originalPacket.getYHeadRot()
-            );
-
-            var container = PacketContainer.fromPacket(newPacket);
-            packetEvent.setPacket(container);
-*/
         }
     }
 
@@ -350,7 +326,6 @@ public class MorphPacketListener extends MorphPluginObject implements PacketList
     {
         return ListeningWhitelist
                 .newBuilder()
-                .types(PacketType.Play.Server.ENTITY_METADATA)
                 .types(PacketType.Play.Server.SPAWN_ENTITY)
                 .gamePhase(GamePhase.PLAYING)
                 .build();
