@@ -279,9 +279,8 @@ public class MorphPacketListener extends MorphPluginObject implements PacketList
         var spawnPackets = buildSpawnPackets(player, parametersFinal);
         spawnPackets.forEach(packet ->
         {
-            var container = PacketContainer.fromPacket(packet);
             for (var visiblePlayer : visiblePlayers)
-                protocolManager.sendServerPacket(visiblePlayer, container);
+                protocolManager.sendServerPacket(visiblePlayer, packet);
         });
     }
 
