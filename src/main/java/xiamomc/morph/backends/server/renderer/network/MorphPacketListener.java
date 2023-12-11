@@ -28,6 +28,7 @@ import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.backends.server.renderer.PlayerSkinProvider;
+import xiamomc.morph.misc.MorphGameProfile;
 import xiamomc.morph.misc.NmsRecord;
 import xiamomc.morph.utilities.EntityTypeUtils;
 import xiamomc.pluginbase.Annotations.Resolved;
@@ -186,8 +187,10 @@ public class MorphPacketListener extends MorphPluginObject implements PacketList
         {
             logger.info("Building player info packet!");
 
-            var gameProfile = parameters.gameProfile();
-            Objects.requireNonNull(gameProfile, "Null game profile!");
+            //todo: Get random UUID from world, not player
+            Objects.requireNonNull(parameters.gameProfile(), "Null game profile!");
+            var gameProfile = new MorphGameProfile(parameters.gameProfile());
+            gameProfile.setUUID(UUID.randomUUID());
 
             //Minecraft需要在生成玩家实体前先发送PlayerInfoUpdate消息
             var uuid = gameProfile.getId();
@@ -294,13 +297,8 @@ public class MorphPacketListener extends MorphPluginObject implements PacketList
         modifier.write(2, entityType);
 
         var meta = packetContainer.getMeta("fm");
-        if (meta.isEmpty())
-        {
-            packetEvent.setCancelled(true);
-            packetContainer.removeMeta("fm");
-        }
-
-        refreshStateForPlayer(Bukkit.getPlayer(packet.getUUID()));
+        if (meta.isPresent()) packetContainer.removeMeta("fm");
+        else refreshStateForPlayer(Bukkit.getPlayer(packet.getUUID()));
     }
 
     @Override
