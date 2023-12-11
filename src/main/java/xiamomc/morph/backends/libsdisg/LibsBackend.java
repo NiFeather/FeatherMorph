@@ -111,7 +111,7 @@ public class LibsBackend extends DisguiseBackend<Disguise, LibsDisguiseWrapper>
     }
 
     @Override
-    public boolean isDisguised(Entity target)
+    public boolean isDisguised(@Nullable Entity target)
     {
         return playerLibsDisguiseWrapperMap.containsKey(target);
     }

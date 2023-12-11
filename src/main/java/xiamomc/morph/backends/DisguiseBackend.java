@@ -48,7 +48,7 @@ public abstract class DisguiseBackend<TInstance, TWrapper extends DisguiseWrappe
      * @param target The entity to check
      * @return Whether this entity is disguised by this backend
      */
-    public abstract boolean isDisguised(Entity target);
+    public abstract boolean isDisguised(@Nullable Entity target);
 
     /**
      * Gets the wrapper that handles the target entity's disguise instance
@@ -92,4 +92,8 @@ public abstract class DisguiseBackend<TInstance, TWrapper extends DisguiseWrappe
      */
     @Nullable
     public abstract String toOfflineSave(DisguiseWrapper<?> wrapper);
+
+    public void dispose()
+    {
+    }
 }
