@@ -62,7 +62,7 @@ public class SkillAbilityConfigurationStore extends MorphJsonBasedStorage<SkillA
         return "技能存储";
     }
 
-    private final int targetVersion = 22;
+    private final int targetVersion = 23;
 
     @Resolved
     private MorphSkillHandler skillHandler;
