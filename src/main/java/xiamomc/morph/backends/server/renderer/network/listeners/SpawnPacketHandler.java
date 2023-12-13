@@ -133,8 +133,9 @@ public class SpawnPacketHandler extends MorphPluginObject implements PacketListe
                     if (registryParameters != null)
                     {
                         logger.info("Triggering refresh!");
-                        refreshStateForPlayer(player,
-                                new DisplayParameters(outcomingProfile, disguiseName, registryParameters.bukkitType(), registryParameters.singleWatcher()));
+                        GameProfile finalOutcomingProfile = outcomingProfile;
+                        this.addSchedule(() -> refreshStateForPlayer(player,
+                                new DisplayParameters(finalOutcomingProfile, disguiseName, registryParameters.bukkitType(), registryParameters.singleWatcher())));
                     }
 
                     return null;
@@ -287,19 +288,21 @@ public class SpawnPacketHandler extends MorphPluginObject implements PacketListe
         //然后发包创建实体
         //确保gameProfile非空
         //如果没有profile，那么随机一个并计划刷新
-        if (displayType == org.bukkit.entity.EntityType.PLAYER)
+        if (displayType == org.bukkit.entity.EntityType.PLAYER && gameProfile == null)
         {
-            if (gameProfile == null)
+            var targetPlayer = Bukkit.getPlayerExact(parameters.playerDisguiseName());
+
+            var cachedProfile = targetPlayer == null
+                    ? PlayerSkinProvider.getInstance().getCachedProfile(parameters.playerDisguiseName())
+                    : NmsRecord.ofPlayer(targetPlayer).gameProfile;
+
+            if (cachedProfile == null)
             {
-                var cachedProfile = PlayerSkinProvider.getInstance().getCachedProfile(parameters.playerDisguiseName());
-                if (cachedProfile == null)
-                {
-                    scheduleRefreshPlayerDisplay(player, parameters.playerDisguiseName());
-                    gameProfile = new GameProfile(Util.NIL_UUID, parameters.playerDisguiseName());
-                }
-                else
-                    gameProfile = cachedProfile;
+                scheduleRefreshPlayerDisplay(player, parameters.playerDisguiseName());
+                gameProfile = new GameProfile(Util.NIL_UUID, parameters.playerDisguiseName());
             }
+            else
+                gameProfile = cachedProfile;
         }
 
         var parametersFinal = new DisplayParameters(gameProfile, parameters.playerDisguiseName(), parameters.bukkitType(), parameters.watcher());
