@@ -9,6 +9,7 @@ import xiamomc.morph.backends.server.renderer.network.RenderRegistry;
 import xiamomc.morph.backends.server.renderer.network.listeners.SpawnPacketHandler;
 import xiamomc.morph.backends.server.renderer.network.ProtocolHandler;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.Watchers;
+import xiamomc.morph.backends.server.renderer.skins.SkinStore;
 import xiamomc.pluginbase.Managers.DependencyManager;
 
 public class ServerRenderer extends MorphPluginObject
@@ -17,9 +18,12 @@ public class ServerRenderer extends MorphPluginObject
 
     private final RenderRegistry registry = new RenderRegistry();
 
+    private final SkinStore skinStore = new SkinStore();
+
     public ServerRenderer()
     {
         dependencies.cache(registry);
+        dependencies.cache(skinStore);
         dependencies.cache(protocolHandler = new ProtocolHandler());
     }
 
