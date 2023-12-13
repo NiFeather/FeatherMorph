@@ -1,7 +1,6 @@
 package xiamomc.morph.backends.server.renderer.network;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import net.minecraft.world.entity.PlayerRideable;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -9,11 +8,10 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
-import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.Watchers;
+import xiamomc.morph.backends.server.renderer.network.datawatcher.WatcherIndex;
 import xiamomc.pluginbase.Exceptions.NullDependencyException;
 
 import java.util.Map;
-import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Consumer;
 
@@ -89,7 +87,7 @@ public class RenderRegistry extends MorphPluginObject
      */
     public void register(@NotNull Player player, @NotNull org.bukkit.entity.EntityType bukkitType)
     {
-        var watcher = Watchers.getWatcherForType(player, bukkitType);
+        var watcher = WatcherIndex.getInstance().getWatcherForType(player, bukkitType);
         register(player.getUniqueId(), bukkitType, watcher);
     }
 

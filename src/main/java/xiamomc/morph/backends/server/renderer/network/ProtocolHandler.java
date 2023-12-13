@@ -1,21 +1,10 @@
 package xiamomc.morph.backends.server.renderer.network;
 
 import com.comphenix.protocol.ProtocolLibrary;
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphPluginObject;
-import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
-import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.Watchers;
+import xiamomc.morph.backends.server.renderer.network.listeners.MetaPacketListener;
 import xiamomc.morph.backends.server.renderer.network.listeners.SpawnPacketHandler;
 import xiamomc.pluginbase.Annotations.Initializer;
-import xiamomc.pluginbase.Exceptions.NullDependencyException;
-
-import java.util.Map;
-import java.util.UUID;
 
 public class ProtocolHandler extends MorphPluginObject
 {
@@ -34,6 +23,8 @@ public class ProtocolHandler extends MorphPluginObject
         var protocolMgr = ProtocolLibrary.getProtocolManager();
 
         protocolMgr.addPacketListener(morphPacketListener);
+        protocolMgr.addPacketListener(new MetaPacketListener());
+        //protocolMgr.addPacketListener(new TestPacketListener());
     }
 
     private boolean disposed;

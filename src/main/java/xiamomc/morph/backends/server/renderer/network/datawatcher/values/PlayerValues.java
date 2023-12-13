@@ -1,16 +1,18 @@
 package xiamomc.morph.backends.server.renderer.network.datawatcher.values;
 
-public class PlayerValues extends AbstractValues
+public class PlayerValues extends LivingEntityValues
 {
-    public final SingleValue<Float> ABSORPTION_AMOUNT = SingleValue.of(15, 0f);
-    public final SingleValue<Integer> SCORE = SingleValue.of(16, 0);
-    public final SingleValue<Byte> SKIN = SingleValue.of(17, (byte)127);
-    public final SingleValue<Byte> MAINHAND = SingleValue.of(18, (byte)1);
+    public final SingleValue<Float> ABSORPTION_AMOUNT = getSingle(0f);
+    public final SingleValue<Integer> SCORE = getSingle(0);
+    public final SingleValue<Byte> SKIN = getSingle((byte)0); //127
+    public final SingleValue<Byte> MAINHAND = getSingle((byte)1);
 
     public PlayerValues()
     {
         super();
 
-        registerValue(ABSORPTION_AMOUNT, SCORE, SKIN, MAINHAND);
+        System.out.println("SKIN is on index " + SKIN.index());
+
+        registerSingle(ABSORPTION_AMOUNT, SCORE, SKIN, MAINHAND);
     }
 }

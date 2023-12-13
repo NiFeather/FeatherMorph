@@ -18,7 +18,6 @@ public class LivingEntityWatcher extends EntityWatcher
     public void doSync()
     {
         var player = getBindingPlayer();
-        //var nmsPlayer = NmsRecord.ofPlayer(player);
         var values = ValueIndex.BASE_LIVING;
 
         write(values.HEALTH, (float)player.getHealth());

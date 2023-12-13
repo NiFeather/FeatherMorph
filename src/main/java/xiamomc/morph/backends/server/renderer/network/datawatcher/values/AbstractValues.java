@@ -1,8 +1,7 @@
 package xiamomc.morph.backends.server.renderer.network.datawatcher.values;
 
-import com.comphenix.protocol.wrappers.WrappedDataWatcher;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraft.core.BlockPos;
+import org.slf4j.Logger;
 import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.backends.server.renderer.utilties.ProtocolRegistryUtils;
 
@@ -10,9 +9,26 @@ import java.util.List;
 
 public abstract class AbstractValues
 {
+    private int currentIndex = 0;
+    protected <X> SingleValue<X> getSingle(X val)
+    {
+        if (val == null)
+            throw new IllegalArgumentException("May not pass a null value to getIndex()");
+
+        var sv = SingleValue.of(currentIndex, val);
+
+        logger.info(this.getClass().getSimpleName() + " :: Value '%s' class '%s' is on Index '%s'"
+                .formatted(val, val.getClass(), currentIndex));
+
+        currentIndex++;
+        return sv;
+    }
+
+    protected final Logger logger = MorphPlugin.getInstance().getSLF4JLogger();
+
     protected final List<SingleValue<?>> values = new ObjectArrayList<>();
 
-    protected void registerValue(SingleValue<?>... value)
+    protected void registerSingle(SingleValue<?>... value)
     {
         for (SingleValue<?> singleValue : value)
             registerSingle(singleValue);
@@ -30,7 +46,7 @@ public abstract class AbstractValues
         }
         catch (Throwable t)
         {
-            MorphPlugin.getInstance().getSLF4JLogger().warn("No serializer for type '%s'!".formatted(value.type()));
+            logger.warn("No serializer for type '%s'!".formatted(value.type()));
         }
 
         values.add(value);

@@ -79,7 +79,7 @@ public abstract class SingleWatcher extends MorphPluginObject
         return true;
     }
 
-    public void write(SingleValue<?> singleValue, Object value)
+    public <X> void write(SingleValue<X> singleValue, X value)
     {
         write(singleValue.index(), value);
     }

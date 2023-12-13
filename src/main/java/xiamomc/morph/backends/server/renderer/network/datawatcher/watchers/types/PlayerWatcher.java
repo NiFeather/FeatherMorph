@@ -11,9 +11,9 @@ import java.util.Optional;
 
 public class PlayerWatcher extends LivingEntityWatcher
 {
-    public PlayerWatcher(Player bindingPlayer, EntityType entityType)
+    public PlayerWatcher(Player bindingPlayer)
     {
-        super(bindingPlayer, entityType);
+        super(bindingPlayer, EntityType.PLAYER);
 
         register(ValueIndex.PLAYER);
     }
