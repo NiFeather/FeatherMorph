@@ -26,10 +26,7 @@ import xiamomc.morph.misc.DisguiseMeta;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.misc.DisguiseTypes;
 import xiamomc.morph.misc.NmsRecord;
-import xiamomc.morph.utilities.EntityTargetingHelper;
-import xiamomc.morph.utilities.EntityTypeUtils;
-import xiamomc.morph.utilities.NbtUtils;
-import xiamomc.morph.utilities.ReflectionUtils;
+import xiamomc.morph.utilities.*;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
@@ -216,7 +213,7 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
             var entityClazz = state.getEntityType().getEntityClass();
             if (entityClazz != null)
             {
-                var entity = state.getPlayer().getWorld().spawn(loc, entityClazz, CreatureSpawnEvent.SpawnReason.CUSTOM);
+                var entity = NmsUtils.spawnEntity(state.getEntityType(), state.getPlayer().getWorld(), loc);
 
                 if (entity instanceof LivingEntity living)
                 {

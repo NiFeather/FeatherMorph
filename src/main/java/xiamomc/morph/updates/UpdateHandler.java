@@ -11,7 +11,7 @@ import org.apache.hc.core5.net.URIBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
-import org.bukkit.craftbukkit.v1_20_R2.command.ServerCommandSender;
+import org.bukkit.craftbukkit.v1_20_R3.command.ServerCommandSender;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.MorphPluginObject;
