@@ -307,11 +307,42 @@ public class SpawnPacketHandler extends MorphPluginObject implements PacketListe
 
         var parametersFinal = new DisplayParameters(gameProfile, parameters.playerDisguiseName(), parameters.bukkitType(), parameters.watcher());
         var spawnPackets = buildSpawnPackets(player, parametersFinal);
+/*
+        var delayedPackets = new ObjectArrayList<PacketContainer>();
+
+        spawnPackets.forEach(packet ->
+        {
+            if (packet.getMeta("delayed").isPresent())
+                delayedPackets.add(packet);
+        });
+
+        spawnPackets.removeAll(delayedPackets);
+
+ */
         spawnPackets.forEach(packet ->
         {
             for (var visiblePlayer : affectedPlayers)
                 protocolManager.sendServerPacket(visiblePlayer, packet);
         });
+/*
+        if (!delayedPackets.isEmpty())
+        {
+            var registryParameters = registry.getParameters(player.getUniqueId());
+
+            this.addSchedule(() ->
+            {
+                var parametersNew = registry.getParameters(player.getUniqueId());
+
+                if (parametersNew != registryParameters) return;
+
+                delayedPackets.forEach(packet ->
+                {
+                    for (var affectedPlayer : affectedPlayers)
+                        protocolManager.sendServerPacket(affectedPlayer, packet);
+                });
+            }, 1);
+        }
+ */
     }
 
     private void onEntityAddPacket(ClientboundAddEntityPacket packet, PacketEvent packetEvent)
@@ -329,8 +360,15 @@ public class SpawnPacketHandler extends MorphPluginObject implements PacketListe
         modifier.write(2, entityType);
 
         var meta = packetContainer.getMeta("fm");
-        if (meta.isPresent()) packetContainer.removeMeta("fm");
-        else refreshStateForPlayer(Bukkit.getPlayer(packet.getUUID()));
+        if (meta.isPresent())
+        {
+            packetContainer.removeMeta("fm");
+        }
+        else
+        {
+            packetEvent.setCancelled(true);
+            refreshStateForPlayer(Bukkit.getPlayer(packet.getUUID()));
+        }
     }
 
     @Override
