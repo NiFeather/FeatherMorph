@@ -2,7 +2,9 @@ package xiamomc.morph.backends.server.renderer.network.datawatcher.values;
 
 import com.comphenix.protocol.wrappers.WrappedDataWatcher;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.minecraft.core.BlockPos;
 import xiamomc.morph.MorphPlugin;
+import xiamomc.morph.backends.server.renderer.utilties.ProtocolRegistryUtils;
 
 import java.util.List;
 
@@ -24,7 +26,7 @@ public abstract class AbstractValues
 
         try
         {
-            WrappedDataWatcher.Registry.get(value.type());
+            ProtocolRegistryUtils.getSerializer(value.defaultValue());
         }
         catch (Throwable t)
         {
