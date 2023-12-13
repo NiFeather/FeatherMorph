@@ -6,15 +6,16 @@ import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.wrappers.WrappedDataValue;
 import com.comphenix.protocol.wrappers.WrappedDataWatcher;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.bukkit.entity.Player;
 import xiamomc.morph.MorphPluginObject;
-import xiamomc.morph.backends.server.renderer.network.RegistryParameters;
+import xiamomc.morph.backends.server.renderer.network.datawatcher.values.SingleValue;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
 import xiamomc.morph.backends.server.renderer.utilties.ProtocolRegistryUtils;
 
 import java.util.List;
-import java.util.UUID;
+import java.util.Map;
 
 public abstract class ProtocolListener extends MorphPluginObject
 {
@@ -34,11 +35,18 @@ public abstract class ProtocolListener extends MorphPluginObject
 
         List<WrappedDataValue> wrappedDataValues = new ObjectArrayList<>();
 
-        watcher.doSync();
+        watcher.sync();
+
+        Map<SingleValue<?>, Object> valuesToSent = new Object2ObjectOpenHashMap<>();
+        valuesToSent.putAll(watcher.getDirty());
         watcher.getRegistry().forEach((single, v) ->
         {
             if (single.defaultValue().equals(v)) return;
+            valuesToSent.put(single, v);
+        });
 
+        valuesToSent.forEach((single, v) ->
+        {
             WrappedDataWatcher.Serializer serializer;
 
             try

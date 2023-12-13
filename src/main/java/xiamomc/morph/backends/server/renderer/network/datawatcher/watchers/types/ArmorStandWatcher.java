@@ -14,7 +14,7 @@ public class ArmorStandWatcher extends LivingEntityWatcher
     }
 
     @Override
-    public void doSync()
+    protected void doSync()
     {
         super.doSync();
     }

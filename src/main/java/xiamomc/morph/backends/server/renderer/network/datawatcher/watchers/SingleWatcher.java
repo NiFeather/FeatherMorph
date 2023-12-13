@@ -94,6 +94,7 @@ public abstract class SingleWatcher extends MorphPluginObject
             throw new IllegalArgumentException("Incompatable value for index '%s', excepted for '%s', but got '%s'".formatted(index, single.defaultValue().getClass(), value.getClass()));
 
         registry.put(single, value);
+        dirtySingles.put(single, value);
     }
 
     public <X> X get(SingleValue<X> singleValue)
@@ -116,9 +117,22 @@ public abstract class SingleWatcher extends MorphPluginObject
         return new Object2ObjectOpenHashMap<>(registry);
     }
 
+    private final Map<SingleValue<?>, Object> dirtySingles = new Object2ObjectOpenHashMap<>();
+
+    public Map<SingleValue<?>, Object> getDirty()
+    {
+        return new Object2ObjectOpenHashMap<>(dirtySingles);
+    }
+
     //endregion Value Registry
 
-    public void doSync()
+    public void sync()
+    {
+        dirtySingles.clear();
+        doSync();
+    }
+
+    protected void doSync()
     {
     }
 
