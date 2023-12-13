@@ -37,6 +37,7 @@ import xiamomc.morph.backends.server.renderer.network.RenderRegistry;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.Watchers;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.PlayerWatcher;
+import xiamomc.morph.backends.server.renderer.utilties.ProtocolRegistryUtils;
 import xiamomc.morph.misc.MorphGameProfile;
 import xiamomc.morph.misc.NmsRecord;
 import xiamomc.morph.utilities.EntityTypeUtils;
@@ -237,7 +238,7 @@ public class SpawnPacketHandler extends MorphPluginObject implements PacketListe
 
             try
             {
-                serializer = WrappedDataWatcher.Registry.get(single.type());
+                serializer = ProtocolRegistryUtils.getSerializer(single.defaultValue());
             }
             catch (Throwable t)
             {
