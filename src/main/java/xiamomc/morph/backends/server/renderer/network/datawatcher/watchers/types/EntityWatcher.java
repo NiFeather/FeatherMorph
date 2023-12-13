@@ -16,7 +16,7 @@ public class EntityWatcher extends SingleWatcher
     }
 
     @Override
-    public void doSync()
+    protected void doSync()
     {
         var player = getBindingPlayer();
         var nmsPlayer = NmsRecord.ofPlayer(player);

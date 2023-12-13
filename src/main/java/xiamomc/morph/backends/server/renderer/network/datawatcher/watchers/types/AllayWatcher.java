@@ -14,7 +14,7 @@ public class AllayWatcher extends LivingEntityWatcher
     }
 
     @Override
-    public void doSync()
+    protected void doSync()
     {
         write(ValueIndex.ALLAY.DANCING, true);
         super.doSync();

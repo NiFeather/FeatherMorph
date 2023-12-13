@@ -15,7 +15,7 @@ public class LivingEntityWatcher extends EntityWatcher
     }
 
     @Override
-    public void doSync()
+    protected void doSync()
     {
         var player = getBindingPlayer();
         var values = ValueIndex.BASE_LIVING;

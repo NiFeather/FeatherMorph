@@ -19,7 +19,7 @@ public class PlayerWatcher extends LivingEntityWatcher
     }
 
     @Override
-    public void doSync()
+    protected void doSync()
     {
         this.write(ValueIndex.PLAYER.SKIN, (byte)getBindingPlayer().getClientOption(ClientOption.SKIN_PARTS).getRaw());
         this.write(ValueIndex.PLAYER.MAINHAND, (byte)getBindingPlayer().getMainHand().ordinal());
