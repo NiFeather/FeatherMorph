@@ -1,15 +1,16 @@
-package xiamomc.morph.backends.server.renderer;
+package xiamomc.morph.backends.server.renderer.skins;
 
 import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.yggdrasil.ProfileResult;
-import net.minecraft.Util;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.players.GameProfileCache;
-import org.jetbrains.annotations.Nullable;
+import org.bukkit.Bukkit;
 import xiamomc.morph.MorphPluginObject;
+import xiamomc.morph.misc.NmsRecord;
 import xiamomc.pluginbase.Annotations.Initializer;
+import xiamomc.pluginbase.Annotations.Resolved;
 
-import java.io.File;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -26,6 +27,9 @@ public class PlayerSkinProvider extends MorphPluginObject
 
     private GameProfileCache userCache;
 
+    @Resolved
+    private SkinStore skinStore;
+
     @Initializer
     private void load()
     {
@@ -38,7 +42,10 @@ public class PlayerSkinProvider extends MorphPluginObject
     {
         if (profile.getProperties().containsKey("textures"))
         {
-            return CompletableFuture.completedFuture(Optional.of(profile));
+            var optional = Optional.of(profile);
+            profileCache.put(profile.getName(), profile);
+
+            return CompletableFuture.completedFuture(optional);
         }
         else
         {
@@ -51,8 +58,21 @@ public class PlayerSkinProvider extends MorphPluginObject
         }
     }
 
+    private final Map<String, GameProfile> profileCache = new Object2ObjectOpenHashMap<>();
+
     public CompletableFuture<Optional<GameProfile>> fetchSkin(String profileName)
     {
+        var player = Bukkit.getPlayerExact(profileName);
+        if (player != null)
+        {
+            profileCache.remove(profileName);
+            return CompletableFuture.completedFuture(Optional.of(NmsRecord.ofPlayer(player).gameProfile));
+        }
+
+        var cachedSkin = profileCache.getOrDefault(profileName, null);
+        if (cachedSkin != null)
+            return CompletableFuture.completedFuture(Optional.of(cachedSkin));
+
         var server = MinecraftServer.getServer();
         var userCache = this.userCache == null
                         ? server.getProfileCache()
