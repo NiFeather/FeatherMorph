@@ -291,8 +291,14 @@ public class SpawnPacketHandler extends MorphPluginObject implements PacketListe
         {
             if (gameProfile == null)
             {
-                scheduleRefreshPlayerDisplay(player, parameters.playerDisguiseName());
-                gameProfile = new GameProfile(Util.NIL_UUID, parameters.playerDisguiseName());
+                var cachedProfile = PlayerSkinProvider.getInstance().getCachedProfile(parameters.playerDisguiseName());
+                if (cachedProfile == null)
+                {
+                    scheduleRefreshPlayerDisplay(player, parameters.playerDisguiseName());
+                    gameProfile = new GameProfile(Util.NIL_UUID, parameters.playerDisguiseName());
+                }
+                else
+                    gameProfile = cachedProfile;
             }
         }
 

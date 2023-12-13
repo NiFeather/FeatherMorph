@@ -5,6 +5,7 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.players.GameProfileCache;
 import org.bukkit.Bukkit;
+import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.misc.NmsRecord;
 import xiamomc.pluginbase.Annotations.Initializer;
@@ -60,6 +61,12 @@ public class PlayerSkinProvider extends MorphPluginObject
 
     private final Map<String, GameProfile> profileCache = new Object2ObjectOpenHashMap<>();
 
+    @Nullable
+    public GameProfile getCachedProfile(String profileName)
+    {
+        return profileCache.getOrDefault(profileName, null);
+    }
+
     public CompletableFuture<Optional<GameProfile>> fetchSkin(String profileName)
     {
         var player = Bukkit.getPlayerExact(profileName);
@@ -69,7 +76,7 @@ public class PlayerSkinProvider extends MorphPluginObject
             return CompletableFuture.completedFuture(Optional.of(NmsRecord.ofPlayer(player).gameProfile));
         }
 
-        var cachedSkin = profileCache.getOrDefault(profileName, null);
+        var cachedSkin = getCachedProfile(profileName);
         if (cachedSkin != null)
             return CompletableFuture.completedFuture(Optional.of(cachedSkin));
 
