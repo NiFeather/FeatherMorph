@@ -9,11 +9,8 @@ public class EntityValues extends AbstractValues
 {
     public final SingleValue<Byte> GENERAL = getSingle((byte)0);
     public final SingleValue<Integer> AIR_TICKS = getSingle(0);
-
-    @Deprecated
-    public final SingleValue<Optional<Component>> CUSTOMNAME = getSingle(Optional.of(Component.empty()));
-
-    public final SingleValue<Boolean> CUSTOMNAME_VISIBLE = getSingle(false);
+    public final SingleValue<Optional<Component>> CUSTOM_NAME = getSingle(Optional.of(Component.empty()));
+    public final SingleValue<Boolean> CUSTOM_NAME_VISIBLE = getSingle(false);
     public final SingleValue<Boolean> SILENT = getSingle(false);
     public final SingleValue<Boolean> NO_GRAVITY = getSingle(false);
     public final SingleValue<Pose> POSE = getSingle(Pose.STANDING);
@@ -21,7 +18,7 @@ public class EntityValues extends AbstractValues
 
     public EntityValues()
     {
-        registerSingle(GENERAL, AIR_TICKS, CUSTOMNAME, CUSTOMNAME_VISIBLE, SILENT, NO_GRAVITY,
+        registerSingle(GENERAL, AIR_TICKS, CUSTOM_NAME, CUSTOM_NAME_VISIBLE, SILENT, NO_GRAVITY,
                 POSE, FROZEN_TICKS);
     }
 }
