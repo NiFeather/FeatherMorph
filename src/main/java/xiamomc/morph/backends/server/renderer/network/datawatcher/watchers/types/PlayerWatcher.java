@@ -1,0 +1,25 @@
+package xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types;
+
+import com.destroystokyo.paper.ClientOption;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Player;
+import xiamomc.morph.backends.server.renderer.network.datawatcher.ValueIndex;
+
+public class PlayerWatcher extends LivingEntityWatcher
+{
+    public PlayerWatcher(Player bindingPlayer, EntityType entityType)
+    {
+        super(bindingPlayer, entityType);
+
+        register(ValueIndex.PLAYER);
+    }
+
+    @Override
+    public void doSync()
+    {
+        this.write(ValueIndex.PLAYER.SKIN, (byte)getBindingPlayer().getClientOption(ClientOption.SKIN_PARTS).getRaw());
+        this.write(ValueIndex.PLAYER.MAINHAND, (byte)getBindingPlayer().getMainHand().ordinal());
+
+        super.doSync();
+    }
+}

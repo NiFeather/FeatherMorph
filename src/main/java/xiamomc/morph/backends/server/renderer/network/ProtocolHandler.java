@@ -1,14 +1,27 @@
 package xiamomc.morph.backends.server.renderer.network;
 
 import com.comphenix.protocol.ProtocolLibrary;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphPluginObject;
+import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
+import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.Watchers;
+import xiamomc.morph.backends.server.renderer.network.listeners.SpawnPacketHandler;
 import xiamomc.pluginbase.Annotations.Initializer;
+import xiamomc.pluginbase.Exceptions.NullDependencyException;
 
-public class ProtocolListener extends MorphPluginObject
+import java.util.Map;
+import java.util.UUID;
+
+public class ProtocolHandler extends MorphPluginObject
 {
-    private final MorphPacketListener morphPacketListener = new MorphPacketListener();
+    private final SpawnPacketHandler morphPacketListener = new SpawnPacketHandler();
 
-    public MorphPacketListener getPacketListener()
+    public SpawnPacketHandler getPacketListener()
     {
         return morphPacketListener;
     }
@@ -38,8 +51,6 @@ public class ProtocolListener extends MorphPluginObject
             logger.error("Error removing packet listener: " + t.getMessage());
             t.printStackTrace();
         }
-
-        morphPacketListener.reset();
 
         disposed = true;
     }

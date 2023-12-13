@@ -1,5 +1,6 @@
 package xiamomc.morph.utilities;
 
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.phys.Vec3;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -25,5 +26,10 @@ public class NmsUtils
         nmsEntity.setPos(new Vec3(location.x(), location.y(), location.z()));
 
         return nmsEntity.getBukkitEntity();
+    }
+
+    public static ServerLevel getNmsLevel(World world)
+    {
+        return ((CraftWorld)world).getHandle();
     }
 }
