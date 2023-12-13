@@ -33,7 +33,7 @@ public class TestPacketListener extends MorphPluginObject implements PacketListe
     @Override
     public void onPacketSending(PacketEvent event)
     {
-        logger.info("SEND! " + event.getPacket().getHandle());
+        logger.info("SEND! type is '%s' handle is '%s'".formatted(event.getPacketType(), event.getPacket().getHandle()));
     }
 
     /**

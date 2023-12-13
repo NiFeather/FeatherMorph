@@ -2,15 +2,12 @@ package xiamomc.morph.backends.server.renderer;
 
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.backends.server.renderer.network.RegistryParameters;
 import xiamomc.morph.backends.server.renderer.network.RenderRegistry;
-import xiamomc.morph.backends.server.renderer.network.listeners.SpawnPacketHandler;
 import xiamomc.morph.backends.server.renderer.network.ProtocolHandler;
-import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.Watchers;
+import xiamomc.morph.backends.server.renderer.network.datawatcher.WatcherIndex;
 import xiamomc.morph.backends.server.renderer.skins.SkinStore;
-import xiamomc.pluginbase.Managers.DependencyManager;
 
 public class ServerRenderer extends MorphPluginObject
 {
@@ -30,7 +27,7 @@ public class ServerRenderer extends MorphPluginObject
     public void renderEntity(Player player, EntityType entityType, String name)
     {
         registry.register(player.getUniqueId(),
-                new RegistryParameters(entityType, name, Watchers.getWatcherForType(player, entityType)));
+                new RegistryParameters(entityType, name, WatcherIndex.getInstance().getWatcherForType(player, entityType)));
     }
 
     public void unRenderEntity(Player player)

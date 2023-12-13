@@ -2,6 +2,7 @@ package xiamomc.morph.backends.server.renderer.network.listeners;
 
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
+import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.events.ListeningWhitelist;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.events.PacketEvent;
@@ -13,10 +14,8 @@ import com.mojang.authlib.GameProfile;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.Util;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
-import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
-import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
-import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
+import net.minecraft.network.protocol.game.*;
+import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.GameType;
 import org.bukkit.Bukkit;
@@ -37,12 +36,14 @@ import xiamomc.morph.backends.server.renderer.utilties.ProtocolRegistryUtils;
 import xiamomc.morph.misc.MorphGameProfile;
 import xiamomc.morph.misc.NmsRecord;
 import xiamomc.morph.utilities.EntityTypeUtils;
+import xiamomc.morph.utilities.NmsUtils;
+import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Exceptions.NullDependencyException;
 
 import java.util.*;
 
-public class SpawnPacketHandler extends MorphPluginObject implements PacketListener, IProtocolListener
+public class SpawnPacketHandler extends ProtocolListener implements PacketListener
 {
     @Resolved(shouldSolveImmediately = true)
     private RenderRegistry registry;
@@ -103,7 +104,7 @@ public class SpawnPacketHandler extends MorphPluginObject implements PacketListe
                 ProtocolEquipment.toPairs(player.getEquipment()));
         packets.add(PacketContainer.fromPacket(equipmentPacket));
 
-        var meta = getMetaPackets(player, new PlayerWatcher(player, org.bukkit.entity.EntityType.PLAYER));
+        var meta = getMetaPackets(player, new PlayerWatcher(player));
         packets.add(meta);
 
         affectedPlayers.forEach(p ->
@@ -146,7 +147,7 @@ public class SpawnPacketHandler extends MorphPluginObject implements PacketListe
     {
         List<PacketContainer> packets = new ObjectArrayList<>();
 
-        logger.info("Build spawn packets, player is " + player.getName() + " :: parameters are " + parameters);
+        //logger.info("Build spawn packets, player is " + player.getName() + " :: parameters are " + parameters);
 
         var playerType = parameters.bukkitType();
         var nmsType = EntityTypeUtils.getNmsType(playerType);
@@ -164,7 +165,7 @@ public class SpawnPacketHandler extends MorphPluginObject implements PacketListe
         //如果是玩家
         if (playerType == org.bukkit.entity.EntityType.PLAYER)
         {
-            logger.info("Building player info packet!");
+            //logger.info("Building player info packet!");
 
             Objects.requireNonNull(parameters.gameProfile(), "Null game profile!");
             var gameProfile = new MorphGameProfile(parameters.gameProfile());
@@ -208,48 +209,6 @@ public class SpawnPacketHandler extends MorphPluginObject implements PacketListe
         packets.add(getMetaPackets(player, parameters.watcher()));
 
         return packets;
-    }
-
-    private PacketContainer getMetaPackets(Player player, SingleWatcher watcher)
-    {
-        var metaPacket = new PacketContainer(PacketType.Play.Server.ENTITY_METADATA);
-        metaPacket.getIntegers().write(0, player.getEntityId());
-
-        var modifier = metaPacket.getDataValueCollectionModifier();
-
-        var entityWatcher = WrappedDataWatcher.getEntityWatcher(player);
-        entityWatcher.asMap().forEach((id, val) ->
-        {
-            //logger.info("Id '%s' is val '%s' raw '%s' class '%s'"
-            //        .formatted(id, val.getValue(),val.getRawValue(),val.getRawValue().getClass()));
-        });
-
-        List<WrappedDataValue> wrappedDataValues = new ObjectArrayList<>();
-
-        watcher.doSync();
-        watcher.getRegistry().forEach((single, v) ->
-        {
-            if (single.defaultValue().equals(v)) return;
-
-            WrappedDataWatcher.Serializer serializer;
-
-            try
-            {
-                serializer = ProtocolRegistryUtils.getSerializer(single.defaultValue());
-            }
-            catch (Throwable t)
-            {
-                logger.warn("Error occurred while generating meta packet with id '%s': %s".formatted(single.index(), t.getMessage()));
-                return;
-            }
-
-            var value = new WrappedDataValue(single.index(), serializer, v);
-            wrappedDataValues.add(value);
-        });
-
-        modifier.write(0, wrappedDataValues);
-
-        return metaPacket;
     }
 
     private void refreshStateForPlayer(@Nullable Player player)
@@ -394,6 +353,7 @@ public class SpawnPacketHandler extends MorphPluginObject implements PacketListe
     {
         return ListeningWhitelist
                 .newBuilder()
+                .types(PacketType.Play.Server.ENTITY_METADATA)
                 .types(PacketType.Play.Server.SPAWN_ENTITY)
                 .gamePhase(GamePhase.PLAYING)
                 .build();

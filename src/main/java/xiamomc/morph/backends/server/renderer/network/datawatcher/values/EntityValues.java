@@ -7,21 +7,21 @@ import java.util.Optional;
 
 public class EntityValues extends AbstractValues
 {
-    public final SingleValue<Byte> GENERAL = SingleValue.of(0, (byte)0);
-    public final SingleValue<Integer> AIR_TICKS = SingleValue.of(1, 0);
+    public final SingleValue<Byte> GENERAL = getSingle((byte)0);
+    public final SingleValue<Integer> AIR_TICKS = getSingle(0);
 
     @Deprecated
-    public final SingleValue<Optional<Component>> CUSTOMNAME = SingleValue.of(2, Optional.of(Component.empty()));
+    public final SingleValue<Optional<Component>> CUSTOMNAME = getSingle(Optional.of(Component.empty()));
 
-    public final SingleValue<Boolean> CUSTOMNAME_VISIBLE = SingleValue.of(3, false);
-    public final SingleValue<Boolean> SILENT = SingleValue.of(4, false);
-    public final SingleValue<Boolean> NO_GRAVITY = SingleValue.of(5, false);
-    public final SingleValue<Pose> POSE = SingleValue.of(6, Pose.STANDING);
-    public final SingleValue<Integer> FROZEN_TICKS = SingleValue.of(7, 0);
+    public final SingleValue<Boolean> CUSTOMNAME_VISIBLE = getSingle(false);
+    public final SingleValue<Boolean> SILENT = getSingle(false);
+    public final SingleValue<Boolean> NO_GRAVITY = getSingle(false);
+    public final SingleValue<Pose> POSE = getSingle(Pose.STANDING);
+    public final SingleValue<Integer> FROZEN_TICKS = getSingle(0);
 
     public EntityValues()
     {
-        registerValue(GENERAL, AIR_TICKS, CUSTOMNAME, CUSTOMNAME_VISIBLE, SILENT, NO_GRAVITY,
+        registerSingle(GENERAL, AIR_TICKS, CUSTOMNAME, CUSTOMNAME_VISIBLE, SILENT, NO_GRAVITY,
                 POSE, FROZEN_TICKS);
     }
 }
