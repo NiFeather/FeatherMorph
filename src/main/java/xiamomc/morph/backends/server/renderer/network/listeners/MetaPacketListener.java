@@ -51,7 +51,6 @@ public class MetaPacketListener extends ProtocolListener
             return;
 
         //取得来源玩家的伪装后的Meta，发送给目标玩家
-        watcher.sync();
         packetEvent.setPacket(getFactory().buildFullMetaPacket(sourcePlayer, watcher));
     }
 

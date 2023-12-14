@@ -96,7 +96,6 @@ public class PacketFactory extends MorphPluginObject
         packets.add(PacketContainer.fromPacket(equipmentPacket));
 
         var watcher = parameters.getWatcher();
-        watcher.sync();
         packets.add(buildFullMetaPacket(player, watcher));
 
         for (PacketContainer packet : packets)
@@ -143,6 +142,8 @@ public class PacketFactory extends MorphPluginObject
 
     public PacketContainer buildFullMetaPacket(Player player, SingleWatcher watcher)
     {
+        watcher.sync();
+
         var metaPacket = new PacketContainer(PacketType.Play.Server.ENTITY_METADATA);
         metaPacket.getIntegers().write(0, player.getEntityId());
 
