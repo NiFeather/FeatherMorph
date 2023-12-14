@@ -15,8 +15,8 @@ import org.slf4j.Logger;
 import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.backends.DisguiseWrapper;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.ValueIndex;
-import xiamomc.morph.backends.server.renderer.network.datawatcher.values.GhastValues;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
+import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.ArmorStandWatcher;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.GhastWatcher;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.SlimeWatcher;
 import xiamomc.morph.backends.server.renderer.network.registries.EntryIndex;
@@ -50,6 +50,16 @@ public class ServerDisguiseWrapper extends DisguiseWrapper<ServerDisguise>
             {
                 var size = Math.max(1, getCompound().getInt("Size"));
                 slimeWatcher.write(ValueIndex.SLIME_MAGMA.SIZE, size);
+            }
+
+            if (bindingWatcher instanceof ArmorStandWatcher armorStandWatcher)
+            {
+                this.armorStandNoBasePlate = getCompound().getBoolean("NoBasePlate");
+                this.armorStandSmall = getCompound().getBoolean("Small");
+                this.armorStandShowArms = getCompound().getBoolean("ShowArms");
+
+                var values = ValueIndex.ARMOR_STAND;
+                armorStandWatcher.write(values.DATA_FLAGS, getArmorStandFlags());
             }
         }
     }
@@ -254,6 +264,36 @@ public class ServerDisguiseWrapper extends DisguiseWrapper<ServerDisguise>
             ghastWatcher.write(ValueIndex.GHAST.CHARGING, aggressive);
     }
 
+    private boolean armorStandShowArms;
+    private boolean armorStandSmall;
+    private boolean armorStandNoBasePlate;
+
+    @Override
+    public void setShowArms(boolean showArms)
+    {
+        super.setShowArms(showArms);
+
+        this.armorStandShowArms = showArms;
+        if (bindingWatcher instanceof ArmorStandWatcher armorStandWatcher)
+            armorStandWatcher.write(ValueIndex.ARMOR_STAND.DATA_FLAGS, getArmorStandFlags());
+    }
+
+    private byte getArmorStandFlags()
+    {
+        var value = (byte)0x00;
+
+        if (armorStandSmall)
+            value |= (byte)0x01;
+
+        if (armorStandShowArms)
+            value |= (byte)0x04;
+
+        if (armorStandNoBasePlate)
+            value |= (byte)0x08;
+
+        return value;
+    }
+
     private Player bindingPlayer;
 
     public Player getBindingPlayer()
@@ -290,5 +330,8 @@ public class ServerDisguiseWrapper extends DisguiseWrapper<ServerDisguise>
 
         if (bindingWatcher instanceof GhastWatcher ghastWatcher)
             ghastWatcher.write(ValueIndex.GHAST.CHARGING, aggressive);
+
+        if (bindingWatcher instanceof ArmorStandWatcher armorStandWatcher)
+            armorStandWatcher.write(ValueIndex.ARMOR_STAND.DATA_FLAGS, getArmorStandFlags());
     }
 }

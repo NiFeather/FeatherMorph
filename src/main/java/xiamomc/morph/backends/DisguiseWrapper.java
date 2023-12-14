@@ -314,5 +314,9 @@ public abstract class DisguiseWrapper<TInstance>
     {
     }
 
+    public void setShowArms(boolean showArms)
+    {
+    }
+
     //endregion
 }
