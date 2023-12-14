@@ -75,12 +75,13 @@ public abstract class SingleWatcher extends MorphPluginObject
 
     public <X> void write(RegistryKey<X> key, X value)
     {
+        var prev = getOrDefault(key, null);
         customRegistry.put(key.name, value);
 
-        onCustomWrite(key, value);
+        onCustomWrite(key, prev, value);
     }
 
-    protected void onCustomWrite(RegistryKey<?> key, Object val)
+    protected void onCustomWrite(RegistryKey<?> key, @Nullable Object oldVal, Object newVal)
     {
     }
 

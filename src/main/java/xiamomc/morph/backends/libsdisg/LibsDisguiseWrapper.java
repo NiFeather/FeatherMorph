@@ -60,13 +60,18 @@ public class LibsDisguiseWrapper extends DisguiseWrapper<Disguise>
     }
 
     @Override
-    public void setDisplayingEquipments(@NotNull EntityEquipment newEquipment)
+    public void setFakeEquipments(@NotNull EntityEquipment newEquipment)
     {
         watcher.setArmor(newEquipment.getArmorContents());
         watcher.setItemInMainHand(newEquipment.getItemInMainHand());
         watcher.setItemInOffHand(newEquipment.getItemInOffHand());
 
         invalidateCompound();
+    }
+
+    @Override
+    public void setDisplayingFakeEquipments(boolean newVal)
+    {
     }
 
     @Override

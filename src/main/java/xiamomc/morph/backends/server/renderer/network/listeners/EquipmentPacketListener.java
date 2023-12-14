@@ -3,17 +3,18 @@ package xiamomc.morph.backends.server.renderer.network.listeners;
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.events.ListeningWhitelist;
 import com.comphenix.protocol.events.PacketEvent;
-import com.comphenix.protocol.events.PacketListener;
 import com.comphenix.protocol.injector.GamePhase;
 import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
+import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
 import org.bukkit.entity.Player;
 import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.backends.server.renderer.network.PacketFactory;
+import xiamomc.morph.backends.server.renderer.network.registries.EntryIndex;
 import xiamomc.morph.backends.server.renderer.network.registries.RenderRegistry;
 import xiamomc.morph.utilities.NmsUtils;
 import xiamomc.pluginbase.Annotations.Resolved;
 
-public class MetaPacketListener extends ProtocolListener
+public class EquipmentPacketListener extends ProtocolListener
 {
     @Resolved(shouldSolveImmediately = true)
     private RenderRegistry registry;
@@ -21,7 +22,7 @@ public class MetaPacketListener extends ProtocolListener
     @Override
     public void onPacketSending(PacketEvent event)
     {
-        if (event.getPacketType() != PacketType.Play.Server.ENTITY_METADATA)
+        if (event.getPacketType() != PacketType.Play.Server.ENTITY_EQUIPMENT)
             return;
 
         var packet = event.getPacket();
@@ -30,13 +31,16 @@ public class MetaPacketListener extends ProtocolListener
         if (packet.getMeta(PacketFactory.MORPH_PACKET_METAKEY).isPresent())
             return;
 
-        onMetaPacket((ClientboundSetEntityDataPacket) event.getPacket().getHandle(), event);
+        onEquipmentPacket((ClientboundSetEquipmentPacket) event.getPacket().getHandle(), event);
     }
 
-    private void onMetaPacket(ClientboundSetEntityDataPacket packet, PacketEvent packetEvent)
+    private void onEquipmentPacket(ClientboundSetEquipmentPacket packet, PacketEvent event)
     {
+        if (event.getPacket().getMeta(PacketFactory.MORPH_PACKET_METAKEY).isPresent())
+            return;
+
         //获取此包的来源实体
-        var sourceNmsEntity = NmsUtils.getNmsLevel(packetEvent.getPlayer().getWorld()).getEntity(packet.id());
+        var sourceNmsEntity = NmsUtils.getNmsLevel(event.getPlayer().getWorld()).getEntity(packet.getEntity());
         if (!(sourceNmsEntity.getBukkitEntity() instanceof Player sourcePlayer)) return;
 
         var watcher = registry.getWatcher(sourcePlayer.getUniqueId());
@@ -44,16 +48,10 @@ public class MetaPacketListener extends ProtocolListener
         if (watcher == null)
             return;
 
-        //然后获取此包要发送的目标玩家
-        var targetPlayer = packetEvent.getPlayer();
-
-        //只拦截其他人的Meta
-        if (targetPlayer == sourcePlayer)
+        if (!watcher.getOrDefault(EntryIndex.DISPLAY_FAKE_EQUIPMENT, false))
             return;
 
-        //取得来源玩家的伪装后的Meta，发送给目标玩家
-        watcher.sync();
-        packetEvent.setPacket(getFactory().buildMetaPacket(sourcePlayer, watcher));
+        event.setPacket(getFactory().getEquipmentPacket(sourcePlayer, watcher));
     }
 
     @Override
@@ -66,7 +64,7 @@ public class MetaPacketListener extends ProtocolListener
     {
         return ListeningWhitelist
                 .newBuilder()
-                .types(PacketType.Play.Server.ENTITY_METADATA)
+                .types(PacketType.Play.Server.ENTITY_EQUIPMENT)
                 .gamePhase(GamePhase.PLAYING)
                 .build();
     }

@@ -776,7 +776,7 @@ public class DisguiseState extends MorphPluginObject
         eq.setItemInOffHand(showDisguised ? handItems[1] : null);
         eq.allowNull = true;
 
-        disguiseWrapper.setDisplayingEquipments(eq);
+        disguiseWrapper.setFakeEquipments(eq);
     }
 
     public DisguiseState createCopy()

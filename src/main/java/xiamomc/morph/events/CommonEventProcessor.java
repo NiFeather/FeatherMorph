@@ -27,7 +27,6 @@ import xiamomc.morph.commands.MorphCommandManager;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.events.api.gameplay.PlayerJoinedWithDisguiseEvent;
-import xiamomc.morph.events.api.lifecycle.ManagerFinishedInitializeEvent;
 import xiamomc.morph.messages.HintStrings;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.MorphStrings;
@@ -337,11 +336,11 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
 
                     equipment.setItemInMainHand(air);
                     equipment.setItemInOffHand(air);
-                    disguise.setDisplayingEquipments(equipment);
+                    disguise.setFakeEquipments(equipment);
 
                     equipment.setItemInMainHand(mainHand);
                     equipment.setItemInOffHand(offHand);
-                    disguise.setDisplayingEquipments(equipment);
+                    disguise.setFakeEquipments(equipment);
                 }, 2);
             }
         }

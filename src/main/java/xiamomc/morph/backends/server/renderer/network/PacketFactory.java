@@ -12,10 +12,13 @@ import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
 import net.minecraft.world.level.GameType;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.EntityEquipment;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.values.SingleValue;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
+import xiamomc.morph.backends.server.renderer.network.registries.EntryIndex;
 import xiamomc.morph.backends.server.renderer.utilties.ProtocolRegistryUtils;
+import xiamomc.morph.misc.DisguiseEquipment;
 import xiamomc.morph.misc.MorphGameProfile;
 import xiamomc.morph.misc.NmsRecord;
 import xiamomc.morph.utilities.EntityTypeUtils;
@@ -85,7 +88,6 @@ public class PacketFactory extends MorphPluginObject
 
         var spawnPacket = PacketContainer.fromPacket(packetAdd);
 
-        spawnPacket.setMeta(MORPH_PACKET_METAKEY, true);
         packets.add(spawnPacket);
 
         //生成装备和Meta
@@ -97,6 +99,11 @@ public class PacketFactory extends MorphPluginObject
         watcher.sync();
         packets.add(buildMetaPacket(player, watcher));
 
+        for (PacketContainer packet : packets)
+        {
+            packet.setMeta(MORPH_PACKET_METAKEY, true);
+        }
+
         return packets;
     }
 
@@ -106,13 +113,6 @@ public class PacketFactory extends MorphPluginObject
         metaPacket.getIntegers().write(0, player.getEntityId());
 
         var modifier = metaPacket.getDataValueCollectionModifier();
-
-        var entityWatcher = WrappedDataWatcher.getEntityWatcher(player);
-        entityWatcher.asMap().forEach((id, val) ->
-        {
-            //logger.info("Id '%s' is val '%s' raw '%s' class '%s'"
-            //        .formatted(id, val.getValue(),val.getRawValue(),val.getRawValue().getClass()));
-        });
 
         List<WrappedDataValue> wrappedDataValues = new ObjectArrayList<>();
 
@@ -140,12 +140,27 @@ public class PacketFactory extends MorphPluginObject
 
             var value = new WrappedDataValue(single.index(), serializer, v);
             wrappedDataValues.add(value);
-            //logger.info("Writing value '%s' index '%s'".formatted(v, single.index()));
         });
 
         modifier.write(0, wrappedDataValues);
         metaPacket.setMeta(MORPH_PACKET_METAKEY, true);
 
         return metaPacket;
+    }
+
+    public PacketContainer getEquipmentPacket(Player player, SingleWatcher watcher)
+    {
+        var shouldDisplayFakeEquip = watcher.getOrDefault(EntryIndex.DISPLAY_FAKE_EQUIPMENT, false);
+        EntityEquipment equipment = shouldDisplayFakeEquip
+                    ? watcher.getOrDefault(EntryIndex.EQUIPMENT, new DisguiseEquipment())
+                    : player.getEquipment();
+
+        var rawPacket = new ClientboundSetEquipmentPacket(player.getEntityId(),
+                ProtocolEquipment.toPairs(equipment));
+
+        var container = PacketContainer.fromPacket(rawPacket);
+        container.setMeta(MORPH_PACKET_METAKEY, true);
+
+        return container;
     }
 }
