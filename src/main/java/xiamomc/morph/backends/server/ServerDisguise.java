@@ -35,6 +35,12 @@ public class ServerDisguise implements Cloneable
 
     public boolean isBaby;
 
+    public boolean armorStandShowArms;
+    public boolean armorStandSmall;
+    public boolean armorStandNoBasePlate;
+
+    public boolean horseChested;
+
     @Override
     protected ServerDisguise clone()
     {
@@ -48,6 +54,12 @@ public class ServerDisguise implements Cloneable
         {
             obj = new ServerDisguise(this.type);
         }
+
+        obj.horseChested = this.horseChested;
+
+        obj.armorStandNoBasePlate = this.armorStandNoBasePlate;
+        obj.armorStandSmall = this.armorStandSmall;
+        obj.armorStandShowArms = this.armorStandShowArms;
 
         obj.type = this.type;
         obj.name = this.name;

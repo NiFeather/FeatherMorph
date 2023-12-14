@@ -3,9 +3,10 @@ package xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.type
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.ValueIndex;
+import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.AgeableMobWatcher;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.LivingEntityWatcher;
 
-public class AbstractHorseWatcher extends LivingEntityWatcher
+public class AbstractHorseWatcher extends AgeableMobWatcher
 {
     @Override
     protected void initRegistry()

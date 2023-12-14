@@ -3,6 +3,7 @@ package xiamomc.morph.backends.server.renderer.network.datawatcher.watchers;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.events.PacketContainer;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.GameType;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.EntityType;
@@ -228,6 +229,10 @@ public abstract class SingleWatcher extends MorphPluginObject
     }
 
     protected void doSync()
+    {
+    }
+
+    public void mergeFromCompound(CompoundTag nbt)
     {
     }
 
