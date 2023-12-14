@@ -598,6 +598,8 @@ public class DisguiseState extends MorphPluginObject
     {
         updateEquipment(value);
         showDisguisedItems = value;
+
+        this.disguiseWrapper.setDisplayingFakeEquipments(value);
     }
 
     /**
