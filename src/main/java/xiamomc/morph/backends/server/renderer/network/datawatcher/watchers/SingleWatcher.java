@@ -157,7 +157,9 @@ public abstract class SingleWatcher extends MorphPluginObject
         dirtySingles.put(single, value);
 
         onTrackerWrite(index, prev, value);
-        sendPacketToAffectedPlayers(packetFactory.buildDiffMetaPacket(getBindingPlayer(), this));
+
+        if (!syncing)
+            sendPacketToAffectedPlayers(packetFactory.buildDiffMetaPacket(getBindingPlayer(), this));
     }
 
     @Resolved(shouldSolveImmediately = true)
@@ -204,10 +206,25 @@ public abstract class SingleWatcher extends MorphPluginObject
 
     //endregion Value Registry
 
+    private boolean syncing;
+
     public void sync()
     {
+        syncing = true;
+
         dirtySingles.clear();
-        doSync();
+
+        try
+        {
+            doSync();
+        }
+        catch (Throwable t)
+        {
+            logger.warn("Error occurred while syncing watcher: " + t.getMessage());
+            t.printStackTrace();
+        }
+
+        syncing = false;
     }
 
     protected void doSync()
