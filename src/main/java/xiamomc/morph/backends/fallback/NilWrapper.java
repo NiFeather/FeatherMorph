@@ -90,11 +90,16 @@ public class NilWrapper extends DisguiseWrapper<NilDisguise>
     }
 
     @Override
-    public void setDisplayingEquipments(@NotNull EntityEquipment newEquipment)
+    public void setFakeEquipments(@NotNull EntityEquipment newEquipment)
     {
         this.equipment.setArmorContents(newEquipment.getArmorContents());
 
         this.equipment.setHandItems(newEquipment.getItemInMainHand(), newEquipment.getItemInOffHand());
+    }
+
+    @Override
+    public void setDisplayingFakeEquipments(boolean newVal)
+    {
     }
 
     @Override

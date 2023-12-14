@@ -39,7 +39,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.UUID;
 
-public class SpawnPacketHandler extends ProtocolListener implements PacketListener
+public class SpawnPacketHandler extends ProtocolListener
 {
     @Resolved(shouldSolveImmediately = true)
     private RenderRegistry registry;
@@ -55,6 +55,7 @@ public class SpawnPacketHandler extends ProtocolListener implements PacketListen
     private List<Player> getAffectedPlayers(Player sourcePlayer)
     {
         var players = sourcePlayer.getWorld().getPlayers();
+        players.remove(sourcePlayer);
         if (NmsRecord.ofPlayer(sourcePlayer).gameMode.getGameModeForPlayer() == GameType.SPECTATOR)
         {
             players.removeIf(bukkitPlayer ->
@@ -101,13 +102,9 @@ public class SpawnPacketHandler extends ProtocolListener implements PacketListen
         packets.add(PacketContainer.fromPacket(packetPlayerInfo));
         packets.add(PacketContainer.fromPacket(packetAdd));
 
-        var equipmentPacket = new ClientboundSetEquipmentPacket(player.getEntityId(),
-                ProtocolEquipment.toPairs(player.getEquipment()));
-        packets.add(PacketContainer.fromPacket(equipmentPacket));
-
         var watcher = new PlayerWatcher(player);
-        var meta = getFactory().buildMetaPacket(player, watcher);
-        packets.add(meta);
+        packets.add(getFactory().getEquipmentPacket(player, watcher));
+        packets.add(getFactory().buildMetaPacket(player, watcher));
 
         affectedPlayers.forEach(p ->
         {

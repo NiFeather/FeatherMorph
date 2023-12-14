@@ -102,7 +102,7 @@ public class ServerDisguiseWrapper extends DisguiseWrapper<ServerDisguise>
     }
 
     @Override
-    public void setDisplayingEquipments(@NotNull EntityEquipment newEquipment)
+    public void setFakeEquipments(@NotNull EntityEquipment newEquipment)
     {
         this.equipment.setArmorContents(newEquipment.getArmorContents());
 
@@ -110,6 +110,17 @@ public class ServerDisguiseWrapper extends DisguiseWrapper<ServerDisguise>
 
         if (bindingWatcher != null)
             bindingWatcher.write(EntryIndex.EQUIPMENT, this.equipment);
+    }
+
+    private boolean shouldDisplayCustomEquipment;
+
+    @Override
+    public void setDisplayingFakeEquipments(boolean newVal)
+    {
+        shouldDisplayCustomEquipment = newVal;
+
+        if (bindingWatcher != null)
+            bindingWatcher.write(EntryIndex.DISPLAY_FAKE_EQUIPMENT, newVal);
     }
 
     @Override
@@ -260,5 +271,7 @@ public class ServerDisguiseWrapper extends DisguiseWrapper<ServerDisguise>
 
         //todo: 激活刷新时也刷新到玩家
         bindingWatcher.write(EntryIndex.PROFILE, this.instance.profile);
+        bindingWatcher.write(EntryIndex.DISPLAY_FAKE_EQUIPMENT, shouldDisplayCustomEquipment);
+        bindingWatcher.write(EntryIndex.EQUIPMENT, this.equipment);
     }
 }

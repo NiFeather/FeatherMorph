@@ -57,7 +57,13 @@ public abstract class DisguiseWrapper<TInstance>
      * Sets displaying equipment to the giving value
      * @param newEquipment A {@link EntityEquipment} that presents the new equipment
      */
-    public abstract void setDisplayingEquipments(@NotNull EntityEquipment newEquipment);
+    public abstract void setFakeEquipments(@NotNull EntityEquipment newEquipment);
+
+    /**
+     * Sets whether to display a fake equipment to the player
+     * @param newVal New State
+     */
+    public abstract void setDisplayingFakeEquipments(boolean newVal);
 
     /**
      * Sets the state of server-side SelfView for the underlying disguise instance
