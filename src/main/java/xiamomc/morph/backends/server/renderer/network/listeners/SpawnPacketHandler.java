@@ -2,7 +2,6 @@ package xiamomc.morph.backends.server.renderer.network.listeners;
 
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
-import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.events.ListeningWhitelist;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.events.PacketEvent;
@@ -23,20 +22,16 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.backends.server.renderer.network.PacketFactory;
-import xiamomc.morph.backends.server.renderer.network.queue.PacketQueue;
-import xiamomc.morph.backends.server.renderer.network.queue.QueueEntry;
+import xiamomc.morph.backends.server.renderer.network.registries.RegistryParameters;
 import xiamomc.morph.backends.server.renderer.skins.PlayerSkinProvider;
-import xiamomc.morph.backends.server.renderer.network.DisplayParameters;
 import xiamomc.morph.backends.server.renderer.network.ProtocolEquipment;
-import xiamomc.morph.backends.server.renderer.network.RenderRegistry;
+import xiamomc.morph.backends.server.renderer.network.registries.RenderRegistry;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.PlayerWatcher;
 import xiamomc.morph.misc.NmsRecord;
-import xiamomc.morph.utilities.EntityTypeUtils;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Exceptions.NullDependencyException;
 
 import java.util.*;
-import java.util.function.Consumer;
 
 public class SpawnPacketHandler extends ProtocolListener implements PacketListener
 {
@@ -136,7 +131,7 @@ public class SpawnPacketHandler extends ProtocolListener implements PacketListen
                         logger.info("Triggering refresh!");
                         GameProfile finalOutcomingProfile = outcomingProfile;
                         this.addSchedule(() -> refreshStateForPlayer(player,
-                                new DisplayParameters(finalOutcomingProfile, disguiseName, registryParameters.bukkitType(), registryParameters.singleWatcher())));
+                                new RegistryParameters(registryParameters.bukkitType(), disguiseName, registryParameters.watcher(), finalOutcomingProfile)));
                     }
 
                     return null;
@@ -151,7 +146,7 @@ public class SpawnPacketHandler extends ProtocolListener implements PacketListen
         if (registryParameters == null)
             throw new NullDependencyException("Null RegistryParameters for a existing player?!");
 
-        refreshStateForPlayer(player, DisplayParameters.fromRegistry(registryParameters));
+        refreshStateForPlayer(player, registryParameters);
     }
 
     /**
@@ -159,7 +154,7 @@ public class SpawnPacketHandler extends ProtocolListener implements PacketListen
      * @param player 目标玩家
      * @param parameters 如果伪装是玩家伪装，则为此伪装的GameProfile
      */
-    private void refreshStateForPlayer(@Nullable Player player, @NotNull DisplayParameters parameters)
+    private void refreshStateForPlayer(@Nullable Player player, @NotNull RegistryParameters parameters)
     {
         if (player == null) return;
         var displayType = parameters.bukkitType();
@@ -174,29 +169,29 @@ public class SpawnPacketHandler extends ProtocolListener implements PacketListen
 
         affectedPlayers.forEach(p -> protocolManager.sendServerPacket(p, packetRemoveContainer));
 
-        var gameProfile = parameters.gameProfile();
+        var gameProfile = parameters.getProfile();
 
         //然后发包创建实体
         //确保gameProfile非空
         //如果没有profile，那么随机一个并计划刷新
         if (displayType == org.bukkit.entity.EntityType.PLAYER && gameProfile == null)
         {
-            var targetPlayer = Bukkit.getPlayerExact(parameters.playerDisguiseName());
+            var targetPlayer = Bukkit.getPlayerExact(parameters.disguiseName());
 
             var cachedProfile = targetPlayer == null
-                    ? PlayerSkinProvider.getInstance().getCachedProfile(parameters.playerDisguiseName())
+                    ? PlayerSkinProvider.getInstance().getCachedProfile(parameters.disguiseName())
                     : NmsRecord.ofPlayer(targetPlayer).gameProfile;
 
             if (cachedProfile == null)
             {
-                scheduleRefreshPlayerDisplay(player, parameters.playerDisguiseName());
-                gameProfile = new GameProfile(Util.NIL_UUID, parameters.playerDisguiseName());
+                scheduleRefreshPlayerDisplay(player, parameters.disguiseName());
+                gameProfile = new GameProfile(Util.NIL_UUID, parameters.disguiseName());
             }
             else
                 gameProfile = cachedProfile;
         }
 
-        var parametersFinal = new DisplayParameters(gameProfile, parameters.playerDisguiseName(), parameters.bukkitType(), parameters.watcher());
+        var parametersFinal = new RegistryParameters(parameters.bukkitType(), parameters.disguiseName(), parameters.watcher(), gameProfile);
         var spawnPackets = getFactory().buildSpawnPackets(player, parametersFinal);
         spawnPackets.forEach(packet ->
         {

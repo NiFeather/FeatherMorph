@@ -5,7 +5,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.TagType;
 import org.bukkit.ChatColor;
-import org.bukkit.Server;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -15,9 +14,10 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.backends.DisguiseWrapper;
-import xiamomc.morph.backends.fallback.NilBackend;
-import xiamomc.morph.backends.fallback.NilDisguise;
-import xiamomc.morph.backends.fallback.NilWrapper;
+import xiamomc.morph.backends.server.renderer.network.datawatcher.ValueIndex;
+import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.SlimeWatcher;
+import xiamomc.morph.backends.server.renderer.network.registries.EntryIndex;
+import xiamomc.morph.backends.server.renderer.network.registries.RegistryParameters;
 import xiamomc.morph.misc.DisguiseEquipment;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.utilities.NbtUtils;
@@ -41,6 +41,16 @@ public class ServerDisguiseWrapper extends DisguiseWrapper<ServerDisguise>
 
         if (this.getEntityType() == EntityType.MAGMA_CUBE || this.getEntityType() == EntityType.SLIME)
             resetDimensions();
+
+        if (bindingParameters != null)
+        {
+            var watcher = bindingParameters.watcher();
+            if (watcher instanceof SlimeWatcher slimeWatcher)
+            {
+                var size = Math.max(1, getCompound().getInt("Size"));
+                slimeWatcher.write(ValueIndex.SLIME_MAGMA.SIZE, size);
+            }
+        }
     }
 
     @Override
@@ -98,6 +108,9 @@ public class ServerDisguiseWrapper extends DisguiseWrapper<ServerDisguise>
         this.equipment.setArmorContents(newEquipment.getArmorContents());
 
         this.equipment.setHandItems(newEquipment.getItemInMainHand(), newEquipment.getItemInOffHand());
+
+        if (bindingParameters != null)
+            bindingParameters.open().write(EntryIndex.EQUIPMENT, this.equipment).close();
     }
 
     @Override
@@ -138,6 +151,9 @@ public class ServerDisguiseWrapper extends DisguiseWrapper<ServerDisguise>
     public void setDisguiseName(String name)
     {
         this.instance.name = name;
+
+        if (bindingParameters != null)
+            bindingParameters.open().write(EntryIndex.CUSTOM_NAME, name).close();
     }
 
     @Override
@@ -181,6 +197,9 @@ public class ServerDisguiseWrapper extends DisguiseWrapper<ServerDisguise>
         if (this.getEntityType() != EntityType.PLAYER) return;
 
         this.instance.profile = profile;
+
+        if (bindingParameters != null)
+            bindingParameters.setProfile(profile);
     }
 
     @Override
@@ -209,5 +228,46 @@ public class ServerDisguiseWrapper extends DisguiseWrapper<ServerDisguise>
     public boolean isSaddled()
     {
         return instance.saddled;
+    }
+
+    private Player bindingPlayer;
+
+    public Player getBindingPlayer()
+    {
+        return bindingPlayer;
+    }
+
+    private RegistryParameters bindingParameters;
+
+    public void setRenderParameters(Player newBinding, RegistryParameters bindingParameters)
+    {
+        bindingPlayer = newBinding;
+        this.bindingParameters = bindingParameters;
+
+        refreshRegistry();
+    }
+
+    private void refreshRegistry()
+    {
+        /*
+        if (!(getBackend() instanceof ServerBackend serverBackend))
+        {
+            logger.warn("ServerDisguiseWrapper applied without ServerBackend?!");
+            Thread.dumpStack();
+            return;
+        }
+         */
+
+        if (bindingPlayer == null)
+            return;
+
+        if (bindingParameters == null)
+        {
+            logger.warn("Have a bindingPlayer but no registry parameters?!");
+            Thread.dumpStack();
+            return;
+        }
+
+        bindingParameters.setProfile(this.instance.profile);
     }
 }

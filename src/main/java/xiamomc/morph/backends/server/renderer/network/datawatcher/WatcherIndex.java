@@ -5,10 +5,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.values.ArmorStandValues;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
-import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.AllayWatcher;
-import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.ArmorStandWatcher;
-import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.LivingEntityWatcher;
-import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.PlayerWatcher;
+import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.*;
 
 import java.util.Map;
 import java.util.function.Function;
@@ -30,6 +27,8 @@ public class WatcherIndex
         setTypeWatcher(EntityType.PLAYER, PlayerWatcher::new);
         setTypeWatcher(EntityType.ALLAY, AllayWatcher::new);
         setTypeWatcher(EntityType.ARMOR_STAND, ArmorStandWatcher::new);
+        setTypeWatcher(EntityType.SLIME, SlimeWatcher::new);
+        setTypeWatcher(EntityType.MAGMA_CUBE, MagmaWatcher::new);
     }
 
     private void setTypeWatcher(EntityType type, Function<Player, SingleWatcher> func)

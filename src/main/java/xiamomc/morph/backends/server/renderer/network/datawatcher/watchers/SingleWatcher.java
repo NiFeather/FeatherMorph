@@ -1,15 +1,21 @@
 package xiamomc.morph.backends.server.renderer.network.datawatcher.watchers;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectLists;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphPluginObject;
+import xiamomc.morph.backends.server.renderer.network.PacketFactory;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.values.AbstractValues;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.values.SingleValue;
+import xiamomc.morph.backends.server.renderer.network.queue.PacketQueue;
+import xiamomc.morph.backends.server.renderer.network.queue.QueueEntry;
+import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Exceptions.NullDependencyException;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -49,6 +55,7 @@ public abstract class SingleWatcher extends MorphPluginObject
         this.bindingPlayer = bindingPlayer;
 
         this.entityType = entityType;
+        sync();
     }
 
     //region Value Registry

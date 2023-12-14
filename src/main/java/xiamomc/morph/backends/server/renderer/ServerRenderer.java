@@ -6,13 +6,15 @@ import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.backends.server.renderer.network.*;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.WatcherIndex;
 import xiamomc.morph.backends.server.renderer.network.queue.PacketQueue;
+import xiamomc.morph.backends.server.renderer.network.registries.RegistryParameters;
+import xiamomc.morph.backends.server.renderer.network.registries.RenderRegistry;
 import xiamomc.morph.backends.server.renderer.skins.SkinStore;
 
 public class ServerRenderer extends MorphPluginObject
 {
     private final ProtocolHandler protocolHandler;
 
-    private final RenderRegistry registry = new RenderRegistry();
+    public final RenderRegistry registry = new RenderRegistry();
 
     private final SkinStore skinStore = new SkinStore();
 
@@ -30,13 +32,24 @@ public class ServerRenderer extends MorphPluginObject
         dependencies.cache(protocolHandler = new ProtocolHandler());
     }
 
-    public void renderEntity(Player player, EntityType entityType, String name)
+    /**
+     * 向后端渲染器注册玩家
+     * @param player 目标玩家
+     * @param entityType 目标类型
+     * @param name 伪装名称
+     */
+    public RegistryParameters registerEntity(Player player, EntityType entityType, String name)
     {
-        registry.register(player.getUniqueId(),
-                new RegistryParameters(entityType, name, WatcherIndex.getInstance().getWatcherForType(player, entityType)));
+        var parameters = new RegistryParameters(
+                entityType, name,
+                WatcherIndex.getInstance().getWatcherForType(player, entityType),
+                null);
+
+        registry.register(player.getUniqueId(), parameters);
+        return parameters;
     }
 
-    public void unRenderEntity(Player player)
+    public void unRegisterEntity(Player player)
     {
         registry.unregister(player.getUniqueId());
     }

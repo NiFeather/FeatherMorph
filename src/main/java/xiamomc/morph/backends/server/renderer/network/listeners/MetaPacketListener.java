@@ -9,7 +9,7 @@ import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
 import org.bukkit.entity.Player;
 import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.backends.server.renderer.network.PacketFactory;
-import xiamomc.morph.backends.server.renderer.network.RenderRegistry;
+import xiamomc.morph.backends.server.renderer.network.registries.RenderRegistry;
 import xiamomc.morph.utilities.NmsUtils;
 import xiamomc.pluginbase.Annotations.Resolved;
 
@@ -54,7 +54,9 @@ public class MetaPacketListener extends ProtocolListener implements PacketListen
             packetEvent.setCancelled(true);
 
         //取得来源玩家的伪装后的Meta，发送给目标玩家
-        var meta = getFactory().buildMetaPacket(sourcePlayer, bindingParameters.singleWatcher());
+        var watcher = bindingParameters.watcher();
+        watcher.sync();
+        var meta = getFactory().buildMetaPacket(sourcePlayer, watcher);
         protocolManager().sendServerPacket(targetPlayer, meta);
     }
 
