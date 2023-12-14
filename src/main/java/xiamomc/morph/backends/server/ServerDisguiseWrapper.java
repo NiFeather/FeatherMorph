@@ -24,6 +24,7 @@ import xiamomc.morph.misc.DisguiseEquipment;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.utilities.NbtUtils;
 
+import java.util.Objects;
 import java.util.UUID;
 
 public class ServerDisguiseWrapper extends DisguiseWrapper<ServerDisguise>
@@ -155,7 +156,17 @@ public class ServerDisguiseWrapper extends DisguiseWrapper<ServerDisguise>
     @Override
     public DisguiseWrapper<ServerDisguise> clone()
     {
-        return new ServerDisguiseWrapper(this.copyInstance(), (ServerBackend) getBackend());
+        var newInstance = new ServerDisguiseWrapper(this.copyInstance(), (ServerBackend) getBackend());
+        newInstance.mergeCompound(this.getCompound());
+
+        newInstance.shouldDisplayCustomEquipment = this.shouldDisplayCustomEquipment;
+        newInstance.setFakeEquipments(this.equipment);
+
+        newInstance.armorStandShowArms = this.armorStandShowArms;
+        newInstance.armorStandSmall = this.armorStandSmall;
+        newInstance.armorStandNoBasePlate = this.armorStandNoBasePlate;
+
+        return newInstance;
     }
 
     /**
@@ -303,8 +314,10 @@ public class ServerDisguiseWrapper extends DisguiseWrapper<ServerDisguise>
 
     private SingleWatcher bindingWatcher;
 
-    public void setRenderParameters(Player newBinding, SingleWatcher bindingWatcher)
+    public void setRenderParameters(@NotNull Player newBinding, @NotNull SingleWatcher bindingWatcher)
     {
+        Objects.requireNonNull(bindingWatcher, "Null Watcher!");
+
         bindingPlayer = newBinding;
         this.bindingWatcher = bindingWatcher;
 
