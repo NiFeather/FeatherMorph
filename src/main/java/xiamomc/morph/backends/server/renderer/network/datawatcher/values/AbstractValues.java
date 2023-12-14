@@ -17,9 +17,6 @@ public abstract class AbstractValues
 
         var sv = SingleValue.of(currentIndex, val);
 
-        logger.info(this.getClass().getSimpleName() + " :: Value '%s' class '%s' is on Index '%s'"
-                .formatted(val, val.getClass(), currentIndex));
-
         currentIndex++;
         return sv;
     }

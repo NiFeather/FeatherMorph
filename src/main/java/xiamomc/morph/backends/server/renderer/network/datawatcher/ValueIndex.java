@@ -11,4 +11,5 @@ public class ValueIndex
     public static final AllayValues ALLAY = new AllayValues();
     public static final PlayerValues PLAYER = new PlayerValues();
     public static final SlimeValues SLIME_MAGMA = new SlimeValues();
+    public static final GhastValues GHAST = new GhastValues();
 }

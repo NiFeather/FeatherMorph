@@ -35,6 +35,21 @@ public class SingleValue<T>
         this.defaultValue = defaultValue;
     }
 
+    @Override
+    public boolean equals(Object obj)
+    {
+        if (this == obj) return true;
+        if (!(obj instanceof SingleValue<?> other)) return false;
+
+        return this.index == other.index && this.type.equals(other.type);
+    }
+
+    @Override
+    public String toString()
+    {
+        return "SingleValue[type='%s', index='%s']".formatted(type, index);
+    }
+
     public static <TVal> SingleValue<TVal> of(int index, @NotNull TVal val)
     {
         if (val == null)

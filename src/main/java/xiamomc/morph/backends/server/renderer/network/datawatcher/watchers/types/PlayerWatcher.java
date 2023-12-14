@@ -46,31 +46,12 @@ public class PlayerWatcher extends LivingEntityWatcher
     @Resolved(shouldSolveImmediately = true)
     private PacketFactory packetFactory;
 
-    private List<Player> getAffectedPlayers(Player sourcePlayer)
-    {
-        var players = sourcePlayer.getWorld().getPlayers();
-        players.remove(sourcePlayer);
-        if (NmsRecord.ofPlayer(sourcePlayer).gameMode.getGameModeForPlayer() == GameType.SPECTATOR)
-        {
-            players.removeIf(bukkitPlayer ->
-                    NmsRecord.ofPlayer(bukkitPlayer).gameMode.getGameModeForPlayer() != GameType.SPECTATOR);
-        }
-
-        return players;
-    }
-
     @Override
     protected void onCustomWrite(RegistryKey<?> key, Object oldVal, Object newVal)
     {
         super.onCustomWrite(key, oldVal, newVal);
 
         if (key.equals(EntryIndex.DISPLAY_FAKE_EQUIPMENT) || key.equals(EntryIndex.EQUIPMENT))
-        {
-            var packet = packetFactory.getEquipmentPacket(getBindingPlayer(), this);
-            var players = getAffectedPlayers(getBindingPlayer());
-
-            var protocol = ProtocolLibrary.getProtocolManager();
-            players.forEach(p -> protocol.sendServerPacket(p, packet));
-        }
+            sendPacketToAffectedPlayers(packetFactory.getEquipmentPacket(getBindingPlayer(), this));
     }
 }
