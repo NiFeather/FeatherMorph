@@ -3,24 +3,16 @@ package xiamomc.morph.backends.server.renderer.network.datawatcher.watchers;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.events.PacketContainer;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.objects.ObjectLists;
-import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.world.level.GameType;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.EntityEquipment;
 import org.jetbrains.annotations.Nullable;
-import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.backends.server.renderer.network.PacketFactory;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.values.AbstractValues;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.values.SingleValue;
-import xiamomc.morph.backends.server.renderer.network.queue.PacketQueue;
-import xiamomc.morph.backends.server.renderer.network.queue.QueueEntry;
-import xiamomc.morph.backends.server.renderer.network.registries.EntryIndex;
 import xiamomc.morph.backends.server.renderer.network.registries.RegistryKey;
-import xiamomc.morph.misc.DisguiseEquipment;
 import xiamomc.morph.misc.NmsRecord;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Exceptions.NullDependencyException;
@@ -165,7 +157,7 @@ public abstract class SingleWatcher extends MorphPluginObject
         dirtySingles.put(single, value);
 
         onTrackerWrite(index, prev, value);
-        sendPacketToAffectedPlayers(packetFactory.buildMetaPacket(getBindingPlayer(), this));
+        sendPacketToAffectedPlayers(packetFactory.buildDiffMetaPacket(getBindingPlayer(), this));
     }
 
     @Resolved(shouldSolveImmediately = true)

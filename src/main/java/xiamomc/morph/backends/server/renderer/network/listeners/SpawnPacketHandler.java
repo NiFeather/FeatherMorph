@@ -5,7 +5,6 @@ import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.events.ListeningWhitelist;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.events.PacketEvent;
-import com.comphenix.protocol.events.PacketListener;
 import com.comphenix.protocol.injector.GamePhase;
 import com.mojang.authlib.GameProfile;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
@@ -14,7 +13,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
-import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.GameType;
 import org.bukkit.Bukkit;
@@ -26,7 +24,6 @@ import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.backends.server.renderer.network.DisplayParameters;
 import xiamomc.morph.backends.server.renderer.network.PacketFactory;
-import xiamomc.morph.backends.server.renderer.network.ProtocolEquipment;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.PlayerWatcher;
 import xiamomc.morph.backends.server.renderer.network.registries.EntryIndex;
 import xiamomc.morph.backends.server.renderer.network.registries.RenderRegistry;
@@ -104,7 +101,7 @@ public class SpawnPacketHandler extends ProtocolListener
 
         var watcher = new PlayerWatcher(player);
         packets.add(getFactory().getEquipmentPacket(player, watcher));
-        packets.add(getFactory().buildMetaPacket(player, watcher));
+        packets.add(getFactory().buildFullMetaPacket(player, watcher));
 
         affectedPlayers.forEach(p ->
         {
