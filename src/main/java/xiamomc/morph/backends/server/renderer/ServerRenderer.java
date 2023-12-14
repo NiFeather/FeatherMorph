@@ -3,10 +3,11 @@ package xiamomc.morph.backends.server.renderer;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import xiamomc.morph.MorphPluginObject;
-import xiamomc.morph.backends.server.renderer.network.*;
-import xiamomc.morph.backends.server.renderer.network.datawatcher.WatcherIndex;
+import xiamomc.morph.backends.server.renderer.network.PacketFactory;
+import xiamomc.morph.backends.server.renderer.network.ProtocolHandler;
+import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
 import xiamomc.morph.backends.server.renderer.network.queue.PacketQueue;
-import xiamomc.morph.backends.server.renderer.network.registries.RegistryParameters;
+import xiamomc.morph.backends.server.renderer.network.registries.RegisterParameters;
 import xiamomc.morph.backends.server.renderer.network.registries.RenderRegistry;
 import xiamomc.morph.backends.server.renderer.skins.SkinStore;
 
@@ -38,15 +39,9 @@ public class ServerRenderer extends MorphPluginObject
      * @param entityType 目标类型
      * @param name 伪装名称
      */
-    public RegistryParameters registerEntity(Player player, EntityType entityType, String name)
+    public SingleWatcher registerEntity(Player player, EntityType entityType, String name)
     {
-        var parameters = new RegistryParameters(
-                entityType, name,
-                WatcherIndex.getInstance().getWatcherForType(player, entityType),
-                null);
-
-        registry.register(player.getUniqueId(), parameters);
-        return parameters;
+        return registry.register(player, new RegisterParameters(entityType, name));
     }
 
     public void unRegisterEntity(Player player)

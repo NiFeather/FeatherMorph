@@ -6,11 +6,17 @@ import xiamomc.morph.backends.server.renderer.network.datawatcher.ValueIndex;
 
 public class ArmorStandWatcher extends LivingEntityWatcher
 {
+    @Override
+    protected void initRegistry()
+    {
+        super.initRegistry();
+
+        register(ValueIndex.ARMOR_STAND);
+    }
+
     public ArmorStandWatcher(Player bindingPlayer)
     {
         super(bindingPlayer, EntityType.ARMOR_STAND);
-
-        register(ValueIndex.ARMOR_STAND);
     }
 
     @Override

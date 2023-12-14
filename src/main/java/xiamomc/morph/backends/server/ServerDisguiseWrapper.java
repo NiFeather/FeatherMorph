@@ -15,9 +15,9 @@ import org.slf4j.Logger;
 import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.backends.DisguiseWrapper;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.ValueIndex;
+import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.SlimeWatcher;
 import xiamomc.morph.backends.server.renderer.network.registries.EntryIndex;
-import xiamomc.morph.backends.server.renderer.network.registries.RegistryParameters;
 import xiamomc.morph.misc.DisguiseEquipment;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.utilities.NbtUtils;
@@ -42,10 +42,9 @@ public class ServerDisguiseWrapper extends DisguiseWrapper<ServerDisguise>
         if (this.getEntityType() == EntityType.MAGMA_CUBE || this.getEntityType() == EntityType.SLIME)
             resetDimensions();
 
-        if (bindingParameters != null)
+        if (bindingWatcher != null)
         {
-            var watcher = bindingParameters.watcher();
-            if (watcher instanceof SlimeWatcher slimeWatcher)
+            if (bindingWatcher instanceof SlimeWatcher slimeWatcher)
             {
                 var size = Math.max(1, getCompound().getInt("Size"));
                 slimeWatcher.write(ValueIndex.SLIME_MAGMA.SIZE, size);
@@ -109,8 +108,8 @@ public class ServerDisguiseWrapper extends DisguiseWrapper<ServerDisguise>
 
         this.equipment.setHandItems(newEquipment.getItemInMainHand(), newEquipment.getItemInOffHand());
 
-        if (bindingParameters != null)
-            bindingParameters.open().write(EntryIndex.EQUIPMENT, this.equipment).close();
+        if (bindingWatcher != null)
+            bindingWatcher.write(EntryIndex.EQUIPMENT, this.equipment);
     }
 
     @Override
@@ -152,8 +151,8 @@ public class ServerDisguiseWrapper extends DisguiseWrapper<ServerDisguise>
     {
         this.instance.name = name;
 
-        if (bindingParameters != null)
-            bindingParameters.open().write(EntryIndex.CUSTOM_NAME, name).close();
+        if (bindingWatcher != null)
+            bindingWatcher.write(EntryIndex.CUSTOM_NAME, name);
     }
 
     @Override
@@ -198,8 +197,8 @@ public class ServerDisguiseWrapper extends DisguiseWrapper<ServerDisguise>
 
         this.instance.profile = profile;
 
-        if (bindingParameters != null)
-            bindingParameters.setProfile(profile);
+        if (bindingWatcher != null)
+            bindingWatcher.write(EntryIndex.PROFILE, this.instance.profile);
     }
 
     @Override
@@ -237,37 +236,29 @@ public class ServerDisguiseWrapper extends DisguiseWrapper<ServerDisguise>
         return bindingPlayer;
     }
 
-    private RegistryParameters bindingParameters;
+    private SingleWatcher bindingWatcher;
 
-    public void setRenderParameters(Player newBinding, RegistryParameters bindingParameters)
+    public void setRenderParameters(Player newBinding, SingleWatcher bindingWatcher)
     {
         bindingPlayer = newBinding;
-        this.bindingParameters = bindingParameters;
+        this.bindingWatcher = bindingWatcher;
 
         refreshRegistry();
     }
 
     private void refreshRegistry()
     {
-        /*
-        if (!(getBackend() instanceof ServerBackend serverBackend))
-        {
-            logger.warn("ServerDisguiseWrapper applied without ServerBackend?!");
-            Thread.dumpStack();
-            return;
-        }
-         */
-
         if (bindingPlayer == null)
             return;
 
-        if (bindingParameters == null)
+        if (bindingWatcher == null)
         {
-            logger.warn("Have a bindingPlayer but no registry parameters?!");
+            logger.warn("Have a bindingPlayer but no bindingWatcher?!");
             Thread.dumpStack();
             return;
         }
 
-        bindingParameters.setProfile(this.instance.profile);
+        //todo: 激活刷新时也刷新到玩家
+        bindingWatcher.write(EntryIndex.PROFILE, this.instance.profile);
     }
 }
