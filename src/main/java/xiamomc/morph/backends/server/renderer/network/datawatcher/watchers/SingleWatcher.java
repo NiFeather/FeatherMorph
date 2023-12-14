@@ -1,7 +1,10 @@
 package xiamomc.morph.backends.server.renderer.network.datawatcher.watchers;
 
+import com.comphenix.protocol.ProtocolLibrary;
+import com.comphenix.protocol.events.PacketContainer;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectLists;
+import net.minecraft.world.level.GameType;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -17,6 +20,7 @@ import xiamomc.morph.backends.server.renderer.network.queue.QueueEntry;
 import xiamomc.morph.backends.server.renderer.network.registries.EntryIndex;
 import xiamomc.morph.backends.server.renderer.network.registries.RegistryKey;
 import xiamomc.morph.misc.DisguiseEquipment;
+import xiamomc.morph.misc.NmsRecord;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Exceptions.NullDependencyException;
 
@@ -128,14 +132,14 @@ public abstract class SingleWatcher extends MorphPluginObject
     {
         var allSuccess = true;
         for (SingleValue<?> value : values.getValues())
-            allSuccess = allSuccess && register(value);
+            allSuccess = register(value) && allSuccess;
 
         return allSuccess;
     }
 
     protected boolean register(SingleValue<?> singleValue)
     {
-        if (registry.containsKey(singleValue)) return false;
+        if (registry.keySet().stream().anyMatch(sv -> sv.index() == singleValue.index())) return false;
 
         registry.put(singleValue, singleValue.defaultValue());
         return true;
@@ -155,8 +159,15 @@ public abstract class SingleWatcher extends MorphPluginObject
         if (!single.defaultValue().getClass().isInstance(value))
             throw new IllegalArgumentException("Incompatable value for index '%s', excepted for '%s', but got '%s'".formatted(index, single.defaultValue().getClass(), value.getClass()));
 
+        var prev = registry.getOrDefault(single, null);
         registry.put(single, value);
         dirtySingles.put(single, value);
+
+        onTrackerWrite(index, prev, value);
+    }
+
+    protected void onTrackerWrite(int index, Object oldVal, Object newVal)
+    {
     }
 
     public <X> X get(SingleValue<X> singleValue)
@@ -204,4 +215,25 @@ public abstract class SingleWatcher extends MorphPluginObject
     //region Networking
 
     //endregion Networking
+
+    protected List<Player> getAffectedPlayers(Player sourcePlayer)
+    {
+        var players = sourcePlayer.getWorld().getPlayers();
+        players.remove(sourcePlayer);
+        if (NmsRecord.ofPlayer(sourcePlayer).gameMode.getGameModeForPlayer() == GameType.SPECTATOR)
+        {
+            players.removeIf(bukkitPlayer ->
+                    NmsRecord.ofPlayer(bukkitPlayer).gameMode.getGameModeForPlayer() != GameType.SPECTATOR);
+        }
+
+        return players;
+    }
+
+    protected void sendPacketToAffectedPlayers(PacketContainer packet)
+    {
+        var players = getAffectedPlayers(getBindingPlayer());
+
+        var protocol = ProtocolLibrary.getProtocolManager();
+        players.forEach(p -> protocol.sendServerPacket(p, packet));
+    }
 }

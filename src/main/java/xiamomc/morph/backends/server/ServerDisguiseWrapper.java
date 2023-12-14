@@ -15,7 +15,9 @@ import org.slf4j.Logger;
 import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.backends.DisguiseWrapper;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.ValueIndex;
+import xiamomc.morph.backends.server.renderer.network.datawatcher.values.GhastValues;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
+import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.GhastWatcher;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.SlimeWatcher;
 import xiamomc.morph.backends.server.renderer.network.registries.EntryIndex;
 import xiamomc.morph.misc.DisguiseEquipment;
@@ -240,6 +242,18 @@ public class ServerDisguiseWrapper extends DisguiseWrapper<ServerDisguise>
         return instance.saddled;
     }
 
+    private boolean aggressive;
+
+    @Override
+    public void setAggressive(boolean aggressive)
+    {
+        super.setAggressive(aggressive);
+
+        this.aggressive = aggressive;
+        if (bindingWatcher instanceof GhastWatcher ghastWatcher)
+            ghastWatcher.write(ValueIndex.GHAST.CHARGING, aggressive);
+    }
+
     private Player bindingPlayer;
 
     public Player getBindingPlayer()
@@ -273,5 +287,8 @@ public class ServerDisguiseWrapper extends DisguiseWrapper<ServerDisguise>
         bindingWatcher.write(EntryIndex.PROFILE, this.instance.profile);
         bindingWatcher.write(EntryIndex.DISPLAY_FAKE_EQUIPMENT, shouldDisplayCustomEquipment);
         bindingWatcher.write(EntryIndex.EQUIPMENT, this.equipment);
+
+        if (bindingWatcher instanceof GhastWatcher ghastWatcher)
+            ghastWatcher.write(ValueIndex.GHAST.CHARGING, aggressive);
     }
 }
