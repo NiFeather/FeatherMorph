@@ -121,7 +121,10 @@ public abstract class SingleWatcher extends MorphPluginObject
 
     public Map<SingleValue<?>, Object> getDirty()
     {
-        return new Object2ObjectOpenHashMap<>(dirtySingles);
+        var dirty = new Object2ObjectOpenHashMap<>(dirtySingles);
+        dirtySingles.clear();
+
+        return dirty;
     }
 
     //endregion Value Registry

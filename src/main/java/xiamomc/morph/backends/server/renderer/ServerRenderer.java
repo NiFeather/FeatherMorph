@@ -3,10 +3,9 @@ package xiamomc.morph.backends.server.renderer;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import xiamomc.morph.MorphPluginObject;
-import xiamomc.morph.backends.server.renderer.network.RegistryParameters;
-import xiamomc.morph.backends.server.renderer.network.RenderRegistry;
-import xiamomc.morph.backends.server.renderer.network.ProtocolHandler;
+import xiamomc.morph.backends.server.renderer.network.*;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.WatcherIndex;
+import xiamomc.morph.backends.server.renderer.network.queue.PacketQueue;
 import xiamomc.morph.backends.server.renderer.skins.SkinStore;
 
 public class ServerRenderer extends MorphPluginObject
@@ -17,8 +16,15 @@ public class ServerRenderer extends MorphPluginObject
 
     private final SkinStore skinStore = new SkinStore();
 
+    private final PacketFactory packetFactory = new PacketFactory();
+
+    private final PacketQueue packetQueue = new PacketQueue();
+
     public ServerRenderer()
     {
+        dependencies.cache(packetFactory);
+        dependencies.cache(packetQueue);
+
         dependencies.cache(registry);
         dependencies.cache(skinStore);
         dependencies.cache(protocolHandler = new ProtocolHandler());

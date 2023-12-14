@@ -5,7 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
 
-public record DisplayParameters(@Nullable GameProfile gameProfile, @NotNull String playerDisguiseName,
+public record DisplayParameters(GameProfile gameProfile, @NotNull String playerDisguiseName,
                                 org.bukkit.entity.EntityType bukkitType,
                                 @NotNull SingleWatcher watcher)
 {
