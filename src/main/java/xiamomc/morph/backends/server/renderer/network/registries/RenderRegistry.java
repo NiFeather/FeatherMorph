@@ -1,4 +1,4 @@
-package xiamomc.morph.backends.server.renderer.network;
+package xiamomc.morph.backends.server.renderer.network.registries;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.bukkit.Bukkit;
@@ -23,6 +23,12 @@ public class RenderRegistry extends MorphPluginObject
 
     private final Map<Object, Consumer<EventParameters>> onRegisterConsumers = new Object2ObjectOpenHashMap<>();
     private final Map<Object, Consumer<Player>> unRegisterConsumers = new Object2ObjectOpenHashMap<>();
+    private final Map<Object, Consumer<EventParameters>> onRegistryChangeConsumers = new Object2ObjectOpenHashMap<>();
+
+    public void onRegistryChange(Object source, Consumer<EventParameters> consumer)
+    {
+        onRegistryChangeConsumers.put(source, consumer);
+    }
 
     public void onRegister(Object source, Consumer<EventParameters> consumer)
     {
@@ -66,7 +72,7 @@ public class RenderRegistry extends MorphPluginObject
     {
         var parameters = registryParameters.getOrDefault(uuid, null);
 
-        return parameters == null ? null : parameters.singleWatcher();
+        return parameters == null ? null : parameters.watcher();
     }
 
     public void unregister(Player player)

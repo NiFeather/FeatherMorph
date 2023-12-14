@@ -22,6 +22,29 @@ public class EntityWatcher extends SingleWatcher
         var nmsPlayer = NmsRecord.ofPlayer(player);
         var values = ValueIndex.BASE_ENTITY;
 
+        byte bitMask = 0x00;
+        if (player.getFireTicks() > 0 || player.isVisualFire())
+            bitMask |= (byte) 0x01;
+
+        if (player.isSneaking())
+            bitMask |= (byte) 0x02;
+
+        if (player.isSprinting())
+            bitMask |= (byte) 0x08;
+
+        if (player.isSwimming())
+            bitMask |= (byte) 0x10;
+
+        if (player.isInvisible())
+            bitMask |= (byte) 0x20;
+
+        if (player.isGlowing())
+            bitMask |= (byte) 0x40;
+
+        if (NmsRecord.ofPlayer(player).isFallFlying())
+            bitMask |= (byte) 0x80;
+
+        write(values.GENERAL, bitMask);
         write(values.SILENT, true);
         write(values.NO_GRAVITY, true);
         write(values.POSE, nmsPlayer.getPose());

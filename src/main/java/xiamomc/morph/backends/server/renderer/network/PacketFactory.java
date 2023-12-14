@@ -15,6 +15,7 @@ import org.bukkit.entity.Player;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.values.SingleValue;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
+import xiamomc.morph.backends.server.renderer.network.registries.RegistryParameters;
 import xiamomc.morph.backends.server.renderer.utilties.ProtocolRegistryUtils;
 import xiamomc.morph.misc.MorphGameProfile;
 import xiamomc.morph.misc.NmsRecord;
@@ -26,7 +27,7 @@ public class PacketFactory extends MorphPluginObject
 {
     public static final String MORPH_PACKET_METAKEY = "fm";
 
-    public List<PacketContainer> buildSpawnPackets(Player player, DisplayParameters parameters)
+    public List<PacketContainer> buildSpawnPackets(Player player, RegistryParameters parameters)
     {
         List<PacketContainer> packets = new ObjectArrayList<>();
 
@@ -51,8 +52,9 @@ public class PacketFactory extends MorphPluginObject
         {
             //logger.info("Building player info packet!");
 
-            Objects.requireNonNull(parameters.gameProfile(), "Null game profile!");
-            var gameProfile = new MorphGameProfile(parameters.gameProfile());
+            var parametersProfile = parameters.getProfile();
+            Objects.requireNonNull(parametersProfile, "Null game profile!");
+            var gameProfile = new MorphGameProfile(parametersProfile);
 
             //todo: Get random UUID from world
             //玩家在客户端的UUID会根据其GameProfile中的UUID设定，我们需要避免伪装的UUID和某一玩家自己的UUID冲突
@@ -91,7 +93,10 @@ public class PacketFactory extends MorphPluginObject
         var equipmentPacket = new ClientboundSetEquipmentPacket(player.getEntityId(),
                 ProtocolEquipment.toPairs(player.getEquipment()));
         packets.add(PacketContainer.fromPacket(equipmentPacket));
-        packets.add(buildMetaPacket(player, parameters.watcher()));
+
+        var watcher = parameters.watcher();
+        watcher.sync();
+        packets.add(buildMetaPacket(player, watcher));
 
         return packets;
     }
@@ -111,8 +116,6 @@ public class PacketFactory extends MorphPluginObject
         });
 
         List<WrappedDataValue> wrappedDataValues = new ObjectArrayList<>();
-
-        watcher.sync();
 
         Map<SingleValue<?>, Object> valuesToSent = new Object2ObjectOpenHashMap<>();
         valuesToSent.putAll(watcher.getDirty());

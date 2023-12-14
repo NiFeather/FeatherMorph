@@ -6,12 +6,12 @@ public class PlayerValues extends LivingEntityValues
     public final SingleValue<Integer> SCORE = getSingle(0);
     public final SingleValue<Byte> SKIN = getSingle((byte)0); //127
     public final SingleValue<Byte> MAINHAND = getSingle((byte)1);
+    public final SingleValue<Object> LEFT_SHOULDER_PARROT_COMPOUND = getSingle(new Object());
+    public final SingleValue<Object> RIGHT_SHOULDER_PARROT_COMPOUND = getSingle(new Object());
 
     public PlayerValues()
     {
         super();
-
-        System.out.println("SKIN is on index " + SKIN.index());
 
         registerSingle(ABSORPTION_AMOUNT, SCORE, SKIN, MAINHAND);
     }
