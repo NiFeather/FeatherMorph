@@ -15,11 +15,11 @@ import org.slf4j.Logger;
 import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.backends.DisguiseWrapper;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.ValueIndex;
+import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.AgeableMobWatcher;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.ArmorStandWatcher;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.GhastWatcher;
-import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.slimemagma.AbstractSlimeWatcher;
-import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.slimemagma.SlimeWatcher;
+import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.InventoryLivingWatcher;
 import xiamomc.morph.backends.server.renderer.network.registries.EntryIndex;
 import xiamomc.morph.misc.DisguiseEquipment;
 import xiamomc.morph.misc.DisguiseState;
@@ -48,21 +48,14 @@ public class ServerDisguiseWrapper extends DisguiseWrapper<ServerDisguise>
 
         if (bindingWatcher != null)
         {
-            if (bindingWatcher instanceof AbstractSlimeWatcher slimeWatcher)
-            {
-                var size = Math.max(1, getCompound().getInt("Size"));
-                slimeWatcher.write(ValueIndex.SLIME_MAGMA.SIZE, size);
-            }
+            bindingWatcher.mergeFromCompound(compoundTag);
 
-            if (bindingWatcher instanceof ArmorStandWatcher armorStandWatcher)
-            {
-                this.armorStandNoBasePlate = getCompound().getBoolean("NoBasePlate");
-                this.armorStandSmall = getCompound().getBoolean("Small");
-                this.armorStandShowArms = getCompound().getBoolean("ShowArms");
+            if (bindingWatcher instanceof AgeableMobWatcher)
+                bindingWatcher.write(ValueIndex.AGEABLE_MOB.IS_BABY, instance.isBaby);
 
-                var values = ValueIndex.ARMOR_STAND;
-                armorStandWatcher.write(values.DATA_FLAGS, getArmorStandFlags());
-            }
+            instance.armorStandSmall = compoundTag.getBoolean("Small");
+            instance.armorStandNoBasePlate = compoundTag.getBoolean("NoBasePlate");
+            instance.armorStandShowArms = compoundTag.getBoolean("ShowArms");
         }
     }
 
@@ -72,8 +65,6 @@ public class ServerDisguiseWrapper extends DisguiseWrapper<ServerDisguise>
         return instance.compoundTag.copy();
     }
 
-    private static final UUID nilUUID = UUID.fromString("0-0-0-0-0");
-
     /**
      * Gets network id of this disguise displayed to other players
      *
@@ -82,7 +73,7 @@ public class ServerDisguiseWrapper extends DisguiseWrapper<ServerDisguise>
     @Override
     public int getNetworkEntityId()
     {
-        return -1;
+        return bindingPlayer.getEntityId();
     }
 
     @Nullable
@@ -162,10 +153,6 @@ public class ServerDisguiseWrapper extends DisguiseWrapper<ServerDisguise>
 
         newInstance.shouldDisplayCustomEquipment = this.shouldDisplayCustomEquipment;
         newInstance.setFakeEquipments(this.equipment);
-
-        newInstance.armorStandShowArms = this.armorStandShowArms;
-        newInstance.armorStandSmall = this.armorStandSmall;
-        newInstance.armorStandNoBasePlate = this.armorStandNoBasePlate;
 
         return newInstance;
     }
@@ -276,36 +263,20 @@ public class ServerDisguiseWrapper extends DisguiseWrapper<ServerDisguise>
             ghastWatcher.write(ValueIndex.GHAST.CHARGING, aggressive);
     }
 
-    private boolean armorStandShowArms;
-    private boolean armorStandSmall;
-    private boolean armorStandNoBasePlate;
-
     @Override
     public void setShowArms(boolean showArms)
     {
         super.setShowArms(showArms);
 
-        this.armorStandShowArms = showArms;
+        instance.armorStandShowArms = showArms;
         if (bindingWatcher instanceof ArmorStandWatcher armorStandWatcher)
-            armorStandWatcher.write(ValueIndex.ARMOR_STAND.DATA_FLAGS, getArmorStandFlags());
+        {
+            armorStandWatcher.write(
+                    ValueIndex.ARMOR_STAND.DATA_FLAGS,
+                    armorStandWatcher.getArmorStandFlags(instance.armorStandSmall,
+                            instance.armorStandShowArms, instance.armorStandNoBasePlate));
+        }
     }
-
-    private byte getArmorStandFlags()
-    {
-        var value = (byte)0x00;
-
-        if (armorStandSmall)
-            value |= (byte)0x01;
-
-        if (armorStandShowArms)
-            value |= (byte)0x04;
-
-        if (armorStandNoBasePlate)
-            value |= (byte)0x08;
-
-        return value;
-    }
-
     private Player bindingPlayer;
 
     public Player getBindingPlayer()
@@ -337,18 +308,17 @@ public class ServerDisguiseWrapper extends DisguiseWrapper<ServerDisguise>
             return;
         }
 
+        bindingWatcher.mergeFromCompound(getCompound());
+
         //todo: 激活刷新时也刷新到玩家
-        bindingWatcher.write(EntryIndex.PROFILE, this.instance.profile);
-        bindingWatcher.write(EntryIndex.DISPLAY_FAKE_EQUIPMENT, shouldDisplayCustomEquipment);
-        bindingWatcher.write(EntryIndex.EQUIPMENT, this.equipment);
+        if (bindingWatcher instanceof InventoryLivingWatcher)
+        {
+            bindingWatcher.write(EntryIndex.PROFILE, this.instance.profile);
+            bindingWatcher.write(EntryIndex.DISPLAY_FAKE_EQUIPMENT, shouldDisplayCustomEquipment);
+            bindingWatcher.write(EntryIndex.EQUIPMENT, this.equipment);
+        }
 
         if (bindingWatcher instanceof GhastWatcher ghastWatcher)
             ghastWatcher.write(ValueIndex.GHAST.CHARGING, aggressive);
-
-        if (bindingWatcher instanceof ArmorStandWatcher armorStandWatcher)
-            armorStandWatcher.write(ValueIndex.ARMOR_STAND.DATA_FLAGS, getArmorStandFlags());
-
-        if (bindingWatcher instanceof AbstractSlimeWatcher slimeWatcher)
-            slimeWatcher.write(ValueIndex.SLIME_MAGMA.SIZE, getSlimeSize());
     }
 }

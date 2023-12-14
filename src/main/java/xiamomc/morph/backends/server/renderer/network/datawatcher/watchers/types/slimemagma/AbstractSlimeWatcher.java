@@ -1,5 +1,6 @@
 package xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.slimemagma;
 
+import net.minecraft.nbt.CompoundTag;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.ValueIndex;
@@ -18,6 +19,14 @@ public class AbstractSlimeWatcher extends LivingEntityWatcher
     public AbstractSlimeWatcher(Player bindingPlayer, EntityType entityType)
     {
         super(bindingPlayer, entityType);
+    }
 
+    @Override
+    public void mergeFromCompound(CompoundTag nbt)
+    {
+        super.mergeFromCompound(nbt);
+
+        var size = Math.max(1, nbt.getInt("Size"));
+        write(ValueIndex.SLIME_MAGMA.SIZE, size);
     }
 }

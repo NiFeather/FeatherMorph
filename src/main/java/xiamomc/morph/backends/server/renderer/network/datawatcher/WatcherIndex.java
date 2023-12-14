@@ -9,6 +9,8 @@ import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.horses.HorseWatcher;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.horses.SkeletonHorseWatcher;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.horses.ZombieHorseWatcher;
+import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.llama.LlamaWatcher;
+import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.llama.TraderLlamaWatcher;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.slimemagma.MagmaWatcher;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.slimemagma.SlimeWatcher;
 
@@ -41,6 +43,11 @@ public class WatcherIndex
         setTypeWatcher(EntityType.ZOMBIE_HORSE, ZombieHorseWatcher::new);
 
         setTypeWatcher(EntityType.CAMEL, p -> new AbstractHorseWatcher(p, EntityType.CAMEL));
+
+        setTypeWatcher(EntityType.LLAMA, LlamaWatcher::new);
+        setTypeWatcher(EntityType.TRADER_LLAMA, TraderLlamaWatcher::new);
+
+        setTypeWatcher(EntityType.FOX, FoxWatcher::new);
     }
 
     private void setTypeWatcher(EntityType type, Function<Player, SingleWatcher> func)
