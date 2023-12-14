@@ -45,8 +45,6 @@ public class InventoryMorphSkill extends MorphSkill<NoOpConfiguration>
                     .send();
         }
 
-        state.getDisguiseWrapper().setDisplayingFakeEquipments(defaultShown);
-
         return configuration.getCooldown();
     }
 
