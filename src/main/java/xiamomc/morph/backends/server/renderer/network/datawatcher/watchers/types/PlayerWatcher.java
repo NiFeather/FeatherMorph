@@ -32,16 +32,4 @@ public class PlayerWatcher extends InventoryLivingWatcher
 
         super.doSync();
     }
-
-    @Resolved(shouldSolveImmediately = true)
-    private PacketFactory packetFactory;
-
-    @Override
-    protected void onCustomWrite(RegistryKey<?> key, Object oldVal, Object newVal)
-    {
-        super.onCustomWrite(key, oldVal, newVal);
-
-        if (key.equals(EntryIndex.DISPLAY_FAKE_EQUIPMENT) || key.equals(EntryIndex.EQUIPMENT))
-            sendPacketToAffectedPlayers(packetFactory.getEquipmentPacket(getBindingPlayer(), this));
-    }
 }

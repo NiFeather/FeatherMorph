@@ -28,16 +28,4 @@ public class ArmorStandWatcher extends InventoryLivingWatcher
     {
         super.doSync();
     }
-
-    @Resolved(shouldSolveImmediately = true)
-    private PacketFactory packetFactory;
-
-    @Override
-    protected void onTrackerWrite(int index, Object oldVal, Object newVal)
-    {
-        super.onTrackerWrite(index, oldVal, newVal);
-
-        if (ValueIndex.ARMOR_STAND.DATA_FLAGS.equals(getSingle(index)))
-            sendPacketToAffectedPlayers(packetFactory.buildMetaPacket(getBindingPlayer(), this));
-    }
 }
