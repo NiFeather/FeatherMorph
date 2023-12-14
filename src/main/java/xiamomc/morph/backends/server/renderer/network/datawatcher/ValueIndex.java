@@ -1,5 +1,6 @@
 package xiamomc.morph.backends.server.renderer.network.datawatcher;
 
+import org.checkerframework.checker.units.qual.A;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.values.*;
 
 public class ValueIndex
@@ -12,4 +13,6 @@ public class ValueIndex
     public static final PlayerValues PLAYER = new PlayerValues();
     public static final SlimeValues SLIME_MAGMA = new SlimeValues();
     public static final GhastValues GHAST = new GhastValues();
+    public static final AbstractHorseValues ABSTRACT_HORSE = new AbstractHorseValues();
+    public static final HorseValues HORSE = new HorseValues();
 }

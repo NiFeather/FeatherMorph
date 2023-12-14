@@ -21,16 +21,4 @@ public class GhastWatcher extends LivingEntityWatcher
     {
         super(bindingPlayer, EntityType.GHAST);
     }
-
-    @Resolved(shouldSolveImmediately = true)
-    private PacketFactory packetFactory;
-
-    @Override
-    protected void onTrackerWrite(int index, Object oldVal, Object newVal)
-    {
-        super.onTrackerWrite(index, oldVal, newVal);
-
-        if (ValueIndex.GHAST.CHARGING.equals(getSingle(index)))
-            sendPacketToAffectedPlayers(packetFactory.buildMetaPacket(getBindingPlayer(), this));
-    }
 }

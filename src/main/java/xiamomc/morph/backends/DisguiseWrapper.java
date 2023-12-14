@@ -184,7 +184,7 @@ public abstract class DisguiseWrapper<TInstance>
 
         if (getEntityType() != EntityType.SLIME && getEntityType() != EntityType.MAGMA_CUBE) return;
 
-        var dimScale = getSlimeDimensionScale();
+        var dimScale = getSlimeSize();
         this.dimensions = EntityDimensions.fixed(0.51F * dimScale, 0.51F * dimScale);
     }
 
@@ -203,7 +203,7 @@ public abstract class DisguiseWrapper<TInstance>
 
     public abstract boolean isBaby();
 
-    protected float getSlimeDimensionScale()
+    protected int getSlimeSize()
     {
         return Math.max(1, getCompound().getInt("Size"));
     }

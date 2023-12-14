@@ -140,7 +140,6 @@ public class ServerBackend extends DisguiseBackend<ServerDisguise, ServerDisguis
     @Override
     public boolean disguise(Player player, DisguiseWrapper<?> wrapper)
     {
-        logger.info("Incoming wrapper is " + wrapper);
         if (!(wrapper instanceof ServerDisguiseWrapper serverDisguiseWrapper)) return false;
         if (disguiseWrapperMap.containsKey(player.getUniqueId()))
             unDisguise(player);

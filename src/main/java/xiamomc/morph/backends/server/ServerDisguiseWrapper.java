@@ -18,7 +18,8 @@ import xiamomc.morph.backends.server.renderer.network.datawatcher.ValueIndex;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.ArmorStandWatcher;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.GhastWatcher;
-import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.SlimeWatcher;
+import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.slimemagma.AbstractSlimeWatcher;
+import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.slimemagma.SlimeWatcher;
 import xiamomc.morph.backends.server.renderer.network.registries.EntryIndex;
 import xiamomc.morph.misc.DisguiseEquipment;
 import xiamomc.morph.misc.DisguiseState;
@@ -47,7 +48,7 @@ public class ServerDisguiseWrapper extends DisguiseWrapper<ServerDisguise>
 
         if (bindingWatcher != null)
         {
-            if (bindingWatcher instanceof SlimeWatcher slimeWatcher)
+            if (bindingWatcher instanceof AbstractSlimeWatcher slimeWatcher)
             {
                 var size = Math.max(1, getCompound().getInt("Size"));
                 slimeWatcher.write(ValueIndex.SLIME_MAGMA.SIZE, size);
@@ -346,5 +347,8 @@ public class ServerDisguiseWrapper extends DisguiseWrapper<ServerDisguise>
 
         if (bindingWatcher instanceof ArmorStandWatcher armorStandWatcher)
             armorStandWatcher.write(ValueIndex.ARMOR_STAND.DATA_FLAGS, getArmorStandFlags());
+
+        if (bindingWatcher instanceof AbstractSlimeWatcher slimeWatcher)
+            slimeWatcher.write(ValueIndex.SLIME_MAGMA.SIZE, getSlimeSize());
     }
 }

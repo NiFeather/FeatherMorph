@@ -4,6 +4,7 @@ import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.events.PacketContainer;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectLists;
+import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.world.level.GameType;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.EntityType;
@@ -164,6 +165,15 @@ public abstract class SingleWatcher extends MorphPluginObject
         dirtySingles.put(single, value);
 
         onTrackerWrite(index, prev, value);
+        sendPacketToAffectedPlayers(packetFactory.buildMetaPacket(getBindingPlayer(), this));
+    }
+
+    @Resolved(shouldSolveImmediately = true)
+    private PacketFactory packetFactory;
+
+    protected PacketFactory getPacketFactory()
+    {
+        return packetFactory;
     }
 
     protected void onTrackerWrite(int index, Object oldVal, Object newVal)
