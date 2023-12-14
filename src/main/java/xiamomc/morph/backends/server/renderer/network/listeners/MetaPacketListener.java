@@ -8,6 +8,7 @@ import com.comphenix.protocol.injector.GamePhase;
 import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
 import org.bukkit.entity.Player;
 import xiamomc.morph.MorphPlugin;
+import xiamomc.morph.backends.server.renderer.network.PacketFactory;
 import xiamomc.morph.backends.server.renderer.network.RenderRegistry;
 import xiamomc.morph.utilities.NmsUtils;
 import xiamomc.pluginbase.Annotations.Resolved;
@@ -20,17 +21,16 @@ public class MetaPacketListener extends ProtocolListener implements PacketListen
     @Override
     public void onPacketSending(PacketEvent event)
     {
-        if (event.getPacketType() == PacketType.Play.Server.ENTITY_METADATA)
-        {
-            var packet = event.getPacket();
-            if (packet.getMeta("fm").isPresent())
-            {
-                packet.removeMeta("fm");
-                return;
-            }
+        if (event.getPacketType() != PacketType.Play.Server.ENTITY_METADATA)
+            return;
 
-            onMetaPacket((ClientboundSetEntityDataPacket) event.getPacket().getHandle(), event);
-        }
+        var packet = event.getPacket();
+
+        //不要处理来自我们自己的包
+        if (packet.getMeta(PacketFactory.MORPH_PACKET_METAKEY).isPresent())
+            return;
+
+        onMetaPacket((ClientboundSetEntityDataPacket) event.getPacket().getHandle(), event);
     }
 
     private void onMetaPacket(ClientboundSetEntityDataPacket packet, PacketEvent packetEvent)
@@ -54,7 +54,7 @@ public class MetaPacketListener extends ProtocolListener implements PacketListen
             packetEvent.setCancelled(true);
 
         //取得来源玩家的伪装后的Meta，发送给目标玩家
-        var meta = getMetaPackets(sourcePlayer, bindingParameters.singleWatcher());
+        var meta = getFactory().buildMetaPacket(sourcePlayer, bindingParameters.singleWatcher());
         protocolManager().sendServerPacket(targetPlayer, meta);
     }
 
