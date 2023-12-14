@@ -97,7 +97,7 @@ public class PacketFactory extends MorphPluginObject
 
         var watcher = parameters.getWatcher();
         watcher.sync();
-        packets.add(buildMetaPacket(player, watcher));
+        packets.add(buildFullMetaPacket(player, watcher));
 
         for (PacketContainer packet : packets)
         {
@@ -107,7 +107,41 @@ public class PacketFactory extends MorphPluginObject
         return packets;
     }
 
-    public PacketContainer buildMetaPacket(Player player, SingleWatcher watcher)
+    public PacketContainer buildDiffMetaPacket(Player player, SingleWatcher watcher)
+    {
+        var metaPacket = new PacketContainer(PacketType.Play.Server.ENTITY_METADATA);
+        metaPacket.getIntegers().write(0, player.getEntityId());
+
+        var modifier = metaPacket.getDataValueCollectionModifier();
+
+        List<WrappedDataValue> wrappedDataValues = new ObjectArrayList<>();
+        Map<SingleValue<?>, Object> valuesToSent = watcher.getDirty();
+
+        valuesToSent.forEach((single, v) ->
+        {
+            WrappedDataWatcher.Serializer serializer;
+
+            try
+            {
+                serializer = ProtocolRegistryUtils.getSerializer(single.defaultValue());
+            }
+            catch (Throwable t)
+            {
+                logger.warn("Error occurred while generating meta packet with id '%s': %s".formatted(single.index(), t.getMessage()));
+                return;
+            }
+
+            var value = new WrappedDataValue(single.index(), serializer, v);
+            wrappedDataValues.add(value);
+        });
+
+        modifier.write(0, wrappedDataValues);
+        metaPacket.setMeta(MORPH_PACKET_METAKEY, true);
+
+        return metaPacket;
+    }
+
+    public PacketContainer buildFullMetaPacket(Player player, SingleWatcher watcher)
     {
         var metaPacket = new PacketContainer(PacketType.Play.Server.ENTITY_METADATA);
         metaPacket.getIntegers().write(0, player.getEntityId());

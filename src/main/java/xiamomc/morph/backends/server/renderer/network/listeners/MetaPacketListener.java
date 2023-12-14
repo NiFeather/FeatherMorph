@@ -3,7 +3,6 @@ package xiamomc.morph.backends.server.renderer.network.listeners;
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.events.ListeningWhitelist;
 import com.comphenix.protocol.events.PacketEvent;
-import com.comphenix.protocol.events.PacketListener;
 import com.comphenix.protocol.injector.GamePhase;
 import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
 import org.bukkit.entity.Player;
@@ -53,7 +52,7 @@ public class MetaPacketListener extends ProtocolListener
 
         //取得来源玩家的伪装后的Meta，发送给目标玩家
         watcher.sync();
-        packetEvent.setPacket(getFactory().buildMetaPacket(sourcePlayer, watcher));
+        packetEvent.setPacket(getFactory().buildFullMetaPacket(sourcePlayer, watcher));
     }
 
     @Override
