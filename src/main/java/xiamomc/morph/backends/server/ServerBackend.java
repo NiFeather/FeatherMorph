@@ -145,10 +145,10 @@ public class ServerBackend extends DisguiseBackend<ServerDisguise, ServerDisguis
 
         disguiseWrapperMap.put(player.getUniqueId(), serverDisguiseWrapper);
 
-        var parameters = serverRenderer.registerEntity(
+        var watcher = serverRenderer.registerEntity(
                 player, wrapper.getEntityType(), wrapper.getDisguiseName());
 
-        serverDisguiseWrapper.setRenderParameters(player, parameters);
+        serverDisguiseWrapper.setRenderParameters(player, watcher);
         return true;
     }
 

@@ -5,13 +5,18 @@ import it.unimi.dsi.fastutil.objects.ObjectLists;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.EntityEquipment;
 import org.jetbrains.annotations.Nullable;
+import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.backends.server.renderer.network.PacketFactory;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.values.AbstractValues;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.values.SingleValue;
 import xiamomc.morph.backends.server.renderer.network.queue.PacketQueue;
 import xiamomc.morph.backends.server.renderer.network.queue.QueueEntry;
+import xiamomc.morph.backends.server.renderer.network.registries.EntryIndex;
+import xiamomc.morph.backends.server.renderer.network.registries.RegistryKey;
+import xiamomc.morph.misc.DisguiseEquipment;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Exceptions.NullDependencyException;
 
@@ -21,6 +26,10 @@ import java.util.UUID;
 
 public abstract class SingleWatcher extends MorphPluginObject
 {
+    protected void initRegistry()
+    {
+    }
+
     public final UUID bindingUUID;
 
     private Player bindingPlayer;
@@ -55,8 +64,53 @@ public abstract class SingleWatcher extends MorphPluginObject
         this.bindingPlayer = bindingPlayer;
 
         this.entityType = entityType;
+        initRegistry();
+
         sync();
     }
+
+    //region Custom Registry
+
+    protected final Map<String, Object> customRegistry = new Object2ObjectOpenHashMap<>();
+
+    public <X> void write(RegistryKey<X> key, X value)
+    {
+        customRegistry.put(key.name, value);
+
+        onCustomWrite(key, value);
+    }
+
+    protected void onCustomWrite(RegistryKey<?> key, Object val)
+    {
+    }
+
+    public <X> X getOrDefault(RegistryKey<X> key, X defaultValue)
+    {
+        var val = get(key);
+
+        return val == null ? defaultValue : val;
+    }
+
+    @Nullable
+    public <X> X get(RegistryKey<X> key)
+    {
+        var val = customRegistry.getOrDefault(key.name, null);
+
+        if (val == null) return null;
+
+        if (key.type.isInstance(val))
+        {
+            return (X)val;
+        }
+        else
+        {
+            logger.warn("Find incompatible value '%s' for key '%s'!".formatted(val, key));
+
+            return null;
+        }
+    }
+
+    //endregion Custom Registry
 
     //region Value Registry
 

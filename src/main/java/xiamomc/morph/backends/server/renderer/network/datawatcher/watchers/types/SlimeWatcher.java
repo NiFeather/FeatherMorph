@@ -6,10 +6,16 @@ import xiamomc.morph.backends.server.renderer.network.datawatcher.ValueIndex;
 
 public class SlimeWatcher extends LivingEntityWatcher
 {
+    @Override
+    protected void initRegistry()
+    {
+        super.initRegistry();
+
+        register(ValueIndex.SLIME_MAGMA);
+    }
+
     public SlimeWatcher(Player bindingPlayer)
     {
         super(bindingPlayer, EntityType.SLIME);
-
-        register(ValueIndex.SLIME_MAGMA);
     }
 }

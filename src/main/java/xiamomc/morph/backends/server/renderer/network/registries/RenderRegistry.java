@@ -17,7 +17,7 @@ import java.util.function.Consumer;
 
 public class RenderRegistry extends MorphPluginObject
 {
-    public record EventParameters(Player player, RegistryParameters parameters)
+    public record EventParameters(Player player, SingleWatcher parameters)
     {
     }
 
@@ -35,9 +35,9 @@ public class RenderRegistry extends MorphPluginObject
         onRegisterConsumers.put(source, consumer);
     }
 
-    private void callRegister(Player player, RegistryParameters parameters)
+    private void callRegister(Player player, SingleWatcher watcher)
     {
-        var ep = new EventParameters(player, parameters);
+        var ep = new EventParameters(player, watcher);
         onRegisterConsumers.forEach((source, consumer) -> consumer.accept(ep));
     }
 
@@ -53,13 +53,7 @@ public class RenderRegistry extends MorphPluginObject
 
     //region Registry
 
-    private final Map<UUID, RegistryParameters> registryParameters = new Object2ObjectOpenHashMap<>();
-
-    @Nullable
-    public RegistryParameters getParameters(UUID uuid)
-    {
-        return registryParameters.getOrDefault(uuid, null);
-    }
+    private final Map<UUID, SingleWatcher> watcherMap = new Object2ObjectOpenHashMap<>();
 
     @Nullable
     public SingleWatcher getWatcher(Entity entity)
@@ -70,9 +64,7 @@ public class RenderRegistry extends MorphPluginObject
     @Nullable
     public SingleWatcher getWatcher(UUID uuid)
     {
-        var parameters = registryParameters.getOrDefault(uuid, null);
-
-        return parameters == null ? null : parameters.watcher();
+        return watcherMap.getOrDefault(uuid, null);
     }
 
     public void unregister(Player player)
@@ -82,7 +74,7 @@ public class RenderRegistry extends MorphPluginObject
 
     public void unregister(UUID uuid)
     {
-        registryParameters.remove(uuid);
+        watcherMap.remove(uuid);
         callUnregister(Bukkit.getPlayer(uuid));
     }
 
@@ -91,39 +83,37 @@ public class RenderRegistry extends MorphPluginObject
      * @param player 目标玩家
      * @param bukkitType 伪装的Bukkit生物类型，为null则移除注册
      */
-    public void register(@NotNull Player player, @NotNull org.bukkit.entity.EntityType bukkitType)
+    public SingleWatcher register(@NotNull Player player, RegisterParameters registerParameters)
     {
-        var watcher = WatcherIndex.getInstance().getWatcherForType(player, bukkitType);
-        register(player.getUniqueId(), bukkitType, watcher);
+        var watcher = WatcherIndex.getInstance().getWatcherForType(player, registerParameters.entityType());
+        watcher.write(EntryIndex.CUSTOM_NAME, registerParameters.name());
+        register(player.getUniqueId(), watcher);
+
+        return watcher;
     }
 
     /**
      * 注册UUID对应的伪装类型
      * @param uuid 目标玩家的UUID
-     * @param bukkitType 伪装的Bukkit生物类型，为null则移除注册
+     * @param watcher 对应的 {@link SingleWatcher}
      */
-    public void register(@NotNull UUID uuid, @NotNull org.bukkit.entity.EntityType bukkitType, SingleWatcher watcher)
+    public void register(@NotNull UUID uuid, @NotNull SingleWatcher watcher)
     {
-        register(uuid, RegistryParameters.fromBukkitType(bukkitType, watcher));
-    }
-
-    public void register(@NotNull UUID uuid, @NotNull RegistryParameters parameters)
-    {
-        if (parameters == null)
+        if (watcher == null)
         {
-            throw new NullDependencyException("Null RegistryParameters!");
+            throw new NullDependencyException("Null Watcher!");
         }
         else
         {
-            registryParameters.put(uuid, parameters);
-            callRegister(Bukkit.getPlayer(uuid), parameters);
+            watcherMap.put(uuid, watcher);
+            callRegister(Bukkit.getPlayer(uuid), watcher);
         }
     }
 
     public void reset()
     {
-        var players = registryParameters.keySet().stream().toList();
-        registryParameters.clear();
+        var players = watcherMap.keySet().stream().toList();
+        watcherMap.clear();
 
         players.forEach(uuid -> callUnregister(Bukkit.getPlayer(uuid)));
     }

@@ -15,7 +15,6 @@ import org.bukkit.entity.Player;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.values.SingleValue;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
-import xiamomc.morph.backends.server.renderer.network.registries.RegistryParameters;
 import xiamomc.morph.backends.server.renderer.utilties.ProtocolRegistryUtils;
 import xiamomc.morph.misc.MorphGameProfile;
 import xiamomc.morph.misc.NmsRecord;
@@ -27,13 +26,13 @@ public class PacketFactory extends MorphPluginObject
 {
     public static final String MORPH_PACKET_METAKEY = "fm";
 
-    public List<PacketContainer> buildSpawnPackets(Player player, RegistryParameters parameters)
+    public List<PacketContainer> buildSpawnPackets(Player player, DisplayParameters parameters)
     {
         List<PacketContainer> packets = new ObjectArrayList<>();
 
         //logger.info("Build spawn packets, player is " + player.getName() + " :: parameters are " + parameters);
 
-        var playerType = parameters.bukkitType();
+        var playerType = parameters.getEntityType();
         var nmsType = EntityTypeUtils.getNmsType(playerType);
         if (nmsType == null)
         {
@@ -94,7 +93,7 @@ public class PacketFactory extends MorphPluginObject
                 ProtocolEquipment.toPairs(player.getEquipment()));
         packets.add(PacketContainer.fromPacket(equipmentPacket));
 
-        var watcher = parameters.watcher();
+        var watcher = parameters.getWatcher();
         watcher.sync();
         packets.add(buildMetaPacket(player, watcher));
 

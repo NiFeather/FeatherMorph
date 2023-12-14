@@ -7,11 +7,17 @@ import xiamomc.morph.misc.NmsRecord;
 
 public class LivingEntityWatcher extends EntityWatcher
 {
+    @Override
+    protected void initRegistry()
+    {
+        super.initRegistry();
+
+        register(ValueIndex.BASE_LIVING);
+    }
+
     public LivingEntityWatcher(Player bindingPlayer, EntityType entityType)
     {
         super(bindingPlayer, entityType);
-
-        register(ValueIndex.BASE_LIVING);
     }
 
     @Override

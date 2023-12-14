@@ -39,9 +39,9 @@ public class MetaPacketListener extends ProtocolListener implements PacketListen
         var sourceNmsEntity = NmsUtils.getNmsLevel(packetEvent.getPlayer().getWorld()).getEntity(packet.id());
         if (!(sourceNmsEntity.getBukkitEntity() instanceof Player sourcePlayer)) return;
 
-        var bindingParameters = registry.getParameters(sourcePlayer.getUniqueId());
+        var watcher = registry.getWatcher(sourcePlayer.getUniqueId());
 
-        if (bindingParameters == null)
+        if (watcher == null)
             return;
 
         //然后获取此包要发送的目标玩家
@@ -54,7 +54,6 @@ public class MetaPacketListener extends ProtocolListener implements PacketListen
             packetEvent.setCancelled(true);
 
         //取得来源玩家的伪装后的Meta，发送给目标玩家
-        var watcher = bindingParameters.watcher();
         watcher.sync();
         var meta = getFactory().buildMetaPacket(sourcePlayer, watcher);
         protocolManager().sendServerPacket(targetPlayer, meta);
