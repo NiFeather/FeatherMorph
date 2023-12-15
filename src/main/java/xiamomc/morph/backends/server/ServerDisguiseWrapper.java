@@ -21,6 +21,7 @@ import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.GhastWatcher;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.InventoryLivingWatcher;
 import xiamomc.morph.backends.server.renderer.network.registries.EntryIndex;
+import xiamomc.morph.backends.server.renderer.utilties.WatcherUtils;
 import xiamomc.morph.misc.DisguiseEquipment;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.utilities.NbtUtils;
@@ -317,7 +318,9 @@ public class ServerDisguiseWrapper extends DisguiseWrapper<ServerDisguise>
             bindingWatcher.write(EntryIndex.EQUIPMENT, this.equipment);
         }
 
-        if (bindingWatcher instanceof GhastWatcher ghastWatcher)
-            ghastWatcher.write(ValueIndex.GHAST.CHARGING, aggressive);
+        if (bindingWatcher.getEntityType() == EntityType.GHAST)
+            bindingWatcher.write(ValueIndex.GHAST.CHARGING, aggressive);
+
+        this.instance.compoundTag.merge(WatcherUtils.buildCompoundFromWatcher(bindingWatcher));
     }
 }

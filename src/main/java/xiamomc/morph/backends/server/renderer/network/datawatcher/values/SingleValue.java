@@ -1,8 +1,12 @@
 package xiamomc.morph.backends.server.renderer.network.datawatcher.values;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Arrays;
+import java.util.List;
 
 public class SingleValue<T>
 {
@@ -33,6 +37,26 @@ public class SingleValue<T>
         this.type = type;
         this.index = index;
         this.defaultValue = defaultValue;
+    }
+
+    private final List<T> randomValues = new ObjectArrayList<>();
+
+    public List<T> getRandomValues()
+    {
+        return new ObjectArrayList<>(randomValues);
+    }
+
+    public SingleValue<T> withRandom(List<T> values)
+    {
+        this.randomValues.clear();
+        this.randomValues.addAll(values);
+
+        return this;
+    }
+
+    public SingleValue<T> withRandom(T... randomValues)
+    {
+        return withRandom(Arrays.stream(randomValues).toList());
     }
 
     @Override

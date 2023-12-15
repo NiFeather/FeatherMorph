@@ -4,6 +4,7 @@ import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.events.PacketContainer;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.RandomSequence;
 import net.minecraft.world.level.GameType;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.EntityType;
@@ -20,6 +21,7 @@ import xiamomc.pluginbase.Exceptions.NullDependencyException;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.UUID;
 
 public abstract class SingleWatcher extends MorphPluginObject
@@ -135,7 +137,17 @@ public abstract class SingleWatcher extends MorphPluginObject
     {
         if (registry.keySet().stream().anyMatch(sv -> sv.index() == singleValue.index())) return false;
 
-        registry.put(singleValue, singleValue.defaultValue());
+        var initialValue = singleValue.defaultValue();
+        var randoms = singleValue.getRandomValues();
+        if (!randoms.isEmpty())
+        {
+            var index = new Random().nextInt(randoms.size());
+            initialValue = randoms.get(index);
+
+            logger.info("Get random value '%s'".formatted(initialValue));
+        }
+
+        registry.put(singleValue, initialValue);
         return true;
     }
 
