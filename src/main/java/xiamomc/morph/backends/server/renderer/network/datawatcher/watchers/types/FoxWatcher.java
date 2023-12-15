@@ -26,7 +26,12 @@ public class FoxWatcher extends AgeableMobWatcher
     {
         super.mergeFromCompound(nbt);
 
-        var isSnow = nbt.getString("Type").equalsIgnoreCase("SNOW");
-        write(ValueIndex.FOX.VARIANT, isSnow ? 1 : 0);
+        var haveType = nbt.contains("Type");
+
+        if (haveType)
+        {
+            var isSnow = nbt.getString("Type").equalsIgnoreCase("SNOW");
+            write(ValueIndex.FOX.VARIANT, isSnow ? 1 : 0);
+        }
     }
 }
