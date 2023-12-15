@@ -8,6 +8,7 @@ public class ValueIndex
     public static final EntityValues BASE_ENTITY = new EntityValues();
     public static final LivingEntityValues BASE_LIVING = new LivingEntityValues();
     public static final AgeableMobValues AGEABLE_MOB = new AgeableMobValues();
+    public static final TameableAnimalValues TAMEABLE = new TameableAnimalValues();
 
     public static final ArmorStandValues ARMOR_STAND = new ArmorStandValues();
     public static final AllayValues ALLAY = new AllayValues();
@@ -19,4 +20,7 @@ public class ValueIndex
     public static final ChestedHorseValues CHESTED_HORSE = new ChestedHorseValues();
     public static final LlamaValues LLAMA = new LlamaValues();
     public static final FoxValues FOX = new FoxValues();
+    public static final ParrotValues PARROT = new ParrotValues();
+    public static final CatValues CAT = new CatValues();
+    public static final GoatValues GOAT = new GoatValues();
 }
