@@ -15,7 +15,7 @@ import org.slf4j.Logger;
 import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.backends.DisguiseWrapper;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.ValueIndex;
-import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.AgeableMobWatcher;
+import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.AgeableMobWatcher;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.ArmorStandWatcher;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.GhastWatcher;

@@ -1,4 +1,4 @@
-package xiamomc.morph.backends.server.renderer.network.datawatcher.watchers;
+package xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types;
 
 import net.minecraft.nbt.CompoundTag;
 import org.bukkit.entity.EntityType;
