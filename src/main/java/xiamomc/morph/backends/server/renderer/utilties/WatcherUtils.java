@@ -3,10 +3,12 @@ package xiamomc.morph.backends.server.renderer.utilties;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.ValueIndex;
+import xiamomc.morph.backends.server.renderer.network.datawatcher.values.SnowGolemValues;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.CatWatcher;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.FrogWatcher;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.PandaWatcher;
+import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.SnowGolemWatcher;
 
 public class WatcherUtils
 {
@@ -94,6 +96,12 @@ public class WatcherUtils
                 compound.putString("type", BuiltInRegistries.VILLAGER_TYPE.getKey(type).toString());
 
                 tag.put("VillagerData", compound);
+            }
+
+            case SNOWMAN ->
+            {
+                var dd = watcher.get(ValueIndex.SNOW_GOLEM.HAT_FLAGS);
+                tag.putBoolean("Pumpkin", dd == SnowGolemValues.HAS_PUMPKIN);
             }
         }
 
