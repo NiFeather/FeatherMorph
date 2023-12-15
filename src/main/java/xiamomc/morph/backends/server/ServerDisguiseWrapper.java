@@ -26,7 +26,6 @@ import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.utilities.NbtUtils;
 
 import java.util.Objects;
-import java.util.UUID;
 
 public class ServerDisguiseWrapper extends DisguiseWrapper<ServerDisguise>
 {
@@ -174,7 +173,7 @@ public class ServerDisguiseWrapper extends DisguiseWrapper<ServerDisguise>
         this.instance.name = name;
 
         if (bindingWatcher != null)
-            bindingWatcher.write(EntryIndex.CUSTOM_NAME, name);
+            bindingWatcher.write(EntryIndex.DISGUISE_NAME, name);
     }
 
     @Override
