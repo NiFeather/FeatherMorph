@@ -24,6 +24,7 @@ import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.backends.server.renderer.network.DisplayParameters;
 import xiamomc.morph.backends.server.renderer.network.PacketFactory;
+import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.PlayerWatcher;
 import xiamomc.morph.backends.server.renderer.network.registries.EntryIndex;
 import xiamomc.morph.backends.server.renderer.network.registries.RenderRegistry;
@@ -68,44 +69,19 @@ public class SpawnPacketHandler extends ProtocolListener
 
         var protocolManager = ProtocolLibrary.getProtocolManager();
         var affectedPlayers = getAffectedPlayers(player);
-        affectedPlayers.remove(player);
+        var gameProfile = ((CraftPlayer) player).getProfile();
+        var watcher = new PlayerWatcher(player);
+
+        var parameters = new DisplayParameters(org.bukkit.entity.EntityType.PLAYER, watcher, gameProfile);
+        parameters.setDontRandomProfileUUID();
+        var spawnPackets = getFactory().buildSpawnPackets(player, parameters);
 
         var removePacket = new ClientboundRemoveEntitiesPacket(player.getEntityId());
         var rmPacketContainer = PacketContainer.fromPacket(removePacket);
         affectedPlayers.forEach(p -> protocolManager.sendServerPacket(p, rmPacketContainer));
-
-        var gameProfile = ((CraftPlayer) player).getProfile();
-        var nmsPlayer = NmsRecord.ofPlayer(player);
-
-        List<PacketContainer> packets = new ObjectArrayList<>();
-
-        var packetPlayerInfo = new ClientboundPlayerInfoUpdatePacket(
-                EnumSet.of(ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER),
-                new ClientboundPlayerInfoUpdatePacket.Entry(
-                        player.getUniqueId(), gameProfile, false, 114514, GameType.DEFAULT_MODE,
-                        Component.empty(), null
-                )
-        );
-
-        var packetAdd = new ClientboundAddEntityPacket(
-                player.getEntityId(), player.getUniqueId(),
-                player.getX(), player.getY(), player.getZ(),
-                player.getPitch(), player.getYaw(),
-                EntityType.PLAYER, 0,
-                nmsPlayer.getDeltaMovement(),
-                nmsPlayer.getYHeadRot()
-        );
-
-        packets.add(PacketContainer.fromPacket(packetPlayerInfo));
-        packets.add(PacketContainer.fromPacket(packetAdd));
-
-        var watcher = new PlayerWatcher(player);
-        packets.add(getFactory().getEquipmentPacket(player, watcher));
-        packets.add(getFactory().buildFullMetaPacket(player, watcher));
-
         affectedPlayers.forEach(p ->
         {
-            for (PacketContainer packet : packets)
+            for (PacketContainer packet : spawnPackets)
             {
                 protocolManager.sendServerPacket(p, packet);
             }
@@ -117,7 +93,7 @@ public class SpawnPacketHandler extends ProtocolListener
      * @param player 目标玩家
      * @param disguiseName 伪装的玩家名称
      */
-    private void scheduleRefreshPlayerDisplay(Player player, String disguiseName)
+    private void scheduleRefreshPlayerDisplay(Player player, String disguiseName, SingleWatcher currentWatcher)
     {
         PlayerSkinProvider.getInstance().fetchSkin(disguiseName)
                 .thenApply(optional ->
@@ -125,17 +101,13 @@ public class SpawnPacketHandler extends ProtocolListener
                     GameProfile outcomingProfile = new GameProfile(UUID.randomUUID(), disguiseName);
                     if (optional.isPresent()) outcomingProfile = optional.get();
 
-                    var watcher = registry.getWatcher(player.getUniqueId());
+                    var newWatcher = registry.getWatcher(player.getUniqueId());
+                    if (newWatcher == null || currentWatcher != newWatcher)
+                        return null;
 
-                    if (watcher != null)
-                    {
-                        logger.info("Triggering refresh!");
-                        GameProfile finalOutcomingProfile = outcomingProfile;
-                        watcher.write(EntryIndex.PROFILE, finalOutcomingProfile);
-
-                        this.addSchedule(() -> refreshStateForPlayer(player,
-                                new DisplayParameters(watcher.getEntityType(), watcher, finalOutcomingProfile)));
-                    }
+                    logger.info("Triggering refresh!");
+                    GameProfile finalOutcomingProfile = outcomingProfile;
+                    newWatcher.write(EntryIndex.PROFILE, finalOutcomingProfile);
 
                     return null;
                 });
@@ -165,13 +137,10 @@ public class SpawnPacketHandler extends ProtocolListener
 
         var protocolManager = ProtocolLibrary.getProtocolManager();
         var affectedPlayers = getAffectedPlayers(player);
-        affectedPlayers.remove(player);
 
         //先发包移除当前实体
         var packetRemove = new ClientboundRemoveEntitiesPacket(player.getEntityId());
         var packetRemoveContainer = PacketContainer.fromPacket(packetRemove);
-
-        affectedPlayers.forEach(p -> protocolManager.sendServerPacket(p, packetRemoveContainer));
 
         var gameProfile = watcher.get(EntryIndex.PROFILE);
 
@@ -180,7 +149,15 @@ public class SpawnPacketHandler extends ProtocolListener
         //如果没有profile，那么随机一个并计划刷新
         if (displayType == org.bukkit.entity.EntityType.PLAYER && gameProfile == null)
         {
-            var disguiseName = watcher.get(EntryIndex.CUSTOM_NAME);
+            var disguiseName = watcher.get(EntryIndex.DISGUISE_NAME);
+
+            if (disguiseName == null)
+            {
+                logger.error("Parameter 'disguiseName' cannot be null!");
+                Thread.dumpStack();
+                return;
+            }
+
             var targetPlayer = Bukkit.getPlayerExact(disguiseName);
 
             var cachedProfile = targetPlayer == null
@@ -189,7 +166,7 @@ public class SpawnPacketHandler extends ProtocolListener
 
             if (cachedProfile == null)
             {
-                scheduleRefreshPlayerDisplay(player, disguiseName);
+                scheduleRefreshPlayerDisplay(player, disguiseName, watcher);
                 gameProfile = new GameProfile(Util.NIL_UUID, disguiseName);
             }
             else
@@ -198,6 +175,9 @@ public class SpawnPacketHandler extends ProtocolListener
 
         var parametersFinal = new DisplayParameters(displayType, watcher, gameProfile);
         var spawnPackets = getFactory().buildSpawnPackets(player, parametersFinal);
+
+        affectedPlayers.forEach(p -> protocolManager.sendServerPacket(p, packetRemoveContainer));
+
         spawnPackets.forEach(packet ->
         {
             for (var visiblePlayer : affectedPlayers)
@@ -246,7 +226,6 @@ public class SpawnPacketHandler extends ProtocolListener
     {
         return ListeningWhitelist
                 .newBuilder()
-                .types(PacketType.Play.Server.ENTITY_METADATA)
                 .types(PacketType.Play.Server.SPAWN_ENTITY)
                 .gamePhase(GamePhase.PLAYING)
                 .build();

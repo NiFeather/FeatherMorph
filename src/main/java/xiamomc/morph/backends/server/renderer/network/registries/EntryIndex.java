@@ -10,9 +10,7 @@ import java.util.UUID;
 public class EntryIndex
 {
     public static final RegistryKey<GameProfile> PROFILE = RegistryKey.of("profile", new GameProfile(UUID.randomUUID(), "sample"));
-    public static final RegistryKey<EntityType> ENTITY_TYPE = RegistryKey.of("entity_type", EntityType.UNKNOWN).doRequireNonNull();
-    public static final RegistryKey<SingleWatcher> BINDING_WATCHER = new RegistryKey<>("binding_watcher", SingleWatcher.class).doRequireNonNull();
-    public static final RegistryKey<String> CUSTOM_NAME = RegistryKey.of("custom_name", "").doRequireNonNull();
+    public static final RegistryKey<String> DISGUISE_NAME = RegistryKey.of("disguise_name", "").doRequireNonNull();
 
     public static final RegistryKey<DisguiseEquipment> EQUIPMENT = RegistryKey.of("equip", new DisguiseEquipment());
     public static final RegistryKey<Boolean> DISPLAY_FAKE_EQUIPMENT = RegistryKey.of("display_fake_equip", false);

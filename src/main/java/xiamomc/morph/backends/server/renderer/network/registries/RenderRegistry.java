@@ -86,7 +86,7 @@ public class RenderRegistry extends MorphPluginObject
     public SingleWatcher register(@NotNull Player player, RegisterParameters registerParameters)
     {
         var watcher = WatcherIndex.getInstance().getWatcherForType(player, registerParameters.entityType());
-        watcher.write(EntryIndex.CUSTOM_NAME, registerParameters.name());
+        watcher.write(EntryIndex.DISGUISE_NAME, registerParameters.name());
         register(player.getUniqueId(), watcher);
 
         return watcher;

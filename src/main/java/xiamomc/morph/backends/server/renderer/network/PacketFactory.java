@@ -1,16 +1,16 @@
 package xiamomc.morph.backends.server.renderer.network;
 
 import com.comphenix.protocol.PacketType;
+import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.wrappers.WrappedDataValue;
 import com.comphenix.protocol.wrappers.WrappedDataWatcher;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
-import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
-import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
+import net.minecraft.network.protocol.game.*;
 import net.minecraft.world.level.GameType;
+import org.bukkit.craftbukkit.v1_20_R3.entity.CraftEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.EntityEquipment;
 import xiamomc.morph.MorphPluginObject;
@@ -58,9 +58,12 @@ public class PacketFactory extends MorphPluginObject
             Objects.requireNonNull(parametersProfile, "Null game profile!");
             var gameProfile = new MorphGameProfile(parametersProfile);
 
-            //todo: Get random UUID from world
-            //玩家在客户端的UUID会根据其GameProfile中的UUID设定，我们需要避免伪装的UUID和某一玩家自己的UUID冲突
-            gameProfile.setUUID(UUID.randomUUID());
+            if (!parameters.dontRandomProfileUUID())
+            {
+                //todo: Get random UUID from world to prevent duplicate UUID
+                //玩家在客户端的UUID会根据其GameProfile中的UUID设定，我们需要避免伪装的UUID和某一玩家自己的UUID冲突
+                gameProfile.setUUID(UUID.randomUUID());
+            }
 
             //Minecraft需要在生成玩家实体前先发送PlayerInfoUpdate消息
             var uuid = gameProfile.getId();
@@ -98,10 +101,17 @@ public class PacketFactory extends MorphPluginObject
         var watcher = parameters.getWatcher();
         packets.add(buildFullMetaPacket(player, watcher));
 
-        for (PacketContainer packet : packets)
+        if (player.getVehicle() != null)
         {
-            packet.setMeta(MORPH_PACKET_METAKEY, true);
+            var nmsEntity = ((CraftEntity)player.getVehicle()).getHandle();
+            packets.add(PacketContainer.fromPacket(new ClientboundSetPassengersPacket(nmsEntity)));
         }
+
+        if (!player.getPassengers().isEmpty())
+            packets.add(PacketContainer.fromPacket(new ClientboundSetPassengersPacket(NmsRecord.ofPlayer(player))));
+
+        for (PacketContainer packet : packets)
+            packet.setMeta(MORPH_PACKET_METAKEY, true);
 
         return packets;
     }
