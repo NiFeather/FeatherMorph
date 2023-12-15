@@ -50,8 +50,14 @@ public class MetaPacketListener extends ProtocolListener
         if (targetPlayer == sourcePlayer)
             return;
 
-        //取得来源玩家的伪装后的Meta，发送给目标玩家
-        packetEvent.setPacket(getFactory().buildFullMetaPacket(sourcePlayer, watcher));
+        //不要二次处理来自我们自己的包
+        var packetContainer = packetEvent.getPacket();
+        var meta = packetContainer.getMeta(PacketFactory.MORPH_PACKET_METAKEY);
+        if (meta.isEmpty())
+        {
+            //取得来源玩家的伪装后的Meta，发送给目标玩家
+            packetEvent.setPacket(getFactory().buildFullMetaPacket(sourcePlayer, watcher));
+        }
     }
 
     @Override
