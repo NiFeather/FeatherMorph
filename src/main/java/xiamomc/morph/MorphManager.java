@@ -111,28 +111,53 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     @Resolved
     private MorphClientHandler clientHandler;
 
-    @Initializer
-    private void load()
+    private void tryBackends()
     {
-        this.addSchedule(this::update);
-
         try
         {
             this.currentBackend = new ServerBackend();
+            return;
         }
         catch (NoClassDefFoundError e)
         {
-            logger.error("Unable to initialize renderer as our disguise backend, maybe ProtocolLib it's not installed on the server>");
-            logger.error("Using NilBackend, displaying disguises at the server side will not be supported this run.");
+            logger.error("Unable to initialize renderer as our disguise backend, maybe ProtocolLib it's not installed on the server.");
+            logger.error("Trying LibsBackend...");
         }
         catch (Throwable t)
         {
             logger.error("Unable to initialize renderer as our disguise backend: " + t.getMessage());
+            logger.error("Please consider reporting this issue to our GitHub: https://github.com/XiaMoZhiShi/MorphPlugin/issues");
+            logger.error("Trying LibsBackend...");
+
+            t.printStackTrace();
+        }
+
+        try
+        {
+            this.currentBackend = new LibsBackend();
+            return;
+        }
+        catch (NoClassDefFoundError e)
+        {
+            logger.error("Unable to initialize LibsDisguises as our disguise backend, maybe it's not installed on the server.");
+            logger.error("Using NilBackend, displaying disguises at the server side will not be supported this run.");
+        }
+        catch (Throwable t)
+        {
+            logger.error("Unable to initialize LibsDisguises as our disguise backend: " + t.getMessage());
             logger.error("Using NilBackend, displaying disguises at the server side will not be supported this run.");
             logger.error("Please consider reporting this issue to our GitHub: https://github.com/XiaMoZhiShi/MorphPlugin/issues");
 
             t.printStackTrace();
         }
+    }
+
+    @Initializer
+    private void load()
+    {
+        this.addSchedule(this::update);
+
+        tryBackends();
 
         logger.info("Using backend: %s".formatted(currentBackend));
 
