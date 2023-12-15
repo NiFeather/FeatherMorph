@@ -4,21 +4,20 @@ import net.minecraft.nbt.CompoundTag;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.ValueIndex;
-import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.AgeableMobWatcher;
 
-public class FoxWatcher extends AgeableMobWatcher
+public class ParrotWatcher extends LivingEntityWatcher
 {
+    public ParrotWatcher(Player bindingPlayer)
+    {
+        super(bindingPlayer, EntityType.PARROT);
+    }
+
     @Override
     protected void initRegistry()
     {
         super.initRegistry();
 
-        register(ValueIndex.FOX);
-    }
-
-    public FoxWatcher(Player bindingPlayer)
-    {
-        super(bindingPlayer, EntityType.FOX);
+        register(ValueIndex.PARROT);
     }
 
     @Override
@@ -26,10 +25,10 @@ public class FoxWatcher extends AgeableMobWatcher
     {
         super.mergeFromCompound(nbt);
 
-        if (nbt.contains("Type"))
+        if (nbt.contains("Variant"))
         {
-            var isSnow = nbt.getString("Type").equalsIgnoreCase("SNOW");
-            write(ValueIndex.FOX.FOX_VARIANT, isSnow ? 1 : 0);
+            var variant = nbt.getInt("Variant");
+            this.write(ValueIndex.PARROT.PARROT_VARIANT, variant);
         }
     }
 }

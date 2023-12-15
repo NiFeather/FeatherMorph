@@ -30,6 +30,22 @@ public abstract class SingleWatcher extends MorphPluginObject
     {
     }
 
+    protected void initValues()
+    {
+        for (SingleValue<?> singleValue : registry.keySet())
+        {
+            var newValue = singleValue.defaultValue();
+            var randoms = singleValue.getRandomValues();
+            if (!randoms.isEmpty())
+            {
+                var index = new Random().nextInt(randoms.size());
+                newValue = randoms.get(index);
+
+                this.write(singleValue.index(), newValue);
+            }
+        }
+    }
+
     public final UUID bindingUUID;
 
     private Player bindingPlayer;
@@ -65,6 +81,7 @@ public abstract class SingleWatcher extends MorphPluginObject
 
         this.entityType = entityType;
         initRegistry();
+        initValues();
 
         sync();
     }
@@ -137,17 +154,7 @@ public abstract class SingleWatcher extends MorphPluginObject
     {
         if (registry.keySet().stream().anyMatch(sv -> sv.index() == singleValue.index())) return false;
 
-        var initialValue = singleValue.defaultValue();
-        var randoms = singleValue.getRandomValues();
-        if (!randoms.isEmpty())
-        {
-            var index = new Random().nextInt(randoms.size());
-            initialValue = randoms.get(index);
-
-            logger.info("Get random value '%s'".formatted(initialValue));
-        }
-
-        registry.put(singleValue, initialValue);
+        registry.put(singleValue, singleValue.defaultValue());
         return true;
     }
 

@@ -19,7 +19,7 @@ public class ChestedHorseWatcher extends AbstractHorseWatcher
     {
         super.mergeFromCompound(nbt);
 
-        var horseChested = nbt.getBoolean("ChestedHorse");
-        write(ValueIndex.CHESTED_HORSE.HAS_CHEST, horseChested);
+        if (nbt.contains("ChestedHorse"))
+            write(ValueIndex.CHESTED_HORSE.HAS_CHEST, nbt.getBoolean("ChestedHorse"));
     }
 }

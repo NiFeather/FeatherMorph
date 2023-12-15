@@ -3,7 +3,7 @@ package xiamomc.morph.backends.server.renderer.utilties;
 import net.minecraft.nbt.CompoundTag;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.ValueIndex;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
-import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.slimemagma.AbstractSlimeWatcher;
+import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.CatWatcher;
 
 public class WatcherUtils
 {
@@ -18,26 +18,25 @@ public class WatcherUtils
                 var size = watcher.get(ValueIndex.SLIME_MAGMA.SIZE);
                 tag.putInt("Size", size);
             }
-/*
+
             case HORSE ->
             {
-                var color = ((HorseWatcher) watcher).getColor().ordinal();
-                var style = ((HorseWatcher) watcher).getStyle().ordinal();
-                compoundTag.putInt("Variant", color | style << 8);
+                tag.putInt("Variant", watcher.get(ValueIndex.HORSE.HORSE_VARIANT));
             }
 
             case PARROT ->
             {
-                var variant = ((ParrotWatcher) watcher).getVariant().ordinal();
-                compoundTag.putInt("Variant", variant);
+                var variant = watcher.get(ValueIndex.PARROT.PARROT_VARIANT);
+                tag.putInt("Variant", variant);
             }
 
             case CAT ->
             {
-                var variant = ((CatWatcher) watcher).getType().getKey().asString();
-                compoundTag.putString("variant", variant);
+                var variant = ((CatWatcher)watcher).getCatType().getKey().asString();
+                tag.putString("variant", variant);
             }
 
+            /*
             case TROPICAL_FISH ->
             {
                 var variant = ((TropicalFishWatcher) watcher).getVariant();
@@ -54,7 +53,7 @@ public class WatcherUtils
 
             case FOX ->
             {
-                var foxType = watcher.get(ValueIndex.FOX.VARIANT) == 0 ? "red" : "snow";
+                var foxType = watcher.get(ValueIndex.FOX.FOX_VARIANT) == 0 ? "red" : "snow";
                 tag.putString("Type", foxType);
             }
 /*
@@ -63,20 +62,16 @@ public class WatcherUtils
                 var variant = ((FrogWatcher) watcher).getVariant().getKey().asString();
                 compoundTag.putString("variant", variant);
             }
+*/
 
             case GOAT ->
             {
-                var goatWatcher = ((GoatWatcher) watcher);
-
-                var hasLeftHorn = goatWatcher.hasLeftHorn();
-                var hasRightHorn = goatWatcher.hasRightHorn();
-                var isScreaming = goatWatcher.isScreaming();
-
-                compoundTag.putBoolean("HasLeftHorn", hasLeftHorn);
-                compoundTag.putBoolean("HasRightHorn", hasRightHorn);
-                compoundTag.putBoolean("IsScreamingGoat", isScreaming);
+                tag.putBoolean("HasLeftHorn", watcher.get(ValueIndex.GOAT.HAS_LEFT_HORN));
+                tag.putBoolean("HasRightHorn", watcher.get(ValueIndex.GOAT.HAS_RIGHT_HORN));
+                tag.putBoolean("IsScreamingGoat", watcher.get(ValueIndex.GOAT.IS_SCREAMING));
             }
 
+/*
             case PANDA ->
             {
                 var pandaWatcher = ((PandaWatcher) watcher);

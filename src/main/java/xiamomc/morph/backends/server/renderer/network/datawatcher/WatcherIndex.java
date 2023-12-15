@@ -3,6 +3,7 @@ package xiamomc.morph.backends.server.renderer.network.datawatcher;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.GoatWatcher;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.*;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.horses.AbstractHorseWatcher;
@@ -48,6 +49,9 @@ public class WatcherIndex
         setTypeWatcher(EntityType.TRADER_LLAMA, TraderLlamaWatcher::new);
 
         setTypeWatcher(EntityType.FOX, FoxWatcher::new);
+        setTypeWatcher(EntityType.PARROT, ParrotWatcher::new);
+        setTypeWatcher(EntityType.CAT, CatWatcher::new);
+        setTypeWatcher(EntityType.GOAT, GoatWatcher::new);
     }
 
     private void setTypeWatcher(EntityType type, Function<Player, SingleWatcher> func)
