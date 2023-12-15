@@ -1,5 +1,7 @@
 package xiamomc.morph.backends.server.renderer.network.datawatcher.values;
 
+import xiamomc.morph.backends.server.renderer.network.datawatcher.values.basetypes.ChestedHorseValues;
+
 public class LlamaValues extends ChestedHorseValues
 {
     public final SingleValue<Integer> SLOTS = getSingle(0);

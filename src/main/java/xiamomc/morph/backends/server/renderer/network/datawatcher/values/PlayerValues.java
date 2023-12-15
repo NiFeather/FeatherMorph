@@ -1,5 +1,7 @@
 package xiamomc.morph.backends.server.renderer.network.datawatcher.values;
 
+import xiamomc.morph.backends.server.renderer.network.datawatcher.values.basetypes.LivingEntityValues;
+
 public class PlayerValues extends LivingEntityValues
 {
     public final SingleValue<Float> ABSORPTION_AMOUNT = getSingle(0f);

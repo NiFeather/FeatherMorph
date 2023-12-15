@@ -1,7 +1,9 @@
-package xiamomc.morph.backends.server.renderer.network.datawatcher.values;
+package xiamomc.morph.backends.server.renderer.network.datawatcher.values.basetypes;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Pose;
+import xiamomc.morph.backends.server.renderer.network.datawatcher.values.AbstractValues;
+import xiamomc.morph.backends.server.renderer.network.datawatcher.values.SingleValue;
 
 import java.util.Optional;
 

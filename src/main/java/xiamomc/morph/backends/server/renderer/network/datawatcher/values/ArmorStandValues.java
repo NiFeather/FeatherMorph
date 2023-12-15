@@ -1,6 +1,7 @@
 package xiamomc.morph.backends.server.renderer.network.datawatcher.values;
 
 import net.minecraft.core.Rotations;
+import xiamomc.morph.backends.server.renderer.network.datawatcher.values.basetypes.LivingEntityValues;
 
 public class ArmorStandValues extends LivingEntityValues
 {

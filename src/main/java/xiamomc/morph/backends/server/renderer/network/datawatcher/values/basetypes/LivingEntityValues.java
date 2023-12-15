@@ -1,6 +1,7 @@
-package xiamomc.morph.backends.server.renderer.network.datawatcher.values;
+package xiamomc.morph.backends.server.renderer.network.datawatcher.values.basetypes;
 
 import net.minecraft.core.BlockPos;
+import xiamomc.morph.backends.server.renderer.network.datawatcher.values.SingleValue;
 
 import java.util.Optional;
 

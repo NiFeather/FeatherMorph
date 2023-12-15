@@ -1,6 +1,7 @@
 package xiamomc.morph.backends.server.renderer.network.datawatcher;
 
 import xiamomc.morph.backends.server.renderer.network.datawatcher.values.*;
+import xiamomc.morph.backends.server.renderer.network.datawatcher.values.basetypes.*;
 
 public class ValueIndex
 {
@@ -29,4 +30,5 @@ public class ValueIndex
     public static final VillagerValues VILLAGER = new VillagerValues();
     public static final SnowGolemValues SNOW_GOLEM = new SnowGolemValues();
     public static final CreeperValues CREEPER = new CreeperValues();
+    public static final PiglinValues PIGLIN = new PiglinValues();
 }
