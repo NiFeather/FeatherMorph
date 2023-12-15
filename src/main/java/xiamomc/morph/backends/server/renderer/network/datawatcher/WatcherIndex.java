@@ -57,6 +57,8 @@ public class WatcherIndex
         setTypeWatcher(EntityType.TROPICAL_FISH, TropicalFishWatcher::new);
         setTypeWatcher(EntityType.FROG, FrogWatcher::new);
         setTypeWatcher(EntityType.PANDA, PandaWatcher::new);
+
+        setTypeWatcher(EntityType.VILLAGER, VillagerWatcher::new);
     }
 
     private void setTypeWatcher(EntityType type, Function<Player, SingleWatcher> func)

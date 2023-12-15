@@ -27,4 +27,5 @@ public class ValueIndex
     public static final RabbitValues RABBIT = new RabbitValues();
     public static final FrogValues FROG = new FrogValues();
     public static final PandaValues PANDA = new PandaValues();
+    public static final VillagerValue VILLAGER = new VillagerValue();
 }

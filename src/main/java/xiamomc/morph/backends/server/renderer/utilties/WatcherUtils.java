@@ -1,5 +1,6 @@
 package xiamomc.morph.backends.server.renderer.utilties;
 
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.ValueIndex;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
@@ -80,25 +81,20 @@ public class WatcherUtils
                 tag.putString("HiddenGene", hiddenGene.toString().toLowerCase());
             }
 
-/*
             case VILLAGER ->
             {
-                if (!compoundTag.contains("VillagerData"))
-                {
-                    var villagerData = ((VillagerWatcher) watcher).getVillagerData();
-                    var profession = villagerData.getProfession();
-                    var type = villagerData.getType();
-                    var level = villagerData.getLevel();
+                var villagerData = watcher.get(ValueIndex.VILLAGER.VILLAGER_DATA);
+                var profession = villagerData.getProfession();
+                var type = villagerData.getType();
+                var level = villagerData.getLevel();
 
-                    var compound = new CompoundTag();
-                    compound.putInt("level", level);
-                    compound.putString("profession", profession.getKey().asString());
-                    compound.putString("type", type.getKey().asString());
+                var compound = new CompoundTag();
+                compound.putInt("level", level);
+                compound.putString("profession", BuiltInRegistries.VILLAGER_PROFESSION.getKey(profession).toString());
+                compound.putString("type", BuiltInRegistries.VILLAGER_TYPE.getKey(type).toString());
 
-                    compoundTag.put("VillagerData", compound);
-                }
+                tag.put("VillagerData", compound);
             }
- */
         }
 
         return tag;

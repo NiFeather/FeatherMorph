@@ -62,9 +62,6 @@ public class ServerDisguiseWrapper extends DisguiseWrapper<ServerDisguise>
     @Override
     public CompoundTag getCompound()
     {
-        if (bindingWatcher != null)
-            instance.compoundTag.merge(WatcherUtils.buildCompoundFromWatcher(bindingWatcher));
-
         return instance.compoundTag.copy();
     }
 
