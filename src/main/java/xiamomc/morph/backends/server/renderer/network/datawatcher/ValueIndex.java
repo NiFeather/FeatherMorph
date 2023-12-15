@@ -23,4 +23,8 @@ public class ValueIndex
     public static final ParrotValues PARROT = new ParrotValues();
     public static final CatValues CAT = new CatValues();
     public static final GoatValues GOAT = new GoatValues();
+    public static final TropicalFishValues TROPICAL = new TropicalFishValues();
+    public static final RabbitValues RABBIT = new RabbitValues();
+    public static final FrogValues FROG = new FrogValues();
+    public static final PandaValues PANDA = new PandaValues();
 }

@@ -4,7 +4,6 @@ import net.minecraft.nbt.CompoundTag;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.ValueIndex;
-import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.AgeableMobWatcher;
 
 public class FoxWatcher extends AgeableMobWatcher
 {

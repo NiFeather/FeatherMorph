@@ -4,6 +4,8 @@ import net.minecraft.nbt.CompoundTag;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.ValueIndex;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.CatWatcher;
+import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.FrogWatcher;
+import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.PandaWatcher;
 
 public class WatcherUtils
 {
@@ -36,33 +38,30 @@ public class WatcherUtils
                 tag.putString("variant", variant);
             }
 
-            /*
             case TROPICAL_FISH ->
             {
-                var variant = ((TropicalFishWatcher) watcher).getVariant();
+                var variant = watcher.get(ValueIndex.TROPICAL.FISH_VARIANT);
 
-                compoundTag.putInt("Variant", variant);
+                tag.putInt("Variant", variant);
             }
 
             case RABBIT ->
             {
-                var type = ((RabbitWatcher) watcher).getType().getTypeId();
-                compoundTag.putInt("RabbitType", type);
+                var type = watcher.get(ValueIndex.RABBIT.RABBIT_TYPE);
+                tag.putInt("RabbitType", type);
             }
- */
 
             case FOX ->
             {
                 var foxType = watcher.get(ValueIndex.FOX.FOX_VARIANT) == 0 ? "red" : "snow";
                 tag.putString("Type", foxType);
             }
-/*
+
             case FROG ->
             {
-                var variant = ((FrogWatcher) watcher).getVariant().getKey().asString();
-                compoundTag.putString("variant", variant);
+                var variant = ((FrogWatcher)watcher).getFrogVariant().getKey().asString();
+                tag.putString("variant", variant);
             }
-*/
 
             case GOAT ->
             {
@@ -71,17 +70,17 @@ public class WatcherUtils
                 tag.putBoolean("IsScreamingGoat", watcher.get(ValueIndex.GOAT.IS_SCREAMING));
             }
 
-/*
             case PANDA ->
             {
-                var pandaWatcher = ((PandaWatcher) watcher);
+                var pandaWatcher = (PandaWatcher)watcher;
                 var mainGene = pandaWatcher.getMainGene();
                 var hiddenGene = pandaWatcher.getHiddenGene();
 
-                compoundTag.putString("MainGene", mainGene.toString().toLowerCase());
-                compoundTag.putString("HiddenGene", hiddenGene.toString().toLowerCase());
+                tag.putString("MainGene", mainGene.toString().toLowerCase());
+                tag.putString("HiddenGene", hiddenGene.toString().toLowerCase());
             }
 
+/*
             case VILLAGER ->
             {
                 if (!compoundTag.contains("VillagerData"))
