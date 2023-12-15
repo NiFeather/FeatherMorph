@@ -79,11 +79,13 @@ public abstract class SingleWatcher extends MorphPluginObject
         this.bindingUUID = bindingPlayer.getUniqueId();
         this.bindingPlayer = bindingPlayer;
 
+        syncing = true;
         this.entityType = entityType;
         initRegistry();
         initValues();
 
         sync();
+        syncing = false;
     }
 
     //region Custom Registry
