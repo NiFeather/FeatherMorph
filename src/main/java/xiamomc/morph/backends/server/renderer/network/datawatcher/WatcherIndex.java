@@ -61,6 +61,7 @@ public class WatcherIndex
         setTypeWatcher(EntityType.VILLAGER, VillagerWatcher::new);
         setTypeWatcher(EntityType.SNOWMAN, SnowGolemWatcher::new);
         setTypeWatcher(EntityType.CREEPER, CreeperWatcher::new);
+        setTypeWatcher(EntityType.PIGLIN, PiglinWatcher::new);
     }
 
     private void setTypeWatcher(EntityType type, Function<Player, SingleWatcher> func)

@@ -3,6 +3,7 @@ package xiamomc.morph.backends.server.renderer.network.datawatcher.values;
 import net.minecraft.world.entity.npc.VillagerData;
 import net.minecraft.world.entity.npc.VillagerProfession;
 import net.minecraft.world.entity.npc.VillagerType;
+import xiamomc.morph.backends.server.renderer.network.datawatcher.values.basetypes.AbstractVillagerValues;
 
 public class VillagerValues extends AbstractVillagerValues
 {

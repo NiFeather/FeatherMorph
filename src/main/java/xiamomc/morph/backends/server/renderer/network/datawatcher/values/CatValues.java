@@ -2,7 +2,7 @@ package xiamomc.morph.backends.server.renderer.network.datawatcher.values;
 
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.animal.CatVariant;
-import org.bukkit.entity.Cat;
+import xiamomc.morph.backends.server.renderer.network.datawatcher.values.basetypes.TameableAnimalValues;
 
 public class CatValues extends TameableAnimalValues
 {
