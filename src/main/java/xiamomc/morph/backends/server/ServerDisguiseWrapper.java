@@ -15,11 +15,8 @@ import org.slf4j.Logger;
 import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.backends.DisguiseWrapper;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.ValueIndex;
-import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.AgeableMobWatcher;
+import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.*;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
-import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.ArmorStandWatcher;
-import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.GhastWatcher;
-import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.InventoryLivingWatcher;
 import xiamomc.morph.backends.server.renderer.network.registries.EntryIndex;
 import xiamomc.morph.backends.server.renderer.utilties.WatcherUtils;
 import xiamomc.morph.misc.DisguiseEquipment;
@@ -259,8 +256,14 @@ public class ServerDisguiseWrapper extends DisguiseWrapper<ServerDisguise>
         super.setAggressive(aggressive);
 
         this.aggressive = aggressive;
-        if (bindingWatcher instanceof GhastWatcher ghastWatcher)
-            ghastWatcher.write(ValueIndex.GHAST.CHARGING, aggressive);
+        if (getEntityType() == EntityType.GHAST)
+            bindingWatcher.write(ValueIndex.GHAST.CHARGING, aggressive);
+
+        if (getEntityType() == EntityType.CREEPER)
+        {
+            bindingWatcher.write(ValueIndex.CREEPER.STATE, aggressive ? 1 : -1);
+            bindingWatcher.write(ValueIndex.CREEPER.IGNITED, aggressive);
+        }
     }
 
     @Override

@@ -1,6 +1,5 @@
 package xiamomc.morph.backends.server.renderer.network.datawatcher;
 
-import org.checkerframework.checker.units.qual.A;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.values.*;
 
 public class ValueIndex
@@ -27,5 +26,7 @@ public class ValueIndex
     public static final RabbitValues RABBIT = new RabbitValues();
     public static final FrogValues FROG = new FrogValues();
     public static final PandaValues PANDA = new PandaValues();
-    public static final VillagerValue VILLAGER = new VillagerValue();
+    public static final VillagerValues VILLAGER = new VillagerValues();
+    public static final SnowGolemValues SNOW_GOLEM = new SnowGolemValues();
+    public static final CreeperValues CREEPER = new CreeperValues();
 }
