@@ -62,6 +62,9 @@ public class ServerDisguiseWrapper extends DisguiseWrapper<ServerDisguise>
     @Override
     public CompoundTag getCompound()
     {
+        if (bindingWatcher != null)
+            instance.compoundTag.merge(WatcherUtils.buildCompoundFromWatcher(bindingWatcher));
+
         return instance.compoundTag.copy();
     }
 
@@ -308,6 +311,7 @@ public class ServerDisguiseWrapper extends DisguiseWrapper<ServerDisguise>
             return;
         }
 
+        //先和watcher同步一下我们的NBT
         bindingWatcher.mergeFromCompound(getCompound());
 
         //todo: 激活刷新时也刷新到玩家
@@ -321,6 +325,8 @@ public class ServerDisguiseWrapper extends DisguiseWrapper<ServerDisguise>
         if (bindingWatcher.getEntityType() == EntityType.GHAST)
             bindingWatcher.write(ValueIndex.GHAST.CHARGING, aggressive);
 
+        //然后从watcher拉取他们的NBT。
+        //如果watcher有存在会随机的值，此举会将随机的值同步给我们
         this.instance.compoundTag.merge(WatcherUtils.buildCompoundFromWatcher(bindingWatcher));
     }
 }

@@ -1,5 +1,6 @@
 package xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types;
 
+import net.minecraft.nbt.CompoundTag;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Panda;
 import org.bukkit.entity.Player;
@@ -46,5 +47,32 @@ public class PandaWatcher extends LivingEntityWatcher
 
         write(ValueIndex.PANDA.MAIN_GENE, (byte)mainGene.ordinal());
         write(ValueIndex.PANDA.HIDDEN_GENE, (byte)hiddenGene.ordinal());
+    }
+
+    @Override
+    public void mergeFromCompound(CompoundTag nbt)
+    {
+        super.mergeFromCompound(nbt);
+
+        if (nbt.contains("MainGene"))
+            write(ValueIndex.PANDA.MAIN_GENE, (byte)getGeneFromName(nbt.getString("MainGene")).ordinal());
+
+        if (nbt.contains("HiddenGene"))
+            write(ValueIndex.PANDA.HIDDEN_GENE, (byte)getGeneFromName(nbt.getString("HiddenGene")).ordinal());
+    }
+
+    private Panda.Gene getGeneFromName(String name)
+    {
+        var gene = Panda.Gene.values();
+        var match = Arrays.stream(gene).filter(g -> g.name().equalsIgnoreCase(name))
+                .findFirst().orElse(null);
+
+        if (match == null)
+        {
+            logger.warn("Null Gene for name " + name + "?!");
+            match = Panda.Gene.NORMAL;
+        }
+
+        return match;
     }
 }
