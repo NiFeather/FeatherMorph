@@ -3,7 +3,6 @@ package xiamomc.morph.events;
 import com.destroystokyo.paper.event.player.PlayerClientOptionsChangeEvent;
 import com.destroystokyo.paper.event.player.PlayerPostRespawnEvent;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import me.libraryaddict.disguise.DisguiseAPI;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import org.bukkit.Bukkit;
@@ -22,7 +21,6 @@ import org.bukkit.inventory.InventoryHolder;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.RevealingHandler;
-import xiamomc.morph.backends.libsdisg.LibsDisguiseWrapper;
 import xiamomc.morph.commands.MorphCommandManager;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
@@ -294,19 +292,6 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
 
         if (state != null)
         {
-            //workaround: 启用服务端预览的情况下会造成物品栏desync
-            if (state.getServerSideSelfVisible())
-            {
-                this.addSchedule(() ->
-                {
-                    if (state.getDisguiseWrapper() instanceof LibsDisguiseWrapper)
-                    {
-                        if (DisguiseAPI.isDisguised(player) && DisguiseAPI.isSelfDisguised(player))
-                            player.updateInventory();
-                    }
-                }, 2);
-            }
-
             //workaround: 交换副手后伪装有概率在左右手显示同一个物品
             if (state.showingDisguisedItems())
             {

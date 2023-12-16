@@ -1,7 +1,6 @@
 package xiamomc.morph.utilities;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import me.libraryaddict.disguise.disguisetypes.EntityPose;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Pose;
@@ -21,20 +20,6 @@ public class DisguiseUtils
     public static String asString(DisguiseMeta info)
     {
         return info.getKey();
-    }
-
-    public static EntityPose toLibsEntityPose(Pose pose)
-    {
-        return switch (pose)
-        {
-            case SWIMMING -> EntityPose.SWIMMING;
-            case FALL_FLYING -> EntityPose.FALL_FLYING;
-            case SNEAKING -> EntityPose.SNEAKING;
-            case SLEEPING -> EntityPose.SLEEPING;
-            case SPIN_ATTACK -> EntityPose.SPIN_ATTACK;
-            case DYING -> EntityPose.DYING;
-            default -> EntityPose.STANDING;
-        };
     }
 
     public static boolean validForHeadMorph(Material material)
