@@ -1,7 +1,6 @@
 package xiamomc.morph.backends.server.renderer.network;
 
 import com.comphenix.protocol.PacketType;
-import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.wrappers.WrappedDataValue;
 import com.comphenix.protocol.wrappers.WrappedDataWatcher;
@@ -11,6 +10,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.*;
 import net.minecraft.world.level.GameType;
 import org.bukkit.craftbukkit.v1_20_R3.entity.CraftEntity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.EntityEquipment;
 import xiamomc.morph.MorphPluginObject;
@@ -35,11 +35,11 @@ public class PacketFactory extends MorphPluginObject
 
         //logger.info("Build spawn packets, player is " + player.getName() + " :: parameters are " + parameters);
 
-        var playerType = parameters.getEntityType();
-        var nmsType = EntityTypeUtils.getNmsType(playerType);
+        var disguiseType = parameters.getEntityType();
+        var nmsType = EntityTypeUtils.getNmsType(disguiseType);
         if (nmsType == null)
         {
-            logger.error("No NMS Type for Bukkit Type '%s'".formatted(playerType));
+            logger.error("No NMS Type for Bukkit Type '%s'".formatted(disguiseType));
             logger.error("Not build spawn packets!");
 
             //addSchedule(() -> registry.unregister(player));
@@ -50,7 +50,7 @@ public class PacketFactory extends MorphPluginObject
         UUID spawnUUID = player.getUniqueId();
 
         //如果是玩家
-        if (playerType == org.bukkit.entity.EntityType.PLAYER)
+        if (disguiseType == org.bukkit.entity.EntityType.PLAYER)
         {
             //logger.info("Building player info packet!");
 
@@ -79,11 +79,23 @@ public class PacketFactory extends MorphPluginObject
             packets.add(PacketContainer.fromPacket(packetPlayerInfo));
         }
 
+        var pitch = player.getPitch();
+        var yaw = player.getYaw();
+
+        if (disguiseType == EntityType.PHANTOM)
+            pitch = (-player.getPitch() / 360f) * 256f;
+
+        if (disguiseType == EntityType.ENDER_DRAGON)
+        {
+            var finalYaw = ((player.getYaw() + 180f) / 360f) * 256f;
+            yaw = (byte)finalYaw;
+        }
+
         //生成实体
         var packetAdd = new ClientboundAddEntityPacket(
                 player.getEntityId(), spawnUUID,
                 player.getX(), player.getY(), player.getZ(),
-                player.getPitch(), player.getYaw(),
+                pitch, yaw,
                 nmsType, 0,
                 nmsPlayer.getDeltaMovement(),
                 nmsPlayer.getYHeadRot()

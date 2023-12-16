@@ -200,10 +200,4 @@ public class SpawnPacketHandler extends ProtocolListener
     {
         return ListeningWhitelist.EMPTY_WHITELIST;
     }
-
-    @Override
-    public Plugin getPlugin()
-    {
-        return MorphPlugin.getInstance();
-    }
 }
