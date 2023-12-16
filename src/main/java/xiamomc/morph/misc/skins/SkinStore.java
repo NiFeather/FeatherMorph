@@ -1,10 +1,6 @@
-package xiamomc.morph.backends.server.renderer.skins;
+package xiamomc.morph.misc.skins;
 
-import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.properties.Property;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import xiamomc.morph.misc.MorphGameProfile;
 import xiamomc.morph.storage.MorphJsonBasedStorage;
 
 public class SkinStore extends MorphJsonBasedStorage<SkinStoreRoot>

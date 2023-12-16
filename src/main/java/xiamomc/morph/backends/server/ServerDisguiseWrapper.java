@@ -24,6 +24,7 @@ import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.utilities.NbtUtils;
 
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ServerDisguiseWrapper extends DisguiseWrapper<ServerDisguise>
 {
@@ -314,10 +315,12 @@ public class ServerDisguiseWrapper extends DisguiseWrapper<ServerDisguise>
         //先和watcher同步一下我们的NBT
         bindingWatcher.mergeFromCompound(getCompound());
 
+        if (getEntityType() == EntityType.PLAYER)
+            bindingWatcher.write(EntryIndex.PROFILE, this.instance.profile);
+
         //todo: 激活刷新时也刷新到玩家
         if (bindingWatcher instanceof InventoryLivingWatcher)
         {
-            bindingWatcher.write(EntryIndex.PROFILE, this.instance.profile);
             bindingWatcher.write(EntryIndex.DISPLAY_FAKE_EQUIPMENT, shouldDisplayCustomEquipment);
             bindingWatcher.write(EntryIndex.EQUIPMENT, this.equipment);
         }

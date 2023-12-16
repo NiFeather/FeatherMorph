@@ -1,4 +1,4 @@
-package xiamomc.morph.backends.server.renderer.skins;
+package xiamomc.morph.misc.skins;
 
 import com.mojang.authlib.GameProfile;
 import net.minecraft.Util;

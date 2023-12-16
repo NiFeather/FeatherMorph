@@ -17,6 +17,8 @@ import xiamomc.morph.misc.CollisionBoxRecord;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.utilities.EntityTypeUtils;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 /**
  * A wrapper that holds the underlying disguise instance
  * @param <TInstance> Type of the disguise instance
@@ -288,11 +290,19 @@ public abstract class DisguiseWrapper<TInstance>
      */
     public abstract int getNetworkEntityId();
 
+    private final AtomicBoolean disposed = new AtomicBoolean(false);
+
+    public boolean disposed()
+    {
+        return disposed.get();
+    }
+
     /**
      * Dispose this wrapper
      */
     public void dispose()
     {
+        disposed.set(true);
     }
 
     //region Temp

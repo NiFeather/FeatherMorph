@@ -1,4 +1,4 @@
-package xiamomc.morph.backends.server.renderer.skins;
+package xiamomc.morph.misc.skins;
 
 import com.mojang.authlib.GameProfile;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
@@ -6,6 +6,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.players.GameProfileCache;
 import org.bukkit.Bukkit;
 import org.jetbrains.annotations.Nullable;
+import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.misc.NmsRecord;
 import xiamomc.pluginbase.Annotations.Initializer;
@@ -44,7 +45,7 @@ public class PlayerSkinProvider extends MorphPluginObject
         if (profile.getProperties().containsKey("textures"))
         {
             var optional = Optional.of(profile);
-            profileCache.put(profile.getName(), profile);
+            profileCache.put(profile.getName(), ProfileMeta.of(profile));
 
             return CompletableFuture.completedFuture(optional);
         }
@@ -59,21 +60,66 @@ public class PlayerSkinProvider extends MorphPluginObject
         }
     }
 
-    private final Map<String, GameProfile> profileCache = new Object2ObjectOpenHashMap<>();
+    private static class ProfileMeta
+    {
+        private final GameProfile profile;
+        private long lastAccess;
+
+        public ProfileMeta(GameProfile profile, long creationTime)
+        {
+            this.profile = profile;
+            lastAccess = creationTime;
+        }
+
+        public static ProfileMeta of(GameProfile profile)
+        {
+            return new ProfileMeta(
+                    profile, MorphPlugin.getInstance().getCurrentTick()
+            );
+        }
+    }
+
+    private final Map<String, ProfileMeta> profileCache = new Object2ObjectOpenHashMap<>();
 
     @Nullable
     public GameProfile getCachedProfile(String profileName)
     {
-        return profileCache.getOrDefault(profileName, null);
+        var meta = profileCache.getOrDefault(profileName, null);
+        if (meta != null)
+        {
+            meta.lastAccess = plugin.getCurrentTick();
+            return meta.profile;
+        }
+
+        return null;
     }
+
+    private void removeUnusedMeta()
+    {
+        var currentTick = plugin.getCurrentTick();
+        var mapCopy = new Object2ObjectOpenHashMap<>(profileCache);
+        mapCopy.forEach((name, meta) ->
+        {
+            if (currentTick - meta.lastAccess > 20 * 60 * 30)
+                profileCache.remove(name);
+        });
+    }
+
+    private int performCount;
 
     public CompletableFuture<Optional<GameProfile>> fetchSkin(String profileName)
     {
+        performCount++;
+
+        if (performCount >= 10)
+            removeUnusedMeta();
+
         var player = Bukkit.getPlayerExact(profileName);
         if (player != null)
         {
-            profileCache.remove(profileName);
-            return CompletableFuture.completedFuture(Optional.of(NmsRecord.ofPlayer(player).gameProfile));
+            var profile = NmsRecord.ofPlayer(player).gameProfile;
+            profileCache.put(profileName, ProfileMeta.of(profile));
+            return CompletableFuture.completedFuture(Optional.of(profile));
         }
 
         var cachedSkin = getCachedProfile(profileName);

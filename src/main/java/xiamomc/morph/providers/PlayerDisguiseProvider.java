@@ -1,5 +1,6 @@
 package xiamomc.morph.providers;
 
+import com.mojang.authlib.GameProfile;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.kyori.adventure.text.Component;
 import net.minecraft.nbt.CompoundTag;
@@ -19,8 +20,11 @@ import xiamomc.morph.misc.DisguiseMeta;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.misc.DisguiseTypes;
 import xiamomc.morph.misc.MorphGameProfile;
+import xiamomc.morph.misc.skins.PlayerSkinProvider;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
 
 public class PlayerDisguiseProvider extends DefaultDisguiseProvider
 {
@@ -52,9 +56,11 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
             return DisguiseResult.fail();
 
         var result = constructFromEntity(disguiseMeta, targetEntity);
-        var disguise = result.success()
+        var wrapper = result.success()
                 ? result.wrapperInstance()
                 : backend.createPlayerInstance(disguiseMeta.playerDisguiseTargetName);
+
+        Objects.requireNonNull(wrapper, "Null wrapper at where it shouldn't be?!");
 
         var mainHandItem = player.getEquipment().getItemInMainHand();
 
@@ -71,10 +77,26 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
 
             //如果玩家头和目标伪装ID一致，那么设置伪装皮肤
             if (gameProfile.getName().equals(DisguiseTypes.PLAYER.toStrippedId(id)))
-                disguise.applySkin(gameProfile);
+                wrapper.applySkin(gameProfile);
         }
 
-        return DisguiseResult.success(disguise, result.isCopy());
+        if (wrapper.getSkin() == null)
+        {
+            PlayerSkinProvider.getInstance().fetchSkin(disguiseMeta.playerDisguiseTargetName)
+                    .thenApply(optional ->
+                    {
+                        if (wrapper.disposed()) return null;
+
+                        GameProfile outcomingProfile = new GameProfile(UUID.randomUUID(), disguiseMeta.playerDisguiseTargetName);
+                        if (optional.isPresent()) outcomingProfile = optional.get();
+
+                        wrapper.applySkin(outcomingProfile);
+
+                        return null;
+                    });
+        }
+
+        return DisguiseResult.success(wrapper, result.isCopy());
     }
 
     @Override

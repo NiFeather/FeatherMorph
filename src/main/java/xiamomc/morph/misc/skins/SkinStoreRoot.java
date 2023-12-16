@@ -1,4 +1,4 @@
-package xiamomc.morph.backends.server.renderer.skins;
+package xiamomc.morph.misc.skins;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 

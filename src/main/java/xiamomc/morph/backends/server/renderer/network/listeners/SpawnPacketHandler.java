@@ -7,11 +7,7 @@ import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.injector.GamePhase;
 import com.mojang.authlib.GameProfile;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraft.Util;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
-import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.GameType;
@@ -24,17 +20,16 @@ import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.backends.server.renderer.network.DisplayParameters;
 import xiamomc.morph.backends.server.renderer.network.PacketFactory;
-import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.PlayerWatcher;
 import xiamomc.morph.backends.server.renderer.network.registries.EntryIndex;
 import xiamomc.morph.backends.server.renderer.network.registries.RenderRegistry;
-import xiamomc.morph.backends.server.renderer.skins.PlayerSkinProvider;
+import xiamomc.morph.misc.skins.PlayerSkinProvider;
 import xiamomc.morph.misc.NmsRecord;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Exceptions.NullDependencyException;
 
-import java.util.EnumSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 public class SpawnPacketHandler extends ProtocolListener
@@ -88,31 +83,6 @@ public class SpawnPacketHandler extends ProtocolListener
         });
     }
 
-    /**
-     * 获取玩家伪装的皮肤，并刷新到玩家上
-     * @param player 目标玩家
-     * @param disguiseName 伪装的玩家名称
-     */
-    private void scheduleRefreshPlayerDisplay(Player player, String disguiseName, SingleWatcher currentWatcher)
-    {
-        PlayerSkinProvider.getInstance().fetchSkin(disguiseName)
-                .thenApply(optional ->
-                {
-                    GameProfile outcomingProfile = new GameProfile(UUID.randomUUID(), disguiseName);
-                    if (optional.isPresent()) outcomingProfile = optional.get();
-
-                    var newWatcher = registry.getWatcher(player.getUniqueId());
-                    if (newWatcher == null || currentWatcher != newWatcher)
-                        return null;
-
-                    logger.info("Triggering refresh!");
-                    GameProfile finalOutcomingProfile = outcomingProfile;
-                    newWatcher.write(EntryIndex.PROFILE, finalOutcomingProfile);
-
-                    return null;
-                });
-    }
-
     private void refreshStateForPlayer(@Nullable Player player)
     {
         if (player == null) return;
@@ -164,13 +134,7 @@ public class SpawnPacketHandler extends ProtocolListener
                     ? PlayerSkinProvider.getInstance().getCachedProfile(disguiseName)
                     : NmsRecord.ofPlayer(targetPlayer).gameProfile;
 
-            if (cachedProfile == null)
-            {
-                scheduleRefreshPlayerDisplay(player, disguiseName, watcher);
-                gameProfile = new GameProfile(Util.NIL_UUID, disguiseName);
-            }
-            else
-                gameProfile = cachedProfile;
+            gameProfile = Objects.requireNonNullElseGet(cachedProfile, () -> new GameProfile(UUID.randomUUID(), disguiseName));
         }
 
         var parametersFinal = new DisplayParameters(displayType, watcher, gameProfile);
