@@ -74,10 +74,4 @@ public class EquipmentPacketListener extends ProtocolListener
     {
         return ListeningWhitelist.EMPTY_WHITELIST;
     }
-
-    @Override
-    public org.bukkit.plugin.Plugin getPlugin()
-    {
-        return MorphPlugin.getInstance();
-    }
 }

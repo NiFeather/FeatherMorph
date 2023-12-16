@@ -3,6 +3,7 @@ package xiamomc.morph.backends.server.renderer.network.listeners;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.events.PacketListener;
+import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.backends.server.renderer.network.PacketFactory;
 import xiamomc.morph.backends.server.renderer.network.queue.PacketQueue;
@@ -26,5 +27,11 @@ public abstract class ProtocolListener extends MorphPluginObject implements Pack
     protected ProtocolManager protocolManager()
     {
         return ProtocolLibrary.getProtocolManager();
+    }
+
+    @Override
+    public org.bukkit.plugin.Plugin getPlugin()
+    {
+        return MorphPlugin.getInstance();
     }
 }

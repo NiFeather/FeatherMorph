@@ -4,6 +4,7 @@ import com.comphenix.protocol.ProtocolLibrary;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.backends.server.renderer.network.listeners.EquipmentPacketListener;
 import xiamomc.morph.backends.server.renderer.network.listeners.MetaPacketListener;
+import xiamomc.morph.backends.server.renderer.network.listeners.PlayerLookPacketListener;
 import xiamomc.morph.backends.server.renderer.network.listeners.SpawnPacketHandler;
 import xiamomc.pluginbase.Annotations.Initializer;
 
@@ -26,7 +27,8 @@ public class ProtocolHandler extends MorphPluginObject
         protocolMgr.addPacketListener(morphPacketListener);
         protocolMgr.addPacketListener(new MetaPacketListener());
         protocolMgr.addPacketListener(new EquipmentPacketListener());
-        //protocolMgr.addPacketListener(new TestPacketListener());
+        protocolMgr.addPacketListener(new PlayerLookPacketListener());
+        protocolMgr.addPacketListener(new TestPacketListener());
     }
 
     private boolean disposed;

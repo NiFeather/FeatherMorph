@@ -29,9 +29,6 @@ public class PlayerSkinProvider extends MorphPluginObject
 
     private GameProfileCache userCache;
 
-    @Resolved
-    private SkinStore skinStore;
-
     @Initializer
     private void load()
     {
