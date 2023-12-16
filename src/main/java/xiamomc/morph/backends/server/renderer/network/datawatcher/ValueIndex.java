@@ -35,4 +35,5 @@ public class ValueIndex
     public static final ZombieVillagerValues ZOMBIE_VILLAGER = new ZombieVillagerValues();
     public static final ZoglinValues ZOGLIN = new ZoglinValues();
     public static final GuardianValues GUARDIAN = new GuardianValues();
+    public static final AxolotlValues AXOLOTL = new AxolotlValues();
 }

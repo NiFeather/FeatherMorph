@@ -15,6 +15,14 @@ public class ChestedHorseWatcher extends AbstractHorseWatcher
     }
 
     @Override
+    protected void initRegistry()
+    {
+        super.initRegistry();
+
+        register(ValueIndex.CHESTED_HORSE);
+    }
+
+    @Override
     public void mergeFromCompound(CompoundTag nbt)
     {
         super.mergeFromCompound(nbt);

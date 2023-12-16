@@ -112,4 +112,22 @@ public class ZombieVillagerWatcher extends ZombieWatcher
         if (nbt.contains("VillagerData"))
             mergeFromVillagerData(nbt.getCompound("VillagerData"));
     }
+
+    @Override
+    public void writeToCompound(CompoundTag nbt)
+    {
+        super.writeToCompound(nbt);
+
+        var villagerData = get(ValueIndex.VILLAGER.VILLAGER_DATA);
+        var profession = villagerData.getProfession();
+        var type = villagerData.getType();
+        var level = villagerData.getLevel();
+
+        var compound = new CompoundTag();
+        compound.putInt("level", level);
+        compound.putString("profession", BuiltInRegistries.VILLAGER_PROFESSION.getKey(profession).toString());
+        compound.putString("type", BuiltInRegistries.VILLAGER_TYPE.getKey(type).toString());
+
+        nbt.put("VillagerData", compound);
+    }
 }
