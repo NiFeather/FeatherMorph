@@ -76,6 +76,9 @@ public class NilBackend extends DisguiseBackend<NilDisguise, NilWrapper>
         if (!(rawWrapper instanceof NilWrapper wrapper))
             return false;
 
+        if (playerFallbackWrapperMap.containsKey(player))
+            unDisguise(player);
+
         playerFallbackWrapperMap.put(player, wrapper);
         return true;
     }
@@ -84,6 +87,10 @@ public class NilBackend extends DisguiseBackend<NilDisguise, NilWrapper>
     public boolean unDisguise(Player player)
     {
         var wrapper = playerFallbackWrapperMap.getOrDefault(player, null);
+
+        if (wrapper != null)
+            wrapper.dispose();
+
         playerFallbackWrapperMap.remove(player);
 
         return true;
