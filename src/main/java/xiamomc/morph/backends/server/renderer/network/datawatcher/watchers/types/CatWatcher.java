@@ -12,7 +12,7 @@ import xiamomc.morph.backends.server.renderer.network.datawatcher.ValueIndex;
 import java.util.Arrays;
 import java.util.Random;
 
-public class CatWatcher extends LivingEntityWatcher
+public class CatWatcher extends TameableAnimalWatcher
 {
     public CatWatcher(Player bindingPlayer)
     {
@@ -45,9 +45,7 @@ public class CatWatcher extends LivingEntityWatcher
         var targetIndex = random.nextInt(availableVariants.size());
         var targetValue = bukkitTypeToNms(availableVariants.get(targetIndex));
 
-        logger.info("Write value " + targetValue);
         this.write(ValueIndex.CAT.CAT_VARIANT, targetValue);
-        logger.info("Get value :" + getCatType());
     }
 
     private CatVariant bukkitTypeToNms(Cat.Type bukkitType)

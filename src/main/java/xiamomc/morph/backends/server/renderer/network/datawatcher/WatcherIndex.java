@@ -71,6 +71,12 @@ public class WatcherIndex
         setTypeWatcher(EntityType.GUARDIAN, GuardianWatcher::new);
 
         setTypeWatcher(EntityType.AXOLOTL, AxolotlWatcher::new);
+
+        setTypeWatcher(EntityType.MUSHROOM_COW, MooshroomWatcher::new);
+        setTypeWatcher(EntityType.SHEEP, SheepWatcher::new);
+
+        setTypeWatcher(EntityType.WOLF, WolfWatcher::new);
+        setTypeWatcher(EntityType.PHANTOM, PhantomWatcher::new);
     }
 
     private void setTypeWatcher(EntityType type, Function<Player, SingleWatcher> func)

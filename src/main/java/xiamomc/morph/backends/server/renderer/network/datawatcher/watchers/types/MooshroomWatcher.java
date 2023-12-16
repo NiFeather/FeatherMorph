@@ -5,11 +5,11 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.ValueIndex;
 
-public class ParrotWatcher extends TameableAnimalWatcher
+public class MooshroomWatcher extends LivingEntityWatcher
 {
-    public ParrotWatcher(Player bindingPlayer)
+    public MooshroomWatcher(Player bindingPlayer)
     {
-        super(bindingPlayer, EntityType.PARROT);
+        super(bindingPlayer, EntityType.MUSHROOM_COW);
     }
 
     @Override
@@ -17,7 +17,7 @@ public class ParrotWatcher extends TameableAnimalWatcher
     {
         super.initRegistry();
 
-        register(ValueIndex.PARROT);
+        register(ValueIndex.MOOSHROOM);
     }
 
     @Override
@@ -25,10 +25,15 @@ public class ParrotWatcher extends TameableAnimalWatcher
     {
         super.mergeFromCompound(nbt);
 
-        if (nbt.contains("Variant"))
-        {
-            var variant = nbt.getInt("Variant");
-            this.write(ValueIndex.PARROT.PARROT_VARIANT, variant);
-        }
+        if (nbt.contains("Type"))
+            write(ValueIndex.MOOSHROOM.VARIANT, nbt.getString("Type"));
+    }
+
+    @Override
+    public void writeToCompound(CompoundTag nbt)
+    {
+        super.writeToCompound(nbt);
+
+        nbt.putString("Type", get(ValueIndex.MOOSHROOM.VARIANT));
     }
 }

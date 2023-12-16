@@ -36,4 +36,8 @@ public class ValueIndex
     public static final ZoglinValues ZOGLIN = new ZoglinValues();
     public static final GuardianValues GUARDIAN = new GuardianValues();
     public static final AxolotlValues AXOLOTL = new AxolotlValues();
+    public static final MooshroomValues MOOSHROOM = new MooshroomValues();
+    public static final SheepValues SHEEP = new SheepValues();
+    public static final WolfValues WOLF = new WolfValues();
+    public static final PhantomValues PHANTOM = new PhantomValues();
 }
