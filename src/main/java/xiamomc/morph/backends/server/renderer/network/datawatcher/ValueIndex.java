@@ -31,4 +31,8 @@ public class ValueIndex
     public static final SnowGolemValues SNOW_GOLEM = new SnowGolemValues();
     public static final CreeperValues CREEPER = new CreeperValues();
     public static final PiglinValues PIGLIN = new PiglinValues();
+    public static final ZombieValues ZOMBIE = new ZombieValues();
+    public static final ZombieVillagerValues ZOMBIE_VILLAGER = new ZombieVillagerValues();
+    public static final ZoglinValues ZOGLIN = new ZoglinValues();
+    public static final GuardianValues GUARDIAN = new GuardianValues();
 }

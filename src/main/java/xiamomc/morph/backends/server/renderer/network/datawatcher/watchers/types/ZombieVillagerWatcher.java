@@ -15,11 +15,11 @@ import xiamomc.morph.utilities.MathUtils;
 import java.util.Arrays;
 import java.util.Random;
 
-public class VillagerWatcher extends LivingEntityWatcher
+public class ZombieVillagerWatcher extends ZombieWatcher
 {
-    public VillagerWatcher(Player bindingPlayer)
+    public ZombieVillagerWatcher(Player bindingPlayer)
     {
-        super(bindingPlayer, EntityType.VILLAGER);
+        super(bindingPlayer, EntityType.ZOMBIE_VILLAGER);
     }
 
     @Override
@@ -27,7 +27,7 @@ public class VillagerWatcher extends LivingEntityWatcher
     {
         super.initRegistry();
 
-        register(ValueIndex.VILLAGER);
+        register(ValueIndex.ZOMBIE_VILLAGER);
     }
 
     @Override
@@ -36,7 +36,7 @@ public class VillagerWatcher extends LivingEntityWatcher
         super.initValues();
 
         var random = new Random();
-        var availableTypes = Arrays.stream(VillagerTypes.values()).toList();
+        var availableTypes = Arrays.stream(VillagerWatcher.VillagerTypes.values()).toList();
         var villagerType = availableTypes.get(random.nextInt(availableTypes.size())).bindingType;
 
         var availableProfessions = Arrays.stream(Villager.Profession.values()).toList();
@@ -54,7 +54,7 @@ public class VillagerWatcher extends LivingEntityWatcher
         }
 
         var level = random.nextInt(1, 6);
-        write(ValueIndex.VILLAGER.VILLAGER_DATA, new VillagerData(villagerType, villagerProfession, level));
+        write(ValueIndex.ZOMBIE_VILLAGER.VILLAGER_DATA, new VillagerData(villagerType, villagerProfession, level));
     }
 
     private void mergeFromVillagerData(CompoundTag nbt)
@@ -101,7 +101,7 @@ public class VillagerWatcher extends LivingEntityWatcher
             logger.info("Set type " + type);
         }
 
-        write(ValueIndex.VILLAGER.VILLAGER_DATA, new VillagerData(type, profession, level));
+        write(ValueIndex.ZOMBIE_VILLAGER.VILLAGER_DATA, new VillagerData(type, profession, level));
     }
 
     @Override
@@ -109,29 +109,7 @@ public class VillagerWatcher extends LivingEntityWatcher
     {
         super.mergeFromCompound(nbt);
 
-        logger.info("Merg " + nbt.getAsString());
         if (nbt.contains("VillagerData"))
-        {
-            var compound = nbt.getCompound("VillagerData");
-            mergeFromVillagerData(compound);
-        }
-    }
-
-    public enum VillagerTypes
-    {
-        DESERT(VillagerType.DESERT),
-        JUNGLE(VillagerType.JUNGLE),
-        PLAINS(VillagerType.PLAINS),
-        SAVANNA(VillagerType.SAVANNA),
-        SNOW(VillagerType.SNOW),
-        SWAMP(VillagerType.SWAMP),
-        TAIGA(VillagerType.TAIGA);
-
-        public final VillagerType bindingType;
-
-        VillagerTypes(VillagerType bindingType)
-        {
-            this.bindingType = bindingType;
-        }
+            mergeFromVillagerData(nbt.getCompound("VillagerData"));
     }
 }

@@ -1,6 +1,7 @@
 package xiamomc.morph.backends.server.renderer.network.datawatcher.values;
 
 import net.minecraft.world.entity.animal.FrogVariant;
+import xiamomc.morph.backends.server.renderer.network.datawatcher.values.basetypes.AnimalValues;
 
 public class FrogValues extends AnimalValues
 {
