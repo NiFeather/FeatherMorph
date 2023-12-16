@@ -62,6 +62,12 @@ public class WatcherIndex
         setTypeWatcher(EntityType.SNOWMAN, SnowGolemWatcher::new);
         setTypeWatcher(EntityType.CREEPER, CreeperWatcher::new);
         setTypeWatcher(EntityType.PIGLIN, PiglinWatcher::new);
+
+        setTypeWatcher(EntityType.ZOMBIE, ZombieWatcher::new);
+        setTypeWatcher(EntityType.ZOMBIE_VILLAGER, ZombieVillagerWatcher::new);
+        setTypeWatcher(EntityType.ZOGLIN, ZoglinWatcher::new);
+        setTypeWatcher(EntityType.HOGLIN, HoglinWatcher::new);
+        setTypeWatcher(EntityType.GUARDIAN, GuardianWatcher::new);
     }
 
     private void setTypeWatcher(EntityType type, Function<Player, SingleWatcher> func)

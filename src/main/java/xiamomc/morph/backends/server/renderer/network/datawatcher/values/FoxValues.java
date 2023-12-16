@@ -1,5 +1,7 @@
 package xiamomc.morph.backends.server.renderer.network.datawatcher.values;
 
+import xiamomc.morph.backends.server.renderer.network.datawatcher.values.basetypes.AnimalValues;
+
 import java.util.UUID;
 
 public class FoxValues extends AnimalValues

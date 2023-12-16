@@ -1,5 +1,7 @@
 package xiamomc.morph.backends.server.renderer.network.datawatcher.values;
 
+import xiamomc.morph.backends.server.renderer.network.datawatcher.values.basetypes.AnimalValues;
+
 public class PandaValues extends AnimalValues
 {
     public final SingleValue<Integer> BREED_TIMER = getSingle(0);

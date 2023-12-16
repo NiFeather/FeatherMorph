@@ -1,5 +1,7 @@
 package xiamomc.morph.backends.server.renderer.network.datawatcher.values;
 
+import xiamomc.morph.backends.server.renderer.network.datawatcher.values.basetypes.AnimalValues;
+
 public class GoatValues extends AnimalValues
 {
     public final SingleValue<Boolean> IS_SCREAMING = getSingle(false);

@@ -1,6 +1,5 @@
 package xiamomc.morph.backends.server.renderer.network.datawatcher.values.basetypes;
 
-import xiamomc.morph.backends.server.renderer.network.datawatcher.values.AnimalValues;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.values.SingleValue;
 
 import java.util.UUID;
