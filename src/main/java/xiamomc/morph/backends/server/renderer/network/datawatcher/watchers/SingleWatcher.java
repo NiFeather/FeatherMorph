@@ -257,6 +257,10 @@ public abstract class SingleWatcher extends MorphPluginObject
     {
     }
 
+    public void writeToCompound(CompoundTag nbt)
+    {
+    }
+
     //region Networking
 
     //endregion Networking

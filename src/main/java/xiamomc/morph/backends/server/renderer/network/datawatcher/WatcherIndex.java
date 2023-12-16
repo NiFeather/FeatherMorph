@@ -42,6 +42,7 @@ public class WatcherIndex
         setTypeWatcher(EntityType.HORSE, HorseWatcher::new);
         setTypeWatcher(EntityType.SKELETON_HORSE, SkeletonHorseWatcher::new);
         setTypeWatcher(EntityType.ZOMBIE_HORSE, ZombieHorseWatcher::new);
+        setTypeWatcher(EntityType.DONKEY, DonkeyWatcher::new);
 
         setTypeWatcher(EntityType.CAMEL, p -> new AbstractHorseWatcher(p, EntityType.CAMEL));
 
@@ -68,6 +69,8 @@ public class WatcherIndex
         setTypeWatcher(EntityType.ZOGLIN, ZoglinWatcher::new);
         setTypeWatcher(EntityType.HOGLIN, HoglinWatcher::new);
         setTypeWatcher(EntityType.GUARDIAN, GuardianWatcher::new);
+
+        setTypeWatcher(EntityType.AXOLOTL, AxolotlWatcher::new);
     }
 
     private void setTypeWatcher(EntityType type, Function<Player, SingleWatcher> func)

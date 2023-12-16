@@ -16,6 +16,8 @@ public class WatcherUtils
     {
         var tag = new CompoundTag();
 
+        watcher.writeToCompound(tag);
+
         switch (watcher.getEntityType())
         {
             case SLIME, MAGMA_CUBE ->
@@ -81,21 +83,6 @@ public class WatcherUtils
 
                 tag.putString("MainGene", mainGene.toString().toLowerCase());
                 tag.putString("HiddenGene", hiddenGene.toString().toLowerCase());
-            }
-
-            case VILLAGER ->
-            {
-                var villagerData = watcher.get(ValueIndex.VILLAGER.VILLAGER_DATA);
-                var profession = villagerData.getProfession();
-                var type = villagerData.getType();
-                var level = villagerData.getLevel();
-
-                var compound = new CompoundTag();
-                compound.putInt("level", level);
-                compound.putString("profession", BuiltInRegistries.VILLAGER_PROFESSION.getKey(profession).toString());
-                compound.putString("type", BuiltInRegistries.VILLAGER_TYPE.getKey(type).toString());
-
-                tag.put("VillagerData", compound);
             }
 
             case SNOWMAN ->
