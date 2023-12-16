@@ -37,6 +37,10 @@ repositories {
     }
 
     maven {
+        url = uri("https://repo.dmulloy2.net/repository/public/")
+    }
+
+    maven {
         url = uri("https://repo.maven.apache.org/maven2/")
     }
 }
@@ -44,11 +48,7 @@ repositories {
 dependencies {
     paperweight.paperDevBundle("${project.property("minecraft_version")}")
 
-    compileOnly("LibsDisguises:LibsDisguises:${project.property("ld_version")}")
-    {
-        exclude("org.spigotmc", "spigot-api")
-        exclude("org.spigotmc", "spigot")
-    }
+    compileOnly("com.comphenix.protocol:ProtocolLib:${project.property("protocollib_version")}")
 
     compileOnly(files("libs/CMILib1.4.3.5.jar"))
     compileOnly(files("libs/Residence5.1.4.0.jar"))
@@ -70,7 +70,7 @@ dependencies {
         exclude("com.google.code.gson", "gson")
     }
 
-    compileOnly("com.github.Gecolay:GSit:${project.property("gsit_version")}")
+    //compileOnly("com.github.Gecolay:GSit:${project.property("gsit_version")}")
     compileOnly("me.clip:placeholderapi:${project.property("papi_version")}")
 }
 

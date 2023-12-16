@@ -19,7 +19,6 @@ import xiamomc.morph.abilities.AbilityHandler;
 import xiamomc.morph.backends.DisguiseBackend;
 import xiamomc.morph.backends.DisguiseWrapper;
 import xiamomc.morph.backends.fallback.NilBackend;
-import xiamomc.morph.backends.libsdisg.LibsBackend;
 import xiamomc.morph.backends.server.ServerBackend;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
@@ -120,31 +119,12 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         }
         catch (NoClassDefFoundError e)
         {
-            logger.error("Unable to initialize renderer as our disguise backend, maybe ProtocolLib it's not installed on the server.");
-            logger.error("Trying LibsBackend...");
-        }
-        catch (Throwable t)
-        {
-            logger.error("Unable to initialize renderer as our disguise backend: " + t.getMessage());
-            logger.error("Please consider reporting this issue to our GitHub: https://github.com/XiaMoZhiShi/MorphPlugin/issues");
-            logger.error("Trying LibsBackend...");
-
-            t.printStackTrace();
-        }
-
-        try
-        {
-            this.currentBackend = new LibsBackend();
-            return;
-        }
-        catch (NoClassDefFoundError e)
-        {
-            logger.error("Unable to initialize LibsDisguises as our disguise backend, maybe it's not installed on the server.");
+            logger.error("Unable to initialize ServerBackend as our disguise backend, maybe ProtocolLib is not installed on the server.");
             logger.error("Using NilBackend, displaying disguises at the server side will not be supported this run.");
         }
         catch (Throwable t)
         {
-            logger.error("Unable to initialize LibsDisguises as our disguise backend: " + t.getMessage());
+            logger.error("Unable to initialize ServerBackend as our disguise backend: " + t.getMessage());
             logger.error("Using NilBackend, displaying disguises at the server side will not be supported this run.");
             logger.error("Please consider reporting this issue to our GitHub: https://github.com/XiaMoZhiShi/MorphPlugin/issues");
 

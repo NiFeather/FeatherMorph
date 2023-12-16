@@ -20,7 +20,6 @@ import xiamomc.morph.misc.NetworkingHelper;
 import xiamomc.morph.misc.PlayerOperationSimulator;
 import xiamomc.morph.misc.integrations.residence.ResidenceEventProcessor;
 import xiamomc.morph.updates.UpdateHandler;
-import xiamomc.morph.misc.integrations.gsit.GSitCompactProcessor;
 import xiamomc.morph.misc.integrations.placeholderapi.PlaceholderIntegration;
 import xiamomc.morph.network.server.MorphClientHandler;
 import xiamomc.morph.skills.MorphSkillHandler;
@@ -29,8 +28,6 @@ import xiamomc.morph.transforms.Transformer;
 import xiamomc.pluginbase.Command.CommandHelper;
 import xiamomc.pluginbase.Messages.MessageStore;
 import xiamomc.pluginbase.XiaMoJavaPlugin;
-
-import java.util.Arrays;
 
 public final class MorphPlugin extends XiaMoJavaPlugin
 {
@@ -95,12 +92,6 @@ public final class MorphPlugin extends XiaMoJavaPlugin
         this.registerListener(softDeps);
 
         var playerTracker = new PlayerTracker();
-
-        softDeps.setHandle("GSit", s ->
-        {
-            logger.info("GSit detected, applying integrations...");
-            this.registerListener(new GSitCompactProcessor());
-        }, true);
 
         softDeps.setHandle("PlaceholderAPI", p ->
         {
