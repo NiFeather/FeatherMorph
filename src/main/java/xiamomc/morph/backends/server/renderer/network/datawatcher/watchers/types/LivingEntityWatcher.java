@@ -83,10 +83,8 @@ public class LivingEntityWatcher extends EntityWatcher implements Listener
         boolean hasAmbient = true;
         for (PotionEffect effect : player.getActivePotionEffects())
         {
-            if (!effect.hasParticles())
-                continue;
-
-            colors.add(effect.getType().getColor());
+            if (effect.hasParticles())
+                colors.add(effect.getType().getColor());
 
             hasAmbient = effect.isAmbient() && hasAmbient;
         }
