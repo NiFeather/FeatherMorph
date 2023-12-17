@@ -83,13 +83,10 @@ public class PacketFactory extends MorphPluginObject
         var yaw = player.getYaw();
 
         if (disguiseType == EntityType.PHANTOM)
-            pitch = (-player.getPitch() / 360f) * 256f;
+            pitch = -player.getPitch();
 
         if (disguiseType == EntityType.ENDER_DRAGON)
-        {
-            var finalYaw = ((player.getYaw() + 180f) / 360f) * 256f;
-            yaw = (byte)finalYaw;
-        }
+            yaw = 180 + yaw;
 
         //生成实体
         var packetAdd = new ClientboundAddEntityPacket(

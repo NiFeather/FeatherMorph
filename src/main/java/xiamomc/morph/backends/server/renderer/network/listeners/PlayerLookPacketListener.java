@@ -18,17 +18,28 @@ import xiamomc.pluginbase.Annotations.Resolved;
 public class PlayerLookPacketListener extends ProtocolListener
 {
     @Override
+    public String getIdentifier()
+    {
+        return "look_move_listener";
+    }
+
+    @Override
     public void onPacketSending(PacketEvent event)
     {
         var packetType = event.getPacketType();
 
         var packet = event.getPacket();
+        //event.setCancelled(true);
 
         //不要处理来自我们自己的包
         if (packet.getMeta(PacketFactory.MORPH_PACKET_METAKEY).isPresent())
+        {
             return;
+        }
 
-        if (packetType == PacketType.Play.Server.ENTITY_LOOK || packetType == PacketType.Play.Server.REL_ENTITY_MOVE)
+        if (packetType == PacketType.Play.Server.ENTITY_LOOK
+                || packetType == PacketType.Play.Server.REL_ENTITY_MOVE
+                || packetType == PacketType.Play.Server.REL_ENTITY_MOVE_LOOK)
         {
             //PacketPlayOutEntity$PacketPlayOutEntityLook
             var cast = (ClientboundMoveEntityPacket)packet.getHandle();
@@ -65,8 +76,6 @@ public class PlayerLookPacketListener extends ProtocolListener
         var yaw = packet.getyRot();
         var pitch = packet.getxRot();
 
-        logger.info("Y " + yaw + " :: P"+ pitch );
-
         var playerYaw = isDragon ? (sourcePlayer.getYaw() + 180f) : sourcePlayer.getYaw();
         var finalYaw = (playerYaw / 360f) * 256f;
         yaw = (byte)finalYaw;
@@ -93,8 +102,6 @@ public class PlayerLookPacketListener extends ProtocolListener
             return;
 
         var headYaw = packet.getYHeadRot();
-
-        logger.info("HEADYAW " + headYaw);
 
         if (watcher.getEntityType() == EntityType.ENDER_DRAGON)
         {
@@ -136,8 +143,6 @@ public class PlayerLookPacketListener extends ProtocolListener
         pitch = (byte)finalPitch;
 
         ClientboundMoveEntityPacket newPacket;
-
-        logger.info("FY " + finalYaw + " FP " + finalPitch);
 
         if (event.getPacketType() == PacketType.Play.Server.ENTITY_LOOK)
         {

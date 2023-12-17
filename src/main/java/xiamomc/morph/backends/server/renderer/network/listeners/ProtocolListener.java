@@ -17,6 +17,8 @@ public abstract class ProtocolListener extends MorphPluginObject implements Pack
     @Resolved(shouldSolveImmediately = true)
     private PacketQueue packetQueue;
 
+    public abstract String getIdentifier();
+
     protected PacketQueue getQueue()
     {
         return packetQueue;

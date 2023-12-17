@@ -2,15 +2,15 @@ package xiamomc.morph.backends.server.renderer.network;
 
 import com.comphenix.protocol.ProtocolLibrary;
 import xiamomc.morph.MorphPluginObject;
-import xiamomc.morph.backends.server.renderer.network.listeners.EquipmentPacketListener;
-import xiamomc.morph.backends.server.renderer.network.listeners.MetaPacketListener;
-import xiamomc.morph.backends.server.renderer.network.listeners.PlayerLookPacketListener;
-import xiamomc.morph.backends.server.renderer.network.listeners.SpawnPacketHandler;
+import xiamomc.morph.backends.server.renderer.network.listeners.*;
 import xiamomc.pluginbase.Annotations.Initializer;
 
 public class ProtocolHandler extends MorphPluginObject
 {
     private final SpawnPacketHandler morphPacketListener = new SpawnPacketHandler();
+    private final MetaPacketListener metaPacketListener = new MetaPacketListener();
+    private final EquipmentPacketListener equipmentPacketListener = new EquipmentPacketListener();
+    private final PlayerLookPacketListener playerLookPacketListener = new PlayerLookPacketListener();
 
     public SpawnPacketHandler getPacketListener()
     {
@@ -25,10 +25,10 @@ public class ProtocolHandler extends MorphPluginObject
         var protocolMgr = ProtocolLibrary.getProtocolManager();
 
         protocolMgr.addPacketListener(morphPacketListener);
-        protocolMgr.addPacketListener(new MetaPacketListener());
-        protocolMgr.addPacketListener(new EquipmentPacketListener());
-        protocolMgr.addPacketListener(new PlayerLookPacketListener());
-        protocolMgr.addPacketListener(new TestPacketListener());
+        protocolMgr.addPacketListener(metaPacketListener);
+        protocolMgr.addPacketListener(equipmentPacketListener);
+        protocolMgr.addPacketListener(playerLookPacketListener);
+        //protocolMgr.addPacketListener(new TestPacketListener());
     }
 
     private boolean disposed;
@@ -40,6 +40,9 @@ public class ProtocolHandler extends MorphPluginObject
             var protocolMgr = ProtocolLibrary.getProtocolManager();
 
             protocolMgr.removePacketListener(morphPacketListener);
+            protocolMgr.removePacketListener(metaPacketListener);
+            protocolMgr.removePacketListener(equipmentPacketListener);
+            protocolMgr.removePacketListener(playerLookPacketListener);
         }
         catch (Throwable t)
         {
