@@ -37,12 +37,32 @@ public class ServerRenderer extends MorphPluginObject
      */
     public SingleWatcher registerEntity(Player player, EntityType entityType, String name)
     {
-        return registry.register(player, new RegisterParameters(entityType, name));
+        try
+        {
+            return registry.register(player, new RegisterParameters(entityType, name));
+        }
+        catch (Throwable t)
+        {
+            logger.error("Can't register player: " + t.getMessage());
+            t.printStackTrace();
+
+            unRegisterEntity(player);
+        }
+
+        return null;
     }
 
     public void unRegisterEntity(Player player)
     {
-        registry.unregister(player.getUniqueId());
+        try
+        {
+            registry.unregister(player.getUniqueId());
+        }
+        catch (Throwable t)
+        {
+            logger.info("Can't unregister player: " + t.getMessage());
+            t.printStackTrace();
+        }
     }
 
     public void dispose()
