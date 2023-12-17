@@ -1,7 +1,7 @@
 package xiamomc.morph.utilities;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import org.bukkit.craftbukkit.v1_20_R3.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_20_R2.inventory.CraftItemStack;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
 import org.slf4j.ILoggerFactory;
