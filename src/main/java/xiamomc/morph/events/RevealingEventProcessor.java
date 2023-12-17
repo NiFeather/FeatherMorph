@@ -1,6 +1,6 @@
 package xiamomc.morph.events;
 
-import org.bukkit.craftbukkit.v1_20_R3.entity.CraftMob;
+import org.bukkit.craftbukkit.v1_20_R2.entity.CraftMob;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;

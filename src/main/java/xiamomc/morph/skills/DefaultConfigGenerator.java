@@ -172,9 +172,6 @@ public class DefaultConfigGenerator
                         .withDelay(DisguiseUtils.GHAST_EXECUTE_DELAY)
                         .withWarningSound("entity.ghast.warn")));
 
-        addSkillConfiguration(skills, EntityType.BREEZE, 40, SkillType.LAUNCH_PROJECTIVE, c ->
-                c.addOption(SkillType.LAUNCH_PROJECTIVE, new ProjectiveConfiguration(EntityType.WIND_CHARGE, 1, "entity.breeze.shoot", 16)));
-
         //药效
         addSkillConfiguration(skills, EntityType.DOLPHIN, 180, SkillType.APPLY_EFFECT, c ->
                 c.addOption(SkillType.APPLY_EFFECT, new EffectConfiguration(PotionEffectType.DOLPHINS_GRACE.getKey().asString(), 0, 180, true, false, null, 0, 9)));
@@ -310,7 +307,5 @@ public class DefaultConfigGenerator
         addAbilityConfiguration(skills, EntityTypeUtils.spider(), AbilityType.SPIDER);
 
         addAbilityConfiguration(skills, EntityType.TURTLE, AbilityType.CAN_BREATHE_UNDER_WATER);
-
-        addAbilityConfiguration(skills, EntityType.BREEZE, AbilityType.HAS_JUMP_BOOST);
     }
 }
