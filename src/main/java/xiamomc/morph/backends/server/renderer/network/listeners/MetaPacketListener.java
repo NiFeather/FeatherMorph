@@ -18,6 +18,12 @@ public class MetaPacketListener extends ProtocolListener
     private RenderRegistry registry;
 
     @Override
+    public String getIdentifier()
+    {
+        return "meta_listener";
+    }
+
+    @Override
     public void onPacketSending(PacketEvent event)
     {
         if (event.getPacketType() != PacketType.Play.Server.ENTITY_METADATA)

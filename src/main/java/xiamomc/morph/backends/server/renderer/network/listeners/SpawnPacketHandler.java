@@ -37,6 +37,12 @@ public class SpawnPacketHandler extends ProtocolListener
     @Resolved(shouldSolveImmediately = true)
     private RenderRegistry registry;
 
+    @Override
+    public String getIdentifier()
+    {
+        return "spawn_listener";
+    }
+
     public SpawnPacketHandler()
     {
         registry.onRegister(this, ep ->

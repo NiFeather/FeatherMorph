@@ -36,17 +36,17 @@ public class TestPacketListener extends MorphPluginObject implements PacketListe
     {
         var type = event.getPacketType();
 
-        if (type == PacketType.Play.Server.ENTITY_LOOK
-            || type == PacketType.Play.Server.ENTITY_HEAD_ROTATION
-            || type == PacketType.Play.Server.REL_ENTITY_MOVE
-            || type == PacketType.Play.Server.REL_ENTITY_MOVE_LOOK
-            || type == PacketType.Play.Server.NAMED_SOUND_EFFECT
+        if (type == PacketType.Play.Server.NAMED_SOUND_EFFECT
             || type == PacketType.Play.Server.ENTITY_EFFECT
             || type == PacketType.Play.Server.BLOCK_CHANGE
             || type == PacketType.Play.Server.UPDATE_TIME)
         {
             return;
         }
+
+        if (event.isCancelled())
+            return;
+
         logger.info("SEND! type is '%s' handle is '%s'".formatted(event.getPacketType().name(), event.getPacket().getHandle()));
     }
 
