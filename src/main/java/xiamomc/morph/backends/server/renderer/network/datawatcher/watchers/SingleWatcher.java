@@ -176,7 +176,9 @@ public abstract class SingleWatcher extends MorphPluginObject
 
         var prev = registry.getOrDefault(single, null);
         registry.put(single, value);
-        dirtySingles.put(single, value);
+
+        if (!value.equals(prev))
+            dirtySingles.put(single, value);
 
         onTrackerWrite(index, prev, value);
 
