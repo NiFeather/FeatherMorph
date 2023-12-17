@@ -10,6 +10,9 @@ import java.util.UUID;
 
 public class MorphGameProfile extends GameProfile
 {
+    private String name;
+    private UUID uuid;
+
     /**
      * Constructs a new Game Profile with the specified ID and name.
      * <p/>
@@ -20,30 +23,21 @@ public class MorphGameProfile extends GameProfile
      */
     public MorphGameProfile(PlayerProfile profile)
     {
-        super(profile.getId(), profile.getName());
-
-        this.name = profile.getName();
+        super(Objects.requireNonNull(profile.getId()), Objects.requireNonNull(profile.getName()));
 
         profile.getProperties().forEach(p ->
-        {
-            map.put(p.getName(), new Property(p.getName(), p.getValue(), p.getSignature()));
-        });
+                map.put(p.getName(), new Property(p.getName(), p.getValue(), p.getSignature())));
     }
-
-    private String name;
-    private UUID uuid;
 
     public MorphGameProfile(GameProfile profile)
     {
         super(profile.getId(), profile.getName());
 
-        this.uuid = profile.getId();
-        this.name = profile.getName();
+        setUUID(profile.getId());
+        setName(profile.getName());
 
         profile.getProperties().forEach((s, p) ->
-        {
-            map.put(p.name(), new Property(p.name(), p.value(), p.signature()));
-        });
+                map.put(p.name(), new Property(p.name(), p.value(), p.signature())));
     }
 
     @Override
@@ -61,13 +55,17 @@ public class MorphGameProfile extends GameProfile
 
     public void setUUID(UUID newuuid)
     {
+        if (newuuid == null)
+            throw new IllegalArgumentException("UUID must not be null!");
+
         this.uuid = newuuid;
     }
 
     @Override
     public UUID getId()
     {
-        return uuid;
+        //Why
+        return uuid != null ? uuid : super.getId();
     }
 
     private final PropertyMap map = new PropertyMap();
