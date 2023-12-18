@@ -26,7 +26,18 @@ public class AbstractSlimeWatcher extends LivingEntityWatcher
     {
         super.mergeFromCompound(nbt);
 
-        var size = Math.max(1, nbt.getInt("Size"));
-        write(ValueIndex.SLIME_MAGMA.SIZE, size);
+        if (nbt.contains("Size"))
+        {
+            var size = Math.max(1, nbt.getInt("Size"));
+            write(ValueIndex.SLIME_MAGMA.SIZE, size);
+        }
+    }
+
+    @Override
+    public void writeToCompound(CompoundTag nbt)
+    {
+        super.writeToCompound(nbt);
+
+        nbt.putInt("Size", get(ValueIndex.SLIME_MAGMA.SIZE));
     }
 }
