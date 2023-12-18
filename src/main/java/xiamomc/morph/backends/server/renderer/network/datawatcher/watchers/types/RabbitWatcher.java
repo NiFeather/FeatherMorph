@@ -1,5 +1,6 @@
 package xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types;
 
+import net.minecraft.nbt.CompoundTag;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Rabbit;
@@ -38,5 +39,22 @@ public class RabbitWatcher extends LivingEntityWatcher
 
         var targetValue = availableTypes.get(random.nextInt(availableTypes.size()));
         write(ValueIndex.RABBIT.RABBIT_TYPE, targetValue.ordinal());
+    }
+
+    @Override
+    public void mergeFromCompound(CompoundTag nbt)
+    {
+        super.mergeFromCompound(nbt);
+
+        if (nbt.contains("RabbitType"))
+            write(ValueIndex.RABBIT.RABBIT_TYPE, nbt.getInt("RabbitType"));
+    }
+
+    @Override
+    public void writeToCompound(CompoundTag nbt)
+    {
+        super.writeToCompound(nbt);
+
+        nbt.putInt("RabbitType", get(ValueIndex.RABBIT.RABBIT_TYPE));
     }
 }

@@ -61,6 +61,18 @@ public class PandaWatcher extends LivingEntityWatcher
             write(ValueIndex.PANDA.HIDDEN_GENE, (byte)getGeneFromName(nbt.getString("HiddenGene")).ordinal());
     }
 
+    @Override
+    public void writeToCompound(CompoundTag nbt)
+    {
+        super.writeToCompound(nbt);
+
+        var mainGene = this.getMainGene();
+        var hiddenGene = this.getHiddenGene();
+
+        nbt.putString("MainGene", mainGene.toString().toLowerCase());
+        nbt.putString("HiddenGene", hiddenGene.toString().toLowerCase());
+    }
+
     private Panda.Gene getGeneFromName(String name)
     {
         var gene = Panda.Gene.values();

@@ -31,4 +31,12 @@ public class ParrotWatcher extends TameableAnimalWatcher
             this.write(ValueIndex.PARROT.PARROT_VARIANT, variant);
         }
     }
+
+    @Override
+    public void writeToCompound(CompoundTag nbt)
+    {
+        super.writeToCompound(nbt);
+
+        nbt.putInt("Variant", get(ValueIndex.PARROT.PARROT_VARIANT));
+    }
 }

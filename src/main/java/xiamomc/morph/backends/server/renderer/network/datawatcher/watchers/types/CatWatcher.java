@@ -74,4 +74,13 @@ public class CatWatcher extends TameableAnimalWatcher
             });
         }
     }
+
+    @Override
+    public void writeToCompound(CompoundTag nbt)
+    {
+        super.writeToCompound(nbt);
+
+        var variant = this.getCatType().getKey().asString();
+        nbt.putString("variant", variant);
+    }
 }

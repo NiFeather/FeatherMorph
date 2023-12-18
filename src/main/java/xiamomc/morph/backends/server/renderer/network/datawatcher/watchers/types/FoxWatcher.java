@@ -31,4 +31,13 @@ public class FoxWatcher extends AgeableMobWatcher
             write(ValueIndex.FOX.FOX_VARIANT, isSnow ? 1 : 0);
         }
     }
+
+    @Override
+    public void writeToCompound(CompoundTag nbt)
+    {
+        super.writeToCompound(nbt);
+
+        var foxType = this.get(ValueIndex.FOX.FOX_VARIANT) == 0 ? "red" : "snow";
+        nbt.putString("Type", foxType);
+    }
 }
