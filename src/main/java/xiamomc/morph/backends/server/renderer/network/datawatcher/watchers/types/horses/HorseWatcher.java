@@ -66,4 +66,12 @@ public class HorseWatcher extends AbstractHorseWatcher
         if (nbt.contains("Variant"))
             this.write(ValueIndex.HORSE.HORSE_VARIANT, nbt.getInt("Variant"));
     }
+
+    @Override
+    public void writeToCompound(CompoundTag nbt)
+    {
+        super.writeToCompound(nbt);
+
+        nbt.putInt("Variant", get(ValueIndex.HORSE.HORSE_VARIANT));
+    }
 }

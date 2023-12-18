@@ -51,4 +51,14 @@ public class GoatWatcher extends LivingEntityWatcher
         if (nbt.contains("IsScreamingGoat"))
             write(ValueIndex.GOAT.IS_SCREAMING, nbt.getBoolean("IsScreamingGoat"));
     }
+
+    @Override
+    public void writeToCompound(CompoundTag nbt)
+    {
+        super.writeToCompound(nbt);
+
+        nbt.putBoolean("HasLeftHorn", get(ValueIndex.GOAT.HAS_LEFT_HORN));
+        nbt.putBoolean("HasRightHorn", get(ValueIndex.GOAT.HAS_RIGHT_HORN));
+        nbt.putBoolean("IsScreamingGoat", get(ValueIndex.GOAT.IS_SCREAMING));
+    }
 }
