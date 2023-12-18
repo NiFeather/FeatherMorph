@@ -86,9 +86,26 @@ public final class MorphPlugin extends XiaMoJavaPlugin
     {
         super.onEnable();
 
+        pluginManager = Bukkit.getPluginManager();
+        var bukkitVersion = Bukkit.getMinecraftVersion();
+        var targetVersion = "1.20.4";
+        if (!bukkitVersion.equals(targetVersion))
+        {
+            logger.error("╔══════════════════════════════════════════════════════════════╗");
+            logger.error("║                                                              ║");
+            logger.error("║    This version of Minecraft (%s) is not supported!      ║".formatted(bukkitVersion));
+            logger.error("║                Please use %s instead!                    ║".formatted(targetVersion));
+            logger.error("║                                                              ║");
+            //logger.error("║       https://modrinth.com/plugin/feathermorph               ║");
+            //logger.error("║                                                              ║");
+            logger.error("╚══════════════════════════════════════════════════════════════╝");
+
+            pluginManager.disablePlugin(this);
+            return;
+        }
+
         this.metrics = new Metrics(this, 18062);
 
-        pluginManager = Bukkit.getPluginManager();
         this.registerListener(softDeps);
 
         var playerTracker = new PlayerTracker();
