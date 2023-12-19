@@ -55,6 +55,10 @@ public class PlayerLookPacketListener extends ProtocolListener
             var cast = (ClientboundTeleportEntityPacket)packet.getHandle();
             onTeleport(cast, event);
         }
+        else
+        {
+            logger.error("Invalid packet type: " + packetType);
+        }
     }
     @Resolved(shouldSolveImmediately = true)
     private RenderRegistry registry;
@@ -63,6 +67,13 @@ public class PlayerLookPacketListener extends ProtocolListener
     {
         //获取此包的来源实体
         var sourceNmsEntity = NmsUtils.getNmsLevel(event.getPlayer().getWorld()).getEntity(packet.getId());
+        if (sourceNmsEntity == null)
+        {
+            logger.warn("A packet from a player that doesn't exist in its world?!");
+            logger.warn("Packet: " + event.getPacketType());
+            return;
+        }
+
         if (!(sourceNmsEntity.getBukkitEntity() instanceof Player sourcePlayer)) return;
 
         var watcher = registry.getWatcher(sourcePlayer.getUniqueId());
@@ -72,6 +83,9 @@ public class PlayerLookPacketListener extends ProtocolListener
 
         var isDragon = watcher.getEntityType() == EntityType.ENDER_DRAGON;
         var isPhantom = watcher.getEntityType() == EntityType.PHANTOM;
+
+        if (!isDragon && !isPhantom)
+            return;
 
         var yaw = packet.getyRot();
         var pitch = packet.getxRot();
@@ -94,22 +108,23 @@ public class PlayerLookPacketListener extends ProtocolListener
     {
         //获取此包的来源实体
         var sourceNmsEntity = packet.getEntity(NmsUtils.getNmsLevel(event.getPlayer().getWorld()));
+        if (sourceNmsEntity == null)
+        {
+            logger.warn("A packet from a player that doesn't exist in its world?!");
+            logger.warn("Packet: " + event.getPacketType());
+            return;
+        }
+
         if (!(sourceNmsEntity.getBukkitEntity() instanceof Player sourcePlayer)) return;
 
         var watcher = registry.getWatcher(sourcePlayer.getUniqueId());
 
-        if (watcher == null)
+        if (watcher == null || watcher.getEntityType() != EntityType.ENDER_DRAGON)
             return;
 
-        var headYaw = packet.getYHeadRot();
+        var newHeadYaw = (byte)(((sourcePlayer.getYaw() + 180f) / 360f) * 256f);
 
-        if (watcher.getEntityType() == EntityType.ENDER_DRAGON)
-        {
-            var finalYaw = ((sourcePlayer.getYaw() + 180f) / 360f) * 256f;
-            headYaw = (byte)finalYaw;
-        }
-
-        var newPacket = new ClientboundRotateHeadPacket(sourceNmsEntity, headYaw);
+        var newPacket = new ClientboundRotateHeadPacket(sourceNmsEntity, newHeadYaw);
         var finalPacket = PacketContainer.fromPacket(newPacket);
         finalPacket.setMeta(PacketFactory.MORPH_PACKET_METAKEY, true);
 
@@ -120,6 +135,13 @@ public class PlayerLookPacketListener extends ProtocolListener
     {
         //获取此包的来源实体
         var sourceNmsEntity = packet.getEntity(NmsUtils.getNmsLevel(event.getPlayer().getWorld()));
+        if (sourceNmsEntity == null)
+        {
+            logger.warn("A packet from a player that doesn't exist in its world?!");
+            logger.warn("Packet: " + event.getPacketType());
+            return;
+        }
+
         if (!(sourceNmsEntity.getBukkitEntity() instanceof Player sourcePlayer)) return;
 
         var watcher = registry.getWatcher(sourcePlayer.getUniqueId());
@@ -129,6 +151,9 @@ public class PlayerLookPacketListener extends ProtocolListener
 
         var isDragon = watcher.getEntityType() == EntityType.ENDER_DRAGON;
         var isPhantom = watcher.getEntityType() == EntityType.PHANTOM;
+
+        if (!isDragon && !isPhantom)
+            return;
 
         var yaw = packet.getyRot();
         var pitch = packet.getxRot();
@@ -144,7 +169,9 @@ public class PlayerLookPacketListener extends ProtocolListener
 
         ClientboundMoveEntityPacket newPacket;
 
-        if (event.getPacketType() == PacketType.Play.Server.ENTITY_LOOK)
+        var packetType = event.getPacketType();
+
+        if (packetType == PacketType.Play.Server.ENTITY_LOOK)
         {
             newPacket = new ClientboundMoveEntityPacket.Rot(
                     sourcePlayer.getEntityId(),
@@ -152,7 +179,7 @@ public class PlayerLookPacketListener extends ProtocolListener
                     packet.isOnGround()
             );
         }
-        else if (event.getPacketType() == PacketType.Play.Server.REL_ENTITY_MOVE)
+        else if (packetType == PacketType.Play.Server.REL_ENTITY_MOVE)
         {
             newPacket = new ClientboundMoveEntityPacket.Pos(
                     sourcePlayer.getEntityId(),
@@ -160,7 +187,7 @@ public class PlayerLookPacketListener extends ProtocolListener
                     packet.isOnGround()
             );
         }
-        else if (event.getPacketType() == PacketType.Play.Server.REL_ENTITY_MOVE_LOOK)
+        else if (packetType == PacketType.Play.Server.REL_ENTITY_MOVE_LOOK)
         {
             newPacket = new ClientboundMoveEntityPacket.PosRot(
                     sourcePlayer.getEntityId(),
@@ -171,7 +198,8 @@ public class PlayerLookPacketListener extends ProtocolListener
         }
         else
         {
-            throw new IllegalArgumentException("Unknown type " + event.getPacketType());
+            logger.error("Unknown ClientboundMoveEntityPacket: " + packetType);
+            return;
         }
 
         var finalPacket = PacketContainer.fromPacket(newPacket);

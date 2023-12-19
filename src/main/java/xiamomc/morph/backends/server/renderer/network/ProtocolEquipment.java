@@ -5,6 +5,7 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.entity.EquipmentSlot;
 import org.bukkit.inventory.EntityEquipment;
+import xiamomc.morph.misc.DisguiseEquipment;
 
 public class ProtocolEquipment
 {
@@ -13,9 +14,7 @@ public class ProtocolEquipment
         var list = new ObjectArrayList<Pair<EquipmentSlot, ItemStack>>();
 
         for (org.bukkit.inventory.EquipmentSlot bukkitSlot : org.bukkit.inventory.EquipmentSlot.values())
-        {
             list.add(toEquipmentPair(equipment, bukkitSlot));
-        }
 
         return list;
     }

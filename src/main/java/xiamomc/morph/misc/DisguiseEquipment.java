@@ -1,5 +1,6 @@
 package xiamomc.morph.misc;
 
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.apache.commons.lang3.NotImplementedException;
 import org.bukkit.entity.Entity;
 import org.bukkit.inventory.EntityEquipment;
@@ -11,10 +12,21 @@ import xiamomc.morph.utilities.DisguiseUtils;
 import xiamomc.morph.utilities.ItemUtils;
 
 import java.util.Arrays;
+import java.util.Map;
 
 public class DisguiseEquipment implements EntityEquipment
 {
     private final ItemStack[] itemStacks = new ItemStack[EquipmentSlot.values().length];
+
+    private final Map<EquipmentSlot, ItemStack> dirtyStacks = new Object2ObjectOpenHashMap<>();
+
+    public Map<EquipmentSlot, ItemStack> getDirty()
+    {
+        var map = new Object2ObjectOpenHashMap<>(dirtyStacks);
+        dirtyStacks.clear();
+
+        return map;
+    }
 
     @Override
     public void setItem(@NotNull EquipmentSlot slot, @Nullable ItemStack item)
@@ -49,7 +61,7 @@ public class DisguiseEquipment implements EntityEquipment
      * @return An {@link ItemStack}
      */
     @Override
-    public @Nullable ItemStack getItem(@NotNull EquipmentSlot slot)
+    public @NotNull ItemStack getItem(@NotNull EquipmentSlot slot)
     {
         return allowNull ? itemStacks[slot.ordinal()] : DisguiseUtils.itemOrAir(itemStacks[slot.ordinal()]);
     }
