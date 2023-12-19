@@ -80,13 +80,13 @@ public class LivingEntityWatcher extends EntityWatcher implements Listener
 
         int potionColor = 0;
         List<Color> colors = new ObjectArrayList<>();
-        boolean hasAmbient = true;
+        boolean hasAmbient = false;
         for (PotionEffect effect : player.getActivePotionEffects())
         {
             if (effect.hasParticles())
                 colors.add(effect.getType().getColor());
 
-            hasAmbient = effect.isAmbient() && hasAmbient;
+            hasAmbient = hasAmbient || effect.isAmbient();
         }
 
         if (!colors.isEmpty())
