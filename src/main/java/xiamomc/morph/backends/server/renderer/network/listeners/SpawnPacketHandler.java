@@ -73,19 +73,19 @@ public class SpawnPacketHandler extends ProtocolListener
         var gameProfile = ((CraftPlayer) player).getProfile();
         var watcher = new PlayerWatcher(player);
 
-        var parameters = new DisplayParameters(org.bukkit.entity.EntityType.PLAYER, watcher, gameProfile);
-        parameters.setDontRandomProfileUUID();
+        var parameters = new DisplayParameters(org.bukkit.entity.EntityType.PLAYER, watcher, gameProfile)
+                .setDontRandomProfileUUID();
+
         var spawnPackets = getFactory().buildSpawnPackets(player, parameters);
 
         var removePacket = new ClientboundRemoveEntitiesPacket(player.getEntityId());
         var rmPacketContainer = PacketContainer.fromPacket(removePacket);
-        affectedPlayers.forEach(p -> protocolManager.sendServerPacket(p, rmPacketContainer));
         affectedPlayers.forEach(p ->
         {
+            protocolManager.sendServerPacket(p, rmPacketContainer);
+
             for (PacketContainer packet : spawnPackets)
-            {
                 protocolManager.sendServerPacket(p, packet);
-            }
         });
     }
 
@@ -95,7 +95,7 @@ public class SpawnPacketHandler extends ProtocolListener
 
         var watcher = registry.getWatcher(player.getUniqueId());
         if (watcher == null)
-            throw new NullDependencyException("Null RegistryParameters for a existing player?!");
+            throw new NullDependencyException("Null Watcher for a existing player?!");
 
         refreshStateForPlayer(player, new DisplayParameters(watcher.getEntityType(), watcher, watcher.get(EntryIndex.PROFILE)));
     }
@@ -143,15 +143,14 @@ public class SpawnPacketHandler extends ProtocolListener
             gameProfile = Objects.requireNonNullElseGet(cachedProfile, () -> new GameProfile(UUID.randomUUID(), disguiseName));
         }
 
-        var parametersFinal = new DisplayParameters(displayType, watcher, gameProfile);
+        var parametersFinal = new DisplayParameters(displayType, watcher, gameProfile).setDontIncludeMeta();
         var spawnPackets = getFactory().buildSpawnPackets(player, parametersFinal);
 
-        affectedPlayers.forEach(p -> protocolManager.sendServerPacket(p, packetRemoveContainer));
-
-        spawnPackets.forEach(packet ->
+        affectedPlayers.forEach(p ->
         {
-            for (var visiblePlayer : affectedPlayers)
-                protocolManager.sendServerPacket(visiblePlayer, packet);
+            protocolManager.sendServerPacket(p, packetRemoveContainer);
+
+            spawnPackets.forEach(packet -> protocolManager.sendServerPacket(p, packet));
         });
     }
 

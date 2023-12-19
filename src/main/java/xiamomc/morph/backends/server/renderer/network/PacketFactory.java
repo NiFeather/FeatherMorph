@@ -107,8 +107,11 @@ public class PacketFactory extends MorphPluginObject
                 ProtocolEquipment.toPairs(player.getEquipment()));
         packets.add(PacketContainer.fromPacket(equipmentPacket));
 
-        var watcher = parameters.getWatcher();
-        packets.add(buildFullMetaPacket(player, watcher));
+        if (parameters.includeMeta())
+        {
+            var watcher = parameters.getWatcher();
+            packets.add(buildFullMetaPacket(player, watcher));
+        }
 
         if (player.getVehicle() != null)
         {
