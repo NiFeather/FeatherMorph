@@ -42,6 +42,13 @@ public class MetaPacketListener extends ProtocolListener
     {
         //获取此包的来源实体
         var sourceNmsEntity = NmsUtils.getNmsLevel(packetEvent.getPlayer().getWorld()).getEntity(packet.id());
+        if (sourceNmsEntity == null)
+        {
+            logger.warn("A packet from a player that doesn't exist in its world?!");
+            logger.warn("Packet: " + packetEvent.getPacketType());
+            return;
+        }
+
         if (!(sourceNmsEntity.getBukkitEntity() instanceof Player sourcePlayer)) return;
 
         var watcher = registry.getWatcher(sourcePlayer.getUniqueId());

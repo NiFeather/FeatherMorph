@@ -27,16 +27,31 @@ public class DisplayParameters
     private final EntityType entityType;
     private final SingleWatcher singleWatcher;
     private final GameProfile gameProfile;
-    private boolean dontRandomProfileUUID;
+    private boolean dontRandomProfileUUID = false;
+    private boolean includeMeta = true;
 
-    public void setDontRandomProfileUUID()
+    public DisplayParameters setDontRandomProfileUUID()
     {
         dontRandomProfileUUID = true;
+
+        return this;
     }
 
     public boolean dontRandomProfileUUID()
     {
         return dontRandomProfileUUID;
+    }
+
+    public DisplayParameters setDontIncludeMeta()
+    {
+        includeMeta = false;
+
+        return this;
+    }
+
+    public boolean includeMeta()
+    {
+        return includeMeta;
     }
 
     public DisplayParameters(EntityType bindingType, SingleWatcher watcher, GameProfile profile)

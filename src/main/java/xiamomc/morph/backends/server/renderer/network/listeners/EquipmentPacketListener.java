@@ -4,20 +4,26 @@ import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.events.ListeningWhitelist;
 import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.injector.GamePhase;
-import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
 import org.bukkit.entity.Player;
-import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.backends.server.renderer.network.PacketFactory;
 import xiamomc.morph.backends.server.renderer.network.registries.EntryIndex;
 import xiamomc.morph.backends.server.renderer.network.registries.RenderRegistry;
 import xiamomc.morph.utilities.NmsUtils;
 import xiamomc.pluginbase.Annotations.Resolved;
 
+import java.util.Map;
+
 public class EquipmentPacketListener extends ProtocolListener
 {
     @Resolved(shouldSolveImmediately = true)
     private RenderRegistry registry;
+
+    public EquipmentPacketListener()
+    {
+        registry.onUnRegister(this, alreadyFake::remove);
+    }
 
     @Override
     public String getIdentifier()
@@ -40,6 +46,8 @@ public class EquipmentPacketListener extends ProtocolListener
         onEquipmentPacket((ClientboundSetEquipmentPacket) event.getPacket().getHandle(), event);
     }
 
+    private final Map<Player, Boolean> alreadyFake = new Object2ObjectOpenHashMap<>();
+
     private void onEquipmentPacket(ClientboundSetEquipmentPacket packet, PacketEvent event)
     {
         if (event.getPacket().getMeta(PacketFactory.MORPH_PACKET_METAKEY).isPresent())
@@ -47,6 +55,13 @@ public class EquipmentPacketListener extends ProtocolListener
 
         //获取此包的来源实体
         var sourceNmsEntity = NmsUtils.getNmsLevel(event.getPlayer().getWorld()).getEntity(packet.getEntity());
+        if (sourceNmsEntity == null)
+        {
+            logger.warn("A packet from a player that doesn't exist in its world?!");
+            logger.warn("Packet: " + event.getPacketType());
+            return;
+        }
+
         if (!(sourceNmsEntity.getBukkitEntity() instanceof Player sourcePlayer)) return;
 
         var watcher = registry.getWatcher(sourcePlayer.getUniqueId());
@@ -55,9 +70,21 @@ public class EquipmentPacketListener extends ProtocolListener
             return;
 
         if (!watcher.getOrDefault(EntryIndex.DISPLAY_FAKE_EQUIPMENT, false))
+        {
+            alreadyFake.remove(sourcePlayer);
             return;
+        }
+
+        if (alreadyFake.getOrDefault(sourcePlayer, false))
+        {
+            //如果已经在显示伪装物品，那么只取消此包
+            event.setCancelled(true);
+            return;
+        }
 
         event.setPacket(getFactory().getEquipmentPacket(sourcePlayer, watcher));
+
+        alreadyFake.put(sourcePlayer, true);
     }
 
     @Override
