@@ -67,6 +67,15 @@ public class PacketFactory extends MorphPluginObject
 
             //Minecraft需要在生成玩家实体前先发送PlayerInfoUpdate消息
             var uuid = gameProfile.getId();
+
+            var profileName =  gameProfile.getName();
+            if (profileName.length() > 16)
+            {
+                logger.warn("Profile name '%s' exceeds the maximum length 16!".formatted(profileName));
+                var subStr = profileName.substring(0, 15);
+                gameProfile.setName(subStr);
+            }
+
             var packetPlayerInfo = new ClientboundPlayerInfoUpdatePacket(
                     EnumSet.of(ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER),
                     new ClientboundPlayerInfoUpdatePacket.Entry(
