@@ -6,6 +6,7 @@ import org.bukkit.entity.Player;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.backends.DisguiseBackend;
 import xiamomc.morph.network.PlayerOptions;
+import xiamomc.morph.providers.PlayerDisguiseProvider;
 import xiamomc.morph.skills.MorphSkillHandler;
 import xiamomc.morph.skills.SkillType;
 import xiamomc.morph.storage.offlinestore.OfflineDisguiseState;
@@ -65,6 +66,12 @@ public class DisguiseStateGenerator
         var wrapper = backend.fromOfflineSave(offlineState.disguiseData);
 
         if (wrapper == null) return null;
+
+        if (provider.getNameSpace().equals("player"))
+        {
+            var playerName = DisguiseTypes.PLAYER.toStrippedId(disguiseIdentifier);
+            wrapper.setDisguiseName(playerName);
+        }
 
         //构建State
         var state = new DisguiseState(player,
