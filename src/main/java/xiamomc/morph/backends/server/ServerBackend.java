@@ -195,6 +195,14 @@ public class ServerBackend extends DisguiseBackend<ServerDisguise, ServerDisguis
             return null;
         }
 
+        if (!sp[0].equals(this.getIdentifier()))
+        {
+            logger.error("The given parameter is not compatible with current backend. (Expected '%s', Current '%s')"
+                    .formatted(sp[0], getIdentifier()));
+
+            return null;
+        }
+
         var spilt = sp[1].split("@", 2);
 
         if (spilt.length < 2)
