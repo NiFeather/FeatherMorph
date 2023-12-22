@@ -1,6 +1,7 @@
 package xiamomc.morph.backends.server;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import net.minecraft.nbt.CompoundTag;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -8,8 +9,10 @@ import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.backends.DisguiseBackend;
 import xiamomc.morph.backends.DisguiseWrapper;
 import xiamomc.morph.backends.server.renderer.ServerRenderer;
+import xiamomc.morph.utilities.NbtUtils;
 
 import javax.annotation.Nullable;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.UUID;
 
@@ -184,7 +187,53 @@ public class ServerBackend extends DisguiseBackend<ServerDisguise, ServerDisguis
     @Override
     public @Nullable ServerDisguiseWrapper fromOfflineSave(String offlineParameter)
     {
-        return null;
+        var sp = offlineParameter.split("\\|", 2);
+
+        if (sp.length < 2)
+        {
+            logger.warn("Invalid offline parameter: '%s'".formatted(offlineParameter));
+            return null;
+        }
+
+        var spilt = sp[1].split("@", 2);
+
+        if (spilt.length < 2)
+        {
+            logger.warn("Invalid offline parameter: '%s'".formatted(sp[1]));
+            return null;
+        }
+
+        var snbt = spilt[1];
+        var typeId = spilt[0];
+
+        CompoundTag compoundTag;
+
+        var typeMatch = Arrays.stream(EntityType.values()).filter(
+                t -> t != EntityType.UNKNOWN && t.getKey().asString().equals(typeId)
+        ).findFirst().orElse(null);
+
+        if (typeMatch == null)
+        {
+            logger.warn("Invalid EntityType: '%s'".formatted(typeId));
+            return null;
+        }
+
+        try
+        {
+            compoundTag = NbtUtils.toCompoundTag(snbt);
+        }
+        catch (Throwable t)
+        {
+            logger.error("Unable to parse sNBT: " + t.getMessage());
+            logger.error("Raw string: '%s'".formatted(snbt));
+            return null;
+        }
+
+        var instance = new ServerDisguise(typeMatch);
+        var wrapper = new ServerDisguiseWrapper(instance, this);
+        wrapper.mergeCompound(compoundTag);
+
+        return wrapper;
     }
 
     /**
@@ -197,6 +246,12 @@ public class ServerBackend extends DisguiseBackend<ServerDisguise, ServerDisguis
     @Override
     public @Nullable String toOfflineSave(DisguiseWrapper<?> wrapper)
     {
-        return null;
+        if (!(wrapper instanceof ServerDisguiseWrapper serverWrapper))
+            return null;
+
+        var compound = serverWrapper.getCompound();
+        var nbtStr = NbtUtils.getCompoundString(compound);
+        var type = wrapper.getEntityType().getKey().asString();
+        return "%s@%s".formatted(type, nbtStr);
     }
 }
