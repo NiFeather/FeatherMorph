@@ -9,7 +9,7 @@
 
 # FeatherMorph
 
-[[English](./README_en.md)] [[Modrinth](https://modrinth.com/plugin/feathermorph)]
+[[Modrinth](https://modrinth.com/plugin/feathermorph)]
 
 一个适用于Paper的变形插件。
 
