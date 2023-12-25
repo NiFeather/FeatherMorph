@@ -15,6 +15,7 @@ import xiamomc.morph.backends.server.renderer.network.PacketFactory;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.values.AbstractValues;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.values.SingleValue;
 import xiamomc.morph.backends.server.renderer.network.registries.RegistryKey;
+import xiamomc.morph.backends.server.renderer.utilties.WatcherUtils;
 import xiamomc.morph.misc.NmsRecord;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Exceptions.NullDependencyException;
@@ -269,15 +270,7 @@ public abstract class SingleWatcher extends MorphPluginObject
 
     protected List<Player> getAffectedPlayers(Player sourcePlayer)
     {
-        var players = sourcePlayer.getWorld().getPlayers();
-        players.remove(sourcePlayer);
-        if (NmsRecord.ofPlayer(sourcePlayer).gameMode.getGameModeForPlayer() == GameType.SPECTATOR)
-        {
-            players.removeIf(bukkitPlayer ->
-                    NmsRecord.ofPlayer(bukkitPlayer).gameMode.getGameModeForPlayer() != GameType.SPECTATOR);
-        }
-
-        return players;
+        return WatcherUtils.getAffectedPlayers(sourcePlayer);
     }
 
     protected void sendPacketToAffectedPlayers(PacketContainer packet)
