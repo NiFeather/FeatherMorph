@@ -49,7 +49,7 @@ public class SpawnPacketHandler extends ProtocolListener
     public SpawnPacketHandler()
     {
         registry.onRegister(this, ep ->
-                refreshStateForPlayer(ep.player()));
+                refreshStateForPlayer(ep.player(), getAffectedPlayers(ep.player())));
 
         registry.onUnRegister(this, this::unDisguiseForPlayer);
     }
@@ -84,7 +84,7 @@ public class SpawnPacketHandler extends ProtocolListener
         });
     }
 
-    private void refreshStateForPlayer(@Nullable Player player)
+    private void refreshStateForPlayer(@Nullable Player player, List<Player> affectedPlayers)
     {
         if (player == null) return;
 
@@ -92,7 +92,9 @@ public class SpawnPacketHandler extends ProtocolListener
         if (watcher == null)
             throw new NullDependencyException("Null Watcher for a existing player?!");
 
-        refreshStateForPlayer(player, new DisplayParameters(watcher.getEntityType(), watcher, watcher.get(EntryIndex.PROFILE)));
+        refreshStateForPlayer(player,
+                new DisplayParameters(watcher.getEntityType(), watcher, watcher.get(EntryIndex.PROFILE)),
+                affectedPlayers);
     }
 
     /**
@@ -100,14 +102,13 @@ public class SpawnPacketHandler extends ProtocolListener
      * @param player 目标玩家
      * @param displayParameters 和伪装对应的 {@link DisplayParameters}
      */
-    private void refreshStateForPlayer(@Nullable Player player, @NotNull DisplayParameters displayParameters)
+    private void refreshStateForPlayer(@Nullable Player player, @NotNull DisplayParameters displayParameters, List<Player> affectedPlayers)
     {
         if (player == null) return;
         var watcher = displayParameters.getWatcher();
         var displayType = watcher.getEntityType();
 
         var protocolManager = ProtocolLibrary.getProtocolManager();
-        var affectedPlayers = getAffectedPlayers(player);
 
         //先发包移除当前实体
         var packetRemove = new ClientboundRemoveEntitiesPacket(player.getEntityId());
@@ -163,7 +164,7 @@ public class SpawnPacketHandler extends ProtocolListener
         if (meta.isEmpty())
         {
             packetEvent.setCancelled(true);
-            refreshStateForPlayer(Bukkit.getPlayer(packet.getUUID()));
+            refreshStateForPlayer(Bukkit.getPlayer(packet.getUUID()), List.of(packetEvent.getPlayer()));
         }
     }
 
