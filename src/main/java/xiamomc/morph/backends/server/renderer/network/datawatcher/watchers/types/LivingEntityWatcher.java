@@ -3,6 +3,7 @@ package xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.type
 import io.papermc.paper.event.player.PlayerStopUsingItemEvent;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.minecraft.core.BlockPos;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.entity.EntityType;
@@ -20,6 +21,7 @@ import xiamomc.morph.misc.NmsRecord;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class LivingEntityWatcher extends EntityWatcher implements Listener
 {
@@ -101,6 +103,24 @@ public class LivingEntityWatcher extends EntityWatcher implements Listener
 
         write(values.STUCKED_ARROWS, player.getArrowsInBody());
         write(values.BEE_STINGERS, player.getBeeStingersInBody());
+
+        Optional<BlockPos> bedPos = Optional.empty();
+        if (player.isSleeping())
+        {
+            try
+            {
+                var bukkitPos = player.getBedLocation();
+                bedPos = Optional.of(
+                        new BlockPos(bukkitPos.blockX(),bukkitPos.blockY(), bukkitPos.blockZ())
+                );
+            }
+            catch (Throwable t)
+            {
+                logger.warn("Error occurred while processing bed pos: " + t.getMessage());
+            }
+        }
+
+        write(values.BED_POS, bedPos);
 
         super.doSync();
     }
