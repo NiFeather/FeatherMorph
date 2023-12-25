@@ -182,13 +182,7 @@ public class PacketFactory extends MorphPluginObject
 
         List<WrappedDataValue> wrappedDataValues = new ObjectArrayList<>();
 
-        Map<SingleValue<?>, Object> valuesToSent = new Object2ObjectOpenHashMap<>();
-        valuesToSent.putAll(watcher.getDirty());
-        watcher.getRegistry().forEach((single, v) ->
-        {
-            if (single.defaultValue().equals(v)) return;
-            valuesToSent.put(single, v);
-        });
+        Map<SingleValue<?>, Object> valuesToSent = watcher.getRegistry();
 
         valuesToSent.forEach((single, v) ->
         {
