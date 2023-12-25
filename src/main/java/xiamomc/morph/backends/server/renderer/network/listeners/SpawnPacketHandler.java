@@ -12,17 +12,20 @@ import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.GameType;
 import org.bukkit.Bukkit;
+import org.bukkit.Server;
 import org.bukkit.craftbukkit.v1_20_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.spigotmc.SpigotWorldConfig;
 import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.backends.server.renderer.network.DisplayParameters;
 import xiamomc.morph.backends.server.renderer.network.PacketFactory;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.PlayerWatcher;
 import xiamomc.morph.backends.server.renderer.network.registries.EntryIndex;
 import xiamomc.morph.backends.server.renderer.network.registries.RenderRegistry;
+import xiamomc.morph.backends.server.renderer.utilties.WatcherUtils;
 import xiamomc.morph.misc.skins.PlayerSkinProvider;
 import xiamomc.morph.misc.NmsRecord;
 import xiamomc.pluginbase.Annotations.Resolved;
@@ -53,15 +56,7 @@ public class SpawnPacketHandler extends ProtocolListener
 
     private List<Player> getAffectedPlayers(Player sourcePlayer)
     {
-        var players = sourcePlayer.getWorld().getPlayers();
-        players.remove(sourcePlayer);
-        if (NmsRecord.ofPlayer(sourcePlayer).gameMode.getGameModeForPlayer() == GameType.SPECTATOR)
-        {
-            players.removeIf(bukkitPlayer ->
-                    NmsRecord.ofPlayer(bukkitPlayer).gameMode.getGameModeForPlayer() != GameType.SPECTATOR);
-        }
-
-        return players;
+        return WatcherUtils.getAffectedPlayers(sourcePlayer);
     }
 
     private void unDisguiseForPlayer(@Nullable Player player)
