@@ -5,9 +5,11 @@ import com.comphenix.protocol.events.ListeningWhitelist;
 import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.injector.GamePhase;
 import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.backends.server.renderer.network.PacketFactory;
+import xiamomc.morph.backends.server.renderer.network.datawatcher.ValueIndex;
 import xiamomc.morph.backends.server.renderer.network.registries.RenderRegistry;
 import xiamomc.morph.utilities.NmsUtils;
 import xiamomc.pluginbase.Annotations.Resolved;
@@ -64,12 +66,14 @@ public class MetaPacketListener extends ProtocolListener
             return;
 
         //不要二次处理来自我们自己的包
+        //并且不要处理同为玩家的Meta包
         var packetContainer = packetEvent.getPacket();
         var meta = packetContainer.getMeta(PacketFactory.MORPH_PACKET_METAKEY);
-        if (meta.isEmpty())
+        if (meta.isEmpty() && watcher.getEntityType() != EntityType.PLAYER)
         {
             //取得来源玩家的伪装后的Meta，发送给目标玩家
-            packetEvent.setPacket(getFactory().buildFullMetaPacket(sourcePlayer, watcher));
+            //从包里移除玩家meta中不属于BASE_LIVING的部分
+            packetEvent.setPacket(getFactory().removeNonLivingValues(ValueIndex.BASE_LIVING, packetContainer));
         }
     }
 
