@@ -90,7 +90,7 @@ public class UpdateHandler extends MorphPluginObject
                     .setScheme("https")
                     .setHost("api.modrinth.com")
                     .setPath("/v2/project/feathermorph/version")
-                    .setParameter("featured", "true")
+                    //.setParameter("featured", "true")
                     .setParameter("game_versions", "[\"%s\"]".formatted(Bukkit.getMinecraftVersion()))
                     .build();
 
