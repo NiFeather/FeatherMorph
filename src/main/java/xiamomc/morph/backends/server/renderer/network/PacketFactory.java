@@ -14,6 +14,8 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.EntityEquipment;
 import xiamomc.morph.MorphPluginObject;
+import xiamomc.morph.backends.server.renderer.network.datawatcher.ValueIndex;
+import xiamomc.morph.backends.server.renderer.network.datawatcher.values.AbstractValues;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.values.SingleValue;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
 import xiamomc.morph.backends.server.renderer.network.registries.EntryIndex;
@@ -135,6 +137,38 @@ public class PacketFactory extends MorphPluginObject
             packet.setMeta(MORPH_PACKET_METAKEY, true);
 
         return packets;
+    }
+
+    /**
+     * 从给定的meta包中移除不属于给定AbstractValues的数据
+     * @return
+     */
+    public PacketContainer removeNonLivingValues(AbstractValues av, PacketContainer originalPacket)
+    {
+        if (originalPacket.getType() != PacketType.Play.Server.ENTITY_METADATA)
+            throw new IllegalArgumentException("Original packet is not a valid metadata packet!");
+
+        var livingValues = av.getValues();
+        var modifier = originalPacket.getDataValueCollectionModifier();
+
+        //获取原Meta包中的数据
+        var wrappedData = modifier.read(0);
+
+        //剔除不属于BASE_LIVING的数据
+        wrappedData.removeIf(w ->
+        {
+            var rawValue = w.getRawValue();
+
+            var match = livingValues.stream().filter(sv ->
+                    w.getIndex() == sv.index() && (rawValue == null || rawValue.getClass() == sv.defaultValue().getClass())
+            ).findFirst().orElse(null);
+
+            return match == null;
+        });
+
+        modifier.write(0, wrappedData);
+
+        return originalPacket;
     }
 
     public PacketContainer buildDiffMetaPacket(Player player, SingleWatcher watcher)
