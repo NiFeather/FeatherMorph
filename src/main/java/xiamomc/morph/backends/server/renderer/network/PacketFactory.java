@@ -119,10 +119,7 @@ public class PacketFactory extends MorphPluginObject
         packets.add(PacketContainer.fromPacket(equipmentPacket));
 
         if (parameters.includeMeta())
-        {
-            var watcher = parameters.getWatcher();
-            packets.add(buildFullMetaPacket(player, watcher));
-        }
+            packets.add(buildFullMetaPacket(player, parameters.getWatcher()));
 
         if (player.getVehicle() != null)
         {
