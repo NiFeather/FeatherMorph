@@ -1,32 +1,55 @@
 package xiamomc.morph.misc.skins;
 
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.Util;
+import net.minecraft.commands.arguments.GameProfileArgument;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtIo;
+import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.misc.MorphGameProfile;
+import xiamomc.morph.utilities.DisguiseUtils;
+import xiamomc.morph.utilities.NbtUtils;
+import xiamomc.morph.utilities.NmsUtils;
 
 import java.util.UUID;
 
 public class SingleSkin
 {
+    @Expose
+    @SerializedName("name")
     public String name = "unknown";
 
-    public UUID uuid = Util.NIL_UUID;
+    @Expose
+    @SerializedName("profile")
+    public String snbt = "{}";
 
-    public String texture = "";
+    @Expose
+    @SerializedName("expires_at")
+    public long expiresAt;
 
-    public String signature = "";
-
-    public int expiresAt = 0;
-
-/*
     public static SingleSkin fromProfile(GameProfile profile)
     {
-        var wrapped = new MorphGameProfile(profile);
         var instance = new SingleSkin();
 
         instance.name = profile.getName();
-        instance.uuid = profile.getId();
+        instance.snbt = NbtUtils.getCompoundString(NbtUtils.toCompoundTag(profile));
+        instance.expiresAt = System.currentTimeMillis() + 15 * 24 * 60 * 60 * 1000;
+        //                                                D    H    M    S    MS
+
+        return instance;
     }
 
- */
+    @Nullable
+    public GameProfile toGameProfile()
+    {
+        if (this.snbt == null || this.snbt.equalsIgnoreCase("{}"))
+            return null;
+
+        var compound = NbtUtils.toCompoundTag(this.snbt);
+        return compound == null
+            ? null
+            : net.minecraft.nbt.NbtUtils.readGameProfile(compound);
+    }
 }

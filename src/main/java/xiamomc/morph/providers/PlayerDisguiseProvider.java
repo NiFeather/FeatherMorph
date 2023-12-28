@@ -99,25 +99,6 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
         return DisguiseResult.success(wrapper, result.isCopy());
     }
 
-    @Override
-    public void postConstructDisguise(DisguiseState state, @Nullable Entity targetEntity)
-    {
-        super.postConstructDisguise(state, targetEntity);
-
-        var profile = state.getDisguiseWrapper().getSkin();
-
-        if (profile != null)
-        {
-            var gameProfile = new MorphGameProfile(profile);
-            var compound = xiamomc.morph.utilities.NbtUtils.toCompoundTag(state.getCachedNbtString(), false);
-
-            gameProfile.setName(DisguiseTypes.PLAYER.toStrippedId(state.getDisguiseIdentifier()));
-
-            NbtUtils.writeGameProfile(compound, gameProfile);
-            state.setCachedProfileNbtString(compound.toString());
-        }
-    }
-
     private MorphGameProfile getGameProfile(ItemStack item)
     {
         if (item.getType() != Material.PLAYER_HEAD) return null;

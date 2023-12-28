@@ -8,20 +8,18 @@ import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.injector.GamePhase;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
+import net.minecraft.network.protocol.game.ClientboundPlayerInfoRemovePacket;
 import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.level.GameType;
 import org.bukkit.Bukkit;
 import org.bukkit.Server;
 import org.bukkit.craftbukkit.v1_20_R2.entity.CraftPlayer;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.spigotmc.SpigotWorldConfig;
-import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.backends.server.renderer.network.DisplayParameters;
 import xiamomc.morph.backends.server.renderer.network.PacketFactory;
+import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.PlayerWatcher;
 import xiamomc.morph.backends.server.renderer.network.registries.EntryIndex;
 import xiamomc.morph.backends.server.renderer.network.registries.RenderRegistry;
@@ -51,7 +49,8 @@ public class SpawnPacketHandler extends ProtocolListener
         registry.onRegister(this, ep ->
                 refreshStateForPlayer(ep.player(), getAffectedPlayers(ep.player())));
 
-        registry.onUnRegister(this, this::unDisguiseForPlayer);
+        registry.onUnRegister(this, ep ->
+                unDisguiseForPlayer(ep.player(), ep.parameters()));
     }
 
     private List<Player> getAffectedPlayers(Player sourcePlayer)
@@ -59,7 +58,7 @@ public class SpawnPacketHandler extends ProtocolListener
         return WatcherUtils.getAffectedPlayers(sourcePlayer);
     }
 
-    private void unDisguiseForPlayer(@Nullable Player player)
+    private void unDisguiseForPlayer(@Nullable Player player, SingleWatcher disguiseWatcher)
     {
         if (player == null) return;
 
@@ -75,6 +74,15 @@ public class SpawnPacketHandler extends ProtocolListener
 
         var removePacket = new ClientboundRemoveEntitiesPacket(player.getEntityId());
         var rmPacketContainer = PacketContainer.fromPacket(removePacket);
+
+        var lastUUID = disguiseWatcher.getOrDefault(EntryIndex.TABLIST_UUID, null);
+        if (lastUUID != null)
+        {
+            spawnPackets.add(PacketContainer.fromPacket(
+                    new ClientboundPlayerInfoRemovePacket(List.of(lastUUID))
+            ));
+        }
+
         affectedPlayers.forEach(p ->
         {
             protocolManager.sendServerPacket(p, rmPacketContainer);

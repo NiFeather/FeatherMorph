@@ -1,7 +1,14 @@
 package xiamomc.morph.misc.skins;
 
+import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.properties.Property;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.storage.MorphJsonBasedStorage;
+
+import java.text.DateFormat;
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 public class SkinStore extends MorphJsonBasedStorage<SkinStoreRoot>
 {
@@ -22,19 +29,34 @@ public class SkinStore extends MorphJsonBasedStorage<SkinStoreRoot>
     {
         return "Server renderer skin store";
     }
-/*
-    @Nullable
-    public GameProfile getProfile(String skinName)
+
+    public synchronized void cache(GameProfile profile)
     {
-        var matchedSkin = storingObject.storedSkins.stream()
-                .filter(skin -> skin.name.equalsIgnoreCase(skinName))
-                .findFirst().orElse(null);
+        storingObject.storedSkins.add(SingleSkin.fromProfile(profile));
 
-        if (matchedSkin == null) return null;
-
-        var profile = new GameProfile(matchedSkin.uuid, matchedSkin.name);
-        profile.getProperties().put("textures", new Property())
+        saveConfiguration();
     }
 
- */
+    public void remove(String name)
+    {
+        storingObject.storedSkins.removeIf(ss -> ss.name.equalsIgnoreCase(name));
+    }
+
+    @Nullable
+    public GameProfile get(String name)
+    {
+        var single = storingObject.storedSkins.stream().filter(ss ->
+                ss.name.equalsIgnoreCase(name)).findFirst().orElse(null);
+
+        if (single == null) return null;
+
+        if (System.currentTimeMillis() > single.expiresAt)
+        {
+            this.addSchedule(() -> storingObject.storedSkins.remove(single));
+
+            return null;
+        }
+
+        return single.toGameProfile();
+    }
 }
