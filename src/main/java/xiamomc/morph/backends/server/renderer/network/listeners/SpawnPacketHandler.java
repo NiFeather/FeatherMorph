@@ -139,7 +139,7 @@ public class SpawnPacketHandler extends ProtocolListener
             gameProfile = Objects.requireNonNullElseGet(cachedProfile, () -> new GameProfile(UUID.randomUUID(), disguiseName));
         }
 
-        var parametersFinal = new DisplayParameters(displayType, watcher, gameProfile).setDontIncludeMeta();
+        var parametersFinal = new DisplayParameters(displayType, watcher, gameProfile); //.setDontIncludeMeta();
         var spawnPackets = getFactory().buildSpawnPackets(player, parametersFinal);
 
         affectedPlayers.forEach(p ->
