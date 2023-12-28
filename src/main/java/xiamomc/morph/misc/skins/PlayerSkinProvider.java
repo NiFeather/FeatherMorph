@@ -56,8 +56,9 @@ public class PlayerSkinProvider extends MorphPluginObject
 
     private Optional<GameProfile> fetchProfileV2(String name)
     {
-        if (!Player.isValidUsername(name))
-            return Optional.empty();
+        //希望没逝
+        //if (!Player.isValidUsername(name))
+        //    return Optional.empty();
 
         var cached = skinStore.get(name);
         if (cached != null)
