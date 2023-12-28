@@ -1,20 +1,31 @@
 package xiamomc.morph.misc.skins;
 
+import com.destroystokyo.paper.profile.PaperAuthenticationService;
 import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.GameProfileRepository;
+import com.mojang.authlib.ProfileLookupCallback;
+import com.mojang.authlib.minecraft.MinecraftSessionService;
+import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import net.minecraft.Util;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.Services;
 import net.minecraft.server.players.GameProfileCache;
+import net.minecraft.world.entity.player.Player;
 import org.bukkit.Bukkit;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.misc.NmsRecord;
 import xiamomc.pluginbase.Annotations.Initializer;
-import xiamomc.pluginbase.Annotations.Resolved;
 
+import java.io.File;
+import java.net.Proxy;
+import java.net.URI;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class PlayerSkinProvider extends MorphPluginObject
 {
@@ -27,14 +38,58 @@ public class PlayerSkinProvider extends MorphPluginObject
         return instance;
     }
 
-    private GameProfileCache userCache;
-
-    @Initializer
-    private void load()
+    private CompletableFuture<Optional<GameProfile>> getProfileAsyncV2(String name)
     {
-        var server = MinecraftServer.getServer();
-        //userCache = new GameProfileCache(server.getProfileRepository(), new File("/dev/null"));
-        //userCache.setExecutor(server);
+        var executor = Util.PROFILE_EXECUTOR;
+
+        var task = CompletableFuture.supplyAsync(() ->
+        {
+            return this.fetchProfileV2(name);
+        }, executor).whenCompleteAsync((optional, throwable) ->
+        {
+        }, executor);
+
+        return task;
+    }
+
+    private final SkinStore skinStore = new SkinStore();
+
+    private Optional<GameProfile> fetchProfileV2(String name)
+    {
+        if (!Player.isValidUsername(name))
+            return Optional.empty();
+
+        var cached = skinStore.get(name);
+        if (cached != null)
+            return Optional.of(cached);
+
+        var profileRef = new AtomicReference<GameProfile>(null);
+
+        var lookupCallback = new ProfileLookupCallback()
+        {
+            public void onProfileLookupSucceeded(GameProfile gameprofile)
+            {
+                profileRef.set(gameprofile);
+            }
+
+            public void onProfileLookupFailed(String profileName, Exception exception)
+            {
+                logger.info("Failed to lookup '%s': '%s'".formatted(profileName, exception.getMessage()));
+                exception.printStackTrace();
+            }
+        };
+
+        GameProfileRepository gameProfileRepository = MinecraftServer.getServer().getProfileRepository();
+        gameProfileRepository.findProfilesByNames(new String[]{name}, lookupCallback);
+
+        var profile = profileRef.get();
+        return profile == null ? Optional.empty() : Optional.of(profile);
+    }
+
+    @Nullable
+    public GameProfile getCachedProfile(String name)
+    {
+        return skinStore.get(name);
     }
 
     public CompletableFuture<Optional<GameProfile>> fetchSkinFromProfile(GameProfile profile)
@@ -42,7 +97,7 @@ public class PlayerSkinProvider extends MorphPluginObject
         if (profile.getProperties().containsKey("textures"))
         {
             var optional = Optional.of(profile);
-            profileCache.put(profile.getName(), ProfileMeta.of(profile));
+            skinStore.cache(profile);
 
             return CompletableFuture.completedFuture(optional);
         }
@@ -52,6 +107,10 @@ public class PlayerSkinProvider extends MorphPluginObject
             {
                 var sessionService = MinecraftServer.getServer().getSessionService();
                 var result = sessionService.fetchProfile(profile.getId(), true);
+
+                if (result != null)
+                    skinStore.cache(result.profile());
+
                 return result == null ? Optional.of(profile) : Optional.of(result.profile());
             });
         }
@@ -76,46 +135,17 @@ public class PlayerSkinProvider extends MorphPluginObject
         }
     }
 
-    private final Map<String, ProfileMeta> profileCache = new Object2ObjectOpenHashMap<>();
-
-    @Nullable
-    public GameProfile getCachedProfile(String profileName)
-    {
-        var meta = profileCache.getOrDefault(profileName, null);
-        if (meta != null)
-        {
-            meta.lastAccess = plugin.getCurrentTick();
-            return meta.profile;
-        }
-
-        return null;
-    }
-
-    private void removeUnusedMeta()
-    {
-        var currentTick = plugin.getCurrentTick();
-        var mapCopy = new Object2ObjectOpenHashMap<>(profileCache);
-        mapCopy.forEach((name, meta) ->
-        {
-            if (currentTick - meta.lastAccess > 20 * 60 * 30)
-                profileCache.remove(name);
-        });
-    }
-
     private int performCount;
 
     public CompletableFuture<Optional<GameProfile>> fetchSkin(String profileName)
     {
         performCount++;
 
-        if (performCount >= 10)
-            removeUnusedMeta();
-
         var player = Bukkit.getPlayerExact(profileName);
         if (player != null)
         {
             var profile = NmsRecord.ofPlayer(player).gameProfile;
-            profileCache.put(profileName, ProfileMeta.of(profile));
+            skinStore.remove(profileName);
             return CompletableFuture.completedFuture(Optional.of(profile));
         }
 
@@ -123,26 +153,17 @@ public class PlayerSkinProvider extends MorphPluginObject
         if (cachedSkin != null)
             return CompletableFuture.completedFuture(Optional.of(cachedSkin));
 
-        var server = MinecraftServer.getServer();
-        var userCache = this.userCache == null
-                        ? server.getProfileCache()
-                        : this.userCache; //new GameProfileCache(server.getProfileRepository(), new File("/dev/null"));
-
-        if (userCache == null) return CompletableFuture.completedFuture(Optional.empty());
-        else
-        {
-            return userCache.getAsync(profileName)
-                    .thenCompose(rawProfileOptional ->
+        return getProfileAsyncV2(profileName)
+                .thenCompose(rawProfileOptional ->
+                {
+                    if (rawProfileOptional.isPresent())
                     {
-                        if (rawProfileOptional.isPresent())
-                        {
-                            return fetchSkinFromProfile(rawProfileOptional.get());
-                        }
-                        else
-                        {
-                            return CompletableFuture.completedFuture(Optional.empty());
-                        }
-                    });
-        }
+                        return fetchSkinFromProfile(rawProfileOptional.get());
+                    }
+                    else
+                    {
+                        return CompletableFuture.completedFuture(Optional.empty());
+                    }
+                });
     }
 }

@@ -7,7 +7,6 @@ import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.backends.DisguiseBackend;
 import xiamomc.morph.network.PlayerOptions;
-import xiamomc.morph.providers.PlayerDisguiseProvider;
 import xiamomc.morph.skills.MorphSkillHandler;
 import xiamomc.morph.skills.SkillType;
 import xiamomc.morph.storage.offlinestore.OfflineDisguiseState;
@@ -80,18 +79,20 @@ public class DisguiseStateGenerator
                 wrapper, true, provider,
                 null, playerOptions, playerMeta);
 
-        //设置NBT和皮肤
-        state.setCachedProfileNbtString(offlineState.profileString);
-        state.setCachedNbtString(offlineState.snbt);
-
         try
         {
             var profileCompound = NbtUtils.toCompoundTag(offlineState.profileString);
 
             if (profileCompound != null)
             {
-                var profile = net.minecraft.nbt.NbtUtils.readGameProfile(profileCompound);
-                wrapper.applySkin(profile);
+                var rawProfile = net.minecraft.nbt.NbtUtils.readGameProfile(profileCompound);
+
+                if (rawProfile != null)
+                {
+                    var profile = new MorphGameProfile(rawProfile);
+                    profile.setName(wrapper.getDisguiseName());
+                    wrapper.applySkin(profile);
+                }
             }
         }
         catch (Throwable t)

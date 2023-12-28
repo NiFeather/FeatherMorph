@@ -78,6 +78,9 @@ public class PacketFactory extends MorphPluginObject
                 gameProfile.setName(subStr);
             }
 
+            if (gameProfile.getName().isBlank())
+                throw new IllegalArgumentException("GameProfile name is empty!");
+
             var packetPlayerInfo = new ClientboundPlayerInfoUpdatePacket(
                     EnumSet.of(ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER),
                     new ClientboundPlayerInfoUpdatePacket.Entry(
@@ -88,6 +91,17 @@ public class PacketFactory extends MorphPluginObject
 
             spawnUUID = uuid;
             packets.add(PacketContainer.fromPacket(packetPlayerInfo));
+
+            var watcher = parameters.getWatcher();
+            var lastUUID = watcher.getOrDefault(EntryIndex.TABLIST_UUID, null);
+
+            if (lastUUID != null)
+            {
+                var packetTabRemove = new ClientboundPlayerInfoRemovePacket(List.of(lastUUID));
+                packets.add(PacketContainer.fromPacket(packetTabRemove));
+            }
+
+            parameters.getWatcher().write(EntryIndex.TABLIST_UUID, uuid);
         }
 
         var pitch = player.getPitch();

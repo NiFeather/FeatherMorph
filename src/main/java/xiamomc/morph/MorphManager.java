@@ -661,10 +661,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             var compound = provider.getNbtCompound(outComingState, targetEntity);
 
             if (compound != null)
-            {
-                outComingState.setCachedNbtString(NbtUtils.getCompoundString(compound));
                 outComingState.getDisguiseWrapper().mergeCompound(compound);
-            }
 
             // 如果此伪装可以同步给客户端，那么初始化客户端状态
             if (provider.validForClient(outComingState))
