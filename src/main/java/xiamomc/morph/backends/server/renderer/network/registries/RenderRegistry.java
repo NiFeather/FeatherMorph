@@ -22,7 +22,7 @@ public class RenderRegistry extends MorphPluginObject
     }
 
     private final Map<Object, Consumer<EventParameters>> onRegisterConsumers = new Object2ObjectOpenHashMap<>();
-    private final Map<Object, Consumer<Player>> unRegisterConsumers = new Object2ObjectOpenHashMap<>();
+    private final Map<Object, Consumer<EventParameters>> unRegisterConsumers = new Object2ObjectOpenHashMap<>();
     private final Map<Object, Consumer<EventParameters>> onRegistryChangeConsumers = new Object2ObjectOpenHashMap<>();
 
     public void onRegistryChange(Object source, Consumer<EventParameters> consumer)
@@ -41,14 +41,14 @@ public class RenderRegistry extends MorphPluginObject
         onRegisterConsumers.forEach((source, consumer) -> consumer.accept(ep));
     }
 
-    public void onUnRegister(Object source, Consumer<Player> consumer)
+    public void onUnRegister(Object source, Consumer<EventParameters> consumer)
     {
         unRegisterConsumers.put(source, consumer);
     }
 
-    private void callUnregister(Player player)
+    private void callUnregister(Player player, SingleWatcher watcher)
     {
-        unRegisterConsumers.forEach((source, consumer) -> consumer.accept(player));
+        unRegisterConsumers.forEach((source, consumer) -> consumer.accept(new EventParameters(player, watcher)));
     }
 
     //region Registry
@@ -74,8 +74,8 @@ public class RenderRegistry extends MorphPluginObject
 
     public void unregister(UUID uuid)
     {
-        watcherMap.remove(uuid);
-        callUnregister(Bukkit.getPlayer(uuid));
+        var watcher = watcherMap.remove(uuid);
+        callUnregister(Bukkit.getPlayer(uuid), watcher);
     }
 
     /**
@@ -112,10 +112,12 @@ public class RenderRegistry extends MorphPluginObject
 
     public void reset()
     {
-        var players = watcherMap.keySet().stream().toList();
-        watcherMap.clear();
+        watcherMap.forEach((uuid, watcher) ->
+        {
+            callRegister(Bukkit.getPlayer(uuid), watcher);
+        });
 
-        players.forEach(uuid -> callUnregister(Bukkit.getPlayer(uuid)));
+        watcherMap.clear();
     }
 
     //endregion Registry

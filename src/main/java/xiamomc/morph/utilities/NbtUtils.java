@@ -1,5 +1,6 @@
 package xiamomc.morph.utilities;
 
+import com.mojang.authlib.GameProfile;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.StringTagVisitor;
 import net.minecraft.nbt.TagParser;
@@ -15,6 +16,12 @@ import java.util.List;
 
 public class NbtUtils
 {
+    public static CompoundTag toCompoundTag(GameProfile profile)
+    {
+        var compound = new CompoundTag();
+        return net.minecraft.nbt.NbtUtils.writeGameProfile(compound, profile);
+    }
+
     /**
      * 获取目标实体的 {@link CompoundTag}
      * @param entity 目标实体

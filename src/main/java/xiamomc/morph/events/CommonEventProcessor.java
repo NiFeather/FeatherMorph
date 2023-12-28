@@ -398,9 +398,6 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
                     state.getSkillLookupIdentifier(), wrapper, state.shouldHandlePose(), false,
                     state.getDisguisedItems());
 
-            state.setCachedNbtString(nbt);
-            state.setCachedProfileNbtString(profile);
-
             if (customName != null)
             {
                 state.entityCustomName = customName;

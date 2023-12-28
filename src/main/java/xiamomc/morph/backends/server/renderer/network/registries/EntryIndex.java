@@ -1,6 +1,7 @@
 package xiamomc.morph.backends.server.renderer.network.registries;
 
 import com.mojang.authlib.GameProfile;
+import net.minecraft.Util;
 import org.bukkit.entity.EntityType;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
 import xiamomc.morph.misc.DisguiseEquipment;
@@ -14,4 +15,6 @@ public class EntryIndex
 
     public static final RegistryKey<DisguiseEquipment> EQUIPMENT = RegistryKey.of("equip", new DisguiseEquipment());
     public static final RegistryKey<Boolean> DISPLAY_FAKE_EQUIPMENT = RegistryKey.of("display_fake_equip", false);
+
+    public static final RegistryKey<UUID> TABLIST_UUID = RegistryKey.of("tablist_uuid", Util.NIL_UUID);
 }
