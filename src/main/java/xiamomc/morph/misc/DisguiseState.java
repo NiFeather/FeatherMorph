@@ -34,10 +34,7 @@ import xiamomc.morph.skills.SkillCooldownInfo;
 import xiamomc.morph.skills.SkillType;
 import xiamomc.morph.skills.impl.NoneMorphSkill;
 import xiamomc.morph.storage.playerdata.PlayerMeta;
-import xiamomc.morph.utilities.EntityTypeUtils;
-import xiamomc.morph.utilities.ItemUtils;
-import xiamomc.morph.utilities.MathUtils;
-import xiamomc.morph.utilities.SoundUtils;
+import xiamomc.morph.utilities.*;
 import xiamomc.pluginbase.Annotations.Resolved;
 
 import java.util.Arrays;
@@ -424,41 +421,27 @@ public class DisguiseState extends MorphPluginObject
 
     //region NBT
 
-    private String cachedNbtString = "{}";
-
     public String getCachedNbtString()
     {
-        return cachedNbtString;
-    }
-
-    public void setCachedNbtString(String newNbt)
-    {
-        if (newNbt == null || newNbt.isEmpty() || newNbt.isBlank()) newNbt = "{}";
-
-        this.cachedNbtString = newNbt;
+        return NbtUtils.getCompoundString(disguiseWrapper.getCompound());
     }
 
     //endregion
 
     //region ProfileNBT
 
-    private String cachedProfileNbtString = "{}";
-
     public String getProfileNbtString()
     {
-        return cachedProfileNbtString;
-    }
+        if (!haveProfile())
+             return "{}";
 
-    public void setCachedProfileNbtString(String newNbt)
-    {
-        if (newNbt == null || newNbt.isEmpty() || newNbt.isBlank()) newNbt = "{}";
-
-        this.cachedProfileNbtString = newNbt;
+        var s = NbtUtils.getCompoundString(NbtUtils.toCompoundTag(disguiseWrapper.getSkin()));
+        return s;
     }
 
     public boolean haveProfile()
     {
-        return !cachedProfileNbtString.equals("{}");
+        return disguiseWrapper.getSkin() != null;
     }
 
     //endregion ProfileNBT
@@ -494,9 +477,6 @@ public class DisguiseState extends MorphPluginObject
                             @Nullable EntityEquipment targetEquipment)
     {
         if (disguiseWrapper == wrapper) return;
-
-        setCachedProfileNbtString(null);
-        setCachedNbtString(null);
 
         this.entityCustomName = null;
 
@@ -787,9 +767,6 @@ public class DisguiseState extends MorphPluginObject
 
         var state = new DisguiseState(player, this.disguiseIdentifier, this.skillLookupIdentifier,
                 disguise, shouldHandlePose, provider, getDisguisedItems(), this.playerOptions, morphConfiguration);
-
-        state.setCachedProfileNbtString(this.cachedProfileNbtString);
-        state.setCachedNbtString(this.cachedNbtString);
 
         return state;
     }
