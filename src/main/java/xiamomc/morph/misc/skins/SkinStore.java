@@ -50,12 +50,14 @@ public class SkinStore extends MorphJsonBasedStorage<SkinStoreRoot>
 
         if (single == null) return null;
 
+/*
         if (System.currentTimeMillis() > single.expiresAt)
         {
             this.addSchedule(() -> storingObject.storedSkins.remove(single));
 
             return null;
         }
+*/
 
         return single.toGameProfile();
     }
