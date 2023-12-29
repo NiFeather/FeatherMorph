@@ -4,7 +4,9 @@ import com.destroystokyo.paper.profile.PaperAuthenticationService;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.GameProfileRepository;
 import com.mojang.authlib.ProfileLookupCallback;
+import com.mojang.authlib.exceptions.AuthenticationUnavailableException;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
+import com.mojang.authlib.yggdrasil.ProfileNotFoundException;
 import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.Util;
@@ -24,6 +26,7 @@ import java.net.Proxy;
 import java.net.URI;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -74,8 +77,19 @@ public class PlayerSkinProvider extends MorphPluginObject
 
             public void onProfileLookupFailed(String profileName, Exception exception)
             {
-                logger.info("Failed to lookup '%s': '%s'".formatted(profileName, exception.getMessage()));
-                exception.printStackTrace();
+                if (exception instanceof ProfileNotFoundException)
+                {
+                    //do nothing
+                }
+                else if (exception instanceof AuthenticationUnavailableException)
+                {
+                    logger.info("Failed to lookup '%s' because the authentication service is not available now...".formatted(profileName));
+                }
+                else
+                {
+                    logger.info("Failed to lookup '%s': '%s'".formatted(profileName, exception.getMessage()));
+                    exception.printStackTrace();
+                }
             }
         };
 
