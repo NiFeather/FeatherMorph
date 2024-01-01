@@ -39,7 +39,7 @@ public abstract class AbstractValues
 
         try
         {
-            ProtocolRegistryUtils.getSerializer(value.defaultValue());
+            ProtocolRegistryUtils.getSerializer(value);
         }
         catch (Throwable t)
         {
