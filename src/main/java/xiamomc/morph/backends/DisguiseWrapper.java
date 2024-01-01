@@ -307,10 +307,6 @@ public abstract class DisguiseWrapper<TInstance>
 
     //region Temp
 
-    public void showArms(boolean showarms)
-    {
-    }
-
     public void setSaddled(boolean saddled)
     {
     }
