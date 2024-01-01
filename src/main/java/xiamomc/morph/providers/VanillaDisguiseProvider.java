@@ -199,7 +199,7 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
         {
             //盔甲架加上手臂
             if (disguise.getEntityType().equals(EntityType.ARMOR_STAND) && armorStandShowArms.get())
-                disguise.showArms(true);
+                disguise.setShowArms(true);
         }
 
         var player = state.getPlayer();
