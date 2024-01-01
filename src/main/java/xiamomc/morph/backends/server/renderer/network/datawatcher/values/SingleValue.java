@@ -1,5 +1,6 @@
 package xiamomc.morph.backends.server.renderer.network.datawatcher.values;
 
+import com.comphenix.protocol.wrappers.WrappedDataWatcher;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -30,6 +31,20 @@ public class SingleValue<T>
     public T defaultValue()
     {
         return defaultValue;
+    }
+
+    @Nullable
+    private WrappedDataWatcher.Serializer serializer;
+
+    public void setSerializer(WrappedDataWatcher.Serializer serializer)
+    {
+        this.serializer = serializer;
+    }
+
+    @Nullable
+    public WrappedDataWatcher.Serializer getSerializer()
+    {
+        return serializer;
     }
 
     public SingleValue(Class<T> type, int index, @NotNull T defaultValue)

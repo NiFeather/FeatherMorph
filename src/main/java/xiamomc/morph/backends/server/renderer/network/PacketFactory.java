@@ -198,7 +198,7 @@ public class PacketFactory extends MorphPluginObject
 
             try
             {
-                serializer = ProtocolRegistryUtils.getSerializer(single.defaultValue());
+                serializer = ProtocolRegistryUtils.getSerializer(single);
             }
             catch (Throwable t)
             {
@@ -235,7 +235,7 @@ public class PacketFactory extends MorphPluginObject
 
             try
             {
-                serializer = ProtocolRegistryUtils.getSerializer(single.defaultValue());
+                serializer = ProtocolRegistryUtils.getSerializer(single);
             }
             catch (Throwable t)
             {
