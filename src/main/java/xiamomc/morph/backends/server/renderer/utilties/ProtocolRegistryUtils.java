@@ -3,6 +3,7 @@ package xiamomc.morph.backends.server.renderer.utilties;
 import com.comphenix.protocol.wrappers.WrappedDataWatcher;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.values.SingleValue;
 
 import java.util.Optional;
@@ -15,7 +16,11 @@ public class ProtocolRegistryUtils
         if (s != null)
             return s;
 
-        return getSerializer(sv.defaultValue());
+        var s1 = getSerializer(sv.defaultValue());
+        if (s1 != null)
+            sv.setSerializer(s1);
+
+        return s1;
     }
 
     public static WrappedDataWatcher.Serializer getSerializer(Object instance)
@@ -37,6 +42,19 @@ public class ProtocolRegistryUtils
         if (instance instanceof Component)
             return WrappedDataWatcher.Registry.getChatComponentSerializer(true);
 
-        return WrappedDataWatcher.Registry.get(clazz);
+        WrappedDataWatcher.Serializer ret = null;
+
+        try
+        {
+            ret = WrappedDataWatcher.Registry.get(clazz);
+        }
+        catch (Throwable t)
+        {
+            var logger = MorphPlugin.getInstance().getSLF4JLogger();
+            logger.error("Can't find serializer for value '%s': '%s'".formatted(instance, t.getMessage()));
+            t.printStackTrace();
+        }
+
+        return ret;
     }
 }
