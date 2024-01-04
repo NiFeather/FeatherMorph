@@ -66,13 +66,10 @@ public class PlayerLookPacketListener extends ProtocolListener
     private void onTeleport(ClientboundTeleportEntityPacket packet, PacketEvent event)
     {
         //获取此包的来源实体
-        var sourceNmsEntity = NmsUtils.getNmsLevel(event.getPlayer().getWorld()).getEntity(packet.getId());
+        var sourceNmsEntity = getNmsEntityFrom(event, packet.getId());
         if (sourceNmsEntity == null)
-        {
-            logger.warn("A packet from a player that doesn't exist in its world?!");
-            logger.warn("Packet: " + event.getPacketType());
             return;
-        }
+
 
         if (!(sourceNmsEntity.getBukkitEntity() instanceof Player sourcePlayer)) return;
 
