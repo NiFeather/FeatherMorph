@@ -43,13 +43,10 @@ public class MetaPacketListener extends ProtocolListener
     private void onMetaPacket(ClientboundSetEntityDataPacket packet, PacketEvent packetEvent)
     {
         //获取此包的来源实体
-        var sourceNmsEntity = NmsUtils.getNmsLevel(packetEvent.getPlayer().getWorld()).getEntity(packet.id());
+        var sourceNmsEntity = getNmsEntityFrom(packetEvent, packet.id());
         if (sourceNmsEntity == null)
-        {
-            logger.warn("A packet from a player that doesn't exist in its world?!");
-            logger.warn("Packet: " + packetEvent.getPacketType());
             return;
-        }
+
 
         if (!(sourceNmsEntity.getBukkitEntity() instanceof Player sourcePlayer)) return;
 
