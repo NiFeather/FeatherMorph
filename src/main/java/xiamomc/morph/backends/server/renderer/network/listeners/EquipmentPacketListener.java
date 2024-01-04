@@ -54,13 +54,9 @@ public class EquipmentPacketListener extends ProtocolListener
             return;
 
         //获取此包的来源实体
-        var sourceNmsEntity = NmsUtils.getNmsLevel(event.getPlayer().getWorld()).getEntity(packet.getEntity());
+        var sourceNmsEntity = getNmsEntityFrom(event, packet.getEntity());
         if (sourceNmsEntity == null)
-        {
-            logger.warn("A packet from a player that doesn't exist in its world?!");
-            logger.warn("Packet: " + event.getPacketType());
             return;
-        }
 
         if (!(sourceNmsEntity.getBukkitEntity() instanceof Player sourcePlayer)) return;
 
