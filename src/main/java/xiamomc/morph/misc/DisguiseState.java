@@ -10,6 +10,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
+import org.bukkit.SoundCategory;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.EntityEquipment;
@@ -650,6 +651,8 @@ public class DisguiseState extends MorphPluginObject
         @Nullable
         private EntityType entityType;
 
+        private SoundCategory soundCategory = SoundCategory.PLAYERS;
+
         @NotNull
         private EntityType getEntityType()
         {
@@ -673,7 +676,6 @@ public class DisguiseState extends MorphPluginObject
             //logger.info("Sound: %s <-- %s(%s) --> %s".formatted(soundTime, frequency, soundFrequency, ambientInterval * frequency));
             if (ambientInterval != 0 && soundTime >= ambientInterval * frequencyScale && !bindingPlayer.isSneaking())
             {
-                var loc = bindingPlayer.getLocation();
                 boolean playSecondary = false;
 
                 if (getEntityType() == EntityType.ALLAY)
@@ -696,7 +698,7 @@ public class DisguiseState extends MorphPluginObject
                 else if (sound != null && random.nextInt((int)(1000 * frequencyScale)) < soundTime)
                 {
                     soundTime = -(int)(ambientInterval * frequencyScale);
-                    bindingPlayer.getWorld().playSound(sound, loc.getX(), loc.getY(), loc.getZ());
+                    bindingPlayer.getWorld().playSound(bindingPlayer, sound.name().asString(), soundCategory, 1f, 1f);
                 }
             }
         }
@@ -730,6 +732,9 @@ public class DisguiseState extends MorphPluginObject
             var pitch = isBaby ? 1.5F : 1F;
 
             this.ambientSoundPrimary = SoundUtils.toBukkitSound(soundEvent, pitch);
+
+            var isEnemy = EntityTypeUtils.isEnemy(entityType);
+            this.soundCategory = isEnemy ? SoundCategory.HOSTILE : SoundCategory.NEUTRAL;
 
             if (entityType == EntityType.ALLAY)
             {
