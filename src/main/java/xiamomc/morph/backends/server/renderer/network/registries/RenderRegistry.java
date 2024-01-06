@@ -13,6 +13,9 @@ import xiamomc.pluginbase.Exceptions.NullDependencyException;
 
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Consumer;
 
 public class RenderRegistry extends MorphPluginObject
@@ -64,7 +67,32 @@ public class RenderRegistry extends MorphPluginObject
     @Nullable
     public SingleWatcher getWatcher(UUID uuid)
     {
-        return watcherMap.getOrDefault(uuid, null);
+        boolean locked;
+
+        try
+        {
+            locked = readLock.tryLock(rwLockWaitTime, TimeUnit.MILLISECONDS);
+        }
+        catch (Throwable t)
+        {
+            throw new RuntimeException("Unable to lock registry for read!", t);
+        }
+
+        if (!locked)
+            throw new RuntimeException("Unable to lock registry for read: Timed out");
+
+        SingleWatcher watcher;
+
+        try
+        {
+            watcher = watcherMap.getOrDefault(uuid, null);
+        }
+        finally
+        {
+            readLock.unlock();
+        }
+
+        return watcher;
     }
 
     public void unregister(Player player)
@@ -81,7 +109,7 @@ public class RenderRegistry extends MorphPluginObject
     /**
      * 注册玩家的伪装类型
      * @param player 目标玩家
-     * @param bukkitType 伪装的Bukkit生物类型，为null则移除注册
+     * @param registerParameters 注册参数
      */
     public SingleWatcher register(@NotNull Player player, RegisterParameters registerParameters)
     {
@@ -92,6 +120,12 @@ public class RenderRegistry extends MorphPluginObject
         return watcher;
     }
 
+    private final ReentrantReadWriteLock rwLock = new ReentrantReadWriteLock();
+
+    private final Lock readLock = rwLock.readLock();
+    private final Lock writeLock = rwLock.writeLock();
+    private final int rwLockWaitTime = 20;
+
     /**
      * 注册UUID对应的伪装类型
      * @param uuid 目标玩家的UUID
@@ -100,13 +134,29 @@ public class RenderRegistry extends MorphPluginObject
     public void register(@NotNull UUID uuid, @NotNull SingleWatcher watcher)
     {
         if (watcher == null)
-        {
             throw new NullDependencyException("Null Watcher!");
+
+        boolean locked;
+        try
+        {
+            locked = writeLock.tryLock(rwLockWaitTime, TimeUnit.MILLISECONDS);
         }
-        else
+        catch (Throwable t)
+        {
+            throw new RuntimeException("Unable to lock registry for write!", t);
+        }
+
+        if (!locked)
+            throw new RuntimeException("Unable to lock registry for write: Timed out.");
+
+        try
         {
             watcherMap.put(uuid, watcher);
             callRegister(Bukkit.getPlayer(uuid), watcher);
+        }
+        finally
+        {
+            writeLock.unlock();
         }
     }
 
