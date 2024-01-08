@@ -105,10 +105,14 @@ public class PlayerLookPacketListener extends ProtocolListener
     {
         //获取此包的来源实体
         var sourceNmsEntity = packet.getEntity(NmsUtils.getNmsLevel(event.getPlayer().getWorld()));
-        if (sourceNmsEntity == null && isDebugEnabled())
+        if (sourceNmsEntity == null)
         {
-            logger.warn("A packet from a player that doesn't exist in its world?!");
-            logger.warn("Packet: " + event.getPacketType());
+            if (isDebugEnabled())
+            {
+                logger.warn("A packet from a player that doesn't exist in its world?!");
+                logger.warn("Packet: " + event.getPacketType());
+            }
+
             return;
         }
 
@@ -132,10 +136,14 @@ public class PlayerLookPacketListener extends ProtocolListener
     {
         //获取此包的来源实体
         var sourceNmsEntity = packet.getEntity(NmsUtils.getNmsLevel(event.getPlayer().getWorld()));
-        if (sourceNmsEntity == null && isDebugEnabled())
+        if (sourceNmsEntity == null)
         {
-            logger.warn("A packet from a player that doesn't exist in its world?!");
-            logger.warn("Packet: " + event.getPacketType());
+            if (isDebugEnabled())
+            {
+                logger.warn("A packet from a player that doesn't exist in its world?!");
+                logger.warn("Packet: " + event.getPacketType());
+            }
+
             return;
         }
 
