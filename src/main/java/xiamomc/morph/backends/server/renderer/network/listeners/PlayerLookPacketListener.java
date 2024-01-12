@@ -107,8 +107,12 @@ public class PlayerLookPacketListener extends ProtocolListener
         var sourceNmsEntity = packet.getEntity(NmsUtils.getNmsLevel(event.getPlayer().getWorld()));
         if (sourceNmsEntity == null)
         {
-            logger.warn("A packet from a player that doesn't exist in its world?!");
-            logger.warn("Packet: " + event.getPacketType());
+            if (isDebugEnabled())
+            {
+                logger.warn("A packet from a player that doesn't exist in its world?!");
+                logger.warn("Packet: " + event.getPacketType());
+            }
+
             return;
         }
 
@@ -134,8 +138,12 @@ public class PlayerLookPacketListener extends ProtocolListener
         var sourceNmsEntity = packet.getEntity(NmsUtils.getNmsLevel(event.getPlayer().getWorld()));
         if (sourceNmsEntity == null)
         {
-            logger.warn("A packet from a player that doesn't exist in its world?!");
-            logger.warn("Packet: " + event.getPacketType());
+            if (isDebugEnabled())
+            {
+                logger.warn("A packet from a player that doesn't exist in its world?!");
+                logger.warn("Packet: " + event.getPacketType());
+            }
+
             return;
         }
 

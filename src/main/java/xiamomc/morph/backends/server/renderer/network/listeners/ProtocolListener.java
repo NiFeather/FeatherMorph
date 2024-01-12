@@ -40,6 +40,11 @@ public abstract class ProtocolListener extends MorphPluginObject implements Pack
 
     private final Bindable<Boolean> debugOutput = new Bindable<>(false);
 
+    protected boolean isDebugEnabled()
+    {
+        return debugOutput.get();
+    }
+
     @Initializer
     private void load(MorphConfigManager configManager)
     {
