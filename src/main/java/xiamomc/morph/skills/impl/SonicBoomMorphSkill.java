@@ -11,10 +11,13 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.misc.NmsRecord;
+import xiamomc.morph.network.commands.S2C.set.S2CSetAggressiveCommand;
+import xiamomc.morph.network.server.MorphClientHandler;
 import xiamomc.morph.skills.SkillType;
 import xiamomc.morph.skills.options.NoOpConfiguration;
 import xiamomc.morph.storage.skill.SkillAbilityConfiguration;
 import xiamomc.morph.utilities.DamageSourceUtils;
+import xiamomc.pluginbase.Annotations.Resolved;
 
 public class SonicBoomMorphSkill extends DelayedMorphSkill<NoOpConfiguration>
 {
@@ -27,6 +30,9 @@ public class SonicBoomMorphSkill extends DelayedMorphSkill<NoOpConfiguration>
         playSoundToNearbyPlayers(player, 160,
                 Key.key("minecraft", "entity.warden.sonic_charge"), Sound.Source.HOSTILE);
 
+        state.getDisguiseWrapper().setAggressive(true);
+        clientHandler.sendCommand(player, new S2CSetAggressiveCommand(true));
+
         return super.preExecute(player, state, configuration, option);
     }
 
@@ -36,9 +42,15 @@ public class SonicBoomMorphSkill extends DelayedMorphSkill<NoOpConfiguration>
         return 34;
     }
 
+    @Resolved
+    private MorphClientHandler clientHandler;
+
     @Override
     protected void executeDelayedSkill(Player player, DisguiseState state, SkillAbilityConfiguration configuration, NoOpConfiguration option)
     {
+        state.getDisguiseWrapper().setAggressive(false);
+        clientHandler.sendCommand(player, new S2CSetAggressiveCommand(false));
+
         var location = player.getEyeLocation().toVector();
         var direction = player.getEyeLocation().getDirection();
 

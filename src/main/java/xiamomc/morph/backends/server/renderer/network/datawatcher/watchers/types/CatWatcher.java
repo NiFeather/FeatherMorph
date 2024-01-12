@@ -7,7 +7,7 @@ import net.minecraft.world.entity.animal.CatVariant;
 import org.bukkit.entity.Cat;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import xiamomc.morph.backends.server.renderer.network.datawatcher.ValueIndex;
+import xiamomc.morph.backends.server.renderer.network.registries.ValueIndex;
 
 import java.util.Arrays;
 import java.util.Random;

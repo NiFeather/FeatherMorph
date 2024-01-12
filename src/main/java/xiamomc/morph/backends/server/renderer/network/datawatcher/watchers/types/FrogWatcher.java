@@ -1,16 +1,13 @@
 package xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types;
 
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.animal.FrogVariant;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Frog;
 import org.bukkit.entity.Player;
-import xiamomc.morph.backends.server.renderer.network.datawatcher.ValueIndex;
-
-import java.util.Arrays;
+import xiamomc.morph.backends.server.renderer.network.registries.ValueIndex;
 
 public class FrogWatcher extends LivingEntityWatcher
 {

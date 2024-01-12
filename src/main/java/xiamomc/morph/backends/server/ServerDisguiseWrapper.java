@@ -14,7 +14,7 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.backends.DisguiseWrapper;
-import xiamomc.morph.backends.server.renderer.network.datawatcher.ValueIndex;
+import xiamomc.morph.backends.server.renderer.network.registries.ValueIndex;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.*;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
 import xiamomc.morph.backends.server.renderer.network.registries.EntryIndex;
@@ -24,7 +24,6 @@ import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.utilities.NbtUtils;
 
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ServerDisguiseWrapper extends DisguiseWrapper<ServerDisguise>
 {
@@ -265,6 +264,16 @@ public class ServerDisguiseWrapper extends DisguiseWrapper<ServerDisguise>
             bindingWatcher.write(ValueIndex.CREEPER.STATE, aggressive ? 1 : -1);
             bindingWatcher.write(ValueIndex.CREEPER.IGNITED, aggressive);
         }
+
+        if (getEntityType() == EntityType.WARDEN)
+            bindingWatcher.write(EntryIndex.WARDEN_CHARGING_ATTACK, aggressive);
+    }
+
+    @Override
+    public void playAttackAnimation()
+    {
+        super.playAttackAnimation();
+        bindingWatcher.write(EntryIndex.ATTACK_ANIMATION, true);
     }
 
     @Override

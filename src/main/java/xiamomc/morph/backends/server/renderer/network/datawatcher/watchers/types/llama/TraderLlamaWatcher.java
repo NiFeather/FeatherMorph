@@ -2,8 +2,7 @@ package xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.type
 
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import xiamomc.morph.backends.server.renderer.network.datawatcher.ValueIndex;
-import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.horses.ChestedHorseWatcher;
+import xiamomc.morph.backends.server.renderer.network.registries.ValueIndex;
 
 public class TraderLlamaWatcher extends LlamaWatcher
 {

@@ -9,7 +9,7 @@ import net.minecraft.world.entity.npc.VillagerType;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
-import xiamomc.morph.backends.server.renderer.network.datawatcher.ValueIndex;
+import xiamomc.morph.backends.server.renderer.network.registries.ValueIndex;
 import xiamomc.morph.utilities.MathUtils;
 
 import java.util.Arrays;

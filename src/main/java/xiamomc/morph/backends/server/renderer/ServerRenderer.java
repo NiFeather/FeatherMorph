@@ -6,7 +6,6 @@ import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.backends.server.renderer.network.PacketFactory;
 import xiamomc.morph.backends.server.renderer.network.ProtocolHandler;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
-import xiamomc.morph.backends.server.renderer.network.queue.PacketQueue;
 import xiamomc.morph.backends.server.renderer.network.registries.RegisterParameters;
 import xiamomc.morph.backends.server.renderer.network.registries.RenderRegistry;
 
@@ -18,12 +17,9 @@ public class ServerRenderer extends MorphPluginObject
 
     private final PacketFactory packetFactory = new PacketFactory();
 
-    private final PacketQueue packetQueue = new PacketQueue();
-
     public ServerRenderer()
     {
         dependencies.cache(packetFactory);
-        dependencies.cache(packetQueue);
 
         dependencies.cache(registry);
         dependencies.cache(protocolHandler = new ProtocolHandler());
