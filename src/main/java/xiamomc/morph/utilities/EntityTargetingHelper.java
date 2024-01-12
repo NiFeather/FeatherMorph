@@ -43,6 +43,9 @@ public class EntityTargetingHelper extends MorphPluginObject
     {
         var toRemoveFromAffect = new ObjectArrayList<net.minecraft.world.entity.Mob>();
 
+        if (affectMobsAndPlayers.isEmpty())
+            return;
+
         affectMobsAndPlayers.forEach((nmsMob, nmsPlayer) ->
         {
             var mob = nmsMob.getBukkitMob();

@@ -72,6 +72,9 @@ public class RevealingHandler extends MorphPluginObject
     {
         this.addSchedule(this::update);
 
+        if (this.playerRevealingStateMap.isEmpty())
+            return;
+
         var decay = plugin.getCurrentTick() % 5 == 0;
         for (var state : this.playerRevealingStateMap.values())
         {
