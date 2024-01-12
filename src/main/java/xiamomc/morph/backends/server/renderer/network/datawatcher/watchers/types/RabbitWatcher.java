@@ -4,7 +4,7 @@ import net.minecraft.nbt.CompoundTag;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Rabbit;
-import xiamomc.morph.backends.server.renderer.network.datawatcher.ValueIndex;
+import xiamomc.morph.backends.server.renderer.network.registries.ValueIndex;
 
 import java.util.Arrays;
 import java.util.Random;

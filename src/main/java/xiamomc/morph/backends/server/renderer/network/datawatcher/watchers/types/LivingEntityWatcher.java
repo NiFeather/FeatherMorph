@@ -1,6 +1,5 @@
 package xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types;
 
-import io.papermc.paper.event.player.PlayerStopUsingItemEvent;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.core.BlockPos;
@@ -11,12 +10,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerItemConsumeEvent;
-import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.inventory.EquipmentSlot;
-import org.bukkit.inventory.MainHand;
 import org.bukkit.potion.PotionEffect;
-import xiamomc.morph.backends.server.renderer.network.datawatcher.ValueIndex;
+import xiamomc.morph.backends.server.renderer.network.registries.ValueIndex;
 import xiamomc.morph.misc.NmsRecord;
 
 import java.util.List;

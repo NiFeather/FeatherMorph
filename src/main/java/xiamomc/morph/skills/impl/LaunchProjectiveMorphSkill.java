@@ -47,11 +47,8 @@ public class LaunchProjectiveMorphSkill extends DelayedMorphSkill<ProjectiveConf
         playSoundToNearbyPlayers(player, option.getSoundDistance(),
                 Key.key(option.getPreLaunchSoundName()), Sound.Source.HOSTILE);
 
-        if (state.getEntityType() == EntityType.GHAST)
-        {
-            state.getDisguiseWrapper().setAggressive(true);
-            clientHandler.sendCommand(player, new S2CSetAggressiveCommand(true));
-        }
+        state.getDisguiseWrapper().setAggressive(true);
+        clientHandler.sendCommand(player, new S2CSetAggressiveCommand(true));
 
         return super.preExecute(player, state, configuration, option);
     }
@@ -59,11 +56,8 @@ public class LaunchProjectiveMorphSkill extends DelayedMorphSkill<ProjectiveConf
     @Override
     protected void executeDelayedSkill(Player player, DisguiseState state, SkillAbilityConfiguration configuration, ProjectiveConfiguration option)
     {
-        if (state.getEntityType() == EntityType.GHAST)
-        {
-            state.getDisguiseWrapper().setAggressive(false);
-            clientHandler.sendCommand(player, new S2CSetAggressiveCommand(false));
-        }
+        state.getDisguiseWrapper().setAggressive(false);
+        clientHandler.sendCommand(player, new S2CSetAggressiveCommand(false));
 
         var type = EntityTypeUtils.fromString(option.getName(), true);
 
