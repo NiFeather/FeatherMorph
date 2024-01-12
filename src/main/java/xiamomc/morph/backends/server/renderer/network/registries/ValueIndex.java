@@ -1,4 +1,4 @@
-package xiamomc.morph.backends.server.renderer.network.datawatcher;
+package xiamomc.morph.backends.server.renderer.network.registries;
 
 import xiamomc.morph.backends.server.renderer.network.datawatcher.values.*;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.values.basetypes.*;

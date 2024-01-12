@@ -3,10 +3,7 @@ package xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.type
 import net.minecraft.nbt.CompoundTag;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.TropicalFish;
-import xiamomc.morph.backends.server.renderer.network.datawatcher.ValueIndex;
-
-import java.util.Arrays;
+import xiamomc.morph.backends.server.renderer.network.registries.ValueIndex;
 
 public class TropicalFishWatcher extends LivingEntityWatcher
 {

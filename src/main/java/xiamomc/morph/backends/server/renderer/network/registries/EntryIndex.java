@@ -17,4 +17,6 @@ public class EntryIndex
     public static final RegistryKey<Boolean> DISPLAY_FAKE_EQUIPMENT = RegistryKey.of("display_fake_equip", false);
 
     public static final RegistryKey<UUID> TABLIST_UUID = RegistryKey.of("tablist_uuid", Util.NIL_UUID);
+
+    public static final RegistryKey<Boolean> WARDEN_CHARGING_ATTACK = RegistryKey.of("warden_charging_attack", false);
 }

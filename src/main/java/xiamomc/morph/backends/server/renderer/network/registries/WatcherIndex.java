@@ -1,4 +1,4 @@
-package xiamomc.morph.backends.server.renderer.network.datawatcher;
+package xiamomc.morph.backends.server.renderer.network.registries;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.bukkit.entity.EntityType;
@@ -77,6 +77,8 @@ public class WatcherIndex
 
         setTypeWatcher(EntityType.WOLF, WolfWatcher::new);
         setTypeWatcher(EntityType.PHANTOM, PhantomWatcher::new);
+
+        setTypeWatcher(EntityType.WARDEN, WardenWatcher::new);
     }
 
     private void setTypeWatcher(EntityType type, Function<Player, SingleWatcher> func)

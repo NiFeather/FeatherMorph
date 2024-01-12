@@ -2,17 +2,10 @@ package xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.type
 
 import net.minecraft.core.Rotations;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.FloatTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.world.level.block.Rotation;
-import net.minecraft.world.phys.Vec3;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import xiamomc.morph.backends.server.renderer.network.PacketFactory;
-import xiamomc.morph.backends.server.renderer.network.datawatcher.ValueIndex;
-import xiamomc.morph.backends.server.renderer.network.registries.EntryIndex;
-import xiamomc.morph.backends.server.renderer.network.registries.RegistryKey;
-import xiamomc.pluginbase.Annotations.Resolved;
+import xiamomc.morph.backends.server.renderer.network.registries.ValueIndex;
 
 public class ArmorStandWatcher extends InventoryLivingWatcher
 {
