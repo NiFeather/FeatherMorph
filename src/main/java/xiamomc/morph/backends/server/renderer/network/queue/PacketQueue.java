@@ -55,6 +55,9 @@ public class PacketQueue extends MorphPluginObject
     {
         this.addSchedule(this::update);
 
+        if (playerPackets.isEmpty())
+            return;
+
         var currentTick = plugin.getCurrentTick();
         var packetsCopy = new Object2ObjectOpenHashMap<>(playerPackets);
         packetsCopy.forEach((player, queue) ->

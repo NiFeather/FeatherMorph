@@ -23,15 +23,7 @@ public abstract class ProtocolListener extends MorphPluginObject implements Pack
     @Resolved(shouldSolveImmediately = true)
     private PacketFactory packetFactory;
 
-    @Resolved(shouldSolveImmediately = true)
-    private PacketQueue packetQueue;
-
     public abstract String getIdentifier();
-
-    protected PacketQueue getQueue()
-    {
-        return packetQueue;
-    }
 
     protected PacketFactory getFactory() { return packetFactory; }
 
