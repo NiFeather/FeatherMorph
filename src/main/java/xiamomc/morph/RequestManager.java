@@ -34,6 +34,9 @@ public class RequestManager extends MorphPluginObject implements IManageRequests
     {
         this.addSchedule(this::update);
 
+        if (this.requests.isEmpty())
+            return;
+
         //更新请求
         var requests = new ObjectArrayList<>(this.requests);
         for (var r : requests)

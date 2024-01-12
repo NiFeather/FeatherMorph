@@ -134,7 +134,8 @@ public class MorphSkillHandler extends MorphPluginObject
         this.addSchedule(this::update);
 
         //更新CD
-        activeCooldownMap.forEach((u, c) -> c.setCooldown(c.getCooldown() - 1));
+        if (!activeCooldownMap.isEmpty())
+            activeCooldownMap.forEach((u, c) -> c.setCooldown(c.getCooldown() - 1));
     }
 
     /**
