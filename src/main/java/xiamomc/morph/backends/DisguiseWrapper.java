@@ -320,6 +320,10 @@ public abstract class DisguiseWrapper<TInstance>
     {
     }
 
+    public void playAttackAnimation()
+    {
+    }
+
     public void setShowArms(boolean showArms)
     {
     }

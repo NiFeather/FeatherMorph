@@ -6,15 +6,14 @@ import org.bukkit.craftbukkit.v1_20_R3.entity.CraftPlayer;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
-import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
 import xiamomc.morph.backends.server.renderer.network.registries.EntryIndex;
 import xiamomc.morph.backends.server.renderer.network.registries.RegistryKey;
 
-public class WardenWatcher extends EHasAttackAnimationWatcher
+public class EHasAttackAnimationWatcher extends LivingEntityWatcher
 {
-    public WardenWatcher(Player bindingPlayer)
+    public EHasAttackAnimationWatcher(Player bindingPlayer, EntityType entityType)
     {
-        super(bindingPlayer, EntityType.WARDEN);
+        super(bindingPlayer, entityType);
     }
 
     @Override
@@ -22,10 +21,10 @@ public class WardenWatcher extends EHasAttackAnimationWatcher
     {
         super.onCustomWrite(key, oldVal, newVal);
 
-        if (key.equals(EntryIndex.WARDEN_CHARGING_ATTACK) && Boolean.TRUE.equals(newVal))
+        if (key.equals(EntryIndex.ATTACK_ANIMATION) && Boolean.TRUE.equals(newVal))
         {
             var entity = ((CraftPlayer)getBindingPlayer()).getHandle();
-            sendPacketToAffectedPlayers(PacketContainer.fromPacket(new ClientboundEntityEventPacket(entity, (byte)62)));
+            sendPacketToAffectedPlayers(PacketContainer.fromPacket(new ClientboundEntityEventPacket(entity, (byte)4)));
         }
     }
 }

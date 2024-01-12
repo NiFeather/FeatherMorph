@@ -5,7 +5,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import xiamomc.morph.backends.server.renderer.network.registries.ValueIndex;
 
-public class ZoglinWatcher extends LivingEntityWatcher
+public class ZoglinWatcher extends EHasAttackAnimationWatcher
 {
     public ZoglinWatcher(Player bindingPlayer)
     {

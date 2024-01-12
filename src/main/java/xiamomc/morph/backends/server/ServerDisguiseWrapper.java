@@ -264,6 +264,16 @@ public class ServerDisguiseWrapper extends DisguiseWrapper<ServerDisguise>
             bindingWatcher.write(ValueIndex.CREEPER.STATE, aggressive ? 1 : -1);
             bindingWatcher.write(ValueIndex.CREEPER.IGNITED, aggressive);
         }
+
+        if (getEntityType() == EntityType.WARDEN)
+            bindingWatcher.write(EntryIndex.WARDEN_CHARGING_ATTACK, aggressive);
+    }
+
+    @Override
+    public void playAttackAnimation()
+    {
+        super.playAttackAnimation();
+        bindingWatcher.write(EntryIndex.ATTACK_ANIMATION, true);
     }
 
     @Override

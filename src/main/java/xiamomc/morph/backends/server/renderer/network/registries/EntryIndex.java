@@ -2,8 +2,6 @@ package xiamomc.morph.backends.server.renderer.network.registries;
 
 import com.mojang.authlib.GameProfile;
 import net.minecraft.Util;
-import org.bukkit.entity.EntityType;
-import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
 import xiamomc.morph.misc.DisguiseEquipment;
 
 import java.util.UUID;
@@ -19,4 +17,5 @@ public class EntryIndex
     public static final RegistryKey<UUID> TABLIST_UUID = RegistryKey.of("tablist_uuid", Util.NIL_UUID);
 
     public static final RegistryKey<Boolean> WARDEN_CHARGING_ATTACK = RegistryKey.of("warden_charging_attack", false);
+    public static final RegistryKey<Boolean> ATTACK_ANIMATION = RegistryKey.of("attack_animation", false);
 }
