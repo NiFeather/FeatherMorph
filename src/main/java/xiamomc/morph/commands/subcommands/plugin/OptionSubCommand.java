@@ -80,6 +80,8 @@ public class OptionSubCommand extends MorphPluginObject implements ISubCommand
         subCommands.add(getList("nofly_worlds", ConfigOption.NOFLY_WORLDS, "nofly_worlds", null));
         subCommands.add(getList("blacklist_tags", ConfigOption.BLACKLIST_TAGS, "blacklist_tags", null));
         subCommands.add(getList("blacklist_nbt_pattern", ConfigOption.BLACKLIST_PATTERNS, "blacklist_patterns", null));
+
+        subCommands.add(getToggle("bedrock_workaround", ConfigOption.BEDROCK_WORKAROUND, "bedrock_workaround"));
     }
 
     private <T> ISubCommand getGeneric(String name, ConfigOption option, String perm,
