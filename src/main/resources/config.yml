@@ -17,12 +17,6 @@ root:
   # If an invalid ID is provided, this option may not take place.
   forced_disguise: "@none"
 
-  # Enable Bedrock workarounds?
-  # This may fix several problems with Bedrock clients, such as players becoming invisible after someone undisguises themselves.
-  # But this will also affect some experiences for Java or other 3rd-party clients.
-  # Only enable if your server has Bedrock support.
-  bedrock_workaround: false
-
   # ChatOverride options
   chatOverride:
     # Enable ChatOverride?
@@ -252,4 +246,4 @@ root:
     client_renderer: true
 
   # Do not touch unless you know what you're doing!
-  version: 29
+  version: 28
