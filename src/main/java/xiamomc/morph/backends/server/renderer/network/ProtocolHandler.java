@@ -3,7 +3,10 @@ package xiamomc.morph.backends.server.renderer.network;
 import com.comphenix.protocol.ProtocolLibrary;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.backends.server.renderer.network.listeners.*;
+import xiamomc.morph.config.ConfigOption;
+import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.pluginbase.Annotations.Initializer;
+import xiamomc.pluginbase.Bindables.Bindable;
 
 public class ProtocolHandler extends MorphPluginObject
 {
@@ -17,10 +20,19 @@ public class ProtocolHandler extends MorphPluginObject
         return morphPacketListener;
     }
 
+    private static final Bindable<Boolean> doBedrockWorkarounds = new Bindable<>(false);
+
+    public static boolean doBedrockWorkarounds()
+    {
+        return doBedrockWorkarounds.get();
+    }
+
     @Initializer
-    private void load()
+    private void load(MorphConfigManager config)
     {
         if (disposed) return;
+
+        config.bind(doBedrockWorkarounds, ConfigOption.BEDROCK_WORKAROUND);
 
         var protocolMgr = ProtocolLibrary.getProtocolManager();
 

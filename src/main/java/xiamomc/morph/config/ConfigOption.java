@@ -16,6 +16,8 @@ public enum ConfigOption
     CHAT_OVERRIDE_USE_CUSTOM_RENDERER(ConfigNode.create().append("chatOverride").append("UseCustomRenderer"), true),
     CHAT_OVERRIDE_DEFAULT_PATTERN(ConfigNode.create().append("chatOverride").append("default_pattern"), "<<who>> <message>"),
 
+    BEDROCK_WORKAROUND(ConfigNode.create().append("bedrock_workaround"), false),
+
     SKILL_COOLDOWN_ON_DAMAGE(ConfigNode.create().append("cooldown_on_damage"), 15),
 
     @Deprecated
