@@ -63,12 +63,6 @@ public class PacketFactory extends MorphPluginObject
                 //todo: Get random UUID from world to prevent duplicate UUID
                 //玩家在客户端的UUID会根据其GameProfile中的UUID设定，我们需要避免伪装的UUID和某一玩家自己的UUID冲突
                 gameProfile.setUUID(UUID.randomUUID());
-
-                //workaround: Bedrock clients will search by name when receive a player remove packet.
-                //            Adding two '§' will prevent them from removing the wrong player entity.
-                //            This doesn't appear to have visible changes for the name tag on both Java and Bedrock side.
-                if (ProtocolHandler.doBedrockWorkarounds())
-                    gameProfile.setName(gameProfile.getName() + "§§");
             }
 
             //Minecraft需要在生成玩家实体前先发送PlayerInfoUpdate消息
