@@ -5,8 +5,11 @@ import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.wrappers.WrappedDataValue;
 import com.comphenix.protocol.wrappers.WrappedDataWatcher;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.*;
+import net.minecraft.world.entity.Attackable;
+import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.level.GameType;
 import org.bukkit.craftbukkit.v1_20_R3.entity.CraftEntity;
 import org.bukkit.entity.EntityType;
@@ -140,7 +143,12 @@ public class PacketFactory extends MorphPluginObject
         }
 
         if (!player.getPassengers().isEmpty())
-            packets.add(PacketContainer.fromPacket(new ClientboundSetPassengersPacket(NmsRecord.ofPlayer(player))));
+            packets.add(PacketContainer.fromPacket(new ClientboundSetPassengersPacket(nmsPlayer)));
+
+        var attributes = nmsPlayer.getAttributes().getSyncableAttributes();
+
+        var attributePacket = new ClientboundUpdateAttributesPacket(player.getEntityId(), attributes);
+        packets.add(PacketContainer.fromPacket(attributePacket));
 
         for (PacketContainer packet : packets)
             packet.setMeta(MORPH_PACKET_METAKEY, true);
