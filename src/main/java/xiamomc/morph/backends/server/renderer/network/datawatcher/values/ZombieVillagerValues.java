@@ -6,8 +6,8 @@ import net.minecraft.world.entity.npc.VillagerType;
 
 public class ZombieVillagerValues extends ZombieValues
 {
-    public final SingleValue<Boolean> CONVERTING = getSingle(false);
-    public final SingleValue<VillagerData> VILLAGER_DATA = getSingle(new VillagerData(VillagerType.PLAINS, VillagerProfession.NONE, 1));
+    public final SingleValue<Boolean> CONVERTING = getSingle("zVillager_converting", false);
+    public final SingleValue<VillagerData> VILLAGER_DATA = getSingle("zVillager_data", new VillagerData(VillagerType.PLAINS, VillagerProfession.NONE, 1));
 
     public ZombieVillagerValues()
     {

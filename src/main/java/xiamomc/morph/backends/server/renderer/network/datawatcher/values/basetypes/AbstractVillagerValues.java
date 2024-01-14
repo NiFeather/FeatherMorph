@@ -4,7 +4,7 @@ import xiamomc.morph.backends.server.renderer.network.datawatcher.values.SingleV
 
 public class AbstractVillagerValues extends AgeableMobValues
 {
-    public final SingleValue<Integer> HEADSHAKE_TIMER = getSingle(0);
+    public final SingleValue<Integer> HEADSHAKE_TIMER = getSingle("ab_villager_handshake_timer", 0);
 
     public AbstractVillagerValues()
     {

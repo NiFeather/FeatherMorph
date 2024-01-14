@@ -4,7 +4,7 @@ import xiamomc.morph.backends.server.renderer.network.datawatcher.values.SingleV
 
 public class AbstractHorseValues extends AgeableMobValues
 {
-    public final SingleValue<Byte> FLAGS = getSingle((byte)0);
+    public final SingleValue<Byte> FLAGS = getSingle("ab_horse_flags", (byte)0);
 
     public AbstractHorseValues()
     {

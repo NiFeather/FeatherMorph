@@ -1,9 +1,12 @@
 package xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types;
 
+import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import xiamomc.morph.backends.server.renderer.network.registries.ValueIndex;
+
+import java.util.Optional;
 
 public class TameableAnimalWatcher extends LivingEntityWatcher
 {
@@ -27,7 +30,7 @@ public class TameableAnimalWatcher extends LivingEntityWatcher
 
         if (nbt.contains("Owner"))
         {
-            write(ValueIndex.TAMEABLE.OWNER, nbt.getUUID("Owner"));
+            write(ValueIndex.TAMEABLE.OWNER, Optional.of(nbt.getUUID("Owner")));
 
             byte val = get(ValueIndex.TAMEABLE.TAMEABLE_FLAGS);
             write(ValueIndex.TAMEABLE.TAMEABLE_FLAGS, (byte)(val | 0x04));
@@ -48,6 +51,6 @@ public class TameableAnimalWatcher extends LivingEntityWatcher
 
         var flag = get(ValueIndex.TAMEABLE.TAMEABLE_FLAGS);
         nbt.putBoolean("Sitting", (flag & 0x01) == 0x01);
-        nbt.putUUID("Owner", get(ValueIndex.TAMEABLE.OWNER));
+        nbt.putUUID("Owner", get(ValueIndex.TAMEABLE.OWNER).orElse(Util.NIL_UUID));
     }
 }

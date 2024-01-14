@@ -5,13 +5,13 @@ import xiamomc.morph.backends.server.renderer.network.datawatcher.values.basetyp
 
 public class ArmorStandValues extends LivingEntityValues
 {
-    public final SingleValue<Byte> DATA_FLAGS = getSingle((byte)0);
-    public final SingleValue<Rotations> HEAD_ROTATION = getSingle(new Rotations(0, 0, 0));
-    public final SingleValue<Rotations> BODY_ROTATION = getSingle(new Rotations(0, 0, 0));
-    public final SingleValue<Rotations> LEFT_ARM_ROTATION = getSingle(new Rotations(-10, 0, -10));
-    public final SingleValue<Rotations> RIGHT_ARM_ROTATION = getSingle(new Rotations(-15, 0, 10));
-    public final SingleValue<Rotations> LEFT_LEG_ROTATION = getSingle(new Rotations(-1, 0, -1));
-    public final SingleValue<Rotations> RIGHT_LEG_ROTATION = getSingle(new Rotations(1, 0, 1));
+    public final SingleValue<Byte> DATA_FLAGS = getSingle("armor_stand_flags", (byte)0);
+    public final SingleValue<Rotations> HEAD_ROTATION = getSingle("armor_stand_headRot", new Rotations(0, 0, 0));
+    public final SingleValue<Rotations> BODY_ROTATION = getSingle("armor_stand_bodyRot", new Rotations(0, 0, 0));
+    public final SingleValue<Rotations> LEFT_ARM_ROTATION = getSingle("armor_stand_leftArmRot", new Rotations(-10, 0, -10));
+    public final SingleValue<Rotations> RIGHT_ARM_ROTATION = getSingle("armor_stand_rightArmRot", new Rotations(-15, 0, 10));
+    public final SingleValue<Rotations> LEFT_LEG_ROTATION = getSingle("armor_stand_leftLegRot", new Rotations(-1, 0, -1));
+    public final SingleValue<Rotations> RIGHT_LEG_ROTATION = getSingle("armor_stand_rightLeg", new Rotations(1, 0, 1));
 
     public ArmorStandValues()
     {
