@@ -3,10 +3,12 @@ package xiamomc.morph.commands.subcommands.plugin;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.messages.CommandStrings;
 import xiamomc.morph.messages.MessageUtils;
+import xiamomc.morph.misc.permissions.CommonPermissions;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Command.ISubCommand;
 import xiamomc.pluginbase.Messages.FormattableMessage;
@@ -19,6 +21,12 @@ public class LookupSubCommand extends MorphPluginObject implements ISubCommand
     public @NotNull String getCommandName()
     {
         return "lookup";
+    }
+
+    @Override
+    public @Nullable String getPermissionRequirement()
+    {
+        return CommonPermissions.LOOKUP;
     }
 
     /**
