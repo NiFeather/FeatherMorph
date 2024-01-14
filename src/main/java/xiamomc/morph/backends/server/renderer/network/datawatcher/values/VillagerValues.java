@@ -7,7 +7,7 @@ import xiamomc.morph.backends.server.renderer.network.datawatcher.values.basetyp
 
 public class VillagerValues extends AbstractVillagerValues
 {
-    public final SingleValue<VillagerData> VILLAGER_DATA = getSingle(new VillagerData(VillagerType.PLAINS, VillagerProfession.NONE, 0));
+    public final SingleValue<VillagerData> VILLAGER_DATA = getSingle("villager_data", new VillagerData(VillagerType.PLAINS, VillagerProfession.NONE, 0));
 
     public VillagerValues()
     {

@@ -47,8 +47,16 @@ public class SingleValue<T>
         return serializer;
     }
 
-    public SingleValue(Class<T> type, int index, @NotNull T defaultValue)
+    private final String name;
+
+    public String name()
     {
+        return name;
+    }
+
+    public SingleValue(String name, Class<T> type, int index, @NotNull T defaultValue)
+    {
+        this.name = name;
         this.type = type;
         this.index = index;
         this.defaultValue = defaultValue;
@@ -86,14 +94,14 @@ public class SingleValue<T>
     @Override
     public String toString()
     {
-        return "SingleValue[type='%s', index='%s']".formatted(type, index);
+        return "SingleValue[name='%s', type='%s', index='%s']".formatted(name, type, index);
     }
 
-    public static <TVal> SingleValue<TVal> of(int index, @NotNull TVal val)
+    public static <TVal> SingleValue<TVal> of(String name, int index, @NotNull TVal val)
     {
         if (val == null)
             throw new IllegalArgumentException("TVal may not be null");
 
-        return new SingleValue<>((Class<TVal>) val.getClass(), index, val);
+        return new SingleValue<>(name, (Class<TVal>) val.getClass(), index, val);
     }
 }

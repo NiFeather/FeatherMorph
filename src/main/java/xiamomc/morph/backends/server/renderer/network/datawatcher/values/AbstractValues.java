@@ -10,12 +10,12 @@ import java.util.List;
 public abstract class AbstractValues
 {
     private int currentIndex = 0;
-    protected <X> SingleValue<X> getSingle(X val)
+    protected <X> SingleValue<X> getSingle(String name, X val)
     {
         if (val == null)
             throw new IllegalArgumentException("May not pass a null value to getIndex()");
 
-        var sv = SingleValue.of(currentIndex, val);
+        var sv = SingleValue.of(name, currentIndex, val);
 
         currentIndex++;
         return sv;

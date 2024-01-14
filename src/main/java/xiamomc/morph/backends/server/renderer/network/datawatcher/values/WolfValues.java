@@ -4,9 +4,9 @@ import xiamomc.morph.backends.server.renderer.network.datawatcher.values.basetyp
 
 public class WolfValues extends TameableAnimalValues
 {
-    public final SingleValue<Boolean> BEGGING = getSingle(false);
-    public final SingleValue<Integer> COLLAR_COLOR = getSingle(14);
-    public final SingleValue<Integer> ANGER_TIME = getSingle(0);
+    public final SingleValue<Boolean> BEGGING = getSingle("wolf_begging", false);
+    public final SingleValue<Integer> COLLAR_COLOR = getSingle("wolf_collar_color", 14);
+    public final SingleValue<Integer> ANGER_TIME = getSingle("wolf_anger_time", 0);
 
     public WolfValues()
     {

@@ -10,14 +10,14 @@ import java.util.Optional;
 
 public class EntityValues extends AbstractValues
 {
-    public final SingleValue<Byte> GENERAL = getSingle((byte)0);
-    public final SingleValue<Integer> AIR_TICKS = getSingle(0);
-    public final SingleValue<Optional<Component>> CUSTOM_NAME = getSingle(Optional.empty());
-    public final SingleValue<Boolean> CUSTOM_NAME_VISIBLE = getSingle(false);
-    public final SingleValue<Boolean> SILENT = getSingle(false);
-    public final SingleValue<Boolean> NO_GRAVITY = getSingle(false);
-    public final SingleValue<Pose> POSE = getSingle(Pose.STANDING);
-    public final SingleValue<Integer> FROZEN_TICKS = getSingle(0);
+    public final SingleValue<Byte> GENERAL = getSingle("general", (byte)0);
+    public final SingleValue<Integer> AIR_TICKS = getSingle("air_ticks", 0);
+    public final SingleValue<Optional<Component>> CUSTOM_NAME = getSingle("custom_name", Optional.empty());
+    public final SingleValue<Boolean> CUSTOM_NAME_VISIBLE = getSingle("custom_name_visible", false);
+    public final SingleValue<Boolean> SILENT = getSingle("silent", false);
+    public final SingleValue<Boolean> NO_GRAVITY = getSingle("no_gravity", false);
+    public final SingleValue<Pose> POSE = getSingle("pose", Pose.STANDING);
+    public final SingleValue<Integer> FROZEN_TICKS = getSingle("frozen_ticks", 0);
 
     public EntityValues()
     {
