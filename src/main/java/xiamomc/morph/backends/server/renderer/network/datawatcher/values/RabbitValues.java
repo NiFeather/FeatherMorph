@@ -4,7 +4,7 @@ import xiamomc.morph.backends.server.renderer.network.datawatcher.values.basetyp
 
 public class RabbitValues extends AnimalValues
 {
-    public final SingleValue<Integer> RABBIT_TYPE = getSingle(0);
+    public final SingleValue<Integer> RABBIT_TYPE = getSingle("rabbit_type", 0);
 
     public RabbitValues()
     {

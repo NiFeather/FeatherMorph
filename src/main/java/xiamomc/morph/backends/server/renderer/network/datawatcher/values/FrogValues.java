@@ -5,7 +5,7 @@ import xiamomc.morph.backends.server.renderer.network.datawatcher.values.basetyp
 
 public class FrogValues extends AnimalValues
 {
-    public final SingleValue<FrogVariant> FROG_VARIANT = getSingle(FrogVariant.TEMPERATE).withRandom(FrogVariant.TEMPERATE, FrogVariant.COLD, FrogVariant.WARM);
+    public final SingleValue<FrogVariant> FROG_VARIANT = getSingle("frog_variant", FrogVariant.TEMPERATE).withRandom(FrogVariant.TEMPERATE, FrogVariant.COLD, FrogVariant.WARM);
 
     public FrogValues()
     {

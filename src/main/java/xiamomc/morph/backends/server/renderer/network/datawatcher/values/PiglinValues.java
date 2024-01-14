@@ -4,9 +4,9 @@ import xiamomc.morph.backends.server.renderer.network.datawatcher.values.basetyp
 
 public class PiglinValues extends BasePiglinValues
 {
-    public final SingleValue<Boolean> IS_BABY = getSingle(false);
-    public final SingleValue<Boolean> CHARGING_CROSSBOW = getSingle(false);
-    public final SingleValue<Boolean> DANCING = getSingle(false);
+    public final SingleValue<Boolean> IS_BABY = getSingle("piglin_is_baby", false);
+    public final SingleValue<Boolean> CHARGING_CROSSBOW = getSingle("piglin_charging_crossbow", false);
+    public final SingleValue<Boolean> DANCING = getSingle("piglin_dancing", false);
 
     public PiglinValues()
     {
