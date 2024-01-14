@@ -4,7 +4,7 @@ import xiamomc.morph.backends.server.renderer.network.datawatcher.values.SingleV
 
 public class AbstractFishValues extends WaterAnimalValues
 {
-    public final SingleValue<Boolean> FROM_BUCKET = getSingle(false);
+    public final SingleValue<Boolean> FROM_BUCKET = getSingle("ab_fish_from_bucket", false);
 
     public AbstractFishValues()
     {

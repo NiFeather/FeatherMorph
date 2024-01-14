@@ -6,10 +6,10 @@ import xiamomc.morph.backends.server.renderer.network.datawatcher.values.basetyp
 
 public class CatValues extends TameableAnimalValues
 {
-    public final SingleValue<CatVariant> CAT_VARIANT = getSingle(BuiltInRegistries.CAT_VARIANT.getOrThrow(CatVariant.TABBY));
-    public final SingleValue<Boolean> IS_LYING = getSingle(false);
-    public final SingleValue<Boolean> RELAXED = getSingle(false);
-    public final SingleValue<Integer> COLLAR_COLOR = getSingle(14);
+    public final SingleValue<CatVariant> CAT_VARIANT = getSingle("cat_variant", BuiltInRegistries.CAT_VARIANT.getOrThrow(CatVariant.TABBY));
+    public final SingleValue<Boolean> IS_LYING = getSingle("cat_is_lying", false);
+    public final SingleValue<Boolean> RELAXED = getSingle("cat_relaxed", false);
+    public final SingleValue<Integer> COLLAR_COLOR = getSingle("cat_collar_color", 14);
 
     public CatValues()
     {
