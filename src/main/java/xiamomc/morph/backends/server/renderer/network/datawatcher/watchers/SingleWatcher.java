@@ -89,7 +89,7 @@ public abstract class SingleWatcher extends MorphPluginObject
     @Initializer
     private void load()
     {
-        if (!syncedOnce.get())
+        if (!syncedOnce.get() && !disposed)
             sync();
     }
 
