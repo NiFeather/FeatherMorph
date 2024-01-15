@@ -82,6 +82,8 @@ public class SpawnPacketHandler extends ProtocolListener
             ));
         }
 
+        watcher.dispose();
+
         affectedPlayers.forEach(p ->
         {
             protocolManager.sendServerPacket(p, rmPacketContainer);

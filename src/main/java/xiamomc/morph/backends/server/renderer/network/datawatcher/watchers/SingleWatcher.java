@@ -285,4 +285,33 @@ public abstract class SingleWatcher extends MorphPluginObject
         var protocol = ProtocolLibrary.getProtocolManager();
         players.forEach(p -> protocol.sendServerPacket(p, packet));
     }
+
+    private boolean disposed;
+
+    public boolean disposed()
+    {
+        return disposed;
+    }
+
+    public final void dispose()
+    {
+        if (disposed)
+            throw new RuntimeException("Already disposed!");
+
+        disposed = true;
+
+        try
+        {
+            onDispose();
+        }
+        catch (Throwable t)
+        {
+            logger.warn("Error occurred while disposing: " + t.getMessage());
+            t.printStackTrace();
+        }
+    }
+
+    protected void onDispose()
+    {
+    }
 }
