@@ -1,9 +1,9 @@
 package xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.InteractionHand;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.entity.EntityType;
@@ -64,8 +64,8 @@ public class LivingEntityWatcher extends EntityWatcher implements Listener
 
             if (handInUse == null)
             {
-                logger.warn("No hand in use but using item? Defaulting to HAND");
-                handInUse = EquipmentSlot.HAND;
+                var nmsHand = nmsPlayer.getUsedItemHand();
+                handInUse = nmsHand == InteractionHand.MAIN_HAND ? EquipmentSlot.HAND : EquipmentSlot.OFF_HAND;
             }
 
             boolean isOffhand = handInUse == EquipmentSlot.OFF_HAND;
@@ -120,5 +120,11 @@ public class LivingEntityWatcher extends EntityWatcher implements Listener
         write(values.BED_POS, bedPos);
 
         super.doSync();
+    }
+
+    @Override
+    protected void onDispose()
+    {
+        PlayerInteractEvent.getHandlerList().unregister(this);
     }
 }
