@@ -64,7 +64,7 @@ public class CatWatcher extends TameableAnimalWatcher
         {
             var name = nbt.getString("variant");
             var match = Arrays.stream(Cat.Type.values())
-                    .filter(t -> t.name().equalsIgnoreCase(name))
+                    .filter(t -> t.key().asString().equalsIgnoreCase(name))
                     .findFirst();
 
             match.ifPresent(type ->
