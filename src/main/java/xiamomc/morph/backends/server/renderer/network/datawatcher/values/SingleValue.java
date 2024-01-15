@@ -2,7 +2,6 @@ package xiamomc.morph.backends.server.renderer.network.datawatcher.values;
 
 import com.comphenix.protocol.wrappers.WrappedDataWatcher;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

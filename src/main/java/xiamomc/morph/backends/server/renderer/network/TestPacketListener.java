@@ -6,7 +6,6 @@ import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.events.PacketListener;
 import com.comphenix.protocol.injector.GamePhase;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraft.server.packs.repository.Pack;
 import org.bukkit.plugin.Plugin;
 import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.MorphPluginObject;

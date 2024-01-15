@@ -24,8 +24,8 @@ import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types
 import xiamomc.morph.backends.server.renderer.network.registries.EntryIndex;
 import xiamomc.morph.backends.server.renderer.network.registries.RenderRegistry;
 import xiamomc.morph.backends.server.renderer.utilties.WatcherUtils;
-import xiamomc.morph.misc.skins.PlayerSkinProvider;
 import xiamomc.morph.misc.NmsRecord;
+import xiamomc.morph.misc.skins.PlayerSkinProvider;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Exceptions.NullDependencyException;
 
@@ -82,6 +82,8 @@ public class SpawnPacketHandler extends ProtocolListener
                     new ClientboundPlayerInfoRemovePacket(List.of(lastUUID))
             ));
         }
+
+        watcher.dispose();
 
         affectedPlayers.forEach(p ->
         {

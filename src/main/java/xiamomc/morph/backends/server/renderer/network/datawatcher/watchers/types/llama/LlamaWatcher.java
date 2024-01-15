@@ -3,8 +3,8 @@ package xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.type
 import net.minecraft.nbt.CompoundTag;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import xiamomc.morph.backends.server.renderer.network.registries.ValueIndex;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.horses.ChestedHorseWatcher;
+import xiamomc.morph.backends.server.renderer.network.registries.ValueIndex;
 
 public class LlamaWatcher extends ChestedHorseWatcher
 {

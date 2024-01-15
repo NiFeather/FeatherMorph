@@ -1,7 +1,5 @@
 package xiamomc.morph.backends.server.renderer.network.registries;
 
-import org.jetbrains.annotations.NotNull;
-
 public class RegistryKey<T>
 {
     public final Class<T> type;
