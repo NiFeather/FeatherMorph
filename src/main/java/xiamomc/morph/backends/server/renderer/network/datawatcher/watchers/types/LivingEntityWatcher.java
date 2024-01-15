@@ -37,18 +37,11 @@ public class LivingEntityWatcher extends EntityWatcher implements Listener
         register(ValueIndex.BASE_LIVING);
     }
 
-    private Map<Player, EquipmentSlot> handMap;
-
-    private void ensureHandMapPresent()
-    {
-        if (handMap == null)
-            handMap = new Object2ObjectArrayMap<>();
-    }
+    private final Map<Player, EquipmentSlot> handMap = new Object2ObjectArrayMap<>();
 
     @EventHandler
     public void onPlayerStartUsingItem(PlayerInteractEvent e)
     {
-        ensureHandMapPresent();
         handMap.put(e.getPlayer(), e.getHand());
     }
 
@@ -66,8 +59,6 @@ public class LivingEntityWatcher extends EntityWatcher implements Listener
         if (nmsPlayer.isUsingItem())
         {
             flagBit |= 0x01;
-
-            ensureHandMapPresent();
 
             var handInUse = handMap.remove(player);
 
