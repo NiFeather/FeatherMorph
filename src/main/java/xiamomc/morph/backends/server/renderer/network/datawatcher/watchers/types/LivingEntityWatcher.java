@@ -1,5 +1,6 @@
 package xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types;
 
+import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.core.BlockPos;
@@ -36,11 +37,18 @@ public class LivingEntityWatcher extends EntityWatcher implements Listener
         register(ValueIndex.BASE_LIVING);
     }
 
-    private final Map<Player, EquipmentSlot> handMap = new Object2ObjectOpenHashMap<>();
+    private Map<Player, EquipmentSlot> handMap;
+
+    private void ensureHandMapPresent()
+    {
+        if (handMap == null)
+            handMap = new Object2ObjectArrayMap<>();
+    }
 
     @EventHandler
     public void onPlayerStartUsingItem(PlayerInteractEvent e)
     {
+        ensureHandMapPresent();
         handMap.put(e.getPlayer(), e.getHand());
     }
 
@@ -58,6 +66,8 @@ public class LivingEntityWatcher extends EntityWatcher implements Listener
         if (nmsPlayer.isUsingItem())
         {
             flagBit |= 0x01;
+
+            ensureHandMapPresent();
 
             var handInUse = handMap.remove(player);
 
