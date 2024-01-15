@@ -338,7 +338,7 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
     }
 
     @Override
-    public @Nullable CompoundTag getNbtCompound(DisguiseState state, Entity targetEntity)
+    public @Nullable CompoundTag getNbtCompound(DisguiseState state, Entity targetEntity, boolean enableCulling)
     {
         var info = getMorphManager().getDisguiseMeta(state.getDisguiseIdentifier());
 
@@ -374,7 +374,7 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
         if (targetEntity == null || targetEntity.getType() != state.getEntityType())
             rawCompound.merge(state.getDisguiseWrapper().getCompound());
 
-        return cullNBT(rawCompound);
+        return enableCulling ? cullNBT(rawCompound) : rawCompound;
     }
 
     @Override

@@ -92,14 +92,14 @@ public abstract class DisguiseProvider extends MorphPluginObject
     }
 
     @Nullable
-    public CompoundTag getNbtCompound(DisguiseState state, Entity targetEntity)
+    public CompoundTag getNbtCompound(DisguiseState state, Entity targetEntity, boolean enableCulling)
     {
         if (targetEntity instanceof CraftLivingEntity
             && canConstruct(getMorphManager().getDisguiseMeta(state.getDisguiseIdentifier()), targetEntity, null))
         {
             var rawCompound = NbtUtils.getRawTagCompound(targetEntity);
 
-            return cullNBT(rawCompound);
+            return enableCulling ? cullNBT(rawCompound) : rawCompound;
         }
 
         return null;
