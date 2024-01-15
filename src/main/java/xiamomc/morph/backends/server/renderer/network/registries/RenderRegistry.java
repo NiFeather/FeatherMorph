@@ -103,6 +103,8 @@ public class RenderRegistry extends MorphPluginObject
     {
         var watcher = watcherMap.remove(uuid);
         callUnregister(Bukkit.getPlayer(uuid), watcher);
+
+        watcher.dispose();
     }
 
     /**
