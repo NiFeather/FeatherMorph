@@ -4,8 +4,6 @@ import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.events.PacketContainer;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.RandomSequence;
-import net.minecraft.world.level.GameType;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -16,7 +14,7 @@ import xiamomc.morph.backends.server.renderer.network.datawatcher.values.Abstrac
 import xiamomc.morph.backends.server.renderer.network.datawatcher.values.SingleValue;
 import xiamomc.morph.backends.server.renderer.network.registries.RegistryKey;
 import xiamomc.morph.backends.server.renderer.utilties.WatcherUtils;
-import xiamomc.morph.misc.NmsRecord;
+import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Exceptions.NullDependencyException;
 
@@ -24,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class SingleWatcher extends MorphPluginObject
 {
@@ -83,6 +82,15 @@ public abstract class SingleWatcher extends MorphPluginObject
         this.entityType = entityType;
         initRegistry();
         initValues();
+    }
+
+    private final AtomicBoolean syncedOnce = new AtomicBoolean(false);
+
+    @Initializer
+    private void load()
+    {
+        if (!syncedOnce.get())
+            sync();
     }
 
     //region Custom Registry
@@ -233,6 +241,7 @@ public abstract class SingleWatcher extends MorphPluginObject
     {
         syncing = true;
 
+        syncedOnce.set(true);
         dirtySingles.clear();
 
         try
