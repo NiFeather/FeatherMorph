@@ -2,10 +2,9 @@ package xiamomc.morph.backends.server.renderer.network;
 
 import com.mojang.datafixers.util.Pair;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.ItemStack;
 import org.bukkit.inventory.EntityEquipment;
-import xiamomc.morph.misc.DisguiseEquipment;
 
 public class ProtocolEquipment
 {

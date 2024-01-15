@@ -1,7 +1,6 @@
 package xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
