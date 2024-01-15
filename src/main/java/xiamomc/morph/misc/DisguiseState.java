@@ -698,7 +698,7 @@ public class DisguiseState extends MorphPluginObject
                 else if (sound != null && random.nextInt((int)(1000 * frequencyScale)) < soundTime)
                 {
                     soundTime = -(int)(ambientInterval * frequencyScale);
-                    bindingPlayer.getWorld().playSound(bindingPlayer, sound.name().asString(), soundCategory, 1f, 1f);
+                    bindingPlayer.getWorld().playSound(bindingPlayer.getLocation(), sound.name().asString(), soundCategory, 1f, 1f);
                 }
             }
         }
