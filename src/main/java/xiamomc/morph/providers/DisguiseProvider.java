@@ -121,7 +121,7 @@ public abstract class DisguiseProvider extends MorphPluginObject
         }
     }
 
-    protected CompoundTag cullNBT(CompoundTag compound)
+    public static CompoundTag cullNBT(CompoundTag compound)
     {
         if (compound == null) return null;
 

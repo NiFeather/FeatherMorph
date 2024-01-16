@@ -422,9 +422,14 @@ public class DisguiseState extends MorphPluginObject
 
     //region NBT
 
-    public String getCachedNbtString()
+    public String getFullNbtString()
     {
         return NbtUtils.getCompoundString(disguiseWrapper.getCompound());
+    }
+
+    public String getCulledNbtString()
+    {
+        return NbtUtils.getCompoundString(DisguiseProvider.cullNBT(disguiseWrapper.getCompound()));
     }
 
     //endregion

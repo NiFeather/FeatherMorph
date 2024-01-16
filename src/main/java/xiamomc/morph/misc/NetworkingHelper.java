@@ -107,10 +107,15 @@ public class NetworkingHelper extends MorphPluginObject
             return this;
         }
 
+        /**
+         * 这里是准备发送给客户端的Meta信息
+         * @param state
+         * @return
+         */
         public PrepareMeta forDisguiseState(DisguiseState state)
         {
             this.setProfileCompound(state.getProfileNbtString())
-                    .setSNbt(state.getCachedNbtString())
+                    .setSNbt(state.getCulledNbtString())
                     .setDisguiseEquipmentShown(state.showingDisguisedItems())
                     .setOverridedEquip(state.getDisguisedItems());
 
