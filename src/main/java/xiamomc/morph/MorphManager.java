@@ -658,15 +658,15 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
             // 初始化nbt
-            var compound = provider.getNbtCompound(outComingState, targetEntity);
+            var wrapperCompound = provider.getNbtCompound(outComingState, targetEntity, false);
 
-            if (compound != null)
-                outComingState.getDisguiseWrapper().mergeCompound(compound);
+            if (wrapperCompound != null)
+                outComingState.getDisguiseWrapper().mergeCompound(wrapperCompound);
 
             // 如果此伪装可以同步给客户端，那么初始化客户端状态
             if (provider.validForClient(outComingState))
             {
-                clientHandler.sendCommand(player, new S2CSetSNbtCommand(outComingState.getCachedNbtString()));
+                clientHandler.sendCommand(player, new S2CSetSNbtCommand(outComingState.getCulledNbtString()));
 
                 clientHandler.sendCommand(player, new S2CSetSelfViewIdentifierCommand(provider.getSelfViewIdentifier(outComingState)));
                 provider.getInitialSyncCommands(outComingState).forEach(s -> clientHandler.sendCommand(player, s));
@@ -800,7 +800,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         var player = state.getPlayer();
 
         clientHandler.updateCurrentIdentifier(player, state.getDisguiseIdentifier());
-        clientHandler.sendCommand(player, new S2CSetSNbtCommand(state.getCachedNbtString()));
+        clientHandler.sendCommand(player, new S2CSetSNbtCommand(state.getCulledNbtString()));
         clientHandler.sendCommand(player, new S2CSetSelfViewIdentifierCommand(state.getProvider().getSelfViewIdentifier(state)));
 
         //刷新主动

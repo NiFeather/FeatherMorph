@@ -409,9 +409,6 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
 
             oldWrapper.dispose();
 
-            var nbt = state.getCachedNbtString();
-            var profile = state.getProfileNbtString();
-
             var customName = state.entityCustomName;
 
             state.setDisguise(state.getDisguiseIdentifier(),

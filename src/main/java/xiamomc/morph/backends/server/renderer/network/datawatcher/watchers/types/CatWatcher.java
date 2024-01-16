@@ -64,7 +64,7 @@ public class CatWatcher extends TameableAnimalWatcher
         {
             var name = nbt.getString("variant");
             var match = Arrays.stream(Cat.Type.values())
-                    .filter(t -> t.name().equalsIgnoreCase(name))
+                    .filter(t -> t.key().asString().equalsIgnoreCase(name))
                     .findFirst();
 
             match.ifPresent(type ->
@@ -73,6 +73,9 @@ public class CatWatcher extends TameableAnimalWatcher
                 this.write(ValueIndex.CAT.CAT_VARIANT, finalValue);
             });
         }
+
+        if (nbt.contains("CollarColor"))
+            write(ValueIndex.CAT.COLLAR_COLOR, (int)nbt.getByte("CollarColor"));
     }
 
     @Override
@@ -82,5 +85,8 @@ public class CatWatcher extends TameableAnimalWatcher
 
         var variant = this.getCatType().getKey().asString();
         nbt.putString("variant", variant);
+
+        var collarColor = get(ValueIndex.CAT.COLLAR_COLOR);
+        nbt.putInt("CollarColor", collarColor);
     }
 }
