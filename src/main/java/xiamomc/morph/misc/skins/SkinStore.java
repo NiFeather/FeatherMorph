@@ -32,6 +32,7 @@ public class SkinStore extends MorphJsonBasedStorage<SkinStoreRoot>
 
     public synchronized void cache(GameProfile profile)
     {
+        storingObject.storedSkins.removeIf(ss -> ss.name.equalsIgnoreCase(profile.getName()));
         storingObject.storedSkins.add(SingleSkin.fromProfile(profile));
 
         saveConfiguration();

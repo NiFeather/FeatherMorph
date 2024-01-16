@@ -65,6 +65,16 @@ public class PacketFactory extends MorphPluginObject
                 gameProfile.setUUID(UUID.randomUUID());
             }
 
+            var lastUUID = parameters.getWatcher().getOrDefault(EntryIndex.TABLIST_UUID, null);
+
+            if (lastUUID != null)
+            {
+                gameProfile.setUUID(lastUUID);
+
+                var packetTabRemove = new ClientboundPlayerInfoRemovePacket(List.of(lastUUID));
+                packets.add(PacketContainer.fromPacket(packetTabRemove));
+            }
+
             //Minecraft需要在生成玩家实体前先发送PlayerInfoUpdate消息
             var uuid = gameProfile.getId();
 
@@ -89,15 +99,6 @@ public class PacketFactory extends MorphPluginObject
 
             spawnUUID = uuid;
             packets.add(PacketContainer.fromPacket(packetPlayerInfo));
-
-            var watcher = parameters.getWatcher();
-            var lastUUID = watcher.getOrDefault(EntryIndex.TABLIST_UUID, null);
-
-            if (lastUUID != null)
-            {
-                var packetTabRemove = new ClientboundPlayerInfoRemovePacket(List.of(lastUUID));
-                packets.add(PacketContainer.fromPacket(packetTabRemove));
-            }
 
             parameters.getWatcher().write(EntryIndex.TABLIST_UUID, uuid);
         }
