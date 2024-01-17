@@ -12,22 +12,35 @@ import org.bukkit.craftbukkit.v1_20_R3.entity.CraftEntity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.EntityEquipment;
+import org.jetbrains.annotations.Debug;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.values.AbstractValues;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.values.SingleValue;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
 import xiamomc.morph.backends.server.renderer.network.registries.EntryIndex;
 import xiamomc.morph.backends.server.renderer.utilties.ProtocolRegistryUtils;
+import xiamomc.morph.config.ConfigOption;
+import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.misc.DisguiseEquipment;
 import xiamomc.morph.misc.MorphGameProfile;
 import xiamomc.morph.misc.NmsRecord;
 import xiamomc.morph.utilities.EntityTypeUtils;
+import xiamomc.pluginbase.Annotations.Initializer;
+import xiamomc.pluginbase.Bindables.Bindable;
 
 import java.util.*;
 
 public class PacketFactory extends MorphPluginObject
 {
     public static final String MORPH_PACKET_METAKEY = "fm";
+
+    private final Bindable<String> randomBase = new Bindable<>("Stateof");
+
+    @Initializer
+    private void load(MorphConfigManager config)
+    {
+        config.bind(randomBase, ConfigOption.UUID_RANDOM_BASE);
+    }
 
     public List<PacketContainer> buildSpawnPackets(Player player, DisplayParameters parameters)
     {
@@ -62,7 +75,8 @@ public class PacketFactory extends MorphPluginObject
             {
                 //todo: Get random UUID from world to prevent duplicate UUID
                 //玩家在客户端的UUID会根据其GameProfile中的UUID设定，我们需要避免伪装的UUID和某一玩家自己的UUID冲突
-                gameProfile.setUUID(UUID.randomUUID());
+                var str = randomBase.get() + player.getName();
+                gameProfile.setUUID(UUID.nameUUIDFromBytes(str.getBytes()));
             }
 
             var lastUUID = parameters.getWatcher().getOrDefault(EntryIndex.TABLIST_UUID, null);
