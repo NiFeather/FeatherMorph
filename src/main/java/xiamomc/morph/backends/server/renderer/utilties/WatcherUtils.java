@@ -29,7 +29,7 @@ public class WatcherUtils
         if (nmsRec.nmsPlayer().gameMode.getGameModeForPlayer() == GameType.SPECTATOR)
         {
             players.removeIf(bukkitPlayer ->
-                    nmsRec.interactManager().getGameModeForPlayer() != GameType.SPECTATOR);
+                    NmsRecord.ofPlayer(bukkitPlayer).gameMode.getGameModeForPlayer() != GameType.SPECTATOR);
         }
 
         var nmsWorld = nmsRec.nmsWorld();
