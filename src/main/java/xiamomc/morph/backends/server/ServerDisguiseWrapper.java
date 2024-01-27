@@ -162,7 +162,9 @@ public class ServerDisguiseWrapper extends DisguiseWrapper<ServerDisguise>
     @Override
     public String getDisguiseName()
     {
-        return instance.name;
+        var instanceName = instance.name;
+
+        return instanceName == null ? "" : instanceName;
     }
 
     @Override
