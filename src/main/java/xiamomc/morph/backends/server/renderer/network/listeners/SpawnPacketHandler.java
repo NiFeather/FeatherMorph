@@ -130,7 +130,7 @@ public class SpawnPacketHandler extends ProtocolListener
         //如果没有profile，那么随机一个并计划刷新
         if (displayType == org.bukkit.entity.EntityType.PLAYER && gameProfile == null)
         {
-            var disguiseName = watcher.get(EntryIndex.PLAYER_DISGUISE_NAME);
+            var disguiseName = watcher.get(EntryIndex.DISGUISE_NAME);
 
             if (disguiseName == null)
             {
