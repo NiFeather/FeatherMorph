@@ -162,7 +162,9 @@ public class ServerDisguiseWrapper extends DisguiseWrapper<ServerDisguise>
     @Override
     public String getDisguiseName()
     {
-        return instance.name;
+        var instanceName = instance.name;
+
+        return instanceName == null ? "" : instanceName;
     }
 
     @Override
@@ -304,6 +306,10 @@ public class ServerDisguiseWrapper extends DisguiseWrapper<ServerDisguise>
         Objects.requireNonNull(bindingWatcher, "Null Watcher!");
 
         bindingPlayer = newBinding;
+
+        if (this.bindingWatcher != null)
+            this.bindingWatcher.dispose();
+
         this.bindingWatcher = bindingWatcher;
 
         refreshRegistry();

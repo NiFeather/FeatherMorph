@@ -1,10 +1,17 @@
 package xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types;
 
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
+import xiamomc.morph.backends.server.renderer.network.registries.EntryIndex;
+import xiamomc.morph.backends.server.renderer.network.registries.RegistryKey;
 import xiamomc.morph.backends.server.renderer.network.registries.ValueIndex;
 import xiamomc.morph.misc.NmsRecord;
+
+import java.util.Optional;
 
 public class EntityWatcher extends SingleWatcher
 {
@@ -57,5 +64,50 @@ public class EntityWatcher extends SingleWatcher
         write(values.FROZEN_TICKS, nmsPlayer.getTicksFrozen());
 
         super.doSync();
+    }
+
+    @Override
+    protected void onCustomWrite(RegistryKey<?> key, @Nullable Object oldVal, Object newVal)
+    {
+        super.onCustomWrite(key, oldVal, newVal);
+
+        if (key.equals(EntryIndex.DISGUISE_NAME))
+        {
+            var str = newVal.toString();
+            var component = str.isEmpty() ? null : Component.literal(str);
+            write(ValueIndex.BASE_ENTITY.CUSTOM_NAME, component == null ? Optional.empty() : Optional.of(component));
+        }
+    }
+
+    @Override
+    public void mergeFromCompound(CompoundTag nbt)
+    {
+        super.mergeFromCompound(nbt);
+
+        if (nbt.contains("CustomName"))
+        {
+            var name = nbt.getString("CustomName");
+            var component = Component.Serializer.fromJsonLenient(name);
+
+            if (component != null)
+                write(ValueIndex.BASE_ENTITY.CUSTOM_NAME, Optional.of(component));
+        }
+
+        if (nbt.contains("CustomNameVisible"))
+        {
+            var visible = nbt.getBoolean("CustomNameVisible");
+            write(ValueIndex.BASE_ENTITY.CUSTOM_NAME_VISIBLE, visible);
+        }
+    }
+
+    @Override
+    public void writeToCompound(CompoundTag nbt)
+    {
+        super.writeToCompound(nbt);
+
+        var customName = get(ValueIndex.BASE_ENTITY.CUSTOM_NAME);
+        customName.ifPresent(c -> nbt.putString("CustomNameVisible", Component.Serializer.toJson(c)));
+
+        nbt.putBoolean("CustomNameVisible", get(ValueIndex.BASE_ENTITY.CUSTOM_NAME_VISIBLE));
     }
 }
