@@ -306,6 +306,10 @@ public class ServerDisguiseWrapper extends DisguiseWrapper<ServerDisguise>
         Objects.requireNonNull(bindingWatcher, "Null Watcher!");
 
         bindingPlayer = newBinding;
+
+        if (this.bindingWatcher != null)
+            this.bindingWatcher.dispose();
+
         this.bindingWatcher = bindingWatcher;
 
         refreshRegistry();
