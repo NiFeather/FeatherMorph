@@ -312,5 +312,6 @@ public class DefaultConfigGenerator
         addAbilityConfiguration(skills, EntityType.TURTLE, AbilityType.CAN_BREATHE_UNDER_WATER);
 
         addAbilityConfiguration(skills, EntityType.BREEZE, AbilityType.HAS_JUMP_BOOST);
+        addAbilityConfiguration(skills, EntityType.BREEZE, AbilityType.NO_FALL_DAMAGE);
     }
 }
