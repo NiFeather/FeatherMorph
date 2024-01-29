@@ -632,6 +632,13 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 if (currentState != null)
                     currentState.reset();
 
+                // 向客户端更新当前伪装ID
+                // 因为下面postConstruct有初始化技能的操作，因此在这里更新
+                clientHandler.updateCurrentIdentifier(player, key);
+
+                outComingState = postConstructDisguise(player, targetEntity,
+                        info.getIdentifier(), result.wrapperInstance(), result.isCopy(), provider);
+
                 // 交由后端来为玩家套上伪装
                 var backendSuccess = currentBackend.disguise(player, result.wrapperInstance());
                 if (!backendSuccess)
@@ -639,13 +646,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                     source.sendMessage(MessageUtils.prefixes(source, MorphStrings.errorWhileDisguising()));
                     return false;
                 }
-
-                // 向客户端更新当前伪装ID
-                // 因为下面postConstruct有初始化技能的操作，因此在这里更新
-                clientHandler.updateCurrentIdentifier(player, key);
-
-                outComingState = postConstructDisguise(player, targetEntity,
-                        info.getIdentifier(), result.wrapperInstance(), result.isCopy(), provider);
 
                 // 解除对currentState的引用
                 currentState = null;
