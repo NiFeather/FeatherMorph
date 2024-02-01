@@ -141,6 +141,8 @@ public class SpawnPacketHandler extends ProtocolListener
 
             var targetPlayer = Bukkit.getPlayerExact(disguiseName);
 
+            //皮肤在其他地方（例如PlayerDisguiseProvider#makeWrapper）中有做获取处理
+            //因此这里只根据情况从缓存或者找到的玩家获取皮肤
             var cachedProfile = targetPlayer == null
                     ? PlayerSkinProvider.getInstance().getCachedProfile(disguiseName)
                     : NmsRecord.ofPlayer(targetPlayer).gameProfile;

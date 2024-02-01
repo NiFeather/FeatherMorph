@@ -3,6 +3,7 @@ package xiamomc.morph.providers;
 import com.mojang.authlib.GameProfile;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.kyori.adventure.text.Component;
+import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import org.bukkit.Bukkit;
@@ -87,7 +88,7 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
                     {
                         if (wrapper.disposed()) return null;
 
-                        GameProfile outcomingProfile = new GameProfile(UUID.randomUUID(), disguiseMeta.playerDisguiseTargetName);
+                        GameProfile outcomingProfile = new GameProfile(Util.NIL_UUID, disguiseMeta.playerDisguiseTargetName);
                         if (optional.isPresent()) outcomingProfile = optional.get();
 
                         wrapper.applySkin(outcomingProfile);
