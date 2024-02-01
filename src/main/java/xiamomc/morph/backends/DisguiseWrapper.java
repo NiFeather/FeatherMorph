@@ -211,16 +211,6 @@ public abstract class DisguiseWrapper<TInstance>
         return Math.max(1, getCompound().getInt("Size"));
     }
 
-    public abstract void setGlowingColor(ChatColor glowingColor);
-
-    public abstract ChatColor getGlowingColor();
-
-    /**
-     * @deprecated No longer used
-     */
-    @Deprecated
-    public abstract void setGlowing(boolean glowing);
-
     /**
      * Adds a custom data to the underlying instance
      * @param key Name

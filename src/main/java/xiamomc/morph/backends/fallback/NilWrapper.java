@@ -151,23 +151,6 @@ public class NilWrapper extends EventWrapper<NilDisguise>
     }
 
     @Override
-    public void setGlowingColor(ChatColor glowingColor)
-    {
-        instance.glowingColor = glowingColor;
-    }
-
-    @Override
-    public void setGlowing(boolean glowing)
-    {
-    }
-
-    @Override
-    public ChatColor getGlowingColor()
-    {
-        return instance.glowingColor;
-    }
-
-    @Override
     public void addCustomData(String key, Object data)
     {
         instance.customData.put(key, data);
