@@ -636,13 +636,13 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                     currentState.reset();
 
                 // 向客户端更新当前伪装ID
-                // 因为下面postConstruct有初始化技能的操作，因此在这里更新
+                // 因为下面postConstruct有初始化技能的操作，根据协议标准中current会重置客户端伪装状态的规定，因此在这里更新
                 clientHandler.updateCurrentIdentifier(player, key);
 
                 outComingState = postConstructDisguise(player, targetEntity,
                         info.getIdentifier(), result.wrapperInstance(), provider);
 
-                // 交由后端来为玩家套上伪装
+                // 在初始化服务端伪装状态后，交由后端来为玩家套上伪装
                 var backendSuccess = currentBackend.disguise(player, result.wrapperInstance());
                 if (!backendSuccess)
                 {
@@ -1013,7 +1013,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             state.updateDisguise(disguiseIdentifier, targetSkillID, disguiseWrapper, true, equipment);
         }
 
-        // workaround: Disguise#getDisguiseName()不会正常返回实体的自定义名称
+
+        // CustomName
         if (targetedEntity != null && targetedEntity.customName() != null)
         {
             var name = targetedEntity.customName();
@@ -1031,8 +1032,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         disguiseWrapper.onPostConstructDisguise(state, targetedEntity);
 
         // 如果玩家客户端不可用并且在骑乘实体，发送伪装在起身后可用的消息
-        if (player.getVehicle() != null && !clientHandler.clientConnected(player))
-            player.sendMessage(MessageUtils.prefixes(player, MorphStrings.morphVisibleAfterStandup()));
+        //if (player.getVehicle() != null && !clientHandler.clientConnected(player))
+        //    player.sendMessage(MessageUtils.prefixes(player, MorphStrings.morphVisibleAfterStandup()));
 
         // 显示粒子
         double cX, cY, cZ;
@@ -1265,29 +1266,27 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     }
 
     /**
-     *
+     * 尝试从离线存储恢复伪装
      * @param player
      * @param offlineState
-     * @return -1: Fail<br/>
-     *         0: Success<br/>
-     *         1: Success(Limited copy)<br/>
+     * @return Disguise result
      */
-    public int disguiseFromOfflineState(Player player, OfflineDisguiseState offlineState)
+    public OfflineDisguiseResult disguiseFromOfflineState(Player player, OfflineDisguiseState offlineState)
     {
         try
         {
             if (player.getUniqueId() == offlineState.playerUUID)
             {
                 logger.error("OfflineState UUID mismatch: %s <-> %s".formatted(player.getUniqueId(), offlineState.playerUUID));
-                return -1;
+                return OfflineDisguiseResult.FAIL;
             }
 
             var key = offlineState.disguiseID;
 
             if (disguiseDisabled(key) || !getPlayerMeta(player).getUnlockedDisguiseIdentifiers().contains(key))
-                return -1;
+                return OfflineDisguiseResult.FAIL;
 
-            if (DisguiseTypes.fromId(key) == DisguiseTypes.UNKNOWN) return -1;
+            if (DisguiseTypes.fromId(key) == DisguiseTypes.UNKNOWN) return OfflineDisguiseResult.FAIL;
 
             var state = DisguiseStateGenerator.fromOfflineState(offlineState,
                     clientHandler.getPlayerOption(player, true), getPlayerMeta(player), skillHandler, currentBackend);
@@ -1296,12 +1295,12 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             {
                 this.disguiseFromState(state);
 
-                return 0;
+                return OfflineDisguiseResult.SUCCESS;
             }
 
             //有限还原
             morph(player, player, key, null);
-            return 1;
+            return OfflineDisguiseResult.LIMITED;
         }
         catch (Throwable t)
         {
@@ -1309,7 +1308,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             t.printStackTrace();
         }
 
-        return -1;
+        return OfflineDisguiseResult.FAIL;
     }
 
     //endregion 玩家伪装相关
