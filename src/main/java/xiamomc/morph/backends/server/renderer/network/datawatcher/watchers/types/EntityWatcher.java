@@ -106,7 +106,7 @@ public class EntityWatcher extends SingleWatcher
         super.writeToCompound(nbt);
 
         var customName = get(ValueIndex.BASE_ENTITY.CUSTOM_NAME);
-        customName.ifPresent(c -> nbt.putString("CustomNameVisible", Component.Serializer.toJson(c)));
+        customName.ifPresent(c -> nbt.putString("CustomName", Component.Serializer.toJson(c)));
 
         nbt.putBoolean("CustomNameVisible", get(ValueIndex.BASE_ENTITY.CUSTOM_NAME_VISIBLE));
     }
