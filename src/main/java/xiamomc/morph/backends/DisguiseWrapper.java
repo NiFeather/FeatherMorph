@@ -18,6 +18,7 @@ import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.utilities.EntityTypeUtils;
 
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 
 /**
  * A wrapper that holds the underlying disguise instance
@@ -329,4 +330,8 @@ public abstract class DisguiseWrapper<TInstance>
     }
 
     //endregion
+
+    public abstract <T> void subscribeEvent(Object source, WrapperEvent<T> wrapperEvent, Consumer<T> c);
+
+    public abstract void unSubscribeEvent(Object source, WrapperEvent<?> wrapperEvent);
 }
