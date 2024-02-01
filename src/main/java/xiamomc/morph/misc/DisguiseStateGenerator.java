@@ -29,7 +29,7 @@ public class DisguiseStateGenerator
 
         offlineState.disguiseData = "%s|%s".formatted(backend.getIdentifier(), backend.toOfflineSave(newDisguise));
         offlineState.displayingDisguisedItems = state.showingDisguisedItems();
-        offlineState.snbt = state.getCachedNbtString();
+        offlineState.snbt = state.getFullNbtString();
         offlineState.profileString = state.getProfileNbtString();
 
         if (state.entityCustomName != null)
@@ -76,7 +76,7 @@ public class DisguiseStateGenerator
         //构建State
         var state = new DisguiseState(player,
                 disguiseIdentifier, targetSkillID,
-                wrapper, true, provider,
+                wrapper, provider,
                 null, playerOptions, playerMeta);
 
         try

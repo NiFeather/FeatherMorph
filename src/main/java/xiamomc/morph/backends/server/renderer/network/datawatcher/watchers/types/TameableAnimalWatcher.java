@@ -5,6 +5,7 @@ import net.minecraft.nbt.CompoundTag;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import xiamomc.morph.backends.server.renderer.network.registries.ValueIndex;
+import xiamomc.morph.utilities.NbtUtils;
 
 import java.util.Optional;
 
@@ -28,7 +29,7 @@ public class TameableAnimalWatcher extends LivingEntityWatcher
     {
         super.mergeFromCompound(nbt);
 
-        if (nbt.contains("Owner"))
+        if (nbt.contains("Owner") && !nbt.getUUID("Owner").equals(Util.NIL_UUID))
         {
             write(ValueIndex.TAMEABLE.OWNER, Optional.of(nbt.getUUID("Owner")));
 
@@ -40,7 +41,8 @@ public class TameableAnimalWatcher extends LivingEntityWatcher
         {
             byte val = get(ValueIndex.TAMEABLE.TAMEABLE_FLAGS);
 
-            write(ValueIndex.TAMEABLE.TAMEABLE_FLAGS, (byte)(val | 0x01));
+            if (nbt.getBoolean("Sitting"))
+                write(ValueIndex.TAMEABLE.TAMEABLE_FLAGS, (byte)(val | 0x01));
         }
     }
 

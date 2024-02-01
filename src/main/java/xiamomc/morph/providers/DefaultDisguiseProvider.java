@@ -32,7 +32,7 @@ import java.util.List;
 
 /**
  * 提供一个默认的DisguiseProvider
- * 包括自动设置Bossbar、飞行技能和应用针对LibsDisguises的一些workaround
+ * 包括自动设置Bossbar、技能等
  */
 public abstract class DefaultDisguiseProvider extends DisguiseProvider
 {
@@ -52,9 +52,6 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
 
     @Resolved
     private AbilityHandler abilityHandler;
-
-    @Resolved
-    private Scoreboard scoreboard;
 
     @Resolved
     private MorphClientHandler clientHandler;
@@ -102,7 +99,7 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
 
         try
         {
-            disguise.update(state.getDisguiseType() != DisguiseTypes.LD, state, player);
+            disguise.update(state, player);
         }
         catch (Throwable t)
         {
@@ -151,60 +148,9 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
     @Override
     public void postConstructDisguise(DisguiseState state, @Nullable Entity targetEntity)
     {
-        var disguise = state.getDisguiseWrapper();
-        var backend = getBackend();
-
         //被动技能
         var abilities = abilityHandler.getAbilitiesFor(state.getSkillLookupIdentifier());
         state.setAbilities(abilities);
         state.setSkill(skillHandler.getSkill(state.getSkillLookupIdentifier()));
-
-        //发光颜色
-        ChatColor glowColor = null;
-        Entity teamTargetEntity = targetEntity;
-        var disguiseID = state.getDisguiseIdentifier();
-        var morphDisguiseType = DisguiseTypes.fromId(disguiseID);
-
-        switch (morphDisguiseType)
-        {
-            //LD伪装为玩家时会自动复制他们当前的队伍到名字里
-            //为了确保一致，除非targetEntity不是null，不然尝试将teamTargetEntity设置为目标玩家
-            case PLAYER ->
-            {
-                if (teamTargetEntity == null)
-                    teamTargetEntity = Bukkit.getPlayerExact(DisguiseTypes.PLAYER.toStrippedId(disguiseID));
-            }
-
-            //LD的伪装直接从伪装flag里获取发光颜色
-            //只要和LD直接打交道事情就变得玄学了起来..
-            case LD ->
-            {
-                glowColor = disguise.getGlowingColor();
-                teamTargetEntity = null;
-            }
-        }
-
-        //从teamTargetEntity获取发光颜色
-        if (teamTargetEntity != null)
-        {
-            var team = scoreboard.getEntityTeam(teamTargetEntity);
-
-            //如果伪装是复制来的，并且目标实体有伪装，则将颜色设置为他们伪装的发光颜色
-            if (state.shouldHandlePose() && backend.isDisguised(teamTargetEntity))
-            {
-                //backend.isDisguised -> backend.getWrapper != null
-                glowColor = backend.getWrapper(teamTargetEntity).getGlowingColor();
-            }
-            else
-            {
-                var color = team == null ? null : (team.hasColor() ? team.color() : null);
-
-                glowColor = ColorUtils.toChatColor(color); //否则，尝试设置成我们自己的
-            }
-        }
-
-        //设置发光颜色
-        state.setCustomGlowColor(ColorUtils.fromChatColor(glowColor));
-        disguise.setGlowingColor(glowColor);
     }
 }

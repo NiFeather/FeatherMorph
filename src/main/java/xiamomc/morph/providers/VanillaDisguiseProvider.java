@@ -4,7 +4,6 @@ import io.papermc.paper.util.CollisionUtil;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.kyori.adventure.text.Component;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.TagParser;
 import org.bukkit.Bukkit;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
@@ -13,7 +12,6 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.backends.DisguiseWrapper;
@@ -338,32 +336,20 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
     }
 
     @Override
-    public @Nullable CompoundTag getNbtCompound(DisguiseState state, Entity targetEntity)
+    public @Nullable CompoundTag getNbtCompound(DisguiseState state, Entity targetEntity, boolean enableCulling)
     {
         var info = getMorphManager().getDisguiseMeta(state.getDisguiseIdentifier());
 
         var rawCompound = targetEntity != null && canConstruct(info, targetEntity, null)
                 ? NbtUtils.getRawTagCompound(targetEntity)
-                : NbtUtils.toCompoundTag(state.getCachedNbtString());
+                : NbtUtils.toCompoundTag(state.getFullNbtString());
 
         if (rawCompound == null) rawCompound = new CompoundTag();
 
         var theirDisguise = getMorphManager().getDisguiseStateFor(targetEntity);
 
         if (theirDisguise != null)
-        {
-            var theirNbtString = theirDisguise.getCachedNbtString();
-
-            try
-            {
-                rawCompound = TagParser.parseTag(theirNbtString);
-            }
-            catch (Throwable t)
-            {
-                logger.error("Unable to copy NBT Tag from disguise: " + t.getMessage());
-                t.printStackTrace();
-            }
-        }
+            rawCompound = theirDisguise.getDisguiseWrapper().getCompound();
 
         if (state.getEntityType().equals(EntityType.ARMOR_STAND)
                 && rawCompound.get("ShowArms") == null)
@@ -374,7 +360,7 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
         if (targetEntity == null || targetEntity.getType() != state.getEntityType())
             rawCompound.merge(state.getDisguiseWrapper().getCompound());
 
-        return cullNBT(rawCompound);
+        return enableCulling ? cullNBT(rawCompound) : rawCompound;
     }
 
     @Override

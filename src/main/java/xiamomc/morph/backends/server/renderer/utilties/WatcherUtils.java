@@ -34,7 +34,8 @@ public class WatcherUtils
 
         var nmsWorld = nmsRec.nmsWorld();
         var tracking = nmsWorld.spigotConfig.playerTrackingRange + 1;
-        players.removeIf(p -> sourcePlayer.getLocation().distance(p.getLocation()) > tracking);
+        var sourceLocation = sourcePlayer.getLocation();
+        players.removeIf(p -> sourceLocation.distance(p.getLocation()) > tracking);
 
         return players;
     }

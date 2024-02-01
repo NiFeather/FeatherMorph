@@ -84,10 +84,7 @@ public class LaunchProjectiveMorphSkill extends DelayedMorphSkill<ProjectiveConf
         //region 发射后...
 
         if (entity instanceof ShulkerBullet bullet)
-        {
             bullet.setTarget(target);
-            bullet.setShooter(player);
-        }
 
         if (entity instanceof WitherSkull skull)
         {

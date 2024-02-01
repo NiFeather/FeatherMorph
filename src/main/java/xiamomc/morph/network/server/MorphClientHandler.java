@@ -81,11 +81,11 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
 
         if (!player.isOnline()) return;
 
-        if (message.length > Messenger.MAX_MESSAGE_SIZE)
-            throw new MessageTooLargeException(Messenger.MAX_MESSAGE_SIZE);
-
         if (logOutGoingPackets.get())
             logPacket(true, player, channel, message);
+
+        if (message.length > Messenger.MAX_MESSAGE_SIZE)
+            throw new MessageTooLargeException(message.length);
 
         var nmsPlayer = NmsRecord.ofPlayer(player);
 
