@@ -1,8 +1,10 @@
 package xiamomc.morph;
 
+import com.mojang.authlib.GameProfile;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
 import net.kyori.adventure.text.Component;
+import net.minecraft.Util;
 import org.bukkit.*;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
@@ -18,6 +20,7 @@ import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.abilities.AbilityHandler;
 import xiamomc.morph.backends.DisguiseBackend;
 import xiamomc.morph.backends.DisguiseWrapper;
+import xiamomc.morph.backends.WrapperEvent;
 import xiamomc.morph.backends.fallback.NilBackend;
 import xiamomc.morph.backends.server.ServerBackend;
 import xiamomc.morph.config.ConfigOption;
@@ -35,6 +38,7 @@ import xiamomc.morph.messages.MorphStrings;
 import xiamomc.morph.messages.vanilla.VanillaMessageStore;
 import xiamomc.morph.misc.*;
 import xiamomc.morph.misc.permissions.CommonPermissions;
+import xiamomc.morph.misc.skins.PlayerSkinProvider;
 import xiamomc.morph.network.commands.S2C.clientrender.*;
 import xiamomc.morph.network.commands.S2C.map.S2CMapCommand;
 import xiamomc.morph.network.commands.S2C.map.S2CMapRemoveCommand;
@@ -1041,6 +1045,37 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         spawnParticle(player, player.getLocation(), cX, cY, cZ);
 
+        //更新皮肤
+        if (state.getDisguiseType() == DisguiseTypes.PLAYER)
+        {
+            var wrapper = state.getDisguiseWrapper();
+            DisguiseState finalState = state;
+
+            if (provider.validForClient(state))
+            {
+                wrapper.subscribeEvent(this, WrapperEvent.SKIN_SET, skin ->
+                        clientHandler.sendCommand(player, new S2CSetProfileCommand(finalState.getProfileNbtString())));
+            }
+
+            if (wrapper.getSkin() == null)
+            {
+                var playerDisguiseTargetName = DisguiseTypes.PLAYER.toStrippedId(state.getDisguiseIdentifier());
+
+                PlayerSkinProvider.getInstance().fetchSkin(playerDisguiseTargetName)
+                        .thenApply(optional ->
+                        {
+                            if (wrapper.disposed()) return null;
+
+                            GameProfile outcomingProfile = new GameProfile(Util.NIL_UUID, playerDisguiseTargetName);
+                            if (optional.isPresent()) outcomingProfile = optional.get();
+
+                            wrapper.applySkin(outcomingProfile);
+
+                            return null;
+                        });
+            }
+        }
+
         // 确保玩家可以根据设置看到自己的伪装
         state.setServerSideSelfVisible(playerMorphConfig.showDisguiseToSelf && !this.clientViewAvailable(player));
 
@@ -1075,7 +1110,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 playerMorphConfig.shownClientSuggestionMessage = true;
             }
 
-            if (!playerMorphConfig.shownDisplayToSelfHint)
+            if (clientHandler.clientInitialized(player) && !playerMorphConfig.shownDisplayToSelfHint)
             {
                 player.sendMessage(MessageUtils.prefixes(player, HintStrings.morphVisibleAfterCommandString()));
                 playerMorphConfig.shownDisplayToSelfHint = true;

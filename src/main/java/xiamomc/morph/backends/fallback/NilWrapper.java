@@ -15,13 +15,15 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.backends.DisguiseWrapper;
+import xiamomc.morph.backends.EventWrapper;
+import xiamomc.morph.backends.WrapperEvent;
 import xiamomc.morph.misc.DisguiseEquipment;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.utilities.NbtUtils;
 
 import java.util.UUID;
 
-public class NilWrapper extends DisguiseWrapper<NilDisguise>
+public class NilWrapper extends EventWrapper<NilDisguise>
 {
     public NilWrapper(@NotNull NilDisguise instance, NilBackend backend)
     {
@@ -149,23 +151,6 @@ public class NilWrapper extends DisguiseWrapper<NilDisguise>
     }
 
     @Override
-    public void setGlowingColor(ChatColor glowingColor)
-    {
-        instance.glowingColor = glowingColor;
-    }
-
-    @Override
-    public void setGlowing(boolean glowing)
-    {
-    }
-
-    @Override
-    public ChatColor getGlowingColor()
-    {
-        return instance.glowingColor;
-    }
-
-    @Override
     public void addCustomData(String key, Object data)
     {
         instance.customData.put(key, data);
@@ -183,6 +168,8 @@ public class NilWrapper extends DisguiseWrapper<NilDisguise>
         if (this.getEntityType() != EntityType.PLAYER) return;
 
         this.instance.profile = profile;
+
+        callEvent(WrapperEvent.SKIN_SET, profile);
     }
 
     @Override

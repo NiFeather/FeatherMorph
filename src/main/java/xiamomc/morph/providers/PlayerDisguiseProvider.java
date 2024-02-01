@@ -81,22 +81,6 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
                 wrapper.applySkin(gameProfile);
         }
 
-        if (wrapper.getSkin() == null)
-        {
-            PlayerSkinProvider.getInstance().fetchSkin(disguiseMeta.playerDisguiseTargetName)
-                    .thenApply(optional ->
-                    {
-                        if (wrapper.disposed()) return null;
-
-                        GameProfile outcomingProfile = new GameProfile(Util.NIL_UUID, disguiseMeta.playerDisguiseTargetName);
-                        if (optional.isPresent()) outcomingProfile = optional.get();
-
-                        wrapper.applySkin(outcomingProfile);
-
-                        return null;
-                    });
-        }
-
         return DisguiseResult.success(wrapper, result.isCopy());
     }
 

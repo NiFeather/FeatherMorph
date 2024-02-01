@@ -1,6 +1,8 @@
 package xiamomc.morph.backends.server;
 
 import com.mojang.authlib.GameProfile;
+import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.TagType;
@@ -14,6 +16,8 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.backends.DisguiseWrapper;
+import xiamomc.morph.backends.EventWrapper;
+import xiamomc.morph.backends.WrapperEvent;
 import xiamomc.morph.backends.server.renderer.network.registries.ValueIndex;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.*;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
@@ -23,9 +27,13 @@ import xiamomc.morph.misc.DisguiseEquipment;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.utilities.NbtUtils;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
-public class ServerDisguiseWrapper extends DisguiseWrapper<ServerDisguise>
+public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
 {
     public ServerDisguiseWrapper(@NotNull ServerDisguise instance, ServerBackend backend)
     {
@@ -183,23 +191,6 @@ public class ServerDisguiseWrapper extends DisguiseWrapper<ServerDisguise>
     }
 
     @Override
-    public void setGlowingColor(ChatColor glowingColor)
-    {
-        instance.glowingColor = glowingColor;
-    }
-
-    @Override
-    public void setGlowing(boolean glowing)
-    {
-    }
-
-    @Override
-    public ChatColor getGlowingColor()
-    {
-        return instance.glowingColor;
-    }
-
-    @Override
     public void addCustomData(String key, Object data)
     {
         instance.customData.put(key, data);
@@ -220,6 +211,8 @@ public class ServerDisguiseWrapper extends DisguiseWrapper<ServerDisguise>
 
         if (bindingWatcher != null)
             bindingWatcher.write(EntryIndex.PROFILE, this.instance.profile);
+
+        callEvent(WrapperEvent.SKIN_SET, profile);
     }
 
     @Override
