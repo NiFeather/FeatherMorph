@@ -32,7 +32,7 @@ import java.util.List;
 
 /**
  * 提供一个默认的DisguiseProvider
- * 包括自动设置Bossbar、飞行技能和应用针对LibsDisguises的一些workaround
+ * 包括自动设置Bossbar、技能等
  */
 public abstract class DefaultDisguiseProvider extends DisguiseProvider
 {
@@ -52,9 +52,6 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
 
     @Resolved
     private AbilityHandler abilityHandler;
-
-    @Resolved
-    private Scoreboard scoreboard;
 
     @Resolved
     private MorphClientHandler clientHandler;
@@ -102,7 +99,7 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
 
         try
         {
-            disguise.update(state.getDisguiseType() != DisguiseTypes.LD, state, player);
+            disguise.update(state, player);
         }
         catch (Throwable t)
         {

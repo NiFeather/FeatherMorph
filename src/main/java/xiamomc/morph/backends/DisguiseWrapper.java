@@ -249,11 +249,10 @@ public abstract class DisguiseWrapper<TInstance>
 
     /**
      * Updates the underlying disguise instance
-     * @param isClone Whether this disguise is cloned from another entity or disguise
      * @param state {@link DisguiseState}
      * @param player The player who owns the provided state
      */
-    public abstract void update(boolean isClone, DisguiseState state, Player player);
+    public abstract void update(DisguiseState state, Player player);
 
     /**
      * Merge NBT to the underlying instance

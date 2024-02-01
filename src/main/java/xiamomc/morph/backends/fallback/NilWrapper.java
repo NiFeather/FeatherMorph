@@ -184,7 +184,7 @@ public class NilWrapper extends EventWrapper<NilDisguise>
     }
 
     @Override
-    public void update(boolean isClone, DisguiseState state, Player player)
+    public void update(DisguiseState state, Player player)
     {
     }
 

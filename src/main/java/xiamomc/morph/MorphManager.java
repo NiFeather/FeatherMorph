@@ -1287,22 +1287,16 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             if (disguiseDisabled(key) || !getPlayerMeta(player).getUnlockedDisguiseIdentifiers().contains(key))
                 return -1;
 
-            var disguiseType = DisguiseTypes.fromId(key);
+            if (DisguiseTypes.fromId(key) == DisguiseTypes.UNKNOWN) return -1;
 
-            if (disguiseType == DisguiseTypes.UNKNOWN) return -1;
+            var state = DisguiseStateGenerator.fromOfflineState(offlineState,
+                    clientHandler.getPlayerOption(player, true), getPlayerMeta(player), skillHandler, currentBackend);
 
-            //直接还原非LD的伪装
-            if (disguiseType != DisguiseTypes.LD)
+            if (state != null)
             {
-                var state = DisguiseStateGenerator.fromOfflineState(offlineState,
-                        clientHandler.getPlayerOption(player, true), getPlayerMeta(player), skillHandler, currentBackend);
+                this.disguiseFromState(state);
 
-                if (state != null)
-                {
-                    this.disguiseFromState(state);
-
-                    return 0;
-                }
+                return 0;
             }
 
             //有限还原

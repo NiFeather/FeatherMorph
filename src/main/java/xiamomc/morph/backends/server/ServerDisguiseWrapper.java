@@ -227,7 +227,7 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
     }
 
     @Override
-    public void update(boolean isClone, DisguiseState state, Player player)
+    public void update(DisguiseState state, Player player)
     {
     }
 

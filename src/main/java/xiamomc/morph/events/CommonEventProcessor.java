@@ -302,8 +302,6 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         return true;
     }
 
-    //region LibsDisguises workaround
-
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerSwapHand(PlayerSwapHandItemsEvent e)
     {
@@ -312,7 +310,6 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
 
         if (state == null) return;
 
-        //workaround: 交换副手后伪装有概率在左右手显示同一个物品
         if (!state.showingDisguisedItems()) return;
 
         state.swapHands();
@@ -358,7 +355,6 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         }
     }
 
-    //非Premium版本的LibsDisguises不会为玩家保存伪装
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent e)
     {
