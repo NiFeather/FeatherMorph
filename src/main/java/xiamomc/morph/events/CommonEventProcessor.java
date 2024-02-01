@@ -310,45 +310,33 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         var player = e.getPlayer();
         var state = morphs.getDisguiseStateFor(player);
 
-        if (state != null)
+        if (state == null) return;
+
+        //workaround: 交换副手后伪装有概率在左右手显示同一个物品
+        if (!state.showingDisguisedItems()) return;
+
+        state.swapHands();
+
+        var equip = state.getDisguisedItems();
+
+        var mainHand = itemOrAir(equip.getItemInMainHand());
+        var offHand = itemOrAir(equip.getItemInOffHand());
+
+        if (clientHandler.isFutureClientProtocol(player, 3))
         {
-            //workaround: 交换副手后伪装有概率在左右手显示同一个物品
-            if (state.showingDisguisedItems())
-            {
-                var disguise = state.getDisguiseWrapper();
-                state.swapHands();
-                var equip = state.getDisguisedItems();
-
-                var mainHand = itemOrAir(equip.getItemInMainHand());
-                var offHand = itemOrAir(equip.getItemInOffHand());
-
-                if (clientHandler.isFutureClientProtocol(player, 3))
-                {
-                    clientHandler.sendCommand(player, new S2CSwapCommand());
-                }
-                else
-                {
-                    clientHandler.sendCommand(player, new ServerSetEquipCommand(mainHand, EquipmentSlot.HAND));
-                    clientHandler.sendCommand(player, new ServerSetEquipCommand(offHand, EquipmentSlot.OFF_HAND));
-                }
-
-                this.addSchedule(() ->
-                {
-                    if (!state.showingDisguisedItems() || state.getDisguiseWrapper() != disguise) return;
-
-                    var air = itemOrAir(null);
-                    var equipment = state.getDisguiseWrapper().getDisplayingEquipments();
-
-                    equipment.setItemInMainHand(air);
-                    equipment.setItemInOffHand(air);
-                    disguise.setFakeEquipments(equipment);
-
-                    equipment.setItemInMainHand(mainHand);
-                    equipment.setItemInOffHand(offHand);
-                    disguise.setFakeEquipments(equipment);
-                }, 2);
-            }
+            clientHandler.sendCommand(player, new S2CSwapCommand());
         }
+        else
+        {
+            clientHandler.sendCommand(player, new ServerSetEquipCommand(mainHand, EquipmentSlot.HAND));
+            clientHandler.sendCommand(player, new ServerSetEquipCommand(offHand, EquipmentSlot.OFF_HAND));
+        }
+
+        var wrapper = state.getDisguiseWrapper();
+        var wrapperEquipments = wrapper.getDisplayingEquipments();
+        wrapperEquipments.setItemInMainHand(mainHand);
+        wrapperEquipments.setItemInOffHand(offHand);
+        wrapper.setFakeEquipments(wrapperEquipments);
     }
 
     @EventHandler
@@ -411,8 +399,8 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
 
             var customName = state.entityCustomName;
 
-            state.setDisguise(state.getDisguiseIdentifier(),
-                    state.getSkillLookupIdentifier(), wrapper, state.shouldHandlePose(), false,
+            state.updateDisguise(state.getDisguiseIdentifier(),
+                    state.getSkillLookupIdentifier(), wrapper, false,
                     state.getDisguisedItems());
 
             if (customName != null)

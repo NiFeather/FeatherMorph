@@ -48,7 +48,7 @@ import static xiamomc.morph.utilities.DisguiseUtils.itemOrAir;
 public class DisguiseState extends MorphPluginObject
 {
     public DisguiseState(Player player, @NotNull String id, @NotNull String skillId,
-                         @NotNull DisguiseWrapper<?> disguiseInstance, boolean isClone, @NotNull DisguiseProvider provider,
+                         @NotNull DisguiseWrapper<?> disguiseInstance, @NotNull DisguiseProvider provider,
                          @Nullable EntityEquipment targetEquipment, @NotNull PlayerOptions<Player> playerOptions,
                          @NotNull PlayerMeta playerMeta)
     {
@@ -60,7 +60,7 @@ public class DisguiseState extends MorphPluginObject
 
         this.soundHandler = new SoundHandler(player);
 
-        this.setDisguise(id, skillId, disguiseInstance, isClone, targetEquipment);
+        this.updateDisguise(id, skillId, disguiseInstance, true, targetEquipment);
     }
 
     private final PlayerOptions<Player> playerOptions;
@@ -240,25 +240,6 @@ public class DisguiseState extends MorphPluginObject
 
     public Entity beamTarget;
 
-    @Nullable
-    private TextColor customGlowColor;
-
-    @Nullable
-    public TextColor getCustomGlowColor()
-    {
-        return customGlowColor;
-    }
-
-    public boolean haveCustomGlowColor()
-    {
-        return customGlowColor != null;
-    }
-
-    public void setCustomGlowColor(@Nullable TextColor color)
-    {
-        this.customGlowColor = color;
-    }
-
     /**
      * 技能查询ID
      */
@@ -405,15 +386,6 @@ public class DisguiseState extends MorphPluginObject
 
     //endregion abilityFlag
 
-    /**
-     * 要不要手动更新伪装Pose？
-     */
-    private boolean shouldHandlePose;
-    public boolean shouldHandlePose()
-    {
-        return shouldHandlePose;
-    }
-
     @Resolved(shouldSolveImmediately = true)
     private MorphSkillHandler skillHandler;
 
@@ -452,20 +424,6 @@ public class DisguiseState extends MorphPluginObject
 
     //endregion ProfileNBT
 
-    /**
-     * 设置伪装
-     * @param identifier 伪装ID
-     * @param skillIdentifier 技能ID
-     * @param d 目标伪装
-     * @param shouldHandlePose 是否要处理玩家Pose（或：是否为克隆的伪装）
-     * @param equipment 要使用的equipment，没有则从伪装获取
-     */
-    public void setDisguise(@NotNull String identifier, @NotNull String skillIdentifier,
-                            @NotNull DisguiseWrapper<?> d, boolean shouldHandlePose, @Nullable EntityEquipment equipment)
-    {
-        setDisguise(identifier, skillIdentifier, d, shouldHandlePose, true, equipment);
-    }
-
     @Resolved(shouldSolveImmediately = true)
     private MorphConfigManager config;
 
@@ -474,13 +432,12 @@ public class DisguiseState extends MorphPluginObject
      * @param identifier 伪装ID
      * @param skillIdentifier 技能ID
      * @param wrapper 目标伪装
-     * @param shouldHandlePose 是否要处理玩家Pose（或：是否为克隆的伪装）
      * @param shouldRefreshDisguiseItems 要不要刷新伪装物品？
      * @param targetEquipment 要使用的equipment，没有则从伪装获取
      */
-    public void setDisguise(@NotNull String identifier, @NotNull String skillIdentifier,
-                            @NotNull DisguiseWrapper<?> wrapper, boolean shouldHandlePose, boolean shouldRefreshDisguiseItems,
-                            @Nullable EntityEquipment targetEquipment)
+    public void updateDisguise(@NotNull String identifier, @NotNull String skillIdentifier,
+                               @NotNull DisguiseWrapper<?> wrapper, boolean shouldRefreshDisguiseItems,
+                               @Nullable EntityEquipment targetEquipment)
     {
         if (disguiseWrapper == wrapper) return;
 
@@ -488,7 +445,6 @@ public class DisguiseState extends MorphPluginObject
 
         this.disguiseWrapper = wrapper;
         this.disguiseIdentifier = identifier;
-        this.shouldHandlePose = shouldHandlePose;
         setSkillLookupIdentifier(skillIdentifier);
 
         disguiseType = DisguiseTypes.fromId(identifier);
@@ -512,44 +468,43 @@ public class DisguiseState extends MorphPluginObject
 
             //更新伪装物品
             if (supportsDisguisedItems)
-            {
-                EntityEquipment equipment = targetEquipment != null ? targetEquipment : disguiseWrapper.getDisplayingEquipments();
-
-                //设置默认盔甲
-                var armors = new ItemStack[]
-                        {
-                                itemOrAir(equipment.getBoots()),
-                                itemOrAir(equipment.getLeggings()),
-                                itemOrAir(equipment.getChestplate()),
-                                itemOrAir(equipment.getHelmet())
-                        };
-
-                //设置默认手持物
-                var handItems = new ItemStack[]
-                        {
-                                itemOrAir(equipment.getItemInMainHand()),
-                                itemOrAir(equipment.getItemInOffHand())
-                        };
-
-                armors = ItemUtils.asCopy(armors);
-                handItems = ItemUtils.asCopy(handItems);
-
-                //workaround: 部分伪装复制装备时两个手会拥有一样的物品（虽然不是一个实例）
-                if (handItems[0].isSimilar(handItems[1]))
-                    handItems[1] = itemOrAir(null);
-
-                //全是空的，则默认显示自身装备
-                var emptyEquipment = Arrays.stream(armors).allMatch(i -> i != null && i.getType().isAir())
-                        && Arrays.stream(handItems).allMatch(i -> i != null && i.getType().isAir());
-
-                disguiseEquipments.allowNull = true;
-                disguiseEquipments.setArmorContents(armors);
-                disguiseEquipments.setHandItems(handItems);
-
-                //开启默认装备显示或者更新显示
-                setShowingDisguisedItems(showDisguisedItems || !emptyEquipment);
-            }
+                refreshDisguiseItems(targetEquipment, wrapper);
         }
+    }
+
+    private void refreshDisguiseItems(EntityEquipment targetEquipment, DisguiseWrapper<?> disguiseWrapper)
+    {
+        EntityEquipment equipment = targetEquipment != null ? targetEquipment : disguiseWrapper.getDisplayingEquipments();
+
+        //设置默认盔甲
+        var armors = new ItemStack[]
+                {
+                        itemOrAir(equipment.getBoots()),
+                        itemOrAir(equipment.getLeggings()),
+                        itemOrAir(equipment.getChestplate()),
+                        itemOrAir(equipment.getHelmet())
+                };
+
+        //设置默认手持物
+        var handItems = new ItemStack[]
+                {
+                        itemOrAir(equipment.getItemInMainHand()),
+                        itemOrAir(equipment.getItemInOffHand())
+                };
+
+        armors = ItemUtils.asCopy(armors);
+        handItems = ItemUtils.asCopy(handItems);
+
+        //全是空的，则默认显示自身装备
+        var emptyEquipment = Arrays.stream(armors).allMatch(i -> i != null && i.getType().isAir())
+                && Arrays.stream(handItems).allMatch(i -> i != null && i.getType().isAir());
+
+        disguiseEquipments.allowNull = true;
+        disguiseEquipments.setArmorContents(armors);
+        disguiseEquipments.setHandItems(handItems);
+
+        //开启默认装备显示或者更新显示
+        setShowingDisguisedItems(showDisguisedItems || !emptyEquipment);
     }
 
     private final DisguiseEquipment disguiseEquipments = new DisguiseEquipment();
@@ -627,7 +582,7 @@ public class DisguiseState extends MorphPluginObject
         return showDisguisedItems;
     }
 
-    private final ItemStack[] emptyArmorStack = new ItemStack[]{ null, null, null, null };
+    private static final ItemStack[] emptyArmorStack = new ItemStack[]{ null, null, null, null };
 
     //region Sound Handling
 
@@ -775,10 +730,8 @@ public class DisguiseState extends MorphPluginObject
     {
         var disguise = this.disguiseWrapper.clone();
 
-        var state = new DisguiseState(player, this.disguiseIdentifier, this.skillLookupIdentifier,
-                disguise, shouldHandlePose, provider, getDisguisedItems(), this.playerOptions, morphConfiguration);
-
-        return state;
+        return new DisguiseState(player, this.disguiseIdentifier, this.skillLookupIdentifier,
+                disguise, provider, getDisguisedItems(), this.playerOptions, morphConfiguration);
     }
 
     public void dispose()

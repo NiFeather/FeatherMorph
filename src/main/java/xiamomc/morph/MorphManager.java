@@ -57,7 +57,6 @@ import xiamomc.morph.storage.offlinestore.OfflineStateStore;
 import xiamomc.morph.storage.playerdata.PlayerDataStore;
 import xiamomc.morph.storage.playerdata.PlayerMeta;
 import xiamomc.morph.utilities.DisguiseUtils;
-import xiamomc.morph.utilities.NbtUtils;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
@@ -641,7 +640,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 clientHandler.updateCurrentIdentifier(player, key);
 
                 outComingState = postConstructDisguise(player, targetEntity,
-                        info.getIdentifier(), result.wrapperInstance(), result.isCopy(), provider);
+                        info.getIdentifier(), result.wrapperInstance(), provider);
 
                 // 交由后端来为玩家套上伪装
                 var backendSuccess = currentBackend.disguise(player, result.wrapperInstance());
@@ -960,7 +959,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     private void postConstructDisguise(DisguiseState state)
     {
         postConstructDisguise(state.getPlayer(), null,
-                state.getDisguiseIdentifier(), state.getDisguiseWrapper(), state.shouldHandlePose(), state.getProvider());
+                state.getDisguiseIdentifier(), state.getDisguiseWrapper(), state.getProvider());
     }
 
     /**
@@ -969,11 +968,10 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
      * @param player     伪装的玩家
      * @param targetedEntity     伪装的目标实体
      * @param disguiseWrapper         伪装
-     * @param shouldHandlePose 要不要手动更新伪装Pose？（伪装是否为克隆）
      * @param provider {@link DisguiseProvider}
      */
     private DisguiseState postConstructDisguise(Player player, @Nullable Entity targetedEntity,
-                                                String disguiseIdentifier, DisguiseWrapper<?> disguiseWrapper, boolean shouldHandlePose,
+                                                String disguiseIdentifier, DisguiseWrapper<?> disguiseWrapper,
                                                 @NotNull DisguiseProvider provider)
     {
         var playerMorphConfig = getPlayerMeta(player);
@@ -1005,14 +1003,14 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         if (state == null)
         {
             state = new DisguiseState(player, disguiseIdentifier, targetSkillID,
-                    disguiseWrapper, shouldHandlePose, provider, equipment,
+                    disguiseWrapper, provider, equipment,
                     clientHandler.getPlayerOption(player, true), playerMorphConfig);
 
             disguiseStates.add(state);
         }
         else
         {
-            state.setDisguise(disguiseIdentifier, targetSkillID, disguiseWrapper, shouldHandlePose, equipment);
+            state.updateDisguise(disguiseIdentifier, targetSkillID, disguiseWrapper, true, equipment);
         }
 
         // workaround: Disguise#getDisguiseName()不会正常返回实体的自定义名称

@@ -76,7 +76,7 @@ public class DisguiseStateGenerator
         //构建State
         var state = new DisguiseState(player,
                 disguiseIdentifier, targetSkillID,
-                wrapper, true, provider,
+                wrapper, provider,
                 null, playerOptions, playerMeta);
 
         try
