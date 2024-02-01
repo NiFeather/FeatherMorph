@@ -25,7 +25,11 @@ public class PlayerSkinProvider extends MorphPluginObject
 
     public static PlayerSkinProvider getInstance()
     {
-        if (instance == null) instance = new PlayerSkinProvider();
+        if (instance == null)
+        {
+            instance = new PlayerSkinProvider();
+            instance.skinCache.initializeStorage();
+        }
 
         return instance;
     }
