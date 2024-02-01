@@ -1295,6 +1295,9 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             {
                 this.disguiseFromState(state);
 
+                // 向管理员发送map消息
+                networkingHelper.sendCommandToRevealablePlayers(genPartialMapCommand(state));
+
                 return OfflineDisguiseResult.SUCCESS;
             }
 
