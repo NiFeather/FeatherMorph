@@ -123,6 +123,7 @@
   "morph.state.recovering_limited_hint": "<italic>恢复后的伪装可能和之前的不一样",
   "morph.state.reset": "相关功能已禁用，正在取消您的伪装...",
   "morph.unmorph_success": "已取消伪装",
+  "morph.no_enough_space": "<red>空间太过狭小，无法进行伪装！",
   "requests.already_have_disguise": "<color:red>你已经有对方的形态了",
   "requests.cant_send_to_self": "<color:red>你不能给自己发请求",
   "requests.request_accepted": "来自<who>的请求已接受！",
