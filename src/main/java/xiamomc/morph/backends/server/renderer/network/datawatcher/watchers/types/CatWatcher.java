@@ -75,7 +75,7 @@ public class CatWatcher extends TameableAnimalWatcher
         }
 
         if (nbt.contains("CollarColor"))
-            write(ValueIndex.CAT.COLLAR_COLOR, nbt.getByte("CollarColor"));
+            write(ValueIndex.CAT.COLLAR_COLOR, (int)nbt.getByte("CollarColor"));
     }
 
     @Override
@@ -87,6 +87,6 @@ public class CatWatcher extends TameableAnimalWatcher
         nbt.putString("variant", variant);
 
         var collarColor = get(ValueIndex.CAT.COLLAR_COLOR);
-        nbt.putByte("CollarColor", collarColor);
+        nbt.putInt("CollarColor", collarColor);
     }
 }
