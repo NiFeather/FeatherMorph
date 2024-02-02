@@ -26,7 +26,7 @@ public class WolfWatcher extends TameableAnimalWatcher
         super.mergeFromCompound(nbt);
 
         if (nbt.contains("CollarColor"))
-            write(ValueIndex.WOLF.COLLAR_COLOR, (int)nbt.getByte("CollarColor"));
+            write(ValueIndex.WOLF.COLLAR_COLOR, nbt.getByte("CollarColor"));
     }
 
     @Override
@@ -34,6 +34,6 @@ public class WolfWatcher extends TameableAnimalWatcher
     {
         super.writeToCompound(nbt);
 
-        nbt.putByte("CollarColor", get(ValueIndex.WOLF.COLLAR_COLOR).byteValue());
+        nbt.putByte("CollarColor", get(ValueIndex.WOLF.COLLAR_COLOR));
     }
 }
