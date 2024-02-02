@@ -123,6 +123,7 @@
   "morph.state.recovering_limited_hint": "<italic>The recovered disguise may differ from before",
   "morph.state.reset": "Some feature has been reset, we are now canceling your disguise...",
   "morph.unmorph_success": "Undisguised",
+  "morph.no_enough_space": "<red>There is not enough space to disguise!",
   "requests.already_have_disguise": "<color:red>You already have their disguise!",
   "requests.cant_send_to_self": "<color:red>You can't send requests to yourself",
   "requests.request_accepted": "Accepted <who>'s request!",
