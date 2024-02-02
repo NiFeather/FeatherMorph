@@ -5,6 +5,7 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.nbt.CompoundTag;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.EntityType;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 
@@ -13,7 +14,6 @@ public class ServerDisguise implements Cloneable
     public ServerDisguise(EntityType type)
     {
         this.type = type;
-        this.name = type.translationKey();
 
         if (type == EntityType.SLIME || type == EntityType.MAGMA_CUBE)
             this.compoundTag.putInt("Size", 4);
@@ -21,6 +21,7 @@ public class ServerDisguise implements Cloneable
 
     public EntityType type;
 
+    @Nullable
     public String name;
 
     public ChatColor glowingColor = ChatColor.WHITE;

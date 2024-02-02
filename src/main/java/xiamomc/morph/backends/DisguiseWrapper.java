@@ -18,6 +18,7 @@ import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.utilities.EntityTypeUtils;
 
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 
 /**
  * A wrapper that holds the underlying disguise instance
@@ -210,16 +211,6 @@ public abstract class DisguiseWrapper<TInstance>
         return Math.max(1, getCompound().getInt("Size"));
     }
 
-    public abstract void setGlowingColor(ChatColor glowingColor);
-
-    public abstract ChatColor getGlowingColor();
-
-    /**
-     * @deprecated No longer used
-     */
-    @Deprecated
-    public abstract void setGlowing(boolean glowing);
-
     /**
      * Adds a custom data to the underlying instance
      * @param key Name
@@ -258,11 +249,10 @@ public abstract class DisguiseWrapper<TInstance>
 
     /**
      * Updates the underlying disguise instance
-     * @param isClone Whether this disguise is cloned from another entity or disguise
      * @param state {@link DisguiseState}
      * @param player The player who owns the provided state
      */
-    public abstract void update(boolean isClone, DisguiseState state, Player player);
+    public abstract void update(DisguiseState state, Player player);
 
     /**
      * Merge NBT to the underlying instance
@@ -329,4 +319,8 @@ public abstract class DisguiseWrapper<TInstance>
     }
 
     //endregion
+
+    public abstract <T> void subscribeEvent(Object source, WrapperEvent<T> wrapperEvent, Consumer<T> c);
+
+    public abstract void unSubscribeEvent(Object source, WrapperEvent<?> wrapperEvent);
 }

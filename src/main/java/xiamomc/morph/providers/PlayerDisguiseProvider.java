@@ -3,6 +3,7 @@ package xiamomc.morph.providers;
 import com.mojang.authlib.GameProfile;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.kyori.adventure.text.Component;
+import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import org.bukkit.Bukkit;
@@ -80,22 +81,6 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
                 wrapper.applySkin(gameProfile);
         }
 
-        if (wrapper.getSkin() == null)
-        {
-            PlayerSkinProvider.getInstance().fetchSkin(disguiseMeta.playerDisguiseTargetName)
-                    .thenApply(optional ->
-                    {
-                        if (wrapper.disposed()) return null;
-
-                        GameProfile outcomingProfile = new GameProfile(UUID.randomUUID(), disguiseMeta.playerDisguiseTargetName);
-                        if (optional.isPresent()) outcomingProfile = optional.get();
-
-                        wrapper.applySkin(outcomingProfile);
-
-                        return null;
-                    });
-        }
-
         return DisguiseResult.success(wrapper, result.isCopy());
     }
 
@@ -151,13 +136,13 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
     }
 
     @Override
-    public @Nullable CompoundTag getNbtCompound(DisguiseState state, Entity targetEntity)
+    public @Nullable CompoundTag getNbtCompound(DisguiseState state, Entity targetEntity, boolean enableCulling)
     {
         if (!(targetEntity instanceof Player targetPlayer)) return null;
 
         if (!targetPlayer.getName().equals(DisguiseTypes.PLAYER.toStrippedId(state.getDisguiseIdentifier()))) return null;
 
-        return super.getNbtCompound(state, targetEntity);
+        return super.getNbtCompound(state, targetEntity, enableCulling);
     }
 
     @Override

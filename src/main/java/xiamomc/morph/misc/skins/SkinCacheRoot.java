@@ -6,7 +6,7 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 
 import java.util.List;
 
-public class SkinStoreRoot
+public class SkinCacheRoot
 {
     @Expose
     @SerializedName("profiles")

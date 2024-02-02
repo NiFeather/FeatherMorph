@@ -69,7 +69,7 @@ public abstract class MorphSkill<T extends ISkillOption> extends MorphPluginObje
         try
         {
             fireBall = player.getWorld()
-                    .spawnEntity(player.getEyeLocation(), fireball, CreatureSpawnEvent.SpawnReason.DEFAULT);
+                    .spawnEntity(player.getEyeLocation(), fireball, CreatureSpawnEvent.SpawnReason.CUSTOM);
         }
         catch (Throwable t)
         {
@@ -81,7 +81,12 @@ public abstract class MorphSkill<T extends ISkillOption> extends MorphPluginObje
         if (fireBall instanceof Projectile projectile)
             projectile.setShooter(player);
 
-        fireBall.setVelocity(player.getEyeLocation().getDirection().normalize().multiply(1.4d * multiplier));
+        //It works for all previous MC versions, then starting from 1.20.3 we need to multiply 0.1 ...
+        //... right before we do any other things.
+        //
+        //Why?
+        var velocity = player.getEyeLocation().getDirection().normalize().multiply(0.1d);
+        fireBall.setVelocity(velocity.multiply(multiplier));
 
         return (E) fireBall;
     }

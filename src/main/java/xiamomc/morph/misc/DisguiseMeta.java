@@ -63,11 +63,6 @@ public class DisguiseMeta
         return disguiseType == DisguiseTypes.PLAYER;
     }
 
-    public boolean isLocalDisguise()
-    {
-        return disguiseType == DisguiseTypes.LD;
-    }
-
     /**
      * 不带"player:"的玩家伪装名称
      */

@@ -3,17 +3,8 @@ package xiamomc.morph.misc.skins;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.mojang.authlib.GameProfile;
-import net.minecraft.Util;
-import net.minecraft.commands.arguments.GameProfileArgument;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtIo;
 import org.jetbrains.annotations.Nullable;
-import xiamomc.morph.misc.MorphGameProfile;
-import xiamomc.morph.utilities.DisguiseUtils;
 import xiamomc.morph.utilities.NbtUtils;
-import xiamomc.morph.utilities.NmsUtils;
-
-import java.util.UUID;
 
 public class SingleSkin
 {
@@ -36,13 +27,13 @@ public class SingleSkin
         instance.name = profile.getName();
         instance.snbt = NbtUtils.getCompoundString(NbtUtils.toCompoundTag(profile));
         instance.expiresAt = System.currentTimeMillis() + 15 * 24 * 60 * 60 * 1000;
-        //                                                D    H    M    S    MS
+        //                   MS                           D    H    M    S    MS
 
         return instance;
     }
 
     @Nullable
-    public GameProfile toGameProfile()
+    public GameProfile generateGameProfile()
     {
         if (this.snbt == null || this.snbt.equalsIgnoreCase("{}"))
             return null;

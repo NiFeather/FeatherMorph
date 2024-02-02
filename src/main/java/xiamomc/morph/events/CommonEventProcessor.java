@@ -32,6 +32,7 @@ import xiamomc.morph.messages.SkillStrings;
 import xiamomc.morph.messages.vanilla.VanillaMessageStore;
 import xiamomc.morph.misc.DisguiseTypes;
 import xiamomc.morph.misc.NetworkingHelper;
+import xiamomc.morph.misc.OfflineDisguiseResult;
 import xiamomc.morph.misc.permissions.CommonPermissions;
 import xiamomc.morph.network.commands.S2C.S2CSwapCommand;
 import xiamomc.morph.network.commands.S2C.map.S2CMapRemoveCommand;
@@ -220,31 +221,11 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
             e.setCancelled(tryInvokeSkillOrQuickDisguise(e.getPlayer(), Action.RIGHT_CLICK_AIR, e.getHand()) || e.isCancelled());
     }
 
-    @Resolved
-    private PlayerTracker tracker;
-
-    @EventHandler
-    public void onEntityDamagedByEntity(EntityDamageByEntityEvent e)
-    {
-        var state = morphs.getDisguiseStateFor(e.getDamager());
-        if (state == null) return;
-
-        state.getDisguiseWrapper().playAttackAnimation();
-    }
-
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent e)
     {
         if (tryInvokeSkillOrQuickDisguise(e.getPlayer(), e.getAction(), e.getHand()))
             e.setCancelled(true);
-
-        var player = e.getPlayer();
-        if (e.getAction().isLeftClick() && !tracker.isBreakingSuspect(player))
-        {
-            var state = morphs.getDisguiseStateFor(player);
-            if (state != null)
-                state.getDisguiseWrapper().playAttackAnimation();
-        }
     }
 
     /**
@@ -302,53 +283,38 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         return true;
     }
 
-    //region LibsDisguises workaround
-
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerSwapHand(PlayerSwapHandItemsEvent e)
     {
         var player = e.getPlayer();
         var state = morphs.getDisguiseStateFor(player);
 
-        if (state != null)
+        if (state == null) return;
+
+        if (!state.showingDisguisedItems()) return;
+
+        state.swapHands();
+
+        var equip = state.getDisguisedItems();
+
+        var mainHand = itemOrAir(equip.getItemInMainHand());
+        var offHand = itemOrAir(equip.getItemInOffHand());
+
+        if (clientHandler.isFutureClientProtocol(player, 3))
         {
-            //workaround: 交换副手后伪装有概率在左右手显示同一个物品
-            if (state.showingDisguisedItems())
-            {
-                var disguise = state.getDisguiseWrapper();
-                state.swapHands();
-                var equip = state.getDisguisedItems();
-
-                var mainHand = itemOrAir(equip.getItemInMainHand());
-                var offHand = itemOrAir(equip.getItemInOffHand());
-
-                if (clientHandler.isFutureClientProtocol(player, 3))
-                {
-                    clientHandler.sendCommand(player, new S2CSwapCommand());
-                }
-                else
-                {
-                    clientHandler.sendCommand(player, new ServerSetEquipCommand(mainHand, EquipmentSlot.HAND));
-                    clientHandler.sendCommand(player, new ServerSetEquipCommand(offHand, EquipmentSlot.OFF_HAND));
-                }
-
-                this.addSchedule(() ->
-                {
-                    if (!state.showingDisguisedItems() || state.getDisguiseWrapper() != disguise) return;
-
-                    var air = itemOrAir(null);
-                    var equipment = state.getDisguiseWrapper().getDisplayingEquipments();
-
-                    equipment.setItemInMainHand(air);
-                    equipment.setItemInOffHand(air);
-                    disguise.setFakeEquipments(equipment);
-
-                    equipment.setItemInMainHand(mainHand);
-                    equipment.setItemInOffHand(offHand);
-                    disguise.setFakeEquipments(equipment);
-                }, 2);
-            }
+            clientHandler.sendCommand(player, new S2CSwapCommand());
         }
+        else
+        {
+            clientHandler.sendCommand(player, new ServerSetEquipCommand(mainHand, EquipmentSlot.HAND));
+            clientHandler.sendCommand(player, new ServerSetEquipCommand(offHand, EquipmentSlot.OFF_HAND));
+        }
+
+        var wrapper = state.getDisguiseWrapper();
+        var wrapperEquipments = wrapper.getDisplayingEquipments();
+        wrapperEquipments.setItemInMainHand(mainHand);
+        wrapperEquipments.setItemInOffHand(offHand);
+        wrapper.setFakeEquipments(wrapperEquipments);
     }
 
     @EventHandler
@@ -370,7 +336,6 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         }
     }
 
-    //非Premium版本的LibsDisguises不会为玩家保存伪装
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent e)
     {
@@ -409,13 +374,10 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
 
             oldWrapper.dispose();
 
-            var nbt = state.getCachedNbtString();
-            var profile = state.getProfileNbtString();
-
             var customName = state.entityCustomName;
 
-            state.setDisguise(state.getDisguiseIdentifier(),
-                    state.getSkillLookupIdentifier(), wrapper, state.shouldHandlePose(), false,
+            state.updateDisguise(state.getDisguiseIdentifier(),
+                    state.getSkillLookupIdentifier(), wrapper, false,
                     state.getDisguisedItems());
 
             if (customName != null)
@@ -452,11 +414,11 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
 
             var result = morphs.disguiseFromOfflineState(player, offlineState);
 
-            if (result == 0)
+            if (result == OfflineDisguiseResult.SUCCESS)
             {
                 player.sendMessage(MessageUtils.prefixes(player, MorphStrings.recoveringStateString()));
             }
-            else if (result == 1)
+            else if (result == OfflineDisguiseResult.LIMITED)
             {
                 player.sendMessage(MessageUtils.prefixes(player, MorphStrings.recoveringStateLimitedString()));
                 player.sendMessage(MessageUtils.prefixes(player, MorphStrings.recoveringStateLimitedHintString()));

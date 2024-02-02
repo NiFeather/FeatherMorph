@@ -1,5 +1,6 @@
 package xiamomc.morph.config;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.events.InteractionMirrorProcessor;
 import xiamomc.morph.utilities.NbtUtils;
@@ -94,6 +95,8 @@ public enum ConfigOption
     ALLOW_FLIGHT(ConfigNode.create().append("allow_flight"), true),
 
     NOFLY_WORLDS(ConfigNode.create().append("nofly_worlds"), new ArrayList<String>()),
+
+    UUID_RANDOM_BASE(ConfigNode.create().append("uuid_random_base"), RandomStringUtils.randomAlphabetic(8)),
 
     VERSION(ConfigNode.create().append("version"), 0);
 

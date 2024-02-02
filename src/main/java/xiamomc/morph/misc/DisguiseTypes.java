@@ -26,6 +26,7 @@ public enum DisguiseTypes
     /**
      * LibsDisguise的本地伪装
      */
+    @Deprecated(forRemoval = true)
     LD("local"),
 
     /**

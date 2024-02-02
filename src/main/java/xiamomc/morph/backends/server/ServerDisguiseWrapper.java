@@ -1,6 +1,8 @@
 package xiamomc.morph.backends.server;
 
 import com.mojang.authlib.GameProfile;
+import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.TagType;
@@ -14,6 +16,8 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.backends.DisguiseWrapper;
+import xiamomc.morph.backends.EventWrapper;
+import xiamomc.morph.backends.WrapperEvent;
 import xiamomc.morph.backends.server.renderer.network.registries.ValueIndex;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.*;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
@@ -23,9 +27,13 @@ import xiamomc.morph.misc.DisguiseEquipment;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.utilities.NbtUtils;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
-public class ServerDisguiseWrapper extends DisguiseWrapper<ServerDisguise>
+public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
 {
     public ServerDisguiseWrapper(@NotNull ServerDisguise instance, ServerBackend backend)
     {
@@ -162,7 +170,9 @@ public class ServerDisguiseWrapper extends DisguiseWrapper<ServerDisguise>
     @Override
     public String getDisguiseName()
     {
-        return instance.name;
+        var instanceName = instance.name;
+
+        return instanceName == null ? "" : instanceName;
     }
 
     @Override
@@ -178,23 +188,6 @@ public class ServerDisguiseWrapper extends DisguiseWrapper<ServerDisguise>
     public boolean isBaby()
     {
         return instance.isBaby;
-    }
-
-    @Override
-    public void setGlowingColor(ChatColor glowingColor)
-    {
-        instance.glowingColor = glowingColor;
-    }
-
-    @Override
-    public void setGlowing(boolean glowing)
-    {
-    }
-
-    @Override
-    public ChatColor getGlowingColor()
-    {
-        return instance.glowingColor;
     }
 
     @Override
@@ -218,6 +211,8 @@ public class ServerDisguiseWrapper extends DisguiseWrapper<ServerDisguise>
 
         if (bindingWatcher != null)
             bindingWatcher.write(EntryIndex.PROFILE, this.instance.profile);
+
+        callEvent(WrapperEvent.SKIN_SET, profile);
     }
 
     @Override
@@ -232,7 +227,7 @@ public class ServerDisguiseWrapper extends DisguiseWrapper<ServerDisguise>
     }
 
     @Override
-    public void update(boolean isClone, DisguiseState state, Player player)
+    public void update(DisguiseState state, Player player)
     {
     }
 
@@ -304,6 +299,10 @@ public class ServerDisguiseWrapper extends DisguiseWrapper<ServerDisguise>
         Objects.requireNonNull(bindingWatcher, "Null Watcher!");
 
         bindingPlayer = newBinding;
+
+        if (this.bindingWatcher != null)
+            this.bindingWatcher.dispose();
+
         this.bindingWatcher = bindingWatcher;
 
         refreshRegistry();

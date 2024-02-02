@@ -14,6 +14,7 @@ import xiamomc.morph.backends.server.renderer.network.datawatcher.values.Abstrac
 import xiamomc.morph.backends.server.renderer.network.datawatcher.values.SingleValue;
 import xiamomc.morph.backends.server.renderer.network.registries.RegistryKey;
 import xiamomc.morph.backends.server.renderer.utilties.WatcherUtils;
+import xiamomc.morph.utilities.NbtUtils;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Exceptions.NullDependencyException;
@@ -167,7 +168,16 @@ public abstract class SingleWatcher extends MorphPluginObject
 
     public <X> void write(SingleValue<X> singleValue, X value)
     {
-        write(singleValue.index(), value);
+        var prev = registry.getOrDefault(singleValue, null);
+        registry.put(singleValue, value);
+
+        if (!value.equals(prev))
+            dirtySingles.put(singleValue, value);
+
+        onTrackerWrite(singleValue.index(), prev, value);
+
+        if (!syncing)
+            sendPacketToAffectedPlayers(packetFactory.buildDiffMetaPacket(getBindingPlayer(), this));
     }
 
     public void write(int index, Object value)
@@ -179,16 +189,7 @@ public abstract class SingleWatcher extends MorphPluginObject
         if (!single.defaultValue().getClass().isInstance(value))
             throw new IllegalArgumentException("Incompatable value for index '%s', excepted for '%s', but got '%s'".formatted(index, single.defaultValue().getClass(), value.getClass()));
 
-        var prev = registry.getOrDefault(single, null);
-        registry.put(single, value);
-
-        if (!value.equals(prev))
-            dirtySingles.put(single, value);
-
-        onTrackerWrite(index, prev, value);
-
-        if (!syncing)
-            sendPacketToAffectedPlayers(packetFactory.buildDiffMetaPacket(getBindingPlayer(), this));
+        write((SingleValue<Object>)single, value);
     }
 
     @Resolved(shouldSolveImmediately = true)
@@ -205,8 +206,7 @@ public abstract class SingleWatcher extends MorphPluginObject
 
     public <X> X get(SingleValue<X> singleValue)
     {
-        var ret = get(singleValue.index());
-        return (X)ret;
+        return (X)registry.getOrDefault(singleValue, singleValue.defaultValue());
     }
 
     public Object get(int index)
@@ -215,7 +215,7 @@ public abstract class SingleWatcher extends MorphPluginObject
         if (single == null)
             throw new NullDependencyException("No registry found for index '%s'".formatted(index));
 
-        return registry.get(single);
+        return get(single);
     }
 
     public Map<SingleValue<?>, Object> getRegistry()
