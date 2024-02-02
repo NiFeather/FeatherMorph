@@ -221,31 +221,11 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
             e.setCancelled(tryInvokeSkillOrQuickDisguise(e.getPlayer(), Action.RIGHT_CLICK_AIR, e.getHand()) || e.isCancelled());
     }
 
-    @Resolved
-    private PlayerTracker tracker;
-
-    @EventHandler
-    public void onEntityDamagedByEntity(EntityDamageByEntityEvent e)
-    {
-        var state = morphs.getDisguiseStateFor(e.getDamager());
-        if (state == null) return;
-
-        state.getDisguiseWrapper().playAttackAnimation();
-    }
-
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent e)
     {
         if (tryInvokeSkillOrQuickDisguise(e.getPlayer(), e.getAction(), e.getHand()))
             e.setCancelled(true);
-
-        var player = e.getPlayer();
-        if (e.getAction().isLeftClick() && !tracker.isBreakingSuspect(player))
-        {
-            var state = morphs.getDisguiseStateFor(player);
-            if (state != null)
-                state.getDisguiseWrapper().playAttackAnimation();
-        }
     }
 
     /**

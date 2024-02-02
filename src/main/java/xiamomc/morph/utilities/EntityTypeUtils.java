@@ -19,6 +19,7 @@ import org.bukkit.entity.Enemy;
 import org.bukkit.entity.EntityType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.misc.DisguiseTypes;
 
 import java.util.Arrays;
@@ -359,6 +360,11 @@ public class EntityTypeUtils
 
     private static final Location spawnLocation = new Location(null, 0d, -4096d, 0d);
 
+    static
+    {
+        isEnemyMap.put(EntityType.BREEZE, true);
+    }
+
     public static boolean isEnemy(EntityType type)
     {
         if (type == EntityType.PLAYER) return false;
@@ -371,10 +377,20 @@ public class EntityTypeUtils
         var world = Bukkit.getWorlds().stream().findFirst().orElse(null);
         if (world == null) return false;
 
-        var entity = world.spawn(spawnLocation, type.getEntityClass());
-        var isEnemy = entity instanceof Enemy;
+        boolean isEnemy = false;
 
-        ((CraftEntity) entity).getHandle().discard();
+        try
+        {
+            var entity = world.spawn(spawnLocation, type.getEntityClass());
+            isEnemy = entity instanceof Enemy;
+
+            ((CraftEntity) entity).getHandle().discard();
+        }
+        catch (Throwable t)
+        {
+            var logger = MorphPlugin.getInstance().getSLF4JLogger();
+            logger.error("Unable to determine whether " + type + " is enemy type: " + t.getMessage());
+        }
 
         isEnemyMap.put(type, isEnemy);
         return isEnemy;

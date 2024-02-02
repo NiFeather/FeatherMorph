@@ -166,6 +166,7 @@ public final class MorphPlugin extends XiaMoJavaPlugin
                             mirrorProcessor,
                             new CommonEventProcessor(),
                             new RevealingEventProcessor(),
+                            new DisguiseAnimationProcessor(),
                             new ForcedDisguiseProcessor()
                     });
 
