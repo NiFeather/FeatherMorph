@@ -14,7 +14,7 @@ import xiamomc.morph.skills.DefaultConfigGenerator;
 import xiamomc.morph.skills.IMorphSkill;
 import xiamomc.morph.skills.MorphSkillHandler;
 import xiamomc.morph.skills.SkillType;
-import xiamomc.morph.skills.impl.LaunchProjectiveMorphSkill;
+import xiamomc.morph.skills.impl.LaunchProjectileMorphSkill;
 import xiamomc.morph.skills.impl.SonicBoomMorphSkill;
 import xiamomc.morph.storage.MorphJsonBasedStorage;
 import xiamomc.morph.utilities.DisguiseUtils;
@@ -204,7 +204,7 @@ public class SkillAbilityConfigurationStore extends MorphJsonBasedStorage<SkillA
 
                     c.setOption(SkillType.TELEPORT.asString(), teleport);
                     c.setOption(SkillType.APPLY_EFFECT.asString(), effect);
-                    c.setOption(SkillType.LAUNCH_PROJECTIVE.asString(), projective);
+                    c.setOption(SkillType.LAUNCH_PROJECTILE.asString(), projective);
                     c.setOption(SkillType.EXPLODE.asString(), explosion);
                 });
             }
@@ -250,10 +250,10 @@ public class SkillAbilityConfigurationStore extends MorphJsonBasedStorage<SkillA
                 if (ghastConfig != null)
                 {
                     //noinspection removal
-                    ghastConfig.moveOption(SkillType.GHAST, SkillType.LAUNCH_PROJECTIVE);
-                    ghastConfig.setSkillIdentifier(SkillType.LAUNCH_PROJECTIVE);
+                    ghastConfig.moveOption(SkillType.GHAST, SkillType.LAUNCH_PROJECTILE);
+                    ghastConfig.setSkillIdentifier(SkillType.LAUNCH_PROJECTILE);
 
-                    var option = ghastConfig.getSkillOptions(new LaunchProjectiveMorphSkill());
+                    var option = ghastConfig.getSkillOptions(new LaunchProjectileMorphSkill());
                     if (option != null)
                     {
                         option.put("delay", DisguiseUtils.GHAST_EXECUTE_DELAY);

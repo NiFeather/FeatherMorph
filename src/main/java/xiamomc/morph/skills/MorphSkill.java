@@ -70,7 +70,7 @@ public abstract class MorphSkill<T extends ISkillOption> extends MorphPluginObje
         }
         catch (Throwable t)
         {
-            printErrorMessage(player, "未能生成" + fireball + ": " + t.getMessage());
+            printErrorMessage(player, "Unable to summon " + fireball + ": " + t.getMessage());
             t.printStackTrace();
             return null;
         }
