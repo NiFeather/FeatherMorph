@@ -140,9 +140,17 @@ public class PacketFactory extends MorphPluginObject
 
         packets.add(spawnPacket);
 
+        var watcher = parameters.getWatcher();
+
         //生成装备和Meta
+        var displayingFake = watcher.getOrDefault(EntryIndex.DISPLAY_FAKE_EQUIPMENT, false);
+        var equip = displayingFake
+                ? watcher.getOrDefault(EntryIndex.EQUIPMENT, new DisguiseEquipment())
+                : player.getEquipment();
+
         var equipmentPacket = new ClientboundSetEquipmentPacket(player.getEntityId(),
-                ProtocolEquipment.toPairs(player.getEquipment()));
+                ProtocolEquipment.toPairs(equip));
+
         packets.add(PacketContainer.fromPacket(equipmentPacket));
 
         if (parameters.includeMeta())
