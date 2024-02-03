@@ -13,7 +13,7 @@ import xiamomc.morph.skills.IMorphSkill;
 import xiamomc.morph.skills.SkillType;
 import xiamomc.morph.skills.options.EffectConfiguration;
 import xiamomc.morph.skills.options.ExplosionConfiguration;
-import xiamomc.morph.skills.options.ProjectiveConfiguration;
+import xiamomc.morph.skills.options.ProjectileConfiguration;
 import xiamomc.morph.skills.options.TeleportConfiguration;
 
 import java.util.List;
@@ -289,12 +289,12 @@ public class SkillAbilityConfiguration
 
     @Expose(serialize = false)
     @SerializedName("projective")
-    private ProjectiveConfiguration projectiveConfiguration;
+    private ProjectileConfiguration projectileConfiguration;
 
     @Deprecated
-    public ProjectiveConfiguration getProjectiveConfiguration()
+    public ProjectileConfiguration getProjectiveConfiguration()
     {
-        return projectiveConfiguration;
+        return projectileConfiguration;
     }
 
     @Expose(serialize = false)

@@ -11,15 +11,15 @@ import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.network.commands.S2C.set.S2CSetAggressiveCommand;
 import xiamomc.morph.network.server.MorphClientHandler;
 import xiamomc.morph.skills.SkillType;
-import xiamomc.morph.skills.options.ProjectiveConfiguration;
+import xiamomc.morph.skills.options.ProjectileConfiguration;
 import xiamomc.morph.storage.skill.SkillAbilityConfiguration;
 import xiamomc.morph.utilities.EntityTypeUtils;
 import xiamomc.pluginbase.Annotations.Resolved;
 
-public class LaunchProjectiveMorphSkill extends DelayedMorphSkill<ProjectiveConfiguration>
+public class LaunchProjectileMorphSkill extends DelayedMorphSkill<ProjectileConfiguration>
 {
     @Override
-    protected int getExecuteDelay(SkillAbilityConfiguration configuration, ProjectiveConfiguration option)
+    protected int getExecuteDelay(SkillAbilityConfiguration configuration, ProjectileConfiguration option)
     {
         return option.executeDelay;
     }
@@ -28,7 +28,7 @@ public class LaunchProjectiveMorphSkill extends DelayedMorphSkill<ProjectiveConf
     private MorphClientHandler clientHandler;
 
     @Override
-    protected ExecuteResult preExecute(Player player, DisguiseState state, SkillAbilityConfiguration configuration, ProjectiveConfiguration option)
+    protected ExecuteResult preExecute(Player player, DisguiseState state, SkillAbilityConfiguration configuration, ProjectileConfiguration option)
     {
         if (option == null || configuration == null)
         {
@@ -54,7 +54,7 @@ public class LaunchProjectiveMorphSkill extends DelayedMorphSkill<ProjectiveConf
     }
 
     @Override
-    protected void executeDelayedSkill(Player player, DisguiseState state, SkillAbilityConfiguration configuration, ProjectiveConfiguration option)
+    protected void executeDelayedSkill(Player player, DisguiseState state, SkillAbilityConfiguration configuration, ProjectileConfiguration option)
     {
         state.getDisguiseWrapper().setAggressive(false);
         clientHandler.sendCommand(player, new S2CSetAggressiveCommand(false));
@@ -102,13 +102,13 @@ public class LaunchProjectiveMorphSkill extends DelayedMorphSkill<ProjectiveConf
     @Override
     public @NotNull NamespacedKey getIdentifier()
     {
-        return SkillType.LAUNCH_PROJECTIVE;
+        return SkillType.LAUNCH_PROJECTILE;
     }
 
-    private final ProjectiveConfiguration option = new ProjectiveConfiguration();
+    private final ProjectileConfiguration option = new ProjectileConfiguration();
 
     @Override
-    public ProjectiveConfiguration getOptionInstance()
+    public ProjectileConfiguration getOptionInstance()
     {
         return option;
     }

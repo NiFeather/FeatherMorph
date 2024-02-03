@@ -8,7 +8,7 @@ public class SkillType
 
     public static final NamespacedKey INVENTORY = new NamespacedKey(nameSpace, "fake_equip");
     public static final NamespacedKey EXPLODE = new NamespacedKey(nameSpace, "explode");
-    public static final NamespacedKey LAUNCH_PROJECTIVE = new NamespacedKey(nameSpace, "launch_projective");
+    public static final NamespacedKey LAUNCH_PROJECTILE = new NamespacedKey(nameSpace, "launch_projective");
     public static final NamespacedKey APPLY_EFFECT = new NamespacedKey(nameSpace, "apply_effect");
     public static final NamespacedKey TELEPORT = new NamespacedKey(nameSpace, "teleport");
     public static final NamespacedKey EVOKER = new NamespacedKey(nameSpace, "evoker");

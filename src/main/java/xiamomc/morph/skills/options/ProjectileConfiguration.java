@@ -5,13 +5,13 @@ import com.google.gson.annotations.SerializedName;
 import org.bukkit.entity.EntityType;
 import xiamomc.morph.storage.skill.ISkillOption;
 
-public class ProjectiveConfiguration implements ISkillOption
+public class ProjectileConfiguration implements ISkillOption
 {
-    public ProjectiveConfiguration()
+    public ProjectileConfiguration()
     {
     }
 
-    public ProjectiveConfiguration(String name, float multiplier, String soundName, int soundDistance, int distanceLimit)
+    public ProjectileConfiguration(String name, float multiplier, String soundName, int soundDistance, int distanceLimit)
     {
         this.name = name;
         this.multiplier = multiplier;
@@ -20,28 +20,28 @@ public class ProjectiveConfiguration implements ISkillOption
         this.distanceLimit = distanceLimit;
     }
 
-    public ProjectiveConfiguration(String name, float multiplier, String soundName, int soundDistance)
+    public ProjectileConfiguration(String name, float multiplier, String soundName, int soundDistance)
     {
         this(name, multiplier, soundName, soundDistance, 0);
     }
 
-    public ProjectiveConfiguration(EntityType entityType, float multiplier, String soundName, int soundDistance)
+    public ProjectileConfiguration(EntityType entityType, float multiplier, String soundName, int soundDistance)
     {
         this(entityType.getKey().asString(), multiplier, soundName, soundDistance, 0);
     }
 
-    public ProjectiveConfiguration(EntityType entityType, float multiplier, String soundName, int soundDistance, int distanceLimit)
+    public ProjectileConfiguration(EntityType entityType, float multiplier, String soundName, int soundDistance, int distanceLimit)
     {
         this(entityType.getKey().asString(), multiplier, soundName, soundDistance, distanceLimit);
     }
 
-    public ProjectiveConfiguration withDelay(int delay)
+    public ProjectileConfiguration withDelay(int delay)
     {
         this.executeDelay = delay;
         return this;
     }
 
-    public ProjectiveConfiguration withWarningSound(String soundName)
+    public ProjectileConfiguration withWarningSound(String soundName)
     {
         this.preLaunchSoundName = soundName;
         return this;
