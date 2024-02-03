@@ -182,24 +182,32 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         {
             var p = i.getPlayer();
 
-            //跳过离线玩家
-            if (!p.isOnline()) return;
-
-            if (!abilityHandler.handle(p, i))
+            //logger.info("Schedule at " + plugin.getCurrentTick() +" -> " + i);
+            p.getScheduler().run(plugin, f ->
             {
-                p.sendMessage(MessageUtils.prefixes(p, MorphStrings.errorWhileUpdatingDisguise()));
+                //logger.info("Run at " + plugin.getCurrentTick() + " -> " + i);
 
-                unMorph(nilCommandSource, p, true, true);
-            }
+                //跳过离线玩家
+                if (!p.isOnline()) return;
 
-            if (!i.getProvider().updateDisguise(p, i))
-            {
-                p.sendMessage(MessageUtils.prefixes(p, MorphStrings.errorWhileUpdatingDisguise()));
+                if (i.disposed()) return;
 
-                unMorph(nilCommandSource, p, true, true);
-            }
+                if (!abilityHandler.handle(p, i))
+                {
+                    p.sendMessage(MessageUtils.prefixes(p, MorphStrings.errorWhileUpdatingDisguise()));
 
-            i.getSoundHandler().update();
+                    unMorph(nilCommandSource, p, true, true);
+                }
+
+                if (!i.getProvider().updateDisguise(p, i))
+                {
+                    p.sendMessage(MessageUtils.prefixes(p, MorphStrings.errorWhileUpdatingDisguise()));
+
+                    unMorph(nilCommandSource, p, true, true);
+                }
+
+                i.getSoundHandler().update();
+            }, () -> { /* retried */ });
         });
     }
 
@@ -951,6 +959,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         if (isUsingClientRenderer())
             networkingHelper.sendCommandToAllPlayers(new S2CRenderMapRemoveCommand(player.getEntityId()));
+
+        state.dispose();
     }
 
     @Resolved
