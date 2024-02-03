@@ -133,9 +133,9 @@ public class SpawnPacketHandler extends ProtocolListener
         {
             var disguiseName = watcher.get(EntryIndex.DISGUISE_NAME);
 
-            if (disguiseName == null)
+            if (disguiseName == null || disguiseName.isBlank())
             {
-                logger.error("Parameter 'disguiseName' cannot be null!");
+                logger.error("Parameter 'disguiseName' cannot be null or blank!");
                 Thread.dumpStack();
                 return;
             }
@@ -149,7 +149,10 @@ public class SpawnPacketHandler extends ProtocolListener
                     : NmsRecord.ofPlayer(targetPlayer).gameProfile;
 
             gameProfile = Objects.requireNonNullElseGet(cachedProfile, () -> new GameProfile(UUID.randomUUID(), disguiseName));
+            logger.info("N is " + disguiseName);
         }
+
+        logger.info("Profile Name is " + gameProfile.getName());
 
         var parametersFinal = new DisplayParameters(displayType, watcher, gameProfile); //.setDontIncludeMeta();
         var spawnPackets = getFactory().buildSpawnPackets(player, parametersFinal);
