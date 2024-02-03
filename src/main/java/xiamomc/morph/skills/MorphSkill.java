@@ -84,7 +84,7 @@ public abstract class MorphSkill<T extends ISkillOption> extends MorphPluginObje
         //
         // Why?
 
-        boolean useLegacyBehavior = (fireBall instanceof ThrownPotion);
+        boolean useLegacyBehavior = (fireBall instanceof ThrowableProjectile);
 
         var velocity = player.getEyeLocation()
                 .getDirection()
