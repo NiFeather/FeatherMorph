@@ -60,7 +60,11 @@ public class ServerBackend extends DisguiseBackend<ServerDisguise, ServerDisguis
     @Override
     public DisguiseWrapper<ServerDisguise> createInstance(@NotNull Entity targetEntity)
     {
-        return new ServerDisguiseWrapper(new ServerDisguise(targetEntity.getType()), this);
+        var wrapper = new ServerDisguiseWrapper(new ServerDisguise(targetEntity.getType()), this);
+        if (targetEntity instanceof Player player)
+            wrapper.setDisguiseName(player.getName());
+
+        return wrapper;
     }
 
     /**
