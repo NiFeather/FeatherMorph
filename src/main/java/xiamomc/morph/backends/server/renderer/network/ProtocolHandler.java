@@ -1,24 +1,111 @@
 package xiamomc.morph.backends.server.renderer.network;
 
 import com.comphenix.protocol.ProtocolLibrary;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import xiamomc.morph.MorphPluginObject;
-import xiamomc.morph.backends.server.renderer.network.listeners.EquipmentPacketListener;
-import xiamomc.morph.backends.server.renderer.network.listeners.MetaPacketListener;
-import xiamomc.morph.backends.server.renderer.network.listeners.PlayerLookPacketListener;
-import xiamomc.morph.backends.server.renderer.network.listeners.SpawnPacketHandler;
+import xiamomc.morph.backends.server.renderer.network.listeners.*;
 import xiamomc.pluginbase.Annotations.Initializer;
+
+import java.util.List;
 
 public class ProtocolHandler extends MorphPluginObject
 {
-    private final SpawnPacketHandler morphPacketListener = new SpawnPacketHandler();
-    private final MetaPacketListener metaPacketListener = new MetaPacketListener();
-    private final EquipmentPacketListener equipmentPacketListener = new EquipmentPacketListener();
-    private final PlayerLookPacketListener playerLookPacketListener = new PlayerLookPacketListener();
-
-    public SpawnPacketHandler getPacketListener()
+    public ProtocolHandler()
     {
-        return morphPacketListener;
+        registerRange(
+                new SpawnPacketHandler(),
+                new MetaPacketListener(),
+                new EquipmentPacketListener(),
+                new PlayerLookPacketListener()
+        );
     }
+
+    private final List<ProtocolListener> listeners = new ObjectArrayList<>();
+
+    private void throwIfDisposed()
+    {
+        if (disposed)
+            throw new IllegalStateException(
+                    "This instance of ProtocolHandler(%s) is disposed and cannot be used."
+                            .formatted(this)
+            );
+    }
+
+    public boolean contains(ProtocolListener listener)
+    {
+        throwIfDisposed();
+
+        return contains(listener.getIdentifier());
+    }
+
+    public boolean contains(String id)
+    {
+        throwIfDisposed();
+
+        return listeners.stream().anyMatch(l -> l.getIdentifier().equalsIgnoreCase(id));
+    }
+
+    public boolean register(ProtocolListener listener)
+    {
+        throwIfDisposed();
+
+        if (this.contains(listener))
+            return false;
+
+        listeners.add(listener);
+
+        if (loadReady)
+        {
+            try
+            {
+                ProtocolLibrary.getProtocolManager().addPacketListener(listener);
+            }
+            catch (Throwable t)
+            {
+                logger.error("Unable to register listener '%s': %s".formatted(
+                        listener.getIdentifier(), t.getMessage()
+                ));
+            }
+        }
+
+        return true;
+    }
+
+    public boolean registerRange(ProtocolListener... listeners)
+    {
+        throwIfDisposed();
+
+        boolean allSuccess = true;
+
+        for (ProtocolListener listener : listeners)
+        {
+            allSuccess = register(listener) && allSuccess;
+        }
+
+        return allSuccess;
+    }
+
+    public boolean unregister(ProtocolListener listener)
+    {
+        throwIfDisposed();
+
+        listeners.remove(listener);
+
+        try
+        {
+            ProtocolLibrary.getProtocolManager().removePacketListener(listener);
+        }
+        catch (Throwable t)
+        {
+            logger.error("Error removing packet listener '%s': %s".formatted(
+                    listener.getIdentifier(), t.getMessage()
+            ));
+        }
+
+        return true;
+    }
+
+    private boolean loadReady;
 
     @Initializer
     private void load()
@@ -27,30 +114,47 @@ public class ProtocolHandler extends MorphPluginObject
 
         var protocolMgr = ProtocolLibrary.getProtocolManager();
 
-        protocolMgr.addPacketListener(morphPacketListener);
-        protocolMgr.addPacketListener(metaPacketListener);
-        protocolMgr.addPacketListener(equipmentPacketListener);
-        protocolMgr.addPacketListener(playerLookPacketListener);
-        //protocolMgr.addPacketListener(new TestPacketListener());
+        for (var listener : listeners)
+        {
+            try
+            {
+                protocolMgr.addPacketListener(listener);
+            }
+            catch (Throwable t)
+            {
+                logger.error("Unable to register listener '%s': %s".formatted(
+                        listener.getIdentifier(), t.getMessage()
+                ));
+            }
+        }
+
+        loadReady = true;
     }
 
     private boolean disposed;
 
+    public boolean disposed()
+    {
+        return disposed;
+    }
+
     public void dispose()
     {
-        try
-        {
-            var protocolMgr = ProtocolLibrary.getProtocolManager();
+        var protocolMgr = ProtocolLibrary.getProtocolManager();
 
-            protocolMgr.removePacketListener(morphPacketListener);
-            protocolMgr.removePacketListener(metaPacketListener);
-            protocolMgr.removePacketListener(equipmentPacketListener);
-            protocolMgr.removePacketListener(playerLookPacketListener);
-        }
-        catch (Throwable t)
+        for (ProtocolListener listener : listeners)
         {
-            logger.error("Error removing packet listener: " + t.getMessage());
-            t.printStackTrace();
+            try
+            {
+                protocolMgr.removePacketListener(listener);
+            }
+            catch (Throwable t)
+            {
+                logger.error("Error removing packet listener %s: %s".formatted(
+                        listener.getIdentifier(),
+                        t.getMessage()
+                ));
+            }
         }
 
         disposed = true;
