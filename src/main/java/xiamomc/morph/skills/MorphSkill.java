@@ -8,10 +8,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.data.type.Fence;
 import org.bukkit.block.data.type.Gate;
 import org.bukkit.block.data.type.Wall;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.Projectile;
+import org.bukkit.entity.*;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphPluginObject;
@@ -73,7 +70,7 @@ public abstract class MorphSkill<T extends ISkillOption> extends MorphPluginObje
         }
         catch (Throwable t)
         {
-            printErrorMessage(player, "未能生成" + fireball + ": " + t.getMessage());
+            printErrorMessage(player, "Unable to summon " + fireball + ": " + t.getMessage());
             t.printStackTrace();
             return null;
         }
@@ -81,11 +78,19 @@ public abstract class MorphSkill<T extends ISkillOption> extends MorphPluginObje
         if (fireBall instanceof Projectile projectile)
             projectile.setShooter(player);
 
-        //It works for all previous MC versions, then starting from 1.20.3 we need to multiply 0.1 ...
-        //... right before we do any other things.
+        // It works for all previous MC versions.
+        // Then starting from 1.20 we need to multiply 0.1 for most projectiles right before we do any other things.
+        // However, the Thrown potions still keep the 1.19 behavior
         //
-        //Why?
-        var velocity = player.getEyeLocation().getDirection().normalize().multiply(0.1d);
+        // Why?
+
+        boolean useLegacyBehavior = (fireBall instanceof ThrowableProjectile);
+
+        var velocity = player.getEyeLocation()
+                .getDirection()
+                .normalize()
+                .multiply(useLegacyBehavior ? 1.4d : 0.1d);
+
         fireBall.setVelocity(velocity.multiply(multiplier));
 
         return (E) fireBall;

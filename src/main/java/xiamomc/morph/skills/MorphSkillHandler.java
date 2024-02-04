@@ -72,7 +72,7 @@ public class MorphSkillHandler extends MorphPluginObject
                 new ApplyEffectMorphSkill(),
                 new ExplodeMorphSkill(),
                 new InventoryMorphSkill(),
-                new LaunchProjectiveMorphSkill(),
+                new LaunchProjectileMorphSkill(),
                 new SummonFangsMorphSkill(),
                 new TeleportMorphSkill(),
                 new SonicBoomMorphSkill(),

@@ -12,7 +12,7 @@ import xiamomc.morph.abilities.options.*;
 import xiamomc.morph.skills.impl.SonicBoomMorphSkill;
 import xiamomc.morph.skills.options.EffectConfiguration;
 import xiamomc.morph.skills.options.ExplosionConfiguration;
-import xiamomc.morph.skills.options.ProjectiveConfiguration;
+import xiamomc.morph.skills.options.ProjectileConfiguration;
 import xiamomc.morph.skills.options.TeleportConfiguration;
 import xiamomc.morph.storage.skill.SkillAbilityConfiguration;
 import xiamomc.morph.storage.skill.SkillAbilityConfigurationContainer;
@@ -146,29 +146,29 @@ public class DefaultConfigGenerator
         addSkillConfiguration(skills, "player:" + MorphManager.disguiseFallbackName, 20, SkillType.INVENTORY, null);
 
         //弹射物
-        addSkillConfiguration(skills, EntityType.BLAZE, 10, SkillType.LAUNCH_PROJECTIVE, c ->
-                c.addOption(SkillType.LAUNCH_PROJECTIVE, new ProjectiveConfiguration(EntityType.SMALL_FIREBALL, 1, "entity.blaze.shoot", 8)));
+        addSkillConfiguration(skills, EntityType.BLAZE, 10, SkillType.LAUNCH_PROJECTILE, c ->
+                c.addOption(SkillType.LAUNCH_PROJECTILE, new ProjectileConfiguration(EntityType.SMALL_FIREBALL, 1, "entity.blaze.shoot", 8)));
 
-        addSkillConfiguration(skills, EntityType.ENDER_DRAGON, 80, SkillType.LAUNCH_PROJECTIVE, c ->
-                c.addOption(SkillType.LAUNCH_PROJECTIVE, new ProjectiveConfiguration(EntityType.DRAGON_FIREBALL, 1, "entity.ender_dragon.shoot", 80)));
+        addSkillConfiguration(skills, EntityType.ENDER_DRAGON, 80, SkillType.LAUNCH_PROJECTILE, c ->
+                c.addOption(SkillType.LAUNCH_PROJECTILE, new ProjectileConfiguration(EntityType.DRAGON_FIREBALL, 1, "entity.ender_dragon.shoot", 80)));
 
-        addSkillConfiguration(skills, EntityType.LLAMA, 25, SkillType.LAUNCH_PROJECTIVE, c ->
-                c.addOption(SkillType.LAUNCH_PROJECTIVE, new ProjectiveConfiguration(EntityType.LLAMA_SPIT, 1, "entity.llama.spit", 8)));
+        addSkillConfiguration(skills, EntityType.LLAMA, 25, SkillType.LAUNCH_PROJECTILE, c ->
+                c.addOption(SkillType.LAUNCH_PROJECTILE, new ProjectileConfiguration(EntityType.LLAMA_SPIT, 1, "entity.llama.spit", 8)));
 
-        addSkillConfiguration(skills, EntityType.TRADER_LLAMA, 25, SkillType.LAUNCH_PROJECTIVE, c ->
-                c.addOption(SkillType.LAUNCH_PROJECTIVE, new ProjectiveConfiguration(EntityType.LLAMA_SPIT, 1, "entity.llama.spit", 8)));
+        addSkillConfiguration(skills, EntityType.TRADER_LLAMA, 25, SkillType.LAUNCH_PROJECTILE, c ->
+                c.addOption(SkillType.LAUNCH_PROJECTILE, new ProjectileConfiguration(EntityType.LLAMA_SPIT, 1, "entity.llama.spit", 8)));
 
-        addSkillConfiguration(skills, EntityType.SHULKER, 40, SkillType.LAUNCH_PROJECTIVE, c ->
-                c.addOption(SkillType.LAUNCH_PROJECTIVE, new ProjectiveConfiguration(EntityType.SHULKER_BULLET, 0, "entity.shulker.shoot", 15, 15)));
+        addSkillConfiguration(skills, EntityType.SHULKER, 40, SkillType.LAUNCH_PROJECTILE, c ->
+                c.addOption(SkillType.LAUNCH_PROJECTILE, new ProjectileConfiguration(EntityType.SHULKER_BULLET, 0, "entity.shulker.shoot", 15, 15)));
 
-        addSkillConfiguration(skills, EntityType.SNOWMAN, 15, SkillType.LAUNCH_PROJECTIVE, c ->
-                c.addOption(SkillType.LAUNCH_PROJECTIVE, new ProjectiveConfiguration(EntityType.SNOWBALL, 1, "entity.snow_golem.shoot", 8)));
+        addSkillConfiguration(skills, EntityType.SNOWMAN, 15, SkillType.LAUNCH_PROJECTILE, c ->
+                c.addOption(SkillType.LAUNCH_PROJECTILE, new ProjectileConfiguration(EntityType.SNOWBALL, 1, "entity.snow_golem.shoot", 8)));
 
-        addSkillConfiguration(skills, EntityType.WITHER, 10, SkillType.LAUNCH_PROJECTIVE, c ->
-                c.addOption(SkillType.LAUNCH_PROJECTIVE, new ProjectiveConfiguration(EntityType.WITHER_SKULL, 1, "entity.wither.shoot", 24)));
+        addSkillConfiguration(skills, EntityType.WITHER, 10, SkillType.LAUNCH_PROJECTILE, c ->
+                c.addOption(SkillType.LAUNCH_PROJECTILE, new ProjectileConfiguration(EntityType.WITHER_SKULL, 1, "entity.wither.shoot", 24)));
 
-        addSkillConfiguration(skills, EntityType.GHAST, DisguiseUtils.GHAST_EXECUTE_DELAY + 40, SkillType.LAUNCH_PROJECTIVE, c ->
-                c.addOption(SkillType.LAUNCH_PROJECTIVE, new ProjectiveConfiguration(EntityType.FIREBALL, 1, "entity.ghast.shoot", 35)
+        addSkillConfiguration(skills, EntityType.GHAST, DisguiseUtils.GHAST_EXECUTE_DELAY + 40, SkillType.LAUNCH_PROJECTILE, c ->
+                c.addOption(SkillType.LAUNCH_PROJECTILE, new ProjectileConfiguration(EntityType.FIREBALL, 1, "entity.ghast.shoot", 35)
                         .withDelay(DisguiseUtils.GHAST_EXECUTE_DELAY)
                         .withWarningSound("entity.ghast.warn")));
 
