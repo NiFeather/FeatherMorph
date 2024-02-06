@@ -25,6 +25,9 @@ public class MorphGameProfile extends GameProfile
     {
         super(Objects.requireNonNull(profile.getId()), Objects.requireNonNull(profile.getName()));
 
+        setUUID(profile.getId());
+        setName(profile.getName());
+
         profile.getProperties().forEach(p ->
                 map.put(p.getName(), new Property(p.getName(), p.getValue(), p.getSignature())));
     }
