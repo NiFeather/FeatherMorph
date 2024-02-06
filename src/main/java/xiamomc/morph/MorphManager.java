@@ -1043,6 +1043,13 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         spawnParticle(player, player.getLocation(), cX, cY, cZ);
 
+        player.getWorld().playSound(
+                player.getLocation(),
+                Sound.UI_LOOM_TAKE_RESULT,
+                SoundCategory.PLAYERS,
+                1, 1
+        );
+
         // 确保玩家可以根据设置看到自己的伪装
         state.setServerSideSelfVisible(playerMorphConfig.showDisguiseToSelf && !this.clientViewAvailable(player));
 
