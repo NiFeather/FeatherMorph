@@ -1013,7 +1013,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             state.updateDisguise(disguiseIdentifier, targetSkillID, disguiseWrapper, true, equipment);
         }
 
-
         // CustomName
         if (targetedEntity != null && targetedEntity.customName() != null)
         {
@@ -1043,37 +1042,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         cY = box.height;
 
         spawnParticle(player, player.getLocation(), cX, cY, cZ);
-
-        //更新皮肤
-        if (state.getDisguiseType() == DisguiseTypes.PLAYER)
-        {
-            var wrapper = state.getDisguiseWrapper();
-            DisguiseState finalState = state;
-
-            if (provider.validForClient(state))
-            {
-                wrapper.subscribeEvent(this, WrapperEvent.SKIN_SET, skin ->
-                        clientHandler.sendCommand(player, new S2CSetProfileCommand(finalState.getProfileNbtString())));
-            }
-
-            if (wrapper.getSkin() == null)
-            {
-                var playerDisguiseTargetName = DisguiseTypes.PLAYER.toStrippedId(state.getDisguiseIdentifier());
-
-                PlayerSkinProvider.getInstance().fetchSkin(playerDisguiseTargetName)
-                        .thenApply(optional ->
-                        {
-                            if (wrapper.disposed()) return null;
-
-                            GameProfile outcomingProfile = new GameProfile(Util.NIL_UUID, playerDisguiseTargetName);
-                            if (optional.isPresent()) outcomingProfile = optional.get();
-
-                            wrapper.applySkin(outcomingProfile);
-
-                            return null;
-                        });
-            }
-        }
 
         // 确保玩家可以根据设置看到自己的伪装
         state.setServerSideSelfVisible(playerMorphConfig.showDisguiseToSelf && !this.clientViewAvailable(player));

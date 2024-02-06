@@ -167,7 +167,8 @@ public final class MorphPlugin extends XiaMoJavaPlugin
                             new CommonEventProcessor(),
                             new RevealingEventProcessor(),
                             new DisguiseAnimationProcessor(),
-                            new ForcedDisguiseProcessor()
+                            new ForcedDisguiseProcessor(),
+                            new PlayerSkinProcessor()
                     });
 
             clientHandler.sendReAuth(Bukkit.getOnlinePlayers());

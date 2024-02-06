@@ -52,4 +52,12 @@ public abstract class EventWrapper<TInstance> extends DisguiseWrapper<TInstance>
 
         list.removeIf(ar -> ar.source() == source);
     }
+
+    @Override
+    public void dispose()
+    {
+        super.dispose();
+
+        eventListMap.clear();
+    }
 }
