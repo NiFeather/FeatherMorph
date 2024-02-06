@@ -13,6 +13,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.potion.PotionEffect;
+import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.backends.server.renderer.network.registries.ValueIndex;
 import xiamomc.morph.misc.NmsRecord;
 
@@ -26,7 +27,10 @@ public class LivingEntityWatcher extends EntityWatcher implements Listener
     {
         super(bindingPlayer, entityType);
 
-        Bukkit.getPluginManager().registerEvents(this, plugin);
+        // 当前插件中有在禁用过程使用LivingEntityWatcher的处理
+        // 因此在这里加上插件是否启用的检查
+        if (MorphPlugin.getInstance().isEnabled())
+            Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 
     @Override
