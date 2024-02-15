@@ -2,8 +2,6 @@ package xiamomc.morph.messages;
 
 import xiamomc.pluginbase.Messages.FormattableMessage;
 
-import java.text.Format;
-
 public class SkinCacheStrings extends AbstractMorphStrings
 {
     public static FormattableMessage listHeader()
@@ -54,6 +52,21 @@ public class SkinCacheStrings extends AbstractMorphStrings
     public static FormattableMessage tabFilterPlayerNameHere()
     {
         return getFormattable(getKey("player_name_here"), "<玩家名>");
+    }
+
+    public static FormattableMessage infoLine()
+    {
+        return getFormattable(getKey("info_general"), "<name>的皮肤信息:");
+    }
+
+    public static FormattableMessage infoSkinLine()
+    {
+        return getFormattable(getKey("info_skin"), "皮肤URL: <url>");
+    }
+
+    public static FormattableMessage infoCapeLine()
+    {
+        return getFormattable(getKey("info_cape"), "披风: <cape>");
     }
 
     private static String getKey(String key)
