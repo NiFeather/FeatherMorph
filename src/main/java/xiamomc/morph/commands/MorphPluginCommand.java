@@ -47,7 +47,8 @@ public class MorphPluginCommand extends MorphSubCommandHandler
             new OptionSubCommand(),
             new StatSubCommand(),
             new CheckUpdateSubCommand(),
-            new LookupSubCommand()
+            new LookupSubCommand(),
+            new SkinCacheSubCommand()
     );
 
     @Override

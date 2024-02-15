@@ -15,6 +15,7 @@ import org.bukkit.inventory.meta.SkullMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.backends.DisguiseWrapper;
+import xiamomc.morph.backends.WrapperEvent;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.MorphStrings;
 import xiamomc.morph.misc.DisguiseMeta;
@@ -22,6 +23,9 @@ import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.misc.DisguiseTypes;
 import xiamomc.morph.misc.MorphGameProfile;
 import xiamomc.morph.misc.skins.PlayerSkinProvider;
+import xiamomc.morph.network.commands.S2C.set.S2CSetProfileCommand;
+import xiamomc.morph.network.server.MorphClientHandler;
+import xiamomc.pluginbase.Annotations.Resolved;
 
 import java.util.List;
 import java.util.Objects;
@@ -82,6 +86,40 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
         }
 
         return DisguiseResult.success(wrapper, result.isCopy());
+    }
+
+    @Resolved(shouldSolveImmediately = true)
+    private MorphClientHandler clientHandler;
+
+    @Override
+    public void postConstructDisguise(DisguiseState state, @Nullable Entity targetEntity)
+    {
+        super.postConstructDisguise(state, targetEntity);
+
+        var wrapper = state.getDisguiseWrapper();
+        var player = state.getPlayer();
+
+        wrapper.subscribeEvent(this, WrapperEvent.SKIN_SET, skin ->
+                clientHandler.sendCommand(player, new S2CSetProfileCommand(state.getProfileNbtString())));
+
+        if (wrapper.getSkin() == null)
+        {
+            var playerDisguiseTargetName = DisguiseTypes.PLAYER.toStrippedId(state.getDisguiseIdentifier());
+
+            PlayerSkinProvider.getInstance().fetchSkin(playerDisguiseTargetName)
+                    .thenApply(optional ->
+                    {
+                        if (wrapper.disposed()) return null;
+
+                        GameProfile outcomingProfile = new GameProfile(Util.NIL_UUID, playerDisguiseTargetName);
+                        if (optional.isPresent()) outcomingProfile = optional.get();
+
+                        wrapper.applySkin(outcomingProfile);
+
+                        return null;
+                    });
+        }
+
     }
 
     private MorphGameProfile getGameProfile(ItemStack item)

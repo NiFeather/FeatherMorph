@@ -178,25 +178,25 @@ public class PacketFactory extends MorphPluginObject
 
     /**
      * 从给定的meta包中移除不属于给定AbstractValues的数据
-     * @return
+     * @return 剔除后的包
      */
     public PacketContainer removeNonLivingValues(AbstractValues av, PacketContainer originalPacket)
     {
         if (originalPacket.getType() != PacketType.Play.Server.ENTITY_METADATA)
             throw new IllegalArgumentException("Original packet is not a valid metadata packet!");
 
-        var livingValues = av.getValues();
+        var values = av.getValues();
         var modifier = originalPacket.getDataValueCollectionModifier();
 
         //获取原Meta包中的数据
         var wrappedData = modifier.read(0);
 
-        //剔除不属于BASE_LIVING的数据
+        //剔除不属于给定AbstractValues中的数据
         wrappedData.removeIf(w ->
         {
             var rawValue = w.getRawValue();
 
-            var match = livingValues.stream().filter(sv ->
+            var match = values.stream().filter(sv ->
                     w.getIndex() == sv.index() && (rawValue == null || rawValue.getClass() == sv.defaultValue().getClass())
             ).findFirst().orElse(null);
 

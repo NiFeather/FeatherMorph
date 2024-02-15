@@ -25,4 +25,6 @@ public class CommonPermissions
     public final static String CHECK_UPDATE = PERM_ROOT + "check_update";
 
     public final static String LOOKUP = PERM_ROOT + "lookup";
+
+    public final static String SKIN_CACHE = PERM_ROOT + "skin_cache";
 }
