@@ -1,11 +1,13 @@
 package xiamomc.morph.backends;
 
+import com.mojang.authlib.GameProfile;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 public abstract class EventWrapper<TInstance> extends DisguiseWrapper<TInstance>
@@ -19,6 +21,20 @@ public abstract class EventWrapper<TInstance> extends DisguiseWrapper<TInstance>
 
     public record ActionRecord<T>(Object source, Consumer<T> consumer)
     {
+    }
+
+    @Override
+    protected <T> void onAttributeWrite(WrapperAttribute<T> attribute, T value)
+    {
+        if (attribute.equals(WrapperAttribute.profile))
+        {
+            var val = ((Optional<GameProfile>) value).orElse(null);
+
+            callEvent(WrapperEvent.SKIN_SET, val);
+            return;
+        }
+
+        super.onAttributeWrite(attribute, value);
     }
 
     protected  <T> void callEvent(WrapperEvent<T> wrapperEvent, T value)

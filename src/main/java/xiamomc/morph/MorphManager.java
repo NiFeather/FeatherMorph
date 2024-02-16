@@ -1,6 +1,7 @@
 package xiamomc.morph;
 
 import com.mojang.authlib.GameProfile;
+import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
 import net.kyori.adventure.text.Component;
@@ -20,6 +21,7 @@ import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.abilities.AbilityHandler;
 import xiamomc.morph.backends.DisguiseBackend;
 import xiamomc.morph.backends.DisguiseWrapper;
+import xiamomc.morph.backends.WrapperAttribute;
 import xiamomc.morph.backends.WrapperEvent;
 import xiamomc.morph.backends.fallback.NilBackend;
 import xiamomc.morph.backends.server.ServerBackend;
@@ -62,10 +64,7 @@ import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
 import xiamomc.pluginbase.Bindables.BindableList;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -95,29 +94,89 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
     public static final String forcedDisguiseNoneId = "@none";
 
+    //region Backends
+
     private final NilBackend nilBackend = new NilBackend();
 
     private DisguiseBackend<?, ?> currentBackend = nilBackend;
 
-    public DisguiseBackend<?, ?> getCurrentBackend()
+    private final Map<String, DisguiseBackend<?, ?>> backends = new Object2ObjectArrayMap<>();
+
+    public boolean registerBackend(DisguiseBackend backend)
     {
-        return currentBackend;
+        var id = backend.getIdentifier();
+
+        if (backends.containsKey(id))
+            return false;
+
+        backends.put(id, backend);
+
+        return true;
     }
 
-    private Material actionItem;
-    public Material getActionItem()
+    @Nullable
+    public DisguiseBackend<?, ?> getBackend(String id)
     {
-        return actionItem;
+        return backends.getOrDefault(id, null);
     }
 
-    @Resolved
-    private MorphClientHandler clientHandler;
+    public Collection<DisguiseBackend<?, ?>> listBackends()
+    {
+        return backends.values();
+    }
+
+    public boolean switchBackend(DisguiseBackend<?, ?> backend)
+    {
+        if (!backends.containsKey(backend.getIdentifier()))
+        {
+            logger.error("Trying to switch to a backend that is not registered");
+            return false;
+        }
+
+        var prevBackend = this.currentBackend;
+
+        try
+        {
+            currentBackend = backend;
+
+            disguiseStates.forEach(state ->
+            {
+                if (prevBackend != null)
+                    prevBackend.unDisguise(state.getPlayer());
+
+                var newWrapper = backend.cloneWrapperFrom(state.getDisguiseWrapper());
+                state.updateDisguise(
+                        state.getDisguiseIdentifier(), state.getSkillLookupIdentifier(),
+                        newWrapper, false, state.getDisguisedItems()
+                );
+
+                // 等待1tick让客户端处理一些网络事务
+                this.addSchedule(() ->
+                {
+                    if (!state.getDisguiseWrapper().disposed())
+                        backend.disguise(state.getPlayer(), state.getDisguiseWrapper());
+                });
+            });
+        }
+        catch (Throwable t)
+        {
+            logger.error("Error occurred switching backend: " + t.getMessage());
+            t.printStackTrace();
+
+            return false;
+        }
+
+        return true;
+    }
 
     private void tryBackends()
     {
         try
         {
-            this.currentBackend = new ServerBackend();
+            var serverBackend = new ServerBackend();
+
+            registerBackend(serverBackend);
+            switchBackend(serverBackend);
             return;
         }
         catch (NoClassDefFoundError e)
@@ -135,11 +194,37 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         }
     }
 
+    public DisguiseBackend<?, ?> getCurrentBackend()
+    {
+        return currentBackend;
+    }
+
+    /**
+     * @deprecated Will be removed in future
+     */
+    @Deprecated
+    public boolean usingNilBackend()
+    {
+        return currentBackend == nilBackend;
+    }
+
+    //endregion Backends
+
+    private Material actionItem;
+    public Material getActionItem()
+    {
+        return actionItem;
+    }
+
+    @Resolved
+    private MorphClientHandler clientHandler;
+
     @Initializer
     private void load()
     {
         this.addSchedule(this::update);
 
+        registerBackend(nilBackend);
         tryBackends();
 
         logger.info("Using backend: %s".formatted(currentBackend));
@@ -700,16 +785,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             // 向管理员发送map消息
             networkingHelper.sendCommandToRevealablePlayers(genPartialMapCommand(outComingState));
 
-            //发送元数据
-            if (isUsingClientRenderer())
-            {
-                networkingHelper.sendCommandToAllPlayers(new S2CRenderMapAddCommand(outComingState.getPlayer().getEntityId(), outComingState.getDisguiseIdentifier()));
-
-                networkingHelper.prepareMeta(player)
-                        .forDisguiseState(outComingState)
-                        .send();
-            }
-
             return true;
         }
         catch (IllegalArgumentException iae)
@@ -734,11 +809,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             unMorph(player);
             return false;
         }
-    }
-
-    public boolean isUsingClientRenderer()
-    {
-        return currentBackend == nilBackend && useClientRenderer.get();
     }
 
     //region Command generating
@@ -957,9 +1027,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         // 向管理员发送map移除指令
         networkingHelper.sendCommandToRevealablePlayers(new S2CMapRemoveCommand(player.getEntityId()));
 
-        if (isUsingClientRenderer())
-            networkingHelper.sendCommandToAllPlayers(new S2CRenderMapRemoveCommand(player.getEntityId()));
-
         state.dispose();
     }
 
@@ -1115,6 +1182,9 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         // 切换CD
         skillHandler.switchCooldown(player.getUniqueId(), cdInfo);
+
+        // 向Wrapper写入伪装ID
+        disguiseWrapper.write(WrapperAttribute.identifier, state.getDisguiseIdentifier());
 
         // 调用事件
         new PlayerMorphEvent(player, state).callEvent();

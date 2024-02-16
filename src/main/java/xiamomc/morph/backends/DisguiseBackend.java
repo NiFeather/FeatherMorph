@@ -6,6 +6,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphPluginObject;
+import xiamomc.pluginbase.Messages.FormattableMessage;
 
 public abstract class DisguiseBackend<TInstance, TWrapper extends DisguiseWrapper<TInstance>> extends MorphPluginObject
 {
@@ -14,6 +15,8 @@ public abstract class DisguiseBackend<TInstance, TWrapper extends DisguiseWrappe
      * @return An identifier of this backend.
      */
     public abstract String getIdentifier();
+
+    public abstract FormattableMessage getDisplayName();
 
     /**
      * Creates a disguise from the giving entity
@@ -57,6 +60,13 @@ public abstract class DisguiseBackend<TInstance, TWrapper extends DisguiseWrappe
      */
     @Nullable
     public abstract TWrapper getWrapper(Entity target);
+
+    /**
+     * 从给定的Wrapper克隆一个属于此后端的新Wrapper
+     * @param otherWrapper 可能属于其他后端的Wrapper
+     * @return 一个新的属于此后端的Wrapper
+     */
+    public abstract TWrapper cloneWrapperFrom(DisguiseWrapper<?> otherWrapper);
 
     /**
      * 将某一玩家伪装成给定Wrapper中的实例

@@ -1,9 +1,13 @@
 package xiamomc.morph.misc;
 
+import com.mojang.authlib.GameProfile;
+import net.minecraft.Util;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.inventory.EntityEquipment;
 import xiamomc.morph.MorphPluginObject;
+import xiamomc.morph.backends.DisguiseWrapper;
+import xiamomc.morph.backends.WrapperAttribute;
 import xiamomc.morph.misc.permissions.CommonPermissions;
 import xiamomc.morph.network.commands.S2C.AbstractS2CCommand;
 import xiamomc.morph.network.commands.S2C.clientrender.S2CRenderMapAddCommand;
@@ -12,6 +16,7 @@ import xiamomc.morph.network.commands.S2C.clientrender.S2CRenderMeta;
 import xiamomc.morph.network.commands.S2C.map.S2CPartialMapCommand;
 import xiamomc.morph.network.server.MorphClientHandler;
 import xiamomc.morph.utilities.MapMetaUtils;
+import xiamomc.morph.utilities.NbtUtils;
 import xiamomc.pluginbase.Annotations.Resolved;
 
 import java.util.HashMap;
@@ -114,10 +119,18 @@ public class NetworkingHelper extends MorphPluginObject
          */
         public PrepareMeta forDisguiseState(DisguiseState state)
         {
-            this.setProfileCompound(state.getProfileNbtString())
-                    .setSNbt(state.getCulledNbtString())
-                    .setDisguiseEquipmentShown(state.showingDisguisedItems())
-                    .setOverridedEquip(state.getDisguisedItems());
+            return forWrapper(state.getDisguiseWrapper());
+        }
+
+        public PrepareMeta forWrapper(DisguiseWrapper<?> wrapper)
+        {
+            var profile = wrapper.readOrDefault(WrapperAttribute.profile).orElse(new GameProfile(Util.NIL_UUID, "NIL"));
+            var profileStr = NbtUtils.getCompoundString(NbtUtils.toCompoundTag(profile));
+
+            this.setProfileCompound(profileStr)
+                    .setSNbt(NbtUtils.getCompoundString(wrapper.getCompound()))
+                    .setDisguiseEquipmentShown(wrapper.getDisplayingFakeEquipments())
+                    .setOverridedEquip(wrapper.getFakeEquipments());
 
             return this;
         }

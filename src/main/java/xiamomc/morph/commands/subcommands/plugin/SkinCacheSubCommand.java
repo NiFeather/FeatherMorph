@@ -5,6 +5,7 @@ import com.destroystokyo.paper.profile.PlayerProfile;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.minecraft.nbt.NbtUtils;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -235,6 +236,7 @@ public class SkinCacheSubCommand extends MorphPluginObject implements ISubComman
                                             "url",
                                             Component.text(texDesc)
                                                     .clickEvent(ClickEvent.clickEvent(ClickEvent.Action.OPEN_URL, texDesc))
+                                                    .decorate(TextDecoration.UNDERLINED)
                                     )
                             )
                     );

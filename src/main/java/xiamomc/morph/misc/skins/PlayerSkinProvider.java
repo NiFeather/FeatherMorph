@@ -205,5 +205,10 @@ public class PlayerSkinProvider extends MorphPluginObject
         skinCache.dropAll();
     }
 
+    public void reload()
+    {
+        skinCache.reloadConfiguration();
+    }
+
     //endregion
 }

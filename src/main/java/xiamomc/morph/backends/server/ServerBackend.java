@@ -9,7 +9,9 @@ import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.backends.DisguiseBackend;
 import xiamomc.morph.backends.DisguiseWrapper;
 import xiamomc.morph.backends.server.renderer.ServerRenderer;
+import xiamomc.morph.messages.BackendStrings;
 import xiamomc.morph.utilities.NbtUtils;
+import xiamomc.pluginbase.Messages.FormattableMessage;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
@@ -49,6 +51,12 @@ public class ServerBackend extends DisguiseBackend<ServerDisguise, ServerDisguis
     public String getIdentifier()
     {
         return "server";
+    }
+
+    @Override
+    public FormattableMessage getDisplayName()
+    {
+        return BackendStrings.serverBackendName();
     }
 
     /**
@@ -131,6 +139,30 @@ public class ServerBackend extends DisguiseBackend<ServerDisguise, ServerDisguis
     public @Nullable ServerDisguiseWrapper getWrapper(Entity target)
     {
         return disguiseWrapperMap.getOrDefault(target.getUniqueId(), null);
+    }
+
+    /**
+     * 从给定的Wrapper克隆一个属于此后端的新Wrapper
+     *
+     * @param otherWrapper 可能属于其他后端的Wrapper
+     * @return 一个新的属于此后端的Wrapper
+     */
+    @Override
+    public ServerDisguiseWrapper cloneWrapperFrom(DisguiseWrapper<?> otherWrapper)
+    {
+        return otherWrapper instanceof ServerDisguiseWrapper serverDisguiseWrapper
+                ? cloneWrapper(serverDisguiseWrapper)
+                : cloneOther(otherWrapper);
+    }
+
+    private ServerDisguiseWrapper cloneWrapper(ServerDisguiseWrapper other)
+    {
+        return (ServerDisguiseWrapper) other.clone();
+    }
+
+    private ServerDisguiseWrapper cloneOther(DisguiseWrapper<?> other)
+    {
+        return ServerDisguiseWrapper.cloneFromExternal(other, this);
     }
 
     /**

@@ -4,7 +4,6 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.TextColor;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
@@ -475,7 +474,7 @@ public class DisguiseState extends MorphPluginObject
 
     private void refreshDisguiseItems(EntityEquipment targetEquipment, DisguiseWrapper<?> disguiseWrapper)
     {
-        EntityEquipment equipment = targetEquipment != null ? targetEquipment : disguiseWrapper.getDisplayingEquipments();
+        EntityEquipment equipment = targetEquipment != null ? targetEquipment : disguiseWrapper.getFakeEquipments();
 
         //设置默认盔甲
         var armors = new ItemStack[]

@@ -1,22 +1,27 @@
 package xiamomc.morph.backends;
 
 import com.mojang.authlib.GameProfile;
+import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.TagType;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.phys.AABB;
-import org.bukkit.ChatColor;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.EntityEquipment;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.misc.CollisionBoxRecord;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.utilities.EntityTypeUtils;
 
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
@@ -52,9 +57,9 @@ public abstract class DisguiseWrapper<TInstance>
 
     /**
      * Gets current displaying equipment
-     * @return A {@link EntityEquipment} that presents the current displaying equipment
+     * @return A {@link EntityEquipment} that presents the fake equipment
      */
-    public abstract EntityEquipment getDisplayingEquipments();
+    public abstract EntityEquipment getFakeEquipments();
 
     /**
      * Sets displaying equipment to the giving value
@@ -63,10 +68,21 @@ public abstract class DisguiseWrapper<TInstance>
     public abstract void setFakeEquipments(@NotNull EntityEquipment newEquipment);
 
     /**
+     * Gets whether this wrapper is displaying fake equipments
+     */
+    public boolean getDisplayingFakeEquipments()
+    {
+        return readOrDefault(WrapperAttribute.displayFakeEquip);
+    }
+
+    /**
      * Sets whether to display a fake equipment to the player
      * @param newVal New State
      */
-    public abstract void setDisplayingFakeEquipments(boolean newVal);
+    public void setDisplayingFakeEquipments(boolean newVal)
+    {
+        write(WrapperAttribute.displayFakeEquip, newVal);
+    }
 
     /**
      * Sets the state of server-side SelfView for the underlying disguise instance
@@ -96,13 +112,19 @@ public abstract class DisguiseWrapper<TInstance>
      * 返回此伪装的名称
      * @return 伪装名称
      */
-    public abstract String getDisguiseName();
+    public String getDisguiseName()
+    {
+        return readOrDefault(WrapperAttribute.disguiseName);
+    }
 
     /**
      * 设置此伪装的名称
      * @param name 要设置的伪装名称
      */
-    public abstract void setDisguiseName(String name);
+    public void setDisguiseName(String name)
+    {
+        write(WrapperAttribute.disguiseName, name);
+    }
 
     /**
      * Checks whether the underlying disguise is a player disguise
@@ -212,33 +234,24 @@ public abstract class DisguiseWrapper<TInstance>
     }
 
     /**
-     * Adds a custom data to the underlying instance
-     * @param key Name
-     * @param data Value
-     */
-    public abstract void addCustomData(String key, Object data);
-
-    /**
-     * Gets a custom value from the underlying instance
-     * @param key Name
-     * @return A value matching the provided key, null if not found
-     */
-    @Nullable
-    public abstract Object getCustomData(String key);
-
-    /**
      * Applies a skin to the underlying player instance
      * @param profile {@link GameProfile}
      * @apiNote This shouldn't do anything if disguise entity type is not {@link EntityType#PLAYER}
      */
-    public abstract void applySkin(GameProfile profile);
+    public void applySkin(GameProfile profile)
+    {
+        write(WrapperAttribute.profile, Optional.of(profile));
+    }
 
     /**
      * Gets current skin from the underlying player instance
      * @return {@link GameProfile}, null if not set or not available
      */
     @Nullable
-    public abstract GameProfile getSkin();
+    public GameProfile getSkin()
+    {
+        return readOrDefault(WrapperAttribute.profile, Optional.empty()).orElse(null);
+    }
 
     /**
      * Actions when we finished constructing disguise
@@ -299,11 +312,12 @@ public abstract class DisguiseWrapper<TInstance>
 
     public void setSaddled(boolean saddled)
     {
+        write(WrapperAttribute.saddled, saddled);
     }
 
     public boolean isSaddled()
     {
-        return false;
+        return readOrDefault(WrapperAttribute.saddled);
     }
 
     public void setAggressive(boolean aggressive)
@@ -319,6 +333,66 @@ public abstract class DisguiseWrapper<TInstance>
     }
 
     //endregion
+
+    private final Map<String, Object> attributes = new Object2ObjectArrayMap<>();
+
+    protected <T> void onAttributeWrite(WrapperAttribute<T> attribute, T value)
+    {
+    }
+
+    public Map<String, Object> getAttributes()
+    {
+        return new Object2ObjectArrayMap<>(attributes);
+    }
+
+    /**
+     * 仅用作克隆使用！
+     */
+    @ApiStatus.Internal
+    protected void writeInternal(String id, Object val)
+    {
+        attributes.put(id, val);
+    }
+
+    public <T> void write(WrapperAttribute<T> attribute, T value)
+    {
+        attributes.put(attribute.getIdentifier(), value);
+
+        try
+        {
+            onAttributeWrite(attribute, value);
+        }
+        catch (Throwable t)
+        {
+            var logger = MorphPlugin.getInstance().getSLF4JLogger();
+
+            logger.error("Error invoking onAttributeWrite: " + t.getMessage());
+            t.printStackTrace();
+        }
+    }
+
+    public <T> T read(WrapperAttribute<T> attribute)
+    {
+        var obj = readOrDefault(attribute, null);
+
+        Objects.requireNonNull(obj, "Null value for attribute '%s'!".formatted(attribute.getIdentifier()));
+
+        return obj;
+    }
+
+    public <T> T readOrDefault(WrapperAttribute<T> attribute)
+    {
+        return readOrDefault(attribute, attribute.createDefault());
+    }
+
+    public <T> T readOrDefault(WrapperAttribute<T> attribute, T defaultVal)
+    {
+        var val = attributes.getOrDefault(attribute.getIdentifier(), null);
+
+        if (val == null) return defaultVal;
+
+        return (T) val;
+    }
 
     public abstract <T> void subscribeEvent(Object source, WrapperEvent<T> wrapperEvent, Consumer<T> c);
 
