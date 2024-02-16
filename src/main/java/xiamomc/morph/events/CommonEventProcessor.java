@@ -311,7 +311,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         }
 
         var wrapper = state.getDisguiseWrapper();
-        var wrapperEquipments = wrapper.getDisplayingEquipments();
+        var wrapperEquipments = wrapper.getFakeEquipments();
         wrapperEquipments.setItemInMainHand(mainHand);
         wrapperEquipments.setItemInOffHand(offHand);
         wrapper.setFakeEquipments(wrapperEquipments);
@@ -389,16 +389,6 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
             state.refreshSkillsAbilities();
 
             networkingHelper.sendCommandToRevealablePlayers(morphs.genPartialMapCommand(state));
-
-            if (morphs.isUsingClientRenderer())
-            {
-                networkingHelper.sendCommandToAllPlayers(morphs.genClientRenderAddCommand(state));
-
-                var metaCommand = networkingHelper.prepareMeta(player)
-                        .forDisguiseState(state)
-                        .build();
-                networkingHelper.sendCommandToAllPlayers(metaCommand);
-            }
 
             //调用Morph事件
             new PlayerJoinedWithDisguiseEvent(player, state).callEvent();

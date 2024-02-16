@@ -4,6 +4,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.MorphManager;
+import xiamomc.morph.backends.WrapperAttribute;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.SkillStrings;
 import xiamomc.morph.misc.DisguiseState;
@@ -37,32 +38,14 @@ public class InventoryMorphSkill extends MorphSkill<NoOpConfiguration>
                 ? SkillStrings.displayingDisguiseInventoryString()
                 : SkillStrings.displayingPlayerInventoryString()));
 
-        //发送元数据
-        if (manager.isUsingClientRenderer())
-        {
-            networkingHelper.prepareMeta(state.getPlayer())
-                    .setDisguiseEquipmentShown(defaultShown)
-                    .send();
-        }
-
         return configuration.getCooldown();
     }
-
-    @Resolved
-    private NetworkingHelper networkingHelper;
 
     @Override
     public void onInitialEquip(DisguiseState state)
     {
         clientHandler.sendCommand(state.getPlayer(), new S2CSetDisplayingFakeEquipCommand(state.showingDisguisedItems()));
-
-        //发送元数据
-        if (manager.isUsingClientRenderer())
-        {
-            networkingHelper.prepareMeta(state.getPlayer())
-                    .setDisguiseEquipmentShown(state.showingDisguisedItems())
-                    .send();
-        }
+        state.setShowingDisguisedItems(state.showingDisguisedItems());
 
         super.onInitialEquip(state);
     }
