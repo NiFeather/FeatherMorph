@@ -28,10 +28,6 @@ public class ServerDisguise implements Cloneable
 
     public final Map<String, Object> customData = new Object2ObjectOpenHashMap<>();
 
-    public boolean saddled;
-
-    public GameProfile profile;
-
     public final CompoundTag compoundTag = new CompoundTag();
 
     public boolean isBaby;
@@ -65,9 +61,6 @@ public class ServerDisguise implements Cloneable
         obj.type = this.type;
         obj.name = this.name;
         obj.glowingColor = this.glowingColor;
-
-        obj.saddled = this.saddled;
-        obj.profile = this.profile;
 
         obj.compoundTag.merge(this.compoundTag);
 

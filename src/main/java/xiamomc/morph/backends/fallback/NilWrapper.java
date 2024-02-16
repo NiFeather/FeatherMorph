@@ -4,23 +4,24 @@ import com.mojang.authlib.GameProfile;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.TagType;
-import org.bukkit.ChatColor;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.EntityEquipment;
-import org.bukkit.util.BoundingBox;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.backends.DisguiseWrapper;
 import xiamomc.morph.backends.EventWrapper;
+import xiamomc.morph.backends.WrapperAttribute;
 import xiamomc.morph.backends.WrapperEvent;
 import xiamomc.morph.misc.DisguiseEquipment;
 import xiamomc.morph.misc.DisguiseState;
+import xiamomc.morph.misc.NetworkingHelper;
 import xiamomc.morph.utilities.NbtUtils;
 
+import java.util.Optional;
 import java.util.UUID;
 
 public class NilWrapper extends EventWrapper<NilDisguise>
@@ -35,7 +36,15 @@ public class NilWrapper extends EventWrapper<NilDisguise>
     @Override
     public void mergeCompound(CompoundTag compoundTag)
     {
-        this.instance.compoundTag.merge(compoundTag);
+        var compound = readOrDefault(WrapperAttribute.nbt, null);
+
+        if (compound == null)
+        {
+            compound = WrapperAttribute.nbt.createDefault();
+            write(WrapperAttribute.nbt, compound);
+        }
+
+        compound.merge(compoundTag);
         this.instance.isBaby = NbtUtils.isBabyForType(getEntityType(), compoundTag);
 
         if (this.getEntityType() == EntityType.MAGMA_CUBE || this.getEntityType() == EntityType.SLIME)
@@ -45,7 +54,7 @@ public class NilWrapper extends EventWrapper<NilDisguise>
     @Override
     public CompoundTag getCompound()
     {
-        return instance.compoundTag.copy();
+        return readOrDefault(WrapperAttribute.nbt);
     }
 
     private static final UUID nilUUID = UUID.fromString("0-0-0-0-0");
@@ -67,7 +76,7 @@ public class NilWrapper extends EventWrapper<NilDisguise>
     {
         try
         {
-            var obj = instance.compoundTag.get(path);
+            var obj = readOrDefault(WrapperAttribute.nbt).get(path);
 
             if (obj != null && obj.getType() == type)
                 return (R) obj;
@@ -86,7 +95,7 @@ public class NilWrapper extends EventWrapper<NilDisguise>
     private static final Logger logger = MorphPlugin.getInstance().getSLF4JLogger();
 
     @Override
-    public EntityEquipment getDisplayingEquipments()
+    public EntityEquipment getFakeEquipments()
     {
         return equipment;
     }
@@ -97,11 +106,6 @@ public class NilWrapper extends EventWrapper<NilDisguise>
         this.equipment.setArmorContents(newEquipment.getArmorContents());
 
         this.equipment.setHandItems(newEquipment.getItemInMainHand(), newEquipment.getItemInOffHand());
-    }
-
-    @Override
-    public void setDisplayingFakeEquipments(boolean newVal)
-    {
     }
 
     @Override
@@ -124,58 +128,26 @@ public class NilWrapper extends EventWrapper<NilDisguise>
     @Override
     public DisguiseWrapper<NilDisguise> clone()
     {
-        return new NilWrapper(this.copyInstance(), (NilBackend) getBackend());
+        var instance = new NilWrapper(this.copyInstance(), (NilBackend) getBackend());
+
+        this.getAttributes().forEach(instance::writeInternal);
+
+        return instance;
     }
 
-    /**
-     * 返回此伪装的名称
-     *
-     * @return 伪装名称
-     */
-    @Override
-    public String getDisguiseName()
+    public static NilWrapper fromExternal(DisguiseWrapper<?> other, NilBackend backend)
     {
-        return instance.name;
-    }
+        var instance = new NilWrapper(new NilDisguise(other.getEntityType()), backend);
 
-    @Override
-    public void setDisguiseName(String name)
-    {
-        this.instance.name = name;
+        other.getAttributes().forEach(instance::writeInternal);
+
+        return instance;
     }
 
     @Override
     public boolean isBaby()
     {
         return instance.isBaby;
-    }
-
-    @Override
-    public void addCustomData(String key, Object data)
-    {
-        instance.customData.put(key, data);
-    }
-
-    @Override
-    public Object getCustomData(String key)
-    {
-        return instance.customData.getOrDefault(key, null);
-    }
-
-    @Override
-    public void applySkin(GameProfile profile)
-    {
-        if (this.getEntityType() != EntityType.PLAYER) return;
-
-        this.instance.profile = profile;
-
-        callEvent(WrapperEvent.SKIN_SET, profile);
-    }
-
-    @Override
-    public @Nullable GameProfile getSkin()
-    {
-        return instance.profile;
     }
 
     @Override
@@ -188,15 +160,34 @@ public class NilWrapper extends EventWrapper<NilDisguise>
     {
     }
 
-    @Override
-    public void setSaddled(boolean saddled)
+    private final NetworkingHelper networkingHelper = new NetworkingHelper();
+
+    @Nullable
+    private Player bindingPlayer;
+
+    @Nullable
+    public Player getBindingPlayer()
     {
-        instance.saddled = saddled;
+        return bindingPlayer;
+    }
+
+    public void setBindingPlayer(@Nullable Player player)
+    {
+        this.bindingPlayer = player;
     }
 
     @Override
-    public boolean isSaddled()
+    protected <T> void onAttributeWrite(WrapperAttribute<T> attribute, T value)
     {
-        return instance.saddled;
+        if (attribute.equals(WrapperAttribute.displayFakeEquip) && getBindingPlayer() != null)
+        {
+            networkingHelper.prepareMeta(getBindingPlayer())
+                    .setDisguiseEquipmentShown(Boolean.TRUE.equals(value))
+                    .send();
+
+            return;
+        }
+
+        super.onAttributeWrite(attribute, value);
     }
 }

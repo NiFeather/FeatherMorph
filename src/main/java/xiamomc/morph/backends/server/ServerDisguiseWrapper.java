@@ -3,6 +3,7 @@ package xiamomc.morph.backends.server;
 import com.mojang.authlib.GameProfile;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.TagType;
@@ -17,6 +18,7 @@ import org.slf4j.Logger;
 import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.backends.DisguiseWrapper;
 import xiamomc.morph.backends.EventWrapper;
+import xiamomc.morph.backends.WrapperAttribute;
 import xiamomc.morph.backends.WrapperEvent;
 import xiamomc.morph.backends.server.renderer.network.registries.ValueIndex;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.*;
@@ -30,6 +32,7 @@ import xiamomc.morph.utilities.NbtUtils;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
@@ -106,7 +109,7 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
     private static final Logger logger = MorphPlugin.getInstance().getSLF4JLogger();
 
     @Override
-    public EntityEquipment getDisplayingEquipments()
+    public EntityEquipment getFakeEquipments()
     {
         return equipment;
     }
@@ -122,12 +125,10 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
             bindingWatcher.write(EntryIndex.EQUIPMENT, this.equipment);
     }
 
-    private boolean shouldDisplayCustomEquipment;
-
     @Override
     public void setDisplayingFakeEquipments(boolean newVal)
     {
-        shouldDisplayCustomEquipment = newVal;
+        super.setDisplayingFakeEquipments(newVal);
 
         if (bindingWatcher != null)
             bindingWatcher.write(EntryIndex.DISPLAY_FAKE_EQUIPMENT, newVal);
@@ -153,32 +154,27 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
     @Override
     public DisguiseWrapper<ServerDisguise> clone()
     {
-        var newInstance = new ServerDisguiseWrapper(this.copyInstance(), (ServerBackend) getBackend());
-        newInstance.mergeCompound(this.getCompound());
+        var newInstance = cloneFromExternal(this, (ServerBackend) getBackend());
 
-        newInstance.shouldDisplayCustomEquipment = this.shouldDisplayCustomEquipment;
+        newInstance.mergeCompound(this.getCompound());
         newInstance.setFakeEquipments(this.equipment);
 
         return newInstance;
     }
 
-    /**
-     * 返回此伪装的名称
-     *
-     * @return 伪装名称
-     */
-    @Override
-    public String getDisguiseName()
+    public static ServerDisguiseWrapper cloneFromExternal(DisguiseWrapper<?> other, ServerBackend backend)
     {
-        var instanceName = instance.name;
+        var newInstance = new ServerDisguiseWrapper(new ServerDisguise(other.getEntityType()), backend);
 
-        return instanceName == null ? "" : instanceName;
+        other.getAttributes().forEach(newInstance::writeInternal);
+
+        return newInstance;
     }
 
     @Override
     public void setDisguiseName(String name)
     {
-        this.instance.name = name;
+        super.setDisguiseName(name);
 
         if (bindingWatcher != null)
             bindingWatcher.write(EntryIndex.DISGUISE_NAME, name);
@@ -191,34 +187,16 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
     }
 
     @Override
-    public void addCustomData(String key, Object data)
-    {
-        instance.customData.put(key, data);
-    }
-
-    @Override
-    public Object getCustomData(String key)
-    {
-        return instance.customData.getOrDefault(key, null);
-    }
-
-    @Override
     public void applySkin(GameProfile profile)
     {
         if (this.getEntityType() != EntityType.PLAYER) return;
 
-        this.instance.profile = profile;
+        write(WrapperAttribute.profile, Optional.of(profile));
 
         if (bindingWatcher != null)
-            bindingWatcher.write(EntryIndex.PROFILE, this.instance.profile);
+            bindingWatcher.write(EntryIndex.PROFILE, profile);
 
         callEvent(WrapperEvent.SKIN_SET, profile);
-    }
-
-    @Override
-    public @Nullable GameProfile getSkin()
-    {
-        return instance.profile;
     }
 
     @Override
@@ -229,18 +207,6 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
     @Override
     public void update(DisguiseState state, Player player)
     {
-    }
-
-    @Override
-    public void setSaddled(boolean saddled)
-    {
-        instance.saddled = saddled;
-    }
-
-    @Override
-    public boolean isSaddled()
-    {
-        return instance.saddled;
     }
 
     private boolean aggressive;
@@ -324,12 +290,17 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
         bindingWatcher.mergeFromCompound(getCompound());
 
         if (getEntityType() == EntityType.PLAYER)
-            bindingWatcher.write(EntryIndex.PROFILE, this.instance.profile);
+        {
+            var profileOptional = readOrDefault(WrapperAttribute.profile)
+                    .orElse(new GameProfile(Util.NIL_UUID, "Nil"));
+
+            bindingWatcher.write(EntryIndex.PROFILE, profileOptional);
+        }
 
         //todo: 激活刷新时也刷新到玩家
         if (bindingWatcher instanceof InventoryLivingWatcher)
         {
-            bindingWatcher.write(EntryIndex.DISPLAY_FAKE_EQUIPMENT, shouldDisplayCustomEquipment);
+            bindingWatcher.write(EntryIndex.DISPLAY_FAKE_EQUIPMENT, read(WrapperAttribute.displayFakeEquip));
             bindingWatcher.write(EntryIndex.EQUIPMENT, this.equipment);
         }
 
