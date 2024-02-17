@@ -180,6 +180,7 @@ public class SkinCacheSubCommand extends MorphPluginObject implements ISubComman
 
                     sender.sendMessage(MessageUtils.prefixes(sender, SkinCacheStrings.fetchingSkin().resolve("name", targetName)));
 
+                    skinProvider.invalidate(targetName);
                     skinProvider.fetchSkin(targetName)
                             .thenAccept(optional ->
                             {

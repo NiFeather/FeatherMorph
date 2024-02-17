@@ -210,5 +210,13 @@ public class PlayerSkinProvider extends MorphPluginObject
         skinCache.reloadConfiguration();
     }
 
+    public void invalidate(String name)
+    {
+        var skin = skinCache.getRaw(name);
+        if(skin == null) return;
+
+        skin.expiresAt = 0;
+    }
+
     //endregion
 }
