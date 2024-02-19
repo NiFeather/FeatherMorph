@@ -69,6 +69,21 @@ public class SkinCacheStrings extends AbstractMorphStrings
         return getFormattable(getKey("info_cape"), "披风: <cape>");
     }
 
+    public static FormattableMessage copySuccess()
+    {
+        return getFormattable(getKey("copy_success"), "成功将 <source> 复制到 <target>");
+    }
+
+    public static FormattableMessage moveSuccess()
+    {
+        return getFormattable(getKey("move_success"), "成功将 <source> 移动到 <target>");
+    }
+
+    public static FormattableMessage copyMoveTargetExists()
+    {
+        return getFormattable(getKey("copymove_target_exists"), "<color:red>目标已存在！将不会进行操作...");
+    }
+
     private static String getKey(String key)
     {
         return "commands.skin_cache." + key;
