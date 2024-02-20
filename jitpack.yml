@@ -4,5 +4,4 @@ before_install:
   - sdk install java 17.0.5-open
   - sdk use java 17.0.5-open
 install:
-  - ./gradlew build publishToMavenLocal
-  - ./gradlew install
+  - ./gradlew build
