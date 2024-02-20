@@ -42,7 +42,7 @@ public class SkinCacheSubCommand extends MorphPluginObject implements ISubComman
     @Override
     public @Nullable String getPermissionRequirement()
     {
-        return CommonPermissions.SKIN_CACHE;
+        return CommonPermissions.ACCESS_SKIN_CACHE;
     }
 
     @Override

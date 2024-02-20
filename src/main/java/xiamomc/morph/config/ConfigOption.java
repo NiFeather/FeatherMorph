@@ -68,11 +68,7 @@ public enum ConfigOption
     FLYABILITY_EXHAUSTION_BASE(flyAbilityNode().append("exhaustion_base"), 200d),
     FLYABILITY_IDLE_CONSUME(flyAbilityNode().append("idle_consumption"), true),
 
-    @Deprecated
-    ALLOW_LD_DISGUISES(ConfigNode.create().append("enable_ld_custom_disguises"), false, true),
-
     LANGUAGE_CODE(languageNode().append("code"), "en_us"),
-    //LANGUAGE_ALLOW_FALLBACK(languageNode().append("cast_translatable"), true),
     SINGLE_LANGUAGE(languageNode().append("single_language"), true),
 
     BLACKLIST_PATTERNS(nbtBlacklistNode().append("patterns"), NbtUtils.defaultBlacklistedPatterns),
@@ -81,7 +77,6 @@ public enum ConfigOption
 
     AMBIENT_FREQUENCY(ambientSoundNode().append("frequency"), 1D),
 
-    @Deprecated
     DEBUG_OUTPUT(ConfigNode.create().append("debug_output"), false, true),
 
     REVEALING(ConfigNode.create().append("revealing"), false),
