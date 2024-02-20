@@ -128,6 +128,10 @@ publishing {
     }
 }
 
+java {
+    withSourcesJar()
+}
+
 tasks.build {
     dependsOn(tasks.shadowJar, tasks.reobfJar)
 }
