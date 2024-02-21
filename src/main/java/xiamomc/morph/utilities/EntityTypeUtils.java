@@ -7,18 +7,14 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.player.Player;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.Sound;
 import org.bukkit.craftbukkit.v1_20_R3.CraftWorld;
 import org.bukkit.craftbukkit.v1_20_R3.entity.CraftEntity;
-import org.bukkit.craftbukkit.v1_20_R3.entity.CraftLivingEntity;
 import org.bukkit.entity.Enemy;
 import org.bukkit.entity.EntityType;
 import org.jetbrains.annotations.NotNull;
@@ -57,6 +53,7 @@ public class EntityTypeUtils
         nmsClassMap.put(EntityType.PLAYER, Player.class);
         typeSoundMap.put(EntityType.BEE, new SoundInfo(SoundEvents.BEE_LOOP, SoundSource.NEUTRAL, 120, 1));
         typeSoundMap.put(EntityType.ENDER_DRAGON, new SoundInfo(SoundEvents.ENDER_DRAGON_AMBIENT, SoundSource.HOSTILE,100, 5));
+        typeSoundMap.put(EntityType.WOLF, new SoundInfo(SoundEvents.WOLF_AMBIENT, SoundSource.NEUTRAL, 80, 1));
     }
 
     public record SoundInfo(@Nullable SoundEvent sound, SoundSource source, int interval, float volume)
@@ -64,7 +61,7 @@ public class EntityTypeUtils
     }
 
     @NotNull
-    public static SoundInfo getSoundEvent(EntityType bukkitType)
+    public static SoundInfo getAmbientSound(EntityType bukkitType)
     {
         var cache = typeSoundMap.getOrDefault(bukkitType, null);
         if (cache != null) return cache;

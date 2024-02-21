@@ -61,7 +61,7 @@ public class AttributeModifyingAbility extends MorphAbility<AttributeModifyOptio
         return super.applyToPlayer(player, state);
     }
 
-    private final String attributeModifierName = "FMAbilityModifier";
+    public static final String attributeModifierName = "FMAbilityModifier";
 
     @Override
     public boolean revokeFromPlayer(Player player, DisguiseState state)
