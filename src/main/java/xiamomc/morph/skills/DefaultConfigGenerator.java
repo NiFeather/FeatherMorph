@@ -221,6 +221,7 @@ public class DefaultConfigGenerator
                                 .from(Attribute.GENERIC_MOVEMENT_SPEED, AttributeModifyOption.OperationType.multiply_base, -0.6)
                                 .with(Attribute.GENERIC_KNOCKBACK_RESISTANCE, AttributeModifyOption.OperationType.add, 1d)
                                 .with(Attribute.GENERIC_ATTACK_DAMAGE, AttributeModifyOption.OperationType.add, 15)
+                                .with(Attribute.GENERIC_ATTACK_SPEED, AttributeModifyOption.OperationType.multiply_base, -0.55d)
                 )
                 .addAbilityIdentifier(AbilityType.EXTRA_KNOCKBACK)
                 .withOption(
@@ -236,7 +237,9 @@ public class DefaultConfigGenerator
                                 .from(Attribute.GENERIC_MOVEMENT_SPEED, AttributeModifyOption.OperationType.multiply_base, -0.6)
                                 .with(Attribute.GENERIC_KNOCKBACK_RESISTANCE, AttributeModifyOption.OperationType.add, 1d)
                                 .with(Attribute.GENERIC_ATTACK_DAMAGE, AttributeModifyOption.OperationType.add, 30)
-                );
+                                .with(Attribute.GENERIC_ATTACK_SPEED, AttributeModifyOption.OperationType.multiply_base, -0.6d)
+                )
+                .addAbilityIdentifier(AbilityType.WARDEN);
 
         this.getConfiguration(EntityTypeUtils.reducesMagicDamage())
                 .addAbilityIdentifier(AbilityType.REDUCES_MAGIC_DAMAGE)

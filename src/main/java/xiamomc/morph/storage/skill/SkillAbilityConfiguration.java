@@ -254,8 +254,10 @@ public class SkillAbilityConfiguration
     }
 
     /**
-     * 添加一个技能设置用于存储
+     * 添加一个技能设置用于存储。
+     * <bold>若此存储已经有此技能的配置，那么将更新不存在的条目</bold>
      *
+     * @apiNote 如果要更新一个列表、集合或类似的东西，请使用 {@link SkillAbilityConfiguration#setOption(String, ISkillOption)}
      * @param identifier 技能ID
      * @param option 目标设置
      */
@@ -285,6 +287,12 @@ public class SkillAbilityConfiguration
         return this;
     }
 
+    /**
+     * 将给定ID对应的配置设置或覆盖为给定的option
+     * @param identifier 目标ID
+     * @param option 要设置或覆盖的{@link ISkillOption}
+     * @return this
+     */
     public SkillAbilityConfiguration setOption(String identifier, ISkillOption option)
     {
         if (options != null && option != null)

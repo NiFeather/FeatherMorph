@@ -33,7 +33,7 @@ public class AttributeModifyOption implements ISkillOption
         info.value = value;
 
         var instance = new AttributeModifyOption();
-        instance.modifiers = List.of(info);
+        instance.modifiers.add(info);
 
         return instance;
     }
