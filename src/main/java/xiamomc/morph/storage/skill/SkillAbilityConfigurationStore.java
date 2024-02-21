@@ -53,7 +53,7 @@ public class SkillAbilityConfigurationStore extends MorphJsonBasedStorage<SkillA
     @Override
     protected @NotNull SkillAbilityConfigurationContainer createDefault()
     {
-        return DefaultConfigGenerator.getDefaultSkillConfiguration();
+        return DefaultConfigGenerator.createInstance().generateConfiguration();
     }
 
     @Override
@@ -288,8 +288,10 @@ public class SkillAbilityConfigurationStore extends MorphJsonBasedStorage<SkillA
             }
 
             //更新默认设置
-            DefaultConfigGenerator.addAbilityConfigurations(config.configurations);
-            DefaultConfigGenerator.addSkillConfigurations(config.configurations);
+            var generator = DefaultConfigGenerator.createInstance();
+            generator.setConfigurationList(config.configurations);
+            generator.generateSkills();
+            generator.generateAbilities();
 
             config.version = targetVersion;
 

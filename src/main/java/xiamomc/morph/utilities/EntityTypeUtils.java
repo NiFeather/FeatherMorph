@@ -283,14 +283,14 @@ public class EntityTypeUtils
         return ObjectSet.of(EntityType.BAT, EntityType.ENDERMAN);
     }
 
-    public static EntityType hasJumpBoost()
+    public static Set<EntityType> hasJumpBoost()
     {
-        return EntityType.MAGMA_CUBE;
+        return Set.of(EntityType.MAGMA_CUBE);
     }
 
-    public static EntityType hasSmallJumpBoost()
+    public static Set<EntityType> hasSmallJumpBoost()
     {
-        return EntityType.RABBIT;
+        return Set.of(EntityType.RABBIT);
     }
 
     public static EntityType hasSpeedBoost()
@@ -322,9 +322,9 @@ public class EntityTypeUtils
         return EntityType.GOAT;
     }
 
-    public static EntityType hasFeatherFalling()
+    public static Set<EntityType> hasFeatherFalling()
     {
-        return EntityType.CHICKEN;
+        return Set.of(EntityType.CHICKEN);
     }
 
     public static EntityType hasSnowTrail()
