@@ -261,7 +261,7 @@ public class SkillAbilityConfiguration
      * @param identifier 技能ID
      * @param option 目标设置
      */
-    public SkillAbilityConfiguration withOption(NamespacedKey identifier, ISkillOption option)
+    public SkillAbilityConfiguration appendOption(NamespacedKey identifier, ISkillOption option)
     {
         Map<String, Object> currentOptionMap = options == null ? null : options.getOrDefault(identifier.asString(), null);
 

@@ -94,42 +94,42 @@ public class DefaultConfigGenerator
         this.getConfiguration(EntityType.BLAZE)
                 .setSkillIdentifier(SkillType.LAUNCH_PROJECTILE)
                 .setCooldown(10)
-                .withOption(SkillType.LAUNCH_PROJECTILE, new ProjectileConfiguration(EntityType.SMALL_FIREBALL, 1, "entity.blaze.shoot", 8));
+                .appendOption(SkillType.LAUNCH_PROJECTILE, new ProjectileConfiguration(EntityType.SMALL_FIREBALL, 1, "entity.blaze.shoot", 8));
 
         this.getConfiguration(EntityType.ENDER_DRAGON)
                 .setSkillIdentifier(SkillType.LAUNCH_PROJECTILE)
                 .setCooldown(80)
-                .withOption(SkillType.LAUNCH_PROJECTILE, new ProjectileConfiguration(EntityType.DRAGON_FIREBALL, 1, "entity.ender_dragon.shoot", 80));
+                .appendOption(SkillType.LAUNCH_PROJECTILE, new ProjectileConfiguration(EntityType.DRAGON_FIREBALL, 1, "entity.ender_dragon.shoot", 80));
 
         this.getConfiguration(EntityType.LLAMA)
                 .setSkillIdentifier(SkillType.LAUNCH_PROJECTILE)
                 .setCooldown(25)
-                .withOption(SkillType.LAUNCH_PROJECTILE, new ProjectileConfiguration(EntityType.LLAMA_SPIT, 1, "entity.llama.spit", 8));
+                .appendOption(SkillType.LAUNCH_PROJECTILE, new ProjectileConfiguration(EntityType.LLAMA_SPIT, 1, "entity.llama.spit", 8));
 
         this.getConfiguration(EntityType.TRADER_LLAMA)
                 .setSkillIdentifier(SkillType.LAUNCH_PROJECTILE)
                 .setCooldown(25)
-                .withOption(SkillType.LAUNCH_PROJECTILE, new ProjectileConfiguration(EntityType.LLAMA_SPIT, 1, "entity.llama.spit", 8));
+                .appendOption(SkillType.LAUNCH_PROJECTILE, new ProjectileConfiguration(EntityType.LLAMA_SPIT, 1, "entity.llama.spit", 8));
 
         this.getConfiguration(EntityType.SHULKER)
                 .setSkillIdentifier(SkillType.LAUNCH_PROJECTILE)
                 .setCooldown(40)
-                .withOption(SkillType.LAUNCH_PROJECTILE, new ProjectileConfiguration(EntityType.SHULKER_BULLET, 0, "entity.shulker.shoot", 15, 15));
+                .appendOption(SkillType.LAUNCH_PROJECTILE, new ProjectileConfiguration(EntityType.SHULKER_BULLET, 0, "entity.shulker.shoot", 15, 15));
 
         this.getConfiguration(EntityType.SNOWMAN)
                 .setSkillIdentifier(SkillType.LAUNCH_PROJECTILE)
                 .setCooldown(15)
-                .withOption(SkillType.LAUNCH_PROJECTILE, new ProjectileConfiguration(EntityType.SNOWBALL, 1, "entity.snow_golem.shoot", 8));
+                .appendOption(SkillType.LAUNCH_PROJECTILE, new ProjectileConfiguration(EntityType.SNOWBALL, 1, "entity.snow_golem.shoot", 8));
 
         this.getConfiguration(EntityType.WITHER)
                 .setSkillIdentifier(SkillType.LAUNCH_PROJECTILE)
                 .setCooldown(10)
-                .withOption(SkillType.LAUNCH_PROJECTILE, new ProjectileConfiguration(EntityType.WITHER_SKULL, 1, "entity.wither.shoot", 24));
+                .appendOption(SkillType.LAUNCH_PROJECTILE, new ProjectileConfiguration(EntityType.WITHER_SKULL, 1, "entity.wither.shoot", 24));
 
         this.getConfiguration(EntityType.GHAST)
                 .setSkillIdentifier(SkillType.LAUNCH_PROJECTILE)
                 .setCooldown(DisguiseUtils.GHAST_EXECUTE_DELAY + 40)
-                .withOption(
+                .appendOption(
                         SkillType.LAUNCH_PROJECTILE, new ProjectileConfiguration(EntityType.FIREBALL, 1, "entity.ghast.shoot", 35)
                                 .withDelay(DisguiseUtils.GHAST_EXECUTE_DELAY)
                                 .withWarningSound("entity.ghast.warn")
@@ -138,29 +138,29 @@ public class DefaultConfigGenerator
         this.getConfiguration(EntityType.BREEZE)
                 .setSkillIdentifier(SkillType.LAUNCH_PROJECTILE)
                 .setCooldown(40)
-                .withOption(SkillType.LAUNCH_PROJECTILE, new ProjectileConfiguration(EntityType.WIND_CHARGE, 1, "entity.breeze.shoot", 16));
+                .appendOption(SkillType.LAUNCH_PROJECTILE, new ProjectileConfiguration(EntityType.WIND_CHARGE, 1, "entity.breeze.shoot", 16));
 
         // 药效给与
         this.getConfiguration(EntityType.DOLPHIN)
                 .setSkillIdentifier(SkillType.APPLY_EFFECT)
                 .setCooldown(180)
-                .withOption(SkillType.APPLY_EFFECT, new EffectConfiguration(PotionEffectType.DOLPHINS_GRACE.getKey().asString(), 0, 180, true, false, null, 0, 9));
+                .appendOption(SkillType.APPLY_EFFECT, new EffectConfiguration(PotionEffectType.DOLPHINS_GRACE.getKey().asString(), 0, 180, true, false, null, 0, 9));
 
         this.getConfiguration(EntityType.ELDER_GUARDIAN)
                 .setSkillIdentifier(SkillType.APPLY_EFFECT)
                 .setCooldown(1200)
-                .withOption(SkillType.APPLY_EFFECT, new EffectConfiguration(PotionEffectType.SLOW_DIGGING.getKey().asString(), 2, 6000, true, true, "entity.elder_guardian.curse", 50, 50));
+                .appendOption(SkillType.APPLY_EFFECT, new EffectConfiguration(PotionEffectType.SLOW_DIGGING.getKey().asString(), 2, 6000, true, true, "entity.elder_guardian.curse", 50, 50));
 
         // 其他
         this.getConfiguration(EntityType.CREEPER)
                 .setSkillIdentifier(SkillType.EXPLODE)
                 .setCooldown(80)
-                .withOption(SkillType.EXPLODE, new ExplosionConfiguration(true, 3, false, 30, "entity.creeper.primed"));
+                .appendOption(SkillType.EXPLODE, new ExplosionConfiguration(true, 3, false, 30, "entity.creeper.primed"));
 
         this.getConfiguration(EntityType.ENDERMAN)
                 .setSkillIdentifier(SkillType.TELEPORT)
                 .setCooldown(40)
-                .withOption(SkillType.TELEPORT, new TeleportConfiguration(32));
+                .appendOption(SkillType.TELEPORT, new TeleportConfiguration(32));
 
         this.getConfiguration(EntityType.WARDEN)
                 .setSkillIdentifier(SkillType.SONIC_BOOM)
@@ -191,7 +191,7 @@ public class DefaultConfigGenerator
 
             this.getConfiguration(type)
                     .addAbilityIdentifier(AbilityType.CAN_FLY)
-                    .withOption(AbilityType.CAN_FLY, option);
+                    .appendOption(AbilityType.CAN_FLY, option);
         }
 
         this.setAbilityRange(EntityTypeUtils.hasFireResistance(), AbilityType.HAS_FIRE_RESISTANCE);
@@ -207,15 +207,15 @@ public class DefaultConfigGenerator
 
         this.getConfiguration(EntityType.AXOLOTL)
                 .addAbilityIdentifier(AbilityType.DRYOUT_IN_AIR)
-                .withOption(AbilityType.DRYOUT_IN_AIR, new DryoutAbilityOption(false));
+                .appendOption(AbilityType.DRYOUT_IN_AIR, new DryoutAbilityOption(false));
 
         this.getConfiguration(EntityType.HORSE)
                 .addAbilityIdentifier(AbilityType.ATTRIBUTE)
-                .withOption(AbilityType.ATTRIBUTE, AttributeModifyOption.from(Attribute.GENERIC_MOVEMENT_SPEED, AttributeModifyOption.OperationType.multiply_base, 0.5d));
+                .appendOption(AbilityType.ATTRIBUTE, AttributeModifyOption.from(Attribute.GENERIC_MOVEMENT_SPEED, AttributeModifyOption.OperationType.multiply_base, 0.5d));
 
         this.getConfiguration(EntityType.IRON_GOLEM)
                 .addAbilityIdentifier(AbilityType.ATTRIBUTE)
-                .withOption(
+                .appendOption(
                         AbilityType.ATTRIBUTE,
                         AttributeModifyOption
                                 .from(Attribute.GENERIC_MOVEMENT_SPEED, AttributeModifyOption.OperationType.multiply_base, -0.6)
@@ -224,14 +224,14 @@ public class DefaultConfigGenerator
                                 .with(Attribute.GENERIC_ATTACK_SPEED, AttributeModifyOption.OperationType.multiply_base, -0.55d)
                 )
                 .addAbilityIdentifier(AbilityType.EXTRA_KNOCKBACK)
-                .withOption(
+                .appendOption(
                         AbilityType.EXTRA_KNOCKBACK,
                         ExtraKnockbackOption.from(0, 0.4D, 0)
                 );
 
         this.getConfiguration(EntityType.WARDEN)
                 .addAbilityIdentifier(AbilityType.ATTRIBUTE)
-                .withOption(
+                .appendOption(
                         AbilityType.ATTRIBUTE,
                         AttributeModifyOption
                                 .from(Attribute.GENERIC_MOVEMENT_SPEED, AttributeModifyOption.OperationType.multiply_base, -0.6)
@@ -243,11 +243,11 @@ public class DefaultConfigGenerator
 
         this.getConfiguration(EntityTypeUtils.reducesMagicDamage())
                 .addAbilityIdentifier(AbilityType.REDUCES_MAGIC_DAMAGE)
-                .withOption(AbilityType.REDUCES_MAGIC_DAMAGE, new ReduceDamageOption(0.15d, true));
+                .appendOption(AbilityType.REDUCES_MAGIC_DAMAGE, new ReduceDamageOption(0.15d, true));
 
         this.getConfiguration(EntityTypeUtils.reducesFallDamage())
                 .addAbilityIdentifier(AbilityType.REDUCES_FALL_DAMAGE)
-                .withOption(AbilityType.REDUCES_FALL_DAMAGE, new ReduceDamageOption(10));
+                .appendOption(AbilityType.REDUCES_FALL_DAMAGE, new ReduceDamageOption(10));
 
         this.getConfiguration(EntityTypeUtils.hasSnowTrail())
                 .addAbilityIdentifier(AbilityType.SNOWY);
@@ -263,7 +263,7 @@ public class DefaultConfigGenerator
 
         this.getConfiguration(EntityType.WITHER)
                 .addAbilityIdentifier(AbilityType.BOSSBAR)
-                .withOption(
+                .appendOption(
                         AbilityType.BOSSBAR,
                         new BossbarOption(
                                 new BossbarOption.BossbarCreateOption(
@@ -276,7 +276,7 @@ public class DefaultConfigGenerator
 
         this.getConfiguration(EntityType.ENDER_DRAGON)
                 .addAbilityIdentifier(AbilityType.BOSSBAR)
-                .withOption(
+                .appendOption(
                         AbilityType.BOSSBAR,
                         new BossbarOption(
                                 new BossbarOption.BossbarCreateOption(
@@ -287,7 +287,7 @@ public class DefaultConfigGenerator
                                 -1)
                 )
                 .addAbilityIdentifier(AbilityType.HEALS_FROM_ENTITY)
-                .withOption(
+                .appendOption(
                         AbilityType.HEALS_FROM_ENTITY,
                         new HealsFromEntityOption(1, 10, 0.05d, 32d, EntityType.ENDER_CRYSTAL.key().asString()));
 
@@ -296,17 +296,17 @@ public class DefaultConfigGenerator
 
         this.getConfiguration(EntityType.WITHER_SKELETON)
                 .addAbilityIdentifier(AbilityType.POTION_ON_ATTACK)
-                .withOption(AbilityType.POTION_ON_ATTACK,
+                .appendOption(AbilityType.POTION_ON_ATTACK,
                         PotionEffectOption.from(PotionEffectType.WITHER, 10 * 20, 0));
 
         this.getConfiguration(EntityType.HUSK)
                 .addAbilityIdentifier(AbilityType.POTION_ON_ATTACK)
-                .withOption(AbilityType.POTION_ON_ATTACK,
+                .appendOption(AbilityType.POTION_ON_ATTACK,
                         PotionEffectOption.from(PotionEffectType.HUNGER, 7 * 2 * 20, 0));
 
         this.getConfiguration(EntityType.CAVE_SPIDER)
                 .addAbilityIdentifier(AbilityType.POTION_ON_ATTACK)
-                .withOption(AbilityType.POTION_ON_ATTACK,
+                .appendOption(AbilityType.POTION_ON_ATTACK,
                         PotionEffectOption.from(PotionEffectType.POISON, 10 * 20, 0));
 
         for (var type : EntityTypeUtils.spider())
