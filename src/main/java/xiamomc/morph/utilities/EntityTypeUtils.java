@@ -7,14 +7,18 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.player.Player;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Sound;
 import org.bukkit.craftbukkit.v1_20_R3.CraftWorld;
 import org.bukkit.craftbukkit.v1_20_R3.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_20_R3.entity.CraftLivingEntity;
 import org.bukkit.entity.Enemy;
 import org.bukkit.entity.EntityType;
 import org.jetbrains.annotations.NotNull;
@@ -363,6 +367,21 @@ public class EntityTypeUtils
     static
     {
         isEnemyMap.put(EntityType.BREEZE, true);
+    }
+
+    @Deprecated
+    @Nullable
+    public static String getStepSound(EntityType type)
+    {
+        if (type == EntityType.PLAYER) return null;
+        return "entity.%s.step".formatted(type.getKey().getKey());
+    }
+
+    @Nullable
+    public static String getDamageSound(EntityType type)
+    {
+        if (type == EntityType.PLAYER) return null;
+        return "entity.%s.hurt".formatted(type.getKey().getKey());
     }
 
     public static boolean isEnemy(EntityType type)
