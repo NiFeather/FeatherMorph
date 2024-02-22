@@ -19,10 +19,7 @@ import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Exceptions.NullDependencyException;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class SingleWatcher extends MorphPluginObject
@@ -51,10 +48,37 @@ public abstract class SingleWatcher extends MorphPluginObject
 
     private Player bindingPlayer;
 
+    @Nullable
+    private Boolean isActive = null;
+
+    public boolean isActive()
+    {
+        checkIfActive();
+        Objects.requireNonNull(isActive, "???");
+
+        return isActive;
+    }
+
+    private void checkIfActive()
+    {
+        if (isActive != null) return;
+
+        if (!bindingPlayer.isOnline())
+        {
+            var player = Bukkit.getPlayer(bindingUUID);
+            isActive = (player != null);
+            return;
+        }
+
+        isActive = true;
+    }
+
     public Player getBindingPlayer()
     {
         if (!bindingPlayer.isOnline())
         {
+            isActive = null;
+
             var player = Bukkit.getPlayer(bindingUUID);
             if (player == null)
             {

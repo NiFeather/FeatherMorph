@@ -66,6 +66,8 @@ public class SoundListener extends ProtocolListener
 
         var watcher = registry.getWatchers().stream().filter(w ->
         {
+            if (!w.isActive()) return false;
+
             var loc = w.getBindingPlayer().getLocation();
             if (!loc.getWorld().equals(playerLocation.getWorld())) return false;
 
