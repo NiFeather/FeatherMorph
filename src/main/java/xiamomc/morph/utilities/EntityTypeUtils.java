@@ -13,6 +13,7 @@ import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.player.Player;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Sound;
 import org.bukkit.craftbukkit.v1_20_R3.CraftWorld;
 import org.bukkit.craftbukkit.v1_20_R3.entity.CraftEntity;
 import org.bukkit.entity.Enemy;
@@ -378,6 +379,10 @@ public class EntityTypeUtils
     public static String getDamageSound(EntityType type)
     {
         if (type == EntityType.PLAYER) return null;
+
+        if (type == EntityType.ARMOR_STAND)
+            return Sound.ENTITY_ARMOR_STAND_HIT.key().asString();
+
         return "entity.%s.hurt".formatted(type.getKey().getKey());
     }
 
