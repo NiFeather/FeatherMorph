@@ -48,37 +48,24 @@ public abstract class SingleWatcher extends MorphPluginObject
 
     private Player bindingPlayer;
 
-    @Nullable
-    private Boolean isActive = null;
-
     public boolean isActive()
     {
-        checkIfActive();
-        Objects.requireNonNull(isActive, "???");
-
-        return isActive;
-    }
-
-    private void checkIfActive()
-    {
-        if (isActive != null) return;
-
-        if (!bindingPlayer.isOnline())
+        // 以目前的框架来看，似乎只能这样了 :(
+        if (bindingPlayer.isOnline())
+        {
+            return true;
+        }
+        else
         {
             var player = Bukkit.getPlayer(bindingUUID);
-            isActive = (player != null);
-            return;
+            return player != null;
         }
-
-        isActive = true;
     }
 
     public Player getBindingPlayer()
     {
         if (!bindingPlayer.isOnline())
         {
-            isActive = null;
-
             var player = Bukkit.getPlayer(bindingUUID);
             if (player == null)
             {
