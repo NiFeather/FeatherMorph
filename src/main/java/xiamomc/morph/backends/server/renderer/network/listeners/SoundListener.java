@@ -111,8 +111,11 @@ public class SoundListener extends ProtocolListener
         var path = location.getPath();
 
         // 如果以".hurt"结尾，那么尝试覆盖此音效
-        // 不打算管冰冻伤害的音效
-        if (path.endsWith(".hurt") || path.endsWith(".hurt_on_fire") || path.endsWith(".hurt_drown"))
+        if (path.endsWith(".hurt")
+                || path.endsWith(".hurt_on_fire")
+                || path.endsWith(".hurt_drown")
+                || path.endsWith(".hurt_freeze")
+                || path.endsWith(".hurt_sweet_berry_bush"))
         {
             var soundId = EntityTypeUtils.getDamageSound(watcher.getEntityType());
             if (soundId == null) return null;
