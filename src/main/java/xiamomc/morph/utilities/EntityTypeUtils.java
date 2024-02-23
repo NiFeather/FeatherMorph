@@ -362,11 +362,6 @@ public class EntityTypeUtils
 
     private static final Location spawnLocation = new Location(null, 0d, -4096d, 0d);
 
-    static
-    {
-        isEnemyMap.put(EntityType.BREEZE, true);
-    }
-
     @Deprecated
     @Nullable
     public static String getStepSound(EntityType type)

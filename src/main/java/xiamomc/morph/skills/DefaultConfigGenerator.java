@@ -314,9 +314,5 @@ public class DefaultConfigGenerator
 
         this.getConfiguration(EntityType.TURTLE)
                 .addAbilityIdentifier(AbilityType.CAN_BREATHE_UNDER_WATER);
-
-        this.getConfiguration(EntityType.BREEZE)
-                .addAbilityIdentifier(AbilityType.HAS_JUMP_BOOST)
-                .addAbilityIdentifier(AbilityType.NO_FALL_DAMAGE);
     }
 }
