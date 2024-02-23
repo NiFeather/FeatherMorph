@@ -135,11 +135,6 @@ public class DefaultConfigGenerator
                                 .withWarningSound("entity.ghast.warn")
                 );
 
-        this.getConfiguration(EntityType.BREEZE)
-                .setSkillIdentifier(SkillType.LAUNCH_PROJECTILE)
-                .setCooldown(40)
-                .appendOption(SkillType.LAUNCH_PROJECTILE, new ProjectileConfiguration(EntityType.WIND_CHARGE, 1, "entity.breeze.shoot", 16));
-
         // 药效给与
         this.getConfiguration(EntityType.DOLPHIN)
                 .setSkillIdentifier(SkillType.APPLY_EFFECT)
