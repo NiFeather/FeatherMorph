@@ -9,6 +9,7 @@ import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.events.InteractionMirrorProcessor;
 import xiamomc.morph.messages.*;
+import xiamomc.morph.misc.permissions.CommonPermissions;
 import xiamomc.morph.utilities.BindableUtils;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Command.ISubCommand;
@@ -31,66 +32,58 @@ public class OptionSubCommand extends MorphPluginObject implements ISubCommand
 
     public OptionSubCommand()
     {
-        subCommands.add(getToggle("bossbar", ConfigOption.DISPLAY_BOSSBAR, "bossbar", CommandNameStrings.bossbarString()));
+        subCommands.add(getToggle("bossbar", ConfigOption.DISPLAY_BOSSBAR, CommandNameStrings.bossbarString()));
 
-        subCommands.add(getToggle("unmorph_on_death", ConfigOption.UNMORPH_ON_DEATH, "unmorph_on_death"));
+        subCommands.add(getToggle("unmorph_on_death", ConfigOption.UNMORPH_ON_DEATH));
 
         //subCommands.with(getToggle("allow_local_disguise", ConfigOption.ALLOW_LD_DISGUISES, "ld", CommandNameStrings.allowLDDisguiseString()));
 
-        subCommands.add(getToggle("allow_client_mods", ConfigOption.ALLOW_CLIENT, "client"));
+        subCommands.add(getToggle("allow_client_mods", ConfigOption.ALLOW_CLIENT));
 
-        subCommands.add(getToggle("piglin_brute_ignore_disguises", ConfigOption.PIGLIN_BRUTE_IGNORE_DISGUISES, "piglin_brute_ignore_disguises"));
+        subCommands.add(getToggle("piglin_brute_ignore_disguises", ConfigOption.PIGLIN_BRUTE_IGNORE_DISGUISES));
 
-        subCommands.add(getToggle("headmorph", ConfigOption.ALLOW_HEAD_MORPH, "headmorph", CommandNameStrings.headMorphString()));
+        subCommands.add(getToggle("headmorph", ConfigOption.ALLOW_HEAD_MORPH, CommandNameStrings.headMorphString()));
 
-        subCommands.add(getToggle("chatoverride", ConfigOption.ALLOW_CHAT_OVERRIDE, "chatoverride", CommandNameStrings.chatOverrideString()));
+        subCommands.add(getToggle("chatoverride", ConfigOption.ALLOW_CHAT_OVERRIDE, CommandNameStrings.chatOverrideString()));
 
-        subCommands.add(getToggle("modify_bounding_boxes", ConfigOption.MODIFY_BOUNDING_BOX, "modify_boxes"));
+        subCommands.add(getToggle("modify_bounding_boxes", ConfigOption.MODIFY_BOUNDING_BOX));
 
-        subCommands.add(getToggle("force_protocol_version", ConfigOption.FORCE_TARGET_VERSION, "force_protocol_version"));
+        subCommands.add(getToggle("force_protocol_version", ConfigOption.FORCE_TARGET_VERSION));
 
-        subCommands.add(getToggle("armorstand_show_arms", ConfigOption.ARMORSTAND_SHOW_ARMS, "armorstand_show_arms"));
+        subCommands.add(getToggle("armorstand_show_arms", ConfigOption.ARMORSTAND_SHOW_ARMS));
 
-        subCommands.add(getMirrorMode("mirror_mode", ConfigOption.MIRROR_SELECTION_MODE, "mirror_mode", null));
-        subCommands.add(getToggle("mirror_interaction", ConfigOption.MIRROR_BEHAVIOR_DO_SIMULATION, "mirror.interaction", CommandNameStrings.mirrorInteractionString()));
-        subCommands.add(getToggle("mirror_sneak", ConfigOption.MIRROR_BEHAVIOR_SNEAK, "mirror.sneak", CommandNameStrings.mirrorSneakString()));
-        subCommands.add(getToggle("mirror_swaphand", ConfigOption.MIRROR_BEHAVIOR_SWAP_HAND, "mirror.swaphand", CommandNameStrings.mirrorSwapHandString()));
-        subCommands.add(getToggle("mirror_drop", ConfigOption.MIRROR_BEHAVIOR_DROP, "mirror.drop", CommandNameStrings.mirrorDropString()));
-        subCommands.add(getToggle("mirror_hotbar", ConfigOption.MIRROR_BEHAVIOR_HOTBAR, "mirror.hotbar", CommandNameStrings.mirrorHotbar()));
-        subCommands.add(getToggle("mirror_ignore_disguised", ConfigOption.MIRROR_IGNORE_DISGUISED, "mirror.ignore_disguised", CommandNameStrings.mirrorIgnoreDisguised()));
-        subCommands.add(getToggle("mirror_log_operations", ConfigOption.MIRROR_LOG_OPERATION, "mirror.log_operations"));
-        subCommands.add(getInteger("mirror_log_cleanup", ConfigOption.MIRROR_LOG_CLEANUP_DATE, "mirror.log_operations"));
+        subCommands.add(getMirrorMode("mirror_mode", ConfigOption.MIRROR_SELECTION_MODE, null));
+        subCommands.add(getToggle("mirror_interaction", ConfigOption.MIRROR_BEHAVIOR_DO_SIMULATION, CommandNameStrings.mirrorInteractionString()));
+        subCommands.add(getToggle("mirror_sneak", ConfigOption.MIRROR_BEHAVIOR_SNEAK, CommandNameStrings.mirrorSneakString()));
+        subCommands.add(getToggle("mirror_swaphand", ConfigOption.MIRROR_BEHAVIOR_SWAP_HAND, CommandNameStrings.mirrorSwapHandString()));
+        subCommands.add(getToggle("mirror_drop", ConfigOption.MIRROR_BEHAVIOR_DROP, CommandNameStrings.mirrorDropString()));
+        subCommands.add(getToggle("mirror_hotbar", ConfigOption.MIRROR_BEHAVIOR_HOTBAR, CommandNameStrings.mirrorHotbar()));
+        subCommands.add(getToggle("mirror_ignore_disguised", ConfigOption.MIRROR_IGNORE_DISGUISED, CommandNameStrings.mirrorIgnoreDisguised()));
+        subCommands.add(getToggle("mirror_log_operations", ConfigOption.MIRROR_LOG_OPERATION));
+        subCommands.add(getInteger("mirror_log_cleanup", ConfigOption.MIRROR_LOG_CLEANUP_DATE));
 
-        subCommands.add(getToggle("debug_output", ConfigOption.DEBUG_OUTPUT, "debug_output"));
-        subCommands.add(getToggle("revealing", ConfigOption.REVEALING, "revealing"));
+        subCommands.add(getToggle("debug_output", ConfigOption.DEBUG_OUTPUT));
+        subCommands.add(getToggle("revealing", ConfigOption.REVEALING));
 
-        subCommands.add(getToggle("check_update", ConfigOption.CHECK_UPDATE, "check_update"));
-        subCommands.add(getToggle("allow_acquire_morphs", ConfigOption.ALLOW_ACQUIRE_MORPHS, "allow_acquire_morphs"));
+        subCommands.add(getToggle("check_update", ConfigOption.CHECK_UPDATE));
+        subCommands.add(getToggle("allow_acquire_morphs", ConfigOption.ALLOW_ACQUIRE_MORPHS));
 
-        subCommands.add(getToggle("log_outgoing_packets", ConfigOption.LOG_OUTGOING_PACKETS, "log_outgoing_packets"));
-        subCommands.add(getToggle("log_incoming_packets", ConfigOption.LOG_INCOMING_PACKETS, "log_incoming_packets"));
+        subCommands.add(getToggle("log_outgoing_packets", ConfigOption.LOG_OUTGOING_PACKETS));
+        subCommands.add(getToggle("log_incoming_packets", ConfigOption.LOG_INCOMING_PACKETS));
 
-        subCommands.add(getToggle("allow_acquire_morphs", ConfigOption.ALLOW_ACQUIRE_MORPHS, "allow_acquire_morphs"));
+        subCommands.add(getToggle("allow_acquire_morphs", ConfigOption.ALLOW_ACQUIRE_MORPHS));
 
-        subCommands.add(getToggle("allow_flight", ConfigOption.ALLOW_FLIGHT, "allow_flight"));
+        subCommands.add(getToggle("allow_flight", ConfigOption.ALLOW_FLIGHT));
 
-        subCommands.add(getToggle("client_renderer", ConfigOption.USE_CLIENT_RENDERER, "client_renderer"));
+        subCommands.add(getToggle("client_renderer", ConfigOption.USE_CLIENT_RENDERER));
 
-        subCommands.add(getList("banned_disguises", ConfigOption.BANNED_DISGUISES, "banned_disguises", null));
-        subCommands.add(getList("nofly_worlds", ConfigOption.NOFLY_WORLDS, "nofly_worlds", null));
-        subCommands.add(getList("blacklist_tags", ConfigOption.BLACKLIST_TAGS, "blacklist_tags", null));
-        subCommands.add(getList("blacklist_nbt_pattern", ConfigOption.BLACKLIST_PATTERNS, "blacklist_patterns", null));
+        subCommands.add(getList("banned_disguises", ConfigOption.BANNED_DISGUISES, null));
+        subCommands.add(getList("nofly_worlds", ConfigOption.NOFLY_WORLDS, null));
+        subCommands.add(getList("blacklist_tags", ConfigOption.BLACKLIST_TAGS, null));
+        subCommands.add(getList("blacklist_nbt_pattern", ConfigOption.BLACKLIST_PATTERNS, null));
     }
 
-    private <T> ISubCommand getGeneric(String name, ConfigOption option, String perm,
-                                       @Nullable FormattableMessage displayName, Class<T> targetClass,
-                                       Function<String, T> func, String typeName)
-    {
-        return getGeneric(name, option, perm,
-                displayName, targetClass, func, new FormattableMessage(plugin, typeName));
-    }
-
-    private ISubCommand getList(String optionName, ConfigOption option, String perm,
+    private ISubCommand getList(String optionName, ConfigOption option,
                                     @Nullable FormattableMessage displayName)
     {
         var targetDisplay = displayName == null ? new FormattableMessage(plugin, optionName) : displayName;
@@ -99,7 +92,7 @@ public class OptionSubCommand extends MorphPluginObject implements ISubCommand
 
         return SubCommandGenerator.command()
                 .setName(optionName)
-                .setPerm("xiamomc.morph.toggle." + perm)
+                .setPerm(this.getPermissionRequirement())
                 .setExec((sender, args) ->
                 {
                     if (args.length < 1)
@@ -198,7 +191,14 @@ public class OptionSubCommand extends MorphPluginObject implements ISubCommand
                 });
     }
 
-    private <T> ISubCommand getGeneric(String name, ConfigOption option, String perm,
+    private <T> ISubCommand getGeneric(String name, ConfigOption option,
+                                       @Nullable FormattableMessage displayName, Class<T> targetClass,
+                                       Function<String, T> func, String typeName)
+    {
+        return getGeneric(name, option, displayName, targetClass, func, new FormattableMessage(plugin, typeName));
+    }
+
+    private <T> ISubCommand getGeneric(String name, ConfigOption option,
                                    @Nullable FormattableMessage displayName, Class<T> targetClass,
                                    Function<String, T> func, FormattableMessage typeName)
     {
@@ -206,7 +206,7 @@ public class OptionSubCommand extends MorphPluginObject implements ISubCommand
 
         return SubCommandGenerator.command()
                 .setName(name)
-                .setPerm("xiamomc.morph.toggle." + perm)
+                .setPerm(this.getPermissionRequirement())
                 .setExec((sender, args) ->
                 {
                     if (args.length < 1)
@@ -250,9 +250,9 @@ public class OptionSubCommand extends MorphPluginObject implements ISubCommand
                 });
     }
 
-    private ISubCommand getMirrorMode(String name, ConfigOption option, String perm, @Nullable FormattableMessage displayName)
+    private ISubCommand getMirrorMode(String name, ConfigOption option, @Nullable FormattableMessage displayName)
     {
-        return getGeneric(name, option, perm, displayName, String.class, enumName ->
+        return getGeneric(name, option, displayName, String.class, enumName ->
         {
             String value = null;
 
@@ -268,29 +268,29 @@ public class OptionSubCommand extends MorphPluginObject implements ISubCommand
         }, "by_sight/by_name");
     }
 
-    private ISubCommand getDouble(String name, ConfigOption option, String perm, @Nullable FormattableMessage displayName)
+    private ISubCommand getDouble(String name, ConfigOption option, @Nullable FormattableMessage displayName)
     {
-        return getGeneric(name, option, perm, displayName, Double.class, Double::parseDouble, TypesString.typeDouble());
+        return getGeneric(name, option, displayName, Double.class, Double::parseDouble, TypesString.typeDouble());
     }
 
-    private ISubCommand getInteger(String name, ConfigOption option, String perm)
+    private ISubCommand getInteger(String name, ConfigOption option)
     {
-        return getInteger(name, option, perm, null);
+        return getInteger(name, option, null);
     }
 
-    private ISubCommand getInteger(String name, ConfigOption option, String perm, @Nullable FormattableMessage displayName)
+    private ISubCommand getInteger(String name, ConfigOption option, @Nullable FormattableMessage displayName)
     {
-        return getGeneric(name, option, perm, displayName, Integer.class, Integer::parseInt, TypesString.typeInteger());
+        return getGeneric(name, option, displayName, Integer.class, Integer::parseInt, TypesString.typeInteger());
     }
 
-    private ISubCommand getToggle(String name, ConfigOption option, String perm)
+    private ISubCommand getToggle(String name, ConfigOption option)
     {
-        return getToggle(name, option, perm, null);
+        return getToggle(name, option, null);
     }
 
-    private ISubCommand getToggle(String name, ConfigOption option, String perm, @Nullable FormattableMessage displayName)
+    private ISubCommand getToggle(String name, ConfigOption option, @Nullable FormattableMessage displayName)
     {
-        return getGeneric(name, option, perm, displayName, Boolean.class, this::parseBoolean, "true/false");
+        return getGeneric(name, option, displayName, Boolean.class, this::parseBoolean, "true/false");
     }
 
     private boolean parseBoolean(String input)
@@ -308,7 +308,7 @@ public class OptionSubCommand extends MorphPluginObject implements ISubCommand
     @Override
     public String getPermissionRequirement()
     {
-        return "xiamomc.morph.toggle";
+        return CommonPermissions.SET_OPTIONS;
     }
 
     @Override

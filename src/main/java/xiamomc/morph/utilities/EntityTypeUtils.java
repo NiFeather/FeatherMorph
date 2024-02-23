@@ -13,6 +13,7 @@ import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.player.Player;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Sound;
 import org.bukkit.craftbukkit.v1_20_R2.CraftWorld;
 import org.bukkit.craftbukkit.v1_20_R2.entity.CraftEntity;
 import org.bukkit.entity.Enemy;
@@ -53,6 +54,7 @@ public class EntityTypeUtils
         nmsClassMap.put(EntityType.PLAYER, Player.class);
         typeSoundMap.put(EntityType.BEE, new SoundInfo(SoundEvents.BEE_LOOP, SoundSource.NEUTRAL, 120, 1));
         typeSoundMap.put(EntityType.ENDER_DRAGON, new SoundInfo(SoundEvents.ENDER_DRAGON_AMBIENT, SoundSource.HOSTILE,100, 5));
+        typeSoundMap.put(EntityType.WOLF, new SoundInfo(SoundEvents.WOLF_AMBIENT, SoundSource.NEUTRAL, 80, 1));
     }
 
     public record SoundInfo(@Nullable SoundEvent sound, SoundSource source, int interval, float volume)
@@ -60,7 +62,7 @@ public class EntityTypeUtils
     }
 
     @NotNull
-    public static SoundInfo getSoundEvent(EntityType bukkitType)
+    public static SoundInfo getAmbientSound(EntityType bukkitType)
     {
         var cache = typeSoundMap.getOrDefault(bukkitType, null);
         if (cache != null) return cache;
@@ -283,14 +285,14 @@ public class EntityTypeUtils
         return ObjectSet.of(EntityType.BAT, EntityType.ENDERMAN);
     }
 
-    public static EntityType hasJumpBoost()
+    public static Set<EntityType> hasJumpBoost()
     {
-        return EntityType.MAGMA_CUBE;
+        return Set.of(EntityType.MAGMA_CUBE);
     }
 
-    public static EntityType hasSmallJumpBoost()
+    public static Set<EntityType> hasSmallJumpBoost()
     {
-        return EntityType.RABBIT;
+        return Set.of(EntityType.RABBIT);
     }
 
     public static EntityType hasSpeedBoost()
@@ -322,9 +324,9 @@ public class EntityTypeUtils
         return EntityType.GOAT;
     }
 
-    public static EntityType hasFeatherFalling()
+    public static Set<EntityType> hasFeatherFalling()
     {
-        return EntityType.CHICKEN;
+        return Set.of(EntityType.CHICKEN);
     }
 
     public static EntityType hasSnowTrail()
@@ -359,6 +361,30 @@ public class EntityTypeUtils
     private static final Map<EntityType, Boolean> isEnemyMap = new Object2ObjectArrayMap<>();
 
     private static final Location spawnLocation = new Location(null, 0d, -4096d, 0d);
+
+    static
+    {
+        isEnemyMap.put(EntityType.BREEZE, true);
+    }
+
+    @Deprecated
+    @Nullable
+    public static String getStepSound(EntityType type)
+    {
+        if (type == EntityType.PLAYER) return null;
+        return "entity.%s.step".formatted(type.getKey().getKey());
+    }
+
+    @Nullable
+    public static String getDamageSound(EntityType type)
+    {
+        if (type == EntityType.PLAYER) return null;
+
+        if (type == EntityType.ARMOR_STAND)
+            return Sound.ENTITY_ARMOR_STAND_HIT.key().asString();
+
+        return "entity.%s.hurt".formatted(type.getKey().getKey());
+    }
 
     public static boolean isEnemy(EntityType type)
     {

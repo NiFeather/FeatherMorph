@@ -12,6 +12,7 @@ import xiamomc.morph.messages.HelpStrings;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.MorphMessageStore;
 import xiamomc.morph.messages.vanilla.VanillaMessageStore;
+import xiamomc.morph.misc.skins.PlayerSkinProvider;
 import xiamomc.morph.network.server.MorphClientHandler;
 import xiamomc.morph.storage.skill.SkillAbilityConfigurationStore;
 import xiamomc.pluginbase.Annotations.Resolved;
@@ -94,6 +95,8 @@ public class ReloadSubCommand extends MorphPluginObject implements ISubCommand
                 config.reload();
                 skills.reloadConfiguration();
                 morphManager.reloadConfiguration();
+
+                PlayerSkinProvider.getInstance().reload();
             }
 
             if (reloadsMessage)

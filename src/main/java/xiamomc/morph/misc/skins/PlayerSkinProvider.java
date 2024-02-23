@@ -15,6 +15,7 @@ import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.misc.MorphGameProfile;
 import xiamomc.morph.misc.NmsRecord;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -141,7 +142,7 @@ public class PlayerSkinProvider extends MorphPluginObject
     public CompletableFuture<Optional<GameProfile>> fetchSkin(String profileName)
     {
         var player = Bukkit.getPlayerExact(profileName);
-        if (player != null)
+        if (player != null && player.getPlayerProfile().hasTextures())
         {
             var profile = NmsRecord.ofPlayer(player).gameProfile;
             skinCache.cache(profile);
@@ -187,4 +188,36 @@ public class PlayerSkinProvider extends MorphPluginObject
 
         return req;
     }
+
+    //region Utils
+
+    public List<SingleSkin> getAllSkins()
+    {
+        return skinCache.listAll();
+    }
+
+    public void dropSkin(String name)
+    {
+        skinCache.drop(name);
+    }
+
+    public void dropAll()
+    {
+        skinCache.dropAll();
+    }
+
+    public void reload()
+    {
+        skinCache.reloadConfiguration();
+    }
+
+    public void invalidate(String name)
+    {
+        var skin = skinCache.getRaw(name);
+        if(skin == null) return;
+
+        skin.expiresAt = 0;
+    }
+
+    //endregion
 }

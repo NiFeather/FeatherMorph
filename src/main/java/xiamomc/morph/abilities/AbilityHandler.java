@@ -129,6 +129,7 @@ public class AbilityHandler extends MorphPluginObject
                 new SpeedBoostAbility(),
                 new TakesDamageFromWaterAbility(),
                 new WardenLessAwareAbility(),
+                new WardenAbility(),
                 new ChatOverrideAbility(),
                 new BossbarAbility(),
                 new NoSweetBushDamageAbility(),

@@ -1,6 +1,9 @@
 package xiamomc.morph.backends.fallback;
 
+import com.google.common.graph.Network;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -8,6 +11,16 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.backends.DisguiseBackend;
 import xiamomc.morph.backends.DisguiseWrapper;
+import xiamomc.morph.backends.WrapperAttribute;
+import xiamomc.morph.backends.server.ServerDisguiseWrapper;
+import xiamomc.morph.messages.BackendStrings;
+import xiamomc.morph.misc.DisguiseState;
+import xiamomc.morph.misc.NetworkingHelper;
+import xiamomc.morph.network.commands.S2C.clientrender.S2CRenderMapAddCommand;
+import xiamomc.morph.network.commands.S2C.clientrender.S2CRenderMapRemoveCommand;
+import xiamomc.morph.network.server.MorphClientHandler;
+import xiamomc.pluginbase.Annotations.Resolved;
+import xiamomc.pluginbase.Messages.FormattableMessage;
 
 import java.util.Map;
 
@@ -22,6 +35,12 @@ public class NilBackend extends DisguiseBackend<NilDisguise, NilWrapper>
     public String getIdentifier()
     {
         return "nil";
+    }
+
+    @Override
+    public FormattableMessage getDisplayName()
+    {
+        return BackendStrings.nilBackendName();
     }
 
     @Override
@@ -68,7 +87,33 @@ public class NilBackend extends DisguiseBackend<NilDisguise, NilWrapper>
         return playerFallbackWrapperMap.getOrDefault(player, null);
     }
 
+    /**
+     * 从给定的Wrapper克隆一个属于此后端的新Wrapper
+     *
+     * @param otherWrapper 可能属于其他后端的Wrapper
+     * @return 一个新的属于此后端的Wrapper
+     */
+    @Override
+    public NilWrapper cloneWrapperFrom(DisguiseWrapper<?> otherWrapper)
+    {
+        return otherWrapper instanceof NilWrapper nilWrapper
+                ? cloneWrapper(nilWrapper)
+                : cloneOther(otherWrapper);
+    }
+
+    private NilWrapper cloneWrapper(NilWrapper other)
+    {
+        return (NilWrapper) other.clone();
+    }
+
+    private NilWrapper cloneOther(DisguiseWrapper<?> other)
+    {
+        return NilWrapper.fromExternal(other, this);
+    }
+
     private final Map<Player, NilWrapper> playerFallbackWrapperMap = new Object2ObjectOpenHashMap<>();
+
+    private final NetworkingHelper networkingHelper = new NetworkingHelper();
 
     @Override
     public boolean disguise(Player player, DisguiseWrapper<?> rawWrapper)
@@ -79,9 +124,25 @@ public class NilBackend extends DisguiseBackend<NilDisguise, NilWrapper>
         if (playerFallbackWrapperMap.containsKey(player))
             unDisguise(player);
 
+        //发送元数据
+
+        var players = new ObjectArrayList<>(Bukkit.getOnlinePlayers());
+        players.remove(player);
+        var cmd = new S2CRenderMapAddCommand(player.getEntityId(), wrapper.read(WrapperAttribute.identifier));
+        players.forEach(p -> clientHandler.sendCommand(p, cmd));
+
+        networkingHelper.prepareMeta(player)
+                .forWrapper(rawWrapper)
+                .send();
+
+        wrapper.setBindingPlayer(player);
+
         playerFallbackWrapperMap.put(player, wrapper);
         return true;
     }
+
+    @Resolved
+    private MorphClientHandler clientHandler;
 
     @Override
     public boolean unDisguise(Player player)
@@ -90,6 +151,11 @@ public class NilBackend extends DisguiseBackend<NilDisguise, NilWrapper>
 
         if (wrapper != null)
             wrapper.dispose();
+
+        var cmd = new S2CRenderMapRemoveCommand(player.getEntityId());
+        var players = new ObjectArrayList<>(Bukkit.getOnlinePlayers());
+        players.remove(player);
+        players.forEach(p -> clientHandler.sendCommand(p, cmd));
 
         playerFallbackWrapperMap.remove(player);
 

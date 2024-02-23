@@ -19,10 +19,7 @@ import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Exceptions.NullDependencyException;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class SingleWatcher extends MorphPluginObject
@@ -50,6 +47,20 @@ public abstract class SingleWatcher extends MorphPluginObject
     public final UUID bindingUUID;
 
     private Player bindingPlayer;
+
+    public boolean isActive()
+    {
+        // 以目前的框架来看，似乎只能这样了 :(
+        if (bindingPlayer.isOnline())
+        {
+            return true;
+        }
+        else
+        {
+            var player = Bukkit.getPlayer(bindingUUID);
+            return player != null;
+        }
+    }
 
     public Player getBindingPlayer()
     {
