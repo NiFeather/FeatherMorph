@@ -599,6 +599,7 @@ public class DisguiseState extends MorphPluginObject
         public Sound ambientSoundSecondary;
         private int soundTime;
         private double soundFrequency = 0D;
+        private float soundVolume = 1f;
 
         public void resetSoundTime()
         {
@@ -657,7 +658,12 @@ public class DisguiseState extends MorphPluginObject
                 else if (sound != null && random.nextInt((int)(1000 * frequencyScale)) < soundTime)
                 {
                     soundTime = -(int)(ambientInterval * frequencyScale);
-                    bindingPlayer.getWorld().playSound(bindingPlayer.getLocation(), sound.name().asString(), soundCategory, 1f, 1f);
+                    bindingPlayer.getWorld().playSound(
+                            bindingPlayer.getLocation(),
+                            sound.name().asString(),
+                            soundCategory,
+                            soundVolume,
+                            1f);
                 }
             }
         }
@@ -687,6 +693,7 @@ public class DisguiseState extends MorphPluginObject
             var sound = soundEvent.sound();
             if (sound == null) return;
 
+            this.soundVolume = soundEvent.volume();
             this.ambientInterval = soundEvent.interval();
             var pitch = isBaby ? 1.5F : 1F;
 

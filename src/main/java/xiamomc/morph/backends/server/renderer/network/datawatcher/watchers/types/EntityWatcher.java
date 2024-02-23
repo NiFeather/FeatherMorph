@@ -58,7 +58,7 @@ public class EntityWatcher extends SingleWatcher
             bitMask |= (byte) 0x80;
 
         write(values.GENERAL, bitMask);
-        write(values.SILENT, true);
+        //write(values.SILENT, true);
         write(values.NO_GRAVITY, !player.hasGravity());
         write(values.POSE, nmsPlayer.getPose());
         write(values.FROZEN_TICKS, nmsPlayer.getTicksFrozen());
