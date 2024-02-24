@@ -298,7 +298,7 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
         //todo: 激活刷新时也刷新到玩家
         if (bindingWatcher instanceof InventoryLivingWatcher)
         {
-            bindingWatcher.write(EntryIndex.DISPLAY_FAKE_EQUIPMENT, read(WrapperAttribute.displayFakeEquip));
+            bindingWatcher.write(EntryIndex.DISPLAY_FAKE_EQUIPMENT, readOrDefault(WrapperAttribute.displayFakeEquip));
             bindingWatcher.write(EntryIndex.EQUIPMENT, this.equipment);
         }
 

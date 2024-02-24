@@ -39,7 +39,7 @@ public class PlayerWatcher extends InventoryLivingWatcher
     }
 
     @Override
-    protected void onCustomWrite(RegistryKey<?> key, Object oldVal, Object newVal)
+    protected <X> void onCustomWrite(RegistryKey<X> key, X oldVal, X newVal)
     {
         super.onCustomWrite(key, oldVal, newVal);
         var player = getBindingPlayer();

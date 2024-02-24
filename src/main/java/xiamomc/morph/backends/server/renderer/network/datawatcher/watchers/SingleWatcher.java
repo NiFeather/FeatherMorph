@@ -14,7 +14,6 @@ import xiamomc.morph.backends.server.renderer.network.datawatcher.values.Abstrac
 import xiamomc.morph.backends.server.renderer.network.datawatcher.values.SingleValue;
 import xiamomc.morph.backends.server.renderer.network.registries.RegistryKey;
 import xiamomc.morph.backends.server.renderer.utilties.WatcherUtils;
-import xiamomc.morph.utilities.NbtUtils;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Exceptions.NullDependencyException;
@@ -117,7 +116,7 @@ public abstract class SingleWatcher extends MorphPluginObject
         onCustomWrite(key, prev, value);
     }
 
-    protected void onCustomWrite(RegistryKey<?> key, @Nullable Object oldVal, Object newVal)
+    protected <X> void onCustomWrite(RegistryKey<X> key, @Nullable X oldVal, @Nullable X newVal)
     {
     }
 
@@ -179,13 +178,13 @@ public abstract class SingleWatcher extends MorphPluginObject
 
     public <X> void write(SingleValue<X> singleValue, X value)
     {
-        var prev = registry.getOrDefault(singleValue, null);
+        var prev = (X) registry.getOrDefault(singleValue, null);
         registry.put(singleValue, value);
 
         if (!value.equals(prev))
             dirtySingles.put(singleValue, value);
 
-        onTrackerWrite(singleValue.index(), prev, value);
+        onTrackerWrite(singleValue, prev, value);
 
         if (!syncing)
             sendPacketToAffectedPlayers(packetFactory.buildDiffMetaPacket(getBindingPlayer(), this));
@@ -211,7 +210,7 @@ public abstract class SingleWatcher extends MorphPluginObject
         return packetFactory;
     }
 
-    protected void onTrackerWrite(int index, Object oldVal, Object newVal)
+    protected <X> void onTrackerWrite(SingleValue<X> single, @Nullable X oldVal, @Nullable X newVal)
     {
     }
 
