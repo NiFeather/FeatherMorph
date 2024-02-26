@@ -85,9 +85,11 @@ public class SkillAbilityConfiguration
         this.identifier = key.asString();
     }
 
-    public void setIdentifier(String id)
+    public SkillAbilityConfiguration setIdentifier(String id)
     {
         this.identifier = id;
+
+        return this;
     }
 
     //region 主动技能
@@ -106,9 +108,10 @@ public class SkillAbilityConfiguration
         return cooldown;
     }
 
-    public void setCooldown(int newCd)
+    public SkillAbilityConfiguration setCooldown(int newCd)
     {
         this.cooldown = newCd;
+        return this;
     }
 
     @Expose
@@ -146,10 +149,12 @@ public class SkillAbilityConfiguration
      * @apiNote 内部方法
      * @param key ID
      */
-    public void setSkillIdentifier(NamespacedKey key)
+    public SkillAbilityConfiguration setSkillIdentifier(NamespacedKey key)
     {
         skillIdentifier = key;
         rawSkillidentifier = key.asString();
+
+        return this;
     }
 
     //endregion 主动技能
@@ -165,22 +170,26 @@ public class SkillAbilityConfiguration
         return abilitiyIdentifiers;
     }
 
-    private void setAbilitiyIdentifiers(List<String> identifiers)
+    private SkillAbilityConfiguration setAbilitiyIdentifiers(List<String> identifiers)
     {
         abilitiyIdentifiers.clear();
 
         if (identifiers != null)
             abilitiyIdentifiers.addAll(identifiers);
+
+        return this;
     }
 
-    public void addAbilityIdentifier(NamespacedKey id)
+    public SkillAbilityConfiguration addAbilityIdentifier(NamespacedKey id)
     {
         var idString = id.asString();
 
         if (abilitiyIdentifiers.stream().anyMatch(s -> s.equals(idString)))
-            return;
+            return this;
 
         this.abilitiyIdentifiers.add(idString);
+
+        return this;
     }
 
     //endregion
@@ -245,12 +254,14 @@ public class SkillAbilityConfiguration
     }
 
     /**
-     * 添加一个技能设置用于存储
+     * 添加一个技能设置用于存储。
+     * <bold>若此存储已经有此技能的配置，那么将更新不存在的条目</bold>
      *
+     * @apiNote 如果要更新一个列表、集合或类似的东西，请使用 {@link SkillAbilityConfiguration#setOption(String, ISkillOption)}
      * @param identifier 技能ID
      * @param option 目标设置
      */
-    public void addOption(NamespacedKey identifier, ISkillOption option)
+    public SkillAbilityConfiguration appendOption(NamespacedKey identifier, ISkillOption option)
     {
         Map<String, Object> currentOptionMap = options == null ? null : options.getOrDefault(identifier.asString(), null);
 
@@ -264,18 +275,30 @@ public class SkillAbilityConfiguration
         {
             this.setOption(identifier.asString(), option.toMap());
         }
+
+        return this;
     }
 
-    public void setOption(String identifier, Map<String, Object> map)
+    public SkillAbilityConfiguration setOption(String identifier, Map<String, Object> map)
     {
         if (options != null)
             this.options.put(identifier, map);
+
+        return this;
     }
 
-    public void setOption(String identifier, ISkillOption option)
+    /**
+     * 将给定ID对应的配置设置或覆盖为给定的option
+     * @param identifier 目标ID
+     * @param option 要设置或覆盖的{@link ISkillOption}
+     * @return this
+     */
+    public SkillAbilityConfiguration setOption(String identifier, ISkillOption option)
     {
         if (options != null && option != null)
-            setOption(identifier, option.toMap());
+            return setOption(identifier, option.toMap());
+
+        return this;
     }
 
     //endregion 技能设置

@@ -4,6 +4,7 @@ import com.mojang.authlib.GameProfile;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.storage.MorphJsonBasedStorage;
 
 import java.util.List;
@@ -67,11 +68,17 @@ public class SkinCache extends MorphJsonBasedStorage<SkinCacheRoot>
     {
     }
 
+    @Nullable
+    SingleSkin getRaw(String name)
+    {
+        return storingObject.storedSkins.stream().filter(ss ->
+                ss.name.equalsIgnoreCase(name)).findFirst().orElse(null);
+    }
+
     @NotNull
     public SkinRecord get(String name)
     {
-        var single = storingObject.storedSkins.stream().filter(ss ->
-                ss.name.equalsIgnoreCase(name)).findFirst().orElse(null);
+        var single = getRaw(name);
 
         if (single == null) return new SkinRecord(Optional.empty(), true);
 

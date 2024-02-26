@@ -45,7 +45,7 @@ public class BackendSubCommand extends MorphPluginObject implements ISubCommand
     @Override
     public @Nullable String getPermissionRequirement()
     {
-        return CommonPermissions.BACKEND;
+        return CommonPermissions.SET_BACKEND;
     }
 
     @Override

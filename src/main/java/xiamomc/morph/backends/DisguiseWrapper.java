@@ -371,6 +371,7 @@ public abstract class DisguiseWrapper<TInstance>
         }
     }
 
+    @Nullable
     public <T> T read(WrapperAttribute<T> attribute)
     {
         var obj = readOrDefault(attribute, null);

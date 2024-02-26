@@ -61,34 +61,31 @@ public class AttributeModifyingAbility extends MorphAbility<AttributeModifyOptio
         return super.applyToPlayer(player, state);
     }
 
-    private final String attributeModifierName = "FMAbilityModifier";
+    public static final String attributeModifierName = "FMAbilityModifier";
 
     @Override
     public boolean revokeFromPlayer(Player player, DisguiseState state)
     {
-        if (super.revokeFromPlayer(player, state))
+        if (!super.revokeFromPlayer(player, state))
+            return false;
+
+        var option = this.getOptionFor(state);
+        if (option == null) return true;
+
+        for (var attributeInfo : option.modifiers)
         {
-            var option = this.getOptionFor(state);
-            if (option == null) return true;
+            var attributeInstance = this.getInstanceFor(player, attributeInfo);
 
-            for (var attributeInfo : option.modifiers)
-            {
-                var attributeInstance = this.getInstanceFor(player, attributeInfo);
+            if (attributeInstance == null) continue;
 
-                if (attributeInstance != null)
-                {
-                    var modifiers = attributeInstance.getModifiers().stream()
-                            .filter(a -> a.getName().equals(attributeModifierName))
-                            .toList();
+            var modifiers = attributeInstance.getModifiers().stream()
+                    .filter(a -> a.getName().equals(attributeModifierName))
+                    .toList();
 
-                    modifiers.forEach(attributeInstance::removeModifier);
-                }
-            }
-
-            return true;
+            modifiers.forEach(attributeInstance::removeModifier);
         }
 
-        return false;
+        return true;
     }
 
     @Nullable

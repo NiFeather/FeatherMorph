@@ -1,12 +1,11 @@
 package xiamomc.morph.commands.subcommands.plugin;
 
 import com.destroystokyo.paper.profile.CraftPlayerProfile;
-import com.destroystokyo.paper.profile.PlayerProfile;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.TextDecoration;
-import net.minecraft.nbt.NbtUtils;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -20,18 +19,16 @@ import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.SkinCacheStrings;
 import xiamomc.morph.misc.CapeURL;
 import xiamomc.morph.misc.DisguiseTypes;
+import xiamomc.morph.misc.MorphGameProfile;
 import xiamomc.morph.misc.MorphParameters;
 import xiamomc.morph.misc.permissions.CommonPermissions;
 import xiamomc.morph.misc.skins.PlayerSkinProvider;
-import xiamomc.morph.misc.skins.SingleSkin;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
 import xiamomc.pluginbase.Command.ISubCommand;
 import xiamomc.pluginbase.Messages.FormattableMessage;
 
-import java.util.Arrays;
-import java.util.Base64;
 import java.util.List;
 
 public class SkinCacheSubCommand extends MorphPluginObject implements ISubCommand
@@ -45,7 +42,7 @@ public class SkinCacheSubCommand extends MorphPluginObject implements ISubComman
     @Override
     public @Nullable String getPermissionRequirement()
     {
-        return CommonPermissions.SKIN_CACHE;
+        return CommonPermissions.ACCESS_SKIN_CACHE;
     }
 
     @Override
@@ -180,6 +177,7 @@ public class SkinCacheSubCommand extends MorphPluginObject implements ISubComman
 
                     sender.sendMessage(MessageUtils.prefixes(sender, SkinCacheStrings.fetchingSkin().resolve("name", targetName)));
 
+                    skinProvider.invalidate(targetName);
                     skinProvider.fetchSkin(targetName)
                             .thenAccept(optional ->
                             {
@@ -297,12 +295,123 @@ public class SkinCacheSubCommand extends MorphPluginObject implements ISubComman
                     return true;
                 })
 
+                .startNew()
+                .name("copy")
+                .onFilter(this::filterSkinName)
+                .executes((sender, args) ->
+                {
+                    if (args.size() < 2)
+                    {
+                        sender.sendMessage(MessageUtils.prefixes(sender, CommandStrings.listNoEnoughArguments()));
+                        return true;
+                    }
+
+                    var sourceName = args.get(0);
+                    var targetName = args.get(1);
+
+                    copyOrMoveSkin(sender, sourceName, targetName, false);
+
+                    return true;
+                })
+
+                .startNew()
+                .name("rename")
+                .onFilter(this::filterSkinName)
+                .executes((sender, args) ->
+                {
+                    if (args.size() < 2)
+                    {
+                        sender.sendMessage(MessageUtils.prefixes(sender, CommandStrings.listNoEnoughArguments()));
+                        return true;
+                    }
+
+                    var sourceName = args.get(0);
+                    var targetName = args.get(1);
+
+                    copyOrMoveSkin(sender, sourceName, targetName, true);
+
+                    return true;
+                })
+
                 .buildAll();
+    }
+
+    private void copyOrMoveSkin(CommandSender sender, String sourceName, String targetName, boolean isMoveOperation)
+    {
+        FormattableMessage msg;
+        var result = isMoveOperation ? this.moveSkin(sourceName, targetName) : this.copySkin(sourceName, targetName);
+        switch (result)
+        {
+            case NO_SUCH_SKIN ->
+            {
+                msg = SkinCacheStrings.targetSkinNotFound();
+            }
+            case SUCCESS ->
+            {
+                msg = (isMoveOperation ? SkinCacheStrings.moveSuccess() : SkinCacheStrings.copySuccess())
+                        .resolve("source", sourceName)
+                        .resolve("target", targetName);
+            }
+            case TARGET_EXISTS ->
+            {
+                msg = SkinCacheStrings.copyMoveTargetExists();
+            }
+            default ->
+            {
+                // Make IDEA happy...
+                msg = new FormattableMessage(plugin, "Nil!");
+            }
+        }
+        sender.sendMessage(MessageUtils.prefixes(sender, msg));
+
+    }
+
+    private enum CopyMoveResult
+    {
+        NO_SUCH_SKIN,
+        TARGET_EXISTS,
+        SUCCESS
+    }
+
+    private CopyMoveResult copySkin(String sourceName, String targetName)
+    {
+        var sourceProfile = skinProvider.getCachedProfile(sourceName);
+        if (sourceProfile == null)
+            return CopyMoveResult.NO_SUCH_SKIN;
+
+        var oTarget = skinProvider.getCachedProfile(targetName);
+        if (oTarget != null)
+            return CopyMoveResult.TARGET_EXISTS;
+
+        var targetProfile = new MorphGameProfile(sourceProfile);
+        targetProfile.setName(targetName);
+
+        skinProvider.cacheProfile(CraftPlayerProfile.asBukkitCopy(targetProfile));
+
+        return CopyMoveResult.SUCCESS;
+    }
+
+    private CopyMoveResult moveSkin(String sourceName, String targetName)
+    {
+        var sourceProfile = skinProvider.getCachedProfile(sourceName);
+        if (sourceProfile == null)
+            return CopyMoveResult.NO_SUCH_SKIN;
+
+        var oTarget = skinProvider.getCachedProfile(targetName);
+        if (oTarget != null)
+            return CopyMoveResult.TARGET_EXISTS;
+
+        this.copySkin(sourceName, targetName);
+        skinProvider.dropSkin(sourceName);
+
+        return CopyMoveResult.SUCCESS;
     }
 
     private List<String> filterSkinName(List<String> args)
     {
         var targetName = args.isEmpty() ? "" : args.get(0);
+
+        if (args.size() > 1) return List.of();
 
         return skinProvider.getAllSkins()
                 .stream()

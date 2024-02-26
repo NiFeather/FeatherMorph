@@ -18,7 +18,7 @@ public class InventoryLivingWatcher extends LivingEntityWatcher
     private PacketFactory packetFactory;
 
     @Override
-    protected void onCustomWrite(RegistryKey<?> key, Object oldVal, Object newVal)
+    protected <X> void onCustomWrite(RegistryKey<X> key, X oldVal, X newVal)
     {
         super.onCustomWrite(key, oldVal, newVal);
 

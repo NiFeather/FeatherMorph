@@ -7,6 +7,7 @@ import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -21,6 +22,7 @@ import org.bukkit.inventory.InventoryHolder;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.RevealingHandler;
+import xiamomc.morph.abilities.impl.AttributeModifyingAbility;
 import xiamomc.morph.commands.MorphCommandManager;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
@@ -359,6 +361,25 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
                         config.shownMorphClientHint = true;
                     }
                 }, 20 * 3);
+        }
+
+        for (var attribute : Attribute.values())
+        {
+            var instance = player.getAttribute(attribute);
+
+            if (instance == null) continue;
+
+            var matches = instance.getModifiers()
+                    .stream().filter(m -> m.getName().equalsIgnoreCase(AttributeModifyingAbility.attributeModifierName))
+                    .toList();
+
+            try
+            {
+                matches.forEach(instance::removeModifier);
+            }
+            catch (Throwable ignored)
+            {
+            }
         }
 
         if (state != null)

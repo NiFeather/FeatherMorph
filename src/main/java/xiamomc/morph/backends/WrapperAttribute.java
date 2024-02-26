@@ -12,7 +12,7 @@ public class WrapperAttribute<T>
 {
     public static final WrapperAttribute<String> identifier = new WrapperAttribute<>("identifier", (o) -> "nil");
     public static final WrapperAttribute<Boolean> showArms = new WrapperAttribute<>("show_arms", (o) -> false);
-    public static final WrapperAttribute<Optional<GameProfile>> profile = new WrapperAttribute<>("profile", (o) -> Optional.of(new GameProfile(Util.NIL_UUID, "NIL")));
+    public static final WrapperAttribute<Optional<GameProfile>> profile = new WrapperAttribute<>("profile", (o) -> Optional.empty());
     public static final WrapperAttribute<CompoundTag> nbt = new WrapperAttribute<>("nbt", (o) -> new CompoundTag());
     public static final WrapperAttribute<Boolean> displayFakeEquip = new WrapperAttribute<>("display_fake_equip", (o) -> false);
     public static final WrapperAttribute<String> disguiseName = new WrapperAttribute<>("disguise_name", (o) -> "");

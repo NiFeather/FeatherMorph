@@ -3,6 +3,7 @@ package xiamomc.morph.storage.skill;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.bukkit.NamespacedKey;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.EntityType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -10,6 +11,8 @@ import xiamomc.morph.MorphManager;
 import xiamomc.morph.abilities.AbilityHandler;
 import xiamomc.morph.abilities.AbilityType;
 import xiamomc.morph.abilities.IMorphAbility;
+import xiamomc.morph.abilities.impl.AttributeModifyingAbility;
+import xiamomc.morph.abilities.options.AttributeModifyOption;
 import xiamomc.morph.skills.DefaultConfigGenerator;
 import xiamomc.morph.skills.IMorphSkill;
 import xiamomc.morph.skills.MorphSkillHandler;
@@ -53,7 +56,7 @@ public class SkillAbilityConfigurationStore extends MorphJsonBasedStorage<SkillA
     @Override
     protected @NotNull SkillAbilityConfigurationContainer createDefault()
     {
-        return DefaultConfigGenerator.getDefaultSkillConfiguration();
+        return DefaultConfigGenerator.createInstance().generateConfiguration();
     }
 
     @Override
@@ -62,7 +65,7 @@ public class SkillAbilityConfigurationStore extends MorphJsonBasedStorage<SkillA
         return "技能存储";
     }
 
-    private final int targetVersion = 24;
+    private final int targetVersion = 25;
 
     @Resolved
     private MorphSkillHandler skillHandler;
@@ -287,9 +290,48 @@ public class SkillAbilityConfigurationStore extends MorphJsonBasedStorage<SkillA
                 }
             }
 
+            //铁傀儡和监守者的攻击伤害和速度
+            if (version < 25)
+            {
+                var wardenConfig = getConfigFor(EntityType.WARDEN, config);
+
+                if (wardenConfig != null)
+                {
+                    var option = (AttributeModifyOption) wardenConfig.getAbilityOptions(abilityHandler.getAbility(AbilityType.ATTRIBUTE));
+
+                    if (option != null)
+                    {
+                        option.with(Attribute.GENERIC_ATTACK_DAMAGE, AttributeModifyOption.OperationType.add, 30)
+                                .with(Attribute.GENERIC_ATTACK_SPEED, AttributeModifyOption.OperationType.multiply_base, -0.6d);
+
+                        wardenConfig.setOption(AbilityType.ATTRIBUTE.asString(), option);
+                    }
+                }
+
+                var ironConfig = getConfigFor(EntityType.IRON_GOLEM, config);
+                if (ironConfig != null)
+                {
+                    var option = (AttributeModifyOption) ironConfig.getAbilityOptions(new AttributeModifyingAbility());
+
+                    if (option != null)
+                    {
+                        option.with(Attribute.GENERIC_ATTACK_DAMAGE, AttributeModifyOption.OperationType.add, 15)
+                                .with(Attribute.GENERIC_ATTACK_SPEED, AttributeModifyOption.OperationType.multiply_base, -0.6d);
+
+                        ironConfig.setOption(AbilityType.ATTRIBUTE.asString(), option);
+                    }
+                }
+
+
+                //var ds = this.createGson().toJson(storingObject);
+                //logger.info(ds);
+            }
+
             //更新默认设置
-            DefaultConfigGenerator.addAbilityConfigurations(config.configurations);
-            DefaultConfigGenerator.addSkillConfigurations(config.configurations);
+            var generator = DefaultConfigGenerator.createInstance();
+            generator.setConfigurationList(config.configurations);
+            generator.generateSkills();
+            generator.generateAbilities();
 
             config.version = targetVersion;
 
@@ -309,7 +351,7 @@ public class SkillAbilityConfigurationStore extends MorphJsonBasedStorage<SkillA
     private SkillAbilityConfiguration getConfigFor(String id, SkillAbilityConfigurationContainer config)
     {
         return config.configurations.stream()
-                .filter(s -> s != null && s.getIdentifier().equals(EntityType.WITCH.getKey().asString()))
+                .filter(s -> s != null && s.getIdentifier().equals(id))
                 .findFirst().orElse(null);
     }
 

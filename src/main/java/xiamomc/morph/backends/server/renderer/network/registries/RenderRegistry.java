@@ -1,6 +1,7 @@
 package xiamomc.morph.backends.server.renderer.network.registries;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -10,6 +11,7 @@ import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
 import xiamomc.pluginbase.Exceptions.NullDependencyException;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -57,6 +59,11 @@ public class RenderRegistry extends MorphPluginObject
 
     private final Map<UUID, SingleWatcher> watcherMap = new Object2ObjectOpenHashMap<>();
 
+    public List<SingleWatcher> getWatchers()
+    {
+        return new ObjectArrayList<>(watcherMap.values());
+    }
+
     @Nullable
     public SingleWatcher getWatcher(Entity entity)
     {
@@ -102,6 +109,8 @@ public class RenderRegistry extends MorphPluginObject
     public void unregister(UUID uuid)
     {
         var watcher = watcherMap.remove(uuid);
+        if (watcher == null) return;
+
         callUnregister(Bukkit.getPlayer(uuid), watcher);
 
         watcher.dispose();

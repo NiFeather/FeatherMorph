@@ -14,15 +14,11 @@ import xiamomc.morph.backends.server.renderer.network.datawatcher.values.Abstrac
 import xiamomc.morph.backends.server.renderer.network.datawatcher.values.SingleValue;
 import xiamomc.morph.backends.server.renderer.network.registries.RegistryKey;
 import xiamomc.morph.backends.server.renderer.utilties.WatcherUtils;
-import xiamomc.morph.utilities.NbtUtils;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Exceptions.NullDependencyException;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class SingleWatcher extends MorphPluginObject
@@ -50,6 +46,20 @@ public abstract class SingleWatcher extends MorphPluginObject
     public final UUID bindingUUID;
 
     private Player bindingPlayer;
+
+    public boolean isActive()
+    {
+        // 以目前的框架来看，似乎只能这样了 :(
+        if (bindingPlayer.isOnline())
+        {
+            return true;
+        }
+        else
+        {
+            var player = Bukkit.getPlayer(bindingUUID);
+            return player != null;
+        }
+    }
 
     public Player getBindingPlayer()
     {
@@ -106,7 +116,7 @@ public abstract class SingleWatcher extends MorphPluginObject
         onCustomWrite(key, prev, value);
     }
 
-    protected void onCustomWrite(RegistryKey<?> key, @Nullable Object oldVal, Object newVal)
+    protected <X> void onCustomWrite(RegistryKey<X> key, @Nullable X oldVal, @Nullable X newVal)
     {
     }
 
@@ -168,13 +178,13 @@ public abstract class SingleWatcher extends MorphPluginObject
 
     public <X> void write(SingleValue<X> singleValue, X value)
     {
-        var prev = registry.getOrDefault(singleValue, null);
+        var prev = (X) registry.getOrDefault(singleValue, null);
         registry.put(singleValue, value);
 
         if (!value.equals(prev))
             dirtySingles.put(singleValue, value);
 
-        onTrackerWrite(singleValue.index(), prev, value);
+        onTrackerWrite(singleValue, prev, value);
 
         if (!syncing)
             sendPacketToAffectedPlayers(packetFactory.buildDiffMetaPacket(getBindingPlayer(), this));
@@ -200,7 +210,7 @@ public abstract class SingleWatcher extends MorphPluginObject
         return packetFactory;
     }
 
-    protected void onTrackerWrite(int index, Object oldVal, Object newVal)
+    protected <X> void onTrackerWrite(SingleValue<X> single, @Nullable X oldVal, @Nullable X newVal)
     {
     }
 

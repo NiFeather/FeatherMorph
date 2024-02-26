@@ -126,7 +126,14 @@ bukkit {
 publishing {
     publications.create<MavenPublication>("maven") {
         from(components["java"])
+
+        // Workaround for no normal artifact present
+        artifact("build/libs/${rootProject.name}-${version}.jar")
     }
+}
+
+java {
+    withSourcesJar()
 }
 
 tasks.build {
