@@ -70,7 +70,7 @@ public class EntityTypeUtils
         var nmsType = getNmsType(bukkitType);
 
         var serverWorld = ((CraftWorld) Bukkit.getWorlds().get(0)).getHandle();
-        var entity = nmsType.create(serverWorld, null, e -> e.remove(Entity.RemovalReason.DISCARDED), BlockPos.ZERO, MobSpawnType.COMMAND, false, false);
+        var entity = nmsType.create(serverWorld, null, EntityTypeUtils::scheduleEntityDiscard, BlockPos.ZERO, MobSpawnType.COMMAND, false, false);
 
         if (entity instanceof Mob mob)
         {
@@ -110,7 +110,7 @@ public class EntityTypeUtils
         }
 
         var serverWorld = ((CraftWorld) Bukkit.getWorlds().get(0)).getHandle();
-        var entity = nmsType.create(serverWorld, null, e -> e.remove(Entity.RemovalReason.DISCARDED), BlockPos.ZERO, MobSpawnType.COMMAND, false, false);
+        var entity = nmsType.create(serverWorld, null, EntityTypeUtils::scheduleEntityDiscard, BlockPos.ZERO, MobSpawnType.COMMAND, false, false);
 
         if (entity == null)
         {
@@ -120,6 +120,13 @@ public class EntityTypeUtils
 
         nmsClassMap.put(type, entity.getClass());
         return entity.getClass();
+    }
+
+    private static void scheduleEntityDiscard(Entity nmsEntity)
+    {
+        var entity = nmsEntity.getBukkitEntity();
+        entity.getScheduler()
+                .run(MorphPlugin.getInstance(), retiredTask -> {}, entity::remove);
     }
 
     public static boolean hasBabyVariant(EntityType type)
