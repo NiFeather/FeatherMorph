@@ -109,6 +109,8 @@ public class RenderRegistry extends MorphPluginObject
     public void unregister(UUID uuid)
     {
         var watcher = watcherMap.remove(uuid);
+        if (watcher == null) return;
+
         callUnregister(Bukkit.getPlayer(uuid), watcher);
 
         watcher.dispose();
