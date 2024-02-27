@@ -4,7 +4,12 @@ import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.events.PacketListener;
+import io.papermc.paper.util.TickThread;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import org.bukkit.Bukkit;
+import org.bukkit.craftbukkit.v1_20_R3.entity.CraftPlayer;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.MorphPluginObject;
@@ -47,6 +52,19 @@ public abstract class ProtocolListener extends MorphPluginObject implements Pack
     private void load(MorphConfigManager configManager)
     {
         configManager.bind(debugOutput, ConfigOption.DEBUG_OUTPUT);
+    }
+
+    @Nullable
+    protected Player getNmsPlayerEntityFrom(PacketEvent event, int id)
+    {
+        //if (!TickThread.isTickThread())
+        //    logger.warn("Not on a tick thread! Caution for exceptions!");
+
+        return Bukkit.getOnlinePlayers()
+                .stream()
+                .filter(p -> p.getEntityId() == id)
+                .map(bukkit -> ((CraftPlayer)bukkit).getHandle())
+                .findFirst().orElse(null);
     }
 
     @Nullable
