@@ -128,10 +128,11 @@ public class SkinCacheSubCommand extends MorphPluginObject implements ISubComman
                     var filterName = args.isEmpty() ? "" : args.get(0);
 
                     var list = new ObjectArrayList<>(stream
-                            .filter(name -> name.toLowerCase().contains(filterName))
+                            .filter(name -> name.toLowerCase().contains(filterName.toLowerCase()))
                             .toList());
 
-                    list.add("*");
+                    if (filterName.isBlank())
+                        list.add("*");
 
                     return list;
                 })

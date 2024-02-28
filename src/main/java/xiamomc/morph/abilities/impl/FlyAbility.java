@@ -1,7 +1,7 @@
 package xiamomc.morph.abilities.impl;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.minecraft.world.level.GameType;
 import net.minecraft.world.phys.Vec3;
 import org.bukkit.GameEvent;
 import org.bukkit.GameMode;
@@ -19,6 +19,7 @@ import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.misc.NmsRecord;
+import xiamomc.morph.misc.permissions.CommonPermissions;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
@@ -86,18 +87,19 @@ public class FlyAbility extends MorphAbility<FlyOption>
     {
         if (plugin.getCurrentTick() % 2 != 0) return true;
 
-        var gameMode = player.getGameMode();
-        if (gameMode == GameMode.CREATIVE || gameMode == GameMode.SPECTATOR)
+        var nmsPlayer = ((CraftPlayer) player).getHandle();
+
+        var gameMode = nmsPlayer.gameMode.getGameModeForPlayer();
+        if (gameMode == GameType.CREATIVE || gameMode == GameType.SPECTATOR)
             return super.handle(player, state);
 
-        var nmsPlayer = ((CraftPlayer) player).getHandle();
-        var config = options.get(state.getSkillLookupIdentifier());
+        var option = options.get(state.getSkillLookupIdentifier());
 
-        var data = nmsPlayer.getFoodData();
-        var allowFlight = this.allowFlight.get()
-                && data.foodLevel > config.getMinimumHunger()
+        var allowFlight = (this.allowFlight.get()
+                && player.getFoodLevel() > option.getMinimumHunger()
                 && !noFlyWorlds.contains(player.getWorld().getName())
-                && !playerBlocked(player);
+                && !playerBlocked(player)
+                && player.hasPermission(CommonPermissions.CAN_FLY)) || player.hasPermission(CommonPermissions.ALWAYS_CAN_FLY);
 
         if (player.isFlying())
         {
@@ -108,8 +110,8 @@ public class FlyAbility extends MorphAbility<FlyOption>
             // 检查玩家飞行速度是否正确
             if (plugin.getCurrentTick() % 10 == 0)
             {
-                var configSpeed = config.getFlyingSpeed();
-                if (player.getFlySpeed() != configSpeed && NmsRecord.ofPlayer(player).gameMode.isSurvival())
+                var configSpeed = option.getFlyingSpeed();
+                if (player.getFlySpeed() != configSpeed && nmsPlayer.gameMode.isSurvival())
                     player.setFlySpeed(configSpeed);
             }
 
@@ -125,7 +127,7 @@ public class FlyAbility extends MorphAbility<FlyOption>
 
             exhaustion = handleMovementForSpeed(delta);
 
-            data.addExhaustion(exhaustion);
+            nmsPlayer.getFoodData().addExhaustion(exhaustion);
 
             if (player.getTicksLived() % 5 == 0)
                 player.getWorld().sendGameEvent(player, GameEvent.FLAP, player.getLocation().toVector());

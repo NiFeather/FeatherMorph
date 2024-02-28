@@ -110,7 +110,9 @@ root:
     idle_consumption: true
 
   # Disable Fly Ability in the following worlds
-  nofly_worlds: []
+  nofly_worlds:
+    - example_world1
+    - example_world2
 
   # Ambient sound options
   ambient_sounds:
@@ -167,8 +169,14 @@ root:
       hotbar: false
 
   # Banned disguises
-  # Disguises in this list won't be available in-game for anyone.
-  bannedDisguises: []
+  # Disguises in this list won't be available in-game for anyone.w
+  #
+  # Use '@default' to disable all disguises under a category, like 'player:@default' or 'minecraft:@default'
+  # Remember to add quotes or the library we use to read the config will panic ;)
+  bannedDisguises:
+    - minecraft:example_mc_disguise
+    - player:a_player_disguise
+    - 'foo:@default'
 
   # NBT blacklist options
   # Defines tags that should not be sent to the client when syncing disguise states.

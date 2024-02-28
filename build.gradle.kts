@@ -116,6 +116,8 @@ bukkit {
         register(permissionRoot + "request.send")
         register(permissionRoot + "request.accept")
         register(permissionRoot + "request.deny")
+
+        register(permissionRoot + "can_fly")
     }
 
     permissions.forEach {
