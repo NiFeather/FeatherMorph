@@ -45,6 +45,9 @@ public class ForceUnmorphSubCommand extends MorphPluginObject implements ISubCom
 
         var onlinePlayers = Bukkit.getOnlinePlayers();
 
+        if (name.isBlank())
+            list.add("*");
+
         for (var p : onlinePlayers)
             if (p.getName().toLowerCase().contains(name.toLowerCase())) list.add(p.getName());
 
