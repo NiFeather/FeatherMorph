@@ -365,15 +365,6 @@ public class EntityTypeUtils
         };
     }
 
-    private static final Map<EntityType, Boolean> isEnemyMap = new Object2ObjectArrayMap<>();
-
-    private static final Location spawnLocation = new Location(null, 0d, -4096d, 0d);
-
-    static
-    {
-        isEnemyMap.put(EntityType.BREEZE, true);
-    }
-
     @Deprecated
     @Nullable
     public static String getStepSound(EntityType type)
@@ -396,31 +387,8 @@ public class EntityTypeUtils
     public static boolean isEnemy(EntityType type)
     {
         if (type == EntityType.PLAYER) return false;
-
-        var cache = isEnemyMap.getOrDefault(type, null);
-        if (cache != null) return cache;
-
         if (type.getEntityClass() == null) return false;
 
-        var world = Bukkit.getWorlds().stream().findFirst().orElse(null);
-        if (world == null) return false;
-
-        boolean isEnemy = false;
-
-        try
-        {
-            var entity = world.spawn(spawnLocation, type.getEntityClass());
-            isEnemy = entity instanceof Enemy;
-
-            ((CraftEntity) entity).getHandle().discard();
-        }
-        catch (Throwable t)
-        {
-            var logger = MorphPlugin.getInstance().getSLF4JLogger();
-            logger.error("Unable to determine whether " + type + " is enemy type: " + t.getMessage());
-        }
-
-        isEnemyMap.put(type, isEnemy);
-        return isEnemy;
+        return Enemy.class.isAssignableFrom(type.getEntityClass());
     }
 }
