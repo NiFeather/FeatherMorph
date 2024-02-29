@@ -122,6 +122,34 @@ bukkit {
     permissions.forEach {
         permission -> permission.default = BukkitPluginDescription.Permission.Default.TRUE
     }
+
+    val opPermsStrList = listOf(
+            permissionRoot + "disguise_revealing",
+            permissionRoot + "manage",
+            permissionRoot + "query",
+            permissionRoot + "queryall",
+            permissionRoot + "reload",
+            permissionRoot + "stat",
+            permissionRoot + "toggle",
+
+            permissionRoot + "lookup",
+            permissionRoot + "skin_cache",
+            permissionRoot + "switch_backend"
+    );
+
+    val opPermsPermList = ArrayList<BukkitPluginDescription.Permission>();
+
+    opPermsStrList.forEach {
+        permStr -> opPermsPermList.add(permissions.register(permStr).get());
+    }
+
+    opPermsPermList.forEach {
+        perm -> perm.default = BukkitPluginDescription.Permission.Default.OP;
+    }
+
+    permissions {
+        register(permissionRoot + "mirror.immune").get().default = BukkitPluginDescription.Permission.Default.FALSE;
+    }
 }
 
 publishing {
