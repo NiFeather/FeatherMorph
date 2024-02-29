@@ -31,13 +31,13 @@ public class StateNameProvider extends MorphPluginObject implements IPlaceholder
         {
             return state != null
                     ? state.getDisguiseIdentifier()
-                    : "无";
+                    : "???";
         }
         else if (type.equalsIgnoreCase("_name"))
         {
             return state != null
                     ? PlainTextComponentSerializer.plainText().serialize(state.getServerDisplay())
-                    : "无";
+                    : "???";
         }
 
         return null;
