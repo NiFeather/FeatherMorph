@@ -38,7 +38,7 @@ public class PlaceholderIntegration extends PlaceholderExpansion
     @Override
     public @NotNull String getVersion()
     {
-        return "0.4.1";
+        return "1.0.10";
     }
 
     private void addPlaceholders(List<IPlaceholderProvider> providerList)

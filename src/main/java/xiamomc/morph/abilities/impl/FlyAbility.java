@@ -6,6 +6,7 @@ import net.minecraft.world.phys.Vec3;
 import org.bukkit.GameEvent;
 import org.bukkit.GameMode;
 import org.bukkit.NamespacedKey;
+import org.bukkit.World;
 import org.bukkit.craftbukkit.v1_20_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -95,11 +96,12 @@ public class FlyAbility extends MorphAbility<FlyOption>
 
         var option = options.get(state.getSkillLookupIdentifier());
 
-        var allowFlight = (this.allowFlight.get()
-                && player.getFoodLevel() > option.getMinimumHunger()
-                && !noFlyWorlds.contains(player.getWorld().getName())
-                && !playerBlocked(player)
-                && player.hasPermission(CommonPermissions.CAN_FLY)) || player.hasPermission(CommonPermissions.ALWAYS_CAN_FLY);
+        var allowFlightConditions = player.getFoodLevel() > option.getMinimumHunger()
+                    && !noFlyWorlds.contains(player.getWorld().getName())
+                    && !playerBlocked(player)
+                    && playerHasCommonFlyPerm(player);
+
+        var allowFlight = this.allowFlight.get() && (allowFlightConditions || player.hasPermission(CommonPermissions.ALWAYS_CAN_FLY));
 
         if (player.isFlying())
         {
@@ -141,6 +143,14 @@ public class FlyAbility extends MorphAbility<FlyOption>
             player.setAllowFlight(allowFlight);
 
         return super.handle(player, state);
+    }
+
+    private boolean playerHasCommonFlyPerm(Player player)
+    {
+        var worldPerm = CommonPermissions.CanFlyIn(player.getWorld().getName());
+
+        return player.hasPermission(CommonPermissions.CAN_FLY)
+                && (!player.isPermissionSet(worldPerm) || player.hasPermission(worldPerm));
     }
 
     private float handleMovementForSpeed(double movementDelta)
