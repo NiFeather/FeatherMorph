@@ -1459,20 +1459,23 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         stateToRecover.forEach(s ->
         {
             var player = s.getPlayer();
-            var config = this.getPlayerMeta(player);
 
-            if (!disguiseDisabled(s.getDisguiseIdentifier()) && config.getUnlockedDisguiseIdentifiers().contains(s.getDisguiseIdentifier()))
+            this.scheduleOn(player, () ->
             {
-                var newState = s.createCopy();
-                s.dispose();
+                var config = this.getPlayerMeta(player);
+                if (!disguiseDisabled(s.getDisguiseIdentifier()) && config.getUnlockedDisguiseIdentifiers().contains(s.getDisguiseIdentifier()))
+                {
+                    var newState = s.createCopy();
+                    s.dispose();
 
-                disguiseFromState(newState);
-                refreshClientState(newState);
+                    disguiseFromState(newState);
+                    refreshClientState(newState);
 
-                player.sendMessage(MessageUtils.prefixes(player, MorphStrings.recoverString()));
-            }
-            else
-                unMorph(nilCommandSource, player, true, true);
+                    player.sendMessage(MessageUtils.prefixes(player, MorphStrings.recoverString()));
+                }
+                else
+                    unMorph(nilCommandSource, player, true, true);
+            });
         });
 
         Bukkit.getOnlinePlayers().forEach(p -> clientHandler.refreshPlayerClientMorphs(this.getPlayerMeta(p).getUnlockedDisguiseIdentifiers(), p));
