@@ -1,5 +1,6 @@
 package xiamomc.morph.utilities;
 
+import io.papermc.paper.util.TickThread;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.server.level.ServerPlayer;
@@ -41,68 +42,58 @@ public class EntityTargetingHelper extends MorphPluginObject
      */
     public void recoverGoal()
     {
-        var toRemoveFromAffect = new ObjectArrayList<net.minecraft.world.entity.Mob>();
-
         if (affectMobsAndPlayers.isEmpty())
             return;
 
+        //todo: Refactor this, or disable on Folia
         affectMobsAndPlayers.forEach((nmsMob, nmsPlayer) ->
         {
             var mob = nmsMob.getBukkitMob();
             var player = nmsPlayer.getBukkitEntity();
-            var state = morphs.getDisguiseStateFor(player);
-
-            EntityType entityType = state == null ? EntityType.PLAYER : state.getEntityType();
-
-            var isHostile = this.hostiles(mob.getType(), entityType);
-            var mobTarget = nmsMob.getTarget();
-
-            if (!isHostile && nmsPlayer.equals(mobTarget))
+            this.scheduleOn(mob, () ->
             {
-                mob.setTarget(null);
-                toRemoveFromAffect.add(nmsMob);
-            }
+                var state = morphs.getDisguiseStateFor(player);
 
-            if (mob.getTarget() == null)
-                toRemoveFromAffect.add(nmsMob);
+                EntityType entityType = state == null ? EntityType.PLAYER : state.getEntityType();
+
+                var isHostile = this.hostiles(mob.getType(), entityType);
+                var mobTarget = nmsMob.getTarget();
+
+                if (!isHostile && nmsPlayer.equals(mobTarget))
+                {
+                    mob.setTarget(null);
+                    affectMobsAndPlayers.remove(nmsMob);
+                }
+
+                if (mob.getTarget() == null)
+                    affectMobsAndPlayers.remove(nmsMob);
+            });
         });
 
-        if (toRemoveFromAffect.size() > 0)
-        {
-            for (var o : toRemoveFromAffect)
-                affectMobsAndPlayers.remove(o);
-        }
-
-        var toRemove = new ObjectArrayList<Mob>();
         entityGoalMap.forEach((mob, goal) ->
         {
             // 跳过已死亡的实体
             if (mob.isDead())
             {
-                toRemove.add(mob);
+                entityGoalMap.remove(mob);
                 return;
             }
 
-            var nmsMob = mob instanceof CraftMob craftMob ? craftMob.getHandle() : null;
-            if (nmsMob == null) return;
+            this.scheduleOn(mob, () ->
+            {
+                var nmsMob = mob instanceof CraftMob craftMob ? craftMob.getHandle() : null;
+                if (nmsMob == null) return;
 
-            // 如果其目标不为null并且目标未死亡，则跳过
-            if (nmsMob.getTarget() != null && !nmsMob.getTarget().isDeadOrDying()) return;
+                // 如果其目标不为null并且目标未死亡，则跳过
+                if (nmsMob.getTarget() != null && !nmsMob.getTarget().isDeadOrDying()) return;
 
-            //logger.info("Recover E %s goal %s".formatted(nmsMob, goal.goal));
-            nmsMob.setTarget(null, EntityTargetEvent.TargetReason.CUSTOM, true);
-            nmsMob.goalSelector.addGoal(goal.priority, goal.goal);
-            nmsMob.goalSelector.removeGoal(goal.replacingGoal);
-            toRemove.add(mob);
+                //logger.info("Recover E %s goal %s".formatted(nmsMob, goal.goal));
+                nmsMob.setTarget(null, EntityTargetEvent.TargetReason.CUSTOM, true);
+                nmsMob.goalSelector.addGoal(goal.priority, goal.goal);
+                nmsMob.goalSelector.removeGoal(goal.replacingGoal);
+                entityGoalMap.remove(mob);
+            });
         });
-
-        if (toRemove.size() > 0)
-        {
-            for (var o : toRemove)
-                entityGoalMap.remove(o);
-
-            toRemove.clear();
-        }
     }
 
     @Initializer
@@ -132,6 +123,23 @@ public class EntityTargetingHelper extends MorphPluginObject
      */
     public void entitySingle(Mob mob)
     {
+        boolean isTickThread = true;
+
+        try
+        {
+            ((CraftMob)mob).getHandle();
+        }
+        catch (Throwable t)
+        {
+            isTickThread = false;
+        }
+
+        if (!isTickThread)
+        {
+            this.scheduleOn(mob, () -> entitySingle(mob));
+            return;
+        }
+
         // 如果实体已有攻击目标，则不做处理
         var nmsMob = mob instanceof CraftMob craftMob ? craftMob.getHandle() : null;
 
