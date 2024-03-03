@@ -279,21 +279,27 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
                 if (i.disposed()) return;
 
-                if (!abilityHandler.handle(p, i))
+                boolean abilitySuccess = true;
+                boolean providerSuccess = true;
+
+                try
+                {
+                    abilitySuccess = abilityHandler.handle(p, i);
+                    providerSuccess = i.getProvider().updateDisguise(p, i);
+                    i.getSoundHandler().update();
+                }
+                catch (Throwable t)
+                {
+                    logger.error("Error occurred updating disguise! " + t.getMessage());
+                    t.printStackTrace();
+                }
+
+                if (!providerSuccess || !abilitySuccess)
                 {
                     p.sendMessage(MessageUtils.prefixes(p, MorphStrings.errorWhileUpdatingDisguise()));
 
                     unMorph(nilCommandSource, p, true, true);
                 }
-
-                if (!i.getProvider().updateDisguise(p, i))
-                {
-                    p.sendMessage(MessageUtils.prefixes(p, MorphStrings.errorWhileUpdatingDisguise()));
-
-                    unMorph(nilCommandSource, p, true, true);
-                }
-
-                i.getSoundHandler().update();
             }, () -> { /* retried */ });
         });
     }

@@ -204,44 +204,61 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
         var player = state.getPlayer();
         if (doHealthScale.get())
         {
-            var loc = player.getLocation();
-            loc.setY(-8192);
-
             removeAllHealthModifiers(player);
 
             var entityClazz = state.getEntityType().getEntityClass();
             if (entityClazz != null)
-            {
-                var entity = NmsUtils.spawnEntity(state.getEntityType(), state.getPlayer().getWorld(), loc);
-
-                if (entity instanceof LivingEntity living)
-                {
-                    var craftLiving = (net.minecraft.world.entity.LivingEntity) ((CraftLivingEntity)living).getHandleRaw();
-                    var mobMaxHealth = craftLiving.craftAttributes.getAttribute(Attribute.GENERIC_MAX_HEALTH).getBaseValue();
-                    var playerAttribute = player.getAttribute(Attribute.GENERIC_MAX_HEALTH);
-
-                    assert playerAttribute != null;
-                    var diff = mobMaxHealth - playerAttribute.getBaseValue();
-
-                    //确保血量不会超过上限
-                    if (playerAttribute.getBaseValue() + diff > healthCap.get())
-                        diff = healthCap.get() - playerAttribute.getBaseValue();
-
-                    //缩放生命值
-                    double finalDiff = diff;
-                    this.executeThenScaleHealth(player, playerAttribute, () ->
-                    {
-                        var modifier = new AttributeModifier(modifierName, finalDiff, AttributeModifier.Operation.ADD_NUMBER);
-                        playerAttribute.addModifier(modifier);
-                    });
-                }
-
-                entity.remove();
-            }
+                tryAddModifier(state);
         }
 
         if (modifyBoundingBoxes.get())
             this.tryModifyPlayerDimensions(player, state.getDisguiseWrapper());
+    }
+
+    private void tryAddModifier(DisguiseState state)
+    {
+        try
+        {
+            var player = state.getPlayer();
+            var loc = player.getLocation();
+            loc.setY(-8192);
+
+            var entity = NmsUtils.spawnEntity(state.getEntityType(), state.getPlayer().getWorld(), loc);
+
+            if (!(entity instanceof LivingEntity living)) return;
+
+            var craftLiving = (net.minecraft.world.entity.LivingEntity) ((CraftLivingEntity)living).getHandleRaw();
+            var mobMaxHealth = craftLiving.craftAttributes.getAttribute(Attribute.GENERIC_MAX_HEALTH).getBaseValue();
+            var playerAttribute = player.getAttribute(Attribute.GENERIC_MAX_HEALTH);
+
+            if (mobMaxHealth <= 0d)
+            {
+                logger.warn("Entity has a max health that's lower than 0? Not applying...");
+                return;
+            }
+
+            assert playerAttribute != null;
+            var diff = mobMaxHealth - playerAttribute.getBaseValue();
+
+            //确保血量不会超过上限
+            if (playerAttribute.getBaseValue() + diff > healthCap.get())
+                diff = healthCap.get() - playerAttribute.getBaseValue();
+
+            //缩放生命值
+            double finalDiff = diff;
+            this.executeThenScaleHealth(player, playerAttribute, () ->
+            {
+                var modifier = new AttributeModifier(modifierName, finalDiff, AttributeModifier.Operation.ADD_NUMBER);
+                playerAttribute.addModifier(modifier);
+            });
+
+            entity.remove();
+        }
+        catch (Throwable t)
+        {
+            logger.error("Error occurred trying to modify player's health attribute: " + t.getMessage());
+            t.printStackTrace();
+        }
     }
 
     private void resetPlayerDimensions(Player player)
