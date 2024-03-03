@@ -135,21 +135,16 @@ bukkit {
 
             permissionRoot + "lookup",
             permissionRoot + "skin_cache",
-            permissionRoot + "switch_backend"
+            permissionRoot + "switch_backend",
+
+            permissionRoot + "can_fly.always",
+            permissionRoot + "mirror.immune"
     );
 
     val opPermsPermList = ArrayList<BukkitPluginDescription.Permission>();
 
     opPermsStrList.forEach {
-        permStr -> opPermsPermList.add(permissions.register(permStr).get());
-    }
-
-    opPermsPermList.forEach {
-        perm -> perm.default = BukkitPluginDescription.Permission.Default.OP;
-    }
-
-    permissions {
-        register(permissionRoot + "mirror.immune").get().default = BukkitPluginDescription.Permission.Default.FALSE;
+        permStr -> permissions.register(permStr).get().default = BukkitPluginDescription.Permission.Default.OP;
     }
 }
 
