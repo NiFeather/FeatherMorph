@@ -689,7 +689,7 @@ public class DisguiseState extends MorphPluginObject
 
             soundFrequency = MathUtils.clamp(0, 2, config.getBindable(Double.class, ConfigOption.AMBIENT_FREQUENCY).get());
 
-            var soundEvent = EntityTypeUtils.getAmbientSound(entityType);
+            var soundEvent = EntityTypeUtils.getAmbientSound(entityType, bindingPlayer.getWorld());
 
             var sound = soundEvent.sound();
             if (sound == null) return;

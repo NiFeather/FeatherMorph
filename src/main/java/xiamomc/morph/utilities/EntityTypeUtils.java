@@ -14,10 +14,12 @@ import net.minecraft.world.entity.player.Player;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Sound;
+import org.bukkit.World;
 import org.bukkit.craftbukkit.v1_20_R3.CraftWorld;
 import org.bukkit.craftbukkit.v1_20_R3.entity.CraftEntity;
 import org.bukkit.entity.Enemy;
 import org.bukkit.entity.EntityType;
+import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphPlugin;
@@ -62,14 +64,15 @@ public class EntityTypeUtils
     }
 
     @NotNull
-    public static SoundInfo getAmbientSound(EntityType bukkitType)
+    public static SoundInfo getAmbientSound(EntityType bukkitType, @Nullable World world)
     {
         var cache = typeSoundMap.getOrDefault(bukkitType, null);
         if (cache != null) return cache;
 
         var nmsType = getNmsType(bukkitType);
 
-        var serverWorld = ((CraftWorld) Bukkit.getWorlds().get(0)).getHandle();
+        if (world == null) world = Bukkit.getWorlds().get(0);
+        var serverWorld = ((CraftWorld) world).getHandle();
         var entity = nmsType.create(serverWorld, null, EntityTypeUtils::scheduleEntityDiscard, BlockPos.ZERO, MobSpawnType.COMMAND, false, false);
 
         if (entity instanceof Mob mob)
@@ -95,7 +98,7 @@ public class EntityTypeUtils
     }
 
     @Nullable
-    public static Class<? extends Entity> getNmsClass(@NotNull EntityType type)
+    public static Class<? extends Entity> getNmsClass(@NotNull EntityType type, @Nullable World world)
     {
         var cache = nmsClassMap.getOrDefault(type, null);
         if (cache != null) return cache;
@@ -109,7 +112,8 @@ public class EntityTypeUtils
             return null;
         }
 
-        var serverWorld = ((CraftWorld) Bukkit.getWorlds().get(0)).getHandle();
+        if (world == null) world = Bukkit.getWorlds().get(0);
+        var serverWorld = ((CraftWorld) world).getHandle();
         var entity = nmsType.create(serverWorld, null, EntityTypeUtils::scheduleEntityDiscard, BlockPos.ZERO, MobSpawnType.COMMAND, false, false);
 
         if (entity == null)
