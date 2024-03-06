@@ -136,7 +136,6 @@ bukkit {
             permissionRoot + "skin_cache",
             permissionRoot + "switch_backend",
 
-            permissionRoot + "can_fly.always",
             permissionRoot + "mirror.immune"
     );
 
@@ -145,6 +144,8 @@ bukkit {
     opPermsStrList.forEach {
         permStr -> permissions.register(permStr).get().default = BukkitPluginDescription.Permission.Default.OP;
     }
+
+    permissions.register(permissionRoot + "can_fly.always").get().default = BukkitPluginDescription.Permission.Default.FALSE;
 }
 
 publishing {

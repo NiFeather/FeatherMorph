@@ -92,9 +92,9 @@ public abstract class MorphAbility<T extends ISkillOption> extends MorphPluginOb
     protected T getOptionFor(DisguiseState state)
     {
         return getOr(
-                () -> options.get(state.getDisguiseIdentifier()),
+                () -> optionMap.get(state.getDisguiseIdentifier()),
                 Objects::nonNull,
-                () -> options.get(state.getSkillLookupIdentifier())
+                () -> optionMap.get(state.getSkillLookupIdentifier())
         );
     }
 
@@ -121,7 +121,7 @@ public abstract class MorphAbility<T extends ISkillOption> extends MorphPluginOb
             return fallbackValue.apply();
     }
 
-    protected final Map<String, T> options = new Object2ObjectOpenHashMap<>();
+    protected final Map<String, T> optionMap = new Object2ObjectOpenHashMap<>();
 
     @Override
     public boolean setOption(@NotNull String disguiseIdentifier, @Nullable T option)
@@ -129,7 +129,7 @@ public abstract class MorphAbility<T extends ISkillOption> extends MorphPluginOb
         if (option == null)
             return false;
 
-        options.put(disguiseIdentifier, option);
+        optionMap.put(disguiseIdentifier, option);
 
         return true;
     }
@@ -137,6 +137,6 @@ public abstract class MorphAbility<T extends ISkillOption> extends MorphPluginOb
     @Override
     public void clearOptions()
     {
-        options.clear();
+        optionMap.clear();
     }
 }
