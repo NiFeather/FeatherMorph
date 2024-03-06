@@ -6,7 +6,6 @@ import net.minecraft.world.phys.Vec3;
 import org.bukkit.GameEvent;
 import org.bukkit.GameMode;
 import org.bukkit.NamespacedKey;
-import org.bukkit.World;
 import org.bukkit.craftbukkit.v1_20_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -19,8 +18,8 @@ import xiamomc.morph.abilities.options.FlyOption;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.misc.DisguiseState;
-import xiamomc.morph.misc.NmsRecord;
 import xiamomc.morph.misc.permissions.CommonPermissions;
+import xiamomc.morph.utilities.MathUtils;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
@@ -52,7 +51,7 @@ public class FlyAbility extends MorphAbility<FlyOption>
     {
         if (super.applyToPlayer(player, state))
         {
-            return updateFlyingAbility(state);
+            return updateFlyingState(state);
         }
         else
             return false;
@@ -94,7 +93,7 @@ public class FlyAbility extends MorphAbility<FlyOption>
         if (gameMode == GameType.CREATIVE || gameMode == GameType.SPECTATOR)
             return super.handle(player, state);
 
-        var option = options.get(state.getSkillLookupIdentifier());
+        var option = optionMap.get(state.getSkillLookupIdentifier());
 
         var allowFlightConditions = player.getFoodLevel() > option.getMinimumHunger()
                     && !noFlyWorlds.contains(player.getWorld().getName())
@@ -187,7 +186,7 @@ public class FlyAbility extends MorphAbility<FlyOption>
     {
         if (identifier == null) return Float.NaN;
 
-        var value = options.get(identifier);
+        var value = optionMap.getOrDefault(identifier, null);
 
         if (value != null)
             return value.getFlyingSpeed();
@@ -195,7 +194,7 @@ public class FlyAbility extends MorphAbility<FlyOption>
             return Float.NaN;
     }
 
-    public boolean updateFlyingAbility(DisguiseState state)
+    public boolean updateFlyingState(DisguiseState state)
     {
         var player = state.getPlayer();
 
@@ -205,10 +204,7 @@ public class FlyAbility extends MorphAbility<FlyOption>
         {
             float speed = getTargetFlySpeed(state.getSkillLookupIdentifier());
 
-            speed = Float.isNaN(speed) ? 0.1f : speed;
-
-            if (speed > 1f) speed = 1;
-            else if (speed < -1f) speed = -1;
+            speed = Float.isNaN(speed) ? 0.1f : MathUtils.clamp(-1f, 1f, speed);
 
             player.setFlySpeed(speed);
         }
@@ -236,7 +232,7 @@ public class FlyAbility extends MorphAbility<FlyOption>
             {
                 if (appliedPlayers.contains(player))
                 {
-                    this.updateFlyingAbility(state);
+                    this.updateFlyingState(state);
 
                     if (flying)
                         player.setFlying(true);
