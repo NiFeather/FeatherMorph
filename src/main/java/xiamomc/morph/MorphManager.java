@@ -1,13 +1,10 @@
 package xiamomc.morph;
 
-import com.mojang.authlib.GameProfile;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
 import net.kyori.adventure.text.Component;
-import net.minecraft.Util;
 import org.bukkit.*;
-import org.bukkit.attribute.Attribute;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -20,11 +17,9 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.abilities.AbilityHandler;
-import xiamomc.morph.abilities.impl.AttributeModifyingAbility;
 import xiamomc.morph.backends.DisguiseBackend;
 import xiamomc.morph.backends.DisguiseWrapper;
 import xiamomc.morph.backends.WrapperAttribute;
-import xiamomc.morph.backends.WrapperEvent;
 import xiamomc.morph.backends.fallback.NilBackend;
 import xiamomc.morph.backends.server.ServerBackend;
 import xiamomc.morph.config.ConfigOption;
@@ -42,7 +37,6 @@ import xiamomc.morph.messages.MorphStrings;
 import xiamomc.morph.messages.vanilla.VanillaMessageStore;
 import xiamomc.morph.misc.*;
 import xiamomc.morph.misc.permissions.CommonPermissions;
-import xiamomc.morph.misc.skins.PlayerSkinProvider;
 import xiamomc.morph.network.commands.S2C.clientrender.*;
 import xiamomc.morph.network.commands.S2C.map.S2CMapCommand;
 import xiamomc.morph.network.commands.S2C.map.S2CMapRemoveCommand;
@@ -265,9 +259,9 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         var states = this.getDisguiseStates();
 
-        states.forEach(i ->
+        states.forEach(state ->
         {
-            var p = i.getPlayer();
+            var p = state.getPlayer();
 
             //logger.info("Schedule at " + plugin.getCurrentTick() +" -> " + i);
             p.getScheduler().run(plugin, f ->
@@ -275,18 +269,16 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 //logger.info("Run at " + plugin.getCurrentTick() + " -> " + i);
 
                 //跳过离线玩家
-                if (!p.isOnline()) return;
-
-                if (i.disposed()) return;
+                if (!p.isOnline() || state.disposed()) return;
 
                 boolean abilitySuccess = true;
                 boolean providerSuccess = true;
 
                 try
                 {
-                    abilitySuccess = abilityHandler.handle(p, i);
-                    providerSuccess = i.getProvider().updateDisguise(p, i);
-                    i.getSoundHandler().update();
+                    abilitySuccess = abilityHandler.handle(p, state);
+                    providerSuccess = state.getProvider().updateDisguise(p, state);
+                    state.getSoundHandler().update();
                 }
                 catch (Throwable t)
                 {
