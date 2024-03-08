@@ -52,6 +52,7 @@ dependencies {
 
     compileOnly(files("libs/CMILib1.4.3.5.jar"))
     compileOnly(files("libs/Residence5.1.4.0.jar"))
+    compileOnly(files("libs/TAB v4.1.2.jar"))
 
     implementation("org.bstats:bstats-bukkit:${project.property("bstats_version")}")
     {
