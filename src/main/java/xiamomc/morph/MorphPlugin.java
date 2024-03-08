@@ -128,7 +128,7 @@ public final class MorphPlugin extends XiaMoJavaPlugin
         {
             logger.info("Applying TAB integrations...");
             this.registerListener(new TabAdapter());
-        });
+        }, true);
 
         //缓存依赖
         dependencyManager.cache(this);
