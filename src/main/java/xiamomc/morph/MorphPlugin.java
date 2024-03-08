@@ -19,6 +19,7 @@ import xiamomc.morph.messages.vanilla.VanillaMessageStore;
 import xiamomc.morph.misc.NetworkingHelper;
 import xiamomc.morph.misc.PlayerOperationSimulator;
 import xiamomc.morph.misc.integrations.residence.ResidenceEventProcessor;
+import xiamomc.morph.misc.integrations.tab.TabAdapter;
 import xiamomc.morph.updates.UpdateHandler;
 import xiamomc.morph.misc.integrations.placeholderapi.PlaceholderIntegration;
 import xiamomc.morph.network.server.MorphClientHandler;
@@ -122,6 +123,12 @@ public final class MorphPlugin extends XiaMoJavaPlugin
             logger.info("Residence detected, applying integrations...");
             this.registerListener(new ResidenceEventProcessor());
         }, true);
+
+        softDeps.setHandle("TAB", r ->
+        {
+            logger.info("Applying TAB integrations...");
+            this.registerListener(new TabAdapter());
+        });
 
         //缓存依赖
         dependencyManager.cache(this);
