@@ -4,7 +4,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
 import xiamomc.morph.backends.server.renderer.network.registries.EntryIndex;
 import xiamomc.morph.backends.server.renderer.network.registries.RegistryKey;
@@ -67,7 +66,7 @@ public class EntityWatcher extends SingleWatcher
     }
 
     @Override
-    protected void onCustomWrite(RegistryKey<?> key, @Nullable Object oldVal, Object newVal)
+    protected <X> void onCustomWrite(RegistryKey<X> key, X oldVal, X newVal)
     {
         super.onCustomWrite(key, oldVal, newVal);
 

@@ -29,7 +29,7 @@ public class AvaliableDisguisesProvider extends MorphPluginObject implements IPl
         var builder = new StringBuilder();
         var list = data.getAvaliableDisguisesFor(player);
 
-        var locale = MessageUtils.getLocale(player);
+        var locale = MessageUtils.getServerLocale();
 
         if (type.equalsIgnoreCase("_name"))
         {

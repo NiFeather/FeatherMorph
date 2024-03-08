@@ -52,6 +52,7 @@ dependencies {
 
     compileOnly(files("libs/CMILib1.4.3.5.jar"))
     compileOnly(files("libs/Residence5.1.4.0.jar"))
+    compileOnly(files("libs/TAB v4.1.2.jar"))
 
     implementation("org.bstats:bstats-bukkit:${project.property("bstats_version")}")
     {
@@ -115,11 +116,37 @@ bukkit {
         register(permissionRoot + "request.send")
         register(permissionRoot + "request.accept")
         register(permissionRoot + "request.deny")
+
+        register(permissionRoot + "can_fly")
     }
 
     permissions.forEach {
         permission -> permission.default = BukkitPluginDescription.Permission.Default.TRUE
     }
+
+    val opPermsStrList = listOf(
+            permissionRoot + "disguise_revealing",
+            permissionRoot + "manage",
+            permissionRoot + "query",
+            permissionRoot + "queryall",
+            permissionRoot + "reload",
+            permissionRoot + "stat",
+            permissionRoot + "toggle",
+
+            permissionRoot + "lookup",
+            permissionRoot + "skin_cache",
+            permissionRoot + "switch_backend",
+
+            permissionRoot + "mirror.immune"
+    );
+
+    val opPermsPermList = ArrayList<BukkitPluginDescription.Permission>();
+
+    opPermsStrList.forEach {
+        permStr -> permissions.register(permStr).get().default = BukkitPluginDescription.Permission.Default.OP;
+    }
+
+    permissions.register(permissionRoot + "can_fly.always").get().default = BukkitPluginDescription.Permission.Default.FALSE;
 }
 
 publishing {

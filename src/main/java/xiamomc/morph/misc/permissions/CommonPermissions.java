@@ -31,4 +31,12 @@ public class CommonPermissions
     public final static String SET_BACKEND = PERM_ROOT + "switch_backend";
 
     public final static String SET_OPTIONS = PERM_ROOT + "toggle";
+
+    public final static String CAN_FLY = PERM_ROOT + "can_fly";
+    public final static String ALWAYS_CAN_FLY = PERM_ROOT + "can_fly.always";
+
+    public final static String CanFlyIn(String worldName)
+    {
+        return CAN_FLY + ".in." + worldName;
+    }
 }

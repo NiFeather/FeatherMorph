@@ -1,7 +1,7 @@
 package xiamomc.morph.abilities.impl;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.minecraft.world.level.GameType;
 import net.minecraft.world.phys.Vec3;
 import org.bukkit.GameEvent;
 import org.bukkit.GameMode;
@@ -18,7 +18,8 @@ import xiamomc.morph.abilities.options.FlyOption;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.misc.DisguiseState;
-import xiamomc.morph.misc.NmsRecord;
+import xiamomc.morph.misc.permissions.CommonPermissions;
+import xiamomc.morph.utilities.MathUtils;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
@@ -50,7 +51,7 @@ public class FlyAbility extends MorphAbility<FlyOption>
     {
         if (super.applyToPlayer(player, state))
         {
-            return updateFlyingAbility(state);
+            return updateFlyingState(state);
         }
         else
             return false;
@@ -86,18 +87,20 @@ public class FlyAbility extends MorphAbility<FlyOption>
     {
         if (plugin.getCurrentTick() % 2 != 0) return true;
 
-        var gameMode = player.getGameMode();
-        if (gameMode == GameMode.CREATIVE || gameMode == GameMode.SPECTATOR)
+        var nmsPlayer = ((CraftPlayer) player).getHandle();
+
+        var gameMode = nmsPlayer.gameMode.getGameModeForPlayer();
+        if (gameMode == GameType.CREATIVE || gameMode == GameType.SPECTATOR)
             return super.handle(player, state);
 
-        var nmsPlayer = ((CraftPlayer) player).getHandle();
-        var config = options.get(state.getSkillLookupIdentifier());
+        var option = optionMap.get(state.getSkillLookupIdentifier());
 
-        var data = nmsPlayer.getFoodData();
-        var allowFlight = this.allowFlight.get()
-                && data.foodLevel > config.getMinimumHunger()
-                && !noFlyWorlds.contains(player.getWorld().getName())
-                && !playerBlocked(player);
+        var allowFlightConditions = player.getFoodLevel() > option.getMinimumHunger()
+                    && !noFlyWorlds.contains(player.getWorld().getName())
+                    && !playerBlocked(player)
+                    && playerHasCommonFlyPerm(player);
+
+        var allowFlight = this.allowFlight.get() && (allowFlightConditions || player.hasPermission(CommonPermissions.ALWAYS_CAN_FLY));
 
         if (player.isFlying())
         {
@@ -108,8 +111,8 @@ public class FlyAbility extends MorphAbility<FlyOption>
             // 检查玩家飞行速度是否正确
             if (plugin.getCurrentTick() % 10 == 0)
             {
-                var configSpeed = config.getFlyingSpeed();
-                if (player.getFlySpeed() != configSpeed && NmsRecord.ofPlayer(player).gameMode.isSurvival())
+                var configSpeed = option.getFlyingSpeed();
+                if (player.getFlySpeed() != configSpeed && nmsPlayer.gameMode.isSurvival())
                     player.setFlySpeed(configSpeed);
             }
 
@@ -125,7 +128,7 @@ public class FlyAbility extends MorphAbility<FlyOption>
 
             exhaustion = handleMovementForSpeed(delta);
 
-            data.addExhaustion(exhaustion);
+            nmsPlayer.getFoodData().addExhaustion(exhaustion);
 
             if (player.getTicksLived() % 5 == 0)
                 player.getWorld().sendGameEvent(player, GameEvent.FLAP, player.getLocation().toVector());
@@ -139,6 +142,14 @@ public class FlyAbility extends MorphAbility<FlyOption>
             player.setAllowFlight(allowFlight);
 
         return super.handle(player, state);
+    }
+
+    private boolean playerHasCommonFlyPerm(Player player)
+    {
+        var worldPerm = CommonPermissions.CanFlyIn(player.getWorld().getName());
+
+        return player.hasPermission(CommonPermissions.CAN_FLY)
+                && (!player.isPermissionSet(worldPerm) || player.hasPermission(worldPerm));
     }
 
     private float handleMovementForSpeed(double movementDelta)
@@ -175,7 +186,7 @@ public class FlyAbility extends MorphAbility<FlyOption>
     {
         if (identifier == null) return Float.NaN;
 
-        var value = options.get(identifier);
+        var value = optionMap.getOrDefault(identifier, null);
 
         if (value != null)
             return value.getFlyingSpeed();
@@ -183,7 +194,7 @@ public class FlyAbility extends MorphAbility<FlyOption>
             return Float.NaN;
     }
 
-    public boolean updateFlyingAbility(DisguiseState state)
+    public boolean updateFlyingState(DisguiseState state)
     {
         var player = state.getPlayer();
 
@@ -193,10 +204,7 @@ public class FlyAbility extends MorphAbility<FlyOption>
         {
             float speed = getTargetFlySpeed(state.getSkillLookupIdentifier());
 
-            speed = Float.isNaN(speed) ? 0.1f : speed;
-
-            if (speed > 1f) speed = 1;
-            else if (speed < -1f) speed = -1;
+            speed = Float.isNaN(speed) ? 0.1f : MathUtils.clamp(-1f, 1f, speed);
 
             player.setFlySpeed(speed);
         }
@@ -224,7 +232,7 @@ public class FlyAbility extends MorphAbility<FlyOption>
             {
                 if (appliedPlayers.contains(player))
                 {
-                    this.updateFlyingAbility(state);
+                    this.updateFlyingState(state);
 
                     if (flying)
                         player.setFlying(true);
