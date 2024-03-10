@@ -18,6 +18,7 @@ import xiamomc.morph.messages.MorphMessageStore;
 import xiamomc.morph.messages.vanilla.VanillaMessageStore;
 import xiamomc.morph.misc.NetworkingHelper;
 import xiamomc.morph.misc.PlayerOperationSimulator;
+import xiamomc.morph.misc.integrations.bridge.BridgeAdapter;
 import xiamomc.morph.misc.integrations.residence.ResidenceEventProcessor;
 import xiamomc.morph.misc.integrations.tab.TabAdapter;
 import xiamomc.morph.updates.UpdateHandler;
@@ -128,6 +129,12 @@ public final class MorphPlugin extends XiaMoJavaPlugin
         {
             logger.info("Applying TAB integrations...");
             this.registerListener(new TabAdapter());
+        }, true);
+
+        softDeps.setHandle("TAB-Bridge", r ->
+        {
+            logger.info("Applying TAB-Bridge integrations...");
+            this.registerListener(new BridgeAdapter());
         }, true);
 
         //缓存依赖
