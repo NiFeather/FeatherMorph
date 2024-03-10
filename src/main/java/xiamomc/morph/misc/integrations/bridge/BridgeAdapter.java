@@ -1,17 +1,25 @@
 package xiamomc.morph.misc.integrations.bridge;
 
 import com.comphenix.protocol.ProtocolLibrary;
+import com.google.common.io.ByteArrayDataInput;
+import com.google.common.io.ByteStreams;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import me.neznamy.tab.bridge.bukkit.BukkitBridge;
 import me.neznamy.tab.bridge.bukkit.BukkitBridgePlayer;
+import me.neznamy.tab.bridge.bukkit.features.unlimitedtags.BridgeNameTagX;
 import me.neznamy.tab.bridge.shared.BridgePlayer;
 import me.neznamy.tab.bridge.shared.TABBridge;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerGameModeChangeEvent;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.events.api.gameplay.PlayerJoinedWithDisguiseEvent;
 import xiamomc.morph.events.api.gameplay.PlayerMorphEvent;
 import xiamomc.morph.events.api.gameplay.PlayerUnMorphEvent;
 import xiamomc.pluginbase.Annotations.Initializer;
+
+import java.util.List;
 
 public class BridgeAdapter extends MorphPluginObject implements Listener
 {
@@ -32,6 +40,20 @@ public class BridgeAdapter extends MorphPluginObject implements Listener
         this.hideNameTag(e.getPlayer());
     }
 
+    @EventHandler(ignoreCancelled = true)
+    public void onUnmorph(PlayerUnMorphEvent e)
+    {
+        showNameTag(e.getPlayer());
+    }
+
+    @EventHandler
+    public void onGameModeChange(PlayerGameModeChangeEvent e)
+    {
+        hideNameTag(e.getPlayer());
+    }
+
+    private final List<BridgePlayer> handledPlayers = new ObjectArrayList<>();
+
     private void hideNameTag(Player player)
     {
         var bridgeInstance = TABBridge.getInstance();
@@ -41,19 +63,20 @@ public class BridgeAdapter extends MorphPluginObject implements Listener
 
         bridgePlayer.setInvisible(true);
         bridgeInstance.removePlayer(bridgePlayer);
+        handledPlayers.add(bridgePlayer);
     }
 
-    @EventHandler(ignoreCancelled = true)
-    public void onUnmorph(PlayerUnMorphEvent e)
+    private void showNameTag(Player player)
     {
         var bridgeInstance = TABBridge.getInstance();
 
-        bridgeInstance.addPlayer(new BukkitBridgePlayer(e.getPlayer(), ProtocolLibrary.getProtocolManager().getProtocolVersion(e.getPlayer())));
-        //var bridgePlayer = bridgeInstance.getPlayer(e.getPlayer().getUniqueId());
+        var bridgePlayer = handledPlayers.stream()
+                .filter(bp -> bp.getUniqueId().equals(player.getUniqueId()))
+                .findFirst()
+                .orElse(null);
 
-        //if (bridgePlayer == null) return;
+        if (bridgePlayer == null) return;
 
-        //bridgePlayer.setInvisible(false);
-        //bridgePlayer.setVanished(false);
+        bridgeInstance.addPlayer(bridgePlayer);
     }
 }
