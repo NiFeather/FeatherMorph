@@ -24,10 +24,7 @@ import xiamomc.morph.backends.fallback.NilBackend;
 import xiamomc.morph.backends.server.ServerBackend;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
-import xiamomc.morph.events.api.gameplay.PlayerMorphEarlyEvent;
-import xiamomc.morph.events.api.gameplay.PlayerMorphEvent;
-import xiamomc.morph.events.api.gameplay.PlayerUnMorphEarlyEvent;
-import xiamomc.morph.events.api.gameplay.PlayerUnMorphEvent;
+import xiamomc.morph.events.api.gameplay.*;
 import xiamomc.morph.events.api.lifecycle.ManagerFinishedInitializeEvent;
 import xiamomc.morph.interfaces.IManagePlayerData;
 import xiamomc.morph.messages.CommandStrings;
@@ -1339,12 +1336,25 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 // 向管理员发送map消息
                 networkingHelper.sendCommandToRevealablePlayers(genPartialMapCommand(state));
 
+                new PlayerDisguisedFromOfflineStateEvent(player, state).callEvent();
+
                 return OfflineDisguiseResult.SUCCESS;
             }
 
             //有限还原
-            morph(player, player, key, null);
-            return OfflineDisguiseResult.LIMITED;
+            if (morph(player, player, key, null))
+            {
+                var newState = getDisguiseStateFor(player);
+
+                if (newState != null)
+                    new PlayerDisguisedFromOfflineStateEvent(player, newState).callEvent();
+
+                return OfflineDisguiseResult.LIMITED;
+            }
+            else
+            {
+                return OfflineDisguiseResult.FAIL;
+            }
         }
         catch (Throwable t)
         {
