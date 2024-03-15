@@ -21,6 +21,9 @@ import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
 
+import java.util.Optional;
+import java.util.function.Function;
+
 public abstract class ProtocolListener extends MorphPluginObject implements PacketListener
 {
     @Resolved(shouldSolveImmediately = true)
@@ -64,7 +67,9 @@ public abstract class ProtocolListener extends MorphPluginObject implements Pack
                 .stream()
                 .filter(p -> p.getEntityId() == id)
                 .map(bukkit -> ((CraftPlayer)bukkit).getHandle())
-                .findFirst().orElse(null);
+                .map(Optional::ofNullable)
+                .findFirst().flatMap(Function.identity())
+                .orElse(null);
     }
 
     @Nullable
