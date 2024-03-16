@@ -82,6 +82,8 @@ public final class MorphPlugin extends XiaMoJavaPlugin
 
     private InteractionMirrorProcessor mirrorProcessor;
 
+    private TabAdapter tabAdapter;
+
     @Override
     public void onEnable()
     {
@@ -127,7 +129,7 @@ public final class MorphPlugin extends XiaMoJavaPlugin
         softDeps.setHandle("TAB", r ->
         {
             logger.info("Applying TAB integrations...");
-            this.registerListener(new TabAdapter());
+            this.registerListener(tabAdapter = new TabAdapter());
         }, true);
 
         //缓存依赖
@@ -212,6 +214,10 @@ public final class MorphPlugin extends XiaMoJavaPlugin
 
             if (mirrorProcessor != null)
                 mirrorProcessor.pushToLoggingBase();
+
+            var messenger = this.getServer().getMessenger();
+
+            messenger.unregisterOutgoingPluginChannel(this);
         }
         catch (Exception e)
         {

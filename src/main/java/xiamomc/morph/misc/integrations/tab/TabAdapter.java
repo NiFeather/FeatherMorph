@@ -1,5 +1,6 @@
 package xiamomc.morph.misc.integrations.tab;
 
+import com.google.common.io.ByteStreams;
 import me.neznamy.tab.shared.TAB;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -9,9 +10,20 @@ import xiamomc.morph.events.api.gameplay.PlayerDisguisedFromOfflineStateEvent;
 import xiamomc.morph.events.api.gameplay.PlayerJoinedWithDisguiseEvent;
 import xiamomc.morph.events.api.gameplay.PlayerMorphEvent;
 import xiamomc.morph.events.api.gameplay.PlayerUnMorphEvent;
+import xiamomc.pluginbase.Annotations.Initializer;
 
 public class TabAdapter extends MorphPluginObject implements Listener
 {
+    public static final String bungeeCommandChannel = "morph:bcmd";
+
+    @Initializer
+    private void load()
+    {
+        var messenger = plugin.getServer().getMessenger();
+
+        messenger.registerOutgoingPluginChannel(plugin, bungeeCommandChannel);
+    }
+
     @EventHandler(ignoreCancelled = true)
     public void onMorph(PlayerMorphEvent e)
     {
@@ -38,6 +50,10 @@ public class TabAdapter extends MorphPluginObject implements Listener
 
     private void hideNameTag(Player player)
     {
+        var data = ByteStreams.newDataOutput();
+        data.writeUTF("tag_hide");
+        player.sendPluginMessage(plugin, bungeeCommandChannel, data.toByteArray());
+
         var tabInstance = TAB.getInstance();
 
         var tagManager = tabInstance.getNameTagManager();
