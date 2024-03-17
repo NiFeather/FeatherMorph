@@ -4,6 +4,7 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.bukkit.Bukkit;
 import org.java_websocket.WebSocket;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.config.ConfigOption;
@@ -21,11 +22,15 @@ import xiamomc.morph.network.multiInstance.protocol.c2s.MIC2SLoginCommand;
 import xiamomc.morph.network.multiInstance.protocol.s2c.MIS2CDisconnectCommand;
 import xiamomc.morph.network.multiInstance.protocol.s2c.MIS2CSyncMetaCommand;
 import xiamomc.morph.network.multiInstance.protocol.s2c.MIS2CLoginResultCommand;
+import xiamomc.morph.network.multiInstance.slave.SlaveInstance;
 import xiamomc.morph.network.server.MorphClientHandler;
+import xiamomc.morph.storage.playerdata.PlayerMeta;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
 
+import java.lang.ref.WeakReference;
+import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.List;
@@ -49,7 +54,7 @@ public class MasterInstance extends MorphPluginObject implements IInstanceServic
             if (bindingServer != null)
             {
                 bindingServer.dispose();
-                bindingServer.stop(1000, "Master instance shutting down");
+                bindingServer.stop(0, "Master instance shutting down");
             }
 
             bindingServer = null;
@@ -100,7 +105,7 @@ public class MasterInstance extends MorphPluginObject implements IInstanceServic
     @Initializer
     private void load()
     {
-        logger.info("Preparing multi-instance service...");
+        logger.info("Preparing multi-instance server...");
 
         config.bind(secret, ConfigOption.MASTER_SECRET);
 
@@ -129,7 +134,7 @@ public class MasterInstance extends MorphPluginObject implements IInstanceServic
         var ws = record.socket();
         var text = record.rawMessage().split(" ", 2);
 
-        logger.info("Get command from " + ws.getRemoteSocketAddress().toString() + ": " + record.rawMessage());
+        logger.info("%s :: <- :: %s".formatted(ws.getRemoteSocketAddress(), record.rawMessage()));
 
         var cmd = registries.createC2SCommand(text[0], text.length == 2 ? text[1] : "");
         if (cmd == null)
@@ -181,6 +186,8 @@ public class MasterInstance extends MorphPluginObject implements IInstanceServic
     private void disconnect(WebSocket socket, String reason)
     {
         this.sendCommand(socket, new MIS2CDisconnectCommand(ReasonCodes.DISCONNECT, reason));
+
+        this.allowedSockets.remove(socket);
         socket.close();
     }
 
@@ -233,6 +240,10 @@ public class MasterInstance extends MorphPluginObject implements IInstanceServic
 
     private final NetworkDisguiseManager disguiseManager = new NetworkDisguiseManager();
 
+    /*
+        缺陷：当子服断开链接后，若玩家在其中被剥夺了伪装，那么在重新连接后此变化不会在整个网络的其他部分生效
+             如果设置会移除主服务器中不存在的条目，那么其他条目少的子服接入时会清空主服务器当前已有的条目
+     */
     @Override
     public void onDisguiseMetaCommand(MIC2SDisguiseMetaCommand cDisguiseMetaCommand)
     {
@@ -267,7 +278,7 @@ public class MasterInstance extends MorphPluginObject implements IInstanceServic
                     playerMeta.addDisguise(disguiseMeta);
             });
 
-            // Broadcast to all allow sockets
+            // Broadcast to all allowed sockets
             for (var allowedSocket : this.allowedSockets)
             {
                 if (allowedSocket == cDisguiseMetaCommand.getSocket())
@@ -285,7 +296,7 @@ public class MasterInstance extends MorphPluginObject implements IInstanceServic
                 playerMeta.removeDisguise(disguiseMeta);
             });
 
-            // Broadcast to all allow sockets
+            // Broadcast to all allowed sockets
             for (var allowedSocket : this.allowedSockets)
             {
                 if (allowedSocket == cDisguiseMetaCommand.getSocket())
@@ -302,11 +313,52 @@ public class MasterInstance extends MorphPluginObject implements IInstanceServic
         this.addSchedule(() -> this.onText(wsRecord));
     }
 
+    @Override
+    public void onServerStart(InstanceServer server)
+    {
+        var slave = slaveWeakRef.get();
+        if (slave == null) return;
+
+        try
+        {
+            slave.onInternalMasterStart(this);
+        }
+        catch (Throwable t)
+        {
+            logger.error("Error occurred while setting up internal client. Stopping master server!");
+            logger.warn(t.getMessage());
+            t.printStackTrace();
+
+            this.stop();
+        }
+    }
+
     //endregion
 
     //region Utilities
 
     private boolean silent = false;
+
+    @NotNull
+    private WeakReference<SlaveInstance> slaveWeakRef = new WeakReference<>(null);
+
+    public void setInternalSlave(SlaveInstance slave)
+    {
+        this.slaveWeakRef = new WeakReference<>(slave);
+    }
+
+    public void onInternalSlaveError(SlaveInstance slave, Exception e)
+    {
+        if (e instanceof ConnectException) return;
+
+        logger.error("Error occurred with the internal client! Shutting down master server...");
+        this.stop();
+    }
+
+    public void loadInitialDisguises(List<PlayerMeta> metaList)
+    {
+        this.disguiseManager.merge(metaList);
+    }
 
     //endregion
 }

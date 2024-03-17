@@ -76,6 +76,16 @@ public class InstanceClient extends WebSocketClient
     @Override
     public void onError(Exception e)
     {
+        try
+        {
+            masterHandler.onClientError(e, this);
+        }
+        catch (Throwable t)
+        {
+            logger.warn("Error occurred invoking onClientError(): " + t.getMessage());
+            t.printStackTrace();
+        }
+
         if (e instanceof ConnectException)
         {
             logger.info("Can't reach the server, retrying after 5 seconds: " + e.getMessage());

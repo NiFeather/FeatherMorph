@@ -1,6 +1,7 @@
 package xiamomc.morph.network.multiInstance;
 
 import org.jetbrains.annotations.Nullable;
+import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
@@ -10,6 +11,7 @@ import xiamomc.morph.network.multiInstance.protocol.c2s.MIC2SDisguiseMetaCommand
 import xiamomc.morph.network.multiInstance.protocol.s2c.MIS2CSyncMetaCommand;
 import xiamomc.morph.network.multiInstance.slave.SlaveInstance;
 import xiamomc.pluginbase.Annotations.Initializer;
+import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
 
 import java.util.Arrays;
@@ -25,14 +27,14 @@ public class MultiInstanceService extends MorphPluginObject
 
     private void checkSanity()
     {
-        if (masterInstance != null && slaveInstance != null)
-            throw new IllegalStateException("Master instance and Slave instance are both not null, which is not good!");
-
         if (masterInstance == null && slaveInstance == null)
             throw new IllegalStateException("None of master or slave instance is alive!");
 
         if (isMaster.get() && masterInstance == null)
             throw new IllegalStateException("We are the master server, but the server instance is null?!");
+
+        if (isMaster.get() && slaveInstance == null)
+            throw new IllegalStateException("A master server should have both master and slave instances active!");
 
         if (!isMaster.get() && slaveInstance == null)
             throw new IllegalStateException("We are the client, but the client instance is null?!");
@@ -55,11 +57,19 @@ public class MultiInstanceService extends MorphPluginObject
         masterInstance = null;
         slaveInstance = null;
 
+        slaveInstance = new SlaveInstance(!isMaster);
+
         if (isMaster)
+        {
             masterInstance = new MasterInstance();
-        else
-            slaveInstance = new SlaveInstance();
+
+            masterInstance.loadInitialDisguises(manager.listAllPlayerMeta());
+            masterInstance.setInternalSlave(slaveInstance);
+        }
     }
+
+    @Resolved
+    private MorphManager manager;
 
     private final Bindable<Boolean> isMaster = new Bindable<>(false);
 

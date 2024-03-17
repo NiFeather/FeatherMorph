@@ -4,6 +4,7 @@ import xiamomc.morph.network.multiInstance.protocol.s2c.MIS2CDisconnectCommand;
 import xiamomc.morph.network.multiInstance.protocol.s2c.MIS2CStateCommand;
 import xiamomc.morph.network.multiInstance.protocol.s2c.MIS2CSyncMetaCommand;
 import xiamomc.morph.network.multiInstance.protocol.s2c.MIS2CLoginResultCommand;
+import xiamomc.morph.network.multiInstance.slave.InstanceClient;
 
 public interface IMasterHandler
 {
@@ -16,4 +17,5 @@ public interface IMasterHandler
 
     public void onConnectionOpen();
     public void onText(String rawCommand);
+    public void onClientError(Exception e, InstanceClient client);
 }

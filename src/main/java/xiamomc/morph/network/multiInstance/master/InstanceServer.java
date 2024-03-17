@@ -18,20 +18,13 @@ public final class InstanceServer extends WebSocketServer
 {
     private final Logger logger;
 
-    @Nullable
-    private MorphConfigManager config;
-
-    private IClientHandler clientHandler;
+    private final IClientHandler clientHandler;
 
     public InstanceServer(XiaMoJavaPlugin plugin, InetSocketAddress address, IClientHandler iClientHandler)
     {
         super(address);
 
         this.logger = plugin.getSLF4JLogger();
-
-        var dependencies = DependencyManager.getManagerOrCreate(plugin);
-        config = dependencies.get(MorphConfigManager.class, false);
-
         this.clientHandler = iClientHandler;
 
         plugin.schedule(this::load);
@@ -87,6 +80,8 @@ public final class InstanceServer extends WebSocketServer
     public void onStart()
     {
         logger.info("Master websocket server started on " + this.getAddress().toString());
+
+        clientHandler.onServerStart(this);
     }
 
     public void dispose()

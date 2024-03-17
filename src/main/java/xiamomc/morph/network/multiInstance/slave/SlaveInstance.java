@@ -12,6 +12,7 @@ import xiamomc.morph.network.ReasonCodes;
 import xiamomc.morph.network.commands.C2S.AbstractC2SCommand;
 import xiamomc.morph.network.commands.CommandRegistries;
 import xiamomc.morph.network.multiInstance.IInstanceService;
+import xiamomc.morph.network.multiInstance.master.MasterInstance;
 import xiamomc.morph.network.multiInstance.protocol.IMasterHandler;
 import xiamomc.morph.network.multiInstance.protocol.Operation;
 import xiamomc.morph.network.multiInstance.protocol.ProtocolLevel;
@@ -19,12 +20,15 @@ import xiamomc.morph.network.multiInstance.protocol.c2s.MIC2SDisguiseMetaCommand
 import xiamomc.morph.network.multiInstance.protocol.c2s.MIC2SLoginCommand;
 import xiamomc.morph.network.multiInstance.protocol.s2c.*;
 import xiamomc.morph.network.server.MorphClientHandler;
+import xiamomc.morph.storage.playerdata.PlayerMeta;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
 import xiamomc.pluginbase.Exceptions.NullDependencyException;
 
+import java.lang.ref.WeakReference;
 import java.net.URI;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
@@ -53,6 +57,20 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
 
     @Resolved
     private MorphConfigManager config;
+
+    @Nullable
+    private MasterInstance internalMasterInstance;
+
+    public void onInternalMasterStart(MasterInstance masterInstance)
+    {
+        if (prepareClient())
+        {
+            this.internalMasterInstance = masterInstance;
+            return;
+        }
+
+        throw new IllegalStateException("Can't setup client!");
+    }
 
     /**
      * @return Whether this operation operates successfully
@@ -83,10 +101,17 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
         }
     }
 
+    public SlaveInstance(boolean startOnLoad)
+    {
+        this.startOnLoad = startOnLoad;
+    }
+
+    private final boolean startOnLoad;
+
     @Initializer
     private void load()
     {
-        logger.info("Preparing multi-instance service...");
+        logger.info("Preparing multi-instance client...");
 
         config.bind(secret, ConfigOption.MASTER_SECRET);
 
@@ -94,6 +119,10 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
                 .registerS2C("dmeta", MIS2CSyncMetaCommand::from)
                 .registerS2C("r_login", MIS2CLoginResultCommand::from)
                 .registerS2C("state", MIS2CStateCommand::from);
+
+        if (client != null) return;
+
+        if (!startOnLoad) return;
 
         if (!prepareClient())
         {
@@ -156,6 +185,7 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
 
         if (operation == Operation.ADD_IF_ABSENT)
         {
+            var countPrev = playerMeta.getUnlockedDisguises().size();
             meta.getIdentifiers().forEach(id ->
             {
                 var disguiseMeta = morphManager.getDisguiseMeta(id);
@@ -166,11 +196,13 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
 
             //morphManager.saveConfiguration();
 
-            if (player != null)
+            if (player != null && playerMeta.getUnlockedDisguiseIdentifiers().size() != countPrev)
                 clientHandler.refreshPlayerClientMorphs(playerMeta.getUnlockedDisguiseIdentifiers(), player);
         }
         else if (operation == Operation.REMOVE)
         {
+            var countPrev = playerMeta.getUnlockedDisguises().size();
+
             meta.getIdentifiers().forEach(id ->
             {
                 var disguiseMeta = morphManager.getDisguiseMeta(id);
@@ -180,7 +212,7 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
 
             //morphManager.saveConfiguration();
 
-            if (player != null)
+            if (player != null && playerMeta.getUnlockedDisguiseIdentifiers().size() != countPrev)
                 clientHandler.refreshPlayerClientMorphs(playerMeta.getUnlockedDisguiseIdentifiers(), player);
         }
 
@@ -231,6 +263,13 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
     public void onConnectionOpen()
     {
         this.addSchedule(() -> this.sendCommand(new MIC2SLoginCommand(implementingLevel, secret.get())));
+    }
+
+    @Override
+    public void onClientError(Exception e, InstanceClient client)
+    {
+        if (internalMasterInstance != null)
+            internalMasterInstance.onInternalSlaveError(this, e);
     }
 
     private final CommandRegistries registries = new CommandRegistries();

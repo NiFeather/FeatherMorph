@@ -44,4 +44,26 @@ public class NetworkDisguiseManager extends MorphPluginObject
 
         return cachedMetas.stream().filter(o -> o.equals(rawString)).findFirst().orElse(null);
     }
+
+    public void merge(List<PlayerMeta> other)
+    {
+        for (var otherMeta : other)
+        {
+            var match = storedMeta.stream()
+                    .filter(meta -> meta.uniqueId.equals(otherMeta.uniqueId))
+                    .findFirst().orElse(null);
+
+            if (match == null)
+            {
+                var newInstance = new PlayerMeta();
+                newInstance.uniqueId = otherMeta.uniqueId;
+                newInstance.getUnlockedDisguiseIdentifiers().addAll(otherMeta.getUnlockedDisguiseIdentifiers());
+                storedMeta.add(newInstance);
+
+                continue;
+            }
+
+            match.getUnlockedDisguiseIdentifiers().addAll(otherMeta.getUnlockedDisguiseIdentifiers());
+        }
+    }
 }
