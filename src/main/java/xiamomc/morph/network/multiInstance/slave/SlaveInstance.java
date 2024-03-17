@@ -15,12 +15,10 @@ import xiamomc.morph.network.multiInstance.IInstanceService;
 import xiamomc.morph.network.multiInstance.protocol.IMasterHandler;
 import xiamomc.morph.network.multiInstance.protocol.Operation;
 import xiamomc.morph.network.multiInstance.protocol.ProtocolLevel;
-import xiamomc.morph.network.multiInstance.protocol.c2s.MIC2SCommand;
 import xiamomc.morph.network.multiInstance.protocol.c2s.MIC2SDisguiseMetaCommand;
 import xiamomc.morph.network.multiInstance.protocol.c2s.MIC2SLoginCommand;
 import xiamomc.morph.network.multiInstance.protocol.s2c.*;
 import xiamomc.morph.network.server.MorphClientHandler;
-import xiamomc.morph.storage.playerdata.PlayerMeta;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
@@ -93,8 +91,9 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
         config.bind(secret, ConfigOption.MASTER_SECRET);
 
         registries.registerS2C("deny", MIS2CDisconnectCommand::from)
-                .registerS2C("dmeta", MIS2CDisguiseMetaCommand::from)
-                .registerS2C("r_login", MIS2CLoginResultCommand::from);
+                .registerS2C("dmeta", MIS2CSyncMetaCommand::from)
+                .registerS2C("r_login", MIS2CLoginResultCommand::from)
+                .registerS2C("state", MIS2CStateCommand::from);
 
         if (!prepareClient())
         {
@@ -130,7 +129,7 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
     }
 
     @Override
-    public void onDisguiseMetaCommand(MIS2CDisguiseMetaCommand metaCommand)
+    public void onSyncMetaCommand(MIS2CSyncMetaCommand metaCommand)
     {
         var meta = metaCommand.getMeta();
         if (meta == null)
@@ -210,6 +209,20 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
         }
 
         cmds.forEach(this::sendCommand);
+    }
+
+    private final Bindable<ProtocolState> currentState = new Bindable<>(ProtocolState.INVALID);
+
+    @Override
+    public void onStateCommand(MIS2CStateCommand cStateCommand)
+    {
+        var newState = cStateCommand.getState();
+
+        if (newState == ProtocolState.INVALID)
+            logger.warn("Bad server implementation? The new session state is invalid!");
+
+        logger.info("State switched to " + newState);
+        currentState.set(newState);
     }
 
     private final ProtocolLevel implementingLevel = ProtocolLevel.V1;

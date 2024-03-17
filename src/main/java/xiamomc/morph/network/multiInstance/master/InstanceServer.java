@@ -71,7 +71,7 @@ public final class InstanceServer extends WebSocketServer
     @Override
     public void onMessage(WebSocket webSocket, String msg)
     {
-        logger.info("%s :: <- :: '%s'".formatted(webSocket.getRemoteSocketAddress(), msg));
+        //logger.info("%s :: <- :: '%s'".formatted(webSocket.getRemoteSocketAddress(), msg));
 
         clientHandler.onMessage(new WsRecord(webSocket, msg), this);
     }

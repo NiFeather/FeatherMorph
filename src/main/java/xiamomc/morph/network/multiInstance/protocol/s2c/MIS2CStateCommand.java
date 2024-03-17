@@ -14,13 +14,13 @@ public class MIS2CStateCommand extends MIS2CCommand<String>
     @Override
     public void onCommand(IMasterHandler handler)
     {
+        handler.onStateCommand(this);
     }
 
-    public enum ProtocolState
+    public ProtocolState getState()
     {
-        INVALID,
-        SYNC,
-        PLAY
+        return Arrays.stream(ProtocolState.values()).filter(s -> s.name().equalsIgnoreCase(getArgumentAt(0, "INVALID")))
+                .findFirst().orElse(ProtocolState.INVALID);
     }
 
     public static MIS2CStateCommand from(String text)

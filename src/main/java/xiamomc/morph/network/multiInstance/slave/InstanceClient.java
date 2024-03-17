@@ -50,7 +50,7 @@ public class InstanceClient extends WebSocketClient
     @Override
     public void onMessage(String msg)
     {
-        logger.info("Received server message: " + msg);
+        //logger.info("Received server message: " + msg);
         masterHandler.onText(msg);
     }
 

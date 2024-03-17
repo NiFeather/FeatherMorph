@@ -9,15 +9,15 @@ import xiamomc.morph.network.multiInstance.protocol.SocketDisguiseMeta;
 import java.util.List;
 import java.util.UUID;
 
-public class MIS2CDisguiseMetaCommand extends MIS2CCommand<SocketDisguiseMeta>
+public class MIS2CSyncMetaCommand extends MIS2CCommand<SocketDisguiseMeta>
 {
 
-    public MIS2CDisguiseMetaCommand(SocketDisguiseMeta meta)
+    public MIS2CSyncMetaCommand(SocketDisguiseMeta meta)
     {
         super("dmeta", meta);
     }
 
-    public MIS2CDisguiseMetaCommand(Operation operation, List<String> identifiers, UUID bindingUUID)
+    public MIS2CSyncMetaCommand(Operation operation, List<String> identifiers, UUID bindingUUID)
     {
         this(new SocketDisguiseMeta(operation, identifiers, bindingUUID));
     }
@@ -25,7 +25,7 @@ public class MIS2CDisguiseMetaCommand extends MIS2CCommand<SocketDisguiseMeta>
     @Override
     public void onCommand(IMasterHandler handler)
     {
-        handler.onDisguiseMetaCommand(this);
+        handler.onSyncMetaCommand(this);
     }
 
     @Nullable
@@ -34,18 +34,18 @@ public class MIS2CDisguiseMetaCommand extends MIS2CCommand<SocketDisguiseMeta>
         return getArgumentAt(0);
     }
 
-    public static MIS2CDisguiseMetaCommand from(String text)
+    public static MIS2CSyncMetaCommand from(String text)
     {
         try
         {
-            return new MIS2CDisguiseMetaCommand(gson().fromJson(text, SocketDisguiseMeta.class));
+            return new MIS2CSyncMetaCommand(gson().fromJson(text, SocketDisguiseMeta.class));
         }
         catch (Throwable t)
         {
             var logger = MorphPlugin.getInstance().getSLF4JLogger();
             logger.warn("Failed to parse SocketDisguiseMeta from the server command! Leaving empty...");
 
-            return new MIS2CDisguiseMetaCommand(Operation.INVALID, List.of(), UUID.randomUUID());
+            return new MIS2CSyncMetaCommand(Operation.INVALID, List.of(), UUID.randomUUID());
         }
     }
 }

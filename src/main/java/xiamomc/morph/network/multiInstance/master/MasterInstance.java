@@ -5,7 +5,6 @@ import org.bukkit.Bukkit;
 import org.java_websocket.WebSocket;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
-import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
@@ -20,7 +19,7 @@ import xiamomc.morph.network.multiInstance.protocol.c2s.MIC2SDisguiseMetaCommand
 import xiamomc.morph.network.multiInstance.protocol.s2c.MIS2CCommand;
 import xiamomc.morph.network.multiInstance.protocol.c2s.MIC2SLoginCommand;
 import xiamomc.morph.network.multiInstance.protocol.s2c.MIS2CDisconnectCommand;
-import xiamomc.morph.network.multiInstance.protocol.s2c.MIS2CDisguiseMetaCommand;
+import xiamomc.morph.network.multiInstance.protocol.s2c.MIS2CSyncMetaCommand;
 import xiamomc.morph.network.multiInstance.protocol.s2c.MIS2CLoginResultCommand;
 import xiamomc.morph.network.server.MorphClientHandler;
 import xiamomc.pluginbase.Annotations.Initializer;
@@ -31,7 +30,6 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
 
 public class MasterInstance extends MorphPluginObject implements IInstanceService, IClientHandler
 {
@@ -175,7 +173,7 @@ public class MasterInstance extends MorphPluginObject implements IInstanceServic
             return;
         }
 
-        logger.info("%s :: -> :: %s".formatted(socket.getRemoteSocketAddress(), command.buildCommand()));
+        //logger.info("%s :: -> :: %s".formatted(socket.getRemoteSocketAddress(), command.buildCommand()));
 
         socket.send(command.buildCommand());
     }
@@ -220,24 +218,20 @@ public class MasterInstance extends MorphPluginObject implements IInstanceServic
         allowedSockets.add(socket);
         sendCommand(socket, new MIS2CLoginResultCommand(true));
 
-        var cmds = new ObjectArrayList<MIS2CDisguiseMetaCommand>();
-        var disguises = morphManager.listAllPlayerMeta();
+        var cmds = new ObjectArrayList<MIS2CSyncMetaCommand>();
+        var disguises = disguiseManager.listAllMeta();
         for (var meta : disguises)
         {
             var identifiers = meta.getUnlockedDisguiseIdentifiers();
 
             if (!identifiers.isEmpty())
-                cmds.add(new MIS2CDisguiseMetaCommand(Operation.ADD_IF_ABSENT, identifiers, meta.uniqueId));
+                cmds.add(new MIS2CSyncMetaCommand(Operation.ADD_IF_ABSENT, identifiers, meta.uniqueId));
         }
 
         cmds.forEach(cmd -> this.sendCommand(socket, cmd));
     }
 
-    @Resolved
-    private MorphManager morphManager;
-
-    @Resolved
-    private MorphClientHandler clientHandler;
+    private final NetworkDisguiseManager disguiseManager = new NetworkDisguiseManager();
 
     @Override
     public void onDisguiseMetaCommand(MIC2SDisguiseMetaCommand cDisguiseMetaCommand)
@@ -258,7 +252,7 @@ public class MasterInstance extends MorphPluginObject implements IInstanceServic
         var operation = meta.getOperation();
         var identifiers = meta.getIdentifiers();
 
-        var playerMeta = morphManager.getPlayerMeta(Bukkit.getOfflinePlayer(Objects.requireNonNull(meta.getBindingUuid(), "???")));
+        var playerMeta = disguiseManager.getPlayerMeta(Bukkit.getOfflinePlayer(Objects.requireNonNull(meta.getBindingUuid(), "???")));
         var unlocked = playerMeta.getUnlockedDisguises();
 
         var player = Bukkit.getPlayer(meta.getBindingUuid());
@@ -267,13 +261,10 @@ public class MasterInstance extends MorphPluginObject implements IInstanceServic
         {
             identifiers.forEach(id ->
             {
-                var disguiseMeta = morphManager.getDisguiseMeta(id);
+                var disguiseMeta = disguiseManager.getDisguiseMeta(id);
 
                 if (!unlocked.contains(disguiseMeta))
                     playerMeta.addDisguise(disguiseMeta);
-
-                if (player != null)
-                    clientHandler.refreshPlayerClientMorphs(playerMeta.getUnlockedDisguiseIdentifiers(), player);
             });
 
             // Broadcast to all allow sockets
@@ -282,20 +273,17 @@ public class MasterInstance extends MorphPluginObject implements IInstanceServic
                 if (allowedSocket == cDisguiseMetaCommand.getSocket())
                     continue;
 
-                this.sendCommand(allowedSocket, new MIS2CDisguiseMetaCommand(meta));
+                this.sendCommand(allowedSocket, new MIS2CSyncMetaCommand(meta));
             }
         }
         else if (operation == Operation.REMOVE)
         {
             identifiers.forEach(id ->
             {
-                var disguiseMeta = morphManager.getDisguiseMeta(id);
+                var disguiseMeta = disguiseManager.getDisguiseMeta(id);
 
                 playerMeta.removeDisguise(disguiseMeta);
             });
-
-            if (player != null)
-                clientHandler.refreshPlayerClientMorphs(playerMeta.getUnlockedDisguiseIdentifiers(), player);
 
             // Broadcast to all allow sockets
             for (var allowedSocket : this.allowedSockets)
@@ -303,7 +291,7 @@ public class MasterInstance extends MorphPluginObject implements IInstanceServic
                 if (allowedSocket == cDisguiseMetaCommand.getSocket())
                     continue;
 
-                this.sendCommand(allowedSocket, new MIS2CDisguiseMetaCommand(meta));
+                this.sendCommand(allowedSocket, new MIS2CSyncMetaCommand(meta));
             }
         }
     }
