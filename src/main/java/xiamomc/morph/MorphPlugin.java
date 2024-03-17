@@ -20,6 +20,7 @@ import xiamomc.morph.misc.NetworkingHelper;
 import xiamomc.morph.misc.PlayerOperationSimulator;
 import xiamomc.morph.misc.integrations.residence.ResidenceEventProcessor;
 import xiamomc.morph.misc.integrations.tab.TabAdapter;
+import xiamomc.morph.network.multiInstance.MultiInstanceService;
 import xiamomc.morph.updates.UpdateHandler;
 import xiamomc.morph.misc.integrations.placeholderapi.PlaceholderIntegration;
 import xiamomc.morph.network.server.MorphClientHandler;
@@ -83,6 +84,8 @@ public final class MorphPlugin extends XiaMoJavaPlugin
     private InteractionMirrorProcessor mirrorProcessor;
 
     private TabAdapter tabAdapter;
+
+    private MultiInstanceService instanceService;
 
     @Override
     public void onEnable()
@@ -164,6 +167,8 @@ public final class MorphPlugin extends XiaMoJavaPlugin
         var updateHandler = new UpdateHandler();
         dependencyManager.cache(updateHandler);
 
+        dependencyManager.cache(instanceService = new MultiInstanceService());
+
         mirrorProcessor = new InteractionMirrorProcessor();
 
         //注册EventProcessor
@@ -214,6 +219,9 @@ public final class MorphPlugin extends XiaMoJavaPlugin
 
             if (mirrorProcessor != null)
                 mirrorProcessor.pushToLoggingBase();
+
+            if (instanceService != null)
+                instanceService.onDisable();
 
             var messenger = this.getServer().getMessenger();
 

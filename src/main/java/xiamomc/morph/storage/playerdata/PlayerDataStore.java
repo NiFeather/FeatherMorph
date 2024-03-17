@@ -249,4 +249,9 @@ public class PlayerDataStore extends MorphJsonBasedStorage<PlayerMetaContainer> 
         else
             player.sendMessage(MessageUtils.prefixes(player, text));
     }
+
+    public List<PlayerMeta> getAll()
+    {
+        return new ObjectArrayList<>(storingObject.playerMetas);
+    }
 }

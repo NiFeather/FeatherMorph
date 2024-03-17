@@ -39,6 +39,8 @@ import xiamomc.morph.network.commands.S2C.map.S2CMapCommand;
 import xiamomc.morph.network.commands.S2C.map.S2CMapRemoveCommand;
 import xiamomc.morph.network.commands.S2C.map.S2CPartialMapCommand;
 import xiamomc.morph.network.commands.S2C.set.*;
+import xiamomc.morph.network.multiInstance.MultiInstanceService;
+import xiamomc.morph.network.multiInstance.protocol.Operation;
 import xiamomc.morph.network.server.MorphClientHandler;
 import xiamomc.morph.providers.DisguiseProvider;
 import xiamomc.morph.providers.FallbackProvider;
@@ -80,6 +82,9 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
     @Resolved
     private NetworkingHelper networkingHelper;
+
+    @Resolved
+    private MultiInstanceService multiInstanceService;
 
     public static final DisguiseProvider fallbackProvider = new FallbackProvider();
 
@@ -1390,6 +1395,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         if (success)
         {
             clientHandler.sendDiff(List.of(disguiseIdentifier), null, player);
+            multiInstanceService.notifyDisguiseMetaChange(player.getUniqueId(), Operation.ADD_IF_ABSENT, disguiseIdentifier);
 
             var config = data.getPlayerMeta(player);
 
@@ -1417,7 +1423,10 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         var success = data.revokeMorphFromPlayer(player, disguiseIdentifier);
 
         if (success)
+        {
             clientHandler.sendDiff(null, List.of(disguiseIdentifier), player);
+            multiInstanceService.notifyDisguiseMetaChange(player.getUniqueId(), Operation.REMOVE, disguiseIdentifier);
+        }
 
         return success;
     }
@@ -1480,4 +1489,10 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         return data.saveConfiguration() && offlineStorage.saveConfiguration();
     }
     //endregion Implementation of IManagePlayerData
+
+    @ApiStatus.Internal
+    public List<PlayerMeta> listAllPlayerMeta()
+    {
+        return data.getAll();
+    }
 }
