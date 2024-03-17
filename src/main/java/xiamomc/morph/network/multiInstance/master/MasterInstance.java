@@ -1,5 +1,6 @@
 package xiamomc.morph.network.multiInstance.master;
 
+import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.bukkit.Bukkit;
 import org.java_websocket.WebSocket;
@@ -17,11 +18,8 @@ import xiamomc.morph.network.multiInstance.protocol.Operation;
 import xiamomc.morph.network.multiInstance.protocol.ProtocolLevel;
 import xiamomc.morph.network.multiInstance.protocol.c2s.MIC2SCommand;
 import xiamomc.morph.network.multiInstance.protocol.c2s.MIC2SDisguiseMetaCommand;
-import xiamomc.morph.network.multiInstance.protocol.s2c.MIS2CCommand;
+import xiamomc.morph.network.multiInstance.protocol.s2c.*;
 import xiamomc.morph.network.multiInstance.protocol.c2s.MIC2SLoginCommand;
-import xiamomc.morph.network.multiInstance.protocol.s2c.MIS2CDisconnectCommand;
-import xiamomc.morph.network.multiInstance.protocol.s2c.MIS2CSyncMetaCommand;
-import xiamomc.morph.network.multiInstance.protocol.s2c.MIS2CLoginResultCommand;
 import xiamomc.morph.network.multiInstance.slave.SlaveInstance;
 import xiamomc.morph.network.server.MorphClientHandler;
 import xiamomc.morph.storage.playerdata.PlayerMeta;
@@ -34,6 +32,7 @@ import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 public class MasterInstance extends MorphPluginObject implements IInstanceService, IClientHandler
@@ -159,19 +158,17 @@ public class MasterInstance extends MorphPluginObject implements IInstanceServic
 
     private final ProtocolLevel level = ProtocolLevel.V1;
 
-    private final List<WebSocket> allowedSockets = new ObjectArrayList<>();
+    private final Map<WebSocket, ProtocolState> allowedSockets = new Object2ObjectArrayMap<>();
 
     @ApiStatus.Internal
     public void broadcastCommand(MIS2CCommand<?> command)
     {
-        for (var allowedSocket : this.allowedSockets)
+        for (var allowedSocket : this.allowedSockets.keySet())
             this.sendCommand(allowedSocket, command);
     }
 
     private void sendCommand(WebSocket socket, MIS2CCommand<?> command)
     {
-        if (silent) return;
-
         if (!socket.isOpen())
         {
             logger.warn("Not sending a command to a closed socket!");
@@ -193,9 +190,22 @@ public class MasterInstance extends MorphPluginObject implements IInstanceServic
 
     private boolean socketAllowed(WebSocket socket)
     {
-        return allowedSockets.contains(socket);
+        return allowedSockets.getOrDefault(socket, null) != null;
     }
 
+    private void switchState(WebSocket socket, ProtocolState state)
+    {
+        allowedSockets.put(socket, state);
+        sendCommand(socket, new MIS2CStateCommand(state));
+    }
+
+    public ProtocolState getConnectionState(WebSocket socket)
+    {
+        return allowedSockets.getOrDefault(socket, ProtocolState.INVALID);
+    }
+
+    //todo: 状态切换应当分为多个函数执行
+    //      现在这么做很💩️
     @Override
     public void onLoginCommand(MIC2SLoginCommand cProtocolCommand)
     {
@@ -204,6 +214,8 @@ public class MasterInstance extends MorphPluginObject implements IInstanceServic
         var socket = cProtocolCommand.getSocket();
         if (socket == null)
             return;
+
+        this.switchState(socket, ProtocolState.LOGIN);
 
         logger.info("Level is '%s', and their secret is '%s'".formatted(cProtocolCommand.getVersion(), cProtocolCommand.getSecret()));
 
@@ -222,8 +234,8 @@ public class MasterInstance extends MorphPluginObject implements IInstanceServic
             return;
         }
 
-        allowedSockets.add(socket);
         sendCommand(socket, new MIS2CLoginResultCommand(true));
+        switchState(socket, ProtocolState.SYNC);
 
         var cmds = new ObjectArrayList<MIS2CSyncMetaCommand>();
         var disguises = disguiseManager.listAllMeta();
@@ -256,9 +268,20 @@ public class MasterInstance extends MorphPluginObject implements IInstanceServic
         var meta = cDisguiseMetaCommand.getMeta();
         if (meta == null || !meta.isValid())
         {
-            logger.warn("Got invalid meta from '%s'".formatted(socket.getRemoteSocketAddress()));
+            logger.warn("Bad client implementation? Got invalid meta from '%s'".formatted(socket.getRemoteSocketAddress()));
             return;
         }
+
+        var state = getConnectionState(socket);
+
+        if (!state.loggedIn())
+        {
+            logger.warn("Bad client implementation? They sent meta sync before they login! (%s)".formatted(socket.getRemoteSocketAddress()));
+            return;
+        }
+
+        if (state == ProtocolState.SYNC)
+            switchState(socket, ProtocolState.WAIT_LISTEN);
 
         var operation = meta.getOperation();
         var identifiers = meta.getIdentifiers();
@@ -279,7 +302,7 @@ public class MasterInstance extends MorphPluginObject implements IInstanceServic
             });
 
             // Broadcast to all allowed sockets
-            for (var allowedSocket : this.allowedSockets)
+            for (var allowedSocket : this.allowedSockets.keySet())
             {
                 if (allowedSocket == cDisguiseMetaCommand.getSocket())
                     continue;
@@ -297,7 +320,7 @@ public class MasterInstance extends MorphPluginObject implements IInstanceServic
             });
 
             // Broadcast to all allowed sockets
-            for (var allowedSocket : this.allowedSockets)
+            for (var allowedSocket : this.allowedSockets.keySet())
             {
                 if (allowedSocket == cDisguiseMetaCommand.getSocket())
                     continue;
@@ -336,8 +359,6 @@ public class MasterInstance extends MorphPluginObject implements IInstanceServic
     //endregion
 
     //region Utilities
-
-    private boolean silent = false;
 
     @NotNull
     private WeakReference<SlaveInstance> slaveWeakRef = new WeakReference<>(null);

@@ -160,6 +160,12 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
     @Override
     public void onSyncMetaCommand(MIS2CSyncMetaCommand metaCommand)
     {
+        if (!currentState.get().loggedIn())
+        {
+            logger.warn("Bad server implementation? They are trying to sync meta before we login!");
+            return;
+        }
+
         var meta = metaCommand.getMeta();
         if (meta == null)
         {
@@ -228,6 +234,12 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
     @Override
     public void onLoginResultCommand(MIS2CLoginResultCommand cLoginResultCommand)
     {
+        if (currentState.get() != ProtocolState.LOGIN)
+        {
+            logger.warn("Bad server implementation? They sent a login result at when we are not in a login process!");
+            return;
+        }
+
         if (!cLoginResultCommand.isAllowed()) return;
 
         var cmds = new ObjectArrayList<MIC2SDisguiseMetaCommand>();
@@ -243,16 +255,19 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
         cmds.forEach(this::sendCommand);
     }
 
-    private final Bindable<ProtocolState> currentState = new Bindable<>(ProtocolState.INVALID);
+    private final Bindable<ProtocolState> currentState = new Bindable<>(ProtocolState.NOT_CONNECTED);
 
     @Override
     public void onStateCommand(MIS2CStateCommand cStateCommand)
     {
-        var newState = cStateCommand.getState();
-
-        if (newState == ProtocolState.INVALID)
+        if (cStateCommand.getState() == ProtocolState.INVALID)
             logger.warn("Bad server implementation? The new session state is invalid!");
 
+        switchState(cStateCommand.getState());
+    }
+
+    private void switchState(ProtocolState newState)
+    {
         logger.info("State switched to " + newState);
         currentState.set(newState);
     }
