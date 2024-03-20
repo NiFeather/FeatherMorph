@@ -261,6 +261,8 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
         for (var socketMeta : revokeStatesAfterDisconnect)
             cmds.add(new MIC2SDisguiseMetaCommand(socketMeta));
 
+        revokeStatesAfterDisconnect.clear();
+
         cmds.forEach(this::sendCommand);
     }
 
