@@ -16,6 +16,7 @@ import xiamomc.morph.network.multiInstance.master.MasterInstance;
 import xiamomc.morph.network.multiInstance.protocol.IMasterHandler;
 import xiamomc.morph.network.multiInstance.protocol.Operation;
 import xiamomc.morph.network.multiInstance.protocol.ProtocolLevel;
+import xiamomc.morph.network.multiInstance.protocol.SocketDisguiseMeta;
 import xiamomc.morph.network.multiInstance.protocol.c2s.MIC2SDisguiseMetaCommand;
 import xiamomc.morph.network.multiInstance.protocol.c2s.MIC2SLoginCommand;
 import xiamomc.morph.network.multiInstance.protocol.s2c.*;
@@ -157,6 +158,11 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
         client.send(command.buildCommand());
     }
 
+    public boolean isOnline()
+    {
+        return client != null && client.isOpen();
+    }
+
     @Override
     public void onSyncMetaCommand(MIS2CSyncMetaCommand metaCommand)
     {
@@ -252,10 +258,20 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
                 cmds.add(new MIC2SDisguiseMetaCommand(Operation.ADD_IF_ABSENT, identifiers, meta.uniqueId));
         }
 
+        for (var socketMeta : revokeStatesAfterDisconnect)
+            cmds.add(new MIC2SDisguiseMetaCommand(socketMeta));
+
         cmds.forEach(this::sendCommand);
     }
 
     private final Bindable<ProtocolState> currentState = new Bindable<>(ProtocolState.NOT_CONNECTED);
+
+    private final List<SocketDisguiseMeta> revokeStatesAfterDisconnect = new ObjectArrayList();
+
+    public void cacheRevokeStates(SocketDisguiseMeta socketDisguiseMeta)
+    {
+        revokeStatesAfterDisconnect.add(socketDisguiseMeta);
+    }
 
     @Override
     public void onStateCommand(MIS2CStateCommand cStateCommand)

@@ -7,6 +7,7 @@ import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.network.multiInstance.master.MasterInstance;
 import xiamomc.morph.network.multiInstance.protocol.Operation;
+import xiamomc.morph.network.multiInstance.protocol.SocketDisguiseMeta;
 import xiamomc.morph.network.multiInstance.protocol.c2s.MIC2SDisguiseMetaCommand;
 import xiamomc.morph.network.multiInstance.protocol.s2c.MIS2CSyncMetaCommand;
 import xiamomc.morph.network.multiInstance.slave.SlaveInstance;
@@ -90,15 +91,21 @@ public class MultiInstanceService extends MorphPluginObject
     {
         checkSanity();
 
+        var meta = new SocketDisguiseMeta(operation, Arrays.stream(identifiers).toList(), uuid);
+
         if (isMaster.get())
         {
             assert masterInstance != null;
-            masterInstance.broadcastCommand(new MIS2CSyncMetaCommand(operation, Arrays.stream(identifiers).toList(), uuid));
+            masterInstance.broadcastCommand(new MIS2CSyncMetaCommand(meta));
         }
         else
         {
             assert slaveInstance != null;
-            slaveInstance.sendCommand(new MIC2SDisguiseMetaCommand(operation, Arrays.stream(identifiers).toList(), uuid));
+
+            if (slaveInstance.isOnline())
+                slaveInstance.sendCommand(new MIC2SDisguiseMetaCommand(meta));
+            else
+                slaveInstance.cacheRevokeStates(meta);
         }
     }
 
