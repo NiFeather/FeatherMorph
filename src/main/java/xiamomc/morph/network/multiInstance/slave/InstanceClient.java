@@ -13,21 +13,17 @@ import java.net.URI;
 
 public class InstanceClient extends WebSocketClient
 {
-    private MorphConfigManager config;
-    private Logger logger;
+    private final Logger logger;
 
-    private XiaMoJavaPlugin plugin;
+    private final XiaMoJavaPlugin plugin;
 
-    private IMasterHandler masterHandler;
+    private final IMasterHandler masterHandler;
 
     public InstanceClient(URI serverUri, XiaMoJavaPlugin plugin, IMasterHandler masterHandler)
     {
         super(serverUri);
 
         this.logger = plugin.getSLF4JLogger();
-
-        var dependencies = DependencyManager.getManagerOrCreate(plugin);
-        config = dependencies.get(MorphConfigManager.class, false);
 
         plugin.schedule(this::load);
         this.plugin = plugin;
@@ -59,11 +55,14 @@ public class InstanceClient extends WebSocketClient
     {
         logger.info("Connection closed with code '%s' and reason '%s'".formatted(code, reason));
 
+        var waitingSecond = 20;
         if (code == 1001 || code == 1000)
         {
-            logger.info("Reconnecting after 10 seconds");
-            plugin.schedule(this::reconnect, 10 * 20);
+            logger.info("Will try to reconnect after '%s' seconds...".formatted(waitingSecond));
+            plugin.schedule(this::reconnect, waitingSecond * 20);
         }
+
+        masterHandler.onConnectionClose(code);
     }
 
     @Override

@@ -164,7 +164,7 @@ public class MorphConfigManager extends PluginConfigManager
         });
 
         //更新配置
-        int targetVersion = 28;
+        int targetVersion = 29;
 
         var configVersion = getOrDefault(Integer.class, ConfigOption.VERSION);
 
@@ -257,6 +257,14 @@ public class MorphConfigManager extends PluginConfigManager
             }
 
             newConfig.set(ConfigOption.VERSION.toString(), targetVersion);
+
+            if (((String)newConfig.get(ConfigOption.MASTER_SECRET.toString(), "~UNSET")).equalsIgnoreCase("~UNSET"))
+            {
+                var defVal = ConfigOption.MASTER_SECRET.defaultValue.toString();
+
+                getBindable(String.class, ConfigOption.MASTER_SECRET).set(defVal);
+                newConfig.set(ConfigOption.MASTER_SECRET.toString(), defVal);
+            }
 
             plugin.saveConfig();
             reload();

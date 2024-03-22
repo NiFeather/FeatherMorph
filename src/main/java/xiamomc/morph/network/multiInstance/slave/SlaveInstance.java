@@ -32,6 +32,7 @@ import java.net.URI;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 
 public class SlaveInstance extends MorphPluginObject implements IInstanceService, IMasterHandler
 {
@@ -268,7 +269,7 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
 
     private final Bindable<ProtocolState> currentState = new Bindable<>(ProtocolState.NOT_CONNECTED);
 
-    private final List<SocketDisguiseMeta> revokeStatesAfterDisconnect = new ObjectArrayList();
+    private final List<SocketDisguiseMeta> revokeStatesAfterDisconnect = new ObjectArrayList<>();
 
     public void cacheRevokeStates(SocketDisguiseMeta socketDisguiseMeta)
     {
@@ -286,7 +287,7 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
 
     private void switchState(ProtocolState newState)
     {
-        logger.info("State switched to " + newState);
+        logger.info("Networking state switched to " + newState);
         currentState.set(newState);
     }
 
@@ -296,6 +297,16 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
     public void onConnectionOpen()
     {
         this.addSchedule(() -> this.sendCommand(new MIC2SLoginCommand(implementingLevel, secret.get())));
+    }
+
+    @Nullable
+    public Consumer<Integer> onClose;
+
+    @Override
+    public void onConnectionClose(int code)
+    {
+        if (onClose != null)
+            onClose.accept(code);
     }
 
     @Override
@@ -325,7 +336,7 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
 
         if (!(cmd instanceof MIS2CCommand<?> mis2c))
         {
-            logger.warn("Command is not a MIS2C instance!");
+            logger.warn("Command '%s' is not a MIS2C instance!".formatted(cmd));
             return;
         }
 

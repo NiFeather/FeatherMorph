@@ -16,6 +16,7 @@ public interface IMasterHandler
     public void onStateCommand(MIS2CStateCommand cStateCommand);
 
     public void onConnectionOpen();
+    public void onConnectionClose(int code);
     public void onText(String rawCommand);
     public void onClientError(Exception e, InstanceClient client);
 }

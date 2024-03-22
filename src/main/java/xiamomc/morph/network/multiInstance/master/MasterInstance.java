@@ -58,6 +58,9 @@ public class MasterInstance extends MorphPluginObject implements IInstanceServic
 
             bindingServer = null;
 
+            if (onStop != null)
+                onStop.run();
+
             return true;
         }
         catch (Throwable t)
@@ -117,6 +120,9 @@ public class MasterInstance extends MorphPluginObject implements IInstanceServic
             return;
         }
     }
+
+    @Nullable
+    public Runnable onStop;
 
     //region IInstanceService
 
