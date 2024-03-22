@@ -111,18 +111,15 @@ public class MultiInstanceService extends MorphPluginObject
 
     public void onReload()
     {
-        if (slaveInstance == null && masterInstance != null)
-            masterInstance.onStop = () -> this.addSchedule(() -> prepareInstance(isMaster.get()), 5);
-        else if (slaveInstance != null)
-            slaveInstance.onClose = code -> this.addSchedule(() -> prepareInstance(isMaster.get()), 5);
-
         stopAll();
+
+        this.addSchedule(() -> prepareInstance(isMaster.get()), 20);
     }
 
     private boolean stopAll()
     {
-        if (masterInstance != null) return masterInstance.stop();
         if (slaveInstance != null) return slaveInstance.stop();
+        if (masterInstance != null) return masterInstance.stop();
 
         return true;
     }

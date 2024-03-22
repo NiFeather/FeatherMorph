@@ -39,7 +39,7 @@ public class InstanceClient extends WebSocketClient
     @Override
     public void onOpen(ServerHandshake serverHandshake)
     {
-        logger.info("Opened connection to the instance server.");
+        logger.info("[C] Opened connection to the instance server.");
         masterHandler.onConnectionOpen();
     }
 
@@ -53,12 +53,12 @@ public class InstanceClient extends WebSocketClient
     @Override
     public void onClose(int code, String reason, boolean isFromRemote)
     {
-        logger.info("Connection closed with code '%s' and reason '%s'".formatted(code, reason));
+        logger.info("[C] Connection closed with code '%s' and reason '%s'".formatted(code, reason));
 
         var waitingSecond = 20;
         if (code == 1001 || code == 1000)
         {
-            logger.info("Will try to reconnect after '%s' seconds...".formatted(waitingSecond));
+            logger.info("[C] Retrying connect after %s seconds...".formatted(waitingSecond));
             plugin.schedule(this::reconnect, waitingSecond * 20);
         }
 
@@ -68,7 +68,7 @@ public class InstanceClient extends WebSocketClient
     @Override
     public void connect()
     {
-        logger.info("Connecting the instance server...");
+        logger.info("[C] Connecting to the instance server...");
         super.connect();
     }
 
@@ -81,14 +81,14 @@ public class InstanceClient extends WebSocketClient
         }
         catch (Throwable t)
         {
-            logger.warn("Error occurred invoking onClientError(): " + t.getMessage());
+            logger.warn("[C] Error occurred invoking onClientError(): " + t.getMessage());
             t.printStackTrace();
         }
 
         if (e instanceof ConnectException)
         {
-            logger.info("Can't reach the server, retrying after 5 seconds: " + e.getMessage());
-            plugin.schedule(this::reconnect, 5 * 20);
+            logger.info("[C] Can't reach the server, retrying after 30 seconds: " + e.getMessage());
+            plugin.schedule(this::reconnect, 30 * 20);
 
             return;
         }

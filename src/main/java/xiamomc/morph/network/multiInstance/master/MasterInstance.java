@@ -65,11 +65,16 @@ public class MasterInstance extends MorphPluginObject implements IInstanceServic
         }
         catch (Throwable t)
         {
-            logger.error("Error occurred shutting down socket server: " + t.getMessage());
+            logger.error("[S] Error occurred shutting down socket server: " + t.getMessage());
             t.printStackTrace();
 
             return false;
         }
+    }
+
+    public boolean isOnline()
+    {
+        return bindingServer != null && bindingServer.running;
     }
 
     /**
@@ -95,7 +100,7 @@ public class MasterInstance extends MorphPluginObject implements IInstanceServic
         }
         catch (Throwable t)
         {
-            logger.warn("Error occurred while setting up server:" + t.getMessage());
+            logger.warn("[S] Error occurred while setting up server:" + t.getMessage());
             t.printStackTrace();
 
             return false;
@@ -103,6 +108,7 @@ public class MasterInstance extends MorphPluginObject implements IInstanceServic
     }
 
     private final Bindable<String> secret = new Bindable<>(null);
+    private final Bindable<Boolean> debug_output = new Bindable<>(false);
 
     @Initializer
     private void load()
@@ -139,18 +145,19 @@ public class MasterInstance extends MorphPluginObject implements IInstanceServic
         var ws = record.socket();
         var text = record.rawMessage().split(" ", 2);
 
-        logger.info("%s :: <- :: %s".formatted(ws.getRemoteSocketAddress(), record.rawMessage()));
+        if (debug_output.get())
+            logger.info("%s :: <- :: %s".formatted(ws.getRemoteSocketAddress(), record.rawMessage()));
 
         var cmd = registries.createC2SCommand(text[0], text.length == 2 ? text[1] : "");
         if (cmd == null)
         {
-            logger.warn("Unknown command: " + text[0]);
+            logger.warn("[S] Unknown command: " + text[0]);
             return;
         }
 
         if (!(cmd instanceof MIC2SCommand<?> mic2s))
         {
-            logger.warn("Command is not a MIC2S instance!");
+            logger.warn("[S] Command is not a MIC2S instance!");
             return;
         }
 
@@ -177,7 +184,7 @@ public class MasterInstance extends MorphPluginObject implements IInstanceServic
     {
         if (!socket.isOpen())
         {
-            logger.warn("Not sending a command to a closed socket!");
+            logger.warn("[S] Not sending commands to a closed socket! %s".formatted(socket.getRemoteSocketAddress()));
             return;
         }
 
@@ -215,30 +222,37 @@ public class MasterInstance extends MorphPluginObject implements IInstanceServic
     @Override
     public void onLoginCommand(MIC2SLoginCommand cProtocolCommand)
     {
-        logger.info("'%s' is requesting a login!".formatted(cProtocolCommand.getSocket()));
-
         var socket = cProtocolCommand.getSocket();
         if (socket == null)
+        {
+            logger.info("Received a login request from an unknown source, not processing.");
             return;
+        }
+
+        logger.info("[S] '%s' is requesting a login".formatted(socket.getRemoteSocketAddress()));
 
         this.switchState(socket, ProtocolState.LOGIN);
 
-        logger.info("Level is '%s', and their secret is '%s'".formatted(cProtocolCommand.getVersion(), cProtocolCommand.getSecret()));
+        if (debug_output.get())
+            logger.info("Level is '%s', and their secret is '%s'".formatted(cProtocolCommand.getVersion(), cProtocolCommand.getSecret()));
 
         if (!this.level.equals(cProtocolCommand.getVersion()))
         {
-            logger.info("Protocol mismatch!");
+            logger.info("[S] Protocol mismatch! Disconnecting...");
+
             this.disconnect(socket, "Protocol mismatch!");
             return;
         }
 
         if (cProtocolCommand.getSecret() == null || !cProtocolCommand.getSecret().equals(this.secret.get()))
         {
-            logger.info("Invalid secret! Disconnecting...");
+            logger.info("[S] Invalid secret! Disconnecting...");
 
             disconnect(socket, "Invalid secret '%s'".formatted(cProtocolCommand.getSecret()));
             return;
         }
+
+        logger.info("[S] '%s' logged in".formatted(socket.getRemoteSocketAddress()));
 
         sendCommand(socket, new MIS2CLoginResultCommand(true));
         switchState(socket, ProtocolState.SYNC);
@@ -274,7 +288,7 @@ public class MasterInstance extends MorphPluginObject implements IInstanceServic
         var meta = cDisguiseMetaCommand.getMeta();
         if (meta == null || !meta.isValid())
         {
-            logger.warn("Bad client implementation? Got invalid meta from '%s'".formatted(socket.getRemoteSocketAddress()));
+            logger.warn("[S] Bad client implementation? Got invalid meta from '%s'".formatted(socket.getRemoteSocketAddress()));
             return;
         }
 
@@ -282,7 +296,7 @@ public class MasterInstance extends MorphPluginObject implements IInstanceServic
 
         if (!state.loggedIn())
         {
-            logger.warn("Bad client implementation? They sent meta sync before they login! (%s)".formatted(socket.getRemoteSocketAddress()));
+            logger.warn("[S] Bad client implementation? They sent meta sync before they login! (%s)".formatted(socket.getRemoteSocketAddress()));
             return;
         }
 
@@ -294,8 +308,6 @@ public class MasterInstance extends MorphPluginObject implements IInstanceServic
 
         var playerMeta = disguiseManager.getPlayerMeta(Bukkit.getOfflinePlayer(Objects.requireNonNull(meta.getBindingUuid(), "???")));
         var unlocked = playerMeta.getUnlockedDisguises();
-
-        var player = Bukkit.getPlayer(meta.getBindingUuid());
 
         if (operation == Operation.ADD_IF_ABSENT)
         {
@@ -362,6 +374,12 @@ public class MasterInstance extends MorphPluginObject implements IInstanceServic
         }
     }
 
+    @Override
+    public void onConnectionClose(WebSocket socket)
+    {
+        allowedSockets.remove(socket);
+    }
+
     //endregion
 
     //region Utilities
@@ -378,7 +396,7 @@ public class MasterInstance extends MorphPluginObject implements IInstanceServic
     {
         if (e instanceof ConnectException) return;
 
-        logger.error("Error occurred with the internal client! Shutting down master server...");
+        logger.error("Error occurred with the internal client! Stopping master server...");
         this.stop();
     }
 

@@ -44,17 +44,28 @@ public final class InstanceServer extends WebSocketServer
     @Override
     public void onOpen(WebSocket webSocket, ClientHandshake clientHandshake)
     {
-        logger.info("New connection opened: " + webSocket.getRemoteSocketAddress());
+        logger.info("[S] New connection opened: " + webSocket.getRemoteSocketAddress());
 
         connectedSockets.add(webSocket);
+    }
+
+    public boolean running;
+
+    @Override
+    public void stop(int timeout, String closeMessage) throws InterruptedException
+    {
+        super.stop(timeout, closeMessage);
+
+        running = false;
     }
 
     @Override
     public void onClose(WebSocket webSocket, int i, String s, boolean b)
     {
-        logger.info("Connection closed: " + webSocket.getRemoteSocketAddress());
+        logger.info("[S] Connection closed: " + webSocket.getRemoteSocketAddress());
 
         connectedSockets.remove(webSocket);
+        clientHandler.onConnectionClose(webSocket);
     }
 
     public record WsRecord(WebSocket socket, String rawMessage)
@@ -72,16 +83,17 @@ public final class InstanceServer extends WebSocketServer
     @Override
     public void onError(WebSocket webSocket, Exception e)
     {
-        logger.warn("An error occurred with socket '%s': %s".formatted(webSocket.getRemoteSocketAddress(), e.getMessage()));
+        logger.warn("[S] An error occurred with socket '%s': %s".formatted(webSocket.getRemoteSocketAddress(), e.getMessage()));
         e.printStackTrace();
     }
 
     @Override
     public void onStart()
     {
-        logger.info("Master websocket server started on " + this.getAddress().toString());
+        logger.info("[S] Master websocket server started on " + this.getAddress().toString());
 
         clientHandler.onServerStart(this);
+        running = true;
     }
 
     public void dispose()

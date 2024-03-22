@@ -52,7 +52,8 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
         }
         catch (Throwable t)
         {
-            logger.warn("Can't close client!");
+            logger.warn("Can't close client! " + t.getMessage());
+            t.printStackTrace();
             return false;
         }
     }
@@ -243,7 +244,7 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
     {
         if (currentState.get() != ProtocolState.LOGIN)
         {
-            logger.warn("Bad server implementation? They sent a login result at when we are not in a login process!");
+            logger.warn("[C] Bad server implementation? They sent a login result at when we are not in a login process!");
             return;
         }
 
@@ -280,14 +281,14 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
     public void onStateCommand(MIS2CStateCommand cStateCommand)
     {
         if (cStateCommand.getState() == ProtocolState.INVALID)
-            logger.warn("Bad server implementation? The new session state is invalid!");
+            logger.warn("[C] Bad server implementation? The new session state is invalid!");
 
         switchState(cStateCommand.getState());
     }
 
     private void switchState(ProtocolState newState)
     {
-        logger.info("Networking state switched to " + newState);
+        logger.info("[C] Client networking state switched to " + newState);
         currentState.set(newState);
     }
 
@@ -330,13 +331,13 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
         var cmd = registries.createS2CCommand(text[0], text.length == 2 ? text[1] : "");
         if (cmd == null)
         {
-            logger.warn("Unknown command: " + text[0]);
+            logger.warn("[C] Unknown command: " + text[0]);
             return;
         }
 
         if (!(cmd instanceof MIS2CCommand<?> mis2c))
         {
-            logger.warn("Command '%s' is not a MIS2C instance!".formatted(cmd));
+            logger.warn("[C] Command '%s' is not a MIS2C instance!".formatted(cmd));
             return;
         }
 
