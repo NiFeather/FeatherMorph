@@ -58,6 +58,8 @@ dependencies {
     compileOnly(files("libs/Residence5.1.4.0.jar"))
     compileOnly(files("libs/TAB v4.1.2.jar"))
 
+    implementation("org.java-websocket:Java-WebSocket:1.5.6")
+
     //compileOnly("dev.majek:hexnicks:3.1.1")
 
     implementation("org.bstats:bstats-bukkit:${project.property("bstats_version")}")
