@@ -178,6 +178,41 @@ root:
     - player:a_player_disguise
     - 'foo:@default'
 
+  # Client integration options
+  client:
+    # Should we allow client integrations?
+    allow_client_mod: true
+
+    # Should we log packets coming from the client?
+    log_incoming_packets: false
+
+    # Should we kick players if their client mod doesn't match our API version?
+    #
+    # Note: This only checks the player who joined with the client mod.
+    #       Players may have their mod implementing our API, so don't treat this as an anti-cheat feature.
+    force_version: false
+
+    # Should we log packets sent to the client?
+    log_outgoing_packets: false
+
+    # Make clients render other players' disguises when LibsDisguises is not present?
+    # Requires the client to implement the v11 protocol
+    client_renderer: true
+
+  # Multi instance network options
+  # This network is used to sync the player data across multiple FeatherMorph instances
+  multi_instance:
+    # The address where the master server is.
+    # If `is_master_service` is on, this will be the address we open the service at.
+    master_address: "0.0.0.0:39210"
+
+    # Whether we are the master server in the instance network or not
+    is_master_service: false
+
+    # The secret token for the network
+    # DO NOT SHARE THIS TO OTHERS! OR ANYONE WITH THE SECRET WILL BE ABLE TO CONNECT TO THE INSTANCE NETWORK!
+    secret: "~UNSET"
+
   # NBT blacklist options
   # Defines tags that should not be sent to the client when syncing disguise states.
   nbt_blacklist:
@@ -232,26 +267,5 @@ root:
       - PersistenceRequired
       - SelectedItem
 
-  # Client integration options
-  client:
-    # Should we allow client integrations?
-    allow_client_mod: true
-
-    # Should we log packets coming from the client?
-    log_incoming_packets: false
-
-    # Should we kick players if their client mod doesn't match our API version?
-    #
-    # Note: This only checks the player who joined with the client mod.
-    #       Players may have their mod implementing our API, so don't treat this as an anti-cheat feature.
-    force_version: false
-
-    # Should we log packets sent to the client?
-    log_outgoing_packets: false
-
-    # Make clients render other players' disguises when LibsDisguises is not present?
-    # Requires the client to implement the v11 protocol
-    client_renderer: true
-
   # Do not touch unless you know what you're doing!
-  version: 28
+  version: 29

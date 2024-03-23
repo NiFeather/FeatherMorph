@@ -46,15 +46,18 @@ public class SummonFangsMorphSkill extends MorphSkill<NoOpConfiguration>
             var location = player.getEyeLocation();
             var targetAmount = 3;
 
-            for (int i = 0; i < targetAmount; i++)
+            this.scheduleOn(player, () ->
             {
-                var vex  = world.spawn(location, Vex.class, CreatureSpawnEvent.SpawnReason.NATURAL);
+                for (int i = 0; i < targetAmount; i++)
+                {
+                    var vex  = world.spawn(location, Vex.class, CreatureSpawnEvent.SpawnReason.NATURAL);
 
-                if (shouldTarget)
-                    vex.setTarget((LivingEntity) targetEntity);
+                    if (shouldTarget)
+                        vex.setTarget((LivingEntity) targetEntity);
 
-                vex.setPersistent(false);
-            }
+                    vex.setPersistent(false);
+                }
+            });
         }
         else
         {
@@ -106,7 +109,7 @@ public class SummonFangsMorphSkill extends MorphSkill<NoOpConfiguration>
                 oldLocation = location.clone();
 
                 //添加到计划任务
-                this.addSchedule(() ->
+                this.scheduleOn(player, ()  ->
                 {
                     var fang = world.spawn(loc, EvokerFangs.class, CreatureSpawnEvent.SpawnReason.CUSTOM);
                     fang.setOwner(player);

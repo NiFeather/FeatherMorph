@@ -93,6 +93,12 @@ public enum ConfigOption
 
     UUID_RANDOM_BASE(ConfigNode.create().append("uuid_random_base"), RandomStringUtils.randomAlphabetic(8)),
 
+    MASTER_ADDRESS(multiInstanceNode().append("master_address"), "0.0.0.0:39210"),
+
+    IS_MASTER(multiInstanceNode().append("is_master_service"), false),
+
+    MASTER_SECRET(multiInstanceNode().append("secret"), RandomStringUtils.randomAlphabetic(12)),
+
     VERSION(ConfigNode.create().append("version"), 0);
 
     public final ConfigNode node;
@@ -161,5 +167,9 @@ public enum ConfigOption
     private static ConfigNode boundingBoxNode()
     {
         return ConfigNode.create().append("bounding_boxes");
+    }
+    private static ConfigNode multiInstanceNode()
+    {
+        return ConfigNode.create().append("multi_instance");
     }
 }

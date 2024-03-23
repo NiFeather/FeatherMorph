@@ -14,7 +14,12 @@ public class MorphPluginObject extends PluginObject<MorphPlugin>
 
     protected void scheduleOn(Entity entity, Runnable r)
     {
-        entity.getScheduler().execute(plugin, r, null, 1);
+        this.scheduleOn(entity, r, 1);
+    }
+
+    protected void scheduleOn(Entity entity, Runnable r, int delay)
+    {
+        entity.getScheduler().execute(plugin, r, null, delay);
     }
 
     protected void scheduleWorld(Entity entity, Runnable r)
