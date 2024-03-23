@@ -110,6 +110,11 @@ root:
     idle_consumption: true
 
   # Disable Fly Ability in the following worlds
+  #
+  # Example:
+  # nofly_worlds:
+  #   - example_world1
+  #   - example_world2
   nofly_worlds:
     - example_world1
     - example_world2
@@ -173,6 +178,12 @@ root:
   #
   # Use '@default' to disable all disguises under a category, like 'player:@default' or 'minecraft:@default'
   # Remember to add quotes or the library we use to read the config will panic ;)
+  #
+  # Example:
+  # bannedDisguises:
+  #   - minecraft:example_mc_disguise
+  #   - player:a_player_disguise
+  #   - 'foo:@default'
   bannedDisguises:
     - minecraft:example_mc_disguise
     - player:a_player_disguise
@@ -202,6 +213,9 @@ root:
   # Multi instance network options
   # This network is used to sync the player data across multiple FeatherMorph instances
   multi_instance:
+    # Enable this feature?
+    enabled: false
+
     # The address where the master server is.
     # If `is_master_service` is on, this will be the address we open the service at.
     master_address: "0.0.0.0:39210"
