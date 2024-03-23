@@ -7,6 +7,7 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
+import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.SkillStrings;
@@ -45,7 +46,7 @@ public class TeleportMorphSkill extends MorphSkill<TeleportConfiguration>
 
         //获取位置
         var loc = targetBlock.getLocation();
-        var face = player.getTargetBlockFace(32);
+        var face = player.getTargetBlockFace(option.getMaxDistance());
 
         var commonOffset = 0.5f;
         var xOffset = 0f;
@@ -61,15 +62,20 @@ public class TeleportMorphSkill extends MorphSkill<TeleportConfiguration>
         //目标X/Z + 0.5 + 从方块朝向获取的ModX/Z
         loc.setX(loc.getX() + xOffset + commonOffset);
         loc.setZ(loc.getZ() + zOffset + commonOffset);
-
-        //目的地
-        var destBlock = loc.getBlock();
-
-        //从目的地的方块获取应该设置的高度
-        loc.setY(face == BlockFace.DOWN ? loc.getY() + yOffset : getTopY(destBlock));
+        loc.setY(loc.getY() + yOffset);
 
         //设置眼睛方向
         loc.setDirection(player.getEyeLocation().getDirection());
+
+        if (face == BlockFace.DOWN)
+        {
+            var box = player.getBoundingBox(); // state.getDisguiseWrapper().getBoundingBoxAt(loc.x(), loc.y(), loc.z());
+            var height = box.getHeight();
+            var traceResult = targetBlock.getWorld().rayTraceBlocks(loc, new Vector(0, -height, 0), height + 0.05d, FluidCollisionMode.NEVER, true);
+
+            if (traceResult == null || traceResult.getHitBlock() == null)
+                loc.setY(loc.getY() - player.getBoundingBox().getHeight() + 1);
+        }
 
         //传送
         playSoundToNearbyPlayers(player, 10,
