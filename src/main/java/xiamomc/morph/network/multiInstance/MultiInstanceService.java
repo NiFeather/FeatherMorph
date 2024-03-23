@@ -80,7 +80,11 @@ public class MultiInstanceService extends MorphPluginObject
     {
         configManager.bind(isMaster, ConfigOption.IS_MASTER);
 
-        isMaster.onValueChanged((o, n) -> prepareInstance(n), true);
+        isMaster.onValueChanged((o, n) ->
+        {
+            if (enabled.get())
+                prepareInstance(n);
+        }, true);
     }
 
     public void onDisable()
