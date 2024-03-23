@@ -73,6 +73,7 @@ public class MultiInstanceService extends MorphPluginObject
     private MorphManager manager;
 
     private final Bindable<Boolean> isMaster = new Bindable<>(false);
+    private final Bindable<Boolean> enabled = new Bindable<>(false);
 
     @Initializer
     private void load(MorphConfigManager configManager)
@@ -113,7 +114,8 @@ public class MultiInstanceService extends MorphPluginObject
     {
         stopAll();
 
-        this.addSchedule(() -> prepareInstance(isMaster.get()), 20);
+        if (enabled.get())
+            this.addSchedule(() -> prepareInstance(isMaster.get()), 20);
     }
 
     private boolean stopAll()

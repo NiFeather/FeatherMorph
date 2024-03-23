@@ -93,6 +93,8 @@ public enum ConfigOption
 
     UUID_RANDOM_BASE(ConfigNode.create().append("uuid_random_base"), RandomStringUtils.randomAlphabetic(8)),
 
+    ENABLE_MULTIINSTANCE(multiInstanceNode().append("enabled"), false),
+
     MASTER_ADDRESS(multiInstanceNode().append("master_address"), "0.0.0.0:39210"),
 
     IS_MASTER(multiInstanceNode().append("is_master_service"), false),
