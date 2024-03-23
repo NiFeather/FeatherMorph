@@ -258,6 +258,7 @@ public class MorphConfigManager extends PluginConfigManager
 
             newConfig.set(ConfigOption.VERSION.toString(), targetVersion);
 
+            //todo: 将~UNSET作为留空的保留字符串写入PluginBase
             if (((String)newConfig.get(ConfigOption.MASTER_SECRET.toString(), "~UNSET")).equalsIgnoreCase("~UNSET"))
             {
                 var defVal = ConfigOption.MASTER_SECRET.defaultValue.toString();
