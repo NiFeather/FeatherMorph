@@ -375,10 +375,13 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
 
             try
             {
+                //this.scheduleOn(player, () -> matches.forEach(instance::removeModifier));
                 matches.forEach(instance::removeModifier);
             }
-            catch (Throwable ignored)
+            catch (Throwable t)
             {
+                logger.warn("Error occurred while removing modifiers: " + t.getMessage());
+                t.printStackTrace();
             }
         }
 
