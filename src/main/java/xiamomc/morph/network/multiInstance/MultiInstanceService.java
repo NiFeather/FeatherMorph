@@ -29,7 +29,7 @@ public class MultiInstanceService extends MorphPluginObject
     private void checkSanity()
     {
         if (masterInstance == null && slaveInstance == null)
-            throw new IllegalStateException("None of master or slave instance is alive!");
+            throw new IllegalStateException("None of master or slave instance is present!");
 
         if (isMaster.get() && masterInstance == null)
             throw new IllegalStateException("We are the master server, but the server instance is null?!");
@@ -94,7 +94,19 @@ public class MultiInstanceService extends MorphPluginObject
 
     public void notifyDisguiseMetaChange(UUID uuid, Operation operation, String... identifiers)
     {
-        checkSanity();
+        if (!enabled.get()) return;
+
+        // Don't ask, its intended.
+        try
+        {
+            checkSanity();
+        }
+        catch (Throwable t)
+        {
+            logger.error("Sanity check failed: " + t.getMessage());
+            t.printStackTrace();
+            return;
+        }
 
         var meta = new SocketDisguiseMeta(operation, Arrays.stream(identifiers).toList(), uuid);
 
