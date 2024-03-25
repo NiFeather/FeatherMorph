@@ -53,7 +53,7 @@ public class EquipmentPacketListener extends ProtocolListener
             return;
 
         //获取此包的来源实体
-        var sourceNmsEntity = getNmsEntityFrom(event, packet.getEntity());
+        var sourceNmsEntity = getNmsPlayerEntityFrom(event, packet.getEntity());
         if (sourceNmsEntity == null)
             return;
 

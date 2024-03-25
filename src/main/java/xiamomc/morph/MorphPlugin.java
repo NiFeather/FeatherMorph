@@ -269,4 +269,10 @@ public final class MorphPlugin extends XiaMoJavaPlugin
     {
         Bukkit.getAsyncScheduler().runNow(this, o -> r.run());
     }
+
+    @Override
+    protected int getExceptionLimit()
+    {
+        return 3;
+    }
 }

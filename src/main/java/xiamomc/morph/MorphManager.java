@@ -265,24 +265,36 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         {
             var p = state.getPlayer();
 
-            //跳过离线玩家
-            if (!p.isOnline()) return;
-
-            if (!abilityHandler.handle(p, state))
+            //logger.info("Schedule at " + plugin.getCurrentTick() +" -> " + i);
+            p.getScheduler().run(plugin, f ->
             {
-                p.sendMessage(MessageUtils.prefixes(p, MorphStrings.errorWhileUpdatingDisguise()));
+                //logger.info("Run at " + plugin.getCurrentTick() + " -> " + i);
 
-                unMorph(nilCommandSource, p, true, true);
-            }
+                //跳过离线玩家
+                if (!p.isOnline() || state.disposed()) return;
 
-            if (!state.getProvider().updateDisguise(p, state))
-            {
-                p.sendMessage(MessageUtils.prefixes(p, MorphStrings.errorWhileUpdatingDisguise()));
+                boolean abilitySuccess = true;
+                boolean providerSuccess = true;
 
-                unMorph(nilCommandSource, p, true, true);
-            }
+                try
+                {
+                    abilitySuccess = abilityHandler.handle(p, state);
+                    providerSuccess = state.getProvider().updateDisguise(p, state);
+                    state.getSoundHandler().update();
+                }
+                catch (Throwable t)
+                {
+                    logger.error("Error occurred updating disguise! " + t.getMessage());
+                    t.printStackTrace();
+                }
 
-            state.getSoundHandler().update();
+                if (!providerSuccess || !abilitySuccess)
+                {
+                    p.sendMessage(MessageUtils.prefixes(p, MorphStrings.errorWhileUpdatingDisguise()));
+
+                    unMorph(nilCommandSource, p, true, true);
+                }
+            }, () -> { /* retried */ });
         });
     }
 
@@ -1016,6 +1028,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         // 向管理员发送map移除指令
         networkingHelper.sendCommandToRevealablePlayers(new S2CMapRemoveCommand(player.getEntityId()));
+
+        state.dispose();
     }
 
     @Resolved
@@ -1462,20 +1476,23 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         stateToRecover.forEach(s ->
         {
             var player = s.getPlayer();
-            var config = this.getPlayerMeta(player);
 
-            if (!disguiseDisabled(s.getDisguiseIdentifier()) && config.getUnlockedDisguiseIdentifiers().contains(s.getDisguiseIdentifier()))
+            this.scheduleOn(player, () ->
             {
-                var newState = s.createCopy();
-                s.dispose();
+                var config = this.getPlayerMeta(player);
+                if (!disguiseDisabled(s.getDisguiseIdentifier()) && config.getUnlockedDisguiseIdentifiers().contains(s.getDisguiseIdentifier()))
+                {
+                    var newState = s.createCopy();
+                    s.dispose();
 
-                disguiseFromState(newState);
-                refreshClientState(newState);
+                    disguiseFromState(newState);
+                    refreshClientState(newState);
 
-                player.sendMessage(MessageUtils.prefixes(player, MorphStrings.recoverString()));
-            }
-            else
-                unMorph(nilCommandSource, player, true, true);
+                    player.sendMessage(MessageUtils.prefixes(player, MorphStrings.recoverString()));
+                }
+                else
+                    unMorph(nilCommandSource, player, true, true);
+            });
         });
 
         Bukkit.getOnlinePlayers().forEach(p -> clientHandler.refreshPlayerClientMorphs(this.getPlayerMeta(p).getUnlockedDisguiseIdentifiers(), p));

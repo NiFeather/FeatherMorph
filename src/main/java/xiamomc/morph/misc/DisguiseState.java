@@ -41,6 +41,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static xiamomc.morph.utilities.DisguiseUtils.itemOrAir;
 
@@ -688,7 +689,7 @@ public class DisguiseState extends MorphPluginObject
 
             soundFrequency = MathUtils.clamp(0, 2, config.getBindable(Double.class, ConfigOption.AMBIENT_FREQUENCY).get());
 
-            var soundEvent = EntityTypeUtils.getAmbientSound(entityType);
+            var soundEvent = EntityTypeUtils.getAmbientSound(entityType, bindingPlayer.getWorld());
 
             var sound = soundEvent.sound();
             if (sound == null) return;
@@ -740,8 +741,16 @@ public class DisguiseState extends MorphPluginObject
                 disguise, provider, getDisguisedItems(), this.playerOptions, morphConfiguration);
     }
 
+    private final AtomicBoolean disposed = new AtomicBoolean(false);
+
+    public boolean disposed()
+    {
+        return disposed.get();
+    }
+
     public void dispose()
     {
+        disposed.set(true);
         this.disguiseWrapper.dispose();
     }
 

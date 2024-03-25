@@ -4,6 +4,7 @@ import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.events.ListeningWhitelist;
 import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.injector.GamePhase;
+import com.sun.jna.platform.win32.Netapi32Util;
 import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -41,12 +42,14 @@ public class MetaPacketListener extends ProtocolListener
     private void onMetaPacket(ClientboundSetEntityDataPacket packet, PacketEvent packetEvent)
     {
         //获取此包的来源实体
-        var sourceNmsEntity = getNmsEntityFrom(packetEvent, packet.id());
+        var sourceNmsEntity = getNmsPlayerEntityFrom(packetEvent, packet.id());
+
         if (sourceNmsEntity == null)
             return;
 
-
         if (!(sourceNmsEntity.getBukkitEntity() instanceof Player sourcePlayer)) return;
+
+        if (sourcePlayer.equals(packetEvent.getPlayer())) return;
 
         var watcher = registry.getWatcher(sourcePlayer.getUniqueId());
 

@@ -66,10 +66,9 @@ public class PlayerLookPacketListener extends ProtocolListener
     private void onTeleport(ClientboundTeleportEntityPacket packet, PacketEvent event)
     {
         //获取此包的来源实体
-        var sourceNmsEntity = getNmsEntityFrom(event, packet.getId());
+        var sourceNmsEntity = getNmsPlayerEntityFrom(event, packet.getId());
         if (sourceNmsEntity == null)
             return;
-
 
         if (!(sourceNmsEntity.getBukkitEntity() instanceof Player sourcePlayer)) return;
 

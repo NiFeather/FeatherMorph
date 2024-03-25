@@ -14,10 +14,12 @@ import net.minecraft.world.entity.player.Player;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Sound;
+import org.bukkit.World;
 import org.bukkit.craftbukkit.v1_20_R3.CraftWorld;
 import org.bukkit.craftbukkit.v1_20_R3.entity.CraftEntity;
 import org.bukkit.entity.Enemy;
 import org.bukkit.entity.EntityType;
+import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphPlugin;
@@ -62,15 +64,16 @@ public class EntityTypeUtils
     }
 
     @NotNull
-    public static SoundInfo getAmbientSound(EntityType bukkitType)
+    public static SoundInfo getAmbientSound(EntityType bukkitType, @Nullable World world)
     {
         var cache = typeSoundMap.getOrDefault(bukkitType, null);
         if (cache != null) return cache;
 
         var nmsType = getNmsType(bukkitType);
 
-        var serverWorld = ((CraftWorld) Bukkit.getWorlds().get(0)).getHandle();
-        var entity = nmsType.create(serverWorld, null, e -> e.remove(Entity.RemovalReason.DISCARDED), BlockPos.ZERO, MobSpawnType.COMMAND, false, false);
+        if (world == null) world = Bukkit.getWorlds().get(0);
+        var serverWorld = ((CraftWorld) world).getHandle();
+        var entity = nmsType.create(serverWorld, null, EntityTypeUtils::scheduleEntityDiscard, BlockPos.ZERO, MobSpawnType.COMMAND, false, false);
 
         if (entity instanceof Mob mob)
         {
@@ -95,7 +98,7 @@ public class EntityTypeUtils
     }
 
     @Nullable
-    public static Class<? extends Entity> getNmsClass(@NotNull EntityType type)
+    public static Class<? extends Entity> getNmsClass(@NotNull EntityType type, @Nullable World world)
     {
         var cache = nmsClassMap.getOrDefault(type, null);
         if (cache != null) return cache;
@@ -109,8 +112,9 @@ public class EntityTypeUtils
             return null;
         }
 
-        var serverWorld = ((CraftWorld) Bukkit.getWorlds().get(0)).getHandle();
-        var entity = nmsType.create(serverWorld, null, e -> e.remove(Entity.RemovalReason.DISCARDED), BlockPos.ZERO, MobSpawnType.COMMAND, false, false);
+        if (world == null) world = Bukkit.getWorlds().get(0);
+        var serverWorld = ((CraftWorld) world).getHandle();
+        var entity = nmsType.create(serverWorld, null, EntityTypeUtils::scheduleEntityDiscard, BlockPos.ZERO, MobSpawnType.COMMAND, false, false);
 
         if (entity == null)
         {
@@ -120,6 +124,13 @@ public class EntityTypeUtils
 
         nmsClassMap.put(type, entity.getClass());
         return entity.getClass();
+    }
+
+    private static void scheduleEntityDiscard(Entity nmsEntity)
+    {
+        var entity = nmsEntity.getBukkitEntity();
+        entity.getScheduler()
+                .run(MorphPlugin.getInstance(), retiredTask -> {}, entity::remove);
     }
 
     public static boolean hasBabyVariant(EntityType type)
@@ -358,15 +369,6 @@ public class EntityTypeUtils
         };
     }
 
-    private static final Map<EntityType, Boolean> isEnemyMap = new Object2ObjectArrayMap<>();
-
-    private static final Location spawnLocation = new Location(null, 0d, -4096d, 0d);
-
-    static
-    {
-        isEnemyMap.put(EntityType.BREEZE, true);
-    }
-
     @Deprecated
     @Nullable
     public static String getStepSound(EntityType type)
@@ -389,31 +391,8 @@ public class EntityTypeUtils
     public static boolean isEnemy(EntityType type)
     {
         if (type == EntityType.PLAYER) return false;
-
-        var cache = isEnemyMap.getOrDefault(type, null);
-        if (cache != null) return cache;
-
         if (type.getEntityClass() == null) return false;
 
-        var world = Bukkit.getWorlds().stream().findFirst().orElse(null);
-        if (world == null) return false;
-
-        boolean isEnemy = false;
-
-        try
-        {
-            var entity = world.spawn(spawnLocation, type.getEntityClass());
-            isEnemy = entity instanceof Enemy;
-
-            ((CraftEntity) entity).getHandle().discard();
-        }
-        catch (Throwable t)
-        {
-            var logger = MorphPlugin.getInstance().getSLF4JLogger();
-            logger.error("Unable to determine whether " + type + " is enemy type: " + t.getMessage());
-        }
-
-        isEnemyMap.put(type, isEnemy);
-        return isEnemy;
+        return Enemy.class.isAssignableFrom(type.getEntityClass());
     }
 }
