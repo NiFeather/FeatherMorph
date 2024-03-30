@@ -1,5 +1,6 @@
 package xiamomc.morph;
 
+import io.papermc.paper.util.TickThread;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
@@ -265,37 +266,43 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         {
             var p = state.getPlayer();
 
-            //logger.info("Schedule at " + plugin.getCurrentTick() +" -> " + i);
-            p.getScheduler().run(plugin, f ->
-            {
-                //logger.info("Run at " + plugin.getCurrentTick() + " -> " + i);
-
-                //跳过离线玩家
-                if (!p.isOnline() || state.disposed()) return;
-
-                boolean abilitySuccess = true;
-                boolean providerSuccess = true;
-
-                try
-                {
-                    abilitySuccess = abilityHandler.handle(p, state);
-                    providerSuccess = state.getProvider().updateDisguise(p, state);
-                    state.getSoundHandler().update();
-                }
-                catch (Throwable t)
-                {
-                    logger.error("Error occurred updating disguise! " + t.getMessage());
-                    t.printStackTrace();
-                }
-
-                if (!providerSuccess || !abilitySuccess)
-                {
-                    p.sendMessage(MessageUtils.prefixes(p, MorphStrings.errorWhileUpdatingDisguise()));
-
-                    unMorph(nilCommandSource, p, true, true);
-                }
-            }, () -> { /* retried */ });
+            if (!TickThread.isTickThreadFor(NmsRecord.ofPlayer(p)))
+                this.scheduleOn(p, () -> this.updateDisguiseSingle(state));
+            else
+                this.updateDisguiseSingle(state);
         });
+    }
+
+    private void updateDisguiseSingle(DisguiseState state)
+    {
+        var player = state.getPlayer();
+
+        //logger.info("Run at " + plugin.getCurrentTick() + " -> " + i);
+
+        //跳过离线玩家
+        if (!player.isOnline() || state.disposed()) return;
+
+        boolean abilitySuccess = false;
+        boolean providerSuccess = false;
+
+        try
+        {
+            abilitySuccess = abilityHandler.handle(player, state);
+            providerSuccess = state.getProvider().updateDisguise(player, state);
+            state.getSoundHandler().update();
+        }
+        catch (Throwable t)
+        {
+            logger.error("Error occurred updating disguise! " + t.getMessage());
+            t.printStackTrace();
+        }
+
+        if (!providerSuccess || !abilitySuccess)
+        {
+            player.sendMessage(MessageUtils.prefixes(player, MorphStrings.errorWhileUpdatingDisguise()));
+
+            unMorph(nilCommandSource, player, true, true);
+        }
     }
 
     //region 玩家伪装相关

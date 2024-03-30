@@ -91,8 +91,11 @@ public abstract class SingleWatcher extends MorphPluginObject
         this.bindingPlayer = bindingPlayer;
 
         this.entityType = entityType;
+
+        silent = true;
         initRegistry();
         initValues();
+        silent = false;
     }
 
     private final AtomicBoolean syncedOnce = new AtomicBoolean(false);
@@ -186,7 +189,7 @@ public abstract class SingleWatcher extends MorphPluginObject
 
         onTrackerWrite(singleValue, prev, value);
 
-        if (!syncing)
+        if (!silent)
             sendPacketToAffectedPlayers(packetFactory.buildDiffMetaPacket(getBindingPlayer(), this));
     }
 
@@ -245,11 +248,11 @@ public abstract class SingleWatcher extends MorphPluginObject
 
     //endregion Value Registry
 
-    private boolean syncing;
+    private boolean silent;
 
     public void sync()
     {
-        syncing = true;
+        silent = true;
 
         syncedOnce.set(true);
         dirtySingles.clear();
@@ -264,7 +267,7 @@ public abstract class SingleWatcher extends MorphPluginObject
             t.printStackTrace();
         }
 
-        syncing = false;
+        silent = false;
     }
 
     protected void doSync()
