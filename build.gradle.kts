@@ -149,8 +149,6 @@ bukkit {
             permissionRoot + "mirror.immune"
     );
 
-    val opPermsPermList = ArrayList<BukkitPluginDescription.Permission>();
-
     opPermsStrList.forEach {
         permStr -> permissions.register(permStr).get().default = BukkitPluginDescription.Permission.Default.OP;
     }

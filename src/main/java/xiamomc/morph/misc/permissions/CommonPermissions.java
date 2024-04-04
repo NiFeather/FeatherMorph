@@ -1,5 +1,7 @@
 package xiamomc.morph.misc.permissions;
 
+import org.bukkit.NamespacedKey;
+
 public class CommonPermissions
 {
     private final static String PERM_ROOT = "xiamomc.morph.";
@@ -35,7 +37,17 @@ public class CommonPermissions
     public final static String CAN_FLY = PERM_ROOT + "can_fly";
     public final static String ALWAYS_CAN_FLY = PERM_ROOT + "can_fly.always";
 
-    public final static String CanFlyIn(String worldName)
+    public static String skillPermissionOf(String skillIdentifier, String disguiseIdentifier)
+    {
+        return PERM_ROOT
+                + "skill"
+                + "."
+                + disguiseIdentifier.replace(":", ".")
+                + "."
+                + skillIdentifier.replace(":", ".");
+    }
+
+    public static String CanFlyIn(String worldName)
     {
         return CAN_FLY + ".in." + worldName;
     }

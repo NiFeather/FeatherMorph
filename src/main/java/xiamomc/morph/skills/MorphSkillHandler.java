@@ -191,71 +191,89 @@ public class MorphSkillHandler extends MorphPluginObject
 
         if (state == null) return;
 
-        var entry = getSkillEntry(state.getSkillLookupIdentifier());
+        var skillEntry= getSkillEntry(state.getSkillLookupIdentifier());
 
-        if (entry != null && !entry.getKey().getSkillIdentifier().equals(SkillType.NONE) && player.getGameMode() != GameMode.SPECTATOR)
-        {
-            var cdInfo = getCooldownInfo(player.getUniqueId(), state.getSkillLookupIdentifier());
-            assert cdInfo != null;
-
-            if (cdInfo.getCooldown() > 0)
-            {
-                player.sendMessage(MessageUtils.prefixes(player,
-                        SkillStrings.skillPreparing().resolve("time", state.getSkillCooldown() / 20 + "")));
-    
-                player.playSound(Sound.sound(Key.key("minecraft", "entity.villager.no"),
-                        Sound.Source.PLAYER, 1f, 1f));
-
-                return;
-            }
-
-            var event = new PlayerExecuteSkillEvent(player, state);
-            event.callEvent();
-
-            if (event.isCancelled())
-            {
-                player.sendMessage(MessageUtils.prefixes(player, MorphStrings.operationCancelledString()));
-                state.setSkillCooldown(5);
-                return;
-            }
-
-            var skill = entry.getValue();
-            var config = entry.getKey();
-
-            ISkillOption option;
-
-            try
-            {
-                option = skill.getOptionInstance().fromMap(config.getSkillOptions(skill));
-            }
-            catch (Throwable t)
-            {
-                if (t instanceof ClassCastException)
-                    logger.error(config.getIdentifier() + " -> " + skill.getIdentifier() + " has an invalid setting, please check your skill configurations.");
-                else
-                    logger.error("Error occurred while parsing skill configuration");
-
-                t.printStackTrace();
-
-                player.sendMessage(MessageUtils.prefixes(player, SkillStrings.exceptionOccurredString()));
-                return;
-            }
-
-            var cd = skill.executeSkillGeneric(player, state, config, option);
-            cdInfo.setLastInvoke(plugin.getCurrentTick());
-
-            state.getSoundHandler().resetSoundTime();
-
-            if (!state.haveCooldown()) state.setCooldownInfo(cdInfo);
-            else state.setSkillCooldown(cd);
-        }
-        else
+        if (player.getGameMode() == GameMode.SPECTATOR
+            || skillEntry == null
+            || skillEntry.getKey().getSkillIdentifier().equals(SkillType.NONE))
         {
             player.sendMessage(MessageUtils.prefixes(player, SkillStrings.skillNotAvaliableString()));
 
             player.playSound(Sound.sound(Key.key("minecraft", "entity.villager.no"),
                     Sound.Source.PLAYER, 1f, 1f));
+
+            return;
         }
+
+        var cdInfo = getCooldownInfo(player.getUniqueId(), state.getSkillLookupIdentifier());
+        assert cdInfo != null;
+
+        //logger.info("Permission is " + CommonPermissions.skillPermissionOf(skillEntry.getKey().getSkillIdentifier().asString(), state.getDisguiseIdentifier()));
+
+        var singleSkillPerm = CommonPermissions.skillPermissionOf(skillEntry.getKey().getSkillIdentifier().asString(), state.getDisguiseIdentifier());
+        var hasSkillPerm = !player.isPermissionSet(singleSkillPerm) || player.hasPermission(singleSkillPerm);
+
+        if (!bypassPermission && !hasSkillPerm)
+        {
+            player.sendMessage(MessageUtils.prefixes(player, CommandStrings.noPermissionMessage()));
+
+            player.playSound(Sound.sound(Key.key("minecraft", "entity.villager.no"),
+                    Sound.Source.PLAYER, 1f, 1f));
+
+            state.setSkillCooldown(5);
+            return;
+        }
+
+        if (cdInfo.getCooldown() > 0)
+        {
+            player.sendMessage(MessageUtils.prefixes(player,
+                    SkillStrings.skillPreparing().resolve("time", state.getSkillCooldown() / 20 + "")));
+
+            player.playSound(Sound.sound(Key.key("minecraft", "entity.villager.no"),
+                    Sound.Source.PLAYER, 1f, 1f));
+
+            return;
+        }
+
+        var event = new PlayerExecuteSkillEvent(player, state);
+        event.callEvent();
+
+        if (event.isCancelled())
+        {
+            player.sendMessage(MessageUtils.prefixes(player, MorphStrings.operationCancelledString()));
+            state.setSkillCooldown(5);
+            return;
+        }
+
+        var skill = skillEntry.getValue();
+        var config = skillEntry.getKey();
+
+        ISkillOption option;
+
+        try
+        {
+            option = skill.getOptionInstance().fromMap(config.getSkillOptions(skill));
+        }
+        catch (Throwable t)
+        {
+            if (t instanceof ClassCastException)
+                logger.error(config.getIdentifier() + " -> " + skill.getIdentifier() + " has an invalid setting, please check your skill configurations.");
+            else
+                logger.error("Error occurred while parsing skill configuration");
+
+            t.printStackTrace();
+
+            player.sendMessage(MessageUtils.prefixes(player, SkillStrings.exceptionOccurredString()));
+            return;
+        }
+
+        var cd = skill.executeSkillGeneric(player, state, config, option);
+        cdInfo.setLastInvoke(plugin.getCurrentTick());
+
+        state.getSoundHandler().resetSoundTime();
+
+        if (!state.haveCooldown()) state.setCooldownInfo(cdInfo);
+        else state.setSkillCooldown(cd);
     }
 
     /**
