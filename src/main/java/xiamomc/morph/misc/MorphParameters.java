@@ -1,5 +1,10 @@
 package xiamomc.morph.misc;
 
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
+import org.jetbrains.annotations.Nullable;
+
 /**
  * 用于传递给morph方法的杂项参数
  */
@@ -8,6 +13,29 @@ public class MorphParameters
     public boolean bypassPermission = false;
     public boolean bypassAvailableCheck = false;
     public boolean forceExecute = false;
+
+    public final Player targetPlayer;
+    public final String targetDisguiseIdentifier;
+
+    @Nullable
+    public CommandSender commandSource;
+
+    @Nullable
+    public Entity targetedEntity;
+
+    public MorphParameters setSource(CommandSender sender)
+    {
+        this.commandSource = sender;
+
+        return this;
+    }
+
+    public MorphParameters setTargetedEntity(Entity entity)
+    {
+        this.targetedEntity = entity;
+
+        return this;
+    }
 
     public MorphParameters setBypassPermission(boolean val)
     {
@@ -30,8 +58,14 @@ public class MorphParameters
         return this;
     }
 
-    public static MorphParameters create()
+    private MorphParameters(Player targetPlayer, String disguiseID)
     {
-        return new MorphParameters();
+        this.targetPlayer = targetPlayer;
+        this.targetDisguiseIdentifier = disguiseID;
+    }
+
+    public static MorphParameters create(Player targetPlayer, String disguiseIdentifier)
+    {
+        return new MorphParameters(targetPlayer, disguiseIdentifier);
     }
 }

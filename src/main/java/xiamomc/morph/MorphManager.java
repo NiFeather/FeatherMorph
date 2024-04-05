@@ -597,7 +597,11 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     public boolean morph(CommandSender source, Player player,
                          String key, @Nullable Entity targetEntity)
     {
-        return this.morph(source, player, key, targetEntity, MorphParameters.create());
+        var parameters = MorphParameters.create(player, key)
+                .setSource(source)
+                .setTargetedEntity(targetEntity);
+
+        return this.morph(parameters);
     }
 
     /**
@@ -614,26 +618,27 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                          String key, @Nullable Entity targetEntity,
                          boolean forceExecute)
     {
-        var parameters = MorphParameters.create().setForceExecute(forceExecute);
-        return this.morph(source, player, key, targetEntity, parameters);
+        var parameters = MorphParameters.create(player, key)
+                .setForceExecute(forceExecute)
+                .setSource(source)
+                .setTargetedEntity(targetEntity);
+
+        return this.morph(parameters);
     }
 
     /**
      * 伪装某一玩家
      *
-     * @param source 发起方
-     * @param player 要伪装的玩家
-     * @param key 伪装ID
-     * @param targetEntity 玩家正在看的实体
      * @param parameters {@link MorphParameters}
      * @return 操作是否成功
      */
-    public boolean morph(@Nullable CommandSender source, Player player,
-                         String key, @Nullable Entity targetEntity,
-                         MorphParameters parameters)
+    public boolean morph(MorphParameters parameters)
     {
         // 确保source不为null
-        source = source == null ? nilCommandSource : source;
+        var source = parameters.commandSource == null ? nilCommandSource : parameters.commandSource;
+        var player = parameters.targetPlayer;
+        var disguiseIdentifier = parameters.targetDisguiseIdentifier;
+        var targetEntity = parameters.targetedEntity;
 
         // 消息源是否为玩家自己
         var isDirect = source == player;
@@ -643,7 +648,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         {
             // 1.玩家是否可以通过指令或客户端伪装
             // 2.玩家是否可以通过此ID伪装；若没有设置，则默认为允许
-            var childNode = CommonPermissions.MORPH + ".as." + key.replace(":", ".");
+            var childNode = CommonPermissions.MORPH + ".as." + disguiseIdentifier.replace(":", ".");
             var hasPerm = player.hasPermission(CommonPermissions.MORPH)
                     && (!player.isPermissionSet(childNode) || player.hasPermission(childNode));
 
@@ -656,10 +661,10 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         }
 
         // 如果ID不包含命名空间，则为其加上 "minecraft:" 前缀
-        if (!key.contains(":")) key = DisguiseTypes.VANILLA.toId(key);
+        if (!disguiseIdentifier.contains(":")) disguiseIdentifier = DisguiseTypes.VANILLA.toId(disguiseIdentifier);
 
         // 检查是否禁用
-        if (disguiseDisabled(key))
+        if (disguiseDisabled(disguiseIdentifier))
         {
             source.sendMessage(MessageUtils.prefixes(source, MorphStrings.disguiseBannedOrNotSupportedString()));
             return false;
@@ -670,13 +675,13 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         if (!parameters.bypassAvailableCheck)
         {
-            String finalKey = key;
+            String finalKey = disguiseIdentifier;
             info = getAvaliableDisguisesFor(player).stream()
                     .filter(i -> i.getIdentifier().equals(finalKey)).findFirst().orElse(null);
         }
-        else if (!key.equals("minecraft:player")) // 禁止不带参数的玩家伪装
+        else if (!disguiseIdentifier.equals("minecraft:player")) // 禁止不带参数的玩家伪装
         {
-            info = new DisguiseMeta(key, DisguiseTypes.fromId(key));
+            info = new DisguiseMeta(disguiseIdentifier, DisguiseTypes.fromId(disguiseIdentifier));
         }
 
         if (info == null)
@@ -689,7 +694,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         try
         {
             // 查找provider
-            var strippedKey = key.split(":", 2);
+            var strippedKey = disguiseIdentifier.split(":", 2);
 
             var provider = getProvider(strippedKey[0]);
 
@@ -702,7 +707,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 logger.error("Unable to find any provider that matches the identifier '%s'".formatted(strippedKey[0]));
                 return false;
             }
-            else if (!provider.isValid(key))
+            else if (!provider.isValid(disguiseIdentifier))
             {
                 outComingState = null;
                 source.sendMessage(MessageUtils.prefixes(source, MorphStrings.invalidIdentityString()));
@@ -726,7 +731,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 }
 
                 // 调用早期事件
-                var earlyEventPassed = new PlayerMorphEarlyEvent(player, currentState, key, parameters.forceExecute).callEvent();
+                var earlyEventPassed = new PlayerMorphEarlyEvent(player, currentState, disguiseIdentifier, parameters.forceExecute).callEvent();
                 if (!parameters.forceExecute && !earlyEventPassed)
                 {
                     source.sendMessage(MessageUtils.prefixes(source, MorphStrings.operationCancelledString()));
@@ -739,7 +744,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
                 // 向客户端更新当前伪装ID
                 // 因为下面postConstruct有初始化技能的操作，根据协议标准中current会重置客户端伪装状态的规定，因此在这里更新
-                clientHandler.updateCurrentIdentifier(player, key);
+                clientHandler.updateCurrentIdentifier(player, disguiseIdentifier);
 
                 outComingState = postConstructDisguise(player, targetEntity,
                         info.getIdentifier(), result.wrapperInstance(), provider);
@@ -799,9 +804,9 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         catch (IllegalArgumentException iae)
         {
             source.sendMessage(MessageUtils.prefixes(source, MorphStrings.parseErrorString()
-                    .resolve("id", key)));
+                    .resolve("id", disguiseIdentifier)));
 
-            logger.error("Unable to parse key " + key + ": " + iae.getMessage());
+            logger.error("Unable to parse key " + disguiseIdentifier + ": " + iae.getMessage());
             iae.printStackTrace();
 
             unMorph(player);
