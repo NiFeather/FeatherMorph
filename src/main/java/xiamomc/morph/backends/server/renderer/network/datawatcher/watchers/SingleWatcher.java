@@ -293,6 +293,12 @@ public abstract class SingleWatcher extends MorphPluginObject
 
     protected void sendPacketToAffectedPlayers(PacketContainer packet)
     {
+        if (silent)
+        {
+            logger.warn("Sending packets while we should be silent?!");
+            Thread.dumpStack();
+        }
+
         var players = getAffectedPlayers(getBindingPlayer());
 
         var protocol = ProtocolLibrary.getProtocolManager();

@@ -125,7 +125,7 @@ public class RenderRegistry extends MorphPluginObject
     {
         var watcher = WatcherIndex.getInstance().getWatcherForType(player, registerParameters.entityType());
         watcher.write(EntryIndex.DISGUISE_NAME, registerParameters.name());
-        register(player.getUniqueId(), watcher);
+        registerWithWatcher(player.getUniqueId(), watcher);
 
         return watcher;
     }
@@ -141,7 +141,7 @@ public class RenderRegistry extends MorphPluginObject
      * @param uuid 目标玩家的UUID
      * @param watcher 对应的 {@link SingleWatcher}
      */
-    public void register(@NotNull UUID uuid, @NotNull SingleWatcher watcher)
+    public void registerWithWatcher(@NotNull UUID uuid, @NotNull SingleWatcher watcher)
     {
         if (watcher == null)
             throw new NullDependencyException("Null Watcher!");

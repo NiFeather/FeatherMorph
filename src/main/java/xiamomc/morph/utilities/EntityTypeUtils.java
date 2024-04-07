@@ -385,6 +385,9 @@ public class EntityTypeUtils
         if (type == EntityType.ARMOR_STAND)
             return Sound.ENTITY_ARMOR_STAND_HIT.key().asString();
 
+        if (type == EntityType.TRADER_LLAMA)
+            return Sound.ENTITY_LLAMA_HURT.key().asString();
+
         return "entity.%s.hurt".formatted(type.getKey().getKey());
     }
 
