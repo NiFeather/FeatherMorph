@@ -288,10 +288,12 @@ public class SkinCacheSubCommand extends MorphPluginObject implements ISubComman
                         return true;
                     }
 
-                    morphManager.morph(
-                            sender, player, DisguiseTypes.PLAYER.toId(skinMatch.getName()), null,
-                            MorphParameters.create().setBypassAvailableCheck(true)
-                    );
+                    var parameters = MorphParameters
+                            .create(player, DisguiseTypes.PLAYER.toId(skinMatch.getName()))
+                            .setSource(sender)
+                            .setBypassAvailableCheck(true);
+
+                    morphManager.morph(parameters);
 
                     return true;
                 })

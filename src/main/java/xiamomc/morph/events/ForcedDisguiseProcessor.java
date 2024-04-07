@@ -65,9 +65,12 @@ public class ForcedDisguiseProcessor extends MorphPluginObject implements Listen
         if (state != null)
             manager.unMorph(Bukkit.getConsoleSender(), player, true, true);
 
-        var success = manager.morph(Bukkit.getConsoleSender(), player,
-                targetId, null,
-                MorphParameters.create().setBypassAvailableCheck(true).setBypassPermission(true));
+        var parameters = MorphParameters.create(player, targetId)
+                .setSource(Bukkit.getConsoleSender())
+                .setBypassAvailableCheck(true)
+                .setBypassPermission(true);
+
+        var success = manager.morph(parameters);
 
         if (!success)
             logger.error("Unable to disguise %s as %s".formatted(player.getName(), targetId));

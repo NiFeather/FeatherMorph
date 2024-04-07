@@ -81,12 +81,14 @@ public class ForceMorphSubCommand extends MorphPluginObject implements ISubComma
         }
 
         var parameters = MorphParameters
-                            .create()
+                            .create(who, targetName)
+                            .setSource(commandSender)
+                            .setTargetedEntity(who.getTargetEntity(3))
                             .setForceExecute(true)
                             .setBypassAvailableCheck(true)
                             .setBypassPermission(true);
 
-        manager.morph(commandSender, who, targetName, who.getTargetEntity(3), parameters);
+        manager.morph(parameters);
         return true;
     }
 
