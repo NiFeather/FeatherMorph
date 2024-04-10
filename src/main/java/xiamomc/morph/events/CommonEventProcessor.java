@@ -22,6 +22,7 @@ import org.bukkit.inventory.InventoryHolder;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.RevealingHandler;
+import xiamomc.morph.abilities.AbilityHandler;
 import xiamomc.morph.abilities.impl.AttributeModifyingAbility;
 import xiamomc.morph.commands.MorphCommandManager;
 import xiamomc.morph.config.ConfigOption;
@@ -129,7 +130,11 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         var state = morphs.getDisguiseStateFor(e.getPlayer());
         if (state != null)
         {
-            state.getAbilities().forEach(a -> a.applyToPlayer(player, state));
+            state.getAbilities().forEach(a ->
+            {
+                if (AbilityHandler.hasPermissionFor(a, state))
+                    a.applyToPlayer(player, state);
+            });
 
             var skill = state.getSkill();
             skill.onInitialEquip(state);
@@ -486,7 +491,11 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
             var abilities = state.getAbilities();
 
             if (abilities != null)
-                abilities.forEach(a -> a.applyToPlayer(player, state));
+                abilities.forEach(a ->
+                {
+                    if (AbilityHandler.hasPermissionFor(a, state))
+                        a.applyToPlayer(player, state);
+                });
         }
     }
 

@@ -207,16 +207,21 @@ public class AbilityHandler extends MorphPluginObject
         registedAbilities.forEach(IMorphAbility::clearOptions);
     }
 
+    public static boolean hasPermissionFor(IMorphAbility<?> ability, DisguiseState state)
+    {
+        var player = state.getPlayer();
+
+        var singleAbilityPerm = CommonPermissions.skillPermissionOf(ability.getIdentifier().asString(), state.getDisguiseIdentifier());
+        return !player.isPermissionSet(singleAbilityPerm) || player.hasPermission(singleAbilityPerm);
+    }
+
     public boolean handle(Player player, DisguiseState state)
     {
         var disguiseId = state.getDisguiseIdentifier();
 
         for (IMorphAbility<?> a : state.getAbilities())
         {
-            var singleAbilityPerm = CommonPermissions.skillPermissionOf(a.getIdentifier().asString(), disguiseId);
-            var hasSkillPerm = !player.isPermissionSet(singleAbilityPerm) || player.hasPermission(singleAbilityPerm);
-
-            if (!hasSkillPerm || !a.optionValid() || a.handle(player, state)) continue;
+            if (!hasPermissionFor(a, state) || !a.optionValid() || a.handle(player, state)) continue;
 
             logger.warn("Error occurred while updating abilities");
             Thread.dumpStack();

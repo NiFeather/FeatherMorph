@@ -19,6 +19,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
+import xiamomc.morph.abilities.AbilityHandler;
 import xiamomc.morph.abilities.IMorphAbility;
 import xiamomc.morph.backends.DisguiseWrapper;
 import xiamomc.morph.config.ConfigOption;
@@ -363,14 +364,23 @@ public class DisguiseState extends MorphPluginObject
         if (newAbilities != null)
         {
             abilities.addAll(newAbilities);
-            newAbilities.forEach(a -> a.applyToPlayer(player, this));
+            newAbilities.forEach(a ->
+            {
+                if (AbilityHandler.hasPermissionFor(a, this))
+                    a.applyToPlayer(player, this);
+            });
         }
     }
 
     @ApiStatus.Internal
     public void refreshSkillsAbilities()
     {
-        this.abilities.forEach(a -> a.applyToPlayer(player, this));
+        this.abilities.forEach(a ->
+        {
+            if (AbilityHandler.hasPermissionFor(a, this))
+                a.applyToPlayer(player, this);
+        });
+
         this.skill.onInitialEquip(this);
     }
 
