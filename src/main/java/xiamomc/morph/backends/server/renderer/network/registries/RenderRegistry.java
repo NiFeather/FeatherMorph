@@ -113,6 +113,7 @@ public class RenderRegistry extends MorphPluginObject
 
         callUnregister(Bukkit.getPlayer(uuid), watcher);
 
+        watcher.setParentRegistry(null);
         watcher.dispose();
     }
 
@@ -124,8 +125,11 @@ public class RenderRegistry extends MorphPluginObject
     public SingleWatcher register(@NotNull Player player, RegisterParameters registerParameters)
     {
         var watcher = WatcherIndex.getInstance().getWatcherForType(player, registerParameters.entityType());
+
+        watcher.markSilent(this);
         watcher.write(EntryIndex.DISGUISE_NAME, registerParameters.name());
         registerWithWatcher(player.getUniqueId(), watcher);
+        watcher.unmarkSilent(this);
 
         return watcher;
     }
@@ -162,6 +166,7 @@ public class RenderRegistry extends MorphPluginObject
         try
         {
             watcherMap.put(uuid, watcher);
+            watcher.setParentRegistry(this);
             callRegister(Bukkit.getPlayer(uuid), watcher);
         }
         finally
@@ -174,7 +179,8 @@ public class RenderRegistry extends MorphPluginObject
     {
         watcherMap.forEach((uuid, watcher) ->
         {
-            callRegister(Bukkit.getPlayer(uuid), watcher);
+            unregister(uuid);
+            //callUnregister(Bukkit.getPlayer(uuid), watcher);
         });
 
         watcherMap.clear();

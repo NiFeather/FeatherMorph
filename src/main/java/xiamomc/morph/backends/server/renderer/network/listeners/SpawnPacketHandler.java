@@ -113,6 +113,8 @@ public class SpawnPacketHandler extends ProtocolListener
      */
     private void refreshStateForPlayer(@Nullable Player player, @NotNull DisplayParameters displayParameters, List<Player> affectedPlayers)
     {
+        if (affectedPlayers.isEmpty()) return;
+
         if (player == null) return;
         var watcher = displayParameters.getWatcher();
         var displayType = watcher.getEntityType();

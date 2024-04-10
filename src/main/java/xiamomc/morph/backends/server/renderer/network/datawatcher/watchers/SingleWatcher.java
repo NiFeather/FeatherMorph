@@ -3,6 +3,7 @@ package xiamomc.morph.backends.server.renderer.network.datawatcher.watchers;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.events.PacketContainer;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.nbt.CompoundTag;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.EntityType;
@@ -13,6 +14,7 @@ import xiamomc.morph.backends.server.renderer.network.PacketFactory;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.values.AbstractValues;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.values.SingleValue;
 import xiamomc.morph.backends.server.renderer.network.registries.RegistryKey;
+import xiamomc.morph.backends.server.renderer.network.registries.RenderRegistry;
 import xiamomc.morph.backends.server.renderer.utilties.WatcherUtils;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
@@ -20,6 +22,7 @@ import xiamomc.pluginbase.Exceptions.NullDependencyException;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 public abstract class SingleWatcher extends MorphPluginObject
 {
@@ -85,6 +88,8 @@ public abstract class SingleWatcher extends MorphPluginObject
         return entityType;
     }
 
+    private boolean doingInitialization;
+
     public SingleWatcher(Player bindingPlayer, EntityType entityType)
     {
         this.bindingUUID = bindingPlayer.getUniqueId();
@@ -92,10 +97,14 @@ public abstract class SingleWatcher extends MorphPluginObject
 
         this.entityType = entityType;
 
-        silent = true;
+        doingInitialization = true;
+        markSilent(this);
+
         initRegistry();
         initValues();
-        silent = false;
+
+        doingInitialization = false;
+        unmarkSilent(this);
     }
 
     private final AtomicBoolean syncedOnce = new AtomicBoolean(false);
@@ -113,9 +122,12 @@ public abstract class SingleWatcher extends MorphPluginObject
 
     public <X> void write(RegistryKey<X> key, X value)
     {
-        var prev = getOrDefault(key, null);
         customRegistry.put(key.name, value);
 
+        if (doingInitialization)
+            return;
+
+        var prev = getOrDefault(key, null);
         onCustomWrite(key, prev, value);
     }
 
@@ -184,12 +196,15 @@ public abstract class SingleWatcher extends MorphPluginObject
         var prev = (X) registry.getOrDefault(singleValue, null);
         registry.put(singleValue, value);
 
+        if (doingInitialization)
+            return;
+
         if (!value.equals(prev))
             dirtySingles.put(singleValue, value);
 
         onTrackerWrite(singleValue, prev, value);
 
-        if (!silent)
+        if (!isSilent() && isAlive())
             sendPacketToAffectedPlayers(packetFactory.buildDiffMetaPacket(getBindingPlayer(), this));
     }
 
@@ -248,11 +263,11 @@ public abstract class SingleWatcher extends MorphPluginObject
 
     //endregion Value Registry
 
-    private boolean silent;
+    private static final Object syncSilentSource = new Object();
 
     public void sync()
     {
-        silent = true;
+        markSilent(syncSilentSource);
 
         syncedOnce.set(true);
         dirtySingles.clear();
@@ -267,7 +282,7 @@ public abstract class SingleWatcher extends MorphPluginObject
             t.printStackTrace();
         }
 
-        silent = false;
+        unmarkSilent(syncSilentSource);
     }
 
     protected void doSync()
@@ -284,6 +299,37 @@ public abstract class SingleWatcher extends MorphPluginObject
 
     //region Networking
 
+    // 针对构建生成包之前就有customWrite的缓解方案: RenderRegistry#register(Player player, RegisterParameters registerParameters)
+    // 或许需要找一种办法能让SingleWatcher在初始化值的时候不要发送任何数据包
+    private final Collection<Object> silentRequestSources = new ObjectArrayList<>();
+
+    public void markSilent(Object source)
+    {
+        silentRequestSources.add(source);
+    }
+
+    public void unmarkSilent(Object source)
+    {
+        silentRequestSources.remove(source);
+    }
+
+    public boolean isSilent()
+    {
+        return !silentRequestSources.isEmpty();
+    }
+
+    private final AtomicReference<RenderRegistry> parentRegistryRef = new AtomicReference<>();
+
+    public void setParentRegistry(RenderRegistry renderRegistry)
+    {
+        this.parentRegistryRef.set(renderRegistry);
+    }
+
+    public boolean isAlive()
+    {
+        return parentRegistryRef.get() != null;
+    }
+
     //endregion Networking
 
     protected List<Player> getAffectedPlayers(Player sourcePlayer)
@@ -293,10 +339,18 @@ public abstract class SingleWatcher extends MorphPluginObject
 
     protected void sendPacketToAffectedPlayers(PacketContainer packet)
     {
-        if (silent)
+        if (isSilent())
         {
-            logger.warn("Sending packets while we should be silent?!");
+            logger.warn("Not sending packets: Sending packets while we should be silent?!");
             Thread.dumpStack();
+            return;
+        }
+
+        if (!isAlive())
+        {
+            logger.warn("Not sending packets: Sending packets while the watcher isn't alive!");
+            Thread.dumpStack();
+            return;
         }
 
         var players = getAffectedPlayers(getBindingPlayer());
