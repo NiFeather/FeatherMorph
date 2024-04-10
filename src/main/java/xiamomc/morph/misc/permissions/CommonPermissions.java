@@ -47,6 +47,16 @@ public class CommonPermissions
                 + skillIdentifier.replace(":", ".");
     }
 
+    public static String abilityPermissionOf(String abilityIdentifier, String disguiseIdentifier)
+    {
+        return PERM_ROOT
+                + "ability"
+                + "."
+                + disguiseIdentifier.replace(":", ".")
+                + "."
+                + abilityIdentifier.replace(":", ".");
+    }
+
     public static String CanFlyIn(String worldName)
     {
         return CAN_FLY + ".in." + worldName;

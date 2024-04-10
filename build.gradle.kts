@@ -119,6 +119,7 @@ bukkit {
         register(permissionRoot + "headmorph")
 
         register(permissionRoot + "skill")
+        register(permissionRoot + "ability")
         register(permissionRoot + "mirror")
         register(permissionRoot + "chatoverride")
 

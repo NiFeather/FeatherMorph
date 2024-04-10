@@ -15,6 +15,7 @@ import xiamomc.morph.abilities.impl.onAttack.PotionOnAttackAbility;
 import xiamomc.morph.abilities.impl.potion.*;
 import xiamomc.morph.events.api.lifecycle.AbilitiesFinishedInitializeEvent;
 import xiamomc.morph.misc.DisguiseState;
+import xiamomc.morph.misc.permissions.CommonPermissions;
 import xiamomc.morph.storage.skill.SkillAbilityConfiguration;
 import xiamomc.morph.storage.skill.SkillAbilityConfigurationStore;
 import xiamomc.pluginbase.Annotations.Initializer;
@@ -208,9 +209,14 @@ public class AbilityHandler extends MorphPluginObject
 
     public boolean handle(Player player, DisguiseState state)
     {
+        var disguiseId = state.getDisguiseIdentifier();
+
         for (IMorphAbility<?> a : state.getAbilities())
         {
-            if (!a.optionValid() || a.handle(player, state)) continue;
+            var singleAbilityPerm = CommonPermissions.skillPermissionOf(a.getIdentifier().asString(), disguiseId);
+            var hasSkillPerm = !player.isPermissionSet(singleAbilityPerm) || player.hasPermission(singleAbilityPerm);
+
+            if (!hasSkillPerm || !a.optionValid() || a.handle(player, state)) continue;
 
             logger.warn("Error occurred while updating abilities");
             Thread.dumpStack();
