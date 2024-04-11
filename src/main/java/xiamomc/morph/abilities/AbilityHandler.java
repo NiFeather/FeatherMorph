@@ -8,6 +8,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphManager;
+import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.abilities.impl.*;
 import xiamomc.morph.abilities.impl.onAttack.ExtraKnockbackAbility;
@@ -211,7 +212,7 @@ public class AbilityHandler extends MorphPluginObject
     {
         var player = state.getPlayer();
 
-        var singleAbilityPerm = CommonPermissions.skillPermissionOf(ability.getIdentifier().asString(), state.getDisguiseIdentifier());
+        var singleAbilityPerm = CommonPermissions.abilityPermissionOf(ability.getIdentifier().asString(), state.getDisguiseIdentifier());
         return !player.isPermissionSet(singleAbilityPerm) || player.hasPermission(singleAbilityPerm);
     }
 
