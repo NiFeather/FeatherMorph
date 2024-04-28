@@ -71,7 +71,6 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
         }
     }
 
-    //部分来自 CraftPlayer#sendPluginMessage(), 在我们搞清楚到底为什么服务端会吞包之前先这样
     private void sendPacket(String channel, Player player, byte[] message)
     {
         if (channel == null || player == null || message == null)
