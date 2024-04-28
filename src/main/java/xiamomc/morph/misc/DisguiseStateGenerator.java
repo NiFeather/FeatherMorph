@@ -85,7 +85,7 @@ public class DisguiseStateGenerator
 
             if (profileCompound != null)
             {
-                var rawProfile = net.minecraft.nbt.NbtUtils.readGameProfile(profileCompound);
+                var rawProfile = NbtUtils.readGameProfile(profileCompound);
 
                 if (rawProfile != null)
                 {

@@ -1,25 +1,111 @@
 package xiamomc.morph.utilities;
 
 import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.GameProfileRepository;
+import com.mojang.authlib.properties.Property;
+import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTagVisitor;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.server.commands.data.EntityDataAccessor;
-import org.bukkit.craftbukkit.v1_20_R3.entity.CraftEntity;
+import net.minecraft.server.players.GameProfileCache;
+import org.bukkit.craftbukkit.entity.CraftEntity;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 
 public class NbtUtils
 {
+    //TODO: COPIED FROM DECOMPILED SOURCE
+    //TODO: REPLACE THIS WITH OUR OWN CODE, OR FIND OUT HOW 1.20.5 CONVERTS GAMEPROFILE
+    public static CompoundTag writeGameProfile(CompoundTag nbt, GameProfile profile) {
+        if (!profile.getName().isEmpty()) {
+            nbt.putString("Name", profile.getName());
+        }
+
+        if (!profile.getId().equals(Util.NIL_UUID)) {
+            nbt.putUUID("Id", profile.getId());
+        }
+
+        if (!profile.getProperties().isEmpty()) {
+            CompoundTag compoundTag = new CompoundTag();
+            Iterator var3 = profile.getProperties().keySet().iterator();
+
+            while(var3.hasNext()) {
+                String string = (String)var3.next();
+                ListTag listTag = new ListTag();
+
+                CompoundTag compoundTag2;
+                for(Iterator var6 = profile.getProperties().get(string).iterator(); var6.hasNext(); listTag.add(compoundTag2)) {
+                    Property property = (Property)var6.next();
+                    compoundTag2 = new CompoundTag();
+                    compoundTag2.putString("Value", property.value());
+                    String string2 = property.signature();
+                    if (string2 != null) {
+                        compoundTag2.putString("Signature", string2);
+                    }
+                }
+
+                compoundTag.put(string, listTag);
+            }
+
+            nbt.put("Properties", compoundTag);
+        }
+
+        return nbt;
+    }
+
+    @javax.annotation.Nullable
+    public static GameProfile readGameProfile(CompoundTag nbt) {
+        UUID uUID = nbt.hasUUID("Id") ? nbt.getUUID("Id") : Util.NIL_UUID;
+        if (nbt.contains("Id", 8)) {
+            try {
+                uUID = UUID.fromString(nbt.getString("Id"));
+            } catch (IllegalArgumentException var11) {
+            }
+        }
+
+        String string = nbt.getString("Name");
+
+        try {
+            GameProfile gameProfile = new GameProfile(uUID, string);
+            if (nbt.contains("Properties", 10)) {
+                CompoundTag compoundTag = nbt.getCompound("Properties");
+                Iterator var5 = compoundTag.getAllKeys().iterator();
+
+                while(var5.hasNext()) {
+                    String string2 = (String)var5.next();
+                    ListTag listTag = compoundTag.getList(string2, 10);
+
+                    for(int i = 0; i < listTag.size(); ++i) {
+                        CompoundTag compoundTag2 = listTag.getCompound(i);
+                        String string3 = compoundTag2.getString("Value");
+                        if (compoundTag2.contains("Signature", 8)) {
+                            gameProfile.getProperties().put(string2, new Property(string2, string3, compoundTag2.getString("Signature")));
+                        } else {
+                            gameProfile.getProperties().put(string2, new Property(string2, string3));
+                        }
+                    }
+                }
+            }
+
+            return gameProfile;
+        } catch (Throwable var12) {
+            return null;
+        }
+    }
+
     public static CompoundTag toCompoundTag(GameProfile profile)
     {
         var compound = new CompoundTag();
-        return net.minecraft.nbt.NbtUtils.writeGameProfile(compound, profile);
+        return writeGameProfile(compound, profile);
     }
 
     /**

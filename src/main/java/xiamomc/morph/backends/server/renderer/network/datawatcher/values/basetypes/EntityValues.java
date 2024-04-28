@@ -19,6 +19,7 @@ public class EntityValues extends AbstractValues
     public final SingleValue<Pose> POSE = getSingle("pose", Pose.STANDING);
     public final SingleValue<Integer> FROZEN_TICKS = getSingle("frozen_ticks", 0);
 
+    //TODO: USE ADVENTURE COMPONENT FOR SERIALIZE
     public EntityValues()
     {
         CUSTOM_NAME.setSerializer(WrappedDataWatcher.Registry.getChatComponentSerializer(true));

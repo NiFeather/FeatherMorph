@@ -1,4 +1,3 @@
-import groovy.lang.Closure
 import net.minecrell.pluginyml.bukkit.BukkitPluginDescription
 
 /*
@@ -8,10 +7,10 @@ import net.minecrell.pluginyml.bukkit.BukkitPluginDescription
 plugins {
     java
     `maven-publish`
-    id("io.papermc.paperweight.userdev") version "1.5.5"
+    id("io.papermc.paperweight.userdev") version "1.6.0"
     id("xyz.jpenilla.run-paper") version "2.0.1" // Adds runServer and runMojangMappedServer tasks for testing
     id("net.minecrell.plugin-yml.bukkit") version "0.6.0" // Generates plugin.yml
-    id("com.github.johnrengelman.shadow") version "7.1.2" // Shadow PluginBase
+    id("io.github.goooler.shadow") version "8.1.7" // Shadow PluginBase
 }
 
 repositories {
@@ -49,6 +48,8 @@ repositories {
     }*/
 }
 
+//paperweight.reobfArtifactConfiguration = ReobfArtifactConfiguration.MOJANG_PRODUCTION
+
 dependencies {
     paperweight.paperDevBundle("${project.property("minecraft_version")}")
 
@@ -73,6 +74,8 @@ dependencies {
 
     implementation("org.apache.httpcomponents.client5:httpclient5:5.2.1")
 
+    implementation("net.kyori:adventure-platform-bukkit:4.3.2")
+
     implementation("com.github.XiaMoZhiShi:feathermorph-protocols:${protocolVersion}")
     implementation("com.github.XiaMoZhiShi:PluginBase:${project.property("pluginbase_version")}")
     {
@@ -86,7 +89,7 @@ dependencies {
 group = "xiamomc.morph"
 version = "${project.property("project_version")}"
 description = "A morph plugin that aims to provide many features out-of-the-box"
-java.sourceCompatibility = JavaVersion.VERSION_17
+java.sourceCompatibility = JavaVersion.VERSION_21
 
 bukkit {
     load = BukkitPluginDescription.PluginLoadOrder.POSTWORLD
@@ -94,7 +97,7 @@ bukkit {
     apiVersion = "1.19"
     authors = listOf("MATRIX-feather")
     depend = listOf()
-    softDepend = listOf("LibsDisguises", "GSit", "PlaceholderAPI")
+    softDepend = listOf("GSit", "PlaceholderAPI")
     version = "${project.property("project_version")}"
     prefix = "FeatherMorph"
     name = "FeatherMorph"
@@ -171,7 +174,7 @@ java {
 }
 
 tasks.build {
-    dependsOn(tasks.shadowJar, tasks.reobfJar)
+    dependsOn(tasks.shadowJar)
 }
 
 tasks.shadowJar {

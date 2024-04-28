@@ -1,7 +1,9 @@
 package xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types;
 
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.animal.FrogVariant;
 import org.bukkit.entity.EntityType;
@@ -47,13 +49,13 @@ public class FrogWatcher extends LivingEntityWatcher
         if (nbt.contains("variant"))
         {
             var typeString = nbt.getString("variant");
-            ResourceLocation rl = BuiltInRegistries.FROG_VARIANT.getKey(FrogVariant.TEMPERATE);
-            FrogVariant type = FrogVariant.TEMPERATE;
+            ResourceLocation rl;
+            ResourceKey<FrogVariant> type = FrogVariant.TEMPERATE;
 
             try
             {
                 rl = new ResourceLocation(typeString);
-                type = BuiltInRegistries.FROG_VARIANT.get(rl);
+                type = ResourceKey.create(Registries.FROG_VARIANT, rl);
             }
             catch (Throwable t)
             {

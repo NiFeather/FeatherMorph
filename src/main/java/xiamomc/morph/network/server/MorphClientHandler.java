@@ -1,13 +1,18 @@
 package xiamomc.morph.network.server;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.kyori.adventure.text.Component;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.network.protocol.common.custom.DiscardedPayload;
 import net.minecraft.resources.ResourceLocation;
+import org.apache.commons.lang.ArrayUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.messaging.MessageTooLargeException;
 import org.bukkit.plugin.messaging.Messenger;
@@ -60,16 +65,9 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
     private record MorphCustomPacketPayload(ResourceLocation channel, byte[] data) implements CustomPacketPayload
     {
         @Override
-        public void write(FriendlyByteBuf buf)
+        public Type<? extends CustomPacketPayload> type()
         {
-            buf.writeBytes(data);
-        }
-
-        @Override
-        @NotNull
-        public ResourceLocation id()
-        {
-            return channel;
+            return null;
         }
     }
 
@@ -84,14 +82,10 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
         if (logOutGoingPackets.get())
             logPacket(true, player, channel, message);
 
-        if (message.length > Messenger.MAX_MESSAGE_SIZE)
-            throw new MessageTooLargeException(message.length);
+        if (!player.getListeningPluginChannels().contains(channel))
+            ((CraftPlayer)player).addChannel(channel);
 
-        var nmsPlayer = NmsRecord.ofPlayer(player);
-
-        var payload = new MorphCustomPacketPayload(new ResourceLocation(channel), message);
-        var packet = new ClientboundCustomPayloadPacket(payload);
-        nmsPlayer.connection.send(packet);
+        player.sendPluginMessage(plugin, channel, message);
     }
 
     /**
@@ -154,7 +148,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
 
             playerConnectionStates.put(player, InitializeState.HANDSHAKE);
 
-            this.sendPacket(initializeChannel, player, "".getBytes());
+            this.sendPacket(initializeChannel, player, "".getBytes(StandardCharsets.UTF_8));
         });
 
         // 注册api频道处理
@@ -583,7 +577,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
 
         if ((!allowClient.get() || !this.clientConnected(player)) && !forceSend) return false;
 
-        this.sendPacket(commandChannel, player, cmd.getBytes());
+        this.sendPacket(commandChannel, player, cmd.getBytes(StandardCharsets.UTF_8));
         return true;
     }
 

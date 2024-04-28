@@ -1,7 +1,7 @@
 package xiamomc.morph.skills.impl;
 
-import net.minecraft.world.item.alchemy.Potion;
-import net.minecraft.world.item.alchemy.PotionUtils;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.alchemy.Potions;
 import org.bukkit.Color;
 import org.bukkit.NamespacedKey;
@@ -35,7 +35,7 @@ public class SplashPotionSkill extends MorphSkill<NoOpConfiguration>
     @Override
     public int executeSkill(Player player, DisguiseState state, SkillAbilityConfiguration configuration, NoOpConfiguration option)
     {
-        var launchedProjectile = launchProjectile(player, EntityType.SPLASH_POTION, 0.4f);
+        var launchedProjectile = launchProjectile(player, EntityType.POTION, 0.4f);
 
         if (launchedProjectile == null)
         {
@@ -54,15 +54,18 @@ public class SplashPotionSkill extends MorphSkill<NoOpConfiguration>
         var potionEffect = new PotionEffect(info.type, info.duration, info.amplifier, false, true);
         meta.addCustomEffect(potionEffect, true);
 
-        var targetPotion = Potion.byName(info.type.getKey().asString());
+        var targetPotion = BuiltInRegistries.POTION.get(new ResourceLocation(info.type.getKey().asString()));
 
-        if (info.type == PotionEffectType.HEAL)
-            targetPotion = Potions.HEALING;
-        else if (info.type == PotionEffectType.HARM)
-            targetPotion = Potions.HARMING;
+        if (info.type == PotionEffectType.INSTANT_HEALTH)
+            targetPotion = Potions.HEALING.value();
+        else if (info.type == PotionEffectType.INSTANT_DAMAGE)
+            targetPotion = Potions.HARMING.value();
 
-        var color = PotionUtils.getColor(targetPotion);
-        meta.setColor(Color.fromRGB(color));
+        // todo: SET COLOR !!!
+        //
+        //var color = PotionUtils.getColor(targetPotion);
+        //meta.setColor(Color.fromRGB(color));
+        meta.setColor(Color.fromRGB(255, 255, 255));
 
         thrownPotion.setPotionMeta(meta);
 
@@ -74,11 +77,11 @@ public class SplashPotionSkill extends MorphSkill<NoOpConfiguration>
     private final PotionInfo[] validTypes = new PotionInfo[]
     {
             PotionInfo.of(PotionEffectType.REGENERATION, 45 * 20, 0),
-            PotionInfo.of(PotionEffectType.HEAL, 20, 0),
-            PotionInfo.of(PotionEffectType.SLOW, 90 * 20, 0),
+            PotionInfo.of(PotionEffectType.REGENERATION, 20, 0),
+            PotionInfo.of(PotionEffectType.SLOWNESS, 90 * 20, 0),
             PotionInfo.of(PotionEffectType.POISON, 45 * 20, 0),
             PotionInfo.of(PotionEffectType.WEAKNESS, 90 * 20, 0),
-            PotionInfo.of(PotionEffectType.HARM, 20, 0)
+            PotionInfo.of(PotionEffectType.INSTANT_DAMAGE, 20, 0)
     };
 
     private record PotionInfo(PotionEffectType type, int duration, int amplifier)

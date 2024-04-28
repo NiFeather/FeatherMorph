@@ -9,7 +9,7 @@ public class MooshroomWatcher extends LivingEntityWatcher
 {
     public MooshroomWatcher(Player bindingPlayer)
     {
-        super(bindingPlayer, EntityType.MUSHROOM_COW);
+        super(bindingPlayer, EntityType.MOOSHROOM);
     }
 
     @Override

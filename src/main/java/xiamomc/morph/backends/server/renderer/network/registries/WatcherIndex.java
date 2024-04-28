@@ -59,7 +59,7 @@ public class WatcherIndex
         setTypeWatcher(EntityType.PANDA, PandaWatcher::new);
 
         setTypeWatcher(EntityType.VILLAGER, VillagerWatcher::new);
-        setTypeWatcher(EntityType.SNOWMAN, SnowGolemWatcher::new);
+        setTypeWatcher(EntityType.SNOW_GOLEM, SnowGolemWatcher::new);
         setTypeWatcher(EntityType.CREEPER, CreeperWatcher::new);
         setTypeWatcher(EntityType.PIGLIN, PiglinWatcher::new);
 
@@ -71,7 +71,7 @@ public class WatcherIndex
 
         setTypeWatcher(EntityType.AXOLOTL, AxolotlWatcher::new);
 
-        setTypeWatcher(EntityType.MUSHROOM_COW, MooshroomWatcher::new);
+        setTypeWatcher(EntityType.MOOSHROOM, MooshroomWatcher::new);
         setTypeWatcher(EntityType.SHEEP, SheepWatcher::new);
 
         setTypeWatcher(EntityType.WOLF, WolfWatcher::new);

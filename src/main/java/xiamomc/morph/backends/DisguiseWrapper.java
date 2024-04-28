@@ -171,7 +171,7 @@ public abstract class DisguiseWrapper<TInstance>
      */
     public double getExceptingEyeHeight()
     {
-        return getDimensions().height * 0.85;
+        return getDimensions().height() * 0.85;
     }
 
     private EntityDimensions dimensions;

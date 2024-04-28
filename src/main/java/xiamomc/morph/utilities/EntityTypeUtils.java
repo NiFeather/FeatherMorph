@@ -15,8 +15,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.World;
-import org.bukkit.craftbukkit.v1_20_R3.CraftWorld;
-import org.bukkit.craftbukkit.v1_20_R3.entity.CraftEntity;
+import org.bukkit.craftbukkit.CraftWorld;
+import org.bukkit.craftbukkit.entity.CraftEntity;
 import org.bukkit.entity.Enemy;
 import org.bukkit.entity.EntityType;
 import org.bukkit.event.entity.CreatureSpawnEvent;
@@ -73,7 +73,7 @@ public class EntityTypeUtils
 
         if (world == null) world = Bukkit.getWorlds().get(0);
         var serverWorld = ((CraftWorld) world).getHandle();
-        var entity = nmsType.create(serverWorld, null, EntityTypeUtils::scheduleEntityDiscard, BlockPos.ZERO, MobSpawnType.COMMAND, false, false);
+        var entity = nmsType.create(serverWorld, EntityTypeUtils::scheduleEntityDiscard, BlockPos.ZERO, MobSpawnType.COMMAND, false, false);
 
         if (entity instanceof Mob mob)
         {
@@ -114,7 +114,7 @@ public class EntityTypeUtils
 
         if (world == null) world = Bukkit.getWorlds().get(0);
         var serverWorld = ((CraftWorld) world).getHandle();
-        var entity = nmsType.create(serverWorld, null, EntityTypeUtils::scheduleEntityDiscard, BlockPos.ZERO, MobSpawnType.COMMAND, false, false);
+        var entity = nmsType.create(serverWorld, EntityTypeUtils::scheduleEntityDiscard, BlockPos.ZERO, MobSpawnType.COMMAND, false, false);
 
         if (entity == null)
         {
@@ -138,10 +138,10 @@ public class EntityTypeUtils
         return switch (type)
         {
             case COW, SHEEP, BEE, CAMEL, CAT, CHICKEN, DONKEY,
-                    FOX, GOAT, HORSE, LLAMA, MUSHROOM_COW, MULE, TRADER_LLAMA, VILLAGER,
+                 FOX, GOAT, HORSE, LLAMA, MOOSHROOM, MULE, TRADER_LLAMA, VILLAGER,
                     OCELOT, PANDA, PIG, POLAR_BEAR, RABBIT, SNIFFER, TURTLE, WOLF,
                     HOGLIN, ZOMBIE, ZOMBIE_VILLAGER, PIGLIN, HUSK, DROWNED, ZOMBIFIED_PIGLIN, STRIDER,
-                    SKELETON_HORSE, ZOMBIE_HORSE, ZOGLIN-> true;
+                    SKELETON_HORSE, ZOMBIE_HORSE, ZOGLIN -> true;
 
             default -> false;
         };
@@ -171,7 +171,7 @@ public class EntityTypeUtils
 
     public static boolean isGolem(EntityType type)
     {
-        return type == EntityType.IRON_GOLEM || type == EntityType.SNOWMAN;
+        return type == EntityType.IRON_GOLEM || type == EntityType.SNOW_GOLEM;
     }
 
     public static boolean isBruteHostile(EntityType type)
@@ -260,7 +260,7 @@ public class EntityTypeUtils
 
     public static Set<EntityType> takesDamageFromWater()
     {
-        return ObjectSet.of(EntityType.ENDERMAN, EntityType.BLAZE, EntityType.SNOWMAN, EntityType.STRIDER);
+        return ObjectSet.of(EntityType.ENDERMAN, EntityType.BLAZE, EntityType.SNOW_GOLEM, EntityType.STRIDER);
     }
 
     public static Set<EntityType> canBreatheUnderWater()
@@ -314,7 +314,7 @@ public class EntityTypeUtils
     public static Set<EntityType> noFallDamage()
     {
         return ObjectSet.of(EntityType.IRON_GOLEM, EntityType.CAT,
-                EntityType.OCELOT, EntityType.SNOWMAN, EntityType.MAGMA_CUBE,
+                EntityType.OCELOT, EntityType.SNOW_GOLEM, EntityType.MAGMA_CUBE,
                 EntityType.CHICKEN, EntityType.SHULKER);
     }
 
@@ -342,7 +342,7 @@ public class EntityTypeUtils
 
     public static EntityType hasSnowTrail()
     {
-        return EntityType.SNOWMAN;
+        return EntityType.SNOW_GOLEM;
     }
 
     public static boolean saddleable(EntityType type)

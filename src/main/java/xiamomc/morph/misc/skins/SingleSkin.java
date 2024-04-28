@@ -41,6 +41,6 @@ public class SingleSkin
         var compound = NbtUtils.toCompoundTag(this.snbt);
         return compound == null
             ? null
-            : net.minecraft.nbt.NbtUtils.readGameProfile(compound);
+            : NbtUtils.readGameProfile(compound);
     }
 }

@@ -29,6 +29,8 @@ public class ProtocolEquipment
             case CHEST -> net.minecraft.world.entity.EquipmentSlot.CHEST;
             case LEGS -> net.minecraft.world.entity.EquipmentSlot.LEGS;
             case FEET -> net.minecraft.world.entity.EquipmentSlot.FEET;
+
+            case BODY -> throw new IllegalArgumentException("BODY is not supported.");
         };
     }
 

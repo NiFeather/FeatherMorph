@@ -116,7 +116,7 @@ public class DefaultConfigGenerator
                 .setCooldown(40)
                 .appendOption(SkillType.LAUNCH_PROJECTILE, new ProjectileConfiguration(EntityType.SHULKER_BULLET, 0, "entity.shulker.shoot", 15, 15));
 
-        this.getConfiguration(EntityType.SNOWMAN)
+        this.getConfiguration(EntityType.SNOW_GOLEM)
                 .setSkillIdentifier(SkillType.LAUNCH_PROJECTILE)
                 .setCooldown(15)
                 .appendOption(SkillType.LAUNCH_PROJECTILE, new ProjectileConfiguration(EntityType.SNOWBALL, 1, "entity.snow_golem.shoot", 8));
@@ -149,7 +149,7 @@ public class DefaultConfigGenerator
         this.getConfiguration(EntityType.ELDER_GUARDIAN)
                 .setSkillIdentifier(SkillType.APPLY_EFFECT)
                 .setCooldown(1200)
-                .appendOption(SkillType.APPLY_EFFECT, new EffectConfiguration(PotionEffectType.SLOW_DIGGING.getKey().asString(), 2, 6000, true, true, "entity.elder_guardian.curse", 50, 50));
+                .appendOption(SkillType.APPLY_EFFECT, new EffectConfiguration(PotionEffectType.MINING_FATIGUE.getKey().asString(), 2, 6000, true, true, "entity.elder_guardian.curse", 50, 50));
 
         // 其他
         this.getConfiguration(EntityType.CREEPER)
@@ -289,7 +289,7 @@ public class DefaultConfigGenerator
                 .addAbilityIdentifier(AbilityType.HEALS_FROM_ENTITY)
                 .appendOption(
                         AbilityType.HEALS_FROM_ENTITY,
-                        new HealsFromEntityOption(1, 10, 0.05d, 32d, EntityType.ENDER_CRYSTAL.key().asString()));
+                        new HealsFromEntityOption(1, 10, 0.05d, 32d, EntityType.END_CRYSTAL.key().asString()));
 
         this.getConfiguration(EntityType.FOX)
                         .addAbilityIdentifier(AbilityType.NO_SWEET_BUSH_DAMAGE);

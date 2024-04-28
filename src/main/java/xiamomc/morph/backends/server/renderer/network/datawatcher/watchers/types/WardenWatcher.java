@@ -2,7 +2,7 @@ package xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.type
 
 import com.comphenix.protocol.events.PacketContainer;
 import net.minecraft.network.protocol.game.ClientboundEntityEventPacket;
-import org.bukkit.craftbukkit.v1_20_R3.entity.CraftPlayer;
+import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import xiamomc.morph.backends.server.renderer.network.registries.EntryIndex;

@@ -58,7 +58,7 @@ public class ApplyEffectMorphSkill extends MorphSkill<EffectConfiguration>
             p.playSound(sound);
 
             if (option.showGuardian())
-                p.spawnParticle(Particle.MOB_APPEARANCE, p.getLocation(), 1);
+                p.spawnParticle(Particle.ELDER_GUARDIAN, p.getLocation(), 1);
         });
 
         player.playSound(sound);

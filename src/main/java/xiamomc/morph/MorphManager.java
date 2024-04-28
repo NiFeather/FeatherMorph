@@ -1129,8 +1129,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         double cX, cY, cZ;
 
         var box = disguiseWrapper.getDimensions();
-        cX = cZ = box.width;
-        cY = box.height;
+        cX = cZ = box.width();
+        cY = box.height();
 
         spawnParticle(player, player.getLocation(), cX, cY, cZ);
 
@@ -1217,7 +1217,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         var particleScale = Math.max(1, (collX * collY * collZ) / 15);
 
         //显示粒子
-        player.getWorld().spawnParticle(Particle.EXPLOSION_NORMAL, location, //类型和位置
+        player.getWorld().spawnParticle(Particle.EXPLOSION, location, //类型和位置
                 (int) (25 * particleScale), //数量
                 collX * 0.6, collY / 4, collZ * 0.6, //分布空间
                 particleScale >= 10 ? 0.2 : 0.05); //速度

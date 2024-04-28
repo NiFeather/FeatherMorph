@@ -8,7 +8,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.attribute.AttributeModifier;
-import org.bukkit.craftbukkit.v1_20_R3.entity.CraftLivingEntity;
+import org.bukkit.craftbukkit.entity.CraftLivingEntity;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
@@ -307,7 +307,7 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
 
             // Update eye height
             var eyeHeightField = ReflectionUtils.getPlayerEyeHeightField(NmsRecord.ofPlayer(player));
-            eyeHeightField.set(nmsPlayer, dimensions.height * 0.85F);
+            eyeHeightField.set(nmsPlayer, dimensions.height() * 0.85F);
         }
         catch (Throwable t)
         {

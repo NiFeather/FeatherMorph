@@ -15,7 +15,7 @@ public class SmallJumpBoostAbility extends EffectMorphAbility
         return AbilityType.HAS_SMALL_JUMP_BOOST;
     }
 
-    private final PotionEffect jumpBoostEffectSmall = new PotionEffect(PotionEffectType.JUMP, 11, 0, true, false);
+    private final PotionEffect jumpBoostEffectSmall = new PotionEffect(PotionEffectType.JUMP_BOOST, 11, 0, true, false);
 
     @Override
     protected PotionEffect getEffect()

@@ -10,9 +10,9 @@ import org.bukkit.Bukkit;
 import org.bukkit.FluidCollisionMode;
 import org.bukkit.GameMode;
 import org.bukkit.block.BlockFace;
-import org.bukkit.craftbukkit.v1_20_R3.block.CraftBlock;
-import org.bukkit.craftbukkit.v1_20_R3.entity.CraftPlayer;
-import org.bukkit.craftbukkit.v1_20_R3.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.block.CraftBlock;
+import org.bukkit.craftbukkit.entity.CraftPlayer;
+import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
@@ -146,11 +146,16 @@ public class PlayerOperationSimulator extends MorphPluginObject
         //如果玩家处于冒险模式并且无法破坏目标方块，也不要做任何事情，只返回success来允许播放动画
         if (player.getGameMode() == GameMode.ADVENTURE)
         {
+            return SimulateResult.success(EquipmentSlot.HAND);
+
+/*
             var meta = Objects.requireNonNull(player.getEquipment(), "Null equipment?")
                     .getItemInMainHand().getItemMeta();
 
+            //todo: CHECK DESTORYABLE KEYS
             if (meta == null || !meta.getDestroyableKeys().contains(targetBlock.getBlockData().getMaterial().getKey()))
                 return SimulateResult.success(EquipmentSlot.HAND);
+ */
         }
 
         //=-=-=-=-=-=-=-=-=-=-=-=
@@ -301,7 +306,7 @@ public class PlayerOperationSimulator extends MorphPluginObject
             var manager = record.interactManager();
 
             //ServerPlayerGameMode.useItem()
-            return manager.useItem(record.nmsPlayer(), record.nmsWorld(), CraftItemStack.asNMSCopy(bukkitItem), hand).shouldAwardStats();
+            return manager.useItem(record.nmsPlayer(), record.nmsWorld(), CraftItemStack.asNMSCopy(bukkitItem), hand).indicateItemUse();
         }
 
         return false;
@@ -325,7 +330,7 @@ public class PlayerOperationSimulator extends MorphPluginObject
         ServerPlayerGameMode manager = record.interactManager();
 
         //ServerPlayerGameMode里已经调用了PlayerInteractEvent，因此不需要再重复调用一遍
-        return manager.useItemOn(record.nmsPlayer(), record.nmsWorld(), CraftItemStack.asNMSCopy(bukkitItem), nmsHand, moving).shouldAwardStats();
+        return manager.useItemOn(record.nmsPlayer(), record.nmsWorld(), CraftItemStack.asNMSCopy(bukkitItem), nmsHand, moving).indicateItemUse();
     }
 
     /**
@@ -363,9 +368,9 @@ public class PlayerOperationSimulator extends MorphPluginObject
             var vec = new Vec3(hitPos.getX(), hitPos.getY(), hitPos.getZ());
 
             assert entityHandle != null;
-            return entityHandle.interactAt(playerHandle, vec, hand).shouldAwardStats()
-                    || playerHandle.interactOn(entityHandle, hand).shouldAwardStats()
-                    || manager.useItem(playerHandle, worldHandle, CraftItemStack.asNMSCopy(bukkitItem), hand).shouldAwardStats();
+            return entityHandle.interactAt(playerHandle, vec, hand).indicateItemUse()
+                    || playerHandle.interactOn(entityHandle, hand).indicateItemUse()
+                    || manager.useItem(playerHandle, worldHandle, CraftItemStack.asNMSCopy(bukkitItem), hand).indicateItemUse();
         }
 
         return false;

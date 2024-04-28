@@ -47,6 +47,23 @@ public class PlayerSkinProvider extends MorphPluginObject
 
     private final SkinCache skinCache = new SkinCache();
 
+    public static boolean isValidUsername(String name) {
+        if (name != null && !name.isEmpty() && name.length() <= 16) {
+            int i = 0;
+
+            for(int len = name.length(); i < len; ++i) {
+                char c = name.charAt(i);
+                if ((c < 'a' || c > 'z') && (c < 'A' || c > 'Z') && (c < '0' || c > '9') && c != '_' && c != '.') {
+                    return false;
+                }
+            }
+
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     /**
      * 根据给定的名称搜索对应的Profile（不包含皮肤）
      * @apiNote 此方法返回的GameProfile不包含皮肤，若要获取于此对应的皮肤，请使用 {@link PlayerSkinProvider#fetchSkinFromProfile(GameProfile)}
@@ -55,9 +72,6 @@ public class PlayerSkinProvider extends MorphPluginObject
      */
     private Optional<GameProfile> fetchProfileV2(String name)
     {
-        if (!Player.isValidUsername(name))
-            return Optional.empty();
-
         var profileRef = new AtomicReference<GameProfile>(null);
 
         var lookupCallback = new ProfileLookupCallback()

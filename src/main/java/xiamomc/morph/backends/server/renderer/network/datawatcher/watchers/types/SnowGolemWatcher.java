@@ -10,7 +10,7 @@ public class SnowGolemWatcher extends LivingEntityWatcher
 {
     public SnowGolemWatcher(Player bindingPlayer)
     {
-        super(bindingPlayer, EntityType.SNOWMAN);
+        super(bindingPlayer, EntityType.SNOW_GOLEM);
     }
 
     @Override

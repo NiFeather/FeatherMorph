@@ -10,7 +10,7 @@ import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.WrappedGoal;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.player.Player;
-import org.bukkit.craftbukkit.v1_20_R3.entity.CraftMob;
+import org.bukkit.craftbukkit.entity.CraftMob;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Mob;
@@ -258,7 +258,7 @@ public class EntityTargetingHelper extends MorphPluginObject
     {
         return switch (sourceType)
         {
-            case IRON_GOLEM, SNOWMAN -> EntityTypeUtils.isEnemy(targetType) && targetType != EntityType.CREEPER;
+            case IRON_GOLEM, SNOW_GOLEM -> EntityTypeUtils.isEnemy(targetType) && targetType != EntityType.CREEPER;
 
             case FOX -> targetType == EntityType.CHICKEN || targetType == EntityType.RABBIT
                     || targetType == EntityType.COD || targetType == EntityType.SALMON

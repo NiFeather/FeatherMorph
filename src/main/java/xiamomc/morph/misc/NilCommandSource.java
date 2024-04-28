@@ -1,7 +1,7 @@
 package xiamomc.morph.misc;
 
 import net.kyori.adventure.text.Component;
-import org.bukkit.craftbukkit.v1_20_R3.command.ServerCommandSender;
+import org.bukkit.craftbukkit.command.ServerCommandSender;
 import org.jetbrains.annotations.NotNull;
 
 public final class NilCommandSource extends ServerCommandSender
