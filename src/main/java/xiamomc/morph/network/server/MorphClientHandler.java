@@ -112,6 +112,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
         }
         catch (Throwable t)
         {
+            msg = new String(data, StandardCharsets.UTF_8);
             logger.warn("Unable to convert byte data to string: " + t.getMessage());
         }
 
@@ -160,13 +161,10 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
 
             playerConnectionStates.put(player, InitializeState.HANDSHAKE);
 
-            var out = ByteStreams.newDataOutput();
-            out.writeUTF("");
-            this.sendPacket(initializeChannel, player, out.toByteArray());
+            this.sendPacket(initializeChannel, player, "".getBytes(StandardCharsets.UTF_8));
         });
 
         // 注册api频道处理
-        var apiVersionBytes = ByteBuffer.allocate(4).putInt(targetApiVersion).array();
         messenger.registerIncomingPluginChannel(plugin, versionChannel, (cN, player, data) ->
         {
             if (!allowClient.get()) return;
@@ -229,8 +227,8 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
             if (logInComingPackets.get())
                 logPacket(false, player, commandChannel, data);
 
-            var input = ByteStreams.newDataInput(data);
-            var str = input.readUTF().split(" ", 2);
+            var input = new String(data, StandardCharsets.UTF_8);
+            var str = input.split(" ", 2);
 
             if (str.length < 1) return;
 
@@ -585,9 +583,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
 
         if ((!allowClient.get() || !this.clientConnected(player)) && !forceSend) return false;
 
-        var out = ByteStreams.newDataOutput();
-        out.writeUTF(cmd);
-        this.sendPacket(commandChannel, player, out.toByteArray());
+        this.sendPacket(commandChannel, player, cmd.getBytes(StandardCharsets.UTF_8));
         return true;
     }
 
