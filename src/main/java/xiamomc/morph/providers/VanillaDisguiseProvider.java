@@ -30,6 +30,7 @@ import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
 
+import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
@@ -265,24 +266,35 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
     {
         var nmsPlayer = NmsRecord.ofPlayer(player);
 
-        var targetField = ReflectionUtils.getPlayerDimensionsField(nmsPlayer);
+        //Find dimensions
+        Field targetField = null;
 
-        if (targetField != null)
+        try
         {
-            try
-            {
-                var dimension = net.minecraft.world.entity.player.Player.STANDING_DIMENSIONS;
+            targetField = ReflectionUtils.getPlayerDimensionsField(nmsPlayer);
+        }
+        catch (Throwable t)
+        {
+            logger.error("Can't read player dimension: " + t.getMessage());
+            t.printStackTrace();
+        }
 
-                targetField.setAccessible(true);
-                targetField.set(nmsPlayer, dimension);
+        if (targetField == null)
+            return;
 
-                nmsPlayer.refreshDimensions();
-            }
-            catch (Throwable t)
-            {
-                logger.error("Unable to reset player's bounding box: " + t.getMessage());
-                t.printStackTrace();
-            }
+        try
+        {
+            var dimension = net.minecraft.world.entity.player.Player.STANDING_DIMENSIONS;
+
+            targetField.setAccessible(true);
+            targetField.set(nmsPlayer, dimension);
+
+            nmsPlayer.refreshDimensions();
+        }
+        catch (Throwable t)
+        {
+            logger.error("Unable to reset player's bounding box: " + t.getMessage());
+            t.printStackTrace();
         }
     }
 
@@ -291,7 +303,17 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
         var nmsPlayer = NmsRecord.ofPlayer(player);
 
         //Find dimensions
-        var targetField = ReflectionUtils.getPlayerDimensionsField(nmsPlayer);
+        Field targetField = null;
+
+        try
+        {
+            targetField = ReflectionUtils.getPlayerDimensionsField(nmsPlayer);
+        }
+        catch (Throwable t)
+        {
+            logger.error("Can't read player dimension: " + t.getMessage());
+            t.printStackTrace();
+        }
 
         if (targetField == null) return;
 

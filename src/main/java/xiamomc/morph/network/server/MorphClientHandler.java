@@ -1,5 +1,6 @@
 package xiamomc.morph.network.server;
 
+import com.google.common.io.ByteStreams;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
@@ -102,7 +103,19 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
 
     private void logPacket(boolean isOutGoingPacket, Player player, String channel, byte[] data)
     {
-        this.logPacket(isOutGoingPacket, player, channel, new String(data, StandardCharsets.UTF_8), data.length);
+        String msg = "<???>";
+        var input = ByteStreams.newDataInput(data);
+
+        try
+        {
+            msg = input.readUTF();
+        }
+        catch (Throwable t)
+        {
+            logger.warn("Unable to convert byte data to string: " + t.getMessage());
+        }
+
+        this.logPacket(isOutGoingPacket, player, channel, msg, data.length);
     }
 
     private void logPacket(boolean isOutGoingPacket, Player player, String channel, String data, int size)
@@ -147,7 +160,9 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
 
             playerConnectionStates.put(player, InitializeState.HANDSHAKE);
 
-            this.sendPacket(initializeChannel, player, "".getBytes(StandardCharsets.UTF_8));
+            var out = ByteStreams.newDataOutput();
+            out.writeUTF("");
+            this.sendPacket(initializeChannel, player, out.toByteArray());
         });
 
         // 注册api频道处理
@@ -161,21 +176,12 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
             //初始化之前忽略API请求
             if (connectionState.worseThan(InitializeState.HANDSHAKE)) return;
 
-            var str = new String(data, StandardCharsets.UTF_8);
+            //尝试获取API版本
+            var input = ByteStreams.newDataInput(data);
+            var clientVersion = input.readInt();
 
             if (logInComingPackets.get())
-                logPacket(false, player, versionChannel, str, str.getBytes().length);
-
-            //尝试获取api版本
-            int clientVersion = 1;
-
-            try
-            {
-                clientVersion = Integer.parseInt(str);
-            }
-            catch (Throwable ignored)
-            {
-            }
+                logPacket(false, player, versionChannel, "" + clientVersion, data.length);
 
             var minimumApiVersion = this.minimumApiVersion;
 
@@ -207,7 +213,9 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
             this.getPlayerOption(player, true).clientApiVersion = clientVersion;
             playerConnectionStates.put(player, InitializeState.API_CHECKED);
 
-            this.sendPacket(versionChannel, player, apiVersionBytes);
+            var out = ByteStreams.newDataOutput();
+            out.writeInt(targetApiVersion);
+            this.sendPacket(versionChannel, player, out.toByteArray());
         });
 
         // 注册command频道处理
@@ -221,7 +229,8 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
             if (logInComingPackets.get())
                 logPacket(false, player, commandChannel, data);
 
-            var str = new String(data, StandardCharsets.UTF_8).split(" ", 2);
+            var input = ByteStreams.newDataInput(data);
+            var str = input.readUTF().split(" ", 2);
 
             if (str.length < 1) return;
 
@@ -576,7 +585,9 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
 
         if ((!allowClient.get() || !this.clientConnected(player)) && !forceSend) return false;
 
-        this.sendPacket(commandChannel, player, cmd.getBytes(StandardCharsets.UTF_8));
+        var out = ByteStreams.newDataOutput();
+        out.writeUTF(cmd);
+        this.sendPacket(commandChannel, player, out.toByteArray());
         return true;
     }
 

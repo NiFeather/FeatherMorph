@@ -1217,7 +1217,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         var particleScale = Math.max(1, (collX * collY * collZ) / 15);
 
         //显示粒子
-        player.getWorld().spawnParticle(Particle.EXPLOSION, location, //类型和位置
+        player.getWorld().spawnParticle(Particle.CLOUD, location, //类型和位置
                 (int) (25 * particleScale), //数量
                 collX * 0.6, collY / 4, collZ * 0.6, //分布空间
                 particleScale >= 10 ? 0.2 : 0.05); //速度
