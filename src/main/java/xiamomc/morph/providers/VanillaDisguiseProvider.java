@@ -29,6 +29,7 @@ import xiamomc.morph.utilities.*;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
+import xiamomc.pluginbase.Exceptions.NullDependencyException;
 
 import java.lang.reflect.Field;
 import java.util.List;
@@ -273,6 +274,10 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
         {
             targetField = ReflectionUtils.getPlayerDimensionsField(nmsPlayer);
         }
+        catch (NullDependencyException t)
+        {
+            logger.error("Can't read player dimension.");
+        }
         catch (Throwable t)
         {
             logger.error("Can't read player dimension: " + t.getMessage());
@@ -308,6 +313,10 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
         try
         {
             targetField = ReflectionUtils.getPlayerDimensionsField(nmsPlayer);
+        }
+        catch (NullDependencyException t)
+        {
+            logger.error("Can't read player dimension.");
         }
         catch (Throwable t)
         {
