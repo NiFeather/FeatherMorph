@@ -82,4 +82,4 @@ cd FeatherMorph
 ./gradlew build --no-daemon
 ```
 
-生成的文件将位于`build/libs`中，`FeatherMorph-x.x.x.jar`就是构建出来的插件。
+生成的文件将位于`build/libs`中，`FeatherMorph-x.x.x-all.jar`就是构建出来的插件。

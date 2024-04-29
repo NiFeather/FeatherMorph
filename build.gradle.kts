@@ -1,3 +1,4 @@
+import io.papermc.paperweight.userdev.ReobfArtifactConfiguration
 import net.minecrell.pluginyml.bukkit.BukkitPluginDescription
 
 /*
@@ -48,7 +49,7 @@ repositories {
     }*/
 }
 
-//paperweight.reobfArtifactConfiguration = ReobfArtifactConfiguration.MOJANG_PRODUCTION
+paperweight.reobfArtifactConfiguration = ReobfArtifactConfiguration.MOJANG_PRODUCTION
 
 dependencies {
     paperweight.paperDevBundle("${project.property("minecraft_version")}")
