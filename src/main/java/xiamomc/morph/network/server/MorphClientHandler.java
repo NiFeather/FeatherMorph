@@ -113,7 +113,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
         catch (Throwable t)
         {
             msg = new String(data, StandardCharsets.UTF_8);
-            logger.warn("Unable to convert byte data to string: " + t.getMessage());
+            //logger.warn("Unable to convert byte data to string: " + t.getMessage());
         }
 
         this.logPacket(isOutGoingPacket, player, channel, msg, data.length);

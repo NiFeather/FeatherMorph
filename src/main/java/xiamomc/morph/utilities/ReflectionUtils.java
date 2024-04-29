@@ -41,8 +41,8 @@ public class ReflectionUtils
     // private EntitySize bh; //Entity#dimensions
     // private float bi; //Entity#eyeHeight
     // 特征：EntitySize下面跟一个float和三个boolean，上面是个long
-    private static final String dimensionsFieldName = "bh";
-    private static final String playerEyeHeightFieldName = "bi";
+    private static final String dimensionsFieldName = "dimensions";
+    private static final String playerEyeHeightFieldName = "eyeHeight";
 
     public static Field getPlayerDimensionsField(ServerPlayer player)
             throws NullDependencyException
