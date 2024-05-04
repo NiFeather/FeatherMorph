@@ -24,7 +24,7 @@ public class MapMetaUtils
                 };
 
         var instance = new Equipment();
-        for (int i = 0; i < items.length - 1; i++)
+        for (int i = 0; i < items.length; i++)
         {
             var rec = bukkitToNMS(items[i]);
             switch (i)

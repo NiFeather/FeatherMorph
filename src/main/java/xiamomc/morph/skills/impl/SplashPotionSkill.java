@@ -20,6 +20,7 @@ import xiamomc.morph.storage.skill.ISkillOption;
 import xiamomc.morph.storage.skill.SkillAbilityConfiguration;
 
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class SplashPotionSkill extends MorphSkill<NoOpConfiguration>
 {
@@ -65,7 +66,14 @@ public class SplashPotionSkill extends MorphSkill<NoOpConfiguration>
         //
         //var color = PotionUtils.getColor(targetPotion);
         //meta.setColor(Color.fromRGB(color));
-        meta.setColor(Color.fromRGB(255, 255, 255));
+
+        //TODO: test this
+        AtomicInteger color = new AtomicInteger();
+
+        if (targetPotion != null)
+            targetPotion.getEffects().stream().findFirst().ifPresent(o -> color.set(o.getEffect().value().getColor()));
+
+        meta.setColor(Color.fromRGB(color.get()));
 
         thrownPotion.setPotionMeta(meta);
 

@@ -3,6 +3,7 @@ package xiamomc.morph.utilities;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.mojang.serialization.JsonOps;
+import net.minecraft.core.component.TypedDataComponent;
 import org.apache.commons.lang.NotImplementedException;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
@@ -62,15 +63,20 @@ public class ItemUtils
     //TODO: CONVERT ITEM TO NBT
     public static String getItemCompound(ItemStack stack)
     {
+        /*
         var item = ItemUtils.itemOrAir(stack);
 
         if (stack.getType().isAir()) return "{}";
 
         var nmsCopy = CraftItemStack.asNMSCopy(item);
+        var components = nmsCopy.getComponents();
 
         throw new NotImplementedException("1.20.5 changed how item NBT works");
 
         //return NbtUtils.getCompoundString(nmsCopy.getTag());
+        */
+
+        return "{}";
     }
 
     /**

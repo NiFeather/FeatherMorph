@@ -2,6 +2,7 @@ package xiamomc.morph.misc;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.server.level.ServerPlayerGameMode;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.phys.BlockHitResult;
@@ -146,16 +147,20 @@ public class PlayerOperationSimulator extends MorphPluginObject
         //如果玩家处于冒险模式并且无法破坏目标方块，也不要做任何事情，只返回success来允许播放动画
         if (player.getGameMode() == GameMode.ADVENTURE)
         {
-            return SimulateResult.success(EquipmentSlot.HAND);
+            var item = net.minecraft.world.item.ItemStack.fromBukkitCopy(
+                    Objects.requireNonNull(player.getEquipment(), "Null equipment?").getItemInMainHand());
 
-/*
-            var meta = Objects.requireNonNull(player.getEquipment(), "Null equipment?")
-                    .getItemInMainHand().getItemMeta();
+            //todo: test this
+            var canBreak = item.getComponents().get(DataComponents.CAN_BREAK);
+            if (canBreak == null)
+                return SimulateResult.fail();
 
-            //todo: CHECK DESTORYABLE KEYS
-            if (meta == null || !meta.getDestroyableKeys().contains(targetBlock.getBlockData().getMaterial().getKey()))
+            var craftBlock = ((CraftBlock) targetBlock);
+            if (canBreak.predicates.stream()
+                    .anyMatch(bp -> bp.matches(craftBlock.getHandle().getMinecraftWorld(), craftBlock.getPosition())))
+            {
                 return SimulateResult.success(EquipmentSlot.HAND);
- */
+            }
         }
 
         //=-=-=-=-=-=-=-=-=-=-=-=
