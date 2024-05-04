@@ -407,7 +407,7 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
         AtomicBoolean success = new AtomicBoolean(false);
         targetPlayer.getScheduler().run(plugin, task ->
         {
-            success.set(simulateOperationSync(action, targetPlayer, source));
+            success.set(simulateOperation(action, targetPlayer, source));
             callback.accept(success.get());
         }, () -> { /* retired */ });
     }
