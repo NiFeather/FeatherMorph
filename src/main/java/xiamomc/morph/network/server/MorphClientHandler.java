@@ -175,11 +175,21 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
             if (connectionState.worseThan(InitializeState.HANDSHAKE)) return;
 
             //尝试获取API版本
-            var input = ByteStreams.newDataInput(data);
-            var clientVersion = input.readInt();
+            int clientVersion = 1;
 
-            if (logInComingPackets.get())
-                logPacket(false, player, versionChannel, "" + clientVersion, data.length);
+            try
+            {
+                var clientVersionStr = new String(data, StandardCharsets.UTF_8);
+
+                if (logInComingPackets.get())
+                    logPacket(false, player, versionChannel, clientVersionStr, data.length);
+
+                clientVersion = Integer.parseInt(clientVersionStr);
+            }
+            catch (Throwable t)
+            {
+                logger.error("Failed to decode client version: " + t.getMessage());
+            }
 
             var minimumApiVersion = this.minimumApiVersion;
 
