@@ -47,7 +47,10 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Map;
 import java.util.Stack;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 
 public class InteractionMirrorProcessor extends MorphPluginObject implements Listener
 {
@@ -179,7 +182,7 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
             var targetPlayer = inf.target;
             assert targetPlayer != null;
 
-            simulateOperation(Action.LEFT_CLICK_AIR, targetPlayer, damager);
+            simulateOperationAsync(Action.LEFT_CLICK_AIR, targetPlayer, damager, success -> {});
             logOperation(damager, targetPlayer, OperationType.LeftClick);
 
             //如果伪装的玩家想攻击本体，取消事件
@@ -258,7 +261,7 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
                 lastAction = PlayerTracker.InteractType.LEFT_CLICK_BLOCK;
         }
 
-        simulateOperation(lastAction.toBukkitAction(), targetPlayer, player);
+        simulateOperationAsync(lastAction.toBukkitAction(), targetPlayer, player, success -> {});
         logOperation(player, targetPlayer, lastAction.isLeftClick() ? OperationType.LeftClick : OperationType.RightClick);
     }
 
@@ -288,7 +291,7 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
         var targetPlayer = inf.target;
         assert targetPlayer != null;
 
-        simulateOperation(e.getAction(), targetPlayer, player);
+        simulateOperationAsync(e.getAction(), targetPlayer, player, success -> {});
         logOperation(player, targetPlayer, e.getAction().isLeftClick() ? OperationType.LeftClick : OperationType.RightClick);
     }
 
@@ -322,7 +325,7 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
         var targetPlayer = inf.target;
         assert targetPlayer != null;
 
-        simulateOperation(Action.RIGHT_CLICK_AIR, targetPlayer, player);
+        simulateOperationAsync(Action.RIGHT_CLICK_AIR, targetPlayer, player, success -> {});
         logOperation(player, targetPlayer, OperationType.RightClick);
     }
 
@@ -397,6 +400,16 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
 
             //logger.info("All passes failed");
         }
+    }
+
+    private void simulateOperationAsync(Action action, Player targetPlayer, Player source, Consumer<Boolean> callback)
+    {
+        AtomicBoolean success = new AtomicBoolean(false);
+        targetPlayer.getScheduler().run(plugin, task ->
+        {
+            success.set(simulateOperation(action, targetPlayer, source));
+            callback.accept(success.get());
+        }, () -> { /* retired */ });
     }
 
     /**
