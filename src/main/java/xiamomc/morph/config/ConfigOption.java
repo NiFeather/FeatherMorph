@@ -13,7 +13,7 @@ public enum ConfigOption
     PLUGIN_PREFIX(ConfigNode.create().append("message_pattern"), "<color:#dddddd>≡ FM » <message>"),
 
     ALLOW_HEAD_MORPH(ConfigNode.create().append("allowHeadMorph"), true),
-    ALLOW_CHAT_OVERRIDE(ConfigNode.create().append("chatOverride").append("allowOverride"), true),
+    ALLOW_CHAT_OVERRIDE(ConfigNode.create().append("chatOverride").append("allowOverride"), false),
     CHAT_OVERRIDE_USE_CUSTOM_RENDERER(ConfigNode.create().append("chatOverride").append("UseCustomRenderer"), true),
     CHAT_OVERRIDE_DEFAULT_PATTERN(ConfigNode.create().append("chatOverride").append("default_pattern"), "<<who>> <message>"),
 
@@ -46,8 +46,8 @@ public enum ConfigOption
     MIRROR_IGNORE_DISGUISED(interactionMirrorNode().append("ignore_disguised"), true),
     MIRROR_DESTROY_TIMEOUT(interactionMirrorNode().append("destroy_timeout"), 40),
 
-    MIRROR_BEHAVIOR_DO_SIMULATION(interactionMirrorBehaviorNode().append("simulate_interactions"), true),
-    MIRROR_BEHAVIOR_SNEAK(interactionMirrorBehaviorNode().append("sneak"), true),
+    MIRROR_BEHAVIOR_DO_SIMULATION(interactionMirrorBehaviorNode().append("simulate_interactions"), false),
+    MIRROR_BEHAVIOR_SNEAK(interactionMirrorBehaviorNode().append("sneak"), false),
     MIRROR_BEHAVIOR_SWAP_HAND(interactionMirrorBehaviorNode().append("swap_hands"), false),
     MIRROR_BEHAVIOR_DROP(interactionMirrorBehaviorNode().append("allow_drop"), false),
     MIRROR_BEHAVIOR_HOTBAR(interactionMirrorBehaviorNode().append("hotbar"), false),

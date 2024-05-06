@@ -22,7 +22,7 @@ root:
     # Enable ChatOverride?
     # Once enabled, we will attempt to change someone's chat message to a configured content if they disguised as something.
     # The "morph:chat_override" ability needs to be added to disguise's abilities to activate this feature.
-    allowOverride: true
+    allowOverride: false
 
     # Should we try to override any existing chat plugin?
     # This will make sure that the player's name can be changed in most situations but may cause compatibility issues.
@@ -126,6 +126,8 @@ root:
     frequency: 1.0
 
   # InteractionMirror options
+  # This is a feature that's made for fun, it could make another player do the same thing as you did when disguising as them
+  # Disabled for default since 1.0.15
   interactionMirror:
     # Maximum affect distance
     # How far should we find for the target player to mirror?
@@ -159,10 +161,10 @@ root:
     # Behavior options
     behaviors:
       # Should we enable interaction control?
-      simulate_interactions: true
+      simulate_interactions: false
 
       # Should we enable sneaking control?
-      sneak: true
+      sneak: false
 
       # Should we enable swapping control?
       swap_hands: false
