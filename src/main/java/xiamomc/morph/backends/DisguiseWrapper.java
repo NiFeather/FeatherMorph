@@ -213,7 +213,7 @@ public abstract class DisguiseWrapper<TInstance>
             var logger = MorphPlugin.getInstance().getSLF4JLogger();
             logger.warn("Unable to get NMS type for %s, using default...".formatted(this.getEntityType()));
 
-            this.dimensions = EntityDimensions.fixed(0.6f, 1.8f);
+            this.dimensions = net.minecraft.world.entity.player.Player.STANDING_DIMENSIONS;
         }
 
         if (getEntityType() != EntityType.SLIME && getEntityType() != EntityType.MAGMA_CUBE) return;
