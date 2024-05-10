@@ -2,6 +2,7 @@ package xiamomc.morph.backends.modelengine.vanish;
 
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
+import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.events.ListeningWhitelist;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.events.PacketEvent;
@@ -26,6 +27,11 @@ import java.util.List;
 
 public class ProtocolLibVanishSource extends MorphPluginObject implements IVanishSource, PacketListener
 {
+    public ProtocolLibVanishSource()
+    {
+        ProtocolLibrary.getProtocolManager().addPacketListener(this);
+    }
+
     private final List<Player> vanish = new ObjectArrayList<>();
 
     @Override
