@@ -14,6 +14,9 @@ import org.bukkit.inventory.EntityEquipment;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.ILoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.misc.CollisionBoxRecord;
 import xiamomc.morph.misc.DisguiseState;
@@ -31,6 +34,7 @@ import java.util.function.Consumer;
  */
 public abstract class DisguiseWrapper<TInstance>
 {
+    private static final Logger log = LoggerFactory.getLogger(DisguiseWrapper.class);
     protected TInstance instance;
 
     public DisguiseWrapper(@NotNull TInstance instance, DisguiseBackend<TInstance, ? extends DisguiseWrapper<TInstance>> backend)
@@ -205,7 +209,12 @@ public abstract class DisguiseWrapper<TInstance>
         if (nmsType != null)
             this.dimensions = nmsType.getDimensions();
         else
-            throw new RuntimeException("Unable to get NMS type for %s".formatted(this.getEntityType()));
+        {
+            var logger = MorphPlugin.getInstance().getSLF4JLogger();
+            logger.warn("Unable to get NMS type for %s, using default...".formatted(this.getEntityType()));
+
+            this.dimensions = EntityDimensions.fixed(0.6f, 1.8f);
+        }
 
         if (getEntityType() != EntityType.SLIME && getEntityType() != EntityType.MAGMA_CUBE) return;
 

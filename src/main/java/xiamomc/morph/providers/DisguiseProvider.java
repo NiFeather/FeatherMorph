@@ -151,7 +151,7 @@ public abstract class DisguiseProvider extends MorphPluginObject
      */
     public boolean unMorph(Player player, DisguiseState state)
     {
-        return morphs.getCurrentBackend().unDisguise(player);
+        return state.getDisguiseWrapper().getBackend().unDisguise(player);
     }
 
     @Resolved

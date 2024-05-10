@@ -22,6 +22,7 @@ import xiamomc.morph.backends.DisguiseBackend;
 import xiamomc.morph.backends.DisguiseWrapper;
 import xiamomc.morph.backends.WrapperAttribute;
 import xiamomc.morph.backends.fallback.NilBackend;
+import xiamomc.morph.backends.modelengine.MEBackend;
 import xiamomc.morph.backends.server.ServerBackend;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
@@ -43,10 +44,7 @@ import xiamomc.morph.network.commands.S2C.set.*;
 import xiamomc.morph.network.multiInstance.MultiInstanceService;
 import xiamomc.morph.network.multiInstance.protocol.Operation;
 import xiamomc.morph.network.server.MorphClientHandler;
-import xiamomc.morph.providers.DisguiseProvider;
-import xiamomc.morph.providers.FallbackProvider;
-import xiamomc.morph.providers.PlayerDisguiseProvider;
-import xiamomc.morph.providers.VanillaDisguiseProvider;
+import xiamomc.morph.providers.*;
 import xiamomc.morph.skills.MorphSkillHandler;
 import xiamomc.morph.skills.SkillCooldownInfo;
 import xiamomc.morph.skills.SkillType;
@@ -119,6 +117,17 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         return backends.getOrDefault(id, null);
     }
 
+    @Nullable
+    public <I, W extends DisguiseWrapper<I>, T extends DisguiseBackend<I, W>> T getBackend(String id, Class<T> exceptedClass)
+    {
+        var backend = this.getBackend(id);
+
+        if (exceptedClass.isInstance(backend))
+            return (T) backend;
+
+        return null;
+    }
+
     public Collection<DisguiseBackend<?, ?>> listBackends()
     {
         return backends.values();
@@ -132,16 +141,13 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             return false;
         }
 
-        var prevBackend = this.currentBackend;
-
         try
         {
             currentBackend = backend;
 
             disguiseStates.forEach(state ->
             {
-                if (prevBackend != null)
-                    prevBackend.unDisguise(state.getPlayer());
+                state.getDisguiseWrapper().getBackend().unDisguise(state.getPlayer());
 
                 var newWrapper = backend.cloneWrapperFrom(state.getDisguiseWrapper());
                 state.updateDisguise(
@@ -176,7 +182,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
             registerBackend(serverBackend);
             switchBackend(serverBackend);
-            return;
         }
         catch (NoClassDefFoundError e)
         {
@@ -190,6 +195,15 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             logger.error("Please consider reporting this issue to our GitHub: https://github.com/XiaMoZhiShi/MorphPlugin/issues");
 
             t.printStackTrace();
+        }
+
+        try
+        {
+            registerBackend(new MEBackend());
+        }
+        catch (Throwable t)
+        {
+            logger.error("Can't register Model Engine as one of the backends.");
         }
     }
 
@@ -236,6 +250,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         registerProviders(ObjectList.of(
                 new VanillaDisguiseProvider(),
                 new PlayerDisguiseProvider(),
+                new ModelEngineProvider(),
                 //new ItemDisplayProvider(),
                 //new LocalDisguiseProvider(),
                 fallbackProvider
@@ -750,9 +765,10 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                         info.getIdentifier(), result.wrapperInstance(), provider);
 
                 // 在初始化服务端伪装状态后，交由后端来为玩家套上伪装
-                var backendSuccess = currentBackend.disguise(player, result.wrapperInstance());
+                var backendSuccess = result.wrapperInstance().getBackend().disguise(player, result.wrapperInstance());
                 if (!backendSuccess)
                 {
+                    logger.warn("Backend '%s' failed to disguise the player...".formatted(result.wrapperInstance().getBackend().getIdentifier()));
                     source.sendMessage(MessageUtils.prefixes(source, MorphStrings.errorWhileDisguising()));
                     return false;
                 }

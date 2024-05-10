@@ -66,6 +66,9 @@ public class EntityTypeUtils
     @NotNull
     public static SoundInfo getAmbientSound(EntityType bukkitType, @Nullable World world)
     {
+        if (bukkitType == EntityType.UNKNOWN)
+            return new SoundInfo(null, SoundSource.PLAYERS, Integer.MAX_VALUE, 1);
+
         var cache = typeSoundMap.getOrDefault(bukkitType, null);
         if (cache != null) return cache;
 
@@ -93,6 +96,8 @@ public class EntityTypeUtils
     @Nullable
     public static net.minecraft.world.entity.EntityType<?> getNmsType(@NotNull EntityType bukkitType)
     {
+        if (bukkitType == EntityType.UNKNOWN) return null;
+
         return net.minecraft.world.entity.EntityType.byString(bukkitType.key().asString())
                 .orElse(null);
     }

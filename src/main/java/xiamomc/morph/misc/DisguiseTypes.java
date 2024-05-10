@@ -34,6 +34,8 @@ public enum DisguiseTypes
      */
     EXTERNAL("external"),
 
+    MODEL_ENGINE("model4"),
+
     /**
      * 未知类型或未指定类型
      */

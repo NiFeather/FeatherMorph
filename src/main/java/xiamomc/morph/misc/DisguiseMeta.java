@@ -21,6 +21,10 @@ public class DisguiseMeta
 
     private final EntityType entityType;
 
+    /**
+     *
+     * @return UNKNOWN if the identifier doesn't match any vanilla type
+     */
     @ApiStatus.Internal
     public EntityType getEntityType()
     {

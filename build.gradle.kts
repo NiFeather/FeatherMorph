@@ -43,6 +43,10 @@ repositories {
     maven {
         url = uri("https://repo.maven.apache.org/maven2/")
     }
+
+    maven {
+        url = uri("https://mvn.lumine.io/repository/maven-public")
+    }
 /*
     maven {
         url = uri("https://repo.majek.dev/releases")
@@ -57,6 +61,8 @@ dependencies {
     compileOnly(files("libs/CMILib1.4.3.5.jar"))
     compileOnly(files("libs/Residence5.1.4.0.jar"))
     compileOnly(files("libs/TAB v4.1.2.jar"))
+
+    compileOnly("com.ticxo.modelengine:ModelEngine:${project.property("me_version")}")
 
     implementation("org.java-websocket:Java-WebSocket:1.5.6")
 
