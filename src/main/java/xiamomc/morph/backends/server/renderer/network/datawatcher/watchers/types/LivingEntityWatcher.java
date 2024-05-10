@@ -3,6 +3,9 @@ package xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.type
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ColorParticleOption;
+import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.InteractionHand;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
@@ -81,7 +84,6 @@ public class LivingEntityWatcher extends EntityWatcher implements Listener
 
         write(values.LIVING_FLAGS, (byte)flagBit);
 
-        int potionColor = 0;
         List<Color> colors = new ObjectArrayList<>();
         boolean hasAmbient = false;
         for (PotionEffect effect : player.getActivePotionEffects())
@@ -92,14 +94,11 @@ public class LivingEntityWatcher extends EntityWatcher implements Listener
             hasAmbient = hasAmbient || effect.isAmbient();
         }
 
-        if (!colors.isEmpty())
-        {
-            var firstColor = colors.remove(0);
-            var finalColor = firstColor.mixColors(colors.toArray(new Color[]{}));
-            potionColor = finalColor.asRGB();
-        }
+        var colorList = new ObjectArrayList<ParticleOptions>();
+        for (var color : colors)
+            colorList.add(ColorParticleOption.create(ParticleTypes.ENTITY_EFFECT, color.asRGB()));
 
-        write(values.POTION_COLOR, potionColor);
+        write(values.POTION_COLOR, colorList);
         write(values.POTION_ISAMBIENT, hasAmbient);
 
         write(values.STUCKED_ARROWS, player.getArrowsInBody());

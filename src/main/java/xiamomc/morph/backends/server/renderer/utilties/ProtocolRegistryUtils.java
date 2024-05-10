@@ -52,7 +52,7 @@ public class ProtocolRegistryUtils
         {
             var logger = MorphPlugin.getInstance().getSLF4JLogger();
             logger.error("Can't find serializer for value '%s': '%s'".formatted(instance, t.getMessage()));
-            t.printStackTrace();
+            //t.printStackTrace();
         }
 
         return ret;
