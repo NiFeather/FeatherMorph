@@ -57,7 +57,7 @@ public class PlayerLookPacketListener extends ProtocolListener
         }
         else
         {
-            logger.error("Invalid packet type: " + packetType);
+            //logger.error("Invalid packet type: " + packetType);
         }
     }
     @Resolved(shouldSolveImmediately = true)

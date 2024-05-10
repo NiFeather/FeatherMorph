@@ -4,7 +4,12 @@ import com.mojang.datafixers.util.Pair;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
+import org.bukkit.Material;
 import org.bukkit.inventory.EntityEquipment;
+import org.slf4j.ILoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import xiamomc.morph.MorphPlugin;
 
 public class ProtocolEquipment
 {
@@ -36,9 +41,26 @@ public class ProtocolEquipment
 
     private static Pair<EquipmentSlot, ItemStack> toEquipmentPair(EntityEquipment equipment, org.bukkit.inventory.EquipmentSlot bukkitSlot)
     {
-        var bukkitItem = equipment.getItem(bukkitSlot);
-        var nmsItem = ItemStack.fromBukkitCopy(bukkitItem);
+        try
+        {
+            var bukkitItem = equipment.getItem(bukkitSlot);
+            var nmsItem = ItemStack.fromBukkitCopy(bukkitItem);
 
-        return Pair.of(toNMSSlot(bukkitSlot), nmsItem);
+            return Pair.of(toNMSSlot(bukkitSlot), nmsItem);
+        }
+        catch (IllegalArgumentException e)
+        {
+            var logger = MorphPlugin.getInstance().getSLF4JLogger();
+
+            logger.warn("Can't generate equipment pair because of a CB bug...");
+        }
+        catch (Throwable t)
+        {
+            var logger = MorphPlugin.getInstance().getSLF4JLogger();
+
+            logger.warn("Can't generate equipment pair: " + t.getMessage());
+        }
+
+        return Pair.of(EquipmentSlot.FEET, ItemStack.fromBukkitCopy(new org.bukkit.inventory.ItemStack(Material.AIR)));
     }
 }

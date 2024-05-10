@@ -18,15 +18,27 @@ public class FrogWatcher extends LivingEntityWatcher
         super(bindingPlayer, EntityType.FROG);
     }
 
+    private FrogVariant getFrogVariant(ResourceKey<FrogVariant> key)
+    {
+        var variant = BuiltInRegistries.FROG_VARIANT.get(key);
+        if (variant == null)
+        {
+            logger.warn("Null FrogVariant for key: " + key.toString());
+            return BuiltInRegistries.FROG_VARIANT.byId(0);
+        }
+
+        return variant;
+    }
+
     public Frog.Variant getFrogVariant()
     {
         var type = get(ValueIndex.FROG.FROG_VARIANT);
 
-        if (type == FrogVariant.TEMPERATE)
+        if (type == getFrogVariant(FrogVariant.TEMPERATE))
             return Frog.Variant.TEMPERATE;
-        else if (type == FrogVariant.COLD)
+        else if (type == getFrogVariant(FrogVariant.COLD))
             return Frog.Variant.COLD;
-        else if (type == FrogVariant.WARM)
+        else if (type == getFrogVariant(FrogVariant.WARM))
             return Frog.Variant.WARM;
 
         logger.warn("No suitable Variant for FrogVariant '%s'".formatted(type));
@@ -62,7 +74,7 @@ public class FrogWatcher extends LivingEntityWatcher
                 logger.error("Failed reading FrogVariant from NBT: " + t.getMessage());
             }
 
-            write(ValueIndex.FROG.FROG_VARIANT, type);
+            write(ValueIndex.FROG.FROG_VARIANT, getFrogVariant(type));
         }
     }
 
