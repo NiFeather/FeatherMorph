@@ -157,7 +157,7 @@ public class PlayerOperationSimulator extends MorphPluginObject
 
             var craftBlock = ((CraftBlock) targetBlock);
             if (canBreak.predicates.stream()
-                    .anyMatch(bp -> bp.matches(craftBlock.getHandle().getMinecraftWorld(), craftBlock.getPosition())))
+                    .noneMatch(bp -> bp.matches(craftBlock.getHandle().getMinecraftWorld(), craftBlock.getPosition())))
             {
                 return SimulateResult.success(EquipmentSlot.HAND);
             }

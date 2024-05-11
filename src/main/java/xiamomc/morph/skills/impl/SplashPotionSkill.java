@@ -62,13 +62,7 @@ public class SplashPotionSkill extends MorphSkill<NoOpConfiguration>
         else if (info.type == PotionEffectType.INSTANT_DAMAGE)
             targetPotion = Potions.HARMING.value();
 
-        // todo: SET COLOR !!!
-        //
-        //var color = PotionUtils.getColor(targetPotion);
-        //meta.setColor(Color.fromRGB(color));
-
-        //TODO: test this
-        AtomicInteger color = new AtomicInteger();
+        var color = new AtomicInteger();
 
         if (targetPotion != null)
             targetPotion.getEffects().stream().findFirst().ifPresent(o -> color.set(o.getEffect().value().getColor()));
