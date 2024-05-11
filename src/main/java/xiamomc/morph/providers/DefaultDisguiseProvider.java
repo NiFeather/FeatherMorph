@@ -62,9 +62,10 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
     @Resolved
     private RevealingHandler revealingHandler;
 
-    protected DisguiseBackend<?, ?> getBackend()
+    @Override
+    public @NotNull DisguiseBackend<?, ?> getPreferredBackend()
     {
-        return getMorphManager().getCurrentBackend();
+        return getMorphManager().getDefaultBackend();
     }
 
     @Override

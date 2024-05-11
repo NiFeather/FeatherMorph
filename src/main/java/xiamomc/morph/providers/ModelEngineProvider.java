@@ -8,12 +8,14 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xiamomc.morph.backends.DisguiseBackend;
 import xiamomc.morph.backends.DisguiseWrapper;
 import xiamomc.morph.backends.modelengine.MEBackend;
 import xiamomc.morph.misc.DisguiseMeta;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.misc.DisguiseTypes;
 import xiamomc.morph.network.commands.S2C.AbstractS2CCommand;
+import xiamomc.pluginbase.Exceptions.NullDependencyException;
 
 import java.util.List;
 
@@ -28,6 +30,16 @@ public class ModelEngineProvider extends DisguiseProvider
     public @NotNull String getNameSpace()
     {
         return DisguiseTypes.MODEL_ENGINE.getNameSpace();
+    }
+
+    @Override
+    public @NotNull DisguiseBackend<?, ?> getPreferredBackend()
+    {
+        var backend = getMorphManager().getBackend(MEBackend.identifier);
+        if (backend == null)
+            throw new NullDependencyException("Excepted model engine backend to appear, but it doesn't");
+
+        return backend;
     }
 
     /**

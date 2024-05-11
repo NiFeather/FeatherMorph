@@ -9,9 +9,20 @@ public class StatStrings extends AbstractMorphStrings
         return getFormattable(getKey("version"), "FeatherMorph <version> by <author> (Implementing protocol v<proto>)");
     }
 
+    @Deprecated(forRemoval = true)
     public static FormattableMessage backendString()
     {
         return getFormattable(getKey("backend"), "Current Backend: <backend>");
+    }
+
+    public static FormattableMessage activeBackends()
+    {
+        return getFormattable(getKey("active_backends"), "Active backends: <list>");
+    }
+
+    public static FormattableMessage backendDescription()
+    {
+        return getFormattable(getKey("backend_desc"), "<name> (<count> active instance(s))");
     }
 
     public static FormattableMessage providersString()

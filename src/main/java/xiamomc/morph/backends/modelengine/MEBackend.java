@@ -15,6 +15,8 @@ import xiamomc.morph.backends.modelengine.vanish.ProtocolLibVanishSource;
 import xiamomc.morph.backends.modelengine.vanish.VanillaVanishSource;
 import xiamomc.pluginbase.Messages.FormattableMessage;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 public class MEBackend extends DisguiseBackend<MEDisguiseInstance, MEDisguiseWrapper>
@@ -251,5 +253,11 @@ public class MEBackend extends DisguiseBackend<MEDisguiseInstance, MEDisguiseWra
     public @Nullable String toOfflineSave(DisguiseWrapper<?> wrapper)
     {
         return null;
+    }
+
+    @Override
+    public Collection<MEDisguiseWrapper> listInstances()
+    {
+        return disguiseWrapperMap.values();
     }
 }

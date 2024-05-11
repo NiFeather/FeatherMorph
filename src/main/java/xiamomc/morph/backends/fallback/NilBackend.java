@@ -22,6 +22,8 @@ import xiamomc.morph.network.server.MorphClientHandler;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Messages.FormattableMessage;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 public class NilBackend extends DisguiseBackend<NilDisguise, NilWrapper>
@@ -41,6 +43,12 @@ public class NilBackend extends DisguiseBackend<NilDisguise, NilWrapper>
     public FormattableMessage getDisplayName()
     {
         return BackendStrings.nilBackendName();
+    }
+
+    @Override
+    public boolean dependsClientRenderer()
+    {
+        return true;
     }
 
     @Override
@@ -186,5 +194,11 @@ public class NilBackend extends DisguiseBackend<NilDisguise, NilWrapper>
     public @Nullable String toOfflineSave(DisguiseWrapper<?> wrapper)
     {
         return null;
+    }
+
+    @Override
+    public Collection<NilWrapper> listInstances()
+    {
+        return playerFallbackWrapperMap.values();
     }
 }

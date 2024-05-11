@@ -103,7 +103,7 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
         var identifier = disguiseMeta.getIdentifier();
 
         DisguiseWrapper<?> constructedDisguise;
-        var backend = getBackend();
+        var backend = getPreferredBackend();
 
         var entityType = EntityTypeUtils.fromString(identifier, true);
 
@@ -192,7 +192,7 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
         super.postConstructDisguise(state, targetEntity);
 
         var disguise = state.getDisguiseWrapper();
-        var backend = getMorphManager().getCurrentBackend();
+        var backend = getPreferredBackend();
 
         if (!backend.isDisguised(targetEntity))
         {
