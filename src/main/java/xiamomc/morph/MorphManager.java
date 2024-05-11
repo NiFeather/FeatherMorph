@@ -22,7 +22,6 @@ import xiamomc.morph.backends.DisguiseBackend;
 import xiamomc.morph.backends.DisguiseWrapper;
 import xiamomc.morph.backends.WrapperAttribute;
 import xiamomc.morph.backends.fallback.NilBackend;
-import xiamomc.morph.backends.modelengine.MEBackend;
 import xiamomc.morph.backends.server.ServerBackend;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
@@ -206,15 +205,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
             t.printStackTrace();
         }
-
-        try
-        {
-            registerBackend(new MEBackend());
-        }
-        catch (Throwable t)
-        {
-            logger.error("Can't register Model Engine as one of the backends.");
-        }
     }
 
     //endregion Backends
@@ -246,7 +236,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         registerProviders(ObjectList.of(
                 new VanillaDisguiseProvider(),
                 new PlayerDisguiseProvider(),
-                new ModelEngineProvider(),
                 //new ItemDisplayProvider(),
                 //new LocalDisguiseProvider(),
                 fallbackProvider

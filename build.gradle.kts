@@ -100,7 +100,7 @@ bukkit {
     apiVersion = "1.19"
     authors = listOf("MATRIX-feather")
     depend = listOf()
-    softDepend = listOf("LibsDisguises", "GSit", "PlaceholderAPI")
+    softDepend = listOf("TAB", "Residence", "ModelEngine", "PlaceholderAPI")
     version = "${project.property("project_version")}"
     prefix = "FeatherMorph"
     name = "FeatherMorph"
