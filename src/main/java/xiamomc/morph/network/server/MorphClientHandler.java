@@ -626,7 +626,8 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
             if (player.hasPermission(CommonPermissions.DISGUISE_REVEALING))
                 sendCommand(player, manager.genMapCommand());
 
-            if (manager.usingNilBackend())
+            //TODO: 独立客户端渲染器
+            if (state != null && state.getDisguiseWrapper().getBackend().dependsClientRenderer())
             {
                 sendCommand(player, manager.genRenderSyncCommand());
 

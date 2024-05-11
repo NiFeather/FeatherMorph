@@ -54,6 +54,23 @@ public class StatSubCommand extends MorphPluginObject implements ISubCommand
 
         var authors = "MATRIX-feather"; //plugin.getPluginMeta().getAuthors();
 
+        var list = new StringBuilder();
+        var backends = morphManager.listManagedBackends();
+        for (var backend : backends)
+        {
+            var instances = backend.listInstances();
+            if (instances.isEmpty()) continue;
+
+            var formattable = StatStrings.backendDescription();
+
+            formattable.resolve("name", backend.getIdentifier())
+                    .resolve("count", "" + instances.size());
+
+            var locale = MessageUtils.getLocale(sender);
+            var str = formattable.toString(locale);
+            list.append(str).append(" ");
+        }
+
         var msg = new FormattableMessage[]
                 {
                         StatStrings.versionString()
@@ -61,8 +78,8 @@ public class StatSubCommand extends MorphPluginObject implements ISubCommand
                                 .resolve("author", authors)
                                 .resolve("proto", String.valueOf(clientHandler.targetApiVersion)),
 
-                        StatStrings.backendString()
-                                .resolve("backend", morphManager.getCurrentBackend().getClass().getName()),
+                        StatStrings.activeBackends()
+                                        .resolve("list", list.toString()),
 
                         StatStrings.providersString()
                                 .resolve("count", String.valueOf(MorphManager.getProviders().size())),

@@ -35,7 +35,7 @@ public class BackendSubCommand extends MorphPluginObject implements ISubCommand
         targetName = targetName.toLowerCase();
 
         String finalTargetName = targetName;
-        return manager.listBackends()
+        return manager.listManagedBackends()
                 .stream()
                 .map(DisguiseBackend::getIdentifier)
                 .filter(id -> id.contains(finalTargetName))

@@ -55,7 +55,7 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
         }
 
         var id = disguiseMeta.getIdentifier();
-        var backend = getBackend();
+        var backend = getPreferredBackend();
 
         if (DisguiseTypes.fromId(id) != DisguiseTypes.PLAYER)
             return DisguiseResult.fail();

@@ -37,6 +37,7 @@ import xiamomc.morph.skills.impl.NoneMorphSkill;
 import xiamomc.morph.storage.playerdata.PlayerMeta;
 import xiamomc.morph.utilities.*;
 import xiamomc.pluginbase.Annotations.Resolved;
+import xiamomc.pluginbase.Exceptions.NullDependencyException;
 
 import java.util.Arrays;
 import java.util.List;
@@ -49,10 +50,13 @@ import static xiamomc.morph.utilities.DisguiseUtils.itemOrAir;
 public class DisguiseState extends MorphPluginObject
 {
     public DisguiseState(Player player, @NotNull String id, @NotNull String skillId,
-                         @NotNull DisguiseWrapper<?> disguiseInstance, @NotNull DisguiseProvider provider,
+                         @NotNull DisguiseWrapper<?> wrapper, @NotNull DisguiseProvider provider,
                          @Nullable EntityEquipment targetEquipment, @NotNull PlayerOptions<Player> playerOptions,
                          @NotNull PlayerMeta playerMeta)
     {
+        if (wrapper == null)
+            throw new NullDependencyException("Wrapper cannot be null.");
+
         this.player = player;
         this.playerUniqueID = player.getUniqueId();
         this.provider = provider;
@@ -61,7 +65,7 @@ public class DisguiseState extends MorphPluginObject
 
         this.soundHandler = new SoundHandler(player);
 
-        this.updateDisguise(id, skillId, disguiseInstance, true, targetEquipment);
+        this.updateDisguise(id, skillId, wrapper, true, targetEquipment);
     }
 
     private final PlayerOptions<Player> playerOptions;
@@ -177,8 +181,12 @@ public class DisguiseState extends MorphPluginObject
     /**
      * 获取此State的伪装Wrapper
      */
+    @NotNull
     public DisguiseWrapper<?> getDisguiseWrapper()
     {
+        if (disguiseWrapper == null)
+            throw new NullDependencyException("Null Wrapper?!");
+
         return disguiseWrapper;
     }
 
@@ -449,6 +457,9 @@ public class DisguiseState extends MorphPluginObject
                                @NotNull DisguiseWrapper<?> wrapper, boolean shouldRefreshDisguiseItems,
                                @Nullable EntityEquipment targetEquipment)
     {
+        if (wrapper == null)
+            throw new NullDependencyException("Wrapper cannot be null.");
+
         if (disguiseWrapper == wrapper) return;
 
         this.entityCustomName = null;
