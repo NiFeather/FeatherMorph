@@ -3,6 +3,8 @@ package xiamomc.morph.utilities;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.GameProfileRepository;
 import com.mojang.authlib.properties.Property;
+import de.tr7zw.changeme.nbtapi.NBT;
+import de.tr7zw.changeme.nbtapi.iface.ReadableNBT;
 import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -63,43 +65,10 @@ public class NbtUtils
     }
 
     @javax.annotation.Nullable
-    public static GameProfile readGameProfile(CompoundTag nbt) {
-        UUID uUID = nbt.hasUUID("Id") ? nbt.getUUID("Id") : Util.NIL_UUID;
-        if (nbt.contains("Id", 8)) {
-            try {
-                uUID = UUID.fromString(nbt.getString("Id"));
-            } catch (IllegalArgumentException var11) {
-            }
-        }
-
-        String string = nbt.getString("Name");
-
-        try {
-            GameProfile gameProfile = new GameProfile(uUID, string);
-            if (nbt.contains("Properties", 10)) {
-                CompoundTag compoundTag = nbt.getCompound("Properties");
-                Iterator var5 = compoundTag.getAllKeys().iterator();
-
-                while(var5.hasNext()) {
-                    String string2 = (String)var5.next();
-                    ListTag listTag = compoundTag.getList(string2, 10);
-
-                    for(int i = 0; i < listTag.size(); ++i) {
-                        CompoundTag compoundTag2 = listTag.getCompound(i);
-                        String string3 = compoundTag2.getString("Value");
-                        if (compoundTag2.contains("Signature", 8)) {
-                            gameProfile.getProperties().put(string2, new Property(string2, string3, compoundTag2.getString("Signature")));
-                        } else {
-                            gameProfile.getProperties().put(string2, new Property(string2, string3));
-                        }
-                    }
-                }
-            }
-
-            return gameProfile;
-        } catch (Throwable var12) {
-            return null;
-        }
+    public static GameProfile readGameProfile(String snbt)
+    {
+        var compound = NBT.parseNBT(snbt);
+        return NBT.gameProfileFromNBT(compound);
     }
 
     public static CompoundTag toCompoundTag(GameProfile profile)

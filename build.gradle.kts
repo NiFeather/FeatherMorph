@@ -43,6 +43,10 @@ repositories {
     maven {
         url = uri("https://repo.maven.apache.org/maven2/")
     }
+
+    maven {
+        url = uri("https://repo.codemc.io/repository/maven-public/")
+    }
 /*
     maven {
         url = uri("https://repo.majek.dev/releases")
@@ -76,6 +80,8 @@ dependencies {
     implementation("org.apache.httpcomponents.client5:httpclient5:5.2.1")
 
     implementation("net.kyori:adventure-platform-bukkit:4.3.2")
+
+    implementation("de.tr7zw:item-nbt-api:2.12.4")
 
     implementation("com.github.XiaMoZhiShi:feathermorph-protocols:${protocolVersion}")
     implementation("com.github.XiaMoZhiShi:PluginBase:${project.property("pluginbase_version")}")
@@ -182,6 +188,7 @@ tasks.shadowJar {
     minimize()
     relocate("xiamomc.pluginbase", "xiamomc.morph.shaded.pluginbase")
     relocate("org.bstats", "xiamomc.morph.shaded.bstats")
+    relocate("de.tr7zw.changeme.nbtapi", "xiamomc.morph.shaded.nbtapi")
 }
 
 tasks.withType<JavaCompile>() {

@@ -81,18 +81,13 @@ public class DisguiseStateGenerator
 
         try
         {
-            var profileCompound = NbtUtils.toCompoundTag(offlineState.profileString);
+            var rawProfile = NbtUtils.readGameProfile(offlineState.profileString);
 
-            if (profileCompound != null)
+            if (rawProfile != null)
             {
-                var rawProfile = NbtUtils.readGameProfile(profileCompound);
-
-                if (rawProfile != null)
-                {
-                    var profile = new MorphGameProfile(rawProfile);
-                    profile.setName(wrapper.getDisguiseName());
-                    wrapper.applySkin(profile);
-                }
+                var profile = new MorphGameProfile(rawProfile);
+                profile.setName(wrapper.getDisguiseName());
+                wrapper.applySkin(profile);
             }
         }
         catch (Throwable t)

@@ -38,9 +38,6 @@ public class SingleSkin
         if (this.snbt == null || this.snbt.equalsIgnoreCase("{}"))
             return null;
 
-        var compound = NbtUtils.toCompoundTag(this.snbt);
-        return compound == null
-            ? null
-            : NbtUtils.readGameProfile(compound);
+        return NbtUtils.readGameProfile(this.snbt);
     }
 }
