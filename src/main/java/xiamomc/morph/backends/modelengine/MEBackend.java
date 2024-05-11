@@ -225,6 +225,8 @@ public class MEBackend extends DisguiseBackend<MEDisguiseInstance, MEDisguiseWra
         vanishSource.cancelVanish(player);
         modeled.removeModel(wrapper.getModelID());
 
+        disguiseWrapperMap.remove(player);
+
         return true;
     }
 
