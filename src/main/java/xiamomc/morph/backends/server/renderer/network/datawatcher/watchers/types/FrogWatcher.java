@@ -1,11 +1,14 @@
 package xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types;
 
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.animal.FrogVariant;
+import org.bukkit.Bukkit;
+import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Frog;
 import org.bukkit.entity.Player;
@@ -18,16 +21,11 @@ public class FrogWatcher extends LivingEntityWatcher
         super(bindingPlayer, EntityType.FROG);
     }
 
-    private FrogVariant getFrogVariant(ResourceKey<FrogVariant> key)
+    private Holder<FrogVariant> getFrogVariant(ResourceKey<FrogVariant> key)
     {
-        var variant = BuiltInRegistries.FROG_VARIANT.get(key);
-        if (variant == null)
-        {
-            logger.warn("Null FrogVariant for key: " + key.toString());
-            return BuiltInRegistries.FROG_VARIANT.byId(0);
-        }
+        var world = ((CraftWorld) Bukkit.getWorlds().stream().findFirst().get()).getHandle();
 
-        return variant;
+        return world.registryAccess().registryOrThrow(Registries.FROG_VARIANT).getHolderOrThrow(key);
     }
 
     public Frog.Variant getFrogVariant()
