@@ -146,7 +146,7 @@ public class ServerBackend extends DisguiseBackend<ServerDisguise, ServerDisguis
      * @return 一个新的属于此后端的Wrapper
      */
     @Override
-    public ServerDisguiseWrapper cloneWrapperFrom(DisguiseWrapper<?> otherWrapper)
+    public @NotNull ServerDisguiseWrapper cloneWrapperFrom(DisguiseWrapper<?> otherWrapper)
     {
         return otherWrapper instanceof ServerDisguiseWrapper serverDisguiseWrapper
                 ? cloneWrapper(serverDisguiseWrapper)

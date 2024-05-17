@@ -192,6 +192,12 @@ public abstract class DisguiseWrapper<TInstance>
     {
         if (dimensions != null) return;
 
+        if (getEntityType() == EntityType.UNKNOWN)
+        {
+            this.dimensions = net.minecraft.world.entity.player.Player.STANDING_DIMENSIONS;
+            return;
+        }
+
         // 2023/5/5: ItemDisplayProvider
         if (getEntityType() == EntityType.BLOCK_DISPLAY)
         {

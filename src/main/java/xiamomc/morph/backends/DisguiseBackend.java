@@ -10,7 +10,6 @@ import xiamomc.morph.MorphPluginObject;
 import xiamomc.pluginbase.Messages.FormattableMessage;
 
 import java.util.Collection;
-import java.util.List;
 
 public abstract class DisguiseBackend<TInstance, TWrapper extends DisguiseWrapper<TInstance>> extends MorphPluginObject
 {
@@ -54,6 +53,7 @@ public abstract class DisguiseBackend<TInstance, TWrapper extends DisguiseWrappe
      * @param entity The entity used to construct disguise
      * @return The constructed instance
      */
+    @Deprecated
     public abstract TInstance createRawInstance(Entity entity);
 
     /**
@@ -76,6 +76,7 @@ public abstract class DisguiseBackend<TInstance, TWrapper extends DisguiseWrappe
      * @param otherWrapper 可能属于其他后端的Wrapper
      * @return 一个新的属于此后端的Wrapper
      */
+    @NotNull
     public abstract TWrapper cloneWrapperFrom(DisguiseWrapper<?> otherWrapper);
 
     /**

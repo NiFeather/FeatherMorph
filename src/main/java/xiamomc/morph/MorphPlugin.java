@@ -147,6 +147,7 @@ public final class MorphPlugin extends XiaMoJavaPlugin
             {
                 logger.info("Error occurred activating model engine support: " + t.getMessage());
                 t.printStackTrace();
+                return;
             }
 
             logger.info("Activating model engine support...");

@@ -16,7 +16,6 @@ import xiamomc.morph.backends.modelengine.vanish.VanillaVanishSource;
 import xiamomc.pluginbase.Messages.FormattableMessage;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
 public class MEBackend extends DisguiseBackend<MEDisguiseInstance, MEDisguiseWrapper>
@@ -118,7 +117,9 @@ public class MEBackend extends DisguiseBackend<MEDisguiseInstance, MEDisguiseWra
     @Override
     public boolean isDisguised(@Nullable Entity target)
     {
-        return false;
+        if (!(target instanceof Player player)) return false;
+
+        return disguiseWrapperMap.containsKey(player);
     }
 
     /**
@@ -130,7 +131,9 @@ public class MEBackend extends DisguiseBackend<MEDisguiseInstance, MEDisguiseWra
     @Override
     public @Nullable MEDisguiseWrapper getWrapper(Entity target)
     {
-        return null;
+        if (!(target instanceof Player player)) return null;
+
+        return disguiseWrapperMap.getOrDefault(player, null);
     }
 
     /**
@@ -140,9 +143,12 @@ public class MEBackend extends DisguiseBackend<MEDisguiseInstance, MEDisguiseWra
      * @return 一个新的属于此后端的Wrapper
      */
     @Override
-    public MEDisguiseWrapper cloneWrapperFrom(DisguiseWrapper<?> otherWrapper)
+    public @NotNull MEDisguiseWrapper cloneWrapperFrom(DisguiseWrapper<?> otherWrapper)
     {
-        return null;
+        return otherWrapper instanceof MEDisguiseWrapper meDisguiseWrapper
+                ? MEDisguiseWrapper.clone(meDisguiseWrapper, this)
+                : MEDisguiseWrapper.cloneOther(otherWrapper, this);
+
     }
 
     private final Map<Player, MEDisguiseWrapper> disguiseWrapperMap = new Object2ObjectArrayMap<>();
