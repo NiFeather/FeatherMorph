@@ -54,8 +54,10 @@ public class StatSubCommand extends MorphPluginObject implements ISubCommand
 
         var authors = "MATRIX-feather"; //plugin.getPluginMeta().getAuthors();
 
-        var list = new StringBuilder();
+        var listString = new StringBuilder();
         var backends = morphManager.listManagedBackends();
+        var locale = MessageUtils.getLocale(sender);
+
         for (var backend : backends)
         {
             var instances = backend.listInstances();
@@ -66,10 +68,15 @@ public class StatSubCommand extends MorphPluginObject implements ISubCommand
             formattable.resolve("name", backend.getIdentifier())
                     .resolve("count", "" + instances.size());
 
-            var locale = MessageUtils.getLocale(sender);
             var str = formattable.toString(locale);
-            list.append(str).append(" ");
+            listString.append(str).append(" ");
         }
+
+        if (listString.isEmpty())
+            listString.append(StatStrings.backendsNone().toString(locale));
+
+        var defaultBackend = morphManager.getDefaultBackend();
+        var defaultBackendString = "%s (%s)".formatted(defaultBackend.getIdentifier(), defaultBackend.getClass().getName());
 
         var msg = new FormattableMessage[]
                 {
@@ -78,8 +85,11 @@ public class StatSubCommand extends MorphPluginObject implements ISubCommand
                                 .resolve("author", authors)
                                 .resolve("proto", String.valueOf(clientHandler.targetApiVersion)),
 
+                        StatStrings.defaultBackendString()
+                                        .resolve("backend", defaultBackendString),
+
                         StatStrings.activeBackends()
-                                        .resolve("list", list.toString()),
+                                        .resolve("list", listString.toString()),
 
                         StatStrings.providersString()
                                 .resolve("count", String.valueOf(MorphManager.getProviders().size())),

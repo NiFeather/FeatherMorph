@@ -15,14 +15,24 @@ public class StatStrings extends AbstractMorphStrings
         return getFormattable(getKey("backend"), "Current Backend: <backend>");
     }
 
+    public static FormattableMessage defaultBackendString()
+    {
+        return getFormattable(getKey("default_backend"), "Default Backend: <backend>");
+    }
+
     public static FormattableMessage activeBackends()
     {
         return getFormattable(getKey("active_backends"), "Active backends: <list>");
     }
 
+    public static FormattableMessage backendsNone()
+    {
+        return getFormattable(getKey("none"), "None");
+    }
+
     public static FormattableMessage backendDescription()
     {
-        return getFormattable(getKey("backend_desc"), "<name> (<count> active instance(s))");
+        return getFormattable(getKey("backend_desc"), "<name> <#B2DFDB>(<count> instance(s))</#B2DFDB>");
     }
 
     public static FormattableMessage providersString()
