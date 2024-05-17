@@ -535,9 +535,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
             if (targetedEntity != null)
             {
-                //TODO: CHOOSE WRAPPER
-                var disg = defaultBackend.getWrapper(targetedEntity);
-
                 String targetKey;
 
                 if (targetedEntity instanceof Player targetPlayer)
@@ -551,11 +548,10 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 }
                 else
                 {
-                    //否则：伪装ID > 伪装类型 > 生物类型
-                    targetKey = disg != null
-                            ? disg.isPlayerDisguise()
-                                ? DisguiseTypes.PLAYER.toId(disg.getDisguiseName())
-                                : disg.getEntityType().getKey().asString()
+                    //否则：伪装ID > 生物类型
+                    var theirState = this.getDisguiseStateFor(targetedEntity);
+                    targetKey = theirState != null
+                            ? theirState.getDisguiseIdentifier()
                             : targetedEntity.getType().getKey().asString();
                 }
 
