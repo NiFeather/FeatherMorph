@@ -1,65 +1,58 @@
 package xiamomc.morph.utilities;
 
 import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.GameProfileRepository;
 import com.mojang.authlib.properties.Property;
-import de.tr7zw.changeme.nbtapi.NBT;
-import de.tr7zw.changeme.nbtapi.iface.ReadableNBT;
 import net.minecraft.Util;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.StringTagVisitor;
-import net.minecraft.nbt.TagParser;
+import net.minecraft.nbt.*;
 import net.minecraft.server.commands.data.EntityDataAccessor;
-import net.minecraft.server.players.GameProfileCache;
 import org.bukkit.craftbukkit.entity.CraftEntity;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xiamomc.morph.MorphPlugin;
+import xiamomc.morph.misc.MorphGameProfile;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
 public class NbtUtils
 {
-    //TODO: COPIED FROM DECOMPILED SOURCE
-    //TODO: REPLACE THIS WITH OUR OWN CODE, OR FIND OUT HOW 1.20.5 CONVERTS GAMEPROFILE
-    public static CompoundTag writeGameProfile(CompoundTag nbt, GameProfile profile) {
-        if (!profile.getName().isEmpty()) {
+    public static CompoundTag writeGameProfile(CompoundTag nbt, GameProfile profile)
+    {
+        if (!profile.getName().isEmpty())
             nbt.putString("Name", profile.getName());
-        }
 
-        if (!profile.getId().equals(Util.NIL_UUID)) {
+        if (!profile.getId().equals(Util.NIL_UUID))
             nbt.putUUID("Id", profile.getId());
-        }
 
-        if (!profile.getProperties().isEmpty()) {
-            CompoundTag compoundTag = new CompoundTag();
-            Iterator var3 = profile.getProperties().keySet().iterator();
+        if (profile.getProperties().isEmpty())
+            return nbt;
 
-            while(var3.hasNext()) {
-                String string = (String)var3.next();
-                ListTag listTag = new ListTag();
+        var propertiesCompound = new CompoundTag();
 
-                CompoundTag compoundTag2;
-                for(Iterator var6 = profile.getProperties().get(string).iterator(); var6.hasNext(); listTag.add(compoundTag2)) {
-                    Property property = (Property)var6.next();
-                    compoundTag2 = new CompoundTag();
-                    compoundTag2.putString("Value", property.value());
-                    String string2 = property.signature();
-                    if (string2 != null) {
-                        compoundTag2.putString("Signature", string2);
-                    }
-                }
+        for (var key : profile.getProperties().keySet())
+        {
+            var list = new ListTag();
 
-                compoundTag.put(string, listTag);
+            CompoundTag childCompound;
+            for (var property : profile.getProperties().get(key))
+            {
+                childCompound = new CompoundTag();
+                childCompound.putString("Value", property.value());
+
+                var sign = property.signature();
+                if (sign != null)
+                    childCompound.putString("Signature", sign);
+
+                list.add(childCompound);
             }
 
-            nbt.put("Properties", compoundTag);
+            propertiesCompound.put(key, list);
         }
+
+        nbt.put("Properties", propertiesCompound);
 
         return nbt;
     }
@@ -67,8 +60,63 @@ public class NbtUtils
     @javax.annotation.Nullable
     public static GameProfile readGameProfile(String snbt)
     {
-        var compound = NBT.parseNBT(snbt);
-        return NBT.gameProfileFromNBT(compound);
+        CompoundTag compound = null;
+
+        try
+        {
+            compound = TagParser.parseTag(snbt);
+        }
+        catch (Throwable t)
+        {
+            var logger = MorphPlugin.getInstance().getSLF4JLogger();
+
+            logger.warn("Unable to parse GameProfile: " + t.getMessage());
+            logger.warn("Raw profile: '%s'".formatted(snbt));
+
+            return null;
+        }
+
+        String name = "NIL";
+        if (compound.contains("Name", Tag.TAG_STRING))
+            name = compound.getString("Name");
+
+        UUID uuid = Util.NIL_UUID;
+        if (compound.hasUUID("Id"))
+            compound.getUUID("Id");
+
+        var profile = new MorphGameProfile(new GameProfile(uuid, name));
+
+        if (!compound.contains("Properties", Tag.TAG_COMPOUND)) return profile;
+
+        try
+        {
+            var propertiesCompound = compound.getCompound("Properties");
+
+            for (var key : propertiesCompound.getAllKeys())
+            {
+                var list = propertiesCompound.getList(key, Tag.TAG_COMPOUND);
+
+                for (int i = 0; i < list.size(); i++)
+                {
+                    var childCompound = list.getCompound(i);
+                    var childValue = childCompound.getString("Value");
+
+                    if (childCompound.contains("Signature", Tag.TAG_STRING))
+                        profile.getProperties().put(key, new Property(childValue, childCompound.getString("Signature")));
+                    else
+                        profile.getProperties().put(key, new Property(key, childValue));
+                }
+            }
+        }
+        catch (Throwable t)
+        {
+            var logger = MorphPlugin.getInstance().getSLF4JLogger();
+
+            logger.warn("Can't parse profile properties: " + t.getMessage());
+            t.printStackTrace();
+        }
+
+        return profile;
     }
 
     public static CompoundTag toCompoundTag(GameProfile profile)
