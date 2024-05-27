@@ -99,12 +99,12 @@ public class NbtUtils
                 for (int i = 0; i < list.size(); i++)
                 {
                     var childCompound = list.getCompound(i);
-                    var childValue = childCompound.getString("Value");
+                    var value = childCompound.getString("Value");
 
                     if (childCompound.contains("Signature", Tag.TAG_STRING))
-                        profile.getProperties().put(key, new Property(childValue, childCompound.getString("Signature")));
+                        profile.getProperties().put(key, new Property(key, value, childCompound.getString("Signature")));
                     else
-                        profile.getProperties().put(key, new Property(key, childValue));
+                        profile.getProperties().put(key, new Property(key, value));
                 }
             }
         }
