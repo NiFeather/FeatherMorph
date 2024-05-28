@@ -65,7 +65,7 @@ public class SkillAbilityConfigurationStore extends MorphJsonBasedStorage<SkillA
         return "技能存储";
     }
 
-    private final int targetVersion = 25;
+    private final int targetVersion = 26;
 
     @Resolved
     private MorphSkillHandler skillHandler;
@@ -311,7 +311,7 @@ public class SkillAbilityConfigurationStore extends MorphJsonBasedStorage<SkillA
                 var ironConfig = getConfigFor(EntityType.IRON_GOLEM, config);
                 if (ironConfig != null)
                 {
-                    var option = (AttributeModifyOption) ironConfig.getAbilityOptions(new AttributeModifyingAbility());
+                    var option = ironConfig.getAbilityOptions(new AttributeModifyingAbility());
 
                     if (option != null)
                     {
@@ -322,9 +322,24 @@ public class SkillAbilityConfigurationStore extends MorphJsonBasedStorage<SkillA
                     }
                 }
 
-
                 //var ds = this.createGson().toJson(storingObject);
                 //logger.info(ds);
+            }
+
+            // 马匹踏上1格高的方块
+            if (version < 26)
+            {
+                var horseConfig = getConfigFor(EntityType.HORSE, config);
+                if (horseConfig != null)
+                {
+                    var option = horseConfig.getAbilityOptions(new AttributeModifyingAbility());
+                    if (option != null)
+                    {
+                        option.with(Attribute.GENERIC_STEP_HEIGHT, AttributeModifyOption.OperationType.add, 0.4d);
+
+                        horseConfig.setOption(AbilityType.ATTRIBUTE.asString(), option);
+                    }
+                }
             }
 
             //更新默认设置

@@ -4,6 +4,7 @@ import com.destroystokyo.paper.profile.PlayerProfile;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 import java.util.UUID;
@@ -21,9 +22,12 @@ public class MorphGameProfile extends GameProfile
      * @param profile   profile
      * @throws IllegalArgumentException Both ID and name are either null or empty
      */
-    public MorphGameProfile(PlayerProfile profile)
+    public MorphGameProfile(@NotNull PlayerProfile profile)
     {
-        super(Objects.requireNonNull(profile.getId()), Objects.requireNonNull(profile.getName()));
+        super(
+                Objects.requireNonNull(profile.getId(), "Null profile ID!"),
+                Objects.requireNonNull(profile.getName(), "Null profile Name!")
+        );
 
         setUUID(profile.getId());
         setName(profile.getName());

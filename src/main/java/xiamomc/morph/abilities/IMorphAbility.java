@@ -73,7 +73,7 @@ public interface IMorphAbility<T extends ISkillOption> extends Listener
      *
      * @return {@link ISkillOption}
      */
-    public ISkillOption getDefaultOption();
+    public T getDefaultOption();
 
     /**
      * 为某个伪装添加设置{@link ISkillOption}

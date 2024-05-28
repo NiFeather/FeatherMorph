@@ -216,11 +216,11 @@ public class SkillAbilityConfiguration
     }
 
     @Nullable
-    public ISkillOption getAbilityOptions(IMorphAbility<?> ability)
+    public <T extends ISkillOption> T getAbilityOptions(IMorphAbility<T> ability)
     {
         if (options == null || ability == null) return null;
 
-        return ability.getDefaultOption().fromMap(options.get(ability.getIdentifier().asString()));
+        return (T) ability.getDefaultOption().fromMap(options.get(ability.getIdentifier().asString()));
     }
 
     /**

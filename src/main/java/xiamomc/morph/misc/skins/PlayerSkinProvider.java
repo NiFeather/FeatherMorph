@@ -10,6 +10,7 @@ import net.minecraft.Util;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.player.Player;
 import org.bukkit.Bukkit;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.misc.MorphGameProfile;
@@ -139,7 +140,7 @@ public class PlayerSkinProvider extends MorphPluginObject
         return skinCache.get(name).profileOptional().orElse(null);
     }
 
-    public void cacheProfile(PlayerProfile playerProfile)
+    public void cacheProfile(@NotNull PlayerProfile playerProfile)
     {
         var gameProfile = new MorphGameProfile(playerProfile);
         skinCache.cache(gameProfile);

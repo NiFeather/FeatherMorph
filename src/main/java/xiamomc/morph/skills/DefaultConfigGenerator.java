@@ -211,7 +211,9 @@ public class DefaultConfigGenerator
 
         this.getConfiguration(EntityType.HORSE)
                 .addAbilityIdentifier(AbilityType.ATTRIBUTE)
-                .appendOption(AbilityType.ATTRIBUTE, AttributeModifyOption.from(Attribute.GENERIC_MOVEMENT_SPEED, AttributeModifyOption.OperationType.multiply_base, 0.5d));
+                .appendOption(AbilityType.ATTRIBUTE, AttributeModifyOption
+                        .from(Attribute.GENERIC_MOVEMENT_SPEED, AttributeModifyOption.OperationType.multiply_base, 0.5d)
+                        .with(Attribute.GENERIC_STEP_HEIGHT, AttributeModifyOption.OperationType.add, 0.4d));
 
         this.getConfiguration(EntityType.IRON_GOLEM)
                 .addAbilityIdentifier(AbilityType.ATTRIBUTE)

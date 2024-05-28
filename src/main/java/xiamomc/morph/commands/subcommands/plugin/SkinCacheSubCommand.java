@@ -388,6 +388,21 @@ public class SkinCacheSubCommand extends MorphPluginObject implements ISubComman
 
         var targetProfile = new MorphGameProfile(sourceProfile);
         targetProfile.setName(targetName);
+        targetProfile.setUUID(sourceProfile.getId());
+
+        var profile = CraftPlayerProfile.asBukkitCopy(targetProfile);
+        if (profile.getId() == null)
+        {
+            logger.error("Null profile ID. " + targetProfile.getId());
+
+            return CopyMoveResult.NO_SUCH_SKIN;
+        }
+
+        if (profile.getName() == null)
+        {
+            logger.error("Null profile Name. " + targetProfile.getName());
+            return CopyMoveResult.NO_SUCH_SKIN;
+        }
 
         skinProvider.cacheProfile(CraftPlayerProfile.asBukkitCopy(targetProfile));
 
