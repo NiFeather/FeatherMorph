@@ -46,10 +46,7 @@ public class ProtocolEquipment
         try
         {
             if (equipment instanceof CraftInventoryPlayer && bukkitSlot == org.bukkit.inventory.EquipmentSlot.BODY)
-            {
-                MorphPlugin.getInstance().getSLF4JLogger().info("Returning air...");
                 return Pair.of(toNMSSlot(bukkitSlot), ItemUtils.nmsAir);
-            }
 
             var bukkitItem = equipment.getItem(bukkitSlot);
             var nmsItem = ItemStack.fromBukkitCopy(bukkitItem);
