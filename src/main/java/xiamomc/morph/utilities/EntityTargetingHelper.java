@@ -23,6 +23,7 @@ import xiamomc.pluginbase.Annotations.Resolved;
 import java.util.List;
 import java.util.Map;
 
+@Deprecated(forRemoval = true)
 public class EntityTargetingHelper extends MorphPluginObject
 {
     private record GoalRecord(Goal goal, int priority, FeatherMorphAvoidPlayerGoal replacingGoal)

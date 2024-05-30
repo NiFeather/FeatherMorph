@@ -173,20 +173,11 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
             if (plugin.getCurrentTick() % 20 == 0)
                 ReflectionUtils.cleanCaches();
 
-            if (plugin.getCurrentTick() % 5 == 0)
-            {
-                var nearByEntities = player.getNearbyEntities(12, 12, 12);
-                targetingHelper.entity(nearByEntities);
-            }
-
             return true;
         }
         else
             return false;
     }
-
-    private final EntityTargetingHelper targetingHelper = new EntityTargetingHelper();
-
 
     @Override
     public void postConstructDisguise(DisguiseState state, @Nullable Entity targetEntity)

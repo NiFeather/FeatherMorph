@@ -4,6 +4,8 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EntityDimensions;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Exceptions.NullDependencyException;
 
 import java.lang.reflect.Field;
@@ -11,6 +13,7 @@ import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class ReflectionUtils
 {
@@ -68,6 +71,37 @@ public class ReflectionUtils
     }
 
     private static final Map<ServerPlayer, Field> playerEHFieldMap = new Object2ObjectOpenHashMap<>();
+
+    public static <T> T getValue(Object obj, String fieldName, Class<T> type)
+    {
+        var fields = ReflectionUtils.getFields(obj, type, true);
+
+        Field targetField = null;
+
+        for (Field field : fields)
+        {
+            if (field.getName().equals(fieldName))
+            {
+                targetField = field;
+                break;
+            }
+        }
+
+        if (targetField == null)
+            throw new NullDependencyException("Field '%s' with type '%s' not found in '%s'".formatted(fieldName, type, obj));
+
+        targetField.setAccessible(true);
+
+        try
+        {
+            var value = targetField.get(obj);
+            return (T) value;
+        }
+        catch (Throwable t)
+        {
+            throw new RuntimeException(t);
+        }
+    }
 
     public static Field getPlayerEyeHeightField(ServerPlayer player)
             throws NullDependencyException
