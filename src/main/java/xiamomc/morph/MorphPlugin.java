@@ -1,5 +1,6 @@
 package xiamomc.morph;
 
+import com.ticxo.modelengine.api.ModelEngineAPI;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
@@ -18,6 +19,7 @@ import xiamomc.morph.messages.MorphMessageStore;
 import xiamomc.morph.messages.vanilla.VanillaMessageStore;
 import xiamomc.morph.misc.NetworkingHelper;
 import xiamomc.morph.misc.PlayerOperationSimulator;
+import xiamomc.morph.misc.integrations.modelengine.ModelEngineHelper;
 import xiamomc.morph.misc.integrations.residence.ResidenceEventProcessor;
 import xiamomc.morph.misc.integrations.tab.TabAdapter;
 import xiamomc.morph.network.multiInstance.MultiInstanceService;
@@ -133,6 +135,23 @@ public final class MorphPlugin extends XiaMoJavaPlugin
         {
             logger.info("Applying TAB integrations...");
             this.registerListener(tabAdapter = new TabAdapter());
+        }, true);
+
+        softDeps.setHandle("ModelEngine", r ->
+        {
+            try
+            {
+                ModelEngineAPI.getAPI();
+            }
+            catch (Throwable t)
+            {
+                logger.info("Error occurred activating model engine support: " + t.getMessage());
+                t.printStackTrace();
+                return;
+            }
+
+            logger.info("Activating model engine support...");
+            this.registerListener(new ModelEngineHelper());
         }, true);
 
         //缓存依赖

@@ -3,10 +3,13 @@ package xiamomc.morph.backends;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.pluginbase.Messages.FormattableMessage;
+
+import java.util.Collection;
 
 public abstract class DisguiseBackend<TInstance, TWrapper extends DisguiseWrapper<TInstance>> extends MorphPluginObject
 {
@@ -17,6 +20,12 @@ public abstract class DisguiseBackend<TInstance, TWrapper extends DisguiseWrappe
     public abstract String getIdentifier();
 
     public abstract FormattableMessage getDisplayName();
+
+    @ApiStatus.Internal
+    public boolean dependsClientRenderer()
+    {
+        return false;
+    }
 
     /**
      * Creates a disguise from the giving entity
@@ -44,6 +53,7 @@ public abstract class DisguiseBackend<TInstance, TWrapper extends DisguiseWrappe
      * @param entity The entity used to construct disguise
      * @return The constructed instance
      */
+    @Deprecated
     public abstract TInstance createRawInstance(Entity entity);
 
     /**
@@ -66,6 +76,7 @@ public abstract class DisguiseBackend<TInstance, TWrapper extends DisguiseWrappe
      * @param otherWrapper 可能属于其他后端的Wrapper
      * @return 一个新的属于此后端的Wrapper
      */
+    @NotNull
     public abstract TWrapper cloneWrapperFrom(DisguiseWrapper<?> otherWrapper);
 
     /**
@@ -102,6 +113,8 @@ public abstract class DisguiseBackend<TInstance, TWrapper extends DisguiseWrappe
      */
     @Nullable
     public abstract String toOfflineSave(DisguiseWrapper<?> wrapper);
+
+    public abstract Collection<TWrapper> listInstances();
 
     public void dispose()
     {

@@ -43,10 +43,7 @@ import xiamomc.morph.network.commands.S2C.set.*;
 import xiamomc.morph.network.multiInstance.MultiInstanceService;
 import xiamomc.morph.network.multiInstance.protocol.Operation;
 import xiamomc.morph.network.server.MorphClientHandler;
-import xiamomc.morph.providers.DisguiseProvider;
-import xiamomc.morph.providers.FallbackProvider;
-import xiamomc.morph.providers.PlayerDisguiseProvider;
-import xiamomc.morph.providers.VanillaDisguiseProvider;
+import xiamomc.morph.providers.*;
 import xiamomc.morph.skills.MorphSkillHandler;
 import xiamomc.morph.skills.SkillCooldownInfo;
 import xiamomc.morph.skills.SkillType;
@@ -97,11 +94,18 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
     private final NilBackend nilBackend = new NilBackend();
 
-    private DisguiseBackend<?, ?> currentBackend = nilBackend;
+    @NotNull
+    private DisguiseBackend<?, ?> defaultBackend = nilBackend;
+
+    @NotNull
+    public DisguiseBackend<?, ?> getDefaultBackend()
+    {
+        return defaultBackend;
+    }
 
     private final Map<String, DisguiseBackend<?, ?>> backends = new Object2ObjectArrayMap<>();
 
-    public boolean registerBackend(DisguiseBackend backend)
+    public boolean registerBackend(DisguiseBackend<?, ?> backend)
     {
         var id = backend.getIdentifier();
 
@@ -119,7 +123,21 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         return backends.getOrDefault(id, null);
     }
 
-    public Collection<DisguiseBackend<?, ?>> listBackends()
+    @Nullable
+    public <I, W extends DisguiseWrapper<I>, T extends DisguiseBackend<I, W>> T getBackend(String id, Class<T> exceptedClass)
+    {
+        var backend = this.getBackend(id);
+
+        if (exceptedClass.isInstance(backend))
+            return (T) backend;
+
+        return null;
+    }
+
+    /**
+     * @return A list that contains all backends registered to this MorphManager instance
+     */
+    public Collection<DisguiseBackend<?, ?>> listManagedBackends()
     {
         return backends.values();
     }
@@ -132,16 +150,13 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             return false;
         }
 
-        var prevBackend = this.currentBackend;
-
         try
         {
-            currentBackend = backend;
+            defaultBackend = backend;
 
             disguiseStates.forEach(state ->
             {
-                if (prevBackend != null)
-                    prevBackend.unDisguise(state.getPlayer());
+                state.getDisguiseWrapper().getBackend().unDisguise(state.getPlayer());
 
                 var newWrapper = backend.cloneWrapperFrom(state.getDisguiseWrapper());
                 state.updateDisguise(
@@ -176,7 +191,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
             registerBackend(serverBackend);
             switchBackend(serverBackend);
-            return;
         }
         catch (NoClassDefFoundError e)
         {
@@ -191,20 +205,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
             t.printStackTrace();
         }
-    }
-
-    public DisguiseBackend<?, ?> getCurrentBackend()
-    {
-        return currentBackend;
-    }
-
-    /**
-     * @deprecated Will be removed in future
-     */
-    @Deprecated
-    public boolean usingNilBackend()
-    {
-        return currentBackend == nilBackend;
     }
 
     //endregion Backends
@@ -226,7 +226,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         registerBackend(nilBackend);
         tryBackends();
 
-        logger.info("Using backend: %s".formatted(currentBackend));
+        logger.info("Default backend: %s".formatted(defaultBackend));
 
         bannedDisguises = config.getBindableList(String.class, ConfigOption.BANNED_DISGUISES);
         config.bind(allowHeadMorph, ConfigOption.ALLOW_HEAD_MORPH);
@@ -535,8 +535,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
             if (targetedEntity != null)
             {
-                var disg = currentBackend.getWrapper(targetedEntity);
-
                 String targetKey;
 
                 if (targetedEntity instanceof Player targetPlayer)
@@ -550,11 +548,10 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 }
                 else
                 {
-                    //否则：伪装ID > 伪装类型 > 生物类型
-                    targetKey = disg != null
-                            ? disg.isPlayerDisguise()
-                                ? DisguiseTypes.PLAYER.toId(disg.getDisguiseName())
-                                : disg.getEntityType().getKey().asString()
+                    //否则：伪装ID > 生物类型
+                    var theirState = this.getDisguiseStateFor(targetedEntity);
+                    targetKey = theirState != null
+                            ? theirState.getDisguiseIdentifier()
                             : targetedEntity.getType().getKey().asString();
                 }
 
@@ -750,9 +747,10 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                         info.getIdentifier(), result.wrapperInstance(), provider);
 
                 // 在初始化服务端伪装状态后，交由后端来为玩家套上伪装
-                var backendSuccess = currentBackend.disguise(player, result.wrapperInstance());
+                var backendSuccess = result.wrapperInstance().getBackend().disguise(player, result.wrapperInstance());
                 if (!backendSuccess)
                 {
+                    logger.warn("Backend '%s' failed to disguise the player...".formatted(result.wrapperInstance().getBackend().getIdentifier()));
                     source.sendMessage(MessageUtils.prefixes(source, MorphStrings.errorWhileDisguising()));
                     return false;
                 }
@@ -1330,7 +1328,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         if (!disguiseStates.contains(state))
             disguiseStates.add(state);
 
-        currentBackend.disguise(state.getPlayer(), state.getDisguiseWrapper());
+        state.getDisguiseWrapper().getBackend().disguise(state.getPlayer(), state.getDisguiseWrapper());
         postConstructDisguise(state);
     }
 
@@ -1357,8 +1355,10 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
             if (DisguiseTypes.fromId(key) == DisguiseTypes.UNKNOWN) return OfflineDisguiseResult.FAIL;
 
+            var provider = getProvider(DisguiseTypes.fromId(key).getNameSpace());
+
             var state = DisguiseStateGenerator.fromOfflineState(offlineState,
-                    clientHandler.getPlayerOption(player, true), getPlayerMeta(player), skillHandler, currentBackend);
+                    clientHandler.getPlayerOption(player, true), getPlayerMeta(player), skillHandler, provider.getPreferredBackend());
 
             if (state != null)
             {

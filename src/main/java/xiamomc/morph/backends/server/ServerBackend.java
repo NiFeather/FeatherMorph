@@ -14,9 +14,7 @@ import xiamomc.morph.utilities.NbtUtils;
 import xiamomc.pluginbase.Messages.FormattableMessage;
 
 import javax.annotation.Nullable;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public class ServerBackend extends DisguiseBackend<ServerDisguise, ServerDisguiseWrapper>
 {
@@ -148,7 +146,7 @@ public class ServerBackend extends DisguiseBackend<ServerDisguise, ServerDisguis
      * @return 一个新的属于此后端的Wrapper
      */
     @Override
-    public ServerDisguiseWrapper cloneWrapperFrom(DisguiseWrapper<?> otherWrapper)
+    public @NotNull ServerDisguiseWrapper cloneWrapperFrom(DisguiseWrapper<?> otherWrapper)
     {
         return otherWrapper instanceof ServerDisguiseWrapper serverDisguiseWrapper
                 ? cloneWrapper(serverDisguiseWrapper)
@@ -294,5 +292,11 @@ public class ServerBackend extends DisguiseBackend<ServerDisguise, ServerDisguis
         var nbtStr = NbtUtils.getCompoundString(compound);
         var type = wrapper.getEntityType().getKey().asString();
         return "%s@%s".formatted(type, nbtStr);
+    }
+
+    @Override
+    public Collection<ServerDisguiseWrapper> listInstances()
+    {
+        return disguiseWrapperMap.values();
     }
 }

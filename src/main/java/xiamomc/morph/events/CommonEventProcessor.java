@@ -394,7 +394,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         {
             //重新进入后player和info.player不属于同一个实例，需要重新disguise
             state.setPlayer(player);
-            var backend = morphs.getCurrentBackend();
+            var backend = state.getDisguiseWrapper().getBackend();
 
             //刷新伪装
             var oldWrapper = state.getDisguiseWrapper();

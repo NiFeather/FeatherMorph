@@ -47,6 +47,11 @@ repositories {
     maven {
         url = uri("https://repo.codemc.io/repository/maven-public/")
     }
+
+    maven {
+        url = uri("https://mvn.lumine.io/repository/maven-public")
+    }
+
 /*
     maven {
         url = uri("https://repo.majek.dev/releases")
@@ -63,6 +68,8 @@ dependencies {
     compileOnly(files("libs/CMILib1.4.3.5.jar"))
     compileOnly(files("libs/Residence5.1.4.0.jar"))
     compileOnly(files("libs/TAB v4.1.2.jar"))
+
+    compileOnly("com.ticxo.modelengine:ModelEngine:${project.property("me_version")}")
 
     implementation("org.java-websocket:Java-WebSocket:1.5.6")
 
@@ -104,7 +111,7 @@ bukkit {
     apiVersion = "1.19"
     authors = listOf("MATRIX-feather")
     depend = listOf()
-    softDepend = listOf("GSit", "PlaceholderAPI")
+    softDepend = listOf("TAB", "Residence", "ModelEngine", "PlaceholderAPI")
     version = "${project.property("project_version")}"
     prefix = "FeatherMorph"
     name = "FeatherMorph"

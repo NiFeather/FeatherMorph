@@ -54,6 +54,30 @@ public class StatSubCommand extends MorphPluginObject implements ISubCommand
 
         var authors = "MATRIX-feather"; //plugin.getPluginMeta().getAuthors();
 
+        var listString = new StringBuilder();
+        var backends = morphManager.listManagedBackends();
+        var locale = MessageUtils.getLocale(sender);
+
+        for (var backend : backends)
+        {
+            var instances = backend.listInstances();
+            if (instances.isEmpty()) continue;
+
+            var formattable = StatStrings.backendDescription();
+
+            formattable.resolve("name", backend.getIdentifier())
+                    .resolve("count", "" + instances.size());
+
+            var str = formattable.toString(locale);
+            listString.append(str).append(" ");
+        }
+
+        if (listString.isEmpty())
+            listString.append(StatStrings.backendsNone().toString(locale));
+
+        var defaultBackend = morphManager.getDefaultBackend();
+        var defaultBackendString = "%s (%s)".formatted(defaultBackend.getIdentifier(), defaultBackend.getClass().getName());
+
         var msg = new FormattableMessage[]
                 {
                         StatStrings.versionString()
@@ -61,8 +85,11 @@ public class StatSubCommand extends MorphPluginObject implements ISubCommand
                                 .resolve("author", authors)
                                 .resolve("proto", String.valueOf(clientHandler.targetApiVersion)),
 
-                        StatStrings.backendString()
-                                .resolve("backend", morphManager.getCurrentBackend().getClass().getName()),
+                        StatStrings.defaultBackendString()
+                                        .resolve("backend", defaultBackendString),
+
+                        StatStrings.activeBackends()
+                                        .resolve("list", listString.toString()),
 
                         StatStrings.providersString()
                                 .resolve("count", String.valueOf(MorphManager.getProviders().size())),

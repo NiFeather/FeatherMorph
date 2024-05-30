@@ -536,7 +536,7 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
     private boolean playerNotDisguised(Player player)
     {
         //ignoreDisguised.get() ? false : !isDisguised;
-        return !ignoreDisguised.get() || !manager.getCurrentBackend().isDisguised(player);
+        return !ignoreDisguised.get() || manager.getDisguiseStateFor(player) == null;
     }
 
     private boolean playerInDistance(Player source, PlayerInfo inf)

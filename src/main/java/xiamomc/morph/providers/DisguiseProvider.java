@@ -10,6 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
+import xiamomc.morph.backends.DisguiseBackend;
 import xiamomc.morph.backends.DisguiseWrapper;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
@@ -145,13 +146,21 @@ public abstract class DisguiseProvider extends MorphPluginObject
     }
 
     /**
+     * Gets the backend used by this provider
+     * @return A disguise backend.
+     * @apiNote The return value SHOULD NOT CHANGE, or will lead to undefined behaviors...
+     */
+    @NotNull
+    public abstract DisguiseBackend<?, ?> getPreferredBackend();
+
+    /**
      * 取消某个玩家的伪装
      * @param player 目标玩家
      * @return 操作是否成功
      */
     public boolean unMorph(Player player, DisguiseState state)
     {
-        return morphs.getCurrentBackend().unDisguise(player);
+        return getPreferredBackend().unDisguise(player);
     }
 
     @Resolved
@@ -176,7 +185,7 @@ public abstract class DisguiseProvider extends MorphPluginObject
 
         boolean allowClone = false;
 
-        var backend = morphs.getCurrentBackend();
+        var backend = getPreferredBackend();
 
         DisguiseWrapper<?> ourDisguise;
         DisguiseWrapper<?> theirDisguise = backend.getWrapper(target);
