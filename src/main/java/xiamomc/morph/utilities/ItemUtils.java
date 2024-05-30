@@ -9,6 +9,7 @@ import net.minecraft.commands.arguments.NbtPathArgument;
 import net.minecraft.core.component.TypedDataComponent;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.server.commands.data.EntityDataAccessor;
+import net.minecraft.world.level.ItemLike;
 import org.apache.commons.lang.NotImplementedException;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -21,7 +22,9 @@ import xiamomc.morph.MorphPlugin;
 
 public class ItemUtils
 {
-    private static final ItemStack air = new ItemStack(Material.AIR, 1);
+    public static final ItemStack air = new ItemStack(Material.AIR, 1);
+
+    public static final net.minecraft.world.item.ItemStack nmsAir = net.minecraft.world.item.ItemStack.fromBukkitCopy(air);
 
     public static ItemStack itemOrAir(ItemStack stack)
     {

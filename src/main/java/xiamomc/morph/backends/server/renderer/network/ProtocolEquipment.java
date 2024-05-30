@@ -5,11 +5,13 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 import org.bukkit.Material;
+import org.bukkit.craftbukkit.inventory.CraftInventoryPlayer;
 import org.bukkit.inventory.EntityEquipment;
 import org.slf4j.ILoggerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import xiamomc.morph.MorphPlugin;
+import xiamomc.morph.utilities.ItemUtils;
 
 public class ProtocolEquipment
 {
@@ -43,16 +45,13 @@ public class ProtocolEquipment
     {
         try
         {
+            if (equipment instanceof CraftInventoryPlayer && bukkitSlot == org.bukkit.inventory.EquipmentSlot.BODY)
+                return Pair.of(toNMSSlot(bukkitSlot), ItemUtils.nmsAir);
+
             var bukkitItem = equipment.getItem(bukkitSlot);
             var nmsItem = ItemStack.fromBukkitCopy(bukkitItem);
 
             return Pair.of(toNMSSlot(bukkitSlot), nmsItem);
-        }
-        catch (IllegalArgumentException e)
-        {
-            var logger = MorphPlugin.getInstance().getSLF4JLogger();
-
-            logger.warn("Can't generate equipment pair because of a CB bug...");
         }
         catch (Throwable t)
         {
