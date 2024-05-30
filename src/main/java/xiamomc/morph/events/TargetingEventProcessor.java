@@ -49,10 +49,7 @@ public class TargetingEventProcessor extends MorphPluginObject implements Listen
         addAvoidEntityGoal(goalSelector, pathfinderMob);
 
         // 添加TargetGoal
-        var wrappedGoal = new PaperVanillaGoal<>(new AttackableGoal(manager, nmsMob, Player.class, true, le -> true));
-
-        //globalGoals.addGoal(mob, 110, wrappedGoal);
-        nmsMob.goalSelector.addGoal(-1, wrappedGoal.getHandle());
+        nmsMob.goalSelector.addGoal(-1, new AttackableGoal(manager, nmsMob, Player.class, true, le -> true));
     }
 
     private void addAvoidEntityGoal(GoalSelector goalSelector, PathfinderMob sourceMob)
