@@ -1,7 +1,6 @@
 package xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types;
 
 import net.minecraft.core.Holder;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
@@ -9,6 +8,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.animal.FrogVariant;
 import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.CraftWorld;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Frog;
 import org.bukkit.entity.Player;
@@ -28,16 +28,23 @@ public class FrogWatcher extends LivingEntityWatcher
         return world.registryAccess().registryOrThrow(Registries.FROG_VARIANT).getHolderOrThrow(key);
     }
 
-    public Frog.Variant getFrogVariant()
+    public Frog.Variant getBukkitFrogVariant()
     {
         var type = get(ValueIndex.FROG.FROG_VARIANT);
 
-        if (type == getFrogVariant(FrogVariant.TEMPERATE))
+        var keyOptional = type.unwrapKey();
+        if (keyOptional.isEmpty())
+        {
+            logger.warn("Empty key for value '%s'?!".formatted(type));
             return Frog.Variant.TEMPERATE;
-        else if (type == getFrogVariant(FrogVariant.COLD))
-            return Frog.Variant.COLD;
-        else if (type == getFrogVariant(FrogVariant.WARM))
-            return Frog.Variant.WARM;
+        }
+
+        var key = keyOptional.get().location().toString();
+        for (var val : Frog.Variant.values())
+        {
+            if (val.getKey().asString().equals(key))
+                return val;
+        }
 
         logger.warn("No suitable Variant for FrogVariant '%s'".formatted(type));
         return Frog.Variant.TEMPERATE;
@@ -81,7 +88,7 @@ public class FrogWatcher extends LivingEntityWatcher
     {
         super.writeToCompound(nbt);
 
-        var variant = this.getFrogVariant().getKey().asString();
+        var variant = this.getBukkitFrogVariant().getKey().asString();
         nbt.putString("variant", variant);
     }
 }
