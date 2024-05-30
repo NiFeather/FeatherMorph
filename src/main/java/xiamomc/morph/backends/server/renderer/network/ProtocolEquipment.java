@@ -29,15 +29,15 @@ public class ProtocolEquipment
     {
         return switch (bukkitSlot)
         {
-            case HAND -> net.minecraft.world.entity.EquipmentSlot.MAINHAND;
-            case OFF_HAND -> net.minecraft.world.entity.EquipmentSlot.OFFHAND;
+            case HAND -> EquipmentSlot.MAINHAND;
+            case OFF_HAND -> EquipmentSlot.OFFHAND;
 
-            case HEAD -> net.minecraft.world.entity.EquipmentSlot.HEAD;
-            case CHEST -> net.minecraft.world.entity.EquipmentSlot.CHEST;
-            case LEGS -> net.minecraft.world.entity.EquipmentSlot.LEGS;
-            case FEET -> net.minecraft.world.entity.EquipmentSlot.FEET;
+            case HEAD -> EquipmentSlot.HEAD;
+            case CHEST -> EquipmentSlot.CHEST;
+            case LEGS -> EquipmentSlot.LEGS;
+            case FEET -> EquipmentSlot.FEET;
 
-            case BODY -> throw new IllegalArgumentException("BODY is not supported.");
+            case BODY -> EquipmentSlot.BODY;
         };
     }
 
@@ -46,7 +46,10 @@ public class ProtocolEquipment
         try
         {
             if (equipment instanceof CraftInventoryPlayer && bukkitSlot == org.bukkit.inventory.EquipmentSlot.BODY)
+            {
+                MorphPlugin.getInstance().getSLF4JLogger().info("Returning air...");
                 return Pair.of(toNMSSlot(bukkitSlot), ItemUtils.nmsAir);
+            }
 
             var bukkitItem = equipment.getItem(bukkitSlot);
             var nmsItem = ItemStack.fromBukkitCopy(bukkitItem);

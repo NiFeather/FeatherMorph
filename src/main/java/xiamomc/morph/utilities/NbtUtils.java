@@ -82,7 +82,7 @@ public class NbtUtils
 
         UUID uuid = Util.NIL_UUID;
         if (compound.hasUUID("Id"))
-            compound.getUUID("Id");
+            uuid = compound.getUUID("Id");
 
         var profile = new MorphGameProfile(new GameProfile(uuid, name));
 
