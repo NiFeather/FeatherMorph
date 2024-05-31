@@ -1,24 +1,24 @@
 package xiamomc.morph.events;
 
-import com.destroystokyo.paper.entity.ai.PaperVanillaGoal;
 import com.destroystokyo.paper.event.entity.EntityAddToWorldEvent;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.NeutralMob;
 import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
-import net.minecraft.world.entity.ai.util.DefaultRandomPos;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.phys.Vec3;
 import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.entity.CraftMob;
+import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Mob;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityTargetEvent;
 import xiamomc.morph.MorphManager;
-import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.utilities.EntityTypeUtils;
 import xiamomc.morph.utilities.ReflectionUtils;
@@ -49,7 +49,7 @@ public class TargetingEventProcessor extends MorphPluginObject implements Listen
         addAvoidEntityGoal(goalSelector, pathfinderMob);
 
         // 添加TargetGoal
-        nmsMob.goalSelector.addGoal(-1, new AttackableGoal(manager, nmsMob, Player.class, true, le -> true));
+        nmsMob.goalSelector.addGoal(-1, new NearestAttackableGoal(manager, nmsMob, Player.class, true, le -> true));
     }
 
     private void addAvoidEntityGoal(GoalSelector goalSelector, PathfinderMob sourceMob)
@@ -129,7 +129,7 @@ public class TargetingEventProcessor extends MorphPluginObject implements Listen
                 {
                     // 只替代我们想替代的
                     if (!(wrappedGoal.getGoal() instanceof FeatherMorphAvoidPlayerGoal)
-                        && !(wrappedGoal.getGoal() instanceof AttackableGoal))
+                        && !(wrappedGoal.getGoal() instanceof NearestAttackableGoal))
                     {
                         return;
                     }
@@ -171,63 +171,99 @@ public class TargetingEventProcessor extends MorphPluginObject implements Listen
     /**
      * 此Goal将被添加到生物，作为附加的TargetGoal执行。
      */
-    public static class AttackableGoal extends NearestAttackableTargetGoal<net.minecraft.world.entity.player.Player>
+    public static class NearestAttackableGoal extends NearestAttackableTargetGoal<net.minecraft.world.entity.player.Player>
     {
         private final MorphManager morphManager;
 
-        public AttackableGoal(MorphManager morphManager,
-                              net.minecraft.world.entity.Mob mob, Class<Player> targetClass,
-                              boolean checkVisibility, Predicate<LivingEntity> targetPredicate)
+        public NearestAttackableGoal(MorphManager morphManager,
+                                     net.minecraft.world.entity.Mob mob, Class<Player> targetClass,
+                                     boolean checkVisibility, Predicate<LivingEntity> targetPredicate)
         {
             super(mob, targetClass, checkVisibility, targetPredicate);
 
             this.morphManager = morphManager;
         }
 
+        private boolean isMobTargetingOurs()
+        {
+            var mobTarget = this.mob.getTarget();
+
+            // 检查当前生物是否在target我们的目标
+            return mobTarget == null || mobTarget == this.target;
+        }
+
+        @Override
+        public boolean canUse()
+        {
+            var superCanUse = super.canUse();
+
+            return this.target != null || superCanUse;
+        }
+
         @Override
         public void tick()
         {
             super.tick();
-            updateTarget();
-        }
 
-        // 更新此生物的Target状态
-        private void updateTarget()
-        {
-            // 如果target是null，则跳过
+            // 如果生物的目标不是我们的目标，则不要处理
+            if (!isMobTargetingOurs()) return;
+
+            // 如果我们期望的目标是null，则跳过
             if (this.target == null)
                 return;
 
-            // 如果当前的目标不再伪装，则取消对此人的target
-            var disguise = morphManager.getDisguiseStateFor(this.target.getBukkitEntity());
-            if (disguise == null)
-            {
-                this.mob.setTarget(null, EntityTargetEvent.TargetReason.CUSTOM, true);
+            // 获取跟随距离
+            double followRange = 16D;
+            var followRangeAttribute = mob.getAttribute(Attributes.FOLLOW_RANGE);
 
-                if (mob instanceof net.minecraft.world.entity.animal.IronGolem ironGolem)
-                    ironGolem.forgetCurrentTargetAndRefreshUniversalAnger();
-            }
+            if (followRangeAttribute != null)
+                followRange = followRangeAttribute.getValue();
+
+            var playerTarget = (CraftPlayer) target.getBukkitEntityRaw();
+
+            var cancelTarget = false;
+
+            // 当满足以下任一条件时，取消仇恨：
+            // 处于不同的世界
+            // 玩家超过跟随距离
+            // 玩家不在线
+            // 玩家不是生存模式
+            cancelTarget = (this.mob.level() != this.target.level());
+            cancelTarget = cancelTarget || (this.mob.distanceTo(this.target) > followRange);
+            cancelTarget = cancelTarget || !playerTarget.isOnline();
+            cancelTarget = cancelTarget || !((ServerPlayer)target).gameMode.isSurvival();
+
+            // 如果玩家后来变成了其他会导致恐慌的类型，也取消仇恨
+            var disguise = morphManager.getDisguiseStateFor(this.target.getBukkitEntity());
+            if (disguise != null)
+                cancelTarget = cancelTarget || panics(this.mob.getBukkitMob().getType(), disguise.getEntityType());
+
+            if (!cancelTarget)
+                return;
+
+            // 如果当前的目标不再伪装，则取消对此人的target
+
+            // Forget our target
+            this.target = null;
+
+            this.mob.setTarget(null, EntityTargetEvent.TargetReason.CUSTOM, true);
+
+            if (mob instanceof NeutralMob neutralMob)
+                neutralMob.forgetCurrentTargetAndRefreshUniversalAnger();
         }
 
         @Override
         protected void findTarget()
         {
-            var mobTarget = this.mob.getTarget();
-
-            // 如果当前生物的target不是我们的target，则跳过
-            if (mobTarget != null && mobTarget != this.target)
-            {
-                this.target = null;
-                return;
-            }
-
-            updateTarget();
-
-            this.target = null;
             var target = this.mob.level().getNearestPlayer(this.mob, this.getFollowDistance());
 
             if (target == null) return;
 
+            // 忽略非生存玩家
+            if (target instanceof ServerPlayer serverPlayer && !serverPlayer.gameMode.isSurvival())
+                return;
+
+            // 我们只想确认玩家的伪装是否为生物的敌对类型
             var disguise = morphManager.getDisguiseStateFor(target.getBukkitEntity());
             if (disguise == null) return;
 
@@ -238,12 +274,12 @@ public class TargetingEventProcessor extends MorphPluginObject implements Listen
         @Override
         public void start()
         {
-            var mobTarget = this.mob.getTarget();
-            if (mobTarget != null && mobTarget != this.target)
+            if (mob.getTarget() == this.target)
                 return;
 
             super.start();
 
+            // 算了就让他优先攻击玩家吧
             // We cancels reason with CLOSEST_PLAYER, so we need to target again with CUSTOM
             // See CommonEventProcessor#onEntityTarget()
             mob.setTarget(this.target, EntityTargetEvent.TargetReason.CUSTOM, true);
