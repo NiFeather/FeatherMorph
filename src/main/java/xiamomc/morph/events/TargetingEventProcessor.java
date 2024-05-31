@@ -352,7 +352,7 @@ public class TargetingEventProcessor extends MorphPluginObject implements Listen
             case CREEPER -> targetType == EntityType.CAT || targetType == EntityType.OCELOT;
             case PHANTOM -> targetType == EntityType.CAT;
             case SPIDER -> targetType == EntityType.ARMADILLO;
-            case SKELETON -> targetType == EntityType.WOLF;
+            case SKELETON, WITHER_SKELETON -> targetType == EntityType.WOLF;
             case VILLAGER -> targetType == EntityType.ZOMBIE || targetType == EntityType.ZOMBIE_VILLAGER;
 
             default -> false;

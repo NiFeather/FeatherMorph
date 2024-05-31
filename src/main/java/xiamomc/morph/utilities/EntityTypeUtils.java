@@ -163,7 +163,9 @@ public class EntityTypeUtils
     public static boolean isSkeleton(EntityType type)
     {
         return type == EntityType.SKELETON
-                || type == EntityType.STRAY;
+                || type == EntityType.STRAY
+                || type == EntityType.WITHER_SKELETON
+                || type == EntityType.BOGGED;
     }
 
     public static boolean isZombiesHostile(EntityType type)
