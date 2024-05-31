@@ -212,6 +212,15 @@ public class TargetingEventProcessor extends MorphPluginObject implements Listen
         @Override
         protected void findTarget()
         {
+            var mobTarget = this.mob.getTarget();
+
+            // 如果当前生物的target不是我们的target，则跳过
+            if (mobTarget != null && mobTarget != this.target)
+            {
+                this.target = null;
+                return;
+            }
+
             updateTarget();
 
             this.target = null;
@@ -229,6 +238,10 @@ public class TargetingEventProcessor extends MorphPluginObject implements Listen
         @Override
         public void start()
         {
+            var mobTarget = this.mob.getTarget();
+            if (mobTarget != null && mobTarget != this.target)
+                return;
+
             super.start();
 
             // We cancels reason with CLOSEST_PLAYER, so we need to target again with CUSTOM
