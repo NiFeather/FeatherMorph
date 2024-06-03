@@ -107,15 +107,6 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
     }
 
     @EventHandler
-    public void onTabComplete(TabCompleteEvent e)
-    {
-        if (e.isCancelled()) return;
-
-        var result = cmdHelper.onTabComplete(e.getBuffer(), e.getSender());
-        if (result != null) e.setCompletions(result);
-    }
-
-    @EventHandler
     public void onPlayerDeath(PlayerDeathEvent e)
     {
         if (unMorphOnDeath.get())
