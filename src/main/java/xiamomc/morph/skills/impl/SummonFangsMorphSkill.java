@@ -1,10 +1,14 @@
 package xiamomc.morph.skills.impl;
 
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.monster.Evoker;
+import net.minecraft.world.phys.Vec3;
 import org.bukkit.Difficulty;
 import org.bukkit.FluidCollisionMode;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
+import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.entity.EvokerFangs;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -15,6 +19,8 @@ import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.SkillStrings;
 import xiamomc.morph.misc.DisguiseState;
+import xiamomc.morph.misc.NmsRecord;
+import xiamomc.morph.misc.mobs.MorphVex;
 import xiamomc.morph.skills.MorphSkill;
 import xiamomc.morph.skills.SkillType;
 import xiamomc.morph.skills.options.NoOpConfiguration;
@@ -27,7 +33,8 @@ public class SummonFangsMorphSkill extends MorphSkill<NoOpConfiguration>
     {
         var targetEntity = player.getTargetEntity(16);
 
-        var summonVex = targetEntity != null && targetEntity.getLocation().distance(player.getLocation()) > 8;
+        var summonVex = targetEntity != null
+                && (player.isSneaking() || targetEntity.getLocation().distance(player.getLocation()) > 8);
         var world = player.getWorld();
 
         if (summonVex)
@@ -41,21 +48,26 @@ public class SummonFangsMorphSkill extends MorphSkill<NoOpConfiguration>
                 return 10;
             }
 
-            var shouldTarget = targetEntity instanceof LivingEntity;
+            var isLiving = targetEntity instanceof LivingEntity;
 
             var location = player.getEyeLocation();
             var targetAmount = 3;
 
             this.scheduleOn(player, () ->
             {
+                var nmsWorld = ((CraftWorld)player.getLocation().getWorld()).getHandle();
+
                 for (int i = 0; i < targetAmount; i++)
                 {
-                    var vex  = world.spawn(location, Vex.class, CreatureSpawnEvent.SpawnReason.NATURAL);
+                    var morphVex = new MorphVex(NmsRecord.ofPlayer(player), EntityType.VEX, nmsWorld);
+                    nmsWorld.addFreshEntity(morphVex, CreatureSpawnEvent.SpawnReason.CUSTOM);
+                    morphVex.teleportTo(nmsWorld, new Vec3(location.getX(), location.getY(), location.getZ()));
+                    morphVex.setLimitedLife(20 * (30 + NmsRecord.ofPlayer(player).random.nextInt(90)));
 
-                    if (shouldTarget)
-                        vex.setTarget((LivingEntity) targetEntity);
+                    if (isLiving)
+                        morphVex.setTarget((LivingEntity) targetEntity);
 
-                    vex.setPersistent(false);
+                    morphVex.setPersistenceRequired(false);
                 }
             });
         }
