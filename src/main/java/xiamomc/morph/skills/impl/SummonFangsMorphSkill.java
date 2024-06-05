@@ -1,14 +1,7 @@
 package xiamomc.morph.skills.impl;
 
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.monster.Evoker;
-import net.minecraft.world.phys.Vec3;
-import org.bukkit.Difficulty;
-import org.bukkit.FluidCollisionMode;
-import org.bukkit.Location;
-import org.bukkit.NamespacedKey;
+import org.bukkit.*;
 import org.bukkit.block.Block;
-import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.entity.EvokerFangs;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -20,7 +13,7 @@ import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.SkillStrings;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.misc.NmsRecord;
-import xiamomc.morph.misc.mobs.MorphVex;
+import xiamomc.morph.misc.mobs.MorphBukkitVexModifier;
 import xiamomc.morph.skills.MorphSkill;
 import xiamomc.morph.skills.SkillType;
 import xiamomc.morph.skills.options.NoOpConfiguration;
@@ -55,19 +48,17 @@ public class SummonFangsMorphSkill extends MorphSkill<NoOpConfiguration>
 
             this.scheduleOn(player, () ->
             {
-                var nmsWorld = ((CraftWorld)player.getLocation().getWorld()).getHandle();
-
                 for (int i = 0; i < targetAmount; i++)
                 {
-                    var morphVex = new MorphVex(NmsRecord.ofPlayer(player), EntityType.VEX, nmsWorld);
-                    nmsWorld.addFreshEntity(morphVex, CreatureSpawnEvent.SpawnReason.CUSTOM);
-                    morphVex.teleportTo(nmsWorld, new Vec3(location.getX(), location.getY(), location.getZ()));
-                    morphVex.setLimitedLife(20 * (30 + NmsRecord.ofPlayer(player).random.nextInt(90)));
+                    var vex = world.spawn(location, Vex.class, CreatureSpawnEvent.SpawnReason.CUSTOM);
+                    new MorphBukkitVexModifier(vex, player);
+
+                    vex.setLimitedLifetimeTicks(20 * (30 + NmsRecord.ofPlayer(player).random.nextInt(90)));
 
                     if (isLiving)
-                        morphVex.setTarget((LivingEntity) targetEntity);
+                        vex.setTarget((LivingEntity) targetEntity);
 
-                    morphVex.setPersistenceRequired(false);
+                    vex.setPersistent(false);
                 }
             });
         }

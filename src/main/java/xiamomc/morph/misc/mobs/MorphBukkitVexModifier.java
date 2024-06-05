@@ -1,72 +1,55 @@
 package xiamomc.morph.misc.mobs;
 
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.goal.target.TargetGoal;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.monster.Vex;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.Level;
-import org.apache.commons.lang.NotImplementedException;
-import org.bukkit.craftbukkit.entity.CraftLivingEntity;
+import org.bukkit.craftbukkit.entity.CraftPlayer;
+import org.bukkit.craftbukkit.entity.CraftVex;
 import org.bukkit.event.entity.EntityTargetEvent;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.EnumSet;
 import java.util.Objects;
 
-public class MorphVex extends Vex
+public class MorphBukkitVexModifier
 {
-    public MorphVex(@NotNull Player owner, EntityType<? extends Vex> type, Level world)
+    private final Vex vex;
+    private final Player owner;
+
+    public MorphBukkitVexModifier(org.bukkit.entity.Vex bukkitVex, org.bukkit.entity.Player bukkitPlayer)
     {
-        super(type, world);
+        this(
+                ((CraftVex)bukkitVex).getHandle(),
+                ((CraftPlayer)bukkitPlayer).getHandle()
+        );
+    }
 
-        Objects.requireNonNull(owner, "Summoning MorphVex with Null owner?!");
+    public MorphBukkitVexModifier(Vex nmsVex, Player owner)
+    {
+        Objects.requireNonNull(nmsVex, "Null NMS Vex");
+        Objects.requireNonNull(owner, "Null owner");
 
+        this.vex = nmsVex;
         this.owner = owner;
+
+        registerGoals();
     }
 
-    @Override
-    public void setOwner(Mob owner)
-    {
-        throw new NotImplementedException("setOwner() is not implemented with our custom impl.");
-    }
-
-    @Override
-    public Mob getOwner()
-    {
-        throw new NotImplementedException("getOwner() is not implemented with our custom impl.");
-    }
-
-    public LivingEntity getPlayerOwner()
-    {
-        return owner;
-    }
-
-    @NotNull
-    private final LivingEntity owner;
-
-    @Override
     protected void registerGoals()
     {
-        super.registerGoals();
-
-        // 移除原版带有的Goal
-        var targetSelectors = this.targetSelector.getAvailableGoals();
+        var targetSelectors = vex.targetSelector.getAvailableGoals();
         for (var wrapped : targetSelectors) if (wrapped != null)
-            this.targetSelector.removeGoal(wrapped.getGoal());
+            vex.targetSelector.removeGoal(wrapped.getGoal());
 
-        // 并添加我们自己的Goal
-        this.targetSelector.addGoal(0, new OwnerHurtTargetGoal(this));
-        this.targetSelector.addGoal(1, new OwnerHurtByTargetGoal(this));
+        vex.targetSelector.addGoal(0, new OwnerHurtTargetGoal(vex, this));
+        vex.targetSelector.addGoal(1, new OwnerHurtByTargetGoal(vex, this));
     }
 
-    public void setTarget(org.bukkit.entity.LivingEntity bukkitLiving)
+    public Player getPlayerOwner()
     {
-        var nmsLiving = ((CraftLivingEntity)bukkitLiving).getHandle();
-
-        this.setTarget(nmsLiving, EntityTargetEvent.TargetReason.CUSTOM, true);
+        return owner;
     }
 
     private static class OwnerHurtByTargetGoal extends TargetGoal
@@ -74,16 +57,19 @@ public class MorphVex extends Vex
         @NotNull
         private LivingEntity owner()
         {
-            return thisEntity.getPlayerOwner();
+            return wrapper.getPlayerOwner();
         }
 
-        private final MorphVex thisEntity;
+        private final Vex thisEntity;
 
-        public OwnerHurtByTargetGoal(MorphVex thisEntity)
+        private final MorphBukkitVexModifier wrapper;
+
+        public OwnerHurtByTargetGoal(Vex thisEntity, MorphBukkitVexModifier wrapper)
         {
             super(thisEntity, false);
 
             this.thisEntity = thisEntity;
+            this.wrapper = wrapper;
         }
 
         @Override
@@ -119,17 +105,21 @@ public class MorphVex extends Vex
         @NotNull
         private LivingEntity owner()
         {
-            return thisEntity.getPlayerOwner();
+            return wrapper.getPlayerOwner();
         }
 
-        private final MorphVex thisEntity;
+        private final Vex thisEntity;
 
-        public OwnerHurtTargetGoal(MorphVex thisEntity)
+        private final MorphBukkitVexModifier wrapper;
+
+        public OwnerHurtTargetGoal(Vex thisEntity, MorphBukkitVexModifier wrapper)
         {
             super(thisEntity, false);
 
             Objects.requireNonNull(thisEntity, "Null Entity");
+            Objects.requireNonNull(wrapper, "Null Wrapper");
 
+            this.wrapper = wrapper;
             this.thisEntity = thisEntity;
 
             this.setFlags(EnumSet.of(Flag.TARGET));
@@ -155,9 +145,7 @@ public class MorphVex extends Vex
         {
             super.start();
 
-            System.out.println("Set new target to " + this.ownerLastHurt);
             ownerLastHurtTimestamp = this.owner().getLastHurtMobTimestamp();
-            this.thisEntity.setTarget(null, EntityTargetEvent.TargetReason.CUSTOM, true);
             this.thisEntity.setTarget(this.ownerLastHurt, EntityTargetEvent.TargetReason.CUSTOM, true);
         }
     }
