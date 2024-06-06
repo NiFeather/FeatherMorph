@@ -237,6 +237,8 @@ public class TargetingEventProcessor extends MorphPluginObject implements Listen
             var disguise = morphManager.getDisguiseStateFor(this.target.getBukkitEntity());
             if (disguise != null)
                 cancelTarget = cancelTarget || panics(this.mob.getBukkitMob().getType(), disguise.getEntityType());
+            else
+                cancelTarget = true;
 
             if (!cancelTarget)
                 return;
