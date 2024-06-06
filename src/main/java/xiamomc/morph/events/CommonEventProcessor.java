@@ -16,13 +16,12 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.player.*;
-import org.bukkit.event.server.TabCompleteEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.InventoryHolder;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.RevealingHandler;
-import xiamomc.morph.abilities.AbilityHandler;
+import xiamomc.morph.abilities.AbilityManager;
 import xiamomc.morph.abilities.impl.AttributeModifyingAbility;
 import xiamomc.morph.commands.MorphCommandManager;
 import xiamomc.morph.config.ConfigOption;
@@ -116,16 +115,10 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
     @EventHandler
     public void onPlayerRespawn(PlayerPostRespawnEvent e)
     {
-        var player = e.getPlayer();
-
         var state = morphs.getDisguiseStateFor(e.getPlayer());
         if (state != null)
         {
-            state.getAbilities().forEach(a ->
-            {
-                if (AbilityHandler.hasPermissionFor(a, state))
-                    a.applyToPlayer(player, state);
-            });
+            state.getAbilityUpdater().reApplyAbility();
 
             var skill = state.getSkill();
             skill.onInitialEquip(state);
@@ -479,14 +472,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
             skill.onInitialEquip(state);
 
             //刷新被动
-            var abilities = state.getAbilities();
-
-            if (abilities != null)
-                abilities.forEach(a ->
-                {
-                    if (AbilityHandler.hasPermissionFor(a, state))
-                        a.applyToPlayer(player, state);
-                });
+            state.getAbilityUpdater().reApplyAbility();
         }
     }
 

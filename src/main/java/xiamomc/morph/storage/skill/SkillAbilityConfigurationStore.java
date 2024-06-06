@@ -8,7 +8,7 @@ import org.bukkit.entity.EntityType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphManager;
-import xiamomc.morph.abilities.AbilityHandler;
+import xiamomc.morph.abilities.AbilityManager;
 import xiamomc.morph.abilities.AbilityType;
 import xiamomc.morph.abilities.IMorphAbility;
 import xiamomc.morph.abilities.impl.AttributeModifyingAbility;
@@ -28,7 +28,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * 技能配置存储，有关技能执行、注册技能请查看{@link MorphSkillHandler} 和 {@link AbilityHandler}
+ * 技能配置存储，有关技能执行、注册技能请查看{@link MorphSkillHandler} 和 {@link AbilityManager}
  */
 public class SkillAbilityConfigurationStore extends MorphJsonBasedStorage<SkillAbilityConfigurationContainer>
 {
@@ -71,7 +71,7 @@ public class SkillAbilityConfigurationStore extends MorphJsonBasedStorage<SkillA
     private MorphSkillHandler skillHandler;
 
     @Resolved
-    private AbilityHandler abilityHandler;
+    private AbilityManager abilityHandler;
 
     @Override
     public boolean reloadConfiguration()

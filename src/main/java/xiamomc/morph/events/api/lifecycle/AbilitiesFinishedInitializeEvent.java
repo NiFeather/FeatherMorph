@@ -3,7 +3,7 @@ package xiamomc.morph.events.api.lifecycle;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
-import xiamomc.morph.abilities.AbilityHandler;
+import xiamomc.morph.abilities.AbilityManager;
 
 public class AbilitiesFinishedInitializeEvent extends Event
 {
@@ -20,9 +20,9 @@ public class AbilitiesFinishedInitializeEvent extends Event
         return handlers;
     }
 
-    public final AbilityHandler manager;
+    public final AbilityManager manager;
 
-    public AbilitiesFinishedInitializeEvent(AbilityHandler instance)
+    public AbilitiesFinishedInitializeEvent(AbilityManager instance)
     {
         this.manager = instance;
     }

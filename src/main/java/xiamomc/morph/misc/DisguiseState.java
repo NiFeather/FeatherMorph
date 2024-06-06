@@ -1,6 +1,5 @@
 package xiamomc.morph.misc;
 
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
@@ -19,8 +18,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
-import xiamomc.morph.abilities.AbilityHandler;
-import xiamomc.morph.abilities.IMorphAbility;
+import xiamomc.morph.abilities.AbilityUpdater;
 import xiamomc.morph.backends.DisguiseWrapper;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
@@ -39,10 +37,7 @@ import xiamomc.morph.utilities.*;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Exceptions.NullDependencyException;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static xiamomc.morph.utilities.DisguiseUtils.itemOrAir;
@@ -54,8 +49,7 @@ public class DisguiseState extends MorphPluginObject
                          @Nullable EntityEquipment targetEquipment, @NotNull PlayerOptions<Player> playerOptions,
                          @NotNull PlayerMeta playerMeta)
     {
-        if (wrapper == null)
-            throw new NullDependencyException("Wrapper cannot be null.");
+        Objects.requireNonNull(wrapper, "Wrapper cannot be null.");
 
         this.player = player;
         this.playerUniqueID = player.getUniqueId();
@@ -64,6 +58,7 @@ public class DisguiseState extends MorphPluginObject
         this.morphConfiguration = playerMeta;
 
         this.soundHandler = new SoundHandler(player);
+        this.abilityUpdater = new AbilityUpdater(this);
 
         this.updateDisguise(id, skillId, wrapper, true, targetEquipment);
     }
@@ -354,41 +349,19 @@ public class DisguiseState extends MorphPluginObject
 
     //region 被动技能
 
-    /**
-     * 伪装被动技能Flag
-     */
-    private final List<IMorphAbility<?>> abilities = new ObjectArrayList<>();
+    @NotNull
+    private final AbilityUpdater abilityUpdater;
 
-    public List<IMorphAbility<?>> getAbilities()
+    @NotNull
+    public AbilityUpdater getAbilityUpdater()
     {
-        return abilities;
-    }
-
-    public void setAbilities(@Nullable List<IMorphAbility<?>> newAbilities)
-    {
-        abilities.forEach(a -> a.revokeFromPlayer(player, this));
-        abilities.clear();
-
-        if (newAbilities != null)
-        {
-            abilities.addAll(newAbilities);
-            newAbilities.forEach(a ->
-            {
-                if (AbilityHandler.hasPermissionFor(a, this))
-                    a.applyToPlayer(player, this);
-            });
-        }
+        return abilityUpdater;
     }
 
     @ApiStatus.Internal
     public void refreshSkillsAbilities()
     {
-        this.abilities.forEach(a ->
-        {
-            if (AbilityHandler.hasPermissionFor(a, this))
-                a.applyToPlayer(player, this);
-        });
-
+        this.abilityUpdater.reApplyAbility();
         this.skill.onInitialEquip(this);
     }
 
@@ -399,7 +372,7 @@ public class DisguiseState extends MorphPluginObject
      */
     public boolean containsAbility(NamespacedKey key)
     {
-        return abilities.stream().anyMatch(a -> a.getIdentifier().equals(key));
+        return abilityUpdater.containsAbility(key);
     }
 
     //endregion abilityFlag
@@ -441,6 +414,13 @@ public class DisguiseState extends MorphPluginObject
     }
 
     //endregion ProfileNBT
+
+    public boolean selfUpdate()
+    {
+        this.getSoundHandler().update();
+
+        return this.abilityUpdater.update();
+    }
 
     @Resolved(shouldSolveImmediately = true)
     private MorphConfigManager config;
@@ -773,13 +753,14 @@ public class DisguiseState extends MorphPluginObject
     {
         disposed.set(true);
         this.disguiseWrapper.dispose();
+        this.abilityUpdater.dispose();
     }
 
     public void reset()
     {
         this.provider.unMorph(player, this);
 
-        this.setAbilities(List.of());
+        this.abilityUpdater.setAbilities(List.of());
         this.setSkill(null);
     }
 }

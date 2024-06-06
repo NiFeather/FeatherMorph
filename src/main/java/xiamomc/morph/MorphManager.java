@@ -17,7 +17,7 @@ import org.bukkit.profile.PlayerTextures;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xiamomc.morph.abilities.AbilityHandler;
+import xiamomc.morph.abilities.AbilityManager;
 import xiamomc.morph.backends.DisguiseBackend;
 import xiamomc.morph.backends.DisguiseWrapper;
 import xiamomc.morph.backends.WrapperAttribute;
@@ -73,7 +73,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     private MorphSkillHandler skillHandler;
 
     @Resolved
-    private AbilityHandler abilityHandler;
+    private AbilityManager abilityHandler;
 
     @Resolved
     private MorphConfigManager config;
@@ -282,14 +282,13 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         //跳过离线玩家
         if (!player.isOnline() || state.disposed()) return;
 
-        boolean abilitySuccess = false;
+        boolean stateSuccess = false;
         boolean providerSuccess = false;
 
         try
         {
-            abilitySuccess = abilityHandler.handle(player, state);
             providerSuccess = state.getProvider().updateDisguise(player, state);
-            state.getSoundHandler().update();
+            stateSuccess = state.selfUpdate();
         }
         catch (Throwable t)
         {
@@ -297,7 +296,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             t.printStackTrace();
         }
 
-        if (!providerSuccess || !abilitySuccess)
+        if (!providerSuccess || !stateSuccess)
         {
             player.sendMessage(MessageUtils.prefixes(player, MorphStrings.errorWhileUpdatingDisguise()));
 
@@ -902,10 +901,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         skill.onClientinit(state);
 
         //刷新被动
-        var abilities = state.getAbilities();
-
-        if (abilities != null)
-            abilities.forEach(a -> a.onClientInit(state));
+        state.getAbilityUpdater().getAbilities().forEach(a -> a.onClientInit(state));
 
         //和客户端同步数据
         state.getProvider().getInitialSyncCommands(state).forEach(c -> clientHandler.sendCommand(player, c));

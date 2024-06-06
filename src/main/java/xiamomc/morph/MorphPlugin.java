@@ -8,7 +8,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.scoreboard.Scoreboard;
 import org.jetbrains.annotations.ApiStatus;
-import xiamomc.morph.abilities.AbilityHandler;
+import xiamomc.morph.abilities.AbilityManager;
 import xiamomc.morph.commands.MorphCommandManager;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.events.*;
@@ -71,7 +71,7 @@ public final class MorphPlugin extends XiaMoJavaPlugin
 
     private MorphSkillHandler skillHandler;
 
-    private AbilityHandler abilityHandler;
+    private AbilityManager abilityManager;
 
     private VanillaMessageStore vanillaMessageStore;
 
@@ -161,7 +161,7 @@ public final class MorphPlugin extends XiaMoJavaPlugin
         dependencyManager.cache(new NetworkingHelper());
         dependencyManager.cache(morphManager = new MorphManager());
         dependencyManager.cache(skillHandler = new MorphSkillHandler());
-        dependencyManager.cache(abilityHandler = new AbilityHandler());
+        dependencyManager.cache(abilityManager = new AbilityManager());
         dependencyManager.cache(new RevealingHandler());
         dependencyManager.cache(new Transformer());
 

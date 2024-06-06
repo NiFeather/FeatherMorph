@@ -6,9 +6,9 @@ import it.unimi.dsi.fastutil.objects.ObjectList;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphManager;
-import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.abilities.impl.*;
 import xiamomc.morph.abilities.impl.onAttack.ExtraKnockbackAbility;
@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class AbilityHandler extends MorphPluginObject
+public class AbilityManager extends MorphPluginObject
 {
     private final List<IMorphAbility<?>> registedAbilities = new ObjectArrayList<>();
 
@@ -170,11 +170,13 @@ public class AbilityHandler extends MorphPluginObject
      * @param id 伪装ID
      * @return 被动技能列表
      */
+    @NotNull
     public List<IMorphAbility<?>> getAbilitiesFor(String id)
     {
         return this.getAbilitiesFor(id, false);
     }
 
+    @NotNull
     public List<IMorphAbility<?>> getAbilitiesFor(String id, boolean noFallback)
     {
         var entry = configToAbilitiesMap.entrySet().stream()
@@ -187,14 +189,14 @@ public class AbilityHandler extends MorphPluginObject
         else if (!noFallback)
         {
             var idSpilt = id.split(":", 2);
-            if (idSpilt.length < 1) return null;
+            if (idSpilt.length < 1) return List.of();
 
             var idNew = idSpilt[0] + ":" + MorphManager.disguiseFallbackName;
 
             return getAbilitiesFor(idNew, true);
         }
 
-        return null;
+        return List.of();
     }
 
     public void setAbilities(SkillAbilityConfiguration configuration, List<IMorphAbility<?>> abilities)
@@ -206,29 +208,5 @@ public class AbilityHandler extends MorphPluginObject
     {
         configToAbilitiesMap.clear();
         registedAbilities.forEach(IMorphAbility::clearOptions);
-    }
-
-    public static boolean hasPermissionFor(IMorphAbility<?> ability, DisguiseState state)
-    {
-        var player = state.getPlayer();
-
-        var singleAbilityPerm = CommonPermissions.abilityPermissionOf(ability.getIdentifier().asString(), state.getDisguiseIdentifier());
-        return !player.isPermissionSet(singleAbilityPerm) || player.hasPermission(singleAbilityPerm);
-    }
-
-    public boolean handle(Player player, DisguiseState state)
-    {
-        var disguiseId = state.getDisguiseIdentifier();
-
-        for (IMorphAbility<?> a : state.getAbilities())
-        {
-            if (!hasPermissionFor(a, state) || !a.optionValid() || a.handle(player, state)) continue;
-
-            logger.warn("Error occurred while updating abilities");
-            Thread.dumpStack();
-            return false;
-        }
-
-        return true;
     }
 }

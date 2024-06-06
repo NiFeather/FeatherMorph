@@ -5,7 +5,7 @@ import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
-import xiamomc.morph.abilities.AbilityHandler;
+import xiamomc.morph.abilities.AbilityManager;
 import xiamomc.morph.messages.HelpStrings;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.StatStrings;
@@ -41,7 +41,7 @@ public class StatSubCommand extends MorphPluginObject implements ISubCommand
     private MorphSkillHandler skillHandler;
 
     @Resolved
-    private AbilityHandler abilityHandler;
+    private AbilityManager abilityHandler;
 
     @Resolved
     private MorphManager morphManager;

@@ -101,6 +101,8 @@ public enum ConfigOption
 
     MASTER_SECRET(multiInstanceNode().append("secret"), RandomStringUtils.randomAlphabetic(12)),
 
+    DO_CHECK_ABILITY_PERMISSIONS(ConfigNode.create().append("check_ability_permissions"), true),
+
     VERSION(ConfigNode.create().append("version"), 0);
 
     public final ConfigNode node;

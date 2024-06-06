@@ -2,23 +2,19 @@ package xiamomc.morph.providers;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.kyori.adventure.text.Component;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.EquipmentSlot;
-import org.bukkit.scoreboard.Scoreboard;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.RevealingHandler;
-import xiamomc.morph.abilities.AbilityHandler;
+import xiamomc.morph.abilities.AbilityManager;
 import xiamomc.morph.backends.DisguiseBackend;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.MorphStrings;
 import xiamomc.morph.misc.DisguiseState;
-import xiamomc.morph.misc.DisguiseTypes;
 import xiamomc.morph.network.commands.S2C.AbstractS2CCommand;
 import xiamomc.morph.network.server.MorphClientHandler;
 import xiamomc.morph.network.server.ServerSetEquipCommand;
@@ -26,7 +22,6 @@ import xiamomc.morph.skills.MorphSkillHandler;
 import xiamomc.morph.skills.SkillType;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Messages.MessageStore;
-import xiamomc.pluginbase.Utilities.ColorUtils;
 
 import java.util.List;
 
@@ -36,22 +31,11 @@ import java.util.List;
  */
 public abstract class DefaultDisguiseProvider extends DisguiseProvider
 {
-    @Override
-    public boolean unMorph(Player player, DisguiseState state)
-    {
-        super.unMorph(player, state);
-
-        state.getAbilities().forEach(a -> a.revokeFromPlayer(player, state));
-        state.setAbilities(List.of());
-
-        return true;
-    }
-
     @Resolved
     private MorphSkillHandler skillHandler;
 
     @Resolved
-    private AbilityHandler abilityHandler;
+    private AbilityManager abilityHandler;
 
     @Resolved
     private MorphClientHandler clientHandler;
@@ -151,7 +135,7 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
     {
         //被动技能
         var abilities = abilityHandler.getAbilitiesFor(state.getSkillLookupIdentifier());
-        state.setAbilities(abilities);
+        state.getAbilityUpdater().setAbilities(abilities);
         state.setSkill(skillHandler.getSkill(state.getSkillLookupIdentifier()));
     }
 }
