@@ -21,7 +21,7 @@ public class PlayerMorphEarlyEvent extends PlayerEvent implements Cancellable
     /**
      * 会在玩家正式进行伪装或更换伪装前触发
      * @param who 玩家
-     * @param state 玩家的{@link DisguiseState}，如果有
+     * @param state 玩家当前活动的{@link DisguiseState}，如果有
      * @param isForce 此操作是否为强制执行，若为true则无法取消
      */
     public PlayerMorphEarlyEvent(@NotNull Player who, @Nullable DisguiseState state, @NotNull String targetId, boolean isForce)

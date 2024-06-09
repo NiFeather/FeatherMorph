@@ -155,7 +155,7 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
             if (hasCollision)
             {
                 player.sendMessage(MessageUtils.prefixes(player, MorphStrings.noEnoughSpaceString()));
-                return DisguiseResult.FAILED_COLLISION;
+                return DisguiseResult.FAIL_SILENT;
             }
         }
 

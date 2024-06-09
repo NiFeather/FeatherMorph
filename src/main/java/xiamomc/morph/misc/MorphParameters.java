@@ -15,7 +15,17 @@ public class MorphParameters
     public boolean forceExecute = false;
 
     public final Player targetPlayer;
-    public final String targetDisguiseIdentifier;
+    private String targetDisguiseIdentifier;
+
+    public String targetDisguiseIdentifier()
+    {
+        return targetDisguiseIdentifier;
+    }
+
+    public void setDisguiseIdentifier(String id)
+    {
+        targetDisguiseIdentifier = id;
+    }
 
     @Nullable
     public CommandSender commandSource;

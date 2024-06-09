@@ -8,10 +8,10 @@ import xiamomc.morph.backends.DisguiseWrapper;
  * @param success 操作是否成功
  * @param isCopy 此伪装是否克隆自其他实体或其他玩家的伪装
  */
-public record DisguiseResult(@Nullable DisguiseWrapper<?> wrapperInstance, boolean success, boolean isCopy, boolean failedCollisionCheck)
+public record DisguiseResult(@Nullable DisguiseWrapper<?> wrapperInstance, boolean success, boolean isCopy, boolean failSilent)
 {
     public static final DisguiseResult FAIL = new DisguiseResult(null, false, false, false);
-    public static final DisguiseResult FAILED_COLLISION = new DisguiseResult(null, false, false, true);
+    public static final DisguiseResult FAIL_SILENT = new DisguiseResult(null, false, false, true);
 
     public static DisguiseResult fail()
     {
