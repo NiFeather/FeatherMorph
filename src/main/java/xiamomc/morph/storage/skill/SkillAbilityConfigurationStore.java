@@ -12,6 +12,7 @@ import xiamomc.morph.abilities.AbilityManager;
 import xiamomc.morph.abilities.AbilityType;
 import xiamomc.morph.abilities.IMorphAbility;
 import xiamomc.morph.abilities.impl.AttributeModifyingAbility;
+import xiamomc.morph.abilities.impl.onAttack.ExtraKnockbackAbility;
 import xiamomc.morph.abilities.options.AttributeModifyOption;
 import xiamomc.morph.skills.DefaultConfigGenerator;
 import xiamomc.morph.skills.IMorphSkill;
@@ -65,7 +66,7 @@ public class SkillAbilityConfigurationStore extends MorphJsonBasedStorage<SkillA
         return "技能存储";
     }
 
-    private final int targetVersion = 26;
+    private final int targetVersion = 27;
 
     @Resolved
     private MorphSkillHandler skillHandler;
@@ -338,6 +339,22 @@ public class SkillAbilityConfigurationStore extends MorphJsonBasedStorage<SkillA
                         option.with(Attribute.GENERIC_STEP_HEIGHT, AttributeModifyOption.OperationType.add, 0.4d);
 
                         horseConfig.setOption(AbilityType.ATTRIBUTE.asString(), option);
+                    }
+                }
+            }
+
+            if (version < 27)
+            {
+                var ironConfig = getConfigFor(EntityType.IRON_GOLEM, config);
+                if (ironConfig != null)
+                {
+                    var option = ironConfig.getAbilityOptions(new ExtraKnockbackAbility());
+                    if (option != null)
+                    {
+                        if (option.yMotion == 0.4d)
+                            option.yMotion = 0.8d;
+
+                        ironConfig.setOption(AbilityType.EXTRA_KNOCKBACK.asString(), option);
                     }
                 }
             }

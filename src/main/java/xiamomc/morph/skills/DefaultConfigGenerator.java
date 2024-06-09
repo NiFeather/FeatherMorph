@@ -228,7 +228,7 @@ public class DefaultConfigGenerator
                 .addAbilityIdentifier(AbilityType.EXTRA_KNOCKBACK)
                 .appendOption(
                         AbilityType.EXTRA_KNOCKBACK,
-                        ExtraKnockbackOption.from(0, 0.4D, 0)
+                        ExtraKnockbackOption.from(0, 0.8D, 0)
                 );
 
         this.getConfiguration(EntityType.WARDEN)
