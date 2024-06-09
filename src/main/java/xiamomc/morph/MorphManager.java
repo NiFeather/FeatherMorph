@@ -901,7 +901,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         skill.onClientinit(state);
 
         //刷新被动
-        state.getAbilityUpdater().getAbilities().forEach(a -> a.onClientInit(state));
+        state.getAbilityUpdater().getRegisteredAbilities().forEach(a -> a.onClientInit(state));
 
         //和客户端同步数据
         state.getProvider().getInitialSyncCommands(state).forEach(c -> clientHandler.sendCommand(player, c));

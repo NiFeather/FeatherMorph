@@ -1,9 +1,13 @@
 package xiamomc.morph.abilities;
 
+import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import it.unimi.dsi.fastutil.objects.ObjectBooleanMutablePair;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Unmodifiable;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
@@ -14,15 +18,17 @@ import xiamomc.pluginbase.Bindables.Bindable;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class AbilityUpdater extends MorphPluginObject
 {
     @NotNull
     private final DisguiseState parentState;
 
-    private final List<IMorphAbility<?>> enabledAbilities = new ObjectArrayList<>();
-    private final List<IMorphAbility<?>> disabledAbilities = new ObjectArrayList<>();
     private final List<IMorphAbility<?>> pendingAbilities = new ObjectArrayList<>();
+
+    // <Ability, Enabled?>
+    private final List<Pair<IMorphAbility<?>, Boolean>> registeredAbilities = new ObjectArrayList<>();
 
     private Bindable<Boolean> checkAbilityPermissions = new Bindable<>(true);
 
@@ -55,15 +61,13 @@ public class AbilityUpdater extends MorphPluginObject
         {
             for (var ability : pending)
             {
-                if (hasPermissionFor(ability, parentState))
-                {
+                var hasPermission = hasPermissionFor(ability, parentState);
+                var pair = new ObjectBooleanMutablePair<IMorphAbility<?>>(ability, hasPermission);
+
+                if (hasPermission)
                     ability.applyToPlayer(player, parentState);
-                    enabledAbilities.add(ability);
-                }
-                else
-                {
-                    disabledAbilities.add(ability);
-                }
+
+                registeredAbilities.add(pair);
             }
 
             this.pendingAbilities.clear();
@@ -72,22 +76,32 @@ public class AbilityUpdater extends MorphPluginObject
         // 如果启用，则每秒只检查4遍权限
         var checkPermissions = checkAbilityPermissions.get() && plugin.getCurrentTick() % 5 == 0;
 
-        for (var ability : enabledAbilities)
+        for (var abilityPair : registeredAbilities)
         {
-            if (!checkPermissions || hasPermissionFor(ability, parentState))
+            var ability = abilityPair.left();
+            var enabled = abilityPair.right();
+
+            // 不检查，那就当有权限
+            var hasPerm = !checkPermissions || hasPermissionFor(ability, parentState);
+            if (hasPerm)
             {
+                if (!enabled)
+                {
+                    ability.applyToPlayer(player, parentState);
+                    abilityPair.right(true);
+                }
+
                 ability.handle(player, parentState);
             }
-            else
+            else if (enabled)
             {
                 ability.revokeFromPlayer(player, parentState);
-                enabledAbilities.remove(ability);
-                disabledAbilities.add(ability);
+                abilityPair.right(false);
             }
         }
     }
 
-    public synchronized boolean update()
+    public boolean update()
     {
         try
         {
@@ -112,50 +126,57 @@ public class AbilityUpdater extends MorphPluginObject
         FAIL_NOT_EXIST
     }
 
-    public synchronized void reApplyAbility()
+    public void reApplyAbility()
     {
-        enabledAbilities.forEach(a -> a.applyToPlayer(player(), parentState));
+        registeredAbilities.forEach(pair ->
+        {
+            if (pair.right())
+                pair.left().applyToPlayer(player(), parentState);
+        });
     }
 
     public boolean containsAbility(NamespacedKey identifier)
     {
-        return enabledAbilities.stream().anyMatch(a -> a.getIdentifier().equals(identifier))
-                || disabledAbilities.stream().anyMatch(a -> a.getIdentifier().equals(identifier));
+        return registeredAbilities.stream().anyMatch(pair -> pair.left().getIdentifier().equals(identifier));
+    }
+
+    @Unmodifiable
+    public List<IMorphAbility<?>> getEnabledAbilities()
+    {
+        return registeredAbilities.stream().filter(Pair::right)
+                .map(Pair::left)
+                .collect(Collectors.toUnmodifiableList());
     }
 
     /**
      * @return True if all success.
      */
-    public synchronized boolean setAbilities(@NotNull List<IMorphAbility<?>> abilities)
+    public boolean setAbilities(@NotNull List<IMorphAbility<?>> abilities)
     {
-        enabledAbilities.forEach(a -> a.revokeFromPlayer(player(), parentState));
-        enabledAbilities.clear();
-        disabledAbilities.clear();
+        this.getEnabledAbilities().forEach(a -> a.revokeFromPlayer(player(), parentState));
+        abilities.clear();
 
         return this.addAbilities(abilities);
     }
 
-    public synchronized OperationResult removeAbility(NamespacedKey targetIdentifier)
+    @Nullable
+    public IMorphAbility<?> getAbilityInstance(NamespacedKey identifier)
     {
-        IMorphAbility<?> ability = null;
+        var optional = registeredAbilities.stream().filter(pair -> pair.left().getIdentifier().equals(identifier))
+                .findFirst();
 
-        ability = enabledAbilities.stream()
-                .filter(a -> a.getIdentifier().equals(targetIdentifier))
-                .findFirst().orElse(null);
+        return optional.map(Pair::left).orElse(null);
+    }
 
-        if (ability == null)
-        {
-            ability = disabledAbilities.stream()
-                    .filter(a -> a.getIdentifier().equals(targetIdentifier))
-                    .findFirst().orElse(null);
-        }
+    public OperationResult removeAbility(NamespacedKey targetIdentifier)
+    {
+        IMorphAbility<?> ability = getAbilityInstance(targetIdentifier);
 
         if (ability == null)
             return OperationResult.FAIL_NOT_EXIST;
 
         ability.revokeFromPlayer(player(), parentState);
-        enabledAbilities.remove(ability);
-        disabledAbilities.remove(ability);
+        registeredAbilities.removeIf(pair -> pair.left().equals(ability));
 
         return OperationResult.SUCCESS;
     }
@@ -163,7 +184,7 @@ public class AbilityUpdater extends MorphPluginObject
     /**
      * @return True if all success.
      */
-    public synchronized boolean addAbilities(IMorphAbility<?>... abilities)
+    public boolean addAbilities(IMorphAbility<?>... abilities)
     {
         return addAbilities(Arrays.stream(abilities).toList());
     }
@@ -171,7 +192,7 @@ public class AbilityUpdater extends MorphPluginObject
     /**
      * @return True if all success.
      */
-    public synchronized boolean addAbilities(List<IMorphAbility<?>> abilities)
+    public boolean addAbilities(List<IMorphAbility<?>> abilities)
     {
         boolean success = true;
 
@@ -181,29 +202,28 @@ public class AbilityUpdater extends MorphPluginObject
         return success;
     }
 
-    public synchronized OperationResult addAbility(IMorphAbility<?> ability)
+    public OperationResult addAbility(IMorphAbility<?> ability)
     {
-        if (pendingAbilities.stream().anyMatch(a -> a.getIdentifier().equals(ability.getIdentifier())))
-            return OperationResult.FAIL_ALREADY_EXISTS;
+        synchronized (pendingAbilities)
+        {
+            if (pendingAbilities.stream().anyMatch(a -> a.getIdentifier().equals(ability.getIdentifier())))
+                return OperationResult.FAIL_ALREADY_EXISTS;
 
-        pendingAbilities.add(ability);
+            pendingAbilities.add(ability);
+        }
 
         return OperationResult.SUCCESS;
     }
 
-    public synchronized List<IMorphAbility<?>> getAbilities()
+    @Unmodifiable
+    public List<IMorphAbility<?>> getRegisteredAbilities()
     {
-        var list = new ObjectArrayList<IMorphAbility<?>>();
-
-        list.addAll(enabledAbilities);
-        list.addAll(disabledAbilities);
-
-        return list;
+        return this.registeredAbilities.stream().map(Pair::left).collect(Collectors.toUnmodifiableList());
     }
 
-    public synchronized void dispose()
+    public void dispose()
     {
-        this.enabledAbilities.forEach(a -> a.revokeFromPlayer(player(), parentState));
+        getEnabledAbilities().forEach(a -> a.revokeFromPlayer(player(), parentState));
         this.setAbilities(List.of());
     }
 
