@@ -81,23 +81,27 @@ public class AbilityUpdater extends MorphPluginObject
             var ability = abilityPair.left();
             var enabled = abilityPair.right();
 
-            // 不检查，那就当有权限
-            var hasPerm = !checkPermissions || hasPermissionFor(ability, parentState);
-            if (hasPerm)
+            if (checkPermissions)
             {
-                if (!enabled)
+                if (hasPermissionFor(ability, parentState))
                 {
-                    ability.applyToPlayer(player, parentState);
-                    abilityPair.right(true);
-                }
+                    if (!enabled)
+                    {
+                        ability.applyToPlayer(player, parentState);
+                        abilityPair.right(true);
 
+                        enabled = true;
+                    }
+                }
+                else if (enabled)
+                {
+                    ability.revokeFromPlayer(player, parentState);
+                    abilityPair.right(false);
+                }
+            }
+
+            if (enabled)
                 ability.handle(player, parentState);
-            }
-            else if (enabled)
-            {
-                ability.revokeFromPlayer(player, parentState);
-                abilityPair.right(false);
-            }
         }
     }
 
@@ -154,7 +158,7 @@ public class AbilityUpdater extends MorphPluginObject
     public boolean setAbilities(@NotNull List<IMorphAbility<?>> abilities)
     {
         this.getEnabledAbilities().forEach(a -> a.revokeFromPlayer(player(), parentState));
-        abilities.clear();
+        this.registeredAbilities.clear();
 
         return this.addAbilities(abilities);
     }
