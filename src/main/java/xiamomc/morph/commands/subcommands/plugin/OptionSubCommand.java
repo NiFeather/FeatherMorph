@@ -81,6 +81,8 @@ public class OptionSubCommand extends MorphPluginObject implements ISubCommand
         subCommands.add(getList("nofly_worlds", ConfigOption.NOFLY_WORLDS, null));
         subCommands.add(getList("blacklist_tags", ConfigOption.BLACKLIST_TAGS, null));
         subCommands.add(getList("blacklist_nbt_pattern", ConfigOption.BLACKLIST_PATTERNS, null));
+
+        subCommands.add(getToggle("ability_check_permissions", ConfigOption.DO_CHECK_ABILITY_PERMISSIONS, null));
     }
 
     private ISubCommand getList(String optionName, ConfigOption option,

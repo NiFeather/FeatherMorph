@@ -61,7 +61,7 @@ public class AbilityUpdater extends MorphPluginObject
         {
             for (var ability : pending)
             {
-                var hasPermission = hasPermissionFor(ability, parentState);
+                var hasPermission = !checkAbilityPermissions.get() || hasPermissionFor(ability, parentState);
                 var pair = new ObjectBooleanMutablePair<IMorphAbility<?>>(ability, hasPermission);
 
                 if (hasPermission)
@@ -73,36 +73,50 @@ public class AbilityUpdater extends MorphPluginObject
             this.pendingAbilities.clear();
         }
 
-        // 如果启用，则每秒只检查4遍权限
-        var checkPermissions = checkAbilityPermissions.get() && plugin.getCurrentTick() % 5 == 0;
-
         for (var abilityPair : registeredAbilities)
         {
             var ability = abilityPair.left();
             var enabled = abilityPair.right();
 
-            if (checkPermissions)
+            if (checkAbilityPermissions.get() && plugin.getCurrentTick() % 5 == 0)
             {
-                if (hasPermissionFor(ability, parentState))
-                {
-                    if (!enabled)
-                    {
-                        ability.applyToPlayer(player, parentState);
-                        abilityPair.right(true);
+                boolean hasPermission = hasPermissionFor(ability, parentState);
 
-                        enabled = true;
-                    }
-                }
-                else if (enabled)
+                if (hasPermission && !enabled)
                 {
-                    ability.revokeFromPlayer(player, parentState);
-                    abilityPair.right(false);
+                    enableAbility(abilityPair, player);
+
+                    enabled = true;
                 }
+                else if (!hasPermission && enabled)
+                {
+                    disableAbility(abilityPair, player);
+
+                    enabled = false;
+                }
+            }
+            else if (!checkAbilityPermissions.get() && !enabled)
+            {
+                enableAbility(abilityPair, player);
+
+                enabled = true;
             }
 
             if (enabled)
                 ability.handle(player, parentState);
         }
+    }
+
+    private void disableAbility(Pair<IMorphAbility<?>, Boolean> pair, Player player)
+    {
+        pair.left().revokeFromPlayer(player, parentState);
+        pair.right(false);
+    }
+
+    private void enableAbility(Pair<IMorphAbility<?>, Boolean> pair, Player player)
+    {
+        pair.left().applyToPlayer(player, parentState);
+        pair.right(true);
     }
 
     public boolean update()
