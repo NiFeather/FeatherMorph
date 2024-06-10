@@ -17,6 +17,7 @@ import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.messaging.MessageTooLargeException;
 import org.bukkit.plugin.messaging.Messenger;
+import org.bukkit.plugin.messaging.StandardMessenger;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -77,15 +78,23 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
         if (channel == null || player == null || message == null)
             throw new IllegalArgumentException("Null channel/player/message");
 
-        if (!player.isOnline()) return;
+        if (!player.isOnline() || !(player instanceof CraftPlayer craftPlayer)) return;
 
         if (logOutGoingPackets.get())
             logPacket(true, player, channel, message);
 
-        if (!player.getListeningPluginChannels().contains(channel))
-            ((CraftPlayer)player).addChannel(channel);
+        try
+        {
+            var channelLocation = new ResourceLocation(channel);
+            var packet = new ClientboundCustomPayloadPacket(new DiscardedPayload(channelLocation, Unpooled.wrappedBuffer(message)));
 
-        player.sendPluginMessage(plugin, channel, message);
+            craftPlayer.getHandle().connection.send(packet);
+        }
+        catch (Throwable t)
+        {
+            logger.error("Can't send packet to player: " + t.getMessage());
+            t.printStackTrace();
+        }
     }
 
     /**
