@@ -3,6 +3,8 @@ package xiamomc.morph.backends.server.renderer.network.datawatcher.values;
 import com.comphenix.protocol.wrappers.WrappedDataWatcher;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.resources.ResourceKey;
@@ -12,6 +14,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.values.basetypes.TameableAnimalValues;
+import xiamomc.morph.backends.server.renderer.utilties.HolderUtils;
 
 public class WolfValues extends TameableAnimalValues
 {
@@ -54,9 +57,7 @@ public class WolfValues extends TameableAnimalValues
 
     public static Holder<WolfVariant> getWolfVariant(ResourceKey<WolfVariant> resKey)
     {
-        var world = ((CraftWorld)Bukkit.getWorlds().stream().findFirst().get()).getHandle();
-
-        return world.registryAccess().registryOrThrow(Registries.WOLF_VARIANT).getHolderOrThrow(resKey);
+        return HolderUtils.getHolderFor(resKey, Registries.WOLF_VARIANT);
     }
 
     public WolfValues()

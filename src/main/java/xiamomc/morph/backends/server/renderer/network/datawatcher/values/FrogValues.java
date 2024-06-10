@@ -10,6 +10,7 @@ import net.minecraft.world.entity.animal.FrogVariant;
 import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.CraftWorld;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.values.basetypes.AnimalValues;
+import xiamomc.morph.backends.server.renderer.utilties.HolderUtils;
 
 public class FrogValues extends AnimalValues
 {
@@ -18,9 +19,7 @@ public class FrogValues extends AnimalValues
 
     private Holder<FrogVariant> getFrogVariant(ResourceKey<FrogVariant> key)
     {
-        var world = ((CraftWorld) Bukkit.getWorlds().stream().findFirst().get()).getHandle();
-
-        return world.registryAccess().registryOrThrow(Registries.FROG_VARIANT).getHolderOrThrow(key);
+        return HolderUtils.getHolderFor(key, Registries.FROG_VARIANT);
     }
 
     public FrogValues()

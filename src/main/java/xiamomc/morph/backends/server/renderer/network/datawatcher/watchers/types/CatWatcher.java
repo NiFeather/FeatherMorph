@@ -1,9 +1,14 @@
 package xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types;
 
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.animal.CatVariant;
+import org.bukkit.Bukkit;
+import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.entity.Cat;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -30,7 +35,7 @@ public class CatWatcher extends TameableAnimalWatcher
     public Cat.Type getCatType()
     {
         var value = get(ValueIndex.CAT.CAT_VARIANT);
-        var index = BuiltInRegistries.CAT_VARIANT.getId(value);
+        var index = BuiltInRegistries.CAT_VARIANT.getId(holderToNmsVariant(value));
 
         return Cat.Type.values()[index];
     }
@@ -43,16 +48,36 @@ public class CatWatcher extends TameableAnimalWatcher
         var random = new Random();
         var availableVariants = Arrays.stream(Cat.Type.values()).toList();
         var targetIndex = random.nextInt(availableVariants.size());
-        var targetValue = bukkitTypeToNms(availableVariants.get(targetIndex));
+        var targetValue = bukkitTypeToNmsHolder(availableVariants.get(targetIndex));
 
         this.write(ValueIndex.CAT.CAT_VARIANT, targetValue);
     }
 
-    private CatVariant bukkitTypeToNms(Cat.Type bukkitType)
+    private CatVariant holderToNmsVariant(Holder<CatVariant> holder)
+    {
+        var keyOptional = holder.unwrapKey();
+        if (keyOptional.isEmpty())
+            throw new NullPointerException("Null ResourceKey for holder " + holder);
+
+        return BuiltInRegistries.CAT_VARIANT.get(keyOptional.get());
+    }
+
+    private Holder<CatVariant> bukkitTypeToNmsHolder(Cat.Type bukkitType)
     {
         var bukkitKey = bukkitType.getKey();
         ResourceLocation key = new ResourceLocation(bukkitKey.namespace(), bukkitKey.getKey());
-        return BuiltInRegistries.CAT_VARIANT.get(key);
+
+        var variant = BuiltInRegistries.CAT_VARIANT.getHolder(key);
+        if (variant.isEmpty() || !variant.get().isBound())
+        {
+            logger.warn("Bukkit type '%s' is not in the registries, returning Tabby...".formatted(bukkitType));
+
+            var world = ((CraftWorld) Bukkit.getWorlds().stream().findFirst().get()).getHandle();
+
+            return world.registryAccess().registryOrThrow(Registries.CAT_VARIANT).getHolderOrThrow(CatVariant.TABBY);
+        }
+
+        return variant.get();
     }
 
     @Override
@@ -69,7 +94,7 @@ public class CatWatcher extends TameableAnimalWatcher
 
             match.ifPresent(type ->
             {
-                var finalValue = bukkitTypeToNms(type);
+                var finalValue = bukkitTypeToNmsHolder(type);
                 this.write(ValueIndex.CAT.CAT_VARIANT, finalValue);
             });
         }
