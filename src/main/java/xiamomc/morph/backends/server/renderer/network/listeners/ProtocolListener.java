@@ -5,10 +5,12 @@ import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.events.PacketListener;
 import io.papermc.paper.util.TickThread;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import org.bukkit.Bukkit;
+import org.bukkit.World;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphPlugin;
@@ -21,6 +23,7 @@ import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -63,13 +66,24 @@ public abstract class ProtocolListener extends MorphPluginObject implements Pack
         //if (!TickThread.isTickThread())
         //    logger.warn("Not on a tick thread! Caution for exceptions!");
 
-        return Bukkit.getOnlinePlayers()
-                .stream()
-                .filter(p -> p.getEntityId() == id)
-                .map(bukkit -> ((CraftPlayer)bukkit).getHandle())
-                .map(Optional::ofNullable)
-                .findFirst().flatMap(Function.identity())
-                .orElse(null);
+        // Bukkit.getOnlinePlayers() 会将正前往不同维度的玩家从列表里移除
+        // 因此我们需要在每个世界都手动查询一遍
+        for (var world : Bukkit.getWorlds())
+        {
+            var worldPlayers = world.getPlayers();
+
+            var match = worldPlayers.stream()
+                    .filter(p -> p.getEntityId() == id)
+                    .map(bukkit -> ((CraftPlayer)bukkit).getHandle())
+                    .map(Optional::ofNullable)
+                    .findFirst().flatMap(Function.identity())
+                    .orElse(null);
+
+            if (match != null)
+                return match;
+        }
+
+        return null;
     }
 
     @Nullable

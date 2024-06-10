@@ -44,6 +44,7 @@ public class MetaPacketListener extends ProtocolListener
         //获取此包的来源实体
         var sourceNmsEntity = getNmsPlayerEntityFrom(packetEvent, packet.id());
 
+        // How could this be?!
         if (sourceNmsEntity == null)
             return;
 
