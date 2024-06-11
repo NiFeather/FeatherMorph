@@ -4,14 +4,13 @@ import xiamomc.morph.backends.server.renderer.network.datawatcher.values.basetyp
 
 public class LlamaValues extends ChestedHorseValues
 {
-    public final SingleValue<Integer> SLOTS = getSingle("llama_slots", 0);
-    public final SingleValue<Integer> CARPET_COLOR = getSingle("llama_carpet_color", -1);
-    public final SingleValue<Integer> VARIANT = getSingle("llama_variant", 0);
+    public final SingleValue<Integer> SLOTS = getSingle("llama_slots", 2);
+    public final SingleValue<Integer> VARIANT = getSingle("llama_variant", 1).withRandom(0, 1, 2, 3);
 
     public LlamaValues()
     {
         super();
 
-        registerSingle(SLOTS, CARPET_COLOR, VARIANT);
+        registerSingle(SLOTS, VARIANT);
     }
 }
