@@ -13,6 +13,9 @@ root:
   # Allow players to fly if they disguised as a mob that can fly?
   allow_flight: true
 
+  # Should we check whether a player has the permission to activate a ability?
+  check_ability_permissions: true
+
   # Disguise as the id given below when they join the server.
   # If an invalid ID is provided, this option may not take place.
   forced_disguise: "@none"
@@ -284,4 +287,4 @@ root:
       - SelectedItem
 
   # Do not touch unless you know what you're doing!
-  version: 29
+  version: 30
