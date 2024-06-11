@@ -15,8 +15,8 @@ public class ServerDisguise implements Cloneable
     {
         this.type = type;
 
-        if (type == EntityType.SLIME || type == EntityType.MAGMA_CUBE)
-            this.compoundTag.putInt("Size", 4);
+        //if (type == EntityType.SLIME || type == EntityType.MAGMA_CUBE)
+        //    this.compoundTag.putInt("Size", 4);
     }
 
     public EntityType type;

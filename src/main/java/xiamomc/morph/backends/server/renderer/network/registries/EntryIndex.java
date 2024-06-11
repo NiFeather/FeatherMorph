@@ -18,4 +18,6 @@ public class EntryIndex
 
     public static final RegistryKey<Boolean> WARDEN_CHARGING_ATTACK = RegistryKey.of("warden_charging_attack", false);
     public static final RegistryKey<Boolean> ATTACK_ANIMATION = RegistryKey.of("attack_animation", false);
+
+    public static final RegistryKey<Integer> SLIME_SIZE_REAL = RegistryKey.of("slime_size_real", 0);
 }

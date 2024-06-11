@@ -124,27 +124,27 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
         // Make IDE happy
         Objects.requireNonNull(constructedDisguise);
 
+        //手动指定史莱姆和岩浆怪的大小
+        if (entityType == EntityType.SLIME || entityType == EntityType.MAGMA_CUBE)
+        {
+            var canCons = canConstruct(disguiseMeta, targetEntity, null);
+
+            if (canCons)
+            {
+                var size = (targetEntity != null && targetEntity.getType() == entityType)
+                        ? NbtUtils.getRawTagCompound(targetEntity).getInt("Size")
+                        : new Random().nextInt(0, 4); //史莱姆的大小其实是0~3
+
+                var initialTag = new CompoundTag();
+
+                initialTag.putInt("Size", size);
+                constructedDisguise.mergeCompound(initialTag);
+            }
+        }
+
         // 检查是否有足够的空间
         if (modifyBoundingBoxes.get() && checkSpaceBoundingBox.get())
         {
-            //手动指定史莱姆和岩浆怪的大小
-            if (entityType == EntityType.SLIME || entityType == EntityType.MAGMA_CUBE)
-            {
-                var canCons = canConstruct(disguiseMeta, targetEntity, null);
-
-                if (canCons)
-                {
-                    var size = targetEntity != null
-                                    ? NbtUtils.getRawTagCompound(targetEntity).getInt("Size")
-                                    : new Random().nextInt(1, 4);
-
-                    var initialTag = new CompoundTag();
-
-                    initialTag.putInt("Size", size);
-                    constructedDisguise.mergeCompound(initialTag);
-                }
-            }
-
             var loc = player.getLocation();
             var box = constructedDisguise.getBoundingBoxAt(loc.x(), loc.y(), loc.z());
 
