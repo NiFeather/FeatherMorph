@@ -191,7 +191,7 @@ public class MorphSkillHandler extends MorphPluginObject
 
         if (state == null) return;
 
-        var skillEntry= getSkillEntry(state.getSkillLookupIdentifier());
+        var skillEntry= getSkillEntry(state.skillLookupIdentifier());
 
         if (player.getGameMode() == GameMode.SPECTATOR
             || skillEntry == null
@@ -205,7 +205,7 @@ public class MorphSkillHandler extends MorphPluginObject
             return;
         }
 
-        var cdInfo = getCooldownInfo(player.getUniqueId(), state.getSkillLookupIdentifier());
+        var cdInfo = getCooldownInfo(player.getUniqueId(), state.skillLookupIdentifier());
         assert cdInfo != null;
 
         //logger.info("Permission is " + CommonPermissions.skillPermissionOf(skillEntry.getKey().getSkillIdentifier().asString(), state.getDisguiseIdentifier()));
@@ -405,7 +405,7 @@ public class MorphSkillHandler extends MorphPluginObject
         //获取当前CD
         SkillCooldownInfo cdInfo = state == null
                 ? null
-                : getCooldownInfo(uuid, state.getSkillLookupIdentifier());
+                : getCooldownInfo(uuid, state.skillLookupIdentifier());
 
         //移除不需要的CD
         list.removeIf(i -> i != cdInfo && this.getCooldownInactive(i) <= 2);

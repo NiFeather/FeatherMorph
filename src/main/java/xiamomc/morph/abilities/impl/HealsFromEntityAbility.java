@@ -47,6 +47,8 @@ public class HealsFromEntityAbility extends MorphAbility<HealsFromEntityOption>
 
     private final RandomSource random = RandomSource.create();
 
+    private static final String PROPERTY_ID = "morph:HFEA_BEAM_TARGET";
+
     @Resolved
     private MorphClientHandler clientHandler;
 
@@ -69,7 +71,7 @@ public class HealsFromEntityAbility extends MorphAbility<HealsFromEntityOption>
     {
         if (!super.revokeFromPlayer(player, state)) return false;
 
-        state.beamTarget = null;
+        state.removeProperty(PROPERTY_ID);
 
         return true;
     }
@@ -90,10 +92,10 @@ public class HealsFromEntityAbility extends MorphAbility<HealsFromEntityOption>
         //Find or refresh entity
         var nmsRecord = NmsRecord.of(player);
 
-        if (state.beamTarget != null)
+        var beamTarget = state.getProperty(PROPERTY_ID, Entity.class);
+        if (beamTarget != null)
         {
-            var entity = state.beamTarget;
-            if (entity.isAlive())
+            if (beamTarget.isAlive())
             {
                 var maxHealth = player.getMaxHealth();
                 var playerHealth = player.getHealth();
@@ -103,7 +105,7 @@ public class HealsFromEntityAbility extends MorphAbility<HealsFromEntityOption>
             }
             else
             {
-                var lastDamageCause = entity.getBukkitEntity().getLastDamageCause();
+                var lastDamageCause = beamTarget.getBukkitEntity().getLastDamageCause();
 
                 if (lastDamageCause instanceof EntityDamageByEntityEvent entityDamageByEntityEvent)
                 {
@@ -119,16 +121,15 @@ public class HealsFromEntityAbility extends MorphAbility<HealsFromEntityOption>
 
                     var sources = nmsRecord.nmsWorld().damageSources();
 
-                    var source = entity.getType() == EntityType.END_CRYSTAL
-                            ? sources.explosion(entity, damager)
-                            : new DamageSource(sources.magic().typeHolder(), entity, damager);
+                    var source = beamTarget.getType() == EntityType.END_CRYSTAL
+                            ? sources.explosion(beamTarget, damager)
+                            : new DamageSource(sources.magic().typeHolder(), beamTarget, damager);
 
                     source = DamageSourceUtils.toNotScalable(source).bypassEverything().noSourceLocation();
                     nmsRecord.nmsPlayer().hurt(source, option.damageWhenDestroyed);
                 }
 
-                if (state.beamTarget == entity)
-                    state.beamTarget = null;
+                state.removeProperty(PROPERTY_ID);
             }
         }
 
@@ -142,13 +143,11 @@ public class HealsFromEntityAbility extends MorphAbility<HealsFromEntityOption>
                 return false;
             }
 
-            var prevEntity = state.beamTarget;
-
             var newEntity = findEntity(nmsRecord, nmsType, option.distance, option.entityType);
 
-            if (prevEntity != newEntity)
+            if (beamTarget != newEntity)
             {
-                state.beamTarget = newEntity;
+                state.setProperty(PROPERTY_ID, newEntity);
 
                 if (state.getEntityType() == org.bukkit.entity.EntityType.ENDER_DRAGON)
                     clientHandler.sendCommand(player, this.getBeamCommand(state));
@@ -169,7 +168,7 @@ public class HealsFromEntityAbility extends MorphAbility<HealsFromEntityOption>
 
     public S2CSetSNbtCommand getBeamCommand(DisguiseState state)
     {
-        var entity = state.beamTarget;
+        var entity = state.getProperty(PROPERTY_ID, Entity.class);
 
         var compound = new CompoundTag();
 

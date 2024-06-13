@@ -94,7 +94,7 @@ public abstract class MorphAbility<T extends ISkillOption> extends MorphPluginOb
         return getOr(
                 () -> optionMap.get(state.getDisguiseIdentifier()),
                 Objects::nonNull,
-                () -> optionMap.get(state.getSkillLookupIdentifier())
+                () -> optionMap.get(state.skillLookupIdentifier())
         );
     }
 

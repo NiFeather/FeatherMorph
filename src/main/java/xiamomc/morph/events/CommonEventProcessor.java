@@ -375,33 +375,6 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
 
         if (state != null)
         {
-            //重新进入后player和info.player不属于同一个实例，需要重新disguise
-            state.setPlayer(player);
-            var backend = state.getDisguiseWrapper().getBackend();
-
-            //刷新伪装
-            var oldWrapper = state.getDisguiseWrapper();
-            var wrapper = state.getDisguiseWrapper().clone();
-            backend.disguise(player, wrapper);
-
-            oldWrapper.dispose();
-
-            var customName = state.entityCustomName;
-
-            state.updateDisguise(state.getDisguiseIdentifier(),
-                    state.getSkillLookupIdentifier(), wrapper, false,
-                    state.getDisguisedItems());
-
-            if (customName != null)
-            {
-                state.entityCustomName = customName;
-                state.setDisplayName(customName);
-            }
-
-            state.refreshSkillsAbilities();
-
-            networkingHelper.sendCommandToRevealablePlayers(morphs.genPartialMapCommand(state));
-
             //调用Morph事件
             new PlayerJoinedWithDisguiseEvent(player, state).callEvent();
 

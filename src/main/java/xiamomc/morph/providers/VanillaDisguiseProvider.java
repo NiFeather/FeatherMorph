@@ -187,14 +187,14 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
     {
         super.postConstructDisguise(state, targetEntity);
 
-        var disguise = state.getDisguiseWrapper();
+        var wrapper = state.getDisguiseWrapper();
         var backend = getPreferredBackend();
 
         if (!backend.isDisguised(targetEntity))
         {
             //盔甲架加上手臂
-            if (disguise.getEntityType().equals(EntityType.ARMOR_STAND) && armorStandShowArms.get())
-                disguise.setShowArms(true);
+            if (wrapper.getEntityType().equals(EntityType.ARMOR_STAND) && armorStandShowArms.get())
+                wrapper.setShowArms(true);
         }
 
         var player = state.getPlayer();

@@ -19,7 +19,7 @@ public class DisguiseStateGenerator
     {
         var offlineState = new OfflineDisguiseState();
 
-        offlineState.playerUUID = state.getPlayerUniqueID();
+        offlineState.playerUUID = state.getPlayer().getUniqueId();
         offlineState.playerName = state.getPlayer().getName();
 
         offlineState.disguiseID = state.getDisguiseIdentifier();

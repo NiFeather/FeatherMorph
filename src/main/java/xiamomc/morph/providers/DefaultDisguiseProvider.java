@@ -102,7 +102,7 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
     public List<AbstractS2CCommand<?>> getInitialSyncCommands(DisguiseState state)
     {
         //logger.info("SID: " + state.getSkillLookupIdentifier() + " :: DID: " + state.getDisguiseIdentifier());
-        if (skillHandler.hasSpeficSkill(state.getSkillLookupIdentifier(), SkillType.INVENTORY))
+        if (skillHandler.hasSpeficSkill(state.skillLookupIdentifier(), SkillType.INVENTORY))
         {
             var eqiupment = state.getDisguisedItems();
 
@@ -134,8 +134,8 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
     public void postConstructDisguise(DisguiseState state, @Nullable Entity targetEntity)
     {
         //被动技能
-        var abilities = abilityHandler.getAbilitiesFor(state.getSkillLookupIdentifier());
+        var abilities = abilityHandler.getAbilitiesFor(state.skillLookupIdentifier());
         state.getAbilityUpdater().setAbilities(abilities);
-        state.setSkill(skillHandler.getSkill(state.getSkillLookupIdentifier()));
+        state.setSkill(skillHandler.getSkill(state.skillLookupIdentifier()));
     }
 }

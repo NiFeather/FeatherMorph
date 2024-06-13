@@ -93,7 +93,7 @@ public class FlyAbility extends MorphAbility<FlyOption>
         if (gameMode == GameType.CREATIVE || gameMode == GameType.SPECTATOR)
             return super.handle(player, state);
 
-        var option = optionMap.get(state.getSkillLookupIdentifier());
+        var option = optionMap.get(state.skillLookupIdentifier());
 
         var allowFlightConditions = player.getFoodLevel() > option.getMinimumHunger()
                     && !noFlyWorlds.contains(player.getWorld().getName())
@@ -202,7 +202,7 @@ public class FlyAbility extends MorphAbility<FlyOption>
 
         if (player.getGameMode() != GameMode.SPECTATOR)
         {
-            float speed = getTargetFlySpeed(state.getSkillLookupIdentifier());
+            float speed = getTargetFlySpeed(state.skillLookupIdentifier());
 
             speed = Float.isNaN(speed) ? 0.1f : MathUtils.clamp(-1f, 1f, speed);
 

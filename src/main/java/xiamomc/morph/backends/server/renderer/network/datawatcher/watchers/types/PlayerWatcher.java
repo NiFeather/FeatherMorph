@@ -42,28 +42,32 @@ public class PlayerWatcher extends InventoryLivingWatcher
     protected <X> void onCustomWrite(RegistryKey<X> key, X oldVal, X newVal)
     {
         super.onCustomWrite(key, oldVal, newVal);
-        var player = getBindingPlayer();
 
-        if (key.equals(EntryIndex.PROFILE))
+        if (isPlayerOnline())
         {
-            var profile = newVal == null
-                    ? new GameProfile(UUID.randomUUID(), this.getOrDefault(EntryIndex.DISGUISE_NAME, ""))
-                    : (GameProfile) newVal;
+            var player = getBindingPlayer();
 
-            var spawnPackets = getPacketFactory()
-                    .buildSpawnPackets(player,
-                            new DisplayParameters(this.getEntityType(), this, profile));
-
-            var packetRemove = PacketContainer.fromPacket(new ClientboundRemoveEntitiesPacket(player.getEntityId()));
-            var protocol = ProtocolLibrary.getProtocolManager();
-
-            var affected = getAffectedPlayers(player);
-            affected.forEach(p ->
+            if (key.equals(EntryIndex.PROFILE))
             {
-                protocol.sendServerPacket(p, packetRemove);
+                var profile = newVal == null
+                        ? new GameProfile(UUID.randomUUID(), this.getOrDefault(EntryIndex.DISGUISE_NAME, ""))
+                        : (GameProfile) newVal;
 
-                spawnPackets.forEach(packet -> protocol.sendServerPacket(p, packet));
-            });
+                var spawnPackets = getPacketFactory()
+                        .buildSpawnPackets(player,
+                                new DisplayParameters(this.getEntityType(), this, profile));
+
+                var packetRemove = PacketContainer.fromPacket(new ClientboundRemoveEntitiesPacket(player.getEntityId()));
+                var protocol = ProtocolLibrary.getProtocolManager();
+
+                var affected = getAffectedPlayers(player);
+                affected.forEach(p ->
+                {
+                    protocol.sendServerPacket(p, packetRemove);
+
+                    spawnPackets.forEach(packet -> protocol.sendServerPacket(p, packet));
+                });
+            }
         }
     }
 }

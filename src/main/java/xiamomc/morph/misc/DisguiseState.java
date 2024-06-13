@@ -1,14 +1,10 @@
 package xiamomc.morph.misc;
 
+    import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.kyori.adventure.bossbar.BossBar;
-import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.entity.Entity;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
-import org.bukkit.SoundCategory;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.EntityEquipment;
@@ -20,9 +16,6 @@ import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.abilities.AbilityUpdater;
 import xiamomc.morph.backends.DisguiseWrapper;
-import xiamomc.morph.config.ConfigOption;
-import xiamomc.morph.config.MorphConfigManager;
-import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.network.PlayerOptions;
 import xiamomc.morph.network.commands.S2C.set.S2CSetSkillCooldownCommand;
 import xiamomc.morph.network.server.MorphClientHandler;
@@ -44,15 +37,19 @@ import static xiamomc.morph.utilities.DisguiseUtils.itemOrAir;
 
 public class DisguiseState extends MorphPluginObject
 {
-    public DisguiseState(Player player, @NotNull String id, @NotNull String skillId,
+    public DisguiseState(Player player, @NotNull String identifier, @NotNull String skillIdentifier,
                          @NotNull DisguiseWrapper<?> wrapper, @NotNull DisguiseProvider provider,
                          @Nullable EntityEquipment targetEquipment, @NotNull PlayerOptions<Player> playerOptions,
                          @NotNull PlayerMeta playerMeta)
     {
         Objects.requireNonNull(wrapper, "Wrapper cannot be null.");
+        Objects.requireNonNull(identifier, "Disguise identifier cannot be null.");
+        Objects.requireNonNull(skillIdentifier, "Skill identifier cannot be null.");
+        Objects.requireNonNull(provider, "Disguise provider cannot be null");
+        Objects.requireNonNull(playerOptions, "Player options cannot be null");
+        Objects.requireNonNull(playerMeta, "Player metadata cannot be null");
 
-        this.player = player;
-        this.playerUniqueID = player.getUniqueId();
+        this.playerUUID = player.getUniqueId();
         this.provider = provider;
         this.playerOptions = playerOptions;
         this.morphConfiguration = playerMeta;
@@ -60,7 +57,24 @@ public class DisguiseState extends MorphPluginObject
         this.soundHandler = new SoundHandler(player);
         this.abilityUpdater = new AbilityUpdater(this);
 
-        this.updateDisguise(id, skillId, wrapper, true, targetEquipment);
+        this.disguiseWrapper = wrapper;
+        this.disguiseIdentifier = identifier;
+        skillLookupIdentifier(skillIdentifier);
+
+        disguiseType = DisguiseTypes.fromId(identifier);
+        this.provider = MorphManager.getProvider(identifier);
+
+        //设置声音
+        this.soundHandler.refreshSounds(wrapper.getEntityType(), wrapper.isBaby());
+
+        //伪装类型是否支持设置伪装物品
+        supportsDisguisedItems = skillHandler.hasSpeficSkill(skillIdentifier, SkillType.INVENTORY);
+
+        //更新伪装物品
+        if (supportsDisguisedItems)
+            refreshDisguiseItems(targetEquipment, wrapper);
+
+        this.cachedPlayer = player;
     }
 
     private final PlayerOptions<Player> playerOptions;
@@ -70,28 +84,50 @@ public class DisguiseState extends MorphPluginObject
     /**
      * 谁在伪装
      */
-    private Player player;
+    private final UUID playerUUID;
 
-    public Player getPlayer()
+    @Nullable
+    private Player cachedPlayer;
+
+    @Nullable
+    public Player tryGetPlayer()
     {
-        return player;
-    }
+        // 如果缓存的玩家实例在线，那么返回缓存
+        if (cachedPlayer != null && cachedPlayer.isConnected())
+            return cachedPlayer;
 
-    public void setPlayer(Player p)
-    {
-        if (!p.getUniqueId().equals(playerUniqueID)) throw new RuntimeException("玩家实例与UUID不符");
+        // 否则，从BukkitAPI获取玩家
+        var player = Bukkit.getPlayer(playerUUID);
 
-        player = p;
+        // 如果玩家不为null，则返回获取到的玩家实例
+        if (player != null)
+        {
+            cachedPlayer = Bukkit.getPlayer(playerUUID);
+            return player;
+        }
+
+        // 如果BukkitAPI没找到玩家，但是缓存有实例，那么返回缓存
+        if (cachedPlayer != null)
+            return cachedPlayer;
+
+        // 啥都没有！返回null
+        // 不过这真的会发生吗？我们都在一开始就设置缓存字段了。
+        return null;
     }
 
     /**
-     * 谁在伪装（UUID）
+     *
+     * @return The player that matches the UUID stored in this DisguiseState
+     * @throws NullDependencyException If the player was not found. For nullable method, check {@link DisguiseState#tryGetPlayer()}
      */
-    private final UUID playerUniqueID;
-
-    public UUID getPlayerUniqueID()
+    @NotNull
+    public Player getPlayer() throws NullDependencyException
     {
-        return playerUniqueID;
+        var player = tryGetPlayer();
+
+        if (player != null) return player;
+
+        throw new NullDependencyException("Can't find player with UUID " + playerUUID);
     }
 
     /**
@@ -120,9 +156,12 @@ public class DisguiseState extends MorphPluginObject
         serverSideSelfVisible = val;
     }
 
+    private static final Component fallbackDisplay = Component.text("~UNDEFINED~");
+
     /**
      * 此伪装面向玩家自己的显示名称。
      */
+    @Nullable
     private Component playerDisplay;
 
     /**
@@ -130,19 +169,21 @@ public class DisguiseState extends MorphPluginObject
      * @return {@link DisguiseState#playerDisplay}
      * @apiNote 对于要显示到服务器公屏上的内容，请使用 {@link DisguiseState#getServerDisplay()}
      */
+    @NotNull
     public Component getPlayerDisplay()
     {
-        return playerDisplay;
+        return playerDisplay == null ? fallbackDisplay : playerDisplay;
     }
 
-    public void setPlayerDisplay(Component newName)
+    public void setPlayerDisplay(@NotNull Component newName)
     {
-        playerDisplay = newName == null ? Component.empty() : newName;
+        playerDisplay = newName;
     }
 
     /**
      * 此伪装面向服务器其他人的显示名称
      */
+    @Nullable
     private Component serverDisplay;
 
     /**
@@ -150,14 +191,15 @@ public class DisguiseState extends MorphPluginObject
      * @return {@link DisguiseState#serverDisplay}
      * @apiNote 对于要显示给玩家自己的内容，请使用 {@link DisguiseState#getPlayerDisplay()}
      */
+    @NotNull
     public Component getServerDisplay()
     {
-        return serverDisplay;
+        return serverDisplay == null ? fallbackDisplay : serverDisplay;
     }
 
-    public void setServerDisplay(Component newName)
+    public void setServerDisplay(@NotNull Component newName)
     {
-        serverDisplay = newName == null ? Component.empty() : newName;
+        serverDisplay = newName;
     }
 
     public void setDisplayName(Component newName)
@@ -171,7 +213,8 @@ public class DisguiseState extends MorphPluginObject
     /**
      * 伪装的{@link DisguiseWrapper}实例
      */
-    private DisguiseWrapper<?> disguiseWrapper;
+    @NotNull
+    private final DisguiseWrapper<?> disguiseWrapper;
 
     /**
      * 获取此State的伪装Wrapper
@@ -179,9 +222,6 @@ public class DisguiseState extends MorphPluginObject
     @NotNull
     public DisguiseWrapper<?> getDisguiseWrapper()
     {
-        if (disguiseWrapper == null)
-            throw new NullDependencyException("Null Wrapper?!");
-
         return disguiseWrapper;
     }
 
@@ -234,7 +274,7 @@ public class DisguiseState extends MorphPluginObject
         return bossbar;
     }
 
-    public void setBossbar(BossBar bossbar)
+    public void setBossbar(@Nullable BossBar bossbar)
     {
         if (this.bossbar != null)
             Bukkit.getOnlinePlayers().forEach(p -> p.hideBossBar(this.bossbar));
@@ -242,12 +282,40 @@ public class DisguiseState extends MorphPluginObject
         this.bossbar = bossbar;
     }
 
-    public Entity beamTarget;
+    //region CustomProperty
+
+    private final Map<String, Object> propertiesMap = new Object2ObjectArrayMap<>();
+
+    public void setProperty(String name, Object value)
+    {
+        propertiesMap.put(name, value);
+    }
+
+    @Nullable
+    public <T> T getProperty(String name, Class<T> type)
+    {
+        var value = propertiesMap.getOrDefault(name, null);
+        if (value == null) return null;
+
+        if (type.isInstance(value)) return (T) value;
+
+        return null;
+    }
+
+    public void removeProperty(String name)
+    {
+        propertiesMap.remove(name);
+    }
+
+    //endregion CustomProperty
 
     /**
      * 技能查询ID
      */
-    private String skillLookupIdentifier = "minecraft:" + MorphManager.disguiseFallbackName;
+    @Nullable
+    private String skillLookupIdentifier = null;
+
+    private static final String DEFAULT_SKILL_LOOKUP = NamespacedKey.MINECRAFT + ":" + MorphManager.disguiseFallbackName;
 
     /**
      * 获取用于查询技能的ID
@@ -255,21 +323,22 @@ public class DisguiseState extends MorphPluginObject
      * @return 技能ID
      */
     @NotNull
-    public String getSkillLookupIdentifier()
+    public String skillLookupIdentifier()
     {
-        return skillLookupIdentifier;
+        return skillLookupIdentifier == null ? DEFAULT_SKILL_LOOKUP : skillLookupIdentifier;
     }
 
     /**
      * 设置技能查询ID
      *
-     * @param skillID 技能ID
+     * @param newSkillID 技能ID
      */
-    public void setSkillLookupIdentifier(@NotNull String skillID)
+    public void skillLookupIdentifier(@NotNull String newSkillID)
     {
-        this.skillLookupIdentifier = skillID;
+        this.skillLookupIdentifier = newSkillID;
     }
 
+    @NotNull
     private IMorphSkill<?> skill = NoneMorphSkill.instance;
 
     /**
@@ -281,11 +350,10 @@ public class DisguiseState extends MorphPluginObject
     {
         if (s == null) s = NoneMorphSkill.instance;
 
-        if (this.skill != null)
-            skill.onDeEquip(this);
+        this.skill.onDeEquip(this);
 
-        this.skill = s;
         s.onInitialEquip(this);
+        this.skill = s;
     }
 
     /**
@@ -323,26 +391,28 @@ public class DisguiseState extends MorphPluginObject
         return cooldownInfo == null ? Long.MIN_VALUE : cooldownInfo.getLastInvoke();
     }
 
+    public boolean haveCooldown()
+    {
+        return cooldownInfo != null;
+    }
+
     public void setSkillCooldown(long val)
     {
         if (haveCooldown())
         {
             cooldownInfo.setCooldown(val);
 
+            var player = getPlayer();
             if (clientHandler.isFutureClientProtocol(player, 3))
                 clientHandler.sendCommand(player, new S2CSetSkillCooldownCommand(val));
         }
-    }
-
-    public boolean haveCooldown()
-    {
-        return cooldownInfo != null;
     }
 
     public void setCooldownInfo(@Nullable SkillCooldownInfo info)
     {
         this.cooldownInfo = info;
 
+        var player = getPlayer();
         if (info != null && clientHandler.isFutureClientProtocol(player, 3))
             clientHandler.sendCommand(player, new S2CSetSkillCooldownCommand(info.getCooldown()));
     }
@@ -420,57 +490,6 @@ public class DisguiseState extends MorphPluginObject
         this.getSoundHandler().update();
 
         return this.abilityUpdater.update();
-    }
-
-    @Resolved(shouldSolveImmediately = true)
-    private MorphConfigManager config;
-
-    /**
-     * 设置伪装
-     * @param identifier 伪装ID
-     * @param skillIdentifier 技能ID
-     * @param wrapper 目标伪装
-     * @param shouldRefreshDisguiseItems 要不要刷新伪装物品？
-     * @param targetEquipment 要使用的equipment，没有则从伪装获取
-     */
-    public void updateDisguise(@NotNull String identifier, @NotNull String skillIdentifier,
-                               @NotNull DisguiseWrapper<?> wrapper, boolean shouldRefreshDisguiseItems,
-                               @Nullable EntityEquipment targetEquipment)
-    {
-        if (wrapper == null)
-            throw new NullDependencyException("Wrapper cannot be null.");
-
-        if (disguiseWrapper == wrapper) return;
-
-        this.entityCustomName = null;
-
-        this.disguiseWrapper = wrapper;
-        this.disguiseIdentifier = identifier;
-        setSkillLookupIdentifier(skillIdentifier);
-
-        disguiseType = DisguiseTypes.fromId(identifier);
-
-        var provider = MorphManager.getProvider(identifier);
-
-        this.provider = provider;
-        playerDisplay = provider.getDisplayName(identifier, MessageUtils.getLocale(player));
-        serverDisplay = provider.getDisplayName(identifier, config.get(String.class, ConfigOption.LANGUAGE_CODE));
-
-        //伪装类型是否支持设置伪装物品
-        supportsDisguisedItems = skillHandler.hasSpeficSkill(skillIdentifier, SkillType.INVENTORY);
-
-        //设置声音
-        this.soundHandler.refreshSounds(wrapper.getEntityType(), wrapper.isBaby());
-
-        //重置伪装物品
-        if (shouldRefreshDisguiseItems)
-        {
-            disguiseEquipments.clear();
-
-            //更新伪装物品
-            if (supportsDisguisedItems)
-                refreshDisguiseItems(targetEquipment, wrapper);
-        }
     }
 
     private void refreshDisguiseItems(EntityEquipment targetEquipment, DisguiseWrapper<?> disguiseWrapper)
@@ -594,126 +613,6 @@ public class DisguiseState extends MorphPluginObject
         return soundHandler;
     }
 
-    public static class SoundHandler
-    {
-        public int ambientInterval = 0;
-        public Sound ambientSoundPrimary;
-        public Sound ambientSoundSecondary;
-        private int soundTime;
-        private double soundFrequency = 0D;
-        private float soundVolume = 1f;
-
-        public void resetSoundTime()
-        {
-            soundTime = 0;
-        }
-
-        private final Player bindingPlayer;
-
-        @Nullable
-        private EntityType entityType;
-
-        private SoundCategory soundCategory = SoundCategory.PLAYERS;
-
-        @NotNull
-        private EntityType getEntityType()
-        {
-            return entityType == null ? EntityType.PLAYER : entityType;
-        }
-
-        public SoundHandler(Player bindingPlayer)
-        {
-            this.bindingPlayer = bindingPlayer;
-        }
-
-        public void update()
-        {
-            soundTime++;
-
-            // Java中浮点数除以0是正或负无穷
-            // 因为soundFrequency永远大于等于0，而分子是1，因此frequencyScale的最大值是正无穷
-            // 除非soundTime最后也加到了大于等于正无穷，否则不需要额外的判断，但这真的会发生吗（
-            double frequencyScale = 1.0D / soundFrequency;
-
-            //logger.info("Sound: %s <-- %s(%s) --> %s".formatted(soundTime, frequency, soundFrequency, ambientInterval * frequency));
-            if (ambientInterval != 0 && soundTime >= ambientInterval * frequencyScale && !bindingPlayer.isSneaking())
-            {
-                boolean playSecondary = false;
-
-                if (getEntityType() == EntityType.ALLAY)
-                {
-                    var eq = bindingPlayer.getEquipment();
-                    if (!eq.getItemInMainHand().getType().isAir()) playSecondary = true;
-                }
-
-                Sound sound = playSecondary ? ambientSoundSecondary : ambientSoundPrimary;
-
-                var nmsPlayer = NmsRecord.ofPlayer(bindingPlayer);
-                var isSpectator = nmsPlayer.isSpectator();
-
-                // 和原版行为保持一致, 并且不要为旁观者播放音效:
-                // net.minecraft.world.entity.Mob#baseTick()
-                if (isSpectator)
-                {
-                    soundTime = -(int)(ambientInterval * frequencyScale);
-                }
-                else if (sound != null && random.nextInt((int)(1000 * frequencyScale)) < soundTime)
-                {
-                    soundTime = -(int)(ambientInterval * frequencyScale);
-                    bindingPlayer.getWorld().playSound(
-                            bindingPlayer.getLocation(),
-                            sound.name().asString(),
-                            soundCategory,
-                            soundVolume,
-                            1f);
-                }
-            }
-        }
-
-        private final Random random = new Random();
-
-        private final MorphConfigManager config = MorphConfigManager.getInstance();
-
-        public void resetSound()
-        {
-            ambientSoundPrimary = null;
-            ambientSoundSecondary = null;
-            ambientInterval = 0;
-            resetSoundTime();
-        }
-
-        public void refreshSounds(EntityType entityType, boolean isBaby)
-        {
-            resetSound();
-
-            this.entityType = entityType;
-
-            soundFrequency = MathUtils.clamp(0, 2, config.getBindable(Double.class, ConfigOption.AMBIENT_FREQUENCY).get());
-
-            var soundEvent = EntityTypeUtils.getAmbientSound(entityType, bindingPlayer.getWorld());
-
-            var sound = soundEvent.sound();
-            if (sound == null) return;
-
-            this.soundVolume = soundEvent.volume();
-            this.ambientInterval = soundEvent.interval();
-            var pitch = isBaby ? 1.5F : 1F;
-
-            this.ambientSoundPrimary = SoundUtils.toBukkitSound(soundEvent, pitch);
-
-            var isEnemy = EntityTypeUtils.isEnemy(entityType);
-            this.soundCategory = isEnemy ? SoundCategory.HOSTILE : SoundCategory.NEUTRAL;
-
-            if (entityType == EntityType.ALLAY)
-            {
-                var allaySecondary = SoundEvents.ALLAY_AMBIENT_WITH_ITEM;
-                var secSi = new EntityTypeUtils.SoundInfo(allaySecondary, SoundSource.NEUTRAL, ambientInterval, soundEvent.volume());
-                this.ambientSoundSecondary = SoundUtils.toBukkitSound(secSi, pitch);
-            }
-        }
-
-    }
-
     //endregion Sound Handling
 
     /**
@@ -734,12 +633,20 @@ public class DisguiseState extends MorphPluginObject
         disguiseWrapper.setFakeEquipments(eq);
     }
 
-    public DisguiseState createCopy()
+    public DisguiseState createCopy(Player player)
     {
-        var disguise = this.disguiseWrapper.clone();
+        if (disposed())
+            throw new RuntimeException("Can't create a copy of a disposed DisguiseState");
 
-        return new DisguiseState(player, this.disguiseIdentifier, this.skillLookupIdentifier,
-                disguise, provider, getDisguisedItems(), this.playerOptions, morphConfiguration);
+        var wrapper = this.disguiseWrapper.clone();
+
+        var newInstance = new DisguiseState(player, this.disguiseIdentifier, this.skillLookupIdentifier(),
+                wrapper, provider, getDisguisedItems(), this.playerOptions, morphConfiguration);
+
+        newInstance.playerDisplay = this.playerDisplay;
+        newInstance.serverDisplay = this.serverDisplay;
+
+        return newInstance;
     }
 
     private final AtomicBoolean disposed = new AtomicBoolean(false);
@@ -758,7 +665,7 @@ public class DisguiseState extends MorphPluginObject
 
     public void reset()
     {
-        this.provider.unMorph(player, this);
+        this.provider.unMorph(getPlayer(), this);
 
         this.abilityUpdater.setAbilities(List.of());
         this.setSkill(null);

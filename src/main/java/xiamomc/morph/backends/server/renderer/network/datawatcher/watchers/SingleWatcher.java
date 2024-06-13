@@ -64,6 +64,11 @@ public abstract class SingleWatcher extends MorphPluginObject
         }
     }
 
+    public boolean isPlayerOnline()
+    {
+        return bindingPlayer != null && bindingPlayer.isConnected();
+    }
+
     public Player getBindingPlayer()
     {
         if (!bindingPlayer.isOnline())
