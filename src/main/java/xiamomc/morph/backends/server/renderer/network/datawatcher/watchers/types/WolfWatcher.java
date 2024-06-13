@@ -1,12 +1,10 @@
 package xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types;
 
 import net.minecraft.core.Holder;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.animal.FrogVariant;
 import net.minecraft.world.entity.animal.WolfVariant;
 import net.minecraft.world.entity.animal.WolfVariants;
 import org.bukkit.Bukkit;
@@ -14,7 +12,6 @@ import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Wolf;
-import xiamomc.morph.backends.server.renderer.network.datawatcher.values.WolfValues;
 import xiamomc.morph.backends.server.renderer.network.registries.ValueIndex;
 
 public class WolfWatcher extends TameableAnimalWatcher

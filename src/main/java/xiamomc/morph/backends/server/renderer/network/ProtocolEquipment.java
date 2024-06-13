@@ -7,9 +7,6 @@ import net.minecraft.world.item.ItemStack;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.inventory.CraftInventoryPlayer;
 import org.bukkit.inventory.EntityEquipment;
-import org.slf4j.ILoggerFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.utilities.ItemUtils;
 

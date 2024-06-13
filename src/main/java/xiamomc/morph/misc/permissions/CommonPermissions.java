@@ -1,7 +1,5 @@
 package xiamomc.morph.misc.permissions;
 
-import org.bukkit.NamespacedKey;
-
 public class CommonPermissions
 {
     private final static String PERM_ROOT = "xiamomc.morph.";

@@ -14,7 +14,10 @@ import xiamomc.morph.utilities.NbtUtils;
 import xiamomc.pluginbase.Messages.FormattableMessage;
 
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Map;
+import java.util.UUID;
 
 public class ServerBackend extends DisguiseBackend<ServerDisguise, ServerDisguiseWrapper>
 {

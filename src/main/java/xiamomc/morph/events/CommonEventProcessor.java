@@ -21,7 +21,6 @@ import org.bukkit.inventory.InventoryHolder;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.RevealingHandler;
-import xiamomc.morph.abilities.AbilityManager;
 import xiamomc.morph.abilities.impl.AttributeModifyingAbility;
 import xiamomc.morph.commands.MorphCommandManager;
 import xiamomc.morph.config.ConfigOption;

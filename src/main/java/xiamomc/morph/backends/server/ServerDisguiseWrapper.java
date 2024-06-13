@@ -1,13 +1,9 @@
 package xiamomc.morph.backends.server;
 
 import com.mojang.authlib.GameProfile;
-import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.TagType;
-import org.bukkit.ChatColor;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -20,21 +16,19 @@ import xiamomc.morph.backends.DisguiseWrapper;
 import xiamomc.morph.backends.EventWrapper;
 import xiamomc.morph.backends.WrapperAttribute;
 import xiamomc.morph.backends.WrapperEvent;
-import xiamomc.morph.backends.server.renderer.network.registries.ValueIndex;
-import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.*;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
+import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.AgeableMobWatcher;
+import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.ArmorStandWatcher;
+import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.InventoryLivingWatcher;
 import xiamomc.morph.backends.server.renderer.network.registries.EntryIndex;
+import xiamomc.morph.backends.server.renderer.network.registries.ValueIndex;
 import xiamomc.morph.backends.server.renderer.utilties.WatcherUtils;
 import xiamomc.morph.misc.DisguiseEquipment;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.utilities.NbtUtils;
 
-import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Consumer;
 
 public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
 {

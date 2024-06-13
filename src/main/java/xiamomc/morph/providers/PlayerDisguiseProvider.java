@@ -5,7 +5,6 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.kyori.adventure.text.Component;
 import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
@@ -29,7 +28,6 @@ import xiamomc.pluginbase.Annotations.Resolved;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
 
 public class PlayerDisguiseProvider extends DefaultDisguiseProvider
 {

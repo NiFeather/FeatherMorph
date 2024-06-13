@@ -1,8 +1,5 @@
 package xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types;
 
-import net.kyori.adventure.platform.bukkit.MinecraftComponentSerializer;
-import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;

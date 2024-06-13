@@ -19,8 +19,6 @@ import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.backends.DisguiseBackend;
 import xiamomc.morph.backends.DisguiseWrapper;
 import xiamomc.morph.backends.WrapperEvent;
-import xiamomc.morph.backends.server.ServerDisguise;
-import xiamomc.morph.backends.server.ServerDisguiseWrapper;
 import xiamomc.morph.misc.DisguiseEquipment;
 import xiamomc.morph.misc.DisguiseState;
 

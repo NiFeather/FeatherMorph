@@ -2,7 +2,6 @@ package xiamomc.morph.network.multiInstance.protocol.s2c;
 
 import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.network.multiInstance.protocol.IMasterHandler;
-import xiamomc.morph.network.server.MorphClientHandler;
 
 public class MIS2CDisconnectCommand extends MIS2CCommand<String>
 {

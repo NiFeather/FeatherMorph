@@ -7,8 +7,6 @@ import xiamomc.morph.backends.modelengine.MEBackend;
 import xiamomc.morph.events.api.lifecycle.ManagerFinishedInitializeEvent;
 import xiamomc.morph.providers.ModelEngineProvider;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
 public class ModelEngineHelper extends MorphPluginObject implements Listener
 {
     @EventHandler

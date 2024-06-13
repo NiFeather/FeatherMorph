@@ -3,7 +3,6 @@ package xiamomc.morph.providers;
 import com.ticxo.modelengine.api.ModelEngineAPI;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.kyori.adventure.text.Component;
-import org.apache.maven.model.Model;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;

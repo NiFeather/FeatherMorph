@@ -4,7 +4,6 @@ import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.events.ListeningWhitelist;
 import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.injector.GamePhase;
-import com.sun.jna.platform.win32.Netapi32Util;
 import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;

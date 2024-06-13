@@ -21,13 +21,11 @@ import xiamomc.morph.network.multiInstance.protocol.c2s.MIC2SDisguiseMetaCommand
 import xiamomc.morph.network.multiInstance.protocol.c2s.MIC2SLoginCommand;
 import xiamomc.morph.network.multiInstance.protocol.s2c.*;
 import xiamomc.morph.network.server.MorphClientHandler;
-import xiamomc.morph.storage.playerdata.PlayerMeta;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
 import xiamomc.pluginbase.Exceptions.NullDependencyException;
 
-import java.lang.ref.WeakReference;
 import java.net.URI;
 import java.util.List;
 import java.util.Objects;

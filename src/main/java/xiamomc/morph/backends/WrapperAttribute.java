@@ -1,7 +1,6 @@
 package xiamomc.morph.backends;
 
 import com.mojang.authlib.GameProfile;
-import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
 import org.jetbrains.annotations.NotNull;
 

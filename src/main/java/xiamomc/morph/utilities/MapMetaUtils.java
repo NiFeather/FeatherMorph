@@ -1,11 +1,7 @@
 package xiamomc.morph.utilities;
 
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
-import org.slf4j.ILoggerFactory;
-import org.slf4j.LoggerFactory;
 import xiamomc.morph.network.commands.S2C.clientrender.Equipment;
 
 public class MapMetaUtils

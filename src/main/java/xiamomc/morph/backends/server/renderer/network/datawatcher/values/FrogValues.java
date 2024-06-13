@@ -2,13 +2,10 @@ package xiamomc.morph.backends.server.renderer.network.datawatcher.values;
 
 import com.comphenix.protocol.wrappers.WrappedDataWatcher;
 import net.minecraft.core.Holder;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.animal.FrogVariant;
-import org.bukkit.Bukkit;
-import org.bukkit.craftbukkit.CraftWorld;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.values.basetypes.AnimalValues;
 import xiamomc.morph.backends.server.renderer.utilties.HolderUtils;
 

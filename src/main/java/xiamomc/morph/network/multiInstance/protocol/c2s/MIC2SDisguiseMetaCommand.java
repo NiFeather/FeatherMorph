@@ -1,16 +1,12 @@
 package xiamomc.morph.network.multiInstance.protocol.c2s;
 
-import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.network.multiInstance.protocol.IClientHandler;
-import xiamomc.morph.network.multiInstance.protocol.IMasterHandler;
 import xiamomc.morph.network.multiInstance.protocol.Operation;
 import xiamomc.morph.network.multiInstance.protocol.SocketDisguiseMeta;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 

@@ -3,7 +3,6 @@ package xiamomc.morph.utilities;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Pose;
 import org.bukkit.inventory.ItemStack;
 import xiamomc.morph.misc.DisguiseMeta;
 import xiamomc.morph.misc.NmsRecord;

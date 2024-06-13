@@ -1,11 +1,9 @@
 package xiamomc.morph.updates;
 
 import com.google.gson.annotations.SerializedName;
-import org.slf4j.ILoggerFactory;
 import xiamomc.morph.MorphPlugin;
 
 import java.lang.reflect.Field;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 

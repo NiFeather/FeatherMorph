@@ -1,6 +1,9 @@
 package xiamomc.morph.skills.impl;
 
-import org.bukkit.*;
+import org.bukkit.Difficulty;
+import org.bukkit.FluidCollisionMode;
+import org.bukkit.Location;
+import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.entity.EvokerFangs;
 import org.bukkit.entity.LivingEntity;

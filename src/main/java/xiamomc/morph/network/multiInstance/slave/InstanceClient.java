@@ -3,9 +3,7 @@ package xiamomc.morph.network.multiInstance.slave;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 import org.slf4j.Logger;
-import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.network.multiInstance.protocol.IMasterHandler;
-import xiamomc.pluginbase.Managers.DependencyManager;
 import xiamomc.pluginbase.XiaMoJavaPlugin;
 
 import java.net.ConnectException;

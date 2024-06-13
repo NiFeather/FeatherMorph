@@ -4,9 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.network.multiInstance.protocol.IClientHandler;
-import xiamomc.morph.network.multiInstance.protocol.IMasterHandler;
 import xiamomc.morph.network.multiInstance.protocol.ProtocolLevel;
-import xiamomc.morph.network.multiInstance.protocol.s2c.MIS2CCommand;
 
 public class MIC2SLoginCommand extends MIC2SCommand<String>
 {

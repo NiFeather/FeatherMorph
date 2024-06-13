@@ -1,6 +1,5 @@
 package xiamomc.morph.backends.server;
 
-import com.mojang.authlib.GameProfile;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.nbt.CompoundTag;
 import org.bukkit.ChatColor;

@@ -1,6 +1,5 @@
 package xiamomc.morph.backends.fallback;
 
-import com.mojang.authlib.GameProfile;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.TagType;
@@ -15,13 +14,11 @@ import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.backends.DisguiseWrapper;
 import xiamomc.morph.backends.EventWrapper;
 import xiamomc.morph.backends.WrapperAttribute;
-import xiamomc.morph.backends.WrapperEvent;
 import xiamomc.morph.misc.DisguiseEquipment;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.misc.NetworkingHelper;
 import xiamomc.morph.utilities.NbtUtils;
 
-import java.util.Optional;
 import java.util.UUID;
 
 public class NilWrapper extends EventWrapper<NilDisguise>

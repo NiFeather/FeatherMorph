@@ -8,7 +8,6 @@ import com.mojang.authlib.exceptions.AuthenticationUnavailableException;
 import com.mojang.authlib.yggdrasil.ProfileNotFoundException;
 import net.minecraft.Util;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.entity.player.Player;
 import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

@@ -6,7 +6,6 @@ import org.bukkit.entity.Player;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.LivingEntityWatcher;
 import xiamomc.morph.backends.server.renderer.network.registries.EntryIndex;
 import xiamomc.morph.backends.server.renderer.network.registries.ValueIndex;
-import xiamomc.morph.utilities.NbtUtils;
 
 public class AbstractSlimeWatcher extends LivingEntityWatcher
 {
