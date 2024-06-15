@@ -70,7 +70,7 @@ public class FrogWatcher extends LivingEntityWatcher
 
             try
             {
-                rl = new ResourceLocation(typeString);
+                rl = ResourceLocation.parse(typeString);
                 type = ResourceKey.create(Registries.FROG_VARIANT, rl);
             }
             catch (Throwable t)

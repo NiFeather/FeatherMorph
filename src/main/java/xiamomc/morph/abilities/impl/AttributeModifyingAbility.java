@@ -1,10 +1,12 @@
 package xiamomc.morph.abilities.impl;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.EquipmentSlotGroup;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.abilities.AbilityType;
@@ -13,6 +15,7 @@ import xiamomc.morph.abilities.options.AttributeModifyOption;
 import xiamomc.morph.misc.DisguiseState;
 
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.UUID;
 
 public class AttributeModifyingAbility extends MorphAbility<AttributeModifyOption>
@@ -52,8 +55,22 @@ public class AttributeModifyingAbility extends MorphAbility<AttributeModifyOptio
             if (attributeInstance == null)
                 continue;
 
-            var modifier = new AttributeModifier(UUID.randomUUID(), attributeModifierName,
-                    modifierOption.value, modifierOption.operationType.toBukkitOperation());
+            var operationType = modifierOption.operationType.toBukkitOperation();
+            if (operationType == null)
+            {
+                logger.warn("");
+                return false;
+            }
+
+            var key = Objects.requireNonNull(
+                    NamespacedKey.fromString(
+                            "feathermorph:ability_modifier_"
+                                + RandomStringUtils.randomAlphabetic(12).toLowerCase()
+                    ),
+                    "How?!");
+
+            var modifier = new AttributeModifier(key, modifierOption.value,
+                    operationType, EquipmentSlotGroup.ANY);
 
             attributeInstance.addModifier(modifier);
         }

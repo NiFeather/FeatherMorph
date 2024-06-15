@@ -45,7 +45,7 @@ public class ZombieVillagerWatcher extends ZombieWatcher
         try
         {
             villagerProfession = BuiltInRegistries.VILLAGER_PROFESSION
-                    .getOptional(new ResourceLocation(targetBukkit))
+                    .getOptional(ResourceLocation.parse(targetBukkit))
                     .orElse(VillagerProfession.NONE);
         }
         catch (Throwable t)
@@ -72,7 +72,7 @@ public class ZombieVillagerWatcher extends ZombieWatcher
 
             try
             {
-                rl = new ResourceLocation(nbt.getString("profession"));
+                rl = ResourceLocation.parse(nbt.getString("profession"));
             }
             catch (Throwable t)
             {
@@ -90,7 +90,7 @@ public class ZombieVillagerWatcher extends ZombieWatcher
 
             try
             {
-                rl = new ResourceLocation(nbt.getString("type"));
+                rl = ResourceLocation.parse(nbt.getString("type"));
             }
             catch (Throwable t)
             {

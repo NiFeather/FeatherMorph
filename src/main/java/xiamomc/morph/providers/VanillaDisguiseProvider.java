@@ -1,10 +1,11 @@
 package xiamomc.morph.providers;
 
-import io.papermc.paper.util.CollisionUtil;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.minecraft.nbt.CompoundTag;
 import org.bukkit.Bukkit;
+import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.attribute.AttributeModifier;
@@ -13,6 +14,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.EquipmentSlotGroup;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.backends.DisguiseWrapper;
@@ -25,10 +27,7 @@ import xiamomc.morph.misc.DisguiseMeta;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.misc.DisguiseTypes;
 import xiamomc.morph.misc.NmsRecord;
-import xiamomc.morph.utilities.EntityTypeUtils;
-import xiamomc.morph.utilities.NbtUtils;
-import xiamomc.morph.utilities.NmsUtils;
-import xiamomc.morph.utilities.ReflectionUtils;
+import xiamomc.morph.utilities.*;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
@@ -38,6 +37,7 @@ import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class VanillaDisguiseProvider extends DefaultDisguiseProvider
@@ -151,10 +151,7 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
             var loc = player.getLocation();
             var box = constructedDisguise.getBoundingBoxAt(loc.x(), loc.y(), loc.z());
 
-            var hasCollision = CollisionUtil.getCollisionsForBlocksOrWorldBorder(
-                    NmsRecord.ofPlayer(player).level(), null, box,
-                    new ObjectArrayList<>(), new ObjectArrayList<>(), CollisionUtil.COLLISION_FLAG_CHECK_BORDER, null);
-
+            var hasCollision = CollisionUtils.hasCollisionWithBlockOrBorder(player, box);
             if (hasCollision)
             {
                 player.sendMessage(MessageUtils.prefixes(player, MorphStrings.noEnoughSpaceString()));
@@ -244,7 +241,7 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
             double finalDiff = diff;
             this.executeThenScaleHealth(player, playerAttribute, () ->
             {
-                var modifier = new AttributeModifier(modifierName, finalDiff, AttributeModifier.Operation.ADD_NUMBER);
+                var modifier = new AttributeModifier(healthModifierKey, finalDiff, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.ANY);
                 playerAttribute.addModifier(modifier);
             });
 
@@ -256,6 +253,9 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
             t.printStackTrace();
         }
     }
+
+    @NotNull
+    private static final NamespacedKey healthModifierKey = Objects.requireNonNull(NamespacedKey.fromString("feathermorph:health_modifier"), "How?!");
 
     private void resetPlayerDimensions(Player player)
     {

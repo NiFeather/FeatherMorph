@@ -76,7 +76,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
 
         try
         {
-            var channelLocation = new ResourceLocation(channel);
+            var channelLocation = ResourceLocation.parse(channel);
             var packet = new ClientboundCustomPayloadPacket(new DiscardedPayload(channelLocation, Unpooled.wrappedBuffer(message)));
 
             craftPlayer.getHandle().connection.send(packet);

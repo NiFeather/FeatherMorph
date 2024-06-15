@@ -1,7 +1,5 @@
 package xiamomc.morph.abilities.impl;
 
-import io.papermc.paper.util.CollisionUtil;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
@@ -11,6 +9,7 @@ import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.misc.NmsRecord;
+import xiamomc.morph.utilities.CollisionUtils;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Bindables.Bindable;
 
@@ -41,16 +40,11 @@ public class SpiderAbility extends NoOpOptionAbility
         if (player.isInWater() || player.isSneaking()) return true;
 
         var boundingBox = NmsRecord.ofPlayer(player).getBoundingBox().inflate(0.02f, 0, 0.02f);
-        var level = NmsRecord.ofPlayer(player).level();
+        var hasCollision = CollisionUtils.hasCollisionWithBlockOrBorder(player, boundingBox);
 
         // 检查是否存在碰撞
-        var bb = CollisionUtil.getCollisionsForBlocksOrWorldBorder(level, null,
-                boundingBox, new ObjectArrayList<>(), new ObjectArrayList<>(), CollisionUtil.COLLISION_FLAG_CHECK_BORDER, null);
-
-        var bbBorder = CollisionUtil.getCollisionsForBlocksOrWorldBorder(level, null,
-                boundingBox, new ObjectArrayList<>(), new ObjectArrayList<>(), CollisionUtil.COLLISION_FLAG_CHECK_ONLY, null);
-
-        var hasCollision = bb || bbBorder;
+        // var bb = CollisionUtil.getCollisionsForBlocksOrWorldBorder(level, null,
+        //        boundingBox, new ObjectArrayList<>(), new ObjectArrayList<>(), CollisionUtil.COLLISION_FLAG_CHECK_BORDER, null);
 
         if (hasCollision)
         {

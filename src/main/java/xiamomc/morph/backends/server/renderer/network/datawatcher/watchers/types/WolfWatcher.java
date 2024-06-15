@@ -45,7 +45,7 @@ public class WolfWatcher extends TameableAnimalWatcher
 
             try
             {
-                rl = new ResourceLocation(typeString);
+                rl = ResourceLocation.parse(typeString);
                 type = ResourceKey.create(Registries.WOLF_VARIANT, rl);
             }
             catch (Throwable t)

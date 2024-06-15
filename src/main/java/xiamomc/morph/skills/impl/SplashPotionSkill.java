@@ -55,7 +55,7 @@ public class SplashPotionSkill extends MorphSkill<NoOpConfiguration>
         var potionEffect = new PotionEffect(info.type, info.duration, info.amplifier, false, true);
         meta.addCustomEffect(potionEffect, true);
 
-        var targetPotion = BuiltInRegistries.POTION.get(new ResourceLocation(info.type.getKey().asString()));
+        var targetPotion = BuiltInRegistries.POTION.get(ResourceLocation.parse(info.type.getKey().asString()));
 
         if (info.type == PotionEffectType.INSTANT_HEALTH)
             targetPotion = Potions.HEALING.value();

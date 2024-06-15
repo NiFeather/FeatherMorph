@@ -64,7 +64,7 @@ public class CatWatcher extends TameableAnimalWatcher
     private Holder<CatVariant> bukkitTypeToNmsHolder(Cat.Type bukkitType)
     {
         var bukkitKey = bukkitType.getKey();
-        ResourceLocation key = new ResourceLocation(bukkitKey.namespace(), bukkitKey.getKey());
+        ResourceLocation key = ResourceLocation.fromNamespaceAndPath(bukkitKey.namespace(), bukkitKey.getKey());
 
         var variant = BuiltInRegistries.CAT_VARIANT.getHolder(key);
         if (variant.isEmpty() || !variant.get().isBound())
