@@ -357,20 +357,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
 
             if (instance == null) continue;
 
-            var matches = instance.getModifiers()
-                    .stream().filter(m -> m.getName().equalsIgnoreCase(AttributeModifyingAbility.attributeModifierName))
-                    .toList();
-
-            try
-            {
-                //this.scheduleOn(player, () -> matches.forEach(instance::removeModifier));
-                matches.forEach(instance::removeModifier);
-            }
-            catch (Throwable t)
-            {
-                logger.warn("Error occurred while removing modifiers: " + t.getMessage());
-                t.printStackTrace();
-            }
+            instance.removeModifier(AttributeModifyingAbility.modifierKey);
         }
 
         if (state != null)

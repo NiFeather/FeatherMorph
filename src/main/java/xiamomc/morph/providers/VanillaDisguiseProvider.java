@@ -257,7 +257,7 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
     }
 
     @NotNull
-    private static final NamespacedKey healthModifierKey = Objects.requireNonNull(NamespacedKey.fromString("feathermorph:health_modifier"), "How?!");
+    public static final NamespacedKey healthModifierKey = Objects.requireNonNull(NamespacedKey.fromString("feathermorph:health_modifier"), "How?!");
 
     private void resetPlayerDimensions(Player player)
     {
@@ -343,8 +343,6 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
         }
     }
 
-    private final String modifierName = "FeatherMorphVDP_Modifier";
-
     private void executeThenScaleHealth(Player player, AttributeInstance attributeInstance, Runnable runnable)
     {
         var currentPercent = player.getHealth() / attributeInstance.getValue();
@@ -360,12 +358,7 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
         var attribute = player.getAttribute(Attribute.GENERIC_MAX_HEALTH);
         assert attribute != null;
 
-        this.executeThenScaleHealth(player, attribute, () ->
-        {
-            attribute.getModifiers().stream()
-                    .filter(m -> m.getName().equals(modifierName)).collect(Collectors.toSet())
-                    .forEach(attribute::removeModifier);
-        });
+        this.executeThenScaleHealth(player, attribute, () -> attribute.removeModifier(healthModifierKey));
     }
 
     @Override

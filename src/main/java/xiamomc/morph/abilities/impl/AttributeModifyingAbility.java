@@ -62,14 +62,7 @@ public class AttributeModifyingAbility extends MorphAbility<AttributeModifyOptio
                 return false;
             }
 
-            var key = Objects.requireNonNull(
-                    NamespacedKey.fromString(
-                            "feathermorph:ability_modifier_"
-                                + RandomStringUtils.randomAlphabetic(12).toLowerCase()
-                    ),
-                    "How?!");
-
-            var modifier = new AttributeModifier(key, modifierOption.value,
+            var modifier = new AttributeModifier(modifierKey, modifierOption.value,
                     operationType, EquipmentSlotGroup.ANY);
 
             attributeInstance.addModifier(modifier);
@@ -78,7 +71,7 @@ public class AttributeModifyingAbility extends MorphAbility<AttributeModifyOptio
         return super.applyToPlayer(player, state);
     }
 
-    public static final String attributeModifierName = "FMAbilityModifier";
+    public static final NamespacedKey modifierKey = Objects.requireNonNull(NamespacedKey.fromString("feathermorph:ability_modifier"), "How?!");
 
     @Override
     public boolean revokeFromPlayer(Player player, DisguiseState state)
@@ -95,11 +88,7 @@ public class AttributeModifyingAbility extends MorphAbility<AttributeModifyOptio
 
             if (attributeInstance == null) continue;
 
-            var modifiers = attributeInstance.getModifiers().stream()
-                    .filter(a -> a.getName().equals(attributeModifierName))
-                    .toList();
-
-            modifiers.forEach(attributeInstance::removeModifier);
+            attributeInstance.removeModifier(modifierKey);
         }
 
         return true;
