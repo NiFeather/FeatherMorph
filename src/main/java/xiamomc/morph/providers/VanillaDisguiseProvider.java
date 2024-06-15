@@ -242,6 +242,8 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
             this.executeThenScaleHealth(player, playerAttribute, () ->
             {
                 var modifier = new AttributeModifier(healthModifierKey, finalDiff, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.ANY);
+
+                playerAttribute.removeModifier(healthModifierKey);
                 playerAttribute.addModifier(modifier);
             });
 
