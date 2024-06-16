@@ -43,31 +43,28 @@ public class PlayerWatcher extends InventoryLivingWatcher
     {
         super.onCustomWrite(key, oldVal, newVal);
 
-        if (isPlayerOnline())
+        if (key.equals(EntryIndex.PROFILE) && isPlayerOnline())
         {
             var player = getBindingPlayer();
 
-            if (key.equals(EntryIndex.PROFILE))
+            var profile = newVal == null
+                    ? new GameProfile(UUID.randomUUID(), this.getOrDefault(EntryIndex.DISGUISE_NAME, ""))
+                    : (GameProfile) newVal;
+
+            var spawnPackets = getPacketFactory()
+                    .buildSpawnPackets(player,
+                            new DisplayParameters(this.getEntityType(), this, profile));
+
+            var packetRemove = PacketContainer.fromPacket(new ClientboundRemoveEntitiesPacket(player.getEntityId()));
+            var protocol = ProtocolLibrary.getProtocolManager();
+
+            var affected = getAffectedPlayers(player);
+            affected.forEach(p ->
             {
-                var profile = newVal == null
-                        ? new GameProfile(UUID.randomUUID(), this.getOrDefault(EntryIndex.DISGUISE_NAME, ""))
-                        : (GameProfile) newVal;
+                protocol.sendServerPacket(p, packetRemove);
 
-                var spawnPackets = getPacketFactory()
-                        .buildSpawnPackets(player,
-                                new DisplayParameters(this.getEntityType(), this, profile));
-
-                var packetRemove = PacketContainer.fromPacket(new ClientboundRemoveEntitiesPacket(player.getEntityId()));
-                var protocol = ProtocolLibrary.getProtocolManager();
-
-                var affected = getAffectedPlayers(player);
-                affected.forEach(p ->
-                {
-                    protocol.sendServerPacket(p, packetRemove);
-
-                    spawnPackets.forEach(packet -> protocol.sendServerPacket(p, packet));
-                });
-            }
+                spawnPackets.forEach(packet -> protocol.sendServerPacket(p, packet));
+            });
         }
     }
 }
