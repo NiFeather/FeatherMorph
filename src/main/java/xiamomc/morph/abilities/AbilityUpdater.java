@@ -149,7 +149,10 @@ public class AbilityUpdater extends MorphPluginObject
         registeredAbilities.forEach(pair ->
         {
             if (pair.right())
+            {
+                pair.left().revokeFromPlayer(player(), parentState);
                 pair.left().applyToPlayer(player(), parentState);
+            }
         });
     }
 
