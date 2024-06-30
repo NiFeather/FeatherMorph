@@ -18,6 +18,7 @@ import xiamomc.morph.misc.DisguiseEquipment;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.misc.NetworkingHelper;
 import xiamomc.morph.utilities.NbtUtils;
+import xiamomc.pluginbase.Annotations.Resolved;
 
 import java.util.UUID;
 
@@ -26,7 +27,11 @@ public class NilWrapper extends EventWrapper<NilDisguise>
     public NilWrapper(@NotNull NilDisguise instance, NilBackend backend)
     {
         super(instance, backend);
+
+        this.backend = backend;
     }
+
+    private final NilBackend backend;
 
     private final DisguiseEquipment equipment = new DisguiseEquipment();
 
@@ -157,8 +162,6 @@ public class NilWrapper extends EventWrapper<NilDisguise>
     {
     }
 
-    private final NetworkingHelper networkingHelper = new NetworkingHelper();
-
     @Nullable
     private Player bindingPlayer;
 
@@ -178,7 +181,7 @@ public class NilWrapper extends EventWrapper<NilDisguise>
     {
         if (attribute.equals(WrapperAttribute.displayFakeEquip) && getBindingPlayer() != null)
         {
-            networkingHelper.prepareMeta(getBindingPlayer())
+            backend.getNetworkingHelper().prepareMeta(getBindingPlayer())
                     .setDisguiseEquipmentShown(Boolean.TRUE.equals(value))
                     .send();
 

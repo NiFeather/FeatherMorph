@@ -23,7 +23,7 @@ import java.util.HashMap;
 
 public class NetworkingHelper extends MorphPluginObject
 {
-    @Resolved
+    @Resolved(shouldSolveImmediately = true)
     private MorphClientHandler clientHandler;
 
     /**

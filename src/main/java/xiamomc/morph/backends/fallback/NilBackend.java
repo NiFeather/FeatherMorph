@@ -1,5 +1,6 @@
 package xiamomc.morph.backends.fallback;
 
+import com.google.common.graph.Network;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.bukkit.Bukkit;
@@ -117,7 +118,13 @@ public class NilBackend extends DisguiseBackend<NilDisguise, NilWrapper>
 
     private final Map<Player, NilWrapper> playerFallbackWrapperMap = new Object2ObjectOpenHashMap<>();
 
-    private final NetworkingHelper networkingHelper = new NetworkingHelper();
+    @Resolved(shouldSolveImmediately = true)
+    private NetworkingHelper networkingHelper;
+
+    NetworkingHelper getNetworkingHelper()
+    {
+        return networkingHelper;
+    }
 
     @Override
     public boolean disguise(Player player, DisguiseWrapper<?> rawWrapper)
