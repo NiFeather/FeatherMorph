@@ -857,6 +857,9 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                         clientHandler.getPlayerOption(player, true), playerMorphConfig);
                 this.disguiseStates.add(outComingState);
 
+                // 向Wrapper写入伪装ID
+                result.wrapperInstance().write(WrapperAttribute.disguiseIdentifier, disguiseIdentifier);
+
                 // 在初始化服务端伪装状态后，交由后端来为玩家套上伪装
                 var backendSuccess = result.wrapperInstance().getBackend().disguise(player, result.wrapperInstance());
                 if (!backendSuccess)
@@ -986,9 +989,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         // 切换CD
         skillHandler.switchCooldown(player.getUniqueId(), cdInfo);
-
-        // 向Wrapper写入伪装ID
-        wrapper.write(WrapperAttribute.identifier, state.getDisguiseIdentifier());
 
         // 调用事件
         new PlayerMorphEvent(player, state).callEvent();

@@ -9,7 +9,7 @@ import java.util.function.Function;
 
 public class WrapperAttribute<T>
 {
-    public static final WrapperAttribute<String> identifier = new WrapperAttribute<>("identifier", (o) -> "nil");
+    public static final WrapperAttribute<String> disguiseIdentifier = new WrapperAttribute<>("disguiseIdentifier", (o) -> "nil");
     public static final WrapperAttribute<Boolean> showArms = new WrapperAttribute<>("show_arms", (o) -> false);
     public static final WrapperAttribute<Optional<GameProfile>> profile = new WrapperAttribute<>("profile", (o) -> Optional.empty());
     public static final WrapperAttribute<CompoundTag> nbt = new WrapperAttribute<>("nbt", (o) -> new CompoundTag());

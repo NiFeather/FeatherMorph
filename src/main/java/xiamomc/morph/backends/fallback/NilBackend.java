@@ -132,7 +132,7 @@ public class NilBackend extends DisguiseBackend<NilDisguise, NilWrapper>
 
         var players = new ObjectArrayList<>(Bukkit.getOnlinePlayers());
         players.remove(player);
-        var cmd = new S2CRenderMapAddCommand(player.getEntityId(), wrapper.read(WrapperAttribute.identifier));
+        var cmd = new S2CRenderMapAddCommand(player.getEntityId(), wrapper.readOrThrow(WrapperAttribute.disguiseIdentifier));
         players.forEach(p -> clientHandler.sendCommand(p, cmd));
 
         networkingHelper.prepareMeta(player)
