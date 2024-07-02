@@ -9,7 +9,9 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.*;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.DefaultAttributes;
 import net.minecraft.world.level.GameType;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.craftbukkit.entity.CraftEntity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -165,6 +167,12 @@ public class PacketFactory extends MorphPluginObject
 
         if (!player.getPassengers().isEmpty())
             packets.add(PacketContainer.fromPacket(new ClientboundSetPassengersPacket(nmsPlayer)));
+
+        //Attributes
+        //TODO: Remove invalid attributes for the disguise
+        var attributes = nmsPlayer.getAttributes().getSyncableAttributes();
+        var attributePacket = new ClientboundUpdateAttributesPacket(player.getEntityId(), attributes);
+        packets.add(PacketContainer.fromPacket(attributePacket));
 
         for (PacketContainer packet : packets)
             packet.setMeta(MORPH_PACKET_METAKEY, true);
