@@ -1,9 +1,6 @@
 package xiamomc.morph.utilities;
 
-import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import it.unimi.dsi.fastutil.objects.ObjectList;
-import it.unimi.dsi.fastutil.objects.ObjectLists;
+import it.unimi.dsi.fastutil.objects.*;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerLevel;
@@ -79,9 +76,7 @@ public class NmsUtils
         var nmsType = EntityTypeUtils.getNmsType(bukkitType);
 
         if (nmsType == null) return List.of();
-
-        var nmsEntity = EntityTypeUtils.createEntityThenDispose(nmsType);
-        if (!(nmsEntity instanceof LivingEntity livingEntity)) return List.of();
+        if (!DefaultAttributes.hasSupplier(nmsType)) return List.of();
 
         // 因为AttributeMap是lazy init，所以我们需要先遍历一遍才能知道哪些属性可以同步
         var lists = ReflectionUtils.getFields(new Attributes(), Holder.class, false);
@@ -91,6 +86,9 @@ public class NmsUtils
 
         // 遍历Attributes中已知的所有属性
         // 没有使用BuiltInRegistries是因为我不知道怎么做... :(
+
+        Map<Holder<Attribute>, AttributeInstance> attributesTempMap = new Object2ObjectOpenHashMap<>();
+
         holders.forEach(f ->
         {
             Holder<?> holder;
@@ -112,8 +110,8 @@ public class NmsUtils
                     throw new IllegalArgumentException("The field '%s' is not a Holder type! Got '%s'".formatted(f.getName(), f.getType()));
 
                 // 激活属性map
-                // TODO: 查看一下AttributeMap中的实现，争取不创建实体就能获取默认的属性
-                livingEntity.getAttribute((Holder<Attribute>) holder);
+                var supplier = DefaultAttributes.getSupplier((net.minecraft.world.entity.EntityType<? extends LivingEntity>) nmsType);
+                attributesTempMap.computeIfAbsent((Holder<Attribute>) holder, holderx -> supplier.createInstance(mod -> {}, holderx));
             }
             catch (Throwable t)
             {
@@ -121,10 +119,14 @@ public class NmsUtils
             }
         });
 
-        var validAttributes = livingEntity.getAttributes().getSyncableAttributes().stream()
-                .filter(instance -> !instance.getAttribute().getRegisteredName().equals("[unregistered]")) // 忽略未注册在案的属性
-                .map(instance -> instance.getAttribute().getRegisteredName()) // 转换为idMap
-                .collect(Collectors.toCollection(ObjectArrayList::new)); // ToList
+        var validAttributes = attributesTempMap.values().stream()
+                .filter(instance ->
+                {
+                    return instance.getAttribute().value().isClientSyncable()
+                            && !instance.getAttribute().getRegisteredName().equals("[unregistered]");
+                })
+                .map(instance -> instance.getAttribute().getRegisteredName())
+                .collect(Collectors.toCollection(ObjectArrayList::new));
 
         syncableAttributesMap.put(bukkitType, ObjectLists.unmodifiable(validAttributes));
 
