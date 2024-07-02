@@ -5,13 +5,12 @@ import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.wrappers.WrappedDataValue;
 import com.comphenix.protocol.wrappers.WrappedDataWatcher;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.*;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
-import net.minecraft.world.entity.ai.attributes.DefaultAttributes;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.level.GameType;
-import org.bukkit.attribute.Attribute;
 import org.bukkit.craftbukkit.entity.CraftEntity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -28,6 +27,7 @@ import xiamomc.morph.misc.DisguiseEquipment;
 import xiamomc.morph.misc.MorphGameProfile;
 import xiamomc.morph.misc.NmsRecord;
 import xiamomc.morph.utilities.EntityTypeUtils;
+import xiamomc.morph.utilities.NmsUtils;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Bindables.Bindable;
 
@@ -168,11 +168,17 @@ public class PacketFactory extends MorphPluginObject
         if (!player.getPassengers().isEmpty())
             packets.add(PacketContainer.fromPacket(new ClientboundSetPassengersPacket(nmsPlayer)));
 
-        //Attributes
-        //TODO: Remove invalid attributes for the disguise
-        var attributes = nmsPlayer.getAttributes().getSyncableAttributes();
-        var attributePacket = new ClientboundUpdateAttributesPacket(player.getEntityId(), attributes);
-        packets.add(PacketContainer.fromPacket(attributePacket));
+        var bukkitEntityType = parameters.getEntityType();
+        if (bukkitEntityType.isAlive())
+        {
+            //Attributes
+            List<AttributeInstance> attributes = bukkitEntityType == EntityType.PLAYER
+                    ? new ObjectArrayList<>(nmsPlayer.getAttributes().getSyncableAttributes())
+                    : NmsUtils.getValidAttributes(bukkitEntityType, nmsPlayer.getAttributes());
+
+            var attributePacket = new ClientboundUpdateAttributesPacket(player.getEntityId(), attributes);
+            packets.add(PacketContainer.fromPacket(attributePacket));
+        }
 
         for (PacketContainer packet : packets)
             packet.setMeta(MORPH_PACKET_METAKEY, true);

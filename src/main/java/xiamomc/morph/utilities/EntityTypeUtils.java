@@ -60,8 +60,18 @@ public class EntityTypeUtils
     {
     }
 
+    // Hope this will work with Folia
+    // I guess it will...
+    public static <T extends Entity> T createEntityThenDispose(net.minecraft.world.entity.EntityType<T> nmsType)
+    {
+        var world = Bukkit.getWorlds().get(0);
+        var serverWorld = ((CraftWorld) world).getHandle();
+
+        return nmsType.create(serverWorld, EntityTypeUtils::scheduleEntityDiscard, BlockPos.ZERO, MobSpawnType.COMMAND, false, false);
+    }
+
     @NotNull
-    public static SoundInfo getAmbientSound(EntityType bukkitType, @Nullable World world)
+    public static SoundInfo getAmbientSound(EntityType bukkitType)
     {
         if (bukkitType == EntityType.UNKNOWN)
             return new SoundInfo(null, SoundSource.PLAYERS, Integer.MAX_VALUE, 1);
@@ -69,11 +79,7 @@ public class EntityTypeUtils
         var cache = typeSoundMap.getOrDefault(bukkitType, null);
         if (cache != null) return cache;
 
-        var nmsType = getNmsType(bukkitType);
-
-        if (world == null) world = Bukkit.getWorlds().get(0);
-        var serverWorld = ((CraftWorld) world).getHandle();
-        var entity = nmsType.create(serverWorld, EntityTypeUtils::scheduleEntityDiscard, BlockPos.ZERO, MobSpawnType.COMMAND, false, false);
+        var entity = createEntityThenDispose(getNmsType(bukkitType));
 
         if (entity instanceof Mob mob)
         {
@@ -90,17 +96,26 @@ public class EntityTypeUtils
         return new SoundInfo(null, SoundSource.PLAYERS, Integer.MAX_VALUE, 1);
     }
 
+    private static final Map<EntityType, net.minecraft.world.entity.EntityType<?>> nmsTypeMap = new Object2ObjectArrayMap<>();
+
     @Nullable
     public static net.minecraft.world.entity.EntityType<?> getNmsType(@NotNull EntityType bukkitType)
     {
+        var cachedResult = nmsTypeMap.get(bukkitType);
+        if (cachedResult != null) return cachedResult;
+
         if (bukkitType == EntityType.UNKNOWN) return null;
 
-        return net.minecraft.world.entity.EntityType.byString(bukkitType.key().asString())
+        var result = net.minecraft.world.entity.EntityType.byString(bukkitType.key().asString())
                 .orElse(null);
+
+        nmsTypeMap.put(bukkitType, result);
+
+        return result;
     }
 
     @Nullable
-    public static Class<? extends Entity> getNmsClass(@NotNull EntityType type, @Nullable World world)
+    public static Class<? extends Entity> getNmsClass(@NotNull EntityType type)
     {
         var cache = nmsClassMap.getOrDefault(type, null);
         if (cache != null) return cache;
@@ -114,9 +129,7 @@ public class EntityTypeUtils
             return null;
         }
 
-        if (world == null) world = Bukkit.getWorlds().get(0);
-        var serverWorld = ((CraftWorld) world).getHandle();
-        var entity = nmsType.create(serverWorld, EntityTypeUtils::scheduleEntityDiscard, BlockPos.ZERO, MobSpawnType.COMMAND, false, false);
+        var entity = createEntityThenDispose(nmsType);
 
         if (entity == null)
         {
