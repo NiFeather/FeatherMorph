@@ -69,14 +69,16 @@ public class NmsUtils
     {
         var logger = MorphPlugin.getInstance().getSLF4JLogger();
         var cached = syncableAttributesMap.getOrDefault(bukkitType, null);
-        if (cached != null) return cached;
+        if (cached != null)
+            return cached;
 
-        if (!bukkitType.isAlive()) return List.of();
+        if (!bukkitType.isAlive())
+            return List.of();
 
         var nmsType = EntityTypeUtils.getNmsType(bukkitType);
 
-        if (nmsType == null) return List.of();
-        if (!DefaultAttributes.hasSupplier(nmsType)) return List.of();
+        if (nmsType == null || !DefaultAttributes.hasSupplier(nmsType))
+            return List.of();
 
         // 因为AttributeMap是lazy init，所以我们需要先遍历一遍才能知道哪些属性可以同步
         var lists = ReflectionUtils.getFields(new Attributes(), Holder.class, false);
