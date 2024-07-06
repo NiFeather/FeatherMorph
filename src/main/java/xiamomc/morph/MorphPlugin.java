@@ -1,6 +1,8 @@
 package xiamomc.morph;
 
+import com.github.retrooper.packetevents.PacketEvents;
 import com.ticxo.modelengine.api.ModelEngineAPI;
+import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
@@ -92,9 +94,22 @@ public final class MorphPlugin extends XiaMoJavaPlugin
     private TargetingEventProcessor targetingEventProcessor;
 
     @Override
+    public void onLoad()
+    {
+        super.onLoad();
+
+        PacketEvents.setAPI(SpigotPacketEventsBuilder.build(this));
+        PacketEvents.getAPI().getSettings().reEncodeByDefault(true).checkForUpdates(false);
+
+        PacketEvents.getAPI().load();
+    }
+
+    @Override
     public void onEnable()
     {
         super.onEnable();
+
+        PacketEvents.getAPI().init();
 
         pluginManager = Bukkit.getPluginManager();
         var bukkitVersion = Bukkit.getMinecraftVersion();
@@ -251,6 +266,8 @@ public final class MorphPlugin extends XiaMoJavaPlugin
             var messenger = this.getServer().getMessenger();
 
             messenger.unregisterOutgoingPluginChannel(this);
+
+            PacketEvents.getAPI().terminate();
         }
         catch (Exception e)
         {

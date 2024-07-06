@@ -1,15 +1,14 @@
 package xiamomc.morph.backends.server.renderer.network.listeners;
 
-import com.comphenix.protocol.PacketType;
-import com.comphenix.protocol.events.ListeningWhitelist;
-import com.comphenix.protocol.events.PacketEvent;
-import com.comphenix.protocol.injector.GamePhase;
-import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
+import com.github.retrooper.packetevents.event.PacketSendEvent;
+import com.github.retrooper.packetevents.protocol.packettype.PacketType;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityMetadata;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import xiamomc.morph.backends.server.renderer.network.PacketFactory;
 import xiamomc.morph.backends.server.renderer.network.registries.RenderRegistry;
 import xiamomc.morph.backends.server.renderer.network.registries.ValueIndex;
+import xiamomc.morph.backends.server.renderer.utilties.PacketUtils;
 import xiamomc.pluginbase.Annotations.Resolved;
 
 public class MetaPacketListener extends ProtocolListener
@@ -23,25 +22,27 @@ public class MetaPacketListener extends ProtocolListener
         return "meta_listener";
     }
 
-    @Override
-    public void onPacketSending(PacketEvent event)
+
+    public void onPacketSending(PacketSendEvent event)
     {
         if (event.getPacketType() != PacketType.Play.Server.ENTITY_METADATA)
             return;
 
-        var packet = event.getPacket();
+        var wrapper = new WrapperPlayServerEntityMetadata(event);
 
-        //不要处理来自我们自己的包
-        if (packet.getMeta(PacketFactory.MORPH_PACKET_METAKEY).isPresent())
+        if (PacketUtils.isPacketOurs(wrapper))
+        {
+            PacketUtils.removeMark(wrapper);
             return;
+        }
 
-        onMetaPacket((ClientboundSetEntityDataPacket) event.getPacket().getHandle(), event);
+        onMetaPacket(wrapper, event);
     }
 
-    private void onMetaPacket(ClientboundSetEntityDataPacket packet, PacketEvent packetEvent)
+    private void onMetaPacket(WrapperPlayServerEntityMetadata packet, PacketSendEvent packetEvent)
     {
         //获取此包的来源实体
-        var sourceNmsEntity = getNmsPlayerEntityFrom(packetEvent, packet.id());
+        var sourceNmsEntity = getNmsPlayerEntityFrom(packet.getEntityId());
 
         // How could this be?!
         if (sourceNmsEntity == null)
@@ -63,41 +64,9 @@ public class MetaPacketListener extends ProtocolListener
         if (targetPlayer == sourcePlayer)
             return;
 
-        //不要二次处理来自我们自己的包
-        //并且不要处理同为玩家的Meta包
-        var packetContainer = packetEvent.getPacket();
-        var meta = packetContainer.getMeta(PacketFactory.MORPH_PACKET_METAKEY);
-        if (meta.isEmpty() && watcher.getEntityType() != EntityType.PLAYER)
-        {
-            //取得来源玩家的伪装后的Meta，发送给目标玩家
-            //从包里移除玩家meta中不属于BASE_LIVING的部分
-            var finalPacket = getFactory().removeNonLivingValues(ValueIndex.BASE_LIVING, packetContainer);
-
-            if (finalPacket.getDataValueCollectionModifier().size() == 0)
-                packetEvent.setCancelled(true);
-
-            packetEvent.setPacket(finalPacket);
-        }
-    }
-
-    @Override
-    public void onPacketReceiving(PacketEvent event)
-    {
-    }
-
-    @Override
-    public ListeningWhitelist getSendingWhitelist()
-    {
-        return ListeningWhitelist
-                .newBuilder()
-                .types(PacketType.Play.Server.ENTITY_METADATA)
-                .gamePhase(GamePhase.PLAYING)
-                .build();
-    }
-
-    @Override
-    public ListeningWhitelist getReceivingWhitelist()
-    {
-        return ListeningWhitelist.EMPTY_WHITELIST;
+        // 不要处理同为玩家的Meta包
+        // 如果不是玩家伪装，则从包里移除玩家meta中不属于BASE_LIVING的部分
+        if (watcher.getEntityType() != EntityType.PLAYER)
+            packet.setEntityMetadata(getFactory().removeNonLivingValues(ValueIndex.BASE_LIVING, packet.getEntityMetadata()));
     }
 }

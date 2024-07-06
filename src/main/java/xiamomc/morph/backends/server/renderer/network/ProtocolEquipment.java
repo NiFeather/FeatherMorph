@@ -1,6 +1,8 @@
 package xiamomc.morph.backends.server.renderer.network;
 
+import com.github.retrooper.packetevents.protocol.player.Equipment;
 import com.mojang.datafixers.util.Pair;
+import io.github.retrooper.packetevents.util.SpigotConversionUtil;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
@@ -10,8 +12,27 @@ import org.bukkit.inventory.EntityEquipment;
 import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.utilities.ItemUtils;
 
+import java.util.List;
+
 public class ProtocolEquipment
 {
+    public static List<Equipment> toPacketEventsEquipmentList(EntityEquipment equipment)
+    {
+        var list = new ObjectArrayList<Equipment>();
+
+        boolean noBody = equipment instanceof CraftInventoryPlayer;
+
+        for (org.bukkit.inventory.EquipmentSlot bukkitSlot : org.bukkit.inventory.EquipmentSlot.values())
+        {
+            if (noBody && bukkitSlot == org.bukkit.inventory.EquipmentSlot.BODY) continue;
+
+            list.add(new Equipment(com.github.retrooper.packetevents.protocol.player.EquipmentSlot.values()[bukkitSlot.ordinal()],
+                    SpigotConversionUtil.fromBukkitItemStack(equipment.getItem(bukkitSlot))));
+        }
+
+        return list;
+    }
+
     public static ObjectArrayList<Pair<EquipmentSlot, ItemStack>> toPairs(EntityEquipment equipment)
     {
         var list = new ObjectArrayList<Pair<EquipmentSlot, ItemStack>>();

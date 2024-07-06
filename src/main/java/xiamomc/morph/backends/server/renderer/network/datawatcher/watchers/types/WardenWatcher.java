@@ -1,6 +1,6 @@
 package xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types;
 
-import com.comphenix.protocol.events.PacketContainer;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityStatus;
 import net.minecraft.network.protocol.game.ClientboundEntityEventPacket;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.EntityType;
@@ -23,7 +23,7 @@ public class WardenWatcher extends EHasAttackAnimationWatcher
         if (key.equals(EntryIndex.WARDEN_CHARGING_ATTACK) && Boolean.TRUE.equals(newVal))
         {
             var entity = ((CraftPlayer)getBindingPlayer()).getHandle();
-            sendPacketToAffectedPlayers(PacketContainer.fromPacket(new ClientboundEntityEventPacket(entity, (byte)62)));
+            sendPacketToAffectedPlayers(new WrapperPlayServerEntityStatus(entity.getId(), 62));
         }
     }
 }

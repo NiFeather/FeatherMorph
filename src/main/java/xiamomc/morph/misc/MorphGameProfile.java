@@ -1,11 +1,15 @@
 package xiamomc.morph.misc;
 
 import com.destroystokyo.paper.profile.PlayerProfile;
+import com.github.retrooper.packetevents.protocol.player.TextureProperty;
+import com.github.retrooper.packetevents.protocol.player.UserProfile;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -87,4 +91,19 @@ public class MorphGameProfile extends GameProfile
         return map;
     }
 
+    public static UserProfile toPacketEventsUserProfile(GameProfile profile)
+    {
+        var userProfile = new UserProfile(profile.getId(), profile.getName());
+
+        List<TextureProperty> propertyList = new ObjectArrayList<>();
+        profile.getProperties().forEach((str, property) ->
+        {
+            var textureProperty = new TextureProperty(property.name(), property.value(), property.signature());
+            propertyList.add(textureProperty);
+        });
+
+        userProfile.setTextureProperties(propertyList);
+
+        return userProfile;
+    }
 }

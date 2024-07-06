@@ -1,30 +1,30 @@
 package xiamomc.morph.backends.server.renderer.network.datawatcher.values;
 
-import com.comphenix.protocol.wrappers.WrappedDataWatcher;
-import net.minecraft.core.Holder;
+import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.animal.FrogVariant;
+import org.bukkit.Bukkit;
+import org.bukkit.craftbukkit.CraftWorld;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.values.basetypes.AnimalValues;
 import xiamomc.morph.backends.server.renderer.utilties.HolderUtils;
 
 public class FrogValues extends AnimalValues
 {
-    public final SingleValue<Holder<FrogVariant>> FROG_VARIANT = getSingle("frog_variant", getFrogVariant(FrogVariant.TEMPERATE))
+    public final SingleValue<Integer> FROG_VARIANT = getSingle("frog_variant", getFrogVariant(FrogVariant.TEMPERATE), EntityDataTypes.INT)
             .withRandom(getFrogVariant(FrogVariant.TEMPERATE), getFrogVariant(FrogVariant.COLD), getFrogVariant(FrogVariant.WARM));
 
-    private Holder<FrogVariant> getFrogVariant(ResourceKey<FrogVariant> key)
+    private int getFrogVariant(ResourceKey<FrogVariant> key)
     {
-        return HolderUtils.getHolderFor(key, Registries.FROG_VARIANT);
+        var registryAccess = ((CraftWorld)Bukkit.getWorlds().get(0)).getHandle().registryAccess().registry(Registries.FROG_VARIANT);
+        var holder = HolderUtils.getHolderFor(key, Registries.FROG_VARIANT);
+
+        return registryAccess.get().getId(holder.value());
     }
 
     public FrogValues()
     {
         super();
-
-        var handle = WrappedDataWatcher.Registry.fromHandle(EntityDataSerializers.FROG_VARIANT);
-        FROG_VARIANT.setSerializer(handle);
 
         registerSingle(FROG_VARIANT);
     }

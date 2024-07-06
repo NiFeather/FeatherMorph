@@ -1,17 +1,18 @@
 package xiamomc.morph.backends.server.renderer.network;
 
-import com.comphenix.protocol.PacketType;
-import com.comphenix.protocol.events.PacketContainer;
-import com.comphenix.protocol.wrappers.WrappedDataValue;
-import com.comphenix.protocol.wrappers.WrappedDataWatcher;
+import com.github.retrooper.packetevents.protocol.attribute.Attributes;
+import com.github.retrooper.packetevents.protocol.entity.data.EntityData;
+import com.github.retrooper.packetevents.protocol.player.Equipment;
+import com.github.retrooper.packetevents.protocol.player.GameMode;
+import com.github.retrooper.packetevents.resources.ResourceLocation;
+import com.github.retrooper.packetevents.util.Vector3d;
+import com.github.retrooper.packetevents.wrapper.PacketWrapper;
+import com.github.retrooper.packetevents.wrapper.play.server.*;
+import io.github.retrooper.packetevents.util.SpigotConversionUtil;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.protocol.game.*;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
-import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.level.GameType;
-import org.bukkit.craftbukkit.entity.CraftEntity;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.EntityEquipment;
@@ -20,7 +21,7 @@ import xiamomc.morph.backends.server.renderer.network.datawatcher.values.Abstrac
 import xiamomc.morph.backends.server.renderer.network.datawatcher.values.SingleValue;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
 import xiamomc.morph.backends.server.renderer.network.registries.EntryIndex;
-import xiamomc.morph.backends.server.renderer.utilties.ProtocolRegistryUtils;
+import xiamomc.morph.backends.server.renderer.utilties.PacketUtils;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.misc.DisguiseEquipment;
@@ -35,8 +36,6 @@ import java.util.*;
 
 public class PacketFactory extends MorphPluginObject
 {
-    public static final String MORPH_PACKET_METAKEY = "fm";
-
     private final Bindable<String> randomBase = new Bindable<>("Stateof");
 
     @Initializer
@@ -45,9 +44,9 @@ public class PacketFactory extends MorphPluginObject
         config.bind(randomBase, ConfigOption.UUID_RANDOM_BASE);
     }
 
-    public List<PacketContainer> buildSpawnPackets(Player player, DisplayParameters parameters)
+    public List<PacketWrapper<?>> buildSpawnPackets(Player player, DisplayParameters parameters)
     {
-        List<PacketContainer> packets = new ObjectArrayList<>();
+        List<PacketWrapper<?>> packets = new ObjectArrayList<>();
 
         //logger.info("Build spawn packets, player is " + player.getName() + " :: parameters are " + parameters);
 
@@ -82,20 +81,19 @@ public class PacketFactory extends MorphPluginObject
                 gameProfile.setUUID(UUID.nameUUIDFromBytes(str.getBytes()));
             }
 
+            // 如果此伪装在TAB里留有一个Entry，那么移除它。
             var lastUUID = parameters.getWatcher().getOrDefault(EntryIndex.TABLIST_UUID, null);
 
             if (lastUUID != null)
             {
                 gameProfile.setUUID(lastUUID);
-
-                var packetTabRemove = new ClientboundPlayerInfoRemovePacket(List.of(lastUUID));
-                packets.add(PacketContainer.fromPacket(packetTabRemove));
+                packets.add(new WrapperPlayServerPlayerInfoRemove(List.of(lastUUID)));
             }
 
             //Minecraft需要在生成玩家实体前先发送PlayerInfoUpdate消息
             var uuid = gameProfile.getId();
 
-            var profileName =  gameProfile.getName();
+            var profileName = gameProfile.getName();
             if (profileName.length() > 16)
             {
                 logger.warn("Profile name '%s' exceeds the maximum length 16!".formatted(profileName));
@@ -106,16 +104,15 @@ public class PacketFactory extends MorphPluginObject
             if (gameProfile.getName().isBlank())
                 throw new IllegalArgumentException("GameProfile name is empty!");
 
-            var packetPlayerInfo = new ClientboundPlayerInfoUpdatePacket(
-                    EnumSet.of(ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER),
-                    new ClientboundPlayerInfoUpdatePacket.Entry(
-                            uuid, gameProfile, false, 114514, GameType.DEFAULT_MODE,
-                            Component.literal(":>"), null
-                    )
-            );
+            var packetPlayerInfo = new WrapperPlayServerPlayerInfoUpdate(
+                    EnumSet.of(WrapperPlayServerPlayerInfoUpdate.Action.ADD_PLAYER),
+                    new WrapperPlayServerPlayerInfoUpdate.PlayerInfo(
+                        MorphGameProfile.toPacketEventsUserProfile(gameProfile), false, 114514,
+                            GameMode.CREATIVE, net.kyori.adventure.text.Component.text("???"), null
+                    ));
 
             spawnUUID = uuid;
-            packets.add(PacketContainer.fromPacket(packetPlayerInfo));
+            packets.add(packetPlayerInfo);
 
             parameters.getWatcher().write(EntryIndex.TABLIST_UUID, uuid);
         }
@@ -130,16 +127,13 @@ public class PacketFactory extends MorphPluginObject
             yaw = 180 + yaw;
 
         //生成实体
-        var packetAdd = new ClientboundAddEntityPacket(
+        var playerVelocity = player.getVelocity();
+        var spawnPacket = new WrapperPlayServerSpawnEntity(
                 player.getEntityId(), spawnUUID,
-                player.getX(), player.getY(), player.getZ(),
-                pitch, yaw,
-                nmsType, 0,
-                nmsPlayer.getDeltaMovement(),
-                nmsPlayer.getYHeadRot()
+                SpigotConversionUtil.fromBukkitEntityType(disguiseType), SpigotConversionUtil.fromBukkitLocation(player.getLocation()),
+                yaw, 0, new Vector3d(playerVelocity.getX(), playerVelocity.getY(), playerVelocity.getZ())
         );
-
-        var spawnPacket = PacketContainer.fromPacket(packetAdd);
+        PacketUtils.markPacketOurs(spawnPacket);
 
         packets.add(spawnPacket);
 
@@ -151,22 +145,26 @@ public class PacketFactory extends MorphPluginObject
                 ? watcher.getOrDefault(EntryIndex.EQUIPMENT, new DisguiseEquipment())
                 : player.getEquipment();
 
-        var equipmentPacket = new ClientboundSetEquipmentPacket(player.getEntityId(),
-                ProtocolEquipment.toPairs(equip));
+        var equipmentPacket = new WrapperPlayServerEntityEquipment(player.getEntityId(),
+                ProtocolEquipment.toPacketEventsEquipmentList(equip));
 
-        packets.add(PacketContainer.fromPacket(equipmentPacket));
+        packets.add(equipmentPacket);
 
         if (parameters.includeMeta())
             packets.add(buildFullMetaPacket(player, parameters.getWatcher()));
 
-        if (player.getVehicle() != null)
-        {
-            var nmsEntity = ((CraftEntity)player.getVehicle()).getHandle();
-            packets.add(PacketContainer.fromPacket(new ClientboundSetPassengersPacket(nmsEntity)));
-        }
+        Entity rootVehicle = null;
+        for (var vehicle = player.getVehicle(); vehicle != null; vehicle = vehicle.getVehicle())
+            rootVehicle = vehicle;
 
-        if (!player.getPassengers().isEmpty())
-            packets.add(PacketContainer.fromPacket(new ClientboundSetPassengersPacket(nmsPlayer)));
+        if (rootVehicle != null)
+        {
+            var passengers = rootVehicle.getPassengers().stream()
+                    .mapToInt(Entity::getEntityId)
+                    .toArray();
+
+            packets.add(new WrapperPlayServerSetPassengers(rootVehicle.getEntityId(), passengers));
+        }
 
         var bukkitEntityType = parameters.getEntityType();
         if (bukkitEntityType.isAlive())
@@ -176,12 +174,34 @@ public class PacketFactory extends MorphPluginObject
                     ? new ObjectArrayList<>(nmsPlayer.getAttributes().getSyncableAttributes())
                     : NmsUtils.getValidAttributes(bukkitEntityType, nmsPlayer.getAttributes());
 
-            var attributePacket = new ClientboundUpdateAttributesPacket(player.getEntityId(), attributes);
-            packets.add(PacketContainer.fromPacket(attributePacket));
-        }
+            List<WrapperPlayServerUpdateAttributes.Property> propertyList = new ObjectArrayList<>();
+            for (AttributeInstance attribute : attributes)
+            {
+                var packetAttribute = Attributes.getByName(attribute.getAttribute().getRegisteredName());
+                if (packetAttribute == null)
+                {
+                    logger.warn("Local attribute '%s' has no packet version!".formatted(attribute.getAttribute().getRegisteredName()));
+                    continue;
+                }
 
-        for (PacketContainer packet : packets)
-            packet.setMeta(MORPH_PACKET_METAKEY, true);
+                List<WrapperPlayServerUpdateAttributes.PropertyModifier> modifiers = new ObjectArrayList<>();
+                for (AttributeModifier modifier : attribute.getModifiers())
+                {
+                    var packetModifier = new WrapperPlayServerUpdateAttributes.PropertyModifier(
+                            new ResourceLocation(modifier.id().getNamespace(), modifier.id().getPath()),
+                            modifier.amount(),
+                            WrapperPlayServerUpdateAttributes.PropertyModifier.Operation.values()[modifier.operation().ordinal()]
+                    );
+
+                    modifiers.add(packetModifier);
+                }
+
+                propertyList.add(new WrapperPlayServerUpdateAttributes.Property(packetAttribute, attribute.getValue(), modifiers));
+            }
+
+            var attributePacket = new WrapperPlayServerUpdateAttributes(player.getEntityId(), propertyList);
+            packets.add(attributePacket);
+        }
 
         return packets;
     }
@@ -190,21 +210,14 @@ public class PacketFactory extends MorphPluginObject
      * 从给定的meta包中移除不属于给定AbstractValues的数据
      * @return 剔除后的包
      */
-    public PacketContainer removeNonLivingValues(AbstractValues av, PacketContainer originalPacket)
+    public List<EntityData> removeNonLivingValues(AbstractValues av, List<EntityData> originalData)
     {
-        if (originalPacket.getType() != PacketType.Play.Server.ENTITY_METADATA)
-            throw new IllegalArgumentException("Original packet is not a valid metadata packet!");
-
         var values = av.getValues();
-        var modifier = originalPacket.getDataValueCollectionModifier();
-
-        //获取原Meta包中的数据
-        var wrappedData = modifier.read(0);
 
         //剔除不属于给定AbstractValues中的数据
-        wrappedData.removeIf(w ->
+        originalData.removeIf(w ->
         {
-            var rawValue = w.getRawValue();
+            var rawValue = w.getValue();
 
             var match = values.stream().filter(sv ->
                     w.getIndex() == sv.index() && (rawValue == null || rawValue.getClass() == sv.defaultValue().getClass())
@@ -213,95 +226,56 @@ public class PacketFactory extends MorphPluginObject
             return match == null;
         });
 
-        modifier.write(0, wrappedData);
-
-        return originalPacket;
+        return originalData;
     }
 
-    public PacketContainer buildDiffMetaPacket(Player player, SingleWatcher watcher)
+    public WrapperPlayServerEntityMetadata buildDiffMetaPacket(Player player, SingleWatcher watcher)
     {
-        var metaPacket = new PacketContainer(PacketType.Play.Server.ENTITY_METADATA);
-        metaPacket.getIntegers().write(0, player.getEntityId());
+        var metaPacket = new WrapperPlayServerEntityMetadata(player.getEntityId(), new ObjectArrayList<>());
 
-        var modifier = metaPacket.getDataValueCollectionModifier();
+        List<EntityData> wrappedDataValues = new ObjectArrayList<>();
+        Map<SingleValue<?>, Object> watcherDirty = watcher.getDirty();
 
-        List<WrappedDataValue> wrappedDataValues = new ObjectArrayList<>();
-        Map<SingleValue<?>, Object> valuesToSent = watcher.getDirty();
-
-        valuesToSent.forEach((single, v) ->
+        watcherDirty.forEach((single, v) ->
         {
-            WrappedDataWatcher.Serializer serializer;
-
-            try
-            {
-                serializer = ProtocolRegistryUtils.getSerializer(single);
-            }
-            catch (Throwable t)
-            {
-                logger.warn("Error occurred while generating meta packet with id '%s': %s".formatted(single.index(), t.getMessage()));
-                return;
-            }
-
-            var value = new WrappedDataValue(single.index(), serializer, v);
-            wrappedDataValues.add(value);
+            var instance = new EntityData(single.index(), single.getDataType(), v);
+            wrappedDataValues.add(instance);
         });
 
-        modifier.write(0, wrappedDataValues);
-        metaPacket.setMeta(MORPH_PACKET_METAKEY, true);
+        metaPacket.setEntityMetadata(wrappedDataValues);
+        PacketUtils.markPacketOurs(metaPacket);
 
         return metaPacket;
     }
 
-    public PacketContainer buildFullMetaPacket(Player player, SingleWatcher watcher)
+    public WrapperPlayServerEntityMetadata buildFullMetaPacket(Player player, SingleWatcher watcher)
     {
         watcher.sync();
 
-        var metaPacket = new PacketContainer(PacketType.Play.Server.ENTITY_METADATA);
-        metaPacket.getIntegers().write(0, player.getEntityId());
+        var metaPacket = new WrapperPlayServerEntityMetadata(player.getEntityId(), new ObjectArrayList<>());
 
-        var modifier = metaPacket.getDataValueCollectionModifier();
+        List<EntityData> wrappedDataValues = new ObjectArrayList<>();
 
-        List<WrappedDataValue> wrappedDataValues = new ObjectArrayList<>();
+        Map<SingleValue<?>, Object> watcherRegistry = watcher.getRegistry();
 
-        Map<SingleValue<?>, Object> valuesToSent = watcher.getRegistry();
-
-        valuesToSent.forEach((single, v) ->
+        watcherRegistry.forEach((single, v) ->
         {
-            WrappedDataWatcher.Serializer serializer;
-
-            try
-            {
-                serializer = ProtocolRegistryUtils.getSerializer(single);
-            }
-            catch (Throwable t)
-            {
-                logger.warn("Error occurred while generating meta packet with id '%s': %s".formatted(single.index(), t.getMessage()));
-                return;
-            }
-
-            var value = new WrappedDataValue(single.index(), serializer, v);
-            wrappedDataValues.add(value);
+            var instance = new EntityData(single.index(), single.getDataType(), v);
+            wrappedDataValues.add(instance);
         });
 
-        modifier.write(0, wrappedDataValues);
-        metaPacket.setMeta(MORPH_PACKET_METAKEY, true);
+        PacketUtils.markPacketOurs(metaPacket);
 
         return metaPacket;
     }
 
-    public PacketContainer getEquipmentPacket(Player player, SingleWatcher watcher)
+    public List<Equipment> getPacketEquipmentList(Player player, SingleWatcher watcher)
     {
         var shouldDisplayFakeEquip = watcher.getOrDefault(EntryIndex.DISPLAY_FAKE_EQUIPMENT, false);
         EntityEquipment equipment = shouldDisplayFakeEquip
                     ? watcher.getOrDefault(EntryIndex.EQUIPMENT, new DisguiseEquipment())
                     : player.getEquipment();
 
-        var rawPacket = new ClientboundSetEquipmentPacket(player.getEntityId(),
-                ProtocolEquipment.toPairs(equipment));
-
-        var container = PacketContainer.fromPacket(rawPacket);
-        container.setMeta(MORPH_PACKET_METAKEY, true);
-
-        return container;
+        return ProtocolEquipment.toPacketEventsEquipmentList(equipment);
     }
 }

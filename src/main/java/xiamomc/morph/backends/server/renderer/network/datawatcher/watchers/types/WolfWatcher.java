@@ -5,6 +5,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.animal.FrogVariant;
 import net.minecraft.world.entity.animal.WolfVariant;
 import net.minecraft.world.entity.animal.WolfVariants;
 import org.bukkit.Bukkit;
@@ -13,6 +14,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Wolf;
 import xiamomc.morph.backends.server.renderer.network.registries.ValueIndex;
+import xiamomc.morph.backends.server.renderer.utilties.HolderUtils;
 
 public class WolfWatcher extends TameableAnimalWatcher
 {
@@ -53,8 +55,25 @@ public class WolfWatcher extends TameableAnimalWatcher
                 logger.error("Failed reading FrogVariant from NBT: " + t.getMessage());
             }
 
-            write(ValueIndex.WOLF.WOLF_VARIANT, getVariant(type));
+            write(ValueIndex.WOLF.WOLF_VARIANT, getVariantIndex(getVariant(type)));
         }
+    }
+
+    private int getVariantIndex(Holder<WolfVariant> variantHolder)
+    {
+        var worldRegistry = ((CraftWorld)Bukkit.getWorlds().get(0)).getHandle()
+                .registryAccess()
+                .registryOrThrow(Registries.WOLF_VARIANT);
+
+        return worldRegistry.getId(variantHolder.value());
+    }
+
+    private Holder<WolfVariant> getHolder(int index)
+    {
+        var world = ((CraftWorld) Bukkit.getWorlds().stream().findFirst().get()).getHandle();
+        var registry = world.registryAccess().registryOrThrow(Registries.WOLF_VARIANT);
+
+        return registry.asHolderIdMap().byIdOrThrow(index);
     }
 
     private Holder<WolfVariant> getVariant(ResourceKey<WolfVariant> key)
@@ -66,7 +85,7 @@ public class WolfWatcher extends TameableAnimalWatcher
         if (holder.isEmpty())
         {
             logger.warn("No suitable Holder for wolf variant " + key);
-            return ValueIndex.WOLF.WOLF_VARIANT.defaultValue();
+            return HolderUtils.getHolderFor(WolfVariants.PALE, Registries.WOLF_VARIANT);
         }
 
         return holder.get();
@@ -111,6 +130,6 @@ public class WolfWatcher extends TameableAnimalWatcher
         super.writeToCompound(nbt);
 
         nbt.putByte("CollarColor", get(ValueIndex.WOLF.COLLAR_COLOR).byteValue());
-        nbt.putString("variant", getBukkitVariant(get(ValueIndex.WOLF.WOLF_VARIANT)).key().asString());
+        nbt.putString("variant", getBukkitVariant(getHolder(get(ValueIndex.WOLF.WOLF_VARIANT))).key().asString());
     }
 }
