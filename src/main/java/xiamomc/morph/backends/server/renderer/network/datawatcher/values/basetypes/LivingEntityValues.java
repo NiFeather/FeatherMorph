@@ -17,7 +17,7 @@ public class LivingEntityValues extends EntityValues
     public final SingleValue<Boolean> POTION_ISAMBIENT = getSingle("living_potion_is_ambient", false, EntityDataTypes.BOOLEAN);
     public final SingleValue<Integer> STUCKED_ARROWS = getSingle("living_stucked_arrows", 0, EntityDataTypes.INT);
     public final SingleValue<Integer> BEE_STINGERS = getSingle("living_bee_stingers", 0, EntityDataTypes.INT);
-    public final SingleValue<Optional<Vector3i>> BED_POS = getSingle("living_bed_pos", Optional.of(new Vector3i(0,0,0)), EntityDataTypes.OPTIONAL_BLOCK_POSITION);
+    public final SingleValue<Optional<Vector3i>> BED_POS = getSingle("living_bed_pos", Optional.empty(), EntityDataTypes.OPTIONAL_BLOCK_POSITION);
 
     public LivingEntityValues()
     {

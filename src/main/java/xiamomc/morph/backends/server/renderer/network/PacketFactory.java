@@ -129,9 +129,11 @@ public class PacketFactory extends MorphPluginObject
         //生成实体
         var playerVelocity = player.getVelocity();
         var spawnPacket = new WrapperPlayServerSpawnEntity(
-                player.getEntityId(), spawnUUID,
-                SpigotConversionUtil.fromBukkitEntityType(disguiseType), SpigotConversionUtil.fromBukkitLocation(player.getLocation()),
-                yaw, 0, new Vector3d(playerVelocity.getX(), playerVelocity.getY(), playerVelocity.getZ())
+                player.getEntityId(), Optional.of(spawnUUID),
+                SpigotConversionUtil.fromBukkitEntityType(disguiseType),
+                new Vector3d(player.getX(), player.getY(), player.getZ()),
+                pitch, yaw, nmsPlayer.getYHeadRot(),
+                0, Optional.of(new Vector3d(playerVelocity.getX(), playerVelocity.getY(), playerVelocity.getZ()))
         );
         PacketUtils.markPacketOurs(spawnPacket);
 
@@ -264,6 +266,7 @@ public class PacketFactory extends MorphPluginObject
             wrappedDataValues.add(instance);
         });
 
+        metaPacket.setEntityMetadata(wrappedDataValues);
         PacketUtils.markPacketOurs(metaPacket);
 
         return metaPacket;

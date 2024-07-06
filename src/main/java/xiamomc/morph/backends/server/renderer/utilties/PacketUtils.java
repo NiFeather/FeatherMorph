@@ -10,7 +10,9 @@ import org.slf4j.LoggerFactory;
 
 public class PacketUtils
 {
-    public static final int METADATA_INDEX = 995880325;
+    // Metadata has a index of the range 0~127
+    // So we pick 109 as a identity of which meta packet is ours
+    public static final int METADATA_INDEX = 109;
     public static final int ITEM_AMOUNT = 86;
     private static final Logger log = LoggerFactory.getLogger(PacketUtils.class);
 
@@ -32,7 +34,7 @@ public class PacketUtils
 
     public static void removeMark(WrapperPlayServerSpawnEntity spawnEntity)
     {
-        if (spawnEntity.getData() == ENTITY_ID_MODIFIER)
+        if (spawnEntity.getData() == ENTITY_DATA_IDENTITY)
             spawnEntity.setData(0);
     }
 
@@ -46,11 +48,12 @@ public class PacketUtils
         return equipmentWrapper.getEquipment().stream().anyMatch(eq -> eq.getItem().getAmount() == ITEM_AMOUNT);
     }
 
-    public static final int ENTITY_ID_MODIFIER = 77890234;
+    // Also make sure.
+    public static final int ENTITY_DATA_IDENTITY = 109;
 
     public static boolean isPacketOurs(WrapperPlayServerSpawnEntity spawnEntity)
     {
-        return spawnEntity.getData() == ENTITY_ID_MODIFIER;
+        return spawnEntity.getData() == ENTITY_DATA_IDENTITY;
     }
 
     public static void markPacketOurs(WrapperPlayServerSpawnEntity spawnEntity)
@@ -58,12 +61,12 @@ public class PacketUtils
         if (spawnEntity.getData() != 0)
             log.warn("The original packet have a non-zero entity data, we are going to overwrite it!");
 
-        spawnEntity.setData(ENTITY_ID_MODIFIER);
+        spawnEntity.setData(ENTITY_DATA_IDENTITY);
     }
 
     public static void markPacketOurs(WrapperPlayServerEntityMetadata metadataWrapper)
     {
-        metadataWrapper.getEntityMetadata().add(new EntityData(METADATA_INDEX, EntityDataTypes.INT, 0));
+        metadataWrapper.getEntityMetadata().add(new EntityData(METADATA_INDEX, EntityDataTypes.INT, 114514));
     }
 
     public static void markPacketOurs(WrapperPlayServerEntityEquipment equipmentWrapper)

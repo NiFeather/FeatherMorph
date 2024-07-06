@@ -108,7 +108,7 @@ public class LivingEntityWatcher extends EntityWatcher implements Listener
         write(values.STUCKED_ARROWS, player.getArrowsInBody());
         write(values.BEE_STINGERS, player.getBeeStingersInBody());
 
-        Vector3i bedPos = new Vector3i();
+        Vector3i bedPos = null;
         if (player.isSleeping())
         {
             try
@@ -122,7 +122,7 @@ public class LivingEntityWatcher extends EntityWatcher implements Listener
             }
         }
 
-        write(values.BED_POS, Optional.of(bedPos));
+        write(values.BED_POS, bedPos == null ? Optional.empty() : Optional.of(bedPos));
 
         super.doSync();
     }
