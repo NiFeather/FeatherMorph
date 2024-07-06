@@ -919,7 +919,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         var state = result.state();
 
         // 初始化nbt
-        var wrapperCompound = provider.getNbtCompound(state, targetEntity, false);
+        var wrapperCompound = provider.getInitialNbtCompound(state, targetEntity, false);
 
         if (wrapperCompound != null)
             state.getDisguiseWrapper().mergeCompound(wrapperCompound);

@@ -172,13 +172,13 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
     }
 
     @Override
-    public @Nullable CompoundTag getNbtCompound(DisguiseState state, Entity targetEntity, boolean enableCulling)
+    public @Nullable CompoundTag getInitialNbtCompound(DisguiseState state, Entity targetEntity, boolean enableCulling)
     {
         if (!(targetEntity instanceof Player targetPlayer)) return null;
 
         if (!targetPlayer.getName().equals(DisguiseTypes.PLAYER.toStrippedId(state.getDisguiseIdentifier()))) return null;
 
-        return super.getNbtCompound(state, targetEntity, enableCulling);
+        return super.getInitialNbtCompound(state, targetEntity, enableCulling);
     }
 
     @Override

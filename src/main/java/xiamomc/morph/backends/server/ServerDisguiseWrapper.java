@@ -55,9 +55,9 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
             if (bindingWatcher instanceof AgeableMobWatcher)
                 bindingWatcher.write(ValueIndex.AGEABLE_MOB.IS_BABY, instance.isBaby);
 
-            instance.armorStandSmall = compoundTag.getBoolean("Small");
-            instance.armorStandNoBasePlate = compoundTag.getBoolean("NoBasePlate");
-            instance.armorStandShowArms = compoundTag.getBoolean("ShowArms");
+            if (compoundTag.contains("Small")) instance.armorStandSmall = compoundTag.getBoolean("Small");
+            if (compoundTag.contains("NoBasePlate")) instance.armorStandNoBasePlate = compoundTag.getBoolean("NoBasePlate");
+            if (compoundTag.contains("ShowArms")) instance.armorStandShowArms = compoundTag.getBoolean("ShowArms");
         }
     }
 

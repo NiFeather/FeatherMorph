@@ -92,8 +92,15 @@ public abstract class DisguiseProvider extends MorphPluginObject
         return false;
     }
 
+    /**
+     * 获取此伪装的初始NBT（如果有），如果有目标实体则尝试复制目标实体的NBT
+     * @param state
+     * @param targetEntity
+     * @param enableCulling 是否要隐藏一些信息防止被客户端获取？
+     * @return
+     */
     @Nullable
-    public CompoundTag getNbtCompound(DisguiseState state, Entity targetEntity, boolean enableCulling)
+    public CompoundTag getInitialNbtCompound(DisguiseState state, Entity targetEntity, boolean enableCulling)
     {
         if (targetEntity instanceof CraftLivingEntity
             && canConstruct(getMorphManager().getDisguiseMeta(state.getDisguiseIdentifier()), targetEntity, null))

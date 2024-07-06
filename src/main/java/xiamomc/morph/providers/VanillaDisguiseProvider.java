@@ -375,29 +375,32 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
     }
 
     @Override
-    public @Nullable CompoundTag getNbtCompound(DisguiseState state, Entity targetEntity, boolean enableCulling)
+    public @Nullable CompoundTag getInitialNbtCompound(DisguiseState state, Entity targetEntity, boolean enableCulling)
     {
         var info = getMorphManager().getDisguiseMeta(state.getDisguiseIdentifier());
 
         var rawCompound = targetEntity != null && canConstruct(info, targetEntity, null)
                 ? NbtUtils.getRawTagCompound(targetEntity)
-                : NbtUtils.toCompoundTag(state.getFullNbtString());
-
-        if (rawCompound == null) rawCompound = new CompoundTag();
+                : new CompoundTag();
 
         var theirDisguise = getMorphManager().getDisguiseStateFor(targetEntity);
 
         if (theirDisguise != null)
-            rawCompound = theirDisguise.getDisguiseWrapper().getCompound();
-
-        if (state.getEntityType().equals(EntityType.ARMOR_STAND)
-                && rawCompound.get("ShowArms") == null)
         {
-            rawCompound.putBoolean("ShowArms", armorStandShowArms.get());
+            rawCompound = theirDisguise.getDisguiseWrapper().getCompound();
+        }
+        else
+        {
+            if (state.getEntityType().equals(EntityType.ARMOR_STAND)
+                    && rawCompound.get("ShowArms") == null)
+            {
+                rawCompound.putBoolean("ShowArms", armorStandShowArms.get());
+            }
         }
 
-        if (targetEntity == null || targetEntity.getType() != state.getEntityType())
-            rawCompound.merge(state.getDisguiseWrapper().getCompound());
+        // ???
+        // if (targetEntity == null || targetEntity.getType() != state.getEntityType())
+        //    rawCompound.merge(state.getDisguiseWrapper().getCompound());
 
         return enableCulling ? cullNBT(rawCompound) : rawCompound;
     }
