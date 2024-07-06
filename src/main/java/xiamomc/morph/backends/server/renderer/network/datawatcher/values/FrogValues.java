@@ -11,7 +11,7 @@ import xiamomc.morph.backends.server.renderer.utilties.HolderUtils;
 
 public class FrogValues extends AnimalValues
 {
-    public final SingleValue<Integer> FROG_VARIANT = getSingle("frog_variant", getFrogVariant(FrogVariant.TEMPERATE), EntityDataTypes.INT)
+    public final SingleValue<Integer> FROG_VARIANT = getSingle("frog_variant", getFrogVariant(FrogVariant.TEMPERATE), EntityDataTypes.FROG_VARIANT)
             .withRandom(getFrogVariant(FrogVariant.TEMPERATE), getFrogVariant(FrogVariant.COLD), getFrogVariant(FrogVariant.WARM));
 
     private int getFrogVariant(ResourceKey<FrogVariant> key)
