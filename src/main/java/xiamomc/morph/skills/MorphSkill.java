@@ -55,22 +55,22 @@ public abstract class MorphSkill<T extends ISkillOption> extends MorphPluginObje
     /**
      * 向玩家的目标方向发射实体
      * @param player 玩家
-     * @param fireball 实体
+     * @param fireballType 实体
      * @return 发射的实体，如果为null则发射失败
      * @param <E> 发射出去的实体
      */
     @Nullable
-    protected <E extends Entity> E launchProjectile(Player player, EntityType fireball, float multiplier)
+    protected <E extends Entity> E launchProjectile(Player player, EntityType fireballType, float multiplier)
     {
         Entity fireBall;
         try
         {
             fireBall = player.getWorld()
-                    .spawnEntity(player.getEyeLocation(), fireball, CreatureSpawnEvent.SpawnReason.CUSTOM);
+                    .spawnEntity(player.getEyeLocation(), fireballType, CreatureSpawnEvent.SpawnReason.CUSTOM);
         }
         catch (Throwable t)
         {
-            printErrorMessage(player, "Unable to summon " + fireball + ": " + t.getMessage());
+            printErrorMessage(player, "Unable to summon " + fireballType + ": " + t.getMessage());
             t.printStackTrace();
             return null;
         }
@@ -82,15 +82,22 @@ public abstract class MorphSkill<T extends ISkillOption> extends MorphPluginObje
         // Then starting from 1.20 we need to multiply 0.1 for most projectiles right before we do any other things.
         // However, the Thrown potions still keep the 1.19 behavior
         //
+        // Then starting 1.21, we no longer requires to multiply 0.1 again.
+        //
         // Why?
 
-        boolean useLegacyBehavior = (fireBall instanceof ThrowableProjectile)
-                || (fireBall instanceof LlamaSpit);
+        double extraMultiplier = switch (fireBall)
+        {
+            case ThrownPotion thrownPotion -> 2.25d;
+            case ThrowableProjectile throwableProjectile -> 1.4d;
+            case LlamaSpit llamaSpit -> 1.4d;
+            default -> 1d;
+        };
 
         var velocity = player.getEyeLocation()
                 .getDirection()
                 .normalize()
-                .multiply(useLegacyBehavior ? 1.4d : 0.1d);
+                .multiply(extraMultiplier);
 
         fireBall.setVelocity(velocity.multiply(multiplier));
 
