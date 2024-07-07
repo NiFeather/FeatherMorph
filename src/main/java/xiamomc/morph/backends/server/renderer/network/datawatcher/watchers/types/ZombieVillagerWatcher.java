@@ -55,7 +55,7 @@ public class ZombieVillagerWatcher extends ZombieWatcher
         }
 
         var level = random.nextInt(1, 6);
-        write(ValueIndex.VILLAGER.VILLAGER_DATA, new VillagerData(villagerType, villagerProfession, level));
+        write(ValueIndex.ZOMBIE_VILLAGER.VILLAGER_DATA, new VillagerData(villagerType, villagerProfession, level));
     }
 
     private void mergeFromVillagerData(CompoundTag nbt)
@@ -93,7 +93,7 @@ public class ZombieVillagerWatcher extends ZombieWatcher
             }
         }
 
-        write(ValueIndex.VILLAGER.VILLAGER_DATA, new VillagerData(type, profession, level));
+        write(ValueIndex.ZOMBIE_VILLAGER.VILLAGER_DATA, new VillagerData(type, profession, level));
     }
 
     @Override
@@ -110,7 +110,7 @@ public class ZombieVillagerWatcher extends ZombieWatcher
     {
         super.writeToCompound(nbt);
 
-        var villagerData = get(ValueIndex.VILLAGER.VILLAGER_DATA);
+        var villagerData = get(ValueIndex.ZOMBIE_VILLAGER.VILLAGER_DATA);
         var profession = villagerData.getProfession();
         var type = villagerData.getType();
         var level = villagerData.getLevel();
