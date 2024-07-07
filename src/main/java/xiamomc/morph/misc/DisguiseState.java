@@ -663,11 +663,17 @@ public class DisguiseState extends MorphPluginObject
         this.abilityUpdater.dispose();
     }
 
-    public void reset()
+    public void reset(boolean unDisguise)
     {
-        this.provider.unMorph(getPlayer(), this);
+        if (unDisguise)
+            this.provider.unMorph(getPlayer(), this);
 
         this.abilityUpdater.setAbilities(List.of());
         this.setSkill(null);
+    }
+
+    public void reset()
+    {
+        this.reset(true);
     }
 }

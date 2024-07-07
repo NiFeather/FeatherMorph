@@ -179,7 +179,7 @@ public class ServerBackend extends DisguiseBackend<ServerDisguise, ServerDisguis
     {
         if (!(wrapper instanceof ServerDisguiseWrapper serverDisguiseWrapper)) return false;
         if (disguiseWrapperMap.containsKey(player.getUniqueId()))
-            unDisguise(player);
+            unDisguise(player, false);
 
         disguiseWrapperMap.put(player.getUniqueId(), serverDisguiseWrapper);
 
@@ -187,6 +187,20 @@ public class ServerBackend extends DisguiseBackend<ServerDisguise, ServerDisguis
                 player, wrapper.getEntityType(), wrapper.getDisguiseName());
 
         serverDisguiseWrapper.setRenderParameters(player, watcher);
+        return true;
+    }
+
+    private boolean unDisguise(Player player, boolean unregisterFromRenderer)
+    {
+        if (unregisterFromRenderer)
+            serverRenderer.unRegisterEntity(player);
+
+        var uuid = player.getUniqueId();
+        var wrapper = disguiseWrapperMap.getOrDefault(uuid, null);
+        if (wrapper != null)
+            wrapper.dispose();
+
+        disguiseWrapperMap.remove(uuid);
         return true;
     }
 
@@ -199,15 +213,7 @@ public class ServerBackend extends DisguiseBackend<ServerDisguise, ServerDisguis
     @Override
     public boolean unDisguise(Player player)
     {
-        serverRenderer.unRegisterEntity(player);
-
-        var uuid = player.getUniqueId();
-        var wrapper = disguiseWrapperMap.getOrDefault(uuid, null);
-        if (wrapper != null)
-            wrapper.dispose();
-
-        disguiseWrapperMap.remove(uuid);
-        return true;
+        return unDisguise(player, true);
     }
 
     /**

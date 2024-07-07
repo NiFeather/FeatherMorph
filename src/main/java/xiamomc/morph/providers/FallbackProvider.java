@@ -20,6 +20,12 @@ public class FallbackProvider extends DefaultDisguiseProvider
     }
 
     @Override
+    public boolean allowSwitchingWithoutUndisguise(DisguiseProvider provider, DisguiseMeta meta)
+    {
+        return false;
+    }
+
+    @Override
     public boolean isValid(String rawIdentifier)
     {
         return false;

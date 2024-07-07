@@ -36,6 +36,12 @@ public abstract class DisguiseProvider extends MorphPluginObject
     public abstract String getNameSpace();
 
     /**
+     * 是否允许在切换到其他伪装时可以不调用此Provider的Unmorph
+     * @return
+     */
+    public abstract boolean allowSwitchingWithoutUndisguise(DisguiseProvider provider, DisguiseMeta meta);
+
+    /**
      * 某个伪装ID是否已知
      * @param rawIdentifier 伪装ID
      * @return 此ID是否已知

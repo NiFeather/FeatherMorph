@@ -32,6 +32,12 @@ public class ModelEngineProvider extends DisguiseProvider
     }
 
     @Override
+    public boolean allowSwitchingWithoutUndisguise(DisguiseProvider provider, DisguiseMeta meta)
+    {
+        return false;
+    }
+
+    @Override
     public @NotNull DisguiseBackend<?, ?> getPreferredBackend()
     {
         var backend = getMorphManager().getBackend(MEBackend.identifier);

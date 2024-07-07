@@ -1,7 +1,6 @@
 package xiamomc.morph.providers;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.minecraft.nbt.CompoundTag;
 import org.bukkit.Bukkit;
@@ -37,8 +36,6 @@ import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 public class VanillaDisguiseProvider extends DefaultDisguiseProvider
 {
@@ -46,6 +43,13 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
     public @NotNull String getNameSpace()
     {
         return DisguiseTypes.VANILLA.getNameSpace();
+    }
+
+    @Override
+    public boolean allowSwitchingWithoutUndisguise(DisguiseProvider other, DisguiseMeta meta)
+    {
+        return other.getPreferredBackend() == this.getPreferredBackend()
+                && (meta.getDisguiseType() == DisguiseTypes.VANILLA || meta.getDisguiseType() == DisguiseTypes.PLAYER);
     }
 
     @Override

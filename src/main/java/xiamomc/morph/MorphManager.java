@@ -825,7 +825,14 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 // 重置上个State的伪装
                 if (currentState != null)
                 {
-                    currentState.reset();
+                    var stateProvider = currentState.getProvider();
+
+                    // 检查上个State的后端是否允许我们在不取消伪装的情况下重置State
+                    if (stateProvider.allowSwitchingWithoutUndisguise(provider, disguiseMeta))
+                        currentState.reset(false);
+                    else
+                        currentState.reset();
+
                     disguiseStates.remove(currentState);
                 }
 
