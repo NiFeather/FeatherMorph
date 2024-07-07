@@ -138,7 +138,7 @@ public class RenderRegistry extends MorphPluginObject
 
     private final Lock readLock = rwLock.readLock();
     private final Lock writeLock = rwLock.writeLock();
-    private final int rwLockWaitTime = 20;
+    private final int rwLockWaitTime = 50;
 
     /**
      * 注册UUID对应的伪装类型
