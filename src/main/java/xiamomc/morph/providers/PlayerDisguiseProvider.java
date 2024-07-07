@@ -44,6 +44,13 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
     }
 
     @Override
+    public boolean allowSwitchingWithoutUndisguise(DisguiseProvider other, DisguiseMeta meta)
+    {
+        return other.getPreferredBackend() == this.getPreferredBackend()
+                && (meta.getDisguiseType() == DisguiseTypes.VANILLA || meta.getDisguiseType() == DisguiseTypes.PLAYER);
+    }
+
+    @Override
     public @NotNull DisguiseResult makeWrapper(Player player, DisguiseMeta disguiseMeta, @Nullable Entity targetEntity)
     {
         if (getMorphManager().getBannedDisguises().contains("minecraft:player"))
