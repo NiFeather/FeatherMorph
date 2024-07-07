@@ -23,7 +23,7 @@ public class SoundListener extends ProtocolListener
     {
         var packetType = event.getPacketType();
 
-        if (packetType != PacketType.Play.Server.NAMED_SOUND_EFFECT)
+        if (packetType != PacketType.Play.Server.SOUND_EFFECT)
             return;
 
         var wrapper = new WrapperPlayServerSoundEffect(event);
