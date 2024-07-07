@@ -2,6 +2,7 @@ package xiamomc.morph.backends.server.renderer.network;
 
 import com.mojang.authlib.GameProfile;
 import org.bukkit.entity.EntityType;
+import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.PlayerWatcher;
 import xiamomc.morph.backends.server.renderer.network.registries.EntryIndex;
@@ -18,6 +19,7 @@ public class DisplayParameters
         return singleWatcher;
     }
 
+    @Nullable
     public GameProfile getProfile()
     {
         return gameProfile;
@@ -53,7 +55,7 @@ public class DisplayParameters
         return includeMeta;
     }
 
-    public DisplayParameters(EntityType bindingType, SingleWatcher watcher, GameProfile profile)
+    public DisplayParameters(EntityType bindingType, SingleWatcher watcher, @Nullable GameProfile profile)
     {
         this.entityType = bindingType;
         this.singleWatcher = watcher;
