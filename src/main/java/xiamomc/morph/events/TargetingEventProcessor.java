@@ -43,9 +43,6 @@ public class TargetingEventProcessor extends MorphPluginObject implements Listen
         var nmsMob = ((CraftMob)mob).getHandle();
         var goalSelector = nmsMob.goalSelector;
 
-        //TODO: test, remove this upon release
-        //if (!(mob instanceof Fox) && !(mob instanceof IronGolem)) return;
-
         if (!(nmsMob instanceof PathfinderMob pathfinderMob)) return;
 
         // 添加AvoidEntityGoal
@@ -63,7 +60,8 @@ public class TargetingEventProcessor extends MorphPluginObject implements Listen
         Goal goalFound = null;
         int goalPriority = 0;
 
-        float distance = 16F; double slowSpeed = 1D, fastSpeed = 1D;
+        float distance = 16F;
+        double slowSpeed = 1D, fastSpeed = 1D;
 
         // 遍历实体已有的Goal
         for (WrappedGoal g : availableGoals)
