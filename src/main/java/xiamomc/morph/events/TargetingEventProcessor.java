@@ -14,7 +14,7 @@ import net.minecraft.world.entity.ai.goal.WrappedGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.ai.util.DefaultRandomPos;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.level.pathfinder.Path;
 import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.entity.CraftMob;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
@@ -25,6 +25,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityTargetEvent;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
+import xiamomc.morph.misc.NmsRecord;
 import xiamomc.morph.utilities.EntityTypeUtils;
 import xiamomc.morph.utilities.ReflectionUtils;
 import xiamomc.pluginbase.Annotations.Resolved;
@@ -324,7 +325,60 @@ public class TargetingEventProcessor extends MorphPluginObject implements Listen
             if (this.toAvoid == null)
                 return;
 
-            super.start();
+            if (findAvoidPath())
+                this.pathNav.moveTo(this.path, this.slowSpeed);
+        }
+
+        /**
+         * @return Whether success
+         */
+        private boolean findAvoidPath()
+        {
+            if (this.toAvoid == null)
+                return false;
+
+            var targetPosition = DefaultRandomPos.getPosAway(this.mob, 16, 7, this.toAvoid.position());
+
+            if (targetPosition == null)
+                return false;
+
+            if (this.toAvoid.distanceToSqr(targetPosition) < this.toAvoid.distanceToSqr(this.mob))
+                return false;
+
+            this.path = this.pathNav.createPath(targetPosition.x, targetPosition.y, targetPosition.z, 0);
+            return this.path != null;
+        }
+
+        private void findEntityToAvoid()
+        {
+            var bukkitMob = this.mob.getBukkitMob();
+
+            var currentDistance = Double.MAX_VALUE;
+            org.bukkit.entity.Player currentPlayer = null;
+            for (var player : bukkitMob.getWorld().getNearbyPlayers(bukkitMob.getLocation(), this.maxDist, 3))
+            {
+                var playerDistance = player.getLocation().distanceSquared(bukkitMob.getLocation());
+                if (playerDistance < currentDistance)
+                {
+                    currentPlayer = player;
+                    currentDistance = playerDistance;
+                }
+            }
+
+            if (currentPlayer == null) return;
+
+            var state = morphs.getDisguiseStateFor(currentPlayer);
+
+            if (state == null && this.isReplacement)
+            {
+                this.toAvoid = NmsRecord.ofPlayer(currentPlayer);
+                return;
+            }
+
+            if (state == null) return;
+
+            if (panics(bukkitMob.getType(), state.getEntityType()))
+                this.toAvoid = NmsRecord.ofPlayer(currentPlayer);
         }
 
         /**
@@ -333,23 +387,10 @@ public class TargetingEventProcessor extends MorphPluginObject implements Listen
         @Override
         public boolean canUse()
         {
-            // avoidClass是玩家的Player.class, 因此super.canUse()当玩家在范围里时永远会是true
-            // 因为这个Goal的avoidClass永远是Player，因此super.canUse()的结果不重要。
-            boolean baseCanUse = super.canUse();
+            this.toAvoid = null;
+            this.findEntityToAvoid();
 
-            if (this.toAvoid == null)
-                return false;
-
-            boolean canPanic = false;
-
-            var state = morphs.getDisguiseStateFor(toAvoid.getBukkitEntity());
-            if (state == null) return baseCanUse;
-            else canPanic = panics(mob.getBukkitMob().getType(), state.getEntityType());
-
-            if (!canPanic)
-                this.toAvoid = null;
-
-            return canPanic;
+            return this.toAvoid != null;
         }
     }
 
