@@ -12,7 +12,9 @@ import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.GoalSelector;
 import net.minecraft.world.entity.ai.goal.WrappedGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
+import net.minecraft.world.entity.ai.util.DefaultRandomPos;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.Vec3;
 import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.entity.CraftMob;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
@@ -333,18 +335,21 @@ public class TargetingEventProcessor extends MorphPluginObject implements Listen
         {
             // avoidClass是玩家的Player.class, 因此super.canUse()当玩家在范围里时永远会是true
             // 因为这个Goal的avoidClass永远是Player，因此super.canUse()的结果不重要。
-            super.canUse();
+            boolean baseCanUse = super.canUse();
 
             if (this.toAvoid == null)
                 return false;
 
-            boolean panics;
-            var state = morphs.getDisguiseStateFor(toAvoid.getBukkitEntity());
-            if (state == null) panics = false;
-            else panics = panics(mob.getBukkitMob().getType(), state.getEntityType());
+            boolean canPanic = false;
 
-            if (!panics) this.toAvoid = null;
-            return panics;
+            var state = morphs.getDisguiseStateFor(toAvoid.getBukkitEntity());
+            if (state == null) return baseCanUse;
+            else canPanic = panics(mob.getBukkitMob().getType(), state.getEntityType());
+
+            if (!canPanic)
+                this.toAvoid = null;
+
+            return canPanic;
         }
     }
 
