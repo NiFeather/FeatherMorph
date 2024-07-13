@@ -67,6 +67,7 @@ public enum ConfigOption
 
     FLYABILITY_EXHAUSTION_BASE(flyAbilityNode().append("exhaustion_base"), 200d),
     FLYABILITY_IDLE_CONSUME(flyAbilityNode().append("idle_consumption"), true),
+    FLYABILITY_NO_LIQUID(flyAbilityNode().append("no_fly_in_liquid"), true),
 
     LANGUAGE_CODE(languageNode().append("code"), "en_us"),
     SINGLE_LANGUAGE(languageNode().append("single_language"), true),

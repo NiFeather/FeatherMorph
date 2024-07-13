@@ -112,6 +112,9 @@ root:
     # Add a minimal consumption limit (20% of the configured consumption speed) as an "Idle consumption" for players per tick.
     idle_consumption: true
 
+    # Should we disallow players flying in liquid?
+    no_fly_in_liquid: true
+
   # Disable Fly Ability in the following worlds
   #
   # Example:
@@ -287,4 +290,4 @@ root:
       - SelectedItem
 
   # Do not touch unless you know what you're doing!
-  version: 30
+  version: 31
