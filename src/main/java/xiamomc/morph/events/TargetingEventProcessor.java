@@ -3,15 +3,14 @@ package xiamomc.morph.events;
 import com.destroystokyo.paper.event.entity.EntityAddToWorldEvent;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.NeutralMob;
-import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.GoalSelector;
 import net.minecraft.world.entity.ai.goal.WrappedGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
+import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.ai.util.DefaultRandomPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.pathfinder.Path;
@@ -351,21 +350,27 @@ public class TargetingEventProcessor extends MorphPluginObject implements Listen
 
         private void findEntityToAvoid()
         {
-            var bukkitMob = this.mob.getBukkitMob();
+            var entityFound = this.mob
+                    .level()
+                    .getNearestEntity(
+                            this.mob.level().getEntitiesOfClass(this.avoidClass,
+                                    this.mob.getBoundingBox().inflate(this.maxDist, 3.0, this.maxDist),
+                                    living -> true),
 
-            var currentDistance = Double.MAX_VALUE;
-            org.bukkit.entity.Player currentPlayer = null;
-            for (var player : bukkitMob.getWorld().getNearbyPlayers(bukkitMob.getLocation(), this.maxDist, 3))
-            {
-                var playerDistance = player.getLocation().distanceSquared(bukkitMob.getLocation());
-                if (playerDistance < currentDistance)
-                {
-                    currentPlayer = player;
-                    currentDistance = playerDistance;
-                }
-            }
+                            TargetingConditions.forCombat()
+                                    .range(this.distance)
+                                    .selector(EntitySelector.NO_CREATIVE_OR_SPECTATOR::test),
 
-            if (currentPlayer == null) return;
+                            this.mob,
+                            this.mob.getX(),
+                            this.mob.getY(),
+                            this.mob.getZ()
+                    );
+
+            if (entityFound == null) return;
+
+            if (!(entityFound.getBukkitEntityRaw() instanceof org.bukkit.entity.Player currentPlayer))
+                return;
 
             var state = morphs.getDisguiseStateFor(currentPlayer);
 
@@ -377,7 +382,7 @@ public class TargetingEventProcessor extends MorphPluginObject implements Listen
 
             if (state == null) return;
 
-            if (panics(bukkitMob.getType(), state.getEntityType()))
+            if (panics(this.mob.getBukkitMob().getType(), state.getEntityType()))
                 this.toAvoid = NmsRecord.ofPlayer(currentPlayer);
         }
 
