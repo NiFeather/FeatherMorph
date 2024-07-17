@@ -167,6 +167,16 @@ public abstract class DisguiseProvider extends MorphPluginObject
     public abstract DisguiseBackend<?, ?> getPreferredBackend();
 
     /**
+     * Resets a player's some attributes from a disguise but not un-disguising them.
+     * Used for keeping disguise appearance while switching (if this provider allow switching to that disguise without un-disguise)
+     *
+     * @param state The {@link DisguiseState} to reset
+     */
+    public void resetDisguise(DisguiseState state)
+    {
+    }
+
+    /**
      * 取消某个玩家的伪装
      * @param player 目标玩家
      * @return 操作是否成功

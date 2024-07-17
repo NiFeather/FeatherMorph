@@ -665,6 +665,8 @@ public class DisguiseState extends MorphPluginObject
 
     public void reset(boolean unDisguise)
     {
+        this.provider.resetDisguise(this);
+
         if (unDisguise)
             this.provider.unMorph(getPlayer(), this);
 
