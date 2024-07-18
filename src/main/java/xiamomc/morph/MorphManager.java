@@ -1,6 +1,6 @@
 package xiamomc.morph;
 
-import io.papermc.paper.util.TickThread;
+import ca.spottedleaf.moonrise.common.util.TickThread;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
