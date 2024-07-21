@@ -239,7 +239,7 @@ public class TargetingEventProcessor extends MorphPluginObject implements Listen
             // 如果玩家后来变成了其他会导致恐慌的类型，也取消仇恨
             var disguise = morphManager.getDisguiseStateFor(this.target.getBukkitEntity());
             if (disguise != null)
-                cancelTarget = cancelTarget || panics(this.mob.getBukkitMob().getType(), disguise.getEntityType());
+                cancelTarget = cancelTarget || panics(this.mob.getBukkitEntity().getType(), disguise.getEntityType());
             else
                 cancelTarget = true;
 
@@ -272,7 +272,7 @@ public class TargetingEventProcessor extends MorphPluginObject implements Listen
             var disguise = morphManager.getDisguiseStateFor(target.getBukkitEntity());
             if (disguise == null) return;
 
-            if (hostiles(mob.getBukkitMob().getType(), disguise.getEntityType()))
+            if (hostiles(mob.getBukkitEntity().getType(), disguise.getEntityType()))
                 this.target = target;
         }
 
@@ -382,7 +382,7 @@ public class TargetingEventProcessor extends MorphPluginObject implements Listen
 
             if (state == null) return;
 
-            if (panics(this.mob.getBukkitMob().getType(), state.getEntityType()))
+            if (panics(this.mob.getBukkitEntity().getType(), state.getEntityType()))
                 this.toAvoid = NmsRecord.ofPlayer(currentPlayer);
         }
 
