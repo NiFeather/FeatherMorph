@@ -374,6 +374,9 @@ public class TargetingEventProcessor extends MorphPluginObject implements Listen
 
             var state = morphs.getDisguiseStateFor(currentPlayer);
 
+            if (this.mob instanceof TamableAnimal tamableAnimal && tamableAnimal.isTame())
+                return;
+
             if (state == null && this.isReplacement)
             {
                 this.toAvoid = NmsRecord.ofPlayer(currentPlayer);
