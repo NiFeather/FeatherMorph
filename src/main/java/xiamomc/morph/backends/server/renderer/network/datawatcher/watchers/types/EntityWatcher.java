@@ -1,8 +1,8 @@
 package xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types;
 
 import io.github.retrooper.packetevents.util.SpigotConversionUtil;
-import net.kyori.adventure.platform.bukkit.BukkitComponentSerializer;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.minecraft.nbt.CompoundTag;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -91,7 +91,7 @@ public class EntityWatcher extends SingleWatcher
 
             try
             {
-                component = BukkitComponentSerializer.gson().deserialize(nbt.getString("CustomName"));
+                component = MiniMessage.miniMessage().deserializeOrNull(nbt.getString("CustomName"));
             }
             catch (Throwable t)
             {
@@ -115,7 +115,15 @@ public class EntityWatcher extends SingleWatcher
         super.writeToCompound(nbt);
 
         var customName = get(ValueIndex.BASE_ENTITY.CUSTOM_NAME);
-        customName.ifPresent(c -> nbt.putString("CustomName", BukkitComponentSerializer.gson().serialize(c)));
+
+        try
+        {
+            customName.ifPresent(c -> nbt.putString("CustomName", MiniMessage.miniMessage().serialize(c)));
+        }
+        catch (Throwable t)
+        {
+            logger.error("Can't serialize component: " + t.getMessage());
+        }
 
         nbt.putBoolean("CustomNameVisible", get(ValueIndex.BASE_ENTITY.CUSTOM_NAME_VISIBLE));
     }
