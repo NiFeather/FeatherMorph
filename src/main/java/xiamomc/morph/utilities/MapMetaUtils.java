@@ -63,7 +63,7 @@ public class MapMetaUtils
 
     private static ItemRecord bukkitToNMS(ItemStack bukkitStack)
     {
-        var snbt = ItemUtils.getItemCompound(bukkitStack);
+        var snbt = ItemUtils.itemToStr(bukkitStack);
         String id = bukkitStack.getType().getKey().asString();
 
         return new ItemRecord(id, snbt);

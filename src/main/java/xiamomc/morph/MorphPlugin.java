@@ -91,7 +91,7 @@ public final class MorphPlugin extends XiaMoJavaPlugin
 
     private MultiInstanceService instanceService;
 
-    private TargetingEventProcessor targetingEventProcessor;
+    private EntityProcessor entityProcessor;
 
     @Override
     public void onLoad()
@@ -219,7 +219,7 @@ public final class MorphPlugin extends XiaMoJavaPlugin
                             new DisguiseAnimationProcessor(),
                             new ForcedDisguiseProcessor(),
                             new PlayerSkinProcessor(),
-                            targetingEventProcessor = new TargetingEventProcessor()
+                            entityProcessor = new EntityProcessor()
                     });
 
             clientHandler.sendReAuth(Bukkit.getOnlinePlayers());
@@ -242,8 +242,8 @@ public final class MorphPlugin extends XiaMoJavaPlugin
         //需要在调用前先把一些东西处理好
         try
         {
-            if (targetingEventProcessor != null)
-                targetingEventProcessor.recoverGoals();
+            if (entityProcessor != null)
+                entityProcessor.recoverGoals();
 
             if (morphManager != null)
                 morphManager.onPluginDisable();

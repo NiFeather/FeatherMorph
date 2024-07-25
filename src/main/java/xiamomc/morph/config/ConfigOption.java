@@ -67,6 +67,7 @@ public enum ConfigOption
 
     FLYABILITY_EXHAUSTION_BASE(flyAbilityNode().append("exhaustion_base"), 200d),
     FLYABILITY_IDLE_CONSUME(flyAbilityNode().append("idle_consumption"), true),
+    FLYABILITY_NO_LIQUID(flyAbilityNode().append("no_fly_in_liquid"), true),
 
     LANGUAGE_CODE(languageNode().append("code"), "en_us"),
     SINGLE_LANGUAGE(languageNode().append("single_language"), true),
@@ -102,6 +103,8 @@ public enum ConfigOption
     MASTER_SECRET(multiInstanceNode().append("secret"), RandomStringUtils.randomAlphabetic(12)),
 
     DO_CHECK_ABILITY_PERMISSIONS(ConfigNode.create().append("check_ability_permissions"), true),
+
+    DO_MODIFY_AI(ConfigNode.create().append("modify_ai"), true),
 
     VERSION(ConfigNode.create().append("version"), 0);
 

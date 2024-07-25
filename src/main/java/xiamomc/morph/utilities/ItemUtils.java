@@ -3,7 +3,6 @@ package xiamomc.morph.utilities;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.mojang.serialization.JsonOps;
-import de.tr7zw.changeme.nbtapi.NBTItem;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.CraftWorld;
@@ -72,31 +71,6 @@ public class ItemUtils
 
             return "{\"id\": \"%s\", \"Count\": 1}".formatted(stack.getType().getKey().asString());
         }
-    }
-
-    //TODO: CONVERT ITEM TO NBT
-    public static String getItemCompound(ItemStack stack)
-    {
-        if (stack == null || stack.getAmount() == 0 || stack.getType().isAir())
-            return "{}";
-
-        var item = new NBTItem(stack);
-
-        //TODO: TEST THIS
-        return item.asNBTString();
-
-        /*
-        var item = ItemUtils.itemOrAir(stack);
-
-        if (stack.getType().isAir()) return "{}";
-
-        var nmsCopy = CraftItemStack.asNMSCopy(item);
-        var components = nmsCopy.getComponents();
-
-        throw new NotImplementedException("1.20.5 changed how item NBT works");
-
-        //return NbtUtils.getCompoundString(nmsCopy.getTag());
-        */
     }
 
     /**

@@ -3,15 +3,18 @@ package xiamomc.morph.events;
 import com.destroystokyo.paper.event.entity.EntityAddToWorldEvent;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.NeutralMob;
-import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.GoalSelector;
 import net.minecraft.world.entity.ai.goal.WrappedGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
+import net.minecraft.world.entity.ai.targeting.TargetingConditions;
+import net.minecraft.world.entity.ai.util.DefaultRandomPos;
+import net.minecraft.world.entity.animal.Ocelot;
+import net.minecraft.world.entity.animal.Panda;
+import net.minecraft.world.entity.animal.Rabbit;
 import net.minecraft.world.entity.player.Player;
 import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.entity.CraftMob;
@@ -23,28 +26,65 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityTargetEvent;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
+import xiamomc.morph.config.ConfigOption;
+import xiamomc.morph.config.MorphConfigManager;
+import xiamomc.morph.messages.CommandStrings;
+import xiamomc.morph.messages.MessageUtils;
+import xiamomc.morph.misc.NmsRecord;
+import xiamomc.morph.misc.permissions.CommonPermissions;
 import xiamomc.morph.utilities.EntityTypeUtils;
 import xiamomc.morph.utilities.ReflectionUtils;
 import xiamomc.pluginbase.Annotations.Resolved;
+import xiamomc.pluginbase.Bindables.Bindable;
 
 import java.util.function.Predicate;
 
-public class TargetingEventProcessor extends MorphPluginObject implements Listener
+public class EntityProcessor extends MorphPluginObject implements Listener
 {
     @Resolved(shouldSolveImmediately = true)
     private MorphManager manager;
 
+    @Resolved(shouldSolveImmediately = true)
+    private MorphConfigManager config;
+
+    private final boolean doModifyAI;
+
+    public EntityProcessor()
+    {
+        doModifyAI = config.get(Boolean.class, ConfigOption.DO_MODIFY_AI);
+
+        config.getBindable(Boolean.class, ConfigOption.DO_MODIFY_AI).onValueChanged((o, n) ->
+        {
+            if (doModifyAI == n) return;
+
+            logger.warn("- x - x - x - x - x - x - x - x - x - x - x - x -");
+            logger.warn("");
+            logger.warn("Changes were made about the option of modifying Mobs' AI.");
+            logger.warn("And this requires a server restart!");
+            logger.warn("");
+            logger.warn("- x - x - x - x - x - x - x - x - x - x - x - x -");
+
+            for (var player : Bukkit.getOnlinePlayers())
+            {
+                if (player.hasPermission(CommonPermissions.ADMIN))
+                {
+                    player.sendMessage(MessageUtils.prefixes(player, CommandStrings.aiWarningPrimary()));
+                    player.sendMessage(MessageUtils.prefixes(player, CommandStrings.aiWarningSecondary()));
+                }
+            }
+        });
+    }
+
     @EventHandler
     public void onEntityAdded(EntityAddToWorldEvent e)
     {
+        if (!doModifyAI) return;
+
         var entity = e.getEntity();
         if (!(entity instanceof Mob mob)) return;
 
         var nmsMob = ((CraftMob)mob).getHandle();
         var goalSelector = nmsMob.goalSelector;
-
-        //TODO: test, remove this upon release
-        //if (!(mob instanceof Fox) && !(mob instanceof IronGolem)) return;
 
         if (!(nmsMob instanceof PathfinderMob pathfinderMob)) return;
 
@@ -52,7 +92,7 @@ public class TargetingEventProcessor extends MorphPluginObject implements Listen
         addAvoidEntityGoal(goalSelector, pathfinderMob);
 
         // 添加TargetGoal
-        nmsMob.goalSelector.addGoal(-1, new NearestAttackableGoal(manager, nmsMob, Player.class, true, le -> true));
+        nmsMob.goalSelector.addGoal(-1, new FeatherMorphNearestAttackableGoal(manager, nmsMob, Player.class, true, le -> true));
     }
 
     private void addAvoidEntityGoal(GoalSelector goalSelector, PathfinderMob sourceMob)
@@ -63,7 +103,8 @@ public class TargetingEventProcessor extends MorphPluginObject implements Listen
         Goal goalFound = null;
         int goalPriority = 0;
 
-        float distance = 16F; double slowSpeed = 1D, fastSpeed = 1D;
+        float distance = 16F;
+        double slowSpeed = 1D, fastSpeed = 1D;
 
         // 遍历实体已有的Goal
         for (WrappedGoal g : availableGoals)
@@ -132,7 +173,7 @@ public class TargetingEventProcessor extends MorphPluginObject implements Listen
                 {
                     // 只替代我们想替代的
                     if (!(wrappedGoal.getGoal() instanceof FeatherMorphAvoidPlayerGoal)
-                        && !(wrappedGoal.getGoal() instanceof NearestAttackableGoal))
+                        && !(wrappedGoal.getGoal() instanceof FeatherMorphNearestAttackableGoal))
                     {
                         return;
                     }
@@ -174,13 +215,13 @@ public class TargetingEventProcessor extends MorphPluginObject implements Listen
     /**
      * 此Goal将被添加到生物，作为附加的TargetGoal执行。
      */
-    public static class NearestAttackableGoal extends NearestAttackableTargetGoal<net.minecraft.world.entity.player.Player>
+    public static class FeatherMorphNearestAttackableGoal extends NearestAttackableTargetGoal<net.minecraft.world.entity.player.Player>
     {
         private final MorphManager morphManager;
 
-        public NearestAttackableGoal(MorphManager morphManager,
-                                     net.minecraft.world.entity.Mob mob, Class<Player> targetClass,
-                                     boolean checkVisibility, Predicate<LivingEntity> targetPredicate)
+        public FeatherMorphNearestAttackableGoal(MorphManager morphManager,
+                                                 net.minecraft.world.entity.Mob mob, Class<Player> targetClass,
+                                                 boolean checkVisibility, Predicate<LivingEntity> targetPredicate)
         {
             super(mob, targetClass, checkVisibility, targetPredicate);
 
@@ -239,7 +280,7 @@ public class TargetingEventProcessor extends MorphPluginObject implements Listen
             // 如果玩家后来变成了其他会导致恐慌的类型，也取消仇恨
             var disguise = morphManager.getDisguiseStateFor(this.target.getBukkitEntity());
             if (disguise != null)
-                cancelTarget = cancelTarget || panics(this.mob.getBukkitMob().getType(), disguise.getEntityType());
+                cancelTarget = cancelTarget || panics(this.mob.getBukkitEntity().getType(), disguise.getEntityType());
             else
                 cancelTarget = true;
 
@@ -272,7 +313,7 @@ public class TargetingEventProcessor extends MorphPluginObject implements Listen
             var disguise = morphManager.getDisguiseStateFor(target.getBukkitEntity());
             if (disguise == null) return;
 
-            if (hostiles(mob.getBukkitMob().getType(), disguise.getEntityType()))
+            if (hostiles(mob.getBukkitEntity().getType(), disguise.getEntityType()))
                 this.target = target;
         }
 
@@ -324,7 +365,76 @@ public class TargetingEventProcessor extends MorphPluginObject implements Listen
             if (this.toAvoid == null)
                 return;
 
-            super.start();
+            if (findAvoidPath())
+                this.pathNav.moveTo(this.path, this.slowSpeed);
+        }
+
+        /**
+         * @return Whether success
+         */
+        private boolean findAvoidPath()
+        {
+            if (this.toAvoid == null)
+                return false;
+
+            var targetPosition = DefaultRandomPos.getPosAway(this.mob, 16, 7, this.toAvoid.position());
+
+            if (targetPosition == null)
+                return false;
+
+            if (this.toAvoid.distanceToSqr(targetPosition) < this.toAvoid.distanceToSqr(this.mob))
+                return false;
+
+            this.path = this.pathNav.createPath(targetPosition.x, targetPosition.y, targetPosition.z, 0);
+            return this.path != null;
+        }
+
+        private void findEntityToAvoid()
+        {
+            var entityFound = this.mob
+                    .level()
+                    .getNearestEntity(
+                            this.mob.level().getEntitiesOfClass(this.avoidClass,
+                                    this.mob.getBoundingBox().inflate(this.maxDist, 3.0, this.maxDist),
+                                    living -> true),
+
+                            TargetingConditions.forCombat()
+                                    .range(this.distance)
+                                    .selector(EntitySelector.NO_CREATIVE_OR_SPECTATOR::test),
+
+                            this.mob,
+                            this.mob.getX(),
+                            this.mob.getY(),
+                            this.mob.getZ()
+                    );
+
+            if (entityFound == null) return;
+
+            if (!(entityFound.getBukkitEntityRaw() instanceof org.bukkit.entity.Player currentPlayer))
+                return;
+
+            var state = morphs.getDisguiseStateFor(currentPlayer);
+
+            // This will happen when you try to cover all the vanilla behavior with only one class...
+            switch (this.mob)
+            {
+                case TamableAnimal tamableAnimal when tamableAnimal.isTame() -> { return; }
+                case Ocelot ocelot when ocelot.isTrusting() -> { return; }
+                case Panda panda when (!panda.isWorried() || !panda.canPerformAction()) -> { return; }
+                case Rabbit rabbit when rabbit.getVariant() == Rabbit.Variant.EVIL -> { return; }
+                default -> { }
+            }
+
+            if (state == null && this.isReplacement)
+            {
+                this.toAvoid = NmsRecord.ofPlayer(currentPlayer);
+                return;
+            }
+
+            if (state == null) return;
+
+            if (panics(this.mob.getBukkitEntity().getType(), state.getEntityType()))
+                this.toAvoid = NmsRecord.ofPlayer(currentPlayer);
         }
 
         /**
@@ -333,20 +443,10 @@ public class TargetingEventProcessor extends MorphPluginObject implements Listen
         @Override
         public boolean canUse()
         {
-            // avoidClass是玩家的Player.class, 因此super.canUse()当玩家在范围里时永远会是true
-            // 因为这个Goal的avoidClass永远是Player，因此super.canUse()的结果不重要。
-            super.canUse();
+            this.toAvoid = null;
+            this.findEntityToAvoid();
 
-            if (this.toAvoid == null)
-                return false;
-
-            boolean panics;
-            var state = morphs.getDisguiseStateFor(toAvoid.getBukkitEntity());
-            if (state == null) panics = false;
-            else panics = panics(mob.getBukkitMob().getType(), state.getEntityType());
-
-            if (!panics) this.toAvoid = null;
-            return panics;
+            return this.toAvoid != null;
         }
     }
 

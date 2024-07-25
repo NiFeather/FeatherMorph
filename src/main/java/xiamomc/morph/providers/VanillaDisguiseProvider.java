@@ -366,12 +366,20 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
     }
 
     @Override
+    public void resetDisguise(DisguiseState state)
+    {
+        var player = state.getPlayer();
+
+        removeAllHealthModifiers(player);
+        resetPlayerDimensions(player);
+    }
+
+    @Override
     public boolean unMorph(Player player, DisguiseState state)
     {
         if (super.unMorph(player, state))
         {
-            removeAllHealthModifiers(player);
-            resetPlayerDimensions(player);
+            resetDisguise(state);
             return true;
         }
         else

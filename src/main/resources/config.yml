@@ -20,6 +20,13 @@ root:
   # If an invalid ID is provided, this option may not take place.
   forced_disguise: "@none"
 
+  # Modify mobs' AI to make them react to disguises?
+  #
+  # PS: !!!This option requires a server restart to make changes!!!
+  # PS: Also, it's not recommended to reload the server after disabling this option.
+  #     While we try to undo changes it made, the mobs' behavior will still have distinction compared to vanilla
+  modify_ai: true
+
   # ChatOverride options
   chatOverride:
     # Enable ChatOverride?
@@ -111,6 +118,9 @@ root:
 
     # Add a minimal consumption limit (20% of the configured consumption speed) as an "Idle consumption" for players per tick.
     idle_consumption: true
+
+    # Should we disallow players flying in liquid?
+    no_fly_in_liquid: true
 
   # Disable Fly Ability in the following worlds
   #
@@ -287,4 +297,4 @@ root:
       - SelectedItem
 
   # Do not touch unless you know what you're doing!
-  version: 30
+  version: 32

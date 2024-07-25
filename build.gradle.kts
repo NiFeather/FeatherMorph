@@ -71,7 +71,10 @@ dependencies {
 
     compileOnly("com.ticxo.modelengine:ModelEngine:${project.property("me_version")}")
 
-    implementation("org.java-websocket:Java-WebSocket:1.5.6")
+    //compileOnly("com.github.Gecolay:GSit:${project.property("gsit_version")}")
+    compileOnly("me.clip:placeholderapi:${project.property("papi_version")}")
+
+    implementation("org.java-websocket:Java-WebSocket:1.5.7")
 
     //compileOnly("dev.majek:hexnicks:3.1.1")
 
@@ -84,20 +87,11 @@ dependencies {
         project.property("protocols_local_version")
         else project.property("protocols_version");
 
-    implementation("org.apache.httpcomponents.client5:httpclient5:5.2.1")
-
-    implementation("net.kyori:adventure-platform-bukkit:4.3.2")
-
-    implementation("de.tr7zw:item-nbt-api:2.12.4")
-
     implementation("com.github.XiaMoZhiShi:feathermorph-protocols:${protocolVersion}")
     implementation("com.github.XiaMoZhiShi:PluginBase:${project.property("pluginbase_version")}")
     {
         exclude("com.google.code.gson", "gson")
     }
-
-    //compileOnly("com.github.Gecolay:GSit:${project.property("gsit_version")}")
-    compileOnly("me.clip:placeholderapi:${project.property("papi_version")}")
 }
 
 group = "xiamomc.morph"
@@ -164,7 +158,9 @@ bukkit {
             permissionRoot + "skin_cache",
             permissionRoot + "switch_backend",
 
-            permissionRoot + "mirror.immune"
+            permissionRoot + "mirror.immune",
+
+            permissionRoot + "admin"
     );
 
     opPermsStrList.forEach {

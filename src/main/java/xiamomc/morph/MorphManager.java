@@ -1,6 +1,6 @@
 package xiamomc.morph;
 
-import io.papermc.paper.util.TickThread;
+import ca.spottedleaf.moonrise.common.util.TickThread;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
@@ -1371,10 +1371,12 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
      * @return 伪装状态，如果为null则表示玩家没有通过插件伪装
      */
     @Nullable
-    public DisguiseState getDisguiseStateFor(Player player)
+    public DisguiseState getDisguiseStateFor(@Nullable Player player)
     {
+        if (player == null) return null;
+
         return this.disguiseStates.stream()
-                .filter(i -> i.getPlayer().getUniqueId().equals(player.getUniqueId()))
+                .filter(i -> !i.disposed() && i.getPlayer().getUniqueId().equals(player.getUniqueId()))
                 .findFirst().orElse(null);
     }
 

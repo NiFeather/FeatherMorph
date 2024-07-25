@@ -60,16 +60,8 @@ public class ModelEngineProvider extends DisguiseProvider
 
         var modelId = DisguiseTypes.MODEL_ENGINE.toStrippedId(rawIdentifier);
 
-        try
-        {
-            var registry = ModelEngineAPI.getAPI().getModelRegistry();
-            if (registry.get(modelId) == registry.getDefault())
-                return false;
-        }
-        catch (Throwable t)
-        {
-        }
-        return true;
+        var registry = ModelEngineAPI.getAPI().getModelRegistry();
+        return registry.get(modelId) != registry.getDefault();
     }
 
     /**

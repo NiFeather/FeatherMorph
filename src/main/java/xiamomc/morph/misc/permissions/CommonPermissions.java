@@ -35,6 +35,8 @@ public class CommonPermissions
     public final static String CAN_FLY = PERM_ROOT + "can_fly";
     public final static String ALWAYS_CAN_FLY = PERM_ROOT + "can_fly.always";
 
+    public final static String ADMIN = PERM_ROOT + "admin";
+
     public static String skillPermissionOf(String skillIdentifier, String disguiseIdentifier)
     {
         return PERM_ROOT

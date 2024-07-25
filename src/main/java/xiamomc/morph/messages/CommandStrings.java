@@ -197,6 +197,22 @@ public class CommandStrings extends AbstractMorphStrings
 
     //endregion Lists
 
+    //region AI Option
+
+    public static FormattableMessage aiWarningPrimary()
+    {
+        return getFormattable(getKey("ai_warning_1"),
+                "<red>检测到更改了是否修改生物AI");
+    }
+
+    public static FormattableMessage aiWarningSecondary()
+    {
+        return getFormattable(getKey("ai_warning_2"),
+                "<red>这需要重启服务器！");
+    }
+
+    //endregion Ai Option
+
     private static String getKey(String key)
     {
         return "commands." + key;

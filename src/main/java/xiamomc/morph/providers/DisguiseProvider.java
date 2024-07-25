@@ -147,7 +147,7 @@ public abstract class DisguiseProvider extends MorphPluginObject
 
         blackListPatterns.forEach(pattern ->
         {
-            compound.tags.keySet().forEach(id ->
+            compound.getAllKeys().forEach(id ->
             {
                 if (Pattern.matches(pattern, id))
                     toRemove.add(id);
@@ -165,6 +165,16 @@ public abstract class DisguiseProvider extends MorphPluginObject
      */
     @NotNull
     public abstract DisguiseBackend<?, ?> getPreferredBackend();
+
+    /**
+     * Resets a player's some attributes from a disguise but not un-disguising them.
+     * Used for keeping disguise appearance while switching (if this provider allow switching to that disguise without un-disguise)
+     *
+     * @param state The {@link DisguiseState} to reset
+     */
+    public void resetDisguise(DisguiseState state)
+    {
+    }
 
     /**
      * 取消某个玩家的伪装
