@@ -164,7 +164,7 @@ public class MorphConfigManager extends PluginConfigManager
         });
 
         //更新配置
-        int targetVersion = 31;
+        int targetVersion = 32;
 
         var configVersion = getOrDefault(Integer.class, ConfigOption.VERSION);
 

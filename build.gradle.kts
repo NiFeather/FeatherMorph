@@ -164,7 +164,9 @@ bukkit {
             permissionRoot + "skin_cache",
             permissionRoot + "switch_backend",
 
-            permissionRoot + "mirror.immune"
+            permissionRoot + "mirror.immune",
+
+            permissionRoot + "admin"
     );
 
     opPermsStrList.forEach {

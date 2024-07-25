@@ -104,6 +104,8 @@ public enum ConfigOption
 
     DO_CHECK_ABILITY_PERMISSIONS(ConfigNode.create().append("check_ability_permissions"), true),
 
+    DO_MODIFY_AI(ConfigNode.create().append("modify_ai"), true),
+
     VERSION(ConfigNode.create().append("version"), 0);
 
     public final ConfigNode node;

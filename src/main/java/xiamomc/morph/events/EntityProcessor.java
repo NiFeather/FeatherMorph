@@ -12,8 +12,10 @@ import net.minecraft.world.entity.ai.goal.WrappedGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.ai.util.DefaultRandomPos;
+import net.minecraft.world.entity.animal.Ocelot;
+import net.minecraft.world.entity.animal.Panda;
+import net.minecraft.world.entity.animal.Rabbit;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.pathfinder.Path;
 import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.entity.CraftMob;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
@@ -24,21 +26,60 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityTargetEvent;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
+import xiamomc.morph.config.ConfigOption;
+import xiamomc.morph.config.MorphConfigManager;
+import xiamomc.morph.messages.CommandStrings;
+import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.misc.NmsRecord;
+import xiamomc.morph.misc.permissions.CommonPermissions;
 import xiamomc.morph.utilities.EntityTypeUtils;
 import xiamomc.morph.utilities.ReflectionUtils;
 import xiamomc.pluginbase.Annotations.Resolved;
+import xiamomc.pluginbase.Bindables.Bindable;
 
 import java.util.function.Predicate;
 
-public class TargetingEventProcessor extends MorphPluginObject implements Listener
+public class EntityProcessor extends MorphPluginObject implements Listener
 {
     @Resolved(shouldSolveImmediately = true)
     private MorphManager manager;
 
+    @Resolved(shouldSolveImmediately = true)
+    private MorphConfigManager config;
+
+    private final boolean doModifyAI;
+
+    public EntityProcessor()
+    {
+        doModifyAI = config.get(Boolean.class, ConfigOption.DO_MODIFY_AI);
+
+        config.getBindable(Boolean.class, ConfigOption.DO_MODIFY_AI).onValueChanged((o, n) ->
+        {
+            if (doModifyAI == n) return;
+
+            logger.warn("- x - x - x - x - x - x - x - x - x - x - x - x -");
+            logger.warn("");
+            logger.warn("Changes were made about the option of modifying Mobs' AI.");
+            logger.warn("And this requires a server restart!");
+            logger.warn("");
+            logger.warn("- x - x - x - x - x - x - x - x - x - x - x - x -");
+
+            for (var player : Bukkit.getOnlinePlayers())
+            {
+                if (player.hasPermission(CommonPermissions.ADMIN))
+                {
+                    player.sendMessage(MessageUtils.prefixes(player, CommandStrings.aiWarningPrimary()));
+                    player.sendMessage(MessageUtils.prefixes(player, CommandStrings.aiWarningSecondary()));
+                }
+            }
+        });
+    }
+
     @EventHandler
     public void onEntityAdded(EntityAddToWorldEvent e)
     {
+        if (!doModifyAI) return;
+
         var entity = e.getEntity();
         if (!(entity instanceof Mob mob)) return;
 
@@ -51,7 +92,7 @@ public class TargetingEventProcessor extends MorphPluginObject implements Listen
         addAvoidEntityGoal(goalSelector, pathfinderMob);
 
         // 添加TargetGoal
-        nmsMob.goalSelector.addGoal(-1, new NearestAttackableGoal(manager, nmsMob, Player.class, true, le -> true));
+        nmsMob.goalSelector.addGoal(-1, new FeatherMorphNearestAttackableGoal(manager, nmsMob, Player.class, true, le -> true));
     }
 
     private void addAvoidEntityGoal(GoalSelector goalSelector, PathfinderMob sourceMob)
@@ -132,7 +173,7 @@ public class TargetingEventProcessor extends MorphPluginObject implements Listen
                 {
                     // 只替代我们想替代的
                     if (!(wrappedGoal.getGoal() instanceof FeatherMorphAvoidPlayerGoal)
-                        && !(wrappedGoal.getGoal() instanceof NearestAttackableGoal))
+                        && !(wrappedGoal.getGoal() instanceof FeatherMorphNearestAttackableGoal))
                     {
                         return;
                     }
@@ -174,13 +215,13 @@ public class TargetingEventProcessor extends MorphPluginObject implements Listen
     /**
      * 此Goal将被添加到生物，作为附加的TargetGoal执行。
      */
-    public static class NearestAttackableGoal extends NearestAttackableTargetGoal<net.minecraft.world.entity.player.Player>
+    public static class FeatherMorphNearestAttackableGoal extends NearestAttackableTargetGoal<net.minecraft.world.entity.player.Player>
     {
         private final MorphManager morphManager;
 
-        public NearestAttackableGoal(MorphManager morphManager,
-                                     net.minecraft.world.entity.Mob mob, Class<Player> targetClass,
-                                     boolean checkVisibility, Predicate<LivingEntity> targetPredicate)
+        public FeatherMorphNearestAttackableGoal(MorphManager morphManager,
+                                                 net.minecraft.world.entity.Mob mob, Class<Player> targetClass,
+                                                 boolean checkVisibility, Predicate<LivingEntity> targetPredicate)
         {
             super(mob, targetClass, checkVisibility, targetPredicate);
 
@@ -374,8 +415,15 @@ public class TargetingEventProcessor extends MorphPluginObject implements Listen
 
             var state = morphs.getDisguiseStateFor(currentPlayer);
 
-            if (this.mob instanceof TamableAnimal tamableAnimal && tamableAnimal.isTame())
-                return;
+            // This will happen when you try to cover all the vanilla behavior with only one class...
+            switch (this.mob)
+            {
+                case TamableAnimal tamableAnimal when tamableAnimal.isTame() -> { return; }
+                case Ocelot ocelot when ocelot.isTrusting() -> { return; }
+                case Panda panda when (!panda.isWorried() || !panda.canPerformAction()) -> { return; }
+                case Rabbit rabbit when rabbit.getVariant() == Rabbit.Variant.EVIL -> { return; }
+                default -> { }
+            }
 
             if (state == null && this.isReplacement)
             {
