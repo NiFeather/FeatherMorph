@@ -2,12 +2,6 @@ package xiamomc.morph.updates;
 
 import com.google.gson.GsonBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import org.apache.hc.client5.http.classic.methods.HttpGet;
-import org.apache.hc.client5.http.config.RequestConfig;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
-import org.apache.hc.client5.http.impl.classic.HttpClients;
-import org.apache.hc.core5.http.io.entity.EntityUtils;
-import org.apache.hc.core5.net.URIBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
@@ -27,9 +21,13 @@ import xiamomc.pluginbase.Exceptions.NullDependencyException;
 import xiamomc.pluginbase.Messages.FormattableMessage;
 import xiamomc.pluginbase.ScheduleInfo;
 
+import java.net.URL;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
@@ -84,33 +82,37 @@ public class UpdateHandler extends MorphPluginObject
         updateAvailable = false;
 
         var reqId = requestId.addAndGet(1);
-        try (var http = HttpClients.createDefault())
+
+        try
         {
-            var uri = new URIBuilder()
-                    .setScheme("https")
-                    .setHost("api.modrinth.com")
-                    .setPath("/v2/project/feathermorph/version")
-                    //.setParameter("featured", "true")
-                    .setParameter("game_versions", "[\"%s\"]".formatted(Bukkit.getMinecraftVersion()))
+            var urlString = "https://api.modrinth.com"
+                    + "/v2/project/feathermorph/version"
+                    + "?"
+                    + "game_versions=[\"%s\"]";
+
+            urlString = urlString.formatted(Bukkit.getMinecraftVersion())
+                    .replace("[", "%5B") // Make URI happy
+                    .replace("]", "%5D")
+                    .replace("\"", "%22");
+
+            var url = new URL(urlString).toURI();
+
+            var request = HttpRequest.newBuilder()
+                    .GET()
+                    .uri(url)
+                    .timeout(Duration.ofSeconds(3))
+                    .header("User-Agent", "feathermorph")
                     .build();
 
-            var httpGet = new HttpGet(uri);
-            httpGet.setHeader("User-Agent", "FeatherMorph-Dev");
+            var client = HttpClient.newBuilder()
+                            .followRedirects(HttpClient.Redirect.ALWAYS)
+                            .build();
 
-            var reqConfig = RequestConfig.custom()
-                    .setResponseTimeout(3, TimeUnit.SECONDS)
-                    .setConnectionRequestTimeout(3, TimeUnit.SECONDS)
-                    .setRedirectsEnabled(true)
-                    .build();
-
-            httpGet.setConfig(reqConfig);
-
-            var response = http.execute(httpGet);
-
-            var statusCode = response.getCode();
-            if (statusCode != 200)
+            var response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() != 200)
             {
-                logger.error("Failed to check update: Server returned HTTP code " + statusCode);
+                logger.error("Failed to check update: Server returned HTTP code {}", response.statusCode());
+                logger.error("Server response: {}", response.body());
 
                 if (onFinish != null)
                     onFinish.accept(CheckResult.FAIL);
@@ -118,7 +120,7 @@ public class UpdateHandler extends MorphPluginObject
                 return;
             }
 
-            this.onUpdateReqFinish(response, reqId, sendMessages, onFinish, forwardTarget);
+            this.onUpdateReqFinish(response.body(), reqId, sendMessages, onFinish, forwardTarget);
         }
         catch (Throwable t)
         {
@@ -141,7 +143,7 @@ public class UpdateHandler extends MorphPluginObject
         e.printStackTrace();
     }
 
-    private void onUpdateReqFinish(CloseableHttpResponse response, int reqId,
+    private void onUpdateReqFinish(String responseStr, int reqId,
                                    boolean sendMessages, @Nullable Consumer<CheckResult> onFinish,
                                    @Nullable CommandSender forwardTarget)
     {
@@ -152,7 +154,6 @@ public class UpdateHandler extends MorphPluginObject
         {
             // 反序列化为Map
             // 之后看情况再考虑要不要反序列化成一个类
-            var responseStr = EntityUtils.toString(response.getEntity());
             var gson = new GsonBuilder().create();
             var versionList = gson.fromJson(responseStr, ArrayList.class);
             var metaList = new ObjectArrayList<SingleUpdateInfoMeta>();

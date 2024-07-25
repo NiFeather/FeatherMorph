@@ -71,7 +71,7 @@ dependencies {
 
     compileOnly("com.ticxo.modelengine:ModelEngine:${project.property("me_version")}")
 
-    implementation("org.java-websocket:Java-WebSocket:1.5.6")
+    implementation("org.java-websocket:Java-WebSocket:1.5.7")
 
     //compileOnly("dev.majek:hexnicks:3.1.1")
 
@@ -83,8 +83,6 @@ dependencies {
     val protocolVersion = if (project.property("protocols_use_local_build") == "true")
         project.property("protocols_local_version")
         else project.property("protocols_version");
-
-    implementation("org.apache.httpcomponents.client5:httpclient5:5.2.1")
 
     implementation("net.kyori:adventure-platform-bukkit:4.3.2")
 
