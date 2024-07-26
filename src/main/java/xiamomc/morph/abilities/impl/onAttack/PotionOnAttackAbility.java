@@ -41,7 +41,7 @@ public class PotionOnAttackAbility extends OnAttackAbility<PotionEffectOption>
     }
 
     @Override
-    protected void apply(LivingEntity hurt, Player source)
+    protected void onAttack(LivingEntity hurt, Player source)
     {
         var option = this.getOptionFor(manager.getDisguiseStateFor(source));
 

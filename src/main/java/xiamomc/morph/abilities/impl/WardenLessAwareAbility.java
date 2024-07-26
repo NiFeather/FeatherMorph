@@ -18,7 +18,7 @@ public class WardenLessAwareAbility extends NoOpOptionAbility
     @EventHandler
     public void onWardenAngerChange(WardenAngerChangeEvent e)
     {
-        if (e.getTarget() instanceof Player player && appliedPlayers.contains(player))
+        if (e.getTarget() instanceof Player player && this.isPlayerApplied(player))
         {
             //不处理愤怒值大于等于80的事件
             if (e.getNewAnger() >= 80 || e.getOldAnger() >= 80) return;

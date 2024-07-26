@@ -11,6 +11,7 @@ import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.storage.skill.ISkillOption;
 
 import java.util.List;
+import java.util.UUID;
 
 public interface IMorphAbility<T extends ISkillOption> extends Listener
 {
@@ -66,7 +67,7 @@ public interface IMorphAbility<T extends ISkillOption> extends Listener
      *
      * @return 玩家列表
      */
-    public List<Player> getAppliedPlayers();
+    public List<UUID> getAppliedPlayers();
 
     /**
      * 获取和此被动对应的{@link ISkillOption}

@@ -28,16 +28,12 @@ import xiamomc.pluginbase.Bindables.BindableList;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
+import java.util.UUID;
 
 public class FlyAbility extends MorphAbility<FlyOption>
 {
     public FlyAbility()
     {
-    }
-
-    public List<Player> getAppliedPlayers()
-    {
-        return List.copyOf(this.appliedPlayers);
     }
 
     @Override
@@ -222,7 +218,7 @@ public class FlyAbility extends MorphAbility<FlyOption>
     public void onGameModeChange(PlayerGameModeChangeEvent e)
     {
         var player = e.getPlayer();
-        if (!this.appliedPlayers.contains(player)) return;
+        if (!this.isPlayerApplied(player)) return;
 
         var state = manager.getDisguiseStateFor(player);
 
@@ -233,7 +229,7 @@ public class FlyAbility extends MorphAbility<FlyOption>
             //立即更新状态不会生效，需要延迟1tick再进行
             this.addSchedule(() ->
             {
-                if (appliedPlayers.contains(player))
+                if (isPlayerApplied(player))
                 {
                     this.updateFlyingState(state);
 
@@ -244,8 +240,8 @@ public class FlyAbility extends MorphAbility<FlyOption>
         }
         else
         {
-            logger.warn(player.getName() + " have fly ability applied, but its DisguiseState is null?");
-            this.appliedPlayers.remove(player);
+            logger.warn(player.getName() + " have fly ability applied, but its DisguiseState is null? Revoking...");
+            this.revokeFromPlayer(player, null);
         }
     }
 

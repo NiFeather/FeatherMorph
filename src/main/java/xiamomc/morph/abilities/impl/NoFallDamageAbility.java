@@ -18,7 +18,7 @@ public class NoFallDamageAbility extends NoOpOptionAbility
     @EventHandler(ignoreCancelled = true)
     public void onPlayerTookDamage(EntityDamageEvent e)
     {
-        if (e.getEntity() instanceof Player player && appliedPlayers.contains(player))
+        if (e.getEntity() instanceof Player player && this.isPlayerApplied(player))
         {
             if (e.getCause() == EntityDamageEvent.DamageCause.FALL)
                 e.setCancelled(true);

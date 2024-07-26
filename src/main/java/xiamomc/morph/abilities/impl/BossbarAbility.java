@@ -87,7 +87,7 @@ public class BossbarAbility extends MorphAbility<BossbarOption>
     {
         if (super.handle(player, state))
         {
-            if (appliedPlayers.contains(player) && plugin.getCurrentTick() % 4 == 0)
+            if (this.isPlayerApplied(player) && plugin.getCurrentTick() % 4 == 0)
             {
                 var option = this.getOptionFor(state);
 

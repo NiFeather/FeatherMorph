@@ -14,9 +14,10 @@ public abstract class OnAttackAbility<T extends ISkillOption> extends MorphAbili
     {
         if (!(e.getDamager() instanceof Player player)) return;
         if (!(e.getEntity() instanceof LivingEntity livingEntity)) return;
-        if (!appliedPlayers.contains(player)) return;
-        this.apply(livingEntity, player);
+        if (!isPlayerApplied(player)) return;
+
+        this.onAttack(livingEntity, player);
     }
 
-    protected abstract void apply(LivingEntity hurt, Player source);
+    protected abstract void onAttack(LivingEntity hurt, Player source);
 }

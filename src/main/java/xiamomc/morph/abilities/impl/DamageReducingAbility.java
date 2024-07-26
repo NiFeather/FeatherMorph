@@ -18,27 +18,27 @@ public abstract class DamageReducingAbility<T extends ReduceDamageOption> extend
     @EventHandler(ignoreCancelled = true)
     public void onPlayerTookDamage(EntityDamageEvent e)
     {
-        if (e.getEntity() instanceof Player player && appliedPlayers.contains(player))
-        {
-            if (e.getCause() == getTargetCause())
-            {
-                var state = morphs.getDisguiseStateFor(player);
-                assert state != null;
+        if (!(e.getEntity() instanceof Player player) || !isPlayerApplied(player))
+            return;
 
-                var dmgOption = this.getOptionFor(state);
+        if (e.getCause() != getTargetCause())
+            return;
 
-                if(dmgOption != null)
-                {
-                    var damage = e.getDamage();
-                    var percentage = dmgOption.isPercentage();
+        var state = morphs.getDisguiseStateFor(player);
+        assert state != null;
 
-                    damage = percentage
-                            ? damage * (1 - dmgOption.getReduceAmount())
-                            : damage - dmgOption.getReduceAmount();
+        var dmgOption = this.getOptionFor(state);
 
-                    e.setDamage(Math.max(0d, damage));
-                }
-            }
-        }
+        if (dmgOption == null)
+            return;
+
+        var damage = e.getDamage();
+        var percentage = dmgOption.isPercentage();
+
+        damage = percentage
+                ? damage * (1 - dmgOption.getReduceAmount())
+                : damage - dmgOption.getReduceAmount();
+
+        e.setDamage(Math.max(0d, damage));
     }
 }

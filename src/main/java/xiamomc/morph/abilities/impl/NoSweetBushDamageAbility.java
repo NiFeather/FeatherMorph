@@ -20,7 +20,7 @@ public class NoSweetBushDamageAbility extends NoOpOptionAbility
     @EventHandler
     private void onPlayerDamage(EntityDamageByBlockEvent e)
     {
-        if (e.getEntity() instanceof Player player && appliedPlayers.contains(player))
+        if (e.getEntity() instanceof Player player && this.isPlayerApplied(player))
         {
             var damagerType = e.getDamager() == null ? Material.AIR : e.getDamager().getType();
 

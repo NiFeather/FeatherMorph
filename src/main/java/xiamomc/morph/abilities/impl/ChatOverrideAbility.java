@@ -56,7 +56,7 @@ public class ChatOverrideAbility extends MorphAbility<ChatOverrideOption>
 
         var player = e.getPlayer();
 
-        if (!appliedPlayers.contains(player) || !player.hasPermission(CommonPermissions.CHAT_OVERRIDE)) return;
+        if (!isPlayerApplied(player) || !player.hasPermission(CommonPermissions.CHAT_OVERRIDE)) return;
 
         var state = morphs.getDisguiseStateFor(player);
         assert state != null;

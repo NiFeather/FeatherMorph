@@ -34,7 +34,7 @@ public class WardenAbility extends NoOpOptionAbility
     {
         if (!(e.getEntity() instanceof Player player)) return;
 
-        if (!this.appliedPlayers.contains(player)) return;
+        if (!this.isPlayerApplied(player)) return;
 
         if (blockedEvents.stream().anyMatch(ev -> ev.equals(e.getEvent())))
             e.setCancelled(true);

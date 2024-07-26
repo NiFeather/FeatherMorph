@@ -5,6 +5,7 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Unmodifiable;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.storage.skill.ISkillOption;
@@ -12,11 +13,12 @@ import xiamomc.morph.storage.skill.ISkillOption;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.function.Predicate;
 
 public abstract class MorphAbility<T extends ISkillOption> extends MorphPluginObject implements IMorphAbility<T>
 {
-    protected final List<Player> appliedPlayers = new ObjectArrayList<>();
+    private final List<UUID> appliedPlayers = new ObjectArrayList<>();
 
     protected boolean requireValidOption()
     {
@@ -29,14 +31,24 @@ public abstract class MorphAbility<T extends ISkillOption> extends MorphPluginOb
         return optionValid;
     }
 
+    public boolean isPlayerApplied(Player player)
+    {
+        return this.isPlayerApplied(player.getUniqueId());
+    }
+
+    public boolean isPlayerApplied(UUID playerUUID)
+    {
+        return this.appliedPlayers.stream().anyMatch(uuid -> uuid.equals(playerUUID));
+    }
+
     @Override
     public boolean applyToPlayer(Player player, DisguiseState state)
     {
         synchronized (appliedPlayers)
         {
-            if (appliedPlayers.contains(player)) return true;
+            if (appliedPlayers.stream().anyMatch(uuid -> uuid.equals(player.getUniqueId()))) return true;
 
-            appliedPlayers.add(player);
+            appliedPlayers.add(player.getUniqueId());
         }
 
         if (!requireValidOption()) return true;
@@ -47,7 +59,7 @@ public abstract class MorphAbility<T extends ISkillOption> extends MorphPluginOb
         logger.error("Disguise '%s' does not have a valid configuration for ability %s, not processing...".formatted(state.getDisguiseIdentifier(), getIdentifier()));
         synchronized (appliedPlayers)
         {
-            appliedPlayers.remove(player);
+            appliedPlayers.remove(player.getUniqueId());
             optionValid = false;
         }
 
@@ -59,16 +71,17 @@ public abstract class MorphAbility<T extends ISkillOption> extends MorphPluginOb
     {
         synchronized (appliedPlayers)
         {
-            appliedPlayers.remove(player);
+            appliedPlayers.remove(player.getUniqueId());
         }
 
         return true;
     }
 
     @Override
-    public List<Player> getAppliedPlayers()
+    @Unmodifiable
+    public List<UUID> getAppliedPlayers()
     {
-        return appliedPlayers;
+        return new ObjectArrayList<>(appliedPlayers);
     }
 
     @NotNull

@@ -42,12 +42,10 @@ public class SnowyAbility extends NoOpOptionAbility
     @EventHandler(ignoreCancelled = true)
     public void onPlayerTookDamage(EntityDamageEvent e)
     {
-        if (e.getEntity() instanceof Player player && appliedPlayers.contains(player))
+        if (e.getEntity() instanceof Player player && isPlayerApplied(player))
         {
             if (e.getCause() == EntityDamageEvent.DamageCause.FREEZE)
-            {
                 e.setDamage(0d);
-            }
         }
     }
 }

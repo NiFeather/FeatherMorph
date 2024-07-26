@@ -44,7 +44,7 @@ public class ExtraKnockbackAbility extends OnAttackAbility<ExtraKnockbackOption>
     private MorphManager manager;
 
     @Override
-    protected void apply(org.bukkit.entity.LivingEntity damaged, Player player)
+    protected void onAttack(org.bukkit.entity.LivingEntity damaged, Player player)
     {
         var nmsDamaged = ((CraftEntity)damaged).getHandle();
 

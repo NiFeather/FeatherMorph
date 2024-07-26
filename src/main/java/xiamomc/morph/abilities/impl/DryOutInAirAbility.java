@@ -3,6 +3,7 @@ package xiamomc.morph.abilities.impl;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.abilities.AbilityType;
 import xiamomc.morph.abilities.MorphAbility;
 import xiamomc.morph.abilities.options.DryoutAbilityOption;
@@ -37,8 +38,11 @@ public class DryOutInAirAbility extends MorphAbility<DryoutAbilityOption>
         return new DryoutAbilityOption();
     }
 
-    private void updateOxygen(Player player, DryoutAbilityOption option)
+    private void updateOxygen(Player player, @Nullable DryoutAbilityOption option)
     {
+        if (option == null)
+            return;
+
         var nmsPlayer = NmsRecord.ofPlayer(player);
         var air = nmsPlayer.getAirSupply();
 

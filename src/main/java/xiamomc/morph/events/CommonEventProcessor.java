@@ -339,7 +339,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         {
             var config = morphs.getPlayerMeta(player);
 
-            if (!config.shownMorphClientHint && config.getUnlockedDisguiseIdentifiers().size() > 0)
+            if (!config.shownMorphClientHint && !config.getUnlockedDisguiseIdentifiers().isEmpty())
                 this.addSchedule(() ->
                 {
                     if (player.isOnline() && !config.shownMorphClientHint)
@@ -362,6 +362,8 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
 
         if (state != null)
         {
+            state.refreshSkillsAbilities();
+
             //调用Morph事件
             new PlayerJoinedWithDisguiseEvent(player, state).callEvent();
 
