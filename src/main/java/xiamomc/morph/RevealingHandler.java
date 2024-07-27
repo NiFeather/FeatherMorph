@@ -86,7 +86,8 @@ public class RevealingHandler extends MorphPluginObject
             //if (state.getBaseValue() < RevealingLevel.SUSPECT.val * 0.2f)
             //    state.addBaseValue(RevealingDiffs.NATURAL_INCREASEMENT);
 
-            state.notifyUpdates();
+            if (plugin.getCurrentTick() % 10 == 0)
+                state.notifyUpdates();
         }
     }
 
