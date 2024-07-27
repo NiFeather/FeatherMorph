@@ -126,7 +126,7 @@ public abstract class SingleWatcher extends MorphPluginObject
 
     //region Custom Registry
 
-    protected final Map<String, Object> customRegistry = new Object2ObjectOpenHashMap<>();
+    protected final Map<String, Object> customRegistry = Collections.synchronizedMap(new Object2ObjectOpenHashMap<>());
 
     public <X> void write(RegistryKey<X> key, X value)
     {
@@ -173,7 +173,7 @@ public abstract class SingleWatcher extends MorphPluginObject
 
     //region Value Registry
 
-    protected final Map<SingleValue<?>, Object> registry = new Object2ObjectOpenHashMap<>();
+    protected final Map<SingleValue<?>, Object> registry = Collections.synchronizedMap(new Object2ObjectOpenHashMap<>());
 
     @Nullable
     public SingleValue<?> getSingle(int index)
