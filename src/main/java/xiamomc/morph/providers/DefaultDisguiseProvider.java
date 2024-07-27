@@ -2,6 +2,7 @@ package xiamomc.morph.providers;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -52,6 +53,35 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
         return getMorphManager().getDefaultBackend();
     }
 
+    private record MessageConfiguration(
+            short statusBit,
+            Component display,
+            String locale
+    )
+    {
+        public static final MessageConfiguration DEFAULT = new MessageConfiguration
+                (
+                        (short) -1,
+                        MiniMessage.miniMessage().deserialize("<yellow>missingno"),
+                        "missingno"
+                );
+
+        public MessageConfiguration withBit(short bit)
+        {
+            return new MessageConfiguration(bit, display, locale);
+        }
+
+        public MessageConfiguration withDisplay(Component display)
+        {
+            return new MessageConfiguration(statusBit, display, locale);
+        }
+
+        public MessageConfiguration withLocale(String newLocale)
+        {
+            return new MessageConfiguration(statusBit, display, newLocale);
+        }
+    }
+
     @Override
     public boolean updateDisguise(Player player, DisguiseState state)
     {
@@ -64,22 +94,54 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
         {
             var locale = MessageUtils.getLocale(player);
 
-            //更新actionbar信息
-            var msg = haveSkill
-                    ? (state.getSkillCooldown() <= 0
-                        ? MorphStrings.disguisingWithSkillAvaliableString()
-                        : MorphStrings.disguisingWithSkillPreparingString())
-                    : MorphStrings.disguisingAsString();
+            short bit = 0;
+
+            if (haveSkill)
+                bit |= 1;
+
+            if (state.getSkillCooldown() <= 0)
+                bit |= 2;
+            else
+                bit |= 4;
 
             var revLevel = revealingHandler.getRevealingLevel(player);
-            var disguiseRevealed = revLevel == RevealingHandler.RevealingLevel.REVEALED || revLevel == RevealingHandler.RevealingLevel.SUSPECT;
-            var display = disguiseRevealed
-                    ? Component.empty()
-                        .append(state.getPlayerDisplay())
-                        .append((revLevel == RevealingHandler.RevealingLevel.REVEALED ? MorphStrings.revealed() : MorphStrings.partialRevealed()).toComponent(locale))
-                    : state.getPlayerDisplay();
+            switch (revLevel)
+            {
+                case SAFE -> bit |= 8;
+                case SUSPECT -> bit |= 16;
+                case REVEALED -> bit |= 32;
+            }
 
-            player.sendActionBar(msg.resolve("what", display).toComponent(locale, messageStore));
+            var msgConfig = state.getProperty("MESSAGE_CONFIG", MessageConfiguration.class);
+            if (msgConfig == null) msgConfig = MessageConfiguration.DEFAULT;
+
+            short stateBit = msgConfig.statusBit();
+
+            if (stateBit != bit || !msgConfig.locale.equals(locale))
+            {
+                //更新actionbar信息
+                var msg = haveSkill
+                        ? (state.getSkillCooldown() <= 0
+                            ? MorphStrings.disguisingWithSkillAvaliableString()
+                            : MorphStrings.disguisingWithSkillPreparingString())
+                        : MorphStrings.disguisingAsString();
+
+                var disguiseRevealed = revLevel == RevealingHandler.RevealingLevel.REVEALED || revLevel == RevealingHandler.RevealingLevel.SUSPECT;
+                var display = disguiseRevealed
+                        ? Component.empty()
+                                .append(state.getPlayerDisplay())
+                                .append((revLevel == RevealingHandler.RevealingLevel.REVEALED ? MorphStrings.revealed() : MorphStrings.partialRevealed()).toComponent(locale))
+                        : state.getPlayerDisplay();
+
+                msgConfig = msgConfig
+                        .withDisplay(msg.resolve("what", display).toComponent(locale, messageStore))
+                        .withBit(bit)
+                        .withLocale(locale);
+
+                state.setProperty("MESSAGE_CONFIG", msgConfig);
+            }
+
+            player.sendActionBar(msgConfig.display);
         }
 
         try
