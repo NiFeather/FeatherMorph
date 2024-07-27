@@ -259,7 +259,7 @@ public abstract class SingleWatcher extends MorphPluginObject
         return new Object2ObjectOpenHashMap<>(registry);
     }
 
-    private final Map<SingleValue<?>, Object> dirtySingles = new Object2ObjectOpenHashMap<>();
+    private final Map<SingleValue<?>, Object> dirtySingles = Collections.synchronizedMap(new Object2ObjectOpenHashMap<>());
 
     public Map<SingleValue<?>, Object> getDirty()
     {
@@ -282,11 +282,13 @@ public abstract class SingleWatcher extends MorphPluginObject
 
         try
         {
+            /*
             if (!isPlayerOnline())
                 throw new IllegalStateException("Can't sync value for offline player!");
 
             var nmsPlayer = NmsRecord.ofPlayer(getBindingPlayer());
             TickThread.ensureTickThread(nmsPlayer, "Syncing watcher's value while not on its player's ticking thread!");
+            */
 
             doSync();
         }
