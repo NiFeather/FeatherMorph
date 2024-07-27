@@ -656,6 +656,7 @@ public class DisguiseState extends MorphPluginObject
         return disposed.get();
     }
 
+    @Override
     public void dispose()
     {
         disposed.set(true);

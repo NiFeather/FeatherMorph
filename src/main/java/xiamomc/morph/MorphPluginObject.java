@@ -26,4 +26,8 @@ public class MorphPluginObject extends PluginObject<MorphPlugin>
     {
         Bukkit.getRegionScheduler().execute(plugin, entity.getLocation(), r);
     }
+
+    public void dispose()
+    {
+    }
 }

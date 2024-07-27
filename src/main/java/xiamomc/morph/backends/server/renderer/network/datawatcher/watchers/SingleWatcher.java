@@ -1,5 +1,6 @@
 package xiamomc.morph.backends.server.renderer.network.datawatcher.watchers;
 
+import ca.spottedleaf.moonrise.common.util.TickThread;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.events.PacketContainer;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
@@ -16,6 +17,8 @@ import xiamomc.morph.backends.server.renderer.network.datawatcher.values.SingleV
 import xiamomc.morph.backends.server.renderer.network.registries.RegistryKey;
 import xiamomc.morph.backends.server.renderer.network.registries.RenderRegistry;
 import xiamomc.morph.backends.server.renderer.utilties.WatcherUtils;
+import xiamomc.morph.misc.NmsRecord;
+import xiamomc.morph.utilities.NmsUtils;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Exceptions.NullDependencyException;
@@ -279,6 +282,12 @@ public abstract class SingleWatcher extends MorphPluginObject
 
         try
         {
+            if (!isPlayerOnline())
+                throw new IllegalStateException("Can't sync value for offline player!");
+
+            var nmsPlayer = NmsRecord.ofPlayer(getBindingPlayer());
+            TickThread.ensureTickThread(nmsPlayer, "Syncing watcher's value while not on its player's ticking thread!");
+
             doSync();
         }
         catch (Throwable t)
@@ -371,6 +380,7 @@ public abstract class SingleWatcher extends MorphPluginObject
         return disposed;
     }
 
+    @Override
     public final void dispose()
     {
         if (disposed)

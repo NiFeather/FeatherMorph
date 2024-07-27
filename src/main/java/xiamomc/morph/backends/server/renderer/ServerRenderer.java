@@ -1,15 +1,25 @@
 package xiamomc.morph.backends.server.renderer;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerInteractEvent;
+import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.backends.server.renderer.network.PacketFactory;
 import xiamomc.morph.backends.server.renderer.network.ProtocolHandler;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
+import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.LivingEntityWatcher;
 import xiamomc.morph.backends.server.renderer.network.registries.RegisterParameters;
 import xiamomc.morph.backends.server.renderer.network.registries.RenderRegistry;
+import xiamomc.pluginbase.Annotations.Initializer;
 
-public class ServerRenderer extends MorphPluginObject
+import java.util.List;
+
+public class ServerRenderer extends MorphPluginObject implements Listener
 {
     private final ProtocolHandler protocolHandler;
 
@@ -25,6 +35,24 @@ public class ServerRenderer extends MorphPluginObject
         dependencies.cache(protocolHandler = new ProtocolHandler());
     }
 
+    @Initializer
+    private void load()
+    {
+        // 当前插件中有在禁用过程使用LivingEntityWatcher的处理
+        // 因此在这里加上插件是否启用的检查
+        if (plugin.isEnabled())
+            Bukkit.getPluginManager().registerEvents(this, plugin);
+    }
+
+    private final List<LivingEntityWatcher> livingEntityWatchers = new ObjectArrayList<>();
+
+    @EventHandler
+    public void onPlayerStartUsingItem(PlayerInteractEvent event)
+    {
+        for (var watcher : livingEntityWatchers)
+            watcher.onPlayerStartUsingItem(event);
+    }
+
     /**
      * 向后端渲染器注册玩家
      * @param player 目标玩家
@@ -35,7 +63,12 @@ public class ServerRenderer extends MorphPluginObject
     {
         try
         {
-            return registry.register(player, new RegisterParameters(entityType, name));
+            var watcher = registry.register(player, new RegisterParameters(entityType, name));
+
+            if (watcher instanceof LivingEntityWatcher livingEntityWatcher)
+                livingEntityWatchers.add(livingEntityWatcher);
+
+            return watcher;
         }
         catch (Throwable t)
         {
@@ -52,11 +85,14 @@ public class ServerRenderer extends MorphPluginObject
     {
         try
         {
-            registry.unregister(player.getUniqueId());
+            var watcher = registry.unregister(player.getUniqueId());
+
+            if (watcher != null)
+                this.livingEntityWatchers.remove(watcher);
         }
         catch (Throwable t)
         {
-            logger.info("Can't unregister player: " + t.getMessage());
+            logger.error("Can't unregister player: " + t.getMessage());
             t.printStackTrace();
         }
     }
@@ -65,5 +101,7 @@ public class ServerRenderer extends MorphPluginObject
     {
         registry.reset();
         protocolHandler.dispose();
+
+        PlayerInteractEvent.getHandlerList().unregister(this);
     }
 }

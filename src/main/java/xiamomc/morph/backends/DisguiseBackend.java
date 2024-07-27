@@ -115,8 +115,4 @@ public abstract class DisguiseBackend<TInstance, TWrapper extends DisguiseWrappe
     public abstract String toOfflineSave(DisguiseWrapper<?> wrapper);
 
     public abstract Collection<TWrapper> listInstances();
-
-    public void dispose()
-    {
-    }
 }

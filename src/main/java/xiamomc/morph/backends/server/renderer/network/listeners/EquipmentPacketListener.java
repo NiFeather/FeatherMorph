@@ -21,7 +21,7 @@ public class EquipmentPacketListener extends ProtocolListener
 
     public EquipmentPacketListener()
     {
-        registry.onUnRegister(this, alreadyFake::remove);
+        registry.onUnRegister(this, parameters -> alreadyFake.remove(parameters.player()));
     }
 
     @Override

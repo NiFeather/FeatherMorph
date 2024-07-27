@@ -1,7 +1,10 @@
 package xiamomc.morph.backends.server.renderer.network.registries;
 
+import it.unimi.dsi.fastutil.ints.Int2IntMaps;
+import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import it.unimi.dsi.fastutil.objects.ObjectLists;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -11,9 +14,11 @@ import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
 import xiamomc.pluginbase.Exceptions.NullDependencyException;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -57,7 +62,7 @@ public class RenderRegistry extends MorphPluginObject
 
     //region Registry
 
-    private final Map<UUID, SingleWatcher> watcherMap = new Object2ObjectOpenHashMap<>();
+    private final Map<UUID, SingleWatcher> watcherMap = new ConcurrentHashMap<>();
 
     public List<SingleWatcher> getWatchers()
     {
@@ -65,6 +70,7 @@ public class RenderRegistry extends MorphPluginObject
     }
 
     @Nullable
+    @Deprecated(forRemoval = true)
     public SingleWatcher getWatcher(Entity entity)
     {
         return getWatcher(entity.getUniqueId());
@@ -73,32 +79,7 @@ public class RenderRegistry extends MorphPluginObject
     @Nullable
     public SingleWatcher getWatcher(UUID uuid)
     {
-        boolean locked;
-
-        try
-        {
-            locked = readLock.tryLock(rwLockWaitTime, TimeUnit.MILLISECONDS);
-        }
-        catch (Throwable t)
-        {
-            throw new RuntimeException("Unable to lock registry for read!", t);
-        }
-
-        if (!locked)
-            throw new RuntimeException("Unable to lock registry for read: Timed out");
-
-        SingleWatcher watcher;
-
-        try
-        {
-            watcher = watcherMap.getOrDefault(uuid, null);
-        }
-        finally
-        {
-            readLock.unlock();
-        }
-
-        return watcher;
+        return watcherMap.getOrDefault(uuid, null);
     }
 
     public void unregister(Player player)
@@ -106,15 +87,23 @@ public class RenderRegistry extends MorphPluginObject
         unregister(player.getUniqueId());
     }
 
-    public void unregister(UUID uuid)
+    /**
+     * @param uuid The player's UUID
+     * @return A watcher that binds to the UUID, if present
+     * @apiNote The watcher returned is disposed
+     */
+    @Nullable
+    public SingleWatcher unregister(UUID uuid)
     {
         var watcher = watcherMap.remove(uuid);
-        if (watcher == null) return;
+        if (watcher == null) return null;
 
         callUnregister(Bukkit.getPlayer(uuid), watcher);
 
         watcher.setParentRegistry(null);
         watcher.dispose();
+
+        return watcher;
     }
 
     /**
@@ -134,12 +123,6 @@ public class RenderRegistry extends MorphPluginObject
         return watcher;
     }
 
-    private final ReentrantReadWriteLock rwLock = new ReentrantReadWriteLock();
-
-    private final Lock readLock = rwLock.readLock();
-    private final Lock writeLock = rwLock.writeLock();
-    private final int rwLockWaitTime = 50;
-
     /**
      * 注册UUID对应的伪装类型
      * @param uuid 目标玩家的UUID
@@ -147,32 +130,10 @@ public class RenderRegistry extends MorphPluginObject
      */
     public void registerWithWatcher(@NotNull UUID uuid, @NotNull SingleWatcher watcher)
     {
-        if (watcher == null)
-            throw new NullDependencyException("Null Watcher!");
+        watcherMap.put(uuid, watcher);
 
-        boolean locked;
-        try
-        {
-            locked = writeLock.tryLock(rwLockWaitTime, TimeUnit.MILLISECONDS);
-        }
-        catch (Throwable t)
-        {
-            throw new RuntimeException("Unable to lock registry for write!", t);
-        }
-
-        if (!locked)
-            throw new RuntimeException("Unable to lock registry for write: Timed out.");
-
-        try
-        {
-            watcherMap.put(uuid, watcher);
-            watcher.setParentRegistry(this);
-            callRegister(Bukkit.getPlayer(uuid), watcher);
-        }
-        finally
-        {
-            writeLock.unlock();
-        }
+        watcher.setParentRegistry(this);
+        callRegister(Bukkit.getPlayer(uuid), watcher);
     }
 
     public void reset()

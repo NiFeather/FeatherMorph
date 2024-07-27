@@ -112,16 +112,15 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
             var playerDisguiseTargetName = DisguiseTypes.PLAYER.toStrippedId(state.getDisguiseIdentifier());
 
             PlayerSkinProvider.getInstance().fetchSkin(playerDisguiseTargetName)
-                    .thenApply(optional ->
+                    .thenAccept(optional ->
                     {
-                        if (wrapper.disposed()) return null;
+                        if (wrapper.disposed()) return;
 
                         GameProfile outcomingProfile = new GameProfile(Util.NIL_UUID, playerDisguiseTargetName);
                         if (optional.isPresent()) outcomingProfile = optional.get();
 
-                        wrapper.applySkin(outcomingProfile);
-
-                        return null;
+                        GameProfile finalOutcomingProfile = outcomingProfile;
+                        this.scheduleOn(player, () -> wrapper.applySkin(finalOutcomingProfile));
                     });
         }
 

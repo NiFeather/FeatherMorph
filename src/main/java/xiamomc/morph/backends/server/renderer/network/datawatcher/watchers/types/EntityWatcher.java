@@ -31,6 +31,8 @@ public class EntityWatcher extends SingleWatcher
     @Override
     protected void doSync()
     {
+        super.doSync();
+
         var player = getBindingPlayer();
         var nmsPlayer = NmsRecord.ofPlayer(player);
         var values = ValueIndex.BASE_ENTITY;
@@ -62,8 +64,6 @@ public class EntityWatcher extends SingleWatcher
         write(values.NO_GRAVITY, !player.hasGravity());
         write(values.POSE, nmsPlayer.getPose());
         write(values.FROZEN_TICKS, nmsPlayer.getTicksFrozen());
-
-        super.doSync();
     }
 
     @Override

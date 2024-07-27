@@ -67,7 +67,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MorphManager extends MorphPluginObject implements IManagePlayerData
 {
-    private final List<DisguiseState> disguiseStates = new ObjectArrayList<>();
+    private final List<DisguiseState> disguiseStates = Collections.synchronizedList(new ObjectArrayList<>());
 
     private final PlayerDataStore data = new PlayerDataStore();
 
@@ -75,9 +75,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
     @Resolved
     private MorphSkillHandler skillHandler;
-
-    @Resolved
-    private AbilityManager abilityHandler;
 
     @Resolved
     private MorphConfigManager config;

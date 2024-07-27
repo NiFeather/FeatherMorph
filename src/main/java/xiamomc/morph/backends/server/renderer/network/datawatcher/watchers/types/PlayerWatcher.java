@@ -32,10 +32,10 @@ public class PlayerWatcher extends InventoryLivingWatcher
     @Override
     protected void doSync()
     {
+        super.doSync();
+
         this.write(ValueIndex.PLAYER.SKIN_FLAGS, (byte)getBindingPlayer().getClientOption(ClientOption.SKIN_PARTS).getRaw());
         this.write(ValueIndex.PLAYER.MAINHAND, (byte)getBindingPlayer().getMainHand().ordinal());
-
-        super.doSync();
     }
 
     @Override

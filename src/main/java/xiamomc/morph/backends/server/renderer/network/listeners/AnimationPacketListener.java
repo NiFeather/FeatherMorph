@@ -22,13 +22,13 @@ public class AnimationPacketListener extends ProtocolListener
     {
         if (packetEvent.getPacketType() != PacketType.Play.Server.ANIMATION)
         {
-            logger.info("Unmatched packettype: " + packetEvent.getPacketType());
+            logger.error("Unmatched packettype: " + packetEvent.getPacketType());
             return;
         }
 
         if (!(packetEvent.getPacket().getHandle() instanceof ClientboundAnimatePacket clientboundAnimatePacket))
         {
-            logger.info("Handle is " + packetEvent.getPacket().getHandle() + ", But expect ClientboundAnimatePacket.");
+            logger.error("Handle is " + packetEvent.getPacket().getHandle() + ", But expect ClientboundAnimatePacket.");
             return;
         }
 

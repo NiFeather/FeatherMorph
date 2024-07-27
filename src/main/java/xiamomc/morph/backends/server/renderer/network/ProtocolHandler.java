@@ -140,6 +140,7 @@ public class ProtocolHandler extends MorphPluginObject
         return disposed;
     }
 
+    @Override
     public void dispose()
     {
         var protocolMgr = ProtocolLibrary.getProtocolManager();

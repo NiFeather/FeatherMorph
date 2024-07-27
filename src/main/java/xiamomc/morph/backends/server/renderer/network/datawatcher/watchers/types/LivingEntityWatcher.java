@@ -1,39 +1,31 @@
 package xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types;
 
+import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import it.unimi.dsi.fastutil.objects.ObjectObjectMutablePair;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ColorParticleOption;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.InteractionHand;
-import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.potion.PotionEffect;
-import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.backends.server.renderer.network.registries.ValueIndex;
 import xiamomc.morph.misc.NmsRecord;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
-public class LivingEntityWatcher extends EntityWatcher implements Listener
+public class LivingEntityWatcher extends EntityWatcher
 {
     public LivingEntityWatcher(Player bindingPlayer, EntityType entityType)
     {
         super(bindingPlayer, entityType);
-
-        // 当前插件中有在禁用过程使用LivingEntityWatcher的处理
-        // 因此在这里加上插件是否启用的检查
-        if (MorphPlugin.getInstance().isEnabled())
-            Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 
     @Override
@@ -44,17 +36,22 @@ public class LivingEntityWatcher extends EntityWatcher implements Listener
         register(ValueIndex.BASE_LIVING);
     }
 
-    private final Map<Player, EquipmentSlot> handMap = new Object2ObjectArrayMap<>();
+    private final Pair<Player, EquipmentSlot> handPair = new ObjectObjectMutablePair<>(null, null);
 
-    @EventHandler
     public void onPlayerStartUsingItem(PlayerInteractEvent e)
     {
-        handMap.put(e.getPlayer(), e.getHand());
+        if (!this.isPlayerOnline()) return;
+        if (!this.getBindingPlayer().equals(e.getPlayer())) return;
+
+        handPair.left(e.getPlayer());
+        handPair.right(e.getHand());
     }
 
     @Override
     protected void doSync()
     {
+        super.doSync();
+
         var player = getBindingPlayer();
         var nmsPlayer = NmsRecord.ofPlayer(player);
         var values = ValueIndex.BASE_LIVING;
@@ -67,7 +64,7 @@ public class LivingEntityWatcher extends EntityWatcher implements Listener
         {
             flagBit |= 0x01;
 
-            var handInUse = handMap.remove(player);
+            var handInUse = handPair.right();
 
             if (handInUse == null)
             {
@@ -121,13 +118,5 @@ public class LivingEntityWatcher extends EntityWatcher implements Listener
         }
 
         write(values.BED_POS, bedPos);
-
-        super.doSync();
-    }
-
-    @Override
-    protected void onDispose()
-    {
-        PlayerInteractEvent.getHandlerList().unregister(this);
     }
 }

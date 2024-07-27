@@ -242,6 +242,7 @@ public class AbilityUpdater extends MorphPluginObject
         return this.registeredAbilities.stream().map(Pair::left).collect(Collectors.toUnmodifiableList());
     }
 
+    @Override
     public void dispose()
     {
         getEnabledAbilities().forEach(a -> a.revokeFromPlayer(player(), parentState));
