@@ -117,8 +117,6 @@ public class ZombieVillagerWatcher extends ZombieWatcher
             }
 
             profession = BuiltInRegistries.VILLAGER_PROFESSION.getOptional(rl).orElse(VillagerProfession.NONE);
-
-            logger.info("Set prof " + profession);
         }
 
         if (nbt.contains("type"))
@@ -135,7 +133,6 @@ public class ZombieVillagerWatcher extends ZombieWatcher
             }
 
             type = BuiltInRegistries.VILLAGER_TYPE.getOptional(rl).orElse(VillagerType.PLAINS);
-            logger.info("Set type " + type);
         }
 
         write(ValueIndex.ZOMBIE_VILLAGER.VILLAGER_DATA, new VillagerData(type, profession, level));

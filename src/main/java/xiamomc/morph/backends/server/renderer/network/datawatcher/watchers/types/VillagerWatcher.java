@@ -60,8 +60,6 @@ public class VillagerWatcher extends LivingEntityWatcher
         var availableTypes = Arrays.stream(VillagerTypes.values()).toList();
         var villagerType = availableTypes.get(type.ordinal()).bindingType;
 
-        logger.warn("P " + villagerProfession + " T " + villagerType);
-
         return new VillagerData(villagerType, villagerProfession, this.lvl);
     }
 
@@ -119,8 +117,6 @@ public class VillagerWatcher extends LivingEntityWatcher
             }
 
             profession = BuiltInRegistries.VILLAGER_PROFESSION.getOptional(rl).orElse(VillagerProfession.NONE);
-
-            logger.info("Set prof " + profession);
         }
 
         if (nbt.contains("type"))
@@ -137,7 +133,6 @@ public class VillagerWatcher extends LivingEntityWatcher
             }
 
             type = BuiltInRegistries.VILLAGER_TYPE.getOptional(rl).orElse(VillagerType.PLAINS);
-            logger.info("Set type " + type);
         }
 
         write(ValueIndex.VILLAGER.VILLAGER_DATA, new VillagerData(type, profession, level));
@@ -148,7 +143,6 @@ public class VillagerWatcher extends LivingEntityWatcher
     {
         super.mergeFromCompound(nbt);
 
-        logger.info("Merg " + nbt.getAsString());
         if (nbt.contains("VillagerData"))
         {
             var compound = nbt.getCompound("VillagerData");
