@@ -67,9 +67,6 @@ public class EntityTypeUtils
     {
         var serverWorld = ((CraftWorld) world).getHandle();
 
-        if (!TickThread.isTickThreadFor(serverWorld, BlockPos.ZERO))
-            throw new IllegalArgumentException("We are not on the ticking thread for world " + world.getName() + "!");
-
         return nmsType.create(serverWorld, EntityTypeUtils::scheduleEntityDiscard, BlockPos.ZERO, MobSpawnType.COMMAND, false, false);
     }
 
