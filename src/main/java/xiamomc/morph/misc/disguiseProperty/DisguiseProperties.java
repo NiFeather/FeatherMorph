@@ -32,6 +32,7 @@ public class DisguiseProperties
         register(EntityType.HORSE, new HorseProperties());
         register(EntityType.PANDA, new PandaProperties());
         register(EntityType.VILLAGER, new VillagerProperties());
+        register(EntityType.ZOMBIE_VILLAGER, new VillagerProperties());
     }
 
     public void register(EntityType type, AbstractProperties properties)
