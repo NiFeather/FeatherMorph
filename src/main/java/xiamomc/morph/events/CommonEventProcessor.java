@@ -402,7 +402,12 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         skillHandler.removeUnusedList(e.getPlayer());
 
         var state = morphs.getDisguiseStateFor(e.getPlayer());
-        var players = Bukkit.getOnlinePlayers();
+
+        List<Player> players;
+        synchronized (this)
+        {
+            players = new ObjectArrayList<>(Bukkit.getOnlinePlayers());
+        }
 
         if (state != null)
         {
