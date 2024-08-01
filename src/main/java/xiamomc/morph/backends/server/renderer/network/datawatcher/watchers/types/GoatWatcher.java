@@ -4,6 +4,9 @@ import net.minecraft.nbt.CompoundTag;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import xiamomc.morph.backends.server.renderer.network.registries.ValueIndex;
+import xiamomc.morph.misc.disguiseProperty.DisguiseProperties;
+import xiamomc.morph.misc.disguiseProperty.SingleProperty;
+import xiamomc.morph.misc.disguiseProperty.values.GoatProperties;
 
 import java.util.Random;
 
@@ -23,17 +26,17 @@ public class GoatWatcher extends LivingEntityWatcher
     }
 
     @Override
-    protected void initValues()
+    protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
-        super.initValues();
+        var properties = DisguiseProperties.INSTANCE.getOrThrow(GoatProperties.class);
 
-        var random = new Random();
+        if (property.equals(properties.HAS_LEFT_HORN))
+            write(ValueIndex.GOAT.HAS_LEFT_HORN, (Boolean) value);
 
-        if (random.nextInt(0, 100) <= 15)
-            write(ValueIndex.GOAT.HAS_LEFT_HORN, false);
+        if (property.equals(properties.HAS_RIGHT_HORN))
+            write(ValueIndex.GOAT.HAS_RIGHT_HORN, (Boolean) value);
 
-        if (random.nextInt(0, 100) <= 15)
-            write(ValueIndex.GOAT.HAS_RIGHT_HORN, false);
+        super.onPropertyWrite(property, value);
     }
 
     @Override

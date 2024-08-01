@@ -18,12 +18,14 @@ import xiamomc.morph.backends.server.renderer.network.registries.RegistryKey;
 import xiamomc.morph.backends.server.renderer.network.registries.RenderRegistry;
 import xiamomc.morph.backends.server.renderer.utilties.WatcherUtils;
 import xiamomc.morph.misc.NmsRecord;
+import xiamomc.morph.misc.disguiseProperty.SingleProperty;
 import xiamomc.morph.utilities.NmsUtils;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Exceptions.NullDependencyException;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -31,22 +33,6 @@ public abstract class SingleWatcher extends MorphPluginObject
 {
     protected void initRegistry()
     {
-    }
-
-    protected void initValues()
-    {
-        for (SingleValue<?> singleValue : registry.keySet())
-        {
-            var newValue = singleValue.defaultValue();
-            var randoms = singleValue.getRandomValues();
-            if (!randoms.isEmpty())
-            {
-                var index = new Random().nextInt(randoms.size());
-                newValue = randoms.get(index);
-
-                this.write(singleValue.index(), newValue);
-            }
-        }
     }
 
     public final UUID bindingUUID;
@@ -109,8 +95,6 @@ public abstract class SingleWatcher extends MorphPluginObject
         markSilent(this);
 
         initRegistry();
-        initValues();
-
         doingInitialization = false;
         unmarkSilent(this);
     }
@@ -123,6 +107,19 @@ public abstract class SingleWatcher extends MorphPluginObject
         if (!syncedOnce.get() && !disposed)
             sync();
     }
+
+    //region Disguise Property
+
+    public final <X> void write(SingleProperty<X> property, X value)
+    {
+        this.onPropertyWrite(property, value);
+    }
+
+    protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
+    {
+    }
+
+    //endregion Disguise Property
 
     //region Custom Registry
 
@@ -173,7 +170,7 @@ public abstract class SingleWatcher extends MorphPluginObject
 
     //region Value Registry
 
-    protected final Map<SingleValue<?>, Object> registry = Collections.synchronizedMap(new Object2ObjectOpenHashMap<>());
+    protected final Map<SingleValue<?>, Object> registry = new ConcurrentHashMap<>();
 
     @Nullable
     public SingleValue<?> getSingle(int index)
@@ -238,6 +235,11 @@ public abstract class SingleWatcher extends MorphPluginObject
 
     protected <X> void onTrackerWrite(SingleValue<X> single, @Nullable X oldVal, @Nullable X newVal)
     {
+    }
+
+    public <X> X getOr(SingleValue<X> singleValue, X defaultVal)
+    {
+        return (X) registry.getOrDefault(singleValue, defaultVal);
     }
 
     public <X> X get(SingleValue<X> singleValue)

@@ -21,18 +21,6 @@ public class TropicalFishWatcher extends LivingEntityWatcher
     }
 
     @Override
-    protected void initValues()
-    {
-        super.initValues();
-/*
-        var patterns = TropicalFish.Pattern.values();
-        Arrays.stream(patterns).findAny().get();
- */
-
-        //todo
-    }
-
-    @Override
     public void mergeFromCompound(CompoundTag nbt)
     {
         super.mergeFromCompound(nbt);

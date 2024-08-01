@@ -16,7 +16,8 @@ import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.abilities.AbilityUpdater;
 import xiamomc.morph.backends.DisguiseWrapper;
-import xiamomc.morph.network.PlayerOptions;
+    import xiamomc.morph.misc.disguiseProperty.PropertyHandler;
+    import xiamomc.morph.network.PlayerOptions;
 import xiamomc.morph.network.commands.S2C.set.S2CSetSkillCooldownCommand;
 import xiamomc.morph.network.server.MorphClientHandler;
 import xiamomc.morph.providers.DisguiseProvider;
@@ -281,6 +282,17 @@ public class DisguiseState extends MorphPluginObject
 
         this.bossbar = bossbar;
     }
+
+    //region Disguise Property
+
+    private final PropertyHandler propertyHandler = new PropertyHandler();
+
+    public PropertyHandler disguisePropertyHandler()
+    {
+        return propertyHandler;
+    }
+
+    //endregion Disguise Property
 
     //region CustomProperty
 

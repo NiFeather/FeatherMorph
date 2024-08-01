@@ -10,10 +10,14 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
 import xiamomc.morph.backends.server.renderer.network.registries.ValueIndex;
+import xiamomc.morph.misc.disguiseProperty.DisguiseProperties;
+import xiamomc.morph.misc.disguiseProperty.SingleProperty;
+import xiamomc.morph.misc.disguiseProperty.values.VillagerProperties;
 import xiamomc.morph.utilities.MathUtils;
 
 import java.util.Arrays;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class ZombieVillagerWatcher extends ZombieWatcher
 {
@@ -30,22 +34,22 @@ public class ZombieVillagerWatcher extends ZombieWatcher
         register(ValueIndex.ZOMBIE_VILLAGER);
     }
 
-    @Override
-    protected void initValues()
+    // region Cache
+
+    private Villager.Profession profession;
+    private Villager.Type type;
+    private int lvl;
+
+    private VillagerData computeNmsVillagerData()
     {
-        super.initValues();
+        var prof = this.profession == null ? Villager.Profession.NONE : this.profession;
+        var type = this.type == null ? Villager.Type.PLAINS : this.type;
 
-        var random = new Random();
-        var availableTypes = Arrays.stream(VillagerWatcher.VillagerTypes.values()).toList();
-        var villagerType = availableTypes.get(random.nextInt(availableTypes.size())).bindingType;
-
-        var availableProfessions = Arrays.stream(Villager.Profession.values()).toList();
-        var targetBukkit = availableProfessions.get(random.nextInt(availableProfessions.size())).getKey().asString();
         VillagerProfession villagerProfession = VillagerProfession.NONE;
         try
         {
             villagerProfession = BuiltInRegistries.VILLAGER_PROFESSION
-                    .getOptional(ResourceLocation.parse(targetBukkit))
+                    .getOptional(ResourceLocation.parse(prof.key().asString()))
                     .orElse(VillagerProfession.NONE);
         }
         catch (Throwable t)
@@ -53,8 +57,41 @@ public class ZombieVillagerWatcher extends ZombieWatcher
             logger.error("Unable to convert bukkit type '%s' to NMS format: " + t.getMessage());
         }
 
-        var level = random.nextInt(1, 6);
-        write(ValueIndex.ZOMBIE_VILLAGER.VILLAGER_DATA, new VillagerData(villagerType, villagerProfession, level));
+        var availableTypes = Arrays.stream(VillagerWatcher.VillagerTypes.values()).toList();
+        var villagerType = availableTypes.get(type.ordinal()).bindingType;
+
+        return new VillagerData(villagerType, villagerProfession, this.lvl);
+    }
+
+    // endregion Cache
+
+    @Override
+    protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
+    {
+        var properties = DisguiseProperties.INSTANCE.getOrThrow(VillagerProperties.class);
+
+        if (property.equals(properties.LEVEL))
+        {
+            this.lvl = (Integer) value;
+
+            write(ValueIndex.VILLAGER.VILLAGER_DATA, computeNmsVillagerData());
+        }
+
+        if (property.equals(properties.TYPE))
+        {
+            this.type = (Villager.Type) value;
+
+            write(ValueIndex.VILLAGER.VILLAGER_DATA, computeNmsVillagerData());
+        }
+
+        if (property.equals(properties.PROFESSION))
+        {
+            this.profession = (Villager.Profession) value;
+
+            write(ValueIndex.VILLAGER.VILLAGER_DATA, computeNmsVillagerData());
+        }
+
+        super.onPropertyWrite(property, value);
     }
 
     private void mergeFromVillagerData(CompoundTag nbt)

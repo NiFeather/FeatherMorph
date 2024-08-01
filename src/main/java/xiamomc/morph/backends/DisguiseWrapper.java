@@ -20,6 +20,7 @@ import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.misc.CollisionBoxRecord;
 import xiamomc.morph.misc.DisguiseState;
+import xiamomc.morph.misc.disguiseProperty.SingleProperty;
 import xiamomc.morph.utilities.EntityTypeUtils;
 
 import java.util.Map;
@@ -348,6 +349,10 @@ public abstract class DisguiseWrapper<TInstance>
     }
 
     //endregion
+
+    public <X> void write(SingleProperty<X> property, X value)
+    {
+    }
 
     private final Map<String, Object> attributes = new Object2ObjectArrayMap<>();
 

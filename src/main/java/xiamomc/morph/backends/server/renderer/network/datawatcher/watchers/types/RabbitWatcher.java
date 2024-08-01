@@ -5,6 +5,9 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Rabbit;
 import xiamomc.morph.backends.server.renderer.network.registries.ValueIndex;
+import xiamomc.morph.misc.disguiseProperty.DisguiseProperties;
+import xiamomc.morph.misc.disguiseProperty.SingleProperty;
+import xiamomc.morph.misc.disguiseProperty.values.RabbitProperties;
 
 import java.util.Arrays;
 import java.util.Random;
@@ -30,15 +33,18 @@ public class RabbitWatcher extends LivingEntityWatcher
     }
 
     @Override
-    protected void initValues()
+    protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
-        super.initValues();
+        var properties = DisguiseProperties.INSTANCE.getOrThrow(RabbitProperties.class);
 
-        var availableTypes = Arrays.stream(Rabbit.Type.values()).toList();
-        var random = new Random();
+        if (property.equals(properties.VARIANT))
+        {
+            var val = (Rabbit.Type) value;
 
-        var targetValue = availableTypes.get(random.nextInt(availableTypes.size()));
-        write(ValueIndex.RABBIT.RABBIT_TYPE, targetValue.ordinal());
+            write(ValueIndex.RABBIT.RABBIT_TYPE, val == Rabbit.Type.THE_KILLER_BUNNY ? 99 : val.ordinal());
+        }
+
+        super.onPropertyWrite(property, value);
     }
 
     @Override

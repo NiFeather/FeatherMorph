@@ -5,6 +5,9 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Horse;
 import org.bukkit.entity.Player;
 import xiamomc.morph.backends.server.renderer.network.registries.ValueIndex;
+import xiamomc.morph.misc.disguiseProperty.DisguiseProperties;
+import xiamomc.morph.misc.disguiseProperty.SingleProperty;
+import xiamomc.morph.misc.disguiseProperty.values.HorseProperties;
 
 import java.util.Arrays;
 import java.util.Random;
@@ -40,22 +43,37 @@ public class HorseWatcher extends AbstractHorseWatcher
         return Horse.Style.values()[type];
     }
 
-    @Override
-    protected void initValues()
+    //region Caches
+    private Horse.Color horseColor;
+    private Horse.Style horseStyle;
+    //endregion Caches
+
+    private int computeHorseVariant()
     {
-        super.initValues();
+        var color = horseColor == null ? Horse.Color.WHITE : horseColor;
+        var style = horseStyle == null ? Horse.Style.NONE : horseStyle;
 
-        var random = new Random();
+        return color.ordinal() | style.ordinal() << 8;
+    }
 
-        //https://zh.minecraft.wiki/w/%E9%A9%AC#%E6%95%B0%E6%8D%AE%E5%80%BC
-        var availableColors = Arrays.stream(Horse.Color.values()).toList();
-        var color = availableColors.get(random.nextInt(availableColors.size()));
+    @Override
+    protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
+    {
+        var properties = DisguiseProperties.INSTANCE.getOrThrow(HorseProperties.class);
 
-        var availableStyles = Arrays.stream(Horse.Style.values()).toList();
-        var style = availableStyles.get(random.nextInt(availableStyles.size()));
+        if (property.equals(properties.COLOR))
+        {
+            this.horseColor = (Horse.Color) value;
+            this.write(ValueIndex.HORSE.HORSE_VARIANT, computeHorseVariant());
+        }
 
-        var finalValue = color.ordinal() | style.ordinal() << 8;
-        this.write(ValueIndex.HORSE.HORSE_VARIANT, finalValue);
+        if (property.equals(properties.STYLE))
+        {
+            this.horseStyle = (Horse.Style) value;
+            this.write(ValueIndex.HORSE.HORSE_VARIANT, computeHorseVariant());
+        }
+
+        super.onPropertyWrite(property, value);
     }
 
     @Override

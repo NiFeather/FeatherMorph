@@ -2,8 +2,12 @@ package xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.type
 
 import net.minecraft.nbt.CompoundTag;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Parrot;
 import org.bukkit.entity.Player;
 import xiamomc.morph.backends.server.renderer.network.registries.ValueIndex;
+import xiamomc.morph.misc.disguiseProperty.DisguiseProperties;
+import xiamomc.morph.misc.disguiseProperty.SingleProperty;
+import xiamomc.morph.misc.disguiseProperty.values.ParrotProperties;
 
 public class ParrotWatcher extends TameableAnimalWatcher
 {
@@ -18,6 +22,20 @@ public class ParrotWatcher extends TameableAnimalWatcher
         super.initRegistry();
 
         register(ValueIndex.PARROT);
+    }
+
+    @Override
+    protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
+    {
+        var properties = DisguiseProperties.INSTANCE.getOrThrow(ParrotProperties.class);
+
+        if (property.equals(properties.VARIANT))
+        {
+            var val = (Parrot.Variant) value;
+            write(ValueIndex.PARROT.PARROT_VARIANT, val.ordinal());
+        }
+
+        super.onPropertyWrite(property, value);
     }
 
     @Override

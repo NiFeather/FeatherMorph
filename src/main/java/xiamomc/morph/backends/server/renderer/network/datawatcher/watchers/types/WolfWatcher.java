@@ -5,14 +5,20 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.animal.FrogVariant;
 import net.minecraft.world.entity.animal.WolfVariant;
 import net.minecraft.world.entity.animal.WolfVariants;
 import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Frog;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Wolf;
 import xiamomc.morph.backends.server.renderer.network.registries.ValueIndex;
+import xiamomc.morph.misc.disguiseProperty.DisguiseProperties;
+import xiamomc.morph.misc.disguiseProperty.SingleProperty;
+import xiamomc.morph.misc.disguiseProperty.values.WolfProperties;
+import xiamomc.pluginbase.Exceptions.NullDependencyException;
 
 public class WolfWatcher extends TameableAnimalWatcher
 {
@@ -27,6 +33,35 @@ public class WolfWatcher extends TameableAnimalWatcher
         super.initRegistry();
 
         register(ValueIndex.WOLF);
+    }
+
+    public Holder<WolfVariant> getVariant(Wolf.Variant bukkitVariant)
+    {
+        var bukkitKey = bukkitVariant.getKey();
+
+        var world = ((CraftWorld) Bukkit.getWorlds().stream().findFirst().get()).getHandle();
+        var registry = world.registryAccess().registryOrThrow(Registries.WOLF_VARIANT);
+
+        var holder = registry.getHolder(ResourceLocation.parse(bukkitKey.asString()));
+        if (holder.isPresent())
+            return holder.get();
+        else
+            throw new NullDependencyException("Null wolf variant for id '%s'('%s')".formatted(bukkitVariant, bukkitVariant));
+    }
+
+    @Override
+    protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
+    {
+        var properties = DisguiseProperties.INSTANCE.getOrThrow(WolfProperties.class);
+
+        if (property.equals(properties.VARIANT))
+        {
+            var val = (Wolf.Variant) value;
+
+            this.write(ValueIndex.WOLF.WOLF_VARIANT, getVariant(val));
+        }
+
+        super.onPropertyWrite(property, value);
     }
 
     @Override

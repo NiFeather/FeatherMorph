@@ -5,6 +5,9 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Panda;
 import org.bukkit.entity.Player;
 import xiamomc.morph.backends.server.renderer.network.registries.ValueIndex;
+import xiamomc.morph.misc.disguiseProperty.DisguiseProperties;
+import xiamomc.morph.misc.disguiseProperty.SingleProperty;
+import xiamomc.morph.misc.disguiseProperty.values.PandaProperties;
 
 import java.util.Arrays;
 import java.util.Random;
@@ -35,17 +38,23 @@ public class PandaWatcher extends LivingEntityWatcher
     }
 
     @Override
-    protected void initValues()
+    protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
-        super.initValues();
+        var properties = DisguiseProperties.INSTANCE.getOrThrow(PandaProperties.class);
 
-        var availableValues = Arrays.stream(Panda.Gene.values()).toList();
-        var random = new Random();
-        var mainGene = availableValues.get(random.nextInt(availableValues.size()));
-        var hiddenGene = availableValues.get(random.nextInt(availableValues.size()));
+        if (property.equals(properties.MAIN_GENE))
+        {
+            var val = (Panda.Gene) value;
+            write(ValueIndex.PANDA.MAIN_GENE, (byte)val.ordinal());
+        }
 
-        write(ValueIndex.PANDA.MAIN_GENE, (byte)mainGene.ordinal());
-        write(ValueIndex.PANDA.HIDDEN_GENE, (byte)hiddenGene.ordinal());
+        if (property.equals(properties.HIDDEN_GENE))
+        {
+            var val = (Panda.Gene) value;
+            write(ValueIndex.PANDA.HIDDEN_GENE, (byte)val.ordinal());
+        }
+
+        super.onPropertyWrite(property, value);
     }
 
     @Override

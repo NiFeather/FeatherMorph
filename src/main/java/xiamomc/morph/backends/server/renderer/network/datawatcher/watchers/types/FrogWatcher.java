@@ -12,6 +12,10 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Frog;
 import org.bukkit.entity.Player;
 import xiamomc.morph.backends.server.renderer.network.registries.ValueIndex;
+import xiamomc.morph.misc.disguiseProperty.DisguiseProperties;
+import xiamomc.morph.misc.disguiseProperty.SingleProperty;
+import xiamomc.morph.misc.disguiseProperty.values.FrogProperties;
+import xiamomc.pluginbase.Exceptions.NullDependencyException;
 
 public class FrogWatcher extends LivingEntityWatcher
 {
@@ -25,6 +29,20 @@ public class FrogWatcher extends LivingEntityWatcher
         var world = ((CraftWorld) Bukkit.getWorlds().stream().findFirst().get()).getHandle();
 
         return world.registryAccess().registryOrThrow(Registries.FROG_VARIANT).getHolderOrThrow(key);
+    }
+
+    public Holder<FrogVariant> getFrogVariant(Frog.Variant bukkitVariant)
+    {
+        var bukkitKey = bukkitVariant.getKey();
+
+        var world = ((CraftWorld) Bukkit.getWorlds().stream().findFirst().get()).getHandle();
+        var registry = world.registryAccess().registryOrThrow(Registries.FROG_VARIANT);
+
+        var holder = registry.getHolder(ResourceLocation.parse(bukkitKey.asString()));
+        if (holder.isPresent())
+            return holder.get();
+        else
+            throw new NullDependencyException("Null frog variant for id '%s'('%s')".formatted(bukkitVariant, bukkitVariant));
     }
 
     public Frog.Variant getBukkitFrogVariant()
@@ -79,6 +97,18 @@ public class FrogWatcher extends LivingEntityWatcher
             }
 
             write(ValueIndex.FROG.FROG_VARIANT, getFrogVariant(type));
+        }
+    }
+
+    @Override
+    protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
+    {
+        var properties = DisguiseProperties.INSTANCE.getOrThrow(FrogProperties.class);
+
+        if (property.equals(properties.VARIANT))
+        {
+            var variant = (Frog.Variant) value;
+            write(ValueIndex.FROG.FROG_VARIANT, getFrogVariant(variant));
         }
     }
 

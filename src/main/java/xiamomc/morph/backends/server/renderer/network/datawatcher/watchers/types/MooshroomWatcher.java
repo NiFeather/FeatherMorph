@@ -2,8 +2,12 @@ package xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.type
 
 import net.minecraft.nbt.CompoundTag;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.MushroomCow;
 import org.bukkit.entity.Player;
 import xiamomc.morph.backends.server.renderer.network.registries.ValueIndex;
+import xiamomc.morph.misc.disguiseProperty.DisguiseProperties;
+import xiamomc.morph.misc.disguiseProperty.SingleProperty;
+import xiamomc.morph.misc.disguiseProperty.values.MooshroomProperties;
 
 public class MooshroomWatcher extends LivingEntityWatcher
 {
@@ -18,6 +22,20 @@ public class MooshroomWatcher extends LivingEntityWatcher
         super.initRegistry();
 
         register(ValueIndex.MOOSHROOM);
+    }
+
+    @Override
+    protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
+    {
+        var properties = DisguiseProperties.INSTANCE.getOrThrow(MooshroomProperties.class);
+
+        if (property.equals(properties.VARIANT))
+        {
+            var val = (MushroomCow.Variant) value;
+            write(ValueIndex.MOOSHROOM.VARIANT, val.name().toUpperCase());
+        }
+
+        super.onPropertyWrite(property, value);
     }
 
     @Override

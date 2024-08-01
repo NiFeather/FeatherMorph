@@ -34,6 +34,8 @@ import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.MorphStrings;
 import xiamomc.morph.messages.vanilla.VanillaMessageStore;
 import xiamomc.morph.misc.*;
+import xiamomc.morph.misc.disguiseProperty.DisguiseProperties;
+import xiamomc.morph.misc.disguiseProperty.SingleProperty;
 import xiamomc.morph.misc.permissions.CommonPermissions;
 import xiamomc.morph.network.commands.S2C.clientrender.S2CRenderMapAddCommand;
 import xiamomc.morph.network.commands.S2C.clientrender.S2CRenderMapSyncCommand;
@@ -84,6 +86,9 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
     @Resolved
     private MultiInstanceService multiInstanceService;
+
+    @Resolved
+    private DisguiseProperties disguiseProperties;
 
     public static final DisguiseProvider fallbackProvider = new FallbackProvider();
 
@@ -861,8 +866,17 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                         clientHandler.getPlayerOption(player, true), playerMorphConfig);
                 this.disguiseStates.add(outComingState);
 
+                // 同步伪装属性
+                var wrapperInstance = result.wrapperInstance();
+                var propertyHandler = outComingState.disguisePropertyHandler();
+                propertyHandler.setProperties(disguiseProperties.get(disguiseMeta.getEntityType()));
+                propertyHandler.getAll().forEach((property, value) ->
+                {
+                    wrapperInstance.write((SingleProperty<Object>) property, value);
+                });
+
                 // 向Wrapper写入伪装ID
-                result.wrapperInstance().write(WrapperAttribute.disguiseIdentifier, disguiseIdentifier);
+                wrapperInstance.write(WrapperAttribute.disguiseIdentifier, disguiseIdentifier);
 
                 // 在初始化服务端伪装状态后，交由后端来为玩家套上伪装
                 var backendSuccess = result.wrapperInstance().getBackend().disguise(player, result.wrapperInstance());

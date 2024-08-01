@@ -2,8 +2,12 @@ package xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.type
 
 import net.minecraft.nbt.CompoundTag;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Fox;
 import org.bukkit.entity.Player;
 import xiamomc.morph.backends.server.renderer.network.registries.ValueIndex;
+import xiamomc.morph.misc.disguiseProperty.DisguiseProperties;
+import xiamomc.morph.misc.disguiseProperty.SingleProperty;
+import xiamomc.morph.misc.disguiseProperty.values.FoxProperties;
 
 public class FoxWatcher extends AgeableMobWatcher
 {
@@ -18,6 +22,21 @@ public class FoxWatcher extends AgeableMobWatcher
     public FoxWatcher(Player bindingPlayer)
     {
         super(bindingPlayer, EntityType.FOX);
+    }
+
+    @Override
+    protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
+    {
+        var properties = DisguiseProperties.INSTANCE.getOrThrow(FoxProperties.class);
+
+        if (property.equals(properties.VARIANT))
+        {
+            var val = (Fox.Type) value;
+
+            this.write(ValueIndex.FOX.FOX_VARIANT, val.ordinal());
+        }
+
+        super.onPropertyWrite(property, value);
     }
 
     @Override

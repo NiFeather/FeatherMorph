@@ -1,6 +1,7 @@
 package xiamomc.morph.backends.server;
 
 import com.mojang.authlib.GameProfile;
+import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.TagType;
@@ -25,10 +26,13 @@ import xiamomc.morph.backends.server.renderer.network.registries.ValueIndex;
 import xiamomc.morph.backends.server.renderer.utilties.WatcherUtils;
 import xiamomc.morph.misc.DisguiseEquipment;
 import xiamomc.morph.misc.DisguiseState;
+import xiamomc.morph.misc.disguiseProperty.SingleProperty;
 import xiamomc.morph.utilities.NbtUtils;
 
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
 {
@@ -64,6 +68,9 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
     @Override
     public CompoundTag getCompound()
     {
+        if (bindingWatcher != null)
+            this.instance.compoundTag.merge(WatcherUtils.buildCompoundFromWatcher(bindingWatcher));
+
         return instance.compoundTag.copy();
     }
 
@@ -163,6 +170,19 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
         other.getAttributes().forEach(newInstance::writeInternal);
 
         return newInstance;
+    }
+
+    private final Map<SingleProperty<?>, Object> disguiseProperties = new ConcurrentHashMap<>();
+
+    @Override
+    public <X> void write(SingleProperty<X> property, X value)
+    {
+        disguiseProperties.put(property, value);
+
+        if (bindingWatcher != null)
+            bindingWatcher.write(property, value);
+
+        super.write(property, value);
     }
 
     @Override
@@ -265,6 +285,11 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
 
         this.bindingWatcher = bindingWatcher;
 
+        this.disguiseProperties.forEach((property, value) ->
+        {
+            bindingWatcher.write((SingleProperty<Object>) property, value);
+        });
+
         refreshRegistry();
     }
 
@@ -280,7 +305,7 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
             return;
         }
 
-        //先和watcher同步一下我们的NBT
+        //和watcher同步我们的NBT
         bindingWatcher.mergeFromCompound(getCompound());
 
         if (getEntityType() == EntityType.PLAYER)
@@ -298,9 +323,5 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
 
         if (bindingWatcher.getEntityType() == EntityType.GHAST)
             bindingWatcher.write(ValueIndex.GHAST.CHARGING, aggressive);
-
-        //然后从watcher拉取他们的NBT。
-        //如果watcher有存在会随机的值，此举会将随机的值同步给我们
-        this.instance.compoundTag.merge(WatcherUtils.buildCompoundFromWatcher(bindingWatcher));
     }
 }

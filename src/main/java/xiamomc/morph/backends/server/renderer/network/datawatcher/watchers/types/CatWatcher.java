@@ -12,6 +12,9 @@ import org.bukkit.entity.Cat;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import xiamomc.morph.backends.server.renderer.network.registries.ValueIndex;
+import xiamomc.morph.misc.disguiseProperty.DisguiseProperties;
+import xiamomc.morph.misc.disguiseProperty.SingleProperty;
+import xiamomc.morph.misc.disguiseProperty.values.CatProperties;
 
 import java.util.Arrays;
 import java.util.Random;
@@ -39,19 +42,6 @@ public class CatWatcher extends TameableAnimalWatcher
         return Cat.Type.values()[index];
     }
 
-    @Override
-    protected void initValues()
-    {
-        super.initValues();
-
-        var random = new Random();
-        var availableVariants = Arrays.stream(Cat.Type.values()).toList();
-        var targetIndex = random.nextInt(availableVariants.size());
-        var targetValue = bukkitTypeToNmsHolder(availableVariants.get(targetIndex));
-
-        this.write(ValueIndex.CAT.CAT_VARIANT, targetValue);
-    }
-
     private CatVariant holderToNmsVariant(Holder<CatVariant> holder)
     {
         var keyOptional = holder.unwrapKey();
@@ -77,6 +67,19 @@ public class CatWatcher extends TameableAnimalWatcher
         }
 
         return variant.get();
+    }
+
+    @Override
+    protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
+    {
+        var properties = DisguiseProperties.INSTANCE.getOrThrow(CatProperties.class);
+
+        if (property.equals(properties.CAT_VARIANT))
+        {
+            var variant = (Cat.Type) value;
+            write(ValueIndex.CAT.CAT_VARIANT, bukkitTypeToNmsHolder(variant));
+        }
+        super.onPropertyWrite(property, value);
     }
 
     @Override
