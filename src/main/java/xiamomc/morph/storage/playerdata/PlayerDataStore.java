@@ -56,7 +56,7 @@ public class PlayerDataStore extends MorphJsonBasedStorage<PlayerMetaContainer> 
         if (storingObject.Version < targetConfigurationVersion)
             migrate(storingObject);
 
-        storingObject.playerMetas.forEach(c ->
+        getAll().forEach(c ->
         {
             //要设置给c.unlockedDisguises的列表
             var list = new ObjectArrayList<DisguiseMeta>();
@@ -152,8 +152,8 @@ public class PlayerDataStore extends MorphJsonBasedStorage<PlayerMetaContainer> 
     @Override
     public PlayerMeta getPlayerMeta(OfflinePlayer player)
     {
-        var value = storingObject.playerMetas
-                .stream().filter(c -> c.uniqueId.equals(player.getUniqueId())).findFirst().orElse(null);
+        var value = getAll().stream()
+                .filter(c -> c.uniqueId.equals(player.getUniqueId())).findFirst().orElse(null);
 
         if (value != null)
         {
@@ -167,7 +167,11 @@ public class PlayerDataStore extends MorphJsonBasedStorage<PlayerMetaContainer> 
             newInstance.uniqueId = player.getUniqueId();
             newInstance.playerName = player.getName();
 
-            storingObject.playerMetas.add(newInstance);
+            synchronized (this)
+            {
+                storingObject.playerMetas.add(newInstance);
+            }
+
             return newInstance;
         }
     }
@@ -250,7 +254,7 @@ public class PlayerDataStore extends MorphJsonBasedStorage<PlayerMetaContainer> 
             player.sendMessage(MessageUtils.prefixes(player, text));
     }
 
-    public List<PlayerMeta> getAll()
+    public synchronized List<PlayerMeta> getAll()
     {
         return new ObjectArrayList<>(storingObject.playerMetas);
     }
