@@ -1,5 +1,6 @@
 package xiamomc.morph.events;
 
+import ca.spottedleaf.moonrise.common.util.TickThread;
 import io.papermc.paper.event.player.PlayerArmSwingEvent;
 import io.papermc.paper.event.player.PlayerStopUsingItemEvent;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
@@ -192,12 +193,17 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
                 return;
             }
 
-            var damagerLookingAt = damager.getTargetEntity(5);
-            var playerLookingAt = targetPlayer.getTargetEntity(5);
+            // 如果不是目标玩家的TickThread，那么就没有必要检查是否要攻击本体
+            // 因为这个事件本来就是攻击者的TickThread上发起，因此没必要检查是否是发起者的TickThread
+            if (TickThread.isTickThreadFor(NmsRecord.ofPlayer(targetPlayer)))
+            {
+                var damagerLookingAt = damager.getTargetEntity(5);
+                var playerLookingAt = targetPlayer.getTargetEntity(5);
 
-            //如果伪装的玩家想攻击的实体和被伪装的玩家一样，模拟左键并取消事件
-            if (damagerLookingAt != null && damagerLookingAt.equals(playerLookingAt))
-                e.setCancelled(true);
+                //如果伪装的玩家想攻击的实体和被伪装的玩家一样，模拟左键并取消事件
+                if (damagerLookingAt != null && damagerLookingAt.equals(playerLookingAt))
+                    e.setCancelled(true);
+            }
         }
     }
 
