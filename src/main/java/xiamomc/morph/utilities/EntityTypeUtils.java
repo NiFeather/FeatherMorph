@@ -1,5 +1,6 @@
 package xiamomc.morph.utilities;
 
+import ca.spottedleaf.moonrise.common.util.TickThread;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
@@ -62,16 +63,18 @@ public class EntityTypeUtils
 
     // Hope this will work with Folia
     // I guess it will...
-    public static <T extends Entity> T createEntityThenDispose(net.minecraft.world.entity.EntityType<T> nmsType)
+    public static <T extends Entity> T createEntityThenDispose(net.minecraft.world.entity.EntityType<T> nmsType, World world)
     {
-        var world = Bukkit.getWorlds().get(0);
         var serverWorld = ((CraftWorld) world).getHandle();
+
+        if (!TickThread.isTickThreadFor(serverWorld, BlockPos.ZERO))
+            throw new IllegalArgumentException("We are not on the ticking thread for world " + world.getName() + "!");
 
         return nmsType.create(serverWorld, EntityTypeUtils::scheduleEntityDiscard, BlockPos.ZERO, MobSpawnType.COMMAND, false, false);
     }
 
     @NotNull
-    public static SoundInfo getAmbientSound(EntityType bukkitType)
+    public static SoundInfo getAmbientSound(EntityType bukkitType, World tickingWorld)
     {
         if (bukkitType == EntityType.UNKNOWN)
             return new SoundInfo(null, SoundSource.PLAYERS, Integer.MAX_VALUE, 1);
@@ -79,7 +82,7 @@ public class EntityTypeUtils
         var cache = typeSoundMap.getOrDefault(bukkitType, null);
         if (cache != null) return cache;
 
-        var entity = createEntityThenDispose(getNmsType(bukkitType));
+        var entity = createEntityThenDispose(getNmsType(bukkitType), tickingWorld);
 
         if (entity instanceof Mob mob)
         {
@@ -115,7 +118,7 @@ public class EntityTypeUtils
     }
 
     @Nullable
-    public static Class<? extends Entity> getNmsClass(@NotNull EntityType type)
+    public static Class<? extends Entity> getNmsClass(@NotNull EntityType type, World tickingWorld)
     {
         var cache = nmsClassMap.getOrDefault(type, null);
         if (cache != null) return cache;
@@ -129,7 +132,7 @@ public class EntityTypeUtils
             return null;
         }
 
-        var entity = createEntityThenDispose(nmsType);
+        var entity = createEntityThenDispose(nmsType, tickingWorld);
 
         if (entity == null)
         {
