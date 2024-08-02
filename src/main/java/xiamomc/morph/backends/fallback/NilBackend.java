@@ -1,6 +1,5 @@
 package xiamomc.morph.backends.fallback;
 
-import com.google.common.graph.Network;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.bukkit.Bukkit;

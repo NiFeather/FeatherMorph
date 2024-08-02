@@ -35,7 +35,6 @@ import xiamomc.morph.misc.permissions.CommonPermissions;
 import xiamomc.morph.utilities.EntityTypeUtils;
 import xiamomc.morph.utilities.ReflectionUtils;
 import xiamomc.pluginbase.Annotations.Resolved;
-import xiamomc.pluginbase.Bindables.Bindable;
 
 import java.util.function.Predicate;
 

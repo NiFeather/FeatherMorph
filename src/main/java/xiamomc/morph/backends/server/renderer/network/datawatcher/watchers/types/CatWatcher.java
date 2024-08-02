@@ -17,7 +17,6 @@ import xiamomc.morph.misc.disguiseProperty.SingleProperty;
 import xiamomc.morph.misc.disguiseProperty.values.CatProperties;
 
 import java.util.Arrays;
-import java.util.Random;
 
 public class CatWatcher extends TameableAnimalWatcher
 {

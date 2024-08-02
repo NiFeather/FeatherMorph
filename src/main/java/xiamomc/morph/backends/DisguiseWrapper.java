@@ -17,7 +17,6 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import xiamomc.morph.MorphPlugin;
-import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.misc.CollisionBoxRecord;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.misc.disguiseProperty.SingleProperty;

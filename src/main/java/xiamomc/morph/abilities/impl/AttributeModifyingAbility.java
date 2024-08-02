@@ -1,6 +1,5 @@
 package xiamomc.morph.abilities.impl;
 
-import org.apache.commons.lang3.RandomStringUtils;
 import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
@@ -16,7 +15,6 @@ import xiamomc.morph.misc.DisguiseState;
 
 import java.util.Arrays;
 import java.util.Objects;
-import java.util.UUID;
 
 public class AttributeModifyingAbility extends MorphAbility<AttributeModifyOption>
 {

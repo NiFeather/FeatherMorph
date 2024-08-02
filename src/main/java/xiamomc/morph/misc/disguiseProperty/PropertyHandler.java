@@ -2,8 +2,6 @@ package xiamomc.morph.misc.disguiseProperty;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import xiamomc.morph.misc.disguiseProperty.values.AbstractProperties;
 
 import java.util.Map;

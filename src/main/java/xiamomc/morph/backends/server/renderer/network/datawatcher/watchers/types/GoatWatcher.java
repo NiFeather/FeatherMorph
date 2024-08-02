@@ -8,8 +8,6 @@ import xiamomc.morph.misc.disguiseProperty.DisguiseProperties;
 import xiamomc.morph.misc.disguiseProperty.SingleProperty;
 import xiamomc.morph.misc.disguiseProperty.values.GoatProperties;
 
-import java.util.Random;
-
 public class GoatWatcher extends LivingEntityWatcher
 {
     public GoatWatcher(Player bindingPlayer)

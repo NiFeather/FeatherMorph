@@ -9,9 +9,6 @@ import xiamomc.morph.misc.disguiseProperty.DisguiseProperties;
 import xiamomc.morph.misc.disguiseProperty.SingleProperty;
 import xiamomc.morph.misc.disguiseProperty.values.HorseProperties;
 
-import java.util.Arrays;
-import java.util.Random;
-
 public class HorseWatcher extends AbstractHorseWatcher
 {
     public HorseWatcher(Player bindingPlayer)

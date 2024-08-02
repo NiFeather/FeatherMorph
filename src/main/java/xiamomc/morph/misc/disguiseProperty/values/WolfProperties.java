@@ -1,6 +1,5 @@
 package xiamomc.morph.misc.disguiseProperty.values;
 
-import com.google.errorprone.annotations.Var;
 import org.bukkit.entity.Wolf;
 import org.bukkit.entity.Wolf.Variant;
 import xiamomc.morph.misc.disguiseProperty.SingleProperty;

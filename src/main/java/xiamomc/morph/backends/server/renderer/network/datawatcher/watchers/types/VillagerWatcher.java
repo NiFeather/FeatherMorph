@@ -16,8 +16,6 @@ import xiamomc.morph.misc.disguiseProperty.values.VillagerProperties;
 import xiamomc.morph.utilities.MathUtils;
 
 import java.util.Arrays;
-import java.util.Random;
-import java.util.concurrent.ThreadLocalRandom;
 
 public class VillagerWatcher extends LivingEntityWatcher
 {

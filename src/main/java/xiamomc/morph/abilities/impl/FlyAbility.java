@@ -25,10 +25,8 @@ import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
 import xiamomc.pluginbase.Bindables.BindableList;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Stack;
-import java.util.UUID;
 
 public class FlyAbility extends MorphAbility<FlyOption>
 {

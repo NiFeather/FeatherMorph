@@ -1,9 +1,8 @@
 package xiamomc.morph.misc.disguiseProperty.values;
 
 import org.bukkit.entity.Parrot;
-import xiamomc.morph.misc.disguiseProperty.SingleProperty;
-
 import org.bukkit.entity.Parrot.Variant;
+import xiamomc.morph.misc.disguiseProperty.SingleProperty;
 
 public class ParrotProperties extends AbstractProperties
 {

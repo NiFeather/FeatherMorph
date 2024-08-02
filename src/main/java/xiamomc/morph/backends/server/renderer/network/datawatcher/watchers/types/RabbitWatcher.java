@@ -10,7 +10,6 @@ import xiamomc.morph.misc.disguiseProperty.SingleProperty;
 import xiamomc.morph.misc.disguiseProperty.values.RabbitProperties;
 
 import java.util.Arrays;
-import java.util.Random;
 
 public class RabbitWatcher extends LivingEntityWatcher
 {
