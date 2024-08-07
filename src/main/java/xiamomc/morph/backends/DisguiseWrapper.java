@@ -420,6 +420,10 @@ public abstract class DisguiseWrapper<TInstance>
         return (T) val;
     }
 
+    public void playAnimation(String animationId)
+    {
+    }
+
     public abstract <T> void subscribeEvent(Object source, WrapperEvent<T> wrapperEvent, Consumer<T> c);
 
     public abstract void unSubscribeEvent(Object source, WrapperEvent<?> wrapperEvent);

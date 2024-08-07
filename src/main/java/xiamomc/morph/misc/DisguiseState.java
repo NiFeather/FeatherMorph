@@ -18,6 +18,7 @@ import xiamomc.morph.abilities.AbilityUpdater;
 import xiamomc.morph.backends.DisguiseWrapper;
 import xiamomc.morph.misc.disguiseProperty.PropertyHandler;
 import xiamomc.morph.network.PlayerOptions;
+import xiamomc.morph.network.commands.S2C.S2CAnimationCommand;
 import xiamomc.morph.network.commands.S2C.set.S2CSetSkillCooldownCommand;
 import xiamomc.morph.network.server.MorphClientHandler;
 import xiamomc.morph.providers.DisguiseProvider;
@@ -77,11 +78,27 @@ public class DisguiseState extends MorphPluginObject
             refreshDisguiseItems(targetEquipment, wrapper);
 
         this.cachedPlayer = player;
+
+        animationSequence.setCooldown(10);
+        animationSequence.onNewAnimation(anim ->
+        {
+            if (anim.availableForClient())
+                clientHandler.sendCommand(getPlayer(), new S2CAnimationCommand(anim.subId()));
+
+            wrapper.playAnimation(anim.subId());
+        });
     }
 
     private final PlayerOptions<Player> playerOptions;
 
     private final PlayerMeta morphConfiguration;
+
+    private final ExecuteSequence animationSequence = new ExecuteSequence();
+
+    public ExecuteSequence getAnimationSequence()
+    {
+        return animationSequence;
+    }
 
     /**
      * 谁在伪装
@@ -501,6 +518,8 @@ public class DisguiseState extends MorphPluginObject
     public boolean selfUpdate()
     {
         this.getSoundHandler().update();
+
+        this.animationSequence.update();
 
         return this.abilityUpdater.update();
     }

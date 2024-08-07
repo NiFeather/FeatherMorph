@@ -40,4 +40,5 @@ public class ValueIndex
     public static final SheepValues SHEEP = new SheepValues();
     public static final WolfValues WOLF = new WolfValues();
     public static final PhantomValues PHANTOM = new PhantomValues();
+    public static final SnifferValues SNIFFER = new SnifferValues();
 }

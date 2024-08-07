@@ -292,6 +292,13 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
         refreshRegistry();
     }
 
+    @Override
+    public void playAnimation(String animationId)
+    {
+        if (bindingWatcher != null)
+            bindingWatcher.write(EntryIndex.ANIMATION, animationId);
+    }
+
     private void refreshRegistry()
     {
         if (bindingPlayer == null)

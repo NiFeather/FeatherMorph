@@ -22,6 +22,7 @@ import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.interfaces.IManageRequests;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.MorphStrings;
+import xiamomc.morph.misc.animation.AnimationHandler;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.misc.NetworkingHelper;
 import xiamomc.morph.misc.permissions.CommonPermissions;
@@ -147,7 +148,8 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
                 .registerC2S(C2SCommandNames.Option, C2SOptionCommand::fromString)
                 .registerC2S(C2SCommandNames.ToggleSelf, a -> new C2SToggleSelfCommand(C2SToggleSelfCommand.SelfViewMode.fromString(a)))
                 .registerC2S(C2SCommandNames.Unmorph, a -> new C2SUnmorphCommand())
-                .registerC2S(C2SCommandNames.Request, C2SRequestCommand::new);
+                .registerC2S(C2SCommandNames.Request, C2SRequestCommand::new)
+                .registerC2S("animation", C2SAnimationCommand::new);
 
         var messenger = Bukkit.getMessenger();
 
@@ -232,7 +234,10 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
             if (!allowClient.get()) return;
 
             //在API检查完成之前忽略客户端的所有指令
-            if (this.getPlayerConnectionState(player).worseThan(InitializeState.API_CHECKED)) return;
+            if (this.getPlayerConnectionState(player).worseThan(InitializeState.API_CHECKED))
+            {
+                return;
+            }
 
             if (logInComingPackets.get())
                 logPacket(false, player, commandChannel, data);
@@ -240,7 +245,11 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
             var input = new String(data, StandardCharsets.UTF_8);
             var str = input.split(" ", 2);
 
-            if (str.length < 1) return;
+            if (str.length < 1)
+            {
+                logger.warn("Incomplete server command: " + input);
+                return;
+            }
 
             var baseCommand = str[0];
             var c2sCommand = registries.createC2SCommand(baseCommand, str.length == 2 ? str[1] : "");
@@ -251,7 +260,9 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
                 c2sCommand.onCommand(this);
             }
             else
+            {
                 logger.warn("Unknown server command: " + baseCommand);
+            }
         });
 
         // 注册outgoing频道
@@ -782,6 +793,22 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
             requestManager.acceptRequest(player, targetPlayer);
         else
             requestManager.denyRequest(player, targetPlayer);
+    }
+
+    @Resolved
+    private AnimationHandler animationHandler;
+
+    @Override
+    public void onAnimationCommand(C2SAnimationCommand c2SAnimationCommand)
+    {
+        var state = manager.getDisguiseStateFor(c2SAnimationCommand.getOwner());
+        if (state == null) return;
+
+        var disguiseID = state.getDisguiseIdentifier();
+        var animationID = c2SAnimationCommand.getAnimationId();
+        var sequence = animationHandler.getSequenceFor(disguiseID, animationID);
+
+        state.getAnimationSequence().setSequences(sequence);
     }
 
     //endregion C2S(Serverbound) commands

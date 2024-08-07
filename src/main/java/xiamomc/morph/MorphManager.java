@@ -33,6 +33,7 @@ import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.MorphStrings;
 import xiamomc.morph.messages.vanilla.VanillaMessageStore;
 import xiamomc.morph.misc.*;
+import xiamomc.morph.misc.animation.AnimationHandler;
 import xiamomc.morph.misc.disguiseProperty.DisguiseProperties;
 import xiamomc.morph.misc.disguiseProperty.SingleProperty;
 import xiamomc.morph.misc.permissions.CommonPermissions;
@@ -916,6 +917,9 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     @Resolved
     private VanillaMessageStore vanillaMessageStore;
 
+    @Resolved
+    private AnimationHandler animationHandler;
+
     private void postBuildDisguise(DisguiseBuildResult result,
                                    MorphParameters parameters,
                                    PlayerMeta playerOptions)
@@ -1007,10 +1011,20 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         // 切换CD
         skillHandler.switchCooldown(player.getUniqueId(), cdInfo);
 
+        // 设置可用动作
+        var availableAnimations = animationHandler.getAvailableAnimationsFor(disguiseIdentifier);
+        clientHandler.sendCommand(player, new S2CSetAvailableAnimationsCommand(availableAnimations));
+
         // 调用事件
         new PlayerMorphEvent(player, state).callEvent();
     }
 
+    /**
+     *
+     * @param result
+     * @param parameters
+     * @param playerOptions
+     */
     private void afterDisguise(DisguiseBuildResult result,
                                MorphParameters parameters,
                                PlayerMeta playerOptions)
@@ -1174,6 +1188,10 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         //和客户端同步数据
         state.getProvider().getInitialSyncCommands(state).forEach(c -> clientHandler.sendCommand(player, c));
 
+        // 设置可用动作
+        var availableAnimations = animationHandler.getAvailableAnimationsFor(state.getDisguiseIdentifier());
+        clientHandler.sendCommand(player, new S2CSetAvailableAnimationsCommand(availableAnimations));
+
         //Profile
         if (state.haveProfile())
             clientHandler.sendCommand(player, new S2CSetProfileCommand(state.getProfileNbtString()));
@@ -1296,6 +1314,9 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         //发送消息以及重置actionbar
         source.sendMessage(MessageUtils.prefixes(player, MorphStrings.unMorphSuccessString().withLocale(MessageUtils.getLocale(player))));
         player.sendActionBar(Component.empty());
+
+        // 设置可用动作
+        clientHandler.sendCommand(player, new S2CSetAvailableAnimationsCommand(List.of()));
 
         // 调用事件
         new PlayerUnMorphEvent(player).callEvent();

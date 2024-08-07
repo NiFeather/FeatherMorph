@@ -20,4 +20,6 @@ public class EntryIndex
     public static final RegistryKey<Boolean> ATTACK_ANIMATION = RegistryKey.of("attack_animation", false);
 
     public static final RegistryKey<Integer> SLIME_SIZE_REAL = RegistryKey.of("slime_size_real", 0);
+
+    public static final RegistryKey<String> ANIMATION = RegistryKey.of("animation", "morph:unknown");
 }

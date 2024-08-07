@@ -10,6 +10,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphPluginObject;
+import xiamomc.morph.misc.ExecuteSequence;
 import xiamomc.morph.backends.server.renderer.network.PacketFactory;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.values.AbstractValues;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.values.SingleValue;
@@ -191,6 +192,11 @@ public abstract class SingleWatcher extends MorphPluginObject
 
         registry.put(singleValue, singleValue.defaultValue());
         return true;
+    }
+
+    public void remove(SingleValue<?> singleValue)
+    {
+        registry.remove(singleValue);
     }
 
     public <X> void write(SingleValue<X> singleValue, X value)
