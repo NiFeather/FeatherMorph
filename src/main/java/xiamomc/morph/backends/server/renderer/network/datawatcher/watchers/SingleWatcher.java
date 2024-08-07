@@ -58,16 +58,17 @@ public abstract class SingleWatcher extends MorphPluginObject
 
     public Player getBindingPlayer()
     {
-        if (!bindingPlayer.isOnline())
+        if (!bindingPlayer.isConnected())
         {
-            var player = Bukkit.getPlayer(bindingUUID);
-            if (player == null)
+            if (!Bukkit.getOfflinePlayer(bindingUUID).isOnline())
             {
                 logger.warn("Calling getBindingPlayer for an offline player!");
                 Thread.dumpStack();
             }
             else
-                bindingPlayer = player;
+            {
+                bindingPlayer = Bukkit.getPlayer(bindingUUID);
+            }
         }
 
         return bindingPlayer;

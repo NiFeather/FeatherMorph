@@ -52,6 +52,9 @@ public class ExecuteSequence extends MorphPluginObject
 
     private void findNextAnimation()
     {
+        currentAnimation = null;
+        if (animationState.isEmpty()) return;
+
         var current = animationState.remove(0);
         currentAnimation = new Pair<>(plugin.getCurrentTick(), current);
 
@@ -72,6 +75,8 @@ public class ExecuteSequence extends MorphPluginObject
         {
             do findNextAnimation();
             while (currentAnimation != null && currentAnimation.getB().duration() == 0);
+
+            if (currentAnimation == null) return;
         }
 
         if (plugin.getCurrentTick() - currentAnimation.getA() >= currentAnimation.getB().duration() + cooldown)

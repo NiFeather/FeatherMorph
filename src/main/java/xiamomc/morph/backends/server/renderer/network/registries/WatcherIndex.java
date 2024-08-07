@@ -83,6 +83,7 @@ public class WatcherIndex
         setTypeWatcher(EntityType.RAVAGER, p -> new EHasAttackAnimationWatcher(p, EntityType.RAVAGER));
 
         setTypeWatcher(EntityType.SNIFFER, SnifferWatcher::new);
+        setTypeWatcher(EntityType.ARMADILLO, ArmadilloWatcher::new);
     }
 
     private void setTypeWatcher(EntityType type, Function<Player, SingleWatcher> func)

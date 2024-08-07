@@ -41,4 +41,5 @@ public class ValueIndex
     public static final WolfValues WOLF = new WolfValues();
     public static final PhantomValues PHANTOM = new PhantomValues();
     public static final SnifferValues SNIFFER = new SnifferValues();
+    public static final ArmadilloValues ARMADILLO = new ArmadilloValues();
 }

@@ -3,9 +3,7 @@ package xiamomc.morph.misc.animation;
 import org.bukkit.entity.EntityType;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.MorphPluginObject;
-import xiamomc.morph.misc.animation.animations.AnimationSet;
-import xiamomc.morph.misc.animation.animations.SnifferAnimationSet;
-import xiamomc.morph.misc.animation.animations.WardenAnimationSet;
+import xiamomc.morph.misc.animation.animations.*;
 import xiamomc.pluginbase.Annotations.Initializer;
 
 import java.util.List;
@@ -19,6 +17,8 @@ public class AnimationHandler extends MorphPluginObject
     {
         this.registerAnimSet(EntityType.WARDEN.getKey().asString(), new WardenAnimationSet());
         this.registerAnimSet(EntityType.SNIFFER.getKey().asString(), new SnifferAnimationSet());
+        this.registerAnimSet(EntityType.ALLAY.getKey().asString(), new AllayAnimationSet());
+        this.registerAnimSet(EntityType.ARMADILLO.getKey().asString(), new ArmadilloAnimationSet());
     }
 
     // AnimationID <-> AnimationSequence

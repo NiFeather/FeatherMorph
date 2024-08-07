@@ -85,7 +85,7 @@ public class DisguiseState extends MorphPluginObject
             if (anim.availableForClient())
                 clientHandler.sendCommand(getPlayer(), new S2CAnimationCommand(anim.subId()));
 
-            wrapper.playAnimation(anim.subId());
+            this.getDisguiseWrapper().playAnimation(anim.subId());
         });
     }
 
