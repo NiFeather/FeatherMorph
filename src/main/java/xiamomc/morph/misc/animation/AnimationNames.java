@@ -11,14 +11,30 @@ public class AnimationNames
     public static final String HIDE = "hide";
 
     public static final String DANCE = "dance";
-    public static final String CLIENT_DANCE_START = "dance_start";
-    public static final String CLIENT_DANCE_STOP = "dance_stop";
+    public static final String DANCE_START = "dance_start";
+    public static final String DANCE_STOP = "dance_stop";
 
     public static final String PANIC = "rollup";
     public static final String PANIC_ROLLING = "rollup_rolling";
     public static final String PANIC_SCARED = "rollup_scared";
     public static final String PANIC_UNROLLING = "rollup_unrolling";
     public static final String PANIC_IDLE = "rollup_idle";
+
+    public static final String PEEK = "peek";
+    public static final String PEEK_START = "peek_start";
+    public static final String PEEK_STOP = "peek_stop";
+
+    public static final String OPEN = "open";
+    public static final String OPEN_START = "open_start";
+    public static final String OPEN_STOP = "open_stop";
+
+    public static final String LAY = "lay";
+    public static final String STANDUP = "standup";
+    public static final String LAY_START = "lay_start";
+    public static final String LAY_STOP = "lay_stop";
+
+    public static final String INFLATE = "inflate";
+    public static final String DEFLATE = "deflate";
 
     public static final String POSE_RESET = "pose_reset";
 }

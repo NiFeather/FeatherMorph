@@ -11,7 +11,10 @@ import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.entity.Cat;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import xiamomc.morph.backends.server.renderer.network.registries.EntryIndex;
+import xiamomc.morph.backends.server.renderer.network.registries.RegistryKey;
 import xiamomc.morph.backends.server.renderer.network.registries.ValueIndex;
+import xiamomc.morph.misc.animation.AnimationNames;
 import xiamomc.morph.misc.disguiseProperty.DisguiseProperties;
 import xiamomc.morph.misc.disguiseProperty.SingleProperty;
 import xiamomc.morph.misc.disguiseProperty.values.CatProperties;
@@ -79,6 +82,23 @@ public class CatWatcher extends TameableAnimalWatcher
             write(ValueIndex.CAT.CAT_VARIANT, bukkitTypeToNmsHolder(variant));
         }
         super.onPropertyWrite(property, value);
+    }
+
+    @Override
+    protected <X> void onCustomWrite(RegistryKey<X> key, X oldVal, X newVal)
+    {
+        super.onCustomWrite(key, oldVal, newVal);
+
+        if (key.equals(EntryIndex.ANIMATION))
+        {
+            var animId = newVal.toString();
+
+            switch (animId)
+            {
+                case AnimationNames.LAY_START -> this.write(ValueIndex.CAT.IS_LYING, true);
+                case AnimationNames.LAY_STOP -> this.write(ValueIndex.CAT.IS_LYING, false);
+            }
+        }
     }
 
     @Override

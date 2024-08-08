@@ -19,6 +19,14 @@ public class AnimationHandler extends MorphPluginObject
         this.registerAnimSet(EntityType.SNIFFER.getKey().asString(), new SnifferAnimationSet());
         this.registerAnimSet(EntityType.ALLAY.getKey().asString(), new AllayAnimationSet());
         this.registerAnimSet(EntityType.ARMADILLO.getKey().asString(), new ArmadilloAnimationSet());
+        this.registerAnimSet(EntityType.SHULKER.getKey().asString(), new ShulkerAnimationSet());
+        this.registerAnimSet(EntityType.CAT.getKey().asString(), new CatAnimationSet());
+
+        // Disabled because parrot dancing is not controlled directly by the metadata or event
+        // this.registerAnimSet(EntityType.PARROT.getKey().asString(), new ParrotAnimationSet());
+
+        this.registerAnimSet(EntityType.PIGLIN.getKey().asString(), new PiglinAnimationSet());
+        this.registerAnimSet(EntityType.PUFFERFISH.getKey().asString(), new PufferfishAnimationSet());
     }
 
     // AnimationID <-> AnimationSequence

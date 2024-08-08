@@ -84,6 +84,8 @@ public class WatcherIndex
 
         setTypeWatcher(EntityType.SNIFFER, SnifferWatcher::new);
         setTypeWatcher(EntityType.ARMADILLO, ArmadilloWatcher::new);
+        setTypeWatcher(EntityType.SHULKER, ShulkerWatcher::new);
+        setTypeWatcher(EntityType.PUFFERFISH, PufferfishWatcher::new);
     }
 
     private void setTypeWatcher(EntityType type, Function<Player, SingleWatcher> func)
