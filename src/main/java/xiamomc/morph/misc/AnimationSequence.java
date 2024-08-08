@@ -11,9 +11,12 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
-public class ExecuteSequence extends MorphPluginObject
+public class AnimationSequence extends MorphPluginObject
 {
-    private final List<SingleAnimation> animationState = Collections.synchronizedList(new ObjectArrayList<>());
+    private final List<SingleAnimation> currentQueue = Collections.synchronizedList(new ObjectArrayList<>());
+
+    @Nullable
+    private List<SingleAnimation> nextQueue;
 
     // StartTick <-> Animation record
     @Nullable
@@ -31,35 +34,27 @@ public class ExecuteSequence extends MorphPluginObject
         return cooldown;
     }
 
-    public void addAction(SingleAnimation animation)
-    {
-        if (animationState.size() > 10)
-            animationState.remove(0);
-
-        animationState.add(animation);
-    }
-
     public void setSequences(List<SingleAnimation> animations)
     {
-        animationState.addAll(animations);
+        synchronized (this)
+        {
+            nextQueue = new ObjectArrayList<>(animations);
+        }
     }
 
     public void reset()
     {
-        animationState.clear();
+        currentQueue.clear();
         currentAnimation = null;
     }
 
     private void findNextAnimation()
     {
         currentAnimation = null;
-        if (animationState.isEmpty()) return;
+        if (currentQueue.isEmpty()) return;
 
-        var current = animationState.remove(0);
+        var current = currentQueue.remove(0);
         currentAnimation = new Pair<>(plugin.getCurrentTick(), current);
-
-        //logger.info("Pick new animation! " + current.identifier());
-        //current.action().run();
 
         if (hookOnNewAnimation != null)
             hookOnNewAnimation.accept(current);
@@ -69,22 +64,28 @@ public class ExecuteSequence extends MorphPluginObject
     {
         if (disposed.get()) return;
 
-        if (currentAnimation == null && animationState.isEmpty()) return;
+        if (currentQueue.isEmpty() && nextQueue != null)
+        {
+            synchronized (this)
+            {
+                // Find next queue
+                currentQueue.addAll(nextQueue);
+                nextQueue = null;
+
+                findNextAnimation();
+            }
+        }
 
         if (currentAnimation == null)
         {
-            do findNextAnimation();
-            while (currentAnimation != null && currentAnimation.getB().duration() == 0);
-
+            findNextAnimation();
             if (currentAnimation == null) return;
         }
 
+        if (currentQueue.isEmpty()) return;
+
         if (plugin.getCurrentTick() - currentAnimation.getA() >= currentAnimation.getB().duration() + cooldown)
-        {
-            //logger.info(currentAnimation.getB().identifier() + "Finished!");
-            //currentAnimation.getB().onFinish().run();
             currentAnimation = null;
-        }
     }
 
     private Consumer<SingleAnimation> hookOnNewAnimation;
@@ -102,6 +103,6 @@ public class ExecuteSequence extends MorphPluginObject
         super.dispose();
 
         disposed.set(true);
-        animationState.clear();
+        currentQueue.clear();
     }
 }

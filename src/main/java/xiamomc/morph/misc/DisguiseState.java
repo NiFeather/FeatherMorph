@@ -93,9 +93,9 @@ public class DisguiseState extends MorphPluginObject
 
     private final PlayerMeta morphConfiguration;
 
-    private final ExecuteSequence animationSequence = new ExecuteSequence();
+    private final AnimationSequence animationSequence = new AnimationSequence();
 
-    public ExecuteSequence getAnimationSequence()
+    public AnimationSequence getAnimationSequence()
     {
         return animationSequence;
     }
