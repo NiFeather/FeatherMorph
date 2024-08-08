@@ -1,5 +1,6 @@
 package xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types;
 
+import net.kyori.adventure.key.Key;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -7,6 +8,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.animal.CatVariant;
 import org.bukkit.Bukkit;
+import org.bukkit.Registry;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.entity.Cat;
 import org.bukkit.entity.EntityType;
@@ -39,9 +41,11 @@ public class CatWatcher extends TameableAnimalWatcher
     public Cat.Type getCatType()
     {
         var value = get(ValueIndex.CAT.CAT_VARIANT);
-        var index = BuiltInRegistries.CAT_VARIANT.getId(holderToNmsVariant(value));
+        var key = value.unwrapKey().orElse(null);
+        if (key == null)
+            logger.warn("Null Key for holder " + value);
 
-        return Cat.Type.values()[index];
+        return Registry.CAT_VARIANT.get(Key.key(key.location().toString()));
     }
 
     private CatVariant holderToNmsVariant(Holder<CatVariant> holder)

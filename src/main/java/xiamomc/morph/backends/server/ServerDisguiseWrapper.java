@@ -67,10 +67,12 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
     @Override
     public CompoundTag getCompound()
     {
-        if (bindingWatcher != null)
-            this.instance.compoundTag.merge(WatcherUtils.buildCompoundFromWatcher(bindingWatcher));
+        var tagCopy = this.instance.compoundTag.copy();
 
-        return instance.compoundTag.copy();
+        if (bindingWatcher != null)
+            tagCopy.merge(WatcherUtils.buildCompoundFromWatcher(bindingWatcher));
+
+        return tagCopy;
     }
 
     /**
