@@ -8,7 +8,7 @@ import java.util.List;
 public class AllayAnimationSet extends AnimationSet
 {
     public final SingleAnimation ROLL_START = new SingleAnimation(AnimationNames.DANCE_START, 0, true);
-    public final SingleAnimation ROLL_STOP = new SingleAnimation(AnimationNames.DANCE_STOP, 0, true);
+    public final SingleAnimation ROLL_STOP = new SingleAnimation(AnimationNames.STANDUP, 0, true);
 
     public AllayAnimationSet()
     {

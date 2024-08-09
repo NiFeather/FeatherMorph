@@ -29,7 +29,7 @@ public class AllayWatcher extends LivingEntityWatcher
             switch (id)
             {
                 case AnimationNames.DANCE_START -> write(ValueIndex.ALLAY.DANCING, true);
-                case AnimationNames.DANCE_STOP -> write(ValueIndex.ALLAY.DANCING, false);
+                case AnimationNames.STANDUP -> write(ValueIndex.ALLAY.DANCING, false);
             }
         }
     }
