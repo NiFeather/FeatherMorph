@@ -99,13 +99,13 @@ public final class MorphPlugin extends XiaMoJavaPlugin
 
         pluginManager = Bukkit.getPluginManager();
         var bukkitVersion = Bukkit.getMinecraftVersion();
-        var targetVersion = "1.21";
+        var targetVersion = "1.21.1";
         if (!bukkitVersion.equals(targetVersion))
         {
             logger.error("╔══════════════════════════════════════════════════════════════╗");
             logger.error("║                                                              ║");
-            logger.error("║    This version of Minecraft (%s) is not supported!      ║".formatted(bukkitVersion));
-            logger.error("║                Please use %s instead!                    ║".formatted(targetVersion));
+            logger.error("║\tThis version of Minecraft (%s) is not supported!\t║".formatted(bukkitVersion));
+            logger.error("║\tPlease use %s instead!\t\t\t\t║".formatted(targetVersion));
             logger.error("║                                                              ║");
             //logger.error("║       https://modrinth.com/plugin/feathermorph               ║");
             //logger.error("║                                                              ║");
