@@ -1,5 +1,6 @@
 package xiamomc.morph.misc.animation.animations;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.misc.animation.AnimationNames;
 import xiamomc.morph.misc.animation.SingleAnimation;
@@ -14,9 +15,12 @@ public abstract class AnimationSet
 
     private final Map<String, List<SingleAnimation>> animationMap = new ConcurrentHashMap<>();
 
+    private final List<String> registeredAnimations = new ObjectArrayList<>();
+
     protected void register(String animationId, List<SingleAnimation> animations)
     {
         animationMap.put(animationId, animations);
+        registeredAnimations.add(animationId);
     }
 
     @NotNull
@@ -25,5 +29,8 @@ public abstract class AnimationSet
         return animationMap.getOrDefault(animationId, List.of());
     }
 
-    public abstract List<String> getAvailableAnimationsForClient();
+    public List<String> getAvailableAnimationsForClient()
+    {
+        return new ObjectArrayList<>(registeredAnimations);
+    }
 }

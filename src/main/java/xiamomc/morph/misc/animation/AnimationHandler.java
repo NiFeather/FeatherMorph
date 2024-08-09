@@ -15,22 +15,31 @@ public class AnimationHandler extends MorphPluginObject
     @Initializer
     private void load()
     {
-        this.registerAnimSet(EntityType.WARDEN.getKey().asString(), new WardenAnimationSet());
-        this.registerAnimSet(EntityType.SNIFFER.getKey().asString(), new SnifferAnimationSet());
-        this.registerAnimSet(EntityType.ALLAY.getKey().asString(), new AllayAnimationSet());
-        this.registerAnimSet(EntityType.ARMADILLO.getKey().asString(), new ArmadilloAnimationSet());
-        this.registerAnimSet(EntityType.SHULKER.getKey().asString(), new ShulkerAnimationSet());
-        this.registerAnimSet(EntityType.CAT.getKey().asString(), new CatAnimationSet());
+        this.registerAnimSet(EntityType.WARDEN, new WardenAnimationSet());
+        this.registerAnimSet(EntityType.SNIFFER, new SnifferAnimationSet());
+        this.registerAnimSet(EntityType.ALLAY, new AllayAnimationSet());
+        this.registerAnimSet(EntityType.ARMADILLO, new ArmadilloAnimationSet());
+        this.registerAnimSet(EntityType.SHULKER, new ShulkerAnimationSet());
+        this.registerAnimSet(EntityType.CAT, new CatAnimationSet());
 
         // Disabled because parrot dancing is not controlled directly by the metadata or event
         // this.registerAnimSet(EntityType.PARROT.getKey().asString(), new ParrotAnimationSet());
 
-        this.registerAnimSet(EntityType.PIGLIN.getKey().asString(), new PiglinAnimationSet());
-        this.registerAnimSet(EntityType.PUFFERFISH.getKey().asString(), new PufferfishAnimationSet());
+        this.registerAnimSet(EntityType.PIGLIN, new PiglinAnimationSet());
+        this.registerAnimSet(EntityType.PUFFERFISH, new PufferfishAnimationSet());
+        this.registerAnimSet(EntityType.FOX, new FoxAnimationSet());
+        this.registerAnimSet(EntityType.FROG, new FrogAnimationSet());
+        this.registerAnimSet(EntityType.WOLF, new WolfAnimationSet());
+        this.registerAnimSet(EntityType.PANDA, new PandaAnimationSet());
     }
 
     // AnimationID <-> AnimationSequence
     private final Map<String, AnimationSet> animSets = new ConcurrentHashMap<>();
+
+    private void registerAnimSet(EntityType type, AnimationSet animationSet)
+    {
+        this.registerAnimSet(type.getKey().asString(), animationSet);
+    }
 
     private void registerAnimSet(String disguiseIdentifier, AnimationSet animationSet)
     {

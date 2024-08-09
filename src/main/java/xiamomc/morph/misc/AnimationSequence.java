@@ -23,6 +23,7 @@ public class AnimationSequence extends MorphPluginObject
     private Pair<Long, SingleAnimation> currentAnimation;
 
     private int cooldown;
+    private int workingCooldown;
 
     public void setCooldown(int cd)
     {
@@ -64,28 +65,46 @@ public class AnimationSequence extends MorphPluginObject
     {
         if (disposed.get()) return;
 
-        if (currentQueue.isEmpty() && nextQueue != null)
-        {
-            synchronized (this)
-            {
-                // Find next queue
-                currentQueue.addAll(nextQueue);
-                nextQueue = null;
+        this.workingCooldown--;
 
-                findNextAnimation();
+        if (workingCooldown > 0)
+            return;
+
+        // 如果当前队列为空并且下一队列不为null，则切换到此队列
+        if (currentQueue.isEmpty() && currentAnimation == null)
+        {
+            if (nextQueue != null)
+            {
+                synchronized (this)
+                {
+                    // Find next queue
+                    currentQueue.addAll(nextQueue);
+                    nextQueue = null;
+                }
+            }
+            else
+            {
+                return;
             }
         }
 
+        // 如果当前动画为空，则寻找动画
         if (currentAnimation == null)
         {
             findNextAnimation();
+
+            // currentAnimation == null -> 动画序列已空
             if (currentAnimation == null) return;
         }
 
-        if (currentQueue.isEmpty()) return;
-
-        if (plugin.getCurrentTick() - currentAnimation.getA() >= currentAnimation.getB().duration() + cooldown)
+        // 动画播放完毕
+        if (plugin.getCurrentTick() - currentAnimation.getA() >= currentAnimation.getB().duration())
+        {
             currentAnimation = null;
+
+            if (currentQueue.isEmpty())
+                this.workingCooldown = cooldown;
+        }
     }
 
     private Consumer<SingleAnimation> hookOnNewAnimation;

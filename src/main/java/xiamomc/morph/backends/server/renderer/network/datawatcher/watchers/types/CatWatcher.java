@@ -100,7 +100,15 @@ public class CatWatcher extends TameableAnimalWatcher
             switch (animId)
             {
                 case AnimationNames.LAY_START -> this.write(ValueIndex.CAT.IS_LYING, true);
-                case AnimationNames.LAY_STOP -> this.write(ValueIndex.CAT.IS_LYING, false);
+                case AnimationNames.SIT -> this.write(ValueIndex.CAT.TAMEABLE_FLAGS, (byte)0x01);
+                case AnimationNames.STANDUP ->
+                {
+                    if (this.getOr(ValueIndex.CAT.IS_LYING, false))
+                        this.write(ValueIndex.CAT.IS_LYING, false);
+
+                    if ((this.getOr(ValueIndex.CAT.TAMEABLE_FLAGS, (byte)0x00) & 1) != 0)
+                        this.write(ValueIndex.CAT.TAMEABLE_FLAGS, (byte)0x00);
+                }
             }
         }
     }

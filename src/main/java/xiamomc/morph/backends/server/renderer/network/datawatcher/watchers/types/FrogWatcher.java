@@ -5,13 +5,17 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.animal.FrogVariant;
 import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Frog;
 import org.bukkit.entity.Player;
+import xiamomc.morph.backends.server.renderer.network.registries.EntryIndex;
+import xiamomc.morph.backends.server.renderer.network.registries.RegistryKey;
 import xiamomc.morph.backends.server.renderer.network.registries.ValueIndex;
+import xiamomc.morph.misc.animation.AnimationNames;
 import xiamomc.morph.misc.disguiseProperty.DisguiseProperties;
 import xiamomc.morph.misc.disguiseProperty.SingleProperty;
 import xiamomc.morph.misc.disguiseProperty.values.FrogProperties;
@@ -109,6 +113,23 @@ public class FrogWatcher extends LivingEntityWatcher
         {
             var variant = (Frog.Variant) value;
             write(ValueIndex.FROG.FROG_VARIANT, getFrogVariant(variant));
+        }
+    }
+
+    @Override
+    protected <X> void onCustomWrite(RegistryKey<X> key, X oldVal, X newVal)
+    {
+        super.onCustomWrite(key, oldVal, newVal);
+
+        if (key.equals(EntryIndex.ANIMATION))
+        {
+            var animId = newVal.toString();
+
+            switch (animId)
+            {
+                case AnimationNames.EAT -> this.write(ValueIndex.FROG.POSE, Pose.USING_TONGUE);
+                case AnimationNames.POSE_RESET -> this.remove(ValueIndex.FROG.POSE);
+            }
         }
     }
 

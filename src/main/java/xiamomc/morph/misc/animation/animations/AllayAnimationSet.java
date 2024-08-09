@@ -13,12 +13,6 @@ public class AllayAnimationSet extends AnimationSet
     public AllayAnimationSet()
     {
         register(AnimationNames.DANCE, List.of(ROLL_START));
-        register(AnimationNames.DANCE_STOP, List.of(ROLL_STOP));
-    }
-
-    @Override
-    public List<String> getAvailableAnimationsForClient()
-    {
-        return List.of(AnimationNames.DANCE, AnimationNames.DANCE_STOP);
+        register(AnimationNames.STANDUP, List.of(ROLL_STOP));
     }
 }

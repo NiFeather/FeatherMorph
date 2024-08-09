@@ -28,13 +28,20 @@ public class AnimationNames
     public static final String OPEN_START = "open_start";
     public static final String OPEN_STOP = "open_stop";
 
-    public static final String LAY = "lay";
     public static final String STANDUP = "standup";
+
+    public static final String LAY = "lay";
     public static final String LAY_START = "lay_start";
     public static final String LAY_STOP = "lay_stop";
 
     public static final String INFLATE = "inflate";
     public static final String DEFLATE = "deflate";
+
+    public static final String SLEEP = "sleep";
+
+    public static final String EAT = "eat";
+
+    public static final String SIT = "sit";
 
     public static final String POSE_RESET = "pose_reset";
 }

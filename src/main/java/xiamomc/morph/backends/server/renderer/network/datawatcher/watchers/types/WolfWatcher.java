@@ -7,12 +7,16 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.animal.WolfVariant;
 import net.minecraft.world.entity.animal.WolfVariants;
+import net.neoforged.art.internal.EntryImpl;
 import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Wolf;
+import xiamomc.morph.backends.server.renderer.network.registries.EntryIndex;
+import xiamomc.morph.backends.server.renderer.network.registries.RegistryKey;
 import xiamomc.morph.backends.server.renderer.network.registries.ValueIndex;
+import xiamomc.morph.misc.animation.AnimationNames;
 import xiamomc.morph.misc.disguiseProperty.DisguiseProperties;
 import xiamomc.morph.misc.disguiseProperty.SingleProperty;
 import xiamomc.morph.misc.disguiseProperty.values.WolfProperties;
@@ -60,6 +64,23 @@ public class WolfWatcher extends TameableAnimalWatcher
         }
 
         super.onPropertyWrite(property, value);
+    }
+
+    @Override
+    protected <X> void onCustomWrite(RegistryKey<X> key, X oldVal, X newVal)
+    {
+        super.onCustomWrite(key, oldVal, newVal);
+
+        if (key.equals(EntryIndex.ANIMATION))
+        {
+            var animId = newVal.toString();
+
+            switch (animId)
+            {
+                case AnimationNames.SIT -> this.write(ValueIndex.WOLF.TAMEABLE_FLAGS, (byte)0x01);
+                case AnimationNames.STANDUP -> this.write(ValueIndex.WOLF.TAMEABLE_FLAGS, (byte)0x00);
+            }
+        }
     }
 
     @Override
