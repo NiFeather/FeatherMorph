@@ -808,7 +808,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
         var animationID = c2SAnimationCommand.getAnimationId();
         var sequence = animationHandler.getSequenceFor(disguiseID, animationID);
 
-        state.getAnimationSequence().setSequences(sequence);
+        state.scheduleSequence(animationID, sequence);
     }
 
     //endregion C2S(Serverbound) commands

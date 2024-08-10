@@ -35,7 +35,7 @@ public class AnimationSequence extends MorphPluginObject
         return cooldown;
     }
 
-    public void setSequences(List<SingleAnimation> animations)
+    public void scheduleNext(List<SingleAnimation> animations)
     {
         synchronized (this)
         {

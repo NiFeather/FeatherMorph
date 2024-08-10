@@ -16,6 +16,10 @@ import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.abilities.AbilityUpdater;
 import xiamomc.morph.backends.DisguiseWrapper;
+import xiamomc.morph.messages.CommandStrings;
+import xiamomc.morph.messages.EmoteStrings;
+import xiamomc.morph.messages.MessageUtils;
+import xiamomc.morph.misc.animation.SingleAnimation;
 import xiamomc.morph.misc.disguiseProperty.PropertyHandler;
 import xiamomc.morph.network.PlayerOptions;
 import xiamomc.morph.network.commands.S2C.S2CAnimationCommand;
@@ -94,6 +98,15 @@ public class DisguiseState extends MorphPluginObject
     private final PlayerMeta morphConfiguration;
 
     private final AnimationSequence animationSequence = new AnimationSequence();
+
+    public void scheduleSequence(String animationId, List<SingleAnimation> sequence)
+    {
+        this.animationSequence.scheduleNext(sequence);
+
+        var player = getPlayer();
+        var animationString = CommandStrings.goingToPlayAnimation().resolve("what", EmoteStrings.get(animationId).withLocale(MessageUtils.getLocale(player)));
+        player.sendMessage(MessageUtils.prefixes(player, animationString));
+    }
 
     public AnimationSequence getAnimationSequence()
     {
