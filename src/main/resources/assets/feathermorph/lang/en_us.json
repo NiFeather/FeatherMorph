@@ -202,5 +202,21 @@
   "update.msg_header_footer": "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-",
   "update.new_version_available": "A newer version of FeatherMorph has been released！(<current> -> <origin>)",
   "update.no_new_ver_available": "You're already on the latest version for <mc_version>",
-  "update.update_here": "Update here: <url>"
+  "update.update_here": "Update here: <url>",
+  "emote.morphclient.sniff": "Sniff",
+  "emote.morphclient.roar": "Roar",
+  "emote.morphclient.rollup": "Roll up",
+  "emote.morphclient.dance": "Dance",
+  "emote.morphclient.inflate": "Inflate",
+  "emote.morphclient.deflate": "Deflate",
+  "emote.morphclient.lay": "Lay",
+  "emote.morphclient.standup": "Stand",
+  "emote.morphclient.sit": "Sit",
+  "emote.morphclient.peek": "Peek",
+  "emote.morphclient.open": "Open",
+  "emote.morphclient.eat": "Eat",
+  "emote.morphclient.sleep": "Sleep",
+  "emote.morphclient.stop": "Stop",
+  "emote.morphclient.prostrate": "Prostrate",
+  "emote.morphclient.unknown": "Unknown"
 }

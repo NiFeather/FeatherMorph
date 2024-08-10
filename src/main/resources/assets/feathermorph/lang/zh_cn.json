@@ -202,5 +202,21 @@
   "update.msg_header_footer" : "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-",
   "update.new_version_available" : "FeatherMorph有新版本辣！(<current> -> <origin>)",
   "update.no_new_ver_available" : "FeatherMorph已是<mc_version>上的最新版本",
-  "update.update_here" : "在此更新：<url>"
+  "update.update_here" : "在此更新：<url>",
+  "emote.morphclient.sniff": "嗅闻",
+  "emote.morphclient.roar": "咆哮",
+  "emote.morphclient.rollup": "缩壳",
+  "emote.morphclient.dance": "跳舞",
+  "emote.morphclient.inflate": "膨胀",
+  "emote.morphclient.deflate": "收缩",
+  "emote.morphclient.lay": "躺下",
+  "emote.morphclient.standup": "站起",
+  "emote.morphclient.sit": "坐下",
+  "emote.morphclient.peek": "偷窥",
+  "emote.morphclient.open": "打开",
+  "emote.morphclient.eat": "开吃",
+  "emote.morphclient.sleep": "睡觉",
+  "emote.morphclient.stop": "停止",
+  "emote.morphclient.prostrate": "趴下",
+  "emote.morphclient.unknown": "未知"
 }

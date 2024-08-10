@@ -8,6 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.messages.CommandStrings;
+import xiamomc.morph.messages.EmoteStrings;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.misc.animation.AnimationHandler;
 import xiamomc.pluginbase.Annotations.Resolved;
@@ -83,7 +84,7 @@ public class AnimationCommand extends MorphPluginObject implements IPluginComman
         var sequences = animationHandler.getSequenceFor(state.getDisguiseIdentifier(), animationId);
         state.getAnimationSequence().setSequences(sequences);
 
-        var animationString = CommandStrings.goingToPlayAnimation().resolve("what", animationId);
+        var animationString = CommandStrings.goingToPlayAnimation().resolve("what", EmoteStrings.get(animationId).withLocale(MessageUtils.getLocale(player)));
         player.sendMessage(MessageUtils.prefixes(player, animationString));
 
         return false;
