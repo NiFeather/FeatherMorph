@@ -189,6 +189,7 @@ tasks.build {
 
 tasks.shadowJar {
     minimize()
+    archiveFileName = "FeatherMorph-${project.property("project_version")}+${project.property("mc_version")}-final.jar"
     relocate("xiamomc.pluginbase", "xiamomc.morph.shaded.pluginbase")
     relocate("org.bstats", "xiamomc.morph.shaded.bstats")
     relocate("de.tr7zw.changeme.nbtapi", "xiamomc.morph.shaded.nbtapi")
