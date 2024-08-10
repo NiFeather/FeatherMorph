@@ -2,7 +2,9 @@ package xiamomc.morph.misc.animation;
 
 import org.bukkit.entity.EntityType;
 import org.jetbrains.annotations.NotNull;
+import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
+import xiamomc.morph.misc.DisguiseTypes;
 import xiamomc.morph.misc.animation.animations.*;
 import xiamomc.pluginbase.Annotations.Initializer;
 
@@ -31,7 +33,10 @@ public class AnimationHandler extends MorphPluginObject
         this.registerAnimSet(EntityType.FROG, new FrogAnimationSet());
         this.registerAnimSet(EntityType.WOLF, new WolfAnimationSet());
         this.registerAnimSet(EntityType.PANDA, new PandaAnimationSet());
+        this.registerAnimSet(playerDisguiseId, new PlayerAnimationSet());
     }
+
+    private final String playerDisguiseId = DisguiseTypes.PLAYER.getNameSpace() + ":" + MorphManager.disguiseFallbackName;
 
     // AnimationID <-> AnimationSequence
     private final Map<String, AnimationSet> animSets = new ConcurrentHashMap<>();
@@ -49,6 +54,9 @@ public class AnimationHandler extends MorphPluginObject
     @NotNull
     public List<String> getAvailableAnimationsFor(String disguiseIdentifier)
     {
+        if (disguiseIdentifier.startsWith("player:"))
+            disguiseIdentifier = playerDisguiseId;
+
         var animSet = this.animSets.getOrDefault(disguiseIdentifier, null);
         if (animSet == null) return List.of();
 
@@ -58,6 +66,9 @@ public class AnimationHandler extends MorphPluginObject
     @NotNull
     public List<SingleAnimation> getSequenceFor(String disguiseIdentifier, String animationIdentifier)
     {
+        if (disguiseIdentifier.startsWith("player:"))
+            disguiseIdentifier = playerDisguiseId;
+
         var animSet = this.animSets.getOrDefault(disguiseIdentifier, null);
         if (animSet == null) return List.of();
 

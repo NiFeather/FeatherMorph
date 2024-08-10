@@ -5,12 +5,15 @@ import com.comphenix.protocol.events.PacketContainer;
 import com.destroystokyo.paper.ClientOption;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
+import net.minecraft.world.entity.Pose;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import xiamomc.morph.backends.server.renderer.network.DisplayParameters;
 import xiamomc.morph.backends.server.renderer.network.registries.EntryIndex;
 import xiamomc.morph.backends.server.renderer.network.registries.RegistryKey;
 import xiamomc.morph.backends.server.renderer.network.registries.ValueIndex;
+import xiamomc.morph.misc.NmsRecord;
+import xiamomc.morph.misc.animation.AnimationNames;
 
 import java.util.UUID;
 
@@ -34,8 +37,12 @@ public class PlayerWatcher extends InventoryLivingWatcher
     {
         super.doSync();
 
-        this.write(ValueIndex.PLAYER.SKIN_FLAGS, (byte)getBindingPlayer().getClientOption(ClientOption.SKIN_PARTS).getRaw());
-        this.write(ValueIndex.PLAYER.MAINHAND, (byte)getBindingPlayer().getMainHand().ordinal());
+        var bindingPlayer = getBindingPlayer();
+        if (NmsRecord.ofPlayer(bindingPlayer).getPose() != this.getOr(ValueIndex.PLAYER.POSE, null))
+            this.remove(ValueIndex.PLAYER.POSE);
+
+        this.write(ValueIndex.PLAYER.SKIN_FLAGS, (byte)bindingPlayer.getClientOption(ClientOption.SKIN_PARTS).getRaw());
+        this.write(ValueIndex.PLAYER.MAINHAND, (byte)bindingPlayer.getMainHand().ordinal());
     }
 
     @Override
@@ -65,6 +72,31 @@ public class PlayerWatcher extends InventoryLivingWatcher
 
                 spawnPackets.forEach(packet -> protocol.sendServerPacket(p, packet));
             });
+        }
+
+        if (key.equals(EntryIndex.ANIMATION))
+        {
+            var animId = newVal + "";
+
+            switch (animId)
+            {
+                case AnimationNames.LAY ->
+                {
+                    this.remove(ValueIndex.PLAYER.POSE);
+                    this.write(ValueIndex.PLAYER.POSE, Pose.SLEEPING);
+                }
+                case AnimationNames.PROSTRATE ->
+                {
+                    this.remove(ValueIndex.PLAYER.POSE);
+                    this.write(ValueIndex.PLAYER.POSE, Pose.SWIMMING);
+                }
+                case AnimationNames.STANDUP ->
+                {
+                    var nmsPlayer = NmsRecord.ofPlayer(getBindingPlayer());
+                    this.write(ValueIndex.PLAYER.POSE, nmsPlayer.getPose());
+                    this.remove(ValueIndex.PLAYER.POSE);
+                }
+            }
         }
     }
 }
