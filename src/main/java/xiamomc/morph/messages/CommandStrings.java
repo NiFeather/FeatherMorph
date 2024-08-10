@@ -213,6 +213,24 @@ public class CommandStrings extends AbstractMorphStrings
 
     //endregion Ai Option
 
+    public static FormattableMessage notDisguised()
+    {
+        return getFormattable(getKey("not_disguised"),
+                "<red>你没有进行伪装");
+    }
+
+    public static FormattableMessage noSuchAnimation()
+    {
+        return getFormattable(getKey("no_such_animation"),
+                "<red>此动画不可用");
+    }
+
+    public static FormattableMessage goingToPlayAnimation()
+    {
+        return getFormattable(getKey("going_to_play_animation"),
+                "即将播放动画 <italic><what></italic>");
+    }
+
     private static String getKey(String key)
     {
         return "commands." + key;

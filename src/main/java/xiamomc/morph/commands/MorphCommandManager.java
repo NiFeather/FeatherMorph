@@ -18,7 +18,8 @@ public class MorphCommandManager extends CommandHelper<MorphPlugin>
             new MorphPlayerCommand(),
             new UnMorphCommand(),
             new RequestCommand(),
-            new MorphPluginCommand());
+            new MorphPluginCommand(),
+            new AnimationCommand());
 
     @Override
     public boolean registerCommand(IPluginCommand command)

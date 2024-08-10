@@ -118,6 +118,8 @@ bukkit {
 
         register("request")
 
+        register("play")
+
         val featherMorphCommand = register("feathermorph").get()
         featherMorphCommand.aliases = listOf("fm");
     }
