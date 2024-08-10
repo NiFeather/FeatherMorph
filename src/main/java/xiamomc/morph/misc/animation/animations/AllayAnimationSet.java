@@ -8,11 +8,11 @@ import java.util.List;
 public class AllayAnimationSet extends AnimationSet
 {
     public final SingleAnimation ROLL_START = new SingleAnimation(AnimationNames.DANCE_START, 0, true);
-    public final SingleAnimation ROLL_STOP = new SingleAnimation(AnimationNames.STANDUP, 0, true);
+    public final SingleAnimation ROLL_STOP = new SingleAnimation(AnimationNames.STOP, 0, true);
 
     public AllayAnimationSet()
     {
         register(AnimationNames.DANCE, List.of(ROLL_START));
-        register(AnimationNames.STANDUP, List.of(ROLL_STOP));
+        register(AnimationNames.STOP, List.of(ROLL_STOP));
     }
 }

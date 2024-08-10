@@ -8,17 +8,11 @@ import java.util.List;
 public class ParrotAnimationSet extends AnimationSet
 {
     public final SingleAnimation DANCE_START = new SingleAnimation(AnimationNames.DANCE_START, 10, true);
-    public final SingleAnimation DANCE_STOP = new SingleAnimation(AnimationNames.DANCE_STOP, 10, true);
+    public final SingleAnimation DANCE_STOP = new SingleAnimation(AnimationNames.STOP, 10, true);
 
     public ParrotAnimationSet()
     {
         register(AnimationNames.DANCE, List.of(DANCE_START));
-        register(AnimationNames.DANCE_STOP, List.of(DANCE_STOP));
-    }
-
-    @Override
-    public List<String> getAvailableAnimationsForClient()
-    {
-        return List.of(AnimationNames.DANCE, AnimationNames.DANCE_STOP);
+        register(AnimationNames.STOP, List.of(DANCE_STOP));
     }
 }

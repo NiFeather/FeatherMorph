@@ -12,7 +12,6 @@ public class AnimationNames
 
     public static final String DANCE = "dance";
     public static final String DANCE_START = "dance_start";
-    public static final String DANCE_STOP = "dance_stop";
 
     public static final String PANIC = "rollup";
     public static final String PANIC_ROLLING = "rollup_rolling";
@@ -42,6 +41,8 @@ public class AnimationNames
     public static final String EAT = "eat";
 
     public static final String SIT = "sit";
+
+    public static final String STOP = "stop";
 
     public static final String POSE_RESET = "pose_reset";
 }

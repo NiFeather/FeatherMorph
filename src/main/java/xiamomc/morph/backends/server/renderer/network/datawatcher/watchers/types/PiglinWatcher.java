@@ -35,7 +35,7 @@ public class PiglinWatcher extends LivingEntityWatcher
             switch (animId)
             {
                 case AnimationNames.DANCE_START -> this.write(ValueIndex.PIGLIN.DANCING, true);
-                case AnimationNames.DANCE_STOP -> this.write(ValueIndex.PIGLIN.DANCING, false);
+                case AnimationNames.STOP -> this.write(ValueIndex.PIGLIN.DANCING, false);
             }
         }
     }
