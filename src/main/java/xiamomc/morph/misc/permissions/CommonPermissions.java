@@ -57,6 +57,16 @@ public class CommonPermissions
                 + abilityIdentifier.replace(":", ".");
     }
 
+    public static String animationPermissionOf(String animationId, String disguiseID)
+    {
+        return PERM_ROOT
+                + "emote"
+                + "."
+                + disguiseID.replace(":", ".")
+                + "."
+                + animationId.replace(":", ".");
+    }
+
     public static String CanFlyIn(String worldName)
     {
         return CAN_FLY + ".in." + worldName;

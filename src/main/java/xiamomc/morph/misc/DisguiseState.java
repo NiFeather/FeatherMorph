@@ -21,6 +21,7 @@ import xiamomc.morph.messages.EmoteStrings;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.misc.animation.SingleAnimation;
 import xiamomc.morph.misc.disguiseProperty.PropertyHandler;
+import xiamomc.morph.misc.permissions.CommonPermissions;
 import xiamomc.morph.network.PlayerOptions;
 import xiamomc.morph.network.commands.S2C.S2CAnimationCommand;
 import xiamomc.morph.network.commands.S2C.set.S2CSetSkillCooldownCommand;
@@ -34,6 +35,7 @@ import xiamomc.morph.skills.impl.NoneMorphSkill;
 import xiamomc.morph.storage.playerdata.PlayerMeta;
 import xiamomc.morph.utilities.ItemUtils;
 import xiamomc.morph.utilities.NbtUtils;
+import xiamomc.morph.utilities.PermissionUtils;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Exceptions.NullDependencyException;
 
@@ -101,6 +103,22 @@ public class DisguiseState extends MorphPluginObject
 
     public void scheduleSequence(String animationId, List<SingleAnimation> sequence)
     {
+        this.scheduleSequence(animationId, sequence, true);
+    }
+
+    public void scheduleSequence(String animationId, List<SingleAnimation> sequence, boolean checkPermission)
+    {
+        if (checkPermission
+                && !PermissionUtils.hasPermission(
+                        getPlayer(),
+                        CommonPermissions.animationPermissionOf(animationId, this.getDisguiseIdentifier()),
+                        true))
+        {
+            var player = getPlayer();
+            player.sendMessage(MessageUtils.prefixes(player, CommandStrings.noPermissionMessage()));
+            return;
+        }
+
         this.animationSequence.scheduleNext(sequence);
 
         var player = getPlayer();
