@@ -38,9 +38,6 @@ public class PlayerWatcher extends InventoryLivingWatcher
         super.doSync();
 
         var bindingPlayer = getBindingPlayer();
-        if (NmsRecord.ofPlayer(bindingPlayer).getPose() != this.getOr(ValueIndex.PLAYER.POSE, null))
-            this.remove(ValueIndex.PLAYER.POSE);
-
         this.write(ValueIndex.PLAYER.SKIN_FLAGS, (byte)bindingPlayer.getClientOption(ClientOption.SKIN_PARTS).getRaw());
         this.write(ValueIndex.PLAYER.MAINHAND, (byte)bindingPlayer.getMainHand().ordinal());
     }
@@ -83,17 +80,17 @@ public class PlayerWatcher extends InventoryLivingWatcher
                 case AnimationNames.LAY ->
                 {
                     this.remove(ValueIndex.PLAYER.POSE);
-                    this.write(ValueIndex.PLAYER.POSE, Pose.SLEEPING);
+                    this.write(ValueIndex.PLAYER.POSE, Pose.SLEEPING, true);
                 }
                 case AnimationNames.PROSTRATE ->
                 {
                     this.remove(ValueIndex.PLAYER.POSE);
-                    this.write(ValueIndex.PLAYER.POSE, Pose.SWIMMING);
+                    this.write(ValueIndex.PLAYER.POSE, Pose.SWIMMING, true);
                 }
                 case AnimationNames.STANDUP ->
                 {
                     var nmsPlayer = NmsRecord.ofPlayer(getBindingPlayer());
-                    this.write(ValueIndex.PLAYER.POSE, nmsPlayer.getPose());
+                    this.write(ValueIndex.PLAYER.POSE, nmsPlayer.getPose(), true);
                     this.remove(ValueIndex.PLAYER.POSE);
                 }
             }

@@ -67,11 +67,11 @@ public class MetaPacketListener extends ProtocolListener
         //并且不要处理同为玩家的Meta包
         var packetContainer = packetEvent.getPacket();
         var meta = packetContainer.getMeta(PacketFactory.MORPH_PACKET_METAKEY);
-        if (meta.isEmpty() && watcher.getEntityType() != EntityType.PLAYER)
+        if (meta.isEmpty())
         {
             //取得来源玩家的伪装后的Meta，发送给目标玩家
             //从包里移除玩家meta中不属于BASE_LIVING的部分
-            var finalPacket = getFactory().removeNonLivingValues(ValueIndex.BASE_LIVING, packetContainer);
+            var finalPacket = getFactory().processServerMetaPacket(ValueIndex.BASE_LIVING, watcher, packetContainer);
 
             if (finalPacket.getDataValueCollectionModifier().size() == 0)
                 packetEvent.setCancelled(true);

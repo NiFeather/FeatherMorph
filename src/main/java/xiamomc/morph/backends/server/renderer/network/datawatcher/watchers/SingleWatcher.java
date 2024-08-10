@@ -8,6 +8,7 @@ import net.minecraft.nbt.CompoundTag;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.backends.server.renderer.network.PacketFactory;
@@ -15,6 +16,7 @@ import xiamomc.morph.backends.server.renderer.network.datawatcher.values.Abstrac
 import xiamomc.morph.backends.server.renderer.network.datawatcher.values.SingleValue;
 import xiamomc.morph.backends.server.renderer.network.registries.RegistryKey;
 import xiamomc.morph.backends.server.renderer.network.registries.RenderRegistry;
+import xiamomc.morph.backends.server.renderer.network.registries.ValueIndex;
 import xiamomc.morph.backends.server.renderer.utilties.WatcherUtils;
 import xiamomc.morph.misc.disguiseProperty.SingleProperty;
 import xiamomc.pluginbase.Annotations.Initializer;
@@ -168,12 +170,23 @@ public abstract class SingleWatcher extends MorphPluginObject
 
     //region Value Registry
 
-    protected final Map<SingleValue<?>, Object> registry = new ConcurrentHashMap<>();
+    /**
+     *
+     * @param val
+     * @param isOverride 此值是否要覆盖服务端的包中的值？
+     */
+    public record ValueOption(Object val, boolean isOverride)
+    {
+    }
+
+    protected final Map<Integer, ValueOption> registry = new ConcurrentHashMap<>();
+
+    private final List<SingleValue<?>> values = new ObjectArrayList<>();
 
     @Nullable
     public SingleValue<?> getSingle(int index)
     {
-        return registry.keySet().stream().filter(sv -> sv.index() == index)
+        return values.stream().filter(sv -> sv.index() == index)
                 .findFirst().orElse(null);
     }
 
@@ -188,21 +201,34 @@ public abstract class SingleWatcher extends MorphPluginObject
 
     protected boolean register(SingleValue<?> singleValue)
     {
-        if (registry.keySet().stream().anyMatch(sv -> sv.index() == singleValue.index())) return false;
+        if (values.stream().anyMatch(sv -> sv.index() == singleValue.index())) return false;
 
-        registry.put(singleValue, singleValue.defaultValue());
+        values.add(singleValue);
         return true;
     }
 
     public void remove(SingleValue<?> singleValue)
     {
-        registry.remove(singleValue);
+        registry.remove(singleValue.index());
     }
 
-    public <X> void write(SingleValue<X> singleValue, X value)
+    public <X> void write(SingleValue<X> singleValue, @NotNull X value)
     {
-        var prev = (X) registry.getOrDefault(singleValue, null);
-        registry.put(singleValue, value);
+        this.write(singleValue, value, false);
+    }
+
+    public <X> void write(SingleValue<X> singleValue, @NotNull X value, boolean isOverride)
+    {
+        if (value == null)
+            throw new IllegalArgumentException("If you wish to remove a SingleValue, use remove()");
+
+        var prevOption = registry.getOrDefault(singleValue.index(), null);
+        var prev = prevOption == null ? null : (X)prevOption.val;
+        var valOption = new ValueOption(value, isOverride);
+        registry.put(singleValue.index(), valOption);
+
+        if (!this.values.contains(singleValue))
+            throw new IllegalArgumentException("Trying to write a value that does not belongs to this watcher");
 
         if (doingInitialization)
             return;
@@ -216,7 +242,7 @@ public abstract class SingleWatcher extends MorphPluginObject
             sendPacketToAffectedPlayers(packetFactory.buildDiffMetaPacket(getBindingPlayer(), this));
     }
 
-    public void write(int index, Object value)
+    public void write(int index, Object value, boolean isOverride)
     {
         var single = getSingle(index);
         if (single == null)
@@ -225,7 +251,7 @@ public abstract class SingleWatcher extends MorphPluginObject
         if (!single.defaultValue().getClass().isInstance(value))
             throw new IllegalArgumentException("Incompatable value for index '%s', excepted for '%s', but got '%s'".formatted(index, single.defaultValue().getClass(), value.getClass()));
 
-        write((SingleValue<Object>)single, value);
+        write((SingleValue<Object>)single, value, isOverride);
     }
 
     @Resolved(shouldSolveImmediately = true)
@@ -240,14 +266,25 @@ public abstract class SingleWatcher extends MorphPluginObject
     {
     }
 
-    public <X> X getOr(SingleValue<X> singleValue, X defaultVal)
+    @Nullable
+    public ValueOption getOption(SingleValue<?> singleValue)
     {
-        return (X) registry.getOrDefault(singleValue, defaultVal);
+        return registry.getOrDefault(singleValue.index(), null);
+    }
+
+    @Nullable
+    public ValueOption getOption(int index)
+    {
+        var sv = this.getSingle(index);
+        if (sv == null)
+            throw new NullDependencyException("No SingleValue found for index " + index);
+
+        return this.getOption(sv);
     }
 
     public <X> X get(SingleValue<X> singleValue)
     {
-        return (X)registry.getOrDefault(singleValue, singleValue.defaultValue());
+        return this.getOr(singleValue, singleValue.defaultValue());
     }
 
     public Object get(int index)
@@ -259,7 +296,27 @@ public abstract class SingleWatcher extends MorphPluginObject
         return get(single);
     }
 
-    public Map<SingleValue<?>, Object> getRegistry()
+    public Object getOr(int index, Object defaultVal)
+    {
+        var single = getSingle(index);
+        if (single == null)
+            throw new NullDependencyException("No registry found for index '%s'".formatted(index));
+
+        logger.info("Found " + single.hashCode());
+
+        var val = getOr((SingleValue<Object>) single, defaultVal);
+        logger.info("Get '%s'('%s') or '%s' -> '%s'".formatted(single.name(), index, defaultVal, val));
+        return val;
+    }
+
+    public <X> X getOr(SingleValue<X> singleValue, X defaultVal)
+    {
+        var option = registry.getOrDefault(singleValue.index(), null);
+        if (option == null) return defaultVal;
+        else return (X) option.val;
+    }
+
+    public Map<Integer, ValueOption> getRegistry()
     {
         return new Object2ObjectOpenHashMap<>(registry);
     }

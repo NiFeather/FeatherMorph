@@ -185,10 +185,10 @@ public class PacketFactory extends MorphPluginObject
     }
 
     /**
-     * 从给定的meta包中移除不属于给定AbstractValues的数据
+     * 处理服务器发送的Meta包数据
      * @return 剔除后的包
      */
-    public PacketContainer removeNonLivingValues(AbstractValues av, PacketContainer originalPacket)
+    public PacketContainer processServerMetaPacket(AbstractValues av, SingleWatcher watcher, PacketContainer originalPacket)
     {
         if (originalPacket.getType() != PacketType.Play.Server.ENTITY_METADATA)
             throw new IllegalArgumentException("Original packet is not a valid metadata packet!");
@@ -199,17 +199,30 @@ public class PacketFactory extends MorphPluginObject
         //获取原Meta包中的数据
         var wrappedData = modifier.read(0);
 
-        //剔除不属于给定AbstractValues中的数据
-        wrappedData.removeIf(w ->
+        for (WrappedDataValue w : wrappedData)
         {
+            var index = w.getIndex();
             var rawValue = w.getRawValue();
 
-            var match = values.stream().filter(sv ->
-                    w.getIndex() == sv.index() && (rawValue == null || rawValue.getClass() == sv.defaultValue().getClass())
-            ).findFirst().orElse(null);
+            // 寻找与其匹配的SingleValue
+            var disguiseValue = values.stream()
+                    .filter(sv -> sv.index() == index && (rawValue == null || rawValue.getClass() == sv.defaultValue().getClass()))
+                    .findFirst().orElse(null);
 
-            return match == null;
-        });
+            // 如果没有匹配的SV，则代表我们的伪装没有此INDEX，移除
+            if (disguiseValue == null)
+            {
+                wrappedData.remove(w);
+            }
+            else
+            {
+                // 否则，查找是否有覆写值
+                var wa = watcher.getOption(disguiseValue.index());
+
+                if (wa != null && wa.isOverride())
+                    w.setRawValue(wa.val());
+            }
+        }
 
         modifier.write(0, wrappedData);
 
@@ -224,7 +237,7 @@ public class PacketFactory extends MorphPluginObject
         var modifier = metaPacket.getDataValueCollectionModifier();
 
         List<WrappedDataValue> wrappedDataValues = new ObjectArrayList<>();
-        Map<SingleValue<?>, Object> valuesToSent = watcher.getDirty();
+        var valuesToSent = watcher.getDirty();
 
         valuesToSent.forEach((single, v) ->
         {
@@ -261,23 +274,27 @@ public class PacketFactory extends MorphPluginObject
 
         List<WrappedDataValue> wrappedDataValues = new ObjectArrayList<>();
 
-        Map<SingleValue<?>, Object> valuesToSent = watcher.getRegistry();
+        var valuesToSent = watcher.getRegistry();
 
-        valuesToSent.forEach((single, v) ->
+        valuesToSent.forEach((index, option) ->
         {
             WrappedDataWatcher.Serializer serializer;
+            var sv = watcher.getSingle(index);
+
+            if (sv == null)
+                throw new IllegalArgumentException("Not SingleValue found for index " + index);
 
             try
             {
-                serializer = ProtocolRegistryUtils.getSerializer(single);
+                serializer = ProtocolRegistryUtils.getSerializer(sv);
             }
             catch (Throwable t)
             {
-                logger.warn("Error occurred while generating meta packet with id '%s': %s".formatted(single.index(), t.getMessage()));
+                logger.warn("Error occurred while generating meta packet with id '%s': %s".formatted(index, t.getMessage()));
                 return;
             }
 
-            var value = new WrappedDataValue(single.index(), serializer, v);
+            var value = new WrappedDataValue(index, serializer, option.val());
             wrappedDataValues.add(value);
         });
 
