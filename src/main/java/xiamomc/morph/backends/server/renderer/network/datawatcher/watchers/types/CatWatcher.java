@@ -83,8 +83,9 @@ public class CatWatcher extends TameableAnimalWatcher
         if (property.equals(properties.CAT_VARIANT))
         {
             var variant = (Cat.Type) value;
-            write(ValueIndex.CAT.CAT_VARIANT, bukkitTypeToNmsHolder(variant));
+            write(ValueIndex.CAT.CAT_VARIANT, getVariantIndex(bukkitTypeToNmsHolder(variant)));
         }
+
         super.onPropertyWrite(property, value);
     }
 

@@ -8,6 +8,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.animal.CatVariant;
 import net.minecraft.world.entity.animal.FrogVariant;
 import org.bukkit.Bukkit;
+import org.bukkit.Registry;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Frog;
@@ -89,7 +90,9 @@ public class FrogWatcher extends LivingEntityWatcher
         if (property.equals(properties.VARIANT))
         {
             var variant = (Frog.Variant) value;
-            write(ValueIndex.FROG.FROG_VARIANT, getFrogVariant(variant));
+            var typeString = ResourceLocation.parse(variant.key().asString());
+            var key = ResourceKey.create(Registries.FROG_VARIANT, typeString);
+            write(ValueIndex.FROG.FROG_VARIANT, getVariantIndex(getFrogVariant(key)));
         }
     }
 

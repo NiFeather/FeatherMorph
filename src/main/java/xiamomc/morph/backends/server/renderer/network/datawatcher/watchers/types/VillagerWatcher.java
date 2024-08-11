@@ -16,6 +16,7 @@ import xiamomc.morph.misc.disguiseProperty.DisguiseProperties;
 import xiamomc.morph.misc.disguiseProperty.SingleProperty;
 import xiamomc.morph.misc.disguiseProperty.values.VillagerProperties;
 import xiamomc.morph.utilities.MathUtils;
+import xiamomc.pluginbase.Exceptions.NullDependencyException;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -47,12 +48,12 @@ public class VillagerWatcher extends LivingEntityWatcher
         var prof = this.profession == null ? Villager.Profession.NONE : this.profession;
         var type = this.type == null ? Villager.Type.PLAINS : this.type;
 
-        VillagerProfession villagerProfession = VillagerProfession.NONE;
+        var villagerProfession = VillagerProfessions.NONE;
         try
         {
-            villagerProfession = BuiltInRegistries.VILLAGER_PROFESSION
-                    .getOptional(ResourceLocation.parse(prof.key().asString()))
-                    .orElse(VillagerProfession.NONE);
+            villagerProfession = VillagerProfessions.getByName(prof.key().asString());
+            if (villagerProfession == null)
+                throw new NullDependencyException("Null villager profession for name " + prof.key().asString());
         }
         catch (Throwable t)
         {
@@ -116,8 +117,6 @@ public class VillagerWatcher extends LivingEntityWatcher
             {
                 logger.warn("Error occurred while reading nbt to villager profession: " + t.getMessage());
             }
-
-            profession = BuiltInRegistries.VILLAGER_PROFESSION.getOptional(rl).orElse(VillagerProfession.NONE);
         }
 
         if (nbt.contains("type"))
@@ -131,8 +130,6 @@ public class VillagerWatcher extends LivingEntityWatcher
             {
                 logger.warn("Error occurred while reading nbt to villager type: " + t.getMessage());
             }
-
-            type = BuiltInRegistries.VILLAGER_TYPE.getOptional(rl).orElse(VillagerType.PLAINS);
         }
 
         write(ValueIndex.VILLAGER.VILLAGER_DATA, new VillagerData(type, profession, level));

@@ -58,7 +58,7 @@ public class WolfWatcher extends TameableAnimalWatcher
         {
             var val = (Wolf.Variant) value;
 
-            this.write(ValueIndex.WOLF.WOLF_VARIANT, getVariant(val));
+            this.write(ValueIndex.WOLF.WOLF_VARIANT, getVariantIndex(getVariant(val)));
         }
 
         super.onPropertyWrite(property, value);

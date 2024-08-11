@@ -91,7 +91,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
     /**
      * 服务端的接口版本
      */
-    public final int targetApiVersion = Constants.PROTOCOL_VERSION;
+    public final int targetApiVersion = 12; //Constants.PROTOCOL_VERSION;
 
     /**
      * 最低能接受的客户端接口版本
@@ -196,7 +196,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
             if (forceTargetVersion.get()) minimumApiVersion = targetApiVersion;
 
             //如果客户端版本低于最低能接受的版本或高于当前版本，拒绝初始化
-            if (clientVersion < minimumApiVersion || clientVersion > Constants.PROTOCOL_VERSION)
+            if (clientVersion < minimumApiVersion || clientVersion > targetApiVersion)
             {
                 unInitializePlayer(player);
 
