@@ -1,6 +1,6 @@
 package xiamomc.morph.backends.server.renderer.network;
 
-import com.comphenix.protocol.ProtocolLibrary;
+import com.github.retrooper.packetevents.PacketEvents;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.backends.server.renderer.network.listeners.*;
@@ -60,7 +60,7 @@ public class ProtocolHandler extends MorphPluginObject
         {
             try
             {
-                ProtocolLibrary.getProtocolManager().addPacketListener(listener);
+                PacketEvents.getAPI().getEventManager().registerListener(listener.listenerWrapper());
             }
             catch (Throwable t)
             {
@@ -80,9 +80,7 @@ public class ProtocolHandler extends MorphPluginObject
         boolean allSuccess = true;
 
         for (ProtocolListener listener : listeners)
-        {
             allSuccess = register(listener) && allSuccess;
-        }
 
         return allSuccess;
     }
@@ -95,7 +93,7 @@ public class ProtocolHandler extends MorphPluginObject
 
         try
         {
-            ProtocolLibrary.getProtocolManager().removePacketListener(listener);
+            PacketEvents.getAPI().getEventManager().unregisterListener(listener.listenerWrapper());
         }
         catch (Throwable t)
         {
@@ -114,13 +112,13 @@ public class ProtocolHandler extends MorphPluginObject
     {
         if (disposed) return;
 
-        var protocolMgr = ProtocolLibrary.getProtocolManager();
+        var protocolMgr = PacketEvents.getAPI().getEventManager();
 
         for (var listener : listeners)
         {
             try
             {
-                protocolMgr.addPacketListener(listener);
+                protocolMgr.registerListener(listener.listenerWrapper());
             }
             catch (Throwable t)
             {
@@ -143,13 +141,13 @@ public class ProtocolHandler extends MorphPluginObject
     @Override
     public void dispose()
     {
-        var protocolMgr = ProtocolLibrary.getProtocolManager();
+        var protocolMgr = PacketEvents.getAPI().getEventManager();
 
         for (ProtocolListener listener : listeners)
         {
             try
             {
-                protocolMgr.removePacketListener(listener);
+                protocolMgr.unregisterListener(listener.listenerWrapper());
             }
             catch (Throwable t)
             {

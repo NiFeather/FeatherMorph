@@ -1,11 +1,12 @@
 package xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types;
 
+import com.github.retrooper.packetevents.protocol.entity.villager.VillagerData;
+import com.github.retrooper.packetevents.protocol.entity.villager.profession.VillagerProfession;
+import com.github.retrooper.packetevents.protocol.entity.villager.profession.VillagerProfessions;
+import com.github.retrooper.packetevents.protocol.entity.villager.type.VillagerType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.npc.VillagerData;
-import net.minecraft.world.entity.npc.VillagerProfession;
-import net.minecraft.world.entity.npc.VillagerType;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
@@ -14,8 +15,11 @@ import xiamomc.morph.misc.disguiseProperty.DisguiseProperties;
 import xiamomc.morph.misc.disguiseProperty.SingleProperty;
 import xiamomc.morph.misc.disguiseProperty.values.VillagerProperties;
 import xiamomc.morph.utilities.MathUtils;
+import xiamomc.pluginbase.Exceptions.NullDependencyException;
 
 import java.util.Arrays;
+import java.util.Objects;
+import java.util.Random;
 
 public class ZombieVillagerWatcher extends ZombieWatcher
 {
@@ -43,16 +47,16 @@ public class ZombieVillagerWatcher extends ZombieWatcher
         var prof = this.profession == null ? Villager.Profession.NONE : this.profession;
         var type = this.type == null ? Villager.Type.PLAINS : this.type;
 
-        VillagerProfession villagerProfession = VillagerProfession.NONE;
+        VillagerProfession villagerProfession = VillagerProfessions.NONE;
         try
         {
-            villagerProfession = BuiltInRegistries.VILLAGER_PROFESSION
-                    .getOptional(ResourceLocation.parse(prof.key().asString()))
-                    .orElse(VillagerProfession.NONE);
+            villagerProfession = VillagerProfessions.getByName(prof.key().asString());
+            if (villagerProfession == null)
+                throw new NullDependencyException("Null villager profession for name " + prof.key().asString());
         }
         catch (Throwable t)
         {
-            logger.error("Unable to convert bukkit type '%s' to NMS format: " + t.getMessage());
+            logger.error("Unable to convert bukkit type '%s' to PacketEvent format: " + t.getMessage());
         }
 
         var availableTypes = Arrays.stream(VillagerWatcher.VillagerTypes.values()).toList();
@@ -95,42 +99,36 @@ public class ZombieVillagerWatcher extends ZombieWatcher
     private void mergeFromVillagerData(CompoundTag nbt)
     {
         int level = 0;
-        VillagerProfession profession = VillagerProfession.NONE;
-        VillagerType type = VillagerType.PLAINS;
+        VillagerProfession profession = VillagerProfessions.NONE;
+        VillagerType type = com.github.retrooper.packetevents.protocol.entity.villager.type.VillagerTypes.PLAINS;
 
         if (nbt.contains("level"))
             level = MathUtils.clamp(1, 5, nbt.getInt("level"));
 
         if (nbt.contains("profession"))
         {
-            ResourceLocation rl = BuiltInRegistries.VILLAGER_PROFESSION.getDefaultKey();
-
             try
             {
-                rl = ResourceLocation.parse(nbt.getString("profession"));
+                var prof = VillagerProfessions.getByName(nbt.getString("profession"));
+                profession = Objects.requireNonNull(prof, "No such profession '%s'".formatted(nbt.getString("profession")));
             }
             catch (Throwable t)
             {
                 logger.warn("Error occurred while reading nbt to villager profession: " + t.getMessage());
             }
-
-            profession = BuiltInRegistries.VILLAGER_PROFESSION.getOptional(rl).orElse(VillagerProfession.NONE);
         }
 
         if (nbt.contains("type"))
         {
-            ResourceLocation rl = BuiltInRegistries.VILLAGER_TYPE.getDefaultKey();
-
             try
             {
-                rl = ResourceLocation.parse(nbt.getString("type"));
+                var newType = com.github.retrooper.packetevents.protocol.entity.villager.type.VillagerTypes.getByName(nbt.getString("type"));
+                type = Objects.requireNonNull(newType, "No such type '%s'".formatted(nbt.getString("type")));
             }
             catch (Throwable t)
             {
                 logger.warn("Error occurred while reading nbt to villager type: " + t.getMessage());
             }
-
-            type = BuiltInRegistries.VILLAGER_TYPE.getOptional(rl).orElse(VillagerType.PLAINS);
         }
 
         write(ValueIndex.ZOMBIE_VILLAGER.VILLAGER_DATA, new VillagerData(type, profession, level));
@@ -157,8 +155,8 @@ public class ZombieVillagerWatcher extends ZombieWatcher
 
         var compound = new CompoundTag();
         compound.putInt("level", level);
-        compound.putString("profession", BuiltInRegistries.VILLAGER_PROFESSION.getKey(profession).toString());
-        compound.putString("type", BuiltInRegistries.VILLAGER_TYPE.getKey(type).toString());
+        compound.putString("profession", profession.getName().toString());
+        compound.putString("type", type.getName().toString());
 
         nbt.put("VillagerData", compound);
     }

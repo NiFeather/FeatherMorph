@@ -1,22 +1,15 @@
 package xiamomc.morph.backends.server.renderer.network.datawatcher.values;
 
-import com.comphenix.protocol.wrappers.WrappedDataWatcher;
+import com.github.retrooper.packetevents.protocol.entity.data.EntityDataType;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 public class SingleValue<T>
 {
-    private final Class<T> type;
-
-    public Class<T> type()
-    {
-        return type;
-    }
-
     private final int index;
 
     public int index()
@@ -32,18 +25,23 @@ public class SingleValue<T>
         return defaultValue;
     }
 
-    @Nullable
-    private WrappedDataWatcher.Serializer serializer;
+    @NotNull
+    private EntityDataType<T> dataType;
 
-    public void setSerializer(WrappedDataWatcher.Serializer serializer)
+    public void setDataType(@NotNull EntityDataType<T> newType)
     {
-        this.serializer = serializer;
+        Objects.requireNonNull(newType, "Can't pass a null type to a value('%s')!".formatted(this.name()));
+
+        this.dataType = newType;
     }
 
-    @Nullable
-    public WrappedDataWatcher.Serializer getSerializer()
+    @NotNull
+    public EntityDataType<T> getDataType()
     {
-        return serializer;
+        if (dataType == null)
+            throw new NullPointerException("Someone forgot to set the data type for this value('%s')!".formatted(this.name()));
+
+        return dataType;
     }
 
     private final String name;
@@ -53,10 +51,10 @@ public class SingleValue<T>
         return name;
     }
 
-    public SingleValue(String name, Class<T> type, int index, @NotNull T defaultValue)
+    public SingleValue(String name, EntityDataType<T> dataType, int index, @NotNull T defaultValue)
     {
         this.name = name;
-        this.type = type;
+        this.setDataType(dataType);
         this.index = index;
         this.defaultValue = defaultValue;
     }
@@ -87,20 +85,20 @@ public class SingleValue<T>
         if (this == obj) return true;
         if (!(obj instanceof SingleValue<?> other)) return false;
 
-        return this.index == other.index && this.type.equals(other.type);
+        return this.index == other.index && this.dataType.equals(other.dataType);
     }
 
     @Override
     public String toString()
     {
-        return "SingleValue[name='%s', type='%s', index='%s']".formatted(name, type, index);
+        return "SingleValue[name='%s', type='%s', index='%s']".formatted(name, dataType, index);
     }
 
-    public static <TVal> SingleValue<TVal> of(String name, int index, @NotNull TVal val)
+    public static <TVal> SingleValue<TVal> of(String name, int index, @NotNull TVal val, EntityDataType<TVal> dataType)
     {
         if (val == null)
             throw new IllegalArgumentException("TVal may not be null");
 
-        return new SingleValue<>(name, (Class<TVal>) val.getClass(), index, val);
+        return new SingleValue<>(name, dataType, index, val);
     }
 }

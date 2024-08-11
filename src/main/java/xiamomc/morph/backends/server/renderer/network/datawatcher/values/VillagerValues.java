@@ -1,13 +1,14 @@
 package xiamomc.morph.backends.server.renderer.network.datawatcher.values;
 
-import net.minecraft.world.entity.npc.VillagerData;
-import net.minecraft.world.entity.npc.VillagerProfession;
-import net.minecraft.world.entity.npc.VillagerType;
+import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
+import com.github.retrooper.packetevents.protocol.entity.villager.VillagerData;
+import com.github.retrooper.packetevents.protocol.entity.villager.profession.VillagerProfessions;
+import com.github.retrooper.packetevents.protocol.entity.villager.type.VillagerTypes;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.values.basetypes.AbstractVillagerValues;
 
 public class VillagerValues extends AbstractVillagerValues
 {
-    public final SingleValue<VillagerData> VILLAGER_DATA = getSingle("villager_data", new VillagerData(VillagerType.PLAINS, VillagerProfession.NONE, 0));
+    public final SingleValue<VillagerData> VILLAGER_DATA = getSingle("villager_data", new VillagerData(VillagerTypes.PLAINS, VillagerProfessions.NONE, 0), EntityDataTypes.VILLAGER_DATA);
 
     public VillagerValues()
     {

@@ -35,10 +35,17 @@ public class CatWatcher extends TameableAnimalWatcher
 
     public Cat.Type getCatType()
     {
-        var value = get(ValueIndex.CAT.CAT_VARIANT);
-        var index = BuiltInRegistries.CAT_VARIANT.getId(holderToNmsVariant(value));
-
+        var index = get(ValueIndex.CAT.CAT_VARIANT);
         return Cat.Type.values()[index];
+    }
+
+    private int getVariantIndex(Holder<CatVariant> variantHolder)
+    {
+        var worldRegistry = ((CraftWorld)Bukkit.getWorlds().get(0)).getHandle()
+                .registryAccess()
+                .registryOrThrow(Registries.CAT_VARIANT);
+
+        return worldRegistry.getId(variantHolder.value());
     }
 
     private CatVariant holderToNmsVariant(Holder<CatVariant> holder)
@@ -76,8 +83,9 @@ public class CatWatcher extends TameableAnimalWatcher
         if (property.equals(properties.CAT_VARIANT))
         {
             var variant = (Cat.Type) value;
-            write(ValueIndex.CAT.CAT_VARIANT, bukkitTypeToNmsHolder(variant));
+            write(ValueIndex.CAT.CAT_VARIANT, getVariantIndex(bukkitTypeToNmsHolder(variant)));
         }
+
         super.onPropertyWrite(property, value);
     }
 
@@ -96,7 +104,7 @@ public class CatWatcher extends TameableAnimalWatcher
             match.ifPresent(type ->
             {
                 var finalValue = bukkitTypeToNmsHolder(type);
-                this.write(ValueIndex.CAT.CAT_VARIANT, finalValue);
+                this.write(ValueIndex.CAT.CAT_VARIANT, getVariantIndex(finalValue));
             });
         }
 

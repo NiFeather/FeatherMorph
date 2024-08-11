@@ -1,6 +1,8 @@
 package xiamomc.morph;
 
+import com.github.retrooper.packetevents.PacketEvents;
 import com.ticxo.modelengine.api.ModelEngineAPI;
+import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
@@ -93,19 +95,32 @@ public final class MorphPlugin extends XiaMoJavaPlugin
     private EntityProcessor entityProcessor;
 
     @Override
+    public void onLoad()
+    {
+        super.onLoad();
+
+        PacketEvents.setAPI(SpigotPacketEventsBuilder.build(this));
+        PacketEvents.getAPI().getSettings().reEncodeByDefault(true).checkForUpdates(false);
+
+        PacketEvents.getAPI().load();
+    }
+
+    @Override
     public void onEnable()
     {
         super.onEnable();
 
+        PacketEvents.getAPI().init();
+
         pluginManager = Bukkit.getPluginManager();
         var bukkitVersion = Bukkit.getMinecraftVersion();
-        var targetVersion = "1.21";
+        var targetVersion = "1.21.1";
         if (!bukkitVersion.equals(targetVersion))
         {
             logger.error("╔══════════════════════════════════════════════════════════════╗");
             logger.error("║                                                              ║");
-            logger.error("║    This version of Minecraft (%s) is not supported!      ║".formatted(bukkitVersion));
-            logger.error("║                Please use %s instead!                    ║".formatted(targetVersion));
+            logger.error("║\tThis version of Minecraft (%s) is not supported!\t║".formatted(bukkitVersion));
+            logger.error("║\tPlease use %s instead!\t\t\t\t║".formatted(targetVersion));
             logger.error("║                                                              ║");
             //logger.error("║       https://modrinth.com/plugin/feathermorph               ║");
             //logger.error("║                                                              ║");
@@ -254,6 +269,8 @@ public final class MorphPlugin extends XiaMoJavaPlugin
             var messenger = this.getServer().getMessenger();
 
             messenger.unregisterOutgoingPluginChannel(this);
+
+            PacketEvents.getAPI().terminate();
         }
         catch (Exception e)
         {

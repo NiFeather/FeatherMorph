@@ -1,7 +1,9 @@
 package xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types;
 
+import com.github.retrooper.packetevents.util.Vector3f;
 import net.minecraft.core.Rotations;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.FloatTag;
 import net.minecraft.nbt.ListTag;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -54,15 +56,31 @@ public class ArmorStandWatcher extends InventoryLivingWatcher
         return (get(ValueIndex.ARMOR_STAND.DATA_FLAGS) & 0x04) == 0x04;
     }
 
-    private Rotations getVec3(ListTag listTag, Rotations defaultValue)
+    private ListTag saveVector(Vector3f vector3f)
+    {
+        var tag = new ListTag();
+
+        tag.add(FloatTag.valueOf(vector3f.getX()));
+        tag.add(FloatTag.valueOf(vector3f.getY()));
+        tag.add(FloatTag.valueOf(vector3f.getZ()));
+
+        return tag;
+    }
+
+    private Vector3f readVector(ListTag tag)
+    {
+        return new Vector3f(tag.getFloat(0), tag.getFloat(1), tag.getFloat(2));
+    }
+
+    private Vector3f getVec3IfEmpty(ListTag listTag, Vector3f defaultValue)
     {
         if (listTag.isEmpty())
         {
             logger.warn("Empty listTag! Using defaultValue...");
-            listTag = defaultValue.save();
+            listTag = saveVector(defaultValue);
         }
 
-        return new Rotations(listTag);
+        return readVector(listTag);
     }
 
     @Override
@@ -93,42 +111,42 @@ public class ArmorStandWatcher extends InventoryLivingWatcher
             if (poseCompound.contains("Body"))
             {
                 write(ValueIndex.ARMOR_STAND.BODY_ROTATION,
-                        getVec3(poseCompound.getList("Body", CompoundTag.TAG_FLOAT),
+                        getVec3IfEmpty(poseCompound.getList("Body", CompoundTag.TAG_FLOAT),
                                 ValueIndex.ARMOR_STAND.BODY_ROTATION.defaultValue()));
             }
 
             if (poseCompound.contains("Head"))
             {
                 write(ValueIndex.ARMOR_STAND.HEAD_ROTATION,
-                        getVec3(poseCompound.getList("Head", CompoundTag.TAG_FLOAT),
+                        getVec3IfEmpty(poseCompound.getList("Head", CompoundTag.TAG_FLOAT),
                                 ValueIndex.ARMOR_STAND.HEAD_ROTATION.defaultValue()));
             }
 
             if (poseCompound.contains("LeftArm"))
             {
                 write(ValueIndex.ARMOR_STAND.LEFT_ARM_ROTATION,
-                        getVec3(poseCompound.getList("LeftArm", CompoundTag.TAG_FLOAT),
+                        getVec3IfEmpty(poseCompound.getList("LeftArm", CompoundTag.TAG_FLOAT),
                                 ValueIndex.ARMOR_STAND.LEFT_ARM_ROTATION.defaultValue()));
             }
 
             if (poseCompound.contains("RightArm"))
             {
                 write(ValueIndex.ARMOR_STAND.RIGHT_ARM_ROTATION,
-                        getVec3(poseCompound.getList("RightArm", CompoundTag.TAG_FLOAT),
+                        getVec3IfEmpty(poseCompound.getList("RightArm", CompoundTag.TAG_FLOAT),
                                 ValueIndex.ARMOR_STAND.RIGHT_ARM_ROTATION.defaultValue()));
             }
 
             if (poseCompound.contains("LeftLeg"))
             {
                 write(ValueIndex.ARMOR_STAND.LEFT_LEG_ROTATION,
-                        getVec3(poseCompound.getList("LeftLeg", CompoundTag.TAG_FLOAT),
+                        getVec3IfEmpty(poseCompound.getList("LeftLeg", CompoundTag.TAG_FLOAT),
                                 ValueIndex.ARMOR_STAND.LEFT_LEG_ROTATION.defaultValue()));
             }
 
             if (poseCompound.contains("RightLeg"))
             {
                 write(ValueIndex.ARMOR_STAND.RIGHT_LEG_ROTATION,
-                        getVec3(poseCompound.getList("RightLeg", CompoundTag.TAG_FLOAT),
+                        getVec3IfEmpty(poseCompound.getList("RightLeg", CompoundTag.TAG_FLOAT),
                                 ValueIndex.ARMOR_STAND.RIGHT_LEG_ROTATION.defaultValue()));
             }
         }
@@ -144,12 +162,12 @@ public class ArmorStandWatcher extends InventoryLivingWatcher
         nbt.putBoolean("ShowArms", this.showArms());
 
         var poseCompound = new CompoundTag();
-        poseCompound.put("Head", get(ValueIndex.ARMOR_STAND.HEAD_ROTATION).save());
-        poseCompound.put("Body", get(ValueIndex.ARMOR_STAND.BODY_ROTATION).save());
-        poseCompound.put("LeftArm", get(ValueIndex.ARMOR_STAND.LEFT_ARM_ROTATION).save());
-        poseCompound.put("RightArm", get(ValueIndex.ARMOR_STAND.RIGHT_ARM_ROTATION).save());
-        poseCompound.put("LeftLeg", get(ValueIndex.ARMOR_STAND.LEFT_LEG_ROTATION).save());
-        poseCompound.put("RightLeg", get(ValueIndex.ARMOR_STAND.RIGHT_LEG_ROTATION).save());
+        poseCompound.put("Head", saveVector(get(ValueIndex.ARMOR_STAND.HEAD_ROTATION)));
+        poseCompound.put("Body", saveVector(get(ValueIndex.ARMOR_STAND.BODY_ROTATION)));
+        poseCompound.put("LeftArm", saveVector(get(ValueIndex.ARMOR_STAND.LEFT_ARM_ROTATION)));
+        poseCompound.put("RightArm", saveVector(get(ValueIndex.ARMOR_STAND.RIGHT_ARM_ROTATION)));
+        poseCompound.put("LeftLeg", saveVector(get(ValueIndex.ARMOR_STAND.LEFT_LEG_ROTATION)));
+        poseCompound.put("RightLeg", saveVector(get(ValueIndex.ARMOR_STAND.RIGHT_LEG_ROTATION)));
 
         nbt.put("Pose", poseCompound);
     }

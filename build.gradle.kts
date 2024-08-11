@@ -63,7 +63,7 @@ paperweight.reobfArtifactConfiguration = ReobfArtifactConfiguration.MOJANG_PRODU
 dependencies {
     paperweight.paperDevBundle("${project.property("minecraft_version")}")
 
-    compileOnly("com.comphenix.protocol:ProtocolLib:${project.property("protocollib_version")}")
+    implementation("com.github.retrooper:packetevents-spigot:${project.property("packetevents_version")}")
 
     compileOnly(files("libs/CMILib1.4.3.5.jar"))
     compileOnly(files("libs/Residence5.1.4.0.jar"))
@@ -189,9 +189,12 @@ tasks.build {
 
 tasks.shadowJar {
     minimize()
+    archiveFileName = "FeatherMorph-${project.property("project_version")}+${project.property("mc_version")}-final.jar"
     relocate("xiamomc.pluginbase", "xiamomc.morph.shaded.pluginbase")
     relocate("org.bstats", "xiamomc.morph.shaded.bstats")
     relocate("de.tr7zw.changeme.nbtapi", "xiamomc.morph.shaded.nbtapi")
+    relocate("com.github.retrooper.packetevents", "xiamomc.morph.shaded.packetevents.a")
+    relocate("io.github.retrooper.packetevents", "xiamomc.morph.shaded.packetevents.b")
 }
 
 tasks.withType<JavaCompile>() {
