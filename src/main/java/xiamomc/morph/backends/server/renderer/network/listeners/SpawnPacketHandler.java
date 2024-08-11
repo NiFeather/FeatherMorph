@@ -1,15 +1,16 @@
 package xiamomc.morph.backends.server.renderer.network.listeners;
 
-import com.comphenix.protocol.PacketType;
-import com.comphenix.protocol.ProtocolLibrary;
-import com.comphenix.protocol.events.ListeningWhitelist;
-import com.comphenix.protocol.events.PacketContainer;
-import com.comphenix.protocol.events.PacketEvent;
-import com.comphenix.protocol.injector.GamePhase;
+import com.github.retrooper.packetevents.PacketEvents;
+import com.github.retrooper.packetevents.event.PacketSendEvent;
+import com.github.retrooper.packetevents.protocol.entity.type.EntityTypes;
+import com.github.retrooper.packetevents.protocol.packettype.PacketType;
+import com.github.retrooper.packetevents.wrapper.PacketWrapper;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerAttachEntity;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerDestroyEntities;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerPlayerInfoRemove;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSpawnEntity;
 import com.mojang.authlib.GameProfile;
-import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
-import net.minecraft.network.protocol.game.ClientboundPlayerInfoRemovePacket;
-import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
+import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.world.entity.EntityType;
 import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
@@ -22,6 +23,7 @@ import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.Singl
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.PlayerWatcher;
 import xiamomc.morph.backends.server.renderer.network.registries.EntryIndex;
 import xiamomc.morph.backends.server.renderer.network.registries.RenderRegistry;
+import xiamomc.morph.backends.server.renderer.utilties.PacketUtils;
 import xiamomc.morph.backends.server.renderer.utilties.WatcherUtils;
 import xiamomc.morph.misc.NmsRecord;
 import xiamomc.morph.misc.skins.PlayerSkinProvider;
@@ -61,7 +63,7 @@ public class SpawnPacketHandler extends ProtocolListener
     {
         if (player == null) return;
 
-        var protocolManager = ProtocolLibrary.getProtocolManager();
+        var playerManager = PacketEvents.getAPI().getPlayerManager();
         var affectedPlayers = getAffectedPlayers(player);
         var gameProfile = ((CraftPlayer) player).getProfile();
         var watcher = new PlayerWatcher(player);
@@ -71,25 +73,21 @@ public class SpawnPacketHandler extends ProtocolListener
 
         var spawnPackets = getFactory().buildSpawnPackets(player, parameters);
 
-        var removePacket = new ClientboundRemoveEntitiesPacket(player.getEntityId());
-        var rmPacketContainer = PacketContainer.fromPacket(removePacket);
+        var removePacket = new WrapperPlayServerDestroyEntities(player.getEntityId());
 
+        // 如果此伪装在TAB里留有一个Entry，那么移除它。
         var lastUUID = disguiseWatcher.getOrDefault(EntryIndex.TABLIST_UUID, null);
         if (lastUUID != null)
-        {
-            spawnPackets.add(PacketContainer.fromPacket(
-                    new ClientboundPlayerInfoRemovePacket(List.of(lastUUID))
-            ));
-        }
+            spawnPackets.add(new WrapperPlayServerPlayerInfoRemove(List.of(lastUUID)));
 
         watcher.dispose();
 
         affectedPlayers.forEach(p ->
         {
-            protocolManager.sendServerPacket(p, rmPacketContainer);
+            playerManager.sendPacket(p, removePacket);
 
-            for (PacketContainer packet : spawnPackets)
-                protocolManager.sendServerPacket(p, packet);
+            for (PacketWrapper<?> packet : spawnPackets)
+                playerManager.sendPacket(p, packet);
         });
     }
 
@@ -119,11 +117,10 @@ public class SpawnPacketHandler extends ProtocolListener
         var watcher = displayParameters.getWatcher();
         var displayType = watcher.getEntityType();
 
-        var protocolManager = ProtocolLibrary.getProtocolManager();
+        var protocolManager = PacketEvents.getAPI().getPlayerManager();
 
         //先发包移除当前实体
-        var packetRemove = new ClientboundRemoveEntitiesPacket(player.getEntityId());
-        var packetRemoveContainer = PacketContainer.fromPacket(packetRemove);
+        var packetRemove = new WrapperPlayServerDestroyEntities(player.getEntityId());
 
         var gameProfile = watcher.get(EntryIndex.PROFILE);
 
@@ -162,61 +159,47 @@ public class SpawnPacketHandler extends ProtocolListener
 
         affectedPlayers.forEach(p ->
         {
-            protocolManager.sendServerPacket(p, packetRemoveContainer);
+            protocolManager.sendPacket(p, packetRemove);
 
-            spawnPackets.forEach(packet -> protocolManager.sendServerPacket(p, packet));
+            spawnPackets.forEach(packet -> protocolManager.sendPacket(p, packet));
         });
     }
 
-    private void onEntityAddPacket(ClientboundAddEntityPacket packet, PacketEvent packetEvent)
+    private void onEntityAddPacket(WrapperPlayServerSpawnEntity packet, PacketSendEvent packetEvent)
     {
-        var packetContainer = packetEvent.getPacket();
+        // 上下文：在 onPacketSending 中，我们过滤掉了非玩家的生成包
+        var uuid = packet.getUUID().orElse(null);
+
+        if (uuid == null)
+        {
+            logger.warn("Null UUID for a spawn packet?!");
+            return;
+        }
 
         //忽略不在注册表中的玩家
-        var bindingWatcher = registry.getWatcher(packet.getUUID());
+        var bindingWatcher = registry.getWatcher(uuid);
         if (bindingWatcher == null)
             return;
 
         //不要二次处理来自我们自己的包
-        var meta = packetContainer.getMeta(PacketFactory.MORPH_PACKET_METAKEY);
-        if (meta.isEmpty())
+        packetEvent.setCancelled(true);
+        refreshStateForPlayer(Bukkit.getPlayer(packet.getUUID().orElseThrow()), List.of((Player) packetEvent.getPlayer()));
+    }
+
+    public void onPacketSending(PacketSendEvent packetEvent)
+    {
+        if (packetEvent.getPacketType() != PacketType.Play.Server.SPAWN_ENTITY) return;
+
+        var packet = new WrapperPlayServerSpawnEntity(packetEvent);
+        if (packet.getEntityType() != EntityTypes.PLAYER) return;
+
+        if (PacketUtils.isPacketOurs(packet))
         {
-            packetEvent.setCancelled(true);
-            refreshStateForPlayer(Bukkit.getPlayer(packet.getUUID()), List.of(packetEvent.getPlayer()));
+            PacketUtils.removeMark(packet);
+            return;
         }
-    }
 
-    @Override
-    public void onPacketSending(PacketEvent packetEvent)
-    {
-        if (!packetEvent.isServerPacket()) return;
-
-        var packetContainer = packetEvent.getPacket();
-        if (packetContainer.getHandle() instanceof ClientboundAddEntityPacket originalPacket
-                && originalPacket.getType() == EntityType.PLAYER)
-        {
-            onEntityAddPacket(originalPacket, packetEvent);
-        }
-    }
-
-    @Override
-    public void onPacketReceiving(PacketEvent packetEvent)
-    {
-    }
-
-    @Override
-    public ListeningWhitelist getSendingWhitelist()
-    {
-        return ListeningWhitelist
-                .newBuilder()
-                .types(PacketType.Play.Server.SPAWN_ENTITY)
-                .gamePhase(GamePhase.PLAYING)
-                .build();
-    }
-
-    @Override
-    public ListeningWhitelist getReceivingWhitelist()
-    {
-        return ListeningWhitelist.EMPTY_WHITELIST;
+        // TODO: We need to change how this works.
+        this.onEntityAddPacket(packet, packetEvent);
     }
 }

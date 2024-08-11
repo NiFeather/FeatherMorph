@@ -1,12 +1,17 @@
 package xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types;
 
 import it.unimi.dsi.fastutil.Pair;
+import com.github.retrooper.packetevents.protocol.particle.Particle;
+import com.github.retrooper.packetevents.protocol.particle.data.ParticleColorData;
+import com.github.retrooper.packetevents.protocol.particle.data.ParticleData;
+import com.github.retrooper.packetevents.protocol.particle.type.ParticleTypes;
+import com.github.retrooper.packetevents.util.Vector3i;
+import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectObjectMutablePair;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ColorParticleOption;
 import net.minecraft.core.particles.ParticleOptions;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.InteractionHand;
 import org.bukkit.Color;
 import org.bukkit.entity.EntityType;
@@ -90,9 +95,9 @@ public class LivingEntityWatcher extends EntityWatcher
             hasAmbient = hasAmbient || effect.isAmbient();
         }
 
-        var colorList = new ObjectArrayList<ParticleOptions>();
+        var colorList = new ObjectArrayList<Particle<?>>();
         for (var color : colors)
-            colorList.add(ColorParticleOption.create(ParticleTypes.ENTITY_EFFECT, color.asRGB()));
+            colorList.add(new Particle<>(ParticleTypes.ENTITY_EFFECT, new ParticleColorData(color.asRGB())));
 
         write(values.POTION_COLOR, colorList);
         write(values.POTION_ISAMBIENT, hasAmbient);
@@ -100,15 +105,13 @@ public class LivingEntityWatcher extends EntityWatcher
         write(values.STUCKED_ARROWS, player.getArrowsInBody());
         write(values.BEE_STINGERS, player.getBeeStingersInBody());
 
-        Optional<BlockPos> bedPos = Optional.empty();
+        Vector3i bedPos = null;
         if (player.isSleeping())
         {
             try
             {
                 var bukkitPos = player.getBedLocation();
-                bedPos = Optional.of(
-                        new BlockPos(bukkitPos.blockX(),bukkitPos.blockY(), bukkitPos.blockZ())
-                );
+                bedPos = new Vector3i(bukkitPos.blockX(),bukkitPos.blockY(), bukkitPos.blockZ());
             }
             catch (Throwable t)
             {
@@ -116,6 +119,8 @@ public class LivingEntityWatcher extends EntityWatcher
             }
         }
 
-        write(values.BED_POS, bedPos);
+        write(values.BED_POS, bedPos == null ? Optional.empty() : Optional.of(bedPos));
+
+        super.doSync();
     }
 }

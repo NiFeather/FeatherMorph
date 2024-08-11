@@ -1,15 +1,13 @@
 package xiamomc.morph.backends.server.renderer.network.listeners;
 
-import com.comphenix.protocol.PacketType;
-import com.comphenix.protocol.events.ListeningWhitelist;
-import com.comphenix.protocol.events.PacketEvent;
-import com.comphenix.protocol.injector.GamePhase;
+import com.github.retrooper.packetevents.event.PacketSendEvent;
+import com.github.retrooper.packetevents.protocol.packettype.PacketType;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityEquipment;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
 import org.bukkit.entity.Player;
-import xiamomc.morph.backends.server.renderer.network.PacketFactory;
 import xiamomc.morph.backends.server.renderer.network.registries.EntryIndex;
 import xiamomc.morph.backends.server.renderer.network.registries.RenderRegistry;
+import xiamomc.morph.backends.server.renderer.utilties.PacketUtils;
 import xiamomc.pluginbase.Annotations.Resolved;
 
 import java.util.Map;
@@ -30,30 +28,31 @@ public class EquipmentPacketListener extends ProtocolListener
         return "equip_listener";
     }
 
-    @Override
-    public void onPacketSending(PacketEvent event)
+    public void onPacketSending(PacketSendEvent event)
     {
         if (event.getPacketType() != PacketType.Play.Server.ENTITY_EQUIPMENT)
             return;
 
-        var packet = event.getPacket();
+        var packet = new WrapperPlayServerEntityEquipment(event);
 
-        //不要处理来自我们自己的包
-        if (packet.getMeta(PacketFactory.MORPH_PACKET_METAKEY).isPresent())
+        if (PacketUtils.isPacketOurs(packet))
+        {
+            PacketUtils.removeMark(packet);
             return;
+        }
 
-        onEquipmentPacket((ClientboundSetEquipmentPacket) event.getPacket().getHandle(), event);
+        onEquipmentPacket(packet, event);
     }
 
     private final Map<Player, Boolean> alreadyFake = new Object2ObjectOpenHashMap<>();
 
-    private void onEquipmentPacket(ClientboundSetEquipmentPacket packet, PacketEvent event)
+    private void onEquipmentPacket(WrapperPlayServerEntityEquipment packet, PacketSendEvent event)
     {
-        if (event.getPacket().getMeta(PacketFactory.MORPH_PACKET_METAKEY).isPresent())
+        if (PacketUtils.isPacketOurs(packet))
             return;
 
         //获取此包的来源实体
-        var sourceNmsEntity = getNmsPlayerEntityFrom(event, packet.getEntity());
+        var sourceNmsEntity = getNmsPlayerEntityFrom(packet.getEntityId());
         if (sourceNmsEntity == null)
             return;
 
@@ -77,29 +76,8 @@ public class EquipmentPacketListener extends ProtocolListener
             return;
         }
 
-        event.setPacket(getFactory().getEquipmentPacket(sourcePlayer, watcher));
+        packet.setEquipment(getFactory().getPacketEquipmentList(sourcePlayer, watcher));
 
         alreadyFake.put(sourcePlayer, true);
-    }
-
-    @Override
-    public void onPacketReceiving(PacketEvent event)
-    {
-    }
-
-    @Override
-    public ListeningWhitelist getSendingWhitelist()
-    {
-        return ListeningWhitelist
-                .newBuilder()
-                .types(PacketType.Play.Server.ENTITY_EQUIPMENT)
-                .gamePhase(GamePhase.PLAYING)
-                .build();
-    }
-
-    @Override
-    public ListeningWhitelist getReceivingWhitelist()
-    {
-        return ListeningWhitelist.EMPTY_WHITELIST;
     }
 }

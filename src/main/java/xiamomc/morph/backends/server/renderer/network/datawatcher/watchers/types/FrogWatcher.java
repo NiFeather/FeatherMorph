@@ -5,6 +5,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.animal.CatVariant;
 import net.minecraft.world.entity.animal.FrogVariant;
 import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.CraftWorld;
@@ -31,40 +32,20 @@ public class FrogWatcher extends LivingEntityWatcher
         return world.registryAccess().registryOrThrow(Registries.FROG_VARIANT).getHolderOrThrow(key);
     }
 
-    public Holder<FrogVariant> getFrogVariant(Frog.Variant bukkitVariant)
+    private int getVariantIndex(Holder<FrogVariant> variantHolder)
     {
-        var bukkitKey = bukkitVariant.getKey();
+        var worldRegistry = ((CraftWorld)Bukkit.getWorlds().get(0)).getHandle()
+                .registryAccess()
+                .registryOrThrow(Registries.FROG_VARIANT);
 
-        var world = ((CraftWorld) Bukkit.getWorlds().stream().findFirst().get()).getHandle();
-        var registry = world.registryAccess().registryOrThrow(Registries.FROG_VARIANT);
-
-        var holder = registry.getHolder(ResourceLocation.parse(bukkitKey.asString()));
-        if (holder.isPresent())
-            return holder.get();
-        else
-            throw new NullDependencyException("Null frog variant for id '%s'('%s')".formatted(bukkitVariant, bukkitVariant));
+        return worldRegistry.getId(variantHolder.value());
     }
 
     public Frog.Variant getBukkitFrogVariant()
     {
         var type = get(ValueIndex.FROG.FROG_VARIANT);
 
-        var keyOptional = type.unwrapKey();
-        if (keyOptional.isEmpty())
-        {
-            logger.warn("Empty key for value '%s'?!".formatted(type));
-            return Frog.Variant.TEMPERATE;
-        }
-
-        var key = keyOptional.get().location().toString();
-        for (var val : Frog.Variant.values())
-        {
-            if (val.getKey().asString().equals(key))
-                return val;
-        }
-
-        logger.warn("No suitable Variant for FrogVariant '%s'".formatted(type));
-        return Frog.Variant.TEMPERATE;
+        return Frog.Variant.values()[type];
     }
 
     @Override
@@ -96,7 +77,7 @@ public class FrogWatcher extends LivingEntityWatcher
                 logger.error("Failed reading FrogVariant from NBT: " + t.getMessage());
             }
 
-            write(ValueIndex.FROG.FROG_VARIANT, getFrogVariant(type));
+            write(ValueIndex.FROG.FROG_VARIANT, getVariantIndex(getFrogVariant(type)));
         }
     }
 

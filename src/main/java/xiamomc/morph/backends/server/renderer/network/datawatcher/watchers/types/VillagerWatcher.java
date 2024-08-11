@@ -1,11 +1,13 @@
 package xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types;
 
+import com.github.retrooper.packetevents.protocol.entity.villager.VillagerData;
+import com.github.retrooper.packetevents.protocol.entity.villager.profession.VillagerProfession;
+import com.github.retrooper.packetevents.protocol.entity.villager.profession.VillagerProfessions;
+import com.github.retrooper.packetevents.protocol.entity.villager.type.VillagerType;
+import com.github.retrooper.packetevents.protocol.entity.villager.type.VillagerTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.npc.VillagerData;
-import net.minecraft.world.entity.npc.VillagerProfession;
-import net.minecraft.world.entity.npc.VillagerType;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
@@ -16,6 +18,8 @@ import xiamomc.morph.misc.disguiseProperty.values.VillagerProperties;
 import xiamomc.morph.utilities.MathUtils;
 
 import java.util.Arrays;
+import java.util.Objects;
+import java.util.Random;
 
 public class VillagerWatcher extends LivingEntityWatcher
 {
@@ -52,7 +56,7 @@ public class VillagerWatcher extends LivingEntityWatcher
         }
         catch (Throwable t)
         {
-            logger.error("Unable to convert bukkit type '%s' to NMS format: " + t.getMessage());
+            logger.error("Unable to convert bukkit type '%s' to PacketEvent format: " + t.getMessage());
         }
 
         var availableTypes = Arrays.stream(VillagerTypes.values()).toList();
@@ -95,19 +99,18 @@ public class VillagerWatcher extends LivingEntityWatcher
     private void mergeFromVillagerData(CompoundTag nbt)
     {
         int level = 0;
-        VillagerProfession profession = VillagerProfession.NONE;
-        VillagerType type = VillagerType.PLAINS;
+        VillagerProfession profession = VillagerProfessions.NONE;
+        VillagerType type = com.github.retrooper.packetevents.protocol.entity.villager.type.VillagerTypes.PLAINS;
 
         if (nbt.contains("level"))
             level = MathUtils.clamp(1, 5, nbt.getInt("level"));
 
         if (nbt.contains("profession"))
         {
-            ResourceLocation rl = BuiltInRegistries.VILLAGER_PROFESSION.getDefaultKey();
-
             try
             {
-                rl = ResourceLocation.parse(nbt.getString("profession"));
+                var prof = VillagerProfessions.getByName(nbt.getString("profession"));
+                profession = Objects.requireNonNull(prof, "No such profession '%s'".formatted(nbt.getString("profession")));
             }
             catch (Throwable t)
             {
@@ -119,11 +122,10 @@ public class VillagerWatcher extends LivingEntityWatcher
 
         if (nbt.contains("type"))
         {
-            ResourceLocation rl = BuiltInRegistries.VILLAGER_TYPE.getDefaultKey();
-
             try
             {
-                rl = ResourceLocation.parse(nbt.getString("type"));
+                var newType = com.github.retrooper.packetevents.protocol.entity.villager.type.VillagerTypes.getByName(nbt.getString("type"));
+                type = Objects.requireNonNull(newType, "No such type '%s'".formatted(nbt.getString("type")));
             }
             catch (Throwable t)
             {
@@ -161,21 +163,21 @@ public class VillagerWatcher extends LivingEntityWatcher
 
         var compound = new CompoundTag();
         compound.putInt("level", level);
-        compound.putString("profession", BuiltInRegistries.VILLAGER_PROFESSION.getKey(profession).toString());
-        compound.putString("type", BuiltInRegistries.VILLAGER_TYPE.getKey(type).toString());
+        compound.putString("profession", profession.getName().toString());
+        compound.putString("type", type.getName().toString());
 
         nbt.put("VillagerData", compound);
     }
 
     public enum VillagerTypes
     {
-        DESERT(VillagerType.DESERT),
-        JUNGLE(VillagerType.JUNGLE),
-        PLAINS(VillagerType.PLAINS),
-        SAVANNA(VillagerType.SAVANNA),
-        SNOW(VillagerType.SNOW),
-        SWAMP(VillagerType.SWAMP),
-        TAIGA(VillagerType.TAIGA);
+        DESERT(com.github.retrooper.packetevents.protocol.entity.villager.type.VillagerTypes.DESERT),
+        JUNGLE(com.github.retrooper.packetevents.protocol.entity.villager.type.VillagerTypes.JUNGLE),
+        PLAINS(com.github.retrooper.packetevents.protocol.entity.villager.type.VillagerTypes.PLAINS),
+        SAVANNA(com.github.retrooper.packetevents.protocol.entity.villager.type.VillagerTypes.SAVANNA),
+        SNOW(com.github.retrooper.packetevents.protocol.entity.villager.type.VillagerTypes.SNOW),
+        SWAMP(com.github.retrooper.packetevents.protocol.entity.villager.type.VillagerTypes.SWAMP),
+        TAIGA(com.github.retrooper.packetevents.protocol.entity.villager.type.VillagerTypes.TAIGA);
 
         public final VillagerType bindingType;
 

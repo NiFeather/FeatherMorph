@@ -1,8 +1,8 @@
 package xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types;
 
-import com.comphenix.protocol.ProtocolLibrary;
-import com.comphenix.protocol.events.PacketContainer;
 import com.destroystokyo.paper.ClientOption;
+import com.github.retrooper.packetevents.PacketEvents;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerDestroyEntities;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
 import org.bukkit.entity.EntityType;
@@ -55,15 +55,15 @@ public class PlayerWatcher extends InventoryLivingWatcher
                     .buildSpawnPackets(player,
                             new DisplayParameters(this.getEntityType(), this, profile));
 
-            var packetRemove = PacketContainer.fromPacket(new ClientboundRemoveEntitiesPacket(player.getEntityId()));
-            var protocol = ProtocolLibrary.getProtocolManager();
+            var packetRemove = new WrapperPlayServerDestroyEntities(player.getEntityId());
+            var protocol = PacketEvents.getAPI().getPlayerManager();
 
             var affected = getAffectedPlayers(player);
             affected.forEach(p ->
             {
-                protocol.sendServerPacket(p, packetRemove);
+                protocol.sendPacket(p, packetRemove);
 
-                spawnPackets.forEach(packet -> protocol.sendServerPacket(p, packet));
+                spawnPackets.forEach(packet -> protocol.sendPacket(p, packet));
             });
         }
     }

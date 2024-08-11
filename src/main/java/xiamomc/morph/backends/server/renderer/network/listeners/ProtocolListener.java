@@ -1,17 +1,18 @@
 package xiamomc.morph.backends.server.renderer.network.listeners;
 
-import com.comphenix.protocol.ProtocolLibrary;
-import com.comphenix.protocol.ProtocolManager;
-import com.comphenix.protocol.events.PacketEvent;
-import com.comphenix.protocol.events.PacketListener;
+import com.github.retrooper.packetevents.PacketEvents;
+import com.github.retrooper.packetevents.event.*;
+import io.github.retrooper.packetevents.util.SpigotReflectionUtil;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import org.bukkit.Bukkit;
+import org.bukkit.craftbukkit.entity.CraftEntity;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.backends.server.renderer.network.PacketFactory;
+import xiamomc.morph.backends.server.renderer.network.ProtocolHandler;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.utilities.NmsUtils;
@@ -20,27 +21,47 @@ import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
 
 import java.util.Optional;
+import java.util.concurrent.Executors;
 import java.util.function.Function;
 
-public abstract class ProtocolListener extends MorphPluginObject implements PacketListener
+public abstract class ProtocolListener extends MorphPluginObject
 {
+    public static class ListenerWrapper extends PacketListenerAbstract
+    {
+        private final ProtocolListener listener;
+
+        public ListenerWrapper(ProtocolListener protocolListener)
+        {
+            this.listener = protocolListener;
+        }
+
+        @Override
+        public void onPacketSend(PacketSendEvent event)
+        {
+            super.onPacketSend(event);
+
+            this.listener.onPacketSending(event);
+        }
+    }
+
+    private final ListenerWrapper listenerWrapper;
+
+    public ListenerWrapper listenerWrapper()
+    {
+        return this.listenerWrapper;
+    }
+
+    protected ProtocolListener()
+    {
+        this.listenerWrapper = new ListenerWrapper(this);
+    }
+
     @Resolved(shouldSolveImmediately = true)
     private PacketFactory packetFactory;
 
     public abstract String getIdentifier();
 
     protected PacketFactory getFactory() { return packetFactory; }
-
-    protected ProtocolManager protocolManager()
-    {
-        return ProtocolLibrary.getProtocolManager();
-    }
-
-    @Override
-    public org.bukkit.plugin.Plugin getPlugin()
-    {
-        return MorphPlugin.getInstance();
-    }
 
     private final Bindable<Boolean> debugOutput = new Bindable<>(false);
 
@@ -55,8 +76,10 @@ public abstract class ProtocolListener extends MorphPluginObject implements Pack
         configManager.bind(debugOutput, ConfigOption.DEBUG_OUTPUT);
     }
 
+    protected abstract void onPacketSending(PacketSendEvent e);
+
     @Nullable
-    protected Player getNmsPlayerEntityFrom(PacketEvent event, int id)
+    protected Player getNmsPlayerEntityFrom(int id)
     {
         //if (!TickThread.isTickThread())
         //    logger.warn("Not on a tick thread! Caution for exceptions!");
@@ -82,9 +105,13 @@ public abstract class ProtocolListener extends MorphPluginObject implements Pack
     }
 
     @Nullable
-    protected Entity getNmsEntityFrom(PacketEvent event, int id)
+    protected Entity getNmsEntityFrom(ProtocolPacketEvent<?> event, int id)
     {
-        var packetTarget = event.getPlayer();
+        var entity = SpigotReflectionUtil.getEntityById(id);
+        if (entity == null) return null;
+        else return ((CraftEntity)entity).getHandleRaw();
+/*
+        var packetTarget = (org.bukkit.entity.Player) event.getPlayer();
         var sourceNmsEntity = NmsUtils.getNmsLevel(packetTarget.getWorld()).getEntity(id);
         if (sourceNmsEntity == null)
         {
@@ -97,6 +124,6 @@ public abstract class ProtocolListener extends MorphPluginObject implements Pack
             return null;
         }
 
-        return sourceNmsEntity;
+        return sourceNmsEntity;*/
     }
 }
