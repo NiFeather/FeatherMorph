@@ -26,7 +26,7 @@ public class SheepWatcher extends LivingEntityWatcher
         super.mergeFromCompound(nbt);
 
         if (nbt.contains("Color"))
-            write(ValueIndex.SHEEP.WOOL_TYPE, nbt.getByte("Color"));
+            writeOverride(ValueIndex.SHEEP.WOOL_TYPE, nbt.getByte("Color"));
     }
 
     @Override

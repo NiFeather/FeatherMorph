@@ -47,13 +47,13 @@ public class PandaWatcher extends LivingEntityWatcher
         if (property.equals(properties.MAIN_GENE))
         {
             var val = (Panda.Gene) value;
-            write(ValueIndex.PANDA.MAIN_GENE, (byte)val.ordinal());
+            writeOverride(ValueIndex.PANDA.MAIN_GENE, (byte)val.ordinal());
         }
 
         if (property.equals(properties.HIDDEN_GENE))
         {
             var val = (Panda.Gene) value;
-            write(ValueIndex.PANDA.HIDDEN_GENE, (byte)val.ordinal());
+            writeOverride(ValueIndex.PANDA.HIDDEN_GENE, (byte)val.ordinal());
         }
 
         super.onPropertyWrite(property, value);
@@ -70,9 +70,9 @@ public class PandaWatcher extends LivingEntityWatcher
 
             switch (animId)
             {
-                case AnimationNames.EAT -> this.write(ValueIndex.PANDA.EAT_TIMER, 100);
-                case AnimationNames.SIT -> this.write(ValueIndex.PANDA.PANDA_FLAGS, (byte)0x08);
-                case AnimationNames.STANDUP -> this.write(ValueIndex.PANDA.PANDA_FLAGS, (byte)0x00);
+                case AnimationNames.EAT -> this.writeOverride(ValueIndex.PANDA.EAT_TIMER, 100);
+                case AnimationNames.SIT -> this.writeOverride(ValueIndex.PANDA.PANDA_FLAGS, (byte)0x08);
+                case AnimationNames.STANDUP, AnimationNames.RESET -> this.writeOverride(ValueIndex.PANDA.PANDA_FLAGS, (byte)0x00);
             }
         }
     }
@@ -83,10 +83,10 @@ public class PandaWatcher extends LivingEntityWatcher
         super.mergeFromCompound(nbt);
 
         if (nbt.contains("MainGene"))
-            write(ValueIndex.PANDA.MAIN_GENE, (byte)getGeneFromName(nbt.getString("MainGene")).ordinal());
+            writeOverride(ValueIndex.PANDA.MAIN_GENE, (byte)getGeneFromName(nbt.getString("MainGene")).ordinal());
 
         if (nbt.contains("HiddenGene"))
-            write(ValueIndex.PANDA.HIDDEN_GENE, (byte)getGeneFromName(nbt.getString("HiddenGene")).ordinal());
+            writeOverride(ValueIndex.PANDA.HIDDEN_GENE, (byte)getGeneFromName(nbt.getString("HiddenGene")).ordinal());
     }
 
     @Override

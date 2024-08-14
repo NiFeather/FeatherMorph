@@ -59,11 +59,11 @@ public class EntityWatcher extends SingleWatcher
         if (NmsRecord.ofPlayer(player).isFallFlying())
             bitMask |= (byte) 0x80;
 
-        write(values.GENERAL, bitMask);
+        writeTemp(values.GENERAL, bitMask);
         //write(values.SILENT, true);
-        write(values.NO_GRAVITY, !player.hasGravity());
-        write(values.POSE, nmsPlayer.getPose());
-        write(values.FROZEN_TICKS, nmsPlayer.getTicksFrozen());
+        writeTemp(values.NO_GRAVITY, !player.hasGravity());
+        writeTemp(values.POSE, nmsPlayer.getPose());
+        writeTemp(values.FROZEN_TICKS, nmsPlayer.getTicksFrozen());
     }
 
     @Override
@@ -75,7 +75,7 @@ public class EntityWatcher extends SingleWatcher
         {
             var str = newVal.toString();
             var component = str.isEmpty() ? null : Component.literal(str);
-            write(ValueIndex.BASE_ENTITY.CUSTOM_NAME, component == null ? Optional.empty() : Optional.of(component));
+            writeOverride(ValueIndex.BASE_ENTITY.CUSTOM_NAME, component == null ? Optional.empty() : Optional.of(component));
         }
     }
 
@@ -90,13 +90,13 @@ public class EntityWatcher extends SingleWatcher
             var component = Component.Serializer.fromJsonLenient(name, MinecraftServer.getServer().registryAccess());
 
             if (component != null)
-                write(ValueIndex.BASE_ENTITY.CUSTOM_NAME, Optional.of(component));
+                writeOverride(ValueIndex.BASE_ENTITY.CUSTOM_NAME, Optional.of(component));
         }
 
         if (nbt.contains("CustomNameVisible"))
         {
             var visible = nbt.getBoolean("CustomNameVisible");
-            write(ValueIndex.BASE_ENTITY.CUSTOM_NAME_VISIBLE, visible);
+            writeOverride(ValueIndex.BASE_ENTITY.CUSTOM_NAME_VISIBLE, visible);
         }
     }
 

@@ -55,7 +55,7 @@ public class LivingEntityWatcher extends EntityWatcher
         var nmsPlayer = NmsRecord.ofPlayer(player);
         var values = ValueIndex.BASE_LIVING;
 
-        write(values.HEALTH, (float)player.getHealth());
+        writeTemp(values.HEALTH, (float)player.getHealth());
 
         var flagBit = 0x00;
 
@@ -78,7 +78,7 @@ public class LivingEntityWatcher extends EntityWatcher
         if (player.isRiptiding())
             flagBit |= 0x04;
 
-        write(values.LIVING_FLAGS, (byte)flagBit);
+        writeTemp(values.LIVING_FLAGS, (byte)flagBit);
 
         List<Color> colors = new ObjectArrayList<>();
         boolean hasAmbient = false;
@@ -94,11 +94,11 @@ public class LivingEntityWatcher extends EntityWatcher
         for (var color : colors)
             colorList.add(ColorParticleOption.create(ParticleTypes.ENTITY_EFFECT, color.asRGB()));
 
-        write(values.POTION_COLOR, colorList);
-        write(values.POTION_ISAMBIENT, hasAmbient);
+        writeTemp(values.POTION_COLOR, colorList);
+        writeTemp(values.POTION_ISAMBIENT, hasAmbient);
 
-        write(values.STUCKED_ARROWS, player.getArrowsInBody());
-        write(values.BEE_STINGERS, player.getBeeStingersInBody());
+        writeTemp(values.STUCKED_ARROWS, player.getArrowsInBody());
+        writeTemp(values.BEE_STINGERS, player.getBeeStingersInBody());
 
         Optional<BlockPos> bedPos = Optional.empty();
         if (player.isSleeping())
@@ -116,6 +116,6 @@ public class LivingEntityWatcher extends EntityWatcher
             }
         }
 
-        write(values.BED_POS, bedPos);
+        writeTemp(values.BED_POS, bedPos);
     }
 }

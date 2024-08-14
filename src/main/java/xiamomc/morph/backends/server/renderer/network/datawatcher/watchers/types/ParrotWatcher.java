@@ -36,7 +36,7 @@ public class ParrotWatcher extends TameableAnimalWatcher
         if (property.equals(properties.VARIANT))
         {
             var val = (Parrot.Variant) value;
-            write(ValueIndex.PARROT.PARROT_VARIANT, val.ordinal());
+            writeOverride(ValueIndex.PARROT.PARROT_VARIANT, val.ordinal());
         }
 
         super.onPropertyWrite(property, value);
@@ -50,7 +50,7 @@ public class ParrotWatcher extends TameableAnimalWatcher
         if (nbt.contains("Variant"))
         {
             var variant = nbt.getInt("Variant");
-            this.write(ValueIndex.PARROT.PARROT_VARIANT, variant);
+            this.writeOverride(ValueIndex.PARROT.PARROT_VARIANT, variant);
         }
     }
 

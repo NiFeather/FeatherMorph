@@ -56,7 +56,7 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
             bindingWatcher.mergeFromCompound(compoundTag);
 
             if (bindingWatcher instanceof AgeableMobWatcher)
-                bindingWatcher.write(ValueIndex.AGEABLE_MOB.IS_BABY, instance.isBaby);
+                bindingWatcher.writeOverride(ValueIndex.AGEABLE_MOB.IS_BABY, instance.isBaby);
 
             if (compoundTag.contains("Small")) instance.armorStandSmall = compoundTag.getBoolean("Small");
             if (compoundTag.contains("NoBasePlate")) instance.armorStandNoBasePlate = compoundTag.getBoolean("NoBasePlate");
@@ -124,7 +124,7 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
         this.equipment.setHandItems(newEquipment.getItemInMainHand(), newEquipment.getItemInOffHand());
 
         if (bindingWatcher != null)
-            bindingWatcher.write(EntryIndex.EQUIPMENT, this.equipment);
+            bindingWatcher.writeEntry(EntryIndex.EQUIPMENT, this.equipment);
     }
 
     @Override
@@ -133,7 +133,7 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
         super.setDisplayingFakeEquipments(newVal);
 
         if (bindingWatcher != null)
-            bindingWatcher.write(EntryIndex.DISPLAY_FAKE_EQUIPMENT, newVal);
+            bindingWatcher.writeEntry(EntryIndex.DISPLAY_FAKE_EQUIPMENT, newVal);
     }
 
     @Override
@@ -192,7 +192,7 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
         super.setDisguiseName(name);
 
         if (bindingWatcher != null)
-            bindingWatcher.write(EntryIndex.DISGUISE_NAME, name);
+            bindingWatcher.writeEntry(EntryIndex.DISGUISE_NAME, name);
     }
 
     @Override
@@ -209,7 +209,7 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
         write(WrapperAttribute.profile, Optional.of(profile));
 
         if (bindingWatcher != null)
-            bindingWatcher.write(EntryIndex.PROFILE, profile);
+            bindingWatcher.writeEntry(EntryIndex.PROFILE, profile);
 
         callEvent(WrapperEvent.SKIN_SET, profile);
     }
@@ -233,23 +233,23 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
 
         this.aggressive = aggressive;
         if (getEntityType() == EntityType.GHAST)
-            bindingWatcher.write(ValueIndex.GHAST.CHARGING, aggressive);
+            bindingWatcher.writeOverride(ValueIndex.GHAST.CHARGING, aggressive);
 
         if (getEntityType() == EntityType.CREEPER)
         {
-            bindingWatcher.write(ValueIndex.CREEPER.STATE, aggressive ? 1 : -1);
-            bindingWatcher.write(ValueIndex.CREEPER.IGNITED, aggressive);
+            bindingWatcher.writeOverride(ValueIndex.CREEPER.STATE, aggressive ? 1 : -1);
+            bindingWatcher.writeOverride(ValueIndex.CREEPER.IGNITED, aggressive);
         }
 
         if (getEntityType() == EntityType.WARDEN)
-            bindingWatcher.write(EntryIndex.WARDEN_CHARGING_ATTACK, aggressive);
+            bindingWatcher.writeEntry(EntryIndex.WARDEN_CHARGING_ATTACK, aggressive);
     }
 
     @Override
     public void playAttackAnimation()
     {
         super.playAttackAnimation();
-        bindingWatcher.write(EntryIndex.ATTACK_ANIMATION, true);
+        bindingWatcher.writeEntry(EntryIndex.ATTACK_ANIMATION, true);
     }
 
     @Override
@@ -260,7 +260,7 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
         instance.armorStandShowArms = showArms;
         if (bindingWatcher instanceof ArmorStandWatcher armorStandWatcher)
         {
-            armorStandWatcher.write(
+            armorStandWatcher.writeOverride(
                     ValueIndex.ARMOR_STAND.DATA_FLAGS,
                     armorStandWatcher.getArmorStandFlags(instance.armorStandSmall,
                             instance.armorStandShowArms, instance.armorStandNoBasePlate));
@@ -298,7 +298,7 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
     public void playAnimation(String animationId)
     {
         if (bindingWatcher != null)
-            bindingWatcher.write(EntryIndex.ANIMATION, animationId);
+            bindingWatcher.writeEntry(EntryIndex.ANIMATION, animationId);
     }
 
     private void refreshRegistry()
@@ -319,17 +319,17 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
         if (getEntityType() == EntityType.PLAYER)
         {
             var profileOptional = readOrDefault(WrapperAttribute.profile);
-            profileOptional.ifPresent(p -> bindingWatcher.write(EntryIndex.PROFILE, p));
+            profileOptional.ifPresent(p -> bindingWatcher.writeEntry(EntryIndex.PROFILE, p));
         }
 
         //todo: 激活刷新时也刷新到玩家
         if (bindingWatcher instanceof InventoryLivingWatcher)
         {
-            bindingWatcher.write(EntryIndex.DISPLAY_FAKE_EQUIPMENT, readOrDefault(WrapperAttribute.displayFakeEquip));
-            bindingWatcher.write(EntryIndex.EQUIPMENT, this.equipment);
+            bindingWatcher.writeEntry(EntryIndex.DISPLAY_FAKE_EQUIPMENT, readOrDefault(WrapperAttribute.displayFakeEquip));
+            bindingWatcher.writeEntry(EntryIndex.EQUIPMENT, this.equipment);
         }
 
         if (bindingWatcher.getEntityType() == EntityType.GHAST)
-            bindingWatcher.write(ValueIndex.GHAST.CHARGING, aggressive);
+            bindingWatcher.writeOverride(ValueIndex.GHAST.CHARGING, aggressive);
     }
 }

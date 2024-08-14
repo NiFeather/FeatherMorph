@@ -11,7 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class AnimationSet
 {
-    public final SingleAnimation POSE_RESET = new SingleAnimation(AnimationNames.POSE_RESET, 1, false);
+    public static final SingleAnimation RESET = new SingleAnimation(AnimationNames.RESET, 1, false);
 
     private final Map<String, List<SingleAnimation>> animationMap = new ConcurrentHashMap<>();
 

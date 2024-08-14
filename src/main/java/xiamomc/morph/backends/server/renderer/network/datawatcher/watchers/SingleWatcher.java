@@ -5,6 +5,7 @@ import com.comphenix.protocol.events.PacketContainer;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.nbt.CompoundTag;
+import org.apache.commons.lang.NotImplementedException;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -16,7 +17,6 @@ import xiamomc.morph.backends.server.renderer.network.datawatcher.values.Abstrac
 import xiamomc.morph.backends.server.renderer.network.datawatcher.values.SingleValue;
 import xiamomc.morph.backends.server.renderer.network.registries.RegistryKey;
 import xiamomc.morph.backends.server.renderer.network.registries.RenderRegistry;
-import xiamomc.morph.backends.server.renderer.network.registries.ValueIndex;
 import xiamomc.morph.backends.server.renderer.utilties.WatcherUtils;
 import xiamomc.morph.misc.disguiseProperty.SingleProperty;
 import xiamomc.pluginbase.Annotations.Initializer;
@@ -125,7 +125,7 @@ public abstract class SingleWatcher extends MorphPluginObject
 
     protected final Map<String, Object> customRegistry = Collections.synchronizedMap(new Object2ObjectOpenHashMap<>());
 
-    public <X> void write(RegistryKey<X> key, X value)
+    public <X> void writeEntry(RegistryKey<X> key, X value)
     {
         customRegistry.put(key.name, value);
 
@@ -179,7 +179,10 @@ public abstract class SingleWatcher extends MorphPluginObject
     {
     }
 
-    protected final Map<Integer, ValueOption> registry = new ConcurrentHashMap<>();
+    //protected final Map<Integer, ValueOption> commonRegistry = new ConcurrentHashMap<>();
+
+    // Overrided values for the packet use, used by animations
+    protected final Map<Integer, ValueOption> overrides = new ConcurrentHashMap<>();
 
     private final List<SingleValue<?>> values = new ObjectArrayList<>();
 
@@ -209,23 +212,63 @@ public abstract class SingleWatcher extends MorphPluginObject
 
     public void remove(SingleValue<?> singleValue)
     {
-        registry.remove(singleValue.index());
+        //commonRegistry.remove(singleValue.index());
+        overrides.remove(singleValue.index());
     }
 
+    /**
+     * @deprecated Use {@link SingleWatcher#writeTemp(SingleValue, Object)} or {@link SingleWatcher#writeOverride(SingleValue, Object)}
+     */
+    @Deprecated(forRemoval = true)
     public <X> void write(SingleValue<X> singleValue, @NotNull X value)
     {
-        this.write(singleValue, value, false);
+        throw new NotImplementedException("Deprecated method");
+        //this.write(singleValue, value, false, false);
     }
 
-    public <X> void write(SingleValue<X> singleValue, @NotNull X value, boolean isOverride)
+    /**
+     * Write value to the temporary buffer (Dirty Singles) <br>
+     * Mostly used in doSync() function.
+     *
+     * @apiNote If the given Single has an override value, this operation will not be performed
+     */
+    public <X> void writeTemp(SingleValue<X> singleValue, @NotNull X value)
+    {
+        if (!this.overrides.containsKey(singleValue.index())) return;
+
+        this.writeEntry(singleValue, value, false, true);
+    }
+
+    /**
+     * Write value to override registry.
+     * <br>
+     * This action will be persistent until a new value covers this
+     */
+    public <X> void writeOverride(SingleValue<X> singleValue, @NotNull X value)
+    {
+        this.writeEntry(singleValue, value, true, false);
+    }
+
+    public <X> void writeEntry(SingleValue<X> singleValue, @NotNull X value, boolean isOverride, boolean isTemp)
     {
         if (value == null)
             throw new IllegalArgumentException("If you wish to remove a SingleValue, use remove()");
 
-        var prevOption = registry.getOrDefault(singleValue.index(), null);
+        //var prevOption = commonRegistry.getOrDefault(singleValue.index(), null);
+        //if (prevOption == null) prevOption = overrides.getOrDefault(singleValue.index(), null);
+
+        var prevOption = overrides.getOrDefault(singleValue.index(), null);
+
         var prev = prevOption == null ? null : (X)prevOption.val;
-        var valOption = new ValueOption(value, isOverride);
-        registry.put(singleValue.index(), valOption);
+
+        if (!isTemp)
+        {
+            var valOption = new ValueOption(value, isOverride);
+            //commonRegistry.put(singleValue.index(), valOption);
+
+            if (isOverride)
+                overrides.put(singleValue.index(), valOption);
+        }
 
         if (!this.values.contains(singleValue))
             throw new IllegalArgumentException("Trying to write a value that does not belongs to this watcher");
@@ -242,7 +285,7 @@ public abstract class SingleWatcher extends MorphPluginObject
             sendPacketToAffectedPlayers(packetFactory.buildDiffMetaPacket(getBindingPlayer(), this));
     }
 
-    public void write(int index, Object value, boolean isOverride)
+    public void writeEntry(int index, Object value, boolean isOverride, boolean isTemp)
     {
         var single = getSingle(index);
         if (single == null)
@@ -251,7 +294,7 @@ public abstract class SingleWatcher extends MorphPluginObject
         if (!single.defaultValue().getClass().isInstance(value))
             throw new IllegalArgumentException("Incompatable value for index '%s', excepted for '%s', but got '%s'".formatted(index, single.defaultValue().getClass(), value.getClass()));
 
-        write((SingleValue<Object>)single, value, isOverride);
+        writeEntry((SingleValue<Object>)single, value, isOverride, isTemp);
     }
 
     @Resolved(shouldSolveImmediately = true)
@@ -269,7 +312,7 @@ public abstract class SingleWatcher extends MorphPluginObject
     @Nullable
     public ValueOption getOption(SingleValue<?> singleValue)
     {
-        return registry.getOrDefault(singleValue.index(), null);
+        return overrides.getOrDefault(singleValue.index(), null);
     }
 
     @Nullable
@@ -280,6 +323,12 @@ public abstract class SingleWatcher extends MorphPluginObject
             throw new NullDependencyException("No SingleValue found for index " + index);
 
         return this.getOption(sv);
+    }
+
+    @Nullable
+    public <X> X getOverride(SingleValue<X> singleValue)
+    {
+        return this.getOverrideOr(singleValue, singleValue.defaultValue());
     }
 
     public <X> X get(SingleValue<X> singleValue)
@@ -302,23 +351,57 @@ public abstract class SingleWatcher extends MorphPluginObject
         if (single == null)
             throw new NullDependencyException("No registry found for index '%s'".formatted(index));
 
-        logger.info("Found " + single.hashCode());
-
         var val = getOr((SingleValue<Object>) single, defaultVal);
-        logger.info("Get '%s'('%s') or '%s' -> '%s'".formatted(single.name(), index, defaultVal, val));
         return val;
     }
 
-    public <X> X getOr(SingleValue<X> singleValue, X defaultVal)
+    public <X> X getOverrideOr(SingleValue<X> singleValue, X defaultVal)
     {
-        var option = registry.getOrDefault(singleValue.index(), null);
+        var option = this.overrides.getOrDefault(singleValue.index(), null);
         if (option == null) return defaultVal;
         else return (X) option.val;
     }
 
-    public Map<Integer, ValueOption> getRegistry()
+    public <X> X getOr(SingleValue<X> singleValue, X defaultVal)
     {
-        return new Object2ObjectOpenHashMap<>(registry);
+        return this.getOverrideOr(singleValue, defaultVal);
+
+        //var option = commonRegistry.getOrDefault(singleValue.index(), null);
+        //if (option == null) return defaultVal;
+        //else return (X) option.val;
+    }
+
+    /**
+     * Gets the common values in this watcher.
+     * @apiNote This may don't include the override values!
+     */
+    @Deprecated(forRemoval = true)
+    public Map<Integer, ValueOption> getCommonRegistry()
+    {
+        throw new NotImplementedException("No longer exists.");
+        //return new Object2ObjectOpenHashMap<>(commonRegistry);
+    }
+
+    /**
+     * Gets the override values for this watcher
+     * @apiNote This doesn't include values in the common registry!
+     */
+    public Map<Integer, ValueOption> getOverrides()
+    {
+        return new Object2ObjectOpenHashMap<>(this.overrides);
+    }
+
+    /**
+     * Gets the combined map for the common and overrided values
+     */
+    public Map<Integer, ValueOption> getOverlayedRegistry()
+    {
+        //var map = getCommonRegistry();
+        //map.putAll(this.getOverrides());
+        //
+        //return map;
+
+        return getOverrides();
     }
 
     private final Map<SingleValue<?>, Object> dirtySingles = Collections.synchronizedMap(new Object2ObjectOpenHashMap<>());

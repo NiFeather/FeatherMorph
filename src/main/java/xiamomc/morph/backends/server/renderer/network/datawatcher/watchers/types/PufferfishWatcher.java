@@ -33,17 +33,21 @@ public class PufferfishWatcher extends LivingEntityWatcher
             {
                 case AnimationNames.INFLATE ->
                 {
-                    this.write(ValueIndex.PUFFERFISH.PUFF_STATE, PufferfishValues.PuffStates.LARGE);
+                    this.writeOverride(ValueIndex.PUFFERFISH.PUFF_STATE, PufferfishValues.PuffStates.LARGE);
 
                     if (lastState != PufferfishValues.PuffStates.LARGE)
                         world.playSound(getBindingPlayer().getLocation(), Sound.ENTITY_PUFFER_FISH_BLOW_UP, SoundCategory.HOSTILE, 1, 1);
                 }
                 case AnimationNames.DEFLATE ->
                 {
-                    this.write(ValueIndex.PUFFERFISH.PUFF_STATE, PufferfishValues.PuffStates.SMALL);
+                    this.writeOverride(ValueIndex.PUFFERFISH.PUFF_STATE, PufferfishValues.PuffStates.SMALL);
 
                     if (lastState != PufferfishValues.PuffStates.SMALL)
                         world.playSound(getBindingPlayer().getLocation(), Sound.ENTITY_PUFFER_FISH_BLOW_OUT, SoundCategory.HOSTILE, 1, 1);
+                }
+                case AnimationNames.RESET ->
+                {
+                    this.writeOverride(ValueIndex.PUFFERFISH.PUFF_STATE, PufferfishValues.PuffStates.SMALL);
                 }
             }
         }

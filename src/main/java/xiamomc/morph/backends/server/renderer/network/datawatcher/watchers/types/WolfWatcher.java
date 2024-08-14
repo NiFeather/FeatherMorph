@@ -60,7 +60,7 @@ public class WolfWatcher extends TameableAnimalWatcher
         {
             var val = (Wolf.Variant) value;
 
-            this.write(ValueIndex.WOLF.WOLF_VARIANT, getVariant(val));
+            this.writeOverride(ValueIndex.WOLF.WOLF_VARIANT, getVariant(val));
         }
 
         super.onPropertyWrite(property, value);
@@ -77,8 +77,8 @@ public class WolfWatcher extends TameableAnimalWatcher
 
             switch (animId)
             {
-                case AnimationNames.SIT -> this.write(ValueIndex.WOLF.TAMEABLE_FLAGS, (byte)0x01);
-                case AnimationNames.STANDUP -> this.write(ValueIndex.WOLF.TAMEABLE_FLAGS, (byte)0x00);
+                case AnimationNames.SIT -> this.writeOverride(ValueIndex.WOLF.TAMEABLE_FLAGS, (byte)0x01);
+                case AnimationNames.STANDUP -> this.writeOverride(ValueIndex.WOLF.TAMEABLE_FLAGS, (byte)0x00);
             }
         }
     }
@@ -89,7 +89,7 @@ public class WolfWatcher extends TameableAnimalWatcher
         super.mergeFromCompound(nbt);
 
         if (nbt.contains("CollarColor"))
-            write(ValueIndex.WOLF.COLLAR_COLOR, (int)nbt.getByte("CollarColor"));
+            writeOverride(ValueIndex.WOLF.COLLAR_COLOR, (int)nbt.getByte("CollarColor"));
 
         if (nbt.contains("variant"))
         {
@@ -107,7 +107,7 @@ public class WolfWatcher extends TameableAnimalWatcher
                 logger.error("Failed reading FrogVariant from NBT: " + t.getMessage());
             }
 
-            write(ValueIndex.WOLF.WOLF_VARIANT, getVariant(type));
+            writeOverride(ValueIndex.WOLF.WOLF_VARIANT, getVariant(type));
         }
     }
 

@@ -19,6 +19,7 @@ import xiamomc.morph.backends.DisguiseWrapper;
 import xiamomc.morph.messages.CommandStrings;
 import xiamomc.morph.messages.EmoteStrings;
 import xiamomc.morph.messages.MessageUtils;
+import xiamomc.morph.misc.animation.AnimationNames;
 import xiamomc.morph.misc.animation.SingleAnimation;
 import xiamomc.morph.misc.disguiseProperty.PropertyHandler;
 import xiamomc.morph.misc.permissions.CommonPermissions;
@@ -101,6 +102,11 @@ public class DisguiseState extends MorphPluginObject
 
     private final AnimationSequence animationSequence = new AnimationSequence();
 
+    public void stopAnimations()
+    {
+        animationSequence.reset();
+    }
+
     public void scheduleSequence(String animationId, List<SingleAnimation> sequence)
     {
         this.scheduleSequence(animationId, sequence, true);
@@ -108,8 +114,8 @@ public class DisguiseState extends MorphPluginObject
 
     public void scheduleSequence(String animationId, List<SingleAnimation> sequence, boolean checkPermission)
     {
-        if (checkPermission
-                && !PermissionUtils.hasPermission(
+        if (checkPermission && animationId.equals(AnimationNames.RESET)
+                || !PermissionUtils.hasPermission(
                         getPlayer(),
                         CommonPermissions.animationPermissionOf(animationId, this.getDisguiseIdentifier()),
                         true))

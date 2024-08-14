@@ -39,7 +39,7 @@ public class LlamaWatcher extends ChestedHorseWatcher
         {
             var val = (Llama.Color) value;
 
-            write(ValueIndex.LLAMA.VARIANT, val.ordinal());
+            writeOverride(ValueIndex.LLAMA.VARIANT, val.ordinal());
         }
 
         super.onPropertyWrite(property, value);
@@ -51,12 +51,12 @@ public class LlamaWatcher extends ChestedHorseWatcher
         super.mergeFromCompound(nbt);
 
         if (nbt.contains("Strength"))
-            write(ValueIndex.LLAMA.SLOTS, nbt.getInt("Strength"));
+            writeOverride(ValueIndex.LLAMA.SLOTS, nbt.getInt("Strength"));
 
         if (nbt.contains("DecorItem"))
             logger.warn("todo: Llama DecorItem is not implemented.");
 
         if (nbt.contains("Variant"))
-            write(ValueIndex.LLAMA.VARIANT, nbt.getInt("Variant"));
+            writeOverride(ValueIndex.LLAMA.VARIANT, nbt.getInt("Variant"));
     }
 }

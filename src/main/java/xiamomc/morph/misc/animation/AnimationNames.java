@@ -46,5 +46,5 @@ public class AnimationNames
 
     public static final String PROSTRATE = "prostrate";
 
-    public static final String POSE_RESET = "pose_reset";
+    public static final String RESET = "reset";
 }

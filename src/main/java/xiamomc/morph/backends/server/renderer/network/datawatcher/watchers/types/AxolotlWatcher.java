@@ -32,7 +32,7 @@ public class AxolotlWatcher extends LivingEntityWatcher
         if (property.equals(properties.VARIANT))
         {
             var val = (Axolotl.Variant) value;
-            write(ValueIndex.AXOLOTL.COLOR, val.ordinal());
+            writeOverride(ValueIndex.AXOLOTL.COLOR, val.ordinal());
         }
 
         super.onPropertyWrite(property, value);
@@ -44,10 +44,10 @@ public class AxolotlWatcher extends LivingEntityWatcher
         super.mergeFromCompound(nbt);
 
         if (nbt.contains("Variant"))
-            write(ValueIndex.AXOLOTL.COLOR, nbt.getInt("Variant"));
+            writeOverride(ValueIndex.AXOLOTL.COLOR, nbt.getInt("Variant"));
 
         if (nbt.contains("FromBucket"))
-            write(ValueIndex.AXOLOTL.SPAWNED_FROM_BUCKET, nbt.getBoolean("FromBucket"));
+            writeOverride(ValueIndex.AXOLOTL.SPAWNED_FROM_BUCKET, nbt.getBoolean("FromBucket"));
     }
 
     @Override

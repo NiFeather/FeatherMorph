@@ -83,7 +83,7 @@ public class CatWatcher extends TameableAnimalWatcher
         if (property.equals(properties.CAT_VARIANT))
         {
             var variant = (Cat.Type) value;
-            write(ValueIndex.CAT.CAT_VARIANT, bukkitTypeToNmsHolder(variant));
+            writeOverride(ValueIndex.CAT.CAT_VARIANT, bukkitTypeToNmsHolder(variant));
         }
         super.onPropertyWrite(property, value);
     }
@@ -99,15 +99,15 @@ public class CatWatcher extends TameableAnimalWatcher
 
             switch (animId)
             {
-                case AnimationNames.LAY_START -> this.write(ValueIndex.CAT.IS_LYING, true);
-                case AnimationNames.SIT -> this.write(ValueIndex.CAT.TAMEABLE_FLAGS, (byte)0x01);
-                case AnimationNames.STANDUP ->
+                case AnimationNames.LAY_START -> this.writeOverride(ValueIndex.CAT.IS_LYING, true);
+                case AnimationNames.SIT -> this.writeOverride(ValueIndex.CAT.TAMEABLE_FLAGS, (byte)0x01);
+                case AnimationNames.STANDUP, AnimationNames.RESET ->
                 {
                     if (this.getOr(ValueIndex.CAT.IS_LYING, false))
-                        this.write(ValueIndex.CAT.IS_LYING, false);
+                        this.writeOverride(ValueIndex.CAT.IS_LYING, false);
 
                     if ((this.getOr(ValueIndex.CAT.TAMEABLE_FLAGS, (byte)0x00) & 1) != 0)
-                        this.write(ValueIndex.CAT.TAMEABLE_FLAGS, (byte)0x00);
+                        this.writeOverride(ValueIndex.CAT.TAMEABLE_FLAGS, (byte)0x00);
                 }
             }
         }
@@ -128,12 +128,12 @@ public class CatWatcher extends TameableAnimalWatcher
             match.ifPresent(type ->
             {
                 var finalValue = bukkitTypeToNmsHolder(type);
-                this.write(ValueIndex.CAT.CAT_VARIANT, finalValue);
+                this.writeOverride(ValueIndex.CAT.CAT_VARIANT, finalValue);
             });
         }
 
         if (nbt.contains("CollarColor"))
-            write(ValueIndex.CAT.COLLAR_COLOR, (int)nbt.getByte("CollarColor"));
+            writeOverride(ValueIndex.CAT.COLLAR_COLOR, (int)nbt.getByte("CollarColor"));
     }
 
     @Override

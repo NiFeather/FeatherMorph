@@ -5,6 +5,7 @@ import org.jetbrains.annotations.Nullable;
 import oshi.util.tuples.Pair;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.misc.animation.SingleAnimation;
+import xiamomc.morph.misc.animation.animations.AnimationSet;
 
 import java.util.Collections;
 import java.util.List;
@@ -47,6 +48,8 @@ public class AnimationSequence extends MorphPluginObject
     {
         currentQueue.clear();
         currentAnimation = null;
+
+        hookOnNewAnimation.accept(AnimationSet.RESET);
     }
 
     private void findNextAnimation()

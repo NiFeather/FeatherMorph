@@ -100,7 +100,7 @@ public class FrogWatcher extends LivingEntityWatcher
                 logger.error("Failed reading FrogVariant from NBT: " + t.getMessage());
             }
 
-            write(ValueIndex.FROG.FROG_VARIANT, getFrogVariant(type));
+            writeOverride(ValueIndex.FROG.FROG_VARIANT, getFrogVariant(type));
         }
     }
 
@@ -112,7 +112,7 @@ public class FrogWatcher extends LivingEntityWatcher
         if (property.equals(properties.VARIANT))
         {
             var variant = (Frog.Variant) value;
-            write(ValueIndex.FROG.FROG_VARIANT, getFrogVariant(variant));
+            writeOverride(ValueIndex.FROG.FROG_VARIANT, getFrogVariant(variant));
         }
     }
 
@@ -127,8 +127,8 @@ public class FrogWatcher extends LivingEntityWatcher
 
             switch (animId)
             {
-                case AnimationNames.EAT -> this.write(ValueIndex.FROG.POSE, Pose.USING_TONGUE);
-                case AnimationNames.POSE_RESET -> this.remove(ValueIndex.FROG.POSE);
+                case AnimationNames.EAT -> this.writeOverride(ValueIndex.FROG.POSE, Pose.USING_TONGUE);
+                case AnimationNames.RESET -> this.remove(ValueIndex.FROG.POSE);
             }
         }
     }

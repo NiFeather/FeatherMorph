@@ -29,10 +29,10 @@ public class GoatWatcher extends LivingEntityWatcher
         var properties = DisguiseProperties.INSTANCE.getOrThrow(GoatProperties.class);
 
         if (property.equals(properties.HAS_LEFT_HORN))
-            write(ValueIndex.GOAT.HAS_LEFT_HORN, (Boolean) value);
+            writeOverride(ValueIndex.GOAT.HAS_LEFT_HORN, (Boolean) value);
 
         if (property.equals(properties.HAS_RIGHT_HORN))
-            write(ValueIndex.GOAT.HAS_RIGHT_HORN, (Boolean) value);
+            writeOverride(ValueIndex.GOAT.HAS_RIGHT_HORN, (Boolean) value);
 
         super.onPropertyWrite(property, value);
     }
@@ -43,13 +43,13 @@ public class GoatWatcher extends LivingEntityWatcher
         super.mergeFromCompound(nbt);
 
         if (nbt.contains("HasLeftHorn"))
-            write(ValueIndex.GOAT.HAS_LEFT_HORN, nbt.getBoolean("HasLeftHorn"));
+            writeOverride(ValueIndex.GOAT.HAS_LEFT_HORN, nbt.getBoolean("HasLeftHorn"));
 
         if (nbt.contains("HasRightHorn"))
-            write(ValueIndex.GOAT.HAS_RIGHT_HORN, nbt.getBoolean("HasRightHorn"));
+            writeOverride(ValueIndex.GOAT.HAS_RIGHT_HORN, nbt.getBoolean("HasRightHorn"));
 
         if (nbt.contains("IsScreamingGoat"))
-            write(ValueIndex.GOAT.IS_SCREAMING, nbt.getBoolean("IsScreamingGoat"));
+            writeOverride(ValueIndex.GOAT.IS_SCREAMING, nbt.getBoolean("IsScreamingGoat"));
     }
 
     @Override

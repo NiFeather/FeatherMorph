@@ -7,6 +7,7 @@ import org.bukkit.entity.Player;
 import xiamomc.morph.backends.server.renderer.network.registries.ValueIndex;
 
 import java.util.Optional;
+import java.util.UUID;
 
 public class TameableAnimalWatcher extends LivingEntityWatcher
 {
@@ -23,6 +24,8 @@ public class TameableAnimalWatcher extends LivingEntityWatcher
         register(ValueIndex.TAMEABLE);
     }
 
+    private final UUID ownerUUID = UUID.randomUUID();
+
     @Override
     public void mergeFromCompound(CompoundTag nbt)
     {
@@ -30,10 +33,10 @@ public class TameableAnimalWatcher extends LivingEntityWatcher
 
         if (nbt.contains("Owner") && !nbt.getUUID("Owner").equals(Util.NIL_UUID))
         {
-            write(ValueIndex.TAMEABLE.OWNER, Optional.of(nbt.getUUID("Owner")));
+            writeOverride(ValueIndex.TAMEABLE.OWNER, Optional.of(ownerUUID));
 
             byte val = get(ValueIndex.TAMEABLE.TAMEABLE_FLAGS);
-            write(ValueIndex.TAMEABLE.TAMEABLE_FLAGS, (byte)(val | 0x04));
+            writeOverride(ValueIndex.TAMEABLE.TAMEABLE_FLAGS, (byte)(val | 0x04));
         }
 
         if (nbt.contains("Sitting"))
@@ -41,7 +44,7 @@ public class TameableAnimalWatcher extends LivingEntityWatcher
             byte val = get(ValueIndex.TAMEABLE.TAMEABLE_FLAGS);
 
             if (nbt.getBoolean("Sitting"))
-                write(ValueIndex.TAMEABLE.TAMEABLE_FLAGS, (byte)(val | 0x01));
+                writeOverride(ValueIndex.TAMEABLE.TAMEABLE_FLAGS, (byte)(val | 0x01));
         }
     }
 

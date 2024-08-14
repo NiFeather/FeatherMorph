@@ -22,8 +22,8 @@ public class WardenAnimationSet extends AnimationSet
 
     public WardenAnimationSet()
     {
-        register(AnimationNames.ROAR, List.of(ROAR, ROAR_SOUND, POSE_RESET));
-        register(AnimationNames.SNIFF, List.of(SNIFF, POSE_RESET));
+        register(AnimationNames.ROAR, List.of(ROAR, ROAR_SOUND, RESET));
+        register(AnimationNames.SNIFF, List.of(SNIFF, RESET));
 
         // Disabled because digging animation doesn't stop in vanilla client, causing invisible-like entity
         //register(AnimationNames.RE_APPEAR, List.of(DISAPPEAR, HANG_200, APPEAR, POSE_RESET));

@@ -11,7 +11,7 @@ public class SnifferAnimationSet extends AnimationSet
 
     public SnifferAnimationSet()
     {
-        register(AnimationNames.SNIFF, List.of(SNIFF, POSE_RESET));
+        register(AnimationNames.SNIFF, List.of(SNIFF, RESET));
     }
 
     @Override

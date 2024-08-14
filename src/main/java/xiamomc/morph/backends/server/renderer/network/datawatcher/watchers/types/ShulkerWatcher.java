@@ -39,20 +39,26 @@ public class ShulkerWatcher extends LivingEntityWatcher
             {
                 case AnimationNames.PEEK_START ->
                 {
-                    this.write(ValueIndex.SHULKER.PEEK_ID, (byte)30);
+                    this.writeOverride(ValueIndex.SHULKER.PEEK_ID, (byte)30);
                     world.playSound(getBindingPlayer().getLocation(), Sound.ENTITY_SHULKER_OPEN, SoundCategory.HOSTILE, 1, 1);
                 }
 
                 case AnimationNames.OPEN_START ->
                 {
-                    this.write(ValueIndex.SHULKER.PEEK_ID, (byte)100);
+                    this.writeOverride(ValueIndex.SHULKER.PEEK_ID, (byte)100);
                     world.playSound(getBindingPlayer().getLocation(), Sound.ENTITY_SHULKER_OPEN, SoundCategory.HOSTILE, 1, 1);
                 }
 
                 case AnimationNames.PEEK_STOP, AnimationNames.OPEN_STOP ->
                 {
-                    this.write(ValueIndex.SHULKER.PEEK_ID, (byte)0);
+                    this.writeOverride(ValueIndex.SHULKER.PEEK_ID, (byte)0);
                     world.playSound(getBindingPlayer().getLocation(), Sound.ENTITY_SHULKER_CLOSE, SoundCategory.HOSTILE, 1, 1);
+                }
+
+                case AnimationNames.RESET ->
+                {
+                    this.writeOverride(ValueIndex.SHULKER.PEEK_ID, (byte)0);
+                    this.remove(ValueIndex.SHULKER.PEEK_ID);
                 }
             }
         }

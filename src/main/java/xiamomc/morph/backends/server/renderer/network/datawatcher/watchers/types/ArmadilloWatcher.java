@@ -33,10 +33,10 @@ public class ArmadilloWatcher extends LivingEntityWatcher
             var animId = newVal.toString();
             switch (animId)
             {
-                case AnimationNames.PANIC_ROLLING -> write(ValueIndex.ARMADILLO.STATE, Armadillo.ArmadilloState.ROLLING);
-                case AnimationNames.PANIC_SCARED -> write(ValueIndex.ARMADILLO.STATE, Armadillo.ArmadilloState.SCARED);
-                case AnimationNames.PANIC_UNROLLING -> write(ValueIndex.ARMADILLO.STATE, Armadillo.ArmadilloState.UNROLLING);
-                case AnimationNames.PANIC_IDLE -> write(ValueIndex.ARMADILLO.STATE, Armadillo.ArmadilloState.IDLE);
+                case AnimationNames.PANIC_ROLLING -> writeOverride(ValueIndex.ARMADILLO.STATE, Armadillo.ArmadilloState.ROLLING);
+                case AnimationNames.PANIC_SCARED -> writeOverride(ValueIndex.ARMADILLO.STATE, Armadillo.ArmadilloState.SCARED);
+                case AnimationNames.PANIC_UNROLLING -> writeOverride(ValueIndex.ARMADILLO.STATE, Armadillo.ArmadilloState.UNROLLING);
+                case AnimationNames.PANIC_IDLE, AnimationNames.RESET -> writeOverride(ValueIndex.ARMADILLO.STATE, Armadillo.ArmadilloState.IDLE);
             }
         }
     }

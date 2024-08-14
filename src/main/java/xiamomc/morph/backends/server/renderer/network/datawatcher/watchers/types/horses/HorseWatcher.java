@@ -61,13 +61,13 @@ public class HorseWatcher extends AbstractHorseWatcher
         if (property.equals(properties.COLOR))
         {
             this.horseColor = (Horse.Color) value;
-            this.write(ValueIndex.HORSE.HORSE_VARIANT, computeHorseVariant());
+            this.writeOverride(ValueIndex.HORSE.HORSE_VARIANT, computeHorseVariant());
         }
 
         if (property.equals(properties.STYLE))
         {
             this.horseStyle = (Horse.Style) value;
-            this.write(ValueIndex.HORSE.HORSE_VARIANT, computeHorseVariant());
+            this.writeOverride(ValueIndex.HORSE.HORSE_VARIANT, computeHorseVariant());
         }
 
         super.onPropertyWrite(property, value);
@@ -79,7 +79,7 @@ public class HorseWatcher extends AbstractHorseWatcher
         super.mergeFromCompound(nbt);
 
         if (nbt.contains("Variant"))
-            this.write(ValueIndex.HORSE.HORSE_VARIANT, nbt.getInt("Variant"));
+            this.writeOverride(ValueIndex.HORSE.HORSE_VARIANT, nbt.getInt("Variant"));
     }
 
     @Override

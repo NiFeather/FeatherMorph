@@ -32,7 +32,7 @@ public class SnowGolemWatcher extends LivingEntityWatcher
                     ? SnowGolemValues.HAS_PUMPKIN
                     : SnowGolemValues.NO_PUMPKIN;
 
-            write(ValueIndex.SNOW_GOLEM.HAT_FLAGS, value);
+            writeOverride(ValueIndex.SNOW_GOLEM.HAT_FLAGS, value);
         }
     }
 

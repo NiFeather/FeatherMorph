@@ -34,8 +34,8 @@ public class PiglinWatcher extends LivingEntityWatcher
 
             switch (animId)
             {
-                case AnimationNames.DANCE_START -> this.write(ValueIndex.PIGLIN.DANCING, true);
-                case AnimationNames.STOP -> this.write(ValueIndex.PIGLIN.DANCING, false);
+                case AnimationNames.DANCE_START -> this.writeOverride(ValueIndex.PIGLIN.DANCING, true);
+                case AnimationNames.STOP, AnimationNames.RESET -> this.writeOverride(ValueIndex.PIGLIN.DANCING, false);
             }
         }
     }
@@ -46,7 +46,7 @@ public class PiglinWatcher extends LivingEntityWatcher
         super.mergeFromCompound(nbt);
 
         if (nbt.contains("IsBaby"))
-            write(ValueIndex.PIGLIN.IS_BABY, nbt.getBoolean("IsBaby"));
+            writeOverride(ValueIndex.PIGLIN.IS_BABY, nbt.getBoolean("IsBaby"));
 
         //if (nbt.contains("IsImmuneToZombification"))
         //    write(ValueIndex.PIGLIN.IMMUNE_TO_ZOMBIFICATION, nbt.getBoolean("IsImmuneToZombification"));

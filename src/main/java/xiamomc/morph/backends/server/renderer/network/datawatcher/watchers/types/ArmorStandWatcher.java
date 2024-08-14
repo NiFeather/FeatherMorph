@@ -84,7 +84,7 @@ public class ArmorStandWatcher extends InventoryLivingWatcher
 
         //Tag "Invisible" is not supported as it's synced with the player
 
-        write(ValueIndex.ARMOR_STAND.DATA_FLAGS, getArmorStandFlags(small, showArms, noBasePlate));
+        writeOverride(ValueIndex.ARMOR_STAND.DATA_FLAGS, getArmorStandFlags(small, showArms, noBasePlate));
 
         if (nbt.contains("Pose"))
         {
@@ -92,42 +92,42 @@ public class ArmorStandWatcher extends InventoryLivingWatcher
 
             if (poseCompound.contains("Body"))
             {
-                write(ValueIndex.ARMOR_STAND.BODY_ROTATION,
+                writeOverride(ValueIndex.ARMOR_STAND.BODY_ROTATION,
                         getVec3(poseCompound.getList("Body", CompoundTag.TAG_FLOAT),
                                 ValueIndex.ARMOR_STAND.BODY_ROTATION.defaultValue()));
             }
 
             if (poseCompound.contains("Head"))
             {
-                write(ValueIndex.ARMOR_STAND.HEAD_ROTATION,
+                writeOverride(ValueIndex.ARMOR_STAND.HEAD_ROTATION,
                         getVec3(poseCompound.getList("Head", CompoundTag.TAG_FLOAT),
                                 ValueIndex.ARMOR_STAND.HEAD_ROTATION.defaultValue()));
             }
 
             if (poseCompound.contains("LeftArm"))
             {
-                write(ValueIndex.ARMOR_STAND.LEFT_ARM_ROTATION,
+                writeOverride(ValueIndex.ARMOR_STAND.LEFT_ARM_ROTATION,
                         getVec3(poseCompound.getList("LeftArm", CompoundTag.TAG_FLOAT),
                                 ValueIndex.ARMOR_STAND.LEFT_ARM_ROTATION.defaultValue()));
             }
 
             if (poseCompound.contains("RightArm"))
             {
-                write(ValueIndex.ARMOR_STAND.RIGHT_ARM_ROTATION,
+                writeOverride(ValueIndex.ARMOR_STAND.RIGHT_ARM_ROTATION,
                         getVec3(poseCompound.getList("RightArm", CompoundTag.TAG_FLOAT),
                                 ValueIndex.ARMOR_STAND.RIGHT_ARM_ROTATION.defaultValue()));
             }
 
             if (poseCompound.contains("LeftLeg"))
             {
-                write(ValueIndex.ARMOR_STAND.LEFT_LEG_ROTATION,
+                writeOverride(ValueIndex.ARMOR_STAND.LEFT_LEG_ROTATION,
                         getVec3(poseCompound.getList("LeftLeg", CompoundTag.TAG_FLOAT),
                                 ValueIndex.ARMOR_STAND.LEFT_LEG_ROTATION.defaultValue()));
             }
 
             if (poseCompound.contains("RightLeg"))
             {
-                write(ValueIndex.ARMOR_STAND.RIGHT_LEG_ROTATION,
+                writeOverride(ValueIndex.ARMOR_STAND.RIGHT_LEG_ROTATION,
                         getVec3(poseCompound.getList("RightLeg", CompoundTag.TAG_FLOAT),
                                 ValueIndex.ARMOR_STAND.RIGHT_LEG_ROTATION.defaultValue()));
             }

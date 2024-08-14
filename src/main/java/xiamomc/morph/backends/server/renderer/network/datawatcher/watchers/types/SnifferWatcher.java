@@ -8,7 +8,6 @@ import org.bukkit.entity.Player;
 import xiamomc.morph.backends.server.renderer.network.registries.EntryIndex;
 import xiamomc.morph.backends.server.renderer.network.registries.RegistryKey;
 import xiamomc.morph.backends.server.renderer.network.registries.ValueIndex;
-import xiamomc.morph.misc.animation.AnimationHandler;
 import xiamomc.morph.misc.animation.AnimationNames;
 
 public class SnifferWatcher extends LivingEntityWatcher
@@ -41,12 +40,12 @@ public class SnifferWatcher extends LivingEntityWatcher
             {
                 case AnimationNames.SNIFF ->
                 {
-                    this.write(ValueIndex.SNIFFER.SNIFFER_STATE, Sniffer.State.SNIFFING);
+                    this.writeOverride(ValueIndex.SNIFFER.SNIFFER_STATE, Sniffer.State.SNIFFING);
                     world.playSound(bindingPlayer.getLocation(), Sound.ENTITY_SNIFFER_SNIFFING, SoundCategory.NEUTRAL, 1, 1);
                 }
-                case AnimationNames.POSE_RESET ->
+                case AnimationNames.RESET ->
                 {
-                    this.write(ValueIndex.SNIFFER.SNIFFER_STATE, Sniffer.State.IDLING);
+                    this.writeOverride(ValueIndex.SNIFFER.SNIFFER_STATE, Sniffer.State.IDLING);
                     this.remove(ValueIndex.SNIFFER.SNIFFER_STATE);
                 }
                 default -> logger.warn("Unknown animation sequence id '%s'".formatted(id));

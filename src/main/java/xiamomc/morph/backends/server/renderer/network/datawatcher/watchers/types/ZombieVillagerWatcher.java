@@ -72,21 +72,21 @@ public class ZombieVillagerWatcher extends ZombieWatcher
         {
             this.lvl = (Integer) value;
 
-            write(ValueIndex.ZOMBIE_VILLAGER.VILLAGER_DATA, computeNmsVillagerData());
+            writeOverride(ValueIndex.ZOMBIE_VILLAGER.VILLAGER_DATA, computeNmsVillagerData());
         }
 
         if (property.equals(properties.TYPE))
         {
             this.type = (Villager.Type) value;
 
-            write(ValueIndex.ZOMBIE_VILLAGER.VILLAGER_DATA, computeNmsVillagerData());
+            writeOverride(ValueIndex.ZOMBIE_VILLAGER.VILLAGER_DATA, computeNmsVillagerData());
         }
 
         if (property.equals(properties.PROFESSION))
         {
             this.profession = (Villager.Profession) value;
 
-            write(ValueIndex.ZOMBIE_VILLAGER.VILLAGER_DATA, computeNmsVillagerData());
+            writeOverride(ValueIndex.ZOMBIE_VILLAGER.VILLAGER_DATA, computeNmsVillagerData());
         }
 
         super.onPropertyWrite(property, value);
@@ -133,7 +133,7 @@ public class ZombieVillagerWatcher extends ZombieWatcher
             type = BuiltInRegistries.VILLAGER_TYPE.getOptional(rl).orElse(VillagerType.PLAINS);
         }
 
-        write(ValueIndex.ZOMBIE_VILLAGER.VILLAGER_DATA, new VillagerData(type, profession, level));
+        writeOverride(ValueIndex.ZOMBIE_VILLAGER.VILLAGER_DATA, new VillagerData(type, profession, level));
     }
 
     @Override

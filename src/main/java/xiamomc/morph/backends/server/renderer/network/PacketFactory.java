@@ -15,7 +15,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.EntityEquipment;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.values.AbstractValues;
-import xiamomc.morph.backends.server.renderer.network.datawatcher.values.SingleValue;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
 import xiamomc.morph.backends.server.renderer.network.registries.EntryIndex;
 import xiamomc.morph.backends.server.renderer.utilties.ProtocolRegistryUtils;
@@ -115,7 +114,7 @@ public class PacketFactory extends MorphPluginObject
             spawnUUID = uuid;
             packets.add(PacketContainer.fromPacket(packetPlayerInfo));
 
-            parameters.getWatcher().write(EntryIndex.TABLIST_UUID, uuid);
+            parameters.getWatcher().writeEntry(EntryIndex.TABLIST_UUID, uuid);
         }
 
         var pitch = player.getPitch();
@@ -278,7 +277,7 @@ public class PacketFactory extends MorphPluginObject
 
         List<WrappedDataValue> wrappedDataValues = new ObjectArrayList<>();
 
-        var valuesToSent = watcher.getRegistry();
+        var valuesToSent = watcher.getOverlayedRegistry();
 
         valuesToSent.forEach((index, option) ->
         {
