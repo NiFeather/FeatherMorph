@@ -198,6 +198,7 @@ public class PacketFactory extends MorphPluginObject
 
         //获取原Meta包中的数据
         var wrappedData = modifier.read(0);
+        List<WrappedDataValue> toRemove = new ObjectArrayList<>();
 
         for (WrappedDataValue w : wrappedData)
         {
@@ -212,7 +213,7 @@ public class PacketFactory extends MorphPluginObject
             // 如果没有匹配的SV，则代表我们的伪装没有此INDEX，移除
             if (disguiseValue == null)
             {
-                wrappedData.remove(w);
+                toRemove.add(w);
             }
             else
             {
@@ -223,6 +224,9 @@ public class PacketFactory extends MorphPluginObject
                     w.setRawValue(wa.val());
             }
         }
+
+        if (!toRemove.isEmpty())
+            toRemove.forEach(wrappedData::remove);
 
         modifier.write(0, wrappedData);
 
