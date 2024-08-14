@@ -217,10 +217,10 @@ public class PacketFactory extends MorphPluginObject
             else
             {
                 // 否则，查找是否有覆写值
-                var wa = watcher.getOption(disguiseValue.index());
+                var wa = watcher.getOr(disguiseValue.index(), null);
 
-                if (wa != null && wa.isOverride())
-                    w.setRawValue(wa.val());
+                if (wa != null)
+                    w.setRawValue(wa);
             }
         }
 
@@ -242,7 +242,7 @@ public class PacketFactory extends MorphPluginObject
         List<WrappedDataValue> wrappedDataValues = new ObjectArrayList<>();
         var valuesToSent = watcher.getDirty();
 
-        valuesToSent.forEach((single, v) ->
+        valuesToSent.forEach((single, val) ->
         {
             WrappedDataWatcher.Serializer serializer;
 
@@ -256,7 +256,7 @@ public class PacketFactory extends MorphPluginObject
                 return;
             }
 
-            var value = new WrappedDataValue(single.index(), serializer, v);
+            var value = new WrappedDataValue(single.index(), serializer, val);
             wrappedDataValues.add(value);
         });
 
@@ -279,7 +279,7 @@ public class PacketFactory extends MorphPluginObject
 
         var valuesToSent = watcher.getOverlayedRegistry();
 
-        valuesToSent.forEach((index, option) ->
+        valuesToSent.forEach((index, val) ->
         {
             WrappedDataWatcher.Serializer serializer;
             var sv = watcher.getSingle(index);
@@ -297,7 +297,7 @@ public class PacketFactory extends MorphPluginObject
                 return;
             }
 
-            var value = new WrappedDataValue(index, serializer, option.val());
+            var value = new WrappedDataValue(index, serializer, val);
             wrappedDataValues.add(value);
         });
 

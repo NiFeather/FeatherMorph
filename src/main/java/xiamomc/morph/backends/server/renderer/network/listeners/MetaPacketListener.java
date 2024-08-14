@@ -71,7 +71,11 @@ public class MetaPacketListener extends ProtocolListener
         {
             //取得来源玩家的伪装后的Meta，发送给目标玩家
             //从包里移除玩家meta中不属于BASE_LIVING的部分
-            var finalPacket = getFactory().processServerMetaPacket(ValueIndex.BASE_LIVING, watcher, packetContainer);
+            var isPlayerDisguise = watcher.getEntityType() == EntityType.PLAYER;
+            var finalPacket = getFactory().processServerMetaPacket(
+                    isPlayerDisguise ? ValueIndex.PLAYER : ValueIndex.BASE_LIVING,
+                    watcher,
+                    packetContainer);
 
             if (finalPacket.getDataValueCollectionModifier().size() == 0)
                 packetEvent.setCancelled(true);

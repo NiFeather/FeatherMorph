@@ -1,7 +1,12 @@
 package xiamomc.morph.backends.server.renderer.network.registries;
 
+import org.bukkit.entity.EntityType;
+import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.values.*;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.values.basetypes.*;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ValueIndex
 {
@@ -44,4 +49,22 @@ public class ValueIndex
     public static final ArmadilloValues ARMADILLO = new ArmadilloValues();
     public static final ShulkerValues SHULKER = new ShulkerValues();
     public static final PufferfishValues PUFFERFISH = new PufferfishValues();
+
+    /*
+    private static final Map<EntityType, AbstractValues> valuesMap = new ConcurrentHashMap<>();
+    private static void register(EntityType type, AbstractValues values)
+    {
+        valuesMap.put(type, values);
+    }
+
+    @NotNull
+    public static AbstractValues get(EntityType type)
+    {
+        return valuesMap.getOrDefault(type, BASE_ENTITY);
+    }
+
+    static
+    {
+    }
+    */
 }
