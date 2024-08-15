@@ -13,12 +13,6 @@ public class PufferfishAnimationSet extends AnimationSet
     public PufferfishAnimationSet()
     {
         register(AnimationNames.INFLATE, List.of(INFLATE));
-        register(AnimationNames.DEFLATE, List.of(DEFLATE));
-    }
-
-    @Override
-    public List<String> getAvailableAnimationsForClient()
-    {
-        return List.of(AnimationNames.INFLATE, AnimationNames.DEFLATE);
+        register(AnimationNames.DEFLATE, List.of(DEFLATE, RESET));
     }
 }

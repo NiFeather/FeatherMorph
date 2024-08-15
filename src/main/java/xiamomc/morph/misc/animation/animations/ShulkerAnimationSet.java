@@ -15,13 +15,7 @@ public class ShulkerAnimationSet extends AnimationSet
 
     public ShulkerAnimationSet()
     {
-        register(AnimationNames.PEEK, List.of(PEEK_START, PEEK_STOP));
-        register(AnimationNames.OPEN, List.of(OPEN_START, OPEN_STOP));
-    }
-
-    @Override
-    public List<String> getAvailableAnimationsForClient()
-    {
-        return List.of(AnimationNames.PEEK, AnimationNames.OPEN);
+        register(AnimationNames.PEEK, List.of(PEEK_START, PEEK_STOP, RESET));
+        register(AnimationNames.OPEN, List.of(OPEN_START, OPEN_STOP, RESET));
     }
 }

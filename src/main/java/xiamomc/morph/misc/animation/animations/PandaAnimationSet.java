@@ -13,6 +13,6 @@ public class PandaAnimationSet extends AnimationSet
     public PandaAnimationSet()
     {
         register(AnimationNames.SIT, List.of(SIT));
-        register(AnimationNames.STANDUP, List.of(STANDUP));
+        register(AnimationNames.STANDUP, List.of(STANDUP, RESET));
     }
 }

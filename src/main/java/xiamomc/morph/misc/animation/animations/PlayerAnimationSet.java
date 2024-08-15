@@ -15,6 +15,6 @@ public class PlayerAnimationSet extends AnimationSet
     {
         register(AnimationNames.LAY, List.of(LAY));
         register(AnimationNames.PROSTRATE, List.of(PROSTRATE));
-        register(AnimationNames.STANDUP, List.of(STAND));
+        register(AnimationNames.STANDUP, List.of(STAND, RESET));
     }
 }

@@ -14,6 +14,6 @@ public class PiglinAnimationSet extends AnimationSet
     public PiglinAnimationSet()
     {
         register(AnimationNames.DANCE, List.of(DANCING_START));
-        register(AnimationNames.STOP, List.of(DANCING_STOP));
+        register(AnimationNames.STOP, List.of(DANCING_STOP, RESET));
     }
 }

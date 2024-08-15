@@ -13,10 +13,4 @@ public class SnifferAnimationSet extends AnimationSet
     {
         register(AnimationNames.SNIFF, List.of(SNIFF, RESET));
     }
-
-    @Override
-    public List<String> getAvailableAnimationsForClient()
-    {
-        return List.of("sniff");
-    }
 }
