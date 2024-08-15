@@ -13,6 +13,7 @@ import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.misc.permissions.CommonPermissions;
+import xiamomc.morph.utilities.PermissionUtils;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Bindables.Bindable;
 
@@ -251,9 +252,7 @@ public class AbilityUpdater extends MorphPluginObject
 
     public static boolean hasPermissionFor(IMorphAbility<?> ability, DisguiseState state)
     {
-        var player = state.getPlayer();
-
         var singleAbilityPerm = CommonPermissions.abilityPermissionOf(ability.getIdentifier().asString(), state.getDisguiseIdentifier());
-        return !player.isPermissionSet(singleAbilityPerm) || player.hasPermission(singleAbilityPerm);
+        return PermissionUtils.hasPermission(state.getPlayer(), singleAbilityPerm, true);
     }
 }

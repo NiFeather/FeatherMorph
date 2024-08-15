@@ -24,6 +24,7 @@ import xiamomc.morph.skills.impl.*;
 import xiamomc.morph.storage.skill.ISkillOption;
 import xiamomc.morph.storage.skill.SkillAbilityConfiguration;
 import xiamomc.morph.storage.skill.SkillAbilityConfigurationStore;
+import xiamomc.morph.utilities.PermissionUtils;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 
@@ -211,7 +212,7 @@ public class MorphSkillHandler extends MorphPluginObject
         //logger.info("Permission is " + CommonPermissions.skillPermissionOf(skillEntry.getKey().getSkillIdentifier().asString(), state.getDisguiseIdentifier()));
 
         var singleSkillPerm = CommonPermissions.skillPermissionOf(skillEntry.getKey().getSkillIdentifier().asString(), state.getDisguiseIdentifier());
-        var hasSkillPerm = !player.isPermissionSet(singleSkillPerm) || player.hasPermission(singleSkillPerm);
+        var hasSkillPerm = PermissionUtils.hasPermission(player, singleSkillPerm, true);
 
         if (!bypassPermission && !hasSkillPerm)
         {

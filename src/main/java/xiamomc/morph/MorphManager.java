@@ -58,6 +58,7 @@ import xiamomc.morph.storage.offlinestore.OfflineStateStore;
 import xiamomc.morph.storage.playerdata.PlayerDataStore;
 import xiamomc.morph.storage.playerdata.PlayerMeta;
 import xiamomc.morph.utilities.DisguiseUtils;
+import xiamomc.morph.utilities.PermissionUtils;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
@@ -688,7 +689,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             // 2.玩家是否可以通过此ID伪装；若没有设置，则默认为允许
             var childNode = CommonPermissions.MORPH + ".as." + disguiseIdentifier.replace(":", ".");
             var hasPerm = player.hasPermission(CommonPermissions.MORPH)
-                    && (!player.isPermissionSet(childNode) || player.hasPermission(childNode));
+                    && PermissionUtils.hasPermission(player, childNode, true);
 
             if (!hasPerm)
             {

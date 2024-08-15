@@ -20,6 +20,7 @@ import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.misc.permissions.CommonPermissions;
 import xiamomc.morph.utilities.MathUtils;
+import xiamomc.morph.utilities.PermissionUtils;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
@@ -146,7 +147,7 @@ public class FlyAbility extends MorphAbility<FlyOption>
         var worldPerm = CommonPermissions.CanFlyIn(player.getWorld().getName());
 
         return player.hasPermission(CommonPermissions.CAN_FLY)
-                && (!player.isPermissionSet(worldPerm) || player.hasPermission(worldPerm));
+                && PermissionUtils.hasPermission(player, worldPerm, true);
     }
 
     private float handleMovementForSpeed(double movementDelta)
