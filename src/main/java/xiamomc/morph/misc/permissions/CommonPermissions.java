@@ -41,6 +41,9 @@ public class CommonPermissions
 
     public static String skillPermissionOf(String skillIdentifier, String disguiseIdentifier)
     {
+        if (disguiseIdentifier.startsWith(DisguiseTypes.PLAYER.getNameSpace()))
+            disguiseIdentifier = "player:default";
+
         return PERM_ROOT
                 + "skill"
                 + "."
@@ -51,6 +54,9 @@ public class CommonPermissions
 
     public static String abilityPermissionOf(String abilityIdentifier, String disguiseIdentifier)
     {
+        if (disguiseIdentifier.startsWith(DisguiseTypes.PLAYER.getNameSpace()))
+            disguiseIdentifier = "player:default";
+
         return PERM_ROOT
                 + "ability"
                 + "."
