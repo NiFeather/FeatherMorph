@@ -8,6 +8,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.animal.FrogVariant;
 import org.bukkit.Bukkit;
+import org.bukkit.Sound;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Frog;
@@ -124,10 +125,16 @@ public class FrogWatcher extends LivingEntityWatcher
         if (key.equals(CustomEntries.ANIMATION))
         {
             var animId = newVal.toString();
+            var player = getBindingPlayer();
+            var world = player.getWorld();
 
             switch (animId)
             {
-                case AnimationNames.EAT -> this.writePersistent(ValueIndex.FROG.POSE, Pose.USING_TONGUE);
+                case AnimationNames.EAT ->
+                {
+                    this.writePersistent(ValueIndex.FROG.POSE, Pose.USING_TONGUE);
+                    world.playSound(player.getLocation(), Sound.ENTITY_FROG_EAT, 1, 1);
+                }
                 case AnimationNames.RESET -> this.remove(ValueIndex.FROG.POSE);
             }
         }

@@ -7,7 +7,7 @@ import java.util.List;
 
 public class FrogAnimationSet extends AnimationSet
 {
-    public final SingleAnimation EAT = new SingleAnimation(AnimationNames.EAT, 1, true);
+    public final SingleAnimation EAT = new SingleAnimation(AnimationNames.EAT, 10, true);
 
     public FrogAnimationSet()
     {
