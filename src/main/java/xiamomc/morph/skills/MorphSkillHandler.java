@@ -194,7 +194,7 @@ public class MorphSkillHandler extends MorphPluginObject
 
         if (!state.canActivateSkill())
         {
-            player.sendMessage("技能在此情况下不可用");
+            player.sendMessage(MessageUtils.prefixes(player, SkillStrings.skillNotAvailableString()));
             return;
         }
 

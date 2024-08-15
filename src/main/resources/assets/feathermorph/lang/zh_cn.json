@@ -163,6 +163,7 @@
   "morph.skill.preparing" : "<color:red>技能正在准备中（ <time>秒 ）",
   "morph.skill.showing_disguise_inventory" : "正显示伪装自带的盔甲和手持物",
   "morph.skill.showing_player_inventory" : "正显示自己的盔甲和手持物",
+  "morph.skill.not_available": "当前不能使用技能",
   "morph.skill.target_not_suitable" : "目标太远或不合适",
   "morph.state.recover_online" : "相关功能已重置，正在恢复您的伪装...",
   "morph.state.recover_reason" : "自上次离线后相关功能已被重置",

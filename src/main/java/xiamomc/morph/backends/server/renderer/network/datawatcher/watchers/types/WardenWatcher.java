@@ -24,6 +24,8 @@ public class WardenWatcher extends EHasAttackAnimationWatcher
         super(bindingPlayer, EntityType.WARDEN);
     }
 
+    private final Pose DIG_PLACEHOLDER_POSE = Pose.FALL_FLYING;
+
     @Override
     protected <X> void onEntryWrite(RegistryKey<X> key, X oldVal, X newVal)
     {
@@ -44,32 +46,45 @@ public class WardenWatcher extends EHasAttackAnimationWatcher
 
             switch (id)
             {
-                case AnimationNames.ROAR -> this.writePersistent(ValueIndex.BASE_LIVING.POSE, Pose.ROARING);
-                case AnimationNames.ROAR_SOUND -> world.playSound(bindingPlayer.getLocation(), Sound.ENTITY_WARDEN_ROAR, SoundCategory.HOSTILE, 3, 1);
+                case AnimationNames.ROAR ->
+                {
+                    if (this.read(ValueIndex.BASE_LIVING.POSE) == DIG_PLACEHOLDER_POSE) return;
+
+                    this.block(ValueIndex.BASE_LIVING.POSE);
+                    this.writePersistent(ValueIndex.BASE_LIVING.POSE, Pose.ROARING);
+                }
+                case AnimationNames.ROAR_SOUND ->
+                {
+                    if (this.read(ValueIndex.BASE_LIVING.POSE) == DIG_PLACEHOLDER_POSE) return;
+
+                    world.playSound(bindingPlayer.getLocation(), Sound.ENTITY_WARDEN_ROAR, SoundCategory.HOSTILE, 3, 1);
+                }
                 case AnimationNames.SNIFF ->
                 {
+                    if (this.read(ValueIndex.BASE_LIVING.POSE) == DIG_PLACEHOLDER_POSE) return;
+
+                    this.block(ValueIndex.BASE_LIVING.POSE);
                     this.writePersistent(ValueIndex.BASE_LIVING.POSE, Pose.SNIFFING);
 
                     world.playSound(bindingPlayer.getLocation(), Sound.ENTITY_WARDEN_SNIFF, SoundCategory.HOSTILE, 5, 1);
                 }
-                case AnimationNames.RESET ->
-                {
-                    this.writePersistent(ValueIndex.BASE_ENTITY.GENERAL, this.getPlayerBitMask(bindingPlayer));
-                    this.writePersistent(ValueIndex.BASE_LIVING.POSE, NmsRecord.ofPlayer(bindingPlayer).getPose());
-                    this.remove(ValueIndex.BASE_LIVING.POSE);
-                    this.remove(ValueIndex.BASE_ENTITY.GENERAL);
-                }
                 case AnimationNames.DIGDOWN ->
                 {
-                    if (this.read(ValueIndex.BASE_LIVING.POSE) == Pose.DIGGING) return;
+                    if (this.read(ValueIndex.BASE_LIVING.POSE) == DIG_PLACEHOLDER_POSE) return;
 
+                    this.block(ValueIndex.BASE_LIVING.POSE);
                     this.writePersistent(ValueIndex.BASE_LIVING.POSE, Pose.DIGGING);
                     world.playSound(bindingPlayer.getLocation(), Sound.ENTITY_WARDEN_DIG, 5, 1);
                 }
-                case AnimationNames.VANISH -> this.writePersistent(ValueIndex.BASE_ENTITY.GENERAL, (byte)0x20);
+                case AnimationNames.VANISH ->
+                {
+                    this.writePersistent(ValueIndex.BASE_LIVING.POSE, DIG_PLACEHOLDER_POSE);
+                    this.writePersistent(ValueIndex.BASE_ENTITY.GENERAL, (byte)0x20);
+                    this.writePersistent(ValueIndex.BASE_LIVING.SILENT, true);
+                }
                 case AnimationNames.APPEAR ->
                 {
-                    if (this.read(ValueIndex.BASE_LIVING.POSE) != Pose.DIGGING) return;
+                    if (this.read(ValueIndex.BASE_LIVING.POSE) != DIG_PLACEHOLDER_POSE) return;
 
                     this.remove(ValueIndex.BASE_ENTITY.GENERAL);
                     this.writePersistent(ValueIndex.BASE_LIVING.POSE, Pose.EMERGING);
@@ -86,6 +101,17 @@ public class WardenWatcher extends EHasAttackAnimationWatcher
                         protocol.sendServerPacket(affectedPlayer, despawnPacket);
                         packets.forEach(p -> protocol.sendServerPacket(affectedPlayer, p));
                     }
+                }
+                case AnimationNames.RESET ->
+                {
+                    this.writePersistent(ValueIndex.BASE_ENTITY.GENERAL, this.getPlayerBitMask(bindingPlayer));
+                    this.writePersistent(ValueIndex.BASE_LIVING.POSE, NmsRecord.ofPlayer(bindingPlayer).getPose());
+                    this.writePersistent(ValueIndex.BASE_LIVING.SILENT, false);
+                    this.remove(ValueIndex.BASE_LIVING.POSE);
+                    this.remove(ValueIndex.BASE_ENTITY.GENERAL);
+                    this.remove(ValueIndex.BASE_LIVING.SILENT);
+
+                    this.unBlock(ValueIndex.BASE_LIVING.POSE);
                 }
             }
         }

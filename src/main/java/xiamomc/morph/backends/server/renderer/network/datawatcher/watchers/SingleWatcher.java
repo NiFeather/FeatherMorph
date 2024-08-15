@@ -174,8 +174,41 @@ public abstract class SingleWatcher extends MorphPluginObject
     //region Value Registry
 
     protected final Map<Integer, Object> registry = new ConcurrentHashMap<>();
-
     private final List<SingleValue<?>> values = new ObjectArrayList<>();
+
+    /**
+     * Values in this list shouldn't be included with meta packet processing in {@link PacketFactory#processServerMetaPacket(AbstractValues, SingleWatcher, PacketContainer)}
+     */
+    private final List<Integer> blockedValues = new ObjectArrayList<>();
+
+    public void block(int index)
+    {
+        if (!blockedValues.contains(index))
+            blockedValues.add(index);
+    }
+
+    public void block(SingleValue<?> sv)
+    {
+        this.block(sv.index());
+    }
+
+    public void unBlock(int index)
+    {
+        blockedValues.remove((Integer) index);
+    }
+
+    public void unBlock(SingleValue<?> sv)
+    {
+        this.unBlock(sv.index());
+    }
+
+    /**
+     * Get values(In index) to filter out from server's metadata packet
+     */
+    public List<Integer> getBlockedValues()
+    {
+        return new ObjectArrayList<>(blockedValues);
+    }
 
     @Nullable
     public SingleValue<?> getSingle(int index)
@@ -315,7 +348,7 @@ public abstract class SingleWatcher extends MorphPluginObject
     public Map<Integer, Object> getOverlayedRegistry()
     {
         var map = this.getRegistry();
-        this.getDirty().forEach((sv, option) -> map.put(sv.index(), option));
+        this.getDirty().forEach((sv, option) -> map.putIfAbsent(sv.index(), option));
 
         return map;
     }

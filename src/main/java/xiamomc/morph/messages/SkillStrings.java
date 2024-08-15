@@ -69,6 +69,12 @@ public class SkillStrings extends AbstractMorphStrings
                 "一股神秘的力量阻止了你的爆炸");
     }
 
+    public static FormattableMessage skillNotAvailableString()
+    {
+        return getFormattable(getKey("not_available"),
+                "目前不能使用技能");
+    }
+
     private static String getKey(String key)
     {
         return "morph.skill." + key;

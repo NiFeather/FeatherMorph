@@ -107,8 +107,8 @@ public class DisguiseState extends MorphPluginObject
         });
     }
 
-    private List<Object> disableSkillRequests = Collections.synchronizedList(new ObjectArrayList<>());
-    private List<Object> disableAmbientRequests = Collections.synchronizedList(new ObjectArrayList<>());
+    private final List<Object> disableSkillRequests = Collections.synchronizedList(new ObjectArrayList<>());
+    private final List<Object> disableAmbientRequests = Collections.synchronizedList(new ObjectArrayList<>());
 
     public void requestSkillState(Object source, boolean shouldDisable)
     {

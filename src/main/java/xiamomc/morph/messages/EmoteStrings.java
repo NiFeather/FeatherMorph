@@ -53,5 +53,7 @@ public class EmoteStrings extends AbstractMorphStrings
         register("sleep");
         register("stop");
         register("prostrate");
+        register("digdown");
+        register("appear");
     }
 }

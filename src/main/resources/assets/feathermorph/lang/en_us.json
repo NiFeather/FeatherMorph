@@ -164,6 +164,7 @@
   "morph.skill.showing_disguise_inventory": "Displaying disguised equipment",
   "morph.skill.showing_player_inventory": "Displaying yourselves equipment",
   "morph.skill.target_not_suitable": "Target too far or not suit for teleport",
+  "morph.skill.not_available": "Can't use skill at this time",
   "morph.state.recover_online": "Some feature has been reset, we are now recovering your disguise...",
   "morph.state.recover_reason": "Some feature has been reset since you last disconnect",
   "morph.state.recovering": "We are now recovering your disguise",
