@@ -1,6 +1,7 @@
 package xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types;
 
 import net.minecraft.nbt.CompoundTag;
+import org.bukkit.Sound;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import xiamomc.morph.backends.server.renderer.network.registries.CustomEntries;
@@ -31,10 +32,16 @@ public class PiglinWatcher extends LivingEntityWatcher
         if (key.equals(CustomEntries.ANIMATION))
         {
             var animId = newVal.toString();
+            var player = getBindingPlayer();
+            var world = player.getWorld();
 
             switch (animId)
             {
-                case AnimationNames.DANCE_START -> this.writePersistent(ValueIndex.PIGLIN.DANCING, true);
+                case AnimationNames.DANCE_START ->
+                {
+                    this.writePersistent(ValueIndex.PIGLIN.DANCING, true);
+                    world.playSound(player.getLocation(), Sound.ENTITY_PIGLIN_CELEBRATE, 1, 1);
+                }
                 case AnimationNames.STOP, AnimationNames.RESET -> this.writePersistent(ValueIndex.PIGLIN.DANCING, false);
             }
         }

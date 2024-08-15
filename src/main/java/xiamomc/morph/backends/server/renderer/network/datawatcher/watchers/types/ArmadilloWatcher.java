@@ -1,6 +1,7 @@
 package xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types;
 
 import net.minecraft.world.entity.animal.armadillo.Armadillo;
+import org.bukkit.Sound;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import xiamomc.morph.backends.server.renderer.network.registries.CustomEntries;
@@ -31,12 +32,32 @@ public class ArmadilloWatcher extends LivingEntityWatcher
         if (key.equals(CustomEntries.ANIMATION))
         {
             var animId = newVal.toString();
+            var player = getBindingPlayer();
+            var world = player.getWorld();
             switch (animId)
             {
-                case AnimationNames.PANIC_ROLLING -> writePersistent(ValueIndex.ARMADILLO.STATE, Armadillo.ArmadilloState.ROLLING);
-                case AnimationNames.PANIC_SCARED -> writePersistent(ValueIndex.ARMADILLO.STATE, Armadillo.ArmadilloState.SCARED);
-                case AnimationNames.PANIC_UNROLLING -> writePersistent(ValueIndex.ARMADILLO.STATE, Armadillo.ArmadilloState.UNROLLING);
-                case AnimationNames.PANIC_IDLE, AnimationNames.RESET -> writePersistent(ValueIndex.ARMADILLO.STATE, Armadillo.ArmadilloState.IDLE);
+                case AnimationNames.PANIC_ROLLING ->
+                {
+                    writePersistent(ValueIndex.ARMADILLO.STATE, Armadillo.ArmadilloState.ROLLING);
+                    world.playSound(player.getLocation(), Sound.ENTITY_ARMADILLO_ROLL, 1, 1);
+                }
+                case AnimationNames.PANIC_SCARED ->
+                {
+                    writePersistent(ValueIndex.ARMADILLO.STATE, Armadillo.ArmadilloState.SCARED);
+                    world.playSound(player.getLocation(), Sound.ENTITY_ARMADILLO_LAND, 1, 1);
+                }
+                case AnimationNames.PANIC_UNROLLING ->
+                {
+                    writePersistent(ValueIndex.ARMADILLO.STATE, Armadillo.ArmadilloState.UNROLLING);
+                    world.playSound(player.getLocation(), Sound.ENTITY_ARMADILLO_UNROLL_START, 1, 1);
+                }
+                case AnimationNames.PANIC_IDLE, AnimationNames.RESET ->
+                {
+                    writePersistent(ValueIndex.ARMADILLO.STATE, Armadillo.ArmadilloState.IDLE);
+
+                    if (animId.equals(AnimationNames.PANIC_IDLE))
+                        world.playSound(player.getLocation(), Sound.ENTITY_ARMADILLO_UNROLL_FINISH, 1, 1);
+                }
             }
         }
     }
