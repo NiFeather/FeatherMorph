@@ -219,5 +219,7 @@
   "emote.morphclient.sleep": "睡觉",
   "emote.morphclient.stop": "停止",
   "emote.morphclient.prostrate": "趴下",
+  "emote.morphclient.digdown": "掘地",
+  "emote.morphclient.appear": "出现",
   "emote.morphclient.unknown": "未知"
 }

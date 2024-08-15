@@ -12,6 +12,10 @@ import java.util.concurrent.ConcurrentHashMap;
 public abstract class AnimationSet
 {
     public static final SingleAnimation RESET = new SingleAnimation(AnimationNames.RESET, 1, true);
+    public static final SingleAnimation DISABLE_SKILL = new SingleAnimation(AnimationNames.INTERNAL_DISABLE_SKILL, 0, false);
+    public static final SingleAnimation ENABLE_SKILL = new SingleAnimation(AnimationNames.INTERNAL_ENABLE_SKILL, 0, false);
+    public static final SingleAnimation DISABLE_AMBIENT = new SingleAnimation(AnimationNames.INTERNAL_DISABLE_AMBIENT, 0, false);
+    public static final SingleAnimation ENABLE_AMBIENT = new SingleAnimation(AnimationNames.INTERNAL_ENABLE_AMBIENT, 0, false);
 
     private final Map<String, List<SingleAnimation>> animationMap = new ConcurrentHashMap<>();
 

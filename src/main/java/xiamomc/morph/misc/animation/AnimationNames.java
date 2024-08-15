@@ -6,7 +6,7 @@ public class AnimationNames
     public static final String ROAR_SOUND = "roar_sound";
     public static final String SNIFF = "sniff";
 
-    public static final String DISAPPEAR = "disappear";
+    public static final String DIGDOWN = "digdown";
     public static final String APPEAR = "appear";
     public static final String HIDE = "hide";
 
@@ -47,4 +47,11 @@ public class AnimationNames
     public static final String PROSTRATE = "prostrate";
 
     public static final String RESET = "reset";
+
+    public static final String VANISH = "vanish";
+
+    public static final String INTERNAL_DISABLE_SKILL = "disable_skill";
+    public static final String INTERNAL_DISABLE_AMBIENT = "disable_ambient";
+    public static final String INTERNAL_ENABLE_SKILL = "enable_skill";
+    public static final String INTERNAL_ENABLE_AMBIENT = "enable_ambient";
 }

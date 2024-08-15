@@ -219,5 +219,7 @@
   "emote.morphclient.sleep": "Sleep",
   "emote.morphclient.stop": "Stop",
   "emote.morphclient.prostrate": "Prostrate",
+  "emote.morphclient.digdown": "Dig Down",
+  "emote.morphclient.appear": "Appear",
   "emote.morphclient.unknown": "Unknown"
 }

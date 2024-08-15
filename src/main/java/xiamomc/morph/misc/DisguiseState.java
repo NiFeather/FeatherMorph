@@ -1,6 +1,7 @@
 package xiamomc.morph.misc;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
@@ -89,11 +90,60 @@ public class DisguiseState extends MorphPluginObject
         animationSequence.setCooldown(10);
         animationSequence.onNewAnimation(anim ->
         {
-            if (anim.availableForClient())
-                clientHandler.sendCommand(getPlayer(), new S2CAnimationCommand(anim.subId()));
+            var animSubId = anim.subId();
 
-            this.getDisguiseWrapper().playAnimation(anim.subId());
+            if (anim.availableForClient())
+                clientHandler.sendCommand(getPlayer(), new S2CAnimationCommand(animSubId));
+
+            this.getDisguiseWrapper().playAnimation(animSubId);
+
+            switch (animSubId)
+            {
+                case AnimationNames.INTERNAL_DISABLE_AMBIENT -> this.requestAmbientState(this, true);
+                case AnimationNames.INTERNAL_ENABLE_AMBIENT -> this.requestAmbientState(this, false);
+                case AnimationNames.INTERNAL_DISABLE_SKILL -> this.requestSkillState(this, true);
+                case AnimationNames.INTERNAL_ENABLE_SKILL -> this.requestSkillState(this, false);
+            }
         });
+    }
+
+    private List<Object> disableSkillRequests = Collections.synchronizedList(new ObjectArrayList<>());
+    private List<Object> disableAmbientRequests = Collections.synchronizedList(new ObjectArrayList<>());
+
+    public void requestSkillState(Object source, boolean shouldDisable)
+    {
+        if (shouldDisable)
+        {
+            if (!disableSkillRequests.contains(source))
+                disableSkillRequests.add(source);
+        }
+        else
+        {
+            disableSkillRequests.remove(source);
+        }
+    }
+
+    public boolean canActivateSkill()
+    {
+        return disableSkillRequests.isEmpty();
+    }
+
+    public void requestAmbientState(Object source, boolean shouldDisable)
+    {
+        if (shouldDisable)
+        {
+            if (!disableAmbientRequests.contains(source))
+                disableAmbientRequests.add(source);
+        }
+        else
+        {
+            disableAmbientRequests.remove(source);
+        }
+    }
+
+    public boolean canPlayAmbient()
+    {
+        return disableSkillRequests.isEmpty();
     }
 
     private final PlayerOptions<Player> playerOptions;
@@ -554,7 +604,8 @@ public class DisguiseState extends MorphPluginObject
 
     public boolean selfUpdate()
     {
-        this.getSoundHandler().update();
+        if (this.canPlayAmbient())
+            this.getSoundHandler().update();
 
         this.animationSequence.update();
 

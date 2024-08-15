@@ -28,15 +28,8 @@ public class EntityWatcher extends SingleWatcher
         super(bindingPlayer, entityType);
     }
 
-    @Override
-    protected void doSync()
+    protected byte getPlayerBitMask(Player player)
     {
-        super.doSync();
-
-        var player = getBindingPlayer();
-        var nmsPlayer = NmsRecord.ofPlayer(player);
-        var values = ValueIndex.BASE_ENTITY;
-
         byte bitMask = 0x00;
         if (player.getFireTicks() > 0 || player.isVisualFire())
             bitMask |= (byte) 0x01;
@@ -59,7 +52,19 @@ public class EntityWatcher extends SingleWatcher
         if (NmsRecord.ofPlayer(player).isFallFlying())
             bitMask |= (byte) 0x80;
 
-        writeTemp(values.GENERAL, bitMask);
+        return bitMask;
+    }
+
+    @Override
+    protected void doSync()
+    {
+        super.doSync();
+
+        var player = getBindingPlayer();
+        var nmsPlayer = NmsRecord.ofPlayer(player);
+        var values = ValueIndex.BASE_ENTITY;
+
+        writeTemp(values.GENERAL, getPlayerBitMask(player));
         //write(values.SILENT, true);
         writeTemp(values.NO_GRAVITY, !player.hasGravity());
         writeTemp(values.POSE, nmsPlayer.getPose());

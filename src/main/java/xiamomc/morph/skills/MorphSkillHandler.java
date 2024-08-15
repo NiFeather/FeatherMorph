@@ -192,6 +192,12 @@ public class MorphSkillHandler extends MorphPluginObject
 
         if (state == null) return;
 
+        if (!state.canActivateSkill())
+        {
+            player.sendMessage("技能在此情况下不可用");
+            return;
+        }
+
         var skillEntry= getSkillEntry(state.skillLookupIdentifier());
 
         if (player.getGameMode() == GameMode.SPECTATOR
