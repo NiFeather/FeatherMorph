@@ -194,6 +194,12 @@ public class HelpStrings extends AbstractMorphStrings
                 "查询插件当前的统计数据");
     }
 
+    public static FormattableMessage animationDescription()
+    {
+        return getFormattable(getKey("animation"),
+                "播放伪装动画");
+    }
+
     private static String getKey(String key)
     {
         return "help." + key;

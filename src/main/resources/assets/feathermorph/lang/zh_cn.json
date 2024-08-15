@@ -120,6 +120,7 @@
   "help.section_not_found" : "<color:red> 未找到此章节",
   "help.special_note" : "特别标注：",
   "help.stat" : "查询插件当前的统计数据",
+  "help.animation": "播放伪装动作",
   "hint.client_suggestion_message_1" : "小提示：我们推荐使用客户端模组来获得更好的体验",
   "hint.client_suggestion_message_2" : "小提示：更多信息请询问服务器管理员",
   "hint.command_hint" : "小提示：发送 /feathermorph help 可以查看伪装的相关用法。",

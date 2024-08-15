@@ -9,6 +9,7 @@ import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.messages.CommandStrings;
 import xiamomc.morph.messages.EmoteStrings;
+import xiamomc.morph.messages.HelpStrings;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.misc.animation.AnimationHandler;
 import xiamomc.pluginbase.Annotations.Resolved;
@@ -22,13 +23,13 @@ public class AnimationCommand extends MorphPluginObject implements IPluginComman
     @Override
     public String getCommandName()
     {
-        return "play";
+        return "play-action";
     }
 
     @Override
     public FormattableMessage getHelpMessage()
     {
-        return new FormattableMessage(plugin, "play animation");
+        return HelpStrings.animationDescription();
     }
 
     @Resolved

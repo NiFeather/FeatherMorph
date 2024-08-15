@@ -120,6 +120,7 @@
   "help.section_not_found": "<color:red>No such section",
   "help.special_note": "Note: ",
   "help.stat": "Check the plugin's stats",
+  "help.animation": "Play disguise actions",
   "hint.client_suggestion_message_1": "Hint: We recommend using client mod to get a better experience",
   "hint.client_suggestion_message_2": "Hint: For more information please contact the server staff",
   "hint.command_hint": "Hint: You can send <underlined>/feathermorph help</underlined> to learn how to use disguises",
