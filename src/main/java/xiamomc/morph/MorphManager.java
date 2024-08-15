@@ -872,7 +872,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 propertyHandler.setProperties(disguiseProperties.get(disguiseMeta.getEntityType()));
                 propertyHandler.getAll().forEach((property, value) ->
                 {
-                    wrapperInstance.write((SingleProperty<Object>) property, value);
+                    wrapperInstance.writeProperty((SingleProperty<Object>) property, value);
                 });
 
                 // 向Wrapper写入伪装ID

@@ -6,7 +6,7 @@ import xiamomc.morph.misc.DisguiseEquipment;
 
 import java.util.UUID;
 
-public class EntryIndex
+public class CustomEntries
 {
     public static final RegistryKey<GameProfile> PROFILE = RegistryKey.of("profile", new GameProfile(UUID.randomUUID(), "sample"));
     public static final RegistryKey<String> DISGUISE_NAME = RegistryKey.of("disguise_name", "").doRequireNonNull();

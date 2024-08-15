@@ -6,7 +6,7 @@ import net.minecraft.server.MinecraftServer;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
-import xiamomc.morph.backends.server.renderer.network.registries.EntryIndex;
+import xiamomc.morph.backends.server.renderer.network.registries.CustomEntries;
 import xiamomc.morph.backends.server.renderer.network.registries.RegistryKey;
 import xiamomc.morph.backends.server.renderer.network.registries.ValueIndex;
 import xiamomc.morph.misc.NmsRecord;
@@ -71,7 +71,7 @@ public class EntityWatcher extends SingleWatcher
     {
         super.onEntryWrite(key, oldVal, newVal);
 
-        if (key.equals(EntryIndex.DISGUISE_NAME))
+        if (key.equals(CustomEntries.DISGUISE_NAME))
         {
             var str = newVal.toString();
             var component = str.isEmpty() ? null : Component.literal(str);

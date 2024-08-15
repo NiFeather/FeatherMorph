@@ -20,7 +20,7 @@ import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.Singl
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.AgeableMobWatcher;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.ArmorStandWatcher;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.InventoryLivingWatcher;
-import xiamomc.morph.backends.server.renderer.network.registries.EntryIndex;
+import xiamomc.morph.backends.server.renderer.network.registries.CustomEntries;
 import xiamomc.morph.backends.server.renderer.network.registries.ValueIndex;
 import xiamomc.morph.backends.server.renderer.utilties.WatcherUtils;
 import xiamomc.morph.misc.DisguiseEquipment;
@@ -124,7 +124,7 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
         this.equipment.setHandItems(newEquipment.getItemInMainHand(), newEquipment.getItemInOffHand());
 
         if (bindingWatcher != null)
-            bindingWatcher.writeEntry(EntryIndex.EQUIPMENT, this.equipment);
+            bindingWatcher.writeEntry(CustomEntries.EQUIPMENT, this.equipment);
     }
 
     @Override
@@ -133,7 +133,7 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
         super.setDisplayingFakeEquipments(newVal);
 
         if (bindingWatcher != null)
-            bindingWatcher.writeEntry(EntryIndex.DISPLAY_FAKE_EQUIPMENT, newVal);
+            bindingWatcher.writeEntry(CustomEntries.DISPLAY_FAKE_EQUIPMENT, newVal);
     }
 
     @Override
@@ -176,14 +176,24 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
     private final Map<SingleProperty<?>, Object> disguiseProperties = new ConcurrentHashMap<>();
 
     @Override
-    public <X> void write(SingleProperty<X> property, X value)
+    public <X> void writeProperty(SingleProperty<X> property, X value)
     {
         disguiseProperties.put(property, value);
 
         if (bindingWatcher != null)
             bindingWatcher.writeProperty(property, value);
+    }
 
-        super.write(property, value);
+    @Override
+    public <X> X readProperty(SingleProperty<X> property)
+    {
+        return this.readPropertyOr(property, property.defaultVal());
+    }
+
+    @Override
+    public <X> X readPropertyOr(SingleProperty<X> property, X defaultVal)
+    {
+        return (X) disguiseProperties.getOrDefault(property, defaultVal);
     }
 
     @Override
@@ -192,7 +202,7 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
         super.setDisguiseName(name);
 
         if (bindingWatcher != null)
-            bindingWatcher.writeEntry(EntryIndex.DISGUISE_NAME, name);
+            bindingWatcher.writeEntry(CustomEntries.DISGUISE_NAME, name);
     }
 
     @Override
@@ -209,7 +219,7 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
         write(WrapperAttribute.profile, Optional.of(profile));
 
         if (bindingWatcher != null)
-            bindingWatcher.writeEntry(EntryIndex.PROFILE, profile);
+            bindingWatcher.writeEntry(CustomEntries.PROFILE, profile);
 
         callEvent(WrapperEvent.SKIN_SET, profile);
     }
@@ -242,14 +252,14 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
         }
 
         if (getEntityType() == EntityType.WARDEN)
-            bindingWatcher.writeEntry(EntryIndex.WARDEN_CHARGING_ATTACK, aggressive);
+            bindingWatcher.writeEntry(CustomEntries.WARDEN_CHARGING_ATTACK, aggressive);
     }
 
     @Override
     public void playAttackAnimation()
     {
         super.playAttackAnimation();
-        bindingWatcher.writeEntry(EntryIndex.ATTACK_ANIMATION, true);
+        bindingWatcher.writeEntry(CustomEntries.ATTACK_ANIMATION, true);
     }
 
     @Override
@@ -266,6 +276,7 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
                             instance.armorStandShowArms, instance.armorStandNoBasePlate));
         }
     }
+
     private Player bindingPlayer;
 
     public Player getBindingPlayer()
@@ -298,7 +309,7 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
     public void playAnimation(String animationId)
     {
         if (bindingWatcher != null)
-            bindingWatcher.writeEntry(EntryIndex.ANIMATION, animationId);
+            bindingWatcher.writeEntry(CustomEntries.ANIMATION, animationId);
     }
 
     private void refreshRegistry()
@@ -319,14 +330,14 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
         if (getEntityType() == EntityType.PLAYER)
         {
             var profileOptional = readOrDefault(WrapperAttribute.profile);
-            profileOptional.ifPresent(p -> bindingWatcher.writeEntry(EntryIndex.PROFILE, p));
+            profileOptional.ifPresent(p -> bindingWatcher.writeEntry(CustomEntries.PROFILE, p));
         }
 
         //todo: 激活刷新时也刷新到玩家
         if (bindingWatcher instanceof InventoryLivingWatcher)
         {
-            bindingWatcher.writeEntry(EntryIndex.DISPLAY_FAKE_EQUIPMENT, readOrDefault(WrapperAttribute.displayFakeEquip));
-            bindingWatcher.writeEntry(EntryIndex.EQUIPMENT, this.equipment);
+            bindingWatcher.writeEntry(CustomEntries.DISPLAY_FAKE_EQUIPMENT, readOrDefault(WrapperAttribute.displayFakeEquip));
+            bindingWatcher.writeEntry(CustomEntries.EQUIPMENT, this.equipment);
         }
 
         if (bindingWatcher.getEntityType() == EntityType.GHAST)

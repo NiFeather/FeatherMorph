@@ -109,6 +109,10 @@ public abstract class SingleWatcher extends MorphPluginObject
 
     //region Disguise Property
 
+    /**
+     * Currently disguise properties are handled by the wrapper.
+     * So the watcher only supports writing values so that the watcher could sync them with the wrapper.
+     */
     public final <X> void writeProperty(SingleProperty<X> property, X value)
     {
         this.onPropertyWrite(property, value);

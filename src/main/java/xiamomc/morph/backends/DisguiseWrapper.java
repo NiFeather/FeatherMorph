@@ -349,9 +349,11 @@ public abstract class DisguiseWrapper<TInstance>
 
     //endregion
 
-    public <X> void write(SingleProperty<X> property, X value)
-    {
-    }
+    public abstract  <X> void writeProperty(SingleProperty<X> property, X value);
+
+    public abstract  <X> X readProperty(SingleProperty<X> property);
+
+    public abstract <X> X readPropertyOr(SingleProperty<X> property, X defaultVal);
 
     private final Map<String, Object> attributes = new Object2ObjectArrayMap<>();
 

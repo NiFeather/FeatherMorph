@@ -16,7 +16,7 @@ import org.bukkit.inventory.EntityEquipment;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.values.AbstractValues;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
-import xiamomc.morph.backends.server.renderer.network.registries.EntryIndex;
+import xiamomc.morph.backends.server.renderer.network.registries.CustomEntries;
 import xiamomc.morph.backends.server.renderer.utilties.ProtocolRegistryUtils;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
@@ -79,7 +79,7 @@ public class PacketFactory extends MorphPluginObject
                 gameProfile.setUUID(UUID.nameUUIDFromBytes(str.getBytes()));
             }
 
-            var lastUUID = parameters.getWatcher().readEntryOrDefault(EntryIndex.TABLIST_UUID, null);
+            var lastUUID = parameters.getWatcher().readEntryOrDefault(CustomEntries.TABLIST_UUID, null);
 
             if (lastUUID != null)
             {
@@ -114,7 +114,7 @@ public class PacketFactory extends MorphPluginObject
             spawnUUID = uuid;
             packets.add(PacketContainer.fromPacket(packetPlayerInfo));
 
-            parameters.getWatcher().writeEntry(EntryIndex.TABLIST_UUID, uuid);
+            parameters.getWatcher().writeEntry(CustomEntries.TABLIST_UUID, uuid);
         }
 
         var pitch = player.getPitch();
@@ -143,9 +143,9 @@ public class PacketFactory extends MorphPluginObject
         var watcher = parameters.getWatcher();
 
         //生成装备和Meta
-        var displayingFake = watcher.readEntryOrDefault(EntryIndex.DISPLAY_FAKE_EQUIPMENT, false);
+        var displayingFake = watcher.readEntryOrDefault(CustomEntries.DISPLAY_FAKE_EQUIPMENT, false);
         var equip = displayingFake
-                ? watcher.readEntryOrDefault(EntryIndex.EQUIPMENT, new DisguiseEquipment())
+                ? watcher.readEntryOrDefault(CustomEntries.EQUIPMENT, new DisguiseEquipment())
                 : player.getEquipment();
 
         var equipmentPacket = new ClientboundSetEquipmentPacket(player.getEntityId(),
@@ -311,9 +311,9 @@ public class PacketFactory extends MorphPluginObject
 
     public PacketContainer getEquipmentPacket(Player player, SingleWatcher watcher)
     {
-        var shouldDisplayFakeEquip = watcher.readEntryOrDefault(EntryIndex.DISPLAY_FAKE_EQUIPMENT, false);
+        var shouldDisplayFakeEquip = watcher.readEntryOrDefault(CustomEntries.DISPLAY_FAKE_EQUIPMENT, false);
         EntityEquipment equipment = shouldDisplayFakeEquip
-                    ? watcher.readEntryOrDefault(EntryIndex.EQUIPMENT, new DisguiseEquipment())
+                    ? watcher.readEntryOrDefault(CustomEntries.EQUIPMENT, new DisguiseEquipment())
                     : player.getEquipment();
 
         var rawPacket = new ClientboundSetEquipmentPacket(player.getEntityId(),

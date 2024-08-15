@@ -8,7 +8,7 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
 import org.bukkit.entity.Player;
 import xiamomc.morph.backends.server.renderer.network.PacketFactory;
-import xiamomc.morph.backends.server.renderer.network.registries.EntryIndex;
+import xiamomc.morph.backends.server.renderer.network.registries.CustomEntries;
 import xiamomc.morph.backends.server.renderer.network.registries.RenderRegistry;
 import xiamomc.pluginbase.Annotations.Resolved;
 
@@ -64,7 +64,7 @@ public class EquipmentPacketListener extends ProtocolListener
         if (watcher == null)
             return;
 
-        if (!watcher.readEntryOrDefault(EntryIndex.DISPLAY_FAKE_EQUIPMENT, false))
+        if (!watcher.readEntryOrDefault(CustomEntries.DISPLAY_FAKE_EQUIPMENT, false))
         {
             alreadyFake.remove(sourcePlayer);
             return;

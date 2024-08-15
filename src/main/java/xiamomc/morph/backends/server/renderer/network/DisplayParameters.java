@@ -5,7 +5,7 @@ import org.bukkit.entity.EntityType;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.PlayerWatcher;
-import xiamomc.morph.backends.server.renderer.network.registries.EntryIndex;
+import xiamomc.morph.backends.server.renderer.network.registries.CustomEntries;
 
 public class DisplayParameters
 {
@@ -65,7 +65,7 @@ public class DisplayParameters
     public static DisplayParameters fromWatcher(SingleWatcher watcher)
     {
         var profile = (watcher instanceof PlayerWatcher)
-                    ? watcher.readEntry(EntryIndex.PROFILE)
+                    ? watcher.readEntry(CustomEntries.PROFILE)
                     : null;
 
         return new DisplayParameters(

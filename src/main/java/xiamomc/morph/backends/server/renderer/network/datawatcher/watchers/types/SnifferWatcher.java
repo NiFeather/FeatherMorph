@@ -5,7 +5,7 @@ import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import xiamomc.morph.backends.server.renderer.network.registries.EntryIndex;
+import xiamomc.morph.backends.server.renderer.network.registries.CustomEntries;
 import xiamomc.morph.backends.server.renderer.network.registries.RegistryKey;
 import xiamomc.morph.backends.server.renderer.network.registries.ValueIndex;
 import xiamomc.morph.misc.animation.AnimationNames;
@@ -30,7 +30,7 @@ public class SnifferWatcher extends LivingEntityWatcher
     {
         super.onEntryWrite(key, oldVal, newVal);
 
-        if (key.equals(EntryIndex.ANIMATION))
+        if (key.equals(CustomEntries.ANIMATION))
         {
             var bindingPlayer = getBindingPlayer();
             var world = bindingPlayer.getWorld();

@@ -20,7 +20,7 @@ import xiamomc.morph.backends.server.renderer.network.DisplayParameters;
 import xiamomc.morph.backends.server.renderer.network.PacketFactory;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.PlayerWatcher;
-import xiamomc.morph.backends.server.renderer.network.registries.EntryIndex;
+import xiamomc.morph.backends.server.renderer.network.registries.CustomEntries;
 import xiamomc.morph.backends.server.renderer.network.registries.RenderRegistry;
 import xiamomc.morph.backends.server.renderer.utilties.WatcherUtils;
 import xiamomc.morph.misc.NmsRecord;
@@ -74,7 +74,7 @@ public class SpawnPacketHandler extends ProtocolListener
         var removePacket = new ClientboundRemoveEntitiesPacket(player.getEntityId());
         var rmPacketContainer = PacketContainer.fromPacket(removePacket);
 
-        var lastUUID = disguiseWatcher.readEntryOrDefault(EntryIndex.TABLIST_UUID, null);
+        var lastUUID = disguiseWatcher.readEntryOrDefault(CustomEntries.TABLIST_UUID, null);
         if (lastUUID != null)
         {
             spawnPackets.add(PacketContainer.fromPacket(
@@ -102,7 +102,7 @@ public class SpawnPacketHandler extends ProtocolListener
             throw new NullDependencyException("Null Watcher for a existing player?!");
 
         refreshStateForPlayer(player,
-                new DisplayParameters(watcher.getEntityType(), watcher, watcher.readEntry(EntryIndex.PROFILE)),
+                new DisplayParameters(watcher.getEntityType(), watcher, watcher.readEntry(CustomEntries.PROFILE)),
                 affectedPlayers);
     }
 
@@ -125,14 +125,14 @@ public class SpawnPacketHandler extends ProtocolListener
         var packetRemove = new ClientboundRemoveEntitiesPacket(player.getEntityId());
         var packetRemoveContainer = PacketContainer.fromPacket(packetRemove);
 
-        var gameProfile = watcher.readEntry(EntryIndex.PROFILE);
+        var gameProfile = watcher.readEntry(CustomEntries.PROFILE);
 
         //然后发包创建实体
         //确保gameProfile非空
         //如果没有profile，那么随机一个并计划刷新
         if (displayType == org.bukkit.entity.EntityType.PLAYER && gameProfile == null)
         {
-            var disguiseName = watcher.readEntry(EntryIndex.DISGUISE_NAME);
+            var disguiseName = watcher.readEntry(CustomEntries.DISGUISE_NAME);
 
             if (disguiseName == null || disguiseName.isBlank())
             {
@@ -143,7 +143,7 @@ public class SpawnPacketHandler extends ProtocolListener
 
             var targetPlayer = Bukkit.getPlayerExact(disguiseName);
 
-            GameProfile targetProfile = watcher.readEntryOrDefault(EntryIndex.PROFILE, null);
+            GameProfile targetProfile = watcher.readEntryOrDefault(CustomEntries.PROFILE, null);
 
             if (targetProfile == null)
             {

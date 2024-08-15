@@ -9,7 +9,7 @@ import net.minecraft.world.entity.Pose;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import xiamomc.morph.backends.server.renderer.network.DisplayParameters;
-import xiamomc.morph.backends.server.renderer.network.registries.EntryIndex;
+import xiamomc.morph.backends.server.renderer.network.registries.CustomEntries;
 import xiamomc.morph.backends.server.renderer.network.registries.RegistryKey;
 import xiamomc.morph.backends.server.renderer.network.registries.ValueIndex;
 import xiamomc.morph.misc.NmsRecord;
@@ -47,12 +47,12 @@ public class PlayerWatcher extends InventoryLivingWatcher
     {
         super.onEntryWrite(key, oldVal, newVal);
 
-        if (key.equals(EntryIndex.PROFILE) && isPlayerOnline())
+        if (key.equals(CustomEntries.PROFILE) && isPlayerOnline())
         {
             var player = getBindingPlayer();
 
             var profile = newVal == null
-                    ? new GameProfile(UUID.randomUUID(), this.readEntryOrDefault(EntryIndex.DISGUISE_NAME, ""))
+                    ? new GameProfile(UUID.randomUUID(), this.readEntryOrDefault(CustomEntries.DISGUISE_NAME, ""))
                     : (GameProfile) newVal;
 
             var spawnPackets = getPacketFactory()
@@ -71,7 +71,7 @@ public class PlayerWatcher extends InventoryLivingWatcher
             });
         }
 
-        if (key.equals(EntryIndex.ANIMATION))
+        if (key.equals(CustomEntries.ANIMATION))
         {
             var animId = newVal + "";
 

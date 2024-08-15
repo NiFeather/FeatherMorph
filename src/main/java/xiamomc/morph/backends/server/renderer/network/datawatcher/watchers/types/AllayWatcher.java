@@ -2,7 +2,7 @@ package xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.type
 
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import xiamomc.morph.backends.server.renderer.network.registries.EntryIndex;
+import xiamomc.morph.backends.server.renderer.network.registries.CustomEntries;
 import xiamomc.morph.backends.server.renderer.network.registries.RegistryKey;
 import xiamomc.morph.backends.server.renderer.network.registries.ValueIndex;
 import xiamomc.morph.misc.animation.AnimationNames;
@@ -22,7 +22,7 @@ public class AllayWatcher extends LivingEntityWatcher
     {
         super.onEntryWrite(key, oldVal, newVal);
 
-        if (key.equals(EntryIndex.ANIMATION))
+        if (key.equals(CustomEntries.ANIMATION))
         {
             var id = newVal.toString();
 

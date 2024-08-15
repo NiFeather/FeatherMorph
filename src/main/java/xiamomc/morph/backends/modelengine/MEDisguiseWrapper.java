@@ -21,7 +21,10 @@ import xiamomc.morph.backends.DisguiseWrapper;
 import xiamomc.morph.backends.WrapperEvent;
 import xiamomc.morph.misc.DisguiseEquipment;
 import xiamomc.morph.misc.DisguiseState;
+import xiamomc.morph.misc.disguiseProperty.SingleProperty;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
@@ -187,6 +190,26 @@ public class MEDisguiseWrapper extends DisguiseWrapper<MEDisguiseInstance>
     public int getNetworkEntityId()
     {
         return getBindingPlayer() == null ? -1 : getBindingPlayer().getEntityId();
+    }
+
+    private final Map<SingleProperty<?>, Object> disguiseProperties = new ConcurrentHashMap<>();
+
+    @Override
+    public <X> void writeProperty(SingleProperty<X> property, X value)
+    {
+        disguiseProperties.put(property, value);
+    }
+
+    @Override
+    public <X> X readProperty(SingleProperty<X> property)
+    {
+        return this.readPropertyOr(property, property.defaultVal());
+    }
+
+    @Override
+    public <X> X readPropertyOr(SingleProperty<X> property, X defaultVal)
+    {
+        return (X) disguiseProperties.getOrDefault(property, defaultVal);
     }
 
     @Override
