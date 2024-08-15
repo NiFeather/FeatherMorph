@@ -42,7 +42,7 @@ public class CommonPermissions
     public static String skillPermissionOf(String skillIdentifier, String disguiseIdentifier)
     {
         if (disguiseIdentifier.startsWith(DisguiseTypes.PLAYER.getNameSpace()))
-            disguiseIdentifier = "player:default";
+            disguiseIdentifier = "player:all";
 
         return PERM_ROOT
                 + "skill"
@@ -55,7 +55,7 @@ public class CommonPermissions
     public static String abilityPermissionOf(String abilityIdentifier, String disguiseIdentifier)
     {
         if (disguiseIdentifier.startsWith(DisguiseTypes.PLAYER.getNameSpace()))
-            disguiseIdentifier = "player:default";
+            disguiseIdentifier = "player:all";
 
         return PERM_ROOT
                 + "ability"
@@ -68,7 +68,7 @@ public class CommonPermissions
     public static String animationPermissionOf(String animationId, String disguiseID)
     {
         if (disguiseID.startsWith(DisguiseTypes.PLAYER.getNameSpace()))
-            disguiseID = "player:default";
+            disguiseID = "player:all";
 
         return PERM_ROOT
                 + "emote"
