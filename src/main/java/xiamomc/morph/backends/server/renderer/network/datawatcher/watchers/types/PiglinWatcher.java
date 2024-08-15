@@ -24,9 +24,9 @@ public class PiglinWatcher extends LivingEntityWatcher
     }
 
     @Override
-    protected <X> void onCustomWrite(RegistryKey<X> key, X oldVal, X newVal)
+    protected <X> void onEntryWrite(RegistryKey<X> key, X oldVal, X newVal)
     {
-        super.onCustomWrite(key, oldVal, newVal);
+        super.onEntryWrite(key, oldVal, newVal);
 
         if (key.equals(EntryIndex.ANIMATION))
         {
@@ -34,8 +34,8 @@ public class PiglinWatcher extends LivingEntityWatcher
 
             switch (animId)
             {
-                case AnimationNames.DANCE_START -> this.writeOverride(ValueIndex.PIGLIN.DANCING, true);
-                case AnimationNames.STOP, AnimationNames.RESET -> this.writeOverride(ValueIndex.PIGLIN.DANCING, false);
+                case AnimationNames.DANCE_START -> this.writePersistent(ValueIndex.PIGLIN.DANCING, true);
+                case AnimationNames.STOP, AnimationNames.RESET -> this.writePersistent(ValueIndex.PIGLIN.DANCING, false);
             }
         }
     }
@@ -46,7 +46,7 @@ public class PiglinWatcher extends LivingEntityWatcher
         super.mergeFromCompound(nbt);
 
         if (nbt.contains("IsBaby"))
-            writeOverride(ValueIndex.PIGLIN.IS_BABY, nbt.getBoolean("IsBaby"));
+            writePersistent(ValueIndex.PIGLIN.IS_BABY, nbt.getBoolean("IsBaby"));
 
         //if (nbt.contains("IsImmuneToZombification"))
         //    write(ValueIndex.PIGLIN.IMMUNE_TO_ZOMBIFICATION, nbt.getBoolean("IsImmuneToZombification"));

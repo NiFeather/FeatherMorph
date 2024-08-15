@@ -7,7 +7,6 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.animal.WolfVariant;
 import net.minecraft.world.entity.animal.WolfVariants;
-import net.neoforged.art.internal.EntryImpl;
 import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.entity.EntityType;
@@ -60,16 +59,16 @@ public class WolfWatcher extends TameableAnimalWatcher
         {
             var val = (Wolf.Variant) value;
 
-            this.writeOverride(ValueIndex.WOLF.WOLF_VARIANT, getVariant(val));
+            this.writePersistent(ValueIndex.WOLF.WOLF_VARIANT, getVariant(val));
         }
 
         super.onPropertyWrite(property, value);
     }
 
     @Override
-    protected <X> void onCustomWrite(RegistryKey<X> key, X oldVal, X newVal)
+    protected <X> void onEntryWrite(RegistryKey<X> key, X oldVal, X newVal)
     {
-        super.onCustomWrite(key, oldVal, newVal);
+        super.onEntryWrite(key, oldVal, newVal);
 
         if (key.equals(EntryIndex.ANIMATION))
         {
@@ -77,8 +76,8 @@ public class WolfWatcher extends TameableAnimalWatcher
 
             switch (animId)
             {
-                case AnimationNames.SIT -> this.writeOverride(ValueIndex.WOLF.TAMEABLE_FLAGS, (byte)0x01);
-                case AnimationNames.STANDUP -> this.writeOverride(ValueIndex.WOLF.TAMEABLE_FLAGS, (byte)0x00);
+                case AnimationNames.SIT -> this.writePersistent(ValueIndex.WOLF.TAMEABLE_FLAGS, (byte)0x01);
+                case AnimationNames.STANDUP -> this.writePersistent(ValueIndex.WOLF.TAMEABLE_FLAGS, (byte)0x00);
             }
         }
     }
@@ -89,7 +88,7 @@ public class WolfWatcher extends TameableAnimalWatcher
         super.mergeFromCompound(nbt);
 
         if (nbt.contains("CollarColor"))
-            writeOverride(ValueIndex.WOLF.COLLAR_COLOR, (int)nbt.getByte("CollarColor"));
+            writePersistent(ValueIndex.WOLF.COLLAR_COLOR, (int)nbt.getByte("CollarColor"));
 
         if (nbt.contains("variant"))
         {
@@ -107,7 +106,7 @@ public class WolfWatcher extends TameableAnimalWatcher
                 logger.error("Failed reading FrogVariant from NBT: " + t.getMessage());
             }
 
-            writeOverride(ValueIndex.WOLF.WOLF_VARIANT, getVariant(type));
+            writePersistent(ValueIndex.WOLF.WOLF_VARIANT, getVariant(type));
         }
     }
 
@@ -164,7 +163,7 @@ public class WolfWatcher extends TameableAnimalWatcher
     {
         super.writeToCompound(nbt);
 
-        nbt.putByte("CollarColor", get(ValueIndex.WOLF.COLLAR_COLOR).byteValue());
-        nbt.putString("variant", getBukkitVariant(get(ValueIndex.WOLF.WOLF_VARIANT)).key().asString());
+        nbt.putByte("CollarColor", read(ValueIndex.WOLF.COLLAR_COLOR).byteValue());
+        nbt.putString("variant", getBukkitVariant(read(ValueIndex.WOLF.WOLF_VARIANT)).key().asString());
     }
 }

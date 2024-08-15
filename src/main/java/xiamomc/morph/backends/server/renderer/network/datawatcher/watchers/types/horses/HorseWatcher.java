@@ -26,7 +26,7 @@ public class HorseWatcher extends AbstractHorseWatcher
 
     public Horse.Color getColor()
     {
-        var value = this.get(ValueIndex.HORSE.HORSE_VARIANT);
+        var value = this.read(ValueIndex.HORSE.HORSE_VARIANT);
         var type = value & 255;
 
         return Horse.Color.values()[type];
@@ -34,7 +34,7 @@ public class HorseWatcher extends AbstractHorseWatcher
 
     public Horse.Style getStyle()
     {
-        var value = this.get(ValueIndex.HORSE.HORSE_VARIANT);
+        var value = this.read(ValueIndex.HORSE.HORSE_VARIANT);
         var type = value >> 8;
 
         return Horse.Style.values()[type];
@@ -61,13 +61,13 @@ public class HorseWatcher extends AbstractHorseWatcher
         if (property.equals(properties.COLOR))
         {
             this.horseColor = (Horse.Color) value;
-            this.writeOverride(ValueIndex.HORSE.HORSE_VARIANT, computeHorseVariant());
+            this.writePersistent(ValueIndex.HORSE.HORSE_VARIANT, computeHorseVariant());
         }
 
         if (property.equals(properties.STYLE))
         {
             this.horseStyle = (Horse.Style) value;
-            this.writeOverride(ValueIndex.HORSE.HORSE_VARIANT, computeHorseVariant());
+            this.writePersistent(ValueIndex.HORSE.HORSE_VARIANT, computeHorseVariant());
         }
 
         super.onPropertyWrite(property, value);
@@ -79,7 +79,7 @@ public class HorseWatcher extends AbstractHorseWatcher
         super.mergeFromCompound(nbt);
 
         if (nbt.contains("Variant"))
-            this.writeOverride(ValueIndex.HORSE.HORSE_VARIANT, nbt.getInt("Variant"));
+            this.writePersistent(ValueIndex.HORSE.HORSE_VARIANT, nbt.getInt("Variant"));
     }
 
     @Override
@@ -87,6 +87,6 @@ public class HorseWatcher extends AbstractHorseWatcher
     {
         super.writeToCompound(nbt);
 
-        nbt.putInt("Variant", get(ValueIndex.HORSE.HORSE_VARIANT));
+        nbt.putInt("Variant", read(ValueIndex.HORSE.HORSE_VARIANT));
     }
 }

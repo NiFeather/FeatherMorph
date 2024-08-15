@@ -27,6 +27,6 @@ public class AbstractHorseWatcher extends AgeableMobWatcher
         super.mergeFromCompound(nbt);
 
         if (nbt.contains("Age"))
-            writeOverride(ValueIndex.ABSTRACT_HORSE.IS_BABY, nbt.getInt("Age") < 0);
+            writePersistent(ValueIndex.ABSTRACT_HORSE.IS_BABY, nbt.getInt("Age") < 0);
     }
 }

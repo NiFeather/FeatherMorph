@@ -36,16 +36,16 @@ public class FoxWatcher extends AgeableMobWatcher
         {
             var val = (Fox.Type) value;
 
-            this.writeOverride(ValueIndex.FOX.FOX_VARIANT, val.ordinal());
+            this.writePersistent(ValueIndex.FOX.FOX_VARIANT, val.ordinal());
         }
 
         super.onPropertyWrite(property, value);
     }
 
     @Override
-    protected <X> void onCustomWrite(RegistryKey<X> key, X oldVal, X newVal)
+    protected <X> void onEntryWrite(RegistryKey<X> key, X oldVal, X newVal)
     {
-        super.onCustomWrite(key, oldVal, newVal);
+        super.onEntryWrite(key, oldVal, newVal);
 
         if (key.equals(EntryIndex.ANIMATION))
         {
@@ -53,9 +53,9 @@ public class FoxWatcher extends AgeableMobWatcher
 
             switch (animId)
             {
-                case AnimationNames.SLEEP -> this.writeOverride(ValueIndex.FOX.FLAGS, (byte)0x20);
-                case AnimationNames.SIT -> this.writeOverride(ValueIndex.FOX.FLAGS, (byte)0x01);
-                case AnimationNames.STANDUP, AnimationNames.RESET -> this.writeOverride(ValueIndex.FOX.FLAGS, (byte)0);
+                case AnimationNames.SLEEP -> this.writePersistent(ValueIndex.FOX.FLAGS, (byte)0x20);
+                case AnimationNames.SIT -> this.writePersistent(ValueIndex.FOX.FLAGS, (byte)0x01);
+                case AnimationNames.STANDUP, AnimationNames.RESET -> this.writePersistent(ValueIndex.FOX.FLAGS, (byte)0);
             }
         }
     }
@@ -68,7 +68,7 @@ public class FoxWatcher extends AgeableMobWatcher
         if (nbt.contains("Type"))
         {
             var isSnow = nbt.getString("Type").equalsIgnoreCase("SNOW");
-            writeOverride(ValueIndex.FOX.FOX_VARIANT, isSnow ? 1 : 0);
+            writePersistent(ValueIndex.FOX.FOX_VARIANT, isSnow ? 1 : 0);
         }
     }
 
@@ -77,7 +77,7 @@ public class FoxWatcher extends AgeableMobWatcher
     {
         super.writeToCompound(nbt);
 
-        var foxType = this.get(ValueIndex.FOX.FOX_VARIANT) == 0 ? "red" : "snow";
+        var foxType = this.read(ValueIndex.FOX.FOX_VARIANT) == 0 ? "red" : "snow";
         nbt.putString("Type", foxType);
     }
 }

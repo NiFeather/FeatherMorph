@@ -21,9 +21,9 @@ public class WardenWatcher extends EHasAttackAnimationWatcher
     }
 
     @Override
-    protected <X> void onCustomWrite(RegistryKey<X> key, X oldVal, X newVal)
+    protected <X> void onEntryWrite(RegistryKey<X> key, X oldVal, X newVal)
     {
-        super.onCustomWrite(key, oldVal, newVal);
+        super.onEntryWrite(key, oldVal, newVal);
 
         var bindingPlayer = getBindingPlayer();
 
@@ -40,17 +40,17 @@ public class WardenWatcher extends EHasAttackAnimationWatcher
 
             switch (id)
             {
-                case AnimationNames.ROAR -> this.writeOverride(ValueIndex.BASE_LIVING.POSE, Pose.ROARING);
+                case AnimationNames.ROAR -> this.writePersistent(ValueIndex.BASE_LIVING.POSE, Pose.ROARING);
                 case AnimationNames.ROAR_SOUND -> world.playSound(bindingPlayer.getLocation(), Sound.ENTITY_WARDEN_ROAR, SoundCategory.HOSTILE, 3, 1);
                 case AnimationNames.SNIFF ->
                 {
-                    this.writeOverride(ValueIndex.BASE_LIVING.POSE, Pose.SNIFFING);
+                    this.writePersistent(ValueIndex.BASE_LIVING.POSE, Pose.SNIFFING);
 
                     world.playSound(bindingPlayer.getLocation(), Sound.ENTITY_WARDEN_SNIFF, SoundCategory.HOSTILE, 5, 1);
                 }
                 case AnimationNames.RESET -> this.remove(ValueIndex.BASE_LIVING.POSE);
-                case AnimationNames.DISAPPEAR -> this.writeOverride(ValueIndex.BASE_LIVING.POSE, Pose.DIGGING);
-                case AnimationNames.APPEAR -> this.writeOverride(ValueIndex.BASE_LIVING.POSE, Pose.EMERGING);
+                case AnimationNames.DISAPPEAR -> this.writePersistent(ValueIndex.BASE_LIVING.POSE, Pose.DIGGING);
+                case AnimationNames.APPEAR -> this.writePersistent(ValueIndex.BASE_LIVING.POSE, Pose.EMERGING);
                 default -> logger.warn("Unknown animation sequence id '%s'".formatted(id));
             }
         }

@@ -24,19 +24,19 @@ public class ArmadilloWatcher extends LivingEntityWatcher
     }
 
     @Override
-    protected <X> void onCustomWrite(RegistryKey<X> key, X oldVal, X newVal)
+    protected <X> void onEntryWrite(RegistryKey<X> key, X oldVal, X newVal)
     {
-        super.onCustomWrite(key, oldVal, newVal);
+        super.onEntryWrite(key, oldVal, newVal);
 
         if (key.equals(EntryIndex.ANIMATION))
         {
             var animId = newVal.toString();
             switch (animId)
             {
-                case AnimationNames.PANIC_ROLLING -> writeOverride(ValueIndex.ARMADILLO.STATE, Armadillo.ArmadilloState.ROLLING);
-                case AnimationNames.PANIC_SCARED -> writeOverride(ValueIndex.ARMADILLO.STATE, Armadillo.ArmadilloState.SCARED);
-                case AnimationNames.PANIC_UNROLLING -> writeOverride(ValueIndex.ARMADILLO.STATE, Armadillo.ArmadilloState.UNROLLING);
-                case AnimationNames.PANIC_IDLE, AnimationNames.RESET -> writeOverride(ValueIndex.ARMADILLO.STATE, Armadillo.ArmadilloState.IDLE);
+                case AnimationNames.PANIC_ROLLING -> writePersistent(ValueIndex.ARMADILLO.STATE, Armadillo.ArmadilloState.ROLLING);
+                case AnimationNames.PANIC_SCARED -> writePersistent(ValueIndex.ARMADILLO.STATE, Armadillo.ArmadilloState.SCARED);
+                case AnimationNames.PANIC_UNROLLING -> writePersistent(ValueIndex.ARMADILLO.STATE, Armadillo.ArmadilloState.UNROLLING);
+                case AnimationNames.PANIC_IDLE, AnimationNames.RESET -> writePersistent(ValueIndex.ARMADILLO.STATE, Armadillo.ArmadilloState.IDLE);
             }
         }
     }

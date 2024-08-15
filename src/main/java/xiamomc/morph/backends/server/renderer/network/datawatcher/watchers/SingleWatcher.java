@@ -5,7 +5,6 @@ import com.comphenix.protocol.events.PacketContainer;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.nbt.CompoundTag;
-import org.apache.commons.lang.NotImplementedException;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -110,7 +109,7 @@ public abstract class SingleWatcher extends MorphPluginObject
 
     //region Disguise Property
 
-    public final <X> void write(SingleProperty<X> property, X value)
+    public final <X> void writeProperty(SingleProperty<X> property, X value)
     {
         this.onPropertyWrite(property, value);
     }
@@ -132,23 +131,23 @@ public abstract class SingleWatcher extends MorphPluginObject
         if (doingInitialization)
             return;
 
-        var prev = getOrDefault(key, null);
-        onCustomWrite(key, prev, value);
+        var prev = readEntryOrDefault(key, null);
+        onEntryWrite(key, prev, value);
     }
 
-    protected <X> void onCustomWrite(RegistryKey<X> key, @Nullable X oldVal, @Nullable X newVal)
+    protected <X> void onEntryWrite(RegistryKey<X> key, @Nullable X oldVal, @Nullable X newVal)
     {
     }
 
-    public <X> X getOrDefault(RegistryKey<X> key, X defaultValue)
+    public <X> X readEntryOrDefault(RegistryKey<X> key, X defaultValue)
     {
-        var val = get(key);
+        var val = readEntry(key);
 
         return val == null ? defaultValue : val;
     }
 
     @Nullable
-    public <X> X get(RegistryKey<X> key)
+    public <X> X readEntry(RegistryKey<X> key)
     {
         var val = customRegistry.getOrDefault(key.name, null);
 
@@ -170,7 +169,7 @@ public abstract class SingleWatcher extends MorphPluginObject
 
     //region Value Registry
 
-    protected final Map<Integer, Object> overrides = new ConcurrentHashMap<>();
+    protected final Map<Integer, Object> registry = new ConcurrentHashMap<>();
 
     private final List<SingleValue<?>> values = new ObjectArrayList<>();
 
@@ -201,7 +200,7 @@ public abstract class SingleWatcher extends MorphPluginObject
     public void remove(SingleValue<?> singleValue)
     {
         //commonRegistry.remove(singleValue.index());
-        overrides.remove(singleValue.index());
+        registry.remove(singleValue.index());
     }
 
     /**
@@ -210,11 +209,11 @@ public abstract class SingleWatcher extends MorphPluginObject
      *
      * @apiNote If the given SingleValue has an override value, this operation will not be performed
      *          <br>
-     *          If you wish to write a persistent value, use {@link SingleWatcher#writeOverride(SingleValue, Object)}
+     *          If you wish to write a persistent value, use {@link SingleWatcher#writePersistent(SingleValue, Object)}
      */
     public <X> void writeTemp(SingleValue<X> singleValue, @NotNull X value)
     {
-        if (this.overrides.containsKey(singleValue.index())) return;
+        if (this.registry.containsKey(singleValue.index())) return;
 
         this.write(singleValue, value, true);
     }
@@ -224,7 +223,7 @@ public abstract class SingleWatcher extends MorphPluginObject
      * <br>
      * This action will be persistent until it get removed or a new value covers this
      */
-    public <X> void writeOverride(SingleValue<X> singleValue, @NotNull X value)
+    public <X> void writePersistent(SingleValue<X> singleValue, @NotNull X value)
     {
         this.write(singleValue, value, false);
     }
@@ -234,11 +233,11 @@ public abstract class SingleWatcher extends MorphPluginObject
         if (value == null)
             throw new IllegalArgumentException("If you wish to remove a SingleValue, use remove()");
 
-        var prevOption = overrides.getOrDefault(singleValue.index(), null);
+        var prevOption = registry.getOrDefault(singleValue.index(), null);
         var prev = prevOption == null ? null : (X)prevOption;
 
         if (!isTemp)
-            overrides.put(singleValue.index(), value);
+            registry.put(singleValue.index(), value);
 
         if (!this.values.contains(singleValue))
             throw new IllegalArgumentException("Trying to write a value that does not belongs to this watcher");
@@ -255,18 +254,6 @@ public abstract class SingleWatcher extends MorphPluginObject
             sendPacketToAffectedPlayers(packetFactory.buildDiffMetaPacket(getBindingPlayer(), this));
     }
 
-    public void write(int index, Object value, boolean isTemp)
-    {
-        var single = getSingle(index);
-        if (single == null)
-            throw new NullDependencyException("No registry found for index '%s'".formatted(index));
-
-        if (!single.defaultValue().getClass().isInstance(value))
-            throw new IllegalArgumentException("Incompatable value for index '%s', excepted for '%s', but got '%s'".formatted(index, single.defaultValue().getClass(), value.getClass()));
-
-        write((SingleValue<Object>)single, value, isTemp);
-    }
-
     @Resolved(shouldSolveImmediately = true)
     private PacketFactory packetFactory;
 
@@ -279,32 +266,32 @@ public abstract class SingleWatcher extends MorphPluginObject
     {
     }
 
-    public <X> X get(SingleValue<X> singleValue)
+    public <X> X read(SingleValue<X> singleValue)
     {
-        return this.getOr(singleValue, singleValue.defaultValue());
+        return this.readOr(singleValue, singleValue.defaultValue());
     }
 
-    public Object get(int index)
+    public Object read(int index)
     {
         var single = getSingle(index);
         if (single == null)
             throw new NullDependencyException("No registry found for index '%s'".formatted(index));
 
-        return get(single);
+        return read(single);
     }
 
-    public Object getOr(int index, Object defaultVal)
+    public Object readOr(int index, Object defaultVal)
     {
         var single = getSingle(index);
         if (single == null)
             throw new NullDependencyException("No registry found for index '%s'".formatted(index));
 
-        return getOr((SingleValue<Object>) single, defaultVal);
+        return readOr((SingleValue<Object>) single, defaultVal);
     }
 
-    public <X> X getOr(SingleValue<X> singleValue, X defaultVal)
+    public <X> X readOr(SingleValue<X> singleValue, X defaultVal)
     {
-        var option = this.overrides.getOrDefault(singleValue.index(), null);
+        var option = this.registry.getOrDefault(singleValue.index(), null);
         if (option == null) return defaultVal;
         else return (X) option;
     }
@@ -313,9 +300,9 @@ public abstract class SingleWatcher extends MorphPluginObject
      * Gets the override values for this watcher
      * @apiNote This doesn't include values in the common registry!
      */
-    public Map<Integer, Object> getOverrides()
+    public Map<Integer, Object> getRegistry()
     {
-        return new Object2ObjectOpenHashMap<>(this.overrides);
+        return new Object2ObjectOpenHashMap<>(this.registry);
     }
 
     /**
@@ -323,7 +310,7 @@ public abstract class SingleWatcher extends MorphPluginObject
      */
     public Map<Integer, Object> getOverlayedRegistry()
     {
-        var map = this.getOverrides();
+        var map = this.getRegistry();
         this.getDirty().forEach((sv, option) -> map.put(sv.index(), option));
 
         return map;
@@ -333,10 +320,12 @@ public abstract class SingleWatcher extends MorphPluginObject
 
     public Map<SingleValue<?>, Object> getDirty()
     {
-        var dirty = new Object2ObjectOpenHashMap<>(dirtySingles);
-        dirtySingles.clear();
+        return new Object2ObjectOpenHashMap<>(dirtySingles);
+    }
 
-        return dirty;
+    public void clearDirty()
+    {
+        dirtySingles.clear();
     }
 
     //endregion Value Registry

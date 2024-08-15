@@ -31,6 +31,6 @@ public class ZombieWatcher extends LivingEntityWatcher
         super.mergeFromCompound(nbt);
 
         if (nbt.contains("IsBaby"))
-            writeOverride(ValueIndex.ZOMBIE.IS_BABY, nbt.getBoolean("IsBaby"));
+            writePersistent(ValueIndex.ZOMBIE.IS_BABY, nbt.getBoolean("IsBaby"));
     }
 }

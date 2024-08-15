@@ -1,14 +1,10 @@
 package xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types;
 
 import net.minecraft.nbt.CompoundTag;
-import net.neoforged.art.internal.EntryImpl;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Parrot;
 import org.bukkit.entity.Player;
-import xiamomc.morph.backends.server.renderer.network.registries.EntryIndex;
-import xiamomc.morph.backends.server.renderer.network.registries.RegistryKey;
 import xiamomc.morph.backends.server.renderer.network.registries.ValueIndex;
-import xiamomc.morph.misc.animation.AnimationNames;
 import xiamomc.morph.misc.disguiseProperty.DisguiseProperties;
 import xiamomc.morph.misc.disguiseProperty.SingleProperty;
 import xiamomc.morph.misc.disguiseProperty.values.ParrotProperties;
@@ -36,7 +32,7 @@ public class ParrotWatcher extends TameableAnimalWatcher
         if (property.equals(properties.VARIANT))
         {
             var val = (Parrot.Variant) value;
-            writeOverride(ValueIndex.PARROT.PARROT_VARIANT, val.ordinal());
+            writePersistent(ValueIndex.PARROT.PARROT_VARIANT, val.ordinal());
         }
 
         super.onPropertyWrite(property, value);
@@ -50,7 +46,7 @@ public class ParrotWatcher extends TameableAnimalWatcher
         if (nbt.contains("Variant"))
         {
             var variant = nbt.getInt("Variant");
-            this.writeOverride(ValueIndex.PARROT.PARROT_VARIANT, variant);
+            this.writePersistent(ValueIndex.PARROT.PARROT_VARIANT, variant);
         }
     }
 
@@ -59,6 +55,6 @@ public class ParrotWatcher extends TameableAnimalWatcher
     {
         super.writeToCompound(nbt);
 
-        nbt.putInt("Variant", get(ValueIndex.PARROT.PARROT_VARIANT));
+        nbt.putInt("Variant", read(ValueIndex.PARROT.PARROT_VARIANT));
     }
 }

@@ -67,15 +67,15 @@ public class EntityWatcher extends SingleWatcher
     }
 
     @Override
-    protected <X> void onCustomWrite(RegistryKey<X> key, X oldVal, X newVal)
+    protected <X> void onEntryWrite(RegistryKey<X> key, X oldVal, X newVal)
     {
-        super.onCustomWrite(key, oldVal, newVal);
+        super.onEntryWrite(key, oldVal, newVal);
 
         if (key.equals(EntryIndex.DISGUISE_NAME))
         {
             var str = newVal.toString();
             var component = str.isEmpty() ? null : Component.literal(str);
-            writeOverride(ValueIndex.BASE_ENTITY.CUSTOM_NAME, component == null ? Optional.empty() : Optional.of(component));
+            writePersistent(ValueIndex.BASE_ENTITY.CUSTOM_NAME, component == null ? Optional.empty() : Optional.of(component));
         }
     }
 
@@ -90,13 +90,13 @@ public class EntityWatcher extends SingleWatcher
             var component = Component.Serializer.fromJsonLenient(name, MinecraftServer.getServer().registryAccess());
 
             if (component != null)
-                writeOverride(ValueIndex.BASE_ENTITY.CUSTOM_NAME, Optional.of(component));
+                writePersistent(ValueIndex.BASE_ENTITY.CUSTOM_NAME, Optional.of(component));
         }
 
         if (nbt.contains("CustomNameVisible"))
         {
             var visible = nbt.getBoolean("CustomNameVisible");
-            writeOverride(ValueIndex.BASE_ENTITY.CUSTOM_NAME_VISIBLE, visible);
+            writePersistent(ValueIndex.BASE_ENTITY.CUSTOM_NAME_VISIBLE, visible);
         }
     }
 
@@ -105,9 +105,9 @@ public class EntityWatcher extends SingleWatcher
     {
         super.writeToCompound(nbt);
 
-        var customName = get(ValueIndex.BASE_ENTITY.CUSTOM_NAME);
+        var customName = read(ValueIndex.BASE_ENTITY.CUSTOM_NAME);
         customName.ifPresent(c -> nbt.putString("CustomName", Component.Serializer.toJson(c, MinecraftServer.getServer().registryAccess())));
 
-        nbt.putBoolean("CustomNameVisible", get(ValueIndex.BASE_ENTITY.CUSTOM_NAME_VISIBLE));
+        nbt.putBoolean("CustomNameVisible", read(ValueIndex.BASE_ENTITY.CUSTOM_NAME_VISIBLE));
     }
 }

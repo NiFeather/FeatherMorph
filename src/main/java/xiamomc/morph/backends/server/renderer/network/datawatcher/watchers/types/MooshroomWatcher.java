@@ -32,7 +32,7 @@ public class MooshroomWatcher extends LivingEntityWatcher
         if (property.equals(properties.VARIANT))
         {
             var val = (MushroomCow.Variant) value;
-            writeOverride(ValueIndex.MOOSHROOM.VARIANT, val.name().toUpperCase());
+            writePersistent(ValueIndex.MOOSHROOM.VARIANT, val.name().toUpperCase());
         }
 
         super.onPropertyWrite(property, value);
@@ -44,7 +44,7 @@ public class MooshroomWatcher extends LivingEntityWatcher
         super.mergeFromCompound(nbt);
 
         if (nbt.contains("Type"))
-            writeOverride(ValueIndex.MOOSHROOM.VARIANT, nbt.getString("Type"));
+            writePersistent(ValueIndex.MOOSHROOM.VARIANT, nbt.getString("Type"));
     }
 
     @Override
@@ -52,6 +52,6 @@ public class MooshroomWatcher extends LivingEntityWatcher
     {
         super.writeToCompound(nbt);
 
-        nbt.putString("Type", get(ValueIndex.MOOSHROOM.VARIANT));
+        nbt.putString("Type", read(ValueIndex.MOOSHROOM.VARIANT));
     }
 }

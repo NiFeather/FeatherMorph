@@ -79,7 +79,7 @@ public class PacketFactory extends MorphPluginObject
                 gameProfile.setUUID(UUID.nameUUIDFromBytes(str.getBytes()));
             }
 
-            var lastUUID = parameters.getWatcher().getOrDefault(EntryIndex.TABLIST_UUID, null);
+            var lastUUID = parameters.getWatcher().readEntryOrDefault(EntryIndex.TABLIST_UUID, null);
 
             if (lastUUID != null)
             {
@@ -143,9 +143,9 @@ public class PacketFactory extends MorphPluginObject
         var watcher = parameters.getWatcher();
 
         //生成装备和Meta
-        var displayingFake = watcher.getOrDefault(EntryIndex.DISPLAY_FAKE_EQUIPMENT, false);
+        var displayingFake = watcher.readEntryOrDefault(EntryIndex.DISPLAY_FAKE_EQUIPMENT, false);
         var equip = displayingFake
-                ? watcher.getOrDefault(EntryIndex.EQUIPMENT, new DisguiseEquipment())
+                ? watcher.readEntryOrDefault(EntryIndex.EQUIPMENT, new DisguiseEquipment())
                 : player.getEquipment();
 
         var equipmentPacket = new ClientboundSetEquipmentPacket(player.getEntityId(),
@@ -217,7 +217,7 @@ public class PacketFactory extends MorphPluginObject
             else
             {
                 // 否则，查找是否有覆写值
-                var wa = watcher.getOr(disguiseValue.index(), null);
+                var wa = watcher.readOr(disguiseValue.index(), null);
 
                 if (wa != null)
                     w.setRawValue(wa);
@@ -241,6 +241,7 @@ public class PacketFactory extends MorphPluginObject
 
         List<WrappedDataValue> wrappedDataValues = new ObjectArrayList<>();
         var valuesToSent = watcher.getDirty();
+        watcher.clearDirty();
 
         valuesToSent.forEach((single, val) ->
         {
@@ -278,6 +279,7 @@ public class PacketFactory extends MorphPluginObject
         List<WrappedDataValue> wrappedDataValues = new ObjectArrayList<>();
 
         var valuesToSent = watcher.getOverlayedRegistry();
+        watcher.clearDirty();
 
         valuesToSent.forEach((index, val) ->
         {
@@ -309,9 +311,9 @@ public class PacketFactory extends MorphPluginObject
 
     public PacketContainer getEquipmentPacket(Player player, SingleWatcher watcher)
     {
-        var shouldDisplayFakeEquip = watcher.getOrDefault(EntryIndex.DISPLAY_FAKE_EQUIPMENT, false);
+        var shouldDisplayFakeEquip = watcher.readEntryOrDefault(EntryIndex.DISPLAY_FAKE_EQUIPMENT, false);
         EntityEquipment equipment = shouldDisplayFakeEquip
-                    ? watcher.getOrDefault(EntryIndex.EQUIPMENT, new DisguiseEquipment())
+                    ? watcher.readEntryOrDefault(EntryIndex.EQUIPMENT, new DisguiseEquipment())
                     : player.getEquipment();
 
         var rawPacket = new ClientboundSetEquipmentPacket(player.getEntityId(),

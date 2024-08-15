@@ -31,12 +31,12 @@ public class PandaWatcher extends LivingEntityWatcher
 
     public Panda.Gene getMainGene()
     {
-        return Arrays.stream(Panda.Gene.values()).toList().get(get(ValueIndex.PANDA.MAIN_GENE));
+        return Arrays.stream(Panda.Gene.values()).toList().get(read(ValueIndex.PANDA.MAIN_GENE));
     }
 
     public Panda.Gene getHiddenGene()
     {
-        return Arrays.stream(Panda.Gene.values()).toList().get(get(ValueIndex.PANDA.HIDDEN_GENE));
+        return Arrays.stream(Panda.Gene.values()).toList().get(read(ValueIndex.PANDA.HIDDEN_GENE));
     }
 
     @Override
@@ -47,22 +47,22 @@ public class PandaWatcher extends LivingEntityWatcher
         if (property.equals(properties.MAIN_GENE))
         {
             var val = (Panda.Gene) value;
-            writeOverride(ValueIndex.PANDA.MAIN_GENE, (byte)val.ordinal());
+            writePersistent(ValueIndex.PANDA.MAIN_GENE, (byte)val.ordinal());
         }
 
         if (property.equals(properties.HIDDEN_GENE))
         {
             var val = (Panda.Gene) value;
-            writeOverride(ValueIndex.PANDA.HIDDEN_GENE, (byte)val.ordinal());
+            writePersistent(ValueIndex.PANDA.HIDDEN_GENE, (byte)val.ordinal());
         }
 
         super.onPropertyWrite(property, value);
     }
 
     @Override
-    protected <X> void onCustomWrite(RegistryKey<X> key, X oldVal, X newVal)
+    protected <X> void onEntryWrite(RegistryKey<X> key, X oldVal, X newVal)
     {
-        super.onCustomWrite(key, oldVal, newVal);
+        super.onEntryWrite(key, oldVal, newVal);
 
         if (key.equals(EntryIndex.ANIMATION))
         {
@@ -70,9 +70,9 @@ public class PandaWatcher extends LivingEntityWatcher
 
             switch (animId)
             {
-                case AnimationNames.EAT -> this.writeOverride(ValueIndex.PANDA.EAT_TIMER, 100);
-                case AnimationNames.SIT -> this.writeOverride(ValueIndex.PANDA.PANDA_FLAGS, (byte)0x08);
-                case AnimationNames.STANDUP, AnimationNames.RESET -> this.writeOverride(ValueIndex.PANDA.PANDA_FLAGS, (byte)0x00);
+                case AnimationNames.EAT -> this.writePersistent(ValueIndex.PANDA.EAT_TIMER, 100);
+                case AnimationNames.SIT -> this.writePersistent(ValueIndex.PANDA.PANDA_FLAGS, (byte)0x08);
+                case AnimationNames.STANDUP, AnimationNames.RESET -> this.writePersistent(ValueIndex.PANDA.PANDA_FLAGS, (byte)0x00);
             }
         }
     }
@@ -83,10 +83,10 @@ public class PandaWatcher extends LivingEntityWatcher
         super.mergeFromCompound(nbt);
 
         if (nbt.contains("MainGene"))
-            writeOverride(ValueIndex.PANDA.MAIN_GENE, (byte)getGeneFromName(nbt.getString("MainGene")).ordinal());
+            writePersistent(ValueIndex.PANDA.MAIN_GENE, (byte)getGeneFromName(nbt.getString("MainGene")).ordinal());
 
         if (nbt.contains("HiddenGene"))
-            writeOverride(ValueIndex.PANDA.HIDDEN_GENE, (byte)getGeneFromName(nbt.getString("HiddenGene")).ordinal());
+            writePersistent(ValueIndex.PANDA.HIDDEN_GENE, (byte)getGeneFromName(nbt.getString("HiddenGene")).ordinal());
     }
 
     @Override

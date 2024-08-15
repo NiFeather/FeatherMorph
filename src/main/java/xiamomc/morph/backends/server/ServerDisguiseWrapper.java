@@ -56,7 +56,7 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
             bindingWatcher.mergeFromCompound(compoundTag);
 
             if (bindingWatcher instanceof AgeableMobWatcher)
-                bindingWatcher.writeOverride(ValueIndex.AGEABLE_MOB.IS_BABY, instance.isBaby);
+                bindingWatcher.writePersistent(ValueIndex.AGEABLE_MOB.IS_BABY, instance.isBaby);
 
             if (compoundTag.contains("Small")) instance.armorStandSmall = compoundTag.getBoolean("Small");
             if (compoundTag.contains("NoBasePlate")) instance.armorStandNoBasePlate = compoundTag.getBoolean("NoBasePlate");
@@ -181,7 +181,7 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
         disguiseProperties.put(property, value);
 
         if (bindingWatcher != null)
-            bindingWatcher.write(property, value);
+            bindingWatcher.writeProperty(property, value);
 
         super.write(property, value);
     }
@@ -233,12 +233,12 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
 
         this.aggressive = aggressive;
         if (getEntityType() == EntityType.GHAST)
-            bindingWatcher.writeOverride(ValueIndex.GHAST.CHARGING, aggressive);
+            bindingWatcher.writePersistent(ValueIndex.GHAST.CHARGING, aggressive);
 
         if (getEntityType() == EntityType.CREEPER)
         {
-            bindingWatcher.writeOverride(ValueIndex.CREEPER.STATE, aggressive ? 1 : -1);
-            bindingWatcher.writeOverride(ValueIndex.CREEPER.IGNITED, aggressive);
+            bindingWatcher.writePersistent(ValueIndex.CREEPER.STATE, aggressive ? 1 : -1);
+            bindingWatcher.writePersistent(ValueIndex.CREEPER.IGNITED, aggressive);
         }
 
         if (getEntityType() == EntityType.WARDEN)
@@ -260,7 +260,7 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
         instance.armorStandShowArms = showArms;
         if (bindingWatcher instanceof ArmorStandWatcher armorStandWatcher)
         {
-            armorStandWatcher.writeOverride(
+            armorStandWatcher.writePersistent(
                     ValueIndex.ARMOR_STAND.DATA_FLAGS,
                     armorStandWatcher.getArmorStandFlags(instance.armorStandSmall,
                             instance.armorStandShowArms, instance.armorStandNoBasePlate));
@@ -288,7 +288,7 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
 
         this.disguiseProperties.forEach((property, value) ->
         {
-            bindingWatcher.write((SingleProperty<Object>) property, value);
+            bindingWatcher.writeProperty((SingleProperty<Object>) property, value);
         });
 
         refreshRegistry();
@@ -330,6 +330,6 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
         }
 
         if (bindingWatcher.getEntityType() == EntityType.GHAST)
-            bindingWatcher.writeOverride(ValueIndex.GHAST.CHARGING, aggressive);
+            bindingWatcher.writePersistent(ValueIndex.GHAST.CHARGING, aggressive);
     }
 }

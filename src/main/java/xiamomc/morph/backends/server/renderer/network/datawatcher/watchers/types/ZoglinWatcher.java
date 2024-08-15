@@ -26,6 +26,6 @@ public class ZoglinWatcher extends EHasAttackAnimationWatcher
         super.mergeFromCompound(nbt);
 
         if (nbt.contains("IsBaby"))
-            writeOverride(ValueIndex.ZOGLIN.IS_BABY, nbt.getBoolean("IsBaby"));
+            writePersistent(ValueIndex.ZOGLIN.IS_BABY, nbt.getBoolean("IsBaby"));
     }
 }

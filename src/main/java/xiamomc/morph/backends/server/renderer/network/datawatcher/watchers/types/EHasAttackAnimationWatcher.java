@@ -16,9 +16,9 @@ public class EHasAttackAnimationWatcher extends LivingEntityWatcher
     }
 
     @Override
-    protected <X> void onCustomWrite(RegistryKey<X> key, X oldVal, X newVal)
+    protected <X> void onEntryWrite(RegistryKey<X> key, X oldVal, X newVal)
     {
-        super.onCustomWrite(key, oldVal, newVal);
+        super.onEntryWrite(key, oldVal, newVal);
 
         if (key.equals(EntryIndex.ATTACK_ANIMATION) && Boolean.TRUE.equals(newVal))
         {

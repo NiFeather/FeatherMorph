@@ -28,7 +28,7 @@ public class RabbitWatcher extends LivingEntityWatcher
 
     public Rabbit.Type getType()
     {
-        return Arrays.stream(Rabbit.Type.values()).toList().get(get(ValueIndex.RABBIT.RABBIT_TYPE));
+        return Arrays.stream(Rabbit.Type.values()).toList().get(read(ValueIndex.RABBIT.RABBIT_TYPE));
     }
 
     @Override
@@ -40,7 +40,7 @@ public class RabbitWatcher extends LivingEntityWatcher
         {
             var val = (Rabbit.Type) value;
 
-            writeOverride(ValueIndex.RABBIT.RABBIT_TYPE, val == Rabbit.Type.THE_KILLER_BUNNY ? 99 : val.ordinal());
+            writePersistent(ValueIndex.RABBIT.RABBIT_TYPE, val == Rabbit.Type.THE_KILLER_BUNNY ? 99 : val.ordinal());
         }
 
         super.onPropertyWrite(property, value);
@@ -52,7 +52,7 @@ public class RabbitWatcher extends LivingEntityWatcher
         super.mergeFromCompound(nbt);
 
         if (nbt.contains("RabbitType"))
-            writeOverride(ValueIndex.RABBIT.RABBIT_TYPE, nbt.getInt("RabbitType"));
+            writePersistent(ValueIndex.RABBIT.RABBIT_TYPE, nbt.getInt("RabbitType"));
     }
 
     @Override
@@ -60,6 +60,6 @@ public class RabbitWatcher extends LivingEntityWatcher
     {
         super.writeToCompound(nbt);
 
-        nbt.putInt("RabbitType", get(ValueIndex.RABBIT.RABBIT_TYPE));
+        nbt.putInt("RabbitType", read(ValueIndex.RABBIT.RABBIT_TYPE));
     }
 }

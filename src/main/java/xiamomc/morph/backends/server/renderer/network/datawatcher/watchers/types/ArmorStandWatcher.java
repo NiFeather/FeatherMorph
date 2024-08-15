@@ -41,17 +41,17 @@ public class ArmorStandWatcher extends InventoryLivingWatcher
 
     private boolean isSmall()
     {
-        return (get(ValueIndex.ARMOR_STAND.DATA_FLAGS) & 0x01) == 0x01;
+        return (read(ValueIndex.ARMOR_STAND.DATA_FLAGS) & 0x01) == 0x01;
     }
 
     private boolean noBasePlate()
     {
-        return (get(ValueIndex.ARMOR_STAND.DATA_FLAGS) & 0x08) == 0x08;
+        return (read(ValueIndex.ARMOR_STAND.DATA_FLAGS) & 0x08) == 0x08;
     }
 
     private boolean showArms()
     {
-        return (get(ValueIndex.ARMOR_STAND.DATA_FLAGS) & 0x04) == 0x04;
+        return (read(ValueIndex.ARMOR_STAND.DATA_FLAGS) & 0x04) == 0x04;
     }
 
     private Rotations getVec3(ListTag listTag, Rotations defaultValue)
@@ -84,7 +84,7 @@ public class ArmorStandWatcher extends InventoryLivingWatcher
 
         //Tag "Invisible" is not supported as it's synced with the player
 
-        writeOverride(ValueIndex.ARMOR_STAND.DATA_FLAGS, getArmorStandFlags(small, showArms, noBasePlate));
+        writePersistent(ValueIndex.ARMOR_STAND.DATA_FLAGS, getArmorStandFlags(small, showArms, noBasePlate));
 
         if (nbt.contains("Pose"))
         {
@@ -92,42 +92,42 @@ public class ArmorStandWatcher extends InventoryLivingWatcher
 
             if (poseCompound.contains("Body"))
             {
-                writeOverride(ValueIndex.ARMOR_STAND.BODY_ROTATION,
+                writePersistent(ValueIndex.ARMOR_STAND.BODY_ROTATION,
                         getVec3(poseCompound.getList("Body", CompoundTag.TAG_FLOAT),
                                 ValueIndex.ARMOR_STAND.BODY_ROTATION.defaultValue()));
             }
 
             if (poseCompound.contains("Head"))
             {
-                writeOverride(ValueIndex.ARMOR_STAND.HEAD_ROTATION,
+                writePersistent(ValueIndex.ARMOR_STAND.HEAD_ROTATION,
                         getVec3(poseCompound.getList("Head", CompoundTag.TAG_FLOAT),
                                 ValueIndex.ARMOR_STAND.HEAD_ROTATION.defaultValue()));
             }
 
             if (poseCompound.contains("LeftArm"))
             {
-                writeOverride(ValueIndex.ARMOR_STAND.LEFT_ARM_ROTATION,
+                writePersistent(ValueIndex.ARMOR_STAND.LEFT_ARM_ROTATION,
                         getVec3(poseCompound.getList("LeftArm", CompoundTag.TAG_FLOAT),
                                 ValueIndex.ARMOR_STAND.LEFT_ARM_ROTATION.defaultValue()));
             }
 
             if (poseCompound.contains("RightArm"))
             {
-                writeOverride(ValueIndex.ARMOR_STAND.RIGHT_ARM_ROTATION,
+                writePersistent(ValueIndex.ARMOR_STAND.RIGHT_ARM_ROTATION,
                         getVec3(poseCompound.getList("RightArm", CompoundTag.TAG_FLOAT),
                                 ValueIndex.ARMOR_STAND.RIGHT_ARM_ROTATION.defaultValue()));
             }
 
             if (poseCompound.contains("LeftLeg"))
             {
-                writeOverride(ValueIndex.ARMOR_STAND.LEFT_LEG_ROTATION,
+                writePersistent(ValueIndex.ARMOR_STAND.LEFT_LEG_ROTATION,
                         getVec3(poseCompound.getList("LeftLeg", CompoundTag.TAG_FLOAT),
                                 ValueIndex.ARMOR_STAND.LEFT_LEG_ROTATION.defaultValue()));
             }
 
             if (poseCompound.contains("RightLeg"))
             {
-                writeOverride(ValueIndex.ARMOR_STAND.RIGHT_LEG_ROTATION,
+                writePersistent(ValueIndex.ARMOR_STAND.RIGHT_LEG_ROTATION,
                         getVec3(poseCompound.getList("RightLeg", CompoundTag.TAG_FLOAT),
                                 ValueIndex.ARMOR_STAND.RIGHT_LEG_ROTATION.defaultValue()));
             }
@@ -144,12 +144,12 @@ public class ArmorStandWatcher extends InventoryLivingWatcher
         nbt.putBoolean("ShowArms", this.showArms());
 
         var poseCompound = new CompoundTag();
-        poseCompound.put("Head", get(ValueIndex.ARMOR_STAND.HEAD_ROTATION).save());
-        poseCompound.put("Body", get(ValueIndex.ARMOR_STAND.BODY_ROTATION).save());
-        poseCompound.put("LeftArm", get(ValueIndex.ARMOR_STAND.LEFT_ARM_ROTATION).save());
-        poseCompound.put("RightArm", get(ValueIndex.ARMOR_STAND.RIGHT_ARM_ROTATION).save());
-        poseCompound.put("LeftLeg", get(ValueIndex.ARMOR_STAND.LEFT_LEG_ROTATION).save());
-        poseCompound.put("RightLeg", get(ValueIndex.ARMOR_STAND.RIGHT_LEG_ROTATION).save());
+        poseCompound.put("Head", read(ValueIndex.ARMOR_STAND.HEAD_ROTATION).save());
+        poseCompound.put("Body", read(ValueIndex.ARMOR_STAND.BODY_ROTATION).save());
+        poseCompound.put("LeftArm", read(ValueIndex.ARMOR_STAND.LEFT_ARM_ROTATION).save());
+        poseCompound.put("RightArm", read(ValueIndex.ARMOR_STAND.RIGHT_ARM_ROTATION).save());
+        poseCompound.put("LeftLeg", read(ValueIndex.ARMOR_STAND.LEFT_LEG_ROTATION).save());
+        poseCompound.put("RightLeg", read(ValueIndex.ARMOR_STAND.RIGHT_LEG_ROTATION).save());
 
         nbt.put("Pose", poseCompound);
     }

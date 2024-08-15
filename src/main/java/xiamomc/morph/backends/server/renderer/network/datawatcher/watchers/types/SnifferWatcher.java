@@ -26,9 +26,9 @@ public class SnifferWatcher extends LivingEntityWatcher
     }
 
     @Override
-    protected <X> void onCustomWrite(RegistryKey<X> key, X oldVal, X newVal)
+    protected <X> void onEntryWrite(RegistryKey<X> key, X oldVal, X newVal)
     {
-        super.onCustomWrite(key, oldVal, newVal);
+        super.onEntryWrite(key, oldVal, newVal);
 
         if (key.equals(EntryIndex.ANIMATION))
         {
@@ -40,12 +40,12 @@ public class SnifferWatcher extends LivingEntityWatcher
             {
                 case AnimationNames.SNIFF ->
                 {
-                    this.writeOverride(ValueIndex.SNIFFER.SNIFFER_STATE, Sniffer.State.SNIFFING);
+                    this.writePersistent(ValueIndex.SNIFFER.SNIFFER_STATE, Sniffer.State.SNIFFING);
                     world.playSound(bindingPlayer.getLocation(), Sound.ENTITY_SNIFFER_SNIFFING, SoundCategory.NEUTRAL, 1, 1);
                 }
                 case AnimationNames.RESET ->
                 {
-                    this.writeOverride(ValueIndex.SNIFFER.SNIFFER_STATE, Sniffer.State.IDLING);
+                    this.writePersistent(ValueIndex.SNIFFER.SNIFFER_STATE, Sniffer.State.IDLING);
                     this.remove(ValueIndex.SNIFFER.SNIFFER_STATE);
                 }
                 default -> logger.warn("Unknown animation sequence id '%s'".formatted(id));

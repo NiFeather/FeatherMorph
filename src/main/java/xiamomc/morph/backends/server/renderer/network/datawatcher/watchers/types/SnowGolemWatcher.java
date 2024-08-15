@@ -32,7 +32,7 @@ public class SnowGolemWatcher extends LivingEntityWatcher
                     ? SnowGolemValues.HAS_PUMPKIN
                     : SnowGolemValues.NO_PUMPKIN;
 
-            writeOverride(ValueIndex.SNOW_GOLEM.HAT_FLAGS, value);
+            writePersistent(ValueIndex.SNOW_GOLEM.HAT_FLAGS, value);
         }
     }
 
@@ -41,7 +41,7 @@ public class SnowGolemWatcher extends LivingEntityWatcher
     {
         super.writeToCompound(nbt);
 
-        var hatFlag = this.get(ValueIndex.SNOW_GOLEM.HAT_FLAGS);
+        var hatFlag = this.read(ValueIndex.SNOW_GOLEM.HAT_FLAGS);
         nbt.putBoolean("Pumpkin", hatFlag == SnowGolemValues.HAS_PUMPKIN);
     }
 }

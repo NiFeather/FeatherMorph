@@ -29,10 +29,10 @@ public class GoatWatcher extends LivingEntityWatcher
         var properties = DisguiseProperties.INSTANCE.getOrThrow(GoatProperties.class);
 
         if (property.equals(properties.HAS_LEFT_HORN))
-            writeOverride(ValueIndex.GOAT.HAS_LEFT_HORN, (Boolean) value);
+            writePersistent(ValueIndex.GOAT.HAS_LEFT_HORN, (Boolean) value);
 
         if (property.equals(properties.HAS_RIGHT_HORN))
-            writeOverride(ValueIndex.GOAT.HAS_RIGHT_HORN, (Boolean) value);
+            writePersistent(ValueIndex.GOAT.HAS_RIGHT_HORN, (Boolean) value);
 
         super.onPropertyWrite(property, value);
     }
@@ -43,13 +43,13 @@ public class GoatWatcher extends LivingEntityWatcher
         super.mergeFromCompound(nbt);
 
         if (nbt.contains("HasLeftHorn"))
-            writeOverride(ValueIndex.GOAT.HAS_LEFT_HORN, nbt.getBoolean("HasLeftHorn"));
+            writePersistent(ValueIndex.GOAT.HAS_LEFT_HORN, nbt.getBoolean("HasLeftHorn"));
 
         if (nbt.contains("HasRightHorn"))
-            writeOverride(ValueIndex.GOAT.HAS_RIGHT_HORN, nbt.getBoolean("HasRightHorn"));
+            writePersistent(ValueIndex.GOAT.HAS_RIGHT_HORN, nbt.getBoolean("HasRightHorn"));
 
         if (nbt.contains("IsScreamingGoat"))
-            writeOverride(ValueIndex.GOAT.IS_SCREAMING, nbt.getBoolean("IsScreamingGoat"));
+            writePersistent(ValueIndex.GOAT.IS_SCREAMING, nbt.getBoolean("IsScreamingGoat"));
     }
 
     @Override
@@ -57,8 +57,8 @@ public class GoatWatcher extends LivingEntityWatcher
     {
         super.writeToCompound(nbt);
 
-        nbt.putBoolean("HasLeftHorn", get(ValueIndex.GOAT.HAS_LEFT_HORN));
-        nbt.putBoolean("HasRightHorn", get(ValueIndex.GOAT.HAS_RIGHT_HORN));
-        nbt.putBoolean("IsScreamingGoat", get(ValueIndex.GOAT.IS_SCREAMING));
+        nbt.putBoolean("HasLeftHorn", read(ValueIndex.GOAT.HAS_LEFT_HORN));
+        nbt.putBoolean("HasRightHorn", read(ValueIndex.GOAT.HAS_RIGHT_HORN));
+        nbt.putBoolean("IsScreamingGoat", read(ValueIndex.GOAT.IS_SCREAMING));
     }
 }

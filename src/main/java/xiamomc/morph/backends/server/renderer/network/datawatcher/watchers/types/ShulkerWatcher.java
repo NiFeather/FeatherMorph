@@ -1,6 +1,5 @@
 package xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types;
 
-import net.neoforged.art.internal.EntryImpl;
 import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
 import org.bukkit.entity.EntityType;
@@ -26,9 +25,9 @@ public class ShulkerWatcher extends LivingEntityWatcher
     }
 
     @Override
-    protected <X> void onCustomWrite(RegistryKey<X> key, X oldVal, X newVal)
+    protected <X> void onEntryWrite(RegistryKey<X> key, X oldVal, X newVal)
     {
-        super.onCustomWrite(key, oldVal, newVal);
+        super.onEntryWrite(key, oldVal, newVal);
 
         if (key.equals(EntryIndex.ANIMATION))
         {
@@ -39,25 +38,25 @@ public class ShulkerWatcher extends LivingEntityWatcher
             {
                 case AnimationNames.PEEK_START ->
                 {
-                    this.writeOverride(ValueIndex.SHULKER.PEEK_ID, (byte)30);
+                    this.writePersistent(ValueIndex.SHULKER.PEEK_ID, (byte)30);
                     world.playSound(getBindingPlayer().getLocation(), Sound.ENTITY_SHULKER_OPEN, SoundCategory.HOSTILE, 1, 1);
                 }
 
                 case AnimationNames.OPEN_START ->
                 {
-                    this.writeOverride(ValueIndex.SHULKER.PEEK_ID, (byte)100);
+                    this.writePersistent(ValueIndex.SHULKER.PEEK_ID, (byte)100);
                     world.playSound(getBindingPlayer().getLocation(), Sound.ENTITY_SHULKER_OPEN, SoundCategory.HOSTILE, 1, 1);
                 }
 
                 case AnimationNames.PEEK_STOP, AnimationNames.OPEN_STOP ->
                 {
-                    this.writeOverride(ValueIndex.SHULKER.PEEK_ID, (byte)0);
+                    this.writePersistent(ValueIndex.SHULKER.PEEK_ID, (byte)0);
                     world.playSound(getBindingPlayer().getLocation(), Sound.ENTITY_SHULKER_CLOSE, SoundCategory.HOSTILE, 1, 1);
                 }
 
                 case AnimationNames.RESET ->
                 {
-                    this.writeOverride(ValueIndex.SHULKER.PEEK_ID, (byte)0);
+                    this.writePersistent(ValueIndex.SHULKER.PEEK_ID, (byte)0);
                     this.remove(ValueIndex.SHULKER.PEEK_ID);
                 }
             }

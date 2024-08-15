@@ -33,18 +33,18 @@ public class TameableAnimalWatcher extends LivingEntityWatcher
 
         if (nbt.contains("Owner") && !nbt.getUUID("Owner").equals(Util.NIL_UUID))
         {
-            writeOverride(ValueIndex.TAMEABLE.OWNER, Optional.of(ownerUUID));
+            writePersistent(ValueIndex.TAMEABLE.OWNER, Optional.of(ownerUUID));
 
-            byte val = get(ValueIndex.TAMEABLE.TAMEABLE_FLAGS);
-            writeOverride(ValueIndex.TAMEABLE.TAMEABLE_FLAGS, (byte)(val | 0x04));
+            byte val = read(ValueIndex.TAMEABLE.TAMEABLE_FLAGS);
+            writePersistent(ValueIndex.TAMEABLE.TAMEABLE_FLAGS, (byte)(val | 0x04));
         }
 
         if (nbt.contains("Sitting"))
         {
-            byte val = get(ValueIndex.TAMEABLE.TAMEABLE_FLAGS);
+            byte val = read(ValueIndex.TAMEABLE.TAMEABLE_FLAGS);
 
             if (nbt.getBoolean("Sitting"))
-                writeOverride(ValueIndex.TAMEABLE.TAMEABLE_FLAGS, (byte)(val | 0x01));
+                writePersistent(ValueIndex.TAMEABLE.TAMEABLE_FLAGS, (byte)(val | 0x01));
         }
     }
 
@@ -53,8 +53,8 @@ public class TameableAnimalWatcher extends LivingEntityWatcher
     {
         super.writeToCompound(nbt);
 
-        var flag = get(ValueIndex.TAMEABLE.TAMEABLE_FLAGS);
+        var flag = read(ValueIndex.TAMEABLE.TAMEABLE_FLAGS);
         nbt.putBoolean("Sitting", (flag & 0x01) == 0x01);
-        nbt.putUUID("Owner", get(ValueIndex.TAMEABLE.OWNER).orElse(Util.NIL_UUID));
+        nbt.putUUID("Owner", read(ValueIndex.TAMEABLE.OWNER).orElse(Util.NIL_UUID));
     }
 }

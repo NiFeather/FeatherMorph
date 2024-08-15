@@ -18,9 +18,9 @@ public class AllayWatcher extends LivingEntityWatcher
     }
 
     @Override
-    protected <X> void onCustomWrite(RegistryKey<X> key, X oldVal, X newVal)
+    protected <X> void onEntryWrite(RegistryKey<X> key, X oldVal, X newVal)
     {
-        super.onCustomWrite(key, oldVal, newVal);
+        super.onEntryWrite(key, oldVal, newVal);
 
         if (key.equals(EntryIndex.ANIMATION))
         {
@@ -28,8 +28,8 @@ public class AllayWatcher extends LivingEntityWatcher
 
             switch (id)
             {
-                case AnimationNames.DANCE_START -> writeOverride(ValueIndex.ALLAY.DANCING, true);
-                case AnimationNames.STOP, AnimationNames.RESET -> writeOverride(ValueIndex.ALLAY.DANCING, false);
+                case AnimationNames.DANCE_START -> writePersistent(ValueIndex.ALLAY.DANCING, true);
+                case AnimationNames.STOP, AnimationNames.RESET -> writePersistent(ValueIndex.ALLAY.DANCING, false);
             }
         }
     }

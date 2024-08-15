@@ -40,7 +40,7 @@ public class CatWatcher extends TameableAnimalWatcher
 
     public Cat.Type getCatType()
     {
-        var value = get(ValueIndex.CAT.CAT_VARIANT);
+        var value = read(ValueIndex.CAT.CAT_VARIANT);
         var key = value.unwrapKey().orElse(null);
         if (key == null)
             logger.warn("Null Key for holder " + value);
@@ -83,15 +83,15 @@ public class CatWatcher extends TameableAnimalWatcher
         if (property.equals(properties.CAT_VARIANT))
         {
             var variant = (Cat.Type) value;
-            writeOverride(ValueIndex.CAT.CAT_VARIANT, bukkitTypeToNmsHolder(variant));
+            writePersistent(ValueIndex.CAT.CAT_VARIANT, bukkitTypeToNmsHolder(variant));
         }
         super.onPropertyWrite(property, value);
     }
 
     @Override
-    protected <X> void onCustomWrite(RegistryKey<X> key, X oldVal, X newVal)
+    protected <X> void onEntryWrite(RegistryKey<X> key, X oldVal, X newVal)
     {
-        super.onCustomWrite(key, oldVal, newVal);
+        super.onEntryWrite(key, oldVal, newVal);
 
         if (key.equals(EntryIndex.ANIMATION))
         {
@@ -99,15 +99,15 @@ public class CatWatcher extends TameableAnimalWatcher
 
             switch (animId)
             {
-                case AnimationNames.LAY_START -> this.writeOverride(ValueIndex.CAT.IS_LYING, true);
-                case AnimationNames.SIT -> this.writeOverride(ValueIndex.CAT.TAMEABLE_FLAGS, (byte)0x01);
+                case AnimationNames.LAY_START -> this.writePersistent(ValueIndex.CAT.IS_LYING, true);
+                case AnimationNames.SIT -> this.writePersistent(ValueIndex.CAT.TAMEABLE_FLAGS, (byte)0x01);
                 case AnimationNames.STANDUP, AnimationNames.RESET ->
                 {
-                    if (this.getOr(ValueIndex.CAT.IS_LYING, false))
-                        this.writeOverride(ValueIndex.CAT.IS_LYING, false);
+                    if (this.readOr(ValueIndex.CAT.IS_LYING, false))
+                        this.writePersistent(ValueIndex.CAT.IS_LYING, false);
 
-                    if ((this.getOr(ValueIndex.CAT.TAMEABLE_FLAGS, (byte)0x00) & 1) != 0)
-                        this.writeOverride(ValueIndex.CAT.TAMEABLE_FLAGS, (byte)0x00);
+                    if ((this.readOr(ValueIndex.CAT.TAMEABLE_FLAGS, (byte)0x00) & 1) != 0)
+                        this.writePersistent(ValueIndex.CAT.TAMEABLE_FLAGS, (byte)0x00);
                 }
             }
         }
@@ -128,12 +128,12 @@ public class CatWatcher extends TameableAnimalWatcher
             match.ifPresent(type ->
             {
                 var finalValue = bukkitTypeToNmsHolder(type);
-                this.writeOverride(ValueIndex.CAT.CAT_VARIANT, finalValue);
+                this.writePersistent(ValueIndex.CAT.CAT_VARIANT, finalValue);
             });
         }
 
         if (nbt.contains("CollarColor"))
-            writeOverride(ValueIndex.CAT.COLLAR_COLOR, (int)nbt.getByte("CollarColor"));
+            writePersistent(ValueIndex.CAT.COLLAR_COLOR, (int)nbt.getByte("CollarColor"));
     }
 
     @Override
@@ -144,7 +144,7 @@ public class CatWatcher extends TameableAnimalWatcher
         var variant = this.getCatType().getKey().asString();
         nbt.putString("variant", variant);
 
-        var collarColor = get(ValueIndex.CAT.COLLAR_COLOR);
+        var collarColor = read(ValueIndex.CAT.COLLAR_COLOR);
         nbt.putInt("CollarColor", collarColor);
     }
 }

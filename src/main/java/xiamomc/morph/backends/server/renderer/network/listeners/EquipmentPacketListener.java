@@ -64,7 +64,7 @@ public class EquipmentPacketListener extends ProtocolListener
         if (watcher == null)
             return;
 
-        if (!watcher.getOrDefault(EntryIndex.DISPLAY_FAKE_EQUIPMENT, false))
+        if (!watcher.readEntryOrDefault(EntryIndex.DISPLAY_FAKE_EQUIPMENT, false))
         {
             alreadyFake.remove(sourcePlayer);
             return;

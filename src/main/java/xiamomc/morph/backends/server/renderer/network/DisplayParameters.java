@@ -65,7 +65,7 @@ public class DisplayParameters
     public static DisplayParameters fromWatcher(SingleWatcher watcher)
     {
         var profile = (watcher instanceof PlayerWatcher)
-                    ? watcher.get(EntryIndex.PROFILE)
+                    ? watcher.readEntry(EntryIndex.PROFILE)
                     : null;
 
         return new DisplayParameters(

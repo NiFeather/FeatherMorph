@@ -51,7 +51,7 @@ public class FrogWatcher extends LivingEntityWatcher
 
     public Frog.Variant getBukkitFrogVariant()
     {
-        var type = get(ValueIndex.FROG.FROG_VARIANT);
+        var type = read(ValueIndex.FROG.FROG_VARIANT);
 
         var keyOptional = type.unwrapKey();
         if (keyOptional.isEmpty())
@@ -100,7 +100,7 @@ public class FrogWatcher extends LivingEntityWatcher
                 logger.error("Failed reading FrogVariant from NBT: " + t.getMessage());
             }
 
-            writeOverride(ValueIndex.FROG.FROG_VARIANT, getFrogVariant(type));
+            writePersistent(ValueIndex.FROG.FROG_VARIANT, getFrogVariant(type));
         }
     }
 
@@ -112,14 +112,14 @@ public class FrogWatcher extends LivingEntityWatcher
         if (property.equals(properties.VARIANT))
         {
             var variant = (Frog.Variant) value;
-            writeOverride(ValueIndex.FROG.FROG_VARIANT, getFrogVariant(variant));
+            writePersistent(ValueIndex.FROG.FROG_VARIANT, getFrogVariant(variant));
         }
     }
 
     @Override
-    protected <X> void onCustomWrite(RegistryKey<X> key, X oldVal, X newVal)
+    protected <X> void onEntryWrite(RegistryKey<X> key, X oldVal, X newVal)
     {
-        super.onCustomWrite(key, oldVal, newVal);
+        super.onEntryWrite(key, oldVal, newVal);
 
         if (key.equals(EntryIndex.ANIMATION))
         {
@@ -127,7 +127,7 @@ public class FrogWatcher extends LivingEntityWatcher
 
             switch (animId)
             {
-                case AnimationNames.EAT -> this.writeOverride(ValueIndex.FROG.POSE, Pose.USING_TONGUE);
+                case AnimationNames.EAT -> this.writePersistent(ValueIndex.FROG.POSE, Pose.USING_TONGUE);
                 case AnimationNames.RESET -> this.remove(ValueIndex.FROG.POSE);
             }
         }

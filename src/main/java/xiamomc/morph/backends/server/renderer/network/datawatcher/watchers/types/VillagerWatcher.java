@@ -72,21 +72,21 @@ public class VillagerWatcher extends LivingEntityWatcher
         {
             this.lvl = (Integer) value;
 
-            writeOverride(ValueIndex.VILLAGER.VILLAGER_DATA, computeNmsVillagerData());
+            writePersistent(ValueIndex.VILLAGER.VILLAGER_DATA, computeNmsVillagerData());
         }
 
         if (property.equals(properties.TYPE))
         {
             this.type = (Villager.Type) value;
 
-            writeOverride(ValueIndex.VILLAGER.VILLAGER_DATA, computeNmsVillagerData());
+            writePersistent(ValueIndex.VILLAGER.VILLAGER_DATA, computeNmsVillagerData());
         }
 
         if (property.equals(properties.PROFESSION))
         {
             this.profession = (Villager.Profession) value;
 
-            writeOverride(ValueIndex.VILLAGER.VILLAGER_DATA, computeNmsVillagerData());
+            writePersistent(ValueIndex.VILLAGER.VILLAGER_DATA, computeNmsVillagerData());
         }
 
         super.onPropertyWrite(property, value);
@@ -133,7 +133,7 @@ public class VillagerWatcher extends LivingEntityWatcher
             type = BuiltInRegistries.VILLAGER_TYPE.getOptional(rl).orElse(VillagerType.PLAINS);
         }
 
-        writeOverride(ValueIndex.VILLAGER.VILLAGER_DATA, new VillagerData(type, profession, level));
+        writePersistent(ValueIndex.VILLAGER.VILLAGER_DATA, new VillagerData(type, profession, level));
     }
 
     @Override
@@ -154,7 +154,7 @@ public class VillagerWatcher extends LivingEntityWatcher
     {
         super.writeToCompound(nbt);
 
-        var villagerData = get(ValueIndex.VILLAGER.VILLAGER_DATA);
+        var villagerData = read(ValueIndex.VILLAGER.VILLAGER_DATA);
         var profession = villagerData.getProfession();
         var type = villagerData.getType();
         var level = villagerData.getLevel();

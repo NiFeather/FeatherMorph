@@ -26,7 +26,7 @@ public class CreeperWatcher extends LivingEntityWatcher
         super.mergeFromCompound(nbt);
 
         if (nbt.contains("powered"))
-            this.writeOverride(ValueIndex.CREEPER.IS_CHARGED_CREEPER, nbt.getBoolean("powered"));
+            this.writePersistent(ValueIndex.CREEPER.IS_CHARGED_CREEPER, nbt.getBoolean("powered"));
     }
 
     @Override
@@ -34,6 +34,6 @@ public class CreeperWatcher extends LivingEntityWatcher
     {
         super.writeToCompound(nbt);
 
-        nbt.putBoolean("powered", this.get(ValueIndex.CREEPER.IS_CHARGED_CREEPER));
+        nbt.putBoolean("powered", this.read(ValueIndex.CREEPER.IS_CHARGED_CREEPER));
     }
 }

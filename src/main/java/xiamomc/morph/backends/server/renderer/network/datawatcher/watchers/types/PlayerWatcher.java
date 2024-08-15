@@ -43,16 +43,16 @@ public class PlayerWatcher extends InventoryLivingWatcher
     }
 
     @Override
-    protected <X> void onCustomWrite(RegistryKey<X> key, X oldVal, X newVal)
+    protected <X> void onEntryWrite(RegistryKey<X> key, X oldVal, X newVal)
     {
-        super.onCustomWrite(key, oldVal, newVal);
+        super.onEntryWrite(key, oldVal, newVal);
 
         if (key.equals(EntryIndex.PROFILE) && isPlayerOnline())
         {
             var player = getBindingPlayer();
 
             var profile = newVal == null
-                    ? new GameProfile(UUID.randomUUID(), this.getOrDefault(EntryIndex.DISGUISE_NAME, ""))
+                    ? new GameProfile(UUID.randomUUID(), this.readEntryOrDefault(EntryIndex.DISGUISE_NAME, ""))
                     : (GameProfile) newVal;
 
             var spawnPackets = getPacketFactory()
@@ -80,17 +80,17 @@ public class PlayerWatcher extends InventoryLivingWatcher
                 case AnimationNames.LAY ->
                 {
                     this.remove(ValueIndex.PLAYER.POSE);
-                    this.writeOverride(ValueIndex.PLAYER.POSE, Pose.SLEEPING);
+                    this.writePersistent(ValueIndex.PLAYER.POSE, Pose.SLEEPING);
                 }
                 case AnimationNames.PROSTRATE ->
                 {
                     this.remove(ValueIndex.PLAYER.POSE);
-                    this.writeOverride(ValueIndex.PLAYER.POSE, Pose.SWIMMING);
+                    this.writePersistent(ValueIndex.PLAYER.POSE, Pose.SWIMMING);
                 }
                 case AnimationNames.STANDUP, AnimationNames.RESET ->
                 {
                     var nmsPlayer = NmsRecord.ofPlayer(getBindingPlayer());
-                    this.writeOverride(ValueIndex.PLAYER.POSE, nmsPlayer.getPose());
+                    this.writePersistent(ValueIndex.PLAYER.POSE, nmsPlayer.getPose());
                     this.remove(ValueIndex.PLAYER.POSE);
                 }
             }

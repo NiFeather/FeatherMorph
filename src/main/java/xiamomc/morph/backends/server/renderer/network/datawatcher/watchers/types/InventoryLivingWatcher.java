@@ -18,9 +18,9 @@ public class InventoryLivingWatcher extends LivingEntityWatcher
     private PacketFactory packetFactory;
 
     @Override
-    protected <X> void onCustomWrite(RegistryKey<X> key, X oldVal, X newVal)
+    protected <X> void onEntryWrite(RegistryKey<X> key, X oldVal, X newVal)
     {
-        super.onCustomWrite(key, oldVal, newVal);
+        super.onEntryWrite(key, oldVal, newVal);
 
         if (key.equals(EntryIndex.DISPLAY_FAKE_EQUIPMENT) || key.equals(EntryIndex.EQUIPMENT))
             sendPacketToAffectedPlayers(packetFactory.getEquipmentPacket(getBindingPlayer(), this));
