@@ -1,5 +1,7 @@
 package xiamomc.morph.misc.permissions;
 
+import xiamomc.morph.misc.DisguiseTypes;
+
 public class CommonPermissions
 {
     private final static String PERM_ROOT = "xiamomc.morph.";
@@ -59,6 +61,9 @@ public class CommonPermissions
 
     public static String animationPermissionOf(String animationId, String disguiseID)
     {
+        if (disguiseID.startsWith(DisguiseTypes.PLAYER.getNameSpace()))
+            disguiseID = "player:default";
+
         return PERM_ROOT
                 + "emote"
                 + "."
