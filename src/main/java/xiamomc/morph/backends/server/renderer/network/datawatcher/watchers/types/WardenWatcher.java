@@ -24,7 +24,7 @@ public class WardenWatcher extends EHasAttackAnimationWatcher
         super(bindingPlayer, EntityType.WARDEN);
     }
 
-    private final Pose DIG_PLACEHOLDER_POSE = Pose.FALL_FLYING;
+    private final Pose DIG_PLACEHOLDER_POSE = Pose.SLEEPING;
 
     @Override
     protected <X> void onEntryWrite(RegistryKey<X> key, X oldVal, X newVal)
