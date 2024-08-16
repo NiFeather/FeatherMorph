@@ -102,18 +102,31 @@ public class WardenWatcher extends EHasAttackAnimationWatcher
                         packets.forEach(p -> protocol.sendServerPacket(affectedPlayer, p));
                     }
                 }
+                case AnimationNames.TRY_RESET ->
+                {
+                    if (this.read(ValueIndex.BASE_LIVING.POSE) == DIG_PLACEHOLDER_POSE) return;
+
+                    reset();
+                }
                 case AnimationNames.RESET ->
                 {
-                    this.writePersistent(ValueIndex.BASE_ENTITY.GENERAL, this.getPlayerBitMask(bindingPlayer));
-                    this.writePersistent(ValueIndex.BASE_LIVING.POSE, NmsRecord.ofPlayer(bindingPlayer).getPose());
-                    this.writePersistent(ValueIndex.BASE_LIVING.SILENT, false);
-                    this.remove(ValueIndex.BASE_LIVING.POSE);
-                    this.remove(ValueIndex.BASE_ENTITY.GENERAL);
-                    this.remove(ValueIndex.BASE_LIVING.SILENT);
-
-                    this.unBlock(ValueIndex.BASE_LIVING.POSE);
+                    reset();
                 }
             }
         }
+    }
+
+    private void reset()
+    {
+        var bindingPlayer = getBindingPlayer();
+
+        this.writePersistent(ValueIndex.BASE_ENTITY.GENERAL, this.getPlayerBitMask(bindingPlayer));
+        this.writePersistent(ValueIndex.BASE_LIVING.POSE, NmsRecord.ofPlayer(bindingPlayer).getPose());
+        this.writePersistent(ValueIndex.BASE_LIVING.SILENT, false);
+        this.remove(ValueIndex.BASE_LIVING.POSE);
+        this.remove(ValueIndex.BASE_ENTITY.GENERAL);
+        this.remove(ValueIndex.BASE_LIVING.SILENT);
+
+        this.unBlock(ValueIndex.BASE_LIVING.POSE);
     }
 }
