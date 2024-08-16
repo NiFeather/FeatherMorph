@@ -5,6 +5,7 @@ import com.comphenix.protocol.events.ListeningWhitelist;
 import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.injector.GamePhase;
 import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
+import net.minecraft.network.syncher.SynchedEntityData;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import xiamomc.morph.backends.server.renderer.network.PacketFactory;
@@ -72,7 +73,7 @@ public class MetaPacketListener extends ProtocolListener
             //取得来源玩家的伪装后的Meta，发送给目标玩家
             //从包里移除玩家meta中不属于BASE_LIVING的部分
             var isPlayerDisguise = watcher.getEntityType() == EntityType.PLAYER;
-            var finalPacket = getFactory().processServerMetaPacket(
+            var finalPacket = getFactory().rebuildServerMetaPacket(
                     isPlayerDisguise ? ValueIndex.PLAYER : ValueIndex.BASE_LIVING,
                     watcher,
                     packetContainer);

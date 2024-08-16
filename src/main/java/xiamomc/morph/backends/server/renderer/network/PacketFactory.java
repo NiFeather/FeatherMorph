@@ -184,23 +184,28 @@ public class PacketFactory extends MorphPluginObject
     }
 
     /**
-     * 处理服务器发送的Meta包数据
+     * 重构服务器的Meta包
+     * <br>
+     * 直接修改Meta包会导致一些玄学问题，例如修改后的值在之后被发给了不该收到的人
      * @return 剔除后的包
      */
-    public PacketContainer processServerMetaPacket(AbstractValues av, SingleWatcher watcher, PacketContainer originalPacket)
+    public PacketContainer rebuildServerMetaPacket(AbstractValues av, SingleWatcher watcher, PacketContainer originalPacket)
     {
         if (originalPacket.getType() != PacketType.Play.Server.ENTITY_METADATA)
             throw new IllegalArgumentException("Original packet is not a valid metadata packet!");
 
+        var newPacket = new PacketContainer(PacketType.Play.Server.ENTITY_METADATA);
+        newPacket.getIntegers().write(0, originalPacket.getIntegers().read(0));
+
         var values = av.getValues();
-        var modifier = originalPacket.getDataValueCollectionModifier();
 
         //获取原Meta包中的数据
-        var wrappedData = modifier.read(0);
-        List<WrappedDataValue> toRemove = new ObjectArrayList<>();
+        var originalData = originalPacket.getDataValueCollectionModifier().read(0);
+
+        List<WrappedDataValue> valuesToAdd = new ObjectArrayList<>();
         var blockedValues = watcher.getBlockedValues();
 
-        for (WrappedDataValue w : wrappedData)
+        for (WrappedDataValue w : originalData)
         {
             var index = w.getIndex();
             var rawValue = w.getRawValue();
@@ -210,27 +215,31 @@ public class PacketFactory extends MorphPluginObject
                     .filter(sv -> sv.index() == index && (rawValue == null || rawValue.getClass() == sv.defaultValue().getClass()))
                     .findFirst().orElse(null);
 
-            // 如果没有匹配的SV，则代表我们的伪装没有此INDEX，移除
-            if (disguiseValue == null || blockedValues.contains(index))
+            // 如果有找到并且没有被屏蔽
+            if (disguiseValue != null && !blockedValues.contains(index))
             {
-                toRemove.add(w);
-            }
-            else
-            {
-                // 否则，查找是否有覆写值
-                var wa = watcher.readOr(disguiseValue.index(), null);
+                var val = watcher.readOr(disguiseValue.index(), null);
+                if (val == null) val = w.getRawValue();
 
-                if (wa != null)
-                    w.setRawValue(wa);
+                WrappedDataWatcher.Serializer serializer;
+
+                try
+                {
+                    serializer = ProtocolRegistryUtils.getSerializer(disguiseValue);
+                }
+                catch (Throwable t)
+                {
+                    logger.warn("Error occurred while generating meta packet with id '%s': %s".formatted(disguiseValue.name(), t.getMessage()));
+                    continue;
+                }
+
+                valuesToAdd.add(new WrappedDataValue(disguiseValue.index(), serializer, val));
             }
         }
 
-        if (!toRemove.isEmpty())
-            toRemove.forEach(wrappedData::remove);
+        newPacket.getDataValueCollectionModifier().write(0, valuesToAdd);
 
-        modifier.write(0, wrappedData);
-
-        return originalPacket;
+        return newPacket;
     }
 
     public PacketContainer buildDiffMetaPacket(Player player, SingleWatcher watcher)
@@ -254,7 +263,7 @@ public class PacketFactory extends MorphPluginObject
             }
             catch (Throwable t)
             {
-                logger.warn("Error occurred while generating meta packet with id '%s': %s".formatted(single.index(), t.getMessage()));
+                logger.warn("Error occurred while generating meta packet with id '%s': %s".formatted(single.name(), t.getMessage()));
                 return;
             }
 
