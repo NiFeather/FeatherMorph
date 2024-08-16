@@ -32,7 +32,7 @@ public class PlayerLookPacketListener extends ProtocolListener
         //event.setCancelled(true);
 
         //不要处理来自我们自己的包
-        if (packet.getMeta(PacketFactory.MORPH_PACKET_METAKEY).isPresent())
+        if (getFactory().isPacketOurs(packet))
         {
             return;
         }
@@ -126,7 +126,7 @@ public class PlayerLookPacketListener extends ProtocolListener
 
         var newPacket = new ClientboundRotateHeadPacket(sourceNmsEntity, newHeadYaw);
         var finalPacket = PacketContainer.fromPacket(newPacket);
-        finalPacket.setMeta(PacketFactory.MORPH_PACKET_METAKEY, true);
+        getFactory().markPacketOurs(finalPacket);
 
         event.setPacket(finalPacket);
     }
@@ -207,7 +207,7 @@ public class PlayerLookPacketListener extends ProtocolListener
         }
 
         var finalPacket = PacketContainer.fromPacket(newPacket);
-        finalPacket.setMeta(PacketFactory.MORPH_PACKET_METAKEY, true);
+        getFactory().markPacketOurs(finalPacket);
         event.setPacket(finalPacket);
     }
 

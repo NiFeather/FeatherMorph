@@ -33,8 +33,11 @@ public class MetaPacketListener extends ProtocolListener
         var packet = event.getPacket();
 
         //不要处理来自我们自己的包
-        if (packet.getMeta(PacketFactory.MORPH_PACKET_METAKEY).isPresent())
+        if (getFactory().isPacketOurs(packet))
+        {
+            //logger.info("Got our packet with hash " + packet.getHandle().hashCode());
             return;
+        }
 
         onMetaPacket((ClientboundSetEntityDataPacket) event.getPacket().getHandle(), event);
     }
@@ -67,22 +70,19 @@ public class MetaPacketListener extends ProtocolListener
         //不要二次处理来自我们自己的包
         //并且不要处理同为玩家的Meta包
         var packetContainer = packetEvent.getPacket();
-        var meta = packetContainer.getMeta(PacketFactory.MORPH_PACKET_METAKEY);
-        if (meta.isEmpty())
-        {
-            //取得来源玩家的伪装后的Meta，发送给目标玩家
-            //从包里移除玩家meta中不属于BASE_LIVING的部分
-            var isPlayerDisguise = watcher.getEntityType() == EntityType.PLAYER;
-            var finalPacket = getFactory().rebuildServerMetaPacket(
-                    isPlayerDisguise ? ValueIndex.PLAYER : ValueIndex.BASE_LIVING,
-                    watcher,
-                    packetContainer);
 
-            if (finalPacket.getDataValueCollectionModifier().size() == 0)
-                packetEvent.setCancelled(true);
+        //取得来源玩家的伪装后的Meta，发送给目标玩家
+        //从包里移除玩家meta中不属于BASE_LIVING的部分
+        var isPlayerDisguise = watcher.getEntityType() == EntityType.PLAYER;
+        var finalPacket = getFactory().rebuildServerMetaPacket(
+                isPlayerDisguise ? ValueIndex.PLAYER : ValueIndex.BASE_LIVING,
+                watcher,
+                packetContainer);
 
-            packetEvent.setPacket(finalPacket);
-        }
+        if (finalPacket.getDataValueCollectionModifier().size() == 0)
+            packetEvent.setCancelled(true);
+
+        packetEvent.setPacket(finalPacket);
     }
 
     @Override

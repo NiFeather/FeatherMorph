@@ -39,7 +39,7 @@ public class EquipmentPacketListener extends ProtocolListener
         var packet = event.getPacket();
 
         //不要处理来自我们自己的包
-        if (packet.getMeta(PacketFactory.MORPH_PACKET_METAKEY).isPresent())
+        if (getFactory().isPacketOurs(packet))
             return;
 
         onEquipmentPacket((ClientboundSetEquipmentPacket) event.getPacket().getHandle(), event);
@@ -49,9 +49,6 @@ public class EquipmentPacketListener extends ProtocolListener
 
     private void onEquipmentPacket(ClientboundSetEquipmentPacket packet, PacketEvent event)
     {
-        if (event.getPacket().getMeta(PacketFactory.MORPH_PACKET_METAKEY).isPresent())
-            return;
-
         //获取此包的来源实体
         var sourceNmsEntity = getNmsPlayerEntityFrom(event, packet.getEntity());
         if (sourceNmsEntity == null)

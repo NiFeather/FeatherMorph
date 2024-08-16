@@ -4,6 +4,8 @@ import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.wrappers.WrappedDataValue;
 import com.comphenix.protocol.wrappers.WrappedDataWatcher;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.*;
@@ -17,6 +19,7 @@ import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.values.AbstractValues;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
 import xiamomc.morph.backends.server.renderer.network.registries.CustomEntries;
+import xiamomc.morph.backends.server.renderer.network.registries.ValueIndex;
 import xiamomc.morph.backends.server.renderer.utilties.ProtocolRegistryUtils;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
@@ -29,17 +32,34 @@ import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Bindables.Bindable;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 public class PacketFactory extends MorphPluginObject
 {
-    public static final String MORPH_PACKET_METAKEY = "fm";
-
     private final Bindable<String> randomBase = new Bindable<>("Stateof");
 
     @Initializer
     private void load(MorphConfigManager config)
     {
         config.bind(randomBase, ConfigOption.UUID_RANDOM_BASE);
+    }
+
+    /**
+     * 如果使用ProtocolLib自己的META系统<br>
+     * 则可能会出现已发送的包又重新回归的问题<br>
+     * 因此我们使用自己的方法，来标记某个包是否属于我们。
+     */
+    private final Cache<Integer, Object> cache = CacheBuilder.newBuilder().expireAfterAccess(1, TimeUnit.SECONDS).build();
+
+    public void markPacketOurs(PacketContainer container)
+    {
+        cache.put(container.getHandle().hashCode(), container);
+    }
+
+    public boolean isPacketOurs(PacketContainer container)
+    {
+        var dd = cache.getIfPresent(container.getHandle().hashCode());
+        return dd != null;
     }
 
     public List<PacketContainer> buildSpawnPackets(Player player, DisplayParameters parameters)
@@ -178,7 +198,7 @@ public class PacketFactory extends MorphPluginObject
         }
 
         for (PacketContainer packet : packets)
-            packet.setMeta(MORPH_PACKET_METAKEY, true);
+            markPacketOurs(packet);
 
         return packets;
     }
@@ -239,8 +259,13 @@ public class PacketFactory extends MorphPluginObject
 
         newPacket.getDataValueCollectionModifier().write(0, valuesToAdd);
 
+        metaPacketIndex++;
+        markPacketOurs(newPacket);
+
         return newPacket;
     }
+
+    private int metaPacketIndex;
 
     public PacketContainer buildDiffMetaPacket(Player player, SingleWatcher watcher)
     {
@@ -272,7 +297,9 @@ public class PacketFactory extends MorphPluginObject
         });
 
         modifier.write(0, wrappedDataValues);
-        metaPacket.setMeta(MORPH_PACKET_METAKEY, true);
+
+        metaPacketIndex++;
+        markPacketOurs(metaPacket);
 
         return metaPacket;
     }
@@ -314,7 +341,9 @@ public class PacketFactory extends MorphPluginObject
         });
 
         modifier.write(0, wrappedDataValues);
-        metaPacket.setMeta(MORPH_PACKET_METAKEY, true);
+
+        metaPacketIndex++;
+        markPacketOurs(metaPacket);
 
         return metaPacket;
     }
@@ -330,7 +359,7 @@ public class PacketFactory extends MorphPluginObject
                 ProtocolEquipment.toPairs(equipment));
 
         var container = PacketContainer.fromPacket(rawPacket);
-        container.setMeta(MORPH_PACKET_METAKEY, true);
+        markPacketOurs(container);
 
         return container;
     }

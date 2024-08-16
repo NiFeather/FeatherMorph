@@ -33,7 +33,7 @@ public class SoundListener extends ProtocolListener
         var packet = event.getPacket();
 
         //不要处理来自我们自己的包
-        if (packet.getMeta(PacketFactory.MORPH_PACKET_METAKEY).isPresent())
+        if (getFactory().isPacketOurs(packet))
         {
             return;
         }

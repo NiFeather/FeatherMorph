@@ -178,8 +178,7 @@ public class SpawnPacketHandler extends ProtocolListener
             return;
 
         //不要二次处理来自我们自己的包
-        var meta = packetContainer.getMeta(PacketFactory.MORPH_PACKET_METAKEY);
-        if (meta.isEmpty())
+        if (!getFactory().isPacketOurs(packetContainer));
         {
             packetEvent.setCancelled(true);
             refreshStateForPlayer(Bukkit.getPlayer(packet.getUUID()), List.of(packetEvent.getPlayer()));
