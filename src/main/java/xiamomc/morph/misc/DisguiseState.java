@@ -97,18 +97,27 @@ public class DisguiseState extends MorphPluginObject
 
             this.getDisguiseWrapper().playAnimation(animSubId);
 
-            switch (animSubId)
-            {
-                case AnimationNames.INTERNAL_DISABLE_AMBIENT -> this.requestAmbientState(this, true);
-                case AnimationNames.INTERNAL_ENABLE_AMBIENT -> this.requestAmbientState(this, false);
-                case AnimationNames.INTERNAL_DISABLE_SKILL -> this.requestSkillState(this, true);
-                case AnimationNames.INTERNAL_ENABLE_SKILL -> this.requestSkillState(this, false);
-            }
+            if (animSubId.startsWith("exec_"))
+                handleInternalExec(animSubId);
         });
+    }
+
+    private void handleInternalExec(String animationSubId)
+    {
+        switch (animationSubId)
+        {
+            case AnimationNames.INTERNAL_DISABLE_AMBIENT -> this.requestAmbientState(this, true);
+            case AnimationNames.INTERNAL_ENABLE_AMBIENT -> this.requestAmbientState(this, false);
+            case AnimationNames.INTERNAL_DISABLE_SKILL -> this.requestSkillState(this, true);
+            case AnimationNames.INTERNAL_ENABLE_SKILL -> this.requestSkillState(this, false);
+            case AnimationNames.INTERNAL_DISABLE_BOSSBAR -> this.requestBossbarState(this, true);
+            case AnimationNames.INTERNAL_ENABLE_BOSSBAR -> this.requestBossbarState(this, false);
+        }
     }
 
     private final List<Object> disableSkillRequests = Collections.synchronizedList(new ObjectArrayList<>());
     private final List<Object> disableAmbientRequests = Collections.synchronizedList(new ObjectArrayList<>());
+    private final List<Object> disableBossbarRequests = Collections.synchronizedList(new ObjectArrayList<>());
 
     public void requestSkillState(Object source, boolean shouldDisable)
     {
@@ -144,6 +153,24 @@ public class DisguiseState extends MorphPluginObject
     public boolean canPlayAmbient()
     {
         return disableSkillRequests.isEmpty();
+    }
+
+    public void requestBossbarState(Object source, boolean shouldDisable)
+    {
+        if (shouldDisable)
+        {
+            if (!disableBossbarRequests.contains(source))
+                disableBossbarRequests.add(source);
+        }
+        else
+        {
+            disableBossbarRequests.remove(source);
+        }
+    }
+
+    public boolean canDisplayBossbar()
+    {
+        return disableBossbarRequests.isEmpty();
     }
 
     private final PlayerOptions<Player> playerOptions;

@@ -85,44 +85,48 @@ public class BossbarAbility extends MorphAbility<BossbarOption>
     @Override
     public boolean handle(Player player, DisguiseState state)
     {
-        if (super.handle(player, state))
+        if (!super.handle(player, state)) return false;
+
+        if (!this.isPlayerApplied(player) || plugin.getCurrentTick() % 4 != 0)
+            return true;
+
+        var option = this.getOptionFor(state);
+
+        if (option == null) return false;
+
+        var bossbar = state.getBossbar();
+        if (bossbar != null)
         {
-            if (this.isPlayerApplied(player) && plugin.getCurrentTick() % 4 == 0)
+            var distance = option.getApplyDistance();
+
+            if (distance < 0)
+                distance = (Bukkit.getViewDistance() - 1) * 16;
+
+            var playerGameMode = player.getGameMode();
+            List<Player> playersToShow = DisguiseUtils.findNearbyPlayers(player, distance, true);
+            List<Player> playersToHide = new ObjectArrayList<>(Bukkit.getOnlinePlayers());
+
+            if (playerGameMode == GameMode.SPECTATOR)
+                playersToShow.removeIf(p -> p.getGameMode() != playerGameMode);
+
+            bossbar.progress((float) (player.getHealth() / player.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue()));
+            //bossbar.name(this.getBossbarName(state, option));
+
+            if (state.canDisplayBossbar())
             {
-                var option = this.getOptionFor(state);
-
-                if (option == null) return false;
-
-                var bossbar = state.getBossbar();
-                if (bossbar != null)
-                {
-                    var distance = option.getApplyDistance();
-
-                    if (distance < 0)
-                        distance = (Bukkit.getViewDistance() - 1) * 16;
-
-                    var playerGameMode = player.getGameMode();
-                    List<Player> playersToShow = DisguiseUtils.findNearbyPlayers(player, distance, true);
-                    List<Player> playersToHide = new ObjectArrayList<>(Bukkit.getOnlinePlayers());
-
-                    if (playerGameMode == GameMode.SPECTATOR)
-                        playersToShow.removeIf(p -> p.getGameMode() != playerGameMode);
-
-                    bossbar.progress((float) (player.getHealth() / player.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue()));
-                    //bossbar.name(this.getBossbarName(state, option));
-
-                    playersToHide.removeAll(playersToShow);
-                    playersToHide.remove(player);
-
-                    playersToShow.forEach(p -> p.showBossBar(bossbar));
-                    playersToHide.forEach(p -> p.hideBossBar(bossbar));
-                }
+                playersToHide.removeAll(playersToShow);
+                playersToHide.remove(player);
+            }
+            else
+            {
+                playersToShow.clear();
             }
 
-            return true;
+            playersToShow.forEach(p -> p.showBossBar(bossbar));
+            playersToHide.forEach(p -> p.hideBossBar(bossbar));
         }
 
-        return false;
+        return true;
     }
 
     private Component getBossbarName(DisguiseState state, BossbarOption option)

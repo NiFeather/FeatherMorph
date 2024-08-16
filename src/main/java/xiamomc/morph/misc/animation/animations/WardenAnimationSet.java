@@ -24,7 +24,7 @@ public class WardenAnimationSet extends AnimationSet
     {
         register(AnimationNames.ROAR, List.of(DISABLE_SKILL, ROAR, ROAR_SOUND, TRY_RESET, ENABLE_SKILL));
         register(AnimationNames.SNIFF, List.of(DISABLE_SKILL, SNIFF, TRY_RESET, ENABLE_SKILL));
-        register(AnimationNames.DIGDOWN, List.of(DISABLE_SKILL, DISABLE_AMBIENT, DIGDOWN, VANISH));
-        register(AnimationNames.APPEAR, List.of(APPEAR, ENABLE_SKILL, ENABLE_AMBIENT, RESET));
+        register(AnimationNames.DIGDOWN, List.of(DISABLE_SKILL, DISABLE_AMBIENT, DIGDOWN, VANISH, DISABLE_BOSSBAR));
+        register(AnimationNames.APPEAR, List.of(ENABLE_BOSSBAR, APPEAR, ENABLE_SKILL, ENABLE_AMBIENT, RESET));
     }
 }

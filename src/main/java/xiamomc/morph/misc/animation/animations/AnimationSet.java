@@ -17,6 +17,8 @@ public abstract class AnimationSet
     public static final SingleAnimation ENABLE_SKILL = new SingleAnimation(AnimationNames.INTERNAL_ENABLE_SKILL, 0, false);
     public static final SingleAnimation DISABLE_AMBIENT = new SingleAnimation(AnimationNames.INTERNAL_DISABLE_AMBIENT, 0, false);
     public static final SingleAnimation ENABLE_AMBIENT = new SingleAnimation(AnimationNames.INTERNAL_ENABLE_AMBIENT, 0, false);
+    public static final SingleAnimation DISABLE_BOSSBAR = new SingleAnimation(AnimationNames.INTERNAL_DISABLE_BOSSBAR, 0, false);
+    public static final SingleAnimation ENABLE_BOSSBAR = new SingleAnimation(AnimationNames.INTERNAL_ENABLE_BOSSBAR, 0, false);
 
     private final Map<String, List<SingleAnimation>> animationMap = new ConcurrentHashMap<>();
 

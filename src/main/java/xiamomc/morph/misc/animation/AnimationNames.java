@@ -51,8 +51,10 @@ public class AnimationNames
 
     public static final String VANISH = "vanish";
 
-    public static final String INTERNAL_DISABLE_SKILL = "disable_skill";
-    public static final String INTERNAL_DISABLE_AMBIENT = "disable_ambient";
-    public static final String INTERNAL_ENABLE_SKILL = "enable_skill";
-    public static final String INTERNAL_ENABLE_AMBIENT = "enable_ambient";
+    public static final String INTERNAL_DISABLE_SKILL = "exec_disable_skill";
+    public static final String INTERNAL_DISABLE_AMBIENT = "exec_disable_ambient";
+    public static final String INTERNAL_ENABLE_SKILL = "exec_enable_skill";
+    public static final String INTERNAL_ENABLE_AMBIENT = "exec_enable_ambient";
+    public static final String INTERNAL_DISABLE_BOSSBAR = "exec_disable_bossbar";
+    public static final String INTERNAL_ENABLE_BOSSBAR = "exec_enable_bossbar";
 }
