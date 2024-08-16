@@ -64,15 +64,20 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
         }
     }
 
-    @Override
-    public CompoundTag getCompound()
+    private CompoundTag getCompound(boolean includeWatcher)
     {
         var tagCopy = this.instance.compoundTag.copy();
 
-        if (bindingWatcher != null)
+        if (bindingWatcher != null && includeWatcher)
             tagCopy.merge(WatcherUtils.buildCompoundFromWatcher(bindingWatcher));
 
         return tagCopy;
+    }
+
+    @Override
+    public CompoundTag getCompound()
+    {
+        return this.getCompound(true);
     }
 
     /**

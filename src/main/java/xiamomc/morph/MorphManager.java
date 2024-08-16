@@ -67,6 +67,7 @@ import xiamomc.pluginbase.Bindables.BindableList;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 public class MorphManager extends MorphPluginObject implements IManagePlayerData
 {
@@ -1606,6 +1607,9 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         disguiseStates.removeAll(stateToOfflineStore);
         var stateToRecover = getDisguiseStates();
+        stateToRecover = stateToRecover.stream()
+                .map(oldState -> oldState.createCopy(oldState.getPlayer()))
+                .toList();
 
         unMorphAll(false);
 
@@ -1623,11 +1627,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 var config = this.getPlayerMeta(player);
                 if (!disguiseDisabled(s.getDisguiseIdentifier()) && config.getUnlockedDisguiseIdentifiers().contains(s.getDisguiseIdentifier()))
                 {
-                    var newState = s.createCopy(s.getPlayer());
-                    s.dispose();
-
-                    disguiseFromState(newState);
-                    refreshClientState(newState);
+                    disguiseFromState(s);
+                    refreshClientState(s);
 
                     player.sendMessage(MessageUtils.prefixes(player, MorphStrings.recoverString()));
                 }
