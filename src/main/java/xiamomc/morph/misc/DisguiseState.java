@@ -157,6 +157,25 @@ public class DisguiseState extends MorphPluginObject
         animationSequence.reset();
     }
 
+    public boolean canScheduleSequence()
+    {
+        var cooldown = skillHandler.getCooldownInfo(playerUUID, disguiseIdentifier);
+        if (cooldown.getCooldown() > 0) return false;
+
+        return true;
+    }
+
+    /**
+     * @return Whether success.
+     */
+    public boolean tryScheduleSequence(String animationId, List<SingleAnimation> sequence)
+    {
+        if (!canScheduleSequence()) return false;
+        this.scheduleSequence(animationId, sequence);
+
+        return true;
+    }
+
     public void scheduleSequence(String animationId, List<SingleAnimation> sequence)
     {
         this.scheduleSequence(animationId, sequence, true);

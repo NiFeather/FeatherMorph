@@ -83,7 +83,8 @@ public class AnimationCommand extends MorphPluginObject implements IPluginComman
         }
 
         var sequences = animationHandler.getSequenceFor(state.getDisguiseIdentifier(), animationId);
-        state.scheduleSequence(animationId, sequences);
+        if (!state.tryScheduleSequence(animationId, sequences))
+            player.sendMessage(MessageUtils.prefixes(player, EmoteStrings.notAvailable()));
 
         return false;
     }

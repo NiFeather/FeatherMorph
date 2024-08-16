@@ -85,7 +85,7 @@
   "commands.unmorph_someone_success" : "成功取消<who>的伪装！",
   "commands.not_disguised": "<red>你没有进行伪装!",
   "commands.no_such_animation": "<red>此动画不可用",
-  "commands.going_to_play_animation": "即将播放动画 <italic><what></italic>",
+  "commands.going_to_play_animation": "即将播放动作 <italic><what></italic>",
   "common.command_not_found" : "<color:red>未找到此指令",
   "common.player_not_defined" : "<color:red>未指定玩家",
   "common.player_not_found" : "<color:red>未找到目标玩家或对方已离线",
@@ -222,5 +222,6 @@
   "emote.morphclient.prostrate": "趴下",
   "emote.morphclient.digdown": "掘地",
   "emote.morphclient.appear": "出现",
+  "emote.morphclient.not_available": "技能冷却时不能播放动作",
   "emote.morphclient.unknown": "未知"
 }

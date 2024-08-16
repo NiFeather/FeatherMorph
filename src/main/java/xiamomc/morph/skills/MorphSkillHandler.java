@@ -9,6 +9,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphManager;
@@ -291,6 +292,7 @@ public class MorphSkillHandler extends MorphPluginObject
      * @return 技能信息，为null则传入的实体类型是null
      */
     @Nullable
+    @Contract("_, !null -> !null; _, null -> null")
     public SkillCooldownInfo getCooldownInfo(UUID uuid, @Nullable String disguiseIdentifier)
     {
         if (disguiseIdentifier == null) return null;

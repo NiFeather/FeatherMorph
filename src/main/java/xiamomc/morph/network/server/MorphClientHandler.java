@@ -20,6 +20,7 @@ import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.interfaces.IManageRequests;
+import xiamomc.morph.messages.EmoteStrings;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.MorphStrings;
 import xiamomc.morph.misc.animation.AnimationHandler;
@@ -801,14 +802,16 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
     @Override
     public void onAnimationCommand(C2SAnimationCommand c2SAnimationCommand)
     {
-        var state = manager.getDisguiseStateFor(c2SAnimationCommand.getOwner());
+        var player = (Player) c2SAnimationCommand.getOwner();
+        var state = manager.getDisguiseStateFor(player);
         if (state == null) return;
 
         var disguiseID = state.getDisguiseIdentifier();
         var animationID = c2SAnimationCommand.getAnimationId();
         var sequence = animationHandler.getSequenceFor(disguiseID, animationID);
 
-        state.scheduleSequence(animationID, sequence);
+        if (!state.tryScheduleSequence(animationID, sequence))
+            player.sendMessage(MessageUtils.prefixes(player, EmoteStrings.notAvailable()));
     }
 
     //endregion C2S(Serverbound) commands

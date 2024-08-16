@@ -9,6 +9,11 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class EmoteStrings extends AbstractMorphStrings
 {
+    public static FormattableMessage notAvailable()
+    {
+        return getFormattable(getKey("not_available"), "当前不能使用动作");
+    }
+
     private static final Map<String, FormattableMessage> map = new ConcurrentHashMap<>();
 
     private static FormattableMessage register(String id)
