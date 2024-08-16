@@ -18,6 +18,14 @@ public class PufferfishWatcher extends LivingEntityWatcher
     }
 
     @Override
+    protected void initRegistry()
+    {
+        super.initRegistry();
+
+        this.register(ValueIndex.PUFFERFISH);
+    }
+
+    @Override
     protected <X> void onEntryWrite(RegistryKey<X> key, X oldVal, X newVal)
     {
         super.onEntryWrite(key, oldVal, newVal);
