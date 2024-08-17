@@ -84,8 +84,7 @@ public class WardenWatcher extends EHasAttackAnimationWatcher
                 }
                 case AnimationNames.APPEAR ->
                 {
-                    if (this.read(ValueIndex.BASE_LIVING.POSE) != DIG_PLACEHOLDER_POSE) return;
-
+                    this.block(ValueIndex.BASE_LIVING.POSE);
                     this.remove(ValueIndex.BASE_ENTITY.GENERAL);
                     this.writePersistent(ValueIndex.BASE_LIVING.POSE, Pose.EMERGING);
                     world.playSound(bindingPlayer.getLocation(), Sound.ENTITY_WARDEN_EMERGE, 5, 1);
