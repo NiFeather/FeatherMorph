@@ -26,6 +26,7 @@ import xiamomc.morph.misc.disguiseProperty.PropertyHandler;
 import xiamomc.morph.misc.permissions.CommonPermissions;
 import xiamomc.morph.network.PlayerOptions;
 import xiamomc.morph.network.commands.S2C.S2CAnimationCommand;
+import xiamomc.morph.network.commands.S2C.set.S2CSetAnimationDisplayNameCommand;
 import xiamomc.morph.network.commands.S2C.set.S2CSetSkillCooldownCommand;
 import xiamomc.morph.network.server.MorphClientHandler;
 import xiamomc.morph.providers.DisguiseProvider;
@@ -100,6 +101,7 @@ public class DisguiseState extends MorphPluginObject
             if (animSubId.startsWith("exec_"))
                 handleInternalExec(animSubId);
         });
+        animationSequence.onNewAnimationSet(setId -> clientHandler.sendCommand(getPlayer(), new S2CSetAnimationDisplayNameCommand(setId)));
     }
 
     private void handleInternalExec(String animationSubId)
@@ -221,7 +223,7 @@ public class DisguiseState extends MorphPluginObject
             return;
         }
 
-        this.animationSequence.scheduleNext(sequence);
+        this.animationSequence.scheduleNext(animationId, sequence);
 
         var player = getPlayer();
         var animationString = CommandStrings.goingToPlayAnimation().resolve("what", EmoteStrings.get(animationId).withLocale(MessageUtils.getLocale(player)));

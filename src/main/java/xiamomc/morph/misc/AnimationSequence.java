@@ -4,6 +4,7 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.jetbrains.annotations.Nullable;
 import oshi.util.tuples.Pair;
 import xiamomc.morph.MorphPluginObject;
+import xiamomc.morph.misc.animation.AnimationNames;
 import xiamomc.morph.misc.animation.SingleAnimation;
 import xiamomc.morph.misc.animation.animations.AnimationSet;
 
@@ -15,9 +16,10 @@ import java.util.function.Consumer;
 public class AnimationSequence extends MorphPluginObject
 {
     private final List<SingleAnimation> currentQueue = Collections.synchronizedList(new ObjectArrayList<>());
+    private String currentAnimationSetId;
 
     @Nullable
-    private List<SingleAnimation> nextQueue;
+    private Pair<String, List<SingleAnimation>> nextQueue;
 
     // StartTick <-> Animation record
     @Nullable
@@ -36,11 +38,11 @@ public class AnimationSequence extends MorphPluginObject
         return cooldown;
     }
 
-    public void scheduleNext(List<SingleAnimation> animations)
+    public void scheduleNext(String animSetId, List<SingleAnimation> animations)
     {
         synchronized (this)
         {
-            nextQueue = new ObjectArrayList<>(animations);
+            nextQueue = new Pair<>(animSetId, new ObjectArrayList<>(animations));
         }
     }
 
@@ -76,19 +78,7 @@ public class AnimationSequence extends MorphPluginObject
         // 如果当前队列为空并且下一队列不为null，则切换到此队列
         if (currentQueue.isEmpty() && currentAnimation == null)
         {
-            if (nextQueue != null)
-            {
-                synchronized (this)
-                {
-                    // Find next queue
-                    currentQueue.addAll(nextQueue);
-                    nextQueue = null;
-                }
-            }
-            else
-            {
-                return;
-            }
+            if (!tryNextQueue()) return;
         }
 
         // 如果当前动画为空，则寻找动画
@@ -106,11 +96,44 @@ public class AnimationSequence extends MorphPluginObject
             currentAnimation = null;
 
             if (currentQueue.isEmpty())
+            {
+                if (hookOnNewAnimationSet != null)
+                    hookOnNewAnimationSet.accept(AnimationNames.NONE);
+
                 this.workingCooldown = cooldown;
+            }
         }
     }
 
+    /**
+     * @return 是否切换了队列
+     */
+    private boolean tryNextQueue()
+    {
+        if (nextQueue == null)
+            return false;
+
+        synchronized (this)
+        {
+            // Find next queue
+            currentQueue.addAll(nextQueue.getB());
+
+            if (hookOnNewAnimationSet != null)
+                hookOnNewAnimationSet.accept(nextQueue.getA());
+
+            nextQueue = null;
+        }
+
+        return true;
+    }
+
     private Consumer<SingleAnimation> hookOnNewAnimation;
+    private Consumer<String> hookOnNewAnimationSet;
+
+    public void onNewAnimationSet(Consumer<String> consumer)
+    {
+        this.hookOnNewAnimationSet = consumer;
+    }
 
     public void onNewAnimation(Consumer<SingleAnimation> consumer)
     {

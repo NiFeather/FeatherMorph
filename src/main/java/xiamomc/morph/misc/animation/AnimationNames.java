@@ -49,6 +49,8 @@ public class AnimationNames
     public static final String RESET = "reset";
     public static final String TRY_RESET = "try_reset";
 
+    public static final String NONE = "none";
+
     public static final String VANISH = "vanish";
 
     public static final String INTERNAL_DISABLE_SKILL = "exec_disable_skill";
