@@ -219,7 +219,7 @@
   "emote.morphclient.eat": "Eat",
   "emote.morphclient.sleep": "Sleep",
   "emote.morphclient.stop": "Stop",
-  "emote.morphclient.prostrate": "Prostrate",
+  "emote.morphclient.crawl": "Crawl",
   "emote.morphclient.digdown": "Dig Down",
   "emote.morphclient.appear": "Appear",
   "emote.morphclient.not_available": "Can't play action while the skill is still in cooldown",
