@@ -82,7 +82,7 @@ public class PlayerWatcher extends InventoryLivingWatcher
                     this.remove(ValueIndex.PLAYER.POSE);
                     this.writePersistent(ValueIndex.PLAYER.POSE, Pose.SLEEPING);
                 }
-                case AnimationNames.PROSTRATE ->
+                case AnimationNames.CRAWL ->
                 {
                     this.remove(ValueIndex.PLAYER.POSE);
                     this.writePersistent(ValueIndex.PLAYER.POSE, Pose.SWIMMING);

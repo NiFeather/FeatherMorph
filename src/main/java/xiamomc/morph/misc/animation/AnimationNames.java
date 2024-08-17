@@ -44,7 +44,7 @@ public class AnimationNames
 
     public static final String STOP = "stop";
 
-    public static final String PROSTRATE = "prostrate";
+    public static final String CRAWL = "crawl";
 
     public static final String RESET = "reset";
     public static final String TRY_RESET = "try_reset";
