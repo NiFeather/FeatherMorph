@@ -53,7 +53,8 @@ public class FlyAbility extends MorphAbility<FlyOption>
     }
 
     private final BindableList<String> noFlyWorlds = new BindableList<>();
-    private final Bindable<Boolean> noFlyInLuquid = new Bindable<>(true);
+    private final BindableList<String> noFlyInLavaWorlds = new BindableList<>();
+    private final BindableList<String> noFlyInWaterWorlds = new BindableList<>();
 
     @Initializer
     private void load(MorphConfigManager configManager)
@@ -70,7 +71,8 @@ public class FlyAbility extends MorphAbility<FlyOption>
                 idleConsumption = n ? 0.1D : 0D, true);
 
         configManager.bind(allowFlight, ConfigOption.ALLOW_FLIGHT);
-        configManager.bind(noFlyInLuquid, ConfigOption.FLYABILITY_NO_LIQUID);
+        configManager.bind(String.class, noFlyInLavaWorlds, ConfigOption.FLYABILITY_DISALLOW_FLY_IN_LAVA);
+        configManager.bind(String.class, noFlyInWaterWorlds, ConfigOption.FLYABILITY_DISALLOW_FLY_IN_WATER);
     }
 
     private final Bindable<Boolean> allowFlight = new Bindable<>(true);
@@ -92,11 +94,13 @@ public class FlyAbility extends MorphAbility<FlyOption>
 
         var option = optionMap.get(state.skillLookupIdentifier());
 
+        var worldName = player.getWorld().getName();
         var allowFlightConditions = player.getFoodLevel() > option.getMinimumHunger()
-                    && !noFlyWorlds.contains(player.getWorld().getName())
+                    && !noFlyWorlds.contains(worldName)
                     && !playerBlocked(player)
                     && playerHasCommonFlyPerm(player)
-                    && (!noFlyInLuquid.get() || (!player.isInLava() && !player.isInWaterOrBubbleColumn()));
+                    && (!noFlyInLavaWorlds.contains(worldName) || !player.isInLava())
+                    && (!noFlyInWaterWorlds.contains(worldName) || !player.isInWaterOrBubbleColumn());
 
         var allowFlight = this.allowFlight.get() && (allowFlightConditions || player.hasPermission(CommonPermissions.ALWAYS_CAN_FLY));
 

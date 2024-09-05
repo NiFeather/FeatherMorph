@@ -2,11 +2,13 @@ package xiamomc.morph.config;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import xiamomc.morph.MorphManager;
+import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.events.InteractionMirrorProcessor;
 import xiamomc.morph.utilities.NbtUtils;
 import xiamomc.pluginbase.Configuration.ConfigNode;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public enum ConfigOption
 {
@@ -29,7 +31,7 @@ public enum ConfigOption
     CHECK_AVAILABLE_SPACE(boundingBoxNode().append("check_space"), true),
 
     @Deprecated
-    MODIFY_BOUNDING_BOX_LEGACY(ConfigNode.create().append("modify_bounding_boxes"), false),
+    MODIFY_BOUNDING_BOX_LEGACY(ConfigNode.create().append("modify_bounding_boxes"), false, true),
 
     UNMORPH_ON_DEATH(ConfigNode.create().append("unmorph_on_death"), true),
 
@@ -67,7 +69,11 @@ public enum ConfigOption
 
     FLYABILITY_EXHAUSTION_BASE(flyAbilityNode().append("exhaustion_base"), 200d),
     FLYABILITY_IDLE_CONSUME(flyAbilityNode().append("idle_consumption"), true),
-    FLYABILITY_NO_LIQUID(flyAbilityNode().append("no_fly_in_liquid"), true),
+    FLYABILITY_DISALLOW_FLY_IN_WATER(flyAbilityNode().append("disallow_in_water"), new ArrayList<String>()),
+    FLYABILITY_DISALLOW_FLY_IN_LAVA(flyAbilityNode().append("disallow_in_lava"), new ArrayList<String>()),
+
+    @Deprecated(since = "1.2.2")
+    FLYABILITY_NO_LIQUID(flyAbilityNode().append("no_fly_in_liquid"), true, true),
 
     LANGUAGE_CODE(languageNode().append("code"), "en_us"),
     SINGLE_LANGUAGE(languageNode().append("single_language"), true),

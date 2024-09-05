@@ -1,6 +1,8 @@
 package xiamomc.morph.config;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import org.bukkit.Bukkit;
+import org.bukkit.generator.WorldInfo;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphPlugin;
@@ -164,7 +166,7 @@ public class MorphConfigManager extends PluginConfigManager
         });
 
         //更新配置
-        int targetVersion = 32;
+        int targetVersion = 33;
 
         var configVersion = getOrDefault(Integer.class, ConfigOption.VERSION);
 
@@ -179,15 +181,19 @@ public class MorphConfigManager extends PluginConfigManager
 
             nonDefaults.forEach((n, v) ->
             {
+                var matching = Arrays.stream(ConfigOption.values())
+                        .filter(option -> option.node.toString().equals(n.toString()))
+                        .findFirst().orElse(null);
+
+                if (matching == null)
+                {
+                    //MorphPlugin.getInstance().getSLF4JLogger().warn("Null ConfigOption for node '%s', skipping...".formatted(n));
+                    return;
+                }
+
                 //noinspection rawtypes
                 if (v instanceof Collection collection)
                 {
-                    var matching = Arrays.stream(ConfigOption.values())
-                            .filter(option -> option.node.toString().equals(n.toString()))
-                            .findFirst().orElse(null);
-
-                    if (matching != null)
-                    {
                         Collection<?> defaultVal = null;
 
                         if (matching.defaultValue instanceof Collection<?> c1)
@@ -203,7 +209,6 @@ public class MorphConfigManager extends PluginConfigManager
                         }
 
                         newConfig.set(n.toString(), v);
-                    }
                 }
                 else
                 {
@@ -254,6 +259,19 @@ public class MorphConfigManager extends PluginConfigManager
 
                 if (val != null)
                     newConfig.set(ConfigOption.MODIFY_BOUNDING_BOX.toString(), val);
+            }
+
+            if (configVersion < 34)
+            {
+                var noFlyInLiquid = getOrDefault(Boolean.class, ConfigOption.FLYABILITY_NO_LIQUID, null);
+
+                if (noFlyInLiquid != null && noFlyInLiquid)
+                {
+                    var list = Bukkit.getWorlds().stream().map(WorldInfo::getName).toList();
+
+                    newConfig.set(ConfigOption.FLYABILITY_DISALLOW_FLY_IN_WATER.toString(), list);
+                    newConfig.set(ConfigOption.FLYABILITY_DISALLOW_FLY_IN_LAVA.toString(), list);
+                }
             }
 
             newConfig.set(ConfigOption.VERSION.toString(), targetVersion);

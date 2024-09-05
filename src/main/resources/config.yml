@@ -119,8 +119,28 @@ root:
     # Add a minimal consumption limit (20% of the configured consumption speed) as an "Idle consumption" for players per tick.
     idle_consumption: true
 
-    # Should we disallow players flying in liquid?
-    no_fly_in_liquid: true
+    # Prevent players from flying in water in these worlds
+    #
+    # Example:
+    # disallow_in_water:
+    #   - example_world1
+    #   - example_world2
+    disallow_in_water:
+      - example_world1
+      - example_world2
+
+    # Prevent players from flying in lava in these worlds
+    #
+    # We HIGHLY suggest adding nether worlds to this list, since there are mods that can remove the fog in lava
+    # This can prevent players from mining Ancient Debris under lava in nether using the fly ability
+    #
+    # Example:
+    # disallow_in_lava:
+    #   - example_world1
+    #   - example_world2
+    disallow_in_lava:
+      - example_world1
+      - example_world2
 
   # Disable Fly Ability in the following worlds
   #
