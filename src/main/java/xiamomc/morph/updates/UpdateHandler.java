@@ -100,7 +100,7 @@ public class UpdateHandler extends MorphPluginObject
             var request = HttpRequest.newBuilder()
                     .GET()
                     .uri(url)
-                    .timeout(Duration.ofSeconds(3))
+                    .timeout(Duration.ofSeconds(10))
                     .header("User-Agent", "feathermorph")
                     .build();
 
