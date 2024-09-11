@@ -25,6 +25,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityTargetEvent;
 import xiamomc.morph.MorphManager;
+import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
@@ -106,34 +107,43 @@ public class EntityProcessor extends MorphPluginObject implements Listener
         double slowSpeed = 1D, fastSpeed = 1D;
 
         // 遍历实体已有的Goal
-        for (WrappedGoal g : availableGoals)
+        for (WrappedGoal wrapped : availableGoals)
         {
             // 跳过不是AvoidEntityGoal的对象
-            if (!(g.getGoal() instanceof AvoidEntityGoal<?> avoidEntityGoal)) continue;
+            if (!(wrapped.getGoal() instanceof AvoidEntityGoal<?> avoidEntityGoal)) continue;
+
+            if (wrapped.getGoal() instanceof FeatherMorphAvoidPlayerGoal)
+            {
+                logger.warn("We are processing entity that's already processed?! Found FeatherMorphAvoidPlayerGoal in entity " + sourceMob);
+                return;
+            }
 
             // 尝试获取他所要避免的目标类型
+            //
+            // Class<?>
+            // ^
             var fields = ReflectionUtils.getFields(avoidEntityGoal, Class.class, false);
             if (fields.isEmpty()) continue;
 
             var field = fields.get(0);
             field.setAccessible(true);
 
-            var goal = g.getGoal();
-
             // 创建用于替代它的Goal
             try
             {
+                // Class<?>
+                //       ^
                 var v = field.get(avoidEntityGoal);
 
                 if (v != Player.class) continue;
 
                 // 类型符合，标记移除此Goal
-                distance = ReflectionUtils.getValue(goal, "maxDist", float.class);
-                slowSpeed = ReflectionUtils.getValue(goal, "walkSpeedModifier", double.class);
-                fastSpeed = ReflectionUtils.getValue(goal, "sprintSpeedModifier", double.class);
+                distance = ReflectionUtils.getValue(avoidEntityGoal, "maxDist", float.class);
+                slowSpeed = ReflectionUtils.getValue(avoidEntityGoal, "walkSpeedModifier", double.class);
+                fastSpeed = ReflectionUtils.getValue(avoidEntityGoal, "sprintSpeedModifier", double.class);
 
-                goalFound = g;
-                goalPriority = g.getPriority();
+                goalFound = wrapped;
+                goalPriority = wrapped.getPriority();
 
                 break;
             }
@@ -355,6 +365,8 @@ public class EntityProcessor extends MorphPluginObject implements Listener
             this.slowSpeed = slowSpeed;
             this.fastSpeed = fastSpeed;
 
+            MorphPlugin.getInstance().getSLF4JLogger().info("Mob " + mob.getBukkitEntityRaw().getType() + " Is Replace? " + isReplace);
+
             this.isReplacement = isReplace;
         }
 
@@ -364,24 +376,22 @@ public class EntityProcessor extends MorphPluginObject implements Listener
             if (this.toAvoid == null)
                 return;
 
-            if (findAvoidPath())
+            if (findAvoidPath(this.toAvoid))
                 this.pathNav.moveTo(this.path, this.slowSpeed);
         }
 
         /**
          * @return Whether success
          */
-        private boolean findAvoidPath()
+        private boolean findAvoidPath(Player toAvoid)
         {
-            if (this.toAvoid == null)
-                return false;
-
-            var targetPosition = DefaultRandomPos.getPosAway(this.mob, 16, 7, this.toAvoid.position());
+            var targetPosition = DefaultRandomPos.getPosAway(this.mob, 16, 7, toAvoid.position());
 
             if (targetPosition == null)
                 return false;
 
-            if (this.toAvoid.distanceToSqr(targetPosition) < this.toAvoid.distanceToSqr(this.mob))
+            // 如果目标位置离要逃离的目标更近，那么不要去那里
+            if (toAvoid.distanceToSqr(targetPosition) < toAvoid.distanceToSqr(this.mob))
                 return false;
 
             this.path = this.pathNav.createPath(targetPosition.x, targetPosition.y, targetPosition.z, 0);
@@ -412,8 +422,6 @@ public class EntityProcessor extends MorphPluginObject implements Listener
             if (!(entityFound.getBukkitEntityRaw() instanceof org.bukkit.entity.Player currentPlayer))
                 return;
 
-            var state = morphs.getDisguiseStateFor(currentPlayer);
-
             // This will happen when you try to cover all the vanilla behavior with only one class...
             switch (this.mob)
             {
@@ -423,6 +431,8 @@ public class EntityProcessor extends MorphPluginObject implements Listener
                 case Rabbit rabbit when rabbit.getVariant() == Rabbit.Variant.EVIL -> { return; }
                 default -> { }
             }
+
+            var state = morphs.getDisguiseStateFor(currentPlayer);
 
             if (state == null && this.isReplacement)
             {
