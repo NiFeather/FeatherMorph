@@ -365,8 +365,6 @@ public class EntityProcessor extends MorphPluginObject implements Listener
             this.slowSpeed = slowSpeed;
             this.fastSpeed = fastSpeed;
 
-            MorphPlugin.getInstance().getSLF4JLogger().info("Mob " + mob.getBukkitEntityRaw().getType() + " Is Replace? " + isReplace);
-
             this.isReplacement = isReplace;
         }
 
