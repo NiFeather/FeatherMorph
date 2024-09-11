@@ -12,7 +12,7 @@ public class ParrotAnimationSet extends AnimationSet
 
     public ParrotAnimationSet()
     {
-        register(AnimationNames.DANCE, List.of(DANCE_START));
-        register(AnimationNames.STOP, List.of(DANCE_STOP));
+        registerPersistent(AnimationNames.DANCE, List.of(DANCE_START));
+        registerPersistent(AnimationNames.STOP, List.of(DANCE_STOP));
     }
 }

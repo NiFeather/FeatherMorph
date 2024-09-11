@@ -12,7 +12,8 @@ public class WolfAnimationSet extends AnimationSet
 
     public WolfAnimationSet()
     {
-        register(AnimationNames.SIT, List.of(SIT));
-        register(AnimationNames.STANDUP, List.of(STANDUP, RESET));
+        registerPersistent(AnimationNames.SIT, List.of(SIT));
+
+        registerCommon(AnimationNames.STANDUP, List.of(STANDUP, RESET));
     }
 }

@@ -12,7 +12,8 @@ public class PufferfishAnimationSet extends AnimationSet
 
     public PufferfishAnimationSet()
     {
-        register(AnimationNames.INFLATE, List.of(INFLATE));
-        register(AnimationNames.DEFLATE, List.of(DEFLATE, RESET));
+        registerPersistent(AnimationNames.INFLATE, List.of(INFLATE));
+
+        registerCommon(AnimationNames.DEFLATE, List.of(DEFLATE, RESET));
     }
 }

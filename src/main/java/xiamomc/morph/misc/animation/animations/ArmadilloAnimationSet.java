@@ -14,7 +14,7 @@ public class ArmadilloAnimationSet extends AnimationSet
 
     public ArmadilloAnimationSet()
     {
-        register(AnimationNames.PANIC, List.of(PANIC_ROLLING, PANIC_SCARED, PANIC_UNROLLING, PANIC_IDLE, RESET));
+        registerCommon(AnimationNames.PANIC, List.of(PANIC_ROLLING, PANIC_SCARED, PANIC_UNROLLING, PANIC_IDLE, RESET));
     }
 
     @Override

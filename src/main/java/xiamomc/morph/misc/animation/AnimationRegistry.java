@@ -1,5 +1,6 @@
 package xiamomc.morph.misc.animation;
 
+import it.unimi.dsi.fastutil.Pair;
 import org.bukkit.entity.EntityType;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.MorphManager;
@@ -12,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class AnimationHandler extends MorphPluginObject
+public class AnimationRegistry extends MorphPluginObject
 {
     @Initializer
     private void load()
@@ -38,7 +39,7 @@ public class AnimationHandler extends MorphPluginObject
 
     private final String playerDisguiseId = DisguiseTypes.PLAYER.getNameSpace() + ":" + MorphManager.disguiseFallbackName;
 
-    // AnimationID <-> AnimationSequence
+    // DisguiseID <-> AnimationSet
     private final Map<String, AnimationSet> animSets = new ConcurrentHashMap<>();
 
     private void registerAnimSet(EntityType type, AnimationSet animationSet)
@@ -63,14 +64,20 @@ public class AnimationHandler extends MorphPluginObject
         return animSet.getAvailableAnimationsForClient();
     }
 
+    /**
+     *
+     * @param disguiseIdentifier The disguise to lookup
+     * @param animationIdentifier The animation to lookup
+     * @return A pair, left is the sequence, right is whether this sequence is persistent
+     */
     @NotNull
-    public List<SingleAnimation> getSequenceFor(String disguiseIdentifier, String animationIdentifier)
+    public Pair<List<SingleAnimation>, Boolean> getSequencePairFor(String disguiseIdentifier, String animationIdentifier)
     {
         if (disguiseIdentifier.startsWith("player:"))
             disguiseIdentifier = playerDisguiseId;
 
         var animSet = this.animSets.getOrDefault(disguiseIdentifier, null);
-        if (animSet == null) return List.of();
+        if (animSet == null) return Pair.of(List.of(), false);
 
         return animSet.sequenceOf(animationIdentifier);
     }

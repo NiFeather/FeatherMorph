@@ -11,6 +11,6 @@ public class FrogAnimationSet extends AnimationSet
 
     public FrogAnimationSet()
     {
-        register(AnimationNames.EAT, List.of(EAT, RESET));
+        registerCommon(AnimationNames.EAT, List.of(EAT, RESET));
     }
 }

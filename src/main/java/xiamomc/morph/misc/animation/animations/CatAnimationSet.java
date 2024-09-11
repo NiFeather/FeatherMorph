@@ -13,8 +13,9 @@ public class CatAnimationSet extends AnimationSet
 
     public CatAnimationSet()
     {
-        register(AnimationNames.LAY, List.of(RESET, LAY));
-        register(AnimationNames.SIT, List.of(RESET, SIT));
-        register(AnimationNames.STANDUP, List.of(STANDUP, RESET));
+        registerPersistent(AnimationNames.LAY, List.of(RESET, LAY));
+        registerPersistent(AnimationNames.SIT, List.of(RESET, SIT));
+
+        registerCommon(AnimationNames.STANDUP, List.of(STANDUP, RESET));
     }
 }

@@ -11,6 +11,6 @@ public class SnifferAnimationSet extends AnimationSet
 
     public SnifferAnimationSet()
     {
-        register(AnimationNames.SNIFF, List.of(SNIFF, RESET));
+        registerCommon(AnimationNames.SNIFF, List.of(SNIFF, RESET));
     }
 }

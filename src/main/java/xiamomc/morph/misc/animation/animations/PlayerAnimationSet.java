@@ -13,8 +13,9 @@ public class PlayerAnimationSet extends AnimationSet
 
     public PlayerAnimationSet()
     {
-        register(AnimationNames.LAY, List.of(LAY));
-        register(AnimationNames.CRAWL, List.of(PROSTRATE));
-        register(AnimationNames.STANDUP, List.of(STAND, RESET));
+        registerPersistent(AnimationNames.LAY, List.of(LAY));
+        registerPersistent(AnimationNames.CRAWL, List.of(PROSTRATE));
+
+        registerCommon(AnimationNames.STANDUP, List.of(STAND, RESET));
     }
 }

@@ -12,7 +12,8 @@ public class AllayAnimationSet extends AnimationSet
 
     public AllayAnimationSet()
     {
-        register(AnimationNames.DANCE, List.of(ROLL_START));
-        register(AnimationNames.STOP, List.of(ROLL_STOP, RESET));
+        registerPersistent(AnimationNames.DANCE, List.of(ROLL_START));
+
+        registerCommon(AnimationNames.STOP, List.of(ROLL_STOP, RESET));
     }
 }

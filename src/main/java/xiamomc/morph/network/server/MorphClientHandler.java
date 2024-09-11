@@ -23,7 +23,7 @@ import xiamomc.morph.interfaces.IManageRequests;
 import xiamomc.morph.messages.EmoteStrings;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.MorphStrings;
-import xiamomc.morph.misc.animation.AnimationHandler;
+import xiamomc.morph.misc.animation.AnimationRegistry;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.misc.NetworkingHelper;
 import xiamomc.morph.misc.permissions.CommonPermissions;
@@ -797,7 +797,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
     }
 
     @Resolved
-    private AnimationHandler animationHandler;
+    private AnimationRegistry animationRegistry;
 
     @Override
     public void onAnimationCommand(C2SAnimationCommand c2SAnimationCommand)
@@ -808,9 +808,9 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
 
         var disguiseID = state.getDisguiseIdentifier();
         var animationID = c2SAnimationCommand.getAnimationId();
-        var sequence = animationHandler.getSequenceFor(disguiseID, animationID);
+        var sequencePair = animationRegistry.getSequencePairFor(disguiseID, animationID);
 
-        if (!state.tryScheduleSequence(animationID, sequence))
+        if (!state.tryScheduleSequence(animationID, sequencePair.left(), sequencePair.right()))
             player.sendMessage(MessageUtils.prefixes(player, EmoteStrings.notAvailable()));
     }
 

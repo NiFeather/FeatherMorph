@@ -33,7 +33,7 @@ import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.MorphStrings;
 import xiamomc.morph.messages.vanilla.VanillaMessageStore;
 import xiamomc.morph.misc.*;
-import xiamomc.morph.misc.animation.AnimationHandler;
+import xiamomc.morph.misc.animation.AnimationRegistry;
 import xiamomc.morph.misc.disguiseProperty.DisguiseProperties;
 import xiamomc.morph.misc.disguiseProperty.SingleProperty;
 import xiamomc.morph.misc.permissions.CommonPermissions;
@@ -67,7 +67,6 @@ import xiamomc.pluginbase.Bindables.BindableList;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
 
 public class MorphManager extends MorphPluginObject implements IManagePlayerData
 {
@@ -920,7 +919,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     private VanillaMessageStore vanillaMessageStore;
 
     @Resolved
-    private AnimationHandler animationHandler;
+    private AnimationRegistry animationRegistry;
 
     private void postBuildDisguise(DisguiseBuildResult result,
                                    MorphParameters parameters,
@@ -1014,7 +1013,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         skillHandler.switchCooldown(player.getUniqueId(), cdInfo);
 
         // 设置可用动作
-        var availableAnimations = animationHandler.getAvailableAnimationsFor(disguiseIdentifier);
+        var availableAnimations = animationRegistry.getAvailableAnimationsFor(disguiseIdentifier);
         clientHandler.sendCommand(player, new S2CSetAvailableAnimationsCommand(availableAnimations));
 
         // 调用事件
@@ -1191,7 +1190,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         state.getProvider().getInitialSyncCommands(state).forEach(c -> clientHandler.sendCommand(player, c));
 
         // 设置可用动作
-        var availableAnimations = animationHandler.getAvailableAnimationsFor(state.getDisguiseIdentifier());
+        var availableAnimations = animationRegistry.getAvailableAnimationsFor(state.getDisguiseIdentifier());
         clientHandler.sendCommand(player, new S2CSetAvailableAnimationsCommand(availableAnimations));
 
         //Profile

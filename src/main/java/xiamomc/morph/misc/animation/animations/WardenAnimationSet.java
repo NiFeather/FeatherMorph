@@ -22,9 +22,10 @@ public class WardenAnimationSet extends AnimationSet
 
     public WardenAnimationSet()
     {
-        register(AnimationNames.ROAR, List.of(DISABLE_SKILL, ROAR, ROAR_SOUND, TRY_RESET, ENABLE_SKILL));
-        register(AnimationNames.SNIFF, List.of(DISABLE_SKILL, SNIFF, TRY_RESET, ENABLE_SKILL));
-        register(AnimationNames.DIGDOWN, List.of(DISABLE_SKILL, DISABLE_AMBIENT, DIGDOWN, VANISH, DISABLE_BOSSBAR));
-        register(AnimationNames.APPEAR, List.of(ENABLE_BOSSBAR, APPEAR, ENABLE_SKILL, ENABLE_AMBIENT, RESET));
+        registerPersistent(AnimationNames.DIGDOWN, List.of(EXEC_DISABLE_SKILL, EXEC_DISABLE_AMBIENT, DIGDOWN, VANISH, EXEC_DISABLE_BOSSBAR));
+
+        registerCommon(AnimationNames.ROAR, List.of(EXEC_DISABLE_SKILL, ROAR, ROAR_SOUND, TRY_RESET, EXEC_ENABLE_SKILL));
+        registerCommon(AnimationNames.SNIFF, List.of(EXEC_DISABLE_SKILL, SNIFF, TRY_RESET, EXEC_ENABLE_SKILL));
+        registerCommon(AnimationNames.APPEAR, List.of(EXEC_ENABLE_BOSSBAR, APPEAR, EXEC_ENABLE_SKILL, EXEC_ENABLE_AMBIENT, RESET));
     }
 }

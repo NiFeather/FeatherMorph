@@ -1,7 +1,7 @@
 package xiamomc.morph.misc.animation.animations;
 
-import xiamomc.morph.misc.animation.AnimationHandler;
 import xiamomc.morph.misc.animation.AnimationNames;
+import xiamomc.morph.misc.animation.AnimationRegistry;
 import xiamomc.morph.misc.animation.SingleAnimation;
 
 import java.util.List;
@@ -13,7 +13,8 @@ public class PiglinAnimationSet extends AnimationSet
 
     public PiglinAnimationSet()
     {
-        register(AnimationNames.DANCE, List.of(DANCING_START));
-        register(AnimationNames.STOP, List.of(DANCING_STOP, RESET));
+        registerPersistent(AnimationNames.DANCE, List.of(DANCING_START));
+
+        registerCommon(AnimationNames.STOP, List.of(DANCING_STOP, RESET));
     }
 }

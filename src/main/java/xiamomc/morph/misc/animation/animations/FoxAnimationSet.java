@@ -13,8 +13,9 @@ public class FoxAnimationSet extends AnimationSet
 
     public FoxAnimationSet()
     {
-        register(AnimationNames.SLEEP, List.of(SLEEP_START));
-        register(AnimationNames.SIT, List.of(SIT_START));
-        register(AnimationNames.STANDUP, List.of(STANDUP, RESET));
+        registerPersistent(AnimationNames.SLEEP, List.of(SLEEP_START));
+        registerPersistent(AnimationNames.SIT, List.of(SIT_START));
+
+        registerCommon(AnimationNames.STANDUP, List.of(STANDUP, RESET));
     }
 }

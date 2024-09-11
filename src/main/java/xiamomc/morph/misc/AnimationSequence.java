@@ -1,6 +1,7 @@
 package xiamomc.morph.misc;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import oshi.util.tuples.Pair;
 import xiamomc.morph.MorphPluginObject;
@@ -11,13 +12,15 @@ import xiamomc.morph.misc.animation.animations.AnimationSet;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 public class AnimationSequence extends MorphPluginObject
 {
     private final List<SingleAnimation> currentQueue = Collections.synchronizedList(new ObjectArrayList<>());
-    private String currentAnimationSetId;
+    private final AtomicReference<String> currentAnimationSequenceName = new AtomicReference<>(AnimationNames.NONE);
 
+    // AnimationSequenceName <-> Animation Sequence
     @Nullable
     private Pair<String, List<SingleAnimation>> nextQueue;
 
@@ -38,11 +41,17 @@ public class AnimationSequence extends MorphPluginObject
         return cooldown;
     }
 
-    public void scheduleNext(String animSetId, List<SingleAnimation> animations)
+    @NotNull
+    public String getCurrentAnimationSequenceName()
+    {
+        return currentAnimationSequenceName.get();
+    }
+
+    public void scheduleNext(String sequenceIdentifier, List<SingleAnimation> animations)
     {
         synchronized (this)
         {
-            nextQueue = new Pair<>(animSetId, new ObjectArrayList<>(animations));
+            nextQueue = new Pair<>(sequenceIdentifier, new ObjectArrayList<>(animations));
         }
     }
 
@@ -50,6 +59,7 @@ public class AnimationSequence extends MorphPluginObject
     {
         currentQueue.clear();
         currentAnimation = null;
+        currentAnimationSequenceName.set(AnimationNames.NONE);
 
         hookOnNewAnimation.accept(AnimationSet.RESET);
     }
@@ -97,8 +107,8 @@ public class AnimationSequence extends MorphPluginObject
 
             if (currentQueue.isEmpty())
             {
-                if (hookOnNewAnimationSet != null)
-                    hookOnNewAnimationSet.accept(AnimationNames.NONE);
+                if (hookOnNewAnimationSequence != null)
+                    hookOnNewAnimationSequence.accept(AnimationNames.NONE);
 
                 this.workingCooldown = cooldown;
             }
@@ -110,6 +120,8 @@ public class AnimationSequence extends MorphPluginObject
      */
     private boolean tryNextQueue()
     {
+        currentAnimationSequenceName.set(AnimationNames.NONE);
+
         if (nextQueue == null)
             return false;
 
@@ -118,8 +130,10 @@ public class AnimationSequence extends MorphPluginObject
             // Find next queue
             currentQueue.addAll(nextQueue.getB());
 
-            if (hookOnNewAnimationSet != null)
-                hookOnNewAnimationSet.accept(nextQueue.getA());
+            if (hookOnNewAnimationSequence != null)
+                hookOnNewAnimationSequence.accept(nextQueue.getA());
+
+            currentAnimationSequenceName.set(nextQueue.getA());
 
             nextQueue = null;
         }
@@ -128,11 +142,11 @@ public class AnimationSequence extends MorphPluginObject
     }
 
     private Consumer<SingleAnimation> hookOnNewAnimation;
-    private Consumer<String> hookOnNewAnimationSet;
+    private Consumer<String> hookOnNewAnimationSequence;
 
-    public void onNewAnimationSet(Consumer<String> consumer)
+    public void onNewAnimationSequence(Consumer<String> consumer)
     {
-        this.hookOnNewAnimationSet = consumer;
+        this.hookOnNewAnimationSequence = consumer;
     }
 
     public void onNewAnimation(Consumer<SingleAnimation> consumer)

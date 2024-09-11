@@ -101,8 +101,35 @@ public class DisguiseState extends MorphPluginObject
             if (animSubId.startsWith("exec_"))
                 handleInternalExec(animSubId);
         });
-        animationSequence.onNewAnimationSet(setId -> clientHandler.sendCommand(getPlayer(), new S2CSetAnimationDisplayNameCommand(setId)));
+        animationSequence.onNewAnimationSequence(newAnimSeqId ->
+        {
+            clientHandler.sendCommand(getPlayer(), new S2CSetAnimationDisplayNameCommand(newAnimSeqId));
+
+            // Not done yet...
+            /*
+            if (newAnimSeqId.equals(AnimationNames.NONE))
+            {
+                var isPersistent = this.sequencePersistent.get();
+                this.sequencePersistent.set(false);
+
+                if (!isPersistent)
+                    clientHandler.sendCommand(getPlayer(), new S2CSetAnimationDisplayNameCommand(newAnimSeqId));
+            }
+            else
+            {
+                clientHandler.sendCommand(getPlayer(), new S2CSetAnimationDisplayNameCommand(newAnimSeqId));
+            }
+            */
+        });
     }
+
+    private final AtomicBoolean sequencePersistent = new AtomicBoolean(false);
+
+    @Resolved(shouldSolveImmediately = true)
+    private MorphSkillHandler skillHandler;
+
+    @Resolved(shouldSolveImmediately = true)
+    private MorphClientHandler clientHandler;
 
     private void handleInternalExec(String animationSubId)
     {
@@ -189,33 +216,38 @@ public class DisguiseState extends MorphPluginObject
     public boolean canScheduleSequence()
     {
         var cooldown = skillHandler.getCooldownInfo(playerUUID, disguiseIdentifier);
-        if (cooldown.getCooldown() > 0) return false;
-
-        return true;
+        return cooldown.getCooldown() <= 0;
     }
 
     /**
      * @return Whether success.
      */
-    public boolean tryScheduleSequence(String animationId, List<SingleAnimation> sequence)
+    public boolean tryScheduleSequence(String sequenceIdentifier,
+                                       List<SingleAnimation> sequence,
+                                       boolean persistent)
     {
         if (!canScheduleSequence()) return false;
-        this.scheduleSequence(animationId, sequence);
+        this.scheduleSequence(sequenceIdentifier, sequence, persistent);
 
         return true;
     }
 
-    public void scheduleSequence(String animationId, List<SingleAnimation> sequence)
+    public void scheduleSequence(String sequenceIdentifier,
+                                 List<SingleAnimation> sequence,
+                                 boolean persistent)
     {
-        this.scheduleSequence(animationId, sequence, true);
+        this.scheduleSequence(sequenceIdentifier, sequence, true, persistent);
     }
 
-    public void scheduleSequence(String animationId, List<SingleAnimation> sequence, boolean checkPermission)
+    private void scheduleSequence(String sequenceIdentifier,
+                                  List<SingleAnimation> sequence,
+                                  boolean checkPermission,
+                                  boolean persistent)
     {
-        if (checkPermission && animationId.equals(AnimationNames.RESET)
+        if (checkPermission && sequenceIdentifier.equals(AnimationNames.RESET)
                 || !PermissionUtils.hasPermission(
                         getPlayer(),
-                        CommonPermissions.animationPermissionOf(animationId, this.getDisguiseIdentifier()),
+                        CommonPermissions.animationPermissionOf(sequenceIdentifier, this.getDisguiseIdentifier()),
                         true))
         {
             var player = getPlayer();
@@ -223,10 +255,11 @@ public class DisguiseState extends MorphPluginObject
             return;
         }
 
-        this.animationSequence.scheduleNext(animationId, sequence);
+        this.animationSequence.scheduleNext(sequenceIdentifier, sequence);
+        this.sequencePersistent.set(persistent);
 
         var player = getPlayer();
-        var animationString = CommandStrings.goingToPlayAnimation().resolve("what", EmoteStrings.get(animationId).withLocale(MessageUtils.getLocale(player)));
+        var animationString = CommandStrings.goingToPlayAnimation().resolve("what", EmoteStrings.get(sequenceIdentifier).withLocale(MessageUtils.getLocale(player)));
         player.sendMessage(MessageUtils.prefixes(player, animationString));
     }
 
@@ -611,12 +644,6 @@ public class DisguiseState extends MorphPluginObject
     }
 
     //endregion abilityFlag
-
-    @Resolved(shouldSolveImmediately = true)
-    private MorphSkillHandler skillHandler;
-
-    @Resolved(shouldSolveImmediately = true)
-    private MorphClientHandler clientHandler;
 
     //region NBT
 
