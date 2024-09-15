@@ -1,23 +1,31 @@
 package xiamomc.morph.misc.gui;
 
+import com.destroystokyo.paper.profile.CraftPlayerProfile;
 import com.mojang.authlib.properties.PropertyMap;
-import net.minecraft.core.component.DataComponentMap;
+import net.minecraft.Util;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.item.component.ResolvableProfile;
+import net.minecraft.world.level.block.entity.SkullBlockEntity;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.SkullMeta;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import xiamomc.morph.misc.DisguiseTypes;
+import xiamomc.morph.misc.skins.PlayerSkinProvider;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class IconLookup
 {
+    private static final Logger log = LoggerFactory.getLogger(IconLookup.class);
     private static IconLookup instance;
 
     public static IconLookup instance()
@@ -147,27 +155,24 @@ public class IconLookup
         else
             item = this.registry.getOrDefault(disguiseIdentifier, defaultItem);
 
-        return item.clone();
+        return item;
     }
 
     public ItemStack lookupPlayer(String playerName)
     {
-        var stack = CraftItemStack.asCraftCopy(new ItemStack(Material.PLAYER_HEAD));
-        var nmsHandle = stack.handle;
+        var stack = new ItemStack(Material.PLAYER_HEAD);
 
-        /*
-        // No, this won't display the skin.
-        stack.editMeta(SkullMeta.class, skull ->
-        {
-            skull.setOwningPlayer(Bukkit.getOfflinePlayer(playerName));
-        });
-        */
+        stack.editMeta(SkullMeta.class, skullMeta ->
+                skullMeta.setPlayerProfile(new CraftPlayerProfile(Util.NIL_UUID, "~nil")));
 
-        // This displays the skin, but only under online mode
-        var profile = new ResolvableProfile(Optional.of(playerName), Optional.empty(), new PropertyMap());
-        nmsHandle.applyComponents(DataComponentMap.builder()
-                        .set(DataComponents.PROFILE, profile)
-                        .build());
+        PlayerSkinProvider.getInstance().fetchSkin(playerName)
+                .thenAccept(optional ->
+                {
+                    if (optional.isEmpty()) return;
+
+                    stack.editMeta(SkullMeta.class, skullMeta ->
+                            skullMeta.setPlayerProfile(new CraftPlayerProfile(optional.get())));
+                });
 
         return stack;
     }

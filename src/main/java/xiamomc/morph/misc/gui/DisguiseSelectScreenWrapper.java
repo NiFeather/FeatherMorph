@@ -1,5 +1,6 @@
 package xiamomc.morph.misc.gui;
 
+import de.themoep.inventorygui.DynamicGuiElement;
 import de.themoep.inventorygui.InventoryGui;
 import de.themoep.inventorygui.StaticGuiElement;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
@@ -18,6 +19,7 @@ import xiamomc.morph.misc.DisguiseMeta;
 import xiamomc.pluginbase.Annotations.Resolved;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class DisguiseSelectScreenWrapper extends MorphPluginObject
 {
@@ -74,9 +76,28 @@ public class DisguiseSelectScreenWrapper extends MorphPluginObject
         initElements();
     }
 
+    private final AtomicBoolean havePlayerHead = new AtomicBoolean(false);
+
     public void show()
     {
         this.gui.show(bindingPlayer);
+
+        if (havePlayerHead.get())
+            this.addSchedule(this::update);
+    }
+
+    private void update()
+    {
+        if (plugin.getCurrentTick() % 10 != 0)
+        {
+            this.addSchedule(this::update);
+            return;
+        }
+
+        if (this.gui.equals(InventoryGui.getOpen(bindingPlayer)))
+            this.addSchedule(this::update);
+
+        this.gui.draw(bindingPlayer);
     }
 
     private InventoryGui preparePage()
@@ -130,8 +151,10 @@ public class DisguiseSelectScreenWrapper extends MorphPluginObject
         for (int index = getStartingIndex(); index < endIndex; index++)
         {
             var meta = disguises.get(index);
-            var element = new StaticGuiElement(this.getElementCharAt(index),
-                    IconLookup.instance().lookup(meta.rawIdentifier),
+            var item = IconLookup.instance().lookup(meta.rawIdentifier);
+
+            var staticElement = new StaticGuiElement(this.getElementCharAt(index),
+                    item,
                     1,
                     click ->
                     {
@@ -143,7 +166,15 @@ public class DisguiseSelectScreenWrapper extends MorphPluginObject
                     // They don't seem to support Components... Sad :(
                     "§r" + PlainTextComponentSerializer.plainText().serialize(meta.asComponent(playerLocale)));
 
-            gui.addElement(element);
+            if (meta.isPlayerDisguise())
+            {
+                this.havePlayerHead.set(true);
+                gui.addElement(new DynamicGuiElement(this.getElementCharAt(index), viewer -> staticElement));
+            }
+            else
+            {
+                gui.addElement(staticElement);
+            }
         }
 
         // Fill controls
