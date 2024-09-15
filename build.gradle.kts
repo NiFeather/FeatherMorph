@@ -16,45 +16,46 @@ plugins {
 
 repositories {
     mavenLocal()
+    gradlePluginPortal()
+
     maven {
         url = uri("https://repo.papermc.io/repository/maven-public/")
     }
 
     maven {
         url = uri("https://jitpack.io")
-    }
-
-    maven {
-        url = uri("https://oss.sonatype.org/content/groups/public/")
-    }
-
-    maven {
-        url = uri("https://repo.md-5.net/content/groups/public/")
+        content {
+            includeGroup("com.github.XiaMoZhiShi")
+        }
     }
 
     maven {
         url = uri("https://repo.extendedclip.com/content/repositories/placeholderapi/")
+        content {
+            includeGroup("me.clip")
+        }
     }
 
     maven {
         url = uri("https://repo.dmulloy2.net/repository/public/")
+        content {
+            includeGroup("com.comphenix.protocol")
+        }
     }
 
-    maven {
-        url = uri("https://repo.maven.apache.org/maven2/")
-    }
-
-    maven {
-        url = uri("https://repo.codemc.io/repository/maven-public/")
-    }
 
     maven {
         url = uri("https://mvn.lumine.io/repository/maven-public")
+        content {
+            includeGroup("com.ticxo.modelengine")
+        }
     }
-
 /*
     maven {
-        url = uri("https://repo.majek.dev/releases")
+        url = uri("https://repo.minebench.de")
+        content {
+            includeGroup("de.themoep")
+        }
     }*/
 }
 
@@ -75,6 +76,8 @@ dependencies {
     compileOnly("me.clip:placeholderapi:${project.property("papi_version")}")
 
     implementation("org.java-websocket:Java-WebSocket:1.5.7")
+
+    //implementation("de.themoep:inventorygui:1.6.3-SNAPSHOT")
 
     //compileOnly("dev.majek:hexnicks:3.1.1")
 
