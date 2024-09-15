@@ -103,6 +103,8 @@ public class IconLookup
         register(EntityType.WOLF, Material.BONE);
         register(EntityType.ZOMBIFIED_PIGLIN, Material.GOLDEN_SWORD);
 
+        register(EntityType.GOAT, Material.GOAT_HORN);
+
         register(EntityType.TADPOLE, Material.TADPOLE_BUCKET);
     }
 

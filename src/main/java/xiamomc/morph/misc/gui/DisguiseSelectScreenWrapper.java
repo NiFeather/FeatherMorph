@@ -43,7 +43,7 @@ public class DisguiseSelectScreenWrapper extends MorphPluginObject
      */
     protected int getRowCount()
     {
-        return 4;
+        return getTemplate().size();
     }
 
     /**
@@ -52,8 +52,35 @@ public class DisguiseSelectScreenWrapper extends MorphPluginObject
      */
     private int getElementCapacity()
     {
-        // 行数 - 1(Footer)
-        return ( getRowCount() - 1 ) * 9;
+        if (this.capacity == -1)
+            throw new IllegalStateException("The page has not been init yet.");
+
+        return this.capacity;
+    }
+
+    private void updateCapacity(List<String> template)
+    {
+        var capacity = 0;
+
+        for (String line : template)
+            capacity += (int) line.chars().filter(ch -> ch == 'D').count();
+
+        this.capacity = capacity;
+    }
+
+    private int capacity = -1;
+
+    private static final List<String> template = List.of(
+            "DDDDDDDDD",
+            "DDDDDDDDD",
+            "DDDDDDDDD",
+            //"         ",
+            "PPPUUUNNN"
+    );
+
+    private List<String> getTemplate()
+    {
+        return template;
     }
 
     /**
@@ -62,7 +89,7 @@ public class DisguiseSelectScreenWrapper extends MorphPluginObject
      */
     private int getStartingIndex()
     {
-        return this.pageOffset * (this.getRowCount() - 1) * 9;
+        return this.pageOffset * this.getElementCapacity();
     }
 
     public DisguiseSelectScreenWrapper(Player bindingPlayer, int pageOffset)
@@ -102,32 +129,64 @@ public class DisguiseSelectScreenWrapper extends MorphPluginObject
 
     private InventoryGui preparePage()
     {
-        var columns = 9;
+        //var columns = 9;
+        var template = this.getTemplate();
 
-        List<String> rows = new ObjectArrayList<>();
-        var index = this.getStartingIndex();
-
-        StringBuilder builder = new StringBuilder();
-
-        // Build element slots
-        for (int x = 1; x <= this.getRowCount() - 1; x++)
+        if (template.size() > 6)
         {
-            for (int y = 1; y <= columns; y++)
-            {
-                index++;
-                builder.append(this.getElementCharAt(index));
-            }
-
-            rows.add(builder.toString());
-            builder = new StringBuilder();
+            capacity = 0;
+            logger.error("May not have a inventory with more than 6 rows.");
+            return new InventoryGui(plugin, "missingno", new String[]{"         "});
         }
 
-        // Build footer slots
+        updateCapacity(template);
+
+        List<String> rows = new ObjectArrayList<>();
+
         var isLast = isLastPage();
         var isFirst = this.pageOffset == 0;
 
-        builder.append(isFirst ? "x" : "P").append("xxxUxxx").append(isLast ? "x" : "N");
-        rows.add(builder.toString());
+        int currentIndex = this.getStartingIndex();
+
+        for (String line : template)
+        {
+            if (line.length() != 9)
+            {
+                logger.warn("A line cannot have more or less than 9 characters, ignoring '%s'".formatted(line));
+                continue;
+            }
+
+            StringBuilder builder = new StringBuilder();
+
+            for (char c : line.toCharArray())
+            {
+                switch (c)
+                {
+                    case 'D' ->
+                    {
+                        builder.append(this.getElementCharAt(currentIndex));
+                        currentIndex++;
+                    }
+
+                    case 'P' ->
+                    {
+                        builder.append(isFirst ? 'x' : 'P');
+                    }
+
+                    case 'N' ->
+                    {
+                        builder.append(isLast ? 'x' : 'N');
+                    }
+
+                    default ->
+                    {
+                        builder.append(c);
+                    }
+                }
+            }
+
+            rows.add(builder.toString());
+        }
 
         // Build page
         var array = rows.toArray(new String[]{});
