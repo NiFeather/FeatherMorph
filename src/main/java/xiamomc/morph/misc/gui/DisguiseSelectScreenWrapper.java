@@ -17,6 +17,7 @@ import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.messages.GuiStrings;
 import xiamomc.morph.messages.MessageUtils;
+import xiamomc.morph.messages.MorphStrings;
 import xiamomc.morph.misc.DisguiseMeta;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.pluginbase.Annotations.Resolved;
@@ -298,11 +299,14 @@ public class DisguiseSelectScreenWrapper extends MorphPluginObject
 
         if (bindingState != null)
         {
+            var name = "§r" + MorphStrings.disguisingAsString().resolve("what", bindingState.getPlayerDisplay())
+                    .toString(playerLocale);
+
             var currentDisguiseButton = new StaticGuiElement('C',
                     IconLookup.instance().lookup(bindingState.getDisguiseIdentifier()),
                     1,
                     click -> true,
-                    "");
+                    name);
 
             gui.addElement(currentDisguiseButton);
         }
