@@ -195,7 +195,7 @@ public class DisguiseSelectScreenWrapper extends MorphPluginObject
 
     private boolean isLastPage()
     {
-        return (this.getStartingIndex() + this.getElementCapacity()) > disguises.size();
+        return (this.getStartingIndex() + this.getElementCapacity()) >= disguises.size();
     }
 
     @Nullable
