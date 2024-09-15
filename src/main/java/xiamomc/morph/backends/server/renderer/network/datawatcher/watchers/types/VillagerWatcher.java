@@ -55,10 +55,16 @@ public class VillagerWatcher extends LivingEntityWatcher
             logger.error("Unable to convert bukkit type '%s' to NMS format: " + t.getMessage());
         }
 
-        var availableTypes = Arrays.stream(VillagerTypes.values()).toList();
-        var villagerType = availableTypes.get(type.ordinal()).bindingType;
-
-        return new VillagerData(villagerType, villagerProfession, this.lvl);
+        var nmsMatch = BuiltInRegistries.VILLAGER_TYPE.getOptional(ResourceLocation.parse(type.getKey().asString()));
+        if (nmsMatch.isEmpty())
+        {
+            logger.warn("Villager type '%s' not found in registry! Ignoring...".formatted(type.getKey().asString()));
+            return new VillagerData(VillagerType.PLAINS, villagerProfession, this.lvl);
+        }
+        else
+        {
+            return new VillagerData(nmsMatch.get(), villagerProfession, this.lvl);
+        }
     }
 
     // endregion Cache
@@ -165,23 +171,5 @@ public class VillagerWatcher extends LivingEntityWatcher
         compound.putString("type", BuiltInRegistries.VILLAGER_TYPE.getKey(type).toString());
 
         nbt.put("VillagerData", compound);
-    }
-
-    public enum VillagerTypes
-    {
-        DESERT(VillagerType.DESERT),
-        JUNGLE(VillagerType.JUNGLE),
-        PLAINS(VillagerType.PLAINS),
-        SAVANNA(VillagerType.SAVANNA),
-        SNOW(VillagerType.SNOW),
-        SWAMP(VillagerType.SWAMP),
-        TAIGA(VillagerType.TAIGA);
-
-        public final VillagerType bindingType;
-
-        VillagerTypes(VillagerType bindingType)
-        {
-            this.bindingType = bindingType;
-        }
     }
 }

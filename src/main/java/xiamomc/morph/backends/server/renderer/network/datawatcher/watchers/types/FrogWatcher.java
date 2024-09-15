@@ -8,6 +8,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.animal.FrogVariant;
 import org.bukkit.Bukkit;
+import org.bukkit.NamespacedKey;
+import org.bukkit.Registry;
 import org.bukkit.Sound;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.entity.EntityType;
@@ -61,12 +63,9 @@ public class FrogWatcher extends LivingEntityWatcher
             return Frog.Variant.TEMPERATE;
         }
 
-        var key = keyOptional.get().location().toString();
-        for (var val : Frog.Variant.values())
-        {
-            if (val.getKey().asString().equals(key))
-                return val;
-        }
+        var bukkitMatch = Registry.FROG_VARIANT.get(NamespacedKey.fromString(keyOptional.get().location().toString()));
+        if (bukkitMatch != null)
+            return bukkitMatch;
 
         logger.warn("No suitable Variant for FrogVariant '%s'".formatted(type));
         return Frog.Variant.TEMPERATE;

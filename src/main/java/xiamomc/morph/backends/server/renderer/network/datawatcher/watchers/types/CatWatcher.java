@@ -8,6 +8,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.animal.CatVariant;
 import org.bukkit.Bukkit;
+import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.entity.Cat;
@@ -121,15 +122,22 @@ public class CatWatcher extends TameableAnimalWatcher
         if (nbt.contains("variant"))
         {
             var name = nbt.getString("variant");
-            var match = Arrays.stream(Cat.Type.values())
-                    .filter(t -> t.key().asString().equalsIgnoreCase(name))
-                    .findFirst();
+            var key = NamespacedKey.fromString(name);
 
-            match.ifPresent(type ->
+            if (key != null)
             {
-                var finalValue = bukkitTypeToNmsHolder(type);
-                this.writePersistent(ValueIndex.CAT.CAT_VARIANT, finalValue);
-            });
+                var bukkitMatch = Registry.CAT_VARIANT.get(key);
+
+                if (bukkitMatch != null)
+                {
+                    var finalValue = bukkitTypeToNmsHolder(bukkitMatch);
+                    this.writePersistent(ValueIndex.CAT.CAT_VARIANT, finalValue);
+                }
+            }
+            else
+            {
+                logger.warn("Invalid cat variant: '%s', ignoring...".formatted(name));
+            }
         }
 
         if (nbt.contains("CollarColor"))
