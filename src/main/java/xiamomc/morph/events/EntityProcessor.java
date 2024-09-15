@@ -49,7 +49,7 @@ public class EntityProcessor extends MorphPluginObject implements Listener
     private MorphConfigManager config;
 
     private final boolean doModifyAI;
-    private final Bindable<Boolean> debugOutput = new Bindable<>();
+    private final Bindable<Boolean> debugOutput = new Bindable<>(false);
 
     public EntityProcessor()
     {

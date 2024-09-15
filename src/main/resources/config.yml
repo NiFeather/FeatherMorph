@@ -27,6 +27,26 @@ root:
   #     While we try to undo changes it made, the mobs' behavior will still have distinction compared to vanilla
   modify_ai: true
 
+  # The GUI pattern for the fallback disguise selection.
+  # It's a bit limited
+  #
+  # Available widgets:
+  #   D: The available disguise to select
+  #   C: The current disguise [1]
+  #   U: "Undisguise" button. [1]
+  #   P: "Last page" button. [1]
+  #   N: "Next page" button [1]
+  #   x: The border (Pink stained glass pane)
+  # Note:
+  #   [1]:  This widget will turn black when unavailable.
+  #         If you wish to make them display as the border, replace it with the small cap variant.
+  gui_pattern:
+    - "cxxxxxuuu"
+    - "DDDDDDDDD"
+    - "DDDDDDDDD"
+    - "DDDDDDDDD"
+    - "PPPPxNNNN"
+
   # ChatOverride options
   chatOverride:
     # Enable ChatOverride?
@@ -317,4 +337,4 @@ root:
       - SelectedItem
 
   # Do not touch unless you know what you're doing!
-  version: 32
+  version: 34

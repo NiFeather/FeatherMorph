@@ -5,6 +5,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.generator.WorldInfo;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.messages.CommonStrings;
 import xiamomc.morph.messages.MessageUtils;
@@ -19,6 +21,8 @@ import java.util.*;
 
 public class MorphConfigManager extends PluginConfigManager
 {
+    private static final Logger log = LoggerFactory.getLogger(MorphConfigManager.class);
+
     public MorphConfigManager(MorphPlugin plugin)
     {
         super(plugin);
@@ -70,7 +74,7 @@ public class MorphConfigManager extends PluginConfigManager
         {
             if (o.excludeFromInit) continue;
 
-            var val = getOrDefault(Object.class, o);
+            var val = getOrDefault(o.defaultValue.getClass(), o);
 
             if (!val.equals(o.defaultValue)) map.put(o.node, val);
         }
@@ -102,7 +106,7 @@ public class MorphConfigManager extends PluginConfigManager
         list.onListChanged((diffList, reason) ->
         {
             //System.out.println("LIST CHANGED: " + diffList + " WITH REASON " + reason);
-            backendConfig.set(option.toString(), list);
+            backendConfig.set(option.toString(), new ArrayList<>(list));
             save();
         }, true);
 
@@ -166,7 +170,7 @@ public class MorphConfigManager extends PluginConfigManager
         });
 
         //更新配置
-        int targetVersion = 33;
+        int targetVersion = 34;
 
         var configVersion = getOrDefault(Integer.class, ConfigOption.VERSION);
 

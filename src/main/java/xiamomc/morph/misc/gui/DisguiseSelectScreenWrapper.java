@@ -13,9 +13,12 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
+import xiamomc.morph.config.ConfigOption;
+import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.messages.GuiStrings;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.misc.DisguiseMeta;
+import xiamomc.morph.misc.DisguiseState;
 import xiamomc.pluginbase.Annotations.Resolved;
 
 import java.util.List;
@@ -28,6 +31,9 @@ public class DisguiseSelectScreenWrapper extends MorphPluginObject
 
     private final Player bindingPlayer;
 
+    @Nullable
+    private final DisguiseState bindingState;
+
     private final int pageOffset;
 
     private final List<DisguiseMeta> disguises;
@@ -36,6 +42,25 @@ public class DisguiseSelectScreenWrapper extends MorphPluginObject
 
     @Resolved(shouldSolveImmediately = true)
     private MorphManager manager;
+
+    @Resolved(shouldSolveImmediately = true)
+    private MorphConfigManager config;
+
+    public DisguiseSelectScreenWrapper(Player bindingPlayer, int pageOffset)
+    {
+        this.disguises = manager.getAvaliableDisguisesFor(bindingPlayer);
+        this.bindingPlayer = bindingPlayer;
+        this.pageOffset = pageOffset;
+        this.playerLocale = MessageUtils.getLocale(bindingPlayer);
+        this.bindingState = manager.getDisguiseStateFor(bindingPlayer);
+
+        this.template.clear();
+        this.template.addAll(config.getBindableList(String.class, ConfigOption.GUI_PATTERN));
+
+
+        this.gui = this.preparePage();
+        initElements();
+    }
 
     /**
      * 获取此GUI的行数
@@ -70,12 +95,8 @@ public class DisguiseSelectScreenWrapper extends MorphPluginObject
 
     private int capacity = -1;
 
-    private static final List<String> template = List.of(
-            "DDDDDDDDD",
-            "DDDDDDDDD",
-            "DDDDDDDDD",
-            //"         ",
-            "PPPUUUNNN"
+    private List<String> template = ObjectArrayList.of(
+            "CxDDDxPUN"
     );
 
     private List<String> getTemplate()
@@ -90,17 +111,6 @@ public class DisguiseSelectScreenWrapper extends MorphPluginObject
     private int getStartingIndex()
     {
         return this.pageOffset * this.getElementCapacity();
-    }
-
-    public DisguiseSelectScreenWrapper(Player bindingPlayer, int pageOffset)
-    {
-        this.disguises = manager.getAvaliableDisguisesFor(bindingPlayer);
-        this.bindingPlayer = bindingPlayer;
-        this.pageOffset = pageOffset;
-        this.playerLocale = MessageUtils.getLocale(bindingPlayer);
-
-        this.gui = this.preparePage();
-        initElements();
     }
 
     private final AtomicBoolean havePlayerHead = new AtomicBoolean(false);
@@ -168,20 +178,16 @@ public class DisguiseSelectScreenWrapper extends MorphPluginObject
                         currentIndex++;
                     }
 
-                    case 'P' ->
-                    {
-                        builder.append(isFirst ? 'x' : 'P');
-                    }
+                    case 'p' -> builder.append(isFirst ? 'x' : 'P');
+                    case 'n' -> builder.append(isLast ? 'x' : 'N');
+                    case 'c' -> builder.append(bindingState == null ? 'x' : 'C');
+                    case 'u' -> builder.append(bindingState == null ? 'x' : 'U');
 
-                    case 'N' ->
-                    {
-                        builder.append(isLast ? 'x' : 'N');
-                    }
-
-                    default ->
-                    {
-                        builder.append(c);
-                    }
+                    case 'P' -> builder.append(isFirst ? 't' : 'P');
+                    case 'N' -> builder.append(isLast ? 't' : 'N');
+                    case 'C' -> builder.append(bindingState == null ? 't' : 'C');
+                    case 'U' -> builder.append(bindingState == null ? 't' : 'U');
+                    default -> builder.append(c);
                 }
             }
 
@@ -245,6 +251,14 @@ public class DisguiseSelectScreenWrapper extends MorphPluginObject
 
         gui.addElement(borderElement);
 
+        var borderGrayElement = new StaticGuiElement('t',
+                new ItemStack(Material.BLACK_STAINED_GLASS_PANE),
+                1,
+                click -> true,
+                "§§");
+
+        gui.addElement(borderGrayElement);
+
         var prevButton = new StaticGuiElement('P',
                 new ItemStack(Material.LIME_STAINED_GLASS_PANE),
                 1,
@@ -281,6 +295,17 @@ public class DisguiseSelectScreenWrapper extends MorphPluginObject
                 "§r" + GuiStrings.unDisguise().toString(playerLocale));
 
         gui.addElement(unDisguiseButton);
+
+        if (bindingState != null)
+        {
+            var currentDisguiseButton = new StaticGuiElement('C',
+                    IconLookup.instance().lookup(bindingState.getDisguiseIdentifier()),
+                    1,
+                    click -> true,
+                    "");
+
+            gui.addElement(currentDisguiseButton);
+        }
     }
 
     private boolean isLastPage()

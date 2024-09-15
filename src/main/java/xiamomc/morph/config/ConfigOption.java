@@ -78,9 +78,9 @@ public enum ConfigOption
     LANGUAGE_CODE(languageNode().append("code"), "en_us"),
     SINGLE_LANGUAGE(languageNode().append("single_language"), true),
 
-    BLACKLIST_PATTERNS(nbtBlacklistNode().append("patterns"), NbtUtils.defaultBlacklistedPatterns),
+    BLACKLIST_PATTERNS(nbtBlacklistNode().append("patterns"), new ArrayList<>(NbtUtils.defaultBlacklistedPatterns)),
 
-    BLACKLIST_TAGS(nbtBlacklistNode().append("names"), NbtUtils.defaultBlacklistedTags),
+    BLACKLIST_TAGS(nbtBlacklistNode().append("names"), new ArrayList<>(NbtUtils.defaultBlacklistedTags)),
 
     AMBIENT_FREQUENCY(ambientSoundNode().append("frequency"), 1D),
 
@@ -111,6 +111,8 @@ public enum ConfigOption
     DO_CHECK_ABILITY_PERMISSIONS(ConfigNode.create().append("check_ability_permissions"), true),
 
     DO_MODIFY_AI(ConfigNode.create().append("modify_ai"), true),
+
+    GUI_PATTERN(ConfigNode.create().append("gui_pattern"), new ArrayList<String>()),
 
     VERSION(ConfigNode.create().append("version"), 0);
 
