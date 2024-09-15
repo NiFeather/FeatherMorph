@@ -50,13 +50,13 @@ repositories {
             includeGroup("com.ticxo.modelengine")
         }
     }
-/*
+
     maven {
         url = uri("https://repo.minebench.de")
         content {
             includeGroup("de.themoep")
         }
-    }*/
+    }
 }
 
 paperweight.reobfArtifactConfiguration = ReobfArtifactConfiguration.MOJANG_PRODUCTION
@@ -76,8 +76,11 @@ dependencies {
     compileOnly("me.clip:placeholderapi:${project.property("papi_version")}")
 
     implementation("org.java-websocket:Java-WebSocket:1.5.7")
+    {
+        exclude("org.slf4j")
+    }
 
-    //implementation("de.themoep:inventorygui:1.6.3-SNAPSHOT")
+    implementation("de.themoep:inventorygui:1.6.3-SNAPSHOT")
 
     //compileOnly("dev.majek:hexnicks:3.1.1")
 
@@ -198,6 +201,7 @@ tasks.shadowJar {
     relocate("xiamomc.pluginbase", "xiamomc.morph.shaded.pluginbase")
     relocate("org.bstats", "xiamomc.morph.shaded.bstats")
     relocate("de.tr7zw.changeme.nbtapi", "xiamomc.morph.shaded.nbtapi")
+    relocate("de.themoep.inventorygui", "xiamomc.morph.shaded.inventorygui")
 }
 
 tasks.withType<JavaCompile>() {

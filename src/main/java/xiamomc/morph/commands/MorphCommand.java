@@ -10,6 +10,7 @@ import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.messages.HelpStrings;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.MorphStrings;
+import xiamomc.morph.misc.gui.DisguiseSelectScreenWrapper;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Command.IPluginCommand;
 import xiamomc.pluginbase.Messages.FormattableMessage;
@@ -35,9 +36,15 @@ public class MorphCommand extends MorphPluginObject implements IPluginCommand
             }
 
             if (args.length >= 1)
+            {
                 morphManager.morph(sender, player, args[0], player.getTargetEntity(5));
+            }
             else
-                sender.sendMessage(MessageUtils.prefixes(sender, MorphStrings.disguiseNotDefinedString()));
+            {
+                var gui = new DisguiseSelectScreenWrapper(player, 0);
+                gui.show();
+                //sender.sendMessage(MessageUtils.prefixes(sender, MorphStrings.disguiseNotDefinedString()));
+            }
         }
 
         return true;

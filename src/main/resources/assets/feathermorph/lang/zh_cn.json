@@ -223,5 +223,9 @@
   "emote.morphclient.digdown": "掘地",
   "emote.morphclient.appear": "出现",
   "emote.morphclient.not_available": "技能冷却时不能播放动作",
-  "emote.morphclient.unknown": "未知"
+  "emote.morphclient.unknown": "未知",
+  "chestui.next_page": "下一页",
+  "chestui.prev_page": "上一页",
+  "chestui.undisguise": "取消伪装",
+  "chestui.title_select_disguise": "选择伪装"
 }
