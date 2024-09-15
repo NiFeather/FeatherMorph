@@ -36,6 +36,7 @@ import xiamomc.morph.misc.permissions.CommonPermissions;
 import xiamomc.morph.utilities.EntityTypeUtils;
 import xiamomc.morph.utilities.ReflectionUtils;
 import xiamomc.pluginbase.Annotations.Resolved;
+import xiamomc.pluginbase.Bindables.Bindable;
 
 import java.util.function.Predicate;
 
@@ -48,10 +49,12 @@ public class EntityProcessor extends MorphPluginObject implements Listener
     private MorphConfigManager config;
 
     private final boolean doModifyAI;
+    private final Bindable<Boolean> debugOutput = new Bindable<>();
 
     public EntityProcessor()
     {
         doModifyAI = config.get(Boolean.class, ConfigOption.DO_MODIFY_AI);
+        config.bind(debugOutput, ConfigOption.DEBUG_OUTPUT);
 
         config.getBindable(Boolean.class, ConfigOption.DO_MODIFY_AI).onValueChanged((o, n) ->
         {
@@ -114,7 +117,9 @@ public class EntityProcessor extends MorphPluginObject implements Listener
 
             if (wrapped.getGoal() instanceof FeatherMorphAvoidPlayerGoal)
             {
-                logger.warn("We are processing entity that's already processed?! Found FeatherMorphAvoidPlayerGoal in entity " + sourceMob);
+                if (debugOutput.get())
+                    logger.warn("We are processing entity that's already processed?! Found FeatherMorphAvoidPlayerGoal in entity " + sourceMob);
+
                 return;
             }
 
