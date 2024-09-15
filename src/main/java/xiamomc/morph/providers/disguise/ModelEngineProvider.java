@@ -1,4 +1,4 @@
-package xiamomc.morph.providers;
+package xiamomc.morph.providers.disguise;
 
 import com.ticxo.modelengine.api.ModelEngineAPI;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
@@ -14,6 +14,9 @@ import xiamomc.morph.misc.DisguiseMeta;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.misc.DisguiseTypes;
 import xiamomc.morph.network.commands.S2C.AbstractS2CCommand;
+import xiamomc.morph.providers.animation.AnimationProvider;
+import xiamomc.morph.providers.animation.provider.FallbackAnimationProvider;
+import xiamomc.morph.providers.animation.provider.VanillaAnimationProvider;
 import xiamomc.pluginbase.Exceptions.NullDependencyException;
 
 import java.util.List;
@@ -29,6 +32,17 @@ public class ModelEngineProvider extends DisguiseProvider
     public @NotNull String getNameSpace()
     {
         return DisguiseTypes.MODEL_ENGINE.getNameSpace();
+    }
+
+    private final AnimationProvider animationProvider = new FallbackAnimationProvider();
+
+    /**
+     * 获取此DisguiseProvider的动画提供器
+     */
+    @Override
+    public AnimationProvider getAnimationProvider()
+    {
+        return animationProvider;
     }
 
     @Override

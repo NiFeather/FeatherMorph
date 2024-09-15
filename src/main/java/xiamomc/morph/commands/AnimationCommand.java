@@ -10,7 +10,6 @@ import xiamomc.morph.messages.CommandStrings;
 import xiamomc.morph.messages.EmoteStrings;
 import xiamomc.morph.messages.HelpStrings;
 import xiamomc.morph.messages.MessageUtils;
-import xiamomc.morph.misc.animation.AnimationRegistry;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Command.IPluginCommand;
 import xiamomc.pluginbase.Messages.FormattableMessage;
@@ -34,9 +33,6 @@ public class AnimationCommand extends MorphPluginObject implements IPluginComman
     @Resolved
     private MorphManager morphManager;
 
-    @Resolved
-    private AnimationRegistry animationRegistry;
-
     @Override
     public List<String> onTabComplete(List<String> args, CommandSender source)
     {
@@ -48,7 +44,10 @@ public class AnimationCommand extends MorphPluginObject implements IPluginComman
 
         if (args.size() >= 2) return List.of();
 
-        var animations = animationRegistry.getAvailableAnimationsFor(state.getDisguiseIdentifier());
+        var animations = state.getProvider()
+                              .getAnimationProvider()
+                              .getAnimationSetFor(state.getDisguiseIdentifier())
+                              .getAvailableAnimationsForClient();
 
         var arg = args.get(0);
         return animations.stream().filter(id -> id.startsWith(arg)).toList();
@@ -75,13 +74,19 @@ public class AnimationCommand extends MorphPluginObject implements IPluginComman
 
         var animationId = args[0];
 
-        if (!animationRegistry.getAvailableAnimationsFor(state.getDisguiseIdentifier()).contains(animationId))
+        var animationSet = state.getProvider()
+                .getAnimationProvider()
+                .getAnimationSetFor(state.getDisguiseIdentifier());
+
+        var animations = animationSet.getAvailableAnimationsForClient();
+
+        if (!animations.contains(animationId))
         {
             player.sendMessage(MessageUtils.prefixes(player, CommandStrings.noSuchAnimation()));
             return true;
         }
 
-        var sequencePair = animationRegistry.getSequencePairFor(state.getDisguiseIdentifier(), animationId);
+        var sequencePair = animationSet.sequenceOf(animationId);
         if (!state.tryScheduleSequence(animationId, sequencePair.left(), sequencePair.right()))
             player.sendMessage(MessageUtils.prefixes(player, EmoteStrings.notAvailable()));
 

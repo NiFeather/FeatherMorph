@@ -19,7 +19,6 @@ import xiamomc.morph.messages.MorphMessageStore;
 import xiamomc.morph.messages.vanilla.VanillaMessageStore;
 import xiamomc.morph.misc.NetworkingHelper;
 import xiamomc.morph.misc.PlayerOperationSimulator;
-import xiamomc.morph.misc.animation.AnimationRegistry;
 import xiamomc.morph.misc.disguiseProperty.DisguiseProperties;
 import xiamomc.morph.misc.integrations.modelengine.ModelEngineHelper;
 import xiamomc.morph.misc.integrations.placeholderapi.PlaceholderIntegration;
@@ -193,8 +192,6 @@ public final class MorphPlugin extends XiaMoJavaPlugin
         dependencyManager.cache(instanceService = new MultiInstanceService());
 
         dependencyManager.cache(DisguiseProperties.INSTANCE);
-
-        dependencyManager.cache(new AnimationRegistry());
 
         mirrorProcessor = new InteractionMirrorProcessor();
 

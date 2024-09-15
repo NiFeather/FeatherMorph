@@ -1,4 +1,4 @@
-package xiamomc.morph.providers;
+package xiamomc.morph.providers.disguise;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.kyori.adventure.text.Component;
@@ -26,6 +26,8 @@ import xiamomc.morph.misc.DisguiseMeta;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.misc.DisguiseTypes;
 import xiamomc.morph.misc.NmsRecord;
+import xiamomc.morph.providers.animation.AnimationProvider;
+import xiamomc.morph.providers.animation.provider.VanillaAnimationProvider;
 import xiamomc.morph.utilities.*;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
@@ -43,6 +45,17 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
     public @NotNull String getNameSpace()
     {
         return DisguiseTypes.VANILLA.getNameSpace();
+    }
+
+    private final AnimationProvider animationProvider = new VanillaAnimationProvider();
+
+    /**
+     * 获取此DisguiseProvider的动画提供器
+     */
+    @Override
+    public AnimationProvider getAnimationProvider()
+    {
+        return animationProvider;
     }
 
     @Override

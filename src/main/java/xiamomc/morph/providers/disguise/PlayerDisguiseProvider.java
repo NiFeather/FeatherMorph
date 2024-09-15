@@ -1,4 +1,4 @@
-package xiamomc.morph.providers;
+package xiamomc.morph.providers.disguise;
 
 import com.mojang.authlib.GameProfile;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
@@ -24,6 +24,8 @@ import xiamomc.morph.misc.MorphGameProfile;
 import xiamomc.morph.misc.skins.PlayerSkinProvider;
 import xiamomc.morph.network.commands.S2C.set.S2CSetProfileCommand;
 import xiamomc.morph.network.server.MorphClientHandler;
+import xiamomc.morph.providers.animation.AnimationProvider;
+import xiamomc.morph.providers.animation.provider.PlayerAnimationProvider;
 import xiamomc.pluginbase.Annotations.Resolved;
 
 import java.util.List;
@@ -35,6 +37,17 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
     public @NotNull String getNameSpace()
     {
         return DisguiseTypes.PLAYER.getNameSpace();
+    }
+
+    private final PlayerAnimationProvider animationProvider = new PlayerAnimationProvider();
+
+    /**
+     * 获取此DisguiseProvider的动画提供器
+     */
+    @Override
+    public AnimationProvider getAnimationProvider()
+    {
+        return animationProvider;
     }
 
     @Override

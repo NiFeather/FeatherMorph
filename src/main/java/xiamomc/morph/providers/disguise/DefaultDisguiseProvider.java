@@ -1,4 +1,4 @@
-package xiamomc.morph.providers;
+package xiamomc.morph.providers.disguise;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.kyori.adventure.text.Component;

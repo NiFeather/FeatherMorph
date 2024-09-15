@@ -1,4 +1,4 @@
-package xiamomc.morph.misc.animation;
+package xiamomc.morph.providers.animation;
 
 /**
  *

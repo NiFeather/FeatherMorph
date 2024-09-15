@@ -8,7 +8,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphManager;
-import xiamomc.morph.providers.DisguiseProvider;
+import xiamomc.morph.providers.disguise.DisguiseProvider;
 import xiamomc.morph.utilities.EntityTypeUtils;
 
 public class DisguiseMeta

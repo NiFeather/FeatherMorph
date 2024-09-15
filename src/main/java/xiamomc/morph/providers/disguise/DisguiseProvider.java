@@ -1,4 +1,4 @@
-package xiamomc.morph.providers;
+package xiamomc.morph.providers.disguise;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.kyori.adventure.text.Component;
@@ -17,6 +17,7 @@ import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.misc.DisguiseMeta;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.network.commands.S2C.AbstractS2CCommand;
+import xiamomc.morph.providers.animation.AnimationProvider;
 import xiamomc.morph.utilities.NbtUtils;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
@@ -25,6 +26,10 @@ import xiamomc.pluginbase.Bindables.BindableList;
 import java.util.List;
 import java.util.regex.Pattern;
 
+/**
+ * 负责提供伪装及其相关功能的组件。
+ * 目前包括：伪装功能和伪装动作
+ */
 public abstract class DisguiseProvider extends MorphPluginObject
 {
     /**
@@ -34,6 +39,11 @@ public abstract class DisguiseProvider extends MorphPluginObject
      */
     @NotNull
     public abstract String getNameSpace();
+
+    /**
+     * 获取此DisguiseProvider的动画提供器
+     */
+    public abstract AnimationProvider getAnimationProvider();
 
     /**
      * 是否允许在切换到其他伪装时可以不调用此Provider的Unmorph

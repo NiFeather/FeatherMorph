@@ -1,4 +1,4 @@
-package xiamomc.morph.providers;
+package xiamomc.morph.providers.disguise;
 
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.backends.DisguiseWrapper;

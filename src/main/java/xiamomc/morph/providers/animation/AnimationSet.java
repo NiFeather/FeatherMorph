@@ -1,11 +1,9 @@
-package xiamomc.morph.misc.animation.animations;
+package xiamomc.morph.providers.animation;
 
 import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.jetbrains.annotations.NotNull;
-import xiamomc.morph.misc.animation.AnimationNames;
-import xiamomc.morph.misc.animation.AnimationRegistry;
-import xiamomc.morph.misc.animation.SingleAnimation;
+import xiamomc.morph.misc.AnimationNames;
 
 import java.util.List;
 import java.util.Map;
@@ -64,8 +62,8 @@ public abstract class AnimationSet
     }
 
     /**
-     *
-     * @param animationId
+     * Gets the animation sequence for the given ID(Name)
+     * @param animationId The animation ID(Name) to lookup
      * @return A pair, left is the sequence, right is whether the sequence is persistent
      */
     @NotNull
@@ -74,6 +72,9 @@ public abstract class AnimationSet
         return animationMap.getOrDefault(animationId, Pair.of(List.of(), false));
     }
 
+    /**
+     * Get all available animation names that is suitable for client (and the command tab complete) in this AnimationSet
+     */
     public List<String> getAvailableAnimationsForClient()
     {
         return new ObjectArrayList<>(registeredAnimations);

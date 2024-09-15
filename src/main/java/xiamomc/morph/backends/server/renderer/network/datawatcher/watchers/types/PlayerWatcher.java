@@ -13,7 +13,7 @@ import xiamomc.morph.backends.server.renderer.network.registries.CustomEntries;
 import xiamomc.morph.backends.server.renderer.network.registries.RegistryKey;
 import xiamomc.morph.backends.server.renderer.network.registries.ValueIndex;
 import xiamomc.morph.misc.NmsRecord;
-import xiamomc.morph.misc.animation.AnimationNames;
+import xiamomc.morph.misc.AnimationNames;
 
 import java.util.UUID;
 

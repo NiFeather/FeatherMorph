@@ -5,7 +5,7 @@ import org.bukkit.event.Listener;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.backends.modelengine.MEBackend;
 import xiamomc.morph.events.api.lifecycle.ManagerFinishedInitializeEvent;
-import xiamomc.morph.providers.ModelEngineProvider;
+import xiamomc.morph.providers.disguise.ModelEngineProvider;
 
 public class ModelEngineHelper extends MorphPluginObject implements Listener
 {

@@ -1,7 +1,8 @@
-package xiamomc.morph.misc.animation.animations;
+package xiamomc.morph.providers.animation.bundled;
 
-import xiamomc.morph.misc.animation.AnimationNames;
-import xiamomc.morph.misc.animation.SingleAnimation;
+import xiamomc.morph.misc.AnimationNames;
+import xiamomc.morph.providers.animation.AnimationSet;
+import xiamomc.morph.providers.animation.SingleAnimation;
 
 import java.util.List;
 

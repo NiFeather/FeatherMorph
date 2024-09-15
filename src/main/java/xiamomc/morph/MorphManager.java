@@ -33,7 +33,6 @@ import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.MorphStrings;
 import xiamomc.morph.messages.vanilla.VanillaMessageStore;
 import xiamomc.morph.misc.*;
-import xiamomc.morph.misc.animation.AnimationRegistry;
 import xiamomc.morph.misc.disguiseProperty.DisguiseProperties;
 import xiamomc.morph.misc.disguiseProperty.SingleProperty;
 import xiamomc.morph.misc.permissions.CommonPermissions;
@@ -46,10 +45,10 @@ import xiamomc.morph.network.commands.S2C.set.*;
 import xiamomc.morph.network.multiInstance.MultiInstanceService;
 import xiamomc.morph.network.multiInstance.protocol.Operation;
 import xiamomc.morph.network.server.MorphClientHandler;
-import xiamomc.morph.providers.DisguiseProvider;
-import xiamomc.morph.providers.FallbackProvider;
-import xiamomc.morph.providers.PlayerDisguiseProvider;
-import xiamomc.morph.providers.VanillaDisguiseProvider;
+import xiamomc.morph.providers.disguise.DisguiseProvider;
+import xiamomc.morph.providers.disguise.FallbackProvider;
+import xiamomc.morph.providers.disguise.PlayerDisguiseProvider;
+import xiamomc.morph.providers.disguise.VanillaDisguiseProvider;
 import xiamomc.morph.skills.MorphSkillHandler;
 import xiamomc.morph.skills.SkillCooldownInfo;
 import xiamomc.morph.skills.SkillType;
@@ -918,9 +917,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     @Resolved
     private VanillaMessageStore vanillaMessageStore;
 
-    @Resolved
-    private AnimationRegistry animationRegistry;
-
     private void postBuildDisguise(DisguiseBuildResult result,
                                    MorphParameters parameters,
                                    PlayerMeta playerOptions)
@@ -1013,7 +1009,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         skillHandler.switchCooldown(player.getUniqueId(), cdInfo);
 
         // 设置可用动作
-        var availableAnimations = animationRegistry.getAvailableAnimationsFor(disguiseIdentifier);
+        var availableAnimations = provider.getAnimationProvider().getAnimationSetFor(disguiseIdentifier).getAvailableAnimationsForClient();
         clientHandler.sendCommand(player, new S2CSetAvailableAnimationsCommand(availableAnimations));
 
         // 调用事件
@@ -1186,11 +1182,13 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         //刷新被动
         state.getAbilityUpdater().getRegisteredAbilities().forEach(a -> a.onClientInit(state));
 
+        var provider = state.getProvider();
+
         //和客户端同步数据
-        state.getProvider().getInitialSyncCommands(state).forEach(c -> clientHandler.sendCommand(player, c));
+        provider.getInitialSyncCommands(state).forEach(c -> clientHandler.sendCommand(player, c));
 
         // 设置可用动作
-        var availableAnimations = animationRegistry.getAvailableAnimationsFor(state.getDisguiseIdentifier());
+        var availableAnimations = provider.getAnimationProvider().getAnimationSetFor(state.getDisguiseIdentifier()).getAvailableAnimationsForClient();
         clientHandler.sendCommand(player, new S2CSetAvailableAnimationsCommand(availableAnimations));
 
         //Profile

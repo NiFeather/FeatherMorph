@@ -34,8 +34,6 @@ import xiamomc.morph.messages.vanilla.VanillaMessageStore;
 import xiamomc.morph.misc.DisguiseTypes;
 import xiamomc.morph.misc.NetworkingHelper;
 import xiamomc.morph.misc.OfflineDisguiseResult;
-import xiamomc.morph.misc.animation.AnimationNames;
-import xiamomc.morph.misc.animation.animations.AnimationSet;
 import xiamomc.morph.misc.permissions.CommonPermissions;
 import xiamomc.morph.network.commands.S2C.S2CSwapCommand;
 import xiamomc.morph.network.commands.S2C.map.S2CMapRemoveCommand;

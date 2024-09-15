@@ -1,4 +1,4 @@
-package xiamomc.morph.providers;
+package xiamomc.morph.providers.disguise;
 
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Entity;
@@ -8,6 +8,8 @@ import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.backends.DisguiseWrapper;
 import xiamomc.morph.misc.DisguiseMeta;
 import xiamomc.morph.misc.DisguiseState;
+import xiamomc.morph.providers.animation.AnimationProvider;
+import xiamomc.morph.providers.animation.provider.FallbackAnimationProvider;
 
 import java.util.List;
 
@@ -17,6 +19,17 @@ public class FallbackProvider extends DefaultDisguiseProvider
     public @NotNull String getNameSpace()
     {
         return "fallback";
+    }
+
+    private final AnimationProvider animationProvider = new FallbackAnimationProvider();
+
+    /**
+     * 获取此DisguiseProvider的动画提供器
+     */
+    @Override
+    public AnimationProvider getAnimationProvider()
+    {
+        return animationProvider;
     }
 
     @Override

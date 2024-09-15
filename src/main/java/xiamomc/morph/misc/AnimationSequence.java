@@ -5,9 +5,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import oshi.util.tuples.Pair;
 import xiamomc.morph.MorphPluginObject;
-import xiamomc.morph.misc.animation.AnimationNames;
-import xiamomc.morph.misc.animation.SingleAnimation;
-import xiamomc.morph.misc.animation.animations.AnimationSet;
+import xiamomc.morph.providers.animation.SingleAnimation;
+import xiamomc.morph.providers.animation.AnimationSet;
 
 import java.util.Collections;
 import java.util.List;

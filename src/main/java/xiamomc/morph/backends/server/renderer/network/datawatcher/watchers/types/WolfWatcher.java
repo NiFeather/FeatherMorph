@@ -15,7 +15,7 @@ import org.bukkit.entity.Wolf;
 import xiamomc.morph.backends.server.renderer.network.registries.CustomEntries;
 import xiamomc.morph.backends.server.renderer.network.registries.RegistryKey;
 import xiamomc.morph.backends.server.renderer.network.registries.ValueIndex;
-import xiamomc.morph.misc.animation.AnimationNames;
+import xiamomc.morph.misc.AnimationNames;
 import xiamomc.morph.misc.disguiseProperty.DisguiseProperties;
 import xiamomc.morph.misc.disguiseProperty.SingleProperty;
 import xiamomc.morph.misc.disguiseProperty.values.WolfProperties;
