@@ -1,16 +1,9 @@
 package xiamomc.morph.misc.gui;
 
 import com.destroystokyo.paper.profile.CraftPlayerProfile;
-import com.mojang.authlib.properties.PropertyMap;
-import net.minecraft.Util;
-import net.minecraft.core.component.DataComponents;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.item.component.ResolvableProfile;
-import net.minecraft.world.level.block.entity.SkullBlockEntity;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.entity.EntityType;
+import org.bukkit.inventory.ItemRarity;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.slf4j.Logger;
@@ -19,13 +12,10 @@ import xiamomc.morph.misc.DisguiseTypes;
 import xiamomc.morph.misc.skins.PlayerSkinProvider;
 
 import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class IconLookup
 {
-    private static final Logger log = LoggerFactory.getLogger(IconLookup.class);
     private static IconLookup instance;
 
     public static IconLookup instance()
@@ -139,7 +129,11 @@ public class IconLookup
 
     private void register(EntityType type, Material material)
     {
-        this.register(type.key().asString(), new ItemStack(material));
+        var item = new ItemStack(material);
+
+        item.editMeta(meta -> meta.setRarity(ItemRarity.COMMON));
+
+        this.register(type.key().asString(), item);
     }
 
     private void register(String disguiseIdentifier, ItemStack stack)
@@ -162,8 +156,7 @@ public class IconLookup
     {
         var stack = new ItemStack(Material.PLAYER_HEAD);
 
-        stack.editMeta(SkullMeta.class, skullMeta ->
-                skullMeta.setPlayerProfile(new CraftPlayerProfile(Util.NIL_UUID, "~nil")));
+        stack.editMeta(meta -> meta.setRarity(ItemRarity.COMMON));
 
         PlayerSkinProvider.getInstance().fetchSkin(playerName)
                 .thenAccept(optional ->

@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class PlayerSkinProvider extends MorphPluginObject
@@ -127,6 +128,8 @@ public class PlayerSkinProvider extends MorphPluginObject
 
                 if (result != null)
                     skinCache.cache(result.profile());
+                else
+                    skinCache.cache(new GameProfile(Util.NIL_UUID, profile.getName()));
 
                 return result == null ? Optional.of(profile) : Optional.of(result.profile());
             });
@@ -189,13 +192,18 @@ public class PlayerSkinProvider extends MorphPluginObject
                         skinCache.cache(cachedSkin.profileOptional().get());
                         return CompletableFuture.completedFuture(cachedSkin.profileOptional());
                     }
-                    else
+                    else //本地没有缓存，则创建一个空Profile
                     {
+                        skinCache.cache(new GameProfile(Util.NIL_UUID, profileName));
                         return CompletableFuture.completedFuture(Optional.empty());
                     }
                 });
 
-        req.thenRun(() -> onGoingRequests.remove(profileName));
+        req.thenRun(() ->
+        {
+            logger.warn("Remove!");
+            onGoingRequests.remove(profileName);
+        });
 
         onGoingRequests.put(profileName, req);
 
