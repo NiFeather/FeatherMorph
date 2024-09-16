@@ -225,7 +225,7 @@
   "emote.morphclient.not_available": "Can't play action while the skill is still in cooldown",
   "emote.morphclient.unknown": "Unknown",
   "chestui.next_page": "Next page",
-  "chestui.prev_page": "Last page",
+  "chestui.prev_page": "Previous page",
   "chestui.undisguise": "Undisguise",
   "chestui.title_select_disguise": "Select disguise"
 }
