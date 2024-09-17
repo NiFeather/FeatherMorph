@@ -13,9 +13,9 @@ public class ServerSetEquipCommand extends S2CSetFakeEquipCommand<ItemStack>
     }
 
     @Override
-    public String buildCommand()
+    public String serializeArguments()
     {
-        return super.buildCommand() + " " + getSlot() + " " + ItemUtils.itemToStr(getItemStack());
+        return getSlot().toString() + " " + ItemUtils.itemToStr(getItemStack());
     }
 
     private static ProtocolEquipmentSlot toProtocolEquipment(EquipmentSlot slot)
