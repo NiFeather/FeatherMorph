@@ -41,11 +41,11 @@ root:
   #   [1]:  This widget will turn black when unavailable.
   #         If you wish to make them display as the border, replace it with the small cap variant.
   gui_pattern:
-    - "cxxxxxuuu"
+    - "Cxxxxxxxx"
     - "DDDDDDDDD"
     - "DDDDDDDDD"
     - "DDDDDDDDD"
-    - "PPPPxNNNN"
+    - "PPPuuuNNN"
 
   # ChatOverride options
   chatOverride:
