@@ -19,7 +19,6 @@ import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.values.AbstractValues;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
 import xiamomc.morph.backends.server.renderer.network.registries.CustomEntries;
-import xiamomc.morph.backends.server.renderer.network.registries.ValueIndex;
 import xiamomc.morph.backends.server.renderer.utilties.ProtocolRegistryUtils;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
@@ -68,7 +67,7 @@ public class PacketFactory extends MorphPluginObject
 
         //logger.info("Build spawn packets, player is " + player.getName() + " :: parameters are " + parameters);
 
-        var disguiseType = parameters.getEntityType();
+        var disguiseType = parameters.getWatcher().getEntityType();
         var nmsType = EntityTypeUtils.getNmsType(disguiseType);
         if (nmsType == null)
         {
@@ -173,7 +172,7 @@ public class PacketFactory extends MorphPluginObject
 
         packets.add(PacketContainer.fromPacket(equipmentPacket));
 
-        if (parameters.includeMeta())
+        if (parameters.includeMetaPackets())
             packets.add(buildFullMetaPacket(player, parameters.getWatcher()));
 
         if (player.getVehicle() != null)
@@ -185,7 +184,7 @@ public class PacketFactory extends MorphPluginObject
         if (!player.getPassengers().isEmpty())
             packets.add(PacketContainer.fromPacket(new ClientboundSetPassengersPacket(nmsPlayer)));
 
-        var bukkitEntityType = parameters.getEntityType();
+        var bukkitEntityType = parameters.getWatcher().getEntityType();
         if (bukkitEntityType.isAlive())
         {
             //Attributes

@@ -57,7 +57,7 @@ public class PlayerWatcher extends InventoryLivingWatcher
 
             var spawnPackets = getPacketFactory()
                     .buildSpawnPackets(player,
-                            new DisplayParameters(this.getEntityType(), this, profile));
+                            new DisplayParameters(this, profile));
 
             var packetRemove = PacketContainer.fromPacket(new ClientboundRemoveEntitiesPacket(player.getEntityId()));
             var protocol = ProtocolLibrary.getProtocolManager();

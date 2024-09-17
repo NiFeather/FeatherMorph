@@ -9,9 +9,10 @@ import xiamomc.morph.backends.server.renderer.network.registries.CustomEntries;
 
 public class DisplayParameters
 {
+    @Deprecated(since = "1.2.5", forRemoval = true)
     public EntityType getEntityType()
     {
-        return entityType;
+        return singleWatcher.getEntityType();
     }
 
     public SingleWatcher getWatcher()
@@ -25,7 +26,6 @@ public class DisplayParameters
         return gameProfile;
     }
 
-    private final EntityType entityType;
     private final SingleWatcher singleWatcher;
     private final GameProfile gameProfile;
     private boolean dontRandomProfileUUID = false;
@@ -50,14 +50,19 @@ public class DisplayParameters
         return this;
     }
 
+    @Deprecated(since = "1.2.5", forRemoval = true)
     public boolean includeMeta()
     {
         return includeMeta;
     }
 
-    public DisplayParameters(EntityType bindingType, SingleWatcher watcher, @Nullable GameProfile profile)
+    public boolean includeMetaPackets()
     {
-        this.entityType = bindingType;
+        return includeMeta;
+    }
+
+    public DisplayParameters(SingleWatcher watcher, @Nullable GameProfile profile)
+    {
         this.singleWatcher = watcher;
         this.gameProfile = profile;
     }
@@ -69,7 +74,6 @@ public class DisplayParameters
                     : null;
 
         return new DisplayParameters(
-                watcher.getEntityType(),
                 watcher,
                 profile
         );

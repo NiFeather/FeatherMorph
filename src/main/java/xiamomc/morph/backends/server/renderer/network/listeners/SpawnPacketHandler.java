@@ -66,7 +66,7 @@ public class SpawnPacketHandler extends ProtocolListener
         var gameProfile = ((CraftPlayer) player).getProfile();
         var watcher = new PlayerWatcher(player);
 
-        var parameters = new DisplayParameters(org.bukkit.entity.EntityType.PLAYER, watcher, gameProfile)
+        var parameters = new DisplayParameters(watcher, gameProfile)
                 .setDontRandomProfileUUID();
 
         var spawnPackets = getFactory().buildSpawnPackets(player, parameters);
@@ -102,7 +102,7 @@ public class SpawnPacketHandler extends ProtocolListener
             throw new NullDependencyException("Null Watcher for a existing player?!");
 
         refreshStateForPlayer(player,
-                new DisplayParameters(watcher.getEntityType(), watcher, watcher.readEntry(CustomEntries.PROFILE)),
+                new DisplayParameters(watcher, watcher.readEntry(CustomEntries.PROFILE)),
                 affectedPlayers);
     }
 
@@ -117,7 +117,6 @@ public class SpawnPacketHandler extends ProtocolListener
 
         if (player == null) return;
         var watcher = displayParameters.getWatcher();
-        var displayType = watcher.getEntityType();
 
         var protocolManager = ProtocolLibrary.getProtocolManager();
 
@@ -130,7 +129,7 @@ public class SpawnPacketHandler extends ProtocolListener
         //然后发包创建实体
         //确保gameProfile非空
         //如果没有profile，那么随机一个并计划刷新
-        if (displayType == org.bukkit.entity.EntityType.PLAYER && gameProfile == null)
+        if (watcher.getEntityType() == org.bukkit.entity.EntityType.PLAYER && gameProfile == null)
         {
             var disguiseName = watcher.readEntry(CustomEntries.DISGUISE_NAME);
 
@@ -157,7 +156,7 @@ public class SpawnPacketHandler extends ProtocolListener
             gameProfile = Objects.requireNonNullElseGet(targetProfile, () -> new GameProfile(UUID.randomUUID(), disguiseName));
         }
 
-        var parametersFinal = new DisplayParameters(displayType, watcher, gameProfile); //.setDontIncludeMeta();
+        var parametersFinal = new DisplayParameters(watcher, gameProfile); //.setDontIncludeMeta();
         var spawnPackets = getFactory().buildSpawnPackets(player, parametersFinal);
 
         affectedPlayers.forEach(p ->
