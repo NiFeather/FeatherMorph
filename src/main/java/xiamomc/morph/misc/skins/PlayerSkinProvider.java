@@ -199,11 +199,7 @@ public class PlayerSkinProvider extends MorphPluginObject
                     }
                 });
 
-        req.thenRun(() ->
-        {
-            logger.warn("Remove!");
-            onGoingRequests.remove(profileName);
-        });
+        req.thenRun(() -> onGoingRequests.remove(profileName));
 
         onGoingRequests.put(profileName, req);
 
