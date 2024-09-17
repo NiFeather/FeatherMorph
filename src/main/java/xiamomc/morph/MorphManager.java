@@ -1286,7 +1286,16 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         // 如果玩家在线，则生成粒子
         if (player.isConnected())
+        {
             spawnParticle(player, player.getLocation(), player.getWidth(), player.getHeight(), player.getWidth());
+
+            player.getWorld().playSound(
+                    player.getLocation(),
+                    Sound.UI_LOOM_TAKE_RESULT,
+                    SoundCategory.PLAYERS,
+                    1, 1
+            );
+        }
 
         // 从disguiseStates里移除此状态
         disguiseStates.remove(state);
