@@ -174,19 +174,29 @@ public abstract class SingleWatcher extends MorphPluginObject
     //region Value Registry
 
     protected final Map<Integer, Object> registry = new ConcurrentHashMap<>();
-    private final List<SingleValue<?>> values = new ObjectArrayList<>();
+    private final List<SingleValue<?>> knownValues = new ObjectArrayList<>();
 
     /**
-     * Values in this list shouldn't be included with meta packet processing in {@link PacketFactory#processServerMetaPacket(AbstractValues, SingleWatcher, PacketContainer)}
+     * Values in this list shouldn't be included with meta packet processing in {@link PacketFactory#rebuildServerMetaPacket(AbstractValues, SingleWatcher, PacketContainer)}
      */
     private final List<Integer> blockedValues = new ObjectArrayList<>();
 
+    /**
+     * Block specific value type (by index) from further updating.
+     * <p>
+     * Also prevents these values from appearing in the server's metadata packet.
+     */
     public void block(int index)
     {
         if (!blockedValues.contains(index))
             blockedValues.add(index);
     }
 
+    /**
+     * Block specific value type from further updating
+     * <p>
+     * Also prevents these values from appearing in the server's metadata packet.
+     */
     public void block(SingleValue<?> sv)
     {
         this.block(sv.index());
@@ -213,7 +223,7 @@ public abstract class SingleWatcher extends MorphPluginObject
     @Nullable
     public SingleValue<?> getSingle(int index)
     {
-        return values.stream().filter(sv -> sv.index() == index)
+        return knownValues.stream().filter(sv -> sv.index() == index)
                 .findFirst().orElse(null);
     }
 
@@ -228,9 +238,9 @@ public abstract class SingleWatcher extends MorphPluginObject
 
     protected boolean register(SingleValue<?> singleValue)
     {
-        if (values.stream().anyMatch(sv -> sv.index() == singleValue.index())) return false;
+        if (knownValues.stream().anyMatch(sv -> sv.index() == singleValue.index())) return false;
 
-        values.add(singleValue);
+        knownValues.add(singleValue);
         return true;
     }
 
@@ -252,7 +262,7 @@ public abstract class SingleWatcher extends MorphPluginObject
     {
         if (this.registry.containsKey(singleValue.index())) return;
 
-        this.write(singleValue, value, true);
+        this.write(singleValue, value, false);
     }
 
     /**
@@ -262,28 +272,45 @@ public abstract class SingleWatcher extends MorphPluginObject
      */
     public <X> void writePersistent(SingleValue<X> singleValue, @NotNull X value)
     {
-        this.write(singleValue, value, false);
+        this.write(singleValue, value, true);
     }
 
-    private <X> void write(SingleValue<X> singleValue, @NotNull X value, boolean isTemp)
+    /**
+     * @return NULL if the external SV doesn't have a matching SV in this watcher
+     * @param <X>
+     */
+    @Nullable
+    public <X> SingleValue<X> tryCast(SingleValue<X> external)
+    {
+        var match = this.knownValues.stream()
+                .filter(sv -> sv.equals(external))
+                .findFirst()
+                .orElse(null);
+
+        if (match == null) return null;
+
+        return (SingleValue<X>) match;
+    }
+
+    private <X> void write(SingleValue<X> singleValue, @NotNull X value, boolean isPersistent)
     {
         if (value == null)
             throw new IllegalArgumentException("If you wish to remove a SingleValue, use remove()");
 
+        if (!this.knownValues.contains(singleValue))
+            throw new IllegalArgumentException("Trying to write a value that does not belongs to this watcher. You may need to use 'tryCast(...)' method to cast a external SV to the one that this watcher uses.");
+
         var prevOption = registry.getOrDefault(singleValue.index(), null);
         var prev = prevOption == null ? null : (X)prevOption;
 
-        if (!isTemp)
+        if (isPersistent)
             registry.put(singleValue.index(), value);
-
-        if (!this.values.contains(singleValue))
-            throw new IllegalArgumentException("Trying to write a value that does not belongs to this watcher");
 
         if (doingInitialization)
             return;
 
         if (!value.equals(prev))
-            dirtySingles.put(singleValue, value);
+            dirtyValues.put(singleValue, value);
 
         onTrackerWrite(singleValue, prev, value);
 
@@ -353,16 +380,16 @@ public abstract class SingleWatcher extends MorphPluginObject
         return map;
     }
 
-    private final Map<SingleValue<?>, Object> dirtySingles = Collections.synchronizedMap(new Object2ObjectOpenHashMap<>());
+    private final Map<SingleValue<?>, Object> dirtyValues = Collections.synchronizedMap(new Object2ObjectOpenHashMap<>());
 
     public Map<SingleValue<?>, Object> getDirty()
     {
-        return new Object2ObjectOpenHashMap<>(dirtySingles);
+        return new Object2ObjectOpenHashMap<>(dirtyValues);
     }
 
     public void clearDirty()
     {
-        dirtySingles.clear();
+        dirtyValues.clear();
     }
 
     //endregion Value Registry
@@ -374,7 +401,7 @@ public abstract class SingleWatcher extends MorphPluginObject
         markSilent(syncSilentSource);
 
         syncedOnce.set(true);
-        dirtySingles.clear();
+        dirtyValues.clear();
 
         try
         {

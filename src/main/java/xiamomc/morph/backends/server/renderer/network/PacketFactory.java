@@ -203,7 +203,7 @@ public class PacketFactory extends MorphPluginObject
     }
 
     /**
-     * 重构服务器的Meta包
+     * 重构服务器将要发送的Meta包
      * <br>
      * 直接修改Meta包会导致一些玄学问题，例如修改后的值在之后被发给了不该收到的人
      * @return 剔除后的包
@@ -229,31 +229,36 @@ public class PacketFactory extends MorphPluginObject
             var index = w.getIndex();
             var rawValue = w.getRawValue();
 
+            // 跳过被屏蔽的数据
+            if (blockedValues.contains(index))
+                continue;
+
             // 寻找与其匹配的SingleValue
             var disguiseValue = values.stream()
                     .filter(sv -> sv.index() == index && (rawValue == null || rawValue.getClass() == sv.defaultValue().getClass()))
                     .findFirst().orElse(null);
 
-            // 如果有找到并且没有被屏蔽
-            if (disguiseValue != null && !blockedValues.contains(index))
+            // 如果没有找到，则代表此Index和伪装不兼容，跳过
+            if (disguiseValue == null)
+                continue;
+
+            // 从Watcher获取要设定的数据值，如果没有，则从服务器的包里取
+            var val = watcher.readOr(disguiseValue.index(), null);
+            if (val == null) val = w.getRawValue();
+
+            WrappedDataWatcher.Serializer serializer;
+
+            try
             {
-                var val = watcher.readOr(disguiseValue.index(), null);
-                if (val == null) val = w.getRawValue();
-
-                WrappedDataWatcher.Serializer serializer;
-
-                try
-                {
-                    serializer = ProtocolRegistryUtils.getSerializer(disguiseValue);
-                }
-                catch (Throwable t)
-                {
-                    logger.warn("Error occurred while generating meta packet with id '%s': %s".formatted(disguiseValue.name(), t.getMessage()));
-                    continue;
-                }
-
-                valuesToAdd.add(new WrappedDataValue(disguiseValue.index(), serializer, val));
+                serializer = ProtocolRegistryUtils.getSerializer(disguiseValue);
             }
+            catch (Throwable t)
+            {
+                logger.warn("Error occurred while generating meta packet with id '%s': %s".formatted(disguiseValue.name(), t.getMessage()));
+                continue;
+            }
+
+            valuesToAdd.add(new WrappedDataValue(disguiseValue.index(), serializer, val));
         }
 
         newPacket.getDataValueCollectionModifier().write(0, valuesToAdd);
