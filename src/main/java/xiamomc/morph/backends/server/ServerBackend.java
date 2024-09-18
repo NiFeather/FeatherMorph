@@ -179,7 +179,13 @@ public class ServerBackend extends DisguiseBackend<ServerDisguise, ServerDisguis
     {
         if (!(wrapper instanceof ServerDisguiseWrapper serverDisguiseWrapper)) return false;
         if (disguiseWrapperMap.containsKey(player.getUniqueId()))
+        {
             unDisguise(player, false);
+
+            // 我们切换伪装时为了视觉上不会露馅（有时候先移除再重新注册会导致在客户端短暂地看到玩家本体）而选择了不告诉渲染器移除玩家
+            // 因此这时需要单独从TAB移除玩家伪装
+            serverRenderer.removePlayerFromTabList(player.getUniqueId());
+        }
 
         disguiseWrapperMap.put(player.getUniqueId(), serverDisguiseWrapper);
 

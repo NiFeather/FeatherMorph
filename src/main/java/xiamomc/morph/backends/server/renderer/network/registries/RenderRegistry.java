@@ -116,8 +116,9 @@ public class RenderRegistry extends MorphPluginObject
      * 注册玩家的伪装类型
      * @param player 目标玩家
      * @param registerParameters 注册参数
+     * @param watcherConsumer Watcher的编辑函数，用于在注册事件前编辑Watcher的各项属性
      */
-    public SingleWatcher register(@NotNull Player player, RegisterParameters registerParameters)
+    public SingleWatcher register(@NotNull Player player, RegisterParameters registerParameters, Consumer<SingleWatcher> watcherConsumer)
     {
         var watcher = WatcherIndex.getInstance().getWatcherForType(player, registerParameters.entityType());
 
@@ -127,9 +128,15 @@ public class RenderRegistry extends MorphPluginObject
         watcher.writeEntry(CustomEntries.DISGUISE_NAME, registerParameters.name());
         watcher.writeEntry(CustomEntries.SPAWN_ID, player.getEntityId());
 
-        var str = randomBase.get() + player.getName();
+        var str = randomBase.get()
+                + registerParameters.entityType().toString()
+                + registerParameters.name()
+                + player.getName();
+
         var virtualEntityUUID = UUID.nameUUIDFromBytes(str.getBytes());
         watcher.writeEntry(CustomEntries.SPAWN_UUID, virtualEntityUUID);
+
+        watcherConsumer.accept(watcher);
 
         registerWithWatcher(player.getUniqueId(), watcher);
         watcher.unmarkSilent(this);

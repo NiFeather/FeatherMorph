@@ -85,7 +85,10 @@ public class PacketFactory extends MorphPluginObject
                 throw new IllegalArgumentException("GameProfile name is empty!");
 
             var packetPlayerInfo = new ClientboundPlayerInfoUpdatePacket(
-                    EnumSet.of(ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER, ClientboundPlayerInfoUpdatePacket.Action.UPDATE_LISTED),
+                    EnumSet.of(
+                            ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER,
+                            ClientboundPlayerInfoUpdatePacket.Action.UPDATE_LISTED
+                    ),
                     new ClientboundPlayerInfoUpdatePacket.Entry(
                             spawnUUID, gameProfile,
                             watcher.readEntryOrDefault(CustomEntries.PROFILE_LISTED, false),

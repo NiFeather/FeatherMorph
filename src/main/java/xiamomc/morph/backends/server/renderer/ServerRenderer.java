@@ -1,6 +1,9 @@
 package xiamomc.morph.backends.server.renderer;
 
+import com.comphenix.protocol.ProtocolLibrary;
+import com.comphenix.protocol.events.PacketContainer;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.minecraft.network.protocol.game.ClientboundPlayerInfoRemovePacket;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -21,6 +24,7 @@ import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Bindables.Bindable;
 
 import java.util.List;
+import java.util.UUID;
 
 public class ServerRenderer extends MorphPluginObject implements Listener
 {
@@ -70,15 +74,14 @@ public class ServerRenderer extends MorphPluginObject implements Listener
     {
         try
         {
-            var watcher = registry.register(player, new RegisterParameters(entityType, name));
+            return registry.register(player, new RegisterParameters(entityType, name), watcher ->
+            {
+                if (this.showPlayerDisguises.get())
+                    watcher.writeEntry(CustomEntries.PROFILE_LISTED, true);
 
-            if (this.showPlayerDisguises.get())
-                watcher.writeEntry(CustomEntries.PROFILE_LISTED, true);
-
-            if (watcher instanceof LivingEntityWatcher livingEntityWatcher)
-                livingEntityWatchers.add(livingEntityWatcher);
-
-            return watcher;
+                if (watcher instanceof LivingEntityWatcher livingEntityWatcher)
+                    livingEntityWatchers.add(livingEntityWatcher);
+            });
         }
         catch (Throwable t)
         {
@@ -89,6 +92,21 @@ public class ServerRenderer extends MorphPluginObject implements Listener
         }
 
         return null;
+    }
+
+    public void removePlayerFromTabList(UUID uuid)
+    {
+        var watcher = this.registry.getWatcher(uuid);
+
+        if (watcher == null || watcher.getEntityType() != EntityType.PLAYER) return;
+
+        var lastUUID = watcher.readEntryOrThrow(CustomEntries.SPAWN_UUID);
+
+        var packetRemoveInfo = PacketContainer.fromPacket(
+                new ClientboundPlayerInfoRemovePacket(List.of(lastUUID)));
+
+        var protocolManager = ProtocolLibrary.getProtocolManager();
+        Bukkit.getOnlinePlayers().forEach(p -> protocolManager.sendServerPacket(p, packetRemoveInfo));
     }
 
     public void unRegisterEntity(Player player)
