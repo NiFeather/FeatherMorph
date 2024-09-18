@@ -4,7 +4,7 @@ import xiamomc.morph.backends.server.renderer.network.datawatcher.values.basetyp
 
 public class PufferfishValues extends AbstractFishValues
 {
-    public final SingleValue<Integer> PUFF_STATE = getSingle("puff_state", PuffStates.SMALL);
+    public final SingleValue<Integer> PUFF_STATE = createSingle("puff_state", PuffStates.SMALL);
 
     public PufferfishValues()
     {

@@ -5,7 +5,7 @@ import xiamomc.morph.backends.server.renderer.network.datawatcher.values.SingleV
 
 public class BasePiglinValues extends MonsterValues
 {
-    public final SingleValue<Boolean> IMMUNE_TO_ZOMBIFICATION = getSingle("piglin_immune_to_zombification", true);
+    public final SingleValue<Boolean> IMMUNE_TO_ZOMBIFICATION = createSingle("piglin_immune_to_zombification", true);
 
     public BasePiglinValues()
     {

@@ -14,10 +14,10 @@ import xiamomc.morph.backends.server.renderer.utilties.HolderUtils;
 
 public class WolfValues extends TameableAnimalValues
 {
-    public final SingleValue<Boolean> BEGGING = getSingle("wolf_begging", false);
-    public final SingleValue<Integer> COLLAR_COLOR = getSingle("wolf_collar_color", 14);
-    public final SingleValue<Integer> ANGER_TIME = getSingle("wolf_anger_time", 0);
-    public final SingleValue<Holder<WolfVariant>> WOLF_VARIANT = getSingle("wolf_variant", getWolfVariant(WolfVariants.PALE)).withRandom(allVariants());
+    public final SingleValue<Boolean> BEGGING = createSingle("wolf_begging", false);
+    public final SingleValue<Integer> COLLAR_COLOR = createSingle("wolf_collar_color", 14);
+    public final SingleValue<Integer> ANGER_TIME = createSingle("wolf_anger_time", 0);
+    public final SingleValue<Holder<WolfVariant>> WOLF_VARIANT = createSingle("wolf_variant", getWolfVariant(WolfVariants.PALE)).withRandom(allVariants());
 
     @Nullable
     private Holder<WolfVariant>[] allVariants;

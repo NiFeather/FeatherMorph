@@ -8,8 +8,8 @@ import java.util.UUID;
 
 public class TameableAnimalValues extends AnimalValues
 {
-    public final SingleValue<Byte> TAMEABLE_FLAGS = getSingle("tameable_flags", (byte)0x00);
-    public final SingleValue<Optional<UUID>> OWNER = getSingle("tameable_owner", Optional.of(Util.NIL_UUID));
+    public final SingleValue<Byte> TAMEABLE_FLAGS = createSingle("tameable_flags", (byte)0x00);
+    public final SingleValue<Optional<UUID>> OWNER = createSingle("tameable_owner", Optional.of(Util.NIL_UUID));
 
     public TameableAnimalValues()
     {

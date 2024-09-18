@@ -5,7 +5,7 @@ import xiamomc.morph.backends.server.renderer.network.datawatcher.values.SingleV
 
 public class AgeableMobValues extends MobValues
 {
-    public final SingleValue<Boolean> IS_BABY = getSingle("ageable_mob_is_baby", false);
+    public final SingleValue<Boolean> IS_BABY = createSingle("ageable_mob_is_baby", false);
 
     public AgeableMobValues()
     {

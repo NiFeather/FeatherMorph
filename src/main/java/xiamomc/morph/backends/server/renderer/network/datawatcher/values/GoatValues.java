@@ -4,9 +4,9 @@ import xiamomc.morph.backends.server.renderer.network.datawatcher.values.basetyp
 
 public class GoatValues extends AnimalValues
 {
-    public final SingleValue<Boolean> IS_SCREAMING = getSingle("goat_is_screaming", false);
-    public final SingleValue<Boolean> HAS_LEFT_HORN = getSingle("goat_has_left_horn", true);
-    public final SingleValue<Boolean> HAS_RIGHT_HORN = getSingle("goat_has_right_horn", true);
+    public final SingleValue<Boolean> IS_SCREAMING = createSingle("goat_is_screaming", false);
+    public final SingleValue<Boolean> HAS_LEFT_HORN = createSingle("goat_has_left_horn", true);
+    public final SingleValue<Boolean> HAS_RIGHT_HORN = createSingle("goat_has_right_horn", true);
 
     public GoatValues()
     {

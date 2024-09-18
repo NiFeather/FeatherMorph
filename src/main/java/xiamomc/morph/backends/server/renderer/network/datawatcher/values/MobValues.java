@@ -4,7 +4,7 @@ import xiamomc.morph.backends.server.renderer.network.datawatcher.values.basetyp
 
 public class MobValues extends LivingEntityValues
 {
-    public final SingleValue<Byte> MOB_FLAGS = getSingle("mob_flags", (byte)0);
+    public final SingleValue<Byte> MOB_FLAGS = createSingle("mob_flags", (byte)0);
 
     public MobValues()
     {

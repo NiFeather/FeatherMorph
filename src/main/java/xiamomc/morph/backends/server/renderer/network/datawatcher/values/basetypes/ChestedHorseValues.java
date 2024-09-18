@@ -4,7 +4,7 @@ import xiamomc.morph.backends.server.renderer.network.datawatcher.values.SingleV
 
 public class ChestedHorseValues extends AbstractHorseValues
 {
-    public final SingleValue<Boolean> HAS_CHEST = getSingle("chested_horse_has_chest", false);
+    public final SingleValue<Boolean> HAS_CHEST = createSingle("chested_horse_has_chest", false);
 
     public ChestedHorseValues()
     {

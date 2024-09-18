@@ -4,7 +4,7 @@ import xiamomc.morph.backends.server.renderer.network.datawatcher.values.basetyp
 
 public class HorseValues extends AbstractHorseValues
 {
-    public final SingleValue<Integer> HORSE_VARIANT = getSingle("horse_variant", 0);
+    public final SingleValue<Integer> HORSE_VARIANT = createSingle("horse_variant", 0);
 
     public HorseValues()
     {

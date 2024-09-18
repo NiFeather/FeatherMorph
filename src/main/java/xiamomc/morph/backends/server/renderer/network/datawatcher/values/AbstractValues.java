@@ -10,7 +10,7 @@ import java.util.List;
 public abstract class AbstractValues
 {
     private int currentIndex = 0;
-    protected <X> SingleValue<X> getSingle(String name, X val)
+    protected <X> SingleValue<X> createSingle(String name, X val)
     {
         if (val == null)
             throw new IllegalArgumentException("May not pass a null value to getIndex()");

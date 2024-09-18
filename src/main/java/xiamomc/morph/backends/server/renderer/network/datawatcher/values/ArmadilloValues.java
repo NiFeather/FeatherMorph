@@ -6,7 +6,7 @@ import xiamomc.morph.backends.server.renderer.network.datawatcher.values.basetyp
 
 public class ArmadilloValues extends AnimalValues
 {
-    public final SingleValue<Armadillo.ArmadilloState> STATE = getSingle("armadillo_state", Armadillo.ArmadilloState.IDLE);
+    public final SingleValue<Armadillo.ArmadilloState> STATE = createSingle("armadillo_state", Armadillo.ArmadilloState.IDLE);
 
     public ArmadilloValues()
     {

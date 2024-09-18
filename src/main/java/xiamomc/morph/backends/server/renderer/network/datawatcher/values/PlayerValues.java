@@ -5,12 +5,12 @@ import xiamomc.morph.backends.server.renderer.network.datawatcher.values.basetyp
 
 public class PlayerValues extends LivingEntityValues
 {
-    public final SingleValue<Float> ABSORPTION_AMOUNT = getSingle("player_absorption_amount", 0f);
-    public final SingleValue<Integer> SCORE = getSingle("player_score", 0);
-    public final SingleValue<Byte> SKIN_FLAGS = getSingle("player_skin_flags", (byte)0); //127
-    public final SingleValue<Byte> MAINHAND = getSingle("player_mainhand", (byte)1);
-    public final SingleValue<CompoundTag> LEFT_SHOULDER_PARROT_COMPOUND = getSingle("player_lSPC", new CompoundTag());
-    public final SingleValue<CompoundTag> RIGHT_SHOULDER_PARROT_COMPOUND = getSingle("player_rSPC", new CompoundTag());
+    public final SingleValue<Float> ABSORPTION_AMOUNT = createSingle("player_absorption_amount", 0f);
+    public final SingleValue<Integer> SCORE = createSingle("player_score", 0);
+    public final SingleValue<Byte> SKIN_FLAGS = createSingle("player_skin_flags", (byte)0); //127
+    public final SingleValue<Byte> MAINHAND = createSingle("player_mainhand", (byte)1);
+    public final SingleValue<CompoundTag> LEFT_SHOULDER_PARROT_COMPOUND = createSingle("player_lSPC", new CompoundTag());
+    public final SingleValue<CompoundTag> RIGHT_SHOULDER_PARROT_COMPOUND = createSingle("player_rSPC", new CompoundTag());
 
     public PlayerValues()
     {

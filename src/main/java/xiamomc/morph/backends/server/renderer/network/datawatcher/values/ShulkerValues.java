@@ -4,9 +4,9 @@ import net.minecraft.core.Direction;
 
 public class ShulkerValues extends MonsterValues
 {
-    public final SingleValue<Direction> ATTACH_FACE_ID = getSingle("shulker_attach_face_id", Direction.DOWN);
-    public final SingleValue<Byte> PEEK_ID = getSingle("shulker_peek_id", (byte)0);
-    public final SingleValue<Byte> COLOR_ID = getSingle("shulker_color_id", (byte)16);
+    public final SingleValue<Direction> ATTACH_FACE_ID = createSingle("shulker_attach_face_id", Direction.DOWN);
+    public final SingleValue<Byte> PEEK_ID = createSingle("shulker_peek_id", (byte)0);
+    public final SingleValue<Byte> COLOR_ID = createSingle("shulker_color_id", (byte)16);
 
     public ShulkerValues()
     {
