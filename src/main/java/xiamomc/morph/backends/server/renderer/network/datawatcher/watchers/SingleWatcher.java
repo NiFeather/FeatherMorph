@@ -174,7 +174,12 @@ public abstract class SingleWatcher extends MorphPluginObject
     //region Value Registry
 
     protected final Map<Integer, Object> registry = new ConcurrentHashMap<>();
-    private final List<SingleValue<?>> knownValues = new ObjectArrayList<>();
+    private final Map<Integer, SingleValue<?>> knownValues = new ConcurrentHashMap<>();
+
+    public Map<Integer, SingleValue<?>> getKnownValues()
+    {
+        return new Object2ObjectOpenHashMap<>(knownValues);
+    }
 
     /**
      * Values in this list shouldn't be included with meta packet processing in {@link PacketFactory#rebuildServerMetaPacket(AbstractValues, SingleWatcher, PacketContainer)}
@@ -223,8 +228,7 @@ public abstract class SingleWatcher extends MorphPluginObject
     @Nullable
     public SingleValue<?> getSingle(int index)
     {
-        return knownValues.stream().filter(sv -> sv.index() == index)
-                .findFirst().orElse(null);
+        return knownValues.getOrDefault(index, null);
     }
 
     protected boolean register(AbstractValues values)
@@ -238,9 +242,9 @@ public abstract class SingleWatcher extends MorphPluginObject
 
     protected boolean register(SingleValue<?> singleValue)
     {
-        if (knownValues.stream().anyMatch(sv -> sv.index() == singleValue.index())) return false;
+        if (knownValues.containsKey(singleValue.index())) return false;
 
-        knownValues.add(singleValue);
+        knownValues.put(singleValue.index(), singleValue);
         return true;
     }
 
@@ -282,14 +286,13 @@ public abstract class SingleWatcher extends MorphPluginObject
     @Nullable
     public <X> SingleValue<X> tryCast(SingleValue<X> external)
     {
-        var match = this.knownValues.stream()
-                .filter(sv -> sv.equals(external))
-                .findFirst()
-                .orElse(null);
-
+        var match = this.knownValues.getOrDefault(external.index(), null);
         if (match == null) return null;
 
-        return (SingleValue<X>) match;
+        if (match.equals(external))
+            return (SingleValue<X>) match;
+        else
+            return null;
     }
 
     private <X> void write(SingleValue<X> singleValue, @NotNull X value, boolean isPersistent)
@@ -297,8 +300,16 @@ public abstract class SingleWatcher extends MorphPluginObject
         if (value == null)
             throw new IllegalArgumentException("If you wish to remove a SingleValue, use remove()");
 
-        if (!this.knownValues.contains(singleValue))
-            throw new IllegalArgumentException("Trying to write a value that does not belongs to this watcher. You may need to use 'tryCast(...)' method to cast a external SV to the one that this watcher uses.");
+        if (!this.knownValues.containsValue(singleValue))
+        {
+            var cast = this.tryCast(singleValue);
+            String message = "Trying to write a SV that doesn't belongs to this Watcher: '%s'. ";
+
+            if (cast == null)
+                throw new IllegalArgumentException(message);
+            else
+                logger.warn(message + "You may want to use 'tryCast(...)' or 'getKnownValues()' to get the correct SV.");
+        }
 
         var prevOption = registry.getOrDefault(singleValue.index(), null);
         var prev = prevOption == null ? null : (X)prevOption;

@@ -70,10 +70,10 @@ public class SingleValue<T>
 
     public SingleValue<T> withRandom(List<T> values)
     {
-        this.randomValues.clear();
-        this.randomValues.addAll(values);
+        var newInstance = new SingleValue<>(this.name, this.type, this.index, this.defaultValue);
+        newInstance.randomValues.addAll(values);
 
-        return this;
+        return newInstance;
     }
 
     public SingleValue<T> withRandom(T... randomValues)
@@ -90,10 +90,22 @@ public class SingleValue<T>
         return this.index == other.index && this.type.equals(other.type);
     }
 
+    public boolean equalsStrict(Object obj)
+    {
+        if (this == obj) return true;
+        if (!(obj instanceof SingleValue<?> other)) return false;
+
+        return this.index == other.index
+                && this.type.equals(other.type)
+                && this.name.equals(other.name)
+                && this.randomValues.equals(other.randomValues)
+                && this.defaultValue.equals(other.defaultValue);
+    }
+
     @Override
     public String toString()
     {
-        return "SingleValue[name='%s', type='%s', index='%s']".formatted(name, type, index);
+        return "SingleValue[name='%s', type='%s', index='%s']@%s".formatted(name, type, index, this.hashCode());
     }
 
     public static <TVal> SingleValue<TVal> of(String name, int index, @NotNull TVal val)
