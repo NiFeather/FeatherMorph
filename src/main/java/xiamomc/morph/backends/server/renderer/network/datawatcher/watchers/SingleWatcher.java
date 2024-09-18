@@ -143,6 +143,16 @@ public abstract class SingleWatcher extends MorphPluginObject
     {
     }
 
+    @NotNull
+    public <X> X readEntryOrThrow(RegistryKey<X> key)
+    {
+        var val = this.readEntry(key);
+        if (val == null)
+            throw new NullDependencyException("Custom Key '%s' not found in '%s'".formatted(key, this.getClass().getSimpleName()));
+
+        return val;
+    }
+
     public <X> X readEntryOrDefault(RegistryKey<X> key, X defaultValue)
     {
         var val = readEntry(key);
@@ -326,7 +336,7 @@ public abstract class SingleWatcher extends MorphPluginObject
         onTrackerWrite(singleValue, prev, value);
 
         if (!isSilent() && isAlive())
-            sendPacketToAffectedPlayers(packetFactory.buildDiffMetaPacket(getBindingPlayer(), this));
+            sendPacketToAffectedPlayers(packetFactory.buildDiffMetaPacket(this));
     }
 
     @Resolved(shouldSolveImmediately = true)

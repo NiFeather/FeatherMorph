@@ -7,6 +7,7 @@ import com.comphenix.protocol.wrappers.WrappedDataWatcher;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.minecraft.Util;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.*;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
@@ -35,14 +36,6 @@ import java.util.concurrent.TimeUnit;
 
 public class PacketFactory extends MorphPluginObject
 {
-    private final Bindable<String> randomBase = new Bindable<>("Stateof");
-
-    @Initializer
-    private void load(MorphConfigManager config)
-    {
-        config.bind(randomBase, ConfigOption.UUID_RANDOM_BASE);
-    }
-
     /**
      * 如果使用ProtocolLib自己的META系统<br>
      * 则可能会出现已发送的包又重新回归的问题<br>
@@ -57,12 +50,14 @@ public class PacketFactory extends MorphPluginObject
 
     public boolean isPacketOurs(PacketContainer container)
     {
-        var dd = cache.getIfPresent(container.getHandle().hashCode());
-        return dd != null;
+        return cache.getIfPresent(container.getHandle().hashCode()) != null;
     }
 
-    public List<PacketContainer> buildSpawnPackets(Player player, DisplayParameters parameters)
+    public List<PacketContainer> buildSpawnPackets(DisplayParameters parameters)
     {
+        var watcher = parameters.getWatcher();
+        var player = watcher.getBindingPlayer();
+
         List<PacketContainer> packets = new ObjectArrayList<>();
 
         //logger.info("Build spawn packets, player is " + player.getName() + " :: parameters are " + parameters);
@@ -79,61 +74,32 @@ public class PacketFactory extends MorphPluginObject
         }
 
         var nmsPlayer = NmsRecord.ofPlayer(player);
-        UUID spawnUUID = player.getUniqueId();
+        UUID spawnUUID = watcher.readEntryOrThrow(CustomEntries.SPAWN_UUID);
+        if (spawnUUID.equals(Util.NIL_UUID))
+            throw new IllegalStateException("A watcher with NIL UUID?!");
 
         //如果是玩家
         if (disguiseType == org.bukkit.entity.EntityType.PLAYER)
         {
-            //logger.info("Building player info packet!");
+            var gameProfile = watcher.readEntryOrThrow(CustomEntries.PROFILE);
 
-            var parametersProfile = parameters.getProfile();
-            Objects.requireNonNull(parametersProfile, "Null game profile!");
-            var gameProfile = new MorphGameProfile(parametersProfile);
-
-            if (!parameters.dontRandomProfileUUID())
-            {
-                //todo: Get random UUID from world to prevent duplicate UUID
-                //玩家在客户端的UUID会根据其GameProfile中的UUID设定，我们需要避免伪装的UUID和某一玩家自己的UUID冲突
-                var str = randomBase.get() + player.getName();
-                gameProfile.setUUID(UUID.nameUUIDFromBytes(str.getBytes()));
-            }
-
-            var lastUUID = parameters.getWatcher().readEntryOrDefault(CustomEntries.TABLIST_UUID, null);
-
-            if (lastUUID != null)
-            {
-                gameProfile.setUUID(lastUUID);
-
-                var packetTabRemove = new ClientboundPlayerInfoRemovePacket(List.of(lastUUID));
-                packets.add(PacketContainer.fromPacket(packetTabRemove));
-            }
-
-            //Minecraft需要在生成玩家实体前先发送PlayerInfoUpdate消息
-            var uuid = gameProfile.getId();
-
-            var profileName =  gameProfile.getName();
-            if (profileName.length() > 16)
-            {
-                logger.warn("Profile name '%s' exceeds the maximum length 16!".formatted(profileName));
-                var subStr = profileName.substring(0, 15);
-                gameProfile.setName(subStr);
-            }
+            var packetTabRemove = new ClientboundPlayerInfoRemovePacket(List.of(spawnUUID));
+            packets.add(PacketContainer.fromPacket(packetTabRemove));
 
             if (gameProfile.getName().isBlank())
                 throw new IllegalArgumentException("GameProfile name is empty!");
 
             var packetPlayerInfo = new ClientboundPlayerInfoUpdatePacket(
-                    EnumSet.of(ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER),
+                    EnumSet.of(ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER, ClientboundPlayerInfoUpdatePacket.Action.UPDATE_LISTED),
                     new ClientboundPlayerInfoUpdatePacket.Entry(
-                            uuid, gameProfile, false, 114514, GameType.DEFAULT_MODE,
-                            Component.literal(":>"), null
+                            spawnUUID, gameProfile,
+                            watcher.readEntryOrDefault(CustomEntries.PROFILE_LISTED, false),
+                            114514, GameType.DEFAULT_MODE,
+                            null, null
                     )
             );
 
-            spawnUUID = uuid;
             packets.add(PacketContainer.fromPacket(packetPlayerInfo));
-
-            parameters.getWatcher().writeEntry(CustomEntries.TABLIST_UUID, uuid);
         }
 
         var pitch = player.getPitch();
@@ -147,7 +113,7 @@ public class PacketFactory extends MorphPluginObject
 
         //生成实体
         var packetAdd = new ClientboundAddEntityPacket(
-                player.getEntityId(), spawnUUID,
+                watcher.readEntryOrThrow(CustomEntries.SPAWN_ID), spawnUUID,
                 player.getX(), player.getY(), player.getZ(),
                 pitch, yaw,
                 nmsType, 0,
@@ -158,8 +124,6 @@ public class PacketFactory extends MorphPluginObject
         var spawnPacket = PacketContainer.fromPacket(packetAdd);
 
         packets.add(spawnPacket);
-
-        var watcher = parameters.getWatcher();
 
         //生成装备和Meta
         var displayingFake = watcher.readEntryOrDefault(CustomEntries.DISPLAY_FAKE_EQUIPMENT, false);
@@ -175,6 +139,7 @@ public class PacketFactory extends MorphPluginObject
         if (parameters.includeMetaPackets())
             packets.add(buildFullMetaPacket(player, parameters.getWatcher()));
 
+        // 载具
         if (player.getVehicle() != null)
         {
             var nmsEntity = ((CraftEntity)player.getVehicle()).getHandle();
@@ -184,6 +149,7 @@ public class PacketFactory extends MorphPluginObject
         if (!player.getPassengers().isEmpty())
             packets.add(PacketContainer.fromPacket(new ClientboundSetPassengersPacket(nmsPlayer)));
 
+        // 属性
         var bukkitEntityType = parameters.getWatcher().getEntityType();
         if (bukkitEntityType.isAlive())
         {
@@ -271,10 +237,10 @@ public class PacketFactory extends MorphPluginObject
 
     private int metaPacketIndex;
 
-    public PacketContainer buildDiffMetaPacket(Player player, SingleWatcher watcher)
+    public PacketContainer buildDiffMetaPacket(SingleWatcher watcher)
     {
         var metaPacket = new PacketContainer(PacketType.Play.Server.ENTITY_METADATA);
-        metaPacket.getIntegers().write(0, player.getEntityId());
+        metaPacket.getIntegers().write(0, watcher.readEntryOrThrow(CustomEntries.SPAWN_ID));
 
         var modifier = metaPacket.getDataValueCollectionModifier();
 

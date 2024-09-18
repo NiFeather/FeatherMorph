@@ -47,17 +47,12 @@ public class PlayerWatcher extends InventoryLivingWatcher
     {
         super.onEntryWrite(key, oldVal, newVal);
 
-        if (key.equals(CustomEntries.PROFILE) && isPlayerOnline())
+        if (key.equals(CustomEntries.PROFILE) && isPlayerOnline() && !isSilent())
         {
             var player = getBindingPlayer();
 
-            var profile = newVal == null
-                    ? new GameProfile(UUID.randomUUID(), this.readEntryOrDefault(CustomEntries.DISGUISE_NAME, ""))
-                    : (GameProfile) newVal;
-
             var spawnPackets = getPacketFactory()
-                    .buildSpawnPackets(player,
-                            new DisplayParameters(this, profile));
+                    .buildSpawnPackets(new DisplayParameters(this));
 
             var packetRemove = PacketContainer.fromPacket(new ClientboundRemoveEntitiesPacket(player.getEntityId()));
             var protocol = ProtocolLibrary.getProtocolManager();

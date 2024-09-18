@@ -21,26 +21,19 @@ public class DisplayParameters
     }
 
     @Nullable
+    @Deprecated(since = "1.2.6", forRemoval = true)
     public GameProfile getProfile()
     {
-        return gameProfile;
+        return singleWatcher.readEntry(CustomEntries.PROFILE);
     }
 
     private final SingleWatcher singleWatcher;
-    private final GameProfile gameProfile;
-    private boolean dontRandomProfileUUID = false;
     private boolean includeMeta = true;
 
+    @Deprecated(since = "1.2.6", forRemoval = true)
     public DisplayParameters setDontRandomProfileUUID()
     {
-        dontRandomProfileUUID = true;
-
         return this;
-    }
-
-    public boolean dontRandomProfileUUID()
-    {
-        return dontRandomProfileUUID;
     }
 
     public DisplayParameters setDontIncludeMeta()
@@ -61,21 +54,19 @@ public class DisplayParameters
         return includeMeta;
     }
 
-    public DisplayParameters(SingleWatcher watcher, @Nullable GameProfile profile)
+    public DisplayParameters(SingleWatcher watcher)
     {
         this.singleWatcher = watcher;
-        this.gameProfile = profile;
+    }
+
+    @Deprecated(since = "1.2.6", forRemoval = true)
+    public DisplayParameters(SingleWatcher watcher, @Nullable GameProfile profile)
+    {
+        this(watcher);
     }
 
     public static DisplayParameters fromWatcher(SingleWatcher watcher)
     {
-        var profile = (watcher instanceof PlayerWatcher)
-                    ? watcher.readEntry(CustomEntries.PROFILE)
-                    : null;
-
-        return new DisplayParameters(
-                watcher,
-                profile
-        );
+        return new DisplayParameters(watcher);
     }
 }

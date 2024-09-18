@@ -63,18 +63,20 @@ public class SpawnPacketHandler extends ProtocolListener
 
         var protocolManager = ProtocolLibrary.getProtocolManager();
         var affectedPlayers = getAffectedPlayers(player);
-        var gameProfile = ((CraftPlayer) player).getProfile();
         var watcher = new PlayerWatcher(player);
+        watcher.markSilent(this);
 
-        var parameters = new DisplayParameters(watcher, gameProfile)
-                .setDontRandomProfileUUID();
+        watcher.writeEntry(CustomEntries.PROFILE, ((CraftPlayer) player).getProfile());
+        watcher.writeEntry(CustomEntries.SPAWN_UUID, player.getUniqueId());
+        watcher.writeEntry(CustomEntries.SPAWN_ID, player.getEntityId());
+        watcher.writeEntry(CustomEntries.PROFILE_LISTED, true);
 
-        var spawnPackets = getFactory().buildSpawnPackets(player, parameters);
+        var spawnPackets = getFactory().buildSpawnPackets(new DisplayParameters(watcher));
 
         var removePacket = new ClientboundRemoveEntitiesPacket(player.getEntityId());
         var rmPacketContainer = PacketContainer.fromPacket(removePacket);
 
-        var lastUUID = disguiseWatcher.readEntryOrDefault(CustomEntries.TABLIST_UUID, null);
+        var lastUUID = disguiseWatcher.readEntryOrDefault(CustomEntries.SPAWN_UUID, null);
         if (lastUUID != null)
         {
             spawnPackets.add(PacketContainer.fromPacket(
@@ -102,7 +104,7 @@ public class SpawnPacketHandler extends ProtocolListener
             throw new NullDependencyException("Null Watcher for a existing player?!");
 
         refreshStateForPlayer(player,
-                new DisplayParameters(watcher, watcher.readEntry(CustomEntries.PROFILE)),
+                new DisplayParameters(watcher),
                 affectedPlayers);
     }
 
@@ -124,12 +126,10 @@ public class SpawnPacketHandler extends ProtocolListener
         var packetRemove = new ClientboundRemoveEntitiesPacket(player.getEntityId());
         var packetRemoveContainer = PacketContainer.fromPacket(packetRemove);
 
-        var gameProfile = watcher.readEntry(CustomEntries.PROFILE);
-
         //然后发包创建实体
         //确保gameProfile非空
         //如果没有profile，那么随机一个并计划刷新
-        if (watcher.getEntityType() == org.bukkit.entity.EntityType.PLAYER && gameProfile == null)
+        if (watcher.getEntityType() == org.bukkit.entity.EntityType.PLAYER && watcher.readEntry(CustomEntries.PROFILE) == null)
         {
             var disguiseName = watcher.readEntry(CustomEntries.DISGUISE_NAME);
 
@@ -153,11 +153,11 @@ public class SpawnPacketHandler extends ProtocolListener
                         : NmsRecord.ofPlayer(targetPlayer).gameProfile;
             }
 
-            gameProfile = Objects.requireNonNullElseGet(targetProfile, () -> new GameProfile(UUID.randomUUID(), disguiseName));
+            watcher.writeEntry(CustomEntries.PROFILE, targetProfile == null ? new GameProfile(UUID.randomUUID(), disguiseName) : targetProfile);
         }
 
-        var parametersFinal = new DisplayParameters(watcher, gameProfile); //.setDontIncludeMeta();
-        var spawnPackets = getFactory().buildSpawnPackets(player, parametersFinal);
+        var parametersFinal = new DisplayParameters(watcher); //.setDontIncludeMeta();
+        var spawnPackets = getFactory().buildSpawnPackets(parametersFinal);
 
         affectedPlayers.forEach(p ->
         {

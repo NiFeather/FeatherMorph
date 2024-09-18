@@ -9,6 +9,10 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
+import xiamomc.morph.config.ConfigOption;
+import xiamomc.morph.config.MorphConfigManager;
+import xiamomc.pluginbase.Annotations.Resolved;
+import xiamomc.pluginbase.Bindables.Bindable;
 
 import java.util.List;
 import java.util.Map;
@@ -98,6 +102,16 @@ public class RenderRegistry extends MorphPluginObject
         return watcher;
     }
 
+    @Resolved(shouldSolveImmediately = true)
+    private MorphConfigManager config;
+
+    private final Bindable<String> randomBase = new Bindable<>("Stateof");
+
+    public RenderRegistry()
+    {
+        config.bind(randomBase, ConfigOption.UUID_RANDOM_BASE);
+    }
+
     /**
      * 注册玩家的伪装类型
      * @param player 目标玩家
@@ -108,7 +122,15 @@ public class RenderRegistry extends MorphPluginObject
         var watcher = WatcherIndex.getInstance().getWatcherForType(player, registerParameters.entityType());
 
         watcher.markSilent(this);
+
+        //设定初始值
         watcher.writeEntry(CustomEntries.DISGUISE_NAME, registerParameters.name());
+        watcher.writeEntry(CustomEntries.SPAWN_ID, player.getEntityId());
+
+        var str = randomBase.get() + player.getName();
+        var virtualEntityUUID = UUID.nameUUIDFromBytes(str.getBytes());
+        watcher.writeEntry(CustomEntries.SPAWN_UUID, virtualEntityUUID);
+
         registerWithWatcher(player.getUniqueId(), watcher);
         watcher.unmarkSilent(this);
 
@@ -122,6 +144,9 @@ public class RenderRegistry extends MorphPluginObject
      */
     public void registerWithWatcher(@NotNull UUID uuid, @NotNull SingleWatcher watcher)
     {
+        if (!watcher.getBindingPlayer().getUniqueId().equals(uuid))
+            throw new IllegalArgumentException("Watcher UUID doesn't match with player's UUID!");
+
         watcherMap.put(uuid, watcher);
 
         watcher.setParentRegistry(this);
