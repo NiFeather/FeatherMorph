@@ -4,6 +4,8 @@ import de.themoep.inventorygui.DynamicGuiElement;
 import de.themoep.inventorygui.InventoryGui;
 import de.themoep.inventorygui.StaticGuiElement;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -41,6 +43,8 @@ public class DisguiseSelectScreenWrapper extends MorphPluginObject
 
     private final String playerLocale;
 
+    private final boolean playOpenSound;
+
     @Resolved(shouldSolveImmediately = true)
     private MorphManager manager;
 
@@ -49,15 +53,20 @@ public class DisguiseSelectScreenWrapper extends MorphPluginObject
 
     public DisguiseSelectScreenWrapper(Player bindingPlayer, int pageOffset)
     {
+        this(bindingPlayer, pageOffset, true);
+    }
+
+    protected DisguiseSelectScreenWrapper(Player bindingPlayer, int pageOffset, boolean playOpenSound)
+    {
         this.disguises = manager.getAvaliableDisguisesFor(bindingPlayer);
         this.bindingPlayer = bindingPlayer;
         this.pageOffset = pageOffset;
         this.playerLocale = MessageUtils.getLocale(bindingPlayer);
         this.bindingState = manager.getDisguiseStateFor(bindingPlayer);
+        this.playOpenSound = playOpenSound;
 
         this.template.clear();
         this.template.addAll(config.getBindableList(String.class, ConfigOption.GUI_PATTERN));
-
 
         this.gui = this.preparePage();
         initElements();
@@ -116,8 +125,13 @@ public class DisguiseSelectScreenWrapper extends MorphPluginObject
 
     private final AtomicBoolean havePlayerHead = new AtomicBoolean(false);
 
+    private static final Sound openSound = Sound.sound().type(Key.key("entity.experience_orb.pickup")).volume(0.55f).build();
+
     public void show()
     {
+        if (playOpenSound)
+            bindingPlayer.playSound(openSound);
+
         this.gui.show(bindingPlayer);
 
         if (havePlayerHead.get())
@@ -210,6 +224,8 @@ public class DisguiseSelectScreenWrapper extends MorphPluginObject
         return (char)(1000 + index);
     }
 
+    private static final Sound clickSound = Sound.sound().type(Key.key("ui.button.click")).volume(0.45f).build();
+
     private void initElements()
     {
         // Fill disguise entries
@@ -224,6 +240,7 @@ public class DisguiseSelectScreenWrapper extends MorphPluginObject
                     1,
                     click ->
                     {
+                        bindingPlayer.playSound(clickSound);
                         manager.morph(bindingPlayer, bindingPlayer, meta.rawIdentifier, bindingPlayer.getTargetEntity(5));
                         gui.close();
 
@@ -265,6 +282,7 @@ public class DisguiseSelectScreenWrapper extends MorphPluginObject
                 1,
                 click ->
                 {
+                    bindingPlayer.playSound(clickSound);
                     schedulePrevPage();
                     return true;
                 },
@@ -277,6 +295,7 @@ public class DisguiseSelectScreenWrapper extends MorphPluginObject
                 1,
                 click ->
                 {
+                    bindingPlayer.playSound(clickSound);
                     scheduleNextPage();
                     return true;
                 },
@@ -289,6 +308,7 @@ public class DisguiseSelectScreenWrapper extends MorphPluginObject
                 1,
                 click ->
                 {
+                    bindingPlayer.playSound(clickSound);
                     manager.unMorph(bindingPlayer);
                     this.gui.close();
                     return true;
@@ -328,7 +348,7 @@ public class DisguiseSelectScreenWrapper extends MorphPluginObject
 
         scheduledAction = () ->
         {
-            var next = new DisguiseSelectScreenWrapper(bindingPlayer, this.pageOffset + 1);
+            var next = new DisguiseSelectScreenWrapper(bindingPlayer, this.pageOffset + 1, false);
             next.show();
         };
 
@@ -343,7 +363,7 @@ public class DisguiseSelectScreenWrapper extends MorphPluginObject
 
         scheduledAction = () ->
         {
-            var next = new DisguiseSelectScreenWrapper(bindingPlayer, this.pageOffset - 1);
+            var next = new DisguiseSelectScreenWrapper(bindingPlayer, this.pageOffset - 1, false);
             next.show();
         };
 
