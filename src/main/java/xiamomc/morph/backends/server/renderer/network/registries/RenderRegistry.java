@@ -22,7 +22,7 @@ import java.util.function.Consumer;
 
 public class RenderRegistry extends MorphPluginObject
 {
-    public record EventParameters(Player player, SingleWatcher parameters)
+    public record EventParameters(Player player, SingleWatcher watcher)
     {
     }
 

@@ -37,7 +37,11 @@ public class PlayerTabVisibilityHandler extends MorphPluginObject
 
         var packet = new ClientboundPlayerInfoRemovePacket(List.of(uuid));
         for (Player onlinePlayer : Bukkit.getOnlinePlayers())
+        {
+            if (onlinePlayer.getUniqueId().equals(uuid)) continue;
+
             this.sendPacket(onlinePlayer, packet);
+        }
     }
 
     public void hidePlayer(@Nullable Player player)
@@ -89,7 +93,10 @@ public class PlayerTabVisibilityHandler extends MorphPluginObject
      */
     public void handle(Player player)
     {
-        var packet = new ClientboundPlayerInfoRemovePacket(this.hiddenPlayers);
+        var list = new ObjectArrayList<>(this.hiddenPlayers);
+        list.removeIf(uuid -> uuid.equals(player.getUniqueId()));
+
+        var packet = new ClientboundPlayerInfoRemovePacket(list);
         this.sendPacket(player, packet);
     }
 }

@@ -17,7 +17,6 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.backends.server.renderer.network.DisplayParameters;
-import xiamomc.morph.backends.server.renderer.network.PacketFactory;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.PlayerWatcher;
 import xiamomc.morph.backends.server.renderer.network.registries.CustomEntries;
@@ -29,7 +28,6 @@ import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Exceptions.NullDependencyException;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 
 public class SpawnPacketHandler extends ProtocolListener
@@ -49,7 +47,7 @@ public class SpawnPacketHandler extends ProtocolListener
                 refreshStateForPlayer(ep.player(), getAffectedPlayers(ep.player())));
 
         registry.onUnRegister(this, ep ->
-                unDisguiseForPlayer(ep.player(), ep.parameters()));
+                unDisguiseForPlayer(ep.player(), ep.watcher()));
     }
 
     private List<Player> getAffectedPlayers(Player sourcePlayer)
@@ -71,17 +69,19 @@ public class SpawnPacketHandler extends ProtocolListener
         watcher.writeEntry(CustomEntries.SPAWN_ID, player.getEntityId());
         watcher.writeEntry(CustomEntries.PROFILE_LISTED, true);
 
-        var spawnPackets = getFactory().buildSpawnPackets(new DisplayParameters(watcher));
+        var packets = getFactory().buildSpawnPackets(new DisplayParameters(watcher));
 
         var removePacket = new ClientboundRemoveEntitiesPacket(player.getEntityId());
         var rmPacketContainer = PacketContainer.fromPacket(removePacket);
 
-        var lastUUID = disguiseWatcher.readEntryOrDefault(CustomEntries.SPAWN_UUID, null);
-        if (lastUUID != null)
+        if (disguiseWatcher.getEntityType() == org.bukkit.entity.EntityType.PLAYER)
         {
-            spawnPackets.add(PacketContainer.fromPacket(
-                    new ClientboundPlayerInfoRemovePacket(List.of(lastUUID))
-            ));
+            var lastUUID = disguiseWatcher.readEntryOrThrow(CustomEntries.SPAWN_UUID);
+
+            var packetRemoveInfo = PacketContainer.fromPacket(
+                    new ClientboundPlayerInfoRemovePacket(List.of(lastUUID)));
+
+            Bukkit.getOnlinePlayers().forEach(p -> protocolManager.sendServerPacket(p, packetRemoveInfo));
         }
 
         watcher.dispose();
@@ -90,7 +90,7 @@ public class SpawnPacketHandler extends ProtocolListener
         {
             protocolManager.sendServerPacket(p, rmPacketContainer);
 
-            for (PacketContainer packet : spawnPackets)
+            for (PacketContainer packet : packets)
                 protocolManager.sendServerPacket(p, packet);
         });
     }
