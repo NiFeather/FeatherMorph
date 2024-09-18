@@ -22,7 +22,6 @@ import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.RevealingHandler;
 import xiamomc.morph.abilities.impl.AttributeModifyingAbility;
-import xiamomc.morph.commands.MorphCommandManager;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.events.api.gameplay.PlayerJoinedWithDisguiseEvent;
@@ -34,6 +33,7 @@ import xiamomc.morph.messages.vanilla.VanillaMessageStore;
 import xiamomc.morph.misc.DisguiseTypes;
 import xiamomc.morph.misc.NetworkingHelper;
 import xiamomc.morph.misc.OfflineDisguiseResult;
+import xiamomc.morph.backends.server.renderer.utilties.PlayerTabVisibilityHandler;
 import xiamomc.morph.misc.permissions.CommonPermissions;
 import xiamomc.morph.network.commands.S2C.S2CSwapCommand;
 import xiamomc.morph.network.commands.S2C.map.S2CMapRemoveCommand;
@@ -52,9 +52,6 @@ import static xiamomc.morph.utilities.DisguiseUtils.itemOrAir;
 
 public class CommonEventProcessor extends MorphPluginObject implements Listener
 {
-    @Resolved(shouldSolveImmediately = true)
-    private MorphCommandManager cmdHelper;
-
     @Resolved(shouldSolveImmediately = true)
     private MorphManager morphs;
 
@@ -359,6 +356,8 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
 
             instance.removeModifier(AttributeModifyingAbility.modifierKey);
         }
+
+        this.addSchedule(() -> PlayerTabVisibilityHandler.instance().handle(player));
 
         if (state != null)
         {

@@ -12,9 +12,13 @@ import xiamomc.morph.backends.server.renderer.network.PacketFactory;
 import xiamomc.morph.backends.server.renderer.network.ProtocolHandler;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.LivingEntityWatcher;
+import xiamomc.morph.backends.server.renderer.network.registries.CustomEntries;
 import xiamomc.morph.backends.server.renderer.network.registries.RegisterParameters;
 import xiamomc.morph.backends.server.renderer.network.registries.RenderRegistry;
+import xiamomc.morph.config.ConfigOption;
+import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.pluginbase.Annotations.Initializer;
+import xiamomc.pluginbase.Bindables.Bindable;
 
 import java.util.List;
 
@@ -26,6 +30,8 @@ public class ServerRenderer extends MorphPluginObject implements Listener
 
     private final PacketFactory packetFactory = new PacketFactory();
 
+    private final Bindable<Boolean> showPlayerDisguises = new Bindable<>();
+
     public ServerRenderer()
     {
         dependencies.cache(packetFactory);
@@ -35,12 +41,14 @@ public class ServerRenderer extends MorphPluginObject implements Listener
     }
 
     @Initializer
-    private void load()
+    private void load(MorphConfigManager config)
     {
         // 当前插件中有在禁用过程使用LivingEntityWatcher的处理
         // 因此在这里加上插件是否启用的检查
         if (plugin.isEnabled())
             Bukkit.getPluginManager().registerEvents(this, plugin);
+
+        config.bind(this.showPlayerDisguises, ConfigOption.SR_SHOW_PLAYER_DISGUISES_IN_TAB);
     }
 
     private final List<LivingEntityWatcher> livingEntityWatchers = new ObjectArrayList<>();
@@ -63,6 +71,9 @@ public class ServerRenderer extends MorphPluginObject implements Listener
         try
         {
             var watcher = registry.register(player, new RegisterParameters(entityType, name));
+
+            if (this.showPlayerDisguises.get())
+                watcher.writeEntry(CustomEntries.PROFILE_LISTED, true);
 
             if (watcher instanceof LivingEntityWatcher livingEntityWatcher)
                 livingEntityWatchers.add(livingEntityWatcher);

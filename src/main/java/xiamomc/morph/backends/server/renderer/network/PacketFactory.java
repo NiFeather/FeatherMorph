@@ -8,10 +8,10 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.Util;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.*;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.level.GameType;
+import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.entity.CraftEntity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -21,15 +21,10 @@ import xiamomc.morph.backends.server.renderer.network.datawatcher.values.Abstrac
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
 import xiamomc.morph.backends.server.renderer.network.registries.CustomEntries;
 import xiamomc.morph.backends.server.renderer.utilties.ProtocolRegistryUtils;
-import xiamomc.morph.config.ConfigOption;
-import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.misc.DisguiseEquipment;
-import xiamomc.morph.misc.MorphGameProfile;
 import xiamomc.morph.misc.NmsRecord;
 import xiamomc.morph.utilities.EntityTypeUtils;
 import xiamomc.morph.utilities.NmsUtils;
-import xiamomc.pluginbase.Annotations.Initializer;
-import xiamomc.pluginbase.Bindables.Bindable;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -62,11 +57,11 @@ public class PacketFactory extends MorphPluginObject
 
         //logger.info("Build spawn packets, player is " + player.getName() + " :: parameters are " + parameters);
 
-        var disguiseType = parameters.getWatcher().getEntityType();
-        var nmsType = EntityTypeUtils.getNmsType(disguiseType);
+        var disguiseEntityType = watcher.getEntityType();
+        var nmsType = EntityTypeUtils.getNmsType(disguiseEntityType);
         if (nmsType == null)
         {
-            logger.error("No NMS Type for Bukkit Type '%s'".formatted(disguiseType));
+            logger.error("No NMS Type for Bukkit Type '%s'".formatted(disguiseEntityType));
             logger.error("Not build spawn packets!");
 
             //addSchedule(() -> registry.unregister(player));
@@ -79,7 +74,7 @@ public class PacketFactory extends MorphPluginObject
             throw new IllegalStateException("A watcher with NIL UUID?!");
 
         //如果是玩家
-        if (disguiseType == org.bukkit.entity.EntityType.PLAYER)
+        if (disguiseEntityType == org.bukkit.entity.EntityType.PLAYER)
         {
             var gameProfile = watcher.readEntryOrThrow(CustomEntries.PROFILE);
 
@@ -105,10 +100,10 @@ public class PacketFactory extends MorphPluginObject
         var pitch = player.getPitch();
         var yaw = player.getYaw();
 
-        if (disguiseType == EntityType.PHANTOM)
+        if (disguiseEntityType == EntityType.PHANTOM)
             pitch = -player.getPitch();
 
-        if (disguiseType == EntityType.ENDER_DRAGON)
+        if (disguiseEntityType == EntityType.ENDER_DRAGON)
             yaw = 180 + yaw;
 
         //生成实体
@@ -135,9 +130,7 @@ public class PacketFactory extends MorphPluginObject
                 ProtocolEquipment.toPairs(equip));
 
         packets.add(PacketContainer.fromPacket(equipmentPacket));
-
-        if (parameters.includeMetaPackets())
-            packets.add(buildFullMetaPacket(player, parameters.getWatcher()));
+        packets.add(buildFullMetaPacket(player, watcher));
 
         // 载具
         if (player.getVehicle() != null)
@@ -150,13 +143,12 @@ public class PacketFactory extends MorphPluginObject
             packets.add(PacketContainer.fromPacket(new ClientboundSetPassengersPacket(nmsPlayer)));
 
         // 属性
-        var bukkitEntityType = parameters.getWatcher().getEntityType();
-        if (bukkitEntityType.isAlive())
+        if (disguiseEntityType.isAlive())
         {
             //Attributes
-            List<AttributeInstance> attributes = bukkitEntityType == EntityType.PLAYER
+            List<AttributeInstance> attributes = disguiseEntityType == EntityType.PLAYER
                     ? new ObjectArrayList<>(nmsPlayer.getAttributes().getSyncableAttributes())
-                    : NmsUtils.getValidAttributes(bukkitEntityType, nmsPlayer.getAttributes());
+                    : NmsUtils.getValidAttributes(disguiseEntityType, nmsPlayer.getAttributes());
 
             var attributePacket = new ClientboundUpdateAttributesPacket(player.getEntityId(), attributes);
             packets.add(PacketContainer.fromPacket(attributePacket));
@@ -229,13 +221,10 @@ public class PacketFactory extends MorphPluginObject
 
         newPacket.getDataValueCollectionModifier().write(0, valuesToAdd);
 
-        metaPacketIndex++;
         markPacketOurs(newPacket);
 
         return newPacket;
     }
-
-    private int metaPacketIndex;
 
     public PacketContainer buildDiffMetaPacket(SingleWatcher watcher)
     {
@@ -268,7 +257,6 @@ public class PacketFactory extends MorphPluginObject
 
         modifier.write(0, wrappedDataValues);
 
-        metaPacketIndex++;
         markPacketOurs(metaPacket);
 
         return metaPacket;
@@ -312,7 +300,6 @@ public class PacketFactory extends MorphPluginObject
 
         modifier.write(0, wrappedDataValues);
 
-        metaPacketIndex++;
         markPacketOurs(metaPacket);
 
         return metaPacket;

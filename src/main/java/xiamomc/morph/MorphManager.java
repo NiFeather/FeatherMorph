@@ -22,6 +22,7 @@ import xiamomc.morph.backends.DisguiseWrapper;
 import xiamomc.morph.backends.WrapperAttribute;
 import xiamomc.morph.backends.fallback.NilBackend;
 import xiamomc.morph.backends.server.ServerBackend;
+import xiamomc.morph.backends.server.renderer.utilties.PlayerTabVisibilityHandler;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.events.api.gameplay.*;
@@ -239,6 +240,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         config.bind(allowHeadMorph, ConfigOption.ALLOW_HEAD_MORPH);
         config.bind(allowAcquireMorph, ConfigOption.ALLOW_ACQUIRE_MORPHS);
         config.bind(useClientRenderer, ConfigOption.USE_CLIENT_RENDERER);
+        config.bind(hideDisguisedPlayers, ConfigOption.HIDE_DISGUISED_PLAYERS_IN_TAB);
 
         registerProviders(ObjectList.of(
                 new VanillaDisguiseProvider(),
@@ -448,6 +450,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
     private final Bindable<Boolean> allowAcquireMorph = new Bindable<>(true);
     private final Bindable<Boolean> useClientRenderer = new Bindable<>(false);
+
+    private final Bindable<Boolean> hideDisguisedPlayers = new Bindable<>(false);
 
     private final Map<UUID, PlayerTextures> uuidPlayerTexturesMap = new ConcurrentHashMap<>();
 
@@ -1099,6 +1103,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             }
         }
 
+        if (this.hideDisguisedPlayers.get())
+            PlayerTabVisibilityHandler.instance().hidePlayer(player);
     }
 
     //region Command generating
@@ -1331,6 +1337,9 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         // 向管理员发送map移除指令
         networkingHelper.sendCommandToRevealablePlayers(new S2CMapRemoveCommand(player.getEntityId()));
+
+        if (this.hideDisguisedPlayers.get())
+            PlayerTabVisibilityHandler.instance().showPlayer(player);
 
         state.dispose();
     }

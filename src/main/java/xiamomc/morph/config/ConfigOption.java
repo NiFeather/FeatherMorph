@@ -2,13 +2,11 @@ package xiamomc.morph.config;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import xiamomc.morph.MorphManager;
-import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.events.InteractionMirrorProcessor;
 import xiamomc.morph.utilities.NbtUtils;
 import xiamomc.pluginbase.Configuration.ConfigNode;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public enum ConfigOption
 {
@@ -114,6 +112,11 @@ public enum ConfigOption
 
     GUI_PATTERN(ConfigNode.create().append("gui_pattern"), new ArrayList<String>()),
 
+    HIDE_DISGUISED_PLAYERS_IN_TAB(ConfigNode.create().append("hide_disguised_players_in_tab"), false),
+
+    // SRR -> ServerRenderer
+    SR_SHOW_PLAYER_DISGUISES_IN_TAB(serverRendererNode().append("show_player_disguises_in_tab"), false),
+
     VERSION(ConfigNode.create().append("version"), 0);
 
     public final ConfigNode node;
@@ -186,5 +189,9 @@ public enum ConfigOption
     private static ConfigNode multiInstanceNode()
     {
         return ConfigNode.create().append("multi_instance");
+    }
+    private static ConfigNode serverRendererNode()
+    {
+        return ConfigNode.create().append("server_renderer");
     }
 }

@@ -17,7 +17,7 @@ public class CustomEntries
     public static final RegistryKey<Boolean> DISPLAY_FAKE_EQUIPMENT = RegistryKey.of("display_fake_equip", false);
 
     /**
-     * @deprecated Use {@link CustomEntries#SPAWN_ID} instead
+     * @deprecated UUID for player disguise now is {@link CustomEntries#SPAWN_ID}
      */
     @Deprecated(since = "1.2.6", forRemoval = true)
     public static final RegistryKey<UUID> TABLIST_UUID = RegistryKey.of("tablist_uuid", Util.NIL_UUID);

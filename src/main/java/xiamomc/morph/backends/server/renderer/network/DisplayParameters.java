@@ -36,6 +36,7 @@ public class DisplayParameters
         return this;
     }
 
+    @Deprecated(since = "1.2.6", forRemoval = true)
     public DisplayParameters setDontIncludeMeta()
     {
         includeMeta = false;
@@ -49,6 +50,7 @@ public class DisplayParameters
         return includeMeta;
     }
 
+    @Deprecated(since = "1.2.6", forRemoval = true)
     public boolean includeMetaPackets()
     {
         return includeMeta;
