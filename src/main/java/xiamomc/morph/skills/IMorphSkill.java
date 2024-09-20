@@ -24,6 +24,7 @@ public interface IMorphSkill<T extends ISkillOption>
 
     /**
      * Called when this skill gets equipped
+     * @implNote We don't suggest sending data to the client in this method, do that in {@link IMorphSkill#applyToClient(DisguiseState)} instead
      * @param state {@link DisguiseState}
      */
     public default void onInitialEquip(DisguiseState state)
@@ -31,10 +32,10 @@ public interface IMorphSkill<T extends ISkillOption>
     }
 
     /**
-     * Called when a player's client mod gets initialized
+     * Apply data to the client
      * @param state {@link DisguiseState}
      */
-    public default void onClientinit(DisguiseState state)
+    public default void applyToClient(DisguiseState state)
     {
     }
 

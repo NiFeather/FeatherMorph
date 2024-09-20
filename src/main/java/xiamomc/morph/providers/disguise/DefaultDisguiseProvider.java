@@ -112,7 +112,7 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
                 case REVEALED -> bit |= 32;
             }
 
-            var msgConfig = state.getProperty("MESSAGE_CONFIG", MessageConfiguration.class);
+            var msgConfig = state.getCustomData("MESSAGE_CONFIG", MessageConfiguration.class);
             if (msgConfig == null) msgConfig = MessageConfiguration.DEFAULT;
 
             short stateBit = msgConfig.statusBit();
@@ -138,7 +138,7 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
                         .withBit(bit)
                         .withLocale(locale);
 
-                state.setProperty("MESSAGE_CONFIG", msgConfig);
+                state.setCustomData("MESSAGE_CONFIG", msgConfig);
             }
 
             player.sendActionBar(msgConfig.display);

@@ -394,7 +394,7 @@ public class DisguiseState extends MorphPluginObject
         serverDisplay = newName;
     }
 
-    public void setDisplayName(Component newName)
+    public void setCustomDisplayName(Component newName)
     {
         setPlayerDisplay(newName);
         setServerDisplay(newName);
@@ -489,13 +489,25 @@ public class DisguiseState extends MorphPluginObject
 
     private final Map<String, Object> propertiesMap = new Object2ObjectArrayMap<>();
 
-    public void setProperty(String name, Object value)
+    /**
+     * @apiNote 这不是伪装的属性，仅仅针对此DisguiseState会话！
+     */
+    public void setCustomData(String name, Object value)
     {
+        if (value == null)
+        {
+            this.removeCustomData(name);
+            return;
+        }
+
         propertiesMap.put(name, value);
     }
 
+    /**
+     * @apiNote 这不是伪装的属性，仅仅针对此DisguiseState会话！
+     */
     @Nullable
-    public <T> T getProperty(String name, Class<T> type)
+    public <T> T getCustomData(String name, Class<T> type)
     {
         var value = propertiesMap.getOrDefault(name, null);
         if (value == null) return null;
@@ -505,7 +517,10 @@ public class DisguiseState extends MorphPluginObject
         return null;
     }
 
-    public void removeProperty(String name)
+    /**
+     * @apiNote 这不是伪装的属性，仅仅针对此DisguiseState会话！
+     */
+    public void removeCustomData(String name)
     {
         propertiesMap.remove(name);
     }
@@ -599,25 +614,31 @@ public class DisguiseState extends MorphPluginObject
         return cooldownInfo != null;
     }
 
-    public void setSkillCooldown(long val)
+    public void setSkillCooldown(long val, boolean notifyClient)
     {
         if (haveCooldown())
-        {
             cooldownInfo.setCooldown(val);
 
-            var player = getPlayer();
-            if (clientHandler.isFutureClientProtocol(player, 3))
-                clientHandler.sendCommand(player, new S2CSetSkillCooldownCommand(val));
-        }
+        if (notifyClient)
+            this.applyCooldownToClient();
     }
 
-    public void setCooldownInfo(@Nullable SkillCooldownInfo info)
+    public void setCooldownInfo(@Nullable SkillCooldownInfo info, boolean notifyClient)
     {
         this.cooldownInfo = info;
 
-        var player = getPlayer();
-        if (info != null && clientHandler.isFutureClientProtocol(player, 3))
-            clientHandler.sendCommand(player, new S2CSetSkillCooldownCommand(info.getCooldown()));
+        if (notifyClient)
+            this.applyCooldownToClient();
+    }
+
+    public void applyCooldownToClient()
+    {
+        long cd = -1;
+
+        if (haveCooldown())
+            cd = this.getSkillCooldown();
+
+        clientHandler.sendCommand(getPlayer(), new S2CSetSkillCooldownCommand(cd));
     }
 
     //region 被动技能

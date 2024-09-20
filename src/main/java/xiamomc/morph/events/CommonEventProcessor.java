@@ -137,7 +137,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
 
                 //如果伤害是0，那么取消事件
                 if (e.getDamage() > 0d)
-                    state.setSkillCooldown(Math.max(state.getSkillCooldown(), cooldownOnDamage.get()));
+                    state.setSkillCooldown(Math.max(state.getSkillCooldown(), cooldownOnDamage.get()), true);
             }
         }
     }

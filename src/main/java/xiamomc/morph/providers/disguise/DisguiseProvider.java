@@ -6,6 +6,7 @@ import net.minecraft.nbt.CompoundTag;
 import org.bukkit.craftbukkit.entity.CraftLivingEntity;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphManager;
@@ -244,7 +245,7 @@ public abstract class DisguiseProvider extends MorphPluginObject
     }
 
     /**
-     * 我们是否可以通过给定的{@link DisguiseMeta}来从某个实体构建伪装?
+     * 我们是否可以根据给定的实体构建伪装？
      *
      * @param info {@link DisguiseMeta}
      * @param targetEntity 目标实体
@@ -253,6 +254,16 @@ public abstract class DisguiseProvider extends MorphPluginObject
      */
     public abstract boolean canConstruct(DisguiseMeta info, Entity targetEntity,
                                          @Nullable DisguiseState theirState);
+
+    /**
+     * 我们是否可以克隆目标实体/玩家的伪装？
+     *
+     * @param info {@link DisguiseMeta}
+     * @param targetEntity 目标实体
+     * @param theirState 他们的{@link DisguiseState}，如果有
+     * @return 是否允许克隆他们的装备进行显示
+     */
+    public abstract boolean canCloneEquipment(DisguiseMeta info, Entity targetEntity, DisguiseState theirState);
 
     /**
      * 是否可以克隆某个实体现有的伪装?

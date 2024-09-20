@@ -106,7 +106,7 @@ public class DisguiseStateGenerator
             var component = GsonComponentSerializer.gson().deserialize(offlineState.customName);
 
             state.entityCustomName = component;
-            state.setDisplayName(component);
+            state.setCustomDisplayName(component);
         }
 
         //设置伪装物品显示

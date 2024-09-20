@@ -182,6 +182,20 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
         return targetPlayer.getName().equals(info.playerDisguiseTargetName);
     }
 
+    /**
+     * 我们是否可以克隆目标实体/玩家的伪装？
+     *
+     * @param info         {@link DisguiseMeta}
+     * @param targetEntity 目标实体
+     * @param theirState   他们的{@link DisguiseState}，如果有
+     * @return 是否允许克隆他们的装备进行显示
+     */
+    @Override
+    public boolean canCloneEquipment(DisguiseMeta info, Entity targetEntity, DisguiseState theirState)
+    {
+        return canConstruct(info, targetEntity, theirState);
+    }
+
     @Override
     protected boolean canCloneDisguise(DisguiseMeta info, Entity targetEntity,
                                        @NotNull DisguiseState theirState, @NotNull DisguiseWrapper<?> theirDisguise)

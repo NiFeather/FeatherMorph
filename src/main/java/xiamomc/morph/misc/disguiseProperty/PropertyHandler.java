@@ -2,6 +2,7 @@ package xiamomc.morph.misc.disguiseProperty;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import org.jetbrains.annotations.Nullable;
+import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.misc.disguiseProperty.values.AbstractProperties;
 
 import java.util.Map;
@@ -18,15 +19,18 @@ public class PropertyHandler
     public void setProperties(AbstractProperties properties)
     {
         reset();
+        properties.getValues().forEach(this::addProperty);
+    }
 
-        for (SingleProperty<?> property : properties.getValues())
+    private void addProperty(SingleProperty<?> property)
+    {
+        propertyMap.put(property, property.defaultVal());
+
+        var random = property.getRandomValues();
+        if (!random.isEmpty())
         {
-            var random = property.getRandomValues();
-            if (!random.isEmpty())
-            {
-                var index = this.random.nextInt(random.size());
-                this.writeGeneric(property, random.get(index));
-            }
+            var index = this.random.nextInt(random.size());
+            this.writeGeneric(property, random.get(index));
         }
     }
 
@@ -45,6 +49,12 @@ public class PropertyHandler
 
     public <X> void set(SingleProperty<X> property, X value)
     {
+        if (!propertyMap.containsKey(property))
+        {
+            MorphPlugin.getInstance().getSLF4JLogger().warn("The given property '%s' doesn't exist.".formatted(property));
+            return;
+        }
+
         propertyMap.put(property, value);
     }
 

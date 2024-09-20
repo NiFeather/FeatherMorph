@@ -47,7 +47,7 @@ import xiamomc.morph.network.multiInstance.MultiInstanceService;
 import xiamomc.morph.network.multiInstance.protocol.Operation;
 import xiamomc.morph.network.server.MorphClientHandler;
 import xiamomc.morph.providers.disguise.DisguiseProvider;
-import xiamomc.morph.providers.disguise.FallbackProvider;
+import xiamomc.morph.providers.disguise.FallbackDisguiseProvider;
 import xiamomc.morph.providers.disguise.PlayerDisguiseProvider;
 import xiamomc.morph.providers.disguise.VanillaDisguiseProvider;
 import xiamomc.morph.skills.MorphSkillHandler;
@@ -64,6 +64,7 @@ import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
 import xiamomc.pluginbase.Bindables.BindableList;
 
+import java.io.InvalidObjectException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -91,7 +92,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     @Resolved
     private DisguiseProperties disguiseProperties;
 
-    public static final DisguiseProvider fallbackProvider = new FallbackProvider();
+    public static final DisguiseProvider fallbackProvider = new FallbackDisguiseProvider();
 
     public static final String disguiseFallbackName = "@default";
 
@@ -642,11 +643,38 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
     private boolean doDisguise(MorphParameters parameters)
     {
+        var source = parameters.commandSource == null ? parameters.targetPlayer : parameters.commandSource;
+
         try
         {
             var meta = preDisguise(parameters);
             if (meta == null)
                 return false;
+
+            // 更新上次操作时间
+            updateLastPlayerMorphOperationTime(parameters.targetPlayer);
+
+            var validateResult = validateDisguise(meta);
+            switch (validateResult)
+            {
+                case VALIDATE_NO_ISSUE -> {}
+
+                case VALIDATE_NO_PROVIDER ->
+                {
+                    logger.error("Unable to find any provider that matches the identifier '%s'".formatted(parameters.targetDisguiseIdentifier()));
+                    source.sendMessage(MessageUtils.prefixes(source, MorphStrings.disguiseBannedOrNotSupportedString()));
+                    return false;
+                }
+
+                case VALIDATE_PROVIDER_FAIL ->
+                {
+                    source.sendMessage(MessageUtils.prefixes(source, MorphStrings.invalidIdentityString()));
+                    return false;
+                }
+
+                // In case I forgot something...
+                default -> throw new InvalidObjectException("Invalid validate result: " + validateResult);
+            }
 
             var buildResult = buildDisguise(parameters, meta);
             if (!buildResult.success())
@@ -654,6 +682,12 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
             var playerMeta = getPlayerMeta(parameters.targetPlayer);
             this.postBuildDisguise(buildResult, parameters, playerMeta);
+
+            if (!applyDisguise(parameters, buildResult.state(), meta, playerMeta))
+            {
+                return false;
+            }
+
             this.afterDisguise(buildResult, parameters, playerMeta);
 
             return true;
@@ -663,7 +697,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             logger.error("Unable to disguise player: " + t.getMessage());
             t.printStackTrace();
 
-            var source = parameters.commandSource;
             source.sendMessage(MessageUtils.prefixes(source, MorphStrings.errorWhileDisguising()));
 
             unMorph(parameters.targetPlayer);
@@ -747,6 +780,27 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         return info;
     }
 
+    public static final int VALIDATE_NO_ISSUE = 0;
+    public static final int VALIDATE_NO_PROVIDER = 1;
+    public static final int VALIDATE_PROVIDER_FAIL = 2;
+
+    public int validateDisguise(DisguiseMeta meta)
+    {
+        var disguiseIdentifier = meta.getIdentifier();
+
+        // 查找provider
+        var strippedKey = disguiseIdentifier.split(":", 2);
+
+        var provider = getProvider(strippedKey[0]);
+
+        if (provider == MorphManager.fallbackProvider) // 如果没找到provider
+            return VALIDATE_NO_PROVIDER;
+        else if (!provider.isValid(disguiseIdentifier)) // 如果provider不认识这个ID
+            return VALIDATE_PROVIDER_FAIL;
+
+        return VALIDATE_NO_ISSUE;
+    }
+
     /**
      * 构建一个最小的
      * @param parameters A {@link MorphParameters}
@@ -767,105 +821,55 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         // 执行伪装操作
         try
         {
-            // 查找provider
-            var strippedKey = disguiseIdentifier.split(":", 2);
+            var provider = getProvider(disguiseIdentifier);
 
-            var provider = getProvider(strippedKey[0]);
+            // 从Provider获取此伪装的Wrapper
+            var result = provider.makeWrapper(player, disguiseMeta, targetEntity);
 
-            if (provider == MorphManager.fallbackProvider) // 如果没找到provider
+            // 如果provider未能构建DisguiseWrapper
+            if (!result.success())
             {
-                source.sendMessage(MessageUtils.prefixes(source, MorphStrings.disguiseBannedOrNotSupportedString()));
-                logger.error("Unable to find any provider that matches the identifier '%s'".formatted(strippedKey[0]));
-                return DisguiseBuildResult.FAILED;
-            }
-            else if (!provider.isValid(disguiseIdentifier)) // 如果provider不认识这个ID
-            {
-                source.sendMessage(MessageUtils.prefixes(source, MorphStrings.invalidIdentityString()));
-                return DisguiseBuildResult.FAILED;
-            }
-            else
-            {
-                // 从Provider获取此伪装的Wrapper
-                var result = provider.makeWrapper(player, disguiseMeta, targetEntity);
-
-                // 如果provider未能构建DisguiseWrapper
-                if (!result.success())
+                if (!result.failSilent())
                 {
-                    if (!result.failSilent())
-                    {
-                        source.sendMessage(MessageUtils.prefixes(source, MorphStrings.errorWhileDisguising()));
-                        logger.error("Unable to get disguise for player with provider {}", provider);
-                    }
-
-                    return DisguiseBuildResult.FAILED;
-                }
-
-                // 玩家是否已有活跃的DisguiseState?
-                var currentState = getDisguiseStateFor(player);
-
-                // 重置上个State的伪装
-                if (currentState != null)
-                {
-                    var stateProvider = currentState.getProvider();
-
-                    // 检查上个State的后端是否允许我们在不取消伪装的情况下重置State
-                    if (stateProvider.allowSwitchingWithoutUndisguise(provider, disguiseMeta))
-                        currentState.reset(false);
-                    else
-                        currentState.reset();
-
-                    activeDisguises.remove(currentState);
-                }
-
-                // 获取此伪装将用来显示的目标装备
-                EntityEquipment equipment = null;
-
-                var theirState = getDisguiseStateFor(targetEntity);
-                if (targetEntity != null && provider.canConstruct(getDisguiseMeta(disguiseIdentifier), targetEntity, theirState))
-                {
-                    if (theirState != null)
-                    {
-                        equipment = theirState.showingDisguisedItems()
-                                ? theirState.getDisguisedItems()
-                                : ((LivingEntity) targetEntity).getEquipment();
-                    }
-                    else
-                    {
-                        equipment = ((LivingEntity) targetEntity).getEquipment();
-                    }
-                }
-
-                // 技能
-                var rawIdentifierHasSkill = skillHandler.hasSkill(disguiseIdentifier) || skillHandler.hasSpeficSkill(disguiseIdentifier, SkillType.NONE);
-                var targetSkillID = rawIdentifierHasSkill ? disguiseIdentifier : provider.getNameSpace() + ":" + MorphManager.disguiseFallbackName;
-
-                var playerMorphConfig = getPlayerMeta(player);
-                outComingState = new DisguiseState(player, disguiseIdentifier, targetSkillID,
-                        result.wrapperInstance(), provider, equipment,
-                        clientHandler.getPlayerOption(player, true), playerMorphConfig);
-                this.activeDisguises.add(outComingState);
-
-                // 同步伪装属性
-                var wrapperInstance = result.wrapperInstance();
-                var propertyHandler = outComingState.disguisePropertyHandler();
-                propertyHandler.setProperties(disguiseProperties.get(disguiseMeta.getEntityType()));
-                propertyHandler.getAll().forEach((property, value) ->
-                {
-                    wrapperInstance.writeProperty((SingleProperty<Object>) property, value);
-                });
-
-                // 向Wrapper写入伪装ID
-                wrapperInstance.write(WrapperAttribute.disguiseIdentifier, disguiseIdentifier);
-
-                // 在初始化服务端伪装状态后，交由后端来为玩家套上伪装
-                var backendSuccess = result.wrapperInstance().getBackend().disguise(player, result.wrapperInstance());
-                if (!backendSuccess)
-                {
-                    logger.warn("Backend '%s' failed to disguise the player...".formatted(result.wrapperInstance().getBackend().getIdentifier()));
                     source.sendMessage(MessageUtils.prefixes(source, MorphStrings.errorWhileDisguising()));
-                    return DisguiseBuildResult.FAILED;
+                    logger.error("Unable to get disguise for player with provider {}", provider);
+                }
+
+                return DisguiseBuildResult.FAILED;
+            }
+
+            var wrapper = result.wrapperInstance();
+            assert wrapper != null;
+
+            // 向Wrapper写入伪装ID
+            wrapper.write(WrapperAttribute.disguiseIdentifier, disguiseIdentifier);
+
+            // 获取此伪装将用来显示的目标装备
+            EntityEquipment equipment = null;
+            var theirState = getDisguiseStateFor(targetEntity);
+            if (targetEntity != null && provider.canCloneEquipment(disguiseMeta, targetEntity, theirState))
+            {
+                if (theirState != null)
+                {
+                    equipment = theirState.showingDisguisedItems()
+                            ? theirState.getDisguisedItems()
+                            : ((LivingEntity) targetEntity).getEquipment();
+
+                }
+                else
+                {
+                    equipment = ((LivingEntity) targetEntity).getEquipment();
                 }
             }
+
+            // 技能
+            var rawIdentifierHasSkill = skillHandler.hasSkill(disguiseIdentifier) || skillHandler.hasSpeficSkill(disguiseIdentifier, SkillType.NONE);
+            var targetSkillID = rawIdentifierHasSkill ? disguiseIdentifier : provider.getNameSpace() + ":" + MorphManager.disguiseFallbackName;
+
+            var playerMorphConfig = getPlayerMeta(player);
+            outComingState = new DisguiseState(player, disguiseIdentifier, targetSkillID,
+                    wrapper, provider, equipment,
+                    clientHandler.getPlayerOption(player, true), playerMorphConfig);
 
             return DisguiseBuildResult.of(outComingState, provider, disguiseMeta, targetEntity);
         }
@@ -905,21 +909,122 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         // 确保source不为null
         var player = parameters.targetPlayer;
-        var disguiseIdentifier = parameters.targetDisguiseIdentifier();
         var targetEntity = parameters.targetedEntity;
-
-        // 向客户端更新当前伪装ID
-        // 因为下面postConstruct有初始化技能的操作，根据协议标准中current会重置客户端伪装状态的规定，因此在这里更新
-        clientHandler.updateCurrentIdentifier(player, disguiseIdentifier);
-
         var provider = result.provider();
         var state = result.state();
+        var wrapper = state.getDisguiseWrapper();
+
+        // 同步伪装属性
+        var propertyHandler = state.disguisePropertyHandler();
+        propertyHandler.setProperties(disguiseProperties.get(state.getEntityType()));
+        propertyHandler.getAll().forEach((property, value) ->
+        {
+            wrapper.writeProperty((SingleProperty<Object>) property, value);
+        });
 
         // 初始化nbt
         var wrapperCompound = provider.getInitialNbtCompound(state, targetEntity, false);
 
         if (wrapperCompound != null)
             state.getDisguiseWrapper().mergeCompound(wrapperCompound);
+
+        // 设定显示名称
+        if (targetEntity != null && targetEntity.customName() != null)
+        {
+            var name = targetEntity.customName();
+
+            state.entityCustomName = name;
+            state.setCustomDisplayName(name);
+        }
+        else
+        {
+            var disguiseID = parameters.targetDisguiseIdentifier();
+            var playerDisplay = provider.getDisplayName(disguiseID, MessageUtils.getLocale(player));
+            var serverDisplay = provider.getDisplayName(disguiseID, config.get(String.class, ConfigOption.LANGUAGE_CODE));
+
+            state.setPlayerDisplay(playerDisplay);
+            state.setServerDisplay(serverDisplay);
+        }
+
+        provider.postConstructDisguise(state, targetEntity);
+        wrapper.onPostConstructDisguise(state, targetEntity);
+
+        SkillCooldownInfo cdInfo;
+
+        //获取与技能对应的CDInfo
+        cdInfo = skillHandler.getCooldownInfo(player.getUniqueId(), state.skillLookupIdentifier());
+        state.setCooldownInfo(cdInfo, false);
+
+        state.setSkillCooldown(Math.max(40, cdInfo.getCooldown()), false);
+        cdInfo.setLastInvoke(plugin.getCurrentTick());
+
+        // 切换CD
+        skillHandler.switchCooldown(player.getUniqueId(), cdInfo);
+
+        // 调用事件
+        new PlayerMorphEvent(player, state).callEvent();
+    }
+
+    private boolean applyDisguise(MorphParameters parameters,
+                                  DisguiseState state,
+                                  DisguiseMeta meta,
+                                  PlayerMeta playerOptions)
+    {
+        var player = parameters.targetPlayer;
+        var provider = getProvider(parameters.targetDisguiseIdentifier());
+        var wrapper = state.getDisguiseWrapper();
+        var source = parameters.commandSource == null ? parameters.targetPlayer : parameters.commandSource;
+
+        // 玩家是否已有活跃的DisguiseState?
+        var currentState = getDisguiseStateFor(player);
+
+        // 重置上个State的伪装
+        if (currentState != null)
+        {
+            var stateProvider = currentState.getProvider();
+
+            // 检查上个State的后端是否允许我们在不取消伪装的情况下重置State
+            if (stateProvider.allowSwitchingWithoutUndisguise(provider, meta))
+                currentState.reset(false);
+            else
+                currentState.reset();
+
+            activeDisguises.remove(currentState);
+        }
+
+        // 在初始化服务端伪装状态后，交由后端来为玩家套上伪装
+        var backendSuccess = wrapper.getBackend().disguise(player, wrapper);
+        if (!backendSuccess)
+        {
+            logger.warn("Backend '%s' failed to disguise the player...".formatted(wrapper.getBackend().getIdentifier()));
+            source.sendMessage(MessageUtils.prefixes(source, MorphStrings.errorWhileDisguising()));
+
+            // Reset last anyway
+            if (currentState != null)
+                currentState.reset();
+
+            return false;
+        }
+
+        this.activeDisguises.add(state);
+
+        // 确保玩家可以根据设置看到自己的伪装
+        state.setServerSideSelfVisible(playerOptions.showDisguiseToSelf && !this.clientViewAvailable(player));
+
+        // Network below!
+
+        // 向管理员发送map消息
+        networkingHelper.sendCommandToRevealablePlayers(genPartialMapCommand(state));
+
+        // 向客户端更新当前伪装ID
+        // 因为下面postConstruct有初始化技能的操作，根据协议标准中current会重置客户端伪装状态的规定，因此在这里更新
+        clientHandler.updateCurrentIdentifier(player, state.getDisguiseIdentifier());
+
+        // Skill
+        state.getSkill().applyToClient(state);
+
+        // Cooldown
+        state.applyCooldownToClient();
 
         // 如果此伪装可以同步给客户端，那么初始化客户端状态
         if (provider.validForClient(state))
@@ -934,65 +1039,14 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 clientHandler.sendCommand(player, new S2CSetProfileCommand(state.getProfileNbtString()));
         }
 
-        // 向管理员发送map消息
-        networkingHelper.sendCommandToRevealablePlayers(genPartialMapCommand(state));
-
-        // CustomName
-        if (targetEntity != null && targetEntity.customName() != null)
-        {
-            var name = targetEntity.customName();
-
-            state.entityCustomName = name;
-            state.setDisplayName(name);
-        }
-        else
-        {
-            var disguiseID = parameters.targetDisguiseIdentifier();
-            var playerDisplay = provider.getDisplayName(disguiseID, MessageUtils.getLocale(player));
-            var serverDisplay = provider.getDisplayName(disguiseID, config.get(String.class, ConfigOption.LANGUAGE_CODE));
-
-            state.setPlayerDisplay(playerDisplay);
-            state.setServerDisplay(serverDisplay);
-        }
-
-        // 调用Provider和Wrapper的postConstructDisguise()
-        if (provider != fallbackProvider)
-            provider.postConstructDisguise(state, targetEntity);
-        else
-            logger.warn("A disguise with id '%s' don't have a matching provider?".formatted(disguiseIdentifier));
-
-        var wrapper = state.getDisguiseWrapper();
-
-        wrapper.onPostConstructDisguise(state, targetEntity);
-
-        // 如果玩家客户端不可用并且在骑乘实体，发送伪装在起身后可用的消息
-        //if (player.getVehicle() != null && !clientHandler.clientConnected(player))
-        //    player.sendMessage(MessageUtils.prefixes(player, MorphStrings.morphVisibleAfterStandup()));
-
-        // 确保玩家可以根据设置看到自己的伪装
-        state.setServerSideSelfVisible(playerOptions.showDisguiseToSelf && !this.clientViewAvailable(player));
-
-        // 更新上次操作时间
-        updateLastPlayerMorphOperationTime(player);
-
-        SkillCooldownInfo cdInfo;
-
-        //获取与技能对应的CDInfo
-        cdInfo = skillHandler.getCooldownInfo(player.getUniqueId(), state.skillLookupIdentifier());
-        state.setCooldownInfo(cdInfo);
-
-        state.setSkillCooldown(Math.max(40, cdInfo.getCooldown()));
-        cdInfo.setLastInvoke(plugin.getCurrentTick());
-
-        // 切换CD
-        skillHandler.switchCooldown(player.getUniqueId(), cdInfo);
-
         // 设置可用动作
-        var availableAnimations = provider.getAnimationProvider().getAnimationSetFor(disguiseIdentifier).getAvailableAnimationsForClient();
+        var availableAnimations = provider.getAnimationProvider()
+                .getAnimationSetFor(state.getDisguiseIdentifier())
+                .getAvailableAnimationsForClient();
+
         clientHandler.sendCommand(player, new S2CSetAvailableAnimationsCommand(availableAnimations));
 
-        // 调用事件
-        new PlayerMorphEvent(player, state).callEvent();
+        return true;
     }
 
     /**
@@ -1156,9 +1210,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         clientHandler.sendCommand(player, new S2CSetSelfViewIdentifierCommand(state.getProvider().getSelfViewIdentifier(state)));
 
         //刷新主动
-        var skill = state.getSkill();
-        state.setSkillCooldown(state.getSkillCooldown());
-        skill.onClientinit(state);
+        state.applyCooldownToClient();
+        state.getSkill().applyToClient(state);
 
         //刷新被动
         state.getAbilityUpdater().getRegisteredAbilities().forEach(a -> a.onClientInit(state));

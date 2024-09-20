@@ -228,7 +228,7 @@ public class MorphSkillHandler extends MorphPluginObject
             player.playSound(Sound.sound(Key.key("minecraft", "entity.villager.no"),
                     Sound.Source.PLAYER, 1f, 1f));
 
-            state.setSkillCooldown(5);
+            state.setSkillCooldown(5, true);
             return;
         }
 
@@ -249,7 +249,7 @@ public class MorphSkillHandler extends MorphPluginObject
         if (event.isCancelled())
         {
             player.sendMessage(MessageUtils.prefixes(player, MorphStrings.operationCancelledString()));
-            state.setSkillCooldown(5);
+            state.setSkillCooldown(5, true);
             return;
         }
 
@@ -280,8 +280,8 @@ public class MorphSkillHandler extends MorphPluginObject
 
         state.getSoundHandler().resetSoundTime();
 
-        if (!state.haveCooldown()) state.setCooldownInfo(cdInfo);
-        else state.setSkillCooldown(cd);
+        if (!state.haveCooldown()) state.setCooldownInfo(cdInfo, true);
+        else state.setSkillCooldown(cd, true);
     }
 
     /**

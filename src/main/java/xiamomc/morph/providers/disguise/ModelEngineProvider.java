@@ -156,6 +156,20 @@ public class ModelEngineProvider extends DisguiseProvider
     }
 
     /**
+     * 我们是否可以克隆目标实体/玩家的伪装？
+     *
+     * @param info {@link DisguiseMeta}
+     * @param targetEntity 目标实体
+     * @param theirState 他们的{@link DisguiseState}，如果有
+     * @return 是否允许克隆他们的装备进行显示
+     */
+    @Override
+    public boolean canCloneEquipment(DisguiseMeta info, Entity targetEntity, DisguiseState theirState)
+    {
+        return false;
+    }
+
+    /**
      * 是否可以克隆某个实体现有的伪装?
      *
      * @param info          {@link DisguiseMeta}
