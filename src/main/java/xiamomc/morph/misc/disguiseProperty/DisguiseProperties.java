@@ -33,6 +33,7 @@ public class DisguiseProperties
         register(EntityType.PANDA, new PandaProperties());
         register(EntityType.VILLAGER, new VillagerProperties());
         register(EntityType.ZOMBIE_VILLAGER, new VillagerProperties());
+        register(EntityType.ARMOR_STAND, new ArmorStandProperties());
     }
 
     public void register(EntityType type, AbstractProperties properties)

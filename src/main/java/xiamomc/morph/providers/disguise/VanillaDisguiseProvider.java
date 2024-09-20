@@ -26,6 +26,8 @@ import xiamomc.morph.misc.DisguiseMeta;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.misc.DisguiseTypes;
 import xiamomc.morph.misc.NmsRecord;
+import xiamomc.morph.misc.disguiseProperty.DisguiseProperties;
+import xiamomc.morph.misc.disguiseProperty.values.ArmorStandProperties;
 import xiamomc.morph.providers.animation.AnimationProvider;
 import xiamomc.morph.providers.animation.provider.VanillaAnimationProvider;
 import xiamomc.morph.utilities.*;
@@ -206,9 +208,12 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
 
         if (!backend.isDisguised(targetEntity))
         {
+            var properties = DisguiseProperties.INSTANCE.getOrThrow(ArmorStandProperties.class);
+            var wrapperShowArms = wrapper.readPropertyOr(properties.SHOW_ARMS, null);
+
             //盔甲架加上手臂
-            if (wrapper.getEntityType().equals(EntityType.ARMOR_STAND) && armorStandShowArms.get())
-                wrapper.setShowArms(true);
+            if (wrapperShowArms == null && armorStandShowArms.get() && wrapper.getEntityType() == EntityType.ARMOR_STAND)
+                wrapper.writeProperty(properties.SHOW_ARMS, true);
         }
 
         var player = state.getPlayer();

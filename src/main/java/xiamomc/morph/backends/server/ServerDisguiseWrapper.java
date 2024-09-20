@@ -280,21 +280,6 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
         bindingWatcher.writeEntry(CustomEntries.ATTACK_ANIMATION, true);
     }
 
-    @Override
-    public void setShowArms(boolean showArms)
-    {
-        super.setShowArms(showArms);
-
-        instance.armorStandShowArms = showArms;
-        if (bindingWatcher instanceof ArmorStandWatcher armorStandWatcher)
-        {
-            armorStandWatcher.writePersistent(
-                    ValueIndex.ARMOR_STAND.DATA_FLAGS,
-                    armorStandWatcher.getArmorStandFlags(instance.armorStandSmall,
-                            instance.armorStandShowArms, instance.armorStandNoBasePlate));
-        }
-    }
-
     private Player bindingPlayer;
 
     public Player getBindingPlayer()

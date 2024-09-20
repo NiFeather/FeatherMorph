@@ -6,6 +6,10 @@ import net.minecraft.nbt.ListTag;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import xiamomc.morph.backends.server.renderer.network.registries.ValueIndex;
+import xiamomc.morph.misc.disguiseProperty.DisguiseProperties;
+import xiamomc.morph.misc.disguiseProperty.SingleProperty;
+import xiamomc.morph.misc.disguiseProperty.values.ArmorStandProperties;
+import xiamomc.morph.misc.disguiseProperty.values.AxolotlProperties;
 
 public class ArmorStandWatcher extends InventoryLivingWatcher
 {
@@ -21,7 +25,6 @@ public class ArmorStandWatcher extends InventoryLivingWatcher
     {
         super(bindingPlayer, EntityType.ARMOR_STAND);
     }
-
 
     public byte getArmorStandFlags(boolean small, boolean showArms, boolean noBasePlate)
     {
@@ -63,6 +66,20 @@ public class ArmorStandWatcher extends InventoryLivingWatcher
         }
 
         return new Rotations(listTag);
+    }
+
+    @Override
+    protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
+    {
+        var properties = DisguiseProperties.INSTANCE.getOrThrow(ArmorStandProperties.class);
+
+        if (property.equals(properties.SHOW_ARMS))
+        {
+            var val = (Boolean) value;
+            this.writePersistent(ValueIndex.ARMOR_STAND.DATA_FLAGS, getArmorStandFlags(this.isSmall(), val, this.noBasePlate()));
+        }
+
+        super.onPropertyWrite(property, value);
     }
 
     @Override

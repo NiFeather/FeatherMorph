@@ -350,10 +350,6 @@ public abstract class DisguiseWrapper<TInstance>
     {
     }
 
-    public void setShowArms(boolean showArms)
-    {
-    }
-
     //endregion
 
     public abstract  <X> void writeProperty(SingleProperty<X> property, X value);

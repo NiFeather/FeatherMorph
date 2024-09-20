@@ -655,7 +655,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
             {
                 sendCommand(player, manager.genRenderSyncCommand());
 
-                var disguises = manager.getDisguiseStates();
+                var disguises = manager.getActiveDisguises();
                 for (DisguiseState bindingState : disguises)
                 {
                     var bindingPlayer = bindingState.getPlayer();

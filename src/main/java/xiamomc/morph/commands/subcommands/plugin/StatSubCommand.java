@@ -49,7 +49,7 @@ public class StatSubCommand extends MorphPluginObject implements ISubCommand
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull String[] args)
     {
-        var disguisesActive = morphManager.getDisguiseStates().stream()
+        var disguisesActive = morphManager.getActiveDisguises().stream()
                 .filter(s -> s.getPlayer().isOnline()).toArray().length;
 
         var authors = "MATRIX-feather"; //plugin.getPluginMeta().getAuthors();
