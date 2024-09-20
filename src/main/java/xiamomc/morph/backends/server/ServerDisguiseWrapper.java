@@ -247,7 +247,7 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
     @Override
     public void onPlayerOffline()
     {
-        PlayerTabHandler.instance().hideDisguisedPlayer(bindingWatcher.readEntryOrThrow(CustomEntries.SPAWN_UUID));
+        PlayerTabHandler.instance().hideFakePlayer(bindingWatcher.readEntryOrThrow(CustomEntries.SPAWN_UUID));
 
         super.onPlayerOffline();
     }

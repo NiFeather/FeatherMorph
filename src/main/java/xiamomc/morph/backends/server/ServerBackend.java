@@ -206,10 +206,10 @@ public class ServerBackend extends DisguiseBackend<ServerDisguise, ServerDisguis
 
             serverDisguiseWrapper.subscribeEvent(this,
                     WrapperEvent.SKIN_SET,
-                    profile -> tabHandler.showDisguisedPlayer(disguiseUUID, profile));
+                    profile -> tabHandler.showFakePlayer(disguiseUUID, profile));
 
             if (wrapper.getEntityType() == EntityType.PLAYER)
-                tabHandler.showDisguisedPlayer(disguiseUUID, watcher.readEntryOrThrow(CustomEntries.PROFILE));
+                tabHandler.showFakePlayer(disguiseUUID, watcher.readEntryOrThrow(CustomEntries.PROFILE));
         }
 
         return true;
@@ -226,7 +226,7 @@ public class ServerBackend extends DisguiseBackend<ServerDisguise, ServerDisguis
         {
             var watcher = wrapper.getBindingWatcher();
             if (watcher != null)
-                PlayerTabHandler.instance().hideDisguisedPlayer(watcher.readEntryOrThrow(CustomEntries.SPAWN_UUID));
+                PlayerTabHandler.instance().hideFakePlayer(watcher.readEntryOrThrow(CustomEntries.SPAWN_UUID));
 
             wrapper.dispose();
         }

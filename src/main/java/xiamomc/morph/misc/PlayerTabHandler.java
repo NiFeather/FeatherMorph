@@ -99,10 +99,10 @@ public class PlayerTabHandler extends MorphPluginObject
 
     private final Map<UUID, GameProfile> fakePlayers = new ConcurrentHashMap<>();
 
-    public void showDisguisedPlayer(UUID disguiseUUID, GameProfile profile)
+    public void showFakePlayer(UUID disguiseUUID, GameProfile profile)
     {
         if (fakePlayers.containsKey(disguiseUUID))
-            this.hideDisguisedPlayer(disguiseUUID);
+            this.hideFakePlayer(disguiseUUID);
 
         fakePlayers.put(disguiseUUID, profile);
 
@@ -122,7 +122,7 @@ public class PlayerTabHandler extends MorphPluginObject
         this.sendToAllPlayers(infoPacket);
     }
 
-    public void hideDisguisedPlayer(UUID disguiseUUID)
+    public void hideFakePlayer(UUID disguiseUUID)
     {
         fakePlayers.remove(disguiseUUID);
 
