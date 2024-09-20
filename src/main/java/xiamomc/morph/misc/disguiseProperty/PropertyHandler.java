@@ -1,6 +1,8 @@
 package xiamomc.morph.misc.disguiseProperty;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.misc.disguiseProperty.values.AbstractProperties;
@@ -24,8 +26,6 @@ public class PropertyHandler
 
     private void addProperty(SingleProperty<?> property)
     {
-        propertyMap.put(property, property.defaultVal());
-
         var random = property.getRandomValues();
         if (!random.isEmpty())
         {
@@ -58,10 +58,17 @@ public class PropertyHandler
         propertyMap.put(property, value);
     }
 
-    @Nullable
+    @NotNull
     public <X> X get(SingleProperty<X> property)
     {
-        return (X) propertyMap.getOrDefault(property, property.defaultVal());
+        return this.getOr(property, property.defaultVal());
+    }
+
+    @Nullable
+    @Contract("_, null -> null; _, !null -> !null")
+    public <X> X getOr(SingleProperty<X> property, X defaultVal)
+    {
+        return (X) propertyMap.getOrDefault(property, defaultVal);
     }
 
     public Map<SingleProperty<?>, ?> getAll()

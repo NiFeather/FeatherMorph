@@ -9,10 +9,7 @@ import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.craftbukkit.entity.CraftLivingEntity;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import org.bukkit.inventory.EquipmentSlotGroup;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -146,12 +143,12 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
         // Make IDE happy
         Objects.requireNonNull(constructedDisguise);
 
+        var canConstructFromEntity = canConstruct(disguiseMeta, targetEntity, null);
+
         //手动指定史莱姆和岩浆怪的大小
         if (entityType == EntityType.SLIME || entityType == EntityType.MAGMA_CUBE)
         {
-            var canCons = canConstruct(disguiseMeta, targetEntity, null);
-
-            if (canCons)
+            if (canConstructFromEntity)
             {
                 var size = (targetEntity != null && targetEntity.getType() == entityType)
                         ? NbtUtils.getRawTagCompound(targetEntity).getInt("Size")
@@ -204,16 +201,24 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
         super.postConstructDisguise(state, targetEntity);
 
         var wrapper = state.getDisguiseWrapper();
-        var backend = getPreferredBackend();
+        var theirDisguise = getMorphManager().getDisguiseStateFor(targetEntity);
 
-        if (!backend.isDisguised(targetEntity))
+        if (wrapper.getEntityType() == EntityType.ARMOR_STAND)
         {
             var properties = DisguiseProperties.INSTANCE.getOrThrow(ArmorStandProperties.class);
             var wrapperShowArms = wrapper.readPropertyOr(properties.SHOW_ARMS, null);
 
             //盔甲架加上手臂
-            if (wrapperShowArms == null && armorStandShowArms.get() && wrapper.getEntityType() == EntityType.ARMOR_STAND)
-                wrapper.writeProperty(properties.SHOW_ARMS, true);
+            if (wrapperShowArms == null)
+            {
+                var showArm = theirDisguise != null
+                        ? theirDisguise.disguisePropertyHandler().getOr(properties.SHOW_ARMS, false)
+                        : targetEntity instanceof ArmorStand armorStand
+                            ? armorStand.hasArms()
+                            : this.armorStandShowArms.get();
+
+                wrapper.writeProperty(properties.SHOW_ARMS, showArm);
+            }
         }
 
         var player = state.getPlayer();
@@ -416,17 +421,7 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
         var theirDisguise = getMorphManager().getDisguiseStateFor(targetEntity);
 
         if (theirDisguise != null)
-        {
             rawCompound = theirDisguise.getDisguiseWrapper().getCompound();
-        }
-        else
-        {
-            if (state.getEntityType().equals(EntityType.ARMOR_STAND)
-                    && rawCompound.get("ShowArms") == null)
-            {
-                rawCompound.putBoolean("ShowArms", armorStandShowArms.get());
-            }
-        }
 
         // ???
         // if (targetEntity == null || targetEntity.getType() != state.getEntityType())
