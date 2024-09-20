@@ -25,6 +25,7 @@ import xiamomc.morph.backends.server.renderer.network.registries.ValueIndex;
 import xiamomc.morph.backends.server.renderer.utilties.WatcherUtils;
 import xiamomc.morph.misc.DisguiseEquipment;
 import xiamomc.morph.misc.DisguiseState;
+import xiamomc.morph.misc.PlayerTabHandler;
 import xiamomc.morph.misc.disguiseProperty.SingleProperty;
 import xiamomc.morph.utilities.NbtUtils;
 
@@ -35,9 +36,13 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
 {
+    private final ServerBackend backend;
+
     public ServerDisguiseWrapper(@NotNull ServerDisguise instance, ServerBackend backend)
     {
         super(instance, backend);
+
+        this.backend = backend;
     }
 
     private final DisguiseEquipment equipment = new DisguiseEquipment();
@@ -239,6 +244,14 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
     {
     }
 
+    @Override
+    public void onPlayerOffline()
+    {
+        PlayerTabHandler.instance().hideDisguisedPlayer(bindingWatcher.readEntryOrThrow(CustomEntries.SPAWN_UUID));
+
+        super.onPlayerOffline();
+    }
+
     private boolean aggressive;
 
     @Override
@@ -290,6 +303,12 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
     }
 
     private SingleWatcher bindingWatcher;
+
+    @Nullable
+    public SingleWatcher getBindingWatcher()
+    {
+        return bindingWatcher;
+    }
 
     public void setRenderParameters(@NotNull Player newBinding, @NotNull SingleWatcher bindingWatcher)
     {

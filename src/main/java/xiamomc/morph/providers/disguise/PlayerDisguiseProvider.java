@@ -85,6 +85,10 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
 
         Objects.requireNonNull(wrapper, "Null wrapper at where it shouldn't be?!");
 
+        // Ensure profile is always present
+        var skin = PlayerSkinProvider.getInstance().getCachedProfile(DisguiseTypes.PLAYER.toStrippedId(id));
+        wrapper.applySkin(skin == null ? new GameProfile(Util.NIL_UUID, DisguiseTypes.PLAYER.toStrippedId(id)) : skin);
+
         var mainHandItem = player.getEquipment().getItemInMainHand();
 
         //存在玩家头颅，尝试通过头颅获取目标皮肤
@@ -120,7 +124,8 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
         wrapper.subscribeEvent(this, WrapperEvent.SKIN_SET, skin ->
                 clientHandler.sendCommand(player, new S2CSetProfileCommand(state.getProfileNbtString())));
 
-        if (wrapper.getSkin() == null)
+        var wrapperSkin = wrapper.getSkin();
+        if (wrapperSkin == null || wrapperSkin.getId().equals(Util.NIL_UUID))
         {
             var playerDisguiseTargetName = DisguiseTypes.PLAYER.toStrippedId(state.getDisguiseIdentifier());
 

@@ -2,6 +2,7 @@ package xiamomc.morph;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.network.commands.S2C.set.S2CSetRevealingCommand;
@@ -13,12 +14,14 @@ import xiamomc.pluginbase.Bindables.Bindable;
 
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class RevealingHandler extends MorphPluginObject
 {
     /**
      * 获取此State的揭示等级
      */
+    @NotNull
     public RevealingLevel getRevealingLevel(Player player)
     {
         return this.getRevealingState(player).getRevealingLevel();
@@ -47,6 +50,7 @@ public class RevealingHandler extends MorphPluginObject
         playerRevealingStateMap.put(newInstance, state);
     }
 
+    @NotNull
     public RevealingState getRevealingState(Player player)
     {
         var state = playerRevealingStateMap.getOrDefault(player, null);
@@ -60,7 +64,7 @@ public class RevealingHandler extends MorphPluginObject
         return state;
     }
 
-    private final Map<Player, RevealingState> playerRevealingStateMap = new Object2ObjectArrayMap<>();
+    private final Map<Player, RevealingState> playerRevealingStateMap = new ConcurrentHashMap<>();
 
     @Initializer
     private void load()
@@ -131,6 +135,7 @@ public class RevealingHandler extends MorphPluginObject
         /**
          * 获取此State的揭示等级
          */
+        @NotNull
         public RevealingLevel getRevealingLevel()
         {
             if (revealingLevel == null) revealingLevel = RevealingLevel.fromValue(baseValue);

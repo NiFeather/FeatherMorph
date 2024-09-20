@@ -8,8 +8,11 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.morph.backends.DisguiseBackend;
 import xiamomc.morph.backends.DisguiseWrapper;
+import xiamomc.morph.backends.WrapperEvent;
 import xiamomc.morph.backends.server.renderer.ServerRenderer;
+import xiamomc.morph.backends.server.renderer.network.registries.CustomEntries;
 import xiamomc.morph.messages.BackendStrings;
+import xiamomc.morph.misc.PlayerTabHandler;
 import xiamomc.morph.utilities.NbtUtils;
 import xiamomc.pluginbase.Messages.FormattableMessage;
 
@@ -181,10 +184,6 @@ public class ServerBackend extends DisguiseBackend<ServerDisguise, ServerDisguis
         if (disguiseWrapperMap.containsKey(player.getUniqueId()))
         {
             unDisguise(player, false);
-
-            // 我们切换伪装时为了视觉上不会露馅（有时候先移除再重新注册会导致在客户端短暂地看到玩家本体）而选择了不告诉渲染器移除玩家
-            // 因此这时需要单独从TAB移除玩家伪装
-            serverRenderer.removePlayerFromTabList(player.getUniqueId());
         }
 
         disguiseWrapperMap.put(player.getUniqueId(), serverDisguiseWrapper);
@@ -192,7 +191,27 @@ public class ServerBackend extends DisguiseBackend<ServerDisguise, ServerDisguis
         var watcher = serverRenderer.registerEntity(
                 player, wrapper.getEntityType(), wrapper.getDisguiseName());
 
+        if (watcher == null)
+        {
+            this.unDisguise(player);
+            return false;
+        }
+
         serverDisguiseWrapper.setRenderParameters(player, watcher);
+
+        if (wrapper.getEntityType() == EntityType.PLAYER)
+        {
+            var disguiseUUID = watcher.readEntryOrThrow(CustomEntries.SPAWN_UUID);
+            var tabHandler = PlayerTabHandler.instance();
+
+            serverDisguiseWrapper.subscribeEvent(this,
+                    WrapperEvent.SKIN_SET,
+                    profile -> tabHandler.showDisguisedPlayer(disguiseUUID, profile));
+
+            if (wrapper.getEntityType() == EntityType.PLAYER)
+                tabHandler.showDisguisedPlayer(disguiseUUID, watcher.readEntryOrThrow(CustomEntries.PROFILE));
+        }
+
         return true;
     }
 
@@ -204,7 +223,13 @@ public class ServerBackend extends DisguiseBackend<ServerDisguise, ServerDisguis
         var uuid = player.getUniqueId();
         var wrapper = disguiseWrapperMap.getOrDefault(uuid, null);
         if (wrapper != null)
+        {
+            var watcher = wrapper.getBindingWatcher();
+            if (watcher != null)
+                PlayerTabHandler.instance().hideDisguisedPlayer(watcher.readEntryOrThrow(CustomEntries.SPAWN_UUID));
+
             wrapper.dispose();
+        }
 
         disguiseWrapperMap.remove(uuid);
         return true;

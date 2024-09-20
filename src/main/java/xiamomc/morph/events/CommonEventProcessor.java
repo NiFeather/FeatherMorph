@@ -33,7 +33,7 @@ import xiamomc.morph.messages.vanilla.VanillaMessageStore;
 import xiamomc.morph.misc.DisguiseTypes;
 import xiamomc.morph.misc.NetworkingHelper;
 import xiamomc.morph.misc.OfflineDisguiseResult;
-import xiamomc.morph.backends.server.renderer.utilties.PlayerTabVisibilityHandler;
+import xiamomc.morph.misc.PlayerTabHandler;
 import xiamomc.morph.misc.permissions.CommonPermissions;
 import xiamomc.morph.network.commands.S2C.S2CSwapCommand;
 import xiamomc.morph.network.commands.S2C.map.S2CMapRemoveCommand;
@@ -357,7 +357,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
             instance.removeModifier(AttributeModifyingAbility.modifierKey);
         }
 
-        this.addSchedule(() -> PlayerTabVisibilityHandler.instance().handle(player));
+        this.addSchedule(() -> PlayerTabHandler.instance().handle(player));
 
         if (state != null)
         {
@@ -415,7 +415,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
             if (bossbar != null)
                 players.forEach(p -> p.hideBossBar(bossbar));
 
-            state.stopAnimations();
+            state.onOffline();
         }
 
         var targets = players.stream()

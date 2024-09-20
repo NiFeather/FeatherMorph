@@ -1,15 +1,13 @@
 package xiamomc.morph.backends.server.renderer;
 
-import com.comphenix.protocol.ProtocolLibrary;
-import com.comphenix.protocol.events.PacketContainer;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraft.network.protocol.game.ClientboundPlayerInfoRemovePacket;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.backends.server.renderer.network.PacketFactory;
 import xiamomc.morph.backends.server.renderer.network.ProtocolHandler;
@@ -24,7 +22,6 @@ import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Bindables.Bindable;
 
 import java.util.List;
-import java.util.UUID;
 
 public class ServerRenderer extends MorphPluginObject implements Listener
 {
@@ -70,16 +67,16 @@ public class ServerRenderer extends MorphPluginObject implements Listener
      * @param entityType 目标类型
      * @param name 伪装名称
      */
+    @Nullable
     public SingleWatcher registerEntity(Player player, EntityType entityType, String name)
     {
         try
         {
-            return registry.register(player, new RegisterParameters(entityType, name), watcher ->
+            return registry.register(player, new RegisterParameters(entityType, name), w ->
             {
-                if (this.showPlayerDisguises.get())
-                    watcher.writeEntry(CustomEntries.PROFILE_LISTED, true);
+                w.writeEntry(CustomEntries.PROFILE_LISTED, this.showPlayerDisguises.get());
 
-                if (watcher instanceof LivingEntityWatcher livingEntityWatcher)
+                if (w instanceof LivingEntityWatcher livingEntityWatcher)
                     livingEntityWatchers.add(livingEntityWatcher);
             });
         }
@@ -92,21 +89,6 @@ public class ServerRenderer extends MorphPluginObject implements Listener
         }
 
         return null;
-    }
-
-    public void removePlayerFromTabList(UUID uuid)
-    {
-        var watcher = this.registry.getWatcher(uuid);
-
-        if (watcher == null || watcher.getEntityType() != EntityType.PLAYER) return;
-
-        var lastUUID = watcher.readEntryOrThrow(CustomEntries.SPAWN_UUID);
-
-        var packetRemoveInfo = PacketContainer.fromPacket(
-                new ClientboundPlayerInfoRemovePacket(List.of(lastUUID)));
-
-        var protocolManager = ProtocolLibrary.getProtocolManager();
-        Bukkit.getOnlinePlayers().forEach(p -> protocolManager.sendServerPacket(p, packetRemoveInfo));
     }
 
     public void unRegisterEntity(Player player)

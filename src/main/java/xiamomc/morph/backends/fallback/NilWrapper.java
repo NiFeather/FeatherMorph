@@ -1,5 +1,6 @@
 package xiamomc.morph.backends.fallback;
 
+import com.mojang.authlib.GameProfile;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.TagType;
@@ -14,12 +15,14 @@ import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.backends.DisguiseWrapper;
 import xiamomc.morph.backends.EventWrapper;
 import xiamomc.morph.backends.WrapperAttribute;
+import xiamomc.morph.backends.WrapperEvent;
 import xiamomc.morph.misc.DisguiseEquipment;
 import xiamomc.morph.misc.DisguiseState;
 import xiamomc.morph.misc.disguiseProperty.SingleProperty;
 import xiamomc.morph.utilities.NbtUtils;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -200,6 +203,14 @@ public class NilWrapper extends EventWrapper<NilDisguise>
     @Override
     protected <T> void onAttributeWrite(WrapperAttribute<T> attribute, T value)
     {
+        if (attribute.equals(WrapperAttribute.profile))
+        {
+            var val = ((Optional<GameProfile>) value).orElse(null);
+
+            callEvent(WrapperEvent.SKIN_SET, val);
+            return;
+        }
+
         if (attribute.equals(WrapperAttribute.displayFakeEquip) && getBindingPlayer() != null)
         {
             backend.getNetworkingHelper().prepareMeta(getBindingPlayer())

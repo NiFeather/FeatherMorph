@@ -107,6 +107,13 @@ public abstract class DisguiseWrapper<TInstance>
     public abstract TInstance copyInstance();
 
     /**
+     * Called when the player exits the server
+     */
+    public void onPlayerOffline()
+    {
+    }
+
+    /**
      * Clone this wrapper
      * @return A new wrapper cloned from this instance, everything in the new instance should not have any reference with this wrapper
      */

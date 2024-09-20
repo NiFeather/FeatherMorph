@@ -50,20 +50,23 @@ public class PlayerWatcher extends InventoryLivingWatcher
         if (key.equals(CustomEntries.PROFILE) && isPlayerOnline() && !isSilent())
         {
             var player = getBindingPlayer();
-
-            var spawnPackets = getPacketFactory()
-                    .buildSpawnPackets(new DisplayParameters(this));
-
-            var packetRemove = PacketContainer.fromPacket(new ClientboundRemoveEntitiesPacket(player.getEntityId()));
-            var protocol = ProtocolLibrary.getProtocolManager();
-
             var affected = getAffectedPlayers(player);
-            affected.forEach(p ->
-            {
-                protocol.sendServerPacket(p, packetRemove);
 
-                spawnPackets.forEach(packet -> protocol.sendServerPacket(p, packet));
-            });
+            if (!affected.isEmpty())
+            {
+                var spawnPackets = getPacketFactory()
+                        .buildSpawnPackets(new DisplayParameters(this));
+
+                var packetRemove = PacketContainer.fromPacket(new ClientboundRemoveEntitiesPacket(player.getEntityId()));
+                var protocol = ProtocolLibrary.getProtocolManager();
+
+                affected.forEach(p ->
+                {
+                    protocol.sendServerPacket(p, packetRemove);
+
+                    spawnPackets.forEach(packet -> protocol.sendServerPacket(p, packet));
+                });
+            }
         }
 
         if (key.equals(CustomEntries.ANIMATION))

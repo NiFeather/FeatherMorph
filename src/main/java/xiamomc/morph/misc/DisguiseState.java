@@ -212,6 +212,12 @@ public class DisguiseState extends MorphPluginObject
         animationSequence.reset();
     }
 
+    public void onOffline()
+    {
+        this.stopAnimations();
+        this.getDisguiseWrapper().onPlayerOffline();
+    }
+
     public boolean canScheduleSequence()
     {
         var cooldown = skillHandler.getCooldownInfo(playerUUID, disguiseIdentifier);

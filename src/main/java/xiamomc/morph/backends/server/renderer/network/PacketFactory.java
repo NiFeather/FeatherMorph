@@ -8,6 +8,7 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.Util;
+import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.*;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.level.GameType;
@@ -78,26 +79,10 @@ public class PacketFactory extends MorphPluginObject
         {
             var gameProfile = watcher.readEntryOrThrow(CustomEntries.PROFILE);
 
-            var packetTabRemove = new ClientboundPlayerInfoRemovePacket(List.of(spawnUUID));
-            packets.add(PacketContainer.fromPacket(packetTabRemove));
-
             if (gameProfile.getName().isBlank())
                 throw new IllegalArgumentException("GameProfile name is empty!");
 
-            var packetPlayerInfo = new ClientboundPlayerInfoUpdatePacket(
-                    EnumSet.of(
-                            ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER,
-                            ClientboundPlayerInfoUpdatePacket.Action.UPDATE_LISTED
-                    ),
-                    new ClientboundPlayerInfoUpdatePacket.Entry(
-                            spawnUUID, gameProfile,
-                            watcher.readEntryOrDefault(CustomEntries.PROFILE_LISTED, false),
-                            114514, GameType.DEFAULT_MODE,
-                            null, null
-                    )
-            );
-
-            packets.add(PacketContainer.fromPacket(packetPlayerInfo));
+            this.buildPlayerInfoPackets(watcher).forEach(nmsPacket -> packets.add(PacketContainer.fromPacket(nmsPacket)));
         }
 
         var pitch = player.getPitch();
@@ -161,6 +146,27 @@ public class PacketFactory extends MorphPluginObject
             markPacketOurs(packet);
 
         return packets;
+    }
+
+    public List<Packet<?>> buildPlayerInfoPackets(SingleWatcher watcher)
+    {
+        var spawnUUID = watcher.readEntryOrThrow(CustomEntries.SPAWN_UUID);
+        var infoRemove = new ClientboundPlayerInfoRemovePacket(List.of(spawnUUID));
+
+        var infoUpdate = new ClientboundPlayerInfoUpdatePacket(
+            EnumSet.of(
+                    ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER,
+                    ClientboundPlayerInfoUpdatePacket.Action.UPDATE_LISTED
+            ),
+            new ClientboundPlayerInfoUpdatePacket.Entry(
+                    spawnUUID, watcher.readEntryOrThrow(CustomEntries.PROFILE),
+                    watcher.readEntryOrDefault(CustomEntries.PROFILE_LISTED, false),
+                    114514, GameType.DEFAULT_MODE,
+                    null, null
+            )
+        );
+
+        return List.of(infoRemove, infoUpdate);
     }
 
     /**

@@ -23,21 +23,7 @@ public abstract class EventWrapper<TInstance> extends DisguiseWrapper<TInstance>
     {
     }
 
-    @Override
-    protected <T> void onAttributeWrite(WrapperAttribute<T> attribute, T value)
-    {
-        if (attribute.equals(WrapperAttribute.profile))
-        {
-            var val = ((Optional<GameProfile>) value).orElse(null);
-
-            callEvent(WrapperEvent.SKIN_SET, val);
-            return;
-        }
-
-        super.onAttributeWrite(attribute, value);
-    }
-
-    protected  <T> void callEvent(WrapperEvent<T> wrapperEvent, T value)
+    protected <T> void callEvent(WrapperEvent<T> wrapperEvent, T value)
     {
         var list = eventListMap.getOrDefault(wrapperEvent, null);
         if (list == null) return;
