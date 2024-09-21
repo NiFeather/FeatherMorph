@@ -7,6 +7,7 @@ import com.comphenix.protocol.events.PacketListener;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import org.bukkit.Bukkit;
+import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphPlugin;
@@ -65,13 +66,13 @@ public abstract class ProtocolListener extends MorphPluginObject implements Pack
         // 因此我们需要在每个世界都手动查询一遍
         for (var world : Bukkit.getWorlds())
         {
-            var worldPlayers = world.getPlayers();
+            // For performance, we use NMS instead of CraftWorld
+            var nmsWorld = NmsUtils.getNmsLevel(world);
+            var worldPlayers = nmsWorld.players();
 
             var match = worldPlayers.stream()
-                    .filter(p -> p.getEntityId() == id)
-                    .map(bukkit -> ((CraftPlayer)bukkit).getHandle())
-                    .map(Optional::ofNullable)
-                    .findFirst().flatMap(Function.identity())
+                    .filter(p -> p.getId() == id)
+                    .findFirst()
                     .orElse(null);
 
             if (match != null)
