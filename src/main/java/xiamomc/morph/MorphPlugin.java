@@ -35,6 +35,8 @@ import xiamomc.pluginbase.Command.CommandHelper;
 import xiamomc.pluginbase.Messages.MessageStore;
 import xiamomc.pluginbase.XiaMoJavaPlugin;
 
+import java.util.Arrays;
+
 public final class MorphPlugin extends XiaMoJavaPlugin
 {
     private static MorphPlugin instance;
@@ -100,13 +102,13 @@ public final class MorphPlugin extends XiaMoJavaPlugin
 
         pluginManager = Bukkit.getPluginManager();
         var bukkitVersion = Bukkit.getMinecraftVersion();
-        var targetVersion = "1.21.1";
-        if (!bukkitVersion.equals(targetVersion))
+        String[] targetVersions = new String[] { "1.21.1" };
+        if (Arrays.stream(targetVersions).noneMatch(bukkitVersion::equals))
         {
             logger.error("╔══════════════════════════════════════════════════════════════╗");
             logger.error("║                                                              ║");
             logger.error("║\tThis version of Minecraft (%s) is not supported!\t║".formatted(bukkitVersion));
-            logger.error("║\tPlease use %s instead!\t\t\t\t║".formatted(targetVersion));
+            logger.error("║\tPlease use %s instead!\t\t\t\t║".formatted(targetVersions[0]));
             logger.error("║                                                              ║");
             //logger.error("║       https://modrinth.com/plugin/feathermorph               ║");
             //logger.error("║                                                              ║");
