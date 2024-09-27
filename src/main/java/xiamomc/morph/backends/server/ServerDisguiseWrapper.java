@@ -321,6 +321,18 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
             bindingWatcher.writeEntry(CustomEntries.ANIMATION, animationId);
     }
 
+    @Override
+    public void onPlayerJoin(Player newInstance)
+    {
+        if (bindingWatcher != null)
+        {
+            this.bindingWatcher.writeEntry(CustomEntries.SPAWN_ID, newInstance.getEntityId());
+            this.bindingPlayer = newInstance;
+        }
+
+        super.onPlayerJoin(newInstance);
+    }
+
     private void refreshRegistry()
     {
         if (bindingPlayer == null)

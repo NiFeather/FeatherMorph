@@ -429,6 +429,10 @@ public abstract class DisguiseWrapper<TInstance>
     {
     }
 
+    public void onPlayerJoin(Player newInstance)
+    {
+    }
+
     public abstract <T> void subscribeEvent(Object source, WrapperEvent<T> wrapperEvent, Consumer<T> c);
 
     public abstract void unSubscribeEvent(Object source, WrapperEvent<?> wrapperEvent);

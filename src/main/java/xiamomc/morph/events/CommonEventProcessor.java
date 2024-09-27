@@ -361,7 +361,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
 
         if (state != null)
         {
-            state.refreshSkillsAbilities();
+            state.onPlayerJoin();
 
             //调用Morph事件
             new PlayerJoinedWithDisguiseEvent(player, state).callEvent();
