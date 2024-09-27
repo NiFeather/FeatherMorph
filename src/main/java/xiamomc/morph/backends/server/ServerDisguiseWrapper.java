@@ -18,14 +18,13 @@ import xiamomc.morph.backends.WrapperAttribute;
 import xiamomc.morph.backends.WrapperEvent;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.AgeableMobWatcher;
-import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.ArmorStandWatcher;
 import xiamomc.morph.backends.server.renderer.network.datawatcher.watchers.types.InventoryLivingWatcher;
 import xiamomc.morph.backends.server.renderer.network.registries.CustomEntries;
 import xiamomc.morph.backends.server.renderer.network.registries.ValueIndex;
 import xiamomc.morph.backends.server.renderer.utilties.WatcherUtils;
 import xiamomc.morph.misc.DisguiseEquipment;
 import xiamomc.morph.misc.DisguiseState;
-import xiamomc.morph.misc.PlayerTabHandler;
+import xiamomc.morph.misc.playerList.PlayerListHandler;
 import xiamomc.morph.misc.disguiseProperty.SingleProperty;
 import xiamomc.morph.utilities.NbtUtils;
 
@@ -247,7 +246,7 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
     @Override
     public void onPlayerOffline()
     {
-        PlayerTabHandler.instance().hideFakePlayer(bindingWatcher.readEntryOrThrow(CustomEntries.SPAWN_UUID));
+        PlayerListHandler.instance().hideFakePlayer(bindingWatcher.readEntryOrThrow(CustomEntries.SPAWN_UUID));
 
         super.onPlayerOffline();
     }
@@ -328,6 +327,14 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
         {
             this.bindingWatcher.writeEntry(CustomEntries.SPAWN_ID, newInstance.getEntityId());
             this.bindingPlayer = newInstance;
+
+            if (this.getEntityType() == EntityType.PLAYER)
+            {
+                PlayerListHandler.instance().showFakePlayer(
+                        bindingWatcher.readEntryOrThrow(CustomEntries.SPAWN_UUID),
+                        bindingWatcher.readEntryOrThrow(CustomEntries.PROFILE)
+                );
+            }
         }
 
         super.onPlayerJoin(newInstance);

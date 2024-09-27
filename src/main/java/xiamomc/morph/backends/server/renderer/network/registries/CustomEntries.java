@@ -8,6 +8,9 @@ import java.util.UUID;
 
 public class CustomEntries
 {
+    /**
+     * This should always present for player disguise!
+     */
     public static final RegistryKey<GameProfile> PROFILE = RegistryKey.of("profile", new GameProfile(UUID.randomUUID(), "sample"));
     public static final RegistryKey<Boolean> PROFILE_LISTED = RegistryKey.of("profile_listed", false);
 

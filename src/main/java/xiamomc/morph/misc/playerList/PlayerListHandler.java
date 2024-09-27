@@ -1,4 +1,4 @@
-package xiamomc.morph.misc;
+package xiamomc.morph.misc.playerList;
 
 import com.mojang.authlib.GameProfile;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
@@ -10,18 +10,19 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphPluginObject;
+import xiamomc.morph.misc.NmsRecord;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class PlayerTabHandler extends MorphPluginObject
+public class PlayerListHandler extends MorphPluginObject
 {
-    private final static AtomicReference<PlayerTabHandler> instance = new AtomicReference<>(null);
-    public static PlayerTabHandler instance()
+    private final static AtomicReference<PlayerListHandler> instance = new AtomicReference<>(null);
+    public static PlayerListHandler instance()
     {
         if (instance.get() == null)
-            instance.set(new PlayerTabHandler());
+            instance.set(new PlayerListHandler());
 
         return instance.get();
     }
@@ -138,10 +139,10 @@ public class PlayerTabHandler extends MorphPluginObject
      */
     public void handle(Player player)
     {
-        var list = new ObjectArrayList<>(this.hiddenPlayers);
-        list.removeIf(uuid -> uuid.equals(player.getUniqueId()));
+        var hiddenPlayers = new ObjectArrayList<>(this.hiddenPlayers);
+        var changed = hiddenPlayers.removeIf(uuid -> uuid.equals(player.getUniqueId()));
 
-        var packet = new ClientboundPlayerInfoRemovePacket(list);
+        var packet = new ClientboundPlayerInfoRemovePacket(hiddenPlayers);
         this.sendPacket(player, packet);
 
         this.fakePlayers.forEach((disguiseUUID, profile) ->

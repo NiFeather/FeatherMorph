@@ -22,7 +22,7 @@ import xiamomc.morph.backends.DisguiseWrapper;
 import xiamomc.morph.backends.WrapperAttribute;
 import xiamomc.morph.backends.fallback.NilBackend;
 import xiamomc.morph.backends.server.ServerBackend;
-import xiamomc.morph.misc.PlayerTabHandler;
+import xiamomc.morph.misc.playerList.PlayerListHandler;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.events.api.gameplay.*;
@@ -1133,7 +1133,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         }
 
         if (this.hideDisguisedPlayers.get())
-            PlayerTabHandler.instance().hidePlayer(player);
+            PlayerListHandler.instance().hidePlayer(player);
     }
 
     //region Command generating
@@ -1367,7 +1367,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         networkingHelper.sendCommandToRevealablePlayers(new S2CMapRemoveCommand(player.getEntityId()));
 
         if (this.hideDisguisedPlayers.get())
-            PlayerTabHandler.instance().showPlayer(player);
+            PlayerListHandler.instance().showPlayer(player);
 
         state.dispose();
     }
