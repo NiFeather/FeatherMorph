@@ -35,6 +35,8 @@ import xiamomc.pluginbase.Command.CommandHelper;
 import xiamomc.pluginbase.Messages.MessageStore;
 import xiamomc.pluginbase.XiaMoJavaPlugin;
 
+import java.util.Arrays;
+
 public final class MorphPlugin extends XiaMoJavaPlugin
 {
     private static MorphPlugin instance;
@@ -93,6 +95,33 @@ public final class MorphPlugin extends XiaMoJavaPlugin
 
     private EntityProcessor entityProcessor;
 
+    private static final String noticeHeaderFooter = "- x - x - x - x - x - x - x - x - x - x - x - x -";
+    private void printStartupWarning(boolean critical, String... warnings)
+    {
+        if (critical)
+        {
+            logger.error(noticeHeaderFooter);
+            logger.error("");
+
+            for (String warning : warnings)
+                logger.error(warning);
+
+            logger.error("");
+            logger.error(noticeHeaderFooter);
+        }
+        else
+        {
+            logger.warn(noticeHeaderFooter);
+            logger.warn("");
+
+            for (String warning : warnings)
+                logger.warn(warning);
+
+            logger.warn("");
+            logger.warn(noticeHeaderFooter);
+        }
+    }
+
     @Override
     public void onEnable()
     {
@@ -100,20 +129,27 @@ public final class MorphPlugin extends XiaMoJavaPlugin
 
         pluginManager = Bukkit.getPluginManager();
         var bukkitVersion = Bukkit.getMinecraftVersion();
-        var targetVersion = "1.21";
-        if (!bukkitVersion.equals(targetVersion))
+        String primaryVersion = "1.21";
+        String[] compatVersions = new String[] { primaryVersion, "1.21.1" };
+        if (Arrays.stream(compatVersions).noneMatch(bukkitVersion::equals))
         {
-            logger.error("╔══════════════════════════════════════════════════════════════╗");
-            logger.error("║                                                              ║");
-            logger.error("║\tThis version of Minecraft (%s) is not supported!\t║".formatted(bukkitVersion));
-            logger.error("║\tPlease use %s instead!\t\t\t\t║".formatted(targetVersion));
-            logger.error("║                                                              ║");
-            //logger.error("║       https://modrinth.com/plugin/feathermorph               ║");
-            //logger.error("║                                                              ║");
-            logger.error("╚══════════════════════════════════════════════════════════════╝");
+            printStartupWarning(
+                    true,
+                    "This version of Minecraft (%s) is not supported!".formatted(bukkitVersion),
+                    "Please use %s instead!".formatted(primaryVersion)
+            );
 
             pluginManager.disablePlugin(this);
             return;
+        }
+
+        if (!bukkitVersion.equals(primaryVersion))
+        {
+            printStartupWarning(
+                    false,
+                    "Minecraft %s is not primary supported!".formatted(bukkitVersion),
+                    "We suggest to use %s instead!".formatted(primaryVersion)
+            );
         }
 
         this.metrics = new Metrics(this, 18062);
