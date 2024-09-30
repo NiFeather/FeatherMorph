@@ -34,18 +34,6 @@ public class HintStrings extends AbstractMorphStrings
                 "小提示：按<key:key.morphclient.morph>键可以打开伪装界面。");
     }
 
-    public static FormattableMessage clientSuggestionStringA()
-    {
-        return getFormattable(getKey("client_suggestion_message_1"),
-                "小提示：我们推荐使用MorphClient模组来获得更好的体验");
-    }
-
-    public static FormattableMessage clientSuggestionStringB()
-    {
-        return getFormattable(getKey("client_suggestion_message_2"),
-                "小提示：更多信息请询问服务器管理员");
-    }
-
     protected static String getKey(String key)
     {
         return "hint." + key;

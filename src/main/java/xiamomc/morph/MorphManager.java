@@ -1117,14 +1117,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 playerOptions.shownServerSkillHint = true;
             }
 
-            if (!playerOptions.shownClientSuggestionMessage)
-            {
-                player.sendMessage(MessageUtils.prefixes(player, HintStrings.clientSuggestionStringA()));
-                player.sendMessage(MessageUtils.prefixes(player, HintStrings.clientSuggestionStringB()));
-
-                playerOptions.shownClientSuggestionMessage = true;
-            }
-
             if (clientHandler.clientInitialized(player) && !playerOptions.shownDisplayToSelfHint)
             {
                 player.sendMessage(MessageUtils.prefixes(player, HintStrings.morphVisibleAfterCommandString()));
