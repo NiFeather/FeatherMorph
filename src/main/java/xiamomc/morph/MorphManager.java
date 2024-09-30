@@ -1495,14 +1495,14 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
     public void disguiseFromState(DisguiseState state)
     {
-        if (!activeDisguises.contains(state))
-            activeDisguises.add(state);
-
-        state.getDisguiseWrapper().getBackend().disguise(state.getPlayer(), state.getDisguiseWrapper());
-
         var meta = getDisguiseMeta(state.getDisguiseIdentifier());
         var result = DisguiseBuildResult.of(state, state.getProvider(), meta, null);
-        this.postBuildDisguise(result, MorphParameters.create(state.getPlayer(), state.getDisguiseIdentifier()), getPlayerMeta(state.getPlayer()));
+        var playerMeta = getPlayerMeta(state.getPlayer());
+        var parameters = MorphParameters.create(state.getPlayer(), state.getDisguiseIdentifier());
+
+        this.postBuildDisguise(result, parameters, playerMeta);
+        this.applyDisguise(parameters, state, meta, playerMeta);
+        this.afterDisguise(result, parameters, playerMeta);
     }
 
     /**
