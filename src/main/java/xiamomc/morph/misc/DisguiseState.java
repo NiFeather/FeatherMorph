@@ -653,10 +653,12 @@ public class DisguiseState extends MorphPluginObject
     }
 
     @ApiStatus.Internal
-    public void refreshSkillsAbilities()
+    public void onPlayerJoin()
     {
         this.abilityUpdater.reApplyAbility();
         this.skill.onInitialEquip(this);
+
+        this.getDisguiseWrapper().onPlayerJoin(this.getPlayer());
     }
 
     /**

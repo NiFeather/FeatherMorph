@@ -8,7 +8,16 @@ import java.util.UUID;
 
 public class CustomEntries
 {
-    public static final RegistryKey<GameProfile> PROFILE = RegistryKey.of("profile", new GameProfile(UUID.randomUUID(), "sample"));
+    /**
+     * This should always present for player disguise!
+     */
+    public static final RegistryKey<GameProfile> PROFILE = RegistryKey.of("profile", new GameProfile(UUID.randomUUID(), "sample")).doRequireNonNull();
+
+    /**
+     * Should profile listed in the tab list?
+     * <b></b>
+     * Also, 'TRUE' means the profile listing is also handled by external sources
+     */
     public static final RegistryKey<Boolean> PROFILE_LISTED = RegistryKey.of("profile_listed", false);
 
     public static final RegistryKey<String> DISGUISE_NAME = RegistryKey.of("disguise_name", "").doRequireNonNull();

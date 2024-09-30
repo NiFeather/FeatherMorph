@@ -110,7 +110,4 @@ public class PlayerMeta
 
     @Expose
     public boolean shownMorphClientHint;
-
-    @Expose
-    public boolean shownClientSuggestionMessage;
 }

@@ -12,7 +12,7 @@ import xiamomc.morph.backends.WrapperEvent;
 import xiamomc.morph.backends.server.renderer.ServerRenderer;
 import xiamomc.morph.backends.server.renderer.network.registries.CustomEntries;
 import xiamomc.morph.messages.BackendStrings;
-import xiamomc.morph.misc.PlayerTabHandler;
+import xiamomc.morph.misc.playerList.PlayerListHandler;
 import xiamomc.morph.utilities.NbtUtils;
 import xiamomc.pluginbase.Messages.FormattableMessage;
 
@@ -199,10 +199,10 @@ public class ServerBackend extends DisguiseBackend<ServerDisguise, ServerDisguis
 
         serverDisguiseWrapper.setRenderParameters(player, watcher);
 
-        if (wrapper.getEntityType() == EntityType.PLAYER)
+        if (wrapper.getEntityType() == EntityType.PLAYER && serverRenderer.showPlayerDisguises.get())
         {
             var disguiseUUID = watcher.readEntryOrThrow(CustomEntries.SPAWN_UUID);
-            var tabHandler = PlayerTabHandler.instance();
+            var tabHandler = PlayerListHandler.instance();
 
             serverDisguiseWrapper.subscribeEvent(this,
                     WrapperEvent.SKIN_SET,
@@ -226,7 +226,7 @@ public class ServerBackend extends DisguiseBackend<ServerDisguise, ServerDisguis
         {
             var watcher = wrapper.getBindingWatcher();
             if (watcher != null)
-                PlayerTabHandler.instance().hideFakePlayer(watcher.readEntryOrThrow(CustomEntries.SPAWN_UUID));
+                PlayerListHandler.instance().hideFakePlayer(watcher.readEntryOrThrow(CustomEntries.SPAWN_UUID));
 
             wrapper.dispose();
         }

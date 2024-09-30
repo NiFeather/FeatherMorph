@@ -22,7 +22,7 @@ import xiamomc.morph.backends.DisguiseWrapper;
 import xiamomc.morph.backends.WrapperAttribute;
 import xiamomc.morph.backends.fallback.NilBackend;
 import xiamomc.morph.backends.server.ServerBackend;
-import xiamomc.morph.misc.PlayerTabHandler;
+import xiamomc.morph.misc.playerList.PlayerListHandler;
 import xiamomc.morph.config.ConfigOption;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.events.api.gameplay.*;
@@ -1117,14 +1117,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 playerOptions.shownServerSkillHint = true;
             }
 
-            if (!playerOptions.shownClientSuggestionMessage)
-            {
-                player.sendMessage(MessageUtils.prefixes(player, HintStrings.clientSuggestionStringA()));
-                player.sendMessage(MessageUtils.prefixes(player, HintStrings.clientSuggestionStringB()));
-
-                playerOptions.shownClientSuggestionMessage = true;
-            }
-
             if (clientHandler.clientInitialized(player) && !playerOptions.shownDisplayToSelfHint)
             {
                 player.sendMessage(MessageUtils.prefixes(player, HintStrings.morphVisibleAfterCommandString()));
@@ -1133,7 +1125,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         }
 
         if (this.hideDisguisedPlayers.get())
-            PlayerTabHandler.instance().hidePlayer(player);
+            PlayerListHandler.instance().hidePlayer(player);
     }
 
     //region Command generating
@@ -1367,7 +1359,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         networkingHelper.sendCommandToRevealablePlayers(new S2CMapRemoveCommand(player.getEntityId()));
 
         if (this.hideDisguisedPlayers.get())
-            PlayerTabHandler.instance().showPlayer(player);
+            PlayerListHandler.instance().showPlayer(player);
 
         state.dispose();
     }
@@ -1495,14 +1487,14 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
     public void disguiseFromState(DisguiseState state)
     {
-        if (!activeDisguises.contains(state))
-            activeDisguises.add(state);
-
-        state.getDisguiseWrapper().getBackend().disguise(state.getPlayer(), state.getDisguiseWrapper());
-
         var meta = getDisguiseMeta(state.getDisguiseIdentifier());
         var result = DisguiseBuildResult.of(state, state.getProvider(), meta, null);
-        this.postBuildDisguise(result, MorphParameters.create(state.getPlayer(), state.getDisguiseIdentifier()), getPlayerMeta(state.getPlayer()));
+        var playerMeta = getPlayerMeta(state.getPlayer());
+        var parameters = MorphParameters.create(state.getPlayer(), state.getDisguiseIdentifier());
+
+        this.postBuildDisguise(result, parameters, playerMeta);
+        this.applyDisguise(parameters, state, meta, playerMeta);
+        this.afterDisguise(result, parameters, playerMeta);
     }
 
     /**

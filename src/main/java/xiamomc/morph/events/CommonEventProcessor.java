@@ -33,7 +33,7 @@ import xiamomc.morph.messages.vanilla.VanillaMessageStore;
 import xiamomc.morph.misc.DisguiseTypes;
 import xiamomc.morph.misc.NetworkingHelper;
 import xiamomc.morph.misc.OfflineDisguiseResult;
-import xiamomc.morph.misc.PlayerTabHandler;
+import xiamomc.morph.misc.playerList.PlayerListHandler;
 import xiamomc.morph.misc.permissions.CommonPermissions;
 import xiamomc.morph.network.commands.S2C.S2CSwapCommand;
 import xiamomc.morph.network.commands.S2C.map.S2CMapRemoveCommand;
@@ -357,11 +357,11 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
             instance.removeModifier(AttributeModifyingAbility.modifierKey);
         }
 
-        this.addSchedule(() -> PlayerTabHandler.instance().handle(player));
+        this.addSchedule(() -> PlayerListHandler.instance().handle(player));
 
         if (state != null)
         {
-            state.refreshSkillsAbilities();
+            state.onPlayerJoin();
 
             //调用Morph事件
             new PlayerJoinedWithDisguiseEvent(player, state).callEvent();
