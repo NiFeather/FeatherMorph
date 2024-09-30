@@ -199,7 +199,7 @@ public class ServerBackend extends DisguiseBackend<ServerDisguise, ServerDisguis
 
         serverDisguiseWrapper.setRenderParameters(player, watcher);
 
-        if (wrapper.getEntityType() == EntityType.PLAYER)
+        if (wrapper.getEntityType() == EntityType.PLAYER && serverRenderer.showPlayerDisguises.get())
         {
             var disguiseUUID = watcher.readEntryOrThrow(CustomEntries.SPAWN_UUID);
             var tabHandler = PlayerListHandler.instance();

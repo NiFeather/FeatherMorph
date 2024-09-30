@@ -328,7 +328,7 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
             this.bindingWatcher.writeEntry(CustomEntries.SPAWN_ID, newInstance.getEntityId());
             this.bindingPlayer = newInstance;
 
-            if (this.getEntityType() == EntityType.PLAYER)
+            if (this.getEntityType() == EntityType.PLAYER && backend.serverRenderer.showPlayerDisguises.get())
             {
                 PlayerListHandler.instance().showFakePlayer(
                         bindingWatcher.readEntryOrThrow(CustomEntries.SPAWN_UUID),

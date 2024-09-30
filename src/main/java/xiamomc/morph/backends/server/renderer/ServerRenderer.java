@@ -31,7 +31,7 @@ public class ServerRenderer extends MorphPluginObject implements Listener
 
     private final PacketFactory packetFactory = new PacketFactory();
 
-    private final Bindable<Boolean> showPlayerDisguises = new Bindable<>();
+    public final Bindable<Boolean> showPlayerDisguises = new Bindable<>();
 
     public ServerRenderer()
     {
