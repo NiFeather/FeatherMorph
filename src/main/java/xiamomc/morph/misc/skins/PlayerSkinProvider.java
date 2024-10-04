@@ -20,7 +20,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class PlayerSkinProvider extends MorphPluginObject
@@ -38,40 +37,22 @@ public class PlayerSkinProvider extends MorphPluginObject
         return instance;
     }
 
-    private CompletableFuture<Optional<GameProfile>> getProfileAsyncV2(String name)
+    private final SkinCache skinCache = new SkinCache();
+
+    private CompletableFuture<Optional<GameProfile>> fetchPlayerInfoAsync(String name)
     {
         var executor = Util.PROFILE_EXECUTOR;
 
-        return CompletableFuture.supplyAsync(() -> this.fetchProfileV2(name), executor)
-                .whenCompleteAsync((optional, throwable) -> {}, executor);
-    }
-
-    private final SkinCache skinCache = new SkinCache();
-
-    public static boolean isValidUsername(String name) {
-        if (name != null && !name.isEmpty() && name.length() <= 16) {
-            int i = 0;
-
-            for(int len = name.length(); i < len; ++i) {
-                char c = name.charAt(i);
-                if ((c < 'a' || c > 'z') && (c < 'A' || c > 'Z') && (c < '0' || c > '9') && c != '_' && c != '.') {
-                    return false;
-                }
-            }
-
-            return true;
-        } else {
-            return false;
-        }
+        return CompletableFuture.supplyAsync(() -> this.fetchPlayerInfo(name), executor);
     }
 
     /**
      * 根据给定的名称搜索对应的Profile（不包含皮肤）
-     * @apiNote 此方法返回的GameProfile不包含皮肤，若要获取于此对应的皮肤，请使用 {@link PlayerSkinProvider#fetchSkinFromProfile(GameProfile)}
+     * @apiNote 此方法返回的GameProfile不包含皮肤，若要获取于此对应的皮肤，请使用 {@link PlayerSkinProvider#fetchSkin(GameProfile)}
      * @param name
      * @return
      */
-    private Optional<GameProfile> fetchProfileV2(String name)
+    private Optional<GameProfile> fetchPlayerInfo(String name)
     {
         var profileRef = new AtomicReference<GameProfile>(null);
 
@@ -106,11 +87,25 @@ public class PlayerSkinProvider extends MorphPluginObject
         return profile == null ? Optional.empty() : Optional.of(profile);
     }
 
+    @Nullable
+    public GameProfile getCachedProfile(String name)
+    {
+        return skinCache.get(name).profileOptional().orElse(null);
+    }
+
+    public void cacheProfile(@NotNull PlayerProfile playerProfile)
+    {
+        var gameProfile = new MorphGameProfile(playerProfile);
+        skinCache.cache(gameProfile);
+    }
+
+    private final Map<String, CompletableFuture<Optional<GameProfile>>> onGoingRequests = new ConcurrentHashMap<>();
+
     /**
      * 通过给定的Profile获取与其对应的皮肤
      * @param profile 目标GameProfile
      */
-    public CompletableFuture<Optional<GameProfile>> fetchSkinFromProfile(GameProfile profile)
+    public CompletableFuture<Optional<GameProfile>> fetchSkin(GameProfile profile)
     {
         if (profile.getProperties().containsKey("textures"))
         {
@@ -135,20 +130,6 @@ public class PlayerSkinProvider extends MorphPluginObject
             });
         }
     }
-
-    @Nullable
-    public GameProfile getCachedProfile(String name)
-    {
-        return skinCache.get(name).profileOptional().orElse(null);
-    }
-
-    public void cacheProfile(@NotNull PlayerProfile playerProfile)
-    {
-        var gameProfile = new MorphGameProfile(playerProfile);
-        skinCache.cache(gameProfile);
-    }
-
-    private final Map<String, CompletableFuture<Optional<GameProfile>>> onGoingRequests = new ConcurrentHashMap<>();
 
     /**
      * 尝试获取与给定名称对应的皮肤
@@ -178,12 +159,12 @@ public class PlayerSkinProvider extends MorphPluginObject
         if (prevReq != null)
             return prevReq;
 
-        var req = getProfileAsyncV2(profileName)
+        var req = fetchPlayerInfoAsync(profileName)
                 .thenCompose(rawProfileOptional ->
                 {
                     if (rawProfileOptional.isPresent()) //如果查有此人，那么继续流程
                     {
-                        return fetchSkinFromProfile(rawProfileOptional.get());
+                        return fetchSkin(rawProfileOptional.get());
                     }
                     else if (cachedSkin.profileOptional().isPresent()) //否则，如果本地有缓存，那就使用本地缓存
                     {
@@ -199,6 +180,11 @@ public class PlayerSkinProvider extends MorphPluginObject
                     }
                 });
 
+        req.exceptionally(t ->
+        {
+            onGoingRequests.remove(profileName);
+            return Optional.empty();
+        });
         req.thenRun(() -> onGoingRequests.remove(profileName));
 
         onGoingRequests.put(profileName, req);

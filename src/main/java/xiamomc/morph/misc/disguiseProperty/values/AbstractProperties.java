@@ -38,6 +38,6 @@ public abstract class AbstractProperties
 
     public List<SingleProperty<?>> getValues()
     {
-        return values;
+        return new ObjectArrayList<>(values);
     }
 }
