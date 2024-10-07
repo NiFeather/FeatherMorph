@@ -81,9 +81,11 @@ public class WardenWatcher extends EHasAttackAnimationWatcher
                     this.writePersistent(ValueIndex.BASE_LIVING.POSE, DIG_PLACEHOLDER_POSE);
                     this.writePersistent(ValueIndex.BASE_ENTITY.GENERAL, (byte)0x20);
                     this.writePersistent(ValueIndex.BASE_LIVING.SILENT, true);
+                    this.writeEntry(CustomEntries.VANISHED, true);
                 }
                 case AnimationNames.APPEAR ->
                 {
+                    this.writeEntry(CustomEntries.VANISHED, false);
                     this.block(ValueIndex.BASE_LIVING.POSE);
                     this.remove(ValueIndex.BASE_ENTITY.GENERAL);
                     this.writePersistent(ValueIndex.BASE_LIVING.POSE, Pose.EMERGING);
