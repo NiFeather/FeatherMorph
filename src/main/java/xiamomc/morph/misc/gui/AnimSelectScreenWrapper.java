@@ -24,7 +24,7 @@ import java.util.List;
 public class AnimSelectScreenWrapper extends ScreenWrapper
 {
     private final BindableList<String> pattern = new BindableList<>(List.of(
-            "D!XXXXX!E"
+            "XXXXE"
     ));
 
     private static final char CHAR_ENTRY = 'X';
@@ -79,12 +79,6 @@ public class AnimSelectScreenWrapper extends ScreenWrapper
         for (String line : template)
         {
             StringBuilder builder = new StringBuilder();
-
-            if (line.length() != 9)
-            {
-                logger.error("A line must have 9 cols, skipping '%s'".formatted(line));
-                continue;
-            }
 
             int lineCapacity = 0;
             for (char c : line.toCharArray())
