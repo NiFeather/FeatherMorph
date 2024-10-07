@@ -18,6 +18,7 @@ import org.bukkit.event.entity.*;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.inventory.ItemStack;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.RevealingHandler;
@@ -31,7 +32,6 @@ import xiamomc.morph.messages.MorphStrings;
 import xiamomc.morph.messages.SkillStrings;
 import xiamomc.morph.messages.vanilla.VanillaMessageStore;
 import xiamomc.morph.misc.DisguiseTypes;
-import xiamomc.morph.misc.NetworkingHelper;
 import xiamomc.morph.misc.OfflineDisguiseResult;
 import xiamomc.morph.misc.playerList.PlayerListHandler;
 import xiamomc.morph.misc.permissions.CommonPermissions;
@@ -41,6 +41,7 @@ import xiamomc.morph.network.server.MorphClientHandler;
 import xiamomc.morph.network.server.ServerSetEquipCommand;
 import xiamomc.morph.skills.MorphSkillHandler;
 import xiamomc.morph.utilities.EntityTypeUtils;
+import xiamomc.morph.utilities.ItemUtils;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
@@ -67,10 +68,9 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
     @Resolved(shouldSolveImmediately = true)
     private RevealingHandler revealingHandler;
 
-    @Resolved(shouldSolveImmediately = true)
-    private NetworkingHelper networkingHelper;
-
     private Bindable<Boolean> unMorphOnDeath;
+
+    private final Bindable<Boolean> useNewSkillItemMethod = new Bindable<>(true);
 
     @EventHandler
     public void onEntityDeath(EntityDeathEvent e)
@@ -155,6 +155,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         config.bind(allowAcquireMorphs, ConfigOption.ALLOW_ACQUIRE_MORPHS);
 
         unMorphOnDeath = config.getBindable(Boolean.class, ConfigOption.UNMORPH_ON_DEATH);
+        config.bind(this.useNewSkillItemMethod, ConfigOption.SKILL_ITEM_USE_COMPONENT);
         this.addSchedule(this::update);
     }
 
@@ -216,6 +217,19 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
     }
 
     /**
+     *
+     * @param actionItemType The type of the action item.
+     * @param item The item to check
+     */
+    private boolean isItemASkillItem(Material actionItemType, ItemStack item)
+    {
+        if (useNewSkillItemMethod.get())
+            return ItemUtils.isSkillActivateItem(item);
+        else
+            return item.getType() == actionItemType;
+    }
+
+    /**
      * 尝试使用技能或快速伪装
      * @param player 目标玩家
      * @param action 动作
@@ -230,13 +244,13 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         var mainHandItem = player.getEquipment().getItemInMainHand();
         var mainHandItemType = mainHandItem.getType();
 
-        if (mainHandItemType.isAir() || !player.isSneaking()) return false;
+        if (mainHandItemType.isAir() || (useNewSkillItemMethod.get() ? false : !player.isSneaking())) return false;
 
         //右键玩家头颅：快速伪装
         if (!action.equals(Action.RIGHT_CLICK_BLOCK) && !action.isLeftClick() && morphs.doQuickDisguise(player, false))
             return true;
 
-        if (mainHandItemType != actionItem || state == null) return false;
+        if (!isItemASkillItem(actionItem, mainHandItem) || state == null) return false;
 
         //激活技能或取消伪装
         if (action.isLeftClick())

@@ -22,6 +22,7 @@ public enum ConfigOption
     @Deprecated
     ACTION_ITEM(ConfigNode.create().append("action_item"), "", true),
     SKILL_ITEM(ConfigNode.create().append("skill_item"), "minecraft:feather"),
+    SKILL_ITEM_USE_COMPONENT(ConfigNode.create().append("skill_item_use_component_detection"), true),
 
     ARMORSTAND_SHOW_ARMS(ConfigNode.create().append("armorstand_show_arms"), true),
 

@@ -99,7 +99,21 @@ root:
 
   # Skill item
   # Defines which item should players use to disguise/undisguise or activate skills.
+  #
+  # ATTENTION! This will do nothing if `skill_item_use_component_detection` is enabled.
   skill_item: minecraft:feather
+
+  # Use item component to detect skill items
+  # Once enabled, players will ONLY need to use the item to activate their disguise skill, no need to sneak!
+  # This could make skill activation easier for players without using client mods.
+  #
+  # In order to make an item a "Skill item", add `"feathermorph:is_skill_item": true` to the item's custom data
+  #
+  # For example, to give yourself a feather as a skill item:
+  #     /give @s minecraft:feather[minecraft:custom_data={"feathermorph:is_skill_item": true}]
+  # Or:
+  #     /fm disguise_item minecraft:feather
+  skill_item_use_component_detection: true
 
   # Should we make Armor Stand disguises show arms by default?
   armorstand_show_arms: true
@@ -347,4 +361,4 @@ root:
       - SelectedItem
 
   # Do not touch unless you know what you're doing!
-  version: 35
+  version: 36

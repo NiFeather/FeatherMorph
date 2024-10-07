@@ -231,6 +231,11 @@ public class CommandStrings extends AbstractMorphStrings
                 "即将播放动画 <italic><what></italic>");
     }
 
+    public static FormattableMessage grantItemSuccess()
+    {
+        return getFormattable(getKey("grant_item_success"), "[Fallback] 成功给与物品。如果没有请检查是否背包已满");
+    }
+
     private static String getKey(String key)
     {
         return "commands." + key;
