@@ -111,8 +111,8 @@ root:
   #
   # For example, to give yourself a feather as a skill item:
   #     /give @s minecraft:feather[minecraft:custom_data={"feathermorph:is_skill_item": true}]
-  # Or:
-  #     /fm disguise_item minecraft:feather
+  # Or use the command below to make an item a skill item:
+  #     /fm make_skill_item
   skill_item_use_component_detection: true
 
   # Should we make Armor Stand disguises show arms by default?

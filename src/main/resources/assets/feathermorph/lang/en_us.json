@@ -87,6 +87,7 @@
   "commands.no_such_animation": "<red>No such animation",
   "commands.going_to_play_animation": "Going to play animation <italic><what></italic>",
   "commands.grant_item_success": "Successfully grant item. If the item is not found please check if the inventory is full.",
+  "commands.operation_success": "Operation success",
   "common.command_not_found": "<color:red>Command not found",
   "common.player_not_defined": "<color:red>No player specified",
   "common.player_not_found": "<color:red>No such player or they are offline",
