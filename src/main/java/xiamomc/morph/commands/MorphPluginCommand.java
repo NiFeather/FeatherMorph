@@ -49,7 +49,7 @@ public class MorphPluginCommand extends MorphSubCommandHandler
             new CheckUpdateSubCommand(),
             new LookupSubCommand(),
             new SkinCacheSubCommand(),
-            new DisguiseItemSubCommand()
+            new MakeSkillItemSubCommand()
             //new BackendSubCommand()
     );
 
