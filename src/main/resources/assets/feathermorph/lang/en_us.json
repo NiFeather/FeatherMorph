@@ -225,5 +225,7 @@
   "chestui.next_page": "Next page",
   "chestui.prev_page": "Previous page",
   "chestui.undisguise": "Undisguise",
-  "chestui.title_select_disguise": "Select disguise"
+  "chestui.title_select_disguise": "Select disguise",
+  "chestui.title_select_emotes": "Disguise actions",
+  "chestui.close": "Close"
 }

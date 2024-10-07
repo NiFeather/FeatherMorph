@@ -24,6 +24,16 @@ public class GuiStrings extends AbstractMorphStrings
         return getFormattable(getKey("title_select_disguise"), "[Fallback] 选择伪装");
     }
 
+    public static FormattableMessage selectAnimation()
+    {
+        return getFormattable(getKey("title_select_emotes"), "[Fallback] 伪装动作");
+    }
+
+    public static FormattableMessage close()
+    {
+        return getFormattable(getKey("close"), "[Fallback] 关闭");
+    }
+
     private static String getKey(String key)
 {
     return "chestui." + key;

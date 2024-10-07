@@ -112,6 +112,8 @@ public enum ConfigOption
 
     GUI_PATTERN(ConfigNode.create().append("gui_pattern"), new ArrayList<String>()),
 
+    //ANIM_SELECT_PATTERN(ConfigNode.create().append("anim_select_pattern"), new ArrayList<String>()),
+
     HIDE_DISGUISED_PLAYERS_IN_TAB(ConfigNode.create().append("hide_disguised_players_in_tab"), false),
 
     // SRR -> ServerRenderer

@@ -225,5 +225,7 @@
   "chestui.next_page": "下一页",
   "chestui.prev_page": "上一页",
   "chestui.undisguise": "取消伪装",
-  "chestui.title_select_disguise": "选择伪装"
+  "chestui.title_select_disguise": "选择伪装",
+  "chestui.title_select_emotes": "伪装动作",
+  "chestui.close": "关闭"
 }
