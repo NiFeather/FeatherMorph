@@ -12,6 +12,7 @@ import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.messages.CommandStrings;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.misc.NmsRecord;
+import xiamomc.morph.misc.permissions.CommonPermissions;
 import xiamomc.morph.utilities.ItemUtils;
 import xiamomc.pluginbase.Command.ISubCommand;
 import xiamomc.pluginbase.Messages.FormattableMessage;
@@ -47,6 +48,12 @@ public class DisguiseItemSubCommand extends MorphPluginObject implements ISubCom
     public @NotNull String getCommandName()
     {
         return "disguise_item";
+    }
+
+    @Override
+    public @Nullable String getPermissionRequirement()
+    {
+        return CommonPermissions.GIVE_SKILL_ITEM;
     }
 
     @Override
