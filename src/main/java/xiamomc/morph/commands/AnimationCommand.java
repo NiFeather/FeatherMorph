@@ -10,6 +10,7 @@ import xiamomc.morph.messages.CommandStrings;
 import xiamomc.morph.messages.EmoteStrings;
 import xiamomc.morph.messages.HelpStrings;
 import xiamomc.morph.messages.MessageUtils;
+import xiamomc.morph.misc.gui.AnimSelectScreenWrapper;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Command.IPluginCommand;
 import xiamomc.pluginbase.Messages.FormattableMessage;
@@ -66,17 +67,20 @@ public class AnimationCommand extends MorphPluginObject implements IPluginComman
             return true;
         }
 
+        var animationSet = state.getProvider()
+                .getAnimationProvider()
+                .getAnimationSetFor(state.getDisguiseIdentifier());
+
         if (args.length == 0)
         {
-            player.sendMessage(MessageUtils.prefixes(player, CommandStrings.listNoEnoughArguments()));
+            var screen = new AnimSelectScreenWrapper(state, animationSet.getAvailableAnimationsForClient());
+            screen.show();
+
+            //player.sendMessage(MessageUtils.prefixes(player, CommandStrings.listNoEnoughArguments()));
             return true;
         }
 
         var animationId = args[0];
-
-        var animationSet = state.getProvider()
-                .getAnimationProvider()
-                .getAnimationSetFor(state.getDisguiseIdentifier());
 
         var animations = animationSet.getAvailableAnimationsForClient();
 

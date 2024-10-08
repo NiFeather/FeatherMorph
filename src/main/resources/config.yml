@@ -97,10 +97,6 @@ root:
     # Should we check if there is enough space to disguise?
     check_space: true
 
-  # Skill item
-  # Defines which item should players use to disguise/undisguise or activate skills.
-  skill_item: minecraft:feather
-
   # Should we make Armor Stand disguises show arms by default?
   armorstand_show_arms: true
 
@@ -347,4 +343,4 @@ root:
       - SelectedItem
 
   # Do not touch unless you know what you're doing!
-  version: 35
+  version: 37

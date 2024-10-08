@@ -17,14 +17,14 @@ import xiamomc.morph.backends.server.renderer.network.registries.ValueIndex;
 import xiamomc.morph.misc.NmsRecord;
 import xiamomc.morph.misc.AnimationNames;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 public class WardenWatcher extends EHasAttackAnimationWatcher
 {
     public WardenWatcher(Player bindingPlayer)
     {
         super(bindingPlayer, EntityType.WARDEN);
     }
-
-    private final Pose DIG_PLACEHOLDER_POSE = Pose.SLEEPING;
 
     @Override
     protected <X> void onEntryWrite(RegistryKey<X> key, X oldVal, X newVal)
@@ -48,20 +48,20 @@ public class WardenWatcher extends EHasAttackAnimationWatcher
             {
                 case AnimationNames.ROAR ->
                 {
-                    if (this.read(ValueIndex.BASE_LIVING.POSE) == DIG_PLACEHOLDER_POSE) return;
+                    if (this.readEntryOrDefault(CustomEntries.VANISHED, false)) return;
 
                     this.block(ValueIndex.BASE_LIVING.POSE);
                     this.writePersistent(ValueIndex.BASE_LIVING.POSE, Pose.ROARING);
                 }
                 case AnimationNames.ROAR_SOUND ->
                 {
-                    if (this.read(ValueIndex.BASE_LIVING.POSE) == DIG_PLACEHOLDER_POSE) return;
+                    if (this.readEntryOrDefault(CustomEntries.VANISHED, false)) return;
 
                     world.playSound(bindingPlayer.getLocation(), Sound.ENTITY_WARDEN_ROAR, SoundCategory.HOSTILE, 3, 1);
                 }
                 case AnimationNames.SNIFF ->
                 {
-                    if (this.read(ValueIndex.BASE_LIVING.POSE) == DIG_PLACEHOLDER_POSE) return;
+                    if (this.readEntryOrDefault(CustomEntries.VANISHED, false)) return;
 
                     this.block(ValueIndex.BASE_LIVING.POSE);
                     this.writePersistent(ValueIndex.BASE_LIVING.POSE, Pose.SNIFFING);
@@ -70,7 +70,7 @@ public class WardenWatcher extends EHasAttackAnimationWatcher
                 }
                 case AnimationNames.DIGDOWN ->
                 {
-                    if (this.read(ValueIndex.BASE_LIVING.POSE) == DIG_PLACEHOLDER_POSE) return;
+                    if (this.readEntryOrDefault(CustomEntries.VANISHED, false)) return;
 
                     this.block(ValueIndex.BASE_LIVING.POSE);
                     this.writePersistent(ValueIndex.BASE_LIVING.POSE, Pose.DIGGING);
@@ -78,12 +78,13 @@ public class WardenWatcher extends EHasAttackAnimationWatcher
                 }
                 case AnimationNames.VANISH ->
                 {
-                    this.writePersistent(ValueIndex.BASE_LIVING.POSE, DIG_PLACEHOLDER_POSE);
                     this.writePersistent(ValueIndex.BASE_ENTITY.GENERAL, (byte)0x20);
                     this.writePersistent(ValueIndex.BASE_LIVING.SILENT, true);
+                    this.writeEntry(CustomEntries.VANISHED, true);
                 }
                 case AnimationNames.APPEAR ->
                 {
+                    this.writeEntry(CustomEntries.VANISHED, false);
                     this.block(ValueIndex.BASE_LIVING.POSE);
                     this.remove(ValueIndex.BASE_ENTITY.GENERAL);
                     this.writePersistent(ValueIndex.BASE_LIVING.POSE, Pose.EMERGING);
@@ -102,7 +103,9 @@ public class WardenWatcher extends EHasAttackAnimationWatcher
                 }
                 case AnimationNames.TRY_RESET ->
                 {
-                    if (this.read(ValueIndex.BASE_LIVING.POSE) == DIG_PLACEHOLDER_POSE) return;
+                    // 如果当前已消失，则不要调用重置
+                    // 因为重置会将一些动作数据重新同步为玩家的数据
+                    if (this.readEntryOrDefault(CustomEntries.VANISHED, false)) return;
 
                     reset();
                 }

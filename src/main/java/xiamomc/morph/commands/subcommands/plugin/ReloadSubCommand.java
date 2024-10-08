@@ -12,6 +12,7 @@ import xiamomc.morph.messages.HelpStrings;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.MorphMessageStore;
 import xiamomc.morph.messages.vanilla.VanillaMessageStore;
+import xiamomc.morph.misc.recipe.RecipeManager;
 import xiamomc.morph.misc.skins.PlayerSkinProvider;
 import xiamomc.morph.network.multiInstance.MultiInstanceService;
 import xiamomc.morph.network.server.MorphClientHandler;
@@ -62,6 +63,9 @@ public class ReloadSubCommand extends MorphPluginObject implements ISubCommand
     @Resolved
     private MultiInstanceService multiInstanceService;
 
+    @Resolved
+    private RecipeManager recipeManager;
+
     private final List<String> subcommands = ObjectImmutableList.of("data", "message", "update_message");
 
     @Override
@@ -103,6 +107,8 @@ public class ReloadSubCommand extends MorphPluginObject implements ISubCommand
                 PlayerSkinProvider.getInstance().reload();
 
                 multiInstanceService.onReload();
+
+                recipeManager.reload();
             }
 
             if (reloadsMessage)

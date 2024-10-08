@@ -3,12 +3,15 @@ package xiamomc.morph.utilities;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.mojang.serialization.JsonOps;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.component.CustomData;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphPlugin;
 
 public class ItemUtils
@@ -71,6 +74,30 @@ public class ItemUtils
 
             return "{\"id\": \"%s\", \"Count\": 1}".formatted(stack.getType().getKey().asString());
         }
+    }
+
+    public static final String SKILL_ACTIVATE_ITEM_KEY = "feathermorph:is_disguise_tool";
+
+    public static ItemStack buildSkillItemFrom(ItemStack stack)
+    {
+        var nms = net.minecraft.world.item.ItemStack.fromBukkitCopy(stack);
+        var customData = nms.getComponents().get(DataComponents.CUSTOM_DATA);
+        if (customData == null) customData = CustomData.EMPTY;
+
+        customData = customData.update(tag -> tag.putBoolean(SKILL_ACTIVATE_ITEM_KEY, true));
+        nms.set(DataComponents.CUSTOM_DATA, customData);
+
+        return nms.asBukkitMirror();
+    }
+
+    public static boolean isSkillActivateItem(ItemStack stack)
+    {
+        var nms = net.minecraft.world.item.ItemStack.fromBukkitCopy(stack);
+        var customData = nms.getComponents().get(DataComponents.CUSTOM_DATA);
+
+        if (customData == null || !customData.contains(SKILL_ACTIVATE_ITEM_KEY)) return false;
+
+        return customData.copyTag().getBoolean(SKILL_ACTIVATE_ITEM_KEY);
     }
 
     /**

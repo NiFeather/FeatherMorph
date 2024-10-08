@@ -165,6 +165,7 @@ bukkit {
             permissionRoot + "lookup",
             permissionRoot + "skin_cache",
             permissionRoot + "switch_backend",
+            permissionRoot + "make_disguise_tool",
 
             permissionRoot + "mirror.immune",
 

@@ -218,10 +218,10 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
     //endregion Backends
 
-    private Material actionItem;
+    @Deprecated(forRemoval = true)
     public Material getActionItem()
     {
-        return actionItem;
+        return Material.AIR;
     }
 
     @Resolved
@@ -250,18 +250,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 //new LocalDisguiseProvider(),
                 fallbackProvider
         ));
-
-        var actionItemId = config.getBindable(String.class, ConfigOption.SKILL_ITEM);
-        actionItemId.onValueChanged((o, n) ->
-        {
-            var item = Material.matchMaterial(n);
-            var disabled = "disabled";
-
-            if (item == null && !disabled.equals(n))
-                logger.warn("Cannot find any item that matches \"" + n + "\" to set for the skill item, some related features may not work!");
-
-            actionItem = item;
-        }, true);
 
         Bukkit.getPluginManager().callEvent(new ManagerFinishedInitializeEvent(this));
     }
@@ -1106,17 +1094,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         }
         else
         {
-            if (!playerOptions.shownServerSkillHint && actionItem != null)
-            {
-                var locale = MessageUtils.getLocale(player);
-                var skillHintMessage = HintStrings.skillString()
-                        .withLocale(locale)
-                        .resolve("item", vanillaMessageStore.get(actionItem.translationKey(), "???", locale));
-
-                player.sendMessage(MessageUtils.prefixes(player, skillHintMessage));
-                playerOptions.shownServerSkillHint = true;
-            }
-
             if (clientHandler.clientInitialized(player) && !playerOptions.shownDisplayToSelfHint)
             {
                 player.sendMessage(MessageUtils.prefixes(player, HintStrings.morphVisibleAfterCommandString()));

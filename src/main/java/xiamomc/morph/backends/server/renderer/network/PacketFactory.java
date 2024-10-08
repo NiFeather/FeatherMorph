@@ -56,6 +56,9 @@ public class PacketFactory extends MorphPluginObject
 
         List<PacketContainer> packets = new ObjectArrayList<>();
 
+        if (watcher.readEntryOrDefault(CustomEntries.VANISHED, false))
+            return packets;
+
         //logger.info("Build spawn packets, player is " + player.getName() + " :: parameters are " + parameters);
 
         var disguiseEntityType = watcher.getEntityType();

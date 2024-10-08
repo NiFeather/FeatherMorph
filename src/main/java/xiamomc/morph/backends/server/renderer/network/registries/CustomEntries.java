@@ -40,4 +40,6 @@ public class CustomEntries
 
     public static final RegistryKey<UUID> SPAWN_UUID = RegistryKey.of("spawn_uuid", Util.NIL_UUID);
     public static final RegistryKey<Integer> SPAWN_ID = RegistryKey.of("spawn_id", -1);
+
+    public static final RegistryKey<Boolean> VANISHED = RegistryKey.of("vanished", false);
 }

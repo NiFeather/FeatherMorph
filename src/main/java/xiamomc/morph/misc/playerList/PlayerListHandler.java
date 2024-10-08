@@ -148,7 +148,11 @@ public class PlayerListHandler extends MorphPluginObject
         if (isPlayerHiddenFromOthers)
         {
             var hidePacket = new ClientboundPlayerInfoRemovePacket(List.of(player.getUniqueId()));
-            Bukkit.getOnlinePlayers().forEach(p -> this.sendPacket(p, hidePacket));
+            Bukkit.getOnlinePlayers().forEach(p ->
+            {
+                if (p != player)
+                    this.sendPacket(p, hidePacket);
+            });
         }
 
         this.fakePlayers.forEach((disguiseUUID, profile) ->

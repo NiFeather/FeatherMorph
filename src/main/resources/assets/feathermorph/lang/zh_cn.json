@@ -86,6 +86,8 @@
   "commands.not_disguised": "<red>你没有进行伪装!",
   "commands.no_such_animation": "<red>此动画不可用",
   "commands.going_to_play_animation": "即将播放动作 <italic><what></italic>",
+  "commands.grant_item_success": "成功给与物品。如果没有请检查是否背包已满",
+  "commands.operation_success": "操作成功执行",
   "common.command_not_found" : "<color:red>未找到此指令",
   "common.player_not_defined" : "<color:red>未指定玩家",
   "common.player_not_found" : "<color:red>未找到目标玩家或对方已离线",
@@ -225,5 +227,7 @@
   "chestui.next_page": "下一页",
   "chestui.prev_page": "上一页",
   "chestui.undisguise": "取消伪装",
-  "chestui.title_select_disguise": "选择伪装"
+  "chestui.title_select_disguise": "选择伪装",
+  "chestui.title_select_emotes": "伪装动作",
+  "chestui.close": "关闭"
 }

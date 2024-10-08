@@ -1,12 +1,14 @@
 package xiamomc.morph.misc.disguiseProperty;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphPlugin;
 import xiamomc.morph.misc.disguiseProperty.values.AbstractProperties;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
@@ -15,12 +17,19 @@ import java.util.concurrent.ThreadLocalRandom;
 public class PropertyHandler
 {
     private final Map<SingleProperty<?>, Object> propertyMap = new ConcurrentHashMap<>();
+    private final List<SingleProperty<?>> validProperties = new ObjectArrayList<>();
 
     private final Random random = ThreadLocalRandom.current();
+
+    @Nullable
+    private AbstractProperties properties;
 
     public void setProperties(AbstractProperties properties)
     {
         reset();
+
+        this.properties = properties;
+        validProperties.addAll(properties.getValues());
         properties.getValues().forEach(this::addProperty);
     }
 
@@ -36,6 +45,8 @@ public class PropertyHandler
 
     public void reset()
     {
+        this.validProperties.clear();
+        this.properties = null;
         propertyMap.clear();
     }
 
@@ -49,9 +60,9 @@ public class PropertyHandler
 
     public <X> void set(SingleProperty<X> property, X value)
     {
-        if (!propertyMap.containsKey(property))
+        if (!validProperties.contains(property))
         {
-            MorphPlugin.getInstance().getSLF4JLogger().warn("The given property '%s' doesn't exist.".formatted(property));
+            MorphPlugin.getInstance().getSLF4JLogger().warn("The given property '%s' doesn't exist in '%s'".formatted(property.id(), this.properties));
             return;
         }
 

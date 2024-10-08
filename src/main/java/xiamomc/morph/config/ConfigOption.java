@@ -7,6 +7,7 @@ import xiamomc.morph.utilities.NbtUtils;
 import xiamomc.pluginbase.Configuration.ConfigNode;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public enum ConfigOption
 {
@@ -19,16 +20,21 @@ public enum ConfigOption
 
     SKILL_COOLDOWN_ON_DAMAGE(ConfigNode.create().append("cooldown_on_damage"), 15),
 
-    @Deprecated
+    @Deprecated(forRemoval = true)
     ACTION_ITEM(ConfigNode.create().append("action_item"), "", true),
-    SKILL_ITEM(ConfigNode.create().append("skill_item"), "minecraft:feather"),
+
+    @Deprecated(forRemoval = true, since = "1.3.0")
+    SKILL_ITEM(ConfigNode.create().append("skill_item"), "", true),
+
+    //@Deprecated(forRemoval = true)
+    //SKILL_ITEM_USE_COMPONENT(ConfigNode.create().append("skill_item_use_component_detection"), true, true),
 
     ARMORSTAND_SHOW_ARMS(ConfigNode.create().append("armorstand_show_arms"), true),
 
     MODIFY_BOUNDING_BOX(boundingBoxNode().append("modify_boxes"), false),
     CHECK_AVAILABLE_SPACE(boundingBoxNode().append("check_space"), true),
 
-    @Deprecated
+    @Deprecated(forRemoval = true)
     MODIFY_BOUNDING_BOX_LEGACY(ConfigNode.create().append("modify_bounding_boxes"), false, true),
 
     UNMORPH_ON_DEATH(ConfigNode.create().append("unmorph_on_death"), true),
@@ -70,7 +76,7 @@ public enum ConfigOption
     FLYABILITY_DISALLOW_FLY_IN_WATER(flyAbilityNode().append("disallow_in_water"), new ArrayList<String>()),
     FLYABILITY_DISALLOW_FLY_IN_LAVA(flyAbilityNode().append("disallow_in_lava"), new ArrayList<String>()),
 
-    @Deprecated(since = "1.2.2")
+    @Deprecated(since = "1.2.2", forRemoval = true)
     FLYABILITY_NO_LIQUID(flyAbilityNode().append("no_fly_in_liquid"), true, true),
 
     LANGUAGE_CODE(languageNode().append("code"), "en_us"),
@@ -112,10 +118,13 @@ public enum ConfigOption
 
     GUI_PATTERN(ConfigNode.create().append("gui_pattern"), new ArrayList<String>()),
 
+    //ANIM_SELECT_PATTERN(ConfigNode.create().append("anim_select_pattern"), new ArrayList<String>()),
+
     HIDE_DISGUISED_PLAYERS_IN_TAB(ConfigNode.create().append("hide_disguised_players_in_tab"), false),
 
     // SRR -> ServerRenderer
     SR_SHOW_PLAYER_DISGUISES_IN_TAB(serverRendererNode().append("show_player_disguises_in_tab"), false),
+
 
     VERSION(ConfigNode.create().append("version"), 0);
 

@@ -100,6 +100,7 @@ public class PlayerMeta
     public boolean shownDisplayToSelfHint = false;
 
     @Expose
+    @Deprecated(forRemoval = true)
     public boolean shownServerSkillHint;
 
     @Expose

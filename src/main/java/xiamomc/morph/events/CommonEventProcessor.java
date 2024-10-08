@@ -2,9 +2,8 @@ package xiamomc.morph.events;
 
 import com.destroystokyo.paper.event.player.PlayerClientOptionsChangeEvent;
 import com.destroystokyo.paper.event.player.PlayerPostRespawnEvent;
+import de.themoep.inventorygui.InventoryGui;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.kyori.adventure.key.Key;
-import net.kyori.adventure.sound.Sound;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
@@ -16,8 +15,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.player.*;
-import org.bukkit.inventory.EquipmentSlot;
-import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.inventory.*;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.RevealingHandler;
@@ -28,11 +26,11 @@ import xiamomc.morph.events.api.gameplay.PlayerJoinedWithDisguiseEvent;
 import xiamomc.morph.messages.HintStrings;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.MorphStrings;
-import xiamomc.morph.messages.SkillStrings;
 import xiamomc.morph.messages.vanilla.VanillaMessageStore;
 import xiamomc.morph.misc.DisguiseTypes;
-import xiamomc.morph.misc.NetworkingHelper;
 import xiamomc.morph.misc.OfflineDisguiseResult;
+import xiamomc.morph.misc.gui.AnimSelectScreenWrapper;
+import xiamomc.morph.misc.gui.DisguiseSelectScreenWrapper;
 import xiamomc.morph.misc.playerList.PlayerListHandler;
 import xiamomc.morph.misc.permissions.CommonPermissions;
 import xiamomc.morph.network.commands.S2C.S2CSwapCommand;
@@ -41,6 +39,7 @@ import xiamomc.morph.network.server.MorphClientHandler;
 import xiamomc.morph.network.server.ServerSetEquipCommand;
 import xiamomc.morph.skills.MorphSkillHandler;
 import xiamomc.morph.utilities.EntityTypeUtils;
+import xiamomc.morph.utilities.ItemUtils;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
@@ -67,10 +66,34 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
     @Resolved(shouldSolveImmediately = true)
     private RevealingHandler revealingHandler;
 
-    @Resolved(shouldSolveImmediately = true)
-    private NetworkingHelper networkingHelper;
-
     private Bindable<Boolean> unMorphOnDeath;
+
+    private final Bindable<Boolean> doRevealing = new Bindable<>(true);
+
+    private final Bindable<Boolean> allowAcquireMorphs = new Bindable<>(false);
+
+    @Initializer
+    private void load()
+    {
+        config.bind(cooldownOnDamage, ConfigOption.SKILL_COOLDOWN_ON_DAMAGE);
+        config.bind(bruteIgnoreDisguises, ConfigOption.PIGLIN_BRUTE_IGNORE_DISGUISES);
+        config.bind(doRevealing, ConfigOption.REVEALING);
+        config.bind(allowAcquireMorphs, ConfigOption.ALLOW_ACQUIRE_MORPHS);
+
+        unMorphOnDeath = config.getBindable(Boolean.class, ConfigOption.UNMORPH_ON_DEATH);
+        this.addSchedule(this::update);
+    }
+
+    private void update()
+    {
+        this.addSchedule(this::update);
+
+        if (plugin.getCurrentTick() % 8 == 0)
+        {
+            playersMinedGoldBlocks.clear();
+            susIncreasedPlayers.clear();
+        }
+    }
 
     @EventHandler
     public void onEntityDeath(EntityDeathEvent e)
@@ -142,33 +165,6 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         }
     }
 
-    private final Bindable<Boolean> doRevealing = new Bindable<>(true);
-
-    private final Bindable<Boolean> allowAcquireMorphs = new Bindable<>(false);
-
-    @Initializer
-    private void load()
-    {
-        config.bind(cooldownOnDamage, ConfigOption.SKILL_COOLDOWN_ON_DAMAGE);
-        config.bind(bruteIgnoreDisguises, ConfigOption.PIGLIN_BRUTE_IGNORE_DISGUISES);
-        config.bind(doRevealing, ConfigOption.REVEALING);
-        config.bind(allowAcquireMorphs, ConfigOption.ALLOW_ACQUIRE_MORPHS);
-
-        unMorphOnDeath = config.getBindable(Boolean.class, ConfigOption.UNMORPH_ON_DEATH);
-        this.addSchedule(this::update);
-    }
-
-    private void update()
-    {
-        this.addSchedule(this::update);
-
-        if (plugin.getCurrentTick() % 8 == 0)
-        {
-            playersMinedGoldBlocks.clear();
-            susIncreasedPlayers.clear();
-        }
-    }
-
     @EventHandler
     public void onPlayerInteractAtEntity(PlayerInteractAtEntityEvent e)
     {
@@ -197,7 +193,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
 
         //workaround: 右键盔甲架不会触发事件、盔甲架是InteractAtEntityEvent
         if (e.getRightClicked() instanceof ArmorStand)
-            e.setCancelled(tryInvokeSkillOrQuickDisguise(e.getPlayer(), Action.RIGHT_CLICK_AIR, e.getHand()) || e.isCancelled());
+            e.setCancelled(invokeOrDisguise(e.getPlayer(), Action.RIGHT_CLICK_AIR, e.getHand()) || e.isCancelled());
     }
 
     @EventHandler
@@ -205,14 +201,27 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
     {
         //workaround: 右键继承了InventoryHolder的实体会打开他们的物品栏而不是使用技能
         if (e.getRightClicked() instanceof InventoryHolder && e.getRightClicked().getType() != EntityType.PLAYER)
-            e.setCancelled(tryInvokeSkillOrQuickDisguise(e.getPlayer(), Action.RIGHT_CLICK_AIR, e.getHand()) || e.isCancelled());
+            e.setCancelled(invokeOrDisguise(e.getPlayer(), Action.RIGHT_CLICK_AIR, e.getHand()) || e.isCancelled());
     }
 
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent e)
     {
-        if (tryInvokeSkillOrQuickDisguise(e.getPlayer(), e.getAction(), e.getHand()))
+        if (invokeOrDisguise(e.getPlayer(), e.getAction(), e.getHand()))
             e.setCancelled(true);
+    }
+
+    @EventHandler
+    public void onEntityHurtEntity(EntityDamageByEntityEvent event)
+    {
+        if (event.getCause() != EntityDamageEvent.DamageCause.ENTITY_ATTACK)
+            return;
+
+        if (event.getDamager() instanceof Player player
+                && invokeOrDisguise(player, Action.LEFT_CLICK_AIR, EquipmentSlot.HAND))
+        {
+            event.setCancelled(true);
+        }
     }
 
     /**
@@ -221,50 +230,68 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
      * @param action 动作
      * @return 是否应该取消Interact事件
      */
-    private boolean tryInvokeSkillOrQuickDisguise(Player player, Action action, EquipmentSlot slot)
+    private boolean invokeOrDisguise(Player player, Action action, EquipmentSlot slot)
     {
-        var actionItem = morphs.getActionItem();
-        if (slot != EquipmentSlot.HAND || actionItem == null) return false;
-
-        var state = morphs.getDisguiseStateFor(player);
         var mainHandItem = player.getEquipment().getItemInMainHand();
-        var mainHandItemType = mainHandItem.getType();
+        if (mainHandItem.getType().isAir())
+            return false;
 
-        if (mainHandItemType.isAir() || !player.isSneaking()) return false;
+        var disguiseState = morphs.getDisguiseStateFor(player);
 
-        //右键玩家头颅：快速伪装
-        if (!action.equals(Action.RIGHT_CLICK_BLOCK) && !action.isLeftClick() && morphs.doQuickDisguise(player, false))
-            return true;
-
-        if (mainHandItemType != actionItem || state == null) return false;
-
-        //激活技能或取消伪装
-        if (action.isLeftClick())
+        // 因为快速伪装功能包含了玩家头颅，所以我们没有在上面检查物品是否为技能触发物品。
+        if (player.isSneaking())
         {
-            if (player.getEyeLocation().getDirection().getY() <= -0.95)
+            if (action.isRightClick()) // 下蹲+右键：快速伪装、打开伪装菜单
+            {
+                // 不要妨碍别人放置头颅
+                if (mainHandItem.getType() == Material.PLAYER_HEAD && action == Action.RIGHT_CLICK_BLOCK)
+                    return false;
+
+                if (!morphs.doQuickDisguise(player, true)
+                        && ItemUtils.isSkillActivateItem(mainHandItem))
+                {
+                    if (InventoryGui.getOpen(player) == null)
+                    {
+                        var guiScreen = new DisguiseSelectScreenWrapper(player, 0);
+                        guiScreen.show();
+                    }
+
+                    return true;
+                }
+
+                return false;
+            }
+            else // 下蹲+左键：取消伪装
+            {
+                if (!ItemUtils.isSkillActivateItem(mainHandItem) || disguiseState == null)
+                    return false;
+
                 morphs.unMorph(player);
-            else
-                morphs.setSelfDisguiseVisible(player, !state.isSelfViewing(), true);
-
-            return true;
-        }
-
-        if (state.getSkillCooldown() <= 0)
-        {
-            morphs.executeDisguiseSkill(player);
+            }
         }
         else
         {
-            //一段时间内内只接受一次右键触发
-            //传送前后会触发两次Interact，而且这两个Interact还不一定在同个Tick里
-            if (plugin.getCurrentTick() - skillHandler.getLastInvoke(player) <= 1)
-                return true;
+            if (!ItemUtils.isSkillActivateItem(mainHandItem) || disguiseState == null)
+                return false;
 
-            player.sendMessage(MessageUtils.prefixes(player,
-                    SkillStrings.skillPreparing().resolve("time", state.getSkillCooldown() / 20 + "")));
+            if (action.isRightClick()) // 站立+右键：技能
+            {
+                if (disguiseState.getSkillCooldown() < 0)
+                    morphs.executeDisguiseSkill(player);
+            }
+            else // 站立+左键：伪装动作
+            {
+                if (InventoryGui.getOpen(player) == null)
+                {
+                    var availableAnimations = disguiseState.getProvider()
+                            .getAnimationProvider()
+                            .getAnimationSetFor(disguiseState.getDisguiseIdentifier())
+                            .getAvailableAnimationsForClient();
 
-            player.playSound(Sound.sound(Key.key("minecraft", "entity.villager.no"),
-                    Sound.Source.PLAYER, 1f, 1f));
+                    var guiScreen = new AnimSelectScreenWrapper(disguiseState, availableAnimations);
+                    guiScreen.show();
+                }
+            }
         }
 
         return true;
