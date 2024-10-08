@@ -242,6 +242,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         config.bind(allowAcquireMorph, ConfigOption.ALLOW_ACQUIRE_MORPHS);
         config.bind(useClientRenderer, ConfigOption.USE_CLIENT_RENDERER);
         config.bind(hideDisguisedPlayers, ConfigOption.HIDE_DISGUISED_PLAYERS_IN_TAB);
+        config.bind(useItemComponentOnSkillItems, ConfigOption.SKILL_ITEM_USE_COMPONENT);
 
         registerProviders(ObjectList.of(
                 new VanillaDisguiseProvider(),
@@ -453,6 +454,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     private final Bindable<Boolean> useClientRenderer = new Bindable<>(false);
 
     private final Bindable<Boolean> hideDisguisedPlayers = new Bindable<>(false);
+
+    private final Bindable<Boolean> useItemComponentOnSkillItems = new Bindable<>(true);
 
     private final Map<UUID, PlayerTextures> uuidPlayerTexturesMap = new ConcurrentHashMap<>();
 
@@ -1106,7 +1109,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         }
         else
         {
-            if (!playerOptions.shownServerSkillHint && actionItem != null)
+            if (!playerOptions.shownServerSkillHint && actionItem != null && !useItemComponentOnSkillItems.get())
             {
                 var locale = MessageUtils.getLocale(player);
                 var skillHintMessage = HintStrings.skillString()
