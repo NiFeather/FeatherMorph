@@ -158,7 +158,7 @@ public class RecipeManager extends MorphPluginObject
         }
 
         Bukkit.removeRecipe(key);
-        Bukkit.addRecipe(recipe);
+        Bukkit.addRecipe(recipe, true);
     }
 
     private void test_dumpExsampleConfig()
