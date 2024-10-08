@@ -3,6 +3,7 @@ package xiamomc.morph.misc.recipe;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.pluginbase.Bindables.Bindable;
 import xiamomc.pluginbase.Configuration.ConfigOption;
@@ -79,6 +80,23 @@ public abstract class StandaloneYamlConfigManager extends MorphPluginObject
     public <T> T get(ConfigOption<T> option)
     {
         return getOrDefault(option, null);
+    }
+
+    @Nullable
+    public Map<String, String> getMap(ConfigOption<?> option)
+    {
+        var node = option.toString();
+
+        var configSection = backendConfiguration.getConfigurationSection(node);
+
+        if (configSection == null)
+            return null;
+
+        Map<String, String> map = new Object2ObjectOpenHashMap<>();
+
+        configSection.getKeys(false).forEach(key -> map.put(key, configSection.getString(key)));
+
+        return map;
     }
 
     /**

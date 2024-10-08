@@ -2,6 +2,7 @@ package xiamomc.morph.events;
 
 import com.destroystokyo.paper.event.player.PlayerClientOptionsChangeEvent;
 import com.destroystokyo.paper.event.player.PlayerPostRespawnEvent;
+import de.themoep.inventorygui.InventoryGui;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -249,10 +250,16 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
                 if (!morphs.doQuickDisguise(player, true)
                         && ItemUtils.isSkillActivateItem(mainHandItem))
                 {
-                    var guiScreen = new DisguiseSelectScreenWrapper(player, 0);
-                    guiScreen.show();
+                    if (InventoryGui.getOpen(player) == null)
+                    {
+                        var guiScreen = new DisguiseSelectScreenWrapper(player, 0);
+                        guiScreen.show();
+                    }
+
                     return true;
                 }
+
+                return false;
             }
             else // 下蹲+左键：取消伪装
             {
@@ -274,13 +281,16 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
             }
             else // 站立+左键：伪装动作
             {
-                var availableAnimations = disguiseState.getProvider()
-                        .getAnimationProvider()
-                        .getAnimationSetFor(disguiseState.getDisguiseIdentifier())
-                        .getAvailableAnimationsForClient();
+                if (InventoryGui.getOpen(player) == null)
+                {
+                    var availableAnimations = disguiseState.getProvider()
+                            .getAnimationProvider()
+                            .getAnimationSetFor(disguiseState.getDisguiseIdentifier())
+                            .getAvailableAnimationsForClient();
 
-                var guiScreen = new AnimSelectScreenWrapper(disguiseState, availableAnimations);
-                guiScreen.show();
+                    var guiScreen = new AnimSelectScreenWrapper(disguiseState, availableAnimations);
+                    guiScreen.show();
+                }
             }
         }
 
