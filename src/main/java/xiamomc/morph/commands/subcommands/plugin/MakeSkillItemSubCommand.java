@@ -19,19 +19,19 @@ public class MakeSkillItemSubCommand extends MorphPluginObject implements ISubCo
     @Override
     public @NotNull String getCommandName()
     {
-        return "make_skill_item";
+        return "make_disguise_tool";
     }
 
     @Override
     public @Nullable String getPermissionRequirement()
     {
-        return CommonPermissions.MAKE_SKILL_ITEM;
+        return CommonPermissions.MAKE_DISGUISE_TOOL;
     }
 
     @Override
     public FormattableMessage getHelpMessage()
     {
-        return new FormattableMessage(plugin, "make selected a skill item");
+        return new FormattableMessage(plugin, "make selected a disguise tool");
     }
 
     private final List<String> emptyList = List.of();

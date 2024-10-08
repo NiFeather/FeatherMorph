@@ -30,7 +30,7 @@ public class CommonPermissions
 
     public final static String ACCESS_SKIN_CACHE = PERM_ROOT + "skin_cache";
 
-    public final static String MAKE_SKILL_ITEM = PERM_ROOT + "make_skill_item";
+    public final static String MAKE_DISGUISE_TOOL = PERM_ROOT + "make_disguise_tool";
 
     public final static String SET_BACKEND = PERM_ROOT + "switch_backend";
 

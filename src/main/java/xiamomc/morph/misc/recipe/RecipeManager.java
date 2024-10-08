@@ -19,7 +19,6 @@ import xiamomc.morph.utilities.PluginAssetUtils;
 import xiamomc.pluginbase.Annotations.Initializer;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -69,14 +68,14 @@ public class RecipeManager extends MorphPluginObject
 
     private void readValuesFromConfig(YamlConfiguration config)
     {
-        allowCrafting = config.getBoolean(RecipeOptions.ALLOW_SKILL_ITEM_CRAFTING.toString(), false);
-        unShaped = config.getBoolean(RecipeOptions.SKILL_ITEM_CRAFTING_UNSHAPED.toString(), false);
-        shape = config.getStringList(RecipeOptions.SKILL_ITEM_CRAFTING_SHAPE.toString());
-        resultMaterialId = config.getString(RecipeOptions.SKILL_ITEM_RESULT_MATERIAL.toString(), "~UNSET");
-        resultName = config.getString(RecipeOptions.SKILL_ITEM_RESULT_NAME.toString(), "~UNSET");
-        resultLore = config.getStringList(RecipeOptions.SKILL_ITEM_RESULT_LORE.toString());
+        allowCrafting = config.getBoolean(RecipeOptions.ALLOW_DISGUISE_TOOL_CRAFTING.toString(), false);
+        unShaped = config.getBoolean(RecipeOptions.DISGUISE_TOOL_CRAFTING_UNSHAPED.toString(), false);
+        shape = config.getStringList(RecipeOptions.DISGUISE_TOOL_CRAFTING_SHAPE.toString());
+        resultMaterialId = config.getString(RecipeOptions.DISGUISE_TOOL_RESULT_MATERIAL.toString(), "~UNSET");
+        resultName = config.getString(RecipeOptions.DISGUISE_TOOL_RESULT_NAME.toString(), "~UNSET");
+        resultLore = config.getStringList(RecipeOptions.DISGUISE_TOOL_RESULT_LORE.toString());
 
-        var materialSection = config.getConfigurationSection(RecipeOptions.SKILL_ITEM_CRAFTING_MATERIALS.toString());
+        var materialSection = config.getConfigurationSection(RecipeOptions.DISGUISE_TOOL_CRAFTING_MATERIALS.toString());
 
         if (materialSection != null)
         {
@@ -132,7 +131,7 @@ public class RecipeManager extends MorphPluginObject
     }
 
     @NotNull
-    public static final NamespacedKey SKILLITEM_CRAFTING_KEY = NamespacedKey.fromString("feathermorph:skill_item_crafting");
+    public static final NamespacedKey SKILLITEM_CRAFTING_KEY = NamespacedKey.fromString("feathermorph:disguise_tool_crafting");
 
     private void prepareRecipe()
     {
@@ -249,16 +248,16 @@ public class RecipeManager extends MorphPluginObject
             return;
         }
 
-        yamlConfiguration.set(RecipeOptions.ALLOW_SKILL_ITEM_CRAFTING.toString(), allowCrafting);
-        yamlConfiguration.set(RecipeOptions.SKILL_ITEM_CRAFTING_UNSHAPED.toString(), this.unShaped);
-        yamlConfiguration.set(RecipeOptions.SKILL_ITEM_CRAFTING_SHAPE.toString(), this.shape);
-        yamlConfiguration.set(RecipeOptions.SKILL_ITEM_RESULT_MATERIAL.toString(), this.resultMaterialId);
-        yamlConfiguration.set(RecipeOptions.SKILL_ITEM_RESULT_NAME.toString(), this.resultName);
-        yamlConfiguration.set(RecipeOptions.SKILL_ITEM_RESULT_LORE.toString(), this.resultLore);
+        yamlConfiguration.set(RecipeOptions.ALLOW_DISGUISE_TOOL_CRAFTING.toString(), allowCrafting);
+        yamlConfiguration.set(RecipeOptions.DISGUISE_TOOL_CRAFTING_UNSHAPED.toString(), this.unShaped);
+        yamlConfiguration.set(RecipeOptions.DISGUISE_TOOL_CRAFTING_SHAPE.toString(), this.shape);
+        yamlConfiguration.set(RecipeOptions.DISGUISE_TOOL_RESULT_MATERIAL.toString(), this.resultMaterialId);
+        yamlConfiguration.set(RecipeOptions.DISGUISE_TOOL_RESULT_NAME.toString(), this.resultName);
+        yamlConfiguration.set(RecipeOptions.DISGUISE_TOOL_RESULT_LORE.toString(), this.resultLore);
 
         this.materials.forEach((str, id) ->
         {
-            var node = RecipeOptions.SKILL_ITEM_CRAFTING_MATERIALS.toString() + "." + str;
+            var node = RecipeOptions.DISGUISE_TOOL_CRAFTING_MATERIALS.toString() + "." + str;
             yamlConfiguration.set(node, id);
         });
 

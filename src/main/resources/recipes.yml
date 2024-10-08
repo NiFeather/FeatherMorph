@@ -1,8 +1,8 @@
 root:
   # Item crafting options
   item_crafting:
-    # Options for the Skill Item
-    skill_item:
+    # Options for the Disguise Tool
+    disguise_tool:
       enabled: true
 
       # Should this recipe shapeless?
@@ -36,3 +36,4 @@ root:
       crafting_materials:
         A: minecraft:feather
         B: minecraft:redstone
+  version: 1

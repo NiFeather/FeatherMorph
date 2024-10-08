@@ -76,7 +76,7 @@ public class ItemUtils
         }
     }
 
-    public static final String SKILL_ACTIVATE_ITEM_KEY = "feathermorph:is_skill_item";
+    public static final String SKILL_ACTIVATE_ITEM_KEY = "feathermorph:is_disguise_tool";
 
     public static ItemStack buildSkillItemFrom(ItemStack stack)
     {
