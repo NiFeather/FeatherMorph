@@ -7,6 +7,7 @@ import xiamomc.morph.utilities.NbtUtils;
 import xiamomc.pluginbase.Configuration.ConfigNode;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public enum ConfigOption
 {
@@ -123,6 +124,7 @@ public enum ConfigOption
 
     // SRR -> ServerRenderer
     SR_SHOW_PLAYER_DISGUISES_IN_TAB(serverRendererNode().append("show_player_disguises_in_tab"), false),
+
 
     VERSION(ConfigNode.create().append("version"), 0);
 

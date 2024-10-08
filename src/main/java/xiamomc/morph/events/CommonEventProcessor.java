@@ -3,8 +3,6 @@ package xiamomc.morph.events;
 import com.destroystokyo.paper.event.player.PlayerClientOptionsChangeEvent;
 import com.destroystokyo.paper.event.player.PlayerPostRespawnEvent;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.kyori.adventure.key.Key;
-import net.kyori.adventure.sound.Sound;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
@@ -16,10 +14,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.player.*;
-import org.bukkit.inventory.EquipmentSlot;
-import org.bukkit.inventory.InventoryHolder;
-import org.bukkit.inventory.ItemStack;
-import org.checkerframework.checker.units.qual.A;
+import org.bukkit.inventory.*;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.RevealingHandler;
@@ -30,7 +25,6 @@ import xiamomc.morph.events.api.gameplay.PlayerJoinedWithDisguiseEvent;
 import xiamomc.morph.messages.HintStrings;
 import xiamomc.morph.messages.MessageUtils;
 import xiamomc.morph.messages.MorphStrings;
-import xiamomc.morph.messages.SkillStrings;
 import xiamomc.morph.messages.vanilla.VanillaMessageStore;
 import xiamomc.morph.misc.DisguiseTypes;
 import xiamomc.morph.misc.OfflineDisguiseResult;
@@ -72,6 +66,33 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
     private RevealingHandler revealingHandler;
 
     private Bindable<Boolean> unMorphOnDeath;
+
+    private final Bindable<Boolean> doRevealing = new Bindable<>(true);
+
+    private final Bindable<Boolean> allowAcquireMorphs = new Bindable<>(false);
+
+    @Initializer
+    private void load()
+    {
+        config.bind(cooldownOnDamage, ConfigOption.SKILL_COOLDOWN_ON_DAMAGE);
+        config.bind(bruteIgnoreDisguises, ConfigOption.PIGLIN_BRUTE_IGNORE_DISGUISES);
+        config.bind(doRevealing, ConfigOption.REVEALING);
+        config.bind(allowAcquireMorphs, ConfigOption.ALLOW_ACQUIRE_MORPHS);
+
+        unMorphOnDeath = config.getBindable(Boolean.class, ConfigOption.UNMORPH_ON_DEATH);
+        this.addSchedule(this::update);
+    }
+
+    private void update()
+    {
+        this.addSchedule(this::update);
+
+        if (plugin.getCurrentTick() % 8 == 0)
+        {
+            playersMinedGoldBlocks.clear();
+            susIncreasedPlayers.clear();
+        }
+    }
 
     @EventHandler
     public void onEntityDeath(EntityDeathEvent e)
@@ -140,33 +161,6 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
                 if (e.getDamage() > 0d)
                     state.setSkillCooldown(Math.max(state.getSkillCooldown(), cooldownOnDamage.get()), true);
             }
-        }
-    }
-
-    private final Bindable<Boolean> doRevealing = new Bindable<>(true);
-
-    private final Bindable<Boolean> allowAcquireMorphs = new Bindable<>(false);
-
-    @Initializer
-    private void load()
-    {
-        config.bind(cooldownOnDamage, ConfigOption.SKILL_COOLDOWN_ON_DAMAGE);
-        config.bind(bruteIgnoreDisguises, ConfigOption.PIGLIN_BRUTE_IGNORE_DISGUISES);
-        config.bind(doRevealing, ConfigOption.REVEALING);
-        config.bind(allowAcquireMorphs, ConfigOption.ALLOW_ACQUIRE_MORPHS);
-
-        unMorphOnDeath = config.getBindable(Boolean.class, ConfigOption.UNMORPH_ON_DEATH);
-        this.addSchedule(this::update);
-    }
-
-    private void update()
-    {
-        this.addSchedule(this::update);
-
-        if (plugin.getCurrentTick() % 8 == 0)
-        {
-            playersMinedGoldBlocks.clear();
-            susIncreasedPlayers.clear();
         }
     }
 
