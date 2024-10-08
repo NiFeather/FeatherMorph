@@ -19,6 +19,7 @@ import org.bukkit.event.player.*;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
+import org.checkerframework.checker.units.qual.A;
 import xiamomc.morph.MorphManager;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.RevealingHandler;
@@ -33,6 +34,8 @@ import xiamomc.morph.messages.SkillStrings;
 import xiamomc.morph.messages.vanilla.VanillaMessageStore;
 import xiamomc.morph.misc.DisguiseTypes;
 import xiamomc.morph.misc.OfflineDisguiseResult;
+import xiamomc.morph.misc.gui.AnimSelectScreenWrapper;
+import xiamomc.morph.misc.gui.DisguiseSelectScreenWrapper;
 import xiamomc.morph.misc.playerList.PlayerListHandler;
 import xiamomc.morph.misc.permissions.CommonPermissions;
 import xiamomc.morph.network.commands.S2C.S2CSwapCommand;
@@ -216,17 +219,18 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
             e.setCancelled(true);
     }
 
-    /**
-     *
-     * @param actionItemType The type of the action item.
-     * @param item The item to check
-     */
-    private boolean isItemASkillItem(Material actionItemType, ItemStack item)
+    @EventHandler
+    public void onEntityHurtEntity(EntityDamageByEntityEvent event)
     {
-        if (useNewSkillItemMethod.get())
-            return ItemUtils.isSkillActivateItem(item);
-        else
-            return item.getType() == actionItemType;
+        if (event.getCause() != EntityDamageEvent.DamageCause.ENTITY_ATTACK)
+            return;
+
+        if (useNewSkillItemMethod.get()
+                && event.getDamager() instanceof Player player
+                && tryInvokeSkillOrQuickDisguise(player, Action.LEFT_CLICK_AIR, EquipmentSlot.HAND))
+        {
+            event.setCancelled(true);
+        }
     }
 
     /**
@@ -237,6 +241,72 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
      */
     private boolean tryInvokeSkillOrQuickDisguise(Player player, Action action, EquipmentSlot slot)
     {
+        if (useNewSkillItemMethod.get())
+            return invokeOrDisguise(player, action, slot);
+        else
+            return invokeOrDisguiseLegacy(player, action, slot);
+    }
+
+    private boolean invokeOrDisguise(Player player, Action action, EquipmentSlot slot)
+    {
+        var mainHandItem = player.getEquipment().getItemInMainHand();
+        if (mainHandItem.getType().isAir())
+            return false;
+
+        var disguiseState = morphs.getDisguiseStateFor(player);
+
+        // 因为快速伪装功能包含了玩家头颅，所以我们没有在上面检查物品是否为技能触发物品。
+        if (player.isSneaking())
+        {
+            if (action.isRightClick()) // 下蹲+右键：快速伪装、打开伪装菜单
+            {
+                // 不要妨碍别人放置头颅
+                if (mainHandItem.getType() == Material.PLAYER_HEAD && action == Action.RIGHT_CLICK_BLOCK)
+                    return false;
+
+                if (!morphs.doQuickDisguise(player, true)
+                        && ItemUtils.isSkillActivateItem(mainHandItem))
+                {
+                    var guiScreen = new DisguiseSelectScreenWrapper(player, 0);
+                    guiScreen.show();
+                    return true;
+                }
+            }
+            else // 下蹲+左键：取消伪装
+            {
+                if (!ItemUtils.isSkillActivateItem(mainHandItem) || disguiseState == null)
+                    return false;
+
+                morphs.unMorph(player);
+            }
+        }
+        else
+        {
+            if (!ItemUtils.isSkillActivateItem(mainHandItem) || disguiseState == null)
+                return false;
+
+            if (action.isRightClick()) // 站立+右键：技能
+            {
+                if (disguiseState.getSkillCooldown() < 0)
+                    morphs.executeDisguiseSkill(player);
+            }
+            else // 站立+左键：伪装动作
+            {
+                var availableAnimations = disguiseState.getProvider()
+                        .getAnimationProvider()
+                        .getAnimationSetFor(disguiseState.getDisguiseIdentifier())
+                        .getAvailableAnimationsForClient();
+
+                var guiScreen = new AnimSelectScreenWrapper(disguiseState, availableAnimations);
+                guiScreen.show();
+            }
+        }
+
+        return true;
+    }
+
+    private boolean invokeOrDisguiseLegacy(Player player, Action action, EquipmentSlot slot)
+    {
         var actionItem = morphs.getActionItem();
         if (slot != EquipmentSlot.HAND || actionItem == null) return false;
 
@@ -244,26 +314,35 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         var mainHandItem = player.getEquipment().getItemInMainHand();
         var mainHandItemType = mainHandItem.getType();
 
-        if (mainHandItemType.isAir() || (useNewSkillItemMethod.get() ? false : !player.isSneaking())) return false;
+        if (mainHandItemType.isAir() || !player.isSneaking()) return false;
 
         //右键玩家头颅：快速伪装
         if (!action.equals(Action.RIGHT_CLICK_BLOCK)
                 && action.isRightClick()
-                && player.isSneaking()
                 && morphs.doQuickDisguise(player, false))
         {
             return true;
         }
 
-        if (!isItemASkillItem(actionItem, mainHandItem) || state == null) return false;
+        if (mainHandItemType != actionItem || state == null) return false;
 
         //激活技能或取消伪装
         if (action.isLeftClick())
         {
             if (player.getEyeLocation().getDirection().getY() <= -0.95)
+            {
                 morphs.unMorph(player);
+            }
             else
-                morphs.setSelfDisguiseVisible(player, !state.isSelfViewing(), true);
+            {
+                var availableAnimations = state.getProvider()
+                        .getAnimationProvider()
+                        .getAnimationSetFor(state.getDisguiseIdentifier())
+                        .getAvailableAnimationsForClient();
+
+                var guiScreen = new AnimSelectScreenWrapper(state, availableAnimations);
+                guiScreen.show();
+            }
 
             return true;
         }
