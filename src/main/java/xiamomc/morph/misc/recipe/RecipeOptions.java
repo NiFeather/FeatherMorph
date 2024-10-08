@@ -17,7 +17,6 @@ public class RecipeOptions
     public static final ConfigOption<String> DISGUISE_TOOL_RESULT_MATERIAL = new ConfigOption<>(skillItemNode().append("result_material"), "minecraft:feather");
     public static final ConfigOption<String> DISGUISE_TOOL_RESULT_NAME = new ConfigOption<>(skillItemNode().append("result_item_name"), "~UNSET");
     public static final ConfigOption<List<String>> DISGUISE_TOOL_RESULT_LORE = new ConfigOption<>(skillItemNode().append("result_item_lore"), new ArrayList<>());
-    public static final ConfigOption<Integer> CONFIG_VERSION = new ConfigOption<>(ConfigNode.create().append("version"), 0);
 
     private static ConfigNode craftingNode()
     {

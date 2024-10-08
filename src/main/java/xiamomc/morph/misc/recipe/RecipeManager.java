@@ -1,6 +1,5 @@
 package xiamomc.morph.misc.recipe;
 
-import com.google.common.base.Charsets;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.kyori.adventure.text.Component;
@@ -8,14 +7,12 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphPluginObject;
 import xiamomc.morph.config.MorphConfigManager;
 import xiamomc.morph.utilities.ItemUtils;
-import xiamomc.morph.utilities.PluginAssetUtils;
 import xiamomc.pluginbase.Annotations.Initializer;
 
 import java.io.*;
@@ -25,10 +22,7 @@ import java.util.Map;
 
 public class RecipeManager extends MorphPluginObject
 {
-    @Nullable
-    private YamlConfiguration yamlConfiguration;
-
-    private final File configFile = new File(plugin.getDataFolder(), "recipes.yml");
+    private final StandaloneYamlConfigManager configManager = new RecipeYamlConfigManager(new File(plugin.getDataFolder(), "recipes.yml"), "recipes.yml");
 
     private boolean allowCrafting = false;
     private boolean unShaped = false;
@@ -38,87 +32,33 @@ public class RecipeManager extends MorphPluginObject
     private String resultName = "~UNSET";
     private List<String> resultLore = new ObjectArrayList<>();
 
-    public void reload()
-    {
-        var newConfig = new YamlConfiguration();
-
-        if (!configFile.exists())
-        {
-            if (!copyInternalRecipeResource())
-            {
-                logger.error("Can't create file to save configuration! Not reloading recipes...");
-                return;
-            }
-        }
-
-        try
-        {
-            newConfig.load(configFile);
-        }
-        catch (Throwable e)
-        {
-            logger.error("Unable to load recipe configuration: " + e.getMessage());
-            return;
-        }
-
-        this.yamlConfiguration = newConfig;
-        readValuesFromConfig(newConfig);
-        prepareRecipe();
-    }
-
-    private void readValuesFromConfig(YamlConfiguration config)
-    {
-        allowCrafting = config.getBoolean(RecipeOptions.ALLOW_DISGUISE_TOOL_CRAFTING.toString(), false);
-        unShaped = config.getBoolean(RecipeOptions.DISGUISE_TOOL_CRAFTING_UNSHAPED.toString(), false);
-        shape = config.getStringList(RecipeOptions.DISGUISE_TOOL_CRAFTING_SHAPE.toString());
-        resultMaterialId = config.getString(RecipeOptions.DISGUISE_TOOL_RESULT_MATERIAL.toString(), "~UNSET");
-        resultName = config.getString(RecipeOptions.DISGUISE_TOOL_RESULT_NAME.toString(), "~UNSET");
-        resultLore = config.getStringList(RecipeOptions.DISGUISE_TOOL_RESULT_LORE.toString());
-
-        var materialSection = config.getConfigurationSection(RecipeOptions.DISGUISE_TOOL_CRAFTING_MATERIALS.toString());
-
-        if (materialSection != null)
-        {
-            materialSection.getKeys(false).forEach(key ->
-            {
-                var value = materialSection.getString(key, "~UNSET");
-                materials.put(key, value);
-            });
-        }
-    }
-
-    private boolean copyInternalRecipeResource()
-    {
-        try
-        {
-            if (!configFile.createNewFile())
-                return false;
-
-            try (var writer = new OutputStreamWriter(new FileOutputStream(configFile), Charsets.UTF_8))
-            {
-                writer.write(PluginAssetUtils.getFileStrings("recipes.yml"));
-            }
-            catch (Throwable t)
-            {
-                logger.error("Can't write content: " + t.getMessage());
-                return false;
-            }
-
-            return true;
-        }
-        catch (Throwable t)
-        {
-            logger.error("Can't create config file: " + t.getMessage());
-        }
-
-        return true;
-    }
-
     @Initializer
     private void load(MorphConfigManager configManager)
     {
-        if (this.yamlConfiguration == null)
-            reload();
+        reload();
+    }
+
+    public void reload()
+    {
+        this.configManager.reload();
+
+        readValuesFromConfig(this.configManager);
+        prepareRecipe();
+    }
+
+    private void readValuesFromConfig(StandaloneYamlConfigManager configManager)
+    {
+        allowCrafting = configManager.getOrDefault(RecipeOptions.ALLOW_DISGUISE_TOOL_CRAFTING);
+        unShaped = configManager.getOrDefault(RecipeOptions.DISGUISE_TOOL_CRAFTING_UNSHAPED);
+        shape = configManager.getList(RecipeOptions.DISGUISE_TOOL_CRAFTING_SHAPE);
+        resultMaterialId = configManager.getOrDefault(RecipeOptions.DISGUISE_TOOL_RESULT_MATERIAL);
+        resultName = configManager.getOrDefault(RecipeOptions.DISGUISE_TOOL_RESULT_NAME);
+        resultLore = configManager.getList(RecipeOptions.DISGUISE_TOOL_RESULT_LORE);
+        var material = configManager.getMap(RecipeOptions.DISGUISE_TOOL_CRAFTING_MATERIALS);
+        this.materials.clear();
+
+        if (material != null)
+            this.materials.putAll(material);
     }
 
     @Nullable
@@ -238,36 +178,5 @@ public class RecipeManager extends MorphPluginObject
         materials = new Object2ObjectOpenHashMap<>();
         materials.put("A", Material.BEDROCK.key().asString());
         materials.put("B", Material.ACACIA_BOAT.key().asString());
-    }
-
-    private void test_saveConfig()
-    {
-        if (yamlConfiguration == null)
-        {
-            logger.error("Null config!");
-            return;
-        }
-
-        yamlConfiguration.set(RecipeOptions.ALLOW_DISGUISE_TOOL_CRAFTING.toString(), allowCrafting);
-        yamlConfiguration.set(RecipeOptions.DISGUISE_TOOL_CRAFTING_UNSHAPED.toString(), this.unShaped);
-        yamlConfiguration.set(RecipeOptions.DISGUISE_TOOL_CRAFTING_SHAPE.toString(), this.shape);
-        yamlConfiguration.set(RecipeOptions.DISGUISE_TOOL_RESULT_MATERIAL.toString(), this.resultMaterialId);
-        yamlConfiguration.set(RecipeOptions.DISGUISE_TOOL_RESULT_NAME.toString(), this.resultName);
-        yamlConfiguration.set(RecipeOptions.DISGUISE_TOOL_RESULT_LORE.toString(), this.resultLore);
-
-        this.materials.forEach((str, id) ->
-        {
-            var node = RecipeOptions.DISGUISE_TOOL_CRAFTING_MATERIALS.toString() + "." + str;
-            yamlConfiguration.set(node, id);
-        });
-
-        try
-        {
-            yamlConfiguration.save(configFile);
-        }
-        catch (IOException e)
-        {
-            throw new RuntimeException(e);
-        }
     }
 }

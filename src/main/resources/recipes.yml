@@ -36,4 +36,6 @@ root:
       crafting_materials:
         A: minecraft:feather
         B: minecraft:redstone
+
+  # Don't touch unless you know what you're doing!
   version: 1

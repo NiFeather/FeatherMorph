@@ -1,30 +1,32 @@
 package xiamomc.morph.misc.recipe;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.MorphPluginObject;
-import xiamomc.pluginbase.Bindables.Bindable;
+import xiamomc.pluginbase.Configuration.ConfigNode;
 import xiamomc.pluginbase.Configuration.ConfigOption;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.*;
 
 public abstract class StandaloneYamlConfigManager extends MorphPluginObject
 {
-    private YamlConfiguration backendConfiguration;
+    protected YamlConfiguration backendConfiguration;
 
-    private final File file;
+    @NotNull
+    protected final File configFile;
 
-    public StandaloneYamlConfigManager(File file)
+    @Nullable
+    private final String internalResourceName;
+
+    public static final ConfigOption<Integer> CONFIG_VERSION = new ConfigOption<>(ConfigNode.create().append("version"), 0);
+
+    public StandaloneYamlConfigManager(@NotNull File file, @Nullable String internalResourceName)
     {
-        this.file = file;
-
-        reload();
+        this.configFile = file;
+        this.internalResourceName = internalResourceName;
     }
 
     /**
@@ -33,11 +35,13 @@ public abstract class StandaloneYamlConfigManager extends MorphPluginObject
      */
     protected abstract boolean copyInternalResource();
 
+    protected abstract int getExpectedConfigVersion();
+
     public void reload()
     {
         var newConfig = new YamlConfiguration();
 
-        if (!file.exists())
+        if (!configFile.exists())
         {
             if (!copyInternalResource())
             {
@@ -48,7 +52,7 @@ public abstract class StandaloneYamlConfigManager extends MorphPluginObject
 
         try
         {
-            newConfig.load(file);
+            newConfig.load(configFile);
         }
         catch (Throwable e)
         {
@@ -56,32 +60,83 @@ public abstract class StandaloneYamlConfigManager extends MorphPluginObject
             return;
         }
 
+        if (this.backendConfiguration == null)
+            this.backendConfiguration = newConfig;
+
+        var configVersion = newConfig.getInt(CONFIG_VERSION.toString(), 0);
+        if (configVersion < this.getExpectedConfigVersion())
+            this.migrate(this.backendConfiguration, newConfig);
+
         this.backendConfiguration = newConfig;
     }
 
-    private final Map<String, Bindable<?>> bindableMap = new ConcurrentHashMap<>();
-
-    public <T> Bindable<T> getBindable(ConfigOption<T> option)
+    @NotNull
+    protected Map<ConfigNode, Object> getAllNotDefault(Collection<ConfigOption<?>> options)
     {
-        var cache = bindableMap.get(option.toString());
-        if (cache != null) return (Bindable<T>) cache;
+        var map = new Object2ObjectOpenHashMap<ConfigNode, Object>();
 
-        if (Map.class.isAssignableFrom(option.getDefault().getClass()))
-            throw new IllegalArgumentException("Maps cannot being used with Bindable");
+        for (var o : options)
+        {
+            Object val;
 
-        var value = this.getOrDefault(option, option.getDefault());
+            if (o.getDefault() instanceof List<?>)
+                val = getList(o);
+            else if (o.getDefault() instanceof Map<?, ?>)
+                val = getMap(o);
+            else
+                val = getOrDefault((ConfigOption<Object>) o, o.getDefault());
 
-        var bindable = new Bindable<T>(value);
-        bindableMap.put(option.toString(), bindable);
+            if (!o.getDefault().equals(val)) map.put(o.node(), val);
+        }
 
-        return bindable;
+        return map;
     }
 
+    protected abstract List<ConfigOption<?>> getAllOptions();
+
+    private void migrate(@Nullable YamlConfiguration currentConfig, YamlConfiguration newConfig)
+    {
+        var allNotDefault = this.getAllNotDefault(this.getAllOptions());
+
+        if (internalResourceName != null)
+            plugin.saveResource(internalResourceName, true);
+
+        this.onMigrate(currentConfig, newConfig, allNotDefault);
+
+        allNotDefault.forEach((node, val) ->
+        {
+            var matching = this.getAllOptions().stream().filter(option -> option.node().equals(node))
+                    .findFirst().orElse(null);
+
+            if (matching == null)
+                return;
+
+            newConfig.set(node.toString(), val);
+        });
+    }
+
+    protected void onMigrate(@Nullable YamlConfiguration currentConfig, YamlConfiguration newConfig, Map<ConfigNode, Object> nonDefaultValues)
+    {
+    }
+
+    /**
+     * @return NULL if not found
+     */
     public <T> T get(ConfigOption<T> option)
     {
         return getOrDefault(option, null);
     }
 
+    @NotNull
+    public List<String> getList(ConfigOption<?> option)
+    {
+        var node = option.toString();
+        return backendConfiguration.getStringList(node);
+    }
+
+    /**
+     * @return NULL if the given node doesn't exist in the configuration
+     */
     @Nullable
     public Map<String, String> getMap(ConfigOption<?> option)
     {
@@ -99,6 +154,11 @@ public abstract class StandaloneYamlConfigManager extends MorphPluginObject
         return map;
     }
 
+    public <T> T getOrDefault(ConfigOption<T> option)
+    {
+        return getOrDefault(option, option.getDefault());
+    }
+
     /**
      * @apiNote List classes will ALWAYS return ArrayList
      */
@@ -114,13 +174,11 @@ public abstract class StandaloneYamlConfigManager extends MorphPluginObject
         // 对列表单独处理
         if (List.class.isAssignableFrom(optionDefault.getClass()))
         {
-            var elementClass = optionDefault.getClass();
-            var newResult = backendConfiguration.getList(node, new ArrayList<>());
-            newResult.removeIf((listVal) -> {
-                return !elementClass.isInstance(listVal);
-            });
-
-            return (T) newResult;
+            throw new IllegalArgumentException("Use getList() instead.");
+        }
+        else if (Map.class.isAssignableFrom(optionDefault.getClass()))
+        {
+            throw new IllegalArgumentException("Use getMap() instead.");
         }
         else
         {
