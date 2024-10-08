@@ -73,8 +73,6 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
 
     private Bindable<Boolean> unMorphOnDeath;
 
-    private final Bindable<Boolean> useNewSkillItemMethod = new Bindable<>(true);
-
     @EventHandler
     public void onEntityDeath(EntityDeathEvent e)
     {
@@ -158,7 +156,6 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         config.bind(allowAcquireMorphs, ConfigOption.ALLOW_ACQUIRE_MORPHS);
 
         unMorphOnDeath = config.getBindable(Boolean.class, ConfigOption.UNMORPH_ON_DEATH);
-        config.bind(this.useNewSkillItemMethod, ConfigOption.SKILL_ITEM_USE_COMPONENT);
         this.addSchedule(this::update);
     }
 
@@ -201,7 +198,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
 
         //workaround: 右键盔甲架不会触发事件、盔甲架是InteractAtEntityEvent
         if (e.getRightClicked() instanceof ArmorStand)
-            e.setCancelled(tryInvokeSkillOrQuickDisguise(e.getPlayer(), Action.RIGHT_CLICK_AIR, e.getHand()) || e.isCancelled());
+            e.setCancelled(invokeOrDisguise(e.getPlayer(), Action.RIGHT_CLICK_AIR, e.getHand()) || e.isCancelled());
     }
 
     @EventHandler
@@ -209,13 +206,13 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
     {
         //workaround: 右键继承了InventoryHolder的实体会打开他们的物品栏而不是使用技能
         if (e.getRightClicked() instanceof InventoryHolder && e.getRightClicked().getType() != EntityType.PLAYER)
-            e.setCancelled(tryInvokeSkillOrQuickDisguise(e.getPlayer(), Action.RIGHT_CLICK_AIR, e.getHand()) || e.isCancelled());
+            e.setCancelled(invokeOrDisguise(e.getPlayer(), Action.RIGHT_CLICK_AIR, e.getHand()) || e.isCancelled());
     }
 
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent e)
     {
-        if (tryInvokeSkillOrQuickDisguise(e.getPlayer(), e.getAction(), e.getHand()))
+        if (invokeOrDisguise(e.getPlayer(), e.getAction(), e.getHand()))
             e.setCancelled(true);
     }
 
@@ -225,9 +222,8 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         if (event.getCause() != EntityDamageEvent.DamageCause.ENTITY_ATTACK)
             return;
 
-        if (useNewSkillItemMethod.get()
-                && event.getDamager() instanceof Player player
-                && tryInvokeSkillOrQuickDisguise(player, Action.LEFT_CLICK_AIR, EquipmentSlot.HAND))
+        if (event.getDamager() instanceof Player player
+                && invokeOrDisguise(player, Action.LEFT_CLICK_AIR, EquipmentSlot.HAND))
         {
             event.setCancelled(true);
         }
@@ -239,14 +235,6 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
      * @param action 动作
      * @return 是否应该取消Interact事件
      */
-    private boolean tryInvokeSkillOrQuickDisguise(Player player, Action action, EquipmentSlot slot)
-    {
-        if (useNewSkillItemMethod.get())
-            return invokeOrDisguise(player, action, slot);
-        else
-            return invokeOrDisguiseLegacy(player, action, slot);
-    }
-
     private boolean invokeOrDisguise(Player player, Action action, EquipmentSlot slot)
     {
         var mainHandItem = player.getEquipment().getItemInMainHand();
@@ -300,69 +288,6 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
                 var guiScreen = new AnimSelectScreenWrapper(disguiseState, availableAnimations);
                 guiScreen.show();
             }
-        }
-
-        return true;
-    }
-
-    private boolean invokeOrDisguiseLegacy(Player player, Action action, EquipmentSlot slot)
-    {
-        var actionItem = morphs.getActionItem();
-        if (slot != EquipmentSlot.HAND || actionItem == null) return false;
-
-        var state = morphs.getDisguiseStateFor(player);
-        var mainHandItem = player.getEquipment().getItemInMainHand();
-        var mainHandItemType = mainHandItem.getType();
-
-        if (mainHandItemType.isAir() || !player.isSneaking()) return false;
-
-        //右键玩家头颅：快速伪装
-        if (!action.equals(Action.RIGHT_CLICK_BLOCK)
-                && action.isRightClick()
-                && morphs.doQuickDisguise(player, false))
-        {
-            return true;
-        }
-
-        if (mainHandItemType != actionItem || state == null) return false;
-
-        //激活技能或取消伪装
-        if (action.isLeftClick())
-        {
-            if (player.getEyeLocation().getDirection().getY() <= -0.95)
-            {
-                morphs.unMorph(player);
-            }
-            else
-            {
-                var availableAnimations = state.getProvider()
-                        .getAnimationProvider()
-                        .getAnimationSetFor(state.getDisguiseIdentifier())
-                        .getAvailableAnimationsForClient();
-
-                var guiScreen = new AnimSelectScreenWrapper(state, availableAnimations);
-                guiScreen.show();
-            }
-
-            return true;
-        }
-
-        if (state.getSkillCooldown() <= 0)
-        {
-            morphs.executeDisguiseSkill(player);
-        }
-        else
-        {
-            //一段时间内内只接受一次右键触发
-            //传送前后会触发两次Interact，而且这两个Interact还不一定在同个Tick里
-            if (plugin.getCurrentTick() - skillHandler.getLastInvoke(player) <= 1)
-                return true;
-
-            player.sendMessage(MessageUtils.prefixes(player,
-                    SkillStrings.skillPreparing().resolve("time", state.getSkillCooldown() / 20 + "")));
-
-            player.playSound(Sound.sound(Key.key("minecraft", "entity.villager.no"),
-                    Sound.Source.PLAYER, 1f, 1f));
         }
 
         return true;

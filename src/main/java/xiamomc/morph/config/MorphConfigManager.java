@@ -168,7 +168,7 @@ public class MorphConfigManager extends PluginConfigManager
         });
 
         //更新配置
-        int targetVersion = 36;
+        int targetVersion = 37;
 
         var configVersion = getOrDefault(Integer.class, ConfigOption.VERSION);
 
@@ -228,11 +228,17 @@ public class MorphConfigManager extends PluginConfigManager
             if (configVersion < 15)
             {
                 //skill item
-                //noinspection deprecation
+                //noinspection removal
                 var oldSkillItem = get(String.class, ConfigOption.ACTION_ITEM);
 
+                //noinspection removal
+                this.remove(ConfigOption.ACTION_ITEM);
+
                 if (oldSkillItem != null)
+                {
+                    //noinspection removal
                     newConfig.set(ConfigOption.SKILL_ITEM.toString(), oldSkillItem);
+                }
             }
 
             // ChatOverride消息的配置从messages迁移到config.yml中
@@ -257,7 +263,11 @@ public class MorphConfigManager extends PluginConfigManager
 
             if (configVersion < 23)
             {
+                //noinspection removal
                 var val = get(Boolean.class, ConfigOption.MODIFY_BOUNDING_BOX_LEGACY);
+
+                //noinspection removal
+                this.remove(ConfigOption.MODIFY_BOUNDING_BOX_LEGACY);
 
                 if (val != null)
                     newConfig.set(ConfigOption.MODIFY_BOUNDING_BOX.toString(), val);
@@ -265,7 +275,11 @@ public class MorphConfigManager extends PluginConfigManager
 
             if (configVersion < 34)
             {
+                //noinspection removal
                 var noFlyInLiquid = getOrDefault(Boolean.class, ConfigOption.FLYABILITY_NO_LIQUID, null);
+
+                //noinspection removal
+                this.remove(ConfigOption.FLYABILITY_NO_LIQUID);
 
                 if (noFlyInLiquid != null && noFlyInLiquid)
                 {
@@ -274,6 +288,12 @@ public class MorphConfigManager extends PluginConfigManager
                     newConfig.set(ConfigOption.FLYABILITY_DISALLOW_FLY_IN_WATER.toString(), list);
                     newConfig.set(ConfigOption.FLYABILITY_DISALLOW_FLY_IN_LAVA.toString(), list);
                 }
+            }
+
+            if (configVersion < 37)
+            {
+                //noinspection removal
+                this.remove(ConfigOption.SKILL_ITEM);
             }
 
             newConfig.set(ConfigOption.VERSION.toString(), targetVersion);
@@ -290,6 +310,12 @@ public class MorphConfigManager extends PluginConfigManager
             plugin.saveConfig();
             reload();
         }
+    }
+
+    public void remove(ConfigOption option)
+    {
+        this.set(option, null);
+        this.backendConfig.set(option.node.toString(), null);
     }
 
     public <T> T get(Class<T> type, ConfigOption option)
