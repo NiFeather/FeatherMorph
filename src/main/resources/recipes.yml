@@ -1,7 +1,20 @@
+# - x - x - x - x - x - x - x - x - x - x - x - x - x - x - x - x - x -
+#
+# Please note that we only provide a very basic crafting recipe support.
+# We recommend using other recipe plugins to get more advanced management experience!
+#
+# - x - x - x - x - x - x - x - x - x - x - x - x - x - x - x - x - x -
 root:
   # Item crafting options
   item_crafting:
     # Options for the Disguise Tool
+    #
+    # PS:
+    #     You can make an item a disguise tool by executing `/fm make_disguise_tool` command
+    #     while holding it on your main hand.
+    #
+    #     You can also give yourself a disguise tool by setting its custom data:
+    #       `/give @s minecraft:feather[minecraft:custom_data={"feathermorph:is_disguise_tool": true}]`
     disguise_tool:
       enabled: true
 
