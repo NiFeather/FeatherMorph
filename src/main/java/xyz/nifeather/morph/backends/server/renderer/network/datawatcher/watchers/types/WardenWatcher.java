@@ -14,8 +14,8 @@ import xyz.nifeather.morph.backends.server.renderer.network.DisplayParameters;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.RegistryKey;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
-import xyz.nifeather.morph.misc.NmsRecord;
 import xyz.nifeather.morph.misc.AnimationNames;
+import xyz.nifeather.morph.misc.NmsRecord;
 
 public class WardenWatcher extends EHasAttackAnimationWatcher
 {

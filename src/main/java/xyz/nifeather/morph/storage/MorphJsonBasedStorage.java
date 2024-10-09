@@ -1,7 +1,7 @@
 package xyz.nifeather.morph.storage;
 
-import xyz.nifeather.morph.MorphPlugin;
 import xiamomc.pluginbase.JsonBasedStorage;
+import xyz.nifeather.morph.MorphPlugin;
 
 public abstract class MorphJsonBasedStorage<T> extends JsonBasedStorage<T, MorphPlugin>
 {

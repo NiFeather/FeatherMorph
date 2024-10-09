@@ -6,8 +6,8 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.nifeather.morph.MorphPluginObject;
 import xiamomc.pluginbase.Messages.FormattableMessage;
+import xyz.nifeather.morph.MorphPluginObject;
 
 import java.util.Collection;
 

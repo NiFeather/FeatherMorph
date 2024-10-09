@@ -2,10 +2,10 @@ package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watcher
 
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import xiamomc.pluginbase.Annotations.Resolved;
 import xyz.nifeather.morph.backends.server.renderer.network.PacketFactory;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.RegistryKey;
-import xiamomc.pluginbase.Annotations.Resolved;
 
 public class InventoryLivingWatcher extends LivingEntityWatcher
 {

@@ -24,8 +24,8 @@ import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueInde
 import xyz.nifeather.morph.backends.server.renderer.utilties.WatcherUtils;
 import xyz.nifeather.morph.misc.DisguiseEquipment;
 import xyz.nifeather.morph.misc.DisguiseState;
-import xyz.nifeather.morph.misc.playerList.PlayerListHandler;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
+import xyz.nifeather.morph.misc.playerList.PlayerListHandler;
 import xyz.nifeather.morph.utilities.NbtUtils;
 
 import java.util.Map;

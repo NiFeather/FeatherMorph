@@ -12,6 +12,7 @@ import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Wolf;
+import xiamomc.pluginbase.Exceptions.NullDependencyException;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.RegistryKey;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
@@ -19,7 +20,6 @@ import xyz.nifeather.morph.misc.AnimationNames;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 import xyz.nifeather.morph.misc.disguiseProperty.values.WolfProperties;
-import xiamomc.pluginbase.Exceptions.NullDependencyException;
 
 public class WolfWatcher extends TameableAnimalWatcher
 {

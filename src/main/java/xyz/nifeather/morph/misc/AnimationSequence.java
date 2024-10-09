@@ -5,8 +5,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import oshi.util.tuples.Pair;
 import xyz.nifeather.morph.MorphPluginObject;
-import xyz.nifeather.morph.providers.animation.SingleAnimation;
 import xyz.nifeather.morph.providers.animation.AnimationSet;
+import xyz.nifeather.morph.providers.animation.SingleAnimation;
 
 import java.util.Collections;
 import java.util.List;

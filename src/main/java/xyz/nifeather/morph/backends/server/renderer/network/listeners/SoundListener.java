@@ -11,9 +11,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import org.bukkit.entity.EntityType;
 import org.jetbrains.annotations.Nullable;
+import xiamomc.pluginbase.Annotations.Resolved;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.RenderRegistry;
 import xyz.nifeather.morph.utilities.EntityTypeUtils;
-import xiamomc.pluginbase.Annotations.Resolved;
 
 import java.util.concurrent.atomic.AtomicReference;
 

@@ -3,8 +3,8 @@ package xyz.nifeather.morph.network.multiInstance.slave;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 import org.slf4j.Logger;
-import xyz.nifeather.morph.network.multiInstance.protocol.IMasterHandler;
 import xiamomc.pluginbase.XiaMoJavaPlugin;
+import xyz.nifeather.morph.network.multiInstance.protocol.IMasterHandler;
 
 import java.net.ConnectException;
 import java.net.URI;

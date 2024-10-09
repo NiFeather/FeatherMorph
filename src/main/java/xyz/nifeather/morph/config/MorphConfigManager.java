@@ -7,15 +7,15 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import xyz.nifeather.morph.MorphPlugin;
-import xyz.nifeather.morph.messages.CommonStrings;
-import xyz.nifeather.morph.messages.MessageUtils;
 import xiamomc.pluginbase.Bindables.Bindable;
 import xiamomc.pluginbase.Bindables.BindableList;
 import xiamomc.pluginbase.Configuration.ConfigNode;
 import xiamomc.pluginbase.Configuration.PluginConfigManager;
 import xiamomc.pluginbase.Managers.DependencyManager;
 import xiamomc.pluginbase.Messages.MessageStore;
+import xyz.nifeather.morph.MorphPlugin;
+import xyz.nifeather.morph.messages.CommonStrings;
+import xyz.nifeather.morph.messages.MessageUtils;
 
 import java.util.*;
 

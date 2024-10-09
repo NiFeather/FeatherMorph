@@ -5,12 +5,12 @@ import me.neznamy.tab.shared.TAB;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import xiamomc.pluginbase.Annotations.Initializer;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.events.api.gameplay.PlayerDisguisedFromOfflineStateEvent;
 import xyz.nifeather.morph.events.api.gameplay.PlayerJoinedWithDisguiseEvent;
 import xyz.nifeather.morph.events.api.gameplay.PlayerMorphEvent;
 import xyz.nifeather.morph.events.api.gameplay.PlayerUnMorphEvent;
-import xiamomc.pluginbase.Annotations.Initializer;
 
 public class TabAdapter extends MorphPluginObject implements Listener
 {

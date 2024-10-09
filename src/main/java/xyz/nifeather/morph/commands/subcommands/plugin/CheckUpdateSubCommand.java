@@ -4,14 +4,14 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xiamomc.pluginbase.Annotations.Resolved;
+import xiamomc.pluginbase.Command.ISubCommand;
+import xiamomc.pluginbase.Messages.FormattableMessage;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.UpdateStrings;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 import xyz.nifeather.morph.updates.UpdateHandler;
-import xiamomc.pluginbase.Annotations.Resolved;
-import xiamomc.pluginbase.Command.ISubCommand;
-import xiamomc.pluginbase.Messages.FormattableMessage;
 
 public class CheckUpdateSubCommand extends MorphPluginObject implements ISubCommand
 {

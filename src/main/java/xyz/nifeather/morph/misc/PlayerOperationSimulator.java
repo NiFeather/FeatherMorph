@@ -26,11 +26,11 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
+import xiamomc.pluginbase.Annotations.Initializer;
+import xiamomc.pluginbase.Bindables.Bindable;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.config.ConfigOption;
 import xyz.nifeather.morph.config.MorphConfigManager;
-import xiamomc.pluginbase.Annotations.Initializer;
-import xiamomc.pluginbase.Bindables.Bindable;
 
 import java.util.Map;
 import java.util.Objects;

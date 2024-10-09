@@ -10,6 +10,9 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xiamomc.pluginbase.Annotations.Initializer;
+import xiamomc.pluginbase.Annotations.Resolved;
+import xiamomc.pluginbase.Exceptions.NullDependencyException;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.backends.server.renderer.network.PacketFactory;
 import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.values.AbstractValues;
@@ -18,9 +21,6 @@ import xyz.nifeather.morph.backends.server.renderer.network.registries.RegistryK
 import xyz.nifeather.morph.backends.server.renderer.network.registries.RenderRegistry;
 import xyz.nifeather.morph.backends.server.renderer.utilties.WatcherUtils;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
-import xiamomc.pluginbase.Annotations.Initializer;
-import xiamomc.pluginbase.Annotations.Resolved;
-import xiamomc.pluginbase.Exceptions.NullDependencyException;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;

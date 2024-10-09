@@ -3,17 +3,18 @@ package xyz.nifeather.morph.commands.subcommands.plugin;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
+import xiamomc.pluginbase.Annotations.Resolved;
+import xiamomc.pluginbase.Command.ISubCommand;
+import xiamomc.pluginbase.Messages.FormattableMessage;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.abilities.AbilityManager;
 import xyz.nifeather.morph.messages.HelpStrings;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.StatStrings;
+import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
 import xyz.nifeather.morph.skills.MorphSkillHandler;
-import xiamomc.pluginbase.Annotations.Resolved;
-import xiamomc.pluginbase.Command.ISubCommand;
-import xiamomc.pluginbase.Messages.FormattableMessage;
 
 public class StatSubCommand extends MorphPluginObject implements ISubCommand
 {
@@ -125,6 +126,6 @@ public class StatSubCommand extends MorphPluginObject implements ISubCommand
     @Override
     public String getPermissionRequirement()
     {
-        return "xiamomc.morph.stat";
+        return CommonPermissions.CHECK_STAT;
     }
 }

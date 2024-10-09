@@ -7,9 +7,9 @@ import com.comphenix.protocol.injector.GamePhase;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
 import org.bukkit.entity.Player;
+import xiamomc.pluginbase.Annotations.Resolved;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.RenderRegistry;
-import xiamomc.pluginbase.Annotations.Resolved;
 
 import java.util.Map;
 

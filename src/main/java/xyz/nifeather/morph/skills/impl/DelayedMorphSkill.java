@@ -1,12 +1,12 @@
 package xyz.nifeather.morph.skills.impl;
 
 import org.bukkit.entity.Player;
+import xiamomc.pluginbase.Annotations.Resolved;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.skills.MorphSkill;
 import xyz.nifeather.morph.storage.skill.ISkillOption;
 import xyz.nifeather.morph.storage.skill.SkillAbilityConfiguration;
-import xiamomc.pluginbase.Annotations.Resolved;
 
 public abstract class DelayedMorphSkill<T extends ISkillOption> extends MorphSkill<T>
 {

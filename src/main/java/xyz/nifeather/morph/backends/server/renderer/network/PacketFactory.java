@@ -26,7 +26,9 @@ import xyz.nifeather.morph.misc.NmsRecord;
 import xyz.nifeather.morph.utilities.EntityTypeUtils;
 import xyz.nifeather.morph.utilities.NmsUtils;
 
-import java.util.*;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 public class PacketFactory extends MorphPluginObject

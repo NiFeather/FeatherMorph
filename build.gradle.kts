@@ -155,7 +155,13 @@ bukkit {
 
     val opPermsStrList = listOf(
             permissionRoot + "disguise_revealing",
+
             permissionRoot + "manage",
+            permissionRoot + "manage.grant",
+            permissionRoot + "manage.revoke",
+            permissionRoot + "manage.unmorph",
+            permissionRoot + "manage.morph",
+
             permissionRoot + "query",
             permissionRoot + "queryall",
             permissionRoot + "reload",

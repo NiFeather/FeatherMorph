@@ -3,8 +3,6 @@ package xyz.nifeather.morph.providers.animation.provider;
 import org.bukkit.entity.EntityType;
 import org.jetbrains.annotations.NotNull;
 import xyz.nifeather.morph.providers.animation.AnimationSet;
-import xiamomc.morph.providers.animation.bundled.*;
-import xyz.nifeather.morph.morph.providers.animation.bundled.*;
 import xyz.nifeather.morph.providers.animation.bundled.*;
 
 public class VanillaAnimationProvider extends DefaultAnimationProvider

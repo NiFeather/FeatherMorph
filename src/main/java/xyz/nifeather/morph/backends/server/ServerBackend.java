@@ -6,6 +6,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import xiamomc.pluginbase.Messages.FormattableMessage;
 import xyz.nifeather.morph.backends.DisguiseBackend;
 import xyz.nifeather.morph.backends.DisguiseWrapper;
 import xyz.nifeather.morph.backends.WrapperEvent;
@@ -14,7 +15,6 @@ import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEnt
 import xyz.nifeather.morph.messages.BackendStrings;
 import xyz.nifeather.morph.misc.playerList.PlayerListHandler;
 import xyz.nifeather.morph.utilities.NbtUtils;
-import xiamomc.pluginbase.Messages.FormattableMessage;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;

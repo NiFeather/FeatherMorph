@@ -4,11 +4,11 @@ import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xiamomc.pluginbase.Annotations.Resolved;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.misc.integrations.placeholderapi.IPlaceholderProvider;
 import xyz.nifeather.morph.misc.integrations.placeholderapi.MatchMode;
-import xiamomc.pluginbase.Annotations.Resolved;
 
 public class StateNameProvider extends MorphPluginObject implements IPlaceholderProvider
 {

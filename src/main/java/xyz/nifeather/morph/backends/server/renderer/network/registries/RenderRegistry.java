@@ -7,12 +7,12 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xiamomc.pluginbase.Annotations.Resolved;
+import xiamomc.pluginbase.Bindables.Bindable;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
 import xyz.nifeather.morph.config.ConfigOption;
 import xyz.nifeather.morph.config.MorphConfigManager;
-import xiamomc.pluginbase.Annotations.Resolved;
-import xiamomc.pluginbase.Bindables.Bindable;
 
 import java.util.List;
 import java.util.Map;

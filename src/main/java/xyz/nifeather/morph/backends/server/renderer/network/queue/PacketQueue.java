@@ -5,8 +5,8 @@ import com.comphenix.protocol.ProtocolManager;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.bukkit.entity.Player;
-import xyz.nifeather.morph.MorphPluginObject;
 import xiamomc.pluginbase.Annotations.Initializer;
+import xyz.nifeather.morph.MorphPluginObject;
 
 import java.util.List;
 import java.util.Map;

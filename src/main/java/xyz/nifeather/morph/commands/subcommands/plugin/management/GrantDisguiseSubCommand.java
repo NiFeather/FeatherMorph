@@ -7,14 +7,14 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.nifeather.morph.MorphManager;
-import xyz.nifeather.morph.MorphPluginObject;
-import xiamomc.morph.messages.*;
-import xyz.nifeather.morph.messages.*;
-import xyz.nifeather.morph.misc.DisguiseTypes;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Command.ISubCommand;
 import xiamomc.pluginbase.Messages.FormattableMessage;
+import xyz.nifeather.morph.MorphManager;
+import xyz.nifeather.morph.MorphPluginObject;
+import xyz.nifeather.morph.messages.*;
+import xyz.nifeather.morph.misc.DisguiseTypes;
+import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 
 import java.util.List;
 
@@ -35,7 +35,7 @@ public class GrantDisguiseSubCommand extends MorphPluginObject implements ISubCo
     @Override
     public @Nullable String getPermissionRequirement()
     {
-        return "xiamomc.morph.manage.grant";
+        return CommonPermissions.MANAGE_GRANT_DISGUISE;
     }
 
     @Override

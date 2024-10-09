@@ -6,8 +6,8 @@ import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.injector.GamePhase;
 import net.minecraft.network.protocol.game.ClientboundAnimatePacket;
 import org.bukkit.entity.Player;
-import xyz.nifeather.morph.backends.server.renderer.network.registries.RenderRegistry;
 import xiamomc.pluginbase.Annotations.Resolved;
+import xyz.nifeather.morph.backends.server.renderer.network.registries.RenderRegistry;
 
 public class AnimationPacketListener extends ProtocolListener
 {

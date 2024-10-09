@@ -6,6 +6,8 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permissible;
 import org.jetbrains.annotations.NotNull;
+import xiamomc.pluginbase.Annotations.Resolved;
+import xiamomc.pluginbase.Messages.FormattableMessage;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.MorphPlugin;
 import xyz.nifeather.morph.MorphPluginObject;
@@ -13,8 +15,6 @@ import xyz.nifeather.morph.config.ConfigOption;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
-import xiamomc.pluginbase.Annotations.Resolved;
-import xiamomc.pluginbase.Messages.FormattableMessage;
 
 public class MorphChatRenderer extends MorphPluginObject implements ChatRenderer
 {

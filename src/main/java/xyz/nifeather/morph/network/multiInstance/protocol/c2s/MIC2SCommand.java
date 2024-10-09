@@ -4,9 +4,9 @@ import org.java_websocket.WebSocket;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
-import xyz.nifeather.morph.MorphPlugin;
 import xiamomc.morph.network.BasicClientHandler;
 import xiamomc.morph.network.commands.C2S.AbstractC2SCommand;
+import xyz.nifeather.morph.MorphPlugin;
 import xyz.nifeather.morph.network.multiInstance.protocol.IClientHandler;
 
 public abstract class MIC2SCommand<T> extends AbstractC2SCommand<T>

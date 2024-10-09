@@ -1,12 +1,11 @@
 package xyz.nifeather.morph.commands;
 
 import it.unimi.dsi.fastutil.objects.ObjectList;
-import xyz.nifeather.morph.commands.subcommands.MorphSubCommandHandler;
-import xiamomc.morph.commands.subcommands.plugin.*;
-import xyz.nifeather.morph.commands.subcommands.plugin.*;
-import xyz.nifeather.morph.messages.HelpStrings;
 import xiamomc.pluginbase.Command.ISubCommand;
 import xiamomc.pluginbase.Messages.FormattableMessage;
+import xyz.nifeather.morph.commands.subcommands.MorphSubCommandHandler;
+import xyz.nifeather.morph.commands.subcommands.plugin.*;
+import xyz.nifeather.morph.messages.HelpStrings;
 
 import java.util.List;
 

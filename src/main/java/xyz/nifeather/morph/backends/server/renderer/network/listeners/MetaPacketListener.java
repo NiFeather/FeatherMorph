@@ -7,9 +7,9 @@ import com.comphenix.protocol.injector.GamePhase;
 import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import xiamomc.pluginbase.Annotations.Resolved;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.RenderRegistry;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
-import xiamomc.pluginbase.Annotations.Resolved;
 
 public class MetaPacketListener extends ProtocolListener
 {

@@ -5,9 +5,9 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.nifeather.morph.MorphPlugin;
 import xiamomc.pluginbase.Command.ISubCommand;
 import xiamomc.pluginbase.Messages.FormattableMessage;
+import xyz.nifeather.morph.MorphPlugin;
 
 import java.util.Arrays;
 import java.util.List;

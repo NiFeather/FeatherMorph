@@ -3,6 +3,10 @@ package xyz.nifeather.morph.commands.subcommands.plugin;
 import it.unimi.dsi.fastutil.objects.ObjectImmutableList;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
+import xiamomc.pluginbase.Annotations.Resolved;
+import xiamomc.pluginbase.Command.ISubCommand;
+import xiamomc.pluginbase.Messages.FormattableMessage;
+import xiamomc.pluginbase.Messages.MessageStore;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.config.MorphConfigManager;
@@ -12,21 +16,19 @@ import xyz.nifeather.morph.messages.HelpStrings;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.MorphMessageStore;
 import xyz.nifeather.morph.messages.vanilla.VanillaMessageStore;
+import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 import xyz.nifeather.morph.misc.recipe.RecipeManager;
 import xyz.nifeather.morph.misc.skins.PlayerSkinProvider;
 import xyz.nifeather.morph.network.multiInstance.MultiInstanceService;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
 import xyz.nifeather.morph.storage.skill.SkillAbilityConfigurationStore;
-import xiamomc.pluginbase.Annotations.Resolved;
-import xiamomc.pluginbase.Command.ISubCommand;
-import xiamomc.pluginbase.Messages.FormattableMessage;
-import xiamomc.pluginbase.Messages.MessageStore;
 
 import java.util.List;
 
 public class ReloadSubCommand extends MorphPluginObject implements ISubCommand
 {
     @Override
+    @NotNull
     public String getCommandName()
     {
         return "reload";
@@ -36,7 +38,7 @@ public class ReloadSubCommand extends MorphPluginObject implements ISubCommand
     @NotNull
     public String getPermissionRequirement()
     {
-        return "xiamomc.morph.reload";
+        return CommonPermissions.DO_RELOAD;
     }
 
     @Override

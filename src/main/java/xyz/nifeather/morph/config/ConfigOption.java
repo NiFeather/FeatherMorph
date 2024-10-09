@@ -1,10 +1,10 @@
 package xyz.nifeather.morph.config;
 
 import org.apache.commons.lang3.RandomStringUtils;
+import xiamomc.pluginbase.Configuration.ConfigNode;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.events.InteractionMirrorProcessor;
 import xyz.nifeather.morph.utilities.NbtUtils;
-import xiamomc.pluginbase.Configuration.ConfigNode;
 
 import java.util.ArrayList;
 

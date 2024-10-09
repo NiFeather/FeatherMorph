@@ -7,9 +7,9 @@ import com.comphenix.protocol.events.PacketListener;
 import com.comphenix.protocol.injector.GamePhase;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.bukkit.plugin.Plugin;
+import xiamomc.pluginbase.Annotations.Initializer;
 import xyz.nifeather.morph.MorphPlugin;
 import xyz.nifeather.morph.MorphPluginObject;
-import xiamomc.pluginbase.Annotations.Initializer;
 
 public class TestPacketListener extends MorphPluginObject implements PacketListener
 {

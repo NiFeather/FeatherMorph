@@ -3,10 +3,10 @@ package xyz.nifeather.morph.commands.subcommands;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
+import xiamomc.pluginbase.Command.SubCommandHandler;
 import xyz.nifeather.morph.MorphPlugin;
 import xyz.nifeather.morph.messages.CommonStrings;
 import xyz.nifeather.morph.messages.MessageUtils;
-import xiamomc.pluginbase.Command.SubCommandHandler;
 
 public abstract class MorphSubCommandHandler extends SubCommandHandler<MorphPlugin>
 {

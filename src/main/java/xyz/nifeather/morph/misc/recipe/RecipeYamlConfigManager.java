@@ -3,8 +3,8 @@ package xyz.nifeather.morph.misc.recipe;
 import com.google.common.base.Charsets;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.jetbrains.annotations.Nullable;
-import xyz.nifeather.morph.utilities.PluginAssetUtils;
 import xiamomc.pluginbase.Configuration.ConfigOption;
+import xyz.nifeather.morph.utilities.PluginAssetUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;

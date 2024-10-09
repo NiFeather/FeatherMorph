@@ -24,6 +24,8 @@ import org.bukkit.entity.Mob;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityTargetEvent;
+import xiamomc.pluginbase.Annotations.Resolved;
+import xiamomc.pluginbase.Bindables.Bindable;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.config.ConfigOption;
@@ -34,8 +36,6 @@ import xyz.nifeather.morph.misc.NmsRecord;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 import xyz.nifeather.morph.utilities.EntityTypeUtils;
 import xyz.nifeather.morph.utilities.ReflectionUtils;
-import xiamomc.pluginbase.Annotations.Resolved;
-import xiamomc.pluginbase.Bindables.Bindable;
 
 import java.util.function.Predicate;
 

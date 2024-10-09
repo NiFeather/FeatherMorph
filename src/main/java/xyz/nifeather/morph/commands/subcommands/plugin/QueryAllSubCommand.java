@@ -2,14 +2,15 @@ package xyz.nifeather.morph.commands.subcommands.plugin;
 
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
+import xiamomc.pluginbase.Annotations.Resolved;
+import xiamomc.pluginbase.Command.ISubCommand;
+import xiamomc.pluginbase.Messages.FormattableMessage;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.messages.CommandStrings;
 import xyz.nifeather.morph.messages.HelpStrings;
 import xyz.nifeather.morph.messages.MessageUtils;
-import xiamomc.pluginbase.Annotations.Resolved;
-import xiamomc.pluginbase.Command.ISubCommand;
-import xiamomc.pluginbase.Messages.FormattableMessage;
+import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 
 public class QueryAllSubCommand extends MorphPluginObject implements ISubCommand
 {
@@ -28,7 +29,7 @@ public class QueryAllSubCommand extends MorphPluginObject implements ISubCommand
     @Override
     public String getPermissionRequirement()
     {
-        return "xiamomc.morph.query";
+        return CommonPermissions.QUERY_STATES;
     }
 
     @Resolved

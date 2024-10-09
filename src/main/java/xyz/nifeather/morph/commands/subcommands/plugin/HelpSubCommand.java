@@ -9,17 +9,17 @@ import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xiamomc.pluginbase.Annotations.Initializer;
+import xiamomc.pluginbase.Annotations.Resolved;
+import xiamomc.pluginbase.Command.ISubCommand;
+import xiamomc.pluginbase.Command.SubCommandHandler;
+import xiamomc.pluginbase.Messages.FormattableMessage;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.commands.MorphCommandManager;
 import xyz.nifeather.morph.commands.subcommands.plugin.helpsections.Entry;
 import xyz.nifeather.morph.commands.subcommands.plugin.helpsections.Section;
 import xyz.nifeather.morph.messages.HelpStrings;
 import xyz.nifeather.morph.messages.MessageUtils;
-import xiamomc.pluginbase.Annotations.Initializer;
-import xiamomc.pluginbase.Annotations.Resolved;
-import xiamomc.pluginbase.Command.ISubCommand;
-import xiamomc.pluginbase.Command.SubCommandHandler;
-import xiamomc.pluginbase.Messages.FormattableMessage;
 
 import java.util.List;
 

@@ -3,17 +3,17 @@ package xyz.nifeather.morph.skills.impl;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import xiamomc.morph.network.commands.S2C.set.S2CSetDisplayingFakeEquipCommand;
+import xiamomc.pluginbase.Annotations.Resolved;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.SkillStrings;
 import xyz.nifeather.morph.misc.DisguiseState;
-import xiamomc.morph.network.commands.S2C.set.S2CSetDisplayingFakeEquipCommand;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
 import xyz.nifeather.morph.skills.MorphSkill;
 import xyz.nifeather.morph.skills.SkillType;
 import xyz.nifeather.morph.skills.options.NoOpConfiguration;
 import xyz.nifeather.morph.storage.skill.SkillAbilityConfiguration;
-import xiamomc.pluginbase.Annotations.Resolved;
 
 public class InventoryMorphSkill extends MorphSkill<NoOpConfiguration>
 {

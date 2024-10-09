@@ -1,8 +1,8 @@
 package xyz.nifeather.morph.misc;
 
+import xiamomc.pluginbase.Messages.FormattableMessage;
 import xyz.nifeather.morph.MorphPlugin;
 import xyz.nifeather.morph.messages.CapeStrings;
-import xiamomc.pluginbase.Messages.FormattableMessage;
 
 public class CapeURL
 {

@@ -36,6 +36,16 @@ public class CommonPermissions
 
     public final static String SET_OPTIONS = PERM_ROOT + "toggle";
 
+    public final static String QUERY_STATES = PERM_ROOT + "query";
+    public final static String CHECK_STAT = PERM_ROOT + "stat";
+    public final static String DO_RELOAD = PERM_ROOT + "reload";
+
+    public final static String MANAGE_DISGUISES = PERM_ROOT + "manage";
+    public final static String MANAGE_GRANT_DISGUISE = MANAGE_DISGUISES + ".grant";
+    public final static String MANAGE_REVOKE_DISGUISE = MANAGE_DISGUISES + ".revoke";
+    public final static String MANAGE_UNMORPH_DISGUISE = MANAGE_DISGUISES + ".unmorph";
+    public final static String MANAGE_MORPH_DISGUISE = MANAGE_DISGUISES + ".morph";
+
     public final static String CAN_FLY = PERM_ROOT + "can_fly";
     public final static String ALWAYS_CAN_FLY = PERM_ROOT + "can_fly.always";
 

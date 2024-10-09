@@ -1,6 +1,9 @@
 package xyz.nifeather.morph.network.multiInstance;
 
 import org.jetbrains.annotations.Nullable;
+import xiamomc.pluginbase.Annotations.Initializer;
+import xiamomc.pluginbase.Annotations.Resolved;
+import xiamomc.pluginbase.Bindables.Bindable;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.config.ConfigOption;
@@ -11,9 +14,6 @@ import xyz.nifeather.morph.network.multiInstance.protocol.SocketDisguiseMeta;
 import xyz.nifeather.morph.network.multiInstance.protocol.c2s.MIC2SDisguiseMetaCommand;
 import xyz.nifeather.morph.network.multiInstance.protocol.s2c.MIS2CSyncMetaCommand;
 import xyz.nifeather.morph.network.multiInstance.slave.SlaveInstance;
-import xiamomc.pluginbase.Annotations.Initializer;
-import xiamomc.pluginbase.Annotations.Resolved;
-import xiamomc.pluginbase.Bindables.Bindable;
 
 import java.util.Arrays;
 import java.util.UUID;

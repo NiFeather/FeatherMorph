@@ -3,9 +3,9 @@ package xyz.nifeather.morph.commands.subcommands;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.nifeather.morph.MorphPluginObject;
 import xiamomc.pluginbase.Command.ISubCommand;
 import xiamomc.pluginbase.Messages.FormattableMessage;
+import xyz.nifeather.morph.MorphPluginObject;
 
 import java.util.function.BiFunction;
 

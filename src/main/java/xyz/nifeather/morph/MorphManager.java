@@ -24,11 +24,9 @@ import xyz.nifeather.morph.backends.fallback.NilBackend;
 import xyz.nifeather.morph.backends.server.ServerBackend;
 import xyz.nifeather.morph.events.api.gameplay.*;
 import xyz.nifeather.morph.misc.*;
-import xyz.nifeather.morph.morph.events.api.gameplay.*;
 import xyz.nifeather.morph.misc.playerList.PlayerListHandler;
 import xyz.nifeather.morph.config.ConfigOption;
 import xyz.nifeather.morph.config.MorphConfigManager;
-import xiamomc.morph.events.api.gameplay.*;
 import xyz.nifeather.morph.events.api.lifecycle.ManagerFinishedInitializeEvent;
 import xyz.nifeather.morph.interfaces.IManagePlayerData;
 import xyz.nifeather.morph.messages.CommandStrings;
@@ -36,7 +34,6 @@ import xyz.nifeather.morph.messages.HintStrings;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.MorphStrings;
 import xyz.nifeather.morph.messages.vanilla.VanillaMessageStore;
-import xiamomc.morph.misc.*;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
@@ -213,7 +210,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         {
             logger.error("Unable to initialize ServerBackend as our disguise backend: " + t.getMessage());
             logger.error("Using NilBackend, displaying disguises at the server side will not be supported this run.");
-            logger.error("Please consider reporting this issue to our GitHub: https://github.com/XiaMoZhiShi/MorphPlugin/issues");
+            logger.error("Please consider reporting this issue to our GitHub: https://github.com/MATRIX-feather/FeatherMorph/issues");
 
             t.printStackTrace();
         }

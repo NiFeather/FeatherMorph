@@ -1,10 +1,7 @@
 package xyz.nifeather.morph.backends.server.renderer.network.registries;
 
-import xiamomc.morph.backends.server.renderer.network.datawatcher.values.*;
-import xiamomc.morph.backends.server.renderer.network.datawatcher.values.basetypes.*;
 import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.values.*;
 import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.values.basetypes.*;
-import xyz.nifeather.morph.morph.backends.server.renderer.network.datawatcher.values.basetypes.*;
 
 public class ValueIndex
 {

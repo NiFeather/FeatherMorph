@@ -5,15 +5,16 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xiamomc.pluginbase.Annotations.Resolved;
+import xiamomc.pluginbase.Command.ISubCommand;
+import xiamomc.pluginbase.Messages.FormattableMessage;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.messages.CommonStrings;
 import xyz.nifeather.morph.messages.HelpStrings;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.misc.MorphParameters;
-import xiamomc.pluginbase.Annotations.Resolved;
-import xiamomc.pluginbase.Command.ISubCommand;
-import xiamomc.pluginbase.Messages.FormattableMessage;
+import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 
 import java.util.List;
 
@@ -28,7 +29,7 @@ public class ForceMorphSubCommand extends MorphPluginObject implements ISubComma
     @Override
     public @Nullable String getPermissionRequirement()
     {
-        return "xiamomc.morph.manage.morph";
+        return CommonPermissions.MANAGE_MORPH_DISGUISE;
     }
 
     @Resolved

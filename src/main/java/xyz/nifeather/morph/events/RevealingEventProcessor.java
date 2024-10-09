@@ -12,6 +12,9 @@ import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import xiamomc.pluginbase.Annotations.Initializer;
+import xiamomc.pluginbase.Annotations.Resolved;
+import xiamomc.pluginbase.Bindables.Bindable;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.RevealingHandler;
 import xyz.nifeather.morph.config.ConfigOption;
@@ -20,9 +23,6 @@ import xyz.nifeather.morph.events.api.gameplay.PlayerMorphEvent;
 import xyz.nifeather.morph.events.api.gameplay.PlayerUnMorphEvent;
 import xyz.nifeather.morph.misc.DisguiseTypes;
 import xyz.nifeather.morph.misc.NmsRecord;
-import xiamomc.pluginbase.Annotations.Initializer;
-import xiamomc.pluginbase.Annotations.Resolved;
-import xiamomc.pluginbase.Bindables.Bindable;
 
 public class RevealingEventProcessor extends MorphPluginObject implements Listener
 {

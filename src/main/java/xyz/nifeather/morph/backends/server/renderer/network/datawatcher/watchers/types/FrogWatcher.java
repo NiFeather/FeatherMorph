@@ -15,6 +15,7 @@ import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Frog;
 import org.bukkit.entity.Player;
+import xiamomc.pluginbase.Exceptions.NullDependencyException;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.RegistryKey;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
@@ -22,7 +23,6 @@ import xyz.nifeather.morph.misc.AnimationNames;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 import xyz.nifeather.morph.misc.disguiseProperty.values.FrogProperties;
-import xiamomc.pluginbase.Exceptions.NullDependencyException;
 
 public class FrogWatcher extends LivingEntityWatcher
 {

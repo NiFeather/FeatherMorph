@@ -5,9 +5,9 @@ import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xiamomc.pluginbase.Managers.DependencyManager;
 import xyz.nifeather.morph.misc.integrations.placeholderapi.builtin.AvaliableDisguisesProvider;
 import xyz.nifeather.morph.misc.integrations.placeholderapi.builtin.StateNameProvider;
-import xiamomc.pluginbase.Managers.DependencyManager;
 
 import java.util.List;
 

@@ -10,9 +10,9 @@ import net.minecraft.network.protocol.game.ClientboundRotateHeadPacket;
 import net.minecraft.network.protocol.game.ClientboundTeleportEntityPacket;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import xiamomc.pluginbase.Annotations.Resolved;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.RenderRegistry;
 import xyz.nifeather.morph.utilities.NmsUtils;
-import xiamomc.pluginbase.Annotations.Resolved;
 
 public class PlayerLookPacketListener extends ProtocolListener
 {

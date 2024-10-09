@@ -4,10 +4,10 @@ import de.themoep.inventorygui.InventoryGui;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import org.bukkit.entity.Player;
-import xyz.nifeather.morph.MorphPluginObject;
-import xyz.nifeather.morph.messages.MessageUtils;
 import xiamomc.pluginbase.Bindables.Bindable;
 import xiamomc.pluginbase.ScheduleInfo;
+import xyz.nifeather.morph.MorphPluginObject;
+import xyz.nifeather.morph.messages.MessageUtils;
 
 public class ScreenWrapper extends MorphPluginObject
 {

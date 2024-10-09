@@ -7,6 +7,7 @@ import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.EntityType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xiamomc.pluginbase.Annotations.Resolved;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.abilities.AbilityManager;
 import xyz.nifeather.morph.abilities.AbilityType;
@@ -23,7 +24,6 @@ import xyz.nifeather.morph.skills.impl.SonicBoomMorphSkill;
 import xyz.nifeather.morph.storage.MorphJsonBasedStorage;
 import xyz.nifeather.morph.utilities.DisguiseUtils;
 import xyz.nifeather.morph.utilities.EntityTypeUtils;
-import xiamomc.pluginbase.Annotations.Resolved;
 
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;

@@ -9,11 +9,11 @@ import org.bukkit.block.data.Levelled;
 import org.bukkit.inventory.ItemRarity;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BlockDataMeta;
+import xiamomc.pluginbase.Bindables.BindableList;
 import xyz.nifeather.morph.messages.EmoteStrings;
 import xyz.nifeather.morph.messages.GuiStrings;
 import xyz.nifeather.morph.messages.MorphStrings;
 import xyz.nifeather.morph.misc.DisguiseState;
-import xiamomc.pluginbase.Bindables.BindableList;
 
 import java.util.List;
 

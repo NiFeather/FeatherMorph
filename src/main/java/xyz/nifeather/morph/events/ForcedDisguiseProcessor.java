@@ -5,6 +5,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
+import xiamomc.pluginbase.Annotations.Initializer;
+import xiamomc.pluginbase.Annotations.Resolved;
+import xiamomc.pluginbase.Bindables.Bindable;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.config.ConfigOption;
@@ -12,9 +15,6 @@ import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.events.api.gameplay.PlayerMorphEarlyEvent;
 import xyz.nifeather.morph.events.api.gameplay.PlayerUnMorphEarlyEvent;
 import xyz.nifeather.morph.misc.MorphParameters;
-import xiamomc.pluginbase.Annotations.Initializer;
-import xiamomc.pluginbase.Annotations.Resolved;
-import xiamomc.pluginbase.Bindables.Bindable;
 
 public class ForcedDisguiseProcessor extends MorphPluginObject implements Listener
 {

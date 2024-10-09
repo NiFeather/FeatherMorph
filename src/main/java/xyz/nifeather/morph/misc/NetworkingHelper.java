@@ -5,19 +5,19 @@ import net.minecraft.Util;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.inventory.EntityEquipment;
-import xyz.nifeather.morph.MorphPluginObject;
-import xyz.nifeather.morph.backends.DisguiseWrapper;
-import xyz.nifeather.morph.backends.WrapperAttribute;
-import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 import xiamomc.morph.network.commands.S2C.AbstractS2CCommand;
 import xiamomc.morph.network.commands.S2C.clientrender.S2CRenderMapAddCommand;
 import xiamomc.morph.network.commands.S2C.clientrender.S2CRenderMapMetaCommand;
 import xiamomc.morph.network.commands.S2C.clientrender.S2CRenderMeta;
 import xiamomc.morph.network.commands.S2C.map.S2CPartialMapCommand;
+import xiamomc.pluginbase.Annotations.Resolved;
+import xyz.nifeather.morph.MorphPluginObject;
+import xyz.nifeather.morph.backends.DisguiseWrapper;
+import xyz.nifeather.morph.backends.WrapperAttribute;
+import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
 import xyz.nifeather.morph.utilities.MapMetaUtils;
 import xyz.nifeather.morph.utilities.NbtUtils;
-import xiamomc.pluginbase.Annotations.Resolved;
 
 import java.util.HashMap;
 
