@@ -26,6 +26,7 @@ repositories {
         url = uri("https://jitpack.io")
         content {
             includeGroup("com.github.XiaMoZhiShi")
+            includeGroup("com.github.NiFeather")
         }
     }
 
@@ -93,7 +94,7 @@ dependencies {
         project.property("protocols_local_version")
         else project.property("protocols_version");
 
-    implementation("com.github.XiaMoZhiShi:feathermorph-protocols:${protocolVersion}")
+    implementation("com.github.NiFeather:feathermorph-protocols:${protocolVersion}")
     implementation("com.github.XiaMoZhiShi:PluginBase:${project.property("pluginbase_version")}")
     {
         exclude("com.google.code.gson", "gson")
