@@ -222,6 +222,7 @@
   "emote.morphclient.crawl": "Crawl",
   "emote.morphclient.digdown": "Dig Down",
   "emote.morphclient.appear": "Appear",
+  "emote.morphclient.none": "<gray>None</gray>",
   "emote.morphclient.not_available": "Can't play action while the skill is still in cooldown",
   "emote.morphclient.unknown": "Unknown",
   "chestui.next_page": "Next page",

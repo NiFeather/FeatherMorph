@@ -67,7 +67,7 @@ public abstract class AnimationSet
      * @return A pair, left is the sequence, right is whether the sequence is persistent
      */
     @NotNull
-    public Pair<List<SingleAnimation>, Boolean> sequenceOf(String animationId)
+    public Pair<List<SingleAnimation>, Boolean> sequenceOf(@NotNull String animationId)
     {
         return animationMap.getOrDefault(animationId, Pair.of(List.of(), false));
     }

@@ -3,22 +3,39 @@ package xyz.nifeather.morph.misc.gui;
 import de.themoep.inventorygui.DynamicGuiElement;
 import de.themoep.inventorygui.InventoryGui;
 import de.themoep.inventorygui.StaticGuiElement;
+import io.papermc.paper.adventure.providers.MiniMessageProviderImpl;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.serializer.ansi.ANSIComponentSerializer;
+import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
 import org.bukkit.Material;
 import org.bukkit.block.data.Levelled;
 import org.bukkit.inventory.ItemRarity;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BlockDataMeta;
+import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Bindables.BindableList;
 import xyz.nifeather.morph.messages.EmoteStrings;
 import xyz.nifeather.morph.messages.GuiStrings;
+import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.MorphStrings;
 import xyz.nifeather.morph.misc.DisguiseState;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 public class AnimSelectScreenWrapper extends ScreenWrapper
 {
+    /*
+    // 如果要启用这个，记得手动设置 capacity
+    private final BindableList<String> pattern = new BindableList<>(
+            List.of(
+                    " " + getCurrentIndexChar(0) + " ",
+                    getCurrentIndexChar(3) + "E" + getCurrentIndexChar(1),
+                    " " + getCurrentIndexChar(2) + " "
+    ));*/
+
     private final BindableList<String> pattern = new BindableList<>(List.of(
             "XXXXE"
     ));
@@ -98,22 +115,32 @@ public class AnimSelectScreenWrapper extends ScreenWrapper
             capacity += lineCapacity;
         }
 
-        return new InventoryGui(plugin, GuiStrings.selectAnimation().toString(playerLocale), rows.toArray(new String[]{}));
+        var gui = new InventoryGui(plugin,
+                GuiStrings.selectAnimation().toString(playerLocale),
+                rows.toArray(new String[]{}));
+
+        gui.setItemNameSetter((meta, string) -> meta.itemName(defaultMiniMessage.deserialize(string)));
+
+        return gui;
     }
 
     private void initElements(InventoryGui gui)
     {
-        var actionItemBase = IconLookup.instance().lookup(state.getDisguiseIdentifier()); //new ItemStack(Material.LIGHT);
+        var defaultIcon = IconLookup.instance().lookup(state.getDisguiseIdentifier()); //new ItemStack(Material.LIGHT);
 
         if (IconLookup.instance().lookup(state.getDisguiseIdentifier()).getType() == Material.PLAYER_HEAD)
             this.isDynamic.set(true);
 
-        for (int i = 0; i < Math.min(capacity, availableSequences.size()); i++)
+        for (int i = 0; i < capacity; i++)
         {
+            @Nullable
+            var sequenceId = i >= availableSequences.size() ? null : availableSequences.get(i);
+
             var guiChar = this.getCurrentIndexChar(i);
-            var itemClone = actionItemBase.clone();
+            var icon = sequenceId == null ? new ItemStack(Material.GRAY_STAINED_GLASS_PANE) : defaultIcon.clone();
             int finalIndex = i;
-            itemClone.editMeta(meta ->
+
+            icon.editMeta(meta ->
             {
                 meta.setRarity(ItemRarity.COMMON);
 
@@ -126,12 +153,18 @@ public class AnimSelectScreenWrapper extends ScreenWrapper
                 }
             });
 
-            var sequenceId = availableSequences.get(i);
+            // String(Raw) -> Component(Parsed) -> String(Parsed MiniMessage format) -> Component(Parsed again)
+            // So terrible, couldn't we just use Component instead String to set the item name?
+            Component sequenceDisplayNameComponent = sequenceId == null
+                    ? EmoteStrings.none().toComponent(playerLocale)
+                    : EmoteStrings.get(sequenceId).toComponent(playerLocale);
 
-            var sequenceDisplayName = EmoteStrings.get(sequenceId).withLocale(playerLocale).toString();
+            String sequenceDisplayName = defaultMiniMessage.serialize(sequenceDisplayNameComponent);
 
-            var element = new StaticGuiElement(guiChar, itemClone, 1 + i, click ->
+            var element = new StaticGuiElement(guiChar, icon, 1 + i, click ->
             {
+                if (sequenceId == null) return true;
+
                 var animationSet = state.getProvider()
                         .getAnimationProvider()
                         .getAnimationSetFor(state.getDisguiseIdentifier());
@@ -141,9 +174,10 @@ public class AnimSelectScreenWrapper extends ScreenWrapper
                 getBindingPlayer().playSound(clickSound);
                 state.tryScheduleSequence(sequenceId, sequencePair.left(), sequencePair.right());
                 guiInstance.close();
+
                 return true;
             },
-            "§r" + sequenceDisplayName);
+            "<italic:false>" + sequenceDisplayName);
 
             gui.addElement(element);
         }
@@ -152,9 +186,9 @@ public class AnimSelectScreenWrapper extends ScreenWrapper
                 new ItemStack(Material.PINK_STAINED_GLASS_PANE),
                 1,
                 click -> true,
-                "§r"));
+                "<italic:false>"));
 
-        var closeElementItem = new ItemStack(Material.BARRIER);
+        var closeElementItem = new ItemStack(Material.MAGENTA_GLAZED_TERRACOTTA);
         closeElementItem.editMeta(meta -> meta.setRarity(ItemRarity.COMMON));
 
         gui.addElement(new StaticGuiElement('E',
@@ -166,13 +200,13 @@ public class AnimSelectScreenWrapper extends ScreenWrapper
                     guiInstance.close();
                     return true;
                 },
-                "§r" + GuiStrings.close().toString(playerLocale)));
+                "<italic:false>" + GuiStrings.close().toString(playerLocale)));
 
         var disguiseElement = new StaticGuiElement('D',
                 IconLookup.instance().lookup(state.getDisguiseIdentifier()),
                 1,
                 click -> true,
-                "§r" + MorphStrings.disguisingAsString().resolve("what", state.getPlayerDisplay())
+                "<italic:false>" + MorphStrings.disguisingAsString().resolve("what", state.getPlayerDisplay())
                         .toString(playerLocale));
 
         if (isDynamic.get())

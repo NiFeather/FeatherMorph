@@ -1,5 +1,6 @@
 package xyz.nifeather.morph.messages;
 
+import org.jetbrains.annotations.NotNull;
 import xyz.nifeather.morph.MorphPlugin;
 import xiamomc.pluginbase.Messages.FormattableMessage;
 
@@ -11,6 +12,10 @@ public class EmoteStrings extends AbstractMorphStrings
     public static FormattableMessage notAvailable()
     {
         return getFormattable(getKey("not_available"), "当前不能使用动作");
+    }
+    public static FormattableMessage none()
+    {
+        return getFormattable(getKey("none"), "<gray>[Fallback] 无");
     }
 
     private static final Map<String, FormattableMessage> map = new ConcurrentHashMap<>();
@@ -28,7 +33,7 @@ public class EmoteStrings extends AbstractMorphStrings
         return getFormattable("unknown", "animation:unknown");
     }
 
-    public static FormattableMessage get(String animationId)
+    public static FormattableMessage get(@NotNull String animationId)
     {
         var value = map.getOrDefault(animationId, Unknown());
 

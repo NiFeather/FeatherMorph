@@ -3,6 +3,7 @@ package xyz.nifeather.morph.misc.gui;
 import de.themoep.inventorygui.InventoryGui;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.entity.Player;
 import xiamomc.pluginbase.Bindables.Bindable;
 import xiamomc.pluginbase.ScheduleInfo;
@@ -19,6 +20,8 @@ public class ScreenWrapper extends MorphPluginObject
 
     public static final Sound clickSound = Sound.sound().type(Key.key("ui.button.click")).volume(0.45f).build();
     public static final Sound openSound = Sound.sound().type(Key.key("entity.experience_orb.pickup")).volume(0.55f).build();
+
+    protected static final MiniMessage defaultMiniMessage = MiniMessage.miniMessage();
 
     protected Player getBindingPlayer()
     {

@@ -1,6 +1,7 @@
 package xyz.nifeather.morph.messages;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -128,5 +129,13 @@ public class MessageUtils extends MorphPluginObject
             return getLocale(player);
         else
             return getServerLocale();
+    }
+
+    public static String asParsedMiniMessageString(String locale, FormattableMessage formattable)
+    {
+        if (formattable.getLocale() == null)
+            formattable.withLocale(locale);
+
+        return MiniMessage.miniMessage().serialize(formattable.toComponent());
     }
 }

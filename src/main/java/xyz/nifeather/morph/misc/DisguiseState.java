@@ -227,7 +227,7 @@ public class DisguiseState extends MorphPluginObject
     /**
      * @return Whether success.
      */
-    public boolean tryScheduleSequence(String sequenceIdentifier,
+    public boolean tryScheduleSequence(@NotNull String sequenceIdentifier,
                                        List<SingleAnimation> sequence,
                                        boolean persistent)
     {
