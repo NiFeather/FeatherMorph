@@ -24,17 +24,19 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class PlayerSkinProvider extends MorphPluginObject
 {
-    private static PlayerSkinProvider instance;
-
     public static PlayerSkinProvider getInstance()
     {
-        if (instance == null)
-        {
-            instance = new PlayerSkinProvider();
-            instance.skinCache.initializeStorage();
-        }
+        return PlayerSkinProviderLazyHolder.instance;
+    }
 
-        return instance;
+    private static class PlayerSkinProviderLazyHolder
+    {
+        public static final PlayerSkinProvider instance = new PlayerSkinProvider();
+    }
+
+    public PlayerSkinProvider()
+    {
+        this.skinCache.initializeStorage();
     }
 
     private final SkinCache skinCache = new SkinCache();

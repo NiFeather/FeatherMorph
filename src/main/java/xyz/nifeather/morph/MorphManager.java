@@ -1,9 +1,7 @@
 package xyz.nifeather.morph;
 
 import ca.spottedleaf.moonrise.common.util.TickThread;
-import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import it.unimi.dsi.fastutil.objects.ObjectList;
+import it.unimi.dsi.fastutil.objects.*;
 import net.kyori.adventure.text.Component;
 import org.bukkit.*;
 import org.bukkit.command.CommandSender;
@@ -71,7 +69,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MorphManager extends MorphPluginObject implements IManagePlayerData
 {
-    private final List<DisguiseState> activeDisguises = Collections.synchronizedList(new ObjectArrayList<>());
+    private final List<DisguiseState> activeDisguises = ObjectLists.synchronize(new ObjectArrayList<>());
 
     private final PlayerDataStore data = new PlayerDataStore();
 

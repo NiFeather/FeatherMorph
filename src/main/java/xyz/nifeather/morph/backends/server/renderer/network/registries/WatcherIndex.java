@@ -21,16 +21,16 @@ public class WatcherIndex
 {
     public static WatcherIndex getInstance()
     {
-        if (instance == null) instance = new WatcherIndex();
-        return instance;
+        return WatcherInstanceLazyHolder.instance;
     }
 
-    private static WatcherIndex instance;
+    private static class WatcherInstanceLazyHolder
+    {
+        public static final WatcherIndex instance = new WatcherIndex();
+    }
 
     public WatcherIndex()
     {
-        instance = this;
-
         setTypeWatcher(EntityType.PLAYER, PlayerWatcher::new);
         setTypeWatcher(EntityType.ALLAY, AllayWatcher::new);
         setTypeWatcher(EntityType.ARMOR_STAND, ArmorStandWatcher::new);
