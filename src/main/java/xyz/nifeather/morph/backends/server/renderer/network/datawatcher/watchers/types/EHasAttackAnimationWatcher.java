@@ -6,7 +6,7 @@ import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
-import xyz.nifeather.morph.backends.server.renderer.network.registries.RegistryKey;
+import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntry;
 
 public class EHasAttackAnimationWatcher extends LivingEntityWatcher
 {
@@ -16,11 +16,11 @@ public class EHasAttackAnimationWatcher extends LivingEntityWatcher
     }
 
     @Override
-    protected <X> void onEntryWrite(RegistryKey<X> key, X oldVal, X newVal)
+    protected <X> void onEntryWrite(CustomEntry<X> entry, X oldVal, X newVal)
     {
-        super.onEntryWrite(key, oldVal, newVal);
+        super.onEntryWrite(entry, oldVal, newVal);
 
-        if (key.equals(CustomEntries.ATTACK_ANIMATION) && Boolean.TRUE.equals(newVal))
+        if (entry.equals(CustomEntries.ATTACK_ANIMATION) && Boolean.TRUE.equals(newVal))
         {
             var entity = ((CraftPlayer)getBindingPlayer()).getHandle();
             sendPacketToAffectedPlayers(PacketContainer.fromPacket(new ClientboundEntityEventPacket(entity, (byte)4)));

@@ -17,39 +17,7 @@ public class WolfValues extends TameableAnimalValues
     public final SingleValue<Boolean> BEGGING = createSingle("wolf_begging", false);
     public final SingleValue<Integer> COLLAR_COLOR = createSingle("wolf_collar_color", 14);
     public final SingleValue<Integer> ANGER_TIME = createSingle("wolf_anger_time", 0);
-    public final SingleValue<Holder<WolfVariant>> WOLF_VARIANT = createSingle("wolf_variant", getWolfVariant(WolfVariants.PALE)).withRandom(allVariants());
-
-    @Nullable
-    private Holder<WolfVariant>[] allVariants;
-
-    private Holder<WolfVariant>[] allVariants()
-    {
-        if (this.allVariants != null)
-            return allVariants;
-
-        this.allVariants = toVariantHolders(
-            WolfVariants.PALE,
-            WolfVariants.SPOTTED,
-            WolfVariants.SNOWY,
-            WolfVariants.BLACK,
-            WolfVariants.ASHEN,
-            WolfVariants.RUSTY,
-            WolfVariants.WOODS,
-            WolfVariants.CHESTNUT,
-            WolfVariants.STRIPED);
-
-        return this.allVariants;
-    }
-
-    public static Holder<WolfVariant>[] toVariantHolders(ResourceKey<WolfVariant>... resKeys)
-    {
-        var list = new ObjectArrayList<Holder<WolfVariant>>();
-
-        for (ResourceKey<WolfVariant> resKey : resKeys)
-            list.add(getWolfVariant(resKey));
-
-        return list.toArray(new Holder[]{});
-    }
+    public final SingleValue<Holder<WolfVariant>> WOLF_VARIANT = createSingle("wolf_variant", getWolfVariant(WolfVariants.PALE));
 
     public static Holder<WolfVariant> getWolfVariant(ResourceKey<WolfVariant> resKey)
     {

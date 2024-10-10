@@ -5,7 +5,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Fox;
 import org.bukkit.entity.Player;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
-import xyz.nifeather.morph.backends.server.renderer.network.registries.RegistryKey;
+import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntry;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.misc.AnimationNames;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
@@ -43,11 +43,11 @@ public class FoxWatcher extends AgeableMobWatcher
     }
 
     @Override
-    protected <X> void onEntryWrite(RegistryKey<X> key, X oldVal, X newVal)
+    protected <X> void onEntryWrite(CustomEntry<X> entry, X oldVal, X newVal)
     {
-        super.onEntryWrite(key, oldVal, newVal);
+        super.onEntryWrite(entry, oldVal, newVal);
 
-        if (key.equals(CustomEntries.ANIMATION))
+        if (entry.equals(CustomEntries.ANIMATION))
         {
             var animId = newVal.toString();
 

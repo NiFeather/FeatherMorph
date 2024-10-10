@@ -11,8 +11,7 @@ import xyz.nifeather.morph.backends.server.renderer.utilties.HolderUtils;
 
 public class FrogValues extends AnimalValues
 {
-    public final SingleValue<Holder<FrogVariant>> FROG_VARIANT = createSingle("frog_variant", getFrogVariant(FrogVariant.TEMPERATE))
-            .withRandom(getFrogVariant(FrogVariant.TEMPERATE), getFrogVariant(FrogVariant.COLD), getFrogVariant(FrogVariant.WARM));
+    public final SingleValue<Holder<FrogVariant>> FROG_VARIANT = createSingle("frog_variant", getFrogVariant(FrogVariant.TEMPERATE));
 
     private Holder<FrogVariant> getFrogVariant(ResourceKey<FrogVariant> key)
     {

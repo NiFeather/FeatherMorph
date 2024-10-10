@@ -1,6 +1,6 @@
 package xyz.nifeather.morph.backends.server.renderer.network.registries;
 
-public class RegistryKey<T>
+public class CustomEntry<T>
 {
     public final Class<T> type;
     public final String name;
@@ -12,21 +12,21 @@ public class RegistryKey<T>
         return requireNonNull;
     }
 
-    public RegistryKey<T> doRequireNonNull()
+    public CustomEntry<T> doRequireNonNull()
     {
         this.requireNonNull = true;
         return this;
     }
 
-    public RegistryKey(String name, Class<T> type)
+    public CustomEntry(String name, Class<T> type)
     {
         this.name = name;
         this.type = type;
     }
 
-    public static <X> RegistryKey<X> of(String name, X val)
+    public static <X> CustomEntry<X> of(String name, X val)
     {
-        return new RegistryKey<>(name, (Class<X>)val.getClass());
+        return new CustomEntry<>(name, (Class<X>)val.getClass());
     }
 
     @Override
@@ -39,7 +39,7 @@ public class RegistryKey<T>
     public boolean equals(Object obj)
     {
         if (this == obj) return true;
-        if (!(obj instanceof RegistryKey<?> other)) return false;
+        if (!(obj instanceof CustomEntry<?> other)) return false;
 
         return other.name.equals(this.name);
     }

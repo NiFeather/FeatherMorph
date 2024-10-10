@@ -5,7 +5,7 @@ import org.bukkit.entity.Player;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xyz.nifeather.morph.backends.server.renderer.network.PacketFactory;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
-import xyz.nifeather.morph.backends.server.renderer.network.registries.RegistryKey;
+import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntry;
 
 public class InventoryLivingWatcher extends LivingEntityWatcher
 {
@@ -18,11 +18,11 @@ public class InventoryLivingWatcher extends LivingEntityWatcher
     private PacketFactory packetFactory;
 
     @Override
-    protected <X> void onEntryWrite(RegistryKey<X> key, X oldVal, X newVal)
+    protected <X> void onEntryWrite(CustomEntry<X> entry, X oldVal, X newVal)
     {
-        super.onEntryWrite(key, oldVal, newVal);
+        super.onEntryWrite(entry, oldVal, newVal);
 
-        if (key.equals(CustomEntries.DISPLAY_FAKE_EQUIPMENT) || key.equals(CustomEntries.EQUIPMENT))
+        if (entry.equals(CustomEntries.DISPLAY_FAKE_EQUIPMENT) || entry.equals(CustomEntries.EQUIPMENT))
             sendPacketToAffectedPlayers(packetFactory.getEquipmentPacket(getBindingPlayer(), this));
     }
 }

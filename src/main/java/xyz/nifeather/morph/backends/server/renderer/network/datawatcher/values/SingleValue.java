@@ -61,26 +61,6 @@ public class SingleValue<T>
         this.defaultValue = defaultValue;
     }
 
-    private final List<T> randomValues = new ObjectArrayList<>();
-
-    public List<T> getRandomValues()
-    {
-        return new ObjectArrayList<>(randomValues);
-    }
-
-    public SingleValue<T> withRandom(List<T> values)
-    {
-        var newInstance = new SingleValue<>(this.name, this.type, this.index, this.defaultValue);
-        newInstance.randomValues.addAll(values);
-
-        return newInstance;
-    }
-
-    public SingleValue<T> withRandom(T... randomValues)
-    {
-        return withRandom(Arrays.stream(randomValues).toList());
-    }
-
     @Override
     public boolean equals(Object obj)
     {
@@ -98,7 +78,6 @@ public class SingleValue<T>
         return this.index == other.index
                 && this.type.equals(other.type)
                 && this.name.equals(other.name)
-                && this.randomValues.equals(other.randomValues)
                 && this.defaultValue.equals(other.defaultValue);
     }
 

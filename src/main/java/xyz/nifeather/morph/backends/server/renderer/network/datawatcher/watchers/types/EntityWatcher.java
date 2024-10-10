@@ -7,7 +7,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
-import xyz.nifeather.morph.backends.server.renderer.network.registries.RegistryKey;
+import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntry;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.misc.NmsRecord;
 
@@ -72,11 +72,11 @@ public class EntityWatcher extends SingleWatcher
     }
 
     @Override
-    protected <X> void onEntryWrite(RegistryKey<X> key, X oldVal, X newVal)
+    protected <X> void onEntryWrite(CustomEntry<X> entry, X oldVal, X newVal)
     {
-        super.onEntryWrite(key, oldVal, newVal);
+        super.onEntryWrite(entry, oldVal, newVal);
 
-        if (key.equals(CustomEntries.DISGUISE_NAME))
+        if (entry.equals(CustomEntries.DISGUISE_NAME))
         {
             var str = newVal.toString();
             var component = str.isEmpty() ? null : Component.literal(str);

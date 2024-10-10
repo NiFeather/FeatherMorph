@@ -17,7 +17,7 @@ import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.backends.server.renderer.network.PacketFactory;
 import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.values.AbstractValues;
 import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.values.SingleValue;
-import xyz.nifeather.morph.backends.server.renderer.network.registries.RegistryKey;
+import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntry;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.RenderRegistry;
 import xyz.nifeather.morph.backends.server.renderer.utilties.WatcherUtils;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
@@ -128,52 +128,52 @@ public abstract class SingleWatcher extends MorphPluginObject
 
     protected final Map<String, Object> customRegistry = Collections.synchronizedMap(new Object2ObjectOpenHashMap<>());
 
-    public <X> void writeEntry(RegistryKey<X> key, X value)
+    public <X> void writeEntry(CustomEntry<X> entry, X value)
     {
-        customRegistry.put(key.name, value);
+        customRegistry.put(entry.name, value);
 
         if (doingInitialization)
             return;
 
-        var prev = readEntryOrDefault(key, null);
-        onEntryWrite(key, prev, value);
+        var prev = readEntryOrDefault(entry, null);
+        onEntryWrite(entry, prev, value);
     }
 
-    protected <X> void onEntryWrite(RegistryKey<X> key, @Nullable X oldVal, @Nullable X newVal)
+    protected <X> void onEntryWrite(CustomEntry<X> entry, @Nullable X oldVal, @Nullable X newVal)
     {
     }
 
     @NotNull
-    public <X> X readEntryOrThrow(RegistryKey<X> key)
+    public <X> X readEntryOrThrow(CustomEntry<X> entry)
     {
-        var val = this.readEntry(key);
+        var val = this.readEntry(entry);
         if (val == null)
-            throw new NullDependencyException("Custom Key '%s' not found in '%s'".formatted(key, this.getClass().getSimpleName()));
+            throw new NullDependencyException("Custom entry '%s' not found in '%s'".formatted(entry, this.getClass().getSimpleName()));
 
         return val;
     }
 
-    public <X> X readEntryOrDefault(RegistryKey<X> key, X defaultValue)
+    public <X> X readEntryOrDefault(CustomEntry<X> entry, X defaultValue)
     {
-        var val = readEntry(key);
+        var val = readEntry(entry);
 
         return val == null ? defaultValue : val;
     }
 
     @Nullable
-    public <X> X readEntry(RegistryKey<X> key)
+    public <X> X readEntry(CustomEntry<X> entry)
     {
-        var val = customRegistry.getOrDefault(key.name, null);
+        var val = customRegistry.getOrDefault(entry.name, null);
 
         if (val == null) return null;
 
-        if (key.type.isInstance(val))
+        if (entry.type.isInstance(val))
         {
             return (X)val;
         }
         else
         {
-            logger.warn("Find incompatible value '%s' for key '%s'!".formatted(val, key));
+            logger.warn("Find incompatible value '%s' for custom entry '%s'!".formatted(val, entry));
 
             return null;
         }

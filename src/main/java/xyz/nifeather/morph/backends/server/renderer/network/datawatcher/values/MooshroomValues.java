@@ -4,7 +4,7 @@ import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.values.b
 
 public class MooshroomValues extends AnimalValues
 {
-    public final SingleValue<String> VARIANT = createSingle("mooshroom_variant", RED).withRandom(RED, RED, RED, BROWN);
+    public final SingleValue<String> VARIANT = createSingle("mooshroom_variant", RED);
     public static final String RED = "red";
     public static final String BROWN = "brown";
 
