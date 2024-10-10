@@ -34,6 +34,7 @@ public class DisguiseProperties
         register(EntityType.VILLAGER, new VillagerProperties());
         register(EntityType.ZOMBIE_VILLAGER, new VillagerProperties());
         register(EntityType.ARMOR_STAND, new ArmorStandProperties());
+        register(EntityType.CREEPER, new CreeperProperties());
     }
 
     public void register(EntityType type, AbstractProperties properties)
