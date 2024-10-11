@@ -65,10 +65,10 @@ public class SkillsConfigurationStoreNew extends DirectoryJsonBasedStorage<Skill
 
             storing.configurations.forEach(this::save);
 
-            var success = file.renameTo(new File(file.getParent(), "skills.old.json"));
+            var success = file.renameTo(new File(file.getParent(), "skills.json.old"));
 
             if (!success)
-                logger.info("Can't rename 'skills.json' to 'skills.old.json', but it's not a big deal, I guess...");
+                logger.info("Can't rename 'skills.json' to 'skills.json.old', but it's not a big deal, I guess...");
 
             logger.info("Done migrating legacy skill configuration!");
         }

@@ -63,10 +63,10 @@ public class PlayerDataStoreNew extends DirectoryJsonBasedStorage<PlayerMeta> im
         legacyStorage.getAll().forEach(this::save);
 
         var file = legacyStorage.file();
-        var success = file.renameTo(new File(file.getParent(), "data.old.json"));
+        var success = file.renameTo(new File(file.getParent(), "data.json.old"));
 
         if (!success)
-            logger.info("Can't rename 'data.json' to 'data.old.json', but it's not a big deal, I guess...");
+            logger.info("Can't rename 'data.json' to 'data.json.old', but it's not a big deal, I guess...");
 
 
         logger.info("Done migrating player data!");
