@@ -1686,6 +1686,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     @ApiStatus.Internal
     public List<PlayerMeta> listAllPlayerMeta()
     {
+        data.shouldLoadAllData(true);
         return data.getAll();
     }
 }

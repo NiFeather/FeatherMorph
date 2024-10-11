@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class PlayerDataStoreNew extends DirectoryJsonBasedStorage<PlayerMeta> implements IManagePlayerData
 {
@@ -260,6 +261,9 @@ public class PlayerDataStoreNew extends DirectoryJsonBasedStorage<PlayerMeta> im
         clearCache();
         trackedPlayerMetaMap.clear();
 
+        if (noLazyLoad.get())
+            loadAll();
+
         return true;
     }
 
@@ -273,21 +277,34 @@ public class PlayerDataStoreNew extends DirectoryJsonBasedStorage<PlayerMeta> im
 
     //endregion IManagePlayerData
 
+    private final AtomicBoolean noLazyLoad = new AtomicBoolean(false);
+
+    public void shouldLoadAllData(boolean val)
+    {
+        noLazyLoad.set(val);
+
+        if (val)
+            loadAll();
+    }
+
     public List<PlayerMeta> getAll()
     {
-        loadAll();
-
         return this.trackedPlayerMetaMap.values().stream().toList();
     }
 
     public void loadAll()
     {
+        logger.info("Force loading all player data...");
         var files = this.directoryStorage.getFiles();
+
+        int count = 0;
         for (File file : files)
         {
-            if (file.isDirectory()) return;
+            if (file.isDirectory()) continue;
 
             var fileName = file.getName();
+            fileName = fileName.substring(0, fileName.lastIndexOf("."));
+
             UUID uuid = null;
 
             try
@@ -298,15 +315,18 @@ public class PlayerDataStoreNew extends DirectoryJsonBasedStorage<PlayerMeta> im
             {
             }
 
-            if (uuid == null || this.trackedPlayerMetaMap.containsKey(uuid)) return;
+            if (uuid == null || this.trackedPlayerMetaMap.containsKey(uuid)) continue;
 
             var meta = this.get(fileName);
-            if (meta == null) return;
+            if (meta == null) continue;
 
             initializePlayerMeta(meta);
 
             this.trackedPlayerMetaMap.put(uuid, meta);
+            count++;
         }
+
+        logger.info("Loaded %s player data".formatted(count));
     }
 
     public static class PackageVersions
