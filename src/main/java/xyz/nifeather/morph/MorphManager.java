@@ -55,7 +55,7 @@ import xyz.nifeather.morph.skills.SkillCooldownInfo;
 import xyz.nifeather.morph.skills.SkillType;
 import xyz.nifeather.morph.storage.offlinestore.OfflineDisguiseState;
 import xyz.nifeather.morph.storage.offlinestore.OfflineStateStore;
-import xyz.nifeather.morph.storage.playerdata.PlayerDataStore;
+import xyz.nifeather.morph.storage.playerdata.PlayerDataStoreNew;
 import xyz.nifeather.morph.storage.playerdata.PlayerMeta;
 import xyz.nifeather.morph.utilities.DisguiseUtils;
 import xyz.nifeather.morph.utilities.PermissionUtils;
@@ -73,7 +73,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 {
     private final List<DisguiseState> activeDisguises = ObjectLists.synchronize(new ObjectArrayList<>());
 
-    private final PlayerDataStore data = new PlayerDataStore();
+    private final PlayerDataStoreNew data = new PlayerDataStoreNew();
 
     private final OfflineStateStore offlineStorage = new OfflineStateStore();
 
@@ -1566,6 +1566,15 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             multiInstanceService.notifyDisguiseMetaChange(player.getUniqueId(), Operation.ADD_IF_ABSENT, disguiseIdentifier);
 
             var config = data.getPlayerMeta(player);
+            var locale = MessageUtils.getLocale(player);
+
+            var meta = data.getDisguiseMeta(disguiseIdentifier);
+            assert meta != null; // 这里不会出现meta是null的情况，除非抽了
+
+            var message = MessageUtils.prefixes(player, MorphStrings.morphUnlockedString()
+                    .withLocale(locale)
+                    .resolve("what", meta.asComponent(locale)));
+            player.sendMessage(message);
 
             if (clientHandler.clientConnected(player))
             {
@@ -1594,6 +1603,19 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         {
             clientHandler.sendDiff(null, List.of(disguiseIdentifier), player);
             multiInstanceService.notifyDisguiseMetaChange(player.getUniqueId(), Operation.REMOVE, disguiseIdentifier);
+
+            var locale = MessageUtils.getLocale(player);
+            var meta = data.getDisguiseMeta(disguiseIdentifier);
+            assert meta != null; // 和上面一样
+
+            var message = MorphStrings.morphLockedString()
+                    .resolve("what", meta.asComponent(locale))
+                    .toComponent(locale);
+            player.sendMessage(message);
+
+            var disguiseState = this.getDisguiseStateFor(player);
+            if (disguiseState != null && disguiseState.getDisguiseIdentifier().equalsIgnoreCase(disguiseIdentifier))
+                this.unMorph(player, true);
         }
 
         return success;

@@ -109,9 +109,7 @@ public class DisguiseMeta
 
     public boolean equals(String rawString)
     {
-        if (!this.isValid()) return false;
-
-        return this.disguiseType != DisguiseTypes.UNKNOWN && this.rawIdentifier.equals(rawString);
+        return this.rawIdentifier.equals(rawString);
     }
 
     /**

@@ -1,7 +1,6 @@
 package xyz.nifeather.morph.storage.playerdata;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.kyori.adventure.text.Component;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -9,22 +8,23 @@ import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.interfaces.IManagePlayerData;
-import xyz.nifeather.morph.messages.MessageUtils;
-import xyz.nifeather.morph.messages.MorphStrings;
 import xyz.nifeather.morph.misc.DisguiseMeta;
-import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.misc.DisguiseTypes;
 import xyz.nifeather.morph.storage.MorphJsonBasedStorage;
 
+import java.io.File;
 import java.util.List;
 import java.util.Objects;
 
-public class PlayerDataStore extends MorphJsonBasedStorage<PlayerMetaContainer> implements IManagePlayerData
+@Deprecated(forRemoval = true)
+public class LegacyPlayerDataStore extends MorphJsonBasedStorage<PlayerMetaContainer> implements IManagePlayerData
 {
     private final List<DisguiseMeta> cachedMetas = new ObjectArrayList<>();
 
-    @Resolved
-    private MorphManager morphs;
+    public File file()
+    {
+        return this.configurationFile;
+    }
 
     @Override
     protected @NotNull String getFileName()
@@ -191,14 +191,6 @@ public class PlayerDataStore extends MorphJsonBasedStorage<PlayerMetaContainer> 
         }
         else return false;
 
-        var locale = MessageUtils.getLocale(player);
-
-        sendMorphAcquiredNotification(player, morphs.getDisguiseStateFor(player),
-                MorphStrings.morphUnlockedString()
-                        .withLocale(locale)
-                        .resolve("what", meta.asComponent(locale))
-                        .toComponent(locale));
-
         return true;
     }
 
@@ -212,16 +204,6 @@ public class PlayerDataStore extends MorphJsonBasedStorage<PlayerMetaContainer> 
 
         getPlayerMeta(player).removeDisguise(meta);
         saveConfiguration();
-
-        var state = morphs.getDisguiseStateFor(player);
-        if (state != null && meta.getKey().equals(state.getDisguiseIdentifier()))
-            morphs.unMorph(player, true);
-
-        var locale = MessageUtils.getLocale(player);
-        sendMorphAcquiredNotification(player, morphs.getDisguiseStateFor(player),
-                MorphStrings.morphLockedString()
-                        .resolve("what", meta.asComponent(locale))
-                        .toComponent(locale));
 
         return true;
     }
@@ -245,14 +227,6 @@ public class PlayerDataStore extends MorphJsonBasedStorage<PlayerMetaContainer> 
     }
 
     //endregion Implementation of IManagePlayerData
-
-    private void sendMorphAcquiredNotification(Player player, @Nullable DisguiseState state, Component text)
-    {
-        if (state == null)
-            player.sendActionBar(text);
-        else
-            player.sendMessage(MessageUtils.prefixes(player, text));
-    }
 
     public synchronized List<PlayerMeta> getAll()
     {
