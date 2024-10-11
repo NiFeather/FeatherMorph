@@ -26,11 +26,7 @@ public class PlayerDataStoreNew extends DirectoryJsonBasedStorage<PlayerMeta> im
     public PlayerDataStoreNew()
     {
         super("playerdata");
-    }
 
-    @Initializer
-    private void load()
-    {
         var packageVersion = this.getPackageVersion();
 
         if (packageVersion < TARGET_PACKAGE_VERSION)
@@ -216,7 +212,9 @@ public class PlayerDataStoreNew extends DirectoryJsonBasedStorage<PlayerMeta> im
         var storedMeta = this.get(uuid.toString());
         if (storedMeta != null)
         {
+            initializePlayerMeta(storedMeta);
             trackedPlayerMetaMap.put(uuid, storedMeta);
+
             return storedMeta;
         }
 
@@ -229,10 +227,39 @@ public class PlayerDataStoreNew extends DirectoryJsonBasedStorage<PlayerMeta> im
         return metaInstance;
     }
 
+    private void initializePlayerMeta(PlayerMeta c)
+    {
+        //要设置给c.unlockedDisguises的列表
+        var list = new ObjectArrayList<DisguiseMeta>();
+
+        //原始列表
+        var unlockedDisguiseIdentifiers = c.getUnlockedDisguiseIdentifiers();
+
+        //先对原始列表排序
+        unlockedDisguiseIdentifiers.sort(null);
+
+        //然后逐个添加
+        unlockedDisguiseIdentifiers.forEach(disguiseId ->
+        {
+            var type = DisguiseTypes.fromId(disguiseId);
+
+            if (type != null)
+                list.add(new DisguiseMeta(disguiseId, DisguiseTypes.fromId(disguiseId)));
+            else
+                logger.warn("Unknown disguise identifier data '%s' owned by '%s'".formatted(disguiseId, c.uniqueId));
+        });
+
+        //设置可用的伪装列表并对其加锁
+        c.setUnlockedDisguises(list);
+        c.lockDisguiseList();
+    }
+
     @Override
     public boolean reloadConfiguration()
     {
+        clearCache();
         trackedPlayerMetaMap.clear();
+
         return true;
     }
 
@@ -275,6 +302,8 @@ public class PlayerDataStoreNew extends DirectoryJsonBasedStorage<PlayerMeta> im
 
             var meta = this.get(fileName);
             if (meta == null) return;
+
+            initializePlayerMeta(meta);
 
             this.trackedPlayerMetaMap.put(uuid, meta);
         }

@@ -42,7 +42,12 @@ public abstract class DirectoryJsonBasedStorage<T> extends MorphPluginObject
             logger.warn("Failed initializing directory storage, please see errors above.");
     }
 
-    private final Map<String, Object> instancesMap = new ConcurrentHashMap<>();
+    private final Map<String, T> instancesMap = new ConcurrentHashMap<>();
+
+    protected Map<String, T> instanceMap()
+    {
+        return this.instancesMap;
+    }
 
     public void clearCache()
     {
@@ -149,7 +154,7 @@ public abstract class DirectoryJsonBasedStorage<T> extends MorphPluginObject
         if (obj == null)
             obj = getDefault();
 
-        this.instancesMap.put(key, obj);
+        this.instancesMap.put(key, (T) obj);
         return obj == getDefault() ? null : (T) obj;
     }
 }
