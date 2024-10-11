@@ -52,15 +52,10 @@ public class SkillsConfigurationStoreNew extends DirectoryJsonBasedStorage<Skill
         {
             logger.info("Migrating from legacy skill configuration...");
             var storage = new LegacyReadonlyConfigurationStorage();
-            var file = storage.file();
-
-            if (!file.exists())
-            {
-                logger.info("Legacy skill configuration doesn't exist, ignoring...");
-                return;
-            }
 
             storage.initializeStorage();
+
+            var file = storage.file();
 
             var storing = storage.getStoring();
             if (storing == null)

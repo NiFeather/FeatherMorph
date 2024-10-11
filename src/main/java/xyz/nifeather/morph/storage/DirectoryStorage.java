@@ -19,7 +19,7 @@ public class DirectoryStorage extends MorphPluginObject
         return initializeFailed;
     }
 
-    private boolean initializeFailed;
+    private boolean initializeFailed = false;
 
     private URI getAbsoulteURI(String path)
     {
@@ -53,6 +53,8 @@ public class DirectoryStorage extends MorphPluginObject
                 this.initializeFailed = true;
             }
         }
+
+        this.initializeFailed = false;
     }
 
     public File[] getFiles(String pattern)
