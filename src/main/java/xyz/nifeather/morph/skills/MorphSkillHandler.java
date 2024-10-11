@@ -25,6 +25,7 @@ import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.MorphStrings;
 import xyz.nifeather.morph.messages.SkillStrings;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
+import xyz.nifeather.morph.providers.disguise.DefaultDisguiseProvider;
 import xyz.nifeather.morph.skills.impl.*;
 import xyz.nifeather.morph.storage.skill.ISkillOption;
 import xyz.nifeather.morph.storage.skill.SkillAbilityConfiguration;
@@ -149,7 +150,7 @@ public class MorphSkillHandler extends MorphPluginObject
      * @return 对应的技能和技能配置，如果没找到则是null
      */
     @Nullable
-    private Pair<SkillAbilityConfiguration, IMorphSkill<?>> getSkillEntry(String identifier)
+    public Pair<SkillAbilityConfiguration, IMorphSkill<?>> getSkillEntry(String identifier)
     {
         if (identifier == null) return null;
 
@@ -215,11 +216,9 @@ public class MorphSkillHandler extends MorphPluginObject
             return;
         }
 
-        var skillEntry= getSkillEntry(state.skillLookupIdentifier());
+        var skill = state.getSkill();
 
-        if (player.getGameMode() == GameMode.SPECTATOR
-            || skillEntry == null
-            || skillEntry.key().getSkillIdentifier().equals(SkillType.NONE))
+        if (player.getGameMode() == GameMode.SPECTATOR || skill == NoneMorphSkill.instance)
         {
             player.sendMessage(MessageUtils.prefixes(player, SkillStrings.skillNotAvaliableString()));
 
@@ -230,11 +229,9 @@ public class MorphSkillHandler extends MorphPluginObject
         }
 
         var cdInfo = getCooldownInfo(player.getUniqueId(), state.skillLookupIdentifier());
-        assert cdInfo != null;
-
         //logger.info("Permission is " + CommonPermissions.skillPermissionOf(skillEntry.getKey().getSkillIdentifier().asString(), state.getDisguiseIdentifier()));
 
-        var singleSkillPerm = CommonPermissions.skillPermissionOf(skillEntry.key().getSkillIdentifier().asString(), state.getDisguiseIdentifier());
+        var singleSkillPerm = CommonPermissions.skillPermissionOf(skill.getIdentifier().asString(), state.getDisguiseIdentifier());
         var hasSkillPerm = PermissionUtils.hasPermission(player, singleSkillPerm, true);
 
         if (!bypassPermission && !hasSkillPerm)
@@ -269,27 +266,17 @@ public class MorphSkillHandler extends MorphPluginObject
             return;
         }
 
-        var skill = skillEntry.right();
-        var config = skillEntry.left();
-
-        ISkillOption option;
-
-        try
+        SkillAbilityConfiguration config = state.getSkillAbilityConfiguration();
+        if (config == null)
         {
-            option = skill.getOptionInstance().fromMap(config.getSkillOptions(skill));
-        }
-        catch (Throwable t)
-        {
-            if (t instanceof ClassCastException)
-                logger.error(state.getDisguiseIdentifier() + " -> " + skill.getIdentifier() + " has an invalid setting, please check your skill configurations.");
-            else
-                logger.error("Error occurred while parsing skill configuration");
-
-            t.printStackTrace();
-
+            logger.warn("Disguise have a skill but don't have a skill configuration?!");
             player.sendMessage(MessageUtils.prefixes(player, SkillStrings.exceptionOccurredString()));
+            state.setSkillCooldown(20, true);
+
             return;
         }
+
+        var option = skill.getOptionInstance().fromMap(config.getSkillOptions(skill));
 
         var cd = skill.executeSkillGeneric(player, state, config, option);
         cdInfo.setLastInvoke(plugin.getCurrentTick());

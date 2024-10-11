@@ -31,12 +31,10 @@ import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
 import xyz.nifeather.morph.providers.animation.SingleAnimation;
 import xyz.nifeather.morph.providers.disguise.DisguiseProvider;
-import xyz.nifeather.morph.skills.IMorphSkill;
-import xyz.nifeather.morph.skills.MorphSkillHandler;
-import xyz.nifeather.morph.skills.SkillCooldownInfo;
-import xyz.nifeather.morph.skills.SkillType;
+import xyz.nifeather.morph.skills.*;
 import xyz.nifeather.morph.skills.impl.NoneMorphSkill;
 import xyz.nifeather.morph.storage.playerdata.PlayerMeta;
+import xyz.nifeather.morph.storage.skill.SkillAbilityConfiguration;
 import xyz.nifeather.morph.utilities.ItemUtils;
 import xyz.nifeather.morph.utilities.NbtUtils;
 import xyz.nifeather.morph.utilities.PermissionUtils;
@@ -556,22 +554,36 @@ public class DisguiseState extends MorphPluginObject
         this.skillLookupIdentifier = newSkillID;
     }
 
+    @Nullable
+    private SkillAbilityConfiguration skillAbilityConfiguration;
+
+    public void setSkillAbilityConfiguration(@Nullable SkillAbilityConfiguration newInstance)
+    {
+        this.skillAbilityConfiguration = newInstance;
+    }
+
+    @Nullable
+    public SkillAbilityConfiguration getSkillAbilityConfiguration()
+    {
+        return skillAbilityConfiguration;
+    }
+
     @NotNull
     private IMorphSkill<?> skill = NoneMorphSkill.instance;
 
     /**
      * 设置此伪装的技能
-     * @param s 目标技能
+     * @param newSkill 目标技能
      * @apiNote 如果目标技能是null，则会fallback到 {@link NoneMorphSkill#instance}
      */
-    public void setSkill(@Nullable IMorphSkill<?> s)
+    public void setSkill(@Nullable IMorphSkill<?> newSkill)
     {
-        if (s == null) s = NoneMorphSkill.instance;
+        if (newSkill == null) newSkill = NoneMorphSkill.instance;
 
         this.skill.onDeEquip(this);
 
-        s.onInitialEquip(this);
-        this.skill = s;
+        newSkill.onInitialEquip(this);
+        this.skill = newSkill;
     }
 
     /**

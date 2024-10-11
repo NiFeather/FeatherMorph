@@ -23,6 +23,7 @@ import xyz.nifeather.morph.skills.MorphSkillHandler;
 import xyz.nifeather.morph.skills.SkillType;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Messages.MessageStore;
+import xyz.nifeather.morph.storage.skill.ISkillOption;
 
 import java.util.List;
 
@@ -202,6 +203,11 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
         var abilityOptions = abilityHandler.getOptionsFor(state.skillLookupIdentifier());
         abilityOptions.forEach((id, config) -> state.getAbilityUpdater().setAbilityConfig(id.asString(), config));
 
-        state.setSkill(skillHandler.lookupDisguiseSkill(state.skillLookupIdentifier()));
+        var skillEntry = skillHandler.getSkillEntry(state.skillLookupIdentifier());
+        if (skillEntry != null)
+        {
+            state.setSkillAbilityConfiguration(skillEntry.key());
+            state.setSkill(skillEntry.value());
+        }
     }
 }
