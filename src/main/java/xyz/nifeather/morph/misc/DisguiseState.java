@@ -34,6 +34,7 @@ import xyz.nifeather.morph.providers.disguise.DisguiseProvider;
 import xyz.nifeather.morph.skills.*;
 import xyz.nifeather.morph.skills.impl.NoneMorphSkill;
 import xyz.nifeather.morph.storage.playerdata.PlayerMeta;
+import xyz.nifeather.morph.storage.skill.ISkillOption;
 import xyz.nifeather.morph.storage.skill.SkillAbilityConfiguration;
 import xyz.nifeather.morph.utilities.ItemUtils;
 import xyz.nifeather.morph.utilities.NbtUtils;
@@ -557,11 +558,6 @@ public class DisguiseState extends MorphPluginObject
     @Nullable
     private SkillAbilityConfiguration skillAbilityConfiguration;
 
-    public void setSkillAbilityConfiguration(@Nullable SkillAbilityConfiguration newInstance)
-    {
-        this.skillAbilityConfiguration = newInstance;
-    }
-
     @Nullable
     public SkillAbilityConfiguration getSkillAbilityConfiguration()
     {
@@ -574,14 +570,22 @@ public class DisguiseState extends MorphPluginObject
     /**
      * 设置此伪装的技能
      * @param newSkill 目标技能
-     * @apiNote 如果目标技能是null，则会fallback到 {@link NoneMorphSkill#instance}
+     * @param config 与技能对应的配置
+     * @apiNote 如果目标技能是null，则会fallback到 {@link NoneMorphSkill#instance}，并一并清除技能配置
      */
-    public void setSkill(@Nullable IMorphSkill<?> newSkill)
+    public <X extends ISkillOption> void setSkill(@Nullable IMorphSkill<X> newSkill,
+                                                  SkillAbilityConfiguration config)
     {
-        if (newSkill == null) newSkill = NoneMorphSkill.instance;
+        if (newSkill == null)
+        {
+            this.skill = NoneMorphSkill.instance;
+            this.skillAbilityConfiguration = null;
+            return;
+        }
 
         this.skill.onDeEquip(this);
 
+        this.skillAbilityConfiguration = config;
         newSkill.onInitialEquip(this);
         this.skill = newSkill;
     }
@@ -907,7 +911,7 @@ public class DisguiseState extends MorphPluginObject
             this.provider.unMorph(getPlayer(), this);
 
         this.abilityUpdater.setAbilities(List.of());
-        this.setSkill(null);
+        this.setSkill(null, null);
     }
 
     public void reset()

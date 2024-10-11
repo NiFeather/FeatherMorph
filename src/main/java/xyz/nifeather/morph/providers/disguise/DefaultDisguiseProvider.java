@@ -205,9 +205,6 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
 
         var skillEntry = skillHandler.getSkillEntry(state.skillLookupIdentifier());
         if (skillEntry != null)
-        {
-            state.setSkillAbilityConfiguration(skillEntry.key());
-            state.setSkill(skillEntry.value());
-        }
+            state.setSkill(skillEntry.value(), skillEntry.key());
     }
 }
