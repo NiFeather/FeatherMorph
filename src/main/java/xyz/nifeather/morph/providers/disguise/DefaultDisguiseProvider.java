@@ -198,6 +198,10 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
         //被动技能
         var abilities = abilityHandler.getAbilitiesFor(state.skillLookupIdentifier());
         state.getAbilityUpdater().setAbilities(abilities);
-        state.setSkill(skillHandler.getSkill(state.skillLookupIdentifier()));
+
+        var abilityOptions = abilityHandler.getOptionsFor(state.skillLookupIdentifier());
+        abilityOptions.forEach((id, config) -> state.getAbilityUpdater().setAbilityConfig(id.asString(), config));
+
+        state.setSkill(skillHandler.lookupDisguiseSkill(state.skillLookupIdentifier()));
     }
 }

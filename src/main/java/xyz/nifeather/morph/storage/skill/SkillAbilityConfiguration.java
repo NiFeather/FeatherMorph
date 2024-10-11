@@ -28,69 +28,19 @@ public class SkillAbilityConfiguration
     /**
      * 创建一个技能配置
      *
-     * @param mobId 生物ID
      * @param cd CD时间
      * @param skillIdentifier 技能ID
      */
-    public SkillAbilityConfiguration(String mobId, int cd, NamespacedKey skillIdentifier)
-    {
-        this.identifier = mobId;
-        this.cooldown = cd;
-        setSkillIdentifier(skillIdentifier);
-    }
-
-    /**
-     * 创建一个技能配置
-     *
-     * @param type 生物类型
-     * @param cd CD时间
-     * @param skillIdentifier 技能ID
-     */
-    public SkillAbilityConfiguration(EntityType type, int cd, NamespacedKey skillIdentifier)
-    {
-        this(type.getKey(), cd, skillIdentifier);
-    }
-
-    /**
-     * 创建一个技能配置
-     *
-     * @param key 生物ID
-     * @param cd CD时间
-     * @param skillIdentifier 技能ID
-     */
-    public SkillAbilityConfiguration(NamespacedKey key, int cd, NamespacedKey skillIdentifier)
+    public SkillAbilityConfiguration(int cd, NamespacedKey skillIdentifier)
     {
         this.cooldown = cd;
         setSkillIdentifier(skillIdentifier);
-        setIdentifier(key);
     }
 
-    @Expose
+    @Nullable
+    @Expose(serialize = false)
     @SerializedName("mobId")
-    private String identifier;
-
-    /**
-     * 获取和配置对应的伪装ID
-     *
-     * @return 伪装ID
-     */
-    @NotNull
-    public String getIdentifier()
-    {
-        return identifier;
-    }
-
-    public void setIdentifier(NamespacedKey key)
-    {
-        this.identifier = key.asString();
-    }
-
-    public SkillAbilityConfiguration setIdentifier(String id)
-    {
-        this.identifier = id;
-
-        return this;
-    }
+    public String legacy_MobID;
 
     //region 主动技能
 
@@ -302,13 +252,6 @@ public class SkillAbilityConfiguration
     }
 
     //endregion 技能设置
-
-    @Override
-    public String toString()
-    {
-        return "Skill configuration for disguise " + this.identifier;
-    }
-
 
     @Expose(serialize = false)
     @SerializedName("projective")

@@ -1,8 +1,10 @@
 package xyz.nifeather.morph.skills;
 
+import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
+import it.unimi.dsi.fastutil.objects.ObjectObjectImmutablePair;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import org.bukkit.Bukkit;
@@ -26,12 +28,13 @@ import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 import xyz.nifeather.morph.skills.impl.*;
 import xyz.nifeather.morph.storage.skill.ISkillOption;
 import xyz.nifeather.morph.storage.skill.SkillAbilityConfiguration;
-import xyz.nifeather.morph.storage.skill.SkillAbilityConfigurationStore;
+import xyz.nifeather.morph.storage.skill.SkillsConfigurationStoreNew;
 import xyz.nifeather.morph.utilities.PermissionUtils;
 
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MorphSkillHandler extends MorphPluginObject
@@ -39,7 +42,7 @@ public class MorphSkillHandler extends MorphPluginObject
     /**
      * 已注册的技能
      */
-    private final List<IMorphSkill<?>> skills = new ObjectArrayList<>();
+    private final Map<String, IMorphSkill<?>> skills = new ConcurrentHashMap<>();
 
     /**
      * 获取已注册的技能
@@ -48,7 +51,7 @@ public class MorphSkillHandler extends MorphPluginObject
      */
     public List<IMorphSkill<?>> getRegistedSkills()
     {
-        return skills;
+        return skills.values().stream().toList();
     }
 
     /**
@@ -65,7 +68,7 @@ public class MorphSkillHandler extends MorphPluginObject
     private MorphManager manager;
 
     @Resolved
-    private SkillAbilityConfigurationStore store;
+    private SkillsConfigurationStoreNew store;
 
     @Initializer
     private void load()
@@ -114,7 +117,7 @@ public class MorphSkillHandler extends MorphPluginObject
     {
         //logger.info("Registering skill: " + skill.getIdentifier().asString());
 
-        if (skills.contains(skill))
+        if (skills.containsKey(skill.getIdentifier().asString()))
         {
             logger.error("Can't register skill: Another skill instance has already registered as " + skill.getIdentifier().asString() + " !");
             return false;
@@ -126,7 +129,7 @@ public class MorphSkillHandler extends MorphPluginObject
             return false;
         }
 
-        skills.add(skill);
+        skills.put(skill.getIdentifier().asString(), skill);
 
         return true;
     }
@@ -142,32 +145,45 @@ public class MorphSkillHandler extends MorphPluginObject
 
     /**
      * 获取某个ID对应的技能和技能配置
-     * @param identifier ID
+     * @param identifier 伪装ID
      * @return 对应的技能和技能配置，如果没找到则是null
      */
     @Nullable
-    private Map.Entry<SkillAbilityConfiguration, IMorphSkill<?>> getSkillEntry(String identifier)
+    private Pair<SkillAbilityConfiguration, IMorphSkill<?>> getSkillEntry(String identifier)
     {
         if (identifier == null) return null;
 
-        return store.getConfiguredSkills().entrySet().stream()
-                .filter(d -> identifier.equals(d.getKey().getIdentifier())).findFirst().orElse(null);
+        var configuration = store.get(identifier);
+        if (configuration == null) return null;
+
+        var skillID = configuration.getSkillIdentifier();
+        var skillInstance = this.getSkill(skillID.asString());
+
+        return new ObjectObjectImmutablePair<>(configuration, skillInstance);
+    }
+
+    @NotNull
+    public IMorphSkill<?> lookupDisguiseSkill(String disguiseIdentifier)
+    {
+        var configuration = store.get(disguiseIdentifier);
+        if (configuration == null) return NoneMorphSkill.instance;
+
+        return this.getSkill(configuration.getSkillIdentifier().asString());
     }
 
     /**
      * 获取和identifier匹配的技能
      *
-     * @param identifier 技能ID
+     * @param skillIdentifier 技能ID
      * @return {@link IMorphSkill}
      * @apiNote 如果未找到则返回 {@link NoneMorphSkill#instance}
      */
     @NotNull
-    public IMorphSkill<?> getSkill(String identifier)
+    public IMorphSkill<?> getSkill(String skillIdentifier)
     {
-        var entry = getSkillEntry(identifier);
+        var skillInstance = this.skills.getOrDefault(skillIdentifier, NoneMorphSkill.instance);
 
-        if (entry != null) return entry.getValue();
-        else return NoneMorphSkill.instance;
+        return skillInstance;
     }
 
     public void executeDisguiseSkill(Player player)
@@ -203,7 +219,7 @@ public class MorphSkillHandler extends MorphPluginObject
 
         if (player.getGameMode() == GameMode.SPECTATOR
             || skillEntry == null
-            || skillEntry.getKey().getSkillIdentifier().equals(SkillType.NONE))
+            || skillEntry.key().getSkillIdentifier().equals(SkillType.NONE))
         {
             player.sendMessage(MessageUtils.prefixes(player, SkillStrings.skillNotAvaliableString()));
 
@@ -218,7 +234,7 @@ public class MorphSkillHandler extends MorphPluginObject
 
         //logger.info("Permission is " + CommonPermissions.skillPermissionOf(skillEntry.getKey().getSkillIdentifier().asString(), state.getDisguiseIdentifier()));
 
-        var singleSkillPerm = CommonPermissions.skillPermissionOf(skillEntry.getKey().getSkillIdentifier().asString(), state.getDisguiseIdentifier());
+        var singleSkillPerm = CommonPermissions.skillPermissionOf(skillEntry.key().getSkillIdentifier().asString(), state.getDisguiseIdentifier());
         var hasSkillPerm = PermissionUtils.hasPermission(player, singleSkillPerm, true);
 
         if (!bypassPermission && !hasSkillPerm)
@@ -253,8 +269,8 @@ public class MorphSkillHandler extends MorphPluginObject
             return;
         }
 
-        var skill = skillEntry.getValue();
-        var config = skillEntry.getKey();
+        var skill = skillEntry.right();
+        var config = skillEntry.left();
 
         ISkillOption option;
 
@@ -265,7 +281,7 @@ public class MorphSkillHandler extends MorphPluginObject
         catch (Throwable t)
         {
             if (t instanceof ClassCastException)
-                logger.error(config.getIdentifier() + " -> " + skill.getIdentifier() + " has an invalid setting, please check your skill configurations.");
+                logger.error(state.getDisguiseIdentifier() + " -> " + skill.getIdentifier() + " has an invalid setting, please check your skill configurations.");
             else
                 logger.error("Error occurred while parsing skill configuration");
 
@@ -365,8 +381,8 @@ public class MorphSkillHandler extends MorphPluginObject
     {
         var entry = getSkillEntry(id);
         return entry != null
-                && !SkillType.UNKNOWN.equals(entry.getKey().getSkillIdentifier())
-                && !SkillType.NONE.equals(entry.getKey().getSkillIdentifier());
+                && !SkillType.UNKNOWN.equals(entry.left().getSkillIdentifier())
+                && !SkillType.NONE.equals(entry.left().getSkillIdentifier());
     }
 
     /**
@@ -379,9 +395,9 @@ public class MorphSkillHandler extends MorphPluginObject
     {
         var entry = getSkillEntry(id);
 
-        if (entry == null || SkillType.UNKNOWN.equals(entry.getKey().getSkillIdentifier())) return false;
+        if (entry == null || SkillType.UNKNOWN.equals(entry.left().getSkillIdentifier())) return false;
 
-        return entry.getValue().getIdentifier().equals(skillKey);
+        return entry.right().getIdentifier().equals(skillKey);
     }
 
     /**

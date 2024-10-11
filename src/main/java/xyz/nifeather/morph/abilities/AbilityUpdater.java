@@ -13,15 +13,18 @@ import xyz.nifeather.morph.config.ConfigOption;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
+import xyz.nifeather.morph.storage.skill.IAbilityConfigLookup;
 import xyz.nifeather.morph.utilities.PermissionUtils;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Bindables.Bindable;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-public class AbilityUpdater extends MorphPluginObject
+public class AbilityUpdater extends MorphPluginObject implements IAbilityConfigLookup
 {
     @NotNull
     private final DisguiseState parentState;
@@ -255,4 +258,27 @@ public class AbilityUpdater extends MorphPluginObject
         var singleAbilityPerm = CommonPermissions.abilityPermissionOf(ability.getIdentifier().asString(), state.getDisguiseIdentifier());
         return PermissionUtils.hasPermission(state.getPlayer(), singleAbilityPerm, true);
     }
+
+    //region IAbilityConfigLookup
+
+    private final Map<String, Object> abilityConfigMap = new ConcurrentHashMap<>();
+
+    @Override
+    @Nullable
+    public <X> X lookupAbilityConfig(String identifier, Class<X> expectedClass)
+    {
+        var val = abilityConfigMap.getOrDefault(identifier, null);
+        if (val == null) return null;
+
+        if (expectedClass.isInstance(val)) return (X) val;
+        else return null;
+    }
+
+    @Override
+    public void setAbilityConfig(String identifier, Object config)
+    {
+        abilityConfigMap.put(identifier, config);
+    }
+
+    //endregion IAbilityConfigLookup
 }

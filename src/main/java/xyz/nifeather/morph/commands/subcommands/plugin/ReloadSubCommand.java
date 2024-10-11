@@ -20,8 +20,7 @@ import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 import xyz.nifeather.morph.misc.recipe.RecipeManager;
 import xyz.nifeather.morph.misc.skins.PlayerSkinProvider;
 import xyz.nifeather.morph.network.multiInstance.MultiInstanceService;
-import xyz.nifeather.morph.network.server.MorphClientHandler;
-import xyz.nifeather.morph.storage.skill.SkillAbilityConfigurationStore;
+import xyz.nifeather.morph.storage.skill.SkillsConfigurationStoreNew;
 
 import java.util.List;
 
@@ -60,7 +59,7 @@ public class ReloadSubCommand extends MorphPluginObject implements ISubCommand
     private VanillaMessageStore vanillaMessageStore;
 
     @Resolved
-    private SkillAbilityConfigurationStore skills;
+    private SkillsConfigurationStoreNew skills;
 
     @Resolved
     private MultiInstanceService multiInstanceService;
@@ -78,9 +77,6 @@ public class ReloadSubCommand extends MorphPluginObject implements ISubCommand
         else
             return null;
     }
-
-    @Resolved
-    private MorphClientHandler clientHandler;
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull String[] args)
@@ -103,7 +99,7 @@ public class ReloadSubCommand extends MorphPluginObject implements ISubCommand
             if (reloadsData)
             {
                 config.reload();
-                skills.reloadConfiguration();
+                skills.clearCache();
                 morphManager.reloadConfiguration();
 
                 PlayerSkinProvider.getInstance().reload();

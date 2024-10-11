@@ -14,13 +14,14 @@ import xyz.nifeather.morph.abilities.impl.potion.*;
 import xyz.nifeather.morph.abilities.impl.onAttack.ExtraKnockbackAbility;
 import xyz.nifeather.morph.abilities.impl.onAttack.PotionOnAttackAbility;
 import xyz.nifeather.morph.events.api.lifecycle.AbilitiesFinishedInitializeEvent;
-import xyz.nifeather.morph.storage.skill.SkillAbilityConfiguration;
-import xyz.nifeather.morph.storage.skill.SkillAbilityConfigurationStore;
+import xyz.nifeather.morph.storage.skill.ISkillOption;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
+import xyz.nifeather.morph.storage.skill.SkillsConfigurationStoreNew;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class AbilityManager extends MorphPluginObject
@@ -28,9 +29,7 @@ public class AbilityManager extends MorphPluginObject
     private final List<IMorphAbility<?>> registedAbilities = new ObjectArrayList<>();
 
     @Resolved
-    private SkillAbilityConfigurationStore store;
-
-    private boolean initalizeDone;
+    private SkillsConfigurationStoreNew store;
 
     /**
      * 注册一个被动技能
@@ -49,32 +48,6 @@ public class AbilityManager extends MorphPluginObject
         }
 
         registedAbilities.add(ability);
-
-        //SkillConfigurationStore只会在重载时给已经注册的被动添加设置
-        //所有在重载/初始化完成后加入的技能都需要我们手动查询
-        if (initalizeDone)
-        {
-            //添加设置
-            store.getConfiguredSkills().forEach((configuration, skill) ->
-            {
-                if (!ability.setOptionGeneric(configuration.getIdentifier(), configuration.getAbilityOptions(ability)))
-                {
-                    logger.warn("Unable to initialize skill configuration for " + configuration.getIdentifier() + " -> " + ability.getIdentifier());
-                }
-            });
-
-            //添加到map中所有符合条件的技能配置里
-            var id = ability.getIdentifier().asString();
-            var matchingConfigs = configToAbilitiesMap.entrySet()
-                    .stream().filter(e -> e.getKey().getAbilitiyIdentifiers().contains(id)).toList();
-
-            matchingConfigs.forEach(c ->
-            {
-                var list = configToAbilitiesMap.get(c.getKey());
-
-                if (!list.contains(ability)) list.add(ability);
-            });
-        }
 
         Bukkit.getPluginManager().registerEvents(ability, plugin);
         return true;
@@ -140,52 +113,84 @@ public class AbilityManager extends MorphPluginObject
                 new SpiderAbility()
         ));
 
-        initalizeDone = true;
-
         Bukkit.getPluginManager().callEvent(new AbilitiesFinishedInitializeEvent(this));
     }
 
-    @Nullable
-    public IMorphAbility<?> getAbility(@Nullable NamespacedKey key)
+    @NotNull
+    public Map<NamespacedKey, ISkillOption> getOptionsFor(String disguiseIdentifier)
     {
-        if (key == null) return null;
+        var configuration = store.get(disguiseIdentifier);
+        if (configuration == null) return new Object2ObjectOpenHashMap<>();
+
+        Map<NamespacedKey, ISkillOption> optionMap = new ConcurrentHashMap<>();
+        configuration.getAbilitiyIdentifiers().forEach(a ->
+        {
+            var idKey = NamespacedKey.fromString(a);
+
+            if (idKey == null)
+            {
+                logger.warn("Invalid ability ID: %s".formatted(a));
+                return;
+            }
+
+            var abilityInstance = this.getAbility(idKey);
+            if (abilityInstance == null) return;
+
+            optionMap.put(idKey, configuration.getAbilityOptions(abilityInstance));
+        });
+
+        return optionMap;
+    }
+
+    @Nullable
+    public IMorphAbility<?> getAbility(@Nullable NamespacedKey abilityIdentifier)
+    {
+        if (abilityIdentifier == null) return null;
 
         var val = registedAbilities.stream()
-                .filter(a -> a.getIdentifier().equals(key)).findFirst().orElse(null);
+                .filter(a -> a.getIdentifier().equals(abilityIdentifier)).findFirst().orElse(null);
 
         if (val == null)
-            logger.warn("Unknown ability: " + key.asString());
+            logger.warn("Unknown ability: " + abilityIdentifier.asString());
 
         return val;
     }
 
-    private final Map<SkillAbilityConfiguration, List<IMorphAbility<?>>> configToAbilitiesMap = new Object2ObjectOpenHashMap<>();
-
     /**
      * 为某个伪装ID获取被动技能
      *
-     * @param id 伪装ID
+     * @param disguiseIdentifier 伪装ID
      * @return 被动技能列表
      */
     @NotNull
-    public List<IMorphAbility<?>> getAbilitiesFor(String id)
+    public List<IMorphAbility<?>> getAbilitiesFor(String disguiseIdentifier)
     {
-        return this.getAbilitiesFor(id, false);
+        return this.getAbilitiesFor(disguiseIdentifier, false);
     }
 
+    /**
+     * @param disguiseIdentifier 目标伪装
+     * @param noFallback 是否要搜索命名空间的默认配置
+     */
     @NotNull
-    public List<IMorphAbility<?>> getAbilitiesFor(String id, boolean noFallback)
+    public List<IMorphAbility<?>> getAbilitiesFor(String disguiseIdentifier, boolean noFallback)
     {
-        var entry = configToAbilitiesMap.entrySet().stream()
-                .filter(s -> s.getKey().getIdentifier().equals(id)).findFirst().orElse(null);
+        var configuration = store.get(disguiseIdentifier);
 
-        if (entry != null)
+        if (configuration != null)
         {
-            return entry.getValue();
+            List<IMorphAbility<?>> abilities = new ObjectArrayList<>();
+            configuration.getAbilitiyIdentifiers().forEach(id ->
+            {
+                var instance = this.getAbility(NamespacedKey.fromString(id));
+                if (instance != null) abilities.add(instance);
+            });
+
+            return abilities;
         }
         else if (!noFallback)
         {
-            var idSpilt = id.split(":", 2);
+            var idSpilt = disguiseIdentifier.split(":", 2);
             if (idSpilt.length < 1) return List.of();
 
             var idNew = idSpilt[0] + ":" + MorphManager.disguiseFallbackName;
@@ -194,16 +199,5 @@ public class AbilityManager extends MorphPluginObject
         }
 
         return List.of();
-    }
-
-    public void setAbilities(SkillAbilityConfiguration configuration, List<IMorphAbility<?>> abilities)
-    {
-        configToAbilitiesMap.put(configuration, abilities);
-    }
-
-    public void clearAbilities()
-    {
-        configToAbilitiesMap.clear();
-        registedAbilities.forEach(IMorphAbility::clearOptions);
     }
 }

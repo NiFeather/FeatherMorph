@@ -29,7 +29,7 @@ import xyz.nifeather.morph.misc.integrations.tab.TabAdapter;
 import xyz.nifeather.morph.network.multiInstance.MultiInstanceService;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
 import xyz.nifeather.morph.skills.MorphSkillHandler;
-import xyz.nifeather.morph.storage.skill.SkillAbilityConfigurationStore;
+import xyz.nifeather.morph.storage.skill.SkillsConfigurationStoreNew;
 import xyz.nifeather.morph.transforms.Transformer;
 import xyz.nifeather.morph.updates.UpdateHandler;
 import xiamomc.pluginbase.Command.CommandHelper;
@@ -219,7 +219,7 @@ public final class MorphPlugin extends XiaMoJavaPlugin
 
         dependencyManager.cache(cmdHelper = new MorphCommandManager());
 
-        dependencyManager.cache(new SkillAbilityConfigurationStore());
+        dependencyManager.cache(new SkillsConfigurationStoreNew());
 
         dependencyManager.cache(new MessageUtils());
 

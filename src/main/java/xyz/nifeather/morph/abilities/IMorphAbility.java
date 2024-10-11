@@ -6,7 +6,6 @@ import org.bukkit.event.Listener;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.LoggerFactory;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.storage.skill.ISkillOption;
 
@@ -81,36 +80,27 @@ public interface IMorphAbility<T extends ISkillOption> extends Listener
      *
      * @return 操作是否成功
      */
-    public boolean setOption(@NotNull String disguiseIdentifier, @Nullable T option);
+    public default boolean setOption(@NotNull String disguiseIdentifier, @Nullable T option)
+    {
+        return false;
+    }
 
     /**
      * @apiNote 内部轮子
      * @return option是否可以cast为目标option，为null则返回true并略过，反之返回setOption的结果
      */
+    @Deprecated(forRemoval = true)
     @ApiStatus.Internal
     public default boolean setOptionGeneric(String disguiseIdentifier, ISkillOption option)
     {
-        T castedOption;
-
-        if (option == null)
-            return true;
-
-        try
-        {
-            castedOption = (T) option;
-        }
-        catch (ClassCastException e)
-        {
-            LoggerFactory.getLogger("morph").error("添加设置时出现问题: " + e.getMessage());
-            e.printStackTrace();
-            return false;
-        }
-
-        return setOption(disguiseIdentifier, castedOption);
+        return false;
     }
 
     /**
      * 清除此被动的所有设置
      */
-    public void clearOptions();
+    @Deprecated(forRemoval = true)
+    public default void clearOptions()
+    {
+    }
 }

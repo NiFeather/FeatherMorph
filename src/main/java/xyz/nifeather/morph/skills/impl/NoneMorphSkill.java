@@ -16,7 +16,7 @@ public final class NoneMorphSkill extends MorphSkill<NoOpConfiguration>
     @Override
     public int executeSkill(Player player, DisguiseState state, SkillAbilityConfiguration configuration, NoOpConfiguration option)
     {
-        logger.warn(configuration.getIdentifier() + "没有技能，但却被调用了executeSkill");
+        logger.warn(state.getDisguiseIdentifier() + "没有技能，但却被调用了executeSkill");
         Thread.dumpStack();
 
         return Integer.MAX_VALUE;

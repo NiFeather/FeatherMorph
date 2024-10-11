@@ -4,6 +4,7 @@ import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.MorphPluginObject;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Path;
 
@@ -106,19 +107,34 @@ public class DirectoryStorage extends MorphPluginObject
         return file;
     }
 
+    /**
+     * @return NULL if the file does not exist.
+     */
     @Nullable
     public File getFile(String fileName, boolean createIfNotExist)
     {
         var file = new File(this.getAbsoulteURI(absoluteDirectoryPath.getPath() + separator + fileName));
 
         if (!file.toPath().toUri().getPath().startsWith(absoluteDirectoryPath.getPath()))
-            throw new RuntimeException("Trying to access a file that does not belongs to this plugin: %s".formatted(file.toURI()));
-
-        if (!file.exists() && createIfNotExist)
         {
+            logger.error("Trying to access a file that does not belongs to this plugin: %s".formatted(file.toURI()));
+            return null;
+        }
+
+        if (!file.exists())
+        {
+            if (!createIfNotExist) return null;
+
             try
             {
-                var success = file.createNewFile();
+                boolean success = true;
+
+                var parent = file.getParentFile();
+                if (!parent.exists())
+                    success = parent.mkdirs();
+
+                success = success && file.createNewFile();
+
                 if (!success)
                 {
                     logger.warn("Unable to create file: Unknown error");
@@ -135,5 +151,24 @@ public class DirectoryStorage extends MorphPluginObject
         if (!file.isFile()) return null;
 
         return file;
+    }
+
+    /**
+     * @return 操作是否成功
+     */
+    private boolean ensureParentAlwaysPresent(File baseFile, boolean isDirectory)
+    {
+        var parent = baseFile.getParentFile();
+        if (!parent.exists()) ensureParentAlwaysPresent(parent, true);
+
+        try
+        {
+            return baseFile.createNewFile();
+        }
+        catch (IOException e)
+        {
+            logger.warn("Can't create file: " + e.getMessage());
+            return false;
+        }
     }
 }

@@ -1,6 +1,5 @@
 package xyz.nifeather.morph.abilities;
 
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -104,11 +103,7 @@ public abstract class MorphAbility<T extends ISkillOption> extends MorphPluginOb
     @Nullable
     protected T getOptionFor(DisguiseState state)
     {
-        return getOr(
-                () -> optionMap.get(state.getDisguiseIdentifier()),
-                Objects::nonNull,
-                () -> optionMap.get(state.skillLookupIdentifier())
-        );
+        return state.getAbilityUpdater().lookupAbilityConfig(this.getIdentifier().asString(), (Class<T>)getDefaultOption().getClass());
     }
 
     public interface Returner<R>
@@ -132,24 +127,5 @@ public abstract class MorphAbility<T extends ISkillOption> extends MorphPluginOb
             return val;
         else
             return fallbackValue.apply();
-    }
-
-    protected final Map<String, T> optionMap = new Object2ObjectOpenHashMap<>();
-
-    @Override
-    public boolean setOption(@NotNull String disguiseIdentifier, @Nullable T option)
-    {
-        if (option == null)
-            return false;
-
-        optionMap.put(disguiseIdentifier, option);
-
-        return true;
-    }
-
-    @Override
-    public void clearOptions()
-    {
-        optionMap.clear();
     }
 }

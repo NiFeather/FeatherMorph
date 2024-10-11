@@ -1,5 +1,6 @@
 package xyz.nifeather.morph.skills;
 
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.kyori.adventure.bossbar.BossBar;
 import org.bukkit.NamespacedKey;
@@ -22,6 +23,7 @@ import xyz.nifeather.morph.utilities.EntityTypeUtils;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class DefaultConfigGenerator
@@ -31,21 +33,18 @@ public class DefaultConfigGenerator
         return new DefaultConfigGenerator();
     }
 
-    private List<SkillAbilityConfiguration> configurations = new ObjectArrayList<>();
+    private Map<String, SkillAbilityConfiguration> configurations = new Object2ObjectOpenHashMap<>();
 
     private SkillAbilityConfiguration getConfiguration(String mobId)
     {
-        var cfg = configurations.stream()
-                .filter(c -> c.getIdentifier().equalsIgnoreCase(mobId))
-                .findFirst().orElse(null);
+        var cfg = configurations.getOrDefault(mobId, null);
 
         if (cfg != null) return cfg;
 
         var newConfig = new SkillAbilityConfiguration();
-        newConfig.setIdentifier(mobId)
-                .setSkillIdentifier(SkillType.NONE);
+        newConfig.setSkillIdentifier(SkillType.NONE);
 
-        configurations.add(newConfig);
+        configurations.put(mobId, newConfig);
 
         return newConfig;
     }
@@ -55,28 +54,12 @@ public class DefaultConfigGenerator
         return getConfiguration(entityType.key().asString());
     }
 
-    @Nullable
-    private SkillAbilityConfigurationContainer cachedContainer;
-
-    public SkillAbilityConfigurationContainer generateConfiguration()
+    public Map<String, SkillAbilityConfiguration> generateConfiguration()
     {
-        if (cachedContainer != null) return cachedContainer;
-
-        var container = new SkillAbilityConfigurationContainer();
-
         this.generateSkills();
         this.generateAbilities();
 
-        container.configurations.addAll(this.configurations);
-
-        cachedContainer = container;
-
-        return container;
-    }
-
-    public void setConfigurationList(List<SkillAbilityConfiguration> newConfigurations)
-    {
-        this.configurations = newConfigurations;
+        return this.configurations;
     }
 
     public void generateSkills()

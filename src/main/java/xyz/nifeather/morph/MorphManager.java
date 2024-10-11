@@ -15,6 +15,8 @@ import org.bukkit.profile.PlayerTextures;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xyz.nifeather.morph.abilities.AbilityManager;
+import xyz.nifeather.morph.abilities.MorphAbility;
 import xyz.nifeather.morph.backends.DisguiseBackend;
 import xyz.nifeather.morph.backends.DisguiseWrapper;
 import xyz.nifeather.morph.backends.WrapperAttribute;
@@ -884,7 +886,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     }
 
     @Resolved
-    private VanillaMessageStore vanillaMessageStore;
+    private AbilityManager abilityManager;
 
     private void postBuildDisguise(DisguiseBuildResult result,
                                    MorphParameters parameters,

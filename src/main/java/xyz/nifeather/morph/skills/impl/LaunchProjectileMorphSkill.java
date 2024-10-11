@@ -43,7 +43,7 @@ public class LaunchProjectileMorphSkill extends DelayedMorphSkill<ProjectileConf
 
         if (type == null)
         {
-            printErrorMessage(player, "Invalid projective entity for configuration " + configuration.getIdentifier());
+            printErrorMessage(player, "Invalid projective entity for " + state.getDisguiseIdentifier());
             return ExecuteResult.fail(10);
         }
 
