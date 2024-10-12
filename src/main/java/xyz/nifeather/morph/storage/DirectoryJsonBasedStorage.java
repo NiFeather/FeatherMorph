@@ -114,7 +114,6 @@ public abstract class DirectoryJsonBasedStorage<T> extends MorphPluginObject
     public String getPath(String key)
     {
         return key.replace(":", "/")
-                .replace("@", "$")
                 .replaceAll("[^a-zA-Z0-9\\-]]", "_");
     }
 
