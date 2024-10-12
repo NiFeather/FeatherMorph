@@ -213,7 +213,7 @@ public class PlayerDataStoreNew extends DirectoryJsonBasedStorage<PlayerMeta> im
         var storedMeta = this.get(uuid.toString());
         if (storedMeta != null)
         {
-            initializePlayerMeta(storedMeta);
+            initializePlayerMeta(storedMeta, uuid);
             trackedPlayerMetaMap.put(uuid, storedMeta);
 
             return storedMeta;
@@ -228,13 +228,15 @@ public class PlayerDataStoreNew extends DirectoryJsonBasedStorage<PlayerMeta> im
         return metaInstance;
     }
 
-    private void initializePlayerMeta(PlayerMeta c)
+    private void initializePlayerMeta(PlayerMeta meta, UUID matchingUUID)
     {
+        meta.uniqueId = matchingUUID;
+
         //要设置给c.unlockedDisguises的列表
         var list = new ObjectArrayList<DisguiseMeta>();
 
         //原始列表
-        var unlockedDisguiseIdentifiers = c.getUnlockedDisguiseIdentifiers();
+        var unlockedDisguiseIdentifiers = meta.getUnlockedDisguiseIdentifiers();
 
         //先对原始列表排序
         unlockedDisguiseIdentifiers.sort(null);
@@ -247,12 +249,12 @@ public class PlayerDataStoreNew extends DirectoryJsonBasedStorage<PlayerMeta> im
             if (type != null)
                 list.add(new DisguiseMeta(disguiseId, DisguiseTypes.fromId(disguiseId)));
             else
-                logger.warn("Unknown disguise identifier data '%s' owned by '%s'".formatted(disguiseId, c.uniqueId));
+                logger.warn("Unknown disguise identifier data '%s' owned by '%s'".formatted(disguiseId, matchingUUID));
         });
 
         //设置可用的伪装列表并对其加锁
-        c.setUnlockedDisguises(list);
-        c.lockDisguiseList();
+        meta.setUnlockedDisguises(list);
+        meta.lockDisguiseList();
     }
 
     @Override
@@ -320,7 +322,7 @@ public class PlayerDataStoreNew extends DirectoryJsonBasedStorage<PlayerMeta> im
             var meta = this.get(fileName);
             if (meta == null) continue;
 
-            initializePlayerMeta(meta);
+            initializePlayerMeta(meta, uuid);
 
             this.trackedPlayerMetaMap.put(uuid, meta);
             count++;

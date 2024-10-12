@@ -13,7 +13,7 @@ public class PlayerMeta
     /**
      * 玩家的UUID
      */
-    @Expose
+    @Expose(serialize = false)
     public UUID uniqueId;
 
     /**
