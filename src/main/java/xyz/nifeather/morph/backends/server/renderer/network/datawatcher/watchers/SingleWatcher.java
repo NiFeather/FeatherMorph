@@ -181,6 +181,23 @@ public abstract class SingleWatcher extends MorphPluginObject
 
     //endregion Custom Registry
 
+    public void resetRegistries()
+    {
+        Map<Integer, Object> registryCopy = new Object2ObjectOpenHashMap<>(registry);
+
+        registryCopy.forEach((id, val) ->
+        {
+            var sv = this.knownValues.getOrDefault(id, null);
+            if (sv != null)
+                this.writePersistent((SingleValue<Object>) sv, sv.defaultValue());
+
+            this.registry.remove(id);
+        });
+
+        Map<String, Object> crCopy = new Object2ObjectOpenHashMap<>(customRegistry);
+        crCopy.clear();
+    }
+
     //region Value Registry
 
     protected final Map<Integer, Object> registry = new ConcurrentHashMap<>();
