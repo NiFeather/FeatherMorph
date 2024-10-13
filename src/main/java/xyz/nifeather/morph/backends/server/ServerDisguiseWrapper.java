@@ -303,14 +303,36 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
         if (this.bindingWatcher != null)
             this.bindingWatcher.dispose();
 
+        refreshRegistry(newBinding, bindingWatcher);
+
         this.bindingWatcher = bindingWatcher;
 
         this.disguiseProperties.forEach((property, value) ->
         {
             bindingWatcher.writeProperty((SingleProperty<Object>) property, value);
         });
+    }
 
-        refreshRegistry();
+    private void refreshRegistry(@NotNull Player bindingPlayer, @NotNull SingleWatcher bindingWatcher)
+    {
+        //和watcher同步我们的NBT
+        bindingWatcher.mergeFromCompound(getCompound(false));
+
+        if (getEntityType() == EntityType.PLAYER)
+        {
+            var profileOptional = readOrDefault(WrapperAttribute.profile);
+            profileOptional.ifPresent(p -> bindingWatcher.writeEntry(CustomEntries.PROFILE, p));
+        }
+
+        //todo: 激活刷新时也刷新到玩家
+        if (bindingWatcher instanceof InventoryLivingWatcher)
+        {
+            bindingWatcher.writeEntry(CustomEntries.DISPLAY_FAKE_EQUIPMENT, readOrDefault(WrapperAttribute.displayFakeEquip));
+            bindingWatcher.writeEntry(CustomEntries.EQUIPMENT, this.equipment);
+        }
+
+        if (bindingWatcher.getEntityType() == EntityType.GHAST)
+            bindingWatcher.writePersistent(ValueIndex.GHAST.CHARGING, aggressive);
     }
 
     @Override
@@ -338,37 +360,5 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
         }
 
         super.onPlayerJoin(newInstance);
-    }
-
-    private void refreshRegistry()
-    {
-        if (bindingPlayer == null)
-            return;
-
-        if (bindingWatcher == null)
-        {
-            logger.warn("Have a bindingPlayer but no bindingWatcher?!");
-            Thread.dumpStack();
-            return;
-        }
-
-        //和watcher同步我们的NBT
-        bindingWatcher.mergeFromCompound(getCompound());
-
-        if (getEntityType() == EntityType.PLAYER)
-        {
-            var profileOptional = readOrDefault(WrapperAttribute.profile);
-            profileOptional.ifPresent(p -> bindingWatcher.writeEntry(CustomEntries.PROFILE, p));
-        }
-
-        //todo: 激活刷新时也刷新到玩家
-        if (bindingWatcher instanceof InventoryLivingWatcher)
-        {
-            bindingWatcher.writeEntry(CustomEntries.DISPLAY_FAKE_EQUIPMENT, readOrDefault(WrapperAttribute.displayFakeEquip));
-            bindingWatcher.writeEntry(CustomEntries.EQUIPMENT, this.equipment);
-        }
-
-        if (bindingWatcher.getEntityType() == EntityType.GHAST)
-            bindingWatcher.writePersistent(ValueIndex.GHAST.CHARGING, aggressive);
     }
 }

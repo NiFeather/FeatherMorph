@@ -351,6 +351,7 @@ public abstract class SingleWatcher extends MorphPluginObject
     {
     }
 
+    @NotNull
     public <X> X read(SingleValue<X> singleValue)
     {
         return this.readOr(singleValue, singleValue.defaultValue());

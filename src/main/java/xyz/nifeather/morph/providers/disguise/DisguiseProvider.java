@@ -221,10 +221,10 @@ public abstract class DisguiseProvider extends MorphPluginObject
         var backend = getPreferredBackend();
 
         DisguiseWrapper<?> ourDisguise;
-        DisguiseWrapper<?> theirDisguise = backend.getWrapper(target);
         DisguiseState theirState = morphs.getDisguiseStateFor(target);
+        DisguiseWrapper<?> theirDisguise = theirState != null ? theirState.getDisguiseWrapper() : null;
 
-        if (theirState != null && theirDisguise != null)
+        if (theirState != null)
         {
             var key = theirState.getDisguiseIdentifier();
 
