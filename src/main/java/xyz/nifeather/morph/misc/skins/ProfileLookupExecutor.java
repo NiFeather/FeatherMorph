@@ -19,20 +19,20 @@ public class ProfileLookupExecutor
 
             MorphPlugin.getInstance()
                     .getSLF4JLogger()
-                    .info("Creating new executor with a maximum of " + getThreadCount() + " thread(s) for profile lookup.");
+                    .info("Creating new executor with a maximum of " + getMaximumThreadCount() + " thread(s) for profile lookup.");
         }
 
         return executor;
     }
 
-    private static int getThreadCount()
+    private static int getMaximumThreadCount()
     {
-        return Math.max(4, Runtime.getRuntime().availableProcessors() / 2);
+        return Math.min(16, Math.max(4, Runtime.getRuntime().availableProcessors() / 2));
     }
 
     private static ExecutorService createExecutor()
     {
-        return Executors.newFixedThreadPool(getThreadCount(), new ThreadFactory()
+        return Executors.newFixedThreadPool(getMaximumThreadCount(), new ThreadFactory()
         {
             private final AtomicInteger threadCount = new AtomicInteger(0);
 
