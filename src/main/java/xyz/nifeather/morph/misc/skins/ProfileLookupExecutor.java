@@ -4,9 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.MorphPlugin;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class ProfileLookupExecutor
@@ -16,14 +14,21 @@ public class ProfileLookupExecutor
     {
         var executor = EXECUTOR;
         if (executor == null || executor.isShutdown())
+        {
             EXECUTOR = executor = createExecutor();
+        }
 
         return executor;
     }
 
+    private static int getThreadCount()
+    {
+        return Math.max(4, Runtime.getRuntime().availableProcessors() / 2);
+    }
+
     private static ExecutorService createExecutor()
     {
-        return Executors.newFixedThreadPool(5, new ThreadFactory()
+        return Executors.newFixedThreadPool(getThreadCount(), new ThreadFactory()
         {
             private final AtomicInteger threadCount = new AtomicInteger(0);
 
@@ -31,7 +36,8 @@ public class ProfileLookupExecutor
             public Thread newThread(@NotNull Runnable runnable)
             {
                 Thread thread = new Thread(runnable);
-                thread.setName("FeatherMorph Profile Executor #" + this.threadCount.getAndIncrement());
+                var threadId = this.threadCount.getAndIncrement();
+                thread.setName("FeatherMorph Profile Executor #" + threadId);
 
                 thread.setUncaughtExceptionHandler((Thread t, Throwable error) ->
                 {
