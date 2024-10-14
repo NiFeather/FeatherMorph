@@ -6,11 +6,15 @@ import com.mojang.authlib.GameProfileRepository;
 import com.mojang.authlib.ProfileLookupCallback;
 import com.mojang.authlib.exceptions.AuthenticationUnavailableException;
 import com.mojang.authlib.yggdrasil.ProfileNotFoundException;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import it.unimi.dsi.fastutil.objects.ObjectLists;
 import net.minecraft.Util;
 import net.minecraft.server.MinecraftServer;
 import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xiamomc.pluginbase.Annotations.Initializer;
+import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.misc.MorphGameProfile;
 import xyz.nifeather.morph.misc.NmsRecord;
@@ -20,7 +24,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.TimeUnit;
+import java.util.function.BiConsumer;
 
 public class PlayerSkinProvider extends MorphPluginObject
 {
@@ -39,30 +44,114 @@ public class PlayerSkinProvider extends MorphPluginObject
         this.skinCache.initializeStorage();
     }
 
+    @Initializer
+    private void load()
+    {
+        Bukkit.getAsyncScheduler().runAtFixedRate(plugin,
+                task -> this.batchPlayerInfo(),
+                1000, 1000,
+                TimeUnit.MILLISECONDS);
+    }
+
     private final SkinCache skinCache = new SkinCache();
+
+    // region Info Request Batching
+
+    private final List<String> namesToLookup = new ObjectArrayList<>();
+    private final Map<String, Optional<GameProfile>> batchResults = new ConcurrentHashMap<>();
+
+    // name <-> lock
+    private final Map<String, Object> nameLockMap = new ConcurrentHashMap<>();
 
     private CompletableFuture<Optional<GameProfile>> fetchPlayerInfoAsync(String name)
     {
-        var executor = Util.PROFILE_EXECUTOR;
+        var executor = ProfileLookupExecutor.executor();
 
-        return CompletableFuture.supplyAsync(() -> this.fetchPlayerInfo(name), executor);
+        return CompletableFuture.supplyAsync(() -> this.schedulePlayerInfo(name), executor);
     }
 
-    /**
-     * 根据给定的名称搜索对应的Profile（不包含皮肤）
-     * @apiNote 此方法返回的GameProfile不包含皮肤，若要获取于此对应的皮肤，请使用 {@link PlayerSkinProvider#fetchSkin(GameProfile)}
-     * @param name
-     * @return
-     */
-    private Optional<GameProfile> fetchPlayerInfo(String name)
+    private Optional<GameProfile> schedulePlayerInfo(String name)
     {
-        var profileRef = new AtomicReference<GameProfile>(null);
+        synchronized (namesToLookup)
+        {
+            this.namesToLookup.add(name);
+        }
+
+        var lock = new Object();
+        nameLockMap.put(name.toUpperCase(), lock);
+
+        try
+        {
+            synchronized (lock)
+            {
+                lock.wait();
+            }
+
+            if (!this.batchResults.containsKey(name))
+                return Optional.empty();
+            else
+                return this.batchResults.remove(name);
+        }
+        catch (InterruptedException e)
+        {
+            logger.info("Skin lookup request for '%s' canceled by external source".formatted(name));
+            return Optional.empty();
+        }
+    }
+
+    private static final Object batchLock = new Object();
+
+    /**
+     * 批量处理玩家信息请求
+     */
+    public void batchPlayerInfo()
+    {
+        synchronized (batchLock)
+        {
+            startBatchPlayerInfo();
+        }
+    }
+
+    private void startBatchPlayerInfo()
+    {
+        if (namesToLookup.isEmpty()) return;
+
+        List<String> list;
+        synchronized (namesToLookup)
+        {
+            list = namesToLookup.stream().map(String::toUpperCase).toList();
+            namesToLookup.clear();
+        }
+
+        List<String> remainingNames = new ObjectArrayList<>(list);
+
+        BiConsumer<String, @Nullable GameProfile> onRequestFinish = (n, profile) ->
+        {
+            var nameUpper = n.toUpperCase();
+
+            Optional<GameProfile> optional = profile == null ? Optional.empty() : Optional.of(profile);
+            this.batchResults.put(n, optional);
+
+            remainingNames.remove(nameUpper);
+
+            var lock = nameLockMap.remove(nameUpper);
+            if (lock == null)
+            {
+                //logger.warn(nameUpper + ": Don't have a lock?!");
+                return;
+            }
+
+            synchronized (lock)
+            {
+                lock.notifyAll();
+            }
+        };
 
         var lookupCallback = new ProfileLookupCallback()
         {
             public void onProfileLookupSucceeded(GameProfile gameprofile)
             {
-                profileRef.set(gameprofile);
+                onRequestFinish.accept(gameprofile.getName(), gameprofile);
             }
 
             public void onProfileLookupFailed(String profileName, Exception exception)
@@ -79,15 +168,16 @@ public class PlayerSkinProvider extends MorphPluginObject
                 {
                     logger.info("Failed to lookup '%s': '%s'".formatted(profileName, exception.getMessage()));
                 }
+
+                onRequestFinish.accept(profileName, null);
             }
         };
 
         GameProfileRepository profileRepo = MinecraftServer.getServer().getProfileRepository();
-        profileRepo.findProfilesByNames(new String[]{name}, lookupCallback);
-
-        var profile = profileRef.get();
-        return profile == null ? Optional.empty() : Optional.of(profile);
+        profileRepo.findProfilesByNames(remainingNames.toArray(new String[0]), lookupCallback);
     }
+
+    // endregion Info Request Batching
 
     @Nullable
     public GameProfile getCachedProfile(String name)
@@ -222,6 +312,11 @@ public class PlayerSkinProvider extends MorphPluginObject
         if(skin == null) return;
 
         skin.expiresAt = 0;
+    }
+
+    public void shutdown()
+    {
+        ProfileLookupExecutor.executor().shutdownNow();
     }
 
     //endregion

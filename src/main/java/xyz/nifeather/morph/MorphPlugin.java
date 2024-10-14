@@ -26,6 +26,7 @@ import xyz.nifeather.morph.misc.integrations.modelengine.ModelEngineHelper;
 import xyz.nifeather.morph.misc.integrations.placeholderapi.PlaceholderIntegration;
 import xyz.nifeather.morph.misc.integrations.residence.ResidenceEventProcessor;
 import xyz.nifeather.morph.misc.integrations.tab.TabAdapter;
+import xyz.nifeather.morph.misc.skins.PlayerSkinProvider;
 import xyz.nifeather.morph.network.multiInstance.MultiInstanceService;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
 import xyz.nifeather.morph.skills.MorphSkillHandler;
@@ -294,6 +295,8 @@ public final class MorphPlugin extends XiaMoJavaPlugin
 
             if (instanceService != null)
                 instanceService.onDisable();
+
+            PlayerSkinProvider.getInstance().shutdown();
 
             var messenger = this.getServer().getMessenger();
 
