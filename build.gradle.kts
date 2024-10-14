@@ -26,6 +26,7 @@ repositories {
         url = uri("https://jitpack.io")
         content {
             includeGroup("com.github.XiaMoZhiShi")
+            includeGroup("com.github.NiFeather")
         }
     }
 
@@ -93,21 +94,21 @@ dependencies {
         project.property("protocols_local_version")
         else project.property("protocols_version");
 
-    implementation("com.github.XiaMoZhiShi:feathermorph-protocols:${protocolVersion}")
+    implementation("com.github.NiFeather:feathermorph-protocols:${protocolVersion}")
     implementation("com.github.XiaMoZhiShi:PluginBase:${project.property("pluginbase_version")}")
     {
         exclude("com.google.code.gson", "gson")
     }
 }
 
-group = "xiamomc.morph"
+group = "xyz.nifeather.morph"
 version = "${project.property("project_version")}"
 description = "A morph plugin that aims to provide many features out-of-the-box"
 java.sourceCompatibility = JavaVersion.VERSION_21
 
 bukkit {
     load = BukkitPluginDescription.PluginLoadOrder.POSTWORLD
-    main = "xiamomc.morph.MorphPlugin"
+    main = "xyz.nifeather.morph.MorphPlugin"
     apiVersion = "1.19"
     authors = listOf("MATRIX-feather")
     depend = listOf()
@@ -130,7 +131,7 @@ bukkit {
         featherMorphCommand.aliases = listOf("fm");
     }
 
-    val permissionRoot = "xiamomc.morph."
+    val permissionRoot = "feathermorph."
 
     permissions {
         register(permissionRoot + "morph")
@@ -155,7 +156,13 @@ bukkit {
 
     val opPermsStrList = listOf(
             permissionRoot + "disguise_revealing",
+
             permissionRoot + "manage",
+            permissionRoot + "manage.grant",
+            permissionRoot + "manage.revoke",
+            permissionRoot + "manage.unmorph",
+            permissionRoot + "manage.morph",
+
             permissionRoot + "query",
             permissionRoot + "queryall",
             permissionRoot + "reload",
@@ -199,10 +206,10 @@ tasks.build {
 tasks.shadowJar {
     minimize()
     archiveFileName = "FeatherMorph-${project.property("project_version")}+${project.property("mc_version")}-final.jar"
-    relocate("xiamomc.pluginbase", "xiamomc.morph.shaded.pluginbase")
-    relocate("org.bstats", "xiamomc.morph.shaded.bstats")
-    relocate("de.tr7zw.changeme.nbtapi", "xiamomc.morph.shaded.nbtapi")
-    relocate("de.themoep.inventorygui", "xiamomc.morph.shaded.inventorygui")
+    relocate("xiamomc.pluginbase", "xyz.nifeather.morph.shaded.pluginbase")
+    relocate("org.bstats", "xyz.nifeather.morph.shaded.bstats")
+    relocate("de.tr7zw.changeme.nbtapi", "xyz.nifeather.morph.shaded.nbtapi")
+    relocate("de.themoep.inventorygui", "xyz.nifeather.morph.shaded.inventorygui")
 }
 
 tasks.withType<JavaCompile>() {
