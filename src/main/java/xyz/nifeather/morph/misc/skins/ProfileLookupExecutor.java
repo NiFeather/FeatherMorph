@@ -19,7 +19,7 @@ public class ProfileLookupExecutor
 
             MorphPlugin.getInstance()
                     .getSLF4JLogger()
-                    .info("Creating new executor with maximum " + getMaximumThreadCount() + " thread(s) for profile lookup.");
+                    .info("Creating new executor with a maximum of " + getMaximumThreadCount() + " thread(s) for profile lookup.");
         }
 
         return executor;
