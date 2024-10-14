@@ -237,6 +237,8 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         if (mainHandItem.getType().isAir())
             return false;
 
+        if (!action.isLeftClick() && !action.isRightClick()) return false;
+
         var disguiseState = morphs.getDisguiseStateFor(player);
 
         // 因为快速伪装功能包含了玩家头颅，所以我们没有在上面检查物品是否为技能触发物品。
