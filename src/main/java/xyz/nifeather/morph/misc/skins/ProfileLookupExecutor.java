@@ -16,39 +16,46 @@ public class ProfileLookupExecutor
         if (executor == null || executor.isShutdown())
         {
             EXECUTOR = executor = createExecutor();
+
+            MorphPlugin.getInstance()
+                    .getSLF4JLogger()
+                    .info("Creating new executor with maximum " + getMaximumThreadCount() + " thread(s) for profile lookup.");
         }
 
         return executor;
     }
 
-    private static int getThreadCount()
+    private static int getMaximumThreadCount()
     {
-        return Math.max(4, Runtime.getRuntime().availableProcessors() / 2);
+        return Math.min(16, Math.max(4, Runtime.getRuntime().availableProcessors() / 2));
     }
 
     private static ExecutorService createExecutor()
     {
-        return Executors.newFixedThreadPool(getThreadCount(), new ThreadFactory()
-        {
-            private final AtomicInteger threadCount = new AtomicInteger(0);
-
-            @Override
-            public Thread newThread(@NotNull Runnable runnable)
-            {
-                Thread thread = new Thread(runnable);
-                var threadId = this.threadCount.getAndIncrement();
-                thread.setName("FeatherMorph Profile Executor #" + threadId);
-
-                thread.setUncaughtExceptionHandler((Thread t, Throwable error) ->
+        return new ThreadPoolExecutor(1, getMaximumThreadCount(),
+                10, TimeUnit.MINUTES,
+                new SynchronousQueue<>(),
+                new ThreadFactory()
                 {
-                    MorphPlugin.getInstance()
-                            .getSLF4JLogger()
-                            .error("Error occurred in thread " + t.getName(), error);
-                });
+                    private final AtomicInteger threadCount = new AtomicInteger(0);
 
-                return thread;
-            }
-        });
+                    @Override
+                    public Thread newThread(@NotNull Runnable runnable)
+                    {
+                        Thread thread = new Thread(runnable);
+                        var threadId = this.threadCount.getAndIncrement();
+                        thread.setName("FeatherMorph Profile Executor #" + threadId);
+
+                        thread.setUncaughtExceptionHandler((Thread t, Throwable error) ->
+                        {
+                            MorphPlugin.getInstance()
+                                    .getSLF4JLogger()
+                                    .error("Error occurred in thread " + t.getName(), error);
+                        });
+
+                        return thread;
+                    }
+                });
     }
 
     @Nullable
