@@ -2,6 +2,8 @@ package xyz.nifeather.morph.misc.integrations.towny;
 
 import com.destroystokyo.paper.event.entity.EntityAddToWorldEvent;
 import com.palmergames.bukkit.towny.TownyAPI;
+import com.palmergames.bukkit.towny.event.PlayerChangePlotEvent;
+import com.palmergames.bukkit.towny.event.TownSpawnEvent;
 import com.palmergames.bukkit.towny.event.player.PlayerEntersIntoTownBorderEvent;
 import com.palmergames.bukkit.towny.event.player.PlayerExitsFromTownBorderEvent;
 import com.palmergames.bukkit.towny.object.Town;
@@ -11,6 +13,7 @@ import com.palmergames.bukkit.towny.utils.MetaDataUtil;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectLists;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Player;
@@ -132,6 +135,12 @@ public class TownyAdapter extends MorphPluginObject implements Listener
     }
 
     @EventHandler
+    public void onTownSpawn(TownSpawnEvent e)
+    {
+        this.updatePlayer(e.getPlayer(), e.getToTown());
+    }
+
+    @EventHandler
     public void onLeavePlot(PlayerExitsFromTownBorderEvent e)
     {
         if (allowFlyInWilderness.get()) return;
@@ -175,12 +184,19 @@ public class TownyAdapter extends MorphPluginObject implements Listener
         this.unblockPlayer(e.getPlayer());
     }
 
+    @EventHandler
+    public void onPlayerTeleport(PlayerTeleportEvent e)
+    {
+        if (e.getFrom().getWorld().equals(e.getTo().getWorld()))
+            this.updatePlayer(e.getPlayer(), null);
+    }
+
     public void updatePlayer(Player player, @Nullable Town town)
     {
         this.updatePlayer(player, town, false);
     }
 
-    public void updatePlayer(Player player, @Nullable Town town, boolean noLookup)
+    public void updatePlayer(Player player, @Nullable Town currentTown, boolean noLookup)
     {
         if (!worldUsingTowny(player.getWorld()))
         {
@@ -188,10 +204,10 @@ public class TownyAdapter extends MorphPluginObject implements Listener
             return;
         }
 
-        if (town == null && !noLookup)
-            town = townyAPI.getTown(player.getLocation());
+        if (currentTown == null && !noLookup)
+            currentTown = townyAPI.getTown(player.getLocation());
 
-        if (allowFlightAt(player, town))
+        if (allowFlightAt(player, currentTown))
             unblockPlayer(player);
         else
             blockPlayer(player);
