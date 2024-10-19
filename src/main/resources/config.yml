@@ -73,6 +73,16 @@ root:
     # Some features may not be affected by this option.
     single_language: false
 
+  # Integration options
+  integrations:
+    # For Towny >= 0.100.4.0
+    towny:
+      # Should we allow flight in wilderness?
+      #
+      # Note that this doesn't affect worlds that are not managed by Towny
+      # To disable flying in these worlds, head to `flying > nofly_worlds`!
+      allow_flight_in_wilderness: false
+
   # Should we enable the "Disguise Revealing" feature?
   #
   # This was made to nerf the ability for players to not get targeted by hostile mobs.

@@ -1,5 +1,6 @@
 package xyz.nifeather.morph.events;
 
+import com.destroystokyo.paper.event.entity.EntityAddToWorldEvent;
 import com.destroystokyo.paper.event.player.PlayerClientOptionsChangeEvent;
 import com.destroystokyo.paper.event.player.PlayerPostRespawnEvent;
 import de.themoep.inventorygui.InventoryGui;

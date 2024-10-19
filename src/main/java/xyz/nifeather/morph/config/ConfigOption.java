@@ -124,6 +124,8 @@ public enum ConfigOption
     // SRR -> ServerRenderer
     SR_SHOW_PLAYER_DISGUISES_IN_TAB(serverRendererNode().append("show_player_disguises_in_tab"), false),
 
+    TOWNY_ALLOW_FLY_IN_WILDERNESS(townyNode().append("allow_fly_in_wilderness"), false),
+
 
     VERSION(ConfigNode.create().append("version"), 0);
 
@@ -201,5 +203,13 @@ public enum ConfigOption
     private static ConfigNode serverRendererNode()
     {
         return ConfigNode.create().append("server_renderer");
+    }
+    private static ConfigNode integrationNode()
+    {
+        return ConfigNode.create().append("integrations");
+    }
+    public static ConfigNode townyNode()
+    {
+        return integrationNode().append("towny");
     }
 }

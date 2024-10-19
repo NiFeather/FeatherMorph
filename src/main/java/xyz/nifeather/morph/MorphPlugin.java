@@ -19,6 +19,7 @@ import xyz.nifeather.morph.messages.MorphMessageStore;
 import xyz.nifeather.morph.messages.vanilla.VanillaMessageStore;
 import xyz.nifeather.morph.misc.NetworkingHelper;
 import xyz.nifeather.morph.misc.PlayerOperationSimulator;
+import xyz.nifeather.morph.misc.integrations.towny.TownyAdapter;
 import xyz.nifeather.morph.misc.recipe.RecipeManager;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.gui.IconLookup;
@@ -172,6 +173,12 @@ public final class MorphPlugin extends XiaMoJavaPlugin
         {
             logger.info("Residence detected, applying integrations...");
             this.registerListener(new ResidenceEventProcessor());
+        }, true);
+
+        softDeps.setHandle("Towny", plugin ->
+        {
+            logger.info("Towny detected, applying integrations...");
+            this.registerListener(new TownyAdapter());
         }, true);
 
         softDeps.setHandle("TAB", r ->

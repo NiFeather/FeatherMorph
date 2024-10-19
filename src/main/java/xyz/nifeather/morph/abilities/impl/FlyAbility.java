@@ -28,6 +28,7 @@ import xiamomc.pluginbase.Bindables.BindableList;
 
 import java.util.Map;
 import java.util.Stack;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class FlyAbility extends MorphAbility<FlyOption>
 {
@@ -248,7 +249,7 @@ public class FlyAbility extends MorphAbility<FlyOption>
         }
     }
 
-    private static final Map<Player, Stack<Object>> blockedPlayersMap = new Object2ObjectOpenHashMap<>();
+    private static final Map<Player, Stack<Object>> blockedPlayersMap = new ConcurrentHashMap<>();
 
     public static boolean playerBlocked(Player player)
     {

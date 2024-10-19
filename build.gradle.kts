@@ -58,6 +58,13 @@ repositories {
             includeGroup("de.themoep")
         }
     }
+
+    maven {
+        url = uri("https://repo.glaremasters.me/repository/towny")
+        content {
+            includeGroup("com.palmergames.bukkit.towny")
+        }
+    }
 }
 
 paperweight.reobfArtifactConfiguration = ReobfArtifactConfiguration.MOJANG_PRODUCTION
@@ -70,6 +77,8 @@ dependencies {
     compileOnly(files("libs/CMILib1.4.3.5.jar"))
     compileOnly(files("libs/Residence5.1.4.0.jar"))
     compileOnly(files("libs/TAB v4.1.2.jar"))
+
+    compileOnly("com.palmergames.bukkit.towny:towny:${project.property("towny_version")}")
 
     compileOnly("com.ticxo.modelengine:ModelEngine:${project.property("me_version")}")
 
@@ -126,6 +135,8 @@ bukkit {
         register("request")
 
         register("play-action")
+
+        register("toggle-town-morph-flight")
 
         val featherMorphCommand = register("feathermorph").get()
         featherMorphCommand.aliases = listOf("fm");
