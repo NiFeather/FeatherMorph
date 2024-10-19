@@ -26,7 +26,6 @@ import xyz.nifeather.morph.misc.gui.IconLookup;
 import xyz.nifeather.morph.misc.integrations.modelengine.ModelEngineHelper;
 import xyz.nifeather.morph.misc.integrations.placeholderapi.PlaceholderIntegration;
 import xyz.nifeather.morph.misc.integrations.residence.ResidenceEventProcessor;
-import xyz.nifeather.morph.misc.integrations.tab.TabAdapter;
 import xyz.nifeather.morph.misc.skins.PlayerSkinProvider;
 import xyz.nifeather.morph.network.multiInstance.MultiInstanceService;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
@@ -91,8 +90,6 @@ public final class MorphPlugin extends XiaMoJavaPlugin
     private Metrics metrics;
 
     private InteractionMirrorProcessor mirrorProcessor;
-
-    private TabAdapter tabAdapter;
 
     private MultiInstanceService instanceService;
 
@@ -179,12 +176,6 @@ public final class MorphPlugin extends XiaMoJavaPlugin
         {
             logger.info("Towny detected, applying integrations...");
             this.registerListener(new TownyAdapter());
-        }, true);
-
-        softDeps.setHandle("TAB", r ->
-        {
-            logger.info("Applying TAB integrations...");
-            this.registerListener(tabAdapter = new TabAdapter());
         }, true);
 
         softDeps.setHandle("ModelEngine", r ->

@@ -76,7 +76,6 @@ dependencies {
 
     compileOnly(files("libs/CMILib1.4.3.5.jar"))
     compileOnly(files("libs/Residence5.1.4.0.jar"))
-    compileOnly(files("libs/TAB v4.1.2.jar"))
 
     compileOnly("com.palmergames.bukkit.towny:towny:${project.property("towny_version")}")
 
@@ -121,7 +120,7 @@ bukkit {
     apiVersion = "1.19"
     authors = listOf("MATRIX-feather")
     depend = listOf()
-    softDepend = listOf("TAB", "Residence", "ModelEngine", "PlaceholderAPI")
+    softDepend = listOf("Towny", "Residence", "ModelEngine", "PlaceholderAPI")
     version = "${project.property("project_version")}"
     prefix = "FeatherMorph"
     name = "FeatherMorph"
