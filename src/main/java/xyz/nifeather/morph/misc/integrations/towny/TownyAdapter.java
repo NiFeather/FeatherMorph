@@ -2,10 +2,11 @@ package xyz.nifeather.morph.misc.integrations.towny;
 
 import com.destroystokyo.paper.event.entity.EntityAddToWorldEvent;
 import com.palmergames.bukkit.towny.TownyAPI;
-import com.palmergames.bukkit.towny.event.PlayerChangePlotEvent;
+import com.palmergames.bukkit.towny.event.TownClaimEvent;
 import com.palmergames.bukkit.towny.event.TownSpawnEvent;
 import com.palmergames.bukkit.towny.event.player.PlayerEntersIntoTownBorderEvent;
 import com.palmergames.bukkit.towny.event.player.PlayerExitsFromTownBorderEvent;
+import com.palmergames.bukkit.towny.event.town.TownUnclaimEvent;
 import com.palmergames.bukkit.towny.object.Town;
 import com.palmergames.bukkit.towny.object.metadata.BooleanDataField;
 import com.palmergames.bukkit.towny.utils.CombatUtil;
@@ -13,9 +14,10 @@ import com.palmergames.bukkit.towny.utils.MetaDataUtil;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectLists;
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
+import org.bukkit.Chunk;
 import org.bukkit.World;
 import org.bukkit.command.PluginCommand;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -32,6 +34,7 @@ import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.events.api.gameplay.PlayerMorphEvent;
 import xyz.nifeather.morph.events.api.gameplay.PlayerUnMorphEvent;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -146,6 +149,38 @@ public class TownyAdapter extends MorphPluginObject implements Listener
         if (allowFlyInWilderness.get()) return;
 
         updatePlayer(e.getPlayer(), null, true);
+    }
+
+    @EventHandler
+    public void onTownUnClaim(TownUnclaimEvent e)
+    {
+        e.getWorldCoord()
+                .getChunks()
+                .forEach(task -> task.thenAccept(c -> this.updatePlayersInChunk(c, null)));
+    }
+
+    private void updatePlayersInChunk(Chunk chunk, Town currentTown)
+    {
+        var players = Arrays.stream(chunk.getEntities())
+                .filter(entity -> entity.getType() == EntityType.PLAYER)
+                .map(entity -> (Player)entity)
+                .toList();
+
+        if (players.isEmpty()) return;
+
+        for (var player : players)
+            updatePlayer(player, currentTown, true);
+    }
+
+    @EventHandler
+    public void onTownClaim(TownClaimEvent e)
+    {
+        var currentTown = e.getTownBlock().getTownOrNull();
+
+        e.getTownBlock()
+                .getWorldCoord()
+                .getChunks()
+                .forEach(chunkTask -> chunkTask.thenAccept(chunk -> this.updatePlayersInChunk(chunk, currentTown)));
     }
 
     @EventHandler
