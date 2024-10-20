@@ -8,14 +8,12 @@ import com.mojang.authlib.exceptions.AuthenticationUnavailableException;
 import com.mojang.authlib.yggdrasil.ProfileNotFoundException;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import it.unimi.dsi.fastutil.objects.ObjectLists;
 import net.minecraft.Util;
 import net.minecraft.server.MinecraftServer;
 import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Annotations.Initializer;
-import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.misc.MorphGameProfile;
 import xyz.nifeather.morph.misc.NmsRecord;
@@ -89,11 +87,21 @@ public class PlayerSkinProvider extends MorphPluginObject
     {
         if (namesToLookup.isEmpty()) return;
 
-        Map<String, CompletableFuture<Optional<GameProfile>>> toBatch;
+        Map<String, CompletableFuture<Optional<GameProfile>>> toBatch = new Object2ObjectOpenHashMap<>();
+
         synchronized (namesToLookup)
         {
-            toBatch = new Object2ObjectOpenHashMap<>(this.namesToLookup);
-            namesToLookup.clear();
+            int currentPickIndex = 0;
+            var targetAmount = Math.min(this.namesToLookup.size(), 10);
+
+            for (String name : new ObjectArrayList<>(this.namesToLookup.keySet()))
+            {
+                if (currentPickIndex >= targetAmount) break;
+
+                var future = this.namesToLookup.remove(name);
+                toBatch.put(name, future);
+                currentPickIndex++;
+            }
         }
 
         List<String> remainingNames = new ObjectArrayList<>(toBatch.keySet());
@@ -106,7 +114,7 @@ public class PlayerSkinProvider extends MorphPluginObject
 
             var future = toBatch.getOrDefault(name, null);
             if (future == null)
-                logger.warn("Profile with name '%s' configured a lookup request but no callback is set?!");
+                logger.warn("Profile with name '%s' configured a lookup request but no callback is set?!".formatted(name));
             else
                 future.complete(optional);
         };
