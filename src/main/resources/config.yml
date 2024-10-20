@@ -122,14 +122,17 @@ root:
   # Should piglin brutes ignore players' disguises?
   piglin_brute_ignore_disguises: true
 
-  # (EXPERIMENTAL) Should we hide disguised players from the TAB list?
+  # Should we hide disguised players from the TAB list?
+  #
   # Note that if there's some other plugin that operates the TAB list, this feature may not work as expected
   # Also this will cause problems with chat signing, you may want to disable it first.
   hide_disguised_players_in_tab: false
 
   # Server renderer options
   server_renderer:
-    # (EXPERIMENTAL) Should we show player disguises in the TAB list?
+    # Should we show player disguises in the TAB list?
+    #
+    # Note that if there's some other plugin that operates the TAB list, this feature may not work as expected
     show_player_disguises_in_tab: false
 
   # Health scale options
