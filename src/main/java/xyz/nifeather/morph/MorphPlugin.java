@@ -294,8 +294,6 @@ public final class MorphPlugin extends XiaMoJavaPlugin
             if (instanceService != null)
                 instanceService.onDisable();
 
-            PlayerSkinProvider.getInstance().shutdown();
-
             var messenger = this.getServer().getMessenger();
 
             messenger.unregisterOutgoingPluginChannel(this);

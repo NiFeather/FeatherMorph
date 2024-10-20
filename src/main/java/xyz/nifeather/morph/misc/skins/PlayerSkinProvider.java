@@ -6,6 +6,7 @@ import com.mojang.authlib.GameProfileRepository;
 import com.mojang.authlib.ProfileLookupCallback;
 import com.mojang.authlib.exceptions.AuthenticationUnavailableException;
 import com.mojang.authlib.yggdrasil.ProfileNotFoundException;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectLists;
 import net.minecraft.Util;
@@ -57,46 +58,18 @@ public class PlayerSkinProvider extends MorphPluginObject
 
     // region Info Request Batching
 
-    private final List<String> namesToLookup = new ObjectArrayList<>();
-    private final Map<String, Optional<GameProfile>> batchResults = new ConcurrentHashMap<>();
-
-    // name <-> lock
-    private final Map<String, Object> nameLockMap = new ConcurrentHashMap<>();
+    private final Map<String, CompletableFuture<Optional<GameProfile>>> namesToLookup = new ConcurrentHashMap<>();
 
     private CompletableFuture<Optional<GameProfile>> fetchPlayerInfoAsync(String name)
     {
-        var executor = ProfileLookupExecutor.executor();
+        var future = new CompletableFuture<Optional<GameProfile>>();
 
-        return CompletableFuture.supplyAsync(() -> this.schedulePlayerInfo(name), executor);
-    }
-
-    private Optional<GameProfile> schedulePlayerInfo(String name)
-    {
-        synchronized (namesToLookup)
+        synchronized (batchLock)
         {
-            this.namesToLookup.add(name);
+            this.namesToLookup.put(name, future);
         }
 
-        var lock = new Object();
-        nameLockMap.put(name.toUpperCase(), lock);
-
-        try
-        {
-            synchronized (lock)
-            {
-                lock.wait();
-            }
-
-            if (!this.batchResults.containsKey(name))
-                return Optional.empty();
-            else
-                return this.batchResults.remove(name);
-        }
-        catch (InterruptedException e)
-        {
-            logger.info("Skin lookup request for '%s' canceled by external source".formatted(name));
-            return Optional.empty();
-        }
+        return future;
     }
 
     private static final Object batchLock = new Object();
@@ -116,35 +89,26 @@ public class PlayerSkinProvider extends MorphPluginObject
     {
         if (namesToLookup.isEmpty()) return;
 
-        List<String> list;
+        Map<String, CompletableFuture<Optional<GameProfile>>> toBatch;
         synchronized (namesToLookup)
         {
-            list = namesToLookup.stream().map(String::toUpperCase).toList();
+            toBatch = new Object2ObjectOpenHashMap<>(this.namesToLookup);
             namesToLookup.clear();
         }
 
-        List<String> remainingNames = new ObjectArrayList<>(list);
+        List<String> remainingNames = new ObjectArrayList<>(toBatch.keySet());
 
-        BiConsumer<String, @Nullable GameProfile> onRequestFinish = (n, profile) ->
+        BiConsumer<String, @Nullable GameProfile> onRequestFinish = (name, profile) ->
         {
-            var nameUpper = n.toUpperCase();
-
             Optional<GameProfile> optional = profile == null ? Optional.empty() : Optional.of(profile);
-            this.batchResults.put(n, optional);
 
-            remainingNames.remove(nameUpper);
+            remainingNames.remove(name);
 
-            var lock = nameLockMap.remove(nameUpper);
-            if (lock == null)
-            {
-                //logger.warn(nameUpper + ": Don't have a lock?!");
-                return;
-            }
-
-            synchronized (lock)
-            {
-                lock.notifyAll();
-            }
+            var future = toBatch.getOrDefault(name, null);
+            if (future == null)
+                logger.warn("Profile with name '%s' configured a lookup request but no callback is set?!");
+            else
+                future.complete(optional);
         };
 
         var lookupCallback = new ProfileLookupCallback()
@@ -312,11 +276,6 @@ public class PlayerSkinProvider extends MorphPluginObject
         if(skin == null) return;
 
         skin.expiresAt = 0;
-    }
-
-    public void shutdown()
-    {
-        ProfileLookupExecutor.executor().shutdownNow();
     }
 
     //endregion
