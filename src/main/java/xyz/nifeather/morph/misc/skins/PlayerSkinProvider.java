@@ -62,7 +62,7 @@ public class PlayerSkinProvider extends MorphPluginObject
     {
         var future = new CompletableFuture<Optional<GameProfile>>();
 
-        synchronized (batchLock)
+        synchronized (namesToLookup)
         {
             this.namesToLookup.put(name, future);
         }
@@ -99,7 +99,7 @@ public class PlayerSkinProvider extends MorphPluginObject
                 if (currentPickIndex >= targetAmount) break;
 
                 var future = this.namesToLookup.remove(name);
-                toBatch.put(name, future);
+                toBatch.put(name.toUpperCase(), future);
                 currentPickIndex++;
             }
         }
@@ -108,6 +108,8 @@ public class PlayerSkinProvider extends MorphPluginObject
 
         BiConsumer<String, @Nullable GameProfile> onRequestFinish = (name, profile) ->
         {
+            name = name.toUpperCase();
+
             Optional<GameProfile> optional = profile == null ? Optional.empty() : Optional.of(profile);
 
             remainingNames.remove(name);
