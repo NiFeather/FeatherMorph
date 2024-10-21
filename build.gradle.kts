@@ -73,16 +73,28 @@ dependencies {
     paperweight.paperDevBundle("${project.property("minecraft_version")}")
 
     compileOnly("com.comphenix.protocol:ProtocolLib:${project.property("protocollib_version")}")
+    {
+        isTransitive = false
+    }
 
     compileOnly(files("libs/CMILib1.4.3.5.jar"))
     compileOnly(files("libs/Residence5.1.4.0.jar"))
 
     compileOnly("com.palmergames.bukkit.towny:towny:${project.property("towny_version")}")
+    {
+        isTransitive = false
+    }
 
     compileOnly("com.ticxo.modelengine:ModelEngine:${project.property("me_version")}")
+    {
+        isTransitive = false
+    }
 
     //compileOnly("com.github.Gecolay:GSit:${project.property("gsit_version")}")
     compileOnly("me.clip:placeholderapi:${project.property("papi_version")}")
+    {
+        isTransitive = false
+    }
 
     implementation("org.java-websocket:Java-WebSocket:1.5.7")
     {
