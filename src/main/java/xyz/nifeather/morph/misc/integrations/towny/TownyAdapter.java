@@ -2,8 +2,7 @@ package xyz.nifeather.morph.misc.integrations.towny;
 
 import com.destroystokyo.paper.event.entity.EntityAddToWorldEvent;
 import com.palmergames.bukkit.towny.TownyAPI;
-import com.palmergames.bukkit.towny.event.TownClaimEvent;
-import com.palmergames.bukkit.towny.event.TownSpawnEvent;
+import com.palmergames.bukkit.towny.event.*;
 import com.palmergames.bukkit.towny.event.player.PlayerEntersIntoTownBorderEvent;
 import com.palmergames.bukkit.towny.event.player.PlayerExitsFromTownBorderEvent;
 import com.palmergames.bukkit.towny.event.town.TownUnclaimEvent;
@@ -33,6 +32,7 @@ import xyz.nifeather.morph.config.ConfigOption;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.events.api.gameplay.PlayerMorphEvent;
 import xyz.nifeather.morph.events.api.gameplay.PlayerUnMorphEvent;
+import xyz.nifeather.morph.misc.NmsRecord;
 
 import java.util.Arrays;
 import java.util.List;
@@ -184,6 +184,18 @@ public class TownyAdapter extends MorphPluginObject implements Listener
     }
 
     @EventHandler
+    public void onTownRemoveResident(TownRemoveResidentEvent e)
+    {
+        updatePlayer(e.getResident().getPlayer(), e.getTown());
+    }
+
+    @EventHandler
+    public void onTownAddResident(TownAddResidentEvent e)
+    {
+        updatePlayer(e.getResident().getPlayer(), e.getTown());
+    }
+
+    @EventHandler
     public void onPlayerMorph(PlayerMorphEvent e)
     {
         if (e.getState().containsAbility(AbilityType.CAN_FLY))
@@ -219,11 +231,11 @@ public class TownyAdapter extends MorphPluginObject implements Listener
         this.unblockPlayer(e.getPlayer());
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onPlayerTeleport(PlayerTeleportEvent e)
     {
         if (e.getFrom().getWorld().equals(e.getTo().getWorld()))
-            this.updatePlayer(e.getPlayer(), null);
+            this.updatePlayer(e.getPlayer(), townyAPI.getTown(e.getTo()));
     }
 
     public void updatePlayer(Player player, @Nullable Town town)
