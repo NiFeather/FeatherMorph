@@ -195,21 +195,6 @@ public class TownyAdapter extends MorphPluginObject implements Listener
         updatePlayer(e.getResident().getPlayer(), e.getTown());
     }
 
-    @EventHandler
-    public void onPlayerMorph(PlayerMorphEvent e)
-    {
-        if (e.getState().containsAbility(AbilityType.CAN_FLY))
-            updatePlayer(e.getPlayer(), null);
-    }
-
-    @EventHandler
-    public void onPlayerUnmorph(PlayerUnMorphEvent e)
-    {
-        var player = e.getPlayer();
-        this.blockedPlayers.remove(player);
-        FlyAbility.unBlockPlayer(player, this);
-    }
-
     // Folia没有提供监听玩家改变世界的事件，所以我们只能监听EntityAddToWorldEvent
     @EventHandler
     public void onPlayerChangeWorld(EntityAddToWorldEvent e)
