@@ -158,6 +158,7 @@ bukkit {
         register(permissionRoot + "request.deny")
 
         register(permissionRoot + "can_fly")
+        register(permissionRoot + "toggle_town_fly")
     }
 
     permissions.forEach {

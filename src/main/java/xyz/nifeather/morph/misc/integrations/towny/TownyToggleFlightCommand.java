@@ -15,6 +15,7 @@ import xyz.nifeather.morph.messages.CommandNameStrings;
 import xyz.nifeather.morph.messages.CommandStrings;
 import xyz.nifeather.morph.messages.CommonStrings;
 import xyz.nifeather.morph.messages.MessageUtils;
+import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 
 import java.util.List;
 
@@ -31,6 +32,12 @@ public class TownyToggleFlightCommand extends MorphPluginObject implements IPlug
     public String getCommandName()
     {
         return "toggle-town-morph-flight";
+    }
+
+    @Override
+    public String getPermissionRequirement()
+    {
+        return CommonPermissions.TOGGLE_TOWN_FLIGHT;
     }
 
     @Override
