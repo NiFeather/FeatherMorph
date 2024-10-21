@@ -34,7 +34,7 @@ root:
       # The name for the item
       # Use "~UNSET" to keep the material's original name
       # Supports MiniMessage
-      result_item_name: ~UNSET
+      result_item_name: "Disguise Tool"
 
       # The lore for the item
       #
@@ -42,7 +42,14 @@ root:
       # result_item_lore:
       #   - Lore1
       #   - <rainbow>Supports MiniMessage!
-      result_item_lore: []
+      result_item_lore:
+        - "<italic:false><#666666>When sneaking: "
+        - "<italic:false><gray><key:key.mouse.right> ~> Open disguise selection or invoke quick disguise"
+        - "<italic:false><gray><key:key.mouse.left> ~> Unmorph(Undisguise)"
+        - ""
+        - "<italic:false><#666666>When disguising"
+        - "<italic:false><gray><key:key.mouse.right> ~> Activate skill"
+        - "<italic:false><gray><key:key.mouse.left> ~> Open Disguise Action selection"
 
       # Materials required to craft this item.
       # Left side is the letter present in crafting_shape, and right side is the item ID
