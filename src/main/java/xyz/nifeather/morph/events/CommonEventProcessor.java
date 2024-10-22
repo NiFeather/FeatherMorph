@@ -5,6 +5,7 @@ import com.destroystokyo.paper.event.player.PlayerClientOptionsChangeEvent;
 import com.destroystokyo.paper.event.player.PlayerPostRespawnEvent;
 import de.themoep.inventorygui.InventoryGui;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import it.unimi.dsi.fastutil.objects.ObjectLists;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
@@ -36,6 +37,7 @@ import xyz.nifeather.morph.messages.MorphStrings;
 import xyz.nifeather.morph.messages.vanilla.VanillaMessageStore;
 import xyz.nifeather.morph.misc.DisguiseTypes;
 import xyz.nifeather.morph.misc.OfflineDisguiseResult;
+import xyz.nifeather.morph.misc.PlayerTracker;
 import xyz.nifeather.morph.misc.gui.AnimSelectScreenWrapper;
 import xyz.nifeather.morph.misc.gui.DisguiseSelectScreenWrapper;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
@@ -360,6 +362,8 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         var player = e.getPlayer();
         var state = morphs.getDisguiseStateFor(player);
 
+        PlayerTracker.instance().addPlayer(player);
+
         clientHandler.markPlayerReady(player);
 
         //如果玩家是第一次用客户端连接，那么等待3秒向其发送提示
@@ -428,6 +432,8 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
     @EventHandler
     public void onPlayerExit(PlayerQuitEvent e)
     {
+        PlayerTracker.instance().removePlayer(e.getPlayer());
+
         clientHandler.unInitializePlayer(e.getPlayer());
         skillHandler.removeUnusedList(e.getPlayer());
 

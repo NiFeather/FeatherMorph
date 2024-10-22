@@ -60,7 +60,7 @@ public class ProtocolHandler extends MorphPluginObject
         {
             try
             {
-                ProtocolLibrary.getProtocolManager().addPacketListener(listener);
+                registerListenerToPacketManager(listener);
             }
             catch (Throwable t)
             {
@@ -95,7 +95,7 @@ public class ProtocolHandler extends MorphPluginObject
 
         try
         {
-            ProtocolLibrary.getProtocolManager().removePacketListener(listener);
+            unRegisterListenerFromPacketManager(listener);
         }
         catch (Throwable t)
         {
@@ -114,13 +114,11 @@ public class ProtocolHandler extends MorphPluginObject
     {
         if (disposed) return;
 
-        var protocolMgr = ProtocolLibrary.getProtocolManager();
-
         for (var listener : listeners)
         {
             try
             {
-                protocolMgr.addPacketListener(listener);
+                registerListenerToPacketManager(listener);
             }
             catch (Throwable t)
             {
@@ -133,6 +131,37 @@ public class ProtocolHandler extends MorphPluginObject
         loadReady = true;
     }
 
+    private final boolean async = false;
+
+    private void registerListenerToPacketManager(ProtocolListener listener)
+    {
+        if (async)
+        {
+            logger.info("Register async handler " + listener.getIdentifier());
+            ProtocolLibrary.getProtocolManager().getAsynchronousManager().registerAsyncHandler(listener).syncStart();
+        }
+        else
+        {
+            ProtocolLibrary.getProtocolManager().addPacketListener(listener);
+        }
+    }
+
+    private void unRegisterListenerFromPacketManager(ProtocolListener listener)
+    {
+        if (async)
+        {
+            var asyncMgr = ProtocolLibrary.getProtocolManager()
+                            .getAsynchronousManager();
+
+            asyncMgr.unregisterAsyncHandler(listener);
+        }
+        else
+        {
+            ProtocolLibrary.getProtocolManager().removePacketListener(listener);
+        }
+
+    }
+
     private boolean disposed;
 
     public boolean disposed()
@@ -143,13 +172,11 @@ public class ProtocolHandler extends MorphPluginObject
     @Override
     public void dispose()
     {
-        var protocolMgr = ProtocolLibrary.getProtocolManager();
-
         for (ProtocolListener listener : listeners)
         {
             try
             {
-                protocolMgr.removePacketListener(listener);
+                unRegisterListenerFromPacketManager(listener);
             }
             catch (Throwable t)
             {

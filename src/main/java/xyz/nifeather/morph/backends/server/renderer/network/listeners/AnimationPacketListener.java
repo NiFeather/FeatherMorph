@@ -44,7 +44,7 @@ public class AnimationPacketListener extends ProtocolListener
             return;
 
         var sourceEntityId = clientboundAnimatePacket.getId();
-        var nmsPlayer = this.getNmsPlayerEntityFrom(event, sourceEntityId);
+        var nmsPlayer = this.getNmsPlayerFrom(sourceEntityId);
 
         if (nmsPlayer == null) return;
 
