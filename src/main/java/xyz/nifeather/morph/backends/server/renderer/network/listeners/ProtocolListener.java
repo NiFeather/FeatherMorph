@@ -17,8 +17,6 @@ import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.backends.server.renderer.network.PacketFactory;
 import xyz.nifeather.morph.config.ConfigOption;
 import xyz.nifeather.morph.config.MorphConfigManager;
-import xyz.nifeather.morph.misc.NmsRecord;
-import xyz.nifeather.morph.misc.PlayerTracker;
 import xyz.nifeather.morph.utilities.NmsUtils;
 import xyz.nifeather.morph.utilities.ReflectionUtils;
 
@@ -90,15 +88,24 @@ public abstract class ProtocolListener extends MorphPluginObject implements Pack
         //if (!TickThread.isTickThread())
         //    logger.warn("Not on a tick thread! Caution for exceptions!");
 
-        var bukkitPlayer = PlayerTracker.instance().getPlayers()
-                .stream()
-                .filter(p -> p.getEntityId() == id)
-                .findFirst()
-                .orElse(null);
+        // Bukkit.getOnlinePlayers() 会将正前往不同维度的玩家从列表里移除
+        // 因此我们需要在每个世界都手动查询一遍
+        for (var world : Bukkit.getWorlds())
+        {
+            // For performance, we use NMS instead of CraftWorld
+            var nmsWorld = NmsUtils.getNmsLevel(world);
+            var worldPlayers = nmsWorld.players();
 
-        if (bukkitPlayer == null) return null;
+            var match = worldPlayers.stream()
+                    .filter(p -> p.getId() == id)
+                    .findFirst()
+                    .orElse(null);
 
-        return NmsRecord.ofPlayer(bukkitPlayer);
+            if (match != null)
+                return match;
+        }
+
+        return null;
     }
 
     @Nullable
