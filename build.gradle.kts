@@ -58,6 +58,13 @@ repositories {
             includeGroup("de.themoep")
         }
     }
+
+    maven {
+        url = uri("https://repo.glaremasters.me/repository/towny")
+        content {
+            includeGroup("com.palmergames.bukkit.towny")
+        }
+    }
 }
 
 paperweight.reobfArtifactConfiguration = ReobfArtifactConfiguration.MOJANG_PRODUCTION
@@ -66,15 +73,28 @@ dependencies {
     paperweight.paperDevBundle("${project.property("minecraft_version")}")
 
     compileOnly("com.comphenix.protocol:ProtocolLib:${project.property("protocollib_version")}")
+    {
+        isTransitive = false
+    }
 
     compileOnly(files("libs/CMILib1.4.3.5.jar"))
     compileOnly(files("libs/Residence5.1.4.0.jar"))
-    compileOnly(files("libs/TAB v4.1.2.jar"))
+
+    compileOnly("com.palmergames.bukkit.towny:towny:${project.property("towny_version")}")
+    {
+        isTransitive = false
+    }
 
     compileOnly("com.ticxo.modelengine:ModelEngine:${project.property("me_version")}")
+    {
+        isTransitive = false
+    }
 
     //compileOnly("com.github.Gecolay:GSit:${project.property("gsit_version")}")
     compileOnly("me.clip:placeholderapi:${project.property("papi_version")}")
+    {
+        isTransitive = false
+    }
 
     implementation("org.java-websocket:Java-WebSocket:1.5.7")
     {
@@ -112,7 +132,7 @@ bukkit {
     apiVersion = "1.19"
     authors = listOf("MATRIX-feather")
     depend = listOf()
-    softDepend = listOf("TAB", "Residence", "ModelEngine", "PlaceholderAPI")
+    softDepend = listOf("Towny", "Residence", "ModelEngine", "PlaceholderAPI")
     version = "${project.property("project_version")}"
     prefix = "FeatherMorph"
     name = "FeatherMorph"
@@ -126,6 +146,8 @@ bukkit {
         register("request")
 
         register("play-action")
+
+        register("toggle-town-morph-flight")
 
         val featherMorphCommand = register("feathermorph").get()
         featherMorphCommand.aliases = listOf("fm");
@@ -148,6 +170,7 @@ bukkit {
         register(permissionRoot + "request.deny")
 
         register(permissionRoot + "can_fly")
+        register(permissionRoot + "toggle_town_fly")
     }
 
     permissions.forEach {

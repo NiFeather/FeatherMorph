@@ -4,6 +4,7 @@ import com.destroystokyo.paper.event.player.PlayerClientOptionsChangeEvent;
 import com.destroystokyo.paper.event.player.PlayerPostRespawnEvent;
 import de.themoep.inventorygui.InventoryGui;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
@@ -237,6 +238,8 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         if (mainHandItem.getType().isAir())
             return false;
 
+        if (!action.isLeftClick() && !action.isRightClick()) return false;
+
         var disguiseState = morphs.getDisguiseStateFor(player);
 
         // 因为快速伪装功能包含了玩家头颅，所以我们没有在上面检查物品是否为技能触发物品。
@@ -358,6 +361,30 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         var state = morphs.getDisguiseStateFor(player);
 
         clientHandler.markPlayerReady(player);
+
+        var effectivePermissions = new ObjectOpenHashSet<>(player.getEffectivePermissions());
+        var permissionAttachment = player.addAttachment(plugin);
+        List<String> legacyPermissions = new ObjectArrayList<>();
+
+        effectivePermissions.forEach(permInfo ->
+        {
+            var name = permInfo.getPermission();
+            boolean value = permInfo.getValue();
+
+            if (!name.startsWith("xiamomc.morph")) return;
+
+            String nameReplaced = name.replace("xiamomc.morph.", "feathermorph.");
+            permissionAttachment.setPermission(nameReplaced, value);
+            legacyPermissions.add(name);
+        });
+
+        if (!legacyPermissions.isEmpty())
+        {
+            logger.warn("Found legacy permission set for player '%s'!".formatted(player.getName()));
+            logger.warn("Please migrate to the new prefix 'feathermorph.XXX' rather than 'xiamomc.morph.XXX' as soon as possible, as legacy support will end at 1.5.0!");
+            logger.warn("Permissions found:");
+            legacyPermissions.forEach(p -> logger.warn("  --> %s".formatted(p)));
+        }
 
         //如果玩家是第一次用客户端连接，那么等待3秒向其发送提示
         if (clientHandler.clientConnected(player))

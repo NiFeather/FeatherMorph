@@ -1,8 +1,11 @@
 package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.types;
 
+import com.comphenix.protocol.events.PacketContainer;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.packs.repository.Pack;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
@@ -81,6 +84,12 @@ public class EntityWatcher extends SingleWatcher
             var str = newVal.toString();
             var component = str.isEmpty() ? null : Component.literal(str);
             writePersistent(ValueIndex.BASE_ENTITY.CUSTOM_NAME, component == null ? Optional.empty() : Optional.of(component));
+        }
+
+        if (entry.equals(CustomEntries.VANISHED))
+        {
+            var packet = new ClientboundRemoveEntitiesPacket(this.readEntryOrThrow(CustomEntries.SPAWN_ID));
+            this.sendPacketToAffectedPlayers(PacketContainer.fromPacket(packet));
         }
     }
 

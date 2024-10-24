@@ -946,9 +946,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         // 切换CD
         skillHandler.switchCooldown(player.getUniqueId(), cdInfo);
-
-        // 调用事件
-        new PlayerMorphEvent(player, state).callEvent();
     }
 
     private boolean applyDisguise(MorphParameters parameters,
@@ -1031,6 +1028,9 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 .getAvailableAnimationsForClient();
 
         clientHandler.sendCommand(player, new S2CSetAvailableAnimationsCommand(availableAnimations));
+
+        // 调用事件
+        new PlayerMorphEvent(player, state).callEvent();
 
         return true;
     }

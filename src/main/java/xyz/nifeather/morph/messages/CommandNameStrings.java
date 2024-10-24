@@ -54,6 +54,11 @@ public class CommandNameStrings extends AbstractMorphStrings
         return getFormattable(getKey("mirror_ignore_disguised"), "使反向控制忽略已伪装的目标");
     }
 
+    public static FormattableMessage morphFlightForTownX()
+    {
+        return getFormattable(getKey("morph_flight_for_town_x"), "[Fallback] <which>的伪装飞行");
+    }
+
     private static String getKey(String key)
     {
         return "commands.option.name." + key;

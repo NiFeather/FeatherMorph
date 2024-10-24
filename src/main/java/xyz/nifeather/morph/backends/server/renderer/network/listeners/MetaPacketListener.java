@@ -43,7 +43,7 @@ public class MetaPacketListener extends ProtocolListener
     private void onMetaPacket(ClientboundSetEntityDataPacket packet, PacketEvent packetEvent)
     {
         //获取此包的来源实体
-        var sourceNmsEntity = getNmsPlayerEntityFrom(packetEvent, packet.id());
+        var sourceNmsEntity = getNmsPlayerFrom(packet.id());
 
         // How could this be?!
         if (sourceNmsEntity == null)

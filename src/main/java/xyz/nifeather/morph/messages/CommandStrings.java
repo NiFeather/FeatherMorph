@@ -241,6 +241,24 @@ public class CommandStrings extends AbstractMorphStrings
         return getFormattable(getKey("grant_item_success"), "[Fallback] 成功给与物品。如果没有请检查是否背包已满");
     }
 
+    public static FormattableMessage unknownError()
+    {
+        return getFormattable(getKey("unknown_error"), "[Fallback] <red>执行时发生了意外事故");
+    }
+
+    // towny
+
+    public static FormattableMessage townyDoesntHaveTown()
+    {
+        return getFormattable(getKey("towny_dont_belong_to_any_town"), "[Fallback] <red>你不属于任何城镇！");
+    }
+
+    public static FormattableMessage townyPlayerNotMayor()
+    {
+        return getFormattable(getKey("towny_not_mayor"), "[Fallback] <red>此操作只适用于镇长");
+    }
+
+
     private static String getKey(String key)
     {
         return "commands." + key;

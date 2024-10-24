@@ -73,6 +73,19 @@ root:
     # Some features may not be affected by this option.
     single_language: false
 
+  # Integration options
+  integrations:
+    # For Towny >= 0.100.4.0
+    towny:
+      # Should we allow flight in wilderness?
+      #
+      # Note that this doesn't affect worlds that are not managed by Towny
+      # To disable flying in these worlds, head to `flying > nofly_worlds`!
+      #
+      # WARNING!
+      # 1. There may be some bypasses on Folia servers, due to their teleport event having a strange trigger condition
+      allow_flight_in_wilderness: false
+
   # Should we enable the "Disguise Revealing" feature?
   #
   # This was made to nerf the ability for players to not get targeted by hostile mobs.
@@ -109,14 +122,17 @@ root:
   # Should piglin brutes ignore players' disguises?
   piglin_brute_ignore_disguises: true
 
-  # (EXPERIMENTAL) Should we hide disguised players from the TAB list?
+  # Should we hide disguised players from the TAB list?
+  #
   # Note that if there's some other plugin that operates the TAB list, this feature may not work as expected
   # Also this will cause problems with chat signing, you may want to disable it first.
   hide_disguised_players_in_tab: false
 
   # Server renderer options
   server_renderer:
-    # (EXPERIMENTAL) Should we show player disguises in the TAB list?
+    # Should we show player disguises in the TAB list?
+    #
+    # Note that if there's some other plugin that operates the TAB list, this feature may not work as expected
     show_player_disguises_in_tab: false
 
   # Health scale options
@@ -343,4 +359,4 @@ root:
       - SelectedItem
 
   # Do not touch unless you know what you're doing!
-  version: 37
+  version: 38

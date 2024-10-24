@@ -4,6 +4,7 @@ import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.events.PacketListener;
+import net.minecraft.network.protocol.Packet;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import org.bukkit.Bukkit;
@@ -17,6 +18,9 @@ import xyz.nifeather.morph.backends.server.renderer.network.PacketFactory;
 import xyz.nifeather.morph.config.ConfigOption;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.utilities.NmsUtils;
+import xyz.nifeather.morph.utilities.ReflectionUtils;
+
+import java.lang.reflect.Field;
 
 public abstract class ProtocolListener extends MorphPluginObject implements PacketListener
 {
@@ -51,8 +55,35 @@ public abstract class ProtocolListener extends MorphPluginObject implements Pack
         configManager.bind(debugOutput, ConfigOption.DEBUG_OUTPUT);
     }
 
+    protected Player getNmsPlayerEntityFromUnreadablePacket(Packet<?> packet)
+    {
+        int entityId;
+
+        try
+        {
+            entityId = ReflectionUtils.getValue(packet, "entityId", int.class);
+        }
+        catch (Throwable t)
+        {
+            if (isDebugEnabled())
+            {
+                logger.error("No field 'entityId' in packet " + packet + "! Skipping: " + t.getMessage());
+
+                logger.info("Valid fields: ");
+                for (Field declaredField : packet.getClass().getDeclaredFields())
+                {
+                    logger.info("  \\--" + declaredField.getName());
+                }
+            }
+
+            return null;
+        }
+
+        return this.getNmsPlayerFrom(entityId);
+    }
+
     @Nullable
-    protected Player getNmsPlayerEntityFrom(PacketEvent event, int id)
+    protected Player getNmsPlayerFrom(int id)
     {
         //if (!TickThread.isTickThread())
         //    logger.warn("Not on a tick thread! Caution for exceptions!");

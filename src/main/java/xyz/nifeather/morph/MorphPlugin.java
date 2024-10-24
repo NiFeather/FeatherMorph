@@ -19,13 +19,13 @@ import xyz.nifeather.morph.messages.MorphMessageStore;
 import xyz.nifeather.morph.messages.vanilla.VanillaMessageStore;
 import xyz.nifeather.morph.misc.NetworkingHelper;
 import xyz.nifeather.morph.misc.PlayerOperationSimulator;
+import xyz.nifeather.morph.misc.integrations.towny.TownyAdapter;
 import xyz.nifeather.morph.misc.recipe.RecipeManager;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.gui.IconLookup;
 import xyz.nifeather.morph.misc.integrations.modelengine.ModelEngineHelper;
 import xyz.nifeather.morph.misc.integrations.placeholderapi.PlaceholderIntegration;
 import xyz.nifeather.morph.misc.integrations.residence.ResidenceEventProcessor;
-import xyz.nifeather.morph.misc.integrations.tab.TabAdapter;
 import xyz.nifeather.morph.misc.skins.PlayerSkinProvider;
 import xyz.nifeather.morph.network.multiInstance.MultiInstanceService;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
@@ -90,8 +90,6 @@ public final class MorphPlugin extends XiaMoJavaPlugin
     private Metrics metrics;
 
     private InteractionMirrorProcessor mirrorProcessor;
-
-    private TabAdapter tabAdapter;
 
     private MultiInstanceService instanceService;
 
@@ -173,10 +171,10 @@ public final class MorphPlugin extends XiaMoJavaPlugin
             this.registerListener(new ResidenceEventProcessor());
         }, true);
 
-        softDeps.setHandle("TAB", r ->
+        softDeps.setHandle("Towny", plugin ->
         {
-            logger.info("Applying TAB integrations...");
-            this.registerListener(tabAdapter = new TabAdapter());
+            logger.info("Towny detected, applying integrations...");
+            this.registerListener(new TownyAdapter());
         }, true);
 
         softDeps.setHandle("ModelEngine", r ->
@@ -294,8 +292,6 @@ public final class MorphPlugin extends XiaMoJavaPlugin
 
             if (instanceService != null)
                 instanceService.onDisable();
-
-            PlayerSkinProvider.getInstance().shutdown();
 
             var messenger = this.getServer().getMessenger();
 

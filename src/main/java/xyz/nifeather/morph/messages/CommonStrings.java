@@ -36,6 +36,16 @@ public class CommonStrings extends AbstractMorphStrings
                 "<color:red>未找到此指令");
     }
 
+    public static FormattableMessage on()
+    {
+        return getFormattable(getKey("on"), "[Fallback] ON");
+    }
+
+    public static FormattableMessage off()
+    {
+        return getFormattable(getKey("off"), "[Fallback] OFF");
+    }
+
     private static String getKey(String key)
     {
         return "common." + key;

@@ -8,11 +8,11 @@ import com.comphenix.protocol.injector.GamePhase;
 import net.minecraft.network.protocol.game.ClientboundMoveEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundRotateHeadPacket;
 import net.minecraft.network.protocol.game.ClientboundTeleportEntityPacket;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.RenderRegistry;
-import xyz.nifeather.morph.utilities.NmsUtils;
 
 public class PlayerLookPacketListener extends ProtocolListener
 {
@@ -65,7 +65,7 @@ public class PlayerLookPacketListener extends ProtocolListener
     private void onTeleport(ClientboundTeleportEntityPacket packet, PacketEvent event)
     {
         //获取此包的来源实体
-        var sourceNmsEntity = getNmsPlayerEntityFrom(event, packet.getId());
+        var sourceNmsEntity = getNmsPlayerFrom(packet.getId());
         if (sourceNmsEntity == null)
             return;
 
@@ -102,17 +102,8 @@ public class PlayerLookPacketListener extends ProtocolListener
     private void onHeadRotation(ClientboundRotateHeadPacket packet, PacketEvent event)
     {
         //获取此包的来源实体
-        var sourceNmsEntity = packet.getEntity(NmsUtils.getNmsLevel(event.getPlayer().getWorld()));
-        if (sourceNmsEntity == null)
-        {
-            if (isDebugEnabled())
-            {
-                logger.warn("A packet from a player that doesn't exist in its world?!");
-                logger.warn("Packet: " + event.getPacketType());
-            }
-
-            return;
-        }
+        var sourceNmsEntity = this.getNmsPlayerEntityFromUnreadablePacket(packet);
+        if (sourceNmsEntity == null) return;
 
         if (!(sourceNmsEntity.getBukkitEntity() instanceof Player sourcePlayer)) return;
 
@@ -133,17 +124,9 @@ public class PlayerLookPacketListener extends ProtocolListener
     private void onLookPacket(ClientboundMoveEntityPacket packet, PacketEvent event)
     {
         //获取此包的来源实体
-        var sourceNmsEntity = packet.getEntity(NmsUtils.getNmsLevel(event.getPlayer().getWorld()));
-        if (sourceNmsEntity == null)
-        {
-            if (isDebugEnabled())
-            {
-                logger.warn("A packet from a player that doesn't exist in its world?!");
-                logger.warn("Packet: " + event.getPacketType());
-            }
+        var sourceNmsEntity = this.getNmsPlayerEntityFromUnreadablePacket(packet);
 
-            return;
-        }
+        if (sourceNmsEntity == null) return;
 
         if (!(sourceNmsEntity.getBukkitEntity() instanceof Player sourcePlayer)) return;
 
