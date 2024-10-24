@@ -200,7 +200,9 @@ public class UpdateHandler extends MorphPluginObject
                 throw new NullDependencyException("Null version number from response: " + gson.toJson(matchMeta));
             }
 
-            if (currentVersion.equals(latestVersion))
+            var compare = currentVersion.compare(latestVersion);
+
+            if (compare == VersionHandling.CompareResult.EQUAL)
             {
                 logger.info("Already on the latest version for " + Bukkit.getMinecraftVersion());
 
@@ -210,7 +212,7 @@ public class UpdateHandler extends MorphPluginObject
                 return;
             }
 
-            if (latestVersion.compare(currentVersion) == VersionHandling.CompareResult.OLDER)
+            if (compare == VersionHandling.CompareResult.NEWER)
             {
                 logger.info("Your version is newer than released for %s!".formatted(Bukkit.getMinecraftVersion()));
 

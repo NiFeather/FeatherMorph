@@ -57,7 +57,7 @@ public class VersionHandling
         /**
          * 将此版本和另一版本比对
          * @param other
-         * @return
+         * @return NEWER: other版本比这个版本高，反之OLDER或者EQUAL
          */
         public CompareResult compare(VersionInfo other)
         {
@@ -74,20 +74,17 @@ public class VersionHandling
             {
                 return CompareResult.EQUAL;
             }
-            else if (majorCompare == CompareResult.NEWER
-                        || minorCompare == CompareResult.NEWER
-                        || patchCompare == CompareResult.NEWER)
-            {
-                return CompareResult.OLDER;
-            }
-            else if (majorCompare == CompareResult.OLDER
-                    || minorCompare == CompareResult.OLDER
-                    || patchCompare == CompareResult.OLDER)
-            {
-                return CompareResult.NEWER;
-            }
 
-            return CompareResult.NOT_ON_SAME_CHANNEL;
+            if (majorCompare == CompareResult.NEWER)
+                return CompareResult.NEWER;
+
+            if (minorCompare == CompareResult.NEWER)
+                return CompareResult.NEWER;
+
+            if (patchCompare == CompareResult.NEWER)
+                return CompareResult.NEWER;
+
+            return CompareResult.OLDER;
         }
 
         /**
