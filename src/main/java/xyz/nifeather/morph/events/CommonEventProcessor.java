@@ -381,7 +381,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         if (!legacyPermissions.isEmpty())
         {
             logger.warn("Found legacy permission set for player '%s'!".formatted(player.getName()));
-            logger.warn("Please migrate to the new prefix 'feathermorph.XXX' rather than 'xiamomc.morph.XXX' as soon as possible, as legacy support will end at 1.4.0!");
+            logger.warn("Please migrate to the new prefix 'feathermorph.XXX' rather than 'xiamomc.morph.XXX' as soon as possible, as legacy support will end at 1.5.0!");
             logger.warn("Permissions found:");
             legacyPermissions.forEach(p -> logger.warn("  --> %s".formatted(p)));
         }
