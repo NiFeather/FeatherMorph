@@ -10,6 +10,7 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.scoreboard.Scoreboard;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.abilities.AbilityManager;
+import xyz.nifeather.morph.api.FeatherMorphAPI;
 import xyz.nifeather.morph.commands.*;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.events.*;
@@ -237,6 +238,8 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
         dependencyManager.cache(new RecipeManager());
 
         dependencyManager.cache(mirrorExecutorHub = new ExecutorHub());
+
+        dependencyManager.cache(new FeatherMorphAPI(this));
 
         var mirrorProcessor = new InteractionMirrorProcessor();
 

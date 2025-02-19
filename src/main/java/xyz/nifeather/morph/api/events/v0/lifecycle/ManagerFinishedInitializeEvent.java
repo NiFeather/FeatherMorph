@@ -1,11 +1,11 @@
-package xyz.nifeather.morph.events.api.lifecycle;
+package xyz.nifeather.morph.api.events.v0.lifecycle;
 
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
-import xyz.nifeather.morph.skills.MorphSkillHandler;
+import xyz.nifeather.morph.MorphManager;
 
-public class SkillsFinishedInitializeEvent extends Event
+public class ManagerFinishedInitializeEvent extends Event
 {
     private static final HandlerList handlers = new HandlerList();
 
@@ -20,9 +20,9 @@ public class SkillsFinishedInitializeEvent extends Event
         return handlers;
     }
 
-    public final MorphSkillHandler manager;
+    public final MorphManager manager;
 
-    public SkillsFinishedInitializeEvent(MorphSkillHandler instance)
+    public ManagerFinishedInitializeEvent(MorphManager instance)
     {
         this.manager = instance;
     }

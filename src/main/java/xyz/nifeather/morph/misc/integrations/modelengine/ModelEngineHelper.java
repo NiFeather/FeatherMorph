@@ -4,7 +4,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.backends.modelengine.MEBackend;
-import xyz.nifeather.morph.events.api.lifecycle.ManagerFinishedInitializeEvent;
+import xyz.nifeather.morph.api.events.v0.lifecycle.ManagerFinishedInitializeEvent;
 import xyz.nifeather.morph.providers.disguise.ModelEngineProvider;
 
 public class ModelEngineHelper extends MorphPluginObject implements Listener

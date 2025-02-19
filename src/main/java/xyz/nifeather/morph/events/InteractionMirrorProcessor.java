@@ -17,16 +17,15 @@ import xiamomc.pluginbase.Bindables.Bindable;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.config.ConfigOption;
 import xyz.nifeather.morph.config.MorphConfigManager;
-import xyz.nifeather.morph.events.api.gameplay.PlayerJoinedWithDisguiseEvent;
-import xyz.nifeather.morph.events.api.gameplay.PlayerMorphEvent;
-import xyz.nifeather.morph.events.api.gameplay.PlayerUnMorphEvent;
+import xyz.nifeather.morph.api.events.v0.gameplay.PlayerJoinedWithDisguiseEvent;
+import xyz.nifeather.morph.api.events.v0.gameplay.PlayerMorphEvent;
+import xyz.nifeather.morph.api.events.v0.gameplay.PlayerUnMorphEvent;
 import xyz.nifeather.morph.events.mirror.ExecutorHub;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.misc.DisguiseTypes;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Stream;
 
 public class InteractionMirrorProcessor extends MorphPluginObject implements Listener
 {

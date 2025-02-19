@@ -12,8 +12,8 @@ import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.config.ConfigOption;
 import xyz.nifeather.morph.config.MorphConfigManager;
-import xyz.nifeather.morph.events.api.gameplay.PlayerMorphEarlyEvent;
-import xyz.nifeather.morph.events.api.gameplay.PlayerUnMorphEarlyEvent;
+import xyz.nifeather.morph.api.events.v0.gameplay.PlayerMorphEarlyEvent;
+import xyz.nifeather.morph.api.events.v0.gameplay.PlayerUnMorphEarlyEvent;
 import xyz.nifeather.morph.misc.MorphParameters;
 
 public class ForcedDisguiseProcessor extends MorphPluginObject implements Listener
