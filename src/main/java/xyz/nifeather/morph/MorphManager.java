@@ -365,7 +365,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     private BindableList<String> disabledWorlds;
 
     /**
-     * 内部轮子，检查某个伪装是否被禁用建议使用 {@link MorphManager#disguiseDisabled(String)}
+     * To check whether a disguise is not available for players: {@link MorphManager#disguiseDisabled(String)}
      */
     @ApiStatus.Internal
     public BindableList<String> getBannedDisguises()

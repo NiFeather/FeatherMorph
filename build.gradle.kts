@@ -290,7 +290,7 @@ tasks.shadowJar {
         relocate("de.themoep.inventorygui", "xyz.nifeather.morph.shaded.inventorygui")
     }
 
-    archiveFileName = "FeatherMorph-${project.property("project_version")}+${project.property("mc_version")}-final.jar"
+    archiveFileName = "FeatherMorph-${project.property("project_version")}-${project.property("mc_version")}-final.jar"
 }
 
 // https://stackoverflow.com/a/74848372

@@ -32,6 +32,7 @@ public class UtilitiesAlpha
 
         for (DisguiseState state : morphManager.getActiveDisguises())
         {
+            // Currently, only ServerDisguiseWrappers are supported
             if (!(state.getDisguiseWrapper() instanceof ServerDisguiseWrapper wrapper))
                 continue;
 

@@ -25,13 +25,13 @@ public class FeatherMorphDirectAccess
     }
 
     /**
-     * The MorphManager, handles these functions:
+     * The MorphManager, mainly handling these functions:
      * <br>
-     * 1. Disguise sessions ({@link xyz.nifeather.morph.misc.DisguiseState}s)
+     * 1. Disguise sessions (Morph/Unmorph, {@link xyz.nifeather.morph.misc.DisguiseState}s)
      * <br>
      * 2. Player data (Grant/Revoke disguises)
      * <br>
-     * 3. Backend stuffs
+     * 3. Backend and Disguise Providers
      */
     public MorphManager morphManager()
     {
