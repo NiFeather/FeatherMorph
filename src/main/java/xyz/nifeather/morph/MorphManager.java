@@ -152,6 +152,11 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         return backends.values();
     }
 
+    /**
+     * NOT FINISHED, DO NOT USE
+     * <br>
+     * AND MAY NEVER FINISH...
+     */
     @ApiStatus.Internal
     public boolean switchBackend(DisguiseBackend<?, ?> backend)
     {
@@ -165,24 +170,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         {
             defaultBackend = backend;
 
-            activeDisguises.forEach(state ->
-            {
-                state.getDisguiseWrapper().getBackend().unDisguise(state.getPlayer());
-
-                //TODO: 更改默认后端时刷新伪装
-                //var newWrapper = backend.cloneWrapperFrom(state.getDisguiseWrapper());
-                //state.updateDisguise(
-                //        state.getDisguiseIdentifier(), state.skillLookupIdentifier(),
-                //        newWrapper, false, state.getDisguisedItems()
-                //);
-
-                // 等待1tick让客户端处理一些网络事务
-                this.addSchedule(() ->
-                {
-                    if (!state.getDisguiseWrapper().disposed())
-                        backend.disguise(state.getPlayer(), state.getDisguiseWrapper());
-                });
-            });
+            unMorphAll(false);
         }
         catch (Throwable t)
         {
