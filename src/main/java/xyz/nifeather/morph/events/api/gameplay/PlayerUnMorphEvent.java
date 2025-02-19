@@ -1,4 +1,4 @@
-package xyz.nifeather.morph.api.events.v0.gameplay;
+package xyz.nifeather.morph.events.api.gameplay;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;

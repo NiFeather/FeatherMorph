@@ -16,7 +16,7 @@ import xyz.nifeather.morph.abilities.impl.dmgReduce.ReduceWitherDamageAbility;
 import xyz.nifeather.morph.abilities.impl.potion.*;
 import xyz.nifeather.morph.abilities.impl.onAttack.ExtraKnockbackAbility;
 import xyz.nifeather.morph.abilities.impl.onAttack.PotionOnAttackAbility;
-import xyz.nifeather.morph.api.events.v0.lifecycle.AbilitiesFinishedInitializeEvent;
+import xyz.nifeather.morph.events.api.lifecycle.AbilitiesFinishedInitializeEvent;
 import xyz.nifeather.morph.storage.skill.ISkillOption;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;

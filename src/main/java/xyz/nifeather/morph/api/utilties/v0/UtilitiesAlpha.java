@@ -20,6 +20,13 @@ public class UtilitiesAlpha
         this.directAccess = directAccess;
     }
 
+    public boolean isPlayerDisguising(Player player)
+    {
+        var morphManager = directAccess.morphManager();
+
+        return morphManager.getDisguiseStateFor(player) != null;
+    }
+
     /**
      * Lookup if the given UUID matches a player's disguise
      * @param input The UUID of the disguise
