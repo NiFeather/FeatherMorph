@@ -24,6 +24,11 @@ public class FeatherMorphDirectAccess
         this.dependencyManager = DependencyManager.getInstance(pl.getNamespace());
     }
 
+    public FeatherMorphMain plugin()
+    {
+        return plugin;
+    }
+
     /**
      * The MorphManager, mainly handling these functions:
      * <br>
