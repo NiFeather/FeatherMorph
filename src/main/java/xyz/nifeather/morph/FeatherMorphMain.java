@@ -239,8 +239,6 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
 
         dependencyManager.cache(mirrorExecutorHub = new ExecutorHub());
 
-        dependencyManager.cache(new FeatherMorphAPI(this));
-
         var mirrorProcessor = new InteractionMirrorProcessor();
 
         // Commands
@@ -248,22 +246,25 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
         lifecycleManager.registerEventHandler(LifecycleEvents.COMMANDS, event ->
                 cmdHelper.register(event));
 
+        var listeners = new Listener[]
+                {
+                        playerTracker,
+                        mirrorProcessor,
+                        new CommonEventProcessor(),
+                        new RevealingEventProcessor(),
+                        new DisguiseAnimationProcessor(),
+                        new ForcedDisguiseProcessor(),
+                        new PlayerSkinProcessor(),
+                        entityProcessor = new EntityProcessor()
+                };
+
         //注册EventProcessor
         this.schedule(() ->
         {
-            registerListeners(new Listener[]
-                    {
-                            playerTracker,
-                            mirrorProcessor,
-                            new CommonEventProcessor(),
-                            new RevealingEventProcessor(),
-                            new DisguiseAnimationProcessor(),
-                            new ForcedDisguiseProcessor(),
-                            new PlayerSkinProcessor(),
-                            entityProcessor = new EntityProcessor()
-                    });
+            registerListeners(listeners);
 
             clientHandler.reAuthPlayers(Bukkit.getOnlinePlayers());
+            dependencyManager.cache(new FeatherMorphAPI(this));
         });
 
         pluginEnableDone.set(true);
