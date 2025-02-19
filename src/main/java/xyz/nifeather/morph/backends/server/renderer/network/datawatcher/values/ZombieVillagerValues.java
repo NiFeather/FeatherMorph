@@ -1,7 +1,6 @@
 package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.values;
 
 import org.bukkit.entity.Villager;
-import xyz.nifeather.morph.backends.server.renderer.network.CustomSerializeMethods;
 
 import static xyz.nifeather.morph.backends.server.renderer.network.datawatcher.DataWrappers.*;
 

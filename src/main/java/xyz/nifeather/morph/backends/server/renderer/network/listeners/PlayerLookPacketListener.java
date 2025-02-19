@@ -1,17 +1,11 @@
 package xyz.nifeather.morph.backends.server.renderer.network.listeners;
 
-import com.comphenix.protocol.PacketType;
-import com.comphenix.protocol.events.ListeningWhitelist;
-import com.comphenix.protocol.events.PacketContainer;
-import com.comphenix.protocol.events.PacketEvent;
-import com.comphenix.protocol.injector.GamePhase;
-import net.minecraft.network.protocol.game.ClientboundMoveEntityPacket;
-import net.minecraft.network.protocol.game.ClientboundRotateHeadPacket;
-import net.minecraft.network.protocol.game.ClientboundTeleportEntityPacket;
-import net.minecraft.util.Mth;
-import org.bukkit.Bukkit;
+import com.github.retrooper.packetevents.event.PacketSendEvent;
+import com.github.retrooper.packetevents.protocol.packettype.PacketType;
+import com.github.retrooper.packetevents.wrapper.play.server.*;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.RenderRegistry;
 
@@ -24,185 +18,96 @@ public class PlayerLookPacketListener extends ProtocolListener
     }
 
     @Override
-    public void onPacketSending(PacketEvent event)
+    public void onPacketSend(PacketSendEvent event)
     {
-        var packetType = event.getPacketType();
+        switch (event.getPacketType())
+        {
+            case PacketType.Play.Server.ENTITY_HEAD_LOOK ->
+            {
+                var wrapper = new WrapperPlayServerEntityHeadLook(event);
+                var rec = this.getConvertedYawPitch(wrapper.getEntityId(), wrapper.getHeadYaw(), 0f);
 
-        var packet = event.getPacket();
-        //event.setCancelled(true);
+                if (rec == null)
+                    return;
 
-        //不要处理来自我们自己的包
-        if (getFactory().isPacketOurs(packet))
-        {
-            return;
-        }
+                event.markForReEncode(true);
+                wrapper.setHeadYaw(rec.yaw());
+            }
 
-        if (packetType == PacketType.Play.Server.ENTITY_LOOK
-                || packetType == PacketType.Play.Server.REL_ENTITY_MOVE
-                || packetType == PacketType.Play.Server.REL_ENTITY_MOVE_LOOK)
-        {
-            //PacketPlayOutEntity$PacketPlayOutEntityLook
-            var cast = (ClientboundMoveEntityPacket)packet.getHandle();
-            onLookPacket(cast, event);
-        }
-        else if (packetType == PacketType.Play.Server.ENTITY_HEAD_ROTATION)
-        {
-            var cast = (ClientboundRotateHeadPacket)packet.getHandle();
-            onHeadRotation(cast, event);
-        }
-        else if (packetType == PacketType.Play.Server.ENTITY_TELEPORT)
-        {
-            var cast = (ClientboundTeleportEntityPacket)packet.getHandle();
-            onTeleport(cast, event);
-        }
-        else
-        {
-            //logger.error("Invalid packet type: " + packetType);
+            case PacketType.Play.Server.ENTITY_ROTATION ->
+            {
+                var wrapper = new WrapperPlayServerEntityRotation(event);
+                var rec = this.getConvertedYawPitch(wrapper.getEntityId(), wrapper.getYaw(), wrapper.getPitch());
+
+                if (rec == null) return;
+
+                event.markForReEncode(true);
+                wrapper.setYaw(rec.yaw());
+                wrapper.setPitch(rec.pitch());
+            }
+
+            case PacketType.Play.Server.ENTITY_RELATIVE_MOVE_AND_ROTATION ->
+            {
+                var wrapper = new WrapperPlayServerEntityRelativeMoveAndRotation(event);
+                var rec = this.getConvertedYawPitch(wrapper.getEntityId(), wrapper.getYaw(), wrapper.getPitch());
+
+                if (rec == null) return;
+
+                event.markForReEncode(true);
+                wrapper.setYaw(rec.yaw());
+                wrapper.setPitch(rec.pitch());
+            }
+
+            case PacketType.Play.Server.ENTITY_TELEPORT ->
+            {
+                var wrapper = new WrapperPlayServerEntityTeleport(event);
+                var rec = this.getConvertedYawPitch(wrapper.getEntityId(), wrapper.getYaw(), wrapper.getPitch());
+
+                if (rec == null) return;
+
+                event.markForReEncode(true);
+                wrapper.setYaw(rec.yaw());
+                wrapper.setPitch(rec.pitch());
+            }
+
+            default -> {}
         }
     }
+
     @Resolved(shouldSolveImmediately = true)
     private RenderRegistry registry;
 
-    private void onTeleport(ClientboundTeleportEntityPacket packet, PacketEvent event)
+    private record YawPitchRec(float yaw, float pitch)
+    {
+    }
+
+    @Nullable
+    private YawPitchRec getConvertedYawPitch(int entityId, float rawYaw, float rawPitch)
     {
         //获取此包的来源实体
-        var sourceNmsEntity = getNmsPlayerFrom(packet.id());
+        var sourceNmsEntity = getNmsPlayerFrom(entityId);
         if (sourceNmsEntity == null)
-            return;
+            return null;
 
-        if (!(sourceNmsEntity.getBukkitEntity() instanceof Player sourcePlayer)) return;
+        if (!(sourceNmsEntity.getBukkitEntity() instanceof Player sourcePlayer))
+            return null;
 
         var watcher = registry.getWatcher(sourcePlayer.getUniqueId());
 
         if (watcher == null)
-            return;
+            return null;
 
         var isDragon = watcher.getEntityType() == EntityType.ENDER_DRAGON;
         var isPhantom = watcher.getEntityType() == EntityType.PHANTOM;
 
         if (!isDragon && !isPhantom)
-            return;
+            return null;
 
-        float yaw = packet.change().yRot();
-        float pitch = packet.change().xRot();
+        float yaw, pitch;
 
-        yaw = isDragon ? (yaw + 180f) : yaw;
-        pitch = isPhantom ? -pitch : pitch;
+        yaw = isDragon ? (rawYaw + 180f) : rawYaw;
+        pitch = isPhantom ? -rawPitch : rawPitch;
 
-        var container = event.getPacket();
-        container.getBytes().write(0, Mth.packDegrees(yaw));
-        container.getBytes().write(1, Mth.packDegrees(pitch));
-    }
-
-    private void onHeadRotation(ClientboundRotateHeadPacket packet, PacketEvent event)
-    {
-        //获取此包的来源实体
-        var sourceNmsEntity = this.getNmsPlayerEntityFromUnreadablePacket(packet);
-        if (sourceNmsEntity == null) return;
-
-        if (!(sourceNmsEntity.getBukkitEntity() instanceof Player sourcePlayer)) return;
-
-        var watcher = registry.getWatcher(sourcePlayer.getUniqueId());
-
-        if (watcher == null || watcher.getEntityType() != EntityType.ENDER_DRAGON)
-            return;
-
-        var newHeadYaw = packet.getYHeadRot() + 180f;
-
-        var newPacket = new ClientboundRotateHeadPacket(sourceNmsEntity, Mth.packDegrees(newHeadYaw));
-        var finalPacket = PacketContainer.fromPacket(newPacket);
-        getFactory().markPacketOurs(finalPacket);
-
-        event.setPacket(finalPacket);
-    }
-
-    private void onLookPacket(ClientboundMoveEntityPacket packet, PacketEvent event)
-    {
-        //获取此包的来源实体
-        var sourceNmsEntity = this.getNmsPlayerEntityFromUnreadablePacket(packet);
-
-        if (sourceNmsEntity == null) return;
-
-        if (!(sourceNmsEntity.getBukkitEntity() instanceof Player sourcePlayer)) return;
-
-        var watcher = registry.getWatcher(sourcePlayer.getUniqueId());
-
-        if (watcher == null)
-            return;
-
-        var isDragon = watcher.getEntityType() == EntityType.ENDER_DRAGON;
-        var isPhantom = watcher.getEntityType() == EntityType.PHANTOM;
-
-        if (!isDragon && !isPhantom)
-            return;
-
-        float yaw = packet.getyRot();
-        float pitch = packet.getxRot();
-
-        yaw = isDragon ? (yaw + 180f) : yaw;
-        pitch = isPhantom ? -pitch : pitch;
-
-        ClientboundMoveEntityPacket newPacket;
-
-        var packetType = event.getPacketType();
-
-        if (packetType == PacketType.Play.Server.ENTITY_LOOK)
-        {
-            newPacket = new ClientboundMoveEntityPacket.Rot(
-                    sourcePlayer.getEntityId(),
-                    Mth.packDegrees(yaw), Mth.packDegrees(pitch),
-                    packet.isOnGround()
-            );
-        }
-        else if (packetType == PacketType.Play.Server.REL_ENTITY_MOVE)
-        {
-            newPacket = new ClientboundMoveEntityPacket.Pos(
-                    sourcePlayer.getEntityId(),
-                    packet.getXa(), packet.getYa(), packet.getZa(),
-                    packet.isOnGround()
-            );
-        }
-        else if (packetType == PacketType.Play.Server.REL_ENTITY_MOVE_LOOK)
-        {
-            newPacket = new ClientboundMoveEntityPacket.PosRot(
-                    sourcePlayer.getEntityId(),
-                    packet.getXa(), packet.getYa(), packet.getZa(),
-                    Mth.packDegrees(yaw), Mth.packDegrees(pitch),
-                    packet.isOnGround()
-            );
-        }
-        else
-        {
-            logger.error("Unknown ClientboundMoveEntityPacket: " + packetType);
-            return;
-        }
-
-        var finalPacket = PacketContainer.fromPacket(newPacket);
-        getFactory().markPacketOurs(finalPacket);
-        event.setPacket(finalPacket);
-    }
-
-    @Override
-    public void onPacketReceiving(PacketEvent packetEvent)
-    {
-    }
-
-    @Override
-    public ListeningWhitelist getSendingWhitelist()
-    {
-        return ListeningWhitelist.newBuilder()
-                .gamePhase(GamePhase.PLAYING)
-                .types(PacketType.Play.Server.ENTITY_LOOK,
-                        PacketType.Play.Server.ENTITY_HEAD_ROTATION,
-                        PacketType.Play.Server.REL_ENTITY_MOVE,
-                        PacketType.Play.Server.REL_ENTITY_MOVE_LOOK,
-                        PacketType.Play.Server.ENTITY_TELEPORT)
-                .build();
-    }
-
-    @Override
-    public ListeningWhitelist getReceivingWhitelist()
-    {
-        return ListeningWhitelist.EMPTY_WHITELIST;
+        return new YawPitchRec(yaw, pitch);
     }
 }

@@ -1,7 +1,6 @@
 package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.values;
 
 import org.bukkit.entity.Frog;
-import xyz.nifeather.morph.backends.server.renderer.network.CustomSerializeMethods;
 import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.values.basetypes.AnimalValues;
 
 public class FrogValues extends AnimalValues

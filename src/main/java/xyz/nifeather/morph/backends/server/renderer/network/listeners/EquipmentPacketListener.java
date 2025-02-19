@@ -1,11 +1,9 @@
 package xyz.nifeather.morph.backends.server.renderer.network.listeners;
 
-import com.comphenix.protocol.PacketType;
-import com.comphenix.protocol.events.ListeningWhitelist;
-import com.comphenix.protocol.events.PacketEvent;
-import com.comphenix.protocol.injector.GamePhase;
+import com.github.retrooper.packetevents.event.PacketSendEvent;
+import com.github.retrooper.packetevents.protocol.packettype.PacketType;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityEquipment;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
 import org.bukkit.entity.Player;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
@@ -30,26 +28,26 @@ public class EquipmentPacketListener extends ProtocolListener
     }
 
     @Override
-    public void onPacketSending(PacketEvent event)
+    public void onPacketSend(PacketSendEvent event)
     {
         if (event.getPacketType() != PacketType.Play.Server.ENTITY_EQUIPMENT)
             return;
 
-        var packet = event.getPacket();
+        var wrapper = new WrapperPlayServerEntityEquipment(event);
 
-        //不要处理来自我们自己的包
-        if (getFactory().isPacketOurs(packet))
-            return;
+        //todo: 不要处理来自我们自己的包
+        //if (getFactory().isPacketOurs(packet))
+        //    return;
 
-        onEquipmentPacket((ClientboundSetEquipmentPacket) event.getPacket().getHandle(), event);
+        onEquipmentPacket(wrapper, event);
     }
 
     private final Map<Player, Boolean> alreadyFake = new Object2ObjectOpenHashMap<>();
 
-    private void onEquipmentPacket(ClientboundSetEquipmentPacket packet, PacketEvent event)
+    private void onEquipmentPacket(WrapperPlayServerEntityEquipment packet, PacketSendEvent event)
     {
         //获取此包的来源实体
-        var sourceNmsEntity = getNmsPlayerFrom(packet.getEntity());
+        var sourceNmsEntity = getNmsPlayerFrom(packet.getEntityId());
         if (sourceNmsEntity == null)
             return;
 
@@ -73,29 +71,10 @@ public class EquipmentPacketListener extends ProtocolListener
             return;
         }
 
-        event.setPacket(getFactory().getEquipmentPacket(sourcePlayer, watcher));
+        event.markForReEncode(true);
+        var equipments = getFactory().getPacketeventsEquipments(sourcePlayer, watcher);
+        packet.setEquipment(equipments);
 
         alreadyFake.put(sourcePlayer, true);
-    }
-
-    @Override
-    public void onPacketReceiving(PacketEvent event)
-    {
-    }
-
-    @Override
-    public ListeningWhitelist getSendingWhitelist()
-    {
-        return ListeningWhitelist
-                .newBuilder()
-                .types(PacketType.Play.Server.ENTITY_EQUIPMENT)
-                .gamePhase(GamePhase.PLAYING)
-                .build();
-    }
-
-    @Override
-    public ListeningWhitelist getReceivingWhitelist()
-    {
-        return ListeningWhitelist.EMPTY_WHITELIST;
     }
 }

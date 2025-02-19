@@ -1,6 +1,5 @@
 package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.values;
 
-import xyz.nifeather.morph.backends.server.renderer.network.CustomSerializeMethods;
 import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.DataWrappers;
 import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.values.basetypes.AnimalValues;
 import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.DataWrappers.ArmadilloState;

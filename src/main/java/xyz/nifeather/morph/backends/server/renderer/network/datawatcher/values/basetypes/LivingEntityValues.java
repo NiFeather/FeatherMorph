@@ -2,7 +2,6 @@ package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.values.
 
 import net.minecraft.core.particles.ParticleOptions;
 import org.joml.Vector3i;
-import xyz.nifeather.morph.backends.server.renderer.network.CustomSerializeMethods;
 import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.values.SingleValue;
 
 import java.util.List;

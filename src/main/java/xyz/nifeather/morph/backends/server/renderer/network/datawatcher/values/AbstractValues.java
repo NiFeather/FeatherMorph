@@ -1,5 +1,6 @@
 package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.values;
 
+import com.github.retrooper.packetevents.protocol.entity.data.EntityDataType;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.slf4j.Logger;
 import xyz.nifeather.morph.FeatherMorphMain;
@@ -10,12 +11,12 @@ import java.util.List;
 public abstract class AbstractValues
 {
     private int currentIndex = 0;
-    protected <X> SingleValue<X> createSingle(String name, X val)
+    protected <X> SingleValue<X> createSingle(String name, X val, EntityDataType<X> dataType)
     {
         if (val == null)
             throw new IllegalArgumentException("May not pass a null value to getIndex()");
 
-        var sv = SingleValue.of(name, currentIndex, val);
+        var sv = SingleValue.of(name, currentIndex, val, dataType);
 
         currentIndex++;
         return sv;

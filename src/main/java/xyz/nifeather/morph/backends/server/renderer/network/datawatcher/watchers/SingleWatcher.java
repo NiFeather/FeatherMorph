@@ -1,7 +1,8 @@
 package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers;
 
-import com.comphenix.protocol.ProtocolLibrary;
-import com.comphenix.protocol.events.PacketContainer;
+import com.github.retrooper.packetevents.PacketEvents;
+import com.github.retrooper.packetevents.wrapper.PacketWrapper;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityMetadata;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.nbt.CompoundTag;
@@ -209,7 +210,7 @@ public abstract class SingleWatcher extends MorphPluginObject
     }
 
     /**
-     * Values in this list shouldn't be included with meta packet processing in {@link PacketFactory#rebuildServerMetaPacket(AbstractValues, SingleWatcher, PacketContainer)}
+     * Values in this list shouldn't be included with meta packet processing in {@link PacketFactory#rebuildServerMetaList(AbstractValues, SingleWatcher, WrapperPlayServerEntityMetadata)}
      */
     private final List<Integer> blockedValues = new ObjectArrayList<>();
 
@@ -515,7 +516,7 @@ public abstract class SingleWatcher extends MorphPluginObject
         return WatcherUtils.getAffectedPlayers(sourcePlayer);
     }
 
-    protected void sendPacketToAffectedPlayers(PacketContainer packet)
+    protected void sendPacketToAffectedPlayers(PacketWrapper<?> packet)
     {
         if (isSilent())
         {
@@ -533,8 +534,8 @@ public abstract class SingleWatcher extends MorphPluginObject
 
         var players = getAffectedPlayers(getBindingPlayer());
 
-        var protocol = ProtocolLibrary.getProtocolManager();
-        players.forEach(p -> protocol.sendServerPacket(p, packet));
+        var protocol = PacketEvents.getAPI().getPlayerManager();
+        players.forEach(p -> protocol.sendPacket(p, packet));
     }
 
     private boolean disposed;

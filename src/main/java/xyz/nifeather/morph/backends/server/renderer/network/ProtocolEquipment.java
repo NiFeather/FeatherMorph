@@ -1,10 +1,9 @@
 package xyz.nifeather.morph.backends.server.renderer.network;
 
-import com.mojang.datafixers.util.Pair;
+import com.github.retrooper.packetevents.protocol.player.Equipment;
+import com.github.retrooper.packetevents.protocol.player.EquipmentSlot;
+import io.github.retrooper.packetevents.util.SpigotConversionUtil;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.item.ItemStack;
-import org.bukkit.Material;
 import org.bukkit.craftbukkit.inventory.CraftInventoryPlayer;
 import org.bukkit.inventory.EntityEquipment;
 import xyz.nifeather.morph.FeatherMorphMain;
@@ -12,43 +11,44 @@ import xyz.nifeather.morph.utilities.ItemUtils;
 
 public class ProtocolEquipment
 {
-    public static ObjectArrayList<Pair<EquipmentSlot, ItemStack>> toPairs(EntityEquipment equipment)
+    public static ObjectArrayList<Equipment> toPEEquipmentList(EntityEquipment equipment)
     {
-        var list = new ObjectArrayList<Pair<EquipmentSlot, ItemStack>>();
+        var list = new ObjectArrayList<Equipment>();
 
         for (org.bukkit.inventory.EquipmentSlot bukkitSlot : org.bukkit.inventory.EquipmentSlot.values())
-            list.add(toEquipmentPair(equipment, bukkitSlot));
+            list.add(toEquipment(equipment, bukkitSlot));
 
         return list;
     }
 
-    private static EquipmentSlot toNMSSlot(org.bukkit.inventory.EquipmentSlot bukkitSlot)
+    private static EquipmentSlot toPESlot(org.bukkit.inventory.EquipmentSlot bukkitSlot)
     {
         return switch (bukkitSlot)
         {
-            case HAND -> EquipmentSlot.MAINHAND;
-            case OFF_HAND -> EquipmentSlot.OFFHAND;
+            case HAND -> EquipmentSlot.MAIN_HAND;
+            case OFF_HAND -> EquipmentSlot.OFF_HAND;
 
-            case HEAD -> EquipmentSlot.HEAD;
-            case CHEST -> EquipmentSlot.CHEST;
-            case LEGS -> EquipmentSlot.LEGS;
-            case FEET -> EquipmentSlot.FEET;
+            case HEAD -> EquipmentSlot.HELMET;
+            case CHEST -> EquipmentSlot.CHEST_PLATE;
+            case LEGS -> EquipmentSlot.LEGGINGS;
+            case FEET -> EquipmentSlot.BOOTS;
 
             case BODY -> EquipmentSlot.BODY;
         };
     }
 
-    private static Pair<EquipmentSlot, ItemStack> toEquipmentPair(EntityEquipment equipment, org.bukkit.inventory.EquipmentSlot bukkitSlot)
+    private static Equipment toEquipment(EntityEquipment equipment, org.bukkit.inventory.EquipmentSlot bukkitSlot)
     {
         try
         {
             if (equipment instanceof CraftInventoryPlayer && bukkitSlot == org.bukkit.inventory.EquipmentSlot.BODY)
-                return Pair.of(toNMSSlot(bukkitSlot), ItemUtils.nmsAir);
+                return new Equipment(toPESlot(bukkitSlot), ItemUtils.peAir);
 
             var bukkitItem = equipment.getItem(bukkitSlot);
-            var nmsItem = ItemStack.fromBukkitCopy(bukkitItem);
 
-            return Pair.of(toNMSSlot(bukkitSlot), nmsItem);
+            var peItem = SpigotConversionUtil.fromBukkitItemStack(bukkitItem);
+
+            return new Equipment(toPESlot(bukkitSlot), peItem);
         }
         catch (Throwable t)
         {
@@ -57,6 +57,6 @@ public class ProtocolEquipment
             logger.warn("Can't generate equipment pair: " + t.getMessage());
         }
 
-        return Pair.of(EquipmentSlot.FEET, ItemStack.fromBukkitCopy(new org.bukkit.inventory.ItemStack(Material.AIR)));
+        return new Equipment(EquipmentSlot.BOOTS, ItemUtils.peAir);
     }
 }
