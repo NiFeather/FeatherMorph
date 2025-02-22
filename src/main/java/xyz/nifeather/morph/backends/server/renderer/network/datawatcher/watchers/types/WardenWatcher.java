@@ -46,20 +46,20 @@ public class WardenWatcher extends EHasAttackAnimationWatcher
             {
                 case AnimationNames.ROAR ->
                 {
-                    if (this.readEntryOrDefault(CustomEntries.VANISHED, false)) return;
+                    if (this.readEntryOrDefault(CustomEntries.WARDEN_VANISHED, false)) return;
 
                     this.block(ValueIndex.BASE_LIVING.POSE);
                     this.writePersistent(ValueIndex.BASE_LIVING.POSE, Pose.ROARING);
                 }
                 case AnimationNames.ROAR_SOUND ->
                 {
-                    if (this.readEntryOrDefault(CustomEntries.VANISHED, false)) return;
+                    if (this.readEntryOrDefault(CustomEntries.WARDEN_VANISHED, false)) return;
 
                     world.playSound(bindingPlayer.getLocation(), Sound.ENTITY_WARDEN_ROAR, SoundCategory.HOSTILE, 3, 1);
                 }
                 case AnimationNames.SNIFF ->
                 {
-                    if (this.readEntryOrDefault(CustomEntries.VANISHED, false)) return;
+                    if (this.readEntryOrDefault(CustomEntries.WARDEN_VANISHED, false)) return;
 
                     this.block(ValueIndex.BASE_LIVING.POSE);
                     this.writePersistent(ValueIndex.BASE_LIVING.POSE, Pose.SNIFFING);
@@ -68,7 +68,7 @@ public class WardenWatcher extends EHasAttackAnimationWatcher
                 }
                 case AnimationNames.DIGDOWN ->
                 {
-                    if (this.readEntryOrDefault(CustomEntries.VANISHED, false)) return;
+                    if (this.readEntryOrDefault(CustomEntries.WARDEN_VANISHED, false)) return;
 
                     this.block(ValueIndex.BASE_LIVING.POSE);
                     this.writePersistent(ValueIndex.BASE_LIVING.POSE, Pose.DIGGING);
@@ -78,11 +78,12 @@ public class WardenWatcher extends EHasAttackAnimationWatcher
                 {
                     this.writePersistent(ValueIndex.BASE_ENTITY.GENERAL, (byte)0x20);
                     this.writePersistent(ValueIndex.BASE_LIVING.SILENT, true);
-                    this.writeEntry(CustomEntries.VANISHED, true);
+                    this.writePersistent(ValueIndex.BASE_LIVING.POSE, Pose.SLEEPING);
+                    this.writeEntry(CustomEntries.WARDEN_VANISHED, true);
                 }
                 case AnimationNames.APPEAR ->
                 {
-                    this.writeEntry(CustomEntries.VANISHED, false);
+                    this.writeEntry(CustomEntries.WARDEN_VANISHED, false);
                     this.block(ValueIndex.BASE_LIVING.POSE);
                     this.remove(ValueIndex.BASE_ENTITY.GENERAL);
                     this.writePersistent(ValueIndex.BASE_LIVING.POSE, Pose.EMERGING);
@@ -103,7 +104,7 @@ public class WardenWatcher extends EHasAttackAnimationWatcher
                 {
                     // 如果当前已消失，则不要调用重置
                     // 因为重置会将一些动作数据重新同步为玩家的数据
-                    if (this.readEntryOrDefault(CustomEntries.VANISHED, false)) return;
+                    if (this.readEntryOrDefault(CustomEntries.WARDEN_VANISHED, false)) return;
 
                     reset();
                 }

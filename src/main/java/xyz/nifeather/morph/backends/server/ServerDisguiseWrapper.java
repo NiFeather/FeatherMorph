@@ -24,6 +24,7 @@ import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.backends.server.renderer.utilties.WatcherUtils;
+import xyz.nifeather.morph.misc.AnimationNames;
 import xyz.nifeather.morph.misc.DisguiseEquipment;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
@@ -365,20 +366,21 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
     @Override
     public void onPlayerJoin(Player newInstance)
     {
-        if (bindingWatcher != null)
+        if (bindingWatcher == null)
+            return;
+
+        this.bindingWatcher.writeEntry(CustomEntries.SPAWN_ID, newInstance.getEntityId());
+        this.bindingPlayer = newInstance;
+
+        if (bindingWatcher.readEntryOrDefault(CustomEntries.WARDEN_VANISHED, false))
+            bindingWatcher.writeEntry(CustomEntries.ANIMATION, AnimationNames.APPEAR);
+
+        if (this.getEntityType() == EntityType.PLAYER && backend.serverRenderer.showPlayerDisguises.get())
         {
-            this.bindingWatcher.writeEntry(CustomEntries.SPAWN_ID, newInstance.getEntityId());
-            this.bindingPlayer = newInstance;
-
-            if (this.getEntityType() == EntityType.PLAYER && backend.serverRenderer.showPlayerDisguises.get())
-            {
-                PlayerListHandler.instance().showFakePlayer(
-                        bindingWatcher.readEntryOrThrow(CustomEntries.SPAWN_UUID),
-                        bindingWatcher.readEntryOrThrow(CustomEntries.PROFILE)
-                );
-            }
+            PlayerListHandler.instance().showFakePlayer(
+                    bindingWatcher.readEntryOrThrow(CustomEntries.SPAWN_UUID),
+                    bindingWatcher.readEntryOrThrow(CustomEntries.PROFILE)
+            );
         }
-
-        super.onPlayerJoin(newInstance);
     }
 }
