@@ -665,12 +665,12 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 default -> throw new InvalidObjectException("Invalid validate result: " + validateResult);
             }
 
-            var buildResult = buildDisguise(parameters, meta);
+            var buildResult = prepareDisguiseState(parameters, meta);
             if (!buildResult.success())
                 return false;
 
             var playerMeta = getPlayerMeta(parameters.targetPlayer);
-            this.postBuildDisguise(buildResult, parameters, playerMeta);
+            this.buildDisguise(buildResult, parameters, playerMeta);
 
             if (!applyDisguise(parameters, buildResult.state(), meta, playerMeta))
             {
@@ -796,6 +796,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         return VALIDATE_NO_ISSUE;
     }
 
+    //region Build and apply disguise
+
     /**
      * 构建一个最小的
      * @param parameters A {@link MorphParameters}
@@ -803,7 +805,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
      * @return {@link DisguiseBuildResult} ，如果不能进行下一步则返回null
      */
     @NotNull
-    private DisguiseBuildResult buildDisguise(MorphParameters parameters, DisguiseMeta disguiseMeta)
+    private DisguiseBuildResult prepareDisguiseState(MorphParameters parameters, DisguiseMeta disguiseMeta)
     {
         // 确保source不为null
         var source = parameters.commandSource == null ? nilCommandSource : parameters.commandSource;
@@ -813,7 +815,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         DisguiseState outComingState = null;
 
-        // 执行伪装操作
         try
         {
             var provider = getProvider(disguiseIdentifier);
@@ -895,11 +896,14 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         }
     }
 
+    /**
+     * Key that indicates whether a disguise state should have random properties set on build.
+     */
     public static final String DATAKEY_SKIP_PROPERTIES = "skip_properties_init";
 
-    private void postBuildDisguise(DisguiseBuildResult result,
-                                   MorphParameters parameters,
-                                   PlayerMeta playerOptions)
+    private void buildDisguise(DisguiseBuildResult result,
+                               MorphParameters parameters,
+                               PlayerMeta playerOptions)
     {
         if (!result.success())
             throw new IllegalArgumentException("Passing a failed result to postDisguise() !");
@@ -935,9 +939,11 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         if (targetEntity != null && targetEntity.customName() != null)
         {
             var name = targetEntity.customName();
+            assert name != null;
 
             state.entityCustomName = name;
-            state.setCustomDisplayName(name);
+            state.setPlayerDisplay(name);
+            state.setServerDisplay(name);
         }
         else
         {
@@ -949,7 +955,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             state.setServerDisplay(serverDisplay);
         }
 
-        provider.postConstructDisguise(state, targetEntity);
+        provider.onPostConstructDisguise(state, targetEntity);
         wrapper.onPostConstructDisguise(state, targetEntity);
 
         SkillCooldownInfo cdInfo;
@@ -962,6 +968,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         cdInfo.setLastInvoke(plugin.getCurrentTick());
 
         // 切换CD
+        // todo: Let DisguiseState handle skill cooldown
         skillHandler.switchCooldown(player.getUniqueId(), cdInfo);
     }
 
@@ -1001,7 +1008,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             logger.warn("Backend '%s' failed to disguise the player...".formatted(wrapper.getBackend().getIdentifier()));
             source.sendMessage(MessageUtils.prefixes(source, MorphStrings.errorWhileDisguising()));
 
-            // Reset last anyway
+            // Reset last disguise anyway
             if (currentState != null)
                 currentState.reset();
 
@@ -1121,6 +1128,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         if (this.hideDisguisedPlayers.get())
             PlayerListHandler.instance().hidePlayer(player);
     }
+
+    //endregion Build and apply disguise
 
     //region Command generating
 
@@ -1489,7 +1498,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         if (this.preDisguise(parameters) == null)
             return false;
 
-        this.postBuildDisguise(result, parameters, playerMeta);
+        this.buildDisguise(result, parameters, playerMeta);
 
         if (!this.applyDisguise(parameters, state, meta, playerMeta))
             return false;

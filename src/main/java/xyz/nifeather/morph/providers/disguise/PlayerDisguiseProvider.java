@@ -114,9 +114,9 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
     private MorphClientHandler clientHandler;
 
     @Override
-    public void postConstructDisguise(DisguiseState state, @Nullable Entity targetEntity)
+    public void onPostConstructDisguise(DisguiseState state, @Nullable Entity targetEntity)
     {
-        super.postConstructDisguise(state, targetEntity);
+        super.onPostConstructDisguise(state, targetEntity);
 
         var wrapper = state.getDisguiseWrapper();
         var player = state.getPlayer();
@@ -209,7 +209,7 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
     }
 
     @Override
-    public @Nullable CompoundTag getInitialNbtCompound(DisguiseState state, Entity targetEntity, boolean enableCulling)
+    public @Nullable CompoundTag getInitialNbtCompound(DisguiseState state, @Nullable Entity targetEntity, boolean enableCulling)
     {
         if (!(targetEntity instanceof Player targetPlayer)) return null;
 

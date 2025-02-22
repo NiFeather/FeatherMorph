@@ -116,7 +116,7 @@ public abstract class DisguiseProvider extends MorphPluginObject
      * @return
      */
     @Nullable
-    public CompoundTag getInitialNbtCompound(DisguiseState state, Entity targetEntity, boolean enableCulling)
+    public CompoundTag getInitialNbtCompound(DisguiseState state, @Nullable Entity targetEntity, boolean enableCulling)
     {
         if (targetEntity instanceof CraftLivingEntity
             && canConstruct(getMorphManager().getDisguiseMeta(state.getDisguiseIdentifier()), targetEntity, null))
@@ -281,7 +281,7 @@ public abstract class DisguiseProvider extends MorphPluginObject
      * @param state {@link DisguiseState}
      * @param targetEntity 目标实体
      */
-    public void postConstructDisguise(DisguiseState state, @Nullable Entity targetEntity)
+    public void onPostConstructDisguise(DisguiseState state, @Nullable Entity targetEntity)
     {
     }
 

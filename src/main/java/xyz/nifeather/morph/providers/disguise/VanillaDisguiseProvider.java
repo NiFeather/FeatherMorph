@@ -10,7 +10,6 @@ import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.craftbukkit.entity.CraftLivingEntity;
 import org.bukkit.entity.*;
-import org.bukkit.inventory.EquipmentSlotGroup;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.backends.DisguiseWrapper;
@@ -196,9 +195,9 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
     }
 
     @Override
-    public void postConstructDisguise(DisguiseState state, @Nullable Entity targetEntity)
+    public void onPostConstructDisguise(DisguiseState state, @Nullable Entity targetEntity)
     {
-        super.postConstructDisguise(state, targetEntity);
+        super.onPostConstructDisguise(state, targetEntity);
 
         var wrapper = state.getDisguiseWrapper();
         var theirDisguise = getMorphManager().getDisguiseStateFor(targetEntity);
@@ -429,7 +428,7 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
     }
 
     @Override
-    public @Nullable CompoundTag getInitialNbtCompound(DisguiseState state, Entity targetEntity, boolean enableCulling)
+    public @Nullable CompoundTag getInitialNbtCompound(DisguiseState state, @Nullable Entity targetEntity, boolean enableCulling)
     {
         var info = getMorphManager().getDisguiseMeta(state.getDisguiseIdentifier());
 
