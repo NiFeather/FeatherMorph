@@ -36,6 +36,7 @@ import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.MorphStrings;
 import xyz.nifeather.morph.messages.vanilla.VanillaMessageStore;
 import xyz.nifeather.morph.misc.DisguiseTypes;
+import xyz.nifeather.morph.misc.NetworkingHelper;
 import xyz.nifeather.morph.misc.OfflineDisguiseResult;
 import xyz.nifeather.morph.misc.gui.AnimSelectScreenWrapper;
 import xyz.nifeather.morph.misc.gui.DisguiseSelectScreenWrapper;
@@ -378,6 +379,9 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         }
     }
 
+    @Resolved(shouldSolveImmediately = true)
+    private NetworkingHelper networkingHelper;
+
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent e)
     {
@@ -432,6 +436,8 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         if (state != null)
         {
             state.onPlayerJoin();
+
+            networkingHelper.sendCommandToRevealablePlayers(networkingHelper.genPartialMapCommand(state));
 
             //调用Morph事件
             new PlayerJoinedWithDisguiseEvent(player, state).callEvent();

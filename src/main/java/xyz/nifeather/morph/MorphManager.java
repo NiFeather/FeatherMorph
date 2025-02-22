@@ -1023,7 +1023,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         // Network below!
 
         // 向管理员发送map消息
-        networkingHelper.sendCommandToRevealablePlayers(genPartialMapCommand(newState));
+        networkingHelper.sendCommandToRevealablePlayers(networkingHelper.genPartialMapCommand(newState));
 
         // 向客户端更新当前伪装ID
         // 因为下面postConstruct有初始化技能的操作，根据协议标准中current会重置客户端伪装状态的规定，因此在这里更新
@@ -1158,20 +1158,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         }
 
         return S2CRenderMapSyncCommand.of(map);
-    }
-
-    /**
-     * 生成用于橙字显示的部分map(mapp)指令
-     * @param diff 用于生成的伪装状态
-     */
-    public S2CPartialMapCommand genPartialMapCommand(DisguiseState... diff)
-    {
-        return networkingHelper.genPartialMapCommand(diff);
-    }
-
-    public S2CRenderMapAddCommand genClientRenderAddCommand(DisguiseState diff)
-    {
-        return networkingHelper.genClientRenderAddCommand(diff);
     }
 
     //endregion Command generating
@@ -1541,7 +1527,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 this.disguiseFromState(state);
 
                 // 向管理员发送map消息
-                networkingHelper.sendCommandToRevealablePlayers(genPartialMapCommand(state));
+                networkingHelper.sendCommandToRevealablePlayers(networkingHelper.genPartialMapCommand(state));
 
                 new PlayerDisguisedFromOfflineStateEvent(player, state).callEvent();
 
