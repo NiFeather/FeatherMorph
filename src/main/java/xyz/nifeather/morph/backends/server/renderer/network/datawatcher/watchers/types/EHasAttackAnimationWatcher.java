@@ -2,6 +2,7 @@ package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watcher
 
 import com.comphenix.protocol.events.PacketContainer;
 import net.minecraft.network.protocol.game.ClientboundEntityEventPacket;
+import net.minecraft.world.entity.EntityEvent;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -23,7 +24,7 @@ public class EHasAttackAnimationWatcher extends LivingEntityWatcher
         if (entry.equals(CustomEntries.ATTACK_ANIMATION) && Boolean.TRUE.equals(newVal))
         {
             var entity = ((CraftPlayer)getBindingPlayer()).getHandle();
-            sendPacketToAffectedPlayers(PacketContainer.fromPacket(new ClientboundEntityEventPacket(entity, (byte)4)));
+            sendPacketToAffectedPlayers(PacketContainer.fromPacket(new ClientboundEntityEventPacket(entity, EntityEvent.START_ATTACKING)));
         }
     }
 }

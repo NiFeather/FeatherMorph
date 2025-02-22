@@ -9,7 +9,7 @@ import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEnt
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.misc.AnimationNames;
 
-public class CreakingWatcher extends LivingEntityWatcher
+public class CreakingWatcher extends EHasAttackAnimationWatcher
 {
     public CreakingWatcher(Player bindingPlayer)
     {
