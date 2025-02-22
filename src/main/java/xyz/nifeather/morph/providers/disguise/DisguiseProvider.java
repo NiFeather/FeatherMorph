@@ -286,6 +286,13 @@ public abstract class DisguiseProvider extends MorphPluginObject
     }
 
     /**
+     * Execute when a disguise is applied
+     */
+    public void onDisguiseApply(DisguiseState state)
+    {
+    }
+
+    /**
      * 获取某个伪装的显示名称
      *
      * @param disguiseIdentifier 伪装ID

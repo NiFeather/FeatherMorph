@@ -203,36 +203,35 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
         var wrapper = state.getDisguiseWrapper();
         var theirDisguise = getMorphManager().getDisguiseStateFor(targetEntity);
 
-        if (wrapper.getEntityType() == EntityType.ARMOR_STAND)
-        {
-            var properties = DisguiseProperties.INSTANCE.getOrThrow(ArmorStandProperties.class);
-            var wrapperShowArms = wrapper.readPropertyOr(properties.SHOW_ARMS, null);
+        if (wrapper.getEntityType() != EntityType.ARMOR_STAND)
+            return;
 
-            //盔甲架加上手臂
-            if (wrapperShowArms == null)
-            {
-                var showArm = theirDisguise != null
-                        ? theirDisguise.disguisePropertyHandler().getOr(properties.SHOW_ARMS, false)
-                        : targetEntity instanceof ArmorStand armorStand
-                            ? armorStand.hasArms()
-                            : this.armorStandShowArms.get();
+        var properties = DisguiseProperties.INSTANCE.getOrThrow(ArmorStandProperties.class);
+        var wrapperShowArms = wrapper.readPropertyOr(properties.SHOW_ARMS, null);
 
-                wrapper.writeProperty(properties.SHOW_ARMS, showArm);
-            }
-        }
+        //盔甲架加上手臂
+        if (wrapperShowArms != null)
+            return;
 
+        var showArm = theirDisguise != null
+                ? theirDisguise.disguisePropertyHandler().getOr(properties.SHOW_ARMS, false)
+                : targetEntity instanceof ArmorStand armorStand
+                    ? armorStand.hasArms()
+                    : this.armorStandShowArms.get();
+
+        wrapper.writeProperty(properties.SHOW_ARMS, showArm);
+    }
+
+    @Override
+    public void onDisguiseApply(DisguiseState state)
+    {
         var player = state.getPlayer();
-        if (doHealthScale.get())
-        {
-            removeAllHealthModifiers(player);
 
-            var entityClazz = state.getEntityType().getEntityClass();
-            if (entityClazz != null)
-                tryAddModifier(state);
-        }
+        if (doHealthScale.get())
+            tryAddModifier(state);
 
         if (modifyBoundingBoxes.get())
-            this.tryModifyPlayerDimensions(player, state.getDisguiseWrapper());
+            tryModifyPlayerDimensions(player, state.getDisguiseWrapper());
     }
 
     private void tryAddModifier(DisguiseState state)
@@ -276,19 +275,21 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
             if (playerAttribute.getBaseValue() + diff > healthCap.get())
                 diff = healthCap.get() - playerAttribute.getBaseValue();
 
-            //缩放生命值
+            //region Scale Health
             double diffFinal = diff;
-            this.executeThenScaleHealth(player, playerAttribute, () ->
-            {
-                var modifier = new AttributeModifier(healthModifierKey, diffFinal, AttributeModifier.Operation.ADD_NUMBER);
 
-                playerAttribute.removeModifier(healthModifierKey);
+            playerAttribute.removeModifier(healthModifierKey);
 
-                // Also handle legacy keys
-                playerAttribute.removeModifier(healthModifierKeyLegacy);
+            // Also handle legacy keys
+            playerAttribute.removeModifier(healthModifierKeyLegacy);
 
-                playerAttribute.addModifier(modifier);
-            });
+            var modifier = new AttributeModifier(healthModifierKey, diffFinal, AttributeModifier.Operation.ADD_NUMBER);
+
+            playerAttribute.addModifier(modifier);
+
+            scaleHealth(player, playerAttribute);
+
+            //endregion Scale Health
 
             entity.remove();
         }
@@ -389,11 +390,9 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
         }
     }
 
-    private void executeThenScaleHealth(Player player, AttributeInstance attributeInstance, Runnable runnable)
+    private void scaleHealth(Player player, AttributeInstance attributeInstance)
     {
         var currentPercent = player.getHealth() / attributeInstance.getValue();
-
-        runnable.run();
 
         if (player.getHealth() > 0)
             player.setHealth(Math.min(player.getMaxHealth(), attributeInstance.getValue() * currentPercent));
@@ -401,10 +400,11 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
 
     private void removeAllHealthModifiers(Player player)
     {
-            var attribute = player.getAttribute(Attribute.MAX_HEALTH);
+        var attribute = player.getAttribute(Attribute.MAX_HEALTH);
         assert attribute != null;
 
-        this.executeThenScaleHealth(player, attribute, () -> attribute.removeModifier(healthModifierKey));
+        attribute.removeModifier(healthModifierKey);
+        scaleHealth(player, attribute);
     }
 
     @Override

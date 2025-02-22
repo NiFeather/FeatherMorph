@@ -427,17 +427,6 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
                 }, 20 * 3);
         }
 
-        for (var attribute : CommonUtils.getAvailableAttributes())
-        {
-            var instance = player.getAttribute(attribute);
-
-            if (instance == null) continue;
-
-            instance.removeModifier(AttributeModifyingAbility.modifierKey);
-            instance.removeModifier(VanillaDisguiseProvider.healthModifierKeyLegacy);
-            instance.removeModifier(VanillaDisguiseProvider.healthModifierKey);
-        }
-
         this.addSchedule(() -> PlayerListHandler.instance().handle(player));
 
         if (state != null)

@@ -141,7 +141,6 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
                         this.scheduleOn(player, () -> wrapper.applySkin(finalOutcomingProfile));
                     });
         }
-
     }
 
     private MorphGameProfile getGameProfile(ItemStack item)

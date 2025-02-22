@@ -966,13 +966,13 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     }
 
     private boolean applyDisguise(MorphParameters parameters,
-                                  DisguiseState state,
+                                  DisguiseState newState,
                                   DisguiseMeta meta,
                                   PlayerMeta playerOptions)
     {
         var player = parameters.targetPlayer;
         var provider = getProvider(parameters.targetDisguiseIdentifier());
-        var wrapper = state.getDisguiseWrapper();
+        var wrapper = newState.getDisguiseWrapper();
         var source = parameters.commandSource == null ? parameters.targetPlayer : parameters.commandSource;
 
         // 玩家是否已有活跃的DisguiseState?
@@ -992,6 +992,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             activeDisguises.remove(currentState);
         }
 
+        provider.onDisguiseApply(newState);
+
         // 在初始化服务端伪装状态后，交由后端来为玩家套上伪装
         var backendSuccess = wrapper.getBackend().disguise(player, wrapper);
         if (!backendSuccess)
@@ -1006,48 +1008,48 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             return false;
         }
 
-        this.activeDisguises.add(state);
+        this.activeDisguises.add(newState);
 
         // 确保玩家可以根据设置看到自己的伪装
-        state.setServerSideSelfVisible(playerOptions.showDisguiseToSelf && !this.clientViewAvailable(player));
+        newState.setServerSideSelfVisible(playerOptions.showDisguiseToSelf && !this.clientViewAvailable(player));
 
         // Network below!
 
         // 向管理员发送map消息
-        networkingHelper.sendCommandToRevealablePlayers(genPartialMapCommand(state));
+        networkingHelper.sendCommandToRevealablePlayers(genPartialMapCommand(newState));
 
         // 向客户端更新当前伪装ID
         // 因为下面postConstruct有初始化技能的操作，根据协议标准中current会重置客户端伪装状态的规定，因此在这里更新
-        clientHandler.updateCurrentIdentifier(player, state.getDisguiseIdentifier());
+        clientHandler.updateCurrentIdentifier(player, newState.getDisguiseIdentifier());
 
         // Skill
-        state.getSkill().applyToClient(state);
+        newState.getSkill().applyToClient(newState);
 
         // Cooldown
-        state.applyCooldownToClient();
+        newState.applyCooldownToClient();
 
         // 如果此伪装可以同步给客户端，那么初始化客户端状态
-        if (provider.validForClient(state))
+        if (provider.validForClient(newState))
         {
-            clientHandler.sendCommand(player, new S2CSetSNbtCommand(state.getCulledNbtString()));
+            clientHandler.sendCommand(player, new S2CSetSNbtCommand(newState.getCulledNbtString()));
 
-            clientHandler.sendCommand(player, new S2CSetSelfViewIdentifierCommand(provider.getSelfViewIdentifier(state)));
-            provider.getInitialSyncCommands(state).forEach(s -> clientHandler.sendCommand(player, s));
+            clientHandler.sendCommand(player, new S2CSetSelfViewIdentifierCommand(provider.getSelfViewIdentifier(newState)));
+            provider.getInitialSyncCommands(newState).forEach(s -> clientHandler.sendCommand(player, s));
 
             // 设置Profile
-            if (state.haveProfile())
-                clientHandler.sendCommand(player, new S2CSetProfileCommand(state.getProfileNbtString()));
+            if (newState.haveProfile())
+                clientHandler.sendCommand(player, new S2CSetProfileCommand(newState.getProfileNbtString()));
         }
 
         // 设置可用动作
         var availableAnimations = provider.getAnimationProvider()
-                .getAnimationSetFor(state.getDisguiseIdentifier())
+                .getAnimationSetFor(newState.getDisguiseIdentifier())
                 .getAvailableAnimationsForClient();
 
         clientHandler.sendCommand(player, new S2CSetAvailableAnimationsCommand(availableAnimations));
 
         // 调用事件
-        new PlayerMorphEvent(player, state).callEvent();
+        new PlayerMorphEvent(player, newState).callEvent();
 
         return true;
     }
