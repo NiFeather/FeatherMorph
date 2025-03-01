@@ -56,7 +56,7 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
     @Resolved(shouldSolveImmediately = true)
     private ExecutorHub executorHub;
 
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerSneak(PlayerToggleSneakEvent e)
     {
         if (!allowSneak.get()) return;
@@ -67,7 +67,7 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
         });
     }
 
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerSwapHand(PlayerSwapHandItemsEvent e)
     {
         if (!allowSwap.get()) return;
@@ -78,7 +78,7 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
         });
     }
 
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onHotbarChange(PlayerItemHeldEvent e)
     {
         if (!allowHotBar.get()) return;
@@ -89,7 +89,7 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
         });
     }
 
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerStopUsingItem(PlayerStopUsingItemEvent e)
     {
         executorHub.executeIfExists(selectionMode.get(), executor ->
@@ -98,7 +98,7 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
         });
     }
 
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerHurtEntity(EntityDamageByEntityEvent e)
     {
         if (!allowSimulation.get()) return;
@@ -120,7 +120,7 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
     /**
      * todo: SwingEvent应当只相应方块破坏
      */
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerSwing(PlayerArmSwingEvent e)
     {
         if (!allowSimulation.get()) return;
@@ -136,7 +136,7 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
             e.setCancelled(true);
     }
 
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerInteract(PlayerInteractEvent e)
     {
         if (!allowSimulation.get()) return;
@@ -147,7 +147,7 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
         });
     }
 
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerInteractAtEntity(PlayerInteractAtEntityEvent e)
     {
         if (!allowSimulation.get()) return;
