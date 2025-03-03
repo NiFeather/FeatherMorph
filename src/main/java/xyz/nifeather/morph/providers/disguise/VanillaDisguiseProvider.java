@@ -284,9 +284,7 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
 
             var modifier = new AttributeModifier(healthModifierKey, diffFinal, AttributeModifier.Operation.ADD_NUMBER);
 
-            playerAttribute.addModifier(modifier);
-
-            scaleHealth(player, playerAttribute);
+            runThenScaleHealth(player, playerAttribute, () -> playerAttribute.addModifier(modifier));
 
             //endregion Scale Health
 
@@ -389,9 +387,19 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
         }
     }
 
-    private void scaleHealth(Player player, AttributeInstance attributeInstance)
+    private void runThenScaleHealth(Player player, AttributeInstance attributeInstance, Runnable runnable)
     {
         var currentPercent = player.getHealth() / attributeInstance.getValue();
+
+        try
+        {
+            runnable.run();
+        }
+        catch (Throwable t)
+        {
+            logger.warn("Failed to execute Runnable in VanillaDisguiseProvider#runThenScaleHealth: {}", t.getMessage());
+            t.printStackTrace();
+        }
 
         if (player.getHealth() > 0)
             player.setHealth(Math.min(player.getMaxHealth(), attributeInstance.getValue() * currentPercent));
@@ -402,8 +410,7 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
         var attribute = player.getAttribute(Attribute.MAX_HEALTH);
         assert attribute != null;
 
-        attribute.removeModifier(healthModifierKey);
-        scaleHealth(player, attribute);
+        runThenScaleHealth(player, attribute, () -> attribute.removeModifier(healthModifierKey));
     }
 
     @Override
