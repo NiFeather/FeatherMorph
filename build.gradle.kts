@@ -260,7 +260,7 @@ tasks.build {
     dependsOn(tasks.shadowJar)
 
     doLast {
-        var file = layout.buildDirectory.file("libs/FeatherMorph-${project.property("project_version")}.jar")
+        var file = layout.buildDirectory.file("libs/feathermorph-${project.property("project_version")}.jar")
 
         System.out.println("Will delete '${file.path}' to prevent anyone use the wrong jar.")
 
@@ -290,7 +290,7 @@ tasks.shadowJar {
         relocate("de.themoep.inventorygui", "xyz.nifeather.morph.shaded.inventorygui")
     }
 
-    archiveFileName = "FeatherMorph-${project.property("project_version")}-${project.property("mc_version")}-final.jar"
+    archiveFileName = "feathermorph-${project.property("project_version")}-${project.property("mc_version")}-final.jar"
 }
 
 // https://stackoverflow.com/a/74848372
