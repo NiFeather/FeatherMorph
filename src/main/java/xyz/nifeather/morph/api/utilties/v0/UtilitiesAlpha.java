@@ -57,4 +57,43 @@ public class UtilitiesAlpha
 
         return null;
     }
+
+    /**
+     * Check if the backend is ServerBackend
+     * @return TRUE if the backend is the server backend, FALSE if not
+     */
+    public boolean isServerBackend()
+    {
+        var morphManager = directAccess.morphManager();
+
+        return morphManager.getDefaultBackend().getIdentifier().equals("server");
+    }
+
+    /**
+     * Find UUID of the disguise from the given player
+     * @param input The player to lookup
+     * @return The disguise UUID, if available
+     * @apiNote If the server is not running ServerBackend, this will return NULL.
+     *          To check whether the server is running ServerBackend, use {@link #isServerBackend()}.
+     */
+    @Nullable
+    public UUID lookupDisguiseUUIDFromPlayer(Player input)
+    {
+        var morphManager = directAccess.morphManager();
+
+        var state = morphManager.getDisguiseStateFor(input);
+        if (state == null)
+            return null;
+
+        var rawWrapper = state.getDisguiseWrapper();
+
+        if (!(rawWrapper instanceof ServerDisguiseWrapper wrapper))
+            return null;
+
+        var watcher = wrapper.getBindingWatcher();
+        if (watcher == null)
+            return null;
+
+        return wrapper.getBindingWatcher().readEntryOrDefault(CustomEntries.SPAWN_UUID, null);
+    }
 }

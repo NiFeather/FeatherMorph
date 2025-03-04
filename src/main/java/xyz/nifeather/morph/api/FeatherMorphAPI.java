@@ -17,7 +17,7 @@ public class FeatherMorphAPI
     //region static stuffs
 
     /**
-     * @return NULL if the plugin haven't initialized yet.
+     * @return NULL if the API haven't initialized yet.
      */
     @Nullable
     public static FeatherMorphAPI instance()
@@ -42,16 +42,44 @@ public class FeatherMorphAPI
 
     private final FeatherMorphDirectAccess directAccess;
     private final UtilitiesAlpha utilsAlpha;
+    private final APIMeta apiMeta;
 
     public FeatherMorphAPI(FeatherMorphMain plugin)
     {
+        var logger = plugin.getSLF4JLogger();
+        logger.info("Running init for FeatherMorphAPI...");
+
         this.plugin = plugin;
         directAccess = new FeatherMorphDirectAccess(plugin);
 
         utilsAlpha = new UtilitiesAlpha(directAccess);
 
+        apiMeta = new APIMeta();
+
         instance = this;
-        hooks.forEach(Runnable::run);
+        hooks.forEach(r ->
+        {
+            try
+            {
+                r.run();
+            }
+            catch (Throwable t)
+            {
+                logger.info("Error occurred while running external hook: " + t.getMessage());
+                t.printStackTrace();
+            }
+        });
+
+        logger.info("Done running init for FeatherMorphAPI");
+    }
+
+    /**
+     * Gets the metadata of the API impl.
+     * @apiNote You can also use {@link APIMeta} directly.
+     */
+    public APIMeta getMeta()
+    {
+        return apiMeta;
     }
 
     /**

@@ -6,8 +6,8 @@ import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Managers.DependencyManager;
 import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.MorphManager;
-import xyz.nifeather.morph.RequestManager;
 import xyz.nifeather.morph.abilities.AbilityManager;
+import xyz.nifeather.morph.interfaces.IManageRequests;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
 import xyz.nifeather.morph.skills.MorphSkillHandler;
 
@@ -22,12 +22,24 @@ public class FeatherMorphDirectAccess
         this.plugin = pl;
 
         this.dependencyManager = DependencyManager.getInstance(pl.getNamespace());
+
+        this.morphManager = dependencyManager.get(MorphManager.class, true);
+        this.skillHandler = dependencyManager.get(MorphSkillHandler.class, true);
+        this.abilityManager = dependencyManager.get(AbilityManager.class, true);
+        this.requestManager = dependencyManager.get(IManageRequests.class, true);
+        this.clientHandler = dependencyManager.get(MorphClientHandler.class, true);
     }
 
     public FeatherMorphMain plugin()
     {
         return plugin;
     }
+
+    private final MorphManager morphManager;
+    private final MorphSkillHandler skillHandler;
+    private final AbilityManager abilityManager;
+    private final IManageRequests requestManager;
+    private final MorphClientHandler clientHandler;
 
     /**
      * The MorphManager, mainly handling these functions:
@@ -40,27 +52,27 @@ public class FeatherMorphDirectAccess
      */
     public MorphManager morphManager()
     {
-        return dependencyManager.get(MorphManager.class, true);
+        return morphManager;
     }
 
     public MorphSkillHandler skillHandler()
     {
-        return dependencyManager.get(MorphSkillHandler.class, true);
+        return skillHandler;
     }
 
     public AbilityManager abilityManager()
     {
-        return dependencyManager.get(AbilityManager.class, true);
+        return abilityManager;
     }
 
-    public RequestManager requestManager()
+    public IManageRequests requestManager()
     {
-        return dependencyManager.get(RequestManager.class, true);
+        return requestManager;
     }
 
     public MorphClientHandler clientHandler()
     {
-        return dependencyManager.get(MorphClientHandler.class, true);
+        return clientHandler;
     }
 
     /**
