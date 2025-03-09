@@ -11,7 +11,7 @@ plugins {
     java
     `maven-publish`
     id("net.minecrell.plugin-yml.paper") version "0.6.0" // Generates plugin.yml
-    id("io.papermc.paperweight.userdev") version "2.0.0-beta.8"
+    id("io.papermc.paperweight.userdev") version "2.0.0-beta.14"
     id("xyz.jpenilla.run-paper") version "2.3.1" // Adds runServer and runMojangMappedServer tasks for testing
     id("io.github.goooler.shadow") version "8.1.7" // Shadow PluginBase
 }
@@ -252,14 +252,15 @@ tasks.withType(xyz.jpenilla.runtask.task.AbstractRun::class) {
         vendor = JvmVendorSpec.JETBRAINS
         languageVersion = JavaLanguageVersion.of(21)
     }
-    jvmArgs("-XX:+AllowEnhancedClassRedefinition")
+
+    jvmArgs("-XX:+AllowEnhancedClassRedefinition", "-Dbstats.relocatecheck=false")
 }
 
 tasks.build {
     dependsOn(tasks.shadowJar)
 
     doLast {
-        var file = layout.buildDirectory.file("libs/FeatherMorph-${project.property("project_version")}.jar")
+        var file = layout.buildDirectory.file("libs/feathermorph-${project.property("project_version")}.jar")
 
         System.out.println("Will delete '${file.path}' to prevent anyone use the wrong jar.")
 
@@ -268,12 +269,28 @@ tasks.build {
 }
 
 tasks.shadowJar {
-    minimize()
-    archiveFileName = "FeatherMorph-${project.property("project_version")}+${project.property("mc_version")}-final.jar"
-    relocate("xiamomc.pluginbase", "xyz.nifeather.morph.shaded.pluginbase")
-    relocate("org.bstats", "xyz.nifeather.morph.shaded.bstats")
-    relocate("de.tr7zw.changeme.nbtapi", "xyz.nifeather.morph.shaded.nbtapi")
-    relocate("de.themoep.inventorygui", "xyz.nifeather.morph.shaded.inventorygui")
+
+    // This allows us to do hot-swap by setting `NO_RELOCATE` to `yes`
+    // See https://github.com/jpenilla/run-task/wiki/Debugging#hot-swap
+    //
+    // ❛
+    //      If you are using Shadow to relocate dependencies,
+    //      you may need to disable relocations or create a separate artifact without relocations for hot-swap to work properly.
+    //                                                                                                                            ❜
+    if (System.getenv("NO_RELOCATE") == "yes")
+    {
+        System.out.println("Not relocating classes!")
+    }
+    else
+    {
+        minimize()
+        relocate("xiamomc.pluginbase", "xyz.nifeather.morph.shaded.pluginbase")
+        relocate("org.bstats", "xyz.nifeather.morph.shaded.bstats")
+        relocate("de.tr7zw.changeme.nbtapi", "xyz.nifeather.morph.shaded.nbtapi")
+        relocate("de.themoep.inventorygui", "xyz.nifeather.morph.shaded.inventorygui")
+    }
+
+    archiveFileName = "feathermorph-${project.property("project_version")}-${project.property("mc_version")}-final.jar"
 }
 
 // https://stackoverflow.com/a/74848372

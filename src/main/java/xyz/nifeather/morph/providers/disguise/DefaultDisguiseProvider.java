@@ -193,7 +193,7 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
     }
 
     @Override
-    public void postConstructDisguise(DisguiseState state, @Nullable Entity targetEntity)
+    public void onPostConstructDisguise(DisguiseState state, @Nullable Entity targetEntity)
     {
         //被动技能
         var abilities = abilityHandler.getAbilitiesFor(state.skillLookupIdentifier());

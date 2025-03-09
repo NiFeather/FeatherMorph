@@ -1,11 +1,10 @@
 package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.types;
 
 import com.comphenix.protocol.events.PacketContainer;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.packs.repository.Pack;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
@@ -64,14 +63,13 @@ public class EntityWatcher extends SingleWatcher
         super.doSync();
 
         var player = getBindingPlayer();
-        var nmsPlayer = NmsRecord.ofPlayer(player);
         var values = ValueIndex.BASE_ENTITY;
 
         writeTemp(values.GENERAL, getPlayerBitMask(player));
         //write(values.SILENT, true);
         writeTemp(values.NO_GRAVITY, !player.hasGravity());
-        writeTemp(values.POSE, nmsPlayer.getPose());
-        writeTemp(values.FROZEN_TICKS, nmsPlayer.getTicksFrozen());
+        writeTemp(values.POSE, player.getPose());
+        writeTemp(values.FROZEN_TICKS, player.getFreezeTicks());
     }
 
     @Override
@@ -82,7 +80,7 @@ public class EntityWatcher extends SingleWatcher
         if (entry.equals(CustomEntries.DISGUISE_NAME) && this.getEntityType() != EntityType.PLAYER)
         {
             var str = newVal.toString();
-            var component = str.isEmpty() ? null : Component.literal(str);
+            var component = str.isEmpty() ? null : Component.text(str);
             writePersistent(ValueIndex.BASE_ENTITY.CUSTOM_NAME, component == null ? Optional.empty() : Optional.of(component));
         }
 
@@ -101,10 +99,17 @@ public class EntityWatcher extends SingleWatcher
         if (nbt.contains("CustomName"))
         {
             var name = nbt.getString("CustomName");
-            var component = Component.Serializer.fromJsonLenient(name, MinecraftServer.getServer().registryAccess());
 
-            if (component != null)
+            try
+            {
+                var component = JSONComponentSerializer.json().deserialize(name);
+
                 writePersistent(ValueIndex.BASE_ENTITY.CUSTOM_NAME, Optional.of(component));
+            }
+            catch (Throwable t)
+            {
+                logger.error("Unable to parse CustomName '%s': %s".formatted(name, t.getMessage()));
+            }
         }
 
         if (nbt.contains("CustomNameVisible"))
@@ -120,7 +125,7 @@ public class EntityWatcher extends SingleWatcher
         super.writeToCompound(nbt);
 
         var customName = read(ValueIndex.BASE_ENTITY.CUSTOM_NAME);
-        customName.ifPresent(c -> nbt.putString("CustomName", Component.Serializer.toJson(c, MinecraftServer.getServer().registryAccess())));
+        customName.ifPresent(c -> nbt.putString("CustomName", JSONComponentSerializer.json().serialize(c)));
 
         nbt.putBoolean("CustomNameVisible", read(ValueIndex.BASE_ENTITY.CUSTOM_NAME_VISIBLE));
     }

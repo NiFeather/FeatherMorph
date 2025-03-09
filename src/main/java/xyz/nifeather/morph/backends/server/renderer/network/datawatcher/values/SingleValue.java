@@ -1,12 +1,11 @@
 package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.values;
 
-import com.comphenix.protocol.wrappers.WrappedDataWatcher;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import com.comphenix.protocol.wrappers.WrappedDataValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.Arrays;
-import java.util.List;
+import xiamomc.pluginbase.Exceptions.NullDependencyException;
+import xyz.nifeather.morph.backends.server.renderer.network.ICustomSerializeMethod;
+import xyz.nifeather.morph.backends.server.renderer.utilties.ProtocolRegistryUtils;
 
 public class SingleValue<T>
 {
@@ -33,17 +32,28 @@ public class SingleValue<T>
     }
 
     @Nullable
-    private WrappedDataWatcher.Serializer serializer;
+    private ICustomSerializeMethod<T> customSerializeMethod;
 
-    public void setSerializer(WrappedDataWatcher.Serializer serializer)
+    public void setSerializeMethod(ICustomSerializeMethod<T> customSerializer)
     {
-        this.serializer = serializer;
+        this.customSerializeMethod = customSerializer;
     }
 
-    @Nullable
-    public WrappedDataWatcher.Serializer getSerializer()
+    public boolean hasSerializeMethod()
     {
-        return serializer;
+        return customSerializeMethod != null;
+    }
+
+    public WrappedDataValue wrap(T value)
+    {
+        if (customSerializeMethod != null)
+            return customSerializeMethod.apply(this, value);
+
+        var defaultSerializer = ProtocolRegistryUtils.getSerializer(this);
+        if (defaultSerializer == null)
+            throw new NullDependencyException("No serializer available for '%s', cannot wrap its value!".formatted(name));
+
+        return new WrappedDataValue(this.index, defaultSerializer, value);
     }
 
     private final String name;

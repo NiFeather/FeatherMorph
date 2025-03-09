@@ -23,7 +23,6 @@ import xiamomc.morph.network.commands.S2C.map.S2CMapRemoveCommand;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
-import xiamomc.pluginbase.Bindables.BindableList;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.RevealingHandler;
@@ -36,6 +35,7 @@ import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.MorphStrings;
 import xyz.nifeather.morph.messages.vanilla.VanillaMessageStore;
 import xyz.nifeather.morph.misc.DisguiseTypes;
+import xyz.nifeather.morph.misc.NetworkingHelper;
 import xyz.nifeather.morph.misc.OfflineDisguiseResult;
 import xyz.nifeather.morph.misc.gui.AnimSelectScreenWrapper;
 import xyz.nifeather.morph.misc.gui.DisguiseSelectScreenWrapper;
@@ -378,6 +378,9 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         }
     }
 
+    @Resolved(shouldSolveImmediately = true)
+    private NetworkingHelper networkingHelper;
+
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent e)
     {
@@ -427,22 +430,13 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
                 }, 20 * 3);
         }
 
-        for (var attribute : CommonUtils.getAvailableAttributes())
-        {
-            var instance = player.getAttribute(attribute);
-
-            if (instance == null) continue;
-
-            instance.removeModifier(AttributeModifyingAbility.modifierKey);
-            instance.removeModifier(VanillaDisguiseProvider.healthModifierKeyLegacy);
-            instance.removeModifier(VanillaDisguiseProvider.healthModifierKey);
-        }
-
         this.addSchedule(() -> PlayerListHandler.instance().handle(player));
 
         if (state != null)
         {
             state.onPlayerJoin();
+
+            networkingHelper.sendCommandToRevealablePlayers(networkingHelper.genPartialMapCommand(state));
 
             //调用Morph事件
             new PlayerJoinedWithDisguiseEvent(player, state).callEvent();

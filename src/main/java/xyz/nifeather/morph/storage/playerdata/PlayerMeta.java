@@ -3,6 +3,7 @@ package xyz.nifeather.morph.storage.playerdata;
 import com.google.gson.annotations.Expose;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Unmodifiable;
 import xyz.nifeather.morph.misc.DisguiseMeta;
 import xyz.nifeather.morph.utilities.DisguiseUtils;
 
@@ -33,6 +34,7 @@ public class PlayerMeta
 
     private boolean disguiseListLocked = false;
 
+    @Unmodifiable
     public ObjectArrayList<DisguiseMeta> getUnlockedDisguises()
     {
         return disguiseListLocked
@@ -43,7 +45,7 @@ public class PlayerMeta
     public void setUnlockedDisguises(ObjectArrayList<DisguiseMeta> newList)
     {
         if (disguiseListLocked)
-            throw new IllegalStateException("不能为 %s 重新设定解锁的伪装，因为列表已被锁定".formatted(this));
+            throw new IllegalStateException("不能为 %s 直接重新设定解锁的伪装，因为列表已被锁定".formatted(this));
 
         unlockedDisguises = newList;
     }
@@ -54,6 +56,11 @@ public class PlayerMeta
     public void lockDisguiseList()
     {
         disguiseListLocked = true;
+    }
+
+    public boolean disguiseListLocked()
+    {
+        return disguiseListLocked;
     }
 
     public void addDisguise(DisguiseMeta info)

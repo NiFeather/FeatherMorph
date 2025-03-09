@@ -132,6 +132,13 @@ public class PlayerDataStoreNew extends DirectoryJsonBasedStorage<PlayerMeta> im
         return meta;
     }
 
+    @Override
+    public void clearCache()
+    {
+        super.clearCache();
+        cachedMetas.clear();
+    }
+
     /**
      * 获取某一玩家所有可用的伪装
      *

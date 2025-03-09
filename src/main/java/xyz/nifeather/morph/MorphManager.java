@@ -152,6 +152,12 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         return backends.values();
     }
 
+    /**
+     * NOT FINISHED, DO NOT USE
+     * <br>
+     * AND MAY NEVER FINISH...
+     */
+    @ApiStatus.Internal
     public boolean switchBackend(DisguiseBackend<?, ?> backend)
     {
         if (!backends.containsKey(backend.getIdentifier()))
@@ -164,24 +170,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         {
             defaultBackend = backend;
 
-            activeDisguises.forEach(state ->
-            {
-                state.getDisguiseWrapper().getBackend().unDisguise(state.getPlayer());
-
-                //TODO: 更改默认后端时刷新伪装
-                //var newWrapper = backend.cloneWrapperFrom(state.getDisguiseWrapper());
-                //state.updateDisguise(
-                //        state.getDisguiseIdentifier(), state.skillLookupIdentifier(),
-                //        newWrapper, false, state.getDisguisedItems()
-                //);
-
-                // 等待1tick让客户端处理一些网络事务
-                this.addSchedule(() ->
-                {
-                    if (!state.getDisguiseWrapper().disposed())
-                        backend.disguise(state.getPlayer(), state.getDisguiseWrapper());
-                });
-            });
+            unMorphAll(false);
         }
         catch (Throwable t)
         {
@@ -376,7 +365,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     private BindableList<String> disabledWorlds;
 
     /**
-     * 内部轮子，检查某个伪装是否被禁用建议使用 {@link MorphManager#disguiseDisabled(String)}
+     * To check whether a disguise is not available for players: {@link MorphManager#disguiseDisabled(String)}
      */
     @ApiStatus.Internal
     public BindableList<String> getBannedDisguises()
@@ -401,7 +390,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     @NotNull
     public static DisguiseProvider getProvider(String id)
     {
-        if (id == null) return null;
+        if (id == null)
+            return fallbackProvider;
 
         id += ":";
         var splitedId = id.split(":", 2);
@@ -675,12 +665,12 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 default -> throw new InvalidObjectException("Invalid validate result: " + validateResult);
             }
 
-            var buildResult = buildDisguise(parameters, meta);
+            var buildResult = prepareDisguiseState(parameters, meta);
             if (!buildResult.success())
                 return false;
 
             var playerMeta = getPlayerMeta(parameters.targetPlayer);
-            this.postBuildDisguise(buildResult, parameters, playerMeta);
+            this.buildDisguise(buildResult, parameters, playerMeta);
 
             if (!applyDisguise(parameters, buildResult.state(), meta, playerMeta))
             {
@@ -806,6 +796,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         return VALIDATE_NO_ISSUE;
     }
 
+    //region Build and apply disguise
+
     /**
      * 构建一个最小的
      * @param parameters A {@link MorphParameters}
@@ -813,7 +805,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
      * @return {@link DisguiseBuildResult} ，如果不能进行下一步则返回null
      */
     @NotNull
-    private DisguiseBuildResult buildDisguise(MorphParameters parameters, DisguiseMeta disguiseMeta)
+    private DisguiseBuildResult prepareDisguiseState(MorphParameters parameters, DisguiseMeta disguiseMeta)
     {
         // 确保source不为null
         var source = parameters.commandSource == null ? nilCommandSource : parameters.commandSource;
@@ -823,7 +815,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         DisguiseState outComingState = null;
 
-        // 执行伪装操作
         try
         {
             var provider = getProvider(disguiseIdentifier);
@@ -905,11 +896,14 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         }
     }
 
+    /**
+     * Key that indicates whether a disguise state should have random properties set on build.
+     */
     public static final String DATAKEY_SKIP_PROPERTIES = "skip_properties_init";
 
-    private void postBuildDisguise(DisguiseBuildResult result,
-                                   MorphParameters parameters,
-                                   PlayerMeta playerOptions)
+    private void buildDisguise(DisguiseBuildResult result,
+                               MorphParameters parameters,
+                               PlayerMeta playerOptions)
     {
         if (!result.success())
             throw new IllegalArgumentException("Passing a failed result to postDisguise() !");
@@ -945,9 +939,11 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         if (targetEntity != null && targetEntity.customName() != null)
         {
             var name = targetEntity.customName();
+            assert name != null;
 
             state.entityCustomName = name;
-            state.setCustomDisplayName(name);
+            state.setPlayerDisplay(name);
+            state.setServerDisplay(name);
         }
         else
         {
@@ -959,7 +955,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             state.setServerDisplay(serverDisplay);
         }
 
-        provider.postConstructDisguise(state, targetEntity);
+        provider.onPostConstructDisguise(state, targetEntity);
         wrapper.onPostConstructDisguise(state, targetEntity);
 
         SkillCooldownInfo cdInfo;
@@ -972,17 +968,18 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         cdInfo.setLastInvoke(plugin.getCurrentTick());
 
         // 切换CD
+        // todo: Let DisguiseState handle skill cooldown
         skillHandler.switchCooldown(player.getUniqueId(), cdInfo);
     }
 
     private boolean applyDisguise(MorphParameters parameters,
-                                  DisguiseState state,
+                                  DisguiseState newState,
                                   DisguiseMeta meta,
                                   PlayerMeta playerOptions)
     {
         var player = parameters.targetPlayer;
         var provider = getProvider(parameters.targetDisguiseIdentifier());
-        var wrapper = state.getDisguiseWrapper();
+        var wrapper = newState.getDisguiseWrapper();
         var source = parameters.commandSource == null ? parameters.targetPlayer : parameters.commandSource;
 
         // 玩家是否已有活跃的DisguiseState?
@@ -1002,6 +999,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             activeDisguises.remove(currentState);
         }
 
+        provider.onDisguiseApply(newState);
+
         // 在初始化服务端伪装状态后，交由后端来为玩家套上伪装
         var backendSuccess = wrapper.getBackend().disguise(player, wrapper);
         if (!backendSuccess)
@@ -1009,55 +1008,55 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             logger.warn("Backend '%s' failed to disguise the player...".formatted(wrapper.getBackend().getIdentifier()));
             source.sendMessage(MessageUtils.prefixes(source, MorphStrings.errorWhileDisguising()));
 
-            // Reset last anyway
+            // Reset last disguise anyway
             if (currentState != null)
                 currentState.reset();
 
             return false;
         }
 
-        this.activeDisguises.add(state);
+        this.activeDisguises.add(newState);
 
         // 确保玩家可以根据设置看到自己的伪装
-        state.setServerSideSelfVisible(playerOptions.showDisguiseToSelf && !this.clientViewAvailable(player));
+        newState.setServerSideSelfVisible(playerOptions.showDisguiseToSelf && !this.clientViewAvailable(player));
 
         // Network below!
 
         // 向管理员发送map消息
-        networkingHelper.sendCommandToRevealablePlayers(genPartialMapCommand(state));
+        networkingHelper.sendCommandToRevealablePlayers(networkingHelper.genPartialMapCommand(newState));
 
         // 向客户端更新当前伪装ID
         // 因为下面postConstruct有初始化技能的操作，根据协议标准中current会重置客户端伪装状态的规定，因此在这里更新
-        clientHandler.updateCurrentIdentifier(player, state.getDisguiseIdentifier());
+        clientHandler.updateCurrentIdentifier(player, newState.getDisguiseIdentifier());
 
         // Skill
-        state.getSkill().applyToClient(state);
+        newState.getSkill().applyToClient(newState);
 
         // Cooldown
-        state.applyCooldownToClient();
+        newState.applyCooldownToClient();
 
         // 如果此伪装可以同步给客户端，那么初始化客户端状态
-        if (provider.validForClient(state))
+        if (provider.validForClient(newState))
         {
-            clientHandler.sendCommand(player, new S2CSetSNbtCommand(state.getCulledNbtString()));
+            clientHandler.sendCommand(player, new S2CSetSNbtCommand(newState.getCulledNbtString()));
 
-            clientHandler.sendCommand(player, new S2CSetSelfViewIdentifierCommand(provider.getSelfViewIdentifier(state)));
-            provider.getInitialSyncCommands(state).forEach(s -> clientHandler.sendCommand(player, s));
+            clientHandler.sendCommand(player, new S2CSetSelfViewIdentifierCommand(provider.getSelfViewIdentifier(newState)));
+            provider.getInitialSyncCommands(newState).forEach(s -> clientHandler.sendCommand(player, s));
 
             // 设置Profile
-            if (state.haveProfile())
-                clientHandler.sendCommand(player, new S2CSetProfileCommand(state.getProfileNbtString()));
+            if (newState.haveProfile())
+                clientHandler.sendCommand(player, new S2CSetProfileCommand(newState.getProfileNbtString()));
         }
 
         // 设置可用动作
         var availableAnimations = provider.getAnimationProvider()
-                .getAnimationSetFor(state.getDisguiseIdentifier())
+                .getAnimationSetFor(newState.getDisguiseIdentifier())
                 .getAvailableAnimationsForClient();
 
         clientHandler.sendCommand(player, new S2CSetAvailableAnimationsCommand(availableAnimations));
 
         // 调用事件
-        new PlayerMorphEvent(player, state).callEvent();
+        new PlayerMorphEvent(player, newState).callEvent();
 
         return true;
     }
@@ -1130,6 +1129,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             PlayerListHandler.instance().hidePlayer(player);
     }
 
+    //endregion Build and apply disguise
+
     //region Command generating
 
     /**
@@ -1157,20 +1158,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         }
 
         return S2CRenderMapSyncCommand.of(map);
-    }
-
-    /**
-     * 生成用于橙字显示的部分map(mapp)指令
-     * @param diff 用于生成的伪装状态
-     */
-    public S2CPartialMapCommand genPartialMapCommand(DisguiseState... diff)
-    {
-        return networkingHelper.genPartialMapCommand(diff);
-    }
-
-    public S2CRenderMapAddCommand genClientRenderAddCommand(DisguiseState diff)
-    {
-        return networkingHelper.genClientRenderAddCommand(diff);
     }
 
     //endregion Command generating
@@ -1497,7 +1484,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         if (this.preDisguise(parameters) == null)
             return false;
 
-        this.postBuildDisguise(result, parameters, playerMeta);
+        this.buildDisguise(result, parameters, playerMeta);
 
         if (!this.applyDisguise(parameters, state, meta, playerMeta))
             return false;
@@ -1540,7 +1527,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 this.disguiseFromState(state);
 
                 // 向管理员发送map消息
-                networkingHelper.sendCommandToRevealablePlayers(genPartialMapCommand(state));
+                networkingHelper.sendCommandToRevealablePlayers(networkingHelper.genPartialMapCommand(state));
 
                 new PlayerDisguisedFromOfflineStateEvent(player, state).callEvent();
 
@@ -1593,35 +1580,34 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     {
         var success = data.grantMorphToPlayer(player, disguiseIdentifier);
 
-        if (success)
+        if (!success)
+            return false;
+
+        clientHandler.sendDiff(List.of(disguiseIdentifier), null, player);
+        multiInstanceService.notifyDisguiseMetaChange(player.getUniqueId(), Operation.ADD_IF_ABSENT, disguiseIdentifier);
+
+        var config = data.getPlayerMeta(player);
+        var locale = MessageUtils.getLocale(player);
+
+        var meta = data.getDisguiseMeta(disguiseIdentifier);
+
+        var message = MessageUtils.prefixes(player, MorphStrings.morphUnlockedString()
+                .withLocale(locale)
+                .resolve("what", meta.asComponent(locale)));
+        player.sendMessage(message);
+
+        if (clientHandler.clientConnected(player))
         {
-            clientHandler.sendDiff(List.of(disguiseIdentifier), null, player);
-            multiInstanceService.notifyDisguiseMetaChange(player.getUniqueId(), Operation.ADD_IF_ABSENT, disguiseIdentifier);
-
-            var config = data.getPlayerMeta(player);
-            var locale = MessageUtils.getLocale(player);
-
-            var meta = data.getDisguiseMeta(disguiseIdentifier);
-            assert meta != null; // 这里不会出现meta是null的情况，除非抽了
-
-            var message = MessageUtils.prefixes(player, MorphStrings.morphUnlockedString()
-                    .withLocale(locale)
-                    .resolve("what", meta.asComponent(locale)));
-            player.sendMessage(message);
-
-            if (clientHandler.clientConnected(player))
+            if (!config.shownMorphClientHint)
             {
-                if (!config.shownMorphClientHint)
-                {
-                    player.sendMessage(MessageUtils.prefixes(player, HintStrings.firstGrantClientHintString()));
-                    config.shownMorphClientHint = true;
-                }
+                player.sendMessage(MessageUtils.prefixes(player, HintStrings.firstGrantClientHintString()));
+                config.shownMorphClientHint = true;
             }
-            else if (!config.shownMorphHint)
-            {
-                player.sendMessage(MessageUtils.prefixes(player, HintStrings.firstGrantHintString()));
-                config.shownMorphHint = true;
-            }
+        }
+        else if (!config.shownMorphHint)
+        {
+            player.sendMessage(MessageUtils.prefixes(player, HintStrings.firstGrantHintString()));
+            config.shownMorphHint = true;
         }
 
         return success;

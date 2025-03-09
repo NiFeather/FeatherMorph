@@ -16,8 +16,10 @@ import org.bukkit.craftbukkit.entity.CraftEntity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.EntityEquipment;
+import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.values.AbstractValues;
+import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.values.SingleValue;
 import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
 import xyz.nifeather.morph.backends.server.renderer.utilties.ProtocolRegistryUtils;
@@ -28,6 +30,7 @@ import xyz.nifeather.morph.utilities.NmsUtils;
 
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -198,38 +201,37 @@ public class PacketFactory extends MorphPluginObject
         for (WrappedDataValue w : originalData)
         {
             var index = w.getIndex();
-            var rawValue = w.getRawValue();
 
             // 跳过被屏蔽的数据
             if (blockedValues.contains(index))
                 continue;
 
             // 寻找与其匹配的SingleValue
-            var disguiseValue = values.stream()
-                    .filter(sv -> sv.index() == index && (rawValue == null || rawValue.getClass() == sv.defaultValue().getClass()))
+            //
+            // todo: 自从去NMS化之后，一些同一个Index上的值和他们对应的SingleValue用旧办法来看已经不再匹配了
+            //       因此需要寻找别的方法来更全面地证明某个Index和SingleValue匹配
+            //       现在我们只能临时删除class验证
+            var singleValue = values.stream()
+                    .filter(sv -> sv.index() == index)
                     .findFirst().orElse(null);
 
             // 如果没有找到，则代表此Index和伪装不兼容，跳过
-            if (disguiseValue == null)
+            if (singleValue == null)
                 continue;
 
-            // 从Watcher获取要设定的数据值，如果没有，则从服务器的包里取
-            var val = watcher.readOr(disguiseValue.index(), null);
-            if (val == null) val = w.getRawValue();
+            // 如果 Watcher 中有覆盖的有对应的值，则重新包装，否则原样返回
+            var val = watcher.readOr(singleValue.index(), null);
 
-            WrappedDataWatcher.Serializer serializer;
-
-            try
+            if (val != null)
             {
-                serializer = ProtocolRegistryUtils.getSerializer(disguiseValue);
-            }
-            catch (Throwable t)
-            {
-                logger.warn("Error occurred while generating meta packet with id '%s': %s".formatted(disguiseValue.name(), t.getMessage()));
-                continue;
-            }
+                var wrapped = ((SingleValue<Object>)singleValue).wrap(val);
 
-            valuesToAdd.add(new WrappedDataValue(disguiseValue.index(), serializer, val));
+                valuesToAdd.add(wrapped);
+            }
+            else
+            {
+                valuesToAdd.add(w);
+            }
         }
 
         newPacket.getDataValueCollectionModifier().write(0, valuesToAdd);
@@ -252,20 +254,10 @@ public class PacketFactory extends MorphPluginObject
 
         valuesToSent.forEach((single, val) ->
         {
-            WrappedDataWatcher.Serializer serializer;
+            var wrapped = ((SingleValue<Object>)single).wrap(val);
 
-            try
-            {
-                serializer = ProtocolRegistryUtils.getSerializer(single);
-            }
-            catch (Throwable t)
-            {
-                logger.warn("Error occurred while generating meta packet with id '%s': %s".formatted(single.name(), t.getMessage()));
-                return;
-            }
-
-            var value = new WrappedDataValue(single.index(), serializer, val);
-            wrappedDataValues.add(value);
+            if (wrapped != null)
+                wrappedDataValues.add(wrapped);
         });
 
         modifier.write(0, wrappedDataValues);
@@ -291,24 +283,15 @@ public class PacketFactory extends MorphPluginObject
 
         valuesToSent.forEach((index, val) ->
         {
-            WrappedDataWatcher.Serializer serializer;
             var sv = watcher.getSingle(index);
 
             if (sv == null)
                 throw new IllegalArgumentException("Not SingleValue found for index " + index);
 
-            try
-            {
-                serializer = ProtocolRegistryUtils.getSerializer(sv);
-            }
-            catch (Throwable t)
-            {
-                logger.warn("Error occurred while generating meta packet with id '%s': %s".formatted(index, t.getMessage()));
-                return;
-            }
+            var wrapped = ((SingleValue<Object>)sv).wrap(val);
 
-            var value = new WrappedDataValue(index, serializer, val);
-            wrappedDataValues.add(value);
+            if (wrapped != null)
+                wrappedDataValues.add(wrapped);
         });
 
         modifier.write(0, wrappedDataValues);

@@ -58,7 +58,8 @@ public class MorphPluginCommand extends MorphPluginObject implements IConvertibl
             new CheckUpdateSubCommand(),
             new LookupSubCommand(),
             new SkinCacheSubCommand(),
-            new MakeSkillItemSubCommand()
+            new MakeSkillItemSubCommand(),
+            new ToolsSubCommand()
     );
 
     @Override

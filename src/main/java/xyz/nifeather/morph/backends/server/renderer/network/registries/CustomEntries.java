@@ -43,6 +43,8 @@ public class CustomEntries
 
     public static final CustomEntry<Boolean> VANISHED = CustomEntry.of("vanished", false);
 
+    public static final CustomEntry<Boolean> WARDEN_VANISHED = CustomEntry.of("warden_vanished", false);
+
     public static final CustomEntry<Boolean> ARMOR_STAND_SMALL = CustomEntry.of("armorstand_is_small", false);
     public static final CustomEntry<Boolean> ARMOR_STAND_NO_BASE_PLATE = CustomEntry.of("armorstand_no_baseplate", false);
     public static final CustomEntry<Boolean> ARMOR_STAND_SHOW_ARMS = CustomEntry.of("armorstand_show_arms", false);

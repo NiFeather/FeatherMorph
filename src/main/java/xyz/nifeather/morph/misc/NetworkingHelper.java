@@ -66,19 +66,19 @@ public class NetworkingHelper extends MorphPluginObject
         Bukkit.getOnlinePlayers().forEach(p -> clientHandler.sendCommand(p, cmd));
     }
 
-    public PrepareMeta prepareMeta(int networkId)
+    public NetworkDisguiseStateRecord prepareMeta(int networkId)
     {
-        return new PrepareMeta(networkId, this);
+        return new NetworkDisguiseStateRecord(networkId, this);
     }
 
-    public PrepareMeta prepareMeta(Entity entity)
+    public NetworkDisguiseStateRecord prepareMeta(Entity entity)
     {
         return prepareMeta(entity.getEntityId());
     }
 
-    public static class PrepareMeta
+    public static class NetworkDisguiseStateRecord
     {
-        public PrepareMeta(int networkId, NetworkingHelper bindingHelper)
+        public NetworkDisguiseStateRecord(int networkId, NetworkingHelper bindingHelper)
         {
             this.renderMeta = new S2CRenderMeta(networkId);
             this.bindingHelper = bindingHelper;
@@ -88,25 +88,25 @@ public class NetworkingHelper extends MorphPluginObject
 
         private final S2CRenderMeta renderMeta;
 
-        public PrepareMeta setSNbt(String snbt)
+        public NetworkDisguiseStateRecord setSNbt(String snbt)
         {
             renderMeta.sNbt = snbt;
             return this;
         }
 
-        public PrepareMeta setOverridedEquip(EntityEquipment equipment)
+        public NetworkDisguiseStateRecord setOverridedEquip(EntityEquipment equipment)
         {
             renderMeta.overridedEquipment = MapMetaUtils.toPacketEquipment(equipment);
             return this;
         }
 
-        public PrepareMeta setProfileCompound(String compoundString)
+        public NetworkDisguiseStateRecord setProfileCompound(String compoundString)
         {
             renderMeta.profileCompound = compoundString;
             return this;
         }
 
-        public PrepareMeta setDisguiseEquipmentShown(boolean newValue)
+        public NetworkDisguiseStateRecord setDisguiseEquipmentShown(boolean newValue)
         {
             renderMeta.showOverridedEquipment = newValue;
             return this;
@@ -117,12 +117,12 @@ public class NetworkingHelper extends MorphPluginObject
          * @param state
          * @return
          */
-        public PrepareMeta forDisguiseState(DisguiseState state)
+        public NetworkDisguiseStateRecord forDisguiseState(DisguiseState state)
         {
             return forWrapper(state.getDisguiseWrapper());
         }
 
-        public PrepareMeta forWrapper(DisguiseWrapper<?> wrapper)
+        public NetworkDisguiseStateRecord forWrapper(DisguiseWrapper<?> wrapper)
         {
             var profile = wrapper.readProperty(WrapperProperties.PROFILE).orElse(new GameProfile(Util.NIL_UUID, "NIL"));
             var profileStr = NbtUtils.getCompoundString(NbtUtils.toCompoundTag(profile));

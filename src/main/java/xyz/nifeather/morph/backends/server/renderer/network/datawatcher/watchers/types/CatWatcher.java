@@ -1,23 +1,14 @@
 package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.types;
 
-import net.kyori.adventure.key.Key;
-import net.minecraft.core.Holder;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.animal.CatVariant;
-import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;
-import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.entity.Cat;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntry;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
-import xyz.nifeather.morph.backends.server.renderer.utilties.HolderUtils;
 import xyz.nifeather.morph.misc.AnimationNames;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
@@ -38,33 +29,6 @@ public class CatWatcher extends TameableAnimalWatcher
         register(ValueIndex.CAT);
     }
 
-    public Cat.Type getCatType()
-    {
-        var value = read(ValueIndex.CAT.CAT_VARIANT);
-        var key = value.unwrapKey().orElse(null);
-        if (key == null)
-            logger.warn("Null Key for holder " + value);
-
-        return Registry.CAT_VARIANT.get(Key.key(key.location().toString()));
-    }
-
-    private Holder<CatVariant> bukkitTypeToNmsHolder(Cat.Type bukkitType)
-    {
-        var bukkitKey = bukkitType.getKey();
-        ResourceLocation key = ResourceLocation.fromNamespaceAndPath(bukkitKey.namespace(), bukkitKey.getKey());
-
-        try
-        {
-            return HolderUtils.getHolderOrThrow(key, Registries.CAT_VARIANT);
-        }
-        catch (Throwable t)
-        {
-            logger.warn("Bukkit type '%s' is not in the registries, trying default value...".formatted(bukkitType));
-
-            return ValueIndex.CAT.CAT_VARIANT.defaultValue();
-        }
-    }
-
     @Override
     protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
@@ -73,8 +37,9 @@ public class CatWatcher extends TameableAnimalWatcher
         if (property.equals(properties.CAT_VARIANT))
         {
             var variant = (Cat.Type) value;
-            writePersistent(ValueIndex.CAT.CAT_VARIANT, bukkitTypeToNmsHolder(variant));
+            writePersistent(ValueIndex.CAT.CAT_VARIANT, variant);
         }
+
         super.onPropertyWrite(property, value);
     }
 
@@ -118,10 +83,7 @@ public class CatWatcher extends TameableAnimalWatcher
                 var bukkitMatch = Registry.CAT_VARIANT.get(key);
 
                 if (bukkitMatch != null)
-                {
-                    var finalValue = bukkitTypeToNmsHolder(bukkitMatch);
-                    this.writePersistent(ValueIndex.CAT.CAT_VARIANT, finalValue);
-                }
+                    this.writePersistent(ValueIndex.CAT.CAT_VARIANT, bukkitMatch);
             }
             else
             {
@@ -138,7 +100,7 @@ public class CatWatcher extends TameableAnimalWatcher
     {
         super.writeToCompound(nbt);
 
-        var variant = this.getCatType().getKey().asString();
+        var variant = read(ValueIndex.CAT.CAT_VARIANT).getKey().asString();
         nbt.putString("variant", variant);
 
         var collarColor = read(ValueIndex.CAT.COLLAR_COLOR);

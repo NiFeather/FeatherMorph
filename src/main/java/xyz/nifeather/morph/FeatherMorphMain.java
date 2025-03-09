@@ -10,6 +10,7 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.scoreboard.Scoreboard;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.abilities.AbilityManager;
+import xyz.nifeather.morph.api.FeatherMorphAPI;
 import xyz.nifeather.morph.commands.*;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.events.*;
@@ -38,6 +39,7 @@ import xiamomc.pluginbase.Messages.MessageStore;
 import xiamomc.pluginbase.XiaMoJavaPlugin;
 
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public final class FeatherMorphMain extends XiaMoJavaPlugin
 {
@@ -139,7 +141,6 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
                     "Please use %s instead!".formatted(primaryVersion)
             );
 
-            FeatherMorphBootstrap.muteHotReloadWarning = true;
             pluginManager.disablePlugin(this);
             return;
         }
@@ -245,34 +246,43 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
         lifecycleManager.registerEventHandler(LifecycleEvents.COMMANDS, event ->
                 cmdHelper.register(event));
 
+        var listeners = new Listener[]
+                {
+                        playerTracker,
+                        mirrorProcessor,
+                        new CommonEventProcessor(),
+                        new RevealingEventProcessor(),
+                        new DisguiseAnimationProcessor(),
+                        new ForcedDisguiseProcessor(),
+                        new PlayerSkinProcessor(),
+                        new WorkaroundProcessor(),
+                        entityProcessor = new EntityProcessor()
+                };
+
         //注册EventProcessor
         this.schedule(() ->
         {
-            registerListeners(new Listener[]
-                    {
-                            playerTracker,
-                            mirrorProcessor,
-                            new CommonEventProcessor(),
-                            new RevealingEventProcessor(),
-                            new DisguiseAnimationProcessor(),
-                            new ForcedDisguiseProcessor(),
-                            new PlayerSkinProcessor(),
-                            entityProcessor = new EntityProcessor()
-                    });
+            registerListeners(listeners);
 
             clientHandler.reAuthPlayers(Bukkit.getOnlinePlayers());
+            dependencyManager.cache(new FeatherMorphAPI(this));
         });
+
+        pluginEnableDone.set(true);
 
         //Init GUI IconLookup
         IconLookup.instance();
     }
 
+    private final AtomicBoolean pluginEnableDone = new AtomicBoolean(false);
+
     @Override
     public void disable()
     {
-        if (!getServer().isStopping())
+        var serverStopping = getServer().isStopping();
+        if (!serverStopping)
         {
-            if (!FeatherMorphBootstrap.muteHotReloadWarning)
+            if (pluginEnableDone.get())
             {
                 printImportantWarning(true,
                         "HEY, THERE!",
@@ -282,15 +292,22 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
             }
         }
 
-        FeatherMorphBootstrap.muteHotReloadWarning = false;
         FeatherMorphBootstrap.pluginDisabled.set(true);
 
         //调用super.onDisable后依赖管理器会被清空
         //需要在调用前先把一些东西处理好
         try
         {
-            if (entityProcessor != null)
+            if (!serverStopping
+                    && entityProcessor.currentlyDoModifyAI()
+                    && pluginEnableDone.get())
+            {
+                printImportantWarning(true,
+                        "Are you disabling/reloading FeatherMorph while modifying AI is enabled?",
+                        "While we try to recover the modifications, still, you are on your own risk.");
+
                 entityProcessor.recoverGoals();
+            }
 
             if (morphManager != null)
                 morphManager.onPluginDisable();

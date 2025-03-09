@@ -10,7 +10,6 @@ import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.craftbukkit.entity.CraftLivingEntity;
 import org.bukkit.entity.*;
-import org.bukkit.inventory.EquipmentSlotGroup;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.backends.DisguiseWrapper;
@@ -196,43 +195,42 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
     }
 
     @Override
-    public void postConstructDisguise(DisguiseState state, @Nullable Entity targetEntity)
+    public void onPostConstructDisguise(DisguiseState state, @Nullable Entity targetEntity)
     {
-        super.postConstructDisguise(state, targetEntity);
+        super.onPostConstructDisguise(state, targetEntity);
 
         var wrapper = state.getDisguiseWrapper();
         var theirDisguise = getMorphManager().getDisguiseStateFor(targetEntity);
 
-        if (wrapper.getEntityType() == EntityType.ARMOR_STAND)
-        {
-            var properties = DisguiseProperties.INSTANCE.getOrThrow(ArmorStandProperties.class);
-            var wrapperShowArms = wrapper.readPropertyOr(properties.SHOW_ARMS, null);
+        if (wrapper.getEntityType() != EntityType.ARMOR_STAND)
+            return;
 
-            //盔甲架加上手臂
-            if (wrapperShowArms == null)
-            {
-                var showArm = theirDisguise != null
-                        ? theirDisguise.disguisePropertyHandler().getOr(properties.SHOW_ARMS, false)
-                        : targetEntity instanceof ArmorStand armorStand
-                            ? armorStand.hasArms()
-                            : this.armorStandShowArms.get();
+        var properties = DisguiseProperties.INSTANCE.getOrThrow(ArmorStandProperties.class);
+        var wrapperShowArms = wrapper.readPropertyOr(properties.SHOW_ARMS, null);
 
-                wrapper.writeProperty(properties.SHOW_ARMS, showArm);
-            }
-        }
+        //盔甲架加上手臂
+        if (wrapperShowArms != null)
+            return;
 
+        var showArm = theirDisguise != null
+                ? theirDisguise.disguisePropertyHandler().getOr(properties.SHOW_ARMS, false)
+                : targetEntity instanceof ArmorStand armorStand
+                    ? armorStand.hasArms()
+                    : this.armorStandShowArms.get();
+
+        wrapper.writeProperty(properties.SHOW_ARMS, showArm);
+    }
+
+    @Override
+    public void onDisguiseApply(DisguiseState state)
+    {
         var player = state.getPlayer();
-        if (doHealthScale.get())
-        {
-            removeAllHealthModifiers(player);
 
-            var entityClazz = state.getEntityType().getEntityClass();
-            if (entityClazz != null)
-                tryAddModifier(state);
-        }
+        if (doHealthScale.get())
+            tryAddModifier(state);
 
         if (modifyBoundingBoxes.get())
-            this.tryModifyPlayerDimensions(player, state.getDisguiseWrapper());
+            tryModifyPlayerDimensions(player, state.getDisguiseWrapper());
     }
 
     private void tryAddModifier(DisguiseState state)
@@ -272,19 +270,19 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
             if (playerAttribute.getBaseValue() + diff > healthCap.get())
                 diff = healthCap.get() - playerAttribute.getBaseValue();
 
-            //缩放生命值
+            //region Scale Health
             double diffFinal = diff;
-            this.executeThenScaleHealth(player, playerAttribute, () ->
-            {
-                var modifier = new AttributeModifier(healthModifierKey, diffFinal, AttributeModifier.Operation.ADD_NUMBER);
 
-                playerAttribute.removeModifier(healthModifierKey);
+            playerAttribute.removeModifier(healthModifierKey);
 
-                // Also handle legacy keys
-                playerAttribute.removeModifier(healthModifierKeyLegacy);
+            // Also handle legacy keys
+            playerAttribute.removeModifier(healthModifierKeyLegacy);
 
-                playerAttribute.addModifier(modifier);
-            });
+            var modifier = new AttributeModifier(healthModifierKey, diffFinal, AttributeModifier.Operation.ADD_NUMBER);
+
+            runThenScaleHealth(player, playerAttribute, () -> playerAttribute.addModifier(modifier));
+
+            //endregion Scale Health
 
             entity.remove();
         }
@@ -385,11 +383,19 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
         }
     }
 
-    private void executeThenScaleHealth(Player player, AttributeInstance attributeInstance, Runnable runnable)
+    private void runThenScaleHealth(Player player, AttributeInstance attributeInstance, Runnable runnable)
     {
         var currentPercent = player.getHealth() / attributeInstance.getValue();
 
-        runnable.run();
+        try
+        {
+            runnable.run();
+        }
+        catch (Throwable t)
+        {
+            logger.warn("Failed to execute Runnable in VanillaDisguiseProvider#runThenScaleHealth: {}", t.getMessage());
+            t.printStackTrace();
+        }
 
         if (player.getHealth() > 0)
             player.setHealth(Math.min(player.getMaxHealth(), attributeInstance.getValue() * currentPercent));
@@ -397,10 +403,10 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
 
     private void removeAllHealthModifiers(Player player)
     {
-            var attribute = player.getAttribute(Attribute.GENERIC_MAX_HEALTH);
+        var attribute = player.getAttribute(Attribute.GENERIC_MAX_HEALTH);
         assert attribute != null;
 
-        this.executeThenScaleHealth(player, attribute, () -> attribute.removeModifier(healthModifierKey));
+        runThenScaleHealth(player, attribute, () -> attribute.removeModifier(healthModifierKey));
     }
 
     @Override
@@ -425,7 +431,7 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
     }
 
     @Override
-    public @Nullable CompoundTag getInitialNbtCompound(DisguiseState state, Entity targetEntity, boolean enableCulling)
+    public @Nullable CompoundTag getInitialNbtCompound(DisguiseState state, @Nullable Entity targetEntity, boolean enableCulling)
     {
         var info = getMorphManager().getDisguiseMeta(state.getDisguiseIdentifier());
 

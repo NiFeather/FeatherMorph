@@ -3,6 +3,7 @@ package xyz.nifeather.morph.backends.server.renderer.utilties;
 import com.comphenix.protocol.wrappers.WrappedDataWatcher;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.values.SingleValue;
 
@@ -10,19 +11,13 @@ import java.util.Optional;
 
 public class ProtocolRegistryUtils
 {
+    @Nullable
     public static WrappedDataWatcher.Serializer getSerializer(SingleValue<?> sv)
     {
-        var s = sv.getSerializer();
-        if (s != null)
-            return s;
-
-        var s1 = getSerializer(sv.defaultValue());
-        if (s1 != null)
-            sv.setSerializer(s1);
-
-        return s1;
+        return getSerializer(sv.defaultValue());
     }
 
+    @Nullable
     public static WrappedDataWatcher.Serializer getSerializer(Object instance)
     {
         var clazz = instance.getClass();
@@ -52,6 +47,8 @@ public class ProtocolRegistryUtils
         {
             var logger = FeatherMorphMain.getInstance().getSLF4JLogger();
             logger.error("Can't find serializer for value '%s': '%s'".formatted(instance, t.getMessage()));
+            throw t;
+
             //t.printStackTrace();
         }
 
