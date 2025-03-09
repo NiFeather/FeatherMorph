@@ -1580,34 +1580,34 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     {
         var success = data.grantMorphToPlayer(player, disguiseIdentifier);
 
-        if (success)
+        if (!success)
+            return false;
+
+        clientHandler.sendDiff(List.of(disguiseIdentifier), null, player);
+        multiInstanceService.notifyDisguiseMetaChange(player.getUniqueId(), Operation.ADD_IF_ABSENT, disguiseIdentifier);
+
+        var config = data.getPlayerMeta(player);
+        var locale = MessageUtils.getLocale(player);
+
+        var meta = data.getDisguiseMeta(disguiseIdentifier);
+
+        var message = MessageUtils.prefixes(player, MorphStrings.morphUnlockedString()
+                .withLocale(locale)
+                .resolve("what", meta.asComponent(locale)));
+        player.sendMessage(message);
+
+        if (clientHandler.clientConnected(player))
         {
-            clientHandler.sendDiff(List.of(disguiseIdentifier), null, player);
-            multiInstanceService.notifyDisguiseMetaChange(player.getUniqueId(), Operation.ADD_IF_ABSENT, disguiseIdentifier);
-
-            var config = data.getPlayerMeta(player);
-            var locale = MessageUtils.getLocale(player);
-
-            var meta = data.getDisguiseMeta(disguiseIdentifier);
-
-            var message = MessageUtils.prefixes(player, MorphStrings.morphUnlockedString()
-                    .withLocale(locale)
-                    .resolve("what", meta.asComponent(locale)));
-            player.sendMessage(message);
-
-            if (clientHandler.clientConnected(player))
+            if (!config.shownMorphClientHint)
             {
-                if (!config.shownMorphClientHint)
-                {
-                    player.sendMessage(MessageUtils.prefixes(player, HintStrings.firstGrantClientHintString()));
-                    config.shownMorphClientHint = true;
-                }
+                player.sendMessage(MessageUtils.prefixes(player, HintStrings.firstGrantClientHintString()));
+                config.shownMorphClientHint = true;
             }
-            else if (!config.shownMorphHint)
-            {
-                player.sendMessage(MessageUtils.prefixes(player, HintStrings.firstGrantHintString()));
-                config.shownMorphHint = true;
-            }
+        }
+        else if (!config.shownMorphHint)
+        {
+            player.sendMessage(MessageUtils.prefixes(player, HintStrings.firstGrantHintString()));
+            config.shownMorphHint = true;
         }
 
         return success;

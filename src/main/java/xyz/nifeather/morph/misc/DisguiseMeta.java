@@ -157,6 +157,20 @@ public class DisguiseMeta
                     : Component.text(rawIdentifier);
     }
 
+    /**
+     * In case someone will need, but do they really need this?
+     */
+    public int objectHashCode()
+    {
+        return super.hashCode();
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return rawIdentifier.hashCode();
+    }
+
     @Override
     public String toString()
     {
