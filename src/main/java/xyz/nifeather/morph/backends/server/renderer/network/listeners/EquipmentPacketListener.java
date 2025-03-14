@@ -83,14 +83,15 @@ public class EquipmentPacketListener extends ProtocolListener
     {
     }
 
+    private final ListeningWhitelist listeningWhitelist = ListeningWhitelist
+            .newBuilder()
+            .types(PacketType.Play.Server.ENTITY_EQUIPMENT)
+            .build();
+
     @Override
     public ListeningWhitelist getSendingWhitelist()
     {
-        return ListeningWhitelist
-                .newBuilder()
-                .types(PacketType.Play.Server.ENTITY_EQUIPMENT)
-                .gamePhase(GamePhase.PLAYING)
-                .build();
+        return listeningWhitelist;
     }
 
     @Override

@@ -187,17 +187,18 @@ public class PlayerLookPacketListener extends ProtocolListener
     {
     }
 
+    private final ListeningWhitelist listeningWhitelist = ListeningWhitelist.newBuilder()
+            .types(PacketType.Play.Server.ENTITY_LOOK,
+                    PacketType.Play.Server.ENTITY_HEAD_ROTATION,
+                    PacketType.Play.Server.REL_ENTITY_MOVE,
+                    PacketType.Play.Server.REL_ENTITY_MOVE_LOOK,
+                    PacketType.Play.Server.ENTITY_TELEPORT)
+            .build();
+
     @Override
     public ListeningWhitelist getSendingWhitelist()
     {
-        return ListeningWhitelist.newBuilder()
-                .gamePhase(GamePhase.PLAYING)
-                .types(PacketType.Play.Server.ENTITY_LOOK,
-                        PacketType.Play.Server.ENTITY_HEAD_ROTATION,
-                        PacketType.Play.Server.REL_ENTITY_MOVE,
-                        PacketType.Play.Server.REL_ENTITY_MOVE_LOOK,
-                        PacketType.Play.Server.ENTITY_TELEPORT)
-                .build();
+        return listeningWhitelist;
     }
 
     @Override
