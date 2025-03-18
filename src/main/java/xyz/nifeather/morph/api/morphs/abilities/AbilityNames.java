@@ -18,7 +18,7 @@ public class AbilityNames
     public static final NamespacedKey HAS_JUMP_BOOST = new NamespacedKey(nameSpace, "normal_jump_boost");
     public static final NamespacedKey HAS_SMALL_JUMP_BOOST = new NamespacedKey(nameSpace, "small_jump_boost");
 
-    @Deprecated(forRemoval = true)
+    @Deprecated
     public static final NamespacedKey HAS_SPEED_BOOST = new NamespacedKey(nameSpace, "speed");
 
     public static final NamespacedKey HAS_FEATHER_FALLING = new NamespacedKey(nameSpace, "feather_falling");

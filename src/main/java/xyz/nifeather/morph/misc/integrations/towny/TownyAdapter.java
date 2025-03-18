@@ -33,6 +33,8 @@ import xyz.nifeather.morph.abilities.impl.FlyAbility;
 import xyz.nifeather.morph.commands.brigadier.IConvertibleBrigadier;
 import xyz.nifeather.morph.config.ConfigOption;
 import xyz.nifeather.morph.config.MorphConfigManager;
+import xyz.nifeather.morph.events.api.gameplay.MorphTownBooleanFlagChangedEvent;
+import xyz.nifeather.morph.misc.integrations.towny.commands.TownyIntegrationCommand;
 
 import java.util.Arrays;
 import java.util.List;
@@ -46,8 +48,6 @@ public class TownyAdapter extends MorphPluginObject implements Listener
 
     private final List<Player> blockedPlayers = ObjectLists.synchronize(new ObjectArrayList<>());
 
-    public static final BooleanDataField allowMorphFlight = new BooleanDataField("allow_morph_flight");
-
     private final FeatherMorphMain plugin;
 
     public TownyAdapter(FeatherMorphMain plugin)
@@ -55,7 +55,7 @@ public class TownyAdapter extends MorphPluginObject implements Listener
         this.plugin = plugin;
 
         plugin.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, event ->
-                new TownyToggleFlightCommand(this).register(event.registrar()));
+                new TownyIntegrationCommand().register(event.registrar()));
     }
 
     @Initializer
@@ -70,52 +70,12 @@ public class TownyAdapter extends MorphPluginObject implements Listener
         });
     }
 
-    private boolean allowFlightAt(Player player, @Nullable Town town)
-    {
-        // Town == null -> Wilderness
-        if (town == null)
-            return allowFlyInWilderness.get();
-
-        var resident = townyAPI.getResident(player);
-        if (resident == null) return false;
-
-        // 玩家城镇
-        var playerTown = resident.getTownOrNull();
-
-        // 如果这个town不支持飞行
-        if (MetaDataUtil.hasMeta(town, allowMorphFlight))
-            return MetaDataUtil.getBoolean(town, allowMorphFlight);
-
-        // 如果这个town信任这个玩家，那么true
-        if (town.getTrustedResidents().contains(resident))
-            return true;
-
-        // 玩家城镇
-
-        // 如果玩家没有城镇，返回false
-        // 因为上面检查了野外和城镇的信任，这里应该没有问题。
-        if (playerTown == null)
-            return false;
-
-        // 玩家就是城镇成员
-        if (playerTown.getUUID() == town.getUUID())
-            return true;
-
-        // 盟友
-        if (CombatUtil.isAlly(town, playerTown))
-            return true;
-
-        // 国家
-        if (CombatUtil.isSameNation(town, playerTown))
-            return true;
-
-        return false;
-    }
+    //region Towny events
 
     @EventHandler
     public void onTownCreate(NewTownEvent e)
     {
-        MetaDataUtil.setBoolean(e.getTown(), TownyAdapter.allowMorphFlight, true, true);
+        MetaDataUtil.setBoolean(e.getTown(), TownyFlags.ALLOW_OUTSIDERS_FLY_IN_TOWN, true, true);
     }
 
     @EventHandler
@@ -145,19 +105,6 @@ public class TownyAdapter extends MorphPluginObject implements Listener
         e.getWorldCoord()
                 .getChunks()
                 .forEach(task -> task.thenAccept(c -> this.updatePlayersInChunk(c, null)));
-    }
-
-    private void updatePlayersInChunk(Chunk chunk, Town currentTown)
-    {
-        var players = Arrays.stream(chunk.getEntities())
-                .filter(entity -> entity.getType() == EntityType.PLAYER)
-                .map(entity -> (Player)entity)
-                .toList();
-
-        if (players.isEmpty()) return;
-
-        for (var player : players)
-            updatePlayer(player, currentTown, true);
     }
 
     @EventHandler
@@ -216,6 +163,90 @@ public class TownyAdapter extends MorphPluginObject implements Listener
         if (e.getFrom().getWorld().equals(e.getTo().getWorld()))
             this.updatePlayer(e.getPlayer(), townyAPI.getTown(e.getTo()));
     }
+
+    //endregion Towny events
+
+    //region Our events
+
+    @EventHandler
+    public void onMorphFlagChanged(MorphTownBooleanFlagChangedEvent e)
+    {
+        this.refreshPlayersIn(e.getTown());
+    }
+
+    private void refreshPlayersIn(Town town)
+    {
+        // Towny没有API来告诉我们一个Town里进了多少玩家
+        // 因此我们只能遍历所有玩家实例
+        Bukkit.getOnlinePlayers().forEach(player ->
+        {
+            // 获取玩家爱所在的Town
+            var currentTown = TownyAPI.getInstance().getTown(player.getLocation());
+
+            // 在野外或者不是目标town
+            if (currentTown == null || currentTown != town) return;
+
+            this.updatePlayer(player, currentTown);
+        });
+    }
+
+    //endregion Our events
+
+    private boolean allowFlightAt(Player player, @Nullable Town town)
+    {
+        // Town == null -> Wilderness
+        if (town == null)
+            return allowFlyInWilderness.get();
+
+        var resident = townyAPI.getResident(player);
+        if (resident == null) return false;
+
+        // 玩家城镇
+        var playerTown = resident.getTownOrNull();
+
+        // 如果这个town不支持飞行
+        if (MetaDataUtil.hasMeta(town, TownyFlags.ALLOW_OUTSIDERS_FLY_IN_TOWN))
+            return MetaDataUtil.getBoolean(town, TownyFlags.ALLOW_OUTSIDERS_FLY_IN_TOWN);
+
+        // 如果这个town信任这个玩家，那么true
+        if (town.getTrustedResidents().contains(resident))
+            return true;
+
+        // 玩家城镇
+
+        // 如果玩家没有城镇，返回false
+        // 因为上面检查了野外和城镇的信任，这里应该没有问题。
+        if (playerTown == null)
+            return false;
+
+        // 玩家就是城镇成员
+        if (playerTown.getUUID() == town.getUUID())
+            return true;
+
+        // 盟友
+        if (CombatUtil.isAlly(town, playerTown))
+            return true;
+
+        // 国家
+        if (CombatUtil.isSameNation(town, playerTown))
+            return true;
+
+        return false;
+    }
+
+    private void updatePlayersInChunk(Chunk chunk, Town currentTown)
+    {
+        var players = Arrays.stream(chunk.getEntities())
+                .filter(entity -> entity.getType() == EntityType.PLAYER)
+                .map(entity -> (Player)entity)
+                .toList();
+
+        if (players.isEmpty()) return;
+
+        for (var player : players)
+            updatePlayer(player, currentTown, true);
+    }
+
 
     public void updatePlayer(@NotNull Player player, @Nullable Town town)
     {
