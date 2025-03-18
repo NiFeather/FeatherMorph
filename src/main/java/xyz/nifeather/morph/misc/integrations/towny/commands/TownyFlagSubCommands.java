@@ -32,7 +32,7 @@ public class TownyFlagSubCommands
         public BooleanFlagCommand(BooleanDataField dataField)
         {
             this.dataField = dataField;
-            this.name = dataField.getKey();
+            this.name = dataField.getKey().replaceFirst("feathermorph_", "");
         }
 
         @Override
@@ -81,7 +81,7 @@ public class TownyFlagSubCommands
             MetaDataUtil.setBoolean(town, dataField, value, true);
             new MorphTownBooleanFlagChangedEvent(player, town, dataField, value).callEvent();
 
-            sender.sendMessage("Set '%s' of '%s' to '%s'".formatted(dataField.getKey(), town.getName(), value));
+            sender.sendMessage("Set '%s' of '%s' to '%s'".formatted(name(), town.getName(), value));
 
             return 1;
         }
@@ -116,14 +116,14 @@ public class TownyFlagSubCommands
 
             if (!MetaDataUtil.hasMeta(town, dataField))
             {
-                sender.sendMessage("The town does not have flag '%s' set yet!".formatted(name));
+                sender.sendMessage("The town does not have flag '%s' set yet! And will use the defalut value '%s'".formatted(name(), dataField.getValue()));
                 return 1;
             }
 
             if (MetaDataUtil.getBoolean(town, dataField))
-                sender.sendMessage("The town has flag '%s' turned on!".formatted(name));
+                sender.sendMessage("The town has flag '%s' turned on!".formatted(name()));
             else
-                sender.sendMessage("The town has flag '%s' turned off!".formatted(name));
+                sender.sendMessage("The town has flag '%s' turned off!".formatted(name()));
 
             return 1;
         }

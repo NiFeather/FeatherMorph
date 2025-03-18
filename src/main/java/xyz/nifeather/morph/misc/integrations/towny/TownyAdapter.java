@@ -5,6 +5,7 @@ import com.palmergames.bukkit.towny.TownyAPI;
 import com.palmergames.bukkit.towny.event.*;
 import com.palmergames.bukkit.towny.event.player.PlayerEntersIntoTownBorderEvent;
 import com.palmergames.bukkit.towny.event.player.PlayerExitsFromTownBorderEvent;
+import com.palmergames.bukkit.towny.event.town.TownTrustAddEvent;
 import com.palmergames.bukkit.towny.event.town.TownUnclaimEvent;
 import com.palmergames.bukkit.towny.object.Town;
 import com.palmergames.bukkit.towny.object.metadata.BooleanDataField;
@@ -16,7 +17,6 @@ import it.unimi.dsi.fastutil.objects.ObjectLists;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.World;
-import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -26,19 +26,17 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Bindables.Bindable;
-import xiamomc.pluginbase.Command.IPluginCommand;
 import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.abilities.impl.FlyAbility;
-import xyz.nifeather.morph.commands.brigadier.IConvertibleBrigadier;
 import xyz.nifeather.morph.config.ConfigOption;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.events.api.gameplay.MorphTownBooleanFlagChangedEvent;
+import xyz.nifeather.morph.events.api.gameplay.PlayerExecuteSkillEvent;
 import xyz.nifeather.morph.misc.integrations.towny.commands.TownyIntegrationCommand;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 public class TownyAdapter extends MorphPluginObject implements Listener
 {
@@ -75,7 +73,10 @@ public class TownyAdapter extends MorphPluginObject implements Listener
     @EventHandler
     public void onTownCreate(NewTownEvent e)
     {
-        MetaDataUtil.setBoolean(e.getTown(), TownyFlags.ALLOW_OUTSIDERS_FLY_IN_TOWN, true, true);
+        //Init town default flags
+        var town = e.getTown();
+        for (BooleanDataField field : TownyFlags.FLAGS_FOR_INIT)
+            MetaDataUtil.setBoolean(town, field, field.getValue(), true);
     }
 
     @EventHandler
@@ -138,7 +139,7 @@ public class TownyAdapter extends MorphPluginObject implements Listener
 
     // Folia没有提供监听玩家改变世界的事件，所以我们只能监听EntityAddToWorldEvent
     @EventHandler
-    public void onPlayerChangeWorld(EntityAddToWorldEvent e)
+    public void onEntityAddToWorld(EntityAddToWorldEvent e)
     {
         if (!(e.getEntity() instanceof Player player)) return;
 
@@ -169,6 +170,31 @@ public class TownyAdapter extends MorphPluginObject implements Listener
     //region Our events
 
     @EventHandler
+    public void onDisguiseSkill(PlayerExecuteSkillEvent event)
+    {
+        var player = event.getPlayer();
+        var town = TownyAPI.getInstance().getTown(player.getLocation());
+
+        if (town == null)
+            return;
+
+        if (playerTrustedByTown(town, player))
+            return;
+
+        boolean outsidersSkilAllowed = TownyFlags.ALLOW_OUTSIDERS_USE_SKILL.getValue();
+
+        //  检查城镇是否允许外来者飞行
+        if (MetaDataUtil.hasMeta(town, TownyFlags.ALLOW_OUTSIDERS_USE_SKILL))
+            outsidersSkilAllowed = MetaDataUtil.getBoolean(town, TownyFlags.ALLOW_OUTSIDERS_FLY);
+
+        if (outsidersSkilAllowed)
+            return;
+
+        player.sendMessage("Using skills is not allowed for you in this town!");
+        event.setCancelled(true);
+    }
+
+    @EventHandler
     public void onMorphFlagChanged(MorphTownBooleanFlagChangedEvent e)
     {
         this.refreshPlayersIn(e.getTown());
@@ -192,27 +218,17 @@ public class TownyAdapter extends MorphPluginObject implements Listener
 
     //endregion Our events
 
-    private boolean allowFlightAt(Player player, @Nullable Town town)
+    private boolean playerTrustedByTown(Town targetTown, Player player)
     {
-        // Town == null -> Wilderness
-        if (town == null)
-            return allowFlyInWilderness.get();
-
         var resident = townyAPI.getResident(player);
         if (resident == null) return false;
 
-        // 玩家城镇
-        var playerTown = resident.getTownOrNull();
-
-        // 如果这个town不支持飞行
-        if (MetaDataUtil.hasMeta(town, TownyFlags.ALLOW_OUTSIDERS_FLY_IN_TOWN))
-            return MetaDataUtil.getBoolean(town, TownyFlags.ALLOW_OUTSIDERS_FLY_IN_TOWN);
-
-        // 如果这个town信任这个玩家，那么true
-        if (town.getTrustedResidents().contains(resident))
+        // 城镇是否信任此玩家？
+        if (targetTown.getTrustedResidents().contains(resident))
             return true;
 
         // 玩家城镇
+        var playerTown = resident.getTownOrNull();
 
         // 如果玩家没有城镇，返回false
         // 因为上面检查了野外和城镇的信任，这里应该没有问题。
@@ -220,18 +236,35 @@ public class TownyAdapter extends MorphPluginObject implements Listener
             return false;
 
         // 玩家就是城镇成员
-        if (playerTown.getUUID() == town.getUUID())
+        if (playerTown.getUUID() == targetTown.getUUID())
             return true;
 
         // 盟友
-        if (CombatUtil.isAlly(town, playerTown))
+        if (CombatUtil.isAlly(targetTown, playerTown))
             return true;
 
         // 国家
-        if (CombatUtil.isSameNation(town, playerTown))
+        if (CombatUtil.isSameNation(targetTown, playerTown))
             return true;
 
         return false;
+    }
+
+    private boolean allowFlightAt(Player player, @Nullable Town town)
+    {
+        // Town == null -> Wilderness
+        if (town == null)
+            return allowFlyInWilderness.get();
+
+        // 如果玩家被城镇信任，那么允许飞行
+        if (playerTrustedByTown(town, player))
+            return true;
+
+        //  检查城镇是否允许外来者飞行
+        if (MetaDataUtil.hasMeta(town, TownyFlags.ALLOW_OUTSIDERS_FLY))
+            return MetaDataUtil.getBoolean(town, TownyFlags.ALLOW_OUTSIDERS_FLY);
+        else
+            return TownyFlags.ALLOW_OUTSIDERS_FLY.getValue();
     }
 
     private void updatePlayersInChunk(Chunk chunk, Town currentTown)

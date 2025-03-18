@@ -17,9 +17,9 @@ public class TownyIntegrationCommand extends BrigadierCommand
     public TownyIntegrationCommand()
     {
         subCommands = List.of(
-                getBooleanToggle(TownyFlags.ALLOW_OUTSIDERS_FLY_IN_TOWN)
-                //todo: Toggle whether outsiders can use skills
-                //todo: Toggle whether outsiders can fly?
+                //getBooleanToggle(TownyFlags.ALLOW_FLIGHT_IN_TOWN_MASTERTOGGLE),
+                getBooleanToggle(TownyFlags.ALLOW_OUTSIDERS_FLY),
+                getBooleanToggle(TownyFlags.ALLOW_OUTSIDERS_USE_SKILL)
         );
     }
 
