@@ -14,7 +14,7 @@ import xiamomc.pluginbase.Annotations.Resolved;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.misc.NmsRecord;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
-import xyz.nifeather.morph.skills.SkillType;
+import xyz.nifeather.morph.api.morphs.skills.SkillNames;
 import xyz.nifeather.morph.skills.options.NoOpConfiguration;
 import xyz.nifeather.morph.storage.skill.SkillAbilityConfiguration;
 import xyz.nifeather.morph.utilities.DamageSourceUtils;
@@ -97,7 +97,7 @@ public class SonicBoomMorphSkill extends DelayedMorphSkill<NoOpConfiguration>
     @Override
     public @NotNull NamespacedKey getIdentifier()
     {
-        return SkillType.SONIC_BOOM;
+        return SkillNames.SONIC_BOOM;
     }
 
     @Override

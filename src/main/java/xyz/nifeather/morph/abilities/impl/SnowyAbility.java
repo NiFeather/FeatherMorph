@@ -6,7 +6,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.jetbrains.annotations.NotNull;
-import xyz.nifeather.morph.abilities.AbilityType;
+import xyz.nifeather.morph.api.morphs.abilities.AbilityNames;
 import xyz.nifeather.morph.misc.DisguiseState;
 
 public class SnowyAbility extends NoOpOptionAbility
@@ -14,7 +14,7 @@ public class SnowyAbility extends NoOpOptionAbility
     @Override
     public @NotNull NamespacedKey getIdentifier()
     {
-        return AbilityType.SNOWY;
+        return AbilityNames.SNOWY;
     }
 
     @Override

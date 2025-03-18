@@ -7,7 +7,7 @@ import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xyz.nifeather.morph.abilities.impl.AttributeModifyingAbility;
 import xyz.nifeather.morph.abilities.options.AttributeModifyOption;
-import xyz.nifeather.morph.abilities.AbilityType;
+import xyz.nifeather.morph.api.morphs.abilities.AbilityNames;
 import xyz.nifeather.morph.abilities.options.ReduceDamageOption;
 import xyz.nifeather.morph.skills.DefaultConfigGenerator;
 import xyz.nifeather.morph.storage.DirectoryJsonBasedStorage;
@@ -15,7 +15,6 @@ import xyz.nifeather.morph.storage.MorphJsonBasedStorage;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class SkillsConfigurationStoreNew extends DirectoryJsonBasedStorage<SkillAbilityConfiguration>
 {
@@ -151,9 +150,9 @@ public class SkillsConfigurationStoreNew extends DirectoryJsonBasedStorage<Skill
             return;
         }
 
-        configuration.addAbilityIdentifier(AbilityType.HAS_FIRE_RESISTANCE)
-                .addAbilityIdentifier(AbilityType.REDUCES_WITHER_DAMAGE)
-                .appendOption(AbilityType.REDUCES_WITHER_DAMAGE,
+        configuration.addAbilityIdentifier(AbilityNames.HAS_FIRE_RESISTANCE)
+                .addAbilityIdentifier(AbilityNames.REDUCES_WITHER_DAMAGE)
+                .appendOption(AbilityNames.REDUCES_WITHER_DAMAGE,
                         new ReduceDamageOption(1, true));
 
         configuration.legacy_MobID = EntityType.WITHER_SKELETON.key().asString();

@@ -5,14 +5,14 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.jetbrains.annotations.NotNull;
-import xyz.nifeather.morph.abilities.AbilityType;
+import xyz.nifeather.morph.api.morphs.abilities.AbilityNames;
 
 public class NoFallDamageAbility extends NoOpOptionAbility
 {
     @Override
     public @NotNull NamespacedKey getIdentifier()
     {
-        return AbilityType.NO_FALL_DAMAGE;
+        return AbilityNames.NO_FALL_DAMAGE;
     }
 
     @EventHandler(ignoreCancelled = true)

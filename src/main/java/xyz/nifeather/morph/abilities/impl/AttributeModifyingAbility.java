@@ -1,14 +1,12 @@
 package xyz.nifeather.morph.abilities.impl;
 
 import org.bukkit.NamespacedKey;
-import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.EquipmentSlotGroup;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.nifeather.morph.abilities.AbilityType;
+import xyz.nifeather.morph.api.morphs.abilities.AbilityNames;
 import xyz.nifeather.morph.abilities.MorphAbility;
 import xyz.nifeather.morph.abilities.options.AttributeModifyOption;
 import xyz.nifeather.morph.misc.DisguiseState;
@@ -27,7 +25,7 @@ public class AttributeModifyingAbility extends MorphAbility<AttributeModifyOptio
     @Override
     public @NotNull NamespacedKey getIdentifier()
     {
-        return AbilityType.ATTRIBUTE;
+        return AbilityNames.ATTRIBUTE_MODIFY;
     }
 
     @Override

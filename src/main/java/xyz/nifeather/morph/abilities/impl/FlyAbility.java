@@ -1,6 +1,5 @@
 package xyz.nifeather.morph.abilities.impl;
 
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.phys.Vec3;
 import org.bukkit.GameEvent;
@@ -12,7 +11,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerGameModeChangeEvent;
 import org.jetbrains.annotations.NotNull;
 import xyz.nifeather.morph.MorphManager;
-import xyz.nifeather.morph.abilities.AbilityType;
+import xyz.nifeather.morph.api.morphs.abilities.AbilityNames;
 import xyz.nifeather.morph.abilities.MorphAbility;
 import xyz.nifeather.morph.abilities.options.FlyOption;
 import xyz.nifeather.morph.config.ConfigOption;
@@ -39,7 +38,7 @@ public class FlyAbility extends MorphAbility<FlyOption>
     @Override
     public @NotNull NamespacedKey getIdentifier()
     {
-        return AbilityType.CAN_FLY;
+        return AbilityNames.CAN_FLY;
     }
 
     @Override

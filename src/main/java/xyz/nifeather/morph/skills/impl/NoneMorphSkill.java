@@ -5,7 +5,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.skills.MorphSkill;
-import xyz.nifeather.morph.skills.SkillType;
+import xyz.nifeather.morph.api.morphs.skills.SkillNames;
 import xyz.nifeather.morph.skills.options.NoOpConfiguration;
 import xyz.nifeather.morph.storage.skill.SkillAbilityConfiguration;
 
@@ -25,7 +25,7 @@ public final class NoneMorphSkill extends MorphSkill<NoOpConfiguration>
     @Override
     public @NotNull NamespacedKey getIdentifier()
     {
-        return SkillType.NONE;
+        return SkillNames.NONE;
     }
 
     private final NoOpConfiguration option = new NoOpConfiguration();

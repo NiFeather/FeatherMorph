@@ -1,8 +1,11 @@
-package xyz.nifeather.morph.abilities;
+package xyz.nifeather.morph.api.morphs.abilities;
 
 import org.bukkit.NamespacedKey;
 
-public class AbilityType
+/**
+ * Built-in ability types
+ */
+public class AbilityNames
 {
     private static final String nameSpace = "morph";
 
@@ -15,18 +18,23 @@ public class AbilityType
     public static final NamespacedKey HAS_JUMP_BOOST = new NamespacedKey(nameSpace, "normal_jump_boost");
     public static final NamespacedKey HAS_SMALL_JUMP_BOOST = new NamespacedKey(nameSpace, "small_jump_boost");
 
-    @Deprecated
+    @Deprecated(forRemoval = true)
     public static final NamespacedKey HAS_SPEED_BOOST = new NamespacedKey(nameSpace, "speed");
 
     public static final NamespacedKey HAS_FEATHER_FALLING = new NamespacedKey(nameSpace, "feather_falling");
     public static final NamespacedKey NO_FALL_DAMAGE = new NamespacedKey(nameSpace, "no_fall_damage");
+
+    /**
+     * With this ability, players can leave a snow trail when they move
+     */
     public static final NamespacedKey SNOWY = new NamespacedKey(nameSpace, "snowy");
+
     public static final NamespacedKey WARDEN_LESS_AWARE = new NamespacedKey(nameSpace, "warden_less_aware");
     public static final NamespacedKey WARDEN = new NamespacedKey(nameSpace, "warden");
     public static final NamespacedKey CHAT_OVERRIDE = new NamespacedKey(nameSpace, "chat_override");
     public static final NamespacedKey BOSSBAR = new NamespacedKey(nameSpace, "bossbar");
     public static final NamespacedKey NO_SWEET_BUSH_DAMAGE = new NamespacedKey(nameSpace, "no_sweet_bush_damage");
-    public static final NamespacedKey ATTRIBUTE = new NamespacedKey(nameSpace, "attribute_modify");
+    public static final NamespacedKey ATTRIBUTE_MODIFY = new NamespacedKey(nameSpace, "attribute_modify");
     public static final NamespacedKey HEALS_FROM_ENTITY = new NamespacedKey(nameSpace, "heals_from_entity");
     public static final NamespacedKey EXTRA_KNOCKBACK = new NamespacedKey(nameSpace, "extra_knockback");
     public static final NamespacedKey DRYOUT_IN_AIR = new NamespacedKey(nameSpace, "dryout_in_air");

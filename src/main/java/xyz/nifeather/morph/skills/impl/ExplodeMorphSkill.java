@@ -16,7 +16,7 @@ import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.SkillStrings;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
-import xyz.nifeather.morph.skills.SkillType;
+import xyz.nifeather.morph.api.morphs.skills.SkillNames;
 import xyz.nifeather.morph.skills.options.ExplosionConfiguration;
 import xyz.nifeather.morph.storage.skill.SkillAbilityConfiguration;
 
@@ -88,7 +88,7 @@ public class ExplodeMorphSkill extends DelayedMorphSkill<ExplosionConfiguration>
     @Override
     public @NotNull NamespacedKey getIdentifier()
     {
-        return SkillType.EXPLODE;
+        return SkillNames.EXPLODE;
     }
 
     private final ExplosionConfiguration option = new ExplosionConfiguration();

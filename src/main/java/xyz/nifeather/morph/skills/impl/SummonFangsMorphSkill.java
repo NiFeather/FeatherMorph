@@ -18,7 +18,7 @@ import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.misc.NmsRecord;
 import xyz.nifeather.morph.misc.mobs.MorphBukkitVexModifier;
 import xyz.nifeather.morph.skills.MorphSkill;
-import xyz.nifeather.morph.skills.SkillType;
+import xyz.nifeather.morph.api.morphs.skills.SkillNames;
 import xyz.nifeather.morph.skills.options.NoOpConfiguration;
 import xyz.nifeather.morph.storage.skill.SkillAbilityConfiguration;
 
@@ -129,7 +129,7 @@ public class SummonFangsMorphSkill extends MorphSkill<NoOpConfiguration>
     @Override
     public @NotNull NamespacedKey getIdentifier()
     {
-        return SkillType.EVOKER;
+        return SkillNames.EVOKER;
     }
 
     private final NoOpConfiguration option = new NoOpConfiguration();

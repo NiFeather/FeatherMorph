@@ -7,7 +7,7 @@ import org.bukkit.craftbukkit.entity.CraftEntity;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import xyz.nifeather.morph.MorphManager;
-import xyz.nifeather.morph.abilities.AbilityType;
+import xyz.nifeather.morph.api.morphs.abilities.AbilityNames;
 import xyz.nifeather.morph.abilities.impl.OnAttackAbility;
 import xyz.nifeather.morph.abilities.options.ExtraKnockbackOption;
 import xiamomc.pluginbase.Annotations.Resolved;
@@ -22,7 +22,7 @@ public class ExtraKnockbackAbility extends OnAttackAbility<ExtraKnockbackOption>
     @Override
     public @NotNull NamespacedKey getIdentifier()
     {
-        return AbilityType.EXTRA_KNOCKBACK;
+        return AbilityNames.EXTRA_KNOCKBACK;
     }
 
     @Resolved(shouldSolveImmediately = true)

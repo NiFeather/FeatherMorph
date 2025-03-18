@@ -11,7 +11,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import xyz.nifeather.morph.abilities.AbilityType;
+import xyz.nifeather.morph.api.morphs.abilities.AbilityNames;
 import xyz.nifeather.morph.abilities.MorphAbility;
 import xyz.nifeather.morph.abilities.options.BossbarOption;
 import xyz.nifeather.morph.config.ConfigOption;
@@ -36,7 +36,7 @@ public class BossbarAbility extends MorphAbility<BossbarOption>
     @Override
     public @NotNull NamespacedKey getIdentifier()
     {
-        return AbilityType.BOSSBAR;
+        return AbilityNames.BOSSBAR;
     }
 
     @Override

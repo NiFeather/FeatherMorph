@@ -12,7 +12,7 @@ import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.SkillStrings;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.skills.MorphSkill;
-import xyz.nifeather.morph.skills.SkillType;
+import xyz.nifeather.morph.api.morphs.skills.SkillNames;
 import xyz.nifeather.morph.skills.options.EffectConfiguration;
 import xyz.nifeather.morph.storage.skill.SkillAbilityConfiguration;
 
@@ -80,7 +80,7 @@ public class ApplyEffectMorphSkill extends MorphSkill<EffectConfiguration>
     @Override
     public @NotNull NamespacedKey getIdentifier()
     {
-        return SkillType.APPLY_EFFECT;
+        return SkillNames.APPLY_EFFECT;
     }
 
     private final EffectConfiguration option = new EffectConfiguration();
