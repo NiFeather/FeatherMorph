@@ -61,7 +61,7 @@ public class TownyIntegrationCommand extends BrigadierCommand
     @Override
     public @NotNull String name()
     {
-        return "morph_town_flags";
+        return "town_disguise_flags";
     }
 
     @Override

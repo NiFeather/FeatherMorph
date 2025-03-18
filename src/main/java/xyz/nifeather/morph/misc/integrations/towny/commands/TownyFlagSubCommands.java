@@ -20,7 +20,6 @@ import xyz.nifeather.morph.commands.brigadier.BrigadierCommand;
 import xyz.nifeather.morph.events.api.gameplay.MorphTownBooleanFlagChangedEvent;
 import xyz.nifeather.morph.messages.CommandStrings;
 import xyz.nifeather.morph.messages.MessageUtils;
-import xyz.nifeather.morph.misc.integrations.towny.TownFlagUtil;
 
 public class TownyFlagSubCommands
 {

@@ -46,12 +46,8 @@ public class TownyAdapter extends MorphPluginObject implements Listener
 
     private final List<Player> blockedPlayers = ObjectLists.synchronize(new ObjectArrayList<>());
 
-    private final FeatherMorphMain plugin;
-
-    public TownyAdapter(FeatherMorphMain plugin)
+    public TownyAdapter()
     {
-        this.plugin = plugin;
-
         plugin.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, event ->
                 new TownyIntegrationCommand().register(event.registrar()));
     }
@@ -281,9 +277,9 @@ public class TownyAdapter extends MorphPluginObject implements Listener
     }
 
 
-    public void updatePlayer(@NotNull Player player, @Nullable Town town)
+    public void updatePlayer(@NotNull Player player, @Nullable Town currentTown)
     {
-        this.updatePlayer(player, town, false);
+        this.updatePlayer(player, currentTown, false);
     }
 
     public void updatePlayer(@NotNull Player player, @Nullable Town currentTown, boolean noTownLookup)

@@ -173,13 +173,10 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
             this.registerListener(new ResidenceEventProcessor());
         }, true);
 
-        @Nullable
-        TownyAdapter townyAdapter = null;
-
         softDeps.setHandle("Towny", plugin ->
         {
             logger.info("Towny detected, applying integrations...");
-            this.registerListener(new TownyAdapter(this));
+            this.registerListener(new TownyAdapter());
         }, true);
 
         softDeps.setHandle("ModelEngine", r ->
