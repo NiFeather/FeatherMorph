@@ -80,7 +80,11 @@ public class TownyFlagSubCommands
             MetaDataUtil.setBoolean(town, dataField, value, true);
             new MorphTownBooleanFlagChangedEvent(player, town, dataField, value).callEvent();
 
-            sender.sendMessage("Set '%s' of '%s' to '%s'".formatted(name(), town.getName(), value));
+            var message = CommandStrings.optionSetString()
+                    .resolve("what", name())
+                    .resolve("value", value);
+
+            sender.sendMessage(MessageUtils.prefixes(sender, message));
 
             return 1;
         }
@@ -113,16 +117,15 @@ public class TownyFlagSubCommands
                 return 0;
             }
 
-            if (!MetaDataUtil.hasMeta(town, dataField))
-            {
-                sender.sendMessage("The town does not have flag '%s' set yet! And will use the defalut value '%s'".formatted(name(), dataField.getValue()));
-                return 1;
-            }
+            var message = CommandStrings.optionValueString()
+                    .resolve("what", name());
 
-            if (MetaDataUtil.getBoolean(town, dataField))
-                sender.sendMessage("The town has flag '%s' turned on!".formatted(name()));
+            if (!MetaDataUtil.hasMeta(town, dataField))
+                message.resolve("value", dataField.getValue());
             else
-                sender.sendMessage("The town has flag '%s' turned off!".formatted(name()));
+                message.resolve("value", MetaDataUtil.getBoolean(town, dataField));
+
+            sender.sendMessage(MessageUtils.prefixes(sender, message));
 
             return 1;
         }

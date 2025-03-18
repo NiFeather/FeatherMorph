@@ -18,7 +18,7 @@ public class TownyIntegrationCommand extends BrigadierCommand
     {
         subCommands = List.of(
                 //getBooleanToggle(TownyFlags.ALLOW_FLIGHT_IN_TOWN_MASTERTOGGLE),
-                getBooleanToggle(TownyFlags.ALLOW_OUTSIDERS_FLY),
+                getBooleanToggle(TownyFlags.ALLOW_OUTSIDERS_FLIGHT),
                 getBooleanToggle(TownyFlags.ALLOW_OUTSIDERS_USE_SKILL)
         );
     }
@@ -61,7 +61,7 @@ public class TownyIntegrationCommand extends BrigadierCommand
     @Override
     public @NotNull String name()
     {
-        return "town_disguise_flags";
+        return "town_morph_flags";
     }
 
     @Override

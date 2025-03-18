@@ -5,7 +5,6 @@ import com.palmergames.bukkit.towny.TownyAPI;
 import com.palmergames.bukkit.towny.event.*;
 import com.palmergames.bukkit.towny.event.player.PlayerEntersIntoTownBorderEvent;
 import com.palmergames.bukkit.towny.event.player.PlayerExitsFromTownBorderEvent;
-import com.palmergames.bukkit.towny.event.town.TownTrustAddEvent;
 import com.palmergames.bukkit.towny.event.town.TownUnclaimEvent;
 import com.palmergames.bukkit.towny.object.Town;
 import com.palmergames.bukkit.towny.object.metadata.BooleanDataField;
@@ -26,13 +25,14 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Bindables.Bindable;
-import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.abilities.impl.FlyAbility;
 import xyz.nifeather.morph.config.ConfigOption;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.events.api.gameplay.MorphTownBooleanFlagChangedEvent;
 import xyz.nifeather.morph.events.api.gameplay.PlayerExecuteSkillEvent;
+import xyz.nifeather.morph.messages.MessageUtils;
+import xyz.nifeather.morph.messages.MorphStrings;
 import xyz.nifeather.morph.misc.integrations.towny.commands.TownyIntegrationCommand;
 
 import java.util.Arrays;
@@ -181,12 +181,12 @@ public class TownyAdapter extends MorphPluginObject implements Listener
 
         //  检查城镇是否允许外来者飞行
         if (MetaDataUtil.hasMeta(town, TownyFlags.ALLOW_OUTSIDERS_USE_SKILL))
-            outsidersSkilAllowed = MetaDataUtil.getBoolean(town, TownyFlags.ALLOW_OUTSIDERS_FLY);
+            outsidersSkilAllowed = MetaDataUtil.getBoolean(town, TownyFlags.ALLOW_OUTSIDERS_FLIGHT);
 
         if (outsidersSkilAllowed)
             return;
 
-        player.sendMessage("Using skills is not allowed for you in this town!");
+        player.sendMessage(MessageUtils.prefixes(player, MorphStrings.townyBlockedSkillString()));
         event.setCancelled(true);
     }
 
@@ -257,10 +257,10 @@ public class TownyAdapter extends MorphPluginObject implements Listener
             return true;
 
         //  检查城镇是否允许外来者飞行
-        if (MetaDataUtil.hasMeta(town, TownyFlags.ALLOW_OUTSIDERS_FLY))
-            return MetaDataUtil.getBoolean(town, TownyFlags.ALLOW_OUTSIDERS_FLY);
+        if (MetaDataUtil.hasMeta(town, TownyFlags.ALLOW_OUTSIDERS_FLIGHT))
+            return MetaDataUtil.getBoolean(town, TownyFlags.ALLOW_OUTSIDERS_FLIGHT);
         else
-            return TownyFlags.ALLOW_OUTSIDERS_FLY.getValue();
+            return TownyFlags.ALLOW_OUTSIDERS_FLIGHT.getValue();
     }
 
     private void updatePlayersInChunk(Chunk chunk, Town currentTown)
