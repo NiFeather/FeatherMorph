@@ -38,12 +38,19 @@ public class WorkaroundProcessor implements Listener
      * Prevents player sitting on another player that disguised as Creaking
      */
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
-    public void onEntityToggleSit(EntityMountEvent event)
+    public void onEntityMount(EntityMountEvent event)
     {
         if (!(event.getEntity() instanceof Player player))
             return;
 
         var morphManager = FeatherMorphAPI.instance().directAccess().morphManager();
+
+        var playerDisguiseState = morphManager.getDisguiseStateFor(player);
+        if (playerDisguiseState == null)
+            return;
+
+        if (playerDisguiseState.getEntityType() == EntityType.PLAYER)
+            playerDisguiseState.stopAnimations();
 
         // Riding on a virtual Creaking would result in a bad state for game clients
         var matchingVehicle = findAnyVehicle(event.getMount(), entity ->
