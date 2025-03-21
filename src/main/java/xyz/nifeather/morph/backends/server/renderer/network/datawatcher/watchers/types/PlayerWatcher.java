@@ -7,12 +7,15 @@ import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Pose;
+import org.joml.Vector3i;
 import xyz.nifeather.morph.backends.server.renderer.network.DisplayParameters;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntry;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.misc.AnimationNames;
 import xyz.nifeather.morph.misc.NmsRecord;
+
+import java.util.Optional;
 
 public class PlayerWatcher extends InventoryLivingWatcher
 {
@@ -76,18 +79,29 @@ public class PlayerWatcher extends InventoryLivingWatcher
                 {
                     this.remove(ValueIndex.PLAYER.POSE);
                     this.writePersistent(ValueIndex.PLAYER.POSE, Pose.SLEEPING);
+
+                    var playerPos = getBindingPlayer().getLocation();
+                    var vec3i = new Vector3i(playerPos.getBlockX(), playerPos.getBlockY(), playerPos.getBlockZ());
+                    this.writePersistent(ValueIndex.PLAYER.BED_POS, Optional.of(vec3i));
                 }
                 case AnimationNames.CRAWL ->
                 {
-                    this.remove(ValueIndex.PLAYER.POSE);
+                    resetValues();
                     this.writePersistent(ValueIndex.PLAYER.POSE, Pose.SWIMMING);
                 }
                 case AnimationNames.STANDUP, AnimationNames.RESET ->
                 {
                     this.writePersistent(ValueIndex.PLAYER.POSE, getBindingPlayer().getPose());
-                    this.remove(ValueIndex.PLAYER.POSE);
+                    resetValues();
                 }
             }
         }
+    }
+
+    private void resetValues()
+    {
+        this.remove(ValueIndex.PLAYER.POSE);
+        this.writePersistent(ValueIndex.PLAYER.BED_POS, Optional.empty());
+        this.remove(ValueIndex.PLAYER.BED_POS);
     }
 }
