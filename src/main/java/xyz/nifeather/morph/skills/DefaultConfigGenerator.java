@@ -155,10 +155,10 @@ public class DefaultConfigGenerator
                 .setCooldown(80);
     }
 
-    private void setAbilityRange(Collection<EntityType> types, NamespacedKey abilityType)
+    private void setAbilityRange(Collection<EntityType> types, NamespacedKey AbilityNames)
     {
         for (var type : types)
-            this.getConfiguration(type).addAbilityIdentifier(abilityType);
+            this.getConfiguration(type).addAbilityIdentifier(AbilityNames);
     }
 
     public void generateAbilities()
@@ -190,8 +190,8 @@ public class DefaultConfigGenerator
                 .appendOption(AbilityNames.DRYOUT_IN_AIR, new DryoutAbilityOption(false));
 
         this.getConfiguration(EntityType.HORSE)
-                .addAbilityIdentifier(AbilityType.ATTRIBUTE_MODIFY)
-                .appendOption(AbilityType.ATTRIBUTE, AttributeModifyOption
+                .addAbilityIdentifier(AbilityNames.ATTRIBUTE_MODIFY)
+                .appendOption(AbilityNames.ATTRIBUTE_MODIFY, AttributeModifyOption
                         .from(Attribute.GENERIC_MOVEMENT_SPEED, AttributeModifyOption.OperationType.multiply_base, 0.5d)
                         .with(Attribute.GENERIC_STEP_HEIGHT, AttributeModifyOption.OperationType.add, 0.4d));
 
