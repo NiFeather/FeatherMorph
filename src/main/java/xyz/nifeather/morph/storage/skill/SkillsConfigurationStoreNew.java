@@ -7,7 +7,7 @@ import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xyz.nifeather.morph.abilities.impl.AttributeModifyingAbility;
 import xyz.nifeather.morph.abilities.options.AttributeModifyOption;
-import xyz.nifeather.morph.abilities.AbilityType;
+import xyz.nifeather.morph.api.morphs.abilities.AbilityNames;
 import xyz.nifeather.morph.abilities.options.ReduceDamageOption;
 import xyz.nifeather.morph.skills.DefaultConfigGenerator;
 import xyz.nifeather.morph.storage.DirectoryJsonBasedStorage;
@@ -15,7 +15,6 @@ import xyz.nifeather.morph.storage.MorphJsonBasedStorage;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class SkillsConfigurationStoreNew extends DirectoryJsonBasedStorage<SkillAbilityConfiguration>
 {
@@ -36,7 +35,7 @@ public class SkillsConfigurationStoreNew extends DirectoryJsonBasedStorage<Skill
             logger.warn("The package version is newer than our implementation! Errors may occur!");
     }
 
-    private static final int TARGET_PACKAGE_VERSION = PackageVersions.WITHER_SKELETON_CHANGES;
+    private static final int TARGET_PACKAGE_VERSION = PackageVersions.INITIAL;
 
     private void update(int currentVersion)
     {
@@ -85,6 +84,28 @@ public class SkillsConfigurationStoreNew extends DirectoryJsonBasedStorage<Skill
             logger.warn("Can't migrate from legacy skill configuration: " + t.getMessage());
             t.printStackTrace();
         }
+    }
+
+    private void migrateWitherSkeleton()
+    {
+        logger.info("Migrating new Wither Skeleton configuration");
+
+        var configuration = this.get(EntityType.WITHER_SKELETON.key().asString());
+        if (configuration == null)
+        {
+            logger.info("No configuration present for minecraft:wither_skeleton, skipping...");
+            return;
+        }
+
+        configuration.addAbilityIdentifier(AbilityNames.HAS_FIRE_RESISTANCE)
+                .addAbilityIdentifier(AbilityNames.REDUCES_WITHER_DAMAGE)
+                .appendOption(AbilityNames.REDUCES_WITHER_DAMAGE,
+                        new ReduceDamageOption(1, true));
+
+        configuration.legacy_MobID = EntityType.WITHER_SKELETON.key().asString();
+        this.save(configuration);
+
+        logger.info("Done Migrating new Wither Skeleton configuration");
     }
 
     private void saveDefaultGeneratedConfigurations()

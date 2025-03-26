@@ -5,12 +5,11 @@ import com.google.gson.annotations.SerializedName;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.bukkit.NamespacedKey;
-import org.bukkit.entity.EntityType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.abilities.IMorphAbility;
 import xyz.nifeather.morph.skills.IMorphSkill;
-import xyz.nifeather.morph.skills.SkillType;
+import xyz.nifeather.morph.api.morphs.skills.SkillNames;
 import xyz.nifeather.morph.skills.options.EffectConfiguration;
 import xyz.nifeather.morph.skills.options.ExplosionConfiguration;
 import xyz.nifeather.morph.skills.options.ProjectileConfiguration;
@@ -84,10 +83,10 @@ public class SkillAbilityConfiguration
         if (skillIdentifier == null)
         {
             NamespacedKey k;
-            if (rawSkillidentifier == null) k = SkillType.NONE;
+            if (rawSkillidentifier == null) k = SkillNames.NONE;
             else k = NamespacedKey.fromString(rawSkillidentifier);
 
-            skillIdentifier = k == null ? SkillType.UNKNOWN : k;
+            skillIdentifier = k == null ? SkillNames.UNKNOWN : k;
         }
 
         return skillIdentifier;

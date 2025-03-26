@@ -71,6 +71,11 @@ public class ReflectionUtils
 
     public static <T> T getValue(Object obj, String fieldName, Class<T> type)
     {
+        return getValue(obj, fieldName, type, true);
+    }
+
+    public static <T> T getValue(Object obj, String fieldName, Class<T> type, boolean includeBaseClasses)
+    {
         var fields = ReflectionUtils.getFields(obj, type, true);
 
         Field targetField = null;

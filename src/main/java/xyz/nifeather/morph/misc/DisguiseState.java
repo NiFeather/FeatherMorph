@@ -11,7 +11,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.network.PlayerOptions;
@@ -23,8 +22,8 @@ import xiamomc.pluginbase.Exceptions.NullDependencyException;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.abilities.AbilityUpdater;
+import xyz.nifeather.morph.api.morphs.skills.SkillNames;
 import xyz.nifeather.morph.backends.DisguiseWrapper;
-import xyz.nifeather.morph.backends.WrapperProperties;
 import xyz.nifeather.morph.messages.CommandStrings;
 import xyz.nifeather.morph.messages.EmoteStrings;
 import xyz.nifeather.morph.messages.MessageUtils;
@@ -80,7 +79,7 @@ public class DisguiseState extends MorphPluginObject
         this.soundHandler.refreshSounds(wrapper.getEntityType(), wrapper.isBaby());
 
         //伪装类型是否支持设置伪装物品
-        supportsDisguisedItems = skillHandler.hasSpeficSkill(skillIdentifier, SkillType.INVENTORY);
+        supportsDisguisedItems = skillHandler.hasSpeficSkill(skillIdentifier, SkillNames.FAKE_EQUIP);
 
         //更新伪装物品
         if (supportsDisguisedItems)
@@ -419,7 +418,7 @@ public class DisguiseState extends MorphPluginObject
     }
 
     // 伪装ID
-    private String disguiseIdentifier = SkillType.UNKNOWN.asString();
+    private String disguiseIdentifier = SkillNames.UNKNOWN.asString();
 
     /**
      * 获取此伪装的ID

@@ -88,14 +88,15 @@ public class MetaPacketListener extends ProtocolListener
     {
     }
 
+    private final ListeningWhitelist listeningWhitelist = ListeningWhitelist
+            .newBuilder()
+            .types(PacketType.Play.Server.ENTITY_METADATA)
+            .build();
+
     @Override
     public ListeningWhitelist getSendingWhitelist()
     {
-        return ListeningWhitelist
-                .newBuilder()
-                .types(PacketType.Play.Server.ENTITY_METADATA)
-                .gamePhase(GamePhase.PLAYING)
-                .build();
+        return listeningWhitelist;
     }
 
     @Override

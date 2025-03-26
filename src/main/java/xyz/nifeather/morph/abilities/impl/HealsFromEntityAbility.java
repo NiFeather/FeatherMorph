@@ -2,7 +2,6 @@ package xyz.nifeather.morph.abilities.impl;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -12,7 +11,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.jetbrains.annotations.NotNull;
-import xyz.nifeather.morph.abilities.AbilityType;
+import xyz.nifeather.morph.api.morphs.abilities.AbilityNames;
 import xyz.nifeather.morph.abilities.MorphAbility;
 import xyz.nifeather.morph.abilities.options.HealsFromEntityOption;
 import xyz.nifeather.morph.misc.DisguiseState;
@@ -38,7 +37,7 @@ public class HealsFromEntityAbility extends MorphAbility<HealsFromEntityOption>
     @Override
     public @NotNull NamespacedKey getIdentifier()
     {
-        return AbilityType.HEALS_FROM_ENTITY;
+        return AbilityNames.HEALS_FROM_ENTITY;
     }
 
     @Override

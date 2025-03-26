@@ -14,7 +14,7 @@ import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.SkillStrings;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
-import xyz.nifeather.morph.skills.SkillType;
+import xyz.nifeather.morph.api.morphs.skills.SkillNames;
 import xyz.nifeather.morph.skills.options.ProjectileConfiguration;
 import xyz.nifeather.morph.storage.skill.SkillAbilityConfiguration;
 import xyz.nifeather.morph.utilities.EntityTypeUtils;
@@ -105,7 +105,7 @@ public class LaunchProjectileMorphSkill extends DelayedMorphSkill<ProjectileConf
     @Override
     public @NotNull NamespacedKey getIdentifier()
     {
-        return SkillType.LAUNCH_PROJECTILE;
+        return SkillNames.LAUNCH_PROJECTILE;
     }
 
     private final ProjectileConfiguration option = new ProjectileConfiguration();

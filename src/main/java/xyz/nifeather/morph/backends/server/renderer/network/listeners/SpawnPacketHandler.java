@@ -203,14 +203,15 @@ public class SpawnPacketHandler extends ProtocolListener
     {
     }
 
+    private final ListeningWhitelist listeningWhitelist = ListeningWhitelist
+            .newBuilder()
+            .types(PacketType.Play.Server.SPAWN_ENTITY)
+            .build();
+
     @Override
     public ListeningWhitelist getSendingWhitelist()
     {
-        return ListeningWhitelist
-                .newBuilder()
-                .types(PacketType.Play.Server.SPAWN_ENTITY)
-                .gamePhase(GamePhase.PLAYING)
-                .build();
+        return listeningWhitelist;
     }
 
     @Override

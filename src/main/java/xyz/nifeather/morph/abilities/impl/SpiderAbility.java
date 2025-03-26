@@ -4,7 +4,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
-import xyz.nifeather.morph.abilities.AbilityType;
+import xyz.nifeather.morph.api.morphs.abilities.AbilityNames;
 import xyz.nifeather.morph.config.ConfigOption;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.misc.DisguiseState;
@@ -31,7 +31,7 @@ public class SpiderAbility extends NoOpOptionAbility
     @Override
     public @NotNull NamespacedKey getIdentifier()
     {
-        return AbilityType.SPIDER;
+        return AbilityNames.SPIDER;
     }
 
     @Override

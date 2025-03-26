@@ -66,14 +66,15 @@ public class AnimationPacketListener extends ProtocolListener
     {
     }
 
+    private final ListeningWhitelist listeningWhitelist = ListeningWhitelist
+            .newBuilder()
+            .types(PacketType.Play.Server.ANIMATION)
+            .build();
+
     @Override
     public ListeningWhitelist getSendingWhitelist()
     {
-        return ListeningWhitelist
-                .newBuilder()
-                .types(PacketType.Play.Server.ANIMATION)
-                .gamePhase(GamePhase.PLAYING)
-                .build();
+        return listeningWhitelist;
     }
 
     @Override

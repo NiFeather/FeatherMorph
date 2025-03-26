@@ -15,7 +15,7 @@ import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.NotNull;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.skills.MorphSkill;
-import xyz.nifeather.morph.skills.SkillType;
+import xyz.nifeather.morph.api.morphs.skills.SkillNames;
 import xyz.nifeather.morph.skills.options.NoOpConfiguration;
 import xyz.nifeather.morph.storage.skill.ISkillOption;
 import xyz.nifeather.morph.storage.skill.SkillAbilityConfiguration;
@@ -110,7 +110,7 @@ public class SplashPotionSkill extends MorphSkill<NoOpConfiguration>
     @Override
     public @NotNull NamespacedKey getIdentifier()
     {
-        return SkillType.WITCH;
+        return SkillNames.WITCH;
     }
 
     /**

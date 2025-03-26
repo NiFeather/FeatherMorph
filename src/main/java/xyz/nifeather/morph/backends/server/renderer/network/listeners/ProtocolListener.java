@@ -61,7 +61,7 @@ public abstract class ProtocolListener extends MorphPluginObject implements Pack
 
         try
         {
-            entityId = ReflectionUtils.getValue(packet, "entityId", int.class);
+            entityId = ReflectionUtils.getValue(packet, "entityId", int.class, false);
         }
         catch (Throwable t)
         {

@@ -6,7 +6,7 @@ import org.bukkit.event.EventHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.MorphManager;
-import xyz.nifeather.morph.abilities.AbilityType;
+import xyz.nifeather.morph.api.morphs.abilities.AbilityNames;
 import xyz.nifeather.morph.abilities.MorphAbility;
 import xyz.nifeather.morph.abilities.options.ChatOverrideOption;
 import xyz.nifeather.morph.config.ConfigOption;
@@ -27,7 +27,7 @@ public class ChatOverrideAbility extends MorphAbility<ChatOverrideOption>
     @Override
     public @NotNull NamespacedKey getIdentifier()
     {
-        return AbilityType.CHAT_OVERRIDE;
+        return AbilityNames.CHAT_OVERRIDE;
     }
 
     @Override

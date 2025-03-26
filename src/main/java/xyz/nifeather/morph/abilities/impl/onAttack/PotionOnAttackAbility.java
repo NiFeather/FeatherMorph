@@ -7,7 +7,7 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.NotNull;
 import xyz.nifeather.morph.MorphManager;
-import xyz.nifeather.morph.abilities.AbilityType;
+import xyz.nifeather.morph.api.morphs.abilities.AbilityNames;
 import xyz.nifeather.morph.abilities.impl.OnAttackAbility;
 import xyz.nifeather.morph.abilities.options.PotionEffectOption;
 import xiamomc.pluginbase.Annotations.Resolved;
@@ -22,7 +22,7 @@ public class PotionOnAttackAbility extends OnAttackAbility<PotionEffectOption>
     @Override
     public @NotNull NamespacedKey getIdentifier()
     {
-        return AbilityType.POTION_ON_ATTACK;
+        return AbilityNames.POTION_ON_ATTACK;
     }
 
     @Override

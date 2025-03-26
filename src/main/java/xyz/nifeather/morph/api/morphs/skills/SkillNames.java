@@ -1,17 +1,25 @@
-package xyz.nifeather.morph.skills;
+package xyz.nifeather.morph.api.morphs.skills;
 
 import org.bukkit.NamespacedKey;
 
-public class SkillType
+/**
+ * Built-in skill types
+ */
+public class SkillNames
 {
     private static final String nameSpace = "morph";
 
-    public static final NamespacedKey INVENTORY = new NamespacedKey(nameSpace, "fake_equip");
+    public static final NamespacedKey FAKE_EQUIP = new NamespacedKey(nameSpace, "fake_equip");
     public static final NamespacedKey EXPLODE = new NamespacedKey(nameSpace, "explode");
     public static final NamespacedKey LAUNCH_PROJECTILE = new NamespacedKey(nameSpace, "launch_projective");
     public static final NamespacedKey APPLY_EFFECT = new NamespacedKey(nameSpace, "apply_effect");
     public static final NamespacedKey TELEPORT = new NamespacedKey(nameSpace, "teleport");
+
+    /**
+     * Summon Vex or Fangs depending on player's distance to their target
+     */
     public static final NamespacedKey EVOKER = new NamespacedKey(nameSpace, "evoker");
+
     public static final NamespacedKey SONIC_BOOM = new NamespacedKey(nameSpace, "sonic_boom");
 
     @Deprecated(forRemoval = true)

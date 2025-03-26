@@ -7,7 +7,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.world.GenericGameEvent;
 import org.jetbrains.annotations.NotNull;
-import xyz.nifeather.morph.abilities.AbilityType;
+import xyz.nifeather.morph.api.morphs.abilities.AbilityNames;
 
 import java.util.List;
 
@@ -21,7 +21,7 @@ public class WardenAbility extends NoOpOptionAbility
     @Override
     public @NotNull NamespacedKey getIdentifier()
     {
-        return AbilityType.WARDEN;
+        return AbilityNames.WARDEN;
     }
 
     private final List<GameEvent> blockedEvents = ObjectArrayList.of(

@@ -228,6 +228,11 @@ public class MorphStrings extends AbstractMorphStrings
                 "（部分暴露）");
     }
 
+    public static FormattableMessage townyBlockedSkillString()
+    {
+        return getFormattable(getKey("towny_blocked_skill"), "[Fallback] <red>你所在的城镇不允许你使用技能");
+    }
+
     private static String getKey(String key)
     {
         return "morph." + key;

@@ -3,7 +3,7 @@ package xyz.nifeather.morph.abilities.impl.dmgReduce;
 import org.bukkit.NamespacedKey;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.jetbrains.annotations.NotNull;
-import xyz.nifeather.morph.abilities.AbilityType;
+import xyz.nifeather.morph.api.morphs.abilities.AbilityNames;
 import xyz.nifeather.morph.abilities.impl.DamageReducingAbility;
 import xyz.nifeather.morph.abilities.options.ReduceDamageOption;
 
@@ -12,7 +12,7 @@ public class ReduceMagicDamageAbility extends DamageReducingAbility<ReduceDamage
     @Override
     public @NotNull NamespacedKey getIdentifier()
     {
-        return AbilityType.REDUCES_MAGIC_DAMAGE;
+        return AbilityNames.REDUCES_MAGIC_DAMAGE;
     }
 
     @Override

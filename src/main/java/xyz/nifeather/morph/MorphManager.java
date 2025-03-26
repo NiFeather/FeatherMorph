@@ -34,11 +34,9 @@ import xyz.nifeather.morph.messages.MorphStrings;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
-import xiamomc.morph.network.commands.S2C.clientrender.S2CRenderMapAddCommand;
 import xiamomc.morph.network.commands.S2C.clientrender.S2CRenderMapSyncCommand;
 import xiamomc.morph.network.commands.S2C.map.S2CMapCommand;
 import xiamomc.morph.network.commands.S2C.map.S2CMapRemoveCommand;
-import xiamomc.morph.network.commands.S2C.map.S2CPartialMapCommand;
 import xiamomc.morph.network.commands.S2C.set.*;
 import xyz.nifeather.morph.network.multiInstance.MultiInstanceService;
 import xyz.nifeather.morph.network.multiInstance.protocol.Operation;
@@ -49,7 +47,7 @@ import xyz.nifeather.morph.providers.disguise.PlayerDisguiseProvider;
 import xyz.nifeather.morph.providers.disguise.VanillaDisguiseProvider;
 import xyz.nifeather.morph.skills.MorphSkillHandler;
 import xyz.nifeather.morph.skills.SkillCooldownInfo;
-import xyz.nifeather.morph.skills.SkillType;
+import xyz.nifeather.morph.api.morphs.skills.SkillNames;
 import xyz.nifeather.morph.storage.offlinestore.OfflineDisguiseState;
 import xyz.nifeather.morph.storage.offlinestore.OfflineStateStore;
 import xyz.nifeather.morph.storage.playerdata.PlayerDataStoreNew;
@@ -859,7 +857,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             }
 
             // 技能
-            var rawIdentifierHasSkill = skillHandler.hasSkill(disguiseIdentifier) || skillHandler.hasSpeficSkill(disguiseIdentifier, SkillType.NONE);
+            var rawIdentifierHasSkill = skillHandler.hasSkill(disguiseIdentifier) || skillHandler.hasSpeficSkill(disguiseIdentifier, SkillNames.NONE);
             var targetSkillID = rawIdentifierHasSkill ? disguiseIdentifier : provider.getNameSpace() + ":" + MorphManager.disguiseFallbackName;
 
             var playerMorphConfig = getPlayerMeta(player);

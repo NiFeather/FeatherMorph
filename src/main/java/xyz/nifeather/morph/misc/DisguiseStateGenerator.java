@@ -8,7 +8,7 @@ import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.backends.DisguiseBackend;
 import xyz.nifeather.morph.skills.MorphSkillHandler;
-import xyz.nifeather.morph.skills.SkillType;
+import xyz.nifeather.morph.api.morphs.skills.SkillNames;
 import xyz.nifeather.morph.storage.offlinestore.OfflineDisguiseState;
 import xyz.nifeather.morph.storage.playerdata.PlayerMeta;
 import xyz.nifeather.morph.utilities.NbtUtils;
@@ -60,7 +60,7 @@ public class DisguiseStateGenerator
 
         //获取技能ID
         //From MorphManager
-        var rawIdentifierHasSkill = skillHandler.hasSkill(disguiseIdentifier) || skillHandler.hasSpeficSkill(disguiseIdentifier, SkillType.NONE);
+        var rawIdentifierHasSkill = skillHandler.hasSkill(disguiseIdentifier) || skillHandler.hasSpeficSkill(disguiseIdentifier, SkillNames.NONE);
         var targetSkillID = rawIdentifierHasSkill ? disguiseIdentifier : provider.getNameSpace() + ":" + MorphManager.disguiseFallbackName;
 
         var wrapper = backend.fromOfflineSave(offlineState.disguiseData);

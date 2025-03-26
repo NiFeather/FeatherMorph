@@ -4,7 +4,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.nifeather.morph.abilities.AbilityType;
+import xyz.nifeather.morph.api.morphs.abilities.AbilityNames;
 import xyz.nifeather.morph.abilities.MorphAbility;
 import xyz.nifeather.morph.abilities.options.DryoutAbilityOption;
 import xyz.nifeather.morph.misc.DisguiseState;
@@ -22,7 +22,7 @@ public class DryOutInAirAbility extends MorphAbility<DryoutAbilityOption>
     @Override
     public @NotNull NamespacedKey getIdentifier()
     {
-        return AbilityType.DRYOUT_IN_AIR;
+        return AbilityNames.DRYOUT_IN_AIR;
     }
 
     @Override

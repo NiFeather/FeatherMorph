@@ -18,6 +18,7 @@ import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.MorphPluginObject;
+import xyz.nifeather.morph.api.morphs.skills.SkillNames;
 import xyz.nifeather.morph.events.api.gameplay.PlayerExecuteSkillEvent;
 import xyz.nifeather.morph.events.api.lifecycle.SkillsFinishedInitializeEvent;
 import xyz.nifeather.morph.messages.CommandStrings;
@@ -122,9 +123,9 @@ public class MorphSkillHandler extends MorphPluginObject
             return false;
         }
 
-        if (skill.getIdentifier().equals(SkillType.UNKNOWN))
+        if (skill.getIdentifier().equals(SkillNames.UNKNOWN))
         {
-            logger.error("Can't register skill: Illegal skill identifier: " + SkillType.UNKNOWN);
+            logger.error("Can't register skill: Illegal skill identifier: " + SkillNames.UNKNOWN);
             return false;
         }
 
@@ -366,8 +367,8 @@ public class MorphSkillHandler extends MorphPluginObject
     {
         var entry = getSkillEntry(id);
         return entry != null
-                && !SkillType.UNKNOWN.equals(entry.left().getSkillIdentifier())
-                && !SkillType.NONE.equals(entry.left().getSkillIdentifier());
+                && !SkillNames.UNKNOWN.equals(entry.left().getSkillIdentifier())
+                && !SkillNames.NONE.equals(entry.left().getSkillIdentifier());
     }
 
     /**
@@ -380,7 +381,7 @@ public class MorphSkillHandler extends MorphPluginObject
     {
         var entry = getSkillEntry(id);
 
-        if (entry == null || SkillType.UNKNOWN.equals(entry.left().getSkillIdentifier())) return false;
+        if (entry == null || SkillNames.UNKNOWN.equals(entry.left().getSkillIdentifier())) return false;
 
         return entry.right().getIdentifier().equals(skillKey);
     }

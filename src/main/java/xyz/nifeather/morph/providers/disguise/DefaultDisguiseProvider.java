@@ -20,7 +20,7 @@ import xiamomc.morph.network.commands.S2C.AbstractS2CCommand;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
 import xyz.nifeather.morph.network.server.ServerSetEquipCommand;
 import xyz.nifeather.morph.skills.MorphSkillHandler;
-import xyz.nifeather.morph.skills.SkillType;
+import xyz.nifeather.morph.api.morphs.skills.SkillNames;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Messages.MessageStore;
 
@@ -164,7 +164,7 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
     public List<AbstractS2CCommand<?>> getInitialSyncCommands(DisguiseState state)
     {
         //logger.info("SID: " + state.getSkillLookupIdentifier() + " :: DID: " + state.getDisguiseIdentifier());
-        if (skillHandler.hasSpeficSkill(state.skillLookupIdentifier(), SkillType.INVENTORY))
+        if (skillHandler.hasSpeficSkill(state.skillLookupIdentifier(), SkillNames.FAKE_EQUIP))
         {
             var eqiupment = state.getDisguisedItems();
 
