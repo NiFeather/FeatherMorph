@@ -84,7 +84,7 @@ root:
       #
       # WARNING!
       # 1. There may be some bypasses on Folia servers, due to their teleport event having a strange trigger condition
-      allow_flight_in_wilderness: false
+      allow_fly_in_wilderness: false
 
   # Should we enable the "Disguise Revealing" feature?
   #
