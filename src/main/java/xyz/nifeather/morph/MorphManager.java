@@ -18,7 +18,7 @@ import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.backends.DisguiseBackend;
 import xyz.nifeather.morph.backends.DisguiseWrapper;
 import xyz.nifeather.morph.backends.WrapperProperties;
-import xyz.nifeather.morph.backends.fallback.NilBackend;
+import xyz.nifeather.morph.backends.client.ModBackend;
 import xyz.nifeather.morph.backends.server.ServerBackend;
 import xyz.nifeather.morph.events.api.gameplay.*;
 import xyz.nifeather.morph.misc.*;
@@ -34,7 +34,6 @@ import xyz.nifeather.morph.messages.MorphStrings;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
-import xiamomc.morph.network.commands.S2C.clientrender.S2CRenderMapSyncCommand;
 import xiamomc.morph.network.commands.S2C.map.S2CMapCommand;
 import xiamomc.morph.network.commands.S2C.map.S2CMapRemoveCommand;
 import xiamomc.morph.network.commands.S2C.set.*;
@@ -84,7 +83,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     private MorphConfigManager config;
 
     @Resolved
-    private NetworkingHelper networkingHelper;
+    private ModNetworkingHelper modNetworkingHelper;
 
     @Resolved
     private MultiInstanceService multiInstanceService;
@@ -100,10 +99,10 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
     //region Backends
 
-    private final NilBackend nilBackend = new NilBackend();
+    private final ModBackend modBackend = new ModBackend();
 
     @NotNull
-    private DisguiseBackend<?, ?> defaultBackend = nilBackend;
+    private DisguiseBackend<?, ?> defaultBackend = modBackend;
 
     @NotNull
     public DisguiseBackend<?, ?> getDefaultBackend()
@@ -221,7 +220,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     {
         this.addSchedule(this::update);
 
-        registerBackend(nilBackend);
+        registerBackend(modBackend);
         tryBackends();
 
         logger.info("Default backend: %s".formatted(defaultBackend));
@@ -1021,7 +1020,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         // Network below!
 
         // 向管理员发送map消息
-        networkingHelper.sendCommandToRevealablePlayers(networkingHelper.genPartialMapCommand(newState));
+        modNetworkingHelper.sendCommandToRevealablePlayers(modNetworkingHelper.genPartialMapCommand(newState));
 
         // 向客户端更新当前伪装ID
         // 因为下面postConstruct有初始化技能的操作，根据协议标准中current会重置客户端伪装状态的规定，因此在这里更新
@@ -1144,18 +1143,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         }
 
         return new S2CMapCommand(map);
-    }
-
-    public S2CRenderMapSyncCommand genRenderSyncCommand()
-    {
-        var map = new HashMap<Integer, String>();
-        for (DisguiseState disguiseState : this.activeDisguises)
-        {
-            var player = disguiseState.getPlayer();
-            map.put(player.getEntityId(), disguiseState.getDisguiseIdentifier());
-        }
-
-        return S2CRenderMapSyncCommand.of(map);
     }
 
     //endregion Command generating
@@ -1343,7 +1330,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         new PlayerUnMorphEvent(player).callEvent();
 
         // 向管理员发送map移除指令
-        networkingHelper.sendCommandToRevealablePlayers(new S2CMapRemoveCommand(player.getEntityId()));
+        modNetworkingHelper.sendCommandToRevealablePlayers(new S2CMapRemoveCommand(player.getEntityId()));
 
         if (this.hideDisguisedPlayers.get())
             PlayerListHandler.instance().showPlayer(player);
@@ -1525,7 +1512,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 this.disguiseFromState(state);
 
                 // 向管理员发送map消息
-                networkingHelper.sendCommandToRevealablePlayers(networkingHelper.genPartialMapCommand(state));
+                modNetworkingHelper.sendCommandToRevealablePlayers(modNetworkingHelper.genPartialMapCommand(state));
 
                 new PlayerDisguisedFromOfflineStateEvent(player, state).callEvent();
 

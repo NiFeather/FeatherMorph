@@ -8,7 +8,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.scoreboard.Scoreboard;
-import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.abilities.AbilityManager;
 import xyz.nifeather.morph.api.FeatherMorphAPI;
 import xyz.nifeather.morph.commands.*;
@@ -20,7 +19,7 @@ import xyz.nifeather.morph.interfaces.IManageRequests;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.MorphMessageStore;
 import xyz.nifeather.morph.messages.vanilla.VanillaMessageStore;
-import xyz.nifeather.morph.misc.NetworkingHelper;
+import xyz.nifeather.morph.misc.ModNetworkingHelper;
 import xyz.nifeather.morph.misc.PlayerOperationSimulator;
 import xyz.nifeather.morph.misc.integrations.towny.TownyAdapter;
 import xyz.nifeather.morph.misc.recipe.RecipeManager;
@@ -199,7 +198,7 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
         //缓存依赖
         dependencyManager.cache(this);
         dependencyManager.cache(clientHandler = new MorphClientHandler());
-        dependencyManager.cache(new NetworkingHelper());
+        dependencyManager.cache(new ModNetworkingHelper());
 
         dependencyManager.cache(morphManager = new MorphManager());
         dependencyManager.cache(skillHandler = new MorphSkillHandler());

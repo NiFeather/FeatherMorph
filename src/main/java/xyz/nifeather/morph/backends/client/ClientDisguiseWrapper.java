@@ -1,4 +1,4 @@
-package xyz.nifeather.morph.backends.fallback;
+package xyz.nifeather.morph.backends.client;
 
 import com.mojang.authlib.GameProfile;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
@@ -12,34 +12,29 @@ import org.bukkit.inventory.EntityEquipment;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
-import xiamomc.pluginbase.Exceptions.NullDependencyException;
 import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.backends.DisguiseWrapper;
 import xyz.nifeather.morph.backends.EventWrapper;
 import xyz.nifeather.morph.backends.WrapperEvent;
 import xyz.nifeather.morph.backends.WrapperProperties;
-import xyz.nifeather.morph.misc.DisguiseEquipment;
 import xyz.nifeather.morph.misc.DisguiseState;
+import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 import xyz.nifeather.morph.utilities.NbtUtils;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
-public class NilWrapper extends EventWrapper<NilDisguise>
+public class ClientDisguiseWrapper extends EventWrapper<TrackingClientDisguise>
 {
-    public NilWrapper(@NotNull NilDisguise instance, NilBackend backend)
+    public ClientDisguiseWrapper(@NotNull TrackingClientDisguise instance, ModBackend backend)
     {
         super(instance, backend);
 
         this.backend = backend;
     }
 
-    private final NilBackend backend;
-
-    private final DisguiseEquipment equipment = new DisguiseEquipment();
+    private final ModBackend backend;
 
     @Override
     public void mergeCompound(CompoundTag compoundTag)
@@ -53,7 +48,7 @@ public class NilWrapper extends EventWrapper<NilDisguise>
         }
 
         compound.merge(compoundTag);
-        this.instance.isBaby = NbtUtils.isBabyForType(getEntityType(), compoundTag);
+        this.writeProperty(DisguiseProperties.INSTANCE.offTreeProperties().IS_BABY, NbtUtils.isBabyForType(getEntityType(), compound));
 
         if (this.getEntityType() == EntityType.MAGMA_CUBE || this.getEntityType() == EntityType.SLIME)
             resetDimensions();
@@ -64,8 +59,6 @@ public class NilWrapper extends EventWrapper<NilDisguise>
     {
         return readPropertyOr(WrapperProperties.NBT, WrapperProperties.NBT.defaultVal().copy());
     }
-
-    private static final UUID nilUUID = UUID.fromString("0-0-0-0-0");
 
     /**
      * Gets network id of this disguise displayed to other players
@@ -78,19 +71,18 @@ public class NilWrapper extends EventWrapper<NilDisguise>
         return -1;
     }
 
-    private final Map<SingleProperty<?>, Object> disguiseProperties = new ConcurrentHashMap<>();
-
     @Override
     public Map<SingleProperty<?>, Object> getProperties()
     {
-        return new Object2ObjectOpenHashMap<>(disguiseProperties);
+        return new Object2ObjectOpenHashMap<>(this.instance.disguiseProperties());
     }
 
     @Override
     public <X> void writeProperty(SingleProperty<X> property, X value)
     {
-        disguiseProperties.put(property, value);
+        this.instance.writeProperty(property, value);
 
+        //todo: Move this to TrackingClientDisguise
         if (property.equals(WrapperProperties.PROFILE))
         {
             var val = ((Optional<GameProfile>) value).orElse(null);
@@ -112,22 +104,19 @@ public class NilWrapper extends EventWrapper<NilDisguise>
     @Override
     public <X> @NotNull X readProperty(SingleProperty<X> property)
     {
-        return this.readPropertyOr(property, property.defaultVal());
+        return this.instance.readProperty(property);
     }
 
     @Override
     public <X> X readPropertyOr(SingleProperty<X> property, X defaultVal)
     {
-        return (X) disguiseProperties.getOrDefault(property, defaultVal);
+        return this.instance.readPropertyOr(property, defaultVal);
     }
 
     @Override
     public <X> X readPropertyOrThrow(SingleProperty<X> property)
     {
-        var val = disguiseProperties.getOrDefault(property, null);
-        if (val == null) throw new NullDependencyException("The requested property '%s' was not found in %s".formatted(property.id(), this));
-
-        return (X) val;
+        return this.instance.readPropertyOrThrow(property);
     }
 
     @Nullable
@@ -157,15 +146,15 @@ public class NilWrapper extends EventWrapper<NilDisguise>
     @Override
     public EntityEquipment getFakeEquipments()
     {
-        return equipment;
+        return this.instance.equipment();
     }
 
     @Override
     public void setFakeEquipments(@NotNull EntityEquipment newEquipment)
     {
-        this.equipment.setArmorContents(newEquipment.getArmorContents());
+        this.instance.equipment().setArmorContents(newEquipment.getArmorContents());
 
-        this.equipment.setHandItems(newEquipment.getItemInMainHand(), newEquipment.getItemInOffHand());
+        this.instance.equipment().setHandItems(newEquipment.getItemInMainHand(), newEquipment.getItemInOffHand());
     }
 
     @Override
@@ -176,38 +165,38 @@ public class NilWrapper extends EventWrapper<NilDisguise>
     @Override
     public EntityType getEntityType()
     {
-        return instance.type;
+        return instance.entityType();
     }
 
     @Override
-    public NilDisguise copyInstance()
+    public TrackingClientDisguise copyInstance()
     {
         return instance.clone();
     }
 
     @Override
-    public DisguiseWrapper<NilDisguise> clone()
+    public DisguiseWrapper<TrackingClientDisguise> clone()
     {
-        var instance = new NilWrapper(this.copyInstance(), (NilBackend) getBackend());
+        var newWrapper = new ClientDisguiseWrapper(this.copyInstance(), (ModBackend) getBackend());
 
-        instance.disguiseProperties.putAll(this.disguiseProperties);
+        newWrapper.instance.disguiseProperties().putAll(this.instance.disguiseProperties());
 
-        return instance;
+        return newWrapper;
     }
 
-    public static NilWrapper fromExternal(DisguiseWrapper<?> other, NilBackend backend)
+    public static ClientDisguiseWrapper fromExternal(DisguiseWrapper<?> other, ModBackend backend)
     {
-        var instance = new NilWrapper(new NilDisguise(other.getEntityType()), backend);
+        var newWrapper = new ClientDisguiseWrapper(new TrackingClientDisguise(other.getEntityType()), backend);
 
-        instance.disguiseProperties.putAll(other.getProperties());
+        newWrapper.instance.disguiseProperties().putAll(other.getProperties());
 
-        return instance;
+        return newWrapper;
     }
 
     @Override
     public boolean isBaby()
     {
-        return instance.isBaby;
+        return this.readPropertyOr(DisguiseProperties.INSTANCE.offTreeProperties().IS_BABY, false);
     }
 
     @Override

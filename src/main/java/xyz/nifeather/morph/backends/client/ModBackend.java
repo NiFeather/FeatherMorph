@@ -1,4 +1,4 @@
-package xyz.nifeather.morph.backends.fallback;
+package xyz.nifeather.morph.backends.client;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
@@ -10,19 +10,23 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.morph.network.commands.S2C.clientrender.S2CRenderMapAddCommand;
 import xiamomc.morph.network.commands.S2C.clientrender.S2CRenderMapRemoveCommand;
+import xiamomc.morph.network.commands.S2C.clientrender.S2CRenderMapSyncCommand;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Messages.FormattableMessage;
+import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.backends.DisguiseBackend;
 import xyz.nifeather.morph.backends.DisguiseWrapper;
 import xyz.nifeather.morph.backends.WrapperProperties;
 import xyz.nifeather.morph.messages.BackendStrings;
-import xyz.nifeather.morph.misc.NetworkingHelper;
+import xyz.nifeather.morph.misc.DisguiseState;
+import xyz.nifeather.morph.misc.ModNetworkingHelper;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 
-public class NilBackend extends DisguiseBackend<NilDisguise, NilWrapper>
+public class ModBackend extends DisguiseBackend<TrackingClientDisguise, ClientDisguiseWrapper>
 {
     /**
      * Gets the identifier of this backend.
@@ -32,49 +36,43 @@ public class NilBackend extends DisguiseBackend<NilDisguise, NilWrapper>
     @Override
     public String getIdentifier()
     {
-        return "nil";
+        return "client";
     }
 
     @Override
     public FormattableMessage getDisplayName()
     {
-        return BackendStrings.nilBackendName();
+        return BackendStrings.clientBackendName();
     }
 
     @Override
-    public boolean dependsClientRenderer()
+    public DisguiseWrapper<TrackingClientDisguise> createInstance(@NotNull Entity targetEntity)
     {
-        return true;
-    }
-
-    @Override
-    public DisguiseWrapper<NilDisguise> createInstance(@NotNull Entity targetEntity)
-    {
-        var wrapper = new NilWrapper(new NilDisguise(targetEntity.getType()), this);
+        var wrapper = new ClientDisguiseWrapper(new TrackingClientDisguise(targetEntity.getType()), this);
         wrapper.setDisguiseName(targetEntity.getName());
 
         return wrapper;
     }
 
     @Override
-    public DisguiseWrapper<NilDisguise> createInstance(EntityType entityType)
+    public DisguiseWrapper<TrackingClientDisguise> createInstance(EntityType entityType)
     {
-        return new NilWrapper(new NilDisguise(entityType), this);
+        return new ClientDisguiseWrapper(new TrackingClientDisguise(entityType), this);
     }
 
     @Override
-    public DisguiseWrapper<NilDisguise> createPlayerInstance(String targetPlayerName)
+    public DisguiseWrapper<TrackingClientDisguise> createPlayerInstance(String targetPlayerName)
     {
-        var wrapper = new NilWrapper(new NilDisguise(EntityType.PLAYER), this);
+        var wrapper = new ClientDisguiseWrapper(new TrackingClientDisguise(EntityType.PLAYER), this);
         wrapper.setDisguiseName(targetPlayerName);
 
         return wrapper;
     }
 
     @Override
-    public NilDisguise createRawInstance(Entity entity)
+    public TrackingClientDisguise createRawInstance(Entity entity)
     {
-        return new NilDisguise(entity.getType());
+        return new TrackingClientDisguise(entity.getType());
     }
 
     @Override
@@ -84,7 +82,7 @@ public class NilBackend extends DisguiseBackend<NilDisguise, NilWrapper>
     }
 
     @Override
-    public NilWrapper getWrapper(Entity target)
+    public ClientDisguiseWrapper getWrapper(Entity target)
     {
         if (!(target instanceof Player player)) return null;
 
@@ -98,37 +96,37 @@ public class NilBackend extends DisguiseBackend<NilDisguise, NilWrapper>
      * @return 一个新的属于此后端的Wrapper
      */
     @Override
-    public @NotNull NilWrapper cloneWrapperFrom(DisguiseWrapper<?> otherWrapper)
+    public @NotNull ClientDisguiseWrapper cloneWrapperFrom(DisguiseWrapper<?> otherWrapper)
     {
-        return otherWrapper instanceof NilWrapper nilWrapper
-                ? cloneWrapper(nilWrapper)
+        return otherWrapper instanceof ClientDisguiseWrapper clientDisguiseWrapper
+                ? cloneWrapper(clientDisguiseWrapper)
                 : cloneOther(otherWrapper);
     }
 
-    private NilWrapper cloneWrapper(NilWrapper other)
+    private ClientDisguiseWrapper cloneWrapper(ClientDisguiseWrapper other)
     {
-        return (NilWrapper) other.clone();
+        return (ClientDisguiseWrapper) other.clone();
     }
 
-    private NilWrapper cloneOther(DisguiseWrapper<?> other)
+    private ClientDisguiseWrapper cloneOther(DisguiseWrapper<?> other)
     {
-        return NilWrapper.fromExternal(other, this);
+        return ClientDisguiseWrapper.fromExternal(other, this);
     }
 
-    private final Map<Player, NilWrapper> playerFallbackWrapperMap = new Object2ObjectOpenHashMap<>();
+    private final Map<Player, ClientDisguiseWrapper> playerFallbackWrapperMap = new Object2ObjectOpenHashMap<>();
 
     @Resolved(shouldSolveImmediately = true)
-    private NetworkingHelper networkingHelper;
+    private ModNetworkingHelper modNetworkingHelper;
 
-    NetworkingHelper getNetworkingHelper()
+    ModNetworkingHelper getNetworkingHelper()
     {
-        return networkingHelper;
+        return modNetworkingHelper;
     }
 
     @Override
     public boolean disguise(Player player, DisguiseWrapper<?> rawWrapper)
     {
-        if (!(rawWrapper instanceof NilWrapper wrapper))
+        if (!(rawWrapper instanceof ClientDisguiseWrapper wrapper))
             return false;
 
         if (playerFallbackWrapperMap.containsKey(player))
@@ -141,7 +139,7 @@ public class NilBackend extends DisguiseBackend<NilDisguise, NilWrapper>
         var cmd = new S2CRenderMapAddCommand(player.getEntityId(), wrapper.readPropertyOrThrow(WrapperProperties.DISGUISE_ID));
         players.forEach(p -> clientHandler.sendCommand(p, cmd));
 
-        networkingHelper.prepareMeta(player)
+        modNetworkingHelper.prepareMeta(player)
                 .forWrapper(rawWrapper)
                 .send();
 
@@ -149,6 +147,37 @@ public class NilBackend extends DisguiseBackend<NilDisguise, NilWrapper>
 
         playerFallbackWrapperMap.put(player, wrapper);
         return true;
+    }
+
+    public S2CRenderMapSyncCommand generateRenderSyncCommand(MorphManager morphManager)
+    {
+        var map = new HashMap<Integer, String>();
+        for (DisguiseState disguiseState : morphManager.getActiveDisguises())
+        {
+            var player = disguiseState.getPlayer();
+            map.put(player.getEntityId(), disguiseState.getDisguiseIdentifier());
+        }
+
+        return S2CRenderMapSyncCommand.of(map);
+    }
+
+    @Override
+    public void onClientModInitialize(Player player, MorphClientHandler clientHandler, MorphManager morphManager)
+    {
+        clientHandler.sendCommand(player, this.generateRenderSyncCommand(morphManager));
+
+        // Sync disguises to the client
+        var disguises = morphManager.getActiveDisguises();
+        for (DisguiseState bindingState : disguises)
+        {
+            var bindingPlayer = bindingState.getPlayer();
+
+            var packet = modNetworkingHelper.prepareMeta(bindingPlayer)
+                    .forDisguiseState(bindingState)
+                    .build();
+
+            clientHandler.sendCommand(player, packet);
+        }
     }
 
     @Resolved
@@ -180,7 +209,7 @@ public class NilBackend extends DisguiseBackend<NilDisguise, NilWrapper>
      * null if invalid or illegal
      */
     @Override
-    public @Nullable NilWrapper fromOfflineSave(String offlineParameter)
+    public @Nullable ClientDisguiseWrapper fromOfflineSave(String offlineParameter)
     {
         return null;
     }
@@ -199,7 +228,7 @@ public class NilBackend extends DisguiseBackend<NilDisguise, NilWrapper>
     }
 
     @Override
-    public Collection<NilWrapper> listInstances()
+    public Collection<ClientDisguiseWrapper> listInstances()
     {
         return playerFallbackWrapperMap.values();
     }

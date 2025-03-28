@@ -24,9 +24,9 @@ public class BackendStrings extends AbstractMorphStrings
         return getFormattable(getKey("experiemental_warning"), "请注意此功能正在实验，并可能在未来移除！");
     }
 
-    public static FormattableMessage nilBackendName()
+    public static FormattableMessage clientBackendName()
     {
-        return getFormattable(getKey("name.nil"), "后备（客户端）渲染器");
+        return getFormattable(getKey("name.client"), "客户端渲染器");
     }
 
     public static FormattableMessage serverBackendName()

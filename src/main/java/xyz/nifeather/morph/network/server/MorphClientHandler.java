@@ -34,8 +34,7 @@ import xyz.nifeather.morph.interfaces.IManageRequests;
 import xyz.nifeather.morph.messages.EmoteStrings;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.MorphStrings;
-import xyz.nifeather.morph.misc.DisguiseState;
-import xyz.nifeather.morph.misc.NetworkingHelper;
+import xyz.nifeather.morph.misc.ModNetworkingHelper;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 import xyz.nifeather.morph.network.server.handlers.CommandPacketHandler;
 import xyz.nifeather.morph.network.server.handlers.ICommandPacketHandler;
@@ -792,23 +791,8 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
         if (player.hasPermission(CommonPermissions.DISGUISE_REVEALING))
             sendCommand(player, manager.genMapCommand());
 
-        //TODO: 独立客户端渲染器
-        if (state != null && state.getDisguiseWrapper().getBackend().dependsClientRenderer())
-        {
-            sendCommand(player, manager.genRenderSyncCommand());
-
-            var disguises = manager.getActiveDisguises();
-            for (DisguiseState bindingState : disguises)
-            {
-                var bindingPlayer = bindingState.getPlayer();
-
-                var packet = networkingHelper.prepareMeta(bindingPlayer)
-                        .forDisguiseState(bindingState)
-                        .build();
-
-                this.sendCommand(player, packet);
-            }
-        }
+        if (state != null)
+            state.getDisguiseWrapper().getBackend().onClientModInitialize(player, this, manager);
 
         session.initializeState = InitializeState.DONE;
     }
@@ -912,7 +896,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
     private IManageRequests requestManager;
 
     @Resolved
-    private NetworkingHelper networkingHelper;
+    private ModNetworkingHelper modNetworkingHelper;
 
     @Override
     public void onRequestCommand(C2SRequestCommand c2SRequestCommand)

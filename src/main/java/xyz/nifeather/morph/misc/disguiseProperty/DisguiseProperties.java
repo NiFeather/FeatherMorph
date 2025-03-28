@@ -40,6 +40,12 @@ public class DisguiseProperties
         register(EntityType.CREEPER, new CreeperProperties());
     }
 
+    private final OffTreeProperties offTreeProperties = new OffTreeProperties();
+    public OffTreeProperties offTreeProperties()
+    {
+        return offTreeProperties;
+    }
+
     public Map<EntityType, AbstractProperties> getAll()
     {
         return new Object2ObjectOpenHashMap<>(handlerMap);

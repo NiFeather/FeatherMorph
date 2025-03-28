@@ -21,7 +21,7 @@ import xyz.nifeather.morph.utilities.NbtUtils;
 
 import java.util.HashMap;
 
-public class NetworkingHelper extends MorphPluginObject
+public class ModNetworkingHelper extends MorphPluginObject
 {
     @Resolved(shouldSolveImmediately = true)
     private MorphClientHandler clientHandler;
@@ -78,13 +78,13 @@ public class NetworkingHelper extends MorphPluginObject
 
     public static class NetworkDisguiseStateRecord
     {
-        public NetworkDisguiseStateRecord(int networkId, NetworkingHelper bindingHelper)
+        public NetworkDisguiseStateRecord(int networkId, ModNetworkingHelper bindingHelper)
         {
             this.renderMeta = new S2CRenderMeta(networkId);
             this.bindingHelper = bindingHelper;
         }
 
-        private final NetworkingHelper bindingHelper;
+        private final ModNetworkingHelper bindingHelper;
 
         private final S2CRenderMeta renderMeta;
 

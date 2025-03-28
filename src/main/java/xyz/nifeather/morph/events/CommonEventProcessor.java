@@ -27,16 +27,14 @@ import xiamomc.pluginbase.Bindables.Bindable;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.RevealingHandler;
-import xyz.nifeather.morph.abilities.impl.AttributeModifyingAbility;
 import xyz.nifeather.morph.config.ConfigOption;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.events.api.gameplay.PlayerJoinedWithDisguiseEvent;
-import xyz.nifeather.morph.messages.HintStrings;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.MorphStrings;
 import xyz.nifeather.morph.messages.vanilla.VanillaMessageStore;
 import xyz.nifeather.morph.misc.DisguiseTypes;
-import xyz.nifeather.morph.misc.NetworkingHelper;
+import xyz.nifeather.morph.misc.ModNetworkingHelper;
 import xyz.nifeather.morph.misc.OfflineDisguiseResult;
 import xyz.nifeather.morph.misc.gui.AnimSelectScreenWrapper;
 import xyz.nifeather.morph.misc.gui.DisguiseSelectScreenWrapper;
@@ -44,9 +42,7 @@ import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 import xyz.nifeather.morph.misc.playerList.PlayerListHandler;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
 import xyz.nifeather.morph.network.server.ServerSetEquipCommand;
-import xyz.nifeather.morph.providers.disguise.VanillaDisguiseProvider;
 import xyz.nifeather.morph.skills.MorphSkillHandler;
-import xyz.nifeather.morph.utilities.CommonUtils;
 import xyz.nifeather.morph.utilities.EntityTypeUtils;
 import xyz.nifeather.morph.utilities.ItemUtils;
 
@@ -380,7 +376,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
     }
 
     @Resolved(shouldSolveImmediately = true)
-    private NetworkingHelper networkingHelper;
+    private ModNetworkingHelper modNetworkingHelper;
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent e)
@@ -420,7 +416,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         {
             state.onPlayerJoin();
 
-            networkingHelper.sendCommandToRevealablePlayers(networkingHelper.genPartialMapCommand(state));
+            modNetworkingHelper.sendCommandToRevealablePlayers(modNetworkingHelper.genPartialMapCommand(state));
 
             //调用Morph事件
             new PlayerJoinedWithDisguiseEvent(player, state).callEvent();

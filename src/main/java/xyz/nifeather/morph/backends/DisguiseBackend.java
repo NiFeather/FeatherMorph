@@ -7,7 +7,9 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Messages.FormattableMessage;
+import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.MorphPluginObject;
+import xyz.nifeather.morph.network.server.MorphClientHandler;
 
 import java.util.Collection;
 
@@ -21,10 +23,15 @@ public abstract class DisguiseBackend<TInstance, TWrapper extends DisguiseWrappe
 
     public abstract FormattableMessage getDisplayName();
 
+    @Deprecated(forRemoval = true)
     @ApiStatus.Internal
     public boolean dependsClientRenderer()
     {
         return false;
+    }
+
+    public void onClientModInitialize(Player player, MorphClientHandler clientHandler, MorphManager morphManager)
+    {
     }
 
     /**
