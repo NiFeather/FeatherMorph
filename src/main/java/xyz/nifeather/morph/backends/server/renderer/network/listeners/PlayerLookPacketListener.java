@@ -136,8 +136,8 @@ public class PlayerLookPacketListener extends ProtocolListener
         if (!isDragon && !isPhantom)
             return;
 
-        float yaw = packet.getyRot();
-        float pitch = packet.getxRot();
+        float yaw = packet.getYRot();
+        float pitch = packet.getXRot();
 
         yaw = isDragon ? (yaw + 180f) : yaw;
         pitch = isPhantom ? -pitch : pitch;

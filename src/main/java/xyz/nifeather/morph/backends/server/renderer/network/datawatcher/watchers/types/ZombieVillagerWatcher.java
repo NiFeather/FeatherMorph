@@ -84,11 +84,11 @@ public class ZombieVillagerWatcher extends ZombieWatcher
         var typeRegistry = RegistryAccess.registryAccess().getRegistry(RegistryKey.VILLAGER_TYPE);
 
         if (nbt.contains("level"))
-            level = MathUtils.clamp(1, 5, nbt.getInt("level"));
+            level = MathUtils.clamp(1, 5, nbt.getInt("level").orElseThrow());
 
         if (nbt.contains("profession"))
         {
-            NamespacedKey rl = NamespacedKey.fromString(nbt.getString("profession"));
+            NamespacedKey rl = NamespacedKey.fromString(nbt.getString("profession").orElseThrow());
 
             if (rl == null)
             {
@@ -107,7 +107,7 @@ public class ZombieVillagerWatcher extends ZombieWatcher
 
         if (nbt.contains("type"))
         {
-            NamespacedKey rl = NamespacedKey.fromString(nbt.getString("type"));
+            NamespacedKey rl = NamespacedKey.fromString(nbt.getString("type").orElseThrow());
 
             if (rl == null)
             {
@@ -133,7 +133,7 @@ public class ZombieVillagerWatcher extends ZombieWatcher
         super.mergeFromCompound(nbt);
 
         if (nbt.contains("VillagerData"))
-            mergeFromVillagerData(nbt.getCompound("VillagerData"));
+            mergeFromVillagerData(nbt.getCompound("VillagerData").orElseThrow());
     }
 
     @Override

@@ -35,6 +35,7 @@ public class ProtocolEquipment
             case FEET -> EquipmentSlot.FEET;
 
             case BODY -> EquipmentSlot.BODY;
+            case SADDLE -> EquipmentSlot.SADDLE;
         };
     }
 

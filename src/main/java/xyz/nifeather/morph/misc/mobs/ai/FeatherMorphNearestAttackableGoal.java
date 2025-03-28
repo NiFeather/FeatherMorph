@@ -92,7 +92,7 @@ public class FeatherMorphNearestAttackableGoal extends NearestAttackableTargetGo
         this.target = null;
 
         if (this.mob.getTarget() == this.target)
-            this.mob.setTarget(null, EntityTargetEvent.TargetReason.CUSTOM, true);
+            this.mob.setTarget(null, EntityTargetEvent.TargetReason.CUSTOM);
 
         if (mob instanceof NeutralMob neutralMob)
             neutralMob.forgetCurrentTargetAndRefreshUniversalAnger();
@@ -128,7 +128,7 @@ public class FeatherMorphNearestAttackableGoal extends NearestAttackableTargetGo
         // 算了就让他优先攻击玩家吧
         // We cancels reason with CLOSEST_PLAYER, so we need to target again with CUSTOM
         // See CommonEventProcessor#onEntityTarget()
-        mob.setTarget(this.target, EntityTargetEvent.TargetReason.CUSTOM, true);
+        mob.setTarget(this.target, EntityTargetEvent.TargetReason.CUSTOM);
     }
 }
 

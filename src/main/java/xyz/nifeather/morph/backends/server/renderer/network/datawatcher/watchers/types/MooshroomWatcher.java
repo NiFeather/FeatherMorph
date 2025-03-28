@@ -44,7 +44,7 @@ public class MooshroomWatcher extends LivingEntityWatcher
         super.mergeFromCompound(nbt);
 
         if (nbt.contains("Type"))
-            writePersistent(ValueIndex.MOOSHROOM.VARIANT, nbt.getString("Type"));
+            writePersistent(ValueIndex.MOOSHROOM.VARIANT, nbt.getString("Type").orElseThrow());
     }
 
     @Override

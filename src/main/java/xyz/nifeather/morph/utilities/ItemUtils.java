@@ -96,7 +96,7 @@ public class ItemUtils
 
         if (customData == null || !customData.contains(SKILL_ACTIVATE_ITEM_KEY)) return false;
 
-        return customData.copyTag().getBoolean(SKILL_ACTIVATE_ITEM_KEY);
+        return customData.copyTag().getBoolean(SKILL_ACTIVATE_ITEM_KEY).orElseThrow() ;
     }
 
     /**

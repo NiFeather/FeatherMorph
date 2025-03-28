@@ -98,7 +98,7 @@ public class EntityWatcher extends SingleWatcher
 
         if (nbt.contains("CustomName"))
         {
-            var name = nbt.getString("CustomName");
+            var name = nbt.getString("CustomName").orElseThrow();
 
             try
             {
@@ -114,7 +114,7 @@ public class EntityWatcher extends SingleWatcher
 
         if (nbt.contains("CustomNameVisible"))
         {
-            var visible = nbt.getBoolean("CustomNameVisible");
+            var visible = nbt.getBoolean("CustomNameVisible").orElseThrow();
             writePersistent(ValueIndex.BASE_ENTITY.CUSTOM_NAME_VISIBLE, visible);
         }
     }

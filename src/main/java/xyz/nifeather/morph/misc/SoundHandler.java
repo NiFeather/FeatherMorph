@@ -10,6 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.config.ConfigOption;
 import xyz.nifeather.morph.config.MorphConfigManager;
+import xyz.nifeather.morph.utilities.DisguiseUtils;
 import xyz.nifeather.morph.utilities.EntityTypeUtils;
 import xyz.nifeather.morph.utilities.MathUtils;
 import xyz.nifeather.morph.utilities.SoundUtils;
@@ -104,7 +105,7 @@ public class SoundHandler
         resetSoundTime();
     }
 
-    public void refreshSounds(EntityType entityType, boolean isBaby)
+    public void refreshSounds(DisguiseState bindingSession, EntityType entityType, boolean isBaby)
     {
         resetSound();
 
@@ -112,7 +113,7 @@ public class SoundHandler
 
         soundFrequency = MathUtils.clamp(0, 2, config.getBindable(Double.class, ConfigOption.AMBIENT_FREQUENCY).get());
 
-        var soundEvent = EntityTypeUtils.getAmbientSound(entityType, this.bindingPlayer.getWorld(), this.bindingPlayer.getLocation());
+        var soundEvent = DisguiseUtils.getAmbientSound(bindingSession, entityType, this.bindingPlayer.getWorld(), this.bindingPlayer.getLocation());
 
         var sound = soundEvent.sound();
         if (sound == null) return;

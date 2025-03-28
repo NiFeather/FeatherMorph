@@ -100,18 +100,12 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
         else
             buffer.writeUtf(message);
 
-        if (logOutGoingPackets.get())
-            logPacket(true, player, channel, message, buffer.readableBytes());
-
         this.sendPacketRaw(channel, player, buffer);
     }
 
     private void sendPacket(String channel, Player player, int integer)
     {
         var buffer = new FriendlyByteBuf(Unpooled.buffer()).writeInt(integer);
-
-        if (logOutGoingPackets.get())
-            logPacket(true, player, channel, "" + integer, buffer.array().length);
 
         this.sendPacketRaw(channel, player, buffer);
     }
@@ -123,13 +117,13 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
 
         if (!player.isOnline()) return;
 
-        if (logOutGoingPackets.get())
-            logPacket(true, player, channel, buffer.array());
-
         try
         {
             byte[] bufferBytes = new byte[buffer.readableBytes()];
             buffer.readBytes(bufferBytes);
+
+            if (logOutGoingPackets.get())
+                logPacket(true, player, channel, bufferBytes);
 
             if (!player.getListeningPluginChannels().contains(channel))
                 throw new NullDependencyException("Channel %s is INVALID for player %s!".formatted(channel, player.getName()));

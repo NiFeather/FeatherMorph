@@ -76,7 +76,7 @@ public class DisguiseState extends MorphPluginObject
         this.provider = MorphManager.getProvider(identifier);
 
         //设置声音
-        this.soundHandler.refreshSounds(wrapper.getEntityType(), wrapper.isBaby());
+        this.soundHandler.refreshSounds(this, wrapper.getEntityType(), wrapper.isBaby());
 
         //伪装类型是否支持设置伪装物品
         supportsDisguisedItems = skillHandler.hasSpeficSkill(skillIdentifier, SkillNames.FAKE_EQUIP);

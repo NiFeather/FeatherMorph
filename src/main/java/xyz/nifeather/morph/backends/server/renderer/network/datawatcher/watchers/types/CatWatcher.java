@@ -75,7 +75,7 @@ public class CatWatcher extends TameableAnimalWatcher
 
         if (nbt.contains("variant"))
         {
-            var name = nbt.getString("variant");
+            var name = nbt.getString("variant").orElseThrow();
             var key = NamespacedKey.fromString(name);
 
             if (key != null)
@@ -92,7 +92,7 @@ public class CatWatcher extends TameableAnimalWatcher
         }
 
         if (nbt.contains("CollarColor"))
-            writePersistent(ValueIndex.CAT.COLLAR_COLOR, (int)nbt.getByte("CollarColor"));
+            writePersistent(ValueIndex.CAT.COLLAR_COLOR, (int)nbt.getByte("CollarColor").orElseThrow());
     }
 
     @Override

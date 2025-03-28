@@ -149,8 +149,8 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
         {
             if (canConstructFromEntity)
             {
-                var size = (targetEntity != null && targetEntity.getType() == entityType)
-                        ? NbtUtils.getRawTagCompound(targetEntity).getInt("Size")
+                var size = (targetEntity instanceof Slime slime)
+                        ? slime.getSize()
                         : new Random().nextInt(0, 4); //史莱姆的大小其实是0~3
 
                 var initialTag = new CompoundTag();

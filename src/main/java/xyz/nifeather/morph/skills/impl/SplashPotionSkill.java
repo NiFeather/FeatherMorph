@@ -37,7 +37,7 @@ public class SplashPotionSkill extends MorphSkill<NoOpConfiguration>
     @Override
     public int executeSkill(Player player, DisguiseState state, SkillAbilityConfiguration configuration, NoOpConfiguration option)
     {
-        var launchedProjectile = launchProjectile(player, EntityType.POTION, 0.4f);
+        var launchedProjectile = launchProjectile(player, EntityType.SPLASH_POTION, 0.4f);
 
         if (launchedProjectile == null)
         {

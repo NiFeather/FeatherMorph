@@ -96,7 +96,7 @@ public class MorphBukkitVexModifier
             var owner = this.owner();
             this.ownerLastHurtByMobTimestamp = owner.getLastHurtByMobTimestamp();
 
-            this.thisEntity.setTarget(ownerLastHurtBy, EntityTargetEvent.TargetReason.CUSTOM, true);
+            this.thisEntity.setTarget(ownerLastHurtBy, EntityTargetEvent.TargetReason.CUSTOM);
         }
     }
 
@@ -146,7 +146,7 @@ public class MorphBukkitVexModifier
             super.start();
 
             ownerLastHurtTimestamp = this.owner().getLastHurtMobTimestamp();
-            this.thisEntity.setTarget(this.ownerLastHurt, EntityTargetEvent.TargetReason.CUSTOM, true);
+            this.thisEntity.setTarget(this.ownerLastHurt, EntityTargetEvent.TargetReason.CUSTOM);
         }
     }
 }

@@ -45,14 +45,10 @@ public class EntityTypeUtils
     }
 
     private static final Map<EntityType, Class<? extends Entity>> nmsClassMap = new Object2ObjectOpenHashMap<>();
-    private static final Map<EntityType, SoundInfo> typeSoundMap = new Object2ObjectArrayMap<>();
 
     static
     {
         nmsClassMap.put(EntityType.PLAYER, Player.class);
-        typeSoundMap.put(EntityType.BEE, new SoundInfo(SoundEvents.BEE_LOOP, SoundSource.NEUTRAL, 120, 1));
-        typeSoundMap.put(EntityType.ENDER_DRAGON, new SoundInfo(SoundEvents.ENDER_DRAGON_AMBIENT, SoundSource.HOSTILE,100, 5));
-        typeSoundMap.put(EntityType.WOLF, new SoundInfo(SoundEvents.WOLF_AMBIENT, SoundSource.NEUTRAL, 80, 1));
     }
 
     public record SoundInfo(@Nullable SoundEvent sound, SoundSource source, int interval, float volume)
@@ -76,32 +72,6 @@ public class EntityTypeUtils
         var spawnBlockLocation = new BlockPos(locationBlock.getBlockX(), locationBlock.getBlockY(), locationBlock.getBlockZ());
 
         return nmsType.create(serverWorld, EntityTypeUtils::scheduleEntityDiscard, spawnBlockLocation, EntitySpawnReason.COMMAND, false, false);
-    }
-
-    @NotNull
-    public static SoundInfo getAmbientSound(EntityType bukkitType, World tickingWorld, Location tickingLocation)
-    {
-        if (bukkitType == EntityType.UNKNOWN)
-            return new SoundInfo(null, SoundSource.PLAYERS, Integer.MAX_VALUE, 1);
-
-        var cache = typeSoundMap.getOrDefault(bukkitType, null);
-        if (cache != null) return cache;
-
-        var entity = createEntityThenDispose(getNmsType(bukkitType), tickingWorld, tickingLocation);
-
-        if (entity instanceof Mob mob)
-        {
-            var source = mob.getSoundSource();
-            var sound = mob.getAmbientSound0();
-            var interval = mob.getAmbientSoundInterval();
-
-            var rec = new SoundInfo(sound, source, interval, mob.getSoundVolume());
-            typeSoundMap.put(bukkitType, rec);
-
-            return rec;
-        }
-
-        return new SoundInfo(null, SoundSource.PLAYERS, Integer.MAX_VALUE, 1);
     }
 
     private static final Map<EntityType, net.minecraft.world.entity.EntityType<?>> nmsTypeMap = new Object2ObjectArrayMap<>();

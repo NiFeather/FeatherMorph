@@ -3,6 +3,7 @@ package xyz.nifeather.morph.utilities;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import net.minecraft.Util;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.nbt.*;
 import net.minecraft.server.commands.data.EntityDataAccessor;
 import org.bukkit.craftbukkit.entity.CraftEntity;
@@ -19,13 +20,46 @@ import java.util.UUID;
 
 public class NbtUtils
 {
+    @Nullable
+    public static UUID readUUID(@Nullable Tag element)
+    {
+        var logger = FeatherMorphMain.getInstance().getSLF4JLogger();
+
+        if (element == null)
+            return null;
+
+        if (element.getType() != IntArrayTag.TYPE)
+        {
+            logger.warn("Given element is not a int array, can't convert to UUID");
+            return null;
+        }
+
+        int[] is = ((IntArrayTag)element).getAsIntArray();
+
+        if (is.length != 4)
+        {
+            logger.warn("Given int array is not of length 4, can't convert to UUID");
+            return null;
+        }
+
+        return UUIDUtil.uuidFromIntArray(is);
+    }
+
+    public static void putUUID(CompoundTag nbt, String key, UUID uuid)
+    {
+        int[] array = UUIDUtil.uuidToIntArray(uuid);
+
+        var tag = new IntArrayTag(array);
+        nbt.put(key, tag);
+    }
+
     public static CompoundTag writeGameProfile(CompoundTag nbt, GameProfile profile)
     {
         if (!profile.getName().isEmpty())
             nbt.putString("Name", profile.getName());
 
         if (!profile.getId().equals(Util.NIL_UUID))
-            nbt.putUUID("Id", profile.getId());
+            putUUID(nbt, "Id", profile.getId());
 
         if (profile.getProperties().isEmpty())
             return nbt;
@@ -64,7 +98,7 @@ public class NbtUtils
 
         try
         {
-            compound = TagParser.parseTag(snbt);
+            compound = TagParser.parseCompoundFully(snbt);
         }
         catch (Throwable t)
         {
@@ -77,36 +111,44 @@ public class NbtUtils
         }
 
         String name = "NIL";
-        if (compound.contains("Name", Tag.TAG_STRING))
-            name = compound.getString("Name");
+        if (compound.contains("Name"))
+            name = compound.getString("Name").orElseThrow();
 
         UUID uuid = Util.NIL_UUID;
-        if (compound.hasUUID("Id"))
-            uuid = compound.getUUID("Id");
+        if (compound.contains("Id"))
+        {
+            var tag = compound.get("Id");
+            var readUUID = NbtUtils.readUUID(tag);
+
+            if (readUUID != null)
+                uuid = readUUID;
+        }
 
         var profile = new MorphGameProfile(new GameProfile(uuid, name));
 
-        if (!compound.contains("Properties", Tag.TAG_COMPOUND)) return profile;
+        if (!compound.contains("Properties")) return profile;
 
         try
         {
-            var propertiesCompound = compound.getCompound("Properties");
+            var propertiesCompound = compound.getCompound("Properties").orElseThrow();
 
-            for (var key : propertiesCompound.getAllKeys())
+            propertiesCompound.forEach((key, tag) ->
             {
-                var list = propertiesCompound.getList(key, Tag.TAG_COMPOUND);
+                var list = propertiesCompound.getListOrEmpty(key);
 
                 for (int i = 0; i < list.size(); i++)
                 {
-                    var childCompound = list.getCompound(i);
-                    var value = childCompound.getString("Value");
+                    var childCompound = list.getCompound(i).orElse(null);
+                    if (childCompound == null) continue;
 
-                    if (childCompound.contains("Signature", Tag.TAG_STRING))
-                        profile.getProperties().put(key, new Property(key, value, childCompound.getString("Signature")));
+                    var value = childCompound.getString("Value").orElseThrow();
+
+                    if (childCompound.contains("Signature"))
+                        profile.getProperties().put(key, new Property(key, value, childCompound.getString("Signature").orElseThrow()));
                     else
                         profile.getProperties().put(key, new Property(key, value));
                 }
-            }
+            });
         }
         catch (Throwable t)
         {
@@ -157,8 +199,10 @@ public class NbtUtils
         //StringNbtWriter
         var visitor = new StringTagVisitor();
 
+        visitor.visitCompound(compound);
+
         //StringNbtWriter#apply(NbtElement)
-        return visitor.visit(compound);
+        return visitor.build();
     }
 
     /**
@@ -173,7 +217,7 @@ public class NbtUtils
 
         try
         {
-            return TagParser.parseTag(input);
+            return TagParser.parseCompoundFully(input);
         }
         catch (Throwable t)
         {
@@ -199,9 +243,9 @@ public class NbtUtils
         if (!ageable) return false;
 
         if (EntityTypeUtils.isZombie(type) || type == EntityType.PIGLIN)
-            return compoundTag.getBoolean("IsBaby");
+            return compoundTag.getBoolean("IsBaby").orElseThrow();
 
-        var val = compoundTag.getInt("Age");
+        var val = compoundTag.getInt("Age").orElseThrow();
 
         return val < 0;
     }

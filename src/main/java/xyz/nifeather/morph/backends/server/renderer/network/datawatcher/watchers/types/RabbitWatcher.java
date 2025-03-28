@@ -52,7 +52,7 @@ public class RabbitWatcher extends LivingEntityWatcher
         super.mergeFromCompound(nbt);
 
         if (nbt.contains("RabbitType"))
-            writePersistent(ValueIndex.RABBIT.RABBIT_TYPE, nbt.getInt("RabbitType"));
+            writePersistent(ValueIndex.RABBIT.RABBIT_TYPE, nbt.getInt("RabbitType").orElseThrow());
     }
 
     @Override

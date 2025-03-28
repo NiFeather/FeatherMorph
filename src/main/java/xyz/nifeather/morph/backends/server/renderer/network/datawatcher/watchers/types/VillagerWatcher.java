@@ -84,11 +84,11 @@ public class VillagerWatcher extends LivingEntityWatcher
         var typeRegistry = RegistryAccess.registryAccess().getRegistry(RegistryKey.VILLAGER_TYPE);
 
         if (nbt.contains("level"))
-            level = MathUtils.clamp(1, 5, nbt.getInt("level"));
+            level = MathUtils.clamp(1, 5, nbt.getInt("level").orElseThrow());
 
         if (nbt.contains("profession"))
         {
-            NamespacedKey rl = NamespacedKey.fromString(nbt.getString("profession"));
+            NamespacedKey rl = NamespacedKey.fromString(nbt.getString("profession").orElseThrow());
 
             if (rl == null)
             {
@@ -107,7 +107,7 @@ public class VillagerWatcher extends LivingEntityWatcher
 
         if (nbt.contains("type"))
         {
-            NamespacedKey rl = NamespacedKey.fromString(nbt.getString("type"));
+            NamespacedKey rl = NamespacedKey.fromString(nbt.getString("type").orElseThrow());
 
             if (rl == null)
             {
@@ -134,7 +134,7 @@ public class VillagerWatcher extends LivingEntityWatcher
 
         if (nbt.contains("VillagerData"))
         {
-            var compound = nbt.getCompound("VillagerData");
+            var compound = nbt.getCompound("VillagerData").orElseThrow();
             mergeFromVillagerData(compound);
         }
     }

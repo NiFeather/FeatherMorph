@@ -26,7 +26,7 @@ public class TropicalFishWatcher extends LivingEntityWatcher
         super.mergeFromCompound(nbt);
 
         if (nbt.contains("Variant"))
-            writePersistent(ValueIndex.TROPICAL.FISH_VARIANT, nbt.getInt("Variant"));
+            writePersistent(ValueIndex.TROPICAL.FISH_VARIANT, nbt.getInt("Variant").orElseThrow());
     }
 
     @Override

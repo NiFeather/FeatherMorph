@@ -6,6 +6,7 @@ import io.papermc.paper.adventure.PaperAdventure;
 import io.papermc.paper.math.Rotations;
 import net.kyori.adventure.text.Component;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -94,9 +95,12 @@ public class CustomSerializeMethods
         var nmsVillagerProfessionOptional = BuiltInRegistries.VILLAGER_PROFESSION
                 .getOptional(ResourceLocation.parse(bukkitVillagerProfession.getKey().asString()));
 
-        var nmsType = nmsVillagerTypeOptional.orElse(VillagerType.PLAINS);
-        var nmsProfession = nmsVillagerProfessionOptional.orElse(VillagerProfession.NONE);
-        var nmsData = new VillagerData(nmsType, nmsProfession, val.level());
+        var defaultType = BuiltInRegistries.VILLAGER_TYPE.get(VillagerType.PLAINS).orElseThrow().value();
+        var defaultProfession = BuiltInRegistries.VILLAGER_PROFESSION.get(VillagerProfession.NONE).orElseThrow().value();
+
+        var nmsType = nmsVillagerTypeOptional.orElse(defaultType);
+        var nmsProfession = nmsVillagerProfessionOptional.orElse(defaultProfession);
+        var nmsData = new VillagerData(Holder.direct(nmsType), Holder.direct(nmsProfession), val.level());
 
         return new WrappedDataValue(sv.index(), VILLAGER_DATA_SERIALIZER, nmsData);
     };
