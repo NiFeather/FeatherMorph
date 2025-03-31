@@ -243,9 +243,9 @@ public class NbtUtils
         if (!ageable) return false;
 
         if (EntityTypeUtils.isZombie(type) || type == EntityType.PIGLIN)
-            return compoundTag.getBoolean("IsBaby").orElseThrow();
+            return compoundTag.getBoolean("IsBaby").orElse(false);
 
-        var val = compoundTag.getInt("Age").orElseThrow();
+        var val = compoundTag.getInt("Age").orElse(1);
 
         return val < 0;
     }

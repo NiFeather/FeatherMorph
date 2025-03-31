@@ -4,14 +4,14 @@ import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.values.b
 
 public class MooshroomValues extends AnimalValues
 {
-    public final SingleValue<String> VARIANT = createSingle("mooshroom_variant", RED);
-    public static final String RED = "red";
-    public static final String BROWN = "brown";
+    public final SingleValue<Integer> DATA_TYPE = createSingle("mooshroom_variant", RED);
+    public static final int RED = 0;
+    public static final int BROWN = 1;
 
     public MooshroomValues()
     {
         super();
 
-        registerSingle(VARIANT);
+        registerSingle(DATA_TYPE);
     }
 }

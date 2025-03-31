@@ -4,6 +4,7 @@ import net.minecraft.nbt.CompoundTag;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.MushroomCow;
 import org.bukkit.entity.Player;
+import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.values.MooshroomValues;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
@@ -32,7 +33,7 @@ public class MooshroomWatcher extends LivingEntityWatcher
         if (property.equals(properties.VARIANT))
         {
             var val = (MushroomCow.Variant) value;
-            writePersistent(ValueIndex.MOOSHROOM.VARIANT, val.name().toUpperCase());
+            writePersistent(ValueIndex.MOOSHROOM.DATA_TYPE, val.ordinal());
         }
 
         super.onPropertyWrite(property, value);
@@ -44,7 +45,7 @@ public class MooshroomWatcher extends LivingEntityWatcher
         super.mergeFromCompound(nbt);
 
         if (nbt.contains("Type"))
-            writePersistent(ValueIndex.MOOSHROOM.VARIANT, nbt.getString("Type").orElseThrow());
+            writePersistent(ValueIndex.MOOSHROOM.DATA_TYPE, nbt.getString("Type").orElseThrow().equals("red") ? MooshroomValues.RED : MooshroomValues.BROWN);
     }
 
     @Override
@@ -52,6 +53,6 @@ public class MooshroomWatcher extends LivingEntityWatcher
     {
         super.writeToCompound(nbt);
 
-        nbt.putString("Type", read(ValueIndex.MOOSHROOM.VARIANT));
+        nbt.putString("Type", read(ValueIndex.MOOSHROOM.DATA_TYPE) == MooshroomValues.RED ? "red" : "brown");
     }
 }
