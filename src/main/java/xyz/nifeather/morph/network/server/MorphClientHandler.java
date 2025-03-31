@@ -121,7 +121,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
         if (channel == null || player == null || buffer == null)
             throw new IllegalArgumentException("Null channel/player/message");
 
-        if (!player.isOnline()) return;
+        if (!player.isOnline() || !isPlayerInitialized(player)) return;
 
         if (logOutGoingPackets.get())
             logPacket(true, player, channel, buffer.array());
