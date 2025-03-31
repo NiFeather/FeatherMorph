@@ -2,12 +2,16 @@ package xyz.nifeather.morph;
 
 import com.ticxo.modelengine.api.ModelEngineAPI;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.scoreboard.Scoreboard;
+import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
+import xiamomc.pluginbase.ScheduleInfo;
 import xyz.nifeather.morph.abilities.AbilityManager;
 import xyz.nifeather.morph.api.FeatherMorphAPI;
 import xyz.nifeather.morph.commands.*;
@@ -38,6 +42,7 @@ import xiamomc.pluginbase.Messages.MessageStore;
 import xiamomc.pluginbase.XiaMoJavaPlugin;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public final class FeatherMorphMain extends XiaMoJavaPlugin
@@ -120,6 +125,16 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
             logger.warn("");
             logger.warn(noticeHeaderFooter);
         }
+    }
+
+    @ApiStatus.Internal
+    public int execSchedules = 0;
+
+    @Override
+    public ScheduleInfo schedule(Runnable function, int delay, boolean async)
+    {
+        execSchedules++;
+        return super.schedule(function, delay, async);
     }
 
     @Override
