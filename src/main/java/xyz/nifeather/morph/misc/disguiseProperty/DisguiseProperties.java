@@ -38,6 +38,10 @@ public class DisguiseProperties
         register(EntityType.ZOMBIE_VILLAGER, new VillagerProperties());
         register(EntityType.ARMOR_STAND, new ArmorStandProperties());
         register(EntityType.CREEPER, new CreeperProperties());
+
+        register(EntityType.PIG, new PigProperties());
+        register(EntityType.COW, new CowProperties());
+        register(EntityType.CHICKEN, new ChickenProperties());
     }
 
     private final OffTreeProperties offTreeProperties = new OffTreeProperties();

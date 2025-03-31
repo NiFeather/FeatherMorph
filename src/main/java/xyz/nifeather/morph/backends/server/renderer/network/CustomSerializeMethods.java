@@ -53,6 +53,33 @@ public class CustomSerializeMethods
         return new WrappedDataValue(sv.index(), NMS_FROG_VARIANT_SERIALIZER, holder);
     };
 
+    private static final WrappedDataWatcher.Serializer NMS_PIG_VARIANT_SERIALIZER = WrappedDataWatcher.Registry.fromHandle(EntityDataSerializers.PIG_VARIANT);
+    public static ICustomSerializeMethod<Pig.Variant> PIG_VARIANT = (sv, bukkitVariant) ->
+    {
+        var rl = ResourceLocation.parse(bukkitVariant.getKey().asString());
+        var holder = HolderUtils.getHolderOrThrow(rl, Registries.PIG_VARIANT);
+
+        return new WrappedDataValue(sv.index(), NMS_PIG_VARIANT_SERIALIZER, holder);
+    };
+
+    private static final WrappedDataWatcher.Serializer NMS_COW_VARIANT_SERIALIZER = WrappedDataWatcher.Registry.fromHandle(EntityDataSerializers.COW_VARIANT);
+    public static ICustomSerializeMethod<Cow.Variant> COW_VARIANT = (sv, bukkitVariant) ->
+    {
+        var rl = ResourceLocation.parse(bukkitVariant.getKey().asString());
+        var holder = HolderUtils.getHolderOrThrow(rl, Registries.COW_VARIANT);
+
+        return new WrappedDataValue(sv.index(), NMS_COW_VARIANT_SERIALIZER, holder);
+    };
+
+    private static final WrappedDataWatcher.Serializer NMS_CHICKEN_VARIANT_SERIALIZER = WrappedDataWatcher.Registry.fromHandle(EntityDataSerializers.CHICKEN_VARIANT);
+    public static ICustomSerializeMethod<Chicken.Variant> CHICKEN_VARIANT = (sv, bukkitVariant) ->
+    {
+        var rl = ResourceLocation.parse(bukkitVariant.getKey().asString());
+        var holder = HolderUtils.getHolderOrThrow(rl, Registries.CHICKEN_VARIANT);
+
+        return new WrappedDataValue(sv.index(), NMS_CHICKEN_VARIANT_SERIALIZER, holder);
+    };
+
     public static ICustomSerializeMethod<Optional<Component>> COMPONENT_ADVENTURE_TO_NMS = (sv, val) ->
     {
         var serializer = WrappedDataWatcher.Registry.getChatComponentSerializer(true);

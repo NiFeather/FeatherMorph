@@ -47,6 +47,10 @@ public class ValueIndex
 
     public static final CreakingValues CREAKING = new CreakingValues();
 
+    public static final PigValues PIG = new PigValues();
+    public static final CowValues COW = new CowValues();
+    public static final ChickenValues CHICKEN = new ChickenValues();
+
     /*
     private static final Map<EntityType, AbstractValues> valuesMap = new ConcurrentHashMap<>();
     private static void register(EntityType type, AbstractValues values)

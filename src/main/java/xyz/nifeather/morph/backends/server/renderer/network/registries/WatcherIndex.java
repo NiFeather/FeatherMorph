@@ -88,6 +88,10 @@ public class WatcherIndex
         setTypeWatcher(EntityType.PUFFERFISH, PufferfishWatcher::new);
 
         setTypeWatcher(EntityType.CREAKING, CreakingWatcher::new);
+
+        setTypeWatcher(EntityType.PIG, PigWatcher::new);
+        setTypeWatcher(EntityType.COW, CowWatcher::new);
+        setTypeWatcher(EntityType.CHICKEN, ChickenWatcher::new);
     }
 
     private void setTypeWatcher(EntityType type, Function<Player, SingleWatcher> func)

@@ -61,7 +61,7 @@ public class SingleProperty<T>
         return new ObjectArrayList<>(randomValues);
     }
 
-    public SingleProperty<T> withRandom(List<T> values)
+    public SingleProperty<T> withRandom(Collection<T> values)
     {
         this.randomValues.clear();
         this.randomValues.addAll(values);
