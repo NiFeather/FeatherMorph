@@ -114,7 +114,8 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
         if (channel == null || player == null || buffer == null)
             throw new IllegalArgumentException("Null channel/player/message");
 
-        if (!player.isOnline() || !isPlayerInitialized(player)) return;
+        if (!player.isOnline() || getPlayerConnectionState(player).worseThan(InitializeState.HANDSHAKE))
+            return;
 
         try
         {
@@ -213,7 +214,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
         var messenger = Bukkit.getMessenger();
 
         // 注册incoming频道
-        messenger.registerIncomingPluginChannel(plugin, MessageChannel.initializeChannel, this::handleInitializeMessage);
+        messenger.registerIncomingPluginChannel(plugin, MessageChannel.initializeChannel, this::handleHandshakeMessage);
 
         messenger.registerIncomingPluginChannel(plugin, MessageChannel.versionChannel, this::handleVersionMessage);
         messenger.registerIncomingPluginChannel(plugin, MessageChannel.commandChannel, this::handleCommandMessage);
@@ -271,7 +272,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
 
     //region Handle Protocol Inputs
 
-    public void handleInitializeMessage(@NotNull String cN, @NotNull Player player, byte @NotNull [] data)
+    public void handleHandshakeMessage(@NotNull String cN, @NotNull Player player, byte @NotNull [] data)
     {
         if (!allowClient.get() || this.getPlayerConnectionState(player).greaterThan(InitializeState.HANDSHAKE)) return;
 
