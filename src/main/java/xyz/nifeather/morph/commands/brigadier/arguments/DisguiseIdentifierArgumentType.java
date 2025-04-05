@@ -147,7 +147,7 @@ public class DisguiseIdentifierArgumentType extends MorphPluginObject implements
     @NotNull
     public ArgumentType<String> getNativeType()
     {
-        return StringArgumentType.word();
+        return StringArgumentType.greedyString();
     }
 
     @Override

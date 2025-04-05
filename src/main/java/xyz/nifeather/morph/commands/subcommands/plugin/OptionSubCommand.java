@@ -90,7 +90,7 @@ public class OptionSubCommand extends MorphPluginObject implements IConvertibleB
 
         subCommands.add(getToggle("ability_check_permissions", ConfigOption.DO_CHECK_ABILITY_PERMISSIONS, null));
 
-        subCommands.add(getToggle("towny_allow_flight_in_wilderness", ConfigOption.TOWNY_ALLOW_FLY_IN_WILDERNESS));
+        subCommands.add(getToggle("towny_allow_fly_in_wilderness", ConfigOption.TOWNY_ALLOW_FLY_IN_WILDERNESS));
     }
 
     private IConvertibleBrigadier getList(String optionName, ConfigOption option,

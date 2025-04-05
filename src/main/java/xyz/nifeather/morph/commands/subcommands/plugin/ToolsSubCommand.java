@@ -9,6 +9,7 @@ import xiamomc.pluginbase.Messages.FormattableMessage;
 import xyz.nifeather.morph.commands.brigadier.BrigadierCommand;
 import xyz.nifeather.morph.commands.brigadier.IConvertibleBrigadier;
 import xyz.nifeather.morph.commands.subcommands.plugin.applets.RemoveDuplicateEntriesAppletCommand;
+import xyz.nifeather.morph.commands.subcommands.plugin.applets.SchedulerTestCommand;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 
 import java.util.List;
@@ -24,7 +25,8 @@ public class ToolsSubCommand extends BrigadierCommand
     public ToolsSubCommand()
     {
         subCommands = List.of(
-                new RemoveDuplicateEntriesAppletCommand()
+                new RemoveDuplicateEntriesAppletCommand(),
+                new SchedulerTestCommand()
         );
     }
 

@@ -96,8 +96,6 @@ public class TownyAdapter extends MorphPluginObject implements Listener
     @EventHandler
     public void onLeavePlot(PlayerExitsFromTownBorderEvent e)
     {
-        if (allowFlyInWilderness.get()) return;
-
         updatePlayer(e.getPlayer(), null, true);
     }
 

@@ -413,23 +413,6 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
             logger.error("- x - x - x - x - x - x - x - x - x - x - x - x -");
         }
 
-        //如果玩家是第一次用客户端连接，那么等待3秒向其发送提示
-        if (clientHandler.clientConnected(player))
-        {
-            var config = morphs.getPlayerMeta(player);
-
-            if (!config.shownMorphClientHint && !config.getUnlockedDisguiseIdentifiers().isEmpty())
-                this.addSchedule(() ->
-                {
-                    if (player.isOnline() && !config.shownMorphClientHint)
-                    {
-                        player.sendMessage(MessageUtils.prefixes(player, HintStrings.firstGrantClientHintString()));
-
-                        config.shownMorphClientHint = true;
-                    }
-                }, 20 * 3);
-        }
-
         this.addSchedule(() -> PlayerListHandler.instance().handle(player));
 
         if (state != null)
