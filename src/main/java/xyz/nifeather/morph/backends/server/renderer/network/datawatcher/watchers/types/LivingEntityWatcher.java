@@ -1,11 +1,11 @@
 package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.types;
 
+import com.github.retrooper.packetevents.protocol.particle.Particle;
+import com.github.retrooper.packetevents.protocol.particle.data.ParticleColorData;
+import com.github.retrooper.packetevents.util.Vector3i;
 import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectObjectMutablePair;
-import net.minecraft.core.particles.ColorParticleOption;
-import net.minecraft.core.particles.ParticleOptions;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.InteractionHand;
 import org.bukkit.Color;
 import org.bukkit.entity.EntityType;
@@ -13,7 +13,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.potion.PotionEffect;
-import org.joml.Vector3i;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.misc.NmsRecord;
 
@@ -90,9 +89,9 @@ public class LivingEntityWatcher extends EntityWatcher
             hasAmbient = hasAmbient || effect.isAmbient();
         }
 
-        var colorList = new ObjectArrayList<ParticleOptions>();
+        var colorList = new ObjectArrayList<Particle<?>>();
         for (var color : colors)
-            colorList.add(ColorParticleOption.create(ParticleTypes.ENTITY_EFFECT, color.asRGB()));
+            colorList.add(new Particle<>(com.github.retrooper.packetevents.protocol.particle.type.ParticleTypes.ENTITY_EFFECT, new ParticleColorData(color.asRGB())));
 
         writeTemp(values.POTION_COLOR, colorList);
         writeTemp(values.POTION_ISAMBIENT, hasAmbient);

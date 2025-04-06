@@ -1,12 +1,13 @@
 package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.types;
 
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityEquipment;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.Nullable;
-import xiamomc.pluginbase.Annotations.Resolved;
-import xyz.nifeather.morph.backends.server.renderer.network.PacketFactory;
+import org.bukkit.inventory.EntityEquipment;
+import xyz.nifeather.morph.backends.server.renderer.network.ProtocolEquipment;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntry;
+import xyz.nifeather.morph.misc.DisguiseEquipment;
 
 public class InventoryLivingWatcher extends LivingEntityWatcher
 {
@@ -21,6 +22,17 @@ public class InventoryLivingWatcher extends LivingEntityWatcher
         super.onEntryWrite(entry, oldVal, newVal);
 
         if (entry.equals(CustomEntries.DISPLAY_FAKE_EQUIPMENT) || entry.equals(CustomEntries.EQUIPMENT))
-            sendPacketToAffectedPlayers(PacketFactory.getEquipmentPacket(getBindingPlayer(), this));
+            sendPacketToAffectedPlayers(this.getEquipmentPacket());
+    }
+
+    public WrapperPlayServerEntityEquipment getEquipmentPacket()
+    {
+        var player = getBindingPlayer();
+        var shouldDisplayFakeEquip = this.readEntryOrDefault(CustomEntries.DISPLAY_FAKE_EQUIPMENT, false);
+        EntityEquipment equipment = shouldDisplayFakeEquip
+                ? this.readEntryOrDefault(CustomEntries.EQUIPMENT, new DisguiseEquipment())
+                : player.getEquipment();
+
+        return new WrapperPlayServerEntityEquipment(player.getEntityId(), ProtocolEquipment.toPEEquipmentList(equipment));
     }
 }

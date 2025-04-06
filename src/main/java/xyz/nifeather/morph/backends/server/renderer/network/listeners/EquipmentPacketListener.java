@@ -73,7 +73,7 @@ public class EquipmentPacketListener extends ProtocolListener
         }
 
         event.markForReEncode(true);
-        var equipments = getFactory().getPacketeventsEquipments(sourcePlayer, watcher);
+        var equipments = PacketFactory.getPacketeventsEquipments(sourcePlayer, watcher);
         packet.setEquipment(equipments);
 
         alreadyFake.put(sourcePlayer, true);

@@ -2,7 +2,6 @@ package xyz.nifeather.morph.backends.server.renderer.network.registries;
 
 import com.mojang.authlib.GameProfile;
 import net.minecraft.Util;
-import org.jetbrains.annotations.ApiStatus;
 import xyz.nifeather.morph.misc.DisguiseEquipment;
 
 import java.util.UUID;

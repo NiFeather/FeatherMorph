@@ -1,21 +1,18 @@
 package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.types;
 
-import com.comphenix.protocol.ProtocolLibrary;
-import com.comphenix.protocol.events.PacketContainer;
-import net.minecraft.network.protocol.game.ClientboundEntityEventPacket;
-import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
+import com.github.retrooper.packetevents.PacketEvents;
+import com.github.retrooper.packetevents.protocol.entity.pose.EntityPose;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerDestroyEntities;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityStatus;
+import io.github.retrooper.packetevents.util.SpigotConversionUtil;
 import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
-import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Pose;
-import xyz.nifeather.morph.backends.server.renderer.network.DisplayParameters;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntry;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.misc.AnimationNames;
-import xyz.nifeather.morph.misc.NmsRecord;
 
 public class WardenWatcher extends EHasAttackAnimationWatcher
 {
@@ -32,10 +29,7 @@ public class WardenWatcher extends EHasAttackAnimationWatcher
         var bindingPlayer = getBindingPlayer();
 
         if (entry.equals(CustomEntries.WARDEN_CHARGING_ATTACK) && Boolean.TRUE.equals(newVal))
-        {
-            var entity = ((CraftPlayer)bindingPlayer).getHandle();
-            sendPacketToAffectedPlayers(PacketContainer.fromPacket(new ClientboundEntityEventPacket(entity, (byte)62)));
-        }
+            sendPacketToAffectedPlayers(new WrapperPlayServerEntityStatus(getBindingPlayer().getEntityId(), 62));
 
         if (entry.equals(CustomEntries.ANIMATION))
         {
@@ -49,7 +43,7 @@ public class WardenWatcher extends EHasAttackAnimationWatcher
                     if (this.readEntryOrDefault(CustomEntries.WARDEN_VANISHED, false)) return;
 
                     this.block(ValueIndex.BASE_LIVING.POSE);
-                    this.writePersistent(ValueIndex.BASE_LIVING.POSE, Pose.ROARING);
+                    this.writePersistent(ValueIndex.BASE_LIVING.POSE, EntityPose.ROARING);
                 }
                 case AnimationNames.ROAR_SOUND ->
                 {
@@ -62,7 +56,7 @@ public class WardenWatcher extends EHasAttackAnimationWatcher
                     if (this.readEntryOrDefault(CustomEntries.WARDEN_VANISHED, false)) return;
 
                     this.block(ValueIndex.BASE_LIVING.POSE);
-                    this.writePersistent(ValueIndex.BASE_LIVING.POSE, Pose.SNIFFING);
+                    this.writePersistent(ValueIndex.BASE_LIVING.POSE, EntityPose.SNIFFING);
 
                     world.playSound(bindingPlayer.getLocation(), Sound.ENTITY_WARDEN_SNIFF, SoundCategory.HOSTILE, 5, 1);
                 }
@@ -71,14 +65,14 @@ public class WardenWatcher extends EHasAttackAnimationWatcher
                     if (this.readEntryOrDefault(CustomEntries.WARDEN_VANISHED, false)) return;
 
                     this.block(ValueIndex.BASE_LIVING.POSE);
-                    this.writePersistent(ValueIndex.BASE_LIVING.POSE, Pose.DIGGING);
+                    this.writePersistent(ValueIndex.BASE_LIVING.POSE, EntityPose.DIGGING);
                     world.playSound(bindingPlayer.getLocation(), Sound.ENTITY_WARDEN_DIG, 5, 1);
                 }
                 case AnimationNames.VANISH ->
                 {
                     this.writePersistent(ValueIndex.BASE_ENTITY.GENERAL, (byte)0x20);
                     this.writePersistent(ValueIndex.BASE_LIVING.SILENT, true);
-                    this.writePersistent(ValueIndex.BASE_LIVING.POSE, Pose.SLEEPING);
+                    this.writePersistent(ValueIndex.BASE_LIVING.POSE, EntityPose.SLEEPING);
                     this.writeEntry(CustomEntries.WARDEN_VANISHED, true);
                 }
                 case AnimationNames.APPEAR ->
@@ -86,18 +80,18 @@ public class WardenWatcher extends EHasAttackAnimationWatcher
                     this.writeEntry(CustomEntries.WARDEN_VANISHED, false);
                     this.block(ValueIndex.BASE_LIVING.POSE);
                     this.remove(ValueIndex.BASE_ENTITY.GENERAL);
-                    this.writePersistent(ValueIndex.BASE_LIVING.POSE, Pose.EMERGING);
+                    this.writePersistent(ValueIndex.BASE_LIVING.POSE, EntityPose.EMERGING);
                     world.playSound(bindingPlayer.getLocation(), Sound.ENTITY_WARDEN_EMERGE, 5, 1);
 
                     var packets = this.buildSpawnPackets();
                     var affectedPlayers = this.getAffectedPlayers(bindingPlayer);
-                    var protocol = ProtocolLibrary.getProtocolManager();
-                    var despawnPacket = PacketContainer.fromPacket(new ClientboundRemoveEntitiesPacket(bindingPlayer.getEntityId()));
+                    var despawnPacket = new WrapperPlayServerDestroyEntities(bindingPlayer.getEntityId());
 
+                    var protocol = PacketEvents.getAPI().getPlayerManager();
                     for (Player affectedPlayer : affectedPlayers)
                     {
-                        protocol.sendServerPacket(affectedPlayer, despawnPacket);
-                        packets.forEach(p -> protocol.sendServerPacket(affectedPlayer, p));
+                        protocol.sendPacket(affectedPlayer, despawnPacket);
+                        packets.forEach(p -> protocol.sendPacket(affectedPlayer, p));
                     }
                 }
                 case AnimationNames.TRY_RESET ->
@@ -121,7 +115,7 @@ public class WardenWatcher extends EHasAttackAnimationWatcher
         var bindingPlayer = getBindingPlayer();
 
         this.writePersistent(ValueIndex.BASE_ENTITY.GENERAL, this.getPlayerBitMask(bindingPlayer));
-        this.writePersistent(ValueIndex.BASE_LIVING.POSE, bindingPlayer.getPose());
+        this.writePersistent(ValueIndex.BASE_LIVING.POSE, SpigotConversionUtil.fromBukkitPose(bindingPlayer.getPose()));
         this.writePersistent(ValueIndex.BASE_LIVING.SILENT, false);
         this.remove(ValueIndex.BASE_LIVING.POSE);
         this.remove(ValueIndex.BASE_ENTITY.GENERAL);

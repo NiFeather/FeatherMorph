@@ -1,7 +1,7 @@
 package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.types;
 
-import io.papermc.paper.registry.RegistryAccess;
-import io.papermc.paper.registry.RegistryKey;
+import com.github.retrooper.packetevents.protocol.entity.pig.PigVariant;
+import com.github.retrooper.packetevents.protocol.entity.pig.PigVariants;
 import net.minecraft.nbt.CompoundTag;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.EntityType;
@@ -11,6 +11,8 @@ import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueInde
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 import xyz.nifeather.morph.misc.disguiseProperty.values.PigProperties;
+
+import java.util.Objects;
 
 public class PigWatcher extends AgeableMobWatcher
 {
@@ -31,6 +33,12 @@ public class PigWatcher extends AgeableMobWatcher
         register(ValueIndex.PIG);
     }
 
+    private PigVariant getPigVariant(String id)
+    {
+        return Objects.requireNonNull(PigVariants.getRegistry().getByName(id),
+                "No pig variant for id: " + id);
+    }
+
     @Override
     protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
@@ -38,7 +46,7 @@ public class PigWatcher extends AgeableMobWatcher
         {
             var variant = (Pig.Variant) value;
 
-            writePersistent(ValueIndex.PIG.PIG_VARIANT, variant);
+            writePersistent(ValueIndex.PIG.PIG_VARIANT, getPigVariant(variant.key().asString()));
         }
 
         super.onPropertyWrite(property, value);
@@ -55,11 +63,7 @@ public class PigWatcher extends AgeableMobWatcher
             if (idKey == null)
                 return;
 
-            var variant = RegistryAccess.registryAccess()
-                    .getRegistry(RegistryKey.PIG_VARIANT)
-                    .getOrThrow(idKey);
-
-            writePersistent(ValueIndex.PIG.PIG_VARIANT, variant);
+            writePersistent(ValueIndex.PIG.PIG_VARIANT, getPigVariant(idString));
         }
 
         super.mergeFromCompound(nbt);
@@ -71,7 +75,7 @@ public class PigWatcher extends AgeableMobWatcher
         var variant = this.readOr(ValueIndex.PIG.PIG_VARIANT, null);
 
         if (variant != null)
-            nbt.putString("variant", variant.getKey().asString());
+            nbt.putString("variant", variant.getName().toString());
 
         super.writeToCompound(nbt);
     }

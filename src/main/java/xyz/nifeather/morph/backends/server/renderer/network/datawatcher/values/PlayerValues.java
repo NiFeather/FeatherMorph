@@ -1,16 +1,17 @@
 package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.values;
 
-import net.minecraft.nbt.CompoundTag;
+import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
+import com.github.retrooper.packetevents.protocol.nbt.NBTCompound;
 import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.values.basetypes.LivingEntityValues;
 
 public class PlayerValues extends LivingEntityValues
 {
-    public final SingleValue<Float> ABSORPTION_AMOUNT = createSingle("player_absorption_amount", 0f);
-    public final SingleValue<Integer> SCORE = createSingle("player_score", 0);
-    public final SingleValue<Byte> SKIN_FLAGS = createSingle("player_skin_flags", (byte)0); //127
-    public final SingleValue<Byte> MAINHAND = createSingle("player_mainhand", (byte)1);
-    public final SingleValue<CompoundTag> LEFT_SHOULDER_PARROT_COMPOUND = createSingle("player_lSPC", new CompoundTag());
-    public final SingleValue<CompoundTag> RIGHT_SHOULDER_PARROT_COMPOUND = createSingle("player_rSPC", new CompoundTag());
+    public final SingleValue<Float> ABSORPTION_AMOUNT = createSingle("player_absorption_amount", 0f, EntityDataTypes.FLOAT);
+    public final SingleValue<Integer> SCORE = createSingle("player_score", 0, EntityDataTypes.INT);
+    public final SingleValue<Byte> SKIN_FLAGS = createSingle("player_skin_flags", (byte)0, EntityDataTypes.BYTE); //127
+    public final SingleValue<Byte> MAINHAND = createSingle("player_mainhand", (byte)1, EntityDataTypes.BYTE);
+    public final SingleValue<NBTCompound> LEFT_SHOULDER_PARROT_COMPOUND = createSingle("player_lSPC", new NBTCompound(), EntityDataTypes.NBT);
+    public final SingleValue<NBTCompound> RIGHT_SHOULDER_PARROT_COMPOUND = createSingle("player_rSPC", new NBTCompound(), EntityDataTypes.NBT);
 
     public PlayerValues()
     {

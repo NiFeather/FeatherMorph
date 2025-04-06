@@ -1,8 +1,6 @@
 package xyz.nifeather.morph;
 
-import com.ticxo.modelengine.api.ModelEngineAPI;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
@@ -10,7 +8,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.scoreboard.Scoreboard;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.ScheduleInfo;
 import xyz.nifeather.morph.abilities.AbilityManager;
 import xyz.nifeather.morph.api.FeatherMorphAPI;
@@ -29,7 +26,6 @@ import xyz.nifeather.morph.misc.integrations.towny.TownyAdapter;
 import xyz.nifeather.morph.misc.recipe.RecipeManager;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.gui.IconLookup;
-import xyz.nifeather.morph.misc.integrations.modelengine.ModelEngineHelper;
 import xyz.nifeather.morph.misc.integrations.placeholderapi.PlaceholderIntegration;
 import xyz.nifeather.morph.misc.integrations.residence.ResidenceEventProcessor;
 import xyz.nifeather.morph.network.multiInstance.MultiInstanceService;
@@ -42,7 +38,6 @@ import xiamomc.pluginbase.Messages.MessageStore;
 import xiamomc.pluginbase.XiaMoJavaPlugin;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public final class FeatherMorphMain extends XiaMoJavaPlugin
@@ -191,23 +186,6 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
         {
             logger.info("Towny detected, applying integrations...");
             this.registerListener(new TownyAdapter());
-        }, true);
-
-        softDeps.setHandle("ModelEngine", r ->
-        {
-            try
-            {
-                ModelEngineAPI.getAPI();
-            }
-            catch (Throwable t)
-            {
-                logger.info("Error occurred activating model engine support: " + t.getMessage());
-                t.printStackTrace();
-                return;
-            }
-
-            logger.info("Activating model engine support...");
-            this.registerListener(new ModelEngineHelper());
         }, true);
 
         //缓存依赖

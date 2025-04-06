@@ -101,10 +101,10 @@ dependencies {
         isTransitive = false
     }
 
-    compileOnly("com.ticxo.modelengine:ModelEngine:${project.property("me_version")}")
-    {
-        isTransitive = false
-    }
+    //compileOnly("com.ticxo.modelengine:ModelEngine:${project.property("me_version")}")
+    //{
+    //    isTransitive = false
+    //}
 
     //compileOnly("com.github.Gecolay:GSit:${project.property("gsit_version")}")
     compileOnly("me.clip:placeholderapi:${project.property("papi_version")}")

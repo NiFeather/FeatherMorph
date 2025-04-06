@@ -1,10 +1,10 @@
 package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.types;
 
+import com.github.retrooper.packetevents.protocol.entity.sniffer.SnifferState;
 import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Sniffer;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntry;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
@@ -40,12 +40,12 @@ public class SnifferWatcher extends LivingEntityWatcher
             {
                 case AnimationNames.SNIFF ->
                 {
-                    this.writePersistent(ValueIndex.SNIFFER.SNIFFER_STATE, Sniffer.State.SNIFFING);
+                    this.writePersistent(ValueIndex.SNIFFER.SNIFFER_STATE, SnifferState.SNIFFING);
                     world.playSound(bindingPlayer.getLocation(), Sound.ENTITY_SNIFFER_SNIFFING, SoundCategory.NEUTRAL, 1, 1);
                 }
                 case AnimationNames.RESET ->
                 {
-                    this.writePersistent(ValueIndex.SNIFFER.SNIFFER_STATE, Sniffer.State.IDLING);
+                    this.writePersistent(ValueIndex.SNIFFER.SNIFFER_STATE, SnifferState.IDLING);
                     this.remove(ValueIndex.SNIFFER.SNIFFER_STATE);
                 }
                 default -> logger.warn("Unknown animation sequence id '%s'".formatted(id));

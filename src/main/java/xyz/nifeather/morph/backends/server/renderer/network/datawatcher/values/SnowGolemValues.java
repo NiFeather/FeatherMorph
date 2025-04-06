@@ -1,10 +1,11 @@
 package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.values;
 
+import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
 import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.values.basetypes.AbstractGolemValues;
 
 public class SnowGolemValues extends AbstractGolemValues
 {
-    public final SingleValue<Byte> HAT_FLAGS = createSingle("snowman_has_pumpkin", HAS_PUMPKIN); //.withRandom(HAS_PUMPKIN, NO_PUMPKIN);
+    public final SingleValue<Byte> HAT_FLAGS = createSingle("snowman_has_pumpkin", HAS_PUMPKIN, EntityDataTypes.BYTE); //.withRandom(HAS_PUMPKIN, NO_PUMPKIN);
 
     public static byte NO_PUMPKIN = 0;
     public static byte HAS_PUMPKIN = 16;

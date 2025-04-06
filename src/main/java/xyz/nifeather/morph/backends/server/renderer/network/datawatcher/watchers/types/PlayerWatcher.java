@@ -1,25 +1,23 @@
 package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.types;
 
-import com.comphenix.protocol.ProtocolLibrary;
-import com.comphenix.protocol.events.PacketContainer;
 import com.destroystokyo.paper.ClientOption;
+import com.github.retrooper.packetevents.PacketEvents;
+import com.github.retrooper.packetevents.protocol.entity.pose.EntityPose;
+import com.github.retrooper.packetevents.protocol.player.GameMode;
+import com.github.retrooper.packetevents.util.Vector3i;
+import com.github.retrooper.packetevents.wrapper.PacketWrapper;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerDestroyEntities;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerPlayerInfoRemove;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerPlayerInfoUpdate;
+import io.github.retrooper.packetevents.util.SpigotConversionUtil;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientboundPlayerInfoRemovePacket;
-import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
-import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
-import net.minecraft.world.level.GameType;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Pose;
-import org.joml.Vector3i;
-import xyz.nifeather.morph.backends.server.renderer.network.DisplayParameters;
-import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntry;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.misc.AnimationNames;
-import xyz.nifeather.morph.misc.NmsRecord;
+import xyz.nifeather.morph.misc.MorphGameProfile;
 
 import java.util.EnumSet;
 import java.util.List;
@@ -64,14 +62,14 @@ public class PlayerWatcher extends InventoryLivingWatcher
             {
                 var spawnPackets = this.buildSpawnPackets();
 
-                var packetRemove = PacketContainer.fromPacket(new ClientboundRemoveEntitiesPacket(player.getEntityId()));
-                var protocol = ProtocolLibrary.getProtocolManager();
+                var packetRemove = new WrapperPlayServerDestroyEntities(player.getEntityId());
+                var protocol = PacketEvents.getAPI().getPlayerManager();
 
                 affected.forEach(p ->
                 {
-                    protocol.sendServerPacket(p, packetRemove);
+                    protocol.sendPacket(p, packetRemove);
 
-                    spawnPackets.forEach(packet -> protocol.sendServerPacket(p, packet));
+                    spawnPackets.forEach(packet -> protocol.sendPacket(p, packet));
                 });
             }
         }
@@ -85,7 +83,7 @@ public class PlayerWatcher extends InventoryLivingWatcher
                 case AnimationNames.LAY ->
                 {
                     this.remove(ValueIndex.PLAYER.POSE);
-                    this.writePersistent(ValueIndex.PLAYER.POSE, Pose.SLEEPING);
+                    this.writePersistent(ValueIndex.PLAYER.POSE, EntityPose.SLEEPING);
 
                     var playerPos = getBindingPlayer().getLocation();
                     var vec3i = new Vector3i(playerPos.getBlockX(), playerPos.getBlockY(), playerPos.getBlockZ());
@@ -94,32 +92,33 @@ public class PlayerWatcher extends InventoryLivingWatcher
                 case AnimationNames.CRAWL ->
                 {
                     resetValues();
-                    this.writePersistent(ValueIndex.PLAYER.POSE, Pose.SWIMMING);
+                    this.writePersistent(ValueIndex.PLAYER.POSE, EntityPose.SWIMMING);
                 }
                 case AnimationNames.STANDUP, AnimationNames.RESET ->
                 {
-                    this.writePersistent(ValueIndex.PLAYER.POSE, getBindingPlayer().getPose());
+                    this.writePersistent(ValueIndex.PLAYER.POSE, SpigotConversionUtil.fromBukkitPose(getBindingPlayer().getPose()));
                     resetValues();
                 }
             }
         }
     }
 
-    public List<Packet<?>> buildPlayerInfoPackets()
+    public List<PacketWrapper<?>> buildPlayerInfoPackets()
     {
         var spawnUUID = this.readEntryOrThrow(CustomEntries.SPAWN_UUID);
-        var infoRemove = new ClientboundPlayerInfoRemovePacket(List.of(spawnUUID));
+        var infoRemove = new WrapperPlayServerPlayerInfoRemove(List.of(spawnUUID));
 
-        var infoUpdate = new ClientboundPlayerInfoUpdatePacket(
+        var packetProfile = MorphGameProfile.toPacketEventsUserProfile(this.readEntryOrThrow(CustomEntries.PROFILE));
+        packetProfile.setUUID(spawnUUID);
+        var infoUpdate = new WrapperPlayServerPlayerInfoUpdate(
                 EnumSet.of(
-                        ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER,
-                        ClientboundPlayerInfoUpdatePacket.Action.UPDATE_LISTED
+                        WrapperPlayServerPlayerInfoUpdate.Action.ADD_PLAYER,
+                        WrapperPlayServerPlayerInfoUpdate.Action.UPDATE_LISTED
                 ),
-                new ClientboundPlayerInfoUpdatePacket.Entry(
-                        spawnUUID, this.readEntryOrThrow(CustomEntries.PROFILE),
-                        this.readEntryOrDefault(CustomEntries.PROFILE_LISTED, false),
-                        114514, GameType.DEFAULT_MODE,
-                        null, true, 999, null
+                new WrapperPlayServerPlayerInfoUpdate.PlayerInfo(
+                        packetProfile,
+                        true, 114514, GameMode.defaultGameMode(), null,
+                        null, 999, true
                 )
         );
 
@@ -127,17 +126,16 @@ public class PlayerWatcher extends InventoryLivingWatcher
     }
 
     @Override
-    public List<PacketContainer> buildSpawnPackets()
+    public List<PacketWrapper<?>> buildSpawnPackets()
     {
-        var list = new ObjectArrayList<PacketContainer>();
+        var list = new ObjectArrayList<PacketWrapper<?>>();
 
         var gameProfile = this.readEntryOrThrow(CustomEntries.PROFILE);
 
         if (gameProfile.getName().isBlank())
             throw new IllegalArgumentException("GameProfile name is empty!");
 
-        this.buildPlayerInfoPackets().forEach(nmsPacket -> list.add(PacketContainer.fromPacket(nmsPacket)));
-
+        list.addAll(this.buildPlayerInfoPackets());
         list.addAll(super.buildSpawnPackets());
 
         return list;

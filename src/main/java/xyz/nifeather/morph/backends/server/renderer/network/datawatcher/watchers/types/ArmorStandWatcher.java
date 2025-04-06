@@ -1,6 +1,6 @@
 package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.types;
 
-import io.papermc.paper.math.Rotations;
+import com.github.retrooper.packetevents.util.Vector3f;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.FloatTag;
 import net.minecraft.nbt.ListTag;
@@ -58,7 +58,7 @@ public class ArmorStandWatcher extends InventoryLivingWatcher
         return (read(ValueIndex.ARMOR_STAND.DATA_FLAGS) & 0x04) == 0x04;
     }
 
-    private Rotations getVec3(ListTag listTag, Rotations defaultValue)
+    private Vector3f getVec3(ListTag listTag, Vector3f defaultValue)
     {
         if (listTag.isEmpty() || listTag.size() < 3)
         {
@@ -66,7 +66,7 @@ public class ArmorStandWatcher extends InventoryLivingWatcher
             return defaultValue;
         }
 
-        return Rotations.ofDegrees(listTag.getFloat(0).orElseThrow(), listTag.getFloat(1).orElseThrow(), listTag.getFloat(2).orElseThrow());
+        return new Vector3f(listTag.getFloat(0).orElseThrow(), listTag.getFloat(1).orElseThrow(), listTag.getFloat(2).orElseThrow());
     }
 
     @Override
@@ -152,17 +152,17 @@ public class ArmorStandWatcher extends InventoryLivingWatcher
         }
     }
 
-    private ListTag saveRotationOf(SingleValue<Rotations> sv)
+    private ListTag saveRotationOf(SingleValue<Vector3f> sv)
     {
         return saveRotations(read(sv));
     }
 
-    private ListTag saveRotations(Rotations rotations)
+    private ListTag saveRotations(Vector3f rotations)
     {
         ListTag listTag = new ListTag();
-        listTag.add(FloatTag.valueOf((float)rotations.x()));
-        listTag.add(FloatTag.valueOf((float)rotations.y()));
-        listTag.add(FloatTag.valueOf((float)rotations.z()));
+        listTag.add(FloatTag.valueOf((float)rotations.getX()));
+        listTag.add(FloatTag.valueOf((float)rotations.getY()));
+        listTag.add(FloatTag.valueOf((float)rotations.getZ()));
         return listTag;
     }
 

@@ -1,10 +1,10 @@
 package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.types;
 
-import com.comphenix.protocol.events.PacketContainer;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerDestroyEntities;
+import io.github.retrooper.packetevents.util.SpigotConversionUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
@@ -68,7 +68,7 @@ public class EntityWatcher extends SingleWatcher
         writeTemp(values.GENERAL, getPlayerBitMask(player));
         //write(values.SILENT, true);
         writeTemp(values.NO_GRAVITY, !player.hasGravity());
-        writeTemp(values.POSE, player.getPose());
+        writeTemp(values.POSE, SpigotConversionUtil.fromBukkitPose(player.getPose()));
         writeTemp(values.FROZEN_TICKS, player.getFreezeTicks());
     }
 
@@ -86,8 +86,8 @@ public class EntityWatcher extends SingleWatcher
 
         if (entry.equals(CustomEntries.VANISHED))
         {
-            var packet = new ClientboundRemoveEntitiesPacket(this.readEntryOrThrow(CustomEntries.SPAWN_ID));
-            this.sendPacketToAffectedPlayers(PacketContainer.fromPacket(packet));
+            var packet = new WrapperPlayServerDestroyEntities(this.readEntryOrThrow(CustomEntries.SPAWN_ID));
+            this.sendPacketToAffectedPlayers(packet);
         }
     }
 

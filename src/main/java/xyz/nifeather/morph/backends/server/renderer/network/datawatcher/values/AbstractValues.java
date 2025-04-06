@@ -4,7 +4,6 @@ import com.github.retrooper.packetevents.protocol.entity.data.EntityDataType;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.slf4j.Logger;
 import xyz.nifeather.morph.FeatherMorphMain;
-import xyz.nifeather.morph.backends.server.renderer.utilties.ProtocolRegistryUtils;
 
 import java.util.List;
 
@@ -37,18 +36,6 @@ public abstract class AbstractValues
         var duplicateValue = values.stream().filter(sv -> sv.index() == value.index()).findFirst().orElse(null);
         if (duplicateValue != null)
             throw new IllegalArgumentException("Already contains a value with index '%s'".formatted(value.index()));
-
-        if (!value.hasSerializeMethod())
-        {
-            try
-            {
-                ProtocolRegistryUtils.getSerializer(value);
-            }
-            catch (Throwable t)
-            {
-                logger.warn("No serializer available for '%s'!".formatted(value.name()));
-            }
-        }
 
         values.add(value);
     }

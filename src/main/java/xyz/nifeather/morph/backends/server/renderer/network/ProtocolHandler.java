@@ -1,6 +1,7 @@
 package xyz.nifeather.morph.backends.server.renderer.network;
 
-import com.comphenix.protocol.ProtocolLibrary;
+import com.github.retrooper.packetevents.PacketEvents;
+import com.github.retrooper.packetevents.event.PacketListenerPriority;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xyz.nifeather.morph.MorphPluginObject;
@@ -131,35 +132,15 @@ public class ProtocolHandler extends MorphPluginObject
         loadReady = true;
     }
 
-    private final boolean async = false;
-
     private void registerListenerToPacketManager(ProtocolListener listener)
     {
-        if (async)
-        {
-            logger.info("Register async handler " + listener.getIdentifier());
-            ProtocolLibrary.getProtocolManager().getAsynchronousManager().registerAsyncHandler(listener).syncStart();
-        }
-        else
-        {
-            ProtocolLibrary.getProtocolManager().addPacketListener(listener);
-        }
+        PacketEvents.getAPI().getEventManager().registerListener(listener, PacketListenerPriority.NORMAL);
     }
 
     private void unRegisterListenerFromPacketManager(ProtocolListener listener)
     {
-        if (async)
-        {
-            var asyncMgr = ProtocolLibrary.getProtocolManager()
-                            .getAsynchronousManager();
-
-            asyncMgr.unregisterAsyncHandler(listener);
-        }
-        else
-        {
-            ProtocolLibrary.getProtocolManager().removePacketListener(listener);
-        }
-
+        logger.error("Unregister listener from PacketEvents is not supported by FeatherMorph yet!");
+        //PacketEvents.getAPI().getEventManager().unregisterListener(listener);
     }
 
     private boolean disposed;

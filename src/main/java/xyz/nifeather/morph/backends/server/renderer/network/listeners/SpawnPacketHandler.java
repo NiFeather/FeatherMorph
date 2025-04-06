@@ -182,11 +182,17 @@ public class SpawnPacketHandler extends ProtocolListener
         if (bindingWatcher == null)
             return;
 
+        logger.info("Capture!");
+
         // todo: 不要二次处理来自我们自己的包
-        //if (getFactory().isPacketOurs(packetContainer))
-        //    return;
+        if (uuid.equals(bindingWatcher.readEntry(CustomEntries.SPAWN_UUID)))
+        {
+            logger.info("Skipping packet that is possible ours!");
+            return;
+        }
 
         packetEvent.setCancelled(true);
-        refreshStateForPlayer(Bukkit.getPlayer(uuid), List.of(packetEvent.getPlayer()));
+        Player pl = packetEvent.getPlayer();
+        refreshStateForPlayer(Bukkit.getPlayer(uuid), List.of(pl));
     }
 }

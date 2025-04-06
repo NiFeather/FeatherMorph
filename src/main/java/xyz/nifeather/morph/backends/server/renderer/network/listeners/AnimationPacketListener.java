@@ -50,26 +50,4 @@ public class AnimationPacketListener extends ProtocolListener
 
         event.setCancelled(true);
     }
-
-    @Override
-    public void onPacketReceiving(PacketEvent packetEvent)
-    {
-    }
-
-    private final ListeningWhitelist listeningWhitelist = ListeningWhitelist
-            .newBuilder()
-            .types(PacketType.Play.Server.ANIMATION)
-            .build();
-
-    @Override
-    public ListeningWhitelist getSendingWhitelist()
-    {
-        return listeningWhitelist;
-    }
-
-    @Override
-    public ListeningWhitelist getReceivingWhitelist()
-    {
-        return ListeningWhitelist.EMPTY_WHITELIST;
-    }
 }

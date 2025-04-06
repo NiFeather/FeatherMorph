@@ -1,17 +1,17 @@
 package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.values;
 
-import org.bukkit.entity.Chicken;
-import xyz.nifeather.morph.backends.server.renderer.network.CustomSerializeMethods;
+import com.github.retrooper.packetevents.protocol.entity.chicken.ChickenVariant;
+import com.github.retrooper.packetevents.protocol.entity.chicken.ChickenVariants;
+import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
 import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.values.basetypes.AnimalValues;
 
 public class ChickenValues extends AnimalValues
 {
-    public final SingleValue<Chicken.Variant> CHICKEN_VARIANT;
+    public final SingleValue<ChickenVariant> CHICKEN_VARIANT;
 
     public ChickenValues()
     {
-        CHICKEN_VARIANT = createSingle("chicken_variant", Chicken.Variant.TEMPERATE);
-        CHICKEN_VARIANT.setSerializeMethod(CustomSerializeMethods.CHICKEN_VARIANT);
+        CHICKEN_VARIANT = createSingle("chicken_variant", ChickenVariants.TEMPERATE, EntityDataTypes.CHICKEN_VARIANT);
 
         registerSingle(CHICKEN_VARIANT);
     }

@@ -1,8 +1,8 @@
 package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.types;
 
+import com.github.retrooper.packetevents.protocol.entity.cat.CatVariant;
+import com.github.retrooper.packetevents.protocol.entity.cat.CatVariants;
 import net.minecraft.nbt.CompoundTag;
-import org.bukkit.NamespacedKey;
-import org.bukkit.Registry;
 import org.bukkit.entity.Cat;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -13,6 +13,8 @@ import xyz.nifeather.morph.misc.AnimationNames;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 import xyz.nifeather.morph.misc.disguiseProperty.values.CatProperties;
+
+import java.util.Objects;
 
 public class CatWatcher extends TameableAnimalWatcher
 {
@@ -29,6 +31,12 @@ public class CatWatcher extends TameableAnimalWatcher
         register(ValueIndex.CAT);
     }
 
+    private CatVariant getCatVariant(String id)
+    {
+        return Objects.requireNonNull(CatVariants.getRegistry().getByName(id),
+                "No cat variant for id: " + id);
+    }
+
     @Override
     protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
@@ -37,7 +45,7 @@ public class CatWatcher extends TameableAnimalWatcher
         if (property.equals(properties.CAT_VARIANT))
         {
             var variant = (Cat.Type) value;
-            writePersistent(ValueIndex.CAT.CAT_VARIANT, variant);
+            writePersistent(ValueIndex.CAT.CAT_VARIANT, getCatVariant(variant.key().asString()));
         }
 
         super.onPropertyWrite(property, value);
@@ -76,19 +84,7 @@ public class CatWatcher extends TameableAnimalWatcher
         if (nbt.contains("variant"))
         {
             var name = nbt.getString("variant").orElseThrow();
-            var key = NamespacedKey.fromString(name);
-
-            if (key != null)
-            {
-                var bukkitMatch = Registry.CAT_VARIANT.get(key);
-
-                if (bukkitMatch != null)
-                    this.writePersistent(ValueIndex.CAT.CAT_VARIANT, bukkitMatch);
-            }
-            else
-            {
-                logger.warn("Invalid cat variant: '%s', ignoring...".formatted(name));
-            }
+            this.writePersistent(ValueIndex.CAT.CAT_VARIANT, getCatVariant(name));
         }
 
         if (nbt.contains("CollarColor"))
@@ -100,7 +96,7 @@ public class CatWatcher extends TameableAnimalWatcher
     {
         super.writeToCompound(nbt);
 
-        var variant = read(ValueIndex.CAT.CAT_VARIANT).getKey().asString();
+        var variant = read(ValueIndex.CAT.CAT_VARIANT).getName().toString();
         nbt.putString("variant", variant);
 
         var collarColor = read(ValueIndex.CAT.COLLAR_COLOR);

@@ -1,14 +1,13 @@
 package xyz.nifeather.morph.backends.server.renderer.network;
 
-import com.comphenix.protocol.PacketType;
-import com.comphenix.protocol.events.PacketContainer;
-import com.comphenix.protocol.wrappers.WrappedDataValue;
+import com.github.retrooper.packetevents.protocol.entity.data.EntityData;
+import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
+import com.github.retrooper.packetevents.protocol.player.Equipment;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityMetadata;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraft.network.protocol.game.*;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.EntityEquipment;
 import xyz.nifeather.morph.MorphPluginObject;
-import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.values.SingleValue;
 import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
 import xyz.nifeather.morph.misc.DisguiseEquipment;
@@ -20,15 +19,15 @@ import java.util.List;
  */
 public class PacketFactory extends MorphPluginObject
 {
-    public static PacketContainer buildDiffMetaPacket(SingleWatcher watcher)
+    public static WrapperPlayServerEntityMetadata buildDiffMetaPacket(SingleWatcher watcher)
     {
-        List<EntityData> wrappedDataValues = new ObjectArrayList<>();
+        List<EntityData<?>> wrappedDataValues = new ObjectArrayList<>();
         var valuesToSent = watcher.getDirty();
         watcher.clearDirty();
 
         // Add our packet identifier!
         if (!watcher.readEntryOrDefault(CustomEntries.DONT_INCLUDE_PACKET_IDENTIFIER, false))
-            wrappedDataValues.add(new WrappedDataValue(99, ProtocolRegistryUtils.getSerializer(MARK_DONT_PROCESS), MARK_DONT_PROCESS));
+            wrappedDataValues.add(new EntityData<>(99, EntityDataTypes.STRING, MARK_DONT_PROCESS));
 
         valuesToSent.forEach((single, val) ->
         {
@@ -36,22 +35,20 @@ public class PacketFactory extends MorphPluginObject
             wrappedDataValues.add(wrapped);
         });
 
-        modifier.write(0, wrappedDataValues);
-
-        return metaPacket;
+        return new WrapperPlayServerEntityMetadata(watcher.getBindingPlayer().getEntityId(), wrappedDataValues);
     }
 
     public static final String MARK_DONT_PROCESS = "~FEATHERMORPH GENERATED METADATA, THIS MESSAGE SHOULD BE REMOVED, OR SOMETHING MAY GONE WRONG!";
 
-    public static PacketContainer buildFullMetaPacket(Player player, SingleWatcher watcher)
+    public static WrapperPlayServerEntityMetadata buildFullMetaPacket(Player player, SingleWatcher watcher)
     {
         watcher.sync();
 
-        List<EntityData> wrappedDataValues = new ObjectArrayList<>();
+        List<EntityData<?>> wrappedDataValues = new ObjectArrayList<>();
 
         // Add our packet identifier!
         if (!watcher.readEntryOrDefault(CustomEntries.DONT_INCLUDE_PACKET_IDENTIFIER, false))
-            wrappedDataValues.add(new WrappedDataValue(99, ProtocolRegistryUtils.getSerializer(MARK_DONT_PROCESS), MARK_DONT_PROCESS));
+            wrappedDataValues.add(new EntityData<>(99, EntityDataTypes.STRING, MARK_DONT_PROCESS));
 
         var valuesToSent = watcher.getOverlayedRegistry();
         watcher.clearDirty();
@@ -67,12 +64,10 @@ public class PacketFactory extends MorphPluginObject
             wrappedDataValues.add(wrapped);
         });
 
-        modifier.write(0, wrappedDataValues);
-
-        return metaPacket;
+        return new WrapperPlayServerEntityMetadata(player.getEntityId(), wrappedDataValues);
     }
 
-    public static PacketContainer getEquipmentPacket(Player player, SingleWatcher watcher)
+    public static List<Equipment> getPacketeventsEquipments(Player player, SingleWatcher watcher)
     {
         var shouldDisplayFakeEquip = watcher.readEntryOrDefault(CustomEntries.DISPLAY_FAKE_EQUIPMENT, false);
         EntityEquipment equipment = shouldDisplayFakeEquip

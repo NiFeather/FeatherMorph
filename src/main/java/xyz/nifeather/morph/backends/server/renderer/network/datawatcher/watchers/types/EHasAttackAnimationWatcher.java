@@ -1,9 +1,7 @@
 package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.types;
 
-import com.comphenix.protocol.events.PacketContainer;
-import net.minecraft.network.protocol.game.ClientboundEntityEventPacket;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityStatus;
 import net.minecraft.world.entity.EntityEvent;
-import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
@@ -22,9 +20,6 @@ public class EHasAttackAnimationWatcher extends LivingEntityWatcher
         super.onEntryWrite(entry, oldVal, newVal);
 
         if (entry.equals(CustomEntries.ATTACK_ANIMATION) && Boolean.TRUE.equals(newVal))
-        {
-            var entity = ((CraftPlayer)getBindingPlayer()).getHandle();
-            sendPacketToAffectedPlayers(PacketContainer.fromPacket(new ClientboundEntityEventPacket(entity, EntityEvent.START_ATTACKING)));
-        }
+            sendPacketToAffectedPlayers(new WrapperPlayServerEntityStatus(getBindingPlayer().getEntityId(), EntityEvent.START_ATTACKING));
     }
 }

@@ -4,8 +4,8 @@ import com.github.retrooper.packetevents.protocol.player.Equipment;
 import com.github.retrooper.packetevents.protocol.player.EquipmentSlot;
 import io.github.retrooper.packetevents.util.SpigotConversionUtil;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import org.bukkit.craftbukkit.inventory.CraftInventoryPlayer;
 import org.bukkit.inventory.EntityEquipment;
+import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.utilities.ItemUtils;
 
@@ -16,7 +16,12 @@ public class ProtocolEquipment
         var list = new ObjectArrayList<Equipment>();
 
         for (org.bukkit.inventory.EquipmentSlot bukkitSlot : org.bukkit.inventory.EquipmentSlot.values())
-            list.add(toEquipment(equipment, bukkitSlot));
+        {
+            var packetEquipment = toEquipment(equipment, bukkitSlot);
+
+            if (packetEquipment != null)
+                list.add(packetEquipment);
+        }
 
         return list;
     }
@@ -38,12 +43,16 @@ public class ProtocolEquipment
         };
     }
 
+    @Nullable
     private static Equipment toEquipment(EntityEquipment equipment, org.bukkit.inventory.EquipmentSlot bukkitSlot)
     {
+        if (bukkitSlot == org.bukkit.inventory.EquipmentSlot.SADDLE || bukkitSlot == org.bukkit.inventory.EquipmentSlot.BODY)
+            return null;
+
         try
         {
-            if (equipment instanceof CraftInventoryPlayer && bukkitSlot == org.bukkit.inventory.EquipmentSlot.BODY)
-                return new Equipment(toPESlot(bukkitSlot), ItemUtils.peAir);
+            //if (equipment instanceof CraftInventoryPlayer && bukkitSlot == org.bukkit.inventory.EquipmentSlot.BODY)
+            //    return new Equipment(toPESlot(bukkitSlot), ItemUtils.peAir);
 
             var bukkitItem = equipment.getItem(bukkitSlot);
 
@@ -56,6 +65,7 @@ public class ProtocolEquipment
             var logger = FeatherMorphMain.getInstance().getSLF4JLogger();
 
             logger.warn("Can't generate equipment pair: " + t.getMessage());
+            t.printStackTrace();
         }
 
         return new Equipment(EquipmentSlot.BOOTS, ItemUtils.peAir);

@@ -1,14 +1,14 @@
 package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.types;
 
-import io.papermc.paper.registry.RegistryAccess;
-import io.papermc.paper.registry.RegistryKey;
+import com.github.retrooper.packetevents.protocol.entity.frog.FrogVariant;
+import com.github.retrooper.packetevents.protocol.entity.frog.FrogVariants;
+import com.github.retrooper.packetevents.protocol.entity.pose.EntityPose;
 import net.minecraft.nbt.CompoundTag;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Sound;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Frog;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Pose;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntry;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
@@ -17,6 +17,8 @@ import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 import xyz.nifeather.morph.misc.disguiseProperty.values.FrogProperties;
 
+import java.util.Objects;
+
 public class FrogWatcher extends LivingEntityWatcher
 {
     public FrogWatcher(Player bindingPlayer)
@@ -24,11 +26,12 @@ public class FrogWatcher extends LivingEntityWatcher
         super(bindingPlayer, EntityType.FROG);
     }
 
-    private Frog.Variant getFrogVariant(NamespacedKey key)
+    private FrogVariant getFrogVariant(NamespacedKey key)
     {
-        return RegistryAccess.registryAccess()
-                .getRegistry(RegistryKey.FROG_VARIANT)
-                .getOrThrow(key);
+        return Objects.requireNonNull(
+                FrogVariants.getRegistry().getByName(key.asString()),
+                "No packet version frog variant: %s".formatted(key.asString())
+        );
     }
 
     @Override
@@ -61,7 +64,7 @@ public class FrogWatcher extends LivingEntityWatcher
         if (property.equals(properties.VARIANT))
         {
             var variant = (Frog.Variant) value;
-            writePersistent(ValueIndex.FROG.FROG_VARIANT, variant);
+            writePersistent(ValueIndex.FROG.FROG_VARIANT, getFrogVariant(variant.getKey()));
         }
     }
 
@@ -80,7 +83,7 @@ public class FrogWatcher extends LivingEntityWatcher
             {
                 case AnimationNames.EAT ->
                 {
-                    this.writePersistent(ValueIndex.FROG.POSE, Pose.USING_TONGUE);
+                    this.writePersistent(ValueIndex.FROG.POSE, EntityPose.USING_TONGUE);
                     world.playSound(player.getLocation(), Sound.ENTITY_FROG_EAT, 1, 1);
                 }
                 case AnimationNames.RESET -> this.remove(ValueIndex.FROG.POSE);
@@ -93,7 +96,7 @@ public class FrogWatcher extends LivingEntityWatcher
     {
         super.writeToCompound(nbt);
 
-        var variant = read(ValueIndex.FROG.FROG_VARIANT).getKey().asString();
+        var variant = read(ValueIndex.FROG.FROG_VARIANT).getName().toString();
         nbt.putString("variant", variant);
     }
 }

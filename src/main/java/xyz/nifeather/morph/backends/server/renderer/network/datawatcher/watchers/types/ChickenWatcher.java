@@ -1,7 +1,7 @@
 package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.types;
 
-import io.papermc.paper.registry.RegistryAccess;
-import io.papermc.paper.registry.RegistryKey;
+import com.github.retrooper.packetevents.protocol.entity.chicken.ChickenVariant;
+import com.github.retrooper.packetevents.protocol.entity.chicken.ChickenVariants;
 import net.minecraft.nbt.CompoundTag;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Chicken;
@@ -11,6 +11,8 @@ import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueInde
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 import xyz.nifeather.morph.misc.disguiseProperty.values.ChickenProperties;
+
+import java.util.Objects;
 
 public class ChickenWatcher extends AgeableMobWatcher
 {
@@ -31,6 +33,12 @@ public class ChickenWatcher extends AgeableMobWatcher
         register(ValueIndex.CHICKEN);
     }
 
+    private ChickenVariant getChickenVariant(String id)
+    {
+        return Objects.requireNonNull(ChickenVariants.getRegistry().getByName(id),
+                "No chicken variant for id: " + id);
+    }
+
     @Override
     protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
@@ -38,7 +46,7 @@ public class ChickenWatcher extends AgeableMobWatcher
         {
             var variant = (Chicken.Variant) value;
 
-            writePersistent(ValueIndex.CHICKEN.CHICKEN_VARIANT, variant);
+            writePersistent(ValueIndex.CHICKEN.CHICKEN_VARIANT, getChickenVariant(variant.getKey().asString()));
         }
 
         super.onPropertyWrite(property, value);
@@ -55,11 +63,7 @@ public class ChickenWatcher extends AgeableMobWatcher
             if (idKey == null)
                 return;
 
-            var variant = RegistryAccess.registryAccess()
-                    .getRegistry(RegistryKey.CHICKEN_VARIANT)
-                    .getOrThrow(idKey);
-
-            writePersistent(ValueIndex.CHICKEN.CHICKEN_VARIANT, variant);
+            writePersistent(ValueIndex.CHICKEN.CHICKEN_VARIANT, getChickenVariant(idString));
         }
 
         super.mergeFromCompound(nbt);
@@ -71,7 +75,7 @@ public class ChickenWatcher extends AgeableMobWatcher
         var variant = this.readOr(ValueIndex.CHICKEN.CHICKEN_VARIANT, null);
 
         if (variant != null)
-            nbt.putString("variant", variant.getKey().asString());
+            nbt.putString("variant", variant.getName().toString());
 
         super.writeToCompound(nbt);
     }

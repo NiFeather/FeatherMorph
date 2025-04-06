@@ -1,19 +1,22 @@
 package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers;
 
 import com.github.retrooper.packetevents.PacketEvents;
+import com.github.retrooper.packetevents.protocol.attribute.Attributes;
+import com.github.retrooper.packetevents.protocol.world.Location;
+import com.github.retrooper.packetevents.resources.ResourceLocation;
+import com.github.retrooper.packetevents.util.Vector3d;
 import com.github.retrooper.packetevents.wrapper.PacketWrapper;
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityMetadata;
+import com.github.retrooper.packetevents.wrapper.play.server.*;
+import io.github.retrooper.packetevents.util.SpigotConversionUtil;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.Util;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
-import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
-import net.minecraft.network.protocol.game.ClientboundSetPassengersPacket;
-import net.minecraft.network.protocol.game.ClientboundUpdateAttributesPacket;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import org.bukkit.Bukkit;
-import org.bukkit.craftbukkit.entity.CraftEntity;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -222,7 +225,7 @@ public abstract class SingleWatcher extends MorphPluginObject
     }
 
     /**
-     * Values in this list shouldn't be included with meta packet processing in {@link xyz.nifeather.morph.backends.server.renderer.network.listeners.MetaPacketListener#rebuildServerMetaPacket(AbstractValues, SingleWatcher, PacketContainer)}
+     * Values in this list shouldn't be included with meta packet processing in {@link xyz.nifeather.morph.backends.server.renderer.network.listeners.MetaPacketListener#rebuildServerMetaPacket(AbstractValues, SingleWatcher, WrapperPlayServerEntityMetadata)}
      */
     private final List<Integer> blockedValues = new ObjectArrayList<>();
 
@@ -542,9 +545,9 @@ public abstract class SingleWatcher extends MorphPluginObject
         players.forEach(p -> protocol.sendPacket(p, packet));
     }
 
-    public List<PacketContainer> buildSpawnPackets()
+    public List<PacketWrapper<?>> buildSpawnPackets()
     {
-        List<PacketContainer> packets = new ObjectArrayList<>();
+        List<PacketWrapper<?>> packets = new ObjectArrayList<>();
         var player = getBindingPlayer();
 
         if (this.readEntryOrDefault(CustomEntries.VANISHED, false))
@@ -572,14 +575,14 @@ public abstract class SingleWatcher extends MorphPluginObject
         var yaw = this.readEntryOrDefault(CustomEntries.OVERLAYED_YAW, player.getYaw());
 
         //生成实体
-        var spawnPacket = PacketContainer.fromPacket(new ClientboundAddEntityPacket(
+        var playerMotion = player.getVelocity();
+        var spawnPacket = new WrapperPlayServerSpawnEntity(
                 this.readEntryOrThrow(CustomEntries.SPAWN_ID), spawnUUID,
-                player.getX(), player.getY(), player.getZ(),
-                pitch, yaw,
-                nmsSpawnType, 0,
-                nmsPlayer.getDeltaMovement(),
-                nmsPlayer.getYHeadRot()
-        ));
+                SpigotConversionUtil.fromBukkitEntityType(disguiseEntityType),
+                new Location(new Vector3d(player.getX(), player.getY(), player.getZ()), yaw, pitch),
+                nmsPlayer.getYHeadRot(), 0,
+                new Vector3d(playerMotion.getX(), playerMotion.getY(), playerMotion.getZ())
+        );
 
         packets.add(spawnPacket);
 
@@ -589,34 +592,90 @@ public abstract class SingleWatcher extends MorphPluginObject
                 ? this.readEntryOrDefault(CustomEntries.EQUIPMENT, new DisguiseEquipment())
                 : player.getEquipment();
 
-        packets.add(PacketContainer.fromPacket(new ClientboundSetEquipmentPacket(player.getEntityId(),
-                ProtocolEquipment.toPairs(equip))));
+        packets.add(new WrapperPlayServerEntityEquipment(player.getEntityId(), ProtocolEquipment.toPEEquipmentList(equip)));
 
         packets.add(PacketFactory.buildFullMetaPacket(player, this));
 
         // 载具
         if (player.getVehicle() != null)
         {
-            var nmsEntity = ((CraftEntity)player.getVehicle()).getHandle();
-            packets.add(PacketContainer.fromPacket(new ClientboundSetPassengersPacket(nmsEntity)));
+            int[] passengers = player.getVehicle().getPassengers()
+                    .stream()
+                    .mapToInt(Entity::getEntityId)
+                    .toArray();
+
+            packets.add(new WrapperPlayServerSetPassengers(player.getVehicle().getEntityId(), passengers));
         }
 
         if (!player.getPassengers().isEmpty())
-            packets.add(PacketContainer.fromPacket(new ClientboundSetPassengersPacket(nmsPlayer)));
+        {
+            int[] passengers = player.getPassengers()
+                    .stream()
+                    .mapToInt(Entity::getEntityId)
+                    .toArray();
+
+            packets.add(new WrapperPlayServerSetPassengers(player.getEntityId(), passengers));
+        }
 
         // 属性
         if (disguiseEntityType.isAlive())
-        {
-            //Attributes
-            List<AttributeInstance> attributes = disguiseEntityType == EntityType.PLAYER
-                    ? new ObjectArrayList<>(nmsPlayer.getAttributes().getSyncableAttributes())
-                    : NmsUtils.getValidAttributes(disguiseEntityType, nmsPlayer.getAttributes());
-
-            var attributePacket = new ClientboundUpdateAttributesPacket(player.getEntityId(), attributes);
-            packets.add(PacketContainer.fromPacket(attributePacket));
-        }
+            packets.add(this.buildAttributePacket());
 
         return packets;
+    }
+
+    private WrapperPlayServerUpdateAttributes.PropertyModifier.Operation fromNMSOperation(AttributeModifier.Operation nmsOperation)
+    {
+        return switch (nmsOperation)
+        {
+            case ADD_VALUE -> WrapperPlayServerUpdateAttributes.PropertyModifier.Operation.ADDITION;
+            case ADD_MULTIPLIED_BASE -> WrapperPlayServerUpdateAttributes.PropertyModifier.Operation.MULTIPLY_BASE;
+            case ADD_MULTIPLIED_TOTAL -> WrapperPlayServerUpdateAttributes.PropertyModifier.Operation.MULTIPLY_TOTAL;
+            default -> throw new RuntimeException("Unknown operation: " + nmsOperation);
+        };
+    }
+
+    private WrapperPlayServerUpdateAttributes buildAttributePacket()
+    {
+        var player = getBindingPlayer();
+        List<WrapperPlayServerUpdateAttributes.Property> attributeProperties = new ObjectArrayList<>();
+
+        var nmsPlayer = NmsRecord.ofPlayer(player);
+
+        List<AttributeInstance> attributes = entityType == EntityType.PLAYER
+                ? new ObjectArrayList<>(nmsPlayer.getAttributes().getSyncableAttributes())
+                : NmsUtils.getValidAttributes(entityType, nmsPlayer.getAttributes());
+
+        attributes.forEach(instance ->
+        {
+            // Still NMS :(
+            var id = BuiltInRegistries.ATTRIBUTE.getKey(instance.getAttribute().value()).toString();
+
+            var packetAttribute = Attributes.getByName(id);
+            if (packetAttribute == null)
+            {
+                logger.warn("Unknown attribute for packet: " + id);
+                return;
+            }
+
+            List<WrapperPlayServerUpdateAttributes.PropertyModifier> modifiers = new ObjectArrayList<>();
+            for (AttributeModifier modifier : instance.getModifiers())
+            {
+                var packetModifier = new WrapperPlayServerUpdateAttributes.PropertyModifier(
+                        new ResourceLocation(modifier.id().toString()),
+                        UUID.randomUUID(),
+                        modifier.amount(),
+                        fromNMSOperation(modifier.operation())
+                );
+
+                modifiers.add(packetModifier);
+            }
+
+            var property = new WrapperPlayServerUpdateAttributes.Property(packetAttribute, instance.getBaseValue(), modifiers);
+            attributeProperties.add(property);
+        });
+
+        return new WrapperPlayServerUpdateAttributes(player.getEntityId(), attributeProperties);
     }
 
     private boolean disposed;

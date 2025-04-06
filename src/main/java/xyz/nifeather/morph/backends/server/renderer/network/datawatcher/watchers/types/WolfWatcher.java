@@ -1,7 +1,7 @@
 package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.types;
 
-import io.papermc.paper.registry.RegistryAccess;
-import io.papermc.paper.registry.RegistryKey;
+import com.github.retrooper.packetevents.protocol.entity.wolfvariant.WolfVariant;
+import com.github.retrooper.packetevents.protocol.entity.wolfvariant.WolfVariants;
 import net.minecraft.nbt.CompoundTag;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.EntityType;
@@ -15,6 +15,8 @@ import xyz.nifeather.morph.misc.AnimationNames;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 import xyz.nifeather.morph.misc.disguiseProperty.values.WolfProperties;
+
+import java.util.Objects;
 
 public class WolfWatcher extends TameableAnimalWatcher
 {
@@ -31,6 +33,12 @@ public class WolfWatcher extends TameableAnimalWatcher
         register(ValueIndex.WOLF);
     }
 
+    private WolfVariant getWolfVariant(String id)
+    {
+        return Objects.requireNonNull(WolfVariants.getRegistry().getByName(id),
+                "No pig variant for id: " + id);
+    }
+
     @Override
     protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
@@ -40,7 +48,7 @@ public class WolfWatcher extends TameableAnimalWatcher
         {
             var val = (Wolf.Variant) value;
 
-            this.writePersistent(ValueIndex.WOLF.WOLF_VARIANT, val);
+            this.writePersistent(ValueIndex.WOLF.WOLF_VARIANT, getWolfVariant(val.key().asString()));
         }
 
         super.onPropertyWrite(property, value);
@@ -82,22 +90,7 @@ public class WolfWatcher extends TameableAnimalWatcher
                 return;
             }
 
-            writePersistent(ValueIndex.WOLF.WOLF_VARIANT, getVariant(key));
-        }
-    }
-
-    private Wolf.Variant getVariant(NamespacedKey key)
-    {
-        try
-        {
-            return RegistryAccess.registryAccess()
-                    .getRegistry(RegistryKey.WOLF_VARIANT)
-                    .getOrThrow(key);
-        }
-        catch (Throwable t)
-        {
-            logger.warn("Can't find Holder for key '%s', trying default value...".formatted(key));
-            return ValueIndex.WOLF.WOLF_VARIANT.defaultValue();
+            writePersistent(ValueIndex.WOLF.WOLF_VARIANT, getWolfVariant(typeString));
         }
     }
 
@@ -107,6 +100,6 @@ public class WolfWatcher extends TameableAnimalWatcher
         super.writeToCompound(nbt);
 
         nbt.putByte("CollarColor", read(ValueIndex.WOLF.COLLAR_COLOR).byteValue());
-        nbt.putString("variant", read(ValueIndex.WOLF.WOLF_VARIANT).key().asString());
+        nbt.putString("variant", read(ValueIndex.WOLF.WOLF_VARIANT).getName().toString());
     }
 }
