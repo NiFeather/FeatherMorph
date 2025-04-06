@@ -228,6 +228,8 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
         messenger.registerOutgoingPluginChannel(plugin, MessageChannel.initializeChannel);
         messenger.registerOutgoingPluginChannel(plugin, MessageChannel.versionChannel);
         messenger.registerOutgoingPluginChannel(plugin, MessageChannel.commandChannel);
+        messenger.registerOutgoingPluginChannel(plugin, MessageChannel.versionChannelLegacy);
+        messenger.registerOutgoingPluginChannel(plugin, MessageChannel.commandChannelLegacy);
 
         configManager.bind(allowClient, ConfigOption.ALLOW_CLIENT);
         configManager.bind(forceTargetVersion, ConfigOption.FORCE_TARGET_VERSION);
