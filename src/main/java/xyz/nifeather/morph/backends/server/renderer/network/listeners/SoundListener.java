@@ -31,12 +31,6 @@ public class SoundListener extends ProtocolListener
         var packetType = event.getPacketType();
         var packet = event.getPacket();
 
-        //不要处理来自我们自己的包
-        if (getFactory().isPacketOurs(packet))
-        {
-            return;
-        }
-
         if (packetType != PacketType.Play.Server.NAMED_SOUND_EFFECT)
             return;
 
@@ -92,20 +86,12 @@ public class SoundListener extends ProtocolListener
         left.ifPresent(rK -> resourceLocationRef.set(rK.location()));
         right.ifPresent(se -> resourceLocationRef.set(se.location()));
 
-        if (resourceLocationRef.get() == null) return null;
+        // 查无此声
+        if (resourceLocationRef.get() == null)
+            return null;
+
         SoundEvent sound = null;
         var location = resourceLocationRef.get();
-
-        /*if (location.getPath().endsWith(".step"))
-        {
-            var soundId = EntityTypeUtils.getStepSound(watcher.getEntityType());
-            if (soundId == null) return null;
-
-            ResourceLocation rL = ResourceLocation.tryParse(soundId);
-            if (rL == null) return null;
-
-            sound = SoundEvent.createFixedRangeEvent(rL, 16);
-        }*/
 
         var path = location.getPath();
 

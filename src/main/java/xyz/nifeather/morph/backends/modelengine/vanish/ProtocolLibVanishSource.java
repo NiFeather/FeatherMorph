@@ -14,7 +14,6 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.MorphPluginObject;
-import xyz.nifeather.morph.backends.server.renderer.network.PacketFactory;
 import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.types.PlayerWatcher;
 import xyz.nifeather.morph.backends.server.renderer.utilties.WatcherUtils;
 import xyz.nifeather.morph.misc.NmsRecord;
@@ -43,8 +42,6 @@ public class ProtocolLibVanishSource extends MorphPluginObject implements IVanis
         for (var affectedPlayer : affected)
             ProtocolLibrary.getProtocolManager().sendServerPacket(affectedPlayer, container);
     }
-
-    private final PacketFactory packetFactory = new PacketFactory();
 
     @Override
     public void cancelVanish(Player player)

@@ -11,7 +11,6 @@ import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Bindables.Bindable;
 import xyz.nifeather.morph.MorphPluginObject;
-import xyz.nifeather.morph.backends.server.renderer.network.PacketFactory;
 import xyz.nifeather.morph.backends.server.renderer.network.ProtocolHandler;
 import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
 import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.types.LivingEntityWatcher;
@@ -29,14 +28,10 @@ public class ServerRenderer extends MorphPluginObject implements Listener
 
     public final RenderRegistry registry = new RenderRegistry();
 
-    private final PacketFactory packetFactory = new PacketFactory();
-
     public final Bindable<Boolean> showPlayerDisguises = new Bindable<>();
 
     public ServerRenderer()
     {
-        dependencies.cache(packetFactory);
-
         dependencies.cache(registry);
         dependencies.cache(protocolHandler = new ProtocolHandler());
     }

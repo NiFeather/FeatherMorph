@@ -24,12 +24,7 @@ import java.lang.reflect.Field;
 
 public abstract class ProtocolListener extends MorphPluginObject implements PacketListener
 {
-    @Resolved(shouldSolveImmediately = true)
-    private PacketFactory packetFactory;
-
     public abstract String getIdentifier();
-
-    protected PacketFactory getFactory() { return packetFactory; }
 
     protected ProtocolManager protocolManager()
     {

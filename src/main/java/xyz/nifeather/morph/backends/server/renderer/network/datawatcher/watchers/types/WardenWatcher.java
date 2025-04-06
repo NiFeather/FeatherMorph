@@ -89,7 +89,7 @@ public class WardenWatcher extends EHasAttackAnimationWatcher
                     this.writePersistent(ValueIndex.BASE_LIVING.POSE, Pose.EMERGING);
                     world.playSound(bindingPlayer.getLocation(), Sound.ENTITY_WARDEN_EMERGE, 5, 1);
 
-                    var packets = getPacketFactory().buildSpawnPackets(new DisplayParameters(this));
+                    var packets = this.buildSpawnPackets();
                     var affectedPlayers = this.getAffectedPlayers(bindingPlayer);
                     var protocol = ProtocolLibrary.getProtocolManager();
                     var despawnPacket = PacketContainer.fromPacket(new ClientboundRemoveEntitiesPacket(bindingPlayer.getEntityId()));

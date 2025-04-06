@@ -13,6 +13,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import xiamomc.pluginbase.Annotations.Resolved;
+import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.RenderRegistry;
 
 public class PlayerLookPacketListener extends ProtocolListener
@@ -31,14 +32,7 @@ public class PlayerLookPacketListener extends ProtocolListener
         var packet = event.getPacket();
         //event.setCancelled(true);
 
-        //不要处理来自我们自己的包
-        if (getFactory().isPacketOurs(packet))
-        {
-            return;
-        }
-
         if (packetType == PacketType.Play.Server.ENTITY_LOOK
-                || packetType == PacketType.Play.Server.REL_ENTITY_MOVE
                 || packetType == PacketType.Play.Server.REL_ENTITY_MOVE_LOOK)
         {
             //PacketPlayOutEntity$PacketPlayOutEntityLook
@@ -111,7 +105,6 @@ public class PlayerLookPacketListener extends ProtocolListener
 
         var newPacket = new ClientboundRotateHeadPacket(sourceNmsEntity, Mth.packDegrees(newHeadYaw));
         var finalPacket = PacketContainer.fromPacket(newPacket);
-        getFactory().markPacketOurs(finalPacket);
 
         event.setPacket(finalPacket);
     }
@@ -154,14 +147,6 @@ public class PlayerLookPacketListener extends ProtocolListener
                     packet.isOnGround()
             );
         }
-        else if (packetType == PacketType.Play.Server.REL_ENTITY_MOVE)
-        {
-            newPacket = new ClientboundMoveEntityPacket.Pos(
-                    sourcePlayer.getEntityId(),
-                    packet.getXa(), packet.getYa(), packet.getZa(),
-                    packet.isOnGround()
-            );
-        }
         else if (packetType == PacketType.Play.Server.REL_ENTITY_MOVE_LOOK)
         {
             newPacket = new ClientboundMoveEntityPacket.PosRot(
@@ -178,7 +163,6 @@ public class PlayerLookPacketListener extends ProtocolListener
         }
 
         var finalPacket = PacketContainer.fromPacket(newPacket);
-        getFactory().markPacketOurs(finalPacket);
         event.setPacket(finalPacket);
     }
 
@@ -190,7 +174,6 @@ public class PlayerLookPacketListener extends ProtocolListener
     private final ListeningWhitelist listeningWhitelist = ListeningWhitelist.newBuilder()
             .types(PacketType.Play.Server.ENTITY_LOOK,
                     PacketType.Play.Server.ENTITY_HEAD_ROTATION,
-                    PacketType.Play.Server.REL_ENTITY_MOVE,
                     PacketType.Play.Server.REL_ENTITY_MOVE_LOOK,
                     PacketType.Play.Server.ENTITY_TELEPORT)
             .build();

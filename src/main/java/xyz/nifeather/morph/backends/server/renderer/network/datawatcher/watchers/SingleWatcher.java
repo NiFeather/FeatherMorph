@@ -4,23 +4,35 @@ import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.events.PacketContainer;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
+import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
+import net.minecraft.network.protocol.game.ClientboundSetPassengersPacket;
+import net.minecraft.network.protocol.game.ClientboundUpdateAttributesPacket;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import org.bukkit.Bukkit;
+import org.bukkit.craftbukkit.entity.CraftEntity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Annotations.Initializer;
-import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Exceptions.NullDependencyException;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.backends.server.renderer.network.PacketFactory;
+import xyz.nifeather.morph.backends.server.renderer.network.ProtocolEquipment;
 import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.values.AbstractValues;
 import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.values.SingleValue;
+import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntry;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.RenderRegistry;
 import xyz.nifeather.morph.backends.server.renderer.utilties.WatcherUtils;
+import xyz.nifeather.morph.misc.DisguiseEquipment;
+import xyz.nifeather.morph.misc.NmsRecord;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
+import xyz.nifeather.morph.utilities.EntityTypeUtils;
+import xyz.nifeather.morph.utilities.NmsUtils;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -209,7 +221,7 @@ public abstract class SingleWatcher extends MorphPluginObject
     }
 
     /**
-     * Values in this list shouldn't be included with meta packet processing in {@link PacketFactory#rebuildServerMetaPacket(AbstractValues, SingleWatcher, PacketContainer)}
+     * Values in this list shouldn't be included with meta packet processing in {@link xyz.nifeather.morph.backends.server.renderer.network.listeners.MetaPacketListener#rebuildServerMetaPacket(AbstractValues, SingleWatcher, PacketContainer)}
      */
     private final List<Integer> blockedValues = new ObjectArrayList<>();
 
@@ -353,15 +365,7 @@ public abstract class SingleWatcher extends MorphPluginObject
         onTrackerWrite(singleValue, prev, value);
 
         if (!isSilent() && isAlive())
-            sendPacketToAffectedPlayers(packetFactory.buildDiffMetaPacket(this));
-    }
-
-    @Resolved(shouldSolveImmediately = true)
-    private PacketFactory packetFactory;
-
-    protected PacketFactory getPacketFactory()
-    {
-        return packetFactory;
+            sendPacketToAffectedPlayers(PacketFactory.buildDiffMetaPacket(this));
     }
 
     protected <X> void onTrackerWrite(SingleValue<X> single, @Nullable X oldVal, @Nullable X newVal)
@@ -535,6 +539,83 @@ public abstract class SingleWatcher extends MorphPluginObject
 
         var protocol = ProtocolLibrary.getProtocolManager();
         players.forEach(p -> protocol.sendServerPacket(p, packet));
+    }
+
+    public List<PacketContainer> buildSpawnPackets()
+    {
+        List<PacketContainer> packets = new ObjectArrayList<>();
+        var player = getBindingPlayer();
+
+        if (this.readEntryOrDefault(CustomEntries.VANISHED, false))
+            return packets;
+
+        var disguiseEntityType = this.getEntityType();
+
+        var nmsSpawnType = EntityTypeUtils.getNmsType(disguiseEntityType);
+        if (nmsSpawnType == null)
+        {
+            logger.error("No NMS Type for Bukkit Type '%s'".formatted(disguiseEntityType));
+            logger.error("Not building spawn packets!");
+
+            return packets;
+        }
+
+        var nmsPlayer = NmsRecord.ofPlayer(player);
+        UUID spawnUUID = this.readEntryOrThrow(CustomEntries.SPAWN_UUID);
+        if (spawnUUID.equals(Util.NIL_UUID))
+            throw new IllegalStateException("A watcher with NIL UUID?!");
+
+        //todo: Should we use a better way to get the yaw/pitch?
+        //      I don't want to read yaw/pitch from player directly, so I used OVERLAYED_XXX to generate the value on call, so that other watchers can override the value
+        var pitch = this.readEntryOrDefault(CustomEntries.OVERLAYED_PITCH, player.getPitch());
+        var yaw = this.readEntryOrDefault(CustomEntries.OVERLAYED_YAW, player.getYaw());
+
+        //生成实体
+        var spawnPacket = PacketContainer.fromPacket(new ClientboundAddEntityPacket(
+                this.readEntryOrThrow(CustomEntries.SPAWN_ID), spawnUUID,
+                player.getX(), player.getY(), player.getZ(),
+                pitch, yaw,
+                nmsSpawnType, 0,
+                nmsPlayer.getDeltaMovement(),
+                nmsPlayer.getYHeadRot()
+        ));
+
+        packets.add(spawnPacket);
+
+        //生成装备和Meta
+        var displayingFakeEquipments = this.readEntryOrDefault(CustomEntries.DISPLAY_FAKE_EQUIPMENT, false);
+        var equip = displayingFakeEquipments
+                ? this.readEntryOrDefault(CustomEntries.EQUIPMENT, new DisguiseEquipment())
+                : player.getEquipment();
+
+        packets.add(PacketContainer.fromPacket(new ClientboundSetEquipmentPacket(player.getEntityId(),
+                ProtocolEquipment.toPairs(equip))));
+
+        packets.add(PacketFactory.buildFullMetaPacket(player, this));
+
+        // 载具
+        if (player.getVehicle() != null)
+        {
+            var nmsEntity = ((CraftEntity)player.getVehicle()).getHandle();
+            packets.add(PacketContainer.fromPacket(new ClientboundSetPassengersPacket(nmsEntity)));
+        }
+
+        if (!player.getPassengers().isEmpty())
+            packets.add(PacketContainer.fromPacket(new ClientboundSetPassengersPacket(nmsPlayer)));
+
+        // 属性
+        if (disguiseEntityType.isAlive())
+        {
+            //Attributes
+            List<AttributeInstance> attributes = disguiseEntityType == EntityType.PLAYER
+                    ? new ObjectArrayList<>(nmsPlayer.getAttributes().getSyncableAttributes())
+                    : NmsUtils.getValidAttributes(disguiseEntityType, nmsPlayer.getAttributes());
+
+            var attributePacket = new ClientboundUpdateAttributesPacket(player.getEntityId(), attributes);
+            packets.add(PacketContainer.fromPacket(attributePacket));
+        }
+
+        return packets;
     }
 
     private boolean disposed;

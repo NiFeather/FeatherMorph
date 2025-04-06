@@ -3,6 +3,9 @@ package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watcher
 import net.minecraft.nbt.CompoundTag;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.Nullable;
+import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
+import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntry;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 
 public class PhantomWatcher extends LivingEntityWatcher
@@ -18,6 +21,15 @@ public class PhantomWatcher extends LivingEntityWatcher
         super.initRegistry();
 
         register(ValueIndex.PHANTOM);
+    }
+
+    @Override
+    public <X> @Nullable X readEntry(CustomEntry<X> entry)
+    {
+        if (entry == CustomEntries.OVERLAYED_PITCH)
+            return (X) Float.valueOf(-getBindingPlayer().getPitch());
+
+        return super.readEntry(entry);
     }
 
     @Override

@@ -92,6 +92,8 @@ public class WatcherIndex
         setTypeWatcher(EntityType.PIG, PigWatcher::new);
         setTypeWatcher(EntityType.COW, CowWatcher::new);
         setTypeWatcher(EntityType.CHICKEN, ChickenWatcher::new);
+
+        setTypeWatcher(EntityType.ENDER_DRAGON, EnderDragonWatcher::new);
     }
 
     private void setTypeWatcher(EntityType type, Function<Player, SingleWatcher> func)

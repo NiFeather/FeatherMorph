@@ -8,6 +8,7 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
 import org.bukkit.entity.Player;
 import xiamomc.pluginbase.Annotations.Resolved;
+import xyz.nifeather.morph.backends.server.renderer.network.PacketFactory;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.RenderRegistry;
 
@@ -36,10 +37,6 @@ public class EquipmentPacketListener extends ProtocolListener
             return;
 
         var packet = event.getPacket();
-
-        //不要处理来自我们自己的包
-        if (getFactory().isPacketOurs(packet))
-            return;
 
         onEquipmentPacket((ClientboundSetEquipmentPacket) event.getPacket().getHandle(), event);
     }
@@ -73,7 +70,7 @@ public class EquipmentPacketListener extends ProtocolListener
             return;
         }
 
-        event.setPacket(getFactory().getEquipmentPacket(sourcePlayer, watcher));
+        event.setPacket(PacketFactory.getEquipmentPacket(sourcePlayer, watcher));
 
         alreadyFake.put(sourcePlayer, true);
     }

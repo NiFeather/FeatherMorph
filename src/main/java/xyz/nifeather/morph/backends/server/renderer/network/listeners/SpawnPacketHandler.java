@@ -68,8 +68,9 @@ public class SpawnPacketHandler extends ProtocolListener
         watcher.writeEntry(CustomEntries.SPAWN_UUID, player.getUniqueId());
         watcher.writeEntry(CustomEntries.SPAWN_ID, player.getEntityId());
         watcher.writeEntry(CustomEntries.PROFILE_LISTED, true);
+        watcher.writeEntry(CustomEntries.DONT_INCLUDE_PACKET_IDENTIFIER, true);
 
-        var packets = getFactory().buildSpawnPackets(new DisplayParameters(watcher));
+        var packets = watcher.buildSpawnPackets();
 
         var removePacket = new ClientboundRemoveEntitiesPacket(player.getEntityId());
         var rmPacketContainer = PacketContainer.fromPacket(removePacket);
@@ -157,8 +158,7 @@ public class SpawnPacketHandler extends ProtocolListener
             watcher.writeEntry(CustomEntries.PROFILE, targetProfile == null ? new GameProfile(UUID.randomUUID(), disguiseName) : targetProfile);
         }
 
-        var parametersFinal = new DisplayParameters(watcher); //.setDontIncludeMeta();
-        var spawnPackets = getFactory().buildSpawnPackets(parametersFinal);
+        var spawnPackets = watcher.buildSpawnPackets();
 
         affectedPlayers.forEach(p ->
         {
@@ -177,12 +177,8 @@ public class SpawnPacketHandler extends ProtocolListener
         if (bindingWatcher == null)
             return;
 
-        //不要二次处理来自我们自己的包
-        if (!getFactory().isPacketOurs(packetContainer));
-        {
-            packetEvent.setCancelled(true);
-            refreshStateForPlayer(Bukkit.getPlayer(packet.getUUID()), List.of(packetEvent.getPlayer()));
-        }
+        packetEvent.setCancelled(true);
+        refreshStateForPlayer(Bukkit.getPlayer(packet.getUUID()), List.of(packetEvent.getPlayer()));
     }
 
     @Override

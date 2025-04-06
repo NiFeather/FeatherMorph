@@ -3,18 +3,26 @@ package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watcher
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.events.PacketContainer;
 import com.destroystokyo.paper.ClientOption;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientboundPlayerInfoRemovePacket;
+import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
+import net.minecraft.world.level.GameType;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Pose;
 import org.joml.Vector3i;
 import xyz.nifeather.morph.backends.server.renderer.network.DisplayParameters;
+import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntry;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.misc.AnimationNames;
 import xyz.nifeather.morph.misc.NmsRecord;
 
+import java.util.EnumSet;
+import java.util.List;
 import java.util.Optional;
 
 public class PlayerWatcher extends InventoryLivingWatcher
@@ -54,8 +62,7 @@ public class PlayerWatcher extends InventoryLivingWatcher
 
             if (!affected.isEmpty())
             {
-                var spawnPackets = getPacketFactory()
-                        .buildSpawnPackets(new DisplayParameters(this));
+                var spawnPackets = this.buildSpawnPackets();
 
                 var packetRemove = PacketContainer.fromPacket(new ClientboundRemoveEntitiesPacket(player.getEntityId()));
                 var protocol = ProtocolLibrary.getProtocolManager();
@@ -96,6 +103,44 @@ public class PlayerWatcher extends InventoryLivingWatcher
                 }
             }
         }
+    }
+
+    public List<Packet<?>> buildPlayerInfoPackets()
+    {
+        var spawnUUID = this.readEntryOrThrow(CustomEntries.SPAWN_UUID);
+        var infoRemove = new ClientboundPlayerInfoRemovePacket(List.of(spawnUUID));
+
+        var infoUpdate = new ClientboundPlayerInfoUpdatePacket(
+                EnumSet.of(
+                        ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER,
+                        ClientboundPlayerInfoUpdatePacket.Action.UPDATE_LISTED
+                ),
+                new ClientboundPlayerInfoUpdatePacket.Entry(
+                        spawnUUID, this.readEntryOrThrow(CustomEntries.PROFILE),
+                        this.readEntryOrDefault(CustomEntries.PROFILE_LISTED, false),
+                        114514, GameType.DEFAULT_MODE,
+                        null, true, 999, null
+                )
+        );
+
+        return List.of(infoRemove, infoUpdate);
+    }
+
+    @Override
+    public List<PacketContainer> buildSpawnPackets()
+    {
+        var list = new ObjectArrayList<PacketContainer>();
+
+        var gameProfile = this.readEntryOrThrow(CustomEntries.PROFILE);
+
+        if (gameProfile.getName().isBlank())
+            throw new IllegalArgumentException("GameProfile name is empty!");
+
+        this.buildPlayerInfoPackets().forEach(nmsPacket -> list.add(PacketContainer.fromPacket(nmsPacket)));
+
+        list.addAll(super.buildSpawnPackets());
+
+        return list;
     }
 
     private void resetValues()

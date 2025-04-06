@@ -2,6 +2,7 @@ package xyz.nifeather.morph.backends.server.renderer.network.registries;
 
 import com.mojang.authlib.GameProfile;
 import net.minecraft.Util;
+import org.jetbrains.annotations.ApiStatus;
 import xyz.nifeather.morph.misc.DisguiseEquipment;
 
 import java.util.UUID;
@@ -48,4 +49,18 @@ public class CustomEntries
     public static final CustomEntry<Boolean> ARMOR_STAND_SMALL = CustomEntry.of("armorstand_is_small", false);
     public static final CustomEntry<Boolean> ARMOR_STAND_NO_BASE_PLATE = CustomEntry.of("armorstand_no_baseplate", false);
     public static final CustomEntry<Boolean> ARMOR_STAND_SHOW_ARMS = CustomEntry.of("armorstand_show_arms", false);
+
+    public static final CustomEntry<Boolean> DONT_INCLUDE_PACKET_IDENTIFIER = CustomEntry.of("dont_include_packet_identifier", false);
+
+    /**
+     * "Overlayed" means that this value is not stored in the watcher's registry,
+     *  instead it will be generated on call.
+     */
+    public static final CustomEntry<Float> OVERLAYED_YAW = CustomEntry.of("overlayed_yaw", 0f);
+
+    /**
+     * "Overlayed" means that this value is not stored in the watcher's registry,
+     *  instead it will be generated on call.
+     */
+    public static final CustomEntry<Float> OVERLAYED_PITCH = CustomEntry.of("overlayed_pitch", 0f);
 }
