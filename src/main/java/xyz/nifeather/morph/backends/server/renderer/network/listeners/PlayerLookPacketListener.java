@@ -2,10 +2,7 @@ package xyz.nifeather.morph.backends.server.renderer.network.listeners;
 
 import com.github.retrooper.packetevents.event.PacketSendEvent;
 import com.github.retrooper.packetevents.protocol.packettype.PacketType;
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityHeadLook;
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityRelativeMoveAndRotation;
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityRotation;
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityTeleport;
+import com.github.retrooper.packetevents.wrapper.play.server.*;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Annotations.Resolved;
@@ -25,6 +22,19 @@ public class PlayerLookPacketListener extends ProtocolListener
     {
         switch (event.getPacketType())
         {
+            case PacketType.Play.Server.ENTITY_POSITION_SYNC ->
+            {
+                var wrapper = new WrapperPlayServerEntityPositionSync(event);
+                var data = wrapper.getValues();
+                var rec = this.getConvertedYawPitch(wrapper.getId(), data.getYaw(), data.getPitch());
+
+                if (rec == null)
+                    return;
+
+                data.setYaw(rec.yaw);
+                data.setPitch(rec.pitch);
+            }
+
             case PacketType.Play.Server.ENTITY_HEAD_LOOK ->
             {
                 var wrapper = new WrapperPlayServerEntityHeadLook(event);

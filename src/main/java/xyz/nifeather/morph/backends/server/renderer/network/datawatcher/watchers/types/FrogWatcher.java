@@ -52,7 +52,8 @@ public class FrogWatcher extends LivingEntityWatcher
             var typeString = nbt.getString("variant").orElseThrow();
             NamespacedKey key = NamespacedKey.fromString(typeString);
 
-            writePersistent(ValueIndex.FROG.FROG_VARIANT, getFrogVariant(key));
+            if (key != null)
+                writePersistent(ValueIndex.FROG.FROG_VARIANT, getFrogVariant(key));
         }
     }
 
