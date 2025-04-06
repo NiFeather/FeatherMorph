@@ -11,7 +11,6 @@ import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.values.SingleValue;
 import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
-import xyz.nifeather.morph.backends.server.renderer.utilties.ProtocolRegistryUtils;
 import xyz.nifeather.morph.misc.DisguiseEquipment;
 
 import java.util.List;
@@ -23,12 +22,7 @@ public class PacketFactory extends MorphPluginObject
 {
     public static PacketContainer buildDiffMetaPacket(SingleWatcher watcher)
     {
-        var metaPacket = new PacketContainer(PacketType.Play.Server.ENTITY_METADATA);
-        metaPacket.getIntegers().write(0, watcher.readEntryOrThrow(CustomEntries.SPAWN_ID));
-
-        var modifier = metaPacket.getDataValueCollectionModifier();
-
-        List<WrappedDataValue> wrappedDataValues = new ObjectArrayList<>();
+        List<EntityData> wrappedDataValues = new ObjectArrayList<>();
         var valuesToSent = watcher.getDirty();
         watcher.clearDirty();
 
@@ -38,10 +32,8 @@ public class PacketFactory extends MorphPluginObject
 
         valuesToSent.forEach((single, val) ->
         {
-            var wrapped = ((SingleValue<Object>)single).wrap(val);
-
-            if (wrapped != null)
-                wrappedDataValues.add(wrapped);
+            var wrapped =  new EntityData(single.index(), single.type(), val);
+            wrappedDataValues.add(wrapped);
         });
 
         modifier.write(0, wrappedDataValues);
@@ -55,12 +47,7 @@ public class PacketFactory extends MorphPluginObject
     {
         watcher.sync();
 
-        var metaPacket = new PacketContainer(PacketType.Play.Server.ENTITY_METADATA);
-        metaPacket.getIntegers().write(0, player.getEntityId());
-
-        var modifier = metaPacket.getDataValueCollectionModifier();
-
-        List<WrappedDataValue> wrappedDataValues = new ObjectArrayList<>();
+        List<EntityData> wrappedDataValues = new ObjectArrayList<>();
 
         // Add our packet identifier!
         if (!watcher.readEntryOrDefault(CustomEntries.DONT_INCLUDE_PACKET_IDENTIFIER, false))
@@ -76,10 +63,8 @@ public class PacketFactory extends MorphPluginObject
             if (sv == null)
                 throw new IllegalArgumentException("Not SingleValue found for index " + index);
 
-            var wrapped = ((SingleValue<Object>)sv).wrap(val);
-
-            if (wrapped != null)
-                wrappedDataValues.add(wrapped);
+            var wrapped =  new EntityData(index, sv.type(), val);
+            wrappedDataValues.add(wrapped);
         });
 
         modifier.write(0, wrappedDataValues);
@@ -91,12 +76,9 @@ public class PacketFactory extends MorphPluginObject
     {
         var shouldDisplayFakeEquip = watcher.readEntryOrDefault(CustomEntries.DISPLAY_FAKE_EQUIPMENT, false);
         EntityEquipment equipment = shouldDisplayFakeEquip
-                    ? watcher.readEntryOrDefault(CustomEntries.EQUIPMENT, new DisguiseEquipment())
-                    : player.getEquipment();
+                ? watcher.readEntryOrDefault(CustomEntries.EQUIPMENT, new DisguiseEquipment())
+                : player.getEquipment();
 
-        var rawPacket = new ClientboundSetEquipmentPacket(player.getEntityId(),
-                ProtocolEquipment.toPairs(equipment));
-
-        return PacketContainer.fromPacket(rawPacket);
+        return ProtocolEquipment.toPEEquipmentList(equipment);
     }
 }

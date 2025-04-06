@@ -1,16 +1,11 @@
 package xyz.nifeather.morph.backends.server.renderer.network.listeners;
 
-import com.comphenix.protocol.PacketType;
-import com.comphenix.protocol.ProtocolLibrary;
-import com.comphenix.protocol.events.ListeningWhitelist;
-import com.comphenix.protocol.events.PacketContainer;
-import com.comphenix.protocol.events.PacketEvent;
-import com.comphenix.protocol.injector.GamePhase;
+import com.github.retrooper.packetevents.event.PacketSendEvent;
+import com.github.retrooper.packetevents.protocol.packettype.PacketType;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerDestroyEntities;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerPlayerInfoRemove;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSpawnEntity;
 import com.mojang.authlib.GameProfile;
-import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
-import net.minecraft.network.protocol.game.ClientboundPlayerInfoRemovePacket;
-import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
-import net.minecraft.world.entity.EntityType;
 import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
@@ -59,7 +54,7 @@ public class SpawnPacketHandler extends ProtocolListener
     {
         if (player == null) return;
 
-        var protocolManager = ProtocolLibrary.getProtocolManager();
+        var protocolManager = playerManager();
         var affectedPlayers = getAffectedPlayers(player);
         var watcher = new PlayerWatcher(player);
         watcher.markSilent(this);
@@ -72,28 +67,26 @@ public class SpawnPacketHandler extends ProtocolListener
 
         var packets = watcher.buildSpawnPackets();
 
-        var removePacket = new ClientboundRemoveEntitiesPacket(player.getEntityId());
-        var rmPacketContainer = PacketContainer.fromPacket(removePacket);
+        var removePacket = new WrapperPlayServerDestroyEntities(player.getEntityId());
 
         if (disguiseWatcher.getEntityType() == org.bukkit.entity.EntityType.PLAYER
                 && !disguiseWatcher.readEntryOrDefault(CustomEntries.PROFILE_LISTED, false))
         {
             var disguiseUUID = disguiseWatcher.readEntryOrThrow(CustomEntries.SPAWN_UUID);
 
-            var packetRemoveInfo = PacketContainer.fromPacket(
-                    new ClientboundPlayerInfoRemovePacket(List.of(disguiseUUID)));
+            var packetRemoveInfo = new WrapperPlayServerPlayerInfoRemove(disguiseUUID);
 
-            Bukkit.getOnlinePlayers().forEach(p -> protocolManager.sendServerPacket(p, packetRemoveInfo));
+            Bukkit.getOnlinePlayers().forEach(p -> protocolManager.sendPacket(p, packetRemoveInfo));
         }
 
         watcher.dispose();
 
         affectedPlayers.forEach(p ->
         {
-            protocolManager.sendServerPacket(p, rmPacketContainer);
+            protocolManager.sendPacket(p, removePacket);
 
-            for (PacketContainer packet : packets)
-                protocolManager.sendServerPacket(p, packet);
+            for (var packet : packets)
+                protocolManager.sendPacket(p, packet);
         });
     }
 
@@ -110,6 +103,16 @@ public class SpawnPacketHandler extends ProtocolListener
                 affectedPlayers);
     }
 
+    @Override
+    public void onPacketSend(PacketSendEvent event)
+    {
+        if (event.getPacketType() != PacketType.Play.Server.SPAWN_ENTITY)
+            return;
+
+        var wrapper = new WrapperPlayServerSpawnEntity(event);
+        this.onEntityAddPacket(wrapper, event);
+    }
+
     /**
      * 刷新玩家的伪装
      * @param player 目标玩家
@@ -122,11 +125,10 @@ public class SpawnPacketHandler extends ProtocolListener
         if (player == null) return;
         var watcher = displayParameters.getWatcher();
 
-        var protocolManager = ProtocolLibrary.getProtocolManager();
+        var protocolManager = playerManager();
 
         //先发包移除当前实体
-        var packetRemove = new ClientboundRemoveEntitiesPacket(player.getEntityId());
-        var packetRemoveContainer = PacketContainer.fromPacket(packetRemove);
+        var removePacket = new WrapperPlayServerDestroyEntities(player.getEntityId());
 
         //然后发包创建实体
         //确保gameProfile非空
@@ -162,57 +164,29 @@ public class SpawnPacketHandler extends ProtocolListener
 
         affectedPlayers.forEach(p ->
         {
-            protocolManager.sendServerPacket(p, packetRemoveContainer);
+            protocolManager.sendPacket(p, removePacket);
 
-            spawnPackets.forEach(packet -> protocolManager.sendServerPacket(p, packet));
+            spawnPackets.forEach(packet -> protocolManager.sendPacket(p, packet));
         });
     }
 
-    private void onEntityAddPacket(ClientboundAddEntityPacket packet, PacketEvent packetEvent)
+    private void onEntityAddPacket(WrapperPlayServerSpawnEntity packet, PacketSendEvent packetEvent)
     {
-        var packetContainer = packetEvent.getPacket();
+        var uuid = packet.getUUID().orElse(null);
+
+        if (uuid == null)
+            return;
 
         //忽略不在注册表中的玩家
-        var bindingWatcher = registry.getWatcher(packet.getUUID());
+        var bindingWatcher = registry.getWatcher(uuid);
         if (bindingWatcher == null)
             return;
 
+        // todo: 不要二次处理来自我们自己的包
+        //if (getFactory().isPacketOurs(packetContainer))
+        //    return;
+
         packetEvent.setCancelled(true);
-        refreshStateForPlayer(Bukkit.getPlayer(packet.getUUID()), List.of(packetEvent.getPlayer()));
-    }
-
-    @Override
-    public void onPacketSending(PacketEvent packetEvent)
-    {
-        if (!packetEvent.isServerPacket()) return;
-
-        var packetContainer = packetEvent.getPacket();
-        if (packetContainer.getHandle() instanceof ClientboundAddEntityPacket originalPacket
-                && originalPacket.getType() == EntityType.PLAYER)
-        {
-            onEntityAddPacket(originalPacket, packetEvent);
-        }
-    }
-
-    @Override
-    public void onPacketReceiving(PacketEvent packetEvent)
-    {
-    }
-
-    private final ListeningWhitelist listeningWhitelist = ListeningWhitelist
-            .newBuilder()
-            .types(PacketType.Play.Server.SPAWN_ENTITY)
-            .build();
-
-    @Override
-    public ListeningWhitelist getSendingWhitelist()
-    {
-        return listeningWhitelist;
-    }
-
-    @Override
-    public ListeningWhitelist getReceivingWhitelist()
-    {
-        return ListeningWhitelist.EMPTY_WHITELIST;
+        refreshStateForPlayer(Bukkit.getPlayer(uuid), List.of(packetEvent.getPlayer()));
     }
 }

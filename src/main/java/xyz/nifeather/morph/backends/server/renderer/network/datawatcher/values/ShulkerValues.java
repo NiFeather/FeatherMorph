@@ -1,6 +1,5 @@
 package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.values;
 
-import xyz.nifeather.morph.backends.server.renderer.network.CustomSerializeMethods;
 import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.DataWrappers;
 
 public class ShulkerValues extends MonsterValues

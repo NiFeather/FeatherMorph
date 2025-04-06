@@ -68,6 +68,20 @@ repositories {
             includeGroup("com.palmergames.bukkit.towny")
         }
     }
+
+    maven {
+        url = uri("https://repo.codemc.io/repository/maven-releases/")
+        content {
+            includeGroup("com.github.retrooper")
+        }
+    }
+
+    maven {
+        url = uri("https://repo.codemc.io/repository/maven-snapshots/")
+        content {
+            includeGroup("com.github.retrooper")
+        }
+    }
 }
 
 paperweight.reobfArtifactConfiguration = ReobfArtifactConfiguration.MOJANG_PRODUCTION
@@ -75,9 +89,8 @@ paperweight.reobfArtifactConfiguration = ReobfArtifactConfiguration.MOJANG_PRODU
 dependencies {
     paperweight.paperDevBundle("${project.property("minecraft_version")}")
 
-    compileOnly("com.comphenix.protocol:ProtocolLib:${project.property("protocollib_version")}")
+    compileOnly("com.github.retrooper:packetevents-spigot:${project.property("packetevents_version")}")
     {
-        isTransitive = false
     }
 
     compileOnly(files("libs/CMILib1.4.3.5.jar"))
@@ -137,7 +150,7 @@ paper {
     authors = listOf("MATRIX-feather")
 
     serverDependencies {
-        register("ProtocolLib") {
+        register("packetevents") {
             load = PaperPluginDescription.RelativeLoadOrder.BEFORE
             required = false
             joinClasspath = true

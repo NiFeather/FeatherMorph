@@ -1,11 +1,15 @@
 package xyz.nifeather.morph.misc;
 
 import com.destroystokyo.paper.profile.PlayerProfile;
+import com.github.retrooper.packetevents.protocol.player.TextureProperty;
+import com.github.retrooper.packetevents.protocol.player.UserProfile;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -19,7 +23,7 @@ public class MorphGameProfile extends GameProfile
      * <p/>
      * Either ID or name may be null/empty, but at least one must be filled.
      *
-     * @param profile   profile
+     * @param profile profile
      * @throws IllegalArgumentException Both ID and name are either null or empty
      */
     public MorphGameProfile(@NotNull PlayerProfile profile)
@@ -83,8 +87,24 @@ public class MorphGameProfile extends GameProfile
      * @return Modifiable map of profile properties.
      */
     @Override
-    public PropertyMap getProperties() {
+    public PropertyMap getProperties()
+    {
         return map;
     }
 
+    public static UserProfile toPacketEventsUserProfile(GameProfile profile)
+    {
+        var userProfile = new UserProfile(profile.getId(), profile.getName());
+
+        List<TextureProperty> propertyList = new ObjectArrayList<>();
+        profile.getProperties().forEach((str, property) ->
+        {
+            var textureProperty = new TextureProperty(property.name(), property.value(), property.signature());
+            propertyList.add(textureProperty);
+        });
+
+        userProfile.setTextureProperties(propertyList);
+
+        return userProfile;
+    }
 }

@@ -1,18 +1,15 @@
 package xyz.nifeather.morph.backends.server.renderer.network.listeners;
 
-import com.comphenix.protocol.ProtocolLibrary;
-import com.comphenix.protocol.ProtocolManager;
-import com.comphenix.protocol.events.PacketEvent;
-import com.comphenix.protocol.events.PacketListener;
+import com.github.retrooper.packetevents.PacketEvents;
+import com.github.retrooper.packetevents.event.PacketListener;
+import com.github.retrooper.packetevents.manager.player.PlayerManager;
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import org.bukkit.Bukkit;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
-import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.backends.server.renderer.network.PacketFactory;
 import xyz.nifeather.morph.config.ConfigOption;
@@ -26,15 +23,9 @@ public abstract class ProtocolListener extends MorphPluginObject implements Pack
 {
     public abstract String getIdentifier();
 
-    protected ProtocolManager protocolManager()
+    protected PlayerManager playerManager()
     {
-        return ProtocolLibrary.getProtocolManager();
-    }
-
-    @Override
-    public org.bukkit.plugin.Plugin getPlugin()
-    {
-        return FeatherMorphMain.getInstance();
+        return PacketEvents.getAPI().getPlayerManager();
     }
 
     private final Bindable<Boolean> debugOutput = new Bindable<>(false);
@@ -101,24 +92,5 @@ public abstract class ProtocolListener extends MorphPluginObject implements Pack
         }
 
         return null;
-    }
-
-    @Nullable
-    protected Entity getNmsEntityFrom(PacketEvent event, int id)
-    {
-        var packetTarget = event.getPlayer();
-        var sourceNmsEntity = NmsUtils.getNmsLevel(packetTarget.getWorld()).getEntity(id);
-        if (sourceNmsEntity == null)
-        {
-            if (debugOutput.get())
-            {
-                logger.warn("A packet from a player that doesn't exist in its world?!");
-                logger.warn("Packet: " + event.getPacketType());
-            }
-
-            return null;
-        }
-
-        return sourceNmsEntity;
     }
 }

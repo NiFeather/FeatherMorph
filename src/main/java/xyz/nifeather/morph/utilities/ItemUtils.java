@@ -1,5 +1,7 @@
 package xyz.nifeather.morph.utilities;
 
+import com.github.retrooper.packetevents.protocol.item.type.ItemType;
+import com.github.retrooper.packetevents.protocol.item.type.ItemTypes;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.mojang.serialization.JsonOps;
@@ -18,6 +20,8 @@ public class ItemUtils
     public static final ItemStack air = new ItemStack(Material.AIR, 1);
 
     public static final net.minecraft.world.item.ItemStack nmsAir = net.minecraft.world.item.ItemStack.fromBukkitCopy(air);
+    public static final com.github.retrooper.packetevents.protocol.item.ItemStack peAir = new com.github.retrooper.packetevents.protocol.item.ItemStack.Builder()
+            .type(ItemTypes.AIR).build();
 
     public static ItemStack itemOrAir(ItemStack stack)
     {

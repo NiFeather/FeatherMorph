@@ -2,7 +2,6 @@ package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.values.
 
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Pose;
-import xyz.nifeather.morph.backends.server.renderer.network.CustomSerializeMethods;
 import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.values.AbstractValues;
 import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.values.SingleValue;
 

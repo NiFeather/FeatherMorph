@@ -1,13 +1,8 @@
 package xyz.nifeather.morph.backends.server.renderer.network.listeners;
 
-import com.comphenix.protocol.PacketType;
-import com.comphenix.protocol.events.ListeningWhitelist;
-import com.comphenix.protocol.events.PacketContainer;
-import com.comphenix.protocol.events.PacketEvent;
-import com.comphenix.protocol.injector.GamePhase;
-import com.comphenix.protocol.wrappers.WrappedDataValue;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
+import com.github.retrooper.packetevents.event.PacketSendEvent;
+import com.github.retrooper.packetevents.protocol.packettype.PacketType;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityMetadata;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import xiamomc.pluginbase.Annotations.Resolved;
@@ -32,18 +27,19 @@ public class MetaPacketListener extends ProtocolListener
     }
 
     @Override
-    public void onPacketSending(PacketEvent event)
+    public void onPacketSend(PacketSendEvent event)
     {
         if (event.getPacketType() != PacketType.Play.Server.ENTITY_METADATA)
             return;
 
-        onMetaPacket((ClientboundSetEntityDataPacket) event.getPacket().getHandle(), event);
+        var wrapper = new WrapperPlayServerEntityMetadata(event);
+        this.onMetaPacket(wrapper, event);
     }
 
-    private void onMetaPacket(ClientboundSetEntityDataPacket packet, PacketEvent packetEvent)
+    private void onMetaPacket(WrapperPlayServerEntityMetadata packet, PacketSendEvent packetEvent)
     {
         //获取此包的来源实体
-        var sourceNmsEntity = getNmsPlayerFrom(packet.id());
+        var sourceNmsEntity = getNmsPlayerFrom(packet.getEntityId());
 
         // How could this be?!
         if (sourceNmsEntity == null)
