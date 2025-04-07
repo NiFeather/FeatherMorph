@@ -19,7 +19,8 @@ public class ProtocolHandler extends MorphPluginObject
                 new EquipmentPacketListener(),
                 new PlayerLookPacketListener(),
                 new SoundListener(),
-                new AnimationPacketListener()
+                new AnimationPacketListener(),
+                new AttributePacketListener()
         );
     }
 

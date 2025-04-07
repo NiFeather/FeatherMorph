@@ -25,6 +25,10 @@ import xyz.nifeather.morph.misc.skins.PlayerSkinProvider;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * The listener that handles the spawn packet!
+ * We also handle renderer register/unregister here. todo: Maybe we want to move this part to somewhere else?
+ */
 public class SpawnPacketHandler extends ProtocolListener
 {
     @Resolved(shouldSolveImmediately = true)

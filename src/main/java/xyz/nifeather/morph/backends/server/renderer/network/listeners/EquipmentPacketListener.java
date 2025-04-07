@@ -12,6 +12,10 @@ import xyz.nifeather.morph.backends.server.renderer.network.registries.RenderReg
 
 import java.util.Map;
 
+/**
+ * Listener used to override the equipment so that we can display the disguise's equipment.
+ * todo: This might catch packets sent by us? We probably don't want this to happen, as it will cause unnecessary performance cost.
+ */
 public class EquipmentPacketListener extends ProtocolListener
 {
     @Resolved(shouldSolveImmediately = true)
@@ -35,10 +39,6 @@ public class EquipmentPacketListener extends ProtocolListener
             return;
 
         var wrapper = new WrapperPlayServerEntityEquipment(event);
-
-        //todo: 不要处理来自我们自己的包
-        //if (getFactory().isPacketOurs(packet))
-        //    return;
 
         onEquipmentPacket(wrapper, event);
     }

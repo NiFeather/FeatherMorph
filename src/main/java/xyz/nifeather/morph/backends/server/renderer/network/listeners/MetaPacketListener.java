@@ -17,6 +17,9 @@ import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueInde
 
 import java.util.List;
 
+/**
+ * Listener used to override the metadata packet, so that the client won't panic when it received player's meta but the player is disguised as a mob.
+ */
 public class MetaPacketListener extends ProtocolListener
 {
     @Resolved(shouldSolveImmediately = true)
@@ -76,9 +79,6 @@ public class MetaPacketListener extends ProtocolListener
 
     /**
      * 重构服务器将要发送的Meta包
-     * <br>
-     * 直接修改Meta包会导致一些玄学问题，例如修改后的值在之后被发给了不该收到的人
-     * @return 剔除后的包
      */
     public void rebuildServerMetaPacket(AbstractValues av, SingleWatcher watcher, WrapperPlayServerEntityMetadata packetWrapper)
     {

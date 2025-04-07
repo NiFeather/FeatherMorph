@@ -9,6 +9,9 @@ import xiamomc.pluginbase.Annotations.Resolved;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.RenderRegistry;
 
+/**
+ * Listener used to fix the rotation issue for Phantom/Ender Dragon disguise
+ */
 public class PlayerLookPacketListener extends ProtocolListener
 {
     @Override

@@ -7,6 +7,9 @@ import org.bukkit.entity.Player;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.RenderRegistry;
 
+/**
+ * Listener used to override the entity animation packet so that we can keep the animation set by disguise action
+ */
 public class AnimationPacketListener extends ProtocolListener
 {
     @Override
