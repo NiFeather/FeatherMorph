@@ -77,11 +77,11 @@ public class WolfWatcher extends TameableAnimalWatcher
         super.mergeFromCompound(nbt);
 
         if (nbt.contains("CollarColor"))
-            writePersistent(ValueIndex.WOLF.COLLAR_COLOR, (int)nbt.getByte("CollarColor").orElseThrow());
+            writePersistent(ValueIndex.WOLF.COLLAR_COLOR, (int)nbt.getByte("CollarColor"));
 
         if (nbt.contains("variant"))
         {
-            var typeString = nbt.getString("variant").orElseThrow();
+            var typeString = nbt.getString("variant");
             NamespacedKey key = NamespacedKey.fromString(typeString);;
 
             if (key == null && FeatherMorphMain.getInstance().doInternalDebugOutput)

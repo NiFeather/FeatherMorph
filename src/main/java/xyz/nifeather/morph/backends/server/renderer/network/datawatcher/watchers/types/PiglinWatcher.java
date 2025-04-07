@@ -53,7 +53,7 @@ public class PiglinWatcher extends LivingEntityWatcher
         super.mergeFromCompound(nbt);
 
         if (nbt.contains("IsBaby"))
-            writePersistent(ValueIndex.PIGLIN.IS_BABY, nbt.getBoolean("IsBaby").orElseThrow());
+            writePersistent(ValueIndex.PIGLIN.IS_BABY, nbt.getBoolean("IsBaby"));
 
         //if (nbt.contains("IsImmuneToZombification"))
         //    write(ValueIndex.PIGLIN.IMMUNE_TO_ZOMBIFICATION, nbt.getBoolean("IsImmuneToZombification"));

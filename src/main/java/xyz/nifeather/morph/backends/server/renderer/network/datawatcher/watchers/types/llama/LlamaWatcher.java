@@ -51,12 +51,12 @@ public class LlamaWatcher extends ChestedHorseWatcher
         super.mergeFromCompound(nbt);
 
         if (nbt.contains("Strength"))
-            writePersistent(ValueIndex.LLAMA.SLOTS, nbt.getInt("Strength").orElseThrow());
+            writePersistent(ValueIndex.LLAMA.SLOTS, nbt.getInt("Strength"));
 
         if (nbt.contains("DecorItem"))
             logger.warn("todo: Llama DecorItem is not implemented.");
 
         if (nbt.contains("Variant"))
-            writePersistent(ValueIndex.LLAMA.VARIANT, nbt.getInt("Variant").orElseThrow());
+            writePersistent(ValueIndex.LLAMA.VARIANT, nbt.getInt("Variant"));
     }
 }

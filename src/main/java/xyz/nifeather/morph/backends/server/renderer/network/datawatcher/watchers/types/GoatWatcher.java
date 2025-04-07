@@ -43,13 +43,13 @@ public class GoatWatcher extends LivingEntityWatcher
         super.mergeFromCompound(nbt);
 
         if (nbt.contains("HasLeftHorn"))
-            writePersistent(ValueIndex.GOAT.HAS_LEFT_HORN, nbt.getBoolean("HasLeftHorn").orElseThrow());
+            writePersistent(ValueIndex.GOAT.HAS_LEFT_HORN, nbt.getBoolean("HasLeftHorn"));
 
         if (nbt.contains("HasRightHorn"))
-            writePersistent(ValueIndex.GOAT.HAS_RIGHT_HORN, nbt.getBoolean("HasRightHorn").orElseThrow());
+            writePersistent(ValueIndex.GOAT.HAS_RIGHT_HORN, nbt.getBoolean("HasRightHorn"));
 
         if (nbt.contains("IsScreamingGoat"))
-            writePersistent(ValueIndex.GOAT.IS_SCREAMING, nbt.getBoolean("IsScreamingGoat").orElseThrow());
+            writePersistent(ValueIndex.GOAT.IS_SCREAMING, nbt.getBoolean("IsScreamingGoat"));
     }
 
     @Override

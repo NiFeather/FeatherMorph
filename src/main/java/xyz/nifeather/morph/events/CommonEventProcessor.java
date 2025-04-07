@@ -611,7 +611,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         if (!(block.getBlockData() instanceof CreakingHeart creakingHeart))
             return;
 
-        if (creakingHeart.getCreakingHeartState() != CreakingHeart.State.AWAKE || !creakingHeart.isNatural())
+        if (!creakingHeart.isActive() || !creakingHeart.isNatural())
             return;
 
         morphs.grantMorphToPlayer(event.getPlayer(), EntityType.CREAKING.getKey().asString());

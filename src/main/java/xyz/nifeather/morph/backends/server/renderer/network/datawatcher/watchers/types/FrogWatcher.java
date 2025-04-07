@@ -49,7 +49,7 @@ public class FrogWatcher extends LivingEntityWatcher
 
         if (nbt.contains("variant"))
         {
-            var typeString = nbt.getString("variant").orElseThrow();
+            var typeString = nbt.getString("variant");
             NamespacedKey key = NamespacedKey.fromString(typeString);
 
             if (key != null)
