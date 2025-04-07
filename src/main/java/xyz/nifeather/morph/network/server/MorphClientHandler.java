@@ -123,8 +123,8 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
 
         if (!player.isOnline() || getPlayerConnectionState(player).worseThan(InitializeState.HANDSHAKE)) return;
 
-        if (logOutGoingPackets.get())
-            logPacket(true, player, channel, buffer.array());
+        //if (logOutGoingPackets.get())
+        //    logPacket(true, player, channel, buffer.array());
 
         try
         {
@@ -133,6 +133,9 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
 
             if (!player.getListeningPluginChannels().contains(channel))
                 throw new NullDependencyException("Channel %s is INVALID for player %s!".formatted(channel, player.getName()));
+
+            if (!plugin.isEnabled())
+                return;
 
             player.sendPluginMessage(plugin, channel, bufferBytes);
         }
@@ -178,6 +181,9 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
 
     private void logPacket(boolean isOutGoingPacket, Player player, String channel, String data, int size)
     {
+        if (!plugin.isEnabled())
+            return;
+
         var arrow = isOutGoingPacket ? " -> " : " <- ";
 
         String builder = channel + arrow
