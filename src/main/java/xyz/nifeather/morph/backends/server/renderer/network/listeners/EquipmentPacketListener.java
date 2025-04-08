@@ -48,11 +48,9 @@ public class EquipmentPacketListener extends ProtocolListener
     private void onEquipmentPacket(WrapperPlayServerEntityEquipment packet, PacketSendEvent event)
     {
         //获取此包的来源实体
-        var sourceNmsEntity = getNmsPlayerFrom(packet.getEntityId());
-        if (sourceNmsEntity == null)
+        var sourcePlayer = getPlayerFrom(packet.getEntityId());
+        if (sourcePlayer == null)
             return;
-
-        if (!(sourceNmsEntity.getBukkitEntity() instanceof Player sourcePlayer)) return;
 
         var watcher = registry.getWatcher(sourcePlayer.getUniqueId());
 

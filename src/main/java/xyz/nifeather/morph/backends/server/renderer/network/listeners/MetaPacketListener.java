@@ -7,7 +7,6 @@ import com.github.retrooper.packetevents.protocol.packettype.PacketType;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityMetadata;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Player;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xyz.nifeather.morph.backends.server.renderer.network.PacketFactory;
 import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.values.AbstractValues;
@@ -44,13 +43,11 @@ public class MetaPacketListener extends ProtocolListener
     private void onMetaPacket(WrapperPlayServerEntityMetadata packet, PacketSendEvent packetEvent)
     {
         //获取此包的来源实体
-        var sourceNmsEntity = getNmsPlayerFrom(packet.getEntityId());
+        var sourcePlayer = getPlayerFrom(packet.getEntityId());
 
         // How could this be?!
-        if (sourceNmsEntity == null)
+        if (sourcePlayer == null)
             return;
-
-        if (!(sourceNmsEntity.getBukkitEntity() instanceof Player sourcePlayer)) return;
 
         if (sourcePlayer.equals(packetEvent.getPlayer())) return;
 

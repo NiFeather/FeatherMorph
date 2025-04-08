@@ -29,11 +29,11 @@ public class AttributePacketListener extends ProtocolListener
 
         var wrapper = new WrapperPlayServerUpdateAttributes(event);
 
-        var sourcePlayer = getNmsPlayerFrom(wrapper.getEntityId());
+        var sourcePlayer = getPlayerFrom(wrapper.getEntityId());
         if (sourcePlayer == null)
             return;
 
-        var watcher = registry.getWatcher(sourcePlayer.getUUID());
+        var watcher = registry.getWatcher(sourcePlayer.getUniqueId());
         if (watcher == null)
             return;
 

@@ -3,7 +3,6 @@ package xyz.nifeather.morph.backends.server.renderer.network.listeners;
 import com.github.retrooper.packetevents.event.PacketSendEvent;
 import com.github.retrooper.packetevents.protocol.packettype.PacketType;
 import com.github.retrooper.packetevents.wrapper.play.server.*;
-import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
@@ -101,11 +100,8 @@ public class PlayerLookPacketListener extends ProtocolListener
     private YawPitchRec getConvertedYawPitch(int entityId, float rawYaw, float rawPitch)
     {
         //获取此包的来源实体
-        var sourceNmsEntity = getNmsPlayerFrom(entityId);
-        if (sourceNmsEntity == null)
-            return null;
-
-        if (!(sourceNmsEntity.getBukkitEntity() instanceof Player sourcePlayer))
+        var sourcePlayer = getPlayerFrom(entityId);
+        if (sourcePlayer == null)
             return null;
 
         var watcher = registry.getWatcher(sourcePlayer.getUniqueId());

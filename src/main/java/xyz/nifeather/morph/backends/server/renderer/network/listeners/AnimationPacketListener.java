@@ -3,7 +3,6 @@ package xyz.nifeather.morph.backends.server.renderer.network.listeners;
 import com.github.retrooper.packetevents.event.PacketSendEvent;
 import com.github.retrooper.packetevents.protocol.packettype.PacketType;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityAnimation;
-import org.bukkit.entity.Player;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.RenderRegistry;
 
@@ -37,11 +36,9 @@ public class AnimationPacketListener extends ProtocolListener
             return;
 
         var sourceEntityId = packet.getEntityId();
-        var nmsPlayer = this.getNmsPlayerFrom(sourceEntityId);
+        var sourcePlayer = this.getPlayerFrom(sourceEntityId);
 
-        if (nmsPlayer == null) return;
-
-        if (!(nmsPlayer.getBukkitEntity() instanceof Player sourcePlayer)) return;
+        if (sourcePlayer == null) return;
 
         var watcher = registry.getWatcher(sourcePlayer.getUniqueId());
 
