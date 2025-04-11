@@ -117,8 +117,8 @@ public class PlayerWatcher extends InventoryLivingWatcher
                 ),
                 new WrapperPlayServerPlayerInfoUpdate.PlayerInfo(
                         packetProfile,
-                        true, 114514, GameMode.defaultGameMode(), null,
-                        null, 999, true
+                        this.readEntryOrDefault(CustomEntries.PROFILE_LISTED, false), 114514, GameMode.defaultGameMode(), null,
+                        null, 0, true
                 )
         );
 
