@@ -51,6 +51,8 @@ public class ValueIndex
     public static final CowValues COW = new CowValues();
     public static final ChickenValues CHICKEN = new ChickenValues();
 
+    public static final EnderDragonValues ENDER_DRAGON = new EnderDragonValues();
+
     /*
     private static final Map<EntityType, AbstractValues> valuesMap = new ConcurrentHashMap<>();
     private static void register(EntityType type, AbstractValues values)

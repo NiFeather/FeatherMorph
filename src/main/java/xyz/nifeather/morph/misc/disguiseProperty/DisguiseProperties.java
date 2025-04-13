@@ -42,6 +42,8 @@ public class DisguiseProperties
         register(EntityType.PIG, new PigProperties());
         register(EntityType.COW, new CowProperties());
         register(EntityType.CHICKEN, new ChickenProperties());
+
+        register(EntityType.ENDER_DRAGON, new EnderDragonProperties());
     }
 
     private final OffTreeProperties offTreeProperties = new OffTreeProperties();

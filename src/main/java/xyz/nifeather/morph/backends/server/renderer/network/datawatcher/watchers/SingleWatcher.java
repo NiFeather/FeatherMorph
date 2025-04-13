@@ -376,6 +376,9 @@ public abstract class SingleWatcher extends MorphPluginObject
     {
     }
 
+    /**
+     * @return A value set for this watcher, RETURNS DEFAULT VALUE IF NOT SET
+     */
     @NotNull
     public <X> X read(SingleValue<X> singleValue)
     {
