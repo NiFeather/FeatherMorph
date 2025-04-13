@@ -80,6 +80,12 @@ public class SkillsConfigurationStoreNew extends DirectoryJsonBasedStorage<Skill
             if (targetOption == null) continue;
 
             var key = getKeyFromFile(file);
+            if (key == null)
+            {
+                logger.warn("Can't get mob key from '%s', see errors above.".formatted(file.toString()));
+                continue;
+            }
+
             config.legacy_MobID = key;
             logger.info("Migrating " + key);
 

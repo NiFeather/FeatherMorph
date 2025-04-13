@@ -118,7 +118,7 @@ public abstract class DirectoryJsonBasedStorage<T> extends MorphPluginObject
     public String getKeyFromFile(File file)
     {
         var root = directoryStorage.getRootDirectory();
-        var rootUri = root.getPath();
+        var rootUri = root.toPath().toUri().getPath();
         var fileUri = file.toPath().toUri().getPath();
 
         if (!fileUri.startsWith(rootUri))
