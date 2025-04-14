@@ -1,5 +1,6 @@
 package xyz.nifeather.morph.backends.server.renderer.network;
 
+import com.github.retrooper.packetevents.protocol.item.type.ItemTypes;
 import com.github.retrooper.packetevents.protocol.player.Equipment;
 import com.github.retrooper.packetevents.protocol.player.EquipmentSlot;
 import io.github.retrooper.packetevents.util.SpigotConversionUtil;
@@ -43,6 +44,9 @@ public class ProtocolEquipment
         };
     }
 
+    public static final com.github.retrooper.packetevents.protocol.item.ItemStack peAir = new com.github.retrooper.packetevents.protocol.item.ItemStack.Builder()
+            .type(ItemTypes.AIR).build();
+
     @Nullable
     private static Equipment toEquipment(EntityEquipment equipment, org.bukkit.inventory.EquipmentSlot bukkitSlot)
     {
@@ -68,6 +72,6 @@ public class ProtocolEquipment
             t.printStackTrace();
         }
 
-        return new Equipment(EquipmentSlot.BOOTS, ItemUtils.peAir);
+        return new Equipment(EquipmentSlot.BOOTS, peAir);
     }
 }
