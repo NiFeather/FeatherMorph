@@ -1,5 +1,6 @@
 package xyz.nifeather.morph.events;
 
+import io.papermc.paper.entity.TeleportFlag;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -7,14 +8,17 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityMountEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.util.Vector;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.FeatherMorphMain;
+import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.api.FeatherMorphAPI;
 import xyz.nifeather.morph.events.api.gameplay.PlayerMorphEarlyEvent;
 
 import java.util.function.Predicate;
 
-public class WorkaroundProcessor implements Listener
+public class WorkaroundProcessor extends MorphPluginObject implements Listener
 {
     /**
      * Prevent players locking others by disguising as Creaking
@@ -46,11 +50,12 @@ public class WorkaroundProcessor implements Listener
         var morphManager = FeatherMorphAPI.instance().directAccess().morphManager();
 
         var playerDisguiseState = morphManager.getDisguiseStateFor(player);
-        if (playerDisguiseState == null)
-            return;
 
-        if (playerDisguiseState.getEntityType() == EntityType.PLAYER)
-            playerDisguiseState.stopAnimations();
+        if (playerDisguiseState != null)
+        {
+            if (playerDisguiseState.getEntityType() == EntityType.PLAYER)
+                playerDisguiseState.stopAnimations();
+        }
 
         // Riding on a virtual Creaking would result in a bad state for game clients
         var matchingVehicle = findAnyVehicle(event.getMount(), entity ->
@@ -58,22 +63,27 @@ public class WorkaroundProcessor implements Listener
             if (!(entity instanceof Player vehiclePlayer))
                 return false;
 
-            var state = morphManager.getDisguiseStateFor(vehiclePlayer);
-            if (state == null)
+            var theirState = morphManager.getDisguiseStateFor(vehiclePlayer);
+            if (theirState == null)
                 return false;
 
-            return state.getEntityType() == EntityType.CREAKING;
+            return theirState.getEntityType() == EntityType.CREAKING;
         });
 
         if (matchingVehicle == null)
             return;
 
+        final var mountLocation = player.getLocation();
+
         // Bad behavior! We should cancel the event...
         // ...but having `HIGHEST` priority and cancelling the event would cause a bad state for GSit... :<
-        FeatherMorphMain.getInstance().schedule(() ->
+        this.scheduleOn(player, () ->
         {
-            if (player.getVehicle() == event.getMount())
-                player.leaveVehicle();
+            if (player.getVehicle() != event.getMount())
+                return;
+
+            player.leaveVehicle();
+            player.teleportAsync(mountLocation);
         });
 
         event.setCancelled(true);
