@@ -33,6 +33,10 @@ public class SoundListener extends ProtocolListener
             return;
 
         var targetPlayer = (Player) event.getPlayer();
+
+        if (targetPlayer == null)
+            return;
+
         var wrapper = new WrapperPlayServerSoundEffect(event);
         var effectPosition = wrapper.getEffectPosition();
         var positionAsLocation = new Location(targetPlayer.getWorld(), effectPosition.x, effectPosition.y, effectPosition.z);
