@@ -7,15 +7,16 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import xyz.nifeather.morph.MorphManager;
+import xyz.nifeather.morph.RevealingHandler;
 
 public class MorphCatAvoidPlayerGoal extends MorphCommonAvoidPlayerGoal
 {
     private static final Logger log = LoggerFactory.getLogger(MorphCatAvoidPlayerGoal.class);
     private final Cat cat;
 
-    public MorphCatAvoidPlayerGoal(MorphManager morphs, Cat bindingMob, float detectDistance, double walkSpeed, double sprintSpeed)
+    public MorphCatAvoidPlayerGoal(MorphManager morphs, RevealingHandler revealingHandler, Cat bindingMob, float detectDistance, double walkSpeed, double sprintSpeed)
     {
-        super(morphs, bindingMob, detectDistance, walkSpeed, sprintSpeed);
+        super(morphs, revealingHandler, bindingMob, detectDistance, walkSpeed, sprintSpeed);
 
         this.cat = bindingMob;
     }

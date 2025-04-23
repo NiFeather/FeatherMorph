@@ -11,7 +11,9 @@ import net.minecraft.world.entity.animal.Rabbit;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xiamomc.pluginbase.Exceptions.NullDependencyException;
 import xyz.nifeather.morph.MorphManager;
+import xyz.nifeather.morph.RevealingHandler;
 import xyz.nifeather.morph.misc.DisguiseState;
 
 public abstract class MorphBasicAvoidPlayerGoal extends AvoidEntityGoal<Player>
@@ -21,6 +23,7 @@ public abstract class MorphBasicAvoidPlayerGoal extends AvoidEntityGoal<Player>
     public final float detectDistance;
     public final double walkSpeed;
     public final double sprintSpeed;
+    private final RevealingHandler revealingHandler;
 
     private boolean canBeUsedForRecover;
     public boolean canBeUsedForRecover()
@@ -34,12 +37,14 @@ public abstract class MorphBasicAvoidPlayerGoal extends AvoidEntityGoal<Player>
     }
 
     public MorphBasicAvoidPlayerGoal(MorphManager morphs,
+                                 RevealingHandler revealingHandler,
                                  PathfinderMob bindingMob,
                                  float detectDistance,
                                  double walkSpeed, double sprintSpeed)
     {
         super(bindingMob, Player.class, detectDistance, walkSpeed, sprintSpeed);
         this.morphs = morphs;
+        this.revealingHandler = revealingHandler;
         this.bindingMob = bindingMob;
         this.detectDistance = detectDistance;
         this.walkSpeed = walkSpeed;
@@ -98,8 +103,15 @@ public abstract class MorphBasicAvoidPlayerGoal extends AvoidEntityGoal<Player>
                 continue;
 
             var distance = entity.distanceToSqr(mob);
-            if (distance < currentDistance)
-                entityFound = entity;
+            if (distance > currentDistance)
+                continue;
+
+            var bukkitPlayer = (org.bukkit.entity.Player) entity.getBukkitEntity();
+
+            if (revealingHandler.shouldMobsAwareRevealed(bukkitPlayer))
+                continue;
+
+            entityFound = entity;
         }
 
         if (entityFound == null)
@@ -125,31 +137,35 @@ public abstract class MorphBasicAvoidPlayerGoal extends AvoidEntityGoal<Player>
 
     @NotNull
     public static MorphBasicAvoidPlayerGoal findGoalForEntity(PathfinderMob entity,
-                                                     MorphManager morphManager,
+                                                     @NotNull MorphManager morphManager,
+                                                     @NotNull RevealingHandler revealingHandler,
                                                      float detectDistance,
                                                      float walkSpeed,
                                                      float sprintSpeed)
     {
+        if (morphManager == null || revealingHandler == null)
+            throw new NullDependencyException("Null MorphManager/RevealingHandler for MorphBasicAvoidPlayerGoal?!");
+
         return switch (entity)
         {
             case Panda panda -> new MorphPandaAvoidPlayerGoal(
-                    morphManager, panda, detectDistance, walkSpeed, sprintSpeed
+                    morphManager, revealingHandler, panda, detectDistance, walkSpeed, sprintSpeed
             );
 
             case Ocelot ocelot -> new MorphOcelotAvoidEntityGoal(
-                    morphManager, ocelot, detectDistance, walkSpeed, sprintSpeed
+                    morphManager, revealingHandler, ocelot, detectDistance, walkSpeed, sprintSpeed
             );
 
             case Rabbit rabbit -> new MorphRabbitAvoidPlayerGoal(
-                    morphManager, rabbit, detectDistance, walkSpeed, sprintSpeed
+                    morphManager, revealingHandler, rabbit, detectDistance, walkSpeed, sprintSpeed
             );
 
             case Cat cat -> new MorphCatAvoidPlayerGoal(
-                    morphManager, cat, detectDistance, walkSpeed, sprintSpeed
+                    morphManager, revealingHandler, cat, detectDistance, walkSpeed, sprintSpeed
             );
 
             default -> new MorphCommonAvoidPlayerGoal(
-                    morphManager, entity, detectDistance, walkSpeed, sprintSpeed
+                    morphManager, revealingHandler, entity, detectDistance, walkSpeed, sprintSpeed
             );
         };
     }

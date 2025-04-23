@@ -29,6 +29,7 @@ import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.MorphPluginObject;
+import xyz.nifeather.morph.RevealingHandler;
 import xyz.nifeather.morph.config.ConfigOption;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.messages.CommandStrings;
@@ -46,6 +47,9 @@ public class EntityProcessor extends MorphPluginObject implements Listener
 {
     @Resolved(shouldSolveImmediately = true)
     private MorphManager manager;
+
+    @Resolved(shouldSolveImmediately = true)
+    private RevealingHandler revealingHandler;
 
     @Resolved(shouldSolveImmediately = true)
     private MorphConfigManager config;
@@ -171,7 +175,7 @@ public class EntityProcessor extends MorphPluginObject implements Listener
             goalSelector.getAvailableGoals().remove(goalFound);
 
         replacingGoal = MorphBasicAvoidPlayerGoal.findGoalForEntity(
-                sourceMob, manager, distance, (float)slowSpeed, (float)fastSpeed
+                sourceMob, manager, revealingHandler, distance, (float)slowSpeed, (float)fastSpeed
         );
 
         goalSelector.addGoal(goalPriority, replacingGoal);
