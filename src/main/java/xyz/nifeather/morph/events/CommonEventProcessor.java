@@ -91,10 +91,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         this.addSchedule(this::update);
 
         if (plugin.getCurrentTick() % 8 == 0)
-        {
             playersMinedGoldBlocks.clear();
-            susIncreasedPlayers.clear();
-        }
     }
 
     @EventHandler
@@ -498,10 +495,6 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         }
     }
 
-    private final Random random = new Random();
-
-    private final List<Player> susIncreasedPlayers = new ObjectArrayList<>();
-
     @EventHandler
     public void onBlockBreak(BlockBreakEvent e)
     {
@@ -559,10 +552,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
                 {
                     case ZOMBIE, ZOMBIE_VILLAGER, HUSK, DROWNED -> EntityTypeUtils.isZombiesHostile(disguiseEntityType);
                     case SKELETON, STRAY -> EntityTypeUtils.isGolem(disguiseEntityType) || disguise.isPlayerDisguise();
-                    case PIGLIN ->
-                    {
-                        yield EntityTypeUtils.isPiglinHostile(disguiseEntityType);
-                    }
+                    case PIGLIN -> EntityTypeUtils.isPiglinHostile(disguiseEntityType);
                     case PIGLIN_BRUTE -> EntityTypeUtils.isBruteHostile(disguiseEntityType);
                     case WITHER_SKELETON -> EntityTypeUtils.isWitherSkeletonHostile(disguiseEntityType);
                     case GUARDIAN, ELDER_GUARDIAN -> EntityTypeUtils.isGuardianHostile(disguiseEntityType);
@@ -575,29 +565,14 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
 
         // 根据揭示值判定要不要允许生物攻击玩家
         var revealingState = revealingHandler.getRevealingState(player);
-        var revealingLevel = revealingState.getRevealingLevel();
 
-        if (!susIncreasedPlayers.contains(player) && doRevealing.get())
-        {
+        // 每次被生物注意到，都会让揭示值上升
+        if (doRevealing.get())
             revealingState.addBaseValue(RevealingHandler.RevealingDiffs.ON_MOB_TARGET);
-            susIncreasedPlayers.add(player);
-        }
 
-        // 如果伪装揭示值已满，则不要处理此事件
-        // 否则，生物将有 ((val - 20) * 0.35)% 的概率target玩家，如果target失败，则加1点揭示值
-        if (revealingLevel == RevealingHandler.RevealingLevel.REVEALED)
-        {
-            shouldTarget = true;
-        }
-        else if (revealingLevel == RevealingHandler.RevealingLevel.SUSPECT)
-        {
-            var rdv = random.nextInt(0, 100);
+        shouldTarget = shouldTarget || revealingState.shouldMobsAwareRevealed();
 
-            //logger.info("RDV " + rdv + " <= " + (revealingState.getBaseValue() - 20) + "?");
-            shouldTarget = shouldTarget || (rdv / 0.35) <= revealingState.getBaseValue() - 20;
-        }
-
-        e.setCancelled(e.isCancelled() || !shouldTarget);
+        e.setCancelled(!shouldTarget);
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)

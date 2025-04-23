@@ -1,6 +1,7 @@
 package xyz.nifeather.morph;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -12,9 +13,9 @@ import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
 
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class RevealingHandler extends MorphPluginObject
 {
@@ -28,6 +29,14 @@ public class RevealingHandler extends MorphPluginObject
     }
 
     /**
+     * 该玩家是否暴露？
+     */
+    public boolean shouldMobsAwareRevealed(Player player)
+    {
+        return this.getRevealingState(player).shouldMobsAwareRevealed();
+    }
+
+    /**
      * 获取此State的揭示值
      */
     public float getRevealingValue(Player player)
@@ -38,7 +47,7 @@ public class RevealingHandler extends MorphPluginObject
     public void updateStatePlayerInstance(Player newInstance)
     {
         var match = playerRevealingStateMap.keySet().stream()
-                .filter(k -> k.getName().equals(newInstance.getName()))
+                .filter(k -> k.equals(newInstance.getUniqueId()))
                 .findFirst().orElse(null);
 
         if (match == null) return;
@@ -47,24 +56,26 @@ public class RevealingHandler extends MorphPluginObject
         state.player = newInstance;
 
         playerRevealingStateMap.remove(match);
-        playerRevealingStateMap.put(newInstance, state);
+        playerRevealingStateMap.put(newInstance.getUniqueId(), state);
     }
+
+    private static final Random seedRandom = new Random();
 
     @NotNull
     public RevealingState getRevealingState(Player player)
     {
-        var state = playerRevealingStateMap.getOrDefault(player, null);
+        var state = playerRevealingStateMap.getOrDefault(player.getUniqueId(), null);
 
         if (state == null)
         {
-            state = new RevealingState(player);
-            playerRevealingStateMap.put(player, state);
+            state = new RevealingState(player, seedRandom.nextInt());
+            playerRevealingStateMap.put(player.getUniqueId(), state);
         }
 
         return state;
     }
 
-    private final Map<Player, RevealingState> playerRevealingStateMap = new ConcurrentHashMap<>();
+    private final Map<UUID, RevealingState> playerRevealingStateMap = new ConcurrentHashMap<>();
 
     @Initializer
     private void load()
@@ -78,6 +89,22 @@ public class RevealingHandler extends MorphPluginObject
 
         if (this.playerRevealingStateMap.isEmpty())
             return;
+
+        // Remove offline players
+        if (plugin.getCurrentTick() % 5 == 0)
+        {
+            var playersToRemove = new ArrayList<UUID>();
+
+            playerRevealingStateMap.forEach((uuid, state) ->
+            {
+                var player = Bukkit.getPlayer(uuid);
+
+                if (player == null)
+                    playersToRemove.add(uuid);
+            });
+
+            playersToRemove.forEach(playerRevealingStateMap::remove);
+        }
 
         var decay = plugin.getCurrentTick() % 5 == 0;
         for (var state : this.playerRevealingStateMap.values())
@@ -100,8 +127,35 @@ public class RevealingHandler extends MorphPluginObject
      */
     public static class RevealingState extends MorphPluginObject
     {
-        //和此State对应的玩家
+        // 和此State对应的玩家
         private Player player;
+
+        private final int randomSeed;
+
+        // 根据当前揭示值确定玩家对于生物是否处于暴露阶段
+        // 如果伪装揭示值已满，则始终允许生物target玩家
+        // 否则，生物将有一定概率target玩家
+        public boolean shouldMobsAwareRevealed()
+        {
+            var revealingLevel = this.getRevealingLevel();
+
+            if (revealingLevel == RevealingLevel.SAFE)
+                return false;
+
+            if (revealingLevel == RevealingLevel.REVEALED)
+                return true;
+
+            // 通过 randomSeed + revAsLong 作为种子，这样我们可以确保在同一个揭示值(baseValue)的情况下，每次调用 shouldRevealToMobs 的输出都会一致
+            long revAsLong = Math.round(this.baseValue.get() * 1000d);
+            var random = new Random(randomSeed + revAsLong);
+            float triggerValue = this.getBaseValue();
+
+            // 随机值 + 20，避免刚到 SUSPECT 等级就被生物gank
+            float randomNext = random.nextFloat(0f, 100f) + 20f;
+            //player.sendActionBar(Component.text("nextFloat: %s | limit: %s | revAsLong: %s".formatted(randomNext, triggerValue, revAsLong)));
+
+            return randomNext <= triggerValue;
+        }
 
         @Nullable
         public DisguiseState bindingState;
@@ -111,14 +165,12 @@ public class RevealingHandler extends MorphPluginObject
             return bindingState != null;
         }
 
-        private boolean baseValueChanged = false;
+        private final AtomicBoolean dirty = new AtomicBoolean(false);
 
-        public RevealingState(Player player)
+        public RevealingState(Player player, int randomSeed)
         {
             this.player = player;
-
-            // bug: float和int的0之间需要用equals???
-            baseValue.onValueChanged((o, n) -> { this.baseValueChanged = !Objects.equals(o, n); });
+            this.randomSeed = randomSeed;
         }
 
         /**
@@ -157,6 +209,9 @@ public class RevealingHandler extends MorphPluginObject
         {
             newVal = MathUtils.clamp(0, 100, newVal);
 
+            if (!dirty.get())
+                dirty.set(newVal != baseValue.get());
+
             this.baseValue.set(newVal);
             this.revealingLevel = null;
         }
@@ -187,10 +242,11 @@ public class RevealingHandler extends MorphPluginObject
 
         public void notifyUpdates()
         {
-            if (!baseValueChanged) return;
+            if (!dirty.get())
+                return;
 
             clientHandler.sendCommand(player, new S2CSetRevealingCommand(baseValue.get()));
-            baseValueChanged = false;
+            dirty.set(false);
         }
     }
 
@@ -237,8 +293,9 @@ public class RevealingHandler extends MorphPluginObject
             var keyArray = valueLevelMap.keySet().stream()
                     .filter(f -> val > f).toList();
 
-            return keyArray.size() == 0 ? SAFE : valueLevelMap
-                    .getOrDefault(keyArray.get(keyArray.size() - 1), SAFE);
+            return keyArray.isEmpty()
+                    ? SAFE
+                    : valueLevelMap.getOrDefault(keyArray.getLast(), SAFE);
         }
     }
 
