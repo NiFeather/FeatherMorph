@@ -51,7 +51,7 @@ public class EnderDragonWatcher extends LivingEntityWatcher
     public void mergeFromCompound(CompoundTag nbt)
     {
         if (nbt.contains("DragonPhase"))
-            this.writePersistent(ValueIndex.ENDER_DRAGON.DRAGON_PHASE, nbt.getInt("DragonPhase"));
+            this.writePersistent(ValueIndex.ENDER_DRAGON.DRAGON_PHASE, nbt.getInt("DragonPhase").orElseThrow());
 
         super.mergeFromCompound(nbt);
     }
