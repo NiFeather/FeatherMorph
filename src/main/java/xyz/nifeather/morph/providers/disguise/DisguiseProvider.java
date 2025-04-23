@@ -157,7 +157,7 @@ public abstract class DisguiseProvider extends MorphPluginObject
 
         blackListPatterns.forEach(pattern ->
         {
-            compound.getAllKeys().forEach(id ->
+            compound.forEach((id, tag) ->
             {
                 if (Pattern.matches(pattern, id))
                     toRemove.add(id);

@@ -40,6 +40,7 @@ public class ProtocolEquipment
             case FEET -> EquipmentSlot.BOOTS;
 
             case BODY -> EquipmentSlot.BODY;
+            case SADDLE -> EquipmentSlot.SADDLE;
         };
     }
 
@@ -49,7 +50,7 @@ public class ProtocolEquipment
     @Nullable
     private static Equipment toEquipment(EntityEquipment equipment, org.bukkit.inventory.EquipmentSlot bukkitSlot)
     {
-        if (bukkitSlot == org.bukkit.inventory.EquipmentSlot.BODY)
+        if (bukkitSlot == org.bukkit.inventory.EquipmentSlot.SADDLE || bukkitSlot == org.bukkit.inventory.EquipmentSlot.BODY)
             return null;
 
         try

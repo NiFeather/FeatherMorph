@@ -249,7 +249,7 @@ public abstract class DisguiseWrapper<TInstance>
 
     protected int getSlimeSize()
     {
-        return Math.max(1, getCompound().getInt("Size"));
+        return Math.max(1, getCompound().getInt("Size").orElse(0));
     }
 
     /**

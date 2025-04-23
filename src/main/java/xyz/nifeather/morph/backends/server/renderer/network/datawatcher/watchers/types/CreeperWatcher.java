@@ -43,7 +43,7 @@ public class CreeperWatcher extends LivingEntityWatcher
         super.mergeFromCompound(nbt);
 
         if (nbt.contains("powered"))
-            this.writePersistent(ValueIndex.CREEPER.IS_CHARGED_CREEPER, nbt.getBoolean("powered"));
+            this.writePersistent(ValueIndex.CREEPER.IS_CHARGED_CREEPER, nbt.getBoolean("powered").orElseThrow());
     }
 
     @Override

@@ -38,7 +38,7 @@ public class PhantomWatcher extends LivingEntityWatcher
         super.mergeFromCompound(nbt);
 
         if (nbt.contains("Size"))
-            writePersistent(ValueIndex.PHANTOM.SIZE, nbt.getInt("Size"));
+            writePersistent(ValueIndex.PHANTOM.SIZE, nbt.getInt("Size").orElseThrow());
     }
 
     @Override

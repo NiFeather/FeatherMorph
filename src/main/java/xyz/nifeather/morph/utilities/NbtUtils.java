@@ -80,7 +80,7 @@ public class NbtUtils
                 if (sign != null)
                     childCompound.putString("Signature", sign);
 
-                list.add(0, childCompound);
+                list.add(childCompound);
             }
 
             propertiesCompound.put(key, list);
@@ -98,7 +98,7 @@ public class NbtUtils
 
         try
         {
-            compound = TagParser.parseTag(snbt);
+            compound = TagParser.parseCompoundFully(snbt);
         }
         catch (Throwable t)
         {
@@ -112,7 +112,7 @@ public class NbtUtils
 
         String name = "NIL";
         if (compound.contains("Name"))
-            name = compound.getString("Name");
+            name = compound.getString("Name").orElseThrow();
 
         UUID uuid = Util.NIL_UUID;
         if (compound.contains("Id"))
@@ -130,21 +130,21 @@ public class NbtUtils
 
         try
         {
-            var propertiesCompound = compound.getCompound("Properties");
+            var propertiesCompound = compound.getCompound("Properties").orElseThrow();
 
-            propertiesCompound.getAllKeys().forEach(key ->
+            propertiesCompound.forEach((key, tag) ->
             {
-                var list = propertiesCompound.getList(key, Tag.TAG_COMPOUND);
+                var list = propertiesCompound.getListOrEmpty(key);
 
                 for (int i = 0; i < list.size(); i++)
                 {
-                    var childCompound = list.getCompound(i);
+                    var childCompound = list.getCompound(i).orElse(null);
                     if (childCompound == null) continue;
 
-                    var value = childCompound.getString("Value");
+                    var value = childCompound.getString("Value").orElseThrow();
 
                     if (childCompound.contains("Signature"))
-                        profile.getProperties().put(key, new Property(key, value, childCompound.getString("Signature")));
+                        profile.getProperties().put(key, new Property(key, value, childCompound.getString("Signature").orElseThrow()));
                     else
                         profile.getProperties().put(key, new Property(key, value));
                 }
@@ -199,8 +199,10 @@ public class NbtUtils
         //StringNbtWriter
         var visitor = new StringTagVisitor();
 
+        visitor.visitCompound(compound);
+
         //StringNbtWriter#apply(NbtElement)
-        return visitor.visit(compound);
+        return visitor.build();
     }
 
     /**
@@ -215,7 +217,7 @@ public class NbtUtils
 
         try
         {
-            return TagParser.parseTag(input);
+            return TagParser.parseCompoundFully(input);
         }
         catch (Throwable t)
         {
@@ -241,9 +243,9 @@ public class NbtUtils
         if (!ageable) return false;
 
         if (EntityTypeUtils.isZombie(type) || type == EntityType.PIGLIN)
-            return compoundTag.getBoolean("IsBaby");
+            return compoundTag.getBoolean("IsBaby").orElse(false);
 
-        var val = compoundTag.getInt("Age");
+        var val = compoundTag.getInt("Age").orElse(1);
 
         return val < 0;
     }

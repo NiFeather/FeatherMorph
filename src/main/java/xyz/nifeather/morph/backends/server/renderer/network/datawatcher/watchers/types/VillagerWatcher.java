@@ -86,11 +86,11 @@ public class VillagerWatcher extends LivingEntityWatcher
         VillagerType type = VillagerTypes.PLAINS;
 
         if (nbt.contains("level"))
-            level = MathUtils.clamp(1, 5, nbt.getInt("level"));
+            level = MathUtils.clamp(1, 5, nbt.getInt("level").orElseThrow());
 
         if (nbt.contains("profession"))
         {
-            var profString = nbt.getString("profession");
+            var profString = nbt.getString("profession").orElseThrow();
             var prof = VillagerProfessions.getByName(profString);
 
             if (prof == null)
@@ -101,7 +101,7 @@ public class VillagerWatcher extends LivingEntityWatcher
 
         if (nbt.contains("type"))
         {
-            var proftypeString = nbt.getString("type");
+            var proftypeString = nbt.getString("type").orElseThrow();
 
             var typeFromRegistry = VillagerTypes.getByName(proftypeString);
 
@@ -121,7 +121,7 @@ public class VillagerWatcher extends LivingEntityWatcher
 
         if (nbt.contains("VillagerData"))
         {
-            var compound = nbt.getCompound("VillagerData");
+            var compound = nbt.getCompound("VillagerData").orElseThrow();
             mergeFromVillagerData(compound);
         }
     }

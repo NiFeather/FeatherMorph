@@ -26,6 +26,6 @@ public class HoglinWatcher extends EHasAttackAnimationWatcher
         super.mergeFromCompound(nbt);
 
         if (nbt.contains("IsBaby"))
-            writePersistent(ValueIndex.AGEABLE_MOB.IS_BABY, nbt.getBoolean("IsBaby"));
+            writePersistent(ValueIndex.AGEABLE_MOB.IS_BABY, nbt.getBoolean("IsBaby").orElseThrow());
     }
 }

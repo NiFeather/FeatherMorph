@@ -83,10 +83,10 @@ public class PandaWatcher extends LivingEntityWatcher
         super.mergeFromCompound(nbt);
 
         if (nbt.contains("MainGene"))
-            writePersistent(ValueIndex.PANDA.MAIN_GENE, (byte)getGeneFromName(nbt.getString("MainGene")).ordinal());
+            writePersistent(ValueIndex.PANDA.MAIN_GENE, (byte)getGeneFromName(nbt.getString("MainGene").orElseThrow()).ordinal());
 
         if (nbt.contains("HiddenGene"))
-            writePersistent(ValueIndex.PANDA.HIDDEN_GENE, (byte)getGeneFromName(nbt.getString("HiddenGene")).ordinal());
+            writePersistent(ValueIndex.PANDA.HIDDEN_GENE, (byte)getGeneFromName(nbt.getString("HiddenGene").orElseThrow()).ordinal());
     }
 
     @Override

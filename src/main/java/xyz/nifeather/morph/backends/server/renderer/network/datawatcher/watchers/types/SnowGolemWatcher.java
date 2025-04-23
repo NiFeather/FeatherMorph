@@ -28,7 +28,7 @@ public class SnowGolemWatcher extends LivingEntityWatcher
 
         if (nbt.contains("Pumpkin"))
         {
-            var value = nbt.getBoolean("Pumpkin")
+            var value = nbt.getBoolean("Pumpkin").orElseThrow()
                     ? SnowGolemValues.HAS_PUMPKIN
                     : SnowGolemValues.NO_PUMPKIN;
 

@@ -39,6 +39,10 @@ public class DisguiseProperties
         register(EntityType.ARMOR_STAND, new ArmorStandProperties());
         register(EntityType.CREEPER, new CreeperProperties());
 
+        register(EntityType.PIG, new PigProperties());
+        register(EntityType.COW, new CowProperties());
+        register(EntityType.CHICKEN, new ChickenProperties());
+
         register(EntityType.ENDER_DRAGON, new EnderDragonProperties());
     }
 

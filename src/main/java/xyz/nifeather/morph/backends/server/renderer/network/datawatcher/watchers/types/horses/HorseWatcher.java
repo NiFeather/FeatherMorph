@@ -79,7 +79,7 @@ public class HorseWatcher extends AbstractHorseWatcher
         super.mergeFromCompound(nbt);
 
         if (nbt.contains("Variant"))
-            this.writePersistent(ValueIndex.HORSE.HORSE_VARIANT, nbt.getInt("Variant"));
+            this.writePersistent(ValueIndex.HORSE.HORSE_VARIANT, nbt.getInt("Variant").orElseThrow());
     }
 
     @Override
