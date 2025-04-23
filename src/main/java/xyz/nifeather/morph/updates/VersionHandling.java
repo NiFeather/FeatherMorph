@@ -1,21 +1,20 @@
 package xyz.nifeather.morph.updates;
 
-import org.jetbrains.annotations.NotNull;
-
 public class VersionHandling
 {
     public static VersionInfo toVersionInfo(String str)
     {
-        if (str == null) return VersionInfo.INVALID_VERSION;
+        if (str == null || str.equals("null") || str.isBlank())
+            return VersionInfo.INVALID_VERSION;
 
         var strSpilt = str.split("\\.");
 
-        var major = strSpilt.length >= 1 ? tryParse(strSpilt[0]) : -1;
-        var minor = strSpilt.length >= 2 ? tryParse(strSpilt[1]) : -1;
-        var patch = strSpilt.length >= 3 ? tryParse(strSpilt[2]) : -1;
-        var edition = strSpilt.length >= 4 ? strSpilt[3] : "Standard";
+        var major = strSpilt.length >= 1 ? tryParse(strSpilt[0]) : 0;
+        var minor = strSpilt.length >= 2 ? tryParse(strSpilt[1]) : 0;
+        var patch = strSpilt.length >= 3 ? tryParse(strSpilt[2]) : 0;
+        var channel = strSpilt.length >= 4 ? strSpilt[3] : "DefaultRelease";
 
-        return new VersionInfo(major, minor, patch, edition);
+        return new VersionInfo(major, minor, patch, channel);
     }
 
     private static int tryParse(String str)
@@ -30,12 +29,12 @@ public class VersionHandling
         }
     }
 
-    public static record VersionInfo(int major, int minor, int patch, @NotNull String channel)
+    public static record VersionInfo(int major, int minor, int patch, String channel)
     {
         @Override
         public String toString()
         {
-            return "%s.%s.%s".formatted(major, minor, patch);
+            return "%s.%s.%s.%s".formatted(major, minor, patch, channel);
         }
 
         public boolean isInvalid()
@@ -56,46 +55,35 @@ public class VersionHandling
 
         /**
          * 将此版本和另一版本比对
-         * @param other
+         * @param input
          * @return NEWER: other版本比这个版本高，反之OLDER或者EQUAL
          */
-        public CompareResult compare(VersionInfo other)
+        public CompareResult compare(VersionInfo input)
         {
-            if (!other.channel.equalsIgnoreCase(this.channel))
-                return CompareResult.NOT_ON_SAME_CHANNEL;
-
-            var majorCompare = integerCompare(other.major, this.major);
-            var minorCompare = integerCompare(other.minor, this.minor);
-            var patchCompare = integerCompare(other.patch, this.patch);
-
-            if (majorCompare == CompareResult.EQUAL
-                    && minorCompare == CompareResult.EQUAL
-                    && patchCompare == CompareResult.EQUAL)
+            // 2.0.0 <-> 2.0.0
+            // 2.0.0 <-> 2.0.0.beta1
+            if (input.major == this.major && input.minor == this.minor && input.patch == this.patch)
             {
-                return CompareResult.EQUAL;
+                if (input.channel.equals(this.channel)) // 2.0.0.abc <-> 2.0.0.abc
+                    return CompareResult.EQUAL;
+                else
+                    return CompareResult.NOT_ON_SAME_CHANNEL; // 2.0.0.abc <-> 2.0.0.bcd
             }
 
-            if (majorCompare == CompareResult.NEWER)
-                return CompareResult.NEWER;
+            if (input.major > this.major) // 2.x.x <-> 1.x.x
+                return CompareResult.INPUT_NEWER;
+            else if (input.major < this.major) // 1.x.x <-> 2.x.x
+                return CompareResult.INPUT_OLDER;
 
-            if (minorCompare == CompareResult.NEWER)
-                return CompareResult.NEWER;
+            if (input.minor > this.minor) // 2.2.x <-> 2.1.x
+                return CompareResult.INPUT_NEWER;
+            else if (input.minor < this.minor) // 2.1.x <-> 2.2.x
+                return CompareResult.INPUT_OLDER;
 
-            if (patchCompare == CompareResult.NEWER)
-                return CompareResult.NEWER;
-
-            return CompareResult.OLDER;
-        }
-
-        /**
-         * 比较两个数之间的版本关系
-         * @param a
-         * @param b
-         * @return a 相较于 b 的关系，如果a更大就返回NEWER，反之返回OLDER
-         */
-        private CompareResult integerCompare(int a, int b)
-        {
-            return a > b ? CompareResult.NEWER : (a == b ? CompareResult.EQUAL : CompareResult.OLDER);
+            if (input.patch > this.patch) // 2.2.2 <-> 2.2.1
+                return CompareResult.INPUT_NEWER;
+            else
+                return CompareResult.INPUT_OLDER; // 2.2.1 <-> 2.2.2
         }
 
         public static VersionInfo INVALID_VERSION = new VersionInfo(0, 0, 0, "Invalid");
@@ -104,8 +92,8 @@ public class VersionHandling
     public enum CompareResult
     {
         EQUAL,
-        NEWER,
-        OLDER,
+        INPUT_NEWER,
+        INPUT_OLDER,
         NOT_ON_SAME_CHANNEL
     }
 }

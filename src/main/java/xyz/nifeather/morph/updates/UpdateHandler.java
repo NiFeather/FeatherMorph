@@ -219,7 +219,7 @@ public class UpdateHandler extends MorphPluginObject
                 return;
             }
 
-            if (compare == VersionHandling.CompareResult.NEWER)
+            if (compare == VersionHandling.CompareResult.INPUT_OLDER)
             {
                 logger.info("Your version is newer than released for %s!".formatted(Bukkit.getMinecraftVersion()));
 
