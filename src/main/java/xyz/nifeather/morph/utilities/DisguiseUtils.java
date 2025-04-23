@@ -120,7 +120,7 @@ public class DisguiseUtils
         if (entity instanceof Mob mob)
         {
             var source = mob.getSoundSource();
-            var sound = mob.getAmbientSound();
+            var sound = mob.getAmbientSound0();
             var interval = mob.getAmbientSoundInterval();
 
             var rec = new EntityTypeUtils.SoundInfo(sound, source, interval, mob.getSoundVolume());

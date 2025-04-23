@@ -44,10 +44,10 @@ public class AxolotlWatcher extends LivingEntityWatcher
         super.mergeFromCompound(nbt);
 
         if (nbt.contains("Variant"))
-            writePersistent(ValueIndex.AXOLOTL.COLOR, nbt.getInt("Variant").orElseThrow());
+            writePersistent(ValueIndex.AXOLOTL.COLOR, nbt.getInt("Variant"));
 
         if (nbt.contains("FromBucket"))
-            writePersistent(ValueIndex.AXOLOTL.SPAWNED_FROM_BUCKET, nbt.getBoolean("FromBucket").orElseThrow());
+            writePersistent(ValueIndex.AXOLOTL.SPAWNED_FROM_BUCKET, nbt.getBoolean("FromBucket"));
     }
 
     @Override

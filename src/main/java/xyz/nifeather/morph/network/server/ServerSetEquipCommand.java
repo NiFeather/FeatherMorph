@@ -29,7 +29,6 @@ public class ServerSetEquipCommand extends S2CSetFakeEquipCommand<ItemStack>
             case CHEST -> ProtocolEquipmentSlot.CHESTPLATE;
             case HEAD -> ProtocolEquipmentSlot.HELMET;
             case BODY -> throw new IllegalArgumentException("BODY is not supported."); //生物BODY，和玩家无关？
-            case SADDLE ->  throw new IllegalArgumentException("SADDLE is not supported.");
         };
     }
 }

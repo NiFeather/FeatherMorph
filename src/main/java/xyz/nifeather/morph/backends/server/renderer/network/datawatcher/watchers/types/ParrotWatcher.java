@@ -45,7 +45,7 @@ public class ParrotWatcher extends TameableAnimalWatcher
 
         if (nbt.contains("Variant"))
         {
-            var variant = nbt.getInt("Variant").orElseThrow();
+            var variant = nbt.getInt("Variant");
             this.writePersistent(ValueIndex.PARROT.PARROT_VARIANT, variant);
         }
     }

@@ -44,7 +44,7 @@ public class TameableAnimalWatcher extends LivingEntityWatcher
         {
             byte val = read(ValueIndex.TAMEABLE.TAMEABLE_FLAGS);
 
-            if (nbt.getBoolean("Sitting").orElseThrow())
+            if (nbt.getBoolean("Sitting"))
                 writePersistent(ValueIndex.TAMEABLE.TAMEABLE_FLAGS, (byte)(val | 0x01));
         }
     }

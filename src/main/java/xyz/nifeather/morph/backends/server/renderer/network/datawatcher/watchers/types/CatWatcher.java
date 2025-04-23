@@ -83,12 +83,12 @@ public class CatWatcher extends TameableAnimalWatcher
 
         if (nbt.contains("variant"))
         {
-            var name = nbt.getString("variant").orElseThrow();
+            var name = nbt.getString("variant");
             this.writePersistent(ValueIndex.CAT.CAT_VARIANT, getCatVariant(name));
         }
 
         if (nbt.contains("CollarColor"))
-            writePersistent(ValueIndex.CAT.COLLAR_COLOR, (int)nbt.getByte("CollarColor").orElseThrow());
+            writePersistent(ValueIndex.CAT.COLLAR_COLOR, (int)nbt.getByte("CollarColor"));
     }
 
     @Override

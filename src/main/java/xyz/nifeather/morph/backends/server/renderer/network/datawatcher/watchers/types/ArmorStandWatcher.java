@@ -66,7 +66,7 @@ public class ArmorStandWatcher extends InventoryLivingWatcher
             return defaultValue;
         }
 
-        return new Vector3f(listTag.getFloat(0).orElseThrow(), listTag.getFloat(1).orElseThrow(), listTag.getFloat(2).orElseThrow());
+        return new Vector3f(listTag.getFloat(0), listTag.getFloat(1), listTag.getFloat(2));
     }
 
     @Override
@@ -92,13 +92,13 @@ public class ArmorStandWatcher extends InventoryLivingWatcher
         boolean showArms = showArms();
 
         if (nbt.contains("Small"))
-            small = nbt.getBoolean("Small").orElseThrow();
+            small = nbt.getBoolean("Small");
 
         if (nbt.contains("NoBasePlate"))
-            noBasePlate = nbt.getBoolean("NoBasePlate").orElseThrow();
+            noBasePlate = nbt.getBoolean("NoBasePlate");
 
         if (nbt.contains("ShowArms"))
-            showArms = nbt.getBoolean("ShowArms").orElseThrow();
+            showArms = nbt.getBoolean("ShowArms");
 
         //Tag "Invisible" is not supported as it's synced with the player
 
@@ -106,47 +106,47 @@ public class ArmorStandWatcher extends InventoryLivingWatcher
 
         if (nbt.contains("Pose"))
         {
-            var poseCompound = nbt.getCompound("Pose").orElseThrow();
+            var poseCompound = nbt.getCompound("Pose");
 
             if (poseCompound.contains("Body"))
             {
                 writePersistent(ValueIndex.ARMOR_STAND.BODY_ROTATION,
-                        getVec3(poseCompound.getListOrEmpty("Body"),
+                        getVec3(poseCompound.getList("Body", CompoundTag.TAG_FLOAT),
                                 ValueIndex.ARMOR_STAND.BODY_ROTATION.defaultValue()));
             }
 
             if (poseCompound.contains("Head"))
             {
                 writePersistent(ValueIndex.ARMOR_STAND.HEAD_ROTATION,
-                        getVec3(poseCompound.getListOrEmpty("Head"),
+                        getVec3(poseCompound.getList("Head", CompoundTag.TAG_FLOAT),
                                 ValueIndex.ARMOR_STAND.HEAD_ROTATION.defaultValue()));
             }
 
             if (poseCompound.contains("LeftArm"))
             {
                 writePersistent(ValueIndex.ARMOR_STAND.LEFT_ARM_ROTATION,
-                        getVec3(poseCompound.getListOrEmpty("LeftArm"),
+                        getVec3(poseCompound.getList("LeftArm", CompoundTag.TAG_FLOAT),
                                 ValueIndex.ARMOR_STAND.LEFT_ARM_ROTATION.defaultValue()));
             }
 
             if (poseCompound.contains("RightArm"))
             {
                 writePersistent(ValueIndex.ARMOR_STAND.RIGHT_ARM_ROTATION,
-                        getVec3(poseCompound.getListOrEmpty("RightArm"),
+                        getVec3(poseCompound.getList("RightArm", CompoundTag.TAG_FLOAT),
                                 ValueIndex.ARMOR_STAND.RIGHT_ARM_ROTATION.defaultValue()));
             }
 
             if (poseCompound.contains("LeftLeg"))
             {
                 writePersistent(ValueIndex.ARMOR_STAND.LEFT_LEG_ROTATION,
-                        getVec3(poseCompound.getListOrEmpty("LeftLeg"),
+                        getVec3(poseCompound.getList("LeftLeg", CompoundTag.TAG_FLOAT),
                                 ValueIndex.ARMOR_STAND.LEFT_LEG_ROTATION.defaultValue()));
             }
 
             if (poseCompound.contains("RightLeg"))
             {
                 writePersistent(ValueIndex.ARMOR_STAND.RIGHT_LEG_ROTATION,
-                        getVec3(poseCompound.getListOrEmpty("RightLeg"),
+                        getVec3(poseCompound.getList("RightLeg", CompoundTag.TAG_FLOAT),
                                 ValueIndex.ARMOR_STAND.RIGHT_LEG_ROTATION.defaultValue()));
             }
         }
@@ -160,9 +160,9 @@ public class ArmorStandWatcher extends InventoryLivingWatcher
     private ListTag saveRotations(Vector3f rotations)
     {
         ListTag listTag = new ListTag();
-        listTag.add(FloatTag.valueOf((float)rotations.getX()));
-        listTag.add(FloatTag.valueOf((float)rotations.getY()));
-        listTag.add(FloatTag.valueOf((float)rotations.getZ()));
+        listTag.add(0, FloatTag.valueOf(rotations.getX()));
+        listTag.add(1, FloatTag.valueOf(rotations.getY()));
+        listTag.add(2, FloatTag.valueOf(rotations.getZ()));
         return listTag;
     }
 

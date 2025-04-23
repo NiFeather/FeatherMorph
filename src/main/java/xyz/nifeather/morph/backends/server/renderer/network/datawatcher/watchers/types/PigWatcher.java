@@ -10,19 +10,14 @@ import org.bukkit.entity.Player;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
-import xyz.nifeather.morph.misc.disguiseProperty.values.PigProperties;
 
 import java.util.Objects;
 
 public class PigWatcher extends AgeableMobWatcher
 {
-    private final PigProperties pigProperties;
-
     public PigWatcher(Player bindingPlayer)
     {
         super(bindingPlayer, EntityType.PIG);
-
-        pigProperties = DisguiseProperties.INSTANCE.getOrThrow(PigProperties.class);
     }
 
     @Override
@@ -42,30 +37,12 @@ public class PigWatcher extends AgeableMobWatcher
     @Override
     protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
-        if (property == pigProperties.VARIANT)
-        {
-            var variant = (Pig.Variant) value;
-
-            writePersistent(ValueIndex.PIG.PIG_VARIANT, getPigVariant(variant.key().asString()));
-        }
-
         super.onPropertyWrite(property, value);
     }
 
     @Override
     public void mergeFromCompound(CompoundTag nbt)
     {
-        if (nbt.contains("variant"))
-        {
-            var idString = nbt.getString("variant").orElseThrow();
-            var idKey = NamespacedKey.fromString(idString);
-
-            if (idKey == null)
-                return;
-
-            writePersistent(ValueIndex.PIG.PIG_VARIANT, getPigVariant(idString));
-        }
-
         super.mergeFromCompound(nbt);
     }
 
