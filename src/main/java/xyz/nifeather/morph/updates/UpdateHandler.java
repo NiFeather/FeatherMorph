@@ -28,6 +28,8 @@ import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
@@ -37,8 +39,6 @@ public class UpdateHandler extends MorphPluginObject
     private FeatherMorphMain plugin;
 
     private final AtomicInteger requestId = new AtomicInteger(0);
-
-    private volatile ScheduleInfo sched;
 
     private final Bindable<Boolean> checkUpdate = new Bindable<>(true);
 
@@ -59,24 +59,43 @@ public class UpdateHandler extends MorphPluginObject
             this.checkUpdate(true, null);
     }
 
-    public void checkUpdate(boolean sendMessages, @Nullable CommandSender forwardTarget)
-    {
-        this.checkUpdate(sendMessages, null, forwardTarget);
-    }
+    private volatile CompletableFuture<CheckResult> runningFuture;
 
-    public void checkUpdate(boolean sendMessages, @Nullable Consumer<CheckResult> onFinish, @Nullable CommandSender forwardTarget)
+    private final Object lock = new Object();
+
+    public CompletableFuture<CheckResult> checkUpdate(boolean sendMessages,
+                            @Nullable CommandSender forwardTarget)
     {
-        if (this.sched != null)
+        CompletableFuture<CheckResult> newFuture;
+        synchronized (lock)
         {
-            sched.cancel();
-            sched = null;
+            if (this.runningFuture != null && runningFuture.state() == Future.State.RUNNING)
+                return runningFuture;
+            else
+                this.runningFuture = null;
+
+            //Run async
+            newFuture = doCheckUpdateAsync(sendMessages, forwardTarget);
+            this.runningFuture = newFuture;
         }
 
-        //Run async
-        this.sched = this.addSchedule(() -> doCheckUpdate(sendMessages, onFinish, forwardTarget), 0, true);
+        newFuture.thenRun(() ->
+        {
+            synchronized (lock)
+            {
+                this.runningFuture = null;
+            }
+        });
+
+        return newFuture;
     }
 
-    private void doCheckUpdate(boolean sendMessages, @Nullable Consumer<CheckResult> onFinish, @Nullable CommandSender forwardTarget)
+    private CompletableFuture<CheckResult> doCheckUpdateAsync(boolean sendMessages, @Nullable CommandSender forwardTarget)
+    {
+        return CompletableFuture.supplyAsync(() -> doCheckUpdate(sendMessages, forwardTarget));
+    }
+
+    private CheckResult doCheckUpdate(boolean sendMessages, @Nullable CommandSender forwardTarget)
     {
         logger.info("Checking updates...");
         updateAvailable = false;
@@ -116,20 +135,16 @@ public class UpdateHandler extends MorphPluginObject
                 logger.error("Failed to check update: Server returned HTTP code {}", response.statusCode());
                 logger.error("Server response: {}", response.body());
 
-                if (onFinish != null)
-                    onFinish.accept(CheckResult.FAIL);
-
-                return;
+                return CheckResult.FAIL;
             }
 
-            this.onUpdateReqFinish(response.body(), reqId, sendMessages, onFinish, forwardTarget);
+            return this.onUpdateReqFinish(response.body(), reqId, sendMessages, forwardTarget);
         }
         catch (Throwable t)
         {
-            this.onUpdateReqFail(t, reqId, onFinish);
+            this.onUpdateReqFail(t, reqId);
 
-            if (onFinish != null)
-                onFinish.accept(CheckResult.FAIL);
+            return CheckResult.FAIL;
         }
         finally
         {
@@ -138,24 +153,21 @@ public class UpdateHandler extends MorphPluginObject
         }
     }
 
-    private void onUpdateReqFail(Throwable e, int reqId, @Nullable Consumer<CheckResult> onFinish)
+    private void onUpdateReqFail(Throwable e, int reqId)
     {
         if (this.requestId.get() != reqId)
             return;
-
-        if (onFinish != null)
-            onFinish.accept(CheckResult.FAIL);
 
         logger.error("Failed checking update: " + e.getMessage());
         e.printStackTrace();
     }
 
-    private void onUpdateReqFinish(String responseStr, int reqId,
-                                   boolean sendMessages, @Nullable Consumer<CheckResult> onFinish,
-                                   @Nullable CommandSender forwardTarget)
+    private CheckResult onUpdateReqFinish(String responseStr, int reqId,
+                                                       boolean sendMessages,
+                                                       @Nullable CommandSender forwardTarget)
     {
         if (this.requestId.get() != reqId)
-            return;
+            return CheckResult.FAIL;
 
         try
         {
@@ -172,7 +184,6 @@ public class UpdateHandler extends MorphPluginObject
                     logger.warn("Cant deserialize element to SingleUpdateInfoMeta: Not a map (" + o + ")");
             }
 
-            var loader = Platforms.fromName(Bukkit.getName());
             var matchMeta = metaList.stream()
                     .filter(m ->
                     {
@@ -180,7 +191,7 @@ public class UpdateHandler extends MorphPluginObject
                         if (supportedLoaders == null) return false;
 
                         var isRelease = "Release".equalsIgnoreCase(m.versionType);
-                        var loaderMatch = supportedLoaders.stream().anyMatch(s -> s.equalsIgnoreCase(loader.getImplName()));
+                        var loaderMatch = supportedLoaders.stream().anyMatch(s -> s.equalsIgnoreCase(Platforms.fromName(Bukkit.getName()).getImplName()));
 
                         return isRelease && loaderMatch;
                     }).findFirst().orElse(null);
@@ -188,12 +199,9 @@ public class UpdateHandler extends MorphPluginObject
             if (matchMeta == null)
             {
                 logger.error("Unable to check update: This version of Minecraft is not listed yet, or your server '%s' is not supported"
-                        .formatted(loader.getImplName()));
+                        .formatted(Bukkit.getName()));
 
-                if (onFinish != null)
-                    onFinish.accept(CheckResult.FAIL);
-
-                return;
+                return CheckResult.NOT_LISTED_OR_UNSUPPORTED;
             }
 
             var currentVersion = VersionHandling.toVersionInfo(plugin.getPluginMeta().getVersion());
@@ -201,10 +209,8 @@ public class UpdateHandler extends MorphPluginObject
 
             if (latestVersion.isInvalid())
             {
-                if (onFinish != null)
-                    onFinish.accept(CheckResult.FAIL);
-
-                throw new NullDependencyException("Null version number from response: " + gson.toJson(matchMeta));
+                logger.error("Null version number from response: " + gson.toJson(matchMeta));
+                return CheckResult.FAIL;
             }
 
             var compare = currentVersion.compare(latestVersion);
@@ -213,20 +219,14 @@ public class UpdateHandler extends MorphPluginObject
             {
                 logger.info("Already on the latest version for " + Bukkit.getMinecraftVersion());
 
-                if (onFinish != null)
-                    onFinish.accept(CheckResult.ALREADY_LATEST);
-
-                return;
+                return CheckResult.ALREADY_LATEST;
             }
 
             if (compare == VersionHandling.CompareResult.INPUT_OLDER)
             {
                 logger.info("Your version is newer than released for %s!".formatted(Bukkit.getMinecraftVersion()));
 
-                if (onFinish != null)
-                    onFinish.accept(CheckResult.ALREADY_LATEST);
-
-                return;
+                return CheckResult.CURRENT_IS_NEWER;
             }
 
             if (compare == VersionHandling.CompareResult.NOT_ON_SAME_CHANNEL)
@@ -268,16 +268,14 @@ public class UpdateHandler extends MorphPluginObject
                     sendUpdateNotifyTo(sendTarget);
             }
 
-            if (onFinish != null)
-                onFinish.accept(CheckResult.HAS_UPDATE);
+            return CheckResult.HAS_UPDATE;
         }
         catch (Throwable t)
         {
             logger.error("Error occurred while processing response: %s".formatted(t.getMessage()));
             t.printStackTrace();
 
-            if (onFinish != null)
-                onFinish.accept(CheckResult.FAIL);
+            return CheckResult.FAIL;
         }
     }
 
@@ -334,6 +332,8 @@ public class UpdateHandler extends MorphPluginObject
     {
         HAS_UPDATE,
         ALREADY_LATEST,
+        NOT_LISTED_OR_UNSUPPORTED,
+        CURRENT_IS_NEWER,
         FAIL
     }
 }
