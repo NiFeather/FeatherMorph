@@ -100,7 +100,16 @@ public class RevealingHandler extends MorphPluginObject
                 var player = Bukkit.getPlayer(uuid);
 
                 if (player == null)
-                    playersToRemove.add(uuid);
+                {
+                    if (state.bindingState == null)
+                    {
+                        playersToRemove.add(uuid);
+                        return;
+                    }
+
+                    if (state.bindingState.disposed())
+                        playersToRemove.add(uuid);
+                }
             });
 
             playersToRemove.forEach(playerRevealingStateMap::remove);
