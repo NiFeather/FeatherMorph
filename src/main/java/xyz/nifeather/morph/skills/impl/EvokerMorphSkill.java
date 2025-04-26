@@ -103,12 +103,12 @@ public class EvokerMorphSkill extends DelayedMorphSkill<NoOpConfiguration>
         else
         {
             var location = player.getLocation();
-            var direction = player.getEyeLocation().getDirection();
+            var direction = scaleVector2D(player.getEyeLocation().getDirection());
 
             var targetFangs = 16;
             Location oldLocation = null;
 
-            for (int i = 0; i < targetFangs; i++)
+            for (int fangIndex = 0; fangIndex < targetFangs; fangIndex++)
             {
                 location.add(direction.getX(), 0, direction.getZ());
 
@@ -123,10 +123,7 @@ public class EvokerMorphSkill extends DelayedMorphSkill<NoOpConfiguration>
 
                     //设置新位置
                     if (newBlock != null)
-                    {
-                        var newY = getTopY(newBlock);
-                        location.setY(newY);
-                    }
+                        location.setY(getTopY(newBlock));
                     else
                         break;
                 }
@@ -154,9 +151,19 @@ public class EvokerMorphSkill extends DelayedMorphSkill<NoOpConfiguration>
                 {
                     var fang = world.spawn(loc, EvokerFangs.class, CreatureSpawnEvent.SpawnReason.CUSTOM);
                     fang.setOwner(player);
-                }, i);
+                }, fangIndex);
             }
         }
+    }
+
+    /**
+     * 将给定的向量在二维空间上缩放到至少有一个值是 1 或 -1
+     */
+    private Vector scaleVector2D(Vector vec)
+    {
+        var maxAbs = Math.max(Math.abs(vec.getX()), Math.abs(vec.getZ()));
+
+        return vec.clone().divide(new Vector(maxAbs, 1, maxAbs));
     }
 
     @Override
