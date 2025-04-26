@@ -7,6 +7,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.*;
 import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -86,7 +87,6 @@ public class EvokerMorphSkill extends DelayedMorphSkill<NoOpConfiguration>
 
     /**
      * 从给定的位置开始，寻找第一个上表面没有碰撞的方块
-     * @param world 当前世界
      * @param startingLocation 起始位置
      * @param step 步进，大于0为向上，小于0为向下
      * @param maxY 最大Y
@@ -94,35 +94,28 @@ public class EvokerMorphSkill extends DelayedMorphSkill<NoOpConfiguration>
      * @return 寻找到的方块的位置，如果没找到则是NULL
      */
     @Nullable
-    private Location traceForFangLocation(World world, Location startingLocation, int step, double maxY, double minY)
+    private Location traceForFangLocation(Location startingLocation, int step, double maxY, double minY)
     {
+        var world = startingLocation.getWorld();
         var currentLocation = startingLocation.clone();
-        Location foundLocation = null;
 
+        Location foundLocation = null;
         while (currentLocation.getY() >= minY && currentLocation.getY() <= maxY)
         {
-            // 确保我们始终在世界范围内，Just in case
-            if (currentLocation.getY() < world.getMinHeight() || currentLocation.getY() > world.getMaxHeight())
-                break;
+            var blockBelow = world.getBlockAt(currentLocation.clone().add(0, -1, 0));
+            var blockCurrent = world.getBlockAt(currentLocation);
 
-            var currentBlock = world.getBlockAt(currentLocation);
-
-            // 如果当前方块不是空气
-            if (!currentBlock.getType().isAir())
+            if (!blockCurrent.isCollidable() && blockBelow.isCollidable())
             {
-                if (!currentBlock.isCollidable())
+                var boundingBoxMaxY = 0d;
+                for (BoundingBox boundingBox : blockBelow.getCollisionShape().getBoundingBoxes())
                 {
-                    foundLocation = currentLocation;
-                    break;
+                    if (boundingBox.getMaxY() > boundingBoxMaxY)
+                        boundingBoxMaxY = boundingBox.getMaxY();
                 }
 
-                var locationUpper = currentLocation.clone().add(0, 1, 0);
-                var blockUpper = world.getBlockAt(locationUpper);
-                if (!blockUpper.isCollidable())
-                {
-                    foundLocation = locationUpper;
-                    break;
-                }
+                foundLocation = currentLocation.add(0, -1, 0).add(0, boundingBoxMaxY, 0);
+                break;
             }
 
             currentLocation.add(0, step, 0);
@@ -150,8 +143,8 @@ public class EvokerMorphSkill extends DelayedMorphSkill<NoOpConfiguration>
         }
         else
         {
-            // 没有目标实体时，让限制更宽松一些，上下10格都可以生成尖牙
-            maxY += 5;
+            // 没有目标实体时，让限制更宽松一些
+            maxY += 1;
             minY -= 5;
         }
 
@@ -169,7 +162,7 @@ public class EvokerMorphSkill extends DelayedMorphSkill<NoOpConfiguration>
 
             traceStartLocation.setY(targetLocationIsHigher ? maxY : minY);
 
-            var targetLocation = this.traceForFangLocation(world, traceStartLocation, stepDirection, maxY, minY);
+            var targetLocation = this.traceForFangLocation(traceStartLocation, stepDirection, maxY, minY);
 
             if (targetLocation == null)
                 break;
