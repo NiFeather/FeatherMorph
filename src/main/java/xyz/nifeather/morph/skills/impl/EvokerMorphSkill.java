@@ -1,5 +1,7 @@
 package xyz.nifeather.morph.skills.impl;
 
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.sound.Sound;
 import org.bukkit.Difficulty;
 import org.bukkit.FluidCollisionMode;
 import org.bukkit.Location;
@@ -22,27 +24,60 @@ import xyz.nifeather.morph.api.morphs.skills.SkillNames;
 import xyz.nifeather.morph.skills.options.NoOpConfiguration;
 import xyz.nifeather.morph.storage.skill.SkillAbilityConfiguration;
 
-public class SummonFangsMorphSkill extends MorphSkill<NoOpConfiguration>
+public class EvokerMorphSkill extends DelayedMorphSkill<NoOpConfiguration>
 {
+    public static final String SESSION_DATA_SUMMON_VEX = "EVOKER_SKILL_SUMMON_VEX";
+
     @Override
-    public int executeSkill(Player player, DisguiseState state, SkillAbilityConfiguration configuration, NoOpConfiguration option)
+    protected ExecuteResult preExecute(Player player, DisguiseState state, SkillAbilityConfiguration configuration, NoOpConfiguration option)
     {
         var targetEntity = player.getTargetEntity(16);
 
         var summonVex = targetEntity != null
                 && (player.isSneaking() || targetEntity.getLocation().distance(player.getLocation()) > 8);
+
+        if (summonVex && player.getWorld().getDifficulty() == Difficulty.PEACEFUL)
+        {
+            sendDenyMessageToPlayer(player, SkillStrings.difficultyIsPeacefulString()
+                    .withLocale(MessageUtils.getLocale(player))
+                    .toComponent(null));
+
+            return ExecuteResult.fail(10);
+        }
+
+        Key soundKey = summonVex
+                ? Key.key("entity.evoker.prepare_summon")
+                : Key.key("entity.evoker.prepare_attack");
+
+        playSoundToNearbyPlayers(player, 16,
+                soundKey, Sound.Source.HOSTILE);
+
+        state.setSessionData(SESSION_DATA_SUMMON_VEX, summonVex);
+        state.getDisguiseWrapper().setAggressive(true);
+        return ExecuteResult.success(configuration.getCooldown());
+    }
+
+    @Override
+    protected int getExecuteDelay(SkillAbilityConfiguration configuration, NoOpConfiguration option)
+    {
+        return 20;
+    }
+
+    @Override
+    public void executeDelayedSkill(Player player, DisguiseState state, SkillAbilityConfiguration configuration, NoOpConfiguration option)
+    {
+        state.getDisguiseWrapper().setAggressive(false);
+        var targetEntity = player.getTargetEntity(16);
+
+        var summonVex = state.getSessionDataOr(SESSION_DATA_SUMMON_VEX, Boolean.class, false);
+        state.removeSessionData(SESSION_DATA_SUMMON_VEX);
+
         var world = player.getWorld();
 
         if (summonVex)
         {
             if (world.getDifficulty() == Difficulty.PEACEFUL)
-            {
-                sendDenyMessageToPlayer(player, SkillStrings.difficultyIsPeacefulString()
-                        .withLocale(MessageUtils.getLocale(player))
-                        .toComponent(null));
-
-                return 10;
-            }
+                return;
 
             var isLiving = targetEntity instanceof LivingEntity;
 
@@ -122,8 +157,6 @@ public class SummonFangsMorphSkill extends MorphSkill<NoOpConfiguration>
                 }, i);
             }
         }
-
-        return configuration.getCooldown();
     }
 
     @Override

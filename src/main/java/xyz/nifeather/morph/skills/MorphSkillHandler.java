@@ -78,7 +78,7 @@ public class MorphSkillHandler extends MorphPluginObject
                 new ExplodeMorphSkill(),
                 new InventoryMorphSkill(),
                 new LaunchProjectileMorphSkill(),
-                new SummonFangsMorphSkill(),
+                new EvokerMorphSkill(),
                 new TeleportMorphSkill(),
                 new SonicBoomMorphSkill(),
                 new SplashPotionSkill(),
