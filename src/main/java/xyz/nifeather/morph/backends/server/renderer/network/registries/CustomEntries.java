@@ -32,6 +32,12 @@ public class CustomEntries
     public static final CustomEntry<UUID> TABLIST_UUID = CustomEntry.of("tablist_uuid", Util.NIL_UUID);
 
     public static final CustomEntry<Boolean> WARDEN_CHARGING_ATTACK = CustomEntry.of("warden_charging_attack", false);
+
+    public static final CustomEntry<Boolean> IS_AGGRESSIVE = CustomEntry.of("is_aggressive", false);
+
+    /**
+     * Animation played upon player attack (on player main hand swing)
+     */
     public static final CustomEntry<Boolean> ATTACK_ANIMATION = CustomEntry.of("attack_animation", false);
 
     public static final CustomEntry<Integer> SLIME_SIZE_REAL = CustomEntry.of("slime_size_real", 0);

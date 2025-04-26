@@ -108,6 +108,12 @@ public class WardenWatcher extends EHasAttackAnimationWatcher
                 }
             }
         }
+
+        if (entry.equals(CustomEntries.IS_AGGRESSIVE))
+        {
+            boolean aggressive = (Boolean) newVal;
+            writeEntry(CustomEntries.WARDEN_CHARGING_ATTACK, aggressive);
+        }
     }
 
     private void reset()

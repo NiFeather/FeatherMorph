@@ -277,17 +277,7 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
         super.setAggressive(aggressive);
 
         this.aggressive = aggressive;
-        if (getEntityType() == EntityType.GHAST)
-            bindingWatcher.writePersistent(ValueIndex.GHAST.CHARGING, aggressive);
-
-        if (getEntityType() == EntityType.CREEPER)
-        {
-            bindingWatcher.writePersistent(ValueIndex.CREEPER.STATE, aggressive ? 1 : -1);
-            bindingWatcher.writePersistent(ValueIndex.CREEPER.IGNITED, aggressive);
-        }
-
-        if (getEntityType() == EntityType.WARDEN)
-            bindingWatcher.writeEntry(CustomEntries.WARDEN_CHARGING_ATTACK, aggressive);
+        bindingWatcher.writeEntry(CustomEntries.IS_AGGRESSIVE, aggressive);
     }
 
     @Override
