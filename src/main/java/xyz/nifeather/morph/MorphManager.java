@@ -532,7 +532,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         {
             var targetedEntity = player.getTargetEntity(5);
 
-            if (targetedEntity != null)
+            if (targetedEntity instanceof LivingEntity)
             {
                 String targetKey;
 
