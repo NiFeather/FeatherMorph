@@ -2,24 +2,19 @@ package xyz.nifeather.morph.skills.impl;
 
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
-import org.bukkit.Difficulty;
-import org.bukkit.FluidCollisionMode;
-import org.bukkit.Location;
-import org.bukkit.NamespacedKey;
+import org.bukkit.*;
 import org.bukkit.block.Block;
-import org.bukkit.entity.EvokerFangs;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.Vex;
+import org.bukkit.block.BlockFace;
+import org.bukkit.entity.*;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.SkillStrings;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.misc.NmsRecord;
 import xyz.nifeather.morph.misc.mobs.MorphBukkitVexModifier;
-import xyz.nifeather.morph.skills.MorphSkill;
 import xyz.nifeather.morph.api.morphs.skills.SkillNames;
 import xyz.nifeather.morph.skills.options.NoOpConfiguration;
 import xyz.nifeather.morph.storage.skill.SkillAbilityConfiguration;
@@ -63,6 +58,132 @@ public class EvokerMorphSkill extends DelayedMorphSkill<NoOpConfiguration>
         return 20;
     }
 
+    private void doSummonVex(Player player, Entity targetEntity)
+    {
+        var world = player.getWorld();
+
+        if (world.getDifficulty() == Difficulty.PEACEFUL)
+            return;
+
+        var isLiving = targetEntity instanceof LivingEntity;
+
+        var location = player.getEyeLocation();
+        var targetAmount = 3;
+
+        this.scheduleOn(player, () ->
+        {
+            for (int i = 0; i < targetAmount; i++)
+            {
+                var vex = world.spawn(location, Vex.class, CreatureSpawnEvent.SpawnReason.CUSTOM);
+                new MorphBukkitVexModifier(vex, player);
+
+                vex.setLimitedLifetimeTicks(20 * (30 + NmsRecord.ofPlayer(player).random.nextInt(90)));
+
+                if (isLiving)
+                    vex.setTarget((LivingEntity) targetEntity);
+
+                vex.setPersistent(false);
+            }
+        });
+    }
+
+    /**
+     * 从给定的位置开始，寻找第一个上表面没有碰撞的方块
+     * @param world 当前世界
+     * @param startingLocation 起始位置
+     * @param step 步进，大于0为向上，小于0为向下
+     * @param maxY 最大Y
+     * @param minY 最小Y
+     * @return 寻找到的方块的位置，如果没找到则是NULL
+     */
+    @Nullable
+    private Location traceForFangLocation(World world, Location startingLocation, int step, double maxY, double minY)
+    {
+        var currentLocation = startingLocation.clone();
+        Location foundLocation = null;
+
+        while (currentLocation.getY() >= minY && currentLocation.getY() <= maxY)
+        {
+            // 确保我们始终在世界范围内，Just in case
+            if (currentLocation.getY() < world.getMinHeight() || currentLocation.getY() > world.getMaxHeight())
+                break;
+
+            var currentBlock = world.getBlockAt(currentLocation);
+
+            // 如果当前方块不是空气
+            if (!currentBlock.getType().isAir())
+            {
+                if (!currentBlock.isCollidable())
+                {
+                    foundLocation = currentLocation;
+                    break;
+                }
+
+                var locationUpper = currentLocation.clone().add(0, 1, 0);
+                var blockUpper = world.getBlockAt(locationUpper);
+                if (!blockUpper.isCollidable())
+                {
+                    foundLocation = locationUpper;
+                    break;
+                }
+            }
+
+            currentLocation.add(0, step, 0);
+        }
+
+        return foundLocation;
+    }
+
+    private void doSummonFangs(Player player, @Nullable Entity targetEntity)
+    {
+        var playerLocation = player.getLocation();
+        var eyeDirection = scaleVector2D(player.getEyeLocation().getDirection());
+        var world = player.getWorld();
+
+        var targetFangs = 16;
+
+        var maxY = player.getY();
+        var minY = player.getY();
+
+        if (targetEntity != null)
+        {
+            // 存在目标实体时，我们要求路径必须连贯完整
+            maxY = Math.max(maxY, targetEntity.getY()) + 1;
+            minY = Math.min(minY, targetEntity.getY()) - 1;
+        }
+        else
+        {
+            // 没有目标实体时，让限制更宽松一些，上下10格都可以生成尖牙
+            maxY += 5;
+            minY -= 5;
+        }
+
+        // 目标实体是否比我们更高？
+        // 如果是，则我们需要从上往下追踪方块
+        // 否则，从下往上找方块
+        // todo: 但是！！！原版中的唤魔者只会从上往下找方块生成尖牙，我们真的需要从下往上增加复杂度吗？
+        var targetLocationIsHigher = targetEntity == null || targetEntity.getLocation().getY() > playerLocation.getY();
+
+        int stepDirection = targetLocationIsHigher ? -1 : 1;
+
+        for (int fangIndex = 1; fangIndex <= targetFangs; fangIndex++)
+        {
+            var traceStartLocation = playerLocation.clone().add(new Vector(eyeDirection.getX() * fangIndex, 0, eyeDirection.getZ() * fangIndex));
+
+            traceStartLocation.setY(targetLocationIsHigher ? maxY : minY);
+
+            var targetLocation = this.traceForFangLocation(world, traceStartLocation, stepDirection, maxY, minY);
+
+            if (targetLocation == null)
+                break;
+
+            // 生成实体
+            var fang = world.spawn(targetLocation, EvokerFangs.class, CreatureSpawnEvent.SpawnReason.CUSTOM);
+            fang.setAttackDelay(fangIndex);
+            fang.setOwner(player);
+        }
+    }
+
     @Override
     public void executeDelayedSkill(Player player, DisguiseState state, SkillAbilityConfiguration configuration, NoOpConfiguration option)
     {
@@ -72,88 +193,10 @@ public class EvokerMorphSkill extends DelayedMorphSkill<NoOpConfiguration>
         var summonVex = state.getSessionDataOr(SESSION_DATA_SUMMON_VEX, Boolean.class, false);
         state.removeSessionData(SESSION_DATA_SUMMON_VEX);
 
-        var world = player.getWorld();
-
         if (summonVex)
-        {
-            if (world.getDifficulty() == Difficulty.PEACEFUL)
-                return;
-
-            var isLiving = targetEntity instanceof LivingEntity;
-
-            var location = player.getEyeLocation();
-            var targetAmount = 3;
-
-            this.scheduleOn(player, () ->
-            {
-                for (int i = 0; i < targetAmount; i++)
-                {
-                    var vex = world.spawn(location, Vex.class, CreatureSpawnEvent.SpawnReason.CUSTOM);
-                    new MorphBukkitVexModifier(vex, player);
-
-                    vex.setLimitedLifetimeTicks(20 * (30 + NmsRecord.ofPlayer(player).random.nextInt(90)));
-
-                    if (isLiving)
-                        vex.setTarget((LivingEntity) targetEntity);
-
-                    vex.setPersistent(false);
-                }
-            });
-        }
+            this.doSummonVex(player, targetEntity);
         else
-        {
-            var location = player.getLocation();
-            var direction = scaleVector2D(player.getEyeLocation().getDirection());
-
-            var targetFangs = 16;
-            Location oldLocation = null;
-
-            for (int fangIndex = 0; fangIndex < targetFangs; fangIndex++)
-            {
-                location.add(direction.getX(), 0, direction.getZ());
-
-                //是否要寻找新方块
-                if (world.getBlockAt(location.getBlockX(), location.getBlockY() - 1, location.getBlockZ()).getType().isAir())
-                {
-                    var blockDown = world.rayTraceBlocks(location, new Vector(0, -1, 0), 8);
-                    Block newBlock;
-
-                    //根据玩家视角选择方向
-                    newBlock = blockDown == null ? null : blockDown.getHitBlock();
-
-                    //设置新位置
-                    if (newBlock != null)
-                        location.setY(getTopY(newBlock));
-                    else
-                        break;
-                }
-
-                if (oldLocation != null && oldLocation.getBlockY() == location.getBlockY())
-                {
-                    //trace方法有问题，尖刺不管多密集总是会在障碍物前面一格停止生成
-                    var traceDirection = location.clone().subtract(oldLocation).toVector();
-
-                    if (traceDirection.lengthSquared() > 0.0)
-                    {
-                        var traceResult = world.rayTraceBlocks(location, traceDirection, oldLocation.distance(location) + 1, FluidCollisionMode.NEVER, true);
-
-                        if (traceResult != null)
-                            break;
-                    }
-                }
-
-                //设置位置
-                var loc = location.clone();
-                oldLocation = location.clone();
-
-                //添加到计划任务
-                this.scheduleOn(player, ()  ->
-                {
-                    var fang = world.spawn(loc, EvokerFangs.class, CreatureSpawnEvent.SpawnReason.CUSTOM);
-                    fang.setOwner(player);
-                }, fangIndex);
-            }
-        }
+            this.doSummonFangs(player, targetEntity);
     }
 
     /**
