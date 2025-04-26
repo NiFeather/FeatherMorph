@@ -52,17 +52,27 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
     private final Bindable<Boolean> logOutGoingPackets = new Bindable<>(false);
     private final Bindable<Boolean> forceTargetVersion = new Bindable<>(false);
 
+    @Deprecated(forRemoval = true)
+    @ApiStatus.ScheduledForRemoval(inVersion = "2.2.0")
     public boolean allowClient()
     {
         return allowClient.get();
     }
 
+    @Deprecated(forRemoval = true)
+    @ApiStatus.ScheduledForRemoval(inVersion = "2.2.0")
     public boolean logInComingPackets()
     {
         return logInComingPackets.get();
     }
 
     //region Send command/packet
+
+    @Override
+    public boolean sendCommand(Player player, AbstractS2CCommand<?> basicS2CCommand)
+    {
+        return this.sendCommand(player, basicS2CCommand, false);
+    }
 
     private boolean sendCommand(Player player, AbstractS2CCommand<?> command, boolean forceSend)
     {
@@ -82,12 +92,6 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
             this.sendPacket(MessageChannel.commandChannel, player, cmd, false);
 
         return true;
-    }
-
-    @Override
-    public boolean sendCommand(Player player, AbstractS2CCommand<?> basicS2CCommand)
-    {
-        return this.sendCommand(player, basicS2CCommand, false);
     }
 
     private void sendPacket(String channel, Player player, String message, boolean isLegacyClient)
@@ -191,23 +195,15 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
 
     private final CommandRegistries registries = new CommandRegistries();
 
-    @ApiStatus.Internal
-    public CommandRegistries getRegistries()
-    {
-        return this.registries;
-    }
-
     private final Bindable<Boolean> modifyBoundingBoxes = new Bindable<>(false);
     private final Bindable<Boolean> useClientRenderer = new Bindable<>(false);
     private final Bindable<Boolean> debugOutput = new Bindable<>(false);
 
-    private static final String newProtocolIdentify = "1_21_3_packetbuf";
+    private static final String serverFeatureFlags = "1_21_3_packetbuf";
 
     @Initializer
     private void load(FeatherMorphMain plugin, MorphConfigManager configManager)
     {
-        // Constants.initialize(true);
-
         registries.registerC2S(C2SCommandNames.Initial, a -> new C2SInitialCommand())
                 .registerC2S(C2SCommandNames.Morph, C2SMorphCommand::new)
                 .registerC2S(C2SCommandNames.Skill, a -> new C2SSkillCommand())
@@ -264,9 +260,9 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
             var players = Bukkit.getOnlinePlayers();
 
             if (n)
-                this.reAuthPlayers(players);
+                players.forEach(this::disconnectThenReAuth);
             else
-                this.disconnectPlayers(players);
+                players.forEach(this::disconnect);
         });
 
         Bukkit.getOnlinePlayers().forEach(p ->
@@ -304,7 +300,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
             var utfData = Arrays.stream(buffer.readUtf().split(" ")).toList();
 
             // 似乎有点多余，因为使用新版序列化方法的客户端总是会发送这个id
-            if (utfData.stream().noneMatch(s -> s.equals(newProtocolIdentify)))
+            if (utfData.stream().noneMatch(s -> s.equals(serverFeatureFlags)))
             {
                 isLegacyBuf = true;
                 logger.info("'%s' is using a legacy client.".formatted(player.getName()));
@@ -333,7 +329,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
         session.initializeState = InitializeState.HANDSHAKE;
         session.isLegacyPacketBuf = isLegacyBuf;
 
-        this.sendPacket(MessageChannel.initializeChannel, player, newProtocolIdentify, isLegacyBuf);
+        this.sendPacket(MessageChannel.initializeChannel, player, serverFeatureFlags, isLegacyBuf);
     }
 
     private void handleVersionInput(ICommandPacketHandler commandPacketHandler, String sourceChannel, Player player, byte[] data)
@@ -360,7 +356,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
         //如果客户端版本低于最低能接受的版本或高于当前版本，拒绝初始化
         if (clientVersion < minimumApiVersion || clientVersion > Constants.PROTOCOL_VERSION)
         {
-            unInitializePlayer(player);
+            disconnect(player);
 
             //player.sendMessage(MessageUtils.prefixes(player, MorphStrings.clientVersionMismatchString()));
             logger.info(player.getName() + " joined with incompatible client API version: " + clientVersion + " (This server requires " + targetApiVersion + ")");
@@ -458,10 +454,8 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
 
     private final Map<Player, PlayerSession> playerSessionMap = new ConcurrentHashMap<>();
 
-    private PlayerSession createSession(Player player, boolean isUsingLegacyBuf)
+    private PlayerSession createSession(Player player)
     {
-        var uuid = player.getUniqueId();
-
         var cached = playerSessionMap.getOrDefault(player, null);
 
         if (cached != null)
@@ -469,7 +463,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
 
         var instance = PlayerSession.SessionBuilder
                 .builder(player)
-                .isLegacy(isUsingLegacyBuf)
+                .isLegacy(false)
                 .build();
 
         playerSessionMap.put(player, instance);
@@ -485,28 +479,12 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
     @NotNull
     public PlayerSession getOrCreateSession(Player player)
     {
-        return createSession(player, false);
+        return createSession(player);
     }
 
     //region wait until ready
 
-    @ApiStatus.Internal
-    public void waitUntilReady(Player player, Runnable r)
-    {
-        var session = getOrCreateSession(player);
-
-        if (session.connectionState == ConnectionState.JOINED)
-        {
-            r.run();
-        }
-        else
-        {
-            //logger.info(player.getName() + " not ready! " + bool);
-            this.addSchedule(() -> waitUntilReady(player, r));
-        }
-    }
-
-    public void markPlayerReady(Player player)
+    public void markPlayerJoined(Player player)
     {
         var session = getOrCreateSession(player);
         session.connectionState = ConnectionState.JOINED;
@@ -570,53 +548,34 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
 
         this.addSchedule(() ->
         {
-            if (!scheduledReauthPlayers.get()) return;
+            synchronized (scheduledReauthPlayers)
+            {
+                if (!scheduledReauthPlayers.get()) return;
 
-            scheduledReauthPlayers.set(false);
-            reAuthPlayers();
+                scheduledReauthPlayers.set(false);
+                reAuthPlayers(Bukkit.getOnlinePlayers());
+            }
         });
     }
 
-    private void reAuthPlayers()
-    {
-        var players = Bukkit.getOnlinePlayers();
-
-        disconnectPlayers(players);
-        reAuthPlayers(players);
-    }
 
     public void rejectPlayer(Player player)
     {
         logger.info("Rejecting player " + player.getName());
         player.sendMessage(MessageUtils.prefixes(player, MorphStrings.unsupportedClientBehavior()));
 
-        this.unInitializePlayer(player);
+        this.disconnect(player);
     }
 
-    /**
-     * 反初始化玩家
-     *
-     * @param player 目标玩家
-     */
-    private void unInitializePlayer(Player player)
+    public void disconnectThenReAuth(Player player)
     {
-        if (!this.playerSessionMap.containsKey(player))
-        {
-            if (FeatherMorphMain.getInstance().doInternalDebugOutput)
-                logger.info("Skipping disconnect for player %s since it does not have a session.".formatted(player));
+        var session = getSession(player);
+        boolean isLegacyClient = session != null && session.isLegacyPacketBuf;
 
-            return;
-        }
+        disconnect(player);
 
-        this.sendCommand(player, new S2CUnAuthCommand(), true);
-
-        this.playerSessionMap.remove(player);
-
-        var playerConfig = manager.getPlayerMeta(player);
-
-        var state = manager.getDisguiseStateFor(player);
-        if (state != null)
-            state.setServerSideSelfVisible(playerConfig.showDisguiseToSelf);
+        // This is not what standard protocol supposed to do but it's the only way to make it work
+        this.sendPacket(MessageChannel.initializeChannel, player, serverFeatureFlags, isLegacyClient);
     }
 
     /**
@@ -628,21 +587,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
     {
         if (!allowClient.get()) return;
 
-        players.forEach(p ->
-        {
-            // This is not what standard protocol supposed to do but it's the only way to make it work
-            this.sendPacket(MessageChannel.initializeChannel, p, newProtocolIdentify, false);
-        });
-    }
-
-    /**
-     * 向列表中的玩家客户端发送unauth指令
-     *
-     * @param players 玩家列表
-     */
-    public void disconnectPlayers(Collection<? extends Player> players)
-    {
-        players.forEach(this::disconnect);
+        players.forEach(this::disconnectThenReAuth);
     }
 
     //endregion Auth/UnAuth
@@ -694,20 +639,18 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
         return session.initializeState == InitializeState.DONE;
     }
 
-    private final PlayerOptions<Player> nilRecord = new PlayerOptions<Player>(null);
-
     @Nullable
     @Contract("_, false -> null; _, true -> !null")
-    public PlayerOptions<Player> getPlayerOption(Player player, boolean createIfNull)
+    public PlayerOptions<Player> getPlayerOption(Player player, boolean createSessionIfNull)
     {
         var session = getSession(player);
 
         if (session != null)
             return session.options;
-        else if (!createIfNull)
+        else if (!createSessionIfNull)
             return null;
 
-        return createSession(player, false).options;
+        return createSession(player).options;
     }
 
     /**
@@ -718,8 +661,6 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
     @Nullable
     public PlayerOptions<Player> getPlayerOption(Player player)
     {
-        var uuid = player.getUniqueId();
-
         var session = getSession(player);
         if (session == null) return null;
 
@@ -765,7 +706,23 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
     @Override
     public void disconnect(Player player)
     {
-        unInitializePlayer(player);
+        if (!this.playerSessionMap.containsKey(player))
+        {
+            if (FeatherMorphMain.getInstance().doInternalDebugOutput)
+                logger.info("Skipping disconnect for player %s since it does not have a session.".formatted(player));
+
+            return;
+        }
+
+        this.sendCommand(player, new S2CUnAuthCommand(), true);
+
+        this.playerSessionMap.remove(player);
+
+        var playerConfig = manager.getPlayerMeta(player);
+
+        var state = manager.getDisguiseStateFor(player);
+        if (state != null)
+            state.setServerSideSelfVisible(playerConfig.showDisguiseToSelf);
     }
 
     //region C2S(Serverbound) commands
@@ -812,7 +769,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
         Player player = c2SMorphCommand.getOwner();
         var id = c2SMorphCommand.getArgumentAt(0, "");
 
-        if (id.isEmpty() || id.isBlank())
+        if (id.isBlank())
             manager.tryQuickDisguise(player);
         else if (manager.canMorph(player))
             manager.morph(player, player, id, player.getTargetEntity(5));

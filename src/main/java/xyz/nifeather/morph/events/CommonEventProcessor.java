@@ -46,7 +46,6 @@ import xyz.nifeather.morph.utilities.EntityTypeUtils;
 import xyz.nifeather.morph.utilities.ItemUtils;
 
 import java.util.List;
-import java.util.Random;
 
 import static xyz.nifeather.morph.utilities.DisguiseUtils.itemOrAir;
 
@@ -380,7 +379,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         var player = e.getPlayer();
         var state = morphs.getDisguiseStateFor(player);
 
-        clientHandler.markPlayerReady(player);
+        clientHandler.markPlayerJoined(player);
 
         var effectivePermissions = new ObjectOpenHashSet<>(player.getEffectivePermissions());
         List<String> legacyPermissions = new ObjectArrayList<>();

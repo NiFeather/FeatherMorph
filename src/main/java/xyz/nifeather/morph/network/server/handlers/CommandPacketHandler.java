@@ -34,16 +34,6 @@ public class CommandPacketHandler extends AbstractCommandPacketHandler
         {
             return VersionHandleResult.fail();
         }
-/*
-        try
-        {
-            if (clientVersion == -1)
-                clientVersion = Integer.parseInt(new String(data, StandardCharsets.UTF_8));
-        }
-        catch (Throwable t)
-        {
-        }
-*/
     }
 
     @Override
