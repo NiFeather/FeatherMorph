@@ -1,6 +1,7 @@
 package xyz.nifeather.morph;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import xiamomc.pluginbase.PluginObject;
 
@@ -22,9 +23,9 @@ public class MorphPluginObject extends PluginObject<FeatherMorphMain>
         entity.getScheduler().execute(plugin, r, null, delay);
     }
 
-    protected void scheduleWorld(Entity entity, Runnable r)
+    protected void scheduleAt(Location location, Runnable r)
     {
-        Bukkit.getRegionScheduler().execute(plugin, entity.getLocation(), r);
+        Bukkit.getRegionScheduler().execute(plugin, location, r);
     }
 
     public void dispose()

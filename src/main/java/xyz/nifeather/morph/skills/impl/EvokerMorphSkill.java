@@ -26,10 +26,7 @@ public class EvokerMorphSkill extends DelayedMorphSkill<NoOpConfiguration>
     @Override
     protected ExecuteResult preExecute(Player player, DisguiseState state, SkillAbilityConfiguration configuration, NoOpConfiguration option)
     {
-        var targetEntity = player.getTargetEntity(16);
-
-        var summonVex = targetEntity != null
-                && (player.isSneaking() || targetEntity.getLocation().distance(player.getLocation()) > 8);
+        var summonVex = player.isSneaking();
 
         if (summonVex && player.getWorld().getDifficulty() == Difficulty.PEACEFUL)
         {
@@ -70,7 +67,7 @@ public class EvokerMorphSkill extends DelayedMorphSkill<NoOpConfiguration>
         var location = player.getEyeLocation();
         var targetAmount = 3;
 
-        this.scheduleOn(player, () ->
+        this.scheduleAt(player.getLocation(), () ->
         {
             for (int i = 0; i < targetAmount; i++)
             {
