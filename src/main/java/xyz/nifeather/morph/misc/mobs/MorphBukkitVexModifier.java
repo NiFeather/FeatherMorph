@@ -9,12 +9,16 @@ import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.craftbukkit.entity.CraftVex;
 import org.bukkit.event.entity.EntityTargetEvent;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import xyz.nifeather.morph.FeatherMorphMain;
 
 import java.util.EnumSet;
 import java.util.Objects;
 
 public class MorphBukkitVexModifier
 {
+    private static final Logger log = LoggerFactory.getLogger(MorphBukkitVexModifier.class);
     private final Vex vex;
     private final Player owner;
 
@@ -78,25 +82,17 @@ public class MorphBukkitVexModifier
             var owner = this.owner();
 
             var lastHurtBy = owner.getLastHurtByMob();
-            this.ownerLastHurtBy = lastHurtBy;
-
             return lastHurtBy != null
                     && this.canAttack(lastHurtBy, TargetingConditions.DEFAULT)
-                    && ownerLastHurtByMobTimestamp != owner.getLastHurtByMobTimestamp();
+                    && owner.tickCount - owner.getLastHurtByMobTimestamp() < 20;
         }
-
-        private int ownerLastHurtByMobTimestamp;
-        private LivingEntity ownerLastHurtBy;
 
         @Override
         public void start()
         {
             super.start();
 
-            var owner = this.owner();
-            this.ownerLastHurtByMobTimestamp = owner.getLastHurtByMobTimestamp();
-
-            this.thisEntity.setTarget(ownerLastHurtBy, EntityTargetEvent.TargetReason.CUSTOM);
+            this.thisEntity.setTarget(owner().getLastHurtByMob(), EntityTargetEvent.TargetReason.CUSTOM);
         }
     }
 
@@ -129,24 +125,18 @@ public class MorphBukkitVexModifier
         public boolean canUse()
         {
             var lastHurt = owner().getLastHurtMob();
-            this.ownerLastHurt = lastHurt;
 
             return lastHurt != null
                     && this.canAttack(lastHurt, TargetingConditions.DEFAULT)
-                    && ownerLastHurtTimestamp != owner().getLastHurtMobTimestamp();
+                    && owner().tickCount - owner().getLastHurtMobTimestamp() < 20;
         }
-
-        private LivingEntity ownerLastHurt;
-
-        private int ownerLastHurtTimestamp;
 
         @Override
         public void start()
         {
             super.start();
 
-            ownerLastHurtTimestamp = this.owner().getLastHurtMobTimestamp();
-            this.thisEntity.setTarget(this.ownerLastHurt, EntityTargetEvent.TargetReason.CUSTOM);
+            this.thisEntity.setTarget(owner().getLastHurtMob(), EntityTargetEvent.TargetReason.CUSTOM);
         }
     }
 }
