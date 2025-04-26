@@ -39,7 +39,6 @@ import xyz.nifeather.morph.misc.OfflineDisguiseResult;
 import xyz.nifeather.morph.misc.gui.AnimSelectScreenWrapper;
 import xyz.nifeather.morph.misc.gui.DisguiseSelectScreenWrapper;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
-import xyz.nifeather.morph.misc.playerList.PlayerListHandler;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
 import xyz.nifeather.morph.network.server.ServerSetEquipCommand;
 import xyz.nifeather.morph.skills.MorphSkillHandler;
@@ -406,8 +405,6 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
             logger.error("");
             logger.error("- x - x - x - x - x - x - x - x - x - x - x - x -");
         }
-
-        this.addSchedule(() -> PlayerListHandler.instance().handle(player));
 
         if (state != null)
         {

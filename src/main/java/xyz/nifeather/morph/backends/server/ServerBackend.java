@@ -13,7 +13,6 @@ import xyz.nifeather.morph.backends.WrapperEvent;
 import xyz.nifeather.morph.backends.server.renderer.ServerRenderer;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
 import xyz.nifeather.morph.messages.BackendStrings;
-import xyz.nifeather.morph.misc.playerList.PlayerListHandler;
 import xyz.nifeather.morph.utilities.NbtUtils;
 
 import javax.annotation.Nullable;
@@ -199,19 +198,6 @@ public class ServerBackend extends DisguiseBackend<ServerDisguise, ServerDisguis
 
         serverDisguiseWrapper.setRenderParameters(player, watcher);
 
-        if (wrapper.getEntityType() == EntityType.PLAYER && serverRenderer.showPlayerDisguises.get())
-        {
-            var disguiseUUID = watcher.readEntryOrThrow(CustomEntries.SPAWN_UUID);
-            var tabHandler = PlayerListHandler.instance();
-
-            serverDisguiseWrapper.subscribeEvent(this,
-                    WrapperEvent.SKIN_SET,
-                    profile -> tabHandler.showFakePlayer(disguiseUUID, profile));
-
-            if (wrapper.getEntityType() == EntityType.PLAYER)
-                tabHandler.showFakePlayer(disguiseUUID, watcher.readEntryOrThrow(CustomEntries.PROFILE));
-        }
-
         return true;
     }
 
@@ -223,13 +209,7 @@ public class ServerBackend extends DisguiseBackend<ServerDisguise, ServerDisguis
         var uuid = player.getUniqueId();
         var wrapper = disguiseWrapperMap.getOrDefault(uuid, null);
         if (wrapper != null)
-        {
-            var watcher = wrapper.getBindingWatcher();
-            if (watcher != null)
-                PlayerListHandler.instance().hideFakePlayer(watcher.readEntryOrThrow(CustomEntries.SPAWN_UUID));
-
             wrapper.dispose();
-        }
 
         disguiseWrapperMap.remove(uuid);
         return true;

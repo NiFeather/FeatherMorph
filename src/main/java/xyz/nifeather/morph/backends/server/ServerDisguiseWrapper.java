@@ -28,7 +28,6 @@ import xyz.nifeather.morph.misc.AnimationNames;
 import xyz.nifeather.morph.misc.DisguiseEquipment;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
-import xyz.nifeather.morph.misc.playerList.PlayerListHandler;
 import xyz.nifeather.morph.utilities.NbtUtils;
 
 import java.util.Map;
@@ -261,14 +260,6 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
     {
     }
 
-    @Override
-    public void onPlayerOffline()
-    {
-        PlayerListHandler.instance().hideFakePlayer(bindingWatcher.readEntryOrThrow(CustomEntries.SPAWN_UUID));
-
-        super.onPlayerOffline();
-    }
-
     private boolean aggressive;
 
     @Override
@@ -364,13 +355,5 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
 
         if (bindingWatcher.readEntryOrDefault(CustomEntries.WARDEN_VANISHED, false))
             bindingWatcher.writeEntry(CustomEntries.ANIMATION, AnimationNames.APPEAR);
-
-        if (this.getEntityType() == EntityType.PLAYER && backend.serverRenderer.showPlayerDisguises.get())
-        {
-            PlayerListHandler.instance().showFakePlayer(
-                    bindingWatcher.readEntryOrThrow(CustomEntries.SPAWN_UUID),
-                    bindingWatcher.readEntryOrThrow(CustomEntries.PROFILE)
-            );
-        }
     }
 }

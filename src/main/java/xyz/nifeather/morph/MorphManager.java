@@ -22,7 +22,6 @@ import xyz.nifeather.morph.backends.client.ModBackend;
 import xyz.nifeather.morph.backends.server.ServerBackend;
 import xyz.nifeather.morph.events.api.gameplay.*;
 import xyz.nifeather.morph.misc.*;
-import xyz.nifeather.morph.misc.playerList.PlayerListHandler;
 import xyz.nifeather.morph.config.ConfigOption;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.events.api.lifecycle.ManagerFinishedInitializeEvent;
@@ -231,7 +230,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         config.bind(allowHeadMorph, ConfigOption.ALLOW_HEAD_MORPH);
         config.bind(allowAcquireMorph, ConfigOption.ALLOW_ACQUIRE_MORPHS);
         config.bind(useClientRenderer, ConfigOption.USE_CLIENT_RENDERER);
-        config.bind(hideDisguisedPlayers, ConfigOption.HIDE_DISGUISED_PLAYERS_IN_TAB);
 
         registerProviders(ObjectList.of(
                 new VanillaDisguiseProvider(),
@@ -441,8 +439,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
     private final Bindable<Boolean> allowAcquireMorph = new Bindable<>(true);
     private final Bindable<Boolean> useClientRenderer = new Bindable<>(false);
-
-    private final Bindable<Boolean> hideDisguisedPlayers = new Bindable<>(false);
 
     private final Map<UUID, PlayerTextures> uuidPlayerTexturesMap = new ConcurrentHashMap<>();
 
@@ -1121,9 +1117,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 playerOptions.shownDisplayToSelfHint = true;
             }
         }
-
-        if (this.hideDisguisedPlayers.get())
-            PlayerListHandler.instance().hidePlayer(player);
     }
 
     //endregion Build and apply disguise
@@ -1331,9 +1324,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         // 向管理员发送map移除指令
         modNetworkingHelper.sendCommandToRevealablePlayers(new S2CMapRemoveCommand(player.getEntityId()));
-
-        if (this.hideDisguisedPlayers.get())
-            PlayerListHandler.instance().showPlayer(player);
 
         state.dispose();
     }

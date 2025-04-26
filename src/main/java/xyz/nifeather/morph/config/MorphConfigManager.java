@@ -21,8 +21,6 @@ import java.util.*;
 
 public class MorphConfigManager extends PluginConfigManager
 {
-    private static final Logger log = LoggerFactory.getLogger(MorphConfigManager.class);
-
     public MorphConfigManager(FeatherMorphMain plugin)
     {
         super(plugin);
@@ -169,12 +167,14 @@ public class MorphConfigManager extends PluginConfigManager
         });
 
         //更新配置
-        int targetVersion = 39;
+        int targetVersion = 40;
 
         var configVersion = getOrDefault(Integer.class, ConfigOption.VERSION);
 
         if (configVersion < targetVersion)
         {
+            FeatherMorphMain.getInstance().getSLF4JLogger().info("Migrating config from %s to %s".formatted(configVersion, targetVersion));
+
             var nonDefaults = this.getAllNotDefault();
 
             plugin.saveResource("config.yml", true);
@@ -294,6 +294,13 @@ public class MorphConfigManager extends PluginConfigManager
             {
                 //noinspection removal
                 this.remove(ConfigOption.SKILL_ITEM);
+            }
+
+            if (configVersion < 40)
+            {
+                //noinspection removal
+                this.remove(ConfigOption.SR_SHOW_PLAYER_DISGUISES_IN_TAB);
+                this.remove(ConfigOption.HIDE_DISGUISED_PLAYERS_IN_TAB);
             }
 
             newConfig.set(ConfigOption.VERSION.toString(), targetVersion);
