@@ -38,14 +38,38 @@ public class MorphBukkitVexModifier
         this.vex = nmsVex;
         this.owner = owner;
 
-        registerGoals();
+        initVex();
+        updateOnEntity();
     }
 
-    protected void registerGoals()
+    protected void updateOnEntity()
     {
-        var targetSelectors = vex.targetSelector.getAvailableGoals();
-        for (var wrapped : targetSelectors) if (wrapped != null)
-            vex.targetSelector.removeGoal(wrapped.getGoal());
+        if (this.vex.isRemoved())
+            return;
+
+        var bukkitVex = this.vex.getBukkitLivingEntity();
+
+        if (this.vex.distanceTo(this.owner) > 24)
+        {
+            var bukkitOwner = this.owner.getBukkitEntity();
+            bukkitVex.teleportAsync(bukkitOwner.getLocation().add(-1, 0, -1)).thenRun(() ->
+            {
+                vex.getMoveControl().setWantedPosition(vex.getX(), vex.getY(), vex.getZ(), 2);
+            });
+        }
+
+        if (owner.isRemoved())
+        {
+            bukkitVex.remove();
+            return;
+        }
+
+        bukkitVex.getScheduler().runDelayed(FeatherMorphMain.getInstance(), task -> updateOnEntity(), () -> {}, 2);
+    }
+
+    protected void initVex()
+    {
+        vex.targetSelector.removeAllGoals(goal -> true);
 
         vex.targetSelector.addGoal(0, new MorphOwnerHurtTargetGoal(vex, this));
         vex.targetSelector.addGoal(1, new MorphOwnerHurtByTargetGoal(vex, this));
@@ -82,9 +106,14 @@ public class MorphBukkitVexModifier
             var owner = this.owner();
 
             var lastHurtBy = owner.getLastHurtByMob();
-            return lastHurtBy != null
+            var canUse = lastHurtBy != null
                     && this.canAttack(lastHurtBy, TargetingConditions.DEFAULT)
                     && owner.tickCount - owner.getLastHurtByMobTimestamp() < 20;
+
+            if (canUse)
+                this.targetMob = lastHurtBy;
+
+            return canUse;
         }
 
         @Override
@@ -92,7 +121,12 @@ public class MorphBukkitVexModifier
         {
             super.start();
 
-            this.thisEntity.setTarget(owner().getLastHurtByMob(), EntityTargetEvent.TargetReason.CUSTOM);
+            if (targetMob != null && targetMob.isRemoved())
+                this.targetMob = null;
+
+            thisEntity.getMoveControl().setWantedPosition(thisEntity.getX(), thisEntity.getY(), thisEntity.getZ(), 2);
+
+            this.thisEntity.setTarget(this.targetMob, EntityTargetEvent.TargetReason.CUSTOM);
         }
     }
 
@@ -126,9 +160,14 @@ public class MorphBukkitVexModifier
         {
             var lastHurt = owner().getLastHurtMob();
 
-            return lastHurt != null
+            var canUse = lastHurt != null
                     && this.canAttack(lastHurt, TargetingConditions.DEFAULT)
                     && owner().tickCount - owner().getLastHurtMobTimestamp() < 20;
+
+            if (canUse)
+                targetMob = lastHurt;
+
+            return canUse;
         }
 
         @Override
@@ -136,7 +175,12 @@ public class MorphBukkitVexModifier
         {
             super.start();
 
-            this.thisEntity.setTarget(owner().getLastHurtMob(), EntityTargetEvent.TargetReason.CUSTOM);
+            thisEntity.getMoveControl().setWantedPosition(thisEntity.getX(), thisEntity.getY(), thisEntity.getZ(), 2);
+
+            if (targetMob != null && targetMob.isRemoved())
+                this.targetMob = null;
+
+            this.thisEntity.setTarget(targetMob, EntityTargetEvent.TargetReason.CUSTOM);
         }
     }
 }
