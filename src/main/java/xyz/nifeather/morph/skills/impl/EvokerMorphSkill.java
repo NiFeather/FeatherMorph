@@ -24,6 +24,10 @@ public class EvokerMorphSkill extends DelayedMorphSkill<NoOpConfiguration>
 {
     public static final String SESSION_DATA_SUMMON_VEX = "EVOKER_SKILL_SUMMON_VEX";
 
+    private record EvokerSkillDataRecord(boolean shouldSummonVex, @Nullable Entity lastTargetedEntity)
+    {
+    }
+
     @Override
     protected ExecuteResult preExecute(Player player, DisguiseState state, SkillAbilityConfiguration configuration, NoOpConfiguration option)
     {
@@ -45,7 +49,7 @@ public class EvokerMorphSkill extends DelayedMorphSkill<NoOpConfiguration>
         playSoundToNearbyPlayers(player, 16,
                 soundKey, Sound.Source.HOSTILE);
 
-        state.setSessionData(SESSION_DATA_SUMMON_VEX, summonVex);
+        state.setSessionData(SESSION_DATA_SUMMON_VEX, new EvokerSkillDataRecord(summonVex, player.getTargetEntity(16)));
         state.getDisguiseWrapper().setAggressive(true);
         return ExecuteResult.success(configuration.getCooldown());
     }
@@ -188,15 +192,14 @@ public class EvokerMorphSkill extends DelayedMorphSkill<NoOpConfiguration>
     public void executeDelayedSkill(Player player, DisguiseState state, SkillAbilityConfiguration configuration, NoOpConfiguration option)
     {
         state.getDisguiseWrapper().setAggressive(false);
-        var targetEntity = player.getTargetEntity(16);
 
-        var summonVex = state.getSessionDataOr(SESSION_DATA_SUMMON_VEX, Boolean.class, false);
+        var skillData = state.getSessionDataOr(SESSION_DATA_SUMMON_VEX, EvokerSkillDataRecord.class, new EvokerSkillDataRecord(false, null));
         state.removeSessionData(SESSION_DATA_SUMMON_VEX);
 
-        if (summonVex)
-            this.doSummonVex(player, targetEntity);
+        if (skillData.shouldSummonVex)
+            this.doSummonVex(player, skillData.lastTargetedEntity);
         else
-            this.doSummonFangs(player, targetEntity);
+            this.doSummonFangs(player, player.getTargetEntity(16));
     }
 
     /**
