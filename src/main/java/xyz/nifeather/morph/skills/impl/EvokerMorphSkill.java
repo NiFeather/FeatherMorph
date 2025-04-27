@@ -102,11 +102,16 @@ public class EvokerMorphSkill extends DelayedMorphSkill<NoOpConfiguration>
         Location foundLocation = null;
         while (currentLocation.getY() >= minY && currentLocation.getY() <= maxY)
         {
+            // 获取当前位置下方的方块：如果下方方块存在碰撞，则我们可以在他的上表面生成
             var blockBelow = world.getBlockAt(currentLocation.clone().add(0, -1, 0));
+
+            // 获取当前方块
             var blockCurrent = world.getBlockAt(currentLocation);
 
+            // 如果当前方块没有碰撞但是下面有，则允许生成
             if (!blockCurrent.isCollidable() && blockBelow.isCollidable())
             {
+                // 获取下方方块最高碰撞箱的Y
                 var boundingBoxMaxY = 0d;
                 for (BoundingBox boundingBox : blockBelow.getCollisionShape().getBoundingBoxes())
                 {
@@ -114,7 +119,12 @@ public class EvokerMorphSkill extends DelayedMorphSkill<NoOpConfiguration>
                         boundingBoxMaxY = boundingBox.getMaxY();
                 }
 
-                foundLocation = currentLocation.add(0, -1, 0).add(0, boundingBoxMaxY, 0);
+                // 设定Y值
+                var found = currentLocation.clone();
+                found.setY(blockBelow.getY() + boundingBoxMaxY);
+
+                foundLocation = found;
+                //logger.info("Current is %s And Below Is %s, Found At (%s, %s, %s)".formatted(blockCurrent.getType(), blockBelow.getType(), foundLocation.getX(), foundLocation.getY(), foundLocation.getZ()));
                 break;
             }
 
