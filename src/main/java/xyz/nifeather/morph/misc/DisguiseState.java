@@ -584,14 +584,14 @@ public class DisguiseState extends MorphPluginObject
     public <X extends ISkillOption> void setSkill(@Nullable IMorphSkill<X> newSkill,
                                                   SkillAbilityConfiguration config)
     {
+        this.skill.onDeEquip(this);
+
         if (newSkill == null)
         {
             this.skill = NoneMorphSkill.instance;
             this.skillAbilityConfiguration = null;
             return;
         }
-
-        this.skill.onDeEquip(this);
 
         this.skillAbilityConfiguration = config;
         newSkill.onInitialEquip(this);
