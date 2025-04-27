@@ -1,31 +1,146 @@
 package xyz.nifeather.morph.skills.impl;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import it.unimi.dsi.fastutil.objects.ObjectLists;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import org.bukkit.*;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
 import org.bukkit.entity.*;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xiamomc.pluginbase.Exceptions.NullDependencyException;
+import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.SkillStrings;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.misc.NmsRecord;
-import xyz.nifeather.morph.misc.mobs.MorphBukkitVexModifier;
+import xyz.nifeather.morph.misc.mobs.MorphBukkitVexHolder;
 import xyz.nifeather.morph.api.morphs.skills.SkillNames;
 import xyz.nifeather.morph.skills.options.NoOpConfiguration;
 import xyz.nifeather.morph.storage.skill.SkillAbilityConfiguration;
 
+import java.util.List;
+
 public class EvokerMorphSkill extends DelayedMorphSkill<NoOpConfiguration>
 {
     public static final String SESSION_DATA_SUMMON_VEX = "EVOKER_SKILL_SUMMON_VEX";
+    public static final String SESSION_DATA_VEX_LIST = "EVOKER_SKILL_VEX_LIST";
 
-    private record EvokerSkillDataRecord(boolean shouldSummonVex, @Nullable Entity lastTargetedEntity)
+    public record EvokerSkillDataRecord(boolean shouldSummonVex, @Nullable Entity lastTargetedEntity)
     {
+    }
+
+    public static class VexHolderCounter
+    {
+        private final List<MorphBukkitVexHolder> list = ObjectLists.synchronize(new ObjectArrayList<>());
+
+        public VexHolderCounter()
+        {
+        }
+
+        public void addHolder(MorphBukkitVexHolder vex)
+        {
+            list.add(vex);
+
+        }
+
+        public void removeHolder(MorphBukkitVexHolder vex)
+        {
+            list.remove(vex);
+        }
+
+        public int countAlive()
+        {
+            return list.stream().filter(holder -> !holder.getVex().isDead()).toArray().length;
+        }
+
+        /**
+         * <b>Please remember to see apiNote*</b>
+         * @apiNote The amount of alive may not be updated after this call
+         *          If you wish to call an immediate kill, see {@link VexHolderCounter#kill(int, boolean)}
+         */
+        public void kill(int amount)
+        {
+            kill(amount, false);
+        }
+
+        /**
+         * Kill X Vex(es) being tracked by this counter
+         * @param amount The amount
+         * @param immediate Whether to immediate kill the vex, <b>REMEMBER</b> to ensure we are on the correct thread (The entity's thread) or it will throw error on Folia
+         */
+        public void kill(int amount, boolean immediate)
+        {
+            if (list.size() < amount)
+                amount = list.size();
+
+            //FeatherMorphMain.getInstance().getSLF4JLogger().info("TO KILL " + amount);
+
+            for (int i = 0; i < amount; i++)
+            {
+                var holder = list.removeFirst();
+                var vex = holder.getVex();
+
+                if (immediate)
+                    vex.setHealth(0);
+                else
+                    vex.getScheduler().run(FeatherMorphMain.getInstance(), task -> vex.setHealth(0), () -> {});
+
+                // Ensure this entity got removed
+                vex.getScheduler().runDelayed(FeatherMorphMain.getInstance(), task ->
+                {
+                    if (!vex.isDead()) vex.remove();
+                }, () -> {}, 60);
+            }
+
+            trim();
+        }
+
+        public void killAll()
+        {
+            kill(list.size());
+        }
+
+        public void trim()
+        {
+            list.removeIf(holder -> holder.getVex().isDead());
+        }
+    }
+
+    @Override
+    public void onDeEquip(DisguiseState state)
+    {
+        super.onDeEquip(state);
+
+        //logger.info("DeEquip! " + state.getPlayer().getName());
+
+        var counter = state.getSessionData(SESSION_DATA_VEX_LIST, VexHolderCounter.class);
+        if (counter != null)
+        {
+            //logger.info("Counter Not Null! Kill all...");
+            counter.killAll();
+        }
+
+        state.removeSessionData(SESSION_DATA_VEX_LIST);
+    }
+
+    @Override
+    public void onInitialEquip(DisguiseState state)
+    {
+        super.onInitialEquip(state);
+        state.setSessionData(SESSION_DATA_VEX_LIST, new VexHolderCounter());
+    }
+
+    private VexHolderCounter getVexCounter(DisguiseState state)
+    {
+        var counter = state.getSessionData(SESSION_DATA_VEX_LIST, VexHolderCounter.class);
+        if (counter == null)
+            throw new NullDependencyException("VexHolderCounter for %s's DisguiseState is NULL!".formatted(state.getPlayer().getName()));
+
+        return counter;
     }
 
     @Override
@@ -60,7 +175,7 @@ public class EvokerMorphSkill extends DelayedMorphSkill<NoOpConfiguration>
         return 20;
     }
 
-    private void doSummonVex(Player player, Entity targetEntity)
+    private void doSummonVex(Player player, Entity targetEntity, DisguiseState state)
     {
         var world = player.getWorld();
 
@@ -70,14 +185,21 @@ public class EvokerMorphSkill extends DelayedMorphSkill<NoOpConfiguration>
         var isLiving = targetEntity instanceof LivingEntity;
 
         var location = player.getEyeLocation();
+
+        int maximumVexAmount = 6;
+
+        var vexCounter = this.getVexCounter(state);
         var targetAmount = 3;
+
+        if (vexCounter.countAlive() + targetAmount > maximumVexAmount)
+            vexCounter.kill(3);
 
         this.scheduleAt(player.getLocation(), () ->
         {
             for (int i = 0; i < targetAmount; i++)
             {
                 var vex = world.spawn(location, Vex.class, CreatureSpawnEvent.SpawnReason.CUSTOM);
-                new MorphBukkitVexModifier(vex, player);
+                vexCounter.addHolder(new MorphBukkitVexHolder(vex, player));
 
                 vex.setLimitedLifetimeTicks(20 * (30 + NmsRecord.ofPlayer(player).random.nextInt(90)));
 
@@ -197,7 +319,7 @@ public class EvokerMorphSkill extends DelayedMorphSkill<NoOpConfiguration>
         state.removeSessionData(SESSION_DATA_SUMMON_VEX);
 
         if (skillData.shouldSummonVex)
-            this.doSummonVex(player, skillData.lastTargetedEntity);
+            this.doSummonVex(player, skillData.lastTargetedEntity, state);
         else
             this.doSummonFangs(player, player.getTargetEntity(16));
     }

@@ -16,13 +16,13 @@ import xyz.nifeather.morph.FeatherMorphMain;
 import java.util.EnumSet;
 import java.util.Objects;
 
-public class MorphBukkitVexModifier
+public class MorphBukkitVexHolder
 {
-    private static final Logger log = LoggerFactory.getLogger(MorphBukkitVexModifier.class);
+    private static final Logger log = LoggerFactory.getLogger(MorphBukkitVexHolder.class);
     private final Vex vex;
     private final Player owner;
 
-    public MorphBukkitVexModifier(org.bukkit.entity.Vex bukkitVex, org.bukkit.entity.Player bukkitPlayer)
+    public MorphBukkitVexHolder(org.bukkit.entity.Vex bukkitVex, org.bukkit.entity.Player bukkitPlayer)
     {
         this(
                 ((CraftVex)bukkitVex).getHandle(),
@@ -30,7 +30,7 @@ public class MorphBukkitVexModifier
         );
     }
 
-    public MorphBukkitVexModifier(Vex nmsVex, Player owner)
+    public MorphBukkitVexHolder(Vex nmsVex, Player owner)
     {
         Objects.requireNonNull(nmsVex, "Null NMS Vex");
         Objects.requireNonNull(owner, "Null owner");
@@ -75,9 +75,24 @@ public class MorphBukkitVexModifier
         vex.targetSelector.addGoal(1, new MorphOwnerHurtByTargetGoal(vex, this));
     }
 
-    public Player getPlayerOwner()
+    public Player getNMSOwner()
     {
         return owner;
+    }
+
+    public Vex getNMSVex()
+    {
+        return this.vex;
+    }
+
+    public org.bukkit.entity.Player getOwner()
+    {
+        return (org.bukkit.entity.Player) owner.getBukkitEntity();
+    }
+
+    public org.bukkit.entity.Vex getVex()
+    {
+        return (org.bukkit.entity.Vex) this.vex.getBukkitLivingEntity();
     }
 
     private static class MorphOwnerHurtByTargetGoal extends TargetGoal
@@ -85,14 +100,14 @@ public class MorphBukkitVexModifier
         @NotNull
         private LivingEntity owner()
         {
-            return wrapper.getPlayerOwner();
+            return wrapper.getNMSOwner();
         }
 
         private final Vex thisEntity;
 
-        private final MorphBukkitVexModifier wrapper;
+        private final MorphBukkitVexHolder wrapper;
 
-        public MorphOwnerHurtByTargetGoal(Vex thisEntity, MorphBukkitVexModifier wrapper)
+        public MorphOwnerHurtByTargetGoal(Vex thisEntity, MorphBukkitVexHolder wrapper)
         {
             super(thisEntity, false);
 
@@ -135,14 +150,14 @@ public class MorphBukkitVexModifier
         @NotNull
         private LivingEntity owner()
         {
-            return wrapper.getPlayerOwner();
+            return wrapper.getNMSOwner();
         }
 
         private final Vex thisEntity;
 
-        private final MorphBukkitVexModifier wrapper;
+        private final MorphBukkitVexHolder wrapper;
 
-        public MorphOwnerHurtTargetGoal(Vex thisEntity, MorphBukkitVexModifier wrapper)
+        public MorphOwnerHurtTargetGoal(Vex thisEntity, MorphBukkitVexHolder wrapper)
         {
             super(thisEntity, false);
 
