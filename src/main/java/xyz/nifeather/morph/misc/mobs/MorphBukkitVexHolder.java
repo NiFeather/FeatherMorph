@@ -141,7 +141,7 @@ public class MorphBukkitVexHolder
 
             thisEntity.getMoveControl().setWantedPosition(thisEntity.getX(), thisEntity.getY(), thisEntity.getZ(), 2);
 
-            this.thisEntity.setTarget(this.targetMob, EntityTargetEvent.TargetReason.CUSTOM);
+            this.thisEntity.setTarget(this.targetMob);
         }
     }
 
@@ -195,7 +195,7 @@ public class MorphBukkitVexHolder
             if (targetMob != null && targetMob.isRemoved())
                 this.targetMob = null;
 
-            this.thisEntity.setTarget(targetMob, EntityTargetEvent.TargetReason.CUSTOM);
+            this.thisEntity.setTarget(targetMob);
         }
     }
 }
