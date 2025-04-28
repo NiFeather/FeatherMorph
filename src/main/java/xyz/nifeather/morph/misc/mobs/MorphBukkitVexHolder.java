@@ -7,6 +7,7 @@ import net.minecraft.world.entity.monster.Vex;
 import net.minecraft.world.entity.player.Player;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.craftbukkit.entity.CraftVex;
+import org.bukkit.entity.Mob;
 import org.bukkit.event.entity.EntityTargetEvent;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -141,7 +142,7 @@ public class MorphBukkitVexHolder
 
             thisEntity.getMoveControl().setWantedPosition(thisEntity.getX(), thisEntity.getY(), thisEntity.getZ(), 2);
 
-            this.thisEntity.setTarget(this.targetMob);
+            ((org.bukkit.entity.Vex)thisEntity.getBukkitLivingEntity()).setTarget(targetMob.getBukkitLivingEntity());
         }
     }
 
@@ -195,7 +196,7 @@ public class MorphBukkitVexHolder
             if (targetMob != null && targetMob.isRemoved())
                 this.targetMob = null;
 
-            this.thisEntity.setTarget(targetMob);
+            ((org.bukkit.entity.Vex)thisEntity.getBukkitLivingEntity()).setTarget(targetMob.getBukkitLivingEntity());
         }
     }
 }
