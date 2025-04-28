@@ -1,12 +1,19 @@
 package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.types;
 
+import com.github.retrooper.packetevents.protocol.attribute.Attributes;
 import com.github.retrooper.packetevents.protocol.particle.Particle;
 import com.github.retrooper.packetevents.protocol.particle.data.ParticleColorData;
+import com.github.retrooper.packetevents.resources.ResourceLocation;
 import com.github.retrooper.packetevents.util.Vector3i;
+import com.github.retrooper.packetevents.wrapper.PacketWrapper;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerUpdateAttributes;
 import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectObjectMutablePair;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import org.bukkit.Color;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -15,9 +22,11 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.potion.PotionEffect;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.misc.NmsRecord;
+import xyz.nifeather.morph.utilities.NmsUtils;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 public class LivingEntityWatcher extends EntityWatcher
 {
@@ -43,6 +52,72 @@ public class LivingEntityWatcher extends EntityWatcher
 
         handPair.left(e.getPlayer());
         handPair.right(e.getHand());
+    }
+
+    protected WrapperPlayServerUpdateAttributes buildAttributePacket()
+    {
+        var player = getBindingPlayer();
+        List<WrapperPlayServerUpdateAttributes.Property> attributeProperties = new ObjectArrayList<>();
+
+        var nmsPlayer = NmsRecord.ofPlayer(player);
+
+        List<AttributeInstance> attributes = getEntityType() == EntityType.PLAYER
+                ? new ObjectArrayList<>(nmsPlayer.getAttributes().getSyncableAttributes())
+                : NmsUtils.getValidAttributes(getEntityType(), nmsPlayer.getAttributes());
+
+        attributes.forEach(instance ->
+        {
+            // Still NMS :(
+            var id = BuiltInRegistries.ATTRIBUTE.getKey(instance.getAttribute().value()).toString();
+
+            var packetAttribute = Attributes.getByName(id);
+            if (packetAttribute == null)
+            {
+                logger.warn("Unknown attribute for packet: " + id);
+                return;
+            }
+
+            List<WrapperPlayServerUpdateAttributes.PropertyModifier> modifiers = new ObjectArrayList<>();
+            for (AttributeModifier modifier : instance.getModifiers())
+            {
+                var packetModifier = new WrapperPlayServerUpdateAttributes.PropertyModifier(
+                        new ResourceLocation(modifier.id().toString()),
+                        UUID.randomUUID(),
+                        modifier.amount(),
+                        fromNMSAttributeOperation(modifier.operation())
+                );
+
+                modifiers.add(packetModifier);
+            }
+
+            var property = new WrapperPlayServerUpdateAttributes.Property(packetAttribute, instance.getBaseValue(), modifiers);
+            attributeProperties.add(property);
+        });
+
+        return new WrapperPlayServerUpdateAttributes(player.getEntityId(), attributeProperties);
+    }
+
+    protected WrapperPlayServerUpdateAttributes.PropertyModifier.Operation fromNMSAttributeOperation(AttributeModifier.Operation nmsOperation)
+    {
+        return switch (nmsOperation)
+        {
+            case ADD_VALUE -> WrapperPlayServerUpdateAttributes.PropertyModifier.Operation.ADDITION;
+            case ADD_MULTIPLIED_BASE -> WrapperPlayServerUpdateAttributes.PropertyModifier.Operation.MULTIPLY_BASE;
+            case ADD_MULTIPLIED_TOTAL -> WrapperPlayServerUpdateAttributes.PropertyModifier.Operation.MULTIPLY_TOTAL;
+            default -> throw new RuntimeException("Unknown operation: " + nmsOperation);
+        };
+    }
+
+    @Override
+    public List<PacketWrapper<?>> buildSpawnPackets()
+    {
+        var packets = new ObjectArrayList<PacketWrapper<?>>();
+        var entityPackets = super.buildSpawnPackets();
+
+        packets.addAll(entityPackets);
+        packets.add(buildAttributePacket());
+
+        return packets;
     }
 
     @Override

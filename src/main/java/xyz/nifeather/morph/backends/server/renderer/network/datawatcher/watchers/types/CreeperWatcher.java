@@ -3,6 +3,8 @@ package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watcher
 import net.minecraft.nbt.CompoundTag;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
+import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntry;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
@@ -35,6 +37,20 @@ public class CreeperWatcher extends LivingEntityWatcher
         }
 
         super.onPropertyWrite(property, value);
+    }
+
+    @Override
+    protected <X> void onEntryWrite(CustomEntry<X> entry, X oldVal, X newVal)
+    {
+        super.onEntryWrite(entry, oldVal, newVal);
+
+        if (entry.equals(CustomEntries.IS_AGGRESSIVE))
+        {
+            boolean aggressive = (boolean) newVal;
+
+            writePersistent(ValueIndex.CREEPER.STATE, aggressive ? 1 : -1);
+            writePersistent(ValueIndex.CREEPER.IGNITED, aggressive);
+        }
     }
 
     @Override

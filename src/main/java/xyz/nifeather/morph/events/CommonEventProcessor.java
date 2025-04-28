@@ -39,7 +39,6 @@ import xyz.nifeather.morph.misc.OfflineDisguiseResult;
 import xyz.nifeather.morph.misc.gui.AnimSelectScreenWrapper;
 import xyz.nifeather.morph.misc.gui.DisguiseSelectScreenWrapper;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
-import xyz.nifeather.morph.misc.playerList.PlayerListHandler;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
 import xyz.nifeather.morph.network.server.ServerSetEquipCommand;
 import xyz.nifeather.morph.skills.MorphSkillHandler;
@@ -47,7 +46,6 @@ import xyz.nifeather.morph.utilities.EntityTypeUtils;
 import xyz.nifeather.morph.utilities.ItemUtils;
 
 import java.util.List;
-import java.util.Random;
 
 import static xyz.nifeather.morph.utilities.DisguiseUtils.itemOrAir;
 
@@ -381,7 +379,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         var player = e.getPlayer();
         var state = morphs.getDisguiseStateFor(player);
 
-        clientHandler.markPlayerReady(player);
+        clientHandler.markPlayerJoined(player);
 
         var effectivePermissions = new ObjectOpenHashSet<>(player.getEffectivePermissions());
         List<String> legacyPermissions = new ObjectArrayList<>();
@@ -406,8 +404,6 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
             logger.error("");
             logger.error("- x - x - x - x - x - x - x - x - x - x - x - x -");
         }
-
-        this.addSchedule(() -> PlayerListHandler.instance().handle(player));
 
         if (state != null)
         {

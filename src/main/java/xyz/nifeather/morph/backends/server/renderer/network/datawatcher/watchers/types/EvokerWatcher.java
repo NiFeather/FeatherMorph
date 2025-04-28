@@ -2,23 +2,24 @@ package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watcher
 
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.values.EvokerValues;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntry;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 
-public class GhastWatcher extends LivingEntityWatcher
+public class EvokerWatcher extends LivingEntityWatcher
 {
+    public EvokerWatcher(Player bindingPlayer)
+    {
+        super(bindingPlayer, EntityType.EVOKER);
+    }
+
     @Override
     protected void initRegistry()
     {
         super.initRegistry();
 
-        register(ValueIndex.GHAST);
-    }
-
-    public GhastWatcher(Player bindingPlayer)
-    {
-        super(bindingPlayer, EntityType.GHAST);
+        register(ValueIndex.EVOKER);
     }
 
     @Override
@@ -28,8 +29,9 @@ public class GhastWatcher extends LivingEntityWatcher
 
         if (entry.equals(CustomEntries.IS_AGGRESSIVE))
         {
-            var aggresive = (boolean) newVal;
-            writePersistent(ValueIndex.GHAST.CHARGING, aggresive);
+            var aggressive = (boolean) newVal;
+            var spellStatus = aggressive ? EvokerValues.SpellStatus.ATTACK : EvokerValues.SpellStatus.NONE;
+            writePersistent(ValueIndex.EVOKER.SPELL_STATUS, spellStatus.val);
         }
     }
 }

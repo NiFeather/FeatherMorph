@@ -46,8 +46,8 @@ public class CheckUpdateSubCommand extends MorphPluginObject implements IConvert
         var sender = context.getSource().getSender();
 
         sender.sendMessage(MessageUtils.prefixes(sender, UpdateStrings.checkingUpdate()));
-        handler.checkUpdate(true, result ->
-                this.onRequestFinish(result, sender), sender);
+        handler.checkUpdate(true, sender)
+                .thenAcceptAsync(result -> this.onRequestFinish(result, sender));
 
         return 1;
     }
@@ -68,10 +68,31 @@ public class CheckUpdateSubCommand extends MorphPluginObject implements IConvert
 
     private void onRequestFinish(UpdateHandler.CheckResult result, CommandSender sender)
     {
-        if (result == UpdateHandler.CheckResult.ALREADY_LATEST)
+        switch (result)
         {
-            var msg = UpdateStrings.noNewVersionAvailable().resolve("mc_version", Bukkit.getMinecraftVersion());
-            sender.sendMessage(MessageUtils.prefixes(sender, msg));
+            case ALREADY_LATEST ->
+            {
+                var msg = UpdateStrings.noNewVersionAvailable().resolve("mc_version", Bukkit.getMinecraftVersion());
+                sender.sendMessage(MessageUtils.prefixes(sender, msg));
+            }
+
+            case FAIL ->
+            {
+                var msg = UpdateStrings.failed();
+                sender.sendMessage(MessageUtils.prefixes(sender, msg));
+            }
+
+            case NOT_LISTED_OR_UNSUPPORTED ->
+            {
+                var msg = UpdateStrings.notListed().resolve("software", Bukkit.getName());
+                sender.sendMessage(MessageUtils.prefixes(sender, msg));
+            }
+
+            case CURRENT_IS_NEWER ->
+            {
+                var msg = UpdateStrings.currentIsNewer().resolve("mc_version", Bukkit.getMinecraftVersion());
+                sender.sendMessage(MessageUtils.prefixes(sender, msg));
+            }
         }
     }
 }

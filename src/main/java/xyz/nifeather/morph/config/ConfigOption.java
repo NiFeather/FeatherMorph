@@ -119,9 +119,11 @@ public enum ConfigOption
 
     //ANIM_SELECT_PATTERN(ConfigNode.create().append("anim_select_pattern"), new ArrayList<String>()),
 
+    @Deprecated(forRemoval = true)
     HIDE_DISGUISED_PLAYERS_IN_TAB(ConfigNode.create().append("hide_disguised_players_in_tab"), false),
 
     // SRR -> ServerRenderer
+    @Deprecated(forRemoval = true)
     SR_SHOW_PLAYER_DISGUISES_IN_TAB(serverRendererNode().append("show_player_disguises_in_tab"), false),
 
     TOWNY_ALLOW_FLY_IN_WILDERNESS(townyNode().append("allow_fly_in_wilderness"), false),

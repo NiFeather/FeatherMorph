@@ -28,7 +28,6 @@ import xyz.nifeather.morph.misc.AnimationNames;
 import xyz.nifeather.morph.misc.DisguiseEquipment;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
-import xyz.nifeather.morph.misc.playerList.PlayerListHandler;
 import xyz.nifeather.morph.utilities.NbtUtils;
 
 import java.util.Map;
@@ -261,14 +260,6 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
     {
     }
 
-    @Override
-    public void onPlayerOffline()
-    {
-        PlayerListHandler.instance().hideFakePlayer(bindingWatcher.readEntryOrThrow(CustomEntries.SPAWN_UUID));
-
-        super.onPlayerOffline();
-    }
-
     private boolean aggressive;
 
     @Override
@@ -277,17 +268,7 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
         super.setAggressive(aggressive);
 
         this.aggressive = aggressive;
-        if (getEntityType() == EntityType.GHAST)
-            bindingWatcher.writePersistent(ValueIndex.GHAST.CHARGING, aggressive);
-
-        if (getEntityType() == EntityType.CREEPER)
-        {
-            bindingWatcher.writePersistent(ValueIndex.CREEPER.STATE, aggressive ? 1 : -1);
-            bindingWatcher.writePersistent(ValueIndex.CREEPER.IGNITED, aggressive);
-        }
-
-        if (getEntityType() == EntityType.WARDEN)
-            bindingWatcher.writeEntry(CustomEntries.WARDEN_CHARGING_ATTACK, aggressive);
+        bindingWatcher.writeEntry(CustomEntries.IS_AGGRESSIVE, aggressive);
     }
 
     @Override
@@ -374,13 +355,5 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
 
         if (bindingWatcher.readEntryOrDefault(CustomEntries.WARDEN_VANISHED, false))
             bindingWatcher.writeEntry(CustomEntries.ANIMATION, AnimationNames.APPEAR);
-
-        if (this.getEntityType() == EntityType.PLAYER && backend.serverRenderer.showPlayerDisguises.get())
-        {
-            PlayerListHandler.instance().showFakePlayer(
-                    bindingWatcher.readEntryOrThrow(CustomEntries.SPAWN_UUID),
-                    bindingWatcher.readEntryOrThrow(CustomEntries.PROFILE)
-            );
-        }
     }
 }

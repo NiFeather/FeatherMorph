@@ -28,8 +28,6 @@ public class ServerRenderer extends MorphPluginObject implements Listener
 
     public final RenderRegistry registry = new RenderRegistry();
 
-    public final Bindable<Boolean> showPlayerDisguises = new Bindable<>();
-
     public ServerRenderer()
     {
         dependencies.cache(registry);
@@ -43,8 +41,6 @@ public class ServerRenderer extends MorphPluginObject implements Listener
         // 因此在这里加上插件是否启用的检查
         if (plugin.isEnabled())
             Bukkit.getPluginManager().registerEvents(this, plugin);
-
-        config.bind(this.showPlayerDisguises, ConfigOption.SR_SHOW_PLAYER_DISGUISES_IN_TAB);
     }
 
     private final List<LivingEntityWatcher> livingEntityWatchers = new ObjectArrayList<>();
@@ -69,8 +65,6 @@ public class ServerRenderer extends MorphPluginObject implements Listener
         {
             return registry.register(player, new RegisterParameters(entityType, name), w ->
             {
-                w.writeEntry(CustomEntries.PROFILE_LISTED, this.showPlayerDisguises.get());
-
                 if (w instanceof LivingEntityWatcher livingEntityWatcher)
                     livingEntityWatchers.add(livingEntityWatcher);
             });

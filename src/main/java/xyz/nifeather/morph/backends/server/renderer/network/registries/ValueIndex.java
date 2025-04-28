@@ -53,6 +53,9 @@ public class ValueIndex
 
     public static final EnderDragonValues ENDER_DRAGON = new EnderDragonValues();
 
+    public static final EvokerValues EVOKER = new EvokerValues();
+    public static final RaiderValues RAIDER = new RaiderValues();
+
     /*
     private static final Map<EntityType, AbstractValues> valuesMap = new ConcurrentHashMap<>();
     private static void register(EntityType type, AbstractValues values)
