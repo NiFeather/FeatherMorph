@@ -28,11 +28,6 @@ import java.util.concurrent.ConcurrentHashMap;
 public class PlayerTracker extends MorphPluginObject implements Listener
 {
     /**
-     * 某人是否疑似正在破坏方块？
-     */
-    private final Map<Player, Long> breakingSuspectList = new ConcurrentHashMap<>();
-
-    /**
      * 玩家上次左/右键的时间
      */
     private final Map<Player, Long> lastInteractTime = new ConcurrentHashMap<>();
@@ -139,9 +134,6 @@ public class PlayerTracker extends MorphPluginObject implements Listener
         {
             lastInteractTime.put(player, plugin.getCurrentTick());
             lastInteractAction.put(player, interactType);
-
-            if (interactType.isLeftClick() && e.getClickedBlock() != null)
-                breakingSuspectList.put(player, plugin.getCurrentTick());
         }
     }
 
@@ -172,24 +164,6 @@ public class PlayerTracker extends MorphPluginObject implements Listener
 
         lastInteractTime.put(player, plugin.getCurrentTick());
         lastInteractAction.put(player, InteractType.RIGHT_CLICK_ENTITY);
-    }
-
-    @EventHandler(priority = EventPriority.LOWEST)
-    public void onBlockBreak(BlockBreakEvent e)
-    {
-        breakingSuspectList.remove(e.getPlayer());
-    }
-
-    @EventHandler(priority = EventPriority.LOWEST)
-    public void onPlayerSwing(PlayerArmSwingEvent e)
-    {
-        var player = e.getPlayer();
-
-        if (!e.getHand().equals(EquipmentSlot.HAND)) return;
-
-        //更新玩家破坏时间
-        if (breakingSuspectList.containsKey(player))
-            breakingSuspectList.put(player, plugin.getCurrentTick());
     }
 
     private final Map<Player, Long> playerDropTrackingMap = new ConcurrentHashMap<>();
@@ -236,7 +210,6 @@ public class PlayerTracker extends MorphPluginObject implements Listener
 
         lastInteractAction.remove(player);
         lastInteractTime.remove(player);
-        breakingSuspectList.remove(player);
         playerDropTrackingMap.remove(player);
     }
 
@@ -309,27 +282,11 @@ public class PlayerTracker extends MorphPluginObject implements Listener
         return lastInteractAction.get(player);
     }
 
-    public boolean isBreakingSuspect(Player player)
-    {
-        return plugin.getCurrentTick() - breakingSuspectList.getOrDefault(player, -1L) <= 0;
-    }
-
     private void update()
     {
         this.addSchedule(this::update);
 
-        var playerToRemoveFromSuspect = new ObjectArrayList<Player>();
-
-        var currentTick = plugin.getCurrentTick();
-
         lastRightClick.clear();
         duplicatedRCs.clear();
-
-        breakingSuspectList.forEach((p, l) ->
-        {
-            if (currentTick - l > 2) playerToRemoveFromSuspect.add(p);
-        });
-
-        playerToRemoveFromSuspect.forEach(breakingSuspectList::remove);
     }
 }
