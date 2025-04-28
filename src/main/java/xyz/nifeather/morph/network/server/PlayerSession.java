@@ -11,11 +11,11 @@ public class PlayerSession
     public PlayerSession(Player bindingPlayer, boolean isLegacyPacketBuf)
     {
         options = new PlayerOptions<>(bindingPlayer);
-        this.isLegacyPacketBuf = isLegacyPacketBuf;
+        //this.isLegacyPacketBuf = isLegacyPacketBuf;
     }
 
     public final PlayerOptions<Player> options;
-    public boolean isLegacyPacketBuf;
+    //public boolean isLegacyPacketBuf;
 
     @NotNull
     public InitializeState initializeState = InitializeState.NOT_CONNECTED;

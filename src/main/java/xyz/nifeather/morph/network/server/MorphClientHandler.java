@@ -7,10 +7,11 @@ import net.minecraft.network.FriendlyByteBuf;
 import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import xiamomc.morph.network.*;
 import xiamomc.morph.network.commands.C2S.*;
 import xiamomc.morph.network.commands.CommandRegistries;
@@ -36,9 +37,11 @@ import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.MorphStrings;
 import xyz.nifeather.morph.misc.ModNetworkingHelper;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
-import xyz.nifeather.morph.network.server.handlers.CommandPacketHandler;
 import xyz.nifeather.morph.network.server.handlers.ICommandPacketHandler;
-import xyz.nifeather.morph.network.server.handlers.LegacyCommandPacketHandler;
+import xyz.nifeather.morph.network.server.handlers.V2ProtocolHandler;
+import xyz.nifeather.morph.network.server.handlers.V3ProtocolHandler;
+import xyz.nifeather.morph.network.server.respond.ClientInitializeRecord;
+import xyz.nifeather.morph.network.server.respond.InitializeRespond;
 
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -52,18 +55,40 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
     private final Bindable<Boolean> logOutGoingPackets = new Bindable<>(false);
     private final Bindable<Boolean> forceTargetVersion = new Bindable<>(false);
 
-    @Deprecated(forRemoval = true)
-    @ApiStatus.ScheduledForRemoval(inVersion = "2.2.0")
+    private final LegacyClientHandler legacyClientHandler;
+
+    public MorphClientHandler()
+    {
+        legacyClientHandler = new LegacyClientHandler(this);
+    }
+
     public boolean allowClient()
     {
         return allowClient.get();
     }
 
-    @Deprecated(forRemoval = true)
-    @ApiStatus.ScheduledForRemoval(inVersion = "2.2.0")
     public boolean logInComingPackets()
     {
         return logInComingPackets.get();
+    }
+
+    private final Map<Player, ICommandPacketHandler> playerCommandHandlerMap = new ConcurrentHashMap<>();
+
+    public void setProtocolHandlerFor(Player player, ICommandPacketHandler commandPacketHandler)
+    {
+        playerCommandHandlerMap.put(player, commandPacketHandler);
+    }
+
+    @Nullable
+    public ICommandPacketHandler getProtocolHandler(Player player)
+    {
+        return playerCommandHandlerMap.getOrDefault(player, null);
+    }
+
+    @NotNull
+    public ICommandPacketHandler getProtocolHandlerOrThrow(Player player)
+    {
+        return Objects.requireNonNull(getProtocolHandler(player), "Null Protocol Handler for player '%s', is everything good?".formatted(player));
     }
 
     //region Send command/packet
@@ -71,77 +96,26 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
     @Override
     public boolean sendCommand(Player player, AbstractS2CCommand<?> basicS2CCommand)
     {
-        return this.sendCommand(player, basicS2CCommand, false);
-    }
+        if (getSession(player) == null)
+        {
+            if (FeatherMorphMain.getInstance().debugOutputEnabled())
+                logger.error("No Session for player " + player.getName() + ", not sending commands.");
 
-    private boolean sendCommand(Player player, AbstractS2CCommand<?> command, boolean forceSend)
-    {
-        var cmd = command.buildCommand();
-        if (cmd == null || cmd.isEmpty() || cmd.isBlank()) return false;
-
-        if ((!allowClient.get() || !this.clientConnected(player)) && !forceSend) return false;
-
-        var session = this.getSession(player);
-
-        if (session == null)
-            throw new NullDependencyException("Player %s does not have a session registered, can't send client command to them.".formatted(player.getName()));
-
-        if (session.isLegacyPacketBuf)
-            this.sendPacket(MessageChannel.commandChannelLegacy, player, cmd, true);
-        else
-            this.sendPacket(MessageChannel.commandChannel, player, cmd, false);
-
-        return true;
-    }
-
-    private void sendPacket(String channel, Player player, String message, boolean isLegacyClient)
-    {
-        var buffer = new FriendlyByteBuf(Unpooled.buffer());
-
-        if (isLegacyClient)
-            buffer.writeBytes(message.getBytes(StandardCharsets.UTF_8));
-        else
-            buffer.writeUtf(message);
-
-        this.sendPacketRaw(channel, player, buffer);
-    }
-
-    private void sendPacket(String channel, Player player, int integer)
-    {
-        var buffer = new FriendlyByteBuf(Unpooled.buffer()).writeInt(integer);
-
-        this.sendPacketRaw(channel, player, buffer);
-    }
-
-    private void sendPacketRaw(String channel, Player player, ByteBuf buffer)
-    {
-        if (channel == null || player == null || buffer == null)
-            throw new IllegalArgumentException("Null channel/player/message");
+            return false;
+        }
 
         if (!player.isOnline() || getPlayerConnectionState(player).worseThan(InitializeState.HANDSHAKE))
-            return;
+            return false;
 
-        try
-        {
-            byte[] bufferBytes = new byte[buffer.readableBytes()];
-            buffer.readBytes(bufferBytes);
+        if (!plugin.isEnabled())
+            return false;
 
-            if (logOutGoingPackets.get())
-                logPacket(true, player, channel, bufferBytes);
+        var cmd = basicS2CCommand.buildCommand();
+        if (cmd.isBlank())
+            return false;
 
-            if (!player.getListeningPluginChannels().contains(channel))
-                throw new NullDependencyException("Channel %s is INVALID for player %s!".formatted(channel, player.getName()));
-
-            if (!plugin.isEnabled())
-                return;
-
-            player.sendPluginMessage(plugin, channel, bufferBytes);
-        }
-        catch (Throwable t)
-        {
-            logger.error("Can't send packet to player: " + t.getMessage());
-            t.printStackTrace();
-        }
+        getProtocolHandlerOrThrow(player).sendCommand(player, cmd);
+        return true;
     }
 
     //endregion Send command/packet
@@ -159,29 +133,30 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
     @Resolved
     private MorphManager manager;
 
-    private void logPacket(boolean isOutGoingPacket, Player player, String channel, byte[] data)
+    public static void logPacket(boolean isOutGoingPacket, Player player, String channel, byte[] data)
     {
-        String msg = "<???>";
+        logPacket(isOutGoingPacket, player, channel, data, false);
+    }
+
+    public static void logPacket(boolean isOutGoingPacket, Player player, String channel, byte[] data, boolean isV1Proto)
+    {
+        String msg;
         var input = new FriendlyByteBuf(Unpooled.wrappedBuffer(data));
 
         try
         {
-            msg = input.readUtf();
+            msg = isV1Proto ? new String(data, StandardCharsets.UTF_8) : input.readUtf();
         }
         catch (Throwable t)
         {
             msg = "<base64> " + Base64.getEncoder().encodeToString(data);
-            //logger.warn("Unable to convert byte data to string: " + t.getMessage());
         }
 
-        this.logPacket(isOutGoingPacket, player, channel, msg, data.length);
+        logPacket(isOutGoingPacket, player, channel, msg, data.length);
     }
 
-    private void logPacket(boolean isOutGoingPacket, Player player, String channel, String data, int size)
+    private static void logPacket(boolean isOutGoingPacket, Player player, String channel, String data, int size)
     {
-        if (!plugin.isEnabled())
-            return;
-
         var arrow = isOutGoingPacket ? " -> " : " <- ";
 
         String builder = channel + arrow
@@ -190,7 +165,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
                 + "'%s'".formatted(data)
                 + " (≈ %s bytes)".formatted(size);
 
-        logger.info(builder);
+        FeatherMorphMain.getInstance().getSLF4JLogger().info(builder);
     }
 
     private final CommandRegistries registries = new CommandRegistries();
@@ -199,7 +174,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
     private final Bindable<Boolean> useClientRenderer = new Bindable<>(false);
     private final Bindable<Boolean> debugOutput = new Bindable<>(false);
 
-    private static final String serverFeatureFlags = "1_21_3_packetbuf";
+    public static final String SERVER_FEATURE_FLAGS = "1_21_3_packetbuf";
 
     @Initializer
     private void load(FeatherMorphMain plugin, MorphConfigManager configManager)
@@ -216,22 +191,17 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
         var messenger = Bukkit.getMessenger();
 
         // 注册incoming频道
-        messenger.registerIncomingPluginChannel(plugin, MessageChannel.initializeChannel, this::handleHandshakeMessage);
+        messenger.registerIncomingPluginChannel(plugin, MessageChannel.initializeChannelV3, this::handleInitializeV3);
+        messenger.registerOutgoingPluginChannel(plugin, MessageChannel.initializeChannelV3);
 
-        messenger.registerIncomingPluginChannel(plugin, MessageChannel.versionChannel, this::handleVersionMessage);
-        messenger.registerIncomingPluginChannel(plugin, MessageChannel.commandChannel, this::handleCommandMessage);
+        //todo: CommandV2 is going to LegacyClientHandler in future
+        messenger.registerIncomingPluginChannel(plugin, MessageChannel.commandChannelV2, (channel, player, data) ->
+        {
+            this.handleCommandInput(V2ProtocolHandler.V2_INSTANCE, channel, player, data);
+        });
 
-        // Legacy incoming channels
-        // todo: Remove legacy packetbuf support along with 1.22 update
-        messenger.registerIncomingPluginChannel(plugin, MessageChannel.versionChannelLegacy, this::handleVersionMessageLegacy);
-        messenger.registerIncomingPluginChannel(plugin, MessageChannel.commandChannelLegacy, this::handleCommandMessageLegacy);
+        messenger.registerOutgoingPluginChannel(plugin, MessageChannel.commandChannelV2);
 
-        // 注册outgoing频道
-        messenger.registerOutgoingPluginChannel(plugin, MessageChannel.initializeChannel);
-        messenger.registerOutgoingPluginChannel(plugin, MessageChannel.versionChannel);
-        messenger.registerOutgoingPluginChannel(plugin, MessageChannel.commandChannel);
-        messenger.registerOutgoingPluginChannel(plugin, MessageChannel.versionChannelLegacy);
-        messenger.registerOutgoingPluginChannel(plugin, MessageChannel.commandChannelLegacy);
 
         configManager.bind(allowClient, ConfigOption.ALLOW_CLIENT);
         configManager.bind(forceTargetVersion, ConfigOption.FORCE_TARGET_VERSION);
@@ -276,78 +246,36 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
 
     //region Handle Protocol Inputs
 
-    public void handleHandshakeMessage(@NotNull String cN, @NotNull Player player, byte @NotNull [] data)
+    public InitializeRespond getInitializeRespond()
+    {
+        return new InitializeRespond(List.of(SERVER_FEATURE_FLAGS), this.targetApiVersion);
+    }
+
+    private void handleInitializeV3(@NotNull String channel, @NotNull Player player, byte @NotNull [] rawData)
+    {
+        var handleResult = V3ProtocolHandler.V3_INSTANCE.handleInitializeData(player, rawData);
+        if (!handleResult.handleSuccess())
+        {
+            rejectPlayer(player);
+            return;
+        }
+
+        this.setProtocolHandlerFor(player, V3ProtocolHandler.V3_INSTANCE);
+
+        logger.info("%s is using V3 packets".formatted(player.getName()));
+        this.handleHandshakeMessage(V3ProtocolHandler.V3_INSTANCE, player, handleResult);
+    }
+
+    public void handleHandshakeMessage(ICommandPacketHandler commandPacketHandler, @NotNull Player player, @NotNull ClientInitializeRecord clientInitializeRecord)
     {
         if (!allowClient.get() || this.getPlayerConnectionState(player).greaterThan(InitializeState.HANDSHAKE)) return;
 
         // This is BAD!
         // We should find another better way to make sure we always send commands when the channel is added.
-        ((CraftPlayer) player).addChannel(MessageChannel.initializeChannel);
-        ((CraftPlayer) player).addChannel(MessageChannel.commandChannelLegacy);
-        ((CraftPlayer) player).addChannel(MessageChannel.versionChannelLegacy);
-        ((CraftPlayer) player).addChannel(MessageChannel.commandChannel);
-        ((CraftPlayer) player).addChannel(MessageChannel.versionChannel);
+        ((CraftPlayer) player).addChannel(MessageChannel.commandChannelV2);
+        ((CraftPlayer) player).addChannel(MessageChannel.initializeChannelV3);
 
-        if (logInComingPackets.get())
-            logPacket(false, player, MessageChannel.initializeChannel, data);
-
-        boolean isLegacyBuf = false;
-
-        try
-        {
-            var buffer = new FriendlyByteBuf(Unpooled.wrappedBuffer(data));
-
-            var utfData = Arrays.stream(buffer.readUtf().split(" ")).toList();
-
-            // 似乎有点多余，因为使用新版序列化方法的客户端总是会发送这个id
-            if (utfData.stream().noneMatch(s -> s.equals(serverFeatureFlags)))
-            {
-                isLegacyBuf = true;
-                logger.info("'%s' is using a legacy client.".formatted(player.getName()));
-                //rejectPlayer(player);
-                //return;
-            }
-
-            buffer.clear();
-        }
-        catch (Throwable t)
-        {
-            isLegacyBuf = true;
-            logger.info("'%s' is possibly using a legacy client.".formatted(player.getName()));
-
-            if (debugOutput.get())
-            {
-                logger.info("Unable to decode packet. Is '%s' using a legacy client? %s".formatted(player.getName(), t.getMessage()));
-                t.printStackTrace();
-            }
-
-            //rejectPlayer(player);
-            //return;
-        }
-
-        var session = getOrCreateSession(player);
-        session.initializeState = InitializeState.HANDSHAKE;
-        session.isLegacyPacketBuf = isLegacyBuf;
-
-        this.sendPacket(MessageChannel.initializeChannel, player, serverFeatureFlags, isLegacyBuf);
-    }
-
-    private void handleVersionInput(ICommandPacketHandler commandPacketHandler, String sourceChannel, Player player, byte[] data)
-    {
-        if (!allowClient.get()) return;
-
-        if (logInComingPackets.get())
-            logPacket(false, player, sourceChannel, data);
-
-        var result = commandPacketHandler.handleVersionData(player, data);
-        if (!result.success())
-        {
-            logger.info("Packet decode failed for player %s, Rejecting...".formatted(player.getName()));
-            rejectPlayer(player);
-            return;
-        }
-
-        int clientVersion = result.result();
+        int clientVersion = clientInitializeRecord.apiVersion();
 
         var minimumApiVersion = this.minimumApiVersion;
 
@@ -376,18 +304,14 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
 
         logger.info(player.getName() + " joined with API version " + clientVersion);
 
-        this.getPlayerOption(player, true).clientApiVersion = clientVersion;
-
-        var session = this.getOrCreateSession(player);
+        var session = getOrCreateSession(player);
+        session.options.clientApiVersion = clientInitializeRecord.apiVersion();
         session.initializeState = InitializeState.API_CHECKED;
 
-        if (!session.isLegacyPacketBuf)
-            this.sendPacket(MessageChannel.versionChannel, player, targetApiVersion);
-        else
-            this.sendPacket(MessageChannel.versionChannelLegacy, player, targetApiVersion);
+        commandPacketHandler.sendInitializeRespond(player, this.getInitializeRespond());
     }
 
-    private void handleCommandInput(ICommandPacketHandler commandPacketHandler, String sourceChannel, Player player, byte[] data)
+    public void handleCommandInput(ICommandPacketHandler commandPacketHandler, String sourceChannel, Player player, byte[] data)
     {
         if (!allowClient.get()) return;
 
@@ -428,26 +352,6 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
             logger.warn("Unknown server command '%s', rejecting...".formatted(baseCommand));
             rejectPlayer(player);
         }
-    }
-
-    private void handleCommandMessageLegacy(@NotNull String cN, @NotNull Player player, @NotNull byte[] data)
-    {
-        this.handleCommandInput(LegacyCommandPacketHandler.INSTANCE, cN, player, data);
-    }
-
-    private void handleVersionMessageLegacy(@NotNull String cN, @NotNull Player player, @NotNull byte[] data)
-    {
-        this.handleVersionInput(LegacyCommandPacketHandler.INSTANCE, cN, player, data);
-    }
-
-    public void handleVersionMessage(@NotNull String cN, @NotNull Player player, byte @NotNull [] data)
-    {
-        this.handleVersionInput(CommandPacketHandler.INSTANCE, cN, player, data);
-    }
-
-    public void handleCommandMessage(@NotNull String cN, @NotNull Player player, byte @NotNull [] data)
-    {
-        this.handleCommandInput(CommandPacketHandler.INSTANCE, cN, player, data);
     }
 
     //endregion Handle Protocol Inputs
@@ -569,13 +473,12 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
 
     public void disconnectThenReAuth(Player player)
     {
-        var session = getSession(player);
-        boolean isLegacyClient = session != null && session.isLegacyPacketBuf;
+        var handler = getProtocolHandler(player);
+        if (handler == null)
+            return;
 
         disconnect(player);
-
-        // This is not what standard protocol supposed to do but it's the only way to make it work
-        this.sendPacket(MessageChannel.initializeChannel, player, serverFeatureFlags, isLegacyClient);
+        handler.sendInitializeRespond(player, getInitializeRespond());
     }
 
     /**
@@ -714,7 +617,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
             return;
         }
 
-        this.sendCommand(player, new S2CUnAuthCommand(), true);
+        this.sendCommand(player, new S2CUnAuthCommand());
 
         this.playerSessionMap.remove(player);
 
@@ -723,6 +626,8 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
         var state = manager.getDisguiseStateFor(player);
         if (state != null)
             state.setServerSideSelfVisible(playerConfig.showDisguiseToSelf);
+
+        this.playerCommandHandlerMap.remove(player);
     }
 
     //region C2S(Serverbound) commands
