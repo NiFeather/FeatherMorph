@@ -1,5 +1,6 @@
 package xyz.nifeather.morph.events;
 
+import io.papermc.paper.event.player.PlayerArmSwingEvent;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -17,23 +18,14 @@ public class DisguiseAnimationProcessor extends MorphPluginObject implements Lis
     private MorphManager morphManager;
 
     @EventHandler
-    public void onPlayerInteract(PlayerInteractEvent e)
+    public void onPlaySwing(PlayerArmSwingEvent e)
     {
         var player = e.getPlayer();
-        if (e.getAction().isLeftClick() && !tracker.isBreakingSuspect(player))
-        {
-            var state = morphManager.getDisguiseStateFor(player);
-            if (state != null)
-                state.getDisguiseWrapper().playAttackAnimation();
-        }
-    }
+        if (!tracker.interactingThisTick(player))
+            return;
 
-    @EventHandler
-    public void onEntityDamagedByEntity(EntityDamageByEntityEvent e)
-    {
-        var state = morphManager.getDisguiseStateFor(e.getDamager());
-        if (state == null) return;
-
-        state.getDisguiseWrapper().playAttackAnimation();
+        var state = morphManager.getDisguiseStateFor(player);
+        if (state != null)
+            state.getDisguiseWrapper().playAttackAnimation();
     }
 }
