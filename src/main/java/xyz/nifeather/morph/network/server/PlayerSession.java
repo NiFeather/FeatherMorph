@@ -2,9 +2,9 @@ package xyz.nifeather.morph.network.server;
 
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import xiamomc.morph.network.ConnectionState;
-import xiamomc.morph.network.InitializeState;
-import xiamomc.morph.network.PlayerOptions;
+import xyz.nifeather.morph.network.ConnectionState;
+import xyz.nifeather.morph.network.InitializeState;
+import xyz.nifeather.morph.network.PlayerOptions;
 
 public class PlayerSession
 {

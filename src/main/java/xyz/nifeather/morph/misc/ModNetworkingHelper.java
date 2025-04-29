@@ -5,11 +5,11 @@ import net.minecraft.Util;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.inventory.EntityEquipment;
-import xiamomc.morph.network.commands.S2C.AbstractS2CCommand;
-import xiamomc.morph.network.commands.S2C.clientrender.S2CRenderMapAddCommand;
-import xiamomc.morph.network.commands.S2C.clientrender.S2CRenderMapMetaCommand;
-import xiamomc.morph.network.commands.S2C.clientrender.S2CRenderMeta;
-import xiamomc.morph.network.commands.S2C.map.S2CPartialMapCommand;
+import xyz.nifeather.morph.network.commands.S2C.AbstractS2CCommand;
+import xyz.nifeather.morph.network.commands.S2C.admin.reveal.S2CPartialRevealCommand;
+import xyz.nifeather.morph.network.commands.S2C.clientrender.S2CRenderMapAddCommand;
+import xyz.nifeather.morph.network.commands.S2C.clientrender.S2CRenderMapMetaCommand;
+import xyz.nifeather.morph.network.commands.S2C.clientrender.S2CRenderMeta;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.backends.DisguiseWrapper;
@@ -30,7 +30,7 @@ public class ModNetworkingHelper extends MorphPluginObject
      * 生成用于橙字显示的部分map(mapp)指令
      * @param diff 用于生成的伪装状态
      */
-    public S2CPartialMapCommand genPartialMapCommand(DisguiseState... diff)
+    public S2CPartialRevealCommand genPartialMapCommand(DisguiseState... diff)
     {
         var map = new HashMap<Integer, String>();
         for (DisguiseState disguiseState : diff)
@@ -39,7 +39,7 @@ public class ModNetworkingHelper extends MorphPluginObject
             map.put(player.getEntityId(), player.getName());
         }
 
-        return new S2CPartialMapCommand(map);
+        return new S2CPartialRevealCommand(map);
     }
 
     public S2CRenderMapAddCommand genClientRenderAddCommand(DisguiseState diff)

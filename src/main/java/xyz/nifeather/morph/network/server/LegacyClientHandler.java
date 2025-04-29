@@ -5,9 +5,9 @@ import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import xyz.nifeather.morph.MorphPluginObject;
+import xyz.nifeather.morph.network.commands.C2S.ClientInitializeRecordV3;
 import xyz.nifeather.morph.network.server.handlers.V1ProtocolHandler;
 import xyz.nifeather.morph.network.server.handlers.V2ProtocolHandler;
-import xyz.nifeather.morph.network.server.respond.ClientInitializeRecord;
 
 import java.util.List;
 
@@ -22,11 +22,15 @@ public class LegacyClientHandler extends MorphPluginObject
 
         var messenger = Bukkit.getMessenger();
 
-        messenger.registerIncomingPluginChannel(plugin, MessageChannel.initializeChannelV1, this::handleInitializeV1V2);
-        messenger.registerOutgoingPluginChannel(plugin, MessageChannel.initializeChannelV1);
-
         messenger.registerIncomingPluginChannel(plugin, MessageChannel.versionChannelV2, this::handleVersionV2);
         messenger.registerOutgoingPluginChannel(plugin, MessageChannel.versionChannelV2);
+
+        //todo: CommandV2 is going to LegacyClientHandler in future
+        messenger.registerIncomingPluginChannel(plugin, MessageChannel.commandChannelV2, this::handleCommandV2);
+        messenger.registerOutgoingPluginChannel(plugin, MessageChannel.commandChannelV2);
+
+        messenger.registerIncomingPluginChannel(plugin, MessageChannel.initializeChannelV1, this::handleInitializeV1V2);
+        messenger.registerOutgoingPluginChannel(plugin, MessageChannel.initializeChannelV1);
 
         messenger.registerIncomingPluginChannel(plugin, MessageChannel.versionChannelV1, this::handleVersionV1);
         messenger.registerOutgoingPluginChannel(plugin, MessageChannel.versionChannelV1);
@@ -43,7 +47,10 @@ public class LegacyClientHandler extends MorphPluginObject
         MorphClientHandler.logPacket(false, player, cN, bytes);
 
         ((CraftPlayer) player).addChannel(MessageChannel.initializeChannelV1);
+
         ((CraftPlayer) player).addChannel(MessageChannel.commandChannelV1);
+        ((CraftPlayer) player).addChannel(MessageChannel.commandChannelV2);
+
         ((CraftPlayer) player).addChannel(MessageChannel.versionChannelV1);
         ((CraftPlayer) player).addChannel(MessageChannel.versionChannelV2);
 
@@ -64,16 +71,20 @@ public class LegacyClientHandler extends MorphPluginObject
         V1ProtocolHandler.V1_INSTANCE.sendV1InitializeRespond(player);
     }
 
-    private void handleCommandV1(@NotNull String cN, @NotNull Player player, byte @NotNull [] data)
+    private void handleCommandV2(@NotNull String channelName, @NotNull Player player, byte @NotNull [] bytes)
     {
-        MorphClientHandler.logPacket(false, player, cN, data, true);
-        clientHandler.setProtocolHandlerFor(player, V1ProtocolHandler.V1_INSTANCE);
-        clientHandler.handleCommandInput(V1ProtocolHandler.V1_INSTANCE, cN, player, data);
+        clientHandler.handleCommandFromHandlerInternal(V2ProtocolHandler.V2_INSTANCE, channelName, player, bytes);
+    }
+
+    private void handleCommandV1(@NotNull String channelName, @NotNull Player player, byte @NotNull [] bytes)
+    {
+        clientHandler.handleCommandFromHandlerInternal(V1ProtocolHandler.V1_INSTANCE, channelName, player, bytes);
     }
 
     private void handleVersionV1(@NotNull String cN, @NotNull Player player, byte @NotNull [] data)
     {
         MorphClientHandler.logPacket(false, player, cN, data);
+
         var protocolHandler = V1ProtocolHandler.V1_INSTANCE;
         var handleResult = protocolHandler.handleVersionData(player, data);
         if (!handleResult.success())
@@ -82,7 +93,7 @@ public class LegacyClientHandler extends MorphPluginObject
             return;
         }
 
-        var client = new ClientInitializeRecord(List.of(), handleResult.result(), true);
+        var client = new ClientInitializeRecordV3(List.of(), handleResult.result(), true);
         clientHandler.handleHandshakeMessage(protocolHandler, player, client);
     }
 
@@ -97,7 +108,7 @@ public class LegacyClientHandler extends MorphPluginObject
             return;
         }
 
-        var client = new ClientInitializeRecord(List.of(), handleResult.result(), true);
+        var client = new ClientInitializeRecordV3(List.of(), handleResult.result(), true);
         clientHandler.handleHandshakeMessage(protocolHandler, player, client);
     }
 }

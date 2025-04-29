@@ -6,11 +6,13 @@ import net.minecraft.network.FriendlyByteBuf;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import xyz.nifeather.morph.FeatherMorphMain;
+import xyz.nifeather.morph.network.commands.C2S.C2SCommandRecord;
+import xyz.nifeather.morph.network.commands.C2S.ClientInitializeRecordV3;
+import xyz.nifeather.morph.network.commands.S2C.InitializeRespondV3;
+import xyz.nifeather.morph.network.commands.S2C.S2CCommandRecord;
 import xyz.nifeather.morph.network.server.MessageChannel;
 import xyz.nifeather.morph.network.server.handlers.results.CommandHandleResult;
 import xyz.nifeather.morph.network.server.handlers.results.VersionHandleResult;
-import xyz.nifeather.morph.network.server.respond.ClientInitializeRecord;
-import xyz.nifeather.morph.network.server.respond.InitializeRespond;
 
 import java.util.Arrays;
 import java.util.List;
@@ -24,7 +26,7 @@ public class V2ProtocolHandler extends AbstractCommandPacketHandler
     public static final V2ProtocolHandler V2_INSTANCE = new V2ProtocolHandler();
 
     @Override
-    public @NotNull ClientInitializeRecord handleInitializeData(Player player, byte @NotNull [] rawData)
+    public @NotNull ClientInitializeRecordV3 handleInitializeData(Player player, byte @NotNull [] rawData)
     {
         List<String> content;
 
@@ -36,7 +38,7 @@ public class V2ProtocolHandler extends AbstractCommandPacketHandler
                 if (FeatherMorphMain.getInstance().debugOutputEnabled())
                     logger.info("Input string is blank, assuming the player is using V1...");
 
-                return ClientInitializeRecord.fail();
+                return ClientInitializeRecordV3.fail();
             }
 
             var contentList = Arrays.stream(stringContent.split(" ")).toList();
@@ -53,10 +55,10 @@ public class V2ProtocolHandler extends AbstractCommandPacketHandler
                 t.printStackTrace();
             }
 
-            return ClientInitializeRecord.fail();
+            return ClientInitializeRecordV3.fail();
         }
 
-        return new ClientInitializeRecord(content, 0, true);
+        return new ClientInitializeRecordV3(content, 0, true);
     }
 
     public void sendV2InitalizeRespond(Player player, List<String> featureFlags)
@@ -78,7 +80,7 @@ public class V2ProtocolHandler extends AbstractCommandPacketHandler
     }
 
     @Override
-    public void sendInitializeRespond(Player player, InitializeRespond respond)
+    public void sendInitializeRespond(Player player, InitializeRespondV3 respond)
     {
         sendInt(player, MessageChannel.versionChannelV2, respond.apiVersion());
     }
@@ -107,7 +109,13 @@ public class V2ProtocolHandler extends AbstractCommandPacketHandler
     {
         try
         {
-            return CommandHandleResult.from(this.readStringFromByteInput(data));
+            var str = this.readStringFromByteInput(data);
+            var split = str.split(" ", 2);
+
+            String commandName = split[0];
+            List<String> content = split.length == 2 ? Arrays.stream(split[1].split(" ")).toList() : new ObjectArrayList<>();
+
+            return CommandHandleResult.from(new C2SCommandRecord(commandName, content));
         }
         catch (Throwable t)
         {
@@ -116,10 +124,22 @@ public class V2ProtocolHandler extends AbstractCommandPacketHandler
         }
     }
 
-    @Override
-    public void sendCommand(Player player, String data)
+    public static String buildV2CommandLine(S2CCommandRecord commandRecord)
     {
-        sendString(player, MessageChannel.commandChannelV2, data);
+        var stringBuilder = new StringBuilder();
+
+        stringBuilder.append(commandRecord.commandName());
+
+        for (String argument : commandRecord.arguments())
+            stringBuilder.append(" ").append(argument);
+
+        return stringBuilder.toString();
+    }
+
+    @Override
+    public void sendCommand(Player player, S2CCommandRecord commandRecord)
+    {
+        sendString(player, MessageChannel.commandChannelV2, buildV2CommandLine(commandRecord));
     }
 
     public void sendString(Player player, String channel, String message)

@@ -16,7 +16,7 @@ import xyz.nifeather.morph.abilities.MorphAbility;
 import xyz.nifeather.morph.abilities.options.HealsFromEntityOption;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.misc.NmsRecord;
-import xiamomc.morph.network.commands.S2C.set.S2CSetSNbtCommand;
+import xyz.nifeather.morph.network.commands.S2C.set.S2CSetSNbtCommand;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
 import xyz.nifeather.morph.utilities.DamageSourceUtils;
 import xyz.nifeather.morph.utilities.EntityTypeUtils;

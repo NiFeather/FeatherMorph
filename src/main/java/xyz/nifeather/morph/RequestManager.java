@@ -10,7 +10,7 @@ import xyz.nifeather.morph.messages.RequestStrings;
 import xyz.nifeather.morph.misc.DisguiseTypes;
 import xyz.nifeather.morph.misc.RequestInfo;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
-import xiamomc.morph.network.commands.S2C.S2CRequestCommand;
+import xyz.nifeather.morph.network.commands.S2C.S2CRequestCommand;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;

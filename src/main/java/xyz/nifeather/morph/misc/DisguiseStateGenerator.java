@@ -3,7 +3,7 @@ package xyz.nifeather.morph.misc;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import xiamomc.morph.network.PlayerOptions;
+import xyz.nifeather.morph.network.PlayerOptions;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.backends.DisguiseBackend;

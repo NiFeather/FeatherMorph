@@ -9,7 +9,7 @@ public class MessageChannel
     //region Currently using
 
     public static final String initializeChannelV3 = nameSpace + ":init_v3";
-    public static final String commandChannelV2 = nameSpace + ":commands_v2";
+    public static final String commandChannelV3 = nameSpace + ":commands_v3";
 
     //endregion
 
@@ -17,6 +17,9 @@ public class MessageChannel
 
     @Deprecated
     public static final String versionChannelV2 = nameSpace + ":version_v2";
+
+    @Deprecated
+    public static final String commandChannelV2 = nameSpace + ":commands_v2";
 
     @Deprecated
     public static final String initializeChannelV1 = nameSpace + ":init";

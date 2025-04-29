@@ -1,16 +1,20 @@
 package xyz.nifeather.morph.network.server.handlers;
 
 import io.netty.buffer.Unpooled;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.network.FriendlyByteBuf;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import xyz.nifeather.morph.network.commands.C2S.C2SCommandRecord;
+import xyz.nifeather.morph.network.commands.C2S.ClientInitializeRecordV3;
+import xyz.nifeather.morph.network.commands.S2C.InitializeRespondV3;
+import xyz.nifeather.morph.network.commands.S2C.S2CCommandRecord;
 import xyz.nifeather.morph.network.server.MessageChannel;
 import xyz.nifeather.morph.network.server.handlers.results.CommandHandleResult;
 import xyz.nifeather.morph.network.server.handlers.results.VersionHandleResult;
-import xyz.nifeather.morph.network.server.respond.ClientInitializeRecord;
-import xyz.nifeather.morph.network.server.respond.InitializeRespond;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -22,9 +26,9 @@ public class V1ProtocolHandler extends AbstractCommandPacketHandler
     public static final V1ProtocolHandler V1_INSTANCE = new V1ProtocolHandler();
 
     @Override
-    public @NotNull ClientInitializeRecord handleInitializeData(Player player, byte @NotNull [] rawData)
+    public @NotNull ClientInitializeRecordV3 handleInitializeData(Player player, byte @NotNull [] rawData)
     {
-        return new ClientInitializeRecord(List.of(), 0, true);
+        return new ClientInitializeRecordV3(List.of(), 0, true);
     }
 
     @Override
@@ -48,7 +52,21 @@ public class V1ProtocolHandler extends AbstractCommandPacketHandler
     @NotNull
     public CommandHandleResult handleCommandData(Player player, byte @NotNull [] rawData)
     {
-        return CommandHandleResult.from(new String(rawData, StandardCharsets.UTF_8));
+        try
+        {
+            var str = new String(rawData, StandardCharsets.UTF_8);
+            var split = str.split(" ", 2);
+
+            String commandName = split[0];
+            List<String> content = split.length == 2 ? Arrays.stream(split[1].split(" ")).toList() : new ObjectArrayList<>();
+
+            return CommandHandleResult.from(new C2SCommandRecord(commandName, content));
+        }
+        catch (Throwable t)
+        {
+            logger.error("Failed to handle command from player '%s': %s".formatted(player.getName(), t.getMessage()));
+            return CommandHandleResult.fail();
+        }
     }
 
     public void sendVersionRespond(Player player, int implementingApi)
@@ -63,7 +81,7 @@ public class V1ProtocolHandler extends AbstractCommandPacketHandler
 
     @Override
     @Deprecated
-    public void sendInitializeRespond(Player player, InitializeRespond respond)
+    public void sendInitializeRespond(Player player, InitializeRespondV3 respond)
     {
         sendInt(player, MessageChannel.versionChannelV1, respond.apiVersion());
     }
@@ -74,9 +92,22 @@ public class V1ProtocolHandler extends AbstractCommandPacketHandler
         sendPacketRaw(channel, player, buffer);
     }
 
-    @Override
-    public void sendCommand(Player player, String data)
+    public static String buildV1CommandLine(S2CCommandRecord commandRecord)
     {
-        sendString(player, MessageChannel.commandChannelV1, data);
+        var stringBuilder = new StringBuilder();
+
+        stringBuilder.append(commandRecord.commandName());
+        stringBuilder.append(" ");
+
+        for (String argument : commandRecord.arguments())
+            stringBuilder.append(" ").append(argument);
+
+        return stringBuilder.toString();
+    }
+
+    @Override
+    public void sendCommand(Player player, S2CCommandRecord commandRecord)
+    {
+        sendString(player, MessageChannel.commandChannelV1, buildV1CommandLine(commandRecord));
     }
 }

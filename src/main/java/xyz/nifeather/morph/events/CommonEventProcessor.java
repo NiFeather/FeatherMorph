@@ -19,8 +19,8 @@ import org.bukkit.event.entity.*;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.InventoryHolder;
-import xiamomc.morph.network.commands.S2C.S2CSwapCommand;
-import xiamomc.morph.network.commands.S2C.map.S2CMapRemoveCommand;
+import xyz.nifeather.morph.network.commands.S2C.S2CSwapCommand;
+import xyz.nifeather.morph.network.commands.S2C.admin.reveal.S2CRemoveRevealCommand;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
@@ -470,7 +470,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
                 .filter(p -> p.hasPermission(CommonPermissions.DISGUISE_REVEALING))
                 .toList();
 
-        var cmd = new S2CMapRemoveCommand(e.getPlayer().getEntityId());
+        var cmd = new S2CRemoveRevealCommand(e.getPlayer().getEntityId());
         targets.forEach(p -> clientHandler.sendCommand(p, cmd));
     }
 

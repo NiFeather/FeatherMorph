@@ -1,12 +1,15 @@
 package xyz.nifeather.morph.network.multiInstance.slave;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.bukkit.Bukkit;
 import org.java_websocket.framing.CloseFrame;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
-import xiamomc.morph.network.commands.C2S.AbstractC2SCommand;
-import xiamomc.morph.network.commands.CommandRegistries;
+import xyz.nifeather.morph.network.commands.C2S.AbstractC2SCommand;
+import xyz.nifeather.morph.network.commands.C2S.C2SCommandRecord;
+import xyz.nifeather.morph.network.commands.CommandRegistries;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
@@ -157,6 +160,8 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
     @Resolved
     private MorphClientHandler clientHandler;
 
+    private final Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
+
     @ApiStatus.Internal
     public void sendCommand(AbstractC2SCommand<?> command)
     {
@@ -166,7 +171,7 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
         if (client == null)
             throw new NullDependencyException("Null client!");
 
-        client.send(command.buildCommand());
+        client.send(gson.toJson(C2SCommandRecord.fromC2SCommand(command)));
     }
 
     public boolean isOnline()

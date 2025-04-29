@@ -1,31 +1,28 @@
 package xyz.nifeather.morph.network.server;
 
-import io.netty.buffer.ByteBuf;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import io.netty.buffer.Unpooled;
 import net.kyori.adventure.text.Component;
 import net.minecraft.network.FriendlyByteBuf;
 import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import xiamomc.morph.network.*;
-import xiamomc.morph.network.commands.C2S.*;
-import xiamomc.morph.network.commands.CommandRegistries;
-import xiamomc.morph.network.commands.S2C.AbstractS2CCommand;
-import xiamomc.morph.network.commands.S2C.S2CCurrentCommand;
-import xiamomc.morph.network.commands.S2C.S2CUnAuthCommand;
-import xiamomc.morph.network.commands.S2C.query.QueryType;
-import xiamomc.morph.network.commands.S2C.query.S2CQueryCommand;
-import xiamomc.morph.network.commands.S2C.set.S2CSetModifyBoundingBoxCommand;
-import xiamomc.morph.network.commands.S2C.set.S2CSetSelfViewingCommand;
+import xyz.nifeather.morph.network.*;
+import xyz.nifeather.morph.network.commands.C2S.*;
+import xyz.nifeather.morph.network.commands.CommandRegistriesNew;
+import xyz.nifeather.morph.network.commands.S2C.*;
+import xyz.nifeather.morph.network.commands.S2C.query.QueryType;
+import xyz.nifeather.morph.network.commands.S2C.query.S2CQueryCommand;
+import xyz.nifeather.morph.network.commands.S2C.set.S2CSetModifyBoundingBoxCommand;
+import xyz.nifeather.morph.network.commands.S2C.set.S2CSetSelfViewingCommand;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
-import xiamomc.pluginbase.Exceptions.NullDependencyException;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.MorphPluginObject;
@@ -38,10 +35,7 @@ import xyz.nifeather.morph.messages.MorphStrings;
 import xyz.nifeather.morph.misc.ModNetworkingHelper;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 import xyz.nifeather.morph.network.server.handlers.ICommandPacketHandler;
-import xyz.nifeather.morph.network.server.handlers.V2ProtocolHandler;
 import xyz.nifeather.morph.network.server.handlers.V3ProtocolHandler;
-import xyz.nifeather.morph.network.server.respond.ClientInitializeRecord;
-import xyz.nifeather.morph.network.server.respond.InitializeRespond;
 
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -110,11 +104,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
         if (!plugin.isEnabled())
             return false;
 
-        var cmd = basicS2CCommand.buildCommand();
-        if (cmd.isBlank())
-            return false;
-
-        getProtocolHandlerOrThrow(player).sendCommand(player, cmd);
+        getProtocolHandlerOrThrow(player).sendCommand(player, S2CCommandRecord.fromS2CCommand(basicS2CCommand));
         return true;
     }
 
@@ -168,7 +158,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
         FeatherMorphMain.getInstance().getSLF4JLogger().info(builder);
     }
 
-    private final CommandRegistries registries = new CommandRegistries();
+    private final CommandRegistriesNew registries = new CommandRegistriesNew();
 
     private final Bindable<Boolean> modifyBoundingBoxes = new Bindable<>(false);
     private final Bindable<Boolean> useClientRenderer = new Bindable<>(false);
@@ -179,14 +169,14 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
     @Initializer
     private void load(FeatherMorphMain plugin, MorphConfigManager configManager)
     {
-        registries.registerC2S(C2SCommandNames.Initial, a -> new C2SInitialCommand())
-                .registerC2S(C2SCommandNames.Morph, C2SMorphCommand::new)
-                .registerC2S(C2SCommandNames.Skill, a -> new C2SSkillCommand())
-                .registerC2S(C2SCommandNames.Option, C2SOptionCommand::fromString)
-                .registerC2S(C2SCommandNames.ToggleSelf, a -> new C2SToggleSelfCommand(C2SToggleSelfCommand.SelfViewMode.fromString(a)))
-                .registerC2S(C2SCommandNames.Unmorph, a -> new C2SUnmorphCommand())
-                .registerC2S(C2SCommandNames.Request, C2SRequestCommand::new)
-                .registerC2S("animation", C2SAnimationCommand::new);
+        registries.registerC2S(C2SCommandNames.Initial, C2SRequestInitialCommand::fromArguments)
+                .registerC2S(C2SCommandNames.Morph, C2SMorphCommand::fromArguments)
+                .registerC2S(C2SCommandNames.Skill, C2SActivateSkillCommand::fromArguments)
+                .registerC2S(C2SCommandNames.SetSingleOption, C2SSetSingleOptionCommand::fromArguments)
+                .registerC2S(C2SCommandNames.ToggleSelf, C2SToggleSelfCommand::fromArguments)
+                .registerC2S(C2SCommandNames.Unmorph, C2SUnmorphCommand::fromArguments)
+                .registerC2S(C2SCommandNames.Request, C2SRequestCommand::fromArguments)
+                .registerC2S("animation", C2SAnimationCommand::fromArguments);
 
         var messenger = Bukkit.getMessenger();
 
@@ -194,14 +184,8 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
         messenger.registerIncomingPluginChannel(plugin, MessageChannel.initializeChannelV3, this::handleInitializeV3);
         messenger.registerOutgoingPluginChannel(plugin, MessageChannel.initializeChannelV3);
 
-        //todo: CommandV2 is going to LegacyClientHandler in future
-        messenger.registerIncomingPluginChannel(plugin, MessageChannel.commandChannelV2, (channel, player, data) ->
-        {
-            this.handleCommandInput(V2ProtocolHandler.V2_INSTANCE, channel, player, data);
-        });
-
-        messenger.registerOutgoingPluginChannel(plugin, MessageChannel.commandChannelV2);
-
+        messenger.registerIncomingPluginChannel(plugin, MessageChannel.commandChannelV3, this::handleCommandV3);
+        messenger.registerOutgoingPluginChannel(plugin, MessageChannel.commandChannelV3);
 
         configManager.bind(allowClient, ConfigOption.ALLOW_CLIENT);
         configManager.bind(forceTargetVersion, ConfigOption.FORCE_TARGET_VERSION);
@@ -246,13 +230,15 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
 
     //region Handle Protocol Inputs
 
-    public InitializeRespond getInitializeRespond()
+    public InitializeRespondV3 getInitializeRespond()
     {
-        return new InitializeRespond(List.of(SERVER_FEATURE_FLAGS), this.targetApiVersion);
+        return new InitializeRespondV3(List.of(SERVER_FEATURE_FLAGS), this.targetApiVersion);
     }
 
     private void handleInitializeV3(@NotNull String channel, @NotNull Player player, byte @NotNull [] rawData)
     {
+        logPacket(false, player, channel, rawData);
+
         var handleResult = V3ProtocolHandler.V3_INSTANCE.handleInitializeData(player, rawData);
         if (!handleResult.handleSuccess())
         {
@@ -266,13 +252,13 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
         this.handleHandshakeMessage(V3ProtocolHandler.V3_INSTANCE, player, handleResult);
     }
 
-    public void handleHandshakeMessage(ICommandPacketHandler commandPacketHandler, @NotNull Player player, @NotNull ClientInitializeRecord clientInitializeRecord)
+    public void handleHandshakeMessage(ICommandPacketHandler commandPacketHandler, @NotNull Player player, @NotNull ClientInitializeRecordV3 clientInitializeRecord)
     {
         if (!allowClient.get() || this.getPlayerConnectionState(player).greaterThan(InitializeState.HANDSHAKE)) return;
 
         // This is BAD!
         // We should find another better way to make sure we always send commands when the channel is added.
-        ((CraftPlayer) player).addChannel(MessageChannel.commandChannelV2);
+        ((CraftPlayer) player).addChannel(MessageChannel.commandChannelV3);
         ((CraftPlayer) player).addChannel(MessageChannel.initializeChannelV3);
 
         int clientVersion = clientInitializeRecord.apiVersion();
@@ -311,47 +297,52 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
         commandPacketHandler.sendInitializeRespond(player, this.getInitializeRespond());
     }
 
-    public void handleCommandInput(ICommandPacketHandler commandPacketHandler, String sourceChannel, Player player, byte[] data)
+    private void handleCommandV3(@NotNull String channel, @NotNull Player player, byte @NotNull [] data)
+    {
+        logPacket(false, player, channel, data);
+        handleCommandFromHandlerInternal(V3ProtocolHandler.V3_INSTANCE, channel, player, data);
+    }
+
+    @ApiStatus.Internal
+    public void handleCommandFromHandlerInternal(ICommandPacketHandler protocolHandler, @NotNull String channel, @NotNull Player player, byte @NotNull [] data)
+    {
+        if (logInComingPackets.get())
+            logPacket(false, player, channel, data);
+
+        var result = protocolHandler.handleCommandData(player, data);
+
+        if (!result.success())
+        {
+            logger.info("Failed to decode command from player '%s', rejecting...".formatted(player.getName()));
+            rejectPlayer(player);
+            return;
+        }
+
+        this.handleCommandInput(player, result.result());
+    }
+
+    public void handleCommandInput(Player player, C2SCommandRecord commandRecord)
     {
         if (!allowClient.get()) return;
-
-        if (logInComingPackets.get())
-            logPacket(false, player, sourceChannel, data);
 
         var session = getSession(player);
         if (session == null || session.initializeState.worseThan(InitializeState.API_CHECKED)) return;
 
-        var result = commandPacketHandler.handleCommandData(player, data);
-        if (!result.success())
+        AbstractC2SCommand<?> command;
+
+        try
         {
-            logger.info("Packet decode failed for player %s, Rejecting...".formatted(player.getName()));
+            command = registries.createC2SCommand(commandRecord.commandName(), commandRecord.arguments());
+        }
+        catch (Throwable t)
+        {
+            logger.warn("Failed to create command instance from '%s': %s".formatted(player, t.getMessage()));
             rejectPlayer(player);
             return;
         }
 
-        String input = result.result();
-
-        var str = input.split(" ", 2);
-
-        if (str.length < 1)
-        {
-            logger.warn("Incomplete server command: " + input);
-            return;
-        }
-
-        var baseCommand = str[0];
-        var c2sCommand = registries.createC2SCommand(baseCommand, str.length == 2 ? str[1] : "");
-
-        if (c2sCommand != null)
-        {
-            c2sCommand.setOwner(player);
-            c2sCommand.onCommand(this);
-        }
-        else
-        {
-            logger.warn("Unknown server command '%s', rejecting...".formatted(baseCommand));
-            rejectPlayer(player);
-        }
+        command.setOwner(player);
+        command.onCommand(this);
     }
 
     //endregion Handle Protocol Inputs
@@ -406,7 +397,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
     {
         if (!allowClient.get()) return;
 
-        this.sendCommand(player, new S2CQueryCommand(QueryType.SET, identifiers.toArray(new String[]{})));
+        this.sendCommand(player, new S2CQueryCommand(QueryType.SET, identifiers));
     }
 
     /**
@@ -421,10 +412,10 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
         if (!allowClient.get()) return;
 
         if (addits != null)
-            this.sendCommand(player, new S2CQueryCommand(QueryType.ADD, addits.toArray(new String[]{})));
+            this.sendCommand(player, new S2CQueryCommand(QueryType.ADD, addits));
 
         if (removal != null)
-            this.sendCommand(player, new S2CQueryCommand(QueryType.REMOVE, removal.toArray(new String[]{})));
+            this.sendCommand(player, new S2CQueryCommand(QueryType.REMOVE, removal));
     }
 
     /**
@@ -633,7 +624,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
     //region C2S(Serverbound) commands
 
     @Override
-    public void onInitialCommand(C2SInitialCommand c2SInitialCommand)
+    public void onInitialCommand(C2SRequestInitialCommand c2SInitialCommand)
     {
         Player player = c2SInitialCommand.getOwner();
 
@@ -681,7 +672,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
     }
 
     @Override
-    public void onOptionCommand(C2SOptionCommand c2SOptionCommand)
+    public void onOptionCommand(C2SSetSingleOptionCommand c2SOptionCommand)
     {
         var option = c2SOptionCommand.getOption();
         Player player = c2SOptionCommand.getOwner();
@@ -708,7 +699,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
     }
 
     @Override
-    public void onSkillCommand(C2SSkillCommand c2SSkillCommand)
+    public void onSkillCommand(C2SActivateSkillCommand c2SSkillCommand)
     {
         manager.executeDisguiseSkill(c2SSkillCommand.getOwner());
     }

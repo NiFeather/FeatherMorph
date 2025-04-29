@@ -16,7 +16,7 @@ import xyz.nifeather.morph.config.ConfigOption;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.misc.DisguiseMeta;
 import xyz.nifeather.morph.misc.DisguiseState;
-import xiamomc.morph.network.commands.S2C.AbstractS2CCommand;
+import xyz.nifeather.morph.network.commands.S2C.AbstractS2CCommand;
 import xyz.nifeather.morph.providers.animation.AnimationProvider;
 import xyz.nifeather.morph.utilities.NbtUtils;
 import xiamomc.pluginbase.Annotations.Initializer;

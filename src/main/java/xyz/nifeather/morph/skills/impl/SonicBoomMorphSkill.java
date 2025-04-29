@@ -9,7 +9,7 @@ import org.bukkit.Particle;
 import org.bukkit.craftbukkit.entity.CraftLivingEntity;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import xiamomc.morph.network.commands.S2C.set.S2CSetAggressiveCommand;
+import xyz.nifeather.morph.network.commands.S2C.set.S2CSetAggressiveCommand;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.misc.NmsRecord;
