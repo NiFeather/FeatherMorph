@@ -3,8 +3,8 @@ package xyz.nifeather.morph.network.server.handlers;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import xyz.nifeather.morph.network.commands.C2S.ClientInitializeRecordV3;
+import xyz.nifeather.morph.network.commands.S2C.AbstractS2CCommand;
 import xyz.nifeather.morph.network.commands.S2C.InitializeRespondV3;
-import xyz.nifeather.morph.network.commands.S2C.S2CCommandRecord;
 import xyz.nifeather.morph.network.server.handlers.results.CommandHandleResult;
 import xyz.nifeather.morph.network.server.handlers.results.VersionHandleResult;
 
@@ -24,5 +24,5 @@ public interface ICommandPacketHandler
      *          有关 V2, V1 协议的处理，参见 {@link xyz.nifeather.morph.network.server.LegacyClientHandler}
      */
     void sendInitializeRespond(Player player, InitializeRespondV3 respond);
-    void sendCommand(Player player, S2CCommandRecord commandRecord);
+    void sendCommand(Player player, AbstractS2CCommand<?> command);
 }

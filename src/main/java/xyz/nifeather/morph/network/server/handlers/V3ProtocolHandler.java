@@ -3,20 +3,16 @@ package xyz.nifeather.morph.network.server.handlers;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import io.netty.buffer.Unpooled;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.network.FriendlyByteBuf;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import xyz.nifeather.morph.network.commands.C2S.C2SCommandRecord;
 import xyz.nifeather.morph.network.commands.C2S.ClientInitializeRecordV3;
+import xyz.nifeather.morph.network.commands.S2C.AbstractS2CCommand;
 import xyz.nifeather.morph.network.commands.S2C.InitializeRespondV3;
-import xyz.nifeather.morph.network.commands.S2C.S2CCommandRecord;
 import xyz.nifeather.morph.network.server.MessageChannel;
 import xyz.nifeather.morph.network.server.handlers.results.CommandHandleResult;
 import xyz.nifeather.morph.network.server.handlers.results.VersionHandleResult;
-
-import java.util.Arrays;
-import java.util.List;
 
 public class V3ProtocolHandler extends AbstractCommandPacketHandler
 {
@@ -87,9 +83,9 @@ public class V3ProtocolHandler extends AbstractCommandPacketHandler
     }
 
     @Override
-    public void sendCommand(Player player, S2CCommandRecord commandRecord)
+    public void sendCommand(Player player, AbstractS2CCommand<?> command)
     {
-        sendString(player, MessageChannel.commandChannelV3, gson.toJson(commandRecord));
+        sendString(player, MessageChannel.commandChannelV3, gson.toJson(command));
     }
 
     protected String readStringFromByteInput(byte[] rawData) throws Throwable

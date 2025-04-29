@@ -104,7 +104,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
         if (!plugin.isEnabled())
             return false;
 
-        getProtocolHandlerOrThrow(player).sendCommand(player, S2CCommandRecord.fromS2CCommand(basicS2CCommand));
+        getProtocolHandlerOrThrow(player).sendCommand(player, basicS2CCommand);
         return true;
     }
 

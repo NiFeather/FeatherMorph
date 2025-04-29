@@ -1,20 +1,21 @@
 package xyz.nifeather.morph.network.server.handlers;
 
 import io.netty.buffer.Unpooled;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.network.FriendlyByteBuf;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.network.commands.C2S.C2SCommandRecord;
 import xyz.nifeather.morph.network.commands.C2S.ClientInitializeRecordV3;
+import xyz.nifeather.morph.network.commands.S2C.AbstractS2CCommand;
 import xyz.nifeather.morph.network.commands.S2C.InitializeRespondV3;
 import xyz.nifeather.morph.network.commands.S2C.S2CCommandRecord;
 import xyz.nifeather.morph.network.server.MessageChannel;
 import xyz.nifeather.morph.network.server.handlers.results.CommandHandleResult;
 import xyz.nifeather.morph.network.server.handlers.results.VersionHandleResult;
+import xyz.nifeather.netherite.LegacyCommandProcessor;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -24,6 +25,9 @@ import java.util.List;
 public class V1ProtocolHandler extends AbstractCommandPacketHandler
 {
     public static final V1ProtocolHandler V1_INSTANCE = new V1ProtocolHandler();
+
+    private final LegacyCommandProcessor<Player> commandProcessor = new LegacyCommandProcessor<>();
+    private final LegacyCommandHandler legacyCommandHandler = new LegacyCommandHandler();
 
     @Override
     public @NotNull ClientInitializeRecordV3 handleInitializeData(Player player, byte @NotNull [] rawData)
@@ -60,11 +64,10 @@ public class V1ProtocolHandler extends AbstractCommandPacketHandler
             //String commandName = split[0];
             //List<String> content = split.length == 2 ? Arrays.stream(split[1].split(" ")).toList() : new ObjectArrayList<>();
 
-            logger.warn("Handling V1 commands under pure V3 context is not possible.");
+            var command = commandProcessor.processLegacyCommandLine(player, str);
+            var convert = legacyCommandHandler.fromNetheriteCommand(command);
 
-            return CommandHandleResult.fail();
-
-            // return CommandHandleResult.from(new C2SCommandRecord(commandName, content));
+            return CommandHandleResult.from(C2SCommandRecord.fromC2SCommand(convert));
         }
         catch (Throwable t)
         {
@@ -96,22 +99,23 @@ public class V1ProtocolHandler extends AbstractCommandPacketHandler
         sendPacketRaw(channel, player, buffer);
     }
 
-    public static String buildV1CommandLine(S2CCommandRecord commandRecord)
-    {
-        var stringBuilder = new StringBuilder();
-
-        stringBuilder.append(commandRecord.commandName());
-        stringBuilder.append(" ");
-
-        for (String argument : commandRecord.arguments().values())
-            stringBuilder.append(" ").append(argument);
-
-        return stringBuilder.toString();
-    }
-
     @Override
-    public void sendCommand(Player player, S2CCommandRecord commandRecord)
+    public void sendCommand(Player player, AbstractS2CCommand<?> command)
     {
-        sendString(player, MessageChannel.commandChannelV1, buildV1CommandLine(commandRecord));
+        String commandString;
+
+        try
+        {
+            commandString = legacyCommandHandler.toNetheriteCommand(command).buildCommand();
+        }
+        catch (Throwable t)
+        {
+            if (FeatherMorphMain.getInstance().debugOutputEnabled())
+                logger.warn("Can't convert from modern to legacy: " + t.getMessage());
+
+            return;
+        }
+
+        sendString(player, MessageChannel.commandChannelV1, commandString);
     }
 }
