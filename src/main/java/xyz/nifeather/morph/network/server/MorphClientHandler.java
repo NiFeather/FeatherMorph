@@ -12,6 +12,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xyz.nifeather.morph.api.FeatherMorphAPI;
 import xyz.nifeather.morph.network.*;
 import xyz.nifeather.morph.network.commands.C2S.*;
 import xyz.nifeather.morph.network.commands.CommandRegistriesNew;
@@ -130,6 +131,14 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
 
     public static void logPacket(boolean isOutGoingPacket, Player player, String channel, byte[] data, boolean isV1Proto)
     {
+        var clientHandlerInstance = FeatherMorphAPI.instance().directAccess().clientHandler();
+
+        if (isOutGoingPacket && !clientHandlerInstance.logOutGoingPackets.get())
+            return;
+
+        if (!isOutGoingPacket && !clientHandlerInstance.logInComingPackets.get())
+            return;
+
         String msg;
         var input = new FriendlyByteBuf(Unpooled.wrappedBuffer(data));
 
@@ -239,6 +248,11 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
     {
         logPacket(false, player, channel, rawData);
 
+        // This is BAD!
+        // We should find another better way to make sure we always send commands when the channel is added.
+        ((CraftPlayer) player).addChannel(MessageChannel.commandChannelV3);
+        ((CraftPlayer) player).addChannel(MessageChannel.initializeChannelV3);
+
         var handleResult = V3ProtocolHandler.V3_INSTANCE.handleInitializeData(player, rawData);
         if (!handleResult.handleSuccess())
         {
@@ -255,11 +269,6 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
     public void handleHandshakeMessage(ICommandPacketHandler commandPacketHandler, @NotNull Player player, @NotNull ClientInitializeRecordV3 clientInitializeRecord)
     {
         if (!allowClient.get() || this.getPlayerConnectionState(player).greaterThan(InitializeState.HANDSHAKE)) return;
-
-        // This is BAD!
-        // We should find another better way to make sure we always send commands when the channel is added.
-        ((CraftPlayer) player).addChannel(MessageChannel.commandChannelV3);
-        ((CraftPlayer) player).addChannel(MessageChannel.initializeChannelV3);
 
         int clientVersion = clientInitializeRecord.apiVersion();
 
@@ -299,7 +308,6 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
 
     private void handleCommandV3(@NotNull String channel, @NotNull Player player, byte @NotNull [] data)
     {
-        logPacket(false, player, channel, data);
         handleCommandFromHandlerInternal(V3ProtocolHandler.V3_INSTANCE, channel, player, data);
     }
 
