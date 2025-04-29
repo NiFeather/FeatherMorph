@@ -10,6 +10,7 @@ import xyz.nifeather.morph.network.commands.S2C.admin.reveal.S2CSyncAdminRevealC
 import xyz.nifeather.morph.network.commands.S2C.clientrender.*;
 import xyz.nifeather.morph.network.commands.S2C.query.S2CQueryCommand;
 import xyz.nifeather.morph.network.commands.S2C.set.*;
+import xyz.nifeather.morph.network.server.ServerSetEquipCommand;
 import xyz.nifeather.morph.skills.impl.ExplodeMorphSkill;
 import xyz.nifeather.netherite.network.commands.C2S.*;
 import xyz.nifeather.netherite.network.commands.S2C.*;
@@ -199,9 +200,22 @@ public class LegacyCommandHandler
         }).registerModernToNetherite(S2CCommandNames.SetAggressive, S2CSetAggressiveCommand.class, cmd ->
         {
             return new NetheriteS2CSetAggressiveCommand(cmd.val);
-        }).registerModernToNetherite(S2CCommandNames.SetFakeEquip, S2CSetDisplayingFakeEquipCommand.class, cmd ->
+        }).registerModernToNetherite(S2CCommandNames.SetFakeEquip, ServerSetEquipCommand.class, cmd ->
         {
-            return new NetheriteS2CSetDisplayingFakeEquipCommand(cmd.displaying);
+            var modernSlot = cmd.getSlot();
+
+            NetheriteS2CSetFakeEquipCommand.ProtocolEquipmentSlot netheriteSlot = switch (modernSlot)
+            {
+                case MAINHAND -> NetheriteS2CSetFakeEquipCommand.ProtocolEquipmentSlot.MAINHAND;
+                case OFF_HAND -> NetheriteS2CSetFakeEquipCommand.ProtocolEquipmentSlot.OFF_HAND;
+
+                case HELMET -> NetheriteS2CSetFakeEquipCommand.ProtocolEquipmentSlot.HELMET;
+                case CHESTPLATE -> NetheriteS2CSetFakeEquipCommand.ProtocolEquipmentSlot.CHESTPLATE;
+                case LEGGINGS -> NetheriteS2CSetFakeEquipCommand.ProtocolEquipmentSlot.LEGGINGS;
+                case BOOTS -> NetheriteS2CSetFakeEquipCommand.ProtocolEquipmentSlot.BOOTS;
+            };
+
+            return new LegacySetEquipCommand(cmd.getItemStack(), netheriteSlot);
         }).registerModernToNetherite(S2CCommandNames.SetProfile, S2CSetProfileCommand.class, cmd ->
         {
             return new NetheriteS2CSetProfileCommand(cmd.getProfileSNbt());
@@ -232,6 +246,9 @@ public class LegacyCommandHandler
         }).registerModernToNetherite(S2CCommandNames.SetAnimationDisplayName, S2CSetAnimationDisplayNameCommand.class, cmd ->
         {
             return new NetheriteS2CSetAnimationDisplayNameCommand(cmd.getDisplayIdentifier());
+        }).registerModernToNetherite(S2CCommandNames.SetDisplayingFakeEquip, S2CSetDisplayingFakeEquipCommand.class, cmd ->
+        {
+            return new NetheriteS2CSetDisplayingFakeEquipCommand(cmd.displaying);
         });
 
         // Admin reveal

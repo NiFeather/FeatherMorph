@@ -73,13 +73,11 @@ public class LegacyClientHandler extends MorphPluginObject
 
     private void handleCommandV2(@NotNull String channelName, @NotNull Player player, byte @NotNull [] bytes)
     {
-        MorphClientHandler.logPacket(false, player, channelName, bytes);
         clientHandler.handleCommandFromHandlerInternal(V2ProtocolHandler.V2_INSTANCE, channelName, player, bytes);
     }
 
     private void handleCommandV1(@NotNull String channelName, @NotNull Player player, byte @NotNull [] bytes)
     {
-        MorphClientHandler.logPacket(false, player, channelName, bytes);
         clientHandler.handleCommandFromHandlerInternal(V1ProtocolHandler.V1_INSTANCE, channelName, player, bytes);
     }
 
