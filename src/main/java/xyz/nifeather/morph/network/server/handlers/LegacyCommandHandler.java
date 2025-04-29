@@ -3,10 +3,10 @@ package xyz.nifeather.morph.network.server.handlers;
 import xyz.nifeather.morph.commands.subcommands.request.AcceptSubCommand;
 import xyz.nifeather.morph.network.commands.C2S.*;
 import xyz.nifeather.morph.network.commands.S2C.*;
-import xyz.nifeather.morph.network.commands.S2C.admin.reveal.S2CClearRevealCommand;
-import xyz.nifeather.morph.network.commands.S2C.admin.reveal.S2CPartialRevealCommand;
-import xyz.nifeather.morph.network.commands.S2C.admin.reveal.S2CRemoveRevealCommand;
-import xyz.nifeather.morph.network.commands.S2C.admin.reveal.S2CSetRenderRevealCommand;
+import xyz.nifeather.morph.network.commands.S2C.admin.reveal.S2CAddAdminRevealCommand;
+import xyz.nifeather.morph.network.commands.S2C.admin.reveal.S2CClearAdminRevealCommand;
+import xyz.nifeather.morph.network.commands.S2C.admin.reveal.S2CRemoveAdminRevealCommand;
+import xyz.nifeather.morph.network.commands.S2C.admin.reveal.S2CSyncAdminRevealCommand;
 import xyz.nifeather.morph.network.commands.S2C.clientrender.*;
 import xyz.nifeather.morph.network.commands.S2C.query.S2CQueryCommand;
 import xyz.nifeather.morph.network.commands.S2C.set.*;
@@ -217,7 +217,7 @@ public class LegacyCommandHandler
         }).registerModernToNetherite(S2CCommandNames.SetSneaking, S2CSetSneakingCommand.class, cmd ->
         {
             return new NetheriteS2CSetSneakingCommand(cmd.sneaking);
-        }).registerModernToNetherite(S2CCommandNames.SetSelfViewing, S2CSetSelfViewingCommand.class, cmd ->
+        }).registerModernToNetherite(S2CCommandNames.SetSelfViewing, S2CSetSelfViewingStatusCommand.class, cmd ->
         {
             return new NetheriteS2CSetSelfViewingCommand(cmd.selfViewing());
         }).registerModernToNetherite(S2CCommandNames.SetModifyBoundingBox, S2CSetModifyBoundingBoxCommand.class, cmd ->
@@ -235,16 +235,16 @@ public class LegacyCommandHandler
         });
 
         // Admin reveal
-        this.registerModernToNetherite(S2CCommandNames.SetReveal, S2CSetRenderRevealCommand.class, cmd ->
+        this.registerModernToNetherite(S2CCommandNames.SetReveal, S2CSyncAdminRevealCommand.class, cmd ->
         {
             return new NetheriteS2CMapCommand(cmd.getMap());
-        }).registerModernToNetherite(S2CCommandNames.AddReveal, S2CPartialRevealCommand.class, cmd ->
+        }).registerModernToNetherite(S2CCommandNames.AddReveal, S2CAddAdminRevealCommand.class, cmd ->
         {
             return new NetheriteS2CPartialMapCommand(cmd.getMap());
-        }).registerModernToNetherite(S2CCommandNames.RemoveReveal, S2CRemoveRevealCommand.class, cmd ->
+        }).registerModernToNetherite(S2CCommandNames.RemoveReveal, S2CRemoveAdminRevealCommand.class, cmd ->
         {
             return new NetheriteS2CMapRemoveCommand(cmd.getTargetId());
-        }).registerModernToNetherite(S2CCommandNames.ClearReveal, S2CClearRevealCommand.class, cmd ->
+        }).registerModernToNetherite(S2CCommandNames.ClearReveal, S2CClearAdminRevealCommand.class, cmd ->
         {
             return new NetheriteS2CMapClearCommand();
         });
@@ -258,19 +258,19 @@ public class LegacyCommandHandler
 
         // Client Renderer
 
-        this.registerModernToNetherite(S2CCommandNames.CRMap, S2CRenderMapSyncCommand.class, cmd ->
+        this.registerModernToNetherite(S2CCommandNames.CRSyncRender, S2CCRSyncRegisterCommand.class, cmd ->
         {
             return new NetheriteS2CRenderMapSyncCommand(cmd.getMap());
-        }).registerModernToNetherite(S2CCommandNames.CRAdd, S2CRenderMapAddCommand.class, cmd ->
+        }).registerModernToNetherite(S2CCommandNames.CRAdd, S2CCRRegisterCommand.class, cmd ->
         {
             return new NetheriteS2CRenderMapAddCommand(cmd.getPlayerNetworkId(), cmd.getMobId());
-        }).registerModernToNetherite(S2CCommandNames.CRRemove, S2CRenderMapRemoveCommand.class, cmd ->
+        }).registerModernToNetherite(S2CCommandNames.CRRemove, S2CCRUnregisterCommand.class, cmd ->
         {
             return new NetheriteS2CRenderMapRemoveCommand(cmd.getPlayerNetworkId());
-        }).registerModernToNetherite(S2CCommandNames.CRClear, S2CRenderMapClearCommand.class, cmd ->
+        }).registerModernToNetherite(S2CCommandNames.CRClear, S2CCRClearCommand.class, cmd ->
         {
             return new NetheriteS2CRenderMapClearCommand();
-        }).registerModernToNetherite(S2CCommandNames.CRMeta, S2CRenderMapMetaCommand.class, cmd ->
+        }).registerModernToNetherite(S2CCommandNames.CRMeta, S2CCRSetMetaCommand.class, cmd ->
         {
             var modernMeta = cmd.renderMeta;
 

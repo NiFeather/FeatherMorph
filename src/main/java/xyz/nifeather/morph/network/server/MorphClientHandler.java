@@ -19,7 +19,7 @@ import xyz.nifeather.morph.network.commands.S2C.*;
 import xyz.nifeather.morph.network.commands.S2C.query.QueryType;
 import xyz.nifeather.morph.network.commands.S2C.query.S2CQueryCommand;
 import xyz.nifeather.morph.network.commands.S2C.set.S2CSetModifyBoundingBoxCommand;
-import xyz.nifeather.morph.network.commands.S2C.set.S2CSetSelfViewingCommand;
+import xyz.nifeather.morph.network.commands.S2C.set.S2CSetSelfViewingStatusCommand;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
@@ -647,7 +647,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
         if (state != null)
             manager.refreshClientState(state);
 
-        sendCommand(player, new S2CSetSelfViewingCommand(config.showDisguiseToSelf));
+        sendCommand(player, new S2CSetSelfViewingStatusCommand(config.showDisguiseToSelf));
         sendCommand(player, new S2CSetModifyBoundingBoxCommand(modifyBoundingBoxes.get()));
 
         if (player.hasPermission(CommonPermissions.DISGUISE_REVEALING))

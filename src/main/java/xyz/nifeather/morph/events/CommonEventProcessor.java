@@ -20,7 +20,6 @@ import org.bukkit.event.player.*;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.InventoryHolder;
 import xyz.nifeather.morph.network.commands.S2C.S2CSwapCommand;
-import xyz.nifeather.morph.network.commands.S2C.admin.reveal.S2CRemoveRevealCommand;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
@@ -39,6 +38,7 @@ import xyz.nifeather.morph.misc.OfflineDisguiseResult;
 import xyz.nifeather.morph.misc.gui.AnimSelectScreenWrapper;
 import xyz.nifeather.morph.misc.gui.DisguiseSelectScreenWrapper;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
+import xyz.nifeather.morph.network.commands.S2C.admin.reveal.S2CRemoveAdminRevealCommand;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
 import xyz.nifeather.morph.network.server.ServerSetEquipCommand;
 import xyz.nifeather.morph.skills.MorphSkillHandler;
@@ -470,7 +470,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
                 .filter(p -> p.hasPermission(CommonPermissions.DISGUISE_REVEALING))
                 .toList();
 
-        var cmd = new S2CRemoveRevealCommand(e.getPlayer().getEntityId());
+        var cmd = new S2CRemoveAdminRevealCommand(e.getPlayer().getEntityId());
         targets.forEach(p -> clientHandler.sendCommand(p, cmd));
     }
 
