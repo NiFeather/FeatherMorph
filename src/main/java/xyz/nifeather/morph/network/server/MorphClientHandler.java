@@ -663,7 +663,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
     public void onMorphCommand(C2SMorphCommand c2SMorphCommand)
     {
         Player player = c2SMorphCommand.getOwner();
-        var id = c2SMorphCommand.getArgumentAt(0, "");
+        var id = c2SMorphCommand.identifier();
 
         if (id.isBlank())
             manager.tryQuickDisguise(player);

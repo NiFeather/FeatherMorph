@@ -7,6 +7,7 @@ import xyz.nifeather.morph.network.commands.S2C.set.S2CSetFakeEquipCommand;
 import xyz.nifeather.morph.utilities.ItemUtils;
 
 import java.util.List;
+import java.util.Map;
 
 public class ServerSetEquipCommand extends S2CSetFakeEquipCommand<ItemStack>
 {
@@ -16,14 +17,12 @@ public class ServerSetEquipCommand extends S2CSetFakeEquipCommand<ItemStack>
     }
 
     @Override
-    public List<String> serializeArgumentList()
+    public Map<String, String> generateArgumentMap()
     {
-        var list = new ObjectArrayList<String>();
-
-        list.add(getSlot().toString());
-        list.add(ItemUtils.itemToStr(getItemStack()));
-
-        return list;
+        return Map.of(
+                "slot", getSlot().toString(),
+                "item", ItemUtils.itemToStr(getItemStack())
+        );
     }
 
     private static ProtocolEquipmentSlot toProtocolEquipment(EquipmentSlot slot)

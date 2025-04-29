@@ -113,9 +113,12 @@ public class V2ProtocolHandler extends AbstractCommandPacketHandler
             var split = str.split(" ", 2);
 
             String commandName = split[0];
-            List<String> content = split.length == 2 ? Arrays.stream(split[1].split(" ")).toList() : new ObjectArrayList<>();
+            //List<String> content = split.length == 2 ? Arrays.stream(split[1].split(" ")).toList() : new ObjectArrayList<>();
 
-            return CommandHandleResult.from(new C2SCommandRecord(commandName, content));
+            logger.warn("Handling V2 commands under pure V3 context is not possible.");
+
+            return CommandHandleResult.fail();
+            //return CommandHandleResult.from(new C2SCommandRecord(commandName, content));
         }
         catch (Throwable t)
         {
@@ -130,7 +133,7 @@ public class V2ProtocolHandler extends AbstractCommandPacketHandler
 
         stringBuilder.append(commandRecord.commandName());
 
-        for (String argument : commandRecord.arguments())
+        for (String argument : commandRecord.arguments().values())
             stringBuilder.append(" ").append(argument);
 
         return stringBuilder.toString();

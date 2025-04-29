@@ -28,9 +28,8 @@ public abstract class MIS2CCommand<T> extends AbstractS2CCommand<T>
 
     public abstract void onCommand(IMasterHandler handler);
 
-    public MIS2CCommand(String cmdBaseName, T... arguments)
+    public MIS2CCommand(String cmdBaseName)
     {
-        super(arguments);
         this.baseName = cmdBaseName;
     }
 

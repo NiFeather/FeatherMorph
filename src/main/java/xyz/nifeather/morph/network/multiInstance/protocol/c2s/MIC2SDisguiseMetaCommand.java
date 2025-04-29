@@ -8,13 +8,28 @@ import xyz.nifeather.morph.network.multiInstance.protocol.Operation;
 import xyz.nifeather.morph.network.multiInstance.protocol.SocketDisguiseMeta;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public class MIC2SDisguiseMetaCommand extends MIC2SCommand<SocketDisguiseMeta>
 {
+    public final SocketDisguiseMeta socketDisguiseMeta;
+
     public MIC2SDisguiseMetaCommand(SocketDisguiseMeta meta)
     {
-        super("dmeta", meta);
+        super("dmeta");
+
+        this.socketDisguiseMeta = meta;
+    }
+
+    @Override
+    public Map<String, String> generateArgumentMap()
+    {
+        var gson = new GsonBuilder().disableHtmlEscaping().create();
+
+        return Map.of(
+                "socket_meta", gson.toJson(socketDisguiseMeta)
+        );
     }
 
     public MIC2SDisguiseMetaCommand(Operation operation, List<String> identifiers, UUID bindingUUID)
@@ -25,7 +40,7 @@ public class MIC2SDisguiseMetaCommand extends MIC2SCommand<SocketDisguiseMeta>
     @Nullable
     public SocketDisguiseMeta getMeta()
     {
-        return getArgumentAt(0);
+        return socketDisguiseMeta;
     }
 
     @Override

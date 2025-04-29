@@ -7,14 +7,26 @@ import xyz.nifeather.morph.network.multiInstance.protocol.Operation;
 import xyz.nifeather.morph.network.multiInstance.protocol.SocketDisguiseMeta;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public class MIS2CSyncMetaCommand extends MIS2CCommand<SocketDisguiseMeta>
 {
+    public final SocketDisguiseMeta disguiseMeta;
 
     public MIS2CSyncMetaCommand(SocketDisguiseMeta meta)
     {
-        super("dmeta", meta);
+        super("dmeta");
+
+        this.disguiseMeta = meta;
+    }
+
+    @Override
+    public Map<String, String> generateArgumentMap()
+    {
+        return Map.of(
+                "socket_meta", gson().toJson(disguiseMeta)
+        );
     }
 
     public MIS2CSyncMetaCommand(Operation operation, List<String> identifiers, UUID bindingUUID)
@@ -31,7 +43,7 @@ public class MIS2CSyncMetaCommand extends MIS2CCommand<SocketDisguiseMeta>
     @Nullable
     public SocketDisguiseMeta getMeta()
     {
-        return getArgumentAt(0);
+        return disguiseMeta;
     }
 
     public static MIS2CSyncMetaCommand from(String text)

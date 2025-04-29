@@ -3,8 +3,13 @@ package xyz.nifeather.morph.network.multiInstance.protocol.s2c;
 import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.network.multiInstance.protocol.IMasterHandler;
 
+import java.util.Map;
+
 public class MIS2CDisconnectCommand extends MIS2CCommand<String>
 {
+    private final int reasonCode;
+    private final String detail;
+
     public MIS2CDisconnectCommand(int reasonCode)
     {
         this(reasonCode, "<No details>");
@@ -12,7 +17,18 @@ public class MIS2CDisconnectCommand extends MIS2CCommand<String>
 
     public MIS2CDisconnectCommand(int reasonCode, String detail)
     {
-        super("deny", "" + reasonCode, detail);
+        super("deny");
+        this.reasonCode = reasonCode;
+        this.detail = detail;
+    }
+
+    @Override
+    public Map<String, String> generateArgumentMap()
+    {
+        return Map.of(
+                "code", Integer.toString(reasonCode),
+                "detail", detail
+        );
     }
 
     @Override
@@ -23,23 +39,12 @@ public class MIS2CDisconnectCommand extends MIS2CCommand<String>
 
     public int getReasonCode()
     {
-        var str = getArgumentAt(0, "0");
-
-        try
-        {
-            return Integer.parseInt(str);
-        }
-        catch (Throwable t)
-        {
-            logger.warn("Unable to parse integer for deny command: " + t.getMessage());
-        }
-
-        return -2;
+        return reasonCode;
     }
 
     public String getDetails()
     {
-        return getArgumentAt(1, "<No details>");
+        return detail;
     }
 
     public static MIS2CDisconnectCommand from(String text)

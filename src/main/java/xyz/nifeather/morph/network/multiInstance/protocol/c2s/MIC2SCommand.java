@@ -28,12 +28,10 @@ public abstract class MIC2SCommand<T> extends AbstractC2SCommand<T>
 
     public abstract void onCommand(IClientHandler handler);
 
-    public MIC2SCommand(String cmdBaseName, T... arguments)
+    public MIC2SCommand(String cmdBaseName)
     {
-        super(arguments);
         this.baseName = cmdBaseName;
     }
-
 
     @Nullable
     private WebSocket sourceSocket;
