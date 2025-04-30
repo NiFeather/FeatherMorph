@@ -4,6 +4,9 @@ import io.netty.buffer.Unpooled;
 import net.minecraft.network.FriendlyByteBuf;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import xyz.nifeather.fmccl.converter.C2SCommandConverter;
+import xyz.nifeather.fmccl.converter.S2CCommandConverter;
+import xyz.nifeather.fmccl.processor.C2SCommandProcessor;
 import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.network.commands.C2S.C2SCommandRecord;
 import xyz.nifeather.morph.network.commands.C2S.ClientInitializeRecordV3;
@@ -12,8 +15,6 @@ import xyz.nifeather.morph.network.commands.S2C.InitializeRespondV3;
 import xyz.nifeather.morph.network.server.MessageChannel;
 import xyz.nifeather.morph.network.server.handlers.results.CommandHandleResult;
 import xyz.nifeather.morph.network.server.handlers.results.VersionHandleResult;
-import xyz.nifeather.fmccl.LegacyCommandConverter;
-import xyz.nifeather.fmccl.LegacyCommandProcessor;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -26,8 +27,9 @@ public class V1ProtocolHandler extends AbstractCommandPacketHandler
 {
     public static final V1ProtocolHandler V1_INSTANCE = new V1ProtocolHandler();
 
-    private final LegacyCommandProcessor<Player> commandProcessor = new LegacyCommandProcessor<>();
-    private final LegacyCommandConverter legacyCommandConverter = new MorphLegacyCommandConverter();
+    private final C2SCommandProcessor commandProcessor = new C2SCommandProcessor();
+    private final S2CCommandConverter s2cConverter = new MorphLegacyCommandConverter();
+    private final C2SCommandConverter c2sConverter = new C2SCommandConverter();
 
     @Override
     public @NotNull ClientInitializeRecordV3 handleInitializeData(Player player, byte @NotNull [] rawData)
@@ -59,13 +61,8 @@ public class V1ProtocolHandler extends AbstractCommandPacketHandler
         try
         {
             var str = new String(rawData, StandardCharsets.UTF_8);
-            //var split = str.split(" ", 2);
-
-            //String commandName = split[0];
-            //List<String> content = split.length == 2 ? Arrays.stream(split[1].split(" ")).toList() : new ObjectArrayList<>();
-
-            var command = commandProcessor.processLegacyCommandLine(player, str);
-            var convert = legacyCommandConverter.fromNetheriteCommand(command);
+            var command = commandProcessor.processLegacyCommandLine(str);
+            var convert = c2sConverter.fromNetheriteCommand(command);
 
             return CommandHandleResult.from(C2SCommandRecord.fromC2SCommand(convert));
         }
@@ -106,7 +103,7 @@ public class V1ProtocolHandler extends AbstractCommandPacketHandler
 
         try
         {
-            commandString = legacyCommandConverter.toNetheriteCommand(command).buildCommand();
+            commandString = s2cConverter.toNetheriteCommand(command).buildCommand();
         }
         catch (Throwable t)
         {
