@@ -130,7 +130,7 @@ dependencies {
         project.property("protocols_local_version")
         else project.property("protocols_version");
 
-    implementation(project(":command-compat-layer"))
+    implementation("com.github.NiFeather:feathermorph-command-compat-layer:776c87287b")
 
     implementation("com.github.NiFeather:feathermorph-protocols:${protocolVersion}")
     implementation("com.github.XiaMoZhiShi:PluginBase:${project.property("pluginbase_version")}")

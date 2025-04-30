@@ -12,4 +12,3 @@ plugins {
 }
 
 rootProject.name = "feathermorph"
-include("command-compat-layer")

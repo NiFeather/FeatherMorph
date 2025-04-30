@@ -13,7 +13,8 @@ import xyz.nifeather.morph.network.commands.S2C.InitializeRespondV3;
 import xyz.nifeather.morph.network.server.MessageChannel;
 import xyz.nifeather.morph.network.server.handlers.results.CommandHandleResult;
 import xyz.nifeather.morph.network.server.handlers.results.VersionHandleResult;
-import xyz.nifeather.netherite.LegacyCommandProcessor;
+import xyz.nifeather.fmccl.LegacyCommandConverter;
+import xyz.nifeather.fmccl.LegacyCommandProcessor;
 
 import java.util.Arrays;
 import java.util.List;
@@ -27,7 +28,7 @@ public class V2ProtocolHandler extends AbstractCommandPacketHandler
     public static final V2ProtocolHandler V2_INSTANCE = new V2ProtocolHandler();
 
     private final LegacyCommandProcessor<Player> commandProcessor = new LegacyCommandProcessor<>();
-    private final LegacyCommandHandler legacyCommandHandler = new LegacyCommandHandler();
+    private final LegacyCommandConverter legacyCommandConverter = new MorphLegacyCommandConverter();
 
     @Override
     public @NotNull ClientInitializeRecordV3 handleInitializeData(Player player, byte @NotNull [] rawData)
@@ -116,7 +117,7 @@ public class V2ProtocolHandler extends AbstractCommandPacketHandler
             var str = this.readStringFromByteInput(data);
 
             var command = commandProcessor.processLegacyCommandLine(player, str);
-            var convert = legacyCommandHandler.fromNetheriteCommand(command);
+            var convert = legacyCommandConverter.fromNetheriteCommand(command);
 
             return CommandHandleResult.from(C2SCommandRecord.fromC2SCommand(convert));
         }
@@ -134,7 +135,7 @@ public class V2ProtocolHandler extends AbstractCommandPacketHandler
 
         try
         {
-            commandString = legacyCommandHandler.toNetheriteCommand(command).buildCommand();
+            commandString = legacyCommandConverter.toNetheriteCommand(command).buildCommand();
         }
         catch (Throwable t)
         {

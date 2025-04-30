@@ -9,11 +9,11 @@ import xyz.nifeather.morph.network.commands.C2S.C2SCommandRecord;
 import xyz.nifeather.morph.network.commands.C2S.ClientInitializeRecordV3;
 import xyz.nifeather.morph.network.commands.S2C.AbstractS2CCommand;
 import xyz.nifeather.morph.network.commands.S2C.InitializeRespondV3;
-import xyz.nifeather.morph.network.commands.S2C.S2CCommandRecord;
 import xyz.nifeather.morph.network.server.MessageChannel;
 import xyz.nifeather.morph.network.server.handlers.results.CommandHandleResult;
 import xyz.nifeather.morph.network.server.handlers.results.VersionHandleResult;
-import xyz.nifeather.netherite.LegacyCommandProcessor;
+import xyz.nifeather.fmccl.LegacyCommandConverter;
+import xyz.nifeather.fmccl.LegacyCommandProcessor;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -27,7 +27,7 @@ public class V1ProtocolHandler extends AbstractCommandPacketHandler
     public static final V1ProtocolHandler V1_INSTANCE = new V1ProtocolHandler();
 
     private final LegacyCommandProcessor<Player> commandProcessor = new LegacyCommandProcessor<>();
-    private final LegacyCommandHandler legacyCommandHandler = new LegacyCommandHandler();
+    private final LegacyCommandConverter legacyCommandConverter = new MorphLegacyCommandConverter();
 
     @Override
     public @NotNull ClientInitializeRecordV3 handleInitializeData(Player player, byte @NotNull [] rawData)
@@ -65,7 +65,7 @@ public class V1ProtocolHandler extends AbstractCommandPacketHandler
             //List<String> content = split.length == 2 ? Arrays.stream(split[1].split(" ")).toList() : new ObjectArrayList<>();
 
             var command = commandProcessor.processLegacyCommandLine(player, str);
-            var convert = legacyCommandHandler.fromNetheriteCommand(command);
+            var convert = legacyCommandConverter.fromNetheriteCommand(command);
 
             return CommandHandleResult.from(C2SCommandRecord.fromC2SCommand(convert));
         }
@@ -106,7 +106,7 @@ public class V1ProtocolHandler extends AbstractCommandPacketHandler
 
         try
         {
-            commandString = legacyCommandHandler.toNetheriteCommand(command).buildCommand();
+            commandString = legacyCommandConverter.toNetheriteCommand(command).buildCommand();
         }
         catch (Throwable t)
         {
