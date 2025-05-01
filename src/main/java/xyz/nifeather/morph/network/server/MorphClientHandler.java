@@ -184,8 +184,8 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
                 .registerC2S(C2SCommandNames.SetSingleOption, C2SSetSingleOptionCommand::fromArguments)
                 .registerC2S(C2SCommandNames.ToggleSelf, C2SToggleSelfCommand::fromArguments)
                 .registerC2S(C2SCommandNames.Unmorph, C2SUnmorphCommand::fromArguments)
-                .registerC2S(C2SCommandNames.Request, C2SRequestCommand::fromArguments)
-                .registerC2S("animation", C2SAnimationCommand::fromArguments);
+                .registerC2S(C2SCommandNames.ExchangeRequestManagement, C2SExchangeRequestManagementCommand::fromArguments)
+                .registerC2S(C2SCommandNames.PlayAnimation, C2SAnimationCommand::fromArguments);
 
         var messenger = Bukkit.getMessenger();
 
@@ -769,13 +769,13 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
     private ModNetworkingHelper modNetworkingHelper;
 
     @Override
-    public void onRequestCommand(C2SRequestCommand c2SRequestCommand)
+    public void onRequestCommand(C2SExchangeRequestManagementCommand c2SRequestCommand)
     {
         Player player = c2SRequestCommand.getOwner();
         var target = c2SRequestCommand.targetRequestName;
         var deceison = c2SRequestCommand.decision;
 
-        if (target.equalsIgnoreCase("unknown") || deceison == C2SRequestCommand.Decision.UNKNOWN)
+        if (target.equalsIgnoreCase("unknown") || deceison == C2SExchangeRequestManagementCommand.Decision.UNKNOWN)
         {
             logger.warn("Received an invalid request response");
             return;
@@ -784,7 +784,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
         var targetPlayer = Bukkit.getPlayerExact(target);
         if (targetPlayer == null) return;
 
-        if (deceison == C2SRequestCommand.Decision.ACCEPT)
+        if (deceison == C2SExchangeRequestManagementCommand.Decision.ACCEPT)
             requestManager.acceptRequest(player, targetPlayer);
         else
             requestManager.denyRequest(player, targetPlayer);
