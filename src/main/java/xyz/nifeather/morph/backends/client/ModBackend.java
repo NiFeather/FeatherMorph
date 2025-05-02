@@ -8,9 +8,6 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xiamomc.morph.network.commands.S2C.clientrender.S2CRenderMapAddCommand;
-import xiamomc.morph.network.commands.S2C.clientrender.S2CRenderMapRemoveCommand;
-import xiamomc.morph.network.commands.S2C.clientrender.S2CRenderMapSyncCommand;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Messages.FormattableMessage;
 import xyz.nifeather.morph.MorphManager;
@@ -20,6 +17,9 @@ import xyz.nifeather.morph.backends.WrapperProperties;
 import xyz.nifeather.morph.messages.BackendStrings;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.misc.ModNetworkingHelper;
+import xyz.nifeather.morph.network.commands.S2C.clientrender.S2CCRRegisterCommand;
+import xyz.nifeather.morph.network.commands.S2C.clientrender.S2CCRSyncRegisterCommand;
+import xyz.nifeather.morph.network.commands.S2C.clientrender.S2CCRUnregisterCommand;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
 
 import java.util.Collection;
@@ -136,7 +136,7 @@ public class ModBackend extends DisguiseBackend<TrackingClientDisguise, ClientDi
 
         var players = new ObjectArrayList<>(Bukkit.getOnlinePlayers());
         players.remove(player);
-        var cmd = new S2CRenderMapAddCommand(player.getEntityId(), wrapper.readPropertyOrThrow(WrapperProperties.DISGUISE_ID));
+        var cmd = new S2CCRRegisterCommand(player.getEntityId(), wrapper.readPropertyOrThrow(WrapperProperties.DISGUISE_ID));
         players.forEach(p -> clientHandler.sendCommand(p, cmd));
 
         modNetworkingHelper.prepareMeta(player)
@@ -149,7 +149,7 @@ public class ModBackend extends DisguiseBackend<TrackingClientDisguise, ClientDi
         return true;
     }
 
-    public S2CRenderMapSyncCommand generateRenderSyncCommand(MorphManager morphManager)
+    public S2CCRSyncRegisterCommand generateRenderSyncCommand(MorphManager morphManager)
     {
         var map = new HashMap<Integer, String>();
         for (DisguiseState disguiseState : morphManager.getActiveDisguises())
@@ -158,7 +158,7 @@ public class ModBackend extends DisguiseBackend<TrackingClientDisguise, ClientDi
             map.put(player.getEntityId(), disguiseState.getDisguiseIdentifier());
         }
 
-        return S2CRenderMapSyncCommand.of(map);
+        return S2CCRSyncRegisterCommand.of(map);
     }
 
     @Override
@@ -191,7 +191,7 @@ public class ModBackend extends DisguiseBackend<TrackingClientDisguise, ClientDi
         if (wrapper != null)
             wrapper.dispose();
 
-        var cmd = new S2CRenderMapRemoveCommand(player.getEntityId());
+        var cmd = new S2CCRUnregisterCommand(player.getEntityId());
         var players = new ObjectArrayList<>(Bukkit.getOnlinePlayers());
         players.remove(player);
         players.forEach(p -> clientHandler.sendCommand(p, cmd));

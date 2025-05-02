@@ -33,9 +33,9 @@ import xyz.nifeather.morph.messages.MorphStrings;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
-import xiamomc.morph.network.commands.S2C.map.S2CMapCommand;
-import xiamomc.morph.network.commands.S2C.map.S2CMapRemoveCommand;
-import xiamomc.morph.network.commands.S2C.set.*;
+import xyz.nifeather.morph.network.commands.S2C.admin.reveal.S2CRemoveAdminRevealCommand;
+import xyz.nifeather.morph.network.commands.S2C.admin.reveal.S2CSyncAdminRevealCommand;
+import xyz.nifeather.morph.network.commands.S2C.set.*;
 import xyz.nifeather.morph.network.multiInstance.MultiInstanceService;
 import xyz.nifeather.morph.network.multiInstance.protocol.Operation;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
@@ -1126,7 +1126,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     /**
      * 生成用于橙字显示的map指令
      */
-    public S2CMapCommand genMapCommand()
+    public S2CSyncAdminRevealCommand genMapCommand()
     {
         var map = new HashMap<Integer, String>();
         for (DisguiseState disguiseState : this.activeDisguises)
@@ -1135,7 +1135,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             map.put(player.getEntityId(), player.getName());
         }
 
-        return new S2CMapCommand(map);
+        return new S2CSyncAdminRevealCommand(map);
     }
 
     //endregion Command generating
@@ -1310,7 +1310,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         clientHandler.sendCommand(player, new S2CSetSelfViewIdentifierCommand(null));
 
         var revLevel = revealingHandler.getRevealingState(player).getBaseValue();
-        clientHandler.sendCommand(player, new S2CSetRevealingCommand(revLevel));
+        clientHandler.sendCommand(player, new S2CSetMobRevealCommand(revLevel));
 
         //发送消息以及重置actionbar
         source.sendMessage(MessageUtils.prefixes(player, MorphStrings.unMorphSuccessString().withLocale(MessageUtils.getLocale(player))));
@@ -1323,7 +1323,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         new PlayerUnMorphEvent(player).callEvent();
 
         // 向管理员发送map移除指令
-        modNetworkingHelper.sendCommandToRevealablePlayers(new S2CMapRemoveCommand(player.getEntityId()));
+        modNetworkingHelper.sendCommandToRevealablePlayers(new S2CRemoveAdminRevealCommand(player.getEntityId()));
 
         state.dispose();
     }
@@ -1384,7 +1384,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         }
 
         if (!noClientCommand)
-            clientHandler.sendCommand(player, new S2CSetSelfViewingCommand(value));
+            clientHandler.sendCommand(player, new S2CSetSelfViewingStatusCommand(value));
 
         if (saveToConfig)
         {

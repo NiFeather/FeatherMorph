@@ -8,10 +8,12 @@ import org.bukkit.event.Listener;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.scoreboard.Scoreboard;
 import org.jetbrains.annotations.ApiStatus;
+import xiamomc.pluginbase.Bindables.Bindable;
 import xiamomc.pluginbase.ScheduleInfo;
 import xyz.nifeather.morph.abilities.AbilityManager;
 import xyz.nifeather.morph.api.FeatherMorphAPI;
 import xyz.nifeather.morph.commands.*;
+import xyz.nifeather.morph.config.ConfigOption;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.events.*;
 import xyz.nifeather.morph.events.mirror.ExecutorHub;
@@ -43,6 +45,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public final class FeatherMorphMain extends XiaMoJavaPlugin
 {
     private static FeatherMorphMain instance;
+    private final Bindable<Boolean> debugOutput = new Bindable<>(false);
 
     /**
      * 仅当当前对象无法继承MorphPluginObject或不需要完全继承MorphPluginObject时使用
@@ -67,6 +70,11 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
     public String getNamespace()
     {
         return getMorphNameSpace();
+    }
+
+    public boolean debugOutputEnabled()
+    {
+        return debugOutput.get();
     }
 
     private MorphCommandManager cmdHelper;
@@ -201,13 +209,16 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
 
         dependencyManager.cache(vanillaMessageStore = new VanillaMessageStore());
 
+        MorphConfigManager config;
         dependencyManager.cacheAs(MessageStore.class, messageStore = new MorphMessageStore());
         dependencyManager.cacheAs(MiniMessage.class, MiniMessage.miniMessage());
         dependencyManager.cacheAs(IManagePlayerData.class, morphManager);
         dependencyManager.cacheAs(IManageRequests.class, new RequestManager());
         dependencyManager.cacheAs(Scoreboard.class, Bukkit.getScoreboardManager().getMainScoreboard());
-        dependencyManager.cacheAs(MorphConfigManager.class, new MorphConfigManager(this));
+        dependencyManager.cacheAs(MorphConfigManager.class, config = new MorphConfigManager(this));
         dependencyManager.cache(playerTracker);
+
+        config.bind(debugOutput, ConfigOption.DEBUG_OUTPUT);
 
         dependencyManager.cache(cmdHelper = new MorphCommandManager());
 

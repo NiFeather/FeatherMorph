@@ -3,12 +3,25 @@ package xyz.nifeather.morph.network.multiInstance.protocol.s2c;
 import xyz.nifeather.morph.network.multiInstance.protocol.IMasterHandler;
 
 import java.util.Arrays;
+import java.util.Map;
 
 public class MIS2CStateCommand extends MIS2CCommand<String>
 {
+    public final ProtocolState newState;
+
     public MIS2CStateCommand(ProtocolState newState)
     {
-        super("state", newState.name());
+        super("state");
+
+        this.newState = newState;
+    }
+
+    @Override
+    public Map<String, String> generateArgumentMap()
+    {
+        return Map.of(
+                "new_state", newState.name()
+        );
     }
 
     @Override
@@ -19,8 +32,7 @@ public class MIS2CStateCommand extends MIS2CCommand<String>
 
     public ProtocolState getState()
     {
-        return Arrays.stream(ProtocolState.values()).filter(s -> s.name().equalsIgnoreCase(getArgumentAt(0, "INVALID")))
-                .findFirst().orElse(ProtocolState.INVALID);
+        return newState;
     }
 
     public static MIS2CStateCommand from(String text)

@@ -6,39 +6,39 @@ import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.network.multiInstance.protocol.IClientHandler;
 import xyz.nifeather.morph.network.multiInstance.protocol.ProtocolLevel;
 
+import java.util.Map;
+
 public class MIC2SLoginCommand extends MIC2SCommand<String>
 {
-    private MIC2SLoginCommand(int ver, String secret)
-    {
-        super("login", "" + ver, secret);
-    }
+    public final ProtocolLevel clientProtocolLevel;
+    public final String secret;
 
     public MIC2SLoginCommand(@NotNull ProtocolLevel protocolLevel, @NotNull String secret)
     {
-        super("login", protocolLevel.versionString(), secret);
+        super("login");
+
+        this.clientProtocolLevel = protocolLevel;
+        this.secret = secret;
+    }
+
+    @Override
+    public Map<String, String> generateArgumentMap()
+    {
+        return Map.of(
+                "protocol", clientProtocolLevel.name(),
+                "secret", secret
+        );
     }
 
     public int getVersion()
     {
-        var argRaw = getArgumentAt(0, "0");
-        int version = 0;
-
-        try
-        {
-            version = Integer.parseInt(argRaw);
-        }
-        catch (Throwable t)
-        {
-            logger.warn("Can't get version from arg '%s': %s".formatted(argRaw, t.getMessage()));
-        }
-
-        return version;
+        return clientProtocolLevel.version();
     }
 
     @Nullable
     public String getSecret()
     {
-        return getArgumentAt(1);
+        return secret;
     }
 
     @Override
@@ -47,6 +47,7 @@ public class MIC2SLoginCommand extends MIC2SCommand<String>
         handler.onLoginCommand(this);
     }
 
+    @Deprecated
     public static MIC2SLoginCommand from(String arg)
     {
         var args = arg.split(" ", 2);
@@ -62,6 +63,6 @@ public class MIC2SLoginCommand extends MIC2SCommand<String>
             logger.warn("Error occurred processing arguments: " + t.getMessage());
         }
 
-        return new MIC2SLoginCommand(ver, args.length == 2 ? args[1] : "~NULL");
+        return new MIC2SLoginCommand(ProtocolLevel.V1, args.length == 2 ? args[1] : "~NULL");
     }
 }

@@ -22,7 +22,7 @@ import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.misc.DisguiseTypes;
 import xyz.nifeather.morph.misc.MorphGameProfile;
 import xyz.nifeather.morph.misc.skins.PlayerSkinProvider;
-import xiamomc.morph.network.commands.S2C.set.S2CSetProfileCommand;
+import xyz.nifeather.morph.network.commands.S2C.set.S2CSetProfileCommand;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
 import xyz.nifeather.morph.providers.animation.AnimationProvider;
 import xyz.nifeather.morph.providers.animation.provider.PlayerAnimationProvider;

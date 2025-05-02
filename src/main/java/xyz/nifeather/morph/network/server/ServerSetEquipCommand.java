@@ -1,9 +1,13 @@
 package xyz.nifeather.morph.network.server;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
-import xiamomc.morph.network.commands.S2C.set.S2CSetFakeEquipCommand;
+import xyz.nifeather.morph.network.commands.S2C.set.S2CSetFakeEquipCommand;
 import xyz.nifeather.morph.utilities.ItemUtils;
+
+import java.util.List;
+import java.util.Map;
 
 public class ServerSetEquipCommand extends S2CSetFakeEquipCommand<ItemStack>
 {
@@ -13,9 +17,12 @@ public class ServerSetEquipCommand extends S2CSetFakeEquipCommand<ItemStack>
     }
 
     @Override
-    public String serializeArguments()
+    public Map<String, String> generateArgumentMap()
     {
-        return getSlot().toString() + " " + ItemUtils.itemToStr(getItemStack());
+        return Map.of(
+                "slot", getSlot().toString(),
+                "item", ItemUtils.itemToStr(getItemStack())
+        );
     }
 
     private static ProtocolEquipmentSlot toProtocolEquipment(EquipmentSlot slot)

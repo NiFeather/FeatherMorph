@@ -2,7 +2,7 @@ package xyz.nifeather.morph.utilities;
 
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
-import xiamomc.morph.network.commands.S2C.clientrender.Equipment;
+import xyz.nifeather.morph.network.commands.S2C.clientrender.Equipment;
 
 public class MapMetaUtils
 {

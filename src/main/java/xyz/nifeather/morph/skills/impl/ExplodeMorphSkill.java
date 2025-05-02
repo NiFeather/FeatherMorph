@@ -10,7 +10,7 @@ import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import xiamomc.morph.network.commands.S2C.set.S2CSetSNbtCommand;
+import xyz.nifeather.morph.network.commands.S2C.set.S2CSetSNbtCommand;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.SkillStrings;

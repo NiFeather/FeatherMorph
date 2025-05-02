@@ -16,7 +16,7 @@ import xyz.nifeather.morph.backends.DisguiseBackend;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.MorphStrings;
 import xyz.nifeather.morph.misc.DisguiseState;
-import xiamomc.morph.network.commands.S2C.AbstractS2CCommand;
+import xyz.nifeather.morph.network.commands.S2C.AbstractS2CCommand;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
 import xyz.nifeather.morph.network.server.ServerSetEquipCommand;
 import xyz.nifeather.morph.skills.MorphSkillHandler;

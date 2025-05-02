@@ -8,7 +8,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import xiamomc.morph.network.commands.S2C.set.S2CSetSneakingCommand;
+import xyz.nifeather.morph.network.commands.S2C.set.S2CSetSneakingCommand;
 import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.config.ConfigOption;
 import xyz.nifeather.morph.events.InteractionMirrorProcessor;

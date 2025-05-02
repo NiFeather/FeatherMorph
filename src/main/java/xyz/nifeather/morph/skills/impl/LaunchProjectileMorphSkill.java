@@ -8,7 +8,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.ShulkerBullet;
 import org.bukkit.entity.WitherSkull;
 import org.jetbrains.annotations.NotNull;
-import xiamomc.morph.network.commands.S2C.set.S2CSetAggressiveCommand;
+import xyz.nifeather.morph.network.commands.S2C.set.S2CSetAggressiveCommand;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.SkillStrings;

@@ -1,5 +1,7 @@
 package xyz.nifeather.morph.network.multiInstance.master;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.bukkit.Bukkit;
@@ -8,13 +10,14 @@ import org.java_websocket.framing.CloseFrame;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xiamomc.morph.network.commands.CommandRegistries;
+import xyz.nifeather.morph.network.commands.CommandRegistries;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.config.ConfigOption;
 import xyz.nifeather.morph.config.MorphConfigManager;
+import xyz.nifeather.morph.network.commands.S2C.S2CCommandRecord;
 import xyz.nifeather.morph.network.multiInstance.IInstanceService;
 import xyz.nifeather.morph.network.multiInstance.protocol.IClientHandler;
 import xyz.nifeather.morph.network.multiInstance.protocol.Operation;
@@ -189,6 +192,8 @@ public class MasterInstance extends MorphPluginObject implements IInstanceServic
             this.sendCommand(allowedSocket, command);
     }
 
+    private final Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
+
     private void sendCommand(WebSocket socket, MIS2CCommand<?> command)
     {
         if (!socket.isOpen())
@@ -199,7 +204,7 @@ public class MasterInstance extends MorphPluginObject implements IInstanceServic
 
         //logger.info("%s :: -> :: %s".formatted(socket.getRemoteSocketAddress(), command.buildCommand()));
 
-        socket.send(command.buildCommand());
+        socket.send(gson.toJson(S2CCommandRecord.fromS2CCommand(command)));
     }
 
     private void disconnect(WebSocket socket, String reason)
