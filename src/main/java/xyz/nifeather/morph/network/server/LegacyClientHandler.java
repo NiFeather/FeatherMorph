@@ -4,6 +4,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.network.commands.C2S.ClientInitializeRecordV3;
 import xyz.nifeather.morph.network.server.handlers.V1ProtocolHandler;
@@ -45,6 +46,14 @@ public class LegacyClientHandler extends MorphPluginObject
     private void handleInitializeV1V2(@NotNull String cN, @NotNull Player player, byte @NotNull [] bytes)
     {
         MorphClientHandler.logPacket(false, player, cN, bytes);
+
+        if (clientHandler.getProtocolHandler(player) != null)
+        {
+            if (FeatherMorphMain.getInstance().debugOutputEnabled())
+                logger.info("Received init message on legacy channel while '%s' have a ProtocolHandler, ignoring...".formatted(player.getName()));
+
+            return;
+        }
 
         ((CraftPlayer) player).addChannel(MessageChannel.initializeChannelV1);
 

@@ -248,6 +248,14 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
     {
         logPacket(false, player, channel, rawData);
 
+        if (getProtocolHandler(player) != null)
+        {
+            if (FeatherMorphMain.getInstance().debugOutputEnabled())
+                logger.info("Received init message while '%s' have a ProtocolHandler, ignoring...".formatted(player.getName()));
+
+            return;
+        }
+
         // This is BAD!
         // We should find another better way to make sure we always send commands when the channel is added.
         ((CraftPlayer) player).addChannel(MessageChannel.commandChannelV3);
