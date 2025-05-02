@@ -14,7 +14,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.network.PlayerOptions;
-import xyz.nifeather.morph.network.commands.S2C.S2CAnimationCommand;
+import xyz.nifeather.morph.network.commands.S2C.S2CPlayAnimationCommand;
 import xyz.nifeather.morph.network.commands.S2C.set.S2CSetAnimationDisplayNameCommand;
 import xyz.nifeather.morph.network.commands.S2C.set.S2CSetSkillCooldownCommand;
 import xiamomc.pluginbase.Annotations.Resolved;
@@ -93,7 +93,7 @@ public class DisguiseState extends MorphPluginObject
             var animSubId = anim.subId();
 
             if (anim.availableForClient())
-                clientHandler.sendCommand(getPlayer(), new S2CAnimationCommand(animSubId));
+                clientHandler.sendCommand(getPlayer(), new S2CPlayAnimationCommand(animSubId));
 
             this.getDisguiseWrapper().playAnimation(animSubId);
 

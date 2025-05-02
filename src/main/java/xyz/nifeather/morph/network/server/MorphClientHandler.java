@@ -178,14 +178,14 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
     @Initializer
     private void load(FeatherMorphMain plugin, MorphConfigManager configManager)
     {
-        registries.registerC2S(C2SCommandNames.Initial, C2SRequestInitialCommand::fromArguments)
+        registries.registerC2S(C2SCommandNames.RequestInitial, C2SRequestInitialCommand::fromArguments)
                 .registerC2S(C2SCommandNames.Morph, C2SMorphCommand::fromArguments)
-                .registerC2S(C2SCommandNames.Skill, C2SActivateSkillCommand::fromArguments)
+                .registerC2S(C2SCommandNames.ActivateSkill, C2SActivateSkillCommand::fromArguments)
                 .registerC2S(C2SCommandNames.SetSingleOption, C2SSetSingleOptionCommand::fromArguments)
                 .registerC2S(C2SCommandNames.ToggleSelf, C2SToggleSelfCommand::fromArguments)
                 .registerC2S(C2SCommandNames.Unmorph, C2SUnmorphCommand::fromArguments)
                 .registerC2S(C2SCommandNames.ExchangeRequestManagement, C2SExchangeRequestManagementCommand::fromArguments)
-                .registerC2S(C2SCommandNames.PlayAnimation, C2SAnimationCommand::fromArguments);
+                .registerC2S(C2SCommandNames.RequestAnimation, C2SRequestAnimationCommand::fromArguments);
 
         var messenger = Bukkit.getMessenger();
 
@@ -436,7 +436,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
     {
         if (!allowClient.get()) return;
 
-        this.sendCommand(player, new S2CCurrentCommand(str));
+        this.sendCommand(player, new S2CSetCurrentCommand(str));
     }
 
     //region Auth/UnAuth/ReAuth
@@ -791,7 +791,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
     }
 
     @Override
-    public void onAnimationCommand(C2SAnimationCommand c2SAnimationCommand)
+    public void onAnimationCommand(C2SRequestAnimationCommand c2SAnimationCommand)
     {
         var player = (Player) c2SAnimationCommand.getOwner();
         var state = manager.getDisguiseStateFor(player);

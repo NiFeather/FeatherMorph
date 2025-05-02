@@ -10,7 +10,7 @@ import xyz.nifeather.morph.messages.RequestStrings;
 import xyz.nifeather.morph.misc.DisguiseTypes;
 import xyz.nifeather.morph.misc.RequestInfo;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
-import xyz.nifeather.morph.network.commands.S2C.S2CRequestCommand;
+import xyz.nifeather.morph.network.commands.S2C.S2CUpdateRequestStatusCommand;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
@@ -48,8 +48,8 @@ public class RequestManager extends MorphPluginObject implements IManageRequests
 
                 if (r.ticksRemain > -255)
                 {
-                    clientHandler.sendCommand(owner, new S2CRequestCommand(S2CRequestCommand.Type.RequestExpiredOwner, r.targetPlayer.getName()));
-                    clientHandler.sendCommand(r.targetPlayer, new S2CRequestCommand(S2CRequestCommand.Type.RequestExpired, owner.getName()));
+                    clientHandler.sendCommand(owner, new S2CUpdateRequestStatusCommand(S2CUpdateRequestStatusCommand.Type.RequestExpiredOwner, r.targetPlayer.getName()));
+                    clientHandler.sendCommand(r.targetPlayer, new S2CUpdateRequestStatusCommand(S2CUpdateRequestStatusCommand.Type.RequestExpired, owner.getName()));
                 }
 
                 this.requests.remove(r);
@@ -96,8 +96,8 @@ public class RequestManager extends MorphPluginObject implements IManageRequests
         source.sendMessage(MessageUtils.prefixes(source, RequestStrings.requestSendString()
                 .resolve("who", target.getName())));
 
-        clientHandler.sendCommand(target, new S2CRequestCommand(S2CRequestCommand.Type.NewRequest, source.getName()));
-        clientHandler.sendCommand(source, new S2CRequestCommand(S2CRequestCommand.Type.RequestSend, target.getName()));
+        clientHandler.sendCommand(target, new S2CUpdateRequestStatusCommand(S2CUpdateRequestStatusCommand.Type.NewRequest, source.getName()));
+        clientHandler.sendCommand(source, new S2CUpdateRequestStatusCommand(S2CUpdateRequestStatusCommand.Type.RequestSend, target.getName()));
     }
 
     @Resolved
@@ -135,7 +135,7 @@ public class RequestManager extends MorphPluginObject implements IManageRequests
         target.sendMessage(MessageUtils.prefixes(target, RequestStrings.targetAcceptedString().resolve("who", source.getName())));
         source.sendMessage(MessageUtils.prefixes(source, RequestStrings.sourceAcceptedString().resolve("who", target.getName())));
 
-        clientHandler.sendCommand(target, new S2CRequestCommand(S2CRequestCommand.Type.RequestAccepted, source.getName()));
+        clientHandler.sendCommand(target, new S2CUpdateRequestStatusCommand(S2CUpdateRequestStatusCommand.Type.RequestAccepted, source.getName()));
         //clientHandler.sendCommand(source, new S2CRequestCommand(S2CRequestCommand.Type.RequestAccepted, target.getName()));
     }
 
@@ -170,7 +170,7 @@ public class RequestManager extends MorphPluginObject implements IManageRequests
         target.sendMessage(MessageUtils.prefixes(target, RequestStrings.targetDeniedString().resolve("who", source.getName())));
         source.sendMessage(MessageUtils.prefixes(source, RequestStrings.sourceDeniedString().resolve("who", target.getName())));
 
-        clientHandler.sendCommand(target, new S2CRequestCommand(S2CRequestCommand.Type.RequestDenied, source.getName()));
+        clientHandler.sendCommand(target, new S2CUpdateRequestStatusCommand(S2CUpdateRequestStatusCommand.Type.RequestDenied, source.getName()));
         //clientHandler.sendCommand(source, new S2CRequestCommand(S2CRequestCommand.Type.RequestDenied, target.getName()));
     }
 

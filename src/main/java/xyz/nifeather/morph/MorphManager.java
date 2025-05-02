@@ -1310,7 +1310,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         clientHandler.sendCommand(player, new S2CSetSelfViewIdentifierCommand(null));
 
         var revLevel = revealingHandler.getRevealingState(player).getBaseValue();
-        clientHandler.sendCommand(player, new S2CSetMobRevealingCommand(revLevel));
+        clientHandler.sendCommand(player, new S2CSetMobRevealCommand(revLevel));
 
         //发送消息以及重置actionbar
         source.sendMessage(MessageUtils.prefixes(player, MorphStrings.unMorphSuccessString().withLocale(MessageUtils.getLocale(player))));

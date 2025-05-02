@@ -6,7 +6,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.misc.DisguiseState;
-import xyz.nifeather.morph.network.commands.S2C.set.S2CSetMobRevealingCommand;
+import xyz.nifeather.morph.network.commands.S2C.set.S2CSetMobRevealCommand;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
 import xyz.nifeather.morph.utilities.MathUtils;
 import xiamomc.pluginbase.Annotations.Initializer;
@@ -254,7 +254,7 @@ public class RevealingHandler extends MorphPluginObject
             if (!dirty.get())
                 return;
 
-            clientHandler.sendCommand(player, new S2CSetMobRevealingCommand(baseValue.get()));
+            clientHandler.sendCommand(player, new S2CSetMobRevealCommand(baseValue.get()));
             dirty.set(false);
         }
     }
