@@ -57,5 +57,45 @@ root:
         A: minecraft:feather
         B: minecraft:redstone
 
+    # Options for the Magic Bottle
+    #
+    # Players can use this feature to collect disguise from other players or passive mobs
+    magic_bottle:
+      enabled: true
+
+      # Should this recipe shapeless?
+      shapeless: true
+
+      # The crafting shape for this recipe
+      # Doesn't work if shapeless is enabled
+      crafting_shape:
+        - ABC
+        - DEF
+        - GHI
+
+      # The material of the crafted result
+      result_material: minecraft:glass_bottle
+
+      # The name for the item
+      # Use "~UNSET" to keep the material's original name
+      # Supports MiniMessage
+      result_item_name: "Magic Bottle"
+
+      # The lore for the item
+      #
+      # Example:
+      # result_item_lore:
+      #   - Lore1
+      #   - <rainbow>Supports MiniMessage!
+      result_item_lore:
+        - "<italic:false><#666666>When sneaking: "
+        - "<italic:false><gray><key:key.mouse.right> ~> Collect disguise from a player or passive mob"
+
+      # Materials required to craft this item.
+      # Left side is the letter present in crafting_shape, and right side is the item ID
+      crafting_materials:
+        A: minecraft:glass_bottle
+        B: minecraft:redstone
+
   # Don't touch unless you know what you're doing!
-  version: 1
+  version: 2

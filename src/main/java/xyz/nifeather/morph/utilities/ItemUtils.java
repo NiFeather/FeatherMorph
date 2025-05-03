@@ -3,15 +3,21 @@ package xyz.nifeather.morph.utilities;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.mojang.serialization.JsonOps;
+import it.unimi.dsi.fastutil.objects.ObjectAVLTreeSet;
+import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.item.component.TooltipDisplay;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.FeatherMorphMain;
+
+import java.util.SequencedSet;
 
 public class ItemUtils
 {
@@ -73,6 +79,70 @@ public class ItemUtils
         }
     }
 
+    //region Magic Bottle
+
+    public static final String MAGIC_BOTTLE_ITEM_KEY = "feathermorph:is_magic_bottle";
+    public static final String MAGIC_BOTTLE_STORE_ITEM_KEY = "feathermorph:magic_bottle_store";
+
+    public static ItemStack buildMagicBottleFrom(ItemStack stack)
+    {
+        var nms = net.minecraft.world.item.ItemStack.fromBukkitCopy(stack);
+        var customData = nms.getComponents().get(DataComponents.CUSTOM_DATA);
+        if (customData == null) customData = CustomData.EMPTY;
+
+        customData = customData.update(tag -> tag.putBoolean(MAGIC_BOTTLE_ITEM_KEY, true));
+        nms.set(DataComponents.CUSTOM_DATA, customData);
+        nms.set(DataComponents.MAX_STACK_SIZE, 1);
+
+        return nms.asBukkitMirror();
+    }
+
+    public static ItemStack writeMagicBottleData(ItemStack inputStack, String disguiseIdentifier)
+    {
+        var stack = inputStack.withType(Material.POTION);
+
+        var nms = net.minecraft.world.item.ItemStack.fromBukkitCopy(stack);
+        var customData = nms.getComponents().get(DataComponents.CUSTOM_DATA);
+        if (customData == null) customData = CustomData.EMPTY;
+
+        customData = customData.update(tag -> tag.putString(MAGIC_BOTTLE_STORE_ITEM_KEY, disguiseIdentifier));
+        nms.set(DataComponents.CUSTOM_DATA, customData);
+
+        SequencedSet<DataComponentType<?>> set = new ObjectAVLTreeSet<>();
+        set.add(DataComponents.POTION_CONTENTS);
+        nms.set(DataComponents.TOOLTIP_DISPLAY, new TooltipDisplay(false, set));
+
+        return nms.asBukkitMirror();
+    }
+
+    @Nullable
+    public static String readMagicBottleData(ItemStack stack)
+    {
+        if (!isMagicBottle(stack)) return null;
+
+        var nms = net.minecraft.world.item.ItemStack.fromBukkitCopy(stack);
+        var customData = nms.getComponents().get(DataComponents.CUSTOM_DATA);
+
+        if (customData == null || !customData.contains(MAGIC_BOTTLE_STORE_ITEM_KEY))
+            return null;
+
+        return customData.copyTag().getString(MAGIC_BOTTLE_STORE_ITEM_KEY).orElse(null);
+    }
+
+    public static boolean isMagicBottle(ItemStack stack)
+    {
+        var nms = net.minecraft.world.item.ItemStack.fromBukkitCopy(stack);
+        var customData = nms.getComponents().get(DataComponents.CUSTOM_DATA);
+
+        if (customData == null || !customData.contains(MAGIC_BOTTLE_ITEM_KEY)) return false;
+
+        return customData.copyTag().getBoolean(MAGIC_BOTTLE_ITEM_KEY).orElseThrow() ;
+    }
+
+    //endregion Magic Bottle
+
+    //region Disguise Tool
+
     public static final String SKILL_ACTIVATE_ITEM_KEY = "feathermorph:is_disguise_tool";
 
     public static ItemStack buildDisguiseToolFrom(ItemStack stack)
@@ -96,6 +166,8 @@ public class ItemUtils
 
         return customData.copyTag().getBoolean(SKILL_ACTIVATE_ITEM_KEY).orElseThrow() ;
     }
+
+    //endregion Disguise Tool
 
     /**
      * Check if the given {@link Material} is a continuous usable type (have consuming animation).

@@ -251,6 +251,7 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
                         playerTracker,
                         mirrorProcessor,
                         new CommonEventProcessor(),
+                        new CustomItemRelatedEvents(),
                         new RevealingEventProcessor(),
                         new DisguiseAnimationProcessor(),
                         new ForcedDisguiseProcessor(),
