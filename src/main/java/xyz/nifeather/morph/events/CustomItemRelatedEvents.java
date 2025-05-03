@@ -231,7 +231,7 @@ public class CustomItemRelatedEvents extends MorphPluginObject implements Listen
         var newItem = ItemUtils.writeMagicBottleData(mainhandItem, disguiseIdentifier);
         newItem.editMeta(PotionMeta.class, meta ->
         {
-            var finalLoreDisplay = Component.text("id: " + disguiseIdentifier)
+            var finalLoreDisplay = Component.text(disguiseIdentifier)
                     .style(
                             Style.style()
                                     .color(TextColor.color(0xAAAAAA))
@@ -242,7 +242,9 @@ public class CustomItemRelatedEvents extends MorphPluginObject implements Listen
             meta.setColor(Color.fromARGB(disguiseIdentifier.hashCode()));
             meta.lore(List.of(finalLoreDisplay));
 
-            var finalNameDisplay = displayName.style(Style.style().decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE).build());
+            // 装有xxx气息的瓶子
+            var finalNameDisplay = Component.translatable("item.morphclient.bottle_with_disguise", "Magic Bottle of %s", displayName)
+                    .style(Style.style().decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE).build());
             meta.displayName(finalNameDisplay);
         });
 

@@ -34,7 +34,7 @@ root:
       # The name for the item
       # Use "~UNSET" to keep the material's original name
       # Supports MiniMessage
-      result_item_name: "Disguise Tool"
+      result_item_name: "<lang_or:item.morphclient.disguise_tool:Disguise Tool>"
 
       # The lore for the item
       #
@@ -43,13 +43,13 @@ root:
       #   - Lore1
       #   - <rainbow>Supports MiniMessage!
       result_item_lore:
-        - "<italic:false><#666666>When sneaking: "
-        - "<italic:false><gray><key:key.mouse.right> ~> Open disguise selection or invoke quick disguise"
-        - "<italic:false><gray><key:key.mouse.left> ~> Unmorph(Undisguise)"
+        - "<italic:false><#666666><lang_or:text.morphclient.tooltip.when_sneaking:When sneaking>"
+        - "<italic:false><gray><key:key.mouse.right> -> <lang_or:text.morphclient.tooltip.open_selection_or_quick_disguise:Open disguise selection or invoke quick disguise>"
+        - "<italic:false><gray><key:key.mouse.left> -> <lang_or:text.morphclient.tooltip.undisguise:Unmorph(Undisguise)>"
         - ""
-        - "<italic:false><#666666>When disguising"
-        - "<italic:false><gray><key:key.mouse.right> ~> Activate skill"
-        - "<italic:false><gray><key:key.mouse.left> ~> Open Disguise Action selection"
+        - "<italic:false><#666666><lang_or:text.morphclient.tooltip.when_disguising:When disguising>"
+        - "<italic:false><gray><key:key.mouse.right> ~> <lang_or:text.morphclient.tooltip.activate_skill:Activate skill>"
+        - "<italic:false><gray><key:key.mouse.left> ~> <lang_or:text.morphclient.tooltip.open_action_selection:Open Disguise Action selection>"
 
       # Materials required to craft this item.
       # Left side is the letter present in crafting_shape, and right side is the item ID
@@ -59,7 +59,12 @@ root:
 
     # Options for the Magic Bottle
     #
-    # Players can use this feature to collect disguise from other players or passive mobs
+    # PS:
+    #     You can make an item a disguise tool by executing `/fm make_disguise_tool` command
+    #     while holding it on your main hand.
+    #
+    #     You can also give yourself a disguise tool by setting its custom data:
+    #       `/give @s minecraft:feather[minecraft:custom_data={"feathermorph:is_disguise_tool": true}]`
     magic_bottle:
       enabled: true
 
@@ -79,7 +84,7 @@ root:
       # The name for the item
       # Use "~UNSET" to keep the material's original name
       # Supports MiniMessage
-      result_item_name: "Magic Bottle"
+      result_item_name: "<lang_or:item.morphclient.magic_bottle:Magic Bottle>"
 
       # The lore for the item
       #
@@ -88,8 +93,8 @@ root:
       #   - Lore1
       #   - <rainbow>Supports MiniMessage!
       result_item_lore:
-        - "<italic:false><#666666>When sneaking: "
-        - "<italic:false><gray><key:key.mouse.right> ~> Collect disguise from a player or passive mob"
+        - "<italic:false><#666666><lang_or:text.morphclient.tooltip.when_sneaking:When sneaking>"
+        - "<italic:false><gray><key:key.mouse.right> -> <lang_or:text.morphclient.tooltip.bottle_collect_disguise:Collect a disguise from a mob or player>"
 
       # Materials required to craft this item.
       # Left side is the letter present in crafting_shape, and right side is the item ID
