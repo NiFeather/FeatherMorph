@@ -39,11 +39,17 @@
 
 - 一个Paper系（Paper或基于Paper）的服务端
 
-为了在服务端向其他人显示伪装，我们需要以下这些插件：
+为了在服务端向其他人显示伪装，根据当前服务器安装的插件版本，我们需要以下这些插件：
 
+#### 2.x
+- [PacketEvents](https://modrinth.com/plugin/packetevents)
+
+#### 1.x
 - [ProtocolLib](https://ci.dmulloy2.net/job/ProtocolLib)
 
-若要运行之前的版本（非1.x和0.13.x），还需安装[LibsDisguises](https://www.spigotmc.org/resources/libs-disguises-free.81/)
+#### 0.x
+- [ProtocolLib](https://ci.dmulloy2.net/job/ProtocolLib)
+- [LibsDisguises](https://www.spigotmc.org/resources/libs-disguises-free.81/)
 
 ### 下载
 
