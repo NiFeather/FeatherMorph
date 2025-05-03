@@ -188,7 +188,7 @@ public class CustomItemRelatedEvents extends MorphPluginObject implements Listen
         }
 
         if (player.getGameMode() != GameMode.CREATIVE)
-            event.setReplacement(ItemStack.of(Material.AIR));
+            event.setReplacement(ItemStack.of(Material.GLASS_BOTTLE));
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
