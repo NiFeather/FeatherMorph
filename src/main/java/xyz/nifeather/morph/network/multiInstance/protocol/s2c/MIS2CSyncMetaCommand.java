@@ -5,12 +5,13 @@ import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.network.multiInstance.protocol.IMasterHandler;
 import xyz.nifeather.morph.network.multiInstance.protocol.Operation;
 import xyz.nifeather.morph.network.multiInstance.protocol.SocketDisguiseMeta;
+import xyz.nifeather.morph.network.utils.Asserts;
 
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-public class MIS2CSyncMetaCommand extends MIS2CCommand<SocketDisguiseMeta>
+public class MIS2CSyncMetaCommand extends MIS2CCommand
 {
     public final SocketDisguiseMeta disguiseMeta;
 
@@ -27,6 +28,13 @@ public class MIS2CSyncMetaCommand extends MIS2CCommand<SocketDisguiseMeta>
         return Map.of(
                 "socket_meta", gson().toJson(disguiseMeta)
         );
+    }
+
+    public static MIS2CSyncMetaCommand fromArguments(Map<String, String> arguments)
+    {
+        var metaString = Asserts.getStringOrThrow(arguments, "socket_meta");
+
+        return new MIS2CSyncMetaCommand(gson().fromJson(metaString, SocketDisguiseMeta.class));
     }
 
     public MIS2CSyncMetaCommand(Operation operation, List<String> identifiers, UUID bindingUUID)

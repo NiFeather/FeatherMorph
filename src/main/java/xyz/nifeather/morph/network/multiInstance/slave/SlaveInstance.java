@@ -20,10 +20,8 @@ import xyz.nifeather.morph.config.ConfigOption;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.network.multiInstance.IInstanceService;
 import xyz.nifeather.morph.network.multiInstance.master.MasterInstance;
-import xyz.nifeather.morph.network.multiInstance.protocol.IMasterHandler;
-import xyz.nifeather.morph.network.multiInstance.protocol.Operation;
-import xyz.nifeather.morph.network.multiInstance.protocol.ProtocolLevel;
-import xyz.nifeather.morph.network.multiInstance.protocol.SocketDisguiseMeta;
+import xyz.nifeather.morph.network.multiInstance.protocol.*;
+import xyz.nifeather.morph.network.multiInstance.protocol.c2s.MIC2SCommand;
 import xyz.nifeather.morph.network.multiInstance.protocol.c2s.MIC2SDisguiseMetaCommand;
 import xyz.nifeather.morph.network.multiInstance.protocol.c2s.MIC2SLoginCommand;
 import xyz.nifeather.morph.network.multiInstance.protocol.s2c.*;
@@ -130,10 +128,10 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
 
         config.bind(secret, ConfigOption.MASTER_SECRET);
 
-        registries.registerS2C("deny", MIS2CDisconnectCommand::from)
-                .registerS2C("dmeta", MIS2CSyncMetaCommand::from)
-                .registerS2C("r_login", MIS2CLoginResultCommand::from)
-                .registerS2C("state", MIS2CStateCommand::from);
+        registries.registerS2C("deny", MIS2CDisconnectCommand::fromArguments)
+                .registerS2C("dmeta", MIS2CSyncMetaCommand::fromArguments)
+                .registerS2C("r_login", MIS2CLoginResultCommand::fromArguments)
+                .registerS2C("state", MIS2CStateCommand::fromArguments);
 
         if (client != null) return;
 
@@ -163,7 +161,7 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
     private final Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
 
     @ApiStatus.Internal
-    public void sendCommand(AbstractC2SCommand<?> command)
+    public void sendCommand(MIC2SCommand command)
     {
         if (silent)
             return;
@@ -171,7 +169,7 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
         if (client == null)
             throw new NullDependencyException("Null client!");
 
-        client.send(gson.toJson(C2SCommandRecord.fromC2SCommand(command)));
+        client.send(gson.toJson(MIServerboundCommandRecord.fromC2SCommand(command)));
     }
 
     public boolean isOnline()
@@ -334,7 +332,7 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
             internalMasterInstance.onInternalSlaveError(this, e);
     }
 
-    private final CommandRegistries registries = new CommandRegistries();
+    private final CommandRegistriesCopy registries = new CommandRegistriesCopy();
 
     @Override
     public void onText(String text)
@@ -344,21 +342,18 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
 
     private void onCommandRaw(String raw)
     {
-        var text = raw.split(" ", 2);
-        var cmd = registries.createS2CCommand(text[0], text.length == 2 ? text[1] : "");
-        if (cmd == null)
+        try
         {
-            logSlaveWarn("Unknown command: " + text[0]);
-            return;
-        }
+            var decode = gson.fromJson(raw, MIClientboundCommandRecord.class);
+            var cmd = registries.createS2CCommand(decode.commandName(), decode.arguments());
 
-        if (!(cmd instanceof MIS2CCommand<?> mis2c))
+            cmd.onCommand(this);
+        }
+        catch (Throwable t)
         {
-            logSlaveWarn("Command '%s' is not a MIS2C instance!".formatted(cmd));
-            return;
+            logSlaveWarn("Failed to handle message from master instance, stopping! (%s)".formatted(t.getMessage()));
+            stopClient();
         }
-
-        mis2c.onCommand(this);
     }
 
     private boolean silent = false;

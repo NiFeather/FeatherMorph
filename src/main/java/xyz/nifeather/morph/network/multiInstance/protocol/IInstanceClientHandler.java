@@ -5,7 +5,7 @@ import xyz.nifeather.morph.network.multiInstance.master.InstanceServer;
 import xyz.nifeather.morph.network.multiInstance.protocol.c2s.MIC2SDisguiseMetaCommand;
 import xyz.nifeather.morph.network.multiInstance.protocol.c2s.MIC2SLoginCommand;
 
-public interface IClientHandler
+public interface IInstanceClientHandler
 {
     public void onLoginCommand(MIC2SLoginCommand cProtocolCommand);
 

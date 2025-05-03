@@ -1,32 +1,41 @@
 package xyz.nifeather.morph.network.multiInstance.protocol.c2s;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.java_websocket.WebSocket;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
-import xyz.nifeather.morph.network.BasicClientHandler;
-import xyz.nifeather.morph.network.commands.C2S.AbstractC2SCommand;
 import xyz.nifeather.morph.FeatherMorphMain;
-import xyz.nifeather.morph.network.multiInstance.protocol.IClientHandler;
+import xyz.nifeather.morph.network.multiInstance.protocol.IInstanceClientHandler;
 
-public abstract class MIC2SCommand<T> extends AbstractC2SCommand<T>
+import java.util.Map;
+
+public abstract class MIC2SCommand
 {
     protected final Logger logger = FeatherMorphMain.getInstance().getSLF4JLogger();
 
     protected final String baseName;
 
-    @Override
-    public final void onCommand(BasicClientHandler<?> handler)
+    //region Utilities
+
+    private static final Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+
+    protected static Gson gson()
     {
+        return gson;
     }
 
-    @Override
+    public abstract Map<String, String> generateArgumentMap();
+
+    //endregion Utilities
+
     public String getBaseName()
     {
         return baseName;
     }
 
-    public abstract void onCommand(IClientHandler handler);
+    public abstract void onCommand(IInstanceClientHandler handler);
 
     public MIC2SCommand(String cmdBaseName)
     {

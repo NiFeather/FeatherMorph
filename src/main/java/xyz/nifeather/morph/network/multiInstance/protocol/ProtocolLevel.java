@@ -2,7 +2,8 @@ package xyz.nifeather.morph.network.multiInstance.protocol;
 
 public enum ProtocolLevel
 {
-    V1(1);
+    V1(1),
+    V3(3); //V2 Skipped
 
     private final int version;
 

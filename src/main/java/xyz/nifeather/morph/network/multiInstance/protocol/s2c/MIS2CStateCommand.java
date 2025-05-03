@@ -1,11 +1,12 @@
 package xyz.nifeather.morph.network.multiInstance.protocol.s2c;
 
 import xyz.nifeather.morph.network.multiInstance.protocol.IMasterHandler;
+import xyz.nifeather.morph.network.utils.Asserts;
 
 import java.util.Arrays;
 import java.util.Map;
 
-public class MIS2CStateCommand extends MIS2CCommand<String>
+public class MIS2CStateCommand extends MIS2CCommand
 {
     public final ProtocolState newState;
 
@@ -21,6 +22,13 @@ public class MIS2CStateCommand extends MIS2CCommand<String>
     {
         return Map.of(
                 "new_state", newState.name()
+        );
+    }
+
+    public static MIS2CStateCommand fromArguments(Map<String, String> arguments) throws RuntimeException
+    {
+        return new MIS2CStateCommand(
+                ProtocolState.valueOf(Asserts.getStringOrThrow(arguments, "new_state").toUpperCase())
         );
     }
 

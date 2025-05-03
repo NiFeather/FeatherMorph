@@ -17,11 +17,10 @@ import xiamomc.pluginbase.Bindables.Bindable;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.config.ConfigOption;
 import xyz.nifeather.morph.config.MorphConfigManager;
+import xyz.nifeather.morph.network.commands.CommandRegistriesNew;
 import xyz.nifeather.morph.network.commands.S2C.S2CCommandRecord;
 import xyz.nifeather.morph.network.multiInstance.IInstanceService;
-import xyz.nifeather.morph.network.multiInstance.protocol.IClientHandler;
-import xyz.nifeather.morph.network.multiInstance.protocol.Operation;
-import xyz.nifeather.morph.network.multiInstance.protocol.ProtocolLevel;
+import xyz.nifeather.morph.network.multiInstance.protocol.*;
 import xyz.nifeather.morph.network.multiInstance.protocol.c2s.MIC2SCommand;
 import xyz.nifeather.morph.network.multiInstance.protocol.c2s.MIC2SDisguiseMetaCommand;
 import xyz.nifeather.morph.network.multiInstance.protocol.c2s.MIC2SLoginCommand;
@@ -37,7 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-public class MasterInstance extends MorphPluginObject implements IInstanceService, IClientHandler
+public class MasterInstance extends MorphPluginObject implements IInstanceService, IInstanceClientHandler
 {
     @Nullable
     private InstanceServer bindingServer;
@@ -64,7 +63,7 @@ public class MasterInstance extends MorphPluginObject implements IInstanceServic
         {
             if (bindingServer != null)
             {
-                bindingServer.stop(1000, "Master instance shutting down");
+                bindingServer.stop(10, "Master instance shutting down");
                 bindingServer.dispose();
             }
 
@@ -129,8 +128,8 @@ public class MasterInstance extends MorphPluginObject implements IInstanceServic
 
         config.bind(secret, ConfigOption.MASTER_SECRET);
 
-        registries.registerC2S("login", MIC2SLoginCommand::from)
-                .registerC2S("dmeta", MIC2SDisguiseMetaCommand::from);
+        registries.registerC2S("login", MIC2SLoginCommand::fromArguments)
+                .registerC2S("dmeta", MIC2SDisguiseMetaCommand::fromArguments);
 
         if (!prepareServer())
         {
@@ -155,38 +154,38 @@ public class MasterInstance extends MorphPluginObject implements IInstanceServic
     private void onText(InstanceServer.WsRecord record)
     {
         var ws = record.socket();
-        var text = record.rawMessage().split(" ", 2);
 
-        if (debug_output.get())
-            logger.info("%s :: <- :: %s".formatted(ws.getRemoteSocketAddress(), record.rawMessage()));
+        //if (debug_output.get())
+            logger.info("WS Master :: %s :: <- :: %s".formatted(ws.getRemoteSocketAddress(), record.rawMessage()));
 
-        var cmd = registries.createC2SCommand(text[0], text.length == 2 ? text[1] : "");
-        if (cmd == null)
+        try
         {
-            logMasterWarn("Unknown command: " + text[0]);
-            return;
-        }
+            var decode = gson.fromJson(record.rawMessage(), MIServerboundCommandRecord.class);
 
-        if (!(cmd instanceof MIC2SCommand<?> mic2s))
+            var cmd = registries.createC2SCommand(decode.commandName(), decode.arguments());
+
+            cmd.setSourceSocket(ws);
+            cmd.onCommand(this);
+        }
+        catch (Throwable t)
         {
-            logMasterWarn("Command is not a MIC2S instance!");
-            return;
-        }
+            logMasterWarn("Error handling command: %s".formatted(t.getMessage()));
+            t.printStackTrace();
 
-        mic2s.setSourceSocket(ws);
-        mic2s.onCommand(this);
+            disconnect(record.socket(), "Failed to handle client message");
+        }
     }
 
     //region IClientHandler
 
-    private final CommandRegistries registries = new CommandRegistries();
+    private final CommandRegistriesCopy registries = new CommandRegistriesCopy();
 
     private final ProtocolLevel level = ProtocolLevel.V1;
 
     private final Map<WebSocket, ProtocolState> allowedSockets = new Object2ObjectArrayMap<>();
 
     @ApiStatus.Internal
-    public void broadcastCommand(MIS2CCommand<?> command)
+    public void broadcastCommand(MIS2CCommand command)
     {
         for (var allowedSocket : this.allowedSockets.keySet())
             this.sendCommand(allowedSocket, command);
@@ -194,7 +193,7 @@ public class MasterInstance extends MorphPluginObject implements IInstanceServic
 
     private final Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
 
-    private void sendCommand(WebSocket socket, MIS2CCommand<?> command)
+    private void sendCommand(WebSocket socket, MIS2CCommand command)
     {
         if (!socket.isOpen())
         {
@@ -202,9 +201,11 @@ public class MasterInstance extends MorphPluginObject implements IInstanceServic
             return;
         }
 
-        //logger.info("%s :: -> :: %s".formatted(socket.getRemoteSocketAddress(), command.buildCommand()));
+        var message = gson.toJson(MIClientboundCommandRecord.fromS2CCommand(command));
 
-        socket.send(gson.toJson(S2CCommandRecord.fromS2CCommand(command)));
+        logMasterInfo("WS Master :: %s :: -> :: %s".formatted(socket.getRemoteSocketAddress(), message));
+
+        socket.send(message);
     }
 
     private void disconnect(WebSocket socket, String reason)
