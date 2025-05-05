@@ -186,7 +186,7 @@ public class CustomItemRelatedEvents extends MorphPluginObject implements Listen
             event.setReplacement(ItemStack.of(Material.GLASS_BOTTLE));
     }
 
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void bottleOnPlayerInteractEntity(PlayerInteractEntityEvent event)
     {
         var player = event.getPlayer();
@@ -250,6 +250,7 @@ public class CustomItemRelatedEvents extends MorphPluginObject implements Listen
         player.getEquipment().setItem(event.getHand(), newItem);
         player.getWorld().playSound(player.getLocation(), Sound.ITEM_BOTTLE_FILL, 1, 1);
         player.swingHand(event.getHand());
+        event.setCancelled(true);
     }
 
     //endregion Magic Bottle
