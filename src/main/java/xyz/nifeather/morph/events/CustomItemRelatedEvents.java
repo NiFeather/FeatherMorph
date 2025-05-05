@@ -180,12 +180,7 @@ public class CustomItemRelatedEvents extends MorphPluginObject implements Listen
             return;
         }
 
-        if (!morphs.grantMorphToPlayer(player, id))
-        {
-            player.playSound(player, Sound.ENTITY_VILLAGER_NO, 1, 1);
-            event.setCancelled(true);
-            return;
-        }
+        morphs.grantMorphToPlayer(player, id);
 
         if (player.getGameMode() != GameMode.CREATIVE)
             event.setReplacement(ItemStack.of(Material.GLASS_BOTTLE));
@@ -198,6 +193,9 @@ public class CustomItemRelatedEvents extends MorphPluginObject implements Listen
 
         var mainhandItem = player.getEquipment().getItem(event.getHand());
         if (!ItemUtils.isMagicBottle(mainhandItem) || event.getHand() != EquipmentSlot.HAND || !player.isSneaking())
+            return;
+
+        if (ItemUtils.readMagicBottleData(mainhandItem) != null)
             return;
 
         var entityClicked = event.getRightClicked();
