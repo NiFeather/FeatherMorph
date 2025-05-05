@@ -1090,7 +1090,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         cX = cZ = box.width();
         cY = box.height();
 
-        spawnParticle(player, player.getLocation(), cX, cY, cZ);
+        spawnCloudParticle(player, player.getLocation(), cX, cY, cZ);
 
         player.getWorld().playSound(
                 player.getLocation(),
@@ -1280,7 +1280,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         // 如果玩家在线，则生成粒子
         if (player.isConnected())
         {
-            spawnParticle(player, player.getLocation(), player.getWidth(), player.getHeight(), player.getWidth());
+            spawnCloudParticle(player, player.getLocation(), player.getWidth(), player.getHeight(), player.getWidth());
 
             player.getWorld().playSound(
                     player.getLocation(),
@@ -1328,7 +1328,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         state.dispose();
     }
 
-    public void spawnParticle(Player player, Location location, double collX, double collY, double collZ)
+    public void spawnCloudParticle(Player player, Location location, double collX, double collY, double collZ)
     {
         if (player.getGameMode() == GameMode.SPECTATOR) return;
 
@@ -1570,6 +1570,12 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 .withLocale(locale)
                 .resolve("what", meta.asComponent(locale)));
         player.sendMessage(message);
+
+        //显示粒子
+        player.getWorld().spawnParticle(Particle.TRIAL_SPAWNER_DETECTION_OMINOUS, player.getLocation(), //类型和位置
+                100, //数量
+                0.8, 0.8, 0.8, //分布空间
+                0.05); //速度
 
         if (clientHandler.clientConnected(player))
         {
