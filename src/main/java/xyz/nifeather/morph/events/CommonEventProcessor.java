@@ -19,6 +19,7 @@ import org.bukkit.event.entity.*;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.InventoryHolder;
+import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.network.commands.S2C.S2CSwapCommand;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
@@ -90,6 +91,13 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
 
         if (plugin.getCurrentTick() % 8 == 0)
             playersMinedGoldBlocks.clear();
+    }
+
+    @EventHandler
+    public void onPlayerChannelRegister(PlayerRegisterChannelEvent event)
+    {
+        if (event.getChannel().startsWith(FeatherMorphMain.getMorphNameSpace()))
+            clientHandler.onPlayerChannelRegister(event.getPlayer(), event.getChannel());
     }
 
     @EventHandler
@@ -272,6 +280,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         var player = e.getPlayer();
         var state = morphs.getDisguiseStateFor(player);
 
+        clientHandler.ensureFuturePresent(player);
         clientHandler.markPlayerJoined(player);
 
         var effectivePermissions = new ObjectOpenHashSet<>(player.getEffectivePermissions());

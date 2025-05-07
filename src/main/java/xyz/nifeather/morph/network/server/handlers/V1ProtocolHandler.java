@@ -31,6 +31,18 @@ public class V1ProtocolHandler extends AbstractCommandPacketHandler
     private final S2CCommandConverter s2cConverter = new MorphLegacyCommandConverter();
     private final C2SCommandConverter c2sConverter = new C2SCommandConverter();
 
+    private static final List<String> validChannels = List.of(
+            MessageChannel.initializeChannelV1,
+            MessageChannel.versionChannelV1,
+            MessageChannel.commandChannelV1
+    );
+
+    @Override
+    public @NotNull List<String> validChannels()
+    {
+        return validChannels;
+    }
+
     @Override
     public @NotNull ClientInitializeRecordV3 handleInitializeData(Player player, byte @NotNull [] rawData)
     {

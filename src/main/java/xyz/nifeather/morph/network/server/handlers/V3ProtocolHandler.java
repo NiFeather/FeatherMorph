@@ -15,9 +15,22 @@ import xyz.nifeather.morph.network.server.MessageChannel;
 import xyz.nifeather.morph.network.server.handlers.results.CommandHandleResult;
 import xyz.nifeather.morph.network.server.handlers.results.VersionHandleResult;
 
+import java.util.List;
+
 public class V3ProtocolHandler extends AbstractCommandPacketHandler
 {
     public static final V3ProtocolHandler V3_INSTANCE = new V3ProtocolHandler();
+
+    private static final List<String> validChannels = List.of(
+            MessageChannel.initializeChannelV3,
+            MessageChannel.commandChannelV3
+    );
+
+    @Override
+    public @NotNull List<String> validChannels()
+    {
+        return validChannels;
+    }
 
     private final Gson gson = new GsonBuilder()
             .excludeFieldsWithoutExposeAnnotation()
