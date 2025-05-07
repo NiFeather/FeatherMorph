@@ -155,7 +155,7 @@ public class MasterInstance extends MorphPluginObject implements IInstanceServic
     {
         var ws = record.socket();
 
-        //if (debug_output.get())
+        if (debug_output.get())
             logger.info("WS Master :: %s :: <- :: %s".formatted(ws.getRemoteSocketAddress(), record.rawMessage()));
 
         try
@@ -203,7 +203,8 @@ public class MasterInstance extends MorphPluginObject implements IInstanceServic
 
         var message = gson.toJson(MIClientboundCommandRecord.fromS2CCommand(command));
 
-        logMasterInfo("WS Master :: %s :: -> :: %s".formatted(socket.getRemoteSocketAddress(), message));
+        if (debug_output.get())
+            logMasterInfo("WS Master :: %s :: -> :: %s".formatted(socket.getRemoteSocketAddress(), message));
 
         socket.send(message);
     }
