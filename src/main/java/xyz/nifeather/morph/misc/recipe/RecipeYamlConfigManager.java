@@ -53,7 +53,7 @@ public class RecipeYamlConfigManager extends StandaloneYamlConfigManager
     @Override
     protected int getExpectedConfigVersion()
     {
-        return 2;
+        return 3;
     }
 
     @Override

@@ -38,7 +38,7 @@ public class RecipeOptions
     public static final ConfigOption<Boolean> MAGIC_BOTTLE_CRAFTING_UNSHAPED = createOption(mobBottleNode().append("shapeless"), true);
     public static final ConfigOption<List<String>> MAGIC_BOTTLE_CRAFTING_SHAPE = createOption(mobBottleNode().append("crafting_shape"), new ArrayList<>());
     public static final ConfigOption<Map<String, String>> MAGIC_BOTTLE_CRAFTING_MATERIALS = createOption(mobBottleNode().append("crafting_materials"), new HashMap<>());
-    public static final ConfigOption<String> MAGIC_BOTTLE_RESULT_MATERIAL = createOption(mobBottleNode().append("result_material"), "minecraft:feather");
+    //public static final ConfigOption<String> MAGIC_BOTTLE_RESULT_MATERIAL = createOption(mobBottleNode().append("result_material"), "minecraft:feather");
     public static final ConfigOption<String> MAGIC_BOTTLE_RESULT_NAME = createOption(mobBottleNode().append("result_item_name"), "~UNSET");
     public static final ConfigOption<List<String>> MAGIC_BOTTLE_RESULT_LORE = createOption(mobBottleNode().append("result_item_lore"), new ArrayList<>());
 

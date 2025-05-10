@@ -48,6 +48,22 @@ public class RecipeManager extends MorphPluginObject
                 configManager.getOrDefault(RecipeOptions.DISGUISE_TOOL_CRAFTING_UNSHAPED)
         );
 
+        //todo: Result material is hardcoded to GLASS_BOTTLE, see `CustomItemRelatedEvents#onConsume`
+        //      ...
+        //      First, when an **Empty** Magic Bottle is used, we ALWAYS replace it with a potion as the **Collected** Magic Bottle
+        //      Then, when the Collected Magic Bottle is consumed, we ALWAYS return a **normal** glass bottle
+        //      ...
+        //      If we want to make it fully customizable, we need to...
+        //          I.  Let server choose the material of the **Collected** Magic Bottle
+        //          II. When the Collected is consumed, we need to return the *Result Material* of the bottle recipe.
+        //      But! If we choose to do this...
+        //          I. The server might have custom recipe plugin installed and take over our recipe management.
+        //             If this happens, how should we choose the material of Collected and Empty bottle?
+        //             ...
+        //          II. Related options will definitely not in the recipe configuration,
+        //              ss I don't want to "pollute" the recipe configuration with unrelated options...
+        //      ...
+        //      So bruh, this is so complicated, so I decided to make it hardcoded to glass bottle...
         prepareRecipe(
                 MAGIC_BOTTLE_CRAFTING_KEY,
                 configManager.getOrDefault(RecipeOptions.ALLOW_MAGIC_BOTTLE_CRAFTING),
@@ -55,7 +71,7 @@ public class RecipeManager extends MorphPluginObject
                 configManager.getList(RecipeOptions.MAGIC_BOTTLE_RESULT_LORE),
                 configManager.getList(RecipeOptions.MAGIC_BOTTLE_CRAFTING_SHAPE),
                 configManager.getMap(RecipeOptions.MAGIC_BOTTLE_CRAFTING_MATERIALS),
-                configManager.getOrDefault(RecipeOptions.MAGIC_BOTTLE_RESULT_MATERIAL),
+                Material.GLASS_BOTTLE.key().asString(),
                 configManager.getOrDefault(RecipeOptions.MAGIC_BOTTLE_CRAFTING_UNSHAPED)
         );
     }

@@ -79,7 +79,8 @@ root:
         - GHI
 
       # The material of the crafted result
-      result_material: minecraft:glass_bottle
+      # Setting result material for Magic Bottle is not available, sorry!
+      #result_material: minecraft:glass_bottle
 
       # The name for the item
       # Use "~UNSET" to keep the material's original name
@@ -103,4 +104,4 @@ root:
         B: minecraft:redstone
 
   # Don't touch unless you know what you're doing!
-  version: 2
+  version: 3
