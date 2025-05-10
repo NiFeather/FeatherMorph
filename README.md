@@ -42,7 +42,7 @@
 为了在服务端向其他人显示伪装，根据当前服务器安装的插件版本，我们需要以下这些插件：
 
 #### 2.x
-- [PacketEvents](https://modrinth.com/plugin/packetevents)
+- [PacketEvents 2.8.0](https://modrinth.com/plugin/packetevents)
 
 #### 1.x
 - [ProtocolLib](https://ci.dmulloy2.net/job/ProtocolLib)
