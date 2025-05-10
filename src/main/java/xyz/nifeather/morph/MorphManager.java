@@ -96,6 +96,11 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
     public static final String forcedDisguiseNoneId = "@none";
 
+    public MorphManager()
+    {
+        offlineStorage.initializeStorage();
+    }
+
     //region Backends
 
     private final ModBackend modBackend = new ModBackend();
