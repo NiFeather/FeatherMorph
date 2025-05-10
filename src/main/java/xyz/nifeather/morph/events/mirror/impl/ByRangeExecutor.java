@@ -37,7 +37,11 @@ public class ByRangeExecutor extends ChainedExecutor
         if (targetName == null)
             return List.of(source);
 
-        var matchedPlayers = source.getWorld().getNearbyPlayers(source.getLocation(), executorHub.getControlDistance(), p ->
+        var controlDistance = executorHub.getControlDistance();
+        if (controlDistance == -1)
+            controlDistance = 32;
+
+        var matchedPlayers = source.getWorld().getNearbyPlayers(source.getLocation(), controlDistance, p ->
         {
             if (p == source)
                 return false;
