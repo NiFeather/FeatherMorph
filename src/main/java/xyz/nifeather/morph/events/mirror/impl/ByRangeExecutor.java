@@ -33,14 +33,16 @@ public class ByRangeExecutor extends ChainedExecutor
     @Override
     protected List<Player> buildSimulateChain(Player source)
     {
+        // 获取控制目标
         var targetName = getTargetControlFor(source);
-        if (targetName == null)
-            return List.of(source);
+        if (targetName == null) // 没有目标 -> 没有伪装，我们要查找附近伪装为来源的玩家
+            targetName = source.getName();
 
         var controlDistance = executorHub.getControlDistance();
         if (controlDistance == -1)
             controlDistance = 32;
 
+        String finalTargetName = targetName;
         var matchedPlayers = source.getWorld().getNearbyPlayers(source.getLocation(), controlDistance, p ->
         {
             if (p == source)
@@ -51,10 +53,10 @@ public class ByRangeExecutor extends ChainedExecutor
 
             var theirState = morphManager().getDisguiseStateFor(p);
 
-            if (theirState != null && theirState.getDisguiseIdentifier().equals("player:" + targetName))
+            if (theirState != null && theirState.getDisguiseIdentifier().equals("player:" + finalTargetName))
                 return true;
             else
-                return p.getName().equals(targetName) && theirState == null;
+                return p.getName().equals(finalTargetName) && theirState == null;
         });
 
         var list = new ObjectArrayList<Player>();
