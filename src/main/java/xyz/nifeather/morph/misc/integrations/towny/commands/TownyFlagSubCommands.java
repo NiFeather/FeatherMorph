@@ -1,6 +1,5 @@
 package xyz.nifeather.morph.misc.integrations.towny.commands;
 
-import com.mojang.brigadier.Message;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
@@ -11,7 +10,6 @@ import com.palmergames.bukkit.towny.object.metadata.BooleanDataField;
 import com.palmergames.bukkit.towny.utils.MetaDataUtil;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
-import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -50,7 +48,7 @@ public class TownyFlagSubCommands
         private int execSetValue(CommandContext<CommandSourceStack> context) throws CommandSyntaxException
         {
             if (!(context.getSource().getExecutor() instanceof Player player))
-                throw new SimpleCommandExceptionType((Message) Component.text("Panic! The executor is not a player!")).create();
+                throw new SimpleCommandExceptionType(net.minecraft.network.chat.Component.literal("Panic! The executor is not a player!")).create();
 
             var towny = TownyAPI.getInstance();
             var town = towny.getTown(player);
@@ -92,7 +90,7 @@ public class TownyFlagSubCommands
         private int execLookup(CommandContext<CommandSourceStack> context) throws CommandSyntaxException
         {
             if (!(context.getSource().getExecutor() instanceof Player player))
-                throw new SimpleCommandExceptionType((Message) Component.text("Panic! The executor is not a player!")).create();
+                throw new SimpleCommandExceptionType(net.minecraft.network.chat.Component.literal("Panic! The executor is not a player!")).create();
 
             var towny = TownyAPI.getInstance();
             var town = towny.getTown(player);

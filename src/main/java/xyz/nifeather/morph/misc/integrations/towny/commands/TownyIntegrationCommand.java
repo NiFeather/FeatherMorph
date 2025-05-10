@@ -40,16 +40,7 @@ public class TownyIntegrationCommand extends BrigadierCommand
     public boolean register(Commands dispatcher)
     {
         var command = Commands.literal(name())
-                .requires(context ->
-                {
-                    if (!(context.getSender() instanceof Player))
-                    {
-                        context.getSender().sendMessage("This command is currently only available to players.");
-                        return false;
-                    }
-
-                    return this.checkPermission(context);
-                });
+                .requires(this::checkPermission);
 
         subCommands.forEach(cmd -> cmd.registerAsChild(command));
 
