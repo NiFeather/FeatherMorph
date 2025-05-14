@@ -99,7 +99,7 @@ public class MorphCommand extends MorphPluginObject implements IConvertibleBriga
             return Command.SINGLE_SUCCESS;
         }
 
-        var gui = new DisguiseSelectScreenWrapper(player, 0);
+        var gui = new DisguiseSelectScreenWrapper(player);
         gui.show();
 
         return 1;

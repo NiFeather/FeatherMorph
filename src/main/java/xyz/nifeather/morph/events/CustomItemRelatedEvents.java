@@ -113,7 +113,7 @@ public class CustomItemRelatedEvents extends MorphPluginObject implements Listen
                 {
                     if (isDisguiseTool && InventoryGui.getOpen(player) == null)
                     {
-                        var guiScreen = new DisguiseSelectScreenWrapper(player, 0);
+                        var guiScreen = new DisguiseSelectScreenWrapper(player);
                         guiScreen.show();
                     }
 
