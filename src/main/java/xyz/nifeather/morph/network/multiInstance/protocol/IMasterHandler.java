@@ -1,19 +1,17 @@
 package xyz.nifeather.morph.network.multiInstance.protocol;
 
-import xyz.nifeather.morph.network.multiInstance.protocol.s2c.MIS2CDisconnectCommand;
-import xyz.nifeather.morph.network.multiInstance.protocol.s2c.MIS2CLoginResultCommand;
-import xyz.nifeather.morph.network.multiInstance.protocol.s2c.MIS2CStateCommand;
-import xyz.nifeather.morph.network.multiInstance.protocol.s2c.MIS2CSyncMetaCommand;
+import xyz.nifeather.morph.network.multiInstance.protocol.s2c.*;
 import xyz.nifeather.morph.network.multiInstance.slave.InstanceClient;
 
 public interface IMasterHandler
 {
-    public void onSyncMetaCommand(MIS2CSyncMetaCommand metaCommand);
+    public void onUpdateMetaCommand(MIS2CUpdateMetaCommand metaCommand);
+    public void onSyncMeta(MIS2CSyncMetaCommand command);
 
     public void onDisconnectCommand(MIS2CDisconnectCommand cDenyCommand);
 
-    public void onLoginResultCommand(MIS2CLoginResultCommand cLoginResultCommand);
-    public void onStateCommand(MIS2CStateCommand cStateCommand);
+    public void onLoginResponse(MIS2CLoginResponseCommand cLoginResultCommand);
+    public void onStateCommand(MIS2CSwitchStateCommand cStateCommand);
 
     public void onConnectionOpen();
     public void onConnectionClose(int code);

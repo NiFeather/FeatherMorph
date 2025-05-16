@@ -5,6 +5,7 @@ import org.java_websocket.framing.CloseFrame;
 import org.java_websocket.handshake.ServerHandshake;
 import org.slf4j.Logger;
 import xiamomc.pluginbase.XiaMoJavaPlugin;
+import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.network.multiInstance.protocol.IMasterHandler;
 
 import java.net.ConnectException;
@@ -66,7 +67,9 @@ public class InstanceClient extends WebSocketClient
     @Override
     public void onMessage(String msg)
     {
-        //logger.info("Received server message: " + msg);
+        if (FeatherMorphMain.getInstance().debugOutputEnabled())
+            logger.info("Received server message: " + msg + " :: Thread is " + Thread.currentThread());
+
         masterHandler.onText(msg);
     }
 

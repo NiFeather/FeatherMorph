@@ -6,11 +6,11 @@ import xyz.nifeather.morph.network.utils.Asserts;
 import java.util.Arrays;
 import java.util.Map;
 
-public class MIS2CStateCommand extends MIS2CCommand
+public class MIS2CSwitchStateCommand extends MIS2CCommand
 {
     public final ProtocolState newState;
 
-    public MIS2CStateCommand(ProtocolState newState)
+    public MIS2CSwitchStateCommand(ProtocolState newState)
     {
         super("state");
 
@@ -25,9 +25,9 @@ public class MIS2CStateCommand extends MIS2CCommand
         );
     }
 
-    public static MIS2CStateCommand fromArguments(Map<String, String> arguments) throws RuntimeException
+    public static MIS2CSwitchStateCommand fromArguments(Map<String, String> arguments) throws RuntimeException
     {
-        return new MIS2CStateCommand(
+        return new MIS2CSwitchStateCommand(
                 ProtocolState.valueOf(Asserts.getStringOrThrow(arguments, "new_state").toUpperCase())
         );
     }
@@ -43,11 +43,11 @@ public class MIS2CStateCommand extends MIS2CCommand
         return newState;
     }
 
-    public static MIS2CStateCommand from(String text)
+    public static MIS2CSwitchStateCommand from(String text)
     {
         var match = Arrays.stream(ProtocolState.values()).filter(v -> v.name().equalsIgnoreCase(text))
                 .findFirst().orElse(ProtocolState.INVALID);
 
-        return new MIS2CStateCommand(match);
+        return new MIS2CSwitchStateCommand(match);
     }
 }

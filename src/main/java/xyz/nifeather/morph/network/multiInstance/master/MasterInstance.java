@@ -10,20 +10,18 @@ import org.java_websocket.framing.CloseFrame;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.nifeather.morph.network.commands.CommandRegistries;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
+import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.config.ConfigOption;
 import xyz.nifeather.morph.config.MorphConfigManager;
-import xyz.nifeather.morph.network.commands.CommandRegistriesNew;
-import xyz.nifeather.morph.network.commands.S2C.S2CCommandRecord;
 import xyz.nifeather.morph.network.multiInstance.IInstanceService;
 import xyz.nifeather.morph.network.multiInstance.protocol.*;
-import xyz.nifeather.morph.network.multiInstance.protocol.c2s.MIC2SCommand;
-import xyz.nifeather.morph.network.multiInstance.protocol.c2s.MIC2SDisguiseMetaCommand;
+import xyz.nifeather.morph.network.multiInstance.protocol.c2s.MIC2SSyncDisguiseCommand;
 import xyz.nifeather.morph.network.multiInstance.protocol.c2s.MIC2SLoginCommand;
+import xyz.nifeather.morph.network.multiInstance.protocol.c2s.MIC2SRequestSyncCommand;
 import xyz.nifeather.morph.network.multiInstance.protocol.s2c.*;
 import xyz.nifeather.morph.network.multiInstance.slave.SlaveInstance;
 import xyz.nifeather.morph.storage.playerdata.PlayerMeta;
@@ -129,7 +127,8 @@ public class MasterInstance extends MorphPluginObject implements IInstanceServic
         config.bind(secret, ConfigOption.MASTER_SECRET);
 
         registries.registerC2S("login", MIC2SLoginCommand::fromArguments)
-                .registerC2S("dmeta", MIC2SDisguiseMetaCommand::fromArguments);
+                .registerC2S("dmeta", MIC2SSyncDisguiseCommand::fromArguments)
+                .registerC2S("request_meta_sync", MIC2SRequestSyncCommand::fromArguments);
 
         if (!prepareServer())
         {
@@ -155,8 +154,8 @@ public class MasterInstance extends MorphPluginObject implements IInstanceServic
     {
         var ws = record.socket();
 
-        if (debug_output.get())
-            logger.info("WS Master :: %s :: <- :: %s".formatted(ws.getRemoteSocketAddress(), record.rawMessage()));
+        if (FeatherMorphMain.getInstance().debugOutputEnabled())
+            logMasterInfo("WS Master :: %s :: <- :: %s".formatted(ws.getRemoteSocketAddress(), record.rawMessage()));
 
         try
         {
@@ -225,7 +224,7 @@ public class MasterInstance extends MorphPluginObject implements IInstanceServic
     private void switchState(WebSocket socket, ProtocolState state)
     {
         allowedSockets.put(socket, state);
-        sendCommand(socket, new MIS2CStateCommand(state));
+        sendCommand(socket, new MIS2CSwitchStateCommand(state));
     }
 
     public ProtocolState getConnectionState(WebSocket socket)
@@ -270,34 +269,36 @@ public class MasterInstance extends MorphPluginObject implements IInstanceServic
 
         logMasterInfo("'%s' logged in".formatted(socket.getRemoteSocketAddress()));
 
-        sendCommand(socket, new MIS2CLoginResultCommand(true));
-        switchState(socket, ProtocolState.SYNC);
-
-        var cmds = new ObjectArrayList<MIS2CSyncMetaCommand>();
-        var disguises = disguiseManager.listAllMeta();
-        for (var meta : disguises)
-        {
-            var identifiers = meta.getUnlockedDisguiseIdentifiers();
-
-            if (!identifiers.isEmpty())
-                cmds.add(new MIS2CSyncMetaCommand(Operation.ADD_IF_ABSENT, identifiers, meta.uniqueId));
-        }
-
-        logMasterInfo("Synced %s metadata(s) to socket '%s'".formatted(disguises.size(), socket.getRemoteSocketAddress()));
-
-        cmds.forEach(cmd -> this.sendCommand(socket, cmd));
-
+        sendCommand(socket, new MIS2CLoginResponseCommand(true));
         switchState(socket, ProtocolState.WAIT_LISTEN);
     }
 
     private final NetworkDisguiseManager disguiseManager = new NetworkDisguiseManager();
 
-    /*
-        缺陷：当子服断开链接后，若玩家在其中被剥夺了伪装，那么在重新连接后此变化不会在整个网络的其他部分生效
-             如果设置会移除主服务器中不存在的条目，那么其他条目少的子服接入时会清空主服务器当前已有的条目
-     */
     @Override
-    public void onDisguiseMetaCommand(MIC2SDisguiseMetaCommand cDisguiseMetaCommand)
+    public void onSlaveRequestMetaSync(MIC2SRequestSyncCommand command)
+    {
+        var socket = command.getSocket();
+
+        if (socket == null)
+        {
+            logger.info("Received a login request from an unknown source, not processing.");
+            return;
+        }
+
+        var cmd = new MIS2CSyncMetaCommand();
+
+        var disguises = disguiseManager.listAllMeta();
+        for (var meta : disguises)
+            cmd.appendMeta(new SocketPlayerMeta(Operation.ADD_IF_ABSENT, meta.getUnlockedDisguiseIdentifiers(), meta.uniqueId));
+
+        this.sendCommand(socket, cmd);
+
+        logMasterInfo("Synced %s metadata(s) to socket '%s'".formatted(disguises.size(), socket.getRemoteSocketAddress()));
+    }
+
+    @Override
+    public void onDisguiseMetaCommand(MIC2SSyncDisguiseCommand cDisguiseMetaCommand)
     {
         var socket = cDisguiseMetaCommand.getSocket();
         if (!socketAllowed(socket))
@@ -330,18 +331,13 @@ public class MasterInstance extends MorphPluginObject implements IInstanceServic
             var unlocked = playerMeta.getUnlockedDisguiseIdentifiers();
             socketMeta.getIdentifiers().forEach(str ->
             {
-                if (!unlocked.contains(str))
+                if (unlocked.stream().noneMatch(s -> s.equals(str)))
                     playerMeta.addDisguise(disguiseManager.getDisguiseMeta(str));
             });
 
             // Broadcast to all allowed sockets
             for (var allowedSocket : this.allowedSockets.keySet())
-            {
-                if (allowedSocket == cDisguiseMetaCommand.getSocket())
-                    continue;
-
-                this.sendCommand(allowedSocket, new MIS2CSyncMetaCommand(socketMeta));
-            }
+                this.sendCommand(allowedSocket, new MIS2CUpdateMetaCommand(socketMeta));
         }
         else if (operation == Operation.REMOVE)
         {
@@ -354,12 +350,7 @@ public class MasterInstance extends MorphPluginObject implements IInstanceServic
 
             // Broadcast to all allowed sockets
             for (var allowedSocket : this.allowedSockets.keySet())
-            {
-                if (allowedSocket == cDisguiseMetaCommand.getSocket())
-                    continue;
-
-                this.sendCommand(allowedSocket, new MIS2CSyncMetaCommand(socketMeta));
-            }
+                this.sendCommand(allowedSocket, new MIS2CUpdateMetaCommand(socketMeta));
         }
     }
 

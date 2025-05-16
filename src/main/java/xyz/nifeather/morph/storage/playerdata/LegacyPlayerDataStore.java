@@ -5,8 +5,6 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xiamomc.pluginbase.Annotations.Resolved;
-import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.interfaces.IManagePlayerData;
 import xyz.nifeather.morph.misc.DisguiseMeta;
 import xyz.nifeather.morph.misc.DisguiseTypes;
@@ -86,6 +84,18 @@ public class LegacyPlayerDataStore extends MorphJsonBasedStorage<PlayerMetaConta
         return true;
     }
 
+    @Override
+    public void shouldLoadAllData(boolean shouldLoadAllData)
+    {
+        throw new RuntimeException("Not implemented");
+    }
+
+    @Override
+    public List<PlayerMeta> listAll()
+    {
+        throw new RuntimeException("Not implemented");
+    }
+
     private final int targetConfigurationVersion = 4;
 
     private void migrate(PlayerMetaContainer configuration)
@@ -150,7 +160,7 @@ public class LegacyPlayerDataStore extends MorphJsonBasedStorage<PlayerMetaConta
     }
 
     @Override
-    public PlayerMeta getPlayerMeta(OfflinePlayer player)
+    public @NotNull PlayerMeta getPlayerMeta(OfflinePlayer player)
     {
         var value = getAll().stream()
                 .filter(c -> c.uniqueId.equals(player.getUniqueId())).findFirst().orElse(null);

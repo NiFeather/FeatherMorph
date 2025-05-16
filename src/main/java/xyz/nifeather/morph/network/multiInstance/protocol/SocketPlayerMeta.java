@@ -10,7 +10,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.UUID;
 
-public class SocketDisguiseMeta
+public class SocketPlayerMeta
 {
     @Expose
     @Nullable
@@ -47,11 +47,11 @@ public class SocketDisguiseMeta
         return uuid != null && operation != Operation.INVALID;
     }
 
-    public SocketDisguiseMeta()
+    public SocketPlayerMeta()
     {
     }
 
-    public SocketDisguiseMeta(@NotNull Operation operation, List<String> ids, @NotNull UUID bindingUUID)
+    public SocketPlayerMeta(@NotNull Operation operation, List<String> ids, @NotNull UUID bindingUUID)
     {
         this.operation = operation;
         this.identifiers.addAll(ids);

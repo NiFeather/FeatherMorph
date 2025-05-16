@@ -16,6 +16,7 @@ import xyz.nifeather.morph.api.FeatherMorphAPI;
 import xyz.nifeather.morph.commands.brigadier.BrigadierCommand;
 import xyz.nifeather.morph.misc.DisguiseMeta;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
+import xyz.nifeather.morph.storage.playerdata.PlayerDataStoreNew;
 import xyz.nifeather.morph.storage.playerdata.PlayerMeta;
 
 import java.util.*;
@@ -60,10 +61,16 @@ public class RemoveDuplicateEntriesAppletCommand extends BrigadierCommand
         sender.sendMessage("Loading player data...");
 
         var morphManager = FeatherMorphAPI.instance().directAccess().morphManager();
-        var dataStore = morphManager.getDataStore();
+        var ds = morphManager.getDataStore();
+
+        if (!(ds instanceof PlayerDataStoreNew dataStore))
+        {
+            sender.sendMessage("Storage not PDSN");
+            return 0;
+        }
 
         dataStore.loadAll();
-        var data = new ObjectArrayList<>(dataStore.getAll());
+        var data = new ObjectArrayList<>(dataStore.listAll());
 
         sender.sendMessage("Done, now processing with CompletableFuture...");
 
@@ -119,7 +126,13 @@ public class RemoveDuplicateEntriesAppletCommand extends BrigadierCommand
         sender.sendMessage("Saving data...");
 
         var morphManager = FeatherMorphAPI.instance().directAccess().morphManager();
-        var dataStore = morphManager.getDataStore();
+        var ds = morphManager.getDataStore();
+
+        if (!(ds instanceof PlayerDataStoreNew dataStore))
+        {
+            sender.sendMessage("Storage not PDSN");
+            return;
+        }
 
         processedList.forEach(meta ->
         {

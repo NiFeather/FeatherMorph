@@ -66,13 +66,24 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 {
     private final List<DisguiseState> activeDisguises = ObjectLists.synchronize(new ObjectArrayList<>());
 
-    private final PlayerDataStoreNew data = new PlayerDataStoreNew();
+    private final IManagePlayerData defaultData = new PlayerDataStoreNew();
+
+    @NotNull
+    private volatile IManagePlayerData data = new PlayerDataStoreNew();
 
     private final OfflineStateStore offlineStorage = new OfflineStateStore();
 
-    public PlayerDataStoreNew getDataStore()
+    public IManagePlayerData getDataStore()
     {
         return data;
+    }
+
+    public void setDataStore(@Nullable IManagePlayerData newDataStore)
+    {
+        this.data = newDataStore == null ? defaultData : newDataStore;
+        logger.info("Updating Player Data Store to %s".formatted(newDataStore));
+
+        reloadConfiguration();
     }
 
     @Resolved
@@ -1627,7 +1638,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     }
 
     @Override
-    public PlayerMeta getPlayerMeta(OfflinePlayer player)
+    public @NotNull PlayerMeta getPlayerMeta(OfflinePlayer player)
     {
         return data.getPlayerMeta(player);
     }
@@ -1689,12 +1700,25 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     {
         return data.saveConfiguration() && offlineStorage.saveConfiguration();
     }
+
+    @Override
+    public void shouldLoadAllData(boolean shouldLoadAllData)
+    {
+        data.shouldLoadAllData(shouldLoadAllData);
+    }
+
+    @Override
+    public List<PlayerMeta> listAll()
+    {
+        return data.listAll();
+    }
+
     //endregion Implementation of IManagePlayerData
 
     @ApiStatus.Internal
     public List<PlayerMeta> listAllPlayerMeta()
     {
         data.shouldLoadAllData(true);
-        return data.getAll();
+        return data.listAll();
     }
 }

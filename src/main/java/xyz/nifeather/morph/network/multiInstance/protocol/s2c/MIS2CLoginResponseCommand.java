@@ -5,11 +5,11 @@ import xyz.nifeather.morph.network.utils.Asserts;
 
 import java.util.Map;
 
-public class MIS2CLoginResultCommand extends MIS2CCommand
+public class MIS2CLoginResponseCommand extends MIS2CCommand
 {
     public final boolean loginAllowed;
 
-    public MIS2CLoginResultCommand(boolean allowed)
+    public MIS2CLoginResponseCommand(boolean allowed)
     {
         super("r_login");
 
@@ -24,9 +24,9 @@ public class MIS2CLoginResultCommand extends MIS2CCommand
         );
     }
 
-    public static MIS2CLoginResultCommand fromArguments(Map<String, String> arguments) throws RuntimeException
+    public static MIS2CLoginResponseCommand fromArguments(Map<String, String> arguments) throws RuntimeException
     {
-        return new MIS2CLoginResultCommand(
+        return new MIS2CLoginResponseCommand(
                 Boolean.parseBoolean(Asserts.getStringOrThrow(arguments, "allowed"))
         );
     }
@@ -39,6 +39,6 @@ public class MIS2CLoginResultCommand extends MIS2CCommand
     @Override
     public void onCommand(IMasterHandler handler)
     {
-        handler.onLoginResultCommand(this);
+        handler.onLoginResponse(this);
     }
 }

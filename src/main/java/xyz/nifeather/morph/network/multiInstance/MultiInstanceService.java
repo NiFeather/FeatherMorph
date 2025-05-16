@@ -10,9 +10,9 @@ import xyz.nifeather.morph.config.ConfigOption;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.network.multiInstance.master.MasterInstance;
 import xyz.nifeather.morph.network.multiInstance.protocol.Operation;
-import xyz.nifeather.morph.network.multiInstance.protocol.SocketDisguiseMeta;
-import xyz.nifeather.morph.network.multiInstance.protocol.c2s.MIC2SDisguiseMetaCommand;
-import xyz.nifeather.morph.network.multiInstance.protocol.s2c.MIS2CSyncMetaCommand;
+import xyz.nifeather.morph.network.multiInstance.protocol.SocketPlayerMeta;
+import xyz.nifeather.morph.network.multiInstance.protocol.c2s.MIC2SSyncDisguiseCommand;
+import xyz.nifeather.morph.network.multiInstance.protocol.s2c.MIS2CUpdateMetaCommand;
 import xyz.nifeather.morph.network.multiInstance.slave.SlaveInstance;
 
 import java.util.Arrays;
@@ -109,21 +109,19 @@ public class MultiInstanceService extends MorphPluginObject
             return;
         }
 
-        var meta = new SocketDisguiseMeta(operation, Arrays.stream(identifiers).toList(), uuid);
+        var meta = new SocketPlayerMeta(operation, Arrays.stream(identifiers).toList(), uuid);
 
         if (isMaster.get())
         {
             assert masterInstance != null;
-            masterInstance.broadcastCommand(new MIS2CSyncMetaCommand(meta));
+            masterInstance.broadcastCommand(new MIS2CUpdateMetaCommand(meta));
         }
         else
         {
             assert slaveInstance != null;
 
-            if (slaveInstance.isOnline())
-                slaveInstance.sendCommand(new MIC2SDisguiseMetaCommand(meta));
-            else
-                slaveInstance.cacheRevokeStates(meta);
+            if (slaveInstance.isOnline() && !slaveInstance.isInternalSlave())
+                slaveInstance.sendCommand(new MIC2SSyncDisguiseCommand(meta));
         }
     }
 
@@ -132,7 +130,14 @@ public class MultiInstanceService extends MorphPluginObject
         stopAll();
 
         if (enabled.get())
+        {
             this.addSchedule(() -> prepareInstance(isMaster.get()), 20);
+        }
+        else
+        {
+            if (slaveInstance != null)
+                slaveInstance.resetDataStore();
+        }
     }
 
     private boolean stopAll()
