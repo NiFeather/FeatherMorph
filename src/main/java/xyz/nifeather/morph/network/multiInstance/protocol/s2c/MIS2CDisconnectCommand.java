@@ -2,10 +2,11 @@ package xyz.nifeather.morph.network.multiInstance.protocol.s2c;
 
 import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.network.multiInstance.protocol.IMasterHandler;
+import xyz.nifeather.morph.network.utils.Asserts;
 
 import java.util.Map;
 
-public class MIS2CDisconnectCommand extends MIS2CCommand<String>
+public class MIS2CDisconnectCommand extends MIS2CCommand
 {
     private final int reasonCode;
     private final String detail;
@@ -31,6 +32,14 @@ public class MIS2CDisconnectCommand extends MIS2CCommand<String>
         );
     }
 
+    public static MIS2CDisconnectCommand fromArguments(Map<String, String> arguments) throws RuntimeException
+    {
+        return new MIS2CDisconnectCommand(
+                Integer.parseInt(Asserts.getStringOrThrow(arguments, "code")),
+                Asserts.getStringOrThrow(arguments, "detail")
+        );
+    }
+
     @Override
     public void onCommand(IMasterHandler handler)
     {
@@ -45,27 +54,5 @@ public class MIS2CDisconnectCommand extends MIS2CCommand<String>
     public String getDetails()
     {
         return detail;
-    }
-
-    public static MIS2CDisconnectCommand from(String text)
-    {
-        var args = text.split(" ", 2);
-        int reasonCode = -2;
-
-        try
-        {
-            reasonCode = Integer.parseInt(args[0]);
-        }
-        catch (Throwable t)
-        {
-            var logger = FeatherMorphMain.getInstance().getSLF4JLogger();
-
-            logger.warn("Can't parse disconnect reason code from the server command");
-        }
-
-        if (args.length == 2)
-            return new MIS2CDisconnectCommand(reasonCode, args[1]);
-        else
-            return new MIS2CDisconnectCommand(reasonCode);
     }
 }

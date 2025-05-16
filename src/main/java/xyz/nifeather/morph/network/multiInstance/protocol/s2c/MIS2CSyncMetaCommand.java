@@ -1,63 +1,80 @@
 package xyz.nifeather.morph.network.multiInstance.protocol.s2c;
 
-import org.jetbrains.annotations.Nullable;
-import xyz.nifeather.morph.FeatherMorphMain;
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import xyz.nifeather.morph.network.multiInstance.protocol.IMasterHandler;
-import xyz.nifeather.morph.network.multiInstance.protocol.Operation;
-import xyz.nifeather.morph.network.multiInstance.protocol.SocketDisguiseMeta;
+import xyz.nifeather.morph.network.multiInstance.protocol.SocketPlayerMeta;
+import xyz.nifeather.morph.network.utils.Asserts;
 
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
-public class MIS2CSyncMetaCommand extends MIS2CCommand<SocketDisguiseMeta>
+public class MIS2CSyncMetaCommand extends MIS2CCommand
 {
-    public final SocketDisguiseMeta disguiseMeta;
+    private final MetaSyncDataRoot data = new MetaSyncDataRoot();
 
-    public MIS2CSyncMetaCommand(SocketDisguiseMeta meta)
+    public List<SocketPlayerMeta> data()
     {
-        super("dmeta");
+        return data.content;
+    }
 
-        this.disguiseMeta = meta;
+    public void appendMeta(SocketPlayerMeta meta)
+    {
+        data.content.add(meta);
+    }
+
+    public MIS2CSyncMetaCommand()
+    {
+        super("sync_player_meta");
+    }
+
+    public MIS2CSyncMetaCommand(MetaSyncDataRoot otherData)
+    {
+        this();
+
+        data.content.addAll(otherData.content);
+    }
+
+    public MIS2CSyncMetaCommand(List<SocketPlayerMeta> metaList)
+    {
+        this();
+
+        this.data.content.addAll(metaList);
     }
 
     @Override
     public Map<String, String> generateArgumentMap()
     {
-        return Map.of(
-                "socket_meta", gson().toJson(disguiseMeta)
-        );
+        var str = gson().toJson(this.data);
+
+        var map = new ConcurrentHashMap<String, String>();
+
+        map.put("meta_list", str);
+
+        return map;
     }
 
-    public MIS2CSyncMetaCommand(Operation operation, List<String> identifiers, UUID bindingUUID)
+    public static MIS2CSyncMetaCommand fromArguments(Map<String, String> arguments)
     {
-        this(new SocketDisguiseMeta(operation, identifiers, bindingUUID));
+        var metaList = Asserts.getStringOrThrow(arguments, "meta_list");
+
+        var result = gson().fromJson(metaList, MetaSyncDataRoot.class);
+
+        return new MIS2CSyncMetaCommand(result);
+    }
+
+    public static class MetaSyncDataRoot
+    {
+        @Expose
+        @SerializedName("content")
+        public List<SocketPlayerMeta> content = new ObjectArrayList<>();
     }
 
     @Override
     public void onCommand(IMasterHandler handler)
     {
-        handler.onSyncMetaCommand(this);
-    }
-
-    @Nullable
-    public SocketDisguiseMeta getMeta()
-    {
-        return disguiseMeta;
-    }
-
-    public static MIS2CSyncMetaCommand from(String text)
-    {
-        try
-        {
-            return new MIS2CSyncMetaCommand(gson().fromJson(text, SocketDisguiseMeta.class));
-        }
-        catch (Throwable t)
-        {
-            var logger = FeatherMorphMain.getInstance().getSLF4JLogger();
-            logger.warn("Failed to parse SocketDisguiseMeta from the server command! Leaving empty...");
-
-            return new MIS2CSyncMetaCommand(Operation.INVALID, List.of(), UUID.randomUUID());
-        }
+        handler.onSyncMeta(this);
     }
 }

@@ -66,13 +66,24 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 {
     private final List<DisguiseState> activeDisguises = ObjectLists.synchronize(new ObjectArrayList<>());
 
-    private final PlayerDataStoreNew data = new PlayerDataStoreNew();
+    private final IManagePlayerData defaultData = new PlayerDataStoreNew();
+
+    @NotNull
+    private volatile IManagePlayerData data = new PlayerDataStoreNew();
 
     private final OfflineStateStore offlineStorage = new OfflineStateStore();
 
-    public PlayerDataStoreNew getDataStore()
+    public IManagePlayerData getDataStore()
     {
         return data;
+    }
+
+    public void setDataStore(@Nullable IManagePlayerData newDataStore)
+    {
+        this.data = newDataStore == null ? defaultData : newDataStore;
+        logger.info("Updating Player Data Store to %s".formatted(newDataStore));
+
+        reloadConfiguration();
     }
 
     @Resolved
@@ -95,6 +106,11 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     public static final String disguiseFallbackName = "@default";
 
     public static final String forcedDisguiseNoneId = "@none";
+
+    public MorphManager()
+    {
+        offlineStorage.initializeStorage();
+    }
 
     //region Backends
 
@@ -1090,7 +1106,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         cX = cZ = box.width();
         cY = box.height();
 
-        spawnParticle(player, player.getLocation(), cX, cY, cZ);
+        spawnCloudParticle(player, player.getLocation(), cX, cY, cZ);
 
         player.getWorld().playSound(
                 player.getLocation(),
@@ -1280,7 +1296,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         // 如果玩家在线，则生成粒子
         if (player.isConnected())
         {
-            spawnParticle(player, player.getLocation(), player.getWidth(), player.getHeight(), player.getWidth());
+            spawnCloudParticle(player, player.getLocation(), player.getWidth(), player.getHeight(), player.getWidth());
 
             player.getWorld().playSound(
                     player.getLocation(),
@@ -1328,7 +1344,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         state.dispose();
     }
 
-    public void spawnParticle(Player player, Location location, double collX, double collY, double collZ)
+    public void spawnCloudParticle(Player player, Location location, double collX, double collY, double collZ)
     {
         if (player.getGameMode() == GameMode.SPECTATOR) return;
 
@@ -1571,6 +1587,12 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 .resolve("what", meta.asComponent(locale)));
         player.sendMessage(message);
 
+        //显示粒子
+        player.getWorld().spawnParticle(Particle.TRIAL_SPAWNER_DETECTION_OMINOUS, player.getLocation(), //类型和位置
+                100, //数量
+                0.8, 0.8, 0.8, //分布空间
+                0.05); //速度
+
         if (clientHandler.clientConnected(player))
         {
             if (!config.shownMorphClientHint)
@@ -1616,7 +1638,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     }
 
     @Override
-    public PlayerMeta getPlayerMeta(OfflinePlayer player)
+    public @NotNull PlayerMeta getPlayerMeta(OfflinePlayer player)
     {
         return data.getPlayerMeta(player);
     }
@@ -1678,12 +1700,25 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     {
         return data.saveConfiguration() && offlineStorage.saveConfiguration();
     }
+
+    @Override
+    public void shouldLoadAllData(boolean shouldLoadAllData)
+    {
+        data.shouldLoadAllData(shouldLoadAllData);
+    }
+
+    @Override
+    public List<PlayerMeta> listAll()
+    {
+        return data.listAll();
+    }
+
     //endregion Implementation of IManagePlayerData
 
     @ApiStatus.Internal
     public List<PlayerMeta> listAllPlayerMeta()
     {
         data.shouldLoadAllData(true);
-        return data.getAll();
+        return data.listAll();
     }
 }

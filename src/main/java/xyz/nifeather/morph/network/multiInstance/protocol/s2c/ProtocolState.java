@@ -6,7 +6,10 @@ public enum ProtocolState
     NOT_CONNECTED(-2),
     WAITING_LOGIN(-1),
     LOGIN(0),
+
+    @Deprecated(forRemoval = true)
     SYNC(1),
+
     WAIT_LISTEN(2);
 
     private final int stateCode;

@@ -19,18 +19,12 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class RecipeManager extends MorphPluginObject
 {
     private final StandaloneYamlConfigManager configManager = new RecipeYamlConfigManager(new File(plugin.getDataFolder(), "recipes.yml"), "recipes.yml");
-
-    private boolean allowCrafting = false;
-    private boolean unShaped = false;
-    private List<String> shape = new ObjectArrayList<>();
-    private Map<String, String> materials = new Object2ObjectOpenHashMap<>();
-    private String resultMaterialId = "~UNSET";
-    private String resultName = "~UNSET";
-    private List<String> resultLore = new ObjectArrayList<>();
 
     @Initializer
     private void load(MorphConfigManager configManager)
@@ -42,23 +36,44 @@ public class RecipeManager extends MorphPluginObject
     {
         this.configManager.reload();
 
-        readValuesFromConfig(this.configManager);
-        prepareRecipe();
-    }
+        // too bad
+        prepareRecipe(
+                SKILLITEM_CRAFTING_KEY,
+                configManager.getOrDefault(RecipeOptions.ALLOW_DISGUISE_TOOL_CRAFTING),
+                configManager.getOrDefault(RecipeOptions.DISGUISE_TOOL_RESULT_NAME),
+                configManager.getList(RecipeOptions.DISGUISE_TOOL_RESULT_LORE),
+                configManager.getList(RecipeOptions.DISGUISE_TOOL_CRAFTING_SHAPE),
+                configManager.getMap(RecipeOptions.DISGUISE_TOOL_CRAFTING_MATERIALS),
+                configManager.getOrDefault(RecipeOptions.DISGUISE_TOOL_RESULT_MATERIAL),
+                configManager.getOrDefault(RecipeOptions.DISGUISE_TOOL_CRAFTING_UNSHAPED)
+        );
 
-    private void readValuesFromConfig(StandaloneYamlConfigManager configManager)
-    {
-        allowCrafting = configManager.getOrDefault(RecipeOptions.ALLOW_DISGUISE_TOOL_CRAFTING);
-        unShaped = configManager.getOrDefault(RecipeOptions.DISGUISE_TOOL_CRAFTING_UNSHAPED);
-        shape = configManager.getList(RecipeOptions.DISGUISE_TOOL_CRAFTING_SHAPE);
-        resultMaterialId = configManager.getOrDefault(RecipeOptions.DISGUISE_TOOL_RESULT_MATERIAL);
-        resultName = configManager.getOrDefault(RecipeOptions.DISGUISE_TOOL_RESULT_NAME);
-        resultLore = configManager.getList(RecipeOptions.DISGUISE_TOOL_RESULT_LORE);
-        var material = configManager.getMap(RecipeOptions.DISGUISE_TOOL_CRAFTING_MATERIALS);
-        this.materials.clear();
-
-        if (material != null)
-            this.materials.putAll(material);
+        //todo: Result material is hardcoded to GLASS_BOTTLE, see `CustomItemRelatedEvents#onConsume`
+        //      ...
+        //      First, when an **Empty** Magic Bottle is used, we ALWAYS replace it with a potion as the **Collected** Magic Bottle
+        //      Then, when the Collected Magic Bottle is consumed, we ALWAYS return a **normal** glass bottle
+        //      ...
+        //      If we want to make it fully customizable, we need to...
+        //          I.  Let server choose the material of the **Collected** Magic Bottle
+        //          II. When the Collected is consumed, we need to return the *Result Material* of the bottle recipe.
+        //      But! If we choose to do this...
+        //          I. The server might have custom recipe plugin installed and take over our recipe management.
+        //             If this happens, how should we choose the material of Collected and Empty bottle?
+        //             ...
+        //          II. Related options will definitely not in the recipe configuration,
+        //              ss I don't want to "pollute" the recipe configuration with unrelated options...
+        //      ...
+        //      So bruh, this is so complicated, so I decided to make it hardcoded to glass bottle...
+        prepareRecipe(
+                MAGIC_BOTTLE_CRAFTING_KEY,
+                configManager.getOrDefault(RecipeOptions.ALLOW_MAGIC_BOTTLE_CRAFTING),
+                configManager.getOrDefault(RecipeOptions.MAGIC_BOTTLE_RESULT_NAME),
+                configManager.getList(RecipeOptions.MAGIC_BOTTLE_RESULT_LORE),
+                configManager.getList(RecipeOptions.MAGIC_BOTTLE_CRAFTING_SHAPE),
+                configManager.getMap(RecipeOptions.MAGIC_BOTTLE_CRAFTING_MATERIALS),
+                Material.GLASS_BOTTLE.key().asString(),
+                configManager.getOrDefault(RecipeOptions.MAGIC_BOTTLE_CRAFTING_UNSHAPED)
+        );
     }
 
     @Nullable
@@ -74,22 +89,32 @@ public class RecipeManager extends MorphPluginObject
     }
 
     @NotNull
-    public static final NamespacedKey SKILLITEM_CRAFTING_KEY = NamespacedKey.fromString("feathermorph:disguise_tool_crafting");
+    public static final NamespacedKey SKILLITEM_CRAFTING_KEY = Objects.requireNonNull(NamespacedKey.fromString("feathermorph:disguise_tool_crafting"));
 
-    private void prepareRecipe()
+    @NotNull
+    public static final NamespacedKey MAGIC_BOTTLE_CRAFTING_KEY = Objects.requireNonNull(NamespacedKey.fromString("feathermorph:magic_bottle_crafting"));
+
+    private void prepareRecipe(NamespacedKey recipeKey,
+                               boolean enabled,
+                               String resultName,
+                               List<String> resultLore,
+                               List<String> shape,
+                               Map<String, String> inputMaterials,
+                               String resultMaterialId,
+                               boolean unShaped)
     {
-        if (!allowCrafting)
+        if (!enabled)
         {
-            Bukkit.removeRecipe(SKILLITEM_CRAFTING_KEY);
+            Bukkit.removeRecipe(recipeKey);
             return;
         }
 
         var minimessage = MiniMessage.miniMessage();
 
-        Component name = this.resultName.equals("~UNSET") ? null : minimessage.deserialize(this.resultName);
-        List<Component> loreComponents = this.resultLore.isEmpty() ? null : this.resultLore.parallelStream().map(minimessage::deserialize).toList();
+        Component name = resultName.equals("~UNSET") ? null : minimessage.deserialize(resultName);
+        List<Component> loreComponents = resultLore.isEmpty() ? null : resultLore.parallelStream().map(minimessage::deserialize).toList();
 
-        var resultMaterial = this.getMaterialFrom(this.resultMaterialId);
+        var resultMaterial = this.getMaterialFrom(resultMaterialId);
         if (resultMaterial == null)
         {
             logger.error("Invalid result material ID: '%s', skipping...".formatted(resultMaterialId));
@@ -97,7 +122,7 @@ public class RecipeManager extends MorphPluginObject
         }
 
         Map<String, Material> materialsReal = new Object2ObjectOpenHashMap<>();
-        this.materials.forEach((str, id) ->
+        inputMaterials.forEach((str, id) ->
         {
             var material = Arrays.stream(Material.values())
                     .filter(m -> m.key().equals(NamespacedKey.fromString(id)))
@@ -113,8 +138,8 @@ public class RecipeManager extends MorphPluginObject
             materialsReal.put(str, material);
         });
 
-        var recipeProperty = new RecipeProperty(SKILLITEM_CRAFTING_KEY,
-                !this.unShaped, this.shape,
+        var recipeProperty = new RecipeProperty(recipeKey,
+                !unShaped, shape,
                 materialsReal,
                 resultMaterial,
                 name,
@@ -123,9 +148,19 @@ public class RecipeManager extends MorphPluginObject
         buildAndAddRecipe(recipeProperty);
     }
 
+    private ItemStack getResultItemFromRecipe(NamespacedKey recipeKey, Material resultMaterial)
+    {
+        if (recipeKey.equals(SKILLITEM_CRAFTING_KEY))
+            return ItemUtils.buildDisguiseToolFrom(ItemStack.of(resultMaterial));
+        else if (recipeKey.equals(MAGIC_BOTTLE_CRAFTING_KEY))
+            return ItemUtils.buildMagicBottleFrom(ItemStack.of(resultMaterial));
+        else return ItemStack.of(resultMaterial);
+    }
+
     private void buildAndAddRecipe(RecipeProperty recipeProperty)
     {
-        var resultItem = ItemUtils.buildDisguiseToolFrom(ItemStack.of(recipeProperty.resultMaterial()));
+        ItemStack resultItem = getResultItemFromRecipe(recipeProperty.key(), recipeProperty.resultMaterial());
+
         resultItem.editMeta(meta ->
         {
             meta.setRarity(ItemRarity.UNCOMMON);
@@ -162,24 +197,5 @@ public class RecipeManager extends MorphPluginObject
 
         Bukkit.removeRecipe(key);
         Bukkit.addRecipe(recipe, true);
-    }
-
-    private void test_dumpExsampleConfig()
-    {
-        allowCrafting = true;
-        unShaped = true;
-        shape = List.of(
-                "ABC",
-                "DEF",
-                "GHI"
-        );
-        resultMaterialId = Material.BEDROCK.key().asString();
-        resultName = "<reset>技能物品";
-        resultLore = List.of(
-                "技能测试1", "技能测试2"
-        );
-        materials = new Object2ObjectOpenHashMap<>();
-        materials.put("A", Material.BEDROCK.key().asString());
-        materials.put("B", Material.ACACIA_BOAT.key().asString());
     }
 }

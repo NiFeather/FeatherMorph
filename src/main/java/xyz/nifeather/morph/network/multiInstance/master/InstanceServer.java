@@ -7,7 +7,7 @@ import org.java_websocket.server.WebSocketServer;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import xiamomc.pluginbase.XiaMoJavaPlugin;
-import xyz.nifeather.morph.network.multiInstance.protocol.IClientHandler;
+import xyz.nifeather.morph.network.multiInstance.protocol.IInstanceClientHandler;
 
 import java.net.InetSocketAddress;
 import java.util.List;
@@ -16,7 +16,7 @@ public final class InstanceServer extends WebSocketServer
 {
     private final Logger logger;
 
-    private final IClientHandler clientHandler;
+    private final IInstanceClientHandler clientHandler;
 
     private void logServerInfo(String message)
     {
@@ -28,12 +28,12 @@ public final class InstanceServer extends WebSocketServer
         logger.warn("[S@%s] %s".formatted(Integer.toHexString(this.hashCode()), message));
     }
 
-    public InstanceServer(XiaMoJavaPlugin plugin, InetSocketAddress address, IClientHandler iClientHandler)
+    public InstanceServer(XiaMoJavaPlugin plugin, InetSocketAddress address, IInstanceClientHandler iInstanceClientHandler)
     {
         super(address);
 
         this.logger = plugin.getSLF4JLogger();
-        this.clientHandler = iClientHandler;
+        this.clientHandler = iInstanceClientHandler;
 
         plugin.schedule(this::load);
     }

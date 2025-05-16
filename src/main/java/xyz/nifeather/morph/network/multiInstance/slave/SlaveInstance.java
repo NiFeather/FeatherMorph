@@ -7,25 +7,20 @@ import org.bukkit.Bukkit;
 import org.java_websocket.framing.CloseFrame;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
-import xyz.nifeather.morph.network.commands.C2S.AbstractC2SCommand;
-import xyz.nifeather.morph.network.commands.C2S.C2SCommandRecord;
-import xyz.nifeather.morph.network.commands.CommandRegistries;
-import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
 import xiamomc.pluginbase.Exceptions.NullDependencyException;
+import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.config.ConfigOption;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.network.multiInstance.IInstanceService;
 import xyz.nifeather.morph.network.multiInstance.master.MasterInstance;
-import xyz.nifeather.morph.network.multiInstance.protocol.IMasterHandler;
-import xyz.nifeather.morph.network.multiInstance.protocol.Operation;
-import xyz.nifeather.morph.network.multiInstance.protocol.ProtocolLevel;
-import xyz.nifeather.morph.network.multiInstance.protocol.SocketDisguiseMeta;
-import xyz.nifeather.morph.network.multiInstance.protocol.c2s.MIC2SDisguiseMetaCommand;
+import xyz.nifeather.morph.network.multiInstance.protocol.*;
+import xyz.nifeather.morph.network.multiInstance.protocol.c2s.MIC2SCommand;
 import xyz.nifeather.morph.network.multiInstance.protocol.c2s.MIC2SLoginCommand;
+import xyz.nifeather.morph.network.multiInstance.protocol.c2s.MIC2SRequestSyncCommand;
 import xyz.nifeather.morph.network.multiInstance.protocol.s2c.*;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
 
@@ -39,6 +34,23 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
 {
     @Nullable
     private InstanceClient client;
+    private volatile CompletableFuture<Void> clientRunningFuture;
+
+    public SlaveInstance(boolean startOnLoad)
+    {
+        super();
+
+        this.startOnLoad = startOnLoad;
+        this.playerDataHolder = new NetworkDataHolder(this);
+
+        load();
+    }
+
+    public void resetDataStore()
+    {
+        if (morphManager.getDataStore() == this.playerDataHolder)
+            morphManager.setDataStore(null);
+    }
 
     private boolean stopClient()
     {
@@ -49,6 +61,8 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
             client.close(CloseFrame.GOING_AWAY, "noRetry");
             client.dispose();
             client = null;
+
+            this.clientRunningFuture.cancel(true);
 
             return true;
         }
@@ -69,9 +83,6 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
     {
         logger.warn("[Slave@%s] %s".formatted(Integer.toHexString(this.hashCode()), message));
     }
-
-    @Resolved
-    private MorphConfigManager config;
 
     @Nullable
     private MasterInstance internalMasterInstance;
@@ -103,7 +114,9 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
             var client = new InstanceClient(uri, plugin, this);
 
             this.client = client;
-            CompletableFuture.runAsync(client);
+
+            //todo: Use a Thread to run client
+            this.clientRunningFuture = CompletableFuture.runAsync(client);
 
             return true;
         }
@@ -116,33 +129,37 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
         }
     }
 
-    public SlaveInstance(boolean startOnLoad)
-    {
-        this.startOnLoad = startOnLoad;
-    }
+    @Resolved(shouldSolveImmediately = true)
+    private MorphConfigManager config;
 
     private final boolean startOnLoad;
 
-    @Initializer
+    private final NetworkDataHolder playerDataHolder;
+
     private void load()
     {
         logSlaveInfo("Preparing multi-instance client...");
 
         config.bind(secret, ConfigOption.MASTER_SECRET);
 
-        registries.registerS2C("deny", MIS2CDisconnectCommand::from)
-                .registerS2C("dmeta", MIS2CSyncMetaCommand::from)
-                .registerS2C("r_login", MIS2CLoginResultCommand::from)
-                .registerS2C("state", MIS2CStateCommand::from);
+        registries.registerS2C("deny", MIS2CDisconnectCommand::fromArguments)
+                .registerS2C("dmeta", MIS2CUpdateMetaCommand::fromArguments)
+                .registerS2C("r_login", MIS2CLoginResponseCommand::fromArguments)
+                .registerS2C("state", MIS2CSwitchStateCommand::fromArguments)
+                .registerS2C("sync_player_meta", MIS2CSyncMetaCommand::fromArguments);
 
         if (client != null) return;
 
         if (!startOnLoad) return;
 
-        if (!prepareClient())
+        if (prepareClient())
+        {
+            if (!isInternalSlave())
+                morphManager.setDataStore(new VoidDataHolder());
+        }
+        else
         {
             logSlaveWarn("Can't setup client, this instance will stay offline from the instance network!");
-            return;
         }
     }
 
@@ -154,24 +171,42 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
         return stopClient();
     }
 
-    @Resolved
+    @Resolved(shouldSolveImmediately = true)
     private MorphManager morphManager;
 
-    @Resolved
+    @Resolved(shouldSolveImmediately = true)
     private MorphClientHandler clientHandler;
 
     private final Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
 
     @ApiStatus.Internal
-    public void sendCommand(AbstractC2SCommand<?> command)
+    public void sendCommand(MIC2SCommand command)
     {
-        if (silent)
-            return;
-
         if (client == null)
             throw new NullDependencyException("Null client!");
 
-        client.send(gson.toJson(C2SCommandRecord.fromC2SCommand(command)));
+        var cmd = gson.toJson(MIServerboundCommandRecord.fromC2SCommand(command));
+
+        if (FeatherMorphMain.getInstance().debugOutputEnabled())
+            logSlaveInfo("WS Slave :: -> SERVER :: " + cmd);
+
+        client.send(cmd);
+    }
+
+    @Nullable
+    private volatile CompletableFuture<SlaveInstance> dataSyncFuture;
+
+    public CompletableFuture<SlaveInstance> requestDataSync()
+    {
+        if (dataSyncFuture != null)
+            return dataSyncFuture;
+
+        if (FeatherMorphMain.getInstance().debugOutputEnabled())
+            logSlaveInfo("Requesting data sync...");
+
+        this.sendCommand(new MIC2SRequestSyncCommand());
+
+        return new CompletableFuture<>();
     }
 
     public boolean isOnline()
@@ -179,9 +214,26 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
         return client != null && client.isOpen();
     }
 
-    @Override
-    public void onSyncMetaCommand(MIS2CSyncMetaCommand metaCommand)
+    public boolean isInternalSlave()
     {
+        return this.internalMasterInstance != null;
+    }
+
+    @Override
+    public void onSyncMeta(MIS2CSyncMetaCommand command)
+    {
+        logSlaveInfo("Received data sync for %s entries".formatted(command.data().size()));
+
+        for (SocketPlayerMeta datum : command.data())
+            this.onReceivePlayerMeta(datum);
+    }
+
+    @Override
+    public void onUpdateMetaCommand(MIS2CUpdateMetaCommand metaCommand)
+    {
+        if (isInternalSlave())
+            return;
+
         if (!currentState.get().loggedIn())
         {
             logSlaveWarn("Bad server implementation? They are trying to sync meta before we login!");
@@ -189,15 +241,22 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
         }
 
         var socketMeta = metaCommand.getMeta();
-        if (socketMeta == null)
-        {
-            logSlaveWarn("Bad server implementation? Get DisguiseMeta command but meta is null!");
-            return;
-        }
-
         if (!socketMeta.isValid())
         {
             logSlaveWarn("Bad server implementation? The meta is invalid!");
+            return;
+        }
+
+        this.onReceivePlayerMeta(socketMeta);
+    }
+
+    private void onReceivePlayerMeta(SocketPlayerMeta socketMeta)
+    {
+        if (isInternalSlave())
+        {
+            if (FeatherMorphMain.getInstance().debugOutputEnabled())
+                logSlaveWarn("InternalSlave received socket meta! Is this right?");
+
             return;
         }
 
@@ -208,26 +267,31 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
 
         var player = offlinePlayer.getPlayer();
 
-        silent = true;
-
         if (operation == Operation.ADD_IF_ABSENT)
         {
-            var countPrev = playerMeta.getUnlockedDisguises().size();
             var unlocked = playerMeta.getUnlockedDisguiseIdentifiers();
 
+            List<String> diff = new ObjectArrayList<>();
             socketMeta.getIdentifiers().forEach(str ->
             {
-                if (!unlocked.contains(str))
-                    playerMeta.addDisguise(morphManager.getDisguiseMeta(str));
+                if (unlocked.contains(str))
+                    return;
+
+                diff.add(str);
+                playerMeta.addDisguise(morphManager.getDisguiseMeta(str));
             });
 
-            if (player != null && playerMeta.getUnlockedDisguiseIdentifiers().size() != countPrev)
-                clientHandler.refreshPlayerClientMorphs(playerMeta.getUnlockedDisguiseIdentifiers(), player);
+            if (player != null && !diff.isEmpty())
+            {
+                if (diff.size() < 5)
+                    clientHandler.sendDiff(diff, null, player);
+                else
+                    clientHandler.refreshPlayerClientMorphs(playerMeta.getUnlockedDisguiseIdentifiers(), player);
+            }
         }
         else if (operation == Operation.REMOVE)
         {
-            var countPrev = playerMeta.getUnlockedDisguises().size();
-
+            List<String> diff = new ObjectArrayList<>();
             socketMeta.getIdentifiers().forEach(id ->
             {
                 var disguiseMeta = morphManager.getDisguiseMeta(id);
@@ -235,13 +299,14 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
                 playerMeta.removeDisguise(disguiseMeta);
             });
 
-            //morphManager.saveConfiguration();
-
-            if (player != null && playerMeta.getUnlockedDisguiseIdentifiers().size() != countPrev)
-                clientHandler.refreshPlayerClientMorphs(playerMeta.getUnlockedDisguiseIdentifiers(), player);
+            if (player != null && !diff.isEmpty())
+            {
+                if (diff.size() < 5)
+                    clientHandler.sendDiff(null, diff, player);
+                else
+                    clientHandler.refreshPlayerClientMorphs(playerMeta.getUnlockedDisguiseIdentifiers(), player);
+            }
         }
-
-        silent = false;
     }
 
     @Override
@@ -251,7 +316,7 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
     }
 
     @Override
-    public void onLoginResultCommand(MIS2CLoginResultCommand cLoginResultCommand)
+    public void onLoginResponse(MIS2CLoginResponseCommand cLoginResultCommand)
     {
         if (currentState.get() != ProtocolState.LOGIN)
         {
@@ -265,37 +330,16 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
             return;
         }
 
-        logSlaveInfo("Done logging in, now sending our disguise data...");
+        logSlaveInfo("Done logging in!");
 
-        var cmds = new ObjectArrayList<MIC2SDisguiseMetaCommand>();
-        var disguises = morphManager.listAllPlayerMeta();
-        for (var meta : disguises)
-        {
-            var identifiers = meta.getUnlockedDisguiseIdentifiers();
-
-            if (!identifiers.isEmpty())
-                cmds.add(new MIC2SDisguiseMetaCommand(Operation.ADD_IF_ABSENT, identifiers, meta.uniqueId));
-        }
-
-        for (var socketMeta : revokeStatesAfterDisconnect)
-            cmds.add(new MIC2SDisguiseMetaCommand(socketMeta));
-
-        revokeStatesAfterDisconnect.clear();
-
-        cmds.forEach(this::sendCommand);
+        if (!isInternalSlave())
+            morphManager.setDataStore(this.playerDataHolder);
     }
 
     private final Bindable<ProtocolState> currentState = new Bindable<>(ProtocolState.NOT_CONNECTED);
 
-    private final List<SocketDisguiseMeta> revokeStatesAfterDisconnect = new ObjectArrayList<>();
-
-    public void cacheRevokeStates(SocketDisguiseMeta socketDisguiseMeta)
-    {
-        revokeStatesAfterDisconnect.add(socketDisguiseMeta);
-    }
-
     @Override
-    public void onStateCommand(MIS2CStateCommand cStateCommand)
+    public void onStateCommand(MIS2CSwitchStateCommand cStateCommand)
     {
         if (cStateCommand.getState() == ProtocolState.INVALID)
             logSlaveWarn("Bad server implementation? The new session state is invalid!");
@@ -334,7 +378,7 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
             internalMasterInstance.onInternalSlaveError(this, e);
     }
 
-    private final CommandRegistries registries = new CommandRegistries();
+    private final CommandRegistriesCopy registries = new CommandRegistriesCopy();
 
     @Override
     public void onText(String text)
@@ -344,22 +388,17 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
 
     private void onCommandRaw(String raw)
     {
-        var text = raw.split(" ", 2);
-        var cmd = registries.createS2CCommand(text[0], text.length == 2 ? text[1] : "");
-        if (cmd == null)
+        try
         {
-            logSlaveWarn("Unknown command: " + text[0]);
-            return;
-        }
+            var decode = gson.fromJson(raw, MIClientboundCommandRecord.class);
+            var cmd = registries.createS2CCommand(decode.commandName(), decode.arguments());
 
-        if (!(cmd instanceof MIS2CCommand<?> mis2c))
+            cmd.onCommand(this);
+        }
+        catch (Throwable t)
         {
-            logSlaveWarn("Command '%s' is not a MIS2C instance!".formatted(cmd));
-            return;
+            logSlaveWarn("Failed to handle message from master instance, stopping! (%s)".formatted(t.getMessage()));
+            stopClient();
         }
-
-        mis2c.onCommand(this);
     }
-
-    private boolean silent = false;
 }

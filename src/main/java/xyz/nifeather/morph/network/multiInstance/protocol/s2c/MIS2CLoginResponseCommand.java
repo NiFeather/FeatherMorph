@@ -1,14 +1,15 @@
 package xyz.nifeather.morph.network.multiInstance.protocol.s2c;
 
 import xyz.nifeather.morph.network.multiInstance.protocol.IMasterHandler;
+import xyz.nifeather.morph.network.utils.Asserts;
 
 import java.util.Map;
 
-public class MIS2CLoginResultCommand extends MIS2CCommand<Boolean>
+public class MIS2CLoginResponseCommand extends MIS2CCommand
 {
     public final boolean loginAllowed;
 
-    public MIS2CLoginResultCommand(boolean allowed)
+    public MIS2CLoginResponseCommand(boolean allowed)
     {
         super("r_login");
 
@@ -23,6 +24,13 @@ public class MIS2CLoginResultCommand extends MIS2CCommand<Boolean>
         );
     }
 
+    public static MIS2CLoginResponseCommand fromArguments(Map<String, String> arguments) throws RuntimeException
+    {
+        return new MIS2CLoginResponseCommand(
+                Boolean.parseBoolean(Asserts.getStringOrThrow(arguments, "allowed"))
+        );
+    }
+
     public boolean isAllowed()
     {
         return loginAllowed;
@@ -31,11 +39,6 @@ public class MIS2CLoginResultCommand extends MIS2CCommand<Boolean>
     @Override
     public void onCommand(IMasterHandler handler)
     {
-        handler.onLoginResultCommand(this);
-    }
-
-    public static MIS2CLoginResultCommand from(String text)
-    {
-        return new MIS2CLoginResultCommand(Boolean.parseBoolean(text));
+        handler.onLoginResponse(this);
     }
 }

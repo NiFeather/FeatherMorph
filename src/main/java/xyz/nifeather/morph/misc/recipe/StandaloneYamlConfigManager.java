@@ -67,9 +67,16 @@ public abstract class StandaloneYamlConfigManager extends MorphPluginObject
 
         var configVersion = newConfig.getInt(CONFIG_VERSION.toString(), 0);
         if (configVersion < this.getExpectedConfigVersion())
+        {
             this.migrate(this.backendConfiguration, newConfig);
-
-        this.backendConfiguration = newConfig;
+            logger.info("Recipe configuration migrate done, reloading...");
+            reload();
+        }
+        else
+        {
+            logger.info("Done reloading recipe configuration");
+            this.backendConfiguration = newConfig;
+        }
     }
 
     @NotNull

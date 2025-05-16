@@ -1,13 +1,13 @@
 package xyz.nifeather.morph.network.server;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import io.netty.buffer.Unpooled;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.kyori.adventure.text.Component;
 import net.minecraft.network.FriendlyByteBuf;
 import org.bukkit.Bukkit;
-import org.bukkit.craftbukkit.entity.CraftPlayer;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
+import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -40,6 +40,7 @@ import xyz.nifeather.morph.network.server.handlers.V3ProtocolHandler;
 
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -72,6 +73,8 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
     public void setProtocolHandlerFor(Player player, ICommandPacketHandler commandPacketHandler)
     {
         playerCommandHandlerMap.put(player, commandPacketHandler);
+
+        this.onPlayerChannelRegister(player, "feathermorph:no_op_just_trigger");
     }
 
     @Nullable
@@ -237,6 +240,74 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
 
     private final AtomicBoolean scheduledReauthPlayers = new AtomicBoolean(false);
 
+    //region Wait Until Ready
+
+    public static final NamespacedKey KEY_CHANNEL_STORE = Objects.requireNonNull(NamespacedKey.fromString("feathermorph:channel_store"), "Null NamespacedKey, you might have a broken server software...");
+
+    private final Map<Player, CompletableFuture<Player>> waitMap = new ConcurrentHashMap<>();
+
+    public void onPlayerChannelRegister(Player player, String channel)
+    {
+        var persistentDataContainer = player.getPersistentDataContainer();
+
+        var list = persistentDataContainer.get(KEY_CHANNEL_STORE, PersistentDataType.LIST.strings());
+        if (list == null)
+            list = List.of();
+
+        var channelList = new ObjectArrayList<>(list);
+
+        channelList.add(channel);
+        persistentDataContainer.set(KEY_CHANNEL_STORE, PersistentDataType.LIST.strings(), channelList);
+
+        var protocolHandler = getProtocolHandler(player);
+
+        if (protocolHandler == null)
+            return;
+
+        if (new HashSet<>(channelList).containsAll(protocolHandler.validChannels()))
+        {
+            notifyReady(player);
+            persistentDataContainer.remove(KEY_CHANNEL_STORE);
+        }
+    }
+
+    public void ensureFuturePresent(Player player)
+    {
+        getOrCreateFuture(player);
+    }
+
+    /**
+     * @return The {@link CompletableFuture} that matches the player, for convenience
+     */
+    @NotNull
+    public CompletableFuture<Player> getOrCreateFuture(Player player)
+    {
+        var existingFuture = waitMap.getOrDefault(player, null);
+
+        if (existingFuture == null)
+        {
+            existingFuture = new CompletableFuture<>();
+            waitMap.put(player, new CompletableFuture<>());
+        }
+
+        return existingFuture;
+    }
+
+    public CompletableFuture<Player> waitReady(Player player)
+    {
+        return getOrCreateFuture(player);
+    }
+
+    public void notifyReady(Player player)
+    {
+        var future = waitMap.getOrDefault(player, null);
+
+        if (future != null)
+            future.complete(player);
+    }
+
+    //endregion
+
     //region Handle Protocol Inputs
 
     public InitializeRespondV3 getInitializeRespond()
@@ -256,11 +327,6 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
             return;
         }
 
-        // This is BAD!
-        // We should find another better way to make sure we always send commands when the channel is added.
-        ((CraftPlayer) player).addChannel(MessageChannel.commandChannelV3);
-        ((CraftPlayer) player).addChannel(MessageChannel.initializeChannelV3);
-
         var handleResult = V3ProtocolHandler.V3_INSTANCE.handleInitializeData(player, rawData);
         if (!handleResult.handleSuccess())
         {
@@ -268,10 +334,10 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
             return;
         }
 
+        logger.info("%s is using V3 packets, scheduling response".formatted(player.getName()));
         this.setProtocolHandlerFor(player, V3ProtocolHandler.V3_INSTANCE);
 
-        logger.info("%s is using V3 packets".formatted(player.getName()));
-        this.handleHandshakeMessage(V3ProtocolHandler.V3_INSTANCE, player, handleResult);
+        this.waitReady(player).thenRun(() -> this.handleHandshakeMessage(V3ProtocolHandler.V3_INSTANCE, player, handleResult));
     }
 
     public void handleHandshakeMessage(ICommandPacketHandler commandPacketHandler, @NotNull Player player, @NotNull ClientInitializeRecordV3 clientInitializeRecord)
@@ -342,7 +408,13 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
         if (!allowClient.get()) return;
 
         var session = getSession(player);
-        if (session == null || session.initializeState.worseThan(InitializeState.API_CHECKED)) return;
+        if (session == null || session.initializeState.worseThan(InitializeState.API_CHECKED))
+        {
+            if (FeatherMorphMain.getInstance().debugOutputEnabled())
+                logger.info("Player %s sent command while not checked API version! ignoring...");
+
+            return;
+        }
 
         AbstractC2SCommand<?> command;
 
@@ -616,6 +688,9 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
     @Override
     public void disconnect(Player player)
     {
+        this.waitMap.remove(player);
+        player.getPersistentDataContainer().remove(KEY_CHANNEL_STORE);
+
         if (!this.playerSessionMap.containsKey(player))
         {
             if (FeatherMorphMain.getInstance().doInternalDebugOutput)

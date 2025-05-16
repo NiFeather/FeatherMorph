@@ -15,6 +15,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.backends.DisguiseWrapper;
 import xyz.nifeather.morph.backends.WrapperEvent;
+import xyz.nifeather.morph.backends.WrapperProperties;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.MorphStrings;
 import xyz.nifeather.morph.misc.DisguiseMeta;
@@ -30,6 +31,7 @@ import xiamomc.pluginbase.Annotations.Resolved;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 public class PlayerDisguiseProvider extends DefaultDisguiseProvider
 {
@@ -91,6 +93,12 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
 
         var mainHandItem = player.getEquipment().getItemInMainHand();
 
+        // Apply PlaceHolder Skin
+        var playerDisguiseTargetName = DisguiseTypes.PLAYER.toStrippedId(id);
+
+        var dummySkin = new GameProfile(UUID.randomUUID(), playerDisguiseTargetName);
+        wrapper.applySkin(dummySkin);
+
         //存在玩家头颅，尝试通过头颅获取目标皮肤
         if (mainHandItem.getType() == Material.PLAYER_HEAD)
         {
@@ -123,24 +131,29 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
 
         wrapper.subscribeEvent(this, WrapperEvent.SKIN_SET, skin ->
                 clientHandler.sendCommand(player, new S2CSetProfileCommand(state.getProfileNbtString())));
+    }
 
-        var wrapperSkin = wrapper.getSkin();
-        if (wrapperSkin == null || wrapperSkin.getId().equals(Util.NIL_UUID))
-        {
-            var playerDisguiseTargetName = DisguiseTypes.PLAYER.toStrippedId(state.getDisguiseIdentifier());
+    @Override
+    public void onDisguiseApply(DisguiseState state)
+    {
+        super.onDisguiseApply(state);
 
-            PlayerSkinProvider.getInstance().fetchSkin(playerDisguiseTargetName)
-                    .thenAccept(optional ->
-                    {
-                        if (wrapper.disposed()) return;
+        var wrapper = state.getDisguiseWrapper();
+        var player = state.getPlayer();
 
-                        GameProfile outcomingProfile = new GameProfile(Util.NIL_UUID, playerDisguiseTargetName);
-                        if (optional.isPresent()) outcomingProfile = optional.get();
+        var playerDisguiseTargetName = DisguiseTypes.PLAYER.toStrippedId(state.getDisguiseIdentifier());
 
-                        GameProfile finalOutcomingProfile = outcomingProfile;
-                        this.scheduleOn(player, () -> wrapper.applySkin(finalOutcomingProfile));
-                    });
-        }
+        PlayerSkinProvider.getInstance().fetchSkin(playerDisguiseTargetName)
+                .thenAccept(optional ->
+                {
+                    if (wrapper.disposed()) return;
+
+                    GameProfile outcomingProfile = new GameProfile(Util.NIL_UUID, playerDisguiseTargetName);
+                    if (optional.isPresent()) outcomingProfile = optional.get();
+
+                    GameProfile finalOutcomingProfile = outcomingProfile;
+                    this.scheduleOn(player, () -> wrapper.applySkin(finalOutcomingProfile));
+                });
     }
 
     private MorphGameProfile getGameProfile(ItemStack item)

@@ -28,7 +28,7 @@ public class InventoryMorphSkill extends MorphSkill<NoOpConfiguration>
     {
         var defaultShown = state.toggleDisguisedItems();
 
-        manager.spawnParticle(player, player.getLocation(), player.getWidth(), player.getHeight(), player.getWidth());
+        manager.spawnCloudParticle(player, player.getLocation(), player.getWidth(), player.getHeight(), player.getWidth());
 
         clientHandler.sendCommand(player, new S2CSetDisplayingFakeEquipCommand(defaultShown));
 

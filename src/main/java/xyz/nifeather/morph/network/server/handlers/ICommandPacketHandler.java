@@ -8,8 +8,13 @@ import xyz.nifeather.morph.network.commands.S2C.InitializeRespondV3;
 import xyz.nifeather.morph.network.server.handlers.results.CommandHandleResult;
 import xyz.nifeather.morph.network.server.handlers.results.VersionHandleResult;
 
+import java.util.List;
+
 public interface ICommandPacketHandler
 {
+    @NotNull
+    List<String> validChannels();
+
     @NotNull
     ClientInitializeRecordV3 handleInitializeData(Player player, byte @NotNull [] rawData);
 

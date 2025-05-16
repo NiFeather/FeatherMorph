@@ -1,7 +1,6 @@
 package xyz.nifeather.morph.network.server;
 
 import org.bukkit.Bukkit;
-import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import xyz.nifeather.morph.FeatherMorphMain;
@@ -26,7 +25,6 @@ public class LegacyClientHandler extends MorphPluginObject
         messenger.registerIncomingPluginChannel(plugin, MessageChannel.versionChannelV2, this::handleVersionV2);
         messenger.registerOutgoingPluginChannel(plugin, MessageChannel.versionChannelV2);
 
-        //todo: CommandV2 is going to LegacyClientHandler in future
         messenger.registerIncomingPluginChannel(plugin, MessageChannel.commandChannelV2, this::handleCommandV2);
         messenger.registerOutgoingPluginChannel(plugin, MessageChannel.commandChannelV2);
 
@@ -55,29 +53,21 @@ public class LegacyClientHandler extends MorphPluginObject
             return;
         }
 
-        ((CraftPlayer) player).addChannel(MessageChannel.initializeChannelV1);
-
-        ((CraftPlayer) player).addChannel(MessageChannel.commandChannelV1);
-        ((CraftPlayer) player).addChannel(MessageChannel.commandChannelV2);
-
-        ((CraftPlayer) player).addChannel(MessageChannel.versionChannelV1);
-        ((CraftPlayer) player).addChannel(MessageChannel.versionChannelV2);
-
         var v2Handle = V2ProtocolHandler.V2_INSTANCE.handleInitializeData(player, bytes);
         if (v2Handle.handleSuccess()) // success!
         {
             clientHandler.setProtocolHandlerFor(player, V2ProtocolHandler.V2_INSTANCE);
-            logger.info("%s is using V2 packets".formatted(player.getName()));
+            logger.info("%s is using V2 packets, scheduling response".formatted(player.getName()));
 
-            V2ProtocolHandler.V2_INSTANCE.sendV2InitalizeRespond(player, clientHandler.getInitializeRespond().serverFeatures());
+            clientHandler.waitReady(player).thenRun(() -> V2ProtocolHandler.V2_INSTANCE.sendV2InitalizeRespond(player, clientHandler.getInitializeRespond().serverFeatures()));
             return;
         }
 
         // Possible V1, just send respond
         clientHandler.setProtocolHandlerFor(player, V1ProtocolHandler.V1_INSTANCE);
-        logger.info("%s is using V1 packets".formatted(player.getName()));
+        logger.info("%s is using V1 packets, scheduling response".formatted(player.getName()));
 
-        V1ProtocolHandler.V1_INSTANCE.sendV1InitializeRespond(player);
+        clientHandler.waitReady(player).thenRun(() -> V1ProtocolHandler.V1_INSTANCE.sendV1InitializeRespond(player));
     }
 
     private void handleCommandV2(@NotNull String channelName, @NotNull Player player, byte @NotNull [] bytes)

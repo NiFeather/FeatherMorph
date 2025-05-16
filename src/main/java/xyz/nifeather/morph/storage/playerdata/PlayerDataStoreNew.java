@@ -6,6 +6,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.interfaces.IManagePlayerData;
 import xyz.nifeather.morph.misc.DisguiseMeta;
 import xyz.nifeather.morph.misc.DisguiseTypes;
@@ -217,7 +218,7 @@ public class PlayerDataStoreNew extends DirectoryJsonBasedStorage<PlayerMeta> im
      * @return 伪装信息
      */
     @Override
-    public PlayerMeta getPlayerMeta(OfflinePlayer player)
+    public @NotNull PlayerMeta getPlayerMeta(OfflinePlayer player)
     {
         var uuid = player.getUniqueId();
 
@@ -251,7 +252,8 @@ public class PlayerDataStoreNew extends DirectoryJsonBasedStorage<PlayerMeta> im
     {
         meta.uniqueId = matchingUUID;
 
-        logger.info("Doing init for " + meta);
+        if (FeatherMorphMain.getInstance().debugOutputEnabled())
+            logger.info("Doing init for " + meta);
 
         //要设置给c.unlockedDisguises的列表
         var list = new ObjectArrayList<DisguiseMeta>();
@@ -302,6 +304,7 @@ public class PlayerDataStoreNew extends DirectoryJsonBasedStorage<PlayerMeta> im
 
     private final AtomicBoolean noLazyLoad = new AtomicBoolean(false);
 
+    @Override
     public void shouldLoadAllData(boolean val)
     {
         noLazyLoad.set(val);
@@ -310,7 +313,8 @@ public class PlayerDataStoreNew extends DirectoryJsonBasedStorage<PlayerMeta> im
             loadAll();
     }
 
-    public List<PlayerMeta> getAll()
+    @Override
+    public List<PlayerMeta> listAll()
     {
         return this.trackedPlayerMetaMap.values().stream().toList();
     }

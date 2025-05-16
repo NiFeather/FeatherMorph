@@ -3,14 +3,17 @@ package xyz.nifeather.morph.interfaces;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.misc.DisguiseMeta;
 import xyz.nifeather.morph.storage.playerdata.PlayerMeta;
 
+import java.util.List;
+
 public interface IManagePlayerData
 {
     /**
-     * 获取包含某一玩家的玩家名的伪装信息
+     * 获取伪装信息
      *
      * @param rawString 原始ID
      * @return 伪装信息
@@ -44,12 +47,24 @@ public interface IManagePlayerData
 
     /**
      * 获取玩家的伪装配置
+     *
      * @param player 目标玩家
      * @return 伪装信息
      */
+    @NotNull
     public PlayerMeta getPlayerMeta(OfflinePlayer player);
 
     public boolean reloadConfiguration();
 
     public boolean saveConfiguration();
+
+    /**
+     * @param shouldLoadAllData TRUE if this manager should load all data immediately
+     */
+    void shouldLoadAllData(boolean shouldLoadAllData);
+
+    /**
+     * @return All available PlayerMeta for this manager
+     */
+    List<PlayerMeta> listAll();
 }
