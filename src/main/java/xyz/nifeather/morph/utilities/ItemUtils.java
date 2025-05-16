@@ -6,12 +6,13 @@ import com.mojang.serialization.JsonOps;
 import it.unimi.dsi.fastutil.objects.ObjectAVLTreeSet;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.util.Unit;
 import net.minecraft.world.item.component.CustomData;
-import net.minecraft.world.item.component.TooltipDisplay;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -108,9 +109,7 @@ public class ItemUtils
         customData = customData.update(tag -> tag.putString(MAGIC_BOTTLE_STORE_ITEM_KEY, disguiseIdentifier));
         nms.set(DataComponents.CUSTOM_DATA, customData);
 
-        SequencedSet<DataComponentType<?>> set = new ObjectAVLTreeSet<>();
-        set.add(DataComponents.POTION_CONTENTS);
-        nms.set(DataComponents.TOOLTIP_DISPLAY, new TooltipDisplay(false, set));
+        nms.set(DataComponents.HIDE_ADDITIONAL_TOOLTIP, Unit.INSTANCE);
 
         return nms.asBukkitMirror();
     }
@@ -126,7 +125,11 @@ public class ItemUtils
         if (customData == null || !customData.contains(MAGIC_BOTTLE_STORE_ITEM_KEY))
             return null;
 
-        return customData.copyTag().getString(MAGIC_BOTTLE_STORE_ITEM_KEY).orElse(null);
+        var result = customData.copyTag().getString(MAGIC_BOTTLE_STORE_ITEM_KEY);
+        if (result.isBlank())
+            throw new RuntimeException("Invalid MAGIC_BOTTLE_STORE_ITEM_KEY in tag " + customData.copyTag().toString());
+
+        return result;
     }
 
     public static boolean isMagicBottle(ItemStack stack)
@@ -136,7 +139,7 @@ public class ItemUtils
 
         if (customData == null || !customData.contains(MAGIC_BOTTLE_ITEM_KEY)) return false;
 
-        return customData.copyTag().getBoolean(MAGIC_BOTTLE_ITEM_KEY).orElseThrow() ;
+        return customData.copyTag().getBoolean(MAGIC_BOTTLE_ITEM_KEY);
     }
 
     //endregion Magic Bottle
