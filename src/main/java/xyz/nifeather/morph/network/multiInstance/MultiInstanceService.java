@@ -58,14 +58,14 @@ public class MultiInstanceService extends MorphPluginObject
         masterInstance = null;
         slaveInstance = null;
 
-        slaveInstance = new SlaveInstance(!isMaster);
-
         if (isMaster)
         {
             masterInstance = new MasterInstance();
-
             masterInstance.loadInitialDisguises(manager.listAllPlayerMeta());
-            masterInstance.setInternalSlave(slaveInstance);
+        }
+        else
+        {
+            slaveInstance = new SlaveInstance(true);
         }
     }
 
@@ -120,7 +120,7 @@ public class MultiInstanceService extends MorphPluginObject
         {
             assert slaveInstance != null;
 
-            if (slaveInstance.isOnline() && !slaveInstance.isInternalSlave())
+            if (slaveInstance.isOnline())
                 slaveInstance.sendCommand(new MIC2SSyncDisguiseCommand(meta));
         }
     }

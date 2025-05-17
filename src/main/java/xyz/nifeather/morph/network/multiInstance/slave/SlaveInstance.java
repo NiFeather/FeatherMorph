@@ -84,20 +84,6 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
         logger.warn("[Slave@%s] %s".formatted(Integer.toHexString(this.hashCode()), message));
     }
 
-    @Nullable
-    private MasterInstance internalMasterInstance;
-
-    public void onInternalMasterStart(MasterInstance masterInstance)
-    {
-        if (prepareClient())
-        {
-            this.internalMasterInstance = masterInstance;
-            return;
-        }
-
-        throw new IllegalStateException("Can't setup client!");
-    }
-
     /**
      * @return Whether this operation operates successfully
      */
@@ -153,14 +139,9 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
         if (!startOnLoad) return;
 
         if (prepareClient())
-        {
-            if (!isInternalSlave())
-                morphManager.setDataStore(new VoidDataHolder());
-        }
+            morphManager.setDataStore(new VoidDataHolder());
         else
-        {
             logSlaveWarn("Can't setup client, this instance will stay offline from the instance network!");
-        }
     }
 
     private final Bindable<String> secret = new Bindable<>(null);
@@ -214,11 +195,6 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
         return client != null && client.isOpen();
     }
 
-    public boolean isInternalSlave()
-    {
-        return this.internalMasterInstance != null;
-    }
-
     @Override
     public void onSyncMeta(MIS2CSyncMetaCommand command)
     {
@@ -231,9 +207,6 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
     @Override
     public void onUpdateMetaCommand(MIS2CUpdateMetaCommand metaCommand)
     {
-        if (isInternalSlave())
-            return;
-
         if (!currentState.get().loggedIn())
         {
             logSlaveWarn("Bad server implementation? They are trying to sync meta before we login!");
@@ -252,14 +225,6 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
 
     private void onReceivePlayerMeta(SocketPlayerMeta socketMeta)
     {
-        if (isInternalSlave())
-        {
-            if (FeatherMorphMain.getInstance().debugOutputEnabled())
-                logSlaveWarn("InternalSlave received socket meta! Is this right?");
-
-            return;
-        }
-
         var operation = socketMeta.getOperation();
         var offlinePlayer = Bukkit.getOfflinePlayer(Objects.requireNonNull(socketMeta.getBindingUuid(), "???"));
 
@@ -330,10 +295,8 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
             return;
         }
 
-        logSlaveInfo("Done logging in!");
-
-        if (!isInternalSlave())
-            morphManager.setDataStore(this.playerDataHolder);
+        logSlaveInfo("Done logging in! Setting up data holder");
+        morphManager.setDataStore(this.playerDataHolder);
     }
 
     private final Bindable<ProtocolState> currentState = new Bindable<>(ProtocolState.NOT_CONNECTED);
@@ -374,8 +337,6 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
     @Override
     public void onClientError(Exception e, InstanceClient client)
     {
-        if (internalMasterInstance != null)
-            internalMasterInstance.onInternalSlaveError(this, e);
     }
 
     private final CommandRegistriesCopy registries = new CommandRegistriesCopy();
