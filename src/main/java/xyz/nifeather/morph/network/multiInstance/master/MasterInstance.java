@@ -189,7 +189,7 @@ public class MasterInstance extends MorphPluginObject implements IInstanceServic
 
     private final CommandRegistriesCopy registries = new CommandRegistriesCopy();
 
-    private final ProtocolLevel level = ProtocolLevel.V1;
+    private final ProtocolLevel level = ProtocolLevel.V3;
 
     private final Map<WebSocket, ProtocolState> allowedSockets = new Object2ObjectArrayMap<>();
 
