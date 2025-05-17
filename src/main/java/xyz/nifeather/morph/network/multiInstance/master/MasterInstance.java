@@ -373,21 +373,6 @@ public class MasterInstance extends MorphPluginObject implements IInstanceServic
     @Override
     public void onServerStart(InstanceServer server)
     {
-        var slave = slaveWeakRef.get();
-        if (slave == null) return;
-
-        try
-        {
-            slave.onInternalMasterStart(this);
-        }
-        catch (Throwable t)
-        {
-            logger.error("Error occurred while setting up internal client. Stopping master server!");
-            logger.warn(t.getMessage());
-            t.printStackTrace();
-
-            this.stop();
-        }
     }
 
     @Override
