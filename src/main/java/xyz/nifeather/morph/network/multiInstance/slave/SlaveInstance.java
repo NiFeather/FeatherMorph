@@ -353,7 +353,7 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
         currentState.set(newState);
     }
 
-    private final ProtocolLevel implementingLevel = ProtocolLevel.V1;
+    private final ProtocolLevel implementingLevel = ProtocolLevel.V3;
 
     @Override
     public void onConnectionOpen()
