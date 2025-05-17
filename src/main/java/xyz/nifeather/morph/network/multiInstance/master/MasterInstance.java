@@ -2,6 +2,7 @@ package xyz.nifeather.morph.network.multiInstance.master;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.bukkit.Bukkit;
@@ -61,8 +62,12 @@ public class MasterInstance extends MorphPluginObject implements IInstanceServic
         {
             if (bindingServer != null)
             {
-                bindingServer.stop(10, "Master instance shutting down");
+                logMasterInfo("Stopping WebSocket server...");
+
+                bindingServer.stop(10000, "Master instance shutting down");
                 bindingServer.dispose();
+
+                logMasterInfo("Done stopping WebSocket server");
             }
 
             bindingServer = null;
@@ -166,9 +171,14 @@ public class MasterInstance extends MorphPluginObject implements IInstanceServic
             cmd.setSourceSocket(ws);
             cmd.onCommand(this);
         }
+        catch (JsonSyntaxException e)
+        {
+            logMasterWarn("Unable to decode JSON from WebSocket '%s': %s".formatted(ws.getRemoteSocketAddress(), e.getMessage()));
+            disconnect(ws, "Failed to decode JSON");
+        }
         catch (Throwable t)
         {
-            logMasterWarn("Error handling command: %s".formatted(t.getMessage()));
+            logMasterWarn("Error handling command from WebSocket '%s': %s".formatted(ws.getRemoteSocketAddress(), t.getMessage()));
             t.printStackTrace();
 
             disconnect(record.socket(), "Failed to handle client message");
