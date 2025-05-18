@@ -16,7 +16,6 @@ import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.config.ConfigOption;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.network.multiInstance.IInstanceService;
-import xyz.nifeather.morph.network.multiInstance.master.MasterInstance;
 import xyz.nifeather.morph.network.multiInstance.protocol.*;
 import xyz.nifeather.morph.network.multiInstance.protocol.c2s.MIC2SCommand;
 import xyz.nifeather.morph.network.multiInstance.protocol.c2s.MIC2SLoginCommand;
@@ -200,8 +199,26 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
     {
         logSlaveInfo("Received data sync for %s entries".formatted(command.data().size()));
 
-        for (SocketPlayerMeta datum : command.data())
-            this.onReceivePlayerMeta(datum);
+        playerDataHolder.dropAll();
+        for (SocketPlayerMeta socketMeta : command.data())
+        {
+            if (!socketMeta.isValid())
+                continue;
+
+            var offlinePlayer = Bukkit.getOfflinePlayer(Objects.requireNonNull(socketMeta.getBindingUuid(), "???"));
+            var playerMeta = playerDataHolder.getPlayerMeta(offlinePlayer);
+
+            for (var identifier : socketMeta.getIdentifiers())
+            {
+                var disguiseMeta = playerDataHolder.getDisguiseMeta(identifier);
+                if (disguiseMeta == null)
+                    continue;
+
+                playerMeta.addDisguise(disguiseMeta);
+            }
+        }
+
+        morphManager.refreshDisguiseUnlockStateToAllPlayers();
     }
 
     @Override
@@ -226,11 +243,10 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
     private void onReceivePlayerMeta(SocketPlayerMeta socketMeta)
     {
         var operation = socketMeta.getOperation();
+
         var offlinePlayer = Bukkit.getOfflinePlayer(Objects.requireNonNull(socketMeta.getBindingUuid(), "???"));
-
-        var playerMeta = morphManager.getPlayerMeta(offlinePlayer);
-
         var player = offlinePlayer.getPlayer();
+        var playerMeta = morphManager.getPlayerMeta(offlinePlayer);
 
         if (operation == Operation.ADD_IF_ABSENT)
         {
