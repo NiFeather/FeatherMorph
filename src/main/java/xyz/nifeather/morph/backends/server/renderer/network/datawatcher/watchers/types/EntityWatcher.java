@@ -78,7 +78,7 @@ public class EntityWatcher extends SingleWatcher
                 ? this.readEntryOrDefault(CustomEntries.EQUIPMENT, new DisguiseEquipment.EmptyDisguiseEquipment())
                 : player.getEquipment();
 
-        var packet = new WrapperPlayServerEntityEquipment(-player.getEntityId(), ProtocolEquipment.toPEEquipmentList(equipment));
+        var packet = new WrapperPlayServerEntityEquipment(player.getEntityId(), ProtocolEquipment.toPEEquipmentList(equipment));
 
         PacketFactory.markEquipmentPacket(packet);
 
