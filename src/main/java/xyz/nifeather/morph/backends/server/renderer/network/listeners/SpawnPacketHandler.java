@@ -66,18 +66,15 @@ public class SpawnPacketHandler extends ProtocolListener
         watcher.writeEntry(CustomEntries.PROFILE, ((CraftPlayer) player).getProfile());
         watcher.writeEntry(CustomEntries.SPAWN_UUID, player.getUniqueId());
         watcher.writeEntry(CustomEntries.SPAWN_ID, player.getEntityId());
-        watcher.writeEntry(CustomEntries.PROFILE_LISTED, true);
         watcher.writeEntry(CustomEntries.DONT_INCLUDE_PACKET_IDENTIFIER, true);
 
         var packets = watcher.buildSpawnPackets();
 
         var removePacket = new WrapperPlayServerDestroyEntities(player.getEntityId());
 
-        if (disguiseWatcher.getEntityType() == org.bukkit.entity.EntityType.PLAYER
-                && !disguiseWatcher.readEntryOrDefault(CustomEntries.PROFILE_LISTED, false))
+        if (disguiseWatcher.getEntityType() == org.bukkit.entity.EntityType.PLAYER)
         {
             var disguiseUUID = disguiseWatcher.readEntryOrThrow(CustomEntries.SPAWN_UUID);
-
             var packetRemoveInfo = new WrapperPlayServerPlayerInfoRemove(disguiseUUID);
 
             Bukkit.getOnlinePlayers().forEach(p -> protocolManager.sendPacket(p, packetRemoveInfo));

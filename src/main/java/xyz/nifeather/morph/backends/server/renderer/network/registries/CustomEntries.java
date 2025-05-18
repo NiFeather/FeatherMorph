@@ -13,13 +13,6 @@ public class CustomEntries
      */
     public static final CustomEntry<GameProfile> PROFILE = CustomEntry.of("profile", new GameProfile(UUID.randomUUID(), "sample")).doRequireNonNull();
 
-    /**
-     * Should profile listed in the tab list?
-     * <b></b>
-     * Also, 'TRUE' means the profile listing is also handled by external sources
-     */
-    public static final CustomEntry<Boolean> PROFILE_LISTED = CustomEntry.of("profile_listed", false);
-
     public static final CustomEntry<String> DISGUISE_NAME = CustomEntry.of("disguise_name", "").doRequireNonNull();
 
     public static final CustomEntry<DisguiseEquipment> EQUIPMENT = CustomEntry.of("equip", new DisguiseEquipment());
