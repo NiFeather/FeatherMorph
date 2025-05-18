@@ -2,6 +2,7 @@ package xyz.nifeather.morph.backends.server.renderer.network.registries;
 
 import com.mojang.authlib.GameProfile;
 import net.minecraft.Util;
+import org.jetbrains.annotations.ApiStatus;
 import xyz.nifeather.morph.misc.DisguiseEquipment;
 
 import java.util.UUID;
@@ -17,6 +18,9 @@ public class CustomEntries
 
     public static final CustomEntry<DisguiseEquipment> EQUIPMENT = CustomEntry.of("equip", new DisguiseEquipment());
     public static final CustomEntry<Boolean> DISPLAY_FAKE_EQUIPMENT = CustomEntry.of("display_fake_equip", false);
+
+    @ApiStatus.Internal
+    public static final CustomEntry<Boolean> PROFILE_LISTED = CustomEntry.of("profile_listed", false);
 
     /**
      * @deprecated UUID for player disguise now is {@link CustomEntries#SPAWN_ID}
