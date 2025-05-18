@@ -23,6 +23,7 @@ import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers
 import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.types.LivingEntityWatcher;
 import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.types.PlayerWatcher;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
+import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntry;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.RegisterParameters;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.RenderRegistry;
 import xyz.nifeather.morph.backends.server.renderer.utilties.WatcherUtils;
@@ -159,6 +160,7 @@ public class ServerRenderer extends MorphPluginObject implements Listener
         watcher.writeEntry(CustomEntries.PROFILE, ((CraftPlayer) player).getProfile());
         watcher.writeEntry(CustomEntries.SPAWN_UUID, player.getUniqueId());
         watcher.writeEntry(CustomEntries.SPAWN_ID, player.getEntityId());
+        watcher.writeEntry(CustomEntries.PROFILE_LISTED, true);
         watcher.writeEntry(CustomEntries.DONT_INCLUDE_PACKET_IDENTIFIER, true);
 
         var packets = watcher.buildSpawnPackets();
