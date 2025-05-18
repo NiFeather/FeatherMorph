@@ -12,6 +12,7 @@ import xyz.nifeather.morph.backends.DisguiseWrapper;
 import xyz.nifeather.morph.backends.WrapperEvent;
 import xyz.nifeather.morph.backends.server.renderer.ServerRenderer;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
+import xyz.nifeather.morph.backends.server.renderer.utilties.WatcherUtils;
 import xyz.nifeather.morph.messages.BackendStrings;
 import xyz.nifeather.morph.utilities.NbtUtils;
 
@@ -196,7 +197,11 @@ public class ServerBackend extends DisguiseBackend<ServerDisguise, ServerDisguis
             return false;
         }
 
+        watcher.markSilent(this);
         serverDisguiseWrapper.setRenderParameters(player, watcher);
+        watcher.unmarkSilent(this);
+
+        serverRenderer.refreshStateForPlayer(player, WatcherUtils.getAffectedPlayers(player));
 
         return true;
     }

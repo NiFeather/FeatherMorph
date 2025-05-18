@@ -62,13 +62,10 @@ public class PlayerWatcher extends InventoryLivingWatcher
             {
                 var spawnPackets = this.buildSpawnPackets();
 
-                var packetRemove = new WrapperPlayServerDestroyEntities(player.getEntityId());
                 var protocol = PacketEvents.getAPI().getPlayerManager();
 
                 affected.forEach(p ->
                 {
-                    protocol.sendPacket(p, packetRemove);
-
                     spawnPackets.forEach(packet -> protocol.sendPacket(p, packet));
                 });
             }

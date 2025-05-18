@@ -47,6 +47,12 @@ public class EquipmentPacketListener extends ProtocolListener
 
     private void onEquipmentPacket(WrapperPlayServerEntityEquipment packet, PacketSendEvent event)
     {
+        if (PacketFactory.isEquipmentPacketOurs(packet))
+        {
+            packet.setEntityId(Math.abs(packet.getEntityId()));
+            return;
+        }
+
         //获取此包的来源实体
         var sourcePlayer = getPlayerFrom(packet.getEntityId());
         if (sourcePlayer == null)

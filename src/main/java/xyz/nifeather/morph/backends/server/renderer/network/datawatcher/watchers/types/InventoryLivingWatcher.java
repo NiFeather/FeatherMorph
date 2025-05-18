@@ -22,17 +22,9 @@ public class InventoryLivingWatcher extends LivingEntityWatcher
         super.onEntryWrite(entry, oldVal, newVal);
 
         if (entry.equals(CustomEntries.DISPLAY_FAKE_EQUIPMENT) || entry.equals(CustomEntries.EQUIPMENT))
-            sendPacketToAffectedPlayers(this.getEquipmentPacket());
-    }
-
-    public WrapperPlayServerEntityEquipment getEquipmentPacket()
-    {
-        var player = getBindingPlayer();
-        var shouldDisplayFakeEquip = this.readEntryOrDefault(CustomEntries.DISPLAY_FAKE_EQUIPMENT, false);
-        EntityEquipment equipment = shouldDisplayFakeEquip
-                ? this.readEntryOrDefault(CustomEntries.EQUIPMENT, new DisguiseEquipment())
-                : player.getEquipment();
-
-        return new WrapperPlayServerEntityEquipment(player.getEntityId(), ProtocolEquipment.toPEEquipmentList(equipment));
+        {
+            if (!isSilent())
+                sendPacketToAffectedPlayers(this.getEquipmentPacket());
+        }
     }
 }
