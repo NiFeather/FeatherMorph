@@ -86,6 +86,9 @@ public class PacketFactory extends MorphPluginObject
 
     public static boolean isEquipmentPacketOurs(WrapperPlayServerEntityEquipment wrapper)
     {
+        if (wrapper.getEntityId() > 0)
+            return false;
+
         var abs = Math.abs(wrapper.getEntityId());
 
         var playerFound = Bukkit.getOnlinePlayers().stream()
