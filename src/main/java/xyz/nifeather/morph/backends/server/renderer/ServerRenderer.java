@@ -1,22 +1,31 @@
 package xyz.nifeather.morph.backends.server.renderer;
 
+import com.github.retrooper.packetevents.PacketEvents;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerDestroyEntities;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerPlayerInfoRemove;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.bukkit.Bukkit;
+import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Bindables.Bindable;
+import xiamomc.pluginbase.Exceptions.NullDependencyException;
 import xyz.nifeather.morph.MorphPluginObject;
+import xyz.nifeather.morph.backends.server.renderer.network.DisplayParameters;
 import xyz.nifeather.morph.backends.server.renderer.network.ProtocolHandler;
 import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
 import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.types.LivingEntityWatcher;
+import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.types.PlayerWatcher;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.RegisterParameters;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.RenderRegistry;
+import xyz.nifeather.morph.backends.server.renderer.utilties.WatcherUtils;
 import xyz.nifeather.morph.config.ConfigOption;
 import xyz.nifeather.morph.config.MorphConfigManager;
 
@@ -32,6 +41,12 @@ public class ServerRenderer extends MorphPluginObject implements Listener
     {
         dependencies.cache(registry);
         dependencies.cache(protocolHandler = new ProtocolHandler());
+
+        registry.onUnRegister(this, parameters ->
+        {
+            var player = parameters.player();
+            this.unDisguiseForPlayer(player, parameters.watcher(), WatcherUtils.getAffectedPlayers(player));
+        });
     }
 
     @Initializer
@@ -94,6 +109,79 @@ public class ServerRenderer extends MorphPluginObject implements Listener
             logger.error("Can't unregister player: " + t.getMessage());
             t.printStackTrace();
         }
+    }
+
+    public void refreshStateForPlayer(@Nullable Player player, List<Player> affectedPlayers)
+    {
+        if (player == null) return;
+
+        var watcher = registry.getWatcher(player.getUniqueId());
+        if (watcher == null)
+            throw new NullDependencyException("Null Watcher for a existing player?!");
+
+        refreshStateForPlayer(player,
+                new DisplayParameters(watcher),
+                affectedPlayers);
+    }
+
+    /**
+     * 刷新玩家的伪装
+     * @param player 目标玩家
+     * @param displayParameters 和伪装对应的 {@link DisplayParameters}
+     */
+    public void refreshStateForPlayer(@Nullable Player player, @NotNull DisplayParameters displayParameters, List<Player> affectedPlayers)
+    {
+        if (affectedPlayers.isEmpty()) return;
+
+        if (player == null) return;
+        var watcher = displayParameters.getWatcher();
+
+        var protocolManager = PacketEvents.getAPI().getPlayerManager();
+
+        var spawnPackets = watcher.buildSpawnPackets();
+
+        affectedPlayers.forEach(p ->
+        {
+            spawnPackets.forEach(packet -> protocolManager.sendPacket(p, packet));
+        });
+    }
+
+    public void unDisguiseForPlayer(@Nullable Player player,
+                                    SingleWatcher disguiseWatcher,
+                                    List<Player> affectedPlayers)
+    {
+        if (player == null) return;
+
+        var protocolManager = PacketEvents.getAPI().getPlayerManager();
+        var watcher = new PlayerWatcher(player);
+        watcher.markSilent(this);
+
+        watcher.writeEntry(CustomEntries.PROFILE, ((CraftPlayer) player).getProfile());
+        watcher.writeEntry(CustomEntries.SPAWN_UUID, player.getUniqueId());
+        watcher.writeEntry(CustomEntries.SPAWN_ID, player.getEntityId());
+        watcher.writeEntry(CustomEntries.DONT_INCLUDE_PACKET_IDENTIFIER, true);
+
+        var packets = watcher.buildSpawnPackets();
+
+        var removePacket = new WrapperPlayServerDestroyEntities(player.getEntityId());
+
+        if (disguiseWatcher.getEntityType() == org.bukkit.entity.EntityType.PLAYER)
+        {
+            var disguiseUUID = disguiseWatcher.readEntryOrThrow(CustomEntries.SPAWN_UUID);
+            var packetRemoveInfo = new WrapperPlayServerPlayerInfoRemove(disguiseUUID);
+
+            Bukkit.getOnlinePlayers().forEach(p -> protocolManager.sendPacket(p, packetRemoveInfo));
+        }
+
+        watcher.dispose();
+
+        affectedPlayers.forEach(p ->
+        {
+            protocolManager.sendPacket(p, removePacket);
+
+            for (var packet : packets)
+                protocolManager.sendPacket(p, packet);
+        });
     }
 
     public void dispose()

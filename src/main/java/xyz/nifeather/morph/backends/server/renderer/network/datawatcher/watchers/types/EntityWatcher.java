@@ -13,6 +13,7 @@ import net.minecraft.nbt.CompoundTag;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.EntityEquipment;
 import xyz.nifeather.morph.backends.server.renderer.network.PacketFactory;
 import xyz.nifeather.morph.backends.server.renderer.network.ProtocolEquipment;
 import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
@@ -69,6 +70,21 @@ public class EntityWatcher extends SingleWatcher
         return bitMask;
     }
 
+    protected WrapperPlayServerEntityEquipment getEquipmentPacket()
+    {
+        var player = getBindingPlayer();
+        var shouldDisplayFakeEquip = this.readEntryOrDefault(CustomEntries.DISPLAY_FAKE_EQUIPMENT, false);
+        EntityEquipment equipment = shouldDisplayFakeEquip
+                ? this.readEntryOrDefault(CustomEntries.EQUIPMENT, new DisguiseEquipment.EmptyDisguiseEquipment())
+                : player.getEquipment();
+
+        var packet = new WrapperPlayServerEntityEquipment(-player.getEntityId(), ProtocolEquipment.toPEEquipmentList(equipment));
+
+        PacketFactory.markEquipmentPacket(packet);
+
+        return packet;
+    }
+
     @Override
     public List<PacketWrapper<?>> buildSpawnPackets()
     {
@@ -94,6 +110,9 @@ public class EntityWatcher extends SingleWatcher
         if (spawnUUID.equals(Util.NIL_UUID))
             throw new IllegalStateException("A watcher with NIL UUID?!");
 
+        var packetDestroy = new WrapperPlayServerDestroyEntities(this.readEntryOrThrow(CustomEntries.SPAWN_ID));
+        packets.add(packetDestroy);
+
         //todo: Should we use a better way to get the yaw/pitch?
         //      I don't want to read yaw/pitch from player directly, so I used OVERLAYED_XXX to generate the value on call, so that other watchers can override the value
         var pitch = this.readEntryOrDefault(CustomEntries.OVERLAYED_PITCH, player.getPitch());
@@ -110,15 +129,7 @@ public class EntityWatcher extends SingleWatcher
         );
 
         packets.add(spawnPacket);
-
-        //生成装备和Meta
-        var displayingFakeEquipments = this.readEntryOrDefault(CustomEntries.DISPLAY_FAKE_EQUIPMENT, false);
-        var equip = displayingFakeEquipments
-                ? this.readEntryOrDefault(CustomEntries.EQUIPMENT, new DisguiseEquipment())
-                : player.getEquipment();
-
-        packets.add(new WrapperPlayServerEntityEquipment(player.getEntityId(), ProtocolEquipment.toPEEquipmentList(equip)));
-
+        packets.add(getEquipmentPacket());
         packets.add(PacketFactory.buildFullMetaPacket(player, this));
 
         // 载具

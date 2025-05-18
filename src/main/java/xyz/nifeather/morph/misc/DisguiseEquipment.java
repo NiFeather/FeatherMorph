@@ -16,6 +16,10 @@ import java.util.Map;
 
 public class DisguiseEquipment implements EntityEquipment
 {
+    public static class EmptyDisguiseEquipment extends DisguiseEquipment
+    {
+    }
+
     private final ItemStack[] itemStacks = new ItemStack[EquipmentSlot.values().length];
 
     private final Map<EquipmentSlot, ItemStack> dirtyStacks = new Object2ObjectOpenHashMap<>();

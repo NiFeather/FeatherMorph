@@ -3,8 +3,10 @@ package xyz.nifeather.morph.backends.server.renderer.network;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityData;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
 import com.github.retrooper.packetevents.protocol.player.Equipment;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityEquipment;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityMetadata;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.EntityEquipment;
 import xyz.nifeather.morph.MorphPluginObject;
@@ -75,5 +77,22 @@ public class PacketFactory extends MorphPluginObject
                 : player.getEquipment();
 
         return ProtocolEquipment.toPEEquipmentList(equipment);
+    }
+
+    public static void markEquipmentPacket(WrapperPlayServerEntityEquipment wrapper)
+    {
+        wrapper.setEntityId(-wrapper.getEntityId());
+    }
+
+    public static boolean isEquipmentPacketOurs(WrapperPlayServerEntityEquipment wrapper)
+    {
+        var abs = Math.abs(wrapper.getEntityId());
+
+        var playerFound = Bukkit.getOnlinePlayers().stream()
+                .filter(p -> p.getEntityId() == abs)
+                .findFirst()
+                .orElse(null);
+
+        return playerFound != null;
     }
 }
