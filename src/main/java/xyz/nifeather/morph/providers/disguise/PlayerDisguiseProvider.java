@@ -1,5 +1,6 @@
 package xyz.nifeather.morph.providers.disguise;
 
+import com.destroystokyo.paper.profile.PlayerProfile;
 import com.mojang.authlib.GameProfile;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.kyori.adventure.text.Component;
@@ -87,17 +88,16 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
 
         Objects.requireNonNull(wrapper, "Null wrapper at where it shouldn't be?!");
 
-        // Ensure profile is always present
-        var skin = PlayerSkinProvider.getInstance().getCachedProfile(DisguiseTypes.PLAYER.toStrippedId(id));
-        wrapper.applySkin(skin == null ? new GameProfile(Util.NIL_UUID, DisguiseTypes.PLAYER.toStrippedId(id)) : skin);
-
+        //region Player Skin
         var mainHandItem = player.getEquipment().getItemInMainHand();
 
         // Apply PlaceHolder Skin
         var playerDisguiseTargetName = DisguiseTypes.PLAYER.toStrippedId(id);
 
-        var dummySkin = new GameProfile(UUID.randomUUID(), playerDisguiseTargetName);
-        wrapper.applySkin(dummySkin);
+        var fallbackSkin = PlayerSkinProvider.getInstance().getCachedProfileOptional(DisguiseTypes.PLAYER.toStrippedId(id))
+                .orElse(new GameProfile(UUID.randomUUID(), playerDisguiseTargetName));
+
+        wrapper.applySkin(fallbackSkin);
 
         //存在玩家头颅，尝试通过头颅获取目标皮肤
         if (mainHandItem.getType() == Material.PLAYER_HEAD)
@@ -114,8 +114,25 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
             if (gameProfile.getName().equals(DisguiseTypes.PLAYER.toStrippedId(id)))
                 wrapper.applySkin(gameProfile);
         }
+        else
+        {
+            PlayerSkinProvider.getInstance().fetchSkin(playerDisguiseTargetName)
+                    .thenAccept(optional ->
+                    {
+                        if (wrapper.disposed() || !fallbackSkin.equals(wrapper.getSkin())) return;
+
+                        GameProfile outcomingProfile = optional.orElse(fallbackSkin);
+                        this.scheduleOn(player, () -> wrapper.applySkin(outcomingProfile));
+                    });
+        }
+
+        //endregion Player Skin
 
         return DisguiseResult.success(wrapper, result.isCopy());
+    }
+
+    private void processInitialGameProfile()
+    {
     }
 
     @Resolved(shouldSolveImmediately = true)
@@ -137,23 +154,6 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
     public void onDisguiseApply(DisguiseState state)
     {
         super.onDisguiseApply(state);
-
-        var wrapper = state.getDisguiseWrapper();
-        var player = state.getPlayer();
-
-        var playerDisguiseTargetName = DisguiseTypes.PLAYER.toStrippedId(state.getDisguiseIdentifier());
-
-        PlayerSkinProvider.getInstance().fetchSkin(playerDisguiseTargetName)
-                .thenAccept(optional ->
-                {
-                    if (wrapper.disposed()) return;
-
-                    GameProfile outcomingProfile = new GameProfile(Util.NIL_UUID, playerDisguiseTargetName);
-                    if (optional.isPresent()) outcomingProfile = optional.get();
-
-                    GameProfile finalOutcomingProfile = outcomingProfile;
-                    this.scheduleOn(player, () -> wrapper.applySkin(finalOutcomingProfile));
-                });
     }
 
     private MorphGameProfile getGameProfile(ItemStack item)

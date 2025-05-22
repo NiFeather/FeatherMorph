@@ -159,6 +159,11 @@ public class PlayerSkinProvider extends MorphPluginObject
         return skinCache.get(name).profileOptional().orElse(null);
     }
 
+    public Optional<GameProfile> getCachedProfileOptional(String name)
+    {
+        return skinCache.get(name).profileOptional();
+    }
+
     public void cacheProfile(@NotNull PlayerProfile playerProfile)
     {
         var gameProfile = new MorphGameProfile(playerProfile);

@@ -238,7 +238,7 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
     }
 
     @Override
-    public void applySkin(GameProfile profile)
+    public void applySkin(@NotNull GameProfile profile)
     {
         if (this.getEntityType() != EntityType.PLAYER) return;
 

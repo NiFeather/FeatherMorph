@@ -459,8 +459,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     private final Bindable<Boolean> allowAcquireMorph = new Bindable<>(true);
     private final Bindable<Boolean> useClientRenderer = new Bindable<>(false);
 
-    private final Map<UUID, PlayerTextures> uuidPlayerTexturesMap = new ConcurrentHashMap<>();
-
     /**
      * 尝试调用快速伪装
      *
@@ -469,7 +467,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
      */
     public boolean tryQuickDisguise(Player player)
     {
-        var state = this.getDisguiseStateFor(player);
         var mainHandItem = player.getEquipment().getItemInMainHand();
         var mainHandItemType = mainHandItem.getType();
 
@@ -517,27 +514,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                         return true;
                     }
 
-                    var name = profile.getName();
-                    var profileTexture = profile.getTextures();
-                    var playerUniqueId = player.getUniqueId();
-
-                    //如果玩家有伪装，并且伪装的材质和Profile中的一样，那么取消伪装
-                    if (state != null)
-                    {
-                        var disguise = state.getDisguiseWrapper();
-
-                        if (disguise.isPlayerDisguise()
-                                && disguise.getDisguiseName().equals(name)
-                                && profileTexture.equals(uuidPlayerTexturesMap.get(playerUniqueId)))
-                        {
-                            unMorph(player);
-                            return true;
-                        }
-                    }
-
-                    //否则，更新或应用伪装
-                    if (morph(player, player, DisguiseTypes.PLAYER.toId(profile.getName()), targetEntity))
-                        uuidPlayerTexturesMap.put(playerUniqueId, profileTexture);
+                    morph(player, player, DisguiseTypes.PLAYER.toId(profile.getName()), targetEntity);
                 }
             }
 
@@ -1320,9 +1297,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         // 移除Bossbar
         state.setBossbar(null);
-
-        // 从材质map中移除此玩家
-        uuidPlayerTexturesMap.remove(player.getUniqueId());
 
         // 向客户端同步伪装属性
         clientHandler.updateCurrentIdentifier(player, null);
