@@ -84,9 +84,9 @@ public class TownyAdapter extends MorphPluginObject implements Listener
         this.scheduleOn(player, () -> updateDisguise(player, state), 5);
 
         var playerLocation = player.getLocation();
-        var lastLocation = state.getSessionDataOr("fm_towny_adapter:last_location", Location.class, playerLocation);
+        var lastLocation = state.getSessionData("fm_towny_adapter:last_location", Location.class);
 
-        if (!lastLocation.equals(playerLocation))
+        if (!playerLocation.equals(lastLocation))
         {
             this.updatePlayer(player, null);
             state.setSessionData("fm_towny_adapter:last_location", playerLocation);
