@@ -15,6 +15,7 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectLists;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
+import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -25,14 +26,18 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Bindables.Bindable;
+import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.abilities.impl.FlyAbility;
 import xyz.nifeather.morph.config.ConfigOption;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.events.api.gameplay.MorphTownBooleanFlagChangedEvent;
 import xyz.nifeather.morph.events.api.gameplay.PlayerExecuteSkillEvent;
+import xyz.nifeather.morph.events.api.gameplay.PlayerMorphEvent;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.MorphStrings;
+import xyz.nifeather.morph.misc.DisguiseState;
+import xyz.nifeather.morph.misc.NmsRecord;
 import xyz.nifeather.morph.misc.integrations.towny.commands.TownyIntegrationCommand;
 
 import java.util.Arrays;
@@ -62,6 +67,30 @@ public class TownyAdapter extends MorphPluginObject implements Listener
             Bukkit.getOnlinePlayers().forEach(p ->
                     this.scheduleOn(p, () -> updatePlayer(p, null)));
         });
+    }
+
+    @EventHandler
+    public void onPlayerMorph(PlayerMorphEvent event)
+    {
+        if (FeatherMorphMain.getInstance().isFolia())
+            this.scheduleOn(event.getPlayer(), () -> this.updateDisguise(event.getPlayer(), event.getState()));
+    }
+
+    private void updateDisguise(Player player, DisguiseState state)
+    {
+        if (state.disposed())
+            return;
+
+        this.scheduleOn(player, () -> updateDisguise(player, state), 5);
+
+        var playerLocation = player.getLocation();
+        var lastLocation = state.getSessionDataOr("fm_towny_adapter:last_location", Location.class, playerLocation);
+
+        if (!lastLocation.equals(playerLocation))
+        {
+            this.updatePlayer(player, null);
+            state.setSessionData("fm_towny_adapter:last_location", playerLocation);
+        }
     }
 
     //region Towny events

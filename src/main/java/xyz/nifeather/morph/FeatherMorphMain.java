@@ -59,6 +59,21 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
     public FeatherMorphMain()
     {
         instance = this;
+
+        boolean folia = false;
+        try
+        {
+            Class.forName("io.papermc.paper.threadedregions.RegionizedServer");
+
+            logger.info("We are running on a Folia server!");
+            folia = true;
+        }
+        catch (Throwable ignored)
+        {
+            logger.info("io.papermc.paper.threadedregions.RegionizedServer not found, possibly not a Folia server.");
+        }
+
+        isFolia = folia;
     }
 
     public static String getMorphNameSpace()
@@ -102,6 +117,12 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
     private EntityProcessor entityProcessor;
 
     private ExecutorHub mirrorExecutorHub;
+
+    private final boolean isFolia;
+    public boolean isFolia()
+    {
+        return isFolia;
+    }
 
     private static final String noticeHeaderFooter = "- x - x - x - x - x - x - x - x - x - x - x - x -";
     private void printImportantWarning(boolean critical, String... warnings)
