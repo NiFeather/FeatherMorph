@@ -257,7 +257,7 @@ public abstract class DisguiseWrapper<TInstance>
      * @param profile {@link GameProfile}
      * @apiNote This shouldn't do anything if disguise entity type is not {@link EntityType#PLAYER}
      */
-    public void applySkin(GameProfile profile)
+    public void applySkin(@NotNull GameProfile profile)
     {
         writeProperty(WrapperProperties.PROFILE, Optional.of(profile));
     }
