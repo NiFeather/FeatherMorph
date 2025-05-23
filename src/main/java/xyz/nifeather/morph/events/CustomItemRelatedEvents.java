@@ -30,6 +30,8 @@ import org.bukkit.potion.PotionType;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.MorphPluginObject;
+import xyz.nifeather.morph.api.events.gameplay.PlayerCollectMagicBottleEvent;
+import xyz.nifeather.morph.api.events.gameplay.PlayerConsumeMagicBottleEvent;
 import xyz.nifeather.morph.misc.DisguiseTypes;
 import xyz.nifeather.morph.misc.gui.AnimSelectScreenWrapper;
 import xyz.nifeather.morph.misc.gui.DisguiseSelectScreenWrapper;
@@ -171,9 +173,13 @@ public class CustomItemRelatedEvents extends MorphPluginObject implements Listen
         var id = ItemUtils.readMagicBottleData(consumedItem);
         if (id == null) return;
 
-        // 不允许玩家获取自己的形态，即使我们的框架允许这样做
         var player = event.getPlayer();
-        if (id.startsWith("player:") && DisguiseTypes.PLAYER.toStrippedId(id).equals(player.getName()))
+
+        var consumeMagicBottleEvent = new PlayerConsumeMagicBottleEvent(player);
+        var cancelled = consumeMagicBottleEvent.callEvent();
+
+        //               不允许玩家获取自己的形态，即使我们的框架允许这样做
+        if (cancelled || (id.startsWith("player:") && DisguiseTypes.PLAYER.toStrippedId(id).equals(player.getName())))
         {
             player.playSound(player, Sound.ENTITY_VILLAGER_NO, 1, 1);
             event.setCancelled(true);
@@ -200,8 +206,11 @@ public class CustomItemRelatedEvents extends MorphPluginObject implements Listen
 
         var entityClicked = event.getRightClicked();
 
-        // 如果目标实体是怪物，或者物品数量大于1，拒绝获取
-        if (entityClicked instanceof Monster || mainhandItem.getAmount() > 1)
+        var collectMagicBottleEvent = new PlayerCollectMagicBottleEvent(player, entityClicked);
+        var cancelled = collectMagicBottleEvent.callEvent();
+
+        // 如果目标实体是怪物，或者物品数量大于1，或者事件被取消，拒绝获取
+        if (entityClicked instanceof Monster || mainhandItem.getAmount() > 1 || cancelled)
         {
             player.getWorld().playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1, 1);
             player.swingHand(event.getHand());

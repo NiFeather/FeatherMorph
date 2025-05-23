@@ -11,21 +11,20 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.meta.SkullMeta;
-import org.bukkit.profile.PlayerTextures;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xyz.nifeather.morph.api.events.gameplay.*;
 import xyz.nifeather.morph.backends.DisguiseBackend;
 import xyz.nifeather.morph.backends.DisguiseWrapper;
 import xyz.nifeather.morph.backends.WrapperProperties;
 import xyz.nifeather.morph.backends.client.ModBackend;
 import xyz.nifeather.morph.backends.server.ServerBackend;
-import xyz.nifeather.morph.events.api.gameplay.*;
-import xyz.nifeather.morph.events.api.misc.NewDataStoreEvent;
+import xyz.nifeather.morph.api.events.misc.DataStoreSwitchEvent;
 import xyz.nifeather.morph.misc.*;
 import xyz.nifeather.morph.config.ConfigOption;
 import xyz.nifeather.morph.config.MorphConfigManager;
-import xyz.nifeather.morph.events.api.lifecycle.ManagerFinishedInitializeEvent;
+import xyz.nifeather.morph.api.events.lifecycle.ManagerFinishedInitializeEvent;
 import xyz.nifeather.morph.interfaces.IManagePlayerData;
 import xyz.nifeather.morph.messages.CommandStrings;
 import xyz.nifeather.morph.messages.HintStrings;
@@ -86,7 +85,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         reloadConfiguration();
 
-        new NewDataStoreEvent(this, this.data).callEvent();
+        new DataStoreSwitchEvent(this, this.data).callEvent();
     }
 
     @Resolved

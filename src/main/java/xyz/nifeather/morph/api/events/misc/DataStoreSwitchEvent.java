@@ -1,4 +1,4 @@
-package xyz.nifeather.morph.events.api.misc;
+package xyz.nifeather.morph.api.events.misc;
 
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
@@ -6,7 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.interfaces.IManagePlayerData;
 
-public class NewDataStoreEvent extends Event
+public class DataStoreSwitchEvent extends Event
 {
     private static final HandlerList handlers = new HandlerList();
 
@@ -35,7 +35,7 @@ public class NewDataStoreEvent extends Event
         return handlers;
     }
 
-    public NewDataStoreEvent(MorphManager manager, IManagePlayerData newDataStore)
+    public DataStoreSwitchEvent(MorphManager manager, IManagePlayerData newDataStore)
     {
         this.manager = manager;
         this.dataStore = newDataStore;
