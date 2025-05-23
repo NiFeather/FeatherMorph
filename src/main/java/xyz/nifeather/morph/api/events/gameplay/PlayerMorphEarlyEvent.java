@@ -1,50 +1,52 @@
-package xyz.nifeather.morph.events.api.gameplay;
+package xyz.nifeather.morph.api.events.gameplay;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.player.PlayerEvent;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.misc.DisguiseState;
 
-public class PlayerUnMorphEarlyEvent extends PlayerEvent implements Cancellable
+public class PlayerMorphEarlyEvent extends PlayerEvent implements Cancellable
 {
     private static final HandlerList handlers = new HandlerList();
 
+    public static HandlerList getHandlerList() { return handlers; }
+
+    public final DisguiseState state;
+
+    public final String targetId;
+
+    public final boolean isForce;
+
     /**
-     * 会在取消伪装的早期处理过程中触发，此时玩家尚未正式取消伪装
+     * 会在玩家正式进行伪装或更换伪装前触发
      * @param who 玩家
-     * @param isForceUnmorph 此操作是否为强制执行，若为true则无法取消
+     * @param state 玩家当前活动的{@link DisguiseState}，如果有
+     * @param isForce 此操作是否为强制执行，若为true则无法取消
      */
-    public PlayerUnMorphEarlyEvent(@NotNull Player who, @NotNull DisguiseState state, boolean isForceUnmorph)
+    public PlayerMorphEarlyEvent(@NotNull Player who, @Nullable DisguiseState state, @NotNull String targetId, boolean isForce)
     {
         super(who);
 
+        this.targetId = targetId;
         this.state = state;
-        this.isForceUnmorph = isForceUnmorph;
+        this.isForce = isForce;
     }
 
-    private final boolean isForceUnmorph;
+    public @NotNull String getTargetId()
+    {
+        return targetId;
+    }
 
-    private final DisguiseState state;
-
-    public DisguiseState getState()
+    public @Nullable DisguiseState getState()
     {
         return state;
     }
 
-    public boolean isForceUnmorph()
-    {
-        return isForceUnmorph;
-    }
-
     @Override
     public @NotNull HandlerList getHandlers()
-    {
-        return handlers;
-    }
-
-    public static HandlerList getHandlerList()
     {
         return handlers;
     }
@@ -75,3 +77,4 @@ public class PlayerUnMorphEarlyEvent extends PlayerEvent implements Cancellable
         this.cancelled = cancel;
     }
 }
+

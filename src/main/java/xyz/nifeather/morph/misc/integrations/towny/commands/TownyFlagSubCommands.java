@@ -15,7 +15,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Messages.FormattableMessage;
 import xyz.nifeather.morph.commands.brigadier.BrigadierCommand;
-import xyz.nifeather.morph.events.api.gameplay.MorphTownBooleanFlagChangedEvent;
+import xyz.nifeather.morph.api.events.gameplay.MorphTownBooleanFlagChangedEvent;
 import xyz.nifeather.morph.messages.CommandStrings;
 import xyz.nifeather.morph.messages.MessageUtils;
 

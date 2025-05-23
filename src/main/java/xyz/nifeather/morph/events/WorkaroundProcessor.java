@@ -1,6 +1,5 @@
 package xyz.nifeather.morph.events;
 
-import io.papermc.paper.entity.TeleportFlag;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -8,13 +7,10 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityMountEvent;
-import org.bukkit.event.player.PlayerTeleportEvent;
-import org.bukkit.util.Vector;
 import org.jetbrains.annotations.Nullable;
-import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.api.FeatherMorphAPI;
-import xyz.nifeather.morph.events.api.gameplay.PlayerMorphEarlyEvent;
+import xyz.nifeather.morph.api.events.gameplay.PlayerMorphEarlyEvent;
 
 import java.util.function.Predicate;
 

@@ -1,4 +1,4 @@
-package xyz.nifeather.morph.events.api.gameplay;
+package xyz.nifeather.morph.api.events.gameplay;
 
 import com.palmergames.bukkit.towny.object.Town;
 import com.palmergames.bukkit.towny.object.metadata.BooleanDataField;
