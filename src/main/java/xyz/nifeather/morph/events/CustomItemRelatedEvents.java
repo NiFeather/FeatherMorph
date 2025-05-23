@@ -176,7 +176,7 @@ public class CustomItemRelatedEvents extends MorphPluginObject implements Listen
         var player = event.getPlayer();
 
         var consumeMagicBottleEvent = new PlayerConsumeMagicBottleEvent(player);
-        var cancelled = consumeMagicBottleEvent.callEvent();
+        var cancelled = !consumeMagicBottleEvent.callEvent();
 
         //               不允许玩家获取自己的形态，即使我们的框架允许这样做
         if (cancelled || (id.startsWith("player:") && DisguiseTypes.PLAYER.toStrippedId(id).equals(player.getName())))
@@ -207,7 +207,7 @@ public class CustomItemRelatedEvents extends MorphPluginObject implements Listen
         var entityClicked = event.getRightClicked();
 
         var collectMagicBottleEvent = new PlayerCollectMagicBottleEvent(player, entityClicked);
-        var cancelled = collectMagicBottleEvent.callEvent();
+        var cancelled = !collectMagicBottleEvent.callEvent();
 
         // 如果目标实体是怪物，或者物品数量大于1，或者事件被取消，拒绝获取
         if (entityClicked instanceof Monster || mainhandItem.getAmount() > 1 || cancelled)
