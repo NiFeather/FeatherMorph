@@ -101,12 +101,6 @@ dependencies {
         isTransitive = false
     }
 
-    //compileOnly("com.ticxo.modelengine:ModelEngine:${project.property("me_version")}")
-    //{
-    //    isTransitive = false
-    //}
-
-    //compileOnly("com.github.Gecolay:GSit:${project.property("gsit_version")}")
     compileOnly("me.clip:placeholderapi:${project.property("papi_version")}")
     {
         isTransitive = false
@@ -118,8 +112,6 @@ dependencies {
     }
 
     implementation("com.github.MATRIX-feather:InventoryGui:791e7bdd65")
-
-    //compileOnly("dev.majek:hexnicks:3.1.1")
 
     implementation("org.bstats:bstats-bukkit:${project.property("bstats_version")}")
     {
@@ -190,35 +182,46 @@ paper {
     name = "FeatherMorph"
     foliaSupported = true
 
+    permissions { /* See below */ }
+
     val permissionRoot = "feathermorph."
 
-    permissions {
-        register(permissionRoot + "morph")
-        register(permissionRoot + "unmorph")
-        register(permissionRoot + "headmorph")
+    val defaultAvailablePermissions = listOf(
+            permissionRoot + "morph",
+            permissionRoot + "unmorph",
+            permissionRoot + "headmorph",
 
-        register(permissionRoot + "skill")
-        register(permissionRoot + "ability")
-        register(permissionRoot + "mirror")
-        register(permissionRoot + "chatoverride")
+            permissionRoot + "skill",
+            permissionRoot + "ability",
+            permissionRoot + "mirror",
+            permissionRoot + "chatoverride",
 
-        register(permissionRoot + "request") {
-            childrenMap = mapOf(
-                    (permissionRoot + "request.send") to true,
-                    (permissionRoot + "request.accept") to true,
-                    (permissionRoot + "request.deny") to true
-            )
-        }
+            permissionRoot + "request",
+            permissionRoot + "request.send",
+            permissionRoot + "request.accept",
+            permissionRoot + "request.deny",
 
-        register(permissionRoot + "can_fly")
-        register(permissionRoot + "toggle_town_fly")
+            permissionRoot + "can_fly",
+            permissionRoot + "toggle_town_fly",
+
+            permissionRoot + "magic_bottle.use"
+    );
+
+    defaultAvailablePermissions.forEach {
+        perm -> permissions.register(perm).get().default = BukkitPluginDescription.Permission.Default.TRUE;
     }
 
-    permissions.forEach {
-        permission -> permission.default = BukkitPluginDescription.Permission.Default.TRUE
+    val defaultDenyPermissions = listOf(
+            permissionRoot + "magic_bottle.exclude",
+
+            permissionRoot + "can_fly.always"
+    )
+
+    defaultDenyPermissions.forEach {
+        perm -> permissions.register(perm).get().default = BukkitPluginDescription.Permission.Default.FALSE;
     }
 
-    val opPermsStrList = listOf(
+    val opPermissions = listOf(
             permissionRoot + "disguise_revealing",
 
             permissionRoot + "manage",
@@ -243,11 +246,9 @@ paper {
             permissionRoot + "admin"
     );
 
-    opPermsStrList.forEach {
+    opPermissions.forEach {
         permStr -> permissions.register(permStr).get().default = BukkitPluginDescription.Permission.Default.OP;
     }
-
-    permissions.register(permissionRoot + "can_fly.always").get().default = BukkitPluginDescription.Permission.Default.FALSE;
 }
 
 publishing {
@@ -296,7 +297,7 @@ tasks.shadowJar {
     //                                                                                                                            ❜
     if (System.getenv("NO_RELOCATE") == "yes")
     {
-        System.out.println("Not relocating classes!")
+        println("Not relocating classes!")
     }
     else
     {

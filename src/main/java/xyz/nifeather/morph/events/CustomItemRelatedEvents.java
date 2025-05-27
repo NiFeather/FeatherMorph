@@ -5,7 +5,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
-import net.kyori.adventure.util.RGBLike;
 import org.bukkit.Color;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -23,10 +22,8 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.InventoryHolder;
-import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
-import org.bukkit.potion.PotionType;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.MorphPluginObject;
@@ -35,7 +32,9 @@ import xyz.nifeather.morph.api.events.gameplay.PlayerConsumeMagicBottleEvent;
 import xyz.nifeather.morph.misc.DisguiseTypes;
 import xyz.nifeather.morph.misc.gui.AnimSelectScreenWrapper;
 import xyz.nifeather.morph.misc.gui.DisguiseSelectScreenWrapper;
+import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 import xyz.nifeather.morph.utilities.ItemUtils;
+import xyz.nifeather.morph.utilities.PermissionUtils;
 
 import java.util.List;
 
@@ -177,9 +176,10 @@ public class CustomItemRelatedEvents extends MorphPluginObject implements Listen
 
         var consumeMagicBottleEvent = new PlayerConsumeMagicBottleEvent(player);
         var cancelled = !consumeMagicBottleEvent.callEvent();
+        var hasPermission = PermissionUtils.hasPermission(player, CommonPermissions.MAGIC_BOTTLE_USE, true);
 
         //               不允许玩家获取自己的形态，即使我们的框架允许这样做
-        if (cancelled || (id.startsWith("player:") && DisguiseTypes.PLAYER.toStrippedId(id).equals(player.getName())))
+        if (cancelled || !hasPermission || (id.startsWith("player:") && DisguiseTypes.PLAYER.toStrippedId(id).equals(player.getName())))
         {
             player.playSound(player, Sound.ENTITY_VILLAGER_NO, 1, 1);
             event.setCancelled(true);
@@ -208,24 +208,40 @@ public class CustomItemRelatedEvents extends MorphPluginObject implements Listen
 
         var collectMagicBottleEvent = new PlayerCollectMagicBottleEvent(player, entityClicked);
         var cancelled = !collectMagicBottleEvent.callEvent();
+        var collectorHasPermission = PermissionUtils.hasPermission(player, CommonPermissions.MAGIC_BOTTLE_USE, true);
 
-        // 如果目标实体是怪物，或者物品数量大于1，或者事件被取消，拒绝获取
-        if (entityClicked instanceof Monster || mainhandItem.getAmount() > 1 || cancelled)
+        Runnable failEffect = () ->
         {
             player.getWorld().playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1, 1);
             player.swingHand(event.getHand());
+        };
+
+        // 如果目标实体是怪物，或者物品数量大于1，或者事件被取消，或者没有权限，拒绝获取
+        if (entityClicked instanceof Monster || mainhandItem.getAmount() > 1 || cancelled || !collectorHasPermission)
+        {
+            failEffect.run();
             return;
         }
 
         // 根据点击的生物获取伪装ID
         String disguiseIdentifier = switch (entityClicked)
         {
-            case Player playerEntity -> DisguiseTypes.PLAYER.toId(playerEntity.getName());
+            case Player playerEntity ->
+            {
+                if (PermissionUtils.hasPermission(playerEntity, CommonPermissions.MAGIC_BOTTLE_EXCLUDE, false))
+                    yield null;
+
+                yield DisguiseTypes.PLAYER.toId(playerEntity.getName());
+            }
             case LivingEntity livingEntity -> livingEntity.getType().key().asString();
             default -> null;
         };
 
-        if (disguiseIdentifier == null) return;
+        if (disguiseIdentifier == null)
+        {
+            failEffect.run();
+            return;
+        }
 
         // 获取显示名
         Component displayName = switch (entityClicked)
