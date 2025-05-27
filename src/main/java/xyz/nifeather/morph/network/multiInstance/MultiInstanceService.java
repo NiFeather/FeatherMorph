@@ -34,9 +34,6 @@ public class MultiInstanceService extends MorphPluginObject
         if (isMaster.get() && masterInstance == null)
             throw new IllegalStateException("We are the master server, but the server instance is null?!");
 
-        if (isMaster.get() && slaveInstance == null)
-            throw new IllegalStateException("A master server should have both master and slave instances active!");
-
         if (!isMaster.get() && slaveInstance == null)
             throw new IllegalStateException("We are the client, but the client instance is null?!");
     }
