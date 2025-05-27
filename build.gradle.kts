@@ -106,7 +106,7 @@ dependencies {
         isTransitive = false
     }
 
-    implementation("org.java-websocket:Java-WebSocket:1.5.7")
+    implementation("org.java-websocket:Java-WebSocket:1.6.0")
     {
         exclude("org.slf4j")
     }
