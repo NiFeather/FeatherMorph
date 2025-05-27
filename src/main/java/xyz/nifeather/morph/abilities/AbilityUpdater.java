@@ -160,6 +160,14 @@ public class AbilityUpdater extends MorphPluginObject implements IAbilityConfigL
         });
     }
 
+    public void onPlayerOffline()
+    {
+        registeredAbilities.forEach(pair ->
+        {
+            pair.left().revokeFromPlayer(player(), parentState);
+        });
+    }
+
     public boolean containsAbility(NamespacedKey identifier)
     {
         return registeredAbilities.stream().anyMatch(pair -> pair.left().getIdentifier().equals(identifier));

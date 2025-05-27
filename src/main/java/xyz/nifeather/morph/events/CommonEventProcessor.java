@@ -359,7 +359,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
             if (bossbar != null)
                 players.forEach(p -> p.hideBossBar(bossbar));
 
-            state.onOffline();
+            state.onPlayerQuit();
         }
 
         var targets = players.stream()

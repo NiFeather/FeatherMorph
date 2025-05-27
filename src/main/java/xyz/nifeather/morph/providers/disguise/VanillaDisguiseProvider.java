@@ -405,6 +405,21 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
             player.setHealth(Math.min(player.getMaxHealth(), attributeInstance.getValue() * currentPercent));
     }
 
+    @Override
+    public void onPlayerJoinWithDisguise(DisguiseState state)
+    {
+        onDisguiseApply(state);
+
+        super.onPlayerJoinWithDisguise(state);
+    }
+
+    @Override
+    public void onPlayerQuitWithDisguise(DisguiseState state)
+    {
+        removeAllHealthModifiers(state.getPlayer());
+        super.onPlayerQuitWithDisguise(state);
+    }
+
     private void removeAllHealthModifiers(Player player)
     {
         var attribute = player.getAttribute(Attribute.MAX_HEALTH);

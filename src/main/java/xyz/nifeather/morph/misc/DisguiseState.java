@@ -212,10 +212,23 @@ public class DisguiseState extends MorphPluginObject
         animationSequence.reset();
     }
 
-    public void onOffline()
+    public void onPlayerQuit()
     {
         this.stopAnimations();
+
+        this.abilityUpdater.onPlayerOffline();
         this.getDisguiseWrapper().onPlayerOffline();
+        this.getProvider().onPlayerQuitWithDisguise(this);
+    }
+
+    @ApiStatus.Internal
+    public void onPlayerJoin()
+    {
+        this.abilityUpdater.reApplyAbility();
+        this.skill.onInitialEquip(this);
+
+        this.getProvider().onPlayerJoinWithDisguise(this);
+        this.getDisguiseWrapper().onPlayerJoin(this.getPlayer());
     }
 
     public boolean canScheduleSequence()
@@ -674,15 +687,6 @@ public class DisguiseState extends MorphPluginObject
     public AbilityUpdater getAbilityUpdater()
     {
         return abilityUpdater;
-    }
-
-    @ApiStatus.Internal
-    public void onPlayerJoin()
-    {
-        this.abilityUpdater.reApplyAbility();
-        this.skill.onInitialEquip(this);
-
-        this.getDisguiseWrapper().onPlayerJoin(this.getPlayer());
     }
 
     /**

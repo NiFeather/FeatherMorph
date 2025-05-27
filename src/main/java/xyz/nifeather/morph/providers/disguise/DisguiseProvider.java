@@ -293,6 +293,22 @@ public abstract class DisguiseProvider extends MorphPluginObject
     }
 
     /**
+     * Execute when a player joined with disguise made by this provider,
+     * Called at {@link DisguiseState#onPlayerJoin()}
+     */
+    public void onPlayerJoinWithDisguise(DisguiseState state)
+    {
+    }
+
+    /**
+     * Execute when a player quit with disguise made by this provider,
+     * Called at {@link DisguiseState#onPlayerQuit()}
+     */
+    public void onPlayerQuitWithDisguise(DisguiseState state)
+    {
+    }
+
+    /**
      * 获取某个伪装的显示名称
      *
      * @param disguiseIdentifier 伪装ID
