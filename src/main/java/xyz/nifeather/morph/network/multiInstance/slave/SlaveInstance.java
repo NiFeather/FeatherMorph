@@ -167,6 +167,14 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
 
         var cmd = gson.toJson(MIServerboundCommandRecord.fromC2SCommand(command));
 
+        if (client.isClosed())
+        {
+            if (FeatherMorphMain.getInstance().debugOutputEnabled())
+                logSlaveInfo("[debug] We are sending WebSocket request while being offline?! trying to send '%s'".formatted(cmd));
+
+            return;
+        }
+
         if (FeatherMorphMain.getInstance().debugOutputEnabled())
             logSlaveInfo("WS Slave :: -> SERVER :: " + cmd);
 
