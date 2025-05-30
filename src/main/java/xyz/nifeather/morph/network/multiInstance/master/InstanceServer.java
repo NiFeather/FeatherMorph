@@ -32,6 +32,9 @@ public final class InstanceServer extends WebSocketServer
     {
         super(address);
 
+        //bug: See https://github.com/TooTallNate/Java-WebSocket/issues/879
+        this.setReuseAddr(true);
+
         this.logger = plugin.getSLF4JLogger();
         this.clientHandler = iInstanceClientHandler;
 
