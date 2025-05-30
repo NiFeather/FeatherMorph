@@ -28,9 +28,9 @@ import xyz.nifeather.morph.network.multiInstance.slave.SlaveInstance;
 import xyz.nifeather.morph.storage.playerdata.PlayerMeta;
 
 import java.lang.ref.WeakReference;
-import java.net.ConnectException;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
+import java.net.*;
+import java.nio.channels.ServerSocketChannel;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -101,20 +101,31 @@ public class MasterInstance extends MorphPluginObject implements IInstanceServic
 
         try
         {
-            String[] configuredAddress = config.getOrDefault(String.class, ConfigOption.MASTER_ADDRESS).split(":");
+            String configuredAddress = config.getOrDefault(String.class, ConfigOption.MASTER_ADDRESS);
 
-            String host = configuredAddress[0];
-            int port = Integer.parseInt( configuredAddress.length >= 2 ? configuredAddress[1] : "39210" );
-            var addr = new InetSocketAddress(InetAddress.getByName(host), port);
+            var uri = URI.create("http://" + configuredAddress);
+            var addr = new InetSocketAddress(InetAddress.getByName(uri.getHost()), uri.getPort());
+            logMasterInfo("Got target host: " + addr);
 
-            bindingServer = new InstanceServer(plugin, addr, this);
+            // Setup socket
+            var socketChannel = ServerSocketChannel.open();
+
+            var serverSocket = socketChannel.socket();
+            serverSocket.setOption(StandardSocketOptions.SO_REUSEADDR, true);
+            serverSocket.setOption(StandardSocketOptions.SO_REUSEPORT, true);
+
+            socketChannel.bind(addr);
+
+            // Setup server
+            bindingServer = new InstanceServer(plugin, socketChannel, this);
+            bindingServer.setDaemon(true);
             bindingServer.start();
 
             return true;
         }
         catch (Throwable t)
         {
-            logMasterWarn("Error occurred while setting up server:" + t.getMessage());
+            logMasterWarn("Error occurred while setting up server: " + t.getMessage());
             t.printStackTrace();
 
             return false;

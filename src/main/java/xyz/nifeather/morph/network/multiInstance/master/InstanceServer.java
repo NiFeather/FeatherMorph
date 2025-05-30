@@ -9,7 +9,10 @@ import org.slf4j.Logger;
 import xiamomc.pluginbase.XiaMoJavaPlugin;
 import xyz.nifeather.morph.network.multiInstance.protocol.IInstanceClientHandler;
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.ServerSocket;
+import java.nio.channels.ServerSocketChannel;
 import java.util.List;
 
 public final class InstanceServer extends WebSocketServer
@@ -17,6 +20,7 @@ public final class InstanceServer extends WebSocketServer
     private final Logger logger;
 
     private final IInstanceClientHandler clientHandler;
+    private final ServerSocketChannel serverSocketChannel;
 
     private void logServerInfo(String message)
     {
@@ -28,10 +32,11 @@ public final class InstanceServer extends WebSocketServer
         logger.warn("[S@%s] %s".formatted(Integer.toHexString(this.hashCode()), message));
     }
 
-    public InstanceServer(XiaMoJavaPlugin plugin, InetSocketAddress address, IInstanceClientHandler iInstanceClientHandler)
+    public InstanceServer(XiaMoJavaPlugin plugin, ServerSocketChannel serverSocketChannel, IInstanceClientHandler iInstanceClientHandler)
     {
-        super(address);
+        super(serverSocketChannel);
 
+        this.serverSocketChannel = serverSocketChannel;
         this.logger = plugin.getSLF4JLogger();
         this.clientHandler = iInstanceClientHandler;
 
@@ -60,11 +65,29 @@ public final class InstanceServer extends WebSocketServer
     public boolean running;
 
     @Override
+    public void start()
+    {
+        super.start();
+    }
+
+    @Override
     public void stop(int timeout, String closeMessage) throws InterruptedException
     {
         logServerInfo("Stopping instance server...");
         super.stop(timeout, closeMessage);
 
+        try
+        {
+            logServerInfo("Closing socket...");
+            serverSocketChannel.close();
+        }
+        catch (IOException e)
+        {
+            logServerWarn("Unable to close socket! " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        logServerInfo("Instance server stopped.");
         running = false;
     }
 

@@ -40,7 +40,7 @@ public class MultiInstanceService extends MorphPluginObject
 
     private void prepareInstance(boolean isMaster)
     {
-        logger.info("Preparing socket instance...");
+        logger.info("Preparing MultiInstance service...");
 
         if (!stopAll())
         {
