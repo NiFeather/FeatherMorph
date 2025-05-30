@@ -35,7 +35,7 @@ public class SkillsConfigurationStoreNew extends DirectoryJsonBasedStorage<Skill
             logger.warn("The package version is newer than our implementation! Errors may occur!");
     }
 
-    private static final int TARGET_PACKAGE_VERSION = PackageVersions.WITHER_SKELETON_CHANGES;
+    private static final int TARGET_PACKAGE_VERSION = PackageVersions.MERGE_ATTRIBUTE_AGAIN;
 
     private void update(int currentVersion)
     {
@@ -48,18 +48,23 @@ public class SkillsConfigurationStoreNew extends DirectoryJsonBasedStorage<Skill
             else
                 saveDefaultGeneratedConfigurations();
         }
+
         if (currentVersion < PackageVersions.ATTRIBUTE_NAME_CHANGED)
-            migrate_attribute();
+            migrateAttribute();
 
         if (currentVersion < PackageVersions.WITHER_SKELETON_CHANGES)
-        {
             migrateWitherSkeleton();
+
+        if (currentVersion < PackageVersions.MERGE_ATTRIBUTE_AGAIN)
+        {
+            logger.info("Migrating attribute name again, to fix windows migrate issue.");
+            migrateAttribute();
         }
 
         setPackageVersion(TARGET_PACKAGE_VERSION);
     }
 
-    private void migrate_attribute()
+    private void migrateAttribute()
     {
         logger.info("Starting migration of attribute names...");
         var files = directoryStorage.getFiles(".*\\.json$");
@@ -256,5 +261,6 @@ public class SkillsConfigurationStoreNew extends DirectoryJsonBasedStorage<Skill
         public static final int INITIAL = 1;
         public static final int ATTRIBUTE_NAME_CHANGED = 2;
         public static final int WITHER_SKELETON_CHANGES = 3;
+        public static final int MERGE_ATTRIBUTE_AGAIN = 4;
     }
 }
