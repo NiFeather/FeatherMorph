@@ -104,6 +104,9 @@ public class StatSubCommand extends BrigadierCommand
                         StatStrings.defaultBackendString()
                                 .resolve("backend", defaultBackendString),
 
+                        StatStrings.activeDataStoreString()
+                                .resolve("store", morphManager.getDataStore().getClass().getName()),
+
                         StatStrings.activeBackends()
                                 .resolve("list", listString.toString()),
 
