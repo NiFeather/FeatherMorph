@@ -198,6 +198,7 @@
   "stat.active_clients": "Active client connections: <count>",
   "stat.active_disguises": "Active Disguises: <count>/<max>",
   "stat.default_backend": "Default Backend: <backend>",
+  "stat.active_datastore": "Active player datastore: <store>",
   "stat.active_backends": "Active backends: <list>",
   "stat.none": "None",
   "stat.backend_desc": "<name> <#B2DFDB>(<count> instance(s))</#B2DFDB>",

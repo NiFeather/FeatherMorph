@@ -46,6 +46,9 @@ public class ServerRenderer extends MorphPluginObject implements Listener
         registry.onUnRegister(this, parameters ->
         {
             var player = parameters.player();
+            if (player == null)
+                return;
+
             this.unDisguiseForPlayer(player, parameters.watcher(), WatcherUtils.getAffectedPlayers(player));
         });
     }

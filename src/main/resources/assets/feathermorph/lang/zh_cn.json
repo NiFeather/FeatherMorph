@@ -201,6 +201,7 @@
   "stat.backend_desc" : "<name> <#B2DFDB>(<count>个实例)</#B2DFDB>",
   "stat.banned_disguises" : "已禁用伪装: <count>",
   "stat.default_backend" : "默认后端: <backend>",
+  "stat.active_datastore": "当前玩家数据后端: <store>",
   "stat.none" : "无",
   "stat.providers" : "已注册伪装构建器: <count>",
   "stat.skills" : "已注册技能: <count>",

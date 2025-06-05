@@ -20,6 +20,11 @@ public class StatStrings extends AbstractMorphStrings
         return getFormattable(getKey("default_backend"), "Default Backend: <backend>");
     }
 
+    public static FormattableMessage activeDataStoreString()
+    {
+        return getFormattable(getKey("active_datastore"), "[Fallback] Active data store: <store>");
+    }
+
     public static FormattableMessage activeBackends()
     {
         return getFormattable(getKey("active_backends"), "Active backends: <list>");

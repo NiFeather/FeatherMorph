@@ -3,6 +3,7 @@ package xyz.nifeather.morph.backends.server.renderer.utilties;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.GameType;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
 import xyz.nifeather.morph.misc.NmsRecord;
 
@@ -19,7 +20,7 @@ public class WatcherUtils
         return tag;
     }
 
-    public static List<Player> getAffectedPlayers(Player sourcePlayer)
+    public static List<Player> getAffectedPlayers(@NotNull Player sourcePlayer)
     {
         var players = sourcePlayer.getWorld().getPlayers();
         players.remove(sourcePlayer);

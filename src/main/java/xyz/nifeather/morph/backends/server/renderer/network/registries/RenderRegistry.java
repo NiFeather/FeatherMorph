@@ -22,7 +22,7 @@ import java.util.function.Consumer;
 
 public class RenderRegistry extends MorphPluginObject
 {
-    public record EventParameters(Player player, SingleWatcher watcher)
+    public record EventParameters(@Nullable Player player, SingleWatcher watcher)
     {
     }
 
@@ -51,7 +51,7 @@ public class RenderRegistry extends MorphPluginObject
         unRegisterConsumers.put(source, consumer);
     }
 
-    private void callUnregister(Player player, SingleWatcher watcher)
+    private void callUnregister(@Nullable Player player, SingleWatcher watcher)
     {
         unRegisterConsumers.forEach((source, consumer) -> consumer.accept(new EventParameters(player, watcher)));
     }
