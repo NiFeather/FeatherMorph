@@ -32,6 +32,7 @@ import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEnt
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntry;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.RenderRegistry;
 import xyz.nifeather.morph.backends.server.renderer.utilties.WatcherUtils;
+import xyz.nifeather.morph.misc.BuildFailedException;
 import xyz.nifeather.morph.misc.DisguiseEquipment;
 import xyz.nifeather.morph.misc.NmsRecord;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
@@ -499,6 +500,19 @@ public abstract class SingleWatcher extends MorphPluginObject
 
     public void unmarkSilent(Object source)
     {
+        //workaround: fastutil: If the list is empty, calling remove will throw exception?!
+        /*
+            [20:54:14 WARN]: [com.github.retrooper.packetevents.PacketEventsAPI] PacketEvents caught an unhandled exception while calling your listener.
+            java.lang.IndexOutOfBoundsException: Index (0) is greater than or equal to list size (0)
+            at it.unimi.dsi.fastutil.objects.ObjectArrayList.remove(ObjectArrayList.java:402) ~[fastutil-8.5.15.jar:?]
+            at it.unimi.dsi.fastutil.objects.ObjectArrayList.remove(ObjectArrayList.java:416) ~[fastutil-8.5.15.jar:?]
+            at feathermorph-2.0.0.rc3-1.21.4-final.jar/xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher.unmarkSilent(SingleWatcher.java:502) ~[feathermorph-2.0.0.rc3-1.21.4-final.jar:?]
+            at feathermorph-2.0.0.rc3-1.21.4-final.jar/xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher.sync(SingleWatcher.java:474) ~[feathermorph-2.0.0.rc3-1.21.4-final.jar:?]
+            at feathermorph-2.0.0.rc3-1.21.4-final.jar/xyz.nifeather.morph.backends.server.renderer.network.PacketFactory.buildFullMetaPacket(PacketFactory.java:47) ~[feathermorph-2.0.0.rc3-1.21.4-final.jar:?]
+        */
+        if (silentRequestSources.isEmpty())
+            return;
+
         silentRequestSources.remove(source);
     }
 
@@ -548,7 +562,7 @@ public abstract class SingleWatcher extends MorphPluginObject
         players.forEach(p -> protocol.sendPacket(p, packet));
     }
 
-    public abstract List<PacketWrapper<?>> buildSpawnPackets();
+    public abstract List<PacketWrapper<?>> buildSpawnPackets() throws BuildFailedException;
 
     private boolean disposed;
 

@@ -17,6 +17,7 @@ import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEnt
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntry;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.misc.AnimationNames;
+import xyz.nifeather.morph.misc.BuildFailedException;
 import xyz.nifeather.morph.misc.MorphGameProfile;
 
 import java.util.EnumSet;
@@ -58,17 +59,25 @@ public class PlayerWatcher extends InventoryLivingWatcher
             var player = getBindingPlayer();
             var affected = getAffectedPlayers(player);
 
-            if (!affected.isEmpty())
+            if (affected.isEmpty())
+                return;
+
+            List<PacketWrapper<?>> spawnPackets;
+
+            try
             {
-                var spawnPackets = this.buildSpawnPackets();
-
-                var protocol = PacketEvents.getAPI().getPlayerManager();
-
-                affected.forEach(p ->
-                {
-                    spawnPackets.forEach(packet -> protocol.sendPacket(p, packet));
-                });
+                spawnPackets = this.buildSpawnPackets();
             }
+            catch (BuildFailedException e)
+            {
+                logger.error("Build spawn packet FAILED for player skin update! not continuing", e);
+                return;
+            }
+
+            var protocol = PacketEvents.getAPI().getPlayerManager();
+
+            affected.forEach(p ->
+                    spawnPackets.forEach(packet -> protocol.sendPacket(p, packet)));
         }
 
         if (entry.equals(CustomEntries.ANIMATION))
@@ -123,7 +132,7 @@ public class PlayerWatcher extends InventoryLivingWatcher
     }
 
     @Override
-    public List<PacketWrapper<?>> buildSpawnPackets()
+    public List<PacketWrapper<?>> buildSpawnPackets() throws BuildFailedException
     {
         var list = new ObjectArrayList<PacketWrapper<?>>();
 

@@ -1,6 +1,7 @@
 package xyz.nifeather.morph.backends.server.renderer;
 
 import com.github.retrooper.packetevents.PacketEvents;
+import com.github.retrooper.packetevents.wrapper.PacketWrapper;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerDestroyEntities;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerPlayerInfoRemove;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
@@ -29,6 +30,7 @@ import xyz.nifeather.morph.backends.server.renderer.network.registries.RenderReg
 import xyz.nifeather.morph.backends.server.renderer.utilties.WatcherUtils;
 import xyz.nifeather.morph.config.ConfigOption;
 import xyz.nifeather.morph.config.MorphConfigManager;
+import xyz.nifeather.morph.misc.BuildFailedException;
 
 import java.util.List;
 
@@ -116,6 +118,7 @@ public class ServerRenderer extends MorphPluginObject implements Listener
     }
 
     public void refreshStateForPlayer(@Nullable Player player, List<Player> affectedPlayers)
+            throws BuildFailedException
     {
         if (player == null) return;
 
@@ -134,6 +137,7 @@ public class ServerRenderer extends MorphPluginObject implements Listener
      * @param displayParameters 和伪装对应的 {@link DisplayParameters}
      */
     public void refreshStateForPlayer(@Nullable Player player, @NotNull DisplayParameters displayParameters, List<Player> affectedPlayers)
+        throws BuildFailedException
     {
         if (affectedPlayers.isEmpty()) return;
 
@@ -166,7 +170,17 @@ public class ServerRenderer extends MorphPluginObject implements Listener
         watcher.writeEntry(CustomEntries.PROFILE_LISTED, true);
         watcher.writeEntry(CustomEntries.DONT_INCLUDE_PACKET_IDENTIFIER, true);
 
-        var packets = watcher.buildSpawnPackets();
+        List<PacketWrapper<?>> packets;
+
+        try
+        {
+            packets = watcher.buildSpawnPackets();
+        }
+        catch (BuildFailedException e)
+        {
+            logger.error("PANIC! Can't undisguise player, BuildFailedException has been thrown!", e);
+            return;
+        }
 
         var removePacket = new WrapperPlayServerDestroyEntities(player.getEntityId());
 

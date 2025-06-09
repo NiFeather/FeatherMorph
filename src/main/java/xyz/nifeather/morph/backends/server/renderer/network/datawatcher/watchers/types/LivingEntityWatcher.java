@@ -21,6 +21,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.potion.PotionEffect;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
+import xyz.nifeather.morph.misc.BuildFailedException;
 import xyz.nifeather.morph.misc.NmsRecord;
 import xyz.nifeather.morph.utilities.NmsUtils;
 
@@ -109,7 +110,7 @@ public class LivingEntityWatcher extends EntityWatcher
     }
 
     @Override
-    public List<PacketWrapper<?>> buildSpawnPackets()
+    public List<PacketWrapper<?>> buildSpawnPackets() throws BuildFailedException
     {
         var packets = new ObjectArrayList<PacketWrapper<?>>();
         var entityPackets = super.buildSpawnPackets();
