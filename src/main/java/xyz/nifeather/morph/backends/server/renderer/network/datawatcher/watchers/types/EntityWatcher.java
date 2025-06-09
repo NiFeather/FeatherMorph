@@ -10,6 +10,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
 import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.packs.repository.Pack;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -20,13 +21,18 @@ import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntry;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
+import xyz.nifeather.morph.misc.BuildFailedException;
 import xyz.nifeather.morph.misc.DisguiseEquipment;
 import xyz.nifeather.morph.misc.NmsRecord;
+import xyz.nifeather.morph.utilities.EntityThreadUtils;
 import xyz.nifeather.morph.utilities.EntityTypeUtils;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 public class EntityWatcher extends SingleWatcher
 {
@@ -85,27 +91,12 @@ public class EntityWatcher extends SingleWatcher
         return packet;
     }
 
-    @Override
-    public List<PacketWrapper<?>> buildSpawnPackets()
+    private List<PacketWrapper<?>> buildSpawnPacketsFor(Player player)
     {
         List<PacketWrapper<?>> packets = new ObjectArrayList<>();
 
-        if (this.readEntryOrDefault(CustomEntries.VANISHED, false))
-            return packets;
-
-        var disguiseEntityType = this.getEntityType();
-
-        var nmsSpawnType = EntityTypeUtils.getNmsType(disguiseEntityType);
-        if (nmsSpawnType == null)
-        {
-            logger.error("No NMS Type for Bukkit Type '%s'".formatted(disguiseEntityType));
-            logger.error("Not building spawn packets!");
-
-            return packets;
-        }
-
-        var player = getBindingPlayer();
         var nmsPlayer = NmsRecord.ofPlayer(player);
+
         UUID spawnUUID = this.readEntryOrThrow(CustomEntries.SPAWN_UUID);
         if (spawnUUID.equals(Util.NIL_UUID))
             throw new IllegalStateException("A watcher with NIL UUID?!");
@@ -119,6 +110,7 @@ public class EntityWatcher extends SingleWatcher
         var yaw = this.readEntryOrDefault(CustomEntries.OVERLAYED_YAW, player.getYaw());
 
         //生成实体
+        var disguiseEntityType = this.getEntityType();
         var playerMotion = player.getVelocity();
         var spawnPacket = new WrapperPlayServerSpawnEntity(
                 this.readEntryOrThrow(CustomEntries.SPAWN_ID), spawnUUID,
@@ -156,6 +148,47 @@ public class EntityWatcher extends SingleWatcher
         // 属性交由 LivingEntityWatcher 添加
 
         return packets;
+    }
+
+    @Override
+    public List<PacketWrapper<?>> buildSpawnPackets() throws BuildFailedException
+    {
+        List<PacketWrapper<?>> result = new ObjectArrayList<>();
+
+        if (this.readEntryOrDefault(CustomEntries.VANISHED, false))
+            return result;
+
+        var disguiseEntityType = this.getEntityType();
+
+        var nmsSpawnType = EntityTypeUtils.getNmsType(disguiseEntityType);
+        if (nmsSpawnType == null)
+        {
+            logger.error("No NMS Type for Bukkit Type '%s'".formatted(disguiseEntityType));
+            logger.error("Not building spawn packets!");
+
+            return result;
+        }
+
+        try
+        {
+            return EntityThreadUtils.runOnEntitySync(getBindingPlayer(), this::buildSpawnPacketsFor, EntityThreadUtils.DEFAULT_WAIT_TIMEOUT);
+        }
+        catch (TimeoutException e)
+        {
+            throw new BuildFailedException("Waiting too long for player '%s'!".formatted(getBindingPlayer().getName()));
+        }
+        catch (InterruptedException e)
+        {
+            throw new BuildFailedException("Task has been interrupted, why?", e);
+        }
+        catch (CancellationException e)
+        {
+            throw new BuildFailedException("Task cancelled, why?", e);
+        }
+        catch (Throwable t)
+        {
+            throw new BuildFailedException("Unhandled exception while building packet for '%s'!", t);
+        }
     }
 
     @Override

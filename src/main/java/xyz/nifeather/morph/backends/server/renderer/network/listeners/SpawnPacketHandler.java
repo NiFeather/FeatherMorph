@@ -74,6 +74,13 @@ public class SpawnPacketHandler extends ProtocolListener
         packetEvent.setCancelled(true);
         Player pl = packetEvent.getPlayer();
 
-        ServerBackend.getInstance().serverRenderer.refreshStateForPlayer(Bukkit.getPlayer(uuid), List.of(pl));
+        try
+        {
+            ServerBackend.getInstance().serverRenderer.refreshStateForPlayer(Bukkit.getPlayer(uuid), List.of(pl));
+        }
+        catch (Throwable t)
+        {
+            logger.error("Failed to spawn fake entity: " + t.getMessage());
+        }
     }
 }

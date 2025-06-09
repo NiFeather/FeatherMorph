@@ -201,7 +201,16 @@ public class ServerBackend extends DisguiseBackend<ServerDisguise, ServerDisguis
         serverDisguiseWrapper.setRenderParameters(player, watcher);
         watcher.unmarkSilent(this);
 
-        serverRenderer.refreshStateForPlayer(player, WatcherUtils.getAffectedPlayers(player));
+        try
+        {
+            serverRenderer.refreshStateForPlayer(player, WatcherUtils.getAffectedPlayers(player));
+        }
+        catch (Throwable t)
+        {
+            logger.error("Failed to apply disguise: " + t.getMessage());
+            t.printStackTrace();
+            return false;
+        }
 
         return true;
     }

@@ -2,6 +2,7 @@ package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watcher
 
 import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.protocol.entity.pose.EntityPose;
+import com.github.retrooper.packetevents.wrapper.PacketWrapper;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerDestroyEntities;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityStatus;
 import io.github.retrooper.packetevents.util.SpigotConversionUtil;
@@ -13,6 +14,9 @@ import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEnt
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntry;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.misc.AnimationNames;
+import xyz.nifeather.morph.misc.BuildFailedException;
+
+import java.util.List;
 
 public class WardenWatcher extends EHasAttackAnimationWatcher
 {
@@ -83,7 +87,20 @@ public class WardenWatcher extends EHasAttackAnimationWatcher
                     this.writePersistent(ValueIndex.BASE_LIVING.POSE, EntityPose.EMERGING);
                     world.playSound(bindingPlayer.getLocation(), Sound.ENTITY_WARDEN_EMERGE, 5, 1);
 
-                    var packets = this.buildSpawnPackets();
+                    List<PacketWrapper<?>> packets;
+
+                    try
+                    {
+                        packets = this.buildSpawnPackets();
+                    }
+                    catch (BuildFailedException e)
+                    {
+                        logger.error("Build spawn packet FAILED for Warden animate! not continuing", e);
+                        reset();
+
+                        return;
+                    }
+
                     var affectedPlayers = this.getAffectedPlayers(bindingPlayer);
                     var despawnPacket = new WrapperPlayServerDestroyEntities(bindingPlayer.getEntityId());
 
