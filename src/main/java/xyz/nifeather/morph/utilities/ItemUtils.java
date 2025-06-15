@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.mojang.serialization.JsonOps;
 import it.unimi.dsi.fastutil.objects.ObjectAVLTreeSet;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
@@ -51,10 +52,22 @@ public class ItemUtils
             .disableHtmlEscaping()
             .create();
 
+    @Nullable
     public static String getItemJsonName(ItemStack stack)
     {
-        var name = stack.displayName();
-        return JSONComponentSerializer.json().serialize(name);
+        var itemMeta = stack.getItemMeta();
+        Component nameToSerialize;
+
+        if (itemMeta.hasCustomName())
+            nameToSerialize = itemMeta.customName();
+        else if (itemMeta.hasItemName())
+            nameToSerialize = itemMeta.itemName();
+        else
+            return null;
+
+        assert nameToSerialize != null;
+
+        return JSONComponentSerializer.json().serialize(nameToSerialize);
     }
 
     public static String itemToStr(ItemStack stack)

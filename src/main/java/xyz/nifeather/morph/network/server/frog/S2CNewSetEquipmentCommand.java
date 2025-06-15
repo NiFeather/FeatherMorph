@@ -2,15 +2,21 @@ package xyz.nifeather.morph.network.server.frog;
 
 import io.papermc.paper.registry.RegistryAccess;
 import io.papermc.paper.registry.RegistryKey;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import org.bukkit.Registry;
+import org.bukkit.block.banner.Pattern;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ArmorMeta;
+import org.bukkit.inventory.meta.BannerMeta;
+import org.bukkit.inventory.meta.Damageable;
 import xyz.nifeather.morph.network.BasicServerHandler;
 import xyz.nifeather.morph.network.commands.S2C.AbstractS2CCommand;
 import xyz.nifeather.morph.network.commands.S2C.set.S2CSetFakeEquipCommand;
 import xyz.nifeather.morph.utilities.ItemUtils;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -40,22 +46,63 @@ public class S2CNewSetEquipmentCommand extends AbstractS2CCommand<ItemStack>
     public Map<String, String> generateArgumentMap()
     {
         Map<String, String> argumentMap = new ConcurrentHashMap<>();
+
+        // Basic elements: slot, type, count, damage
         argumentMap.put("slot", this.slot.toString());
         argumentMap.put("type", this.item.getType().key().asString());
         argumentMap.put("count", "" + this.item.getAmount());
-        argumentMap.put("name", ItemUtils.getItemJsonName(this.item));
 
-        Map<String, String> enchantments = new HashMap<>();
-        item.getEnchantments().forEach((ench, lvl) ->
+        int damage = 0;
+        if (item.getItemMeta() instanceof Damageable damageable)
+            damage = damageable.getDamage();
+
+        argumentMap.put("damage", "" + damage);
+
+        // Optional elements: name, enchantments, armor_trim, banner_pattern
+        var nameString = ItemUtils.getItemJsonName(this.item);
+        if (nameString != null)
+            argumentMap.put("name", nameString);
+
+        var itemEnchantments = item.getEnchantments();
+        if (!itemEnchantments.isEmpty())
         {
-            enchantments.put(ench.key().asString(), "" + lvl);
-        });
+            Map<String, String> enchantments = new HashMap<>();
+            itemEnchantments.forEach((ench, lvl) -> enchantments.put(ench.key().asString(), "" + lvl));
 
-        argumentMap.put("enchantments", gson().toJson(enchantments));
+            argumentMap.put("enchantments", gson().toJson(enchantments));
+        }
 
         appendArmorTrimIfPossible(argumentMap, this.item);
+        appendBannerIfPossible(argumentMap, this.item);
 
         return argumentMap;
+    }
+
+    private void appendBannerIfPossible(Map<String, String> argumentMap, ItemStack item)
+    {
+        if (!(item.getItemMeta() instanceof BannerMeta banner))
+            return;
+
+        List<String> patternList = new ObjectArrayList<>();
+
+        for (Pattern pattern : banner.getPatterns())
+        {
+            var map = new HashMap<String, String>();
+
+            var patternKey = RegistryAccess.registryAccess()
+                    .getRegistry(RegistryKey.BANNER_PATTERN)
+                    .getKey(pattern.getPattern());
+
+            if (patternKey == null)
+                continue;
+
+            map.put("pattern_type", patternKey.key().asString());
+            map.put("color", pattern.getColor().toString());
+
+            patternList.add(gson().toJson(map));
+        }
+
+        argumentMap.put("banner_pattern", gson().toJson(patternList));
     }
 
     private void appendArmorTrimIfPossible(Map<String, String> argumentMap, ItemStack item)
