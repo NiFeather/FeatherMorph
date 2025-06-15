@@ -213,7 +213,7 @@ public class S2CNewSetEquipmentCommand extends AbstractS2CCommand<ItemStack>
             case CHEST -> S2CSetFakeEquipCommand.ProtocolEquipmentSlot.CHESTPLATE;
             case HEAD -> S2CSetFakeEquipCommand.ProtocolEquipmentSlot.HELMET;
             case BODY -> throw new IllegalArgumentException("BODY is not supported."); //生物BODY，和玩家无关？
-            case SADDLE ->  throw new IllegalArgumentException("SADDLE is not supported.");
+            //case SADDLE ->  throw new IllegalArgumentException("SADDLE is not supported.");
         };
     }
 }
