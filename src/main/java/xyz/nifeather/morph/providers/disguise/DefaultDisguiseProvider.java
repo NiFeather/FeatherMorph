@@ -169,7 +169,7 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
         if (skillHandler.hasSpeficSkill(state.skillLookupIdentifier(), SkillNames.FAKE_EQUIP))
         {
             var eqiupment = state.getDisguisedItems();
-            var canUseAlternativeEquipment = clientHandler.playerHasFeature(state.getPlayer(), ModFeatures.FROG_ALTERNATIVE_EQUIPMENT_COMMAND);
+            var canUseAlternativeEquipment = false; //clientHandler.playerHasFeature(state.getPlayer(), ModFeatures.FROG_ALTERNATIVE_EQUIPMENT_COMMAND);
 
             var list = new ObjectArrayList<AbstractS2CCommand<?>>();
 
