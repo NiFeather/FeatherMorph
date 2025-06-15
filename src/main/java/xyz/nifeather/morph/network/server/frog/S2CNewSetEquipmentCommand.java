@@ -1,8 +1,10 @@
 package xyz.nifeather.morph.network.server.frog;
 
+import com.google.gson.annotations.Expose;
 import io.papermc.paper.registry.RegistryAccess;
 import io.papermc.paper.registry.RegistryKey;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import org.bukkit.Color;
 import org.bukkit.Registry;
 import org.bukkit.block.banner.Pattern;
 import org.bukkit.inventory.EquipmentSlot;
@@ -10,10 +12,13 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ArmorMeta;
 import org.bukkit.inventory.meta.BannerMeta;
 import org.bukkit.inventory.meta.Damageable;
+import org.bukkit.inventory.meta.SkullMeta;
+import xyz.nifeather.morph.misc.MorphGameProfile;
 import xyz.nifeather.morph.network.BasicServerHandler;
 import xyz.nifeather.morph.network.commands.S2C.AbstractS2CCommand;
 import xyz.nifeather.morph.network.commands.S2C.set.S2CSetFakeEquipCommand;
 import xyz.nifeather.morph.utilities.ItemUtils;
+import xyz.nifeather.morph.utilities.NbtUtils;
 
 import java.util.HashMap;
 import java.util.List;
@@ -58,7 +63,7 @@ public class S2CNewSetEquipmentCommand extends AbstractS2CCommand<ItemStack>
 
         argumentMap.put("damage", "" + damage);
 
-        // Optional elements: name, enchantments, armor_trim, banner_pattern
+        // Optional elements: name, enchantments, armor_trim, banner_pattern, profile, custom_model_data
         var nameString = ItemUtils.getItemJsonName(this.item);
         if (nameString != null)
             argumentMap.put("name", nameString);
@@ -74,8 +79,62 @@ public class S2CNewSetEquipmentCommand extends AbstractS2CCommand<ItemStack>
 
         appendArmorTrimIfPossible(argumentMap, this.item);
         appendBannerIfPossible(argumentMap, this.item);
+        appendProfileIfPossible(argumentMap, this.item);
+        appendCustomModelDataIsPossible(argumentMap, this.item);
 
         return argumentMap;
+    }
+
+    private void appendCustomModelDataIsPossible(Map<String, String> argumentMap, ItemStack item)
+    {
+        var itemMeta = item.getItemMeta();
+
+        if (!itemMeta.hasCustomModelData())
+            return;
+
+        var cmdc = itemMeta.getCustomModelDataComponent();
+        Map<String, String> dataMap = new HashMap<>();
+
+        // Flags
+        var flags = cmdc.getFlags()
+                .stream().map(Object::toString)
+                .toList();
+
+        dataMap.put("flags", gson().toJson(flags));
+
+        // Floats
+        var floats = cmdc.getFloats()
+                .stream().map(Object::toString)
+                .toList();
+
+        dataMap.put("floats", gson().toJson(floats));
+
+        // Strings
+        dataMap.put("strings", gson().toJson(cmdc.getStrings()));
+
+        // Colors
+        List<String> colors = cmdc.getColors()
+                        .stream().map(c -> "" + c.asRGB())
+                        .toList();
+
+        dataMap.put("colors", gson().toJson(colors));
+
+        argumentMap.put("custom_model_data", gson().toJson(dataMap));
+    }
+
+    private void appendProfileIfPossible(Map<String, String> argumentMap, ItemStack item)
+    {
+        if (!(item.getItemMeta() instanceof SkullMeta skullMeta))
+            return;
+
+        var profile = skullMeta.getPlayerProfile();
+        if (profile == null)
+            return;
+
+        var morphGameProfile = new MorphGameProfile(profile);
+        var profileString = NbtUtils.getCompoundString(NbtUtils.toCompoundTag(morphGameProfile));
+
+        argumentMap.put("profile", profileString);
     }
 
     private void appendBannerIfPossible(Map<String, String> argumentMap, ItemStack item)

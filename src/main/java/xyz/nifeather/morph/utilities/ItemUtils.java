@@ -9,6 +9,7 @@ import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.item.component.CustomModelData;
 import net.minecraft.world.item.component.TooltipDisplay;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -51,6 +52,15 @@ public class ItemUtils
     private static final Gson gson = new GsonBuilder()
             .disableHtmlEscaping()
             .create();
+
+    public static void extractItemCustomModel(ItemStack bukkitStack)
+    {
+        var nmsStack = CraftItemStack.asNMSCopy(bukkitStack);
+        var customModelData = nmsStack.get(DataComponents.CUSTOM_MODEL_DATA);
+
+        if (customModelData == null)
+            return;
+    }
 
     @Nullable
     public static String getItemJsonName(ItemStack stack)
