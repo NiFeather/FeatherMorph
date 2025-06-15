@@ -12,6 +12,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xiamomc.pluginbase.Exceptions.NullDependencyException;
 import xyz.nifeather.morph.api.FeatherMorphAPI;
 import xyz.nifeather.morph.network.*;
 import xyz.nifeather.morph.network.commands.C2S.*;
@@ -176,7 +177,10 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
     private final Bindable<Boolean> useClientRenderer = new Bindable<>(false);
     private final Bindable<Boolean> debugOutput = new Bindable<>(false);
 
-    public static final String SERVER_FEATURE_FLAGS = "1_21_3_packetbuf";
+    public static final List<String> SERVER_FEATURE_FLAGS = List.of(
+            ModFeatures.PACKETBUF1213,
+            ModFeatures.FROG_ALTERNATIVE_EQUIPMENT_COMMAND
+    );
 
     @Initializer
     private void load(FeatherMorphMain plugin, MorphConfigManager configManager)
@@ -230,12 +234,6 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
             else
                 players.forEach(this::disconnect);
         });
-
-        Bukkit.getOnlinePlayers().forEach(p ->
-        {
-            var session = this.getOrCreateSession(p);
-            session.connectionState = ConnectionState.JOINED;
-        });
     }
 
     private final AtomicBoolean scheduledReauthPlayers = new AtomicBoolean(false);
@@ -246,16 +244,19 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
 
     private final Map<Player, CompletableFuture<Player>> waitMap = new ConcurrentHashMap<>();
 
+    // Called when player's client registers a channel
     public void onPlayerChannelRegister(Player player, String channel)
     {
         var persistentDataContainer = player.getPersistentDataContainer();
 
-        var list = persistentDataContainer.get(KEY_CHANNEL_STORE, PersistentDataType.LIST.strings());
-        if (list == null)
-            list = List.of();
+        // Get channels that the player registered
+        var data = persistentDataContainer.get(KEY_CHANNEL_STORE, PersistentDataType.LIST.strings());
+        if (data == null)
+            data = List.of();
 
-        var channelList = new ObjectArrayList<>(list);
+        var channelList = new ObjectArrayList<>(data);
 
+        // Add the new channel into the list, then set it back.
         channelList.add(channel);
         persistentDataContainer.set(KEY_CHANNEL_STORE, PersistentDataType.LIST.strings(), channelList);
 
@@ -264,9 +265,11 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
         if (protocolHandler == null)
             return;
 
+        // If the player registered all channels that the binding ProtocolHandler requires
+        // Notify that the player is ready.
         if (new HashSet<>(channelList).containsAll(protocolHandler.validChannels()))
         {
-            notifyReady(player);
+            completePlayerFuture(player);
             persistentDataContainer.remove(KEY_CHANNEL_STORE);
         }
     }
@@ -293,12 +296,16 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
         return existingFuture;
     }
 
-    public CompletableFuture<Player> waitReady(Player player)
+    /**
+     * Get a pending {@link CompletableFuture} that matches the given player.
+     * The Future will complete when the player registered all channels required for client-server communication
+     */
+    public CompletableFuture<Player> getPlayerPendingFuture(Player player)
     {
         return getOrCreateFuture(player);
     }
 
-    public void notifyReady(Player player)
+    public void completePlayerFuture(Player player)
     {
         var future = waitMap.getOrDefault(player, null);
 
@@ -312,7 +319,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
 
     public InitializeRespondV3 getInitializeRespond()
     {
-        return new InitializeRespondV3(List.of(SERVER_FEATURE_FLAGS), this.targetApiVersion);
+        return new InitializeRespondV3(SERVER_FEATURE_FLAGS, this.targetApiVersion);
     }
 
     private void handleInitializeV3(@NotNull String channel, @NotNull Player player, byte @NotNull [] rawData)
@@ -337,7 +344,8 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
         logger.info("%s is using V3 packets, scheduling response".formatted(player.getName()));
         this.setProtocolHandlerFor(player, V3ProtocolHandler.V3_INSTANCE);
 
-        this.waitReady(player).thenRun(() -> this.handleHandshakeMessage(V3ProtocolHandler.V3_INSTANCE, player, handleResult));
+        this.getPlayerPendingFuture(player)
+                .thenRun(() -> this.handleHandshakeMessage(V3ProtocolHandler.V3_INSTANCE, player, handleResult));
     }
 
     public void handleHandshakeMessage(ICommandPacketHandler commandPacketHandler, @NotNull Player player, @NotNull ClientInitializeRecordV3 clientInitializeRecord)
@@ -373,7 +381,8 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
 
         logger.info(player.getName() + " joined with API version " + clientVersion);
 
-        var session = getOrCreateSession(player);
+        var session = createSession(player);
+        session.clientFeatures.addAll(clientInitializeRecord.clientFeatures());
         session.options.clientApiVersion = clientInitializeRecord.apiVersion();
         session.initializeState = InitializeState.API_CHECKED;
 
@@ -437,6 +446,15 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
 
     private final Map<Player, PlayerSession> playerSessionMap = new ConcurrentHashMap<>();
 
+    public boolean playerHasFeature(Player player, String feature)
+    {
+        var session = this.getSession(player);
+        if (session == null)
+            return false;
+
+        return session.clientFeatures.stream().anyMatch(s -> s.equals(feature));
+    }
+
     private PlayerSession createSession(Player player)
     {
         var cached = playerSessionMap.getOrDefault(player, null);
@@ -446,7 +464,6 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
 
         var instance = PlayerSession.SessionBuilder
                 .builder(player)
-                .isLegacy(false)
                 .build();
 
         playerSessionMap.put(player, instance);
@@ -458,22 +475,6 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
     {
         return playerSessionMap.getOrDefault(player, null);
     }
-
-    @NotNull
-    public PlayerSession getOrCreateSession(Player player)
-    {
-        return createSession(player);
-    }
-
-    //region wait until ready
-
-    public void markPlayerJoined(Player player)
-    {
-        var session = getOrCreateSession(player);
-        session.connectionState = ConnectionState.JOINED;
-    }
-
-    //endregion
 
     /**
      * 刷新某个玩家的客户端的伪装列表
@@ -649,6 +650,16 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
         return session.options;
     }
 
+    @NotNull
+    public PlayerOptions<Player> getPlayerOptionOrThrow(Player player)
+    {
+        var options = getPlayerOption(player);
+        if (options == null)
+            throw new NullPointerException("Operation required a non-null PlayerOptions.");
+
+        return options;
+    }
+
     @Override
     public int getPlayerVersion(Player player)
     {
@@ -721,7 +732,10 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
 
         if (this.clientInitialized(player)) return;
 
-        var session = getOrCreateSession(player);
+        var session = getSession(player);
+        if (session == null)
+            throw new NullDependencyException("Player session is NULL while we accepts their commands?!");
+
         if (session.connectionState != ConnectionState.JOINED)
             session.connectionState = ConnectionState.CONNECTING;
 
@@ -773,7 +787,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
             case CLIENTVIEW ->
             {
                 var val = Boolean.parseBoolean(c2SOptionCommand.getValue());
-                this.getPlayerOption(player, true).setClientSideSelfView(val);
+                this.getPlayerOptionOrThrow(player).setClientSideSelfView(val);
 
                 var state = manager.getDisguiseStateFor(player);
                 if (state != null) state.setServerSideSelfVisible(!val);
@@ -782,7 +796,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
             case HUD ->
             {
                 var val = Boolean.parseBoolean(c2SOptionCommand.getValue());
-                this.getPlayerOption(player, true).displayDisguiseOnHUD = val;
+                this.getPlayerOptionOrThrow(player).displayDisguiseOnHUD = val;
 
                 if (!val) player.sendActionBar(Component.empty());
             }
@@ -800,7 +814,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
     {
         Player player = c2SToggleSelfCommand.getOwner();
 
-        var playerOption = this.getPlayerOption(player, true);
+        var playerOption = this.getPlayerOptionOrThrow(player);
         var playerConfig = manager.getPlayerMeta(player);
 
         switch (c2SToggleSelfCommand.getSelfViewMode())

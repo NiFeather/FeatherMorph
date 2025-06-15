@@ -4,10 +4,14 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.mojang.serialization.JsonOps;
 import it.unimi.dsi.fastutil.objects.ObjectAVLTreeSet;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.util.Unit;
 import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.item.component.CustomModelData;
+import net.minecraft.world.item.component.TooltipDisplay;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.CraftWorld;
@@ -50,6 +54,33 @@ public class ItemUtils
     private static final Gson gson = new GsonBuilder()
             .disableHtmlEscaping()
             .create();
+
+    public static void extractItemCustomModel(ItemStack bukkitStack)
+    {
+        var nmsStack = CraftItemStack.asNMSCopy(bukkitStack);
+        var customModelData = nmsStack.get(DataComponents.CUSTOM_MODEL_DATA);
+
+        if (customModelData == null)
+            return;
+    }
+
+    @Nullable
+    public static String getItemJsonName(ItemStack stack)
+    {
+        var itemMeta = stack.getItemMeta();
+        Component nameToSerialize;
+
+        if (itemMeta.hasCustomName())
+            nameToSerialize = itemMeta.customName();
+        else if (itemMeta.hasItemName())
+            nameToSerialize = itemMeta.itemName();
+        else
+            return null;
+
+        assert nameToSerialize != null;
+
+        return JSONComponentSerializer.json().serialize(nameToSerialize);
+    }
 
     public static String itemToStr(ItemStack stack)
     {

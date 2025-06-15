@@ -1,6 +1,7 @@
 package xyz.nifeather.morph.network.server;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.minecraft.SharedConstants;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import xyz.nifeather.morph.network.commands.S2C.set.S2CSetFakeEquipCommand;
@@ -21,7 +22,8 @@ public class ServerSetEquipCommand extends S2CSetFakeEquipCommand<ItemStack>
     {
         return Map.of(
                 "slot", getSlot().toString(),
-                "item", ItemUtils.itemToStr(getItemStack())
+                "item", ItemUtils.itemToStr(getItemStack()),
+                "data_version", "" + SharedConstants.getCurrentVersion().getDataVersion().getVersion()
         );
     }
 
