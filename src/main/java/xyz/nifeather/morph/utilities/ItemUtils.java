@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.mojang.serialization.JsonOps;
 import it.unimi.dsi.fastutil.objects.ObjectAVLTreeSet;
+import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.component.CustomData;
@@ -49,6 +50,12 @@ public class ItemUtils
     private static final Gson gson = new GsonBuilder()
             .disableHtmlEscaping()
             .create();
+
+    public static String getItemJsonName(ItemStack stack)
+    {
+        var name = stack.displayName();
+        return JSONComponentSerializer.json().serialize(name);
+    }
 
     public static String itemToStr(ItemStack stack)
     {

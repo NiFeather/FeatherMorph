@@ -275,7 +275,6 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         var state = morphs.getDisguiseStateFor(player);
 
         clientHandler.ensureFuturePresent(player);
-        clientHandler.markPlayerJoined(player);
 
         var effectivePermissions = new ObjectOpenHashSet<>(player.getEffectivePermissions());
         List<String> legacyPermissions = new ObjectArrayList<>();

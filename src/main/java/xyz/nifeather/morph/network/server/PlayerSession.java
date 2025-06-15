@@ -1,27 +1,33 @@
 package xyz.nifeather.morph.network.server;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import it.unimi.dsi.fastutil.objects.ObjectLists;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
 import xyz.nifeather.morph.network.ConnectionState;
 import xyz.nifeather.morph.network.InitializeState;
 import xyz.nifeather.morph.network.PlayerOptions;
 
+import java.util.List;
+
 public class PlayerSession
 {
-    public PlayerSession(Player bindingPlayer, boolean isLegacyPacketBuf)
+    public PlayerSession(Player bindingPlayer, List<String> clientFeatures)
     {
         options = new PlayerOptions<>(bindingPlayer);
-        //this.isLegacyPacketBuf = isLegacyPacketBuf;
+        this.clientFeatures.addAll(clientFeatures);
     }
 
     public final PlayerOptions<Player> options;
-    //public boolean isLegacyPacketBuf;
 
     @NotNull
     public InitializeState initializeState = InitializeState.NOT_CONNECTED;
 
     @NotNull
     public ConnectionState connectionState = ConnectionState.NOT_CONNECTED;
+
+    public final List<String> clientFeatures = ObjectLists.synchronize(new ObjectArrayList<>());
 
     public static final class SessionBuilder
     {
@@ -30,17 +36,17 @@ public class PlayerSession
             return new SessionBuilder(player);
         }
 
+        private final List<String> features = new ObjectArrayList<>();
         private final Player bindingPlayer;
-        private boolean isLegacy;
 
         public SessionBuilder(Player bindingPlayer)
         {
             this.bindingPlayer = bindingPlayer;
         }
 
-        public SessionBuilder isLegacy(boolean isLegacy)
+        public SessionBuilder withClientFeature(List<String> list)
         {
-            this.isLegacy = isLegacy;
+            features.addAll(list);
             return this;
         }
 
@@ -48,7 +54,7 @@ public class PlayerSession
         {
             return new PlayerSession(
                     bindingPlayer,
-                    isLegacy
+                    List.copyOf(features)
             );
         }
     }
