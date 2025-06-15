@@ -208,7 +208,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         }
         catch (NoClassDefFoundError e)
         {
-            logger.error("Unable to initialize ServerBackend as our disguise backend, maybe ProtocolLib is not installed on the server.");
+            logger.error("Unable to initialize ServerBackend as our disguise backend, maybe PacketEvents is not installed on the server.");
             logger.error("Using NilBackend, displaying disguises at the server side will not be supported this run.");
         }
         catch (Throwable t)
