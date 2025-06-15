@@ -4,15 +4,13 @@ import com.google.gson.annotations.Expose;
 import io.papermc.paper.registry.RegistryAccess;
 import io.papermc.paper.registry.RegistryKey;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.minecraft.SharedConstants;
 import org.bukkit.Color;
 import org.bukkit.Registry;
 import org.bukkit.block.banner.Pattern;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ArmorMeta;
-import org.bukkit.inventory.meta.BannerMeta;
-import org.bukkit.inventory.meta.Damageable;
-import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.inventory.meta.*;
 import xyz.nifeather.morph.misc.MorphGameProfile;
 import xyz.nifeather.morph.network.BasicServerHandler;
 import xyz.nifeather.morph.network.commands.S2C.AbstractS2CCommand;
@@ -80,12 +78,24 @@ public class S2CNewSetEquipmentCommand extends AbstractS2CCommand<ItemStack>
         appendArmorTrimIfPossible(argumentMap, this.item);
         appendBannerIfPossible(argumentMap, this.item);
         appendProfileIfPossible(argumentMap, this.item);
-        appendCustomModelDataIsPossible(argumentMap, this.item);
+        appendCustomModelDataIfPossible(argumentMap, this.item);
+        appendBaseColorIfPossible(argumentMap, this.item);
 
         return argumentMap;
     }
 
-    private void appendCustomModelDataIsPossible(Map<String, String> argumentMap, ItemStack item)
+    private void appendBaseColorIfPossible(Map<String, String> argumentMap, ItemStack item)
+    {
+        if (!(item.getItemMeta() instanceof ShieldMeta shield))
+            return;
+
+        if (shield.getBaseColor() == null)
+            return;
+
+        argumentMap.put("base_color", shield.getBaseColor().toString());
+    }
+
+    private void appendCustomModelDataIfPossible(Map<String, String> argumentMap, ItemStack item)
     {
         var itemMeta = item.getItemMeta();
 
