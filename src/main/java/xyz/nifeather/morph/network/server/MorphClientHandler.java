@@ -178,8 +178,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
     private final Bindable<Boolean> debugOutput = new Bindable<>(false);
 
     public static final List<String> SERVER_FEATURE_FLAGS = List.of(
-            ModFeatures.PACKETBUF1213,
-            ModFeatures.FROG_ALTERNATIVE_EQUIPMENT_COMMAND
+            ModFeatures.PACKETBUF1213
     );
 
     @Initializer

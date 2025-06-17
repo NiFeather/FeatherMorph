@@ -20,7 +20,6 @@ import xyz.nifeather.morph.network.commands.S2C.AbstractS2CCommand;
 import xyz.nifeather.morph.network.server.ModFeatures;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
 import xyz.nifeather.morph.network.server.ServerSetEquipCommand;
-import xyz.nifeather.morph.network.server.frog.S2CNewSetEquipmentCommand;
 import xyz.nifeather.morph.skills.MorphSkillHandler;
 import xyz.nifeather.morph.api.morphs.skills.SkillNames;
 import xiamomc.pluginbase.Annotations.Resolved;
@@ -169,17 +168,16 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
         if (skillHandler.hasSpeficSkill(state.skillLookupIdentifier(), SkillNames.FAKE_EQUIP))
         {
             var eqiupment = state.getDisguisedItems();
-            var canUseAlternativeEquipment = false; //clientHandler.playerHasFeature(state.getPlayer(), ModFeatures.FROG_ALTERNATIVE_EQUIPMENT_COMMAND);
 
             var list = new ObjectArrayList<AbstractS2CCommand<?>>();
 
-            this.addIfPresents(eqiupment, list, EquipmentSlot.HAND, canUseAlternativeEquipment);
-            this.addIfPresents(eqiupment, list, EquipmentSlot.OFF_HAND, canUseAlternativeEquipment);
+            this.addIfPresents(eqiupment, list, EquipmentSlot.HAND);
+            this.addIfPresents(eqiupment, list, EquipmentSlot.OFF_HAND);
 
-            this.addIfPresents(eqiupment, list, EquipmentSlot.HEAD, canUseAlternativeEquipment);
-            this.addIfPresents(eqiupment, list, EquipmentSlot.CHEST, canUseAlternativeEquipment);
-            this.addIfPresents(eqiupment, list, EquipmentSlot.LEGS, canUseAlternativeEquipment);
-            this.addIfPresents(eqiupment, list, EquipmentSlot.FEET, canUseAlternativeEquipment);
+            this.addIfPresents(eqiupment, list, EquipmentSlot.HEAD);
+            this.addIfPresents(eqiupment, list, EquipmentSlot.CHEST);
+            this.addIfPresents(eqiupment, list, EquipmentSlot.LEGS);
+            this.addIfPresents(eqiupment, list, EquipmentSlot.FEET);
 
             return list;
         }
@@ -189,15 +187,12 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
 
     private void addIfPresents(EntityEquipment equipment,
                                ObjectArrayList<AbstractS2CCommand<?>> list,
-                               EquipmentSlot slot,
-                               boolean useAlternativeCommand)
+                               EquipmentSlot slot)
     {
         var item = equipment.getItem(slot);
 
         if (item.getType() != Material.AIR)
-            list.add(useAlternativeCommand
-                    ? new S2CNewSetEquipmentCommand(slot, item)
-                    : new ServerSetEquipCommand(item, slot));
+            list.add(new ServerSetEquipCommand(item, slot));
     }
 
     @Override
