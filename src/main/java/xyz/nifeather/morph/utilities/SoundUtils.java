@@ -32,6 +32,7 @@ public class SoundUtils
             case PLAYERS -> Sound.Source.PLAYER;
             case AMBIENT -> Sound.Source.AMBIENT;
             case VOICE -> Sound.Source.VOICE;
+            case UI -> Sound.Source.MASTER;
         };
     }
 }

@@ -23,7 +23,7 @@ public class ServerSetEquipCommand extends S2CSetFakeEquipCommand<ItemStack>
         return Map.of(
                 "slot", getSlot().toString(),
                 "item", ItemUtils.itemToStr(getItemStack()),
-                "data_version", "" + SharedConstants.getCurrentVersion().getDataVersion().getVersion()
+                "data_version", "" + SharedConstants.getCurrentVersion().dataVersion().version()
         );
     }
 
