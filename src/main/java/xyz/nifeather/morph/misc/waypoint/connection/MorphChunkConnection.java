@@ -1,14 +1,18 @@
 package xyz.nifeather.morph.misc.waypoint.connection;
 
-import net.minecraft.network.protocol.game.ClientboundTrackedWaypointPacket;
+//import net.minecraft.network.protocol.game.ClientboundTrackedWaypointPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.waypoints.Waypoint;
-import net.minecraft.world.waypoints.WaypointTransmitter;
+//import net.minecraft.world.waypoints.Waypoint;
+//import net.minecraft.world.waypoints.WaypointTransmitter;
 import org.bukkit.entity.Player;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.misc.NmsRecord;
 
+public class MorphChunkConnection
+{
+}
+/*
 public class MorphChunkConnection implements WaypointTransmitter.Connection
 {
     private final DisguiseState bindingState;
@@ -64,3 +68,4 @@ public class MorphChunkConnection implements WaypointTransmitter.Connection
                 || bindingState.getPlayer().isTrackedBy(receiverBukkit);
     }
 }
+*/

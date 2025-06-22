@@ -68,7 +68,7 @@ public class DisguiseState extends MorphPluginObject
 
         this.soundHandler = new SoundHandler(player);
         this.abilityUpdater = new AbilityUpdater(this);
-        this.waypointUpdater = new WaypointUpdater(this);
+        //this.waypointUpdater = new WaypointUpdater(this);
 
         this.disguiseWrapper = wrapper;
         this.disguiseIdentifier = identifier;
@@ -686,14 +686,14 @@ public class DisguiseState extends MorphPluginObject
     }
 
     //region Waypoint
-
+/*
     private final WaypointUpdater waypointUpdater;
 
     public WaypointUpdater waypointUpdater()
     {
         return waypointUpdater;
     }
-
+*/
     //endregion Waypoint
 
     //region 被动技能

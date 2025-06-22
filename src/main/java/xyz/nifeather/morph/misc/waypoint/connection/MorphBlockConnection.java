@@ -1,15 +1,19 @@
 package xyz.nifeather.morph.misc.waypoint.connection;
 
 import net.minecraft.core.Vec3i;
-import net.minecraft.network.protocol.game.ClientboundTrackedWaypointPacket;
+//import net.minecraft.network.protocol.game.ClientboundTrackedWaypointPacket;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.waypoints.Waypoint;
-import net.minecraft.world.waypoints.WaypointTransmitter;
+//import net.minecraft.world.waypoints.Waypoint;
+//import net.minecraft.world.waypoints.WaypointTransmitter;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.misc.NmsRecord;
 
+public class MorphBlockConnection implements IMorphWaypointConnection
+{
+}
+/*
 public class MorphBlockConnection implements IMorphWaypointConnection
 {
     private final DisguiseState bindingState;
@@ -74,3 +78,4 @@ public class MorphBlockConnection implements IMorphWaypointConnection
                 || !WaypointTransmitter.isChunkVisible(player.chunkPosition(), receiver);
     }
 }
+*/

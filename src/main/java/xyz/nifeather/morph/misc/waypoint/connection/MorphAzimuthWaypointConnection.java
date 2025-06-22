@@ -1,15 +1,19 @@
 package xyz.nifeather.morph.misc.waypoint.connection;
 
-import net.minecraft.network.protocol.game.ClientboundTrackedWaypointPacket;
+//import net.minecraft.network.protocol.game.ClientboundTrackedWaypointPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
-import net.minecraft.world.waypoints.Waypoint;
-import net.minecraft.world.waypoints.WaypointTransmitter;
+//import net.minecraft.world.waypoints.Waypoint;
+//import net.minecraft.world.waypoints.WaypointTransmitter;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.misc.NmsRecord;
 
+public class MorphAzimuthWaypointConnection
+{
+}
+/*
 public class MorphAzimuthWaypointConnection implements WaypointTransmitter.Connection
 {
     private final DisguiseState bindingState;
@@ -67,3 +71,4 @@ public class MorphAzimuthWaypointConnection implements WaypointTransmitter.Conne
         return !WaypointTransmitter.isReallyFar(source, receiver);
     }
 }
+*/

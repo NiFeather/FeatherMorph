@@ -336,7 +336,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
 
     @Resolved(shouldSolveImmediately = true)
     private MorphClientHandler clientHandler;
-
+/*
     @EventHandler
     public void onPlayerMove(PlayerMoveEvent e)
     {
@@ -346,7 +346,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
 
         state.waypointUpdater().updateRealtimeConnections();
     }
-
+*/
     @EventHandler
     public void onPlayerExit(PlayerQuitEvent e)
     {

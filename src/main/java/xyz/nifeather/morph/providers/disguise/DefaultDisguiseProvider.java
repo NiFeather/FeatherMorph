@@ -174,7 +174,7 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
     public static final NamespacedKey WAYPOINT_TRANSMIT_MODIFIER_KEY = Objects.requireNonNull(NamespacedKey.fromString("feathermorph:waypoint_transmit_modifier"));
 
     protected void mutePlayerWaypoint(Player player)
-    {
+    {/*
         // I don't know if adding -1 with ADD_SCALAR is allowed
         // But to prevent the player from transmitting waypoint, this is the easiest way...?
         // And by doing this, we won't have to mess with the WaypointManager
@@ -182,33 +182,33 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
 
         if (attribute.getModifier(WAYPOINT_TRANSMIT_MODIFIER_KEY) == null)
             attribute.addModifier(new AttributeModifier(WAYPOINT_TRANSMIT_MODIFIER_KEY, -1, AttributeModifier.Operation.ADD_SCALAR));
-    }
+    */}
 
     protected void recoverPlayerWaypoint(Player player)
-    {
+    {/*
         this.acquireAttributeOrThrow(player, Attribute.WAYPOINT_TRANSMIT_RANGE)
                 .removeModifier(WAYPOINT_TRANSMIT_MODIFIER_KEY);
-    }
+    */}
 
     protected void addDisguiseWaypoint(DisguiseState state)
-    {
+    {/*
         var player = state.getPlayer();
 
         var disguiseWaypoint = state.waypointUpdater();
         var nmsPlayer = NmsRecord.ofPlayer(player);
         var waypointManager = nmsPlayer.level().getWaypointManager();
         waypointManager.trackWaypoint(disguiseWaypoint);
-    }
+    */}
 
     public void removeDisguiseWaypoint(DisguiseState state)
-    {
+    {/*
         var player = state.getPlayer();
 
         var nmsPlayer = NmsRecord.ofPlayer(player);
         var waypointManager = nmsPlayer.level().getWaypointManager();
         var disguiseWaypoint = state.waypointUpdater();
         waypointManager.untrackWaypoint(disguiseWaypoint);
-    }
+    */}
 
     @Override
     @NotNull

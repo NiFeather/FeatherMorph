@@ -2,7 +2,7 @@ package xyz.nifeather.morph.misc.waypoint;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.waypoints.WaypointTransmitter;
+//import net.minecraft.world.waypoints.WaypointTransmitter;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.pluginbase.Exceptions.NullDependencyException;
@@ -17,6 +17,10 @@ import xyz.nifeather.morph.misc.waypoint.connection.MorphChunkConnection;
 import java.util.List;
 import java.util.Optional;
 
+public class WaypointUpdater
+{
+}
+/*
 public class WaypointUpdater implements WaypointTransmitter
 {
     public WaypointUpdater(DisguiseState state)
@@ -110,7 +114,7 @@ public class WaypointUpdater implements WaypointTransmitter
 
     /**
      * We might want to support changing icon in the future.
-     */
+     /
     private final Icon waypointIcon = new Icon();
 
     @Override
@@ -127,3 +131,4 @@ public class WaypointUpdater implements WaypointTransmitter
         return "(Disguise Waypoint for %s)@%s".formatted(playerString, Integer.toHexString(hashCode()));
     }
 }
+*/
