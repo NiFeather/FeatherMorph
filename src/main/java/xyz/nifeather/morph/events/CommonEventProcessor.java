@@ -338,6 +338,16 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
     private MorphClientHandler clientHandler;
 
     @EventHandler
+    public void onPlayerMove(PlayerMoveEvent e)
+    {
+        var state = morphs.getDisguiseStateFor(e.getPlayer());
+        if (state == null)
+            return;
+
+        state.waypointUpdater().updateRealtimeConnections();
+    }
+
+    @EventHandler
     public void onPlayerExit(PlayerQuitEvent e)
     {
         clientHandler.disconnect(e.getPlayer());

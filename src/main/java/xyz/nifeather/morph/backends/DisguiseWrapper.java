@@ -22,6 +22,7 @@ import xyz.nifeather.morph.utilities.EntityTypeUtils;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
@@ -311,6 +312,14 @@ public abstract class DisguiseWrapper<TInstance>
      * @return The network id of this disguise
      */
     public abstract int getNetworkEntityId();
+
+    /**
+     * @return Empty Optional if not available
+     */
+    public Optional<UUID> getVirtualEntityUUID()
+    {
+        return Optional.empty();
+    }
 
     private final AtomicBoolean disposed = new AtomicBoolean(false);
 

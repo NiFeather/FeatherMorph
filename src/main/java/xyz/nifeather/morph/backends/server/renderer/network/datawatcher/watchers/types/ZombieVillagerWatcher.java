@@ -65,7 +65,7 @@ public class ZombieVillagerWatcher extends ZombieWatcher
             var bukkitValue = (Villager.Type) value;
             this.type = Objects.requireNonNull(VillagerTypes.getByName(bukkitValue.key().asString()));
 
-            writePersistent(ValueIndex.VILLAGER.VILLAGER_DATA, computeVillagerData());
+            writePersistent(ValueIndex.ZOMBIE_VILLAGER.VILLAGER_DATA, computeVillagerData());
         }
 
         if (property.equals(properties.PROFESSION))
@@ -73,7 +73,7 @@ public class ZombieVillagerWatcher extends ZombieWatcher
             var bukkitValue = (Villager.Profession) value;
             this.profession = Objects.requireNonNull(VillagerProfessions.getByName(bukkitValue.key().asString()));
 
-            writePersistent(ValueIndex.VILLAGER.VILLAGER_DATA, computeVillagerData());
+            writePersistent(ValueIndex.ZOMBIE_VILLAGER.VILLAGER_DATA, computeVillagerData());
         }
 
         super.onPropertyWrite(property, value);

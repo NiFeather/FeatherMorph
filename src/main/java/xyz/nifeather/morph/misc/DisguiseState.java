@@ -13,6 +13,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xyz.nifeather.morph.misc.waypoint.WaypointUpdater;
 import xyz.nifeather.morph.network.PlayerOptions;
 import xyz.nifeather.morph.network.commands.S2C.S2CPlayAnimationCommand;
 import xyz.nifeather.morph.network.commands.S2C.set.S2CSetAnimationDisplayNameCommand;
@@ -67,6 +68,7 @@ public class DisguiseState extends MorphPluginObject
 
         this.soundHandler = new SoundHandler(player);
         this.abilityUpdater = new AbilityUpdater(this);
+        this.waypointUpdater = new WaypointUpdater(this);
 
         this.disguiseWrapper = wrapper;
         this.disguiseIdentifier = identifier;
@@ -290,6 +292,11 @@ public class DisguiseState extends MorphPluginObject
      * 谁在伪装
      */
     private final UUID playerUUID;
+
+    public UUID getPlayerUUID()
+    {
+        return playerUUID;
+    }
 
     @Nullable
     private Player cachedPlayer;
@@ -677,6 +684,17 @@ public class DisguiseState extends MorphPluginObject
 
         clientHandler.sendCommand(getPlayer(), new S2CSetSkillCooldownCommand(cd));
     }
+
+    //region Waypoint
+
+    private final WaypointUpdater waypointUpdater;
+
+    public WaypointUpdater waypointUpdater()
+    {
+        return waypointUpdater;
+    }
+
+    //endregion Waypoint
 
     //region 被动技能
 
