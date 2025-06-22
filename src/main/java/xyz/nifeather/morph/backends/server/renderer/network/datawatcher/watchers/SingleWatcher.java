@@ -347,7 +347,7 @@ public abstract class SingleWatcher extends MorphPluginObject
         if (!this.knownValues.containsValue(singleValue))
         {
             var cast = this.tryCast(singleValue);
-            String message = "Trying to write a SV that doesn't belongs to this Watcher: '%s'. ";
+            String message = "Trying to write a SV that doesn't belongs to this Watcher: '%s'. ".formatted(singleValue);
 
             if (cast == null)
                 throw new IllegalArgumentException(message);
