@@ -221,18 +221,6 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
         wrapper.writeProperty(properties.SHOW_ARMS, showArm);
     }
 
-    @Override
-    public void onDisguiseApply(DisguiseState state)
-    {
-        var player = state.getPlayer();
-
-        if (doHealthScale.get())
-            tryAddModifier(state);
-
-        if (modifyBoundingBoxes.get())
-            tryModifyPlayerDimensions(player, state.getDisguiseWrapper());
-    }
-
     private void tryAddModifier(DisguiseState state)
     {
         try
@@ -409,6 +397,7 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
     public void onPlayerJoinWithDisguise(DisguiseState state)
     {
         onDisguiseApply(state);
+        mutePlayerWaypoint(state.getPlayer());
 
         super.onPlayerJoinWithDisguise(state);
     }
@@ -416,7 +405,10 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
     @Override
     public void onPlayerQuitWithDisguise(DisguiseState state)
     {
-        removeAllHealthModifiers(state.getPlayer());
+        var player = state.getPlayer();
+        removeAllHealthModifiers(player);
+        recoverPlayerWaypoint(player);
+
         super.onPlayerQuitWithDisguise(state);
     }
 
@@ -435,6 +427,7 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
 
         removeAllHealthModifiers(player);
         resetPlayerDimensions(player);
+        recoverPlayerWaypoint(player);
     }
 
     @Override
@@ -447,6 +440,22 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
         }
         else
             return false;
+    }
+
+    @Override
+    public void onDisguiseApply(DisguiseState state)
+    {
+        super.onDisguiseApply(state);
+
+        var player = state.getPlayer();
+
+        if (doHealthScale.get())
+            tryAddModifier(state);
+
+        if (modifyBoundingBoxes.get())
+            tryModifyPlayerDimensions(player, state.getDisguiseWrapper());
+
+        mutePlayerWaypoint(player);
     }
 
     @Override

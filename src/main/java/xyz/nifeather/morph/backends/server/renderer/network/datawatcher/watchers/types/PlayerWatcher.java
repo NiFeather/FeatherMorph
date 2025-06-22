@@ -4,13 +4,17 @@ import com.destroystokyo.paper.ClientOption;
 import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.protocol.entity.pose.EntityPose;
 import com.github.retrooper.packetevents.protocol.player.GameMode;
+import com.github.retrooper.packetevents.protocol.world.waypoint.*;
+import com.github.retrooper.packetevents.util.Either;
 import com.github.retrooper.packetevents.util.Vector3i;
 import com.github.retrooper.packetevents.wrapper.PacketWrapper;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerDestroyEntities;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerPlayerInfoRemove;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerPlayerInfoUpdate;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerWaypoint;
 import io.github.retrooper.packetevents.util.SpigotConversionUtil;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import org.bukkit.GameRule;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
@@ -19,6 +23,7 @@ import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueInde
 import xyz.nifeather.morph.misc.AnimationNames;
 import xyz.nifeather.morph.misc.BuildFailedException;
 import xyz.nifeather.morph.misc.MorphGameProfile;
+import xyz.nifeather.morph.misc.NmsRecord;
 
 import java.util.EnumSet;
 import java.util.List;
@@ -143,6 +148,22 @@ public class PlayerWatcher extends InventoryLivingWatcher
 
         list.addAll(this.buildPlayerInfoPackets());
         list.addAll(super.buildSpawnPackets());
+/*
+        var bindingPlayer = getBindingPlayer();
+        var nmsPlayer = NmsRecord.ofPlayer(bindingPlayer);
+        if (nmsPlayer.isTransmittingWaypoint() && Boolean.TRUE.equals(bindingPlayer.getWorld().getGameRuleValue(GameRule.LOCATOR_BAR)))
+        {
+            list.add(new WrapperPlayServerWaypoint(
+                    WrapperPlayServerWaypoint.Operation.TRACK,
+                    new TrackedWaypoint(
+                            Either.createLeft(this.readEntryOrThrow(CustomEntries.SPAWN_UUID)),
+                            new WaypointIcon(WaypointIcon.ICON_STYLE_DEFAULT, null),
+                            new Vec3iWaypointInfo(new Vector3i(
+                                    nmsPlayer.getBlockX(), nmsPlayer.getBlockY(), nmsPlayer.getBlockZ()
+                            ))
+                    )
+            ));
+        }*/
 
         return list;
     }

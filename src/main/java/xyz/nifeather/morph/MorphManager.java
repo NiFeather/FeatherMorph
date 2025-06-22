@@ -976,20 +976,11 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         // 重置上个State的伪装
         if (currentState != null)
         {
-            var stateProvider = currentState.getProvider();
-
-            // 检查上个State的后端是否允许我们在不取消伪装的情况下重置State
-            if (stateProvider.allowSwitchingWithoutUndisguise(provider, meta))
-                currentState.reset(false);
-            else
-                currentState.reset();
+            currentState.reset();
 
             activeDisguises.remove(currentState);
         }
 
-        provider.onDisguiseApply(newState);
-
-        // 在初始化服务端伪装状态后，交由后端来为玩家套上伪装
         var backendSuccess = wrapper.getBackend().disguise(player, wrapper);
         if (!backendSuccess)
         {
@@ -1002,6 +993,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
             return false;
         }
+
+        provider.onDisguiseApply(newState);
 
         this.activeDisguises.add(newState);
 

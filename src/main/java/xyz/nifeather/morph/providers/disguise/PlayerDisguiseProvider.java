@@ -131,10 +131,6 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
         return DisguiseResult.success(wrapper, result.isCopy());
     }
 
-    private void processInitialGameProfile()
-    {
-    }
-
     @Resolved(shouldSolveImmediately = true)
     private MorphClientHandler clientHandler;
 
@@ -153,7 +149,37 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
     @Override
     public void onDisguiseApply(DisguiseState state)
     {
+        mutePlayerWaypoint(state.getPlayer());
+        addDisguiseWaypoint(state);
+
         super.onDisguiseApply(state);
+    }
+
+    @Override
+    public boolean unMorph(Player player, DisguiseState state)
+    {
+        recoverPlayerWaypoint(player);
+        removeDisguiseWaypoint(state);
+
+        return super.unMorph(player, state);
+    }
+
+    @Override
+    public void onPlayerJoinWithDisguise(DisguiseState state)
+    {
+        mutePlayerWaypoint(state.getPlayer());
+        addDisguiseWaypoint(state);
+
+        super.onPlayerJoinWithDisguise(state);
+    }
+
+    @Override
+    public void onPlayerQuitWithDisguise(DisguiseState state)
+    {
+        recoverPlayerWaypoint(state.getPlayer());
+        removeDisguiseWaypoint(state);
+
+        super.onPlayerQuitWithDisguise(state);
     }
 
     private MorphGameProfile getGameProfile(ItemStack item)
@@ -229,12 +255,6 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
         if (!targetPlayer.getName().equals(DisguiseTypes.PLAYER.toStrippedId(state.getDisguiseIdentifier()))) return null;
 
         return super.getInitialNbtCompound(state, targetEntity, enableCulling);
-    }
-
-    @Override
-    public boolean unMorph(Player player, DisguiseState state)
-    {
-        return super.unMorph(player, state);
     }
 
     @Override

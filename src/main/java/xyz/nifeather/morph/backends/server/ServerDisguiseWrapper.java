@@ -33,6 +33,7 @@ import xyz.nifeather.morph.utilities.NbtUtils;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
@@ -95,6 +96,16 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
     public int getNetworkEntityId()
     {
         return bindingPlayer.getEntityId();
+    }
+
+    private final UUID waypointUUID = UUID.randomUUID();
+
+    @Override
+    public @Nullable Optional<UUID> getVirtualEntityUUID()
+    {
+        return bindingWatcher == null
+                ? Optional.empty()
+                : Optional.ofNullable(bindingWatcher.readEntryOrDefault(CustomEntries.SPAWN_UUID, null));
     }
 
     @Nullable

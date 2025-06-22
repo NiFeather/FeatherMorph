@@ -4,6 +4,10 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeInstance;
+import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.EntityEquipment;
@@ -16,8 +20,8 @@ import xyz.nifeather.morph.backends.DisguiseBackend;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.MorphStrings;
 import xyz.nifeather.morph.misc.DisguiseState;
+import xyz.nifeather.morph.misc.NmsRecord;
 import xyz.nifeather.morph.network.commands.S2C.AbstractS2CCommand;
-import xyz.nifeather.morph.network.server.ModFeatures;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
 import xyz.nifeather.morph.network.server.ServerSetEquipCommand;
 import xyz.nifeather.morph.skills.MorphSkillHandler;
@@ -26,6 +30,7 @@ import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Messages.MessageStore;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 提供一个默认的DisguiseProvider
@@ -158,6 +163,51 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
         }
 
         return true;
+    }
+
+    protected AttributeInstance acquireAttributeOrThrow(Player player, Attribute attribute)
+    {
+        return Objects.requireNonNull(player.getAttribute(attribute),
+                "Player don't have a '%s' attribute, you might using a broken server implementation.".formatted(attribute.key().asString()));
+    }
+
+    public static final NamespacedKey WAYPOINT_TRANSMIT_MODIFIER_KEY = Objects.requireNonNull(NamespacedKey.fromString("feathermorph:waypoint_transmit_modifier"));
+
+    protected void mutePlayerWaypoint(Player player)
+    {
+        // I don't know if adding -1 with ADD_SCALAR is allowed
+        // But to prevent the player from transmitting waypoint, this is the easiest way...?
+        // And by doing this, we won't have to mess with the WaypointManager
+        var attribute = this.acquireAttributeOrThrow(player, Attribute.WAYPOINT_TRANSMIT_RANGE);
+
+        if (attribute.getModifier(WAYPOINT_TRANSMIT_MODIFIER_KEY) == null)
+            attribute.addModifier(new AttributeModifier(WAYPOINT_TRANSMIT_MODIFIER_KEY, -1, AttributeModifier.Operation.ADD_SCALAR));
+    }
+
+    protected void recoverPlayerWaypoint(Player player)
+    {
+        this.acquireAttributeOrThrow(player, Attribute.WAYPOINT_TRANSMIT_RANGE)
+                .removeModifier(WAYPOINT_TRANSMIT_MODIFIER_KEY);
+    }
+
+    protected void addDisguiseWaypoint(DisguiseState state)
+    {
+        var player = state.getPlayer();
+
+        var disguiseWaypoint = state.waypointUpdater();
+        var nmsPlayer = NmsRecord.ofPlayer(player);
+        var waypointManager = nmsPlayer.level().getWaypointManager();
+        waypointManager.trackWaypoint(disguiseWaypoint);
+    }
+
+    public void removeDisguiseWaypoint(DisguiseState state)
+    {
+        var player = state.getPlayer();
+
+        var nmsPlayer = NmsRecord.ofPlayer(player);
+        var waypointManager = nmsPlayer.level().getWaypointManager();
+        var disguiseWaypoint = state.waypointUpdater();
+        waypointManager.untrackWaypoint(disguiseWaypoint);
     }
 
     @Override
