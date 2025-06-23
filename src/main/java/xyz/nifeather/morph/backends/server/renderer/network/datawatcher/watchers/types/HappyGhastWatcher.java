@@ -23,8 +23,8 @@ public class HappyGhastWatcher extends LivingEntityWatcher
     @Override
     protected void initRegistry()
     {
-        register(ValueIndex.HAPPY_GHAST);
         super.initRegistry();
+        register(ValueIndex.HAPPY_GHAST);
     }
 
     @Override
