@@ -36,7 +36,7 @@ public class SkillsConfigurationStoreNew extends DirectoryJsonBasedStorage<Skill
             logger.warn("The package version is newer than our implementation! Errors may occur!");
     }
 
-    private static final int TARGET_PACKAGE_VERSION = PackageVersions.HAPPY_GHAST;
+    private static final int TARGET_PACKAGE_VERSION = PackageVersions.MERGE_ATTRIBUTE_AGAIN;
 
     private void update(int currentVersion)
     {
@@ -62,16 +62,16 @@ public class SkillsConfigurationStoreNew extends DirectoryJsonBasedStorage<Skill
             migrateAttribute();
         }
 
-        if (currentVersion < PackageVersions.HAPPY_GHAST)
+        /*if (currentVersion < PackageVersions.HAPPY_GHAST)
         {
             createHappyGhastConfiguration();
-        }
+        }*/
 
         setPackageVersion(TARGET_PACKAGE_VERSION);
     }
 
     private void createHappyGhastConfiguration()
-    {
+    {/*
         var newConfig = DefaultConfigGenerator.createInstance().generateConfiguration()
                 .getOrDefault(EntityType.HAPPY_GHAST.key().asString(), null);
 
@@ -80,7 +80,7 @@ public class SkillsConfigurationStoreNew extends DirectoryJsonBasedStorage<Skill
 
         newConfig.legacy_MobID = EntityType.HAPPY_GHAST.key().asString();
 
-        save(newConfig);
+        save(newConfig);*/
     }
 
     private void migrateAttribute()
@@ -281,6 +281,6 @@ public class SkillsConfigurationStoreNew extends DirectoryJsonBasedStorage<Skill
         public static final int ATTRIBUTE_NAME_CHANGED = 2;
         public static final int WITHER_SKELETON_CHANGES = 3;
         public static final int MERGE_ATTRIBUTE_AGAIN = 4;
-        public static final int HAPPY_GHAST = 5;
+        //public static final int HAPPY_GHAST = 5;
     }
 }
