@@ -1393,7 +1393,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         if (player == null) return null;
 
         return this.activeDisguises.stream()
-                .filter(i -> !i.disposed() && i.getPlayer().getUniqueId().equals(player.getUniqueId()))
+                .filter(i -> !i.disposed() && i.hasPlayer() && i.getPlayer().getUniqueId().equals(player.getUniqueId()))
                 .findFirst().orElse(null);
     }
 

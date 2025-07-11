@@ -301,6 +301,12 @@ public class DisguiseState extends MorphPluginObject
     @Nullable
     private Player cachedPlayer;
 
+    public boolean hasPlayer()
+    {
+        var player = tryGetPlayer();
+        return player != null && player.isConnected();
+    }
+
     @Nullable
     public Player tryGetPlayer()
     {

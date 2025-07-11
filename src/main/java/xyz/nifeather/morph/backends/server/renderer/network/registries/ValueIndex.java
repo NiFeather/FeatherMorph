@@ -56,6 +56,8 @@ public class ValueIndex
     public static final EvokerValues EVOKER = new EvokerValues();
     public static final RaiderValues RAIDER = new RaiderValues();
 
+    public static final HappyGhastValues HAPPY_GHAST = new HappyGhastValues();
+
     /*
     private static final Map<EntityType, AbstractValues> valuesMap = new ConcurrentHashMap<>();
     private static void register(EntityType type, AbstractValues values)
