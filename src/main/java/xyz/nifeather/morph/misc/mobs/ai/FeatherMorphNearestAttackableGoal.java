@@ -73,7 +73,7 @@ public class FeatherMorphNearestAttackableGoal extends NearestAttackableTargetGo
         // 玩家不是生存模式
         cancelTarget = (this.mob.level() != this.target.level());
         cancelTarget = cancelTarget || (this.mob.distanceTo(this.target) > followRange);
-        cancelTarget = cancelTarget || !playerTarget.isOnline();
+        cancelTarget = cancelTarget || playerTarget != null && !playerTarget.isOnline();
         cancelTarget = cancelTarget || !((ServerPlayer)target).gameMode.isSurvival();
 
         // 如果玩家后来变成了其他会导致恐慌的类型，也取消仇恨
