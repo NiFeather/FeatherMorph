@@ -44,6 +44,7 @@ import xyz.nifeather.morph.utilities.PermissionUtils;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
 
 import static xyz.nifeather.morph.utilities.DisguiseUtils.itemOrAir;
 
@@ -301,10 +302,9 @@ public class DisguiseState extends MorphPluginObject
     @Nullable
     private Player cachedPlayer;
 
-    public boolean hasPlayer()
+    public <X> X applyPlayer(Function<@Nullable Player, X> func)
     {
-        var player = tryGetPlayer();
-        return player != null && player.isConnected();
+        return func.apply(tryGetPlayer());
     }
 
     @Nullable
