@@ -304,5 +304,10 @@ public class DefaultConfigGenerator
         this.getConfiguration(EntityType.BREEZE)
                 .addAbilityIdentifier(AbilityNames.HAS_JUMP_BOOST)
                 .addAbilityIdentifier(AbilityNames.NO_FALL_DAMAGE);
+
+        this.getConfiguration(EntityType.HAPPY_GHAST)
+                .addAbilityIdentifier(AbilityNames.CAN_FLY)
+                .appendOption(AbilityNames.CAN_FLY,
+                        new FlyOption(0.05f));
     }
 }
