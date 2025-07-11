@@ -11,6 +11,10 @@ import java.lang.reflect.Constructor;
 
 public class RecoverGoalGenerator
 {
+    /**
+     * @deprecated TODO: Remove this since we and Paper no longer support reloading plugins anymore.
+     */
+    @Deprecated
     public static  <T extends PathfinderMob> AvoidEntityGoal<Player> generateRecover(Class<T> entityClazz, T entity, String className,
                                                                                      double detectDistance, double walkSpeed, double sprintSpeed)
     {

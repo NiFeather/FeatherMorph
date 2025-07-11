@@ -143,9 +143,6 @@ public abstract class MorphBasicAvoidPlayerGoal extends AvoidEntityGoal<Player>
                                                      float walkSpeed,
                                                      float sprintSpeed)
     {
-        if (morphManager == null || revealingHandler == null)
-            throw new NullDependencyException("Null MorphManager/RevealingHandler for MorphBasicAvoidPlayerGoal?!");
-
         return switch (entity)
         {
             case Panda panda -> new MorphPandaAvoidPlayerGoal(
