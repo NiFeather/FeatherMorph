@@ -11,6 +11,12 @@ import xyz.nifeather.morph.misc.disguiseProperty.values.HappyGhastProperties;
 
 public class HappyGhastWatcher extends LivingEntityWatcher
 {
+    public HappyGhastWatcher(Player bindingPlayer)
+    {
+        super(bindingPlayer, EntityType.GHAST);
+    }
+
+/*
     private final HappyGhastProperties properties;
 
     public HappyGhastWatcher(Player bindingPlayer)
@@ -54,5 +60,5 @@ public class HappyGhastWatcher extends LivingEntityWatcher
         }
 
         super.onPropertyWrite(property, value);
-    }
+    }*/
 }

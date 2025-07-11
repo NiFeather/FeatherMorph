@@ -40,7 +40,7 @@ public class DisguiseProperties
         register(EntityType.CREEPER, new CreeperProperties());
 
         register(EntityType.ENDER_DRAGON, new EnderDragonProperties());
-        register(EntityType.HAPPY_GHAST, new HappyGhastProperties());
+        //register(EntityType.HAPPY_GHAST, new HappyGhastProperties());
     }
 
     private final OffTreeProperties offTreeProperties = new OffTreeProperties();
