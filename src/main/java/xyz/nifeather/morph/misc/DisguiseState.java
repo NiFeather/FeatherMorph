@@ -50,7 +50,7 @@ import static xyz.nifeather.morph.utilities.DisguiseUtils.itemOrAir;
 
 public class DisguiseState extends MorphPluginObject
 {
-    public DisguiseState(Player player, @NotNull String identifier, @NotNull String skillIdentifier,
+    public DisguiseState(@NotNull Player player, @NotNull String identifier, @NotNull String skillIdentifier,
                          @NotNull DisguiseWrapper<?> wrapper, @NotNull DisguiseProvider provider,
                          @Nullable EntityEquipment targetEquipment, @NotNull PlayerOptions<Player> playerOptions,
                          @NotNull PlayerMeta playerMeta)
@@ -88,7 +88,7 @@ public class DisguiseState extends MorphPluginObject
         if (supportsDisguisedItems)
             refreshDisguiseItems(targetEquipment, wrapper);
 
-        this.cachedPlayer = player;
+        this.cachedPlayer = CacheWithDefault.of(player);
 
         animationSequence.setCooldown(10);
         animationSequence.onNewAnimation(anim ->
@@ -299,53 +299,26 @@ public class DisguiseState extends MorphPluginObject
         return playerUUID;
     }
 
-    @Nullable
-    private Player cachedPlayer;
-
-    public <X> X applyPlayer(Function<@Nullable Player, X> func)
-    {
-        return func.apply(tryGetPlayer());
-    }
-
-    @Nullable
-    public Player tryGetPlayer()
-    {
-        // 如果缓存的玩家实例在线，那么返回缓存
-        if (cachedPlayer != null && cachedPlayer.isConnected())
-            return cachedPlayer;
-
-        // 否则，从BukkitAPI获取玩家
-        var player = Bukkit.getPlayer(playerUUID);
-
-        // 如果玩家不为null，则返回获取到的玩家实例
-        if (player != null)
-        {
-            cachedPlayer = Bukkit.getPlayer(playerUUID);
-            return player;
-        }
-
-        // 如果BukkitAPI没找到玩家，但是缓存有实例，那么返回缓存
-        if (cachedPlayer != null)
-            return cachedPlayer;
-
-        // 啥都没有！返回null
-        // 不过这真的会发生吗？我们都在一开始就设置缓存字段了。
-        return null;
-    }
+    @NotNull
+    private final CacheWithDefault<Player> cachedPlayer;
 
     /**
      *
      * @return The player that matches the UUID stored in this DisguiseState
-     * @throws NullDependencyException If the player was not found. For nullable method, check {@link DisguiseState#tryGetPlayer()}
      */
     @NotNull
-    public Player getPlayer() throws NullDependencyException
+    public Player getPlayer()
     {
-        var player = tryGetPlayer();
+        var cached = cachedPlayer.get();
 
-        if (player != null) return player;
+        if (cached.isConnected())
+            return cached;
 
-        throw new NullDependencyException("Can't find player with UUID " + playerUUID);
+        var newPlayer = Bukkit.getPlayer(playerUUID);
+        if (newPlayer == null)
+            return cached;
+
+        return cachedPlayer.set(newPlayer);
     }
 
     /**

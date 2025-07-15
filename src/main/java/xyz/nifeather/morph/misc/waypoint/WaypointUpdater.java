@@ -122,8 +122,8 @@ public class WaypointUpdater implements WaypointTransmitter
     @Override
     public String toString()
     {
-        var pl = bindingState.tryGetPlayer();
-        String playerString = pl == null ? bindingState.getPlayerUUID().toString() : pl.getName();
+        var pl = bindingState.getPlayer();
+        String playerString = pl.getName();
         return "(Disguise Waypoint for %s)@%s".formatted(playerString, Integer.toHexString(hashCode()));
     }
 }

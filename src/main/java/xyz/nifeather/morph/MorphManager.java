@@ -278,7 +278,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         states.forEach(state ->
         {
-            var p = state.tryGetPlayer();
+            var p = state.getPlayer();
 
             if (p == null) return;
 
@@ -1244,7 +1244,9 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         // 获取当前伪装状态
         var state = activeDisguises.stream()
-                .filter(i -> i.getPlayer().getUniqueId().equals(player.getUniqueId())).findFirst().orElse(null);
+                .filter(s -> s.getPlayer().getUniqueId().equals(player.getUniqueId()))
+                .findFirst()
+                .orElse(null);
 
         // 如果当前没有状态，则不做任何事
         if (state == null)
@@ -1393,7 +1395,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         if (player == null) return null;
 
         return this.activeDisguises.stream()
-                .filter(i -> !i.disposed() && i.applyPlayer(p -> p != null && p.getUniqueId().equals(player.getUniqueId())))
+                .filter(i -> !i.disposed() && i.getPlayer().getUniqueId().equals(player.getUniqueId()))
                 .findFirst().orElse(null);
     }
 
