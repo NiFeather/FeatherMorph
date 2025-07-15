@@ -140,7 +140,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         }
 
         //防止获得自己的伪装
-        if (killer != null && killer != entity)
+        if (killer != null && !killer.equals(entity))
             this.onPlayerKillEntity(killer, e.getEntity());
     }
 

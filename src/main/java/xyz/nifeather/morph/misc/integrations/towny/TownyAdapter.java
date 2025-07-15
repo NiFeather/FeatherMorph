@@ -41,6 +41,7 @@ import xyz.nifeather.morph.misc.integrations.towny.commands.TownyIntegrationComm
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 public class TownyAdapter extends MorphPluginObject implements Listener
 {
@@ -232,7 +233,7 @@ public class TownyAdapter extends MorphPluginObject implements Listener
             var currentTown = TownyAPI.getInstance().getTown(player.getLocation());
 
             // 在野外或者不是目标town
-            if (currentTown == null || currentTown != town) return;
+            if (currentTown == null || !currentTown.equals(town)) return;
 
             this.updatePlayer(player, currentTown);
         });
@@ -258,7 +259,7 @@ public class TownyAdapter extends MorphPluginObject implements Listener
             return false;
 
         // 玩家就是城镇成员
-        if (playerTown.getUUID() == targetTown.getUUID())
+        if (Objects.equals(playerTown.getUUID(), targetTown.getUUID()))
             return true;
 
         // 盟友

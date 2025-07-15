@@ -59,7 +59,7 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
     @Override
     public boolean allowSwitchingWithoutUndisguise(DisguiseProvider other, DisguiseMeta meta)
     {
-        return other.getPreferredBackend() == this.getPreferredBackend()
+        return other.getPreferredBackend().equals(this.getPreferredBackend())
                 && (meta.getDisguiseType() == DisguiseTypes.VANILLA || meta.getDisguiseType() == DisguiseTypes.PLAYER);
     }
 

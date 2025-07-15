@@ -639,7 +639,7 @@ public class DisguiseState extends MorphPluginObject
 
     public void setSkillCooldown(long val, boolean notifyClient)
     {
-        if (haveCooldown())
+        if (cooldownInfo != null)
             cooldownInfo.setCooldown(val);
 
         if (notifyClient)
