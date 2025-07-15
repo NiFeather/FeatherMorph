@@ -69,7 +69,7 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
     {
         instance = this;
 
-        currentPlatform = new PaperPlatform(this);
+        currentPlatform = new PaperPlatform();
 
         boolean folia = false;
         try
