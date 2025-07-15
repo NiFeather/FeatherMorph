@@ -78,7 +78,7 @@ public class EntityProcessor extends MorphPluginObject implements Listener
             logger.warn("");
             logger.warn("- x - x - x - x - x - x - x - x - x - x - x - x -");
 
-            for (var player : Bukkit.getOnlinePlayers())
+            for (var player : featherMorph().getPlatform().onlinePlayers())
             {
                 if (player.hasPermission(CommonPermissions.ADMIN))
                 {

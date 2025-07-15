@@ -104,7 +104,7 @@ public class BossbarAbility extends MorphAbility<BossbarOption>
 
             var playerGameMode = player.getGameMode();
             List<Player> playersToShow = DisguiseUtils.findNearbyPlayers(player, distance, true);
-            List<Player> playersToHide = new ObjectArrayList<>(Bukkit.getOnlinePlayers());
+            List<Player> playersToHide = new ObjectArrayList<>(featherMorph().getPlatform().onlinePlayers());
 
             if (playerGameMode == GameMode.SPECTATOR)
                 playersToShow.removeIf(p -> p.getGameMode() != playerGameMode);

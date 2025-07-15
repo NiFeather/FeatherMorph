@@ -38,7 +38,7 @@ public class SendSubCommand extends MorphPluginObject implements IConvertibleBri
         if (!(source instanceof Player player))
             return CompletableFuture.completedFuture(suggestionsBuilder.build());
 
-        var currentOnline = Bukkit.getOnlinePlayers();
+        var currentOnline = featherMorph().getPlatform().onlinePlayers();
 
         return CompletableFuture.supplyAsync(() ->
         {

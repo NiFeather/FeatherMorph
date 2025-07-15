@@ -46,7 +46,7 @@ public class RemoveDuplicateEntriesAppletCommand extends BrigadierCommand
     {
         var sender = context.getSource().getSender();
 
-        if (!Bukkit.getOnlinePlayers().isEmpty())
+        if (!featherMorph().getPlatform().onlinePlayers().isEmpty())
         {
             if (!(sender instanceof Player))
             {

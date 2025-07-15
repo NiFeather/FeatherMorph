@@ -13,6 +13,11 @@ public class MorphPluginObject extends PluginObject<FeatherMorphMain>
         return FeatherMorphMain.getMorphNameSpace();
     }
 
+    public FeatherMorphMain featherMorph()
+    {
+        return (FeatherMorphMain) plugin;
+    }
+
     protected void scheduleOn(Entity entity, Runnable r)
     {
         this.scheduleOn(entity, r, 1);

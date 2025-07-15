@@ -358,7 +358,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         List<Player> players;
         synchronized (this)
         {
-            players = new ObjectArrayList<>(Bukkit.getOnlinePlayers());
+            players = new ObjectArrayList<>(featherMorph().getPlatform().onlinePlayers());
         }
 
         if (state != null)

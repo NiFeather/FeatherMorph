@@ -1616,7 +1616,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
     public void refreshDisguiseUnlockStateToAllPlayers()
     {
-        Bukkit.getOnlinePlayers().forEach(p -> clientHandler.refreshPlayerClientMorphs(this.getPlayerMeta(p).getUnlockedDisguiseIdentifiers(), p));
+        featherMorph().getPlatform().onlinePlayers().forEach(p -> clientHandler.refreshPlayerClientMorphs(this.getPlayerMeta(p).getUnlockedDisguiseIdentifiers(), p));
     }
 
     @Override

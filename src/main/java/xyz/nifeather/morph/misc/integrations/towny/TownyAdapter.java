@@ -63,7 +63,7 @@ public class TownyAdapter extends MorphPluginObject implements Listener
 
         allowFlyInWilderness.onValueChanged((o, n) ->
         {
-            Bukkit.getOnlinePlayers().forEach(p ->
+            featherMorph().getPlatform().onlinePlayers().forEach(p ->
                     this.scheduleOn(p, () -> updatePlayer(p, null)));
         });
     }
@@ -226,7 +226,7 @@ public class TownyAdapter extends MorphPluginObject implements Listener
     {
         // Towny没有API来告诉我们一个Town里进了多少玩家
         // 因此我们只能遍历所有玩家实例
-        Bukkit.getOnlinePlayers().forEach(player ->
+        featherMorph().getPlatform().onlinePlayers().forEach(player ->
         {
             // 获取玩家爱所在的Town
             var currentTown = TownyAPI.getInstance().getTown(player.getLocation());

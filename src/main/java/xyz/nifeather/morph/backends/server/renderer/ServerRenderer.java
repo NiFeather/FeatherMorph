@@ -189,7 +189,9 @@ public class ServerRenderer extends MorphPluginObject implements Listener
             var disguiseUUID = disguiseWatcher.readEntryOrThrow(CustomEntries.SPAWN_UUID);
             var packetRemoveInfo = new WrapperPlayServerPlayerInfoRemove(disguiseUUID);
 
-            Bukkit.getOnlinePlayers().forEach(p -> protocolManager.sendPacket(p, packetRemoveInfo));
+            featherMorph().getPlatform()
+                    .onlinePlayers()
+                    .forEach(p -> protocolManager.sendPacket(p, packetRemoveInfo));
         }
 
         watcher.dispose();

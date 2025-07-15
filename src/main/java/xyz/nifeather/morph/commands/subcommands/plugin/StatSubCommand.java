@@ -127,7 +127,7 @@ public class StatSubCommand extends BrigadierCommand
 
                         StatStrings.activeDisguisesString()
                                 .resolve("count", String.valueOf(disguisesActive))
-                                .resolve("max", String.valueOf(Bukkit.getOnlinePlayers().size()))
+                                .resolve("max", String.valueOf(featherMorph().getPlatform().onlinePlayers().size()))
                 };
 
         for (FormattableMessage formattableMessage : msg)

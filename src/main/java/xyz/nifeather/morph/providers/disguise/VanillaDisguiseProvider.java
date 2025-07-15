@@ -104,7 +104,7 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
         modifyBoundingBoxes.onValueChanged((o, n) ->
         {
             if (o && !n)
-                Bukkit.getOnlinePlayers().forEach(p -> NmsRecord.ofPlayer(p).refreshDimensions());
+                featherMorph().getPlatform().onlinePlayers().forEach(p -> NmsRecord.ofPlayer(p).refreshDimensions());
         });
     }
 

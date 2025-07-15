@@ -195,7 +195,7 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
     @Override
     public List<String> getAllAvailableDisguises()
     {
-        var onlinePlayers = Bukkit.getOnlinePlayers();
+        var onlinePlayers = featherMorph().getPlatform().onlinePlayers();
 
         var list = new ObjectArrayList<String>();
         onlinePlayers.forEach(p -> list.add(p.getName()));

@@ -134,7 +134,7 @@ public class ModBackend extends DisguiseBackend<TrackingClientDisguise, ClientDi
 
         //发送元数据
 
-        var players = new ObjectArrayList<>(Bukkit.getOnlinePlayers());
+        var players = new ObjectArrayList<>(featherMorph().getPlatform().onlinePlayers());
         players.remove(player);
         var cmd = new S2CCRRegisterCommand(player.getEntityId(), wrapper.readPropertyOrThrow(WrapperProperties.DISGUISE_ID));
         players.forEach(p -> clientHandler.sendCommand(p, cmd));
@@ -192,7 +192,7 @@ public class ModBackend extends DisguiseBackend<TrackingClientDisguise, ClientDi
             wrapper.dispose();
 
         var cmd = new S2CCRUnregisterCommand(player.getEntityId());
-        var players = new ObjectArrayList<>(Bukkit.getOnlinePlayers());
+        var players = new ObjectArrayList<>(featherMorph().getPlatform().onlinePlayers());
         players.remove(player);
         players.forEach(p -> clientHandler.sendCommand(p, cmd));
 
