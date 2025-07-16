@@ -10,6 +10,7 @@ import xyz.nifeather.morph.commands.brigadier.BrigadierCommand;
 import xyz.nifeather.morph.commands.brigadier.IConvertibleBrigadier;
 import xyz.nifeather.morph.commands.subcommands.plugin.applets.RemoveDuplicateEntriesAppletCommand;
 import xyz.nifeather.morph.commands.subcommands.plugin.applets.SchedulerTestCommand;
+import xyz.nifeather.morph.commands.subcommands.plugin.applets.SentryTestCommand;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 
 import java.util.List;
@@ -26,7 +27,8 @@ public class ToolsSubCommand extends BrigadierCommand
     {
         subCommands = List.of(
                 new RemoveDuplicateEntriesAppletCommand(),
-                new SchedulerTestCommand()
+                new SchedulerTestCommand(),
+                new SentryTestCommand()
         );
     }
 
