@@ -19,7 +19,7 @@ public enum ConfigOption
 
     SKILL_COOLDOWN_ON_DAMAGE(ConfigNode.create().append("cooldown_on_damage"), 15),
 
-    ENABLE_SENTRY_LOGGER(ConfigNode.create().append("enable_sentry"), true),
+    ENABLE_SENTRY_LOGGER(ConfigNode.create().append("enable_sentry"), false),
 
     @Deprecated(forRemoval = true)
     ACTION_ITEM(ConfigNode.create().append("action_item"), "", true),
