@@ -10,28 +10,6 @@ root:
   # Allow players acquire morphs by killing mobs and other players?
   allow_acquire_morphs: true
 
-  # Enable Sentry Logger (https://sentry.io)?
-  # Sentry Logger is a kind of telemetry, and we use it to upload errors that occur in FeatherMorph automatically
-  #
-  # When do we upload an error:
-  # - Once an unhandled exception is detected, if the stack trace seems to contain our codepath (ClassName contains "xyz.nifeather.morph"), plugin will try to report this error to Sentry
-  #
-  # Some information that is sent along with the report:
-  # 1. Server version: The currently running Minecraft version of this server
-  # 2. Server brand: The currently running server software (Paper/Folia, etc.)
-  # 3. Plugin version: The current version of the plugin.
-  # 4. OS Name: Result from `System.getProperty("os.name")`, used to determine which platform this error happens on
-  #
-  # Some data that Sentry will also upload:
-  # 1. Current Java information includes version (e.g., 21.0.6) and name (e.g., JetBrains s.r.o.)
-  # 2. Current Geography (e.g., "Hefei, China (CN)", IP is not visible)
-  # 3. Installed dependencies of this server
-  # 4. Server hostname (e.g., nekoarch)
-  #
-  # You can choose to disable this anytime, via the config file or the `/fm option` command.
-  # The status of Sentry will not be logged in bStats.
-  enable_sentry: false
-
   # Allow players to fly if they disguised as a mob that can fly?
   allow_flight: true
 
@@ -380,4 +358,4 @@ root:
       - SelectedItem
 
   # Do not touch unless you know what you're doing!
-  version: 41
+  version: 42

@@ -30,8 +30,6 @@ import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.gui.IconLookup;
 import xyz.nifeather.morph.misc.integrations.placeholderapi.PlaceholderIntegration;
 import xyz.nifeather.morph.misc.integrations.residence.ResidenceEventProcessor;
-import xyz.nifeather.morph.misc.sentry.SentryConfigHandler;
-import xyz.nifeather.morph.misc.sentry.SentryLogger;
 import xyz.nifeather.morph.network.multiInstance.MultiInstanceService;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
 import xyz.nifeather.morph.platform.IPlatform;
@@ -52,7 +50,6 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
     private final Bindable<Boolean> debugOutput = new Bindable<>(false);
 
     private final IPlatform currentPlatform;
-    private final SentryLogger sentryLogger;
 
     public IPlatform getPlatform()
     {
@@ -73,9 +70,6 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
         instance = this;
 
         currentPlatform = new PaperPlatform();
-
-        sentryLogger = new SentryLogger();
-        Bukkit.getLogger().getParent().addHandler(sentryLogger);
 
         boolean folia = false;
         try
@@ -277,8 +271,6 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
 
         dependencyManager.cache(mirrorExecutorHub = new ExecutorHub());
 
-        dependencyManager.cache(new SentryConfigHandler(sentryLogger));
-
         var mirrorProcessor = new InteractionMirrorProcessor();
 
         // Commands
@@ -377,8 +369,6 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
             logger.warn("Error occurred while disabling: " + e.getMessage());
             e.printStackTrace();
         }
-
-        Bukkit.getLogger().getParent().removeHandler(sentryLogger);
 
         super.disable();
     }

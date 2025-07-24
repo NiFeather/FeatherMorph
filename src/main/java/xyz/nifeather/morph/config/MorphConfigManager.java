@@ -162,12 +162,15 @@ public class MorphConfigManager extends PluginConfigManager
         bindableLists.forEach((node, list) ->
         {
             var configList = backendConfig.getList(node);
+            if (configList == null)
+                return;
+
             list.clear();
             list.addAllInternal(configList);
         });
 
         //更新配置
-        int targetVersion = 41;
+        int targetVersion = 42;
 
         var configVersion = getOrDefault(Integer.class, ConfigOption.VERSION);
 
@@ -301,6 +304,11 @@ public class MorphConfigManager extends PluginConfigManager
                 //noinspection removal
                 this.remove(ConfigOption.SR_SHOW_PLAYER_DISGUISES_IN_TAB);
                 this.remove(ConfigOption.HIDE_DISGUISED_PLAYERS_IN_TAB);
+            }
+
+            if (configVersion < 41)
+            {
+                this.remove(ConfigOption.ENABLE_SENTRY_LOGGER);
             }
 
             newConfig.set(ConfigOption.VERSION.toString(), targetVersion);

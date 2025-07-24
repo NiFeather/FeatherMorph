@@ -308,7 +308,6 @@ tasks.shadowJar {
         relocate("org.bstats", "xyz.nifeather.morph.shaded.bstats")
         relocate("de.tr7zw.changeme.nbtapi", "xyz.nifeather.morph.shaded.nbtapi")
         relocate("de.themoep.inventorygui", "xyz.nifeather.morph.shaded.inventorygui")
-        relocate("io.sentry", "xyz.nifeather.morph.shaded.sentry")
     }
 
     archiveFileName = "feathermorph-${project.property("project_version")}-${project.property("mc_version")}-final.jar"
