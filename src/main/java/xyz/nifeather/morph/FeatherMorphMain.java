@@ -75,10 +75,7 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
         currentPlatform = new PaperPlatform();
 
         sentryLogger = new SentryLogger();
-        if (sentryLogger.init())
-            Bukkit.getLogger().getParent().addHandler(sentryLogger);
-        else
-            logger.warn("Not using SentryLogger...");
+        Bukkit.getLogger().getParent().addHandler(sentryLogger);
 
         boolean folia = false;
         try

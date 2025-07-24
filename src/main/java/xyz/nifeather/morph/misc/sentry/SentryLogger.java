@@ -24,9 +24,9 @@ public class SentryLogger extends Handler
     public void enabled(boolean enabled)
     {
         if (enabled)
-            FeatherMorphMain.getInstance().getSLF4JLogger().info("Enabled Sentry Logger!");
+            setupSentry();
         else
-            FeatherMorphMain.getInstance().getSLF4JLogger().info("Disabled Sentry Logger! Further errors will not be processed!");
+            closeSentry();
 
         this.enabled = enabled;
     }
@@ -35,7 +35,13 @@ public class SentryLogger extends Handler
     {
     }
 
-    public boolean init()
+    public void closeSentry()
+    {
+        Sentry.close();
+        FeatherMorphMain.getInstance().getSLF4JLogger().info("Disabled Sentry Logger! Further errors will not be processed!");
+    }
+
+    public boolean setupSentry()
     {
         var logger = FeatherMorphMain.getInstance().getSLF4JLogger();
 
@@ -49,9 +55,11 @@ public class SentryLogger extends Handler
                 options.setEnableAutoSessionTracking(true);
                 options.setRelease(FeatherMorphMain.getInstance().getPluginMeta().getVersion());
                 options.setDebug(false);
+                options.setEnableUncaughtExceptionHandler(false);
             });
 
-            logger.info("Done setting up sentry!");
+            logger.info("Done setting up Sentry!");
+            logger.info("Enabled Sentry Logger!");
             return true;
         }
         catch (Throwable t)
@@ -106,6 +114,6 @@ public class SentryLogger extends Handler
     @Override
     public void close() throws SecurityException
     {
-        Sentry.close();
+        closeSentry();
     }
 }
