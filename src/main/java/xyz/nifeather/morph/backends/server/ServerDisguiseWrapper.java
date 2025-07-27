@@ -98,8 +98,6 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
         return bindingPlayer.getEntityId();
     }
 
-    private final UUID waypointUUID = UUID.randomUUID();
-
     @Override
     public @Nullable Optional<UUID> getVirtualEntityUUID()
     {
