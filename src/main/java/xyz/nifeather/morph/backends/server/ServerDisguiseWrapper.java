@@ -99,11 +99,10 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
     }
 
     @Override
-    public @Nullable Optional<UUID> getVirtualEntityUUID()
+    public @NotNull UUID getVirtualEntityUUID()
     {
-        return bindingWatcher == null
-                ? Optional.empty()
-                : Optional.ofNullable(bindingWatcher.readEntryOrDefault(CustomEntries.SPAWN_UUID, null));
+        var uuid = bindingWatcher == null ? null : bindingWatcher.readEntryOrThrow(CustomEntries.SPAWN_UUID);
+        return Objects.requireNonNull(uuid, "VirtualEntityUUID is not set for an instance of ModDisguiseWrapper");
     }
 
     @Nullable
@@ -114,7 +113,7 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
         {
             var obj = instance.compoundTag.get(path);
 
-            if (obj != null && obj.getType() == type)
+            if (obj != null && obj.getType().equals(type))
                 return (R) obj;
 
             return null;

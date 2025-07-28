@@ -23,6 +23,7 @@ import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 import xyz.nifeather.morph.utilities.NbtUtils;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -39,9 +40,10 @@ public class ModDisguiseWrapper extends EventWrapper<TrackingClientDisguise>
     }
 
     @Override
-    public Optional<UUID> getVirtualEntityUUID()
+    public @NotNull UUID getVirtualEntityUUID()
     {
-        return Optional.of(waypointUUID);
+        var val = readPropertyOr(DisguiseProperties.INSTANCE.offTreeProperties().VIRTUAL_ENTITY_UUID, null);
+        return Objects.requireNonNull(val, "VirtualEntityUUID is not set for an instance of ModDisguiseWrapper");
     }
 
     private final ModBackend backend;
@@ -137,7 +139,7 @@ public class ModDisguiseWrapper extends EventWrapper<TrackingClientDisguise>
         {
             var obj = getCompound().get(path);
 
-            if (obj != null && obj.getType() == type)
+            if (obj != null && obj.getType().equals(type))
                 return (R) obj;
 
             return null;

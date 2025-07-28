@@ -248,12 +248,11 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         config.bind(allowHeadMorph, ConfigOption.ALLOW_HEAD_MORPH);
         config.bind(allowAcquireMorph, ConfigOption.ALLOW_ACQUIRE_MORPHS);
         config.bind(useClientRenderer, ConfigOption.USE_CLIENT_RENDERER);
+        config.bind(uuidRandomBaseString, ConfigOption.UUID_RANDOM_BASE);
 
         registerProviders(ObjectList.of(
                 new VanillaDisguiseProvider(),
                 new PlayerDisguiseProvider(),
-                //new ItemDisplayProvider(),
-                //new LocalDisguiseProvider(),
                 fallbackProvider
         ));
 
@@ -458,6 +457,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     private final Bindable<Boolean> allowAcquireMorph = new Bindable<>(true);
     private final Bindable<Boolean> useClientRenderer = new Bindable<>(false);
 
+    private final Bindable<String> uuidRandomBaseString = new Bindable<>("???");
+
     /**
      * 尝试调用快速伪装
      *
@@ -624,7 +625,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         try
         {
-            var meta = preDisguise(parameters);
+            var meta = prepareDisguiseMeta(parameters);
             if (meta == null)
                 return false;
 
@@ -688,7 +689,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
      * @return 一个DisguiseMeta，如果构建失败则返回Null
      */
     @Nullable
-    private DisguiseMeta preDisguise(MorphParameters parameters)
+    private DisguiseMeta prepareDisguiseMeta(MorphParameters parameters)
     {
         // 确保source不为null
         var source = parameters.commandSource == null ? nilCommandSource : parameters.commandSource;
@@ -776,7 +777,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         var provider = getProvider(strippedKey[0]);
 
-        if (provider == MorphManager.fallbackProvider) // 如果没找到provider
+        if (provider.equals(MorphManager.fallbackProvider)) // 如果没找到provider
             return VALIDATE_NO_PROVIDER;
         else if (!provider.isValid(disguiseIdentifier)) // 如果provider不认识这个ID
             return VALIDATE_PROVIDER_FAIL;
@@ -946,6 +947,14 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         provider.onPostConstructDisguise(state, targetEntity);
         wrapper.onPostConstructDisguise(state, targetEntity);
 
+        // 设定初始属性
+        var str = uuidRandomBaseString.get()
+                + parameters.targetDisguiseIdentifier()
+                + player.getName();
+
+        var virtualEntityUUID = UUID.nameUUIDFromBytes(str.getBytes());
+        wrapper.writeProperty(DisguiseProperties.INSTANCE.offTreeProperties().VIRTUAL_ENTITY_UUID, virtualEntityUUID);
+
         SkillCooldownInfo cdInfo;
 
         //获取与技能对应的CDInfo
@@ -1058,7 +1067,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         var disguiseMeta = result.meta();
 
         // 消息源是否为玩家自己
-        var isDirect = source == player;
+        var isDirect = source.equals(player);
 
         // 返回消息
         var playerLocale = MessageUtils.getLocale(source);
@@ -1443,7 +1452,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         var playerMeta = getPlayerMeta(state.getPlayer());
         var parameters = MorphParameters.create(state.getPlayer(), state.getDisguiseIdentifier());
 
-        if (this.preDisguise(parameters) == null)
+        if (this.prepareDisguiseMeta(parameters) == null)
             return false;
 
         this.buildDisguise(result, parameters, playerMeta);
@@ -1466,7 +1475,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     {
         try
         {
-            if (player.getUniqueId() == offlineState.playerUUID)
+            if (player.getUniqueId().equals(offlineState.playerUUID))
             {
                 logger.error("OfflineState UUID mismatch: %s <-> %s".formatted(player.getUniqueId(), offlineState.playerUUID));
                 return OfflineDisguiseResult.FAIL;
@@ -1651,7 +1660,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             this.scheduleOn(player, () ->
             {
                 var parameter = MorphParameters.create(player, s.getDisguiseIdentifier());
-                if (this.preDisguise(parameter) == null)
+                if (this.prepareDisguiseMeta(parameter) == null)
                     return;
 
                 if (disguiseFromState(s))

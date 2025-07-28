@@ -81,7 +81,7 @@ public class WaypointUpdater implements WaypointTransmitter
 
         var icon = waypointIcon();
 
-        FeatherMorphMain.getInstance().getSLF4JLogger().info("Getting new instance");
+        //FeatherMorphMain.getInstance().getSLF4JLogger().info("Getting new instance");
 
         if (WaypointTransmitter.isReallyFar(player, target))
         {

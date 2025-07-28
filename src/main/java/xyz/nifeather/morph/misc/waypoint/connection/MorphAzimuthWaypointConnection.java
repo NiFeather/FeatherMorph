@@ -29,7 +29,7 @@ public class MorphAzimuthWaypointConnection implements WaypointTransmitter.Conne
     @Override
     public void connect()
     {
-        var uuid = bindingState.getDisguiseWrapper().getVirtualEntityUUID().orElseThrow();
+        var uuid = bindingState.getDisguiseWrapper().getVirtualEntityUUID();
 
         this.receiver.connection.send(ClientboundTrackedWaypointPacket.addWaypointAzimuth(uuid, this.icon, this.lastAngle));
     }
@@ -37,7 +37,7 @@ public class MorphAzimuthWaypointConnection implements WaypointTransmitter.Conne
     @Override
     public void disconnect()
     {
-        var uuid = bindingState.getDisguiseWrapper().getVirtualEntityUUID().orElseThrow();
+        var uuid = bindingState.getDisguiseWrapper().getVirtualEntityUUID();
 
         this.receiver.connection.send(ClientboundTrackedWaypointPacket.removeWaypoint(uuid));
     }
@@ -54,7 +54,7 @@ public class MorphAzimuthWaypointConnection implements WaypointTransmitter.Conne
 
         if (Mth.abs(angle - this.lastAngle) > 0.008726646F)
         {
-            var uuid = bindingState.getDisguiseWrapper().getVirtualEntityUUID().orElseThrow();
+            var uuid = bindingState.getDisguiseWrapper().getVirtualEntityUUID();
             this.receiver.connection.send(ClientboundTrackedWaypointPacket.updateWaypointAzimuth(uuid, this.icon, angle));
             this.lastAngle = angle;
         }

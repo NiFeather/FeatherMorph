@@ -35,6 +35,7 @@ import xyz.nifeather.morph.backends.server.renderer.utilties.WatcherUtils;
 import xyz.nifeather.morph.misc.BuildFailedException;
 import xyz.nifeather.morph.misc.DisguiseEquipment;
 import xyz.nifeather.morph.misc.NmsRecord;
+import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 import xyz.nifeather.morph.utilities.EntityTypeUtils;
 import xyz.nifeather.morph.utilities.NmsUtils;
@@ -132,7 +133,20 @@ public abstract class SingleWatcher extends MorphPluginObject
      */
     public final <X> void writeProperty(SingleProperty<X> property, X value)
     {
+        this.handlePropertyWriteInternal(property, value);
         this.onPropertyWrite(property, value);
+    }
+
+    // I think we should handle this in a more proper way...
+    private <X> void handlePropertyWriteInternal(SingleProperty<X> property, X value)
+    {
+        var offTree = DisguiseProperties.INSTANCE.offTreeProperties();
+
+        if (offTree.VIRTUAL_ENTITY_UUID.equals(property))
+        {
+            var uuid = (UUID) value;
+            this.writeEntry(CustomEntries.SPAWN_UUID, uuid);
+        }
     }
 
     protected <X> void onPropertyWrite(SingleProperty<X> property, X value)

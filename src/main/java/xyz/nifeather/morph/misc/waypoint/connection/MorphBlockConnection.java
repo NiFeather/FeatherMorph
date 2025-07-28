@@ -34,14 +34,14 @@ public class MorphBlockConnection implements IMorphWaypointConnection
     @Override
     public void connect()
     {
-        var uuid = bindingState.getDisguiseWrapper().getVirtualEntityUUID().orElseThrow();
+        var uuid = bindingState.getDisguiseWrapper().getVirtualEntityUUID();
         this.receiver.connection.send(ClientboundTrackedWaypointPacket.addWaypointPosition(uuid, this.icon, lastPosition));
     }
 
     @Override
     public void disconnect()
     {
-        var uuid = bindingState.getDisguiseWrapper().getVirtualEntityUUID().orElseThrow();
+        var uuid = bindingState.getDisguiseWrapper().getVirtualEntityUUID();
         this.receiver.connection.send(ClientboundTrackedWaypointPacket.removeWaypoint(uuid));
     }
 
@@ -54,7 +54,7 @@ public class MorphBlockConnection implements IMorphWaypointConnection
         if (blockPos.distManhattan(this.lastPosition) <= 0)
             return;
 
-        var uuid = bindingState.getDisguiseWrapper().getVirtualEntityUUID().orElseThrow();
+        var uuid = bindingState.getDisguiseWrapper().getVirtualEntityUUID();
         this.receiver.connection.send(ClientboundTrackedWaypointPacket.updateWaypointPosition(uuid, this.icon, blockPos));
         this.lastPosition = blockPos;
     }
