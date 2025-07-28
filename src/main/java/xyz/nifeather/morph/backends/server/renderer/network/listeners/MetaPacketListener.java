@@ -60,7 +60,7 @@ public class MetaPacketListener extends ProtocolListener
         var targetPlayer = packetEvent.getPlayer();
 
         //只拦截其他人的Meta
-        if (targetPlayer == sourcePlayer)
+        if (targetPlayer.equals(sourcePlayer))
             return;
 
         var wrapper = new WrapperPlayServerEntityMetadata(packetEvent);

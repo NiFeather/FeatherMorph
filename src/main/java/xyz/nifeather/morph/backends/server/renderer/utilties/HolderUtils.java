@@ -19,7 +19,7 @@ public class HolderUtils
     {
         if (level != null) return;
 
-        level = ((CraftWorld)Bukkit.getWorlds().stream().findFirst().get()).getHandle();
+        level = ((CraftWorld)Bukkit.getWorlds().stream().findFirst().orElseThrow()).getHandle();
     }
 
     private static <T> Registry<T> lookupRegistryOrThrow(ResourceKey<Registry<T>> registryKey)

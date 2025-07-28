@@ -70,8 +70,8 @@ public class RequestManager extends MorphPluginObject implements IManageRequests
         }
 
         if (requests.stream()
-                .anyMatch(i -> i.sourcePlayer.getUniqueId() == source.getUniqueId()
-                        && i.targetPlayer.getUniqueId() == target.getUniqueId()))
+                .anyMatch(i -> i.sourcePlayer.getUniqueId().equals(source.getUniqueId())
+                        && i.targetPlayer.getUniqueId().equals(target.getUniqueId())))
         {
             source.sendMessage(MessageUtils.prefixes(source, RequestStrings.requestAlreadySentString()
                     .resolve("who", target.getName())));

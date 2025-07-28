@@ -114,7 +114,11 @@ public class DisguiseUtils
         var cache = typeSoundMap.getOrDefault(bukkitType, null);
         if (cache != null) return cache;
 
-        var entity = EntityTypeUtils.createEntityThenDispose(EntityTypeUtils.getNmsType(bukkitType), tickingWorld, tickingLocation);
+        var nmsType = EntityTypeUtils.getNmsType(bukkitType);
+        if (nmsType == null)
+            return new EntityTypeUtils.SoundInfo(null, SoundSource.PLAYERS, Integer.MAX_VALUE, 1);
+
+        var entity = EntityTypeUtils.createEntityThenDispose(nmsType, tickingWorld, tickingLocation);
 
         //todo: Make DisguiseState records Wolves' SoundVariant
         if (entity instanceof Mob mob)

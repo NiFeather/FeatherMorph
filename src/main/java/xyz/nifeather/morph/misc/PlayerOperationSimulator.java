@@ -86,7 +86,7 @@ public class PlayerOperationSimulator extends MorphPluginObject
                 FluidCollisionMode.NEVER, false, 0d, e ->
                 {
                     if (e instanceof Player p)
-                        return e != player && p.getGameMode() != GameMode.SPECTATOR;
+                        return !e.equals(player) && p.getGameMode() != GameMode.SPECTATOR;
                     else
                         return true;
                 });

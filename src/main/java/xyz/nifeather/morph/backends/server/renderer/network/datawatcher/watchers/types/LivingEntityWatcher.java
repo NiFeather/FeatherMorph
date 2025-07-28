@@ -69,7 +69,14 @@ public class LivingEntityWatcher extends EntityWatcher
         attributes.forEach(instance ->
         {
             // Still NMS :(
-            var id = BuiltInRegistries.ATTRIBUTE.getKey(instance.getAttribute().value()).toString();
+            var nmsAttribute = BuiltInRegistries.ATTRIBUTE.getKey(instance.getAttribute().value());
+            if (nmsAttribute == null)
+            {
+                logger.warn("Unknown attribute from bukkit to NMS: " + instance.getAttribute().value());
+                return;
+            }
+
+            String id = nmsAttribute.toString();
 
             var packetAttribute = Attributes.getByName(id);
             if (packetAttribute == null)
@@ -105,7 +112,6 @@ public class LivingEntityWatcher extends EntityWatcher
             case ADD_VALUE -> WrapperPlayServerUpdateAttributes.PropertyModifier.Operation.ADDITION;
             case ADD_MULTIPLIED_BASE -> WrapperPlayServerUpdateAttributes.PropertyModifier.Operation.MULTIPLY_BASE;
             case ADD_MULTIPLIED_TOTAL -> WrapperPlayServerUpdateAttributes.PropertyModifier.Operation.MULTIPLY_TOTAL;
-            default -> throw new RuntimeException("Unknown operation: " + nmsOperation);
         };
     }
 

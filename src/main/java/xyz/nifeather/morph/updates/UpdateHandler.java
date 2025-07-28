@@ -304,6 +304,9 @@ public class UpdateHandler extends MorphPluginObject
             return;
         }
 
+        assert msgPrimary != null;
+        assert msgSecondary != null;
+
         sendTarget.sendMessage(MessageUtils.prefixes(sendTarget, messageHeaderFooter));
         sendTarget.sendMessage(MessageUtils.prefixes(sendTarget, msgPrimary));
         sendTarget.sendMessage(MessageUtils.prefixes(sendTarget, msgSecondary));

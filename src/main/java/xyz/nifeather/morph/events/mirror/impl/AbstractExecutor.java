@@ -83,11 +83,6 @@ public abstract class AbstractExecutor extends MorphPluginObject implements IExe
         return executorHub.getControl(source);
     }
 
-    protected boolean playerInDistance(Player source, InteractionMirrorProcessor.PlayerInfo inf)
-    {
-        return playerInDistance(source, inf.target());
-    }
-
     @Contract("_, null-> false; _, !null -> _")
     protected boolean playerInDistance(@NotNull Player source, @Nullable Player target)
     {

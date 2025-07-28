@@ -35,7 +35,7 @@ public class CowWatcher extends AgeableMobWatcher
     @Override
     protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
-        if (property == cowProperties.VARIANT)
+        if (Objects.equals(property, cowProperties.VARIANT))
         {
             var bukkitVariant = (Cow.Variant) value;
             var packetVariant = Objects.requireNonNull(CowVariants.getRegistry().getByName(bukkitVariant.key().asString()),

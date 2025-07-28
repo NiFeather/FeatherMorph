@@ -93,6 +93,8 @@ public class FlyAbility extends MorphAbility<FlyOption>
             return super.handle(player, state);
 
         var option = this.getOptionFor(state);
+        if (option == null)
+            return false;
 
         var worldName = player.getWorld().getName();
         var allowFlightConditions = player.getFoodLevel() > option.getMinimumHunger()
@@ -100,7 +102,7 @@ public class FlyAbility extends MorphAbility<FlyOption>
                     && !playerBlocked(player)
                     && playerHasCommonFlyPerm(player)
                     && (!noFlyInLavaWorlds.contains(worldName) || !player.isInLava())
-                    && (!noFlyInWaterWorlds.contains(worldName) || !player.isInWaterOrBubbleColumn());
+                    && (!noFlyInWaterWorlds.contains(worldName) || !player.isInWater());
 
         var allowFlight = this.allowFlight.get() && (allowFlightConditions || player.hasPermission(CommonPermissions.ALWAYS_CAN_FLY));
 

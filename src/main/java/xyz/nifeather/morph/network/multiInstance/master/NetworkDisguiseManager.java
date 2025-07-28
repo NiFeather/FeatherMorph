@@ -58,13 +58,13 @@ public class NetworkDisguiseManager extends MorphPluginObject
             {
                 var newInstance = new PlayerMeta();
                 newInstance.uniqueId = otherMeta.uniqueId;
-                newInstance.getUnlockedDisguiseIdentifiers().addAll(otherMeta.getUnlockedDisguiseIdentifiers());
+                newInstance.addUnlockedDisguiseIdentifier(otherMeta.getUnlockedDisguiseIdentifiers());
                 storedMeta.add(newInstance);
 
                 continue;
             }
 
-            match.getUnlockedDisguiseIdentifiers().addAll(otherMeta.getUnlockedDisguiseIdentifiers());
+            match.addUnlockedDisguiseIdentifier(other.getFirst().getUnlockedDisguiseIdentifiers());
         }
     }
 }

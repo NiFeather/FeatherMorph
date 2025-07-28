@@ -9,6 +9,7 @@ import xiamomc.pluginbase.Bindables.Bindable;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 public class Transformer extends MorphPluginObject
 {
@@ -71,7 +72,7 @@ public class Transformer extends MorphPluginObject
     public static <T> GenericTransform<T> transform(Recorder<T> recorder, T endValue, long duration, Easing easing)
     {
         var prevTransform = (GenericTransform<T>) transforms.stream()
-                .filter(t -> (t instanceof GenericTransform<?> tB && tB.val == recorder))
+                .filter(t -> (t instanceof GenericTransform<?> tB && Objects.equals(tB.val, recorder)))
                 .findFirst().orElse(null);
 
         if (prevTransform != null)
@@ -98,7 +99,7 @@ public class Transformer extends MorphPluginObject
     public static <T> BindableTransform<T> transform(Bindable<T> bindable, T endValue, long duration, Easing easing)
     {
         var prevTransform = (BindableTransform<T>) transforms.stream()
-                .filter(t -> (t instanceof BindableTransform<?> tB && tB.bindable == bindable))
+                .filter(t -> (t instanceof BindableTransform<?> tB && Objects.equals(tB.bindable, bindable)))
                 .findFirst().orElse(null);
 
         if (prevTransform != null)

@@ -28,7 +28,7 @@ public class NbtUtils
         if (element == null)
             return null;
 
-        if (element.getType() != IntArrayTag.TYPE)
+        if (!element.getType().equals(IntArrayTag.TYPE))
         {
             logger.warn("Given element is not a int array, can't convert to UUID");
             return null;

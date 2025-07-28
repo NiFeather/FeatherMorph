@@ -42,7 +42,7 @@ public class PigWatcher extends AgeableMobWatcher
     @Override
     protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
-        if (property == pigProperties.VARIANT)
+        if (Objects.equals(property, pigProperties.VARIANT))
         {
             var variant = (Pig.Variant) value;
 

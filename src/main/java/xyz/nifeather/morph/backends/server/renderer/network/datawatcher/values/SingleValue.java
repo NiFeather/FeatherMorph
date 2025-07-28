@@ -53,7 +53,7 @@ public class SingleValue<T>
 
     public boolean equalsStrict(Object obj)
     {
-        if (this == obj) return true;
+        if (this.equals(obj)) return true;
         if (!(obj instanceof SingleValue<?> other)) return false;
 
         return this.index == other.index

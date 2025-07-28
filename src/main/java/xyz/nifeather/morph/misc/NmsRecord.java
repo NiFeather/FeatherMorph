@@ -3,8 +3,10 @@ package xyz.nifeather.morph.misc;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.ServerPlayerGameMode;
+import net.minecraft.world.entity.LivingEntity;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.entity.CraftEntity;
+import org.bukkit.craftbukkit.entity.CraftLivingEntity;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -33,6 +35,11 @@ public record NmsRecord(ServerPlayer nmsPlayer, ServerLevel nmsWorld,
     public static ServerPlayer ofPlayer(Player player)
     {
         return ((CraftPlayer) player).getHandle();
+    }
+
+    public static LivingEntity ofLiving(org.bukkit.entity.LivingEntity bukkitLiving)
+    {
+        return ((CraftLivingEntity) bukkitLiving).getHandle();
     }
 
     public static NmsRecord of(Player player, @Nullable Entity targetEntity)

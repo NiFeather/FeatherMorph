@@ -107,7 +107,7 @@ public class MorphCommand extends MorphPluginObject implements IConvertibleBriga
 
     private int execWithID(CommandContext<CommandSourceStack> context)
     {
-        var sender = context.getSource().getExecutor();
+        var sender = context.getSource().getSender();
         var executor = context.getSource().getExecutor();
 
         if (!(executor instanceof Player player))

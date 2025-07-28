@@ -84,12 +84,7 @@ public class BySightExecutor extends ChainedExecutor
 
         // 如果玩家在链条中，并且不是链条中的最后一个，则取消挥手的事件
         if (isInChain)
-        {
-            if (isLastInChain(source))
-                return false;
-
-            return true;
-        }
+            return !isLastInChain(source);
 
         var tracker = tracker();
 

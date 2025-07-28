@@ -15,6 +15,8 @@ import xiamomc.pluginbase.Annotations.Resolved;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.RenderRegistry;
 import xyz.nifeather.morph.utilities.EntityTypeUtils;
 
+import java.util.Objects;
+
 public class SoundListener extends ProtocolListener
 {
     @Override
@@ -50,7 +52,7 @@ public class SoundListener extends ProtocolListener
 
             var playerLocation = w.getBindingPlayer().getLocation();
 
-            if (playerLocation.getWorld() != positionAsLocation.getWorld())
+            if (!Objects.equals(playerLocation.getWorld(), positionAsLocation.getWorld()))
                 return false;
 
             var locX = (int) (playerLocation.x() * 8);

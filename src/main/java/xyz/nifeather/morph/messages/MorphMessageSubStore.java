@@ -54,7 +54,7 @@ public class MorphMessageSubStore extends MessageStore<FeatherMorphMain>
         var path = PluginAssetUtils.langPath(locale);
         var asset = PluginAssetUtils.getFileStrings(path);
 
-        if (!asset.isEmpty() && !asset.isBlank())
+        if (!asset.isBlank())
         {
             try
             {

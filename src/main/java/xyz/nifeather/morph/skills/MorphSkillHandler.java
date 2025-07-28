@@ -33,6 +33,7 @@ import xyz.nifeather.morph.utilities.PermissionUtils;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -341,7 +342,7 @@ public class MorphSkillHandler extends MorphPluginObject
      */
     public void switchCooldown(UUID uuid, @Nullable SkillCooldownInfo info)
     {
-        if (info != null && getCooldownInfo(uuid, info.getIdentifier()) != info)
+        if (info != null && !Objects.equals(getCooldownInfo(uuid, info.getIdentifier()), info))
             throw new IllegalArgumentException("传入的Info不属于此玩家");
 
         if (info == null)
@@ -419,7 +420,7 @@ public class MorphSkillHandler extends MorphPluginObject
                 : getCooldownInfo(uuid, state.skillLookupIdentifier());
 
         //移除不需要的CD
-        list.removeIf(i -> i != cdInfo && this.getCooldownInactive(i) <= 2);
+        list.removeIf(i -> !Objects.equals(i, cdInfo) && this.getCooldownInactive(i) <= 2);
 
         if (list.isEmpty()) uuidInfoMap.remove(uuid);
     }

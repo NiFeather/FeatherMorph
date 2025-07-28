@@ -1,7 +1,9 @@
 package xyz.nifeather.morph.storage.playerdata;
 
+import com.google.common.collect.ImmutableList;
 import com.google.gson.annotations.Expose;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 import xyz.nifeather.morph.misc.DisguiseMeta;
@@ -34,35 +36,15 @@ public class PlayerMeta
     @Expose(serialize = false)
     private List<DisguiseMeta> unlockedDisguises = Collections.synchronizedList(new ObjectArrayList<>());
 
-    private boolean disguiseListLocked = false;
-
     @Unmodifiable
     public List<DisguiseMeta> getUnlockedDisguises()
     {
-        return disguiseListLocked
-                ? new ObjectArrayList<>(unlockedDisguises)
-                : unlockedDisguises;
+        return ImmutableList.copyOf(unlockedDisguises);
     }
 
     public void setUnlockedDisguises(ObjectArrayList<DisguiseMeta> newList)
     {
-        if (disguiseListLocked)
-            throw new IllegalStateException("不能为 %s 直接重新设定解锁的伪装，因为列表已被锁定".formatted(this));
-
         unlockedDisguises = newList;
-    }
-
-    /**
-     * 锁定伪装列表使之后的获取操作只能获得其副本
-     */
-    public void lockDisguiseList()
-    {
-        disguiseListLocked = true;
-    }
-
-    public boolean disguiseListLocked()
-    {
-        return disguiseListLocked;
     }
 
     public void addDisguise(DisguiseMeta info)
@@ -83,18 +65,23 @@ public class PlayerMeta
     @Expose
     private List<String> unlockedDisguiseIdentifiers = Collections.synchronizedList(new ObjectArrayList<>());
 
-    public List<String> getUnlockedDisguiseIdentifiers()
+    /**
+     * @apiNote Only use
+     */
+    @ApiStatus.Internal
+    public void addUnlockedDisguiseIdentifier(List<String> list)
     {
-        return disguiseListLocked
-                ? new ObjectArrayList<>(unlockedDisguiseIdentifiers)
-                : unlockedDisguiseIdentifiers;
+        unlockedDisguiseIdentifiers.addAll(list);
     }
 
-    public void setUnlockedDisguiseIdentifiers(ObjectArrayList<String> newList)
+    @Unmodifiable
+    public List<String> getUnlockedDisguiseIdentifiers()
     {
-        if (disguiseListLocked)
-            throw new IllegalStateException("不能为 %s 重新设定原始解锁的伪装，因为列表已被锁定".formatted(this));
+        return ImmutableList.copyOf(unlockedDisguiseIdentifiers);
+    }
 
+    public void setUnlockedDisguiseIdentifiers(List<String> newList)
+    {
         unlockedDisguiseIdentifiers = newList;
     }
 

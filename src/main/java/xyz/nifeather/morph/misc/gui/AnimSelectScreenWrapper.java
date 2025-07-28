@@ -96,18 +96,15 @@ public class AnimSelectScreenWrapper extends ScreenWrapper
             int lineCapacity = 0;
             for (char c : line.toCharArray())
             {
-                switch (c)
+                if (c == CHAR_ENTRY)
                 {
-                    case CHAR_ENTRY ->
-                    {
-                        builder.append(getCurrentIndexChar(this.capacity + lineCapacity));
+                    builder.append(getCurrentIndexChar(this.capacity + lineCapacity));
 
-                        lineCapacity++;
-                    }
-                    default ->
-                    {
-                        builder.append(c);
-                    }
+                    lineCapacity++;
+                }
+                else
+                {
+                    builder.append(c);
                 }
             }
 

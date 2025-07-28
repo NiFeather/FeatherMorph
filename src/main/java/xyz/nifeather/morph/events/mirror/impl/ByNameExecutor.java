@@ -19,6 +19,8 @@ import xyz.nifeather.morph.storage.mirrorlogging.OperationType;
 import xyz.nifeather.morph.utilities.ItemUtils;
 import xyz.nifeather.morph.utilities.NmsUtils;
 
+import java.util.Objects;
+
 public class ByNameExecutor extends AbstractExecutor
 {
     public ByNameExecutor(ExecutorHub executorHub)
@@ -73,7 +75,7 @@ public class ByNameExecutor extends AbstractExecutor
         var playerInf = getMirrorTarget(player);
         var targetPlayer = playerInf.target();
 
-        if (!playerInDistance(player, playerInf) || targetPlayer.isSneaking() == sneaking) return;
+        if (!playerInDistance(player, playerInf.target()) || targetPlayer.isSneaking() == sneaking) return;
 
         scheduleIfNotInSameRegion(targetPlayer, () ->
         {
@@ -89,12 +91,10 @@ public class ByNameExecutor extends AbstractExecutor
     {
         var playerInf = getMirrorTarget(player);
 
-        if (!playerInDistance(player, playerInf))
+        if (!playerInDistance(player, playerInf.target()))
             return;
 
         var targetPlayer = playerInf.target();
-
-        assert targetPlayer != null;
 
         scheduleIfNotInSameRegion(targetPlayer, () ->
         {
@@ -115,11 +115,10 @@ public class ByNameExecutor extends AbstractExecutor
     {
         var inf = getMirrorTarget(player);
 
-        if (!playerInDistance(player, inf))
+        if (!playerInDistance(player, inf.target()))
             return;
 
         var targetPlayer = inf.target();
-        assert targetPlayer != null;
 
         scheduleIfNotInSameRegion(targetPlayer, () ->
         {
@@ -133,11 +132,10 @@ public class ByNameExecutor extends AbstractExecutor
     {
         var inf = getMirrorTarget(player);
 
-        if (!playerInDistance(player, inf))
+        if (!playerInDistance(player, inf.target()))
             return;
 
         var targetPlayer = inf.target();
-        assert targetPlayer != null;
 
         scheduleIfNotInSameRegion(targetPlayer, () ->
         {
@@ -161,11 +159,10 @@ public class ByNameExecutor extends AbstractExecutor
     {
         var inf = getMirrorTarget(damager);
 
-        if (!playerInDistance(damager, inf))
+        if (!playerInDistance(damager, inf.target()))
             return false;
 
         var targetPlayer = inf.target();
-        assert targetPlayer != null;
 
         simulateOperationAsync(Action.LEFT_CLICK_AIR, targetPlayer, damager, success -> {});
         logOperation(damager, targetPlayer, OperationType.LeftClick);
@@ -190,10 +187,10 @@ public class ByNameExecutor extends AbstractExecutor
         var targetPlayer = inf.target();
         if (targetPlayer == null) return false;
 
-        var playerInDistance = playerInDistance(source, inf);
+        var playerInDistance = playerInDistance(source, inf.target());
 
         //取消一定条件下源玩家的挥手动画
-        if (targetPlayer.getLocation().getWorld() == source.getLocation().getWorld()
+        if (targetPlayer.getLocation().getWorld().equals(source.getLocation().getWorld())
                 && playerInDistance
                 && NmsUtils.isTickThreadFor(targetPlayer)
                 && NmsUtils.isTickThreadFor(source)
@@ -203,7 +200,7 @@ public class ByNameExecutor extends AbstractExecutor
             var ourTarget = source.getTargetEntity(5);
 
             if ((ourTarget != null || theirTarget != null)
-                    && (ourTarget == targetPlayer || ourTarget == theirTarget || theirTarget == source))
+                    && (Objects.equals(ourTarget, targetPlayer) || Objects.equals(ourTarget, theirTarget) || Objects.equals(theirTarget, source)))
             {
                 return true;
             }
@@ -260,11 +257,10 @@ public class ByNameExecutor extends AbstractExecutor
 
         var inf = getMirrorTarget(source);
 
-        if (!playerInDistance(source, inf))
+        if (!playerInDistance(source, inf.target()))
             return;
 
         var targetPlayer = inf.target();
-        assert targetPlayer != null;
 
         simulateOperationAsync(action, targetPlayer, source, success -> {});
         logOperation(source, targetPlayer, action.isLeftClick() ? OperationType.LeftClick : OperationType.RightClick);

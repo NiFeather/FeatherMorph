@@ -60,7 +60,7 @@ public abstract class DelayedMorphSkill<T extends ISkillOption> extends MorphSki
             var currentState = manager.getDisguiseStateFor(player);
 
             //检查伪装是否为同一个实例（玩家是否更改了伪装）
-            if (currentState != null && currentState.getDisguiseWrapper() == state.getDisguiseWrapper())
+            if (currentState != null && currentState.getDisguiseWrapper().equals(state.getDisguiseWrapper()))
                 execution.run();
         }, delay);
     }

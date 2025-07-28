@@ -24,8 +24,6 @@ public class EasingImpl implements IEasing
     {
         return switch (easing)
         {
-            default -> progress;
-
             case InSine -> 1 - Math.cos((progress * Math.PI) / 2);
             case OutSine -> Math.sin((progress * Math.PI) / 2);
             case InOutSine -> -(Math.cos(progress * Math.PI) - 1) / 2;
@@ -91,6 +89,8 @@ public class EasingImpl implements IEasing
             case InOutBounce -> progress < 0.5
                     ? (1 - calcOutBounce(1 - 2 * progress)) / 2
                     : (1 + calcOutBounce(2 * progress - 1)) / 2;
+
+            default -> progress;
         };
     }
 

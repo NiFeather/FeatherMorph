@@ -87,8 +87,6 @@ public class PlayerTracker extends MorphPluginObject implements Listener
 
                 case RIGHT_CLICK_AIR, RIGHT_CLICK_ENTITY -> Action.RIGHT_CLICK_AIR;
                 case RIGHT_CLICK_BLOCK -> Action.RIGHT_CLICK_BLOCK;
-
-                default -> throw new RuntimeException(this + " 不能转化为任何一个已知的 BukkitAction");
             };
         }
 

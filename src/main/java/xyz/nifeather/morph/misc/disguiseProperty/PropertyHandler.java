@@ -36,6 +36,12 @@ public class PropertyHandler
 
     public void updateFromPropertiesInput(Map<String, String> input)
     {
+        if (this.properties == null)
+        {
+            FeatherMorphMain.getInstance().getSLF4JLogger().warn("Trying to update property input while the PropertyHandler has not been initialized?!");
+            return;
+        }
+
         var results = this.properties.readFromPropertiesInput(input);
         results.forEach(this::writeGeneric);
     }

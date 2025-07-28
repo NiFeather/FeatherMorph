@@ -160,9 +160,9 @@ public class ArmorStandWatcher extends InventoryLivingWatcher
     private ListTag saveRotations(Vector3f rotations)
     {
         ListTag listTag = new ListTag();
-        listTag.add(FloatTag.valueOf((float)rotations.getX()));
-        listTag.add(FloatTag.valueOf((float)rotations.getY()));
-        listTag.add(FloatTag.valueOf((float)rotations.getZ()));
+        listTag.add(FloatTag.valueOf(rotations.getX()));
+        listTag.add(FloatTag.valueOf(rotations.getY()));
+        listTag.add(FloatTag.valueOf(rotations.getZ()));
         return listTag;
     }
 

@@ -59,7 +59,8 @@ public class RevealingEventProcessor extends MorphPluginObject implements Listen
         if (tracker.isDuplicatedRightClick(player)) return;
 
         var revealingState = handler.getRevealingState(player);
-        if (!revealingState.haveBindingState()) return;
+        if (revealingState.bindingState == null) return;
+
         if (revealingState.bindingState.getDisguiseType() == DisguiseTypes.PLAYER) return;
 
         revealingState.addBaseValue(RevealingHandler.RevealingDiffs.INTERACT);
@@ -80,8 +81,9 @@ public class RevealingEventProcessor extends MorphPluginObject implements Listen
         if (!doRevealing.get()) return;
         var revState = handler.getRevealingState(e.getPlayer());
 
-        if (!revState.haveBindingState()) return;
+        if (revState.bindingState == null) return;
         if (revState.bindingState.getDisguiseType() == DisguiseTypes.PLAYER) return;
+
         revState.addBaseValue(RevealingHandler.RevealingDiffs.INTERACT_ENTITY);
     }
 
@@ -92,8 +94,8 @@ public class RevealingEventProcessor extends MorphPluginObject implements Listen
         if (!(e.getEntity() instanceof Player player)) return;
 
         var revState = handler.getRevealingState(player);
+        if (revState.bindingState == null) return;
 
-        if (!revState.haveBindingState()) return;
         if (revState.bindingState.getDisguiseType() == DisguiseTypes.PLAYER) return;
         revState.addBaseValue(RevealingHandler.RevealingDiffs.TAKE_DAMAGE);
     }
@@ -105,8 +107,8 @@ public class RevealingEventProcessor extends MorphPluginObject implements Listen
         if (!(e.getDamager() instanceof Player player)) return;
 
         var revState = handler.getRevealingState(player);
+        if (revState.bindingState == null) return;
 
-        if (!revState.haveBindingState()) return;
         if (revState.bindingState.getDisguiseType() == DisguiseTypes.PLAYER) return;
         revState.addBaseValue(RevealingHandler.RevealingDiffs.DEAL_DAMAGE);
     }
@@ -118,8 +120,8 @@ public class RevealingEventProcessor extends MorphPluginObject implements Listen
 
         // 玩家破坏方块 -> 揭示值+5
         var revealingState = handler.getRevealingState(e.getPlayer());
+        if (revealingState.bindingState == null) return;
 
-        if (!revealingState.haveBindingState()) return;
         if (revealingState.bindingState.getDisguiseType() == DisguiseTypes.PLAYER) return;
         revealingState.addBaseValue(RevealingHandler.RevealingDiffs.BLOCK_BREAK);
     }
@@ -129,8 +131,8 @@ public class RevealingEventProcessor extends MorphPluginObject implements Listen
     {
         if (!doRevealing.get()) return;
         var revealingState = handler.getRevealingState(e.getPlayer());
+        if (revealingState.bindingState == null) return;
 
-        if (!revealingState.haveBindingState()) return;
         if (revealingState.bindingState.getDisguiseType() == DisguiseTypes.PLAYER) return;
         revealingState.addBaseValue(RevealingHandler.RevealingDiffs.BLOCK_PLACE);
     }
@@ -156,7 +158,7 @@ public class RevealingEventProcessor extends MorphPluginObject implements Listen
             for (var entity : mobsNearby)
             {
                 if (!(entity instanceof CraftMob craftMob)) continue;
-                if (craftMob.getHandle().getTarget() == nmsPlayer)
+                if (nmsPlayer.equals(craftMob.getHandle().getTarget()))
                 {
                     var base = revealingState.getBaseValue();
                     revealingState.setBaseValue(Math.max(base, RevealingHandler.RevealingDiffs.ALREADY_TARGETED));

@@ -425,7 +425,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         if (sourceEntityType == EntityType.PIGLIN && playersMinedGoldBlocks.contains(player))
             return;
 
-        if (e.getEntity().getLastDamageCause() instanceof EntityDamageByEntityEvent edbee && edbee.getDamager() == player)
+        if (e.getEntity().getLastDamageCause() instanceof EntityDamageByEntityEvent edbee && edbee.getDamager().equals(player))
             return;
 
         //受到外力攻击或者其他原因时不要处理

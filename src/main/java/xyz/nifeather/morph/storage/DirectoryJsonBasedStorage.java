@@ -174,7 +174,8 @@ public abstract class DirectoryJsonBasedStorage<T> extends MorphPluginObject
         key = getPath(key);
 
         var cached = instancesMap.getOrDefault(key, null);
-        if (cached != null) return cached == getDefault() ? null : (T) cached;
+        if (cached != null)
+            return cached.equals(getDefault()) ? null : cached;
 
         var file = directoryStorage.getFile(key + ".json", false);
         var obj = loadFrom(file);
@@ -182,7 +183,7 @@ public abstract class DirectoryJsonBasedStorage<T> extends MorphPluginObject
         if (obj == null)
             obj = getDefault();
 
-        this.instancesMap.put(key, (T) obj);
+        this.instancesMap.put(key, obj);
         return obj;
     }
 }

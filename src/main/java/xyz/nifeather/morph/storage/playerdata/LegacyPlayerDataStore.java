@@ -61,7 +61,7 @@ public class LegacyPlayerDataStore extends MorphJsonBasedStorage<PlayerMetaConta
             var list = new ObjectArrayList<DisguiseMeta>();
 
             //原始列表
-            var unlockedDisguiseIdentifiers = c.getUnlockedDisguiseIdentifiers();
+            var unlockedDisguiseIdentifiers = new ObjectArrayList<>(c.getUnlockedDisguiseIdentifiers());
 
             //先对原始列表排序
             unlockedDisguiseIdentifiers.sort(null);
@@ -79,7 +79,6 @@ public class LegacyPlayerDataStore extends MorphJsonBasedStorage<PlayerMetaConta
 
             //设置可用的伪装列表并对其加锁
             c.setUnlockedDisguises(list);
-            c.lockDisguiseList();
         });
 
         return true;

@@ -63,9 +63,9 @@ public class SplashPotionSkill extends MorphSkill<NoOpConfiguration>
         if (potionRef != null && potionRef.isBound())
             targetPotion = potionRef.value();
 
-        if (info.type == PotionEffectType.INSTANT_HEALTH)
+        if (info.type.equals(PotionEffectType.INSTANT_HEALTH))
             targetPotion = Potions.HEALING.value();
-        else if (info.type == PotionEffectType.INSTANT_DAMAGE)
+        else if (info.type.equals(PotionEffectType.INSTANT_DAMAGE))
             targetPotion = Potions.HARMING.value();
 
         var color = new AtomicInteger();

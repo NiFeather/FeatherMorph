@@ -42,7 +42,7 @@ public class ChickenWatcher extends AgeableMobWatcher
     @Override
     protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
-        if (property == chickenProperties.VARIANT)
+        if (Objects.equals(property, chickenProperties.VARIANT))
         {
             var variant = (Chicken.Variant) value;
 

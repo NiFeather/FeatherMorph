@@ -1535,16 +1535,17 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     //region Implementation of IManagePlayerData
 
     @Override
-    @NotNull
+    @Nullable
     public DisguiseMeta getDisguiseMeta(String rawString)
     {
         return data.getDisguiseMeta(rawString);
     }
 
     @Override
-    public ObjectArrayList<DisguiseMeta> getAvaliableDisguisesFor(Player player)
+    public List<DisguiseMeta> getAvaliableDisguisesFor(Player player)
     {
-        return data.getAvaliableDisguisesFor(player);
+        var avail = data.getAvaliableDisguisesFor(player);
+        return avail == null ? new ObjectArrayList<>() : avail;
     }
 
     @Override
@@ -1562,6 +1563,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         var locale = MessageUtils.getLocale(player);
 
         var meta = data.getDisguiseMeta(disguiseIdentifier);
+        if (meta == null)
+            return false;
 
         var message = MessageUtils.prefixes(player, MorphStrings.morphUnlockedString()
                 .withLocale(locale)
