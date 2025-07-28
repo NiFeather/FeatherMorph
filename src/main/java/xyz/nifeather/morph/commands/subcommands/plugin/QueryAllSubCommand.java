@@ -55,7 +55,7 @@ public class QueryAllSubCommand extends BrigadierCommand
 
         var commandSender = context.getSource().getSender();
 
-        if (list.size() == 0 && offlineStates.size() == 0)
+        if (list.isEmpty() && offlineStates.isEmpty())
         {
             commandSender.sendMessage(MessageUtils.prefixes(commandSender, CommandStrings.qaNoBodyDisguisingString()));
             return 1;

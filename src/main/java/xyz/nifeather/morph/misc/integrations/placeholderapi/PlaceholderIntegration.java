@@ -12,10 +12,11 @@ import xyz.nifeather.morph.misc.integrations.placeholderapi.builtin.AvaliableDis
 import xyz.nifeather.morph.misc.integrations.placeholderapi.builtin.StateNameProvider;
 
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class PlaceholderIntegration extends PlaceholderExpansion
 {
-    private static final List<IPlaceholderProvider> providers = new ObjectArrayList<>();
+    private static final List<IPlaceholderProvider> providers = new CopyOnWriteArrayList<>();
     private static final Logger log = LoggerFactory.getLogger(PlaceholderIntegration.class);
 
     public PlaceholderIntegration(DependencyManager depManager)

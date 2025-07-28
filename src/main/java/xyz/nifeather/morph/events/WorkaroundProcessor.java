@@ -12,6 +12,7 @@ import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.api.FeatherMorphAPI;
 import xyz.nifeather.morph.api.events.gameplay.PlayerMorphEarlyEvent;
 
+import java.util.Objects;
 import java.util.function.Predicate;
 
 public class WorkaroundProcessor extends MorphPluginObject implements Listener
@@ -75,7 +76,7 @@ public class WorkaroundProcessor extends MorphPluginObject implements Listener
         // ...but having `HIGHEST` priority and cancelling the event would cause a bad state for GSit... :<
         this.scheduleOn(player, () ->
         {
-            if (player.getVehicle() != event.getMount())
+            if (!Objects.equals(player.getVehicle(), event.getMount()))
                 return;
 
             player.leaveVehicle();

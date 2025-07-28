@@ -27,7 +27,7 @@ public interface IManagePlayerData
      * @param player 目标玩家
      * @return 目标玩家拥有的伪装
      */
-    public ObjectArrayList<DisguiseMeta> getAvaliableDisguisesFor(Player player);
+    public List<DisguiseMeta> getAvaliableDisguisesFor(Player player);
 
     /**
      * 将伪装授予某一玩家

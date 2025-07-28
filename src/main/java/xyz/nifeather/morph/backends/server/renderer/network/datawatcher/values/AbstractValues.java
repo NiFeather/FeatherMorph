@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import xyz.nifeather.morph.FeatherMorphMain;
 
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public abstract class AbstractValues
 {
@@ -23,7 +24,7 @@ public abstract class AbstractValues
 
     protected final Logger logger = FeatherMorphMain.getInstance().getSLF4JLogger();
 
-    protected final List<SingleValue<?>> values = new ObjectArrayList<>();
+    protected final List<SingleValue<?>> values = new CopyOnWriteArrayList<>();
 
     protected void registerSingle(SingleValue<?>... value)
     {

@@ -6,17 +6,17 @@ public class MathUtils
 {
     public static int clamp(int min, int max, int val)
     {
-        return val > max ? max : (val < min ? min : val);
+        return val > max ? max : Math.max(val, min);
     }
 
     public static float clamp(float min, float max, float val)
     {
-        return val > max ? max : (val < min ? min : val);
+        return val > max ? max : Math.max(val, min);
     }
 
     public static double clamp(double min, double max, double val)
     {
-        return val > max ? max : (val < min ? min : val);
+        return val > max ? max : Math.max(val, min);
     }
 
     public static boolean vectorNotZero(Vector vector)
@@ -30,11 +30,11 @@ public class MathUtils
         var y = vector.getY();
         var z = vector.getZ();
 
-        return x > y ? x : y > z ? y : z;
+        return x > y ? x : Math.max(y, z);
     }
 
     public static int max(int a, int b, int c)
     {
-        return a > b ? a : b > c ? b : c;
+        return a > b ? a : Math.max(b, c);
     }
 }

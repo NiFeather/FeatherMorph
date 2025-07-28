@@ -47,7 +47,7 @@ public class ModNetworkingHelper extends MorphPluginObject
      */
     public void sendCommandToRevealablePlayers(AbstractS2CCommand<?> cmd)
     {
-        var target = Bukkit.getOnlinePlayers().stream()
+        var target = featherMorph().getPlatform().onlinePlayers().stream()
                 .filter(p -> p.hasPermission(CommonPermissions.DISGUISE_REVEALING))
                 .toList();
 
@@ -56,7 +56,7 @@ public class ModNetworkingHelper extends MorphPluginObject
 
     public void sendCommandToAllPlayers(AbstractS2CCommand<?> cmd)
     {
-        Bukkit.getOnlinePlayers().forEach(p -> clientHandler.sendCommand(p, cmd));
+        featherMorph().getPlatform().onlinePlayers().forEach(p -> clientHandler.sendCommand(p, cmd));
     }
 
     public NetworkDisguiseStateRecord prepareMeta(int networkId)

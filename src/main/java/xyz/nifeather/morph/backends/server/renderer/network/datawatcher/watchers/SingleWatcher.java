@@ -35,6 +35,7 @@ import xyz.nifeather.morph.backends.server.renderer.utilties.WatcherUtils;
 import xyz.nifeather.morph.misc.BuildFailedException;
 import xyz.nifeather.morph.misc.DisguiseEquipment;
 import xyz.nifeather.morph.misc.NmsRecord;
+import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 import xyz.nifeather.morph.utilities.EntityTypeUtils;
 import xyz.nifeather.morph.utilities.NmsUtils;
@@ -132,7 +133,20 @@ public abstract class SingleWatcher extends MorphPluginObject
      */
     public final <X> void writeProperty(SingleProperty<X> property, X value)
     {
+        this.handlePropertyWriteInternal(property, value);
         this.onPropertyWrite(property, value);
+    }
+
+    // I think we should handle this in a more proper way...
+    private <X> void handlePropertyWriteInternal(SingleProperty<X> property, X value)
+    {
+        var offTree = DisguiseProperties.INSTANCE.offTreeProperties();
+
+        if (offTree.VIRTUAL_ENTITY_UUID.equals(property))
+        {
+            var uuid = (UUID) value;
+            this.writeEntry(CustomEntries.SPAWN_UUID, uuid);
+        }
     }
 
     protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
@@ -228,7 +242,7 @@ public abstract class SingleWatcher extends MorphPluginObject
     /**
      * Values in this list shouldn't be included with meta packet processing in {@link xyz.nifeather.morph.backends.server.renderer.network.listeners.MetaPacketListener#rebuildServerMetaPacket(AbstractValues, SingleWatcher, WrapperPlayServerEntityMetadata)}
      */
-    private final List<Integer> blockedValues = new ObjectArrayList<>();
+    private final List<Integer> blockedValues = Collections.synchronizedList(new ObjectArrayList<>());
 
     /**
      * Block specific value type (by index) from further updating.
@@ -491,7 +505,7 @@ public abstract class SingleWatcher extends MorphPluginObject
 
     // 针对构建生成包之前就有customWrite的缓解方案: RenderRegistry#register(Player player, RegisterParameters registerParameters)
     // 或许需要找一种办法能让SingleWatcher在初始化值的时候不要发送任何数据包
-    private final Collection<Object> silentRequestSources = new ObjectArrayList<>();
+    private final Collection<Object> silentRequestSources = Collections.synchronizedList(new ObjectArrayList<>());
 
     public void markSilent(Object source)
     {

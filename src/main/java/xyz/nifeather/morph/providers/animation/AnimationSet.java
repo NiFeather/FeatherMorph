@@ -8,6 +8,7 @@ import xyz.nifeather.morph.misc.AnimationNames;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public abstract class AnimationSet
 {
@@ -24,7 +25,7 @@ public abstract class AnimationSet
     // SequenceId <-> <Sequence, IsPersistent>
     private final Map<String, Pair<List<SingleAnimation>, Boolean>> animationMap = new ConcurrentHashMap<>();
 
-    private final List<String> registeredAnimations = new ObjectArrayList<>();
+    private final List<String> registeredAnimations = new CopyOnWriteArrayList<>();
 
     /**
      * Register an non-persistent sequence<br>

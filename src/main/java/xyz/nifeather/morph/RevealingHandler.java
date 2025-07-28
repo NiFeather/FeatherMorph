@@ -169,11 +169,6 @@ public class RevealingHandler extends MorphPluginObject
         @Nullable
         public DisguiseState bindingState;
 
-        public boolean haveBindingState()
-        {
-            return bindingState != null;
-        }
-
         private final AtomicBoolean dirty = new AtomicBoolean(false);
 
         public RevealingState(Player player, int randomSeed)

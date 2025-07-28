@@ -17,6 +17,8 @@ import xyz.nifeather.morph.skills.options.TeleportConfiguration;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class SkillAbilityConfiguration
 {
@@ -112,7 +114,7 @@ public class SkillAbilityConfiguration
 
     @Expose
     @SerializedName("abilities")
-    private final List<String> abilitiyIdentifiers = new ObjectArrayList<>();
+    private final List<String> abilitiyIdentifiers = new CopyOnWriteArrayList<>();
 
     public List<String> getAbilitiyIdentifiers()
     {
@@ -148,7 +150,7 @@ public class SkillAbilityConfiguration
     @Expose
     @Nullable
     @SerializedName("settings")
-    private Object2ObjectOpenHashMap<String, Map<String, Object>> options = new Object2ObjectOpenHashMap<>();
+    private Map<String, Map<String, Object>> options = new ConcurrentHashMap<>();
 
     /**
      * 获取某个主动技能的技能设置

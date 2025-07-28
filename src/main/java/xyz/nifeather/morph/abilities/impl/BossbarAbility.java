@@ -22,6 +22,7 @@ import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Bindables.Bindable;
 
 import java.util.List;
+import java.util.Objects;
 
 public class BossbarAbility extends MorphAbility<BossbarOption>
 {
@@ -104,12 +105,13 @@ public class BossbarAbility extends MorphAbility<BossbarOption>
 
             var playerGameMode = player.getGameMode();
             List<Player> playersToShow = DisguiseUtils.findNearbyPlayers(player, distance, true);
-            List<Player> playersToHide = new ObjectArrayList<>(Bukkit.getOnlinePlayers());
+            List<Player> playersToHide = new ObjectArrayList<>(featherMorph().getPlatform().onlinePlayers());
 
             if (playerGameMode == GameMode.SPECTATOR)
                 playersToShow.removeIf(p -> p.getGameMode() != playerGameMode);
 
-            bossbar.progress((float) (player.getHealth() / player.getAttribute(Attribute.MAX_HEALTH).getValue()));
+            var playerMaxHealth = Objects.requireNonNull(player.getAttribute(Attribute.MAX_HEALTH)).getValue();
+            bossbar.progress((float) (player.getHealth() / playerMaxHealth));
             //bossbar.name(this.getBossbarName(state, option));
 
             if (state.canDisplayBossbar())

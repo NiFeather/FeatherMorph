@@ -15,6 +15,7 @@ import xyz.nifeather.morph.network.server.MorphClientHandler;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 
+import java.util.Collections;
 import java.util.List;
 
 public class RequestManager extends MorphPluginObject implements IManageRequests
@@ -57,7 +58,7 @@ public class RequestManager extends MorphPluginObject implements IManageRequests
         }
     }
 
-    private final List<RequestInfo> requests = new ObjectArrayList<>();
+    private final List<RequestInfo> requests = Collections.synchronizedList(new ObjectArrayList<>());
 
     @Override
     public void createRequest(Player source, Player target)
@@ -69,8 +70,8 @@ public class RequestManager extends MorphPluginObject implements IManageRequests
         }
 
         if (requests.stream()
-                .anyMatch(i -> i.sourcePlayer.getUniqueId() == source.getUniqueId()
-                        && i.targetPlayer.getUniqueId() == target.getUniqueId()))
+                .anyMatch(i -> i.sourcePlayer.getUniqueId().equals(source.getUniqueId())
+                        && i.targetPlayer.getUniqueId().equals(target.getUniqueId())))
         {
             source.sendMessage(MessageUtils.prefixes(source, RequestStrings.requestAlreadySentString()
                     .resolve("who", target.getName())));

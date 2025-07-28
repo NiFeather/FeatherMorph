@@ -14,6 +14,7 @@ import xyz.nifeather.morph.backends.server.renderer.ServerRenderer;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
 import xyz.nifeather.morph.backends.server.renderer.utilties.WatcherUtils;
 import xyz.nifeather.morph.messages.BackendStrings;
+import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.utilities.NbtUtils;
 
 import javax.annotation.Nullable;
@@ -75,6 +76,8 @@ public class ServerBackend extends DisguiseBackend<ServerDisguise, ServerDisguis
         var wrapper = new ServerDisguiseWrapper(new ServerDisguise(targetEntity.getType()), this);
         if (targetEntity instanceof Player player)
             wrapper.setDisguiseName(player.getName());
+
+        wrapper.writeProperty(DisguiseProperties.INSTANCE.offTreeProperties().VIRTUAL_ENTITY_UUID, UUID.randomUUID());
 
         return wrapper;
     }

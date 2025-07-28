@@ -57,6 +57,9 @@ public class SpawnPacketHandler extends ProtocolListener
 
     private void onEntityAddPacket(WrapperPlayServerSpawnEntity packet, PacketSendEvent packetEvent)
     {
+        var backend = ServerBackend.getInstance();
+        if (backend == null) return;
+
         var uuid = packet.getUUID().orElse(null);
 
         if (uuid == null)
@@ -76,7 +79,7 @@ public class SpawnPacketHandler extends ProtocolListener
 
         try
         {
-            ServerBackend.getInstance().serverRenderer.refreshStateForPlayer(Bukkit.getPlayer(uuid), List.of(pl));
+            backend.serverRenderer.refreshStateForPlayer(Bukkit.getPlayer(uuid), List.of(pl));
         }
         catch (Throwable t)
         {

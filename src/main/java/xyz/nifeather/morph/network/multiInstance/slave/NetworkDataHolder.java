@@ -46,7 +46,7 @@ public class NetworkDataHolder extends MorphPluginObject implements IManagePlaye
     }
 
     @Override
-    public ObjectArrayList<DisguiseMeta> getAvaliableDisguisesFor(Player player)
+    public List<DisguiseMeta> getAvaliableDisguisesFor(Player player)
     {
         var playerMeta = getPlayerMeta(player);
 

@@ -40,6 +40,7 @@ import xyz.nifeather.morph.network.server.ServerSetEquipCommand;
 import xyz.nifeather.morph.skills.MorphSkillHandler;
 import xyz.nifeather.morph.utilities.EntityTypeUtils;
 
+import java.util.Collections;
 import java.util.List;
 
 import static xyz.nifeather.morph.utilities.DisguiseUtils.itemOrAir;
@@ -140,7 +141,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         }
 
         //防止获得自己的伪装
-        if (killer != null && killer != entity)
+        if (killer != null && !killer.equals(entity))
             this.onPlayerKillEntity(killer, e.getEntity());
     }
 
@@ -358,7 +359,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         List<Player> players;
         synchronized (this)
         {
-            players = new ObjectArrayList<>(Bukkit.getOnlinePlayers());
+            players = new ObjectArrayList<>(featherMorph().getPlatform().onlinePlayers());
         }
 
         if (state != null)
@@ -406,7 +407,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
             playersMinedGoldBlocks.add(e.getPlayer());
     }
 
-    private final List<Player> playersMinedGoldBlocks = new ObjectArrayList<>();
+    private final List<Player> playersMinedGoldBlocks = Collections.synchronizedList(new ObjectArrayList<>());
 
     @EventHandler(ignoreCancelled = true)
     public void onEntityTarget(EntityTargetEvent e)
@@ -424,7 +425,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         if (sourceEntityType == EntityType.PIGLIN && playersMinedGoldBlocks.contains(player))
             return;
 
-        if (e.getEntity().getLastDamageCause() instanceof EntityDamageByEntityEvent edbee && edbee.getDamager() == player)
+        if (e.getEntity().getLastDamageCause() instanceof EntityDamageByEntityEvent edbee && edbee.getDamager().equals(player))
             return;
 
         //受到外力攻击或者其他原因时不要处理

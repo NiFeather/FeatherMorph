@@ -32,6 +32,7 @@ import xyz.nifeather.morph.config.ConfigOption;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.misc.BuildFailedException;
 
+import java.util.Collections;
 import java.util.List;
 
 public class ServerRenderer extends MorphPluginObject implements Listener
@@ -64,7 +65,7 @@ public class ServerRenderer extends MorphPluginObject implements Listener
             Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 
-    private final List<LivingEntityWatcher> livingEntityWatchers = new ObjectArrayList<>();
+    private final List<LivingEntityWatcher> livingEntityWatchers = Collections.synchronizedList(new ObjectArrayList<>());
 
     @EventHandler
     public void onPlayerStartUsingItem(PlayerInteractEvent event)
@@ -189,7 +190,9 @@ public class ServerRenderer extends MorphPluginObject implements Listener
             var disguiseUUID = disguiseWatcher.readEntryOrThrow(CustomEntries.SPAWN_UUID);
             var packetRemoveInfo = new WrapperPlayServerPlayerInfoRemove(disguiseUUID);
 
-            Bukkit.getOnlinePlayers().forEach(p -> protocolManager.sendPacket(p, packetRemoveInfo));
+            featherMorph().getPlatform()
+                    .onlinePlayers()
+                    .forEach(p -> protocolManager.sendPacket(p, packetRemoveInfo));
         }
 
         watcher.dispose();

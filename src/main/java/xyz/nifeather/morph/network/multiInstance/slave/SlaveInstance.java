@@ -47,7 +47,7 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
 
     public void resetDataStore()
     {
-        if (morphManager.getDataStore() == this.playerDataHolder)
+        if (Objects.equals(morphManager.getDataStore(), this.playerDataHolder))
             morphManager.setDataStore(null);
     }
 

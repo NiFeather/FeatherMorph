@@ -8,6 +8,7 @@ import org.bukkit.event.server.PluginEnableEvent;
 import xyz.nifeather.morph.MorphPluginObject;
 
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 
 public class PluginEventListener extends MorphPluginObject implements Listener
@@ -24,8 +25,8 @@ public class PluginEventListener extends MorphPluginObject implements Listener
         onEnableConsumers.forEach(c -> c.accept(e.getPlugin().getName()));
     }
 
-    private final List<Consumer<String>> onEnableConsumers = new ObjectArrayList<>();
-    private final List<Consumer<String>> onDisableConsumers = new ObjectArrayList<>();
+    private final List<Consumer<String>> onEnableConsumers = new CopyOnWriteArrayList<>();
+    private final List<Consumer<String>> onDisableConsumers = new CopyOnWriteArrayList<>();
 
     public void onPluginEnable(Consumer<String> c)
     {

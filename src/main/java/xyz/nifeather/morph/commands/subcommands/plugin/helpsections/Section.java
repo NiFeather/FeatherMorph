@@ -5,10 +5,11 @@ import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Messages.FormattableMessage;
 
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Section
 {
-    private final List<Entry> entries = new ObjectArrayList<>();
+    private final List<Entry> entries = new CopyOnWriteArrayList<>();
 
     public List<Entry> getEntries()
     {

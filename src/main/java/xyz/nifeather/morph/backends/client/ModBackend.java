@@ -2,7 +2,6 @@ package xyz.nifeather.morph.backends.client;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -26,7 +25,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ModBackend extends DisguiseBackend<TrackingClientDisguise, ClientDisguiseWrapper>
+public class ModBackend extends DisguiseBackend<TrackingClientDisguise, ModDisguiseWrapper>
 {
     /**
      * Gets the identifier of this backend.
@@ -48,7 +47,7 @@ public class ModBackend extends DisguiseBackend<TrackingClientDisguise, ClientDi
     @Override
     public DisguiseWrapper<TrackingClientDisguise> createInstance(@NotNull Entity targetEntity)
     {
-        var wrapper = new ClientDisguiseWrapper(new TrackingClientDisguise(targetEntity.getType()), this);
+        var wrapper = new ModDisguiseWrapper(new TrackingClientDisguise(targetEntity.getType()), this);
         wrapper.setDisguiseName(targetEntity.getName());
 
         return wrapper;
@@ -57,13 +56,13 @@ public class ModBackend extends DisguiseBackend<TrackingClientDisguise, ClientDi
     @Override
     public DisguiseWrapper<TrackingClientDisguise> createInstance(EntityType entityType)
     {
-        return new ClientDisguiseWrapper(new TrackingClientDisguise(entityType), this);
+        return new ModDisguiseWrapper(new TrackingClientDisguise(entityType), this);
     }
 
     @Override
     public DisguiseWrapper<TrackingClientDisguise> createPlayerInstance(String targetPlayerName)
     {
-        var wrapper = new ClientDisguiseWrapper(new TrackingClientDisguise(EntityType.PLAYER), this);
+        var wrapper = new ModDisguiseWrapper(new TrackingClientDisguise(EntityType.PLAYER), this);
         wrapper.setDisguiseName(targetPlayerName);
 
         return wrapper;
@@ -82,7 +81,7 @@ public class ModBackend extends DisguiseBackend<TrackingClientDisguise, ClientDi
     }
 
     @Override
-    public ClientDisguiseWrapper getWrapper(Entity target)
+    public ModDisguiseWrapper getWrapper(Entity target)
     {
         if (!(target instanceof Player player)) return null;
 
@@ -96,24 +95,24 @@ public class ModBackend extends DisguiseBackend<TrackingClientDisguise, ClientDi
      * @return 一个新的属于此后端的Wrapper
      */
     @Override
-    public @NotNull ClientDisguiseWrapper cloneWrapperFrom(DisguiseWrapper<?> otherWrapper)
+    public @NotNull ModDisguiseWrapper cloneWrapperFrom(DisguiseWrapper<?> otherWrapper)
     {
-        return otherWrapper instanceof ClientDisguiseWrapper clientDisguiseWrapper
-                ? cloneWrapper(clientDisguiseWrapper)
+        return otherWrapper instanceof ModDisguiseWrapper modDisguiseWrapper
+                ? cloneWrapper(modDisguiseWrapper)
                 : cloneOther(otherWrapper);
     }
 
-    private ClientDisguiseWrapper cloneWrapper(ClientDisguiseWrapper other)
+    private ModDisguiseWrapper cloneWrapper(ModDisguiseWrapper other)
     {
-        return (ClientDisguiseWrapper) other.clone();
+        return (ModDisguiseWrapper) other.clone();
     }
 
-    private ClientDisguiseWrapper cloneOther(DisguiseWrapper<?> other)
+    private ModDisguiseWrapper cloneOther(DisguiseWrapper<?> other)
     {
-        return ClientDisguiseWrapper.fromExternal(other, this);
+        return ModDisguiseWrapper.fromExternal(other, this);
     }
 
-    private final Map<Player, ClientDisguiseWrapper> playerFallbackWrapperMap = new Object2ObjectOpenHashMap<>();
+    private final Map<Player, ModDisguiseWrapper> playerFallbackWrapperMap = new Object2ObjectOpenHashMap<>();
 
     @Resolved(shouldSolveImmediately = true)
     private ModNetworkingHelper modNetworkingHelper;
@@ -126,7 +125,7 @@ public class ModBackend extends DisguiseBackend<TrackingClientDisguise, ClientDi
     @Override
     public boolean disguise(Player player, DisguiseWrapper<?> rawWrapper)
     {
-        if (!(rawWrapper instanceof ClientDisguiseWrapper wrapper))
+        if (!(rawWrapper instanceof ModDisguiseWrapper wrapper))
             return false;
 
         if (playerFallbackWrapperMap.containsKey(player))
@@ -134,7 +133,7 @@ public class ModBackend extends DisguiseBackend<TrackingClientDisguise, ClientDi
 
         //发送元数据
 
-        var players = new ObjectArrayList<>(Bukkit.getOnlinePlayers());
+        var players = new ObjectArrayList<>(featherMorph().getPlatform().onlinePlayers());
         players.remove(player);
         var cmd = new S2CCRRegisterCommand(player.getEntityId(), wrapper.readPropertyOrThrow(WrapperProperties.DISGUISE_ID));
         players.forEach(p -> clientHandler.sendCommand(p, cmd));
@@ -192,7 +191,7 @@ public class ModBackend extends DisguiseBackend<TrackingClientDisguise, ClientDi
             wrapper.dispose();
 
         var cmd = new S2CCRUnregisterCommand(player.getEntityId());
-        var players = new ObjectArrayList<>(Bukkit.getOnlinePlayers());
+        var players = new ObjectArrayList<>(featherMorph().getPlatform().onlinePlayers());
         players.remove(player);
         players.forEach(p -> clientHandler.sendCommand(p, cmd));
 
@@ -209,7 +208,7 @@ public class ModBackend extends DisguiseBackend<TrackingClientDisguise, ClientDi
      * null if invalid or illegal
      */
     @Override
-    public @Nullable ClientDisguiseWrapper fromOfflineSave(String offlineParameter)
+    public @Nullable ModDisguiseWrapper fromOfflineSave(String offlineParameter)
     {
         return null;
     }
@@ -228,7 +227,7 @@ public class ModBackend extends DisguiseBackend<TrackingClientDisguise, ClientDi
     }
 
     @Override
-    public Collection<ClientDisguiseWrapper> listInstances()
+    public Collection<ModDisguiseWrapper> listInstances()
     {
         return playerFallbackWrapperMap.values();
     }

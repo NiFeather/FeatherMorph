@@ -10,6 +10,7 @@ import xyz.nifeather.morph.network.InitializeState;
 import xyz.nifeather.morph.network.PlayerOptions;
 
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class PlayerSession
 {
@@ -27,7 +28,7 @@ public class PlayerSession
     @NotNull
     public ConnectionState connectionState = ConnectionState.NOT_CONNECTED;
 
-    public final List<String> clientFeatures = ObjectLists.synchronize(new ObjectArrayList<>());
+    public final List<String> clientFeatures = new CopyOnWriteArrayList<>();
 
     public static final class SessionBuilder
     {
@@ -36,7 +37,7 @@ public class PlayerSession
             return new SessionBuilder(player);
         }
 
-        private final List<String> features = new ObjectArrayList<>();
+        private final List<String> features = new CopyOnWriteArrayList<>();
         private final Player bindingPlayer;
 
         public SessionBuilder(Player bindingPlayer)

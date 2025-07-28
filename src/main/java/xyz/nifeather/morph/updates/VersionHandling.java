@@ -39,7 +39,7 @@ public class VersionHandling
 
         public boolean isInvalid()
         {
-            return this == INVALID_VERSION;
+            return this.equals(INVALID_VERSION);
         }
 
         @Override

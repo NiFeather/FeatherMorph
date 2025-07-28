@@ -216,7 +216,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
 
         modifyBoundingBoxes.onValueChanged((o, n) ->
         {
-            var players = Bukkit.getOnlinePlayers();
+            var players = featherMorph().getPlatform().onlinePlayers();
             players.forEach(p -> sendCommand(p, new S2CSetModifyBoundingBoxCommand(n)));
         });
 
@@ -226,7 +226,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
 
         allowClient.onValueChanged((o, n) ->
         {
-            var players = Bukkit.getOnlinePlayers();
+            var players = featherMorph().getPlatform().onlinePlayers();
 
             if (n)
                 players.forEach(this::disconnectThenReAuth);
@@ -536,7 +536,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
                 if (!scheduledReauthPlayers.get()) return;
 
                 scheduledReauthPlayers.set(false);
-                reAuthPlayers(Bukkit.getOnlinePlayers());
+                reAuthPlayers(featherMorph().getPlatform().onlinePlayers());
             }
         });
     }

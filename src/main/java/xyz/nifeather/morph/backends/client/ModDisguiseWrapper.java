@@ -23,15 +23,27 @@ import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 import xyz.nifeather.morph.utilities.NbtUtils;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 
-public class ClientDisguiseWrapper extends EventWrapper<TrackingClientDisguise>
+public class ModDisguiseWrapper extends EventWrapper<TrackingClientDisguise>
 {
-    public ClientDisguiseWrapper(@NotNull TrackingClientDisguise instance, ModBackend backend)
+    private final UUID waypointUUID;
+
+    public ModDisguiseWrapper(@NotNull TrackingClientDisguise instance, ModBackend backend)
     {
         super(instance, backend);
 
         this.backend = backend;
+        this.waypointUUID = UUID.randomUUID();
+    }
+
+    @Override
+    public @NotNull UUID getVirtualEntityUUID()
+    {
+        var val = readPropertyOr(DisguiseProperties.INSTANCE.offTreeProperties().VIRTUAL_ENTITY_UUID, null);
+        return Objects.requireNonNull(val, "VirtualEntityUUID is not set for an instance of ModDisguiseWrapper");
     }
 
     private final ModBackend backend;
@@ -127,7 +139,7 @@ public class ClientDisguiseWrapper extends EventWrapper<TrackingClientDisguise>
         {
             var obj = getCompound().get(path);
 
-            if (obj != null && obj.getType() == type)
+            if (obj != null && obj.getType().equals(type))
                 return (R) obj;
 
             return null;
@@ -177,16 +189,16 @@ public class ClientDisguiseWrapper extends EventWrapper<TrackingClientDisguise>
     @Override
     public DisguiseWrapper<TrackingClientDisguise> clone()
     {
-        var newWrapper = new ClientDisguiseWrapper(this.copyInstance(), (ModBackend) getBackend());
+        var newWrapper = new ModDisguiseWrapper(this.copyInstance(), (ModBackend) getBackend());
 
         newWrapper.instance.disguiseProperties().putAll(this.instance.disguiseProperties());
 
         return newWrapper;
     }
 
-    public static ClientDisguiseWrapper fromExternal(DisguiseWrapper<?> other, ModBackend backend)
+    public static ModDisguiseWrapper fromExternal(DisguiseWrapper<?> other, ModBackend backend)
     {
-        var newWrapper = new ClientDisguiseWrapper(new TrackingClientDisguise(other.getEntityType()), backend);
+        var newWrapper = new ModDisguiseWrapper(new TrackingClientDisguise(other.getEntityType()), backend);
 
         newWrapper.instance.disguiseProperties().putAll(other.getProperties());
 

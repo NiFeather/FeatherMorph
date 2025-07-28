@@ -7,12 +7,8 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xiamomc.pluginbase.Annotations.Resolved;
-import xiamomc.pluginbase.Bindables.Bindable;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
-import xyz.nifeather.morph.config.ConfigOption;
-import xyz.nifeather.morph.config.MorphConfigManager;
 
 import java.util.List;
 import java.util.Map;
@@ -102,16 +98,6 @@ public class RenderRegistry extends MorphPluginObject
         return watcher;
     }
 
-    @Resolved(shouldSolveImmediately = true)
-    private MorphConfigManager config;
-
-    private final Bindable<String> randomBase = new Bindable<>("Stateof");
-
-    public RenderRegistry()
-    {
-        config.bind(randomBase, ConfigOption.UUID_RANDOM_BASE);
-    }
-
     /**
      * 注册玩家的伪装类型
      * @param player 目标玩家
@@ -127,14 +113,6 @@ public class RenderRegistry extends MorphPluginObject
         //设定初始值
         watcher.writeEntry(CustomEntries.DISGUISE_NAME, registerParameters.name());
         watcher.writeEntry(CustomEntries.SPAWN_ID, player.getEntityId());
-
-        var str = randomBase.get()
-                + registerParameters.entityType().toString()
-                + registerParameters.name()
-                + player.getName();
-
-        var virtualEntityUUID = UUID.nameUUIDFromBytes(str.getBytes());
-        watcher.writeEntry(CustomEntries.SPAWN_UUID, virtualEntityUUID);
 
         watcherConsumer.accept(watcher);
 

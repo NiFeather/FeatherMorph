@@ -12,12 +12,13 @@ import xyz.nifeather.morph.storage.skill.ISkillOption;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class AttributeModifyOption implements ISkillOption
 {
     @Expose
     @SerializedName("modifiers")
-    public List<AttributeInfo> modifiers = new ObjectArrayList<>();
+    public List<AttributeInfo> modifiers = new CopyOnWriteArrayList<>();
 
     public boolean isValid()
     {

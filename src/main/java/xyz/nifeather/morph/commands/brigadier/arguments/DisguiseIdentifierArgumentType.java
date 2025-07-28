@@ -22,6 +22,7 @@ import xyz.nifeather.morph.misc.DisguiseMeta;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 @SuppressWarnings("UnstableApiUsage")
@@ -123,7 +124,7 @@ public class DisguiseIdentifierArgumentType extends MorphPluginObject implements
 
             for (var p : MorphManager.getProviders())
             {
-                if (p == MorphManager.fallbackProvider) continue;
+                if (Objects.equals(p, MorphManager.fallbackProvider)) continue;
 
                 var providerNamespace = p.getNameSpace();
                 p.getAllAvailableDisguises().forEach(path ->

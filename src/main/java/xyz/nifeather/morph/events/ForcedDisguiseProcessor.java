@@ -32,7 +32,7 @@ public class ForcedDisguiseProcessor extends MorphPluginObject implements Listen
                 logger.info("Config changed, re-disguising players...");
                 this.addSchedule(() ->
                 {
-                    var players = Bukkit.getOnlinePlayers();
+                    var players = featherMorph().getPlatform().onlinePlayers();
                     players.forEach(p -> this.doDisguise(p, n));
                 });
             }

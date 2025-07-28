@@ -14,6 +14,7 @@ import xyz.nifeather.morph.misc.waypoint.connection.MorphAzimuthWaypointConnecti
 import xyz.nifeather.morph.misc.waypoint.connection.MorphBlockConnection;
 import xyz.nifeather.morph.misc.waypoint.connection.MorphChunkConnection;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -54,7 +55,7 @@ public class WaypointUpdater implements WaypointTransmitter
         return true;
     }
 
-    private final List<IMorphWaypointConnection> realtimeConnections = new ObjectArrayList<>();
+    private final List<IMorphWaypointConnection> realtimeConnections = Collections.synchronizedList(new ObjectArrayList<>());
 
     public void updateRealtimeConnections()
     {
@@ -80,12 +81,12 @@ public class WaypointUpdater implements WaypointTransmitter
 
         var player = NmsRecord.ofPlayer(getPlayer());
 
-        if (player == target)
+        if (player.equals(target))
             return Optional.empty();
 
         var icon = waypointIcon();
 
-        FeatherMorphMain.getInstance().getSLF4JLogger().info("Getting new instance");
+        //FeatherMorphMain.getInstance().getSLF4JLogger().info("Getting new instance");
 
         if (WaypointTransmitter.isReallyFar(player, target))
         {
@@ -126,8 +127,8 @@ public class WaypointUpdater implements WaypointTransmitter
     @Override
     public String toString()
     {
-        var pl = bindingState.tryGetPlayer();
-        String playerString = pl == null ? bindingState.getPlayerUUID().toString() : pl.getName();
+        var pl = bindingState.getPlayer();
+        String playerString = pl.getName();
         return "(Disguise Waypoint for %s)@%s".formatted(playerString, Integer.toHexString(hashCode()));
     }
 }

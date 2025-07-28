@@ -60,6 +60,7 @@ import xiamomc.pluginbase.Bindables.BindableList;
 import java.io.InvalidObjectException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MorphManager extends MorphPluginObject implements IManagePlayerData
@@ -248,12 +249,11 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         config.bind(allowHeadMorph, ConfigOption.ALLOW_HEAD_MORPH);
         config.bind(allowAcquireMorph, ConfigOption.ALLOW_ACQUIRE_MORPHS);
         config.bind(useClientRenderer, ConfigOption.USE_CLIENT_RENDERER);
+        config.bind(uuidRandomBaseString, ConfigOption.UUID_RANDOM_BASE);
 
         registerProviders(ObjectList.of(
                 new VanillaDisguiseProvider(),
                 new PlayerDisguiseProvider(),
-                //new ItemDisplayProvider(),
-                //new LocalDisguiseProvider(),
                 fallbackProvider
         ));
 
@@ -278,7 +278,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         states.forEach(state ->
         {
-            var p = state.tryGetPlayer();
+            var p = state.getPlayer();
 
             if (p == null) return;
 
@@ -388,7 +388,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
     //region 伪装提供器
 
-    private static final List<DisguiseProvider> providers = new ObjectArrayList<>();
+    private static final List<DisguiseProvider> providers = new CopyOnWriteArrayList<>();
 
     public static List<DisguiseProvider> getProviders()
     {
@@ -457,6 +457,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
     private final Bindable<Boolean> allowAcquireMorph = new Bindable<>(true);
     private final Bindable<Boolean> useClientRenderer = new Bindable<>(false);
+
+    private final Bindable<String> uuidRandomBaseString = new Bindable<>("???");
 
     /**
      * 尝试调用快速伪装
@@ -624,7 +626,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         try
         {
-            var meta = preDisguise(parameters);
+            var meta = prepareDisguiseMeta(parameters);
             if (meta == null)
                 return false;
 
@@ -688,7 +690,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
      * @return 一个DisguiseMeta，如果构建失败则返回Null
      */
     @Nullable
-    private DisguiseMeta preDisguise(MorphParameters parameters)
+    private DisguiseMeta prepareDisguiseMeta(MorphParameters parameters)
     {
         // 确保source不为null
         var source = parameters.commandSource == null ? nilCommandSource : parameters.commandSource;
@@ -776,7 +778,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         var provider = getProvider(strippedKey[0]);
 
-        if (provider == MorphManager.fallbackProvider) // 如果没找到provider
+        if (provider.equals(MorphManager.fallbackProvider)) // 如果没找到provider
             return VALIDATE_NO_PROVIDER;
         else if (!provider.isValid(disguiseIdentifier)) // 如果provider不认识这个ID
             return VALIDATE_PROVIDER_FAIL;
@@ -946,6 +948,14 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         provider.onPostConstructDisguise(state, targetEntity);
         wrapper.onPostConstructDisguise(state, targetEntity);
 
+        // 设定初始属性
+        var str = uuidRandomBaseString.get()
+                + parameters.targetDisguiseIdentifier()
+                + player.getName();
+
+        var virtualEntityUUID = UUID.nameUUIDFromBytes(str.getBytes());
+        wrapper.writeProperty(DisguiseProperties.INSTANCE.offTreeProperties().VIRTUAL_ENTITY_UUID, virtualEntityUUID);
+
         SkillCooldownInfo cdInfo;
 
         //获取与技能对应的CDInfo
@@ -1058,7 +1068,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         var disguiseMeta = result.meta();
 
         // 消息源是否为玩家自己
-        var isDirect = source == player;
+        var isDirect = source.equals(player);
 
         // 返回消息
         var playerLocale = MessageUtils.getLocale(source);
@@ -1244,7 +1254,9 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         // 获取当前伪装状态
         var state = activeDisguises.stream()
-                .filter(i -> i.getPlayer().getUniqueId().equals(player.getUniqueId())).findFirst().orElse(null);
+                .filter(s -> s.getPlayer().getUniqueId().equals(player.getUniqueId()))
+                .findFirst()
+                .orElse(null);
 
         // 如果当前没有状态，则不做任何事
         if (state == null)
@@ -1393,7 +1405,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         if (player == null) return null;
 
         return this.activeDisguises.stream()
-                .filter(i -> !i.disposed() && i.applyPlayer(p -> p != null && p.getUniqueId().equals(player.getUniqueId())))
+                .filter(i -> !i.disposed() && i.getPlayer().getUniqueId().equals(player.getUniqueId()))
                 .findFirst().orElse(null);
     }
 
@@ -1441,7 +1453,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         var playerMeta = getPlayerMeta(state.getPlayer());
         var parameters = MorphParameters.create(state.getPlayer(), state.getDisguiseIdentifier());
 
-        if (this.preDisguise(parameters) == null)
+        if (this.prepareDisguiseMeta(parameters) == null)
             return false;
 
         this.buildDisguise(result, parameters, playerMeta);
@@ -1464,7 +1476,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     {
         try
         {
-            if (player.getUniqueId() == offlineState.playerUUID)
+            if (player.getUniqueId().equals(offlineState.playerUUID))
             {
                 logger.error("OfflineState UUID mismatch: %s <-> %s".formatted(player.getUniqueId(), offlineState.playerUUID));
                 return OfflineDisguiseResult.FAIL;
@@ -1523,16 +1535,17 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     //region Implementation of IManagePlayerData
 
     @Override
-    @NotNull
+    @Nullable
     public DisguiseMeta getDisguiseMeta(String rawString)
     {
         return data.getDisguiseMeta(rawString);
     }
 
     @Override
-    public ObjectArrayList<DisguiseMeta> getAvaliableDisguisesFor(Player player)
+    public List<DisguiseMeta> getAvaliableDisguisesFor(Player player)
     {
-        return data.getAvaliableDisguisesFor(player);
+        var avail = data.getAvaliableDisguisesFor(player);
+        return avail == null ? new ObjectArrayList<>() : avail;
     }
 
     @Override
@@ -1550,6 +1563,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         var locale = MessageUtils.getLocale(player);
 
         var meta = data.getDisguiseMeta(disguiseIdentifier);
+        if (meta == null)
+            return false;
 
         var message = MessageUtils.prefixes(player, MorphStrings.morphUnlockedString()
                 .withLocale(locale)
@@ -1614,7 +1629,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
     public void refreshDisguiseUnlockStateToAllPlayers()
     {
-        Bukkit.getOnlinePlayers().forEach(p -> clientHandler.refreshPlayerClientMorphs(this.getPlayerMeta(p).getUnlockedDisguiseIdentifiers(), p));
+        featherMorph().getPlatform().onlinePlayers().forEach(p -> clientHandler.refreshPlayerClientMorphs(this.getPlayerMeta(p).getUnlockedDisguiseIdentifiers(), p));
     }
 
     @Override
@@ -1649,7 +1664,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             this.scheduleOn(player, () ->
             {
                 var parameter = MorphParameters.create(player, s.getDisguiseIdentifier());
-                if (this.preDisguise(parameter) == null)
+                if (this.prepareDisguiseMeta(parameter) == null)
                     return;
 
                 if (disguiseFromState(s))

@@ -316,10 +316,8 @@ public abstract class DisguiseWrapper<TInstance>
     /**
      * @return Empty Optional if not available
      */
-    public Optional<UUID> getVirtualEntityUUID()
-    {
-        return Optional.empty();
-    }
+    @NotNull
+    public abstract UUID getVirtualEntityUUID();
 
     private final AtomicBoolean disposed = new AtomicBoolean(false);
 
@@ -358,7 +356,7 @@ public abstract class DisguiseWrapper<TInstance>
 
     //endregion
 
-    public abstract  <X> void writeProperty(SingleProperty<X> property, X value);
+    public abstract <X> void writeProperty(SingleProperty<X> property, X value);
 
     /**
      * @return 与此Property对应的值，如果没有设定则返回默认值

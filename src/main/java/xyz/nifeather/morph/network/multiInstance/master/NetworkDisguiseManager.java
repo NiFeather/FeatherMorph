@@ -7,11 +7,12 @@ import xyz.nifeather.morph.misc.DisguiseMeta;
 import xyz.nifeather.morph.misc.DisguiseTypes;
 import xyz.nifeather.morph.storage.playerdata.PlayerMeta;
 
+import java.util.Collections;
 import java.util.List;
 
 public class NetworkDisguiseManager extends MorphPluginObject
 {
-    private final List<PlayerMeta> storedMeta = new ObjectArrayList<>();
+    private final List<PlayerMeta> storedMeta = Collections.synchronizedList(new ObjectArrayList<>());
 
     public List<PlayerMeta> listAllMeta()
     {
@@ -33,7 +34,7 @@ public class NetworkDisguiseManager extends MorphPluginObject
         return newInstance;
     }
 
-    private final List<DisguiseMeta> cachedMetas = new ObjectArrayList<>();
+    private final List<DisguiseMeta> cachedMetas = Collections.synchronizedList(new ObjectArrayList<>());
 
     public DisguiseMeta getDisguiseMeta(String rawString)
     {
@@ -57,13 +58,13 @@ public class NetworkDisguiseManager extends MorphPluginObject
             {
                 var newInstance = new PlayerMeta();
                 newInstance.uniqueId = otherMeta.uniqueId;
-                newInstance.getUnlockedDisguiseIdentifiers().addAll(otherMeta.getUnlockedDisguiseIdentifiers());
+                newInstance.addUnlockedDisguiseIdentifier(otherMeta.getUnlockedDisguiseIdentifiers());
                 storedMeta.add(newInstance);
 
                 continue;
             }
 
-            match.getUnlockedDisguiseIdentifiers().addAll(otherMeta.getUnlockedDisguiseIdentifiers());
+            match.addUnlockedDisguiseIdentifier(other.getFirst().getUnlockedDisguiseIdentifiers());
         }
     }
 }

@@ -16,6 +16,7 @@ import xyz.nifeather.morph.utilities.ItemUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
@@ -62,7 +63,7 @@ public abstract class ChainedExecutor extends AbstractExecutor
             // 这样可能会导致以下情况的发生：
             //
             // 玩家A点击左键 -> 被加入模拟链条 -> 触发A的模拟 -> 继续被加入新的模拟链条
-            if (pl != first)
+            if (!Objects.equals(pl, first))
                 chainConsumer.accept(pl);
         });
 

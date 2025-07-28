@@ -23,8 +23,12 @@ import org.slf4j.LoggerFactory;
 import xyz.nifeather.morph.FeatherMorphMain;
 
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 public class NmsUtils
@@ -54,7 +58,7 @@ public class NmsUtils
         return ((CraftWorld)world).getHandle();
     }
 
-    private final static Map<EntityType, List<String>> syncableAttributesMap = new Object2ObjectArrayMap<>();
+    private final static Map<EntityType, List<String>> syncableAttributesMap = new ConcurrentHashMap<>();
 
     public static List<AttributeInstance> getValidAttributes(EntityType targetType, AttributeMap mapToLookup)
     {
@@ -132,9 +136,9 @@ public class NmsUtils
                             && !instance.getAttribute().getRegisteredName().equals("[unregistered]");
                 })
                 .map(instance -> instance.getAttribute().getRegisteredName())
-                .collect(Collectors.toCollection(ObjectArrayList::new));
+                .collect(Collectors.toCollection(ArrayList::new));
 
-        syncableAttributesMap.put(bukkitType, ObjectLists.unmodifiable(validAttributes));
+        syncableAttributesMap.put(bukkitType, Collections.synchronizedList(validAttributes));
 
         return validAttributes;
     }

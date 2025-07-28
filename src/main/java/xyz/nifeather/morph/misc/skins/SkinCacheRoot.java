@@ -4,11 +4,12 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 
+import java.util.Collections;
 import java.util.List;
 
 public class SkinCacheRoot
 {
     @Expose
     @SerializedName("profiles")
-    public List<SingleSkin> storedSkins = new ObjectArrayList<>();
+    public List<SingleSkin> storedSkins = Collections.synchronizedList(new ObjectArrayList<>());
 }

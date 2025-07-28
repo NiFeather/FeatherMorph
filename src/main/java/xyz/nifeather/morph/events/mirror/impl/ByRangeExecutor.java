@@ -11,6 +11,7 @@ import xyz.nifeather.morph.misc.NmsRecord;
 import xyz.nifeather.morph.storage.mirrorlogging.OperationType;
 
 import java.util.List;
+import java.util.Objects;
 
 public class ByRangeExecutor extends ChainedExecutor
 {
@@ -45,7 +46,7 @@ public class ByRangeExecutor extends ChainedExecutor
         String finalTargetName = targetName;
         var matchedPlayers = source.getWorld().getNearbyPlayers(source.getLocation(), controlDistance, p ->
         {
-            if (p == source)
+            if (Objects.equals(p, source))
                 return false;
 
             if (NmsRecord.ofPlayer(p).gameMode.getGameModeForPlayer() ==GameType.SPECTATOR)

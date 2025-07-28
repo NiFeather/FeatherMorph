@@ -8,6 +8,8 @@ import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEnt
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntry;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 
+import java.util.Objects;
+
 public class PhantomWatcher extends LivingEntityWatcher
 {
     public PhantomWatcher(Player bindingPlayer)
@@ -26,7 +28,7 @@ public class PhantomWatcher extends LivingEntityWatcher
     @Override
     public <X> @Nullable X readEntry(CustomEntry<X> entry)
     {
-        if (entry == CustomEntries.OVERLAYED_PITCH)
+        if (Objects.equals(entry, CustomEntries.OVERLAYED_PITCH))
             return (X) Float.valueOf(-getBindingPlayer().getPitch());
 
         return super.readEntry(entry);

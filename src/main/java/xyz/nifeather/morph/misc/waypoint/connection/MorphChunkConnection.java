@@ -33,7 +33,7 @@ public class MorphChunkConnection implements WaypointTransmitter.Connection
     @Override
     public void connect()
     {
-        var uuid = bindingState.getDisguiseWrapper().getVirtualEntityUUID().orElseThrow();
+        var uuid = bindingState.getDisguiseWrapper().getVirtualEntityUUID();
         var player = NmsRecord.ofPlayer(bindingState.getPlayer());
         this.receiver.connection.send(ClientboundTrackedWaypointPacket.addWaypointChunk(uuid, this.icon, player.chunkPosition()));
     }
@@ -41,7 +41,7 @@ public class MorphChunkConnection implements WaypointTransmitter.Connection
     @Override
     public void disconnect()
     {
-        var uuid = bindingState.getDisguiseWrapper().getVirtualEntityUUID().orElseThrow();
+        var uuid = bindingState.getDisguiseWrapper().getVirtualEntityUUID();
         this.receiver.connection.send(ClientboundTrackedWaypointPacket.removeWaypoint(uuid));
     }
 
@@ -53,7 +53,7 @@ public class MorphChunkConnection implements WaypointTransmitter.Connection
         if (chunkPos.getChessboardDistance(this.lastPosition) <= 0)
             return;
 
-        var uuid = bindingState.getDisguiseWrapper().getVirtualEntityUUID().orElseThrow();
+        var uuid = bindingState.getDisguiseWrapper().getVirtualEntityUUID();
         this.receiver.connection.send(ClientboundTrackedWaypointPacket.updateWaypointChunk(uuid, this.icon, chunkPos));
         this.lastPosition = chunkPos;
     }

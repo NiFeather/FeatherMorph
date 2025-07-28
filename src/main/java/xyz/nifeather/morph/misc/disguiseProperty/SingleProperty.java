@@ -1,10 +1,12 @@
 package xyz.nifeather.morph.misc.disguiseProperty;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class SingleProperty<T>
 {
@@ -34,8 +36,9 @@ public class SingleProperty<T>
         this.type = type;
     }
 
-    private final List<String> validValues = new ObjectArrayList<>();
+    private final List<String> validValues = new CopyOnWriteArrayList<>();
 
+    @Unmodifiable
     public List<String> validInputs()
     {
         return new ObjectArrayList<>(validValues);
@@ -54,8 +57,9 @@ public class SingleProperty<T>
         return this;
     }
 
-    private final List<T> randomValues = new ObjectArrayList<>();
+    private final List<T> randomValues = new CopyOnWriteArrayList<>();
 
+    @Unmodifiable
     public List<T> getRandomValues()
     {
         return new ObjectArrayList<>(randomValues);

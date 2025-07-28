@@ -12,6 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class DamageSourceUtils
 {
@@ -53,7 +54,7 @@ public class DamageSourceUtils
             return false;
         }
 
-        public final List<TagKey<DamageType>> tags = new ObjectArrayList<>();
+        public final List<TagKey<DamageType>> tags = new CopyOnWriteArrayList<>();
 
         @Override
         public boolean is(@NotNull TagKey<DamageType> tag)

@@ -24,6 +24,7 @@ import xyz.nifeather.morph.utilities.NbtUtils;
 import xiamomc.pluginbase.Annotations.Resolved;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -122,7 +123,7 @@ public class HealsFromEntityAbility extends MorphAbility<HealsFromEntityOption>
 
                     var sources = nmsRecord.nmsWorld().damageSources();
 
-                    var source = beamTarget.getType() == EntityType.END_CRYSTAL
+                    var source = beamTarget.getType().equals(EntityType.END_CRYSTAL)
                             ? sources.explosion(beamTarget, damager)
                             : new DamageSource(sources.magic().typeHolder(), beamTarget, damager);
 
@@ -146,7 +147,7 @@ public class HealsFromEntityAbility extends MorphAbility<HealsFromEntityOption>
 
             var newEntity = findEntity(nmsRecord, nmsType, option.distance, option.entityType);
 
-            if (beamTarget != newEntity)
+            if (!Objects.equals(beamTarget, newEntity))
             {
                 state.setSessionData(PROPERTY_ID, newEntity);
 

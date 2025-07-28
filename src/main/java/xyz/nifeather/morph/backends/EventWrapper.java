@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 public abstract class EventWrapper<TInstance> extends DisguiseWrapper<TInstance>
@@ -40,7 +41,7 @@ public abstract class EventWrapper<TInstance> extends DisguiseWrapper<TInstance>
             eventListMap.put(wrapperEvent, list);
         }
 
-        if (list.stream().noneMatch(ar -> ar.source() == source))
+        if (list.stream().noneMatch(ar -> Objects.equals(ar.source(), source)))
             list.add(new ActionRecord<>(source, c));
     }
 
@@ -50,7 +51,7 @@ public abstract class EventWrapper<TInstance> extends DisguiseWrapper<TInstance>
         var list = eventListMap.getOrDefault(wrapperEvent, null);
         if (list == null) return;
 
-        list.removeIf(ar -> ar.source() == source);
+        list.removeIf(ar -> Objects.equals(ar.source(), source));
     }
 
     @Override

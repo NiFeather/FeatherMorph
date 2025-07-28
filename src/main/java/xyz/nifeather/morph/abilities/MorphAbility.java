@@ -9,15 +9,12 @@ import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.storage.skill.ISkillOption;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Predicate;
 
 public abstract class MorphAbility<T extends ISkillOption> extends MorphPluginObject implements IMorphAbility<T>
 {
-    private final List<UUID> appliedPlayers = new ObjectArrayList<>();
+    private final List<UUID> appliedPlayers = Collections.synchronizedList(new ObjectArrayList<>());
 
     protected boolean requireValidOption()
     {

@@ -99,7 +99,7 @@ public class LookupSubCommand extends BrigadierCommand
         }
         else
         {
-            matches = configuration.getUnlockedDisguiseIdentifiers().clone();
+            matches = configuration.getUnlockedDisguiseIdentifiers();
         }
 
         sender.sendMessage(MessageUtils.prefixes(sender, CommandStrings.lookupFilterCommand()));

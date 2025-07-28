@@ -70,20 +70,6 @@ public class OfflineStateStore extends MorphJsonBasedStorage<OfflineStateContain
         {
             storingObject.disguiseStates.remove(state);
 
-            if (state.disguiseData != null)
-            {
-                try
-                {
-                    //todo: 是否要保留离线伪装?
-                    //state.disguise = DisguiseParser.parseDisguise(state.disguiseData);
-                }
-                catch (Throwable e)
-                {
-                    logger.warn("无法从数据创建伪装：" + e.getMessage());
-                    e.printStackTrace();
-                }
-            }
-
             saveConfiguration();
 
             return state;

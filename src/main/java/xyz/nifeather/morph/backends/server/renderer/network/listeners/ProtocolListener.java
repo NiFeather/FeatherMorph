@@ -31,32 +31,10 @@ public abstract class ProtocolListener extends MorphPluginObject implements Pack
     @Nullable
     protected Player getPlayerFrom(int id)
     {
-        //if (!TickThread.isTickThread())
-        //    logger.warn("Not on a tick thread! Caution for exceptions!");
-
-        return Bukkit.getOnlinePlayers().stream()
+        return featherMorph().getPlatform().onlinePlayers()
+                .stream()
                 .filter(p -> p.getEntityId() == id)
                 .findFirst()
                 .orElse(null);
-
-        // Bukkit.getOnlinePlayers() 会将正前往不同维度的玩家从列表里移除
-        // 因此我们需要在每个世界都手动查询一遍
-        // 2024/4/7: Seems no longer an issue after migrate to packetevents.
-        /*for (var world : Bukkit.getWorlds())
-        {
-            // For performance, we use NMS instead of CraftWorld
-            var nmsWorld = NmsUtils.getNmsLevel(world);
-            var worldPlayers = nmsWorld.players();
-
-            var match = worldPlayers.stream()
-                    .filter(p -> p.getId() == id)
-                    .findFirst()
-                    .orElse(null);
-
-            if (match != null)
-                return match;
-        }
-
-        return null;*/
     }
 }

@@ -32,6 +32,8 @@ import xyz.nifeather.morph.misc.integrations.placeholderapi.PlaceholderIntegrati
 import xyz.nifeather.morph.misc.integrations.residence.ResidenceEventProcessor;
 import xyz.nifeather.morph.network.multiInstance.MultiInstanceService;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
+import xyz.nifeather.morph.platform.IPlatform;
+import xyz.nifeather.morph.platform.impl.PaperPlatform;
 import xyz.nifeather.morph.skills.MorphSkillHandler;
 import xyz.nifeather.morph.storage.skill.SkillsConfigurationStoreNew;
 import xyz.nifeather.morph.transforms.Transformer;
@@ -47,6 +49,13 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
     private static FeatherMorphMain instance;
     private final Bindable<Boolean> debugOutput = new Bindable<>(false);
 
+    private final IPlatform currentPlatform;
+
+    public IPlatform getPlatform()
+    {
+        return currentPlatform;
+    }
+
     /**
      * 仅当当前对象无法继承MorphPluginObject或不需要完全继承MorphPluginObject时使用
      * @return 插件的实例
@@ -59,6 +68,8 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
     public FeatherMorphMain()
     {
         instance = this;
+
+        currentPlatform = new PaperPlatform();
 
         boolean folia = false;
         try
@@ -286,7 +297,7 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
         {
             registerListeners(listeners);
 
-            clientHandler.reAuthPlayers(Bukkit.getOnlinePlayers());
+            clientHandler.reAuthPlayers(getPlatform().onlinePlayers());
             dependencyManager.cache(new FeatherMorphAPI(this));
         });
 

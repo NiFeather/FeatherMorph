@@ -127,9 +127,6 @@ public class DisguiseMeta
      */
     public String getKey()
     {
-        if (!this.isValid())
-            return rawIdentifier;
-
         return rawIdentifier;
     }
 

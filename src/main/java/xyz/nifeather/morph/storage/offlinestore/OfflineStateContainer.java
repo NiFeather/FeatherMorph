@@ -4,9 +4,10 @@ import com.google.gson.annotations.Expose;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class OfflineStateContainer
 {
     @Expose
-    public List<OfflineDisguiseState> disguiseStates = new ObjectArrayList<>();
+    public List<OfflineDisguiseState> disguiseStates = new CopyOnWriteArrayList<>();
 }

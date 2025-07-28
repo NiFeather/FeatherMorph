@@ -62,7 +62,7 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
     @Override
     public boolean allowSwitchingWithoutUndisguise(DisguiseProvider other, DisguiseMeta meta)
     {
-        return other.getPreferredBackend() == this.getPreferredBackend()
+        return other.getPreferredBackend().equals(this.getPreferredBackend())
                 && (meta.getDisguiseType() == DisguiseTypes.VANILLA || meta.getDisguiseType() == DisguiseTypes.PLAYER);
     }
 
@@ -195,7 +195,7 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
     @Override
     public List<String> getAllAvailableDisguises()
     {
-        var onlinePlayers = Bukkit.getOnlinePlayers();
+        var onlinePlayers = featherMorph().getPlatform().onlinePlayers();
 
         var list = new ObjectArrayList<String>();
         onlinePlayers.forEach(p -> list.add(p.getName()));

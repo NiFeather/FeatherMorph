@@ -18,6 +18,7 @@ import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xyz.nifeather.morph.MorphPluginObject;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -60,7 +61,7 @@ public class PlayerTracker extends MorphPluginObject implements Listener
     }
 
     private final Map<Player, Action> lastRightClick = new Object2ObjectOpenHashMap<>();
-    private final List<Player> duplicatedRCs = new ObjectArrayList<>();
+    private final List<Player> duplicatedRCs = Collections.synchronizedList(new ObjectArrayList<>());
 
     public boolean isDuplicatedRightClick(Player player)
     {
@@ -86,8 +87,6 @@ public class PlayerTracker extends MorphPluginObject implements Listener
 
                 case RIGHT_CLICK_AIR, RIGHT_CLICK_ENTITY -> Action.RIGHT_CLICK_AIR;
                 case RIGHT_CLICK_BLOCK -> Action.RIGHT_CLICK_BLOCK;
-
-                default -> throw new RuntimeException(this + " 不能转化为任何一个已知的 BukkitAction");
             };
         }
 

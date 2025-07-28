@@ -9,6 +9,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class SocketPlayerMeta
 {
@@ -22,7 +23,7 @@ public class SocketPlayerMeta
     }
 
     @Expose
-    private List<String> identifiers = new ObjectArrayList<>();
+    private List<String> identifiers = new CopyOnWriteArrayList<>();
 
     public List<String> getIdentifiers()
     {

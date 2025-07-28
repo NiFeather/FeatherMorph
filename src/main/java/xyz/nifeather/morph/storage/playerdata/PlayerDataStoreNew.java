@@ -147,7 +147,7 @@ public class PlayerDataStoreNew extends DirectoryJsonBasedStorage<PlayerMeta> im
      * @return 目标玩家拥有的伪装
      */
     @Override
-    public ObjectArrayList<DisguiseMeta> getAvaliableDisguisesFor(Player player)
+    public List<DisguiseMeta> getAvaliableDisguisesFor(Player player)
     {
         return getPlayerMeta(player).getUnlockedDisguises();
     }
@@ -208,7 +208,7 @@ public class PlayerDataStoreNew extends DirectoryJsonBasedStorage<PlayerMeta> im
 
     private boolean isDefaultMeta(@Nullable PlayerMeta meta)
     {
-        return meta == null || meta == defaultMeta;
+        return meta == null || meta.equals(defaultMeta);
     }
 
     /**
@@ -259,7 +259,7 @@ public class PlayerDataStoreNew extends DirectoryJsonBasedStorage<PlayerMeta> im
         var list = new ObjectArrayList<DisguiseMeta>();
 
         //原始列表
-        var unlockedDisguiseIdentifiers = meta.getUnlockedDisguiseIdentifiers();
+        var unlockedDisguiseIdentifiers = new ObjectArrayList<>(meta.getUnlockedDisguiseIdentifiers());
 
         //先对原始列表排序
         unlockedDisguiseIdentifiers.sort(null);
@@ -277,7 +277,6 @@ public class PlayerDataStoreNew extends DirectoryJsonBasedStorage<PlayerMeta> im
 
         //设置可用的伪装列表并对其加锁
         meta.setUnlockedDisguises(list);
-        meta.lockDisguiseList();
     }
 
     @Override

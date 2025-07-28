@@ -11,6 +11,8 @@ import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 import xyz.nifeather.morph.misc.disguiseProperty.values.EnderDragonProperties;
 
+import java.util.Objects;
+
 public class EnderDragonWatcher extends LivingEntityWatcher
 {
     public EnderDragonWatcher(Player bindingPlayer)
@@ -33,7 +35,7 @@ public class EnderDragonWatcher extends LivingEntityWatcher
     @Override
     protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
-        if (property == properties.DRAGON_PHASE)
+        if (Objects.equals(property, properties.DRAGON_PHASE))
             this.writePersistent(ValueIndex.ENDER_DRAGON.DRAGON_PHASE, (Integer) value);
 
         super.onPropertyWrite(property, value);
@@ -59,7 +61,7 @@ public class EnderDragonWatcher extends LivingEntityWatcher
     @Override
     public <X> @Nullable X readEntry(CustomEntry<X> entry)
     {
-        if (entry == CustomEntries.OVERLAYED_YAW)
+        if (Objects.equals(entry, CustomEntries.OVERLAYED_YAW))
             return (X) Float.valueOf(180f + getBindingPlayer().getYaw());
 
         return super.readEntry(entry);

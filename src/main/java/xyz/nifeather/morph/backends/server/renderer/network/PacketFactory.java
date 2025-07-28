@@ -9,6 +9,7 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.EntityEquipment;
+import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
@@ -91,7 +92,10 @@ public class PacketFactory extends MorphPluginObject
 
         var abs = Math.abs(wrapper.getEntityId());
 
-        var playerFound = Bukkit.getOnlinePlayers().stream()
+        var playerFound = FeatherMorphMain.getInstance()
+                .getPlatform()
+                .onlinePlayers()
+                .stream()
                 .filter(p -> p.getEntityId() == abs)
                 .findFirst()
                 .orElse(null);

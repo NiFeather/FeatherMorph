@@ -75,10 +75,10 @@ public class SonicBoomMorphSkill extends DelayedMorphSkill<NoOpConfiguration>
             {
                 var record = NmsRecord.of(player, entity);
                 var nmsPlayer = record.nmsPlayer();
-                var nmsEntity = (LivingEntity)record.nmsEntity();
+                var nmsEntity = NmsRecord.ofLiving(entity);
                 var sources = record.nmsWorld().damageSources();
 
-                nmsEntity.hurt(DamageSourceUtils.toNotScalable(sources.sonicBoom(nmsPlayer)), 10.0F);
+                nmsEntity.hurtServer(record.nmsWorld(), DamageSourceUtils.toNotScalable(sources.sonicBoom(nmsPlayer)), 10.0F);
 
                 //From SonicBoom
                 double d = 0.5D * (1.0D - nmsEntity.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE));
@@ -86,8 +86,6 @@ public class SonicBoomMorphSkill extends DelayedMorphSkill<NoOpConfiguration>
                 nmsEntity.push(direction.getX() * e,
                         direction.getY() * d,
                         direction.getZ() * e, nmsPlayer); // Paper
-
-                entity = null;
             }
 
             world.spawnParticle(Particle.SONIC_BOOM, locNew.getX(), locNew.getY(), locNew.getZ(), 1, null);

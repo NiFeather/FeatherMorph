@@ -11,6 +11,8 @@ import org.bukkit.event.entity.EntityTargetEvent;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.utilities.EntityTypeUtils;
 
+import java.util.Objects;
+
 /**
  * 此Goal将被添加到生物，作为附加的TargetGoal执行。
  */
@@ -32,7 +34,7 @@ public class FeatherMorphNearestAttackableGoal extends NearestAttackableTargetGo
         var mobTarget = this.mob.getTarget();
 
         // 检查当前生物是否在target我们的目标
-        return mobTarget == null || mobTarget == this.target;
+        return mobTarget == null || mobTarget.equals(this.target);
     }
 
     @Override
@@ -71,7 +73,7 @@ public class FeatherMorphNearestAttackableGoal extends NearestAttackableTargetGo
         // 玩家超过跟随距离
         // 玩家不在线
         // 玩家不是生存模式
-        cancelTarget = (this.mob.level() != this.target.level());
+        cancelTarget = (!this.mob.level().equals(this.target.level()));
         cancelTarget = cancelTarget || (this.mob.distanceTo(this.target) > followRange);
         cancelTarget = cancelTarget || playerTarget != null && !playerTarget.isOnline();
         cancelTarget = cancelTarget || !((ServerPlayer)target).gameMode.isSurvival();
@@ -120,7 +122,7 @@ public class FeatherMorphNearestAttackableGoal extends NearestAttackableTargetGo
     @Override
     public void start()
     {
-        if (mob.getTarget() == this.target)
+        if (Objects.equals(mob.getTarget(), this.target))
             return;
 
         super.start();

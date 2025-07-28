@@ -88,7 +88,7 @@ public class ItemUtils
         if (stack.getType().isAir()) return "{\"id\":\"minecraft:air\",\"Count\":3}";
 
         //NOTE: 1.20.6需要访问世界注册表来获取JsonOps的序列化上下文来完整地反序列化ItemStack
-        var registry = ((CraftWorld)Bukkit.getWorlds().stream().findFirst().get()).getHandle().registryAccess();
+        var registry = ((CraftWorld)Bukkit.getWorlds().stream().findFirst().orElseThrow()).getHandle().registryAccess();
 
         //CODEC
         var nmsCodec = net.minecraft.world.item.ItemStack.CODEC;

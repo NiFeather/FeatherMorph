@@ -358,4 +358,4 @@ root:
       - SelectedItem
 
   # Do not touch unless you know what you're doing!
-  version: 40
+  version: 42
