@@ -60,6 +60,7 @@ import xiamomc.pluginbase.Bindables.BindableList;
 import java.io.InvalidObjectException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MorphManager extends MorphPluginObject implements IManagePlayerData
@@ -387,7 +388,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
     //region 伪装提供器
 
-    private static final List<DisguiseProvider> providers = new ObjectArrayList<>();
+    private static final List<DisguiseProvider> providers = new CopyOnWriteArrayList<>();
 
     public static List<DisguiseProvider> getProviders()
     {

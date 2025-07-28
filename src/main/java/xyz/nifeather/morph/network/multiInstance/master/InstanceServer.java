@@ -11,6 +11,7 @@ import xyz.nifeather.morph.network.multiInstance.protocol.IInstanceClientHandler
 
 import java.net.InetSocketAddress;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public final class InstanceServer extends WebSocketServer
 {
@@ -45,7 +46,7 @@ public final class InstanceServer extends WebSocketServer
     {
     }
 
-    private final List<WebSocket> connectedSockets = new ObjectArrayList<>();
+    private final List<WebSocket> connectedSockets = new CopyOnWriteArrayList<>();
 
     public List<WebSocket> getConnectedSockets()
     {

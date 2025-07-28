@@ -12,12 +12,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class PropertyHandler
 {
     private final Map<SingleProperty<?>, Object> propertyMap = new ConcurrentHashMap<>();
-    private final List<SingleProperty<?>> validProperties = new ObjectArrayList<>();
+    private final List<SingleProperty<?>> validProperties = new CopyOnWriteArrayList<>();
 
     private final Random random = ThreadLocalRandom.current();
 

@@ -25,11 +25,12 @@ import xyz.nifeather.morph.storage.skill.SkillsConfigurationStoreNew;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class AbilityManager extends MorphPluginObject
 {
-    private final List<IMorphAbility<?>> registedAbilities = new ObjectArrayList<>();
+    private final List<IMorphAbility<?>> registedAbilities = new CopyOnWriteArrayList<>();
 
     @Resolved
     private SkillsConfigurationStoreNew store;

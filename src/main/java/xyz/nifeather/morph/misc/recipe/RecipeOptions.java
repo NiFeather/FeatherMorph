@@ -8,10 +8,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class RecipeOptions
 {
-    private static final List<ConfigOption<?>> options = new ObjectArrayList<>();
+    private static final List<ConfigOption<?>> options = new CopyOnWriteArrayList<>();
 
     private static <X> ConfigOption<X> createOption(ConfigNode node, X val)
     {

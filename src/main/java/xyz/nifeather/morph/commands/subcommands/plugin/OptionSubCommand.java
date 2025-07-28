@@ -23,6 +23,7 @@ import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class OptionSubCommand extends MorphPluginObject implements IConvertibleBrigadier
 {
@@ -125,7 +126,7 @@ public class OptionSubCommand extends MorphPluginObject implements IConvertibleB
         return new OptionSubCommands.BooleanOptionCommand(name, config, option);
     }
 
-    private final List<IConvertibleBrigadier> subCommands = new ObjectArrayList<>();
+    private final List<IConvertibleBrigadier> subCommands = new CopyOnWriteArrayList<>();
 
     @Override
     public @Nullable String permission()

@@ -19,9 +19,11 @@ import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Bindables.Bindable;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 public class AbilityUpdater extends MorphPluginObject implements IAbilityConfigLookup
@@ -29,10 +31,10 @@ public class AbilityUpdater extends MorphPluginObject implements IAbilityConfigL
     @NotNull
     private final DisguiseState parentState;
 
-    private final List<IMorphAbility<?>> pendingAbilities = new ObjectArrayList<>();
+    private final List<IMorphAbility<?>> pendingAbilities = Collections.synchronizedList(new ObjectArrayList<>());
 
     // <Ability, Enabled?>
-    private final List<Pair<IMorphAbility<?>, Boolean>> registeredAbilities = new ObjectArrayList<>();
+    private final List<Pair<IMorphAbility<?>, Boolean>> registeredAbilities = new CopyOnWriteArrayList<>();
 
     private Bindable<Boolean> checkAbilityPermissions = new Bindable<>(true);
 

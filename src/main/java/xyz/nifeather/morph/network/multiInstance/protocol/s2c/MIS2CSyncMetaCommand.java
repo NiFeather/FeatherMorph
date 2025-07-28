@@ -10,6 +10,7 @@ import xyz.nifeather.morph.network.utils.Asserts;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class MIS2CSyncMetaCommand extends MIS2CCommand
 {
@@ -69,7 +70,7 @@ public class MIS2CSyncMetaCommand extends MIS2CCommand
     {
         @Expose
         @SerializedName("content")
-        public List<SocketPlayerMeta> content = new ObjectArrayList<>();
+        public List<SocketPlayerMeta> content = new CopyOnWriteArrayList<>();
     }
 
     @Override

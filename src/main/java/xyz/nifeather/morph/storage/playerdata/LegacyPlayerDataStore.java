@@ -13,11 +13,12 @@ import xyz.nifeather.morph.storage.MorphJsonBasedStorage;
 import java.io.File;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 @Deprecated(forRemoval = true)
 public class LegacyPlayerDataStore extends MorphJsonBasedStorage<PlayerMetaContainer> implements IManagePlayerData
 {
-    private final List<DisguiseMeta> cachedMetas = new ObjectArrayList<>();
+    private final List<DisguiseMeta> cachedMetas = new CopyOnWriteArrayList<>();
 
     public File file()
     {
@@ -231,7 +232,7 @@ public class LegacyPlayerDataStore extends MorphJsonBasedStorage<PlayerMetaConta
     }
 
     @Override
-    public ObjectArrayList<DisguiseMeta> getAvaliableDisguisesFor(Player player)
+    public List<DisguiseMeta> getAvaliableDisguisesFor(Player player)
     {
         return getPlayerMeta(player).getUnlockedDisguises();
     }

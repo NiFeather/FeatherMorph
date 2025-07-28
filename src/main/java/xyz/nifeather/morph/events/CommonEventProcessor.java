@@ -40,6 +40,7 @@ import xyz.nifeather.morph.network.server.ServerSetEquipCommand;
 import xyz.nifeather.morph.skills.MorphSkillHandler;
 import xyz.nifeather.morph.utilities.EntityTypeUtils;
 
+import java.util.Collections;
 import java.util.List;
 
 import static xyz.nifeather.morph.utilities.DisguiseUtils.itemOrAir;
@@ -406,7 +407,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
             playersMinedGoldBlocks.add(e.getPlayer());
     }
 
-    private final List<Player> playersMinedGoldBlocks = new ObjectArrayList<>();
+    private final List<Player> playersMinedGoldBlocks = Collections.synchronizedList(new ObjectArrayList<>());
 
     @EventHandler(ignoreCancelled = true)
     public void onEntityTarget(EntityTargetEvent e)

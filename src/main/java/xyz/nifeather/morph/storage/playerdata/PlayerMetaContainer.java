@@ -5,12 +5,13 @@ import com.google.gson.annotations.SerializedName;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class PlayerMetaContainer
 {
     @Expose
     @SerializedName("playerMorphConfigurations")
-    public List<PlayerMeta> playerMetas = new ObjectArrayList<>();
+    public List<PlayerMeta> playerMetas = new CopyOnWriteArrayList<>();
 
     @Expose
     public int Version;

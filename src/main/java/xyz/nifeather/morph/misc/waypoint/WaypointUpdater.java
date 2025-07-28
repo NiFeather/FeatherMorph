@@ -14,6 +14,7 @@ import xyz.nifeather.morph.misc.waypoint.connection.MorphAzimuthWaypointConnecti
 import xyz.nifeather.morph.misc.waypoint.connection.MorphBlockConnection;
 import xyz.nifeather.morph.misc.waypoint.connection.MorphChunkConnection;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -50,7 +51,7 @@ public class WaypointUpdater implements WaypointTransmitter
         return true;
     }
 
-    private final List<IMorphWaypointConnection> realtimeConnections = new ObjectArrayList<>();
+    private final List<IMorphWaypointConnection> realtimeConnections = Collections.synchronizedList(new ObjectArrayList<>());
 
     public void updateRealtimeConnections()
     {
@@ -76,7 +77,7 @@ public class WaypointUpdater implements WaypointTransmitter
 
         var player = NmsRecord.ofPlayer(getPlayer());
 
-        if (player == target)
+        if (player.equals(target))
             return Optional.empty();
 
         var icon = waypointIcon();

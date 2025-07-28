@@ -7,6 +7,7 @@ import xyz.nifeather.morph.transforms.easings.Easing;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Bindables.Bindable;
 
+import java.util.Collections;
 import java.util.List;
 
 public class Transformer extends MorphPluginObject
@@ -60,7 +61,7 @@ public class Transformer extends MorphPluginObject
         }
     }
 
-    private static final List<Transform<?>> transforms = new ObjectArrayList<>();
+    private static final List<Transform<?>> transforms = Collections.synchronizedList(new ObjectArrayList<>());
 
     public static synchronized void startTransform(Transform<?> info)
     {

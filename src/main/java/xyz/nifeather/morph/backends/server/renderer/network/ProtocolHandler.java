@@ -8,6 +8,7 @@ import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.backends.server.renderer.network.listeners.*;
 
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class ProtocolHandler extends MorphPluginObject
 {
@@ -24,7 +25,7 @@ public class ProtocolHandler extends MorphPluginObject
         );
     }
 
-    private final List<ProtocolListener> listeners = new ObjectArrayList<>();
+    private final List<ProtocolListener> listeners = new CopyOnWriteArrayList<>();
 
     private void throwIfDisposed()
     {

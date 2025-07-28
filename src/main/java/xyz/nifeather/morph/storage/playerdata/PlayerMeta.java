@@ -7,6 +7,8 @@ import org.jetbrains.annotations.Unmodifiable;
 import xyz.nifeather.morph.misc.DisguiseMeta;
 import xyz.nifeather.morph.utilities.DisguiseUtils;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
 public class PlayerMeta
@@ -30,12 +32,12 @@ public class PlayerMeta
      * @apiNote 移除或添加伪装请使用addDisguise和removeDisguise
      */
     @Expose(serialize = false)
-    private ObjectArrayList<DisguiseMeta> unlockedDisguises = new ObjectArrayList<>();
+    private List<DisguiseMeta> unlockedDisguises = Collections.synchronizedList(new ObjectArrayList<>());
 
     private boolean disguiseListLocked = false;
 
     @Unmodifiable
-    public ObjectArrayList<DisguiseMeta> getUnlockedDisguises()
+    public List<DisguiseMeta> getUnlockedDisguises()
     {
         return disguiseListLocked
                 ? new ObjectArrayList<>(unlockedDisguises)
@@ -79,9 +81,9 @@ public class PlayerMeta
      * 此玩家解锁的所有伪装（原始数据）
      */
     @Expose
-    private ObjectArrayList<String> unlockedDisguiseIdentifiers = new ObjectArrayList<>();
+    private List<String> unlockedDisguiseIdentifiers = Collections.synchronizedList(new ObjectArrayList<>());
 
-    public ObjectArrayList<String> getUnlockedDisguiseIdentifiers()
+    public List<String> getUnlockedDisguiseIdentifiers()
     {
         return disguiseListLocked
                 ? new ObjectArrayList<>(unlockedDisguiseIdentifiers)

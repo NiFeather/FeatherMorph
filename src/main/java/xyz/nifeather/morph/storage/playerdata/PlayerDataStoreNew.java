@@ -147,7 +147,7 @@ public class PlayerDataStoreNew extends DirectoryJsonBasedStorage<PlayerMeta> im
      * @return 目标玩家拥有的伪装
      */
     @Override
-    public ObjectArrayList<DisguiseMeta> getAvaliableDisguisesFor(Player player)
+    public List<DisguiseMeta> getAvaliableDisguisesFor(Player player)
     {
         return getPlayerMeta(player).getUnlockedDisguises();
     }

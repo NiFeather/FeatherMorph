@@ -32,6 +32,7 @@ import xyz.nifeather.morph.config.ConfigOption;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.misc.BuildFailedException;
 
+import java.util.Collections;
 import java.util.List;
 
 public class ServerRenderer extends MorphPluginObject implements Listener
@@ -64,7 +65,7 @@ public class ServerRenderer extends MorphPluginObject implements Listener
             Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 
-    private final List<LivingEntityWatcher> livingEntityWatchers = new ObjectArrayList<>();
+    private final List<LivingEntityWatcher> livingEntityWatchers = Collections.synchronizedList(new ObjectArrayList<>());
 
     @EventHandler
     public void onPlayerStartUsingItem(PlayerInteractEvent event)

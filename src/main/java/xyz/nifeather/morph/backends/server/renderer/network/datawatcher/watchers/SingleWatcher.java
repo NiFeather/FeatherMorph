@@ -242,7 +242,7 @@ public abstract class SingleWatcher extends MorphPluginObject
     /**
      * Values in this list shouldn't be included with meta packet processing in {@link xyz.nifeather.morph.backends.server.renderer.network.listeners.MetaPacketListener#rebuildServerMetaPacket(AbstractValues, SingleWatcher, WrapperPlayServerEntityMetadata)}
      */
-    private final List<Integer> blockedValues = new ObjectArrayList<>();
+    private final List<Integer> blockedValues = Collections.synchronizedList(new ObjectArrayList<>());
 
     /**
      * Block specific value type (by index) from further updating.
@@ -505,7 +505,7 @@ public abstract class SingleWatcher extends MorphPluginObject
 
     // 针对构建生成包之前就有customWrite的缓解方案: RenderRegistry#register(Player player, RegisterParameters registerParameters)
     // 或许需要找一种办法能让SingleWatcher在初始化值的时候不要发送任何数据包
-    private final Collection<Object> silentRequestSources = new ObjectArrayList<>();
+    private final Collection<Object> silentRequestSources = Collections.synchronizedList(new ObjectArrayList<>());
 
     public void markSilent(Object source)
     {

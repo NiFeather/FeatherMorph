@@ -27,6 +27,7 @@ import xyz.nifeather.morph.messages.MessageUtils;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class HelpSubCommand extends MorphPluginObject implements IConvertibleBrigadier
 {
@@ -45,7 +46,7 @@ public class HelpSubCommand extends MorphPluginObject implements IConvertibleBri
     @Resolved
     private MorphCommandManager cmdHelper;
 
-    private final List<Section> commandSections = new ObjectArrayList<>();
+    private final List<Section> commandSections = new CopyOnWriteArrayList<>();
 
     /**
      * 设置用于构建帮助信息的Section

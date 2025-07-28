@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public abstract class AbstractProperties
 {
@@ -24,7 +25,7 @@ public abstract class AbstractProperties
 
     protected final Logger logger = FeatherMorphMain.getInstance().getSLF4JLogger();
 
-    protected final List<SingleProperty<?>> values = new ObjectArrayList<>();
+    protected final List<SingleProperty<?>> values = new CopyOnWriteArrayList<>();
 
     protected void registerSingle(SingleProperty<?>... value)
     {
