@@ -910,6 +910,7 @@ public class DisguiseState extends MorphPluginObject
     public void dispose()
     {
         disposed.set(true);
+        this.waypointUpdater().dispose();
         this.disguiseWrapper.dispose();
         this.abilityUpdater.dispose();
     }

@@ -190,22 +190,6 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
                 .removeModifier(WAYPOINT_TRANSMIT_MODIFIER_KEY);
     }
 
-    protected void addDisguiseWaypoint(DisguiseState state)
-    {
-        var disguiseWaypoint = state.waypointUpdater();
-
-        disguiseWaypoint.allowWaypointConnection(true);
-        disguiseWaypoint.tick();
-    }
-
-    public void removeDisguiseWaypoint(DisguiseState state)
-    {
-        var disguiseWaypoint = state.waypointUpdater();
-
-        disguiseWaypoint.allowWaypointConnection(false);
-        disguiseWaypoint.tick();
-    }
-
     @Override
     @NotNull
     public List<AbstractS2CCommand<?>> getInitialSyncCommands(DisguiseState state)

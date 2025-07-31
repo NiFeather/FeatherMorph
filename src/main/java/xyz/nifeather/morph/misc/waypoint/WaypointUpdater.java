@@ -10,10 +10,7 @@ import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.NotNull;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.misc.NmsRecord;
-import xyz.nifeather.morph.misc.waypoint.connection.IMorphRealtimeWaypointConnection;
-import xyz.nifeather.morph.misc.waypoint.connection.MorphAzimuthWaypointConnection;
-import xyz.nifeather.morph.misc.waypoint.connection.MorphBlockConnection;
-import xyz.nifeather.morph.misc.waypoint.connection.MorphChunkConnection;
+import xyz.nifeather.morph.misc.waypoint.connection.*;
 import xyz.nifeather.morph.providers.disguise.DefaultDisguiseProvider;
 
 import java.util.Collections;
@@ -29,33 +26,42 @@ public class WaypointUpdater implements WaypointTransmitter
 
     private volatile boolean transmitting;
 
+    public void dispose()
+    {
+        enabled(false);
+        tick();
+    }
+
     public void tick()
     {
         var allowConnection = allowWaypointConnection();
 
         if (transmitting != allowConnection)
         {
-            transmitting = allowConnection;
             var waypointManager = NmsRecord.ofPlayer(getPlayer()).level().getWaypointManager();
 
             if (allowConnection)
             {
-                waypointManager.trackWaypoint(this);
-                this.updateRealtimeConnections();
+                if (!waypointManager.transmitters().contains(this))
+                    waypointManager.trackWaypoint(this);
+
+                transmitting = true;
             }
             else
             {
+                transmitting = false;
+
                 waypointManager.untrackWaypoint(this);
                 this.realtimeConnections.clear();
             }
         }
     }
 
-    private volatile boolean allowWaypoint = true;
+    private volatile boolean enabled = true;
 
     public boolean allowWaypointConnection()
     {
-        if (!allowWaypoint) return false;
+        if (!enabled) return false;
 
         if (bindingState.disposed()) return false;
 
@@ -88,9 +94,9 @@ public class WaypointUpdater implements WaypointTransmitter
         return true;
     }
 
-    public void allowWaypointConnection(boolean allow)
+    public void enabled(boolean value)
     {
-        this.allowWaypoint = allow;
+        this.enabled = value;
     }
 
     private final DisguiseState bindingState;
