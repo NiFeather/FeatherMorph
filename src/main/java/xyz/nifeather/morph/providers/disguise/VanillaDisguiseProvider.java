@@ -3,7 +3,6 @@ package xyz.nifeather.morph.providers.disguise;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.kyori.adventure.text.Component;
 import net.minecraft.nbt.CompoundTag;
-import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
@@ -54,13 +53,6 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
     public AnimationProvider getAnimationProvider()
     {
         return animationProvider;
-    }
-
-    @Override
-    public boolean allowSwitchingWithoutUndisguise(DisguiseProvider other, DisguiseMeta meta)
-    {
-        return other.getPreferredBackend().equals(this.getPreferredBackend())
-                && (meta.getDisguiseType() == DisguiseTypes.VANILLA || meta.getDisguiseType() == DisguiseTypes.PLAYER);
     }
 
     @Override
