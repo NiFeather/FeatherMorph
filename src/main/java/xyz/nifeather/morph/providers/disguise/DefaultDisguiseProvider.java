@@ -192,22 +192,18 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
 
     protected void addDisguiseWaypoint(DisguiseState state)
     {
-        var player = state.getPlayer();
-
         var disguiseWaypoint = state.waypointUpdater();
-        var nmsPlayer = NmsRecord.ofPlayer(player);
-        var waypointManager = nmsPlayer.level().getWaypointManager();
-        waypointManager.trackWaypoint(disguiseWaypoint);
+
+        disguiseWaypoint.allowWaypointConnection(true);
+        disguiseWaypoint.tick();
     }
 
     public void removeDisguiseWaypoint(DisguiseState state)
     {
-        var player = state.getPlayer();
-
-        var nmsPlayer = NmsRecord.ofPlayer(player);
-        var waypointManager = nmsPlayer.level().getWaypointManager();
         var disguiseWaypoint = state.waypointUpdater();
-        waypointManager.untrackWaypoint(disguiseWaypoint);
+
+        disguiseWaypoint.allowWaypointConnection(false);
+        disguiseWaypoint.tick();
     }
 
     @Override
