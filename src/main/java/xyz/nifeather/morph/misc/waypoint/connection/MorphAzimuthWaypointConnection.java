@@ -47,6 +47,9 @@ public class MorphAzimuthWaypointConnection implements WaypointTransmitter.Conne
     {
         var player = bindingState.getPlayer();
 
+        if (!player.getLocation().getWorld().equals(receiverBukkit.getLocation().getWorld()))
+            return;
+
         var vec = player.getLocation().subtract(receiverBukkit.getLocation());
         vec = new Location(vec.getWorld(), -vec.x(), vec.y(), vec.z());
 
