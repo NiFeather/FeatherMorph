@@ -913,21 +913,10 @@ public class DisguiseState extends MorphPluginObject
         this.waypointUpdater().dispose();
         this.disguiseWrapper.dispose();
         this.abilityUpdater.dispose();
-    }
 
-    public void reset(boolean unDisguise)
-    {
         this.provider.resetDisguise(this);
-
-        if (unDisguise)
-            this.provider.unMorph(getPlayer(), this);
-
+        this.provider.unMorph(getPlayer(), this);
         this.abilityUpdater.setAbilities(List.of());
         this.setSkill(null, null);
-    }
-
-    public void reset()
-    {
-        this.reset(true);
     }
 }

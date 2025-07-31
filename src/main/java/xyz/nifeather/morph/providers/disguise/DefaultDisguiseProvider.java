@@ -20,7 +20,6 @@ import xyz.nifeather.morph.backends.DisguiseBackend;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.MorphStrings;
 import xyz.nifeather.morph.misc.DisguiseState;
-import xyz.nifeather.morph.misc.NmsRecord;
 import xyz.nifeather.morph.network.commands.S2C.AbstractS2CCommand;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
 import xyz.nifeather.morph.network.server.ServerSetEquipCommand;
@@ -188,6 +187,18 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
     {
         this.acquireAttributeOrThrow(player, Attribute.WAYPOINT_TRANSMIT_RANGE)
                 .removeModifier(WAYPOINT_TRANSMIT_MODIFIER_KEY);
+    }
+
+    protected void enableDisguiseWaypoint(DisguiseState state)
+    {
+        var disguiseWaypoint = state.waypointUpdater();
+        disguiseWaypoint.enabled(true);
+    }
+
+    public void disableDisguiseWaypoint(DisguiseState state)
+    {
+        var disguiseWaypoint = state.waypointUpdater();
+        disguiseWaypoint.enabled(false);
     }
 
     @Override

@@ -986,8 +986,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         // 重置上个State的伪装
         if (currentState != null)
         {
-            currentState.reset();
-
+            currentState.dispose();
             activeDisguises.remove(currentState);
         }
 
@@ -996,10 +995,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         {
             logger.warn("Backend '%s' failed to disguise the player...".formatted(wrapper.getBackend().getIdentifier()));
             source.sendMessage(MessageUtils.prefixes(source, MorphStrings.errorWhileDisguising()));
-
-            // Reset last disguise anyway
-            if (currentState != null)
-                currentState.reset();
 
             return false;
         }
@@ -1275,7 +1270,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         // state.getProvider().unMorph(player, state);
 
         // 重置此State
-        state.reset();
+        state.dispose();
 
         // 如果玩家在线，则生成粒子
         if (player.isConnected())

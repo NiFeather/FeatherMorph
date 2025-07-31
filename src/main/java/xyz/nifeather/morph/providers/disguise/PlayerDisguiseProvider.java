@@ -150,6 +150,7 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
     public void onDisguiseApply(DisguiseState state)
     {
         mutePlayerWaypoint(state.getPlayer());
+        enableDisguiseWaypoint(state);
 
         super.onDisguiseApply(state);
     }
@@ -158,6 +159,7 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
     public boolean unMorph(Player player, DisguiseState state)
     {
         recoverPlayerWaypoint(player);
+        disableDisguiseWaypoint(state);
 
         return super.unMorph(player, state);
     }

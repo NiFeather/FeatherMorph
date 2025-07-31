@@ -25,11 +25,14 @@ public class WaypointUpdater implements WaypointTransmitter
     }
 
     private volatile boolean transmitting;
+    private volatile boolean disposed;
 
     public void dispose()
     {
         enabled(false);
         tick();
+
+        disposed = true;
     }
 
     public void tick()
@@ -57,7 +60,7 @@ public class WaypointUpdater implements WaypointTransmitter
         }
     }
 
-    private volatile boolean enabled = true;
+    private volatile boolean enabled = false;
 
     public boolean allowWaypointConnection()
     {
@@ -96,6 +99,8 @@ public class WaypointUpdater implements WaypointTransmitter
 
     public void enabled(boolean value)
     {
+        if (disposed) return;
+
         this.enabled = value;
     }
 
