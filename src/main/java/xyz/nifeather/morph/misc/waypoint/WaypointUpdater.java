@@ -1,6 +1,7 @@
 package xyz.nifeather.morph.misc.waypoint;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.waypoints.WaypointTransmitter;
@@ -8,6 +9,7 @@ import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.misc.NmsRecord;
 import xyz.nifeather.morph.misc.waypoint.connection.*;
@@ -35,18 +37,32 @@ public class WaypointUpdater implements WaypointTransmitter
         disposed = true;
     }
 
+    @Nullable
+    private ServerLevel lastWorld = null;
+
     public void tick()
     {
         var allowConnection = allowWaypointConnection();
 
+        var currentWorld = NmsRecord.ofPlayer(getPlayer()).level();
+        var currentWaypointManager = currentWorld.getWaypointManager();
+
+        if (!currentWorld.equals(lastWorld))
+        {
+            if (lastWorld != null)
+                lastWorld.getWaypointManager().untrackWaypoint(this);
+
+            transmitting = false;
+        }
+
+        lastWorld = currentWorld;
+
         if (transmitting != allowConnection)
         {
-            var waypointManager = NmsRecord.ofPlayer(getPlayer()).level().getWaypointManager();
-
             if (allowConnection)
             {
-                if (!waypointManager.transmitters().contains(this))
-                    waypointManager.trackWaypoint(this);
+                if (!currentWaypointManager.transmitters().contains(this))
+                    currentWaypointManager.trackWaypoint(this);
 
                 transmitting = true;
             }
@@ -54,7 +70,7 @@ public class WaypointUpdater implements WaypointTransmitter
             {
                 transmitting = false;
 
-                waypointManager.untrackWaypoint(this);
+                currentWaypointManager.untrackWaypoint(this);
                 this.realtimeConnections.clear();
             }
         }
