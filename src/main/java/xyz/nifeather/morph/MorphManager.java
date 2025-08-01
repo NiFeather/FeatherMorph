@@ -1471,7 +1471,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     {
         try
         {
-            if (player.getUniqueId().equals(offlineState.playerUUID))
+            if (!player.getUniqueId().equals(offlineState.playerUUID))
             {
                 logger.error("OfflineState UUID mismatch: %s <-> %s".formatted(player.getUniqueId(), offlineState.playerUUID));
                 return OfflineDisguiseResult.FAIL;
