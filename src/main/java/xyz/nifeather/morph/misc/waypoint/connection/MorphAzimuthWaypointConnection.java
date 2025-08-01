@@ -50,8 +50,8 @@ public class MorphAzimuthWaypointConnection implements WaypointTransmitter.Conne
         if (!player.getLocation().getWorld().equals(receiverBukkit.getLocation().getWorld()))
             return;
 
-        var vec = player.getLocation().subtract(receiverBukkit.getLocation());
-        vec = new Location(vec.getWorld(), -vec.x(), vec.y(), vec.z());
+        var vec = receiverBukkit.getLocation().subtract(player.getLocation());
+        vec = new Location(vec.getWorld(), -vec.z(), vec.y(), vec.x());
 
         float angle = (float) Math.atan2(vec.z(), vec.x());
 
