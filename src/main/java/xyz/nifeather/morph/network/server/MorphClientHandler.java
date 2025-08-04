@@ -246,31 +246,17 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
     // Called when player's client registers a channel
     public void onPlayerChannelRegister(Player player, String channel)
     {
-        var persistentDataContainer = player.getPersistentDataContainer();
-
-        // Get channels that the player registered
-        var data = persistentDataContainer.get(KEY_CHANNEL_STORE, PersistentDataType.LIST.strings());
-        if (data == null)
-            data = List.of();
-
-        var channelList = new ObjectArrayList<>(data);
-
-        // Add the new channel into the list, then set it back.
-        channelList.add(channel);
-        persistentDataContainer.set(KEY_CHANNEL_STORE, PersistentDataType.LIST.strings(), channelList);
-
         var protocolHandler = getProtocolHandler(player);
 
         if (protocolHandler == null)
             return;
 
+        var channelList = player.getListeningPluginChannels();
+
         // If the player registered all channels that the binding ProtocolHandler requires
         // Notify that the player is ready.
-        if (new HashSet<>(channelList).containsAll(protocolHandler.validChannels()))
-        {
+        if (channelList.containsAll(protocolHandler.validChannels()))
             completePlayerFuture(player);
-            persistentDataContainer.remove(KEY_CHANNEL_STORE);
-        }
     }
 
     public void ensureFuturePresent(Player player)
@@ -306,10 +292,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
 
     public void completePlayerFuture(Player player)
     {
-        var future = waitMap.getOrDefault(player, null);
-
-        if (future != null)
-            future.complete(player);
+        getOrCreateFuture(player).complete(player);
     }
 
     //endregion
