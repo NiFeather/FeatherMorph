@@ -103,8 +103,8 @@ public class WaypointUpdater implements WaypointTransmitter
             if (modifier != null)
             {
                 playerAttribute.removeModifier(modifier);
-                var value = playerAttribute.getValue();
-                playerAttribute.addModifier(modifier);
+                var value = playerAttribute.getValue(); // Gets the value of this attribute without our modifier
+                playerAttribute.addTransientModifier(modifier);
 
                 return value > 0d;
             }

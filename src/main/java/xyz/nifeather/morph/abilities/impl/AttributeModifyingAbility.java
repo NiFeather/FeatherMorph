@@ -64,7 +64,7 @@ public class AttributeModifyingAbility extends MorphAbility<AttributeModifyOptio
             var modifier = new AttributeModifier(modifierKey, modifierOption.value, operationType);
 
             attributeInstance.removeModifier(modifierKey);
-            attributeInstance.addModifier(modifier);
+            attributeInstance.addTransientModifier(modifier);
         }
 
         return super.applyToPlayer(player, state);

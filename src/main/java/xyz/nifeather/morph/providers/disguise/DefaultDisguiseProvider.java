@@ -180,7 +180,7 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
         var attribute = this.acquireAttributeOrThrow(player, Attribute.WAYPOINT_TRANSMIT_RANGE);
 
         if (attribute.getModifier(WAYPOINT_TRANSMIT_MODIFIER_KEY) == null)
-            attribute.addModifier(new AttributeModifier(WAYPOINT_TRANSMIT_MODIFIER_KEY, -1, AttributeModifier.Operation.ADD_SCALAR));
+            attribute.addTransientModifier(new AttributeModifier(WAYPOINT_TRANSMIT_MODIFIER_KEY, -1, AttributeModifier.Operation.ADD_SCALAR));
     }
 
     protected void recoverPlayerWaypoint(Player player)

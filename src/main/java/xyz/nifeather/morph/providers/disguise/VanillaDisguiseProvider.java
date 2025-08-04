@@ -264,7 +264,7 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
 
             var modifier = new AttributeModifier(healthModifierKey, diffFinal, AttributeModifier.Operation.ADD_NUMBER);
 
-            runThenScaleHealth(player, playerAttribute, () -> playerAttribute.addModifier(modifier));
+            runThenScaleHealth(player, playerAttribute, () -> playerAttribute.addTransientModifier(modifier));
 
             //endregion Scale Health
 
@@ -392,16 +392,6 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
         mutePlayerWaypoint(state.getPlayer());
 
         super.onPlayerJoinWithDisguise(state);
-    }
-
-    @Override
-    public void onPlayerQuitWithDisguise(DisguiseState state)
-    {
-        var player = state.getPlayer();
-        removeAllHealthModifiers(player);
-        recoverPlayerWaypoint(player);
-
-        super.onPlayerQuitWithDisguise(state);
     }
 
     private void removeAllHealthModifiers(Player player)
