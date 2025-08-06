@@ -381,7 +381,7 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
             t.printStackTrace();
         }
 
-        if (player.getHealth() > 0)
+        if (player.getHealth() > 0) //       v 偷懒
             player.setHealth(Math.min(player.getMaxHealth(), attributeInstance.getValue() * currentPercent));
     }
 

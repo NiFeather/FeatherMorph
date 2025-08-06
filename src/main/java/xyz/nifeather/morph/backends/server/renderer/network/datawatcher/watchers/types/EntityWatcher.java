@@ -8,6 +8,7 @@ import io.github.retrooper.packetevents.util.SpigotConversionUtil;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
+import net.kyori.adventure.util.TriState;
 import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.packs.repository.Pack;
@@ -52,7 +53,7 @@ public class EntityWatcher extends SingleWatcher
     protected byte getPlayerBitMask(Player player)
     {
         byte bitMask = 0x00;
-        if (player.getFireTicks() > 0 || player.isVisualFire())
+        if (player.getFireTicks() > 0 || player.getVisualFire() == TriState.TRUE)
             bitMask |= (byte) 0x01;
 
         if (player.isSneaking())

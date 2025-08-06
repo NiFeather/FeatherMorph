@@ -105,7 +105,7 @@ public enum ConfigOption
 
     NOFLY_WORLDS(ConfigNode.create().append("nofly_worlds"), new ArrayList<String>()),
 
-    UUID_RANDOM_BASE(ConfigNode.create().append("uuid_random_base"), RandomStringUtils.randomAlphabetic(8)),
+    UUID_RANDOM_BASE(ConfigNode.create().append("uuid_random_base"), RandomStringUtils.secure().randomAlphabetic(8)),
 
     ENABLE_MULTIINSTANCE(multiInstanceNode().append("enabled"), false),
 
@@ -113,7 +113,7 @@ public enum ConfigOption
 
     IS_MASTER(multiInstanceNode().append("is_master_service"), false),
 
-    MASTER_SECRET(multiInstanceNode().append("secret"), RandomStringUtils.randomAlphabetic(12)),
+    MASTER_SECRET(multiInstanceNode().append("secret"), RandomStringUtils.secureStrong().randomAlphabetic(12)),
 
     DO_CHECK_ABILITY_PERMISSIONS(ConfigNode.create().append("check_ability_permissions"), true),
 

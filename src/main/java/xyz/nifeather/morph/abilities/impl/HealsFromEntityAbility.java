@@ -99,7 +99,7 @@ public class HealsFromEntityAbility extends MorphAbility<HealsFromEntityOption>
         {
             if (beamTarget.isAlive())
             {
-                var maxHealth = player.getMaxHealth();
+                var maxHealth = player.getMaxHealth(); // 偷懒了
                 var playerHealth = player.getHealth();
 
                 if (playerHealth > 0 && playerHealth / maxHealth < option.maxPercentage)
@@ -128,7 +128,7 @@ public class HealsFromEntityAbility extends MorphAbility<HealsFromEntityOption>
                             : new DamageSource(sources.magic().typeHolder(), beamTarget, damager);
 
                     source = DamageSourceUtils.toNotScalable(source).bypassEverything().noSourceLocation();
-                    nmsRecord.nmsPlayer().hurt(source, option.damageWhenDestroyed);
+                    nmsRecord.nmsPlayer().hurtServer(nmsRecord.nmsWorld(), source, option.damageWhenDestroyed);
                 }
 
                 state.removeSessionData(PROPERTY_ID);

@@ -1,5 +1,7 @@
 package xyz.nifeather.morph.misc.disguiseProperty.values;
 
+import io.papermc.paper.registry.RegistryAccess;
+import io.papermc.paper.registry.RegistryKey;
 import it.unimi.dsi.fastutil.Pair;
 import org.bukkit.Registry;
 import org.bukkit.entity.Frog;
@@ -15,7 +17,7 @@ public class FrogProperties extends AbstractProperties
 
     private void initMap()
     {
-        for (Frog.Variant variant : Registry.FROG_VARIANT.stream().toList())
+        for (Frog.Variant variant : RegistryAccess.registryAccess().getRegistry(RegistryKey.FROG_VARIANT).stream().toList())
             variantMap.put(variant.key().asString(), variant);
     }
 

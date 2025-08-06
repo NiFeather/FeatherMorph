@@ -10,7 +10,7 @@ public class PotionEffectOption implements ISkillOption
     public static PotionEffectOption from(PotionEffectType type, int duration, int amplifier)
     {
         var instance = new PotionEffectOption();
-        instance.effectId = type.getName();
+        instance.effectId = type.getName(); //todo: replace this
         instance.duration = duration;
         instance.amplifier = amplifier;
 
