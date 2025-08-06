@@ -32,6 +32,7 @@ import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.MorphStrings;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
+import xyz.nifeather.morph.misc.disguiseProperty.values.OffTreeProperties;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 import xyz.nifeather.morph.network.commands.S2C.admin.reveal.S2CRemoveAdminRevealCommand;
 import xyz.nifeather.morph.network.commands.S2C.admin.reveal.S2CSyncAdminRevealCommand;
@@ -954,7 +955,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 + player.getName();
 
         var virtualEntityUUID = UUID.nameUUIDFromBytes(str.getBytes());
-        wrapper.writeProperty(DisguiseProperties.INSTANCE.offTreeProperties().VIRTUAL_ENTITY_UUID, virtualEntityUUID);
+        wrapper.writeProperty(OffTreeProperties.VIRTUAL_ENTITY_UUID, virtualEntityUUID);
 
         SkillCooldownInfo cdInfo;
 

@@ -1,22 +1,12 @@
 package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers;
 
 import com.github.retrooper.packetevents.PacketEvents;
-import com.github.retrooper.packetevents.protocol.attribute.Attributes;
-import com.github.retrooper.packetevents.protocol.world.Location;
-import com.github.retrooper.packetevents.resources.ResourceLocation;
-import com.github.retrooper.packetevents.util.Vector3d;
 import com.github.retrooper.packetevents.wrapper.PacketWrapper;
 import com.github.retrooper.packetevents.wrapper.play.server.*;
-import io.github.retrooper.packetevents.util.SpigotConversionUtil;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraft.Util;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.entity.ai.attributes.AttributeInstance;
-import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import org.bukkit.Bukkit;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -25,7 +15,6 @@ import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Exceptions.NullDependencyException;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.backends.server.renderer.network.PacketFactory;
-import xyz.nifeather.morph.backends.server.renderer.network.ProtocolEquipment;
 import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.values.AbstractValues;
 import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.values.SingleValue;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
@@ -33,12 +22,9 @@ import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEnt
 import xyz.nifeather.morph.backends.server.renderer.network.registries.RenderRegistry;
 import xyz.nifeather.morph.backends.server.renderer.utilties.WatcherUtils;
 import xyz.nifeather.morph.misc.BuildFailedException;
-import xyz.nifeather.morph.misc.DisguiseEquipment;
-import xyz.nifeather.morph.misc.NmsRecord;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
-import xyz.nifeather.morph.utilities.EntityTypeUtils;
-import xyz.nifeather.morph.utilities.NmsUtils;
+import xyz.nifeather.morph.misc.disguiseProperty.values.OffTreeProperties;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -140,9 +126,7 @@ public abstract class SingleWatcher extends MorphPluginObject
     // I think we should handle this in a more proper way...
     private <X> void handlePropertyWriteInternal(SingleProperty<X> property, X value)
     {
-        var offTree = DisguiseProperties.INSTANCE.offTreeProperties();
-
-        if (offTree.VIRTUAL_ENTITY_UUID.equals(property))
+        if (OffTreeProperties.VIRTUAL_ENTITY_UUID.equals(property))
         {
             var uuid = (UUID) value;
             this.writeEntry(CustomEntries.SPAWN_UUID, uuid);
