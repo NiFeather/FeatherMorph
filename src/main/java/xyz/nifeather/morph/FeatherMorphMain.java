@@ -36,7 +36,6 @@ import xyz.nifeather.morph.platform.IPlatform;
 import xyz.nifeather.morph.platform.impl.PaperPlatform;
 import xyz.nifeather.morph.skills.MorphSkillHandler;
 import xyz.nifeather.morph.storage.skill.SkillsConfigurationStoreNew;
-import xyz.nifeather.morph.transforms.Transformer;
 import xyz.nifeather.morph.updates.UpdateHandler;
 import xiamomc.pluginbase.Messages.MessageStore;
 import xiamomc.pluginbase.XiaMoJavaPlugin;
@@ -237,7 +236,6 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
         dependencyManager.cache(skillHandler = new MorphSkillHandler());
         dependencyManager.cache(abilityManager = new AbilityManager());
         dependencyManager.cache(new RevealingHandler());
-        dependencyManager.cache(new Transformer());
 
         dependencyManager.cache(vanillaMessageStore = new VanillaMessageStore());
 
