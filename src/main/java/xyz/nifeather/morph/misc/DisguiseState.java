@@ -13,13 +13,12 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.nifeather.morph.misc.waypoint.WaypointUpdater;
+import xyz.nifeather.morph.misc.waypoint.DisguiseWaypointUpdater;
 import xyz.nifeather.morph.network.PlayerOptions;
 import xyz.nifeather.morph.network.commands.S2C.S2CPlayAnimationCommand;
 import xyz.nifeather.morph.network.commands.S2C.set.S2CSetAnimationDisplayNameCommand;
 import xyz.nifeather.morph.network.commands.S2C.set.S2CSetSkillCooldownCommand;
 import xiamomc.pluginbase.Annotations.Resolved;
-import xiamomc.pluginbase.Exceptions.NullDependencyException;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.abilities.AbilityUpdater;
@@ -44,7 +43,6 @@ import xyz.nifeather.morph.utilities.PermissionUtils;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Function;
 
 import static xyz.nifeather.morph.utilities.DisguiseUtils.itemOrAir;
 
@@ -69,7 +67,7 @@ public class DisguiseState extends MorphPluginObject
 
         this.soundHandler = new SoundHandler(player);
         this.abilityUpdater = new AbilityUpdater(this);
-        this.waypointUpdater = new WaypointUpdater(this);
+        this.disguiseWaypointUpdater = new DisguiseWaypointUpdater(this);
 
         this.disguiseWrapper = wrapper;
         this.disguiseIdentifier = identifier;
@@ -666,11 +664,11 @@ public class DisguiseState extends MorphPluginObject
 
     //region Waypoint
 
-    private final WaypointUpdater waypointUpdater;
+    private final DisguiseWaypointUpdater disguiseWaypointUpdater;
 
-    public WaypointUpdater waypointUpdater()
+    public DisguiseWaypointUpdater waypointUpdater()
     {
-        return waypointUpdater;
+        return disguiseWaypointUpdater;
     }
 
     //endregion Waypoint
@@ -737,7 +735,7 @@ public class DisguiseState extends MorphPluginObject
 
         this.animationSequence.update();
 
-        waypointUpdater.tick();
+        disguiseWaypointUpdater.tick();
 
         return this.abilityUpdater.update();
     }
