@@ -88,9 +88,12 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
             playersMinedGoldBlocks.clear();
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerChannelRegister(PlayerRegisterChannelEvent event)
     {
+        if (featherMorph().debugOutputEnabled())
+            logger.info("Player registered channel %s".formatted(event.getChannel()));
+
         if (event.getChannel().startsWith(FeatherMorphMain.getMorphNameSpace()))
             clientHandler.onPlayerChannelRegister(event.getPlayer(), event.getChannel());
     }

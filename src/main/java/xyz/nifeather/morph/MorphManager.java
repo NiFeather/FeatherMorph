@@ -32,6 +32,7 @@ import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.MorphStrings;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
+import xyz.nifeather.morph.misc.disguiseProperty.values.OffTreeProperties;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 import xyz.nifeather.morph.network.commands.S2C.admin.reveal.S2CRemoveAdminRevealCommand;
 import xyz.nifeather.morph.network.commands.S2C.admin.reveal.S2CSyncAdminRevealCommand;
@@ -954,7 +955,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 + player.getName();
 
         var virtualEntityUUID = UUID.nameUUIDFromBytes(str.getBytes());
-        wrapper.writeProperty(DisguiseProperties.INSTANCE.offTreeProperties().VIRTUAL_ENTITY_UUID, virtualEntityUUID);
+        wrapper.writeProperty(OffTreeProperties.VIRTUAL_ENTITY_UUID, virtualEntityUUID);
 
         SkillCooldownInfo cdInfo;
 
@@ -986,8 +987,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         // 重置上个State的伪装
         if (currentState != null)
         {
-            currentState.reset();
-
+            currentState.dispose();
             activeDisguises.remove(currentState);
         }
 
@@ -996,10 +996,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         {
             logger.warn("Backend '%s' failed to disguise the player...".formatted(wrapper.getBackend().getIdentifier()));
             source.sendMessage(MessageUtils.prefixes(source, MorphStrings.errorWhileDisguising()));
-
-            // Reset last disguise anyway
-            if (currentState != null)
-                currentState.reset();
 
             return false;
         }
@@ -1275,7 +1271,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         // state.getProvider().unMorph(player, state);
 
         // 重置此State
-        state.reset();
+        state.dispose();
 
         // 如果玩家在线，则生成粒子
         if (player.isConnected())
@@ -1476,7 +1472,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     {
         try
         {
-            if (player.getUniqueId().equals(offlineState.playerUUID))
+            if (!player.getUniqueId().equals(offlineState.playerUUID))
             {
                 logger.error("OfflineState UUID mismatch: %s <-> %s".formatted(player.getUniqueId(), offlineState.playerUUID));
                 return OfflineDisguiseResult.FAIL;

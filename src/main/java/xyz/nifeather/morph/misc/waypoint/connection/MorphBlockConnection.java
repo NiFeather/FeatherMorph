@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.misc.NmsRecord;
 
-public class MorphBlockConnection implements IMorphWaypointConnection
+public class MorphBlockConnection implements IMorphRealtimeWaypointConnection
 {
 }
 /*

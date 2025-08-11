@@ -1,7 +1,6 @@
 package xyz.nifeather.morph.misc.disguiseProperty;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.bukkit.entity.EntityType;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -9,7 +8,6 @@ import org.slf4j.LoggerFactory;
 import xiamomc.pluginbase.Exceptions.NullDependencyException;
 import xyz.nifeather.morph.misc.disguiseProperty.values.*;
 
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -41,12 +39,6 @@ public class DisguiseProperties
 
         register(EntityType.ENDER_DRAGON, new EnderDragonProperties());
         //register(EntityType.HAPPY_GHAST, new HappyGhastProperties());
-    }
-
-    private final OffTreeProperties offTreeProperties = new OffTreeProperties();
-    public OffTreeProperties offTreeProperties()
-    {
-        return offTreeProperties;
     }
 
     public Map<EntityType, AbstractProperties> getAll()

@@ -5,6 +5,7 @@ import net.minecraft.Util;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.inventory.EntityEquipment;
+import xyz.nifeather.morph.misc.disguiseProperty.values.OffTreeProperties;
 import xyz.nifeather.morph.network.commands.S2C.AbstractS2CCommand;
 import xyz.nifeather.morph.network.commands.S2C.admin.reveal.S2CAddAdminRevealCommand;
 import xyz.nifeather.morph.network.commands.S2C.clientrender.S2CCRSetMetaCommand;
@@ -122,7 +123,7 @@ public class ModNetworkingHelper extends MorphPluginObject
 
             this.setProfileCompound(profileStr)
                     .setSNbt(NbtUtils.getCompoundString(wrapper.getCompound()))
-                    .setDisguiseEquipmentShown(wrapper.getDisplayingFakeEquipments())
+                    .setDisguiseEquipmentShown(wrapper.readProperty(OffTreeProperties.DISPLAY_FAKE_EQUIPMENT))
                     .setOverridedEquip(wrapper.getFakeEquipments());
 
             return this;

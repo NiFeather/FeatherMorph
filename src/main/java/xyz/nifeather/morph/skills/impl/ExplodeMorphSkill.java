@@ -80,7 +80,7 @@ public class ExplodeMorphSkill extends DelayedMorphSkill<ExplosionConfiguration>
             var nmsPlayer = ((CraftPlayer) player).getHandle();
             var source = ((CraftWorld) player.getWorld()).getHandle().damageSources().explosion(nmsPlayer, null);
 
-            nmsPlayer.hurt(source, 1);
+            nmsPlayer.hurtServer(nmsPlayer.level(), source, 1);
             player.setHealth(0);
         }
     }

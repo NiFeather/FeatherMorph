@@ -1,10 +1,8 @@
 package xyz.nifeather.morph.providers.disguise;
 
-import com.destroystokyo.paper.profile.PlayerProfile;
 import com.mojang.authlib.GameProfile;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.kyori.adventure.text.Component;
-import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -16,7 +14,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.backends.DisguiseWrapper;
 import xyz.nifeather.morph.backends.WrapperEvent;
-import xyz.nifeather.morph.backends.WrapperProperties;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.MorphStrings;
 import xyz.nifeather.morph.misc.DisguiseMeta;
@@ -57,13 +54,6 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
     public boolean isValid(String rawIdentifier)
     {
         return DisguiseTypes.fromId(rawIdentifier) == DisguiseTypes.PLAYER;
-    }
-
-    @Override
-    public boolean allowSwitchingWithoutUndisguise(DisguiseProvider other, DisguiseMeta meta)
-    {
-        return other.getPreferredBackend().equals(this.getPreferredBackend())
-                && (meta.getDisguiseType() == DisguiseTypes.VANILLA || meta.getDisguiseType() == DisguiseTypes.PLAYER);
     }
 
     @Override
@@ -150,7 +140,7 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
     public void onDisguiseApply(DisguiseState state)
     {
         mutePlayerWaypoint(state.getPlayer());
-        addDisguiseWaypoint(state);
+        enableDisguiseWaypoint(state);
 
         super.onDisguiseApply(state);
     }
@@ -159,7 +149,7 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
     public boolean unMorph(Player player, DisguiseState state)
     {
         recoverPlayerWaypoint(player);
-        removeDisguiseWaypoint(state);
+        disableDisguiseWaypoint(state);
 
         return super.unMorph(player, state);
     }
@@ -168,7 +158,6 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
     public void onPlayerJoinWithDisguise(DisguiseState state)
     {
         mutePlayerWaypoint(state.getPlayer());
-        addDisguiseWaypoint(state);
 
         super.onPlayerJoinWithDisguise(state);
     }
@@ -177,7 +166,6 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
     public void onPlayerQuitWithDisguise(DisguiseState state)
     {
         recoverPlayerWaypoint(state.getPlayer());
-        removeDisguiseWaypoint(state);
 
         super.onPlayerQuitWithDisguise(state);
     }

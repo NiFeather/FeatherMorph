@@ -20,7 +20,6 @@ import xyz.nifeather.morph.backends.WrapperEvent;
 import xyz.nifeather.morph.backends.WrapperProperties;
 import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
 import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.types.AgeableMobWatcher;
-import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.types.InventoryLivingWatcher;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.backends.server.renderer.utilties.WatcherUtils;
@@ -28,6 +27,7 @@ import xyz.nifeather.morph.misc.AnimationNames;
 import xyz.nifeather.morph.misc.DisguiseEquipment;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
+import xyz.nifeather.morph.misc.disguiseProperty.values.OffTreeProperties;
 import xyz.nifeather.morph.utilities.NbtUtils;
 
 import java.util.Map;
@@ -45,9 +45,8 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
         super(instance, backend);
 
         this.backend = backend;
+        this.writeProperty(OffTreeProperties.FAKE_EQUIPMENT, new DisguiseEquipment());
     }
-
-    private final DisguiseEquipment equipment = new DisguiseEquipment();
 
     @Override
     public void mergeCompound(CompoundTag compoundTag)
@@ -102,7 +101,7 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
     public @NotNull UUID getVirtualEntityUUID()
     {
         var uuid = bindingWatcher == null ? null : bindingWatcher.readEntryOrThrow(CustomEntries.SPAWN_UUID);
-        return Objects.requireNonNull(uuid, "VirtualEntityUUID is not set for an instance of ModDisguiseWrapper");
+        return Objects.requireNonNull(uuid, "VirtualEntityUUID is not set for an instance of ServerDisguiseWrapper");
     }
 
     @Nullable
@@ -132,27 +131,17 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
     @Override
     public EntityEquipment getFakeEquipments()
     {
-        return equipment;
+        return this.readPropertyOrThrow(OffTreeProperties.FAKE_EQUIPMENT);
     }
 
     @Override
-    public void setFakeEquipments(@NotNull EntityEquipment newEquipment)
+    public void setFakeEquipments(@NotNull EntityEquipment value)
     {
-        this.equipment.setArmorContents(newEquipment.getArmorContents());
+        var newEquipment = new DisguiseEquipment();
+        newEquipment.setArmorContents(value.getArmorContents());
+        newEquipment.setHandItems(value.getItemInMainHand(), value.getItemInOffHand());
 
-        this.equipment.setHandItems(newEquipment.getItemInMainHand(), newEquipment.getItemInOffHand());
-
-        if (bindingWatcher != null)
-            bindingWatcher.writeEntry(CustomEntries.EQUIPMENT, this.equipment);
-    }
-
-    @Override
-    public void setDisplayingFakeEquipments(boolean newVal)
-    {
-        super.setDisplayingFakeEquipments(newVal);
-
-        if (bindingWatcher != null)
-            bindingWatcher.writeEntry(CustomEntries.DISPLAY_FAKE_EQUIPMENT, newVal);
+        this.writeProperty(OffTreeProperties.FAKE_EQUIPMENT, newEquipment);
     }
 
     @Override
@@ -178,7 +167,7 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
         var newInstance = cloneFromExternal(this, (ServerBackend) getBackend());
 
         newInstance.mergeCompound(this.getCompound());
-        newInstance.setFakeEquipments(this.equipment);
+        newInstance.writeProperty(OffTreeProperties.FAKE_EQUIPMENT, this.readPropertyOrThrow(OffTreeProperties.FAKE_EQUIPMENT));
 
         return newInstance;
     }
@@ -334,12 +323,8 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
             profileOptional.ifPresent(p -> bindingWatcher.writeEntry(CustomEntries.PROFILE, p));
         }
 
-        //todo: 激活刷新时也刷新到玩家
-        if (bindingWatcher instanceof InventoryLivingWatcher)
-        {
-            bindingWatcher.writeEntry(CustomEntries.DISPLAY_FAKE_EQUIPMENT, readProperty(WrapperProperties.DISPLAY_FAKE_EQUIP));
-            bindingWatcher.writeEntry(CustomEntries.EQUIPMENT, this.equipment);
-        }
+        bindingWatcher.writeEntry(CustomEntries.DISPLAY_FAKE_EQUIPMENT, readProperty(OffTreeProperties.DISPLAY_FAKE_EQUIPMENT));
+        bindingWatcher.writeEntry(CustomEntries.EQUIPMENT, readPropertyOrThrow(OffTreeProperties.FAKE_EQUIPMENT));
 
         if (bindingWatcher.getEntityType() == EntityType.GHAST)
             bindingWatcher.writePersistent(ValueIndex.GHAST.CHARGING, aggressive);

@@ -1,19 +1,29 @@
 package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.types;
 
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityEquipment;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.EntityEquipment;
-import xyz.nifeather.morph.backends.server.renderer.network.ProtocolEquipment;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntry;
 import xyz.nifeather.morph.misc.DisguiseEquipment;
+import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
+import xyz.nifeather.morph.misc.disguiseProperty.values.OffTreeProperties;
 
 public class InventoryLivingWatcher extends LivingEntityWatcher
 {
     public InventoryLivingWatcher(Player bindingPlayer, EntityType entityType)
     {
         super(bindingPlayer, entityType);
+    }
+
+    @Override
+    protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
+    {
+        super.onPropertyWrite(property, value);
+
+        if (property.equals(OffTreeProperties.FAKE_EQUIPMENT))
+            this.writeEntry(CustomEntries.EQUIPMENT, (DisguiseEquipment) value);
+        else if (property.equals(OffTreeProperties.DISPLAY_FAKE_EQUIPMENT))
+            this.writeEntry(CustomEntries.DISPLAY_FAKE_EQUIPMENT, Boolean.TRUE.equals(value));
     }
 
     @Override

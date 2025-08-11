@@ -52,10 +52,10 @@ public class DryOutInAirAbility extends MorphAbility<DryoutAbilityOption>
 
         if (air <= -20)
         {
-            var sr = DamageSourceUtils.toNotScalable(nmsPlayer.level().damageSources().dryOut())
+            var damageSource = DamageSourceUtils.toNotScalable(nmsPlayer.level().damageSources().dryOut())
                             .bypassEverything();
 
-            nmsPlayer.hurt(sr, 2);
+            nmsPlayer.hurtServer(nmsPlayer.level(), damageSource, 2);
             air = 0;
         }
 

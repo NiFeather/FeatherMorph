@@ -4,10 +4,12 @@ import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Particle;
+import org.bukkit.Registry;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.SkillStrings;
 import xyz.nifeather.morph.misc.DisguiseState;
@@ -66,11 +68,15 @@ public class ApplyEffectMorphSkill extends MorphSkill<EffectConfiguration>
         return configuration.getCooldown();
     }
 
+    @Nullable
     private PotionEffect getEffect(String key, int duration, int multiplier)
     {
         if (key == null) return null;
 
-        var type = PotionEffectType.getByKey(NamespacedKey.fromString(key));
+        var keyNamespaced = NamespacedKey.fromString(key);
+        if (keyNamespaced == null) return null;
+
+        var type = Registry.POTION_EFFECT_TYPE.get(keyNamespaced);
 
         if (type == null) return null;
 

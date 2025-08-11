@@ -18,6 +18,7 @@ import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.misc.CollisionBoxRecord;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
+import xyz.nifeather.morph.misc.disguiseProperty.values.OffTreeProperties;
 import xyz.nifeather.morph.utilities.EntityTypeUtils;
 
 import java.util.Map;
@@ -64,8 +65,10 @@ public abstract class DisguiseWrapper<TInstance>
     public abstract EntityEquipment getFakeEquipments();
 
     /**
-     * Sets displaying equipment to the giving value
-     * @param newEquipment A {@link EntityEquipment} that presents the new equipment
+     * Sets displaying equipment to the giving value, an alternative way of writing the {@link OffTreeProperties#FAKE_EQUIPMENT} property
+     * @param newEquipment A {@link EntityEquipment} that presents the new equipment to display.<br>
+     *                     Beware that the DisguiseWrapper may not keep a copy of the given equipment,
+     *                     meaning that any changes made to the equipment may affect this wrapper
      */
     public abstract void setFakeEquipments(@NotNull EntityEquipment newEquipment);
 
@@ -74,7 +77,7 @@ public abstract class DisguiseWrapper<TInstance>
      */
     public boolean getDisplayingFakeEquipments()
     {
-        return readProperty(WrapperProperties.DISPLAY_FAKE_EQUIP);
+        return readProperty(OffTreeProperties.DISPLAY_FAKE_EQUIPMENT);
     }
 
     /**
@@ -83,7 +86,7 @@ public abstract class DisguiseWrapper<TInstance>
      */
     public void setDisplayingFakeEquipments(boolean newVal)
     {
-        writeProperty(WrapperProperties.DISPLAY_FAKE_EQUIP, newVal);
+        writeProperty(OffTreeProperties.DISPLAY_FAKE_EQUIPMENT, newVal);
     }
 
     /**

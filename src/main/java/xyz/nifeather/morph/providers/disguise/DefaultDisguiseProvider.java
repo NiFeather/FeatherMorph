@@ -20,7 +20,6 @@ import xyz.nifeather.morph.backends.DisguiseBackend;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.MorphStrings;
 import xyz.nifeather.morph.misc.DisguiseState;
-import xyz.nifeather.morph.misc.NmsRecord;
 import xyz.nifeather.morph.network.commands.S2C.AbstractS2CCommand;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
 import xyz.nifeather.morph.network.server.ServerSetEquipCommand;
@@ -181,7 +180,7 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
         var attribute = this.acquireAttributeOrThrow(player, Attribute.WAYPOINT_TRANSMIT_RANGE);
 
         if (attribute.getModifier(WAYPOINT_TRANSMIT_MODIFIER_KEY) == null)
-            attribute.addModifier(new AttributeModifier(WAYPOINT_TRANSMIT_MODIFIER_KEY, -1, AttributeModifier.Operation.ADD_SCALAR));
+            attribute.addTransientModifier(new AttributeModifier(WAYPOINT_TRANSMIT_MODIFIER_KEY, -1, AttributeModifier.Operation.ADD_SCALAR));
     */}
 
     protected void recoverPlayerWaypoint(Player player)
@@ -190,25 +189,17 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
                 .removeModifier(WAYPOINT_TRANSMIT_MODIFIER_KEY);
     */}
 
-    protected void addDisguiseWaypoint(DisguiseState state)
+    protected void enableDisguiseWaypoint(DisguiseState state)
     {/*
-        var player = state.getPlayer();
-
         var disguiseWaypoint = state.waypointUpdater();
-        var nmsPlayer = NmsRecord.ofPlayer(player);
-        var waypointManager = nmsPlayer.level().getWaypointManager();
-        waypointManager.trackWaypoint(disguiseWaypoint);
-    */}
+        disguiseWaypoint.enabled(true);*/
+    }
 
-    public void removeDisguiseWaypoint(DisguiseState state)
+    public void disableDisguiseWaypoint(DisguiseState state)
     {/*
-        var player = state.getPlayer();
-
-        var nmsPlayer = NmsRecord.ofPlayer(player);
-        var waypointManager = nmsPlayer.level().getWaypointManager();
         var disguiseWaypoint = state.waypointUpdater();
-        waypointManager.untrackWaypoint(disguiseWaypoint);
-    */}
+        disguiseWaypoint.enabled(false);*/
+    }
 
     @Override
     @NotNull

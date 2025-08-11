@@ -20,6 +20,7 @@ import xyz.nifeather.morph.backends.WrapperProperties;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
+import xyz.nifeather.morph.misc.disguiseProperty.values.OffTreeProperties;
 import xyz.nifeather.morph.utilities.NbtUtils;
 
 import java.util.Map;
@@ -42,7 +43,7 @@ public class ModDisguiseWrapper extends EventWrapper<TrackingClientDisguise>
     @Override
     public @NotNull UUID getVirtualEntityUUID()
     {
-        var val = readPropertyOr(DisguiseProperties.INSTANCE.offTreeProperties().VIRTUAL_ENTITY_UUID, null);
+        var val = readPropertyOr(OffTreeProperties.VIRTUAL_ENTITY_UUID, null);
         return Objects.requireNonNull(val, "VirtualEntityUUID is not set for an instance of ModDisguiseWrapper");
     }
 
@@ -60,7 +61,7 @@ public class ModDisguiseWrapper extends EventWrapper<TrackingClientDisguise>
         }
 
         compound.merge(compoundTag);
-        this.writeProperty(DisguiseProperties.INSTANCE.offTreeProperties().IS_BABY, NbtUtils.isBabyForType(getEntityType(), compound));
+        this.writeProperty(OffTreeProperties.IS_BABY, NbtUtils.isBabyForType(getEntityType(), compound));
 
         if (this.getEntityType() == EntityType.MAGMA_CUBE || this.getEntityType() == EntityType.SLIME)
             resetDimensions();
@@ -103,7 +104,7 @@ public class ModDisguiseWrapper extends EventWrapper<TrackingClientDisguise>
             return;
         }
 
-        if (property.equals(WrapperProperties.DISPLAY_FAKE_EQUIP) && getBindingPlayer() != null)
+        if (property.equals(OffTreeProperties.DISPLAY_FAKE_EQUIPMENT) && getBindingPlayer() != null)
         {
             backend.getNetworkingHelper().prepareMeta(getBindingPlayer())
                     .setDisguiseEquipmentShown(Boolean.TRUE.equals(value))
@@ -165,7 +166,6 @@ public class ModDisguiseWrapper extends EventWrapper<TrackingClientDisguise>
     public void setFakeEquipments(@NotNull EntityEquipment newEquipment)
     {
         this.instance.equipment().setArmorContents(newEquipment.getArmorContents());
-
         this.instance.equipment().setHandItems(newEquipment.getItemInMainHand(), newEquipment.getItemInOffHand());
     }
 
@@ -208,7 +208,7 @@ public class ModDisguiseWrapper extends EventWrapper<TrackingClientDisguise>
     @Override
     public boolean isBaby()
     {
-        return this.readPropertyOr(DisguiseProperties.INSTANCE.offTreeProperties().IS_BABY, false);
+        return this.readPropertyOr(OffTreeProperties.IS_BABY, false);
     }
 
     @Override

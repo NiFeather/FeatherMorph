@@ -22,7 +22,7 @@ public class BurnsUnderSunAbility extends NoOpOptionAbility
                 && player.getEquipment().getHelmet() == null
                 && player.getWorld().isDayTime()
                 && player.getWorld().isClearWeather()
-                && !player.isInWaterOrRainOrBubbleColumn()
+                && !(player.isInWater() || player.isInRain())
                 && player.getLocation().getBlock().getLightFromSky() == 15)
         {
             player.setFireTicks(200);

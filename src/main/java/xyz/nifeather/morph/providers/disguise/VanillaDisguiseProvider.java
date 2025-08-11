@@ -3,7 +3,6 @@ package xyz.nifeather.morph.providers.disguise;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.kyori.adventure.text.Component;
 import net.minecraft.nbt.CompoundTag;
-import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
@@ -54,13 +53,6 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
     public AnimationProvider getAnimationProvider()
     {
         return animationProvider;
-    }
-
-    @Override
-    public boolean allowSwitchingWithoutUndisguise(DisguiseProvider other, DisguiseMeta meta)
-    {
-        return other.getPreferredBackend().equals(this.getPreferredBackend())
-                && (meta.getDisguiseType() == DisguiseTypes.VANILLA || meta.getDisguiseType() == DisguiseTypes.PLAYER);
     }
 
     @Override
@@ -272,7 +264,7 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
 
             var modifier = new AttributeModifier(healthModifierKey, diffFinal, AttributeModifier.Operation.ADD_NUMBER);
 
-            runThenScaleHealth(player, playerAttribute, () -> playerAttribute.addModifier(modifier));
+            runThenScaleHealth(player, playerAttribute, () -> playerAttribute.addTransientModifier(modifier));
 
             //endregion Scale Health
 
@@ -389,7 +381,7 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
             t.printStackTrace();
         }
 
-        if (player.getHealth() > 0)
+        if (player.getHealth() > 0) //       v 偷懒
             player.setHealth(Math.min(player.getMaxHealth(), attributeInstance.getValue() * currentPercent));
     }
 
@@ -400,16 +392,6 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
         mutePlayerWaypoint(state.getPlayer());
 
         super.onPlayerJoinWithDisguise(state);
-    }
-
-    @Override
-    public void onPlayerQuitWithDisguise(DisguiseState state)
-    {
-        var player = state.getPlayer();
-        removeAllHealthModifiers(player);
-        recoverPlayerWaypoint(player);
-
-        super.onPlayerQuitWithDisguise(state);
     }
 
     private void removeAllHealthModifiers(Player player)

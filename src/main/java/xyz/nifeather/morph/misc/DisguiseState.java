@@ -13,13 +13,12 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.nifeather.morph.misc.waypoint.WaypointUpdater;
+import xyz.nifeather.morph.misc.waypoint.DisguiseWaypointUpdater;
 import xyz.nifeather.morph.network.PlayerOptions;
 import xyz.nifeather.morph.network.commands.S2C.S2CPlayAnimationCommand;
 import xyz.nifeather.morph.network.commands.S2C.set.S2CSetAnimationDisplayNameCommand;
 import xyz.nifeather.morph.network.commands.S2C.set.S2CSetSkillCooldownCommand;
 import xiamomc.pluginbase.Annotations.Resolved;
-import xiamomc.pluginbase.Exceptions.NullDependencyException;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.abilities.AbilityUpdater;
@@ -44,7 +43,6 @@ import xyz.nifeather.morph.utilities.PermissionUtils;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Function;
 
 import static xyz.nifeather.morph.utilities.DisguiseUtils.itemOrAir;
 
@@ -69,7 +67,11 @@ public class DisguiseState extends MorphPluginObject
 
         this.soundHandler = new SoundHandler(player);
         this.abilityUpdater = new AbilityUpdater(this);
+<<<<<<< HEAD
         //this.waypointUpdater = new WaypointUpdater(this);
+=======
+        this.disguiseWaypointUpdater = new DisguiseWaypointUpdater(this);
+>>>>>>> 1.21.8
 
         this.disguiseWrapper = wrapper;
         this.disguiseIdentifier = identifier;
@@ -666,11 +668,11 @@ public class DisguiseState extends MorphPluginObject
 
     //region Waypoint
 /*
-    private final WaypointUpdater waypointUpdater;
+    private final DisguiseWaypointUpdater disguiseWaypointUpdater;
 
-    public WaypointUpdater waypointUpdater()
+    public DisguiseWaypointUpdater waypointUpdater()
     {
-        return waypointUpdater;
+        return disguiseWaypointUpdater;
     }
 */
     //endregion Waypoint
@@ -737,12 +739,14 @@ public class DisguiseState extends MorphPluginObject
 
         this.animationSequence.update();
 
+        disguiseWaypointUpdater.tick();
+
         return this.abilityUpdater.update();
     }
 
     private void refreshDisguiseItems(EntityEquipment targetEquipment, DisguiseWrapper<?> disguiseWrapper)
     {
-        EntityEquipment equipment = targetEquipment != null ? targetEquipment : disguiseWrapper.getFakeEquipments();
+        EntityEquipment equipment = targetEquipment != null ? targetEquipment : new DisguiseEquipment();
 
         //设置默认盔甲
         var armors = new ItemStack[]
@@ -772,6 +776,7 @@ public class DisguiseState extends MorphPluginObject
         disguiseEquipments.setHandItems(handItems);
 
         //开启默认装备显示或者更新显示
+        disguiseWrapper.setFakeEquipments(disguiseEquipments);
         setShowingDisguisedItems(showDisguisedItems || !emptyEquipment);
     }
 
@@ -805,9 +810,7 @@ public class DisguiseState extends MorphPluginObject
      */
     public void setShowingDisguisedItems(boolean value)
     {
-        updateEquipment(value);
         showDisguisedItems = value;
-
         this.disguiseWrapper.setDisplayingFakeEquipments(value);
     }
 
@@ -863,24 +866,6 @@ public class DisguiseState extends MorphPluginObject
 
     //endregion Sound Handling
 
-    /**
-     * 更新伪装物品显示
-     * @param showDisguised 是否显示默认盔甲
-     * @apiNote 此方法在将状态转换为离线存储的过程中才会直接调用，其他情况下请用不带参数的方法
-     */
-    private void updateEquipment(boolean showDisguised)
-    {
-        var handItems = disguiseEquipments.getHandItems();
-
-        var eq = new DisguiseEquipment();
-        eq.setArmorContents(showDisguised ? disguiseEquipments.getArmorContents() : emptyArmorStack);
-        eq.setItemInMainHand(showDisguised ? handItems[0] : null);
-        eq.setItemInOffHand(showDisguised ? handItems[1] : null);
-        eq.allowNull = true;
-
-        disguiseWrapper.setFakeEquipments(eq);
-    }
-
     public DisguiseState createCopy(Player player)
     {
         if (disposed())
@@ -908,23 +893,13 @@ public class DisguiseState extends MorphPluginObject
     public void dispose()
     {
         disposed.set(true);
+        this.waypointUpdater().dispose();
         this.disguiseWrapper.dispose();
         this.abilityUpdater.dispose();
-    }
 
-    public void reset(boolean unDisguise)
-    {
         this.provider.resetDisguise(this);
-
-        if (unDisguise)
-            this.provider.unMorph(getPlayer(), this);
-
+        this.provider.unMorph(getPlayer(), this);
         this.abilityUpdater.setAbilities(List.of());
         this.setSkill(null, null);
-    }
-
-    public void reset()
-    {
-        this.reset(true);
     }
 }
