@@ -128,8 +128,8 @@ public class EntityProcessor extends MorphPluginObject implements Listener
 
             if (wrapped.getGoal() instanceof MorphBasicAvoidPlayerGoal)
             {
-                if (debugOutput.get())
-                    logger.warn("We are processing entity that's already processed?! Found FeatherMorphAvoidPlayerGoal in entity " + sourceMob);
+                //if (debugOutput.get())
+                //    logger.warn("We are processing entity that's already processed?! Found FeatherMorphAvoidPlayerGoal in entity " + sourceMob);
 
                 return;
             }
