@@ -39,5 +39,36 @@ public class MessageChannel
     @Deprecated(forRemoval = true)
     public static final String commandChannelLegacy = commandChannelV1;
 
+    /**
+     * Currently we prefer to use these channels to communicate with the client mod
+     */
+    public static String[] preferredChannels()
+    {
+        return new String[]
+                {
+                        initializeChannelV3,
+                        commandChannelV3
+                };
+    }
+
+    /**
+     * All valid plugin channels, include deprecated channel
+     */
+    public static String[] allValidChannels()
+    {
+        return new String[]
+                {
+                        initializeChannelV3,
+                        commandChannelV3,
+
+                        versionChannelV2,
+                        commandChannelV2,
+
+                        versionChannelV1,
+                        commandChannelV1,
+                        initializeChannelV1,
+                };
+    }
+
     //endregion Deprecated channels
 }

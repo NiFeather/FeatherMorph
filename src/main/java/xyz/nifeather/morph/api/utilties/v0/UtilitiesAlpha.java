@@ -7,6 +7,7 @@ import xyz.nifeather.morph.api.direct.FeatherMorphDirectAccess;
 import xyz.nifeather.morph.backends.server.ServerDisguiseWrapper;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
 import xyz.nifeather.morph.misc.DisguiseState;
+import xyz.nifeather.morph.network.server.MessageChannel;
 
 import java.util.UUID;
 
@@ -95,5 +96,21 @@ public class UtilitiesAlpha
             return null;
 
         return wrapper.getBindingWatcher().readEntryOrDefault(CustomEntries.SPAWN_UUID, null);
+    }
+
+    /**
+     * Get channels that we currently prefer to communicate with clients
+     */
+    public String[] getPreferredPluginChannels()
+    {
+        return MessageChannel.preferredChannels();
+    }
+
+    /**
+     * Get all plugin channels that we support, including deprecated(legacy) channels
+     */
+    public String[] getAllPluginChannels()
+    {
+        return MessageChannel.allValidChannels();
     }
 }
