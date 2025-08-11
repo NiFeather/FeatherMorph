@@ -53,7 +53,7 @@ public class EntityWatcher extends SingleWatcher
     protected byte getPlayerBitMask(Player player)
     {
         byte bitMask = 0x00;
-        if (player.getFireTicks() > 0 || player.getVisualFire() == TriState.TRUE)
+        if (player.getFireTicks() > 0 || player.isVisualFire())
             bitMask |= (byte) 0x01;
 
         if (player.isSneaking())

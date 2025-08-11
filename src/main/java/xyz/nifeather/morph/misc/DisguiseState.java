@@ -67,11 +67,7 @@ public class DisguiseState extends MorphPluginObject
 
         this.soundHandler = new SoundHandler(player);
         this.abilityUpdater = new AbilityUpdater(this);
-<<<<<<< HEAD
-        //this.waypointUpdater = new WaypointUpdater(this);
-=======
-        this.disguiseWaypointUpdater = new DisguiseWaypointUpdater(this);
->>>>>>> 1.21.8
+        //this.disguiseWaypointUpdater = new DisguiseWaypointUpdater(this);
 
         this.disguiseWrapper = wrapper;
         this.disguiseIdentifier = identifier;
@@ -739,7 +735,7 @@ public class DisguiseState extends MorphPluginObject
 
         this.animationSequence.update();
 
-        disguiseWaypointUpdater.tick();
+        //disguiseWaypointUpdater.tick();
 
         return this.abilityUpdater.update();
     }
@@ -893,7 +889,7 @@ public class DisguiseState extends MorphPluginObject
     public void dispose()
     {
         disposed.set(true);
-        this.waypointUpdater().dispose();
+        //this.waypointUpdater().dispose();
         this.disguiseWrapper.dispose();
         this.abilityUpdater.dispose();
 

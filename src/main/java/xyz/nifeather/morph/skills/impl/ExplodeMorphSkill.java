@@ -2,6 +2,7 @@ package xyz.nifeather.morph.skills.impl;
 
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
+import net.minecraft.server.level.ServerLevel;
 import org.bukkit.GameMode;
 import org.bukkit.GameRule;
 import org.bukkit.NamespacedKey;
@@ -80,7 +81,7 @@ public class ExplodeMorphSkill extends DelayedMorphSkill<ExplosionConfiguration>
             var nmsPlayer = ((CraftPlayer) player).getHandle();
             var source = ((CraftWorld) player.getWorld()).getHandle().damageSources().explosion(nmsPlayer, null);
 
-            nmsPlayer.hurtServer(nmsPlayer.level(), source, 1);
+            nmsPlayer.hurtServer((ServerLevel) nmsPlayer.level(), source, 1);
             player.setHealth(0);
         }
     }

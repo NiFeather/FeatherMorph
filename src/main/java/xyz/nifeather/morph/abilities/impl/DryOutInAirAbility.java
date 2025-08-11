@@ -1,5 +1,6 @@
 package xyz.nifeather.morph.abilities.impl;
 
+import net.minecraft.server.level.ServerLevel;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -55,7 +56,7 @@ public class DryOutInAirAbility extends MorphAbility<DryoutAbilityOption>
             var damageSource = DamageSourceUtils.toNotScalable(nmsPlayer.level().damageSources().dryOut())
                             .bypassEverything();
 
-            nmsPlayer.hurtServer(nmsPlayer.level(), damageSource, 2);
+            nmsPlayer.hurtServer((ServerLevel) nmsPlayer.level(), damageSource, 2);
             air = 0;
         }
 
