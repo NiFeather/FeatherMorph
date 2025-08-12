@@ -95,7 +95,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
             logger.info("Player registered channel %s".formatted(event.getChannel()));
 
         if (event.getChannel().startsWith(FeatherMorphMain.getMorphNameSpace()))
-            clientHandler.onPlayerChannelRegister(event.getPlayer(), event.getChannel());
+            clientHandler.onPlayerChannelRegister(event.getPlayer());
     }
 
     @EventHandler

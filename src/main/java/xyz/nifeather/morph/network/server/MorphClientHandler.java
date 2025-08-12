@@ -75,7 +75,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
     {
         playerCommandHandlerMap.put(player, commandPacketHandler);
 
-        this.onPlayerChannelRegister(player, "feathermorph:no_op_just_trigger");
+        this.onPlayerChannelRegister(player);
     }
 
     @Nullable
@@ -244,7 +244,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
     private final Map<Player, CompletableFuture<Player>> waitMap = new ConcurrentHashMap<>();
 
     // Called when player's client registers a channel
-    public void onPlayerChannelRegister(Player player, String channel)
+    public void onPlayerChannelRegister(Player player)
     {
         var protocolHandler = getProtocolHandler(player);
 
