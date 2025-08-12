@@ -1,7 +1,6 @@
 package xyz.nifeather.morph.misc.recipe;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
@@ -20,7 +19,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class RecipeManager extends MorphPluginObject
 {
@@ -153,7 +151,7 @@ public class RecipeManager extends MorphPluginObject
         if (recipeKey.equals(SKILLITEM_CRAFTING_KEY))
             return ItemUtils.buildDisguiseToolFrom(ItemStack.of(resultMaterial));
         else if (recipeKey.equals(MAGIC_BOTTLE_CRAFTING_KEY))
-            return ItemUtils.buildMagicBottleFrom(ItemStack.of(resultMaterial));
+            return ItemUtils.buildMagicItemFrom(ItemStack.of(resultMaterial));
         else return ItemStack.of(resultMaterial);
     }
 

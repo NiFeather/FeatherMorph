@@ -6,7 +6,6 @@ import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Color;
-import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.*;
@@ -167,14 +166,14 @@ public class CustomItemRelatedEvents extends MorphPluginObject implements Listen
     public void onConsume(PlayerItemConsumeEvent event)
     {
         var consumedItem = event.getItem();
-        if (!ItemUtils.isMagicBottle(consumedItem)) return;
+        if (!ItemUtils.isMagicItem(consumedItem)) return;
 
-        var id = ItemUtils.readMagicBottleData(consumedItem);
+        var id = ItemUtils.readMagicItemData(consumedItem);
         if (id == null) return;
 
         var player = event.getPlayer();
 
-        var consumeMagicBottleEvent = new PlayerConsumeMagicBottleEvent(player);
+        var consumeMagicBottleEvent = new PlayerConsumeMagicBottleEvent(player, consumedItem);
         var cancelled = !consumeMagicBottleEvent.callEvent();
         var hasPermission = PermissionUtils.hasPermission(player, CommonPermissions.MAGIC_BOTTLE_USE, true);
 
@@ -187,9 +186,6 @@ public class CustomItemRelatedEvents extends MorphPluginObject implements Listen
         }
 
         morphs.grantMorphToPlayer(player, id);
-
-        if (player.getGameMode() != GameMode.CREATIVE)
-            event.setReplacement(ItemStack.of(Material.GLASS_BOTTLE));
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -198,10 +194,10 @@ public class CustomItemRelatedEvents extends MorphPluginObject implements Listen
         var player = event.getPlayer();
 
         var mainhandItem = player.getEquipment().getItem(event.getHand());
-        if (!ItemUtils.isMagicBottle(mainhandItem) || event.getHand() != EquipmentSlot.HAND || !player.isSneaking())
+        if (!ItemUtils.isMagicItem(mainhandItem) || event.getHand() != EquipmentSlot.HAND || !player.isSneaking())
             return;
 
-        if (ItemUtils.readMagicBottleData(mainhandItem) != null)
+        if (ItemUtils.readMagicItemData(mainhandItem) != null)
             return;
 
         var entityClicked = event.getRightClicked();
@@ -251,7 +247,7 @@ public class CustomItemRelatedEvents extends MorphPluginObject implements Listen
         };
 
         // 设定物品
-        var newItem = ItemUtils.writeMagicBottleData(mainhandItem, disguiseIdentifier);
+        var newItem = ItemUtils.writeMagicItemData(ItemStack.of(Material.POTION), disguiseIdentifier);
         newItem.editMeta(PotionMeta.class, meta ->
         {
             var finalLoreDisplay = Component.text(disguiseIdentifier)
