@@ -8,6 +8,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.scoreboard.Scoreboard;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Bindables.Bindable;
 import xiamomc.pluginbase.ScheduleInfo;
 import xyz.nifeather.morph.abilities.AbilityManager;
@@ -124,6 +125,7 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
 
     private MultiInstanceService instanceService;
 
+    @Nullable
     private EntityProcessor entityProcessor;
 
     private ExecutorHub mirrorExecutorHub;
@@ -171,6 +173,31 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
         return super.schedule(function, delay, async);
     }
 
+    @ApiStatus.Internal
+    public static void panic(String... message)
+    {
+        var plugin = FeatherMorphMain.getInstance();
+        var logger = plugin.getSLF4JLogger();
+
+        logger.error("- x - x - x - x - x - x - x - x - x - x - x - x - x - x - x -");
+        logger.error("PANIC!");
+        for (String s : message)
+        {
+            logger.error(s);
+        }
+
+        logger.error("- x - x - x - x - x - x - x - x - x - x - x - x - x - x - x -");
+        logger.error("Called at {}", Thread.currentThread().getName());
+        logger.error("Invoke stacktrace:");
+        Thread.dumpStack();
+        logger.error("- x - x - x - x - x - x - x - x - x - x - x - x - x - x - x -");
+
+        FeatherMorphAPI.panic();
+
+        if (plugin.isEnabled())
+            Bukkit.getPluginManager().disablePlugin(FeatherMorphMain.getInstance());
+    }
+
     @Override
     protected void enable()
     {
@@ -189,7 +216,7 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
                     "Please use %s instead!".formatted(primaryVersion)
             );
 
-            pluginManager.disablePlugin(this);
+            panic("This version of Minecraft is not supported.");
             return;
         }
 
@@ -329,7 +356,8 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
         //需要在调用前先把一些东西处理好
         try
         {
-            if (!serverStopping
+            if (entityProcessor != null
+                    && !serverStopping
                     && entityProcessor.currentlyDoModifyAI()
                     && pluginEnableDone.get())
             {
@@ -396,6 +424,10 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
     @Override
     public void startMainLoop(Runnable r)
     {
+        // workaround: 如果插件在 enable() 中选择禁用自己，XiaMoJavaPlugin 仍会选择继续 startMainLoop()
+        //             所以我们需要检查插件是否被启动
+        if (!this.isEnabled()) return;
+
         Bukkit.getGlobalRegionScheduler().runAtFixedRate(this, o -> r.run(), 1, 1);
     }
 
