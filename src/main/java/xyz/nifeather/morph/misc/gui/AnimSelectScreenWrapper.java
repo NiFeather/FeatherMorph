@@ -1,15 +1,17 @@
 package xyz.nifeather.morph.misc.gui;
 
-import de.themoep.inventorygui.DynamicGuiElement;
-import de.themoep.inventorygui.InventoryGui;
-import de.themoep.inventorygui.StaticGuiElement;
+import de.themoep.inventorygui.*;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.Style;
+import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Material;
 import org.bukkit.block.data.Levelled;
 import org.bukkit.inventory.ItemRarity;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BlockDataMeta;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Bindables.BindableList;
 import xyz.nifeather.morph.messages.EmoteStrings;
@@ -33,8 +35,6 @@ public class AnimSelectScreenWrapper extends ScreenWrapper
     private final BindableList<String> pattern = new BindableList<>(List.of(
             "XXXXE"
     ));
-
-    private static final char CHAR_ENTRY = 'X';
 
     private List<String> getTemplate()
     {
@@ -63,20 +63,52 @@ public class AnimSelectScreenWrapper extends ScreenWrapper
         super.show();
     }
 
-    private int capacity = 0;
-
-    private char getCurrentIndexChar(int index)
+    protected void parseItemLore(ItemMeta itemMeta, List<String> strings)
     {
-        return (char) (10000 + index);
+        List<Component> loreList = new ObjectArrayList<>();
+
+        strings.forEach(lore ->
+        {
+            Component component = Component.text("???");
+
+            try
+            {
+                component = MiniMessage.miniMessage().deserialize(lore);
+            }
+            catch (Throwable t)
+            {
+                logger.error("Can't deserialize lore string '%s': %s".formatted(lore, t.getMessage()));
+            }
+
+            loreList.add(component);
+        });
+
+        itemMeta.lore(loreList);
+    }
+
+    protected void parseItemName(ItemMeta itemMeta, String s)
+    {
+        Component component = Component.text("???");
+
+        try
+        {
+            component = MiniMessage.miniMessage().deserialize(s);
+        }
+        catch (Throwable t)
+        {
+            logger.error("Can't deserialize string '%s': %s".formatted(s, t.getMessage()));
+        }
+
+        itemMeta.itemName(component);
     }
 
     private InventoryGui preparePage()
     {
+        //var columns = 9;
         var template = this.getTemplate();
 
         if (template.size() > 6)
         {
-            capacity = 0;
             logger.error("May not have a inventory with more than 6 rows.");
             return new InventoryGui(plugin, "missingno", new String[]{"         "});
         }
@@ -85,34 +117,19 @@ public class AnimSelectScreenWrapper extends ScreenWrapper
 
         for (String line : template)
         {
-            StringBuilder builder = new StringBuilder();
-
-            int lineCapacity = 0;
-            for (char c : line.toCharArray())
-            {
-                if (c == CHAR_ENTRY)
-                {
-                    builder.append(getCurrentIndexChar(this.capacity + lineCapacity));
-
-                    lineCapacity++;
-                }
-                else
-                {
-                    builder.append(c);
-                }
-            }
-
-            rows.add(builder.toString());
-            capacity += lineCapacity;
+            rows.add(line.toUpperCase());
         }
 
-        var gui = new InventoryGui(plugin,
-                GuiStrings.selectAnimation().toString(playerLocale),
-                rows.toArray(new String[]{}));
+        // Build page
+        var array = rows.toArray(new String[]{});
 
-        gui.setItemNameSetter((meta, string) -> meta.itemName(defaultMiniMessage.deserialize(string)));
+        var skel = new InventoryGui(plugin, GuiStrings.selectAnimation().toString(playerLocale), array);
 
-        return gui;
+        skel.setItemNameSetter(this::parseItemName);
+        skel.setItemLoreSetter(this::parseItemLore);
+        skel.setCloseAction(close -> false);
+
+        return skel;
     }
 
     private void initElements(InventoryGui gui)
@@ -122,40 +139,37 @@ public class AnimSelectScreenWrapper extends ScreenWrapper
         if (IconLookup.instance().lookup(state.getDisguiseIdentifier()).getType() == Material.PLAYER_HEAD)
             this.isDynamic.set(true);
 
-        for (int i = 0; i < capacity; i++)
-        {
-            @Nullable
-            var sequenceId = i >= availableSequences.size() ? null : availableSequences.get(i);
+        var groupElement = new GuiElementGroup('X');
 
-            var guiChar = this.getCurrentIndexChar(i);
-            var icon = sequenceId == null ? new ItemStack(Material.GRAY_STAINED_GLASS_PANE) : defaultIcon.clone();
-            int finalIndex = i;
+        var filler = ItemStack.of(Material.LIGHT_GRAY_STAINED_GLASS_PANE);
+        filler.editMeta(meta ->
+        {
+            var name = EmoteStrings.none()
+                    .toComponent(playerLocale)
+                    .style(Style.style().decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE));
+
+            meta.customName(name);
+        });
+
+        groupElement.setFiller(filler);
+
+        for (String sequenceId : availableSequences)
+        {
+            var icon = defaultIcon.clone();
 
             icon.editMeta(meta ->
             {
+                var name = EmoteStrings.get(sequenceId)
+                        .withLocale(playerLocale)
+                        .toComponent()
+                        .style(Style.style().decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE));
+
                 meta.setRarity(ItemRarity.COMMON);
-
-                if (meta instanceof BlockDataMeta blockDataMeta)
-                {
-                    var blockData = blockDataMeta.getBlockData(Material.LIGHT);
-                    if (blockData instanceof Levelled levelled) levelled.setLevel(1 + finalIndex);
-
-                    blockDataMeta.setBlockData(blockData);
-                }
+                meta.customName(name);
             });
 
-            // String(Raw) -> Component(Parsed) -> String(Parsed MiniMessage format) -> Component(Parsed again)
-            // So terrible, couldn't we just use Component instead String to set the item name?
-            Component sequenceDisplayNameComponent = sequenceId == null
-                    ? EmoteStrings.none().toComponent(playerLocale)
-                    : EmoteStrings.get(sequenceId).toComponent(playerLocale);
-
-            String sequenceDisplayName = defaultMiniMessage.serialize(sequenceDisplayNameComponent);
-
-            var element = new StaticGuiElement(guiChar, icon, 1 + i, click ->
+            var element = new StaticGuiElement('_', icon, 1 + availableSequences.indexOf(sequenceId), click ->
             {
-                if (sequenceId == null) return true;
-
                 var animationSet = state.getProvider()
                         .getAnimationProvider()
                         .getAnimationSetFor(state.getDisguiseIdentifier());
@@ -167,11 +181,12 @@ public class AnimSelectScreenWrapper extends ScreenWrapper
                 guiInstance.close();
 
                 return true;
-            },
-            "<italic:false>" + sequenceDisplayName);
+            });
 
-            gui.addElement(element);
+            groupElement.addElement(element);
         }
+
+        gui.addElement(groupElement);
 
         gui.addElement(new StaticGuiElement('!',
                 new ItemStack(Material.PINK_STAINED_GLASS_PANE),
@@ -192,17 +207,5 @@ public class AnimSelectScreenWrapper extends ScreenWrapper
                     return true;
                 },
                 "<italic:false>" + GuiStrings.close().toString(playerLocale)));
-
-        var disguiseElement = new StaticGuiElement('D',
-                IconLookup.instance().lookup(state.getDisguiseIdentifier()),
-                1,
-                click -> true,
-                "<italic:false>" + MorphStrings.disguisingAsString().resolve("what", state.getPlayerDisplay())
-                        .toString(playerLocale));
-
-        if (isDynamic.get())
-            gui.addElement(new DynamicGuiElement('D', viewer -> disguiseElement));
-        else
-            gui.addElement(disguiseElement);
     }
 }
