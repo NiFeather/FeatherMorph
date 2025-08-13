@@ -44,7 +44,7 @@ public class QuerySubCommand extends BrigadierCommand
                 Commands.literal(name())
                         .requires(this::checkPermission)
                         .then(
-                                Commands.argument("who", ArgumentTypes.player())
+                                Commands.argument("who", ArgumentTypes.players())
                                         .executes(this::executes)
                         )
         );
@@ -68,32 +68,31 @@ public class QuerySubCommand extends BrigadierCommand
             locale = MessageUtils.getLocale(player);
 
         if (players.isEmpty())
-        {
             return 0;
-        }
 
-        var targetPlayer = players.getFirst();
-
-        var state = manager.getDisguiseStateFor(targetPlayer);
-
-        if (state != null)
+        for (Player targetPlayer : players)
         {
-            commandSender.sendMessage(MessageUtils.prefixes(commandSender,
-                    CommandStrings.qDisguisedString()
-                            .withLocale(locale)
-                            .resolve("who", targetPlayer.getName())
-                            .resolve("what", state.getDisguiseIdentifier())
-                            .resolve("storage_status",
-                                    state.showingDisguisedItems()
-                                            ? CommandStrings.qaShowingDisguisedItemsString()
-                                            : CommandStrings.qaNotShowingDisguisedItemsString(),
-                                    null)
-            ));
-        }
-        else
-        {
-            commandSender.sendMessage(MessageUtils.prefixes(commandSender,
-                    CommandStrings.qNotDisguisedString().resolve("who", targetPlayer.getName())));
+            var state = manager.getDisguiseStateFor(targetPlayer);
+
+            if (state != null)
+            {
+                commandSender.sendMessage(MessageUtils.prefixes(commandSender,
+                        CommandStrings.qDisguisedString()
+                                .withLocale(locale)
+                                .resolve("who", targetPlayer.getName())
+                                .resolve("what", state.getDisguiseIdentifier())
+                                .resolve("storage_status",
+                                        state.showingDisguisedItems()
+                                                ? CommandStrings.qaShowingDisguisedItemsString()
+                                                : CommandStrings.qaNotShowingDisguisedItemsString(),
+                                        null)
+                ));
+            }
+            else
+            {
+                commandSender.sendMessage(MessageUtils.prefixes(commandSender,
+                        CommandStrings.qNotDisguisedString().resolve("who", targetPlayer.getName())));
+            }
         }
 
         return 1;
