@@ -1,8 +1,6 @@
 package xyz.nifeather.morph.misc;
 
 import com.mojang.authlib.GameProfile;
-import net.minecraft.Util;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.inventory.EntityEquipment;
 import xyz.nifeather.morph.misc.disguiseProperty.values.OffTreeProperties;
@@ -18,6 +16,7 @@ import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
 import xyz.nifeather.morph.utilities.MapMetaUtils;
 import xyz.nifeather.morph.utilities.NbtUtils;
+import xyz.nifeather.morph.utilities.Uuids;
 
 import java.util.HashMap;
 
@@ -118,7 +117,7 @@ public class ModNetworkingHelper extends MorphPluginObject
 
         public NetworkDisguiseStateRecord forWrapper(DisguiseWrapper<?> wrapper)
         {
-            var profile = wrapper.readProperty(WrapperProperties.PROFILE).orElse(new GameProfile(Util.NIL_UUID, "NIL"));
+            var profile = wrapper.readProperty(WrapperProperties.PROFILE).orElse(new GameProfile(Uuids.NIL_UUID, "NIL"));
             var profileStr = NbtUtils.getCompoundString(NbtUtils.toCompoundTag(profile));
 
             this.setProfileCompound(profileStr)

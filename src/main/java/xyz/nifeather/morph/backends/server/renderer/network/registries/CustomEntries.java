@@ -1,9 +1,9 @@
 package xyz.nifeather.morph.backends.server.renderer.network.registries;
 
 import com.mojang.authlib.GameProfile;
-import net.minecraft.Util;
 import org.jetbrains.annotations.ApiStatus;
 import xyz.nifeather.morph.misc.DisguiseEquipment;
+import xyz.nifeather.morph.utilities.Uuids;
 
 import java.util.UUID;
 
@@ -26,7 +26,7 @@ public class CustomEntries
      * @deprecated UUID for player disguise now is {@link CustomEntries#SPAWN_ID}
      */
     @Deprecated(since = "1.2.6", forRemoval = true)
-    public static final CustomEntry<UUID> TABLIST_UUID = CustomEntry.of("tablist_uuid", Util.NIL_UUID);
+    public static final CustomEntry<UUID> TABLIST_UUID = CustomEntry.of("tablist_uuid", Uuids.NIL_UUID);
 
     public static final CustomEntry<Boolean> WARDEN_CHARGING_ATTACK = CustomEntry.of("warden_charging_attack", false);
 
@@ -41,7 +41,7 @@ public class CustomEntries
 
     public static final CustomEntry<String> ANIMATION = CustomEntry.of("animation", "morph:unknown");
 
-    public static final CustomEntry<UUID> SPAWN_UUID = CustomEntry.of("spawn_uuid", Util.NIL_UUID);
+    public static final CustomEntry<UUID> SPAWN_UUID = CustomEntry.of("spawn_uuid", Uuids.NIL_UUID);
     public static final CustomEntry<Integer> SPAWN_ID = CustomEntry.of("spawn_id", -1);
 
     public static final CustomEntry<Boolean> VANISHED = CustomEntry.of("vanished", false);
