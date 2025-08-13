@@ -1,19 +1,18 @@
 package xyz.nifeather.morph.network.server;
 
 import io.netty.buffer.Unpooled;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.kyori.adventure.text.Component;
 import net.minecraft.network.FriendlyByteBuf;
 import org.bukkit.Bukkit;
-import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
-import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Exceptions.NullDependencyException;
 import xyz.nifeather.morph.api.FeatherMorphAPI;
+import xyz.nifeather.morph.api.networking.exceptions.*;
+import xyz.nifeather.morph.misc.PlayerWaitingHandler;
 import xyz.nifeather.morph.network.*;
 import xyz.nifeather.morph.network.commands.C2S.*;
 import xyz.nifeather.morph.network.commands.CommandRegistriesNew;
@@ -98,7 +97,10 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
         if (getSession(player) == null)
         {
             if (FeatherMorphMain.getInstance().debugOutputEnabled())
-                logger.error("No Session for player " + player.getName() + ", not sending commands.");
+            {
+                logger.error("No Session for player " + player.getName() + ", not sending command: '%s'".formatted(basicS2CCommand.getBaseName()));
+                //Thread.dumpStack();
+            }
 
             return false;
         }
@@ -214,12 +216,6 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
 
         configManager.bind(debugOutput, ConfigOption.DEBUG_OUTPUT);
 
-        modifyBoundingBoxes.onValueChanged((o, n) ->
-        {
-            var players = featherMorph().getPlatform().onlinePlayers();
-            players.forEach(p -> sendCommand(p, new S2CSetModifyBoundingBoxCommand(n)));
-        });
-
         forceTargetVersion.onValueChanged((o, n) -> scheduleReAuthPlayers());
         modifyBoundingBoxes.onValueChanged((o, n) -> scheduleReAuthPlayers());
         useClientRenderer.onValueChanged((o, n) -> scheduleReAuthPlayers());
@@ -231,17 +227,13 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
             if (n)
                 players.forEach(this::disconnectThenReAuth);
             else
-                players.forEach(this::disconnect);
+                players.forEach(p -> disconnect(p, new ClientIntegrationDisabledException("Client integration has been disabled")));
         });
     }
 
-    private final AtomicBoolean scheduledReauthPlayers = new AtomicBoolean(false);
+    //region Connection Futures
 
-    //region Wait Until Ready
-
-    public static final NamespacedKey KEY_CHANNEL_STORE = Objects.requireNonNull(NamespacedKey.fromString("feathermorph:channel_store"), "Null NamespacedKey, you might have a broken server software...");
-
-    private final Map<Player, CompletableFuture<Player>> waitMap = new ConcurrentHashMap<>();
+    private final PlayerWaitingHandler<Player> playerChannelPendingFutures = new PlayerWaitingHandler<>();
 
     // Called when player's client registers a channel
     public void onPlayerChannelRegister(Player player)
@@ -256,46 +248,54 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
         // If the player registered all channels that the binding ProtocolHandler requires
         // Notify that the player is ready.
         if (channelList.containsAll(protocolHandler.validChannels()))
-            completePlayerFuture(player);
-    }
-
-    public void ensureFuturePresent(Player player)
-    {
-        getOrCreateFuture(player);
+            playerChannelPendingFutures.completeFuture(player);
     }
 
     /**
-     * @return The {@link CompletableFuture} that matches the player, for convenience
+     * @deprecated To listen for whether the player registered all required channels, use {@link MorphClientHandler#getPlayerChannelPendingFuture(Player)}<br>
+     *             To listen for whether the player finished login, use {@link MorphClientHandler#getPlayerLoginPendingFuture(Player)}
      */
-    @NotNull
-    public CompletableFuture<Player> getOrCreateFuture(Player player)
-    {
-        var existingFuture = waitMap.getOrDefault(player, null);
-
-        if (existingFuture == null)
-        {
-            existingFuture = new CompletableFuture<>();
-            waitMap.put(player, new CompletableFuture<>());
-        }
-
-        return existingFuture;
-    }
-
-    /**
-     * Get a pending {@link CompletableFuture} that matches the given player.
-     * The Future will complete when the player registered all channels required for client-server communication
-     */
+    @Deprecated(forRemoval = true, since = "(yyyy-mm-dd) 2025-08-14")
     public CompletableFuture<Player> getPlayerPendingFuture(Player player)
     {
-        return getOrCreateFuture(player);
+        return getPlayerChannelPendingFuture(player);
     }
 
-    public void completePlayerFuture(Player player)
+    /**
+     * Get a pending {@link CompletableFuture} that matches the given player.<br>
+     * The Future will complete when the player registered all channels required for client-server communication.<br>
+     * For possible exceptions that this CompletableFuture might throw, see {@link xyz.nifeather.morph.api.networking.exceptions} package.<br>
+     */
+    public CompletableFuture<Player> getPlayerChannelPendingFuture(Player player)
     {
-        getOrCreateFuture(player).complete(player);
+        return playerChannelPendingFutures.getWaitingFuture(player);
     }
 
-    //endregion
+    private final PlayerWaitingHandler<Player> playerLoginPendingFutures = new PlayerWaitingHandler<>();
+
+    /**
+     * Get a pending {@link CompletableFuture} that matches the given player.<br>
+     * The Future will complete when the player finished mod login.<br>
+     * For possible exceptions that this CompletableFuture might throw, see {@link xyz.nifeather.morph.api.networking.exceptions} package.
+     */
+    public CompletableFuture<Player> getPlayerLoginPendingFuture(Player player)
+    {
+        return playerLoginPendingFutures.getWaitingFuture(player);
+    }
+
+    private final PlayerWaitingHandler<Player> playerConnectionFutures = new PlayerWaitingHandler<>();
+
+    /**
+     * Get a pending {@link CompletableFuture} that matches this player's client connection.<br>
+     * This CompletableFuture will <b>NEVER</b> get finished, it only throws exceptions when {@link MorphClientHandler#disconnect(Player, Exception)} is called.<br>
+     * For possible exceptions that this CompletableFuture might throw, see {@link xyz.nifeather.morph.api.networking.exceptions} package.
+     */
+    public CompletableFuture<Player> getPlayerConnectionFuture(Player player)
+    {
+        return playerConnectionFutures.getWaitingFuture(player);
+    }
+
+    //endregion Connection Futures
 
     //region Handle Protocol Inputs
 
@@ -326,7 +326,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
         logger.info("%s is using V3 packets, scheduling response".formatted(player.getName()));
         this.setProtocolHandlerFor(player, V3ProtocolHandler.V3_INSTANCE);
 
-        this.getPlayerPendingFuture(player)
+        this.getPlayerChannelPendingFuture(player)
                 .thenRun(() -> this.handleHandshakeMessage(V3ProtocolHandler.V3_INSTANCE, player, handleResult));
     }
 
@@ -343,10 +343,11 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
         //如果客户端版本低于最低能接受的版本或高于当前版本，拒绝初始化
         if (clientVersion < minimumApiVersion || clientVersion > Constants.PROTOCOL_VERSION)
         {
-            disconnect(player);
+            var logginMsg = player.getName() + " joined with incompatible client API version: " + clientVersion + " (This server requires " + targetApiVersion + ")";
+            disconnect(player, new ClientAPIMismatchException(logginMsg));
 
             //player.sendMessage(MessageUtils.prefixes(player, MorphStrings.clientVersionMismatchString()));
-            logger.info(player.getName() + " joined with incompatible client API version: " + clientVersion + " (This server requires " + targetApiVersion + ")");
+            logger.info(logginMsg);
 
             var msg = forceTargetVersion.get() ? MorphStrings.clientVersionMismatchKickString() : MorphStrings.clientVersionMismatchString();
             msg.withLocale(MessageUtils.getLocale(player))
@@ -504,6 +505,8 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
 
     //region Auth/UnAuth/ReAuth
 
+    private final AtomicBoolean scheduledReauthPlayers = new AtomicBoolean(false);
+
     private void scheduleReAuthPlayers()
     {
         synchronized (scheduledReauthPlayers)
@@ -519,7 +522,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
                 if (!scheduledReauthPlayers.get()) return;
 
                 scheduledReauthPlayers.set(false);
-                reAuthPlayers(featherMorph().getPlatform().onlinePlayers());
+                featherMorph().getPlatform().onlinePlayers().forEach(this::disconnectThenReAuth);
             }
         });
     }
@@ -530,7 +533,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
         logger.info("Rejecting player " + player.getName());
         player.sendMessage(MessageUtils.prefixes(player, MorphStrings.unsupportedClientBehavior()));
 
-        this.disconnect(player);
+        this.disconnect(player, new PlayerRejectedException("Player has been rejected because of bad client behavior"));
     }
 
     public void disconnectThenReAuth(Player player)
@@ -539,20 +542,12 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
         if (handler == null)
             return;
 
-        disconnect(player);
-        handler.sendInitializeRespond(player, getInitializeRespond());
-    }
+        disconnect(player, new ScheduleReconnectException("A reconnection has been scheduled"));
 
-    /**
-     * 向列表中的玩家客户端发送reauth指令
-     *
-     * @param players 玩家列表
-     */
-    public void reAuthPlayers(Collection<? extends Player> players)
-    {
-        if (!allowClient.get()) return;
+        // reconnect... We might want to do in a better way
 
-        players.forEach(this::disconnectThenReAuth);
+        onPlayerChannelRegister(player); // Make sure the channel future will trigger
+        handler.sendCommand(player, new S2CReAuthCommand()); // 剩下的就交给客户端登录流程了
     }
 
     //endregion Auth/UnAuth
@@ -678,11 +673,21 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
 
     //endregion Player Status/Option
 
+    /**
+     * @deprecated Please use {@link MorphClientHandler#disconnect(Player, Exception)} instead
+     */
+    @Deprecated(forRemoval = true)
     @Override
     public void disconnect(Player player)
     {
-        this.waitMap.remove(player);
-        player.getPersistentDataContainer().remove(KEY_CHANNEL_STORE);
+        disconnect(player, null);
+    }
+
+    public void disconnect(Player player, @Nullable Exception reason)
+    {
+        playerChannelPendingFutures.discard(player, reason);
+        playerLoginPendingFutures.discard(player, reason);
+        playerConnectionFutures.discard(player, reason);
 
         if (!this.playerSessionMap.containsKey(player))
         {
@@ -744,6 +749,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
             state.getDisguiseWrapper().getBackend().onClientModInitialize(player, this, manager);
 
         session.initializeState = InitializeState.DONE;
+        playerLoginPendingFutures.completeFuture(player);
     }
 
     @Override

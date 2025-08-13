@@ -5,7 +5,6 @@ import com.destroystokyo.paper.event.player.PlayerClientOptionsChangeEvent;
 import com.destroystokyo.paper.event.player.PlayerPostRespawnEvent;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.data.type.CreakingHeart;
 import org.bukkit.entity.*;
@@ -36,6 +35,7 @@ import xyz.nifeather.morph.misc.OfflineDisguiseResult;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 import xyz.nifeather.morph.network.commands.S2C.admin.reveal.S2CRemoveAdminRevealCommand;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
+import xyz.nifeather.morph.api.networking.exceptions.PlayerDisconnectedException;
 import xyz.nifeather.morph.network.server.ServerSetEquipCommand;
 import xyz.nifeather.morph.skills.MorphSkillHandler;
 import xyz.nifeather.morph.utilities.EntityTypeUtils;
@@ -272,13 +272,11 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
     @Resolved(shouldSolveImmediately = true)
     private ModNetworkingHelper modNetworkingHelper;
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlayerJoin(PlayerJoinEvent e)
     {
         var player = e.getPlayer();
         var state = morphs.getDisguiseStateFor(player);
-
-        clientHandler.ensureFuturePresent(player);
 
         var effectivePermissions = new ObjectOpenHashSet<>(player.getEffectivePermissions());
         List<String> legacyPermissions = new ObjectArrayList<>();
@@ -354,7 +352,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
     @EventHandler
     public void onPlayerExit(PlayerQuitEvent e)
     {
-        clientHandler.disconnect(e.getPlayer());
+        clientHandler.disconnect(e.getPlayer(), new PlayerDisconnectedException("Player disconnected"));
         skillHandler.removeUnusedList(e.getPlayer());
 
         var state = morphs.getDisguiseStateFor(e.getPlayer());

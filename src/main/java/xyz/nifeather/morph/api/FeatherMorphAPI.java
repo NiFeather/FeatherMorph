@@ -1,19 +1,14 @@
 package xyz.nifeather.morph.api;
 
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import it.unimi.dsi.fastutil.objects.ObjectLists;
-import org.checkerframework.checker.units.qual.C;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.api.direct.FeatherMorphDirectAccess;
+import xyz.nifeather.morph.api.networking.PlayerConnection;
 import xyz.nifeather.morph.api.utilties.v0.UtilitiesAlpha;
 
-import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Future;
 
 @ApiStatus.Experimental
 public class FeatherMorphAPI
@@ -93,6 +88,7 @@ public class FeatherMorphAPI
 
     private final FeatherMorphDirectAccess directAccess;
     private final UtilitiesAlpha utilsAlpha;
+    private final PlayerConnection playerConnection;
     private final APIMeta apiMeta;
 
     public FeatherMorphAPI(FeatherMorphMain plugin)
@@ -104,6 +100,7 @@ public class FeatherMorphAPI
         directAccess = new FeatherMorphDirectAccess(plugin);
 
         utilsAlpha = new UtilitiesAlpha(directAccess);
+        playerConnection = new PlayerConnection(this);
 
         apiMeta = new APIMeta();
 
@@ -136,5 +133,10 @@ public class FeatherMorphAPI
     public UtilitiesAlpha utilitiesAlpha()
     {
         return utilsAlpha;
+    }
+
+    public PlayerConnection playerConnection()
+    {
+        return playerConnection;
     }
 }

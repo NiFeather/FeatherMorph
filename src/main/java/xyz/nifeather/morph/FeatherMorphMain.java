@@ -33,6 +33,7 @@ import xyz.nifeather.morph.misc.integrations.placeholderapi.PlaceholderIntegrati
 import xyz.nifeather.morph.misc.integrations.residence.ResidenceEventProcessor;
 import xyz.nifeather.morph.network.multiInstance.MultiInstanceService;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
+import xyz.nifeather.morph.api.networking.exceptions.PluginDisabledException;
 import xyz.nifeather.morph.platform.IPlatform;
 import xyz.nifeather.morph.platform.impl.PaperPlatform;
 import xyz.nifeather.morph.skills.MorphSkillHandler;
@@ -322,7 +323,6 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
         {
             registerListeners(listeners);
 
-            clientHandler.reAuthPlayers(getPlatform().onlinePlayers());
             dependencyManager.cache(new FeatherMorphAPI(this));
         });
 
@@ -375,7 +375,7 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
                 placeholderIntegration.unregister();
 
             if (clientHandler != null)
-                clientHandler.getConnectedPlayers().forEach(clientHandler::disconnect);
+                clientHandler.getConnectedPlayers().forEach(p -> clientHandler.disconnect(p, new PluginDisabledException("Plugin has been disabled")));
 
             if (metrics != null)
                 metrics.shutdown();
