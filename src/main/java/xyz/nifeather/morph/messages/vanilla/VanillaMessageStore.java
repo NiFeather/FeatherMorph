@@ -4,10 +4,10 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.nifeather.morph.config.ConfigOption;
-import xyz.nifeather.morph.config.MorphConfigManager;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Bindables.Bindable;
+import xyz.nifeather.morph.config.ConfigOption;
+import xyz.nifeather.morph.config.MorphConfigManager;
 
 import java.util.Map;
 

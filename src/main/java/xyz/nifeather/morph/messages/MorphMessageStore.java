@@ -6,13 +6,13 @@ import it.unimi.dsi.fastutil.objects.ObjectList;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.nifeather.morph.FeatherMorphMain;
-import xyz.nifeather.morph.config.ConfigOption;
-import xyz.nifeather.morph.config.MorphConfigManager;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Bindables.Bindable;
 import xiamomc.pluginbase.Messages.IStrings;
 import xiamomc.pluginbase.Messages.MessageStore;
+import xyz.nifeather.morph.FeatherMorphMain;
+import xyz.nifeather.morph.config.ConfigOption;
+import xyz.nifeather.morph.config.MorphConfigManager;
 
 import java.io.File;
 import java.net.URI;

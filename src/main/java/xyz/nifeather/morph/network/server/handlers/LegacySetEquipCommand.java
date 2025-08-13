@@ -1,8 +1,8 @@
 package xyz.nifeather.morph.network.server.handlers;
 
 import org.bukkit.inventory.ItemStack;
-import xyz.nifeather.morph.utilities.ItemUtils;
 import xyz.nifeather.fmccl.network.commands.S2C.set.NetheriteS2CSetFakeEquipCommand;
+import xyz.nifeather.morph.utilities.ItemUtils;
 
 public class LegacySetEquipCommand extends NetheriteS2CSetFakeEquipCommand<ItemStack>
 {

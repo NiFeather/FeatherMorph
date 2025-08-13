@@ -11,7 +11,6 @@ import net.minecraft.world.entity.animal.Rabbit;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xiamomc.pluginbase.Exceptions.NullDependencyException;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.RevealingHandler;
 import xyz.nifeather.morph.misc.DisguiseState;

@@ -1,6 +1,5 @@
 package xyz.nifeather.morph.misc.disguiseProperty.values;
 
-import org.bukkit.inventory.EntityEquipment;
 import xyz.nifeather.morph.misc.DisguiseEquipment;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 

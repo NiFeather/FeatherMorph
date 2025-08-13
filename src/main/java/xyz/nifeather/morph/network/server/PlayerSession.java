@@ -1,10 +1,7 @@
 package xyz.nifeather.morph.network.server;
 
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import it.unimi.dsi.fastutil.objects.ObjectLists;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Unmodifiable;
 import xyz.nifeather.morph.network.ConnectionState;
 import xyz.nifeather.morph.network.InitializeState;
 import xyz.nifeather.morph.network.PlayerOptions;

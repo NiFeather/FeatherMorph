@@ -10,9 +10,7 @@ import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
-import xiamomc.pluginbase.Exceptions.NullDependencyException;
 import xiamomc.pluginbase.Messages.FormattableMessage;
-import xiamomc.pluginbase.ScheduleInfo;
 import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.config.ConfigOption;
@@ -31,7 +29,6 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Consumer;
 
 public class UpdateHandler extends MorphPluginObject
 {

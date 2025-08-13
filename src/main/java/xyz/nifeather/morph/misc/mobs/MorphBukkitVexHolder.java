@@ -7,8 +7,6 @@ import net.minecraft.world.entity.monster.Vex;
 import net.minecraft.world.entity.player.Player;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.craftbukkit.entity.CraftVex;
-import org.bukkit.entity.Mob;
-import org.bukkit.event.entity.EntityTargetEvent;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

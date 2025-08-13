@@ -2,7 +2,6 @@ package xyz.nifeather.morph.network.server.handlers.results;
 
 import xyz.nifeather.morph.network.commands.C2S.C2SCommandRecord;
 
-import java.util.List;
 import java.util.Map;
 
 public record CommandHandleResult(boolean success, C2SCommandRecord result)

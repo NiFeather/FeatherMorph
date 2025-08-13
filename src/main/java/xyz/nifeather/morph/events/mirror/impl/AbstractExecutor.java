@@ -11,7 +11,6 @@ import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.MorphPluginObject;
-import xyz.nifeather.morph.events.InteractionMirrorProcessor;
 import xyz.nifeather.morph.events.PlayerTracker;
 import xyz.nifeather.morph.events.mirror.ExecutorHub;
 import xyz.nifeather.morph.events.mirror.IExecutor;

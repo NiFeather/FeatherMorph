@@ -2,29 +2,15 @@ package xyz.nifeather.morph.backends.server.renderer.network.listeners;
 
 import com.github.retrooper.packetevents.event.PacketSendEvent;
 import com.github.retrooper.packetevents.protocol.packettype.PacketType;
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerDestroyEntities;
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerPlayerInfoRemove;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSpawnEntity;
-import com.mojang.authlib.GameProfile;
 import org.bukkit.Bukkit;
-import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Annotations.Resolved;
-import xiamomc.pluginbase.Exceptions.NullDependencyException;
 import xyz.nifeather.morph.backends.server.ServerBackend;
-import xyz.nifeather.morph.backends.server.renderer.network.DisplayParameters;
-import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
-import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.types.PlayerWatcher;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.RenderRegistry;
-import xyz.nifeather.morph.backends.server.renderer.utilties.WatcherUtils;
-import xyz.nifeather.morph.misc.NmsRecord;
-import xyz.nifeather.morph.misc.skins.PlayerSkinProvider;
 
 import java.util.List;
-import java.util.UUID;
 
 /**
  * The listener that handles the spawn packet!

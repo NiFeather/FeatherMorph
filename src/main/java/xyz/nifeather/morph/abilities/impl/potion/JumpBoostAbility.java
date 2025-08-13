@@ -4,8 +4,8 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.NotNull;
-import xyz.nifeather.morph.api.morphs.abilities.AbilityNames;
 import xyz.nifeather.morph.abilities.EffectMorphAbility;
+import xyz.nifeather.morph.api.morphs.abilities.AbilityNames;
 
 public class JumpBoostAbility extends EffectMorphAbility
 {

@@ -1,6 +1,5 @@
 package xyz.nifeather.morph.network.multiInstance.protocol.s2c;
 
-import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.network.multiInstance.protocol.IMasterHandler;
 import xyz.nifeather.morph.network.utils.Asserts;
 

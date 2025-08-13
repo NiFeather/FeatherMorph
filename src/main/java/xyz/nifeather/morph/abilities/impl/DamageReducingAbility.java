@@ -3,10 +3,10 @@ package xyz.nifeather.morph.abilities.impl;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.EntityDamageEvent;
+import xiamomc.pluginbase.Annotations.Resolved;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.abilities.MorphAbility;
 import xyz.nifeather.morph.abilities.options.ReduceDamageOption;
-import xiamomc.pluginbase.Annotations.Resolved;
 
 public abstract class DamageReducingAbility<T extends ReduceDamageOption> extends MorphAbility<T>
 {

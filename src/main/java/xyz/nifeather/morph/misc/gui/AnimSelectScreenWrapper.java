@@ -3,12 +3,8 @@ package xyz.nifeather.morph.misc.gui;
 import de.themoep.inventorygui.DynamicGuiElement;
 import de.themoep.inventorygui.InventoryGui;
 import de.themoep.inventorygui.StaticGuiElement;
-import io.papermc.paper.adventure.providers.MiniMessageProviderImpl;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.MiniMessage;
-import net.kyori.adventure.text.serializer.ansi.ANSIComponentSerializer;
-import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
 import org.bukkit.Material;
 import org.bukkit.block.data.Levelled;
 import org.bukkit.inventory.ItemRarity;
@@ -18,12 +14,10 @@ import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Bindables.BindableList;
 import xyz.nifeather.morph.messages.EmoteStrings;
 import xyz.nifeather.morph.messages.GuiStrings;
-import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.MorphStrings;
 import xyz.nifeather.morph.misc.DisguiseState;
 
 import java.util.List;
-import java.util.function.Consumer;
 
 public class AnimSelectScreenWrapper extends ScreenWrapper
 {

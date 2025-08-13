@@ -2,8 +2,6 @@ package xyz.nifeather.morph.network.multiInstance.protocol;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import org.jetbrains.annotations.NotNull;
-import xyz.nifeather.morph.network.commands.C2S.AbstractC2SCommand;
-import xyz.nifeather.morph.network.commands.S2C.AbstractS2CCommand;
 import xyz.nifeather.morph.network.multiInstance.protocol.c2s.MIC2SCommand;
 import xyz.nifeather.morph.network.multiInstance.protocol.s2c.MIS2CCommand;
 

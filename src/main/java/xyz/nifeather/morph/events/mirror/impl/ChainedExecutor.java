@@ -1,23 +1,20 @@
 package xyz.nifeather.morph.events.mirror.impl;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
-import xyz.nifeather.morph.network.commands.S2C.set.S2CSetSneakingCommand;
 import xyz.nifeather.morph.FeatherMorphMain;
-import xyz.nifeather.morph.events.PlayerTracker;
 import xyz.nifeather.morph.events.mirror.ExecutorHub;
 import xyz.nifeather.morph.misc.NmsRecord;
+import xyz.nifeather.morph.network.commands.S2C.set.S2CSetSneakingCommand;
 import xyz.nifeather.morph.storage.mirrorlogging.OperationType;
 import xyz.nifeather.morph.utilities.ItemUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 public abstract class ChainedExecutor extends AbstractExecutor

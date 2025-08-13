@@ -1,10 +1,10 @@
 package xyz.nifeather.morph.network.server.handlers;
 
 import xyz.nifeather.fmccl.converter.S2CCommandConverter;
+import xyz.nifeather.fmccl.network.commands.S2C.set.NetheriteS2CSetFakeEquipCommand;
 import xyz.nifeather.morph.network.commands.S2C.S2CCommandNames;
 import xyz.nifeather.morph.network.commands.S2C.set.S2CSetFakeEquipCommand;
 import xyz.nifeather.morph.network.server.ServerSetEquipCommand;
-import xyz.nifeather.fmccl.network.commands.S2C.set.NetheriteS2CSetFakeEquipCommand;
 
 public class MorphLegacyCommandConverter extends S2CCommandConverter
 {

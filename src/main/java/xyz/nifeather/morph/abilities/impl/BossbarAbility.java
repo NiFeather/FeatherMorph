@@ -11,15 +11,15 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import xyz.nifeather.morph.api.morphs.abilities.AbilityNames;
+import xiamomc.pluginbase.Annotations.Initializer;
+import xiamomc.pluginbase.Bindables.Bindable;
 import xyz.nifeather.morph.abilities.MorphAbility;
 import xyz.nifeather.morph.abilities.options.BossbarOption;
+import xyz.nifeather.morph.api.morphs.abilities.AbilityNames;
 import xyz.nifeather.morph.config.ConfigOption;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.utilities.DisguiseUtils;
-import xiamomc.pluginbase.Annotations.Initializer;
-import xiamomc.pluginbase.Bindables.Bindable;
 
 import java.util.List;
 import java.util.Objects;

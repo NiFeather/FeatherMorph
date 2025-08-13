@@ -17,10 +17,10 @@ import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.RevealingHandler;
-import xyz.nifeather.morph.config.ConfigOption;
-import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.api.events.gameplay.PlayerMorphEvent;
 import xyz.nifeather.morph.api.events.gameplay.PlayerUnMorphEvent;
+import xyz.nifeather.morph.config.ConfigOption;
+import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.misc.DisguiseTypes;
 import xyz.nifeather.morph.misc.NmsRecord;
 

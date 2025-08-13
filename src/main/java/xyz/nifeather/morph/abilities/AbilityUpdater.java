@@ -8,6 +8,8 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
+import xiamomc.pluginbase.Annotations.Initializer;
+import xiamomc.pluginbase.Bindables.Bindable;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.config.ConfigOption;
 import xyz.nifeather.morph.config.MorphConfigManager;
@@ -15,8 +17,6 @@ import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 import xyz.nifeather.morph.storage.skill.IAbilityConfigLookup;
 import xyz.nifeather.morph.utilities.PermissionUtils;
-import xiamomc.pluginbase.Annotations.Initializer;
-import xiamomc.pluginbase.Bindables.Bindable;
 
 import java.util.Arrays;
 import java.util.Collections;

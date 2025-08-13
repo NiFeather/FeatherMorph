@@ -6,7 +6,6 @@ import com.mojang.serialization.JsonOps;
 import it.unimi.dsi.fastutil.objects.ObjectAVLTreeSet;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
-import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.component.TooltipDisplay;
@@ -18,8 +17,6 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.FeatherMorphMain;
-
-import java.util.SequencedSet;
 
 public class ItemUtils
 {

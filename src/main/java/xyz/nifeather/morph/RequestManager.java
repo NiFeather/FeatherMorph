@@ -2,6 +2,8 @@ package xyz.nifeather.morph;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.bukkit.entity.Player;
+import xiamomc.pluginbase.Annotations.Initializer;
+import xiamomc.pluginbase.Annotations.Resolved;
 import xyz.nifeather.morph.interfaces.IManagePlayerData;
 import xyz.nifeather.morph.interfaces.IManageRequests;
 import xyz.nifeather.morph.messages.CommandStrings;
@@ -12,8 +14,6 @@ import xyz.nifeather.morph.misc.RequestInfo;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 import xyz.nifeather.morph.network.commands.S2C.S2CUpdateRequestStatusCommand;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
-import xiamomc.pluginbase.Annotations.Initializer;
-import xiamomc.pluginbase.Annotations.Resolved;
 
 import java.util.Collections;
 import java.util.List;

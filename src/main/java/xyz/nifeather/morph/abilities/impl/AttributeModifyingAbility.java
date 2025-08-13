@@ -6,9 +6,9 @@ import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.nifeather.morph.api.morphs.abilities.AbilityNames;
 import xyz.nifeather.morph.abilities.MorphAbility;
 import xyz.nifeather.morph.abilities.options.AttributeModifyOption;
+import xyz.nifeather.morph.api.morphs.abilities.AbilityNames;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.utilities.CommonUtils;
 

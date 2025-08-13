@@ -8,7 +8,6 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.bukkit.inventory.EntityEquipment;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.FeatherMorphMain;
-import xyz.nifeather.morph.utilities.ItemUtils;
 
 public class ProtocolEquipment
 {

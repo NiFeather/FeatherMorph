@@ -6,14 +6,14 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xiamomc.pluginbase.Bindables.Bindable;
+import xiamomc.pluginbase.Managers.DependencyManager;
+import xiamomc.pluginbase.Messages.FormattableMessage;
 import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.config.ConfigOption;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.misc.NmsRecord;
-import xiamomc.pluginbase.Bindables.Bindable;
-import xiamomc.pluginbase.Managers.DependencyManager;
-import xiamomc.pluginbase.Messages.FormattableMessage;
 
 public class MessageUtils extends MorphPluginObject
 {

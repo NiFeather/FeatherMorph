@@ -4,9 +4,6 @@ import it.unimi.dsi.fastutil.Pair;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 public class CreeperProperties extends AbstractProperties
 {
     public final SingleProperty<Boolean> CHARGED = getSingle("creeper_charged", false)

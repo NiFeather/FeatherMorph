@@ -12,6 +12,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xiamomc.pluginbase.Annotations.Resolved;
 import xyz.nifeather.morph.backends.DisguiseWrapper;
 import xyz.nifeather.morph.backends.WrapperEvent;
 import xyz.nifeather.morph.messages.MessageUtils;
@@ -25,7 +26,6 @@ import xyz.nifeather.morph.network.commands.S2C.set.S2CSetProfileCommand;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
 import xyz.nifeather.morph.providers.animation.AnimationProvider;
 import xyz.nifeather.morph.providers.animation.provider.PlayerAnimationProvider;
-import xiamomc.pluginbase.Annotations.Resolved;
 
 import java.util.List;
 import java.util.Objects;

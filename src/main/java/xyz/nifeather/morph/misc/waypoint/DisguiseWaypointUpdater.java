@@ -12,7 +12,10 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.misc.NmsRecord;
-import xyz.nifeather.morph.misc.waypoint.connection.*;
+import xyz.nifeather.morph.misc.waypoint.connection.IMorphRealtimeWaypointConnection;
+import xyz.nifeather.morph.misc.waypoint.connection.MorphAzimuthWaypointConnection;
+import xyz.nifeather.morph.misc.waypoint.connection.MorphBlockConnection;
+import xyz.nifeather.morph.misc.waypoint.connection.MorphChunkConnection;
 import xyz.nifeather.morph.providers.disguise.DefaultDisguiseProvider;
 
 import java.util.Collections;

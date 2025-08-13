@@ -12,8 +12,6 @@ import xyz.nifeather.morph.backends.DisguiseWrapper;
 import xyz.nifeather.morph.backends.server.renderer.ServerRenderer;
 import xyz.nifeather.morph.backends.server.renderer.utilties.WatcherUtils;
 import xyz.nifeather.morph.messages.BackendStrings;
-import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
-import xyz.nifeather.morph.misc.disguiseProperty.values.OffTreeProperties;
 import xyz.nifeather.morph.utilities.NbtUtils;
 
 import javax.annotation.Nullable;

@@ -1,6 +1,5 @@
 package xyz.nifeather.morph.misc.integrations.placeholderapi.builtin;
 
-import me.clip.placeholderapi.PlaceholderAPI;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
