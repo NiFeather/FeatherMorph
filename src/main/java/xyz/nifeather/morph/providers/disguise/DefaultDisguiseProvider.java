@@ -170,6 +170,7 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
                 "Player don't have a '%s' attribute, you might using a broken server implementation.".formatted(attribute.key().asString()));
     }
 
+    @NotNull
     public static final NamespacedKey WAYPOINT_TRANSMIT_MODIFIER_KEY = Objects.requireNonNull(NamespacedKey.fromString("feathermorph:waypoint_transmit_modifier"));
 
     protected void mutePlayerWaypoint(Player player)

@@ -189,11 +189,7 @@ public class DisguiseWaypointUpdater implements WaypointTransmitter
             else
             {
                 var conn = new MorphBlockConnection(bindingState, icon, target);
-
-                synchronized (realtimeConnections)
-                {
-                    realtimeConnections.add(conn);
-                }
+                realtimeConnections.add(conn);
 
                 return Optional.of(conn);
             }
