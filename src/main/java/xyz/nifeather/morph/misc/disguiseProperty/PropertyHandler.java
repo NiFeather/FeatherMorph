@@ -81,6 +81,11 @@ public class PropertyHandler
         propertyMap.put(property, value);
     }
 
+    public boolean contains(SingleProperty<?> property)
+    {
+        return propertyMap.containsKey(property);
+    }
+
     @NotNull
     public <X> X get(SingleProperty<X> property)
     {

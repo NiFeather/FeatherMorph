@@ -917,6 +917,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             propertyHandler.initProperties(properties);
             propertyHandler.updateFromPropertiesInput(parameters.properties);
 
+            provider.setupProperties(state, targetEntity);
+
             propertyHandler.getAll().forEach((property, value) ->
             {
                 wrapper.writeProperty((SingleProperty<Object>) property, value);

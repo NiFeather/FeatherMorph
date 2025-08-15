@@ -43,6 +43,8 @@ public class DisguiseProperties
 
         register(EntityType.ENDER_DRAGON, new EnderDragonProperties());
         register(EntityType.HAPPY_GHAST, new HappyGhastProperties());
+
+        register(EntityType.PLAYER, new PlayerProperties());
     }
 
     public Map<EntityType, AbstractProperties> getAll()

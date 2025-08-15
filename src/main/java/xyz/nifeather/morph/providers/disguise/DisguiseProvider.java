@@ -80,6 +80,16 @@ public abstract class DisguiseProvider extends MorphPluginObject
     public abstract boolean updateDisguise(Player player, DisguiseState state);
 
     /**
+     * Setup properties for the given disguise.<br>
+     * Please note that this will apply before player inputs, means that players may override changes made by the provider
+     * @param state The disguise to setup
+     * @param targetEntity Player's targeted entity, NULL if none
+     */
+    public void setupProperties(DisguiseState state, @Nullable Entity targetEntity)
+    {
+    }
+
+    /**
      * 获取某个伪装的初始化指令
      * @param state 目标伪装
      * @return 要对客户端发送的指令列表

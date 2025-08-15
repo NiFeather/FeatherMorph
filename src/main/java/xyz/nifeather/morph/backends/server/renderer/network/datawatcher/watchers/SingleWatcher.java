@@ -408,6 +408,16 @@ public abstract class SingleWatcher extends MorphPluginObject
         else return (X) option;
     }
 
+    public boolean isValuePresent(SingleValue<?> singleValue)
+    {
+        return isValuePresent(singleValue.index());
+    }
+
+    public boolean isValuePresent(int index)
+    {
+        return this.registry.containsKey(index);
+    }
+
     /**
      * Gets the override values for this watcher
      * @apiNote This doesn't include values in the common registry!

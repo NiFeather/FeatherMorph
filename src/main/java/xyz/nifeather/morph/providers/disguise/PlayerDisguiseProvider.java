@@ -9,6 +9,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.MainHand;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -21,6 +22,8 @@ import xyz.nifeather.morph.misc.DisguiseMeta;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.misc.DisguiseTypes;
 import xyz.nifeather.morph.misc.MorphGameProfile;
+import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.values.PlayerProperties;
 import xyz.nifeather.morph.misc.skins.PlayerSkinProvider;
 import xyz.nifeather.morph.network.commands.S2C.set.S2CSetProfileCommand;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
@@ -125,12 +128,42 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
     private MorphClientHandler clientHandler;
 
     @Override
+    public void setupProperties(DisguiseState state, @Nullable Entity targetEntity)
+    {
+        if (!(targetEntity instanceof Player targetPlayer))
+            return;
+
+        var propertyHandler = state.disguisePropertyHandler();
+        var playerProperties = DisguiseProperties.INSTANCE.getOrThrow(PlayerProperties.class);
+
+        if (!propertyHandler.contains(playerProperties.MAIN_HAND)) //todo: Remove this when we deprecated NBT usage
+            propertyHandler.set(playerProperties.MAIN_HAND, targetPlayer.getMainHand());
+
+        super.setupProperties(state, targetEntity);
+    }
+
+    //todo: Remove this when we deprecated NBT usage
+    private void setupPropertiesNBT(DisguiseState state, @Nullable Entity targetEntity)
+    {
+        if (!(targetEntity instanceof Player targetPlayer))
+            return;
+
+        CompoundTag compoundTag = new CompoundTag();
+        compoundTag.putBoolean("feathermorph:is_left_hand", targetPlayer.getMainHand() == MainHand.LEFT);
+
+        state.getDisguiseWrapper().mergeCompound(compoundTag);
+    }
+
+    @Override
     public void onPostConstructDisguise(DisguiseState state, @Nullable Entity targetEntity)
     {
         super.onPostConstructDisguise(state, targetEntity);
 
         var wrapper = state.getDisguiseWrapper();
         var player = state.getPlayer();
+
+        //todo: Remove this when we deprecated NBT usage
+        setupPropertiesNBT(state, targetEntity);
 
         wrapper.subscribeEvent(this, WrapperEvent.SKIN_SET, skin ->
                 clientHandler.sendCommand(player, new S2CSetProfileCommand(state.getProfileNbtString())));
