@@ -695,18 +695,6 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
         playerLoginPendingFutures.discard(player, reason);
         playerConnectionFutures.discard(player, reason);
 
-        if (!this.playerSessionMap.containsKey(player))
-        {
-            if (FeatherMorphMain.getInstance().doInternalDebugOutput)
-                logger.info("Skipping disconnect for player %s since it does not have a session.".formatted(player));
-
-            return;
-        }
-
-        this.sendCommand(player, new S2CUnAuthCommand());
-
-        this.playerSessionMap.remove(player);
-
         var playerConfig = manager.getPlayerMeta(player);
 
         var state = manager.getDisguiseStateFor(player);
@@ -714,6 +702,11 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
             state.setServerSideSelfVisible(playerConfig.showDisguiseToSelf);
 
         this.playerCommandHandlerMap.remove(player);
+
+        if (getSession(player) != null)
+            this.sendCommand(player, new S2CUnAuthCommand());
+
+        this.playerSessionMap.remove(player);
     }
 
     //region C2S(Serverbound) commands
