@@ -1,7 +1,6 @@
 package xyz.nifeather.morph.backends.server;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import net.minecraft.nbt.CompoundTag;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.EntityType;
 import org.jetbrains.annotations.Nullable;
@@ -26,8 +25,6 @@ public class ServerDisguise implements Cloneable
     public ChatColor glowingColor = ChatColor.WHITE;
 
     public final Map<String, Object> customData = new Object2ObjectOpenHashMap<>();
-
-    public final CompoundTag compoundTag = new CompoundTag();
 
     public boolean isBaby;
 
@@ -60,8 +57,6 @@ public class ServerDisguise implements Cloneable
         obj.type = this.type;
         obj.name = this.name;
         obj.glowingColor = this.glowingColor;
-
-        obj.compoundTag.merge(this.compoundTag);
 
         obj.customData.putAll(this.customData);
 

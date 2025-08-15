@@ -228,38 +228,9 @@ public class EntityWatcher extends SingleWatcher
     }
 
     @Override
-    public void mergeFromCompound(CompoundTag nbt)
-    {
-        super.mergeFromCompound(nbt);
-
-        if (nbt.contains("CustomName"))
-        {
-            var name = nbt.getString("CustomName").orElseThrow();
-
-            try
-            {
-                var component = JSONComponentSerializer.json().deserialize(name);
-
-                writePersistent(ValueIndex.BASE_ENTITY.CUSTOM_NAME, Optional.of(component));
-            }
-            catch (Throwable t)
-            {
-                logger.error("Unable to parse CustomName '%s': %s".formatted(name, t.getMessage()));
-            }
-        }
-
-        if (nbt.contains("CustomNameVisible"))
-        {
-            var visible = nbt.getBoolean("CustomNameVisible").orElseThrow();
-            writePersistent(ValueIndex.BASE_ENTITY.CUSTOM_NAME_VISIBLE, visible);
-        }
-    }
-
-    @Override
+    //@Deprecated(forRemoval = true)
     public void writeToCompound(CompoundTag nbt)
     {
-        super.writeToCompound(nbt);
-
         var customName = read(ValueIndex.BASE_ENTITY.CUSTOM_NAME);
         customName.ifPresent(c -> nbt.putString("CustomName", JSONComponentSerializer.json().serialize(c)));
 

@@ -1,15 +1,19 @@
 package xyz.nifeather.morph.misc.disguiseProperty.values;
 
 import it.unimi.dsi.fastutil.Pair;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Rabbit;
 import org.bukkit.entity.Rabbit.Type;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
+import xyz.nifeather.morph.utilities.DisguiseUtils;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class RabbitProperties extends AbstractProperties
+public class RabbitProperties extends BaseLivingEntityProperties<Rabbit>
 {
     private final Map<String, Type> typeMap = new ConcurrentHashMap<>();
 
@@ -41,6 +45,32 @@ public class RabbitProperties extends AbstractProperties
                 return Pair.of(VARIANT, variant);
         }
 
-        return null;
+        return super.parseSingleInput(key, value);
+    }
+
+    @Override
+    protected @Nullable Rabbit tryCastEntity(@Nullable Entity targetEntity)
+    {
+        return targetEntity instanceof Rabbit rabbit ? rabbit : null;
+    }
+
+    @Override
+    protected void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull Rabbit targetEntity)
+    {
+        propertyHandler.set(VARIANT, targetEntity.getRabbitType());
+    }
+
+    @Override
+    protected void setupDefaultProperties(PropertyHandler propertyHandler)
+    {
+        propertyHandler.set(VARIANT, DisguiseUtils.pick(VARIANT.getRandomValues()));
+    }
+
+    @Override
+    public Map<String, String> mapToNetworkProperties(PropertyHandler propertyHandler)
+    {
+        return Map.of(
+                "variant", propertyHandler.get(VARIANT).name().toLowerCase()
+        );
     }
 }

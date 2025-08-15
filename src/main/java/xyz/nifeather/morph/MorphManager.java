@@ -42,6 +42,8 @@ import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 import xyz.nifeather.morph.misc.disguiseProperty.values.OffTreeProperties;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
+import xyz.nifeather.morph.network.Constants;
+import xyz.nifeather.morph.network.commands.S2C.S2CUpdatePropertiesCommand;
 import xyz.nifeather.morph.network.commands.S2C.admin.reveal.S2CRemoveAdminRevealCommand;
 import xyz.nifeather.morph.network.commands.S2C.admin.reveal.S2CSyncAdminRevealCommand;
 import xyz.nifeather.morph.network.commands.S2C.set.*;
@@ -861,9 +863,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                     wrapper, provider, equipment,
                     clientHandler.getPlayerOption(player, true), playerMorphConfig);
 
-            if (result.isCopy())
-                outComingState.setSessionData(DATAKEY_SKIP_PROPERTIES, true);
-
             return DisguiseBuildResult.of(outComingState, provider, disguiseMeta, targetEntity);
         }
         catch (IllegalArgumentException iae)
@@ -890,11 +889,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         }
     }
 
-    /**
-     * Key that indicates whether a disguise state should have random properties set on build.
-     */
-    public static final String DATAKEY_SKIP_PROPERTIES = "skip_properties_init";
-
     private void buildDisguise(DisguiseBuildResult result,
                                MorphParameters parameters,
                                PlayerMeta playerOptions)
@@ -909,27 +903,16 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         var state = result.state();
         var wrapper = state.getDisguiseWrapper();
 
-        if (!state.getSessionDataOr(DATAKEY_SKIP_PROPERTIES, Boolean.class, false))
-        {
-            // 同步伪装属性
-            var propertyHandler = state.disguisePropertyHandler();
-            var properties = disguiseProperties.get(state.getEntityType());
-            propertyHandler.initProperties(properties);
-            propertyHandler.updateFromPropertiesInput(parameters.properties);
+        // 设定形态属性
+        var propertyHandler = state.disguisePropertyHandler();
+        var properties = disguiseProperties.get(state.getEntityType());
+        propertyHandler.initProperties(properties);
 
-            provider.setupProperties(state, targetEntity);
+        provider.setupProperties(state, targetEntity);
+        propertyHandler.updateFromPropertiesInput(parameters.propertiesInput);
 
-            propertyHandler.getAll().forEach((property, value) ->
-            {
-                wrapper.writeProperty((SingleProperty<Object>) property, value);
-            });
-        }
-
-        // 初始化nbt
-        var initialNbtCompound = provider.getInitialNbtCompound(state, targetEntity, false);
-
-        if (initialNbtCompound != null)
-            state.getDisguiseWrapper().mergeCompound(initialNbtCompound);
+        propertyHandler.getAll().forEach((property, value) ->
+                wrapper.writeProperty((SingleProperty<Object>) property, value));
 
         // 设定显示名称
         if (targetEntity != null && targetEntity.customName() != null)
@@ -1031,14 +1014,14 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         if (provider.validForClient(newState))
         {
             clientHandler.sendCommand(player, new S2CSetSNbtCommand(newState.getCulledNbtString()));
-
-            clientHandler.sendCommand(player, new S2CSetSelfViewIdentifierCommand(provider.getSelfViewIdentifier(newState)));
             provider.getInitialSyncCommands(newState).forEach(s -> clientHandler.sendCommand(player, s));
 
             // 设置Profile
             if (newState.haveProfile())
                 clientHandler.sendCommand(player, new S2CSetProfileCommand(newState.getProfileNbtString()));
         }
+
+        clientHandler.sendCommand(player, new S2CUpdatePropertiesCommand(newState.disguisePropertyHandler().toNetworkProperties()));
 
         // 设置可用动作
         var availableAnimations = provider.getAnimationProvider()
@@ -1164,8 +1147,15 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         var player = state.getPlayer();
 
         clientHandler.updateCurrentIdentifier(player, state.getDisguiseIdentifier());
-        clientHandler.sendCommand(player, new S2CSetSNbtCommand(state.getCulledNbtString()));
-        clientHandler.sendCommand(player, new S2CSetSelfViewIdentifierCommand(state.getProvider().getSelfViewIdentifier(state)));
+
+        var clientSession = clientHandler.getSession(player);
+
+        // For legacy client compat
+        //todo: Remove at 2026, or 1.22 comes out
+        if (clientSession != null && clientSession.apiVersion < Constants.ApiLevel.NETWORK_DISGUISE_PROPERTIES.protocolVersion)
+            clientHandler.sendCommand(player, new S2CSetSNbtCommand(state.getCulledNbtString()));
+
+        clientHandler.sendCommand(player, new S2CUpdatePropertiesCommand(state.disguisePropertyHandler().toNetworkProperties()));
 
         //刷新主动
         state.applyCooldownToClient();
@@ -1305,7 +1295,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         // 向客户端同步伪装属性
         clientHandler.updateCurrentIdentifier(player, null);
-        clientHandler.sendCommand(player, new S2CSetSelfViewIdentifierCommand(null));
 
         var revLevel = revealingHandler.getRevealingState(player).getBaseValue();
         clientHandler.sendCommand(player, new S2CSetMobRevealCommand(revLevel));

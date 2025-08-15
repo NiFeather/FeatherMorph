@@ -277,8 +277,6 @@ public class ServerBackend extends DisguiseBackend<ServerDisguise, ServerDisguis
         var snbt = spilt[1];
         var typeId = spilt[0];
 
-        CompoundTag compoundTag;
-
         var typeMatch = Arrays.stream(EntityType.values()).filter(
                 t -> t != EntityType.UNKNOWN && t.getKey().asString().equals(typeId)
         ).findFirst().orElse(null);
@@ -289,22 +287,9 @@ public class ServerBackend extends DisguiseBackend<ServerDisguise, ServerDisguis
             return null;
         }
 
-        try
-        {
-            compoundTag = NbtUtils.toCompoundTag(snbt);
-        }
-        catch (Throwable t)
-        {
-            logger.error("Unable to parse sNBT: " + t.getMessage());
-            logger.error("Raw string: '%s'".formatted(snbt));
-            return null;
-        }
-
         var instance = new ServerDisguise(typeMatch);
-        var wrapper = new ServerDisguiseWrapper(instance, this);
-        wrapper.mergeCompound(compoundTag);
 
-        return wrapper;
+        return new ServerDisguiseWrapper(instance, this);
     }
 
     /**
@@ -320,10 +305,8 @@ public class ServerBackend extends DisguiseBackend<ServerDisguise, ServerDisguis
         if (!(wrapper instanceof ServerDisguiseWrapper serverWrapper))
             return null;
 
-        var compound = serverWrapper.getCompound();
-        var nbtStr = NbtUtils.getCompoundString(compound);
         var type = wrapper.getEntityType().getKey().asString();
-        return "%s@%s".formatted(type, nbtStr);
+        return "%s@%s".formatted(type, "NIL");
     }
 
     @Override

@@ -19,6 +19,7 @@ import xyz.nifeather.morph.misc.NmsRecord;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class DisguiseUtils
 {
@@ -136,4 +137,16 @@ public class DisguiseUtils
     }
 
     //endregion Ambient sound
+
+    public static <X> X pick(List<X> list)
+    {
+        var random = ThreadLocalRandom.current();
+        return list.get(random.nextInt(list.size()));
+    }
+
+    public static <X> X pick(X[] array)
+    {
+        var random = ThreadLocalRandom.current();
+        return array[random.nextInt(array.length)];
+    }
 }

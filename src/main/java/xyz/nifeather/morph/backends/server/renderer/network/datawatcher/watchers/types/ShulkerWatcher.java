@@ -1,5 +1,6 @@
 package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.types;
 
+import org.bukkit.DyeColor;
 import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
 import org.bukkit.entity.EntityType;
@@ -8,6 +9,9 @@ import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEnt
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntry;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.misc.AnimationNames;
+import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
+import xyz.nifeather.morph.misc.disguiseProperty.values.ShulkerProperties;
 
 public class ShulkerWatcher extends LivingEntityWatcher
 {
@@ -22,6 +26,20 @@ public class ShulkerWatcher extends LivingEntityWatcher
         super.initRegistry();
 
         register(ValueIndex.SHULKER);
+    }
+
+    @Override
+    protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
+    {
+        var properties = DisguiseProperties.INSTANCE.getOrThrow(ShulkerProperties.class);
+
+        if (properties.DYE_COLOR.equals(property))
+        {
+            var val = (DyeColor) value;
+            this.writePersistent(ValueIndex.SHULKER.COLOR_ID, val.getWoolData());
+        }
+
+        super.onPropertyWrite(property, value);
     }
 
     @Override

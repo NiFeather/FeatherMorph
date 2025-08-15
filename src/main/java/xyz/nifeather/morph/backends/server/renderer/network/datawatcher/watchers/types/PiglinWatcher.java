@@ -1,6 +1,5 @@
 package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.types;
 
-import net.minecraft.nbt.CompoundTag;
 import org.bukkit.Sound;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -47,15 +46,4 @@ public class PiglinWatcher extends LivingEntityWatcher
         }
     }
 
-    @Override
-    public void mergeFromCompound(CompoundTag nbt)
-    {
-        super.mergeFromCompound(nbt);
-
-        if (nbt.contains("IsBaby"))
-            writePersistent(ValueIndex.PIGLIN.IS_BABY, nbt.getBoolean("IsBaby").orElseThrow());
-
-        //if (nbt.contains("IsImmuneToZombification"))
-        //    write(ValueIndex.PIGLIN.IMMUNE_TO_ZOMBIFICATION, nbt.getBoolean("IsImmuneToZombification"));
-    }
 }

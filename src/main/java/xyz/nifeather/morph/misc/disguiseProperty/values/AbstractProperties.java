@@ -2,9 +2,13 @@ package xyz.nifeather.morph.misc.disguiseProperty.values;
 
 import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import org.bukkit.entity.Entity;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import xyz.nifeather.morph.FeatherMorphMain;
+import xyz.nifeather.morph.misc.DisguiseState;
+import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 
 import java.util.List;
@@ -12,7 +16,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-public abstract class AbstractProperties
+public abstract class AbstractProperties<E extends Entity>
 {
     protected <X> SingleProperty<X> getSingle(String name, X val)
     {
@@ -63,4 +67,22 @@ public abstract class AbstractProperties
 
         return map;
     }
+
+    @Nullable
+    protected abstract E tryCastEntity(@Nullable Entity targetEntity);
+
+    public final void setupProperties(DisguiseState state, @Nullable Entity targetEntity)
+    {
+        var cast = tryCastEntity(targetEntity);
+
+        if (cast != null)
+            setupPropertiesFromEntity(state.disguisePropertyHandler(), cast);
+        else
+            setupDefaultProperties(state.disguisePropertyHandler());
+    }
+
+    protected abstract void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull E targetEntity);
+    protected abstract void setupDefaultProperties(PropertyHandler propertyHandler);
+
+    public abstract Map<String, String> mapToNetworkProperties(PropertyHandler propertyHandler);
 }

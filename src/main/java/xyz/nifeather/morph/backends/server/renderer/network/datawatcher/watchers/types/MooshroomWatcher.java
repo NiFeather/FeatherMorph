@@ -40,15 +40,6 @@ public class MooshroomWatcher extends LivingEntityWatcher
     }
 
     @Override
-    public void mergeFromCompound(CompoundTag nbt)
-    {
-        super.mergeFromCompound(nbt);
-
-        if (nbt.contains("Type"))
-            writePersistent(ValueIndex.MOOSHROOM.DATA_TYPE, nbt.getString("Type").orElseThrow().equals("red") ? MooshroomValues.RED : MooshroomValues.BROWN);
-    }
-
-    @Override
     public void writeToCompound(CompoundTag nbt)
     {
         super.writeToCompound(nbt);

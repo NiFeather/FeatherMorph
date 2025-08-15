@@ -115,15 +115,6 @@ public class ZombieVillagerWatcher extends ZombieWatcher
     }
 
     @Override
-    public void mergeFromCompound(CompoundTag nbt)
-    {
-        super.mergeFromCompound(nbt);
-
-        if (nbt.contains("VillagerData"))
-            mergeFromVillagerData(nbt.getCompound("VillagerData").orElseThrow());
-    }
-
-    @Override
     public void writeToCompound(CompoundTag nbt)
     {
         super.writeToCompound(nbt);

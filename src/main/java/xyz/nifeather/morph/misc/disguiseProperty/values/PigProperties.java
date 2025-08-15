@@ -3,14 +3,18 @@ package xyz.nifeather.morph.misc.disguiseProperty.values;
 import io.papermc.paper.registry.RegistryAccess;
 import io.papermc.paper.registry.RegistryKey;
 import it.unimi.dsi.fastutil.Pair;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Pig;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
+import xyz.nifeather.morph.utilities.DisguiseUtils;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class PigProperties extends AbstractProperties
+public class PigProperties extends BaseLivingEntityProperties<Pig>
 {
     private final Map<String, Pig.Variant> variantMap = new ConcurrentHashMap<>();
 
@@ -39,6 +43,32 @@ public class PigProperties extends AbstractProperties
                 return Pair.of(VARIANT, match);
         }
 
-        return null;
+        return super.parseSingleInput(key, value);
+    }
+
+    @Override
+    protected @Nullable Pig tryCastEntity(@Nullable Entity targetEntity)
+    {
+        return targetEntity instanceof Pig pig ? pig : null;
+    }
+
+    @Override
+    protected void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull Pig targetEntity)
+    {
+        propertyHandler.set(VARIANT, targetEntity.getVariant());
+    }
+
+    @Override
+    protected void setupDefaultProperties(PropertyHandler propertyHandler)
+    {
+        propertyHandler.set(VARIANT, DisguiseUtils.pick(VARIANT.getRandomValues()));
+    }
+
+    @Override
+    public Map<String, String> mapToNetworkProperties(PropertyHandler propertyHandler)
+    {
+        return Map.of(
+                "variant", propertyHandler.get(VARIANT).key().asString()
+        );
     }
 }

@@ -1,6 +1,5 @@
 package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.types.horses;
 
-import net.minecraft.nbt.CompoundTag;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.types.AgeableMobWatcher;
@@ -21,12 +20,4 @@ public class AbstractHorseWatcher extends AgeableMobWatcher
         super(bindingPlayer, entityType);
     }
 
-    @Override
-    public void mergeFromCompound(CompoundTag nbt)
-    {
-        super.mergeFromCompound(nbt);
-
-        if (nbt.contains("Age"))
-            writePersistent(ValueIndex.ABSTRACT_HORSE.IS_BABY, nbt.getInt("Age").orElseThrow() < 0);
-    }
 }

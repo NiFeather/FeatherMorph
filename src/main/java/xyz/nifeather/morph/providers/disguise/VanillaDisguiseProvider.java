@@ -2,7 +2,6 @@ package xyz.nifeather.morph.providers.disguise;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.kyori.adventure.text.Component;
-import net.minecraft.nbt.CompoundTag;
 import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
@@ -27,6 +26,7 @@ import xyz.nifeather.morph.misc.DisguiseTypes;
 import xyz.nifeather.morph.misc.NmsRecord;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.values.ArmorStandProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.values.SlimeMagmaProperties;
 import xyz.nifeather.morph.providers.animation.AnimationProvider;
 import xyz.nifeather.morph.providers.animation.provider.VanillaAnimationProvider;
 import xyz.nifeather.morph.utilities.*;
@@ -134,24 +134,6 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
         // Make IDE happy
         Objects.requireNonNull(constructedDisguise);
 
-        var canConstructFromEntity = canConstruct(disguiseMeta, targetEntity, null);
-
-        //手动指定史莱姆和岩浆怪的大小
-        if (entityType == EntityType.SLIME || entityType == EntityType.MAGMA_CUBE)
-        {
-            if (canConstructFromEntity)
-            {
-                var size = (targetEntity instanceof Slime slime)
-                        ? slime.getSize()
-                        : new Random().nextInt(0, 4); //史莱姆的大小其实是0~3
-
-                var initialTag = new CompoundTag();
-
-                initialTag.putInt("Size", size);
-                constructedDisguise.mergeCompound(initialTag);
-            }
-        }
-
         // 检查是否有足够的空间
         if (modifyBoundingBoxes.get() && checkSpaceBoundingBox.get())
         {
@@ -166,7 +148,7 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
             }
         }
 
-        return DisguiseResult.success(constructedDisguise, copyResult.isCopy());
+        return DisguiseResult.success(constructedDisguise);
     }
 
     @Override
@@ -438,27 +420,6 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
             tryModifyPlayerDimensions(player, state.getDisguiseWrapper());
 
         mutePlayerWaypoint(player);
-    }
-
-    @Override
-    public @Nullable CompoundTag getInitialNbtCompound(DisguiseState state, @Nullable Entity targetEntity, boolean enableCulling)
-    {
-        var info = getMorphManager().getDisguiseMeta(state.getDisguiseIdentifier());
-
-        var rawCompound = targetEntity != null && canConstruct(info, targetEntity, null)
-                ? NbtUtils.getRawTagCompound(targetEntity)
-                : new CompoundTag();
-
-        var theirDisguise = getMorphManager().getDisguiseStateFor(targetEntity);
-
-        if (theirDisguise != null)
-            rawCompound = theirDisguise.getDisguiseWrapper().getCompound();
-
-        // ???
-        // if (targetEntity == null || targetEntity.getType() != state.getEntityType())
-        //    rawCompound.merge(state.getDisguiseWrapper().getCompound());
-
-        return enableCulling ? cullNBT(rawCompound) : rawCompound;
     }
 
     @Override

@@ -78,78 +78,60 @@ public class ArmorStandWatcher extends InventoryLivingWatcher
         {
             var val = (Boolean) value;
             this.writePersistent(ValueIndex.ARMOR_STAND.DATA_FLAGS, getArmorStandFlags(this.isSmall(), val, this.noBasePlate()));
+            return;
+        }
+
+        if (property.equals(properties.HAS_BASE_PLATE))
+        {
+            var val = (Boolean) value;
+            this.writePersistent(ValueIndex.ARMOR_STAND.DATA_FLAGS, getArmorStandFlags(this.isSmall(), this.showArms(), val));
+            return;
+        }
+
+        if (property.equals(properties.SMALL))
+        {
+            var val = (Boolean) value;
+            this.writePersistent(ValueIndex.ARMOR_STAND.DATA_FLAGS, getArmorStandFlags(val, this.showArms(), this.noBasePlate()));
+            return;
+        }
+
+        if (property.equals(properties.HEAD_ROTATION))
+        {
+            var val = (Vector3f) value;
+            this.writePersistent(ValueIndex.ARMOR_STAND.HEAD_ROTATION, val);
+        }
+
+        if (property.equals(properties.BODY_ROTATION))
+        {
+            var val = (Vector3f) value;
+            this.writePersistent(ValueIndex.ARMOR_STAND.BODY_ROTATION, val);
+        }
+
+        if (property.equals(properties.LEFT_ARM_ROTATION))
+        {
+            var val = (Vector3f) value;
+            this.writePersistent(ValueIndex.ARMOR_STAND.LEFT_ARM_ROTATION, val);
+        }
+
+        if (property.equals(properties.RIGHT_ARM_ROTATION))
+        {
+            var val = (Vector3f) value;
+            this.writePersistent(ValueIndex.ARMOR_STAND.RIGHT_ARM_ROTATION, val);
+        }
+
+        if (property.equals(properties.LEFT_LEG_ROTATION))
+        {
+            var val = (Vector3f) value;
+            this.writePersistent(ValueIndex.ARMOR_STAND.LEFT_LEG_ROTATION, val);
+        }
+
+        if (property.equals(properties.RIGHT_LEG_ROTATION))
+        {
+            var val = (Vector3f) value;
+            this.writePersistent(ValueIndex.ARMOR_STAND.RIGHT_LEG_ROTATION, val);
         }
 
         super.onPropertyWrite(property, value);
-    }
-
-    @Override
-    public void mergeFromCompound(CompoundTag nbt)
-    {
-        super.mergeFromCompound(nbt);
-        boolean small = isSmall();
-        boolean noBasePlate = noBasePlate();
-        boolean showArms = showArms();
-
-        if (nbt.contains("Small"))
-            small = nbt.getBoolean("Small").orElseThrow();
-
-        if (nbt.contains("NoBasePlate"))
-            noBasePlate = nbt.getBoolean("NoBasePlate").orElseThrow();
-
-        if (nbt.contains("ShowArms"))
-            showArms = nbt.getBoolean("ShowArms").orElseThrow();
-
-        //Tag "Invisible" is not supported as it's synced with the player
-
-        writePersistent(ValueIndex.ARMOR_STAND.DATA_FLAGS, getArmorStandFlags(small, showArms, noBasePlate));
-
-        if (nbt.contains("Pose"))
-        {
-            var poseCompound = nbt.getCompound("Pose").orElseThrow();
-
-            if (poseCompound.contains("Body"))
-            {
-                writePersistent(ValueIndex.ARMOR_STAND.BODY_ROTATION,
-                        getVec3(poseCompound.getListOrEmpty("Body"),
-                                ValueIndex.ARMOR_STAND.BODY_ROTATION.defaultValue()));
-            }
-
-            if (poseCompound.contains("Head"))
-            {
-                writePersistent(ValueIndex.ARMOR_STAND.HEAD_ROTATION,
-                        getVec3(poseCompound.getListOrEmpty("Head"),
-                                ValueIndex.ARMOR_STAND.HEAD_ROTATION.defaultValue()));
-            }
-
-            if (poseCompound.contains("LeftArm"))
-            {
-                writePersistent(ValueIndex.ARMOR_STAND.LEFT_ARM_ROTATION,
-                        getVec3(poseCompound.getListOrEmpty("LeftArm"),
-                                ValueIndex.ARMOR_STAND.LEFT_ARM_ROTATION.defaultValue()));
-            }
-
-            if (poseCompound.contains("RightArm"))
-            {
-                writePersistent(ValueIndex.ARMOR_STAND.RIGHT_ARM_ROTATION,
-                        getVec3(poseCompound.getListOrEmpty("RightArm"),
-                                ValueIndex.ARMOR_STAND.RIGHT_ARM_ROTATION.defaultValue()));
-            }
-
-            if (poseCompound.contains("LeftLeg"))
-            {
-                writePersistent(ValueIndex.ARMOR_STAND.LEFT_LEG_ROTATION,
-                        getVec3(poseCompound.getListOrEmpty("LeftLeg"),
-                                ValueIndex.ARMOR_STAND.LEFT_LEG_ROTATION.defaultValue()));
-            }
-
-            if (poseCompound.contains("RightLeg"))
-            {
-                writePersistent(ValueIndex.ARMOR_STAND.RIGHT_LEG_ROTATION,
-                        getVec3(poseCompound.getListOrEmpty("RightLeg"),
-                                ValueIndex.ARMOR_STAND.RIGHT_LEG_ROTATION.defaultValue()));
-            }
-        }
     }
 
     private ListTag saveRotationOf(SingleValue<Vector3f> sv)

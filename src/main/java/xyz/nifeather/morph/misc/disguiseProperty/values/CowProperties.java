@@ -4,13 +4,17 @@ import io.papermc.paper.registry.RegistryAccess;
 import io.papermc.paper.registry.RegistryKey;
 import it.unimi.dsi.fastutil.Pair;
 import org.bukkit.entity.Cow;
+import org.bukkit.entity.Entity;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
+import xyz.nifeather.morph.utilities.DisguiseUtils;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class CowProperties extends AbstractProperties
+public class CowProperties extends BaseLivingEntityProperties<Cow>
 {
     private final Map<String, Cow.Variant> variantMap = new ConcurrentHashMap<>();
 
@@ -39,6 +43,32 @@ public class CowProperties extends AbstractProperties
                 return Pair.of(VARIANT, match);
         }
 
-        return null;
+        return super.parseSingleInput(key, value);
+    }
+
+    @Override
+    protected @Nullable Cow tryCastEntity(@Nullable Entity targetEntity)
+    {
+        return targetEntity instanceof Cow cow ? cow : null;
+    }
+
+    @Override
+    protected void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull Cow cow)
+    {
+        propertyHandler.set(VARIANT, cow.getVariant());
+    }
+
+    @Override
+    protected void setupDefaultProperties(PropertyHandler propertyHandler)
+    {
+        propertyHandler.set(VARIANT, DisguiseUtils.pick(VARIANT.getRandomValues()));
+    }
+
+    @Override
+    public Map<String, String> mapToNetworkProperties(PropertyHandler propertyHandler)
+    {
+        return Map.of(
+                "variant", propertyHandler.get(VARIANT).key().asString()
+        );
     }
 }

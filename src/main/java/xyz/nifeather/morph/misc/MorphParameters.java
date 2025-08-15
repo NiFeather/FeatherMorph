@@ -37,7 +37,7 @@ public class MorphParameters
     @Nullable
     public Entity targetedEntity;
 
-    public final Map<String, String> properties = new ConcurrentHashMap<>();
+    public final Map<String, String> propertiesInput = new ConcurrentHashMap<>();
 
     public MorphParameters setSource(CommandSender sender)
     {
@@ -76,14 +76,14 @@ public class MorphParameters
 
     public MorphParameters withProperties(Map<String, String> map)
     {
-        this.properties.putAll(map);
+        this.propertiesInput.putAll(map);
 
         return this;
     }
 
     public MorphParameters withProperties(@NotNull String key, @NotNull String value)
     {
-        this.properties.put(key, value);
+        this.propertiesInput.put(key, value);
 
         return this;
     }

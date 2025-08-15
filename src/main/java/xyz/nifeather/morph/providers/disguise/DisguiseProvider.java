@@ -1,30 +1,22 @@
 package xyz.nifeather.morph.providers.disguise;
 
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.kyori.adventure.text.Component;
-import net.minecraft.nbt.CompoundTag;
-import org.bukkit.craftbukkit.entity.CraftLivingEntity;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
-import xiamomc.pluginbase.Bindables.BindableList;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.backends.DisguiseBackend;
 import xyz.nifeather.morph.backends.DisguiseWrapper;
-import xyz.nifeather.morph.config.ConfigOption;
-import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.misc.DisguiseMeta;
 import xyz.nifeather.morph.misc.DisguiseState;
+import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.network.commands.S2C.AbstractS2CCommand;
 import xyz.nifeather.morph.providers.animation.AnimationProvider;
-import xyz.nifeather.morph.utilities.NbtUtils;
 
 import java.util.List;
-import java.util.regex.Pattern;
 
 /**
  * 负责提供伪装及其相关功能的组件。
@@ -87,6 +79,8 @@ public abstract class DisguiseProvider extends MorphPluginObject
      */
     public void setupProperties(DisguiseState state, @Nullable Entity targetEntity)
     {
+        var matchingProperty = DisguiseProperties.INSTANCE.get(state.getEntityType());
+        matchingProperty.setupProperties(state, targetEntity);
     }
 
     /**
@@ -110,66 +104,6 @@ public abstract class DisguiseProvider extends MorphPluginObject
     public boolean validForClient(DisguiseState state)
     {
         return false;
-    }
-
-    /**
-     * 获取此伪装的初始NBT（如果有），如果有目标实体则尝试复制目标实体的NBT
-     * @param state
-     * @param targetEntity
-     * @param enableCulling 是否要隐藏一些信息防止被客户端获取？
-     * @return
-     */
-    @Nullable
-    public CompoundTag getInitialNbtCompound(DisguiseState state, @Nullable Entity targetEntity, boolean enableCulling)
-    {
-        if (targetEntity instanceof CraftLivingEntity
-            && canConstruct(getMorphManager().getDisguiseMeta(state.getDisguiseIdentifier()), targetEntity, null))
-        {
-            var rawCompound = NbtUtils.getRawTagCompound(targetEntity);
-
-            return enableCulling ? cullNBT(rawCompound) : rawCompound;
-        }
-
-        return null;
-    }
-
-    private static final BindableList<String> blackListTags = new BindableList<>();
-    private static final BindableList<String> blackListPatterns = new BindableList<>();
-    private static boolean bindableInitialized;
-
-    @Initializer
-    private void load(MorphConfigManager configManager)
-    {
-        if (!bindableInitialized)
-        {
-            configManager.bind(String.class, blackListTags, ConfigOption.BLACKLIST_TAGS);
-            configManager.bind(String.class, blackListPatterns, ConfigOption.BLACKLIST_PATTERNS);
-
-            bindableInitialized = true;
-        }
-    }
-
-    public static CompoundTag cullNBT(CompoundTag compound)
-    {
-        if (compound == null) return null;
-
-        //compound.r() -> NBTCompound#remove()
-
-        blackListTags.forEach(compound::remove);
-
-        var toRemove = new ObjectArrayList<String>();
-
-        blackListPatterns.forEach(pattern ->
-        {
-            compound.forEach((id, tag) ->
-            {
-                if (Pattern.matches(pattern, id))
-                    toRemove.add(id);
-            });
-        });
-
-        toRemove.forEach(compound::remove);
-        return compound;
     }
 
     /**
@@ -244,7 +178,7 @@ public abstract class DisguiseProvider extends MorphPluginObject
 
         return ourDisguise == null
                 ? DisguiseResult.fail()
-                : DisguiseResult.success(ourDisguise, true);
+                : DisguiseResult.success(ourDisguise);
     }
 
     /**

@@ -3,13 +3,11 @@ package xyz.nifeather.morph.providers.disguise;
 import com.mojang.authlib.GameProfile;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.kyori.adventure.text.Component;
-import net.minecraft.nbt.CompoundTag;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.MainHand;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -121,38 +119,11 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
 
         //endregion Player Skin
 
-        return DisguiseResult.success(wrapper, result.isCopy());
+        return DisguiseResult.success(wrapper);
     }
 
     @Resolved(shouldSolveImmediately = true)
     private MorphClientHandler clientHandler;
-
-    @Override
-    public void setupProperties(DisguiseState state, @Nullable Entity targetEntity)
-    {
-        if (!(targetEntity instanceof Player targetPlayer))
-            return;
-
-        var propertyHandler = state.disguisePropertyHandler();
-        var playerProperties = DisguiseProperties.INSTANCE.getOrThrow(PlayerProperties.class);
-
-        if (!propertyHandler.contains(playerProperties.MAIN_HAND)) //todo: Remove this when we deprecated NBT usage
-            propertyHandler.set(playerProperties.MAIN_HAND, targetPlayer.getMainHand());
-
-        super.setupProperties(state, targetEntity);
-    }
-
-    //todo: Remove this when we deprecated NBT usage
-    private void setupPropertiesNBT(DisguiseState state, @Nullable Entity targetEntity)
-    {
-        if (!(targetEntity instanceof Player targetPlayer))
-            return;
-
-        CompoundTag compoundTag = new CompoundTag();
-        compoundTag.putBoolean("feathermorph:is_left_hand", targetPlayer.getMainHand() == MainHand.LEFT);
-
-        state.getDisguiseWrapper().mergeCompound(compoundTag);
-    }
 
     @Override
     public void onPostConstructDisguise(DisguiseState state, @Nullable Entity targetEntity)
@@ -161,9 +132,6 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
 
         var wrapper = state.getDisguiseWrapper();
         var player = state.getPlayer();
-
-        //todo: Remove this when we deprecated NBT usage
-        setupPropertiesNBT(state, targetEntity);
 
         wrapper.subscribeEvent(this, WrapperEvent.SKIN_SET, skin ->
                 clientHandler.sendCommand(player, new S2CSetProfileCommand(state.getProfileNbtString())));
@@ -266,16 +234,6 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
     public boolean validForClient(DisguiseState state)
     {
         return true;
-    }
-
-    @Override
-    public @Nullable CompoundTag getInitialNbtCompound(DisguiseState state, @Nullable Entity targetEntity, boolean enableCulling)
-    {
-        if (!(targetEntity instanceof Player targetPlayer)) return null;
-
-        if (!targetPlayer.getName().equals(DisguiseTypes.PLAYER.toStrippedId(state.getDisguiseIdentifier()))) return null;
-
-        return super.getInitialNbtCompound(state, targetEntity, enableCulling);
     }
 
     @Override

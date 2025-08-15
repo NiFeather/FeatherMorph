@@ -37,4 +37,17 @@ public class MathUtils
     {
         return a > b ? a : Math.max(b, c);
     }
+
+    public static int parseIntOr(String input, int defaultValue)
+    {
+        try
+        {
+            return Integer.parseInt(input);
+        }
+        catch (Throwable ignored)
+        {
+        }
+
+        return defaultValue;
+    }
 }

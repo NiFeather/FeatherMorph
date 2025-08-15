@@ -47,15 +47,6 @@ public class RabbitWatcher extends LivingEntityWatcher
     }
 
     @Override
-    public void mergeFromCompound(CompoundTag nbt)
-    {
-        super.mergeFromCompound(nbt);
-
-        if (nbt.contains("RabbitType"))
-            writePersistent(ValueIndex.RABBIT.RABBIT_TYPE, nbt.getInt("RabbitType").orElseThrow());
-    }
-
-    @Override
     public void writeToCompound(CompoundTag nbt)
     {
         super.writeToCompound(nbt);

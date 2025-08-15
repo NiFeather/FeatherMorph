@@ -115,18 +115,6 @@ public class VillagerWatcher extends LivingEntityWatcher
     }
 
     @Override
-    public void mergeFromCompound(CompoundTag nbt)
-    {
-        super.mergeFromCompound(nbt);
-
-        if (nbt.contains("VillagerData"))
-        {
-            var compound = nbt.getCompound("VillagerData").orElseThrow();
-            mergeFromVillagerData(compound);
-        }
-    }
-
-    @Override
     public void writeToCompound(CompoundTag nbt)
     {
         super.writeToCompound(nbt);

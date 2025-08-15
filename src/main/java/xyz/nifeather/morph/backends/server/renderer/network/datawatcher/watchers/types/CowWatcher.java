@@ -2,7 +2,6 @@ package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watcher
 
 import com.github.retrooper.packetevents.protocol.entity.cow.CowVariants;
 import net.minecraft.nbt.CompoundTag;
-import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Cow;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -45,26 +44,6 @@ public class CowWatcher extends AgeableMobWatcher
         }
 
         super.onPropertyWrite(property, value);
-    }
-
-    @Override
-    public void mergeFromCompound(CompoundTag nbt)
-    {
-        if (nbt.contains("variant"))
-        {
-            var idString = nbt.getString("variant").orElseThrow();
-            var idKey = NamespacedKey.fromString(idString);
-
-            if (idKey == null)
-                return;
-
-            var variant = Objects.requireNonNull(CowVariants.getRegistry().getByName(idString),
-                    "No packet version for NMS variant %s!".formatted(idString));
-
-            writePersistent(ValueIndex.COW.COW_VARIANT, variant);
-        }
-
-        super.mergeFromCompound(nbt);
     }
 
     @Override

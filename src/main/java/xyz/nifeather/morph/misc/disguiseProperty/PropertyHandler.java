@@ -7,6 +7,7 @@ import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.misc.disguiseProperty.values.AbstractProperties;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -19,46 +20,45 @@ public class PropertyHandler
     private final Map<SingleProperty<?>, Object> propertyMap = new ConcurrentHashMap<>();
     private final List<SingleProperty<?>> validProperties = new CopyOnWriteArrayList<>();
 
-    private final Random random = ThreadLocalRandom.current();
+    public Map<String, String> toNetworkProperties()
+    {
+        if (bindingProperties == null)
+        {
+            FeatherMorphMain.getInstance().getSLF4JLogger().warn("Trying to map network properties while a PropertyHandler has not been initialized?!");
+
+            return new HashMap<>();
+        }
+
+        return bindingProperties.mapToNetworkProperties(this);
+    }
 
     @Nullable
-    private AbstractProperties properties;
+    private AbstractProperties<?> bindingProperties;
 
-    public void initProperties(AbstractProperties properties)
+    public void initProperties(AbstractProperties<?> properties)
     {
         reset();
 
-        this.properties = properties;
+        this.bindingProperties = properties;
         validProperties.addAll(properties.getValues());
-        properties.getValues().forEach(this::initProperty);
     }
 
     public void updateFromPropertiesInput(Map<String, String> input)
     {
-        if (this.properties == null)
+        if (this.bindingProperties == null)
         {
-            FeatherMorphMain.getInstance().getSLF4JLogger().warn("Trying to update property input while the PropertyHandler has not been initialized?!");
+            FeatherMorphMain.getInstance().getSLF4JLogger().warn("Trying to update property input while a PropertyHandler has not been initialized?!");
             return;
         }
 
-        var results = this.properties.readFromPropertiesInput(input);
+        var results = this.bindingProperties.readFromPropertiesInput(input);
         results.forEach(this::writeGeneric);
-    }
-
-    private void initProperty(SingleProperty<?> property)
-    {
-        var random = property.getRandomValues();
-        if (!random.isEmpty())
-        {
-            var index = this.random.nextInt(random.size());
-            this.writeGeneric(property, random.get(index));
-        }
     }
 
     public void reset()
     {
         this.validProperties.clear();
-        this.properties = null;
+        this.bindingProperties = null;
         propertyMap.clear();
     }
 
@@ -74,7 +74,7 @@ public class PropertyHandler
     {
         if (!validProperties.contains(property))
         {
-            FeatherMorphMain.getInstance().getSLF4JLogger().warn("The given property '%s' doesn't exist in '%s'".formatted(property.id(), this.properties));
+            FeatherMorphMain.getInstance().getSLF4JLogger().warn("The given property '%s' doesn't exist in '%s'".formatted(property.id(), this.bindingProperties));
             return;
         }
 

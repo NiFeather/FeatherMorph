@@ -35,15 +35,6 @@ public class HappyGhastWatcher extends LivingEntityWatcher
     }
 
     @Override
-    public void mergeFromCompound(CompoundTag nbt)
-    {
-        nbt.getInt("Age")
-                .ifPresent(i -> this.writePersistent(ValueIndex.HAPPY_GHAST.IS_BABY, i < 0));
-
-        super.mergeFromCompound(nbt);
-    }
-
-    @Override
     protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
         if (property.equals(properties.IS_GHASTLING))

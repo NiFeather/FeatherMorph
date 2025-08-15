@@ -698,19 +698,11 @@ public class DisguiseState extends MorphPluginObject
 
     //endregion abilityFlag
 
-    //region NBT
-
-    public String getFullNbtString()
+    @Deprecated
+    public String getCulledNbtString()
     {
         return NbtUtils.getCompoundString(disguiseWrapper.getCompound());
     }
-
-    public String getCulledNbtString()
-    {
-        return NbtUtils.getCompoundString(DisguiseProvider.cullNBT(disguiseWrapper.getCompound()));
-    }
-
-    //endregion
 
     //region ProfileNBT
 
@@ -719,8 +711,7 @@ public class DisguiseState extends MorphPluginObject
         if (!haveProfile())
              return "{}";
 
-        var s = NbtUtils.getCompoundString(NbtUtils.toCompoundTag(disguiseWrapper.getSkin()));
-        return s;
+        return NbtUtils.getCompoundString(NbtUtils.toCompoundTag(disguiseWrapper.getSkin()));
     }
 
     public boolean haveProfile()

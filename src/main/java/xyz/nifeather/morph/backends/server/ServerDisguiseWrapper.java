@@ -3,8 +3,6 @@ package xyz.nifeather.morph.backends.server;
 import com.mojang.authlib.GameProfile;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
-import net.minecraft.nbt.TagType;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -28,7 +26,6 @@ import xyz.nifeather.morph.misc.DisguiseEquipment;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 import xyz.nifeather.morph.misc.disguiseProperty.values.OffTreeProperties;
-import xyz.nifeather.morph.utilities.NbtUtils;
 
 import java.util.Map;
 import java.util.Objects;
@@ -49,52 +46,14 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
     }
 
     @Override
-    public void mergeCompound(CompoundTag compoundTag)
+    public CompoundTag getCompound()
     {
-        this.instance.compoundTag.merge(compoundTag);
-        this.instance.isBaby = NbtUtils.isBabyForType(getEntityType(), compoundTag);
-
-        if (this.getEntityType() == EntityType.MAGMA_CUBE || this.getEntityType() == EntityType.SLIME)
-            resetDimensions();
+        var tagCopy = new CompoundTag();
 
         if (bindingWatcher != null)
-        {
-            bindingWatcher.mergeFromCompound(compoundTag);
-
-            if (bindingWatcher instanceof AgeableMobWatcher)
-                bindingWatcher.writePersistent(ValueIndex.AGEABLE_MOB.IS_BABY, instance.isBaby);
-
-            if (compoundTag.contains("Small")) instance.armorStandSmall = compoundTag.getBoolean("Small").orElse(false);
-            if (compoundTag.contains("NoBasePlate")) instance.armorStandNoBasePlate = compoundTag.getBoolean("NoBasePlate").orElse(false);
-            if (compoundTag.contains("ShowArms")) instance.armorStandShowArms = compoundTag.getBoolean("ShowArms").orElse(false);
-        }
-    }
-
-    private CompoundTag getCompound(boolean includeWatcher)
-    {
-        var tagCopy = this.instance.compoundTag.copy();
-
-        if (bindingWatcher != null && includeWatcher)
             tagCopy.merge(WatcherUtils.buildCompoundFromWatcher(bindingWatcher));
 
         return tagCopy;
-    }
-
-    @Override
-    public CompoundTag getCompound()
-    {
-        return this.getCompound(true);
-    }
-
-    /**
-     * Gets network id of this disguise displayed to other players
-     *
-     * @return The network id of this disguise
-     */
-    @Override
-    public int getNetworkEntityId()
-    {
-        return bindingPlayer.getEntityId();
     }
 
     @Override
@@ -102,28 +61,6 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
     {
         var uuid = bindingWatcher == null ? null : bindingWatcher.readEntryOrThrow(CustomEntries.SPAWN_UUID);
         return Objects.requireNonNull(uuid, "VirtualEntityUUID is not set for an instance of ServerDisguiseWrapper");
-    }
-
-    @Nullable
-    @Override
-    public <R extends Tag> R getTag(@NotNull String path, TagType<R> type)
-    {
-        try
-        {
-            var obj = instance.compoundTag.get(path);
-
-            if (obj != null && obj.getType().equals(type))
-                return (R) obj;
-
-            return null;
-        }
-        catch (Throwable t)
-        {
-            logger.error("Unable to read NBT '%s' from instance:".formatted(path));
-            t.printStackTrace();
-
-            return null;
-        }
     }
 
     private static final Logger logger = FeatherMorphMain.getInstance().getSLF4JLogger();
@@ -166,7 +103,7 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
     {
         var newInstance = cloneFromExternal(this, (ServerBackend) getBackend());
 
-        newInstance.mergeCompound(this.getCompound());
+        newInstance.disguiseProperties.putAll(this.disguiseProperties);
         newInstance.writeProperty(OffTreeProperties.FAKE_EQUIPMENT, this.readPropertyOrThrow(OffTreeProperties.FAKE_EQUIPMENT));
 
         return newInstance;
@@ -231,7 +168,10 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
     @Override
     public boolean isBaby()
     {
-        return instance.isBaby;
+        if (!(bindingWatcher instanceof AgeableMobWatcher))
+            return false;
+
+        return bindingWatcher.readOr(ValueIndex.AGEABLE_MOB.IS_BABY, false);
     }
 
     @Override
@@ -309,9 +249,6 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
 
     private void refreshRegistry(@NotNull Player bindingPlayer, @NotNull SingleWatcher bindingWatcher)
     {
-        //和watcher同步我们的NBT
-        bindingWatcher.mergeFromCompound(getCompound(false));
-
         this.disguiseProperties.forEach((property, value) ->
         {
             bindingWatcher.writeProperty((SingleProperty<Object>) property, value);

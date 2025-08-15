@@ -1,6 +1,5 @@
 package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.types.llama;
 
-import net.minecraft.nbt.CompoundTag;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Llama;
 import org.bukkit.entity.Player;
@@ -43,20 +42,5 @@ public class LlamaWatcher extends ChestedHorseWatcher
         }
 
         super.onPropertyWrite(property, value);
-    }
-
-    @Override
-    public void mergeFromCompound(CompoundTag nbt)
-    {
-        super.mergeFromCompound(nbt);
-
-        if (nbt.contains("Strength"))
-            writePersistent(ValueIndex.LLAMA.SLOTS, nbt.getInt("Strength").orElseThrow());
-
-        if (nbt.contains("DecorItem"))
-            logger.warn("todo: Llama DecorItem is not implemented.");
-
-        if (nbt.contains("Variant"))
-            writePersistent(ValueIndex.LLAMA.VARIANT, nbt.getInt("Variant").orElseThrow());
     }
 }

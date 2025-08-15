@@ -4,6 +4,9 @@ import net.minecraft.nbt.CompoundTag;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
+import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
+import xyz.nifeather.morph.misc.disguiseProperty.values.TropicalFishProperties;
 
 public class TropicalFishWatcher extends LivingEntityWatcher
 {
@@ -21,12 +24,17 @@ public class TropicalFishWatcher extends LivingEntityWatcher
     }
 
     @Override
-    public void mergeFromCompound(CompoundTag nbt)
+    protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
-        super.mergeFromCompound(nbt);
+        var tropicalProperties = DisguiseProperties.INSTANCE.getOrThrow(TropicalFishProperties.class);
 
-        if (nbt.contains("Variant"))
-            writePersistent(ValueIndex.TROPICAL.FISH_VARIANT, nbt.getInt("Variant").orElseThrow());
+        if (property.equals(tropicalProperties.VARIANT))
+        {
+            int val = (Integer) value;
+            this.writePersistent(ValueIndex.TROPICAL.FISH_VARIANT, val);
+        }
+
+        super.onPropertyWrite(property, value);
     }
 
     @Override

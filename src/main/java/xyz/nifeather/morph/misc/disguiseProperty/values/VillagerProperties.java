@@ -2,15 +2,19 @@ package xyz.nifeather.morph.misc.disguiseProperty.values;
 
 import it.unimi.dsi.fastutil.Pair;
 import org.bukkit.Registry;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Villager;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
+import xyz.nifeather.morph.utilities.DisguiseUtils;
 import xyz.nifeather.morph.utilities.MathUtils;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class VillagerProperties extends AbstractProperties
+public class VillagerProperties extends BaseLivingEntityProperties<Villager>
 {
     private final Map<String, Villager.Type> typeMap = new ConcurrentHashMap<>();
     private final Map<String, Villager.Profession> professionMap = new ConcurrentHashMap<>();
@@ -82,6 +86,38 @@ public class VillagerProperties extends AbstractProperties
             }
         }
 
-        return null;
+        return super.parseSingleInput(key, value);
+    }
+
+    @Override
+    protected @Nullable Villager tryCastEntity(@Nullable Entity targetEntity)
+    {
+        return targetEntity instanceof Villager villager ? villager : null;
+    }
+
+    @Override
+    protected void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull Villager targetEntity)
+    {
+        propertyHandler.set(TYPE, targetEntity.getVillagerType());
+        propertyHandler.set(PROFESSION, targetEntity.getProfession());
+        propertyHandler.set(LEVEL, targetEntity.getVillagerLevel());
+    }
+
+    @Override
+    protected void setupDefaultProperties(PropertyHandler propertyHandler)
+    {
+        propertyHandler.set(TYPE, DisguiseUtils.pick(TYPE.getRandomValues()));
+        propertyHandler.set(PROFESSION, DisguiseUtils.pick(PROFESSION.getRandomValues()));
+        propertyHandler.set(LEVEL, DisguiseUtils.pick(LEVEL.getRandomValues()));
+    }
+
+    @Override
+    public Map<String, String> mapToNetworkProperties(PropertyHandler propertyHandler)
+    {
+        return Map.of(
+                "type", propertyHandler.get(TYPE).key().asString(),
+                "profession", propertyHandler.get(PROFESSION).key().asString(),
+                "level", propertyHandler.get(LEVEL) + ""
+        );
     }
 }

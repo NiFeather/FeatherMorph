@@ -1,14 +1,18 @@
 package xyz.nifeather.morph.misc.disguiseProperty.values;
 
 import it.unimi.dsi.fastutil.Pair;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Horse;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
+import xyz.nifeather.morph.utilities.DisguiseUtils;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class HorseProperties extends AbstractProperties
+public class HorseProperties extends BaseLivingEntityProperties<Horse>
 {
     private final Map<String, Horse.Color> colorMap = new ConcurrentHashMap<>();
     private final Map<String, Horse.Style> styleMap = new ConcurrentHashMap<>();
@@ -60,6 +64,35 @@ public class HorseProperties extends AbstractProperties
             }
         }
 
-        return null;
+        return super.parseSingleInput(key, value);
+    }
+
+    @Override
+    protected @Nullable Horse tryCastEntity(@Nullable Entity targetEntity)
+    {
+        return targetEntity instanceof Horse horse ? horse : null;
+    }
+
+    @Override
+    protected void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull Horse horse)
+    {
+        propertyHandler.set(COLOR, horse.getColor());
+        propertyHandler.set(STYLE, horse.getStyle());
+    }
+
+    @Override
+    protected void setupDefaultProperties(PropertyHandler propertyHandler)
+    {
+        propertyHandler.set(COLOR, DisguiseUtils.pick(COLOR.getRandomValues()));
+        propertyHandler.set(STYLE, DisguiseUtils.pick(STYLE.getRandomValues()));
+    }
+
+    @Override
+    public Map<String, String> mapToNetworkProperties(PropertyHandler propertyHandler)
+    {
+        return Map.of(
+                "color", propertyHandler.get(COLOR).name().toLowerCase(),
+                "style", propertyHandler.get(STYLE).name().toLowerCase()
+        );
     }
 }

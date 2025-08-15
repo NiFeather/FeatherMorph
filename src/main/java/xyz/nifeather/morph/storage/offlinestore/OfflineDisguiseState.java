@@ -41,12 +41,6 @@ public class OfflineDisguiseState implements IOfflineState
     public boolean displayingDisguisedItems;
 
     /**
-     * 伪装的NBT数据（如果有）
-     */
-    @Expose
-    public String snbt;
-
-    /**
      * 伪装的{@link com.mojang.authlib.GameProfile}数据（如果有）
      */
     @Expose
