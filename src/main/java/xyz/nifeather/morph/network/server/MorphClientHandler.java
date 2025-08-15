@@ -701,11 +701,10 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
         if (state != null)
             state.setServerSideSelfVisible(playerConfig.showDisguiseToSelf);
 
-        this.playerCommandHandlerMap.remove(player);
-
         if (getSession(player) != null)
             this.sendCommand(player, new S2CUnAuthCommand());
 
+        this.playerCommandHandlerMap.remove(player);
         this.playerSessionMap.remove(player);
     }
 
