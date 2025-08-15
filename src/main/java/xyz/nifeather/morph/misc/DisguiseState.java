@@ -765,17 +765,13 @@ public class DisguiseState extends MorphPluginObject
         armors = ItemUtils.asCopy(armors);
         handItems = ItemUtils.asCopy(handItems);
 
-        //全是空的，则默认显示自身装备
-        var emptyEquipment = Arrays.stream(armors).allMatch(i -> i != null && i.getType().isAir())
-                && Arrays.stream(handItems).allMatch(i -> i != null && i.getType().isAir());
-
         disguiseEquipments.allowNull = true;
         disguiseEquipments.setArmorContents(armors);
         disguiseEquipments.setHandItems(handItems);
 
         //开启默认装备显示或者更新显示
         disguiseWrapper.setFakeEquipments(disguiseEquipments);
-        setShowingDisguisedItems(showDisguisedItems || !emptyEquipment);
+        setShowingDisguisedItems(showDisguisedItems || targetEquipment != null);
     }
 
     private final DisguiseEquipment disguiseEquipments = new DisguiseEquipment();
