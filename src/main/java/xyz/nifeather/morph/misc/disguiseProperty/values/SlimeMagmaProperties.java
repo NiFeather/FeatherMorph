@@ -17,7 +17,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class SlimeMagmaProperties extends BaseLivingEntityProperties<Slime>
 {
-    public final SingleProperty<Integer> SIZE = getSingle("slime_magma_size", 1);
+    public final SingleProperty<Integer> SIZE = getSingle("slime_magma/size", 1);
 
     public SlimeMagmaProperties()
     {
@@ -58,7 +58,7 @@ public class SlimeMagmaProperties extends BaseLivingEntityProperties<Slime>
     public Map<String, String> mapToNetworkProperties(PropertyHandler propertyHandler)
     {
         return Map.of(
-                "size", propertyHandler.getOr(SIZE, 1).toString()
+                SIZE.id(), propertyHandler.getOr(SIZE, 1).toString()
         );
     }
 }

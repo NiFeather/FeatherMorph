@@ -2,6 +2,8 @@ package xyz.nifeather.morph.utilities;
 
 import org.bukkit.util.Vector;
 
+import java.util.Optional;
+
 public class MathUtils
 {
     public static int clamp(int min, int max, int val)
@@ -49,5 +51,18 @@ public class MathUtils
         }
 
         return defaultValue;
+    }
+
+    public static Optional<Integer> parseIntOrEmpty(String input)
+    {
+        try
+        {
+            return Optional.of(Integer.parseInt(input));
+        }
+        catch (Throwable ignored)
+        {
+        }
+
+        return Optional.empty();
     }
 }

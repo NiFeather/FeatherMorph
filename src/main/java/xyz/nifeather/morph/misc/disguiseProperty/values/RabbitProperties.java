@@ -23,7 +23,7 @@ public class RabbitProperties extends BaseLivingEntityProperties<Rabbit>
             typeMap.put(type.name().toLowerCase(), type);
     }
 
-    public final SingleProperty<Rabbit.Type> VARIANT = getSingle("rabbit_type", Type.BROWN)
+    public final SingleProperty<Rabbit.Type> VARIANT = getSingle("rabbit/variant", Type.BROWN)
             .withRandom(Type.values());
 
     public RabbitProperties()
@@ -70,7 +70,7 @@ public class RabbitProperties extends BaseLivingEntityProperties<Rabbit>
     public Map<String, String> mapToNetworkProperties(PropertyHandler propertyHandler)
     {
         return Map.of(
-                "variant", propertyHandler.get(VARIANT).name().toLowerCase()
+                VARIANT.id(), propertyHandler.get(VARIANT).name().toLowerCase()
         );
     }
 }

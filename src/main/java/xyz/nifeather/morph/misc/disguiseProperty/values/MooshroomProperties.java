@@ -13,7 +13,7 @@ import java.util.Map;
 
 public class MooshroomProperties extends BaseLivingEntityProperties<MushroomCow>
 {
-    public final SingleProperty<MushroomCow.Variant> VARIANT = getSingle("mooshroom_variant", MushroomCow.Variant.RED)
+    public final SingleProperty<MushroomCow.Variant> VARIANT = getSingle("mooshroom/variant", MushroomCow.Variant.RED)
             .withRandom(MushroomCow.Variant.RED, MushroomCow.Variant.RED, MushroomCow.Variant.RED, MushroomCow.Variant.BROWN)
             .withValidInput("red", "brown");
 
@@ -58,7 +58,7 @@ public class MooshroomProperties extends BaseLivingEntityProperties<MushroomCow>
     public Map<String, String> mapToNetworkProperties(PropertyHandler propertyHandler)
     {
         return Map.of(
-                "variant", propertyHandler.get(VARIANT).name().toLowerCase()
+                VARIANT.id(), propertyHandler.get(VARIANT).name().toLowerCase()
         );
     }
 }

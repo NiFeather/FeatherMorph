@@ -22,7 +22,7 @@ public class AxolotlProperties extends BaseLivingEntityProperties<Axolotl>
             variantMap.put(variant.name().toLowerCase(), variant);
     }
 
-    public final SingleProperty<Axolotl.Variant> VARIANT = getSingle("axolotl_color", Axolotl.Variant.LUCY)
+    public final SingleProperty<Axolotl.Variant> VARIANT = getSingle("axolotl/variant", Axolotl.Variant.LUCY)
             .withRandom(Axolotl.Variant.values());
 
     public AxolotlProperties()
@@ -69,7 +69,7 @@ public class AxolotlProperties extends BaseLivingEntityProperties<Axolotl>
     public Map<String, String> mapToNetworkProperties(PropertyHandler propertyHandler)
     {
         return Map.of(
-                "variant", propertyHandler.get(VARIANT).name().toLowerCase()
+                VARIANT.id(), propertyHandler.get(VARIANT).name().toLowerCase()
         );
     }
 }

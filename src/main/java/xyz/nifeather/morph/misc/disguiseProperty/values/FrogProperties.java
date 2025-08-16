@@ -24,7 +24,7 @@ public class FrogProperties extends BaseLivingEntityProperties<Frog>
             variantMap.put(variant.key().asString(), variant);
     }
 
-    public final SingleProperty<Frog.Variant> VARIANT = getSingle("frog_variant", Frog.Variant.TEMPERATE)
+    public final SingleProperty<Frog.Variant> VARIANT = getSingle("frog/variant", Frog.Variant.TEMPERATE)
             .withRandom(Frog.Variant.TEMPERATE, Frog.Variant.COLD, Frog.Variant.WARM);
 
     public FrogProperties()
@@ -73,7 +73,7 @@ public class FrogProperties extends BaseLivingEntityProperties<Frog>
     public Map<String, String> mapToNetworkProperties(PropertyHandler propertyHandler)
     {
         return Map.of(
-                "variant", propertyHandler.get(VARIANT).key().asString()
+                VARIANT.id(), propertyHandler.get(VARIANT).key().asString()
         );
     }
 }

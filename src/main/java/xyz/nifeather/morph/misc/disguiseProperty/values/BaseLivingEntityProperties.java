@@ -11,12 +11,12 @@ import xyz.nifeather.morph.utilities.MathUtils;
 
 public abstract class BaseLivingEntityProperties<E extends Entity> extends AbstractProperties<E>
 {
-    public final SingleProperty<Component> CUSTOM_NAME = getSingle("custom_name", Component.empty());
+    public final SingleProperty<Component> CUSTOM_NAME = getSingle("entity/custom_name", Component.empty());
 
-    public final SingleProperty<Boolean> CUSTOM_NAME_VISIBLE = getSingle("custom_name_visible", false)
+    public final SingleProperty<Boolean> CUSTOM_NAME_VISIBLE = getSingle("entity/custom_name_visible", false)
             .withValidInput("true", "false");
 
-    public final SingleProperty<Integer> STUCKED_ARROWS = getSingle("stucked_arrows", 0);
+    public final SingleProperty<Integer> STUCKED_ARROWS = getSingle("entity/stucked_arrows", 0);
 
     public BaseLivingEntityProperties()
     {

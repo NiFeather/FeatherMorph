@@ -24,7 +24,7 @@ public class LlamaProperties extends BaseLivingEntityProperties<Llama>
             colorMap.put(value.name().toLowerCase(), value);
     }
 
-    public final SingleProperty<Llama.Color> COLOR = getSingle("llama_color", Color.CREAMY)
+    public final SingleProperty<Llama.Color> COLOR = getSingle("llama/color", Color.CREAMY)
             .withRandom(Color.values());
 
     public LlamaProperties()
@@ -71,7 +71,7 @@ public class LlamaProperties extends BaseLivingEntityProperties<Llama>
     public Map<String, String> mapToNetworkProperties(PropertyHandler propertyHandler)
     {
         return Map.of(
-                "color", propertyHandler.get(COLOR).name().toLowerCase()
+                COLOR.id(), propertyHandler.get(COLOR).name().toLowerCase()
         );
     }
 }

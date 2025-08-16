@@ -26,10 +26,10 @@ public class HorseProperties extends BaseLivingEntityProperties<Horse>
             styleMap.put(style.name().toLowerCase(), style);
     }
 
-    public final SingleProperty<Horse.Color> COLOR = getSingle("horse_color", Horse.Color.WHITE)
+    public final SingleProperty<Horse.Color> COLOR = getSingle("horse/color", Horse.Color.WHITE)
             .withRandom(Horse.Color.values());
 
-    public final SingleProperty<Horse.Style> STYLE = getSingle("horse_style", Horse.Style.NONE)
+    public final SingleProperty<Horse.Style> STYLE = getSingle("horse/style", Horse.Style.NONE)
             .withRandom(Horse.Style.values());
 
     public HorseProperties()
@@ -47,7 +47,7 @@ public class HorseProperties extends BaseLivingEntityProperties<Horse>
     {
         switch (key)
         {
-            case "horse_color" ->
+            case "horse/color" ->
             {
                 var color = colorMap.getOrDefault(value, null);
 
@@ -55,7 +55,7 @@ public class HorseProperties extends BaseLivingEntityProperties<Horse>
                     return Pair.of(COLOR, color);
             }
 
-            case "horse_style" ->
+            case "horse/style" ->
             {
                 var style = styleMap.getOrDefault(value, null);
 
@@ -91,8 +91,8 @@ public class HorseProperties extends BaseLivingEntityProperties<Horse>
     public Map<String, String> mapToNetworkProperties(PropertyHandler propertyHandler)
     {
         return Map.of(
-                "color", propertyHandler.get(COLOR).name().toLowerCase(),
-                "style", propertyHandler.get(STYLE).name().toLowerCase()
+                COLOR.id(), propertyHandler.get(COLOR).name().toLowerCase(),
+                STYLE.id(), propertyHandler.get(STYLE).name().toLowerCase()
         );
     }
 }

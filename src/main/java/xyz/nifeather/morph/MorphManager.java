@@ -1013,15 +1013,21 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         // 如果此伪装可以同步给客户端，那么初始化客户端状态
         if (provider.validForClient(newState))
         {
-            clientHandler.sendCommand(player, new S2CSetSNbtCommand(newState.getCulledNbtString()));
+            var clientSession = clientHandler.getSession(player);
+
+            // For legacy client compat
+            //todo: Remove at 2026, or 1.22 comes out
+            if (clientSession != null && clientSession.apiVersion < Constants.ApiLevel.NETWORK_DISGUISE_PROPERTIES.protocolVersion)
+                clientHandler.sendCommand(player, new S2CSetSNbtCommand(newState.getCulledNbtString()));
+            else
+                clientHandler.sendCommand(player, new S2CUpdatePropertiesCommand(newState.disguisePropertyHandler().toNetworkProperties()));
+
             provider.getInitialSyncCommands(newState).forEach(s -> clientHandler.sendCommand(player, s));
 
             // 设置Profile
             if (newState.haveProfile())
                 clientHandler.sendCommand(player, new S2CSetProfileCommand(newState.getProfileNbtString()));
         }
-
-        clientHandler.sendCommand(player, new S2CUpdatePropertiesCommand(newState.disguisePropertyHandler().toNetworkProperties()));
 
         // 设置可用动作
         var availableAnimations = provider.getAnimationProvider()
@@ -1154,8 +1160,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         //todo: Remove at 2026, or 1.22 comes out
         if (clientSession != null && clientSession.apiVersion < Constants.ApiLevel.NETWORK_DISGUISE_PROPERTIES.protocolVersion)
             clientHandler.sendCommand(player, new S2CSetSNbtCommand(state.getCulledNbtString()));
-
-        clientHandler.sendCommand(player, new S2CUpdatePropertiesCommand(state.disguisePropertyHandler().toNetworkProperties()));
+        else
+            clientHandler.sendCommand(player, new S2CUpdatePropertiesCommand(state.disguisePropertyHandler().toNetworkProperties()));
 
         //刷新主动
         state.applyCooldownToClient();

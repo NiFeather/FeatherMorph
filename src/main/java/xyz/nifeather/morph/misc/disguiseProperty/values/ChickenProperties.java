@@ -24,7 +24,7 @@ public class ChickenProperties extends BaseLivingEntityProperties<Chicken>
             variantMap.put(variant.key().asString(), variant);
     }
 
-    public final SingleProperty<Chicken.Variant> VARIANT = getSingle("chicken_variant", Chicken.Variant.TEMPERATE);
+    public final SingleProperty<Chicken.Variant> VARIANT = getSingle("chicken/variant", Chicken.Variant.TEMPERATE);
 
     public ChickenProperties()
     {
@@ -73,7 +73,7 @@ public class ChickenProperties extends BaseLivingEntityProperties<Chicken>
     public Map<String, String> mapToNetworkProperties(PropertyHandler propertyHandler)
     {
         return Map.of(
-                "variant", propertyHandler.get(VARIANT).key().asString()
+                VARIANT.id(), propertyHandler.get(VARIANT).key().asString()
         );
     }
 }

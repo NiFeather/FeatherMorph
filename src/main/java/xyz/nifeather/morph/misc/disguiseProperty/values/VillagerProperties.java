@@ -28,13 +28,13 @@ public class VillagerProperties extends BaseLivingEntityProperties<Villager>
             professionMap.put(profession.key().asString(), profession);
     }
 
-    public final SingleProperty<Villager.Type> TYPE = getSingle("villager_type", Villager.Type.PLAINS)
+    public final SingleProperty<Villager.Type> TYPE = getSingle("villager/type", Villager.Type.PLAINS)
             .withRandom(Registry.VILLAGER_TYPE.stream().toList());
 
-    public final SingleProperty<Villager.Profession> PROFESSION = getSingle("villager_profession", Villager.Profession.NONE)
+    public final SingleProperty<Villager.Profession> PROFESSION = getSingle("villager/profession", Villager.Profession.NONE)
             .withRandom(Registry.VILLAGER_PROFESSION.stream().toList());
 
-    public final SingleProperty<Integer> LEVEL = getSingle("villager_level", 1)
+    public final SingleProperty<Integer> LEVEL = getSingle("villager/level", 1)
             .withRandom(1, 2, 3, 4, 5, 6);
 
     public VillagerProperties()
@@ -52,7 +52,7 @@ public class VillagerProperties extends BaseLivingEntityProperties<Villager>
     {
         switch (key)
         {
-            case "villager_type" ->
+            case "villager/type" ->
             {
                 var type = typeMap.getOrDefault(value, null);
 
@@ -60,7 +60,7 @@ public class VillagerProperties extends BaseLivingEntityProperties<Villager>
                     return Pair.of(TYPE, type);
             }
 
-            case "villager_profession" ->
+            case "villager/profession" ->
             {
                 var profession = professionMap.getOrDefault(value, null);
 
@@ -68,7 +68,7 @@ public class VillagerProperties extends BaseLivingEntityProperties<Villager>
                     return Pair.of(PROFESSION, profession);
             }
 
-            case "villager_level" ->
+            case "villager/level" ->
             {
                 int level = 1;
 
@@ -115,9 +115,9 @@ public class VillagerProperties extends BaseLivingEntityProperties<Villager>
     public Map<String, String> mapToNetworkProperties(PropertyHandler propertyHandler)
     {
         return Map.of(
-                "type", propertyHandler.get(TYPE).key().asString(),
-                "profession", propertyHandler.get(PROFESSION).key().asString(),
-                "level", propertyHandler.get(LEVEL) + ""
+                TYPE.id(), propertyHandler.get(TYPE).key().asString(),
+                PROFESSION.id(), propertyHandler.get(PROFESSION).key().asString(),
+                LEVEL.id(), propertyHandler.get(LEVEL) + ""
         );
     }
 }

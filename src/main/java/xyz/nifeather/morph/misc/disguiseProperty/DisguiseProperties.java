@@ -6,7 +6,6 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import xiamomc.pluginbase.Exceptions.NullDependencyException;
-import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.misc.disguiseProperty.values.*;
 
 import java.util.Map;
@@ -77,7 +76,7 @@ public class DisguiseProperties
         handlerMap.put(type, properties);
     }
 
-    private static final AbstractProperties<?> defaultProperties = new DefaultProperties();
+    private static final AbstractProperties<?> defaultProperties = new FallbackProperties();
 
     public <X> X getOrThrow(Class<X> expectedClass)
     {

@@ -13,7 +13,7 @@ import java.util.Map;
 
 public class CreeperProperties extends BaseLivingEntityProperties<Creeper>
 {
-    public final SingleProperty<Boolean> CHARGED = getSingle("creeper_charged", false)
+    public final SingleProperty<Boolean> CHARGED = getSingle("creeper/charged", false)
             .withRandom(false, false, false, true)
             .withValidInput("true", "false");
 
@@ -53,7 +53,7 @@ public class CreeperProperties extends BaseLivingEntityProperties<Creeper>
     public Map<String, String> mapToNetworkProperties(PropertyHandler propertyHandler)
     {
         return Map.of(
-                "charged", propertyHandler.get(CHARGED).toString().toLowerCase()
+                CHARGED.id(), propertyHandler.get(CHARGED).toString().toLowerCase()
         );
     }
 }

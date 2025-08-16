@@ -13,11 +13,11 @@ import java.util.Map;
 
 public class GoatProperties extends BaseLivingEntityProperties<Goat>
 {
-    public final SingleProperty<Boolean> HAS_LEFT_HORN = getSingle("goat_has_left_horn", true)
+    public final SingleProperty<Boolean> HAS_LEFT_HORN = getSingle("goat/has_left_horn", true)
             .withRandom(true, true, true, false)
             .withValidInput("false", "true");
 
-    public final SingleProperty<Boolean> HAS_RIGHT_HORN = getSingle("goat_has_right_horn", true)
+    public final SingleProperty<Boolean> HAS_RIGHT_HORN = getSingle("goat/has_right_horn", true)
             .withRandom(true, true, true, false)
             .withValidInput("false", "true");
 
@@ -31,8 +31,8 @@ public class GoatProperties extends BaseLivingEntityProperties<Goat>
     {
         return switch (key)
         {
-            case "goat_has_left_horn" -> Pair.of(HAS_LEFT_HORN, Boolean.valueOf(value));
-            case "goat_has_right_horn" -> Pair.of(HAS_RIGHT_HORN, Boolean.valueOf(value));
+            case "goat/has_left_horn" -> Pair.of(HAS_LEFT_HORN, Boolean.valueOf(value));
+            case "goat/has_right_horn" -> Pair.of(HAS_RIGHT_HORN, Boolean.valueOf(value));
 
             default -> super.parseSingleInput(key, value);
         };
@@ -62,8 +62,8 @@ public class GoatProperties extends BaseLivingEntityProperties<Goat>
     public Map<String, String> mapToNetworkProperties(PropertyHandler propertyHandler)
     {
         return Map.of(
-                "has_left_horn", propertyHandler.get(HAS_LEFT_HORN).toString().toLowerCase(),
-                "has_right_horn", propertyHandler.get(HAS_RIGHT_HORN).toString().toLowerCase()
+                HAS_LEFT_HORN.id(), propertyHandler.get(HAS_LEFT_HORN).toString().toLowerCase(),
+                HAS_RIGHT_HORN.id(), propertyHandler.get(HAS_RIGHT_HORN).toString().toLowerCase()
         );
     }
 }

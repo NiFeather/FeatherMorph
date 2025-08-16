@@ -12,7 +12,7 @@ import java.util.Map;
 
 public class HappyGhastProperties extends BaseLivingEntityProperties<HappyGhast>
 {
-    public final SingleProperty<Boolean> IS_GHASTLING = getSingle("happy_ghast_is_ghastling", false)
+    public final SingleProperty<Boolean> IS_GHASTLING = getSingle("happy_ghast/ghastling", false)
             .withValidInput("true", "false");
 
     public HappyGhastProperties()
@@ -51,7 +51,7 @@ public class HappyGhastProperties extends BaseLivingEntityProperties<HappyGhast>
     public Map<String, String> mapToNetworkProperties(PropertyHandler propertyHandler)
     {
         return Map.of(
-                "is_ghastling", propertyHandler.get(IS_GHASTLING).toString().toLowerCase()
+                IS_GHASTLING.id(), propertyHandler.get(IS_GHASTLING).toString().toLowerCase()
         );
     }
 }

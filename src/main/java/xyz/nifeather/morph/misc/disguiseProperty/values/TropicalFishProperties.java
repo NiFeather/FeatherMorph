@@ -14,7 +14,7 @@ import java.util.Map;
 
 public class TropicalFishProperties extends BaseLivingEntityProperties<TropicalFish>
 {
-    public final SingleProperty<Integer> VARIANT = getSingle("tropical_fish_variant", 0);
+    public final SingleProperty<Integer> VARIANT = getSingle("tropical_fish/variant", 0);
 
     public TropicalFishProperties()
     {
@@ -56,7 +56,7 @@ public class TropicalFishProperties extends BaseLivingEntityProperties<TropicalF
     public Map<String, String> mapToNetworkProperties(PropertyHandler propertyHandler)
     {
         return Map.of(
-                "variant", propertyHandler.get(VARIANT).toString()
+                    VARIANT.id(), propertyHandler.get(VARIANT).toString()
         );
     }
 }

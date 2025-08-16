@@ -28,13 +28,13 @@ public class ZombieVillagerProperties extends BaseLivingEntityProperties<ZombieV
             professionMap.put(profession.key().asString(), profession);
     }
 
-    public final SingleProperty<Villager.Type> TYPE = getSingle("villager_type", Villager.Type.PLAINS)
+    public final SingleProperty<Villager.Type> TYPE = getSingle("zombie_villager/type", Villager.Type.PLAINS)
             .withRandom(Registry.VILLAGER_TYPE.stream().toList());
 
-    public final SingleProperty<Villager.Profession> PROFESSION = getSingle("villager_profession", Villager.Profession.NONE)
+    public final SingleProperty<Villager.Profession> PROFESSION = getSingle("zombie_villager/profession", Villager.Profession.NONE)
             .withRandom(Registry.VILLAGER_PROFESSION.stream().toList());
 
-    public final SingleProperty<Boolean> IS_BABY = getSingle("is_baby", false);
+    public final SingleProperty<Boolean> IS_BABY = getSingle("zombie_villager/is_baby", false);
 
     public ZombieVillagerProperties()
     {
@@ -50,7 +50,7 @@ public class ZombieVillagerProperties extends BaseLivingEntityProperties<ZombieV
     {
         switch (key)
         {
-            case "villager_type" ->
+            case "zombie_villager/type" ->
             {
                 var type = typeMap.getOrDefault(value, null);
 
@@ -58,7 +58,7 @@ public class ZombieVillagerProperties extends BaseLivingEntityProperties<ZombieV
                     return Pair.of(TYPE, type);
             }
 
-            case "villager_profession" ->
+            case "zombie_villager/profession" ->
             {
                 var profession = professionMap.getOrDefault(value, null);
 
@@ -66,7 +66,7 @@ public class ZombieVillagerProperties extends BaseLivingEntityProperties<ZombieV
                     return Pair.of(PROFESSION, profession);
             }
 
-            case "is_baby" ->
+            case "zombie_villager/is_baby" ->
             {
                 return Pair.of(IS_BABY, Boolean.valueOf(value));
             }
@@ -99,8 +99,8 @@ public class ZombieVillagerProperties extends BaseLivingEntityProperties<ZombieV
     public Map<String, String> mapToNetworkProperties(PropertyHandler propertyHandler)
     {
         return Map.of(
-                "type", propertyHandler.get(TYPE).key().asString(),
-                "profession", propertyHandler.get(PROFESSION).key().asString()
+                TYPE.id(), propertyHandler.get(TYPE).key().asString(),
+                PROFESSION.id(), propertyHandler.get(PROFESSION).key().asString()
         );
     }
 }

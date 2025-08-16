@@ -8,13 +8,12 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
-import xyz.nifeather.morph.utilities.MathUtils;
 
 import java.util.Map;
 
 public class PlayerProperties extends BaseLivingEntityProperties<Player>
 {
-    public final SingleProperty<MainHandStatus> MAIN_HAND = getSingle("main_hand", MainHandStatus.NOTSET)
+    public final SingleProperty<MainHandStatus> MAIN_HAND = getSingle("player/main_hand", MainHandStatus.NOTSET)
             .withValidInput("left", "right");
 
     public PlayerProperties()
@@ -56,7 +55,8 @@ public class PlayerProperties extends BaseLivingEntityProperties<Player>
     public Map<String, String> mapToNetworkProperties(PropertyHandler propertyHandler)
     {
         return Map.of(
-                "main_hand", propertyHandler.get(MAIN_HAND).name().toLowerCase()
+                MAIN_HAND.id(), propertyHandler.get(MAIN_HAND).name().toLowerCase(),
+                STUCKED_ARROWS.id(), propertyHandler.get(STUCKED_ARROWS).toString()
         );
     }
 

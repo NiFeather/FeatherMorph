@@ -13,7 +13,7 @@ import java.util.Map;
 
 public class ZombieProperties extends BaseLivingEntityProperties<Zombie>
 {
-    public final SingleProperty<Boolean> IS_BABY = getSingle("is_baby", false);
+    public final SingleProperty<Boolean> IS_BABY = getSingle("zombie/is_baby", false);
 
     public ZombieProperties()
     {
@@ -50,7 +50,7 @@ public class ZombieProperties extends BaseLivingEntityProperties<Zombie>
     public Map<String, String> mapToNetworkProperties(PropertyHandler propertyHandler)
     {
         return Map.of(
-                "is_baby", propertyHandler.get(IS_BABY).toString().toLowerCase()
+                IS_BABY.id(), propertyHandler.get(IS_BABY).toString().toLowerCase()
         );
     }
 }

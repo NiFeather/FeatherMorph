@@ -1,15 +1,13 @@
 package xyz.nifeather.morph.misc.disguiseProperty.values;
 
-import it.unimi.dsi.fastutil.Pair;
 import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
-import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 
 import java.util.Map;
 
-public class DefaultProperties extends BaseLivingEntityProperties<Entity>
+public class FallbackProperties extends BaseLivingEntityProperties<Entity>
 {
     @Override
     protected @Nullable Entity tryCastEntity(@Nullable Entity targetEntity)

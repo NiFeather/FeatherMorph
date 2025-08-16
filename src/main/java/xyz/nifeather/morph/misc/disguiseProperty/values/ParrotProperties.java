@@ -23,7 +23,7 @@ public class ParrotProperties extends BaseLivingEntityProperties<Parrot>
             variantMap.put(variant.name().toLowerCase(), variant);
     }
 
-    public final SingleProperty<Parrot.Variant> VARIANT = getSingle("parrot_variant", Variant.RED)
+    public final SingleProperty<Parrot.Variant> VARIANT = getSingle("parrot/variant", Variant.RED)
             .withRandom(Variant.values());
 
     public ParrotProperties()
@@ -70,7 +70,7 @@ public class ParrotProperties extends BaseLivingEntityProperties<Parrot>
     public Map<String, String> mapToNetworkProperties(PropertyHandler propertyHandler)
     {
         return Map.of(
-                "variant", propertyHandler.get(VARIANT).name().toLowerCase()
+                VARIANT.id(), propertyHandler.get(VARIANT).name().toLowerCase()
         );
     }
 }

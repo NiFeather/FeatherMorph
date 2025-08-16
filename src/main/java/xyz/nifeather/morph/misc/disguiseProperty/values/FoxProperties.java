@@ -13,7 +13,7 @@ import java.util.Map;
 
 public class FoxProperties extends BaseLivingEntityProperties<Fox>
 {
-    public final SingleProperty<Fox.Type> VARIANT = getSingle("fox_variant", Fox.Type.RED)
+    public final SingleProperty<Fox.Type> VARIANT = getSingle("fox/variant", Fox.Type.RED)
             .withRandom(Fox.Type.values())
             .withValidInput("default", "snow");
 
@@ -57,7 +57,7 @@ public class FoxProperties extends BaseLivingEntityProperties<Fox>
     public Map<String, String> mapToNetworkProperties(PropertyHandler propertyHandler)
     {
         return Map.of(
-                "variant", propertyHandler.get(VARIANT).name().toLowerCase()
+                VARIANT.id(), propertyHandler.get(VARIANT).name().toLowerCase()
         );
     }
 }

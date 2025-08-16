@@ -25,7 +25,7 @@ public class CowProperties extends BaseLivingEntityProperties<Cow>
         for (Cow.Variant variant : RegistryAccess.registryAccess().getRegistry(RegistryKey.COW_VARIANT))
             variantMap.put(variant.key().asString(), variant);
 
-        VARIANT = getSingle("cow_variant", Cow.Variant.TEMPERATE)
+        VARIANT = getSingle("cow/variant", Cow.Variant.TEMPERATE)
                 .withRandom(variantMap.values())
                 .withValidInput(variantMap.keySet());
 
@@ -68,7 +68,7 @@ public class CowProperties extends BaseLivingEntityProperties<Cow>
     public Map<String, String> mapToNetworkProperties(PropertyHandler propertyHandler)
     {
         return Map.of(
-                "variant", propertyHandler.get(VARIANT).key().asString()
+                VARIANT.id(), propertyHandler.get(VARIANT).key().asString()
         );
     }
 }

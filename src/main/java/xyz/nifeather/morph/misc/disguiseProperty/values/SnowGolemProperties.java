@@ -13,7 +13,7 @@ import java.util.Map;
 
 public class SnowGolemProperties extends BaseLivingEntityProperties<Snowman>
 {
-    public final SingleProperty<Boolean> HAS_PUMPKIN = getSingle("has_pumpkin", true);
+    public final SingleProperty<Boolean> HAS_PUMPKIN = getSingle("snow_golem/pumpkin", true);
 
     public SnowGolemProperties()
     {
@@ -52,7 +52,7 @@ public class SnowGolemProperties extends BaseLivingEntityProperties<Snowman>
     public Map<String, String> mapToNetworkProperties(PropertyHandler propertyHandler)
     {
         return Map.of(
-                "has_pumpkin", propertyHandler.get(HAS_PUMPKIN).toString().toLowerCase()
+                HAS_PUMPKIN.id(), propertyHandler.get(HAS_PUMPKIN).toString().toLowerCase()
         );
     }
 }

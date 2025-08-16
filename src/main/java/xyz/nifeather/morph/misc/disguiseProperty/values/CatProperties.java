@@ -26,8 +26,8 @@ public class CatProperties extends BaseLivingEntityProperties<Cat>
             variantMap.put(variant.key().asString(), variant);
     }
 
-    public final SingleProperty<Cat.Type> CAT_VARIANT = getSingle("cat_variant", Cat.Type.TABBY);
-    public final SingleProperty<UUID> OWNER = getSingle("owner", Uuids.NIL_UUID);
+    public final SingleProperty<Cat.Type> CAT_VARIANT = getSingle("cat/variant", Cat.Type.TABBY);
+    public final SingleProperty<UUID> OWNER = getSingle("cat/owner", Uuids.NIL_UUID);
 
     public CatProperties()
     {
@@ -95,7 +95,7 @@ public class CatProperties extends BaseLivingEntityProperties<Cat>
     public Map<String, String> mapToNetworkProperties(PropertyHandler propertyHandler)
     {
         return Map.of(
-                "variant", propertyHandler.get(CAT_VARIANT).key().asString()
+                CAT_VARIANT.id(), propertyHandler.get(CAT_VARIANT).key().asString()
         );
     }
 }

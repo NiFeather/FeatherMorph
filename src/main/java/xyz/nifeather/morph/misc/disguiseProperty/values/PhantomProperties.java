@@ -14,7 +14,7 @@ import java.util.Map;
 
 public class PhantomProperties extends BaseLivingEntityProperties<Phantom>
 {
-    public final SingleProperty<Integer> SIZE = getSingle("size", 1);
+    public final SingleProperty<Integer> SIZE = getSingle("phantom/size", 1);
 
     public PhantomProperties()
     {
@@ -54,7 +54,7 @@ public class PhantomProperties extends BaseLivingEntityProperties<Phantom>
     public Map<String, String> mapToNetworkProperties(PropertyHandler propertyHandler)
     {
         return Map.of(
-                "size", propertyHandler.get(SIZE).toString()
+                SIZE.id(), propertyHandler.get(SIZE).toString()
         );
     }
 }

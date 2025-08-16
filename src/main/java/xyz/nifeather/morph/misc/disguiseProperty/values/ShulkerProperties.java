@@ -14,7 +14,7 @@ import java.util.Map;
 
 public class ShulkerProperties extends BaseLivingEntityProperties<Shulker>
 {
-    public final SingleProperty<DyeColor> DYE_COLOR = getSingle("shulker_color", DyeColor.getByWoolData((byte)15));
+    public final SingleProperty<DyeColor> DYE_COLOR = getSingle("shulker/color", DyeColor.getByWoolData((byte)15));
 
     public ShulkerProperties()
     {
@@ -61,7 +61,7 @@ public class ShulkerProperties extends BaseLivingEntityProperties<Shulker>
     public Map<String, String> mapToNetworkProperties(PropertyHandler propertyHandler)
     {
         return Map.of(
-                "dye_color", propertyHandler.get(DYE_COLOR).name().toLowerCase()
+                DYE_COLOR.id(), propertyHandler.get(DYE_COLOR).name().toLowerCase()
         );
     }
 }

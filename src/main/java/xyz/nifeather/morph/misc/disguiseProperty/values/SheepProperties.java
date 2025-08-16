@@ -14,7 +14,7 @@ import java.util.Map;
 
 public class SheepProperties extends BaseLivingEntityProperties<Sheep>
 {
-    public final SingleProperty<DyeColor> DYE_COLOR = getSingle("dye_color", DyeColor.getByWoolData((byte)15));
+    public final SingleProperty<DyeColor> DYE_COLOR = getSingle("sheep/color", DyeColor.getByWoolData((byte)15));
 
     public SheepProperties()
     {
@@ -61,7 +61,7 @@ public class SheepProperties extends BaseLivingEntityProperties<Sheep>
     public Map<String, String> mapToNetworkProperties(PropertyHandler propertyHandler)
     {
         return Map.of(
-                "dye_color", propertyHandler.get(DYE_COLOR).name().toLowerCase()
+                DYE_COLOR.id(), propertyHandler.get(DYE_COLOR).name().toLowerCase()
         );
     }
 }

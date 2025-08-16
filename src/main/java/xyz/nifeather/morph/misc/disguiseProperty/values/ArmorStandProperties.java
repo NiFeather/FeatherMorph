@@ -15,18 +15,18 @@ import java.util.Map;
 
 public class ArmorStandProperties extends BaseLivingEntityProperties<ArmorStand>
 {
-    public final SingleProperty<Boolean> SHOW_ARMS = getSingle("armor_stand_show_arms", false).withValidInput("true", "false");
-    public final SingleProperty<Boolean> HAS_BASE_PLATE = getSingle("has_base_plate", true)
+    public final SingleProperty<Boolean> SHOW_ARMS = getSingle("armor_stand/show_arms", false).withValidInput("true", "false");
+    public final SingleProperty<Boolean> HAS_BASE_PLATE = getSingle("armor_stand/has_base_plate", true)
             .withValidInput("true", "false");
-    public final SingleProperty<Boolean> SMALL = getSingle("small", false)
+    public final SingleProperty<Boolean> SMALL = getSingle("armor_stand/small", false)
             .withValidInput("true", "false");
 
-    public final SingleProperty<Vector3f> HEAD_ROTATION = getSingle("head_rotation", Vector3f.zero());
-    public final SingleProperty<Vector3f> BODY_ROTATION = getSingle("body_rotation", Vector3f.zero());
-    public final SingleProperty<Vector3f> RIGHT_ARM_ROTATION = getSingle("right_arm_rotation", Vector3f.zero());
-    public final SingleProperty<Vector3f> LEFT_ARM_ROTATION = getSingle("left_arm_rotation", Vector3f.zero());
-    public final SingleProperty<Vector3f> RIGHT_LEG_ROTATION = getSingle("right_leg_rotation", Vector3f.zero());
-    public final SingleProperty<Vector3f> LEFT_LEG_ROTATION = getSingle("left_leg_rotation", Vector3f.zero());
+    public final SingleProperty<Vector3f> HEAD_ROTATION = getSingle("armor_stand/head_rotation", Vector3f.zero());
+    public final SingleProperty<Vector3f> BODY_ROTATION = getSingle("armor_stand/body_rotation", Vector3f.zero());
+    public final SingleProperty<Vector3f> RIGHT_ARM_ROTATION = getSingle("armor_stand/right_arm_rotation", Vector3f.zero());
+    public final SingleProperty<Vector3f> LEFT_ARM_ROTATION = getSingle("armor_stand/left_arm_rotation", Vector3f.zero());
+    public final SingleProperty<Vector3f> RIGHT_LEG_ROTATION = getSingle("armor_stand/right_leg_rotation", Vector3f.zero());
+    public final SingleProperty<Vector3f> LEFT_LEG_ROTATION = getSingle("armor_stand/left_leg_rotation", Vector3f.zero());
 
     public ArmorStandProperties()
     {
@@ -83,7 +83,7 @@ public class ArmorStandProperties extends BaseLivingEntityProperties<ArmorStand>
     public Map<String, String> mapToNetworkProperties(PropertyHandler propertyHandler)
     {
         return Map.of(
-                "show_arms", propertyHandler.get(SHOW_ARMS).toString()
+                SHOW_ARMS.id(), propertyHandler.get(SHOW_ARMS).toString()
         );
     }
 }

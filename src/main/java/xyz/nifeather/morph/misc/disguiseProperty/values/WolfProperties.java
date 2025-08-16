@@ -27,12 +27,12 @@ public class WolfProperties extends BaseLivingEntityProperties<Wolf>
             variantMap.put(variant.key().asString(), variant);
     }
 
-    public final SingleProperty<Wolf.Variant> VARIANT = getSingle("wolf_variant", Variant.PALE)
+    public final SingleProperty<Wolf.Variant> VARIANT = getSingle("wolf/variant", Variant.PALE)
             .withRandom(
                     RegistryAccess.registryAccess().getRegistry(RegistryKey.WOLF_VARIANT).stream().toList()
             );
 
-    public final SingleProperty<UUID> OWNER = getSingle("owner", Uuids.NIL_UUID);
+    public final SingleProperty<UUID> OWNER = getSingle("wolf/owner", Uuids.NIL_UUID);
 
     public WolfProperties()
     {
@@ -94,7 +94,7 @@ public class WolfProperties extends BaseLivingEntityProperties<Wolf>
     public Map<String, String> mapToNetworkProperties(PropertyHandler propertyHandler)
     {
         return Map.of(
-                "variant", propertyHandler.get(VARIANT).key().asString()
+                VARIANT.id(), propertyHandler.get(VARIANT).key().asString()
         );
     }
 }
