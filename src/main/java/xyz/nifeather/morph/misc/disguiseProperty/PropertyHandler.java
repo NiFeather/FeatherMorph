@@ -7,13 +7,9 @@ import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.misc.disguiseProperty.values.AbstractProperties;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.ThreadLocalRandom;
 
 public class PropertyHandler
 {
@@ -92,8 +88,13 @@ public class PropertyHandler
         return this.getOr(property, property.defaultVal());
     }
 
+    public <X> Optional<X> getOptional(SingleProperty<X> property)
+    {
+        return Optional.ofNullable(getOr(property, null));
+    }
+
     @Nullable
-    @Contract("_, null -> null; _, !null -> !null")
+    @Contract("_, null -> _; _, !null -> !null")
     public <X> X getOr(SingleProperty<X> property, X defaultVal)
     {
         return (X) propertyMap.getOrDefault(property, defaultVal);

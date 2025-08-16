@@ -15,7 +15,7 @@ public class FoxProperties extends BaseLivingEntityProperties<Fox>
 {
     public final SingleProperty<Fox.Type> VARIANT = getSingle("fox/variant", Fox.Type.RED)
             .withRandom(Fox.Type.values())
-            .withValidInput("default", "snow");
+            .withValidInput("red", "snow");
 
     public FoxProperties()
     {
@@ -27,7 +27,7 @@ public class FoxProperties extends BaseLivingEntityProperties<Fox>
     {
         if (key.equals(VARIANT.id()))
         {
-            var type = value.equals("default") ? Fox.Type.RED : Fox.Type.SNOW;
+            var type = value.equals("red") ? Fox.Type.RED : Fox.Type.SNOW;
 
             return Pair.of(VARIANT, type);
         }

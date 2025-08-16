@@ -84,7 +84,7 @@ public class ArmorStandWatcher extends InventoryLivingWatcher
         if (property.equals(properties.HAS_BASE_PLATE))
         {
             var val = (Boolean) value;
-            this.writePersistent(ValueIndex.ARMOR_STAND.DATA_FLAGS, getArmorStandFlags(this.isSmall(), this.showArms(), val));
+            this.writePersistent(ValueIndex.ARMOR_STAND.DATA_FLAGS, getArmorStandFlags(this.isSmall(), this.showArms(), !val));
             return;
         }
 

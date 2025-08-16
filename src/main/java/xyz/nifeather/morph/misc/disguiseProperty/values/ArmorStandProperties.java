@@ -1,9 +1,10 @@
 package xyz.nifeather.morph.misc.disguiseProperty.values;
 
 import com.github.retrooper.packetevents.util.Vector3f;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import io.papermc.paper.math.Rotations;
 import it.unimi.dsi.fastutil.Pair;
-import org.bukkit.Rotation;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
@@ -12,6 +13,7 @@ import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ArmorStandProperties extends BaseLivingEntityProperties<ArmorStand>
 {
@@ -79,11 +81,29 @@ public class ArmorStandProperties extends BaseLivingEntityProperties<ArmorStand>
     {
     }
 
+    private final Gson gson = new GsonBuilder().create();
+
+    private String vectorToStringArray(Vector3f vec)
+    {
+        float[] array = new float[] {vec.x, vec.y, vec.z};
+        return gson.toJson(array);
+    }
+
     @Override
     public Map<String, String> mapToNetworkProperties(PropertyHandler propertyHandler)
     {
-        return Map.of(
-                SHOW_ARMS.id(), propertyHandler.get(SHOW_ARMS).toString()
-        );
+        var map = new ConcurrentHashMap<String, String>();
+        map.put(SHOW_ARMS.id(), propertyHandler.get(SHOW_ARMS).toString().toLowerCase());
+        map.put(HAS_BASE_PLATE.id(), propertyHandler.get(HAS_BASE_PLATE).toString().toLowerCase());
+        map.put(SMALL.id(), propertyHandler.get(SMALL).toString().toLowerCase());
+
+        propertyHandler.getOptional(HEAD_ROTATION).ifPresent(v -> map.put(HEAD_ROTATION.id(), vectorToStringArray(v)));
+        propertyHandler.getOptional(BODY_ROTATION).ifPresent(v -> map.put(BODY_ROTATION.id(), vectorToStringArray(v)));
+        propertyHandler.getOptional(LEFT_ARM_ROTATION).ifPresent(v -> map.put(LEFT_ARM_ROTATION.id(), vectorToStringArray(v)));
+        propertyHandler.getOptional(RIGHT_ARM_ROTATION).ifPresent(v -> map.put(RIGHT_ARM_ROTATION.id(), vectorToStringArray(v)));
+        propertyHandler.getOptional(LEFT_LEG_ROTATION).ifPresent(v -> map.put(LEFT_LEG_ROTATION.id(), vectorToStringArray(v)));
+        propertyHandler.getOptional(RIGHT_LEG_ROTATION).ifPresent(v -> map.put(RIGHT_LEG_ROTATION.id(), vectorToStringArray(v)));
+
+        return map;
     }
 }

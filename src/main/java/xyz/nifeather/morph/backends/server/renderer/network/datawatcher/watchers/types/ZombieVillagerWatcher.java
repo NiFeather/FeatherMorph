@@ -13,6 +13,7 @@ import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueInde
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 import xyz.nifeather.morph.misc.disguiseProperty.values.VillagerProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.values.ZombieVillagerProperties;
 import xyz.nifeather.morph.utilities.MathUtils;
 
 import java.util.Objects;
@@ -51,7 +52,7 @@ public class ZombieVillagerWatcher extends ZombieWatcher
     @Override
     protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
-        var properties = DisguiseProperties.INSTANCE.getOrThrow(VillagerProperties.class);
+        var properties = DisguiseProperties.INSTANCE.getOrThrow(ZombieVillagerProperties.class);
 
         if (property.equals(properties.LEVEL))
         {
@@ -79,47 +80,12 @@ public class ZombieVillagerWatcher extends ZombieWatcher
         super.onPropertyWrite(property, value);
     }
 
-    private void mergeFromVillagerData(CompoundTag nbt)
-    {
-        int level = 0;
-        VillagerProfession profession = VillagerProfessions.NONE;
-        VillagerType type = VillagerTypes.PLAINS;
-
-        if (nbt.contains("level"))
-            level = MathUtils.clamp(1, 5, nbt.getInt("level").orElseThrow());
-
-        if (nbt.contains("profession"))
-        {
-            var profString = nbt.getString("profession").orElseThrow();
-            var prof = VillagerProfessions.getByName(profString);
-
-            if (prof == null)
-                logger.warn("No such profession '%s', using default".formatted(profString));
-            else
-                profession = prof;
-        }
-
-        if (nbt.contains("type"))
-        {
-            var proftypeString = nbt.getString("type").orElseThrow();
-
-            var typeFromRegistry = VillagerTypes.getByName(proftypeString);
-
-            if (typeFromRegistry == null)
-                logger.warn("No such type '%s', using default".formatted(proftypeString));
-            else
-                type = typeFromRegistry;
-        }
-
-        writePersistent(ValueIndex.VILLAGER.VILLAGER_DATA, new VillagerData(type, profession, level));
-    }
-
     @Override
     public void writeToCompound(CompoundTag nbt)
     {
         super.writeToCompound(nbt);
 
-        var villagerData = read(ValueIndex.VILLAGER.VILLAGER_DATA);
+        var villagerData = read(ValueIndex.ZOMBIE_VILLAGER.VILLAGER_DATA);
         var profession = villagerData.getProfession();
         var type = villagerData.getType();
         var level = villagerData.getLevel();

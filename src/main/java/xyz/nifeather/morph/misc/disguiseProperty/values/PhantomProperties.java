@@ -5,7 +5,6 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Phantom;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.types.PhantomWatcher;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 import xyz.nifeather.morph.utilities.MathUtils;
@@ -32,7 +31,7 @@ public class PhantomProperties extends BaseLivingEntityProperties<Phantom>
     {
         if (key.equals(SIZE.id()))
         {
-            int size = MathUtils.clamp(1, 5, MathUtils.parseIntOr(value, 1));
+            int size = MathUtils.clamp(1, 10, MathUtils.parseIntOr(value, 1));
             return Pair.of(SIZE, size);
         }
 

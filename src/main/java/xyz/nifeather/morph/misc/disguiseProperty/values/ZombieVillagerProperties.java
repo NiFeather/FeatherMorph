@@ -10,6 +10,7 @@ import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 import xyz.nifeather.morph.utilities.DisguiseUtils;
+import xyz.nifeather.morph.utilities.MathUtils;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -34,6 +35,9 @@ public class ZombieVillagerProperties extends BaseLivingEntityProperties<ZombieV
     public final SingleProperty<Villager.Profession> PROFESSION = getSingle("zombie_villager/profession", Villager.Profession.NONE)
             .withRandom(Registry.VILLAGER_PROFESSION.stream().toList());
 
+    public final SingleProperty<Integer> LEVEL = getSingle("zombie_villager/level", 0)
+            .withRandom(1, 2, 3, 4, 5, 6);
+
     public final SingleProperty<Boolean> IS_BABY = getSingle("zombie_villager/is_baby", false);
 
     public ZombieVillagerProperties()
@@ -42,7 +46,7 @@ public class ZombieVillagerProperties extends BaseLivingEntityProperties<ZombieV
         TYPE.withValidInput(typeMap.keySet());
         PROFESSION.withValidInput(professionMap.keySet());
 
-        registerSingle(TYPE, PROFESSION, IS_BABY);
+        registerSingle(TYPE, PROFESSION, IS_BABY, LEVEL);
     }
 
     @Override
@@ -69,6 +73,11 @@ public class ZombieVillagerProperties extends BaseLivingEntityProperties<ZombieV
             case "zombie_villager/is_baby" ->
             {
                 return Pair.of(IS_BABY, Boolean.valueOf(value));
+            }
+
+            case "zombie_villager/level" ->
+            {
+                return Pair.of(LEVEL, MathUtils.clamp(1, 6, MathUtils.parseIntOr(value, 1)));
             }
         }
 

@@ -1,8 +1,11 @@
 package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.types;
 
 import net.minecraft.nbt.CompoundTag;
+import org.bukkit.DyeColor;
+import org.bukkit.craftbukkit.entity.CraftTropicalFish;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.TropicalFish;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
@@ -23,18 +26,39 @@ public class TropicalFishWatcher extends LivingEntityWatcher
         register(ValueIndex.TROPICAL);
     }
 
+    private volatile DyeColor baseColor = DyeColor.BLACK;
+    private volatile DyeColor patternColor = DyeColor.BLACK;
+    private volatile TropicalFish.Pattern pattern = TropicalFish.Pattern.BLOCKFISH;
+
     @Override
     protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
         var tropicalProperties = DisguiseProperties.INSTANCE.getOrThrow(TropicalFishProperties.class);
 
-        if (property.equals(tropicalProperties.VARIANT))
+        if (property.equals(tropicalProperties.BODY_COLOR))
         {
-            int val = (Integer) value;
-            this.writePersistent(ValueIndex.TROPICAL.FISH_VARIANT, val);
+            logger.info("WRITE BODY COLOR " + value);
+            baseColor = (DyeColor) value;
+            updatePackedData();
+        }
+        else if (property.equals(tropicalProperties.PATTERN_COLOR))
+        {
+            patternColor = (DyeColor) value;
+            updatePackedData();
+        }
+        else if (property.equals(tropicalProperties.PATTERN))
+        {
+            pattern = (TropicalFish.Pattern) value;
+            updatePackedData();
         }
 
         super.onPropertyWrite(property, value);
+    }
+
+    private void updatePackedData()
+    {
+        var data = CraftTropicalFish.getData(patternColor, baseColor, pattern);
+        this.writePersistent(ValueIndex.TROPICAL.FISH_VARIANT, data);
     }
 
     @Override
