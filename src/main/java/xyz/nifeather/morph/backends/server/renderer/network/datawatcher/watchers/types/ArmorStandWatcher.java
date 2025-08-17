@@ -1,6 +1,7 @@
 package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.types;
 
 import com.github.retrooper.packetevents.util.Vector3f;
+import io.papermc.paper.math.Rotations;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.FloatTag;
 import net.minecraft.nbt.ListTag;
@@ -97,41 +98,46 @@ public class ArmorStandWatcher extends InventoryLivingWatcher
 
         if (property.equals(properties.HEAD_ROTATION))
         {
-            var val = (Vector3f) value;
-            this.writePersistent(ValueIndex.ARMOR_STAND.HEAD_ROTATION, val);
+            var val = (Rotations) value;
+            this.writePersistent(ValueIndex.ARMOR_STAND.HEAD_ROTATION, toVector(val));
         }
 
         if (property.equals(properties.BODY_ROTATION))
         {
-            var val = (Vector3f) value;
-            this.writePersistent(ValueIndex.ARMOR_STAND.BODY_ROTATION, val);
+            var val = (Rotations) value;
+            this.writePersistent(ValueIndex.ARMOR_STAND.BODY_ROTATION, toVector(val));
         }
 
         if (property.equals(properties.LEFT_ARM_ROTATION))
         {
-            var val = (Vector3f) value;
-            this.writePersistent(ValueIndex.ARMOR_STAND.LEFT_ARM_ROTATION, val);
+            var val = (Rotations) value;
+            this.writePersistent(ValueIndex.ARMOR_STAND.LEFT_ARM_ROTATION, toVector(val));
         }
 
         if (property.equals(properties.RIGHT_ARM_ROTATION))
         {
-            var val = (Vector3f) value;
-            this.writePersistent(ValueIndex.ARMOR_STAND.RIGHT_ARM_ROTATION, val);
+            var val = (Rotations) value;
+            this.writePersistent(ValueIndex.ARMOR_STAND.RIGHT_ARM_ROTATION, toVector(val));
         }
 
         if (property.equals(properties.LEFT_LEG_ROTATION))
         {
-            var val = (Vector3f) value;
-            this.writePersistent(ValueIndex.ARMOR_STAND.LEFT_LEG_ROTATION, val);
+            var val = (Rotations) value;
+            this.writePersistent(ValueIndex.ARMOR_STAND.LEFT_LEG_ROTATION, toVector(val));
         }
 
         if (property.equals(properties.RIGHT_LEG_ROTATION))
         {
-            var val = (Vector3f) value;
-            this.writePersistent(ValueIndex.ARMOR_STAND.RIGHT_LEG_ROTATION, val);
+            var val = (Rotations) value;
+            this.writePersistent(ValueIndex.ARMOR_STAND.RIGHT_LEG_ROTATION, toVector(val));
         }
 
         super.onPropertyWrite(property, value);
+    }
+
+    private Vector3f toVector(Rotations rotations)
+    {
+        return new Vector3f((float) rotations.x(), (float) rotations.y(), (float) rotations.z());
     }
 
     private ListTag saveRotationOf(SingleValue<Vector3f> sv)
