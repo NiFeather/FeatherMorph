@@ -50,10 +50,9 @@ public class PhantomProperties extends BaseLivingEntityProperties<Phantom>
     }
 
     @Override
-    public Map<String, String> mapToNetworkProperties(PropertyHandler propertyHandler)
+    protected void appendNetworkMap(PropertyHandler propertyHandler, Map<String, String> map)
     {
-        return Map.of(
-                SIZE.id(), propertyHandler.get(SIZE).toString()
-        );
+        super.appendNetworkMap(propertyHandler, map);
+        map.put(SIZE.id(), propertyHandler.get(SIZE).toString());
     }
 }

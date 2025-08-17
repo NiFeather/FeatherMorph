@@ -47,10 +47,9 @@ public class EnderDragonProperties extends BaseLivingEntityProperties<EnderDrago
     }
 
     @Override
-    public Map<String, String> mapToNetworkProperties(PropertyHandler propertyHandler)
+    protected void appendNetworkMap(PropertyHandler propertyHandler, Map<String, String> map)
     {
-        return Map.of(
-                DRAGON_PHASE.id(), propertyHandler.get(DRAGON_PHASE) + ""
-        );
+        super.appendNetworkMap(propertyHandler, map);
+        map.put(DRAGON_PHASE.id(), propertyHandler.get(DRAGON_PHASE) + "");
     }
 }

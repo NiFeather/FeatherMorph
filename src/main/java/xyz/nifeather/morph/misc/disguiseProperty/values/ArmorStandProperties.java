@@ -90,9 +90,8 @@ public class ArmorStandProperties extends BaseLivingEntityProperties<ArmorStand>
     }
 
     @Override
-    public Map<String, String> mapToNetworkProperties(PropertyHandler propertyHandler)
+    protected void appendNetworkMap(PropertyHandler propertyHandler, Map<String, String> map)
     {
-        var map = new ConcurrentHashMap<String, String>();
         map.put(SHOW_ARMS.id(), propertyHandler.get(SHOW_ARMS).toString().toLowerCase());
         map.put(HAS_BASE_PLATE.id(), propertyHandler.get(HAS_BASE_PLATE).toString().toLowerCase());
         map.put(SMALL.id(), propertyHandler.get(SMALL).toString().toLowerCase());
@@ -104,6 +103,6 @@ public class ArmorStandProperties extends BaseLivingEntityProperties<ArmorStand>
         propertyHandler.getOptional(LEFT_LEG_ROTATION).ifPresent(v -> map.put(LEFT_LEG_ROTATION.id(), vectorToStringArray(v)));
         propertyHandler.getOptional(RIGHT_LEG_ROTATION).ifPresent(v -> map.put(RIGHT_LEG_ROTATION.id(), vectorToStringArray(v)));
 
-        return map;
+        super.appendNetworkMap(propertyHandler, map);
     }
 }

@@ -58,10 +58,9 @@ public class SheepProperties extends BaseLivingEntityProperties<Sheep>
     }
 
     @Override
-    public Map<String, String> mapToNetworkProperties(PropertyHandler propertyHandler)
+    protected void appendNetworkMap(PropertyHandler propertyHandler, Map<String, String> map)
     {
-        return Map.of(
-                DYE_COLOR.id(), propertyHandler.get(DYE_COLOR).name().toLowerCase()
-        );
+        super.appendNetworkMap(propertyHandler, map);
+        map.put(DYE_COLOR.id(), propertyHandler.get(DYE_COLOR).name().toLowerCase());
     }
 }

@@ -85,11 +85,10 @@ public class PandaProperties extends BaseLivingEntityProperties<Panda>
     }
 
     @Override
-    public Map<String, String> mapToNetworkProperties(PropertyHandler propertyHandler)
+    protected void appendNetworkMap(PropertyHandler propertyHandler, Map<String, String> map)
     {
-        return Map.of(
-                MAIN_GENE.id(), propertyHandler.get(MAIN_GENE).name().toLowerCase(),
-                HIDDEN_GENE.id(), propertyHandler.get(HIDDEN_GENE).name().toLowerCase()
-        );
+        super.appendNetworkMap(propertyHandler, map);
+        map.put(MAIN_GENE.id(), propertyHandler.get(MAIN_GENE).name().toLowerCase());
+        map.put(HIDDEN_GENE.id(), propertyHandler.get(HIDDEN_GENE).name().toLowerCase());
     }
 }

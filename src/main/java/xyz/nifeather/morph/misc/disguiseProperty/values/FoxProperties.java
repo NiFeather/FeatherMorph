@@ -54,10 +54,9 @@ public class FoxProperties extends BaseLivingEntityProperties<Fox>
     }
 
     @Override
-    public Map<String, String> mapToNetworkProperties(PropertyHandler propertyHandler)
+    protected void appendNetworkMap(PropertyHandler propertyHandler, Map<String, String> map)
     {
-        return Map.of(
-                VARIANT.id(), propertyHandler.get(VARIANT).name().toLowerCase()
-        );
+        super.appendNetworkMap(propertyHandler, map);
+        map.put(VARIANT.id(), propertyHandler.get(VARIANT).name().toLowerCase());
     }
 }

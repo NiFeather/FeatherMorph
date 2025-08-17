@@ -112,12 +112,11 @@ public class VillagerProperties extends BaseLivingEntityProperties<Villager>
     }
 
     @Override
-    public Map<String, String> mapToNetworkProperties(PropertyHandler propertyHandler)
+    protected void appendNetworkMap(PropertyHandler propertyHandler, Map<String, String> map)
     {
-        return Map.of(
-                TYPE.id(), propertyHandler.get(TYPE).key().asString(),
-                PROFESSION.id(), propertyHandler.get(PROFESSION).key().asString(),
-                LEVEL.id(), propertyHandler.get(LEVEL) + ""
-        );
+        super.appendNetworkMap(propertyHandler, map);
+        map.put(TYPE.id(), propertyHandler.get(TYPE).key().asString());
+        map.put(PROFESSION.id(), propertyHandler.get(PROFESSION).key().asString());
+        map.put(LEVEL.id(), propertyHandler.get(LEVEL) + "");
     }
 }

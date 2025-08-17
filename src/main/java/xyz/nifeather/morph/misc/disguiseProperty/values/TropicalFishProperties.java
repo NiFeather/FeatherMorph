@@ -106,12 +106,12 @@ public class TropicalFishProperties extends BaseLivingEntityProperties<TropicalF
     }
 
     @Override
-    public Map<String, String> mapToNetworkProperties(PropertyHandler propertyHandler)
+    protected void appendNetworkMap(PropertyHandler propertyHandler, Map<String, String> map)
     {
-        return Map.of(
-                BODY_COLOR.id(), propertyHandler.get(BODY_COLOR).name().toLowerCase(),
-                PATTERN_COLOR.id(), propertyHandler.get(PATTERN_COLOR).name().toLowerCase(),
-                PATTERN.id(), propertyHandler.get(PATTERN).name().toLowerCase()
-        );
+        super.appendNetworkMap(propertyHandler, map);
+
+        map.put(BODY_COLOR.id(), propertyHandler.get(BODY_COLOR).name().toLowerCase());
+        map.put(PATTERN_COLOR.id(), propertyHandler.get(PATTERN_COLOR).name().toLowerCase());
+        map.put(PATTERN.id(), propertyHandler.get(PATTERN).name().toLowerCase());
     }
 }

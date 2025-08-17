@@ -49,10 +49,9 @@ public class SnowGolemProperties extends BaseLivingEntityProperties<Snowman>
     }
 
     @Override
-    public Map<String, String> mapToNetworkProperties(PropertyHandler propertyHandler)
+    protected void appendNetworkMap(PropertyHandler propertyHandler, Map<String, String> map)
     {
-        return Map.of(
-                HAS_PUMPKIN.id(), propertyHandler.get(HAS_PUMPKIN).toString().toLowerCase()
-        );
+        super.appendNetworkMap(propertyHandler, map);
+        map.put(HAS_PUMPKIN.id(), propertyHandler.get(HAS_PUMPKIN).toString().toLowerCase());
     }
 }

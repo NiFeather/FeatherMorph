@@ -65,10 +65,9 @@ public class CowProperties extends BaseLivingEntityProperties<Cow>
     }
 
     @Override
-    public Map<String, String> mapToNetworkProperties(PropertyHandler propertyHandler)
+    protected void appendNetworkMap(PropertyHandler propertyHandler, Map<String, String> map)
     {
-        return Map.of(
-                VARIANT.id(), propertyHandler.get(VARIANT).key().asString()
-        );
+        super.appendNetworkMap(propertyHandler, map);
+        map.put(VARIANT.id(), propertyHandler.get(VARIANT).key().asString());
     }
 }

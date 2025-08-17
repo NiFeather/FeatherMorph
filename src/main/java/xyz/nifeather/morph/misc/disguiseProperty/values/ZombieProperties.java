@@ -47,10 +47,9 @@ public class ZombieProperties extends BaseLivingEntityProperties<Zombie>
     }
 
     @Override
-    public Map<String, String> mapToNetworkProperties(PropertyHandler propertyHandler)
+    protected void appendNetworkMap(PropertyHandler propertyHandler, Map<String, String> map)
     {
-        return Map.of(
-                IS_BABY.id(), propertyHandler.get(IS_BABY).toString().toLowerCase()
-        );
+        super.appendNetworkMap(propertyHandler, map);
+        map.put(IS_BABY.id(), propertyHandler.get(IS_BABY).toString().toLowerCase());
     }
 }

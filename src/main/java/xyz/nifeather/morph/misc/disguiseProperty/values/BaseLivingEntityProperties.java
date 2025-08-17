@@ -4,10 +4,14 @@ import it.unimi.dsi.fastutil.Pair;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
 import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.Nullable;
+import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 import xyz.nifeather.morph.utilities.MathUtils;
+
+import java.util.Map;
 
 public abstract class BaseLivingEntityProperties<E extends Entity> extends AbstractProperties<E>
 {
@@ -56,5 +60,16 @@ public abstract class BaseLivingEntityProperties<E extends Entity> extends Abstr
         }
 
         return null;
+    }
+
+    @Override
+    protected void appendNetworkMap(PropertyHandler propertyHandler, Map<String, String> map)
+    {
+        propertyHandler.getOptional(CUSTOM_NAME).ifPresent(component ->
+                map.put(CUSTOM_NAME.id(), JSONComponentSerializer.json().serialize(component)));
+
+        propertyHandler.getOptional(CUSTOM_NAME_VISIBLE).ifPresent(v -> map.put(CUSTOM_NAME_VISIBLE.id(), v.toString().toLowerCase()));
+
+        propertyHandler.getOptional(STUCKED_ARROWS).ifPresent(v -> map.put(STUCKED_ARROWS.id(), v.toString()));
     }
 }

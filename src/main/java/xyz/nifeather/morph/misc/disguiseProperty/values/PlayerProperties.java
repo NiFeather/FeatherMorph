@@ -52,12 +52,11 @@ public class PlayerProperties extends BaseLivingEntityProperties<Player>
     }
 
     @Override
-    public Map<String, String> mapToNetworkProperties(PropertyHandler propertyHandler)
+    protected void appendNetworkMap(PropertyHandler propertyHandler, Map<String, String> map)
     {
-        return Map.of(
-                MAIN_HAND.id(), propertyHandler.get(MAIN_HAND).name().toLowerCase(),
-                STUCKED_ARROWS.id(), propertyHandler.get(STUCKED_ARROWS).toString()
-        );
+        super.appendNetworkMap(propertyHandler, map);
+
+        propertyHandler.getOptional(MAIN_HAND).ifPresent(hand -> map.put(MAIN_HAND.id(), hand.name().toLowerCase()));
     }
 
     public enum MainHandStatus

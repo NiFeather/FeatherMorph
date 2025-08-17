@@ -48,10 +48,9 @@ public class HappyGhastProperties extends BaseLivingEntityProperties<HappyGhast>
     }
 
     @Override
-    public Map<String, String> mapToNetworkProperties(PropertyHandler propertyHandler)
+    protected void appendNetworkMap(PropertyHandler propertyHandler, Map<String, String> map)
     {
-        return Map.of(
-                IS_GHASTLING.id(), propertyHandler.get(IS_GHASTLING).toString().toLowerCase()
-        );
+        super.appendNetworkMap(propertyHandler, map);
+        map.put(IS_GHASTLING.id(), propertyHandler.get(IS_GHASTLING).toString().toLowerCase());
     }
 }

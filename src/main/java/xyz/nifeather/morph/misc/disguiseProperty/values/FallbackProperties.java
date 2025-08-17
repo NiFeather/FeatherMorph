@@ -24,10 +24,4 @@ public class FallbackProperties extends BaseLivingEntityProperties<Entity>
     protected void setupDefaultProperties(PropertyHandler propertyHandler)
     {
     }
-
-    @Override
-    public Map<String, String> mapToNetworkProperties(PropertyHandler propertyHandler)
-    {
-        return Map.of();
-    }
 }

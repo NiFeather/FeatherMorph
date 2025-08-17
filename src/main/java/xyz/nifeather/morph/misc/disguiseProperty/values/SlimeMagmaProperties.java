@@ -55,10 +55,9 @@ public class SlimeMagmaProperties extends BaseLivingEntityProperties<Slime>
     }
 
     @Override
-    public Map<String, String> mapToNetworkProperties(PropertyHandler propertyHandler)
+    protected void appendNetworkMap(PropertyHandler propertyHandler, Map<String, String> map)
     {
-        return Map.of(
-                SIZE.id(), propertyHandler.getOr(SIZE, 1).toString()
-        );
+        super.appendNetworkMap(propertyHandler, map);
+        map.put(SIZE.id(), propertyHandler.getOr(SIZE, 1).toString());
     }
 }

@@ -59,11 +59,10 @@ public class GoatProperties extends BaseLivingEntityProperties<Goat>
     }
 
     @Override
-    public Map<String, String> mapToNetworkProperties(PropertyHandler propertyHandler)
+    protected void appendNetworkMap(PropertyHandler propertyHandler, Map<String, String> map)
     {
-        return Map.of(
-                HAS_LEFT_HORN.id(), propertyHandler.get(HAS_LEFT_HORN).toString().toLowerCase(),
-                HAS_RIGHT_HORN.id(), propertyHandler.get(HAS_RIGHT_HORN).toString().toLowerCase()
-        );
+        super.appendNetworkMap(propertyHandler, map);
+        map.put(HAS_LEFT_HORN.id(), propertyHandler.get(HAS_LEFT_HORN).toString().toLowerCase());
+        map.put(HAS_RIGHT_HORN.id(), propertyHandler.get(HAS_RIGHT_HORN).toString().toLowerCase());
     }
 }

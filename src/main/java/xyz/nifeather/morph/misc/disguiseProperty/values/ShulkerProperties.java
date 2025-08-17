@@ -58,10 +58,9 @@ public class ShulkerProperties extends BaseLivingEntityProperties<Shulker>
     }
 
     @Override
-    public Map<String, String> mapToNetworkProperties(PropertyHandler propertyHandler)
+    protected void appendNetworkMap(PropertyHandler propertyHandler, Map<String, String> map)
     {
-        return propertyHandler.contains(DYE_COLOR)
-                ? Map.of(DYE_COLOR.id(), propertyHandler.get(DYE_COLOR).name().toLowerCase())
-                : Map.of();
+        super.appendNetworkMap(propertyHandler, map);
+        propertyHandler.getOptional(DYE_COLOR).ifPresent(v -> map.put(DYE_COLOR.id(), v.name().toLowerCase()));
     }
 }

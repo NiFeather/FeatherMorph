@@ -35,7 +35,7 @@ public class ZombieVillagerProperties extends BaseLivingEntityProperties<ZombieV
     public final SingleProperty<Villager.Profession> PROFESSION = getSingle("zombie_villager/profession", Villager.Profession.NONE)
             .withRandom(Registry.VILLAGER_PROFESSION.stream().toList());
 
-    public final SingleProperty<Integer> LEVEL = getSingle("zombie_villager/level", 0)
+    public final SingleProperty<Integer> LEVEL = getSingle("zombie_villager/level", 1)
             .withRandom(1, 2, 3, 4, 5, 6);
 
     public final SingleProperty<Boolean> IS_BABY = getSingle("zombie_villager/is_baby", false);
@@ -105,11 +105,12 @@ public class ZombieVillagerProperties extends BaseLivingEntityProperties<ZombieV
     }
 
     @Override
-    public Map<String, String> mapToNetworkProperties(PropertyHandler propertyHandler)
+    protected void appendNetworkMap(PropertyHandler propertyHandler, Map<String, String> map)
     {
-        return Map.of(
-                TYPE.id(), propertyHandler.get(TYPE).key().asString(),
-                PROFESSION.id(), propertyHandler.get(PROFESSION).key().asString()
-        );
+        super.appendNetworkMap(propertyHandler, map);
+
+        map.put(TYPE.id(), propertyHandler.get(TYPE).key().asString());
+        map.put(PROFESSION.id(), propertyHandler.get(PROFESSION).key().asString());
+        map.put(LEVEL.id(), propertyHandler.get(LEVEL).toString());
     }
 }

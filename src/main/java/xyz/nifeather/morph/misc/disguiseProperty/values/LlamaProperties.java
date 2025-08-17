@@ -68,10 +68,9 @@ public class LlamaProperties extends BaseLivingEntityProperties<Llama>
     }
 
     @Override
-    public Map<String, String> mapToNetworkProperties(PropertyHandler propertyHandler)
+    protected void appendNetworkMap(PropertyHandler propertyHandler, Map<String, String> map)
     {
-        return Map.of(
-                COLOR.id(), propertyHandler.get(COLOR).name().toLowerCase()
-        );
+        super.appendNetworkMap(propertyHandler, map);
+        map.put(COLOR.id(), propertyHandler.get(COLOR).name().toLowerCase());
     }
 }

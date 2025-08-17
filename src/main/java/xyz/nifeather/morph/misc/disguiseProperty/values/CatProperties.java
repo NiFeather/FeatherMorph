@@ -92,10 +92,9 @@ public class CatProperties extends BaseLivingEntityProperties<Cat>
     }
 
     @Override
-    public Map<String, String> mapToNetworkProperties(PropertyHandler propertyHandler)
+    protected void appendNetworkMap(PropertyHandler propertyHandler, Map<String, String> map)
     {
-        return Map.of(
-                CAT_VARIANT.id(), propertyHandler.get(CAT_VARIANT).key().asString()
-        );
+        super.appendNetworkMap(propertyHandler, map);
+        map.put(CAT_VARIANT.id(), propertyHandler.get(CAT_VARIANT).key().asString());
     }
 }

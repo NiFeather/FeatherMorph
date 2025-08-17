@@ -88,11 +88,10 @@ public class HorseProperties extends BaseLivingEntityProperties<Horse>
     }
 
     @Override
-    public Map<String, String> mapToNetworkProperties(PropertyHandler propertyHandler)
+    protected void appendNetworkMap(PropertyHandler propertyHandler, Map<String, String> map)
     {
-        return Map.of(
-                COLOR.id(), propertyHandler.get(COLOR).name().toLowerCase(),
-                STYLE.id(), propertyHandler.get(STYLE).name().toLowerCase()
-        );
+        super.appendNetworkMap(propertyHandler, map);
+        map.put(COLOR.id(), propertyHandler.get(COLOR).name().toLowerCase());
+        map.put(STYLE.id(), propertyHandler.get(STYLE).name().toLowerCase());
     }
 }

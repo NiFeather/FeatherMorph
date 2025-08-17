@@ -84,5 +84,13 @@ public abstract class AbstractProperties<E extends Entity>
     protected abstract void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull E targetEntity);
     protected abstract void setupDefaultProperties(PropertyHandler propertyHandler);
 
-    public abstract Map<String, String> mapToNetworkProperties(PropertyHandler propertyHandler);
+    public final Map<String, String> mapToNetworkProperties(PropertyHandler propertyHandler)
+    {
+        var map = new ConcurrentHashMap<String, String>();
+        this.appendNetworkMap(propertyHandler, map);
+
+        return map;
+    }
+
+    protected abstract void appendNetworkMap(PropertyHandler propertyHandler, Map<String, String> map);
 }
