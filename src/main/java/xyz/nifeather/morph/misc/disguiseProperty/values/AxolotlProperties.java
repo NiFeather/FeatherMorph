@@ -6,6 +6,7 @@ import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
+import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 import xyz.nifeather.morph.utilities.DisguiseUtils;
 
@@ -22,7 +23,7 @@ public class AxolotlProperties extends BaseLivingEntityProperties<Axolotl>
             variantMap.put(variant.name().toLowerCase(), variant);
     }
 
-    public final SingleProperty<Axolotl.Variant> VARIANT = getSingle("axolotl/variant", Axolotl.Variant.LUCY)
+    public final SingleProperty<Axolotl.Variant> VARIANT = getSingle(PropertyNames.AXOLOTL_VARIANT, Axolotl.Variant.LUCY)
             .withRandom(Axolotl.Variant.values());
 
     public AxolotlProperties()
@@ -36,7 +37,7 @@ public class AxolotlProperties extends BaseLivingEntityProperties<Axolotl>
     @Override
     protected @Nullable Pair<SingleProperty<?>, Object> parseSingleInput(String key, String value)
     {
-        if (key.equals(VARIANT.id()))
+        if (key.equals(PropertyNames.AXOLOTL_VARIANT))
         {
             var match = variantMap.getOrDefault(value, null);
 

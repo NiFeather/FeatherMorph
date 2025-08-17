@@ -9,6 +9,7 @@ import org.bukkit.entity.Wolf.Variant;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
+import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 import xyz.nifeather.morph.utilities.DisguiseUtils;
 import xyz.nifeather.morph.utilities.Uuids;
@@ -27,12 +28,12 @@ public class WolfProperties extends BaseLivingEntityProperties<Wolf>
             variantMap.put(variant.key().asString(), variant);
     }
 
-    public final SingleProperty<Wolf.Variant> VARIANT = getSingle("wolf/variant", Variant.PALE)
+    public final SingleProperty<Wolf.Variant> VARIANT = getSingle(PropertyNames.WOLF_VARIANT, Variant.PALE)
             .withRandom(
                     RegistryAccess.registryAccess().getRegistry(RegistryKey.WOLF_VARIANT).stream().toList()
             );
 
-    public final SingleProperty<UUID> OWNER = getSingle("wolf/owner", Uuids.NIL_UUID);
+    public final SingleProperty<UUID> OWNER = getSingle(PropertyNames.WOLF_OWNER, Uuids.NIL_UUID);
 
     public WolfProperties()
     {
@@ -45,7 +46,7 @@ public class WolfProperties extends BaseLivingEntityProperties<Wolf>
     @Override
     protected @Nullable Pair<SingleProperty<?>, Object> parseSingleInput(String key, String value)
     {
-        if (key.equals(VARIANT.id()))
+        if (key.equals(PropertyNames.WOLF_VARIANT))
         {
             var variant = this.variantMap.getOrDefault(value, null);
 
@@ -53,7 +54,7 @@ public class WolfProperties extends BaseLivingEntityProperties<Wolf>
                 return Pair.of(VARIANT, variant);
         }
 
-        if (key.equals(OWNER.id()))
+        if (key.equals(PropertyNames.WOLF_OWNER))
         {
             UUID uuid = null;
 

@@ -8,6 +8,7 @@ import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
+import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 import xyz.nifeather.morph.utilities.DisguiseUtils;
 
@@ -24,7 +25,7 @@ public class ChickenProperties extends BaseLivingEntityProperties<Chicken>
             variantMap.put(variant.key().asString(), variant);
     }
 
-    public final SingleProperty<Chicken.Variant> VARIANT = getSingle("chicken/variant", Chicken.Variant.TEMPERATE);
+    public final SingleProperty<Chicken.Variant> VARIANT = getSingle(PropertyNames.CHICKEN_VARIANT, Chicken.Variant.TEMPERATE);
 
     public ChickenProperties()
     {
@@ -40,7 +41,7 @@ public class ChickenProperties extends BaseLivingEntityProperties<Chicken>
     @Override
     protected @Nullable Pair<SingleProperty<?>, Object> parseSingleInput(String key, String value)
     {
-        if (key.equals(VARIANT.id()))
+        if (key.equals(PropertyNames.CHICKEN_VARIANT))
         {
             var match = variantMap.getOrDefault(value, null);
 

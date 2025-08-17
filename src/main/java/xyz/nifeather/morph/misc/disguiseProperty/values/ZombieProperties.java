@@ -7,13 +7,14 @@ import org.bukkit.entity.Zombie;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
+import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 
 import java.util.Map;
 
 public class ZombieProperties extends BaseLivingEntityProperties<Zombie>
 {
-    public final SingleProperty<Boolean> IS_BABY = getSingle("zombie/is_baby", false);
+    public final SingleProperty<Boolean> IS_BABY = getSingle(PropertyNames.ZOMBIE_IS_BABY, false);
 
     public ZombieProperties()
     {
@@ -29,7 +30,7 @@ public class ZombieProperties extends BaseLivingEntityProperties<Zombie>
     @Override
     protected @Nullable Pair<SingleProperty<?>, Object> parseSingleInput(String key, String value)
     {
-        if (key.equals(IS_BABY.id()))
+        if (key.equals(PropertyNames.ZOMBIE_IS_BABY))
             return Pair.of(IS_BABY, Boolean.valueOf(value));
 
         return super.parseSingleInput(key, value);

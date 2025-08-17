@@ -8,6 +8,7 @@ import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
+import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 import xyz.nifeather.morph.utilities.DisguiseUtils;
 
@@ -25,7 +26,7 @@ public class CowProperties extends BaseLivingEntityProperties<Cow>
         for (Cow.Variant variant : RegistryAccess.registryAccess().getRegistry(RegistryKey.COW_VARIANT))
             variantMap.put(variant.key().asString(), variant);
 
-        VARIANT = getSingle("cow/variant", Cow.Variant.TEMPERATE)
+        VARIANT = getSingle(PropertyNames.COW_VARIANT, Cow.Variant.TEMPERATE)
                 .withRandom(variantMap.values())
                 .withValidInput(variantMap.keySet());
 
@@ -35,7 +36,7 @@ public class CowProperties extends BaseLivingEntityProperties<Cow>
     @Override
     protected @Nullable Pair<SingleProperty<?>, Object> parseSingleInput(String key, String value)
     {
-        if (key.equals(VARIANT.id()))
+        if (key.equals(PropertyNames.COW_VARIANT))
         {
             var match = variantMap.getOrDefault(value, null);
 

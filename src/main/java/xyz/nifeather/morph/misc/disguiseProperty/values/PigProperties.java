@@ -8,6 +8,7 @@ import org.bukkit.entity.Pig;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
+import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 import xyz.nifeather.morph.utilities.DisguiseUtils;
 
@@ -25,7 +26,7 @@ public class PigProperties extends BaseLivingEntityProperties<Pig>
         for (Pig.Variant variant : RegistryAccess.registryAccess().getRegistry(RegistryKey.PIG_VARIANT))
             variantMap.put(variant.key().asString(), variant);
 
-        VARIANT = getSingle("pig/variant", Pig.Variant.TEMPERATE)
+        VARIANT = getSingle(PropertyNames.PIG_VARIANT, Pig.Variant.TEMPERATE)
                 .withRandom(Pig.Variant.TEMPERATE, Pig.Variant.COLD, Pig.Variant.WARM)
                 .withValidInput(variantMap.keySet());
 
@@ -35,7 +36,7 @@ public class PigProperties extends BaseLivingEntityProperties<Pig>
     @Override
     protected @Nullable Pair<SingleProperty<?>, Object> parseSingleInput(String key, String value)
     {
-        if (key.equals(VARIANT.id()))
+        if (key.equals(PropertyNames.PIG_VARIANT))
         {
             var match = variantMap.getOrDefault(value, null);
 

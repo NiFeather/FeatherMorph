@@ -6,13 +6,14 @@ import org.bukkit.entity.HappyGhast;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
+import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 
 import java.util.Map;
 
 public class HappyGhastProperties extends BaseLivingEntityProperties<HappyGhast>
 {
-    public final SingleProperty<Boolean> IS_GHASTLING = getSingle("happy_ghast/ghastling", false)
+    public final SingleProperty<Boolean> IS_GHASTLING = getSingle(PropertyNames.HAPPY_GHAST_IS_GHASTLING, false)
             .withValidInput("true", "false");
 
     public HappyGhastProperties()
@@ -23,7 +24,7 @@ public class HappyGhastProperties extends BaseLivingEntityProperties<HappyGhast>
     @Override
     protected @Nullable Pair<SingleProperty<?>, Object> parseSingleInput(String key, String value)
     {
-        if (key.equals(IS_GHASTLING.id()))
+        if (key.equals(PropertyNames.HAPPY_GHAST_IS_GHASTLING))
             return Pair.of(IS_GHASTLING, Boolean.parseBoolean(value));
 
         return super.parseSingleInput(key, value);

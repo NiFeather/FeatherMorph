@@ -8,6 +8,7 @@ import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
+import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 import xyz.nifeather.morph.utilities.DisguiseUtils;
 import xyz.nifeather.morph.utilities.Uuids;
@@ -26,8 +27,8 @@ public class CatProperties extends BaseLivingEntityProperties<Cat>
             variantMap.put(variant.key().asString(), variant);
     }
 
-    public final SingleProperty<Cat.Type> CAT_VARIANT = getSingle("cat/variant", Cat.Type.TABBY);
-    public final SingleProperty<UUID> OWNER = getSingle("cat/owner", Uuids.NIL_UUID);
+    public final SingleProperty<Cat.Type> CAT_VARIANT = getSingle(PropertyNames.CAT_VARIANT, Cat.Type.TABBY);
+    public final SingleProperty<UUID> OWNER = getSingle(PropertyNames.CAT_OWNER, Uuids.NIL_UUID);
 
     public CatProperties()
     {
@@ -43,31 +44,36 @@ public class CatProperties extends BaseLivingEntityProperties<Cat>
     @Override
     protected @Nullable Pair<SingleProperty<?>, Object> parseSingleInput(String key, String value)
     {
-        if (key.equals(CAT_VARIANT.id()))
+        return switch (key)
         {
-            var match = variantMap.getOrDefault(value, null);
-
-            if (match != null)
-                return Pair.of(CAT_VARIANT, match);
-        }
-
-        if (key.equals(OWNER.id()))
-        {
-            UUID uuid = null;
-
-            try
+            case PropertyNames.CAT_VARIANT ->
             {
-                uuid = UUID.fromString(value);
-                return Pair.of(OWNER, uuid);
-            }
-            catch (Throwable ignored)
-            {
+                var match = variantMap.getOrDefault(value, null);
+
+                if (match != null)
+                    yield Pair.of(CAT_VARIANT, match);
+                else
+                    yield null;
             }
 
-            return null;
-        }
+            case PropertyNames.CAT_OWNER ->
+            {
+                UUID uuid = null;
 
-        return super.parseSingleInput(key, value);
+                try
+                {
+                    uuid = UUID.fromString(value);
+                    yield Pair.of(OWNER, uuid);
+                }
+                catch (Throwable ignored)
+                {
+                }
+
+                yield null;
+            }
+
+            default -> super.parseSingleInput(key, value);
+        };
     }
 
     @Override

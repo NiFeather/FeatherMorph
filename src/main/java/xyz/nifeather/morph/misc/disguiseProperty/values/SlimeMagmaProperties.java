@@ -8,6 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
+import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 import xyz.nifeather.morph.utilities.MathUtils;
 
@@ -17,7 +18,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class SlimeMagmaProperties extends BaseLivingEntityProperties<Slime>
 {
-    public final SingleProperty<Integer> SIZE = getSingle("slime_magma/size", 1);
+    public final SingleProperty<Integer> SIZE = getSingle(PropertyNames.SLIME_MAGMA_SIZE, 1);
 
     public SlimeMagmaProperties()
     {
@@ -27,7 +28,7 @@ public class SlimeMagmaProperties extends BaseLivingEntityProperties<Slime>
     @Override
     protected @Nullable Pair<SingleProperty<?>, Object> parseSingleInput(String key, String value)
     {
-        if (key.equals(SIZE.id()))
+        if (key.equals(PropertyNames.SLIME_MAGMA_SIZE))
         {
             int size = MathUtils.clamp(1, 4, MathUtils.parseIntOr(value, 1));
             return Pair.of(SIZE, size);

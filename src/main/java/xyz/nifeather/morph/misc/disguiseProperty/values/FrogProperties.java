@@ -8,6 +8,7 @@ import org.bukkit.entity.Frog;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
+import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 import xyz.nifeather.morph.utilities.DisguiseUtils;
 
@@ -24,7 +25,7 @@ public class FrogProperties extends BaseLivingEntityProperties<Frog>
             variantMap.put(variant.key().asString(), variant);
     }
 
-    public final SingleProperty<Frog.Variant> VARIANT = getSingle("frog/variant", Frog.Variant.TEMPERATE)
+    public final SingleProperty<Frog.Variant> VARIANT = getSingle(PropertyNames.FROG_VARIANT, Frog.Variant.TEMPERATE)
             .withRandom(Frog.Variant.TEMPERATE, Frog.Variant.COLD, Frog.Variant.WARM);
 
     public FrogProperties()
@@ -40,7 +41,7 @@ public class FrogProperties extends BaseLivingEntityProperties<Frog>
     @Override
     protected @Nullable Pair<SingleProperty<?>, Object> parseSingleInput(String key, String value)
     {
-        if (key.equals(VARIANT.id()))
+        if (key.equals(PropertyNames.FROG_VARIANT))
         {
             var match = variantMap.getOrDefault(value, null);
 

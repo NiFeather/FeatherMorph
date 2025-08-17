@@ -7,13 +7,14 @@ import org.bukkit.inventory.MainHand;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
+import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 
 import java.util.Map;
 
 public class PlayerProperties extends BaseLivingEntityProperties<Player>
 {
-    public final SingleProperty<MainHandStatus> MAIN_HAND = getSingle("player/main_hand", MainHandStatus.NOTSET)
+    public final SingleProperty<MainHandStatus> MAIN_HAND = getSingle(PropertyNames.PLAYER_MAIN_HAND, MainHandStatus.NOTSET)
             .withValidInput("left", "right");
 
     public PlayerProperties()
@@ -24,7 +25,7 @@ public class PlayerProperties extends BaseLivingEntityProperties<Player>
     @Override
     protected @Nullable Pair<SingleProperty<?>, Object> parseSingleInput(String key, String value)
     {
-        if (key.equals(MAIN_HAND.id()))
+        if (key.equals(PropertyNames.PLAYER_MAIN_HAND))
         {
             var val = value.equals("left") ? MainHandStatus.LEFT : MainHandStatus.RIGHT;
             return Pair.of(MAIN_HAND, val);

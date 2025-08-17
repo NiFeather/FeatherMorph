@@ -7,6 +7,7 @@ import org.bukkit.entity.Parrot.Variant;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
+import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 import xyz.nifeather.morph.utilities.DisguiseUtils;
 
@@ -23,7 +24,7 @@ public class ParrotProperties extends BaseLivingEntityProperties<Parrot>
             variantMap.put(variant.name().toLowerCase(), variant);
     }
 
-    public final SingleProperty<Parrot.Variant> VARIANT = getSingle("parrot/variant", Variant.RED)
+    public final SingleProperty<Parrot.Variant> VARIANT = getSingle(PropertyNames.PARROT_VARIANT, Variant.RED)
             .withRandom(Variant.values());
 
     public ParrotProperties()
@@ -37,7 +38,7 @@ public class ParrotProperties extends BaseLivingEntityProperties<Parrot>
     @Override
     protected @Nullable Pair<SingleProperty<?>, Object> parseSingleInput(String key, String value)
     {
-        if (key.equals(VARIANT.id()))
+        if (key.equals(PropertyNames.PARROT_VARIANT))
         {
             var variant = variantMap.getOrDefault(value, null);
 

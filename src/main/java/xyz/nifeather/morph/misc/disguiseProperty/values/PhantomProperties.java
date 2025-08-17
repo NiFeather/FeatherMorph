@@ -6,6 +6,7 @@ import org.bukkit.entity.Phantom;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
+import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 import xyz.nifeather.morph.utilities.MathUtils;
 
@@ -13,7 +14,7 @@ import java.util.Map;
 
 public class PhantomProperties extends BaseLivingEntityProperties<Phantom>
 {
-    public final SingleProperty<Integer> SIZE = getSingle("phantom/size", 1);
+    public final SingleProperty<Integer> SIZE = getSingle(PropertyNames.PHANTOM_SIZE, 1);
 
     public PhantomProperties()
     {
@@ -29,7 +30,7 @@ public class PhantomProperties extends BaseLivingEntityProperties<Phantom>
     @Override
     protected @Nullable Pair<SingleProperty<?>, Object> parseSingleInput(String key, String value)
     {
-        if (key.equals(SIZE.id()))
+        if (key.equals(PropertyNames.PHANTOM_SIZE))
         {
             int size = MathUtils.clamp(1, 10, MathUtils.parseIntOr(value, 1));
             return Pair.of(SIZE, size);

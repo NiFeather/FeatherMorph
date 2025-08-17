@@ -6,6 +6,7 @@ import org.bukkit.entity.Horse;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
+import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 import xyz.nifeather.morph.utilities.DisguiseUtils;
 
@@ -26,10 +27,10 @@ public class HorseProperties extends BaseLivingEntityProperties<Horse>
             styleMap.put(style.name().toLowerCase(), style);
     }
 
-    public final SingleProperty<Horse.Color> COLOR = getSingle("horse/color", Horse.Color.WHITE)
+    public final SingleProperty<Horse.Color> COLOR = getSingle(PropertyNames.HORSE_COLOR, Horse.Color.WHITE)
             .withRandom(Horse.Color.values());
 
-    public final SingleProperty<Horse.Style> STYLE = getSingle("horse/style", Horse.Style.NONE)
+    public final SingleProperty<Horse.Style> STYLE = getSingle(PropertyNames.HORSE_STYLE, Horse.Style.NONE)
             .withRandom(Horse.Style.values());
 
     public HorseProperties()
@@ -47,7 +48,7 @@ public class HorseProperties extends BaseLivingEntityProperties<Horse>
     {
         switch (key)
         {
-            case "horse/color" ->
+            case PropertyNames.HORSE_COLOR ->
             {
                 var color = colorMap.getOrDefault(value, null);
 
@@ -55,7 +56,7 @@ public class HorseProperties extends BaseLivingEntityProperties<Horse>
                     return Pair.of(COLOR, color);
             }
 
-            case "horse/style" ->
+            case PropertyNames.HORSE_STYLE ->
             {
                 var style = styleMap.getOrDefault(value, null);
 

@@ -6,6 +6,7 @@ import org.bukkit.entity.Goat;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
+import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 import xyz.nifeather.morph.utilities.DisguiseUtils;
 
@@ -13,11 +14,11 @@ import java.util.Map;
 
 public class GoatProperties extends BaseLivingEntityProperties<Goat>
 {
-    public final SingleProperty<Boolean> HAS_LEFT_HORN = getSingle("goat/has_left_horn", true)
+    public final SingleProperty<Boolean> HAS_LEFT_HORN = getSingle(PropertyNames.GOAT_HAS_LEFT_HORN, true)
             .withRandom(true, true, true, false)
             .withValidInput("false", "true");
 
-    public final SingleProperty<Boolean> HAS_RIGHT_HORN = getSingle("goat/has_right_horn", true)
+    public final SingleProperty<Boolean> HAS_RIGHT_HORN = getSingle(PropertyNames.GOAT_HAS_RIGHT_HORN, true)
             .withRandom(true, true, true, false)
             .withValidInput("false", "true");
 
@@ -31,8 +32,8 @@ public class GoatProperties extends BaseLivingEntityProperties<Goat>
     {
         return switch (key)
         {
-            case "goat/has_left_horn" -> Pair.of(HAS_LEFT_HORN, Boolean.valueOf(value));
-            case "goat/has_right_horn" -> Pair.of(HAS_RIGHT_HORN, Boolean.valueOf(value));
+            case PropertyNames.GOAT_HAS_LEFT_HORN -> Pair.of(HAS_LEFT_HORN, Boolean.valueOf(value));
+            case PropertyNames.GOAT_HAS_RIGHT_HORN -> Pair.of(HAS_RIGHT_HORN, Boolean.valueOf(value));
 
             default -> super.parseSingleInput(key, value);
         };

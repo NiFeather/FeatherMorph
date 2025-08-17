@@ -7,6 +7,7 @@ import org.bukkit.entity.Sheep;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
+import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 
 import java.util.Arrays;
@@ -14,7 +15,7 @@ import java.util.Map;
 
 public class SheepProperties extends BaseLivingEntityProperties<Sheep>
 {
-    public final SingleProperty<DyeColor> DYE_COLOR = getSingle("sheep/color", DyeColor.getByWoolData((byte)15));
+    public final SingleProperty<DyeColor> DYE_COLOR = getSingle(PropertyNames.SHEEP_COLOR, DyeColor.getByWoolData((byte)15));
 
     public SheepProperties()
     {
@@ -31,7 +32,7 @@ public class SheepProperties extends BaseLivingEntityProperties<Sheep>
     @Override
     protected @Nullable Pair<SingleProperty<?>, Object> parseSingleInput(String key, String value)
     {
-        if (key.equals(DYE_COLOR.id()))
+        if (key.equals(PropertyNames.SHEEP_COLOR))
         {
             var match = Arrays.stream(DyeColor.values()).filter(v -> v.name().equalsIgnoreCase(value))
                     .findFirst().orElse(null);

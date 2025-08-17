@@ -8,6 +8,7 @@ import org.checkerframework.checker.units.qual.C;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
+import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 import xyz.nifeather.morph.utilities.DisguiseUtils;
 
@@ -24,7 +25,7 @@ public class LlamaProperties extends BaseLivingEntityProperties<Llama>
             colorMap.put(value.name().toLowerCase(), value);
     }
 
-    public final SingleProperty<Llama.Color> COLOR = getSingle("llama/color", Color.CREAMY)
+    public final SingleProperty<Llama.Color> COLOR = getSingle(PropertyNames.LLAMA_COLOR, Color.CREAMY)
             .withRandom(Color.values());
 
     public LlamaProperties()
@@ -38,7 +39,7 @@ public class LlamaProperties extends BaseLivingEntityProperties<Llama>
     @Override
     protected @Nullable Pair<SingleProperty<?>, Object> parseSingleInput(String key, String value)
     {
-        if (key.equals(COLOR.id()))
+        if (key.equals(PropertyNames.LLAMA_COLOR))
         {
             var color = colorMap.getOrDefault(value, null);
 

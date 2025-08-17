@@ -7,6 +7,7 @@ import org.bukkit.entity.Villager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
+import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 import xyz.nifeather.morph.utilities.DisguiseUtils;
 import xyz.nifeather.morph.utilities.MathUtils;
@@ -28,13 +29,13 @@ public class VillagerProperties extends BaseLivingEntityProperties<Villager>
             professionMap.put(profession.key().asString(), profession);
     }
 
-    public final SingleProperty<Villager.Type> TYPE = getSingle("villager/type", Villager.Type.PLAINS)
+    public final SingleProperty<Villager.Type> TYPE = getSingle(PropertyNames.VILLAGER_TYPE, Villager.Type.PLAINS)
             .withRandom(Registry.VILLAGER_TYPE.stream().toList());
 
-    public final SingleProperty<Villager.Profession> PROFESSION = getSingle("villager/profession", Villager.Profession.NONE)
+    public final SingleProperty<Villager.Profession> PROFESSION = getSingle(PropertyNames.VILLAGER_PROFESSION, Villager.Profession.NONE)
             .withRandom(Registry.VILLAGER_PROFESSION.stream().toList());
 
-    public final SingleProperty<Integer> LEVEL = getSingle("villager/level", 1)
+    public final SingleProperty<Integer> LEVEL = getSingle(PropertyNames.VILLAGER_LEVEL, 1)
             .withRandom(1, 2, 3, 4, 5, 6);
 
     public VillagerProperties()
@@ -52,7 +53,7 @@ public class VillagerProperties extends BaseLivingEntityProperties<Villager>
     {
         switch (key)
         {
-            case "villager/type" ->
+            case PropertyNames.VILLAGER_TYPE ->
             {
                 var type = typeMap.getOrDefault(value, null);
 
@@ -60,7 +61,7 @@ public class VillagerProperties extends BaseLivingEntityProperties<Villager>
                     return Pair.of(TYPE, type);
             }
 
-            case "villager/profession" ->
+            case PropertyNames.VILLAGER_PROFESSION ->
             {
                 var profession = professionMap.getOrDefault(value, null);
 
@@ -68,7 +69,7 @@ public class VillagerProperties extends BaseLivingEntityProperties<Villager>
                     return Pair.of(PROFESSION, profession);
             }
 
-            case "villager/level" ->
+            case PropertyNames.VILLAGER_LEVEL ->
             {
                 int level = 1;
 

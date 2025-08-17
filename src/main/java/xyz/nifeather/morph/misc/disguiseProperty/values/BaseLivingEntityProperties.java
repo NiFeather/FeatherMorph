@@ -8,6 +8,7 @@ import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
 import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
+import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 import xyz.nifeather.morph.utilities.MathUtils;
 
@@ -15,12 +16,12 @@ import java.util.Map;
 
 public abstract class BaseLivingEntityProperties<E extends Entity> extends AbstractProperties<E>
 {
-    public final SingleProperty<Component> CUSTOM_NAME = getSingle("entity/custom_name", Component.empty());
+    public final SingleProperty<Component> CUSTOM_NAME = getSingle(PropertyNames.ENTITY_CUSTOM_NAME, Component.empty());
 
-    public final SingleProperty<Boolean> CUSTOM_NAME_VISIBLE = getSingle("entity/custom_name_visible", false)
+    public final SingleProperty<Boolean> CUSTOM_NAME_VISIBLE = getSingle(PropertyNames.ENTITY_CUSTOM_NAME_VISIBLE, false)
             .withValidInput("true", "false");
 
-    public final SingleProperty<Integer> STUCKED_ARROWS = getSingle("entity/stucked_arrows", 0);
+    public final SingleProperty<Integer> STUCKED_ARROWS = getSingle(PropertyNames.ENTITY_ARROW_COUNT, 0);
 
     public BaseLivingEntityProperties()
     {
@@ -33,7 +34,7 @@ public abstract class BaseLivingEntityProperties<E extends Entity> extends Abstr
     @Override
     protected @Nullable Pair<SingleProperty<?>, Object> parseSingleInput(String key, String value)
     {
-        if (key.equals(CUSTOM_NAME.id()))
+        if (key.equals(PropertyNames.ENTITY_CUSTOM_NAME))
         {
             try
             {
@@ -49,11 +50,11 @@ public abstract class BaseLivingEntityProperties<E extends Entity> extends Abstr
                 return Pair.of(CUSTOM_NAME, minimessageFormatFail);
             }
         }
-        else if (key.equals(CUSTOM_NAME_VISIBLE.id()))
+        else if (key.equals(PropertyNames.ENTITY_CUSTOM_NAME_VISIBLE))
         {
             return Pair.of(CUSTOM_NAME_VISIBLE, Boolean.parseBoolean(value));
         }
-        else if (key.equals(STUCKED_ARROWS.id()))
+        else if (key.equals(PropertyNames.ENTITY_ARROW_COUNT))
         {
             int val = MathUtils.clamp(0, 100, MathUtils.parseIntOr(value, 0));
             return Pair.of(STUCKED_ARROWS, val);

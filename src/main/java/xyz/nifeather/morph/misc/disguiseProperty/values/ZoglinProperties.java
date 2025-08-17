@@ -7,13 +7,14 @@ import org.bukkit.entity.Zoglin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
+import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 
 import java.util.Map;
 
 public class ZoglinProperties extends BaseLivingEntityProperties<Zoglin>
 {
-    public final SingleProperty<Boolean> IS_BABY = getSingle("zoglin/is_baby", false);
+    public final SingleProperty<Boolean> IS_BABY = getSingle(PropertyNames.ZOGLIN_IS_BABY, false);
 
     public ZoglinProperties()
     {
@@ -29,7 +30,7 @@ public class ZoglinProperties extends BaseLivingEntityProperties<Zoglin>
     @Override
     protected @Nullable Pair<SingleProperty<?>, Object> parseSingleInput(String key, String value)
     {
-        if (key.equals(IS_BABY.id()))
+        if (key.equals(PropertyNames.ZOGLIN_IS_BABY))
             return Pair.of(IS_BABY, Boolean.valueOf(value));
 
         return super.parseSingleInput(key, value);

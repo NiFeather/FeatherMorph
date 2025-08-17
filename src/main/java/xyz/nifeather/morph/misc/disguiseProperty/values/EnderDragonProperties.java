@@ -7,6 +7,7 @@ import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
+import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 
 import java.util.List;
@@ -14,7 +15,7 @@ import java.util.Map;
 
 public class EnderDragonProperties extends BaseLivingEntityProperties<EnderDragon>
 {
-    public final SingleProperty<Integer> DRAGON_PHASE = getSingle("ender_dragon/dragon_phase", 10);
+    public final SingleProperty<Integer> DRAGON_PHASE = getSingle(PropertyNames.ENDER_DRAGON_DRAGON_PHASE, 10);
 
     public EnderDragonProperties()
     {
@@ -24,7 +25,7 @@ public class EnderDragonProperties extends BaseLivingEntityProperties<EnderDrago
     @Override
     protected @Nullable Pair<SingleProperty<?>, Object> parseSingleInput(String key, String value)
     {
-        if (key.equals(DRAGON_PHASE.id()))
+        if (key.equals(PropertyNames.ENDER_DRAGON_DRAGON_PHASE))
             return Pair.of(DRAGON_PHASE, Math.clamp(Integer.parseInt(value), 0, 10));
 
         return super.parseSingleInput(key, value);

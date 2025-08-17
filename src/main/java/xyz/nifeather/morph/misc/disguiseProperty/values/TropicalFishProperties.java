@@ -7,6 +7,7 @@ import org.bukkit.entity.TropicalFish;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
+import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 import xyz.nifeather.morph.utilities.DisguiseUtils;
 
@@ -16,11 +17,11 @@ import java.util.Map;
 
 public class TropicalFishProperties extends BaseLivingEntityProperties<TropicalFish>
 {
-    public final SingleProperty<DyeColor> BODY_COLOR = getSingle("tropical_fish/body_color", DyeColor.GREEN)
+    public final SingleProperty<DyeColor> BODY_COLOR = getSingle(PropertyNames.TROPICAL_FISH_BODY_COLOR, DyeColor.GREEN)
             .withRandom(DyeColor.values());
-    public final SingleProperty<DyeColor> PATTERN_COLOR = getSingle("tropical_fish/pattern_color", DyeColor.BLACK)
+    public final SingleProperty<DyeColor> PATTERN_COLOR = getSingle(PropertyNames.TROPICAL_FISH_PATTERN_COLOR, DyeColor.BLACK)
             .withRandom(DyeColor.values());
-    public final SingleProperty<TropicalFish.Pattern> PATTERN = getSingle("tropical_fish/pattern", TropicalFish.Pattern.BLOCKFISH)
+    public final SingleProperty<TropicalFish.Pattern> PATTERN = getSingle(PropertyNames.TROPICAL_FISH_PATTERN, TropicalFish.Pattern.BLOCKFISH)
             .withRandom(TropicalFish.Pattern.values());
 
     public TropicalFishProperties()
@@ -39,40 +40,43 @@ public class TropicalFishProperties extends BaseLivingEntityProperties<TropicalF
     @Override
     protected @Nullable Pair<SingleProperty<?>, Object> parseSingleInput(String key, String value)
     {
-        logger.info("Input! key is %s and value is %s".formatted(key, value));
-        if (key.equals(BODY_COLOR.id()))
+        return switch (key)
         {
-            var match = Arrays.stream(DyeColor.values())
-                    .filter(c -> c.name().equalsIgnoreCase(value))
-                    .findFirst().orElse(null);
+            case PropertyNames.TROPICAL_FISH_BODY_COLOR ->
+            {
+                var match = Arrays.stream(DyeColor.values())
+                        .filter(c -> c.name().equalsIgnoreCase(value))
+                        .findFirst().orElse(null);
 
-            logger.info("BODY COILOR get " + match);
-            if (match == null) return null;
+                if (match == null) yield null;
 
-            return Pair.of(BODY_COLOR, match);
-        }
-        else if (key.equals(PATTERN_COLOR.id()))
-        {
-            var match = Arrays.stream(DyeColor.values())
-                    .filter(c -> c.name().equalsIgnoreCase(value))
-                    .findFirst().orElse(null);
+                yield  Pair.of(BODY_COLOR, match);
+            }
 
-            if (match == null) return null;
+            case PropertyNames.TROPICAL_FISH_PATTERN_COLOR ->
+            {
+                var match = Arrays.stream(DyeColor.values())
+                        .filter(c -> c.name().equalsIgnoreCase(value))
+                        .findFirst().orElse(null);
 
-            return Pair.of(PATTERN_COLOR, match);
-        }
-        else if (key.equals(PATTERN.id()))
-        {
-            var match = Arrays.stream(TropicalFish.Pattern.values())
-                    .filter(p -> p.name().equalsIgnoreCase(value))
-                    .findFirst().orElse(null);
+                if (match == null) yield null;
 
-            if (match == null) return null;
+                yield Pair.of(PATTERN_COLOR, match);
+            }
 
-            return Pair.of(PATTERN, match);
-        }
+            case PropertyNames.TROPICAL_FISH_PATTERN ->
+            {
+                var match = Arrays.stream(TropicalFish.Pattern.values())
+                        .filter(p -> p.name().equalsIgnoreCase(value))
+                        .findFirst().orElse(null);
 
-        return super.parseSingleInput(key, value);
+                if (match == null) yield null;
+
+                yield Pair.of(PATTERN, match);
+            }
+
+            default -> super.parseSingleInput(key, value);
+        };
     }
 
     @Override

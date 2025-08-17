@@ -7,6 +7,7 @@ import org.bukkit.entity.Panda.Gene;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
+import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 import xyz.nifeather.morph.utilities.DisguiseUtils;
 
@@ -23,10 +24,10 @@ public class PandaProperties extends BaseLivingEntityProperties<Panda>
             geneMap.put(gene.name().toLowerCase(), gene);
     }
 
-    public final SingleProperty<Panda.Gene> MAIN_GENE = getSingle("panda/main_gene", Gene.NORMAL)
+    public final SingleProperty<Panda.Gene> MAIN_GENE = getSingle(PropertyNames.PANDA_MAIN_GENE, Gene.NORMAL)
             .withRandom(Gene.values());
 
-    public final SingleProperty<Panda.Gene> HIDDEN_GENE = getSingle("panda/hidden_gene", Gene.NORMAL)
+    public final SingleProperty<Panda.Gene> HIDDEN_GENE = getSingle(PropertyNames.PANDA_HIDDEN_GENE, Gene.NORMAL)
             .withRandom(Gene.values());
 
     public PandaProperties()
@@ -44,7 +45,7 @@ public class PandaProperties extends BaseLivingEntityProperties<Panda>
     {
         switch (key)
         {
-            case "panda/main_gene" ->
+            case PropertyNames.PANDA_MAIN_GENE ->
             {
                 var gene = geneMap.getOrDefault(value, null);
 
@@ -52,7 +53,7 @@ public class PandaProperties extends BaseLivingEntityProperties<Panda>
                     return Pair.of(MAIN_GENE, gene);
             }
 
-            case "panda/hidden_gene" ->
+            case PropertyNames.PANDA_HIDDEN_GENE ->
             {
                 var gene = geneMap.getOrDefault(value, null);
 

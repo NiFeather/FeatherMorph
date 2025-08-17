@@ -7,6 +7,7 @@ import org.bukkit.entity.Rabbit.Type;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
+import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 import xyz.nifeather.morph.utilities.DisguiseUtils;
 
@@ -23,7 +24,7 @@ public class RabbitProperties extends BaseLivingEntityProperties<Rabbit>
             typeMap.put(type.name().toLowerCase(), type);
     }
 
-    public final SingleProperty<Rabbit.Type> VARIANT = getSingle("rabbit/variant", Type.BROWN)
+    public final SingleProperty<Rabbit.Type> VARIANT = getSingle(PropertyNames.RABBIT_VARIANT, Type.BROWN)
             .withRandom(Type.values());
 
     public RabbitProperties()
@@ -37,7 +38,7 @@ public class RabbitProperties extends BaseLivingEntityProperties<Rabbit>
     @Override
     protected @Nullable Pair<SingleProperty<?>, Object> parseSingleInput(String key, String value)
     {
-        if (key.equals(VARIANT.id()))
+        if (key.equals(PropertyNames.RABBIT_VARIANT))
         {
             var variant = typeMap.getOrDefault(value, null);
 
