@@ -228,9 +228,9 @@ public class MorphStrings extends AbstractMorphStrings
                 "（部分暴露）");
     }
 
-    public static FormattableMessage townyBlockedSkillString()
+    public static FormattableMessage regionBlockedSkillString()
     {
-        return getFormattable(getKey("towny_blocked_skill"), "[Fallback] <red>你所在的城镇不允许你使用技能");
+        return getFormattable(getKey("region_blocked_skill"), "[Fallback] <red>你所在的区域不允许你使用技能");
     }
 
     private static String getKey(String key)

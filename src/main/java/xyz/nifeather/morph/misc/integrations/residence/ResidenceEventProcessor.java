@@ -1,5 +1,6 @@
 package xyz.nifeather.morph.misc.integrations.residence;
 
+import com.bekvon.bukkit.residence.Residence;
 import com.bekvon.bukkit.residence.containers.Flags;
 import com.bekvon.bukkit.residence.event.ResidenceChangedEvent;
 import com.bekvon.bukkit.residence.event.ResidenceFlagChangeEvent;
@@ -8,6 +9,10 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.abilities.impl.FlyAbility;
+import xyz.nifeather.morph.abilities.impl.SnowyAbility;
+import xyz.nifeather.morph.api.events.gameplay.PlayerExecuteSkillEvent;
+import xyz.nifeather.morph.messages.MessageUtils;
+import xyz.nifeather.morph.messages.MorphStrings;
 
 public class ResidenceEventProcessor extends MorphPluginObject implements Listener
 {
@@ -20,18 +25,20 @@ public class ResidenceEventProcessor extends MorphPluginObject implements Listen
         if (newResidence == null)
         {
             FlyAbility.unBlockPlayer(player, this);
+            SnowyAbility.unBlockPlayer(player, this);
             return;
         }
 
         var residencePermissions = newResidence.getPermissions();
         if (residencePermissions.playerHas(player, Flags.nofly, false))
-        {
             FlyAbility.blockPlayer(player, this);
-        }
         else
-        {
             FlyAbility.unBlockPlayer(player, this);
-        }
+
+        if (residencePermissions.playerHas(player, Flags.place, false))
+            SnowyAbility.unBlockPlayer(player, this);
+        else
+            SnowyAbility.blockPlayer(player, this);
     }
 
     @EventHandler
@@ -41,22 +48,47 @@ public class ResidenceEventProcessor extends MorphPluginObject implements Listen
         var players = residence.getPlayersInResidence();
 
         var flagName = e.getFlag();
-        if (!flagName.equals(Flags.nofly.getName()))
-            return;
-
         var newState = e.getNewState();
-        var canFly = newState == FlagPermissions.FlagState.FALSE || newState == FlagPermissions.FlagState.NEITHER;
 
-        players.forEach(p ->
+        if (flagName.equals(Flags.place.getName()))
         {
-            if (!canFly)
+            var allowPlace = newState == FlagPermissions.FlagState.TRUE;
+
+            players.forEach(p ->
             {
-                FlyAbility.blockPlayer(p, this);
-            }
-            else
+                if (!allowPlace)
+                    SnowyAbility.blockPlayer(p, this);
+                else
+                    SnowyAbility.unBlockPlayer(p, this);
+            });
+        }
+        else if (flagName.equals(Flags.nofly.getName()))
+        {
+            var canFly = newState == FlagPermissions.FlagState.FALSE || newState == FlagPermissions.FlagState.NEITHER;
+
+            players.forEach(p ->
             {
-                FlyAbility.unBlockPlayer(p, this);
-            }
-        });
+                if (!canFly)
+                    FlyAbility.blockPlayer(p, this);
+                else
+                    FlyAbility.unBlockPlayer(p, this);
+            });
+        }
+    }
+
+    @EventHandler
+    public void onPlayerUseSkill(PlayerExecuteSkillEvent e)
+    {
+        var player = e.getPlayer();
+        var residence = Residence.getInstance()
+                .getResidenceManager()
+                .getByLoc(player);
+
+        var residencePermissions = residence.getPermissions();
+        if (!residencePermissions.playerHas(player, Flags.use, false))
+        {
+            e.setCancelled(true);
+            player.sendMessage(MessageUtils.prefixes(player, MorphStrings.regionBlockedSkillString()));
+        }
     }
 }
