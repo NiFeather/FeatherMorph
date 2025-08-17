@@ -121,6 +121,7 @@ public class DisguiseWaypointUpdater implements WaypointTransmitter
         if (disposed) return;
 
         this.enabled = value;
+        tick();
     }
 
     private final DisguiseState bindingState;
