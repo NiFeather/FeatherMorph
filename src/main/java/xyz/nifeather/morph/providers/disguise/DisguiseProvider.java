@@ -91,16 +91,6 @@ public abstract class DisguiseProvider extends MorphPluginObject
     @NotNull
     public abstract List<AbstractS2CCommand<?>> getInitialSyncCommands(DisguiseState state);
 
-    /**
-     * 获取某个伪装的客户端预览ID
-     * @param state 目标伪装
-     * @return ID
-     */
-    public String getSelfViewIdentifier(DisguiseState state)
-    {
-        return state.getDisguiseIdentifier();
-    }
-
     public boolean validForClient(DisguiseState state)
     {
         return false;
