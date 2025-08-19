@@ -2,7 +2,6 @@ package xyz.nifeather.morph.providers.disguise;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.kyori.adventure.text.Component;
-import net.minecraft.nbt.CompoundTag;
 import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
@@ -34,7 +33,6 @@ import xyz.nifeather.morph.utilities.*;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Objects;
-import java.util.Random;
 
 public class VanillaDisguiseProvider extends DefaultDisguiseProvider
 {
@@ -114,7 +112,6 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
     {
         var identifier = disguiseMeta.getIdentifier();
 
-        DisguiseWrapper<?> constructedDisguise;
         var backend = getPreferredBackend();
 
         var entityType = EntityTypeUtils.fromString(identifier, true);
@@ -125,38 +122,16 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
             return DisguiseResult.fail();
         }
 
-        var copyResult = constructFromEntity(disguiseMeta, targetEntity);
-
-        constructedDisguise = copyResult.success()
-                ? copyResult.wrapperInstance() //copyResult.success() -> wrapperInstance() != null
-                : backend.createInstance(entityType);
+        var newDisguise = backend.createInstance(entityType);
 
         // Make IDE happy
-        Objects.requireNonNull(constructedDisguise);
-
-        var canConstructFromEntity = canConstruct(disguiseMeta, targetEntity, null);
-
-        //手动指定史莱姆和岩浆怪的大小
-        if (entityType == EntityType.SLIME || entityType == EntityType.MAGMA_CUBE)
-        {
-            if (canConstructFromEntity)
-            {
-                var size = (targetEntity instanceof Slime slime)
-                        ? slime.getSize()
-                        : new Random().nextInt(0, 4); //史莱姆的大小其实是0~3
-
-                var initialTag = new CompoundTag();
-
-                initialTag.putInt("Size", size);
-                constructedDisguise.mergeCompound(initialTag);
-            }
-        }
+        Objects.requireNonNull(newDisguise);
 
         // 检查是否有足够的空间
         if (modifyBoundingBoxes.get() && checkSpaceBoundingBox.get())
         {
             var loc = player.getLocation();
-            var box = constructedDisguise.getBoundingBoxAt(loc.x(), loc.y(), loc.z());
+            var box = newDisguise.getBoundingBoxAt(loc.x(), loc.y(), loc.z());
 
             var hasCollision = CollisionUtils.hasCollisionWithBlockOrBorder(player, box);
             if (hasCollision)
@@ -166,7 +141,7 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
             }
         }
 
-        return DisguiseResult.success(constructedDisguise, copyResult.isCopy());
+        return DisguiseResult.success(newDisguise);
     }
 
     @Override
@@ -187,9 +162,9 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
     }
 
     @Override
-    public void onPostConstructDisguise(DisguiseState state, @Nullable Entity targetEntity)
+    public void postBuildDisguise(DisguiseState state, @Nullable Entity targetEntity)
     {
-        super.onPostConstructDisguise(state, targetEntity);
+        super.postBuildDisguise(state, targetEntity);
 
         var wrapper = state.getDisguiseWrapper();
         var theirDisguise = getMorphManager().getDisguiseStateFor(targetEntity);
@@ -403,25 +378,20 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
     }
 
     @Override
-    public void resetDisguise(DisguiseState state)
-    {
-        var player = state.getPlayer();
-
-        removeAllHealthModifiers(player);
-        resetPlayerDimensions(player);
-        recoverPlayerWaypoint(player);
-    }
-
-    @Override
     public boolean unMorph(Player player, DisguiseState state)
     {
         if (super.unMorph(player, state))
         {
-            resetDisguise(state);
+            removeAllHealthModifiers(player);
+            resetPlayerDimensions(player);
+            recoverPlayerWaypoint(player);
+
             return true;
         }
         else
+        {
             return false;
+        }
     }
 
     @Override
@@ -441,38 +411,9 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
     }
 
     @Override
-    public @Nullable CompoundTag getInitialNbtCompound(DisguiseState state, @Nullable Entity targetEntity, boolean enableCulling)
-    {
-        var info = getMorphManager().getDisguiseMeta(state.getDisguiseIdentifier());
-
-        var rawCompound = targetEntity != null && canConstruct(info, targetEntity, null)
-                ? NbtUtils.getRawTagCompound(targetEntity)
-                : new CompoundTag();
-
-        var theirDisguise = getMorphManager().getDisguiseStateFor(targetEntity);
-
-        if (theirDisguise != null)
-            rawCompound = theirDisguise.getDisguiseWrapper().getCompound();
-
-        // ???
-        // if (targetEntity == null || targetEntity.getType() != state.getEntityType())
-        //    rawCompound.merge(state.getDisguiseWrapper().getCompound());
-
-        return enableCulling ? cullNBT(rawCompound) : rawCompound;
-    }
-
-    @Override
     public boolean validForClient(DisguiseState state)
     {
         return true;
-    }
-
-    @Override
-    public boolean canConstruct(DisguiseMeta info, @Nullable Entity targetEntity, DisguiseState theirState)
-    {
-        return theirState != null
-                ? theirState.getDisguiseWrapper().getEntityType().equals(info.getEntityType())
-                : targetEntity == null || targetEntity.getType().equals(info.getEntityType());
     }
 
     /**
@@ -486,14 +427,9 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
     @Override
     public boolean canCloneEquipment(DisguiseMeta info, Entity targetEntity, DisguiseState theirState)
     {
-        return canConstruct(info, targetEntity, theirState);
-    }
-
-    @Override
-    protected boolean canCloneDisguise(DisguiseMeta info, Entity targetEntity,
-                                       @NotNull DisguiseState theirDisguiseState, @NotNull DisguiseWrapper<?> theirDisguise)
-    {
-        return theirDisguise.getEntityType().equals(info.getEntityType());
+        return theirState != null
+                ? theirState.getDisguiseWrapper().getEntityType().equals(info.getEntityType())
+                : targetEntity == null || targetEntity.getType().equals(info.getEntityType());
     }
 
     @Resolved

@@ -39,18 +39,6 @@ public class ParrotWatcher extends TameableAnimalWatcher
     }
 
     @Override
-    public void mergeFromCompound(CompoundTag nbt)
-    {
-        super.mergeFromCompound(nbt);
-
-        if (nbt.contains("Variant"))
-        {
-            var variant = nbt.getInt("Variant").orElseThrow();
-            this.writePersistent(ValueIndex.PARROT.PARROT_VARIANT, variant);
-        }
-    }
-
-    @Override
     public void writeToCompound(CompoundTag nbt)
     {
         super.writeToCompound(nbt);

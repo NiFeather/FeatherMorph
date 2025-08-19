@@ -50,8 +50,7 @@ public class FallbackDisguiseProvider extends DefaultDisguiseProvider
         return DisguiseResult.fail();
     }
 
-    @Override
-    public boolean canConstruct(DisguiseMeta info, Entity targetEntity, @Nullable DisguiseState theirState)
+    private boolean canConstruct(DisguiseMeta info, Entity targetEntity, @Nullable DisguiseState theirState)
     {
         return false;
     }
@@ -66,12 +65,6 @@ public class FallbackDisguiseProvider extends DefaultDisguiseProvider
      */
     @Override
     public boolean canCloneEquipment(DisguiseMeta info, Entity targetEntity, DisguiseState theirState)
-    {
-        return false;
-    }
-
-    @Override
-    protected boolean canCloneDisguise(DisguiseMeta info, Entity targetEntity, @NotNull DisguiseState theirState, @NotNull DisguiseWrapper<?> theirDisguise)
     {
         return false;
     }

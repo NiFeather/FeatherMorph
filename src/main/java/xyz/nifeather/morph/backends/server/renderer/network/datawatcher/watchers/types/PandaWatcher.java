@@ -78,18 +78,6 @@ public class PandaWatcher extends LivingEntityWatcher
     }
 
     @Override
-    public void mergeFromCompound(CompoundTag nbt)
-    {
-        super.mergeFromCompound(nbt);
-
-        if (nbt.contains("MainGene"))
-            writePersistent(ValueIndex.PANDA.MAIN_GENE, (byte)getGeneFromName(nbt.getString("MainGene").orElseThrow()).ordinal());
-
-        if (nbt.contains("HiddenGene"))
-            writePersistent(ValueIndex.PANDA.HIDDEN_GENE, (byte)getGeneFromName(nbt.getString("HiddenGene").orElseThrow()).ordinal());
-    }
-
-    @Override
     public void writeToCompound(CompoundTag nbt)
     {
         super.writeToCompound(nbt);

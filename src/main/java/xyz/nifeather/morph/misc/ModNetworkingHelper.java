@@ -121,7 +121,7 @@ public class ModNetworkingHelper extends MorphPluginObject
             var profileStr = NbtUtils.getCompoundString(NbtUtils.toCompoundTag(profile));
 
             this.setProfileCompound(profileStr)
-                    .setSNbt(NbtUtils.getCompoundString(wrapper.getCompound()))
+                    //.setSNbt(NbtUtils.getCompoundString(wrapper.getCompound()))
                     .setDisguiseEquipmentShown(wrapper.readProperty(OffTreeProperties.DISPLAY_FAKE_EQUIPMENT))
                     .setOverridedEquip(wrapper.getFakeEquipments());
 

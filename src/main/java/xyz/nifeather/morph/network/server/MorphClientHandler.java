@@ -374,6 +374,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
         session.clientFeatures.addAll(clientInitializeRecord.clientFeatures());
         session.options.clientApiVersion = clientInitializeRecord.apiVersion();
         session.initializeState = InitializeState.API_CHECKED;
+        session.apiVersion = clientVersion;
 
         commandPacketHandler.sendInitializeRespond(player, this.getInitializeRespond());
     }

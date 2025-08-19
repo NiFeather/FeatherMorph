@@ -10,6 +10,7 @@ import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerUp
 import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectObjectMutablePair;
+import net.kyori.adventure.text.Component;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
@@ -20,9 +21,13 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.potion.PotionEffect;
+import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.misc.BuildFailedException;
 import xyz.nifeather.morph.misc.NmsRecord;
+import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
+import xyz.nifeather.morph.misc.disguiseProperty.values.BaseLivingEntityProperties;
 import xyz.nifeather.morph.utilities.NmsUtils;
 
 import java.util.List;
@@ -53,6 +58,29 @@ public class LivingEntityWatcher extends EntityWatcher
 
         handPair.left(e.getPlayer());
         handPair.right(e.getHand());
+    }
+
+    @Override
+    protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
+    {
+        var properties = DisguiseProperties.INSTANCE.getOrThrow(BaseLivingEntityProperties.class);
+        if (property.equals(properties.CUSTOM_NAME))
+        {
+            Component component = value instanceof Component component1 ? component1 : Component.empty();
+            this.writePersistent(ValueIndex.BASE_LIVING.CUSTOM_NAME, component.equals(Component.empty()) ? Optional.empty() : Optional.of(component));
+        }
+        else if (property.equals(properties.CUSTOM_NAME_VISIBLE))
+        {
+            Boolean bool = value instanceof Boolean b ? b : Boolean.parseBoolean(value.toString());
+            this.writePersistent(ValueIndex.BASE_LIVING.CUSTOM_NAME_VISIBLE, bool);
+        }
+        else if (property.equals(properties.STUCKED_ARROWS))
+        {
+            int count = (Integer) value;
+            this.writePersistent(ValueIndex.BASE_LIVING.STUCKED_ARROWS, count);
+        }
+
+        super.onPropertyWrite(property, value);
     }
 
     protected WrapperPlayServerUpdateAttributes buildAttributePacket()

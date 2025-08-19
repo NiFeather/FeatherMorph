@@ -3,7 +3,6 @@ package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watcher
 import com.github.retrooper.packetevents.protocol.entity.pig.PigVariant;
 import com.github.retrooper.packetevents.protocol.entity.pig.PigVariants;
 import net.minecraft.nbt.CompoundTag;
-import org.bukkit.NamespacedKey;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Pig;
 import org.bukkit.entity.Player;
@@ -50,23 +49,6 @@ public class PigWatcher extends AgeableMobWatcher
         }
 
         super.onPropertyWrite(property, value);
-    }
-
-    @Override
-    public void mergeFromCompound(CompoundTag nbt)
-    {
-        if (nbt.contains("variant"))
-        {
-            var idString = nbt.getString("variant").orElseThrow();
-            var idKey = NamespacedKey.fromString(idString);
-
-            if (idKey == null)
-                return;
-
-            writePersistent(ValueIndex.PIG.PIG_VARIANT, getPigVariant(idString));
-        }
-
-        super.mergeFromCompound(nbt);
     }
 
     @Override

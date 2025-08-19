@@ -16,7 +16,7 @@ public class DisguiseProperties
     public static final DisguiseProperties INSTANCE = new DisguiseProperties();
     private static final Logger log = LoggerFactory.getLogger(DisguiseProperties.class);
 
-    private final Map<EntityType, AbstractProperties> handlerMap = new ConcurrentHashMap<>();
+    private final Map<EntityType, AbstractProperties<?>> handlerMap = new ConcurrentHashMap<>();
 
     private DisguiseProperties()
     {
@@ -33,7 +33,7 @@ public class DisguiseProperties
         register(EntityType.HORSE, new HorseProperties());
         register(EntityType.PANDA, new PandaProperties());
         register(EntityType.VILLAGER, new VillagerProperties());
-        register(EntityType.ZOMBIE_VILLAGER, new VillagerProperties());
+        register(EntityType.ZOMBIE_VILLAGER, new ZombieVillagerProperties());
         register(EntityType.ARMOR_STAND, new ArmorStandProperties());
         register(EntityType.CREEPER, new CreeperProperties());
 
@@ -45,14 +45,30 @@ public class DisguiseProperties
         register(EntityType.HAPPY_GHAST, new HappyGhastProperties());
 
         register(EntityType.PLAYER, new PlayerProperties());
+
+        var slimeMagmaProperties = new SlimeMagmaProperties();
+        register(EntityType.SLIME, slimeMagmaProperties);
+        register(EntityType.MAGMA_CUBE, slimeMagmaProperties);
+
+        register(EntityType.SHULKER, new ShulkerProperties());
+        register(EntityType.TRADER_LLAMA, new TraderLlamaProperties());
+        register(EntityType.PHANTOM, new PhantomProperties());
+        register(EntityType.SHEEP, new SheepProperties());
+        register(EntityType.SNOW_GOLEM, new SnowGolemProperties());
+        register(EntityType.TROPICAL_FISH, new TropicalFishProperties());
+
+        register(EntityType.HOGLIN, new HoglinProperties());
+        register(EntityType.ZOGLIN, new ZoglinProperties());
+
+        register(EntityType.ZOMBIE, new ZombieProperties());
     }
 
-    public Map<EntityType, AbstractProperties> getAll()
+    public Map<EntityType, AbstractProperties<?>> getAll()
     {
         return new Object2ObjectOpenHashMap<>(handlerMap);
     }
 
-    public void register(EntityType type, AbstractProperties properties)
+    public void register(EntityType type, AbstractProperties<?> properties)
     {
         if (handlerMap.containsKey(type))
             throw new IllegalArgumentException("Already contains properties setup for type " + type);
@@ -60,7 +76,7 @@ public class DisguiseProperties
         handlerMap.put(type, properties);
     }
 
-    private static final AbstractProperties defaultProperties = new DefaultProperties();
+    private static final AbstractProperties<?> defaultProperties = new FallbackProperties();
 
     public <X> X getOrThrow(Class<X> expectedClass)
     {
@@ -86,7 +102,7 @@ public class DisguiseProperties
     }
 
     @NotNull
-    public AbstractProperties get(EntityType type)
+    public AbstractProperties<?> get(EntityType type)
     {
         return handlerMap.getOrDefault(type, defaultProperties);
     }

@@ -11,6 +11,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 public class PlayerSession
 {
+    public volatile int apiVersion;
+
     public PlayerSession(Player bindingPlayer, List<String> clientFeatures)
     {
         options = new PlayerOptions<>(bindingPlayer);
@@ -20,10 +22,10 @@ public class PlayerSession
     public final PlayerOptions<Player> options;
 
     @NotNull
-    public InitializeState initializeState = InitializeState.NOT_CONNECTED;
+    public volatile InitializeState initializeState = InitializeState.NOT_CONNECTED;
 
     @NotNull
-    public ConnectionState connectionState = ConnectionState.NOT_CONNECTED;
+    public volatile ConnectionState connectionState = ConnectionState.NOT_CONNECTED;
 
     public final List<String> clientFeatures = new CopyOnWriteArrayList<>();
 

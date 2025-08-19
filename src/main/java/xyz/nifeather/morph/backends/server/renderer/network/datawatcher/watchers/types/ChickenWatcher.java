@@ -3,7 +3,6 @@ package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watcher
 import com.github.retrooper.packetevents.protocol.entity.chicken.ChickenVariant;
 import com.github.retrooper.packetevents.protocol.entity.chicken.ChickenVariants;
 import net.minecraft.nbt.CompoundTag;
-import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Chicken;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -50,23 +49,6 @@ public class ChickenWatcher extends AgeableMobWatcher
         }
 
         super.onPropertyWrite(property, value);
-    }
-
-    @Override
-    public void mergeFromCompound(CompoundTag nbt)
-    {
-        if (nbt.contains("variant"))
-        {
-            var idString = nbt.getString("variant").orElseThrow();
-            var idKey = NamespacedKey.fromString(idString);
-
-            if (idKey == null)
-                return;
-
-            writePersistent(ValueIndex.CHICKEN.CHICKEN_VARIANT, getChickenVariant(idString));
-        }
-
-        super.mergeFromCompound(nbt);
     }
 
     @Override

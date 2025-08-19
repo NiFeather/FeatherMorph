@@ -39,18 +39,6 @@ public class AxolotlWatcher extends LivingEntityWatcher
     }
 
     @Override
-    public void mergeFromCompound(CompoundTag nbt)
-    {
-        super.mergeFromCompound(nbt);
-
-        if (nbt.contains("Variant"))
-            writePersistent(ValueIndex.AXOLOTL.COLOR, nbt.getInt("Variant").orElseThrow());
-
-        if (nbt.contains("FromBucket"))
-            writePersistent(ValueIndex.AXOLOTL.SPAWNED_FROM_BUCKET, nbt.getBoolean("FromBucket").orElseThrow());
-    }
-
-    @Override
     public void writeToCompound(CompoundTag nbt)
     {
         super.writeToCompound(nbt);

@@ -4,13 +4,18 @@ import io.papermc.paper.registry.RegistryAccess;
 import io.papermc.paper.registry.RegistryKey;
 import it.unimi.dsi.fastutil.Pair;
 import org.bukkit.entity.Chicken;
+import org.bukkit.entity.Entity;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
+import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
+import xyz.nifeather.morph.utilities.DisguiseUtils;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class ChickenProperties extends AbstractProperties
+public class ChickenProperties extends BaseLivingEntityProperties<Chicken>
 {
     private final Map<String, Chicken.Variant> variantMap = new ConcurrentHashMap<>();
 
@@ -20,7 +25,7 @@ public class ChickenProperties extends AbstractProperties
             variantMap.put(variant.key().asString(), variant);
     }
 
-    public final SingleProperty<Chicken.Variant> VARIANT = getSingle("chicken_variant", Chicken.Variant.TEMPERATE);
+    public final SingleProperty<Chicken.Variant> VARIANT = getSingle(PropertyNames.CHICKEN_VARIANT, Chicken.Variant.TEMPERATE);
 
     public ChickenProperties()
     {
@@ -36,7 +41,7 @@ public class ChickenProperties extends AbstractProperties
     @Override
     protected @Nullable Pair<SingleProperty<?>, Object> parseSingleInput(String key, String value)
     {
-        if (key.equals(VARIANT.id()))
+        if (key.equals(PropertyNames.CHICKEN_VARIANT))
         {
             var match = variantMap.getOrDefault(value, null);
 
@@ -44,6 +49,31 @@ public class ChickenProperties extends AbstractProperties
                 return Pair.of(VARIANT, match);
         }
 
-        return null;
+        return super.parseSingleInput(key, value);
+    }
+
+    @Override
+    protected @Nullable Chicken tryCastEntity(@Nullable Entity targetEntity)
+    {
+        return targetEntity instanceof Chicken chicken ? chicken : null;
+    }
+
+    @Override
+    protected void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull Chicken chicken)
+    {
+        propertyHandler.set(VARIANT, chicken.getVariant());
+    }
+
+    @Override
+    protected void setupDefaultProperties(PropertyHandler propertyHandler)
+    {
+        propertyHandler.set(VARIANT, DisguiseUtils.pick(VARIANT.getRandomValues()));
+    }
+
+    @Override
+    protected void appendNetworkMap(PropertyHandler propertyHandler, Map<String, String> map)
+    {
+        super.appendNetworkMap(propertyHandler, map);
+        map.put(VARIANT.id(), propertyHandler.get(VARIANT).key().asString());
     }
 }

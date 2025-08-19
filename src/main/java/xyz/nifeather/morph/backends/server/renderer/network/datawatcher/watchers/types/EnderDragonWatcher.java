@@ -50,15 +50,6 @@ public class EnderDragonWatcher extends LivingEntityWatcher
     }
 
     @Override
-    public void mergeFromCompound(CompoundTag nbt)
-    {
-        if (nbt.contains("DragonPhase"))
-            this.writePersistent(ValueIndex.ENDER_DRAGON.DRAGON_PHASE, nbt.getInt("DragonPhase").orElseThrow());
-
-        super.mergeFromCompound(nbt);
-    }
-
-    @Override
     public <X> @Nullable X readEntry(CustomEntry<X> entry)
     {
         if (Objects.equals(entry, CustomEntries.OVERLAYED_YAW))

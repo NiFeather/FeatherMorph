@@ -1,14 +1,19 @@
 package xyz.nifeather.morph.misc.disguiseProperty.values;
 
 import it.unimi.dsi.fastutil.Pair;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Horse;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
+import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
+import xyz.nifeather.morph.utilities.DisguiseUtils;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class HorseProperties extends AbstractProperties
+public class HorseProperties extends BaseLivingEntityProperties<Horse>
 {
     private final Map<String, Horse.Color> colorMap = new ConcurrentHashMap<>();
     private final Map<String, Horse.Style> styleMap = new ConcurrentHashMap<>();
@@ -22,10 +27,10 @@ public class HorseProperties extends AbstractProperties
             styleMap.put(style.name().toLowerCase(), style);
     }
 
-    public final SingleProperty<Horse.Color> COLOR = getSingle("horse_color", Horse.Color.WHITE)
+    public final SingleProperty<Horse.Color> COLOR = getSingle(PropertyNames.HORSE_COLOR, Horse.Color.WHITE)
             .withRandom(Horse.Color.values());
 
-    public final SingleProperty<Horse.Style> STYLE = getSingle("horse_style", Horse.Style.NONE)
+    public final SingleProperty<Horse.Style> STYLE = getSingle(PropertyNames.HORSE_STYLE, Horse.Style.NONE)
             .withRandom(Horse.Style.values());
 
     public HorseProperties()
@@ -43,7 +48,7 @@ public class HorseProperties extends AbstractProperties
     {
         switch (key)
         {
-            case "horse_color" ->
+            case PropertyNames.HORSE_COLOR ->
             {
                 var color = colorMap.getOrDefault(value, null);
 
@@ -51,7 +56,7 @@ public class HorseProperties extends AbstractProperties
                     return Pair.of(COLOR, color);
             }
 
-            case "horse_style" ->
+            case PropertyNames.HORSE_STYLE ->
             {
                 var style = styleMap.getOrDefault(value, null);
 
@@ -60,6 +65,34 @@ public class HorseProperties extends AbstractProperties
             }
         }
 
-        return null;
+        return super.parseSingleInput(key, value);
+    }
+
+    @Override
+    protected @Nullable Horse tryCastEntity(@Nullable Entity targetEntity)
+    {
+        return targetEntity instanceof Horse horse ? horse : null;
+    }
+
+    @Override
+    protected void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull Horse horse)
+    {
+        propertyHandler.set(COLOR, horse.getColor());
+        propertyHandler.set(STYLE, horse.getStyle());
+    }
+
+    @Override
+    protected void setupDefaultProperties(PropertyHandler propertyHandler)
+    {
+        propertyHandler.set(COLOR, DisguiseUtils.pick(COLOR.getRandomValues()));
+        propertyHandler.set(STYLE, DisguiseUtils.pick(STYLE.getRandomValues()));
+    }
+
+    @Override
+    protected void appendNetworkMap(PropertyHandler propertyHandler, Map<String, String> map)
+    {
+        super.appendNetworkMap(propertyHandler, map);
+        map.put(COLOR.id(), propertyHandler.get(COLOR).name().toLowerCase());
+        map.put(STYLE.id(), propertyHandler.get(STYLE).name().toLowerCase());
     }
 }

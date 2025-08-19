@@ -10,10 +10,8 @@ import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerPl
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerPlayerInfoUpdate;
 import io.github.retrooper.packetevents.util.SpigotConversionUtil;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraft.nbt.CompoundTag;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.MainHand;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntry;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
@@ -64,24 +62,17 @@ public class PlayerWatcher extends InventoryLivingWatcher
     {
         if (property.equals(playerDisguiseProperties.MAIN_HAND))
         {
-            var hand = (MainHand) value;
+            var handStatus = (PlayerProperties.MainHandStatus) value;
+            if (handStatus == PlayerProperties.MainHandStatus.NOTSET)
+                return;
+
+            var hand = handStatus.bindingHand;
+            assert hand != null;
+
             this.writePersistent(ValueIndex.PLAYER.MAINHAND, (byte) hand.ordinal());
         }
 
         super.onPropertyWrite(property, value);
-    }
-
-    @Override
-    public void mergeFromCompound(CompoundTag nbt)
-    {
-        if (nbt.contains("feathermorph:is_left_hand"))
-        {
-            var isLeftHand = nbt.getBoolean("feathermorph:is_left_hand").orElseThrow();
-            int hand = isLeftHand ? MainHand.LEFT.ordinal() : MainHand.RIGHT.ordinal();
-            this.writePersistent(ValueIndex.PLAYER.MAINHAND, (byte)hand);
-        }
-
-        super.mergeFromCompound(nbt);
     }
 
     @Override

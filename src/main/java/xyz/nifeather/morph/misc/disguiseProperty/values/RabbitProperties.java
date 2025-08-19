@@ -1,15 +1,20 @@
 package xyz.nifeather.morph.misc.disguiseProperty.values;
 
 import it.unimi.dsi.fastutil.Pair;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Rabbit;
 import org.bukkit.entity.Rabbit.Type;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
+import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
+import xyz.nifeather.morph.utilities.DisguiseUtils;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class RabbitProperties extends AbstractProperties
+public class RabbitProperties extends BaseLivingEntityProperties<Rabbit>
 {
     private final Map<String, Type> typeMap = new ConcurrentHashMap<>();
 
@@ -19,7 +24,7 @@ public class RabbitProperties extends AbstractProperties
             typeMap.put(type.name().toLowerCase(), type);
     }
 
-    public final SingleProperty<Rabbit.Type> VARIANT = getSingle("rabbit_type", Type.BROWN)
+    public final SingleProperty<Rabbit.Type> VARIANT = getSingle(PropertyNames.RABBIT_VARIANT, Type.BROWN)
             .withRandom(Type.values());
 
     public RabbitProperties()
@@ -33,7 +38,7 @@ public class RabbitProperties extends AbstractProperties
     @Override
     protected @Nullable Pair<SingleProperty<?>, Object> parseSingleInput(String key, String value)
     {
-        if (key.equals(VARIANT.id()))
+        if (key.equals(PropertyNames.RABBIT_VARIANT))
         {
             var variant = typeMap.getOrDefault(value, null);
 
@@ -41,6 +46,31 @@ public class RabbitProperties extends AbstractProperties
                 return Pair.of(VARIANT, variant);
         }
 
-        return null;
+        return super.parseSingleInput(key, value);
+    }
+
+    @Override
+    protected @Nullable Rabbit tryCastEntity(@Nullable Entity targetEntity)
+    {
+        return targetEntity instanceof Rabbit rabbit ? rabbit : null;
+    }
+
+    @Override
+    protected void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull Rabbit targetEntity)
+    {
+        propertyHandler.set(VARIANT, targetEntity.getRabbitType());
+    }
+
+    @Override
+    protected void setupDefaultProperties(PropertyHandler propertyHandler)
+    {
+        propertyHandler.set(VARIANT, DisguiseUtils.pick(VARIANT.getRandomValues()));
+    }
+
+    @Override
+    protected void appendNetworkMap(PropertyHandler propertyHandler, Map<String, String> map)
+    {
+        super.appendNetworkMap(propertyHandler, map);
+        map.put(VARIANT.id(), propertyHandler.get(VARIANT).name().toLowerCase());
     }
 }

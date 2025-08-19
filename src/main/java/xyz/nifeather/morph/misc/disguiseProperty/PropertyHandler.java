@@ -7,58 +7,54 @@ import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.misc.disguiseProperty.values.AbstractProperties;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.ThreadLocalRandom;
 
 public class PropertyHandler
 {
     private final Map<SingleProperty<?>, Object> propertyMap = new ConcurrentHashMap<>();
     private final List<SingleProperty<?>> validProperties = new CopyOnWriteArrayList<>();
 
-    private final Random random = ThreadLocalRandom.current();
+    public Map<String, String> toNetworkProperties()
+    {
+        if (bindingProperties == null)
+        {
+            FeatherMorphMain.getInstance().getSLF4JLogger().warn("Trying to map network properties while a PropertyHandler has not been initialized?!");
+
+            return new HashMap<>();
+        }
+
+        return bindingProperties.mapToNetworkProperties(this);
+    }
 
     @Nullable
-    private AbstractProperties properties;
+    private AbstractProperties<?> bindingProperties;
 
-    public void initProperties(AbstractProperties properties)
+    public void initProperties(AbstractProperties<?> properties)
     {
         reset();
 
-        this.properties = properties;
+        this.bindingProperties = properties;
         validProperties.addAll(properties.getValues());
-        properties.getValues().forEach(this::initProperty);
     }
 
     public void updateFromPropertiesInput(Map<String, String> input)
     {
-        if (this.properties == null)
+        if (this.bindingProperties == null)
         {
-            FeatherMorphMain.getInstance().getSLF4JLogger().warn("Trying to update property input while the PropertyHandler has not been initialized?!");
+            FeatherMorphMain.getInstance().getSLF4JLogger().warn("Trying to update property input while a PropertyHandler has not been initialized?!");
             return;
         }
 
-        var results = this.properties.readFromPropertiesInput(input);
+        var results = this.bindingProperties.readFromPropertiesInput(input);
         results.forEach(this::writeGeneric);
-    }
-
-    private void initProperty(SingleProperty<?> property)
-    {
-        var random = property.getRandomValues();
-        if (!random.isEmpty())
-        {
-            var index = this.random.nextInt(random.size());
-            this.writeGeneric(property, random.get(index));
-        }
     }
 
     public void reset()
     {
         this.validProperties.clear();
-        this.properties = null;
+        this.bindingProperties = null;
         propertyMap.clear();
     }
 
@@ -74,7 +70,7 @@ public class PropertyHandler
     {
         if (!validProperties.contains(property))
         {
-            FeatherMorphMain.getInstance().getSLF4JLogger().warn("The given property '%s' doesn't exist in '%s'".formatted(property.id(), this.properties));
+            FeatherMorphMain.getInstance().getSLF4JLogger().warn("The given property '%s' doesn't exist in '%s'".formatted(property.id(), this.bindingProperties));
             return;
         }
 
@@ -92,8 +88,13 @@ public class PropertyHandler
         return this.getOr(property, property.defaultVal());
     }
 
+    public <X> Optional<X> getOptional(SingleProperty<X> property)
+    {
+        return Optional.ofNullable(getOr(property, null));
+    }
+
     @Nullable
-    @Contract("_, null -> null; _, !null -> !null")
+    @Contract("_, null -> _; _, !null -> !null")
     public <X> X getOr(SingleProperty<X> property, X defaultVal)
     {
         return (X) propertyMap.getOrDefault(property, defaultVal);
@@ -102,5 +103,32 @@ public class PropertyHandler
     public Map<SingleProperty<?>, ?> getAll()
     {
         return new Object2ObjectArrayMap<>(propertyMap);
+    }
+
+    /**
+     * Execute a simple copy which copies our value to the given PropertyHandler
+     */
+    public void copyTo(PropertyHandler other)
+    {
+        this.propertyMap.forEach((k, v) ->
+        {
+            other.set((SingleProperty<Object>) k, v);
+        });
+    }
+
+    /**
+     * Check if the given PropertyHandler has been set up with the same properties of this handler
+     */
+    public boolean bindingPropertiesEquals(PropertyHandler other)
+    {
+        return other.bindingProperties != null && this.bindingPropertiesEquals(other.bindingProperties);
+    }
+
+    /**
+     * Check if the given Properties is same properties of this handler
+     */
+    public boolean bindingPropertiesEquals(AbstractProperties<?> other)
+    {
+        return this.bindingProperties != null && this.bindingProperties.equals(other);
     }
 }

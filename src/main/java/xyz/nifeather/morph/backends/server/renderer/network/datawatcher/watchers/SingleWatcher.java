@@ -486,10 +486,8 @@ public abstract class SingleWatcher extends MorphPluginObject
     {
     }
 
-    public void mergeFromCompound(CompoundTag nbt)
-    {
-    }
-
+    // Kept for legacy client usage
+    //@Deprecated(forRemoval = true)
     public void writeToCompound(CompoundTag nbt)
     {
     }

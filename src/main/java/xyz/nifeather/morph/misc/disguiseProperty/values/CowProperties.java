@@ -4,13 +4,18 @@ import io.papermc.paper.registry.RegistryAccess;
 import io.papermc.paper.registry.RegistryKey;
 import it.unimi.dsi.fastutil.Pair;
 import org.bukkit.entity.Cow;
+import org.bukkit.entity.Entity;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
+import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
+import xyz.nifeather.morph.utilities.DisguiseUtils;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class CowProperties extends AbstractProperties
+public class CowProperties extends BaseLivingEntityProperties<Cow>
 {
     private final Map<String, Cow.Variant> variantMap = new ConcurrentHashMap<>();
 
@@ -21,7 +26,7 @@ public class CowProperties extends AbstractProperties
         for (Cow.Variant variant : RegistryAccess.registryAccess().getRegistry(RegistryKey.COW_VARIANT))
             variantMap.put(variant.key().asString(), variant);
 
-        VARIANT = getSingle("cow_variant", Cow.Variant.TEMPERATE)
+        VARIANT = getSingle(PropertyNames.COW_VARIANT, Cow.Variant.TEMPERATE)
                 .withRandom(variantMap.values())
                 .withValidInput(variantMap.keySet());
 
@@ -31,7 +36,7 @@ public class CowProperties extends AbstractProperties
     @Override
     protected @Nullable Pair<SingleProperty<?>, Object> parseSingleInput(String key, String value)
     {
-        if (key.equals(VARIANT.id()))
+        if (key.equals(PropertyNames.COW_VARIANT))
         {
             var match = variantMap.getOrDefault(value, null);
 
@@ -39,6 +44,31 @@ public class CowProperties extends AbstractProperties
                 return Pair.of(VARIANT, match);
         }
 
-        return null;
+        return super.parseSingleInput(key, value);
+    }
+
+    @Override
+    protected @Nullable Cow tryCastEntity(@Nullable Entity targetEntity)
+    {
+        return targetEntity instanceof Cow cow ? cow : null;
+    }
+
+    @Override
+    protected void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull Cow cow)
+    {
+        propertyHandler.set(VARIANT, cow.getVariant());
+    }
+
+    @Override
+    protected void setupDefaultProperties(PropertyHandler propertyHandler)
+    {
+        propertyHandler.set(VARIANT, DisguiseUtils.pick(VARIANT.getRandomValues()));
+    }
+
+    @Override
+    protected void appendNetworkMap(PropertyHandler propertyHandler, Map<String, String> map)
+    {
+        super.appendNetworkMap(propertyHandler, map);
+        map.put(VARIANT.id(), propertyHandler.get(VARIANT).key().asString());
     }
 }
