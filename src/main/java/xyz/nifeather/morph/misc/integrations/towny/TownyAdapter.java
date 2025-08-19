@@ -214,7 +214,7 @@ public class TownyAdapter extends MorphPluginObject implements Listener
         if (outsidersSkilAllowed)
             return;
 
-        player.sendMessage(MessageUtils.prefixes(player, MorphStrings.townyBlockedSkillString()));
+        player.sendMessage(MessageUtils.prefixes(player, MorphStrings.regionBlockedSkillString()));
         event.setCancelled(true);
     }
 
