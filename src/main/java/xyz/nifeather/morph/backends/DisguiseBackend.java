@@ -35,13 +35,6 @@ public abstract class DisguiseBackend<TInstance, TWrapper extends DisguiseWrappe
     }
 
     /**
-     * Creates a disguise from the giving entity
-     * @param targetEntity The entity used to construct disguise
-     * @return A wrapper that handles the constructed disguise
-     */
-    public abstract DisguiseWrapper<TInstance> createInstance(@NotNull Entity targetEntity);
-
-    /**
      * Creates a disguise by the giving type
      * @param entityType Target entity type
      * @return A wrapper that handles the constructed disguise

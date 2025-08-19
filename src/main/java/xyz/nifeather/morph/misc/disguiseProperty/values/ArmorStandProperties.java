@@ -1,24 +1,169 @@
 package xyz.nifeather.morph.misc.disguiseProperty.values;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import io.papermc.paper.math.Rotations;
+import it.unimi.dsi.fastutil.Function;
 import it.unimi.dsi.fastutil.Pair;
+import org.bukkit.entity.ArmorStand;
+import org.bukkit.entity.Entity;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
+import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 
-public class ArmorStandProperties extends AbstractProperties
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+public class ArmorStandProperties extends BaseLivingEntityProperties<ArmorStand>
 {
-    public final SingleProperty<Boolean> SHOW_ARMS = getSingle("armor_stand_show_arms", false).withValidInput("true", "false");
+    public final SingleProperty<Boolean> SHOW_ARMS = getSingle(PropertyNames.ARMOR_STAND_SHOW_ARMS, false).withValidInput("true", "false");
+    public final SingleProperty<Boolean> HAS_BASE_PLATE = getSingle(PropertyNames.ARMOR_STAND_HAS_BASE_PLATE, true)
+            .withValidInput("true", "false");
+    public final SingleProperty<Boolean> SMALL = getSingle(PropertyNames.ARMOR_STAND_SMALL, false)
+            .withValidInput("true", "false");
+
+    public final SingleProperty<Rotations> HEAD_ROTATION = getSingle(PropertyNames.ARMOR_STAND_HEAD_ROTATION, Rotations.ZERO);
+    public final SingleProperty<Rotations> BODY_ROTATION = getSingle(PropertyNames.ARMOR_STAND_BODY_ROTATION, Rotations.ZERO);
+    public final SingleProperty<Rotations> RIGHT_ARM_ROTATION = getSingle(PropertyNames.ARMOR_STAND_RIGHT_ARM_ROTATION, Rotations.ZERO);
+    public final SingleProperty<Rotations> LEFT_ARM_ROTATION = getSingle(PropertyNames.ARMOR_STAND_LEFT_ARM_ROTATION, Rotations.ZERO);
+    public final SingleProperty<Rotations> RIGHT_LEG_ROTATION = getSingle(PropertyNames.ARMOR_STAND_RIGHT_LEG_ROTATION, Rotations.ZERO);
+    public final SingleProperty<Rotations> LEFT_LEG_ROTATION = getSingle(PropertyNames.ARMOR_STAND_LEFT_LEG_ROTATION, Rotations.ZERO);
 
     public ArmorStandProperties()
     {
-        registerSingle(SHOW_ARMS);
+        registerSingle(SHOW_ARMS, HAS_BASE_PLATE, SMALL);
+
+        registerSingle(HEAD_ROTATION, BODY_ROTATION, RIGHT_ARM_ROTATION, LEFT_ARM_ROTATION, RIGHT_LEG_ROTATION, LEFT_LEG_ROTATION);
     }
 
     @Override
     protected @Nullable Pair<SingleProperty<?>, Object> parseSingleInput(String key, String value)
     {
-        if (key.equals(SHOW_ARMS.id()))
-            return Pair.of(SHOW_ARMS, Boolean.valueOf(value));
+        return switch (key)
+        {
+            case PropertyNames.ARMOR_STAND_SHOW_ARMS -> Pair.of(SHOW_ARMS, Boolean.valueOf(value));
+            case PropertyNames.ARMOR_STAND_HAS_BASE_PLATE -> Pair.of(HAS_BASE_PLATE, Boolean.valueOf(value));
+            case PropertyNames.ARMOR_STAND_SMALL -> Pair.of(SMALL, Boolean.valueOf(value));
 
-        return null;
+            case PropertyNames.ARMOR_STAND_HEAD_ROTATION -> parseRotatins(HEAD_ROTATION, value);
+            case PropertyNames.ARMOR_STAND_BODY_ROTATION -> parseRotatins(BODY_ROTATION, value);
+            case PropertyNames.ARMOR_STAND_RIGHT_ARM_ROTATION -> parseRotatins(RIGHT_ARM_ROTATION, value);
+            case PropertyNames.ARMOR_STAND_LEFT_ARM_ROTATION -> parseRotatins(LEFT_ARM_ROTATION, value);
+            case PropertyNames.ARMOR_STAND_RIGHT_LEG_ROTATION -> parseRotatins(RIGHT_LEG_ROTATION, value);
+            case PropertyNames.ARMOR_STAND_LEFT_LEG_ROTATION -> parseRotatins(LEFT_LEG_ROTATION, value);
+
+            default -> super.parseSingleInput(key, value);
+        };
+    }
+
+    @Nullable
+    private Pair<SingleProperty<?>, Object> parseRotatins(SingleProperty<Rotations> property, String input)
+    {
+        var rot = this.readRotations(input);
+
+        return rot.<Pair<SingleProperty<?>, Object>>map(rotations -> Pair.of(property, rotations))
+                .orElse(null);
+    }
+
+    public static class RotationStore
+    {
+        private float x, y, z;
+
+        public void x(float v) { x = v; }
+        public void y(float v) { y = v; }
+        public void z(float v) { z = v; }
+
+        public Rotations toRotations()
+        {
+            return Rotations.ofDegrees(x, y, z);
+        }
+    }
+
+    private Optional<Rotations> readRotations(String value)
+    {
+        try
+        {
+            var list = gson.fromJson(value, List.class);
+
+            Function<String, Optional<Float>> parseFloat = s ->
+            {
+                float v = Float.parseFloat(s + "");
+                if (!Float.isFinite(v)) return Optional.empty();
+
+                return Optional.of(v);
+            };
+
+            RotationStore rotationStore = new RotationStore();
+            parseFloat.get(list.get(0)).ifPresent(rotationStore::x);
+
+            if (list.size() > 1)
+                parseFloat.get(list.get(1)).ifPresent(rotationStore::y);
+
+            if (list.size() > 2)
+                parseFloat.get(list.get(2)).ifPresent(rotationStore::z);
+
+            return Optional.of(rotationStore.toRotations());
+        }
+        catch (Throwable ignored)
+        {
+        }
+
+
+        return Optional.empty();
+    }
+
+    @Override
+    protected @Nullable ArmorStand tryCastEntity(@Nullable Entity targetEntity)
+    {
+        return targetEntity instanceof ArmorStand armorStand ? armorStand : null;
+    }
+
+    @Override
+    public void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull ArmorStand armorStand)
+    {
+        propertyHandler.set(SHOW_ARMS, armorStand.hasArms());
+        propertyHandler.set(HAS_BASE_PLATE, armorStand.hasBasePlate());
+        propertyHandler.set(SMALL, armorStand.isSmall());
+
+        propertyHandler.set(HEAD_ROTATION, armorStand.getHeadRotations());
+        propertyHandler.set(BODY_ROTATION, armorStand.getBodyRotations());
+        propertyHandler.set(LEFT_ARM_ROTATION, armorStand.getLeftArmRotations());
+        propertyHandler.set(RIGHT_ARM_ROTATION, armorStand.getRightArmRotations());
+        propertyHandler.set(LEFT_LEG_ROTATION, armorStand.getLeftLegRotations());
+        propertyHandler.set(RIGHT_LEG_ROTATION, armorStand.getRightLegRotations());
+    }
+
+    @Override
+    protected void setupDefaultProperties(PropertyHandler propertyHandler)
+    {
+        propertyHandler.set(SHOW_ARMS, false);
+    }
+
+    private final Gson gson = new GsonBuilder().create();
+
+    private String rotationToStringArray(Rotations vec)
+    {
+        float[] array = new float[] {(float)vec.x(), (float)vec.y(), (float)vec.z()};
+        return gson.toJson(array);
+    }
+
+    @Override
+    protected void appendNetworkMap(PropertyHandler propertyHandler, Map<String, String> map)
+    {
+        map.put(SHOW_ARMS.id(), propertyHandler.get(SHOW_ARMS).toString().toLowerCase());
+        map.put(HAS_BASE_PLATE.id(), propertyHandler.get(HAS_BASE_PLATE).toString().toLowerCase());
+        map.put(SMALL.id(), propertyHandler.get(SMALL).toString().toLowerCase());
+
+        propertyHandler.getOptional(HEAD_ROTATION).ifPresent(v -> map.put(HEAD_ROTATION.id(), rotationToStringArray(v)));
+        propertyHandler.getOptional(BODY_ROTATION).ifPresent(v -> map.put(BODY_ROTATION.id(), rotationToStringArray(v)));
+        propertyHandler.getOptional(LEFT_ARM_ROTATION).ifPresent(v -> map.put(LEFT_ARM_ROTATION.id(), rotationToStringArray(v)));
+        propertyHandler.getOptional(RIGHT_ARM_ROTATION).ifPresent(v -> map.put(RIGHT_ARM_ROTATION.id(), rotationToStringArray(v)));
+        propertyHandler.getOptional(LEFT_LEG_ROTATION).ifPresent(v -> map.put(LEFT_LEG_ROTATION.id(), rotationToStringArray(v)));
+        propertyHandler.getOptional(RIGHT_LEG_ROTATION).ifPresent(v -> map.put(RIGHT_LEG_ROTATION.id(), rotationToStringArray(v)));
+
+        super.appendNetworkMap(propertyHandler, map);
     }
 }

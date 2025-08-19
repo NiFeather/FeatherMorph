@@ -1,9 +1,13 @@
 package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.types;
 
 import net.minecraft.nbt.CompoundTag;
+import org.bukkit.DyeColor;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
+import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
+import xyz.nifeather.morph.misc.disguiseProperty.values.SheepProperties;
 
 public class SheepWatcher extends LivingEntityWatcher
 {
@@ -21,12 +25,17 @@ public class SheepWatcher extends LivingEntityWatcher
     }
 
     @Override
-    public void mergeFromCompound(CompoundTag nbt)
+    protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
-        super.mergeFromCompound(nbt);
+        var sheepProperties = DisguiseProperties.INSTANCE.getOrThrow(SheepProperties.class);
 
-        if (nbt.contains("Color"))
-            writePersistent(ValueIndex.SHEEP.WOOL_TYPE, nbt.getByte("Color"));
+        if (property.equals(sheepProperties.DYE_COLOR))
+        {
+            var dyeColor = (DyeColor) value;
+            this.writePersistent(ValueIndex.SHEEP.WOOL_TYPE, dyeColor.getWoolData());
+        }
+
+        super.onPropertyWrite(property, value);
     }
 
     @Override

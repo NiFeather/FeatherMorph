@@ -698,19 +698,11 @@ public class DisguiseState extends MorphPluginObject
 
     //endregion abilityFlag
 
-    //region NBT
-
-    public String getFullNbtString()
+    @Deprecated
+    public String getCulledNbtString()
     {
         return NbtUtils.getCompoundString(disguiseWrapper.getCompound());
     }
-
-    public String getCulledNbtString()
-    {
-        return NbtUtils.getCompoundString(DisguiseProvider.cullNBT(disguiseWrapper.getCompound()));
-    }
-
-    //endregion
 
     //region ProfileNBT
 
@@ -719,8 +711,7 @@ public class DisguiseState extends MorphPluginObject
         if (!haveProfile())
              return "{}";
 
-        var s = NbtUtils.getCompoundString(NbtUtils.toCompoundTag(disguiseWrapper.getSkin()));
-        return s;
+        return NbtUtils.getCompoundString(NbtUtils.toCompoundTag(disguiseWrapper.getSkin()));
     }
 
     public boolean haveProfile()
@@ -891,7 +882,6 @@ public class DisguiseState extends MorphPluginObject
         this.disguiseWrapper.dispose();
         this.abilityUpdater.dispose();
 
-        this.provider.resetDisguise(this);
         this.provider.unMorph(getPlayer(), this);
         this.abilityUpdater.setAbilities(List.of());
         this.setSkill(null, null);

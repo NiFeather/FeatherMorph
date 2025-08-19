@@ -7,6 +7,9 @@ import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntry;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
+import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
+import xyz.nifeather.morph.misc.disguiseProperty.values.PhantomProperties;
 
 import java.util.Objects;
 
@@ -26,21 +29,23 @@ public class PhantomWatcher extends LivingEntityWatcher
     }
 
     @Override
+    protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
+    {
+        var phantomProperties = DisguiseProperties.INSTANCE.getOrThrow(PhantomProperties.class);
+
+        if (property.equals(phantomProperties.SIZE))
+            this.writePersistent(ValueIndex.PHANTOM.SIZE, (Integer) value);
+
+        super.onPropertyWrite(property, value);
+    }
+
+    @Override
     public <X> @Nullable X readEntry(CustomEntry<X> entry)
     {
         if (Objects.equals(entry, CustomEntries.OVERLAYED_PITCH))
             return (X) Float.valueOf(-getBindingPlayer().getPitch());
 
         return super.readEntry(entry);
-    }
-
-    @Override
-    public void mergeFromCompound(CompoundTag nbt)
-    {
-        super.mergeFromCompound(nbt);
-
-        if (nbt.contains("Size"))
-            writePersistent(ValueIndex.PHANTOM.SIZE, nbt.getInt("Size"));
     }
 
     @Override

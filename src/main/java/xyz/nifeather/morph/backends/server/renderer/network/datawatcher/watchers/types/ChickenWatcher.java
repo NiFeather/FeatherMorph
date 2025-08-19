@@ -3,7 +3,6 @@ package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watcher
 import com.github.retrooper.packetevents.protocol.entity.chicken.ChickenVariant;
 import com.github.retrooper.packetevents.protocol.entity.chicken.ChickenVariants;
 import net.minecraft.nbt.CompoundTag;
-import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Chicken;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -38,12 +37,6 @@ public class ChickenWatcher extends AgeableMobWatcher
     protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
         super.onPropertyWrite(property, value);
-    }
-
-    @Override
-    public void mergeFromCompound(CompoundTag nbt)
-    {
-        super.mergeFromCompound(nbt);
     }
 
     @Override

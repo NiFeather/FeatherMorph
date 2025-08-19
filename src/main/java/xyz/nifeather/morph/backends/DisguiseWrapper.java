@@ -2,8 +2,6 @@ package xyz.nifeather.morph.backends;
 
 import com.mojang.authlib.GameProfile;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
-import net.minecraft.nbt.TagType;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.phys.AABB;
 import org.bukkit.entity.Entity;
@@ -17,8 +15,10 @@ import org.slf4j.LoggerFactory;
 import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.misc.CollisionBoxRecord;
 import xyz.nifeather.morph.misc.DisguiseState;
+import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 import xyz.nifeather.morph.misc.disguiseProperty.values.OffTreeProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.values.SlimeMagmaProperties;
 import xyz.nifeather.morph.utilities.EntityTypeUtils;
 
 import java.util.Map;
@@ -232,7 +232,7 @@ public abstract class DisguiseWrapper<TInstance>
 
         if (getEntityType() != EntityType.SLIME && getEntityType() != EntityType.MAGMA_CUBE) return;
 
-        var dimScale = getSlimeSize();
+        var dimScale = getDimensionScale();
         this.dimensions = EntityDimensions.fixed(0.51F * dimScale, 0.51F * dimScale);
     }
 
@@ -251,9 +251,10 @@ public abstract class DisguiseWrapper<TInstance>
 
     public abstract boolean isBaby();
 
-    protected int getSlimeSize()
+    protected int getDimensionScale()
     {
-        return Math.max(1, getCompound().getInt("Size"));
+        var property = DisguiseProperties.INSTANCE.getOrThrow(SlimeMagmaProperties.class);
+        return this.readPropertyOr(property.SIZE, 1);
     }
 
     /**
@@ -281,7 +282,7 @@ public abstract class DisguiseWrapper<TInstance>
      * @param state A {@link DisguiseState} that handles the current wrapper
      * @param targetEntity The targeted entity (If there is any)
      */
-    public abstract void onPostConstructDisguise(DisguiseState state, @Nullable Entity targetEntity);
+    public abstract void postBuildDisguise(DisguiseState state, @Nullable Entity targetEntity);
 
     /**
      * Updates the underlying disguise instance
@@ -291,30 +292,10 @@ public abstract class DisguiseWrapper<TInstance>
     public abstract void update(DisguiseState state, Player player);
 
     /**
-     * Merge NBT to the underlying instance
-     * @param compound {@link CompoundTag}
-     */
-    public abstract void mergeCompound(CompoundTag compound);
-
-    /**
-     * Gets a value from current compound
-     * @param path NBT Path
-     * @param type {@link TagType}, check {@link net.minecraft.nbt.TagTypes} for more information
-     * @return A NBT tag, null if not found
-     */
-    @Nullable
-    public abstract <R extends Tag> R getTag(String path, TagType<R> type);
-
-    /**
      * Returns a copy of the existing compound.
      */
+    @Deprecated
     public abstract CompoundTag getCompound();
-
-    /**
-     * Gets network id of this disguise displayed to other players
-     * @return The network id of this disguise
-     */
-    public abstract int getNetworkEntityId();
 
     /**
      * @return Empty Optional if not available

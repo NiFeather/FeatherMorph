@@ -45,15 +45,6 @@ public class ModBackend extends DisguiseBackend<TrackingClientDisguise, ModDisgu
     }
 
     @Override
-    public DisguiseWrapper<TrackingClientDisguise> createInstance(@NotNull Entity targetEntity)
-    {
-        var wrapper = new ModDisguiseWrapper(new TrackingClientDisguise(targetEntity.getType()), this);
-        wrapper.setDisguiseName(targetEntity.getName());
-
-        return wrapper;
-    }
-
-    @Override
     public DisguiseWrapper<TrackingClientDisguise> createInstance(EntityType entityType)
     {
         return new ModDisguiseWrapper(new TrackingClientDisguise(entityType), this);

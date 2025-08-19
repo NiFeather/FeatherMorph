@@ -2,15 +2,20 @@ package xyz.nifeather.morph.misc.disguiseProperty.values;
 
 import it.unimi.dsi.fastutil.Pair;
 import org.bukkit.Registry;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Villager;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
+import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
+import xyz.nifeather.morph.utilities.DisguiseUtils;
 import xyz.nifeather.morph.utilities.MathUtils;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class VillagerProperties extends AbstractProperties
+public class VillagerProperties extends BaseLivingEntityProperties<Villager>
 {
     private final Map<String, Villager.Type> typeMap = new ConcurrentHashMap<>();
     private final Map<String, Villager.Profession> professionMap = new ConcurrentHashMap<>();
@@ -24,13 +29,13 @@ public class VillagerProperties extends AbstractProperties
             professionMap.put(profession.key().asString(), profession);
     }
 
-    public final SingleProperty<Villager.Type> TYPE = getSingle("villager_type", Villager.Type.PLAINS)
+    public final SingleProperty<Villager.Type> TYPE = getSingle(PropertyNames.VILLAGER_TYPE, Villager.Type.PLAINS)
             .withRandom(Registry.VILLAGER_TYPE.stream().toList());
 
-    public final SingleProperty<Villager.Profession> PROFESSION = getSingle("villager_profession", Villager.Profession.NONE)
+    public final SingleProperty<Villager.Profession> PROFESSION = getSingle(PropertyNames.VILLAGER_PROFESSION, Villager.Profession.NONE)
             .withRandom(Registry.VILLAGER_PROFESSION.stream().toList());
 
-    public final SingleProperty<Integer> LEVEL = getSingle("villager_level", 1)
+    public final SingleProperty<Integer> LEVEL = getSingle(PropertyNames.VILLAGER_LEVEL, 1)
             .withRandom(1, 2, 3, 4, 5, 6);
 
     public VillagerProperties()
@@ -48,7 +53,7 @@ public class VillagerProperties extends AbstractProperties
     {
         switch (key)
         {
-            case "villager_type" ->
+            case PropertyNames.VILLAGER_TYPE ->
             {
                 var type = typeMap.getOrDefault(value, null);
 
@@ -56,7 +61,7 @@ public class VillagerProperties extends AbstractProperties
                     return Pair.of(TYPE, type);
             }
 
-            case "villager_profession" ->
+            case PropertyNames.VILLAGER_PROFESSION ->
             {
                 var profession = professionMap.getOrDefault(value, null);
 
@@ -64,7 +69,7 @@ public class VillagerProperties extends AbstractProperties
                     return Pair.of(PROFESSION, profession);
             }
 
-            case "villager_level" ->
+            case PropertyNames.VILLAGER_LEVEL ->
             {
                 int level = 1;
 
@@ -82,6 +87,37 @@ public class VillagerProperties extends AbstractProperties
             }
         }
 
-        return null;
+        return super.parseSingleInput(key, value);
+    }
+
+    @Override
+    protected @Nullable Villager tryCastEntity(@Nullable Entity targetEntity)
+    {
+        return targetEntity instanceof Villager villager ? villager : null;
+    }
+
+    @Override
+    protected void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull Villager targetEntity)
+    {
+        propertyHandler.set(TYPE, targetEntity.getVillagerType());
+        propertyHandler.set(PROFESSION, targetEntity.getProfession());
+        propertyHandler.set(LEVEL, targetEntity.getVillagerLevel());
+    }
+
+    @Override
+    protected void setupDefaultProperties(PropertyHandler propertyHandler)
+    {
+        propertyHandler.set(TYPE, DisguiseUtils.pick(TYPE.getRandomValues()));
+        propertyHandler.set(PROFESSION, DisguiseUtils.pick(PROFESSION.getRandomValues()));
+        propertyHandler.set(LEVEL, DisguiseUtils.pick(LEVEL.getRandomValues()));
+    }
+
+    @Override
+    protected void appendNetworkMap(PropertyHandler propertyHandler, Map<String, String> map)
+    {
+        super.appendNetworkMap(propertyHandler, map);
+        map.put(TYPE.id(), propertyHandler.get(TYPE).key().asString());
+        map.put(PROFESSION.id(), propertyHandler.get(PROFESSION).key().asString());
+        map.put(LEVEL.id(), propertyHandler.get(LEVEL) + "");
     }
 }

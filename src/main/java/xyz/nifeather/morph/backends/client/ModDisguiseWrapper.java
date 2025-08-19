@@ -3,8 +3,6 @@ package xyz.nifeather.morph.backends.client;
 import com.mojang.authlib.GameProfile;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
-import net.minecraft.nbt.TagType;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -47,41 +45,6 @@ public class ModDisguiseWrapper extends EventWrapper<TrackingClientDisguise>
     }
 
     private final ModBackend backend;
-
-    @Override
-    public void mergeCompound(CompoundTag compoundTag)
-    {
-        var compound = readPropertyOr(WrapperProperties.NBT, null);
-
-        if (compound == null)
-        {
-            compound = WrapperProperties.NBT.defaultVal().copy();
-            writeProperty(WrapperProperties.NBT, compound);
-        }
-
-        compound.merge(compoundTag);
-        this.writeProperty(OffTreeProperties.IS_BABY, NbtUtils.isBabyForType(getEntityType(), compound));
-
-        if (this.getEntityType() == EntityType.MAGMA_CUBE || this.getEntityType() == EntityType.SLIME)
-            resetDimensions();
-    }
-
-    @Override
-    public CompoundTag getCompound()
-    {
-        return readPropertyOr(WrapperProperties.NBT, WrapperProperties.NBT.defaultVal().copy());
-    }
-
-    /**
-     * Gets network id of this disguise displayed to other players
-     *
-     * @return The network id of this disguise
-     */
-    @Override
-    public int getNetworkEntityId()
-    {
-        return -1;
-    }
 
     @Override
     public Map<SingleProperty<?>, Object> getProperties()
@@ -129,28 +92,6 @@ public class ModDisguiseWrapper extends EventWrapper<TrackingClientDisguise>
     public <X> X readPropertyOrThrow(SingleProperty<X> property)
     {
         return this.instance.readPropertyOrThrow(property);
-    }
-
-    @Nullable
-    @Override
-    public <R extends Tag> R getTag(@NotNull String path, TagType<R> type)
-    {
-        try
-        {
-            var obj = getCompound().get(path);
-
-            if (obj != null && obj.getType().equals(type))
-                return (R) obj;
-
-            return null;
-        }
-        catch (Throwable t)
-        {
-            logger.error("Unable to read NBT '%s' from instance:".formatted(path));
-            t.printStackTrace();
-
-            return null;
-        }
     }
 
     private static final Logger logger = FeatherMorphMain.getInstance().getSLF4JLogger();
@@ -211,13 +152,19 @@ public class ModDisguiseWrapper extends EventWrapper<TrackingClientDisguise>
     }
 
     @Override
-    public void onPostConstructDisguise(DisguiseState state, @Nullable Entity targetEntity)
+    public void postBuildDisguise(DisguiseState state, @Nullable Entity targetEntity)
     {
     }
 
     @Override
     public void update(DisguiseState state, Player player)
     {
+    }
+
+    @Override
+    public CompoundTag getCompound()
+    {
+        return new CompoundTag();
     }
 
     @Nullable

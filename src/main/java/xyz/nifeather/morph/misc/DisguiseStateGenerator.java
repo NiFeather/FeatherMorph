@@ -29,7 +29,6 @@ public class DisguiseStateGenerator
 
         offlineState.disguiseData = "%s|%s".formatted(backend.getIdentifier(), backend.toOfflineSave(newDisguise));
         offlineState.displayingDisguisedItems = state.showingDisguisedItems();
-        offlineState.snbt = state.getFullNbtString();
         offlineState.profileString = state.getProfileNbtString();
 
         if (state.entityCustomName != null)
@@ -95,10 +94,6 @@ public class DisguiseStateGenerator
             var logger = FeatherMorphMain.getInstance().getSLF4JLogger();
             logger.error("Unable to parse profile data: " + t.getMessage());
         }
-
-        var compound = NbtUtils.toCompoundTag(offlineState.snbt);
-        if (compound != null)
-            state.getDisguiseWrapper().mergeCompound(compound);
 
         //设置显示名称
         if (offlineState.customName != null)

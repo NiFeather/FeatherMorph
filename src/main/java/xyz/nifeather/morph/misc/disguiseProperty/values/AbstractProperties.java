@@ -2,17 +2,23 @@ package xyz.nifeather.morph.misc.disguiseProperty.values;
 
 import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import org.bukkit.entity.Entity;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import xyz.nifeather.morph.FeatherMorphMain;
+import xyz.nifeather.morph.api.FeatherMorphAPI;
+import xyz.nifeather.morph.misc.DisguiseState;
+import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-public abstract class AbstractProperties
+public abstract class AbstractProperties<E extends Entity>
 {
     protected <X> SingleProperty<X> getSingle(String name, X val)
     {
@@ -63,4 +69,58 @@ public abstract class AbstractProperties
 
         return map;
     }
+
+    @Nullable
+    protected abstract E tryCastEntity(@Nullable Entity targetEntity);
+
+    protected boolean validateOtherDisguise(DisguiseState our, DisguiseState other)
+    {
+        return our.disguisePropertyHandler().bindingPropertiesEquals(other.disguisePropertyHandler());
+    }
+
+    public final void setupProperties(DisguiseState state, @Nullable Entity targetEntity)
+    {
+        var theirDisguise = Objects.requireNonNull(FeatherMorphAPI.instance())
+                .directAccess()
+                .morphManager()
+                .getDisguiseStateFor(targetEntity);
+
+        // Clone if the target entity is disguised.
+        // If their disguise is not compatible with ours, we don't want to continue cloning from them anyway
+        if (theirDisguise != null)
+        {
+            if (validateOtherDisguise(state, theirDisguise))
+                this.setupFromOtherDisguise(state, theirDisguise);
+
+            return;
+        }
+
+        var cast = tryCastEntity(targetEntity);
+
+        if (cast != null)
+            setupPropertiesFromEntity(state.disguisePropertyHandler(), cast);
+        else
+            setupDefaultProperties(state.disguisePropertyHandler());
+    }
+
+    protected abstract void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull E targetEntity);
+    protected abstract void setupDefaultProperties(PropertyHandler propertyHandler);
+
+    protected void setupFromOtherDisguise(DisguiseState ourState, DisguiseState theirState)
+    {
+        var ourHandler = ourState.disguisePropertyHandler();
+        var theirHandler = theirState.disguisePropertyHandler();
+
+        theirHandler.copyTo(ourHandler);
+    }
+
+    public final Map<String, String> mapToNetworkProperties(PropertyHandler propertyHandler)
+    {
+        var map = new ConcurrentHashMap<String, String>();
+        this.appendNetworkMap(propertyHandler, map);
+
+        return map;
+    }
+
+    protected abstract void appendNetworkMap(PropertyHandler propertyHandler, Map<String, String> map);
 }

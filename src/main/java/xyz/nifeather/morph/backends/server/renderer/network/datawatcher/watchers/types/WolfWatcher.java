@@ -3,11 +3,9 @@ package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watcher
 import com.github.retrooper.packetevents.protocol.entity.wolfvariant.WolfVariant;
 import com.github.retrooper.packetevents.protocol.entity.wolfvariant.WolfVariants;
 import net.minecraft.nbt.CompoundTag;
-import org.bukkit.NamespacedKey;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Wolf;
-import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntry;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
@@ -17,6 +15,8 @@ import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 import xyz.nifeather.morph.misc.disguiseProperty.values.WolfProperties;
 
 import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
 
 public class WolfWatcher extends TameableAnimalWatcher
 {
@@ -50,6 +50,11 @@ public class WolfWatcher extends TameableAnimalWatcher
 
             this.writePersistent(ValueIndex.WOLF.WOLF_VARIANT, getWolfVariant(val.key().asString()));
         }
+        else if (property.equals(properties.OWNER))
+        {
+            var uuid = (UUID) value;
+            writePersistent(ValueIndex.WOLF.OWNER, Optional.ofNullable(uuid));
+        }
 
         super.onPropertyWrite(property, value);
     }
@@ -68,29 +73,6 @@ public class WolfWatcher extends TameableAnimalWatcher
                 case AnimationNames.SIT -> this.writePersistent(ValueIndex.WOLF.TAMEABLE_FLAGS, (byte)0x01);
                 case AnimationNames.STANDUP -> this.writePersistent(ValueIndex.WOLF.TAMEABLE_FLAGS, (byte)0x00);
             }
-        }
-    }
-
-    @Override
-    public void mergeFromCompound(CompoundTag nbt)
-    {
-        super.mergeFromCompound(nbt);
-
-        if (nbt.contains("CollarColor"))
-            writePersistent(ValueIndex.WOLF.COLLAR_COLOR, (int)nbt.getByte("CollarColor"));
-
-        if (nbt.contains("variant"))
-        {
-            var typeString = nbt.getString("variant");
-            NamespacedKey key = NamespacedKey.fromString(typeString);;
-
-            if (key == null && FeatherMorphMain.getInstance().doInternalDebugOutput)
-            {
-                logger.warn("[DEBUG] Ignoring unknown variant: " + typeString);
-                return;
-            }
-
-            writePersistent(ValueIndex.WOLF.WOLF_VARIANT, getWolfVariant(typeString));
         }
     }
 

@@ -15,6 +15,8 @@ import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 import xyz.nifeather.morph.misc.disguiseProperty.values.CatProperties;
 
 import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
 
 public class CatWatcher extends TameableAnimalWatcher
 {
@@ -47,6 +49,11 @@ public class CatWatcher extends TameableAnimalWatcher
             var variant = (Cat.Type) value;
             writePersistent(ValueIndex.CAT.CAT_VARIANT, getCatVariant(variant.key().asString()));
         }
+        else if (property.equals(properties.OWNER))
+        {
+            var uuid = (UUID) value;
+            writePersistent(ValueIndex.CAT.OWNER, Optional.ofNullable(uuid));
+        }
 
         super.onPropertyWrite(property, value);
     }
@@ -74,21 +81,6 @@ public class CatWatcher extends TameableAnimalWatcher
                 }
             }
         }
-    }
-
-    @Override
-    public void mergeFromCompound(CompoundTag nbt)
-    {
-        super.mergeFromCompound(nbt);
-
-        if (nbt.contains("variant"))
-        {
-            var name = nbt.getString("variant");
-            this.writePersistent(ValueIndex.CAT.CAT_VARIANT, getCatVariant(name));
-        }
-
-        if (nbt.contains("CollarColor"))
-            writePersistent(ValueIndex.CAT.COLLAR_COLOR, (int)nbt.getByte("CollarColor"));
     }
 
     @Override

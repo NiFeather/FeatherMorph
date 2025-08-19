@@ -74,15 +74,6 @@ public class HorseWatcher extends AbstractHorseWatcher
     }
 
     @Override
-    public void mergeFromCompound(CompoundTag nbt)
-    {
-        super.mergeFromCompound(nbt);
-
-        if (nbt.contains("Variant"))
-            this.writePersistent(ValueIndex.HORSE.HORSE_VARIANT, nbt.getInt("Variant"));
-    }
-
-    @Override
     public void writeToCompound(CompoundTag nbt)
     {
         super.writeToCompound(nbt);

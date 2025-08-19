@@ -2,7 +2,6 @@ package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watcher
 
 import com.github.retrooper.packetevents.protocol.entity.cow.CowVariants;
 import net.minecraft.nbt.CompoundTag;
-import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Cow;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -31,12 +30,6 @@ public class CowWatcher extends AgeableMobWatcher
     protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
         super.onPropertyWrite(property, value);
-    }
-
-    @Override
-    public void mergeFromCompound(CompoundTag nbt)
-    {
-        super.mergeFromCompound(nbt);
     }
 
     @Override

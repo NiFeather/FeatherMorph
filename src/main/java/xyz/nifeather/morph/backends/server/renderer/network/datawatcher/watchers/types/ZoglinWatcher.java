@@ -1,9 +1,12 @@
 package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.types;
 
-import net.minecraft.nbt.CompoundTag;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
+import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
+import xyz.nifeather.morph.misc.disguiseProperty.values.HoglinProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.values.ZoglinProperties;
 
 public class ZoglinWatcher extends EHasAttackAnimationWatcher
 {
@@ -13,19 +16,21 @@ public class ZoglinWatcher extends EHasAttackAnimationWatcher
     }
 
     @Override
+    protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
+    {
+        var properties = DisguiseProperties.INSTANCE.getOrThrow(ZoglinProperties.class);
+
+        if (property.equals(properties.IS_BABY))
+            this.writePersistent(ValueIndex.AGEABLE_MOB.IS_BABY, (Boolean) value);
+
+        super.onPropertyWrite(property, value);
+    }
+
+    @Override
     protected void initRegistry()
     {
         super.initRegistry();
 
         register(ValueIndex.ZOGLIN);
-    }
-
-    @Override
-    public void mergeFromCompound(CompoundTag nbt)
-    {
-        super.mergeFromCompound(nbt);
-
-        if (nbt.contains("IsBaby"))
-            writePersistent(ValueIndex.ZOGLIN.IS_BABY, nbt.getBoolean("IsBaby"));
     }
 }

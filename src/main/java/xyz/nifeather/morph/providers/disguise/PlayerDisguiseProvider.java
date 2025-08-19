@@ -3,13 +3,11 @@ package xyz.nifeather.morph.providers.disguise;
 import com.mojang.authlib.GameProfile;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.kyori.adventure.text.Component;
-import net.minecraft.nbt.CompoundTag;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.MainHand;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -22,8 +20,6 @@ import xyz.nifeather.morph.misc.DisguiseMeta;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.misc.DisguiseTypes;
 import xyz.nifeather.morph.misc.MorphGameProfile;
-import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
-import xyz.nifeather.morph.misc.disguiseProperty.values.PlayerProperties;
 import xyz.nifeather.morph.misc.skins.PlayerSkinProvider;
 import xyz.nifeather.morph.network.commands.S2C.set.S2CSetProfileCommand;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
@@ -74,10 +70,7 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
         if (DisguiseTypes.fromId(id) != DisguiseTypes.PLAYER)
             return DisguiseResult.fail();
 
-        var result = constructFromEntity(disguiseMeta, targetEntity);
-        var wrapper = result.success()
-                ? result.wrapperInstance()
-                : backend.createPlayerInstance(disguiseMeta.playerDisguiseTargetName);
+        var wrapper = backend.createPlayerInstance(disguiseMeta.playerDisguiseTargetName);
 
         Objects.requireNonNull(wrapper, "Null wrapper at where it shouldn't be?!");
 
@@ -121,49 +114,19 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
 
         //endregion Player Skin
 
-        return DisguiseResult.success(wrapper, result.isCopy());
+        return DisguiseResult.success(wrapper);
     }
 
     @Resolved(shouldSolveImmediately = true)
     private MorphClientHandler clientHandler;
 
     @Override
-    public void setupProperties(DisguiseState state, @Nullable Entity targetEntity)
+    public void postBuildDisguise(DisguiseState state, @Nullable Entity targetEntity)
     {
-        if (!(targetEntity instanceof Player targetPlayer))
-            return;
-
-        var propertyHandler = state.disguisePropertyHandler();
-        var playerProperties = DisguiseProperties.INSTANCE.getOrThrow(PlayerProperties.class);
-
-        if (!propertyHandler.contains(playerProperties.MAIN_HAND)) //todo: Remove this when we deprecated NBT usage
-            propertyHandler.set(playerProperties.MAIN_HAND, targetPlayer.getMainHand());
-
-        super.setupProperties(state, targetEntity);
-    }
-
-    //todo: Remove this when we deprecated NBT usage
-    private void setupPropertiesNBT(DisguiseState state, @Nullable Entity targetEntity)
-    {
-        if (!(targetEntity instanceof Player targetPlayer))
-            return;
-
-        CompoundTag compoundTag = new CompoundTag();
-        compoundTag.putBoolean("feathermorph:is_left_hand", targetPlayer.getMainHand() == MainHand.LEFT);
-
-        state.getDisguiseWrapper().mergeCompound(compoundTag);
-    }
-
-    @Override
-    public void onPostConstructDisguise(DisguiseState state, @Nullable Entity targetEntity)
-    {
-        super.onPostConstructDisguise(state, targetEntity);
+        super.postBuildDisguise(state, targetEntity);
 
         var wrapper = state.getDisguiseWrapper();
         var player = state.getPlayer();
-
-        //todo: Remove this when we deprecated NBT usage
-        setupPropertiesNBT(state, targetEntity);
 
         wrapper.subscribeEvent(this, WrapperEvent.SKIN_SET, skin ->
                 clientHandler.sendCommand(player, new S2CSetProfileCommand(state.getProfileNbtString())));
@@ -224,8 +187,16 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
         return list;
     }
 
+    /**
+     * 我们是否可以克隆目标实体/玩家的伪装？
+     *
+     * @param info         {@link DisguiseMeta}
+     * @param targetEntity 目标实体
+     * @param theirState   他们的{@link DisguiseState}，如果有
+     * @return 是否允许克隆他们的装备进行显示
+     */
     @Override
-    public boolean canConstruct(DisguiseMeta info, Entity targetEntity, @Nullable DisguiseState theirState)
+    public boolean canCloneEquipment(DisguiseMeta info, Entity targetEntity, DisguiseState theirState)
     {
         if (theirState != null)
         {
@@ -241,41 +212,10 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
         return targetPlayer.getName().equals(info.playerDisguiseTargetName);
     }
 
-    /**
-     * 我们是否可以克隆目标实体/玩家的伪装？
-     *
-     * @param info         {@link DisguiseMeta}
-     * @param targetEntity 目标实体
-     * @param theirState   他们的{@link DisguiseState}，如果有
-     * @return 是否允许克隆他们的装备进行显示
-     */
-    @Override
-    public boolean canCloneEquipment(DisguiseMeta info, Entity targetEntity, DisguiseState theirState)
-    {
-        return canConstruct(info, targetEntity, theirState);
-    }
-
-    @Override
-    protected boolean canCloneDisguise(DisguiseMeta info, Entity targetEntity,
-                                       @NotNull DisguiseState theirState, @NotNull DisguiseWrapper<?> theirDisguise)
-    {
-        return theirDisguise.getDisguiseName().equals(info.playerDisguiseTargetName) && theirDisguise.isPlayerDisguise();
-    }
-
     @Override
     public boolean validForClient(DisguiseState state)
     {
         return true;
-    }
-
-    @Override
-    public @Nullable CompoundTag getInitialNbtCompound(DisguiseState state, @Nullable Entity targetEntity, boolean enableCulling)
-    {
-        if (!(targetEntity instanceof Player targetPlayer)) return null;
-
-        if (!targetPlayer.getName().equals(DisguiseTypes.PLAYER.toStrippedId(state.getDisguiseIdentifier()))) return null;
-
-        return super.getInitialNbtCompound(state, targetEntity, enableCulling);
     }
 
     @Override

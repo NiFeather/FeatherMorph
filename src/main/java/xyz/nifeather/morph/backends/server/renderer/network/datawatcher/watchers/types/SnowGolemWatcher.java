@@ -5,6 +5,9 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.values.SnowGolemValues;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
+import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
+import xyz.nifeather.morph.misc.disguiseProperty.values.SnowGolemProperties;
 
 public class SnowGolemWatcher extends LivingEntityWatcher
 {
@@ -22,18 +25,17 @@ public class SnowGolemWatcher extends LivingEntityWatcher
     }
 
     @Override
-    public void mergeFromCompound(CompoundTag nbt)
+    protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
-        super.mergeFromCompound(nbt);
+        var snowmanProperties = DisguiseProperties.INSTANCE.getOrThrow(SnowGolemProperties.class);
 
-        if (nbt.contains("Pumpkin"))
+        if (property.equals(snowmanProperties.HAS_PUMPKIN))
         {
-            var value = nbt.getBoolean("Pumpkin")
-                    ? SnowGolemValues.HAS_PUMPKIN
-                    : SnowGolemValues.NO_PUMPKIN;
-
-            writePersistent(ValueIndex.SNOW_GOLEM.HAT_FLAGS, value);
+            var val = (Boolean) value;
+            this.writePersistent(ValueIndex.SNOW_GOLEM.HAT_FLAGS, val ? SnowGolemValues.HAS_PUMPKIN : SnowGolemValues.NO_PUMPKIN);
         }
+
+        super.onPropertyWrite(property, value);
     }
 
     @Override

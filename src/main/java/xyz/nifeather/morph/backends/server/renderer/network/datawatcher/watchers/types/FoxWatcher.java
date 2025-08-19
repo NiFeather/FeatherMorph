@@ -61,18 +61,6 @@ public class FoxWatcher extends AgeableMobWatcher
     }
 
     @Override
-    public void mergeFromCompound(CompoundTag nbt)
-    {
-        super.mergeFromCompound(nbt);
-
-        if (nbt.contains("Type"))
-        {
-            var isSnow = nbt.getString("Type").equalsIgnoreCase("SNOW");
-            writePersistent(ValueIndex.FOX.FOX_VARIANT, isSnow ? 1 : 0);
-        }
-    }
-
-    @Override
     public void writeToCompound(CompoundTag nbt)
     {
         super.writeToCompound(nbt);

@@ -7,9 +7,6 @@ import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueInde
 import xyz.nifeather.morph.utilities.NbtUtils;
 import xyz.nifeather.morph.utilities.Uuids;
 
-import java.util.Optional;
-import java.util.UUID;
-
 public class TameableAnimalWatcher extends LivingEntityWatcher
 {
     protected TameableAnimalWatcher(Player bindingPlayer, EntityType entityType)
@@ -23,30 +20,6 @@ public class TameableAnimalWatcher extends LivingEntityWatcher
         super.initRegistry();
 
         register(ValueIndex.TAMEABLE);
-    }
-
-    private final UUID ownerUUID = UUID.randomUUID();
-
-    @Override
-    public void mergeFromCompound(CompoundTag nbt)
-    {
-        super.mergeFromCompound(nbt);
-
-        if (nbt.contains("Owner") && !Uuids.NIL_UUID.equals(NbtUtils.readUUID(nbt.get("Owner"))))
-        {
-            writePersistent(ValueIndex.TAMEABLE.OWNER, Optional.of(ownerUUID));
-
-            byte val = read(ValueIndex.TAMEABLE.TAMEABLE_FLAGS);
-            writePersistent(ValueIndex.TAMEABLE.TAMEABLE_FLAGS, (byte)(val | 0x04));
-        }
-
-        if (nbt.contains("Sitting"))
-        {
-            byte val = read(ValueIndex.TAMEABLE.TAMEABLE_FLAGS);
-
-            if (nbt.getBoolean("Sitting"))
-                writePersistent(ValueIndex.TAMEABLE.TAMEABLE_FLAGS, (byte)(val | 0x01));
-        }
     }
 
     @Override

@@ -43,21 +43,6 @@ public class FrogWatcher extends LivingEntityWatcher
     }
 
     @Override
-    public void mergeFromCompound(CompoundTag nbt)
-    {
-        super.mergeFromCompound(nbt);
-
-        if (nbt.contains("variant"))
-        {
-            var typeString = nbt.getString("variant");
-            NamespacedKey key = NamespacedKey.fromString(typeString);
-
-            if (key != null)
-                writePersistent(ValueIndex.FROG.FROG_VARIANT, getFrogVariant(key));
-        }
-    }
-
-    @Override
     protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
         var properties = DisguiseProperties.INSTANCE.getOrThrow(FrogProperties.class);
