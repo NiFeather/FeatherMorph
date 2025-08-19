@@ -76,7 +76,7 @@ public class PlayerWatcher extends InventoryLivingWatcher
     {
         if (nbt.contains("feathermorph:is_left_hand"))
         {
-            var isLeftHand = nbt.getBoolean("feathermorph:is_left_hand").orElseThrow();
+            var isLeftHand = nbt.getBoolean("feathermorph:is_left_hand");
             int hand = isLeftHand ? MainHand.LEFT.ordinal() : MainHand.RIGHT.ordinal();
             this.writePersistent(ValueIndex.PLAYER.MAINHAND, (byte)hand);
         }
