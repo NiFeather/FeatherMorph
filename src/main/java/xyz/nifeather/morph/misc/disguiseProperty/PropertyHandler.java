@@ -104,4 +104,31 @@ public class PropertyHandler
     {
         return new Object2ObjectArrayMap<>(propertyMap);
     }
+
+    /**
+     * Execute a simple copy which copies our value to the given PropertyHandler
+     */
+    public void copyTo(PropertyHandler other)
+    {
+        this.propertyMap.forEach((k, v) ->
+        {
+            other.set((SingleProperty<Object>) k, v);
+        });
+    }
+
+    /**
+     * Check if the given PropertyHandler has been set up with the same properties of this handler
+     */
+    public boolean bindingPropertiesEquals(PropertyHandler other)
+    {
+        return other.bindingProperties != null && this.bindingPropertiesEquals(other.bindingProperties);
+    }
+
+    /**
+     * Check if the given Properties is same properties of this handler
+     */
+    public boolean bindingPropertiesEquals(AbstractProperties<?> other)
+    {
+        return this.bindingProperties != null && this.bindingProperties.equals(other);
+    }
 }

@@ -115,16 +115,6 @@ public abstract class DisguiseProvider extends MorphPluginObject
     public abstract DisguiseBackend<?, ?> getPreferredBackend();
 
     /**
-     * Resets a player's some attributes from a disguise but not un-disguising them.
-     * Used for keeping disguise appearance while switching (if this provider allow switching to that disguise without un-disguise)
-     *
-     * @param state The {@link DisguiseState} to reset
-     */
-    public void resetDisguise(DisguiseState state)
-    {
-    }
-
-    /**
      * 取消某个玩家的伪装
      * @param player 目标玩家
      * @return 操作是否成功
@@ -143,56 +133,6 @@ public abstract class DisguiseProvider extends MorphPluginObject
     }
 
     /**
-     * 从某一实体构建伪装
-     *
-     * @param info 伪装信息
-     * @param target 目标实体
-     * @return 一个包含伪装Wrapper的 {@link DisguiseResult}, 失败时返回 {@link DisguiseResult#FAIL}
-     */
-    @NotNull
-    protected DisguiseResult constructFromEntity(DisguiseMeta info, @Nullable Entity target)
-    {
-        if (target == null) return DisguiseResult.fail();
-
-        boolean allowClone = false;
-
-        var backend = getPreferredBackend();
-
-        DisguiseWrapper<?> ourDisguise;
-        DisguiseState theirState = morphs.getDisguiseStateFor(target);
-        DisguiseWrapper<?> theirDisguise = theirState != null ? theirState.getDisguiseWrapper() : null;
-
-        if (theirState != null)
-        {
-            var key = theirState.getDisguiseIdentifier();
-
-            //ID不一样则返回失败
-            if (!key.equals(info.getIdentifier())) return DisguiseResult.fail();
-
-            allowClone = canCloneDisguise(info, target, theirState, theirDisguise);
-        }
-
-        ourDisguise = allowClone
-                ? theirDisguise.clone()
-                : canConstruct(info, target, theirState) ? backend.createInstance(target) : null;
-
-        return ourDisguise == null
-                ? DisguiseResult.fail()
-                : DisguiseResult.success(ourDisguise);
-    }
-
-    /**
-     * 我们是否可以根据给定的实体构建伪装？
-     *
-     * @param info {@link DisguiseMeta}
-     * @param targetEntity 目标实体
-     * @param theirState 他们的{@link DisguiseState}，为null则代表他们不是玩家或没有通过MorphPlugin伪装
-     * @return 是否允许此操作，如果theirState不为null则优先检查theirState是否和传入的info相匹配
-     */
-    public abstract boolean canConstruct(DisguiseMeta info, Entity targetEntity,
-                                         @Nullable DisguiseState theirState);
-
-    /**
      * 我们是否可以克隆目标实体/玩家的伪装？
      *
      * @param info {@link DisguiseMeta}
@@ -203,23 +143,11 @@ public abstract class DisguiseProvider extends MorphPluginObject
     public abstract boolean canCloneEquipment(DisguiseMeta info, Entity targetEntity, DisguiseState theirState);
 
     /**
-     * 是否可以克隆某个实体现有的伪装?
-     *
-     * @param info {@link DisguiseMeta}
-     * @param targetEntity 目标实体
-     * @param theirDisguise 他们目前应用的伪装
-     * @param theirState 他们的{@link DisguiseState}，为null则代表他们不是玩家或没有通过MorphPlugin伪装
-     * @return 是否允许此操作
-     */
-    protected abstract boolean canCloneDisguise(DisguiseMeta info, Entity targetEntity,
-                                                @NotNull DisguiseState theirState, @NotNull DisguiseWrapper<?> theirDisguise);
-
-    /**
      * 伪装后要做的事
      * @param state {@link DisguiseState}
      * @param targetEntity 目标实体
      */
-    public void onPostConstructDisguise(DisguiseState state, @Nullable Entity targetEntity)
+    public void postBuildDisguise(DisguiseState state, @Nullable Entity targetEntity)
     {
     }
 

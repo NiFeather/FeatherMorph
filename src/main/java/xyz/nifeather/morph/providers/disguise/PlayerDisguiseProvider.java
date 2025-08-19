@@ -20,8 +20,6 @@ import xyz.nifeather.morph.misc.DisguiseMeta;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.misc.DisguiseTypes;
 import xyz.nifeather.morph.misc.MorphGameProfile;
-import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
-import xyz.nifeather.morph.misc.disguiseProperty.values.PlayerProperties;
 import xyz.nifeather.morph.misc.skins.PlayerSkinProvider;
 import xyz.nifeather.morph.network.commands.S2C.set.S2CSetProfileCommand;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
@@ -72,10 +70,7 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
         if (DisguiseTypes.fromId(id) != DisguiseTypes.PLAYER)
             return DisguiseResult.fail();
 
-        var result = constructFromEntity(disguiseMeta, targetEntity);
-        var wrapper = result.success()
-                ? result.wrapperInstance()
-                : backend.createPlayerInstance(disguiseMeta.playerDisguiseTargetName);
+        var wrapper = backend.createPlayerInstance(disguiseMeta.playerDisguiseTargetName);
 
         Objects.requireNonNull(wrapper, "Null wrapper at where it shouldn't be?!");
 
@@ -126,9 +121,9 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
     private MorphClientHandler clientHandler;
 
     @Override
-    public void onPostConstructDisguise(DisguiseState state, @Nullable Entity targetEntity)
+    public void postBuildDisguise(DisguiseState state, @Nullable Entity targetEntity)
     {
-        super.onPostConstructDisguise(state, targetEntity);
+        super.postBuildDisguise(state, targetEntity);
 
         var wrapper = state.getDisguiseWrapper();
         var player = state.getPlayer();
@@ -192,8 +187,16 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
         return list;
     }
 
+    /**
+     * 我们是否可以克隆目标实体/玩家的伪装？
+     *
+     * @param info         {@link DisguiseMeta}
+     * @param targetEntity 目标实体
+     * @param theirState   他们的{@link DisguiseState}，如果有
+     * @return 是否允许克隆他们的装备进行显示
+     */
     @Override
-    public boolean canConstruct(DisguiseMeta info, Entity targetEntity, @Nullable DisguiseState theirState)
+    public boolean canCloneEquipment(DisguiseMeta info, Entity targetEntity, DisguiseState theirState)
     {
         if (theirState != null)
         {
@@ -207,27 +210,6 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
             return false;
 
         return targetPlayer.getName().equals(info.playerDisguiseTargetName);
-    }
-
-    /**
-     * 我们是否可以克隆目标实体/玩家的伪装？
-     *
-     * @param info         {@link DisguiseMeta}
-     * @param targetEntity 目标实体
-     * @param theirState   他们的{@link DisguiseState}，如果有
-     * @return 是否允许克隆他们的装备进行显示
-     */
-    @Override
-    public boolean canCloneEquipment(DisguiseMeta info, Entity targetEntity, DisguiseState theirState)
-    {
-        return canConstruct(info, targetEntity, theirState);
-    }
-
-    @Override
-    protected boolean canCloneDisguise(DisguiseMeta info, Entity targetEntity,
-                                       @NotNull DisguiseState theirState, @NotNull DisguiseWrapper<?> theirDisguise)
-    {
-        return theirDisguise.getDisguiseName().equals(info.playerDisguiseTargetName) && theirDisguise.isPlayerDisguise();
     }
 
     @Override

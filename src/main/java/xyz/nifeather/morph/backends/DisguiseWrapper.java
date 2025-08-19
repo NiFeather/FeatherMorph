@@ -282,7 +282,7 @@ public abstract class DisguiseWrapper<TInstance>
      * @param state A {@link DisguiseState} that handles the current wrapper
      * @param targetEntity The targeted entity (If there is any)
      */
-    public abstract void onPostConstructDisguise(DisguiseState state, @Nullable Entity targetEntity);
+    public abstract void postBuildDisguise(DisguiseState state, @Nullable Entity targetEntity);
 
     /**
      * Updates the underlying disguise instance

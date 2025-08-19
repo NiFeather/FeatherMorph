@@ -934,8 +934,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             state.setServerDisplay(serverDisplay);
         }
 
-        provider.onPostConstructDisguise(state, targetEntity);
-        wrapper.onPostConstructDisguise(state, targetEntity);
+        provider.postBuildDisguise(state, targetEntity);
+        wrapper.postBuildDisguise(state, targetEntity);
 
         // 设定初始属性
         var str = uuidRandomBaseString.get()
@@ -1406,7 +1406,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     }
 
     @Nullable
-    public DisguiseState getDisguiseStateFor(Entity entity)
+    public DisguiseState getDisguiseStateFor(@Nullable Entity entity)
     {
         if (!(entity instanceof Player player)) return null;
 

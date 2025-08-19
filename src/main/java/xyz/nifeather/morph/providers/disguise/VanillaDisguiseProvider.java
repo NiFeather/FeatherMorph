@@ -26,7 +26,6 @@ import xyz.nifeather.morph.misc.DisguiseTypes;
 import xyz.nifeather.morph.misc.NmsRecord;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.values.ArmorStandProperties;
-import xyz.nifeather.morph.misc.disguiseProperty.values.SlimeMagmaProperties;
 import xyz.nifeather.morph.providers.animation.AnimationProvider;
 import xyz.nifeather.morph.providers.animation.provider.VanillaAnimationProvider;
 import xyz.nifeather.morph.utilities.*;
@@ -34,7 +33,6 @@ import xyz.nifeather.morph.utilities.*;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Objects;
-import java.util.Random;
 
 public class VanillaDisguiseProvider extends DefaultDisguiseProvider
 {
@@ -114,7 +112,6 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
     {
         var identifier = disguiseMeta.getIdentifier();
 
-        DisguiseWrapper<?> constructedDisguise;
         var backend = getPreferredBackend();
 
         var entityType = EntityTypeUtils.fromString(identifier, true);
@@ -125,20 +122,16 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
             return DisguiseResult.fail();
         }
 
-        var copyResult = constructFromEntity(disguiseMeta, targetEntity);
-
-        constructedDisguise = copyResult.success()
-                ? copyResult.wrapperInstance() //copyResult.success() -> wrapperInstance() != null
-                : backend.createInstance(entityType);
+        var newDisguise = backend.createInstance(entityType);
 
         // Make IDE happy
-        Objects.requireNonNull(constructedDisguise);
+        Objects.requireNonNull(newDisguise);
 
         // 检查是否有足够的空间
         if (modifyBoundingBoxes.get() && checkSpaceBoundingBox.get())
         {
             var loc = player.getLocation();
-            var box = constructedDisguise.getBoundingBoxAt(loc.x(), loc.y(), loc.z());
+            var box = newDisguise.getBoundingBoxAt(loc.x(), loc.y(), loc.z());
 
             var hasCollision = CollisionUtils.hasCollisionWithBlockOrBorder(player, box);
             if (hasCollision)
@@ -148,7 +141,7 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
             }
         }
 
-        return DisguiseResult.success(constructedDisguise);
+        return DisguiseResult.success(newDisguise);
     }
 
     @Override
@@ -169,9 +162,9 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
     }
 
     @Override
-    public void onPostConstructDisguise(DisguiseState state, @Nullable Entity targetEntity)
+    public void postBuildDisguise(DisguiseState state, @Nullable Entity targetEntity)
     {
-        super.onPostConstructDisguise(state, targetEntity);
+        super.postBuildDisguise(state, targetEntity);
 
         var wrapper = state.getDisguiseWrapper();
         var theirDisguise = getMorphManager().getDisguiseStateFor(targetEntity);
@@ -385,25 +378,20 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
     }
 
     @Override
-    public void resetDisguise(DisguiseState state)
-    {
-        var player = state.getPlayer();
-
-        removeAllHealthModifiers(player);
-        resetPlayerDimensions(player);
-        recoverPlayerWaypoint(player);
-    }
-
-    @Override
     public boolean unMorph(Player player, DisguiseState state)
     {
         if (super.unMorph(player, state))
         {
-            resetDisguise(state);
+            removeAllHealthModifiers(player);
+            resetPlayerDimensions(player);
+            recoverPlayerWaypoint(player);
+
             return true;
         }
         else
+        {
             return false;
+        }
     }
 
     @Override
@@ -428,14 +416,6 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
         return true;
     }
 
-    @Override
-    public boolean canConstruct(DisguiseMeta info, @Nullable Entity targetEntity, DisguiseState theirState)
-    {
-        return theirState != null
-                ? theirState.getDisguiseWrapper().getEntityType().equals(info.getEntityType())
-                : targetEntity == null || targetEntity.getType().equals(info.getEntityType());
-    }
-
     /**
      * 我们是否可以克隆目标实体/玩家的伪装？
      *
@@ -447,14 +427,9 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
     @Override
     public boolean canCloneEquipment(DisguiseMeta info, Entity targetEntity, DisguiseState theirState)
     {
-        return canConstruct(info, targetEntity, theirState);
-    }
-
-    @Override
-    protected boolean canCloneDisguise(DisguiseMeta info, Entity targetEntity,
-                                       @NotNull DisguiseState theirDisguiseState, @NotNull DisguiseWrapper<?> theirDisguise)
-    {
-        return theirDisguise.getEntityType().equals(info.getEntityType());
+        return theirState != null
+                ? theirState.getDisguiseWrapper().getEntityType().equals(info.getEntityType())
+                : targetEntity == null || targetEntity.getType().equals(info.getEntityType());
     }
 
     @Resolved

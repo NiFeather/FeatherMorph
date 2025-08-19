@@ -882,7 +882,6 @@ public class DisguiseState extends MorphPluginObject
         this.disguiseWrapper.dispose();
         this.abilityUpdater.dispose();
 
-        this.provider.resetDisguise(this);
         this.provider.unMorph(getPlayer(), this);
         this.abilityUpdater.setAbilities(List.of());
         this.setSkill(null, null);

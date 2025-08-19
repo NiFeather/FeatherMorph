@@ -1,7 +1,6 @@
 package xyz.nifeather.morph.backends.server;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import net.minecraft.nbt.CompoundTag;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -12,7 +11,6 @@ import xyz.nifeather.morph.backends.DisguiseWrapper;
 import xyz.nifeather.morph.backends.server.renderer.ServerRenderer;
 import xyz.nifeather.morph.backends.server.renderer.utilties.WatcherUtils;
 import xyz.nifeather.morph.messages.BackendStrings;
-import xyz.nifeather.morph.utilities.NbtUtils;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
@@ -59,22 +57,6 @@ public class ServerBackend extends DisguiseBackend<ServerDisguise, ServerDisguis
     public FormattableMessage getDisplayName()
     {
         return BackendStrings.serverBackendName();
-    }
-
-    /**
-     * Creates a disguise from the giving entity
-     *
-     * @param targetEntity The entity used to construct disguise
-     * @return A wrapper that handles the constructed disguise
-     */
-    @Override
-    public DisguiseWrapper<ServerDisguise> createInstance(@NotNull Entity targetEntity)
-    {
-        var wrapper = new ServerDisguiseWrapper(new ServerDisguise(targetEntity.getType()), this);
-        if (targetEntity instanceof Player player)
-            wrapper.setDisguiseName(player.getName());
-
-        return wrapper;
     }
 
     /**
