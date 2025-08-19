@@ -6,11 +6,11 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.craftbukkit.entity.CraftEntity;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import xiamomc.pluginbase.Annotations.Resolved;
 import xyz.nifeather.morph.MorphManager;
-import xyz.nifeather.morph.api.morphs.abilities.AbilityNames;
 import xyz.nifeather.morph.abilities.impl.OnAttackAbility;
 import xyz.nifeather.morph.abilities.options.ExtraKnockbackOption;
-import xiamomc.pluginbase.Annotations.Resolved;
+import xyz.nifeather.morph.api.morphs.abilities.AbilityNames;
 
 public class ExtraKnockbackAbility extends OnAttackAbility<ExtraKnockbackOption>
 {

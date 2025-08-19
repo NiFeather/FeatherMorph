@@ -12,7 +12,10 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.misc.NmsRecord;
-import xyz.nifeather.morph.misc.waypoint.connection.*;
+import xyz.nifeather.morph.misc.waypoint.connection.IMorphRealtimeWaypointConnection;
+import xyz.nifeather.morph.misc.waypoint.connection.MorphAzimuthWaypointConnection;
+import xyz.nifeather.morph.misc.waypoint.connection.MorphBlockConnection;
+import xyz.nifeather.morph.misc.waypoint.connection.MorphChunkConnection;
 import xyz.nifeather.morph.providers.disguise.DefaultDisguiseProvider;
 
 import java.util.Collections;
@@ -122,6 +125,7 @@ public class DisguiseWaypointUpdater implements WaypointTransmitter
         if (disposed) return;
 
         this.enabled = value;
+        tick();
     }
 
     private final DisguiseState bindingState;
@@ -190,11 +194,7 @@ public class DisguiseWaypointUpdater implements WaypointTransmitter
             else
             {
                 var conn = new MorphBlockConnection(bindingState, icon, target);
-
-                synchronized (realtimeConnections)
-                {
-                    realtimeConnections.add(conn);
-                }
+                realtimeConnections.add(conn);
 
                 return Optional.of(conn);
             }

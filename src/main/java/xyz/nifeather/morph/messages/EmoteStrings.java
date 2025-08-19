@@ -1,8 +1,8 @@
 package xyz.nifeather.morph.messages;
 
 import org.jetbrains.annotations.NotNull;
-import xyz.nifeather.morph.FeatherMorphMain;
 import xiamomc.pluginbase.Messages.FormattableMessage;
+import xyz.nifeather.morph.FeatherMorphMain;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

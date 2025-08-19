@@ -7,7 +7,6 @@ import org.slf4j.Logger;
 import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

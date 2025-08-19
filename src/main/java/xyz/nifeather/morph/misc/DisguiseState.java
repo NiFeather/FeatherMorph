@@ -13,11 +13,6 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.nifeather.morph.misc.waypoint.DisguiseWaypointUpdater;
-import xyz.nifeather.morph.network.PlayerOptions;
-import xyz.nifeather.morph.network.commands.S2C.S2CPlayAnimationCommand;
-import xyz.nifeather.morph.network.commands.S2C.set.S2CSetAnimationDisplayNameCommand;
-import xyz.nifeather.morph.network.commands.S2C.set.S2CSetSkillCooldownCommand;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.MorphPluginObject;
@@ -29,10 +24,17 @@ import xyz.nifeather.morph.messages.EmoteStrings;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
+import xyz.nifeather.morph.misc.waypoint.DisguiseWaypointUpdater;
+import xyz.nifeather.morph.network.PlayerOptions;
+import xyz.nifeather.morph.network.commands.S2C.S2CPlayAnimationCommand;
+import xyz.nifeather.morph.network.commands.S2C.set.S2CSetAnimationDisplayNameCommand;
+import xyz.nifeather.morph.network.commands.S2C.set.S2CSetSkillCooldownCommand;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
 import xyz.nifeather.morph.providers.animation.SingleAnimation;
 import xyz.nifeather.morph.providers.disguise.DisguiseProvider;
-import xyz.nifeather.morph.skills.*;
+import xyz.nifeather.morph.skills.IMorphSkill;
+import xyz.nifeather.morph.skills.MorphSkillHandler;
+import xyz.nifeather.morph.skills.SkillCooldownInfo;
 import xyz.nifeather.morph.skills.impl.NoneMorphSkill;
 import xyz.nifeather.morph.storage.playerdata.PlayerMeta;
 import xyz.nifeather.morph.storage.skill.ISkillOption;
@@ -763,17 +765,13 @@ public class DisguiseState extends MorphPluginObject
         armors = ItemUtils.asCopy(armors);
         handItems = ItemUtils.asCopy(handItems);
 
-        //全是空的，则默认显示自身装备
-        var emptyEquipment = Arrays.stream(armors).allMatch(i -> i != null && i.getType().isAir())
-                && Arrays.stream(handItems).allMatch(i -> i != null && i.getType().isAir());
-
         disguiseEquipments.allowNull = true;
         disguiseEquipments.setArmorContents(armors);
         disguiseEquipments.setHandItems(handItems);
 
         //开启默认装备显示或者更新显示
         disguiseWrapper.setFakeEquipments(disguiseEquipments);
-        setShowingDisguisedItems(showDisguisedItems || !emptyEquipment);
+        setShowingDisguisedItems(showDisguisedItems || targetEquipment != null);
     }
 
     private final DisguiseEquipment disguiseEquipments = new DisguiseEquipment();

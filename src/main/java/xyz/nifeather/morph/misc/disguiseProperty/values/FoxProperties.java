@@ -5,8 +5,6 @@ import org.bukkit.entity.Fox;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 
-import java.util.Map;
-
 public class FoxProperties extends AbstractProperties
 {
     public final SingleProperty<Fox.Type> VARIANT = getSingle("fox_variant", Fox.Type.RED)

@@ -2,9 +2,9 @@ package xyz.nifeather.morph.messages.vanilla;
 
 import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
-import xyz.nifeather.morph.FeatherMorphMain;
 import xiamomc.pluginbase.Messages.IStrings;
 import xiamomc.pluginbase.Messages.MessageStore;
+import xyz.nifeather.morph.FeatherMorphMain;
 
 import java.io.BufferedReader;
 import java.io.File;

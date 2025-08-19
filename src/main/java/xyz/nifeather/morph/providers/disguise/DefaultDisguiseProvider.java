@@ -14,8 +14,11 @@ import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.EquipmentSlot;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xiamomc.pluginbase.Annotations.Resolved;
+import xiamomc.pluginbase.Messages.MessageStore;
 import xyz.nifeather.morph.RevealingHandler;
 import xyz.nifeather.morph.abilities.AbilityManager;
+import xyz.nifeather.morph.api.morphs.skills.SkillNames;
 import xyz.nifeather.morph.backends.DisguiseBackend;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.MorphStrings;
@@ -24,9 +27,6 @@ import xyz.nifeather.morph.network.commands.S2C.AbstractS2CCommand;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
 import xyz.nifeather.morph.network.server.ServerSetEquipCommand;
 import xyz.nifeather.morph.skills.MorphSkillHandler;
-import xyz.nifeather.morph.api.morphs.skills.SkillNames;
-import xiamomc.pluginbase.Annotations.Resolved;
-import xiamomc.pluginbase.Messages.MessageStore;
 
 import java.util.List;
 import java.util.Objects;
@@ -170,6 +170,7 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
                 "Player don't have a '%s' attribute, you might using a broken server implementation.".formatted(attribute.key().asString()));
     }
 
+    @NotNull
     public static final NamespacedKey WAYPOINT_TRANSMIT_MODIFIER_KEY = Objects.requireNonNull(NamespacedKey.fromString("feathermorph:waypoint_transmit_modifier"));
 
     protected void mutePlayerWaypoint(Player player)

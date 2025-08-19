@@ -2,7 +2,6 @@ package xyz.nifeather.morph.backends.server.renderer.network;
 
 import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.event.PacketListenerPriority;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.backends.server.renderer.network.listeners.*;

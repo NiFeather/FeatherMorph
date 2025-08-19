@@ -1,20 +1,19 @@
 package xyz.nifeather.morph.events.mirror.impl;
 
 import ca.spottedleaf.moonrise.common.util.TickThread;
-import io.papermc.paper.event.player.PlayerArmSwingEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import xyz.nifeather.morph.network.commands.S2C.set.S2CSetSneakingCommand;
 import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.config.ConfigOption;
 import xyz.nifeather.morph.events.InteractionMirrorProcessor;
 import xyz.nifeather.morph.events.PlayerTracker;
 import xyz.nifeather.morph.events.mirror.ExecutorHub;
 import xyz.nifeather.morph.misc.NmsRecord;
+import xyz.nifeather.morph.network.commands.S2C.set.S2CSetSneakingCommand;
 import xyz.nifeather.morph.storage.mirrorlogging.OperationType;
 import xyz.nifeather.morph.utilities.ItemUtils;
 import xyz.nifeather.morph.utilities.NmsUtils;

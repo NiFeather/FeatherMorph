@@ -6,7 +6,6 @@ import com.mojang.serialization.JsonOps;
 import it.unimi.dsi.fastutil.objects.ObjectAVLTreeSet;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
-import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.util.Unit;
 import net.minecraft.world.item.component.CustomData;
@@ -20,8 +19,6 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.FeatherMorphMain;
-
-import java.util.SequencedSet;
 
 public class ItemUtils
 {
@@ -115,7 +112,7 @@ public class ItemUtils
     public static final String MAGIC_BOTTLE_ITEM_KEY = "feathermorph:is_magic_bottle";
     public static final String MAGIC_BOTTLE_STORE_ITEM_KEY = "feathermorph:magic_bottle_store";
 
-    public static ItemStack buildMagicBottleFrom(ItemStack stack)
+    public static ItemStack buildMagicItemFrom(ItemStack stack)
     {
         var nms = net.minecraft.world.item.ItemStack.fromBukkitCopy(stack);
         var customData = nms.getComponents().get(DataComponents.CUSTOM_DATA);
@@ -123,16 +120,13 @@ public class ItemUtils
 
         customData = customData.update(tag -> tag.putBoolean(MAGIC_BOTTLE_ITEM_KEY, true));
         nms.set(DataComponents.CUSTOM_DATA, customData);
-        nms.set(DataComponents.MAX_STACK_SIZE, 1);
 
         return nms.asBukkitMirror();
     }
 
-    public static ItemStack writeMagicBottleData(ItemStack inputStack, String disguiseIdentifier)
+    public static ItemStack writeMagicItemData(ItemStack inputStack, String disguiseIdentifier)
     {
-        var stack = inputStack.withType(Material.POTION);
-
-        var nms = net.minecraft.world.item.ItemStack.fromBukkitCopy(stack);
+        var nms = net.minecraft.world.item.ItemStack.fromBukkitCopy(inputStack);
         var customData = nms.getComponents().get(DataComponents.CUSTOM_DATA);
         if (customData == null) customData = CustomData.EMPTY;
 
@@ -145,9 +139,9 @@ public class ItemUtils
     }
 
     @Nullable
-    public static String readMagicBottleData(ItemStack stack)
+    public static String readMagicItemData(ItemStack stack)
     {
-        if (!isMagicBottle(stack)) return null;
+        if (!isMagicItem(stack)) return null;
 
         var nms = net.minecraft.world.item.ItemStack.fromBukkitCopy(stack);
         var customData = nms.getComponents().get(DataComponents.CUSTOM_DATA);
@@ -162,7 +156,7 @@ public class ItemUtils
         return result;
     }
 
-    public static boolean isMagicBottle(ItemStack stack)
+    public static boolean isMagicItem(ItemStack stack)
     {
         var nms = net.minecraft.world.item.ItemStack.fromBukkitCopy(stack);
         var customData = nms.getComponents().get(DataComponents.CUSTOM_DATA);

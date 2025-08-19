@@ -9,11 +9,11 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
+import xyz.nifeather.morph.api.morphs.skills.SkillNames;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.SkillStrings;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.skills.MorphSkill;
-import xyz.nifeather.morph.api.morphs.skills.SkillNames;
 import xyz.nifeather.morph.skills.options.TeleportConfiguration;
 import xyz.nifeather.morph.storage.skill.SkillAbilityConfiguration;
 

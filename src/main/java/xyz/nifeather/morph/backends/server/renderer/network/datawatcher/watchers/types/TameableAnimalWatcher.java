@@ -1,11 +1,11 @@
 package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.types;
 
-import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.utilities.NbtUtils;
+import xyz.nifeather.morph.utilities.Uuids;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -32,7 +32,7 @@ public class TameableAnimalWatcher extends LivingEntityWatcher
     {
         super.mergeFromCompound(nbt);
 
-        if (nbt.contains("Owner") && !Util.NIL_UUID.equals(NbtUtils.readUUID(nbt.get("Owner"))))
+        if (nbt.contains("Owner") && !Uuids.NIL_UUID.equals(NbtUtils.readUUID(nbt.get("Owner"))))
         {
             writePersistent(ValueIndex.TAMEABLE.OWNER, Optional.of(ownerUUID));
 
@@ -56,6 +56,6 @@ public class TameableAnimalWatcher extends LivingEntityWatcher
 
         var flag = read(ValueIndex.TAMEABLE.TAMEABLE_FLAGS);
         nbt.putBoolean("Sitting", (flag & 0x01) == 0x01);
-        NbtUtils.putUUID(nbt, "Owner", read(ValueIndex.TAMEABLE.OWNER).orElse(Util.NIL_UUID));
+        NbtUtils.putUUID(nbt, "Owner", read(ValueIndex.TAMEABLE.OWNER).orElse(Uuids.NIL_UUID));
     }
 }

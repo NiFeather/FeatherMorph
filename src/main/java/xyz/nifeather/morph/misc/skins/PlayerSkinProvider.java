@@ -8,7 +8,6 @@ import com.mojang.authlib.exceptions.AuthenticationUnavailableException;
 import com.mojang.authlib.yggdrasil.ProfileNotFoundException;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraft.Util;
 import net.minecraft.server.MinecraftServer;
 import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
@@ -17,6 +16,7 @@ import xiamomc.pluginbase.Annotations.Initializer;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.misc.MorphGameProfile;
 import xyz.nifeather.morph.misc.NmsRecord;
+import xyz.nifeather.morph.utilities.Uuids;
 
 import java.util.List;
 import java.util.Map;
@@ -195,7 +195,7 @@ public class PlayerSkinProvider extends MorphPluginObject
                 if (result != null)
                     skinCache.cache(result.profile());
                 else
-                    skinCache.cache(new GameProfile(Util.NIL_UUID, profile.getName()));
+                    skinCache.cache(new GameProfile(Uuids.NIL_UUID, profile.getName()));
 
                 return result == null ? Optional.of(profile) : Optional.of(result.profile());
             });
@@ -246,7 +246,7 @@ public class PlayerSkinProvider extends MorphPluginObject
                     }
                     else //本地没有缓存，则创建一个空Profile
                     {
-                        skinCache.cache(new GameProfile(Util.NIL_UUID, profileName));
+                        skinCache.cache(new GameProfile(Uuids.NIL_UUID, profileName));
                         return CompletableFuture.completedFuture(Optional.empty());
                     }
                 });

@@ -3,9 +3,11 @@ package xyz.nifeather.morph.commands.subcommands.request;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
+import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSelectorArgumentResolver;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -31,54 +33,34 @@ public class SendSubCommand extends MorphPluginObject implements IConvertibleBri
     @Resolved
     private MorphManager morphs;
 
-    public @NotNull CompletableFuture<Suggestions> suggests(CommandContext<CommandSourceStack> context, SuggestionsBuilder suggestionsBuilder)
-    {
-        var source = context.getSource().getSender();
-
-        if (!(source instanceof Player player))
-            return CompletableFuture.completedFuture(suggestionsBuilder.build());
-
-        var currentOnline = featherMorph().getPlatform().onlinePlayers();
-
-        return CompletableFuture.supplyAsync(() ->
-        {
-            currentOnline.stream().filter(p -> !p.getUniqueId().equals(player.getUniqueId()))
-                    .forEach(p -> suggestionsBuilder.suggest(p.getName()));
-
-            return suggestionsBuilder.build();
-        });
-    }
-
-    public int executes(CommandContext<CommandSourceStack> context)
+    public int executes(CommandContext<CommandSourceStack> context) throws CommandSyntaxException
     {
         var sender = context.getSource().getSender();
 
         if (!(sender instanceof Player sourcePlayer))
             return Command.SINGLE_SUCCESS;
 
-        var targetPlayer = Bukkit.getPlayerExact(StringArgumentType.getString(context, "who"));
+        var players = context.getArgument("who", PlayerSelectorArgumentResolver.class)
+                .resolve(context.getSource());
 
-        if (targetPlayer == null)
+        players.forEach(targetPlayer ->
         {
-            sender.sendMessage(MessageUtils.prefixes(sender, CommonStrings.playerNotFoundString()));
-            return Command.SINGLE_SUCCESS;
-        }
+            if (targetPlayer.getUniqueId().equals(sourcePlayer.getUniqueId()))
+            {
+                sourcePlayer.sendMessage(MessageUtils.prefixes(sender, RequestStrings.cantSendToSelfString()));
+                return;
+            }
 
-        if (targetPlayer.getUniqueId().equals(sourcePlayer.getUniqueId()))
-        {
-            sourcePlayer.sendMessage(MessageUtils.prefixes(sender, RequestStrings.cantSendToSelfString()));
-            return Command.SINGLE_SUCCESS;
-        }
+            var id = DisguiseTypes.PLAYER.toId(targetPlayer.getName());
+            if (morphs.getAvaliableDisguisesFor(sourcePlayer).stream()
+                    .anyMatch(c -> c.rawIdentifier.equals(id)))
+            {
+                sourcePlayer.sendMessage(MessageUtils.prefixes(sender, RequestStrings.alreadyHaveDisguiseString()));
+                return;
+            }
 
-        var id = DisguiseTypes.PLAYER.toId(targetPlayer.getName());
-        if (morphs.getAvaliableDisguisesFor(sourcePlayer).stream()
-                .anyMatch(c -> c.rawIdentifier.equals(id)))
-        {
-            sourcePlayer.sendMessage(MessageUtils.prefixes(sender, RequestStrings.alreadyHaveDisguiseString()));
-            return Command.SINGLE_SUCCESS;
-        }
-
-        requests.createRequest(sourcePlayer, targetPlayer);
+            requests.createRequest(sourcePlayer, targetPlayer);
+        });
 
         return Command.SINGLE_SUCCESS;
     }

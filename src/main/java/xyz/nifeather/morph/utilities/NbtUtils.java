@@ -2,7 +2,6 @@ package xyz.nifeather.morph.utilities;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
-import net.minecraft.Util;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.nbt.*;
 import net.minecraft.server.commands.data.EntityDataAccessor;
@@ -58,7 +57,7 @@ public class NbtUtils
         if (!profile.getName().isEmpty())
             nbt.putString("Name", profile.getName());
 
-        if (!profile.getId().equals(Util.NIL_UUID))
+        if (!profile.getId().equals(Uuids.NIL_UUID))
             putUUID(nbt, "Id", profile.getId());
 
         if (profile.getProperties().isEmpty())
@@ -114,7 +113,7 @@ public class NbtUtils
         if (compound.contains("Name"))
             name = compound.getString("Name");
 
-        UUID uuid = Util.NIL_UUID;
+        UUID uuid = Uuids.NIL_UUID;
         if (compound.contains("Id"))
         {
             var tag = compound.get("Id");

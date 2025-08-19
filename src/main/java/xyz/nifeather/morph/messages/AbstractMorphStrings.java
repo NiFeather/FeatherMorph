@@ -1,8 +1,8 @@
 package xyz.nifeather.morph.messages;
 
-import xyz.nifeather.morph.FeatherMorphMain;
 import xiamomc.pluginbase.Messages.FormattableMessage;
 import xiamomc.pluginbase.Messages.IStrings;
+import xyz.nifeather.morph.FeatherMorphMain;
 
 public abstract class AbstractMorphStrings implements IStrings
 {

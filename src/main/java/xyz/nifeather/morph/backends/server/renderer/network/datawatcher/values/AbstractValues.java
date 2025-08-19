@@ -1,7 +1,6 @@
 package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.values;
 
 import com.github.retrooper.packetevents.protocol.entity.data.EntityDataType;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.slf4j.Logger;
 import xyz.nifeather.morph.FeatherMorphMain;
 

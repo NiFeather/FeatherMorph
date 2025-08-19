@@ -2,7 +2,6 @@ package xyz.nifeather.morph.storage.playerdata;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;

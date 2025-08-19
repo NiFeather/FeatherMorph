@@ -59,7 +59,7 @@ public class LegacyClientHandler extends MorphPluginObject
             clientHandler.setProtocolHandlerFor(player, V2ProtocolHandler.V2_INSTANCE);
             logger.info("%s is using V2 packets, scheduling response".formatted(player.getName()));
 
-            clientHandler.getPlayerPendingFuture(player).thenRun(() -> V2ProtocolHandler.V2_INSTANCE.sendV2InitalizeRespond(player, clientHandler.getInitializeRespond().serverFeatures()));
+            clientHandler.getPlayerChannelPendingFuture(player).thenRun(() -> V2ProtocolHandler.V2_INSTANCE.sendV2InitalizeRespond(player, clientHandler.getInitializeRespond().serverFeatures()));
             return;
         }
 
@@ -67,7 +67,7 @@ public class LegacyClientHandler extends MorphPluginObject
         clientHandler.setProtocolHandlerFor(player, V1ProtocolHandler.V1_INSTANCE);
         logger.info("%s is using V1 packets, scheduling response".formatted(player.getName()));
 
-        clientHandler.getPlayerPendingFuture(player).thenRun(() -> V1ProtocolHandler.V1_INSTANCE.sendV1InitializeRespond(player));
+        clientHandler.getPlayerChannelPendingFuture(player).thenRun(() -> V1ProtocolHandler.V1_INSTANCE.sendV1InitializeRespond(player));
     }
 
     private void handleCommandV2(@NotNull String channelName, @NotNull Player player, byte @NotNull [] bytes)

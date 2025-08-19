@@ -4,26 +4,25 @@ import com.destroystokyo.paper.ClientOption;
 import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.protocol.entity.pose.EntityPose;
 import com.github.retrooper.packetevents.protocol.player.GameMode;
-import com.github.retrooper.packetevents.protocol.world.waypoint.*;
-import com.github.retrooper.packetevents.util.Either;
 import com.github.retrooper.packetevents.util.Vector3i;
 import com.github.retrooper.packetevents.wrapper.PacketWrapper;
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerDestroyEntities;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerPlayerInfoRemove;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerPlayerInfoUpdate;
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerWaypoint;
 import io.github.retrooper.packetevents.util.SpigotConversionUtil;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import org.bukkit.GameRule;
+import net.minecraft.nbt.CompoundTag;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.MainHand;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntry;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.misc.AnimationNames;
 import xyz.nifeather.morph.misc.BuildFailedException;
 import xyz.nifeather.morph.misc.MorphGameProfile;
-import xyz.nifeather.morph.misc.NmsRecord;
+import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
+import xyz.nifeather.morph.misc.disguiseProperty.values.PlayerProperties;
 
 import java.util.EnumSet;
 import java.util.List;
@@ -39,9 +38,13 @@ public class PlayerWatcher extends InventoryLivingWatcher
         register(ValueIndex.PLAYER);
     }
 
+    private final PlayerProperties playerDisguiseProperties;
+
     public PlayerWatcher(Player bindingPlayer)
     {
         super(bindingPlayer, EntityType.PLAYER);
+
+        this.playerDisguiseProperties = DisguiseProperties.INSTANCE.getOrThrow(PlayerProperties.class);
     }
 
     @Override
@@ -51,7 +54,34 @@ public class PlayerWatcher extends InventoryLivingWatcher
 
         var bindingPlayer = getBindingPlayer();
         this.writeTemp(ValueIndex.PLAYER.SKIN_FLAGS, (byte)bindingPlayer.getClientOption(ClientOption.SKIN_PARTS).getRaw());
-        this.writeTemp(ValueIndex.PLAYER.MAINHAND, (byte)bindingPlayer.getMainHand().ordinal());
+
+        if (!this.isValuePresent(ValueIndex.PLAYER.MAINHAND))
+            this.writeTemp(ValueIndex.PLAYER.MAINHAND, (byte)bindingPlayer.getMainHand().ordinal());
+    }
+
+    @Override
+    protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
+    {
+        if (property.equals(playerDisguiseProperties.MAIN_HAND))
+        {
+            var hand = (MainHand) value;
+            this.writePersistent(ValueIndex.PLAYER.MAINHAND, (byte) hand.ordinal());
+        }
+
+        super.onPropertyWrite(property, value);
+    }
+
+    @Override
+    public void mergeFromCompound(CompoundTag nbt)
+    {
+        if (nbt.contains("feathermorph:is_left_hand"))
+        {
+            var isLeftHand = nbt.getBoolean("feathermorph:is_left_hand").orElseThrow();
+            int hand = isLeftHand ? MainHand.LEFT.ordinal() : MainHand.RIGHT.ordinal();
+            this.writePersistent(ValueIndex.PLAYER.MAINHAND, (byte)hand);
+        }
+
+        super.mergeFromCompound(nbt);
     }
 
     @Override

@@ -10,10 +10,10 @@ import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.MorphPluginObject;
-import xyz.nifeather.morph.config.ConfigOption;
-import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.api.events.gameplay.PlayerMorphEarlyEvent;
 import xyz.nifeather.morph.api.events.gameplay.PlayerUnMorphEarlyEvent;
+import xyz.nifeather.morph.config.ConfigOption;
+import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.misc.MorphParameters;
 
 public class ForcedDisguiseProcessor extends MorphPluginObject implements Listener

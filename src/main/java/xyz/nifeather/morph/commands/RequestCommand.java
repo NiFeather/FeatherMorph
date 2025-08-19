@@ -2,6 +2,7 @@ package xyz.nifeather.morph.commands;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
 import io.papermc.paper.command.brigadier.Commands;
+import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
 import it.unimi.dsi.fastutil.objects.ObjectList;
 import org.jetbrains.annotations.Unmodifiable;
 import xiamomc.pluginbase.Messages.FormattableMessage;
@@ -42,8 +43,7 @@ public class RequestCommand extends MorphPluginObject implements IConvertibleBri
                         .then(
                                 Commands.literal("send")
                                         .then(
-                                                Commands.argument("who", StringArgumentType.greedyString())
-                                                        .suggests(sendCommand::suggests)
+                                                Commands.argument("who", ArgumentTypes.players())
                                                         .executes(sendCommand::executes)
                                         )
                         )

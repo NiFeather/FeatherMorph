@@ -2,7 +2,6 @@ package xyz.nifeather.morph.misc.integrations.towny.commands;
 
 import com.palmergames.bukkit.towny.object.metadata.BooleanDataField;
 import io.papermc.paper.command.brigadier.Commands;
-import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Messages.FormattableMessage;

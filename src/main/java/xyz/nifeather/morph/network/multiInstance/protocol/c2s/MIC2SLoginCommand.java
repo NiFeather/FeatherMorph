@@ -2,12 +2,10 @@ package xyz.nifeather.morph.network.multiInstance.protocol.c2s;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.network.multiInstance.protocol.IInstanceClientHandler;
 import xyz.nifeather.morph.network.multiInstance.protocol.ProtocolLevel;
 import xyz.nifeather.morph.network.utils.Asserts;
 
-import java.util.Locale;
 import java.util.Map;
 
 public class MIC2SLoginCommand extends MIC2SCommand

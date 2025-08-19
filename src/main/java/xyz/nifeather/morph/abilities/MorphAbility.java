@@ -9,7 +9,9 @@ import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.storage.skill.ISkillOption;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
 import java.util.function.Predicate;
 
 public abstract class MorphAbility<T extends ISkillOption> extends MorphPluginObject implements IMorphAbility<T>

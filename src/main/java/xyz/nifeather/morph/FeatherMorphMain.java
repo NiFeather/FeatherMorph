@@ -8,11 +8,15 @@ import org.bukkit.event.Listener;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.scoreboard.Scoreboard;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Bindables.Bindable;
+import xiamomc.pluginbase.Messages.MessageStore;
 import xiamomc.pluginbase.ScheduleInfo;
+import xiamomc.pluginbase.XiaMoJavaPlugin;
 import xyz.nifeather.morph.abilities.AbilityManager;
 import xyz.nifeather.morph.api.FeatherMorphAPI;
-import xyz.nifeather.morph.commands.*;
+import xyz.nifeather.morph.api.networking.exceptions.PluginDisabledException;
+import xyz.nifeather.morph.commands.MorphCommandManager;
 import xyz.nifeather.morph.config.ConfigOption;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.events.*;
@@ -24,12 +28,12 @@ import xyz.nifeather.morph.messages.MorphMessageStore;
 import xyz.nifeather.morph.messages.vanilla.VanillaMessageStore;
 import xyz.nifeather.morph.misc.ModNetworkingHelper;
 import xyz.nifeather.morph.misc.PlayerOperationSimulator;
-import xyz.nifeather.morph.misc.integrations.towny.TownyAdapter;
-import xyz.nifeather.morph.misc.recipe.RecipeManager;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.gui.IconLookup;
 import xyz.nifeather.morph.misc.integrations.placeholderapi.PlaceholderIntegration;
 import xyz.nifeather.morph.misc.integrations.residence.ResidenceEventProcessor;
+import xyz.nifeather.morph.misc.integrations.towny.TownyAdapter;
+import xyz.nifeather.morph.misc.recipe.RecipeManager;
 import xyz.nifeather.morph.network.multiInstance.MultiInstanceService;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
 import xyz.nifeather.morph.platform.IPlatform;
@@ -37,8 +41,6 @@ import xyz.nifeather.morph.platform.impl.PaperPlatform;
 import xyz.nifeather.morph.skills.MorphSkillHandler;
 import xyz.nifeather.morph.storage.skill.SkillsConfigurationStoreNew;
 import xyz.nifeather.morph.updates.UpdateHandler;
-import xiamomc.pluginbase.Messages.MessageStore;
-import xiamomc.pluginbase.XiaMoJavaPlugin;
 
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -124,6 +126,7 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
 
     private MultiInstanceService instanceService;
 
+    @Nullable
     private EntityProcessor entityProcessor;
 
     private ExecutorHub mirrorExecutorHub;
@@ -171,6 +174,31 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
         return super.schedule(function, delay, async);
     }
 
+    @ApiStatus.Internal
+    public static void panic(String... message)
+    {
+        var plugin = FeatherMorphMain.getInstance();
+        var logger = plugin.getSLF4JLogger();
+
+        logger.error("- x - x - x - x - x - x - x - x - x - x - x - x - x - x - x -");
+        logger.error("PANIC!");
+        for (String s : message)
+        {
+            logger.error(s);
+        }
+
+        logger.error("- x - x - x - x - x - x - x - x - x - x - x - x - x - x - x -");
+        logger.error("Called at {}", Thread.currentThread().getName());
+        logger.error("Invoke stacktrace:");
+        Thread.dumpStack();
+        logger.error("- x - x - x - x - x - x - x - x - x - x - x - x - x - x - x -");
+
+        FeatherMorphAPI.panic();
+
+        if (plugin.isEnabled())
+            Bukkit.getPluginManager().disablePlugin(FeatherMorphMain.getInstance());
+    }
+
     @Override
     protected void enable()
     {
@@ -189,7 +217,7 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
                     "Please use %s instead!".formatted(primaryVersion)
             );
 
-            pluginManager.disablePlugin(this);
+            panic("This version of Minecraft is not supported.");
             return;
         }
 
@@ -295,7 +323,6 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
         {
             registerListeners(listeners);
 
-            clientHandler.reAuthPlayers(getPlatform().onlinePlayers());
             dependencyManager.cache(new FeatherMorphAPI(this));
         });
 
@@ -329,7 +356,8 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
         //需要在调用前先把一些东西处理好
         try
         {
-            if (!serverStopping
+            if (entityProcessor != null
+                    && !serverStopping
                     && entityProcessor.currentlyDoModifyAI()
                     && pluginEnableDone.get())
             {
@@ -347,7 +375,7 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
                 placeholderIntegration.unregister();
 
             if (clientHandler != null)
-                clientHandler.getConnectedPlayers().forEach(clientHandler::disconnect);
+                clientHandler.getConnectedPlayers().forEach(p -> clientHandler.disconnect(p, new PluginDisabledException("Plugin has been disabled")));
 
             if (metrics != null)
                 metrics.shutdown();
@@ -396,6 +424,10 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
     @Override
     public void startMainLoop(Runnable r)
     {
+        // workaround: 如果插件在 enable() 中选择禁用自己，XiaMoJavaPlugin 仍会选择继续 startMainLoop()
+        //             所以我们需要检查插件是否被启动
+        if (!this.isEnabled()) return;
+
         Bukkit.getGlobalRegionScheduler().runAtFixedRate(this, o -> r.run(), 1, 1);
     }
 

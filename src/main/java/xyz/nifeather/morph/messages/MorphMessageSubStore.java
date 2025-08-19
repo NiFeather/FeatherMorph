@@ -1,10 +1,10 @@
 package xyz.nifeather.morph.messages;
 
 import org.jetbrains.annotations.NotNull;
-import xyz.nifeather.morph.FeatherMorphMain;
-import xyz.nifeather.morph.utilities.PluginAssetUtils;
 import xiamomc.pluginbase.Messages.IStrings;
 import xiamomc.pluginbase.Messages.MessageStore;
+import xyz.nifeather.morph.FeatherMorphMain;
+import xyz.nifeather.morph.utilities.PluginAssetUtils;
 
 import java.util.List;
 import java.util.Map;

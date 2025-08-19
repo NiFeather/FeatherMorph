@@ -1,7 +1,6 @@
 package xyz.nifeather.morph.events.mirror;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import org.bukkit.Registry;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 import org.bukkit.inventory.ItemStack;

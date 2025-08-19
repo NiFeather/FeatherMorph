@@ -4,9 +4,6 @@ import it.unimi.dsi.fastutil.Pair;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 public class ArmorStandProperties extends AbstractProperties
 {
     public final SingleProperty<Boolean> SHOW_ARMS = getSingle("armor_stand_show_arms", false).withValidInput("true", "false");

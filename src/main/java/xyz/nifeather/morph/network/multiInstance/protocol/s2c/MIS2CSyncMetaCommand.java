@@ -2,7 +2,6 @@ package xyz.nifeather.morph.network.multiInstance.protocol.s2c;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import xyz.nifeather.morph.network.multiInstance.protocol.IMasterHandler;
 import xyz.nifeather.morph.network.multiInstance.protocol.SocketPlayerMeta;
 import xyz.nifeather.morph.network.utils.Asserts;

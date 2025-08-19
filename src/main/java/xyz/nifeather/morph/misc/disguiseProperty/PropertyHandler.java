@@ -1,7 +1,6 @@
 package xyz.nifeather.morph.misc.disguiseProperty;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -80,6 +79,11 @@ public class PropertyHandler
         }
 
         propertyMap.put(property, value);
+    }
+
+    public boolean contains(SingleProperty<?> property)
+    {
+        return propertyMap.containsKey(property);
     }
 
     @NotNull

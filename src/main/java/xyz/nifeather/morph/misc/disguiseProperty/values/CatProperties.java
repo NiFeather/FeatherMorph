@@ -3,7 +3,6 @@ package xyz.nifeather.morph.misc.disguiseProperty.values;
 import io.papermc.paper.registry.RegistryAccess;
 import io.papermc.paper.registry.RegistryKey;
 import it.unimi.dsi.fastutil.Pair;
-import org.bukkit.Registry;
 import org.bukkit.entity.Cat;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;

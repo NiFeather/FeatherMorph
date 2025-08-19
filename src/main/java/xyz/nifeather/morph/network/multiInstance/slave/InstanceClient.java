@@ -1,7 +1,6 @@
 package xyz.nifeather.morph.network.multiInstance.slave;
 
 import org.java_websocket.client.WebSocketClient;
-import org.java_websocket.framing.CloseFrame;
 import org.java_websocket.handshake.ServerHandshake;
 import org.slf4j.Logger;
 import xiamomc.pluginbase.XiaMoJavaPlugin;

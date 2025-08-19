@@ -5,10 +5,12 @@ import com.destroystokyo.paper.event.player.PlayerClientOptionsChangeEvent;
 import com.destroystokyo.paper.event.player.PlayerPostRespawnEvent;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.data.type.CreakingHeart;
-import org.bukkit.entity.*;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -16,17 +18,17 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.EquipmentSlot;
-import xyz.nifeather.morph.FeatherMorphMain;
-import xyz.nifeather.morph.network.commands.S2C.S2CSwapCommand;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
+import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.RevealingHandler;
+import xyz.nifeather.morph.api.events.gameplay.PlayerJoinedWithDisguiseEvent;
+import xyz.nifeather.morph.api.networking.exceptions.PlayerDisconnectedException;
 import xyz.nifeather.morph.config.ConfigOption;
 import xyz.nifeather.morph.config.MorphConfigManager;
-import xyz.nifeather.morph.api.events.gameplay.PlayerJoinedWithDisguiseEvent;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.MorphStrings;
 import xyz.nifeather.morph.messages.vanilla.VanillaMessageStore;
@@ -34,6 +36,7 @@ import xyz.nifeather.morph.misc.DisguiseTypes;
 import xyz.nifeather.morph.misc.ModNetworkingHelper;
 import xyz.nifeather.morph.misc.OfflineDisguiseResult;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
+import xyz.nifeather.morph.network.commands.S2C.S2CSwapCommand;
 import xyz.nifeather.morph.network.commands.S2C.admin.reveal.S2CRemoveAdminRevealCommand;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
 import xyz.nifeather.morph.network.server.ServerSetEquipCommand;
@@ -88,14 +91,14 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
             playersMinedGoldBlocks.clear();
     }
 
-    @EventHandler(priority = EventPriority.MONITOR)
+    @EventHandler
     public void onPlayerChannelRegister(PlayerRegisterChannelEvent event)
     {
         if (featherMorph().debugOutputEnabled())
             logger.info("Player registered channel %s".formatted(event.getChannel()));
 
         if (event.getChannel().startsWith(FeatherMorphMain.getMorphNameSpace()))
-            clientHandler.onPlayerChannelRegister(event.getPlayer(), event.getChannel());
+            clientHandler.onPlayerChannelRegister(event.getPlayer());
     }
 
     @EventHandler
@@ -272,13 +275,11 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
     @Resolved(shouldSolveImmediately = true)
     private ModNetworkingHelper modNetworkingHelper;
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlayerJoin(PlayerJoinEvent e)
     {
         var player = e.getPlayer();
         var state = morphs.getDisguiseStateFor(player);
-
-        clientHandler.ensureFuturePresent(player);
 
         var effectivePermissions = new ObjectOpenHashSet<>(player.getEffectivePermissions());
         List<String> legacyPermissions = new ObjectArrayList<>();
@@ -354,7 +355,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
     @EventHandler
     public void onPlayerExit(PlayerQuitEvent e)
     {
-        clientHandler.disconnect(e.getPlayer());
+        clientHandler.disconnect(e.getPlayer(), new PlayerDisconnectedException("Player disconnected"));
         skillHandler.removeUnusedList(e.getPlayer());
 
         var state = morphs.getDisguiseStateFor(e.getPlayer());

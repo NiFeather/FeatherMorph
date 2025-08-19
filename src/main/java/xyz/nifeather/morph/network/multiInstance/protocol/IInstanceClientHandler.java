@@ -2,9 +2,9 @@ package xyz.nifeather.morph.network.multiInstance.protocol;
 
 import org.java_websocket.WebSocket;
 import xyz.nifeather.morph.network.multiInstance.master.InstanceServer;
-import xyz.nifeather.morph.network.multiInstance.protocol.c2s.MIC2SSyncDisguiseCommand;
 import xyz.nifeather.morph.network.multiInstance.protocol.c2s.MIC2SLoginCommand;
 import xyz.nifeather.morph.network.multiInstance.protocol.c2s.MIC2SRequestSyncCommand;
+import xyz.nifeather.morph.network.multiInstance.protocol.c2s.MIC2SSyncDisguiseCommand;
 
 public interface IInstanceClientHandler
 {

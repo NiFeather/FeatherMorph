@@ -18,7 +18,6 @@ import xyz.nifeather.morph.backends.EventWrapper;
 import xyz.nifeather.morph.backends.WrapperEvent;
 import xyz.nifeather.morph.backends.WrapperProperties;
 import xyz.nifeather.morph.misc.DisguiseState;
-import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 import xyz.nifeather.morph.misc.disguiseProperty.values.OffTreeProperties;
 import xyz.nifeather.morph.utilities.NbtUtils;

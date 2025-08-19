@@ -8,6 +8,9 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xiamomc.pluginbase.Annotations.Initializer;
+import xiamomc.pluginbase.Annotations.Resolved;
+import xiamomc.pluginbase.Bindables.BindableList;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.backends.DisguiseBackend;
@@ -19,9 +22,6 @@ import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.network.commands.S2C.AbstractS2CCommand;
 import xyz.nifeather.morph.providers.animation.AnimationProvider;
 import xyz.nifeather.morph.utilities.NbtUtils;
-import xiamomc.pluginbase.Annotations.Initializer;
-import xiamomc.pluginbase.Annotations.Resolved;
-import xiamomc.pluginbase.Bindables.BindableList;
 
 import java.util.List;
 import java.util.regex.Pattern;
@@ -78,6 +78,16 @@ public abstract class DisguiseProvider extends MorphPluginObject
      * @return 操作是否成功
      */
     public abstract boolean updateDisguise(Player player, DisguiseState state);
+
+    /**
+     * Setup properties for the given disguise.<br>
+     * Please note that this will apply before player inputs, means that players may override changes made by the provider
+     * @param state The disguise to setup
+     * @param targetEntity Player's targeted entity, NULL if none
+     */
+    public void setupProperties(DisguiseState state, @Nullable Entity targetEntity)
+    {
+    }
 
     /**
      * 获取某个伪装的初始化指令

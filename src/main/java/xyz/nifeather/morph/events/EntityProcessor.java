@@ -2,29 +2,18 @@ package xyz.nifeather.morph.events;
 
 import com.destroystokyo.paper.event.entity.EntityAddToWorldEvent;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.*;
-import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.GoalSelector;
 import net.minecraft.world.entity.ai.goal.WrappedGoal;
-import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
-import net.minecraft.world.entity.ai.targeting.TargetingConditions;
-import net.minecraft.world.entity.ai.util.DefaultRandomPos;
-import net.minecraft.world.entity.animal.Ocelot;
-import net.minecraft.world.entity.animal.Panda;
-import net.minecraft.world.entity.animal.Rabbit;
 import net.minecraft.world.entity.player.Player;
 import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.entity.CraftMob;
-import org.bukkit.craftbukkit.entity.CraftPlayer;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Mob;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.EntityTargetEvent;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
 import xyz.nifeather.morph.MorphManager;
@@ -34,14 +23,10 @@ import xyz.nifeather.morph.config.ConfigOption;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.messages.CommandStrings;
 import xyz.nifeather.morph.messages.MessageUtils;
-import xyz.nifeather.morph.misc.NmsRecord;
 import xyz.nifeather.morph.misc.mobs.ai.FeatherMorphNearestAttackableGoal;
 import xyz.nifeather.morph.misc.mobs.ai.MorphBasicAvoidPlayerGoal;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
-import xyz.nifeather.morph.utilities.EntityTypeUtils;
 import xyz.nifeather.morph.utilities.ReflectionUtils;
-
-import java.util.function.Predicate;
 
 public class EntityProcessor extends MorphPluginObject implements Listener
 {
