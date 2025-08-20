@@ -48,7 +48,7 @@ public class SingleProperty<T>
     public SingleProperty(String identifier, T defaultValue, Class<T> type, @Nullable InputHandle<T> inputHandle)
     {
         if (inputHandle == null)
-            inputHandle = InputHandles::empty;
+            inputHandle = InputHandles::immediateException;
 
         this.identifier = identifier;
         this.defaultVal = defaultValue;
