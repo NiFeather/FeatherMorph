@@ -21,23 +21,28 @@ public class InputHandles
 {
     private static final Gson gson = new GsonBuilder().disableHtmlEscaping().create();
 
-    public static <X> Optional<X> empty(String ignored)
+    public static <X> Optional<X> empty(String propertyName, String ignored)
     {
         return Optional.empty();
     }
 
-    public static Optional<Boolean> readBooleanStrict(String input) throws ParseErrorException
+    public static <X> Optional<X> immediateException(String propertyName, String ignored) throws ParseErrorException
+    {
+        throw new ParseErrorException(propertyName, "This freaking property does not accept any inputs");
+    }
+
+    public static Optional<Boolean> readBooleanStrict(String propertyName, String input) throws ParseErrorException
     {
         if (input.isBlank())
-            throw new ParseErrorException("readBooleanStrict: Empty input for a boolean type");
+            throw new ParseErrorException(propertyName, "readBooleanStrict: Empty input for a boolean type");
 
         return Optional.of(Boolean.parseBoolean(input));
     }
 
-    public static Optional<Boolean> readBooleanRelaxed(String input) throws ParseErrorException
+    public static Optional<Boolean> readBooleanRelaxed(String propertyName, String input) throws ParseErrorException
     {
         if (input.isBlank())
-            throw new ParseErrorException("readBooleanRelaxed: Empty input for a boolean type");
+            throw new ParseErrorException(propertyName, "readBooleanRelaxed: Empty input for a boolean type");
 
         if (input.equalsIgnoreCase("true")
             || input.equalsIgnoreCase("yes")
@@ -53,7 +58,7 @@ public class InputHandles
         }
     }
 
-    public static Optional<Integer> readInteger(String input) throws ParseErrorException
+    public static Optional<Integer> readInteger(String propertyName, String input) throws ParseErrorException
     {
         try
         {
@@ -61,11 +66,11 @@ public class InputHandles
         }
         catch (Throwable t)
         {
-            throw new ParseErrorException("readInteger: Can't parse integer from input '%s'".formatted(input), t);
+            throw new ParseErrorException(propertyName, "readInteger: Can't parse integer from input '%s'".formatted(input), t);
         }
     }
 
-    public static <E extends Enum<?>> Optional<E> readEnum(E[] array, String input)
+    public static <E extends Enum<?>> Optional<E> readEnum(E[] array, String propertyName, String input)
     {
         return Arrays.stream(array)
                 .filter(e -> e.name().equalsIgnoreCase(input))
@@ -74,27 +79,27 @@ public class InputHandles
 
     //region Enum
 
-    public static <E extends Enum<?>> Optional<E> readEnumNonNull(E[] array, String input) throws ParseErrorException
+    public static <E extends Enum<?>> Optional<E> readEnumNonNull(E[] array, String propertyName, String input) throws ParseErrorException
     {
         if (array.length == 0)
-            throw new ParseErrorException("readEnumNonNull: Empty enum array! Is the server bugged?");
+            throw new ParseErrorException(propertyName, "readEnumNonNull: Empty enum array! Is the server bugged?");
 
         var optional = Arrays.stream(array)
                 .filter(e -> e.name().equalsIgnoreCase(input))
                 .findFirst();
 
         if (optional.isPresent()) return optional;
-        else throw new ParseErrorException("readEnumNonNull: No value match for input '%s'".formatted(input));
+        else throw new ParseErrorException(propertyName, "readEnumNonNull: No value match for input '%s'".formatted(input));
     }
 
-    public static Optional<DyeColor> readDyeColor(String input) throws ParseErrorException
+    public static Optional<DyeColor> readDyeColor(String propertyName, String input) throws ParseErrorException
     {
-        return readEnumNonNull(DyeColor.values(), input);
+        return readEnumNonNull(DyeColor.values(), propertyName, input);
     }
 
     //endregion Enum
 
-    public static Optional<Component> readAdventureComponent(String input) throws ParseErrorException
+    public static Optional<Component> readAdventureComponent(String propertyName, String input) throws ParseErrorException
     {
         try
         {
@@ -102,11 +107,11 @@ public class InputHandles
         }
         catch (Throwable t)
         {
-            throw new ParseErrorException("readAdventureComponent: Can't parse input to adventure component from value '%s'".formatted(input), t);
+            throw new ParseErrorException(propertyName, "readAdventureComponent: Can't parse input to adventure component from value '%s'".formatted(input), t);
         }
     }
 
-    public static Optional<UUID> readUUID(String input) throws ParseErrorException
+    public static Optional<UUID> readUUID(String propertyName, String input) throws ParseErrorException
     {
         try
         {
@@ -114,17 +119,17 @@ public class InputHandles
         }
         catch (Throwable t)
         {
-            throw new ParseErrorException("readUUID: Can't read UUID from input '%s'".formatted(input), t);
+            throw new ParseErrorException(propertyName, "readUUID: Can't read UUID from input '%s'".formatted(input), t);
         }
     }
 
     //region Registry
 
-    public static <V extends Keyed> Optional<V> readRegistry(RegistryKey<@NotNull V> registryKey, String input) throws ParseErrorException
+    public static <V extends Keyed> Optional<V> readRegistry(RegistryKey<@NotNull V> registryKey, String propertyName, String input) throws ParseErrorException
     {
         var key = NamespacedKey.fromString(input);
         if (key == null)
-            throw new ParseErrorException("readRegistry: Invalid identifier '%s'".formatted(input));
+            throw new ParseErrorException(propertyName, "readRegistry: Invalid identifier '%s'".formatted(input));
 
         Registry<@NotNull V> registry;
 
@@ -134,11 +139,11 @@ public class InputHandles
         }
         catch (NoSuchElementException e)
         {
-            throw new ParseErrorException("readRegistry: Can't read from registry since the target registry '%s' does not exist! Is the server broken?".formatted(registryKey.key().toString()), e);
+            throw new ParseErrorException(propertyName, "readRegistry: Can't read from registry since the target registry '%s' does not exist! Is the server broken?".formatted(registryKey.key().toString()), e);
         }
         catch (IllegalArgumentException e)
         {
-            throw new ParseErrorException("readRegistry: The target registry '%s' is not available at this moment. Is the server broken?".formatted(registryKey.key().toString()));
+            throw new ParseErrorException(propertyName, "readRegistry: The target registry '%s' is not available at this moment. Is the server broken?".formatted(registryKey.key().toString()));
         }
 
         try
@@ -149,26 +154,26 @@ public class InputHandles
         }
         catch (Throwable t)
         {
-            throw new ParseErrorException("readRegistry: Can't read value from input '%s' in registry '%s'".formatted(input, registryKey.key().toString()), t);
+            throw new ParseErrorException(propertyName, "readRegistry: Can't read value from input '%s' in registry '%s'".formatted(input, registryKey.key().toString()), t);
         }
     }
 
-    public static Optional<Villager.Type> readVillagerType(String input) throws ParseErrorException
+    public static Optional<Villager.Type> readVillagerType(String propertyName, String input) throws ParseErrorException
     {
-        return readRegistry(RegistryKey.VILLAGER_TYPE, input);
+        return readRegistry(RegistryKey.VILLAGER_TYPE, propertyName, input);
     }
 
-    public static Optional<Villager.Profession> readVillagerProfession(String input) throws ParseErrorException
+    public static Optional<Villager.Profession> readVillagerProfession(String propertyName, String input) throws ParseErrorException
     {
-        return readRegistry(RegistryKey.VILLAGER_PROFESSION, input);
+        return readRegistry(RegistryKey.VILLAGER_PROFESSION, propertyName, input);
     }
 
     //endregion Registry
 
-    public static Optional<Integer> readVillagerLevel(String string) throws ParseErrorException
+    public static Optional<Integer> readVillagerLevel(String propertyName, String string) throws ParseErrorException
     {
-        var val = InputHandles.readInteger(string)
-                .orElseThrow(() -> new ParseErrorException("readVillagerLevel: Unable to parse villager level from input '%s'".formatted(string)));
+        var val = InputHandles.readInteger(propertyName, string)
+                .orElseThrow(() -> new ParseErrorException(propertyName, "readVillagerLevel: Unable to parse villager level from input '%s'".formatted(string)));
 
         return Optional.of(Math.clamp(val, 1, 6));
     }
@@ -187,7 +192,7 @@ public class InputHandles
         }
     }
 
-    public static Optional<Float> readFloatStrict(String input) throws ParseErrorException
+    public static Optional<Float> readFloatStrict(String propertyName, String input) throws ParseErrorException
     {
         float v;
         try
@@ -196,19 +201,19 @@ public class InputHandles
         }
         catch (Throwable t)
         {
-            throw new ParseErrorException("readFloatStrict: Can't parse float from input '%s': %s".formatted(input, t.getMessage()), t);
+            throw new ParseErrorException(propertyName, "readFloatStrict: Can't parse float from input '%s': %s".formatted(input, t.getMessage()), t);
         }
 
         if (!Float.isFinite(v))
-            throw new ParseErrorException("readFloatStrict: Non-Finite value from input '%s'".formatted(input));
+            throw new ParseErrorException(propertyName, "readFloatStrict: Non-Finite value from input '%s'".formatted(input));
 
         return Optional.of(v);
     }
 
-    public static Optional<Rotations> readRotations(String value) throws ParseErrorException
+    public static Optional<Rotations> readRotations(String propertyName, String value) throws ParseErrorException
     {
         if (value.isBlank())
-            throw new ParseErrorException("readRotations: Empty input for a rotation type");
+            throw new ParseErrorException(propertyName, "readRotations: Empty input for a rotation type");
 
         try
         {
@@ -217,13 +222,13 @@ public class InputHandles
             RotationStore rotationStore = new RotationStore();
 
             if (!list.isEmpty())
-                readFloatStrict("" + list.get(0)).ifPresent(rotationStore::x);
+                readFloatStrict(propertyName, "" + list.get(0)).ifPresent(rotationStore::x);
 
             if (list.size() > 1)
-                readFloatStrict("" + list.get(1)).ifPresent(rotationStore::y);
+                readFloatStrict(propertyName,"" + list.get(1)).ifPresent(rotationStore::y);
 
             if (list.size() > 2)
-                readFloatStrict("" + list.get(2)).ifPresent(rotationStore::z);
+                readFloatStrict(propertyName,"" + list.get(2)).ifPresent(rotationStore::z);
 
             return Optional.of(rotationStore.toRotations());
         }
@@ -233,13 +238,13 @@ public class InputHandles
         }
         catch (Throwable t)
         {
-            throw new ParseErrorException("readRotations: Failed to parse float array in JSON from input '%s'".formatted(value), t);
+            throw new ParseErrorException(propertyName, "readRotations: Failed to parse float array in JSON from input '%s'".formatted(value), t);
         }
     }
 
-    public static void throwIfOutOfBounds(int value, int min, int max) throws ParseErrorException
+    public static void throwIfOutOfBounds(String propertyName, int value, int min, int max) throws ParseErrorException
     {
         if (value < min || value > max)
-            throw new ParseErrorException("throwIfOutOfBounds: Input '%s' does not fit the required range of [%s, %s]".formatted(value, min, max));
+            throw new ParseErrorException(propertyName, "throwIfOutOfBounds: Input '%s' does not fit the required range of [%s, %s]".formatted(value, min, max));
     }
 }

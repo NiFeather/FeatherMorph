@@ -15,12 +15,12 @@ public class PlayerProperties extends BaseLivingEntityProperties<Player>
     public final SingleProperty<MainHandStatus> MAIN_HAND = getSingle(PropertyNames.PLAYER_MAIN_HAND, MainHandStatus.NOTSET, this::readHand)
             .withValidInput("left", "right");
 
-    private Optional<MainHandStatus> readHand(String string) throws ParseErrorException
+    private Optional<MainHandStatus> readHand(String propertyName, String string) throws ParseErrorException
     {
         if (string.equalsIgnoreCase("default"))
-            throw new ParseErrorException("readHand: This value is not allowed here!");
+            throw new ParseErrorException(propertyName, "readHand: This value is not allowed here!");
 
-        return InputHandles.readEnumNonNull(MainHandStatus.values(), string);
+        return InputHandles.readEnumNonNull(MainHandStatus.values(), propertyName, string);
     }
 
     public PlayerProperties()

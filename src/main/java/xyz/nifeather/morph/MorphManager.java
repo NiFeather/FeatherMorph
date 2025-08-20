@@ -685,7 +685,11 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             else
                 logger.warn("Unable to disguise player because they are giving invalid inputs", e);
 
-            source.sendMessage(MessageUtils.prefixes(source, MorphStrings.errorWhileDisguisingUserFault().resolve("error", e.getMessage())));
+            var msg = MorphStrings.errorWhileDisguisingUserFault()
+                    .resolve("error", e.getMessage())
+                    .resolve("what", e.propertyName);
+
+            source.sendMessage(MessageUtils.prefixes(source, msg));
 
             return false;
         }

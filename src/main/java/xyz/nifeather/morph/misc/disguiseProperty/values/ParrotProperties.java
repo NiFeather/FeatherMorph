@@ -25,9 +25,9 @@ public class ParrotProperties extends BaseLivingEntityProperties<Parrot>
     public final SingleProperty<Parrot.Variant> VARIANT = getSingle(PropertyNames.PARROT_VARIANT, Variant.RED, this::readVariant)
             .withRandom(Variant.values());
 
-    private Optional<Variant> readVariant(String string) throws ParseErrorException
+    private Optional<Variant> readVariant(String propertyName, String string) throws ParseErrorException
     {
-        return InputHandles.readEnumNonNull(Variant.values(), string);
+        return InputHandles.readEnumNonNull(Variant.values(), propertyName, string);
     }
 
     public ParrotProperties()

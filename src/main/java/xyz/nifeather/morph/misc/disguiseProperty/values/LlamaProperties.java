@@ -25,9 +25,9 @@ public class LlamaProperties extends BaseLivingEntityProperties<Llama>
     public final SingleProperty<Llama.Color> COLOR = getSingle(PropertyNames.LLAMA_COLOR, Color.CREAMY, this::readLlamaColor)
             .withRandom(Color.values());
 
-    private Optional<Color> readLlamaColor(String string) throws ParseErrorException
+    private Optional<Color> readLlamaColor(String propertyName, String string) throws ParseErrorException
     {
-        return InputHandles.readEnumNonNull(Color.values(), string);
+        return InputHandles.readEnumNonNull(Color.values(), propertyName, string);
     }
 
     public LlamaProperties()

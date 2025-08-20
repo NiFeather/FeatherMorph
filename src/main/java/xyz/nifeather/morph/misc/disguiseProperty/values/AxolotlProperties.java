@@ -24,9 +24,9 @@ public class AxolotlProperties extends BaseLivingEntityProperties<Axolotl>
     public final SingleProperty<Axolotl.Variant> VARIANT = getSingle(PropertyNames.AXOLOTL_VARIANT, Axolotl.Variant.LUCY, this::readAxolotlVariant)
             .withRandom(Axolotl.Variant.values());
 
-    public Optional<Axolotl.Variant> readAxolotlVariant(String input) throws ParseErrorException
+    public Optional<Axolotl.Variant> readAxolotlVariant(String propertyName, String input) throws ParseErrorException
     {
-        return InputHandles.readEnumNonNull(Axolotl.Variant.values(), input);
+        return InputHandles.readEnumNonNull(Axolotl.Variant.values(), propertyName, input);
     }
 
     public AxolotlProperties()

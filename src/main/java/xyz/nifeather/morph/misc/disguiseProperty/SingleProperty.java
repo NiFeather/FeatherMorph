@@ -36,7 +36,7 @@ public class SingleProperty<T>
 
     public Optional<T> forInput(String input) throws ParseErrorException
     {
-        return inputHandle.handle(input);
+        return inputHandle.handle(this.id(), input);
     }
 
     @Deprecated

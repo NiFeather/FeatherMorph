@@ -26,9 +26,9 @@ public class FrogProperties extends BaseLivingEntityProperties<Frog>
     public final SingleProperty<Frog.Variant> VARIANT = getSingle(PropertyNames.FROG_VARIANT, Frog.Variant.TEMPERATE, this::readFrogVariant)
             .withRandom(Frog.Variant.TEMPERATE, Frog.Variant.COLD, Frog.Variant.WARM);
 
-    private Optional<Frog.Variant> readFrogVariant(String string) throws ParseErrorException
+    private Optional<Frog.Variant> readFrogVariant(String propertyName, String string) throws ParseErrorException
     {
-        return InputHandles.readRegistry(RegistryKey.FROG_VARIANT, string);
+        return InputHandles.readRegistry(RegistryKey.FROG_VARIANT, propertyName, string);
     }
 
     public FrogProperties()

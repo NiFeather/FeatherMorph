@@ -28,17 +28,17 @@ public class HorseProperties extends BaseLivingEntityProperties<Horse>
     public final SingleProperty<Horse.Color> COLOR = getSingle(PropertyNames.HORSE_COLOR, Horse.Color.WHITE, this::readHorseColor)
             .withRandom(Horse.Color.values());
 
-    private Optional<Horse.Color> readHorseColor(String string) throws ParseErrorException
+    private Optional<Horse.Color> readHorseColor(String propertyName, String string) throws ParseErrorException
     {
-        return InputHandles.readEnumNonNull(Horse.Color.values(), string);
+        return InputHandles.readEnumNonNull(Horse.Color.values(), propertyName, string);
     }
 
     public final SingleProperty<Horse.Style> STYLE = getSingle(PropertyNames.HORSE_STYLE, Horse.Style.NONE, this::readHorseStyle)
             .withRandom(Horse.Style.values());
 
-    private Optional<Horse.Style> readHorseStyle(String string) throws ParseErrorException
+    private Optional<Horse.Style> readHorseStyle(String propertyName, String string) throws ParseErrorException
     {
-        return InputHandles.readEnumNonNull(Horse.Style.values(), string);
+        return InputHandles.readEnumNonNull(Horse.Style.values(), propertyName, string);
     }
 
     public HorseProperties()

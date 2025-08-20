@@ -25,9 +25,9 @@ public class RabbitProperties extends BaseLivingEntityProperties<Rabbit>
     public final SingleProperty<Rabbit.Type> VARIANT = getSingle(PropertyNames.RABBIT_VARIANT, Type.BROWN, this::readVariant)
             .withRandom(Type.values());
 
-    private Optional<Type> readVariant(String string) throws ParseErrorException
+    private Optional<Type> readVariant(String propertyName, String string) throws ParseErrorException
     {
-        return InputHandles.readEnumNonNull(Type.values(), string);
+        return InputHandles.readEnumNonNull(Type.values(), propertyName, string);
     }
 
     public RabbitProperties()

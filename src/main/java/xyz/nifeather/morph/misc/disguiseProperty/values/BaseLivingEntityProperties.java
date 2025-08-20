@@ -12,12 +12,12 @@ public abstract class BaseLivingEntityProperties<E extends Entity> extends Abstr
 {
     public final SingleProperty<Component> CUSTOM_NAME = getSingle(PropertyNames.ENTITY_CUSTOM_NAME, Component.empty(), this::readCustomName);
 
-    private Optional<Component> readCustomName(String string) throws ParseErrorException
+    private Optional<Component> readCustomName(String propertyName, String string) throws ParseErrorException
     {
         if (string.length() > 256)
-            throw new ParseErrorException("readCustomName: Input string is too long!");
+            throw new ParseErrorException(propertyName, "readCustomName: Input string is too long!");
 
-        return InputHandles.readAdventureComponent(string);
+        return InputHandles.readAdventureComponent(propertyName, string);
     }
 
     public final SingleProperty<Boolean> CUSTOM_NAME_VISIBLE = getSingle(PropertyNames.ENTITY_CUSTOM_NAME_VISIBLE, false, InputHandles::readBooleanRelaxed)
@@ -25,12 +25,12 @@ public abstract class BaseLivingEntityProperties<E extends Entity> extends Abstr
 
     public final SingleProperty<Integer> STUCKED_ARROWS = getSingle(PropertyNames.ENTITY_ARROW_COUNT, 0, this::readArrows);
 
-    private Optional<Integer> readArrows(String string) throws ParseErrorException
+    private Optional<Integer> readArrows(String propertyName, String string) throws ParseErrorException
     {
-        var val = InputHandles.readInteger(string)
-                .orElseThrow(() -> new ParseErrorException("readArrows: Unable to parse arrows"));
+        var val = InputHandles.readInteger(propertyName, string)
+                .orElseThrow(() -> new ParseErrorException(propertyName, "readArrows: Unable to parse arrows"));
 
-        InputHandles.throwIfOutOfBounds(val, 0, 100);
+        InputHandles.throwIfOutOfBounds(propertyName, val, 0, 100);
 
         return Optional.of(val);
     }

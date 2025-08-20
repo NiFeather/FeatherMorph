@@ -31,9 +31,9 @@ public class CowProperties extends BaseLivingEntityProperties<Cow>
         registerSingle(VARIANT);
     }
 
-    private Optional<Cow.Variant> readCowVariant(String string) throws ParseErrorException
+    private Optional<Cow.Variant> readCowVariant(String propertyName, String string) throws ParseErrorException
     {
-        return InputHandles.readRegistry(RegistryKey.COW_VARIANT, string);
+        return InputHandles.readRegistry(RegistryKey.COW_VARIANT, propertyName, string);
     }
 
     @Override

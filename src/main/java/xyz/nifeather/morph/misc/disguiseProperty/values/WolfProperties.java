@@ -33,9 +33,9 @@ public class WolfProperties extends BaseLivingEntityProperties<Wolf>
                     RegistryAccess.registryAccess().getRegistry(RegistryKey.WOLF_VARIANT).stream().toList()
             );
 
-    public Optional<Wolf.Variant> readWolfVariant(String string) throws ParseErrorException
+    public Optional<Wolf.Variant> readWolfVariant(String propertyName, String string) throws ParseErrorException
     {
-        return InputHandles.readRegistry(RegistryKey.WOLF_VARIANT, string);
+        return InputHandles.readRegistry(RegistryKey.WOLF_VARIANT, propertyName, string);
     }
 
     public final SingleProperty<UUID> OWNER = getSingle(PropertyNames.WOLF_OWNER, Uuids.NIL_UUID, InputHandles::readUUID);

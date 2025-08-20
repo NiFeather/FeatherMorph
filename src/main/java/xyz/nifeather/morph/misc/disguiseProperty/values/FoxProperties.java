@@ -16,9 +16,9 @@ public class FoxProperties extends BaseLivingEntityProperties<Fox>
             .withRandom(Fox.Type.values())
             .withValidInput("red", "snow");
 
-    public Optional<Fox.Type> readFoxType(String input) throws ParseErrorException
+    public Optional<Fox.Type> readFoxType(String propertyName, String input) throws ParseErrorException
     {
-        return InputHandles.readEnumNonNull(Fox.Type.values(), input);
+        return InputHandles.readEnumNonNull(Fox.Type.values(), propertyName, input);
     }
 
     public FoxProperties()

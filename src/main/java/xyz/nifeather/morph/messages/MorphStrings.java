@@ -182,7 +182,7 @@ public class MorphStrings extends AbstractMorphStrings
     public static FormattableMessage errorWhileDisguisingUserFault()
     {
         return getFormattable(getKey("error_while_disguising_user_fault"),
-                "[Fallback] <color:red>未能解析属性: <error>");
+                "[Fallback] <color:red>未能解析属性 <what>: <error>");
     }
 
     public static FormattableMessage errorWhileUpdatingDisguise()

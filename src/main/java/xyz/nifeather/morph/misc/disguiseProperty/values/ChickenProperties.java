@@ -25,9 +25,9 @@ public class ChickenProperties extends BaseLivingEntityProperties<Chicken>
 
     public final SingleProperty<Chicken.Variant> VARIANT = getSingle(PropertyNames.CHICKEN_VARIANT, Chicken.Variant.TEMPERATE, this::readChickenVariant);
 
-    private Optional<Chicken.Variant> readChickenVariant(String string) throws ParseErrorException
+    private Optional<Chicken.Variant> readChickenVariant(String propertyName, String string) throws ParseErrorException
     {
-        return InputHandles.readRegistry(RegistryKey.CHICKEN_VARIANT, string);
+        return InputHandles.readRegistry(RegistryKey.CHICKEN_VARIANT, propertyName, string);
     }
 
     public ChickenProperties()

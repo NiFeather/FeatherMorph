@@ -13,12 +13,12 @@ public class EnderDragonProperties extends BaseLivingEntityProperties<EnderDrago
 {
     public final SingleProperty<Integer> DRAGON_PHASE = getSingle(PropertyNames.ENDER_DRAGON_DRAGON_PHASE, 10, this::readDragonPhase);
 
-    private Optional<Integer> readDragonPhase(String str) throws ParseErrorException
+    private Optional<Integer> readDragonPhase(String propertyName, String str) throws ParseErrorException
     {
-        var val = InputHandles.readInteger(str)
-                .orElseThrow(() -> new ParseErrorException("readDragonPhase: Unable to parse dragon phase"));
+        var val = InputHandles.readInteger(propertyName, str)
+                .orElseThrow(() -> new ParseErrorException(propertyName, "readDragonPhase: Unable to parse dragon phase"));
 
-        InputHandles.throwIfOutOfBounds(val, 0, 10);
+        InputHandles.throwIfOutOfBounds(propertyName, val, 0, 10);
 
         return Optional.of(val);
     }

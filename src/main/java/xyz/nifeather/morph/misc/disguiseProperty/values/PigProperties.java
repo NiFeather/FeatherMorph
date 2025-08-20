@@ -31,9 +31,9 @@ public class PigProperties extends BaseLivingEntityProperties<Pig>
         registerSingle(VARIANT);
     }
 
-    private Optional<Pig.Variant> readVariant(String string) throws ParseErrorException
+    private Optional<Pig.Variant> readVariant(String propertyName, String string) throws ParseErrorException
     {
-        return InputHandles.readRegistry(RegistryKey.PIG_VARIANT, string);
+        return InputHandles.readRegistry(RegistryKey.PIG_VARIANT, propertyName, string);
     }
 
     @Override

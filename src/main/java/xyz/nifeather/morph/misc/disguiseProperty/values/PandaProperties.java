@@ -25,9 +25,9 @@ public class PandaProperties extends BaseLivingEntityProperties<Panda>
     public final SingleProperty<Panda.Gene> MAIN_GENE = getSingle(PropertyNames.PANDA_MAIN_GENE, Gene.NORMAL, this::readGene)
             .withRandom(Gene.values());
 
-    private Optional<Gene> readGene(String string) throws ParseErrorException
+    private Optional<Gene> readGene(String propertyName, String string) throws ParseErrorException
     {
-        return InputHandles.readEnumNonNull(Gene.values(), string);
+        return InputHandles.readEnumNonNull(Gene.values(), propertyName, string);
     }
 
     public final SingleProperty<Panda.Gene> HIDDEN_GENE = getSingle(PropertyNames.PANDA_HIDDEN_GENE, Gene.NORMAL, this::readGene)

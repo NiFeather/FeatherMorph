@@ -29,9 +29,9 @@ public class CatProperties extends BaseLivingEntityProperties<Cat>
 
     public final SingleProperty<Cat.Type> CAT_VARIANT = getSingle(PropertyNames.CAT_VARIANT, Cat.Type.TABBY, this::readCatVariant);
 
-    private Optional<Cat.Type> readCatVariant(String string) throws ParseErrorException
+    private Optional<Cat.Type> readCatVariant(String propertyName, String string) throws ParseErrorException
     {
-        return InputHandles.readRegistry(RegistryKey.CAT_VARIANT, string);
+        return InputHandles.readRegistry(RegistryKey.CAT_VARIANT, propertyName, string);
     }
 
     public final SingleProperty<UUID> OWNER = getSingle(PropertyNames.CAT_OWNER, Uuids.NIL_UUID, InputHandles::readUUID);

@@ -13,12 +13,12 @@ public class PhantomProperties extends BaseLivingEntityProperties<Phantom>
 {
     public final SingleProperty<Integer> SIZE = getSingle(PropertyNames.PHANTOM_SIZE, 1, this::readPhantomSize);
 
-    private Optional<Integer> readPhantomSize(String string) throws ParseErrorException
+    private Optional<Integer> readPhantomSize(String propertyName, String string) throws ParseErrorException
     {
-        var val = InputHandles.readInteger(string)
-                .orElseThrow(() -> new ParseErrorException("readPhantomSize: Unable to parse phantom size"));
+        var val = InputHandles.readInteger(propertyName, string)
+                .orElseThrow(() -> new ParseErrorException(propertyName, "readPhantomSize: Unable to parse phantom size"));
 
-        InputHandles.throwIfOutOfBounds(val, 1, 10);
+        InputHandles.throwIfOutOfBounds(propertyName, val, 1, 10);
 
         return Optional.of(val);
     }

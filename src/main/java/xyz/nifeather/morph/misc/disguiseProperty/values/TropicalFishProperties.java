@@ -22,9 +22,9 @@ public class TropicalFishProperties extends BaseLivingEntityProperties<TropicalF
     public final SingleProperty<TropicalFish.Pattern> PATTERN = getSingle(PropertyNames.TROPICAL_FISH_PATTERN, TropicalFish.Pattern.BLOCKFISH, this::readPattern)
             .withRandom(TropicalFish.Pattern.values());
 
-    private Optional<TropicalFish.Pattern> readPattern(String string) throws ParseErrorException
+    private Optional<TropicalFish.Pattern> readPattern(String propertyName, String string) throws ParseErrorException
     {
-        return InputHandles.readEnumNonNull(TropicalFish.Pattern.values(), string);
+        return InputHandles.readEnumNonNull(TropicalFish.Pattern.values(), propertyName, string);
     }
 
     public TropicalFishProperties()

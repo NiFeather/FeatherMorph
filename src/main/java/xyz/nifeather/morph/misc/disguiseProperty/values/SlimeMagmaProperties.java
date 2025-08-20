@@ -14,12 +14,12 @@ public class SlimeMagmaProperties extends BaseLivingEntityProperties<Slime>
 {
     public final SingleProperty<Integer> SIZE = getSingle(PropertyNames.SLIME_MAGMA_SIZE, 1, this::readSize);
 
-    private Optional<Integer> readSize(String string) throws ParseErrorException
+    private Optional<Integer> readSize(String propertyName, String string) throws ParseErrorException
     {
-        var val = InputHandles.readInteger(string)
-                .orElseThrow(() -> new ParseErrorException("readSize: Unable to parse slime/magma size"));
+        var val = InputHandles.readInteger(propertyName, string)
+                .orElseThrow(() -> new ParseErrorException(propertyName, "readSize: Unable to parse slime/magma size"));
 
-        InputHandles.throwIfOutOfBounds(val, 1, 4);
+        InputHandles.throwIfOutOfBounds(propertyName, val, 1, 4);
 
         return Optional.of(val);
     }
