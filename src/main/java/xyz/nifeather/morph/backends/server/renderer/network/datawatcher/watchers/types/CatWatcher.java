@@ -3,6 +3,7 @@ package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watcher
 import com.github.retrooper.packetevents.protocol.entity.cat.CatVariant;
 import com.github.retrooper.packetevents.protocol.entity.cat.CatVariants;
 import net.minecraft.nbt.CompoundTag;
+import org.bukkit.DyeColor;
 import org.bukkit.entity.Cat;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -13,6 +14,7 @@ import xyz.nifeather.morph.misc.AnimationNames;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 import xyz.nifeather.morph.misc.disguiseProperty.values.CatProperties;
+import xyz.nifeather.morph.utilities.Uuids;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -53,6 +55,14 @@ public class CatWatcher extends TameableAnimalWatcher
         {
             var uuid = (UUID) value;
             writePersistent(ValueIndex.CAT.OWNER, Optional.ofNullable(uuid));
+
+            var uuidValid = !Uuids.NIL_UUID.equals(uuid);
+            this.writeTamed(uuidValid);
+        }
+        else if (property.equals(properties.COLLAR_COLOR))
+        {
+            var dyeColor = (DyeColor) value;
+            writePersistent(ValueIndex.CAT.COLLAR_COLOR, (int)dyeColor.getWoolData());
         }
 
         super.onPropertyWrite(property, value);

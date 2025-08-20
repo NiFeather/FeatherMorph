@@ -3,6 +3,7 @@ package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watcher
 import com.github.retrooper.packetevents.protocol.entity.wolfvariant.WolfVariant;
 import com.github.retrooper.packetevents.protocol.entity.wolfvariant.WolfVariants;
 import net.minecraft.nbt.CompoundTag;
+import org.bukkit.DyeColor;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Wolf;
@@ -13,6 +14,7 @@ import xyz.nifeather.morph.misc.AnimationNames;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 import xyz.nifeather.morph.misc.disguiseProperty.values.WolfProperties;
+import xyz.nifeather.morph.utilities.Uuids;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -54,6 +56,13 @@ public class WolfWatcher extends TameableAnimalWatcher
         {
             var uuid = (UUID) value;
             writePersistent(ValueIndex.WOLF.OWNER, Optional.ofNullable(uuid));
+
+            this.writeTamed(!Uuids.NIL_UUID.equals(uuid));
+        }
+        else if (property.equals(properties.COLLAR_COLOR))
+        {
+            var dyeColor = (DyeColor) value;
+            writePersistent(ValueIndex.WOLF.COLLAR_COLOR, (int)dyeColor.getWoolData());
         }
 
         super.onPropertyWrite(property, value);

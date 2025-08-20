@@ -3,6 +3,7 @@ package xyz.nifeather.morph.misc.disguiseProperty.values;
 import io.papermc.paper.registry.RegistryAccess;
 import io.papermc.paper.registry.RegistryKey;
 import it.unimi.dsi.fastutil.Pair;
+import org.bukkit.DyeColor;
 import org.bukkit.entity.Cat;
 import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
@@ -13,6 +14,7 @@ import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 import xyz.nifeather.morph.utilities.DisguiseUtils;
 import xyz.nifeather.morph.utilities.Uuids;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -29,6 +31,7 @@ public class CatProperties extends BaseLivingEntityProperties<Cat>
 
     public final SingleProperty<Cat.Type> CAT_VARIANT = getSingle(PropertyNames.CAT_VARIANT, Cat.Type.TABBY);
     public final SingleProperty<UUID> OWNER = getSingle(PropertyNames.CAT_OWNER, Uuids.NIL_UUID);
+    public final SingleProperty<DyeColor> COLLAR_COLOR = getSingle(PropertyNames.CAT_COLLAR_COLOR, DyeColor.RED);
 
     public CatProperties()
     {
@@ -36,8 +39,10 @@ public class CatProperties extends BaseLivingEntityProperties<Cat>
         CAT_VARIANT.withValidInput(variantMap.keySet())
                 .withRandom(variantMap.values());
 
+        COLLAR_COLOR.withValidInput(Arrays.stream(DyeColor.values()).map(c -> c.name().toLowerCase()).toList());
+
         registerSingle(
-                CAT_VARIANT, OWNER
+                CAT_VARIANT, OWNER, COLLAR_COLOR
         );
     }
 
@@ -70,6 +75,18 @@ public class CatProperties extends BaseLivingEntityProperties<Cat>
                 }
 
                 yield null;
+            }
+
+            case PropertyNames.CAT_COLLAR_COLOR ->
+            {
+                var match = Arrays.stream(DyeColor.values())
+                        .filter(v -> v.name().equalsIgnoreCase(value))
+                        .findFirst().orElse(null);
+
+                if (match == null)
+                    yield null;
+
+                yield  Pair.of(COLLAR_COLOR, match);
             }
 
             default -> super.parseSingleInput(key, value);

@@ -3,6 +3,7 @@ package xyz.nifeather.morph.misc.disguiseProperty.values;
 import io.papermc.paper.registry.RegistryAccess;
 import io.papermc.paper.registry.RegistryKey;
 import it.unimi.dsi.fastutil.Pair;
+import org.bukkit.DyeColor;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Wolf;
 import org.bukkit.entity.Wolf.Variant;
@@ -14,6 +15,7 @@ import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 import xyz.nifeather.morph.utilities.DisguiseUtils;
 import xyz.nifeather.morph.utilities.Uuids;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -35,42 +37,63 @@ public class WolfProperties extends BaseLivingEntityProperties<Wolf>
 
     public final SingleProperty<UUID> OWNER = getSingle(PropertyNames.WOLF_OWNER, Uuids.NIL_UUID);
 
+    public final SingleProperty<DyeColor> COLLAR_COLOR = getSingle(PropertyNames.WOLF_COLLAR_COLOR, DyeColor.RED);
+
     public WolfProperties()
     {
         initMap();
         VARIANT.withValidInput(variantMap.keySet());
 
-        registerSingle(VARIANT, OWNER);
+        COLLAR_COLOR.withValidInput(Arrays.stream(DyeColor.values()).map(c -> c.name().toLowerCase()).toList());
+
+        registerSingle(VARIANT, OWNER, COLLAR_COLOR);
     }
 
     @Override
     protected @Nullable Pair<SingleProperty<?>, Object> parseSingleInput(String key, String value)
     {
-        if (key.equals(PropertyNames.WOLF_VARIANT))
+        return switch (key)
         {
-            var variant = this.variantMap.getOrDefault(value, null);
-
-            if (variant != null)
-                return Pair.of(VARIANT, variant);
-        }
-
-        if (key.equals(PropertyNames.WOLF_OWNER))
-        {
-            UUID uuid = null;
-
-            try
+            case PropertyNames.WOLF_VARIANT ->
             {
-                uuid = UUID.fromString(value);
-                return Pair.of(OWNER, uuid);
-            }
-            catch (Throwable ignored)
-            {
+                var variant = this.variantMap.getOrDefault(value, null);
+
+                if (variant != null)
+                    yield Pair.of(VARIANT, variant);
+                else
+                    yield null;
             }
 
-            return null;
-        }
+            case PropertyNames.WOLF_OWNER ->
+            {
+                UUID uuid = null;
 
-        return super.parseSingleInput(key, value);
+                try
+                {
+                    uuid = UUID.fromString(value);
+                    yield Pair.of(OWNER, uuid);
+                }
+                catch (Throwable ignored)
+                {
+                }
+
+                yield null;
+            }
+
+            case PropertyNames.WOLF_COLLAR_COLOR ->
+            {
+                var match = Arrays.stream(DyeColor.values())
+                        .filter(v -> v.name().equalsIgnoreCase(value))
+                        .findFirst().orElse(null);
+
+                if (match == null)
+                    yield null;
+
+                yield Pair.of(COLLAR_COLOR, match);
+            }
+
+            default -> super.parseSingleInput(key, value);
+        };
     }
 
     @Override

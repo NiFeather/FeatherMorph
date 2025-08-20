@@ -22,6 +22,16 @@ public class TameableAnimalWatcher extends LivingEntityWatcher
         register(ValueIndex.TAMEABLE);
     }
 
+    protected void writeTamed(boolean tamed)
+    {
+        byte flag = this.read(ValueIndex.TAMEABLE.TAMEABLE_FLAGS);
+
+        if (tamed)
+            writePersistent(ValueIndex.TAMEABLE.TAMEABLE_FLAGS, (byte)(flag | 4));
+        else
+            writePersistent(ValueIndex.TAMEABLE.TAMEABLE_FLAGS, (byte)(flag & -5));
+    }
+
     @Override
     public void writeToCompound(CompoundTag nbt)
     {
