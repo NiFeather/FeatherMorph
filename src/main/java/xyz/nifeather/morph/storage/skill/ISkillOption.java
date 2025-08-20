@@ -53,8 +53,7 @@ public interface ISkillOption
             catch (Throwable t)
             {
                 var logger = FeatherMorphMain.getInstance().getSLF4JLogger();
-                logger.warn("Can't serialize option %s to map: %s".formatted(this, t.getMessage()));
-                t.printStackTrace();
+                logger.warn("Can't serialize option %s to map".formatted(this), t);
             }
         });
 
@@ -148,8 +147,7 @@ public interface ISkillOption
                         }
                         catch (Throwable t)
                         {
-                            logger.warn("Can't cast value %s to type %s: %s".formatted(v, targetClass, t.getMessage()));
-                            t.printStackTrace();
+                            logger.warn("Can't cast value %s to type %s".formatted(v, targetClass), t);
                         }
                     }
                     else
@@ -161,8 +159,7 @@ public interface ISkillOption
                         }
                         catch (IllegalAccessException e)
                         {
-                            logger.warn("Can't set value for %s: %s".formatted(field, e.getMessage()));
-                            e.printStackTrace();
+                            logger.warn("Can't set value for %s".formatted(field), e);
                         }
                     }
                 }
@@ -173,8 +170,7 @@ public interface ISkillOption
         catch (Throwable t)
         {
             var logger = FeatherMorphMain.getInstance().getSLF4JLogger();
-            logger.warn("Can't deserialize option %s from map: %s".formatted(this, t.getMessage()));
-            t.printStackTrace();
+            logger.warn("Can't deserialize option %s from map".formatted(this), t);
         }
 
         throw new RuntimeException("Can't initialize option for %s".formatted(this));
@@ -236,8 +232,7 @@ public interface ISkillOption
         catch (Throwable t)
         {
             var logger = FeatherMorphMain.getInstance().getSLF4JLogger();
-            logger.warn("Unable to parse key '%s': %s".formatted(key, t.getMessage()));
-            t.printStackTrace();
+            logger.warn("Unable to parse key '%s'".formatted(key), t);
 
             value = null;
         }

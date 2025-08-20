@@ -44,10 +44,8 @@ public abstract class MorphSkill<T extends ISkillOption> extends MorphPluginObje
                 Sound.Source.PLAYER, 1f, 1f));
     }
 
-    protected void printErrorMessage(Player player, String message)
+    protected void notifyError(Player player)
     {
-        logger.error(message);
-
         sendDenyMessageToPlayer(player, SkillStrings.exceptionOccurredString()
                 .withLocale(MessageUtils.getLocale(player)).toComponent(null));
     }
@@ -70,8 +68,8 @@ public abstract class MorphSkill<T extends ISkillOption> extends MorphPluginObje
         }
         catch (Throwable t)
         {
-            printErrorMessage(player, "Unable to summon " + fireballType + ": " + t.getMessage());
-            t.printStackTrace();
+            logger.error("Unable to summon %s".formatted(fireballType), t);
+            notifyError(player);
             return null;
         }
 

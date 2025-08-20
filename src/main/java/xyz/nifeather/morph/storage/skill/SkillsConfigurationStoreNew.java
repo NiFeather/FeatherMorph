@@ -163,8 +163,7 @@ public class SkillsConfigurationStoreNew extends DirectoryJsonBasedStorage<Skill
         }
         catch (Throwable t)
         {
-            logger.warn("Can't migrate from legacy skill configuration: " + t.getMessage());
-            t.printStackTrace();
+            logger.warn("Can't migrate from legacy skill configuration", t);
         }
     }
 
@@ -230,7 +229,7 @@ public class SkillsConfigurationStoreNew extends DirectoryJsonBasedStorage<Skill
         }
         catch (Throwable t)
         {
-            logger.error("Can't write content to file: " + t.getMessage());
+            logger.error("Can't write content to file", t);
         }
     }
 

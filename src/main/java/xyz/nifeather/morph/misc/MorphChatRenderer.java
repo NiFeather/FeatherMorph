@@ -61,8 +61,7 @@ public class MorphChatRenderer extends MorphPluginObject implements ChatRenderer
             }
             catch (Throwable t)
             {
-                logger.error("Error occurred while formatting message: " + t.getMessage());
-                t.printStackTrace();
+                logger.error("Error occurred while formatting message", t);
 
                 this.message = this.message == null ? Component.empty() : this.message;
                 this.messageRevealed = this.messageRevealed == null ? Component.empty() : this.messageRevealed;

@@ -35,7 +35,7 @@ public class LaunchProjectileMorphSkill extends DelayedMorphSkill<ProjectileConf
     {
         if (option == null || configuration == null)
         {
-            printErrorMessage(player, configuration + " doesn't seems to have a valid projective configuration");
+            notifyError(player);
             return ExecuteResult.fail(10);
         }
 
@@ -43,7 +43,7 @@ public class LaunchProjectileMorphSkill extends DelayedMorphSkill<ProjectileConf
 
         if (type == null)
         {
-            printErrorMessage(player, "Invalid projective entity for " + state.getDisguiseIdentifier());
+            notifyError(player);
             return ExecuteResult.fail(10);
         }
 

@@ -155,9 +155,7 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
         }
         catch (Throwable t)
         {
-            logger.error("Error occurred while updating disguise!");
-            t.printStackTrace();
-
+            logger.error("Error occurred while updating disguise!", t);
             return false;
         }
 

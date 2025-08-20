@@ -73,18 +73,13 @@ public class SingleUpdateInfoMeta
 
             var mapValue = map.getOrDefault(serializedName, null);
 
-            //MorphPlugin.getInstance().getSLF4JLogger()
-            //        .info("Name: '%s', ST: '%s', VT: '%s'"
-            //                .formatted(field.getName(), field.getType(), (mapValue == null ? "nil" : mapValue.getClass())));
-
             try
             {
                 field.set(instance, mapValue);
             }
             catch (Throwable t)
             {
-                FeatherMorphMain.getInstance().getSLF4JLogger().warn("Unable to set '%s' to '%s': %s".formatted(field.getName(), mapValue, t.getMessage()));
-                //t.printStackTrace();
+                FeatherMorphMain.getInstance().getSLF4JLogger().warn("Unable to set '%s' to '%s'".formatted(field.getName(), mapValue), t);
             }
         }
 

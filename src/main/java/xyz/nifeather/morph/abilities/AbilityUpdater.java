@@ -135,9 +135,7 @@ public class AbilityUpdater extends MorphPluginObject implements IAbilityConfigL
         }
         catch (Throwable t)
         {
-            logger.error("Error occurred updating abilities: " + t.getMessage());
-            t.printStackTrace();
-
+            logger.error("Error occurred updating abilities", t);
             return false;
         }
     }

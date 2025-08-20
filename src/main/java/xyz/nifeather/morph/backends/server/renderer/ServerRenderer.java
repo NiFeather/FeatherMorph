@@ -90,8 +90,7 @@ public class ServerRenderer extends MorphPluginObject implements Listener
         }
         catch (Throwable t)
         {
-            logger.error("Can't register player: " + t.getMessage());
-            t.printStackTrace();
+            logger.error("Can't register player", t);
 
             unRegisterEntity(player);
         }
@@ -110,13 +109,12 @@ public class ServerRenderer extends MorphPluginObject implements Listener
         }
         catch (Throwable t)
         {
-            logger.error("Can't unregister player: " + t.getMessage());
-            t.printStackTrace();
+            logger.error("Can't unregister player", t);
         }
     }
 
     public void refreshStateForPlayer(@Nullable Player player, List<Player> affectedPlayers)
-            throws BuildFailedException
+            throws BuildFailedException, NullDependencyException
     {
         if (player == null) return;
 

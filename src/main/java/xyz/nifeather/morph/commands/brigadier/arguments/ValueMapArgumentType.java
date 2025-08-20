@@ -149,9 +149,7 @@ public class ValueMapArgumentType implements CustomArgumentType<Map<String, Stri
         }
         catch (Throwable t)
         {
-            //log.error("Failed to list suggestions!" + t.getMessage());
-            //t.printStackTrace();
-
+            //log.error("Failed to list suggestions!", t);
             return defaultBuilder.createOffset(masterReader.getCursor()).suggest("???", ERR_SUGGEST_FAIL).build();
         }
 

@@ -52,6 +52,11 @@ public class MasterInstance extends MorphPluginObject implements IInstanceServic
         logger.warn("[Master@%s] %s".formatted(Integer.toHexString(this.hashCode()), message));
     }
 
+    private void logMasterError(String message, Throwable t)
+    {
+        logger.warn("[Master@%s] %s".formatted(Integer.toHexString(this.hashCode()), message), t);
+    }
+
     /**
      * @return Success?
      */
@@ -78,9 +83,7 @@ public class MasterInstance extends MorphPluginObject implements IInstanceServic
         }
         catch (Throwable t)
         {
-            logMasterWarn("Error occurred shutting down socket server: " + t.getMessage());
-            t.printStackTrace();
-
+            logMasterError("Error occurred shutting down socket server", t);
             return false;
         }
     }
@@ -113,9 +116,7 @@ public class MasterInstance extends MorphPluginObject implements IInstanceServic
         }
         catch (Throwable t)
         {
-            logMasterWarn("Error occurred while setting up server:" + t.getMessage());
-            t.printStackTrace();
-
+            logMasterError("Error occurred while setting up server", t);
             return false;
         }
     }
@@ -177,9 +178,7 @@ public class MasterInstance extends MorphPluginObject implements IInstanceServic
         }
         catch (Throwable t)
         {
-            logMasterWarn("Error handling command from WebSocket '%s': %s".formatted(ws.getRemoteSocketAddress(), t.getMessage()));
-            t.printStackTrace();
-
+            logMasterError("Error handling command from WebSocket '%s'".formatted(ws.getRemoteSocketAddress()), t);
             disconnect(record.socket(), "Failed to handle client message");
         }
     }

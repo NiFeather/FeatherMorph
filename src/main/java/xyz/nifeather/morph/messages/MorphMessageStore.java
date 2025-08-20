@@ -15,6 +15,7 @@ import xyz.nifeather.morph.config.ConfigOption;
 import xyz.nifeather.morph.config.MorphConfigManager;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
 import java.util.List;
@@ -46,10 +47,10 @@ public class MorphMessageStore extends MessageStore<FeatherMorphMain>
 
     public File getFile(String relativePath, boolean nullIfNotFound)
     {
-        if (relativePath == null || relativePath.isBlank() || relativePath.isEmpty()) return null;
+        if (relativePath == null || relativePath.isBlank()) return null;
 
         var dataFolder = plugin.getDataFolder().toURI();
-        var file = new File(URI.create("" + dataFolder + "/" + relativePath));
+        var file = new File(URI.create(dataFolder + "/" + relativePath));
 
         if (!nullIfNotFound) return file;
 
@@ -58,10 +59,9 @@ public class MorphMessageStore extends MessageStore<FeatherMorphMain>
     }
 
     @Nullable
-    @Contract("null -> null; !null -> !null")
     public String getAbsolutePath(String relativePath)
     {
-        if (relativePath == null || relativePath.isBlank() || relativePath.isEmpty()) return null;
+        if (relativePath == null || relativePath.isBlank()) return null;
 
         return plugin.getDataFolder().toURI().getPath() + "/" + relativePath;
     }
@@ -82,9 +82,9 @@ public class MorphMessageStore extends MessageStore<FeatherMorphMain>
                 Files.move(legacyDefaultFile.toPath(), targetFile.toPath());
                 this.addSchedule(super::reloadConfiguration);
             }
-            catch (Throwable t)
+            catch (IOException e)
             {
-                logger.error("Unable to update builtin message store: %s".formatted(t));
+                logger.error("Unable to update builtin message store", e);
             }
         }
 

@@ -101,8 +101,7 @@ public class MultiInstanceService extends MorphPluginObject
         }
         catch (Throwable t)
         {
-            logger.error("Sanity check failed: " + t.getMessage());
-            t.printStackTrace();
+            logger.error("Sanity check failed", t);
             return;
         }
 

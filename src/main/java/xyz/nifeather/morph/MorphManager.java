@@ -196,8 +196,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         }
         catch (Throwable t)
         {
-            logger.error("Error occurred switching backend: " + t.getMessage());
-            t.printStackTrace();
+            logger.error("Error occurred switching backend", t);
 
             return false;
         }
@@ -221,11 +220,9 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         }
         catch (Throwable t)
         {
-            logger.error("Unable to initialize ServerBackend as our disguise backend: " + t.getMessage());
+            logger.error("Unable to initialize ServerBackend as our disguise backend", t);
             logger.error("Using NilBackend, displaying disguises at the server side will not be supported this run.");
             logger.error("Please consider reporting this issue to our GitHub: https://github.com/MATRIX-feather/FeatherMorph/issues");
-
-            t.printStackTrace();
         }
     }
 
@@ -315,8 +312,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         }
         catch (Throwable t)
         {
-            logger.error("Error occurred updating disguise! " + t.getMessage());
-            t.printStackTrace();
+            logger.error("Error occurred updating disguise!", t);
         }
 
         if (!providerSuccess || !stateSuccess)
@@ -884,8 +880,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             source.sendMessage(MessageUtils.prefixes(source, MorphStrings.parseErrorString()
                     .resolve("id", disguiseIdentifier)));
 
-            logger.error("Unable to parse key " + disguiseIdentifier + ": " + iae.getMessage());
-            iae.printStackTrace();
+            logger.error("Unable to parse key " + disguiseIdentifier, iae);
 
             unMorph(player);
 
@@ -895,8 +890,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         {
             source.sendMessage(MessageUtils.prefixes(source, MorphStrings.errorWhileDisguising()));
 
-            logger.error("Error while disguising: %s".formatted(t.getMessage()));
-            t.printStackTrace();
+            logger.error("Error while disguising", t);
 
             unMorph(player);
             return DisguiseBuildResult.FAILED;
@@ -1540,8 +1534,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         }
         catch (Throwable t)
         {
-            logger.error("Unable to recover disguise from OfflineState: " + t.getMessage());
-            t.printStackTrace();
+            logger.error("Unable to recover disguise from OfflineState", t);
         }
 
         return OfflineDisguiseResult.FAIL;

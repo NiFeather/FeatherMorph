@@ -67,8 +67,7 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
         }
         catch (Throwable t)
         {
-            logSlaveWarn("Can't close client! " + t.getMessage());
-            t.printStackTrace();
+            logSlaveError("Can't close client!", t);
             return false;
         }
     }
@@ -83,6 +82,10 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
         logger.warn("[Slave@%s] %s".formatted(Integer.toHexString(this.hashCode()), message));
     }
 
+    private void logSlaveError(String message, Throwable t)
+    {
+        logger.error("[Slave@%s] %s".formatted(Integer.toHexString(this.hashCode()), message), t);
+    }
     /**
      * @return Whether this operation operates successfully
      */
@@ -107,8 +110,7 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
         }
         catch (Throwable t)
         {
-            logSlaveWarn("Error occurred setting up client: " + t.getMessage());
-            t.printStackTrace();
+            logSlaveError("Error occurred setting up client", t);
 
             return false;
         }

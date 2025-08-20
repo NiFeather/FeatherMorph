@@ -187,8 +187,7 @@ public class ServerBackend extends DisguiseBackend<ServerDisguise, ServerDisguis
         }
         catch (Throwable t)
         {
-            logger.error("Failed to apply disguise: " + t.getMessage());
-            t.printStackTrace();
+            logger.error("Failed to apply disguise", t);
             return false;
         }
 

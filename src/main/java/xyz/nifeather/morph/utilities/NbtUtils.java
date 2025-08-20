@@ -153,8 +153,7 @@ public class NbtUtils
         {
             var logger = FeatherMorphMain.getInstance().getSLF4JLogger();
 
-            logger.warn("Can't parse profile properties: " + t.getMessage());
-            t.printStackTrace();
+            logger.warn("Can't parse profile properties", t);
         }
 
         return profile;

@@ -51,8 +51,7 @@ public class DirectoryStorage extends MorphPluginObject
             }
             catch (Throwable t)
             {
-                logger.error("Unable to create directory '%s' for logging: %s".formatted(directoryBaseName, t.getLocalizedMessage()));
-                t.printStackTrace();
+                logger.error("Unable to create directory '%s' for logging".formatted(directoryBaseName), t);
 
                 this.initializeFailed = true;
             }
@@ -135,8 +134,7 @@ public class DirectoryStorage extends MorphPluginObject
             }
             catch (Throwable t)
             {
-                logger.error("Unable to create directory '%s': %s".formatted(relativePath, t.getLocalizedMessage()));
-                t.printStackTrace();
+                logger.error("Unable to create directory '%s': %s".formatted(relativePath, t.getLocalizedMessage()), t);
             }
         }
 
@@ -181,8 +179,7 @@ public class DirectoryStorage extends MorphPluginObject
             }
             catch (Throwable t)
             {
-                logger.error("Unable to create file '%s': %s".formatted(fileName, t.getLocalizedMessage()));
-                t.printStackTrace();
+                logger.error("Unable to create file '%s': %s".formatted(fileName, t.getLocalizedMessage()), t);
             }
         }
 
@@ -205,7 +202,7 @@ public class DirectoryStorage extends MorphPluginObject
         }
         catch (IOException e)
         {
-            logger.warn("Can't create file: " + e.getMessage());
+            logger.warn("Can't create file", e);
             return false;
         }
     }

@@ -155,8 +155,7 @@ public class UpdateHandler extends MorphPluginObject
         if (this.requestId.get() != reqId)
             return;
 
-        logger.error("Failed checking update: " + e.getMessage());
-        e.printStackTrace();
+        logger.error("Failed checking update", e);
     }
 
     private CheckResult onUpdateReqFinish(String responseStr, int reqId,
@@ -269,8 +268,7 @@ public class UpdateHandler extends MorphPluginObject
         }
         catch (Throwable t)
         {
-            logger.error("Error occurred while processing response: %s".formatted(t.getMessage()));
-            t.printStackTrace();
+            logger.error("Error occurred while processing response", t);
 
             return CheckResult.FAIL;
         }

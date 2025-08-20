@@ -74,8 +74,7 @@ public class DebugTestCommand extends BrigadierCommand
                     }
                     catch (Throwable t)
                     {
-                        logger.warn("Exception! " + t.getMessage());
-                        t.printStackTrace();
+                        logger.warn("Exception!", t);
                     }
                     return 1;
                 })

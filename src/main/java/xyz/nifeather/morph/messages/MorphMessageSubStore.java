@@ -1,5 +1,6 @@
 package xyz.nifeather.morph.messages;
 
+import com.google.gson.JsonSyntaxException;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.pluginbase.Messages.IStrings;
 import xiamomc.pluginbase.Messages.MessageStore;
@@ -61,18 +62,19 @@ public class MorphMessageSubStore extends MessageStore<FeatherMorphMain>
                 var defaults = createGson().fromJson(asset, this.storingObject.getClass());
                 defaults.forEach((o1, o2) ->
                 {
-                    if (o1 instanceof String key && o2 instanceof String msg)
+                    if (!(o1 instanceof String key) || !(o2 instanceof String msg))
+                        return;
+
+                    if (!storingObject.containsKey(key)
+                            || (overwriteNonDef && !storingObject.getOrDefault(key, "").equals(msg)))
                     {
-                        if (!storingObject.containsKey(key)
-                                || (overwriteNonDef && !storingObject.getOrDefault(key, "").equals(msg)))
-                            storingObject.put(key, msg);
+                        storingObject.put(key, msg);
                     }
                 });
             }
-            catch (Throwable t)
+            catch (JsonSyntaxException e)
             {
-                logger.error("Error occurred while updating localization for locale '" + locale + "': " + t.getMessage());
-                t.printStackTrace();
+                logger.error("Error occurred while updating localization for locale '" + locale + "'", e);
             }
         }
 

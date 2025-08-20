@@ -24,7 +24,8 @@ public class ApplyEffectMorphSkill extends MorphSkill<EffectConfiguration>
     {
         if (option == null || configuration == null)
         {
-            printErrorMessage(player, configuration + "没有设置药水效果");
+            logger.error("%s does not have a potion effect set".formatted(state.getDisguiseIdentifier()));
+            notifyError(player);
             return 10;
         }
 
@@ -49,7 +50,8 @@ public class ApplyEffectMorphSkill extends MorphSkill<EffectConfiguration>
 
         if (effect == null)
         {
-            printErrorMessage(player, configuration + "设置了无效的药水效果");
+            logger.error("An effect set for %s is invalid!".formatted(state.getDisguiseIdentifier()));
+            notifyError(player);
             return 10;
         }
 

@@ -45,6 +45,11 @@ public class InstanceClient extends WebSocketClient
         logger.warn("[C@%s] %s".formatted(Integer.toHexString(this.hashCode()), message));
     }
 
+    private void logClientError(String message, Throwable t)
+    {
+        logger.error("[C@%s] %s".formatted(Integer.toHexString(this.hashCode()), message), t);
+    }
+
     private final AtomicBoolean disposed = new AtomicBoolean(false);
     public void dispose()
     {
@@ -136,8 +141,7 @@ public class InstanceClient extends WebSocketClient
         }
         catch (Throwable t)
         {
-            logClientWarn("Error occurred invoking onClientError(): " + t.getMessage());
-            t.printStackTrace();
+            logClientError("Error occurred invoking onClientError()", t);
         }
 
         if (e instanceof ConnectException)
@@ -147,8 +151,7 @@ public class InstanceClient extends WebSocketClient
             return;
         }
 
-        logger.error("Unknown error occurred with the client %s: %s".formatted(Integer.toHexString(this.hashCode()), e.getMessage()));
-        e.printStackTrace();
+        logger.error("Unknown error occurred with the client %s".formatted(Integer.toHexString(this.hashCode())), e);
     }
 
     //endregion

@@ -24,7 +24,7 @@ public class TeleportMorphSkill extends MorphSkill<TeleportConfiguration>
     {
         if (option == null)
         {
-            printErrorMessage(player, configuration + "没有传送设置");
+            notifyError(player);
             return 10;
         }
 

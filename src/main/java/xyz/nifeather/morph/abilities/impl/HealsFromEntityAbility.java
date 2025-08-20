@@ -216,8 +216,7 @@ public class HealsFromEntityAbility extends MorphAbility<HealsFromEntityOption>
         }
         catch (Throwable t)
         {
-            logger.error("Error finding entity around player %s: %s".formatted(record.nmsPlayer(), t.getMessage()));
-            t.printStackTrace();
+            logger.error("Error finding entity around player %s".formatted(record.nmsPlayer()), t);
         }
 
         return null;

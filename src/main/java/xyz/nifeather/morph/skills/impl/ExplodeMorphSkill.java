@@ -36,7 +36,7 @@ public class ExplodeMorphSkill extends DelayedMorphSkill<ExplosionConfiguration>
     {
         if (option == null)
         {
-            printErrorMessage(player, configuration + " doesn't seems to have a valid explosion configuration");
+            notifyError(player);
             return ExecuteResult.fail(10);
         }
 

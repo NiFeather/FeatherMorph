@@ -6,10 +6,7 @@ import xiamomc.pluginbase.Messages.IStrings;
 import xiamomc.pluginbase.Messages.MessageStore;
 import xyz.nifeather.morph.FeatherMorphMain;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
@@ -110,10 +107,9 @@ public abstract class BasicVanillaMessageStore extends MessageStore<FeatherMorph
                         this.addSchedule(this::reloadConfiguration);
                         logger.info("Successfully downloaded Minecraft localization for language " + getLocaleCode() + "!");
                     }
-                    catch (Throwable t)
+                    catch (IOException e)
                     {
-                        logger.error("Error occurred while writing data for language " + getLocaleCode() + ": " + t.getMessage());
-                        t.printStackTrace();
+                        logger.error("Error occurred while writing data for language " + getLocaleCode(), e);
                     }
                 }
                 else

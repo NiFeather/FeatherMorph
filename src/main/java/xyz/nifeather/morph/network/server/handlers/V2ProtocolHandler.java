@@ -69,10 +69,7 @@ public class V2ProtocolHandler extends AbstractCommandPacketHandler
                 logger.info("'%s' is possibly using a legacy client.".formatted(player.getName()));
 
             if (FeatherMorphMain.getInstance().debugOutputEnabled())
-            {
-                logger.info("Unable to decode packet. Is '%s' using a legacy client? %s".formatted(player.getName(), t.getMessage()));
-                t.printStackTrace();
-            }
+                logger.info("Unable to decode packet. Is '%s' using a legacy client? %s".formatted(player.getName()), t);
 
             return ClientInitializeRecordV3.fail();
         }

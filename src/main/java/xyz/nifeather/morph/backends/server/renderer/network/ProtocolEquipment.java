@@ -67,8 +67,7 @@ public class ProtocolEquipment
         {
             var logger = FeatherMorphMain.getInstance().getSLF4JLogger();
 
-            logger.warn("Can't generate equipment pair: " + t.getMessage());
-            t.printStackTrace();
+            logger.warn("Can't generate equipment pair", t);
         }
 
         return new Equipment(EquipmentSlot.BOOTS, peAir);

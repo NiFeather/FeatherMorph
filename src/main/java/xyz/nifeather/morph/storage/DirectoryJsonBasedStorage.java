@@ -8,6 +8,7 @@ import xyz.nifeather.morph.MorphPluginObject;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
@@ -73,9 +74,9 @@ public abstract class DirectoryJsonBasedStorage<T> extends MorphPluginObject
         {
             FileUtils.writeStringToFile(file, "" + version, StandardCharsets.UTF_8);
         }
-        catch (Throwable t)
+        catch (IOException e)
         {
-            logger.warn("Can't write package version to file, it will not be saved across sessions: " + t.getMessage());
+            logger.warn("Can't write package version to file, it will not be saved across sessions.", e);
         }
     }
 
@@ -97,8 +98,7 @@ public abstract class DirectoryJsonBasedStorage<T> extends MorphPluginObject
         }
         catch (Throwable t)
         {
-            logger.error("Can't get package version: " + t.getMessage());
-            t.printStackTrace();
+            logger.error("Can't get package version", t);
 
             return -1;
         }

@@ -18,16 +18,22 @@ public abstract class DelayedMorphSkill<T extends ISkillOption> extends MorphSki
     {
         if (option == null || configuration == null)
         {
-            printErrorMessage(player, configuration + "没有对" + getIdentifier().asString() + "技能进行配置");
+            logger.error("%s does not have a potion effect set".formatted(state.getDisguiseIdentifier()));
+            notifyError(player);
             return 10;
         }
 
         var result = this.preExecute(player, state, configuration, option);
 
         if (result.success)
+        {
             this.addDelayedSkillSchedule(player, () -> executeDelayedSkill(player, state, configuration, option), getExecuteDelay(configuration, option));
+        }
         else
-            printErrorMessage(player, "执行技能时出现问题");
+        {
+            logger.error("Delayed skill '%s' for '%s' encountered error while performing pre-execute".formatted(configuration.getSkillIdentifier(), state.getDisguiseIdentifier()));
+            notifyError(player);
+        }
 
         return configuration.getCooldown();
     }

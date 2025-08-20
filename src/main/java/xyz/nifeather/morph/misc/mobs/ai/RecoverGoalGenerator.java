@@ -8,6 +8,7 @@ import xiamomc.pluginbase.Exceptions.NullDependencyException;
 import xyz.nifeather.morph.FeatherMorphMain;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 
 public class RecoverGoalGenerator
 {
@@ -42,11 +43,10 @@ public class RecoverGoalGenerator
 
                 return (AvoidEntityGoal<Player>) avoidEntityGoal;
             }
-            catch (Throwable t)
+            catch (NullDependencyException | NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException e)
             {
-                log.warn("Unable to create '%s: %s".formatted(className, t.getMessage()));
+                log.warn("Unable to create '%s".formatted(className), e);
                 log.warn("Using common AvoidEntityGoal...");
-                t.printStackTrace();
             }
 
             if (constructor == null)

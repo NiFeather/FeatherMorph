@@ -29,6 +29,11 @@ public final class InstanceServer extends WebSocketServer
         logger.warn("[S@%s] %s".formatted(Integer.toHexString(this.hashCode()), message));
     }
 
+    private void logServerError(String message, Throwable t)
+    {
+        logger.warn("[S@%s] %s".formatted(Integer.toHexString(this.hashCode()), message), t);
+    }
+
     public InstanceServer(XiaMoJavaPlugin plugin, InetSocketAddress address, IInstanceClientHandler iInstanceClientHandler)
     {
         super(address);
@@ -99,8 +104,7 @@ public final class InstanceServer extends WebSocketServer
         String socketAddress = "<unknown socket @ %s>".formatted(webSocket);
         if (webSocket != null) socketAddress = webSocket.getRemoteSocketAddress().toString();
 
-        logServerWarn("An error occurred with socket '%s': %s".formatted(socketAddress, e.getMessage()));
-        e.printStackTrace();
+        logServerError("An error occurred with socket '%s'".formatted(socketAddress), e);
     }
 
     @Override

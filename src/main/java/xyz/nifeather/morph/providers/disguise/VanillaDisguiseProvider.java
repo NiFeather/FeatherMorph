@@ -247,8 +247,7 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
         }
         catch (Throwable t)
         {
-            logger.error("Error occurred trying to modify player's health attribute: " + t.getMessage());
-            t.printStackTrace();
+            logger.error("Error occurred trying to modify player's health attribute", t);
         }
     }
 
@@ -269,14 +268,9 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
         {
             targetField = ReflectionUtils.getPlayerDimensionsField(nmsPlayer);
         }
-        catch (NullDependencyException t)
-        {
-            logger.error("Can't read player dimension.");
-        }
         catch (Throwable t)
         {
-            logger.error("Can't read player dimension: " + t.getMessage());
-            t.printStackTrace();
+            logger.error("Can't read player dimension.", t);
         }
 
         if (targetField == null)
@@ -293,8 +287,7 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
         }
         catch (Throwable t)
         {
-            logger.error("Unable to reset player's bounding box: " + t.getMessage());
-            t.printStackTrace();
+            logger.error("Unable to reset player's bounding box", t);
         }
     }
 
@@ -309,14 +302,9 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
         {
             targetField = ReflectionUtils.getPlayerDimensionsField(nmsPlayer);
         }
-        catch (NullDependencyException t)
-        {
-            logger.error("Can't read player dimension.");
-        }
         catch (Throwable t)
         {
-            logger.error("Can't read player dimension: " + t.getMessage());
-            t.printStackTrace();
+            logger.error("Can't read player dimension.", t);
         }
 
         if (targetField == null) return;
@@ -337,8 +325,7 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
         }
         catch (Throwable t)
         {
-            logger.warn("Unable to modify player's bounding box: " + t.getMessage());
-            t.printStackTrace();
+            logger.warn("Unable to modify player's bounding box", t);
         }
     }
 
@@ -352,8 +339,7 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
         }
         catch (Throwable t)
         {
-            logger.warn("Failed to execute Runnable in VanillaDisguiseProvider#runThenScaleHealth: {}", t.getMessage());
-            t.printStackTrace();
+            logger.warn("Failed to execute Runnable in VanillaDisguiseProvider#runThenScaleHealth", t);
         }
 
         if (player.getHealth() > 0) //       v 偷懒

@@ -392,8 +392,7 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
         }
         catch (Exception e)
         {
-            logger.warn("Error occurred while disabling: " + e.getMessage());
-            e.printStackTrace();
+            logger.warn("Error occurred while disabling", e);
         }
 
         super.disable();

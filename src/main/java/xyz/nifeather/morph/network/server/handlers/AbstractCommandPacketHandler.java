@@ -39,8 +39,7 @@ public abstract class AbstractCommandPacketHandler extends MorphPluginObject imp
         }
         catch (Throwable t)
         {
-            logger.error("Can't send packet to player: " + t.getMessage());
-            t.printStackTrace();
+            logger.error("Can't send packet to player", t);
         }
     }
 }

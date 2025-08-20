@@ -188,7 +188,6 @@ public abstract class SingleWatcher extends MorphPluginObject
         else
         {
             logger.warn("Find incompatible value '%s' for custom entry '%s'!".formatted(val, entry));
-
             return null;
         }
     }
@@ -475,8 +474,7 @@ public abstract class SingleWatcher extends MorphPluginObject
         }
         catch (Throwable t)
         {
-            logger.warn("Error occurred while syncing watcher: " + t.getMessage());
-            t.printStackTrace();
+            logger.warn("Error occurred while syncing watcher", t);
         }
 
         unmarkSilent(syncSilentSource);
@@ -590,8 +588,7 @@ public abstract class SingleWatcher extends MorphPluginObject
         }
         catch (Throwable t)
         {
-            logger.warn("Error occurred while disposing: " + t.getMessage());
-            t.printStackTrace();
+            logger.warn("Error occurred while disposing", t);
         }
     }
 

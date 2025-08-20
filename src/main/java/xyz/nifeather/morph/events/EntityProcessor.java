@@ -16,6 +16,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
+import xiamomc.pluginbase.Exceptions.NullDependencyException;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.RevealingHandler;
@@ -148,10 +149,9 @@ public class EntityProcessor extends MorphPluginObject implements Listener
 
                 break;
             }
-            catch (Throwable throwable)
+            catch (IllegalAccessException e)
             {
-                logger.warn("Failed to modify goal: " + throwable.getMessage());
-                throwable.printStackTrace();
+                logger.warn("Failed to modify goal", e);
             }
         }
 
@@ -226,8 +226,7 @@ public class EntityProcessor extends MorphPluginObject implements Listener
         }
         catch (Throwable t)
         {
-            logger.error("Failed to recover goals: " + t.getMessage());
-            t.printStackTrace();
+            logger.error("Failed to recover goals", t);
         }
     }
 }

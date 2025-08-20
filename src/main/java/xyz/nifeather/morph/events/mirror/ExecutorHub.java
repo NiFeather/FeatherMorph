@@ -20,8 +20,10 @@ import xyz.nifeather.morph.storage.mirrorlogging.MirrorSingleEntry;
 import xyz.nifeather.morph.storage.mirrorlogging.OperationType;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -154,27 +156,18 @@ public class ExecutorHub extends MorphPluginObject
             {
                 date = logFileTimeFormat.parse(formattedName);
             }
-            catch (Throwable t)
+            catch (ParseException e)
             {
-                logger.error("Unable to determine creation date for InteractionMirror log file '%s': '%s'".formatted(file.getName(), t.getLocalizedMessage()));
-                t.printStackTrace();
+                logger.error("Unable to determine creation date for InteractionMirror log file '%s'".formatted(file.getName()), e);
                 continue;
             }
 
             if (date.after(targetDate)) continue;
 
-            try
-            {
-                logger.info("Removing InteractionMirror log '%s' as it's older than %s day(s)".formatted(file.getName(), days));
+            logger.info("Removing InteractionMirror log '%s' as it's older than %s day(s)".formatted(file.getName(), days));
 
-                if (!file.delete())
-                    logger.warn("Unable to remove file: Unknown error");
-            }
-            catch (Throwable t)
-            {
-                logger.error("Unable to remove file: %s".formatted(t.getLocalizedMessage()));
-                t.printStackTrace();
-            }
+            if (!file.delete())
+                logger.warn("Unable to remove file: Unknown error");
         }
     }
 
@@ -225,16 +218,14 @@ public class ExecutorHub extends MorphPluginObject
                         }
                         catch (IOException e)
                         {
-                            logger.error("Error occurred while saving logs: " + e.getLocalizedMessage());
-                            e.printStackTrace();
+                            logger.error("Error occurred while saving logs", e);
                         }
                     }
                 });
             }
-            catch (Throwable throwable)
+            catch (IOException e)
             {
-                logger.error("Error occurred while saving logs: " + throwable.getLocalizedMessage());
-                throwable.printStackTrace();
+                logger.error("Error occurred while saving logs", e);
             }
 
             this.tempEntries.clear();
