@@ -10,7 +10,15 @@ import java.util.Optional;
 
 public abstract class BaseLivingEntityProperties<E extends Entity> extends AbstractProperties<E>
 {
-    public final SingleProperty<Component> CUSTOM_NAME = getSingle(PropertyNames.ENTITY_CUSTOM_NAME, Component.empty(), InputHandles::readAdventureComponent);
+    public final SingleProperty<Component> CUSTOM_NAME = getSingle(PropertyNames.ENTITY_CUSTOM_NAME, Component.empty(), this::readCustomName);
+
+    private Optional<Component> readCustomName(String string) throws ParseErrorException
+    {
+        if (string.length() > 256)
+            throw new ParseErrorException("readCustomName: Input string is too long!");
+
+        return InputHandles.readAdventureComponent(string);
+    }
 
     public final SingleProperty<Boolean> CUSTOM_NAME_VISIBLE = getSingle(PropertyNames.ENTITY_CUSTOM_NAME_VISIBLE, false, InputHandles::readBooleanRelaxed)
             .withValidInput("true", "false");
