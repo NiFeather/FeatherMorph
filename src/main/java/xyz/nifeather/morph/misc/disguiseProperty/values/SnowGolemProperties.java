@@ -14,7 +14,8 @@ import java.util.Map;
 
 public class SnowGolemProperties extends BaseLivingEntityProperties<Snowman>
 {
-    public final SingleProperty<Boolean> HAS_PUMPKIN = getSingle(PropertyNames.SNOW_GOLEM_HAS_PUMPKIN, true);
+    public final SingleProperty<Boolean> HAS_PUMPKIN = getSingle(PropertyNames.SNOW_GOLEM_HAS_PUMPKIN, true)
+            .withValidInput("true", "false");
 
     public SnowGolemProperties()
     {

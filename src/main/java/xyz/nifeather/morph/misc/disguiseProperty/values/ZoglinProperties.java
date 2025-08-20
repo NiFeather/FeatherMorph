@@ -14,7 +14,8 @@ import java.util.Map;
 
 public class ZoglinProperties extends BaseLivingEntityProperties<Zoglin>
 {
-    public final SingleProperty<Boolean> IS_BABY = getSingle(PropertyNames.ZOGLIN_IS_BABY, false);
+    public final SingleProperty<Boolean> IS_BABY = getSingle(PropertyNames.ZOGLIN_IS_BABY, false)
+            .withValidInput("true", "false");
 
     public ZoglinProperties()
     {

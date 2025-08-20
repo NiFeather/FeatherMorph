@@ -14,7 +14,8 @@ import java.util.Map;
 
 public class ZombieProperties extends BaseLivingEntityProperties<Zombie>
 {
-    public final SingleProperty<Boolean> IS_BABY = getSingle(PropertyNames.ZOMBIE_IS_BABY, false);
+    public final SingleProperty<Boolean> IS_BABY = getSingle(PropertyNames.ZOMBIE_IS_BABY, false)
+            .withValidInput("true", "false");
 
     public ZombieProperties()
     {
