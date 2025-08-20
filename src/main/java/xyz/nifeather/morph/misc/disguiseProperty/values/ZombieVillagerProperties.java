@@ -1,17 +1,16 @@
 package xyz.nifeather.morph.misc.disguiseProperty.values;
 
-import it.unimi.dsi.fastutil.Pair;
 import org.bukkit.Registry;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Villager;
 import org.bukkit.entity.ZombieVillager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xyz.nifeather.morph.misc.disguiseProperty.InputHandles;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 import xyz.nifeather.morph.utilities.DisguiseUtils;
-import xyz.nifeather.morph.utilities.MathUtils;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -30,16 +29,16 @@ public class ZombieVillagerProperties extends BaseLivingEntityProperties<ZombieV
             professionMap.put(profession.key().asString(), profession);
     }
 
-    public final SingleProperty<Villager.Type> TYPE = getSingle(PropertyNames.ZOMBIE_VILLAGER_TYPE, Villager.Type.PLAINS)
+    public final SingleProperty<Villager.Type> TYPE = getSingle(PropertyNames.ZOMBIE_VILLAGER_TYPE, Villager.Type.PLAINS, InputHandles::readVillagerType)
             .withRandom(Registry.VILLAGER_TYPE.stream().toList());
 
-    public final SingleProperty<Villager.Profession> PROFESSION = getSingle(PropertyNames.ZOMBIE_VILLAGER_PROFESSION, Villager.Profession.NONE)
+    public final SingleProperty<Villager.Profession> PROFESSION = getSingle(PropertyNames.ZOMBIE_VILLAGER_PROFESSION, Villager.Profession.NONE, InputHandles::readVillagerProfession)
             .withRandom(Registry.VILLAGER_PROFESSION.stream().toList());
 
-    public final SingleProperty<Integer> LEVEL = getSingle(PropertyNames.ZOMBIE_VILLAGER_LEVEL, 1)
+    public final SingleProperty<Integer> LEVEL = getSingle(PropertyNames.ZOMBIE_VILLAGER_LEVEL, 1, InputHandles::readVillagerLevel)
             .withRandom(1, 2, 3, 4, 5, 6);
 
-    public final SingleProperty<Boolean> IS_BABY = getSingle(PropertyNames.ZOMBIE_VILLAGER_IS_BABY, false);
+    public final SingleProperty<Boolean> IS_BABY = getSingle(PropertyNames.ZOMBIE_VILLAGER_IS_BABY, false, InputHandles::readBooleanRelaxed);
 
     public ZombieVillagerProperties()
     {
@@ -48,41 +47,6 @@ public class ZombieVillagerProperties extends BaseLivingEntityProperties<ZombieV
         PROFESSION.withValidInput(professionMap.keySet());
 
         registerSingle(TYPE, PROFESSION, IS_BABY, LEVEL);
-    }
-
-    @Override
-    protected @Nullable Pair<SingleProperty<?>, Object> parseSingleInput(String key, String value)
-    {
-        switch (key)
-        {
-            case PropertyNames.ZOMBIE_VILLAGER_TYPE ->
-            {
-                var type = typeMap.getOrDefault(value, null);
-
-                if (type != null)
-                    return Pair.of(TYPE, type);
-            }
-
-            case PropertyNames.ZOMBIE_VILLAGER_PROFESSION ->
-            {
-                var profession = professionMap.getOrDefault(value, null);
-
-                if (profession != null)
-                    return Pair.of(PROFESSION, profession);
-            }
-
-            case PropertyNames.ZOMBIE_VILLAGER_IS_BABY ->
-            {
-                return Pair.of(IS_BABY, Boolean.valueOf(value));
-            }
-
-            case PropertyNames.ZOMBIE_VILLAGER_LEVEL ->
-            {
-                return Pair.of(LEVEL, MathUtils.clamp(1, 6, MathUtils.parseIntOr(value, 1)));
-            }
-        }
-
-        return super.parseSingleInput(key, value);
     }
 
     @Override

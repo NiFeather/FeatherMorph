@@ -1,10 +1,10 @@
 package xyz.nifeather.morph.misc.disguiseProperty.values;
 
-import it.unimi.dsi.fastutil.Pair;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.HappyGhast;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xyz.nifeather.morph.misc.disguiseProperty.InputHandles;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
@@ -13,21 +13,12 @@ import java.util.Map;
 
 public class HappyGhastProperties extends BaseLivingEntityProperties<HappyGhast>
 {
-    public final SingleProperty<Boolean> IS_GHASTLING = getSingle(PropertyNames.HAPPY_GHAST_IS_GHASTLING, false)
+    public final SingleProperty<Boolean> IS_GHASTLING = getSingle(PropertyNames.HAPPY_GHAST_IS_GHASTLING, false, InputHandles::readBooleanRelaxed)
             .withValidInput("true", "false");
 
     public HappyGhastProperties()
     {
         registerSingle(IS_GHASTLING);
-    }
-
-    @Override
-    protected @Nullable Pair<SingleProperty<?>, Object> parseSingleInput(String key, String value)
-    {
-        if (key.equals(PropertyNames.HAPPY_GHAST_IS_GHASTLING))
-            return Pair.of(IS_GHASTLING, Boolean.parseBoolean(value));
-
-        return super.parseSingleInput(key, value);
     }
 
     @Override

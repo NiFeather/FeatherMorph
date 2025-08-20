@@ -1,11 +1,11 @@
 package xyz.nifeather.morph.misc.disguiseProperty.values;
 
-import it.unimi.dsi.fastutil.Pair;
 import org.bukkit.DyeColor;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Shulker;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xyz.nifeather.morph.misc.disguiseProperty.InputHandles;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
@@ -15,7 +15,7 @@ import java.util.Map;
 
 public class ShulkerProperties extends BaseLivingEntityProperties<Shulker>
 {
-    public final SingleProperty<DyeColor> DYE_COLOR = getSingle(PropertyNames.SHULKER_COLOR, DyeColor.getByWoolData((byte)15));
+    public final SingleProperty<DyeColor> DYE_COLOR = getSingle(PropertyNames.SHULKER_COLOR, DyeColor.getByWoolData((byte)15), InputHandles::readDyeColor);
 
     public ShulkerProperties()
     {
@@ -27,23 +27,6 @@ public class ShulkerProperties extends BaseLivingEntityProperties<Shulker>
     protected @Nullable Shulker tryCastEntity(@Nullable Entity targetEntity)
     {
         return targetEntity instanceof Shulker shulker ? shulker : null;
-    }
-
-    @Override
-    protected @Nullable Pair<SingleProperty<?>, Object> parseSingleInput(String key, String value)
-    {
-        if (key.equals(PropertyNames.SHULKER_COLOR))
-        {
-            var match = Arrays.stream(DyeColor.values()).filter(v -> v.name().equalsIgnoreCase(value))
-                    .findFirst().orElse(null);
-
-            if (match == null)
-                return null;
-
-            return Pair.of(DYE_COLOR, match);
-        }
-
-        return super.parseSingleInput(key, value);
     }
 
     @Override

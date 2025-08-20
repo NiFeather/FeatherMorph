@@ -39,6 +39,7 @@ import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.MorphStrings;
 import xyz.nifeather.morph.misc.*;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.ParseErrorException;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 import xyz.nifeather.morph.misc.disguiseProperty.values.OffTreeProperties;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
@@ -677,12 +678,21 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
             return true;
         }
+        catch (ParseErrorException e)
+        {
+            if (!FeatherMorphMain.getInstance().debugOutputEnabled())
+                logger.warn("Unable to disguise player because they are giving invalid inputs: %s".formatted(e.getMessage()));
+            else
+                logger.warn("Unable to disguise player because they are giving invalid inputs", e);
+
+            source.sendMessage(MessageUtils.prefixes(source, MorphStrings.errorWhileDisguisingUserFault().resolve("error", e.getMessage())));
+
+            return false;
+        }
         catch (Throwable t)
         {
-            logger.error("Unable to disguise player: " + t.getMessage());
-            t.printStackTrace();
-
-            source.sendMessage(MessageUtils.prefixes(source, MorphStrings.errorWhileDisguising()));
+            logger.error("Unable to disguise player", t);
+            source.sendMessage(MessageUtils.prefixes(source, MorphStrings.errorWhileDisguisingWithError().resolve("error", t.getMessage())));
 
             unMorph(parameters.targetPlayer);
 
@@ -891,7 +901,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
     private void buildDisguise(DisguiseBuildResult result,
                                MorphParameters parameters,
-                               PlayerMeta playerOptions)
+                               PlayerMeta playerOptions) throws ParseErrorException
     {
         if (!result.success())
             throw new IllegalArgumentException("Passing a failed result to postDisguise() !");
@@ -1452,7 +1462,14 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         if (this.prepareDisguiseMeta(parameters) == null)
             return false;
 
-        this.buildDisguise(result, parameters, playerMeta);
+        try
+        {
+            this.buildDisguise(result, parameters, playerMeta);
+        }
+        catch (Throwable ignored)
+        {
+            return false;
+        }
 
         if (!this.applyDisguise(parameters, state, meta, playerMeta))
             return false;

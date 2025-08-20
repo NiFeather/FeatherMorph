@@ -1,39 +1,29 @@
 package xyz.nifeather.morph.misc.disguiseProperty.values;
 
-import it.unimi.dsi.fastutil.Pair;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Fox;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
-import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
-import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
+import xyz.nifeather.morph.misc.disguiseProperty.*;
 import xyz.nifeather.morph.utilities.DisguiseUtils;
 
 import java.util.Map;
+import java.util.Optional;
 
 public class FoxProperties extends BaseLivingEntityProperties<Fox>
 {
-    public final SingleProperty<Fox.Type> VARIANT = getSingle(PropertyNames.FOX_VARIANT, Fox.Type.RED)
+    public final SingleProperty<Fox.Type> VARIANT = getSingle(PropertyNames.FOX_VARIANT, Fox.Type.RED, this::readFoxType)
             .withRandom(Fox.Type.values())
             .withValidInput("red", "snow");
+
+    public Optional<Fox.Type> readFoxType(String input) throws ParseErrorException
+    {
+        return InputHandles.readEnumNonNull(Fox.Type.values(), input);
+    }
 
     public FoxProperties()
     {
         registerSingle(VARIANT);
-    }
-
-    @Override
-    protected @Nullable Pair<SingleProperty<?>, Object> parseSingleInput(String key, String value)
-    {
-        if (key.equals(PropertyNames.FOX_VARIANT))
-        {
-            var type = value.equals("red") ? Fox.Type.RED : Fox.Type.SNOW;
-
-            return Pair.of(VARIANT, type);
-        }
-
-        return super.parseSingleInput(key, value);
     }
 
     @Override

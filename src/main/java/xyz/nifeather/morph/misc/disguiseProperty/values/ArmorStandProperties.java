@@ -3,116 +3,39 @@ package xyz.nifeather.morph.misc.disguiseProperty.values;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import io.papermc.paper.math.Rotations;
-import it.unimi.dsi.fastutil.Function;
 import it.unimi.dsi.fastutil.Pair;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xyz.nifeather.morph.misc.disguiseProperty.InputHandles;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 public class ArmorStandProperties extends BaseLivingEntityProperties<ArmorStand>
 {
-    public final SingleProperty<Boolean> SHOW_ARMS = getSingle(PropertyNames.ARMOR_STAND_SHOW_ARMS, false).withValidInput("true", "false");
-    public final SingleProperty<Boolean> HAS_BASE_PLATE = getSingle(PropertyNames.ARMOR_STAND_HAS_BASE_PLATE, true)
+    public final SingleProperty<Boolean> SHOW_ARMS = getSingle(PropertyNames.ARMOR_STAND_SHOW_ARMS, false, InputHandles::readBooleanRelaxed)
             .withValidInput("true", "false");
-    public final SingleProperty<Boolean> SMALL = getSingle(PropertyNames.ARMOR_STAND_SMALL, false)
+    public final SingleProperty<Boolean> HAS_BASE_PLATE = getSingle(PropertyNames.ARMOR_STAND_HAS_BASE_PLATE, true, InputHandles::readBooleanRelaxed)
+            .withValidInput("true", "false");
+    public final SingleProperty<Boolean> SMALL = getSingle(PropertyNames.ARMOR_STAND_SMALL, false, InputHandles::readBooleanRelaxed)
             .withValidInput("true", "false");
 
-    public final SingleProperty<Rotations> HEAD_ROTATION = getSingle(PropertyNames.ARMOR_STAND_HEAD_ROTATION, Rotations.ZERO);
-    public final SingleProperty<Rotations> BODY_ROTATION = getSingle(PropertyNames.ARMOR_STAND_BODY_ROTATION, Rotations.ZERO);
-    public final SingleProperty<Rotations> RIGHT_ARM_ROTATION = getSingle(PropertyNames.ARMOR_STAND_RIGHT_ARM_ROTATION, Rotations.ZERO);
-    public final SingleProperty<Rotations> LEFT_ARM_ROTATION = getSingle(PropertyNames.ARMOR_STAND_LEFT_ARM_ROTATION, Rotations.ZERO);
-    public final SingleProperty<Rotations> RIGHT_LEG_ROTATION = getSingle(PropertyNames.ARMOR_STAND_RIGHT_LEG_ROTATION, Rotations.ZERO);
-    public final SingleProperty<Rotations> LEFT_LEG_ROTATION = getSingle(PropertyNames.ARMOR_STAND_LEFT_LEG_ROTATION, Rotations.ZERO);
+    public final SingleProperty<Rotations> HEAD_ROTATION = getSingle(PropertyNames.ARMOR_STAND_HEAD_ROTATION, Rotations.ZERO, InputHandles::readRotations);
+    public final SingleProperty<Rotations> BODY_ROTATION = getSingle(PropertyNames.ARMOR_STAND_BODY_ROTATION, Rotations.ZERO, InputHandles::readRotations);
+    public final SingleProperty<Rotations> RIGHT_ARM_ROTATION = getSingle(PropertyNames.ARMOR_STAND_RIGHT_ARM_ROTATION, Rotations.ZERO, InputHandles::readRotations);
+    public final SingleProperty<Rotations> LEFT_ARM_ROTATION = getSingle(PropertyNames.ARMOR_STAND_LEFT_ARM_ROTATION, Rotations.ZERO, InputHandles::readRotations);
+    public final SingleProperty<Rotations> RIGHT_LEG_ROTATION = getSingle(PropertyNames.ARMOR_STAND_RIGHT_LEG_ROTATION, Rotations.ZERO, InputHandles::readRotations);
+    public final SingleProperty<Rotations> LEFT_LEG_ROTATION = getSingle(PropertyNames.ARMOR_STAND_LEFT_LEG_ROTATION, Rotations.ZERO, InputHandles::readRotations);
 
     public ArmorStandProperties()
     {
         registerSingle(SHOW_ARMS, HAS_BASE_PLATE, SMALL);
 
         registerSingle(HEAD_ROTATION, BODY_ROTATION, RIGHT_ARM_ROTATION, LEFT_ARM_ROTATION, RIGHT_LEG_ROTATION, LEFT_LEG_ROTATION);
-    }
-
-    @Override
-    protected @Nullable Pair<SingleProperty<?>, Object> parseSingleInput(String key, String value)
-    {
-        return switch (key)
-        {
-            case PropertyNames.ARMOR_STAND_SHOW_ARMS -> Pair.of(SHOW_ARMS, Boolean.valueOf(value));
-            case PropertyNames.ARMOR_STAND_HAS_BASE_PLATE -> Pair.of(HAS_BASE_PLATE, Boolean.valueOf(value));
-            case PropertyNames.ARMOR_STAND_SMALL -> Pair.of(SMALL, Boolean.valueOf(value));
-
-            case PropertyNames.ARMOR_STAND_HEAD_ROTATION -> parseRotatins(HEAD_ROTATION, value);
-            case PropertyNames.ARMOR_STAND_BODY_ROTATION -> parseRotatins(BODY_ROTATION, value);
-            case PropertyNames.ARMOR_STAND_RIGHT_ARM_ROTATION -> parseRotatins(RIGHT_ARM_ROTATION, value);
-            case PropertyNames.ARMOR_STAND_LEFT_ARM_ROTATION -> parseRotatins(LEFT_ARM_ROTATION, value);
-            case PropertyNames.ARMOR_STAND_RIGHT_LEG_ROTATION -> parseRotatins(RIGHT_LEG_ROTATION, value);
-            case PropertyNames.ARMOR_STAND_LEFT_LEG_ROTATION -> parseRotatins(LEFT_LEG_ROTATION, value);
-
-            default -> super.parseSingleInput(key, value);
-        };
-    }
-
-    @Nullable
-    private Pair<SingleProperty<?>, Object> parseRotatins(SingleProperty<Rotations> property, String input)
-    {
-        var rot = this.readRotations(input);
-
-        return rot.<Pair<SingleProperty<?>, Object>>map(rotations -> Pair.of(property, rotations))
-                .orElse(null);
-    }
-
-    public static class RotationStore
-    {
-        private float x, y, z;
-
-        public void x(float v) { x = v; }
-        public void y(float v) { y = v; }
-        public void z(float v) { z = v; }
-
-        public Rotations toRotations()
-        {
-            return Rotations.ofDegrees(x, y, z);
-        }
-    }
-
-    private Optional<Rotations> readRotations(String value)
-    {
-        try
-        {
-            var list = gson.fromJson(value, List.class);
-
-            Function<String, Optional<Float>> parseFloat = s ->
-            {
-                float v = Float.parseFloat(s + "");
-                if (!Float.isFinite(v)) return Optional.empty();
-
-                return Optional.of(v);
-            };
-
-            RotationStore rotationStore = new RotationStore();
-            parseFloat.get(list.get(0)).ifPresent(rotationStore::x);
-
-            if (list.size() > 1)
-                parseFloat.get(list.get(1)).ifPresent(rotationStore::y);
-
-            if (list.size() > 2)
-                parseFloat.get(list.get(2)).ifPresent(rotationStore::z);
-
-            return Optional.of(rotationStore.toRotations());
-        }
-        catch (Throwable ignored)
-        {
-        }
-
-
-        return Optional.empty();
     }
 
     @Override

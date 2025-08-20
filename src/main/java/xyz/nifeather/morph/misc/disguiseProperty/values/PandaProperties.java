@@ -1,17 +1,15 @@
 package xyz.nifeather.morph.misc.disguiseProperty.values;
 
-import it.unimi.dsi.fastutil.Pair;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Panda;
 import org.bukkit.entity.Panda.Gene;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
-import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
-import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
+import xyz.nifeather.morph.misc.disguiseProperty.*;
 import xyz.nifeather.morph.utilities.DisguiseUtils;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class PandaProperties extends BaseLivingEntityProperties<Panda>
@@ -24,10 +22,15 @@ public class PandaProperties extends BaseLivingEntityProperties<Panda>
             geneMap.put(gene.name().toLowerCase(), gene);
     }
 
-    public final SingleProperty<Panda.Gene> MAIN_GENE = getSingle(PropertyNames.PANDA_MAIN_GENE, Gene.NORMAL)
+    public final SingleProperty<Panda.Gene> MAIN_GENE = getSingle(PropertyNames.PANDA_MAIN_GENE, Gene.NORMAL, this::readGene)
             .withRandom(Gene.values());
 
-    public final SingleProperty<Panda.Gene> HIDDEN_GENE = getSingle(PropertyNames.PANDA_HIDDEN_GENE, Gene.NORMAL)
+    private Optional<Gene> readGene(String string) throws ParseErrorException
+    {
+        return InputHandles.readEnumNonNull(Gene.values(), string);
+    }
+
+    public final SingleProperty<Panda.Gene> HIDDEN_GENE = getSingle(PropertyNames.PANDA_HIDDEN_GENE, Gene.NORMAL, this::readGene)
             .withRandom(Gene.values());
 
     public PandaProperties()
@@ -38,31 +41,6 @@ public class PandaProperties extends BaseLivingEntityProperties<Panda>
         HIDDEN_GENE.withValidInput(geneMap.keySet());
 
         registerSingle(MAIN_GENE, HIDDEN_GENE);
-    }
-
-    @Override
-    protected @Nullable Pair<SingleProperty<?>, Object> parseSingleInput(String key, String value)
-    {
-        switch (key)
-        {
-            case PropertyNames.PANDA_MAIN_GENE ->
-            {
-                var gene = geneMap.getOrDefault(value, null);
-
-                if (gene != null)
-                    return Pair.of(MAIN_GENE, gene);
-            }
-
-            case PropertyNames.PANDA_HIDDEN_GENE ->
-            {
-                var gene = geneMap.getOrDefault(value, null);
-
-                if (gene != null)
-                    return Pair.of(HIDDEN_GENE, gene);
-            }
-        }
-
-        return super.parseSingleInput(key, value);
     }
 
     @Override

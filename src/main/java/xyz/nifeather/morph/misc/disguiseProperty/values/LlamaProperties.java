@@ -1,18 +1,15 @@
 package xyz.nifeather.morph.misc.disguiseProperty.values;
 
-import it.unimi.dsi.fastutil.Pair;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Llama;
 import org.bukkit.entity.Llama.Color;
-import org.checkerframework.checker.units.qual.C;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
-import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
-import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
+import xyz.nifeather.morph.misc.disguiseProperty.*;
 import xyz.nifeather.morph.utilities.DisguiseUtils;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class LlamaProperties extends BaseLivingEntityProperties<Llama>
@@ -25,8 +22,13 @@ public class LlamaProperties extends BaseLivingEntityProperties<Llama>
             colorMap.put(value.name().toLowerCase(), value);
     }
 
-    public final SingleProperty<Llama.Color> COLOR = getSingle(PropertyNames.LLAMA_COLOR, Color.CREAMY)
+    public final SingleProperty<Llama.Color> COLOR = getSingle(PropertyNames.LLAMA_COLOR, Color.CREAMY, this::readLlamaColor)
             .withRandom(Color.values());
+
+    private Optional<Color> readLlamaColor(String string) throws ParseErrorException
+    {
+        return InputHandles.readEnumNonNull(Color.values(), string);
+    }
 
     public LlamaProperties()
     {
@@ -34,20 +36,6 @@ public class LlamaProperties extends BaseLivingEntityProperties<Llama>
         COLOR.withValidInput(colorMap.keySet());
 
         registerSingle(COLOR);
-    }
-
-    @Override
-    protected @Nullable Pair<SingleProperty<?>, Object> parseSingleInput(String key, String value)
-    {
-        if (key.equals(PropertyNames.LLAMA_COLOR))
-        {
-            var color = colorMap.getOrDefault(value, null);
-
-            if (color != null)
-                return Pair.of(COLOR, color);
-        }
-
-        return super.parseSingleInput(key, value);
     }
 
     @Override

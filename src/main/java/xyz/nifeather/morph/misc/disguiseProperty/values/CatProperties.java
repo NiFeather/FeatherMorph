@@ -2,20 +2,18 @@ package xyz.nifeather.morph.misc.disguiseProperty.values;
 
 import io.papermc.paper.registry.RegistryAccess;
 import io.papermc.paper.registry.RegistryKey;
-import it.unimi.dsi.fastutil.Pair;
 import org.bukkit.DyeColor;
 import org.bukkit.entity.Cat;
 import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
-import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
-import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
+import xyz.nifeather.morph.misc.disguiseProperty.*;
 import xyz.nifeather.morph.utilities.DisguiseUtils;
 import xyz.nifeather.morph.utilities.Uuids;
 
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -29,9 +27,15 @@ public class CatProperties extends BaseLivingEntityProperties<Cat>
             variantMap.put(variant.key().asString(), variant);
     }
 
-    public final SingleProperty<Cat.Type> CAT_VARIANT = getSingle(PropertyNames.CAT_VARIANT, Cat.Type.TABBY);
-    public final SingleProperty<UUID> OWNER = getSingle(PropertyNames.CAT_OWNER, Uuids.NIL_UUID);
-    public final SingleProperty<DyeColor> COLLAR_COLOR = getSingle(PropertyNames.CAT_COLLAR_COLOR, DyeColor.RED);
+    public final SingleProperty<Cat.Type> CAT_VARIANT = getSingle(PropertyNames.CAT_VARIANT, Cat.Type.TABBY, this::readCatVariant);
+
+    private Optional<Cat.Type> readCatVariant(String string) throws ParseErrorException
+    {
+        return InputHandles.readRegistry(RegistryKey.CAT_VARIANT, string);
+    }
+
+    public final SingleProperty<UUID> OWNER = getSingle(PropertyNames.CAT_OWNER, Uuids.NIL_UUID, InputHandles::readUUID);
+    public final SingleProperty<DyeColor> COLLAR_COLOR = getSingle(PropertyNames.CAT_COLLAR_COLOR, DyeColor.RED, InputHandles::readDyeColor);
 
     public CatProperties()
     {
@@ -44,53 +48,6 @@ public class CatProperties extends BaseLivingEntityProperties<Cat>
         registerSingle(
                 CAT_VARIANT, OWNER, COLLAR_COLOR
         );
-    }
-
-    @Override
-    protected @Nullable Pair<SingleProperty<?>, Object> parseSingleInput(String key, String value)
-    {
-        return switch (key)
-        {
-            case PropertyNames.CAT_VARIANT ->
-            {
-                var match = variantMap.getOrDefault(value, null);
-
-                if (match != null)
-                    yield Pair.of(CAT_VARIANT, match);
-                else
-                    yield null;
-            }
-
-            case PropertyNames.CAT_OWNER ->
-            {
-                UUID uuid = null;
-
-                try
-                {
-                    uuid = UUID.fromString(value);
-                    yield Pair.of(OWNER, uuid);
-                }
-                catch (Throwable ignored)
-                {
-                }
-
-                yield null;
-            }
-
-            case PropertyNames.CAT_COLLAR_COLOR ->
-            {
-                var match = Arrays.stream(DyeColor.values())
-                        .filter(v -> v.name().equalsIgnoreCase(value))
-                        .findFirst().orElse(null);
-
-                if (match == null)
-                    yield null;
-
-                yield  Pair.of(COLLAR_COLOR, match);
-            }
-
-            default -> super.parseSingleInput(key, value);
-        };
     }
 
     @Override

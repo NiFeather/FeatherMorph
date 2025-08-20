@@ -1,6 +1,5 @@
 package xyz.nifeather.morph.misc.disguiseProperty.values;
 
-import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
@@ -9,6 +8,8 @@ import org.slf4j.Logger;
 import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.api.FeatherMorphAPI;
 import xyz.nifeather.morph.misc.DisguiseState;
+import xyz.nifeather.morph.misc.disguiseProperty.InputHandle;
+import xyz.nifeather.morph.misc.disguiseProperty.ParseErrorException;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 
@@ -16,21 +17,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 public abstract class AbstractProperties<E extends Entity>
 {
-    protected <X> SingleProperty<X> getSingle(String name, X val)
+    protected <X> SingleProperty<X> getSingle(String name, X val, InputHandle<X> inputHandle)
     {
         if (val == null)
             throw new IllegalArgumentException("May not pass a null value to getSingle()");
 
-        return SingleProperty.of(name, val);
+        return SingleProperty.of(name, val, inputHandle);
     }
 
     protected final Logger logger = FeatherMorphMain.getInstance().getSLF4JLogger();
 
-    protected final List<SingleProperty<?>> values = new CopyOnWriteArrayList<>();
+    protected final Map<String, SingleProperty<?>> values = new ConcurrentHashMap<>();
 
     protected void registerSingle(SingleProperty<?>... value)
     {
@@ -40,32 +40,42 @@ public abstract class AbstractProperties<E extends Entity>
 
     protected void registerSingle(SingleProperty<?> value)
     {
-        var duplicateValue = values.stream().filter(p -> p.id().equals(value.id())).findFirst().orElse(null);
+        var duplicateValue = values.getOrDefault(value.id(), null);
         if (duplicateValue != null)
             throw new IllegalArgumentException("Already contains a value with ID '%s'".formatted(value.id()));
 
-        values.add(value);
+        values.put(value.id(), value);
     }
 
+    @Deprecated
     public List<SingleProperty<?>> getValues()
     {
-        return new ObjectArrayList<>(values);
+        return new ObjectArrayList<>(values.values());
     }
 
-    @Nullable
-    protected abstract Pair<SingleProperty<?>, Object> parseSingleInput(String key, String value);
+    public Map<String, SingleProperty<?>> getRegisteredProperties()
+    {
+        return Map.copyOf(this.values);
+    }
 
-    public final Map<SingleProperty<?>, Object> readFromPropertiesInput(Map<String, String> propertiesInput)
+    public final Map<SingleProperty<?>, Object> readFromPropertiesInput(Map<String, String> propertiesInput) throws ParseErrorException
     {
         var map = new ConcurrentHashMap<SingleProperty<?>, Object>();
 
-        propertiesInput.forEach((key, value) ->
+        for (Map.Entry<String, String> entry : propertiesInput.entrySet())
         {
-            var pair = this.parseSingleInput(key, value);
+            var key = entry.getKey();
+            var value = entry.getValue();
 
-            if (pair != null)
-                map.put(pair.key(), pair.value());
-        });
+            var property = (SingleProperty<Object>) this.values.getOrDefault(key, null);
+            if (property == null)
+                continue;
+
+            var val = property.forInput(value);
+            if (val.isEmpty()) continue;
+
+            map.put(property, val.get());
+        }
 
         return map;
     }

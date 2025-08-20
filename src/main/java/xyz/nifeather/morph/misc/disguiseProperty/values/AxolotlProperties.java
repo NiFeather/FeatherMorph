@@ -1,16 +1,14 @@
 package xyz.nifeather.morph.misc.disguiseProperty.values;
 
-import it.unimi.dsi.fastutil.Pair;
 import org.bukkit.entity.Axolotl;
 import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
-import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
-import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
+import xyz.nifeather.morph.misc.disguiseProperty.*;
 import xyz.nifeather.morph.utilities.DisguiseUtils;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class AxolotlProperties extends BaseLivingEntityProperties<Axolotl>
@@ -23,8 +21,13 @@ public class AxolotlProperties extends BaseLivingEntityProperties<Axolotl>
             variantMap.put(variant.name().toLowerCase(), variant);
     }
 
-    public final SingleProperty<Axolotl.Variant> VARIANT = getSingle(PropertyNames.AXOLOTL_VARIANT, Axolotl.Variant.LUCY)
+    public final SingleProperty<Axolotl.Variant> VARIANT = getSingle(PropertyNames.AXOLOTL_VARIANT, Axolotl.Variant.LUCY, this::readAxolotlVariant)
             .withRandom(Axolotl.Variant.values());
+
+    public Optional<Axolotl.Variant> readAxolotlVariant(String input) throws ParseErrorException
+    {
+        return InputHandles.readEnumNonNull(Axolotl.Variant.values(), input);
+    }
 
     public AxolotlProperties()
     {
@@ -32,20 +35,6 @@ public class AxolotlProperties extends BaseLivingEntityProperties<Axolotl>
         VARIANT.withValidInput(variantMap.keySet());
 
         registerSingle(VARIANT);
-    }
-
-    @Override
-    protected @Nullable Pair<SingleProperty<?>, Object> parseSingleInput(String key, String value)
-    {
-        if (key.equals(PropertyNames.AXOLOTL_VARIANT))
-        {
-            var match = variantMap.getOrDefault(value, null);
-
-            if (match != null)
-                return Pair.of(VARIANT, match);
-        }
-
-        return super.parseSingleInput(key, value);
     }
 
     @Override

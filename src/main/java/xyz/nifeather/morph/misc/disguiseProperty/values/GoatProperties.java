@@ -1,10 +1,10 @@
 package xyz.nifeather.morph.misc.disguiseProperty.values;
 
-import it.unimi.dsi.fastutil.Pair;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Goat;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xyz.nifeather.morph.misc.disguiseProperty.InputHandles;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
@@ -14,29 +14,17 @@ import java.util.Map;
 
 public class GoatProperties extends BaseLivingEntityProperties<Goat>
 {
-    public final SingleProperty<Boolean> HAS_LEFT_HORN = getSingle(PropertyNames.GOAT_HAS_LEFT_HORN, true)
+    public final SingleProperty<Boolean> HAS_LEFT_HORN = getSingle(PropertyNames.GOAT_HAS_LEFT_HORN, true, InputHandles::readBooleanRelaxed)
             .withRandom(true, true, true, false)
             .withValidInput("false", "true");
 
-    public final SingleProperty<Boolean> HAS_RIGHT_HORN = getSingle(PropertyNames.GOAT_HAS_RIGHT_HORN, true)
+    public final SingleProperty<Boolean> HAS_RIGHT_HORN = getSingle(PropertyNames.GOAT_HAS_RIGHT_HORN, true, InputHandles::readBooleanRelaxed)
             .withRandom(true, true, true, false)
             .withValidInput("false", "true");
 
     public GoatProperties()
     {
         registerSingle(HAS_LEFT_HORN, HAS_RIGHT_HORN);
-    }
-
-    @Override
-    protected @Nullable Pair<SingleProperty<?>, Object> parseSingleInput(String key, String value)
-    {
-        return switch (key)
-        {
-            case PropertyNames.GOAT_HAS_LEFT_HORN -> Pair.of(HAS_LEFT_HORN, Boolean.valueOf(value));
-            case PropertyNames.GOAT_HAS_RIGHT_HORN -> Pair.of(HAS_RIGHT_HORN, Boolean.valueOf(value));
-
-            default -> super.parseSingleInput(key, value);
-        };
     }
 
     @Override

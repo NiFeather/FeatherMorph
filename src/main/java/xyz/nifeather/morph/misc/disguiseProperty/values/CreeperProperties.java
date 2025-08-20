@@ -1,10 +1,10 @@
 package xyz.nifeather.morph.misc.disguiseProperty.values;
 
-import it.unimi.dsi.fastutil.Pair;
 import org.bukkit.entity.Creeper;
 import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xyz.nifeather.morph.misc.disguiseProperty.InputHandles;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
@@ -14,22 +14,13 @@ import java.util.Map;
 
 public class CreeperProperties extends BaseLivingEntityProperties<Creeper>
 {
-    public final SingleProperty<Boolean> CHARGED = getSingle(PropertyNames.CREEPER_CHARGED, false)
+    public final SingleProperty<Boolean> CHARGED = getSingle(PropertyNames.CREEPER_CHARGED, false, InputHandles::readBooleanRelaxed)
             .withRandom(false, false, false, true)
             .withValidInput("true", "false");
 
     public CreeperProperties()
     {
         registerSingle(CHARGED);
-    }
-
-    @Override
-    protected @Nullable Pair<SingleProperty<?>, Object> parseSingleInput(String key, String value)
-    {
-        if (key.equals(PropertyNames.CREEPER_CHARGED))
-            return Pair.of(CHARGED, Boolean.valueOf(value));
-
-        return super.parseSingleInput(key, value);
     }
 
     @Override

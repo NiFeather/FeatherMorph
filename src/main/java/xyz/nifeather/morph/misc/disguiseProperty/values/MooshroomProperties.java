@@ -1,40 +1,29 @@
 package xyz.nifeather.morph.misc.disguiseProperty.values;
 
-import it.unimi.dsi.fastutil.Pair;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.MushroomCow;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
-import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
-import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
+import xyz.nifeather.morph.misc.disguiseProperty.*;
 import xyz.nifeather.morph.utilities.DisguiseUtils;
 
 import java.util.Map;
+import java.util.Optional;
 
 public class MooshroomProperties extends BaseLivingEntityProperties<MushroomCow>
 {
-    public final SingleProperty<MushroomCow.Variant> VARIANT = getSingle(PropertyNames.MOOSHROOM_VARIANT, MushroomCow.Variant.RED)
+    public final SingleProperty<MushroomCow.Variant> VARIANT = getSingle(PropertyNames.MOOSHROOM_VARIANT, MushroomCow.Variant.RED, this::readVariant)
             .withRandom(MushroomCow.Variant.RED, MushroomCow.Variant.RED, MushroomCow.Variant.RED, MushroomCow.Variant.BROWN)
             .withValidInput("red", "brown");
+
+    private Optional<MushroomCow.Variant> readVariant(String string) throws ParseErrorException
+    {
+        return InputHandles.readEnumNonNull(MushroomCow.Variant.values(), string);
+    }
 
     public MooshroomProperties()
     {
         registerSingle(VARIANT);
-    }
-
-    @Override
-    protected @Nullable Pair<SingleProperty<?>, Object> parseSingleInput(String key, String value)
-    {
-        if (key.equals(PropertyNames.MOOSHROOM_VARIANT))
-        {
-            if (value.equals("red"))
-                return Pair.of(VARIANT, MushroomCow.Variant.RED);
-            else if (value.equals("brown"))
-                return Pair.of(VARIANT, MushroomCow.Variant.BROWN);
-        }
-
-        return super.parseSingleInput(key, value);
     }
 
     @Override

@@ -1,6 +1,7 @@
 package xyz.nifeather.morph.misc.disguiseProperty;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
@@ -16,7 +17,7 @@ public class SingleProperty<T>
     private final String identifier;
     private final T defaultVal;
     private final Class<T> type;
-    private final Function<String, Optional<T>> inputHandle;
+    private final InputHandle<T> inputHandle;
 
     public String id()
     {
@@ -33,9 +34,9 @@ public class SingleProperty<T>
         return type;
     }
 
-    public Optional<T> forInput(String input)
+    public Optional<T> forInput(String input) throws ParseErrorException
     {
-        return inputHandle.apply(input);
+        return inputHandle.handle(input);
     }
 
     @Deprecated
@@ -44,10 +45,10 @@ public class SingleProperty<T>
         this(identifier, defaultValue, type, null);
     }
 
-    public SingleProperty(String identifier, T defaultValue, Class<T> type, @Nullable Function<String, Optional<T>> inputHandle)
+    public SingleProperty(String identifier, T defaultValue, Class<T> type, @Nullable InputHandle<T> inputHandle)
     {
         if (inputHandle == null)
-            inputHandle = str -> Optional.empty();
+            inputHandle = InputHandles::empty;
 
         this.identifier = identifier;
         this.defaultVal = defaultValue;
@@ -111,7 +112,7 @@ public class SingleProperty<T>
         return new SingleProperty<>(id, val, (Class<T>) val.getClass());
     }
 
-    public static <T> SingleProperty<T> of(String id, T val, Function<String, Optional<T>> inputHandle)
+    public static <T> SingleProperty<T> of(String id, T val, InputHandle<T> inputHandle)
     {
         return new SingleProperty<>(id, val, (Class<T>) val.getClass(), inputHandle);
     }

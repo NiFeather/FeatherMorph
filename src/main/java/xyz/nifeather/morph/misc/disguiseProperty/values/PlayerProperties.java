@@ -1,37 +1,31 @@
 package xyz.nifeather.morph.misc.disguiseProperty.values;
 
-import it.unimi.dsi.fastutil.Pair;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.MainHand;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
-import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
-import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
+import xyz.nifeather.morph.misc.disguiseProperty.*;
 
 import java.util.Map;
+import java.util.Optional;
 
 public class PlayerProperties extends BaseLivingEntityProperties<Player>
 {
-    public final SingleProperty<MainHandStatus> MAIN_HAND = getSingle(PropertyNames.PLAYER_MAIN_HAND, MainHandStatus.NOTSET)
+    public final SingleProperty<MainHandStatus> MAIN_HAND = getSingle(PropertyNames.PLAYER_MAIN_HAND, MainHandStatus.NOTSET, this::readHand)
             .withValidInput("left", "right");
+
+    private Optional<MainHandStatus> readHand(String string) throws ParseErrorException
+    {
+        if (string.equalsIgnoreCase("default"))
+            throw new ParseErrorException("readHand: This value is not allowed here!");
+
+        return InputHandles.readEnumNonNull(MainHandStatus.values(), string);
+    }
 
     public PlayerProperties()
     {
         registerSingle(MAIN_HAND);
-    }
-
-    @Override
-    protected @Nullable Pair<SingleProperty<?>, Object> parseSingleInput(String key, String value)
-    {
-        if (key.equals(PropertyNames.PLAYER_MAIN_HAND))
-        {
-            var val = value.equals("left") ? MainHandStatus.LEFT : MainHandStatus.RIGHT;
-            return Pair.of(MAIN_HAND, val);
-        }
-
-        return super.parseSingleInput(key, value);
     }
 
     @Override

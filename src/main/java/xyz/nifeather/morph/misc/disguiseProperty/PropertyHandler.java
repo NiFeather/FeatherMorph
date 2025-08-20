@@ -39,7 +39,7 @@ public class PropertyHandler
         validProperties.addAll(properties.getValues());
     }
 
-    public void updateFromPropertiesInput(Map<String, String> input)
+    public void updateFromPropertiesInput(Map<String, String> input) throws ParseErrorException
     {
         if (this.bindingProperties == null)
         {

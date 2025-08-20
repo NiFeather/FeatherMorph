@@ -1,16 +1,14 @@
 package xyz.nifeather.morph.misc.disguiseProperty.values;
 
-import it.unimi.dsi.fastutil.Pair;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Horse;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
-import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
-import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
+import xyz.nifeather.morph.misc.disguiseProperty.*;
 import xyz.nifeather.morph.utilities.DisguiseUtils;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class HorseProperties extends BaseLivingEntityProperties<Horse>
@@ -27,11 +25,21 @@ public class HorseProperties extends BaseLivingEntityProperties<Horse>
             styleMap.put(style.name().toLowerCase(), style);
     }
 
-    public final SingleProperty<Horse.Color> COLOR = getSingle(PropertyNames.HORSE_COLOR, Horse.Color.WHITE)
+    public final SingleProperty<Horse.Color> COLOR = getSingle(PropertyNames.HORSE_COLOR, Horse.Color.WHITE, this::readHorseColor)
             .withRandom(Horse.Color.values());
 
-    public final SingleProperty<Horse.Style> STYLE = getSingle(PropertyNames.HORSE_STYLE, Horse.Style.NONE)
+    private Optional<Horse.Color> readHorseColor(String string) throws ParseErrorException
+    {
+        return InputHandles.readEnumNonNull(Horse.Color.values(), string);
+    }
+
+    public final SingleProperty<Horse.Style> STYLE = getSingle(PropertyNames.HORSE_STYLE, Horse.Style.NONE, this::readHorseStyle)
             .withRandom(Horse.Style.values());
+
+    private Optional<Horse.Style> readHorseStyle(String string) throws ParseErrorException
+    {
+        return InputHandles.readEnumNonNull(Horse.Style.values(), string);
+    }
 
     public HorseProperties()
     {
@@ -41,31 +49,6 @@ public class HorseProperties extends BaseLivingEntityProperties<Horse>
         STYLE.withValidInput(styleMap.keySet());
 
         registerSingle(COLOR, STYLE);
-    }
-
-    @Override
-    protected @Nullable Pair<SingleProperty<?>, Object> parseSingleInput(String key, String value)
-    {
-        switch (key)
-        {
-            case PropertyNames.HORSE_COLOR ->
-            {
-                var color = colorMap.getOrDefault(value, null);
-
-                if (color != null)
-                    return Pair.of(COLOR, color);
-            }
-
-            case PropertyNames.HORSE_STYLE ->
-            {
-                var style = styleMap.getOrDefault(value, null);
-
-                if (style != null)
-                    return Pair.of(STYLE, style);
-            }
-        }
-
-        return super.parseSingleInput(key, value);
     }
 
     @Override

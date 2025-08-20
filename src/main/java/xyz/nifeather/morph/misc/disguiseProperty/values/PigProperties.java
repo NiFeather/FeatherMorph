@@ -2,17 +2,15 @@ package xyz.nifeather.morph.misc.disguiseProperty.values;
 
 import io.papermc.paper.registry.RegistryAccess;
 import io.papermc.paper.registry.RegistryKey;
-import it.unimi.dsi.fastutil.Pair;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Pig;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
-import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
-import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
+import xyz.nifeather.morph.misc.disguiseProperty.*;
 import xyz.nifeather.morph.utilities.DisguiseUtils;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class PigProperties extends BaseLivingEntityProperties<Pig>
@@ -26,25 +24,16 @@ public class PigProperties extends BaseLivingEntityProperties<Pig>
         for (Pig.Variant variant : RegistryAccess.registryAccess().getRegistry(RegistryKey.PIG_VARIANT))
             variantMap.put(variant.key().asString(), variant);
 
-        VARIANT = getSingle(PropertyNames.PIG_VARIANT, Pig.Variant.TEMPERATE)
+        VARIANT = getSingle(PropertyNames.PIG_VARIANT, Pig.Variant.TEMPERATE, this::readVariant)
                 .withRandom(Pig.Variant.TEMPERATE, Pig.Variant.COLD, Pig.Variant.WARM)
                 .withValidInput(variantMap.keySet());
 
         registerSingle(VARIANT);
     }
 
-    @Override
-    protected @Nullable Pair<SingleProperty<?>, Object> parseSingleInput(String key, String value)
+    private Optional<Pig.Variant> readVariant(String string) throws ParseErrorException
     {
-        if (key.equals(PropertyNames.PIG_VARIANT))
-        {
-            var match = variantMap.getOrDefault(value, null);
-
-            if (match != null)
-                return Pair.of(VARIANT, match);
-        }
-
-        return super.parseSingleInput(key, value);
+        return InputHandles.readRegistry(RegistryKey.PIG_VARIANT, string);
     }
 
     @Override

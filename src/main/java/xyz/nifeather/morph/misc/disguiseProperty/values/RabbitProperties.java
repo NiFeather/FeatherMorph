@@ -1,17 +1,15 @@
 package xyz.nifeather.morph.misc.disguiseProperty.values;
 
-import it.unimi.dsi.fastutil.Pair;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Rabbit;
 import org.bukkit.entity.Rabbit.Type;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
-import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
-import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
+import xyz.nifeather.morph.misc.disguiseProperty.*;
 import xyz.nifeather.morph.utilities.DisguiseUtils;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class RabbitProperties extends BaseLivingEntityProperties<Rabbit>
@@ -24,8 +22,13 @@ public class RabbitProperties extends BaseLivingEntityProperties<Rabbit>
             typeMap.put(type.name().toLowerCase(), type);
     }
 
-    public final SingleProperty<Rabbit.Type> VARIANT = getSingle(PropertyNames.RABBIT_VARIANT, Type.BROWN)
+    public final SingleProperty<Rabbit.Type> VARIANT = getSingle(PropertyNames.RABBIT_VARIANT, Type.BROWN, this::readVariant)
             .withRandom(Type.values());
+
+    private Optional<Type> readVariant(String string) throws ParseErrorException
+    {
+        return InputHandles.readEnumNonNull(Type.values(), string);
+    }
 
     public RabbitProperties()
     {
@@ -33,20 +36,6 @@ public class RabbitProperties extends BaseLivingEntityProperties<Rabbit>
         VARIANT.withValidInput(typeMap.keySet());
 
         registerSingle(VARIANT);
-    }
-
-    @Override
-    protected @Nullable Pair<SingleProperty<?>, Object> parseSingleInput(String key, String value)
-    {
-        if (key.equals(PropertyNames.RABBIT_VARIANT))
-        {
-            var variant = typeMap.getOrDefault(value, null);
-
-            if (variant != null)
-                return Pair.of(VARIANT, variant);
-        }
-
-        return super.parseSingleInput(key, value);
     }
 
     @Override

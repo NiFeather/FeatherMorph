@@ -1,11 +1,10 @@
 package xyz.nifeather.morph.misc.disguiseProperty.values;
 
-import it.unimi.dsi.fastutil.Pair;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Snowman;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.types.SnowGolemWatcher;
+import xyz.nifeather.morph.misc.disguiseProperty.InputHandles;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
@@ -14,7 +13,7 @@ import java.util.Map;
 
 public class SnowGolemProperties extends BaseLivingEntityProperties<Snowman>
 {
-    public final SingleProperty<Boolean> HAS_PUMPKIN = getSingle(PropertyNames.SNOW_GOLEM_HAS_PUMPKIN, true)
+    public final SingleProperty<Boolean> HAS_PUMPKIN = getSingle(PropertyNames.SNOW_GOLEM_HAS_PUMPKIN, true, InputHandles::readBooleanRelaxed)
             .withValidInput("true", "false");
 
     public SnowGolemProperties()
@@ -32,17 +31,6 @@ public class SnowGolemProperties extends BaseLivingEntityProperties<Snowman>
     protected void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull Snowman targetEntity)
     {
         propertyHandler.set(HAS_PUMPKIN, !targetEntity.isDerp());
-    }
-
-    @Override
-    protected @Nullable Pair<SingleProperty<?>, Object> parseSingleInput(String key, String value)
-    {
-        if (key.equals(PropertyNames.SNOW_GOLEM_HAS_PUMPKIN))
-        {
-            return Pair.of(HAS_PUMPKIN, Boolean.valueOf(value));
-        }
-
-        return super.parseSingleInput(key, value);
     }
 
     @Override

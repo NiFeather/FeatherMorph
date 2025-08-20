@@ -1,16 +1,12 @@
 package xyz.nifeather.morph.misc.disguiseProperty.values;
 
-import it.unimi.dsi.fastutil.Pair;
 import org.bukkit.Registry;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Villager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
-import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
-import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
+import xyz.nifeather.morph.misc.disguiseProperty.*;
 import xyz.nifeather.morph.utilities.DisguiseUtils;
-import xyz.nifeather.morph.utilities.MathUtils;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -29,13 +25,13 @@ public class VillagerProperties extends BaseLivingEntityProperties<Villager>
             professionMap.put(profession.key().asString(), profession);
     }
 
-    public final SingleProperty<Villager.Type> TYPE = getSingle(PropertyNames.VILLAGER_TYPE, Villager.Type.PLAINS)
+    public final SingleProperty<Villager.Type> TYPE = getSingle(PropertyNames.VILLAGER_TYPE, Villager.Type.PLAINS, InputHandles::readVillagerType)
             .withRandom(Registry.VILLAGER_TYPE.stream().toList());
 
-    public final SingleProperty<Villager.Profession> PROFESSION = getSingle(PropertyNames.VILLAGER_PROFESSION, Villager.Profession.NONE)
+    public final SingleProperty<Villager.Profession> PROFESSION = getSingle(PropertyNames.VILLAGER_PROFESSION, Villager.Profession.NONE, InputHandles::readVillagerProfession)
             .withRandom(Registry.VILLAGER_PROFESSION.stream().toList());
 
-    public final SingleProperty<Integer> LEVEL = getSingle(PropertyNames.VILLAGER_LEVEL, 1)
+    public final SingleProperty<Integer> LEVEL = getSingle(PropertyNames.VILLAGER_LEVEL, 1, InputHandles::readVillagerLevel)
             .withRandom(1, 2, 3, 4, 5, 6);
 
     public VillagerProperties()
@@ -46,48 +42,6 @@ public class VillagerProperties extends BaseLivingEntityProperties<Villager>
         LEVEL.withValidInput("1", "2", "3", "4", "5", "6");
 
         registerSingle(TYPE, PROFESSION, LEVEL);
-    }
-
-    @Override
-    protected @Nullable Pair<SingleProperty<?>, Object> parseSingleInput(String key, String value)
-    {
-        switch (key)
-        {
-            case PropertyNames.VILLAGER_TYPE ->
-            {
-                var type = typeMap.getOrDefault(value, null);
-
-                if (type != null)
-                    return Pair.of(TYPE, type);
-            }
-
-            case PropertyNames.VILLAGER_PROFESSION ->
-            {
-                var profession = professionMap.getOrDefault(value, null);
-
-                if (profession != null)
-                    return Pair.of(PROFESSION, profession);
-            }
-
-            case PropertyNames.VILLAGER_LEVEL ->
-            {
-                int level = 1;
-
-                try
-                {
-                    level = Integer.parseInt(value);
-                }
-                catch (Throwable ignored)
-                {
-                }
-
-                level = MathUtils.clamp(1, 6, level);
-
-                return Pair.of(LEVEL, level);
-            }
-        }
-
-        return super.parseSingleInput(key, value);
     }
 
     @Override

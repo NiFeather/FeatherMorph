@@ -1,40 +1,32 @@
 package xyz.nifeather.morph.misc.disguiseProperty.values;
 
-import it.unimi.dsi.fastutil.Pair;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Slime;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.nifeather.morph.misc.DisguiseState;
-import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
-import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
-import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
-import xyz.nifeather.morph.utilities.MathUtils;
+import xyz.nifeather.morph.misc.disguiseProperty.*;
 
 import java.util.Map;
-import java.util.Random;
+import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class SlimeMagmaProperties extends BaseLivingEntityProperties<Slime>
 {
-    public final SingleProperty<Integer> SIZE = getSingle(PropertyNames.SLIME_MAGMA_SIZE, 1);
+    public final SingleProperty<Integer> SIZE = getSingle(PropertyNames.SLIME_MAGMA_SIZE, 1, this::readSize);
+
+    private Optional<Integer> readSize(String string) throws ParseErrorException
+    {
+        var val = InputHandles.readInteger(string)
+                .orElseThrow(() -> new ParseErrorException("readSize: Unable to parse slime/magma size"));
+
+        InputHandles.throwIfOutOfBounds(val, 1, 4);
+
+        return Optional.of(val);
+    }
 
     public SlimeMagmaProperties()
     {
         registerSingle(SIZE);
-    }
-
-    @Override
-    protected @Nullable Pair<SingleProperty<?>, Object> parseSingleInput(String key, String value)
-    {
-        if (key.equals(PropertyNames.SLIME_MAGMA_SIZE))
-        {
-            int size = MathUtils.clamp(1, 4, MathUtils.parseIntOr(value, 1));
-            return Pair.of(SIZE, size);
-        }
-
-        return super.parseSingleInput(key, value);
     }
 
     @Override

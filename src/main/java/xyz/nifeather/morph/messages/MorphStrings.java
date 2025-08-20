@@ -163,10 +163,26 @@ public class MorphStrings extends AbstractMorphStrings
                 "<color:red>服务器不支持或已禁用此伪装");
     }
 
+    /**
+     * @deprecated Please use {@link MorphStrings#errorWhileDisguisingWithError()} ASAP.
+     */
+    @Deprecated
     public static FormattableMessage errorWhileDisguising()
     {
         return getFormattable(getKey("error_while_disguising"),
                 "<color:red>伪装时出现问题");
+    }
+
+    public static FormattableMessage errorWhileDisguisingWithError()
+    {
+        return getFormattable(getKey("error_while_disguising_with_detail"),
+                "[Fallback] <color:red>变形时出现问题: <error>");
+    }
+
+    public static FormattableMessage errorWhileDisguisingUserFault()
+    {
+        return getFormattable(getKey("error_while_disguising_user_fault"),
+                "[Fallback] <color:red>未能解析属性: <error>");
     }
 
     public static FormattableMessage errorWhileUpdatingDisguise()
