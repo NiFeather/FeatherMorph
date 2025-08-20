@@ -148,7 +148,8 @@ public class ModDisguiseWrapper extends EventWrapper<TrackingClientDisguise>
     @Override
     public boolean isBaby()
     {
-        return this.readPropertyOr(OffTreeProperties.IS_BABY, false);
+        //todo: implement this
+        return false;
     }
 
     @Override
