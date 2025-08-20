@@ -11,13 +11,11 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.DyeColor;
 import org.bukkit.Keyed;
 import org.bukkit.NamespacedKey;
+import org.bukkit.Registry;
 import org.bukkit.entity.*;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 public class InputHandles
 {
@@ -125,11 +123,26 @@ public class InputHandles
     public static <V extends Keyed> Optional<V> readRegistry(RegistryKey<@NotNull V> registryKey, String input) throws ParseErrorException
     {
         var key = NamespacedKey.fromString(input);
-        if (key == null) return Optional.empty();
+        if (key == null)
+            throw new ParseErrorException("readRegistry: Invalid identifier '%s'".formatted(input));
+
+        Registry<@NotNull V> registry;
 
         try
         {
-            var registry = RegistryAccess.registryAccess().getRegistry(registryKey);
+            registry = RegistryAccess.registryAccess().getRegistry(registryKey);
+        }
+        catch (NoSuchElementException e)
+        {
+            throw new ParseErrorException("readRegistry: Can't read from registry since the target registry '%s' does not exist! Is the server broken?".formatted(registryKey.key().toString()), e);
+        }
+        catch (IllegalArgumentException e)
+        {
+            throw new ParseErrorException("readRegistry: The target registry '%s' is not available at this moment. Is the server broken?".formatted(registryKey.key().toString()));
+        }
+
+        try
+        {
             var val = registry.getOrThrow(key);
 
             return Optional.of(val);
