@@ -92,7 +92,6 @@ public class FeatherMorphDirectAccess
      * @throws xiamomc.pluginbase.Exceptions.NullDependencyException if the dependency is not registered, AND throwIfNotFound is set to true
      */
     @Nullable
-    @Contract("_, true -> !null; _, false -> null")
     public <T> T getGlobalDependency(Class<T> clazz, boolean throwIfNotFound)
     {
         return dependencyManager.get(clazz, throwIfNotFound);

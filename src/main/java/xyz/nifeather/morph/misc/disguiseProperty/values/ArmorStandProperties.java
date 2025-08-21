@@ -8,6 +8,11 @@ import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xiamomc.pluginbase.Bindables.Bindable;
+import xyz.nifeather.morph.FeatherMorphMain;
+import xyz.nifeather.morph.api.FeatherMorphAPI;
+import xyz.nifeather.morph.config.ConfigOption;
+import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.misc.disguiseProperty.InputHandles;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
@@ -30,6 +35,27 @@ public class ArmorStandProperties extends BaseLivingEntityProperties<ArmorStand>
     public final SingleProperty<Rotations> LEFT_ARM_ROTATION = getSingle(PropertyNames.ARMOR_STAND_LEFT_ARM_ROTATION, Rotations.ZERO, InputHandles::readRotations);
     public final SingleProperty<Rotations> RIGHT_LEG_ROTATION = getSingle(PropertyNames.ARMOR_STAND_RIGHT_LEG_ROTATION, Rotations.ZERO, InputHandles::readRotations);
     public final SingleProperty<Rotations> LEFT_LEG_ROTATION = getSingle(PropertyNames.ARMOR_STAND_LEFT_LEG_ROTATION, Rotations.ZERO, InputHandles::readRotations);
+
+    @Nullable
+    private volatile MorphConfigManager config;
+    private final Bindable<Boolean> showArms = new Bindable<>(false);
+
+    private void lateInitConfig()
+    {
+        if (config != null)
+            return;
+
+        var api = FeatherMorphAPI.instance();
+        if (api == null)
+            return;
+
+        var configManager = api.directAccess().getGlobalDependency(MorphConfigManager.class, false);
+        if (configManager == null)
+            return;
+
+        configManager.bind(showArms, ConfigOption.ARMORSTAND_SHOW_ARMS);
+        this.config = configManager;
+    }
 
     public ArmorStandProperties()
     {
@@ -62,7 +88,8 @@ public class ArmorStandProperties extends BaseLivingEntityProperties<ArmorStand>
     @Override
     protected void setupDefaultProperties(PropertyHandler propertyHandler)
     {
-        propertyHandler.set(SHOW_ARMS, false);
+        lateInitConfig();
+        propertyHandler.set(SHOW_ARMS, showArms.get());
     }
 
     private final Gson gson = new GsonBuilder().create();
