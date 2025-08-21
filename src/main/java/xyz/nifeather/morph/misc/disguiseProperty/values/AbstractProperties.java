@@ -71,10 +71,7 @@ public abstract class AbstractProperties<E extends Entity>
             if (property == null)
                 continue;
 
-            var val = property.forInput(value);
-            if (val.isEmpty()) continue;
-
-            map.put(property, val.get());
+            property.forInput(value).ifPresent(o -> map.put(property, o));
         }
 
         return map;
