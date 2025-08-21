@@ -676,10 +676,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         }
         catch (ParseErrorException e)
         {
-            if (!FeatherMorphMain.getInstance().debugOutputEnabled())
-                logger.warn("Unable to disguise player because they are giving invalid inputs: %s".formatted(e.getMessage()));
-            else
-                logger.warn("Unable to disguise player because they are giving invalid inputs", e);
+            if (FeatherMorphMain.getInstance().debugOutputEnabled())
+                logger.warn("Unable to disguise player because a ParseErrorException has occurred", e);
 
             var msg = MorphStrings.errorWhileDisguisingUserFault()
                     .resolve("error", e.getMessage())
