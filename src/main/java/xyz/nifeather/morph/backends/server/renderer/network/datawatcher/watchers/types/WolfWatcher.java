@@ -49,20 +49,24 @@ public class WolfWatcher extends TameableAnimalWatcher
         if (property.equals(properties.VARIANT))
         {
             var val = (Wolf.Variant) value;
-
             this.writePersistent(ValueIndex.WOLF.WOLF_VARIANT, getWolfVariant(val.key().asString()));
         }
         else if (property.equals(properties.OWNER))
         {
             var uuid = (UUID) value;
-            writePersistent(ValueIndex.WOLF.OWNER, Optional.ofNullable(uuid));
+            if (Uuids.NIL_UUID.equals(uuid))
+                uuid = null;
 
-            this.writeTamed(!Uuids.NIL_UUID.equals(uuid));
+            writePersistent(ValueIndex.WOLF.OWNER, Optional.ofNullable(uuid));
+            this.writeTamed(uuid != null && !Uuids.NIL_UUID.equals(uuid));
         }
         else if (property.equals(properties.COLLAR_COLOR))
         {
             var dyeColor = (DyeColor) value;
             writePersistent(ValueIndex.WOLF.COLLAR_COLOR, (int)dyeColor.getWoolData());
+
+            this.readOr(ValueIndex.CAT.OWNER, Optional.empty())
+                    .ifPresentOrElse(uuid -> {}, () -> this.writeProperty(properties.OWNER, UUID.randomUUID()));
         }
 
         super.onPropertyWrite(property, value);
