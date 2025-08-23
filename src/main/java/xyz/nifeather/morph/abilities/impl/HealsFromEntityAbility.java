@@ -12,6 +12,7 @@ import org.bukkit.entity.Projectile;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.pluginbase.Annotations.Resolved;
+import xyz.nifeather.morph.abilities.ISkillAbilityOptionHandler;
 import xyz.nifeather.morph.abilities.MorphAbility;
 import xyz.nifeather.morph.abilities.options.HealsFromEntityOption;
 import xyz.nifeather.morph.api.morphs.abilities.AbilityNames;
@@ -30,6 +31,12 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class HealsFromEntityAbility extends MorphAbility<HealsFromEntityOption>
 {
+    @Override
+    public @NotNull ISkillAbilityOptionHandler<HealsFromEntityOption> optionHandler()
+    {
+        return HealsFromEntityOption.OPTION_HANDLER;
+    }
+
     /**
      * 获取此被动技能的ID
      *
@@ -39,12 +46,6 @@ public class HealsFromEntityAbility extends MorphAbility<HealsFromEntityOption>
     public @NotNull NamespacedKey getIdentifier()
     {
         return AbilityNames.HEALS_FROM_ENTITY;
-    }
-
-    @Override
-    protected @NotNull HealsFromEntityOption createOption()
-    {
-        return new HealsFromEntityOption();
     }
 
     private final Random random = ThreadLocalRandom.current();
@@ -81,15 +82,9 @@ public class HealsFromEntityAbility extends MorphAbility<HealsFromEntityOption>
     @Override
     public boolean handle(Player player, DisguiseState state)
     {
-        //Validate option
-        if (!super.handle(player, state)) return false;
-
         var option = this.getOptionFor(state);
 
         if (option == null || !option.isValid()) return false;
-
-        if (option.entityType == null)
-            option.entityType = EntityTypeUtils.fromString(option.entityIdentifier);
 
         //Find or refresh entity
         var nmsRecord = NmsRecord.of(player);

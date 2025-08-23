@@ -25,9 +25,11 @@ import xyz.nifeather.morph.messages.CommandStrings;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.MorphStrings;
 import xyz.nifeather.morph.messages.SkillStrings;
+import xyz.nifeather.morph.misc.disguiseProperty.ParseErrorException;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 import xyz.nifeather.morph.skills.impl.*;
-import xyz.nifeather.morph.storage.skill.SkillAbilityConfiguration;
+import xyz.nifeather.morph.storage.skill.ISkillAbilityOption;
+import xyz.nifeather.morph.storage.skill.SkillAbilityConfigContainer;
 import xyz.nifeather.morph.storage.skill.SkillsConfigurationStoreNew;
 import xyz.nifeather.morph.utilities.PermissionUtils;
 
@@ -43,14 +45,14 @@ public class MorphSkillHandler extends MorphPluginObject
     /**
      * 已注册的技能
      */
-    private final Map<String, IMorphSkill<?>> skills = new ConcurrentHashMap<>();
+    private final Map<String, ISkill<?>> skills = new ConcurrentHashMap<>();
 
     /**
      * 获取已注册的技能
      *
      * @return 技能列表
      */
-    public List<IMorphSkill<?>> getRegistedSkills()
+    public List<ISkill<?>> getRegistedSkills()
     {
         return skills.values().stream().toList();
     }
@@ -97,7 +99,7 @@ public class MorphSkillHandler extends MorphPluginObject
      * @param skills 技能列表
      * @return 所有操作是否成功
      */
-    public boolean registerSkills(List<IMorphSkill<?>> skills)
+    public boolean registerSkills(List<ISkill<?>> skills)
     {
         var success = new AtomicBoolean(true);
 
@@ -114,7 +116,7 @@ public class MorphSkillHandler extends MorphPluginObject
      * @param skill 技能
      * @return 操作是否成功
      */
-    public boolean registerSkill(IMorphSkill<?> skill)
+    public boolean registerSkill(ISkill<?> skill)
     {
         //logger.info("Registering skill: " + skill.getIdentifier().asString());
 
@@ -150,7 +152,7 @@ public class MorphSkillHandler extends MorphPluginObject
      * @return 对应的技能和技能配置，如果没找到则是null
      */
     @Nullable
-    public Pair<SkillAbilityConfiguration, IMorphSkill<?>> getSkillEntry(@Nullable String identifier)
+    public Pair<SkillAbilityConfigContainer, ISkill<?>> getSkillEntry(@Nullable String identifier)
     {
         if (identifier == null) return null;
 
@@ -164,7 +166,7 @@ public class MorphSkillHandler extends MorphPluginObject
     }
 
     @NotNull
-    public IMorphSkill<?> lookupDisguiseSkill(String disguiseIdentifier)
+    public ISkill<?> lookupDisguiseSkill(String disguiseIdentifier)
     {
         var configuration = store.get(disguiseIdentifier);
         if (configuration == null) return NoneMorphSkill.instance;
@@ -176,11 +178,11 @@ public class MorphSkillHandler extends MorphPluginObject
      * 获取和identifier匹配的技能
      *
      * @param skillIdentifier 技能ID
-     * @return {@link IMorphSkill}
+     * @return {@link ISkill}
      * @apiNote 如果未找到则返回 {@link NoneMorphSkill#instance}
      */
     @NotNull
-    public IMorphSkill<?> getSkill(String skillIdentifier)
+    public ISkill<?> getSkill(String skillIdentifier)
     {
         var skillInstance = this.skills.getOrDefault(skillIdentifier, NoneMorphSkill.instance);
 
@@ -266,7 +268,7 @@ public class MorphSkillHandler extends MorphPluginObject
             return;
         }
 
-        SkillAbilityConfiguration config = state.getSkillAbilityConfiguration();
+        SkillAbilityConfigContainer config = state.getSkillAbilityConfiguration();
         if (config == null)
         {
             logger.warn("Disguise have a skill but don't have a skill configuration?!");
@@ -276,9 +278,22 @@ public class MorphSkillHandler extends MorphPluginObject
             return;
         }
 
-        var option = skill.getOptionInstance().fromMap(config.getSkillOptions(skill));
+        ISkillAbilityOption option = null;
+        try
+        {
+            option = skill.optionHandler().readOption(config.getSkillOptions(skill));
+        }
+        catch (ParseErrorException e)
+        {
+            logger.warn("Error parsing skill configuration, is everything right?", e);
+            player.sendMessage(MessageUtils.prefixes(player, SkillStrings.exceptionOccurredString()));
+            state.setSkillCooldown(20, true);
+
+            return;
+        }
 
         var cd = skill.executeSkillGeneric(player, state, config, option);
+
         cdInfo.setLastInvoke(plugin.getCurrentTick());
 
         state.getSoundHandler().resetSoundTime();

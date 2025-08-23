@@ -1,21 +1,89 @@
 package xyz.nifeather.morph.abilities.options;
 
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectArraySet;
 import net.kyori.adventure.bossbar.BossBar;
+import org.bukkit.entity.Boss;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.nifeather.morph.storage.skill.ISkillOption;
+import xyz.nifeather.morph.abilities.ISkillAbilityOptionHandler;
+import xyz.nifeather.morph.misc.disguiseProperty.InputHandles;
+import xyz.nifeather.morph.misc.disguiseProperty.ParseErrorException;
+import xyz.nifeather.morph.storage.skill.ISkillAbilityOption;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
-public class BossbarOption implements ISkillOption
+public class BossbarOption implements ISkillAbilityOption
 {
-    public BossbarOption()
+    public static class BossbarOptionHandler implements ISkillAbilityOptionHandler<BossbarOption>
     {
+        @Override
+        public Class<BossbarOption> getOptionClass()
+        {
+            return BossbarOption.class;
+        }
+
+        @Override
+        public void writeOption(BossbarOption option, @NotNull Map<String, Object> gsonMap)
+        {
+            var createOption = option.getCreateOption();
+
+            if (createOption != null)
+            {
+                gsonMap.put("color", createOption.color.name().toLowerCase());
+                gsonMap.put("style", createOption.overlay().name().toLowerCase());
+                gsonMap.put("name", createOption.name());
+
+                List<String> flags = new ObjectArrayList<>();
+                createOption.flags().forEach(f -> flags.add(f.name().toLowerCase()));
+                gsonMap.put("flags", flags);
+            }
+
+            gsonMap.put("distance", option.applyDistance);
+        }
+
+        @Override
+        public @NotNull BossbarOption readOption(@NotNull Map<String, Object> gsonMap) throws ParseErrorException
+        {
+            var colorString = utilGetTypedOrThrow("color", gsonMap, String.class);
+            var styleString = utilGetTypedOrThrow("style", gsonMap, String.class);
+            var name = utilGetTypedOrThrow("name", gsonMap, String.class);
+
+            int distance = utilGetTypedOrThrow("distance", gsonMap, Number.class).intValue();
+
+            var color = InputHandles.readEnumNonNull(BossBar.Color.values(), "color", colorString)
+                    .orElseThrow(() -> new ParseErrorException("color", "No value match for bossbar color '%s'".formatted(colorString)));
+
+            var style = InputHandles.readEnumNonNull(BossBar.Overlay.values(), "style", styleString)
+                    .orElseThrow(() -> new ParseErrorException("style", "No value match for bossbar style '%s'".formatted(styleString)));
+
+            List<String> rawFlagList = utilGetTypedOrThrow("flags", gsonMap, List.class)
+                    .stream()
+                    .map(Object::toString)
+                    .toList();
+
+            String clazzSimpleName = this.getClass().getSimpleName();
+            Set<BossBar.Flag> flags = new ObjectArraySet<>();
+            for (String input : rawFlagList)
+            {
+                var flag = InputHandles.readEnumNonNull(BossBar.Flag.values(), clazzSimpleName, input)
+                        .orElseThrow(() -> new ParseErrorException(clazzSimpleName, "No matching bossbar flag for input '%s'".formatted(input)));
+
+                flags.add(flag);
+            }
+
+            var createOption = new BossbarCreateOption(name, color, style, flags);
+            return new BossbarOption(createOption, distance);
+        }
     }
+
+    public static final BossbarOptionHandler OPTION_HANDLER = new BossbarOptionHandler();
 
     public BossbarOption(BossbarCreateOption option, int distance)
     {
@@ -23,13 +91,13 @@ public class BossbarOption implements ISkillOption
         this.applyDistance = distance;
     }
 
-    private int applyDistance;
+    private final int applyDistance;
     public int getApplyDistance()
     {
         return applyDistance;
     }
 
-    private BossbarCreateOption createOption;
+    private final BossbarCreateOption createOption;
 
     public BossbarCreateOption getCreateOption()
     {
@@ -42,53 +110,10 @@ public class BossbarOption implements ISkillOption
         return true;
     }
 
-    @Override
-    public Map<String, Object> toMap()
-    {
-        var map = new Object2ObjectOpenHashMap<String, Object>();
-
-        if (createOption != null)
-        {
-            map.put("color", createOption.color.name().toLowerCase());
-            map.put("style", createOption.overlay().name().toLowerCase());
-            map.put("name", createOption.name());
-
-            List<String> flags = new ObjectArrayList<>();
-            createOption.flags().forEach(f -> flags.add(f.name().toLowerCase()));
-            map.put("flags", flags);
-        }
-
-        map.put("distance", applyDistance);
-
-        return map;
-    }
-
-    @Override
-    public @Nullable ISkillOption fromMap(@Nullable Map<String, Object> map)
-    {
-        if (map == null) return null;
-
-        //flag
-        var flags = new ObjectArraySet<BossBar.Flag>();
-        var rawFlags = tryGet(map, "flags", List.class);
-
-        if (rawFlags != null) rawFlags.forEach(o ->
-        {
-            if (!(o instanceof String str)) return;
-
-            var matchingFlag = BossBar.Flag.NAMES.value(str);
-            if (matchingFlag != null) flags.add(matchingFlag);
-        });
-
-        var color = tryGet(map, "color", BossBar.Color.WHITE, o -> BossBar.Color.NAMES.value("" + o));
-        var style = tryGet(map, "style", BossBar.Overlay.PROGRESS, o -> BossBar.Overlay.NAMES.value("" + o));
-        var title = "" + map.getOrDefault("name", "<name>");
-        int distance = tryGetInt(map, "distance", -1);
-
-        return new BossbarOption(new BossbarCreateOption(title, color, style, flags), distance);
-    }
-
-    public record BossbarCreateOption(String name, BossBar.Color color, BossBar.Overlay overlay, Set<BossBar.Flag> flags)
+    public record BossbarCreateOption(String name,
+                                      BossBar.Color color,
+                                      BossBar.Overlay overlay,
+                                      Set<BossBar.Flag> flags)
     {
     }
 }

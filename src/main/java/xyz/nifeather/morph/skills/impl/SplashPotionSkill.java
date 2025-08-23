@@ -13,18 +13,26 @@ import org.bukkit.entity.ThrownPotion;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.NotNull;
+import xyz.nifeather.morph.abilities.ISkillAbilityOptionHandler;
 import xyz.nifeather.morph.api.morphs.skills.SkillNames;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.skills.MorphSkill;
 import xyz.nifeather.morph.skills.options.NoOpConfiguration;
-import xyz.nifeather.morph.storage.skill.ISkillOption;
-import xyz.nifeather.morph.storage.skill.SkillAbilityConfiguration;
+import xyz.nifeather.morph.storage.skill.ISkillAbilityOption;
+import xyz.nifeather.morph.storage.skill.SkillAbilityConfigContainer;
 
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class SplashPotionSkill extends MorphSkill<NoOpConfiguration>
 {
+    @Override
+    public ISkillAbilityOptionHandler<NoOpConfiguration> optionHandler()
+    {
+        return NoOpConfiguration.OPTION_HANDLER;
+    }
+
     /**
      * 执行伪装的主动技能
      *
@@ -35,24 +43,24 @@ public class SplashPotionSkill extends MorphSkill<NoOpConfiguration>
      * @return 执行后的冷却长度
      */
     @Override
-    public int executeSkill(Player player, DisguiseState state, SkillAbilityConfiguration configuration, NoOpConfiguration option)
+    public int executeSkill(Player player, DisguiseState state, SkillAbilityConfigContainer configuration, NoOpConfiguration option)
     {
         var launchedProjectile = launchProjectile(player, EntityType.SPLASH_POTION, 0.4f);
 
         if (launchedProjectile == null)
         {
             logger.error("Error summoning splash potion: null");
-            return configuration.getCooldown();
+            return configuration.getSkillCooldown();
         }
 
         if (!(launchedProjectile instanceof ThrownPotion thrownPotion))
         {
             logger.error("Error summoning splash potion: Excepted ThrownPotion, but get %s".formatted(launchedProjectile.getClass()));
-            return configuration.getCooldown();
+            return configuration.getSkillCooldown();
         }
 
         var meta = thrownPotion.getPotionMeta();
-        var info = validTypes[random.nextInt(0, validTypes.length)];
+        var info = validTypes[ThreadLocalRandom.current().nextInt(0, validTypes.length)];
         var potionEffect = new PotionEffect(info.type, info.duration, info.amplifier, false, true);
         meta.addCustomEffect(potionEffect, true);
 
@@ -79,7 +87,7 @@ public class SplashPotionSkill extends MorphSkill<NoOpConfiguration>
 
         player.getWorld().playSound(player.getLocation(), Sound.ENTITY_WITCH_THROW, 1, 1);
 
-        return configuration.getCooldown();
+        return configuration.getSkillCooldown();
     }
 
     private final PotionInfo[] validTypes = new PotionInfo[]
@@ -100,8 +108,6 @@ public class SplashPotionSkill extends MorphSkill<NoOpConfiguration>
         }
     }
 
-    private final Random random = new Random();
-
     /**
      * 获取要应用的技能ID
      *
@@ -111,16 +117,5 @@ public class SplashPotionSkill extends MorphSkill<NoOpConfiguration>
     public @NotNull NamespacedKey getIdentifier()
     {
         return SkillNames.WITCH;
-    }
-
-    /**
-     * 获取和此技能对应的{@link ISkillOption}实例
-     *
-     * @return {@link ISkillOption}
-     */
-    @Override
-    public NoOpConfiguration getOptionInstance()
-    {
-        return NoOpConfiguration.instance;
     }
 }

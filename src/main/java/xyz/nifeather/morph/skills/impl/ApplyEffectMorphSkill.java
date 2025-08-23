@@ -9,18 +9,28 @@ import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xyz.nifeather.morph.abilities.ISkillAbilityOptionHandler;
 import xyz.nifeather.morph.api.morphs.skills.SkillNames;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.SkillStrings;
 import xyz.nifeather.morph.misc.DisguiseState;
+import xyz.nifeather.morph.misc.disguiseProperty.ParseErrorException;
 import xyz.nifeather.morph.skills.MorphSkill;
 import xyz.nifeather.morph.skills.options.EffectConfiguration;
-import xyz.nifeather.morph.storage.skill.SkillAbilityConfiguration;
+import xyz.nifeather.morph.storage.skill.SkillAbilityConfigContainer;
+
+import java.util.Map;
 
 public class ApplyEffectMorphSkill extends MorphSkill<EffectConfiguration>
 {
     @Override
-    public int executeSkill(Player player, DisguiseState state, SkillAbilityConfiguration configuration, EffectConfiguration option)
+    public ISkillAbilityOptionHandler<EffectConfiguration> optionHandler()
+    {
+        return EffectConfiguration.OPTION_HANDLER;
+    }
+
+    @Override
+    public int executeSkill(Player player, DisguiseState state, SkillAbilityConfigContainer configuration, EffectConfiguration option)
     {
         if (option == null || configuration == null)
         {
@@ -66,7 +76,7 @@ public class ApplyEffectMorphSkill extends MorphSkill<EffectConfiguration>
 
         player.playSound(sound);
 
-        return configuration.getCooldown();
+        return configuration.getSkillCooldown();
     }
 
     @Nullable
@@ -88,13 +98,5 @@ public class ApplyEffectMorphSkill extends MorphSkill<EffectConfiguration>
     public @NotNull NamespacedKey getIdentifier()
     {
         return SkillNames.APPLY_EFFECT;
-    }
-
-    private final EffectConfiguration option = new EffectConfiguration();
-
-    @Override
-    public EffectConfiguration getOptionInstance()
-    {
-        return option;
     }
 }

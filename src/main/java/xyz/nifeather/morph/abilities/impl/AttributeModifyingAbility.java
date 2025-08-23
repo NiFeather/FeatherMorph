@@ -6,6 +6,7 @@ import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xyz.nifeather.morph.abilities.ISkillAbilityOptionHandler;
 import xyz.nifeather.morph.abilities.MorphAbility;
 import xyz.nifeather.morph.abilities.options.AttributeModifyOption;
 import xyz.nifeather.morph.api.morphs.abilities.AbilityNames;
@@ -17,6 +18,12 @@ import java.util.Objects;
 
 public class AttributeModifyingAbility extends MorphAbility<AttributeModifyOption>
 {
+    @Override
+    public @NotNull ISkillAbilityOptionHandler<AttributeModifyOption> optionHandler()
+    {
+        return AttributeModifyOption.OPTION_HANDLER;
+    }
+
     /**
      * 获取此被动技能的ID
      *
@@ -26,12 +33,6 @@ public class AttributeModifyingAbility extends MorphAbility<AttributeModifyOptio
     public @NotNull NamespacedKey getIdentifier()
     {
         return AbilityNames.ATTRIBUTE_MODIFY;
-    }
-
-    @Override
-    protected @NotNull AttributeModifyOption createOption()
-    {
-        return new AttributeModifyOption();
     }
 
     @Override
@@ -70,7 +71,14 @@ public class AttributeModifyingAbility extends MorphAbility<AttributeModifyOptio
         return super.applyToPlayer(player, state);
     }
 
-    public static final NamespacedKey modifierKey = Objects.requireNonNull(NamespacedKey.fromString("feathermorph:ability_modifier"), "How?!");
+    @Override
+    public boolean handle(Player player, DisguiseState state)
+    {
+        return true;
+    }
+
+    @NotNull
+    public static final NamespacedKey modifierKey = Objects.requireNonNull(NamespacedKey.fromString("feathermorph:ability_modifier"), "Bad server implementation");
 
     @Override
     public boolean revokeFromPlayer(Player player, DisguiseState state)

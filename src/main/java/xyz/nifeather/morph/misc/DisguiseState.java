@@ -32,13 +32,13 @@ import xyz.nifeather.morph.network.commands.S2C.set.S2CSetSkillCooldownCommand;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
 import xyz.nifeather.morph.providers.animation.SingleAnimation;
 import xyz.nifeather.morph.providers.disguise.DisguiseProvider;
-import xyz.nifeather.morph.skills.IMorphSkill;
+import xyz.nifeather.morph.skills.ISkill;
 import xyz.nifeather.morph.skills.MorphSkillHandler;
 import xyz.nifeather.morph.skills.SkillCooldownInfo;
 import xyz.nifeather.morph.skills.impl.NoneMorphSkill;
 import xyz.nifeather.morph.storage.playerdata.PlayerMeta;
-import xyz.nifeather.morph.storage.skill.ISkillOption;
-import xyz.nifeather.morph.storage.skill.SkillAbilityConfiguration;
+import xyz.nifeather.morph.storage.skill.ISkillAbilityOption;
+import xyz.nifeather.morph.storage.skill.SkillAbilityConfigContainer;
 import xyz.nifeather.morph.utilities.ItemUtils;
 import xyz.nifeather.morph.utilities.NbtUtils;
 import xyz.nifeather.morph.utilities.PermissionUtils;
@@ -563,16 +563,16 @@ public class DisguiseState extends MorphPluginObject
     }
 
     @Nullable
-    private SkillAbilityConfiguration skillAbilityConfiguration;
+    private SkillAbilityConfigContainer skillAbilityConfigContainer;
 
     @Nullable
-    public SkillAbilityConfiguration getSkillAbilityConfiguration()
+    public SkillAbilityConfigContainer getSkillAbilityConfiguration()
     {
-        return skillAbilityConfiguration;
+        return skillAbilityConfigContainer;
     }
 
     @NotNull
-    private IMorphSkill<?> skill = NoneMorphSkill.instance;
+    private ISkill<?> skill = NoneMorphSkill.instance;
 
     /**
      * 设置此伪装的技能
@@ -580,29 +580,29 @@ public class DisguiseState extends MorphPluginObject
      * @param config 与技能对应的配置
      * @apiNote 如果目标技能是null，则会fallback到 {@link NoneMorphSkill#instance}，并一并清除技能配置
      */
-    public <X extends ISkillOption> void setSkill(@Nullable IMorphSkill<X> newSkill,
-                                                  SkillAbilityConfiguration config)
+    public <X extends ISkillAbilityOption> void setSkill(@Nullable ISkill<X> newSkill,
+                                                         SkillAbilityConfigContainer config)
     {
         this.skill.onDeEquip(this);
 
         if (newSkill == null)
         {
             this.skill = NoneMorphSkill.instance;
-            this.skillAbilityConfiguration = null;
+            this.skillAbilityConfigContainer = null;
             return;
         }
 
-        this.skillAbilityConfiguration = config;
+        this.skillAbilityConfigContainer = config;
         newSkill.onInitialEquip(this);
         this.skill = newSkill;
     }
 
     /**
      * 获取此伪装的技能
-     * @return {@link IMorphSkill}
+     * @return {@link ISkill}
      */
     @NotNull
-    public IMorphSkill<?> getSkill()
+    public ISkill<?> getSkill()
     {
         return skill;
     }

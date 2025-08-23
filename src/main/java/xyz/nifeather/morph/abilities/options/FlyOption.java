@@ -1,60 +1,73 @@
 package xyz.nifeather.morph.abilities.options;
 
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
-import xyz.nifeather.morph.storage.skill.ISkillOption;
+import org.jetbrains.annotations.NotNull;
+import xyz.nifeather.morph.abilities.ISkillAbilityOptionHandler;
+import xyz.nifeather.morph.misc.disguiseProperty.ParseErrorException;
+import xyz.nifeather.morph.storage.skill.ISkillAbilityOption;
 
-public class FlyOption implements ISkillOption
+import java.util.Map;
+
+public class FlyOption implements ISkillAbilityOption
 {
-    public FlyOption()
+    public static class FlyOptionHandler implements ISkillAbilityOptionHandler<FlyOption>
     {
+        @Override
+        public Class<FlyOption> getOptionClass()
+        {
+            return FlyOption.class;
+        }
+
+        @Override
+        public void writeOption(FlyOption option, @NotNull Map<String, Object> gsonMap)
+        {
+            gsonMap.put("fly_speed", option.getFlyingSpeed());
+            gsonMap.put("minimum_hunger", option.getMinimumHunger());
+        }
+
+        @Override
+        public @NotNull FlyOption readOption(@NotNull Map<String, Object> gsonMap) throws ParseErrorException
+        {
+            float flySpeed = utilGetTypedOrThrow("fly_speed", gsonMap, Number.class).floatValue();
+            int minimumHunger = utilGetTypedOrThrow("minimum_hunger", gsonMap, Number.class).intValue();
+
+            var clazzSimpleName = this.getClass().getSimpleName();
+            if (!Float.isFinite(flySpeed))
+                throw new ParseErrorException(clazzSimpleName, "Non-Finite fly speed");
+
+            return new FlyOption(flySpeed, minimumHunger);
+        }
     }
+
+    public static final FlyOptionHandler OPTION_HANDLER = new FlyOptionHandler();
 
     public FlyOption(float speed)
     {
-        this.flyingSpeed = speed;
+        this(speed, 6);
     }
 
-    @Expose
-    @SerializedName("fly_speed")
-    private float flyingSpeed = Float.NaN;
+    public FlyOption(float speed, int minimumHunger)
+    {
+        this.flyingSpeed = speed;
+        this.minimumHunger = minimumHunger;
+    }
+
+    private final float flyingSpeed;
 
     public float getFlyingSpeed()
     {
         return flyingSpeed;
     }
 
-    @Expose
-    @SerializedName("hunger_consume_multiplier")
-    private float hungerConsumeMultiplier = 1f;
-
-    public float getHungerConsumeMultiplier()
-    {
-        return hungerConsumeMultiplier;
-    }
-
-    public void setHungerConsumeMultiplier(float newVal)
-    {
-        hungerConsumeMultiplier = newVal;
-    }
-
-    @Expose
-    @SerializedName("minimum_hunger")
-    private int minimumHunger = 6;
+    private final int minimumHunger;
 
     public int getMinimumHunger()
     {
         return minimumHunger;
     }
 
-    public void setMinimumHunger(int newVal)
-    {
-        minimumHunger = newVal;
-    }
-
     @Override
     public boolean isValid()
     {
-        return !Float.isNaN(hungerConsumeMultiplier) && !Float.isNaN(flyingSpeed);
+        return !Float.isNaN(flyingSpeed);
     }
 }

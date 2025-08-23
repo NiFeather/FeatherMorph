@@ -8,12 +8,19 @@ import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xyz.nifeather.morph.MorphManager;
+import xyz.nifeather.morph.abilities.ISkillAbilityOptionHandler;
 import xyz.nifeather.morph.abilities.impl.OnAttackAbility;
 import xyz.nifeather.morph.abilities.options.PotionEffectOption;
 import xyz.nifeather.morph.api.morphs.abilities.AbilityNames;
 
 public class PotionOnAttackAbility extends OnAttackAbility<PotionEffectOption>
 {
+    @Override
+    public @NotNull ISkillAbilityOptionHandler<PotionEffectOption> optionHandler()
+    {
+        return PotionEffectOption.OPTION_HANDLER;
+    }
+
     /**
      * 获取此被动技能的ID
      *
@@ -23,12 +30,6 @@ public class PotionOnAttackAbility extends OnAttackAbility<PotionEffectOption>
     public @NotNull NamespacedKey getIdentifier()
     {
         return AbilityNames.POTION_ON_ATTACK;
-    }
-
-    @Override
-    protected @NotNull PotionEffectOption createOption()
-    {
-        return new PotionEffectOption();
     }
 
     @Resolved

@@ -9,6 +9,7 @@ import xyz.nifeather.morph.abilities.impl.AttributeModifyingAbility;
 import xyz.nifeather.morph.abilities.options.AttributeModifyOption;
 import xyz.nifeather.morph.abilities.options.ReduceDamageOption;
 import xyz.nifeather.morph.api.morphs.abilities.AbilityNames;
+import xyz.nifeather.morph.misc.disguiseProperty.ParseErrorException;
 import xyz.nifeather.morph.skills.DefaultConfigGenerator;
 import xyz.nifeather.morph.storage.DirectoryJsonBasedStorage;
 import xyz.nifeather.morph.storage.MorphJsonBasedStorage;
@@ -16,7 +17,7 @@ import xyz.nifeather.morph.storage.MorphJsonBasedStorage;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 
-public class SkillsConfigurationStoreNew extends DirectoryJsonBasedStorage<SkillAbilityConfiguration>
+public class SkillsConfigurationStoreNew extends DirectoryJsonBasedStorage<SkillAbilityConfigContainer>
 {
     public SkillsConfigurationStoreNew()
     {
@@ -98,9 +99,19 @@ public class SkillsConfigurationStoreNew extends DirectoryJsonBasedStorage<Skill
                 continue;
             }
 
-            var targetOption = config.getAbilityOptions(abilityInstance);
+            AttributeModifyOption option;
 
-            if (targetOption == null) continue;
+            try
+            {
+                option = config.readAbilityOptions(abilityInstance);
+            }
+            catch (ParseErrorException e)
+            {
+                logger.error("Can't read ability option from file! Skipping {}", file.getName(), e);
+                continue;
+            }
+
+            if (option == null) continue;
 
             var key = getKeyFromFile(file);
             if (key == null)
@@ -112,7 +123,7 @@ public class SkillsConfigurationStoreNew extends DirectoryJsonBasedStorage<Skill
             config.legacy_MobID = key;
             logger.info("Migrating " + key);
 
-            for (AttributeModifyOption.AttributeInfo attributeInfo : targetOption.modifiers)
+            for (AttributeModifyOption.AttributeInfo attributeInfo : option.modifiers)
             {
                 if (!attributeInfo.isValid())
                 {
@@ -126,7 +137,7 @@ public class SkillsConfigurationStoreNew extends DirectoryJsonBasedStorage<Skill
                 attributeInfo.attributeName = attributeInfo.attributeName.replace("generic.", "");
             }
 
-            config.setOption(abilityInstance.getIdentifier().asString(), targetOption);
+            config.appendOption(abilityInstance.getIdentifier(), abilityInstance.optionHandler(), option);
 
             this.save(config);
         }
@@ -178,9 +189,10 @@ public class SkillsConfigurationStoreNew extends DirectoryJsonBasedStorage<Skill
             return;
         }
 
-        configuration.addAbilityIdentifier(AbilityNames.HAS_FIRE_RESISTANCE)
-                .addAbilityIdentifier(AbilityNames.REDUCES_WITHER_DAMAGE)
+        configuration.addAbility(AbilityNames.HAS_FIRE_RESISTANCE)
+                .addAbility(AbilityNames.REDUCES_WITHER_DAMAGE)
                 .appendOption(AbilityNames.REDUCES_WITHER_DAMAGE,
+                        ReduceDamageOption.OPTION_HANDLER,
                         new ReduceDamageOption(1, true));
 
         configuration.legacy_MobID = EntityType.WITHER_SKELETON.key().asString();
@@ -203,7 +215,7 @@ public class SkillsConfigurationStoreNew extends DirectoryJsonBasedStorage<Skill
         logger.info("Done saving default generated skill configurations!");
     }
 
-    public void save(SkillAbilityConfiguration configuration)
+    public void save(SkillAbilityConfigContainer configuration)
     {
         var identifier = configuration.legacy_MobID;
 
@@ -233,10 +245,10 @@ public class SkillsConfigurationStoreNew extends DirectoryJsonBasedStorage<Skill
         }
     }
 
-    private static final SkillAbilityConfiguration defaultConfig = new SkillAbilityConfiguration();
+    private static final SkillAbilityConfigContainer defaultConfig = new SkillAbilityConfigContainer();
 
     @Override
-    protected SkillAbilityConfiguration getDefault()
+    protected SkillAbilityConfigContainer getDefault()
     {
         return defaultConfig;
     }

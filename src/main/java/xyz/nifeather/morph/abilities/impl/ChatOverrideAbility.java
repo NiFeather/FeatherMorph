@@ -2,6 +2,7 @@ package xyz.nifeather.morph.abilities.impl;
 
 import io.papermc.paper.event.player.AsyncChatEvent;
 import org.bukkit.NamespacedKey;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -11,6 +12,7 @@ import xiamomc.pluginbase.Bindables.Bindable;
 import xiamomc.pluginbase.Messages.FormattableMessage;
 import xiamomc.pluginbase.Messages.MessageStore;
 import xyz.nifeather.morph.MorphManager;
+import xyz.nifeather.morph.abilities.ISkillAbilityOptionHandler;
 import xyz.nifeather.morph.abilities.MorphAbility;
 import xyz.nifeather.morph.abilities.options.ChatOverrideOption;
 import xyz.nifeather.morph.api.morphs.abilities.AbilityNames;
@@ -25,15 +27,15 @@ import java.util.concurrent.atomic.AtomicReference;
 public class ChatOverrideAbility extends MorphAbility<ChatOverrideOption>
 {
     @Override
-    public @NotNull NamespacedKey getIdentifier()
+    public @NotNull ISkillAbilityOptionHandler<ChatOverrideOption> optionHandler()
     {
-        return AbilityNames.CHAT_OVERRIDE;
+        return ChatOverrideOption.OPTION_HANDLER;
     }
 
     @Override
-    protected @NotNull ChatOverrideOption createOption()
+    public @NotNull NamespacedKey getIdentifier()
     {
-        return new ChatOverrideOption();
+        return AbilityNames.CHAT_OVERRIDE;
     }
 
     @Initializer
@@ -45,6 +47,12 @@ public class ChatOverrideAbility extends MorphAbility<ChatOverrideOption>
 
     private final Bindable<Boolean> useCustomRenderer = new Bindable<>(false);
     private final Bindable<Boolean> allowChatOverride = new Bindable<>(true);
+
+    @Override
+    public boolean handle(Player player, DisguiseState state)
+    {
+        return true;
+    }
 
     @Resolved
     private MorphManager morphs;

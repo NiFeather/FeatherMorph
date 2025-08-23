@@ -16,6 +16,7 @@ import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 import xyz.nifeather.morph.storage.skill.IAbilityConfigLookup;
+import xyz.nifeather.morph.storage.skill.ISkillAbilityOption;
 import xyz.nifeather.morph.utilities.PermissionUtils;
 
 import java.util.Arrays;
@@ -31,10 +32,10 @@ public class AbilityUpdater extends MorphPluginObject implements IAbilityConfigL
     @NotNull
     private final DisguiseState parentState;
 
-    private final List<IMorphAbility<?>> pendingAbilities = Collections.synchronizedList(new ObjectArrayList<>());
+    private final List<IAbility<?>> pendingAbilities = Collections.synchronizedList(new ObjectArrayList<>());
 
     // <Ability, Enabled?>
-    private final List<Pair<IMorphAbility<?>, Boolean>> registeredAbilities = new CopyOnWriteArrayList<>();
+    private final List<Pair<IAbility<?>, Boolean>> registeredAbilities = new CopyOnWriteArrayList<>();
 
     private Bindable<Boolean> checkAbilityPermissions = new Bindable<>(true);
 
@@ -56,27 +57,28 @@ public class AbilityUpdater extends MorphPluginObject implements IAbilityConfigL
 
     private void doUpdate()
     {
-        List<IMorphAbility<?>> pending = new ObjectArrayList<>();
+        List<IAbility<?>> pending = new ObjectArrayList<>();
+        var player = player();
+
         synchronized (pendingAbilities)
         {
             pending.addAll(pendingAbilities);
-        }
 
-        var player = player();
-        if (!pending.isEmpty())
-        {
-            for (var ability : pending)
+            if (!pending.isEmpty())
             {
-                var hasPermission = !checkAbilityPermissions.get() || hasPermissionFor(ability, parentState);
-                var pair = new ObjectBooleanMutablePair<IMorphAbility<?>>(ability, hasPermission);
+                for (var ability : pending)
+                {
+                    var hasPermission = !checkAbilityPermissions.get() || hasPermissionFor(ability, parentState);
+                    var pair = new ObjectBooleanMutablePair<IAbility<?>>(ability, hasPermission);
 
-                if (hasPermission)
-                    ability.applyToPlayer(player, parentState);
+                    if (hasPermission)
+                        ability.applyToPlayer(player, parentState);
 
-                registeredAbilities.add(pair);
+                    registeredAbilities.add(pair);
+                }
+
+                this.pendingAbilities.clear();
             }
-
-            this.pendingAbilities.clear();
         }
 
         for (var abilityPair : registeredAbilities)
@@ -113,13 +115,13 @@ public class AbilityUpdater extends MorphPluginObject implements IAbilityConfigL
         }
     }
 
-    private void disableAbility(Pair<IMorphAbility<?>, Boolean> pair, Player player)
+    private void disableAbility(Pair<IAbility<?>, Boolean> pair, Player player)
     {
         pair.left().revokeFromPlayer(player, parentState);
         pair.right(false);
     }
 
-    private void enableAbility(Pair<IMorphAbility<?>, Boolean> pair, Player player)
+    private void enableAbility(Pair<IAbility<?>, Boolean> pair, Player player)
     {
         pair.left().applyToPlayer(player, parentState);
         pair.right(true);
@@ -174,7 +176,7 @@ public class AbilityUpdater extends MorphPluginObject implements IAbilityConfigL
     }
 
     @Unmodifiable
-    public List<IMorphAbility<?>> getEnabledAbilities()
+    public List<IAbility<?>> getEnabledAbilities()
     {
         return registeredAbilities.stream().filter(Pair::right)
                 .map(Pair::left)
@@ -184,7 +186,7 @@ public class AbilityUpdater extends MorphPluginObject implements IAbilityConfigL
     /**
      * @return True if all success.
      */
-    public boolean setAbilities(@NotNull List<IMorphAbility<?>> abilities)
+    public boolean setAbilities(@NotNull List<IAbility<?>> abilities)
     {
         this.getEnabledAbilities().forEach(a -> a.revokeFromPlayer(player(), parentState));
         this.registeredAbilities.clear();
@@ -193,7 +195,7 @@ public class AbilityUpdater extends MorphPluginObject implements IAbilityConfigL
     }
 
     @Nullable
-    public IMorphAbility<?> getAbilityInstance(NamespacedKey identifier)
+    public IAbility<?> getAbilityInstance(NamespacedKey identifier)
     {
         var optional = registeredAbilities.stream().filter(pair -> pair.left().getIdentifier().equals(identifier))
                 .findFirst();
@@ -203,7 +205,7 @@ public class AbilityUpdater extends MorphPluginObject implements IAbilityConfigL
 
     public OperationResult removeAbility(NamespacedKey targetIdentifier)
     {
-        IMorphAbility<?> ability = getAbilityInstance(targetIdentifier);
+        IAbility<?> ability = getAbilityInstance(targetIdentifier);
 
         if (ability == null)
             return OperationResult.FAIL_NOT_EXIST;
@@ -217,7 +219,7 @@ public class AbilityUpdater extends MorphPluginObject implements IAbilityConfigL
     /**
      * @return True if all success.
      */
-    public boolean addAbilities(IMorphAbility<?>... abilities)
+    public boolean addAbilities(IAbility<?>... abilities)
     {
         return addAbilities(Arrays.stream(abilities).toList());
     }
@@ -225,17 +227,17 @@ public class AbilityUpdater extends MorphPluginObject implements IAbilityConfigL
     /**
      * @return True if all success.
      */
-    public boolean addAbilities(List<IMorphAbility<?>> abilities)
+    public boolean addAbilities(List<IAbility<?>> abilities)
     {
         boolean success = true;
 
-        for (IMorphAbility<?> ability : abilities)
+        for (IAbility<?> ability : abilities)
             success = success && (addAbility(ability) == OperationResult.SUCCESS);
 
         return success;
     }
 
-    public OperationResult addAbility(IMorphAbility<?> ability)
+    public OperationResult addAbility(IAbility<?> ability)
     {
         synchronized (pendingAbilities)
         {
@@ -249,7 +251,7 @@ public class AbilityUpdater extends MorphPluginObject implements IAbilityConfigL
     }
 
     @Unmodifiable
-    public List<IMorphAbility<?>> getRegisteredAbilities()
+    public List<IAbility<?>> getRegisteredAbilities()
     {
         return this.registeredAbilities.stream().map(Pair::left).collect(Collectors.toUnmodifiableList());
     }
@@ -261,7 +263,7 @@ public class AbilityUpdater extends MorphPluginObject implements IAbilityConfigL
         this.setAbilities(List.of());
     }
 
-    public static boolean hasPermissionFor(IMorphAbility<?> ability, DisguiseState state)
+    public static boolean hasPermissionFor(IAbility<?> ability, DisguiseState state)
     {
         var singleAbilityPerm = CommonPermissions.abilityPermissionOf(ability.getIdentifier().asString(), state.getDisguiseIdentifier());
         return PermissionUtils.hasPermission(state.getPlayer(), singleAbilityPerm, true);
@@ -269,7 +271,7 @@ public class AbilityUpdater extends MorphPluginObject implements IAbilityConfigL
 
     //region IAbilityConfigLookup
 
-    private final Map<String, Object> abilityConfigMap = new ConcurrentHashMap<>();
+    private final Map<String, ISkillAbilityOption> abilityConfigMap = new ConcurrentHashMap<>();
 
     @Override
     @Nullable
@@ -283,7 +285,7 @@ public class AbilityUpdater extends MorphPluginObject implements IAbilityConfigL
     }
 
     @Override
-    public void setAbilityConfig(String identifier, Object config)
+    public void setAbilityConfig(String identifier, ISkillAbilityOption config)
     {
         abilityConfigMap.put(identifier, config);
     }

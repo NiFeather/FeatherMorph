@@ -4,13 +4,14 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
+import xyz.nifeather.morph.abilities.ISkillAbilityOptionHandler;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.SkillStrings;
 import xyz.nifeather.morph.misc.DisguiseState;
-import xyz.nifeather.morph.storage.skill.ISkillOption;
-import xyz.nifeather.morph.storage.skill.SkillAbilityConfiguration;
+import xyz.nifeather.morph.storage.skill.ISkillAbilityOption;
+import xyz.nifeather.morph.storage.skill.SkillAbilityConfigContainer;
 
-public interface IMorphSkill<T extends ISkillOption>
+public interface ISkill<T extends ISkillAbilityOption>
 {
     /**
      * 执行伪装的主动技能
@@ -20,11 +21,11 @@ public interface IMorphSkill<T extends ISkillOption>
      * @param option 此技能的详细设置
      * @return 执行后的冷却长度
      */
-    public int executeSkill(Player player, DisguiseState state, SkillAbilityConfiguration configuration, T option);
+    public int executeSkill(Player player, DisguiseState state, SkillAbilityConfigContainer configuration, T option);
 
     /**
      * Called when this skill gets equipped
-     * @implNote We don't suggest sending data to the client in this method, do that in {@link IMorphSkill#applyToClient(DisguiseState)} instead
+     * @implNote We don't suggest sending data to the client in this method, do that in {@link ISkill#applyToClient(DisguiseState)} instead
      * @param state {@link DisguiseState}
      */
     public default void onInitialEquip(DisguiseState state)
@@ -51,7 +52,7 @@ public interface IMorphSkill<T extends ISkillOption>
      * 内部轮子
      */
     @ApiStatus.Internal
-    public default int executeSkillGeneric(Player player, DisguiseState state, SkillAbilityConfiguration config, ISkillOption option)
+    public default int executeSkillGeneric(Player player, DisguiseState state, SkillAbilityConfigContainer config, ISkillAbilityOption option)
     {
         T castedOption;
 
@@ -75,10 +76,5 @@ public interface IMorphSkill<T extends ISkillOption>
     @NotNull
     public NamespacedKey getIdentifier();
 
-    /**
-     * 获取和此技能对应的{@link ISkillOption}实例
-     *
-     * @return {@link ISkillOption}
-     */
-    public T getOptionInstance();
+    public ISkillAbilityOptionHandler<T> optionHandler();
 }

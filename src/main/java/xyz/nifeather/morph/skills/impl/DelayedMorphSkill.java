@@ -5,16 +5,16 @@ import xiamomc.pluginbase.Annotations.Resolved;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.skills.MorphSkill;
-import xyz.nifeather.morph.storage.skill.ISkillOption;
-import xyz.nifeather.morph.storage.skill.SkillAbilityConfiguration;
+import xyz.nifeather.morph.storage.skill.ISkillAbilityOption;
+import xyz.nifeather.morph.storage.skill.SkillAbilityConfigContainer;
 
-public abstract class DelayedMorphSkill<T extends ISkillOption> extends MorphSkill<T>
+public abstract class DelayedMorphSkill<T extends ISkillAbilityOption> extends MorphSkill<T>
 {
     @Resolved
     private MorphManager manager;
 
     @Override
-    public final int executeSkill(Player player, DisguiseState state, SkillAbilityConfiguration configuration, T option)
+    public final int executeSkill(Player player, DisguiseState state, SkillAbilityConfigContainer configuration, T option)
     {
         if (option == null || configuration == null)
         {
@@ -35,17 +35,17 @@ public abstract class DelayedMorphSkill<T extends ISkillOption> extends MorphSki
             notifyError(player);
         }
 
-        return configuration.getCooldown();
+        return configuration.getSkillCooldown();
     }
 
-    protected ExecuteResult preExecute(Player player, DisguiseState state, SkillAbilityConfiguration configuration, T option)
+    protected ExecuteResult preExecute(Player player, DisguiseState state, SkillAbilityConfigContainer configuration, T option)
     {
-        return ExecuteResult.success(configuration.getCooldown());
+        return ExecuteResult.success(configuration.getSkillCooldown());
     }
 
-    protected abstract int getExecuteDelay(SkillAbilityConfiguration configuration, T option);
+    protected abstract int getExecuteDelay(SkillAbilityConfigContainer configuration, T option);
 
-    protected abstract void executeDelayedSkill(Player player, DisguiseState state, SkillAbilityConfiguration configuration, T option);
+    protected abstract void executeDelayedSkill(Player player, DisguiseState state, SkillAbilityConfigContainer configuration, T option);
 
     protected void addDelayedSkillSchedule(Player player, Runnable execution, int delay)
     {

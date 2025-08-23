@@ -9,18 +9,25 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
+import xyz.nifeather.morph.abilities.ISkillAbilityOptionHandler;
 import xyz.nifeather.morph.api.morphs.skills.SkillNames;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.SkillStrings;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.skills.MorphSkill;
 import xyz.nifeather.morph.skills.options.TeleportConfiguration;
-import xyz.nifeather.morph.storage.skill.SkillAbilityConfiguration;
+import xyz.nifeather.morph.storage.skill.SkillAbilityConfigContainer;
 
 public class TeleportMorphSkill extends MorphSkill<TeleportConfiguration>
 {
     @Override
-    public int executeSkill(Player player, DisguiseState state, SkillAbilityConfiguration configuration, TeleportConfiguration option)
+    public ISkillAbilityOptionHandler<TeleportConfiguration> optionHandler()
+    {
+        return TeleportConfiguration.OPTION_HANDLER;
+    }
+
+    @Override
+    public int executeSkill(Player player, DisguiseState state, SkillAbilityConfigContainer configuration, TeleportConfiguration option)
     {
         if (option == null)
         {
@@ -90,20 +97,12 @@ public class TeleportMorphSkill extends MorphSkill<TeleportConfiguration>
         //重设下落距离
         player.setFallDistance(0);
 
-        return configuration.getCooldown();
+        return configuration.getSkillCooldown();
     }
 
     @Override
     public @NotNull NamespacedKey getIdentifier()
     {
         return SkillNames.TELEPORT;
-    }
-
-    private final TeleportConfiguration option = new TeleportConfiguration();
-
-    @Override
-    public TeleportConfiguration getOptionInstance()
-    {
-        return option;
     }
 }

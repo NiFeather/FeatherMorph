@@ -6,10 +6,17 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import xyz.nifeather.morph.abilities.MorphAbility;
-import xyz.nifeather.morph.storage.skill.ISkillOption;
+import xyz.nifeather.morph.misc.DisguiseState;
+import xyz.nifeather.morph.storage.skill.ISkillAbilityOption;
 
-public abstract class OnAttackAbility<T extends ISkillOption> extends MorphAbility<T>
+public abstract class OnAttackAbility<T extends ISkillAbilityOption> extends MorphAbility<T>
 {
+    @Override
+    public boolean handle(Player player, DisguiseState state)
+    {
+        return true;
+    }
+
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
     public void onEntityDamagedByEntity(EntityDamageByEntityEvent e)
     {

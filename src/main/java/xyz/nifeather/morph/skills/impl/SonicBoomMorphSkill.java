@@ -9,13 +9,14 @@ import org.bukkit.craftbukkit.entity.CraftLivingEntity;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.pluginbase.Annotations.Resolved;
+import xyz.nifeather.morph.abilities.ISkillAbilityOptionHandler;
 import xyz.nifeather.morph.api.morphs.skills.SkillNames;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.misc.NmsRecord;
 import xyz.nifeather.morph.network.commands.S2C.set.S2CSetAggressiveCommand;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
 import xyz.nifeather.morph.skills.options.NoOpConfiguration;
-import xyz.nifeather.morph.storage.skill.SkillAbilityConfiguration;
+import xyz.nifeather.morph.storage.skill.SkillAbilityConfigContainer;
 import xyz.nifeather.morph.utilities.DamageSourceUtils;
 
 public class SonicBoomMorphSkill extends DelayedMorphSkill<NoOpConfiguration>
@@ -24,7 +25,13 @@ public class SonicBoomMorphSkill extends DelayedMorphSkill<NoOpConfiguration>
     public static int defaultCooldown = 34 + 20 * 3;
 
     @Override
-    protected ExecuteResult preExecute(Player player, DisguiseState state, SkillAbilityConfiguration configuration, NoOpConfiguration option)
+    public ISkillAbilityOptionHandler<NoOpConfiguration> optionHandler()
+    {
+        return NoOpConfiguration.OPTION_HANDLER;
+    }
+
+    @Override
+    protected ExecuteResult preExecute(Player player, DisguiseState state, SkillAbilityConfigContainer configuration, NoOpConfiguration option)
     {
         playSoundToNearbyPlayers(player, 160,
                 Key.key("minecraft", "entity.warden.sonic_charge"), Sound.Source.HOSTILE);
@@ -36,7 +43,7 @@ public class SonicBoomMorphSkill extends DelayedMorphSkill<NoOpConfiguration>
     }
 
     @Override
-    protected int getExecuteDelay(SkillAbilityConfiguration configuration, NoOpConfiguration option)
+    protected int getExecuteDelay(SkillAbilityConfigContainer configuration, NoOpConfiguration option)
     {
         return 34;
     }
@@ -45,7 +52,7 @@ public class SonicBoomMorphSkill extends DelayedMorphSkill<NoOpConfiguration>
     private MorphClientHandler clientHandler;
 
     @Override
-    protected void executeDelayedSkill(Player player, DisguiseState state, SkillAbilityConfiguration configuration, NoOpConfiguration option)
+    protected void executeDelayedSkill(Player player, DisguiseState state, SkillAbilityConfigContainer configuration, NoOpConfiguration option)
     {
         state.getDisguiseWrapper().setAggressive(false);
         clientHandler.sendCommand(player, new S2CSetAggressiveCommand(false));
@@ -95,11 +102,5 @@ public class SonicBoomMorphSkill extends DelayedMorphSkill<NoOpConfiguration>
     public @NotNull NamespacedKey getIdentifier()
     {
         return SkillNames.SONIC_BOOM;
-    }
-
-    @Override
-    public NoOpConfiguration getOptionInstance()
-    {
-        return NoOpConfiguration.instance;
     }
 }

@@ -1,18 +1,63 @@
 package xyz.nifeather.morph.abilities.options;
 
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
-import xyz.nifeather.morph.storage.skill.ISkillOption;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import xyz.nifeather.morph.abilities.ISkillAbilityOptionHandler;
+import xyz.nifeather.morph.misc.disguiseProperty.ParseErrorException;
+import xyz.nifeather.morph.storage.skill.ISkillAbilityOption;
 
-public class TakesDamageFromWaterOption implements ISkillOption
+import java.util.Map;
+
+public class TakesDamageFromWaterOption implements ISkillAbilityOption
 {
-    public TakesDamageFromWaterOption()
+    public static class TakesDamageFromWaterOptionHandler implements ISkillAbilityOptionHandler<TakesDamageFromWaterOption>
     {
+        @Override
+        public Class<TakesDamageFromWaterOption> getOptionClass()
+        {
+            return TakesDamageFromWaterOption.class;
+        }
+
+        @Override
+        public boolean acceptNullableOptions()
+        {
+            return true;
+        }
+
+        @Override
+        public void writeOption(TakesDamageFromWaterOption option, @NotNull Map<String, Object> gsonMap)
+        {
+            gsonMap.put("damage", option.damageAmount);
+        }
+
+        @Override
+        public TakesDamageFromWaterOption readOptionNullable(@Nullable Map<String, Object> gsonMap) throws NullPointerException, UnsupportedOperationException, ParseErrorException
+        {
+            return gsonMap == null
+                    ? new TakesDamageFromWaterOption(1d)
+                    : readOption(gsonMap);
+        }
+
+        @Override
+        public @NotNull TakesDamageFromWaterOption readOption(@NotNull Map<String, Object> gsonMap) throws ParseErrorException
+        {
+            double damage = utilGetTypedOrThrow("damage", gsonMap, Number.class).doubleValue();
+
+            if (!Double.isFinite(damage))
+                throw new ParseErrorException(this.getClass().getSimpleName(), "Non-Finite value 'damage'");
+
+            return new TakesDamageFromWaterOption(damage);
+        }
     }
 
-    @Expose
-    @SerializedName("damage")
-    public double damageAmount = 1d;
+    public static final TakesDamageFromWaterOptionHandler OPTION_HANDLER = new TakesDamageFromWaterOptionHandler();
+
+    public TakesDamageFromWaterOption(double val)
+    {
+        this.damageAmount = val;
+    }
+
+    public final double damageAmount;
 
     @Override
     public boolean isValid()

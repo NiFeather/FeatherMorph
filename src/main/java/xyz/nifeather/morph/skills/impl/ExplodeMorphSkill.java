@@ -11,6 +11,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.pluginbase.Annotations.Resolved;
+import xyz.nifeather.morph.abilities.ISkillAbilityOptionHandler;
 import xyz.nifeather.morph.api.morphs.skills.SkillNames;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.SkillStrings;
@@ -18,12 +19,18 @@ import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.network.commands.S2C.set.S2CSetSNbtCommand;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
 import xyz.nifeather.morph.skills.options.ExplosionConfiguration;
-import xyz.nifeather.morph.storage.skill.SkillAbilityConfiguration;
+import xyz.nifeather.morph.storage.skill.SkillAbilityConfigContainer;
 
 public class ExplodeMorphSkill extends DelayedMorphSkill<ExplosionConfiguration>
 {
     @Override
-    protected int getExecuteDelay(SkillAbilityConfiguration configuration, ExplosionConfiguration option)
+    public ISkillAbilityOptionHandler<ExplosionConfiguration> optionHandler()
+    {
+        return ExplosionConfiguration.OPTION_HANDLER;
+    }
+
+    @Override
+    protected int getExecuteDelay(SkillAbilityConfigContainer configuration, ExplosionConfiguration option)
     {
         return option.executeDelay;
     }
@@ -32,7 +39,7 @@ public class ExplodeMorphSkill extends DelayedMorphSkill<ExplosionConfiguration>
     private MorphClientHandler clientHandler;
 
     @Override
-    protected ExecuteResult preExecute(Player player, DisguiseState state, SkillAbilityConfiguration configuration, ExplosionConfiguration option)
+    protected ExecuteResult preExecute(Player player, DisguiseState state, SkillAbilityConfigContainer configuration, ExplosionConfiguration option)
     {
         if (option == null)
         {
@@ -53,7 +60,7 @@ public class ExplodeMorphSkill extends DelayedMorphSkill<ExplosionConfiguration>
     }
 
     @Override
-    protected void executeDelayedSkill(Player player, DisguiseState state, SkillAbilityConfiguration configuration, ExplosionConfiguration option)
+    protected void executeDelayedSkill(Player player, DisguiseState state, SkillAbilityConfigContainer configuration, ExplosionConfiguration option)
     {
         var strength = option.getStrength();
         var setsFire = option.setsFire();
@@ -89,13 +96,5 @@ public class ExplodeMorphSkill extends DelayedMorphSkill<ExplosionConfiguration>
     public @NotNull NamespacedKey getIdentifier()
     {
         return SkillNames.EXPLODE;
-    }
-
-    private final ExplosionConfiguration option = new ExplosionConfiguration();
-
-    @Override
-    public ExplosionConfiguration getOptionInstance()
-    {
-        return option;
     }
 }

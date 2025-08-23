@@ -9,6 +9,7 @@ import org.bukkit.entity.ShulkerBullet;
 import org.bukkit.entity.WitherSkull;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.pluginbase.Annotations.Resolved;
+import xyz.nifeather.morph.abilities.ISkillAbilityOptionHandler;
 import xyz.nifeather.morph.api.morphs.skills.SkillNames;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.SkillStrings;
@@ -16,13 +17,19 @@ import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.network.commands.S2C.set.S2CSetAggressiveCommand;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
 import xyz.nifeather.morph.skills.options.ProjectileConfiguration;
-import xyz.nifeather.morph.storage.skill.SkillAbilityConfiguration;
+import xyz.nifeather.morph.storage.skill.SkillAbilityConfigContainer;
 import xyz.nifeather.morph.utilities.EntityTypeUtils;
 
 public class LaunchProjectileMorphSkill extends DelayedMorphSkill<ProjectileConfiguration>
 {
     @Override
-    protected int getExecuteDelay(SkillAbilityConfiguration configuration, ProjectileConfiguration option)
+    public ISkillAbilityOptionHandler<ProjectileConfiguration> optionHandler()
+    {
+        return ProjectileConfiguration.OPTION_HANDLER;
+    }
+
+    @Override
+    protected int getExecuteDelay(SkillAbilityConfigContainer configuration, ProjectileConfiguration option)
     {
         return option.executeDelay;
     }
@@ -31,17 +38,9 @@ public class LaunchProjectileMorphSkill extends DelayedMorphSkill<ProjectileConf
     private MorphClientHandler clientHandler;
 
     @Override
-    protected ExecuteResult preExecute(Player player, DisguiseState state, SkillAbilityConfiguration configuration, ProjectileConfiguration option)
+    protected ExecuteResult preExecute(Player player, DisguiseState state, SkillAbilityConfigContainer configuration, ProjectileConfiguration option)
     {
         if (option == null || configuration == null)
-        {
-            notifyError(player);
-            return ExecuteResult.fail(10);
-        }
-
-        var type = EntityTypeUtils.fromString(option.getName(), true);
-
-        if (type == null)
         {
             notifyError(player);
             return ExecuteResult.fail(10);
@@ -57,12 +56,12 @@ public class LaunchProjectileMorphSkill extends DelayedMorphSkill<ProjectileConf
     }
 
     @Override
-    protected void executeDelayedSkill(Player player, DisguiseState state, SkillAbilityConfiguration configuration, ProjectileConfiguration option)
+    protected void executeDelayedSkill(Player player, DisguiseState state, SkillAbilityConfigContainer configuration, ProjectileConfiguration option)
     {
         state.getDisguiseWrapper().setAggressive(false);
         clientHandler.sendCommand(player, new S2CSetAggressiveCommand(false));
 
-        var type = EntityTypeUtils.fromString(option.getName(), true);
+        var type = option.entityType();
 
         Entity target = null;
         var distanceLimit = option.getDistanceLimit();
@@ -106,13 +105,5 @@ public class LaunchProjectileMorphSkill extends DelayedMorphSkill<ProjectileConf
     public @NotNull NamespacedKey getIdentifier()
     {
         return SkillNames.LAUNCH_PROJECTILE;
-    }
-
-    private final ProjectileConfiguration option = new ProjectileConfiguration();
-
-    @Override
-    public ProjectileConfiguration getOptionInstance()
-    {
-        return option;
     }
 }

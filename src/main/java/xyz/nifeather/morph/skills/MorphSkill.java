@@ -14,12 +14,12 @@ import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.SkillStrings;
-import xyz.nifeather.morph.storage.skill.ISkillOption;
+import xyz.nifeather.morph.storage.skill.ISkillAbilityOption;
 import xyz.nifeather.morph.utilities.DisguiseUtils;
 
 import java.util.List;
 
-public abstract class MorphSkill<T extends ISkillOption> extends MorphPluginObject implements IMorphSkill<T>
+public abstract class MorphSkill<T extends ISkillAbilityOption> extends MorphPluginObject implements ISkill<T>
 {
     protected void playSoundToNearbyPlayers(Player player, int distance, Key key, Sound.Source source)
     {
@@ -100,17 +100,5 @@ public abstract class MorphSkill<T extends ISkillOption> extends MorphPluginObje
         fireBall.setVelocity(velocity.multiply(multiplier));
 
         return (E) fireBall;
-    }
-
-    protected float getTopY(Block block)
-    {
-        var data = block.getBlockData();
-
-        var val = block.getBoundingBox().getMinY() + block.getBoundingBox().getHeight();
-
-        if (data instanceof Fence || data instanceof Wall || data instanceof Gate)
-            val += 0.5d;
-
-        return (float) Math.max(block.getLocation().getY(), val);
     }
 }

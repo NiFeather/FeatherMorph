@@ -2,9 +2,11 @@ package xyz.nifeather.morph.abilities;
 
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
+import org.jetbrains.annotations.NotNull;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xyz.nifeather.morph.abilities.impl.NoOpOptionAbility;
 import xyz.nifeather.morph.misc.DisguiseState;
+import xyz.nifeather.morph.skills.options.NoOpConfiguration;
 
 public abstract class EffectMorphAbility extends NoOpOptionAbility
 {

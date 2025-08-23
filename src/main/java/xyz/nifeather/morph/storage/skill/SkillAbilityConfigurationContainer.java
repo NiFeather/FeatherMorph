@@ -9,7 +9,7 @@ import java.util.List;
 public class SkillAbilityConfigurationContainer
 {
     @Expose
-    public List<SkillAbilityConfiguration> configurations = Collections.synchronizedList(new ObjectArrayList<>());
+    public List<SkillAbilityConfigContainer> configurations = Collections.synchronizedList(new ObjectArrayList<>());
 
     @Expose
     public int version;

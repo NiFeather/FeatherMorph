@@ -15,6 +15,7 @@ import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
 import xiamomc.pluginbase.Bindables.BindableList;
 import xyz.nifeather.morph.MorphManager;
+import xyz.nifeather.morph.abilities.ISkillAbilityOptionHandler;
 import xyz.nifeather.morph.abilities.MorphAbility;
 import xyz.nifeather.morph.abilities.options.FlyOption;
 import xyz.nifeather.morph.api.morphs.abilities.AbilityNames;
@@ -31,6 +32,12 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class FlyAbility extends MorphAbility<FlyOption>
 {
+    @Override
+    public @NotNull ISkillAbilityOptionHandler<FlyOption> optionHandler()
+    {
+        return FlyOption.OPTION_HANDLER;
+    }
+
     public FlyAbility()
     {
     }
@@ -90,7 +97,7 @@ public class FlyAbility extends MorphAbility<FlyOption>
 
         var gameMode = nmsPlayer.gameMode.getGameModeForPlayer();
         if (gameMode == GameType.CREATIVE || gameMode == GameType.SPECTATOR)
-            return super.handle(player, state);
+            return true;
 
         var option = this.getOptionFor(state);
         if (option == null)
@@ -145,7 +152,7 @@ public class FlyAbility extends MorphAbility<FlyOption>
         if (playerCanFly != allowFlight)
             player.setAllowFlight(allowFlight);
 
-        return super.handle(player, state);
+        return true;
     }
 
     private boolean playerHasCommonFlyPerm(Player player)
@@ -178,12 +185,6 @@ public class FlyAbility extends MorphAbility<FlyOption>
         player.setFlySpeed(0.1f);
 
         return true;
-    }
-
-    @Override
-    protected @NotNull FlyOption createOption()
-    {
-        return new FlyOption();
     }
 
     public float getTargetFlySpeed(DisguiseState state)

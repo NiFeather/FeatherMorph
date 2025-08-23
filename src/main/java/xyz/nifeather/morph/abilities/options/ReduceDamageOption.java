@@ -1,22 +1,44 @@
 package xyz.nifeather.morph.abilities.options;
 
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
-import xyz.nifeather.morph.storage.skill.ISkillOption;
+import org.jetbrains.annotations.NotNull;
+import xyz.nifeather.morph.abilities.ISkillAbilityOptionHandler;
+import xyz.nifeather.morph.misc.disguiseProperty.ParseErrorException;
+import xyz.nifeather.morph.storage.skill.ISkillAbilityOption;
 
-public class ReduceDamageOption implements ISkillOption
+import java.util.Map;
+
+public class ReduceDamageOption implements ISkillAbilityOption
 {
-    @Expose
-    @SerializedName("amount")
-    private double reduceAmount = 0d;
-
-    @Expose
-    @SerializedName("is_percentage")
-    private boolean isPercentage = false;
-
-    public ReduceDamageOption()
+    public static class ReduceDamageOptionHandler implements ISkillAbilityOptionHandler<ReduceDamageOption>
     {
+        @Override
+        public Class<ReduceDamageOption> getOptionClass()
+        {
+            return ReduceDamageOption.class;
+        }
+
+        @Override
+        public void writeOption(ReduceDamageOption option, @NotNull Map<String, Object> gsonMap)
+        {
+            gsonMap.put("amount", option.getReduceAmount());
+            gsonMap.put("is_percentage", option.isPercentage());
+        }
+
+        @Override
+        public @NotNull ReduceDamageOption readOption(@NotNull Map<String, Object> gsonMap) throws ParseErrorException
+        {
+            double amount = utilGetTypedOrThrow("amount", gsonMap, Number.class).doubleValue();
+            boolean isPercentage = utilGetTypedOrThrow("is_percentage", gsonMap, Boolean.class);
+
+            return new ReduceDamageOption(amount, isPercentage);
+        }
     }
+
+    public static final ReduceDamageOptionHandler OPTION_HANDLER = new ReduceDamageOptionHandler();
+
+    private final double reduceAmount;
+
+    private final boolean isPercentage;
 
     public ReduceDamageOption(double amount)
     {
@@ -37,11 +59,6 @@ public class ReduceDamageOption implements ISkillOption
     public boolean isPercentage()
     {
         return isPercentage;
-    }
-
-    protected ReduceDamageOption createInstance()
-    {
-        return new ReduceDamageOption();
     }
 
     @Override

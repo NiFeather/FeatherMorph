@@ -1,23 +1,48 @@
 package xyz.nifeather.morph.skills.options;
 
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import xyz.nifeather.morph.storage.skill.ISkillOption;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import xyz.nifeather.morph.abilities.ISkillAbilityOptionHandler;
+import xyz.nifeather.morph.misc.disguiseProperty.ParseErrorException;
+import xyz.nifeather.morph.storage.skill.ISkillAbilityOption;
 
 import java.util.Map;
 
-public class NoOpConfiguration implements ISkillOption
+public class NoOpConfiguration implements ISkillAbilityOption
 {
-    @Override
-    public Map<String, Object> toMap()
+    public static class NoOpOptionHandler implements ISkillAbilityOptionHandler<NoOpConfiguration>
     {
-        return new Object2ObjectOpenHashMap<>();
+        @Override
+        public Class<NoOpConfiguration> getOptionClass()
+        {
+            return NoOpConfiguration.class;
+        }
+
+        @Override
+        public boolean acceptNullableOptions()
+        {
+            return true;
+        }
+
+        @Override
+        public void writeOption(NoOpConfiguration option, @NotNull Map<String, Object> gsonMap)
+        {
+        }
+
+        @Override
+        public NoOpConfiguration readOptionNullable(@Nullable Map<String, Object> gsonMap) throws NullPointerException, UnsupportedOperationException, ParseErrorException
+        {
+            return NoOpConfiguration.instance;
+        }
+
+        @Override
+        public @NotNull NoOpConfiguration readOption(@NotNull Map<String, Object> gsonMap) throws ParseErrorException
+        {
+            return NoOpConfiguration.instance;
+        }
     }
 
-    @Override
-    public NoOpConfiguration fromMap(Map<String, Object> map)
-    {
-        return new NoOpConfiguration();
-    }
+    public static final NoOpOptionHandler OPTION_HANDLER = new NoOpOptionHandler();
 
     public static NoOpConfiguration instance = new NoOpConfiguration();
 

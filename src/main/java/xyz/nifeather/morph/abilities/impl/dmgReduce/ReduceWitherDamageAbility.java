@@ -3,6 +3,7 @@ package xyz.nifeather.morph.abilities.impl.dmgReduce;
 import org.bukkit.NamespacedKey;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.jetbrains.annotations.NotNull;
+import xyz.nifeather.morph.abilities.ISkillAbilityOptionHandler;
 import xyz.nifeather.morph.abilities.impl.DamageReducingAbility;
 import xyz.nifeather.morph.abilities.options.ReduceDamageOption;
 import xyz.nifeather.morph.api.morphs.abilities.AbilityNames;
@@ -10,15 +11,15 @@ import xyz.nifeather.morph.api.morphs.abilities.AbilityNames;
 public class ReduceWitherDamageAbility extends DamageReducingAbility<ReduceDamageOption>
 {
     @Override
-    protected EntityDamageEvent.DamageCause getTargetCause()
+    public @NotNull ISkillAbilityOptionHandler<ReduceDamageOption> optionHandler()
     {
-        return EntityDamageEvent.DamageCause.WITHER;
+        return ReduceDamageOption.OPTION_HANDLER;
     }
 
     @Override
-    protected @NotNull ReduceDamageOption createOption()
+    protected EntityDamageEvent.DamageCause getTargetCause()
     {
-        return new ReduceDamageOption();
+        return EntityDamageEvent.DamageCause.WITHER;
     }
 
     @Override

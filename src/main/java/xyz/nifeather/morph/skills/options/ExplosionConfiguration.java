@@ -1,14 +1,46 @@
 package xyz.nifeather.morph.skills.options;
 
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
-import xyz.nifeather.morph.storage.skill.ISkillOption;
+import org.jetbrains.annotations.NotNull;
+import xyz.nifeather.morph.abilities.ISkillAbilityOptionHandler;
+import xyz.nifeather.morph.misc.disguiseProperty.ParseErrorException;
+import xyz.nifeather.morph.storage.skill.ISkillAbilityOption;
 
-public class ExplosionConfiguration implements ISkillOption
+import java.util.Map;
+
+public class ExplosionConfiguration implements ISkillAbilityOption
 {
-    public ExplosionConfiguration()
+    public static class ExplosionOptionHandler implements ISkillAbilityOptionHandler<ExplosionConfiguration>
     {
+        @Override
+        public Class<ExplosionConfiguration> getOptionClass()
+        {
+            return ExplosionConfiguration.class;
+        }
+
+        @Override
+        public void writeOption(ExplosionConfiguration option, @NotNull Map<String, Object> gsonMap)
+        {
+            gsonMap.put("kills_self", option.killsSelf());
+            gsonMap.put("strength", option.getStrength());
+            gsonMap.put("sets_fire", option.setsFire());
+            gsonMap.put("delay", option.executeDelay);
+            gsonMap.put("primed_sound", option.getPrimedSound());
+        }
+
+        @Override
+        public @NotNull ExplosionConfiguration readOption(@NotNull Map<String, Object> gsonMap) throws ParseErrorException
+        {
+            boolean killsSelf = utilGetTypedOrThrow("kills_self", gsonMap, Boolean.class);
+            int strength = utilGetTypedOrThrow("strength", gsonMap, Number.class).intValue();
+            boolean setsFire = utilGetTypedOrThrow("sets_fire", gsonMap, Boolean.class);
+            int delay = utilGetTypedOrThrow("delay", gsonMap, Number.class).intValue();
+            String primedSound = utilGetTypedOrThrow("primed_sound", gsonMap, String.class);
+
+            return new ExplosionConfiguration(killsSelf, strength, setsFire, delay, primedSound);
+        }
     }
+
+    public static final ExplosionOptionHandler OPTION_HANDLER = new ExplosionOptionHandler();
 
     public ExplosionConfiguration(boolean killsSelf, int strength, boolean setsFire, int delay, String primedSound)
     {
@@ -20,39 +52,30 @@ public class ExplosionConfiguration implements ISkillOption
         this.primedSound = primedSound;
     }
 
-    @Expose
-    @SerializedName("kills_self")
-    private boolean killsSelf = true;
+    private final boolean killsSelf;
 
-    @Expose
-    @SerializedName("delay")
-    public int executeDelay = 30;
+    public int executeDelay;
 
     public boolean killsSelf()
     {
         return killsSelf;
     }
 
-    @Expose
-    private int strength = 3;
+    private final int strength;
 
     public int getStrength()
     {
         return strength;
     }
 
-    @Expose
-    @SerializedName("sets_fire")
-    private boolean setsFire;
+    private final boolean setsFire;
 
     public boolean setsFire()
     {
         return setsFire;
     }
 
-    @Expose
-    @SerializedName("primed_sound")
-    public String primedSound;
+    public final String primedSound;
 
     public String getPrimedSound()
     {

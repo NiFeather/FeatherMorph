@@ -7,6 +7,7 @@ import xiamomc.pluginbase.Annotations.Resolved;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.abilities.MorphAbility;
 import xyz.nifeather.morph.abilities.options.ReduceDamageOption;
+import xyz.nifeather.morph.misc.DisguiseState;
 
 public abstract class DamageReducingAbility<T extends ReduceDamageOption> extends MorphAbility<T>
 {
@@ -14,6 +15,12 @@ public abstract class DamageReducingAbility<T extends ReduceDamageOption> extend
 
     @Resolved
     private MorphManager morphs;
+
+    @Override
+    public boolean handle(Player player, DisguiseState state)
+    {
+        return true;
+    }
 
     @EventHandler(ignoreCancelled = true)
     public void onPlayerTookDamage(EntityDamageEvent e)

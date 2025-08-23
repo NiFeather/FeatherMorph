@@ -1,16 +1,57 @@
 package xyz.nifeather.morph.skills.options;
 
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.nifeather.morph.storage.skill.ISkillOption;
+import xyz.nifeather.morph.abilities.ISkillAbilityOptionHandler;
+import xyz.nifeather.morph.misc.disguiseProperty.ParseErrorException;
+import xyz.nifeather.morph.storage.skill.ISkillAbilityOption;
 
-public class EffectConfiguration implements ISkillOption
+import java.util.Map;
+
+public class EffectConfiguration implements ISkillAbilityOption
 {
-    public EffectConfiguration()
+    public static class ApplyEffectSkillConfigurationHandler implements ISkillAbilityOptionHandler<EffectConfiguration>
     {
+        @Override
+        public Class<EffectConfiguration> getOptionClass()
+        {
+            return EffectConfiguration.class;
+        }
+
+        @Override
+        public void writeOption(EffectConfiguration option, @NotNull Map<String, Object> gsonMap)
+        {
+            gsonMap.put("name", option.getName());
+            gsonMap.put("multiplier", option.getMultiplier());
+            gsonMap.put("duration", option.getDuration());
+
+            gsonMap.put("acquires_water", option.acquiresWater());
+            gsonMap.put("show_guardian", option.showGuardian());
+
+            gsonMap.put("sound", option.getSoundName());
+            gsonMap.put("sound_distance", option.getSoundDistance());
+            gsonMap.put("apply_distance", option.getApplyDistance());
+        }
+
+        @Override
+        public @NotNull EffectConfiguration readOption(@NotNull Map<String, Object> gsonMap) throws ParseErrorException
+        {
+            String name = utilGetTypedOrThrow("name", gsonMap, String.class);
+            int multiplier = utilGetTypedOrThrow("multiplier", gsonMap, Number.class).intValue();
+            int duration = utilGetTypedOrThrow("duration", gsonMap, Number.class).intValue();
+
+            boolean acquiresWater = utilGetTypedOrThrow("acquires_water", gsonMap, Boolean.class);
+            boolean showGuardian = utilGetTypedOrThrow("show_guardian", gsonMap, Boolean.class);
+
+            String soundName = utilGetTypedOrThrow("sound", gsonMap, String.class);
+            int soundDistance = utilGetTypedOrThrow("sound_distance", gsonMap, Number.class).intValue();
+            int applyDistance = utilGetTypedOrThrow("apply_distance", gsonMap, Number.class).intValue();
+
+            return new EffectConfiguration(name, multiplier, duration, acquiresWater, showGuardian, soundName, soundDistance, applyDistance);
+        }
     }
+
+    public static final ApplyEffectSkillConfigurationHandler OPTION_HANDLER = new ApplyEffectSkillConfigurationHandler();
 
     public EffectConfiguration(String name, int multiplier, int duration,
                                boolean requiresWater, boolean showGuardian,
@@ -27,52 +68,43 @@ public class EffectConfiguration implements ISkillOption
     }
 
     //效果名称
-    @Expose
-    private String name = "";
+    private final String name;
 
     public String getName()
     {
         return name;
     }
 
-    @Expose
-    private int multiplier;
+    private final int multiplier;
 
     public int getMultiplier()
     {
         return multiplier;
     }
 
-    @Expose
-    private int duration;
+    private final int duration;
 
     public int getDuration()
     {
         return duration;
     }
 
-    @Expose
-    @SerializedName("acquires_water")
-    private boolean acquiresWater;
+    private final boolean acquiresWater;
 
     public boolean acquiresWater()
     {
         return acquiresWater;
     }
 
-    @Expose
-    @SerializedName("show_guardian")
-    private boolean showGuardian;
+    private final boolean showGuardian;
 
     public boolean showGuardian()
     {
         return showGuardian;
     }
 
-    @Expose
     @Nullable
-    @SerializedName("sound")
-    private String soundName;
+    private final String soundName;
 
     @NotNull
     public String getSoundName()
@@ -80,13 +112,9 @@ public class EffectConfiguration implements ISkillOption
         return soundName == null ? "" : soundName;
     }
 
-    @Expose
-    @SerializedName("sound_distance")
-    private int soundDistance;
+    private final int soundDistance;
 
-    @Expose
-    @SerializedName("apply_distance")
-    private int applyDistance;
+    private final int applyDistance;
 
     public int getApplyDistance()
     {

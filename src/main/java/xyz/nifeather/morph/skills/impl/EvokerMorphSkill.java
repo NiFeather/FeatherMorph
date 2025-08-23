@@ -15,6 +15,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Exceptions.NullDependencyException;
 import xyz.nifeather.morph.FeatherMorphMain;
+import xyz.nifeather.morph.abilities.ISkillAbilityOptionHandler;
 import xyz.nifeather.morph.api.morphs.skills.SkillNames;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.SkillStrings;
@@ -22,12 +23,18 @@ import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.misc.NmsRecord;
 import xyz.nifeather.morph.misc.mobs.MorphBukkitVexHolder;
 import xyz.nifeather.morph.skills.options.NoOpConfiguration;
-import xyz.nifeather.morph.storage.skill.SkillAbilityConfiguration;
+import xyz.nifeather.morph.storage.skill.SkillAbilityConfigContainer;
 
 import java.util.List;
 
 public class EvokerMorphSkill extends DelayedMorphSkill<NoOpConfiguration>
 {
+    @Override
+    public ISkillAbilityOptionHandler<NoOpConfiguration> optionHandler()
+    {
+        return NoOpConfiguration.OPTION_HANDLER;
+    }
+
     public static final String SESSION_DATA_SUMMON_VEX = "EVOKER_SKILL_SUMMON_VEX";
     public static final String SESSION_DATA_VEX_LIST = "EVOKER_SKILL_VEX_LIST";
 
@@ -146,7 +153,7 @@ public class EvokerMorphSkill extends DelayedMorphSkill<NoOpConfiguration>
     }
 
     @Override
-    protected ExecuteResult preExecute(Player player, DisguiseState state, SkillAbilityConfiguration configuration, NoOpConfiguration option)
+    protected ExecuteResult preExecute(Player player, DisguiseState state, SkillAbilityConfigContainer configuration, NoOpConfiguration option)
     {
         var summonVex = player.isSneaking();
 
@@ -168,11 +175,11 @@ public class EvokerMorphSkill extends DelayedMorphSkill<NoOpConfiguration>
 
         state.setSessionData(SESSION_DATA_SUMMON_VEX, new EvokerSkillDataRecord(summonVex, player.getTargetEntity(16)));
         state.getDisguiseWrapper().setAggressive(true);
-        return ExecuteResult.success(configuration.getCooldown());
+        return ExecuteResult.success(configuration.getSkillCooldown());
     }
 
     @Override
-    protected int getExecuteDelay(SkillAbilityConfiguration configuration, NoOpConfiguration option)
+    protected int getExecuteDelay(SkillAbilityConfigContainer configuration, NoOpConfiguration option)
     {
         return 20;
     }
@@ -313,7 +320,7 @@ public class EvokerMorphSkill extends DelayedMorphSkill<NoOpConfiguration>
     }
 
     @Override
-    public void executeDelayedSkill(Player player, DisguiseState state, SkillAbilityConfiguration configuration, NoOpConfiguration option)
+    public void executeDelayedSkill(Player player, DisguiseState state, SkillAbilityConfigContainer configuration, NoOpConfiguration option)
     {
         state.getDisguiseWrapper().setAggressive(false);
 
@@ -340,13 +347,5 @@ public class EvokerMorphSkill extends DelayedMorphSkill<NoOpConfiguration>
     public @NotNull NamespacedKey getIdentifier()
     {
         return SkillNames.EVOKER;
-    }
-
-    private final NoOpConfiguration option = new NoOpConfiguration();
-
-    @Override
-    public NoOpConfiguration getOptionInstance()
-    {
-        return option;
     }
 }

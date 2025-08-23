@@ -2,31 +2,25 @@ package xyz.nifeather.morph.abilities;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.misc.DisguiseState;
-import xyz.nifeather.morph.storage.skill.ISkillOption;
+import xyz.nifeather.morph.storage.skill.ISkillAbilityOption;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
-public abstract class MorphAbility<T extends ISkillOption> extends MorphPluginObject implements IMorphAbility<T>
+public abstract class MorphAbility<T extends ISkillAbilityOption> extends MorphPluginObject implements IAbility<T>
 {
     private final List<UUID> appliedPlayers = Collections.synchronizedList(new ObjectArrayList<>());
 
     protected boolean requireValidOption()
     {
         return false;
-    }
-
-    private boolean optionValid = true;
-    public boolean optionValid()
-    {
-        return optionValid;
     }
 
     public boolean isPlayerApplied(Player player)
@@ -39,6 +33,7 @@ public abstract class MorphAbility<T extends ISkillOption> extends MorphPluginOb
         return this.appliedPlayers.stream().anyMatch(uuid -> uuid.equals(playerUUID));
     }
 
+    // WTF is this doing?
     @Override
     public boolean applyToPlayer(Player player, DisguiseState state)
     {
@@ -58,7 +53,6 @@ public abstract class MorphAbility<T extends ISkillOption> extends MorphPluginOb
         synchronized (appliedPlayers)
         {
             appliedPlayers.remove(player.getUniqueId());
-            optionValid = false;
         }
 
         return false;
@@ -82,18 +76,6 @@ public abstract class MorphAbility<T extends ISkillOption> extends MorphPluginOb
         return new ObjectArrayList<>(appliedPlayers);
     }
 
-    @NotNull
-    protected abstract T createOption();
-
-    private final T option = createOption();
-
-    @Override
-    @NotNull
-    public T getDefaultOption()
-    {
-        return option;
-    }
-
     /**
      * 获取和目标{@link DisguiseState}对应的技能配置
      * @param state {@link DisguiseState}
@@ -102,12 +84,8 @@ public abstract class MorphAbility<T extends ISkillOption> extends MorphPluginOb
     @Nullable
     protected T getOptionFor(DisguiseState state)
     {
-        return state.getAbilityUpdater().lookupAbilityConfig(this.getIdentifier().asString(), (Class<T>)getDefaultOption().getClass());
-    }
-
-    public interface Returner<R>
-    {
-        R apply();
+        return state.getAbilityUpdater()
+                .lookupAbilityConfig(this.getIdentifier().asString(), optionHandler().getOptionClass());
     }
 
     /**
@@ -118,13 +96,13 @@ public abstract class MorphAbility<T extends ISkillOption> extends MorphPluginOb
      * @param fallbackValue 后备值
      * @return 若value满足判断条件，则返回value，否则返回fallbackValue
      */
-    protected <R> R getOr(Returner<R> value, Predicate<R> p, Returner<R> fallbackValue)
+    protected <R> R getOr(Supplier<R> value, Predicate<R> p, Supplier<R> fallbackValue)
     {
-        var val = value.apply();
+        var val = value.get();
 
         if (p.test(val))
             return val;
         else
-            return fallbackValue.apply();
+            return fallbackValue.get();
     }
 }

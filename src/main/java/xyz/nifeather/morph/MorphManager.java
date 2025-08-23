@@ -687,10 +687,10 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
             return false;
         }
-        catch (Throwable t)
+        catch (Exception e)
         {
-            logger.error("Unable to disguise player", t);
-            source.sendMessage(MessageUtils.prefixes(source, MorphStrings.errorWhileDisguisingWithError().resolve("error", t.getMessage())));
+            logger.error("Unable to disguise player", e);
+            source.sendMessage(MessageUtils.prefixes(source, MorphStrings.errorWhileDisguisingWithError().resolve("error", e.getMessage())));
 
             unMorph(parameters.targetPlayer);
 

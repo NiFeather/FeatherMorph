@@ -5,6 +5,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xyz.nifeather.morph.MorphManager;
+import xyz.nifeather.morph.abilities.ISkillAbilityOptionHandler;
 import xyz.nifeather.morph.api.morphs.skills.SkillNames;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.SkillStrings;
@@ -13,10 +14,16 @@ import xyz.nifeather.morph.network.commands.S2C.set.S2CSetDisplayingFakeEquipCom
 import xyz.nifeather.morph.network.server.MorphClientHandler;
 import xyz.nifeather.morph.skills.MorphSkill;
 import xyz.nifeather.morph.skills.options.NoOpConfiguration;
-import xyz.nifeather.morph.storage.skill.SkillAbilityConfiguration;
+import xyz.nifeather.morph.storage.skill.SkillAbilityConfigContainer;
 
 public class InventoryMorphSkill extends MorphSkill<NoOpConfiguration>
 {
+    @Override
+    public ISkillAbilityOptionHandler<NoOpConfiguration> optionHandler()
+    {
+        return NoOpConfiguration.OPTION_HANDLER;
+    }
+
     @Resolved
     private MorphManager manager;
 
@@ -24,7 +31,7 @@ public class InventoryMorphSkill extends MorphSkill<NoOpConfiguration>
     private MorphClientHandler clientHandler;
 
     @Override
-    public int executeSkill(Player player, DisguiseState state, SkillAbilityConfiguration configuration, NoOpConfiguration option)
+    public int executeSkill(Player player, DisguiseState state, SkillAbilityConfigContainer configuration, NoOpConfiguration option)
     {
         var defaultShown = state.toggleDisguisedItems();
 
@@ -36,7 +43,7 @@ public class InventoryMorphSkill extends MorphSkill<NoOpConfiguration>
                 ? SkillStrings.displayingDisguiseInventoryString()
                 : SkillStrings.displayingPlayerInventoryString()));
 
-        return configuration.getCooldown();
+        return configuration.getSkillCooldown();
     }
 
     @Override
@@ -67,13 +74,5 @@ public class InventoryMorphSkill extends MorphSkill<NoOpConfiguration>
     public @NotNull NamespacedKey getIdentifier()
     {
         return SkillNames.FAKE_EQUIP;
-    }
-
-    private final NoOpConfiguration option = new NoOpConfiguration();
-
-    @Override
-    public NoOpConfiguration getOptionInstance()
-    {
-        return option;
     }
 }

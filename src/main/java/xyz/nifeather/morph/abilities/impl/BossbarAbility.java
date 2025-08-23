@@ -13,6 +13,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Bindables.Bindable;
+import xyz.nifeather.morph.abilities.ISkillAbilityOptionHandler;
 import xyz.nifeather.morph.abilities.MorphAbility;
 import xyz.nifeather.morph.abilities.options.BossbarOption;
 import xyz.nifeather.morph.api.morphs.abilities.AbilityNames;
@@ -26,6 +27,12 @@ import java.util.Objects;
 
 public class BossbarAbility extends MorphAbility<BossbarOption>
 {
+    @Override
+    public @NotNull ISkillAbilityOptionHandler<BossbarOption> optionHandler()
+    {
+        return BossbarOption.OPTION_HANDLER;
+    }
+
     private final Bindable<Boolean> allowBossbar = new Bindable<>(false);
 
     @Initializer
@@ -38,12 +45,6 @@ public class BossbarAbility extends MorphAbility<BossbarOption>
     public @NotNull NamespacedKey getIdentifier()
     {
         return AbilityNames.BOSSBAR;
-    }
-
-    @Override
-    protected @NotNull BossbarOption createOption()
-    {
-        return new BossbarOption();
     }
 
     @Override
@@ -86,8 +87,6 @@ public class BossbarAbility extends MorphAbility<BossbarOption>
     @Override
     public boolean handle(Player player, DisguiseState state)
     {
-        if (!super.handle(player, state)) return false;
-
         if (!this.isPlayerApplied(player) || plugin.getCurrentTick() % 4 != 0)
             return true;
 

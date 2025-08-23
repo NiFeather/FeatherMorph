@@ -19,7 +19,8 @@ import xyz.nifeather.morph.abilities.impl.onAttack.ExtraKnockbackAbility;
 import xyz.nifeather.morph.abilities.impl.onAttack.PotionOnAttackAbility;
 import xyz.nifeather.morph.abilities.impl.potion.*;
 import xyz.nifeather.morph.api.events.lifecycle.AbilitiesFinishedInitializeEvent;
-import xyz.nifeather.morph.storage.skill.ISkillOption;
+import xyz.nifeather.morph.misc.disguiseProperty.ParseErrorException;
+import xyz.nifeather.morph.storage.skill.ISkillAbilityOption;
 import xyz.nifeather.morph.storage.skill.SkillsConfigurationStoreNew;
 
 import java.util.List;
@@ -30,7 +31,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class AbilityManager extends MorphPluginObject
 {
-    private final List<IMorphAbility<?>> registedAbilities = new CopyOnWriteArrayList<>();
+    private final List<IAbility<?>> registedAbilities = new CopyOnWriteArrayList<>();
 
     @Resolved
     private SkillsConfigurationStoreNew store;
@@ -41,7 +42,7 @@ public class AbilityManager extends MorphPluginObject
      * @param ability 技能ID
      * @return 操作是否成功
      */
-    public boolean registerAbility(IMorphAbility<?> ability)
+    public boolean registerAbility(IAbility<?> ability)
     {
         //logger.info("Registering ability: " + ability.getIdentifier().asString());
 
@@ -62,7 +63,7 @@ public class AbilityManager extends MorphPluginObject
      *
      * @return 被动技能列表
      */
-    public List<IMorphAbility<?>> getRegistedAbilities()
+    public List<IAbility<?>> getRegistedAbilities()
     {
         return new ObjectArrayList<>(registedAbilities);
     }
@@ -73,7 +74,7 @@ public class AbilityManager extends MorphPluginObject
      * @param abilities ID列表
      * @return 操作是否成功
      */
-    public boolean registerAbilities(List<IMorphAbility<?>> abilities)
+    public boolean registerAbilities(List<IAbility<?>> abilities)
     {
         var success = new AtomicBoolean(false);
 
@@ -122,26 +123,35 @@ public class AbilityManager extends MorphPluginObject
     }
 
     @NotNull
-    public Map<NamespacedKey, ISkillOption> getOptionsFor(String disguiseIdentifier)
+    public Map<NamespacedKey, ISkillAbilityOption> getOptionsFor(String disguiseIdentifier)
     {
         var configuration = store.get(disguiseIdentifier);
         if (configuration == null) return new Object2ObjectOpenHashMap<>();
 
-        Map<NamespacedKey, ISkillOption> optionMap = new ConcurrentHashMap<>();
-        configuration.getAbilitiyIdentifiers().forEach(a ->
+        Map<NamespacedKey, ISkillAbilityOption> optionMap = new ConcurrentHashMap<>();
+        configuration.getAbilitiyIdentifiers().forEach(abilityIdString ->
         {
-            var idKey = NamespacedKey.fromString(a);
+            var idKey = NamespacedKey.fromString(abilityIdString);
 
             if (idKey == null)
             {
-                logger.warn("Invalid ability ID: %s".formatted(a));
+                logger.warn("Invalid ability ID: %s".formatted(abilityIdString));
                 return;
             }
 
             var abilityInstance = this.getAbility(idKey);
             if (abilityInstance == null) return;
 
-            var options = configuration.getAbilityOptions(abilityInstance);
+            ISkillAbilityOption options = null;
+
+            try
+            {
+                options = configuration.readAbilityOptions(abilityInstance);
+            }
+            catch (ParseErrorException e)
+            {
+                logger.warn("Failed to parse ability configuration for '%s' under '%s'".formatted(abilityIdString, disguiseIdentifier), e);
+            }
 
             if (options != null)
                 optionMap.put(idKey, options);
@@ -153,7 +163,7 @@ public class AbilityManager extends MorphPluginObject
     }
 
     @Nullable
-    public IMorphAbility<?> getAbility(@Nullable NamespacedKey abilityIdentifier)
+    public IAbility<?> getAbility(@Nullable NamespacedKey abilityIdentifier)
     {
         if (abilityIdentifier == null) return null;
 
@@ -173,7 +183,7 @@ public class AbilityManager extends MorphPluginObject
      * @return 被动技能列表
      */
     @NotNull
-    public List<IMorphAbility<?>> getAbilitiesFor(String disguiseIdentifier)
+    public List<IAbility<?>> getAbilitiesFor(String disguiseIdentifier)
     {
         return this.getAbilitiesFor(disguiseIdentifier, false);
     }
@@ -183,13 +193,13 @@ public class AbilityManager extends MorphPluginObject
      * @param noFallback 是否要搜索命名空间的默认配置
      */
     @NotNull
-    public List<IMorphAbility<?>> getAbilitiesFor(String disguiseIdentifier, boolean noFallback)
+    public List<IAbility<?>> getAbilitiesFor(String disguiseIdentifier, boolean noFallback)
     {
         var configuration = store.get(disguiseIdentifier);
 
         if (configuration != null)
         {
-            List<IMorphAbility<?>> abilities = new ObjectArrayList<>();
+            List<IAbility<?>> abilities = new ObjectArrayList<>();
             configuration.getAbilitiyIdentifiers().forEach(id ->
             {
                 var instance = this.getAbility(NamespacedKey.fromString(id));

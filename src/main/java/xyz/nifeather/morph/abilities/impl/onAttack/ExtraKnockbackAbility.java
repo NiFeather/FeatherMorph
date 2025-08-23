@@ -8,12 +8,19 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xyz.nifeather.morph.MorphManager;
+import xyz.nifeather.morph.abilities.ISkillAbilityOptionHandler;
 import xyz.nifeather.morph.abilities.impl.OnAttackAbility;
 import xyz.nifeather.morph.abilities.options.ExtraKnockbackOption;
 import xyz.nifeather.morph.api.morphs.abilities.AbilityNames;
 
 public class ExtraKnockbackAbility extends OnAttackAbility<ExtraKnockbackOption>
 {
+    @Override
+    public @NotNull ISkillAbilityOptionHandler<ExtraKnockbackOption> optionHandler()
+    {
+        return ExtraKnockbackOption.OPTION_HANDLER;
+    }
+
     /**
      * 获取此被动技能的ID
      *
@@ -63,9 +70,4 @@ public class ExtraKnockbackAbility extends OnAttackAbility<ExtraKnockbackOption>
 
     private static final ExtraKnockbackOption defaultOption = ExtraKnockbackOption.from(0, 0.4D, 0);
 
-    @Override
-    protected @NotNull ExtraKnockbackOption createOption()
-    {
-        return defaultOption;
-    }
 }
