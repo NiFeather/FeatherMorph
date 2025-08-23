@@ -174,6 +174,17 @@ public class MorphSkillHandler extends MorphPluginObject
         return this.getSkill(configuration.getSkillIdentifier().asString());
     }
 
+    public <O extends ISkillAbilityOption> O lookupOptionFor(ISkill<O> skill, String disguiseIdentifier) throws ParseErrorException
+    {
+        var configContainer = store.get(disguiseIdentifier);
+        var optionMap = Objects.requireNonNull(configContainer, "No configuration for disguise " + disguiseIdentifier)
+                .getSkillOptions(skill);
+
+        return skill.optionHandler().acceptNullableOptions()
+                ? skill.optionHandler().readOptionNullable(optionMap)
+                : skill.optionHandler().readOption(optionMap);
+    }
+
     /**
      * 获取和identifier匹配的技能
      *
@@ -376,12 +387,12 @@ public class MorphSkillHandler extends MorphPluginObject
     /**
      * 某个实体类型是否有技能
      *
-     * @param id 实体ID
+     * @param disguiseIdentifier 实体ID
      * @return 是否拥有技能
      */
-    public boolean hasSkill(String id)
+    public boolean hasSkill(String disguiseIdentifier)
     {
-        var entry = getSkillEntry(id);
+        var entry = getSkillEntry(disguiseIdentifier);
         return entry != null
                 && !SkillNames.UNKNOWN.equals(entry.left().getSkillIdentifier())
                 && !SkillNames.NONE.equals(entry.left().getSkillIdentifier());

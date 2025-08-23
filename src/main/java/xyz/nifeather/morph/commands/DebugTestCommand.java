@@ -1,15 +1,25 @@
 package xyz.nifeather.morph.commands;
 
+import com.mojang.brigadier.context.CommandContext;
+import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
 import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSelectorArgumentResolver;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.EntityType;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Messages.FormattableMessage;
+import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.MorphManager;
+import xyz.nifeather.morph.api.FeatherMorphAPI;
 import xyz.nifeather.morph.commands.brigadier.BrigadierCommand;
+import xyz.nifeather.morph.storage.skill.SkillAbilityConfigContainer;
+import xyz.nifeather.morph.storage.skill.SkillsConfigurationStoreNew;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class DebugTestCommand extends BrigadierCommand
@@ -26,7 +36,6 @@ public class DebugTestCommand extends BrigadierCommand
     @Override
     public boolean register(Commands dispatcher)
     {
-
         dispatcher.register(
                 Commands.literal("listRaw")
                         .then(
@@ -81,7 +90,70 @@ public class DebugTestCommand extends BrigadierCommand
                         .build()
         );
 
+        dispatcher.register(
+                Commands.literal("validate_skill_ability")
+                        .executes(this::validateSkillAbilities)
+                        .build()
+        );
+
         return true;
+    }
+
+    private int validateSkillAbilities(CommandContext<CommandSourceStack> commandSourceStackCommandContext)
+    {
+        var api = FeatherMorphAPI.instance();
+        assert api != null;
+
+        var skillConfigs = api.directAccess().getGlobalDependency(SkillsConfigurationStoreNew.class);
+
+        var abilityManager = api.directAccess().abilityManager();
+        List<String> targets = Arrays.stream(EntityType.values())
+                .filter(t -> !t.equals(EntityType.UNKNOWN))
+                .map(t -> t.key().asString())
+                .toList();
+
+        var skillHandler = api.directAccess().skillHandler();
+
+        Bukkit.broadcast(Component.text("Testing abilitymanager#getOptionsFor for any mc id"));
+
+        try
+        {
+            for (String id : targets)
+            {
+                var xx = abilityManager.getOptionsFor(id);
+                logger.info("%s no error: %s".formatted(id, xx));
+            }
+        }
+        catch (Exception e)
+        {
+            Bukkit.broadcast(Component.text("Error! " + e.getMessage()));
+            logger.error("Error!", e);
+        }
+
+        Bukkit.broadcast(Component.text("Now for skills..."));
+
+        try
+        {
+            for (String id : targets)
+            {
+                var skill = skillHandler.lookupDisguiseSkill(id);
+
+                if (!skillHandler.hasSkill(id))
+                    continue;
+
+                var option = skillHandler.lookupOptionFor(skill, id);
+                logger.info("%s no error: %s".formatted(id, option));
+            }
+        }
+        catch (Exception e)
+        {
+            Bukkit.broadcast(Component.text("Error! " + e.getMessage()));
+            logger.error("Error!", e);
+        }
+
+        Bukkit.broadcast(Component.text("Test complete"));
+
+        return 1;
     }
 
     @Override
