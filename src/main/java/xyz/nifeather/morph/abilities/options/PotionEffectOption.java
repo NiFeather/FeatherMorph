@@ -8,6 +8,7 @@ import xyz.nifeather.morph.abilities.ISkillAbilityOptionHandler;
 import xyz.nifeather.morph.misc.disguiseProperty.ParseErrorException;
 import xyz.nifeather.morph.storage.skill.ISkillAbilityOption;
 
+import java.util.Arrays;
 import java.util.Map;
 
 public class PotionEffectOption implements ISkillAbilityOption
@@ -35,6 +36,11 @@ public class PotionEffectOption implements ISkillAbilityOption
             int duration = utilGetTypedOrThrow("duration", gsonMap, Number.class).intValue();
             int amplifier = utilGetTypedOrThrow("amplifier", gsonMap, Number.class).intValue();
 
+            //todo: Migrate potion name to potion ID
+            PotionEffectType effect = Arrays.stream(PotionEffectType.values())
+                    .filter(v -> v.getName().equalsIgnoreCase(id))
+                    .findFirst().orElseThrow(() -> new ParseErrorException(this.getClass().getSimpleName(), "Not a valid Identifier for string '%s'".formatted(id)));
+/*
             var namespaced = NamespacedKey.fromString(id);
             if (namespaced == null)
                 throw new ParseErrorException(this.getClass().getSimpleName(), "Not a valid Identifier for string '%s'".formatted(id));
@@ -42,7 +48,7 @@ public class PotionEffectOption implements ISkillAbilityOption
             var effect = Registry.EFFECT.get(namespaced);
             if (effect == null)
                 throw new ParseErrorException(this.getClass().getSimpleName(), "Not a valid effect for string '%s'".formatted(id));
-
+*/
             return PotionEffectOption.from(effect, duration, amplifier);
         }
     }

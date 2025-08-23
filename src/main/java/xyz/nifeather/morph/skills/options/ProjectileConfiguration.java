@@ -2,6 +2,7 @@ package xyz.nifeather.morph.skills.options;
 
 import org.bukkit.entity.EntityType;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.abilities.ISkillAbilityOptionHandler;
 import xyz.nifeather.morph.misc.disguiseProperty.ParseErrorException;
 import xyz.nifeather.morph.storage.skill.ISkillAbilityOption;
@@ -39,9 +40,9 @@ public class ProjectileConfiguration implements ISkillAbilityOption
             String name = utilGetTypedOrThrow("name", gsonMap, String.class);
             float speedMultiplier = utilGetTypedOrThrow("speed_multiplier", gsonMap, Number.class).floatValue();
 
-            String soundName = utilGetTypedOrThrow("sound_name", gsonMap, String.class);
+            String soundName = utilGetTypedOrNull("sound_name", gsonMap, String.class);
             int soundDistance = utilGetTypedOrThrow("sound_distance", gsonMap, Number.class).intValue();
-            String preLaunchSoundName = utilGetTypedOrThrow("warning_sound_name", gsonMap, String.class);
+            String preLaunchSoundName = utilGetTypedOrNull("warning_sound_name", gsonMap, String.class);
 
             int distanceLimit = utilGetTypedOrThrow("max_target_distance", gsonMap, Number.class).intValue();
             int executeDelay = utilGetTypedOrThrow("delay", gsonMap, Number.class).intValue();
@@ -60,7 +61,7 @@ public class ProjectileConfiguration implements ISkillAbilityOption
 
     public ProjectileConfiguration(EntityType entityType,
                                    float multiplier,
-                                   String soundName, int soundDistance,
+                                   @Nullable String soundName, int soundDistance,
                                    int distanceLimit,
                                    int executeDelay)
     {
@@ -79,13 +80,13 @@ public class ProjectileConfiguration implements ISkillAbilityOption
 
     public ProjectileConfiguration(EntityType entityType,
                                    float multiplier,
-                                   String soundName, int soundDistance,
+                                   @Nullable String soundName, int soundDistance,
                                    int distanceLimit)
     {
         this(entityType, multiplier, soundName, soundDistance, distanceLimit, 0);
     }
 
-    public ProjectileConfiguration withWarningSound(String soundName)
+    public ProjectileConfiguration withWarningSound(@Nullable String soundName)
     {
         this.preLaunchSoundName = soundName;
         return this;
@@ -105,6 +106,7 @@ public class ProjectileConfiguration implements ISkillAbilityOption
         return multiplier;
     }
 
+    @Nullable
     private String preLaunchSoundName;
 
     public String getPreLaunchSoundName()
@@ -112,6 +114,7 @@ public class ProjectileConfiguration implements ISkillAbilityOption
         return preLaunchSoundName == null ? "" : preLaunchSoundName;
     }
 
+    @Nullable
     private final String soundName;
 
     public String getSoundName()

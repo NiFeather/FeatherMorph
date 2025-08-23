@@ -58,15 +58,25 @@ public interface ISkillAbilityOptionHandler<O extends ISkillAbilityOption>
     @NotNull
     O readOption(@NotNull Map<String, Object> gsonMap) throws ParseErrorException;
 
-    default <T> T utilGetTypedOrThrow(String key, Map<String, Object> gsonMap, Class<T> expectedType) throws ParseErrorException
+    @Nullable
+    default <T> T utilGetTypedOrNull(String key, Map<String, Object> gsonMap, Class<T> expectedType) throws ParseErrorException
     {
         var val = gsonMap.getOrDefault(key, null);
         if (val == null)
-            throw new ParseErrorException(this.getClass().getSimpleName(), "Key '%s' not present in the option map".formatted(key));
+            return null;
 
         if (expectedType.isInstance(val))
             return (T) val;
         else
             throw new ParseErrorException(this.getClass().getSimpleName(), "Input key '%s' is not a instance of expected type '%s'".formatted(key, expectedType));
+    }
+
+    default <T> T utilGetTypedOrThrow(String key, Map<String, Object> gsonMap, Class<T> expectedType) throws ParseErrorException
+    {
+        var val = utilGetTypedOrNull(key, gsonMap, expectedType);
+        if (val == null)
+            throw new ParseErrorException(this.getClass().getSimpleName(), "Key '%s' not present in the option map".formatted(key));
+
+        return val;
     }
 }

@@ -43,7 +43,7 @@ public class EffectConfiguration implements ISkillAbilityOption
             boolean acquiresWater = utilGetTypedOrThrow("acquires_water", gsonMap, Boolean.class);
             boolean showGuardian = utilGetTypedOrThrow("show_guardian", gsonMap, Boolean.class);
 
-            String soundName = utilGetTypedOrThrow("sound", gsonMap, String.class);
+            String soundName = utilGetTypedOrNull("sound", gsonMap, String.class);
             int soundDistance = utilGetTypedOrThrow("sound_distance", gsonMap, Number.class).intValue();
             int applyDistance = utilGetTypedOrThrow("apply_distance", gsonMap, Number.class).intValue();
 
