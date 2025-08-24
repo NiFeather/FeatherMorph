@@ -19,6 +19,20 @@ public class ChatOverrideOption implements ISkillAbilityOption
         }
 
         @Override
+        public boolean acceptNullableOptions()
+        {
+            return true;
+        }
+
+        @Override
+        public ChatOverrideOption readOptionNullable(@Nullable Map<String, Object> gsonMap) throws NullPointerException, UnsupportedOperationException, ParseErrorException
+        {
+            return gsonMap == null
+                    ? new ChatOverrideOption(null)
+                    : readOption(gsonMap);
+        }
+
+        @Override
         public void writeOption(ChatOverrideOption option, @NotNull Map<String, Object> gsonMap)
         {
             gsonMap.put("message_pattern", option.messagePattern);
