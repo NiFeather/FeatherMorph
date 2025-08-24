@@ -57,7 +57,7 @@ public class NetworkDataHolder extends MorphPluginObject implements IManagePlaye
     {
         if (!bindingSlave.isOnline())
         {
-            logger.info("We are not connected with master server! Refusing to update unlock state...");
+            logger.error("We are not connected with master server! Refusing to update unlock state...");
             return false;
         }
 
@@ -73,7 +73,7 @@ public class NetworkDataHolder extends MorphPluginObject implements IManagePlaye
     {
         if (!bindingSlave.isOnline())
         {
-            logger.info("We are not connected with master server! Refusing to update unlock state...");
+            logger.error("We are not connected with master server! Refusing to update unlock state...");
             return false;
         }
 
