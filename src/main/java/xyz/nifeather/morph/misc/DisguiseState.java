@@ -44,6 +44,7 @@ import xyz.nifeather.morph.utilities.NbtUtils;
 import xyz.nifeather.morph.utilities.PermissionUtils;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static xyz.nifeather.morph.utilities.DisguiseUtils.itemOrAir;
@@ -721,6 +722,74 @@ public class DisguiseState extends MorphPluginObject
 
     //endregion ProfileNBT
 
+    private final CompletableFuture<DisguiseState> stateFuture = new CompletableFuture<>();
+
+    // If the selfUpdate loop has scheduled, or began
+    private volatile boolean selfUpdateBegan;
+    private volatile boolean selfUpdateScheduled;
+
+    /**
+     * Get A {@link CompletableFuture} that binds to this state.<br>
+     * Finishes when this state has been disposed.<br>
+     * Fail with exception if an error occurred while updating this state, or the state has been disposed without running {@link DisguiseState#doUpdate()} once
+     */
+    public CompletableFuture<DisguiseState> getStateFuture()
+    {
+        var instance = new CompletableFuture<DisguiseState>();
+        stateFuture.thenAccept(instance::complete);
+        stateFuture.exceptionally(t ->
+        {
+            instance.completeExceptionally(t);
+            return null;
+        });
+
+        return instance;
+    }
+
+    public void scheduleSelfUpdate()
+    {
+        if (selfUpdateScheduled)
+            return;
+
+        selfUpdateScheduled = true;
+        this.scheduleOn(getPlayer(), this::doUpdate);
+    }
+
+    public void doUpdate()
+    {
+        if (this.disposed()) return;
+
+        boolean noSchedule = false;
+
+        if (!selfUpdateBegan)
+            selfUpdateBegan = true;
+
+        try
+        {
+            var player = getPlayer();
+
+            if (!player.isOnline())
+                return;
+
+            if (!this.getProvider().updateDisguise(player, this))
+                throw new UpdateFailedException("Failed executing provider update");
+
+            if (!this.selfUpdate())
+                throw new UpdateFailedException("Failed executing self update");
+        }
+        catch (Exception e)
+        {
+            noSchedule = true;
+            logger.warn("Error occurred while updating disguise", e);
+            stateFuture.completeExceptionally(e);
+        }
+        finally
+        {
+            if (!noSchedule)
+                this.scheduleOn(getPlayer(), this::doUpdate);
+        }
+    }
+
     public boolean selfUpdate()
     {
         if (this.canPlayAmbient())
@@ -838,8 +907,6 @@ public class DisguiseState extends MorphPluginObject
         return showDisguisedItems;
     }
 
-    private static final ItemStack[] emptyArmorStack = new ItemStack[]{ null, null, null, null };
-
     //region Sound Handling
 
     private final SoundHandler soundHandler;
@@ -877,6 +944,14 @@ public class DisguiseState extends MorphPluginObject
     @Override
     public void dispose()
     {
+        if (disposed())
+            return;
+
+        if (selfUpdateBegan)
+            stateFuture.complete(this);
+        else
+            stateFuture.completeExceptionally(new EarlyDisposeException("The DisguiseState has been disposed before running once"));
+
         disposed.set(true);
         this.waypointUpdater().dispose();
         this.disguiseWrapper.dispose();

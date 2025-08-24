@@ -1,6 +1,5 @@
 package xyz.nifeather.morph;
 
-import ca.spottedleaf.moonrise.common.util.TickThread;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
@@ -240,8 +239,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     @Initializer
     private void load()
     {
-        this.addSchedule(this::update);
-
         registerBackend(modBackend);
         tryBackends();
 
@@ -272,55 +269,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     public boolean disguiseDisabledInWorld(String worldName)
     {
         return disabledWorlds.contains(worldName);
-    }
-
-    private void update()
-    {
-        this.addSchedule(this::update);
-
-        var states = this.getActiveDisguises();
-
-        states.forEach(state ->
-        {
-            var p = state.getPlayer();
-
-            if (p == null) return;
-
-            if (!TickThread.isTickThreadFor(NmsRecord.ofPlayer(p)))
-                this.scheduleOn(p, () -> this.updateDisguiseSingle(state));
-            else
-                this.updateDisguiseSingle(state);
-        });
-    }
-
-    private void updateDisguiseSingle(DisguiseState state)
-    {
-        var player = state.getPlayer();
-
-        //logger.info("Run at " + plugin.getCurrentTick() + " -> " + i);
-
-        //跳过离线玩家
-        if (!player.isOnline() || state.disposed()) return;
-
-        boolean stateSuccess = false;
-        boolean providerSuccess = false;
-
-        try
-        {
-            providerSuccess = state.getProvider().updateDisguise(player, state);
-            stateSuccess = state.selfUpdate();
-        }
-        catch (Throwable t)
-        {
-            logger.error("Error occurred updating disguise!", t);
-        }
-
-        if (!providerSuccess || !stateSuccess)
-        {
-            player.sendMessage(MessageUtils.prefixes(player, MorphStrings.errorWhileUpdatingDisguise()));
-
-            unMorph(nilCommandSource, player, true, true);
-        }
     }
 
     //region 玩家伪装相关
@@ -666,9 +614,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             this.buildDisguise(buildResult, parameters, playerMeta);
 
             if (!applyDisguise(parameters, buildResult.state(), meta, playerMeta))
-            {
                 return false;
-            }
 
             this.afterDisguise(buildResult, parameters, playerMeta);
 
@@ -995,6 +941,22 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         }
 
         provider.onDisguiseApply(newState);
+
+        newState.getStateFuture()
+                .thenAccept(state ->
+                {
+                    logger.info("On Finish!");
+                    activeDisguises.remove(state);
+                })
+                .exceptionally(t ->
+                {
+                    logger.info("On Exception!", t);
+                    player.sendMessage(MessageUtils.prefixes(player, MorphStrings.errorWhileUpdatingDisguise()));
+                    unMorph(nilCommandSource, player, true, true);
+                    return null;
+                });
+
+        newState.scheduleSelfUpdate();
 
         this.activeDisguises.add(newState);
 
