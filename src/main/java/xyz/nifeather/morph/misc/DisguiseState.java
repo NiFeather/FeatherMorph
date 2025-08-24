@@ -722,6 +722,8 @@ public class DisguiseState extends MorphPluginObject
 
     //endregion ProfileNBT
 
+    //region Updating
+
     private final CompletableFuture<DisguiseState> stateFuture = new CompletableFuture<>();
 
     // If the selfUpdate loop has scheduled, or began
@@ -755,11 +757,10 @@ public class DisguiseState extends MorphPluginObject
         this.scheduleOn(getPlayer(), this::doUpdate);
     }
 
-    public void doUpdate()
+    // Adding synchronized since we don't want someone to dispose when the DisguiseState is running self update
+    private synchronized void doUpdate()
     {
         if (this.disposed()) return;
-
-        boolean noSchedule = false;
 
         if (!selfUpdateBegan)
             selfUpdateBegan = true;
@@ -776,17 +777,13 @@ public class DisguiseState extends MorphPluginObject
 
             if (!this.selfUpdate())
                 throw new UpdateFailedException("Failed executing self update");
+
+            this.scheduleOn(getPlayer(), this::doUpdate);
         }
         catch (Exception e)
         {
-            noSchedule = true;
             logger.warn("Error occurred while updating disguise", e);
             stateFuture.completeExceptionally(e);
-        }
-        finally
-        {
-            if (!noSchedule)
-                this.scheduleOn(getPlayer(), this::doUpdate);
         }
     }
 
@@ -796,11 +793,11 @@ public class DisguiseState extends MorphPluginObject
             this.getSoundHandler().update();
 
         this.animationSequence.update();
-
         disguiseWaypointUpdater.tick();
-
         return this.abilityUpdater.update();
     }
+
+    //endregion Updating
 
     private void refreshDisguiseItems(EntityEquipment targetEquipment, DisguiseWrapper<?> disguiseWrapper)
     {
@@ -941,8 +938,9 @@ public class DisguiseState extends MorphPluginObject
         return disposed.get();
     }
 
+    // Adding synchronized since we don't want someone to dispose when the DisguiseState is running self update
     @Override
-    public void dispose()
+    public synchronized void dispose()
     {
         if (disposed())
             return;
@@ -953,6 +951,7 @@ public class DisguiseState extends MorphPluginObject
             stateFuture.completeExceptionally(new EarlyDisposeException("The DisguiseState has been disposed before running once"));
 
         disposed.set(true);
+
         this.waypointUpdater().dispose();
         this.disguiseWrapper.dispose();
         this.abilityUpdater.dispose();
