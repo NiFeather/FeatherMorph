@@ -147,7 +147,7 @@ public class SkillAbilityConfigContainer
 
     // id <-> Option Map
     @Expose
-    @Nullable
+    @NotNull
     @SerializedName("settings")
     private final Map<String, Map<String, Object>> options = new ConcurrentHashMap<>();
 
@@ -191,9 +191,14 @@ public class SkillAbilityConfigContainer
                                                                                     ISkillAbilityOptionHandler<O> optionHandler,
                                                                                     O option)
     {
-        Map<String, Object> currentOptionMap = options == null ? null : options.getOrDefault(identifier.asString(), null);
+        Map<String, Object> currentOptionMap = options.getOrDefault(identifier.asString(), null);
 
-        Objects.requireNonNull(currentOptionMap);
+        if (currentOptionMap == null)
+        {
+            var newMap = new ConcurrentHashMap<String, Object>();
+            options.put(identifier.asString(), newMap);
+            currentOptionMap = newMap;
+        }
 
         var optionMap = new Object2ObjectOpenHashMap<String, Object>();
         optionHandler.writeOption(option, optionMap);

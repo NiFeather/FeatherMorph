@@ -31,7 +31,7 @@ public class SonicBoomMorphSkill extends DelayedMorphSkill<NoOpConfiguration>
     }
 
     @Override
-    protected ExecuteResult preExecute(Player player, DisguiseState state, SkillAbilityConfigContainer configuration, NoOpConfiguration option)
+    protected ExecuteResult preExecute(Player player, DisguiseState state, @NotNull SkillAbilityConfigContainer configuration, NoOpConfiguration option)
     {
         playSoundToNearbyPlayers(player, 160,
                 Key.key("minecraft", "entity.warden.sonic_charge"), Sound.Source.HOSTILE);

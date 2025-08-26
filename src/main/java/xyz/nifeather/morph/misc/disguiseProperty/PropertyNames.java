@@ -88,4 +88,7 @@ public class PropertyNames
     public static final String ZOMBIE_VILLAGER_TYPE = "zombie_villager/type";
     public static final String ZOMBIE_VILLAGER_PROFESSION = "zombie_villager/profession";
     public static final String ZOMBIE_VILLAGER_LEVEL = "zombie_villager/level";
+
+    @ReservedProperty
+    public static final String GUARDIAN_ATTACK_TARGET = "guardian/attack_target";
 }

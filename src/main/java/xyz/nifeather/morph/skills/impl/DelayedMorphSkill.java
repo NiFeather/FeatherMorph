@@ -1,6 +1,7 @@
 package xyz.nifeather.morph.skills.impl;
 
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.misc.DisguiseState;
@@ -38,7 +39,7 @@ public abstract class DelayedMorphSkill<T extends ISkillAbilityOption> extends M
         return configuration.getSkillCooldown();
     }
 
-    protected ExecuteResult preExecute(Player player, DisguiseState state, SkillAbilityConfigContainer configuration, T option)
+    protected ExecuteResult preExecute(Player player, DisguiseState state, @NotNull SkillAbilityConfigContainer configuration, @NotNull T option)
     {
         return ExecuteResult.success(configuration.getSkillCooldown());
     }

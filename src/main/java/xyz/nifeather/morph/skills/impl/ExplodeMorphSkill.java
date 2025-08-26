@@ -39,7 +39,7 @@ public class ExplodeMorphSkill extends DelayedMorphSkill<ExplosionConfiguration>
     private MorphClientHandler clientHandler;
 
     @Override
-    protected ExecuteResult preExecute(Player player, DisguiseState state, SkillAbilityConfigContainer configuration, ExplosionConfiguration option)
+    protected ExecuteResult preExecute(Player player, DisguiseState state, @NotNull SkillAbilityConfigContainer configuration, ExplosionConfiguration option)
     {
         if (option == null)
         {

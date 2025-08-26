@@ -16,6 +16,7 @@ import xyz.nifeather.morph.storage.MorphJsonBasedStorage;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
 
 public class SkillsConfigurationStoreNew extends DirectoryJsonBasedStorage<SkillAbilityConfigContainer>
 {
@@ -36,7 +37,7 @@ public class SkillsConfigurationStoreNew extends DirectoryJsonBasedStorage<Skill
             logger.warn("The package version is newer than our implementation! Errors may occur!");
     }
 
-    private static final int TARGET_PACKAGE_VERSION = PackageVersions.HAPPY_GHAST;
+    private static final int TARGET_PACKAGE_VERSION = PackageVersions.GUARDIAN_SKILL;
 
     private void update(int currentVersion)
     {
@@ -62,23 +63,29 @@ public class SkillsConfigurationStoreNew extends DirectoryJsonBasedStorage<Skill
             migrateAttribute();
         }
 
+        var generatedConfigurations = DefaultConfigGenerator.createInstance().generateConfiguration();
+
         if (currentVersion < PackageVersions.HAPPY_GHAST)
         {
-            createHappyGhastConfiguration();
+            saveEntityTypeConfiguration(generatedConfigurations, EntityType.HAPPY_GHAST);
+        }
+
+        if (currentVersion < PackageVersions.GUARDIAN_SKILL)
+        {
+            saveEntityTypeConfiguration(generatedConfigurations, EntityType.GUARDIAN);
         }
 
         setPackageVersion(TARGET_PACKAGE_VERSION);
     }
 
-    private void createHappyGhastConfiguration()
+    private void saveEntityTypeConfiguration(Map<String, SkillAbilityConfigContainer> defaultConfigurations, EntityType entityType)
     {
-        var newConfig = DefaultConfigGenerator.createInstance().generateConfiguration()
-                .getOrDefault(EntityType.HAPPY_GHAST.key().asString(), null);
+        var newConfig = defaultConfigurations.getOrDefault(entityType.key().asString(), null);
 
         if (newConfig == null)
             return;
 
-        newConfig.legacy_MobID = EntityType.HAPPY_GHAST.key().asString();
+        newConfig.legacy_MobID = entityType.key().asString();
 
         save(newConfig);
     }
@@ -292,5 +299,6 @@ public class SkillsConfigurationStoreNew extends DirectoryJsonBasedStorage<Skill
         public static final int WITHER_SKELETON_CHANGES = 3;
         public static final int MERGE_ATTRIBUTE_AGAIN = 4;
         public static final int HAPPY_GHAST = 5;
+        public static final int GUARDIAN_SKILL = 6;
     }
 }

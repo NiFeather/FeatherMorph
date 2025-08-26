@@ -28,7 +28,12 @@ public class InputHandles
 
     public static <X> Optional<X> immediateException(String propertyName, String ignored) throws ParseErrorException
     {
-        throw new ParseErrorException(propertyName, "This freaking property does not accept any inputs");
+        throw new ParseErrorException(propertyName, "immediateException: This freaking property does not accept any inputs");
+    }
+
+    public static <X> Optional<X> reservedException(String propertyName, String ignored) throws ParseErrorException
+    {
+        throw new ParseErrorException(propertyName, "reservedException: Internal property, not available for user inputs");
     }
 
     public static Optional<Boolean> readBooleanStrict(String propertyName, String input) throws ParseErrorException

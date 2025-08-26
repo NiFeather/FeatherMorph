@@ -154,6 +154,10 @@ public class DefaultConfigGenerator
         this.getConfiguration(EntityType.WITCH)
                 .setSkillIdentifier(SkillNames.WITCH)
                 .setSkillCooldown(80);
+
+        this.getConfiguration(EntityType.GUARDIAN)
+                .setSkillIdentifier(SkillNames.GUARDIAN)
+                .setSkillCooldown(80);
     }
 
     private void setAbilityRange(Collection<EntityType> types, NamespacedKey abilityType)

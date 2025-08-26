@@ -18,7 +18,6 @@ import xyz.nifeather.morph.network.commands.S2C.set.S2CSetAggressiveCommand;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
 import xyz.nifeather.morph.skills.options.ProjectileConfiguration;
 import xyz.nifeather.morph.storage.skill.SkillAbilityConfigContainer;
-import xyz.nifeather.morph.utilities.EntityTypeUtils;
 
 public class LaunchProjectileMorphSkill extends DelayedMorphSkill<ProjectileConfiguration>
 {
@@ -38,7 +37,7 @@ public class LaunchProjectileMorphSkill extends DelayedMorphSkill<ProjectileConf
     private MorphClientHandler clientHandler;
 
     @Override
-    protected ExecuteResult preExecute(Player player, DisguiseState state, SkillAbilityConfigContainer configuration, ProjectileConfiguration option)
+    protected ExecuteResult preExecute(Player player, DisguiseState state, @NotNull SkillAbilityConfigContainer configuration, ProjectileConfiguration option)
     {
         if (option == null || configuration == null)
         {

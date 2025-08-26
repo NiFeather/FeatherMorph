@@ -12,24 +12,30 @@ public class PaperEntityLookup implements IPlatformEntityLookup<LivingEntity, Pl
     @Override
     public @Nullable IPlatformPlayer getPlatformPlayer(Player player)
     {
+        if (player == null) return null;
+
         return new PaperPlayer(player);
     }
 
     @Override
     public Player getNativePlayer(@Nullable IPlatformPlayer platformPlayer)
     {
-        return ((PaperPlayer) platformPlayer).handle();
+        return platformPlayer == null ? null : ((PaperPlayer) platformPlayer).handle();
     }
 
     @Override
-    public PaperEntity getPlatformEntity(LivingEntity entity)
+    public PaperEntity getPlatformEntity(@Nullable LivingEntity entity)
     {
+        if (entity == null) return null;
+        if (entity instanceof Player player)
+            return (PaperPlayer) getPlatformPlayer(player);
+
         return new PaperEntity(entity);
     }
 
     @Override
     public LivingEntity getNativeEntity(@Nullable IPlatformEntity platformEntity)
     {
-        return ((PaperEntity)platformEntity).getHandle();
+        return platformEntity == null ? null : ((PaperEntity)platformEntity).getHandle();
     }
 }

@@ -1,13 +1,22 @@
 package xyz.nifeather.morph.platform.impl.paper.world;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.util.concurrent.ExecutionError;
+import com.google.common.util.concurrent.UncheckedExecutionException;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
+import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.platform.world.IPlatformLocation;
 import xyz.nifeather.morph.platform.world.IPlatformWorld;
 import xyz.nifeather.morph.platform.world.IPlatformWorldLookup;
 
+import java.time.Duration;
+import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 public class PaperWorldLookup implements IPlatformWorldLookup<World, Location>
 {
@@ -25,9 +34,23 @@ public class PaperWorldLookup implements IPlatformWorldLookup<World, Location>
         return getPlatformWorld(nativeWorld);
     }
 
+    private final Cache<World, PaperWorld> worldCache = CacheBuilder.newBuilder()
+            .concurrencyLevel(4)
+            .expireAfterAccess(Duration.ofMinutes(1))
+            .build();
+
     @Override
     public PaperWorld getPlatformWorld(World world)
     {
+        try
+        {
+            return worldCache.get(world, () -> new PaperWorld(world));
+        }
+        catch (ExecutionException | ExecutionError | UncheckedExecutionException e)
+        {
+            FeatherMorphMain.getInstance().getSLF4JLogger().error("Failed fetching cross-platform world from cache, returning new instance.", e);
+        }
+
         return new PaperWorld(world);
     }
 

@@ -61,6 +61,9 @@ public class DisguiseProperties
         register(EntityType.ZOGLIN, new ZoglinProperties());
 
         register(EntityType.ZOMBIE, new ZombieProperties());
+
+        register(EntityType.GUARDIAN, new GuardianProperties());
+        register(EntityType.ELDER_GUARDIAN, new GuardianProperties());
     }
 
     public Map<EntityType, AbstractProperties<?>> getAll()

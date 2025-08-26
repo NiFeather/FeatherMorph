@@ -18,6 +18,7 @@ public class SingleProperty<T>
     private final T defaultVal;
     private final Class<T> type;
     private final InputHandle<T> inputHandle;
+    private final boolean hideFromUserInput;
 
     public String id()
     {
@@ -34,6 +35,11 @@ public class SingleProperty<T>
         return type;
     }
 
+    public boolean hideFromUserInput()
+    {
+        return hideFromUserInput;
+    }
+
     public Optional<T> forInput(String input) throws ParseErrorException
     {
         return inputHandle.handle(this.id(), input);
@@ -42,10 +48,11 @@ public class SingleProperty<T>
     @Deprecated
     public SingleProperty(String identifier, T defaultValue, Class<T> type)
     {
-        this(identifier, defaultValue, type, null);
+        this(identifier, defaultValue, type, null, false);
     }
 
-    public SingleProperty(String identifier, T defaultValue, Class<T> type, @Nullable InputHandle<T> inputHandle)
+    public SingleProperty(String identifier, T defaultValue, Class<T> type,
+                          @Nullable InputHandle<T> inputHandle, boolean hideFromUserInput)
     {
         if (inputHandle == null)
             inputHandle = InputHandles::immediateException;
@@ -54,6 +61,7 @@ public class SingleProperty<T>
         this.defaultVal = defaultValue;
         this.type = type;
         this.inputHandle = inputHandle;
+        this.hideFromUserInput = hideFromUserInput;
     }
 
     private final List<String> validValues = new CopyOnWriteArrayList<>();
@@ -114,6 +122,11 @@ public class SingleProperty<T>
 
     public static <T> SingleProperty<T> of(String id, T val, InputHandle<T> inputHandle)
     {
-        return new SingleProperty<>(id, val, (Class<T>) val.getClass(), inputHandle);
+        return new SingleProperty<>(id, val, (Class<T>) val.getClass(), inputHandle, false);
+    }
+
+    public static <T> SingleProperty<T> of(String id, T val, InputHandle<T> inputHandle, boolean hideFromUserInput)
+    {
+        return new SingleProperty<>(id, val, (Class<T>) val.getClass(), inputHandle, hideFromUserInput);
     }
 }

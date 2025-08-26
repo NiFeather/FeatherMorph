@@ -69,6 +69,9 @@ public class MorphCommand extends MorphPluginObject implements IConvertibleBriga
         {
             for (SingleProperty<?> property : properties.getValues())
             {
+                if (property.hideFromUserInput())
+                    continue;
+
                 var name = property.id();
                 var values = property.validInputs();
 

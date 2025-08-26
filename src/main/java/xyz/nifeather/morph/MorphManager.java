@@ -943,14 +943,9 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         provider.onDisguiseApply(newState);
 
         newState.getStateFuture()
-                .thenAccept(state ->
-                {
-                    logger.info("On Finish!");
-                    activeDisguises.remove(state);
-                })
+                .thenAccept(activeDisguises::remove)
                 .exceptionally(t ->
                 {
-                    logger.info("On Exception!", t);
                     player.sendMessage(MessageUtils.prefixes(player, MorphStrings.errorWhileUpdatingDisguise()));
                     unMorph(nilCommandSource, player, true, true);
                     return null;

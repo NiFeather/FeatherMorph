@@ -153,7 +153,7 @@ public class EvokerMorphSkill extends DelayedMorphSkill<NoOpConfiguration>
     }
 
     @Override
-    protected ExecuteResult preExecute(Player player, DisguiseState state, SkillAbilityConfigContainer configuration, NoOpConfiguration option)
+    protected ExecuteResult preExecute(Player player, DisguiseState state, @NotNull SkillAbilityConfigContainer configuration, NoOpConfiguration option)
     {
         var summonVex = player.isSneaking();
 
