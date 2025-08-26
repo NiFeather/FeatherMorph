@@ -84,6 +84,9 @@ public class ResidenceEventProcessor extends MorphPluginObject implements Listen
                 .getResidenceManager()
                 .getByLoc(player);
 
+        if (residence == null)
+            return;
+
         var residencePermissions = residence.getPermissions();
         if (!residencePermissions.playerHas(player, Flags.use, false))
         {
