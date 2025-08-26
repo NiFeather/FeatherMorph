@@ -14,6 +14,10 @@ import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.config.ConfigOption;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.misc.NmsRecord;
+import xyz.nifeather.morph.platform.CurrentPlatform;
+import xyz.nifeather.morph.platform.entity.IPlatformPlayer;
+
+import java.util.Currency;
 
 public class MessageUtils extends MorphPluginObject
 {
@@ -30,7 +34,12 @@ public class MessageUtils extends MorphPluginObject
     private static MorphConfigManager config;
     private static FeatherMorphMain plugin;
 
-    public static Component prefixes(CommandSender sender, Component[] c)
+    public static Component prefixes(IPlatformPlayer player, Component... c)
+    {
+        return prefixes(CurrentPlatform.instance().entityLookup().getNativePlayer(player), c);
+    }
+
+    public static Component prefixes(CommandSender sender, Component... c)
     {
         if (config == null)
             setupConfigManager();
@@ -56,9 +65,9 @@ public class MessageUtils extends MorphPluginObject
         return prefixes(sender, Component.text(str));
     }
 
-    public static Component prefixes(CommandSender sender, Component c)
+    public static Component prefixes(IPlatformPlayer player, FormattableMessage formattableMessage)
     {
-        return prefixes(sender, new Component[]{c});
+        return prefixes(CurrentPlatform.instance().entityLookup().getNativePlayer(player), formattableMessage);
     }
 
     public static Component prefixes(CommandSender sender, FormattableMessage formattable)
@@ -67,6 +76,12 @@ public class MessageUtils extends MorphPluginObject
             formattable.withLocale(getLocale(sender));
 
         return prefixes(sender, formattable.toComponent(null));
+    }
+
+    @NotNull
+    public static String getLocale(IPlatformPlayer player)
+    {
+        return getLocale(CurrentPlatform.instance().entityLookup().getNativePlayer(player));
     }
 
     @NotNull

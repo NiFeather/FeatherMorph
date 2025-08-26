@@ -19,7 +19,7 @@ public abstract class ProtocolListener extends MorphPluginObject implements Pack
     @Nullable
     protected Player getPlayerFrom(int id)
     {
-        return featherMorph().getPlatform().onlinePlayers()
+        return featherMorph().getPlatform().onlinePlayersNative()
                 .stream()
                 .filter(p -> p.getEntityId() == id)
                 .findFirst()

@@ -24,7 +24,7 @@ public class MorphPluginObject extends PluginObject<FeatherMorphMain>
 
     protected void scheduleOn(Entity entity, Runnable r, int delay)
     {
-        featherMorph().getPlatform().runAtEntityDelayed(entity, r, delay);
+        featherMorph().getPlatform().runAtEntityDelayedNative(entity, r, delay);
     }
 
     protected void scheduleAt(Location location, Runnable r)
@@ -34,7 +34,7 @@ public class MorphPluginObject extends PluginObject<FeatherMorphMain>
 
     protected void scheduleAt(Location location, Runnable r, int delay)
     {
-        featherMorph().getPlatform().runAtLocationDelayed(location, r, delay);
+        featherMorph().getPlatform().runAtLocationDelayedNative(location, r, delay);
     }
 
     public void dispose()

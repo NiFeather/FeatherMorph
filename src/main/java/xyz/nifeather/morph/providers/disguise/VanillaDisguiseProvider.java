@@ -13,7 +13,6 @@ import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
-import xiamomc.pluginbase.Exceptions.NullDependencyException;
 import xyz.nifeather.morph.backends.DisguiseWrapper;
 import xyz.nifeather.morph.config.ConfigOption;
 import xyz.nifeather.morph.config.MorphConfigManager;
@@ -94,7 +93,7 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
         modifyBoundingBoxes.onValueChanged((o, n) ->
         {
             if (o && !n)
-                featherMorph().getPlatform().onlinePlayers().forEach(p -> NmsRecord.ofPlayer(p).refreshDimensions());
+                featherMorph().getPlatform().onlinePlayersNative().forEach(p -> NmsRecord.ofPlayer(p).refreshDimensions());
         });
     }
 

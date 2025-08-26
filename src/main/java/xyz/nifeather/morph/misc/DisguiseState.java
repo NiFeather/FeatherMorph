@@ -469,7 +469,7 @@ public class DisguiseState extends MorphPluginObject
     public void setBossbar(@Nullable BossBar bossbar)
     {
         if (this.bossbar != null)
-            featherMorph().getPlatform().onlinePlayers().forEach(p -> p.hideBossBar(this.bossbar));
+            featherMorph().getPlatform().onlinePlayersNative().forEach(p -> p.hideBossBar(this.bossbar));
 
         this.bossbar = bossbar;
     }

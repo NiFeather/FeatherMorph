@@ -228,7 +228,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
 
         allowClient.onValueChanged((o, n) ->
         {
-            var players = featherMorph().getPlatform().onlinePlayers();
+            var players = featherMorph().getPlatform().onlinePlayersNative();
 
             if (n)
                 players.forEach(this::disconnectThenReAuth);
@@ -529,7 +529,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
                 if (!scheduledReauthPlayers.get()) return;
 
                 scheduledReauthPlayers.set(false);
-                featherMorph().getPlatform().onlinePlayers().forEach(this::disconnectThenReAuth);
+                featherMorph().getPlatform().onlinePlayersNative().forEach(this::disconnectThenReAuth);
             }
         });
     }

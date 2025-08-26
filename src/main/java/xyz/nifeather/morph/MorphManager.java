@@ -1599,7 +1599,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
     public void refreshDisguiseUnlockStateToAllPlayers()
     {
-        featherMorph().getPlatform().onlinePlayers().forEach(p -> clientHandler.refreshPlayerClientMorphs(this.getPlayerMeta(p).getUnlockedDisguiseIdentifiers(), p));
+        featherMorph().getPlatform().onlinePlayersNative().forEach(p -> clientHandler.refreshPlayerClientMorphs(this.getPlayerMeta(p).getUnlockedDisguiseIdentifiers(), p));
     }
 
     @Override

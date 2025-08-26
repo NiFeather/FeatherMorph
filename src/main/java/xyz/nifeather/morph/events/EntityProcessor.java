@@ -16,7 +16,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
-import xiamomc.pluginbase.Exceptions.NullDependencyException;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.RevealingHandler;
@@ -64,7 +63,7 @@ public class EntityProcessor extends MorphPluginObject implements Listener
             logger.warn("");
             logger.warn("- x - x - x - x - x - x - x - x - x - x - x - x -");
 
-            for (var player : featherMorph().getPlatform().onlinePlayers())
+            for (var player : featherMorph().getPlatform().onlinePlayersNative())
             {
                 if (player.hasPermission(CommonPermissions.ADMIN))
                 {

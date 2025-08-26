@@ -2,18 +2,31 @@ package xyz.nifeather.morph.platform;
 
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Unmodifiable;
+import xyz.nifeather.morph.platform.entity.IPlatformEntity;
+import xyz.nifeather.morph.platform.entity.IPlatformEntityLookup;
+import xyz.nifeather.morph.platform.entity.IPlatformPlayer;
+import xyz.nifeather.morph.platform.world.IPlatformWorldLookup;
 
 import java.util.List;
 
-public interface IPlatform
+public interface IPlatform<TNativeEntity, TNativePlayer, TNativeWorld, TNativeLocation>
 {
     /**
      * Get currently online players
      */
     @Unmodifiable
-    public List<Player> onlinePlayers();
+    public List<TNativePlayer> onlinePlayersNative();
+
+    /**
+     * Get currently online players
+     */
+    @Unmodifiable
+    public List<IPlatformPlayer> onlinePlayers();
+
+    public IPlatformEntityLookup<TNativeEntity, TNativePlayer> entityLookup();
+
+    public IPlatformWorldLookup<TNativeWorld, TNativeLocation> worldLookup();
 
     /**
      * @param delay Any number greater than zero.
@@ -28,10 +41,15 @@ public interface IPlatform
     /**
      * @param delay Any number greater than zero.
      */
-    public void runAtEntityDelayed(Entity entity, Runnable r, int delay);
+    public void runAtEntityDelayedNative(Entity entity, Runnable r, int delay);
 
     /**
      * @param delay Any number greater than zero.
      */
-    public void runAtLocationDelayed(Location location, Runnable r, int delay);
+    public void runAtEntityDelayed(IPlatformEntity entity, Runnable r, int delay);
+
+    /**
+     * @param delay Any number greater than zero.
+     */
+    public void runAtLocationDelayedNative(Location location, Runnable r, int delay);
 }

@@ -36,8 +36,9 @@ import xyz.nifeather.morph.misc.integrations.towny.TownyAdapter;
 import xyz.nifeather.morph.misc.recipe.RecipeManager;
 import xyz.nifeather.morph.network.multiInstance.MultiInstanceService;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
+import xyz.nifeather.morph.platform.CurrentPlatform;
 import xyz.nifeather.morph.platform.IPlatform;
-import xyz.nifeather.morph.platform.impl.PaperPlatform;
+import xyz.nifeather.morph.platform.impl.paper.PaperPlatform;
 import xyz.nifeather.morph.skills.MorphSkillHandler;
 import xyz.nifeather.morph.storage.skill.SkillsConfigurationStoreNew;
 import xyz.nifeather.morph.updates.UpdateHandler;
@@ -50,11 +51,9 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
     private static FeatherMorphMain instance;
     private final Bindable<Boolean> debugOutput = new Bindable<>(false);
 
-    private final IPlatform currentPlatform;
-
-    public IPlatform getPlatform()
+    public PaperPlatform getPlatform()
     {
-        return currentPlatform;
+        return CurrentPlatform.instance();
     }
 
     /**
@@ -70,7 +69,7 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
     {
         instance = this;
 
-        currentPlatform = new PaperPlatform();
+        CurrentPlatform.instance();
 
         boolean folia = false;
         try

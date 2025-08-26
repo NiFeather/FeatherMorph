@@ -93,7 +93,7 @@ public class PacketFactory extends MorphPluginObject
 
         var playerFound = FeatherMorphMain.getInstance()
                 .getPlatform()
-                .onlinePlayers()
+                .onlinePlayersNative()
                 .stream()
                 .filter(p -> p.getEntityId() == abs)
                 .findFirst()

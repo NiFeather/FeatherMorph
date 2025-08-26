@@ -12,7 +12,6 @@ import org.bukkit.inventory.meta.SkullMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Annotations.Resolved;
-import xyz.nifeather.morph.backends.DisguiseWrapper;
 import xyz.nifeather.morph.backends.WrapperEvent;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.MorphStrings;
@@ -179,7 +178,7 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
     @Override
     public List<String> getAllAvailableDisguises()
     {
-        var onlinePlayers = featherMorph().getPlatform().onlinePlayers();
+        var onlinePlayers = featherMorph().getPlatform().onlinePlayersNative();
 
         var list = new ObjectArrayList<String>();
         onlinePlayers.forEach(p -> list.add(p.getName()));

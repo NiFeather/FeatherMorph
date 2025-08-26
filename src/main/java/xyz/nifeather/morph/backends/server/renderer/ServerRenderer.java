@@ -186,7 +186,7 @@ public class ServerRenderer extends MorphPluginObject implements Listener
             var packetRemoveInfo = new WrapperPlayServerPlayerInfoRemove(disguiseUUID);
 
             featherMorph().getPlatform()
-                    .onlinePlayers()
+                    .onlinePlayersNative()
                     .forEach(p -> protocolManager.sendPacket(p, packetRemoveInfo));
         }
 
