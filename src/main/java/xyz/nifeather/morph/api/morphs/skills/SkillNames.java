@@ -14,6 +14,7 @@ public class SkillNames
     public static final NamespacedKey LAUNCH_PROJECTILE = new NamespacedKey(nameSpace, "launch_projective");
     public static final NamespacedKey APPLY_EFFECT = new NamespacedKey(nameSpace, "apply_effect");
     public static final NamespacedKey TELEPORT = new NamespacedKey(nameSpace, "teleport");
+    public static final NamespacedKey GUARDIAN = new NamespacedKey(nameSpace, "guardian");
 
     /**
      * Summon Vex or Fangs depending on player's distance to their target
