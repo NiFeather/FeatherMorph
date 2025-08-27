@@ -39,6 +39,7 @@ body:
     validations:
       required: true
   - type: checkboxes
+    id: challenge-logs
     attributes:
       label: "Logs..."
       options:
@@ -58,6 +59,7 @@ body:
     validations:
       required: true
   - type: checkboxes
+    id: challenge-steps-to-reproduce
     attributes:
       label: "Steps to reproduce..."
       options:
@@ -96,6 +98,7 @@ body:
         Please note that we DON'T support hybrid servers like Mohist, issues about running on such servers would likely not get solved!
         请注意我们不支持Mohist这样的模组端，任何在模组端上运行出现的问题很可能不会得到解决！
   - type: checkboxes
+    id: challenge-title
     attributes:
       label: "Please check the title"
       options:
