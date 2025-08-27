@@ -15,6 +15,7 @@ public class PhantomProperties extends BaseLivingEntityProperties<Phantom>
 
     private Optional<Integer> readPhantomSize(String propertyName, String string) throws ParseErrorException
     {
+        // localizable message not required, since readInteger always return a value or throw ParseErrorException
         var val = InputHandles.readInteger(propertyName, string)
                 .orElseThrow(() -> new ParseErrorException(propertyName, "readPhantomSize: Unable to parse phantom size"));
 

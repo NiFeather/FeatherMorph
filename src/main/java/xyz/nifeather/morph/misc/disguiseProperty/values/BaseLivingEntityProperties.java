@@ -3,6 +3,7 @@ package xyz.nifeather.morph.misc.disguiseProperty.values;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
 import org.bukkit.entity.Entity;
+import xyz.nifeather.morph.messages.ExceptionStrings;
 import xyz.nifeather.morph.misc.disguiseProperty.*;
 
 import java.util.Map;
@@ -10,12 +11,23 @@ import java.util.Optional;
 
 public abstract class BaseLivingEntityProperties<E extends Entity> extends AbstractProperties<E>
 {
-    public final SingleProperty<Component> CUSTOM_NAME = getSingle(PropertyNames.ENTITY_CUSTOM_NAME, Component.empty(), this::readCustomName);
+    protected SingleProperty<Component> createCustomNameProperty()
+    {
+        return getSingle(PropertyNames.ENTITY_CUSTOM_NAME, Component.empty(), this::readCustomName);
+    }
+
+    public final SingleProperty<Component> CUSTOM_NAME = createCustomNameProperty();
 
     private Optional<Component> readCustomName(String propertyName, String string) throws ParseErrorException
     {
         if (string.length() > 256)
-            throw new ParseErrorException(propertyName, "readCustomName: Input string is too long!");
+        {
+            throw ParseErrorException.forProperty(propertyName)
+                    .byMethod("readCustomName")
+                    .withMessage("Given input is too long!")
+                    .withLocalizableMessage(ExceptionStrings.inputTooLong())
+                    .create();
+        }
 
         return InputHandles.readAdventureComponent(propertyName, string);
     }
@@ -27,6 +39,7 @@ public abstract class BaseLivingEntityProperties<E extends Entity> extends Abstr
 
     private Optional<Integer> readArrows(String propertyName, String string) throws ParseErrorException
     {
+        // localizable message not required, since readInteger always return a value or throw ParseErrorException
         var val = InputHandles.readInteger(propertyName, string)
                 .orElseThrow(() -> new ParseErrorException(propertyName, "readArrows: Unable to parse arrows"));
 

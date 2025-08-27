@@ -38,7 +38,8 @@ public class MorphMessageStore extends MessageStore<FeatherMorphMain>
             StatStrings.class,
             UpdateStrings.class,
             SkinCacheStrings.class,
-            CapeStrings.class
+            CapeStrings.class,
+            ExceptionStrings.class
     );
 
     private final Map<String, MorphMessageSubStore> subStores = new Object2ObjectOpenHashMap<>();

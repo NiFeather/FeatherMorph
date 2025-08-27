@@ -5,7 +5,6 @@ import com.google.gson.GsonBuilder;
 import io.papermc.paper.math.Rotations;
 import io.papermc.paper.registry.RegistryAccess;
 import io.papermc.paper.registry.RegistryKey;
-import it.unimi.dsi.fastutil.Function;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.DyeColor;
@@ -14,6 +13,9 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;
 import org.bukkit.entity.*;
 import org.jetbrains.annotations.NotNull;
+import xiamomc.pluginbase.Messages.FormattableMessage;
+import xyz.nifeather.morph.messages.ExceptionStrings;
+import xyz.nifeather.morph.messages.TypesString;
 
 import java.util.*;
 
@@ -28,18 +30,32 @@ public class InputHandles
 
     public static <X> Optional<X> immediateException(String propertyName, String ignored) throws ParseErrorException
     {
-        throw new ParseErrorException(propertyName, "immediateException: This freaking property does not accept any inputs");
+        throw ParseErrorException.forProperty(propertyName)
+                .byMethod("immediateException")
+                .withMessage("This freaking property does not accept any inputs")
+                .withLocalizableMessage(ExceptionStrings.noUserInput())
+                .create();
     }
 
     public static <X> Optional<X> reservedException(String propertyName, String ignored) throws ParseErrorException
     {
-        throw new ParseErrorException(propertyName, "reservedException: Internal property, not available for user inputs");
+        throw ParseErrorException.forProperty(propertyName)
+                .byMethod("reservedException")
+                .withMessage("Internal property, not available for user inputs")
+                .withLocalizableMessage(ExceptionStrings.internalProperty())
+                .create();
     }
 
     public static Optional<Boolean> readBooleanStrict(String propertyName, String input) throws ParseErrorException
     {
         if (input.isBlank())
-            throw new ParseErrorException(propertyName, "readBooleanStrict: Empty input for a boolean type");
+        {
+            throw ParseErrorException.forProperty(propertyName)
+                    .byMethod("readBooleanStrict")
+                    .withMessage("Empty input for a boolean type")
+                    .withLocalizableMessage(ExceptionStrings.noEmptyInput())
+                    .create();
+        }
 
         return Optional.of(Boolean.parseBoolean(input));
     }
@@ -47,7 +63,13 @@ public class InputHandles
     public static Optional<Boolean> readBooleanRelaxed(String propertyName, String input) throws ParseErrorException
     {
         if (input.isBlank())
-            throw new ParseErrorException(propertyName, "readBooleanRelaxed: Empty input for a boolean type");
+        {
+            throw ParseErrorException.forProperty(propertyName)
+                    .byMethod("readBooleanRelaxed")
+                    .withMessage("Empty input for a boolean type")
+                    .withLocalizableMessage(ExceptionStrings.noEmptyInput())
+                    .create();
+        }
 
         if (input.equalsIgnoreCase("true")
             || input.equalsIgnoreCase("yes")
@@ -71,7 +93,12 @@ public class InputHandles
         }
         catch (Throwable t)
         {
-            throw new ParseErrorException(propertyName, "readInteger: Can't parse integer from input '%s'".formatted(input), t);
+            throw ParseErrorException.forProperty(propertyName)
+                    .byMethod("readInteger")
+                    .withLocalizableMessage(ExceptionStrings.failedParsingWhatFromInput().resolve("type", TypesString.typeInteger()))
+                    .withMessage("Can't parse integer from input '%s'".formatted(input))
+                    .causedBy(t)
+                    .create();
         }
     }
 
@@ -87,14 +114,25 @@ public class InputHandles
     public static <E extends Enum<?>> Optional<E> readEnumNonNull(E[] array, String propertyName, String input) throws ParseErrorException
     {
         if (array.length == 0)
-            throw new ParseErrorException(propertyName, "readEnumNonNull: Empty enum array! Is the server bugged?");
+        {
+            throw ParseErrorException.forProperty(propertyName)
+                    .byMethod("readEnumNonNull")
+                    .withLocalizableMessage(ExceptionStrings.emptyValueCandidate())
+                    .withMessage("Empty enum array! Is the server bugged?")
+                    .create();
+        }
 
         var optional = Arrays.stream(array)
                 .filter(e -> e.name().equalsIgnoreCase(input))
                 .findFirst();
 
         if (optional.isPresent()) return optional;
-        else throw new ParseErrorException(propertyName, "readEnumNonNull: No value match for input '%s'".formatted(input));
+
+        throw ParseErrorException.forProperty(propertyName)
+                .byMethod("readEnumNonNull")
+                .withLocalizableMessage(ExceptionStrings.noValueMatch())
+                .withMessage("No value match for input '%s'".formatted(input))
+                .create();
     }
 
     public static Optional<DyeColor> readDyeColor(String propertyName, String input) throws ParseErrorException
@@ -112,7 +150,12 @@ public class InputHandles
         }
         catch (Throwable t)
         {
-            throw new ParseErrorException(propertyName, "readAdventureComponent: Can't parse input to adventure component from value '%s'".formatted(input), t);
+            throw ParseErrorException.forProperty(propertyName)
+                    .byMethod("readAdventureComponent")
+                    .withLocalizableMessage(ExceptionStrings.failedParsingWhatFromInput().resolve("type", TypesString.textComponent()))
+                    .withMessage("Can't parse input to adventure component from value '%s'".formatted(input))
+                    .causedBy(t)
+                    .create();
         }
     }
 
@@ -124,7 +167,12 @@ public class InputHandles
         }
         catch (Throwable t)
         {
-            throw new ParseErrorException(propertyName, "readUUID: Can't read UUID from input '%s'".formatted(input), t);
+            throw ParseErrorException.forProperty(propertyName)
+                    .byMethod("readUUID")
+                    .withLocalizableMessage(ExceptionStrings.failedParsingWhatFromInput().resolve("type", "UUID"))
+                    .withMessage("Can't read UUID from input '%s'".formatted(input))
+                    .causedBy(t)
+                    .create();
         }
     }
 
@@ -134,7 +182,13 @@ public class InputHandles
     {
         var key = NamespacedKey.fromString(input);
         if (key == null)
-            throw new ParseErrorException(propertyName, "readRegistry: Invalid identifier '%s'".formatted(input));
+        {
+            throw ParseErrorException.forProperty(propertyName)
+                    .byMethod("readRegistry")
+                    .withLocalizableMessage(ExceptionStrings.failedParsingWhatFromInput().resolve("type", "ResourceLocation"))
+                    .withMessage("Invalid input for ResourceLocation: '%s'".formatted(input))
+                    .create();
+        }
 
         Registry<@NotNull V> registry;
 
@@ -144,11 +198,21 @@ public class InputHandles
         }
         catch (NoSuchElementException e)
         {
-            throw new ParseErrorException(propertyName, "readRegistry: Can't read from registry since the target registry '%s' does not exist! Is the server broken?".formatted(registryKey.key().toString()), e);
+            throw ParseErrorException.forProperty(propertyName)
+                    .byMethod("readRegistry")
+                    .withLocalizableMessage(ExceptionStrings.emptyValueCandidate())
+                    .withMessage("Can't read from registry since the target registry '%s' does not exist! Is the server broken?".formatted(registryKey.key().toString()))
+                    .causedBy(e)
+                    .create();
         }
         catch (IllegalArgumentException e)
         {
-            throw new ParseErrorException(propertyName, "readRegistry: The target registry '%s' is not available at this moment. Is the server broken?".formatted(registryKey.key().toString()));
+            throw ParseErrorException.forProperty(propertyName)
+                    .byMethod("readRegistry")
+                    .withLocalizableMessage(ExceptionStrings.registryNotAvailable())
+                    .withMessage("The target registry '%s' is not available at this moment. Is the server broken?".formatted(registryKey.key().toString()))
+                    .causedBy(e)
+                    .create();
         }
 
         try
@@ -157,9 +221,14 @@ public class InputHandles
 
             return Optional.of(val);
         }
-        catch (Throwable t)
+        catch (NoSuchElementException e)
         {
-            throw new ParseErrorException(propertyName, "readRegistry: Can't read value from input '%s' in registry '%s'".formatted(input, registryKey.key().toString()), t);
+            throw ParseErrorException.forProperty(propertyName)
+                    .byMethod("readRegistry")
+                    .withLocalizableMessage(ExceptionStrings.noValueMatch())
+                    .withMessage("Can't read value from input '%s' in registry '%s'".formatted(input, registryKey.key().toString()))
+                    .causedBy(e)
+                    .create();
         }
     }
 
@@ -177,6 +246,7 @@ public class InputHandles
 
     public static Optional<Integer> readVillagerLevel(String propertyName, String string) throws ParseErrorException
     {
+        // localizable message not required, since readInteger always return a value or throw ParseErrorException
         var val = InputHandles.readInteger(propertyName, string)
                 .orElseThrow(() -> new ParseErrorException(propertyName, "readVillagerLevel: Unable to parse villager level from input '%s'".formatted(string)));
 
@@ -204,13 +274,24 @@ public class InputHandles
         {
             v = Float.parseFloat(input);
         }
-        catch (Throwable t)
+        catch (NumberFormatException e)
         {
-            throw new ParseErrorException(propertyName, "readFloatStrict: Can't parse float from input '%s': %s".formatted(input, t.getMessage()), t);
+            throw ParseErrorException.forProperty(propertyName)
+                    .byMethod("readFloatStrict")
+                    .withLocalizableMessage(ExceptionStrings.failedParsingWhatFromInput().resolve("type", TypesString.typeFloat()))
+                    .withMessage("Can't parse float from input '%s': %s".formatted(input, e.getMessage()))
+                    .causedBy(e)
+                    .create();
         }
 
         if (!Float.isFinite(v))
-            throw new ParseErrorException(propertyName, "readFloatStrict: Non-Finite value from input '%s'".formatted(input));
+        {
+            throw ParseErrorException.forProperty(propertyName)
+                    .byMethod("readFloatStrict")
+                    .withLocalizableMessage(ExceptionStrings.nonFinite())
+                    .withMessage("Non-Finite value from input '%s'".formatted(input))
+                    .create();
+        }
 
         return Optional.of(v);
     }
@@ -218,7 +299,13 @@ public class InputHandles
     public static Optional<Rotations> readRotations(String propertyName, String value) throws ParseErrorException
     {
         if (value.isBlank())
-            throw new ParseErrorException(propertyName, "readRotations: Empty input for a rotation type");
+        {
+            throw ParseErrorException.forProperty(propertyName)
+                    .byMethod("readRotations")
+                    .withMessage("Empty input for a rotation type")
+                    .withLocalizableMessage(ExceptionStrings.noEmptyInput())
+                    .create();
+        }
 
         try
         {
@@ -241,15 +328,26 @@ public class InputHandles
         {
             throw e;
         }
-        catch (Throwable t)
+        catch (Exception e)
         {
-            throw new ParseErrorException(propertyName, "readRotations: Failed to parse float array in JSON from input '%s'".formatted(value), t);
+            throw ParseErrorException.forProperty(propertyName)
+                    .byMethod("readRotations")
+                    .withLocalizableMessage(ExceptionStrings.failedParsingWhatFromInput().resolve("type", "float array"))
+                    .withMessage("readRotations: Failed to parse float array in JSON from input '%s'".formatted(value))
+                    .causedBy(e)
+                    .create();
         }
     }
 
     public static void throwIfOutOfBounds(String propertyName, int value, int min, int max) throws ParseErrorException
     {
         if (value < min || value > max)
-            throw new ParseErrorException(propertyName, "throwIfOutOfBounds: Input '%s' does not fit the required range of [%s, %s]".formatted(value, min, max));
+        {
+            throw ParseErrorException.forProperty(propertyName)
+                    .byMethod("throwIfOutOfBounds")
+                    .withLocalizableMessage(ExceptionStrings.outOfRangeClosedBracket().resolve("min", min).resolve("max", max))
+                    .withMessage("Input '%s' does not fit the required range of [%s, %s]".formatted(value, min, max))
+                    .create();
+        }
     }
 }

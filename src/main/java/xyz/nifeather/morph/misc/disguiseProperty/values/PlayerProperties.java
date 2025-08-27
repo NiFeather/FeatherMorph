@@ -5,6 +5,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.MainHand;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xyz.nifeather.morph.messages.ExceptionStrings;
 import xyz.nifeather.morph.misc.disguiseProperty.*;
 
 import java.util.Map;
@@ -17,8 +18,14 @@ public class PlayerProperties extends BaseLivingEntityProperties<Player>
 
     private Optional<MainHandStatus> readHand(String propertyName, String string) throws ParseErrorException
     {
-        if (string.equalsIgnoreCase("default"))
-            throw new ParseErrorException(propertyName, "readHand: This value is not allowed here!");
+        if (string.equalsIgnoreCase("notset"))
+        {
+            throw ParseErrorException.forProperty(propertyName)
+                    .byMethod("readHand")
+                    .withLocalizableMessage(ExceptionStrings.inputNotAllowed())
+                    .withMessage("This value is not allowed here!")
+                    .create();
+        }
 
         return InputHandles.readEnumNonNull(MainHandStatus.values(), propertyName, string);
     }

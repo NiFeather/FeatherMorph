@@ -15,6 +15,7 @@ public class EnderDragonProperties extends BaseLivingEntityProperties<EnderDrago
 
     private Optional<Integer> readDragonPhase(String propertyName, String str) throws ParseErrorException
     {
+        // localizable message not required, since readInteger always return a value or throw ParseErrorException
         var val = InputHandles.readInteger(propertyName, str)
                 .orElseThrow(() -> new ParseErrorException(propertyName, "readDragonPhase: Unable to parse dragon phase"));
 

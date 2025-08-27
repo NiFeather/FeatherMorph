@@ -5,6 +5,7 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
 import it.unimi.dsi.fastutil.objects.ObjectLists;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.HoverEvent;
 import org.bukkit.*;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
@@ -20,6 +21,7 @@ import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
 import xiamomc.pluginbase.Bindables.BindableList;
+import xiamomc.pluginbase.Messages.FormattableMessage;
 import xyz.nifeather.morph.api.events.gameplay.*;
 import xyz.nifeather.morph.api.events.lifecycle.ManagerFinishedInitializeEvent;
 import xyz.nifeather.morph.api.events.misc.DataStoreSwitchEvent;
@@ -625,11 +627,17 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             if (FeatherMorphMain.getInstance().debugOutputEnabled())
                 logger.warn("Unable to disguise player because a ParseErrorException has occurred", e);
 
+            var message = e.localizableMessage.orElseGet(() -> new FormattableMessage(plugin, e.getMessage()))
+                    .withLocale(MessageUtils.getLocale(source));
+
             var msg = MorphStrings.errorWhileDisguisingUserFault()
-                    .resolve("error", e.getMessage())
+                    .resolve("error", message)
                     .resolve("what", e.propertyName);
 
-            source.sendMessage(MessageUtils.prefixes(source, msg));
+            var component = MessageUtils.prefixes(source, msg)
+                    .hoverEvent(HoverEvent.showText(Component.text(e.getMessage())));
+
+            source.sendMessage(component);
 
             return false;
         }

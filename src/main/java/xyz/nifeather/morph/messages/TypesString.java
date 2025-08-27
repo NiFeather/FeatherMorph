@@ -24,6 +24,11 @@ public class TypesString extends AbstractMorphStrings
         return getFormattable(getKey("string"), "字符串");
     }
 
+    public static FormattableMessage textComponent()
+    {
+        return getFormattable(getKey("text_component"), "[Fallback] 文本组件");
+    }
+
     private static String getKey(String key)
     {
         return "types." + key;
