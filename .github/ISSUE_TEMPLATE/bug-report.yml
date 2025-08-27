@@ -40,7 +40,7 @@ body:
       required: true
   - type: checkboxes
     attributes:
-      label: "One more thing..."
+      label: "Logs..."
       options:
           - label: I have uploaded the required logs / 我已上传需要的日志
             required: true
@@ -59,7 +59,7 @@ body:
       required: true
   - type: checkboxes
     attributes:
-      label: "One more thing..."
+      label: "Steps to reproduce..."
       options:
           - label: I have filled steps to reproduce / 我已填写了复现步骤
             required: true
