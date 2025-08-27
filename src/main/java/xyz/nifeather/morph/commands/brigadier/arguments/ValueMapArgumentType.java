@@ -16,8 +16,6 @@ import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
-import org.slf4j.Logger;
-import xyz.nifeather.morph.FeatherMorphMain;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -27,14 +25,10 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
 @SuppressWarnings("UnstableApiUsage")
-public class ValueMapArgumentType implements CustomArgumentType<Map<String, String>, String>
+public class ValueMapArgumentType implements CustomArgumentType<@NotNull Map<String, String>, @NotNull String>
 {
     public static final Collection<String> EXAMPLES = ObjectArrayList.of("[foo=bar]", "[foo=bar, aabb=\"ccdd\"]");
     private static final Map<String, List<String>> EMPTY_MAP = new HashMap<>();
-
-    private static final Logger log = FeatherMorphMain.getInstance().getSLF4JLogger();
-    private static final Map<String, String> defaultMap = new Object2ObjectOpenHashMap<>();
-
     private final Map<String, List<String>> properties = new ConcurrentHashMap<>();
 
     @Unmodifiable
@@ -80,7 +74,7 @@ public class ValueMapArgumentType implements CustomArgumentType<Map<String, Stri
 
     public static Map<String, String> get(String name, CommandContext<CommandSourceStack> context)
     {
-        return context.getArgument(name, defaultMap.getClass());
+        return context.getArgument(name, Map.class);
     }
 
     private static final Component ERR_NO_BRACKET = Component.translatableWithFallback(
@@ -117,7 +111,7 @@ public class ValueMapArgumentType implements CustomArgumentType<Map<String, Stri
     }
 
     @Override
-    public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder)
+    public <S> @NotNull CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder)
     {
         // Starting at /morph xx [abcd=ef]
         //                       ^ HERE
@@ -138,11 +132,11 @@ public class ValueMapArgumentType implements CustomArgumentType<Map<String, Stri
         if (masterReader.peek() == '[')
             masterReader.skip();
 
-        // 循环到最后一个KVP
-        KeyValuePair keyValuePair = new KeyValuePair(null, null, masterReader.getCursor(), masterReader.getCursor());
+        KeyValuePair keyValuePair = new KeyValuePair(null, null, masterReader.getCursor(), masterReader.getCursor(), false);
 
         try
         {
+            // 循环到最后一个KVP
             var parseResults = parseAll(masterReader, ',', ']');
 
             keyValuePair = parseResults.isEmpty() ? keyValuePair : parseResults.getLast();
@@ -150,7 +144,8 @@ public class ValueMapArgumentType implements CustomArgumentType<Map<String, Stri
         catch (Throwable t)
         {
             //log.error("Failed to list suggestions!", t);
-            return defaultBuilder.createOffset(masterReader.getCursor()).suggest("???", ERR_SUGGEST_FAIL).build();
+            //return defaultBuilder.createOffset(masterReader.getCursor()).suggest("???", ERR_SUGGEST_FAIL).build();
+            return defaultBuilder.build();
         }
 
         // 读取一下输入的最后一个字符
@@ -170,9 +165,11 @@ public class ValueMapArgumentType implements CustomArgumentType<Map<String, Stri
         var hasMatchKey = this.properties.keySet().stream().anyMatch(k -> k.equals(keyInput));
 
         // Suggest Key
-        if (!keyValuePair.metEqual())
+        if (!keyValuePair.hasValue)
         {
             finalBuilder = defaultBuilder.createOffset(keyValuePair.keyCursor);
+
+            //FeatherMorphMain.getInstance().getSLF4JLogger().info("Builder offset is " + finalBuilder.getStart());
 
             if (!hasMatchKey)
             {
@@ -252,67 +249,24 @@ public class ValueMapArgumentType implements CustomArgumentType<Map<String, Stri
         return map;
     }
 
-    public record KeyValuePair(@Nullable String key, @Nullable String value, int keyCursor, int valueCursor)
+    public record KeyValuePair(@Nullable String key, @Nullable String value, int keyCursor, int valueCursor, boolean hasValue)
     {
-        /**
-         * 输入中是否存在等于号
-         */
-        public boolean metEqual()
-        {
-            return valueCursor != keyCursor;
-        }
     }
 
     /**
-     *
      * @apiNote 总是会停在 terminator 和 endOfString 上
-     * @param reader
-     * @param terminator
-     * @param endOfString
-     * @return
      */
-    public List<KeyValuePair> parseAll(StringReader reader, char terminator, char endOfString)
+    public List<KeyValuePair> parseAll(StringReader reader, char splitter, char endOfString) throws CommandSyntaxException
     {
         List<KeyValuePair> list = new ObjectArrayList<>();
 
         while (reader.canRead())
         {
-            KeyValuePair pair = null;
+            KeyValuePair pair = this.parseOnce(reader, splitter, endOfString);
 
-            try
-            {
-                pair = this.parseOnce(reader, terminator, endOfString);
-            }
-            catch (Throwable t)
-            {
-                //log.error("Error parsing arguments: " + t.getMessage());
-                break;
-            }
-
-            //log.info("[parseAll] Adding " + pair);
+            //FeatherMorphMain.getInstance().getSLF4JLogger().info("[parseAll] Adding " + pair + " :: readercursor is " + reader.getCursor());
 
             list.add(pair);
-
-            // 如果我们没有读到末尾
-            if (reader.canRead())
-            {
-                char peek = reader.peek();
-
-                if (peek == terminator)
-                {
-                    reader.skip();
-
-                    if (!reader.canRead()) // 如果Terminator后面没有东西，那么结束读取
-                    {
-                        //log.info("[parseAll] EOF after terminator! Adding new NULL");
-                        list.add(new KeyValuePair(null, null, reader.getCursor(), reader.getCursor()));
-                        break;
-                    }
-                }
-
-                if (peek == endOfString)
-                    break;
-            }
 
             if (pair.key == null)
                 break;
@@ -329,7 +283,7 @@ public class ValueMapArgumentType implements CustomArgumentType<Map<String, Stri
     // [a=b]  |||  [a=b,c=d]  ||| [a=b
     //     ^           ^             ^
     @NotNull
-    public KeyValuePair parseOnce(StringReader reader, char terminator, char endOfString)
+    public KeyValuePair parseOnce(StringReader reader, char terminator, char endOfString) throws CommandSyntaxException
     {
         //log.info("Starting read... Peek is '%s'".formatted(reader.peek()));
         StringBuilder keyStringBuilder = new StringBuilder();
@@ -342,25 +296,28 @@ public class ValueMapArgumentType implements CustomArgumentType<Map<String, Stri
         String key = null;
         String value = null;
 
+        char last;
+
         while (reader.canRead())
         {
-            char next = reader.peek();
+            last = reader.peek(0);
+            char current = reader.read();
 
             //log.info("[parseOnce] Next is " + next);
 
             // 如果遇到了闭合括号，break;
-            if (next == endOfString)
+            if (current == endOfString)
                 break;
 
             // 遇到了结束符
-            if (next == terminator)
+            if (current == terminator)
                 break;
 
-            reader.skip();
+            // Stop at first char that is not space
+            if (isKey && last == ' ')
+                keyCursor = reader.getCursor();
 
-            char current = next;
-
-            //log.info("Current: '%s'".formatted(next));
+            //FeatherMorphMain.getInstance().getSLF4JLogger().info("Current: '%s'".formatted(next));
 
             //region 识别Key
 
@@ -403,15 +360,8 @@ public class ValueMapArgumentType implements CustomArgumentType<Map<String, Stri
                 var quoteReader = new StringReader(reader);
                 String str;
 
-                try
-                {
-                    str = quoteReader.readStringUntil(current);
-                    reader.setCursor(quoteReader.getCursor());
-                }
-                catch (Throwable ignored) // 在补全过程中，我们可能读不到下一个引号，所以 Just in case
-                {
-                    str = reader.readUnquotedString();
-                }
+                str = quoteReader.readStringUntil(current);
+                reader.setCursor(quoteReader.getCursor());
 
                 //log.info("APPENDING QUOTE STRING [%s]".formatted(str));
                 builder.append(str);
@@ -430,7 +380,7 @@ public class ValueMapArgumentType implements CustomArgumentType<Map<String, Stri
             value = valueStringBuilder.toString();
 
         //log.info("DONE! result is [%s]".formatted(builder.toString()));
-        return new KeyValuePair(key, value, keyCursor, valueCursor);
+        return new KeyValuePair(key, value, keyCursor, valueCursor, !isKey);
     }
 
     @Override
