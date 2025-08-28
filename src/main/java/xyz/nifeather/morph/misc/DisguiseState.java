@@ -1,5 +1,6 @@
 package xyz.nifeather.morph.misc;
 
+import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.kyori.adventure.bossbar.BossBar;
@@ -233,6 +234,10 @@ public class DisguiseState extends MorphPluginObject
 
         this.getProvider().onPlayerJoinWithDisguise(this);
         this.getDisguiseWrapper().onPlayerJoin(this.getPlayer());
+
+        var currentLoopTask = this.loopTask;
+        if (currentLoopTask == null || currentLoopTask.isCancelled())
+            this.scheduleSelfUpdate();
     }
 
     public boolean canScheduleSequence()
@@ -728,7 +733,6 @@ public class DisguiseState extends MorphPluginObject
 
     // If the selfUpdate loop has scheduled, or began
     private volatile boolean selfUpdateBegan;
-    private volatile boolean selfUpdateScheduled;
 
     /**
      * Get A {@link CompletableFuture} that binds to this state.<br>
@@ -748,13 +752,29 @@ public class DisguiseState extends MorphPluginObject
         return instance;
     }
 
-    public void scheduleSelfUpdate()
+    /**
+     * @throws UnsupportedOperationException If an existing update loop is running
+     */
+    public void scheduleSelfUpdate() throws UnsupportedOperationException
     {
-        if (selfUpdateScheduled)
-            return;
+        var currentLoopTask = this.loopTask;
+        if (currentLoopTask != null && !currentLoopTask.isCancelled())
+            throw new UnsupportedOperationException("Scheduling update loop while an existing loop is running");
 
-        selfUpdateScheduled = true;
-        this.scheduleOn(getPlayer(), this::doUpdate);
+        loopTask = getPlayer().getScheduler().runAtFixedRate(plugin, this::updateLoop, this::onEntityRetired, 1, 1);
+    }
+
+    @Nullable
+    private volatile ScheduledTask loopTask;
+
+    private void updateLoop(ScheduledTask task)
+    {
+        if (!task.isCancelled())
+            doUpdate();
+    }
+
+    private void onEntityRetired()
+    {
     }
 
     // Adding synchronized since we don't want someone to dispose when the DisguiseState is running self update
@@ -769,16 +789,14 @@ public class DisguiseState extends MorphPluginObject
         {
             var player = getPlayer();
 
-            if (!player.isOnline())
-                return;
+            if (player.isOnline())
+            {
+                if (!this.getProvider().updateDisguise(player, this))
+                    throw new UpdateFailedException("Failed executing provider update");
 
-            if (!this.getProvider().updateDisguise(player, this))
-                throw new UpdateFailedException("Failed executing provider update");
-
-            if (!this.selfUpdate())
-                throw new UpdateFailedException("Failed executing self update");
-
-            this.scheduleOn(getPlayer(), this::doUpdate);
+                if (!this.selfUpdate())
+                    throw new UpdateFailedException("Failed executing self update");
+            }
         }
         catch (Exception e)
         {

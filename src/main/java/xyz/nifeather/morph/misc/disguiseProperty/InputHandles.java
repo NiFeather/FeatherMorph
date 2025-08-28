@@ -95,7 +95,7 @@ public class InputHandles
         {
             throw ParseErrorException.forProperty(propertyName)
                     .byMethod("readInteger")
-                    .withLocalizableMessage(ExceptionStrings.failedParsingWhatFromInput().resolve("type", TypesString.typeInteger()))
+                    .withLocalizableMessage(ExceptionStrings.failedParsingWhatFromInput().resolve("type", "Integer"))
                     .withMessage("Can't parse integer from input '%s'".formatted(input))
                     .causedBy(t)
                     .create();
@@ -152,7 +152,7 @@ public class InputHandles
         {
             throw ParseErrorException.forProperty(propertyName)
                     .byMethod("readAdventureComponent")
-                    .withLocalizableMessage(ExceptionStrings.failedParsingWhatFromInput().resolve("type", TypesString.textComponent()))
+                    .withLocalizableMessage(ExceptionStrings.failedParsingWhatFromInput().resolve("type", "Text Component"))
                     .withMessage("Can't parse input to adventure component from value '%s'".formatted(input))
                     .causedBy(t)
                     .create();
@@ -278,7 +278,7 @@ public class InputHandles
         {
             throw ParseErrorException.forProperty(propertyName)
                     .byMethod("readFloatStrict")
-                    .withLocalizableMessage(ExceptionStrings.failedParsingWhatFromInput().resolve("type", TypesString.typeFloat()))
+                    .withLocalizableMessage(ExceptionStrings.failedParsingWhatFromInput().resolve("type", "Float"))
                     .withMessage("Can't parse float from input '%s': %s".formatted(input, e.getMessage()))
                     .causedBy(e)
                     .create();
@@ -332,7 +332,7 @@ public class InputHandles
         {
             throw ParseErrorException.forProperty(propertyName)
                     .byMethod("readRotations")
-                    .withLocalizableMessage(ExceptionStrings.failedParsingWhatFromInput().resolve("type", "float array"))
+                    .withLocalizableMessage(ExceptionStrings.failedParsingWhatFromInput().resolve("type", "Float array"))
                     .withMessage("readRotations: Failed to parse float array in JSON from input '%s'".formatted(value))
                     .causedBy(e)
                     .create();
