@@ -21,14 +21,4 @@ public class MorphCommonAvoidPlayerGoal extends MorphBasicAvoidPlayerGoal
     {
         return EntityTypeUtils.panicsFrom(this.bindingMob.getBukkitEntity().getType(), disguiseState.getEntityType());
     }
-
-    @Override
-    @Nullable
-    public AvoidEntityGoal<Player> getRecoverGoalOrNull()
-    {
-        return new AvoidEntityGoal<>(
-                this.bindingMob, Player.class,
-                this.detectDistance, this.walkSpeed, this.sprintSpeed
-        );
-    }
 }

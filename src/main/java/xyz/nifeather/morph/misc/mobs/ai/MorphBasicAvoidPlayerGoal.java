@@ -10,7 +10,6 @@ import net.minecraft.world.entity.animal.Panda;
 import net.minecraft.world.entity.animal.Rabbit;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.RevealingHandler;
 import xyz.nifeather.morph.misc.DisguiseState;
@@ -130,9 +129,6 @@ public abstract class MorphBasicAvoidPlayerGoal extends AvoidEntityGoal<Player>
     }
 
     protected abstract boolean panicFrom(Player nmsPlayer, DisguiseState disguiseState);
-
-    @Nullable
-    public abstract AvoidEntityGoal<Player> getRecoverGoalOrNull();
 
     @NotNull
     public static MorphBasicAvoidPlayerGoal findGoalForEntity(PathfinderMob entity,

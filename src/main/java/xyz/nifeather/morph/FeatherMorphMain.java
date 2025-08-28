@@ -361,10 +361,8 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
                     && pluginEnableDone.get())
             {
                 printImportantWarning(true,
-                        "Are you disabling/reloading FeatherMorph while modifying AI is enabled?",
-                        "While we try to recover the modifications, still, you are on your own risk.");
-
-                entityProcessor.recoverGoals();
+                        "Disabling/reloading FeatherMorph while modifying AI is not supported",
+                        "Expect problems!");
             }
 
             if (morphManager != null)

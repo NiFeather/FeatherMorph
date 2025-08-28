@@ -1,9 +1,6 @@
 package xyz.nifeather.morph.misc.mobs.ai;
 
-import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
 import net.minecraft.world.entity.animal.Ocelot;
-import net.minecraft.world.entity.player.Player;
-import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import xyz.nifeather.morph.MorphManager;
@@ -30,9 +27,4 @@ public class MorphOcelotAvoidEntityGoal extends MorphCommonAvoidPlayerGoal
         return super.canUse();
     }
 
-    @Override
-    public @Nullable AvoidEntityGoal<Player> getRecoverGoalOrNull()
-    {
-        return RecoverGoalGenerator.generateRecover(Ocelot.class, this.bindingOcelot, "OcelotAvoidEntityGoal", this.detectDistance, this.walkSpeed, this.sprintSpeed);
-    }
 }
