@@ -33,7 +33,6 @@ public class EntityGoalHandles
 
     public void handle(Mob mob)
     {
-        initHandles();
         var handle = (IEntityGoalHandle<Mob>) handleMap.getOrDefault(mob.getType(), null);
         if (handle == null)
         {
