@@ -1,11 +1,8 @@
 package xyz.nifeather.morph.skills.impl;
 
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.alchemy.Potion;
-import net.minecraft.world.item.alchemy.Potions;
 import org.bukkit.Color;
 import org.bukkit.NamespacedKey;
+import org.bukkit.Registry;
 import org.bukkit.Sound;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -63,25 +60,7 @@ public class SplashPotionSkill extends MorphSkill<NoOpConfiguration>
         var info = validTypes[ThreadLocalRandom.current().nextInt(0, validTypes.length)];
         var potionEffect = new PotionEffect(info.type, info.duration, info.amplifier, false, true);
         meta.addCustomEffect(potionEffect, true);
-
-        Potion targetPotion = null;
-        var potionRef = BuiltInRegistries.POTION.get(ResourceLocation.parse(info.type.getKey().asString()))
-                .orElse(null);
-
-        if (potionRef != null && potionRef.isBound())
-            targetPotion = potionRef.value();
-
-        if (info.type.equals(PotionEffectType.INSTANT_HEALTH))
-            targetPotion = Potions.HEALING.value();
-        else if (info.type.equals(PotionEffectType.INSTANT_DAMAGE))
-            targetPotion = Potions.HARMING.value();
-
-        var color = new AtomicInteger();
-
-        if (targetPotion != null)
-            targetPotion.getEffects().stream().findFirst().ifPresent(o -> color.set(o.getEffect().value().getColor()));
-
-        meta.setColor(Color.fromRGB(color.get()));
+        meta.setColor(info.type().getColor());
 
         thrownPotion.setPotionMeta(meta);
 
