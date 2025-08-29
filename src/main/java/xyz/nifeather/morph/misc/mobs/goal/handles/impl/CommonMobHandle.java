@@ -30,8 +30,8 @@ public class CommonMobHandle extends BasicEntityHandle<Creature>
         var replacingGoal = AvoidPlayerGoals.findGoal(creature, morphManager, revealingHandler, 16, 0.8, 1.33);
         if (replacingGoal == null) return;
 
+        mobGoals().addGoal(creature, getGoalPriority(creature, vanillaGoal), replacingGoal);
         mobGoals().removeGoal(creature, vanillaGoal);
-        mobGoals().addGoal(creature, 4, replacingGoal);
     }
 
     @Override

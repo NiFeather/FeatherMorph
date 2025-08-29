@@ -27,11 +27,10 @@ public class PandaHandle extends BasicEntityHandle<Panda>
     @Override
     protected void onTargetGoalFound(Panda panda, Goal<@NotNull Panda> vanillaGoal)
     {
-        mobGoals().removeGoal(panda, vanillaGoal);
-
-        var replacingGoal = AvoidPlayerGoals.findGoal(panda, morphManager, revealingHandler, 16, 0.8d, 1.33d);
+        var replacingGoal = AvoidPlayerGoals.findGoal(panda, morphManager, revealingHandler, 16, 2, 2);
         if (replacingGoal == null) return;
 
-        mobGoals().addGoal(panda, 6, replacingGoal);
+        mobGoals().addGoal(panda, getGoalPriority(panda, vanillaGoal), replacingGoal);
+        mobGoals().removeGoal(panda, vanillaGoal);
     }
 }

@@ -4,8 +4,10 @@ import com.destroystokyo.paper.entity.ai.Goal;
 import com.destroystokyo.paper.entity.ai.MobGoals;
 import com.destroystokyo.paper.entity.ai.PaperGoal;
 import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
+import net.minecraft.world.entity.ai.goal.WrappedGoal;
 import net.minecraft.world.entity.player.Player;
 import org.bukkit.Bukkit;
+import org.bukkit.craftbukkit.entity.CraftMob;
 import org.bukkit.entity.Mob;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -60,6 +62,25 @@ public abstract class BasicEntityHandle<M extends Mob> implements IEntityGoalHan
         }
 
         return Optional.empty();
+    }
+
+    protected int getGoalPriority(M mob, Goal<@NotNull M> goal)
+    {
+        var goalSelector = ((CraftMob) mob).getHandle().goalSelector;
+        var matchedGoal = goalSelector.getAvailableGoals()
+                .stream()
+                .filter(wrapped -> wrapped.getGoal().asPaperGoal().equals(goal))
+                .findFirst();
+
+        if (FeatherMorphMain.getInstance().debugOutputEnabled())
+        {
+            if (matchedGoal.isEmpty())
+                logger.error("The given goal '%s' does not exist for the given mob '%s'".formatted(goal, mob));
+            else
+                logger.info("Given goal has priority %s for entity %s".formatted(matchedGoal.get().getPriority(), mob));
+        }
+
+        return matchedGoal.map(WrappedGoal::getPriority).orElse(0);
     }
 
     protected MobGoals mobGoals()

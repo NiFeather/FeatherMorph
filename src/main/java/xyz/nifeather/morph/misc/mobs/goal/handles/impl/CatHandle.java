@@ -30,7 +30,7 @@ public class CatHandle extends BasicEntityHandle<Cat>
         var replacingGoal = AvoidPlayerGoals.findGoal(cat, morphManager, revealingHandler, 16, 0.8d, 1.33d);
         if (replacingGoal == null) return;
 
+        mobGoals().addGoal(cat, getGoalPriority(cat, vanillaGoal), replacingGoal);
         mobGoals().removeGoal(cat, vanillaGoal);
-        mobGoals().addGoal(cat, 4, replacingGoal);
     }
 }

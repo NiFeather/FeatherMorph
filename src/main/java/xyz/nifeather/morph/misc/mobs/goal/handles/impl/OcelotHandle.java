@@ -30,7 +30,7 @@ public class OcelotHandle extends BasicEntityHandle<Ocelot>
         var replacingGoal = AvoidPlayerGoals.findGoal(ocelot, morphManager, revealingHandler, 16, 0.8, 1.33);
         if (replacingGoal == null) return;
 
+        mobGoals().addGoal(ocelot, getGoalPriority(ocelot, vanillaGoal), replacingGoal);
         mobGoals().removeGoal(ocelot, vanillaGoal);
-        mobGoals().addGoal(ocelot, 4, replacingGoal);
     }
 }
