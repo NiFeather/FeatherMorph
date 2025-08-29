@@ -1,5 +1,6 @@
 package xyz.nifeather.morph.misc.mobs.goal.impl;
 
+import com.destroystokyo.paper.entity.Pathfinder;
 import com.destroystokyo.paper.entity.ai.Goal;
 import com.destroystokyo.paper.entity.ai.GoalType;
 import net.minecraft.world.entity.PathfinderMob;
@@ -19,8 +20,10 @@ import xyz.nifeather.morph.RevealingHandler;
 import xyz.nifeather.morph.utilities.EntityTypeUtils;
 
 import java.util.EnumSet;
-import java.util.Objects;
 
+/**
+ * 一定程度上复刻了 NMS 中的 {@link net.minecraft.world.entity.ai.goal.AvoidEntityGoal}
+ */
 public abstract class MorphBasicAvoidPlayerGoal<M extends Mob> implements Goal<@NotNull M>
 {
     protected final M mob;
@@ -53,8 +56,8 @@ public abstract class MorphBasicAvoidPlayerGoal<M extends Mob> implements Goal<@
         entityToAvoid = findEntityToAvoid();
         if (entityToAvoid == null) return false;
 
-        this.targetEscapeLocation = findEscapeLocation();
-        return targetEscapeLocation != null;
+        this.path = findEscapePath();
+        return path != null;
     }
 
     @Override
@@ -85,6 +88,7 @@ public abstract class MorphBasicAvoidPlayerGoal<M extends Mob> implements Goal<@
             if (distance > currentDistance)
                 continue;
 
+            // 对于已经暴露的玩家，不要对他们进行检查
             if (revealingHandler.shouldMobsAwareRevealed(player))
                 continue;
 
@@ -106,10 +110,10 @@ public abstract class MorphBasicAvoidPlayerGoal<M extends Mob> implements Goal<@
     }
 
     @Nullable
-    private Location targetEscapeLocation;
+    private Pathfinder.PathResult path;
 
     @Nullable
-    private Location findEscapeLocation()
+    private Pathfinder.PathResult findEscapePath()
     {
         if (entityToAvoid == null)
             return null;
@@ -121,25 +125,36 @@ public abstract class MorphBasicAvoidPlayerGoal<M extends Mob> implements Goal<@
         if (nmsTarget == null)
             return null;
 
-        return new Location(mob.getWorld(), nmsTarget.x(), nmsTarget.y(), nmsTarget.z());
+        var escapeLocation = new Location(mob.getWorld(), nmsTarget.x(), nmsTarget.y(), nmsTarget.z());
+        return mob.getPathfinder().findPath(escapeLocation);
     }
 
     @Override
     public void start()
     {
-        var path = mob.getPathfinder().findPath(Objects.requireNonNull(targetEscapeLocation));
+        if (path != null)
+            this.mob.getPathfinder().moveTo(path, sprintSpeed);
+        else
+            this.mob.getPathfinder().stopPathfinding();
+    }
 
-        if (path == null)
-            return;
+    @Override
+    public void tick()
+    {
+        if (entityToAvoid == null || path == null) return;
 
-        this.mob.getPathfinder().moveTo(path, sprintSpeed);
+        var pathfinder = mob.getPathfinder();
+        if (mob.getLocation().distance(entityToAvoid.getLocation()) < 49)
+            pathfinder.moveTo(path, sprintSpeed);
+        else
+            pathfinder.moveTo(path, walkSpeed);
     }
 
     @Override
     public void stop()
     {
         entityToAvoid = null;
-        targetEscapeLocation = null;
+        path = null;
     }
 
     @Override
