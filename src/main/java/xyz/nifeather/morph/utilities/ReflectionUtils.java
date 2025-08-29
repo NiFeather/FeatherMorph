@@ -69,12 +69,12 @@ public class ReflectionUtils
 
     private static final Map<ServerPlayer, Field> playerEHFieldMap = new Object2ObjectOpenHashMap<>();
 
-    public static <T> T getValue(Object obj, String fieldName, Class<T> type)
+    public static <T> T getValue(Object obj, String fieldName, Class<T> type) throws NullDependencyException
     {
         return getValue(obj, fieldName, type, true);
     }
 
-    public static <T> T getValue(Object obj, String fieldName, Class<T> type, boolean includeBaseClasses)
+    public static <T> T getValue(Object obj, String fieldName, Class<T> type, boolean includeBaseClasses) throws NullDependencyException
     {
         var fields = ReflectionUtils.getFields(obj, type, true);
 

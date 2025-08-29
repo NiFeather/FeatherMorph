@@ -6,6 +6,7 @@ import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Managers.DependencyManager;
 import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.MorphManager;
+import xyz.nifeather.morph.RevealingHandler;
 import xyz.nifeather.morph.abilities.AbilityManager;
 import xyz.nifeather.morph.interfaces.IManageRequests;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
@@ -28,6 +29,7 @@ public class FeatherMorphDirectAccess
         this.abilityManager = dependencyManager.get(AbilityManager.class, true);
         this.requestManager = dependencyManager.get(IManageRequests.class, true);
         this.clientHandler = dependencyManager.get(MorphClientHandler.class, true);
+        this.revealingHandler = dependencyManager.get(RevealingHandler.class, true);
     }
 
     public FeatherMorphMain plugin()
@@ -40,6 +42,7 @@ public class FeatherMorphDirectAccess
     private final AbilityManager abilityManager;
     private final IManageRequests requestManager;
     private final MorphClientHandler clientHandler;
+    private final RevealingHandler revealingHandler;
 
     /**
      * The MorphManager, mainly handling these functions:
@@ -53,6 +56,11 @@ public class FeatherMorphDirectAccess
     public MorphManager morphManager()
     {
         return morphManager;
+    }
+
+    public RevealingHandler revealingHandler()
+    {
+        return revealingHandler;
     }
 
     public MorphSkillHandler skillHandler()
