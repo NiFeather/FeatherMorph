@@ -160,7 +160,7 @@ public class SkillAbilityConfigContainer
     @NotNull
     public Map<String, Object> getSkillOptions(ISkill<?> skill)
     {
-        if (options == null || skill == null) return Map.of();
+        if (skill == null) return Map.of();
 
         return options.getOrDefault(skill.getIdentifier().asString(), Map.of());
     }
@@ -168,7 +168,7 @@ public class SkillAbilityConfigContainer
     @Nullable
     public <T extends ISkillAbilityOption> T readAbilityOptions(IAbility<T> ability) throws ParseErrorException, NullPointerException
     {
-        if (options == null || ability == null) return null;
+        if (ability == null) return null;
 
         var gsonMap = options.getOrDefault(ability.getIdentifier().asString(), null);
         var optionHandler = ability.optionHandler();
