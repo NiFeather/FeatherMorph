@@ -1,6 +1,8 @@
 package xyz.nifeather.morph.abilities.impl;
 
 import org.bukkit.NamespacedKey;
+import org.bukkit.damage.DamageSource;
+import org.bukkit.damage.DamageType;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -9,8 +11,6 @@ import xyz.nifeather.morph.abilities.MorphAbility;
 import xyz.nifeather.morph.abilities.options.DryoutAbilityOption;
 import xyz.nifeather.morph.api.morphs.abilities.AbilityNames;
 import xyz.nifeather.morph.misc.DisguiseState;
-import xyz.nifeather.morph.misc.NmsRecord;
-import xyz.nifeather.morph.utilities.DamageSourceUtils;
 import xyz.nifeather.morph.utilities.MathUtils;
 
 public class DryOutInAirAbility extends MorphAbility<DryoutAbilityOption>
@@ -44,22 +44,18 @@ public class DryOutInAirAbility extends MorphAbility<DryoutAbilityOption>
         if (option == null)
             return;
 
-        var nmsPlayer = NmsRecord.ofPlayer(player);
-        var air = nmsPlayer.getAirSupply();
+        var air = player.getRemainingAir();
 
         //LivingEntity#increaseAirSupply()
-        air -= (option.includeRain ? nmsPlayer.isInWater() : nmsPlayer.isInWaterOrRain()) ? (-5) : 5;
-        air = MathUtils.clamp(-20, nmsPlayer.getMaxAirSupply(), air);
+        air -= (option.includeRain ? player.isInWater() : (player.isInWater() || player.isInRain())) ? (-5) : 5;
+        air = MathUtils.clamp(-20, player.getMaximumAir(), air);
 
         if (air <= -20)
         {
-            var damageSource = DamageSourceUtils.toNotScalable(nmsPlayer.level().damageSources().dryOut())
-                            .bypassEverything();
-
-            nmsPlayer.hurtServer(nmsPlayer.level(), damageSource, 2);
+            player.damage(2, DamageSource.builder(DamageType.DRY_OUT).build());
             air = 0;
         }
 
-        nmsPlayer.setAirSupply(air);
+        player.setRemainingAir(air);
     }
 }

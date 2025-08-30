@@ -325,5 +325,17 @@ public class DefaultConfigGenerator
                 .appendOption(AbilityNames.CAN_FLY,
                         FlyOption.OPTION_HANDLER,
                         new FlyOption(0.05f));
+
+        this.getConfiguration(EntityType.AXOLOTL)
+                .addAbility(AbilityNames.EXTRA_AIR)
+                .appendOption(AbilityNames.EXTRA_AIR,
+                        ExtraAirOption.OPTION_HANDLER,
+                        new ExtraAirOption(6000)); // See NMS Axolotl#getDefaultMaxAirSupply
+
+        this.getConfiguration(EntityType.DOLPHIN)
+                .addAbility(AbilityNames.EXTRA_AIR)
+                .appendOption(AbilityNames.EXTRA_AIR,
+                        ExtraAirOption.OPTION_HANDLER,
+                        new ExtraAirOption(4800)); // See NMS Dolphin#getDefaultMaxAirSupply
     }
 }

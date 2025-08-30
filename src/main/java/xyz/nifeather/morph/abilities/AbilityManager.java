@@ -116,7 +116,8 @@ public class AbilityManager extends MorphPluginObject
                 new ExtraKnockbackAbility(),
                 new DryOutInAirAbility(),
                 new PotionOnAttackAbility(),
-                new SpiderAbility()
+                new SpiderAbility(),
+                new ExtraAirAbility()
         ));
 
         Bukkit.getPluginManager().callEvent(new AbilitiesFinishedInitializeEvent(this));

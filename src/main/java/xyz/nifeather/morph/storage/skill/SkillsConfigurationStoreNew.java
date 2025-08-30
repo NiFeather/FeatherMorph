@@ -1,14 +1,18 @@
 package xyz.nifeather.morph.storage.skill;
 
+import net.minecraft.server.packs.repository.Pack;
 import org.apache.commons.io.FileUtils;
 import org.bukkit.entity.EntityType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Annotations.Initializer;
+import xiamomc.pluginbase.Exceptions.NullDependencyException;
 import xyz.nifeather.morph.abilities.impl.AttributeModifyingAbility;
 import xyz.nifeather.morph.abilities.options.AttributeModifyOption;
+import xyz.nifeather.morph.abilities.options.ExtraAirOption;
 import xyz.nifeather.morph.abilities.options.ReduceDamageOption;
 import xyz.nifeather.morph.api.morphs.abilities.AbilityNames;
+import xyz.nifeather.morph.commands.brigadier.IConvertibleBrigadier;
 import xyz.nifeather.morph.misc.disguiseProperty.ParseErrorException;
 import xyz.nifeather.morph.skills.DefaultConfigGenerator;
 import xyz.nifeather.morph.storage.DirectoryJsonBasedStorage;
@@ -37,7 +41,7 @@ public class SkillsConfigurationStoreNew extends DirectoryJsonBasedStorage<Skill
             logger.warn("The package version is newer than our implementation! Errors may occur!");
     }
 
-    private static final int TARGET_PACKAGE_VERSION = PackageVersions.GUARDIAN_SKILL;
+    private static final int TARGET_PACKAGE_VERSION = PackageVersions.EXTRA_AIR_ABILITY;
 
     private void update(int currentVersion)
     {
@@ -75,7 +79,35 @@ public class SkillsConfigurationStoreNew extends DirectoryJsonBasedStorage<Skill
             saveEntityTypeConfiguration(generatedConfigurations, EntityType.GUARDIAN);
         }
 
+        if (currentVersion < PackageVersions.EXTRA_AIR_ABILITY)
+        {
+            migrateMaxAirOption(EntityType.AXOLOTL, 6000); // See NMS Axolotl#getDefaultMaxAirSupply
+            migrateMaxAirOption(EntityType.DOLPHIN, 4800); // See NMS Dolphin#getDefaultMaxAirSupply
+        }
+
         setPackageVersion(TARGET_PACKAGE_VERSION);
+    }
+
+    private void migrateMaxAirOption(EntityType type, int air)
+    {
+        logger.info("Migrating %s configuration...".formatted(type));
+
+        var configuration = this.get(type.key().asString());
+        if (configuration == null)
+        {
+            logger.info("No configuration present, skipping...");
+            return;
+        }
+
+        configuration.addAbility(AbilityNames.EXTRA_AIR)
+                .appendOption(AbilityNames.EXTRA_AIR,
+                        ExtraAirOption.OPTION_HANDLER,
+                        new ExtraAirOption(air));
+
+        configuration.legacy_MobID = type.key().asString();
+        this.save(configuration);
+
+        logger.info("Done Migrating new %s configuration".formatted(type));
     }
 
     private void saveEntityTypeConfiguration(Map<String, SkillAbilityConfigContainer> defaultConfigurations, EntityType entityType)
@@ -110,9 +142,12 @@ public class SkillsConfigurationStoreNew extends DirectoryJsonBasedStorage<Skill
 
             try
             {
-                option = config.readAbilityOptions(abilityInstance);
+                if (config.getAbilitiyIdentifiers().contains(abilityInstance.getIdentifier().asString()))
+                    option = config.readAbilityOptions(abilityInstance);
+                else
+                    option = null;
             }
-            catch (ParseErrorException e)
+            catch (ParseErrorException | NullPointerException e)
             {
                 logger.error("Can't read ability option from file! Skipping {}", file.getName(), e);
                 continue;
@@ -300,5 +335,6 @@ public class SkillsConfigurationStoreNew extends DirectoryJsonBasedStorage<Skill
         public static final int MERGE_ATTRIBUTE_AGAIN = 4;
         public static final int HAPPY_GHAST = 5;
         public static final int GUARDIAN_SKILL = 6;
+        public static final int EXTRA_AIR_ABILITY = 7;
     }
 }

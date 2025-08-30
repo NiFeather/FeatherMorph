@@ -41,6 +41,8 @@ public class AbilityNames
     public static final NamespacedKey POTION_ON_ATTACK = new NamespacedKey(nameSpace, "potion_on_attack");
     public static final NamespacedKey SPIDER = new NamespacedKey(nameSpace, "spider");
 
+    public static final NamespacedKey EXTRA_AIR = new NamespacedKey(nameSpace, "override_maximum_air");
+
     public static final NamespacedKey REDUCES_FALL_DAMAGE = new NamespacedKey(nameSpace, "reduce_fall_damage");
     public static final NamespacedKey REDUCES_MAGIC_DAMAGE = new NamespacedKey(nameSpace, "reduce_magic_damage");
     public static final NamespacedKey REDUCES_WITHER_DAMAGE = new NamespacedKey(nameSpace, "reduce_wither_damage");
