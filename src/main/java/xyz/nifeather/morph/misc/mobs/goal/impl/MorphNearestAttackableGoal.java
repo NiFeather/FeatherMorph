@@ -12,22 +12,29 @@ import org.bukkit.entity.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.MorphManager;
+import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.utilities.EntityTypeUtils;
 
 import java.util.EnumSet;
 import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class NewMorphNearestAttackableGoal implements Goal<@NotNull Mob>
+public class MorphNearestAttackableGoal implements Goal<@NotNull Mob>
 {
     private final Mob mob;
     private final MorphManager morphManager;
 
-    public NewMorphNearestAttackableGoal(Mob mob, MorphManager morphManager)
+    public MorphNearestAttackableGoal(Mob mob, MorphManager morphManager)
     {
         this.mob = mob;
         this.morphManager = morphManager;
     }
+
+    @Nullable
+    private LivingEntity targetedEntity;
+
+    @Nullable
+    private DisguiseState cachedTargetEntityState;
 
     /**
      * Checks if this goal should be activated
@@ -37,6 +44,9 @@ public class NewMorphNearestAttackableGoal implements Goal<@NotNull Mob>
     @Override
     public boolean shouldActivate()
     {
+        if (targetedEntity != null)
+            return checkTargetEntity();
+
         if (ThreadLocalRandom.current().nextInt(10) != 0)
             return false;
 
@@ -46,8 +56,38 @@ public class NewMorphNearestAttackableGoal implements Goal<@NotNull Mob>
         return newTarget != null;
     }
 
-    @Nullable
-    private LivingEntity targetedEntity;
+    private boolean checkTargetEntity()
+    {
+        var target = targetedEntity;
+        if (target == null) return false;
+
+        boolean cancelTarget;
+
+        // 当满足以下任一条件时，取消仇恨：
+        // 处于不同的世界
+        // 目标超过跟随距离
+        // 玩家不在线
+        // 玩家不是生存模式
+        cancelTarget = !mob.getWorld().equals(target.getWorld());
+        cancelTarget = cancelTarget || target.getLocation().distance(mob.getLocation()) > getFollowRange();
+
+        if (target instanceof Player targetPlayer)
+        {
+            var gamemode = targetPlayer.getGameMode();
+
+            cancelTarget = cancelTarget || !targetPlayer.isOnline();
+            cancelTarget = cancelTarget || gamemode.isInvulnerable();
+
+            // 如果玩家后来变成了其他会导致恐慌的类型，也取消仇恨
+            var state = cachedTargetEntityState;
+            if (state != null && !state.disposed())
+                cancelTarget = cancelTarget || EntityTypeUtils.panicsFrom(mob.getType(), state.getEntityType());
+            else
+                cancelTarget = true;
+        }
+
+        return !cancelTarget;
+    }
 
     private double getFollowRange()
     {
@@ -76,7 +116,10 @@ public class NewMorphNearestAttackableGoal implements Goal<@NotNull Mob>
             if (state == null) continue;
 
             if (EntityTypeUtils.hostiles(mob.getType(), state.getEntityType()))
+            {
+                cachedTargetEntityState = state;
                 return candidate;
+            }
         }
 
         return null;
@@ -97,51 +140,19 @@ public class NewMorphNearestAttackableGoal implements Goal<@NotNull Mob>
     @Override
     public void stop()
     {
-        targetedEntity = null;
-    }
-
-    /**
-     * Called each tick the goal is activated
-     */
-    @Override
-    public void tick()
-    {
         var target = targetedEntity;
         if (target == null) return;
-
-        boolean cancelTarget = false;
-
-        // 当满足以下任一条件时，取消仇恨：
-        // 处于不同的世界
-        // 目标超过跟随距离
-        // 玩家不在线
-        // 玩家不是生存模式
-        cancelTarget = !mob.getWorld().equals(target.getWorld());
-        cancelTarget = cancelTarget || target.getLocation().distance(mob.getLocation()) > getFollowRange();
-
-        if (target instanceof Player targetPlayer)
-        {
-            var gamemode = targetPlayer.getGameMode();
-
-            cancelTarget = cancelTarget || !targetPlayer.isOnline();
-            cancelTarget = cancelTarget || gamemode.isInvulnerable();
-
-            // 如果玩家后来变成了其他会导致恐慌的类型，也取消仇恨
-            var state = morphManager.getDisguiseStateFor(targetPlayer);
-            if (state != null)
-                cancelTarget = cancelTarget || EntityTypeUtils.panicsFrom(mob.getType(), state.getEntityType());
-            else
-                cancelTarget = true;
-        }
-
-        if (!cancelTarget) return;
 
         if (target.equals(mob.getTarget()))
             mob.setTarget(null);
 
+        // Fix IronGolem still angry at player after this target stopped
         var mobHandle = ((CraftMob)mob).getHandle();
         if (mobHandle instanceof NeutralMob neutralMob)
-            neutralMob.forgetCurrentTargetAndRefreshUniversalAnger();
+            neutralMob.stopBeingAngry();
+
+        targetedEntity = null;
+        cachedTargetEntityState = null;
     }
 
     /**

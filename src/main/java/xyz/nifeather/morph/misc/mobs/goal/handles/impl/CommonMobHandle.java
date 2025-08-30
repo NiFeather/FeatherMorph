@@ -6,6 +6,7 @@ import org.bukkit.entity.Creature;
 import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import xyz.nifeather.morph.misc.mobs.goal.AvoidPlayerGoals;
+import xyz.nifeather.morph.misc.mobs.goal.impl.MorphNearestAttackableGoal;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -35,15 +36,14 @@ public class CommonMobHandle extends BasicEntityHandle<Creature>
     }
 
     @Override
-    public void apply(Creature mob)
+    protected void addDefaultGoals(Creature creature)
     {
-        var matchingGoals = filterGoals(mob);
-        if (matchingGoals.isEmpty()) return;
-
-        findAvoidPlayerGoal(matchingGoals).ifPresentOrElse(g -> this.onTargetGoalFound(mob, g), () -> addDefaultGoal(mob));
+        var goal = new MorphNearestAttackableGoal(creature, morphManager);
+        mobGoals().addGoal(creature, 1, goal);
     }
 
-    private void addDefaultGoal(Creature creature)
+    @Override
+    protected void whenNoTargetGoal(Creature creature)
     {
         var replacingGoal = AvoidPlayerGoals.findGoal(creature, morphManager, revealingHandler, 16, 0.8, 1.33);
         if (replacingGoal == null) return;

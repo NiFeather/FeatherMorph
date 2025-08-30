@@ -40,12 +40,22 @@ public abstract class BasicEntityHandle<M extends Mob> implements IEntityGoalHan
     protected abstract void onTargetGoalFound(M mob, Goal<@NotNull M> vanillaGoal);
 
     @Override
-    public void apply(M mob)
+    public final void apply(M mob)
     {
+        addDefaultGoals(mob);
+
         var matchingGoals = filterGoals(mob);
         if (matchingGoals.isEmpty()) return;
 
-        findAvoidPlayerGoal(matchingGoals).ifPresent(g -> this.onTargetGoalFound(mob, g));
+        findAvoidPlayerGoal(matchingGoals).ifPresentOrElse(g -> this.onTargetGoalFound(mob, g), () -> this.whenNoTargetGoal(mob));
+    }
+
+    protected void addDefaultGoals(M mob)
+    {
+    }
+
+    protected void whenNoTargetGoal(M mob)
+    {
     }
 
     protected Optional<Goal<@NotNull M>> findAvoidPlayerGoal(Collection<Goal<@NotNull M>> collection)
