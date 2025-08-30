@@ -10,7 +10,6 @@ import xyz.nifeather.morph.api.morphs.abilities.AbilityNames;
 import xyz.nifeather.morph.config.ConfigOption;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.misc.DisguiseState;
-import xyz.nifeather.morph.misc.NmsRecord;
 import xyz.nifeather.morph.utilities.CollisionUtils;
 
 public class SpiderAbility extends NoOpOptionAbility
@@ -39,12 +38,8 @@ public class SpiderAbility extends NoOpOptionAbility
     {
         if (player.isInWater() || player.isSneaking()) return true;
 
-        var boundingBox = NmsRecord.ofPlayer(player).getBoundingBox().inflate(0.02f, 0, 0.02f);
-        var hasCollision = CollisionUtils.hasCollisionWithBlockOrBorder(player, boundingBox);
-
-        // 检查是否存在碰撞
-        // var bb = CollisionUtil.getCollisionsForBlocksOrWorldBorder(level, null,
-        //        boundingBox, new ObjectArrayList<>(), new ObjectArrayList<>(), CollisionUtil.COLLISION_FLAG_CHECK_BORDER, null);
+        var boundingBox = player.getBoundingBox().expand(0.02f, 0f, 0.02f);
+        var hasCollision = CollisionUtils.hasHardCollision(player.getWorld(), boundingBox);
 
         if (hasCollision)
         {

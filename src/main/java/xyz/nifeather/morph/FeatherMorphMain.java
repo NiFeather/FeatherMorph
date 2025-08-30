@@ -4,6 +4,7 @@ import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.scoreboard.Scoreboard;
@@ -26,6 +27,7 @@ import xyz.nifeather.morph.interfaces.IManageRequests;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.MorphMessageStore;
 import xyz.nifeather.morph.messages.vanilla.VanillaMessageStore;
+import xyz.nifeather.morph.misc.BoundingBoxLookup;
 import xyz.nifeather.morph.misc.ModNetworkingHelper;
 import xyz.nifeather.morph.misc.PlayerOperationSimulator;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
@@ -329,6 +331,7 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
 
         //Init GUI IconLookup
         IconLookup.instance();
+        BoundingBoxLookup.instance().initializeMapping();
     }
 
     private final AtomicBoolean pluginEnableDone = new AtomicBoolean(false);

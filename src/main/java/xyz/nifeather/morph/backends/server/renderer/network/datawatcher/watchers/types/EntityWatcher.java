@@ -26,8 +26,8 @@ import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueInde
 import xyz.nifeather.morph.misc.BuildFailedException;
 import xyz.nifeather.morph.misc.DisguiseEquipment;
 import xyz.nifeather.morph.misc.NmsRecord;
-import xyz.nifeather.morph.utilities.EntityThreadUtils;
 import xyz.nifeather.morph.utilities.EntityTypeUtils;
+import xyz.nifeather.morph.utilities.FoliaThreadUtils;
 import xyz.nifeather.morph.utilities.Uuids;
 
 import java.util.List;
@@ -173,7 +173,7 @@ public class EntityWatcher extends SingleWatcher
 
         try
         {
-            return EntityThreadUtils.runOnEntitySync(getBindingPlayer(), this::buildSpawnPacketsFor, EntityThreadUtils.DEFAULT_WAIT_TIMEOUT);
+            return FoliaThreadUtils.runOnEntitySync(getBindingPlayer(), this::buildSpawnPacketsFor, FoliaThreadUtils.DEFAULT_WAIT_TIMEOUT);
         }
         catch (TimeoutException e)
         {

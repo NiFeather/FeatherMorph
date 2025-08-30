@@ -4,20 +4,22 @@ import ca.spottedleaf.moonrise.common.util.TickThread;
 import net.minecraft.world.phys.Vec3;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.entity.CraftEntity;
 import org.bukkit.entity.Entity;
 import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.misc.EntityRetiredException;
 
+import java.time.Duration;
 import java.util.concurrent.*;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public class EntityThreadUtils
+public class FoliaThreadUtils
 {
-    public static int DEFAULT_WAIT_TIMEOUT =150;
-    public static TimeUnit DEFAULT_WAIT_TIMEUNIT = TimeUnit.MILLISECONDS;
+    public static Duration DEFAULT_WAIT_TIMEOUT = Duration.ofMillis(150);
 
     public static <X> X runOnRegionSync(Location location, Supplier<X> supplier, int timeout)
             throws CancellationException, ExecutionException, TimeoutException, InterruptedException
@@ -41,10 +43,10 @@ public class EntityThreadUtils
         return future;
     }
 
-    public static <X, E extends Entity> X runOnEntitySync(E bukkitEntity, Function<E, X> func, int timeout)
+    public static <X, E extends Entity> X runOnEntitySync(E bukkitEntity, Function<E, X> func, Duration timeout)
             throws CancellationException, ExecutionException, TimeoutException, InterruptedException
     {
-        return delegateEntity(bukkitEntity, func).get(timeout, TimeUnit.MILLISECONDS);
+        return delegateEntity(bukkitEntity, func).get(timeout.getNano(), TimeUnit.NANOSECONDS);
     }
 
     /**
@@ -67,6 +69,30 @@ public class EntityThreadUtils
         bukkitEntity.getScheduler().run(FeatherMorphMain.getInstance(),
                 task -> future.complete(func.apply(bukkitEntity)),
                 () -> future.completeExceptionally(new EntityRetiredException())); //retired: entity removed
+
+        return future;
+    }
+
+    public static void runAtLocationSync(Location location, Consumer<World> worldConsumer, Duration timeout)
+            throws ExecutionException, InterruptedException, TimeoutException
+    {
+        delegateLocation(location).thenAccept(worldConsumer).get(timeout.getNano(), TimeUnit.NANOSECONDS);
+    }
+
+    public static CompletableFuture<World> delegateLocation(Location location)
+    {
+        var world = location.getWorld();
+        var nmsWorld = ((CraftWorld)location.getWorld()).getHandle();
+
+        // Make sure we call the method that uses block location
+        if (TickThread.isTickThreadFor(nmsWorld, 0d + location.getBlockX(), 0d + location.getBlockZ()))
+            return CompletableFuture.completedFuture(world);
+
+        CompletableFuture<World> future = new CompletableFuture<>();
+
+        Bukkit.getRegionScheduler().run(FeatherMorphMain.getInstance(),
+                location,
+                task -> future.complete(world));
 
         return future;
     }

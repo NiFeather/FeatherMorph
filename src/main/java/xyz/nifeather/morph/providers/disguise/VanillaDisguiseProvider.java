@@ -2,6 +2,9 @@ package xyz.nifeather.morph.providers.disguise;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.kyori.adventure.text.Component;
+import net.minecraft.world.entity.EntityDimensions;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
@@ -19,10 +22,7 @@ import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.MorphStrings;
 import xyz.nifeather.morph.messages.vanilla.VanillaMessageStore;
-import xyz.nifeather.morph.misc.DisguiseMeta;
-import xyz.nifeather.morph.misc.DisguiseState;
-import xyz.nifeather.morph.misc.DisguiseTypes;
-import xyz.nifeather.morph.misc.NmsRecord;
+import xyz.nifeather.morph.misc.*;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.values.ArmorStandProperties;
 import xyz.nifeather.morph.providers.animation.AnimationProvider;
@@ -129,10 +129,10 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
         // 检查是否有足够的空间
         if (modifyBoundingBoxes.get() && checkSpaceBoundingBox.get())
         {
-            var loc = player.getLocation();
-            var box = newDisguise.getBoundingBoxAt(loc.x(), loc.y(), loc.z());
+            var box = BoundingBoxLookup.instance()
+                    .getBoundingBoxAt(entityType, player.getLocation());
 
-            var hasCollision = CollisionUtils.hasCollisionWithBlockOrBorder(player, box);
+            var hasCollision = CollisionUtils.hasHardCollision(player.getWorld(), box);
             if (hasCollision)
             {
                 player.sendMessage(MessageUtils.prefixes(player, MorphStrings.noEnoughSpaceString()));
@@ -204,7 +204,8 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
             }
 
             var craftLiving = (net.minecraft.world.entity.LivingEntity) ((CraftLivingEntity)living).getHandleRaw();
-            var mobMaxHealth = craftLiving.craftAttributes.getAttribute(Attribute.MAX_HEALTH).getBaseValue();
+            var mobMaxHealth =Objects.requireNonNull(craftLiving.craftAttributes.getAttribute(Attribute.MAX_HEALTH), "Bad server implementation")
+                    .getBaseValue();
 
             // patch: CREAKING only have half heart, and we don't want that.
             if (state.getEntityType() == EntityType.CREAKING)
@@ -310,13 +311,14 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
 
         try
         {
-            var box = wrapper.getBoundingBoxAt(nmsPlayer.getX(), nmsPlayer.getY(), nmsPlayer.getZ());
-            var dimensions = wrapper.getDimensions();
+            var box = BoundingBoxLookup.instance().getBoundingBoxAt(wrapper.getEntityType(), player.getLocation());
+            var dimensions = EntityDimensions.fixed((float)box.getWidthX(), (float)box.getHeight());
+            var center = player.getBoundingBox().getCenter();
+            var aabb = AABB.ofSize(new Vec3(center.getX(), center.getY(), center.getZ()), box.getWidthX(), box.getHeight(), box.getWidthZ());
 
             // Update dimensions
             targetField.set(nmsPlayer, dimensions);
-
-            nmsPlayer.setBoundingBox(box);
+            nmsPlayer.setBoundingBox(aabb);
 
             // Update eye height
             var eyeHeightField = ReflectionUtils.getPlayerEyeHeightField(NmsRecord.ofPlayer(player));

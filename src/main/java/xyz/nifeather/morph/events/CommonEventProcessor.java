@@ -450,14 +450,13 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         //目标玩家没在伪装时不要处理
         if (state == null) return;
 
-        var disguise = state.getDisguiseWrapper();
         var disguiseEntityType = state.getEntityType();
 
         //检查是否要取消Target
         boolean shouldTarget = switch (sourceEntityType)
                 {
                     case ZOMBIE, ZOMBIE_VILLAGER, HUSK, DROWNED -> EntityTypeUtils.isZombiesHostile(disguiseEntityType);
-                    case SKELETON, STRAY -> EntityTypeUtils.isGolem(disguiseEntityType) || disguise.isPlayerDisguise();
+                    case SKELETON, STRAY -> EntityTypeUtils.isGolem(disguiseEntityType) || state.getEntityType() == EntityType.PLAYER;
                     case PIGLIN -> EntityTypeUtils.isPiglinHostile(disguiseEntityType);
                     case PIGLIN_BRUTE -> EntityTypeUtils.isBruteHostile(disguiseEntityType);
                     case WITHER_SKELETON -> EntityTypeUtils.isWitherSkeletonHostile(disguiseEntityType);
@@ -466,7 +465,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
                     case PILLAGER, VEX, ILLUSIONER, VINDICATOR, EVOKER, RAVAGER -> EntityTypeUtils.isRaiderHostile(disguiseEntityType);
                     case ENDERMAN -> disguiseEntityType == EntityType.PLAYER || disguiseEntityType == EntityType.ENDERMITE;
                     case ZOGLIN -> EntityTypeUtils.isZoglinHostile(disguiseEntityType);
-                    default -> disguise.isPlayerDisguise();
+                    default -> state.getEntityType() == EntityType.PLAYER;
                 };
 
         // 根据揭示值判定要不要允许生物攻击玩家

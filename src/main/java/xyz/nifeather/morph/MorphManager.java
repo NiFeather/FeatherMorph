@@ -14,6 +14,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.util.BoundingBox;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -1044,10 +1045,11 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         // 显示粒子
         double cX, cY, cZ;
 
-        var wrapper = result.state().getDisguiseWrapper();
-        var box = wrapper.getDimensions();
-        cX = cZ = box.width();
-        cY = box.height();
+        var box = BoundingBoxLookup.instance().getBoundboxOptional(result.state().getEntityType())
+                .orElse(BoundingBox.of(player.getLocation().getBlock()));
+
+        cX = cZ = box.getWidthX();
+        cY = box.getHeight();
 
         spawnCloudParticle(player, player.getLocation(), cX, cY, cZ);
 

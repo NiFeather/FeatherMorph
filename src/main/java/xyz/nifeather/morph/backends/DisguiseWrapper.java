@@ -2,8 +2,6 @@ package xyz.nifeather.morph.backends;
 
 import com.mojang.authlib.GameProfile;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.entity.EntityDimensions;
-import net.minecraft.world.phys.AABB;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -12,14 +10,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import xyz.nifeather.morph.FeatherMorphMain;
-import xyz.nifeather.morph.misc.CollisionBoxRecord;
 import xyz.nifeather.morph.misc.DisguiseState;
-import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 import xyz.nifeather.morph.misc.disguiseProperty.values.OffTreeProperties;
-import xyz.nifeather.morph.misc.disguiseProperty.values.SlimeMagmaProperties;
-import xyz.nifeather.morph.utilities.EntityTypeUtils;
 
 import java.util.Map;
 import java.util.Optional;
@@ -138,124 +131,7 @@ public abstract class DisguiseWrapper<TInstance>
         writeProperty(WrapperProperties.DISGUISE_NAME, name);
     }
 
-    /**
-     * Checks whether the underlying disguise is a player disguise
-     * @return A value that presents whether the underlying disguise is a player disguise
-     */
-    public boolean isPlayerDisguise()
-    {
-        return getEntityType() == EntityType.PLAYER;
-    }
-
-    /**
-     * Checks whether the underlying disguise is a mob disguise
-     * @return A value that presents whether the underlying disguise is a mob disguise (e.g. Not a player disguise)
-     */
-    public boolean isMobDisguise()
-    {
-        return getEntityType().isAlive() && getEntityType() != EntityType.PLAYER;
-    }
-
-    /**
-     * Gets a {@link AABB} matching the current disguise at an exact position
-     * @return A {@link AABB} matching the current disguise at the exact position
-     * @apiNote This doesn't check whether bounding box modification is enabled and will always present value from the modified one.
-     */
-    public AABB getBoundingBoxAt(double x, double y, double z)
-    {
-        return this.getDimensions().makeBoundingBox(x, y, z);
-    }
-
-    /**
-     * Alternative method of {@link DisguiseWrapper#getBoundingBoxAt(double, double, double)}
-     * <br>
-     * Can be used if a plugin doesn't have an NMS dependency set.
-     * @apiNote This doesn't check whether bounding box modification is enabled and will always present value from the modified one.
-     */
-    public CollisionBoxRecord getBoundingBoxAtAlternative(double x, double y, double z)
-    {
-        return CollisionBoxRecord.fromAABB(getBoundingBoxAt(x, y, z));
-    }
-
-    /**
-     * Gets the excepted eye height for the bounding box of this disguise.
-     * @apiNote This doesn't check whether bounding box modification is enabled and will always present value from the modified one.
-     */
-    public double getExceptingEyeHeight()
-    {
-        return getDimensions().height() * 0.85;
-    }
-
-    private EntityDimensions dimensions;
-
-    /**
-     * 重置此Wrapper已缓存的Dimensions
-     */
-    protected void resetDimensions()
-    {
-        this.dimensions = null;
-    }
-
-    private void ensureDimensionPresent()
-    {
-        if (dimensions != null) return;
-
-        if (getEntityType() == EntityType.UNKNOWN)
-        {
-            this.dimensions = net.minecraft.world.entity.player.Player.STANDING_DIMENSIONS;
-            return;
-        }
-
-        // 2023/5/5: ItemDisplayProvider
-        if (getEntityType() == EntityType.BLOCK_DISPLAY)
-        {
-            this.dimensions = EntityDimensions.fixed(1, 1);
-            return;
-        }
-        else if (getEntityType() == EntityType.ITEM_DISPLAY)
-        {
-            this.dimensions = EntityDimensions.fixed(0.3f, 0.3f);
-            return;
-        }
-
-        var nmsType = EntityTypeUtils.getNmsType(this.getEntityType());
-
-        if (nmsType != null)
-            this.dimensions = nmsType.getDimensions();
-        else
-        {
-            var logger = FeatherMorphMain.getInstance().getSLF4JLogger();
-            logger.warn("Unable to get NMS type for %s, using default...".formatted(this.getEntityType()));
-
-            this.dimensions = net.minecraft.world.entity.player.Player.STANDING_DIMENSIONS;
-        }
-
-        if (getEntityType() != EntityType.SLIME && getEntityType() != EntityType.MAGMA_CUBE) return;
-
-        var dimScale = getDimensionScale();
-        this.dimensions = EntityDimensions.fixed(0.51F * dimScale, 0.51F * dimScale);
-    }
-
-    /**
-     * Gets the dimensions of the current disguise
-     * @return A value of {@link EntityDimensions} matching the current disguise
-     */
-    public EntityDimensions getDimensions()
-    {
-        ensureDimensionPresent();
-
-        return isBaby()
-                ? dimensions.scale(this.getEntityType() == EntityType.TURTLE ? 0.3F : 0.5F)
-                : dimensions;
-    }
-
     public abstract boolean isBaby();
-
-    protected int getDimensionScale()
-    {
-        var property = DisguiseProperties.INSTANCE.getOrThrow(SlimeMagmaProperties.class);
-        return this.readPropertyOr(property.SIZE, 1);
-    }
 
     /**
      * Applies a skin to the underlying player instance
