@@ -1,7 +1,6 @@
 package xyz.nifeather.morph.utilities;
 
 import ca.spottedleaf.moonrise.common.util.TickThread;
-import net.minecraft.world.phys.Vec3;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -32,9 +31,8 @@ public class FoliaThreadUtils
     public static <X> CompletableFuture<X> delegateRegion(Location location, Supplier<X> supplier)
     {
         var nmsWorld = ((CraftWorld) location.getWorld()).getHandle();
-        Vec3 vec = new Vec3(location.x(), location.y(), location.z());
 
-        if (TickThread.isTickThreadFor(nmsWorld, vec))
+        if (TickThread.isTickThreadFor(nmsWorld, location.x(), location.z()))
             return CompletableFuture.completedFuture(supplier.get());
 
         CompletableFuture<X> future = new CompletableFuture<>();
