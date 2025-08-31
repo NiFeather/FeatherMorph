@@ -8,14 +8,12 @@
 
 <h3> ~ 72变，但是MC ~ </h3>
 
-<p align="center">
-  <img src="https://github.com/XiaMoZhiShi/MorphPlugin/actions/workflows/build.yml/badge.svg">
-  <img src="https://img.shields.io/github/release/XiaMoZhiShi/MorphPlugin.svg">
-</p>
-
 </div>
 
 ---
+![CI Status](https://github.com/XiaMoZhiShi/MorphPlugin/actions/workflows/build.yml/badge.svg)
+![Release](https://img.shields.io/github/release/XiaMoZhiShi/MorphPlugin.svg)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/NiFeather/FeatherMorph)
 
 ### 功能和特色
 
