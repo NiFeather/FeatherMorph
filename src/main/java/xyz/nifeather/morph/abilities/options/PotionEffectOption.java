@@ -13,6 +13,20 @@ import java.util.Map;
 
 public class PotionEffectOption implements ISkillAbilityOption
 {
+    /**
+     * Read potion effect in Enum Name, rather than NamespacedKey
+     */
+    public static class LegacyPotionEffectOptionHandler extends PotionEffectOptionHandler
+    {
+        @Override
+        protected PotionEffectType readPotion(String input) throws ParseErrorException
+        {
+            return Arrays.stream(PotionEffectType.values())
+                    .filter(v -> v.getName().equalsIgnoreCase(input))
+                    .findFirst().orElseThrow(() -> new ParseErrorException(this.getClass().getSimpleName(), "Not a valid Identifier for string '%s'".formatted(input)));
+        }
+    }
+
     public static class PotionEffectOptionHandler implements ISkillAbilityOptionHandler<PotionEffectOption>
     {
         @Override
@@ -24,9 +38,22 @@ public class PotionEffectOption implements ISkillAbilityOption
         @Override
         public void writeOption(PotionEffectOption option, @NotNull Map<String, Object> gsonMap)
         {
-            gsonMap.put("name", option.effectId);
+            gsonMap.put("name", option.effectType.key().asString());
             gsonMap.put("duration", option.duration);
             gsonMap.put("amplifier", option.amplifier);
+        }
+
+        protected PotionEffectType readPotion(String input) throws ParseErrorException
+        {
+            var namespaced = NamespacedKey.fromString(input);
+            if (namespaced == null)
+                throw new ParseErrorException(this.getClass().getSimpleName(), "Not a valid Identifier for string '%s'".formatted(input));
+
+            var effect = Registry.EFFECT.get(namespaced);
+            if (effect == null)
+                throw new ParseErrorException(this.getClass().getSimpleName(), "Not a valid effect for string '%s'".formatted(input));
+
+            return effect;
         }
 
         @Override
@@ -36,33 +63,23 @@ public class PotionEffectOption implements ISkillAbilityOption
             int duration = utilGetTypedOrThrow("duration", gsonMap, Number.class).intValue();
             int amplifier = utilGetTypedOrThrow("amplifier", gsonMap, Number.class).intValue();
 
-            //todo: Migrate potion name to potion ID
-            PotionEffectType effect = Arrays.stream(PotionEffectType.values())
-                    .filter(v -> v.getName().equalsIgnoreCase(id))
-                    .findFirst().orElseThrow(() -> new ParseErrorException(this.getClass().getSimpleName(), "Not a valid Identifier for string '%s'".formatted(id)));
-/*
-            var namespaced = NamespacedKey.fromString(id);
-            if (namespaced == null)
-                throw new ParseErrorException(this.getClass().getSimpleName(), "Not a valid Identifier for string '%s'".formatted(id));
+            PotionEffectType effect = readPotion(id);
 
-            var effect = Registry.EFFECT.get(namespaced);
-            if (effect == null)
-                throw new ParseErrorException(this.getClass().getSimpleName(), "Not a valid effect for string '%s'".formatted(id));
-*/
             return PotionEffectOption.from(effect, duration, amplifier);
         }
     }
 
     public static final PotionEffectOptionHandler OPTION_HANDLER = new PotionEffectOptionHandler();
+    public static final LegacyPotionEffectOptionHandler LEGACY_OPTION_HANDLER = new LegacyPotionEffectOptionHandler();
 
     public static PotionEffectOption from(PotionEffectType type, int duration, int amplifier)
     {
-        return new PotionEffectOption(type.getName(), duration, amplifier);
+        return new PotionEffectOption(type, duration, amplifier);
     }
 
-    public PotionEffectOption(String effectId, int duration, int amplifier)
+    public PotionEffectOption(PotionEffectType effectType, int duration, int amplifier)
     {
-        this.effectId = effectId;
+        this.effectType = effectType;
         this.duration = duration;
         this.amplifier = amplifier;
     }
@@ -75,10 +92,10 @@ public class PotionEffectOption implements ISkillAbilityOption
     @Override
     public boolean isValid()
     {
-        return effectId != null && !effectId.isEmpty() && duration > 0 && amplifier > -1;
+        return duration > 0 && amplifier > -1;
     }
 
-    public final String effectId;
+    public final PotionEffectType effectType;
     public final int duration;
     public final int amplifier;
 }

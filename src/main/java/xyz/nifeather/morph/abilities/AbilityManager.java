@@ -147,7 +147,7 @@ public class AbilityManager extends MorphPluginObject
 
             try
             {
-                options = configuration.readAbilityOptions(abilityInstance);
+                options = configuration.readOptions(abilityInstance);
             }
             catch (ParseErrorException e)
             {

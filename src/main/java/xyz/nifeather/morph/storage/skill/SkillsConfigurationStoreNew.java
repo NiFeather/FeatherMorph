@@ -1,18 +1,17 @@
 package xyz.nifeather.morph.storage.skill;
 
-import net.minecraft.server.packs.repository.Pack;
 import org.apache.commons.io.FileUtils;
 import org.bukkit.entity.EntityType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Annotations.Initializer;
-import xiamomc.pluginbase.Exceptions.NullDependencyException;
 import xyz.nifeather.morph.abilities.impl.AttributeModifyingAbility;
 import xyz.nifeather.morph.abilities.options.AttributeModifyOption;
 import xyz.nifeather.morph.abilities.options.ExtraAirOption;
+import xyz.nifeather.morph.abilities.options.PotionEffectOption;
 import xyz.nifeather.morph.abilities.options.ReduceDamageOption;
 import xyz.nifeather.morph.api.morphs.abilities.AbilityNames;
-import xyz.nifeather.morph.commands.brigadier.IConvertibleBrigadier;
+import xyz.nifeather.morph.api.morphs.skills.SkillNames;
 import xyz.nifeather.morph.misc.disguiseProperty.ParseErrorException;
 import xyz.nifeather.morph.skills.DefaultConfigGenerator;
 import xyz.nifeather.morph.storage.DirectoryJsonBasedStorage;
@@ -41,7 +40,7 @@ public class SkillsConfigurationStoreNew extends DirectoryJsonBasedStorage<Skill
             logger.warn("The package version is newer than our implementation! Errors may occur!");
     }
 
-    private static final int TARGET_PACKAGE_VERSION = PackageVersions.EXTRA_AIR_ABILITY;
+    private static final int TARGET_PACKAGE_VERSION = PackageVersions.POTION_MIGRATE;
 
     private void update(int currentVersion)
     {
@@ -85,7 +84,52 @@ public class SkillsConfigurationStoreNew extends DirectoryJsonBasedStorage<Skill
             migrateMaxAirOption(EntityType.DOLPHIN, 4800); // See NMS Dolphin#getDefaultMaxAirSupply
         }
 
+        if (currentVersion < PackageVersions.POTION_MIGRATE)
+        {
+            migratePotionEffect();
+        }
+
         setPackageVersion(TARGET_PACKAGE_VERSION);
+    }
+
+    private void migratePotionEffect()
+    {
+        var files = directoryStorage.getFiles(".*\\.json$");
+        for (File file : files)
+        {
+            var config = loadFrom(file);
+            if (config == null)
+            {
+                logger.warn("Can't load SkillAbilityConfiguration from '%s', see errors above.".formatted(file.toString()));
+                continue;
+            }
+
+            var key = getKeyFromFile(file);
+            if (key == null)
+            {
+                logger.warn("Can't get mob key from '%s', see errors above.".formatted(file.toString()));
+                continue;
+            }
+
+            if (config.getAbilitiyIdentifiers().contains(AbilityNames.POTION_ON_ATTACK.asString()))
+            {
+                config.legacy_MobID = key;
+                logger.info("Migrating " + key);
+
+                try
+                {
+                    var option = config.readOptions(AbilityNames.POTION_ON_ATTACK, PotionEffectOption.LEGACY_OPTION_HANDLER);
+                    config.setOption(AbilityNames.POTION_ON_ATTACK, PotionEffectOption.OPTION_HANDLER, option);
+
+                    save(config);
+                    logger.info("Done saving new potion id for {}", file.getName());
+                }
+                catch (ParseErrorException | NullPointerException e)
+                {
+                    logger.error("Unable to read legacy potion option, ignoring...", e);
+                }
+            }
+        }
     }
 
     private void migrateMaxAirOption(EntityType type, int air)
@@ -143,7 +187,7 @@ public class SkillsConfigurationStoreNew extends DirectoryJsonBasedStorage<Skill
             try
             {
                 if (config.getAbilitiyIdentifiers().contains(abilityInstance.getIdentifier().asString()))
-                    option = config.readAbilityOptions(abilityInstance);
+                    option = config.readOptions(abilityInstance);
                 else
                     option = null;
             }
@@ -336,5 +380,6 @@ public class SkillsConfigurationStoreNew extends DirectoryJsonBasedStorage<Skill
         public static final int HAPPY_GHAST = 5;
         public static final int GUARDIAN_SKILL = 6;
         public static final int EXTRA_AIR_ABILITY = 7;
+        public static final int POTION_MIGRATE = 8;
     }
 }

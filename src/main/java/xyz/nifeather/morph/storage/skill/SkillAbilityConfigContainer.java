@@ -14,7 +14,6 @@ import xyz.nifeather.morph.skills.ISkill;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -165,20 +164,56 @@ public class SkillAbilityConfigContainer
         return options.getOrDefault(skill.getIdentifier().asString(), Map.of());
     }
 
-    @Nullable
-    public <T extends ISkillAbilityOption> T readAbilityOptions(IAbility<T> ability) throws ParseErrorException, NullPointerException
+    public <T extends ISkillAbilityOption> T readOptions(NamespacedKey abilityIdentifier,
+                                                         ISkillAbilityOptionHandler<T> optionHandler) throws ParseErrorException, NullPointerException
     {
-        if (ability == null) return null;
-
-        var gsonMap = options.getOrDefault(ability.getIdentifier().asString(), null);
-        var optionHandler = ability.optionHandler();
+        var gsonMap = options.getOrDefault(abilityIdentifier.asString(), null);
 
         if (optionHandler.acceptNullableOptions())
             return optionHandler.readOptionNullable(gsonMap);
         else if (gsonMap == null)
-            throw new NullPointerException("Null option map for ability '%s'".formatted(ability.getIdentifier()));
+            throw new NullPointerException("Null option map for ability '%s'".formatted(abilityIdentifier));
 
         return optionHandler.readOption(gsonMap);
+    }
+
+    @Nullable
+    public <T extends ISkillAbilityOption> T readOptions(@Nullable IAbility<T> ability) throws ParseErrorException, NullPointerException
+    {
+        if (ability == null) return null;
+
+        return readOptions(ability.getIdentifier(), ability.optionHandler());
+    }
+
+    public <T extends ISkillAbilityOption> T readOptions(@Nullable ISkill<T> skill) throws ParseErrorException, NullPointerException
+    {
+        if (skill == null) return null;
+
+        return readOptions(skill.getIdentifier(), skill.optionHandler());
+    }
+
+    /**
+     * Clear the current option for the given skill/ability, then sets the new value
+     */
+    public <O extends ISkillAbilityOption> SkillAbilityConfigContainer setOption(NamespacedKey identifier,
+                                                                                 ISkillAbilityOptionHandler<O> optionHandler,
+                                                                                 O option)
+    {
+        Map<String, Object> currentOptionMap = options.getOrDefault(identifier.asString(), null);
+
+        if (currentOptionMap == null)
+        {
+            var newMap = new ConcurrentHashMap<String, Object>();
+            options.put(identifier.asString(), newMap);
+            currentOptionMap = newMap;
+        }
+
+        var optionMap = new Object2ObjectOpenHashMap<String, Object>();
+        optionHandler.writeOption(option, optionMap);
+        currentOptionMap.clear();
+        currentOptionMap.putAll(optionMap);
+
+        return this;
     }
 
     /**

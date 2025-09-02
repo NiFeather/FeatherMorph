@@ -51,7 +51,7 @@ public class PotionOnAttackAbility extends OnAttackAbility<PotionEffectOption>
 
         if (option == null || !option.isValid()) return;
 
-        var effectType = PotionEffectType.getByName(option.effectId.replace("minecraft:", ""));
+        var effectType = option.effectType;
         if (effectType == null) return;
 
         var effect = new PotionEffect(effectType, option.duration, option.amplifier, false);
