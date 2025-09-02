@@ -20,6 +20,8 @@ import xyz.nifeather.morph.api.morphs.abilities.AbilityNames;
 import xyz.nifeather.morph.config.ConfigOption;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.misc.DisguiseState;
+import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.values.BaseLivingEntityProperties;
 import xyz.nifeather.morph.utilities.DisguiseUtils;
 
 import java.util.List;
@@ -132,8 +134,21 @@ public class BossbarAbility extends MorphAbility<BossbarOption>
 
     private Component getBossbarName(DisguiseState state, BossbarOption option)
     {
+        //todo: The server display text should be the custom name if set, but currently we don't know how to deal with it.
+        var display = state.getServerDisplay();
+        var properties = DisguiseProperties.INSTANCE.get(state.getEntityType());
+
+        if (properties instanceof BaseLivingEntityProperties<?> baseLivingEntityProperties)
+        {
+            var component = state.disguisePropertyHandler().getOptional(baseLivingEntityProperties.CUSTOM_NAME)
+                    .orElse(Component.empty());
+
+            if (!component.equals(Component.empty()))
+                display = component;
+        }
+
         return MiniMessage.miniMessage().deserialize(option.getCreateOption().name(),
-                Placeholder.component("name", state.getServerDisplay()),
+                Placeholder.component("name", display),
                 Placeholder.component("who", state.getPlayer().displayName()));
     }
 }
