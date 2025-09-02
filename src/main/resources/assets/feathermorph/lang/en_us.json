@@ -98,6 +98,7 @@
   "common.on": "On",
   "common.off": "Off",
   "exceptions.no_user_input": "This poor property does not accept any inputs",
+  "exceptions.unsupported": "This property is not available for this disguise",
   "exceptions.internal_property": "Internal property, does not accept user input",
   "exceptions.no_empty_input": "This property does not accept empty inputs",
   "exceptions.failed_parsing_what_from_input": "Can't parse input as an instance of <type>",

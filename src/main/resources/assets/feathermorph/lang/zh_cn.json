@@ -98,6 +98,7 @@
   "common.on": "启用",
   "common.off": "禁用",
   "exceptions.no_user_input": "这该死的属性不接受任何输入",
+  "exceptions.unsupported": "该属性对此形态不可用",
   "exceptions.internal_property": "内部属性，不接受用户输入",
   "exceptions.no_empty_input": "该属性不接受空输入",
   "exceptions.failed_parsing_what_from_input": "无法将输入解析为 <type>",

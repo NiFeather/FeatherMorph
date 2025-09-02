@@ -28,11 +28,20 @@ public class InputHandles
         return Optional.empty();
     }
 
+    public static <X> Optional<X> unsupported(String propertyName, String ignored) throws ParseErrorException
+    {
+        throw ParseErrorException.forProperty(propertyName)
+                .byMethod("unsupported")
+                .withMessage("This property is not available for this disguise")
+                .withLocalizableMessage(ExceptionStrings.unsupported())
+                .create();
+    }
+
     public static <X> Optional<X> immediateException(String propertyName, String ignored) throws ParseErrorException
     {
         throw ParseErrorException.forProperty(propertyName)
                 .byMethod("immediateException")
-                .withMessage("This freaking property does not accept any inputs")
+                .withMessage("This poor property does not accept any inputs")
                 .withLocalizableMessage(ExceptionStrings.noUserInput())
                 .create();
     }

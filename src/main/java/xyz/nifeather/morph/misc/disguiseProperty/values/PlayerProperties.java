@@ -1,5 +1,6 @@
 package xyz.nifeather.morph.misc.disguiseProperty.values;
 
+import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.MainHand;
@@ -15,6 +16,12 @@ public class PlayerProperties extends BaseLivingEntityProperties<Player>
 {
     public final SingleProperty<MainHandStatus> MAIN_HAND = getSingle(PropertyNames.PLAYER_MAIN_HAND, MainHandStatus.NOTSET, this::readHand)
             .withValidInput("left", "right");
+
+    @Override
+    protected SingleProperty<Component> createCustomNameProperty()
+    {
+        return getSingle(PropertyNames.ENTITY_CUSTOM_NAME, Component.empty(), InputHandles::unsupported);
+    }
 
     private Optional<MainHandStatus> readHand(String propertyName, String string) throws ParseErrorException
     {

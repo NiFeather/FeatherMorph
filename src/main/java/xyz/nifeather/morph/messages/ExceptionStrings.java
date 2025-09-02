@@ -9,6 +9,11 @@ public class ExceptionStrings extends AbstractMorphStrings
         return getFormattable(getKey("no_user_input"), "[Fallback] 这该死的属性不接受任何输入");
     }
 
+    public static FormattableMessage unsupported()
+    {
+        return getFormattable(getKey("unsupported"), "[Fallback] 该属性对此形态不可用");
+    }
+
     public static FormattableMessage internalProperty()
     {
         return getFormattable(getKey("internal_property"), "[Fallback] 内部属性，不接受用户输入");
