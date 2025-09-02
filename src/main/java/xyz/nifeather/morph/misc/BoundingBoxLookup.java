@@ -6,6 +6,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.util.BoundingBox;
+import org.bukkit.util.Vector;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Exceptions.NullDependencyException;
 import xyz.nifeather.morph.FeatherMorphMain;
@@ -32,62 +33,39 @@ public class BoundingBoxLookup
 
     private final Map<EntityType, BoundingBox> boundingBoxMap = new ConcurrentHashMap<>();
 
-    /**
-     * @throws NullDependencyException If the server doesn't have any world loaded
-     */
-    public void initializeMapping() throws NullDependencyException
+    @Nullable
+    private BoundingBox lookupBoundingBox(EntityType type, Location executingLocation)
     {
-        if (!boundingBoxMap.isEmpty()) return;
+        if (type == EntityType.UNKNOWN || !type.isAlive() || !type.isSpawnable())
+            return null;
 
-        var logger = FeatherMorphMain.getInstance().getSLF4JLogger();
-        logger.info("Initializing entity BoundingBox mapping");
+        var world = executingLocation.getWorld();
+        var entity = world.spawnEntity(executingLocation.clone().add(0, -4096, 0), type, CreatureSpawnEvent.SpawnReason.CUSTOM, Entity::remove);
 
-        var defaultWorld = Bukkit.getWorlds().stream()
-                .findFirst()
-                .orElseThrow(() -> new NullDependencyException("No world is loaded currently"));
+        var entityBox = entity.getBoundingBox();
+        var box = BoundingBox.of(new Vector(0, entityBox.getHeight() / 2d, 0), entityBox.getWidthX() / 2d, entityBox.getHeight() / 2d, entityBox.getWidthZ() / 2d);
+        boundingBoxMap.put(type, box);
 
-        var spawnLocation = new Location(defaultWorld, 0, -4096d, 0);
-
-        try
-        {
-            FoliaThreadUtils.delegateLocation(spawnLocation)
-                    .thenAccept(w ->
-                    {
-                        for (EntityType type : EntityType.values())
-                        {
-                            if (type == EntityType.UNKNOWN) continue;
-                            if (!type.isSpawnable() || !type.isAlive()) continue;
-
-                            var entity = w.spawnEntity(spawnLocation, type, CreatureSpawnEvent.SpawnReason.CUSTOM, Entity::remove);
-                            boundingBoxMap.put(type, entity.getBoundingBox().shift(0, 4096d, 0));
-                        }
-
-                        logger.info("Finished with %s entries".formatted(boundingBoxMap.size()));
-                    }).get(5000, TimeUnit.MILLISECONDS);
-        }
-        catch (InterruptedException | ExecutionException | TimeoutException e)
-        {
-            logger.error("Can't initializing BoundingBox mapping, expect problems!", e);
-        }
+        return box;
     }
 
     public BoundingBox getBoundingBoxAt(EntityType type, Location location)
     {
-        return getBoundboxOptional(type).map(b -> b.clone().shift(location))
+        return getBoundboxOptional(type, location).map(b -> b.clone().shift(location))
                 .orElse(BoundingBox.of(location, 0.6d / 2, 1.8d / 2, 0.6d / 2d).shift(0, 0.9d, 0));
     }
 
     //todo: Check for Slime/Magma disguise
-    public Optional<BoundingBox> getBoundboxOptional(EntityType type)
+    public Optional<BoundingBox> getBoundboxOptional(EntityType type, Location executingLocation)
     {
-        return Optional.ofNullable(getBoundingBox(type));
+        return Optional.ofNullable(getBoundingBox(type, executingLocation));
     }
 
     @Nullable
-    public BoundingBox getBoundingBox(EntityType type)
+    public BoundingBox getBoundingBox(EntityType type, Location executingLocation)
     {
         var box = boundingBoxMap.getOrDefault(type, null);
 
-        return box == null ? null : box.clone();
+        return box == null ? lookupBoundingBox(type, executingLocation) : box.clone();
     }
 }

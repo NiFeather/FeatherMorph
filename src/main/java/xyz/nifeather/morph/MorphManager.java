@@ -1045,7 +1045,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         // 显示粒子
         double cX, cY, cZ;
 
-        var box = BoundingBoxLookup.instance().getBoundboxOptional(result.state().getEntityType())
+        var box = BoundingBoxLookup.instance().getBoundboxOptional(result.state().getEntityType(), player.getLocation())
                 .orElse(BoundingBox.of(player.getLocation().getBlock()));
 
         cX = cZ = box.getWidthX();

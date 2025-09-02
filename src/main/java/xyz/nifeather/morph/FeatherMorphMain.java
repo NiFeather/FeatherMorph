@@ -331,7 +331,6 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
 
         //Init GUI IconLookup
         IconLookup.instance();
-        BoundingBoxLookup.instance().initializeMapping();
     }
 
     private final AtomicBoolean pluginEnableDone = new AtomicBoolean(false);
