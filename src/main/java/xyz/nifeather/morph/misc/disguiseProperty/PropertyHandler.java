@@ -81,13 +81,18 @@ public class PropertyHandler
         set((SingleProperty<Object>)property, value);
     }
 
-    public <X> void set(SingleProperty<X> property, X value)
+    /**
+     * @throws NullPointerException If the given value is NULL
+     */
+    public <X> void set(SingleProperty<X> property, @NotNull X value) throws NullPointerException
     {
         if (!validProperties.contains(property))
         {
             FeatherMorphMain.getInstance().getSLF4JLogger().warn("The given property '%s' doesn't exist in '%s'".formatted(property.id(), this.bindingProperties));
             return;
         }
+
+        Objects.requireNonNull(value, "Null values are not accepted");
 
         propertyMap.put(property, value);
         this.actions.invoke(BiConsumerActions.pair(property, value));

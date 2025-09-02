@@ -12,12 +12,13 @@ public class FallbackProperties extends BaseLivingEntityProperties<Entity>
     @Override
     protected @Nullable Entity tryCastEntity(@Nullable Entity targetEntity)
     {
-        return null;
+        return targetEntity;
     }
 
     @Override
     protected void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull Entity targetEntity)
     {
+        super.setupPropertiesFromEntity(propertyHandler, targetEntity);
     }
 
     @Override

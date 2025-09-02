@@ -4,6 +4,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.entity.Entity;
+import org.jetbrains.annotations.NotNull;
 import xyz.nifeather.morph.messages.ExceptionStrings;
 import xyz.nifeather.morph.misc.disguiseProperty.*;
 
@@ -56,6 +57,17 @@ public abstract class BaseLivingEntityProperties<E extends Entity> extends Abstr
         }
 
         return component;
+    }
+
+    @Override
+    protected void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull E targetEntity)
+    {
+        propertyHandler.set(CUSTOM_NAME_VISIBLE, targetEntity.isCustomNameVisible());
+
+        var entityCustomName = targetEntity.customName();
+
+        if (entityCustomName != null)
+            propertyHandler.set(CUSTOM_NAME, entityCustomName);
     }
 
     public final SingleProperty<Boolean> CUSTOM_NAME_VISIBLE = getSingle(PropertyNames.ENTITY_CUSTOM_NAME_VISIBLE, false, InputHandles::readBooleanRelaxed)
