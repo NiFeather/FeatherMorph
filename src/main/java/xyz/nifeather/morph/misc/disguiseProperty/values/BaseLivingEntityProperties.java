@@ -2,6 +2,7 @@ package xyz.nifeather.morph.misc.disguiseProperty.values;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.entity.Entity;
 import xyz.nifeather.morph.messages.ExceptionStrings;
 import xyz.nifeather.morph.misc.disguiseProperty.*;
@@ -29,7 +30,32 @@ public abstract class BaseLivingEntityProperties<E extends Entity> extends Abstr
                     .create();
         }
 
-        return InputHandles.readAdventureComponent(propertyName, string);
+        if (string.isBlank())
+        {
+            throw ParseErrorException.forProperty(propertyName)
+                    .byMethod("readCustomName")
+                    .withMessage("Blank string for custom name")
+                    .withLocalizableMessage(ExceptionStrings.noEmptyInput())
+                    .create();
+        }
+
+        var component = InputHandles.readAdventureComponent(propertyName, string);
+
+        if (component.isPresent())
+        {
+            var finalText = PlainTextComponentSerializer.plainText().serialize(component.get());
+
+            if (finalText.isBlank())
+            {
+                throw ParseErrorException.forProperty(propertyName)
+                        .byMethod("readCustomName")
+                        .withMessage("Blank component is not allowed")
+                        .withLocalizableMessage(ExceptionStrings.noEmptyInput())
+                        .create();
+            }
+        }
+
+        return component;
     }
 
     public final SingleProperty<Boolean> CUSTOM_NAME_VISIBLE = getSingle(PropertyNames.ENTITY_CUSTOM_NAME_VISIBLE, false, InputHandles::readBooleanRelaxed)
