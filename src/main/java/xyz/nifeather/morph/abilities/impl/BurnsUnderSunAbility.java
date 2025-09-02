@@ -6,6 +6,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import xyz.nifeather.morph.api.morphs.abilities.AbilityNames;
 import xyz.nifeather.morph.misc.DisguiseState;
+import xyz.nifeather.morph.utilities.ItemUtils;
 
 public class BurnsUnderSunAbility extends NoOpOptionAbility
 {
@@ -19,7 +20,7 @@ public class BurnsUnderSunAbility extends NoOpOptionAbility
     public boolean handle(Player player, DisguiseState state)
     {
         if (player.getWorld().getEnvironment().equals(World.Environment.NORMAL)
-                && player.getEquipment().getHelmet() == null
+                && ItemUtils.itemOrAir(player.getEquipment().getHelmet()).getType().isAir()
                 && player.getWorld().isDayTime()
                 && player.getWorld().isClearWeather()
                 && !(player.isInWater() || player.isInRain())
