@@ -1,5 +1,6 @@
 package xyz.nifeather.morph;
 
+import com.fasterxml.jackson.databind.PropertyName;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
@@ -42,7 +43,9 @@ import xyz.nifeather.morph.messages.MorphStrings;
 import xyz.nifeather.morph.misc.*;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.ParseErrorException;
+import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
+import xyz.nifeather.morph.misc.disguiseProperty.values.BaseLivingEntityProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.values.OffTreeProperties;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 import xyz.nifeather.morph.network.Constants;
@@ -875,17 +878,13 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         propertyHandler.getAll().forEach((property, value) ->
                 wrapper.writeProperty((SingleProperty<Object>) property, value));
 
-        // 设定显示名称
-        if (targetEntity != null && targetEntity.customName() != null)
-        {
-            var name = targetEntity.customName();
-            assert name != null;
+        Component customName = propertyHandler.getOr(PropertyNames.ENTITY_CUSTOM_NAME, null);
 
-            state.entityCustomName = name;
-            state.setPlayerDisplay(name);
-            state.setServerDisplay(name);
-        }
-        else
+        // 设定显示名称
+        // CustomName property is now handled in DisguiseState
+        // See DisguiseState#onPropertyWrite
+        // ... Should we move default name setup into DisguiseState either?
+        if (customName == null)
         {
             var disguiseID = parameters.targetDisguiseIdentifier();
             var playerDisplay = provider.getDisplayName(disguiseID, MessageUtils.getLocale(player));

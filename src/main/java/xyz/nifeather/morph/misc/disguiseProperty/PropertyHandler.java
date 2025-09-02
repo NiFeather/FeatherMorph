@@ -1,20 +1,29 @@
 package xyz.nifeather.morph.misc.disguiseProperty;
 
+import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.FeatherMorphMain;
+import xyz.nifeather.morph.misc.actions.BiConsumerActions;
 import xyz.nifeather.morph.misc.disguiseProperty.values.AbstractProperties;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.BiConsumer;
 
 public class PropertyHandler
 {
     private final Map<SingleProperty<?>, Object> propertyMap = new ConcurrentHashMap<>();
     private final List<SingleProperty<?>> validProperties = new CopyOnWriteArrayList<>();
+
+    protected final BiConsumerActions<SingleProperty<?>, Object> actions = new BiConsumerActions<>();
+    public void hookOnPropertyWrite(BiConsumer<SingleProperty<?>, Object> consumer)
+    {
+        actions.hook(consumer);
+    }
 
     public Map<String, String> toNetworkProperties()
     {
@@ -30,6 +39,12 @@ public class PropertyHandler
 
     @Nullable
     private AbstractProperties<?> bindingProperties;
+
+    @Nullable
+    public AbstractProperties<?> bindingProperties()
+    {
+        return bindingProperties;
+    }
 
     public void initProperties(AbstractProperties<?> properties)
     {
@@ -75,6 +90,7 @@ public class PropertyHandler
         }
 
         propertyMap.put(property, value);
+        this.actions.invoke(BiConsumerActions.pair(property, value));
     }
 
     public boolean contains(SingleProperty<?> property)
@@ -100,6 +116,17 @@ public class PropertyHandler
         return (X) propertyMap.getOrDefault(property, defaultVal);
     }
 
+    @Nullable
+    public <X> X getOr(String propertyName, @Nullable X defaultVal)
+    {
+        var property = validProperties.stream().filter(p -> p.id().equals(propertyName))
+                .findFirst()
+                .orElse(null);
+
+        if (property == null) return null;
+
+        return (X) getOr((SingleProperty<Object>) property, defaultVal);
+    }
     public Map<SingleProperty<?>, ?> getAll()
     {
         return new Object2ObjectArrayMap<>(propertyMap);
@@ -130,5 +157,10 @@ public class PropertyHandler
     public boolean bindingPropertiesEquals(AbstractProperties<?> other)
     {
         return this.bindingProperties != null && this.bindingProperties.equals(other);
+    }
+
+    public void dispose()
+    {
+        actions.clear();
     }
 }

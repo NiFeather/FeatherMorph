@@ -24,6 +24,10 @@ import xyz.nifeather.morph.messages.CommandStrings;
 import xyz.nifeather.morph.messages.EmoteStrings;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
+import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
+import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
+import xyz.nifeather.morph.misc.disguiseProperty.values.AbstractProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.values.BaseLivingEntityProperties;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 import xyz.nifeather.morph.misc.waypoint.DisguiseWaypointUpdater;
 import xyz.nifeather.morph.network.PlayerOptions;
@@ -125,6 +129,17 @@ public class DisguiseState extends MorphPluginObject
             }
             */
         });
+
+        disguisePropertyHandler().hookOnPropertyWrite(this::onPropertyWrite);
+    }
+
+    private void onPropertyWrite(SingleProperty<?> singleProperty, Object o)
+    {
+        if (singleProperty.id().equals(PropertyNames.ENTITY_CUSTOM_NAME))
+        {
+            var component = (Component) o;
+            this.setCustomDisplayName(component);
+        }
     }
 
     private final AtomicBoolean sequencePersistent = new AtomicBoolean(false);
@@ -973,6 +988,7 @@ public class DisguiseState extends MorphPluginObject
         this.waypointUpdater().dispose();
         this.disguiseWrapper.dispose();
         this.abilityUpdater.dispose();
+        this.propertyHandler.dispose();
 
         this.provider.unMorph(getPlayer(), this);
         this.abilityUpdater.setAbilities(List.of());
