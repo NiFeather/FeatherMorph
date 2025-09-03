@@ -161,34 +161,6 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
             return false;
     }
 
-    @Override
-    public void buildDisguise(DisguiseState state, @Nullable Entity targetEntity) throws ParseErrorException
-    {
-        super.buildDisguise(state, targetEntity);
-
-        var wrapper = state.getDisguiseWrapper();
-        var theirDisguise = getMorphManager().getDisguiseStateFor(targetEntity);
-
-        if (wrapper.getEntityType() != EntityType.ARMOR_STAND)
-            return;
-
-        //todo: Remove this
-        var properties = DisguiseProperties.INSTANCE.getOrThrow(ArmorStandProperties.class);
-        var wrapperShowArms = wrapper.readPropertyOr(properties.SHOW_ARMS, null);
-
-        //盔甲架加上手臂
-        if (wrapperShowArms != null)
-            return;
-
-        var showArm = theirDisguise != null
-                ? theirDisguise.disguisePropertyHandler().getOr(properties.SHOW_ARMS, false)
-                : targetEntity instanceof ArmorStand armorStand
-                    ? armorStand.hasArms()
-                    : this.armorStandShowArms.get();
-
-        wrapper.writeProperty(properties.SHOW_ARMS, showArm);
-    }
-
     private void tryAddModifier(DisguiseState state)
     {
         try
