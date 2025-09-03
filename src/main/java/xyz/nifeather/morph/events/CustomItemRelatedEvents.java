@@ -247,7 +247,8 @@ public class CustomItemRelatedEvents extends MorphPluginObject implements Listen
         };
 
         // 设定物品
-        var newItem = ItemUtils.writeMagicItemData(ItemStack.of(Material.POTION), disguiseIdentifier);
+        var magicItem = ItemUtils.buildMagicItemFrom(ItemStack.of(Material.POTION));
+        var newItem = ItemUtils.writeMagicItemData(magicItem, disguiseIdentifier);
         newItem.editMeta(PotionMeta.class, meta ->
         {
             var finalLoreDisplay = Component.text(disguiseIdentifier)
