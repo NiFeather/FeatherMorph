@@ -6,6 +6,7 @@ import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Color;
+import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.*;
@@ -212,8 +213,8 @@ public class CustomItemRelatedEvents extends MorphPluginObject implements Listen
             player.swingHand(event.getHand());
         };
 
-        // 如果目标实体是怪物，或者物品数量大于1，或者事件被取消，或者没有权限，拒绝获取
-        if (entityClicked instanceof Monster || mainhandItem.getAmount() > 1 || cancelled || !collectorHasPermission)
+        // 如果目标实体是怪物，或者事件被取消，或者没有权限，拒绝获取
+        if (entityClicked instanceof Monster || cancelled || !collectorHasPermission)
         {
             failEffect.run();
             return;
@@ -269,7 +270,10 @@ public class CustomItemRelatedEvents extends MorphPluginObject implements Listen
         });
 
         // 设置物品
-        player.getEquipment().setItem(event.getHand(), newItem);
+        if (player.getGameMode() != GameMode.CREATIVE)
+            mainhandItem.setAmount(mainhandItem.getAmount() - 1);
+
+        player.give(newItem);
         player.getWorld().playSound(player.getLocation(), Sound.ITEM_BOTTLE_FILL, 1, 1);
         player.swingHand(event.getHand());
         event.setCancelled(true);
