@@ -1,8 +1,6 @@
 package xyz.nifeather.morph.abilities.impl;
 
 import org.bukkit.NamespacedKey;
-import org.bukkit.damage.DamageSource;
-import org.bukkit.damage.DamageType;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -11,6 +9,8 @@ import xyz.nifeather.morph.abilities.MorphAbility;
 import xyz.nifeather.morph.abilities.options.DryoutAbilityOption;
 import xyz.nifeather.morph.api.morphs.abilities.AbilityNames;
 import xyz.nifeather.morph.misc.DisguiseState;
+import xyz.nifeather.morph.misc.NmsRecord;
+import xyz.nifeather.morph.utilities.DamageSourceUtils;
 import xyz.nifeather.morph.utilities.MathUtils;
 
 public class DryOutInAirAbility extends MorphAbility<DryoutAbilityOption>
@@ -52,7 +52,11 @@ public class DryOutInAirAbility extends MorphAbility<DryoutAbilityOption>
 
         if (air <= -20)
         {
-            player.damage(2, DamageSource.builder(DamageType.DRY_OUT).build());
+            // We still need NMS since bukkit damage function doesn't support setting whether the damage source bypasses everything
+            var nmsRecord = NmsRecord.of(player);
+            var source = DamageSourceUtils.toNotScalable(nmsRecord.nmsWorld().damageSources().dryOut()).bypassEverything();
+            nmsRecord.nmsPlayer().hurtServer(nmsRecord.nmsWorld(), source, 2);
+
             air = 0;
         }
 
