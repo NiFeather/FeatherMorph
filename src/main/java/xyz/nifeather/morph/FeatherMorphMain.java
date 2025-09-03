@@ -4,7 +4,6 @@ import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.scoreboard.Scoreboard;
@@ -27,7 +26,6 @@ import xyz.nifeather.morph.interfaces.IManageRequests;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.MorphMessageStore;
 import xyz.nifeather.morph.messages.vanilla.VanillaMessageStore;
-import xyz.nifeather.morph.misc.BoundingBoxLookup;
 import xyz.nifeather.morph.misc.ModNetworkingHelper;
 import xyz.nifeather.morph.misc.PlayerOperationSimulator;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
@@ -39,9 +37,8 @@ import xyz.nifeather.morph.misc.recipe.RecipeManager;
 import xyz.nifeather.morph.network.multiInstance.MultiInstanceService;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
 import xyz.nifeather.morph.platform.CurrentPlatform;
-import xyz.nifeather.morph.platform.IPlatform;
 import xyz.nifeather.morph.platform.impl.paper.PaperPlatform;
-import xyz.nifeather.morph.skills.MorphSkillHandler;
+import xyz.nifeather.morph.skills.SkillManager;
 import xyz.nifeather.morph.storage.skill.SkillsConfigurationStoreNew;
 import xyz.nifeather.morph.updates.UpdateHandler;
 
@@ -111,7 +108,7 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
 
     private PluginManager pluginManager;
 
-    private MorphSkillHandler skillHandler;
+    private SkillManager skillHandler;
 
     private AbilityManager abilityManager;
 
@@ -262,7 +259,7 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
         dependencyManager.cache(new ModNetworkingHelper());
 
         dependencyManager.cache(morphManager = new MorphManager());
-        dependencyManager.cache(skillHandler = new MorphSkillHandler());
+        dependencyManager.cache(skillHandler = new SkillManager());
         dependencyManager.cache(abilityManager = new AbilityManager());
         dependencyManager.cache(new RevealingHandler());
 

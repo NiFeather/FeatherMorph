@@ -15,7 +15,7 @@ import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.StatStrings;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
-import xyz.nifeather.morph.skills.MorphSkillHandler;
+import xyz.nifeather.morph.skills.SkillManager;
 
 public class StatSubCommand extends BrigadierCommand
 {
@@ -52,7 +52,7 @@ public class StatSubCommand extends BrigadierCommand
     private MorphClientHandler clientHandler;
 
     @Resolved
-    private MorphSkillHandler skillHandler;
+    private SkillManager skillHandler;
 
     @Resolved
     private AbilityManager abilityHandler;

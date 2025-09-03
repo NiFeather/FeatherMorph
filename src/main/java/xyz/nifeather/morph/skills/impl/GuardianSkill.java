@@ -14,10 +14,10 @@ import xyz.nifeather.morph.api.morphs.skills.SkillNames;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.SkillStrings;
 import xyz.nifeather.morph.misc.DisguiseState;
+import xyz.nifeather.morph.misc.ExecutionErrorException;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.values.GuardianProperties;
 import xyz.nifeather.morph.skills.options.NoOpConfiguration;
-import xyz.nifeather.morph.storage.skill.SkillAbilityConfigContainer;
 
 public class GuardianSkill extends DelayedMorphSkill<NoOpConfiguration>
 {
@@ -29,17 +29,21 @@ public class GuardianSkill extends DelayedMorphSkill<NoOpConfiguration>
     }
 
     @Override
-    protected int getExecuteDelay(SkillAbilityConfigContainer configuration, NoOpConfiguration option)
+    protected int getExecuteDelay(NoOpConfiguration option)
     {
         return 80; // Normal guardian has 80, while elder guardian has 60
     }
 
     @Override
     protected ExecuteResult preExecute(Player player, DisguiseState state,
-                                       @NotNull SkillAbilityConfigContainer configuration, @NotNull NoOpConfiguration option)
+                                       @NotNull NoOpConfiguration option) throws ExecutionErrorException
     {
         if (state.getEntityType() != EntityType.GUARDIAN)
-            return ExecuteResult.fail(20);
+        {
+            throw ExecutionErrorException.forMethod("preExecute")
+                    .withMessage("This skill is only available for guardian disguises!")
+                    .create();
+        }
 
         int distanceLimit = 16;
         var targetEntity = player.getTargetEntity(distanceLimit);
@@ -70,7 +74,7 @@ public class GuardianSkill extends DelayedMorphSkill<NoOpConfiguration>
         state.setSessionData(EXECUTE_ID, id);
         this.scheduleOn(player, () -> updateState(state, player, living, id));
 
-        return ExecuteResult.success(configuration.getSkillCooldown());
+        return ExecuteResult.success(0);
     }
 
     private static final int MAX_TRACE_DISTANCE = 16;
@@ -98,7 +102,7 @@ public class GuardianSkill extends DelayedMorphSkill<NoOpConfiguration>
     }
 
     @Override
-    protected void executeDelayedSkill(Player player, DisguiseState state, SkillAbilityConfigContainer configuration, NoOpConfiguration option)
+    protected void executeDelayedSkill(Player player, DisguiseState state, NoOpConfiguration option)
     {
         var properties = DisguiseProperties.INSTANCE.getOrThrow(GuardianProperties.class);
         state.disguisePropertyHandler().set(properties.ATTACK_TARGET, 0);

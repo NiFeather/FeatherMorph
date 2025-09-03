@@ -137,7 +137,7 @@ public class CustomItemRelatedEvents extends MorphPluginObject implements Listen
 
             if (action.isRightClick()) // 站立+右键：技能
             {
-                if (disguiseState.getSkillCooldown() < 0)
+                if (!disguiseState.skillInCooldown())
                     morphs.executeDisguiseSkill(player);
             }
             else // 站立+左键：伪装动作

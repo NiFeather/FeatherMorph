@@ -24,6 +24,7 @@ import xyz.nifeather.morph.messages.MorphStrings;
 import xyz.nifeather.morph.messages.vanilla.VanillaMessageStore;
 import xyz.nifeather.morph.misc.*;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.ParseErrorException;
 import xyz.nifeather.morph.misc.disguiseProperty.values.ArmorStandProperties;
 import xyz.nifeather.morph.providers.animation.AnimationProvider;
 import xyz.nifeather.morph.providers.animation.provider.VanillaAnimationProvider;
@@ -161,9 +162,9 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
     }
 
     @Override
-    public void postBuildDisguise(DisguiseState state, @Nullable Entity targetEntity)
+    public void buildDisguise(DisguiseState state, @Nullable Entity targetEntity) throws ParseErrorException
     {
-        super.postBuildDisguise(state, targetEntity);
+        super.buildDisguise(state, targetEntity);
 
         var wrapper = state.getDisguiseWrapper();
         var theirDisguise = getMorphManager().getDisguiseStateFor(targetEntity);
@@ -171,6 +172,7 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
         if (wrapper.getEntityType() != EntityType.ARMOR_STAND)
             return;
 
+        //todo: Remove this
         var properties = DisguiseProperties.INSTANCE.getOrThrow(ArmorStandProperties.class);
         var wrapperShowArms = wrapper.readPropertyOr(properties.SHOW_ARMS, null);
 

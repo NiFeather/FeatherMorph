@@ -1,7 +1,6 @@
 package xyz.nifeather.morph.misc;
 
 import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.EntityType;
 import org.jetbrains.annotations.ApiStatus;
@@ -13,12 +12,6 @@ import xyz.nifeather.morph.utilities.EntityTypeUtils;
 
 public class DisguiseMeta
 {
-    @SerializedName("Type")
-    @Expose(serialize = false)
-    @Deprecated
-    //仅更新配置时使用
-    public EntityType type;
-
     private final EntityType entityType;
 
     /**

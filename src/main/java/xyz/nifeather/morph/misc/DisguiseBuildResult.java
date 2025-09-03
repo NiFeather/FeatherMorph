@@ -16,17 +16,16 @@ import java.util.Objects;
 public record DisguiseBuildResult(boolean success,
                                    DisguiseState state,
                                    DisguiseProvider provider,
-                                   DisguiseMeta meta,
-                                   @Nullable Entity targetedEntity)
+                                   DisguiseMeta meta)
 {
-    public static final DisguiseBuildResult FAILED = new DisguiseBuildResult(false, null, null, null, null);
+    public static final DisguiseBuildResult FAILED = new DisguiseBuildResult(false, null, null, null);
 
-    public static DisguiseBuildResult of(DisguiseState state, DisguiseProvider provider, DisguiseMeta meta, @Nullable Entity targetedEntity)
+    public static DisguiseBuildResult of(DisguiseState state, DisguiseProvider provider, DisguiseMeta meta)
     {
         Objects.requireNonNull(state, "Null state!");
         Objects.requireNonNull(provider, "Null provider!");
         Objects.requireNonNull(meta, "Null Meta!");
 
-        return new DisguiseBuildResult(true, state, provider, meta, targetedEntity);
+        return new DisguiseBuildResult(true, state, provider, meta);
     }
 }

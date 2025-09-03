@@ -17,7 +17,6 @@ import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.network.commands.S2C.set.S2CSetAggressiveCommand;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
 import xyz.nifeather.morph.skills.options.ProjectileConfiguration;
-import xyz.nifeather.morph.storage.skill.SkillAbilityConfigContainer;
 
 public class LaunchProjectileMorphSkill extends DelayedMorphSkill<ProjectileConfiguration>
 {
@@ -28,7 +27,7 @@ public class LaunchProjectileMorphSkill extends DelayedMorphSkill<ProjectileConf
     }
 
     @Override
-    protected int getExecuteDelay(SkillAbilityConfigContainer configuration, ProjectileConfiguration option)
+    protected int getExecuteDelay(ProjectileConfiguration option)
     {
         return option.executeDelay;
     }
@@ -37,25 +36,19 @@ public class LaunchProjectileMorphSkill extends DelayedMorphSkill<ProjectileConf
     private MorphClientHandler clientHandler;
 
     @Override
-    protected ExecuteResult preExecute(Player player, DisguiseState state, @NotNull SkillAbilityConfigContainer configuration, ProjectileConfiguration option)
+    protected ExecuteResult preExecute(Player player, DisguiseState state, @NotNull ProjectileConfiguration option)
     {
-        if (option == null || configuration == null)
-        {
-            notifyError(player);
-            return ExecuteResult.fail(10);
-        }
-
         playSoundToNearbyPlayers(player, option.getSoundDistance(),
                 Key.key(option.getPreLaunchSoundName()), Sound.Source.HOSTILE);
 
         state.getDisguiseWrapper().setAggressive(true);
         clientHandler.sendCommand(player, new S2CSetAggressiveCommand(true));
 
-        return super.preExecute(player, state, configuration, option);
+        return ExecuteResult.success(0);
     }
 
     @Override
-    protected void executeDelayedSkill(Player player, DisguiseState state, SkillAbilityConfigContainer configuration, ProjectileConfiguration option)
+    protected void executeDelayedSkill(Player player, DisguiseState state, ProjectileConfiguration option)
     {
         state.getDisguiseWrapper().setAggressive(false);
         clientHandler.sendCommand(player, new S2CSetAggressiveCommand(false));

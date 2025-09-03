@@ -5,9 +5,9 @@ import org.jetbrains.annotations.NotNull;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.misc.DisguiseState;
+import xyz.nifeather.morph.misc.ExecutionErrorException;
 import xyz.nifeather.morph.skills.MorphSkill;
 import xyz.nifeather.morph.storage.skill.ISkillAbilityOption;
-import xyz.nifeather.morph.storage.skill.SkillAbilityConfigContainer;
 
 public abstract class DelayedMorphSkill<T extends ISkillAbilityOption> extends MorphSkill<T>
 {
@@ -15,38 +15,28 @@ public abstract class DelayedMorphSkill<T extends ISkillAbilityOption> extends M
     private MorphManager manager;
 
     @Override
-    public final int executeSkill(Player player, DisguiseState state, SkillAbilityConfigContainer configuration, T option)
+    public final int executeSkill(Player player, DisguiseState state, T option) throws ExecutionErrorException
     {
-        if (option == null || configuration == null)
+        if (option == null)
         {
-            logger.error("%s does not have a potion effect set".formatted(state.getDisguiseIdentifier()));
-            notifyError(player);
-            return 10;
+            throw ExecutionErrorException.forMethod("executeSkill")
+                    .withMessage("%s does not have a option set".formatted(state.getDisguiseIdentifier()))
+                    .create();
         }
 
-        var result = this.preExecute(player, state, configuration, option);
+        var executeResult = this.preExecute(player, state, option);
 
-        if (result.success)
-        {
-            this.addDelayedSkillSchedule(player, () -> executeDelayedSkill(player, state, configuration, option), getExecuteDelay(configuration, option));
-        }
-        else
-        {
-            logger.error("Delayed skill '%s' for '%s' encountered error while performing pre-execute".formatted(configuration.getSkillIdentifier(), state.getDisguiseIdentifier()));
-            notifyError(player);
-        }
+        if (executeResult.success())
+            this.addDelayedSkillSchedule(player, () -> executeDelayedSkill(player, state, option), getExecuteDelay(option));
 
-        return configuration.getSkillCooldown();
+        return executeResult.cd();
     }
 
-    protected ExecuteResult preExecute(Player player, DisguiseState state, @NotNull SkillAbilityConfigContainer configuration, @NotNull T option)
-    {
-        return ExecuteResult.success(configuration.getSkillCooldown());
-    }
+    protected abstract ExecuteResult preExecute(Player player, DisguiseState state, @NotNull T option) throws ExecutionErrorException;
 
-    protected abstract int getExecuteDelay(SkillAbilityConfigContainer configuration, T option);
+    protected abstract int getExecuteDelay(T option);
 
-    protected abstract void executeDelayedSkill(Player player, DisguiseState state, SkillAbilityConfigContainer configuration, T option);
+    protected abstract void executeDelayedSkill(Player player, DisguiseState state, T option);
 
     protected void addDelayedSkillSchedule(Player player, Runnable execution, int delay)
     {

@@ -1,8 +1,6 @@
 package xyz.nifeather.morph.skills.impl;
 
-import org.bukkit.Color;
 import org.bukkit.NamespacedKey;
-import org.bukkit.Registry;
 import org.bukkit.Sound;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -13,14 +11,11 @@ import org.jetbrains.annotations.NotNull;
 import xyz.nifeather.morph.abilities.ISkillAbilityOptionHandler;
 import xyz.nifeather.morph.api.morphs.skills.SkillNames;
 import xyz.nifeather.morph.misc.DisguiseState;
+import xyz.nifeather.morph.misc.ExecutionErrorException;
 import xyz.nifeather.morph.skills.MorphSkill;
 import xyz.nifeather.morph.skills.options.NoOpConfiguration;
-import xyz.nifeather.morph.storage.skill.ISkillAbilityOption;
-import xyz.nifeather.morph.storage.skill.SkillAbilityConfigContainer;
 
-import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class SplashPotionSkill extends MorphSkill<NoOpConfiguration>
 {
@@ -33,27 +28,28 @@ public class SplashPotionSkill extends MorphSkill<NoOpConfiguration>
     /**
      * 执行伪装的主动技能
      *
-     * @param player        玩家
-     * @param state         {@link DisguiseState}
-     * @param configuration 此技能的整体配置，包括ID、冷却等
-     * @param option        此技能的详细设置
+     * @param player 玩家
+     * @param state  {@link DisguiseState}
+     * @param option 此技能的详细设置
      * @return 执行后的冷却长度
      */
     @Override
-    public int executeSkill(Player player, DisguiseState state, SkillAbilityConfigContainer configuration, NoOpConfiguration option)
+    public int executeSkill(Player player, DisguiseState state, NoOpConfiguration option) throws ExecutionErrorException
     {
         var launchedProjectile = launchProjectile(player, EntityType.SPLASH_POTION, 0.4f);
 
         if (launchedProjectile == null)
         {
-            logger.error("Error summoning splash potion: null");
-            return configuration.getSkillCooldown();
+            throw ExecutionErrorException.forMethod("executeSkill")
+                    .withMessage("Unable to spawn entity")
+                    .create();
         }
 
         if (!(launchedProjectile instanceof ThrownPotion thrownPotion))
         {
-            logger.error("Error summoning splash potion: Excepted ThrownPotion, but get %s".formatted(launchedProjectile.getClass()));
-            return configuration.getSkillCooldown();
+            throw ExecutionErrorException.forMethod("executeSkill")
+                    .withMessage("Error summoning splash potion: Excepted ThrownPotion, but got %s".formatted(launchedProjectile.getClass()))
+                    .create();
         }
 
         var meta = thrownPotion.getPotionMeta();
@@ -65,8 +61,7 @@ public class SplashPotionSkill extends MorphSkill<NoOpConfiguration>
         thrownPotion.setPotionMeta(meta);
 
         player.getWorld().playSound(player.getLocation(), Sound.ENTITY_WITCH_THROW, 1, 1);
-
-        return configuration.getSkillCooldown();
+        return 0;
     }
 
     private final PotionInfo[] validTypes = new PotionInfo[]

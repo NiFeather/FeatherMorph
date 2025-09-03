@@ -16,7 +16,6 @@ import xyz.nifeather.morph.misc.NmsRecord;
 import xyz.nifeather.morph.network.commands.S2C.set.S2CSetAggressiveCommand;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
 import xyz.nifeather.morph.skills.options.NoOpConfiguration;
-import xyz.nifeather.morph.storage.skill.SkillAbilityConfigContainer;
 import xyz.nifeather.morph.utilities.DamageSourceUtils;
 
 public class SonicBoomMorphSkill extends DelayedMorphSkill<NoOpConfiguration>
@@ -31,7 +30,7 @@ public class SonicBoomMorphSkill extends DelayedMorphSkill<NoOpConfiguration>
     }
 
     @Override
-    protected ExecuteResult preExecute(Player player, DisguiseState state, @NotNull SkillAbilityConfigContainer configuration, NoOpConfiguration option)
+    protected ExecuteResult preExecute(Player player, DisguiseState state, @NotNull NoOpConfiguration option)
     {
         playSoundToNearbyPlayers(player, 160,
                 Key.key("minecraft", "entity.warden.sonic_charge"), Sound.Source.HOSTILE);
@@ -39,11 +38,11 @@ public class SonicBoomMorphSkill extends DelayedMorphSkill<NoOpConfiguration>
         state.getDisguiseWrapper().setAggressive(true);
         clientHandler.sendCommand(player, new S2CSetAggressiveCommand(true));
 
-        return super.preExecute(player, state, configuration, option);
+        return ExecuteResult.success(0);
     }
 
     @Override
-    protected int getExecuteDelay(SkillAbilityConfigContainer configuration, NoOpConfiguration option)
+    protected int getExecuteDelay(NoOpConfiguration option)
     {
         return 34;
     }
@@ -52,7 +51,7 @@ public class SonicBoomMorphSkill extends DelayedMorphSkill<NoOpConfiguration>
     private MorphClientHandler clientHandler;
 
     @Override
-    protected void executeDelayedSkill(Player player, DisguiseState state, SkillAbilityConfigContainer configuration, NoOpConfiguration option)
+    protected void executeDelayedSkill(Player player, DisguiseState state, NoOpConfiguration option)
     {
         state.getDisguiseWrapper().setAggressive(false);
         clientHandler.sendCommand(player, new S2CSetAggressiveCommand(false));

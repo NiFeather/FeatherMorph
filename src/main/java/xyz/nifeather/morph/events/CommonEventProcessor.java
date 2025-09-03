@@ -40,7 +40,7 @@ import xyz.nifeather.morph.network.commands.S2C.S2CSwapCommand;
 import xyz.nifeather.morph.network.commands.S2C.admin.reveal.S2CRemoveAdminRevealCommand;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
 import xyz.nifeather.morph.network.server.ServerSetEquipCommand;
-import xyz.nifeather.morph.skills.MorphSkillHandler;
+import xyz.nifeather.morph.skills.SkillManager;
 import xyz.nifeather.morph.utilities.EntityTypeUtils;
 
 import java.util.Collections;
@@ -57,7 +57,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
     private MorphConfigManager config;
 
     @Resolved(shouldSolveImmediately = true)
-    private MorphSkillHandler skillHandler;
+    private SkillManager skillHandler;
 
     @Resolved(shouldSolveImmediately = true)
     private VanillaMessageStore vanillaMessageStore;
@@ -188,7 +188,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
 
             //如果伤害是0，那么取消事件
             if (e.getDamage() > 0d)
-                state.setSkillCooldown(Math.max(state.getSkillCooldown(), cooldownOnDamage.get()), true);
+                state.setSkillCooldown(Math.max(state.calculateRemainingCooldown(), cooldownOnDamage.get()), true);
         }
     }
 
@@ -356,7 +356,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
     public void onPlayerExit(PlayerQuitEvent e)
     {
         clientHandler.disconnect(e.getPlayer(), new PlayerDisconnectedException("Player disconnected"));
-        skillHandler.removeUnusedList(e.getPlayer());
+        skillHandler.trim();
 
         var state = morphs.getDisguiseStateFor(e.getPlayer());
 

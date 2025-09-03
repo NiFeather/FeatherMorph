@@ -2,26 +2,24 @@ package xyz.nifeather.morph.skills;
 
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import xyz.nifeather.morph.abilities.ISkillAbilityOptionHandler;
-import xyz.nifeather.morph.messages.MessageUtils;
-import xyz.nifeather.morph.messages.SkillStrings;
 import xyz.nifeather.morph.misc.DisguiseState;
+import xyz.nifeather.morph.misc.ExecutionErrorException;
 import xyz.nifeather.morph.storage.skill.ISkillAbilityOption;
-import xyz.nifeather.morph.storage.skill.SkillAbilityConfigContainer;
 
 public interface ISkill<T extends ISkillAbilityOption>
 {
     /**
-     * 执行伪装的主动技能
+     * 执行变形形态的主动技能
+     *
      * @param player 玩家
-     * @param state {@link DisguiseState}
-     * @param configuration 此技能的整体配置，包括ID、冷却等
+     * @param state  {@link DisguiseState}
      * @param option 此技能的详细设置
-     * @return 执行后的冷却长度
+     * @return The override cooldown time if greater than 0
+     * @throws ExecutionErrorException There's an error while executing the skill
      */
-    public int executeSkill(Player player, DisguiseState state, SkillAbilityConfigContainer configuration, T option);
+    public int executeSkill(Player player, DisguiseState state, T option) throws ExecutionErrorException;
 
     /**
      * Called when this skill gets equipped
@@ -46,27 +44,6 @@ public interface ISkill<T extends ISkillAbilityOption>
      */
     public default void onDeEquip(DisguiseState state)
     {
-    }
-
-    /**
-     * 内部轮子
-     */
-    @ApiStatus.Internal
-    public default int executeSkillGeneric(Player player, DisguiseState state, SkillAbilityConfigContainer config, ISkillAbilityOption option)
-    {
-        T castedOption;
-
-        try
-        {
-            castedOption = (T) option;
-        }
-        catch (ClassCastException e)
-        {
-            player.sendMessage(MessageUtils.prefixes(player, SkillStrings.exceptionOccurredString()));
-            return 20;
-        }
-
-        return executeSkill(player, state, config, castedOption);
     }
 
     /**

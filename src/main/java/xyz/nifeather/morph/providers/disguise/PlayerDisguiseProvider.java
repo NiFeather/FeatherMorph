@@ -19,6 +19,7 @@ import xyz.nifeather.morph.misc.DisguiseMeta;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.misc.DisguiseTypes;
 import xyz.nifeather.morph.misc.MorphGameProfile;
+import xyz.nifeather.morph.misc.disguiseProperty.ParseErrorException;
 import xyz.nifeather.morph.misc.skins.PlayerSkinProvider;
 import xyz.nifeather.morph.network.commands.S2C.set.S2CSetProfileCommand;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
@@ -120,9 +121,9 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
     private MorphClientHandler clientHandler;
 
     @Override
-    public void postBuildDisguise(DisguiseState state, @Nullable Entity targetEntity)
+    public void buildDisguise(DisguiseState state, @Nullable Entity targetEntity) throws ParseErrorException
     {
-        super.postBuildDisguise(state, targetEntity);
+        super.buildDisguise(state, targetEntity);
 
         var wrapper = state.getDisguiseWrapper();
         var player = state.getPlayer();

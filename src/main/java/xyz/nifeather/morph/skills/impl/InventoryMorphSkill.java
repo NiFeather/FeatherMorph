@@ -10,11 +10,11 @@ import xyz.nifeather.morph.api.morphs.skills.SkillNames;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.SkillStrings;
 import xyz.nifeather.morph.misc.DisguiseState;
+import xyz.nifeather.morph.misc.ExecutionErrorException;
 import xyz.nifeather.morph.network.commands.S2C.set.S2CSetDisplayingFakeEquipCommand;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
 import xyz.nifeather.morph.skills.MorphSkill;
 import xyz.nifeather.morph.skills.options.NoOpConfiguration;
-import xyz.nifeather.morph.storage.skill.SkillAbilityConfigContainer;
 
 public class InventoryMorphSkill extends MorphSkill<NoOpConfiguration>
 {
@@ -31,7 +31,7 @@ public class InventoryMorphSkill extends MorphSkill<NoOpConfiguration>
     private MorphClientHandler clientHandler;
 
     @Override
-    public int executeSkill(Player player, DisguiseState state, SkillAbilityConfigContainer configuration, NoOpConfiguration option)
+    public int executeSkill(Player player, DisguiseState state, NoOpConfiguration option) throws ExecutionErrorException
     {
         var defaultShown = state.toggleDisguisedItems();
 
@@ -43,7 +43,7 @@ public class InventoryMorphSkill extends MorphSkill<NoOpConfiguration>
                 ? SkillStrings.displayingDisguiseInventoryString()
                 : SkillStrings.displayingPlayerInventoryString()));
 
-        return configuration.getSkillCooldown();
+        return 0;
     }
 
     @Override

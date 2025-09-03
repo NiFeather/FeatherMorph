@@ -13,6 +13,7 @@ import xyz.nifeather.morph.backends.DisguiseWrapper;
 import xyz.nifeather.morph.misc.DisguiseMeta;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.ParseErrorException;
 import xyz.nifeather.morph.network.commands.S2C.AbstractS2CCommand;
 import xyz.nifeather.morph.providers.animation.AnimationProvider;
 
@@ -136,8 +137,9 @@ public abstract class DisguiseProvider extends MorphPluginObject
      * 伪装后要做的事
      * @param state {@link DisguiseState}
      * @param targetEntity 目标实体
+     * @throws ParseErrorException If there's an error parsing disguise configurations
      */
-    public void postBuildDisguise(DisguiseState state, @Nullable Entity targetEntity)
+    public void buildDisguise(DisguiseState state, @Nullable Entity targetEntity) throws ParseErrorException
     {
     }
 

@@ -6,9 +6,9 @@ import org.jetbrains.annotations.NotNull;
 import xyz.nifeather.morph.abilities.ISkillAbilityOptionHandler;
 import xyz.nifeather.morph.api.morphs.skills.SkillNames;
 import xyz.nifeather.morph.misc.DisguiseState;
+import xyz.nifeather.morph.misc.ExecutionErrorException;
 import xyz.nifeather.morph.skills.MorphSkill;
 import xyz.nifeather.morph.skills.options.NoOpConfiguration;
-import xyz.nifeather.morph.storage.skill.SkillAbilityConfigContainer;
 
 public final class NoneMorphSkill extends MorphSkill<NoOpConfiguration>
 {
@@ -21,12 +21,11 @@ public final class NoneMorphSkill extends MorphSkill<NoOpConfiguration>
     }
 
     @Override
-    public int executeSkill(Player player, DisguiseState state, SkillAbilityConfigContainer configuration, NoOpConfiguration option)
+    public int executeSkill(Player player, DisguiseState state, NoOpConfiguration option) throws ExecutionErrorException
     {
-        logger.warn(state.getDisguiseIdentifier() + "没有技能，但却被调用了executeSkill");
-        Thread.dumpStack();
-
-        return Integer.MAX_VALUE;
+        throw ExecutionErrorException.forMethod("executeSkill")
+                .withMessage("Method called for an instance of %s !".formatted(this.getClass().getSimpleName()))
+                .create();
     }
 
     @Override

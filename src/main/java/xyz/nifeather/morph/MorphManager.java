@@ -1,6 +1,5 @@
 package xyz.nifeather.morph;
 
-import com.fasterxml.jackson.databind.PropertyName;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
@@ -45,7 +44,6 @@ import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.ParseErrorException;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
-import xyz.nifeather.morph.misc.disguiseProperty.values.BaseLivingEntityProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.values.OffTreeProperties;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 import xyz.nifeather.morph.network.Constants;
@@ -60,8 +58,7 @@ import xyz.nifeather.morph.providers.disguise.DisguiseProvider;
 import xyz.nifeather.morph.providers.disguise.FallbackDisguiseProvider;
 import xyz.nifeather.morph.providers.disguise.PlayerDisguiseProvider;
 import xyz.nifeather.morph.providers.disguise.VanillaDisguiseProvider;
-import xyz.nifeather.morph.skills.MorphSkillHandler;
-import xyz.nifeather.morph.skills.SkillCooldownInfo;
+import xyz.nifeather.morph.skills.SkillManager;
 import xyz.nifeather.morph.storage.offlinestore.OfflineDisguiseState;
 import xyz.nifeather.morph.storage.offlinestore.OfflineStateStore;
 import xyz.nifeather.morph.storage.playerdata.PlayerDataStoreNew;
@@ -102,7 +99,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     }
 
     @Resolved
-    private MorphSkillHandler skillHandler;
+    private SkillManager skillManager;
 
     @Resolved
     private MorphConfigManager config;
@@ -285,7 +282,10 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
      */
     public void executeDisguiseSkill(Player player)
     {
-        skillHandler.executeDisguiseSkill(player);
+        var state = getDisguiseStateFor(player);
+        if (state == null) return;
+
+        state.executeSkillCheckPermission();
     }
 
     /**
@@ -821,7 +821,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             }
 
             // 技能
-            var rawIdentifierHasSkill = skillHandler.hasSkill(disguiseIdentifier) || skillHandler.hasSpeficSkill(disguiseIdentifier, SkillNames.NONE);
+            var rawIdentifierHasSkill = skillManager.hasSkill(disguiseIdentifier) || skillManager.hasSpeficSkill(disguiseIdentifier, SkillNames.NONE);
             var targetSkillID = rawIdentifierHasSkill ? disguiseIdentifier : provider.getNameSpace() + ":" + MorphManager.disguiseFallbackName;
 
             var playerMorphConfig = getPlayerMeta(player);
@@ -829,7 +829,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                     wrapper, provider, equipment,
                     clientHandler.getPlayerOption(player, true), playerMorphConfig);
 
-            return DisguiseBuildResult.of(outComingState, provider, disguiseMeta, targetEntity);
+            return DisguiseBuildResult.of(outComingState, provider, disguiseMeta);
         }
         catch (IllegalArgumentException iae)
         {
@@ -855,7 +855,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
     private void buildDisguise(DisguiseBuildResult result,
                                MorphParameters parameters,
-                               PlayerMeta playerOptions) throws ParseErrorException
+                               PlayerMeta playerOptions) throws ParseErrorException, NullPointerException
     {
         if (!result.success())
             throw new IllegalArgumentException("Passing a failed result to postDisguise() !");
@@ -868,6 +868,16 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         var wrapper = state.getDisguiseWrapper();
 
         // 设定形态属性
+
+        // 设定初始UUID
+        var str = uuidRandomBaseString.get()
+                + parameters.targetDisguiseIdentifier()
+                + player.getName();
+
+        var virtualEntityUUID = UUID.nameUUIDFromBytes(str.getBytes());
+        wrapper.writeProperty(OffTreeProperties.VIRTUAL_ENTITY_UUID, virtualEntityUUID);
+
+        // Properties
         var propertyHandler = state.disguisePropertyHandler();
         var properties = disguiseProperties.get(state.getEntityType());
         propertyHandler.initProperties(properties);
@@ -894,29 +904,11 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             state.setServerDisplay(serverDisplay);
         }
 
-        provider.postBuildDisguise(state, targetEntity);
+        provider.buildDisguise(state, targetEntity);
         wrapper.postBuildDisguise(state, targetEntity);
 
-        // 设定初始属性
-        var str = uuidRandomBaseString.get()
-                + parameters.targetDisguiseIdentifier()
-                + player.getName();
-
-        var virtualEntityUUID = UUID.nameUUIDFromBytes(str.getBytes());
-        wrapper.writeProperty(OffTreeProperties.VIRTUAL_ENTITY_UUID, virtualEntityUUID);
-
-        SkillCooldownInfo cdInfo;
-
-        //获取与技能对应的CDInfo
-        cdInfo = skillHandler.getCooldownInfo(player.getUniqueId(), state.skillLookupIdentifier());
-        state.setCooldownInfo(cdInfo, false);
-
-        state.setSkillCooldown(Math.max(40, cdInfo.getCooldown()), false);
-        cdInfo.setLastInvoke(plugin.getCurrentTick());
-
-        // 切换CD
-        // todo: Let DisguiseState handle skill cooldown
-        skillHandler.switchCooldown(player.getUniqueId(), cdInfo);
+        long availableAfter = skillManager.getAvailableAfter(player.getUniqueId(), state.getDisguiseIdentifier());
+        state.setAvailableAfter(Math.max(plugin.getCurrentTick() + 40, availableAfter), true);
     }
 
     private boolean applyDisguise(MorphParameters parameters,
@@ -1265,9 +1257,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         // 更新最后操作时间
         updateLastPlayerMorphOperationTime(player);
 
-        // 移除CD
-        skillHandler.switchCooldown(player.getUniqueId(), null);
-
         // 移除Bossbar
         state.setBossbar(null);
 
@@ -1417,7 +1406,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     public boolean disguiseFromState(DisguiseState state)
     {
         var meta = getDisguiseMeta(state.getDisguiseIdentifier());
-        var result = DisguiseBuildResult.of(state, state.getProvider(), meta, null);
+        var result = DisguiseBuildResult.of(state, state.getProvider(), meta);
         var playerMeta = getPlayerMeta(state.getPlayer());
         var parameters = MorphParameters.create(state.getPlayer(), state.getDisguiseIdentifier());
 
@@ -1467,7 +1456,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             var provider = getProvider(DisguiseTypes.fromId(key).getNameSpace());
 
             var state = DisguiseStateGenerator.fromOfflineState(offlineState,
-                    clientHandler.getPlayerOption(player, true), getPlayerMeta(player), skillHandler, provider.getPreferredBackend());
+                    clientHandler.getPlayerOption(player, true), getPlayerMeta(player), skillManager, provider.getPreferredBackend());
 
             if (state != null)
             {

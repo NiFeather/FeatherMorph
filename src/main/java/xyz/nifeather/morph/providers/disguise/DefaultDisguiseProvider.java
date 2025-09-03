@@ -23,10 +23,13 @@ import xyz.nifeather.morph.backends.DisguiseBackend;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.MorphStrings;
 import xyz.nifeather.morph.misc.DisguiseState;
+import xyz.nifeather.morph.misc.disguiseProperty.ParseErrorException;
 import xyz.nifeather.morph.network.commands.S2C.AbstractS2CCommand;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
 import xyz.nifeather.morph.network.server.ServerSetEquipCommand;
-import xyz.nifeather.morph.skills.MorphSkillHandler;
+import xyz.nifeather.morph.skills.ISkill;
+import xyz.nifeather.morph.skills.SkillManager;
+import xyz.nifeather.morph.storage.skill.ISkillAbilityOption;
 
 import java.util.List;
 import java.util.Objects;
@@ -38,7 +41,7 @@ import java.util.Objects;
 public abstract class DefaultDisguiseProvider extends DisguiseProvider
 {
     @Resolved
-    private MorphSkillHandler skillHandler;
+    private SkillManager skillHandler;
 
     @Resolved
     private AbilityManager abilityHandler;
@@ -104,7 +107,7 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
             if (haveSkill)
                 bit |= 1;
 
-            if (state.getSkillCooldown() <= 0)
+            if (state.skillInCooldown())
                 bit |= 2;
             else
                 bit |= 4;
@@ -126,7 +129,7 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
             {
                 //更新actionbar信息
                 var msg = haveSkill
-                        ? (state.getSkillCooldown() <= 0
+                        ? (!state.skillInCooldown()
                             ? MorphStrings.disguisingWithSkillAvaliableString()
                             : MorphStrings.disguisingWithSkillPreparingString())
                         : MorphStrings.disguisingAsString();
@@ -236,7 +239,7 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
     }
 
     @Override
-    public void postBuildDisguise(DisguiseState state, @Nullable Entity targetEntity)
+    public void buildDisguise(DisguiseState state, @Nullable Entity targetEntity) throws ParseErrorException, NullPointerException
     {
         //被动技能
         var abilities = abilityHandler.getAbilitiesFor(state.skillLookupIdentifier());
@@ -245,8 +248,19 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
         var abilityOptions = abilityHandler.getOptionsFor(state.skillLookupIdentifier());
         abilityOptions.forEach((id, config) -> state.getAbilityUpdater().setAbilityConfig(id.asString(), config));
 
-        var skillEntry = skillHandler.getSkillEntry(state.skillLookupIdentifier());
-        if (skillEntry != null)
-            state.setSkill(skillEntry.value(), skillEntry.key());
+        if (!skillHandler.hasSkillAbilityConfiguration(state.skillLookupIdentifier()))
+        {
+            throw ParseErrorException.forProperty("DefaultDisguiseProvider")
+                    .byMethod("buildDisguise")
+                    .withMessage("The disguise '%s' has a skill set, but no skill/ability config file is present?!".formatted(state.skillLookupIdentifier()))
+                    .create();
+        }
+
+        var config = skillHandler.getConfiguration(state.skillLookupIdentifier());
+        var skill = skillHandler.getSkill(config.getSkillIdentifier().key().asString());
+        ISkillAbilityOption option = skillHandler.lookupOptionFor(skill, state.getDisguiseIdentifier());
+
+        state.bindSkill((ISkill<? super ISkillAbilityOption>) skill, option);
+        state.setDefaultSkillCooldown(config.getSkillCooldown());
     }
 }

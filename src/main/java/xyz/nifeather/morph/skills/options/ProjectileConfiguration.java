@@ -48,7 +48,7 @@ public class ProjectileConfiguration implements ISkillAbilityOption
             int executeDelay = utilGetTypedOrThrow("delay", gsonMap, Number.class).intValue();
 
             var entityType = Arrays.stream(EntityType.values())
-                    .filter(type -> type.key().asString().equalsIgnoreCase(name))
+                    .filter(type -> type != EntityType.UNKNOWN && type.name().equalsIgnoreCase(name))
                     .findFirst()
                     .orElseThrow(() -> new ParseErrorException(this.getClass().getSimpleName(), "No matching entity found for type '%s'".formatted(name)));
 

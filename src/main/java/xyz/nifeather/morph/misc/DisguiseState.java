@@ -26,24 +26,20 @@ import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
-import xyz.nifeather.morph.misc.disguiseProperty.values.AbstractProperties;
-import xyz.nifeather.morph.misc.disguiseProperty.values.BaseLivingEntityProperties;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 import xyz.nifeather.morph.misc.waypoint.DisguiseWaypointUpdater;
 import xyz.nifeather.morph.network.PlayerOptions;
 import xyz.nifeather.morph.network.commands.S2C.S2CPlayAnimationCommand;
 import xyz.nifeather.morph.network.commands.S2C.set.S2CSetAnimationDisplayNameCommand;
-import xyz.nifeather.morph.network.commands.S2C.set.S2CSetSkillCooldownCommand;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
 import xyz.nifeather.morph.providers.animation.SingleAnimation;
 import xyz.nifeather.morph.providers.disguise.DisguiseProvider;
 import xyz.nifeather.morph.skills.ISkill;
-import xyz.nifeather.morph.skills.MorphSkillHandler;
-import xyz.nifeather.morph.skills.SkillCooldownInfo;
+import xyz.nifeather.morph.skills.SkillManager;
+import xyz.nifeather.morph.skills.SkillUpdater;
 import xyz.nifeather.morph.skills.impl.NoneMorphSkill;
 import xyz.nifeather.morph.storage.playerdata.PlayerMeta;
 import xyz.nifeather.morph.storage.skill.ISkillAbilityOption;
-import xyz.nifeather.morph.storage.skill.SkillAbilityConfigContainer;
 import xyz.nifeather.morph.utilities.ItemUtils;
 import xyz.nifeather.morph.utilities.NbtUtils;
 import xyz.nifeather.morph.utilities.PermissionUtils;
@@ -88,7 +84,7 @@ public class DisguiseState extends MorphPluginObject
         this.soundHandler.refreshSounds(this, wrapper.getEntityType(), wrapper.isBaby());
 
         //伪装类型是否支持设置伪装物品
-        supportsDisguisedItems = skillHandler.hasSpeficSkill(skillIdentifier, SkillNames.FAKE_EQUIP);
+        supportsDisguisedItems = skillManager.hasSpeficSkill(skillIdentifier, SkillNames.FAKE_EQUIP);
 
         //更新伪装物品
         if (supportsDisguisedItems)
@@ -145,7 +141,7 @@ public class DisguiseState extends MorphPluginObject
     private final AtomicBoolean sequencePersistent = new AtomicBoolean(false);
 
     @Resolved(shouldSolveImmediately = true)
-    private MorphSkillHandler skillHandler;
+    private SkillManager skillManager;
 
     @Resolved(shouldSolveImmediately = true)
     private MorphClientHandler clientHandler;
@@ -245,7 +241,7 @@ public class DisguiseState extends MorphPluginObject
     public void onPlayerJoin()
     {
         this.abilityUpdater.reApplyAbility();
-        this.skill.onInitialEquip(this);
+        this.skillUpdater.onPlayerJoin();
 
         this.getProvider().onPlayerJoinWithDisguise(this);
         this.getDisguiseWrapper().onPlayerJoin(this.getPlayer());
@@ -257,8 +253,7 @@ public class DisguiseState extends MorphPluginObject
 
     public boolean canScheduleSequence()
     {
-        var cooldown = skillHandler.getCooldownInfo(playerUUID, disguiseIdentifier);
-        return cooldown.getCooldown() <= 0;
+        return skillUpdater.calculateCooldown() <= 0;
     }
 
     /**
@@ -583,39 +578,53 @@ public class DisguiseState extends MorphPluginObject
         this.skillLookupIdentifier = newSkillID;
     }
 
-    @Nullable
-    private SkillAbilityConfigContainer skillAbilityConfigContainer;
+    private final SkillUpdater skillUpdater = new SkillUpdater(this);
 
-    @Nullable
-    public SkillAbilityConfigContainer getSkillAbilityConfiguration()
+    private void postExecuteSkill()
     {
-        return skillAbilityConfigContainer;
+        soundHandler.resetSoundTime();
     }
 
-    @NotNull
-    private ISkill<?> skill = NoneMorphSkill.instance;
-
-    /**
-     * 设置此伪装的技能
-     * @param newSkill 目标技能
-     * @param config 与技能对应的配置
-     * @apiNote 如果目标技能是null，则会fallback到 {@link NoneMorphSkill#instance}，并一并清除技能配置
-     */
-    public <X extends ISkillAbilityOption> void setSkill(@Nullable ISkill<X> newSkill,
-                                                         SkillAbilityConfigContainer config)
+    public void setDefaultSkillCooldown(int cd)
     {
-        this.skill.onDeEquip(this);
+        skillUpdater.defaultSkillCooldown = Math.max(0, cd);
+    }
 
-        if (newSkill == null)
+    public boolean skillInCooldown()
+    {
+        return plugin.getCurrentTick() < skillUpdater.getAvailableAfter();
+    }
+
+    public int getDefaultSkillCooldown()
+    {
+        return skillUpdater.defaultSkillCooldown;
+    }
+
+    public boolean executeSkillCheckPermission()
+    {
+        if (skillUpdater.executeSkillCheckPermission())
         {
-            this.skill = NoneMorphSkill.instance;
-            this.skillAbilityConfigContainer = null;
-            return;
+            postExecuteSkill();
+            return true;
         }
 
-        this.skillAbilityConfigContainer = config;
-        newSkill.onInitialEquip(this);
-        this.skill = newSkill;
+        return false;
+    }
+
+    public boolean executeSkillDirect()
+    {
+        if (skillUpdater.executeSkill())
+        {
+            postExecuteSkill();
+            return true;
+        }
+
+        return false;
+    }
+
+    public <O extends ISkillAbilityOption> void bindSkill(@Nullable ISkill<O> newSkill, O option)
+    {
+        skillUpdater.bindSkill(newSkill, option);
     }
 
     /**
@@ -625,7 +634,7 @@ public class DisguiseState extends MorphPluginObject
     @NotNull
     public ISkill<?> getSkill()
     {
-        return skill;
+        return skillUpdater.getBindingSkill();
     }
 
     /**
@@ -634,55 +643,27 @@ public class DisguiseState extends MorphPluginObject
      */
     public boolean haveSkill()
     {
-        return skill != NoneMorphSkill.instance;
+        return skillUpdater.getBindingSkill() != NoneMorphSkill.instance;
     }
 
-    /**
-     * 伪装技能冷却
-     */
-    @Nullable
-    private SkillCooldownInfo cooldownInfo;
-
-    public long getSkillCooldown()
+    public long calculateRemainingCooldown()
     {
-        return cooldownInfo == null ? -1 : cooldownInfo.getCooldown();
-    }
-
-    public long getSkillLastInvoke()
-    {
-        return cooldownInfo == null ? Long.MIN_VALUE : cooldownInfo.getLastInvoke();
-    }
-
-    public boolean haveCooldown()
-    {
-        return cooldownInfo != null;
+        return skillUpdater.calculateCooldown();
     }
 
     public void setSkillCooldown(long val, boolean notifyClient)
     {
-        if (cooldownInfo != null)
-            cooldownInfo.setCooldown(val);
-
-        if (notifyClient)
-            this.applyCooldownToClient();
+        skillUpdater.setCooldown(val, notifyClient);
     }
 
-    public void setCooldownInfo(@Nullable SkillCooldownInfo info, boolean notifyClient)
+    public void setAvailableAfter(long val, boolean notifyClient)
     {
-        this.cooldownInfo = info;
-
-        if (notifyClient)
-            this.applyCooldownToClient();
+        skillUpdater.setAvailableAfter(val, notifyClient);
     }
 
     public void applyCooldownToClient()
     {
-        long cd = -1;
-
-        if (haveCooldown())
-            cd = this.getSkillCooldown();
-
-        clientHandler.sendCommand(getPlayer(), new S2CSetSkillCooldownCommand(cd));
+        skillUpdater.applyCooldownToClient();
     }
 
     //region Waypoint
@@ -827,6 +808,7 @@ public class DisguiseState extends MorphPluginObject
 
         this.animationSequence.update();
         disguiseWaypointUpdater.tick();
+        skillUpdater.update();
         return this.abilityUpdater.update();
     }
 
@@ -992,6 +974,8 @@ public class DisguiseState extends MorphPluginObject
 
         this.provider.unMorph(getPlayer(), this);
         this.abilityUpdater.setAbilities(List.of());
-        this.setSkill(null, null);
+        this.skillUpdater.submitCooldown(skillManager.cooldownManager());
+
+        this.bindSkill(null, null);
     }
 }

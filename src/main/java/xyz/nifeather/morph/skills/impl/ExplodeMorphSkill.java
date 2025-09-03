@@ -16,10 +16,11 @@ import xyz.nifeather.morph.api.morphs.skills.SkillNames;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.SkillStrings;
 import xyz.nifeather.morph.misc.DisguiseState;
+import xyz.nifeather.morph.misc.EarlyDisposeException;
+import xyz.nifeather.morph.misc.ExecutionErrorException;
 import xyz.nifeather.morph.network.commands.S2C.set.S2CSetSNbtCommand;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
 import xyz.nifeather.morph.skills.options.ExplosionConfiguration;
-import xyz.nifeather.morph.storage.skill.SkillAbilityConfigContainer;
 
 public class ExplodeMorphSkill extends DelayedMorphSkill<ExplosionConfiguration>
 {
@@ -30,7 +31,7 @@ public class ExplodeMorphSkill extends DelayedMorphSkill<ExplosionConfiguration>
     }
 
     @Override
-    protected int getExecuteDelay(SkillAbilityConfigContainer configuration, ExplosionConfiguration option)
+    protected int getExecuteDelay(ExplosionConfiguration option)
     {
         return option.executeDelay;
     }
@@ -39,14 +40,8 @@ public class ExplodeMorphSkill extends DelayedMorphSkill<ExplosionConfiguration>
     private MorphClientHandler clientHandler;
 
     @Override
-    protected ExecuteResult preExecute(Player player, DisguiseState state, @NotNull SkillAbilityConfigContainer configuration, ExplosionConfiguration option)
+    protected ExecuteResult preExecute(Player player, DisguiseState state, @NotNull ExplosionConfiguration option) throws ExecutionErrorException
     {
-        if (option == null)
-        {
-            notifyError(player);
-            return ExecuteResult.fail(10);
-        }
-
         if (state.getEntityType() == EntityType.CREEPER)
         {
             state.getDisguiseWrapper().setAggressive(true);
@@ -56,11 +51,11 @@ public class ExplodeMorphSkill extends DelayedMorphSkill<ExplosionConfiguration>
         playSoundToNearbyPlayers(player, 16,
                 Key.key(option.getPrimedSound()), Sound.Source.HOSTILE);
 
-        return super.preExecute(player, state, configuration, option);
+        return ExecuteResult.success(0);
     }
 
     @Override
-    protected void executeDelayedSkill(Player player, DisguiseState state, SkillAbilityConfigContainer configuration, ExplosionConfiguration option)
+    protected void executeDelayedSkill(Player player, DisguiseState state, ExplosionConfiguration option)
     {
         var strength = option.getStrength();
         var setsFire = option.setsFire();

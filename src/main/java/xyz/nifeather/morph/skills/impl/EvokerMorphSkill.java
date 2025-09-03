@@ -20,10 +20,10 @@ import xyz.nifeather.morph.api.morphs.skills.SkillNames;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.SkillStrings;
 import xyz.nifeather.morph.misc.DisguiseState;
+import xyz.nifeather.morph.misc.ExecutionErrorException;
 import xyz.nifeather.morph.misc.NmsRecord;
 import xyz.nifeather.morph.misc.mobs.MorphBukkitVexHolder;
 import xyz.nifeather.morph.skills.options.NoOpConfiguration;
-import xyz.nifeather.morph.storage.skill.SkillAbilityConfigContainer;
 
 import java.util.List;
 
@@ -153,7 +153,7 @@ public class EvokerMorphSkill extends DelayedMorphSkill<NoOpConfiguration>
     }
 
     @Override
-    protected ExecuteResult preExecute(Player player, DisguiseState state, @NotNull SkillAbilityConfigContainer configuration, NoOpConfiguration option)
+    protected ExecuteResult preExecute(Player player, DisguiseState state, @NotNull NoOpConfiguration option) throws ExecutionErrorException
     {
         var summonVex = player.isSneaking();
 
@@ -175,11 +175,11 @@ public class EvokerMorphSkill extends DelayedMorphSkill<NoOpConfiguration>
 
         state.setSessionData(SESSION_DATA_SUMMON_VEX, new EvokerSkillDataRecord(summonVex, player.getTargetEntity(16)));
         state.getDisguiseWrapper().setAggressive(true);
-        return ExecuteResult.success(configuration.getSkillCooldown());
+        return ExecuteResult.success(0);
     }
 
     @Override
-    protected int getExecuteDelay(SkillAbilityConfigContainer configuration, NoOpConfiguration option)
+    protected int getExecuteDelay(NoOpConfiguration option)
     {
         return 20;
     }
@@ -320,7 +320,7 @@ public class EvokerMorphSkill extends DelayedMorphSkill<NoOpConfiguration>
     }
 
     @Override
-    public void executeDelayedSkill(Player player, DisguiseState state, SkillAbilityConfigContainer configuration, NoOpConfiguration option)
+    public void executeDelayedSkill(Player player, DisguiseState state, NoOpConfiguration option)
     {
         state.getDisguiseWrapper().setAggressive(false);
 

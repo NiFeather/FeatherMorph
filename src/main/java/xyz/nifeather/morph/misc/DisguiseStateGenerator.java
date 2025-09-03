@@ -8,7 +8,7 @@ import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.api.morphs.skills.SkillNames;
 import xyz.nifeather.morph.backends.DisguiseBackend;
 import xyz.nifeather.morph.network.PlayerOptions;
-import xyz.nifeather.morph.skills.MorphSkillHandler;
+import xyz.nifeather.morph.skills.SkillManager;
 import xyz.nifeather.morph.storage.offlinestore.OfflineDisguiseState;
 import xyz.nifeather.morph.storage.playerdata.PlayerMeta;
 import xyz.nifeather.morph.utilities.NbtUtils;
@@ -44,7 +44,7 @@ public class DisguiseStateGenerator
      */
     public static DisguiseState fromOfflineState(OfflineDisguiseState offlineState,
                                                  PlayerOptions<Player> playerOptions, PlayerMeta playerMeta,
-                                                 MorphSkillHandler skillHandler, DisguiseBackend<?, ?> backend)
+                                                 SkillManager skillHandler, DisguiseBackend<?, ?> backend)
     {
         if (!offlineState.isValid())
             throw new RuntimeException("Broken Offline State for UUID '%s'".formatted(offlineState.playerUUID));

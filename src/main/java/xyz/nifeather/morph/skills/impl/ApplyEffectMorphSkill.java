@@ -14,12 +14,9 @@ import xyz.nifeather.morph.api.morphs.skills.SkillNames;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.SkillStrings;
 import xyz.nifeather.morph.misc.DisguiseState;
-import xyz.nifeather.morph.misc.disguiseProperty.ParseErrorException;
+import xyz.nifeather.morph.misc.ExecutionErrorException;
 import xyz.nifeather.morph.skills.MorphSkill;
 import xyz.nifeather.morph.skills.options.EffectConfiguration;
-import xyz.nifeather.morph.storage.skill.SkillAbilityConfigContainer;
-
-import java.util.Map;
 
 public class ApplyEffectMorphSkill extends MorphSkill<EffectConfiguration>
 {
@@ -30,14 +27,12 @@ public class ApplyEffectMorphSkill extends MorphSkill<EffectConfiguration>
     }
 
     @Override
-    public int executeSkill(Player player, DisguiseState state, SkillAbilityConfigContainer configuration, EffectConfiguration option)
+    public int executeSkill(Player player, DisguiseState state, EffectConfiguration option) throws ExecutionErrorException
     {
-        if (option == null || configuration == null)
-        {
-            logger.error("%s does not have a potion effect set".formatted(state.getDisguiseIdentifier()));
-            notifyError(player);
-            return 10;
-        }
+        if (option == null)
+            throw ExecutionErrorException.forMethod("executeSkill")
+                    .withMessage("%s does not have a potion effect set".formatted(state.getDisguiseIdentifier()))
+                    .create();
 
         if (option.acquiresWater() && !player.isInWater())
         {
@@ -60,9 +55,9 @@ public class ApplyEffectMorphSkill extends MorphSkill<EffectConfiguration>
 
         if (effect == null)
         {
-            logger.error("An effect set for %s is invalid!".formatted(state.getDisguiseIdentifier()));
-            notifyError(player);
-            return 10;
+            throw ExecutionErrorException.forMethod("executeSkill")
+                    .withMessage("An effect set for %s is invalid!".formatted(state.getDisguiseIdentifier()))
+                    .create();
         }
 
         players.forEach(p ->
@@ -75,8 +70,7 @@ public class ApplyEffectMorphSkill extends MorphSkill<EffectConfiguration>
         });
 
         player.playSound(sound);
-
-        return configuration.getSkillCooldown();
+        return 0;
     }
 
     @Nullable

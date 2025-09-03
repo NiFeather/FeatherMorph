@@ -1,6 +1,5 @@
 package xyz.nifeather.morph.api.direct;
 
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Managers.DependencyManager;
@@ -10,7 +9,7 @@ import xyz.nifeather.morph.RevealingHandler;
 import xyz.nifeather.morph.abilities.AbilityManager;
 import xyz.nifeather.morph.interfaces.IManageRequests;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
-import xyz.nifeather.morph.skills.MorphSkillHandler;
+import xyz.nifeather.morph.skills.SkillManager;
 
 public class FeatherMorphDirectAccess
 {
@@ -25,7 +24,7 @@ public class FeatherMorphDirectAccess
         this.dependencyManager = DependencyManager.getInstance(pl.getNamespace());
 
         this.morphManager = dependencyManager.get(MorphManager.class, true);
-        this.skillHandler = dependencyManager.get(MorphSkillHandler.class, true);
+        this.skillHandler = dependencyManager.get(SkillManager.class, true);
         this.abilityManager = dependencyManager.get(AbilityManager.class, true);
         this.requestManager = dependencyManager.get(IManageRequests.class, true);
         this.clientHandler = dependencyManager.get(MorphClientHandler.class, true);
@@ -38,7 +37,7 @@ public class FeatherMorphDirectAccess
     }
 
     private final MorphManager morphManager;
-    private final MorphSkillHandler skillHandler;
+    private final SkillManager skillHandler;
     private final AbilityManager abilityManager;
     private final IManageRequests requestManager;
     private final MorphClientHandler clientHandler;
@@ -63,7 +62,7 @@ public class FeatherMorphDirectAccess
         return revealingHandler;
     }
 
-    public MorphSkillHandler skillHandler()
+    public SkillManager skillHandler()
     {
         return skillHandler;
     }

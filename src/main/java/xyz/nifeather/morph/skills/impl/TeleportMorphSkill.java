@@ -14,9 +14,9 @@ import xyz.nifeather.morph.api.morphs.skills.SkillNames;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.SkillStrings;
 import xyz.nifeather.morph.misc.DisguiseState;
+import xyz.nifeather.morph.misc.ExecutionErrorException;
 import xyz.nifeather.morph.skills.MorphSkill;
 import xyz.nifeather.morph.skills.options.TeleportConfiguration;
-import xyz.nifeather.morph.storage.skill.SkillAbilityConfigContainer;
 
 public class TeleportMorphSkill extends MorphSkill<TeleportConfiguration>
 {
@@ -27,13 +27,12 @@ public class TeleportMorphSkill extends MorphSkill<TeleportConfiguration>
     }
 
     @Override
-    public int executeSkill(Player player, DisguiseState state, SkillAbilityConfigContainer configuration, TeleportConfiguration option)
+    public int executeSkill(Player player, DisguiseState state, TeleportConfiguration option) throws ExecutionErrorException
     {
         if (option == null)
-        {
-            notifyError(player);
-            return 10;
-        }
+            throw ExecutionErrorException.forMethod("executeSkill")
+                    .withMessage("No option set for teleport skill")
+                    .create();
 
         //目标方块
         var targetBlock = player.getTargetBlockExact(
@@ -96,8 +95,7 @@ public class TeleportMorphSkill extends MorphSkill<TeleportConfiguration>
 
         //重设下落距离
         player.setFallDistance(0);
-
-        return configuration.getSkillCooldown();
+        return 0;
     }
 
     @Override
