@@ -16,6 +16,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Messages.MessageStore;
+import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.RevealingHandler;
 import xyz.nifeather.morph.abilities.AbilityManager;
 import xyz.nifeather.morph.api.morphs.skills.SkillNames;
@@ -239,7 +240,7 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
     }
 
     @Override
-    public void buildDisguise(DisguiseState state, @Nullable Entity targetEntity) throws ParseErrorException, NullPointerException
+    public void buildDisguise(DisguiseState state, @Nullable Entity targetEntity) throws ParseErrorException
     {
         //被动技能
         var abilities = abilityHandler.getAbilitiesFor(state.skillLookupIdentifier());
@@ -248,18 +249,17 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
         var abilityOptions = abilityHandler.getOptionsFor(state.skillLookupIdentifier());
         abilityOptions.forEach((id, config) -> state.getAbilityUpdater().setAbilityConfig(id.asString(), config));
 
-        if (!skillHandler.hasSkillAbilityConfiguration(state.skillLookupIdentifier()))
+        var config = skillHandler.getConfiguration(state.skillLookupIdentifier());
+        if (config == null) // Only setup if there's any skill config
         {
-            throw ParseErrorException.forProperty("DefaultDisguiseProvider")
-                    .byMethod("buildDisguise")
-                    .withMessage("The disguise '%s' has a skill set, but no skill/ability config file is present?!".formatted(state.skillLookupIdentifier()))
-                    .create();
+            if (FeatherMorphMain.getInstance().debugOutputEnabled())
+                logger.warn("The skill lookup '{}' does not have a matching skill/ability configuration", state.skillLookupIdentifier());
+
+            return;
         }
 
-        var config = skillHandler.getConfiguration(state.skillLookupIdentifier());
         var skill = skillHandler.getSkill(config.getSkillIdentifier().key().asString());
         ISkillAbilityOption option = skillHandler.lookupOptionFor(skill, state.skillLookupIdentifier());
-
         state.bindSkill((ISkill<? super ISkillAbilityOption>) skill, option);
         state.setDefaultSkillCooldown(config.getSkillCooldown());
     }
