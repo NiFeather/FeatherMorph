@@ -52,8 +52,8 @@ public class MorphCommandManager extends MorphPluginObject
             catch (InterruptedException ignored)
             {
             }
-        }
 
-        new DebugTestCommand().register(registrar);
+            new DebugTestCommand().register(registrar);
+        }
     }
 }
