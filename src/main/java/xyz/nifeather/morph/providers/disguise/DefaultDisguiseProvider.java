@@ -258,7 +258,7 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
 
         var config = skillHandler.getConfiguration(state.skillLookupIdentifier());
         var skill = skillHandler.getSkill(config.getSkillIdentifier().key().asString());
-        ISkillAbilityOption option = skillHandler.lookupOptionFor(skill, state.getDisguiseIdentifier());
+        ISkillAbilityOption option = skillHandler.lookupOptionFor(skill, state.skillLookupIdentifier());
 
         state.bindSkill((ISkill<? super ISkillAbilityOption>) skill, option);
         state.setDefaultSkillCooldown(config.getSkillCooldown());

@@ -139,10 +139,10 @@ public class SkillManager extends MorphPluginObject
      * @throws ParseErrorException If there's a parse error
      * @throws NullPointerException If the disguise doesn't have a matching configuration file
      */
-    public <O extends ISkillAbilityOption> O lookupOptionFor(ISkill<O> skill, String disguiseIdentifier) throws ParseErrorException, NullPointerException
+    public <O extends ISkillAbilityOption> O lookupOptionFor(ISkill<O> skill, String skillLookup) throws ParseErrorException, NullPointerException
     {
-        var configContainer = store.get(disguiseIdentifier);
-        var optionMap = Objects.requireNonNull(configContainer, "No configuration for disguise " + disguiseIdentifier)
+        var configContainer = store.get(skillLookup);
+        var optionMap = Objects.requireNonNull(configContainer, "No configuration for id " + skillLookup)
                 .getSkillOptions(skill);
 
         return skill.optionHandler().acceptNullableOptions()
