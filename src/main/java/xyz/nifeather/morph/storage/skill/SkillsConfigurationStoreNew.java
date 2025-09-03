@@ -49,9 +49,14 @@ public class SkillsConfigurationStoreNew extends DirectoryJsonBasedStorage<Skill
             var legacySkillFile = new File(this.plugin.getDataFolder(), "skills.json");
 
             if (legacySkillFile.exists())
+            {
                 migrateFromLegacyStorage();
+            }
             else
+            {
                 saveDefaultGeneratedConfigurations();
+                return;
+            }
         }
 
         if (currentVersion < PackageVersions.ATTRIBUTE_NAME_CHANGED)

@@ -23,7 +23,7 @@ public class ProjectileConfiguration implements ISkillAbilityOption
         @Override
         public void writeOption(ProjectileConfiguration option, @NotNull Map<String, Object> gsonMap)
         {
-            gsonMap.put("name", option.entityType());
+            gsonMap.put("name", option.entityType().key().asString());
             gsonMap.put("speed_multiplier", option.getVectorMultiplier());
 
             gsonMap.put("sound_name", option.getSoundName());
@@ -48,7 +48,7 @@ public class ProjectileConfiguration implements ISkillAbilityOption
             int executeDelay = utilGetTypedOrThrow("delay", gsonMap, Number.class).intValue();
 
             var entityType = Arrays.stream(EntityType.values())
-                    .filter(type -> type != EntityType.UNKNOWN && type.name().equalsIgnoreCase(name))
+                    .filter(type -> type != EntityType.UNKNOWN && type.key().asString().equalsIgnoreCase(name))
                     .findFirst()
                     .orElseThrow(() -> new ParseErrorException(this.getClass().getSimpleName(), "No matching entity found for type '%s'".formatted(name)));
 
