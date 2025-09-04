@@ -10,7 +10,7 @@ public class APIMeta
     /**
      * Current version of the API
      */
-    public static final int VERSION = 5;
+    public static final int VERSION = 6;
 
     /**
      * Flags of the API, currently useless
