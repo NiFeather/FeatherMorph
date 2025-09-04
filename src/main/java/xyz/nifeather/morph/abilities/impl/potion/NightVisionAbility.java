@@ -15,7 +15,7 @@ public class NightVisionAbility extends EffectMorphAbility
         return AbilityNames.ALWAYS_NIGHT_VISION;
     }
 
-    private final PotionEffect nightVisionEffect = new PotionEffect(PotionEffectType.NIGHT_VISION, 300, 0);
+    private final PotionEffect nightVisionEffect = new PotionEffect(PotionEffectType.NIGHT_VISION, 300, 0, true, false);
 
     @Override
     protected PotionEffect getEffect()
