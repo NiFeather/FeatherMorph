@@ -2,17 +2,24 @@ package xyz.nifeather.morph.updates;
 
 public class VersionHandling
 {
-    public static VersionInfo toVersionInfo(String str)
+    public static VersionInfo toVersionInfo(String versionString)
     {
-        if (str == null || str.equals("null") || str.isBlank())
+        if (versionString == null || versionString.equals("null") || versionString.isBlank())
             return VersionInfo.INVALID_VERSION;
 
-        var strSpilt = str.split("\\.");
+        var vers = versionString.split("-", 2);
+
+        var strSpilt = vers[0].split("\\.");
 
         var major = strSpilt.length >= 1 ? tryParse(strSpilt[0]) : 0;
         var minor = strSpilt.length >= 2 ? tryParse(strSpilt[1]) : 0;
         var patch = strSpilt.length >= 3 ? tryParse(strSpilt[2]) : 0;
-        var channel = strSpilt.length >= 4 ? strSpilt[3] : "DefaultRelease";
+        String channel;
+
+        if (vers.length > 2)
+            channel = vers[1];
+        else
+            channel = strSpilt.length >= 4 ? strSpilt[3] : "DefaultRelease";
 
         return new VersionInfo(major, minor, patch, channel);
     }
