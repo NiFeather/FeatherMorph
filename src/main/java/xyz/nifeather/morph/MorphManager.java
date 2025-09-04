@@ -707,7 +707,10 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         }
 
         // 调用早期事件
-        var earlyEventPassed = new PlayerMorphEarlyEvent(player, null, disguiseIdentifier, parameters.forceExecute).callEvent();
+        var earlyEventPassed = new PlayerMorphEarlyEvent(player,
+                disguiseIdentifier,
+                parameters.forceExecute, parameters.propertiesInput).callEvent();
+
         if (!parameters.forceExecute && !earlyEventPassed)
         {
             source.sendMessage(MessageUtils.prefixes(source, MorphStrings.operationCancelledString()));

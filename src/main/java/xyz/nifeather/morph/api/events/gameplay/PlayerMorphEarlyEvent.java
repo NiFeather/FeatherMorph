@@ -6,15 +6,18 @@ import org.bukkit.event.HandlerList;
 import org.bukkit.event.player.PlayerEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Unmodifiable;
 import xyz.nifeather.morph.misc.DisguiseState;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class PlayerMorphEarlyEvent extends PlayerEvent implements Cancellable
 {
     private static final HandlerList handlers = new HandlerList();
+    private final Map<String, String> propertyInputs = new ConcurrentHashMap<>();
 
     public static HandlerList getHandlerList() { return handlers; }
-
-    public final DisguiseState state;
 
     public final String targetId;
 
@@ -23,26 +26,45 @@ public class PlayerMorphEarlyEvent extends PlayerEvent implements Cancellable
     /**
      * 会在玩家正式进行伪装或更换伪装前触发
      * @param who 玩家
-     * @param state 玩家当前活动的{@link DisguiseState}，如果有
      * @param isForce 此操作是否为强制执行，若为true则无法取消
      */
-    public PlayerMorphEarlyEvent(@NotNull Player who, @Nullable DisguiseState state, @NotNull String targetId, boolean isForce)
+    public PlayerMorphEarlyEvent(@NotNull Player who,
+                                 @NotNull String targetId,
+                                 boolean isForce,
+                                 Map<String, String> propertyInputs)
     {
         super(who);
 
         this.targetId = targetId;
-        this.state = state;
         this.isForce = isForce;
+        this.propertyInputs.putAll(propertyInputs);
     }
 
+    /**
+     * @return The target disguise ID
+     */
     public @NotNull String getTargetId()
     {
         return targetId;
     }
 
+    /**
+     * Gets the player's current {@link DisguiseState}, if the player is disguised at this moment
+     * @deprecated We no longer include current state in this event
+     */
+    @Deprecated(forRemoval = true)
     public @Nullable DisguiseState getState()
     {
-        return state;
+        return null;
+    }
+
+    /**
+     * Gets the player's property inputs, paired with Key <-> Value
+     */
+    @Unmodifiable
+    public Map<String, String> getPropertyInputs()
+    {
+        return propertyInputs;
     }
 
     @Override
