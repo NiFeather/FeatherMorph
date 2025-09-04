@@ -38,13 +38,6 @@ public class SkillUpdater extends MorphPluginObject
     @NotNull
     private volatile ISkillAbilityOption skillOption = NoOpConfiguration.instance;
 
-    private volatile long lastInvoke;
-
-    public long getLastInvoke()
-    {
-        return lastInvoke;
-    }
-
     private volatile long availableAfter;
     public long getAvailableAfter()
     {
@@ -53,7 +46,6 @@ public class SkillUpdater extends MorphPluginObject
 
     public void setAvailableAfter(long val, boolean notifyClient)
     {
-        lastInvoke = plugin.getCurrentTick();
         availableAfter = val;
 
         if (notifyClient)
@@ -175,16 +167,15 @@ public class SkillUpdater extends MorphPluginObject
 
     public void setCooldown(long cooldown, boolean notifyClient)
     {
-        lastInvoke = plugin.getCurrentTick();
-        this.availableAfter = lastInvoke + cooldown;
+        this.availableAfter = plugin.getCurrentTick() + cooldown;
 
         if (notifyClient)
             this.applyCooldownToClient();
     }
 
-    public long calculateCooldown()
+    public long calculateRemainingCooldown()
     {
-        return Math.max(0, availableAfter - lastInvoke);
+        return Math.max(0, availableAfter - plugin.getCurrentTick());
     }
 
     @Resolved(shouldSolveImmediately = true)
@@ -192,7 +183,7 @@ public class SkillUpdater extends MorphPluginObject
 
     public void applyCooldownToClient()
     {
-        clientHandler.sendCommand(state.getPlayer(), new S2CSetSkillCooldownCommand(calculateCooldown()));
+        clientHandler.sendCommand(state.getPlayer(), new S2CSetSkillCooldownCommand(calculateRemainingCooldown()));
     }
 
     public void submitCooldown(CooldownManager cooldownManager)

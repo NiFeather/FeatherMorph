@@ -253,7 +253,7 @@ public class DisguiseState extends MorphPluginObject
 
     public boolean canScheduleSequence()
     {
-        return skillUpdater.calculateCooldown() <= 0;
+        return skillUpdater.calculateRemainingCooldown() <= 0;
     }
 
     /**
@@ -648,7 +648,7 @@ public class DisguiseState extends MorphPluginObject
 
     public long calculateRemainingCooldown()
     {
-        return skillUpdater.calculateCooldown();
+        return skillUpdater.calculateRemainingCooldown();
     }
 
     public void setSkillCooldown(long val, boolean notifyClient)
