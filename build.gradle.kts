@@ -131,8 +131,6 @@ dependencies {
     {
         exclude("com.google.code.gson", "gson")
     }
-
-    implementation("io.sentry:sentry:8.16.0")
 }
 
 group = "xyz.nifeather.morph"
