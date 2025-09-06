@@ -38,7 +38,7 @@ public class CooldownManager extends MorphPluginObject
     {
         for (Map.Entry<UUID, CooldownStore> pair : new HashSet<>(storeMap.entrySet()))
         {
-            if (pair.getValue().allAvailable())
+            if (pair.getValue().trim())
                 storeMap.remove(pair.getKey());
         }
     }
@@ -64,10 +64,20 @@ public class CooldownManager extends MorphPluginObject
             return 0L;
         }
 
-        public boolean allAvailable()
+        /**
+         * @return TRUE if this cooldownStore no longer holds any offline cooldowns
+         */
+        public boolean trim()
         {
             var currentTick = FeatherMorphMain.getInstance().getCurrentTick();
-            return cooldownMap.values().stream().allMatch(time -> currentTick > time);
+
+            HashSet<Map.Entry<String, Long>> entries = new HashSet<>(cooldownMap.entrySet());
+            var list = entries.stream()
+                    .filter(entry -> currentTick > entry.getValue())
+                    .toList();
+
+            list.forEach(entrySet -> cooldownMap.remove(entrySet.getKey()));
+            return cooldownMap.isEmpty();
         }
     }
 }
