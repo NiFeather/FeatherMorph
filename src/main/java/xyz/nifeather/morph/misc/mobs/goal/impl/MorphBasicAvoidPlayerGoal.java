@@ -11,6 +11,7 @@ import org.bukkit.Location;
 import org.bukkit.craftbukkit.entity.CraftEntity;
 import org.bukkit.craftbukkit.entity.CraftMob;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -54,6 +55,8 @@ public abstract class MorphBasicAvoidPlayerGoal<M extends Mob> implements Goal<@
     public boolean shouldActivate()
     {
         entityToAvoid = findEntityToAvoid();
+        if (mob.getType() == EntityType.WANDERING_TRADER)
+        System.out.println("ToAvoid is  " + entityToAvoid);
         if (entityToAvoid == null) return false;
 
         this.path = findEscapePath();
@@ -106,7 +109,10 @@ public abstract class MorphBasicAvoidPlayerGoal<M extends Mob> implements Goal<@
             found = player;
         }
 
-        return found;
+        if (EntityTypeUtils.panicsFrom(mob.getType(), EntityType.PLAYER))
+            return found;
+
+        return null;
     }
 
     @Nullable
