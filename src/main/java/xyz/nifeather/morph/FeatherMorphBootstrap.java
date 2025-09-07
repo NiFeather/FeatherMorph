@@ -42,7 +42,8 @@ public class FeatherMorphBootstrap implements PluginBootstrap
     {
         try
         {
-            registerBuiltinDatapack(event, "feathermorph_recipes");
+            for (String datapack : BuiltinDatapackNames.values())
+                registerBuiltinDatapack(event, datapack);
         }
         catch (URISyntaxException | IOException e)
         {
@@ -53,7 +54,7 @@ public class FeatherMorphBootstrap implements PluginBootstrap
     private void registerBuiltinDatapack(RegistrarEvent<DatapackRegistrar> event, String id)
             throws IOException, URISyntaxException, NullDependencyException
     {
-        URI datapackURI = Objects.requireNonNull(this.getClass().getResource("/%s".formatted(id)))
+        URI datapackURI = Objects.requireNonNull(this.getClass().getResource("/datapacks/%s".formatted(id)))
                 .toURI();
 
         var discoverResult = event.registrar().discoverPack(datapackURI, id);

@@ -1,14 +1,14 @@
 package xyz.nifeather.morph.events;
 
 import de.themoep.inventorygui.InventoryGui;
+import io.papermc.paper.registry.RegistryAccess;
+import io.papermc.paper.registry.RegistryKey;
+import io.papermc.paper.registry.tag.TagKey;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
-import org.bukkit.Color;
-import org.bukkit.GameMode;
-import org.bukkit.Material;
-import org.bukkit.Sound;
+import org.bukkit.*;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -24,6 +24,7 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
+import org.jetbrains.annotations.NotNull;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.MorphPluginObject;
@@ -37,6 +38,7 @@ import xyz.nifeather.morph.utilities.ItemUtils;
 import xyz.nifeather.morph.utilities.PermissionUtils;
 
 import java.util.List;
+import java.util.Objects;
 
 public class CustomItemRelatedEvents extends MorphPluginObject implements Listener
 {
@@ -189,6 +191,9 @@ public class CustomItemRelatedEvents extends MorphPluginObject implements Listen
         morphs.grantMorphToPlayer(player, id);
     }
 
+    public final TagKey<@NotNull EntityType> tagMagicBottleCollectable = TagKey.create(RegistryKey.ENTITY_TYPE,
+            Objects.requireNonNull(NamespacedKey.fromString("feathermorph:magic_bottle_collectable")));
+
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void bottleOnPlayerInteractEntity(PlayerInteractEntityEvent event)
     {
@@ -213,8 +218,22 @@ public class CustomItemRelatedEvents extends MorphPluginObject implements Listen
             player.swingHand(event.getHand());
         };
 
-        // 如果目标实体是怪物，或者事件被取消，或者没有权限，拒绝获取
-        if (entityClicked instanceof Monster || cancelled || !collectorHasPermission)
+        // 如果事件被取消，或者没有权限，拒绝获取
+        if (cancelled || !collectorHasPermission)
+        {
+            failEffect.run();
+            return;
+        }
+
+        var registry = RegistryAccess.registryAccess().getRegistry(RegistryKey.ENTITY_TYPE);
+        if (!registry.hasTag(tagMagicBottleCollectable))
+        {
+            failEffect.run();
+            return;
+        }
+
+        var allowedTypes = registry.getTagValues(tagMagicBottleCollectable);
+        if (!allowedTypes.contains(entityClicked.getType()))
         {
             failEffect.run();
             return;
