@@ -33,7 +33,6 @@ import xyz.nifeather.morph.misc.gui.IconLookup;
 import xyz.nifeather.morph.misc.integrations.placeholderapi.PlaceholderIntegration;
 import xyz.nifeather.morph.misc.integrations.residence.ResidenceEventProcessor;
 import xyz.nifeather.morph.misc.integrations.towny.TownyAdapter;
-import xyz.nifeather.morph.misc.recipe.RecipeManager;
 import xyz.nifeather.morph.network.multiInstance.MultiInstanceService;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
 import xyz.nifeather.morph.platform.CurrentPlatform;
@@ -291,7 +290,7 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
 
         dependencyManager.cache(DisguiseProperties.INSTANCE);
 
-        dependencyManager.cache(new RecipeManager());
+        //dependencyManager.cache(new RecipeManager());
 
         dependencyManager.cache(mirrorExecutorHub = new ExecutorHub());
 

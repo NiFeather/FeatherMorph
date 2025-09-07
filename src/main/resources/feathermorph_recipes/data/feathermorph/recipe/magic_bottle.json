@@ -1,0 +1,48 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    [
+      "minecraft:glass_bottle"
+    ],
+    [
+      "minecraft:redstone"
+    ]
+  ],
+  "result": {
+    "id": "minecraft:glass_bottle",
+    "components": {
+      "minecraft:custom_data": {
+        "feathermorph:is_magic_bottle": true
+      },
+      "minecraft:item_name": {
+        "translate": "item.morphclient.magic_bottle",
+        "fallback": "Magic Bottle"
+      },
+      "minecraft:lore": [
+        {
+          "translate": "text.morphclient.tooltip.when_sneaking",
+          "fallback": "When sneaking",
+          "color": "gray",
+          "italic": false
+        },
+        {
+          "translate": "%s -> %s",
+          "with": [
+            {
+              "keybind": "key.use"
+            },
+            {
+              "translate": "text.morphclient.tooltip.bottle_collect_disguise",
+              "fallback": "Collect a disguise from a mob or player"
+            }
+          ],
+          "color": "gray",
+          "italic": false
+        }
+      ],
+      "minecraft:enchantment_glint_override": true
+    },
+    "count": 1
+  }
+}

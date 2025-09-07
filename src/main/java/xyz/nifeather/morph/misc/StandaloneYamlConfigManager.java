@@ -1,4 +1,4 @@
-package xyz.nifeather.morph.misc.recipe;
+package xyz.nifeather.morph.misc;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.bukkit.configuration.file.YamlConfiguration;

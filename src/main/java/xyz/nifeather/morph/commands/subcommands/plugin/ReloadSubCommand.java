@@ -23,7 +23,6 @@ import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.MorphMessageStore;
 import xyz.nifeather.morph.messages.vanilla.VanillaMessageStore;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
-import xyz.nifeather.morph.misc.recipe.RecipeManager;
 import xyz.nifeather.morph.misc.skins.PlayerSkinProvider;
 import xyz.nifeather.morph.network.multiInstance.MultiInstanceService;
 import xyz.nifeather.morph.storage.skill.SkillsConfigurationStoreNew;
@@ -70,8 +69,8 @@ public class ReloadSubCommand extends BrigadierCommand
     @Resolved
     private MultiInstanceService multiInstanceService;
 
-    @Resolved
-    private RecipeManager recipeManager;
+    //@Resolved
+    //private RecipeManager recipeManager;
 
     private final List<String> subcommands = ObjectImmutableList.of("data", "message", "update_message");
 
@@ -131,7 +130,7 @@ public class ReloadSubCommand extends BrigadierCommand
 
             multiInstanceService.onReload();
 
-            recipeManager.reload();
+            //recipeManager.reload();
         }
 
         if (reloadsMessage)
