@@ -28,6 +28,7 @@ import xyz.nifeather.morph.messages.MorphMessageStore;
 import xyz.nifeather.morph.messages.vanilla.VanillaMessageStore;
 import xyz.nifeather.morph.misc.ModNetworkingHelper;
 import xyz.nifeather.morph.misc.PlayerOperationSimulator;
+import xyz.nifeather.morph.misc.RecipeConfigHandle;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.gui.IconLookup;
 import xyz.nifeather.morph.misc.integrations.placeholderapi.PlaceholderIntegration;
@@ -324,6 +325,7 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
         });
 
         pluginEnableDone.set(true);
+        RecipeConfigHandle.handle(this.getDataFolder());
 
         //Init GUI IconLookup
         IconLookup.instance();
