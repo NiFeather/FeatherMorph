@@ -70,6 +70,11 @@ public class PropertyHandler
     {
         this.validProperties.clear();
         this.bindingProperties = null;
+        clearProperties();
+    }
+
+    public void clearProperties()
+    {
         propertyMap.clear();
     }
 
@@ -94,8 +99,13 @@ public class PropertyHandler
 
         Objects.requireNonNull(value, "Null values are not accepted");
 
-        propertyMap.put(property, value);
-        this.actions.invoke(BiConsumerActions.pair(property, value));
+        var existing = getOptional(property).orElse(null);
+
+        if (!value.equals(existing))
+        {
+            propertyMap.put(property, value);
+            this.actions.invoke(BiConsumerActions.pair(property, value));
+        }
     }
 
     public boolean contains(SingleProperty<?> property)

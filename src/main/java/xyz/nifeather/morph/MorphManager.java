@@ -40,10 +40,7 @@ import xyz.nifeather.morph.messages.HintStrings;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.MorphStrings;
 import xyz.nifeather.morph.misc.*;
-import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
-import xyz.nifeather.morph.misc.disguiseProperty.ParseErrorException;
-import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
-import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
+import xyz.nifeather.morph.misc.disguiseProperty.*;
 import xyz.nifeather.morph.misc.disguiseProperty.values.OffTreeProperties;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 import xyz.nifeather.morph.network.Constants;
@@ -1053,6 +1050,35 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 SoundCategory.PLAYERS,
                 1, 1
         );
+
+        var newState = result.state();
+        var propertyHandler = newState.disguisePropertyHandler();
+        var properties = propertyHandler.bindingProperties();
+
+        //todo: This is bad!, however, we need to change the existing properties framework in order to implement partial sync... :(
+        if (properties != null)
+        {
+            var partialSyncHandler = new PropertyHandler();
+            partialSyncHandler.initProperties(properties);
+            partialSyncHandler.hookOnPropertyWrite((p, v) ->
+            {
+                if (!player.isOnline()) return;
+
+                // fix command not sending when player rejoins
+                Player pl = player.isConnected() ? player : Bukkit.getPlayer(player.getUniqueId());
+                clientHandler.sendCommand(pl, new S2CUpdatePropertiesCommand(partialSyncHandler.toNetworkProperties()));
+            });
+
+            propertyHandler.hookOnPropertyWrite((property, value) ->
+            {
+                if (newState.disposed()) return;
+
+                if (!properties.equals(propertyHandler.bindingProperties())) return;
+
+                partialSyncHandler.clearProperties();
+                partialSyncHandler.set((SingleProperty<Object>) property, value);
+            });
+        }
 
         // 发送提示
         var isClientPlayer = clientHandler.clientConnected(player);
