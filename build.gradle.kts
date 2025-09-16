@@ -314,6 +314,7 @@ tasks.shadowJar {
 // https://stackoverflow.com/a/74848372
 tasks.withType<Jar> {
     exclude("plugin.yml")
+    from("LICENSE")
 }
 
 tasks.withType<JavaCompile>() {
