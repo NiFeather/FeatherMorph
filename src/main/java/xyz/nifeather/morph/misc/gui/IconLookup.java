@@ -1,6 +1,9 @@
 package xyz.nifeather.morph.misc.gui;
 
 import com.destroystokyo.paper.profile.CraftPlayerProfile;
+import io.papermc.paper.datacomponent.DataComponentTypes;
+import io.papermc.paper.datacomponent.item.ResolvableProfile;
+import net.kyori.adventure.key.Key;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.EntityType;
@@ -110,17 +113,18 @@ public class IconLookup
 
     public ItemStack lookupPlayer(String playerName)
     {
-        var stack = new ItemStack(Material.PLAYER_HEAD);
+        var stack = new ItemStack(Material.SNOWBALL);
 
-        stack.editMeta(meta -> meta.setRarity(ItemRarity.COMMON));
+        stack.setData(DataComponentTypes.RARITY, ItemRarity.COMMON);
+        stack.setData(DataComponentTypes.ITEM_MODEL, Key.key("player_head"));
 
         PlayerSkinProvider.getInstance().fetchSkin(playerName)
                 .thenAccept(optional ->
                 {
                     if (optional.isEmpty()) return;
 
-                    stack.editMeta(SkullMeta.class, skullMeta ->
-                            skullMeta.setPlayerProfile(new CraftPlayerProfile(optional.get())));
+                    stack.setData(DataComponentTypes.PROFILE,
+                            ResolvableProfile.resolvableProfile(new CraftPlayerProfile(optional.get())));
                 });
 
         return stack;
