@@ -4,17 +4,12 @@ import org.bukkit.entity.Creeper;
 import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.nifeather.morph.misc.disguiseProperty.InputHandles;
-import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
-import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
-import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
+import xyz.nifeather.morph.misc.disguiseProperty.*;
 import xyz.nifeather.morph.utilities.DisguiseUtils;
-
-import java.util.Map;
 
 public class CreeperProperties extends BaseLivingEntityProperties<Creeper>
 {
-    public final SingleProperty<Boolean> CHARGED = getSingle(PropertyNames.CREEPER_CHARGED, false, InputHandles::readBooleanRelaxed)
+    public final SingleProperty<Boolean> CHARGED = createProperty(PropertyNames.CREEPER_CHARGED, false, InputHandles::readBooleanRelaxed, OutputHandles::writeBoolean)
             .withRandom(false, false, false, true)
             .withValidInput("true", "false");
 
@@ -41,10 +36,4 @@ public class CreeperProperties extends BaseLivingEntityProperties<Creeper>
         propertyHandler.set(CHARGED, DisguiseUtils.pick(CHARGED.getRandomValues()));
     }
 
-    @Override
-    protected void appendNetworkMap(PropertyHandler propertyHandler, Map<String, String> map)
-    {
-        super.appendNetworkMap(propertyHandler, map);
-        map.put(CHARGED.id(), propertyHandler.get(CHARGED).toString().toLowerCase());
-    }
 }

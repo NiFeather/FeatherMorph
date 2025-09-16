@@ -5,17 +5,13 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Sheep;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.nifeather.morph.misc.disguiseProperty.InputHandles;
-import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
-import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
-import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
+import xyz.nifeather.morph.misc.disguiseProperty.*;
 
 import java.util.Arrays;
-import java.util.Map;
 
 public class SheepProperties extends BaseLivingEntityProperties<Sheep>
 {
-    public final SingleProperty<DyeColor> DYE_COLOR = getSingle(PropertyNames.SHEEP_COLOR, DyeColor.getByWoolData((byte)15), InputHandles::readDyeColor);
+    public final SingleProperty<DyeColor> DYE_COLOR = createProperty(PropertyNames.SHEEP_COLOR, DyeColor.getByWoolData((byte)15), InputHandles::readDyeColor, OutputHandles::writeEnum);
 
     public SheepProperties()
     {
@@ -41,10 +37,4 @@ public class SheepProperties extends BaseLivingEntityProperties<Sheep>
     {
     }
 
-    @Override
-    protected void appendNetworkMap(PropertyHandler propertyHandler, Map<String, String> map)
-    {
-        super.appendNetworkMap(propertyHandler, map);
-        map.put(DYE_COLOR.id(), propertyHandler.get(DYE_COLOR).name().toLowerCase());
-    }
 }

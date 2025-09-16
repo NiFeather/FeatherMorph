@@ -4,16 +4,11 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Guardian;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.nifeather.morph.misc.disguiseProperty.InputHandles;
-import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
-import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
-import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
-
-import java.util.Map;
+import xyz.nifeather.morph.misc.disguiseProperty.*;
 
 public class GuardianProperties extends BaseLivingEntityProperties<Guardian>
 {
-    public final SingleProperty<Integer> ATTACK_TARGET = SingleProperty.of(PropertyNames.GUARDIAN_ATTACK_TARGET, -1, InputHandles::reservedException, true);
+    public final SingleProperty<Integer> ATTACK_TARGET = SingleProperty.of(PropertyNames.GUARDIAN_ATTACK_TARGET, -1, InputHandles::reservedException, OutputHandles::writeInteger, true);
 
     public GuardianProperties()
     {
@@ -36,11 +31,4 @@ public class GuardianProperties extends BaseLivingEntityProperties<Guardian>
     {
     }
 
-    @Override
-    protected void appendNetworkMap(PropertyHandler propertyHandler, Map<String, String> map)
-    {
-        super.appendNetworkMap(propertyHandler, map);
-
-        map.put(ATTACK_TARGET.id(), propertyHandler.getOptional(ATTACK_TARGET).orElse(0) + "");
-    }
 }

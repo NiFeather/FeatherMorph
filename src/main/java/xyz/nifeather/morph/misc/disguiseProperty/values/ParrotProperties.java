@@ -22,7 +22,7 @@ public class ParrotProperties extends BaseLivingEntityProperties<Parrot>
             variantMap.put(variant.name().toLowerCase(), variant);
     }
 
-    public final SingleProperty<Parrot.Variant> VARIANT = getSingle(PropertyNames.PARROT_VARIANT, Variant.RED, this::readVariant)
+    public final SingleProperty<Parrot.Variant> VARIANT = createProperty(PropertyNames.PARROT_VARIANT, Variant.RED, this::readVariant, OutputHandles::writeEnum)
             .withRandom(Variant.values());
 
     private Optional<Variant> readVariant(String propertyName, String string) throws ParseErrorException
@@ -56,10 +56,4 @@ public class ParrotProperties extends BaseLivingEntityProperties<Parrot>
         propertyHandler.set(VARIANT, DisguiseUtils.pick(VARIANT.getRandomValues()));
     }
 
-    @Override
-    protected void appendNetworkMap(PropertyHandler propertyHandler, Map<String, String> map)
-    {
-        super.appendNetworkMap(propertyHandler, map);
-        map.put(VARIANT.id(), propertyHandler.get(VARIANT).name().toLowerCase());
-    }
 }

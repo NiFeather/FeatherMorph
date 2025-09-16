@@ -27,15 +27,15 @@ public class CatProperties extends BaseLivingEntityProperties<Cat>
             variantMap.put(variant.key().asString(), variant);
     }
 
-    public final SingleProperty<Cat.Type> CAT_VARIANT = getSingle(PropertyNames.CAT_VARIANT, Cat.Type.TABBY, this::readCatVariant);
+    public final SingleProperty<Cat.Type> CAT_VARIANT = createProperty(PropertyNames.CAT_VARIANT, Cat.Type.TABBY, this::readCatVariant, OutputHandles::writeKeyed);
 
     private Optional<Cat.Type> readCatVariant(String propertyName, String string) throws ParseErrorException
     {
         return InputHandles.readRegistry(RegistryKey.CAT_VARIANT, propertyName, string);
     }
 
-    public final SingleProperty<UUID> OWNER = getSingle(PropertyNames.CAT_OWNER, Uuids.NIL_UUID, InputHandles::readUUID);
-    public final SingleProperty<DyeColor> COLLAR_COLOR = getSingle(PropertyNames.CAT_COLLAR_COLOR, DyeColor.RED, InputHandles::readDyeColor);
+    public final SingleProperty<UUID> OWNER = createProperty(PropertyNames.CAT_OWNER, Uuids.NIL_UUID, InputHandles::readUUID, OutputHandles::writeUUID);
+    public final SingleProperty<DyeColor> COLLAR_COLOR = createProperty(PropertyNames.CAT_COLLAR_COLOR, DyeColor.RED, InputHandles::readDyeColor, OutputHandles::writeEnum);
 
     public CatProperties()
     {
@@ -71,10 +71,4 @@ public class CatProperties extends BaseLivingEntityProperties<Cat>
         propertyHandler.set(CAT_VARIANT, DisguiseUtils.pick(CAT_VARIANT.getRandomValues()));
     }
 
-    @Override
-    protected void appendNetworkMap(PropertyHandler propertyHandler, Map<String, String> map)
-    {
-        super.appendNetworkMap(propertyHandler, map);
-        map.put(CAT_VARIANT.id(), propertyHandler.get(CAT_VARIANT).key().asString());
-    }
 }

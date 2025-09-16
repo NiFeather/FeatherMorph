@@ -1055,28 +1055,27 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         var propertyHandler = newState.disguisePropertyHandler();
         var properties = propertyHandler.bindingProperties();
 
-        //todo: This is bad!, however, we need to change the existing properties framework in order to implement partial sync... :(
         if (properties != null)
         {
-            var partialSyncHandler = new PropertyHandler();
-            partialSyncHandler.initProperties(properties);
-            partialSyncHandler.hookOnPropertyWrite((p, v) ->
-            {
-                if (!player.isOnline()) return;
-
-                // fix command not sending when player rejoins
-                Player pl = player.isConnected() ? player : Bukkit.getPlayer(player.getUniqueId());
-                clientHandler.sendCommand(pl, new S2CUpdatePropertiesCommand(partialSyncHandler.toNetworkProperties()));
-            });
-
             propertyHandler.hookOnPropertyWrite((property, value) ->
             {
                 if (newState.disposed()) return;
 
                 if (!properties.equals(propertyHandler.bindingProperties())) return;
 
-                partialSyncHandler.clearProperties();
-                partialSyncHandler.set((SingleProperty<Object>) property, value);
+                Player pl = player.isConnected() ? player : Bukkit.getPlayer(player.getUniqueId());
+                Map<String ,String> diffMap = new ConcurrentHashMap<>();
+                try
+                {
+                    diffMap.put(property.id(), property.forValue(value));
+                }
+                catch (ParseErrorException e)
+                {
+                    logger.error("Can't generate output from value", e);
+                    return;
+                }
+
+                clientHandler.sendCommand(pl, new S2CUpdatePropertiesCommand(diffMap));
             });
         }
 

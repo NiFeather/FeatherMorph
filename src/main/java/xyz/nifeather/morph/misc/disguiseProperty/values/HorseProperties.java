@@ -25,7 +25,7 @@ public class HorseProperties extends BaseLivingEntityProperties<Horse>
             styleMap.put(style.name().toLowerCase(), style);
     }
 
-    public final SingleProperty<Horse.Color> COLOR = getSingle(PropertyNames.HORSE_COLOR, Horse.Color.WHITE, this::readHorseColor)
+    public final SingleProperty<Horse.Color> COLOR = createProperty(PropertyNames.HORSE_COLOR, Horse.Color.WHITE, this::readHorseColor, OutputHandles::writeEnum)
             .withRandom(Horse.Color.values());
 
     private Optional<Horse.Color> readHorseColor(String propertyName, String string) throws ParseErrorException
@@ -33,7 +33,7 @@ public class HorseProperties extends BaseLivingEntityProperties<Horse>
         return InputHandles.readEnumNonNull(Horse.Color.values(), propertyName, string);
     }
 
-    public final SingleProperty<Horse.Style> STYLE = getSingle(PropertyNames.HORSE_STYLE, Horse.Style.NONE, this::readHorseStyle)
+    public final SingleProperty<Horse.Style> STYLE = createProperty(PropertyNames.HORSE_STYLE, Horse.Style.NONE, this::readHorseStyle, OutputHandles::writeEnum)
             .withRandom(Horse.Style.values());
 
     private Optional<Horse.Style> readHorseStyle(String propertyName, String string) throws ParseErrorException
@@ -71,11 +71,4 @@ public class HorseProperties extends BaseLivingEntityProperties<Horse>
         propertyHandler.set(STYLE, DisguiseUtils.pick(STYLE.getRandomValues()));
     }
 
-    @Override
-    protected void appendNetworkMap(PropertyHandler propertyHandler, Map<String, String> map)
-    {
-        super.appendNetworkMap(propertyHandler, map);
-        map.put(COLOR.id(), propertyHandler.get(COLOR).name().toLowerCase());
-        map.put(STYLE.id(), propertyHandler.get(STYLE).name().toLowerCase());
-    }
 }

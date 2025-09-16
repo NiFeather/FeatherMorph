@@ -25,13 +25,13 @@ public class VillagerProperties extends BaseLivingEntityProperties<Villager>
             professionMap.put(profession.key().asString(), profession);
     }
 
-    public final SingleProperty<Villager.Type> TYPE = getSingle(PropertyNames.VILLAGER_TYPE, Villager.Type.PLAINS, InputHandles::readVillagerType)
+    public final SingleProperty<Villager.Type> TYPE = createProperty(PropertyNames.VILLAGER_TYPE, Villager.Type.PLAINS, InputHandles::readVillagerType, OutputHandles::writeKeyed)
             .withRandom(Registry.VILLAGER_TYPE.stream().toList());
 
-    public final SingleProperty<Villager.Profession> PROFESSION = getSingle(PropertyNames.VILLAGER_PROFESSION, Villager.Profession.NONE, InputHandles::readVillagerProfession)
+    public final SingleProperty<Villager.Profession> PROFESSION = createProperty(PropertyNames.VILLAGER_PROFESSION, Villager.Profession.NONE, InputHandles::readVillagerProfession, OutputHandles::writeKeyed)
             .withRandom(Registry.VILLAGER_PROFESSION.stream().toList());
 
-    public final SingleProperty<Integer> LEVEL = getSingle(PropertyNames.VILLAGER_LEVEL, 1, InputHandles::readVillagerLevel)
+    public final SingleProperty<Integer> LEVEL = createProperty(PropertyNames.VILLAGER_LEVEL, 1, InputHandles::readVillagerLevel, OutputHandles::writeInteger)
             .withRandom(1, 2, 3, 4, 5, 6);
 
     public VillagerProperties()
@@ -66,12 +66,4 @@ public class VillagerProperties extends BaseLivingEntityProperties<Villager>
         propertyHandler.set(LEVEL, DisguiseUtils.pick(LEVEL.getRandomValues()));
     }
 
-    @Override
-    protected void appendNetworkMap(PropertyHandler propertyHandler, Map<String, String> map)
-    {
-        super.appendNetworkMap(propertyHandler, map);
-        map.put(TYPE.id(), propertyHandler.get(TYPE).key().asString());
-        map.put(PROFESSION.id(), propertyHandler.get(PROFESSION).key().asString());
-        map.put(LEVEL.id(), propertyHandler.get(LEVEL) + "");
-    }
 }

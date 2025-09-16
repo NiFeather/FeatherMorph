@@ -8,10 +8,7 @@ import org.slf4j.Logger;
 import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.api.FeatherMorphAPI;
 import xyz.nifeather.morph.misc.DisguiseState;
-import xyz.nifeather.morph.misc.disguiseProperty.InputHandle;
-import xyz.nifeather.morph.misc.disguiseProperty.ParseErrorException;
-import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
-import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
+import xyz.nifeather.morph.misc.disguiseProperty.*;
 
 import java.util.List;
 import java.util.Map;
@@ -20,12 +17,12 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class AbstractProperties<E extends Entity>
 {
-    protected <X> SingleProperty<X> getSingle(String name, X val, InputHandle<X> inputHandle)
+    protected <X> SingleProperty<X> createProperty(String name, X val, InputHandle<X> inputHandle, OutputHandle<X> outputHandle)
     {
         if (val == null)
             throw new IllegalArgumentException("May not pass a null value to getSingle()");
 
-        return SingleProperty.of(name, val, inputHandle);
+        return SingleProperty.of(name, val, inputHandle, outputHandle);
     }
 
     protected final Logger logger = FeatherMorphMain.getInstance().getSLF4JLogger();
@@ -121,13 +118,27 @@ public abstract class AbstractProperties<E extends Entity>
         theirHandler.copyTo(ourHandler);
     }
 
+    //todo: We might not want ParseErrorException to be caught here
     public final Map<String, String> mapToNetworkProperties(PropertyHandler propertyHandler)
     {
         var map = new ConcurrentHashMap<String, String>();
-        this.appendNetworkMap(propertyHandler, map);
+
+        try
+        {
+            for (SingleProperty<?> p : values.values())
+            {
+                SingleProperty<Object> property = (SingleProperty<Object>) p;
+
+                var optional = propertyHandler.getOptional(property);
+                if (optional.isPresent())
+                    map.put(property.id(), property.forValue(optional.get()));
+            }
+        }
+        catch (ParseErrorException e)
+        {
+            logger.error("Failed writing values", e);
+        }
 
         return map;
     }
-
-    protected abstract void appendNetworkMap(PropertyHandler propertyHandler, Map<String, String> map);
 }

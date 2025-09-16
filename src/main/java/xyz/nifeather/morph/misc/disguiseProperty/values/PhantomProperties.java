@@ -6,12 +6,11 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.misc.disguiseProperty.*;
 
-import java.util.Map;
 import java.util.Optional;
 
 public class PhantomProperties extends BaseLivingEntityProperties<Phantom>
 {
-    public final SingleProperty<Integer> SIZE = getSingle(PropertyNames.PHANTOM_SIZE, 1, this::readPhantomSize);
+    public final SingleProperty<Integer> SIZE = createProperty(PropertyNames.PHANTOM_SIZE, 1, this::readPhantomSize, OutputHandles::writeInteger);
 
     private Optional<Integer> readPhantomSize(String propertyName, String string) throws ParseErrorException
     {
@@ -46,10 +45,4 @@ public class PhantomProperties extends BaseLivingEntityProperties<Phantom>
     {
     }
 
-    @Override
-    protected void appendNetworkMap(PropertyHandler propertyHandler, Map<String, String> map)
-    {
-        super.appendNetworkMap(propertyHandler, map);
-        map.put(SIZE.id(), propertyHandler.get(SIZE).toString());
-    }
 }

@@ -10,16 +10,15 @@ import xyz.nifeather.morph.utilities.DisguiseUtils;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 public class TropicalFishProperties extends BaseLivingEntityProperties<TropicalFish>
 {
-    public final SingleProperty<DyeColor> BODY_COLOR = getSingle(PropertyNames.TROPICAL_FISH_BODY_COLOR, DyeColor.GREEN, InputHandles::readDyeColor)
+    public final SingleProperty<DyeColor> BODY_COLOR = createProperty(PropertyNames.TROPICAL_FISH_BODY_COLOR, DyeColor.GREEN, InputHandles::readDyeColor, OutputHandles::writeEnum)
             .withRandom(DyeColor.values());
-    public final SingleProperty<DyeColor> PATTERN_COLOR = getSingle(PropertyNames.TROPICAL_FISH_PATTERN_COLOR, DyeColor.BLACK, InputHandles::readDyeColor)
+    public final SingleProperty<DyeColor> PATTERN_COLOR = createProperty(PropertyNames.TROPICAL_FISH_PATTERN_COLOR, DyeColor.BLACK, InputHandles::readDyeColor, OutputHandles::writeEnum)
             .withRandom(DyeColor.values());
-    public final SingleProperty<TropicalFish.Pattern> PATTERN = getSingle(PropertyNames.TROPICAL_FISH_PATTERN, TropicalFish.Pattern.BLOCKFISH, this::readPattern)
+    public final SingleProperty<TropicalFish.Pattern> PATTERN = createProperty(PropertyNames.TROPICAL_FISH_PATTERN, TropicalFish.Pattern.BLOCKFISH, this::readPattern, OutputHandles::writeEnum)
             .withRandom(TropicalFish.Pattern.values());
 
     private Optional<TropicalFish.Pattern> readPattern(String propertyName, String string) throws ParseErrorException
@@ -70,13 +69,4 @@ public class TropicalFishProperties extends BaseLivingEntityProperties<TropicalF
         propertyHandler.set(PATTERN, pattern);
     }
 
-    @Override
-    protected void appendNetworkMap(PropertyHandler propertyHandler, Map<String, String> map)
-    {
-        super.appendNetworkMap(propertyHandler, map);
-
-        map.put(BODY_COLOR.id(), propertyHandler.get(BODY_COLOR).name().toLowerCase());
-        map.put(PATTERN_COLOR.id(), propertyHandler.get(PATTERN_COLOR).name().toLowerCase());
-        map.put(PATTERN.id(), propertyHandler.get(PATTERN).name().toLowerCase());
-    }
 }

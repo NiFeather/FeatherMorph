@@ -7,12 +7,11 @@ import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.misc.disguiseProperty.*;
 import xyz.nifeather.morph.utilities.DisguiseUtils;
 
-import java.util.Map;
 import java.util.Optional;
 
 public class FoxProperties extends BaseLivingEntityProperties<Fox>
 {
-    public final SingleProperty<Fox.Type> VARIANT = getSingle(PropertyNames.FOX_VARIANT, Fox.Type.RED, this::readFoxType)
+    public final SingleProperty<Fox.Type> VARIANT = createProperty(PropertyNames.FOX_VARIANT, Fox.Type.RED, this::readFoxType, OutputHandles::writeEnum)
             .withRandom(Fox.Type.values())
             .withValidInput("red", "snow");
 
@@ -44,10 +43,4 @@ public class FoxProperties extends BaseLivingEntityProperties<Fox>
         propertyHandler.set(VARIANT, DisguiseUtils.pick(VARIANT.getRandomValues()));
     }
 
-    @Override
-    protected void appendNetworkMap(PropertyHandler propertyHandler, Map<String, String> map)
-    {
-        super.appendNetworkMap(propertyHandler, map);
-        map.put(VARIANT.id(), propertyHandler.get(VARIANT).name().toLowerCase());
-    }
 }

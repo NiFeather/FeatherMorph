@@ -10,7 +10,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.function.Function;
 
 public class SingleProperty<T>
 {
@@ -18,6 +17,7 @@ public class SingleProperty<T>
     private final T defaultVal;
     private final Class<T> type;
     private final InputHandle<T> inputHandle;
+    private final OutputHandle<T> outputHandle;
     private final boolean hideFromUserInput;
 
     public String id()
@@ -45,22 +45,32 @@ public class SingleProperty<T>
         return inputHandle.handle(this.id(), input);
     }
 
+    @NotNull
+    public String forValue(T value) throws ParseErrorException
+    {
+        return outputHandle.handle(this.id(), value);
+    }
+
     @Deprecated
     public SingleProperty(String identifier, T defaultValue, Class<T> type)
     {
-        this(identifier, defaultValue, type, null, false);
+        this(identifier, defaultValue, type, null, null, false);
     }
 
     public SingleProperty(String identifier, T defaultValue, Class<T> type,
-                          @Nullable InputHandle<T> inputHandle, boolean hideFromUserInput)
+                          @Nullable InputHandle<T> inputHandle, @Nullable OutputHandle<T> outputHandle, boolean hideFromUserInput)
     {
         if (inputHandle == null)
             inputHandle = InputHandles::immediateException;
+
+        if (outputHandle == null)
+            outputHandle = OutputHandles::immediateException;
 
         this.identifier = identifier;
         this.defaultVal = defaultValue;
         this.type = type;
         this.inputHandle = inputHandle;
+        this.outputHandle = outputHandle;
         this.hideFromUserInput = hideFromUserInput;
     }
 
@@ -120,13 +130,13 @@ public class SingleProperty<T>
         return new SingleProperty<>(id, val, (Class<T>) val.getClass());
     }
 
-    public static <T> SingleProperty<T> of(String id, T val, InputHandle<T> inputHandle)
+    public static <T> SingleProperty<T> of(String id, T val, InputHandle<T> inputHandle, OutputHandle<T> outputHandle)
     {
-        return new SingleProperty<>(id, val, (Class<T>) val.getClass(), inputHandle, false);
+        return new SingleProperty<>(id, val, (Class<T>) val.getClass(), inputHandle, outputHandle, false);
     }
 
-    public static <T> SingleProperty<T> of(String id, T val, InputHandle<T> inputHandle, boolean hideFromUserInput)
+    public static <T> SingleProperty<T> of(String id, T val, InputHandle<T> inputHandle, OutputHandle<T> outputHandle, boolean hideFromUserInput)
     {
-        return new SingleProperty<>(id, val, (Class<T>) val.getClass(), inputHandle, hideFromUserInput);
+        return new SingleProperty<>(id, val, (Class<T>) val.getClass(), inputHandle, outputHandle, hideFromUserInput);
     }
 }

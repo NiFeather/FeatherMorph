@@ -3,38 +3,31 @@ package xyz.nifeather.morph.misc.disguiseProperty.values;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import io.papermc.paper.math.Rotations;
-import it.unimi.dsi.fastutil.Pair;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Bindables.Bindable;
-import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.api.FeatherMorphAPI;
 import xyz.nifeather.morph.config.ConfigOption;
 import xyz.nifeather.morph.config.MorphConfigManager;
-import xyz.nifeather.morph.misc.disguiseProperty.InputHandles;
-import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
-import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
-import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
-
-import java.util.Map;
+import xyz.nifeather.morph.misc.disguiseProperty.*;
 
 public class ArmorStandProperties extends BaseLivingEntityProperties<ArmorStand>
 {
-    public final SingleProperty<Boolean> SHOW_ARMS = getSingle(PropertyNames.ARMOR_STAND_SHOW_ARMS, false, InputHandles::readBooleanRelaxed)
+    public final SingleProperty<Boolean> SHOW_ARMS = createProperty(PropertyNames.ARMOR_STAND_SHOW_ARMS, false, InputHandles::readBooleanRelaxed, OutputHandles::writeBoolean)
             .withValidInput("true", "false");
-    public final SingleProperty<Boolean> HAS_BASE_PLATE = getSingle(PropertyNames.ARMOR_STAND_HAS_BASE_PLATE, true, InputHandles::readBooleanRelaxed)
+    public final SingleProperty<Boolean> HAS_BASE_PLATE = createProperty(PropertyNames.ARMOR_STAND_HAS_BASE_PLATE, true, InputHandles::readBooleanRelaxed, OutputHandles::writeBoolean)
             .withValidInput("true", "false");
-    public final SingleProperty<Boolean> SMALL = getSingle(PropertyNames.ARMOR_STAND_SMALL, false, InputHandles::readBooleanRelaxed)
+    public final SingleProperty<Boolean> SMALL = createProperty(PropertyNames.ARMOR_STAND_SMALL, false, InputHandles::readBooleanRelaxed, OutputHandles::writeBoolean)
             .withValidInput("true", "false");
 
-    public final SingleProperty<Rotations> HEAD_ROTATION = getSingle(PropertyNames.ARMOR_STAND_HEAD_ROTATION, Rotations.ZERO, InputHandles::readRotations);
-    public final SingleProperty<Rotations> BODY_ROTATION = getSingle(PropertyNames.ARMOR_STAND_BODY_ROTATION, Rotations.ZERO, InputHandles::readRotations);
-    public final SingleProperty<Rotations> RIGHT_ARM_ROTATION = getSingle(PropertyNames.ARMOR_STAND_RIGHT_ARM_ROTATION, Rotations.ZERO, InputHandles::readRotations);
-    public final SingleProperty<Rotations> LEFT_ARM_ROTATION = getSingle(PropertyNames.ARMOR_STAND_LEFT_ARM_ROTATION, Rotations.ZERO, InputHandles::readRotations);
-    public final SingleProperty<Rotations> RIGHT_LEG_ROTATION = getSingle(PropertyNames.ARMOR_STAND_RIGHT_LEG_ROTATION, Rotations.ZERO, InputHandles::readRotations);
-    public final SingleProperty<Rotations> LEFT_LEG_ROTATION = getSingle(PropertyNames.ARMOR_STAND_LEFT_LEG_ROTATION, Rotations.ZERO, InputHandles::readRotations);
+    public final SingleProperty<Rotations> HEAD_ROTATION = createProperty(PropertyNames.ARMOR_STAND_HEAD_ROTATION, Rotations.ZERO, InputHandles::readRotations, OutputHandles::writeRotations);
+    public final SingleProperty<Rotations> BODY_ROTATION = createProperty(PropertyNames.ARMOR_STAND_BODY_ROTATION, Rotations.ZERO, InputHandles::readRotations, OutputHandles::writeRotations);
+    public final SingleProperty<Rotations> RIGHT_ARM_ROTATION = createProperty(PropertyNames.ARMOR_STAND_RIGHT_ARM_ROTATION, Rotations.ZERO, InputHandles::readRotations, OutputHandles::writeRotations);
+    public final SingleProperty<Rotations> LEFT_ARM_ROTATION = createProperty(PropertyNames.ARMOR_STAND_LEFT_ARM_ROTATION, Rotations.ZERO, InputHandles::readRotations, OutputHandles::writeRotations);
+    public final SingleProperty<Rotations> RIGHT_LEG_ROTATION = createProperty(PropertyNames.ARMOR_STAND_RIGHT_LEG_ROTATION, Rotations.ZERO, InputHandles::readRotations, OutputHandles::writeRotations);
+    public final SingleProperty<Rotations> LEFT_LEG_ROTATION = createProperty(PropertyNames.ARMOR_STAND_LEFT_LEG_ROTATION, Rotations.ZERO, InputHandles::readRotations, OutputHandles::writeRotations);
 
     @Nullable
     private volatile MorphConfigManager config;
@@ -100,20 +93,4 @@ public class ArmorStandProperties extends BaseLivingEntityProperties<ArmorStand>
         return gson.toJson(array);
     }
 
-    @Override
-    protected void appendNetworkMap(PropertyHandler propertyHandler, Map<String, String> map)
-    {
-        map.put(SHOW_ARMS.id(), propertyHandler.get(SHOW_ARMS).toString().toLowerCase());
-        map.put(HAS_BASE_PLATE.id(), propertyHandler.get(HAS_BASE_PLATE).toString().toLowerCase());
-        map.put(SMALL.id(), propertyHandler.get(SMALL).toString().toLowerCase());
-
-        propertyHandler.getOptional(HEAD_ROTATION).ifPresent(v -> map.put(HEAD_ROTATION.id(), rotationToStringArray(v)));
-        propertyHandler.getOptional(BODY_ROTATION).ifPresent(v -> map.put(BODY_ROTATION.id(), rotationToStringArray(v)));
-        propertyHandler.getOptional(LEFT_ARM_ROTATION).ifPresent(v -> map.put(LEFT_ARM_ROTATION.id(), rotationToStringArray(v)));
-        propertyHandler.getOptional(RIGHT_ARM_ROTATION).ifPresent(v -> map.put(RIGHT_ARM_ROTATION.id(), rotationToStringArray(v)));
-        propertyHandler.getOptional(LEFT_LEG_ROTATION).ifPresent(v -> map.put(LEFT_LEG_ROTATION.id(), rotationToStringArray(v)));
-        propertyHandler.getOptional(RIGHT_LEG_ROTATION).ifPresent(v -> map.put(RIGHT_LEG_ROTATION.id(), rotationToStringArray(v)));
-
-        super.appendNetworkMap(propertyHandler, map);
-    }
 }

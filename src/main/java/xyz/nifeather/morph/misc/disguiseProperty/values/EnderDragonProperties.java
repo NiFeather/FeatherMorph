@@ -6,12 +6,11 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.misc.disguiseProperty.*;
 
-import java.util.Map;
 import java.util.Optional;
 
 public class EnderDragonProperties extends BaseLivingEntityProperties<EnderDragon>
 {
-    public final SingleProperty<Integer> DRAGON_PHASE = getSingle(PropertyNames.ENDER_DRAGON_DRAGON_PHASE, 10, this::readDragonPhase);
+    public final SingleProperty<Integer> DRAGON_PHASE = createProperty(PropertyNames.ENDER_DRAGON_DRAGON_PHASE, 10, this::readDragonPhase, OutputHandles::writeInteger);
 
     private Optional<Integer> readDragonPhase(String propertyName, String str) throws ParseErrorException
     {
@@ -45,10 +44,4 @@ public class EnderDragonProperties extends BaseLivingEntityProperties<EnderDrago
     {
     }
 
-    @Override
-    protected void appendNetworkMap(PropertyHandler propertyHandler, Map<String, String> map)
-    {
-        super.appendNetworkMap(propertyHandler, map);
-        map.put(DRAGON_PHASE.id(), propertyHandler.get(DRAGON_PHASE) + "");
-    }
 }

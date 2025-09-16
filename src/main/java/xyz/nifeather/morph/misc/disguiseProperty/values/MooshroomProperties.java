@@ -7,12 +7,11 @@ import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.misc.disguiseProperty.*;
 import xyz.nifeather.morph.utilities.DisguiseUtils;
 
-import java.util.Map;
 import java.util.Optional;
 
 public class MooshroomProperties extends BaseLivingEntityProperties<MushroomCow>
 {
-    public final SingleProperty<MushroomCow.Variant> VARIANT = getSingle(PropertyNames.MOOSHROOM_VARIANT, MushroomCow.Variant.RED, this::readVariant)
+    public final SingleProperty<MushroomCow.Variant> VARIANT = createProperty(PropertyNames.MOOSHROOM_VARIANT, MushroomCow.Variant.RED, this::readVariant, OutputHandles::writeEnum)
             .withRandom(MushroomCow.Variant.RED, MushroomCow.Variant.RED, MushroomCow.Variant.RED, MushroomCow.Variant.BROWN)
             .withValidInput("red", "brown");
 
@@ -44,10 +43,4 @@ public class MooshroomProperties extends BaseLivingEntityProperties<MushroomCow>
         propertyHandler.set(VARIANT, DisguiseUtils.pick(VARIANT.getRandomValues()));
     }
 
-    @Override
-    protected void appendNetworkMap(PropertyHandler propertyHandler, Map<String, String> map)
-    {
-        super.appendNetworkMap(propertyHandler, map);
-        map.put(VARIANT.id(), propertyHandler.get(VARIANT).name().toLowerCase());
-    }
 }

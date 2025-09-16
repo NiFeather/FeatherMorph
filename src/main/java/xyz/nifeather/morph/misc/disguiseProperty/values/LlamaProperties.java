@@ -22,7 +22,7 @@ public class LlamaProperties extends BaseLivingEntityProperties<Llama>
             colorMap.put(value.name().toLowerCase(), value);
     }
 
-    public final SingleProperty<Llama.Color> COLOR = getSingle(PropertyNames.LLAMA_COLOR, Color.CREAMY, this::readLlamaColor)
+    public final SingleProperty<Llama.Color> COLOR = createProperty(PropertyNames.LLAMA_COLOR, Color.CREAMY, this::readLlamaColor, OutputHandles::writeEnum)
             .withRandom(Color.values());
 
     private Optional<Color> readLlamaColor(String propertyName, String string) throws ParseErrorException
@@ -56,10 +56,4 @@ public class LlamaProperties extends BaseLivingEntityProperties<Llama>
         propertyHandler.set(COLOR, DisguiseUtils.pick(COLOR.getRandomValues()));
     }
 
-    @Override
-    protected void appendNetworkMap(PropertyHandler propertyHandler, Map<String, String> map)
-    {
-        super.appendNetworkMap(propertyHandler, map);
-        map.put(COLOR.id(), propertyHandler.get(COLOR).name().toLowerCase());
-    }
 }

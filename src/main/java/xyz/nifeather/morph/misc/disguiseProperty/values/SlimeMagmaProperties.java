@@ -6,13 +6,12 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.misc.disguiseProperty.*;
 
-import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class SlimeMagmaProperties extends BaseLivingEntityProperties<Slime>
 {
-    public final SingleProperty<Integer> SIZE = getSingle(PropertyNames.SLIME_MAGMA_SIZE, 1, this::readSize);
+    public final SingleProperty<Integer> SIZE = createProperty(PropertyNames.SLIME_MAGMA_SIZE, 1, this::readSize, OutputHandles::writeInteger);
 
     private Optional<Integer> readSize(String propertyName, String string) throws ParseErrorException
     {
@@ -48,10 +47,4 @@ public class SlimeMagmaProperties extends BaseLivingEntityProperties<Slime>
         propertyHandler.set(SIZE, ThreadLocalRandom.current().nextInt(0, 4));
     }
 
-    @Override
-    protected void appendNetworkMap(PropertyHandler propertyHandler, Map<String, String> map)
-    {
-        super.appendNetworkMap(propertyHandler, map);
-        map.put(SIZE.id(), propertyHandler.getOr(SIZE, 1).toString());
-    }
 }

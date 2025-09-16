@@ -4,16 +4,11 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Zoglin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.nifeather.morph.misc.disguiseProperty.InputHandles;
-import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
-import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
-import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
-
-import java.util.Map;
+import xyz.nifeather.morph.misc.disguiseProperty.*;
 
 public class ZoglinProperties extends BaseLivingEntityProperties<Zoglin>
 {
-    public final SingleProperty<Boolean> IS_BABY = getSingle(PropertyNames.ZOGLIN_IS_BABY, false, InputHandles::readBooleanRelaxed)
+    public final SingleProperty<Boolean> IS_BABY = createProperty(PropertyNames.ZOGLIN_IS_BABY, false, InputHandles::readBooleanRelaxed, OutputHandles::writeBoolean)
             .withValidInput("true", "false");
 
     public ZoglinProperties()
@@ -38,10 +33,4 @@ public class ZoglinProperties extends BaseLivingEntityProperties<Zoglin>
     {
     }
 
-    @Override
-    protected void appendNetworkMap(PropertyHandler propertyHandler, Map<String, String> map)
-    {
-        super.appendNetworkMap(propertyHandler, map);
-        map.put(IS_BABY.id(), propertyHandler.get(IS_BABY).toString().toLowerCase());
-    }
 }

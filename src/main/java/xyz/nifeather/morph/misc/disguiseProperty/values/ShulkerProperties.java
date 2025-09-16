@@ -5,17 +5,13 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Shulker;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.nifeather.morph.misc.disguiseProperty.InputHandles;
-import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
-import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
-import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
+import xyz.nifeather.morph.misc.disguiseProperty.*;
 
 import java.util.Arrays;
-import java.util.Map;
 
 public class ShulkerProperties extends BaseLivingEntityProperties<Shulker>
 {
-    public final SingleProperty<DyeColor> DYE_COLOR = getSingle(PropertyNames.SHULKER_COLOR, DyeColor.getByWoolData((byte)15), InputHandles::readDyeColor);
+    public final SingleProperty<DyeColor> DYE_COLOR = createProperty(PropertyNames.SHULKER_COLOR, DyeColor.getByWoolData((byte)15), InputHandles::readDyeColor, OutputHandles::writeEnum);
 
     public ShulkerProperties()
     {
@@ -41,10 +37,4 @@ public class ShulkerProperties extends BaseLivingEntityProperties<Shulker>
     {
     }
 
-    @Override
-    protected void appendNetworkMap(PropertyHandler propertyHandler, Map<String, String> map)
-    {
-        super.appendNetworkMap(propertyHandler, map);
-        propertyHandler.getOptional(DYE_COLOR).ifPresent(v -> map.put(DYE_COLOR.id(), v.name().toLowerCase()));
-    }
 }

@@ -22,7 +22,7 @@ public class PandaProperties extends BaseLivingEntityProperties<Panda>
             geneMap.put(gene.name().toLowerCase(), gene);
     }
 
-    public final SingleProperty<Panda.Gene> MAIN_GENE = getSingle(PropertyNames.PANDA_MAIN_GENE, Gene.NORMAL, this::readGene)
+    public final SingleProperty<Panda.Gene> MAIN_GENE = createProperty(PropertyNames.PANDA_MAIN_GENE, Gene.NORMAL, this::readGene, OutputHandles::writeEnum)
             .withRandom(Gene.values());
 
     private Optional<Gene> readGene(String propertyName, String string) throws ParseErrorException
@@ -30,7 +30,7 @@ public class PandaProperties extends BaseLivingEntityProperties<Panda>
         return InputHandles.readEnumNonNull(Gene.values(), propertyName, string);
     }
 
-    public final SingleProperty<Panda.Gene> HIDDEN_GENE = getSingle(PropertyNames.PANDA_HIDDEN_GENE, Gene.NORMAL, this::readGene)
+    public final SingleProperty<Panda.Gene> HIDDEN_GENE = createProperty(PropertyNames.PANDA_HIDDEN_GENE, Gene.NORMAL, this::readGene, OutputHandles::writeEnum)
             .withRandom(Gene.values());
 
     public PandaProperties()
@@ -63,11 +63,4 @@ public class PandaProperties extends BaseLivingEntityProperties<Panda>
         propertyHandler.set(HIDDEN_GENE, DisguiseUtils.pick(HIDDEN_GENE.getRandomValues()));
     }
 
-    @Override
-    protected void appendNetworkMap(PropertyHandler propertyHandler, Map<String, String> map)
-    {
-        super.appendNetworkMap(propertyHandler, map);
-        map.put(MAIN_GENE.id(), propertyHandler.get(MAIN_GENE).name().toLowerCase());
-        map.put(HIDDEN_GENE.id(), propertyHandler.get(HIDDEN_GENE).name().toLowerCase());
-    }
 }

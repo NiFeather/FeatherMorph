@@ -23,7 +23,7 @@ public class ChickenProperties extends BaseLivingEntityProperties<Chicken>
             variantMap.put(variant.key().asString(), variant);
     }
 
-    public final SingleProperty<Chicken.Variant> VARIANT = getSingle(PropertyNames.CHICKEN_VARIANT, Chicken.Variant.TEMPERATE, this::readChickenVariant);
+    public final SingleProperty<Chicken.Variant> VARIANT = createProperty(PropertyNames.CHICKEN_VARIANT, Chicken.Variant.TEMPERATE, this::readChickenVariant, OutputHandles::writeKeyed);
 
     private Optional<Chicken.Variant> readChickenVariant(String propertyName, String string) throws ParseErrorException
     {
@@ -59,10 +59,4 @@ public class ChickenProperties extends BaseLivingEntityProperties<Chicken>
         propertyHandler.set(VARIANT, DisguiseUtils.pick(VARIANT.getRandomValues()));
     }
 
-    @Override
-    protected void appendNetworkMap(PropertyHandler propertyHandler, Map<String, String> map)
-    {
-        super.appendNetworkMap(propertyHandler, map);
-        map.put(VARIANT.id(), propertyHandler.get(VARIANT).key().asString());
-    }
 }

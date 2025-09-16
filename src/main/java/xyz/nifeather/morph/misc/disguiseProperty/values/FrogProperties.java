@@ -23,7 +23,7 @@ public class FrogProperties extends BaseLivingEntityProperties<Frog>
             variantMap.put(variant.key().asString(), variant);
     }
 
-    public final SingleProperty<Frog.Variant> VARIANT = getSingle(PropertyNames.FROG_VARIANT, Frog.Variant.TEMPERATE, this::readFrogVariant)
+    public final SingleProperty<Frog.Variant> VARIANT = createProperty(PropertyNames.FROG_VARIANT, Frog.Variant.TEMPERATE, this::readFrogVariant, OutputHandles::writeKeyed)
             .withRandom(Frog.Variant.TEMPERATE, Frog.Variant.COLD, Frog.Variant.WARM);
 
     private Optional<Frog.Variant> readFrogVariant(String propertyName, String string) throws ParseErrorException
@@ -59,10 +59,4 @@ public class FrogProperties extends BaseLivingEntityProperties<Frog>
         propertyHandler.set(VARIANT, DisguiseUtils.pick(VARIANT.getRandomValues()));
     }
 
-    @Override
-    protected void appendNetworkMap(PropertyHandler propertyHandler, Map<String, String> map)
-    {
-        super.appendNetworkMap(propertyHandler, map);
-        map.put(VARIANT.id(), propertyHandler.get(VARIANT).key().asString());
-    }
 }

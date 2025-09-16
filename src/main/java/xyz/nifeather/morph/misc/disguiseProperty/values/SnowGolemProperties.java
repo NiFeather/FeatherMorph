@@ -4,16 +4,11 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Snowman;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.nifeather.morph.misc.disguiseProperty.InputHandles;
-import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
-import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
-import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
-
-import java.util.Map;
+import xyz.nifeather.morph.misc.disguiseProperty.*;
 
 public class SnowGolemProperties extends BaseLivingEntityProperties<Snowman>
 {
-    public final SingleProperty<Boolean> HAS_PUMPKIN = getSingle(PropertyNames.SNOW_GOLEM_HAS_PUMPKIN, true, InputHandles::readBooleanRelaxed)
+    public final SingleProperty<Boolean> HAS_PUMPKIN = createProperty(PropertyNames.SNOW_GOLEM_HAS_PUMPKIN, true, InputHandles::readBooleanRelaxed, OutputHandles::writeBoolean)
             .withValidInput("true", "false");
 
     public SnowGolemProperties()
@@ -38,10 +33,4 @@ public class SnowGolemProperties extends BaseLivingEntityProperties<Snowman>
     {
     }
 
-    @Override
-    protected void appendNetworkMap(PropertyHandler propertyHandler, Map<String, String> map)
-    {
-        super.appendNetworkMap(propertyHandler, map);
-        map.put(HAS_PUMPKIN.id(), propertyHandler.get(HAS_PUMPKIN).toString().toLowerCase());
-    }
 }

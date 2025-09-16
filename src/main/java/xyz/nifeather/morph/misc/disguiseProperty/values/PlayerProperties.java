@@ -9,18 +9,17 @@ import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.messages.ExceptionStrings;
 import xyz.nifeather.morph.misc.disguiseProperty.*;
 
-import java.util.Map;
 import java.util.Optional;
 
 public class PlayerProperties extends BaseLivingEntityProperties<Player>
 {
-    public final SingleProperty<MainHandStatus> MAIN_HAND = getSingle(PropertyNames.PLAYER_MAIN_HAND, MainHandStatus.NOTSET, this::readHand)
+    public final SingleProperty<MainHandStatus> MAIN_HAND = createProperty(PropertyNames.PLAYER_MAIN_HAND, MainHandStatus.NOTSET, this::readHand, OutputHandles::writeEnum)
             .withValidInput("left", "right");
 
     @Override
     protected SingleProperty<Component> createCustomNameProperty()
     {
-        return getSingle(PropertyNames.ENTITY_CUSTOM_NAME, Component.empty(), InputHandles::unsupported);
+        return createProperty(PropertyNames.ENTITY_CUSTOM_NAME, Component.empty(), InputHandles::unsupported, OutputHandles::writeAdventureComponentJSON);
     }
 
     private Optional<MainHandStatus> readHand(String propertyName, String string) throws ParseErrorException
@@ -58,14 +57,6 @@ public class PlayerProperties extends BaseLivingEntityProperties<Player>
     @Override
     protected void setupDefaultProperties(PropertyHandler propertyHandler)
     {
-    }
-
-    @Override
-    protected void appendNetworkMap(PropertyHandler propertyHandler, Map<String, String> map)
-    {
-        super.appendNetworkMap(propertyHandler, map);
-
-        propertyHandler.getOptional(MAIN_HAND).ifPresent(hand -> map.put(MAIN_HAND.id(), hand.name().toLowerCase()));
     }
 
     public enum MainHandStatus

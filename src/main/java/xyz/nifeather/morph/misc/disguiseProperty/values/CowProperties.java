@@ -24,7 +24,7 @@ public class CowProperties extends BaseLivingEntityProperties<Cow>
         for (Cow.Variant variant : RegistryAccess.registryAccess().getRegistry(RegistryKey.COW_VARIANT))
             variantMap.put(variant.key().asString(), variant);
 
-        VARIANT = getSingle(PropertyNames.COW_VARIANT, Cow.Variant.TEMPERATE, this::readCowVariant)
+        VARIANT = createProperty(PropertyNames.COW_VARIANT, Cow.Variant.TEMPERATE, this::readCowVariant, OutputHandles::writeKeyed)
                 .withRandom(variantMap.values())
                 .withValidInput(variantMap.keySet());
 
@@ -54,10 +54,4 @@ public class CowProperties extends BaseLivingEntityProperties<Cow>
         propertyHandler.set(VARIANT, DisguiseUtils.pick(VARIANT.getRandomValues()));
     }
 
-    @Override
-    protected void appendNetworkMap(PropertyHandler propertyHandler, Map<String, String> map)
-    {
-        super.appendNetworkMap(propertyHandler, map);
-        map.put(VARIANT.id(), propertyHandler.get(VARIANT).key().asString());
-    }
 }

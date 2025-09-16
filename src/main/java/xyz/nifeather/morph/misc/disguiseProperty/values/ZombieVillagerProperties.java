@@ -6,10 +6,7 @@ import org.bukkit.entity.Villager;
 import org.bukkit.entity.ZombieVillager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.nifeather.morph.misc.disguiseProperty.InputHandles;
-import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
-import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
-import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
+import xyz.nifeather.morph.misc.disguiseProperty.*;
 import xyz.nifeather.morph.utilities.DisguiseUtils;
 
 import java.util.Map;
@@ -29,16 +26,16 @@ public class ZombieVillagerProperties extends BaseLivingEntityProperties<ZombieV
             professionMap.put(profession.key().asString(), profession);
     }
 
-    public final SingleProperty<Villager.Type> TYPE = getSingle(PropertyNames.ZOMBIE_VILLAGER_TYPE, Villager.Type.PLAINS, InputHandles::readVillagerType)
+    public final SingleProperty<Villager.Type> TYPE = createProperty(PropertyNames.ZOMBIE_VILLAGER_TYPE, Villager.Type.PLAINS, InputHandles::readVillagerType, OutputHandles::writeKeyed)
             .withRandom(Registry.VILLAGER_TYPE.stream().toList());
 
-    public final SingleProperty<Villager.Profession> PROFESSION = getSingle(PropertyNames.ZOMBIE_VILLAGER_PROFESSION, Villager.Profession.NONE, InputHandles::readVillagerProfession)
+    public final SingleProperty<Villager.Profession> PROFESSION = createProperty(PropertyNames.ZOMBIE_VILLAGER_PROFESSION, Villager.Profession.NONE, InputHandles::readVillagerProfession, OutputHandles::writeKeyed)
             .withRandom(Registry.VILLAGER_PROFESSION.stream().toList());
 
-    public final SingleProperty<Integer> LEVEL = getSingle(PropertyNames.ZOMBIE_VILLAGER_LEVEL, 1, InputHandles::readVillagerLevel)
+    public final SingleProperty<Integer> LEVEL = createProperty(PropertyNames.ZOMBIE_VILLAGER_LEVEL, 1, InputHandles::readVillagerLevel, OutputHandles::writeInteger)
             .withRandom(1, 2, 3, 4, 5, 6);
 
-    public final SingleProperty<Boolean> IS_BABY = getSingle(PropertyNames.ZOMBIE_VILLAGER_IS_BABY, false, InputHandles::readBooleanRelaxed);
+    public final SingleProperty<Boolean> IS_BABY = createProperty(PropertyNames.ZOMBIE_VILLAGER_IS_BABY, false, InputHandles::readBooleanRelaxed, OutputHandles::writeBoolean);
 
     public ZombieVillagerProperties()
     {
@@ -69,13 +66,4 @@ public class ZombieVillagerProperties extends BaseLivingEntityProperties<ZombieV
         propertyHandler.set(PROFESSION, DisguiseUtils.pick(PROFESSION.getRandomValues()));
     }
 
-    @Override
-    protected void appendNetworkMap(PropertyHandler propertyHandler, Map<String, String> map)
-    {
-        super.appendNetworkMap(propertyHandler, map);
-
-        map.put(TYPE.id(), propertyHandler.get(TYPE).key().asString());
-        map.put(PROFESSION.id(), propertyHandler.get(PROFESSION).key().asString());
-        map.put(LEVEL.id(), propertyHandler.get(LEVEL).toString());
-    }
 }

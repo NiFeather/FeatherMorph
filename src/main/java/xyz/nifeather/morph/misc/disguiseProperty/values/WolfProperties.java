@@ -28,7 +28,7 @@ public class WolfProperties extends BaseLivingEntityProperties<Wolf>
             variantMap.put(variant.key().asString(), variant);
     }
 
-    public final SingleProperty<Wolf.Variant> VARIANT = getSingle(PropertyNames.WOLF_VARIANT, Variant.PALE, this::readWolfVariant)
+    public final SingleProperty<Wolf.Variant> VARIANT = createProperty(PropertyNames.WOLF_VARIANT, Variant.PALE, this::readWolfVariant, OutputHandles::writeKeyed)
             .withRandom(
                     RegistryAccess.registryAccess().getRegistry(RegistryKey.WOLF_VARIANT).stream().toList()
             );
@@ -38,9 +38,9 @@ public class WolfProperties extends BaseLivingEntityProperties<Wolf>
         return InputHandles.readRegistry(RegistryKey.WOLF_VARIANT, propertyName, string);
     }
 
-    public final SingleProperty<UUID> OWNER = getSingle(PropertyNames.WOLF_OWNER, Uuids.NIL_UUID, InputHandles::readUUID);
+    public final SingleProperty<UUID> OWNER = createProperty(PropertyNames.WOLF_OWNER, Uuids.NIL_UUID, InputHandles::readUUID, OutputHandles::writeUUID);
 
-    public final SingleProperty<DyeColor> COLLAR_COLOR = getSingle(PropertyNames.WOLF_COLLAR_COLOR, DyeColor.RED, InputHandles::readDyeColor);
+    public final SingleProperty<DyeColor> COLLAR_COLOR = createProperty(PropertyNames.WOLF_COLLAR_COLOR, DyeColor.RED, InputHandles::readDyeColor, OutputHandles::writeEnum);
 
     public WolfProperties()
     {
@@ -70,10 +70,4 @@ public class WolfProperties extends BaseLivingEntityProperties<Wolf>
         propertyHandler.set(VARIANT, DisguiseUtils.pick(VARIANT.getRandomValues()));
     }
 
-    @Override
-    protected void appendNetworkMap(PropertyHandler propertyHandler, Map<String, String> map)
-    {
-        super.appendNetworkMap(propertyHandler, map);
-        map.put(VARIANT.id(), propertyHandler.get(VARIANT).key().asString());
-    }
 }

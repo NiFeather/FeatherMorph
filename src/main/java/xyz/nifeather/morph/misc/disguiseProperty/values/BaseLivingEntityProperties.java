@@ -1,26 +1,29 @@
 package xyz.nifeather.morph.misc.disguiseProperty.values;
 
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import xyz.nifeather.morph.messages.ExceptionStrings;
 import xyz.nifeather.morph.misc.disguiseProperty.*;
 
-import java.util.Map;
 import java.util.Optional;
 
 public abstract class BaseLivingEntityProperties<E extends Entity> extends AbstractProperties<E>
 {
     protected SingleProperty<Component> createCustomNameProperty()
     {
-        return getSingle(PropertyNames.ENTITY_CUSTOM_NAME, Component.empty(), this::readCustomName);
+        return createProperty(PropertyNames.ENTITY_CUSTOM_NAME, Component.empty(), this::readCustomNameMiniMessage, OutputHandles::writeAdventureComponentJSON);
     }
+
+    public final SingleProperty<Boolean> CUSTOM_NAME_VISIBLE = createProperty(PropertyNames.ENTITY_CUSTOM_NAME_VISIBLE, false, InputHandles::readBooleanRelaxed, OutputHandles::writeBoolean)
+            .withValidInput("true", "false");
+
+    public final SingleProperty<Integer> STUCKED_ARROWS = createProperty(PropertyNames.ENTITY_ARROW_COUNT, 0, this::readArrows, OutputHandles::writeInteger);
 
     public final SingleProperty<Component> CUSTOM_NAME = createCustomNameProperty();
 
-    private Optional<Component> readCustomName(String propertyName, String string) throws ParseErrorException
+    private Optional<Component> readCustomNameMiniMessage(String propertyName, String string) throws ParseErrorException
     {
         if (string.length() > 256)
         {
@@ -70,11 +73,6 @@ public abstract class BaseLivingEntityProperties<E extends Entity> extends Abstr
             propertyHandler.set(CUSTOM_NAME, entityCustomName);
     }
 
-    public final SingleProperty<Boolean> CUSTOM_NAME_VISIBLE = getSingle(PropertyNames.ENTITY_CUSTOM_NAME_VISIBLE, false, InputHandles::readBooleanRelaxed)
-            .withValidInput("true", "false");
-
-    public final SingleProperty<Integer> STUCKED_ARROWS = getSingle(PropertyNames.ENTITY_ARROW_COUNT, 0, this::readArrows);
-
     private Optional<Integer> readArrows(String propertyName, String string) throws ParseErrorException
     {
         // localizable message not required, since readInteger always return a value or throw ParseErrorException
@@ -94,14 +92,4 @@ public abstract class BaseLivingEntityProperties<E extends Entity> extends Abstr
     private static final Component minimessageFormatFail = Component.text("MiniMessage format error");
     private static final Component minimessageCastFail = Component.text("MiniMessage cast error");
 
-    @Override
-    protected void appendNetworkMap(PropertyHandler propertyHandler, Map<String, String> map)
-    {
-        propertyHandler.getOptional(CUSTOM_NAME).ifPresent(component ->
-                map.put(CUSTOM_NAME.id(), JSONComponentSerializer.json().serialize(component)));
-
-        propertyHandler.getOptional(CUSTOM_NAME_VISIBLE).ifPresent(v -> map.put(CUSTOM_NAME_VISIBLE.id(), v.toString().toLowerCase()));
-
-        propertyHandler.getOptional(STUCKED_ARROWS).ifPresent(v -> map.put(STUCKED_ARROWS.id(), v.toString()));
-    }
 }

@@ -4,16 +4,11 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.HappyGhast;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.nifeather.morph.misc.disguiseProperty.InputHandles;
-import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
-import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
-import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
-
-import java.util.Map;
+import xyz.nifeather.morph.misc.disguiseProperty.*;
 
 public class HappyGhastProperties extends BaseLivingEntityProperties<HappyGhast>
 {
-    public final SingleProperty<Boolean> IS_GHASTLING = getSingle(PropertyNames.HAPPY_GHAST_IS_GHASTLING, false, InputHandles::readBooleanRelaxed)
+    public final SingleProperty<Boolean> IS_GHASTLING = createProperty(PropertyNames.HAPPY_GHAST_IS_GHASTLING, false, InputHandles::readBooleanRelaxed, OutputHandles::writeBoolean)
             .withValidInput("true", "false");
 
     public HappyGhastProperties()
@@ -39,10 +34,4 @@ public class HappyGhastProperties extends BaseLivingEntityProperties<HappyGhast>
         propertyHandler.set(IS_GHASTLING, false);
     }
 
-    @Override
-    protected void appendNetworkMap(PropertyHandler propertyHandler, Map<String, String> map)
-    {
-        super.appendNetworkMap(propertyHandler, map);
-        map.put(IS_GHASTLING.id(), propertyHandler.get(IS_GHASTLING).toString().toLowerCase());
-    }
 }

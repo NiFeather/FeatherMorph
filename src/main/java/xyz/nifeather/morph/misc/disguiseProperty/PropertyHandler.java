@@ -20,9 +20,9 @@ public class PropertyHandler
     private final List<SingleProperty<?>> validProperties = new CopyOnWriteArrayList<>();
 
     protected final BiConsumerActions<SingleProperty<?>, Object> actions = new BiConsumerActions<>();
-    public void hookOnPropertyWrite(BiConsumer<SingleProperty<?>, Object> consumer)
+    public <X> void hookOnPropertyWrite(BiConsumer<SingleProperty<X>, X> consumer)
     {
-        actions.hook(consumer);
+        actions.hook((BiConsumer) consumer);
     }
 
     public Map<String, String> toNetworkProperties()

@@ -24,7 +24,7 @@ public class PigProperties extends BaseLivingEntityProperties<Pig>
         for (Pig.Variant variant : RegistryAccess.registryAccess().getRegistry(RegistryKey.PIG_VARIANT))
             variantMap.put(variant.key().asString(), variant);
 
-        VARIANT = getSingle(PropertyNames.PIG_VARIANT, Pig.Variant.TEMPERATE, this::readVariant)
+        VARIANT = createProperty(PropertyNames.PIG_VARIANT, Pig.Variant.TEMPERATE, this::readVariant, OutputHandles::writeKeyed)
                 .withRandom(Pig.Variant.TEMPERATE, Pig.Variant.COLD, Pig.Variant.WARM)
                 .withValidInput(variantMap.keySet());
 
@@ -54,10 +54,4 @@ public class PigProperties extends BaseLivingEntityProperties<Pig>
         propertyHandler.set(VARIANT, DisguiseUtils.pick(VARIANT.getRandomValues()));
     }
 
-    @Override
-    protected void appendNetworkMap(PropertyHandler propertyHandler, Map<String, String> map)
-    {
-        super.appendNetworkMap(propertyHandler, map);
-        map.put(VARIANT.id(), propertyHandler.get(VARIANT).key().asString());
-    }
 }

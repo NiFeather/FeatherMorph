@@ -4,21 +4,16 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Goat;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.nifeather.morph.misc.disguiseProperty.InputHandles;
-import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
-import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
-import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
+import xyz.nifeather.morph.misc.disguiseProperty.*;
 import xyz.nifeather.morph.utilities.DisguiseUtils;
-
-import java.util.Map;
 
 public class GoatProperties extends BaseLivingEntityProperties<Goat>
 {
-    public final SingleProperty<Boolean> HAS_LEFT_HORN = getSingle(PropertyNames.GOAT_HAS_LEFT_HORN, true, InputHandles::readBooleanRelaxed)
+    public final SingleProperty<Boolean> HAS_LEFT_HORN = createProperty(PropertyNames.GOAT_HAS_LEFT_HORN, true, InputHandles::readBooleanRelaxed, OutputHandles::writeBoolean)
             .withRandom(true, true, true, false)
             .withValidInput("false", "true");
 
-    public final SingleProperty<Boolean> HAS_RIGHT_HORN = getSingle(PropertyNames.GOAT_HAS_RIGHT_HORN, true, InputHandles::readBooleanRelaxed)
+    public final SingleProperty<Boolean> HAS_RIGHT_HORN = createProperty(PropertyNames.GOAT_HAS_RIGHT_HORN, true, InputHandles::readBooleanRelaxed, OutputHandles::writeBoolean)
             .withRandom(true, true, true, false)
             .withValidInput("false", "true");
 
@@ -47,11 +42,4 @@ public class GoatProperties extends BaseLivingEntityProperties<Goat>
         propertyHandler.set(HAS_LEFT_HORN, DisguiseUtils.pick(HAS_LEFT_HORN.getRandomValues()));
     }
 
-    @Override
-    protected void appendNetworkMap(PropertyHandler propertyHandler, Map<String, String> map)
-    {
-        super.appendNetworkMap(propertyHandler, map);
-        map.put(HAS_LEFT_HORN.id(), propertyHandler.get(HAS_LEFT_HORN).toString().toLowerCase());
-        map.put(HAS_RIGHT_HORN.id(), propertyHandler.get(HAS_RIGHT_HORN).toString().toLowerCase());
-    }
 }
