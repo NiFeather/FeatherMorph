@@ -14,7 +14,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 /**
- * This checks for whether the mob's type would panic from the player, while {@link MorphDefaultPanickingPanicFromPlayerGoal} always make the mob panic from the player
+ * This checks for whether the mob's type would panic from the player, while {@link MorphDefaultPanickingAvoidPlayerGoal} always make the mob panic from the player
  */
 public class MorphCommonMobAvoidPlayerGoal extends MorphBasicAvoidPlayerGoal<Mob>
 {

@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.RevealingHandler;
 import xyz.nifeather.morph.misc.mobs.goal.AvoidPlayerGoals;
-import xyz.nifeather.morph.misc.mobs.goal.impl.MorphDefaultPanickingPanicFromPlayerGoal;
+import xyz.nifeather.morph.misc.mobs.goal.impl.MorphDefaultPanickingAvoidPlayerGoal;
 import xyz.nifeather.morph.misc.mobs.goal.impl.MorphNearestAttackableGoal;
 
 import java.util.Collection;
@@ -51,7 +51,7 @@ public class CommonMobHandle extends BasicEntityHandle<Creature>
                                                           double walkSpeed,
                                                           double sprintSpeed)
     {
-        return new MorphDefaultPanickingPanicFromPlayerGoal(mob, revealingHandler, morphManager, detectDistance, walkSpeed, sprintSpeed);
+        return new MorphDefaultPanickingAvoidPlayerGoal(mob, revealingHandler, morphManager, detectDistance, walkSpeed, sprintSpeed);
     }
 
     @Override
