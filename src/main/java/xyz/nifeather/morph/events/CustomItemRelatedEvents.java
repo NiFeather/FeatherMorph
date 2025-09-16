@@ -169,7 +169,6 @@ public class CustomItemRelatedEvents extends MorphPluginObject implements Listen
     public void onConsume(PlayerItemConsumeEvent event)
     {
         var consumedItem = event.getItem();
-        if (!ItemUtils.isMagicItem(consumedItem)) return;
 
         var id = ItemUtils.readMagicItemData(consumedItem);
         if (id == null) return;
@@ -194,6 +193,7 @@ public class CustomItemRelatedEvents extends MorphPluginObject implements Listen
     public final TagKey<@NotNull EntityType> tagMagicBottleCollectable = TagKey.create(RegistryKey.ENTITY_TYPE,
             Objects.requireNonNull(NamespacedKey.fromString("feathermorph:magic_bottle_collectable")));
 
+    // Collect
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void bottleOnPlayerInteractEntity(PlayerInteractEntityEvent event)
     {

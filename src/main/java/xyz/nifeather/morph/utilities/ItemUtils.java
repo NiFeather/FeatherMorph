@@ -138,8 +138,6 @@ public class ItemUtils
     @Nullable
     public static String readMagicItemData(ItemStack stack)
     {
-        if (!isMagicItem(stack)) return null;
-
         var nms = net.minecraft.world.item.ItemStack.fromBukkitCopy(stack);
         var customData = nms.getComponents().get(DataComponents.CUSTOM_DATA);
 
