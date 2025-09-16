@@ -38,6 +38,12 @@ public class MorphPandaAvoidPlayerGoal extends MorphBasicAvoidPlayerGoal<Panda>
         return super.shouldActivate();
     }
 
+    @Override
+    protected boolean mobPanicFromPlayerByDefault()
+    {
+        return true;
+    }
+
     public static final MorphPandaAvoidPlayerGoal.PandaGoalProvider GOAL_PROVIDER = new MorphPandaAvoidPlayerGoal.PandaGoalProvider();
 
     public static class PandaGoalProvider implements IGoalProvider<Panda>

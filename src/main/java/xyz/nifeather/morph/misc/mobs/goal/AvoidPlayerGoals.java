@@ -14,6 +14,7 @@ import xyz.nifeather.morph.misc.mobs.goal.impl.*;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Supplier;
 
 public class AvoidPlayerGoals
 {
@@ -40,15 +41,28 @@ public class AvoidPlayerGoals
 
     @Nullable
     public static <X extends Mob> Goal<@NotNull X> findGoal(X mob,
+                                                            @NotNull MorphManager morphManager,
+                                                            @NotNull RevealingHandler revealingHandler,
+                                                            double detectDistance,
+                                                            double walkSpeed,
+                                                            double sprintSpeed)
+    {
+        IGoalSupplier<Mob> supplier = MorphCommonMobAvoidPlayerGoal.GOAL_PROVIDER;
+        return findGoal(mob, morphManager, revealingHandler, detectDistance, walkSpeed, sprintSpeed, (IGoalSupplier<X>) supplier);
+    }
+
+    @Nullable
+    public static <X extends Mob> Goal<@NotNull X> findGoal(X mob,
                                                    @NotNull MorphManager morphManager,
                                                    @NotNull RevealingHandler revealingHandler,
                                                    double detectDistance,
                                                    double walkSpeed,
-                                                   double sprintSpeed)
+                                                   double sprintSpeed,
+                                                   IGoalSupplier<X> defaultSupplier)
     {
         var matchingProvider = goalProviders.getOrDefault(mob.getType(), null);
         if (matchingProvider == null)
-            matchingProvider = MorphCommonMobAvoidPlayerGoal.GOAL_PROVIDER;
+            return defaultSupplier.createGoal(mob, morphManager, revealingHandler, detectDistance, walkSpeed, sprintSpeed);
 
         IGoalProvider<X> provider = (IGoalProvider<X>) matchingProvider;
 

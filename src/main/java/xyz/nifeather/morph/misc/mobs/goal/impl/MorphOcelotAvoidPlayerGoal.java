@@ -32,6 +32,12 @@ public class MorphOcelotAvoidPlayerGoal extends MorphBasicAvoidPlayerGoal<Ocelot
         return !mob.isTrusting() && super.shouldActivate();
     }
 
+    @Override
+    protected boolean mobPanicFromPlayerByDefault()
+    {
+        return true;
+    }
+
     public static final MorphOcelotAvoidPlayerGoal.OcelotGoalProvider GOAL_PROVIDER = new MorphOcelotAvoidPlayerGoal.OcelotGoalProvider();
 
     public static class OcelotGoalProvider implements IGoalProvider<Ocelot>

@@ -27,6 +27,12 @@ public class MorphCatAvoidPlayerGoal extends MorphBasicAvoidPlayerGoal<Cat>
     }
 
     @Override
+    protected boolean mobPanicFromPlayerByDefault()
+    {
+        return true;
+    }
+
+    @Override
     public GoalKey<@NotNull Cat> getKey()
     {
         return GoalKey.of(Cat.class, Objects.requireNonNull(NamespacedKey.fromString("feathermorph:cat_avoid_player_goal")));

@@ -13,6 +13,9 @@ import xyz.nifeather.morph.misc.mobs.goal.IGoalProvider;
 import java.util.Objects;
 import java.util.Optional;
 
+/**
+ * This checks for whether the mob's type would panic from the player, while {@link MorphDefaultPanickingPanicFromPlayerGoal} always make the mob panic from the player
+ */
 public class MorphCommonMobAvoidPlayerGoal extends MorphBasicAvoidPlayerGoal<Mob>
 {
     public MorphCommonMobAvoidPlayerGoal(Mob bindingMob, RevealingHandler revealingHandler, MorphManager morphManager, double detectDistance, double walkSpeed, double sprintSpeed)
@@ -37,7 +40,7 @@ public class MorphCommonMobAvoidPlayerGoal extends MorphBasicAvoidPlayerGoal<Mob
         }
 
         @Override
-        public Goal<Mob> createGoal(Mob mob, @NotNull MorphManager morphManager, @NotNull RevealingHandler revealingHandler, double detectDistance, double walkSpeed, double sprintSpeed)
+        public Goal<@NotNull Mob> createGoal(Mob mob, @NotNull MorphManager morphManager, @NotNull RevealingHandler revealingHandler, double detectDistance, double walkSpeed, double sprintSpeed)
         {
             return new MorphCommonMobAvoidPlayerGoal(mob, revealingHandler, morphManager, detectDistance, walkSpeed, sprintSpeed);
         }

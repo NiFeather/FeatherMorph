@@ -80,6 +80,8 @@ public abstract class MorphBasicAvoidPlayerGoal<M extends Mob> implements Goal<@
         double currentDistance = Double.MAX_VALUE;
         var catLocation = mob.getLocation();
 
+        boolean isDisguisePanicking = false;
+
         for (Player player : nearbyPlayers)
         {
             var gamemode = player.getGameMode();
@@ -100,7 +102,11 @@ public abstract class MorphBasicAvoidPlayerGoal<M extends Mob> implements Goal<@
             if (state != null)
             {
                 if (EntityTypeUtils.panicsFrom(mob.getType(), state.getEntityType()))
+                {
+                    isDisguisePanicking = true;
                     found = player;
+                    break;
+                }
 
                 continue;
             }
@@ -108,10 +114,15 @@ public abstract class MorphBasicAvoidPlayerGoal<M extends Mob> implements Goal<@
             found = player;
         }
 
-        if (EntityTypeUtils.panicsFrom(mob.getType(), EntityType.PLAYER))
+        if (isDisguisePanicking || mobPanicFromPlayerByDefault())
             return found;
 
         return null;
+    }
+
+    protected boolean mobPanicFromPlayerByDefault()
+    {
+        return EntityTypeUtils.panicsFrom(mob.getType(), EntityType.PLAYER);
     }
 
     @Nullable

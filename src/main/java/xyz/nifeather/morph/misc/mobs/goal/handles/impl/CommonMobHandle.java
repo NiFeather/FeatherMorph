@@ -6,7 +6,10 @@ import org.bukkit.entity.Creature;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.jetbrains.annotations.NotNull;
+import xyz.nifeather.morph.MorphManager;
+import xyz.nifeather.morph.RevealingHandler;
 import xyz.nifeather.morph.misc.mobs.goal.AvoidPlayerGoals;
+import xyz.nifeather.morph.misc.mobs.goal.impl.MorphDefaultPanickingPanicFromPlayerGoal;
 import xyz.nifeather.morph.misc.mobs.goal.impl.MorphNearestAttackableGoal;
 
 import java.util.Collection;
@@ -34,18 +37,21 @@ public class CommonMobHandle extends BasicEntityHandle<Creature>
         double walkSpeed = isWanderingTrader ? 0.5 : 0.8;
         double sprintSpeed = isWanderingTrader ? 0.5 : 1.33;
 
-        var replacingGoal = AvoidPlayerGoals.findGoal(creature, morphManager, revealingHandler, 16, walkSpeed, sprintSpeed);
+        var replacingGoal = AvoidPlayerGoals.findGoal(creature, morphManager, revealingHandler, 16, walkSpeed, sprintSpeed, this::createDefaultPanickingGoal);
         if (replacingGoal == null) return;
 
         mobGoals().addGoal(creature, getGoalPriority(creature, vanillaGoal), replacingGoal);
         mobGoals().removeGoal(creature, vanillaGoal);
     }
 
-    @Override
-    protected void addDefaultGoals(Creature creature)
+    private Goal<@NotNull Creature> createDefaultPanickingGoal(Creature mob,
+                                                          @NotNull MorphManager morphManager,
+                                                          @NotNull RevealingHandler revealingHandler,
+                                                          double detectDistance,
+                                                          double walkSpeed,
+                                                          double sprintSpeed)
     {
-        var goal = new MorphNearestAttackableGoal(creature, morphManager);
-        mobGoals().addGoal(creature, 1, goal);
+        return new MorphDefaultPanickingPanicFromPlayerGoal(mob, revealingHandler, morphManager, detectDistance, walkSpeed, sprintSpeed);
     }
 
     @Override
@@ -56,9 +62,16 @@ public class CommonMobHandle extends BasicEntityHandle<Creature>
         double walkSpeed = isWanderingTrader ? 0.5 : 0.8;
         double sprintSpeed = isWanderingTrader ? 0.5 : 1.33;
 
-        var replacingGoal = AvoidPlayerGoals.findGoal(creature, morphManager, revealingHandler, 16, walkSpeed, sprintSpeed);
-        if (replacingGoal == null) return;
+        var defaultGoal = AvoidPlayerGoals.findGoal(creature, morphManager, revealingHandler, 16, walkSpeed, sprintSpeed);
+        if (defaultGoal == null) return;
 
-        mobGoals().addGoal(creature, 4, replacingGoal);
+        mobGoals().addGoal(creature, 4, defaultGoal);
+    }
+
+    @Override
+    protected void addDefaultGoals(Creature creature)
+    {
+        var goal = new MorphNearestAttackableGoal(creature, morphManager);
+        mobGoals().addGoal(creature, 1, goal);
     }
 }
