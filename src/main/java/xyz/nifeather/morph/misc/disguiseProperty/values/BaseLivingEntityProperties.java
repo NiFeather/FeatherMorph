@@ -49,6 +49,15 @@ public abstract class BaseLivingEntityProperties<E extends Entity> extends Abstr
         {
             var finalText = PlainTextComponentSerializer.plainText().serialize(component.get());
 
+            if (finalText.length() > 50)
+            {
+                throw ParseErrorException.forProperty(propertyName)
+                        .byMethod("readCustomName")
+                        .withMessage("The final name input is too long!")
+                        .withLocalizableMessage(ExceptionStrings.inputTooLong())
+                        .create();
+            }
+
             if (finalText.isBlank())
             {
                 throw ParseErrorException.forProperty(propertyName)
