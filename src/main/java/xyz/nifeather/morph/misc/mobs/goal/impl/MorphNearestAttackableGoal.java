@@ -44,6 +44,9 @@ public class MorphNearestAttackableGoal implements Goal<@NotNull Mob>
     @Override
     public boolean shouldActivate()
     {
+        if (mob instanceof Tameable tameable && tameable.isTamed())
+            return false;
+
         if (targetedEntity != null)
             return checkTargetEntity();
 
