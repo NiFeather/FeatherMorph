@@ -6,6 +6,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Ocelot;
 import org.jetbrains.annotations.NotNull;
 import xyz.nifeather.morph.misc.mobs.goal.AvoidPlayerGoals;
+import xyz.nifeather.morph.misc.mobs.goal.impl.MorphNearestAttackableGoal;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -32,5 +33,12 @@ public class OcelotHandle extends BasicEntityHandle<Ocelot>
 
         mobGoals().addGoal(ocelot, getGoalPriority(ocelot, vanillaGoal), replacingGoal);
         mobGoals().removeGoal(ocelot, vanillaGoal);
+    }
+
+    @Override
+    protected void addDefaultGoals(Ocelot mob)
+    {
+        var goal = new MorphNearestAttackableGoal(mob, morphManager);
+        mobGoals().addGoal(mob, 1, goal);
     }
 }

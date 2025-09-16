@@ -6,6 +6,7 @@ import org.bukkit.entity.Cat;
 import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import xyz.nifeather.morph.misc.mobs.goal.AvoidPlayerGoals;
+import xyz.nifeather.morph.misc.mobs.goal.impl.MorphNearestAttackableGoal;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -32,5 +33,12 @@ public class CatHandle extends BasicEntityHandle<Cat>
 
         mobGoals().addGoal(cat, getGoalPriority(cat, vanillaGoal), replacingGoal);
         mobGoals().removeGoal(cat, vanillaGoal);
+    }
+
+    @Override
+    protected void addDefaultGoals(Cat mob)
+    {
+        var goal = new MorphNearestAttackableGoal(mob, morphManager);
+        mobGoals().addGoal(mob, 1, goal);
     }
 }
