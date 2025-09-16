@@ -9,7 +9,6 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemRarity;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.SkullMeta;
 import xyz.nifeather.morph.misc.DisguiseTypes;
 import xyz.nifeather.morph.misc.skins.PlayerSkinProvider;
 
@@ -34,11 +33,16 @@ public class IconLookup
 
     // DisguiseIdentifier <-> IconItem
     private final Map<String, ItemStack> registry = new ConcurrentHashMap<>();
+    
+    protected Material getDisplayBaseMaterial()
+    {
+        return Material.SNOWBALL;
+    }
 
     protected ItemStack generateDefaultItem()
     {
-        var item = ItemStack.of(Material.SNOWBALL);
-        item.editMeta(meta -> meta.setItemModel(NamespacedKey.minecraft("bedrock")));
+        var item = ItemStack.of(getDisplayBaseMaterial());
+        item.setData(DataComponentTypes.ITEM_MODEL, NamespacedKey.minecraft("bedrock"));
 
         return item;
     }
@@ -55,68 +59,31 @@ public class IconLookup
             this.register(value);
         }
 
-        register(EntityType.ARMOR_STAND, Material.ARMOR_STAND);
-        register(EntityType.GIANT, Material.ZOMBIE_HEAD);
-        register(EntityType.ILLUSIONER, Material.SPECTRAL_ARROW);
+        register(EntityType.ARMOR_STAND, createIconForType(Material.ARMOR_STAND));
+        register(EntityType.GIANT, createIconForType(Material.ZOMBIE_HEAD));
+        register(EntityType.ILLUSIONER, createIconForType(Material.SPECTRAL_ARROW));
     }
 
-    private ItemStack lookupEntitySpawnEgg(EntityType type)
+    public ItemStack createIconForType(Material targetModelMaterial)
     {
-        var name = "%s_SPAWN_EGG".formatted(type.name().toUpperCase());
+        var materialItem = ItemStack.of(targetModelMaterial);
+        var model = materialItem.getData(DataComponentTypes.ITEM_MODEL);
 
-        var match = Material.matchMaterial(name);
-        if (match == null)
-        {
-            return defaultItem;
-        }
+        Key modelKey;
+        if (model == null)
+            modelKey = targetModelMaterial.getKey();
         else
-        {
-            NamespacedKey key = NamespacedKey.minecraft(name.toLowerCase());
-            var item = ItemStack.of(Material.SNOWBALL);
-            item.editMeta(meta -> meta.setItemModel(key));
+            modelKey = model.key();
 
-            return item;
-        }
+        var targetItem = ItemStack.of(getDisplayBaseMaterial());
+        targetItem.setData(DataComponentTypes.ITEM_MODEL, modelKey);
+        return targetItem;
     }
 
-    private void register(EntityType type)
+    public ItemStack createIconForPlayer(String playerName)
     {
-        this.register(type, lookupEntitySpawnEgg(type));
-    }
-
-    private void register(EntityType type, ItemStack item)
-    {
-        item.editMeta(meta -> meta.setRarity(ItemRarity.COMMON));
-        this.register(type.key().asString(), item);
-    }
-
-    private void register(EntityType type, Material material)
-    {
-        register(type, ItemStack.of(material));
-    }
-
-    private void register(String disguiseIdentifier, ItemStack stack)
-    {
-        registry.put(disguiseIdentifier, stack);
-    }
-
-    public ItemStack lookup(String disguiseIdentifier)
-    {
-        ItemStack item;
-        if (disguiseIdentifier.startsWith(DisguiseTypes.PLAYER.getNameSpace()))
-            item = lookupPlayer(DisguiseTypes.PLAYER.toStrippedId(disguiseIdentifier));
-        else
-            item = this.registry.getOrDefault(disguiseIdentifier, defaultItem);
-
-        return item;
-    }
-
-    public ItemStack lookupPlayer(String playerName)
-    {
-        var stack = new ItemStack(Material.SNOWBALL);
-
+        var stack = createIconForType(Material.PLAYER_HEAD);
         stack.setData(DataComponentTypes.RARITY, ItemRarity.COMMON);
-        stack.setData(DataComponentTypes.ITEM_MODEL, Key.key("player_head"));
 
         PlayerSkinProvider.getInstance().fetchSkin(playerName)
                 .thenAccept(optional ->
@@ -128,5 +95,48 @@ public class IconLookup
                 });
 
         return stack;
+    }
+
+    private ItemStack createIconForEntityType(EntityType type)
+    {
+        var name = "%s_SPAWN_EGG".formatted(type.name().toUpperCase());
+
+        var match = Material.matchMaterial(name);
+        if (match == null)
+            return defaultItem;
+        else
+            return createIconForType(match);
+    }
+
+    private void register(EntityType type)
+    {
+        this.register(type, createIconForEntityType(type));
+    }
+
+    private void register(EntityType type, ItemStack item)
+    {
+        item.editMeta(meta -> meta.setRarity(ItemRarity.COMMON));
+        this.register(type.key().asString(), item);
+    }
+
+    private void register(EntityType type, Material material)
+    {
+        register(type, createIconForType(material));
+    }
+
+    private void register(String disguiseIdentifier, ItemStack stack)
+    {
+        registry.put(disguiseIdentifier, stack);
+    }
+
+    public ItemStack lookup(String disguiseIdentifier)
+    {
+        ItemStack item;
+        if (disguiseIdentifier.startsWith(DisguiseTypes.PLAYER.getNameSpace()))
+            item = createIconForPlayer(DisguiseTypes.PLAYER.toStrippedId(disguiseIdentifier));
+        else
+            item = this.registry.getOrDefault(disguiseIdentifier, defaultItem);
+
+        return item;
     }
 }
