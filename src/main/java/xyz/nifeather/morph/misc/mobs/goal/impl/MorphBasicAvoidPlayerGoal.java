@@ -55,8 +55,6 @@ public abstract class MorphBasicAvoidPlayerGoal<M extends Mob> implements Goal<@
     public boolean shouldActivate()
     {
         entityToAvoid = findEntityToAvoid();
-        if (mob.getType() == EntityType.WANDERING_TRADER)
-        System.out.println("ToAvoid is  " + entityToAvoid);
         if (entityToAvoid == null) return false;
 
         this.path = findEscapePath();
