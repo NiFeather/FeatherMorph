@@ -1063,6 +1063,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
                 if (!properties.equals(propertyHandler.bindingProperties())) return;
 
+                // fix command not sending when player rejoins
                 Player pl = player.isConnected() ? player : Bukkit.getPlayer(player.getUniqueId());
                 Map<String ,String> diffMap = new ConcurrentHashMap<>();
                 try
