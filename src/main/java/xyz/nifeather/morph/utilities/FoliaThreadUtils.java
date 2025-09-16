@@ -94,4 +94,10 @@ public class FoliaThreadUtils
 
         return future;
     }
+
+    public static boolean isTickThreadFor(Entity bukkitEntity)
+    {
+        var nmsEntity = ((CraftEntity) bukkitEntity).getHandle();
+        return TickThread.isTickThreadFor(nmsEntity);
+    }
 }

@@ -19,6 +19,7 @@ import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.RevealingHandler;
 import xyz.nifeather.morph.utilities.EntityTypeUtils;
+import xyz.nifeather.morph.utilities.FoliaThreadUtils;
 
 import java.util.EnumSet;
 
@@ -145,7 +146,9 @@ public abstract class MorphBasicAvoidPlayerGoal<M extends Mob> implements Goal<@
     @Override
     public void tick()
     {
-        if (entityToAvoid == null || path == null) return;
+        // I'm just too lazy to check if comparing distance would trigger async catch,
+        // so let's not check for entities that's not on the same thread.
+        if (entityToAvoid == null || path == null || !FoliaThreadUtils.isTickThreadFor(entityToAvoid)) return;
 
         var pathfinder = mob.getPathfinder();
         if (mob.getLocation().distance(entityToAvoid.getLocation()) < 49)
