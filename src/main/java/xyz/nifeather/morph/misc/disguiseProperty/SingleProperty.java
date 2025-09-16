@@ -51,21 +51,9 @@ public class SingleProperty<T>
         return outputHandle.handle(this.id(), value);
     }
 
-    @Deprecated
-    public SingleProperty(String identifier, T defaultValue, Class<T> type)
-    {
-        this(identifier, defaultValue, type, null, null, false);
-    }
-
     public SingleProperty(String identifier, T defaultValue, Class<T> type,
-                          @Nullable InputHandle<T> inputHandle, @Nullable OutputHandle<T> outputHandle, boolean hideFromUserInput)
+                          @NotNull InputHandle<T> inputHandle, @NotNull OutputHandle<T> outputHandle, boolean hideFromUserInput)
     {
-        if (inputHandle == null)
-            inputHandle = InputHandles::immediateException;
-
-        if (outputHandle == null)
-            outputHandle = OutputHandles::immediateException;
-
         this.identifier = identifier;
         this.defaultVal = defaultValue;
         this.type = type;
@@ -123,11 +111,6 @@ public class SingleProperty<T>
         if (!(obj instanceof SingleProperty<?> other)) return false;
 
         return this.identifier.equals(other.identifier) && this.type.equals(other.type);
-    }
-
-    public static <T> SingleProperty<T> of(String id, T val)
-    {
-        return new SingleProperty<>(id, val, (Class<T>) val.getClass());
     }
 
     public static <T> SingleProperty<T> of(String id, T val, InputHandle<T> inputHandle, OutputHandle<T> outputHandle)
