@@ -62,6 +62,10 @@ public class WolfProperties extends BaseLivingEntityProperties<Wolf>
     protected void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull Wolf targetEntity)
     {
         propertyHandler.set(VARIANT, targetEntity.getVariant());
+        propertyHandler.set(COLLAR_COLOR, targetEntity.getCollarColor());
+
+        if (targetEntity.getOwnerUniqueId() != null)
+            propertyHandler.set(OWNER, targetEntity.getOwnerUniqueId());
     }
 
     @Override
@@ -69,5 +73,4 @@ public class WolfProperties extends BaseLivingEntityProperties<Wolf>
     {
         propertyHandler.set(VARIANT, DisguiseUtils.pick(VARIANT.getRandomValues()));
     }
-
 }

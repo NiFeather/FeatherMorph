@@ -60,6 +60,7 @@ public class CatProperties extends BaseLivingEntityProperties<Cat>
     protected void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull Cat cat)
     {
         propertyHandler.set(CAT_VARIANT, cat.getCatType());
+        propertyHandler.set(COLLAR_COLOR, cat.getCollarColor());
 
         if (cat.getOwnerUniqueId() != null)
             propertyHandler.set(OWNER, cat.getOwnerUniqueId());
