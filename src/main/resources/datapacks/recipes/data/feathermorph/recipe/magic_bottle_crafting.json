@@ -13,7 +13,8 @@
     "id": "minecraft:glass_bottle",
     "components": {
       "minecraft:custom_data": {
-        "feathermorph:is_magic_bottle": true
+        "feathermorph:is_magic_bottle": true,
+        "feathermorph:magic_bottle_transform_material": "minecraft:potion"
       },
       "minecraft:item_name": {
         "translate": "item.morphclient.magic_bottle",

@@ -18,6 +18,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.FeatherMorphMain;
 
+import java.util.Arrays;
+
 public class ItemUtils
 {
     public static final ItemStack air = new ItemStack(Material.AIR, 1);
@@ -133,6 +135,32 @@ public class ItemUtils
         nms.set(DataComponents.TOOLTIP_DISPLAY, new TooltipDisplay(false, new ObjectAVLTreeSet<>()));
 
         return nms.asBukkitMirror();
+    }
+
+    private static final String MAGIC_BOTTLE_TRANSFORM_MATERIAL_KEY = "feathermorph:magic_bottle_transform_material";
+    private static final String MAGIC_BOTTLE_DEFAULT_TRANSFORM_TARGET = Material.POTION.key().asString();
+
+    @NotNull
+    public static Material readMagicBottleTransformMaterial(ItemStack stack)
+    {
+        var id = readMagicBottleTransformId(stack);
+        var matched = Arrays.stream(Material.values())
+                .filter(m -> m.key().asString().equals(id))
+                .findFirst().orElse(null);
+
+        return matched == null ? Material.POTION : matched;
+    }
+
+    @NotNull
+    public static String readMagicBottleTransformId(ItemStack stack)
+    {
+        var nms = net.minecraft.world.item.ItemStack.fromBukkitCopy(stack);
+        var customData = nms.getComponents().get(DataComponents.CUSTOM_DATA);
+
+        if (customData == null || !customData.contains(MAGIC_BOTTLE_TRANSFORM_MATERIAL_KEY))
+            return MAGIC_BOTTLE_DEFAULT_TRANSFORM_TARGET;
+
+        return customData.copyTag().getStringOr(MAGIC_BOTTLE_TRANSFORM_MATERIAL_KEY, MAGIC_BOTTLE_DEFAULT_TRANSFORM_TARGET);
     }
 
     @Nullable

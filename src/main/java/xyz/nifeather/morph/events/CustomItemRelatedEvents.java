@@ -1,6 +1,11 @@
 package xyz.nifeather.morph.events;
 
 import de.themoep.inventorygui.InventoryGui;
+import io.papermc.paper.datacomponent.DataComponentTypes;
+import io.papermc.paper.datacomponent.item.Consumable;
+import io.papermc.paper.datacomponent.item.DyedItemColor;
+import io.papermc.paper.datacomponent.item.ItemLore;
+import io.papermc.paper.datacomponent.item.PotionContents;
 import io.papermc.paper.registry.RegistryAccess;
 import io.papermc.paper.registry.RegistryKey;
 import io.papermc.paper.registry.tag.TagKey;
@@ -267,26 +272,33 @@ public class CustomItemRelatedEvents extends MorphPluginObject implements Listen
         };
 
         // 设定物品
-        var magicItem = ItemUtils.buildMagicItemFrom(ItemStack.of(Material.POTION));
+        var i = ItemStack.of(ItemUtils.readMagicBottleTransformMaterial(mainhandItem));
+        var magicItem = ItemUtils.buildMagicItemFrom(i);
         var newItem = ItemUtils.writeMagicItemData(magicItem, disguiseIdentifier);
-        newItem.editMeta(PotionMeta.class, meta ->
-        {
-            var finalLoreDisplay = Component.text(disguiseIdentifier)
-                    .style(
-                            Style.style()
-                                    .color(TextColor.color(0xAAAAAA))
-                                    .decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE)
-                                    .build()
-                    );
 
-            meta.setColor(Color.fromARGB(disguiseIdentifier.hashCode()));
-            meta.lore(List.of(finalLoreDisplay));
+        logger.info("Item! is " + i);
 
-            // 装有xxx气息的瓶子
-            var finalNameDisplay = Component.translatable("item.morphclient.bottle_with_disguise", "Magic Bottle of %s", displayName)
-                    .style(Style.style().decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE).build());
-            meta.displayName(finalNameDisplay);
-        });
+        var finalLoreDisplay = Component.text(disguiseIdentifier)
+                .style(
+                        Style.style()
+                                .color(TextColor.color(0xAAAAAA))
+                                .decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE)
+                                .build()
+                );
+
+        newItem.setData(DataComponentTypes.LORE, ItemLore.lore().addLine(finalLoreDisplay));
+
+        var itemColor = Color.fromARGB(disguiseIdentifier.hashCode());
+        newItem.setData(DataComponentTypes.POTION_CONTENTS, PotionContents.potionContents().customColor(itemColor));
+        newItem.setData(DataComponentTypes.DYED_COLOR, DyedItemColor.dyedItemColor().color(itemColor));
+
+        // translate: 装有xxx气息的瓶子
+        var finalNameDisplay = Component.translatable("item.morphclient.bottle_with_disguise", "Magic Bottle of %s", displayName)
+                .style(Style.style().decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE).build());
+
+        newItem.setData(DataComponentTypes.CUSTOM_NAME, finalNameDisplay);
+        if (!newItem.hasData(DataComponentTypes.CONSUMABLE))
+            newItem.setData(DataComponentTypes.CONSUMABLE, Consumable.consumable().build());
 
         // 设置物品
         if (player.getGameMode() != GameMode.CREATIVE)
