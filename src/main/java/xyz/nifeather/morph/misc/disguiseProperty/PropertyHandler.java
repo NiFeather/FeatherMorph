@@ -27,14 +27,25 @@ public class PropertyHandler
 
     public Map<String, String> toNetworkProperties()
     {
-        if (bindingProperties == null)
-        {
-            FeatherMorphMain.getInstance().getSLF4JLogger().warn("Trying to map network properties while a PropertyHandler has not been initialized?!");
+        Map<String, String> map = new ConcurrentHashMap<>();
 
-            return new HashMap<>();
+        try
+        {
+            for (Map.Entry<SingleProperty<?>, Object> entry : this.propertyMap.entrySet())
+            {
+                var property = (SingleProperty<Object>) entry.getKey();
+                var value = entry.getValue();
+
+                map.put(property.id(), property.forValue(value));
+            }
+
+        }
+        catch (ParseErrorException e)
+        {
+            FeatherMorphMain.getInstance().getSLF4JLogger().error("Failed writing full network map, some properties may not be synced!", e);
         }
 
-        return bindingProperties.mapToNetworkProperties(this);
+        return map;
     }
 
     @Nullable
@@ -51,7 +62,7 @@ public class PropertyHandler
         reset();
 
         this.bindingProperties = properties;
-        validProperties.addAll(properties.getValues());
+        validProperties.addAll(properties.getRegisteredProperties().values());
     }
 
     public void updateFromPropertiesInput(Map<String, String> input) throws ParseErrorException

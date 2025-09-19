@@ -44,12 +44,6 @@ public abstract class AbstractProperties<E extends Entity>
         values.put(value.id(), value);
     }
 
-    @Deprecated
-    public List<SingleProperty<?>> getValues()
-    {
-        return new ObjectArrayList<>(values.values());
-    }
-
     public Map<String, SingleProperty<?>> getRegisteredProperties()
     {
         return Map.copyOf(this.values);
@@ -116,29 +110,5 @@ public abstract class AbstractProperties<E extends Entity>
         var theirHandler = theirState.disguisePropertyHandler();
 
         theirHandler.copyTo(ourHandler);
-    }
-
-    //todo: We might not want ParseErrorException to be caught here
-    public final Map<String, String> mapToNetworkProperties(PropertyHandler propertyHandler)
-    {
-        var map = new ConcurrentHashMap<String, String>();
-
-        try
-        {
-            for (SingleProperty<?> p : values.values())
-            {
-                SingleProperty<Object> property = (SingleProperty<Object>) p;
-
-                var optional = propertyHandler.getOptional(property);
-                if (optional.isPresent())
-                    map.put(property.id(), property.forValue(optional.get()));
-            }
-        }
-        catch (ParseErrorException e)
-        {
-            logger.error("Failed writing values", e);
-        }
-
-        return map;
     }
 }

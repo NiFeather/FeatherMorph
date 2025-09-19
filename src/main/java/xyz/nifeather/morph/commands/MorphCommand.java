@@ -67,7 +67,7 @@ public class MorphCommand extends MorphPluginObject implements IConvertibleBriga
     {
         DisguiseProperties.INSTANCE.getAll().forEach((type, properties) ->
         {
-            for (SingleProperty<?> property : properties.getValues())
+            for (SingleProperty<?> property : properties.getRegisteredProperties().values())
             {
                 if (property.hideFromUserInput())
                     continue;
