@@ -109,7 +109,7 @@ public class GrantDisguiseSubCommand extends MorphPluginObject implements IConve
 
     private void grantDisguise(Player who, String targetName, CommandSender commandSender)
     {
-        var msg = morphs.grantMorphToPlayer(who, targetName)
+        var msg = morphs.grantMorphToPlayer(who, targetName, true)
                 ? CommandStrings.grantSuccessString()
                 : CommandStrings.grantFailString();
 

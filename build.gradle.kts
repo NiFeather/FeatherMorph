@@ -204,7 +204,9 @@ paper {
             permissionRoot + "can_fly",
             permissionRoot + "toggle_town_fly",
 
-            permissionRoot + "magic_bottle.use"
+            permissionRoot + "magic_bottle.use",
+
+            permissionRoot + "acquire_morph"
     );
 
     defaultAvailablePermissions.forEach {

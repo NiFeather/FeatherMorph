@@ -1543,6 +1543,14 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     @Override
     public boolean grantMorphToPlayer(Player player, String disguiseIdentifier)
     {
+        return grantMorphToPlayer(player, disguiseIdentifier, false);
+    }
+
+    public boolean grantMorphToPlayer(Player player, String disguiseIdentifier, boolean bypassPermission)
+    {
+        if (!bypassPermission && !player.hasPermission(CommonPermissions.ACQUIRE_MORPH))
+            return false;
+
         var success = data.grantMorphToPlayer(player, disguiseIdentifier);
 
         if (!success)

@@ -10,6 +10,8 @@ public class CommonPermissions
     public final static String ACCEPT_REQUEST = PERM_ROOT + "request.accept";
     public final static String DENY_REQUEST = PERM_ROOT + "request.deny";
 
+    public final static String ACQUIRE_MORPH = PERM_ROOT + "acquire_morph";
+
     public final static String MORPH = PERM_ROOT + "morph";
     public final static String UNMORPH = PERM_ROOT + "unmorph";
 

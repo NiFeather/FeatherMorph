@@ -193,7 +193,11 @@ public class CustomItemRelatedEvents extends MorphPluginObject implements Listen
             return;
         }
 
-        morphs.grantMorphToPlayer(player, id);
+        if (!morphs.grantMorphToPlayer(player, id))
+        {
+            player.playSound(player, Sound.ENTITY_VILLAGER_NO, 1, 1);
+            event.setCancelled(true);
+        }
     }
 
     public final TagKey<@NotNull EntityType> tagMagicBottleCollectable = TagKey.create(RegistryKey.ENTITY_TYPE,
