@@ -16,6 +16,7 @@ public class BuiltinDatapackNames
 
     public static final String RECIPES = add("recipes");
     public static final String DISGUISE_TAGS = add("disguise_tags");
+    public static final String LOOT_TABLES = add("loot_tables");
 
     public static List<String> values()
     {

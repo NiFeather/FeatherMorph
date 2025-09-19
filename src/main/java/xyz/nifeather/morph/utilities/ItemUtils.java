@@ -3,12 +3,10 @@ package xyz.nifeather.morph.utilities;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.mojang.serialization.JsonOps;
-import it.unimi.dsi.fastutil.objects.ObjectAVLTreeSet;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.component.CustomData;
-import net.minecraft.world.item.component.TooltipDisplay;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.CraftWorld;
@@ -17,8 +15,6 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.FeatherMorphMain;
-
-import java.util.Arrays;
 
 public class ItemUtils
 {
@@ -111,17 +107,27 @@ public class ItemUtils
 
     public static final String MAGIC_BOTTLE_ITEM_KEY = "feathermorph:is_magic_bottle";
     public static final String MAGIC_BOTTLE_STORE_ITEM_KEY = "feathermorph:magic_bottle_store";
+    public static final String SKIP_MAGIC_BOTTLE_SETUP_KEY = "feathermorph:skip_magic_bottle_setup";
+    public static final String ALWAYS_APPEND_REFERENCE_TOOLTIP_KEY = "feathermorph:always_append_reference_tooltip";
 
-    public static ItemStack buildMagicItemFrom(ItemStack stack)
+    public static boolean alwaysAppendReferenceTooltip(ItemStack stack)
     {
         var nms = net.minecraft.world.item.ItemStack.fromBukkitCopy(stack);
         var customData = nms.getComponents().get(DataComponents.CUSTOM_DATA);
-        if (customData == null) customData = CustomData.EMPTY;
+        if (customData == null)
+            return true;
 
-        customData = customData.update(tag -> tag.putBoolean(MAGIC_BOTTLE_ITEM_KEY, true));
-        nms.set(DataComponents.CUSTOM_DATA, customData);
+        return customData.copyTag().getBooleanOr(ALWAYS_APPEND_REFERENCE_TOOLTIP_KEY, false);
+    }
 
-        return nms.asBukkitMirror();
+    public static boolean skipMagicBottleSetup(ItemStack stack)
+    {
+        var nms = net.minecraft.world.item.ItemStack.fromBukkitCopy(stack);
+        var customData = nms.getComponents().get(DataComponents.CUSTOM_DATA);
+        if (customData == null)
+            return false;
+
+        return customData.copyTag().getBooleanOr(SKIP_MAGIC_BOTTLE_SETUP_KEY, false);
     }
 
     public static ItemStack writeMagicItemData(ItemStack inputStack, String disguiseIdentifier)
@@ -132,35 +138,8 @@ public class ItemUtils
 
         customData = customData.update(tag -> tag.putString(MAGIC_BOTTLE_STORE_ITEM_KEY, disguiseIdentifier));
         nms.set(DataComponents.CUSTOM_DATA, customData);
-        nms.set(DataComponents.TOOLTIP_DISPLAY, new TooltipDisplay(false, new ObjectAVLTreeSet<>()));
 
         return nms.asBukkitMirror();
-    }
-
-    private static final String MAGIC_BOTTLE_TRANSFORM_MATERIAL_KEY = "feathermorph:magic_bottle_transform_material";
-    private static final String MAGIC_BOTTLE_DEFAULT_TRANSFORM_TARGET = Material.POTION.key().asString();
-
-    @NotNull
-    public static Material readMagicBottleTransformMaterial(ItemStack stack)
-    {
-        var id = readMagicBottleTransformId(stack);
-        var matched = Arrays.stream(Material.values())
-                .filter(m -> m.key().asString().equals(id))
-                .findFirst().orElse(null);
-
-        return matched == null ? Material.POTION : matched;
-    }
-
-    @NotNull
-    public static String readMagicBottleTransformId(ItemStack stack)
-    {
-        var nms = net.minecraft.world.item.ItemStack.fromBukkitCopy(stack);
-        var customData = nms.getComponents().get(DataComponents.CUSTOM_DATA);
-
-        if (customData == null || !customData.contains(MAGIC_BOTTLE_TRANSFORM_MATERIAL_KEY))
-            return MAGIC_BOTTLE_DEFAULT_TRANSFORM_TARGET;
-
-        return customData.copyTag().getStringOr(MAGIC_BOTTLE_TRANSFORM_MATERIAL_KEY, MAGIC_BOTTLE_DEFAULT_TRANSFORM_TARGET);
     }
 
     @Nullable

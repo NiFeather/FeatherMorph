@@ -2,7 +2,6 @@ package xyz.nifeather.morph.events;
 
 import de.themoep.inventorygui.InventoryGui;
 import io.papermc.paper.datacomponent.DataComponentTypes;
-import io.papermc.paper.datacomponent.item.Consumable;
 import io.papermc.paper.datacomponent.item.DyedItemColor;
 import io.papermc.paper.datacomponent.item.ItemLore;
 import io.papermc.paper.datacomponent.item.PotionContents;
@@ -28,7 +27,8 @@ import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.loot.LootContext;
+import org.bukkit.loot.LootTable;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xyz.nifeather.morph.MorphManager;
@@ -42,8 +42,9 @@ import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 import xyz.nifeather.morph.utilities.ItemUtils;
 import xyz.nifeather.morph.utilities.PermissionUtils;
 
-import java.util.List;
+import java.util.Collection;
 import java.util.Objects;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class CustomItemRelatedEvents extends MorphPluginObject implements Listener
 {
@@ -199,6 +200,10 @@ public class CustomItemRelatedEvents extends MorphPluginObject implements Listen
             Objects.requireNonNull(NamespacedKey.fromString("feathermorph:magic_bottle_collectable")));
 
     // Collect
+
+    @NotNull
+    public final NamespacedKey collectedMagicBottleLootKey = Objects.requireNonNull(NamespacedKey.fromString("feathermorph:magic_bottle_template"));
+
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void bottleOnPlayerInteractEntity(PlayerInteractEntityEvent event)
     {
@@ -271,40 +276,94 @@ public class CustomItemRelatedEvents extends MorphPluginObject implements Listen
             case Entity entity -> Component.translatable(entity.getType().translationKey());
         };
 
-        // 设定物品
-        var i = ItemStack.of(ItemUtils.readMagicBottleTransformMaterial(mainhandItem));
-        var magicItem = ItemUtils.buildMagicItemFrom(i);
-        var newItem = ItemUtils.writeMagicItemData(magicItem, disguiseIdentifier);
-
-        logger.info("Item! is " + i);
-
-        var finalLoreDisplay = Component.text(disguiseIdentifier)
-                .style(
-                        Style.style()
-                                .color(TextColor.color(0xAAAAAA))
-                                .decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE)
-                                .build()
-                );
-
-        newItem.setData(DataComponentTypes.LORE, ItemLore.lore().addLine(finalLoreDisplay));
-
-        var itemColor = Color.fromARGB(disguiseIdentifier.hashCode());
-        newItem.setData(DataComponentTypes.POTION_CONTENTS, PotionContents.potionContents().customColor(itemColor));
-        newItem.setData(DataComponentTypes.DYED_COLOR, DyedItemColor.dyedItemColor().color(itemColor));
-
-        // translate: 装有xxx气息的瓶子
-        var finalNameDisplay = Component.translatable("item.morphclient.bottle_with_disguise", "Magic Bottle of %s", displayName)
-                .style(Style.style().decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE).build());
-
-        newItem.setData(DataComponentTypes.CUSTOM_NAME, finalNameDisplay);
-        if (!newItem.hasData(DataComponentTypes.CONSUMABLE))
-            newItem.setData(DataComponentTypes.CONSUMABLE, Consumable.consumable().build());
-
         // 设置物品
         if (player.getGameMode() != GameMode.CREATIVE)
             mainhandItem.setAmount(mainhandItem.getAmount() - 1);
 
-        player.give(newItem);
+        LootTable lootTable = Bukkit.getLootTable(collectedMagicBottleLootKey);
+
+        if (lootTable == null)
+        {
+            logger.error("Loot table '%s' not found! Failed to setup magic bottle!".formatted(collectedMagicBottleLootKey));
+            failEffect.run();
+            return;
+        }
+
+        LootContext lootContext = new LootContext.Builder(player.getLocation())
+                .killer(player)
+                .lootedEntity(entityClicked)
+                .build();
+
+        Collection<ItemStack> items = lootTable
+                .populateLoot(ThreadLocalRandom.current(), lootContext)
+                .stream().map(stack ->
+                {
+                    // If skipped, don't process
+                    if (ItemUtils.skipMagicBottleSetup(stack))
+                        return stack;
+
+                    var itemColor = Color.fromARGB(disguiseIdentifier.hashCode());
+
+                    // Override the potion color if it hasn't been set
+                    //region Potion Data
+                    PotionContents.Builder contentBuilder = PotionContents.potionContents().customColor(itemColor);
+                    PotionContents potionContents = stack.getData(DataComponentTypes.POTION_CONTENTS);
+
+                    if (potionContents != null)
+                    {
+                        var color = potionContents.customColor();
+                        color = color == null ? itemColor : color;
+
+                        contentBuilder.customColor(color)
+                                .addCustomEffects(potionContents.customEffects())
+                                .potion(potionContents.potion())
+                                .customName(potionContents.customName());
+                    }
+
+                    stack.setData(DataComponentTypes.POTION_CONTENTS, contentBuilder);
+                    //endregion Potion Data
+
+                    // Set the `dyed_color` property is it hasn't been set
+                    if (!stack.hasData(DataComponentTypes.DYED_COLOR))
+                        stack.setData(DataComponentTypes.DYED_COLOR, DyedItemColor.dyedItemColor().color(itemColor));
+
+                    // Add lore to the item if no lore has been set
+                    // The lore is used to tell the player which disguise this bottle would unlock
+                    var currentLore = stack.getData(DataComponentTypes.LORE);
+
+                    var referenceLore = Component.text(disguiseIdentifier)
+                            .style(
+                                    Style.style()
+                                            .color(TextColor.color(0xAAAAAA))
+                                            .decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE)
+                                            .build()
+                            );
+
+                    if (currentLore != null && ItemUtils.alwaysAppendReferenceTooltip(stack))
+                    {
+                        var newLore = ItemLore.lore().addLines(currentLore.lines()).addLine(referenceLore);
+                        stack.setData(DataComponentTypes.LORE, newLore);
+                    }
+                    else if (currentLore == null || currentLore.lines().isEmpty())
+                    {
+                        stack.setData(DataComponentTypes.LORE, ItemLore.lore().addLine(referenceLore));
+                    }
+
+                    // We already have name setup in the loot table, do we really need this?
+                    /*
+                    // translate: 装有xxx气息的瓶子
+                    var finalNameDisplay = Component.translatable("item.morphclient.bottle_with_disguise", "Magic Bottle of %s", displayName)
+                            .style(Style.style().decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE).build());
+
+                    if (!stack.hasData(DataComponentTypes.CUSTOM_NAME))
+                        stack.setData(DataComponentTypes.CUSTOM_NAME, finalNameDisplay);
+                    */
+
+                    return ItemUtils.writeMagicItemData(stack, disguiseIdentifier);
+                }).toList();
+
+        items.forEach(player::give);
+
         player.getWorld().playSound(player.getLocation(), Sound.ITEM_BOTTLE_FILL, 1, 1);
         player.swingHand(event.getHand());
         event.setCancelled(true);

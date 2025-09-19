@@ -1,0 +1,41 @@
+{
+  "type": "minecraft:entity",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:potion",
+          "functions": [
+            {
+              "function": "minecraft:set_components",
+              "components": {
+                "minecraft:custom_data": {
+                  "feathermorph:skip_magic_bottle_setup": false,
+                  "feathermorph:always_append_reference_tooltip": true
+                }
+              }
+            },
+            {
+              "function": "minecraft:set_name",
+              "entity": "this",
+              "name": {
+                "translate": "item.morphclient.bottle_with_disguise",
+                "fallback": "Magic Bottle of %s",
+                "italic": false,
+                "with": [
+                  {
+                    "selector": "@s"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "functions": []
+    }
+  ],
+  "functions": []
+}
