@@ -1,5 +1,6 @@
 package xyz.nifeather.morph.commands.subcommands.plugin;
 
+import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
@@ -34,16 +35,14 @@ public class MakeSkillItemSubCommand extends BrigadierCommand
     }
 
     @Override
-    public boolean register(Commands dispatcher)
+    public void registerAsChild(ArgumentBuilder<CommandSourceStack, ?> parentBuilder)
     {
-        dispatcher.register(
-                Commands.literal(name())
-                        .requires(this::checkPermission)
-                        .executes(this::executes)
-                        .build()
-        );
+        parentBuilder.then(Commands.literal(name())
+                .requires(this::checkPermission)
+                .executes(this::executes)
+                .build());
 
-        return super.register(dispatcher);
+        super.registerAsChild(parentBuilder);
     }
 
     public int executes(CommandContext<CommandSourceStack> context)
