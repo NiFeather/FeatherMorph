@@ -5,13 +5,18 @@ import net.minecraft.world.level.GameType;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
+import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.events.PlayerTracker;
 import xyz.nifeather.morph.events.mirror.ExecutorHub;
 import xyz.nifeather.morph.misc.NmsRecord;
 import xyz.nifeather.morph.storage.mirrorlogging.OperationType;
+import xyz.nifeather.morph.utilities.FoliaThreadUtils;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 public class ByRangeExecutor extends ChainedExecutor
 {
@@ -44,21 +49,36 @@ public class ByRangeExecutor extends ChainedExecutor
             controlDistance = 32;
 
         String finalTargetName = targetName;
-        var matchedPlayers = source.getWorld().getNearbyPlayers(source.getLocation(), controlDistance, p ->
+
+        int finalControlDistance = controlDistance;
+        Collection<Player> matchedPlayers = null;
+
+        try
         {
-            if (Objects.equals(p, source))
-                return false;
+            matchedPlayers = FoliaThreadUtils.runOnEntitySync(source, src ->
+            {
+                return src.getWorld().getNearbyPlayers(src.getLocation(), finalControlDistance, candidatePlayer ->
+                {
+                    if (Objects.equals(candidatePlayer, src))
+                        return false;
 
-            if (NmsRecord.ofPlayer(p).gameMode.getGameModeForPlayer() ==GameType.SPECTATOR)
-                return false;
+                    if (NmsRecord.ofPlayer(candidatePlayer).gameMode.getGameModeForPlayer() == GameType.SPECTATOR)
+                        return false;
 
-            var theirState = morphManager().getDisguiseStateFor(p);
+                    var theirState = morphManager().getDisguiseStateFor(candidatePlayer);
 
-            if (theirState != null && theirState.getDisguiseIdentifier().equals("player:" + finalTargetName))
-                return true;
-            else
-                return p.getName().equals(finalTargetName) && theirState == null;
-        });
+                    if (theirState != null && theirState.getDisguiseIdentifier().equals("player:" + finalTargetName))
+                        return true;
+                    else
+                        return candidatePlayer.getName().equals(finalTargetName) && theirState == null;
+                });
+            }, FoliaThreadUtils.DEFAULT_WAIT_TIMEOUT);
+        }
+        catch (ExecutionException | TimeoutException | InterruptedException e)
+        {
+            if (FeatherMorphMain.getInstance().debugOutputEnabled())
+                logger.error("Failed to build byRange simulate chain", e);
+        }
 
         var list = new ObjectArrayList<Player>();
 
