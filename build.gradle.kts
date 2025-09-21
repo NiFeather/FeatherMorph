@@ -216,7 +216,9 @@ paper {
     val defaultDenyPermissions = listOf(
             permissionRoot + "magic_bottle.exclude",
 
-            permissionRoot + "can_fly.always"
+            permissionRoot + "can_fly.always",
+
+            permissionRoot + "disguise_use_real_uuid"
     )
 
     defaultDenyPermissions.forEach {

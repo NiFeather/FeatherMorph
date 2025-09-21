@@ -58,6 +58,8 @@ public class CommonPermissions
     public final static String MAGIC_BOTTLE_USE = PERM_ROOT + "magic_bottle.use";
     public final static String MAGIC_BOTTLE_EXCLUDE = PERM_ROOT + "magic_bottle.exclude";
 
+    public final static String DISGUISE_USE_REAL_UUID = PERM_ROOT + "disguise_use_real_uuid";
+
     public static String skillPermissionOf(String skillIdentifier, String disguiseIdentifier)
     {
         if (disguiseIdentifier.startsWith(DisguiseTypes.PLAYER.getNameSpace()))
