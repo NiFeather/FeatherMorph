@@ -133,6 +133,7 @@
   "help.description_request_send": "Send exchange requests",
   "help.description_toggle_self": "Toggle SelfView",
   "help.description_unmorph": "Undisguise",
+  "help.discard_morph_command_description": "Discard unlocked disguises",
   "help.morph_command_description": "Disguise/Undisguise",
   "help.morph_command_note_1": "You can unlock disguise by killing mobs or players",
   "help.morph_command_note_2": "We'll also clone a disguise from the first matching entity within 5 blocks in sight if available",

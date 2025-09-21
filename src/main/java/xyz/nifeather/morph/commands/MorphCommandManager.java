@@ -19,7 +19,8 @@ public class MorphCommandManager extends MorphPluginObject
             new UnMorphCommand(),
             new RequestCommand(),
             new MorphPluginCommand(),
-            new AnimationCommand());
+            new AnimationCommand(),
+            new DiscardMorphCommand());
 
     public List<IConvertibleBrigadier> commands()
     {

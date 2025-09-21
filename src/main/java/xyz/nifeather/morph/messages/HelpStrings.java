@@ -59,6 +59,12 @@ public class HelpStrings extends AbstractMorphStrings
                 "伪装、取消伪装");
     }
 
+    public static FormattableMessage discardMorphCommandDescription()
+    {
+        return getFormattable(getKey("discard_morph_command_description"),
+                "[Fallback] 删除形态");
+    }
+
     public static FormattableMessage morphCommandSpecialNote1()
     {
         return getFormattable(getKey("morph_command_note_1"),

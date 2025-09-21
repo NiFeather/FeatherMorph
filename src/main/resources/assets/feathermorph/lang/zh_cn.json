@@ -133,6 +133,7 @@
   "help.description_request_send" : "发送交换请求",
   "help.description_toggle_self" : "切换自身可见",
   "help.description_unmorph" : "解除变形",
+  "help.discard_morph_command_description": "丢弃已解锁的形态",
   "help.morph_command_description" : "变形、解除变形",
   "help.morph_command_note_1" : "变形形态可以通过击杀生物或玩家获得",
   "help.morph_command_note_2" : "变形时会优先复制视线方向5格以内的相同生物或玩家作为目标形态",

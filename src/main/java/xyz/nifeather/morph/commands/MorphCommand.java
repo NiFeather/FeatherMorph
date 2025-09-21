@@ -38,9 +38,6 @@ public class MorphCommand extends MorphPluginObject implements IConvertibleBriga
         return "morph";
     }
 
-    @Resolved
-    private MorphManager morphs;
-
     private final ValueMapArgumentType propertyArgument = new ValueMapArgumentType();
 
     @Override
