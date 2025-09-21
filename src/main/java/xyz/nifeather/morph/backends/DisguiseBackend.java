@@ -9,6 +9,7 @@ import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Messages.FormattableMessage;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.MorphPluginObject;
+import xyz.nifeather.morph.misc.ExecutionErrorException;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
 
 import java.util.Collection;
@@ -83,10 +84,9 @@ public abstract class DisguiseBackend<TInstance, TWrapper extends DisguiseWrappe
      * 将某一玩家伪装成给定Wrapper中的实例
      * @param player 目标玩家
      * @param wrapper 目标Wrapper
-     * @return 操作是否成功
      * @apiNote 传入的wrapper可能不是此后端产出的Wrapper，需要对其进行验证
      */
-    public abstract boolean disguise(Player player, DisguiseWrapper<?> wrapper);
+    public abstract void disguise(Player player, DisguiseWrapper<?> wrapper) throws ExecutionErrorException;
 
     /**
      * Undisguise a player

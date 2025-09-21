@@ -2,20 +2,23 @@ package xyz.nifeather.morph.misc.disguiseProperty;
 
 import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Messages.FormattableMessage;
+import xyz.nifeather.morph.misc.IMaybeUserFriendlyException;
 
 import java.util.Optional;
 
-public class ParseErrorException extends Exception
+public class ParseErrorException extends Exception implements IMaybeUserFriendlyException
 {
     public final String propertyName;
-    public final Optional<FormattableMessage> localizableMessage;
     public final String methodName;
+
+    @Nullable
+    private final FormattableMessage localizableMessage;
 
     public ParseErrorException(String propertyName, String msg)
     {
         super(msg);
         this.propertyName = propertyName;
-        localizableMessage = Optional.empty();
+        localizableMessage = null;
         methodName = "";
     }
 
@@ -29,8 +32,24 @@ public class ParseErrorException extends Exception
     {
         super(msg, cause);
         this.propertyName = propertyName;
-        this.localizableMessage = Optional.ofNullable(localizableMessage);
+        this.localizableMessage = localizableMessage;
         this.methodName = methodName == null ? "" : methodName;
+    }
+
+    @Override
+    public String underlyingMessage()
+    {
+        var cause = getCause();
+        return cause == null ? this.getMessage() : "%s (Caused by %s: %s)".formatted(this.getMessage(), cause.getClass().getSimpleName(), cause.getMessage());
+    }
+
+    @Override
+    public Optional<FormattableMessage> localizableMessage()
+    {
+        if (getCause() instanceof IMaybeUserFriendlyException userFriendlyException)
+            return userFriendlyException.localizableMessage();
+        else
+            return Optional.ofNullable(localizableMessage);
     }
 
     public static ParseErrorGenerator forProperty(String property)

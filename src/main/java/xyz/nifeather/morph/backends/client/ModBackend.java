@@ -15,6 +15,7 @@ import xyz.nifeather.morph.backends.DisguiseWrapper;
 import xyz.nifeather.morph.backends.WrapperProperties;
 import xyz.nifeather.morph.messages.BackendStrings;
 import xyz.nifeather.morph.misc.DisguiseState;
+import xyz.nifeather.morph.misc.ExecutionErrorException;
 import xyz.nifeather.morph.misc.ModNetworkingHelper;
 import xyz.nifeather.morph.network.commands.S2C.clientrender.S2CCRRegisterCommand;
 import xyz.nifeather.morph.network.commands.S2C.clientrender.S2CCRSyncRegisterCommand;
@@ -114,10 +115,14 @@ public class ModBackend extends DisguiseBackend<TrackingClientDisguise, ModDisgu
     }
 
     @Override
-    public boolean disguise(Player player, DisguiseWrapper<?> rawWrapper)
+    public void disguise(Player player, DisguiseWrapper<?> rawWrapper) throws ExecutionErrorException
     {
         if (!(rawWrapper instanceof ModDisguiseWrapper wrapper))
-            return false;
+        {
+            throw ExecutionErrorException.forMethod("ModBackend#disguise")
+                    .withMessage("The given disguise wrapper is not an instance of ModDisguiseWrapper.")
+                    .create();
+        }
 
         if (playerFallbackWrapperMap.containsKey(player))
             unDisguise(player);
@@ -136,7 +141,6 @@ public class ModBackend extends DisguiseBackend<TrackingClientDisguise, ModDisgu
         wrapper.setBindingPlayer(player);
 
         playerFallbackWrapperMap.put(player, wrapper);
-        return true;
     }
 
     public S2CCRSyncRegisterCommand generateRenderSyncCommand(MorphManager morphManager)

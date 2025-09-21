@@ -105,6 +105,7 @@ public class RenderRegistry extends MorphPluginObject
      * @param watcherConsumer Watcher的编辑函数，用于在注册事件前编辑Watcher的各项属性
      */
     public SingleWatcher register(@NotNull Player player, RegisterParameters registerParameters, Consumer<SingleWatcher> watcherConsumer)
+        throws IllegalArgumentException
     {
         var watcher = WatcherIndex.getInstance().getWatcherForType(player, registerParameters.entityType());
 
@@ -127,7 +128,7 @@ public class RenderRegistry extends MorphPluginObject
      * @param uuid 目标玩家的UUID
      * @param watcher 对应的 {@link SingleWatcher}
      */
-    public void registerWithWatcher(@NotNull UUID uuid, @NotNull SingleWatcher watcher)
+    public void registerWithWatcher(@NotNull UUID uuid, @NotNull SingleWatcher watcher) throws IllegalArgumentException
     {
         if (!watcher.getBindingPlayer().getUniqueId().equals(uuid))
             throw new IllegalArgumentException("Watcher UUID doesn't match with player's UUID!");

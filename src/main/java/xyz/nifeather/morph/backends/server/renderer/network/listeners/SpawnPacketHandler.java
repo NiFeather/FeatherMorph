@@ -61,11 +61,13 @@ public class SpawnPacketHandler extends ProtocolListener
             return;
 
         packetEvent.setCancelled(true);
-        Player pl = packetEvent.getPlayer();
+        Player affectedPlayer = packetEvent.getPlayer();
 
         try
         {
-            backend.serverRenderer.refreshStateForPlayer(Bukkit.getPlayer(uuid), List.of(pl));
+            var disguisedPlayer = Bukkit.getPlayer(uuid);
+            if (disguisedPlayer != null)
+                backend.serverRenderer.refreshStateForPlayer(disguisedPlayer, List.of(affectedPlayer));
         }
         catch (Throwable t)
         {

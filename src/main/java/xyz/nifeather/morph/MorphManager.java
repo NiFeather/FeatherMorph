@@ -614,9 +614,9 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 return false;
 
             var playerMeta = getPlayerMeta(parameters.targetPlayer);
-            this.buildDisguise(buildResult, parameters, playerMeta);
+            this.buildDisguise(buildResult, parameters);
 
-            if (!applyDisguise(parameters, buildResult.state(), meta, playerMeta))
+            if (!applyDisguise(parameters, buildResult.state(), playerMeta))
                 return false;
 
             this.afterDisguise(buildResult, parameters, playerMeta);
@@ -628,7 +628,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             if (FeatherMorphMain.getInstance().debugOutputEnabled())
                 logger.warn("Unable to disguise player because a ParseErrorException has occurred", e);
 
-            var message = e.localizableMessage.orElseGet(() -> new FormattableMessage(plugin, e.getMessage()))
+            var message = e.localizableMessage().orElseGet(() -> new FormattableMessage(plugin, e.getMessage()))
                     .withLocale(MessageUtils.getLocale(source));
 
             var msg = MorphStrings.errorWhileDisguisingUserFault()
@@ -636,7 +636,24 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                     .resolve("what", e.propertyName);
 
             var component = MessageUtils.prefixes(source, msg)
-                    .hoverEvent(HoverEvent.showText(Component.text(e.getMessage())));
+                    .hoverEvent(HoverEvent.showText(Component.text(e.underlyingMessage())));
+
+            source.sendMessage(component);
+
+            return false;
+        }
+        catch (ExecutionErrorException e)
+        {
+            logger.error("Failed to disguise player because an ExecutionErrorException has occurred", e);
+
+            var message = e.localizableMessage().orElseGet(() -> new FormattableMessage(plugin, e.getMessage()))
+                    .withLocale(MessageUtils.getLocale(source));
+
+            var msg = MorphStrings.errorWhileDisguisingWithError()
+                    .resolve("error", message);
+
+            var component = MessageUtils.prefixes(source, msg)
+                    .hoverEvent(HoverEvent.showText(Component.text(e.underlyingMessage())));
 
             source.sendMessage(component);
 
@@ -789,7 +806,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             {
                 if (!result.failSilent())
                 {
-                    source.sendMessage(MessageUtils.prefixes(source, MorphStrings.errorWhileDisguising()));
+                    source.sendMessage(MessageUtils.prefixes(source, MorphStrings.errorWhileDisguisingWithError().resolve("error", "Unable to build wrapper")));
                     logger.error("Unable to get disguise for player with provider {}", provider);
                 }
 
@@ -837,25 +854,19 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                     .resolve("id", disguiseIdentifier)));
 
             logger.error("Unable to parse key " + disguiseIdentifier, iae);
-
-            unMorph(player);
-
             return DisguiseBuildResult.FAILED;
         }
-        catch (Throwable t)
+        catch (Exception e)
         {
-            source.sendMessage(MessageUtils.prefixes(source, MorphStrings.errorWhileDisguising()));
+            source.sendMessage(MessageUtils.prefixes(source, MorphStrings.errorWhileDisguisingWithError().resolve("error", e.getMessage())));
+            logger.error("Error while disguising", e);
 
-            logger.error("Error while disguising", t);
-
-            unMorph(player);
             return DisguiseBuildResult.FAILED;
         }
     }
 
     private void buildDisguise(DisguiseBuildResult result,
-                               MorphParameters parameters,
-                               PlayerMeta playerOptions) throws ParseErrorException, NullPointerException
+                               MorphParameters parameters) throws ParseErrorException, NullPointerException
     {
         if (!result.success())
             throw new IllegalArgumentException("Passing a failed result to postDisguise() !");
@@ -923,13 +934,11 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
     private boolean applyDisguise(MorphParameters parameters,
                                   DisguiseState newState,
-                                  DisguiseMeta meta,
-                                  PlayerMeta playerOptions)
+                                  PlayerMeta playerOptions) throws ExecutionErrorException
     {
         var player = parameters.targetPlayer;
         var provider = getProvider(parameters.targetDisguiseIdentifier());
         var wrapper = newState.getDisguiseWrapper();
-        var source = parameters.commandSource == null ? parameters.targetPlayer : parameters.commandSource;
 
         // 玩家是否已有活跃的DisguiseState?
         var currentState = getDisguiseStateFor(player);
@@ -941,14 +950,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             activeDisguises.remove(currentState);
         }
 
-        var backendSuccess = wrapper.getBackend().disguise(player, wrapper);
-        if (!backendSuccess)
-        {
-            logger.warn("Backend '%s' failed to disguise the player...".formatted(wrapper.getBackend().getIdentifier()));
-            source.sendMessage(MessageUtils.prefixes(source, MorphStrings.errorWhileDisguising()));
-
-            return false;
-        }
+        wrapper.getBackend().disguise(player, wrapper);
 
         provider.onDisguiseApply(newState);
 
@@ -1454,15 +1456,14 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         try
         {
-            this.buildDisguise(result, parameters, playerMeta);
+            this.buildDisguise(result, parameters);
+            this.applyDisguise(parameters, state, playerMeta);
         }
-        catch (Throwable ignored)
+        catch (Exception e) //todo: 或许之后能调整一下，让 ParseErrorException, ExecutionErrorException 单独提示
         {
+            logger.error("Failed calling disguiseFromState", e);
             return false;
         }
-
-        if (!this.applyDisguise(parameters, state, meta, playerMeta))
-            return false;
 
         this.afterDisguise(result, parameters, playerMeta);
 

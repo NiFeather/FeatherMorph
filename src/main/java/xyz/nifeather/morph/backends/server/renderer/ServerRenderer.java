@@ -28,6 +28,7 @@ import xyz.nifeather.morph.backends.server.renderer.network.registries.RenderReg
 import xyz.nifeather.morph.backends.server.renderer.utilties.WatcherUtils;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.misc.BuildFailedException;
+import xyz.nifeather.morph.misc.ExecutionErrorException;
 
 import java.util.Collections;
 import java.util.List;
@@ -76,9 +77,10 @@ public class ServerRenderer extends MorphPluginObject implements Listener
      * @param player 目标玩家
      * @param entityType 目标类型
      * @param name 伪装名称
+     * @throws ExecutionErrorException If there's an error while registering the player
      */
-    @Nullable
-    public SingleWatcher registerEntity(Player player, EntityType entityType, String name)
+    @NotNull
+    public SingleWatcher registerEntity(Player player, EntityType entityType, String name) throws ExecutionErrorException
     {
         try
         {
@@ -88,14 +90,15 @@ public class ServerRenderer extends MorphPluginObject implements Listener
                     livingEntityWatchers.add(livingEntityWatcher);
             });
         }
-        catch (Throwable t)
+        catch (Exception e)
         {
-            logger.error("Can't register player", t);
-
             unRegisterEntity(player);
-        }
 
-        return null;
+            throw ExecutionErrorException.forMethod("registerEntity")
+                    .causedBy(e)
+                    .withMessage("Can't register player")
+                    .create();
+        }
     }
 
     public void unRegisterEntity(Player player)
@@ -113,11 +116,9 @@ public class ServerRenderer extends MorphPluginObject implements Listener
         }
     }
 
-    public void refreshStateForPlayer(@Nullable Player player, List<Player> affectedPlayers)
+    public void refreshStateForPlayer(@NotNull Player player, List<Player> affectedPlayers)
             throws BuildFailedException, NullDependencyException
     {
-        if (player == null) return;
-
         var watcher = registry.getWatcher(player.getUniqueId());
         if (watcher == null)
             throw new NullDependencyException("Null Watcher for a existing player?!");
@@ -132,16 +133,13 @@ public class ServerRenderer extends MorphPluginObject implements Listener
      * @param player 目标玩家
      * @param displayParameters 和伪装对应的 {@link DisplayParameters}
      */
-    public void refreshStateForPlayer(@Nullable Player player, @NotNull DisplayParameters displayParameters, List<Player> affectedPlayers)
+    public void refreshStateForPlayer(@NotNull Player player, @NotNull DisplayParameters displayParameters, List<Player> affectedPlayers)
         throws BuildFailedException
     {
         if (affectedPlayers.isEmpty()) return;
 
-        if (player == null) return;
         var watcher = displayParameters.getWatcher();
-
         var protocolManager = PacketEvents.getAPI().getPlayerManager();
-
         var spawnPackets = watcher.buildSpawnPackets();
 
         affectedPlayers.forEach(p ->

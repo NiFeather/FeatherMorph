@@ -5,12 +5,15 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import xiamomc.pluginbase.Exceptions.NullDependencyException;
 import xiamomc.pluginbase.Messages.FormattableMessage;
 import xyz.nifeather.morph.backends.DisguiseBackend;
 import xyz.nifeather.morph.backends.DisguiseWrapper;
 import xyz.nifeather.morph.backends.server.renderer.ServerRenderer;
 import xyz.nifeather.morph.backends.server.renderer.utilties.WatcherUtils;
 import xyz.nifeather.morph.messages.BackendStrings;
+import xyz.nifeather.morph.misc.BuildFailedException;
+import xyz.nifeather.morph.misc.ExecutionErrorException;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
@@ -154,28 +157,26 @@ public class ServerBackend extends DisguiseBackend<ServerDisguise, ServerDisguis
      *
      * @param player  目标玩家
      * @param wrapper 目标Wrapper
-     * @return 操作是否成功
      * @apiNote 传入的wrapper可能不是此后端产出的Wrapper，需要对其进行验证
+     * @throws ExecutionErrorException If there's an error occurred while applying
      */
     @Override
-    public boolean disguise(Player player, DisguiseWrapper<?> wrapper)
+    public void disguise(Player player, DisguiseWrapper<?> wrapper) throws ExecutionErrorException
     {
-        if (!(wrapper instanceof ServerDisguiseWrapper serverDisguiseWrapper)) return false;
-        if (disguiseWrapperMap.containsKey(player.getUniqueId()))
+        if (!(wrapper instanceof ServerDisguiseWrapper serverDisguiseWrapper))
         {
-            unDisguise(player, false);
+            throw ExecutionErrorException.forMethod("ServerBackend#disguise")
+                    .withMessage("The given disguise wrapper is not an instance of ServerDisguiseWrapper.")
+                    .create();
         }
+
+        if (disguiseWrapperMap.containsKey(player.getUniqueId()))
+            unDisguise(player, false);
 
         disguiseWrapperMap.put(player.getUniqueId(), serverDisguiseWrapper);
 
         var watcher = serverRenderer.registerEntity(
                 player, wrapper.getEntityType(), wrapper.getDisguiseName());
-
-        if (watcher == null)
-        {
-            this.unDisguise(player);
-            return false;
-        }
 
         watcher.markSilent(this);
         serverDisguiseWrapper.setRenderParameters(player, watcher);
@@ -185,13 +186,27 @@ public class ServerBackend extends DisguiseBackend<ServerDisguise, ServerDisguis
         {
             serverRenderer.refreshStateForPlayer(player, WatcherUtils.getAffectedPlayers(player));
         }
-        catch (Throwable t)
+        catch (NullDependencyException e)
         {
-            logger.error("Failed to apply disguise", t);
-            return false;
+            throw ExecutionErrorException.forMethod("ServerBackend#disguise")
+                    .causedBy(e)
+                    .withMessage("Failed to refresh player state, watcher not registered in the renderer!")
+                    .create();
         }
-
-        return true;
+        catch (BuildFailedException e)
+        {
+            throw ExecutionErrorException.forMethod("ServerBackend#disguise")
+                    .causedBy(e)
+                    .withMessage("Renderer failed to build spawn packets")
+                    .create();
+        }
+        catch (Exception e)
+        {
+            throw ExecutionErrorException.forMethod("ServerBackend#disguise")
+                    .causedBy(e)
+                    .withMessage("Unknown error")
+                    .create();
+        }
     }
 
     private boolean unDisguise(Player player, boolean unregisterFromRenderer)

@@ -5,9 +5,10 @@ import xiamomc.pluginbase.Messages.FormattableMessage;
 
 import java.util.Optional;
 
-public class ExecutionErrorException extends Exception
+public class ExecutionErrorException extends Exception implements IMaybeUserFriendlyException
 {
-    public final Optional<FormattableMessage> localizableMessage;
+    @Nullable
+    private final FormattableMessage localizableMessage;
     public final String methodName;
 
     public ExecutionErrorException(String methodName, String msg)
@@ -24,7 +25,7 @@ public class ExecutionErrorException extends Exception
                                Throwable cause, @Nullable FormattableMessage localizableMessage)
     {
         super(msg, cause);
-        this.localizableMessage = Optional.ofNullable(localizableMessage);
+        this.localizableMessage = localizableMessage;
         this.methodName = methodName == null ? "" : methodName;
     }
 
@@ -32,6 +33,22 @@ public class ExecutionErrorException extends Exception
     public static ExecutionErrorGenerator forMethod(String method)
     {
         return new ExecutionErrorGenerator(method);
+    }
+
+    @Override
+    public String underlyingMessage()
+    {
+        var cause = getCause();
+        return cause == null ? this.getMessage() : "%s (Caused by %s: %s)".formatted(this.getMessage(), cause.getClass().getSimpleName(), cause.getMessage());
+    }
+
+    @Override
+    public Optional<FormattableMessage> localizableMessage()
+    {
+        if (getCause() instanceof IMaybeUserFriendlyException userFriendlyException)
+            return userFriendlyException.localizableMessage();
+        else
+            return Optional.ofNullable(localizableMessage);
     }
 
     public static class ExecutionErrorGenerator
