@@ -28,7 +28,7 @@ public class RabbitHandle extends BasicEntityHandle<Rabbit>
     @Override
     protected void onTargetGoalFound(Rabbit mob, Goal<@NotNull Rabbit> vanillaGoal)
     {
-        var replacingGoal = AvoidPlayerGoals.findGoal(mob, morphManager, revealingHandler, 16, 2.2, 2.2);
+        var replacingGoal = AvoidPlayerGoals.findGoal(mob, morphManager(), revealingHandler(), 16, 2.2, 2.2);
         if (replacingGoal == null) return;
 
         mobGoals().addGoal(mob, getGoalPriority(mob, vanillaGoal), replacingGoal);

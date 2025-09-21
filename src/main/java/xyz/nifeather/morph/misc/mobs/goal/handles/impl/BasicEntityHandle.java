@@ -11,8 +11,10 @@ import org.bukkit.craftbukkit.entity.CraftMob;
 import org.bukkit.entity.Mob;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
+import xiamomc.pluginbase.Annotations.Resolved;
 import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.MorphManager;
+import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.RevealingHandler;
 import xyz.nifeather.morph.api.FeatherMorphAPI;
 import xyz.nifeather.morph.misc.mobs.goal.handles.IEntityGoalHandle;
@@ -21,19 +23,28 @@ import xyz.nifeather.morph.utilities.ReflectionUtils;
 import java.util.Collection;
 import java.util.Optional;
 
-public abstract class BasicEntityHandle<M extends Mob> implements IEntityGoalHandle<M>
+public abstract class BasicEntityHandle<M extends Mob> extends MorphPluginObject implements IEntityGoalHandle<M>
 {
-    protected final MorphManager morphManager;
-    protected final RevealingHandler revealingHandler;
+    @Resolved(shouldSolveImmediately = true)
+    private volatile MorphManager morphManager;
+
+    protected MorphManager morphManager()
+    {
+        return morphManager;
+    }
+
+    @Resolved(shouldSolveImmediately = true)
+    private volatile RevealingHandler revealingHandler;
+
+    protected RevealingHandler revealingHandler()
+    {
+        return revealingHandler;
+    }
+
     protected final Logger logger = FeatherMorphMain.getInstance().getSLF4JLogger();
 
     public BasicEntityHandle()
     {
-        var api = FeatherMorphAPI.instance();
-        assert api != null;
-
-        this.morphManager = api.directAccess().morphManager();
-        this.revealingHandler = api.directAccess().revealingHandler();
     }
 
     protected abstract Collection<Goal<@NotNull M>> filterGoals(M mob);

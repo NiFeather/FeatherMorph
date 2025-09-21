@@ -28,7 +28,7 @@ public class CatHandle extends BasicEntityHandle<Cat>
     @Override
     protected void onTargetGoalFound(Cat cat, Goal<@NotNull Cat> vanillaGoal)
     {
-        var replacingGoal = AvoidPlayerGoals.findGoal(cat, morphManager, revealingHandler, 16, 0.8d, 1.33d);
+        var replacingGoal = AvoidPlayerGoals.findGoal(cat, morphManager(), revealingHandler(), 16, 0.8d, 1.33d);
         if (replacingGoal == null) return;
 
         mobGoals().addGoal(cat, getGoalPriority(cat, vanillaGoal), replacingGoal);
@@ -38,7 +38,7 @@ public class CatHandle extends BasicEntityHandle<Cat>
     @Override
     protected void addDefaultGoals(Cat mob)
     {
-        var goal = new MorphNearestAttackableGoal(mob, morphManager);
+        var goal = new MorphNearestAttackableGoal(mob, morphManager());
         mobGoals().addGoal(mob, 1, goal);
     }
 }

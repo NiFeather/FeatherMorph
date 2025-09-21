@@ -37,7 +37,7 @@ public class CommonMobHandle extends BasicEntityHandle<Creature>
         double walkSpeed = isWanderingTrader ? 0.5 : 0.8;
         double sprintSpeed = isWanderingTrader ? 0.5 : 1.33;
 
-        var replacingGoal = AvoidPlayerGoals.findGoal(creature, morphManager, revealingHandler, 16, walkSpeed, sprintSpeed, this::createDefaultPanickingGoal);
+        var replacingGoal = AvoidPlayerGoals.findGoal(creature, morphManager(), revealingHandler(), 16, walkSpeed, sprintSpeed, this::createDefaultPanickingGoal);
         if (replacingGoal == null) return;
 
         mobGoals().addGoal(creature, getGoalPriority(creature, vanillaGoal), replacingGoal);
@@ -62,7 +62,7 @@ public class CommonMobHandle extends BasicEntityHandle<Creature>
         double walkSpeed = isWanderingTrader ? 0.5 : 0.8;
         double sprintSpeed = isWanderingTrader ? 0.5 : 1.33;
 
-        var defaultGoal = AvoidPlayerGoals.findGoal(creature, morphManager, revealingHandler, 16, walkSpeed, sprintSpeed);
+        var defaultGoal = AvoidPlayerGoals.findGoal(creature, morphManager(), revealingHandler(), 16, walkSpeed, sprintSpeed);
         if (defaultGoal == null) return;
 
         mobGoals().addGoal(creature, 4, defaultGoal);
@@ -71,7 +71,7 @@ public class CommonMobHandle extends BasicEntityHandle<Creature>
     @Override
     protected void addDefaultGoals(Creature creature)
     {
-        var goal = new MorphNearestAttackableGoal(creature, morphManager);
+        var goal = new MorphNearestAttackableGoal(creature, morphManager());
         mobGoals().addGoal(creature, 1, goal);
     }
 }

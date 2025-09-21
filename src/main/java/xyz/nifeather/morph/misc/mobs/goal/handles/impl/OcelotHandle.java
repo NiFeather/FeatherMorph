@@ -28,7 +28,7 @@ public class OcelotHandle extends BasicEntityHandle<Ocelot>
     @Override
     protected void onTargetGoalFound(Ocelot ocelot, Goal<@NotNull Ocelot> vanillaGoal)
     {
-        var replacingGoal = AvoidPlayerGoals.findGoal(ocelot, morphManager, revealingHandler, 16, 0.8, 1.33);
+        var replacingGoal = AvoidPlayerGoals.findGoal(ocelot, morphManager(), revealingHandler(), 16, 0.8, 1.33);
         if (replacingGoal == null) return;
 
         mobGoals().addGoal(ocelot, getGoalPriority(ocelot, vanillaGoal), replacingGoal);
@@ -38,7 +38,7 @@ public class OcelotHandle extends BasicEntityHandle<Ocelot>
     @Override
     protected void addDefaultGoals(Ocelot mob)
     {
-        var goal = new MorphNearestAttackableGoal(mob, morphManager);
+        var goal = new MorphNearestAttackableGoal(mob, morphManager());
         mobGoals().addGoal(mob, 1, goal);
     }
 }

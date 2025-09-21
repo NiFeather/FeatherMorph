@@ -34,6 +34,8 @@ import xyz.nifeather.morph.misc.gui.IconLookup;
 import xyz.nifeather.morph.misc.integrations.placeholderapi.PlaceholderIntegration;
 import xyz.nifeather.morph.misc.integrations.residence.ResidenceEventProcessor;
 import xyz.nifeather.morph.misc.integrations.towny.TownyAdapter;
+import xyz.nifeather.morph.misc.mobs.goal.handles.impl.BasicEntityHandle;
+import xyz.nifeather.morph.misc.mobs.goal.handles.impl.CatHandle;
 import xyz.nifeather.morph.network.multiInstance.MultiInstanceService;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
 import xyz.nifeather.morph.platform.CurrentPlatform;
@@ -319,9 +321,20 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
         //注册EventProcessor
         this.schedule(() ->
         {
-            registerListeners(listeners);
+            FeatherMorphAPI api;
+            try
+            {
+                api = new FeatherMorphAPI(this);
+            }
+            catch (Exception e)
+            {
+                logger.error("FeatherMorphAPI failed to load!", e);
+                panic("API failed to load");
+                return;
+            }
 
-            dependencyManager.cache(new FeatherMorphAPI(this));
+            dependencyManager.cache(api);
+            registerListeners(listeners);
         });
 
         pluginEnableDone.set(true);
