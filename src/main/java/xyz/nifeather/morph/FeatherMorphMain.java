@@ -34,8 +34,6 @@ import xyz.nifeather.morph.misc.gui.IconLookup;
 import xyz.nifeather.morph.misc.integrations.placeholderapi.PlaceholderIntegration;
 import xyz.nifeather.morph.misc.integrations.residence.ResidenceEventProcessor;
 import xyz.nifeather.morph.misc.integrations.towny.TownyAdapter;
-import xyz.nifeather.morph.misc.mobs.goal.handles.impl.BasicEntityHandle;
-import xyz.nifeather.morph.misc.mobs.goal.handles.impl.CatHandle;
 import xyz.nifeather.morph.network.multiInstance.MultiInstanceService;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
 import xyz.nifeather.morph.platform.CurrentPlatform;
@@ -43,6 +41,7 @@ import xyz.nifeather.morph.platform.impl.paper.PaperPlatform;
 import xyz.nifeather.morph.skills.SkillManager;
 import xyz.nifeather.morph.storage.skill.SkillsConfigurationStoreNew;
 import xyz.nifeather.morph.updates.UpdateHandler;
+import xyz.nifeather.morph.utilities.FoliaThreadUtils;
 
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -72,20 +71,8 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
 
         CurrentPlatform.instance();
 
-        boolean folia = false;
-        try
-        {
-            Class.forName("io.papermc.paper.threadedregions.RegionizedServer");
-
+        if (isFolia())
             logger.info("We are running on a Folia server!");
-            folia = true;
-        }
-        catch (Throwable ignored)
-        {
-            logger.info("io.papermc.paper.threadedregions.RegionizedServer not found, possibly not a Folia server.");
-        }
-
-        isFolia = folia;
     }
 
     public static String getMorphNameSpace()
@@ -131,10 +118,9 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
 
     private ExecutorHub mirrorExecutorHub;
 
-    private final boolean isFolia;
     public boolean isFolia()
     {
-        return isFolia;
+        return FoliaThreadUtils.isFolia();
     }
 
     private static final String noticeHeaderFooter = "- x - x - x - x - x - x - x - x - x - x - x - x -";
