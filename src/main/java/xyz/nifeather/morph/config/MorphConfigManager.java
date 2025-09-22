@@ -14,6 +14,7 @@ import xiamomc.pluginbase.Messages.MessageStore;
 import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.messages.CommonStrings;
 import xyz.nifeather.morph.messages.MessageUtils;
+import xyz.nifeather.morph.utilities.FoliaThreadUtils;
 
 import java.util.*;
 
@@ -168,7 +169,7 @@ public class MorphConfigManager extends PluginConfigManager
         });
 
         //更新配置
-        int targetVersion = 42;
+        int targetVersion = 43;
 
         var configVersion = getOrDefault(Integer.class, ConfigOption.VERSION);
 
@@ -307,6 +308,12 @@ public class MorphConfigManager extends PluginConfigManager
             if (configVersion < 41)
             {
                 this.remove(ConfigOption.ENABLE_SENTRY_LOGGER);
+            }
+
+            if (configVersion < 43 && FoliaThreadUtils.isFolia())
+            {
+                newConfig.set(ConfigOption.DO_MODIFY_AI.node.toString(), false);
+                FeatherMorphMain.getInstance().getSLF4JLogger().info("AI Modification has been disabled due to having issue on Folia server");
             }
 
             newConfig.set(ConfigOption.VERSION.toString(), targetVersion);

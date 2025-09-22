@@ -117,7 +117,7 @@ public enum ConfigOption
 
     DO_CHECK_ABILITY_PERMISSIONS(ConfigNode.create().append("check_ability_permissions"), true),
 
-    DO_MODIFY_AI(ConfigNode.create().append("modify_ai"), true),
+    DO_MODIFY_AI(ConfigNode.create().append("modify_ai"), false),
 
     GUI_PATTERN(ConfigNode.create().append("gui_pattern"), new ArrayList<String>()),
 

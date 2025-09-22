@@ -100,4 +100,18 @@ public class FoliaThreadUtils
         var nmsEntity = ((CraftEntity) bukkitEntity).getHandle();
         return TickThread.isTickThreadFor(nmsEntity);
     }
+
+    // https://docs.papermc.io/paper/dev/folia-support/#checking-for-folia
+    public static boolean isFolia()
+    {
+        try
+        {
+            Class.forName("io.papermc.paper.threadedregions.RegionizedServer");
+            return true;
+        }
+        catch (ClassNotFoundException e)
+        {
+            return false;
+        }
+    }
 }

@@ -23,9 +23,8 @@ root:
   # Modify mobs' AI to make them react to disguises?
   #
   # PS: !!!This option requires a server restart to make changes!!!
-  # PS: Also, it's not recommended to reload the server after disabling this option.
-  #     While we try to undo changes it made, the mobs' behavior will still have distinction compared to vanilla
-  modify_ai: true
+  # PS: Due to having issue on Folia server, this feature is disabled by default
+  modify_ai: false
 
   # The GUI pattern for the fallback disguise selection.
   # It's a bit limited
@@ -358,4 +357,4 @@ root:
       - SelectedItem
 
   # Do not touch unless you know what you're doing!
-  version: 42
+  version: 43
