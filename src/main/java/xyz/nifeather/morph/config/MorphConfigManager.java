@@ -310,11 +310,11 @@ public class MorphConfigManager extends PluginConfigManager
                 this.remove(ConfigOption.ENABLE_SENTRY_LOGGER);
             }
 
-            if (configVersion < 43 && FoliaThreadUtils.isFolia())
+            /*if (configVersion < 43 && FoliaThreadUtils.isFolia())
             {
                 newConfig.set(ConfigOption.DO_MODIFY_AI.node.toString(), false);
                 FeatherMorphMain.getInstance().getSLF4JLogger().info("AI Modification has been disabled due to having issue on Folia server");
-            }
+            }*/
 
             newConfig.set(ConfigOption.VERSION.toString(), targetVersion);
 
