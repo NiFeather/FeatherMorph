@@ -10,6 +10,7 @@ import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.utilities.EntityTypeUtils;
+import xyz.nifeather.morph.utilities.FoliaThreadUtils;
 
 import java.util.EnumSet;
 import java.util.concurrent.ThreadLocalRandom;
@@ -64,6 +65,9 @@ public class MorphNearestAttackableGoal extends Goal
         var target = targetedEntity;
         if (target == null) return false;
 
+        if (!FoliaThreadUtils.isTickThreadFor(target))
+            return false;
+
         boolean cancelTarget;
 
         // 当满足以下任一条件时，取消仇恨：
@@ -105,7 +109,7 @@ public class MorphNearestAttackableGoal extends Goal
         var players = mob.getNearbyEntities(followRange, followRange, followRange)
                 .stream().filter(e ->
                 {
-                    if (!(e instanceof Player player)) return false;
+                    if (!(e instanceof Player player) || !FoliaThreadUtils.isTickThreadFor(e)) return false;
 
                     var gamemode = player.getGameMode();
                     return gamemode == GameMode.SURVIVAL || gamemode == GameMode.ADVENTURE;

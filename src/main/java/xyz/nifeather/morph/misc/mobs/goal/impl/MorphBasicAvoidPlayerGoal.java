@@ -69,7 +69,7 @@ public abstract class MorphBasicAvoidPlayerGoal<M extends Mob> extends Goal
     {
         var trackingDistance = (mob.getBoundingBox().getWidthX() / 2d) + detectDistance;
         var nearbyPlayers = mob.getNearbyEntities(trackingDistance, 3, trackingDistance)
-                .stream().filter(e -> e instanceof Player)
+                .stream().filter(e -> e instanceof Player && FoliaThreadUtils.isTickThreadFor(e))
                 .map(e -> (Player) e)
                 .toList();
 
