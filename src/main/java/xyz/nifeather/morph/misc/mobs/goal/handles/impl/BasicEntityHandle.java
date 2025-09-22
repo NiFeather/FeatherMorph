@@ -53,7 +53,6 @@ public abstract class BasicEntityHandle<M extends Mob> extends MorphPluginObject
         addDefaultGoals(mob);
 
         var matchingGoals = filterGoals(mob);
-        logger.info("Found %s goal(s) for mob %s".formatted(matchingGoals.size(), mob.getType()));
         if (matchingGoals.isEmpty()) return;
 
         findAvoidPlayerGoal(matchingGoals).ifPresentOrElse(g -> this.onTargetGoalFound(mob, g), () -> this.whenNoTargetGoal(mob));
