@@ -1,7 +1,7 @@
 package xyz.nifeather.morph.misc.mobs.goal.impl;
 
-import com.destroystokyo.paper.entity.ai.Goal;
 import com.destroystokyo.paper.entity.ai.GoalKey;
+import net.minecraft.world.entity.ai.goal.Goal;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Ocelot;
 import org.bukkit.entity.Entity;
@@ -21,15 +21,9 @@ public class MorphOcelotAvoidPlayerGoal extends MorphBasicAvoidPlayerGoal<Ocelot
     }
 
     @Override
-    public GoalKey<@NotNull Ocelot> getKey()
+    public boolean canUse()
     {
-        return GoalKey.of(Ocelot.class, Objects.requireNonNull(NamespacedKey.fromString("feathermorph:ocelot_avoid_player_goal")));
-    }
-
-    @Override
-    public boolean shouldActivate()
-    {
-        return !mob.isTrusting() && super.shouldActivate();
+        return !mob.isTrusting() && super.canUse();
     }
 
     @Override
@@ -49,7 +43,7 @@ public class MorphOcelotAvoidPlayerGoal extends MorphBasicAvoidPlayerGoal<Ocelot
         }
 
         @Override
-        public Goal<Ocelot> createGoal(Ocelot mob, @NotNull MorphManager morphManager, @NotNull RevealingHandler revealingHandler, double detectDistance, double walkSpeed, double sprintSpeed)
+        public Goal createGoal(Ocelot mob, @NotNull MorphManager morphManager, @NotNull RevealingHandler revealingHandler, double detectDistance, double walkSpeed, double sprintSpeed)
         {
             return new MorphOcelotAvoidPlayerGoal(mob, revealingHandler, morphManager, detectDistance, walkSpeed, sprintSpeed);
         }

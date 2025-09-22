@@ -1,22 +1,19 @@
 package xyz.nifeather.morph.misc.mobs.goal.handles.impl;
 
-import com.destroystokyo.paper.entity.ai.Goal;
-import com.destroystokyo.paper.entity.ai.MobGoals;
-import com.destroystokyo.paper.entity.ai.PaperGoal;
 import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
+import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.ai.goal.GoalSelector;
 import net.minecraft.world.entity.ai.goal.WrappedGoal;
 import net.minecraft.world.entity.player.Player;
 import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.entity.CraftMob;
 import org.bukkit.entity.Mob;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.RevealingHandler;
-import xyz.nifeather.morph.api.FeatherMorphAPI;
 import xyz.nifeather.morph.misc.mobs.goal.handles.IEntityGoalHandle;
 import xyz.nifeather.morph.utilities.ReflectionUtils;
 
@@ -47,8 +44,8 @@ public abstract class BasicEntityHandle<M extends Mob> extends MorphPluginObject
     {
     }
 
-    protected abstract Collection<Goal<@NotNull M>> filterGoals(M mob);
-    protected abstract void onTargetGoalFound(M mob, Goal<@NotNull M> vanillaGoal);
+    protected abstract Collection<WrappedGoal> filterGoals(M mob);
+    protected abstract void onTargetGoalFound(M mob, WrappedGoal vanillaGoal);
 
     @Override
     public final void apply(M mob)
@@ -56,6 +53,7 @@ public abstract class BasicEntityHandle<M extends Mob> extends MorphPluginObject
         addDefaultGoals(mob);
 
         var matchingGoals = filterGoals(mob);
+        logger.info("Found %s goal(s) for mob %s".formatted(matchingGoals.size(), mob.getType()));
         if (matchingGoals.isEmpty()) return;
 
         findAvoidPlayerGoal(matchingGoals).ifPresentOrElse(g -> this.onTargetGoalFound(mob, g), () -> this.whenNoTargetGoal(mob));
@@ -69,24 +67,26 @@ public abstract class BasicEntityHandle<M extends Mob> extends MorphPluginObject
     {
     }
 
-    protected Optional<Goal<@NotNull M>> findAvoidPlayerGoal(Collection<Goal<@NotNull M>> collection)
+    protected Optional<WrappedGoal> findAvoidPlayerGoal(Collection<WrappedGoal> collection)
     {
         // 移除目标是玩家的AvoidGoal
-        for (Goal<@NotNull M> g : collection)
+        for (var wrapped : collection)
         {
-            if (!(g instanceof PaperGoal<M> paperWrapped)) continue;
-            if (!(paperWrapped.getHandle() instanceof AvoidEntityGoal<?> avoidEntityGoal)) continue;
+            var underlyingGoal = wrapped.getGoal();
 
-            var clazz = (Class<?>) ReflectionUtils.getValue(avoidEntityGoal, "avoidClass", Class.class);
+            var clazz = (Class<?>) ReflectionUtils.getValue(underlyingGoal, "avoidClass", Class.class);
             if (clazz.isAssignableFrom(Player.class))
-                return Optional.of(g);
+                return Optional.of(wrapped);
         }
 
         return Optional.empty();
     }
 
-    protected int getGoalPriority(M mob, Goal<@NotNull M> goal)
+    @Deprecated
+    protected int getGoalPriority(M mob, WrappedGoal goal)
     {
+        return goal.getPriority();
+        /*
         var goalSelector = ((CraftMob) mob).getHandle().goalSelector;
         var matchedGoal = goalSelector.getAvailableGoals()
                 .stream()
@@ -102,10 +102,11 @@ public abstract class BasicEntityHandle<M extends Mob> extends MorphPluginObject
         }
 
         return matchedGoal.map(WrappedGoal::getPriority).orElse(0);
+        */
     }
 
-    protected MobGoals mobGoals()
+    protected GoalSelector goalSelector(M mob)
     {
-        return Bukkit.getMobGoals();
+        return ((CraftMob)mob).getHandle().goalSelector;
     }
 }

@@ -1,8 +1,6 @@
 package xyz.nifeather.morph.misc.mobs.goal.impl;
 
-import com.destroystokyo.paper.entity.ai.Goal;
-import com.destroystokyo.paper.entity.ai.GoalKey;
-import org.bukkit.NamespacedKey;
+import net.minecraft.world.entity.ai.goal.Goal;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Panda;
 import org.jetbrains.annotations.NotNull;
@@ -10,7 +8,6 @@ import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.RevealingHandler;
 import xyz.nifeather.morph.misc.mobs.goal.IGoalProvider;
 
-import java.util.Objects;
 import java.util.Optional;
 
 public class MorphPandaAvoidPlayerGoal extends MorphBasicAvoidPlayerGoal<Panda>
@@ -21,13 +18,7 @@ public class MorphPandaAvoidPlayerGoal extends MorphBasicAvoidPlayerGoal<Panda>
     }
 
     @Override
-    public GoalKey<@NotNull Panda> getKey()
-    {
-        return GoalKey.of(Panda.class, Objects.requireNonNull(NamespacedKey.fromString("feathermorph:panda_avoid_player_goal")));
-    }
-
-    @Override
-    public boolean shouldActivate()
+    public boolean canUse()
     {
         if (mob.getCombinedGene() != Panda.Gene.WORRIED) return false;
 
@@ -35,7 +26,7 @@ public class MorphPandaAvoidPlayerGoal extends MorphBasicAvoidPlayerGoal<Panda>
         if (mob.isOnBack() || mob.isScared() || mob.isEating() || mob.isRolling() || mob.isSitting())
             return false;
 
-        return super.shouldActivate();
+        return super.canUse();
     }
 
     @Override
@@ -55,7 +46,7 @@ public class MorphPandaAvoidPlayerGoal extends MorphBasicAvoidPlayerGoal<Panda>
         }
 
         @Override
-        public Goal<Panda> createGoal(Panda mob, @NotNull MorphManager morphManager, @NotNull RevealingHandler revealingHandler, double detectDistance, double walkSpeed, double sprintSpeed)
+        public Goal createGoal(Panda mob, @NotNull MorphManager morphManager, @NotNull RevealingHandler revealingHandler, double detectDistance, double walkSpeed, double sprintSpeed)
         {
             return new MorphPandaAvoidPlayerGoal(mob, revealingHandler, morphManager, detectDistance, walkSpeed, sprintSpeed);
         }

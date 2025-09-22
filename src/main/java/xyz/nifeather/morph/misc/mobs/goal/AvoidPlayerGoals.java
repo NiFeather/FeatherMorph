@@ -1,8 +1,6 @@
 package xyz.nifeather.morph.misc.mobs.goal;
 
-import com.destroystokyo.paper.entity.ai.Goal;
-import org.bukkit.entity.Creature;
-import org.bukkit.entity.Entity;
+import net.minecraft.world.entity.ai.goal.Goal;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Mob;
 import org.jetbrains.annotations.ApiStatus;
@@ -40,19 +38,19 @@ public class AvoidPlayerGoals
     }
 
     @Nullable
-    public static <X extends Mob> Goal<@NotNull X> findGoal(X mob,
-                                                            @NotNull MorphManager morphManager,
-                                                            @NotNull RevealingHandler revealingHandler,
-                                                            double detectDistance,
-                                                            double walkSpeed,
-                                                            double sprintSpeed)
+    public static <X extends Mob> Goal findGoal(X mob,
+                                                @NotNull MorphManager morphManager,
+                                                @NotNull RevealingHandler revealingHandler,
+                                                double detectDistance,
+                                                double walkSpeed,
+                                                double sprintSpeed)
     {
         IGoalSupplier<Mob> supplier = MorphCommonMobAvoidPlayerGoal.GOAL_PROVIDER;
         return findGoal(mob, morphManager, revealingHandler, detectDistance, walkSpeed, sprintSpeed, (IGoalSupplier<X>) supplier);
     }
 
     @Nullable
-    public static <X extends Mob> Goal<@NotNull X> findGoal(X mob,
+    public static <X extends Mob> Goal findGoal(X mob,
                                                    @NotNull MorphManager morphManager,
                                                    @NotNull RevealingHandler revealingHandler,
                                                    double detectDistance,
@@ -66,7 +64,7 @@ public class AvoidPlayerGoals
 
         IGoalProvider<X> provider = (IGoalProvider<X>) matchingProvider;
 
-        Goal<@NotNull X> goal = null;
+        Goal goal = null;
         var optional = provider.tryCast(mob);
         if (optional.isPresent())
             goal = provider.createGoal(optional.get(), morphManager, revealingHandler, detectDistance, walkSpeed, sprintSpeed);

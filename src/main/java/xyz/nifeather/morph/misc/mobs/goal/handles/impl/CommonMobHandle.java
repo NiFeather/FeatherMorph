@@ -1,7 +1,9 @@
 package xyz.nifeather.morph.misc.mobs.goal.handles.impl;
 
-import com.destroystokyo.paper.entity.ai.Goal;
 import com.destroystokyo.paper.entity.ai.VanillaGoal;
+import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
+import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.ai.goal.WrappedGoal;
 import org.bukkit.entity.Creature;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -24,13 +26,16 @@ public class CommonMobHandle extends BasicEntityHandle<Creature>
     }
 
     @Override
-    protected Collection<Goal<@NotNull Creature>> filterGoals(Creature mob)
+    protected Collection<WrappedGoal> filterGoals(Creature mob)
     {
-        return mobGoals().getGoals(mob, VanillaGoal.AVOID_ENTITY);
+        return goalSelector(mob).getAvailableGoals()
+                .stream()
+                .filter(wrappedGoal -> wrappedGoal.getGoal() instanceof AvoidEntityGoal<?>)
+                .toList();
     }
 
     @Override
-    protected void onTargetGoalFound(Creature creature, Goal<@NotNull Creature> vanillaGoal)
+    protected void onTargetGoalFound(Creature creature, WrappedGoal vanillaGoal)
     {
         // Dirty fix for wandering traders, we may want to detect entity's walk/sprintSpeed in future
         boolean isWanderingTrader = creature.getType() == EntityType.WANDERING_TRADER;
@@ -40,16 +45,17 @@ public class CommonMobHandle extends BasicEntityHandle<Creature>
         var replacingGoal = AvoidPlayerGoals.findGoal(creature, morphManager(), revealingHandler(), 16, walkSpeed, sprintSpeed, this::createDefaultPanickingGoal);
         if (replacingGoal == null) return;
 
-        mobGoals().addGoal(creature, getGoalPriority(creature, vanillaGoal), replacingGoal);
-        mobGoals().removeGoal(creature, vanillaGoal);
+        var selector = goalSelector(creature);
+        selector.addGoal(vanillaGoal.getPriority(), replacingGoal);
+        selector.removeGoal(vanillaGoal);
     }
 
-    private Goal<@NotNull Creature> createDefaultPanickingGoal(Creature mob,
-                                                          @NotNull MorphManager morphManager,
-                                                          @NotNull RevealingHandler revealingHandler,
-                                                          double detectDistance,
-                                                          double walkSpeed,
-                                                          double sprintSpeed)
+    private Goal createDefaultPanickingGoal(Creature mob,
+                                            @NotNull MorphManager morphManager,
+                                            @NotNull RevealingHandler revealingHandler,
+                                            double detectDistance,
+                                            double walkSpeed,
+                                            double sprintSpeed)
     {
         return new MorphDefaultPanickingAvoidPlayerGoal(mob, revealingHandler, morphManager, detectDistance, walkSpeed, sprintSpeed);
     }
@@ -65,13 +71,13 @@ public class CommonMobHandle extends BasicEntityHandle<Creature>
         var defaultGoal = AvoidPlayerGoals.findGoal(creature, morphManager(), revealingHandler(), 16, walkSpeed, sprintSpeed);
         if (defaultGoal == null) return;
 
-        mobGoals().addGoal(creature, 4, defaultGoal);
+        goalSelector(creature).addGoal(4, defaultGoal);
     }
 
     @Override
     protected void addDefaultGoals(Creature creature)
     {
         var goal = new MorphNearestAttackableGoal(creature, morphManager());
-        mobGoals().addGoal(creature, 1, goal);
+        goalSelector(creature).addGoal(1, goal);
     }
 }

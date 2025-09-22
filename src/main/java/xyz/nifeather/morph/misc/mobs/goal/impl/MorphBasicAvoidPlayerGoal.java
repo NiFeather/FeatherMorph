@@ -1,20 +1,15 @@
 package xyz.nifeather.morph.misc.mobs.goal.impl;
 
 import com.destroystokyo.paper.entity.Pathfinder;
-import com.destroystokyo.paper.entity.ai.Goal;
-import com.destroystokyo.paper.entity.ai.GoalType;
 import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.util.DefaultRandomPos;
 import net.minecraft.world.phys.Vec3;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.entity.CraftEntity;
 import org.bukkit.craftbukkit.entity.CraftMob;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Mob;
-import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
+import org.bukkit.entity.*;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.RevealingHandler;
@@ -26,7 +21,7 @@ import java.util.EnumSet;
 /**
  * 一定程度上复刻了 NMS 中的 {@link net.minecraft.world.entity.ai.goal.AvoidEntityGoal}
  */
-public abstract class MorphBasicAvoidPlayerGoal<M extends Mob> implements Goal<@NotNull M>
+public abstract class MorphBasicAvoidPlayerGoal<M extends Mob> extends Goal
 {
     protected final M mob;
     protected final RevealingHandler revealingHandler;
@@ -47,13 +42,15 @@ public abstract class MorphBasicAvoidPlayerGoal<M extends Mob> implements Goal<@
         this.detectDistance = detectDistance;
         this.walkSpeed = walkSpeed;
         this.sprintSpeed = sprintSpeed;
+
+        setFlags(EnumSet.of(Flag.MOVE));
     }
 
     @Nullable
     private Entity entityToAvoid;
 
     @Override
-    public boolean shouldActivate()
+    public boolean canUse()
     {
         entityToAvoid = findEntityToAvoid();
         if (entityToAvoid == null) return false;
@@ -63,7 +60,7 @@ public abstract class MorphBasicAvoidPlayerGoal<M extends Mob> implements Goal<@
     }
 
     @Override
-    public boolean shouldStayActive()
+    public boolean canContinueToUse()
     {
         return !mob.getPathfinder().hasPath();
     }
@@ -173,12 +170,5 @@ public abstract class MorphBasicAvoidPlayerGoal<M extends Mob> implements Goal<@
     {
         entityToAvoid = null;
         path = null;
-    }
-
-    @Override
-    @NotNull
-    public EnumSet<GoalType> getTypes()
-    {
-        return EnumSet.of(GoalType.MOVE);
     }
 }

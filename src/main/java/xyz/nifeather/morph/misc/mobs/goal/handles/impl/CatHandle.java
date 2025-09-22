@@ -2,6 +2,8 @@ package xyz.nifeather.morph.misc.mobs.goal.handles.impl;
 
 import com.destroystokyo.paper.entity.ai.Goal;
 import com.destroystokyo.paper.entity.ai.VanillaGoal;
+import net.minecraft.world.entity.ai.goal.WrappedGoal;
+import org.bukkit.craftbukkit.entity.CraftCat;
 import org.bukkit.entity.Cat;
 import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
@@ -20,25 +22,29 @@ public class CatHandle extends BasicEntityHandle<Cat>
     }
 
     @Override
-    protected Collection<Goal<@NotNull Cat>> filterGoals(Cat mob)
+    protected Collection<WrappedGoal> filterGoals(Cat mob)
     {
-        return mobGoals().getGoals(mob, VanillaGoal.CAT_AVOID_ENTITY);
+        return goalSelector(mob).getAvailableGoals()
+                .stream()
+                .filter(wrappedGoal -> wrappedGoal.getGoal().getClass().getSimpleName().equals("CatAvoidEntityGoal"))
+                .toList();
     }
 
     @Override
-    protected void onTargetGoalFound(Cat cat, Goal<@NotNull Cat> vanillaGoal)
+    protected void onTargetGoalFound(Cat cat, WrappedGoal vanillaGoal)
     {
         var replacingGoal = AvoidPlayerGoals.findGoal(cat, morphManager(), revealingHandler(), 16, 0.8d, 1.33d);
         if (replacingGoal == null) return;
 
-        mobGoals().addGoal(cat, getGoalPriority(cat, vanillaGoal), replacingGoal);
-        mobGoals().removeGoal(cat, vanillaGoal);
+        var selector = goalSelector(cat);
+        selector.removeGoal(vanillaGoal.getGoal());
+        selector.addGoal(vanillaGoal.getPriority(), replacingGoal);
     }
 
     @Override
     protected void addDefaultGoals(Cat mob)
     {
         var goal = new MorphNearestAttackableGoal(mob, morphManager());
-        mobGoals().addGoal(mob, 1, goal);
+        goalSelector(mob).addGoal(1, goal);
     }
 }

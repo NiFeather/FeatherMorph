@@ -1,8 +1,6 @@
 package xyz.nifeather.morph.misc.mobs.goal.impl;
 
-import com.destroystokyo.paper.entity.ai.Goal;
-import com.destroystokyo.paper.entity.ai.GoalKey;
-import org.bukkit.NamespacedKey;
+import net.minecraft.world.entity.ai.goal.Goal;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Mob;
 import org.jetbrains.annotations.NotNull;
@@ -23,12 +21,6 @@ public class MorphCommonMobAvoidPlayerGoal extends MorphBasicAvoidPlayerGoal<Mob
         super(bindingMob, revealingHandler, morphManager, detectDistance, walkSpeed, sprintSpeed);
     }
 
-    @Override
-    public @NotNull GoalKey<@NotNull Mob> getKey()
-    {
-        return GoalKey.of(Mob.class, Objects.requireNonNull(NamespacedKey.fromString("feathermorph:common_mob_avoid_player_goal")));
-    }
-
     public static final MorphCommonMobAvoidPlayerGoal.CommonMobGoalProvider GOAL_PROVIDER = new MorphCommonMobAvoidPlayerGoal.CommonMobGoalProvider();
 
     public static class CommonMobGoalProvider implements IGoalProvider<Mob>
@@ -40,7 +32,7 @@ public class MorphCommonMobAvoidPlayerGoal extends MorphBasicAvoidPlayerGoal<Mob
         }
 
         @Override
-        public Goal<@NotNull Mob> createGoal(Mob mob, @NotNull MorphManager morphManager, @NotNull RevealingHandler revealingHandler, double detectDistance, double walkSpeed, double sprintSpeed)
+        public Goal createGoal(Mob mob, @NotNull MorphManager morphManager, @NotNull RevealingHandler revealingHandler, double detectDistance, double walkSpeed, double sprintSpeed)
         {
             return new MorphCommonMobAvoidPlayerGoal(mob, revealingHandler, morphManager, detectDistance, walkSpeed, sprintSpeed);
         }

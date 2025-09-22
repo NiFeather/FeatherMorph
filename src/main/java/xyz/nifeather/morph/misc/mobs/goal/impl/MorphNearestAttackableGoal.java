@@ -1,25 +1,23 @@
 package xyz.nifeather.morph.misc.mobs.goal.impl;
 
-import com.destroystokyo.paper.entity.ai.Goal;
-import com.destroystokyo.paper.entity.ai.GoalKey;
-import com.destroystokyo.paper.entity.ai.GoalType;
 import net.minecraft.world.entity.NeutralMob;
+import net.minecraft.world.entity.ai.goal.Goal;
 import org.bukkit.GameMode;
-import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.craftbukkit.entity.CraftMob;
 import org.bukkit.entity.*;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.utilities.EntityTypeUtils;
 
 import java.util.EnumSet;
-import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class MorphNearestAttackableGoal implements Goal<@NotNull Mob>
+/**
+ * 一定程度上复刻了 {@link net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal}
+ */
+public class MorphNearestAttackableGoal extends Goal
 {
     private final Mob mob;
     private final MorphManager morphManager;
@@ -28,6 +26,8 @@ public class MorphNearestAttackableGoal implements Goal<@NotNull Mob>
     {
         this.mob = mob;
         this.morphManager = morphManager;
+
+        setFlags(EnumSet.of(Flag.TARGET));
     }
 
     @Nullable
@@ -42,7 +42,7 @@ public class MorphNearestAttackableGoal implements Goal<@NotNull Mob>
      * @return if this goal should be activated
      */
     @Override
-    public boolean shouldActivate()
+    public boolean canUse()
     {
         if (mob instanceof Tameable tameable && tameable.isTamed())
             return false;
@@ -156,30 +156,5 @@ public class MorphNearestAttackableGoal implements Goal<@NotNull Mob>
 
         targetedEntity = null;
         cachedTargetEntityState = null;
-    }
-
-    /**
-     * A unique key that identifies this type of goal. Plugins should use their own namespace, not the minecraft
-     * namespace. Additionally, this key also specifies to what mobs this goal can be applied to
-     *
-     * @return the goal key
-     */
-    @Override
-    public @NotNull GoalKey<@NotNull Mob> getKey()
-    {
-        return GoalKey.of(Mob.class, Objects.requireNonNull(NamespacedKey.fromString("feathermorph:nearest_attackable_goal")));
-    }
-
-    /**
-     * Returns a list of all applicable flags for this goal.<br>
-     * <p>
-     * This method is only called on construction.
-     *
-     * @return the subtypes.
-     */
-    @Override
-    public @NotNull EnumSet<GoalType> getTypes()
-    {
-        return EnumSet.of(GoalType.TARGET);
     }
 }
