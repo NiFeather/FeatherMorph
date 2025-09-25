@@ -17,10 +17,10 @@ import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEnt
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.misc.AnimationNames;
 import xyz.nifeather.morph.misc.BuildFailedException;
-import xyz.nifeather.morph.misc.MorphGameProfile;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 import xyz.nifeather.morph.misc.disguiseProperty.values.PlayerProperties;
+import xyz.nifeather.morph.utilities.GameProfileUtils;
 
 import java.util.EnumSet;
 import java.util.List;
@@ -140,7 +140,7 @@ public class PlayerWatcher extends InventoryLivingWatcher
         var spawnUUID = this.readEntryOrThrow(CustomEntries.SPAWN_UUID);
         var infoRemove = new WrapperPlayServerPlayerInfoRemove(List.of(spawnUUID));
 
-        var packetProfile = MorphGameProfile.toPacketEventsUserProfile(this.readEntryOrThrow(CustomEntries.PROFILE));
+        var packetProfile = GameProfileUtils.toPacketEventsUserProfile(this.readEntryOrThrow(CustomEntries.PROFILE));
         packetProfile.setUUID(spawnUUID);
         var infoUpdate = new WrapperPlayServerPlayerInfoUpdate(
                 EnumSet.of(
@@ -164,7 +164,7 @@ public class PlayerWatcher extends InventoryLivingWatcher
 
         var gameProfile = this.readEntryOrThrow(CustomEntries.PROFILE);
 
-        if (gameProfile.getName().isBlank())
+        if (gameProfile.name().isBlank())
             throw new IllegalArgumentException("GameProfile name is empty!");
 
         list.addAll(this.buildPlayerInfoPackets());

@@ -24,7 +24,7 @@ public class SingleSkin
     {
         var instance = new SingleSkin();
 
-        instance.name = profile.getName();
+        instance.name = profile.name();
         instance.snbt = NbtUtils.getCompoundString(NbtUtils.toCompoundTag(profile));
         instance.expiresAt = System.currentTimeMillis() + 15 * 24 * 60 * 60 * 1000;
         //                   MS                           D    H    M    S    MS

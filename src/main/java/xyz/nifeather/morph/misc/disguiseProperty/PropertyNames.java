@@ -91,4 +91,8 @@ public class PropertyNames
 
     @ReservedProperty
     public static final String GUARDIAN_ATTACK_TARGET = "guardian/attack_target";
+
+    public static final String MANNEQUIN_NPC_DESCRIPTION = "mannequin/description";
+    public static final String MANNEQUIN_SKIN = "mannequin/skin";
+    public static final String MANNEQUIN_IMMOVABLE = "mannequin/immovable";
 }

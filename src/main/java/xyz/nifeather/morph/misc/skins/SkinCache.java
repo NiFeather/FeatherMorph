@@ -31,7 +31,7 @@ public class SkinCache extends MorphJsonBasedStorage<SkinCacheRoot>
 
     public synchronized void cache(GameProfile profile)
     {
-        drop(profile.getName());
+        drop(profile.name());
         storingObject.storedSkins.add(SingleSkin.fromProfile(profile));
 
         saveConfiguration();
@@ -46,7 +46,7 @@ public class SkinCache extends MorphJsonBasedStorage<SkinCacheRoot>
 
     public synchronized void drop(GameProfile profile)
     {
-        drop(profile.getName());
+        drop(profile.name());
     }
 
     public synchronized void drop(SingleSkin singleSkin)

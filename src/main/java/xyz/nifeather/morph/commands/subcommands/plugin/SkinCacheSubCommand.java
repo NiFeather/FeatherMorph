@@ -1,6 +1,7 @@
 package xyz.nifeather.morph.commands.subcommands.plugin;
 
 import com.destroystokyo.paper.profile.CraftPlayerProfile;
+import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
@@ -29,7 +30,6 @@ import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.SkinCacheStrings;
 import xyz.nifeather.morph.misc.CapeURL;
 import xyz.nifeather.morph.misc.DisguiseTypes;
-import xyz.nifeather.morph.misc.MorphGameProfile;
 import xyz.nifeather.morph.misc.MorphParameters;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 import xyz.nifeather.morph.misc.skins.PlayerSkinProvider;
@@ -286,7 +286,7 @@ public class SkinCacheSubCommand extends MorphPluginObject implements IConvertib
 
         var texDesc = "<Nil>";
         var capeDesc = "<Nil>";
-        var tex = skinMatch.getProperties().get("textures").stream().findFirst().orElse(null);
+        var tex = skinMatch.properties().get("textures").stream().findFirst().orElse(null);
 
         if (tex != null)
         {
@@ -301,7 +301,7 @@ public class SkinCacheSubCommand extends MorphPluginObject implements IConvertib
                 capeDesc = capeURL.toString();
         }
 
-        sender.sendMessage(MessageUtils.prefixes(sender, SkinCacheStrings.infoLine().resolve("name", skinMatch.getName())));
+        sender.sendMessage(MessageUtils.prefixes(sender, SkinCacheStrings.infoLine().resolve("name", skinMatch.name())));
 
         sender.sendMessage(
                 MessageUtils.prefixes(
@@ -357,7 +357,7 @@ public class SkinCacheSubCommand extends MorphPluginObject implements IConvertib
         }
 
         var parameters = MorphParameters
-                .create(player, DisguiseTypes.PLAYER.toId(skinMatch.getName()))
+                .create(player, DisguiseTypes.PLAYER.toId(skinMatch.name()))
                 .setSource(sender)
                 .setBypassAvailableCheck(true);
 
@@ -437,21 +437,19 @@ public class SkinCacheSubCommand extends MorphPluginObject implements IConvertib
         if (oTarget != null)
             return CopyMoveResult.TARGET_EXISTS;
 
-        var targetProfile = new MorphGameProfile(sourceProfile);
-        targetProfile.setName(targetName);
-        targetProfile.setUUID(sourceProfile.getId());
+        var targetProfile = new GameProfile(sourceProfile.id(), targetName, sourceProfile.properties());
 
         var profile = CraftPlayerProfile.asBukkitCopy(targetProfile);
         if (profile.getId() == null)
         {
-            logger.error("Null profile ID. " + targetProfile.getId());
+            logger.error("Null profile ID. " + targetProfile.id());
 
             return CopyMoveResult.NO_SUCH_SKIN;
         }
 
         if (profile.getName() == null)
         {
-            logger.error("Null profile Name. " + targetProfile.getName());
+            logger.error("Null profile Name. " + targetProfile.name());
             return CopyMoveResult.NO_SUCH_SKIN;
         }
 

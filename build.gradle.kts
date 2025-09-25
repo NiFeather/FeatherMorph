@@ -86,8 +86,26 @@ repositories {
 
 paperweight.reobfArtifactConfiguration = ReobfArtifactConfiguration.MOJANG_PRODUCTION
 
+fun Project.configureUnstableAdventureStrategy() {
+    configurations.configureEach {
+        resolutionStrategy.capabilitiesResolution.all {
+            if (candidates.size == 2) {
+                // Select unstable Paper variant over stable Kyori variant
+                val unstable = candidates.find { c -> c.id.displayName.startsWith("io.papermc") }
+                val stable = candidates.find { c -> c.id.displayName.startsWith("net.kyori") }
+                if (unstable != null && stable != null) {
+                    select(unstable)
+                }
+            }
+        }
+    }
+}
+
 dependencies {
     paperweight.paperDevBundle("${project.property("minecraft_version")}")
+
+    // Fix from Paper discord, see #dev-announcements !
+    configureUnstableAdventureStrategy()
 
     compileOnly("com.github.retrooper:packetevents-spigot:${project.property("packetevents_version")}")
     {

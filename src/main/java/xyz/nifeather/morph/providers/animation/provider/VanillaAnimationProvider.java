@@ -26,6 +26,7 @@ public class VanillaAnimationProvider extends DefaultAnimationProvider
         this.registerAnimSet(EntityType.WOLF, new WolfAnimationSet());
         this.registerAnimSet(EntityType.PANDA, new PandaAnimationSet());
         this.registerAnimSet(EntityType.CREAKING, new CreakingAnimationSet());
+        this.registerAnimSet(EntityType.MANNEQUIN, new PlayerAnimationSet());
     }
 
     @Override

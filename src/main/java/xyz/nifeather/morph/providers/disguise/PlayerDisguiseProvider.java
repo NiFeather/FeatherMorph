@@ -18,13 +18,13 @@ import xyz.nifeather.morph.messages.MorphStrings;
 import xyz.nifeather.morph.misc.DisguiseMeta;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.misc.DisguiseTypes;
-import xyz.nifeather.morph.misc.MorphGameProfile;
 import xyz.nifeather.morph.misc.disguiseProperty.ParseErrorException;
 import xyz.nifeather.morph.misc.skins.PlayerSkinProvider;
 import xyz.nifeather.morph.network.commands.S2C.set.S2CSetProfileCommand;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
 import xyz.nifeather.morph.providers.animation.AnimationProvider;
 import xyz.nifeather.morph.providers.animation.provider.PlayerAnimationProvider;
+import xyz.nifeather.morph.utilities.GameProfileUtils;
 
 import java.util.List;
 import java.util.Objects;
@@ -97,7 +97,7 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
             }
 
             //如果玩家头和目标伪装ID一致，那么设置伪装皮肤
-            if (gameProfile.getName().equals(DisguiseTypes.PLAYER.toStrippedId(id)))
+            if (gameProfile.name().equals(DisguiseTypes.PLAYER.toStrippedId(id)))
                 wrapper.applySkin(gameProfile);
         }
         else
@@ -166,14 +166,14 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
         super.onPlayerQuitWithDisguise(state);
     }
 
-    private MorphGameProfile getGameProfile(ItemStack item)
+    private GameProfile getGameProfile(ItemStack item)
     {
         if (item.getType() != Material.PLAYER_HEAD) return null;
 
         var profile = ((SkullMeta) item.getItemMeta()).getPlayerProfile();
         if (profile == null) return null;
 
-        return new MorphGameProfile(profile);
+        return GameProfileUtils.convertPlayerProfile(profile);
     }
 
     @Override

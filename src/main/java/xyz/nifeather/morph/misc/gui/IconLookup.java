@@ -62,6 +62,7 @@ public class IconLookup
         register(EntityType.ARMOR_STAND, createIconForType(Material.ARMOR_STAND));
         register(EntityType.GIANT, createIconForType(Material.ZOMBIE_HEAD));
         register(EntityType.ILLUSIONER, createIconForType(Material.SPECTRAL_ARROW));
+        register(EntityType.MANNEQUIN, createIconForType(Material.PLAYER_HEAD));
     }
 
     public ItemStack createIconForType(Material targetModelMaterial)

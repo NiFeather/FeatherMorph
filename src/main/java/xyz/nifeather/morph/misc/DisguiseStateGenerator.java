@@ -1,5 +1,6 @@
 package xyz.nifeather.morph.misc;
 
+import com.mojang.authlib.GameProfile;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -84,8 +85,7 @@ public class DisguiseStateGenerator
 
             if (rawProfile != null)
             {
-                var profile = new MorphGameProfile(rawProfile);
-                profile.setName(wrapper.getDisguiseName());
+                var profile = new GameProfile(rawProfile.id(), wrapper.getDisguiseName(), rawProfile.properties());
                 wrapper.applySkin(profile);
             }
         }

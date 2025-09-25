@@ -13,6 +13,7 @@ public class ValueIndex
     public static final ArmorStandValues ARMOR_STAND = new ArmorStandValues();
     public static final AllayValues ALLAY = new AllayValues();
     public static final PlayerValues PLAYER = new PlayerValues();
+    public static final MannequinValues MANNEQUIN = new MannequinValues();
     public static final SlimeValues SLIME_MAGMA = new SlimeValues();
     public static final GhastValues GHAST = new GhastValues();
     public static final AbstractHorseValues ABSTRACT_HORSE = new AbstractHorseValues();

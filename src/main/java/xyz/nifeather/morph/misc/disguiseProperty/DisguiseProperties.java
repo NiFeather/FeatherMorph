@@ -64,6 +64,8 @@ public class DisguiseProperties
 
         register(EntityType.GUARDIAN, new GuardianProperties());
         register(EntityType.ELDER_GUARDIAN, new GuardianProperties());
+
+        register(EntityType.MANNEQUIN, new MannequinProperties());
     }
 
     public Map<EntityType, AbstractProperties<?>> getAll()

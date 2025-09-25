@@ -1,6 +1,5 @@
 package xyz.nifeather.morph.misc.disguiseProperty.values;
 
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -10,7 +9,6 @@ import xyz.nifeather.morph.api.FeatherMorphAPI;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.misc.disguiseProperty.*;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -111,4 +109,5 @@ public abstract class AbstractProperties<E extends Entity>
 
         theirHandler.copyTo(ourHandler);
     }
+
 }

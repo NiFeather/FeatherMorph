@@ -97,6 +97,8 @@ public class WatcherIndex
         setTypeWatcher(EntityType.EVOKER, EvokerWatcher::new);
 
         setTypeWatcher(EntityType.HAPPY_GHAST, HappyGhastWatcher::new);
+
+        setTypeWatcher(EntityType.MANNEQUIN, MannequinWatcher::new);
     }
 
     private void setTypeWatcher(EntityType type, Function<Player, SingleWatcher> func)

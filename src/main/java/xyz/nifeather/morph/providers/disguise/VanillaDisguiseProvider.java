@@ -252,7 +252,8 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
 
         try
         {
-            var dimension = net.minecraft.world.entity.player.Player.STANDING_DIMENSIONS;
+            // From NMS Avatar
+            var dimension = EntityDimensions.scalable(0.6F, 1.8F).withEyeHeight(1.62F);
 
             targetField.setAccessible(true);
             targetField.set(nmsPlayer, dimension);

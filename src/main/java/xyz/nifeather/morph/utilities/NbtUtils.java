@@ -1,7 +1,10 @@
 package xyz.nifeather.morph.utilities;
 
+import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.Multimap;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
+import com.mojang.authlib.properties.PropertyMap;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.nbt.*;
 import net.minecraft.server.commands.data.EntityDataAccessor;
@@ -12,7 +15,6 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.FeatherMorphMain;
-import xyz.nifeather.morph.misc.MorphGameProfile;
 
 import java.util.List;
 import java.util.UUID;
@@ -54,24 +56,27 @@ public class NbtUtils
 
     public static CompoundTag writeGameProfile(CompoundTag nbt, GameProfile profile)
     {
-        if (!profile.getName().isEmpty())
-            nbt.putString("Name", profile.getName());
+        if (!profile.name().isEmpty())
+            nbt.putString("Name", profile.name());
 
-        if (!profile.getId().equals(Uuids.NIL_UUID))
-            putUUID(nbt, "Id", profile.getId());
+        if (!profile.id().equals(Uuids.NIL_UUID))
+            putUUID(nbt, "Id", profile.id());
 
-        if (profile.getProperties().isEmpty())
+        if (profile.properties().isEmpty())
             return nbt;
 
         var propertiesCompound = new CompoundTag();
 
-        for (var key : profile.getProperties().keySet())
+        for (var key : profile.properties().keySet())
         {
+            if (key == null) continue;
             var list = new ListTag();
 
             CompoundTag childCompound;
-            for (var property : profile.getProperties().get(key))
+            for (var property : profile.properties().get(key))
             {
+                if (property == null) continue;
+
                 childCompound = new CompoundTag();
                 childCompound.putString("Value", property.value());
 
@@ -123,13 +128,12 @@ public class NbtUtils
                 uuid = readUUID;
         }
 
-        var profile = new MorphGameProfile(new GameProfile(uuid, name));
-
-        if (!compound.contains("Properties")) return profile;
+        if (!compound.contains("Properties")) return new GameProfile(uuid, name);
 
         try
         {
             var propertiesCompound = compound.getCompound("Properties").orElseThrow();
+            ImmutableMultimap.Builder<String, Property> propertiesBuilder = ImmutableMultimap.builder();
 
             propertiesCompound.forEach((key, tag) ->
             {
@@ -143,20 +147,22 @@ public class NbtUtils
                     var value = childCompound.getString("Value").orElseThrow();
 
                     if (childCompound.contains("Signature"))
-                        profile.getProperties().put(key, new Property(key, value, childCompound.getString("Signature").orElseThrow()));
+                        propertiesBuilder.put(key, new Property(key, value, childCompound.getString("Signature").orElseThrow()));
                     else
-                        profile.getProperties().put(key, new Property(key, value));
+                        propertiesBuilder.put(key, new Property(key, value));
                 }
             });
+
+            return new GameProfile(uuid, name, new PropertyMap(propertiesBuilder.build()));
         }
         catch (Throwable t)
         {
             var logger = FeatherMorphMain.getInstance().getSLF4JLogger();
 
             logger.warn("Can't parse profile properties", t);
-        }
 
-        return profile;
+            return null;
+        }
     }
 
     public static CompoundTag toCompoundTag(GameProfile profile)

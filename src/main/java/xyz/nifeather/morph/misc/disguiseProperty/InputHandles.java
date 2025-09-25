@@ -348,6 +348,20 @@ public class InputHandles
         }
     }
 
+    public static Optional<String> readSkinName(String propertyName, String value) throws ParseErrorException
+    {
+        if (propertyName.length() > 16)
+        {
+            throw ParseErrorException.forProperty(propertyName)
+                    .byMethod("readSkinName")
+                    .withMessage("Input name exceeds the limit of 16 characters")
+                    .withLocalizableMessage(ExceptionStrings.inputTooLong())
+                    .create();
+        }
+
+        return Optional.of(value);
+    }
+
     public static void throwIfOutOfBounds(String propertyName, int value, int min, int max) throws ParseErrorException
     {
         if (value < min || value > max)

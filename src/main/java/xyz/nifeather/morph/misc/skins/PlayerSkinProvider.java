@@ -14,13 +14,14 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xyz.nifeather.morph.MorphPluginObject;
-import xyz.nifeather.morph.misc.MorphGameProfile;
 import xyz.nifeather.morph.misc.NmsRecord;
+import xyz.nifeather.morph.utilities.GameProfileUtils;
 import xyz.nifeather.morph.utilities.Uuids;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -123,9 +124,9 @@ public class PlayerSkinProvider extends MorphPluginObject
 
         var lookupCallback = new ProfileLookupCallback()
         {
-            public void onProfileLookupSucceeded(GameProfile gameprofile)
+            public void onProfileLookupSucceeded(String profileName, UUID profileId)
             {
-                onRequestFinish.accept(gameprofile.getName(), gameprofile);
+                onRequestFinish.accept(profileName, new GameProfile(profileId, profileName));
             }
 
             public void onProfileLookupFailed(String profileName, Exception exception)
@@ -147,7 +148,7 @@ public class PlayerSkinProvider extends MorphPluginObject
             }
         };
 
-        GameProfileRepository profileRepo = MinecraftServer.getServer().getProfileRepository();
+        GameProfileRepository profileRepo = MinecraftServer.getServer().services().profileRepository();
         profileRepo.findProfilesByNames(remainingNames.toArray(new String[0]), lookupCallback);
     }
 
@@ -166,7 +167,7 @@ public class PlayerSkinProvider extends MorphPluginObject
 
     public void cacheProfile(@NotNull PlayerProfile playerProfile)
     {
-        var gameProfile = new MorphGameProfile(playerProfile);
+        var gameProfile = GameProfileUtils.convertPlayerProfile(playerProfile);
         skinCache.cache(gameProfile);
     }
 
@@ -178,7 +179,7 @@ public class PlayerSkinProvider extends MorphPluginObject
      */
     public CompletableFuture<Optional<GameProfile>> fetchSkin(GameProfile profile)
     {
-        if (profile.getProperties().containsKey("textures"))
+        if (profile.properties().containsKey("textures"))
         {
             var optional = Optional.of(profile);
             skinCache.cache(profile);
@@ -189,13 +190,13 @@ public class PlayerSkinProvider extends MorphPluginObject
         {
             return CompletableFuture.supplyAsync(() ->
             {
-                var sessionService = MinecraftServer.getServer().getSessionService();
-                var result = sessionService.fetchProfile(profile.getId(), true);
+                var sessionService = MinecraftServer.getServer().services().sessionService();
+                var result = sessionService.fetchProfile(profile.id(), true);
 
                 if (result != null)
                     skinCache.cache(result.profile());
                 else
-                    skinCache.cache(new GameProfile(Uuids.NIL_UUID, profile.getName()));
+                    skinCache.cache(new GameProfile(Uuids.NIL_UUID, profile.name()));
 
                 return result == null ? Optional.of(profile) : Optional.of(result.profile());
             });

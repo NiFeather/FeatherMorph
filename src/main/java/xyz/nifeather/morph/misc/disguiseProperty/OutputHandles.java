@@ -27,6 +27,11 @@ public class OutputHandles
         return val.toString().toLowerCase();
     }
 
+    public static String writeString(String propertyName, String val)
+    {
+        return val;
+    }
+
     public static String writeFloat(String propertyName, Float fl)
     {
         return Float.toString(fl);
