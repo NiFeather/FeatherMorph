@@ -77,7 +77,7 @@ public class DisguiseStateGenerator
         var state = new DisguiseState(player,
                 disguiseIdentifier, targetSkillID,
                 wrapper, provider,
-                null, playerOptions, playerMeta);
+                playerOptions, playerMeta);
 
         try
         {
@@ -105,8 +105,7 @@ public class DisguiseStateGenerator
         }
 
         //设置伪装物品显示
-        if (state.supportsShowingDefaultItems())
-            state.setShowingDisguisedItems(offlineState.displayingDisguisedItems);
+        state.setShowingDisguisedEquipment(offlineState.displayingDisguisedItems);
 
         return state;
     }

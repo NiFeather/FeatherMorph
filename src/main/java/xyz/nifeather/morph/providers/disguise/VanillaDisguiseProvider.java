@@ -153,6 +153,8 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
     @Override
     public void finalizeProperties(DisguiseState state)
     {
+        super.finalizeProperties(state);
+
         var propertyHandler = state.disguisePropertyHandler();
         if (!(propertyHandler.bindingProperties() instanceof MannequinProperties mannequinProperties)) return;
 
@@ -172,8 +174,6 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
                 });
             });
         }
-
-        super.finalizeProperties(state);
     }
 
     @Override

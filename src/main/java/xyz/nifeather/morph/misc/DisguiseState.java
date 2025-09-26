@@ -26,6 +26,7 @@ import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
+import xyz.nifeather.morph.misc.disguiseProperty.values.BaseLivingEntityProperties;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 import xyz.nifeather.morph.misc.waypoint.DisguiseWaypointUpdater;
 import xyz.nifeather.morph.network.PlayerOptions;
@@ -47,6 +48,8 @@ import xyz.nifeather.morph.utilities.PermissionUtils;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 import static xyz.nifeather.morph.utilities.DisguiseUtils.itemOrAir;
 
@@ -54,7 +57,7 @@ public class DisguiseState extends MorphPluginObject
 {
     public DisguiseState(@NotNull Player player, @NotNull String identifier, @NotNull String skillIdentifier,
                          @NotNull DisguiseWrapper<?> wrapper, @NotNull DisguiseProvider provider,
-                         @Nullable EntityEquipment targetEquipment, @NotNull PlayerOptions<Player> playerOptions,
+                         @NotNull PlayerOptions<Player> playerOptions,
                          @NotNull PlayerMeta playerMeta)
     {
         Objects.requireNonNull(wrapper, "Wrapper cannot be null.");
@@ -82,13 +85,6 @@ public class DisguiseState extends MorphPluginObject
 
         //设置声音
         this.soundHandler.refreshSounds(this, wrapper.getEntityType(), wrapper.isBaby());
-
-        //伪装类型是否支持设置伪装物品
-        supportsDisguisedItems = skillManager.hasSpeficSkill(skillIdentifier, SkillNames.FAKE_EQUIP);
-
-        //更新伪装物品
-        if (supportsDisguisedItems)
-            refreshDisguiseItems(targetEquipment, wrapper);
 
         this.cachedPlayer = CacheWithDefault.of(player);
 
@@ -131,10 +127,25 @@ public class DisguiseState extends MorphPluginObject
 
     private void onPropertyWrite(SingleProperty<?> singleProperty, Object o)
     {
-        if (singleProperty.id().equals(PropertyNames.ENTITY_CUSTOM_NAME))
+        switch (singleProperty.id())
         {
-            var component = (Component) o;
-            this.setCustomDisplayName(component);
+            case PropertyNames.ENTITY_CUSTOM_NAME ->
+            {
+                var component = (Component) o;
+                this.setCustomDisplayName(component);
+            }
+
+            case PropertyNames.ENTITY_DISPLAY_DISGUISE_EQUIPMENT ->
+            {
+                var value = (Boolean) o;
+                disguiseWrapper.setDisplayingFakeEquipments(value);
+            }
+
+            case PropertyNames.ENTITY_EQUIPMENT ->
+            {
+                var equipment = (EntityEquipment) o;
+                disguiseWrapper.setFakeEquipments(equipment);
+            }
         }
     }
 
@@ -814,7 +825,7 @@ public class DisguiseState extends MorphPluginObject
 
     //endregion Updating
 
-    private void refreshDisguiseItems(EntityEquipment targetEquipment, DisguiseWrapper<?> disguiseWrapper)
+    public void refreshDisguiseItems(@Nullable EntityEquipment targetEquipment)
     {
         EntityEquipment equipment = targetEquipment != null ? targetEquipment : new DisguiseEquipment();
 
@@ -837,28 +848,33 @@ public class DisguiseState extends MorphPluginObject
         armors = ItemUtils.asCopy(armors);
         handItems = ItemUtils.asCopy(handItems);
 
-        disguiseEquipments.allowNull = true;
+        var disguiseEquipments = new DisguiseEquipment();
+
+        disguiseEquipments.allowNull = false;
         disguiseEquipments.setArmorContents(armors);
         disguiseEquipments.setHandItems(handItems);
 
         //开启默认装备显示或者更新显示
-        disguiseWrapper.setFakeEquipments(disguiseEquipments);
-        setShowingDisguisedItems(showDisguisedItems || targetEquipment != null);
+        setEquipment(disguiseEquipments);
+        setShowingDisguisedEquipment(targetEquipment != null);
     }
 
-    private final DisguiseEquipment disguiseEquipments = new DisguiseEquipment();
-
-    private boolean showDisguisedItems = false;
-
-    private boolean supportsDisguisedItems = false;
-
-    /**
-     * 此阶段是否支持显示伪装物品
-     * @return 是否支持
-     */
-    public boolean supportsShowingDefaultItems()
+    private <X> void consumeIfPropertiesSupported(Class<X> clazz, Consumer<X> consumer)
     {
-        return supportsDisguisedItems;
+        var bindingProperties = propertyHandler.bindingProperties();
+        if (bindingProperties == null) return;
+        if (!clazz.isInstance(bindingProperties)) return;
+
+        consumer.accept((X) bindingProperties);
+    }
+
+    private <X, V> Optional<V> funcIfPropertiesSupported(Class<X> clazz, Function<X, Optional<V>> func)
+    {
+        var bindingProperties = propertyHandler.bindingProperties();
+        if (bindingProperties == null) return Optional.empty();
+        if (!clazz.isInstance(bindingProperties)) return Optional.empty();
+
+        return func.apply((X) bindingProperties);
     }
 
     /**
@@ -867,29 +883,51 @@ public class DisguiseState extends MorphPluginObject
      */
     public boolean showingDisguisedItems()
     {
-        return showDisguisedItems;
+        return propertyHandler.getOr(PropertyNames.ENTITY_DISPLAY_DISGUISE_EQUIPMENT, false);
+    }
+
+    public void editEquipment(Consumer<DisguiseEquipment> consumer)
+    {
+        var equipment = getDisguiseEquipment();
+        consumer.accept(equipment);
+
+        setEquipment(equipment);
+    }
+
+    public void setEquipment(DisguiseEquipment equipment)
+    {
+        consumeIfPropertiesSupported(BaseLivingEntityProperties.class, p -> propertyHandler.set(p.EQUIPMENT, equipment));
+        disguiseWrapper.setFakeEquipments(equipment);
     }
 
     /**
      * 设置是否要显示伪装物品
      * @param value 值
      */
-    public void setShowingDisguisedItems(boolean value)
+    public void setShowingDisguisedEquipment(boolean value)
     {
-        showDisguisedItems = value;
-        this.disguiseWrapper.setDisplayingFakeEquipments(value);
+        consumeIfPropertiesSupported(BaseLivingEntityProperties.class, p ->
+                propertyHandler.set(p.DISPLAY_DISGUISE_EQUIPMENT, value));
     }
 
     /**
      * 获取此State的伪装物品
      * @return 此State的伪装物品
      */
-    public EntityEquipment getDisguisedItems()
+    public DisguiseEquipment getDisguiseEquipment()
     {
         var eq = new DisguiseEquipment();
 
-        eq.setArmorContents(ItemUtils.asCopy(disguiseEquipments.getArmorContents()));
-        eq.setHandItems(ItemUtils.asCopy(disguiseEquipments.getHandItems()));
+        var disguiseEquipments = funcIfPropertiesSupported(BaseLivingEntityProperties.class, properties ->
+        {
+            return propertyHandler.getOptional((SingleProperty<DisguiseEquipment>)properties.EQUIPMENT);
+        }).orElse(null);
+
+        if (disguiseEquipments != null)
+        {
+            eq.setArmorContents(ItemUtils.asCopy(disguiseEquipments.getArmorContents()));
+            eq.setHandItems(ItemUtils.asCopy(disguiseEquipments.getHandItems()));
+        }
 
         return eq;
     }
@@ -897,15 +935,17 @@ public class DisguiseState extends MorphPluginObject
     @ApiStatus.Internal
     public void swapHands()
     {
-        var handItems = disguiseEquipments.getHandItems();
-
-        if (handItems.length == 2)
+        editEquipment(equipment ->
         {
+            var handItems = equipment.getHandItems();
+
+            if (handItems.length != 2) return;
+
             var mainHand = handItems[0];
             var offHand = handItems[1];
 
-            disguiseEquipments.setHandItems(offHand, mainHand);
-        }
+            equipment.setHandItems(offHand, mainHand);
+        });
     }
 
     /**
@@ -914,9 +954,11 @@ public class DisguiseState extends MorphPluginObject
      */
     public boolean toggleDisguisedItems()
     {
-        setShowingDisguisedItems(!showDisguisedItems);
+        var showDisguisedItems = showingDisguisedItems();
 
-        return showDisguisedItems;
+        setShowingDisguisedEquipment(!showDisguisedItems);
+
+        return !showDisguisedItems;
     }
 
     //region Sound Handling
@@ -938,7 +980,7 @@ public class DisguiseState extends MorphPluginObject
         var wrapper = this.disguiseWrapper.clone();
 
         var newInstance = new DisguiseState(player, this.disguiseIdentifier, this.skillLookupIdentifier(),
-                wrapper, provider, getDisguisedItems(), this.playerOptions, morphConfiguration);
+                wrapper, provider, this.playerOptions, morphConfiguration);
 
         newInstance.playerDisplay = this.playerDisplay;
         newInstance.serverDisplay = this.serverDisplay;

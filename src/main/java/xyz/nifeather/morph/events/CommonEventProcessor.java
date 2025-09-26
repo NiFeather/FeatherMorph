@@ -231,7 +231,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
 
         state.swapHands();
 
-        var equip = state.getDisguisedItems();
+        var equip = state.getDisguiseEquipment();
 
         var mainHand = itemOrAir(equip.getItemInMainHand());
         var offHand = itemOrAir(equip.getItemInOffHand());

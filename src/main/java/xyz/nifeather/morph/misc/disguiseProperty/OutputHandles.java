@@ -7,14 +7,24 @@ import io.papermc.paper.datacomponent.item.ResolvableProfile;
 import io.papermc.paper.math.Rotations;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
+import net.minecraft.SharedConstants;
 import net.minecraft.nbt.CompoundTag;
 import org.bukkit.Keyed;
+import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.ItemStack;
+import xyz.nifeather.morph.misc.DisguiseEquipment;
+import xyz.nifeather.morph.misc.disguiseProperty.struct.MorphEquipmentStruct;
+import xyz.nifeather.morph.misc.disguiseProperty.struct.MorphResolvableProfileStruct;
+import xyz.nifeather.morph.network.server.ServerSetEquipCommand;
 import xyz.nifeather.morph.utilities.GameProfileUtils;
+import xyz.nifeather.morph.utilities.ItemUtils;
 import xyz.nifeather.morph.utilities.NbtUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class OutputHandles
 {
@@ -102,14 +112,14 @@ public class OutputHandles
         }
 
         var profile = writeGameProfile(propertyName, GameProfileUtils.convertPlayerProfile(val));
-        var record = new MorphResolvableProfileRecord(false, val.getId(), val.getName(), profile);
+        var record = new MorphResolvableProfileStruct(false, val.getId(), val.getName(), profile);
 
         return gson.toJson(record);
     }
 
     public static String writeResolvableProfileDynamic(String propertyName, ResolvableProfile resolvableProfile) throws ParseErrorException
     {
-        var record = new MorphResolvableProfileRecord(true, resolvableProfile.uuid(), resolvableProfile.name(), "");
+        var record = new MorphResolvableProfileStruct(true, resolvableProfile.uuid(), resolvableProfile.name(), "");
         return gson.toJson(record);
     }
 
@@ -121,5 +131,20 @@ public class OutputHandles
     public static String writeCompound(String propertyName, CompoundTag compoundTag)
     {
         return NbtUtils.getCompoundString(compoundTag);
+    }
+
+    public static String writeEquipment(String propertyName, DisguiseEquipment equipment)
+    {
+        Map<String, String> stringMap = new ConcurrentHashMap<>();
+        for (EquipmentSlot slot : EquipmentSlot.values())
+        {
+            if (slot == EquipmentSlot.BODY || slot == EquipmentSlot.SADDLE) continue;
+
+            ItemStack item = equipment.getItem(slot);
+            stringMap.put(ServerSetEquipCommand.toProtocolEquipment(slot).toString(), ItemUtils.itemToStr(item));
+        }
+
+        var record = new MorphEquipmentStruct(SharedConstants.getCurrentVersion().dataVersion().version(), stringMap);
+        return gson.toJson(record);
     }
 }

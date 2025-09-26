@@ -614,7 +614,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 return false;
 
             var playerMeta = getPlayerMeta(parameters.targetPlayer);
-            this.buildDisguise(buildResult, parameters);
+            this.buildDisguise(buildResult, parameters, meta);
 
             if (!applyDisguise(parameters, buildResult.state(), playerMeta))
                 return false;
@@ -819,31 +819,13 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             // 向Wrapper写入伪装ID
             wrapper.writeProperty(WrapperProperties.DISGUISE_ID, disguiseIdentifier);
 
-            // 获取此伪装将用来显示的目标装备
-            EntityEquipment equipment = null;
-            var theirState = getDisguiseStateFor(targetEntity);
-            if (targetEntity != null && provider.canCloneEquipment(disguiseMeta, targetEntity, theirState))
-            {
-                if (theirState != null)
-                {
-                    equipment = theirState.showingDisguisedItems()
-                            ? theirState.getDisguisedItems()
-                            : ((LivingEntity) targetEntity).getEquipment();
-
-                }
-                else
-                {
-                    equipment = ((LivingEntity) targetEntity).getEquipment();
-                }
-            }
-
             // 技能
             var rawIdentifierHasSkill = skillManager.hasSkill(disguiseIdentifier) || skillManager.hasSpeficSkill(disguiseIdentifier, SkillNames.NONE);
             var targetSkillID = rawIdentifierHasSkill ? disguiseIdentifier : provider.getNameSpace() + ":" + MorphManager.disguiseFallbackName;
 
             var playerMorphConfig = getPlayerMeta(player);
             outComingState = new DisguiseState(player, disguiseIdentifier, targetSkillID,
-                    wrapper, provider, equipment,
+                    wrapper, provider,
                     clientHandler.getPlayerOption(player, true), playerMorphConfig);
 
             return DisguiseBuildResult.of(outComingState, provider, disguiseMeta);
@@ -866,7 +848,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     }
 
     private void buildDisguise(DisguiseBuildResult result,
-                               MorphParameters parameters) throws ParseErrorException, NullPointerException
+                               MorphParameters parameters, DisguiseMeta disguiseMeta) throws ParseErrorException, NullPointerException
     {
         if (!result.success())
             throw new IllegalArgumentException("Passing a failed result to postDisguise() !");
@@ -904,6 +886,28 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         propertyHandler.initProperties(properties);
 
         provider.setupProperties(state, targetEntity);
+
+        // todo: Maybe we should move this to somewhere else
+        // 获取此伪装将用来显示的目标装备
+        EntityEquipment equipment = null;
+        var theirState = getDisguiseStateFor(targetEntity);
+        if (targetEntity != null && state.getSkill().getIdentifier().equals(SkillNames.FAKE_EQUIP) && provider.canCloneEquipment(disguiseMeta, targetEntity, theirState))
+        {
+            if (theirState != null)
+            {
+                equipment = theirState.showingDisguisedItems()
+                        ? theirState.getDisguiseEquipment()
+                        : ((LivingEntity) targetEntity).getEquipment();
+
+            }
+            else
+            {
+                equipment = ((LivingEntity) targetEntity).getEquipment();
+            }
+        }
+
+        state.refreshDisguiseItems(equipment);
+
         propertyHandler.updateFromPropertiesInput(parameters.propertiesInput);
 
         propertyHandler.getAll().forEach((property, value) ->
@@ -1458,7 +1462,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         try
         {
-            this.buildDisguise(result, parameters);
+            this.buildDisguise(result, parameters, meta);
             this.applyDisguise(parameters, state, playerMeta);
         }
         catch (Exception e) //todo: 或许之后能调整一下，让 ParseErrorException, ExecutionErrorException 单独提示

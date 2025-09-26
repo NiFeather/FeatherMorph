@@ -7,6 +7,8 @@ public class PropertyNames
     public static final String ENTITY_ARROW_COUNT = "entity/stucked_arrows";
     public static final String ENTITY_CUSTOM_NAME = "entity/custom_name";
     public static final String ENTITY_CUSTOM_NAME_VISIBLE = "entity/custom_name_visible";
+    public static final String ENTITY_EQUIPMENT = "entity/equipment";
+    public static final String ENTITY_DISPLAY_DISGUISE_EQUIPMENT = "entity/display_disguise_equipment";
 
     public static final String AXOLOTL_VARIANT = "axolotl/variant";
 

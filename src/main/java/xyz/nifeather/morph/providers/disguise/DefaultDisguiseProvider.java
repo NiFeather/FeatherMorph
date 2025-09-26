@@ -207,7 +207,7 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
     @Override
     @NotNull
     public List<AbstractS2CCommand<?>> getInitialSyncCommands(DisguiseState state)
-    {
+    {/*
         //logger.info("SID: " + state.getSkillLookupIdentifier() + " :: DID: " + state.getDisguiseIdentifier());
         if (skillHandler.hasSpeficSkill(state.skillLookupIdentifier(), SkillNames.FAKE_EQUIP))
         {
@@ -225,7 +225,7 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
 
             return list;
         }
-
+*/
         return List.of();
     }
 

@@ -143,13 +143,14 @@ public class PropertyHandler
     }
 
     @Nullable
+    @Contract("_, null -> _; _, !null -> !null")
     public <X> X getOr(String propertyName, @Nullable X defaultVal)
     {
         var property = validProperties.stream().filter(p -> p.id().equals(propertyName))
                 .findFirst()
                 .orElse(null);
 
-        if (property == null) return null;
+        if (property == null) return defaultVal;
 
         return (X) getOr((SingleProperty<Object>) property, defaultVal);
     }

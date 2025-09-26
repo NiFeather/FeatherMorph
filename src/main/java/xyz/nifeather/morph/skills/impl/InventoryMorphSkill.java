@@ -49,7 +49,7 @@ public class InventoryMorphSkill extends MorphSkill<NoOpConfiguration>
     @Override
     public void onInitialEquip(DisguiseState state)
     {
-        state.setShowingDisguisedItems(state.showingDisguisedItems());
+        state.setShowingDisguisedEquipment(state.showingDisguisedItems());
 
         super.onInitialEquip(state);
     }
