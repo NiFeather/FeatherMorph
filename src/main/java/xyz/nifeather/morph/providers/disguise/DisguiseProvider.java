@@ -85,6 +85,14 @@ public abstract class DisguiseProvider extends MorphPluginObject
     }
 
     /**
+     * Called when disguise properties finished parsing, can be used for post-processing
+     * @param state The disguise to finalize
+     */
+    public void finalizeProperties(DisguiseState state)
+    {
+    }
+
+    /**
      * 获取某个伪装的初始化指令
      * @param state 目标伪装
      * @return 要对客户端发送的指令列表

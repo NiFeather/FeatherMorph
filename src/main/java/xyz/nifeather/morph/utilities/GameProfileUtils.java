@@ -1,5 +1,6 @@
 package xyz.nifeather.morph.utilities;
 
+import com.destroystokyo.paper.profile.CraftPlayerProfile;
 import com.destroystokyo.paper.profile.PlayerProfile;
 import com.github.retrooper.packetevents.protocol.player.TextureProperty;
 import com.github.retrooper.packetevents.protocol.player.UserProfile;
@@ -7,6 +8,7 @@ import com.google.common.collect.ImmutableMultimap;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
+import io.papermc.paper.datacomponent.item.ResolvableProfile;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.jetbrains.annotations.NotNull;
 
@@ -14,6 +16,16 @@ import java.util.List;
 
 public class GameProfileUtils
 {
+    public static ResolvableProfile asResolvableProfile(GameProfile profile)
+    {
+        return ResolvableProfile.resolvableProfile(asPlayerProfile(profile));
+    }
+
+    public static PlayerProfile asPlayerProfile(GameProfile profile)
+    {
+        return CraftPlayerProfile.asBukkitCopy(profile);
+    }
+
     public static GameProfile convertPlayerProfile(@NotNull PlayerProfile profile)
     {
         ImmutableMultimap.Builder<String, Property> map = ImmutableMultimap.builder();

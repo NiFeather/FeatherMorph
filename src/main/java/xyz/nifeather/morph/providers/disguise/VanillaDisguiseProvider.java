@@ -1,5 +1,8 @@
 package xyz.nifeather.morph.providers.disguise;
 
+import com.destroystokyo.paper.profile.PlayerProfile;
+import com.mojang.authlib.GameProfile;
+import io.papermc.paper.datacomponent.item.ResolvableProfile;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.kyori.adventure.text.Component;
 import net.minecraft.world.entity.EntityDimensions;
@@ -26,6 +29,8 @@ import xyz.nifeather.morph.misc.*;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.ParseErrorException;
 import xyz.nifeather.morph.misc.disguiseProperty.values.ArmorStandProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.values.MannequinProperties;
+import xyz.nifeather.morph.misc.skins.PlayerSkinProvider;
 import xyz.nifeather.morph.providers.animation.AnimationProvider;
 import xyz.nifeather.morph.providers.animation.provider.VanillaAnimationProvider;
 import xyz.nifeather.morph.utilities.*;
@@ -33,6 +38,7 @@ import xyz.nifeather.morph.utilities.*;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 public class VanillaDisguiseProvider extends DefaultDisguiseProvider
 {
@@ -142,6 +148,32 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
         }
 
         return DisguiseResult.success(newDisguise);
+    }
+
+    @Override
+    public void finalizeProperties(DisguiseState state)
+    {
+        var propertyHandler = state.disguisePropertyHandler();
+        if (!(propertyHandler.bindingProperties() instanceof MannequinProperties mannequinProperties)) return;
+
+        if (propertyHandler.contains(mannequinProperties.SKIN_NAME) && !propertyHandler.contains(mannequinProperties.SKIN_INTERNAL))
+        {
+            var value = propertyHandler.get(mannequinProperties.SKIN_NAME);
+            PlayerSkinProvider.getInstance().fetchSkin(value).thenAccept(optional ->
+            {
+                if (optional.isEmpty()) return;
+
+                this.scheduleOn(state.getPlayer(), () ->
+                {
+                    if (state.disposed()) return;
+
+                    if (!propertyHandler.contains(mannequinProperties.SKIN_INTERNAL))
+                        propertyHandler.set(mannequinProperties.SKIN_INTERNAL, GameProfileUtils.asResolvableProfile(optional.get()));
+                });
+            });
+        }
+
+        super.finalizeProperties(state);
     }
 
     @Override

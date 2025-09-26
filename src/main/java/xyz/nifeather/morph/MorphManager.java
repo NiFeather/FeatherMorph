@@ -909,6 +909,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         propertyHandler.getAll().forEach((property, value) ->
                 wrapper.writeProperty((SingleProperty<Object>) property, value));
 
+        provider.finalizeProperties(state);
+
         Component customName = propertyHandler.getOr(PropertyNames.ENTITY_CUSTOM_NAME, null);
 
         // 设定显示名称

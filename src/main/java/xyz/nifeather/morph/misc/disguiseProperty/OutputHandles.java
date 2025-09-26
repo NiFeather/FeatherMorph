@@ -2,10 +2,15 @@ package xyz.nifeather.morph.misc.disguiseProperty;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.mojang.authlib.GameProfile;
+import io.papermc.paper.datacomponent.item.ResolvableProfile;
 import io.papermc.paper.math.Rotations;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
+import net.minecraft.nbt.CompoundTag;
 import org.bukkit.Keyed;
+import xyz.nifeather.morph.utilities.GameProfileUtils;
+import xyz.nifeather.morph.utilities.NbtUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -75,5 +80,46 @@ public class OutputHandles
     public static String writeKeyed(String propertyName, Keyed keyed)
     {
         return keyed.key().asString();
+    }
+
+    public static String writeResolvableProfileAny(String propertyName, ResolvableProfile resolvableProfile) throws ParseErrorException
+    {
+        return resolvableProfile.dynamic()
+                ? writeResolvableProfileDynamic(propertyName, resolvableProfile)
+                : writeResolvableProfileStatic(propertyName, resolvableProfile);
+    }
+
+    public static String writeResolvableProfileStatic(String propertyName, ResolvableProfile resolvableProfile) throws ParseErrorException
+    {
+        var defaultProfile = GameProfileUtils.asPlayerProfile(new GameProfile(UUID.randomUUID(), "xx"));
+        var val = resolvableProfile.resolve().getNow(defaultProfile);
+
+        if (val.equals(defaultProfile))
+        {
+            throw ParseErrorException.forProperty(propertyName)
+                    .withMessage("Expected a static profile, but the result is not present")
+                    .create();
+        }
+
+        var profile = writeGameProfile(propertyName, GameProfileUtils.convertPlayerProfile(val));
+        var record = new MorphResolvableProfileRecord(false, val.getId(), val.getName(), profile);
+
+        return gson.toJson(record);
+    }
+
+    public static String writeResolvableProfileDynamic(String propertyName, ResolvableProfile resolvableProfile) throws ParseErrorException
+    {
+        var record = new MorphResolvableProfileRecord(true, resolvableProfile.uuid(), resolvableProfile.name(), "");
+        return gson.toJson(record);
+    }
+
+    public static String writeGameProfile(String propertyName, GameProfile profile)
+    {
+        return writeCompound(propertyName, NbtUtils.toCompoundTag(profile));
+    }
+
+    public static String writeCompound(String propertyName, CompoundTag compoundTag)
+    {
+        return NbtUtils.getCompoundString(compoundTag);
     }
 }
