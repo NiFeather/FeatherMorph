@@ -880,6 +880,9 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         wrapper.writeProperty(OffTreeProperties.VIRTUAL_ENTITY_UUID, virtualEntityUUID);
 
+        // First we call provider to build the disguise
+        provider.buildDisguise(state, targetEntity);
+
         // Properties
         var propertyHandler = state.disguisePropertyHandler();
         var properties = disguiseProperties.get(state.getEntityType());
@@ -887,8 +890,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         provider.setupProperties(state, targetEntity);
 
+        // Then we apply the disguise equipment
         // todo: Maybe we should move this to somewhere else
-        // 获取此伪装将用来显示的目标装备
         EntityEquipment equipment = null;
         var theirState = getDisguiseStateFor(targetEntity);
         if (targetEntity != null && state.getSkill().getIdentifier().equals(SkillNames.FAKE_EQUIP) && provider.canCloneEquipment(disguiseMeta, targetEntity, theirState))
@@ -908,6 +911,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         state.refreshDisguiseItems(equipment);
 
+        // Then apply properties
         propertyHandler.updateFromPropertiesInput(parameters.propertiesInput);
 
         propertyHandler.getAll().forEach((property, value) ->
@@ -931,7 +935,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             state.setServerDisplay(serverDisplay);
         }
 
-        provider.buildDisguise(state, targetEntity);
         wrapper.postBuildDisguise(state, targetEntity);
 
         long availableAfter = skillManager.getAvailableAfter(player.getUniqueId(), state.getDisguiseIdentifier());
@@ -994,11 +997,11 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         // 如果此伪装可以同步给客户端，那么初始化客户端状态
         if (provider.validForClient(newState))
         {
-            var clientSession = clientHandler.getSession(player);
+            var clientApiVersion = clientHandler.getPlayerVersion(player);
 
             // For legacy client compat
             //todo: Remove at 2026, or 1.22 comes out
-            if (clientSession != null && clientSession.apiVersion < Constants.ApiLevel.NETWORK_DISGUISE_PROPERTIES.protocolVersion)
+            if (clientApiVersion < Constants.ApiLevel.NETWORK_DISGUISE_PROPERTIES.protocolVersion)
                 clientHandler.sendCommand(player, new S2CSetSNbtCommand(newState.getCulledNbtString()));
             else
                 clientHandler.sendCommand(player, new S2CUpdatePropertiesCommand(newState.disguisePropertyHandler().toNetworkProperties()));
@@ -1006,7 +1009,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             provider.getInitialSyncCommands(newState).forEach(s -> clientHandler.sendCommand(player, s));
 
             // 设置Profile
-            if (newState.haveProfile())
+            if (newState.haveProfile() && clientApiVersion < 16)
                 clientHandler.sendCommand(player, new S2CSetProfileCommand(newState.getProfileNbtString()));
         }
 
@@ -1165,11 +1168,11 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         clientHandler.updateCurrentIdentifier(player, state.getDisguiseIdentifier());
 
-        var clientSession = clientHandler.getSession(player);
+        int playerApiVersion = clientHandler.getPlayerVersion(player);
 
         // For legacy client compat
         //todo: Remove at 2026, or 1.22 comes out
-        if (clientSession != null && clientSession.apiVersion < Constants.ApiLevel.NETWORK_DISGUISE_PROPERTIES.protocolVersion)
+        if (playerApiVersion < Constants.ApiLevel.NETWORK_DISGUISE_PROPERTIES.protocolVersion)
             clientHandler.sendCommand(player, new S2CSetSNbtCommand(state.getCulledNbtString()));
         else
             clientHandler.sendCommand(player, new S2CUpdatePropertiesCommand(state.disguisePropertyHandler().toNetworkProperties()));
@@ -1191,10 +1194,11 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         clientHandler.sendCommand(player, new S2CSetAvailableAnimationsCommand(availableAnimations));
 
         //Profile
-        if (state.haveProfile())
+        if (state.haveProfile() && playerApiVersion < 16)
+        {
             clientHandler.sendCommand(player, new S2CSetProfileCommand(state.getProfileNbtString()));
-
-        clientHandler.sendCommand(player, new S2CSetDisplayingFakeEquipCommand(state.showingDisguisedItems()));
+            clientHandler.sendCommand(player, new S2CSetDisplayingFakeEquipCommand(state.showingDisguisedItems()));
+        }
     }
 
     /**

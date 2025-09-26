@@ -1,5 +1,6 @@
 package xyz.nifeather.morph.misc;
 
+import com.mojang.authlib.GameProfile;
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
@@ -27,6 +28,7 @@ import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 import xyz.nifeather.morph.misc.disguiseProperty.values.BaseLivingEntityProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.values.PlayerProperties;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 import xyz.nifeather.morph.misc.waypoint.DisguiseWaypointUpdater;
 import xyz.nifeather.morph.network.PlayerOptions;
@@ -41,6 +43,7 @@ import xyz.nifeather.morph.skills.SkillUpdater;
 import xyz.nifeather.morph.skills.impl.NoneMorphSkill;
 import xyz.nifeather.morph.storage.playerdata.PlayerMeta;
 import xyz.nifeather.morph.storage.skill.ISkillAbilityOption;
+import xyz.nifeather.morph.utilities.GameProfileUtils;
 import xyz.nifeather.morph.utilities.ItemUtils;
 import xyz.nifeather.morph.utilities.NbtUtils;
 import xyz.nifeather.morph.utilities.PermissionUtils;
@@ -729,7 +732,8 @@ public class DisguiseState extends MorphPluginObject
 
     public boolean haveProfile()
     {
-        return disguiseWrapper.getSkin() != null;
+        return funcIfPropertiesSupported(PlayerProperties.class, p -> Optional.ofNullable(propertyHandler.getOr(p.SKIN, null)))
+                .orElse(null) != null;
     }
 
     //endregion ProfileNBT

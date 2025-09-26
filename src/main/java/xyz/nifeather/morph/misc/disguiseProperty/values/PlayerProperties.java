@@ -1,5 +1,6 @@
 package xyz.nifeather.morph.misc.disguiseProperty.values;
 
+import com.mojang.authlib.GameProfile;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -8,13 +9,18 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.messages.ExceptionStrings;
 import xyz.nifeather.morph.misc.disguiseProperty.*;
+import xyz.nifeather.morph.utilities.GameProfileUtils;
+import xyz.nifeather.morph.utilities.Uuids;
 
 import java.util.Optional;
+import java.util.UUID;
 
 public class PlayerProperties extends BaseLivingEntityProperties<Player>
 {
     public final SingleProperty<MainHandStatus> MAIN_HAND = createProperty(PropertyNames.PLAYER_MAIN_HAND, MainHandStatus.NOTSET, this::readHand, OutputHandles::writeEnum)
             .withValidInput("left", "right");
+
+    public final SingleProperty<GameProfile> SKIN = SingleProperty.of(PropertyNames.PLAYER_SKIN, new GameProfile(Uuids.NIL_UUID, "unknown"), InputHandles::unsupported, OutputHandles::writeGameProfile);
 
     @Override
     protected SingleProperty<Component> createCustomNameProperty()
@@ -38,7 +44,8 @@ public class PlayerProperties extends BaseLivingEntityProperties<Player>
 
     public PlayerProperties()
     {
-        registerSingle(MAIN_HAND);
+        super();
+        registerSingle(MAIN_HAND, SKIN);
     }
 
     @Override
@@ -52,6 +59,7 @@ public class PlayerProperties extends BaseLivingEntityProperties<Player>
     {
         propertyHandler.set(MAIN_HAND, MainHandStatus.fromBukkitHand(targetEntity.getMainHand()));
         propertyHandler.set(STUCKED_ARROWS, targetEntity.getArrowsInBody());
+        propertyHandler.set(SKIN, GameProfileUtils.convertPlayerProfile(targetEntity.getPlayerProfile()));
     }
 
     @Override

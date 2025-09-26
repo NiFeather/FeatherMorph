@@ -18,9 +18,11 @@ import xyz.nifeather.morph.messages.MorphStrings;
 import xyz.nifeather.morph.misc.DisguiseMeta;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.misc.DisguiseTypes;
+import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.ParseErrorException;
+import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
+import xyz.nifeather.morph.misc.disguiseProperty.values.PlayerProperties;
 import xyz.nifeather.morph.misc.skins.PlayerSkinProvider;
-import xyz.nifeather.morph.network.commands.S2C.set.S2CSetProfileCommand;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
 import xyz.nifeather.morph.providers.animation.AnimationProvider;
 import xyz.nifeather.morph.providers.animation.provider.PlayerAnimationProvider;
@@ -74,46 +76,6 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
 
         Objects.requireNonNull(wrapper, "Null wrapper at where it shouldn't be?!");
 
-        //region Player Skin
-        var mainHandItem = player.getEquipment().getItemInMainHand();
-
-        // Apply PlaceHolder Skin
-        var playerDisguiseTargetName = DisguiseTypes.PLAYER.toStrippedId(id);
-
-        var fallbackSkin = PlayerSkinProvider.getInstance().getCachedProfileOptional(DisguiseTypes.PLAYER.toStrippedId(id))
-                .orElse(new GameProfile(UUID.randomUUID(), playerDisguiseTargetName));
-
-        wrapper.applySkin(fallbackSkin);
-
-        //存在玩家头颅，尝试通过头颅获取目标皮肤
-        if (mainHandItem.getType() == Material.PLAYER_HEAD)
-        {
-            var gameProfile = getGameProfile(mainHandItem);
-
-            if (gameProfile == null)
-            {
-                player.sendMessage(MessageUtils.prefixes(player, MorphStrings.invalidSkinString()));
-                return DisguiseResult.fail();
-            }
-
-            //如果玩家头和目标伪装ID一致，那么设置伪装皮肤
-            if (gameProfile.name().equals(DisguiseTypes.PLAYER.toStrippedId(id)))
-                wrapper.applySkin(gameProfile);
-        }
-        else
-        {
-            PlayerSkinProvider.getInstance().fetchSkin(playerDisguiseTargetName)
-                    .thenAccept(optional ->
-                    {
-                        if (wrapper.disposed() || !fallbackSkin.equals(wrapper.getSkin())) return;
-
-                        GameProfile outcomingProfile = optional.orElse(fallbackSkin);
-                        this.scheduleOn(player, () -> wrapper.applySkin(outcomingProfile));
-                    });
-        }
-
-        //endregion Player Skin
-
         return DisguiseResult.success(wrapper);
     }
 
@@ -123,13 +85,52 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
     @Override
     public void buildDisguise(DisguiseState state, @Nullable Entity targetEntity) throws ParseErrorException
     {
-        super.buildDisguise(state, targetEntity);
-
-        var wrapper = state.getDisguiseWrapper();
         var player = state.getPlayer();
 
-        wrapper.subscribeEvent(this, WrapperEvent.SKIN_SET, skin ->
-                clientHandler.sendCommand(player, new S2CSetProfileCommand(state.getProfileNbtString())));
+        //todo: Move this to a more proper place
+        //region Player Skin
+        var mainHandItem = player.getEquipment().getItemInMainHand();
+        String id = state.getDisguiseIdentifier();
+        var propertyHandler = state.disguisePropertyHandler();
+        var playerProperties = DisguiseProperties.INSTANCE.getOrThrow(PlayerProperties.class);
+        var playerDisguiseTargetName = DisguiseTypes.PLAYER.toStrippedId(id);
+
+        var fallbackSkin = PlayerSkinProvider.getInstance().getCachedProfileOptional(DisguiseTypes.PLAYER.toStrippedId(id))
+                .orElse(new GameProfile(UUID.randomUUID(), playerDisguiseTargetName));
+
+        propertyHandler.set(playerProperties.SKIN, fallbackSkin);
+
+        //存在玩家头颅，尝试通过头颅获取目标皮肤
+        if (mainHandItem.getType() == Material.PLAYER_HEAD)
+        {
+            var gameProfile = getGameProfile(mainHandItem);
+
+            if (gameProfile == null)
+            {
+                player.sendMessage(MessageUtils.prefixes(player, MorphStrings.invalidSkinString()));
+                throw ParseErrorException.forProperty(PropertyNames.PLAYER_SKIN)
+                        .withLocalizableMessage(MorphStrings.invalidSkinString())
+                        .withMessage("Invalid GameProfile for the given player head")
+                        .byMethod("PlayerDisguiseProvider#buildDisguise")
+                        .create();
+            }
+
+            //如果玩家头和目标伪装ID一致，那么设置伪装皮肤
+            if (gameProfile.name().equals(playerDisguiseTargetName))
+                propertyHandler.set(playerProperties.SKIN, gameProfile);
+        }
+
+        PlayerSkinProvider.getInstance().fetchSkin(playerDisguiseTargetName)
+                .thenAccept(optional ->
+                {
+                    if (state.disposed() || !fallbackSkin.equals(propertyHandler.get(playerProperties.SKIN)))
+                        return;
+
+                    GameProfile outcomingProfile = optional.orElse(fallbackSkin);
+                    this.scheduleOn(player, () -> propertyHandler.set(playerProperties.SKIN, outcomingProfile));
+                });
+
+        super.buildDisguise(state, targetEntity);
     }
 
     @Override
@@ -137,6 +138,23 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
     {
         mutePlayerWaypoint(state.getPlayer());
         enableDisguiseWaypoint(state);
+
+        var wrapper = state.getDisguiseWrapper();
+
+        var playerProperties = DisguiseProperties.INSTANCE.getOrThrow(PlayerProperties.class);
+        var propertyHandler = state.disguisePropertyHandler();
+
+        var playerDisguiseTargetName = DisguiseTypes.PLAYER.toStrippedId(state.getDisguiseIdentifier());
+        wrapper.applySkin(propertyHandler.getOr(playerProperties.SKIN, new GameProfile(UUID.randomUUID(), playerDisguiseTargetName)));
+
+        propertyHandler.hookOnPropertyWrite((property, value) ->
+        {
+            if (property.equals(playerProperties.SKIN))
+            {
+                var profile = (GameProfile) value;
+                wrapper.applySkin(profile);
+            }
+        });
 
         super.onDisguiseApply(state);
     }

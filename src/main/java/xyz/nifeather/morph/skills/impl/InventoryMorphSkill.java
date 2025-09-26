@@ -37,7 +37,8 @@ public class InventoryMorphSkill extends MorphSkill<NoOpConfiguration>
 
         manager.spawnCloudParticle(player, player.getLocation(), player.getWidth(), player.getHeight(), player.getWidth());
 
-        clientHandler.sendCommand(player, new S2CSetDisplayingFakeEquipCommand(defaultShown));
+        if (clientHandler.getPlayerVersion(player) < 16)
+            clientHandler.sendCommand(player, new S2CSetDisplayingFakeEquipCommand(defaultShown));
 
         player.sendMessage(MessageUtils.prefixes(player, defaultShown
                 ? SkillStrings.displayingDisguiseInventoryString()
@@ -57,7 +58,9 @@ public class InventoryMorphSkill extends MorphSkill<NoOpConfiguration>
     @Override
     public void applyToClient(DisguiseState state)
     {
-        clientHandler.sendCommand(state.getPlayer(), new S2CSetDisplayingFakeEquipCommand(state.showingDisguisedItems()));
+        var player = state.getPlayer();
+        if (clientHandler.getPlayerVersion(player) < 16)
+            clientHandler.sendCommand(player, new S2CSetDisplayingFakeEquipCommand(state.showingDisguisedItems()));
 
         super.applyToClient(state);
     }
@@ -65,7 +68,9 @@ public class InventoryMorphSkill extends MorphSkill<NoOpConfiguration>
     @Override
     public void onDeEquip(DisguiseState state)
     {
-        clientHandler.sendCommand(state.getPlayer(), new S2CSetDisplayingFakeEquipCommand(false));
+        var player = state.getPlayer();
+        if (clientHandler.getPlayerVersion(player) < 16)
+            clientHandler.sendCommand(player, new S2CSetDisplayingFakeEquipCommand(false));
 
         super.onDeEquip(state);
     }

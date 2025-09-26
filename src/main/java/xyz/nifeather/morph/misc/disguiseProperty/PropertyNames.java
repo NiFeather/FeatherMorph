@@ -3,6 +3,7 @@ package xyz.nifeather.morph.misc.disguiseProperty;
 public class PropertyNames
 {
     public static final String PLAYER_MAIN_HAND = "player/main_hand";
+    public static final String PLAYER_SKIN = "player/skin";
 
     public static final String ENTITY_ARROW_COUNT = "entity/stucked_arrows";
     public static final String ENTITY_CUSTOM_NAME = "entity/custom_name";

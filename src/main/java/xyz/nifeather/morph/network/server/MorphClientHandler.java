@@ -126,7 +126,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
     /**
      * 服务端的接口版本
      */
-    public final int targetApiVersion = Constants.PROTOCOL_VERSION;
+    public final int targetApiVersion = 16; //Constants.PROTOCOL_VERSION;
 
     /**
      * 最低能接受的客户端接口版本
@@ -347,7 +347,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
         if (forceTargetVersion.get()) minimumApiVersion = targetApiVersion;
 
         //如果客户端版本低于最低能接受的版本或高于当前版本，拒绝初始化
-        if (clientVersion < minimumApiVersion || clientVersion > Constants.PROTOCOL_VERSION)
+        if (clientVersion < minimumApiVersion || clientVersion > targetApiVersion)
         {
             var logginMsg = player.getName() + " joined with incompatible client API version: " + clientVersion + " (This server requires " + targetApiVersion + ")";
             disconnect(player, new ClientAPIMismatchException(logginMsg));
@@ -647,9 +647,10 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
     @Override
     public int getPlayerVersion(Player player)
     {
-        var option = getPlayerOption(player);
+        var session = getSession(player);
+        if (session == null) return -1;
 
-        return option == null ? -1 : option.clientApiVersion;
+        return session.apiVersion;
     }
 
     @Override

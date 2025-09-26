@@ -207,11 +207,11 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
     @Override
     @NotNull
     public List<AbstractS2CCommand<?>> getInitialSyncCommands(DisguiseState state)
-    {/*
+    {
         //logger.info("SID: " + state.getSkillLookupIdentifier() + " :: DID: " + state.getDisguiseIdentifier());
-        if (skillHandler.hasSpeficSkill(state.skillLookupIdentifier(), SkillNames.FAKE_EQUIP))
+        if (skillHandler.hasSpeficSkill(state.skillLookupIdentifier(), SkillNames.FAKE_EQUIP) && clientHandler.getPlayerVersion(state.getPlayer()) < 16)
         {
-            var eqiupment = state.getDisguisedItems();
+            var eqiupment = state.getDisguiseEquipment();
 
             var list = new ObjectArrayList<AbstractS2CCommand<?>>();
 
@@ -225,7 +225,7 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
 
             return list;
         }
-*/
+
         return List.of();
     }
 
