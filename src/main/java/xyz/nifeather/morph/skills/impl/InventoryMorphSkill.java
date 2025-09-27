@@ -1,7 +1,10 @@
 package xyz.nifeather.morph.skills.impl;
 
 import org.bukkit.NamespacedKey;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.EntityEquipment;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xyz.nifeather.morph.MorphManager;
@@ -50,7 +53,32 @@ public class InventoryMorphSkill extends MorphSkill<NoOpConfiguration>
     @Override
     public void onInitialEquip(DisguiseState state)
     {
-        state.setShowingDisguisedEquipment(state.showingDisguisedItems());
+        // Apply the disguise equip
+        var targetEntity = state.getSessionData(MorphManager.SESSIONKEY_TARGET_ENTITY, Entity.class);
+        if (targetEntity != null)
+        {
+            var provider = state.getProvider();
+            EntityEquipment equipment = null;
+            var theirState = manager.getDisguiseStateFor(targetEntity);
+            var disguiseMeta = manager.getDisguiseMeta(state.getDisguiseIdentifier());
+
+            if (provider.canCloneEquipment(disguiseMeta, targetEntity, theirState))
+            {
+                if (theirState != null)
+                {
+                    equipment = theirState.showingDisguisedItems()
+                            ? theirState.getDisguiseEquipment()
+                            : ((LivingEntity) targetEntity).getEquipment();
+
+                }
+                else
+                {
+                    equipment = ((LivingEntity) targetEntity).getEquipment();
+                }
+            }
+
+            state.refreshDisguiseItems(equipment);
+        }
 
         super.onInitialEquip(state);
     }

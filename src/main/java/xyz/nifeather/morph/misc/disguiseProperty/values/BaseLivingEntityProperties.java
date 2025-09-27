@@ -85,7 +85,7 @@ public abstract class BaseLivingEntityProperties<E extends Entity> extends Abstr
         if (entityCustomName != null)
             propertyHandler.set(CUSTOM_NAME, entityCustomName);
 
-        // equipment properties is currently hand-off to MorphManager#buildDisguise
+        // equipment properties setup is currently hand-off to InventoryMorphSkill#onInitialEquip
     }
 
     private Optional<Integer> readArrows(String propertyName, String string) throws ParseErrorException

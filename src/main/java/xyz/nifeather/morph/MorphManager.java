@@ -614,7 +614,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 return false;
 
             var playerMeta = getPlayerMeta(parameters.targetPlayer);
-            this.buildDisguise(buildResult, parameters, meta);
+            this.buildDisguise(buildResult, parameters);
 
             if (!applyDisguise(parameters, buildResult.state(), playerMeta))
                 return false;
@@ -847,8 +847,10 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         }
     }
 
+    public static final String SESSIONKEY_TARGET_ENTITY = "MORPHMANAGER_TARGET_ENTITY";
+
     private void buildDisguise(DisguiseBuildResult result,
-                               MorphParameters parameters, DisguiseMeta disguiseMeta) throws ParseErrorException, NullPointerException
+                               MorphParameters parameters) throws ParseErrorException, NullPointerException
     {
         if (!result.success())
             throw new IllegalArgumentException("Passing a failed result to postDisguise() !");
@@ -880,36 +882,17 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         wrapper.writeProperty(OffTreeProperties.VIRTUAL_ENTITY_UUID, virtualEntityUUID);
 
-        // First we call provider to build the disguise
-        provider.buildDisguise(state, targetEntity);
+        //Push DataKeys
+
+        state.setSessionData(SESSIONKEY_TARGET_ENTITY, targetEntity);
 
         // Properties
         var propertyHandler = state.disguisePropertyHandler();
         var properties = disguiseProperties.get(state.getEntityType());
-        propertyHandler.initProperties(properties);
+        propertyHandler.initProperties(properties); // Make sure that disguise properties are always available for further disguise construct
 
+        provider.buildDisguise(state, targetEntity);
         provider.setupProperties(state, targetEntity);
-
-        // Then we apply the disguise equipment
-        // todo: Maybe we should move this to somewhere else
-        EntityEquipment equipment = null;
-        var theirState = getDisguiseStateFor(targetEntity);
-        if (targetEntity != null && state.getSkill().getIdentifier().equals(SkillNames.FAKE_EQUIP) && provider.canCloneEquipment(disguiseMeta, targetEntity, theirState))
-        {
-            if (theirState != null)
-            {
-                equipment = theirState.showingDisguisedItems()
-                        ? theirState.getDisguiseEquipment()
-                        : ((LivingEntity) targetEntity).getEquipment();
-
-            }
-            else
-            {
-                equipment = ((LivingEntity) targetEntity).getEquipment();
-            }
-        }
-
-        state.refreshDisguiseItems(equipment);
 
         // Then apply properties
         propertyHandler.updateFromPropertiesInput(parameters.propertiesInput);
@@ -939,6 +922,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         long availableAfter = skillManager.getAvailableAfter(player.getUniqueId(), state.getDisguiseIdentifier());
         state.setAvailableAfter(Math.max(plugin.getCurrentTick() + 40, availableAfter), true);
+
+        state.removeSessionData(SESSIONKEY_TARGET_ENTITY);
     }
 
     private boolean applyDisguise(MorphParameters parameters,
@@ -1466,7 +1451,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         try
         {
-            this.buildDisguise(result, parameters, meta);
+            this.buildDisguise(result, parameters);
             this.applyDisguise(parameters, state, playerMeta);
         }
         catch (Exception e) //todo: 或许之后能调整一下，让 ParseErrorException, ExecutionErrorException 单独提示

@@ -16,6 +16,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Annotations.Resolved;
+import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.abilities.AbilityUpdater;
@@ -866,8 +867,21 @@ public class DisguiseState extends MorphPluginObject
     private <X> void consumeIfPropertiesSupported(Class<X> clazz, Consumer<X> consumer)
     {
         var bindingProperties = propertyHandler.bindingProperties();
-        if (bindingProperties == null) return;
-        if (!clazz.isInstance(bindingProperties)) return;
+        if (bindingProperties == null)
+        {
+            if (FeatherMorphMain.getInstance().debugOutputEnabled())
+                logger.info("BindingProperties is NULL, not continuing...");
+
+            return;
+        }
+
+        if (!clazz.isInstance(bindingProperties))
+        {
+            if (FeatherMorphMain.getInstance().debugOutputEnabled())
+                logger.info("Expected %s but got %s, not continuing".formatted(clazz, bindingProperties.getClass()));
+
+            return;
+        }
 
         consumer.accept((X) bindingProperties);
     }
@@ -875,8 +889,21 @@ public class DisguiseState extends MorphPluginObject
     private <X, V> Optional<V> funcIfPropertiesSupported(Class<X> clazz, Function<X, Optional<V>> func)
     {
         var bindingProperties = propertyHandler.bindingProperties();
-        if (bindingProperties == null) return Optional.empty();
-        if (!clazz.isInstance(bindingProperties)) return Optional.empty();
+        if (bindingProperties == null)
+        {
+            if (FeatherMorphMain.getInstance().debugOutputEnabled())
+                logger.info("BindingProperties is NULL, not continuing...");
+
+            return Optional.empty();
+        }
+
+        if (!clazz.isInstance(bindingProperties))
+        {
+            if (FeatherMorphMain.getInstance().debugOutputEnabled())
+                logger.info("Expected %s but got %s, not continuing".formatted(clazz, bindingProperties.getClass()));
+
+            return Optional.empty();
+        }
 
         return func.apply((X) bindingProperties);
     }
