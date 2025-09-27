@@ -80,8 +80,8 @@ public class OptionSubCommand extends MorphPluginObject implements IConvertibleB
 
         subCommands.add(getList("banned_disguises", ConfigOption.BANNED_DISGUISES, null));
         subCommands.add(getList("nofly_worlds", ConfigOption.NOFLY_WORLDS, null));
-        subCommands.add(getList("blacklist_tags", ConfigOption.BLACKLIST_TAGS, null));
-        subCommands.add(getList("blacklist_nbt_pattern", ConfigOption.BLACKLIST_PATTERNS, null));
+        //subCommands.add(getList("blacklist_tags", ConfigOption.BLACKLIST_TAGS, null));
+        //subCommands.add(getList("blacklist_nbt_pattern", ConfigOption.BLACKLIST_PATTERNS, null));
         //subCommands.add(getList("disabled_worlds", ConfigOption.DISGUISE_DISABLED_WORLDS, null));
 
         subCommands.add(getToggle("ability_check_permissions", ConfigOption.DO_CHECK_ABILITY_PERMISSIONS, null));

@@ -169,7 +169,7 @@ public class MorphConfigManager extends PluginConfigManager
         });
 
         //更新配置
-        int targetVersion = 43;
+        int targetVersion = 44;
 
         var configVersion = getOrDefault(Integer.class, ConfigOption.VERSION);
 
@@ -315,6 +315,12 @@ public class MorphConfigManager extends PluginConfigManager
                 newConfig.set(ConfigOption.DO_MODIFY_AI.node.toString(), false);
                 FeatherMorphMain.getInstance().getSLF4JLogger().info("AI Modification has been disabled due to having issue on Folia server");
             }*/
+
+            if (configVersion < 44)
+            {
+                this.remove(ConfigOption.BLACKLIST_PATTERNS);
+                this.remove(ConfigOption.BLACKLIST_TAGS);
+            }
 
             newConfig.set(ConfigOption.VERSION.toString(), targetVersion);
 

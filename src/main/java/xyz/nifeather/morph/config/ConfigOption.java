@@ -85,10 +85,6 @@ public enum ConfigOption
     LANGUAGE_CODE(languageNode().append("code"), "en_us"),
     SINGLE_LANGUAGE(languageNode().append("single_language"), true),
 
-    BLACKLIST_PATTERNS(nbtBlacklistNode().append("patterns"), new ArrayList<>(NbtUtils.defaultBlacklistedPatterns)),
-
-    BLACKLIST_TAGS(nbtBlacklistNode().append("names"), new ArrayList<>(NbtUtils.defaultBlacklistedTags)),
-
     AMBIENT_FREQUENCY(ambientSoundNode().append("frequency"), 1D),
 
     DEBUG_OUTPUT(ConfigNode.create().append("debug_output"), false, true),
@@ -133,6 +129,12 @@ public enum ConfigOption
     TOWNY_ALLOW_FLY_IN_WILDERNESS(townyNode().append("allow_fly_in_wilderness"), false),
 
     DISGUISE_DISABLED_WORLDS(worldOptionNode().append("disabled_worlds"), new ArrayList<String>()),
+
+    @Deprecated(forRemoval = true, since = "2.5.0")
+    BLACKLIST_PATTERNS(nbtBlacklistNode().append("patterns"), new ArrayList<>(NbtUtils.defaultBlacklistedPatterns)),
+
+    @Deprecated(forRemoval = true, since = "2.5.0")
+    BLACKLIST_TAGS(nbtBlacklistNode().append("names"), new ArrayList<>(NbtUtils.defaultBlacklistedTags)),
 
     VERSION(ConfigNode.create().append("version"), 0);
 
