@@ -13,7 +13,7 @@ import xyz.nifeather.morph.utilities.Uuids;
 
 public class MannequinProperties extends BaseLivingEntityProperties<Mannequin>
 {
-    public final SingleProperty<Component> NPC_DESCRIPTION = createProperty(PropertyNames.MANNEQUIN_NPC_DESCRIPTION, Component.empty(), InputHandles::readAdventureComponent, OutputHandles::writeAdventureComponentJSON);
+    public final SingleProperty<Component> NPC_DESCRIPTION = createProperty(PropertyNames.MANNEQUIN_NPC_DESCRIPTION, Component.empty(), InputHandles::readAdventureComponentLimited, OutputHandles::writeAdventureComponentJSON);
     public final SingleProperty<Boolean> HIDE_DESCRIPTION = createProperty(PropertyNames.MANNEQUIN_HIDE_DESCRIPTION, false, InputHandles::readBooleanRelaxed, OutputHandles::writeBoolean);
     public final SingleProperty<Boolean> IMMOVABLE = SingleProperty.of(PropertyNames.MANNEQUIN_IMMOVABLE, false, InputHandles::reservedException, OutputHandles::writeBoolean, false)
             .withValidInput("true", "false");
@@ -49,6 +49,6 @@ public class MannequinProperties extends BaseLivingEntityProperties<Mannequin>
     @Override
     protected void setupDefaultProperties(PropertyHandler propertyHandler)
     {
-        //propertyHandler.set(CUSTOM_NAME_VISIBLE, true);
+        propertyHandler.set(CUSTOM_NAME_VISIBLE, true);
     }
 }

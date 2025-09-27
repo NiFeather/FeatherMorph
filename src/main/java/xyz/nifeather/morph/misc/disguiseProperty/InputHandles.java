@@ -7,15 +7,14 @@ import io.papermc.paper.registry.RegistryAccess;
 import io.papermc.paper.registry.RegistryKey;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.DyeColor;
 import org.bukkit.Keyed;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;
 import org.bukkit.entity.*;
 import org.jetbrains.annotations.NotNull;
-import xiamomc.pluginbase.Messages.FormattableMessage;
 import xyz.nifeather.morph.messages.ExceptionStrings;
-import xyz.nifeather.morph.messages.TypesString;
 
 import java.util.*;
 
@@ -150,6 +149,58 @@ public class InputHandles
     }
 
     //endregion Enum
+    public static Optional<Component> readAdventureComponentLimitedNonEmpty(String propertyName, String string) throws ParseErrorException
+    {
+        if (string.isBlank())
+        {
+            throw ParseErrorException.forProperty(propertyName)
+                    .byMethod("readAdventureComponentLimited")
+                    .withMessage("Blank string for component")
+                    .withLocalizableMessage(ExceptionStrings.noEmptyInput())
+                    .create();
+        }
+
+        return readAdventureComponentLimited(propertyName, string);
+    }
+
+    public static Optional<Component> readAdventureComponentLimited(String propertyName, String string) throws ParseErrorException
+    {
+        if (string.length() > 256)
+        {
+            throw ParseErrorException.forProperty(propertyName)
+                    .byMethod("readAdventureComponentLimited")
+                    .withMessage("Given input is too long!")
+                    .withLocalizableMessage(ExceptionStrings.inputTooLong())
+                    .create();
+        }
+
+        var componentOptional = InputHandles.readAdventureComponent(propertyName, string);
+
+        if (componentOptional.isPresent())
+        {
+            var finalText = PlainTextComponentSerializer.plainText().serialize(componentOptional.get());
+
+            if (finalText.length() > 50)
+            {
+                throw ParseErrorException.forProperty(propertyName)
+                        .byMethod("readAdventureComponentLimited")
+                        .withMessage("The parse result is too long!")
+                        .withLocalizableMessage(ExceptionStrings.inputTooLong())
+                        .create();
+            }
+
+            if (finalText.isBlank())
+            {
+                throw ParseErrorException.forProperty(propertyName)
+                        .byMethod("readAdventureComponentLimited")
+                        .withMessage("Blank component is not allowed")
+                        .withLocalizableMessage(ExceptionStrings.noEmptyInput())
+                        .create();
+            }
+        }
+
+        return componentOptional;
+    }
 
     public static Optional<Component> readAdventureComponent(String propertyName, String input) throws ParseErrorException
     {

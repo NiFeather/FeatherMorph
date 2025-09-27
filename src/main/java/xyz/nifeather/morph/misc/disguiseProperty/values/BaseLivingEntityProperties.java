@@ -1,10 +1,8 @@
 package xyz.nifeather.morph.misc.disguiseProperty.values;
 
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
-import xyz.nifeather.morph.messages.ExceptionStrings;
 import xyz.nifeather.morph.misc.DisguiseEquipment;
 import xyz.nifeather.morph.misc.disguiseProperty.*;
 
@@ -14,7 +12,7 @@ public abstract class BaseLivingEntityProperties<E extends Entity> extends Abstr
 {
     protected SingleProperty<Component> createCustomNameProperty()
     {
-        return createProperty(PropertyNames.ENTITY_CUSTOM_NAME, Component.empty(), this::readCustomNameMiniMessage, OutputHandles::writeAdventureComponentJSON);
+        return createProperty(PropertyNames.ENTITY_CUSTOM_NAME, Component.empty(), InputHandles::readAdventureComponentLimitedNonEmpty, OutputHandles::writeAdventureComponentJSON);
     }
 
     public final SingleProperty<Boolean> CUSTOM_NAME_VISIBLE = createProperty(PropertyNames.ENTITY_CUSTOM_NAME_VISIBLE, false, InputHandles::readBooleanRelaxed, OutputHandles::writeBoolean)
@@ -26,54 +24,6 @@ public abstract class BaseLivingEntityProperties<E extends Entity> extends Abstr
 
     public final SingleProperty<DisguiseEquipment> EQUIPMENT = SingleProperty.of(PropertyNames.ENTITY_EQUIPMENT, new DisguiseEquipment(), InputHandles::reservedException, OutputHandles::writeEquipment, true);
     public final SingleProperty<Boolean> DISPLAY_DISGUISE_EQUIPMENT = SingleProperty.of(PropertyNames.ENTITY_DISPLAY_DISGUISE_EQUIPMENT, false, InputHandles::reservedException, OutputHandles::writeBoolean, true);
-
-    private Optional<Component> readCustomNameMiniMessage(String propertyName, String string) throws ParseErrorException
-    {
-        if (string.length() > 256)
-        {
-            throw ParseErrorException.forProperty(propertyName)
-                    .byMethod("readCustomName")
-                    .withMessage("Given input is too long!")
-                    .withLocalizableMessage(ExceptionStrings.inputTooLong())
-                    .create();
-        }
-
-        if (string.isBlank())
-        {
-            throw ParseErrorException.forProperty(propertyName)
-                    .byMethod("readCustomName")
-                    .withMessage("Blank string for custom name")
-                    .withLocalizableMessage(ExceptionStrings.noEmptyInput())
-                    .create();
-        }
-
-        var component = InputHandles.readAdventureComponent(propertyName, string);
-
-        if (component.isPresent())
-        {
-            var finalText = PlainTextComponentSerializer.plainText().serialize(component.get());
-
-            if (finalText.length() > 50)
-            {
-                throw ParseErrorException.forProperty(propertyName)
-                        .byMethod("readCustomName")
-                        .withMessage("The final name input is too long!")
-                        .withLocalizableMessage(ExceptionStrings.inputTooLong())
-                        .create();
-            }
-
-            if (finalText.isBlank())
-            {
-                throw ParseErrorException.forProperty(propertyName)
-                        .byMethod("readCustomName")
-                        .withMessage("Blank component is not allowed")
-                        .withLocalizableMessage(ExceptionStrings.noEmptyInput())
-                        .create();
-            }
-        }
-
-        return component;
-    }
 
     @Override
     protected void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull E targetEntity)
