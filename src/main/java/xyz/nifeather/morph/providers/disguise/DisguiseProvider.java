@@ -88,7 +88,7 @@ public abstract class DisguiseProvider extends MorphPluginObject
      * Called when disguise properties finished parsing, can be used for post-processing
      * @param state The disguise to finalize
      */
-    public void finalizeProperties(DisguiseState state)
+    public void finalizeProperties(DisguiseState state) throws ParseErrorException
     {
     }
 

@@ -265,7 +265,8 @@ paper {
 
             permissionRoot + "mirror.immune",
 
-            permissionRoot + "admin"
+            permissionRoot + "admin",
+            permissionRoot + "custom_skin"
     );
 
     opPermissions.forEach {
