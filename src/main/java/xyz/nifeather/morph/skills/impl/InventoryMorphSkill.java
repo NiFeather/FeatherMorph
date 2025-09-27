@@ -58,12 +58,13 @@ public class InventoryMorphSkill extends MorphSkill<NoOpConfiguration>
         if (targetEntity != null)
         {
             var provider = state.getProvider();
-            EntityEquipment equipment = null;
             var theirState = manager.getDisguiseStateFor(targetEntity);
             var disguiseMeta = manager.getDisguiseMeta(state.getDisguiseIdentifier());
 
             if (provider.canCloneEquipment(disguiseMeta, targetEntity, theirState))
             {
+                EntityEquipment equipment = null;
+
                 if (theirState != null)
                 {
                     equipment = theirState.showingDisguisedItems()
@@ -75,9 +76,9 @@ public class InventoryMorphSkill extends MorphSkill<NoOpConfiguration>
                 {
                     equipment = ((LivingEntity) targetEntity).getEquipment();
                 }
-            }
 
-            state.refreshDisguiseItems(equipment);
+                state.refreshDisguiseItems(equipment);
+            }
         }
 
         super.onInitialEquip(state);
