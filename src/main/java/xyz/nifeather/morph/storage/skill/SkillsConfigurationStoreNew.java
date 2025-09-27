@@ -40,7 +40,7 @@ public class SkillsConfigurationStoreNew extends DirectoryJsonBasedStorage<Skill
             logger.warn("The package version is newer than our implementation! Errors may occur!");
     }
 
-    private static final int TARGET_PACKAGE_VERSION = PackageVersions.POTION_MIGRATE;
+    private static final int TARGET_PACKAGE_VERSION = PackageVersions.MANNEQUIN_SKILL;
 
     private void update(int currentVersion)
     {
@@ -92,6 +92,11 @@ public class SkillsConfigurationStoreNew extends DirectoryJsonBasedStorage<Skill
         if (currentVersion < PackageVersions.POTION_MIGRATE)
         {
             migratePotionEffect();
+        }
+
+        if (currentVersion < PackageVersions.MANNEQUIN_SKILL)
+        {
+            saveEntityTypeConfiguration(generatedConfigurations, EntityType.MANNEQUIN);
         }
 
         setPackageVersion(TARGET_PACKAGE_VERSION);
@@ -386,5 +391,6 @@ public class SkillsConfigurationStoreNew extends DirectoryJsonBasedStorage<Skill
         public static final int GUARDIAN_SKILL = 6;
         public static final int EXTRA_AIR_ABILITY = 7;
         public static final int POTION_MIGRATE = 8;
+        public static final int MANNEQUIN_SKILL = 9;
     }
 }

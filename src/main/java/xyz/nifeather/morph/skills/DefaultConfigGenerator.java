@@ -158,6 +158,10 @@ public class DefaultConfigGenerator
         this.getConfiguration(EntityType.GUARDIAN)
                 .setSkillIdentifier(SkillNames.GUARDIAN)
                 .setSkillCooldown(80);
+
+        this.getConfiguration(EntityType.MANNEQUIN)
+                .setSkillIdentifier(SkillNames.FAKE_EQUIP)
+                .setSkillCooldown(20);
     }
 
     private void setAbilityRange(Collection<EntityType> types, NamespacedKey abilityType)
