@@ -24,8 +24,8 @@ public abstract class BaseLivingEntityProperties<E extends Entity> extends Abstr
 
     public final SingleProperty<Component> CUSTOM_NAME = createCustomNameProperty();
 
-    public final SingleProperty<DisguiseEquipment> EQUIPMENT = SingleProperty.of(PropertyNames.ENTITY_EQUIPMENT, new DisguiseEquipment(), InputHandles::unsupported, OutputHandles::writeEquipment, true);
-    public final SingleProperty<Boolean> DISPLAY_DISGUISE_EQUIPMENT = createProperty(PropertyNames.ENTITY_DISPLAY_DISGUISE_EQUIPMENT, false, InputHandles::readBooleanRelaxed, OutputHandles::writeBoolean);
+    public final SingleProperty<DisguiseEquipment> EQUIPMENT = SingleProperty.of(PropertyNames.ENTITY_EQUIPMENT, new DisguiseEquipment(), InputHandles::reservedException, OutputHandles::writeEquipment, true);
+    public final SingleProperty<Boolean> DISPLAY_DISGUISE_EQUIPMENT = SingleProperty.of(PropertyNames.ENTITY_DISPLAY_DISGUISE_EQUIPMENT, false, InputHandles::reservedException, OutputHandles::writeBoolean, true);
 
     private Optional<Component> readCustomNameMiniMessage(String propertyName, String string) throws ParseErrorException
     {
