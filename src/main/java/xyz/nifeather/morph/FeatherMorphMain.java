@@ -31,6 +31,7 @@ import xyz.nifeather.morph.misc.PlayerOperationSimulator;
 import xyz.nifeather.morph.misc.RecipeConfigHandle;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.gui.IconLookup;
+import xyz.nifeather.morph.misc.integrations.pingwheel.PingWheelAdapter;
 import xyz.nifeather.morph.misc.integrations.placeholderapi.PlaceholderIntegration;
 import xyz.nifeather.morph.misc.integrations.residence.ResidenceEventProcessor;
 import xyz.nifeather.morph.misc.integrations.towny.TownyAdapter;
@@ -239,6 +240,12 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
         {
             logger.info("Towny detected, applying integrations...");
             this.registerListener(new TownyAdapter());
+        }, true);
+
+        softDeps.setHandle("PingWheelPluginForked", plugin ->
+        {
+            logger.info("PingWheelPluginForked detected, trying to apply integrations...");
+            new PingWheelAdapter();
         }, true);
 
         //缓存依赖
