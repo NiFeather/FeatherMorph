@@ -51,6 +51,7 @@
     "minecraft:villager",
     "minecraft:wandering_trader",
     "minecraft:wolf",
-    "minecraft:zombie_horse"
+    "minecraft:zombie_horse",
+    "minecraft:copper_golem"
   ]
 }
