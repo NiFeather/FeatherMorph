@@ -5,6 +5,8 @@ public class PropertyNames
     public static final String PLAYER_MAIN_HAND = "player/main_hand";
     public static final String PLAYER_SKIN = "player/skin";
 
+    public static final String COPPER_GOLEM_WEATHER_STATE = "copper_golem/weather_state";
+
     public static final String ENTITY_ARROW_COUNT = "entity/stucked_arrows";
     public static final String ENTITY_CUSTOM_NAME = "entity/custom_name";
     public static final String ENTITY_CUSTOM_NAME_VISIBLE = "entity/custom_name_visible";

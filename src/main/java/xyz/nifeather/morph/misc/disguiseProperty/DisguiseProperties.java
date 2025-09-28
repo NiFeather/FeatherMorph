@@ -66,6 +66,7 @@ public class DisguiseProperties
         register(EntityType.ELDER_GUARDIAN, new GuardianProperties());
 
         register(EntityType.MANNEQUIN, new MannequinProperties());
+        register(EntityType.COPPER_GOLEM, new CopperGolemProperties());
     }
 
     public Map<EntityType, AbstractProperties<?>> getAll()
