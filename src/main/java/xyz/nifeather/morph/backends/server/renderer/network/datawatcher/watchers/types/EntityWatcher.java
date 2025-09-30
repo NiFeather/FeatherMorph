@@ -93,6 +93,8 @@ public class EntityWatcher extends SingleWatcher
         return packet;
     }
 
+    public static final int PACKET_MARK = 10998;
+
     private List<PacketWrapper<?>> buildSpawnPacketsFor(Player player)
     {
         List<PacketWrapper<?>> packets = new ObjectArrayList<>();
@@ -118,7 +120,7 @@ public class EntityWatcher extends SingleWatcher
                 this.readEntryOrThrow(CustomEntries.SPAWN_ID), spawnUUID,
                 SpigotConversionUtil.fromBukkitEntityType(disguiseEntityType),
                 new Location(new Vector3d(player.getX(), player.getY(), player.getZ()), yaw, pitch),
-                nmsPlayer.getYHeadRot(), 0,
+                nmsPlayer.getYHeadRot(), PACKET_MARK,
                 new Vector3d(playerMotion.getX(), playerMotion.getY(), playerMotion.getZ())
         );
 

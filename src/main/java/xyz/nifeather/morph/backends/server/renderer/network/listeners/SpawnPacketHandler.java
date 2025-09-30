@@ -7,6 +7,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xyz.nifeather.morph.backends.server.ServerBackend;
+import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.types.EntityWatcher;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.RenderRegistry;
 
@@ -57,8 +58,11 @@ public class SpawnPacketHandler extends ProtocolListener
             return;
 
         // todo: 不要二次处理来自我们自己的包
-        if (uuid.equals(bindingWatcher.readEntry(CustomEntries.SPAWN_UUID)))
+        if (packet.getData() == EntityWatcher.PACKET_MARK)
             return;
+
+        //if (uuid.equals(bindingWatcher.readEntry(CustomEntries.SPAWN_UUID)))
+        //    return;
 
         packetEvent.setCancelled(true);
         Player affectedPlayer = packetEvent.getPlayer();
