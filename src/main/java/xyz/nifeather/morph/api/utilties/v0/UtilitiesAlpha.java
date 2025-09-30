@@ -7,6 +7,7 @@ import xyz.nifeather.morph.api.direct.FeatherMorphDirectAccess;
 import xyz.nifeather.morph.backends.server.ServerDisguiseWrapper;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
 import xyz.nifeather.morph.misc.DisguiseState;
+import xyz.nifeather.morph.misc.disguiseProperty.values.OffTreeProperties;
 import xyz.nifeather.morph.network.server.MessageChannel;
 
 import java.util.UUID;
@@ -86,16 +87,7 @@ public class UtilitiesAlpha
         if (state == null)
             return null;
 
-        var rawWrapper = state.getDisguiseWrapper();
-
-        if (!(rawWrapper instanceof ServerDisguiseWrapper wrapper))
-            return null;
-
-        var watcher = wrapper.getBindingWatcher();
-        if (watcher == null)
-            return null;
-
-        return wrapper.getBindingWatcher().readEntryOrDefault(CustomEntries.SPAWN_UUID, null);
+        return state.getDisguiseWrapper().readPropertyOr(OffTreeProperties.VIRTUAL_ENTITY_UUID, null);
     }
 
     /**

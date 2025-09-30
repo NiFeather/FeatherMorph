@@ -183,9 +183,12 @@ public class ServerRenderer extends MorphPluginObject implements Listener
             var disguiseUUID = disguiseWatcher.readEntryOrThrow(CustomEntries.SPAWN_UUID);
             var packetRemoveInfo = new WrapperPlayServerPlayerInfoRemove(disguiseUUID);
 
-            featherMorph().getPlatform()
-                    .onlinePlayersNative()
-                    .forEach(p -> protocolManager.sendPacket(p, packetRemoveInfo));
+            var targetPlayers = new ObjectArrayList<>(featherMorph().getPlatform().onlinePlayersNative());
+
+            if (disguiseUUID.equals(watcher.bindingUUID))
+                targetPlayers.removeIf(p -> p.getUniqueId().equals(watcher.bindingUUID));
+
+            targetPlayers.forEach(p -> protocolManager.sendPacket(p, packetRemoveInfo));
         }
 
         watcher.dispose();

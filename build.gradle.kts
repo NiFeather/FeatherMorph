@@ -113,6 +113,7 @@ dependencies {
 
     compileOnly(files("libs/CMILib1.4.3.5.jar"))
     compileOnly(files("libs/Residence5.1.4.0.jar"))
+    compileOnly(files("libs/pingwheel-plugin-forked-1.0.0-all.jar"))
 
     compileOnly("com.palmergames.bukkit.towny:towny:${project.property("towny_version")}")
     {
@@ -189,6 +190,12 @@ paper {
         }
 
         register("Towny") {
+            load = PaperPluginDescription.RelativeLoadOrder.BEFORE
+            required = false
+            joinClasspath = true
+        }
+
+        register("PingWheelPluginForked") {
             load = PaperPluginDescription.RelativeLoadOrder.BEFORE
             required = false
             joinClasspath = true
