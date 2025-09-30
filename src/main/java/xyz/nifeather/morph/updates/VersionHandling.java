@@ -16,10 +16,10 @@ public class VersionHandling
         var patch = strSpilt.length >= 3 ? tryParse(strSpilt[2]) : 0;
         String channel;
 
-        if (vers.length > 2)
+        if (vers.length == 2)
             channel = vers[1];
         else
-            channel = strSpilt.length >= 4 ? strSpilt[3] : "DefaultRelease";
+            channel = strSpilt.length >= 4 ? strSpilt[3] : "release";
 
         return new VersionInfo(major, minor, patch, channel);
     }
@@ -41,7 +41,7 @@ public class VersionHandling
         @Override
         public String toString()
         {
-            return "%s.%s.%s.%s".formatted(major, minor, patch, channel);
+            return "%s.%s.%s-%s".formatted(major, minor, patch, channel);
         }
 
         public boolean isInvalid()
@@ -93,7 +93,7 @@ public class VersionHandling
                 return CompareResult.INPUT_OLDER; // 2.2.1 <-> 2.2.2
         }
 
-        public static VersionInfo INVALID_VERSION = new VersionInfo(0, 0, 0, "Invalid");
+        public static VersionInfo INVALID_VERSION = new VersionInfo(0, 0, 0, "invalid");
     }
 
     public enum CompareResult

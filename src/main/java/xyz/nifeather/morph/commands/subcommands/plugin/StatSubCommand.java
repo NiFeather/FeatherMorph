@@ -16,6 +16,7 @@ import xyz.nifeather.morph.messages.StatStrings;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
 import xyz.nifeather.morph.skills.SkillManager;
+import xyz.nifeather.morph.updates.VersionHandling;
 
 public class StatSubCommand extends BrigadierCommand
 {
@@ -93,10 +94,11 @@ public class StatSubCommand extends BrigadierCommand
         var defaultBackend = morphManager.getDefaultBackend();
         var defaultBackendString = "%s (%s)".formatted(defaultBackend.getIdentifier(), defaultBackend.getClass().getName());
 
+        String versionString = plugin.getPluginMeta().getVersion();
         var msg = new FormattableMessage[]
                 {
                         StatStrings.versionString()
-                                .resolve("version", plugin.getPluginMeta().getVersion())
+                                .resolve("version", "%s(%s)".formatted(versionString, VersionHandling.toVersionInfo(versionString)))
                                 .resolve("author", authors)
                                 .resolve("proto", String.valueOf(clientHandler.targetApiVersion)),
 
