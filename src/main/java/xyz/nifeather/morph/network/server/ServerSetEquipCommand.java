@@ -1,14 +1,14 @@
 package xyz.nifeather.morph.network.server;
 
-import net.minecraft.SharedConstants;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.network.commands.S2C.set.S2CSetFakeEquipCommand;
-import xyz.nifeather.morph.utilities.ItemUtils;
+import xyz.nifeather.morph.network.utils.ProtocolEquipmentSlot;
 
 import java.util.Map;
 
+@SuppressWarnings("removal")
 public class ServerSetEquipCommand extends S2CSetFakeEquipCommand<ItemStack>
 {
     public ServerSetEquipCommand(ItemStack item, EquipmentSlot slot)

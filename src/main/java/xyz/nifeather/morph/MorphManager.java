@@ -994,7 +994,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             provider.getInitialSyncCommands(newState).forEach(s -> clientHandler.sendCommand(player, s));
 
             // 设置Profile
-            if (newState.haveProfile() && clientApiVersion < 16)
+            if (newState.haveProfile() && clientApiVersion < Constants.ApiLevel.EQUIPMENT_AND_SKIN_ARE_NOW_PROPERTY.protocolVersion)
+                //noinspection removal
                 clientHandler.sendCommand(player, new S2CSetProfileCommand(newState.getProfileNbtString()));
         }
 
@@ -1179,9 +1180,12 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         clientHandler.sendCommand(player, new S2CSetAvailableAnimationsCommand(availableAnimations));
 
         //Profile
-        if (state.haveProfile() && playerApiVersion < 16)
+        if (state.haveProfile() && playerApiVersion < Constants.ApiLevel.EQUIPMENT_AND_SKIN_ARE_NOW_PROPERTY.protocolVersion)
         {
+            //noinspection removal
             clientHandler.sendCommand(player, new S2CSetProfileCommand(state.getProfileNbtString()));
+
+            //noinspection removal
             clientHandler.sendCommand(player, new S2CSetDisplayingFakeEquipCommand(state.showingDisguisedItems()));
         }
     }

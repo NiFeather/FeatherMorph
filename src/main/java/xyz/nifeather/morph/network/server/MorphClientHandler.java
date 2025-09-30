@@ -126,7 +126,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
     /**
      * 服务端的接口版本
      */
-    public final int targetApiVersion = 16; //Constants.PROTOCOL_VERSION;
+    public final int targetApiVersion = Constants.PROTOCOL_VERSION;
 
     /**
      * 最低能接受的客户端接口版本
