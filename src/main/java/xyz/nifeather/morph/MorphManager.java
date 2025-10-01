@@ -12,7 +12,6 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.util.BoundingBox;
 import org.jetbrains.annotations.ApiStatus;
@@ -644,6 +643,24 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
             return false;
         }
+        catch (PropertyValidationException e)
+        {
+            if (FeatherMorphMain.getInstance().debugOutputEnabled())
+                logger.error("Failed to disguise player because a PropertyValidationException has occurred", e);
+
+            var message = e.localizableMessage().orElseGet(() -> new FormattableMessage(plugin, e.getMessage()))
+                    .withLocale(MessageUtils.getLocale(source));
+
+            var msg = MorphStrings.errorWhileDisguisingWithError()
+                    .resolve("error", message);
+
+            var component = MessageUtils.prefixes(source, msg)
+                    .hoverEvent(HoverEvent.showText(Component.text(e.underlyingMessage())));
+
+            source.sendMessage(component);
+
+            return false;
+        }
         catch (ExecutionErrorException e)
         {
             logger.error("Failed to disguise player because an ExecutionErrorException has occurred", e);
@@ -852,7 +869,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     public static final String SESSIONKEY_TARGET_ENTITY = "MORPHMANAGER_TARGET_ENTITY";
 
     private void buildDisguise(DisguiseBuildResult result,
-                               MorphParameters parameters) throws ParseErrorException, NullPointerException
+                               MorphParameters parameters) throws ParseErrorException, PropertyValidationException, NullPointerException
     {
         if (!result.success())
             throw new IllegalArgumentException("Passing a failed result to postDisguise() !");
@@ -897,7 +914,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         provider.setupProperties(state, targetEntity);
 
         // Then apply properties
-        propertyHandler.updateFromPropertiesInput(parameters.propertiesInput);
+        propertyHandler.updateFromPropertiesInput(parameters.propertiesInput, map -> properties.validateInput(map, player));
 
         propertyHandler.getAll().forEach((property, value) ->
                 wrapper.writeProperty((SingleProperty<Object>) property, value));

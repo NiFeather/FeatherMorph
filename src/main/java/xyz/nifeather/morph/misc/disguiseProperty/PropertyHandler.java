@@ -65,7 +65,12 @@ public class PropertyHandler
         validProperties.addAll(properties.getRegisteredProperties().values());
     }
 
-    public void updateFromPropertiesInput(Map<String, String> input) throws ParseErrorException
+    public void updateFromPropertiesInput(Map<String, String> input) throws ParseErrorException, PropertyValidationException
+    {
+        updateFromPropertiesInput(input, map -> {});
+    }
+
+    public void updateFromPropertiesInput(Map<String, String> input, IPropertyValidateHandle validateHandle) throws ParseErrorException, PropertyValidationException
     {
         if (this.bindingProperties == null)
         {
@@ -74,6 +79,8 @@ public class PropertyHandler
         }
 
         var results = this.bindingProperties.readFromPropertiesInput(input);
+        validateHandle.validate(results);
+
         results.forEach(this::writeGeneric);
     }
 

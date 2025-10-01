@@ -1,6 +1,7 @@
 package xyz.nifeather.morph.misc.disguiseProperty.values;
 
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -110,4 +111,7 @@ public abstract class AbstractProperties<E extends Entity>
         theirHandler.copyTo(ourHandler);
     }
 
+    public void validateInput(Map<SingleProperty<?>, Object> result, Player player) throws PropertyValidationException
+    {
+    }
 }

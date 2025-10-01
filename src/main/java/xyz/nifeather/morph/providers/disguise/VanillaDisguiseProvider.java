@@ -159,17 +159,6 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
         if (propertyHandler.contains(mannequinProperties.SKIN_NAME)
                 && !propertyHandler.contains(mannequinProperties.SKIN_INTERNAL))
         {
-            var player = state.getPlayer();
-
-            if (!player.hasPermission(CommonPermissions.DISGUISE_CUSTOM_SKIN))
-            {
-                throw ParseErrorException.forProperty(PropertyNames.MANNEQUIN_SKIN)
-                        .byMethod("VanillaDisguiseProvider#finalizeProperties")
-                        .withLocalizableMessage(CommandStrings.noPermissionMessage())
-                        .withMessage("Player don't have permission for setting custom skin")
-                        .create();
-            }
-
             var value = propertyHandler.get(mannequinProperties.SKIN_NAME);
             PlayerSkinProvider.getInstance().fetchSkin(value).thenAccept(optional ->
             {

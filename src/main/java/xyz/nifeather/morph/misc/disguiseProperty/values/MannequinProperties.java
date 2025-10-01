@@ -5,11 +5,16 @@ import io.papermc.paper.datacomponent.item.ResolvableProfile;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Mannequin;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xyz.nifeather.morph.messages.CommandStrings;
 import xyz.nifeather.morph.misc.disguiseProperty.*;
+import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 import xyz.nifeather.morph.utilities.GameProfileUtils;
 import xyz.nifeather.morph.utilities.Uuids;
+
+import java.util.Map;
 
 public class MannequinProperties extends BaseLivingEntityProperties<Mannequin>
 {
@@ -51,5 +56,23 @@ public class MannequinProperties extends BaseLivingEntityProperties<Mannequin>
     protected void setupDefaultProperties(PropertyHandler propertyHandler)
     {
         propertyHandler.set(CUSTOM_NAME_VISIBLE, true);
+    }
+
+    @Override
+    public void validateInput(Map<SingleProperty<?>, Object> result, Player player) throws PropertyValidationException
+    {
+        if (result.containsKey(SKIN_NAME) || result.containsKey(SKIN_INTERNAL))
+        {
+            if (!player.hasPermission(CommonPermissions.DISGUISE_CUSTOM_SKIN))
+            {
+                throw PropertyValidationException.forProperty(PropertyNames.MANNEQUIN_SKIN)
+                        .byMethod("MannequinProperties#validateInput")
+                        .withLocalizableMessage(CommandStrings.noPermissionMessage())
+                        .withMessage("Player don't have permission for setting custom skin")
+                        .create();
+            }
+
+        }
+        super.validateInput(result, player);
     }
 }
