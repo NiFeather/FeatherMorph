@@ -78,7 +78,7 @@ public class ItemUtils
     {
         var item = ItemUtils.itemOrAir(stack);
 
-        if (stack.getType().isAir()) return "{\"id\":\"minecraft:air\",\"Count\":3}";
+        if (stack.getType().isAir()) return "{\"id\":\"minecraft:air\",\"count\":1}";
 
         //NOTE: 1.20.6需要访问世界注册表来获取JsonOps的序列化上下文来完整地反序列化ItemStack
         var registry = ((CraftWorld)Bukkit.getWorlds().stream().findFirst().orElseThrow()).getHandle().registryAccess();
@@ -99,7 +99,7 @@ public class ItemUtils
 
             logger.warn("Can't encode item '%s'! Providing without component data...".formatted(stack));
 
-            return "{\"id\": \"%s\", \"Count\": 1}".formatted(stack.getType().getKey().asString());
+            return "{\"id\": \"%s\", \"count\": 1}".formatted(stack.getType().getKey().asString());
         }
     }
 
