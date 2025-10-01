@@ -17,7 +17,7 @@ public class CustomEntries
     public static final CustomEntry<String> DISGUISE_NAME = CustomEntry.of("disguise_name", "").doRequireNonNull();
 
     //todo: Deprecate these two
-    public static final CustomEntry<DisguiseEquipment> EQUIPMENT = CustomEntry.of("equip", new DisguiseEquipment());
+    public static final CustomEntry<DisguiseEquipment> EQUIPMENT = CustomEntry.of("equip", DisguiseEquipment.empty());
     public static final CustomEntry<Boolean> DISPLAY_FAKE_EQUIPMENT = CustomEntry.of("display_fake_equip", false);
 
     @ApiStatus.Internal

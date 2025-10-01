@@ -22,7 +22,7 @@ public abstract class BaseLivingEntityProperties<E extends Entity> extends Abstr
 
     public final SingleProperty<Component> CUSTOM_NAME = createCustomNameProperty();
 
-    public final SingleProperty<DisguiseEquipment> EQUIPMENT = SingleProperty.of(PropertyNames.ENTITY_EQUIPMENT, new DisguiseEquipment(), InputHandles::reservedException, OutputHandles::writeEquipment, true);
+    public final SingleProperty<DisguiseEquipment> EQUIPMENT = SingleProperty.of(PropertyNames.ENTITY_EQUIPMENT, DisguiseEquipment.empty(), InputHandles::reservedException, OutputHandles::writeEquipment, true);
     public final SingleProperty<Boolean> DISPLAY_DISGUISE_EQUIPMENT = SingleProperty.of(PropertyNames.ENTITY_DISPLAY_DISGUISE_EQUIPMENT, false, InputHandles::reservedException, OutputHandles::writeBoolean, true);
 
     @Override

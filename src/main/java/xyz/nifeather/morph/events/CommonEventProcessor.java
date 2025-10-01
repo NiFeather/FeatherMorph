@@ -32,6 +32,7 @@ import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.MorphStrings;
 import xyz.nifeather.morph.messages.vanilla.VanillaMessageStore;
+import xyz.nifeather.morph.misc.DisguiseEquipment;
 import xyz.nifeather.morph.misc.DisguiseTypes;
 import xyz.nifeather.morph.misc.ModNetworkingHelper;
 import xyz.nifeather.morph.misc.OfflineDisguiseResult;
@@ -231,8 +232,6 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
 
         if (!state.showingDisguisedItems()) return;
 
-        state.swapHands();
-
         var equip = state.getDisguiseEquipment();
 
         var mainHand = itemOrAir(equip.getItemInMainHand());
@@ -253,10 +252,12 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         if (propertyHandler.bindingProperties() instanceof BaseLivingEntityProperties<?> properties)
         {
             var disguiseEquipment = propertyHandler.get(properties.EQUIPMENT);
-            disguiseEquipment.setItemInMainHand(mainHand);
-            disguiseEquipment.setItemInOffHand(offHand);
+            var newEquipment = DisguiseEquipment.builder(disguiseEquipment)
+                    .offHand(mainHand)
+                    .mainHand(offHand)
+                    .build();
 
-            propertyHandler.set(properties.EQUIPMENT, disguiseEquipment);
+            propertyHandler.set(properties.EQUIPMENT, newEquipment);
         }
     }
 

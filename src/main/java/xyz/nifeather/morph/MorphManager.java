@@ -928,6 +928,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         state.removeSessionData(SESSIONKEY_TARGET_ENTITY);
     }
 
+    @SuppressWarnings("removal")
     private boolean applyDisguise(MorphParameters parameters,
                                   DisguiseState newState,
                                   PlayerMeta playerOptions) throws ExecutionErrorException
@@ -1004,7 +1005,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                             // 设置Profile
                             var skinTag = NbtUtils.toCompoundTag(profile);
 
-                            //noinspection removal
                             clientHandler.sendCommand(player, new S2CSetProfileCommand(NbtUtils.getCompoundString(skinTag)));
                         });
             }
@@ -1159,6 +1159,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
      * 向客户端发送一组用于同步伪装状态的指令
      * @param state {@link DisguiseState}
      */
+    @SuppressWarnings("removal")
     public void refreshClientState(DisguiseState state)
     {
         var player = state.getPlayer();
@@ -1199,11 +1200,9 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                         // 设置Profile
                         var skinTag = NbtUtils.toCompoundTag(profile);
 
-                        //noinspection removal
                         clientHandler.sendCommand(player, new S2CSetProfileCommand(NbtUtils.getCompoundString(skinTag)));
                     });
 
-            //noinspection removal
             clientHandler.sendCommand(player, new S2CSetDisplayingFakeEquipCommand(state.showingDisguisedItems()));
         }
     }

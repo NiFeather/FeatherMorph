@@ -82,9 +82,9 @@ public class EntityWatcher extends SingleWatcher
     {
         var player = getBindingPlayer();
         var shouldDisplayFakeEquip = this.readEntryOrDefault(CustomEntries.DISPLAY_FAKE_EQUIPMENT, false);
-        EntityEquipment equipment = shouldDisplayFakeEquip
-                ? this.readEntryOrDefault(CustomEntries.EQUIPMENT, new DisguiseEquipment.EmptyDisguiseEquipment())
-                : player.getEquipment();
+        DisguiseEquipment equipment = shouldDisplayFakeEquip
+                ? this.readEntryOrDefault(CustomEntries.EQUIPMENT, DisguiseEquipment.empty())
+                : DisguiseEquipment.copy(player.getEquipment());
 
         var packet = new WrapperPlayServerEntityEquipment(player.getEntityId(), ProtocolEquipment.toPEEquipmentList(equipment));
 

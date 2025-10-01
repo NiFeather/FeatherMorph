@@ -23,8 +23,10 @@ import xyz.nifeather.morph.api.morphs.skills.SkillNames;
 import xyz.nifeather.morph.backends.DisguiseBackend;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.MorphStrings;
+import xyz.nifeather.morph.misc.DisguiseEquipment;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.misc.disguiseProperty.ParseErrorException;
+import xyz.nifeather.morph.network.Constants;
 import xyz.nifeather.morph.network.commands.S2C.AbstractS2CCommand;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
 import xyz.nifeather.morph.network.server.ServerSetEquipCommand;
@@ -209,7 +211,8 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
     public List<AbstractS2CCommand<?>> getInitialSyncCommands(DisguiseState state)
     {
         //logger.info("SID: " + state.getSkillLookupIdentifier() + " :: DID: " + state.getDisguiseIdentifier());
-        if (skillHandler.hasSpeficSkill(state.skillLookupIdentifier(), SkillNames.FAKE_EQUIP) && clientHandler.getPlayerVersion(state.getPlayer()) < 16)
+        if (skillHandler.hasSpeficSkill(state.skillLookupIdentifier(), SkillNames.FAKE_EQUIP)
+                && clientHandler.getPlayerVersion(state.getPlayer()) < Constants.ApiLevel.EQUIPMENT_AND_SKIN_ARE_NOW_PROPERTY.protocolVersion)
         {
             var eqiupment = state.getDisguiseEquipment();
 
@@ -229,7 +232,7 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
         return List.of();
     }
 
-    private void addIfPresents(EntityEquipment equipment,
+    private void addIfPresents(DisguiseEquipment equipment,
                                ObjectArrayList<AbstractS2CCommand<?>> list,
                                EquipmentSlot slot)
     {

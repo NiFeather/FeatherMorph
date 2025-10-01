@@ -72,9 +72,9 @@ public class PacketFactory extends MorphPluginObject
     public static List<Equipment> getPacketeventsEquipments(Player player, SingleWatcher watcher)
     {
         var shouldDisplayFakeEquip = watcher.readEntryOrDefault(CustomEntries.DISPLAY_FAKE_EQUIPMENT, false);
-        EntityEquipment equipment = shouldDisplayFakeEquip
-                ? watcher.readEntryOrDefault(CustomEntries.EQUIPMENT, new DisguiseEquipment())
-                : player.getEquipment();
+        DisguiseEquipment equipment = shouldDisplayFakeEquip
+                ? watcher.readEntryOrDefault(CustomEntries.EQUIPMENT, DisguiseEquipment.empty())
+                : DisguiseEquipment.copy(player.getEquipment());
 
         return ProtocolEquipment.toPEEquipmentList(equipment);
     }

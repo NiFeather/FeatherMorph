@@ -140,8 +140,10 @@ public class OutputHandles
         {
             if (slot == EquipmentSlot.BODY || slot == EquipmentSlot.SADDLE) continue;
 
-            ItemStack item = equipment.getItem(slot);
-            stringMap.put(ServerSetEquipCommand.toProtocolEquipment(slot).toString(), ItemUtils.itemToStr(item));
+            ItemStack item = equipment.getItemOrNull(slot);
+
+            if (item != null)
+                stringMap.put(ServerSetEquipCommand.toProtocolEquipment(slot).toString(), ItemUtils.itemToStr(item));
         }
 
         var record = new MorphEquipmentStruct(SharedConstants.getCurrentVersion().dataVersion().version(), stringMap);

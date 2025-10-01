@@ -7,6 +7,7 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -802,38 +803,10 @@ public class DisguiseState extends MorphPluginObject
 
     //endregion Updating
 
-    public void refreshDisguiseItems(@Nullable EntityEquipment targetEquipment)
+    public void refreshDisguiseItems(DisguiseEquipment disguiseEquipment)
     {
-        EntityEquipment equipment = targetEquipment != null ? targetEquipment : new DisguiseEquipment();
-
-        //设置默认盔甲
-        var armors = new ItemStack[]
-                {
-                        itemOrAir(equipment.getBoots()),
-                        itemOrAir(equipment.getLeggings()),
-                        itemOrAir(equipment.getChestplate()),
-                        itemOrAir(equipment.getHelmet())
-                };
-
-        //设置默认手持物
-        var handItems = new ItemStack[]
-                {
-                        itemOrAir(equipment.getItemInMainHand()),
-                        itemOrAir(equipment.getItemInOffHand())
-                };
-
-        armors = ItemUtils.asCopy(armors);
-        handItems = ItemUtils.asCopy(handItems);
-
-        var disguiseEquipments = new DisguiseEquipment();
-
-        disguiseEquipments.allowNull = false;
-        disguiseEquipments.setArmorContents(armors);
-        disguiseEquipments.setHandItems(handItems);
-
-        //开启默认装备显示或者更新显示
-        setEquipment(disguiseEquipments);
-        setShowingDisguisedEquipment(targetEquipment != null);
+        setEquipment(disguiseEquipment);
+        setShowingDisguisedEquipment(!disguiseEquipment.filterAll(item -> item.getType() == Material.AIR));
     }
 
     private <X> void consumeIfPropertiesSupported(Class<X> clazz, Consumer<X> consumer)
@@ -918,36 +891,10 @@ public class DisguiseState extends MorphPluginObject
      */
     public DisguiseEquipment getDisguiseEquipment()
     {
-        var eq = new DisguiseEquipment();
-
-        var disguiseEquipments = funcIfPropertiesSupported(BaseLivingEntityProperties.class, properties ->
+        return funcIfPropertiesSupported(BaseLivingEntityProperties.class, properties ->
         {
-            return propertyHandler.getOptional((SingleProperty<DisguiseEquipment>)properties.EQUIPMENT);
-        }).orElse(null);
-
-        if (disguiseEquipments != null)
-        {
-            eq.setArmorContents(ItemUtils.asCopy(disguiseEquipments.getArmorContents()));
-            eq.setHandItems(ItemUtils.asCopy(disguiseEquipments.getHandItems()));
-        }
-
-        return eq;
-    }
-
-    @ApiStatus.Internal
-    public void swapHands()
-    {
-        editEquipment(equipment ->
-        {
-            var handItems = equipment.getHandItems();
-
-            if (handItems.length != 2) return;
-
-            var mainHand = handItems[0];
-            var offHand = handItems[1];
-
-            equipment.setHandItems(offHand, mainHand);
-        });
+            return propertyHandler.getOptional((SingleProperty<DisguiseEquipment>) properties.EQUIPMENT);
+        }).orElseGet(DisguiseEquipment::empty);
     }
 
     /**

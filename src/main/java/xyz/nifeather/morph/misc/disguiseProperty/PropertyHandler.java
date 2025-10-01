@@ -1,11 +1,11 @@
 package xyz.nifeather.morph.misc.disguiseProperty;
 
-import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.FeatherMorphMain;
+import xyz.nifeather.morph.misc.ISupportDiffs;
 import xyz.nifeather.morph.misc.actions.BiConsumerActions;
 import xyz.nifeather.morph.misc.disguiseProperty.values.AbstractProperties;
 
@@ -114,8 +114,14 @@ public class PropertyHandler
 
         if (!value.equals(existing))
         {
+            X diffIfPossible;
+            if (existing instanceof ISupportDiffs<?> existingDiff)
+                diffIfPossible = ((ISupportDiffs<X>)existingDiff).diff(value);
+            else
+                diffIfPossible = value;
+
             propertyMap.put(property, value);
-            this.actions.invoke(BiConsumerActions.pair(property, value));
+            this.actions.invoke(BiConsumerActions.pair(property, diffIfPossible));
         }
     }
 

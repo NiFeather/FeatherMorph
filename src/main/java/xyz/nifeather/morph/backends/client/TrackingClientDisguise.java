@@ -16,13 +16,6 @@ public class TrackingClientDisguise implements Cloneable
         this.entityType = type;
     }
 
-    private final DisguiseEquipment equipment = new DisguiseEquipment();
-
-    public DisguiseEquipment equipment()
-    {
-        return equipment;
-    }
-
     private EntityType entityType;
 
     public EntityType entityType()
