@@ -13,6 +13,7 @@ import xyz.nifeather.morph.utilities.ItemUtils;
 
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Objects;
 
 public class DisguiseEquipment implements EntityEquipment
 {
@@ -327,6 +328,27 @@ public class DisguiseEquipment implements EntityEquipment
     @Override
     public void setDropChance(@NotNull EquipmentSlot slot, float chance)
     {
-
     }
+
+    //todo: Uncomment when DisguiseEquip is unmodifiable
+    /*
+    @Override
+    public boolean equals(Object obj)
+    {
+        if (!(obj instanceof DisguiseEquipment other)) return false;
+
+        boolean allEqual = false;
+        var ourContent = this.getArmorContents();
+        var theirContent = other.getArmorContents();
+
+        for (int i = 0; i < this.getArmorContents().length; i++)
+        {
+            if (i == theirContent.length) break;
+            allEqual = Objects.equals(ourContent[i], theirContent[i]);
+
+            if (!allEqual) break;
+        }
+
+        return allEqual;
+    }*/
 }
