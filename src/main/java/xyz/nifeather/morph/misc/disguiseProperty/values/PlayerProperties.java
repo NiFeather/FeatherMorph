@@ -20,7 +20,7 @@ public class PlayerProperties extends BaseLivingEntityProperties<Player>
     public final SingleProperty<MainHandStatus> MAIN_HAND = createProperty(PropertyNames.PLAYER_MAIN_HAND, MainHandStatus.NOTSET, this::readHand, OutputHandles::writeEnum)
             .withValidInput("left", "right");
 
-    public final SingleProperty<GameProfile> SKIN = SingleProperty.of(PropertyNames.PLAYER_SKIN, new GameProfile(Uuids.NIL_UUID, "unknown"), InputHandles::unsupported, OutputHandles::writeGameProfile);
+    public final SingleProperty<GameProfile> SKIN = SingleProperty.of(PropertyNames.PLAYER_SKIN, new GameProfile(Uuids.NIL_UUID, "unknown"), InputHandles::reservedException, OutputHandles::writeGameProfile, true);
 
     @Override
     protected SingleProperty<Component> createCustomNameProperty()

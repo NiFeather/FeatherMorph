@@ -14,8 +14,9 @@ import xyz.nifeather.morph.utilities.Uuids;
 public class MannequinProperties extends BaseLivingEntityProperties<Mannequin>
 {
     public final SingleProperty<Component> NPC_DESCRIPTION = createProperty(PropertyNames.MANNEQUIN_NPC_DESCRIPTION, Component.empty(), InputHandles::readAdventureComponentLimited, OutputHandles::writeAdventureComponentJSON);
-    public final SingleProperty<Boolean> HIDE_DESCRIPTION = createProperty(PropertyNames.MANNEQUIN_HIDE_DESCRIPTION, false, InputHandles::readBooleanRelaxed, OutputHandles::writeBoolean);
-    public final SingleProperty<Boolean> IMMOVABLE = SingleProperty.of(PropertyNames.MANNEQUIN_IMMOVABLE, false, InputHandles::reservedException, OutputHandles::writeBoolean, false)
+    public final SingleProperty<Boolean> HIDE_DESCRIPTION = createProperty(PropertyNames.MANNEQUIN_HIDE_DESCRIPTION, false, InputHandles::readBooleanRelaxed, OutputHandles::writeBoolean)
+            .withValidInput("true", "false");
+    public final SingleProperty<Boolean> IMMOVABLE = SingleProperty.of(PropertyNames.MANNEQUIN_IMMOVABLE, false, InputHandles::immediateException, OutputHandles::writeBoolean, true)
             .withValidInput("true", "false");
 
     public final SingleProperty<ResolvableProfile> SKIN_INTERNAL = SingleProperty.of(PropertyNames.MANNEQUIN_SKIN_INTERNAL, GameProfileUtils.asResolvableProfile(new GameProfile(Uuids.NIL_UUID, "unknown")), InputHandles::reservedException, OutputHandles::writeResolvableProfileAny, true);
