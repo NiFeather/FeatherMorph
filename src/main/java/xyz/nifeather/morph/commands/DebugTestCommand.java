@@ -1,13 +1,16 @@
 package xyz.nifeather.morph.commands;
 
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
+import io.papermc.paper.command.brigadier.argument.resolvers.selector.EntitySelectorArgumentResolver;
 import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSelectorArgumentResolver;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Mannequin;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Messages.FormattableMessage;
@@ -96,7 +99,32 @@ public class DebugTestCommand extends BrigadierCommand
                         .build()
         );
 
+        dispatcher.register(
+                Commands.literal("mannequinswing")
+                        .then(
+                                Commands.argument("entity", ArgumentTypes.entity())
+                                        .executes(this::execMannequinSwing)
+                        )
+                        .build()
+        );
+
         return true;
+    }
+
+    private int execMannequinSwing(CommandContext<CommandSourceStack> context) throws CommandSyntaxException
+    {
+        var entity = context.getArgument("entity", EntitySelectorArgumentResolver.class)
+                .resolve(context.getSource());
+
+        entity.forEach(e ->
+        {
+            if (!(e instanceof Mannequin mannequin)) return;
+
+            mannequin.swingMainHand();
+            context.getSource().getSender().sendMessage("Call swing!");
+        });
+
+        return 1;
     }
 
     private int validateSkillAbilities(CommandContext<CommandSourceStack> commandSourceStackCommandContext)

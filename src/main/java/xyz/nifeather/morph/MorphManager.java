@@ -42,6 +42,7 @@ import xyz.nifeather.morph.messages.MorphStrings;
 import xyz.nifeather.morph.misc.*;
 import xyz.nifeather.morph.misc.disguiseProperty.*;
 import xyz.nifeather.morph.misc.disguiseProperty.values.OffTreeProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.values.PlayerProperties;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 import xyz.nifeather.morph.network.Constants;
 import xyz.nifeather.morph.network.commands.S2C.S2CUpdatePropertiesCommand;
@@ -61,6 +62,7 @@ import xyz.nifeather.morph.storage.offlinestore.OfflineStateStore;
 import xyz.nifeather.morph.storage.playerdata.PlayerDataStoreNew;
 import xyz.nifeather.morph.storage.playerdata.PlayerMeta;
 import xyz.nifeather.morph.utilities.DisguiseUtils;
+import xyz.nifeather.morph.utilities.NbtUtils;
 import xyz.nifeather.morph.utilities.PermissionUtils;
 
 import java.io.InvalidObjectException;
@@ -993,10 +995,19 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
             provider.getInitialSyncCommands(newState).forEach(s -> clientHandler.sendCommand(player, s));
 
-            // 设置Profile
-            if (newState.haveProfile() && clientApiVersion < Constants.ApiLevel.EQUIPMENT_AND_SKIN_ARE_NOW_PROPERTY.protocolVersion)
-                //noinspection removal
-                clientHandler.sendCommand(player, new S2CSetProfileCommand(newState.getProfileNbtString()));
+            if (clientApiVersion < Constants.ApiLevel.EQUIPMENT_AND_SKIN_ARE_NOW_PROPERTY.protocolVersion)
+            {
+                var properties = DisguiseProperties.INSTANCE.getOrThrow(PlayerProperties.class);
+                newState.disguisePropertyHandler().getOptional(properties.SKIN)
+                        .ifPresent(profile ->
+                        {
+                            // 设置Profile
+                            var skinTag = NbtUtils.toCompoundTag(profile);
+
+                            //noinspection removal
+                            clientHandler.sendCommand(player, new S2CSetProfileCommand(NbtUtils.getCompoundString(skinTag)));
+                        });
+            }
         }
 
         // 设置可用动作
@@ -1179,11 +1190,18 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         var availableAnimations = provider.getAnimationProvider().getAnimationSetFor(state.getDisguiseIdentifier()).getAvailableAnimationsForClient();
         clientHandler.sendCommand(player, new S2CSetAvailableAnimationsCommand(availableAnimations));
 
-        //Profile
-        if (state.haveProfile() && playerApiVersion < Constants.ApiLevel.EQUIPMENT_AND_SKIN_ARE_NOW_PROPERTY.protocolVersion)
+        if (playerApiVersion < Constants.ApiLevel.EQUIPMENT_AND_SKIN_ARE_NOW_PROPERTY.protocolVersion)
         {
-            //noinspection removal
-            clientHandler.sendCommand(player, new S2CSetProfileCommand(state.getProfileNbtString()));
+            var properties = DisguiseProperties.INSTANCE.getOrThrow(PlayerProperties.class);
+            state.disguisePropertyHandler().getOptional(properties.SKIN)
+                    .ifPresent(profile ->
+                    {
+                        // 设置Profile
+                        var skinTag = NbtUtils.toCompoundTag(profile);
+
+                        //noinspection removal
+                        clientHandler.sendCommand(player, new S2CSetProfileCommand(NbtUtils.getCompoundString(skinTag)));
+                    });
 
             //noinspection removal
             clientHandler.sendCommand(player, new S2CSetDisplayingFakeEquipCommand(state.showingDisguisedItems()));

@@ -139,23 +139,6 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
         mutePlayerWaypoint(state.getPlayer());
         enableDisguiseWaypoint(state);
 
-        var wrapper = state.getDisguiseWrapper();
-
-        var playerProperties = DisguiseProperties.INSTANCE.getOrThrow(PlayerProperties.class);
-        var propertyHandler = state.disguisePropertyHandler();
-
-        var playerDisguiseTargetName = DisguiseTypes.PLAYER.toStrippedId(state.getDisguiseIdentifier());
-        wrapper.applySkin(propertyHandler.getOr(playerProperties.SKIN, new GameProfile(UUID.randomUUID(), playerDisguiseTargetName)));
-
-        propertyHandler.hookOnPropertyWrite((property, value) ->
-        {
-            if (property.equals(playerProperties.SKIN))
-            {
-                var profile = (GameProfile) value;
-                wrapper.applySkin(profile);
-            }
-        });
-
         super.onDisguiseApply(state);
     }
 

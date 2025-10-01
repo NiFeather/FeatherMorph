@@ -44,6 +44,7 @@ public class OfflineDisguiseState implements IOfflineState
      * 伪装的{@link com.mojang.authlib.GameProfile}数据（如果有）
      */
     @Expose
+    @Deprecated(forRemoval = true)
     public String profileString;
 
     @Expose

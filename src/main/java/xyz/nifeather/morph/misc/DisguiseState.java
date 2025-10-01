@@ -723,24 +723,6 @@ public class DisguiseState extends MorphPluginObject
         return NbtUtils.getCompoundString(disguiseWrapper.getCompound());
     }
 
-    //region ProfileNBT
-
-    public String getProfileNbtString()
-    {
-        if (!haveProfile())
-             return "{}";
-
-        return NbtUtils.getCompoundString(NbtUtils.toCompoundTag(disguiseWrapper.getSkin()));
-    }
-
-    public boolean haveProfile()
-    {
-        return funcIfPropertiesSupported(PlayerProperties.class, p -> Optional.ofNullable(propertyHandler.getOr(p.SKIN, null)))
-                .orElse(null) != null;
-    }
-
-    //endregion ProfileNBT
-
     //region Updating
 
     private final CompletableFuture<DisguiseState> stateFuture = new CompletableFuture<>();

@@ -16,6 +16,7 @@ import xyz.nifeather.morph.backends.EventWrapper;
 import xyz.nifeather.morph.backends.WrapperEvent;
 import xyz.nifeather.morph.backends.WrapperProperties;
 import xyz.nifeather.morph.misc.DisguiseState;
+import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 import xyz.nifeather.morph.misc.disguiseProperty.values.OffTreeProperties;
 import xyz.nifeather.morph.utilities.NbtUtils;
@@ -56,15 +57,6 @@ public class ModDisguiseWrapper extends EventWrapper<TrackingClientDisguise>
     public <X> void writeProperty(SingleProperty<X> property, X value)
     {
         this.instance.writeProperty(property, value);
-
-        //todo: Move this to TrackingClientDisguise
-        if (property.equals(WrapperProperties.PROFILE))
-        {
-            var val = ((Optional<GameProfile>) value).orElse(null);
-
-            callEvent(WrapperEvent.SKIN_SET, val);
-            return;
-        }
 
         if (property.equals(OffTreeProperties.DISPLAY_FAKE_EQUIPMENT) && getBindingPlayer() != null)
         {

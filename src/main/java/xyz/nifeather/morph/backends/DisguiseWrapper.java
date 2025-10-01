@@ -134,26 +134,6 @@ public abstract class DisguiseWrapper<TInstance>
     public abstract boolean isBaby();
 
     /**
-     * Applies a skin to the underlying player instance
-     * @param profile {@link GameProfile}
-     * @apiNote This shouldn't do anything if disguise entity type is not {@link EntityType#PLAYER}
-     */
-    public void applySkin(@NotNull GameProfile profile)
-    {
-        writeProperty(WrapperProperties.PROFILE, Optional.of(profile));
-    }
-
-    /**
-     * Gets current skin from the underlying player instance
-     * @return {@link GameProfile}, null if not set or not available
-     */
-    @Nullable
-    public GameProfile getSkin()
-    {
-        return readPropertyOr(WrapperProperties.PROFILE, Optional.empty()).orElse(null);
-    }
-
-    /**
      * Actions when we finished constructing disguise
      * @param state A {@link DisguiseState} that handles the current wrapper
      * @param targetEntity The targeted entity (If there is any)

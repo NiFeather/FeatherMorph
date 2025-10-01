@@ -24,8 +24,11 @@ import xyz.nifeather.morph.backends.server.renderer.utilties.WatcherUtils;
 import xyz.nifeather.morph.misc.AnimationNames;
 import xyz.nifeather.morph.misc.DisguiseEquipment;
 import xyz.nifeather.morph.misc.DisguiseState;
+import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 import xyz.nifeather.morph.misc.disguiseProperty.values.OffTreeProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.values.PlayerProperties;
 
 import java.util.Map;
 import java.util.Objects;
@@ -62,8 +65,6 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
         var uuid = bindingWatcher == null ? null : bindingWatcher.readEntryOrThrow(CustomEntries.SPAWN_UUID);
         return Objects.requireNonNull(uuid, "VirtualEntityUUID is not set for an instance of ServerDisguiseWrapper");
     }
-
-    private static final Logger logger = FeatherMorphMain.getInstance().getSLF4JLogger();
 
     @Override
     public EntityEquipment getFakeEquipments()
@@ -127,6 +128,9 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
 
         if (!property.id().startsWith("wrapper_") && bindingWatcher != null)
             bindingWatcher.writeProperty(property, value);
+
+        if (property.id().equals(PropertyNames.PLAYER_SKIN) && bindingWatcher != null)
+            bindingWatcher.writeEntry(CustomEntries.PROFILE, (GameProfile) value);
     }
 
     @Override
@@ -172,19 +176,6 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
             return false;
 
         return bindingWatcher.readOr(ValueIndex.AGEABLE_MOB.IS_BABY, false);
-    }
-
-    @Override
-    public void applySkin(@NotNull GameProfile profile)
-    {
-        if (this.getEntityType() != EntityType.PLAYER) return;
-
-        writeProperty(WrapperProperties.PROFILE, Optional.of(profile));
-
-        if (bindingWatcher != null)
-            bindingWatcher.writeEntry(CustomEntries.PROFILE, profile);
-
-        callEvent(WrapperEvent.SKIN_SET, profile);
     }
 
     @Override
@@ -256,7 +247,8 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
 
         if (getEntityType() == EntityType.PLAYER)
         {
-            var profileOptional = readProperty(WrapperProperties.PROFILE);
+            var properties = DisguiseProperties.INSTANCE.getOrThrow(PlayerProperties.class);
+            var profileOptional = Optional.ofNullable(readPropertyOr(properties.SKIN, null));
             profileOptional.ifPresent(p -> bindingWatcher.writeEntry(CustomEntries.PROFILE, p));
         }
 

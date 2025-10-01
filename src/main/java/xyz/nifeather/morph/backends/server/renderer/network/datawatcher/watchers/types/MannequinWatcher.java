@@ -2,15 +2,21 @@ package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watcher
 
 import com.destroystokyo.paper.profile.ProfileProperty;
 import com.github.retrooper.packetevents.protocol.component.builtin.item.ItemProfile;
+import com.github.retrooper.packetevents.protocol.entity.pose.EntityPose;
 import com.github.retrooper.packetevents.protocol.player.PlayerModelType;
 import com.github.retrooper.packetevents.resources.ResourceLocation;
+import com.github.retrooper.packetevents.util.Vector3i;
+import io.github.retrooper.packetevents.util.SpigotConversionUtil;
 import io.papermc.paper.datacomponent.item.ResolvableProfile;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.profile.PlayerTextures;
+import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
+import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntry;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
+import xyz.nifeather.morph.misc.AnimationNames;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 
@@ -61,6 +67,47 @@ public class MannequinWatcher extends LivingEntityWatcher
         }
 
         super.onPropertyWrite(property, value);
+    }
+
+    @Override
+    protected <X> void onEntryWrite(CustomEntry<X> entry, X oldVal, X newVal)
+    {
+        super.onEntryWrite(entry, oldVal, newVal);
+
+        if (entry.equals(CustomEntries.ANIMATION))
+        {
+            var animId = newVal + "";
+
+            switch (animId)
+            {
+                case AnimationNames.LAY ->
+                {
+                    this.remove(ValueIndex.MANNEQUIN.POSE);
+                    this.writePersistent(ValueIndex.MANNEQUIN.POSE, EntityPose.SLEEPING);
+
+                    var playerPos = getBindingPlayer().getLocation();
+                    var vec3i = new Vector3i(playerPos.getBlockX(), playerPos.getBlockY(), playerPos.getBlockZ());
+                    this.writePersistent(ValueIndex.MANNEQUIN.BED_POS, Optional.of(vec3i));
+                }
+                case AnimationNames.CRAWL ->
+                {
+                    resetValues();
+                    this.writePersistent(ValueIndex.MANNEQUIN.POSE, EntityPose.SWIMMING);
+                }
+                case AnimationNames.STANDUP, AnimationNames.RESET ->
+                {
+                    this.writePersistent(ValueIndex.MANNEQUIN.POSE, SpigotConversionUtil.fromBukkitPose(getBindingPlayer().getPose()));
+                    resetValues();
+                }
+            }
+        }
+    }
+
+    private void resetValues()
+    {
+        this.remove(ValueIndex.MANNEQUIN.POSE);
+        this.writePersistent(ValueIndex.MANNEQUIN.BED_POS, Optional.empty());
+        this.remove(ValueIndex.MANNEQUIN.BED_POS);
     }
 
     public void updateDescription(boolean hideDescription, @Nullable Component description)

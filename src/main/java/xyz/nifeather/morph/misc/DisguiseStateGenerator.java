@@ -30,7 +30,6 @@ public class DisguiseStateGenerator
 
         offlineState.disguiseData = "%s|%s".formatted(backend.getIdentifier(), backend.toOfflineSave(newDisguise));
         offlineState.displayingDisguisedItems = state.showingDisguisedItems();
-        offlineState.profileString = state.getProfileNbtString();
 
         if (state.entityCustomName != null)
             offlineState.customName = GsonComponentSerializer.gson().serialize(state.entityCustomName);
@@ -78,22 +77,6 @@ public class DisguiseStateGenerator
                 disguiseIdentifier, targetSkillID,
                 wrapper, provider,
                 playerOptions, playerMeta);
-
-        try
-        {
-            var rawProfile = NbtUtils.readGameProfile(offlineState.profileString);
-
-            if (rawProfile != null)
-            {
-                var profile = new GameProfile(rawProfile.id(), wrapper.getDisguiseName(), rawProfile.properties());
-                wrapper.applySkin(profile);
-            }
-        }
-        catch (Throwable t)
-        {
-            var logger = FeatherMorphMain.getInstance().getSLF4JLogger();
-            logger.error("Unable to parse profile data: " + t.getMessage());
-        }
 
         //设置显示名称
         if (offlineState.customName != null)

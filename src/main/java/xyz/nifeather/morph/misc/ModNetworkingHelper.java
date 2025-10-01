@@ -117,12 +117,7 @@ public class ModNetworkingHelper extends MorphPluginObject
 
         public NetworkDisguiseStateRecord forWrapper(DisguiseWrapper<?> wrapper)
         {
-            var profile = wrapper.readProperty(WrapperProperties.PROFILE).orElse(new GameProfile(Uuids.NIL_UUID, "NIL"));
-            var profileStr = NbtUtils.getCompoundString(NbtUtils.toCompoundTag(profile));
-
-            this.setProfileCompound(profileStr)
-                    //.setSNbt(NbtUtils.getCompoundString(wrapper.getCompound()))
-                    .setDisguiseEquipmentShown(wrapper.readProperty(OffTreeProperties.DISPLAY_FAKE_EQUIPMENT))
+            this.setDisguiseEquipmentShown(wrapper.readProperty(OffTreeProperties.DISPLAY_FAKE_EQUIPMENT))
                     .setOverridedEquip(wrapper.getFakeEquipments());
 
             return this;
