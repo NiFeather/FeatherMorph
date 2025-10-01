@@ -13,7 +13,7 @@ import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 import xyz.nifeather.morph.misc.disguiseProperty.values.ArmorStandProperties;
 
-public class ArmorStandWatcher extends InventoryLivingWatcher
+public class ArmorStandWatcher extends LivingEntityWatcher
 {
     @Override
     protected void initRegistry()

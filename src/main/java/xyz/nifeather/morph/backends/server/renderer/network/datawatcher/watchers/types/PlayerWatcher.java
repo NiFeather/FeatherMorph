@@ -26,7 +26,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 
-public class PlayerWatcher extends InventoryLivingWatcher
+public class PlayerWatcher extends LivingEntityWatcher
 {
     @Override
     protected void initRegistry()

@@ -22,12 +22,15 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.potion.PotionEffect;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
+import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntry;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.misc.BuildFailedException;
+import xyz.nifeather.morph.misc.DisguiseEquipment;
 import xyz.nifeather.morph.misc.NmsRecord;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 import xyz.nifeather.morph.misc.disguiseProperty.values.BaseLivingEntityProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.values.OffTreeProperties;
 import xyz.nifeather.morph.utilities.NmsUtils;
 
 import java.util.List;
@@ -79,8 +82,28 @@ public class LivingEntityWatcher extends EntityWatcher
             int count = (Integer) value;
             this.writePersistent(ValueIndex.BASE_LIVING.STUCKED_ARROWS, count);
         }
+        else if (property.equals(OffTreeProperties.FAKE_EQUIPMENT))
+        {
+            this.writeEntry(CustomEntries.EQUIPMENT, (DisguiseEquipment) value);
+        }
+        else if (property.equals(OffTreeProperties.DISPLAY_FAKE_EQUIPMENT))
+        {
+            this.writeEntry(CustomEntries.DISPLAY_FAKE_EQUIPMENT, Boolean.TRUE.equals(value));
+        }
 
         super.onPropertyWrite(property, value);
+    }
+
+    @Override
+    protected <X> void onEntryWrite(CustomEntry<X> entry, X oldVal, X newVal)
+    {
+        super.onEntryWrite(entry, oldVal, newVal);
+
+        if (entry.equals(CustomEntries.DISPLAY_FAKE_EQUIPMENT) || entry.equals(CustomEntries.EQUIPMENT))
+        {
+            if (!isSilent())
+                sendPacketToAffectedPlayers(this.getEquipmentPacket());
+        }
     }
 
     protected WrapperPlayServerUpdateAttributes buildAttributePacket()
