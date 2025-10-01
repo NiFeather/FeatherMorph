@@ -107,8 +107,13 @@ dependencies {
     // Fix from Paper discord, see #dev-announcements !
     configureUnstableAdventureStrategy()
 
-    compileOnly("com.github.retrooper:packetevents-spigot:${project.property("packetevents_version")}")
-    {
+    if (project.property("packetevents_use_local_build") == "true") {
+        System.out.println("We are using local PE build!")
+        compileOnly(files("libs/packetevents.jar"))
+    } else {
+        compileOnly("com.github.retrooper:packetevents-spigot:${project.property("packetevents_version")}")
+        {
+        }
     }
 
     compileOnly(files("libs/CMILib1.4.3.5.jar"))
