@@ -151,6 +151,8 @@ public class DisguiseState extends MorphPluginObject
                 disguiseWrapper.setFakeEquipments(equipment);
             }
         }
+
+        disguiseWrapper.writeProperty((SingleProperty<Object>) singleProperty, o);
     }
 
     private final AtomicBoolean sequencePersistent = new AtomicBoolean(false);
