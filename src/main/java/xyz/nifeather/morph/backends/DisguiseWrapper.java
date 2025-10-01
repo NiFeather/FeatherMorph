@@ -1,21 +1,17 @@
 package xyz.nifeather.morph.backends;
 
-import com.mojang.authlib.GameProfile;
 import net.minecraft.nbt.CompoundTag;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.EntityEquipment;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
-import xyz.nifeather.morph.misc.disguiseProperty.values.OffTreeProperties;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
@@ -49,37 +45,6 @@ public abstract class DisguiseWrapper<TInstance>
     public DisguiseBackend<TInstance, ? extends DisguiseWrapper<TInstance>> getBackend()
     {
         return backend;
-    }
-
-    /**
-     * Gets current displaying equipment
-     * @return A {@link EntityEquipment} that presents the fake equipment
-     */
-    public abstract EntityEquipment getFakeEquipments();
-
-    /**
-     * Sets displaying equipment to the giving value, an alternative way of writing the {@link OffTreeProperties#FAKE_EQUIPMENT} property
-     * @param newEquipment A {@link EntityEquipment} that presents the new equipment to display.<br>
-     *                     Beware that the DisguiseWrapper may not keep a copy of the given equipment,
-     *                     meaning that any changes made to the equipment may affect this wrapper
-     */
-    public abstract void setFakeEquipments(@NotNull EntityEquipment newEquipment);
-
-    /**
-     * Gets whether this wrapper is displaying fake equipments
-     */
-    public boolean getDisplayingFakeEquipments()
-    {
-        return readProperty(OffTreeProperties.DISPLAY_FAKE_EQUIPMENT);
-    }
-
-    /**
-     * Sets whether to display a fake equipment to the player
-     * @param newVal New State
-     */
-    public void setDisplayingFakeEquipments(boolean newVal)
-    {
-        writeProperty(OffTreeProperties.DISPLAY_FAKE_EQUIPMENT, newVal);
     }
 
     /**

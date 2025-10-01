@@ -16,17 +16,12 @@ public class CustomEntries
 
     public static final CustomEntry<String> DISGUISE_NAME = CustomEntry.of("disguise_name", "").doRequireNonNull();
 
+    //todo: Deprecate these two
     public static final CustomEntry<DisguiseEquipment> EQUIPMENT = CustomEntry.of("equip", new DisguiseEquipment());
     public static final CustomEntry<Boolean> DISPLAY_FAKE_EQUIPMENT = CustomEntry.of("display_fake_equip", false);
 
     @ApiStatus.Internal
     public static final CustomEntry<Boolean> PROFILE_LISTED = CustomEntry.of("profile_listed", false);
-
-    /**
-     * @deprecated UUID for player disguise now is {@link CustomEntries#SPAWN_ID}
-     */
-    @Deprecated(since = "1.2.6", forRemoval = true)
-    public static final CustomEntry<UUID> TABLIST_UUID = CustomEntry.of("tablist_uuid", Uuids.NIL_UUID);
 
     public static final CustomEntry<Boolean> WARDEN_CHARGING_ATTACK = CustomEntry.of("warden_charging_attack", false);
 
@@ -47,10 +42,6 @@ public class CustomEntries
     public static final CustomEntry<Boolean> VANISHED = CustomEntry.of("vanished", false);
 
     public static final CustomEntry<Boolean> WARDEN_VANISHED = CustomEntry.of("warden_vanished", false);
-
-    public static final CustomEntry<Boolean> ARMOR_STAND_SMALL = CustomEntry.of("armorstand_is_small", false);
-    public static final CustomEntry<Boolean> ARMOR_STAND_NO_BASE_PLATE = CustomEntry.of("armorstand_no_baseplate", false);
-    public static final CustomEntry<Boolean> ARMOR_STAND_SHOW_ARMS = CustomEntry.of("armorstand_show_arms", false);
 
     public static final CustomEntry<Boolean> DONT_INCLUDE_PACKET_IDENTIFIER = CustomEntry.of("dont_include_packet_identifier", false);
 

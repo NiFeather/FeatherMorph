@@ -35,7 +35,9 @@ import xyz.nifeather.morph.messages.vanilla.VanillaMessageStore;
 import xyz.nifeather.morph.misc.DisguiseTypes;
 import xyz.nifeather.morph.misc.ModNetworkingHelper;
 import xyz.nifeather.morph.misc.OfflineDisguiseResult;
+import xyz.nifeather.morph.misc.disguiseProperty.values.BaseLivingEntityProperties;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
+import xyz.nifeather.morph.network.Constants;
 import xyz.nifeather.morph.network.commands.S2C.S2CSwapCommand;
 import xyz.nifeather.morph.network.commands.S2C.admin.reveal.S2CRemoveAdminRevealCommand;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
@@ -238,7 +240,8 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
 
         if (clientHandler.isFutureClientProtocol(player, 3))
         {
-            clientHandler.sendCommand(player, new S2CSwapCommand());
+            if (!clientHandler.isFutureClientProtocol(player, Constants.ApiLevel.EQUIPMENT_AND_SKIN_ARE_NOW_PROPERTY.protocolVersion))
+                clientHandler.sendCommand(player, new S2CSwapCommand());
         }
         else
         {
@@ -246,11 +249,15 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
             clientHandler.sendCommand(player, new ServerSetEquipCommand(offHand, EquipmentSlot.OFF_HAND));
         }
 
-        var wrapper = state.getDisguiseWrapper();
-        var wrapperEquipments = wrapper.getFakeEquipments();
-        wrapperEquipments.setItemInMainHand(mainHand);
-        wrapperEquipments.setItemInOffHand(offHand);
-        wrapper.setFakeEquipments(wrapperEquipments);
+        var propertyHandler = state.disguisePropertyHandler();
+        if (propertyHandler.bindingProperties() instanceof BaseLivingEntityProperties<?> properties)
+        {
+            var disguiseEquipment = propertyHandler.get(properties.EQUIPMENT);
+            disguiseEquipment.setItemInMainHand(mainHand);
+            disguiseEquipment.setItemInOffHand(offHand);
+
+            propertyHandler.set(properties.EQUIPMENT, disguiseEquipment);
+        }
     }
 
     @EventHandler

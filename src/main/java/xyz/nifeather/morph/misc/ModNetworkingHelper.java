@@ -117,9 +117,6 @@ public class ModNetworkingHelper extends MorphPluginObject
 
         public NetworkDisguiseStateRecord forWrapper(DisguiseWrapper<?> wrapper)
         {
-            this.setDisguiseEquipmentShown(wrapper.readProperty(OffTreeProperties.DISPLAY_FAKE_EQUIPMENT))
-                    .setOverridedEquip(wrapper.getFakeEquipments());
-
             return this;
         }
 

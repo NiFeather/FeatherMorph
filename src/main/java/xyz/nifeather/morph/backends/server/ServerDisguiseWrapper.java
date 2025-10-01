@@ -6,16 +6,11 @@ import net.minecraft.nbt.CompoundTag;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.EntityEquipment;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
 import xiamomc.pluginbase.Exceptions.NullDependencyException;
-import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.backends.DisguiseWrapper;
 import xyz.nifeather.morph.backends.EventWrapper;
-import xyz.nifeather.morph.backends.WrapperEvent;
-import xyz.nifeather.morph.backends.WrapperProperties;
 import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
 import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.types.AgeableMobWatcher;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
@@ -43,9 +38,7 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
     public ServerDisguiseWrapper(@NotNull ServerDisguise instance, ServerBackend backend)
     {
         super(instance, backend);
-
         this.backend = backend;
-        this.writeProperty(OffTreeProperties.FAKE_EQUIPMENT, new DisguiseEquipment());
     }
 
     @Override
@@ -64,22 +57,6 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
     {
         var uuid = bindingWatcher == null ? null : bindingWatcher.readEntryOrThrow(CustomEntries.SPAWN_UUID);
         return Objects.requireNonNull(uuid, "VirtualEntityUUID is not set for an instance of ServerDisguiseWrapper");
-    }
-
-    @Override
-    public EntityEquipment getFakeEquipments()
-    {
-        return this.readPropertyOrThrow(OffTreeProperties.FAKE_EQUIPMENT);
-    }
-
-    @Override
-    public void setFakeEquipments(@NotNull EntityEquipment value)
-    {
-        var newEquipment = new DisguiseEquipment();
-        newEquipment.setArmorContents(value.getArmorContents());
-        newEquipment.setHandItems(value.getItemInMainHand(), value.getItemInOffHand());
-
-        this.writeProperty(OffTreeProperties.FAKE_EQUIPMENT, newEquipment);
     }
 
     @Override
@@ -103,10 +80,7 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
     public DisguiseWrapper<ServerDisguise> clone()
     {
         var newInstance = cloneFromExternal(this, (ServerBackend) getBackend());
-
         newInstance.disguiseProperties.putAll(this.disguiseProperties);
-        newInstance.writeProperty(OffTreeProperties.FAKE_EQUIPMENT, this.readPropertyOrThrow(OffTreeProperties.FAKE_EQUIPMENT));
-
         return newInstance;
     }
 
@@ -126,11 +100,20 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
     {
         disguiseProperties.put(property, value);
 
-        if (!property.id().startsWith("wrapper_") && bindingWatcher != null)
+        if (bindingWatcher == null) return;
+        applyProperty(property, value);
+    }
+
+    protected <X> void applyProperty(SingleProperty<X> property, X value)
+    {
+        if (!property.id().startsWith("wrapper_"))
             bindingWatcher.writeProperty(property, value);
 
-        if (property.id().equals(PropertyNames.PLAYER_SKIN) && bindingWatcher != null)
-            bindingWatcher.writeEntry(CustomEntries.PROFILE, (GameProfile) value);
+        switch (property.id())
+        {
+            case PropertyNames.PLAYER_SKIN -> bindingWatcher.writeEntry(CustomEntries.PROFILE, (GameProfile) value);
+            case PropertyNames.ENTITY_EQUIPMENT -> bindingWatcher.writeEntry(CustomEntries.EQUIPMENT, (DisguiseEquipment) value);
+        }
     }
 
     @Override
@@ -233,17 +216,13 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
             this.bindingWatcher = null;
         }
 
-        refreshRegistry(newBinding, bindingWatcher);
-
         this.bindingWatcher = bindingWatcher;
+        refreshRegistry(bindingWatcher);
     }
 
-    private void refreshRegistry(@NotNull Player bindingPlayer, @NotNull SingleWatcher bindingWatcher)
+    private void refreshRegistry(@NotNull SingleWatcher bindingWatcher)
     {
-        this.disguiseProperties.forEach((property, value) ->
-        {
-            bindingWatcher.writeProperty((SingleProperty<Object>) property, value);
-        });
+        this.disguiseProperties.forEach((property, value) -> applyProperty((SingleProperty<Object>) property, value));
 
         if (getEntityType() == EntityType.PLAYER)
         {
@@ -251,9 +230,6 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
             var profileOptional = Optional.ofNullable(readPropertyOr(properties.SKIN, null));
             profileOptional.ifPresent(p -> bindingWatcher.writeEntry(CustomEntries.PROFILE, p));
         }
-
-        bindingWatcher.writeEntry(CustomEntries.DISPLAY_FAKE_EQUIPMENT, readProperty(OffTreeProperties.DISPLAY_FAKE_EQUIPMENT));
-        bindingWatcher.writeEntry(CustomEntries.EQUIPMENT, readPropertyOrThrow(OffTreeProperties.FAKE_EQUIPMENT));
 
         if (bindingWatcher.getEntityType() == EntityType.GHAST)
             bindingWatcher.writePersistent(ValueIndex.GHAST.CHARGING, aggressive);

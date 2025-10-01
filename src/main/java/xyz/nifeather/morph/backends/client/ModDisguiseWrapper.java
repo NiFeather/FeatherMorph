@@ -1,29 +1,23 @@
 package xyz.nifeather.morph.backends.client;
 
-import com.mojang.authlib.GameProfile;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.nbt.CompoundTag;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.EntityEquipment;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.backends.DisguiseWrapper;
 import xyz.nifeather.morph.backends.EventWrapper;
-import xyz.nifeather.morph.backends.WrapperEvent;
-import xyz.nifeather.morph.backends.WrapperProperties;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 import xyz.nifeather.morph.misc.disguiseProperty.values.OffTreeProperties;
-import xyz.nifeather.morph.utilities.NbtUtils;
 
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.UUID;
 
 public class ModDisguiseWrapper extends EventWrapper<TrackingClientDisguise>
@@ -58,7 +52,7 @@ public class ModDisguiseWrapper extends EventWrapper<TrackingClientDisguise>
     {
         this.instance.writeProperty(property, value);
 
-        if (property.equals(OffTreeProperties.DISPLAY_FAKE_EQUIPMENT) && getBindingPlayer() != null)
+        if (property.id().equals(PropertyNames.ENTITY_DISPLAY_DISGUISE_EQUIPMENT) && getBindingPlayer() != null)
         {
             backend.getNetworkingHelper().prepareMeta(getBindingPlayer())
                     .setDisguiseEquipmentShown(Boolean.TRUE.equals(value))
@@ -87,19 +81,6 @@ public class ModDisguiseWrapper extends EventWrapper<TrackingClientDisguise>
     }
 
     private static final Logger logger = FeatherMorphMain.getInstance().getSLF4JLogger();
-
-    @Override
-    public EntityEquipment getFakeEquipments()
-    {
-        return this.instance.equipment();
-    }
-
-    @Override
-    public void setFakeEquipments(@NotNull EntityEquipment newEquipment)
-    {
-        this.instance.equipment().setArmorContents(newEquipment.getArmorContents());
-        this.instance.equipment().setHandItems(newEquipment.getItemInMainHand(), newEquipment.getItemInOffHand());
-    }
 
     @Override
     public void setServerSelfView(boolean enabled)

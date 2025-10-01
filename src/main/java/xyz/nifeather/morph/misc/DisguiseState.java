@@ -138,18 +138,6 @@ public class DisguiseState extends MorphPluginObject
                 var component = (Component) o;
                 this.setCustomDisplayName(component);
             }
-
-            case PropertyNames.ENTITY_DISPLAY_DISGUISE_EQUIPMENT ->
-            {
-                var value = (Boolean) o;
-                disguiseWrapper.setDisplayingFakeEquipments(value);
-            }
-
-            case PropertyNames.ENTITY_EQUIPMENT ->
-            {
-                var equipment = (EntityEquipment) o;
-                disguiseWrapper.setFakeEquipments(equipment);
-            }
         }
 
         disguiseWrapper.writeProperty((SingleProperty<Object>) singleProperty, o);
@@ -912,7 +900,6 @@ public class DisguiseState extends MorphPluginObject
     public void setEquipment(DisguiseEquipment equipment)
     {
         consumeIfPropertiesSupported(BaseLivingEntityProperties.class, p -> propertyHandler.set(p.EQUIPMENT, equipment));
-        disguiseWrapper.setFakeEquipments(equipment);
     }
 
     /**

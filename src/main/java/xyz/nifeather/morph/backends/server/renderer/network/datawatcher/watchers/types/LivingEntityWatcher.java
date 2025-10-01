@@ -82,11 +82,11 @@ public class LivingEntityWatcher extends EntityWatcher
             int count = (Integer) value;
             this.writePersistent(ValueIndex.BASE_LIVING.STUCKED_ARROWS, count);
         }
-        else if (property.equals(OffTreeProperties.FAKE_EQUIPMENT))
+        else if (property.equals(properties.EQUIPMENT))
         {
             this.writeEntry(CustomEntries.EQUIPMENT, (DisguiseEquipment) value);
         }
-        else if (property.equals(OffTreeProperties.DISPLAY_FAKE_EQUIPMENT))
+        else if (property.equals(properties.DISPLAY_DISGUISE_EQUIPMENT))
         {
             this.writeEntry(CustomEntries.DISPLAY_FAKE_EQUIPMENT, Boolean.TRUE.equals(value));
         }
