@@ -88,26 +88,58 @@ public class DisguiseEquipment implements ISupportDiffs<DisguiseEquipment>
         return builder(this);
     }
 
+    @Override
+    public String toString()
+    {
+        return "DisguiseEquipment[%s]".formatted(itemStackMap.toString());
+    }
+
+    /**
+     * Returns a builder that's pre-filled all slots with air
+     */
     public static DisguiseEquipmentBuilder builder()
     {
         return new DisguiseEquipmentBuilder();
     }
 
+    /**
+     * Returns a builder that's pre-filled with the given equipment.<br>
+     * If the equipment has a slot that's NULL, it will be filled with air
+     */
     public static DisguiseEquipmentBuilder builder(EntityEquipment other)
     {
         return new DisguiseEquipmentBuilder(other);
     }
 
+    /**
+     * Returns a builder that's pre-filled with the given equipment.<br>
+     * If the equipment has a slot that's NULL, it will be filled with air
+     */
     public static DisguiseEquipmentBuilder builder(DisguiseEquipment other)
     {
         return new DisguiseEquipmentBuilder(other.itemStackMap);
     }
 
+    /**
+     * Returns a builder that's pre-filled with the given map.<br>
+     * This builder will <b>NOT</b> pre-fill any slot with air
+     */
+    public static DisguiseEquipmentBuilder builder(Map<EquipmentSlot, ItemStack> map)
+    {
+        return new DisguiseEquipmentBuilder(map);
+    }
+
+    /**
+     * See {@link DisguiseEquipmentBuilder#builder(EntityEquipment)}
+     */
     public static DisguiseEquipment copy(EntityEquipment other)
     {
         return builder(other).build();
     }
 
+    /**
+     * A pure empty DisguiseEquipment
+     */
     public static DisguiseEquipment empty()
     {
         return builder().build();
@@ -133,9 +165,18 @@ public class DisguiseEquipment implements ISupportDiffs<DisguiseEquipment>
     {
         private final Map<EquipmentSlot, ItemStack> itemMap = new ConcurrentHashMap<>();
 
+        private static Map<EquipmentSlot, ItemStack> airMap()
+        {
+            var itemMap = new ConcurrentHashMap<EquipmentSlot, ItemStack>();
+            for (EquipmentSlot value : EquipmentSlot.values())
+                itemMap.put(value, ItemUtils.air.clone());
+
+            return itemMap;
+        }
+
         public DisguiseEquipmentBuilder()
         {
-            this(Map.of());
+            this(airMap());
         }
 
         public DisguiseEquipmentBuilder(@NotNull EntityEquipment entityEquipment)
@@ -153,9 +194,6 @@ public class DisguiseEquipment implements ISupportDiffs<DisguiseEquipment>
 
         public DisguiseEquipmentBuilder(Map<EquipmentSlot, ItemStack> existing)
         {
-            for (EquipmentSlot value : EquipmentSlot.values())
-                itemMap.put(value, ItemUtils.air.clone());
-
             itemMap.putAll(existing);
         }
 
@@ -193,6 +231,19 @@ public class DisguiseEquipment implements ISupportDiffs<DisguiseEquipment>
         {
             Objects.requireNonNull(stack, "Null item is not accepted");
             itemMap.put(slot, stack);
+            return this;
+        }
+
+        public DisguiseEquipmentBuilder mergeIfNotNull(@Nullable DisguiseEquipment other)
+        {
+            if (other != null) merge(other);
+
+            return this;
+        }
+
+        public DisguiseEquipmentBuilder merge(DisguiseEquipment other)
+        {
+            other.itemStackMap.forEach(this::forSlot);
             return this;
         }
 

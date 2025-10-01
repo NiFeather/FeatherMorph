@@ -112,7 +112,6 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
         switch (property.id())
         {
             case PropertyNames.PLAYER_SKIN -> bindingWatcher.writeEntry(CustomEntries.PROFILE, (GameProfile) value);
-            case PropertyNames.ENTITY_EQUIPMENT -> bindingWatcher.writeEntry(CustomEntries.EQUIPMENT, (DisguiseEquipment) value);
         }
     }
 

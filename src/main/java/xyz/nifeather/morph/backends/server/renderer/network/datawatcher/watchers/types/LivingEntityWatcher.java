@@ -30,7 +30,6 @@ import xyz.nifeather.morph.misc.NmsRecord;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 import xyz.nifeather.morph.misc.disguiseProperty.values.BaseLivingEntityProperties;
-import xyz.nifeather.morph.misc.disguiseProperty.values.OffTreeProperties;
 import xyz.nifeather.morph.utilities.NmsUtils;
 
 import java.util.List;
@@ -84,7 +83,15 @@ public class LivingEntityWatcher extends EntityWatcher
         }
         else if (property.equals(properties.EQUIPMENT))
         {
-            this.writeEntry(CustomEntries.EQUIPMENT, (DisguiseEquipment) value);
+            var upcoming = (DisguiseEquipment) value;
+            var existing = this.readEntry(CustomEntries.EQUIPMENT);
+
+            var newInstance = DisguiseEquipment.builder()
+                    .mergeIfNotNull(existing)
+                    .merge(upcoming)
+                    .build();
+
+            this.writeEntry(CustomEntries.EQUIPMENT, newInstance);
         }
         else if (property.equals(properties.DISPLAY_DISGUISE_EQUIPMENT))
         {
