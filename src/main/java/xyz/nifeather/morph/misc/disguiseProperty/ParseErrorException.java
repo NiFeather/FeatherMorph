@@ -40,16 +40,21 @@ public class ParseErrorException extends Exception implements IMaybeUserFriendly
     public String underlyingMessage()
     {
         var cause = getCause();
-        return cause == null ? this.getMessage() : "%s (Caused by %s: %s)".formatted(this.getMessage(), cause.getClass().getSimpleName(), cause.getMessage());
+        return cause == null ? this.getMessage() : "%s \n\nCaused by %s: %s".formatted(this.getMessage(), cause.getClass().getSimpleName(), cause.getMessage());
     }
 
     @Override
     public Optional<FormattableMessage> localizableMessage()
     {
         if (getCause() instanceof IMaybeUserFriendlyException userFriendlyException)
-            return userFriendlyException.localizableMessage();
+        {
+            var theirMessage = userFriendlyException.localizableMessage();
+            return theirMessage.isEmpty() ? Optional.ofNullable(localizableMessage) : theirMessage;
+        }
         else
+        {
             return Optional.ofNullable(localizableMessage);
+        }
     }
 
     public static ParseErrorGenerator forProperty(String property)

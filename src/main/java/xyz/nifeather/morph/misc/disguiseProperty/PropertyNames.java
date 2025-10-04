@@ -99,7 +99,6 @@ public class PropertyNames
 
     public static final String MANNEQUIN_NPC_DESCRIPTION = "mannequin/description";
     public static final String MANNEQUIN_HIDE_DESCRIPTION = "mannequin/hide_description";
-    public static final String MANNEQUIN_SKIN_INTERNAL = "mannequin/skin_internal";
     public static final String MANNEQUIN_SKIN = "mannequin/skin";
     public static final String MANNEQUIN_IMMOVABLE = "mannequin/immovable";
 }

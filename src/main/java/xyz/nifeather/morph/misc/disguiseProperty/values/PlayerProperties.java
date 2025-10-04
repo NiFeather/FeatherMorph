@@ -7,20 +7,24 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.MainHand;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xyz.nifeather.morph.messages.CommandStrings;
 import xyz.nifeather.morph.messages.ExceptionStrings;
 import xyz.nifeather.morph.misc.disguiseProperty.*;
+import xyz.nifeather.morph.misc.permissions.CommonPermissions;
+import xyz.nifeather.morph.misc.skins.PlayerSkinProvider;
 import xyz.nifeather.morph.utilities.GameProfileUtils;
 import xyz.nifeather.morph.utilities.Uuids;
 
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
-import java.util.UUID;
 
 public class PlayerProperties extends BaseLivingEntityProperties<Player>
 {
     public final SingleProperty<MainHandStatus> MAIN_HAND = createProperty(PropertyNames.PLAYER_MAIN_HAND, MainHandStatus.NOTSET, this::readHand, OutputHandles::writeEnum)
             .withValidInput("left", "right");
 
-    public final SingleProperty<GameProfile> SKIN = SingleProperty.of(PropertyNames.PLAYER_SKIN, new GameProfile(Uuids.NIL_UUID, "unknown"), InputHandles::reservedException, OutputHandles::writeGameProfile, true);
+    public final SingleProperty<GameProfile> SKIN = SingleProperty.of(PropertyNames.PLAYER_SKIN, new GameProfile(Uuids.NIL_UUID, "unknown"), InputHandles::readGameProfile, OutputHandles::writeGameProfile, true);
 
     @Override
     protected SingleProperty<Component> createCustomNameProperty()
@@ -65,6 +69,36 @@ public class PlayerProperties extends BaseLivingEntityProperties<Player>
     @Override
     protected void setupDefaultProperties(PropertyHandler propertyHandler)
     {
+    }
+
+    @Override
+    public void validateInput(Map<SingleProperty<?>, Object> result, Player player) throws PropertyValidationException
+    {
+        if (result.containsKey(SKIN))
+        {
+            var skin = (GameProfile) result.get(SKIN);
+            boolean skinMatchesCache = Objects.equals(PlayerSkinProvider.getInstance().getCachedProfile(skin.name()), skin);
+
+            if (!skinMatchesCache && !player.hasPermission(CommonPermissions.DISGUISE_CUSTOM_SKIN))
+            {
+                throw PropertyValidationException.forProperty(PropertyNames.PLAYER_SKIN)
+                        .byMethod("PlayerProperties#validateInput")
+                        .withLocalizableMessage(CommandStrings.noPermissionMessage())
+                        .withMessage("Player don't have permission for setting custom skin")
+                        .create();
+            }
+
+            if (skin.id().equals(Uuids.NIL_UUID))
+            {
+                throw PropertyValidationException.forProperty(PropertyNames.PLAYER_SKIN)
+                        .byMethod("PlayerProperties#validateInput")
+                        .withLocalizableMessage(ExceptionStrings.inputNotAllowed())
+                        .withMessage("UUID of the skin may not be ZERO")
+                        .create();
+            }
+        }
+
+        super.validateInput(result, player);
     }
 
     public enum MainHandStatus

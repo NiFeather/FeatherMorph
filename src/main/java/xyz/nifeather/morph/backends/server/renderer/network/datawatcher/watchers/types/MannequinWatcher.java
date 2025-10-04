@@ -47,7 +47,7 @@ public class MannequinWatcher extends LivingEntityWatcher
     {
         switch (property.id())
         {
-            case PropertyNames.MANNEQUIN_SKIN_INTERNAL ->
+            case PropertyNames.MANNEQUIN_SKIN ->
             {
                 ResolvableProfile resolvable = (ResolvableProfile) value;
                 this.writePersistent(ValueIndex.MANNEQUIN.SKIN_PROFILE, itemProfile(resolvable));

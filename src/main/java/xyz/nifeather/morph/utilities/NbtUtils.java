@@ -15,6 +15,7 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.FeatherMorphMain;
+import xyz.nifeather.morph.misc.disguiseProperty.ParseErrorException;
 
 import java.util.List;
 import java.util.UUID;
@@ -24,14 +25,14 @@ public class NbtUtils
     @Nullable
     public static UUID readUUID(@Nullable Tag element)
     {
-        var logger = FeatherMorphMain.getInstance().getSLF4JLogger();
+        //var logger = FeatherMorphMain.getInstance().getSLF4JLogger();
 
         if (element == null)
             return null;
 
         if (!element.getType().equals(IntArrayTag.TYPE))
         {
-            logger.warn("Given element is not a int array, can't convert to UUID");
+            //logger.warn("Given element is not a int array, can't convert to UUID");
             return null;
         }
 
@@ -39,7 +40,7 @@ public class NbtUtils
 
         if (is.length != 4)
         {
-            logger.warn("Given int array is not of length 4, can't convert to UUID");
+            //logger.warn("Given int array is not of length 4, can't convert to UUID");
             return null;
         }
 
@@ -95,10 +96,10 @@ public class NbtUtils
         return nbt;
     }
 
-    @javax.annotation.Nullable
-    public static GameProfile readGameProfile(String snbt)
+    @NotNull
+    public static GameProfile readGameProfileOrThrow(String snbt) throws ParseErrorException
     {
-        CompoundTag compound = null;
+        CompoundTag compound;
 
         try
         {
@@ -106,17 +107,24 @@ public class NbtUtils
         }
         catch (Throwable t)
         {
-            var logger = FeatherMorphMain.getInstance().getSLF4JLogger();
-
-            logger.warn("Unable to parse GameProfile: " + t.getMessage());
-            logger.warn("Raw profile: '%s'".formatted(snbt));
-
-            return null;
+            throw ParseErrorException.forProperty("anyskin")
+                    .byMethod("NbtUtils#readGameProfileOrThrow")
+                    .withMessage("Failed to read skin from compound")
+                    .causedBy(t)
+                    .create();
         }
 
         String name = "NIL";
         if (compound.contains("Name"))
-            name = compound.getString("Name").orElseThrow();
+        {
+            name = compound.getString("Name").orElseThrow(() ->
+            {
+                return ParseErrorException.forProperty("anyskin")
+                        .byMethod("NbtUtils#readGameProfileOrThrow")
+                        .withMessage("Profile doesn't containing a name!")
+                        .create();
+            });
+        }
 
         UUID uuid = Uuids.NIL_UUID;
         if (compound.contains("Id"))
@@ -157,9 +165,26 @@ public class NbtUtils
         }
         catch (Throwable t)
         {
+            throw ParseErrorException.forProperty("anyskin")
+                    .withMessage("Failed to read skin from compound")
+                    .causedBy(t)
+                    .create();
+        }
+    }
+
+    @javax.annotation.Nullable
+    public static GameProfile readGameProfile(String snbt)
+    {
+        try
+        {
+            return readGameProfileOrThrow(snbt);
+        }
+        catch (ParseErrorException e)
+        {
             var logger = FeatherMorphMain.getInstance().getSLF4JLogger();
 
-            logger.warn("Can't parse profile properties", t);
+            logger.warn("Unable to parse GameProfile: " + e.getMessage());
+            logger.warn("Raw profile: '%s'".formatted(snbt));
 
             return null;
         }

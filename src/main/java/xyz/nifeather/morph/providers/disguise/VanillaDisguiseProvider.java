@@ -1,6 +1,7 @@
 package xyz.nifeather.morph.providers.disguise;
 
-import io.papermc.paper.datacomponent.item.ResolvableProfile;
+import com.destroystokyo.paper.profile.PlayerProfile;
+import com.mojang.authlib.GameProfile;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.kyori.adventure.text.Component;
 import net.minecraft.world.entity.EntityDimensions;
@@ -20,15 +21,12 @@ import xiamomc.pluginbase.Bindables.Bindable;
 import xyz.nifeather.morph.backends.DisguiseWrapper;
 import xyz.nifeather.morph.config.ConfigOption;
 import xyz.nifeather.morph.config.MorphConfigManager;
-import xyz.nifeather.morph.messages.CommandStrings;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.MorphStrings;
 import xyz.nifeather.morph.messages.vanilla.VanillaMessageStore;
 import xyz.nifeather.morph.misc.*;
 import xyz.nifeather.morph.misc.disguiseProperty.ParseErrorException;
-import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
 import xyz.nifeather.morph.misc.disguiseProperty.values.MannequinProperties;
-import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 import xyz.nifeather.morph.misc.skins.PlayerSkinProvider;
 import xyz.nifeather.morph.providers.animation.AnimationProvider;
 import xyz.nifeather.morph.providers.animation.provider.VanillaAnimationProvider;
@@ -37,6 +35,7 @@ import xyz.nifeather.morph.utilities.*;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 public class VanillaDisguiseProvider extends DefaultDisguiseProvider
 {
@@ -156,11 +155,15 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
         var propertyHandler = state.disguisePropertyHandler();
         if (!(propertyHandler.bindingProperties() instanceof MannequinProperties mannequinProperties)) return;
 
-        if (propertyHandler.contains(mannequinProperties.SKIN_NAME)
-                && !propertyHandler.contains(mannequinProperties.SKIN_INTERNAL))
+        if (propertyHandler.contains(mannequinProperties.SKIN))
         {
-            var value = propertyHandler.get(mannequinProperties.SKIN_NAME);
-            PlayerSkinProvider.getInstance().fetchSkin(value).thenAccept(optional ->
+            PlayerProfile placeHolder = GameProfileUtils.asPlayerProfile(new GameProfile(UUID.randomUUID(), "error_in_vdp"));
+            var value = propertyHandler.get(mannequinProperties.SKIN);
+            var resolvedSkin = value.resolve().getNow(placeHolder);
+
+            if (!resolvedSkin.equals(placeHolder) && !value.dynamic()) return;
+
+            PlayerSkinProvider.getInstance().fetchSkin(value.name()).thenAccept(optional ->
             {
                 if (optional.isEmpty()) return;
 
@@ -168,8 +171,8 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
                 {
                     if (state.disposed()) return;
 
-                    if (!propertyHandler.contains(mannequinProperties.SKIN_INTERNAL))
-                        propertyHandler.set(mannequinProperties.SKIN_INTERNAL, GameProfileUtils.asResolvableProfile(optional.get()));
+                    if (value.equals(propertyHandler.get(mannequinProperties.SKIN)))
+                        propertyHandler.set(mannequinProperties.SKIN, GameProfileUtils.asResolvableProfile(optional.get()));
                 });
             });
         }

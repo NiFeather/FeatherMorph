@@ -236,7 +236,9 @@ paper {
 
             permissionRoot + "magic_bottle.use",
 
-            permissionRoot + "acquire_morph"
+            permissionRoot + "acquire_morph",
+
+            permissionRoot + "custom_text"
     );
 
     defaultAvailablePermissions.forEach {

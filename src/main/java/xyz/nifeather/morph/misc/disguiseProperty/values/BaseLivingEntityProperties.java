@@ -2,17 +2,21 @@ package xyz.nifeather.morph.misc.disguiseProperty.values;
 
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import xyz.nifeather.morph.messages.CommandStrings;
 import xyz.nifeather.morph.misc.DisguiseEquipment;
 import xyz.nifeather.morph.misc.disguiseProperty.*;
+import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 
+import java.util.Map;
 import java.util.Optional;
 
 public abstract class BaseLivingEntityProperties<E extends Entity> extends AbstractProperties<E>
 {
     protected SingleProperty<Component> createCustomNameProperty()
     {
-        return createProperty(PropertyNames.ENTITY_CUSTOM_NAME, Component.empty(), InputHandles::readAdventureComponentLimitedNonEmpty, OutputHandles::writeAdventureComponentJSON);
+        return createProperty(PropertyNames.ENTITY_CUSTOM_NAME, Component.empty(), InputHandles::readComponentAny, OutputHandles::writeAdventureComponentJSON);
     }
 
     public final SingleProperty<Boolean> CUSTOM_NAME_VISIBLE = createProperty(PropertyNames.ENTITY_CUSTOM_NAME_VISIBLE, false, InputHandles::readBooleanRelaxed, OutputHandles::writeBoolean)
@@ -54,7 +58,18 @@ public abstract class BaseLivingEntityProperties<E extends Entity> extends Abstr
         registerSingle(CUSTOM_NAME, CUSTOM_NAME_VISIBLE, STUCKED_ARROWS, EQUIPMENT, DISPLAY_DISGUISE_EQUIPMENT);
     }
 
-    private static final Component minimessageFormatFail = Component.text("MiniMessage format error");
-    private static final Component minimessageCastFail = Component.text("MiniMessage cast error");
+    @Override
+    public void validateInput(Map<SingleProperty<?>, Object> result, Player player) throws PropertyValidationException
+    {
+        if (result.containsKey(CUSTOM_NAME) && !player.hasPermission(CommonPermissions.DISGUISE_CUSTOM_TEXT))
+        {
+            throw PropertyValidationException.forProperty(PropertyNames.MANNEQUIN_SKIN)
+                    .byMethod("BaseLivingEntityProperties#validateInput")
+                    .withLocalizableMessage(CommandStrings.noPermissionMessage())
+                    .withMessage("Player don't have permission for setting custom text")
+                    .create();
+        }
 
+        super.validateInput(result, player);
+    }
 }

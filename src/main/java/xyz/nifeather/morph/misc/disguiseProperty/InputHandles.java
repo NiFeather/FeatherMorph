@@ -2,11 +2,16 @@ package xyz.nifeather.morph.misc.disguiseProperty;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonSyntaxException;
+import com.mojang.authlib.GameProfile;
+import io.papermc.paper.datacomponent.item.ResolvableProfile;
 import io.papermc.paper.math.Rotations;
 import io.papermc.paper.registry.RegistryAccess;
 import io.papermc.paper.registry.RegistryKey;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.DyeColor;
 import org.bukkit.Keyed;
@@ -15,6 +20,10 @@ import org.bukkit.Registry;
 import org.bukkit.entity.*;
 import org.jetbrains.annotations.NotNull;
 import xyz.nifeather.morph.messages.ExceptionStrings;
+import xyz.nifeather.morph.misc.disguiseProperty.struct.MorphResolvableProfileStruct;
+import xyz.nifeather.morph.misc.skins.PlayerSkinProvider;
+import xyz.nifeather.morph.utilities.GameProfileUtils;
+import xyz.nifeather.morph.utilities.NbtUtils;
 
 import java.util.*;
 
@@ -149,6 +158,39 @@ public class InputHandles
     }
 
     //endregion Enum
+
+    /**
+     * Read {@link Component} from the given input, in JSON or MiniMessage format. <br>
+     * Since we only utilizes JSON and MiniMessage, so this is called "any"
+     */
+    public static Optional<Component> readComponentAny(String propertyName, String value) throws ParseErrorException
+    {
+        if (value.startsWith("{"))
+            return readJSONComponentLimitedNonEmpty(propertyName, value);
+        else
+            return readAdventureComponentLimitedNonEmpty(propertyName, value);
+    }
+
+    public static Optional<Component> readJSONComponentLimitedNonEmpty(String propertyName, String string) throws ParseErrorException
+    {
+        try
+        {
+            var json = JSONComponentSerializer.json().deserialize(string);
+            throwIfIllegal(propertyName, json);
+
+            return Optional.of(json);
+        }
+        catch (JsonParseException e)
+        {
+            throw ParseErrorException.forProperty(propertyName)
+                    .byMethod("readJSONComponentLimitedNonEmpty")
+                    .causedBy(e)
+                    .withMessage("Invalid JSON Component")
+                    .withLocalizableMessage(ExceptionStrings.malformedInput())
+                    .create();
+        }
+    }
+
     public static Optional<Component> readAdventureComponentLimitedNonEmpty(String propertyName, String string) throws ParseErrorException
     {
         if (string.isBlank())
@@ -177,27 +219,7 @@ public class InputHandles
         var componentOptional = InputHandles.readAdventureComponent(propertyName, string);
 
         if (componentOptional.isPresent())
-        {
-            var finalText = PlainTextComponentSerializer.plainText().serialize(componentOptional.get());
-
-            if (finalText.length() > 50)
-            {
-                throw ParseErrorException.forProperty(propertyName)
-                        .byMethod("readAdventureComponentLimited")
-                        .withMessage("The parse result is too long!")
-                        .withLocalizableMessage(ExceptionStrings.inputTooLong())
-                        .create();
-            }
-
-            if (finalText.isBlank())
-            {
-                throw ParseErrorException.forProperty(propertyName)
-                        .byMethod("readAdventureComponentLimited")
-                        .withMessage("Blank component is not allowed")
-                        .withLocalizableMessage(ExceptionStrings.noEmptyInput())
-                        .create();
-            }
-        }
+            throwIfIllegal(propertyName, componentOptional.get());
 
         return componentOptional;
     }
@@ -399,18 +421,86 @@ public class InputHandles
         }
     }
 
-    public static Optional<String> readSkinName(String propertyName, String value) throws ParseErrorException
+    public static Optional<ResolvableProfile> readResolvableSkinInput(String propertyName, String value) throws ParseErrorException
     {
-        if (propertyName.length() > 16)
+        if (value.startsWith("{"))
+            return readResolvableProfile(propertyName, value);
+        else
+        {
+            if (value.length() > 16)
+            {
+                throw ParseErrorException.forProperty(propertyName)
+                        .byMethod("readResolvableSkinInput")
+                        .withMessage("Input name exceeds the limit of 16 characters")
+                        .withLocalizableMessage(ExceptionStrings.inputTooLong())
+                        .create();
+            }
+
+            var resolvable = PlayerSkinProvider.getInstance().getCachedProfileOptional(value)
+                    .map(skin ->
+                    {
+                        return ResolvableProfile.resolvableProfile(GameProfileUtils.asPlayerProfile(skin));
+                    }).orElseGet(() -> ResolvableProfile.resolvableProfile().name(value).build());
+
+            return Optional.of(resolvable);
+        }
+    }
+
+    public static Optional<GameProfile> readGameProfile(String propertyName, String value) throws ParseErrorException
+    {
+        return Optional.of(NbtUtils.readGameProfileOrThrow(value));
+    }
+
+    public static Optional<ResolvableProfile> readResolvableProfile(String propertyName, String input) throws ParseErrorException
+    {
+        try
+        {
+            var record = gson.fromJson(input, MorphResolvableProfileStruct.class);
+            return record.isDynamic()
+                    ? readResolvableProfileDynamic(propertyName, record)
+                    : readResolvableProfileStatic(propertyName, record);
+        }
+        catch (JsonSyntaxException e)
         {
             throw ParseErrorException.forProperty(propertyName)
-                    .byMethod("readSkinName")
-                    .withMessage("Input name exceeds the limit of 16 characters")
-                    .withLocalizableMessage(ExceptionStrings.inputTooLong())
+                    .byMethod("readResolvableProfile")
+                    .causedBy(e)
+                    .withMessage("Possibly Malformed JSON")
+                    .withLocalizableMessage(ExceptionStrings.malformedInput())
                     .create();
         }
+    }
 
-        return Optional.of(value);
+    public static Optional<ResolvableProfile> readResolvableProfileDynamic(String propertyName, MorphResolvableProfileStruct record) throws ParseErrorException
+    {
+        if (record.uuid() != null)
+            return Optional.of(ResolvableProfile.resolvableProfile().uuid(record.uuid()).build());
+        else if (record.name() != null)
+            return Optional.of(ResolvableProfile.resolvableProfile().name(record.name()).build());
+
+        throw ParseErrorException.forProperty(propertyName)
+                .byMethod("readResolvableProfileDynamic")
+                .withMessage("Unable to create dynamic ResolvableProfile: Either UUID and name is NULL")
+                .withLocalizableMessage(ExceptionStrings.malformedInput())
+                .create();
+    }
+
+    public static Optional<ResolvableProfile> readResolvableProfileStatic(String propertyName, MorphResolvableProfileStruct record) throws ParseErrorException
+    {
+        try
+        {
+            var profile = NbtUtils.readGameProfileOrThrow(record.data());
+            return Optional.of(GameProfileUtils.asResolvableProfile(profile));
+        }
+        catch (ParseErrorException e)
+        {
+            throw ParseErrorException.forProperty(propertyName)
+                    .causedBy(e)
+                    .byMethod("readResolvableProfileStatic")
+                    .withMessage("NbtUtils threw error, possible invalid skin NBT")
+                    .withLocalizableMessage(ExceptionStrings.malformedInput())
+                    .create();
+        }
     }
 
     public static void throwIfOutOfBounds(String propertyName, int value, int min, int max) throws ParseErrorException
@@ -421,6 +511,29 @@ public class InputHandles
                     .byMethod("throwIfOutOfBounds")
                     .withLocalizableMessage(ExceptionStrings.outOfRangeClosedBracket().resolve("min", min).resolve("max", max))
                     .withMessage("Input '%s' does not fit the required range of [%s, %s]".formatted(value, min, max))
+                    .create();
+        }
+    }
+
+    public static void throwIfIllegal(String propertyName, Component component) throws ParseErrorException
+    {
+        var finalText = PlainTextComponentSerializer.plainText().serialize(component);
+
+        if (finalText.length() > 50)
+        {
+            throw ParseErrorException.forProperty(propertyName)
+                    .byMethod("readAdventureComponentLimited")
+                    .withMessage("The parse result is too long!")
+                    .withLocalizableMessage(ExceptionStrings.inputTooLong())
+                    .create();
+        }
+
+        if (finalText.isBlank())
+        {
+            throw ParseErrorException.forProperty(propertyName)
+                    .byMethod("readAdventureComponentLimited")
+                    .withMessage("Blank component is not allowed")
+                    .withLocalizableMessage(ExceptionStrings.noEmptyInput())
                     .create();
         }
     }

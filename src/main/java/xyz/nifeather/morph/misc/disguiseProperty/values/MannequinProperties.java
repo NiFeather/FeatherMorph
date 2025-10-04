@@ -18,18 +18,17 @@ import java.util.Map;
 
 public class MannequinProperties extends BaseLivingEntityProperties<Mannequin>
 {
-    public final SingleProperty<Component> NPC_DESCRIPTION = createProperty(PropertyNames.MANNEQUIN_NPC_DESCRIPTION, Component.empty(), InputHandles::readAdventureComponentLimited, OutputHandles::writeAdventureComponentJSON);
+    public final SingleProperty<Component> NPC_DESCRIPTION = createProperty(PropertyNames.MANNEQUIN_NPC_DESCRIPTION, Component.empty(), InputHandles::readComponentAny, OutputHandles::writeAdventureComponentJSON);
     public final SingleProperty<Boolean> HIDE_DESCRIPTION = createProperty(PropertyNames.MANNEQUIN_HIDE_DESCRIPTION, false, InputHandles::readBooleanRelaxed, OutputHandles::writeBoolean)
             .withValidInput("true", "false");
     public final SingleProperty<Boolean> IMMOVABLE = SingleProperty.of(PropertyNames.MANNEQUIN_IMMOVABLE, false, InputHandles::immediateException, OutputHandles::writeBoolean, true)
             .withValidInput("true", "false");
 
-    public final SingleProperty<ResolvableProfile> SKIN_INTERNAL = SingleProperty.of(PropertyNames.MANNEQUIN_SKIN_INTERNAL, GameProfileUtils.asResolvableProfile(new GameProfile(Uuids.NIL_UUID, "unknown")), InputHandles::reservedException, OutputHandles::writeResolvableProfileAny, true);
-    public final SingleProperty<String> SKIN_NAME = createProperty(PropertyNames.MANNEQUIN_SKIN, "Notch", InputHandles::readSkinName, OutputHandles::writeString);
+    public final SingleProperty<ResolvableProfile> SKIN = createProperty(PropertyNames.MANNEQUIN_SKIN, GameProfileUtils.asResolvableProfile(new GameProfile(Uuids.NIL_UUID, "notset")), InputHandles::readResolvableSkinInput, OutputHandles::writeResolvableProfileAny);
 
     public MannequinProperties()
     {
-        registerSingle(NPC_DESCRIPTION, HIDE_DESCRIPTION, SKIN_INTERNAL, SKIN_NAME, IMMOVABLE);
+        registerSingle(NPC_DESCRIPTION, HIDE_DESCRIPTION, SKIN, IMMOVABLE);
     }
 
     @Override
@@ -41,7 +40,7 @@ public class MannequinProperties extends BaseLivingEntityProperties<Mannequin>
     @Override
     protected void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull Mannequin targetEntity)
     {
-        propertyHandler.set(SKIN_INTERNAL, targetEntity.getProfile());
+        propertyHandler.set(SKIN, targetEntity.getProfile());
 
         var description = targetEntity.getDescription();
         if (description != null)
@@ -61,18 +60,24 @@ public class MannequinProperties extends BaseLivingEntityProperties<Mannequin>
     @Override
     public void validateInput(Map<SingleProperty<?>, Object> result, Player player) throws PropertyValidationException
     {
-        if (result.containsKey(SKIN_NAME) || result.containsKey(SKIN_INTERNAL))
+        if (result.containsKey(SKIN) && !player.hasPermission(CommonPermissions.DISGUISE_CUSTOM_SKIN))
         {
-            if (!player.hasPermission(CommonPermissions.DISGUISE_CUSTOM_SKIN))
-            {
-                throw PropertyValidationException.forProperty(PropertyNames.MANNEQUIN_SKIN)
-                        .byMethod("MannequinProperties#validateInput")
-                        .withLocalizableMessage(CommandStrings.noPermissionMessage())
-                        .withMessage("Player don't have permission for setting custom skin")
-                        .create();
-            }
-
+            throw PropertyValidationException.forProperty(PropertyNames.MANNEQUIN_SKIN)
+                    .byMethod("MannequinProperties#validateInput")
+                    .withLocalizableMessage(CommandStrings.noPermissionMessage())
+                    .withMessage("Player don't have permission for setting custom skin")
+                    .create();
         }
+
+        if (result.containsKey(NPC_DESCRIPTION) && !player.hasPermission(CommonPermissions.DISGUISE_CUSTOM_TEXT))
+        {
+            throw PropertyValidationException.forProperty(PropertyNames.MANNEQUIN_SKIN)
+                    .byMethod("MannequinProperties#validateInput")
+                    .withLocalizableMessage(CommandStrings.noPermissionMessage())
+                    .withMessage("Player don't have permission for setting custom description")
+                    .create();
+        }
+
         super.validateInput(result, player);
     }
 }

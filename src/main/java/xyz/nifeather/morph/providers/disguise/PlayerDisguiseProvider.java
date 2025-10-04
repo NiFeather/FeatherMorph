@@ -83,16 +83,24 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
     private MorphClientHandler clientHandler;
 
     @Override
-    public void buildDisguise(DisguiseState state, @Nullable Entity targetEntity) throws ParseErrorException
+    public void finalizeProperties(DisguiseState state) throws ParseErrorException
+    {
+        super.finalizeProperties(state);
+        setupSkinIfPossible(state);
+    }
+
+    private void setupSkinIfPossible(DisguiseState state) throws ParseErrorException
     {
         var player = state.getPlayer();
 
-        //todo: Move this to a more proper place
-        //region Player Skin
         var mainHandItem = player.getEquipment().getItemInMainHand();
         String id = state.getDisguiseIdentifier();
         var propertyHandler = state.disguisePropertyHandler();
         var playerProperties = DisguiseProperties.INSTANCE.getOrThrow(PlayerProperties.class);
+
+        if (propertyHandler.contains(playerProperties.SKIN))
+            return;
+
         var playerDisguiseTargetName = DisguiseTypes.PLAYER.toStrippedId(id);
 
         var fallbackSkin = PlayerSkinProvider.getInstance().getCachedProfileOptional(DisguiseTypes.PLAYER.toStrippedId(id))
@@ -111,7 +119,7 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
                 throw ParseErrorException.forProperty(PropertyNames.PLAYER_SKIN)
                         .withLocalizableMessage(MorphStrings.invalidSkinString())
                         .withMessage("Invalid GameProfile for the given player head")
-                        .byMethod("PlayerDisguiseProvider#buildDisguise")
+                        .byMethod("PlayerDisguiseProvider#setupSkinIfPossible")
                         .create();
             }
 
@@ -129,8 +137,6 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
                     GameProfile outcomingProfile = optional.orElse(fallbackSkin);
                     this.scheduleOn(player, () -> propertyHandler.set(playerProperties.SKIN, outcomingProfile));
                 });
-
-        super.buildDisguise(state, targetEntity);
     }
 
     @Override

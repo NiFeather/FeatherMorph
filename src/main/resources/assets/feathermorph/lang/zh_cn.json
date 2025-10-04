@@ -109,6 +109,7 @@
   "exceptions.input_out_of_range_closed_bracket": "输入值超过了 [<min>, <max>] 的范围限定",
   "exceptions.input_too_long": "输入过长！",
   "exceptions.input_not_allowed": "不接受此输入",
+  "exceptions.malformed_input": "不正确的格式",
   "help.avaliable_cmd_header" : "当前可用的指令（单击补全/查看）",
   "help.click_to_complete" : "点击补全",
   "help.click_to_view" : "点击查看",
