@@ -63,7 +63,7 @@ public abstract class BaseLivingEntityProperties<E extends Entity> extends Abstr
     {
         if (result.containsKey(CUSTOM_NAME) && !player.hasPermission(CommonPermissions.DISGUISE_CUSTOM_TEXT))
         {
-            throw PropertyValidationException.forProperty(PropertyNames.MANNEQUIN_SKIN)
+            throw PropertyValidationException.forProperty(PropertyNames.ENTITY_CUSTOM_NAME)
                     .byMethod("BaseLivingEntityProperties#validateInput")
                     .withLocalizableMessage(CommandStrings.noPermissionMessage())
                     .withMessage("Player don't have permission for setting custom text")

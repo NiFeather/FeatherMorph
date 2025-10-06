@@ -21,6 +21,10 @@ public class MannequinProperties extends BaseLivingEntityProperties<Mannequin>
     public final SingleProperty<Component> NPC_DESCRIPTION = createProperty(PropertyNames.MANNEQUIN_NPC_DESCRIPTION, Component.empty(), InputHandles::readComponentAny, OutputHandles::writeAdventureComponentJSON);
     public final SingleProperty<Boolean> HIDE_DESCRIPTION = createProperty(PropertyNames.MANNEQUIN_HIDE_DESCRIPTION, false, InputHandles::readBooleanRelaxed, OutputHandles::writeBoolean)
             .withValidInput("true", "false");
+
+    /**
+     * We don't suggest using this property, as it doesn't work for both Server and Mod renderer
+     */
     public final SingleProperty<Boolean> IMMOVABLE = SingleProperty.of(PropertyNames.MANNEQUIN_IMMOVABLE, false, InputHandles::immediateException, OutputHandles::writeBoolean, true)
             .withValidInput("true", "false");
 
@@ -46,7 +50,7 @@ public class MannequinProperties extends BaseLivingEntityProperties<Mannequin>
         if (description != null)
             propertyHandler.set(NPC_DESCRIPTION, description);
 
-        propertyHandler.set(IMMOVABLE, targetEntity.isImmovable());
+        //propertyHandler.set(IMMOVABLE, targetEntity.isImmovable());
 
         super.setupPropertiesFromEntity(propertyHandler, targetEntity);
     }
@@ -71,7 +75,17 @@ public class MannequinProperties extends BaseLivingEntityProperties<Mannequin>
 
         if (result.containsKey(NPC_DESCRIPTION) && !player.hasPermission(CommonPermissions.DISGUISE_CUSTOM_TEXT))
         {
-            throw PropertyValidationException.forProperty(PropertyNames.MANNEQUIN_SKIN)
+            throw PropertyValidationException.forProperty(PropertyNames.MANNEQUIN_NPC_DESCRIPTION)
+                    .byMethod("MannequinProperties#validateInput")
+                    .withLocalizableMessage(CommandStrings.noPermissionMessage())
+                    .withMessage("Player don't have permission for setting custom description")
+                    .create();
+        }
+
+        //todo: maybe merge this with NPC_DESCRIPTION, but how should we deal with property name?
+        if (result.containsKey(HIDE_DESCRIPTION) && !player.hasPermission(CommonPermissions.DISGUISE_CUSTOM_TEXT))
+        {
+            throw PropertyValidationException.forProperty(PropertyNames.MANNEQUIN_HIDE_DESCRIPTION)
                     .byMethod("MannequinProperties#validateInput")
                     .withLocalizableMessage(CommandStrings.noPermissionMessage())
                     .withMessage("Player don't have permission for setting custom description")
