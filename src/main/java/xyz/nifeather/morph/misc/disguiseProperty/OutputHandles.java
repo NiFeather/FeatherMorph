@@ -1,7 +1,10 @@
 package xyz.nifeather.morph.misc.disguiseProperty;
 
+import com.destroystokyo.paper.profile.ProfileProperty;
+import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonParseException;
 import com.mojang.authlib.GameProfile;
 import io.papermc.paper.datacomponent.item.ResolvableProfile;
 import io.papermc.paper.math.Rotations;
@@ -12,8 +15,10 @@ import net.minecraft.nbt.CompoundTag;
 import org.bukkit.Keyed;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
+import xyz.nifeather.morph.messages.ExceptionStrings;
 import xyz.nifeather.morph.misc.DisguiseEquipment;
 import xyz.nifeather.morph.misc.disguiseProperty.struct.MorphEquipmentStruct;
+import xyz.nifeather.morph.misc.disguiseProperty.struct.MorphProfileProperty;
 import xyz.nifeather.morph.misc.disguiseProperty.struct.MorphResolvableProfileStruct;
 import xyz.nifeather.morph.network.server.ServerSetEquipCommand;
 import xyz.nifeather.morph.utilities.GameProfileUtils;
@@ -94,32 +99,26 @@ public class OutputHandles
 
     public static String writeResolvableProfileAny(String propertyName, ResolvableProfile resolvableProfile) throws ParseErrorException
     {
-        return resolvableProfile.dynamic()
-                ? writeResolvableProfileDynamic(propertyName, resolvableProfile)
-                : writeResolvableProfileStatic(propertyName, resolvableProfile);
-    }
+        ImmutableList.Builder<String> properties = ImmutableList.builder();
 
-    public static String writeResolvableProfileStatic(String propertyName, ResolvableProfile resolvableProfile) throws ParseErrorException
-    {
-        var defaultProfile = GameProfileUtils.asPlayerProfile(new GameProfile(UUID.randomUUID(), "xx"));
-        var val = resolvableProfile.resolve().getNow(defaultProfile);
-
-        if (val.equals(defaultProfile))
+        for (ProfileProperty property : resolvableProfile.properties())
         {
-            throw ParseErrorException.forProperty(propertyName)
-                    .withMessage("Expected a static profile, but the result is not present")
-                    .create();
+            try
+            {
+                properties.add(gson.toJson(MorphProfileProperty.fromPaperProperty(property)));
+            }
+            catch (JsonParseException e)
+            {
+                throw ParseErrorException.forProperty(propertyName)
+                        .causedBy(e)
+                        .withMessage("GSON error, see details")
+                        .withLocalizableMessage(ExceptionStrings.malformedInput())
+                        .create();
+            }
         }
 
-        var profile = writeGameProfile(propertyName, GameProfileUtils.convertPlayerProfile(val));
-        var record = new MorphResolvableProfileStruct(false, val.getId(), val.getName(), profile);
+        var record = new MorphResolvableProfileStruct(resolvableProfile.uuid(), resolvableProfile.name(), properties.build());
 
-        return gson.toJson(record);
-    }
-
-    public static String writeResolvableProfileDynamic(String propertyName, ResolvableProfile resolvableProfile) throws ParseErrorException
-    {
-        var record = new MorphResolvableProfileStruct(true, resolvableProfile.uuid(), resolvableProfile.name(), "");
         return gson.toJson(record);
     }
 

@@ -1,10 +1,13 @@
 package xyz.nifeather.morph.misc.disguiseProperty;
 
+import com.google.common.collect.ImmutableMultimap;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonSyntaxException;
 import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.properties.Property;
+import com.mojang.authlib.properties.PropertyMap;
 import io.papermc.paper.datacomponent.item.ResolvableProfile;
 import io.papermc.paper.math.Rotations;
 import io.papermc.paper.registry.RegistryAccess;
@@ -20,6 +23,7 @@ import org.bukkit.Registry;
 import org.bukkit.entity.*;
 import org.jetbrains.annotations.NotNull;
 import xyz.nifeather.morph.messages.ExceptionStrings;
+import xyz.nifeather.morph.misc.disguiseProperty.struct.MorphProfileProperty;
 import xyz.nifeather.morph.misc.disguiseProperty.struct.MorphResolvableProfileStruct;
 import xyz.nifeather.morph.misc.skins.PlayerSkinProvider;
 import xyz.nifeather.morph.utilities.GameProfileUtils;
@@ -456,7 +460,8 @@ public class InputHandles
         try
         {
             var record = gson.fromJson(input, MorphResolvableProfileStruct.class);
-            return record.isDynamic()
+
+            return record.dynamic()
                     ? readResolvableProfileDynamic(propertyName, record)
                     : readResolvableProfileStatic(propertyName, record);
         }
@@ -473,8 +478,8 @@ public class InputHandles
 
     public static Optional<ResolvableProfile> readResolvableProfileDynamic(String propertyName, MorphResolvableProfileStruct record) throws ParseErrorException
     {
-        if (record.uuid() != null)
-            return Optional.of(ResolvableProfile.resolvableProfile().uuid(record.uuid()).build());
+        if (record.id() != null)
+            return Optional.of(ResolvableProfile.resolvableProfile().uuid(record.id()).build());
         else if (record.name() != null)
             return Optional.of(ResolvableProfile.resolvableProfile().name(record.name()).build());
 
@@ -487,20 +492,36 @@ public class InputHandles
 
     public static Optional<ResolvableProfile> readResolvableProfileStatic(String propertyName, MorphResolvableProfileStruct record) throws ParseErrorException
     {
-        try
-        {
-            var profile = NbtUtils.readGameProfileOrThrow(record.data());
-            return Optional.of(GameProfileUtils.asResolvableProfile(profile));
-        }
-        catch (ParseErrorException e)
+        if (record.name() == null || record.id() == null)
         {
             throw ParseErrorException.forProperty(propertyName)
-                    .causedBy(e)
                     .byMethod("readResolvableProfileStatic")
-                    .withMessage("NbtUtils threw error, possible invalid skin NBT")
+                    .withMessage("UUID or Name of the record is NULL")
                     .withLocalizableMessage(ExceptionStrings.malformedInput())
                     .create();
         }
+
+        ImmutableMultimap.Builder<String, Property> propertiesBuilder = ImmutableMultimap.builder();
+        for (String propertyJson : record.properties())
+        {
+            try
+            {
+                var struct = gson.fromJson(propertyJson, MorphProfileProperty.class);
+                propertiesBuilder.put(struct.name(), new Property(struct.name(), struct.value(), struct.signature()));
+            }
+            catch (JsonParseException e)
+            {
+                throw ParseErrorException.forProperty(propertyName)
+                        .causedBy(e)
+                        .byMethod("readResolvableProfileStatic")
+                        .withMessage("GSON error, see details")
+                        .withLocalizableMessage(ExceptionStrings.malformedInput())
+                        .create();
+            }
+        }
+
+        var profile = new GameProfile(record.id(), record.name(), new PropertyMap(propertiesBuilder.build()));
+        return Optional.of(GameProfileUtils.asResolvableProfile(profile));
     }
 
     public static void throwIfOutOfBounds(String propertyName, int value, int min, int max) throws ParseErrorException
