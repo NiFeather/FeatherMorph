@@ -14,6 +14,7 @@ import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
 import xyz.nifeather.morph.FeatherMorphMain;
+import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.config.ConfigOption;
 import xyz.nifeather.morph.config.MorphConfigManager;
@@ -281,8 +282,6 @@ public class MasterInstance extends MorphPluginObject implements IInstanceServic
         switchState(socket, ProtocolState.WAIT_LISTEN);
     }
 
-    private final NetworkDisguiseManager disguiseManager = new NetworkDisguiseManager();
-
     @Override
     public void onSlaveRequestMetaSync(MIC2SRequestSyncCommand command)
     {
@@ -296,7 +295,7 @@ public class MasterInstance extends MorphPluginObject implements IInstanceServic
 
         var cmd = new MIS2CSyncMetaCommand();
 
-        var disguises = disguiseManager.listAllMeta();
+        var disguises = morphManager.listAllPlayerMeta();
         for (var meta : disguises)
             cmd.appendMeta(new SocketPlayerMeta(Operation.ADD_IF_ABSENT, meta.getUnlockedDisguiseIdentifiers(), meta.uniqueId));
 
@@ -304,6 +303,9 @@ public class MasterInstance extends MorphPluginObject implements IInstanceServic
 
         logMasterInfo("Synced %s metadata(s) to socket '%s'".formatted(disguises.size(), socket.getRemoteSocketAddress()));
     }
+
+    @Resolved
+    private MorphManager morphManager;
 
     @Override
     public void onDisguiseMetaCommand(MIC2SSyncDisguiseCommand cDisguiseMetaCommand)
@@ -332,15 +334,20 @@ public class MasterInstance extends MorphPluginObject implements IInstanceServic
         var operation = socketMeta.getOperation();
         var identifiers = socketMeta.getIdentifiers();
 
-        var playerMeta = disguiseManager.getPlayerMeta(Bukkit.getOfflinePlayer(Objects.requireNonNull(socketMeta.getBindingUuid(), "???")));
+        var playerMeta = morphManager.getPlayerMeta(Bukkit.getOfflinePlayer(Objects.requireNonNull(socketMeta.getBindingUuid(), "???")));
 
         if (operation == Operation.ADD_IF_ABSENT)
         {
             var unlocked = playerMeta.getUnlockedDisguiseIdentifiers();
             socketMeta.getIdentifiers().forEach(str ->
             {
-                if (unlocked.stream().noneMatch(s -> s.equals(str)))
-                    playerMeta.addDisguise(disguiseManager.getDisguiseMeta(str));
+                if (unlocked.stream().anyMatch(s -> s.equals(str))) return;
+
+                var meta = morphManager.getDisguiseMeta(str);
+                if (meta != null)
+                    playerMeta.addDisguise(morphManager.getDisguiseMeta(str));
+                else
+                    playerMeta.addUnmanagedDisguise(str);
             });
 
             // Broadcast to all allowed sockets
@@ -351,7 +358,7 @@ public class MasterInstance extends MorphPluginObject implements IInstanceServic
         {
             identifiers.forEach(id ->
             {
-                var disguiseMeta = disguiseManager.getDisguiseMeta(id);
+                var disguiseMeta = morphManager.getDisguiseMeta(id);
 
                 playerMeta.removeDisguise(disguiseMeta);
             });
@@ -401,7 +408,6 @@ public class MasterInstance extends MorphPluginObject implements IInstanceServic
 
     public void loadInitialDisguises(List<PlayerMeta> metaList)
     {
-        this.disguiseManager.merge(metaList);
     }
 
     //endregion
