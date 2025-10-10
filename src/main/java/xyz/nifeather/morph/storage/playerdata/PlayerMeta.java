@@ -53,6 +53,11 @@ public class PlayerMeta
         unlockedDisguises.add(info);
     }
 
+    public void addUnmanagedDisguise(String identifier)
+    {
+        unlockedDisguiseIdentifiers.add(identifier);
+    }
+
     public void removeDisguise(DisguiseMeta info)
     {
         unlockedDisguiseIdentifiers.remove(DisguiseUtils.asString(info));
