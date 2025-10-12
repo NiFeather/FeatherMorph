@@ -476,6 +476,15 @@ public abstract class SingleWatcher extends MorphPluginObject
             return;
         }
 
+        var overrideList = rebuildMetadata(originalData);
+
+        // Then we ask the implementation if there's anything to modify
+        overrideList = this.handleEntityMetadata(ImmutableList.copyOf(originalData), overrideList);
+        packetWrapper.setEntityMetadata(new ArrayList<>(overrideList));
+    }
+
+    private List<EntityData<?>> rebuildMetadata(List<EntityData<?>> originalData) throws ExecutionErrorException
+    {
         // First we do internal process
         List<EntityData<?>> overrideList = new ObjectArrayList<>();
 
@@ -496,11 +505,7 @@ public abstract class SingleWatcher extends MorphPluginObject
             }
 
             if (!raw.getType().equals(sv.type()))
-            {
-                throw ExecutionErrorException.forMethod("handleEntityMetadata")
-                        .withMessage("Type of index %s doesn't matched expected for type %s(%s)".formatted(index, entityType, this.getClass().getSimpleName()))
-                        .create();
-            }
+                continue;
 
             var value = this.readOr(sv, null);
             if (value != null)
@@ -509,9 +514,7 @@ public abstract class SingleWatcher extends MorphPluginObject
                 overrideList.add(raw);
         }
 
-        // Then we ask the implementation if there's anything to modify
-        overrideList = this.handleEntityMetadata(ImmutableList.copyOf(originalData), overrideList);
-        packetWrapper.setEntityMetadata(new ArrayList<>(overrideList));
+        return overrideList;
     }
 
     protected List<EntityData<?>> handleEntityMetadata(@Unmodifiable List<EntityData<?>> originalData,
