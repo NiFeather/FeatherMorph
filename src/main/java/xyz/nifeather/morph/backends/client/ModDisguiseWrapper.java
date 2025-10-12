@@ -131,7 +131,7 @@ public class ModDisguiseWrapper extends EventWrapper<TrackingClientDisguise>
     }
 
     @Override
-    public void update(DisguiseState state, Player player)
+    public void update()
     {
     }
 

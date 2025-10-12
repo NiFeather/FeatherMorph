@@ -107,10 +107,8 @@ public abstract class DisguiseWrapper<TInstance>
 
     /**
      * Updates the underlying disguise instance
-     * @param state {@link DisguiseState}
-     * @param player The player who owns the provided state
      */
-    public abstract void update(DisguiseState state, Player player);
+    public abstract void update();
 
     /**
      * Returns a copy of the existing compound.

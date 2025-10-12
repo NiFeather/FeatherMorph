@@ -17,12 +17,10 @@ import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEnt
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.backends.server.renderer.utilties.WatcherUtils;
 import xyz.nifeather.morph.misc.AnimationNames;
-import xyz.nifeather.morph.misc.DisguiseEquipment;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
-import xyz.nifeather.morph.misc.disguiseProperty.values.OffTreeProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.values.PlayerProperties;
 
 import java.util.Map;
@@ -166,8 +164,10 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
     }
 
     @Override
-    public void update(DisguiseState state, Player player)
+    public void update()
     {
+        if (bindingWatcher != null)
+            bindingWatcher.update();
     }
 
     private boolean aggressive;

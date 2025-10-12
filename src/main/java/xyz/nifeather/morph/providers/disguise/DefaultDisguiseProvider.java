@@ -10,7 +10,6 @@ import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.EquipmentSlot;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -96,7 +95,6 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
     @Override
     public boolean updateDisguise(Player player, DisguiseState state)
     {
-        var disguise = state.getDisguiseWrapper();
         var option = clientHandler.getPlayerOption(player, true);
 
         var haveSkill = state.haveSkill();
@@ -153,16 +151,6 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
             }
 
             player.sendActionBar(msgConfig.display);
-        }
-
-        try
-        {
-            disguise.update(state, player);
-        }
-        catch (Throwable t)
-        {
-            logger.error("Error occurred while updating disguise!", t);
-            return false;
         }
 
         return true;

@@ -798,6 +798,7 @@ public class DisguiseState extends MorphPluginObject
         this.animationSequence.update();
         disguiseWaypointUpdater.tick();
         skillUpdater.update();
+        disguiseWrapper.update();
         return this.abilityUpdater.update();
     }
 

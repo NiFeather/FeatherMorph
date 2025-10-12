@@ -453,6 +453,10 @@ public abstract class SingleWatcher extends MorphPluginObject
 
     private static final Object syncSilentSource = new Object();
 
+    public void update()
+    {
+    }
+
     public void sync()
     {
         markSilent(syncSilentSource);
@@ -462,14 +466,6 @@ public abstract class SingleWatcher extends MorphPluginObject
 
         try
         {
-            /*
-            if (!isPlayerOnline())
-                throw new IllegalStateException("Can't sync value for offline player!");
-
-            var nmsPlayer = NmsRecord.ofPlayer(getBindingPlayer());
-            TickThread.ensureTickThread(nmsPlayer, "Syncing watcher's value while not on its player's ticking thread!");
-            */
-
             doSync();
         }
         catch (Throwable t)

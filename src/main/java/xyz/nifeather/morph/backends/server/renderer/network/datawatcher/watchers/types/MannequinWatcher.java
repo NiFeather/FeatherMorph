@@ -40,6 +40,27 @@ public class MannequinWatcher extends LivingEntityWatcher
         register(ValueIndex.MANNEQUIN);
     }
 
+    @Override
+    protected byte getPlayerBitMask(Player player)
+    {
+        var bitMask = super.getPlayerBitMask(player);
+
+        if ((bitMask & 0x02) == 0x02)
+            bitMask ^= (byte) 0x02;
+
+        return bitMask;
+    }
+
+    // todo: This is made to honor that mannequin disguises should not have a sneaking status set
+    //       And later I have another idea of implementing such feature, is that make SingleWatcher filter entity metadata being sent to players
+    //       Should we implement this later?
+    @Override
+    public void update()
+    {
+        super.update();
+        writePersistent(ValueIndex.MANNEQUIN.GENERAL, getPlayerBitMask(getBindingPlayer()));
+    }
+
     private volatile boolean hideDescription = false;
 
     @Override
