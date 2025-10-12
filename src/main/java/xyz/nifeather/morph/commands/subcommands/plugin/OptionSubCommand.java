@@ -60,6 +60,7 @@ public class OptionSubCommand extends MorphPluginObject implements IConvertibleB
         subCommands.add(getToggle("mirror_drop", ConfigOption.MIRROR_BEHAVIOR_DROP, CommandNameStrings.mirrorDropString()));
         subCommands.add(getToggle("mirror_hotbar", ConfigOption.MIRROR_BEHAVIOR_HOTBAR, CommandNameStrings.mirrorHotbar()));
         subCommands.add(getToggle("mirror_ignore_disguised", ConfigOption.MIRROR_IGNORE_DISGUISED, CommandNameStrings.mirrorIgnoreDisguised()));
+        subCommands.add(getInteger("mirror_control_distance", ConfigOption.MIRROR_CONTROL_DISTANCE));
         subCommands.add(getToggle("mirror_log_operations", ConfigOption.MIRROR_LOG_OPERATION));
         subCommands.add(getInteger("mirror_log_cleanup", ConfigOption.MIRROR_LOG_CLEANUP_DATE));
 
@@ -108,7 +109,7 @@ public class OptionSubCommand extends MorphPluginObject implements IConvertibleB
 
     private IConvertibleBrigadier getInteger(String name, ConfigOption option, @Nullable FormattableMessage displayName)
     {
-        return new OptionSubCommands.BooleanOptionCommand(name, config, option);
+        return new OptionSubCommands.IntegerOptionCommand(name, config, option).min(-1);
     }
 
     private IConvertibleBrigadier getToggle(String name, ConfigOption option)

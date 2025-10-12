@@ -404,7 +404,7 @@ public class OptionSubCommands
 
     public static class IntegerOptionCommand extends BasicOptionCommand<Integer>
     {
-        protected IntegerOptionCommand(String name, MorphConfigManager configManager, ConfigOption option)
+        public IntegerOptionCommand(String name, MorphConfigManager configManager, ConfigOption option)
         {
             super(name, configManager, option);
         }
@@ -451,7 +451,7 @@ public class OptionSubCommands
                     Commands.literal(name)
                             .executes(this::executes)
                             .then(
-                                    Commands.argument("value", IntegerArgumentType.integer())
+                                    Commands.argument("value", IntegerArgumentType.integer(min, max))
                                             .executes(this::execSetConfig)
                             )
             );
@@ -468,11 +468,7 @@ public class OptionSubCommands
         private int execSetConfig(CommandContext<CommandSourceStack> context)
         {
             var sender = context.getSource().getSender();
-            sender.sendMessage(MessageUtils.prefixes(sender,
-                    CommandStrings.optionValueString()
-                            .withLocale(MessageUtils.getLocale(sender))
-                            .resolve("what", name)
-                            .resolve("value", config.get(Integer.class, option) + "")));
+            this.setConfig(sender, IntegerArgumentType.getInteger(context, "value"));
             return 1;
         }
 
