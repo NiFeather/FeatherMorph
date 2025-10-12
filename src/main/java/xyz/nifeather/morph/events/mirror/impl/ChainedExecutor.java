@@ -10,6 +10,7 @@ import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.events.mirror.ExecutorHub;
 import xyz.nifeather.morph.misc.NmsRecord;
+import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 import xyz.nifeather.morph.network.commands.S2C.set.S2CSetSneakingCommand;
 import xyz.nifeather.morph.storage.mirrorlogging.OperationType;
 import xyz.nifeather.morph.utilities.FoliaThreadUtils;
@@ -133,6 +134,9 @@ public abstract class ChainedExecutor extends AbstractExecutor
 
     protected void applyToNearByMannequin(Player player, Consumer<Mannequin> consumer)
     {
+        if (!player.hasPermission(CommonPermissions.MIRROR_MANNEQUIN))
+            return;
+
         var state = morphManager().getDisguiseStateFor(player);
         if (state == null) return;
 
