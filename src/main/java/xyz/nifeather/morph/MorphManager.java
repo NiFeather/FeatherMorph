@@ -969,13 +969,16 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         provider.onDisguiseApply(newState);
 
         newState.getStateFuture()
-                .thenAccept(activeDisguises::remove)
                 .exceptionally(t ->
                 {
-                    player.sendMessage(MessageUtils.prefixes(player, MorphStrings.errorWhileUpdatingDisguise()));
-                    unMorph(nilCommandSource, player, true, true);
+                    scheduleOn(player, () ->
+                    {
+                        player.sendMessage(MessageUtils.prefixes(player, MorphStrings.errorWhileUpdatingDisguise()));
+                        unMorph(nilCommandSource, player, true, true);
+                    });
+
                     return null;
-                });
+                }).thenAccept(activeDisguises::remove);
 
         newState.scheduleSelfUpdate();
 
@@ -1283,7 +1286,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         if (!bypassPermission && !player.hasPermission(CommonPermissions.UNMORPH))
         {
             source.sendMessage(MessageUtils.prefixes(player, CommandStrings.noPermissionMessage()));
-
             return;
         }
 
@@ -1308,9 +1310,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         // 后端的取消操作在Provider里，因此调用Provider的unMorph()
         // state.getProvider().unMorph(player, state);
-
-        // 重置此State
-        state.dispose();
 
         // 如果玩家在线，则生成粒子
         if (player.isConnected())
