@@ -1,5 +1,6 @@
 package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.values;
 
+import com.github.retrooper.packetevents.protocol.entity.data.EntityData;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityDataType;
 import org.jetbrains.annotations.NotNull;
 
@@ -49,6 +50,11 @@ public class SingleValue<T>
         if (!(obj instanceof SingleValue<?> other)) return false;
 
         return this.index == other.index && this.type.equals(other.type);
+    }
+
+    public boolean equals(EntityData<?> data)
+    {
+        return this.index == data.getIndex() && this.type.equals(data.getType());
     }
 
     public boolean equalsStrict(Object obj)

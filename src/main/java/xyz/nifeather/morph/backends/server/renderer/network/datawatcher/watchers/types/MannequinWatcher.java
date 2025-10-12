@@ -2,6 +2,7 @@ package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watcher
 
 import com.destroystokyo.paper.profile.ProfileProperty;
 import com.github.retrooper.packetevents.protocol.component.builtin.item.ItemProfile;
+import com.github.retrooper.packetevents.protocol.entity.data.EntityData;
 import com.github.retrooper.packetevents.protocol.entity.pose.EntityPose;
 import com.github.retrooper.packetevents.protocol.player.PlayerModelType;
 import com.github.retrooper.packetevents.resources.ResourceLocation;
@@ -13,10 +14,12 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.profile.PlayerTextures;
+import org.jetbrains.annotations.Unmodifiable;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntry;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.misc.AnimationNames;
+import xyz.nifeather.morph.misc.ExecutionErrorException;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 
@@ -24,6 +27,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class MannequinWatcher extends LivingEntityWatcher
 {
@@ -51,14 +55,20 @@ public class MannequinWatcher extends LivingEntityWatcher
         return bitMask;
     }
 
-    // todo: This is made to honor that mannequin disguises should not have a sneaking status set
-    //       And later I have another idea of implementing such feature, is that make SingleWatcher filter entity metadata being sent to players
-    //       Should we implement this later?
     @Override
-    public void update()
+    protected List<EntityData<?>> handleEntityMetadata(@Unmodifiable List<EntityData<?>> originalData,
+                                                       List<EntityData<?>> currentData) throws ExecutionErrorException
     {
-        super.update();
-        writePersistent(ValueIndex.MANNEQUIN.GENERAL, getPlayerBitMask(getBindingPlayer()));
+        if (currentData.removeIf(ValueIndex.MANNEQUIN.GENERAL::equals))
+        {
+            currentData.add(new EntityData<>(
+                    ValueIndex.MANNEQUIN.GENERAL.index(),
+                    ValueIndex.MANNEQUIN.GENERAL.type(),
+                    getPlayerBitMask(getBindingPlayer()))
+            );
+        }
+
+        return super.handleEntityMetadata(originalData, currentData);
     }
 
     private volatile boolean hideDescription = false;

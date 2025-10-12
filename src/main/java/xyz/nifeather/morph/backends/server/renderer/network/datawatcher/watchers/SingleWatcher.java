@@ -1,8 +1,10 @@
 package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers;
 
 import com.github.retrooper.packetevents.PacketEvents;
+import com.github.retrooper.packetevents.protocol.entity.data.EntityData;
 import com.github.retrooper.packetevents.wrapper.PacketWrapper;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityMetadata;
+import com.google.common.collect.ImmutableList;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.nbt.CompoundTag;
@@ -11,6 +13,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Unmodifiable;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Exceptions.NullDependencyException;
 import xyz.nifeather.morph.MorphPluginObject;
@@ -22,11 +25,13 @@ import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEnt
 import xyz.nifeather.morph.backends.server.renderer.network.registries.RenderRegistry;
 import xyz.nifeather.morph.backends.server.renderer.utilties.WatcherUtils;
 import xyz.nifeather.morph.misc.BuildFailedException;
+import xyz.nifeather.morph.misc.ExecutionErrorException;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 import xyz.nifeather.morph.misc.disguiseProperty.values.OffTreeProperties;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -222,7 +227,7 @@ public abstract class SingleWatcher extends MorphPluginObject
     }
 
     /**
-     * Values in this list shouldn't be included with meta packet processing in {@link xyz.nifeather.morph.backends.server.renderer.network.listeners.MetaPacketListener#rebuildServerMetaPacket(AbstractValues, SingleWatcher, WrapperPlayServerEntityMetadata)}
+     * Values in this list shouldn't be included with meta packet processing in {@link SingleWatcher#handleEntityMetadataPacket(WrapperPlayServerEntityMetadata)}
      */
     private final List<Integer> blockedValues = Collections.synchronizedList(new ObjectArrayList<>());
 
@@ -453,8 +458,66 @@ public abstract class SingleWatcher extends MorphPluginObject
 
     private static final Object syncSilentSource = new Object();
 
+    // Let's just keep this for a while...
     public void update()
     {
+    }
+
+    public final void handleEntityMetadataPacket(WrapperPlayServerEntityMetadata packetWrapper)
+            throws ExecutionErrorException
+    {
+        //获取原Meta包中的数据
+        var originalData = packetWrapper.getEntityMetadata();
+
+        // 如果Meta包里有咱的标记，那么移除标记并返回原包
+        if (originalData.removeIf(wrapped -> wrapped.getValue().equals(PacketFactory.MARK_DONT_PROCESS)))
+        {
+            packetWrapper.setEntityMetadata(originalData);
+            return;
+        }
+
+        // First we do internal process
+        List<EntityData<?>> overrideList = new ObjectArrayList<>();
+
+        for (EntityData<?> raw : originalData)
+        {
+            var index = raw.getIndex();
+
+            // 跳过被屏蔽的数据
+            if (blockedValues.contains(index))
+                continue;
+
+            var sv = (SingleValue<Object>) this.getSingle(index);
+            if (sv == null)
+            {
+                throw ExecutionErrorException.forMethod("handleEntityMetadata")
+                        .withMessage("Index %s not found for watcher of type %s(%s)".formatted(index, entityType, this.getClass().getSimpleName()))
+                        .create();
+            }
+
+            if (!raw.getType().equals(sv.type()))
+            {
+                throw ExecutionErrorException.forMethod("handleEntityMetadata")
+                        .withMessage("Type of index %s doesn't matched expected for type %s(%s)".formatted(index, entityType, this.getClass().getSimpleName()))
+                        .create();
+            }
+
+            var value = this.readOr(sv, null);
+            if (value != null)
+                overrideList.add(new EntityData<>(sv.index(), sv.type(), value));
+            else
+                overrideList.add(raw);
+        }
+
+        // Then we ask the implementation if there's anything to modify
+        overrideList = this.handleEntityMetadata(ImmutableList.copyOf(originalData), overrideList);
+        packetWrapper.setEntityMetadata(new ArrayList<>(overrideList));
+    }
+
+    protected List<EntityData<?>> handleEntityMetadata(@Unmodifiable List<EntityData<?>> originalData,
+                                                       List<EntityData<?>> currentData) throws ExecutionErrorException
+    {
+        return currentData;
     }
 
     public void sync()

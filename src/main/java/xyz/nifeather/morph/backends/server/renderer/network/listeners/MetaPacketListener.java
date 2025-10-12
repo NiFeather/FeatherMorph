@@ -1,20 +1,11 @@
 package xyz.nifeather.morph.backends.server.renderer.network.listeners;
 
 import com.github.retrooper.packetevents.event.PacketSendEvent;
-import com.github.retrooper.packetevents.protocol.entity.data.EntityData;
-import com.github.retrooper.packetevents.protocol.entity.data.EntityDataType;
 import com.github.retrooper.packetevents.protocol.packettype.PacketType;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityMetadata;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import org.bukkit.entity.EntityType;
 import xiamomc.pluginbase.Annotations.Resolved;
-import xyz.nifeather.morph.backends.server.renderer.network.PacketFactory;
-import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.values.AbstractValues;
-import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
+import xyz.nifeather.morph.api.FeatherMorphAPI;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.RenderRegistry;
-import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
-
-import java.util.List;
 
 /**
  * Listener used to override the metadata packet, so that the client won't panic when it received player's meta but the player is disguised as a mob.
@@ -65,67 +56,33 @@ public class MetaPacketListener extends ProtocolListener
 
         var wrapper = new WrapperPlayServerEntityMetadata(packetEvent);
 
-        //取得来源玩家的伪装后的Meta，发送给目标玩家
-        //从包里移除玩家meta中不属于BASE_LIVING的部分
-        var isPlayerDisguise = watcher.getEntityType() == EntityType.PLAYER;
-        this.rebuildServerMetaPacket(
-                isPlayerDisguise ? ValueIndex.PLAYER : ValueIndex.BASE_LIVING,
-                watcher,
-                wrapper);
-    }
-
-    /**
-     * 重构服务器将要发送的Meta包
-     */
-    public void rebuildServerMetaPacket(AbstractValues av, SingleWatcher watcher, WrapperPlayServerEntityMetadata packetWrapper)
-    {
-        var values = av.getValues();
-
-        //获取原Meta包中的数据
-        var originalData = packetWrapper.getEntityMetadata();
-
-        // 如果Meta包里有咱的标记，那么移除标记并返回原包
-        if (originalData.removeIf(wrapped -> wrapped.getValue().equals(PacketFactory.MARK_DONT_PROCESS)))
+        try
         {
-            packetWrapper.setEntityMetadata(originalData);
-            return;
+            watcher.handleEntityMetadataPacket(wrapper);
         }
-
-        List<EntityData<?>> valuesToOverwrite = new ObjectArrayList<>();
-        var blockedValues = watcher.getBlockedValues();
-
-        for (EntityData<?> raw : originalData)
+        catch (Exception e)
         {
-            var index = raw.getIndex();
+            boolean handled = false;
+            var api = FeatherMorphAPI.instance();
 
-            // 跳过被屏蔽的数据
-            if (blockedValues.contains(index))
-                continue;
-
-            // 寻找与其匹配的SingleValue
-            var singleValue = values.stream()
-                    .filter(sv -> sv.index() == index && raw.getType().equals(sv.type()))
-                    .findFirst().orElse(null);
-
-            // 如果没有找到，则代表此Index和伪装不兼容，跳过
-            if (singleValue == null)
-                continue;
-
-            // 如果 Watcher 中有覆盖的有对应的值，则重新包装，否则原样返回
-            var val = watcher.readOr(singleValue, null);
-
-            if (val != null)
+            // Sometimes API would return NULL where I believe it shouldn't... D:
+            if (api != null)
             {
-                var wrapped = new EntityData<>(singleValue.index(), (EntityDataType<? super Object>) singleValue.type(), val);
-
-                valuesToOverwrite.add(wrapped);
+                var state = api.directAccess().morphManager().getDisguiseStateFor(sourcePlayer);
+                if (state != null)
+                {
+                    logger.info("Failed rebuilding server metadata packet, calling DisguiseState#handleException");
+                    state.handleException(e);
+                    handled = true;
+                }
             }
-            else
+
+            if (!handled)
             {
-                valuesToOverwrite.add(raw);
+                // If API is not ready (where it shouldn't), unregister from render registry to prevent future chaos
+                logger.error("Failed rebuilding server metadata packet", e);
+                registry.unregister(watcher.bindingUUID);
             }
         }
-
-        packetWrapper.setEntityMetadata(valuesToOverwrite);
     }
 }
