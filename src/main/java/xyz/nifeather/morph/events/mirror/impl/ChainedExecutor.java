@@ -1,7 +1,9 @@
 package xyz.nifeather.morph.events.mirror.impl;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import org.bukkit.entity.Mannequin;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Pose;
 import org.bukkit.event.block.Action;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
@@ -10,6 +12,7 @@ import xyz.nifeather.morph.events.mirror.ExecutorHub;
 import xyz.nifeather.morph.misc.NmsRecord;
 import xyz.nifeather.morph.network.commands.S2C.set.S2CSetSneakingCommand;
 import xyz.nifeather.morph.storage.mirrorlogging.OperationType;
+import xyz.nifeather.morph.utilities.FoliaThreadUtils;
 import xyz.nifeather.morph.utilities.ItemUtils;
 
 import java.util.ArrayList;
@@ -117,6 +120,8 @@ public abstract class ChainedExecutor extends AbstractExecutor
     @Override
     public void onSneak(Player source, boolean sneaking)
     {
+        applyToNearByMannequin(source, mannequin -> mannequin.setPose(sneaking ? Pose.SNEAKING : Pose.STANDING));
+
         this.runIfChainable(source, p ->
         {
             p.setSneaking(sneaking);
@@ -124,6 +129,16 @@ public abstract class ChainedExecutor extends AbstractExecutor
 
             logOperation(source, p, OperationType.ToggleSneak);
         });
+    }
+
+    protected void applyToNearByMannequin(Player player, Consumer<Mannequin> consumer)
+    {
+        var state = morphManager().getDisguiseStateFor(player);
+        if (state == null) return;
+
+        var distance = Math.max(executorHub.getControlDistance(), 5);
+        if (player.getTargetEntity(distance) instanceof Mannequin mannequin)
+            consumer.accept(mannequin);
     }
 
     @Override

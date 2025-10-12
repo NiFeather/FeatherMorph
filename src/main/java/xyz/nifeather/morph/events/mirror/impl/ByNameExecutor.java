@@ -1,24 +1,32 @@
 package xyz.nifeather.morph.events.mirror.impl;
 
 import ca.spottedleaf.moonrise.common.util.TickThread;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
+import org.bukkit.entity.Mannequin;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Pose;
 import org.bukkit.event.block.Action;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.config.ConfigOption;
 import xyz.nifeather.morph.events.InteractionMirrorProcessor;
 import xyz.nifeather.morph.events.PlayerTracker;
 import xyz.nifeather.morph.events.mirror.ExecutorHub;
+import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.misc.NmsRecord;
+import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
 import xyz.nifeather.morph.network.commands.S2C.set.S2CSetSneakingCommand;
 import xyz.nifeather.morph.storage.mirrorlogging.OperationType;
+import xyz.nifeather.morph.utilities.FoliaThreadUtils;
 import xyz.nifeather.morph.utilities.ItemUtils;
 import xyz.nifeather.morph.utilities.NmsUtils;
 
 import java.util.Objects;
+import java.util.function.Consumer;
 
 public class ByNameExecutor extends AbstractExecutor
 {
@@ -71,6 +79,8 @@ public class ByNameExecutor extends AbstractExecutor
     @Override
     public void onSneak(Player player, boolean sneaking)
     {
+        applyToNearByMannequin(player, mannequin -> mannequin.setPose(sneaking ? Pose.SNEAKING : Pose.STANDING));
+
         var playerInf = getMirrorTarget(player);
         var targetPlayer = playerInf.target();
 
@@ -83,6 +93,43 @@ public class ByNameExecutor extends AbstractExecutor
 
             logOperation(player, targetPlayer, OperationType.ToggleSneak);
         });
+    }
+
+    protected void applyToNearByMannequin(Player player, Consumer<Mannequin> consumer)
+    {
+        var state = morphManager().getDisguiseStateFor(player);
+        if (state == null) return;
+
+        var ourLocation = player.getLocation();
+        var distance = executorHub.getControlDistance();
+
+        player.getWorld().getEntitiesByClass(Mannequin.class)
+                .stream()
+                .filter(m ->
+                {
+                    boolean success = true;
+                    if (distance != -1)
+                        success = m.getLocation().distance(ourLocation) <= distance;
+
+                    success = success && this.filterMannequin(m, state);
+
+                    return success;
+                })
+                .forEach(consumer);
+    }
+
+    private boolean filterMannequin(@Nullable Mannequin mannequin, DisguiseState state)
+    {
+        if (mannequin == null || !FoliaThreadUtils.isTickThreadFor(mannequin))
+            return false;
+
+        var entityName = mannequin.customName();
+        var disguiseName = state.disguisePropertyHandler().getOr(PropertyNames.ENTITY_CUSTOM_NAME, Component.empty());
+
+        if (entityName == null)
+            return disguiseName.equals(Component.empty());
+
+        return entityName.equals(disguiseName);
     }
 
     @Override

@@ -23,6 +23,7 @@ public class CommonPermissions
 
     public final static String MIRROR = PERM_ROOT + "mirror";
     public final static String MIRROR_IMMUNE = PERM_ROOT + "mirror.immune";
+    public final static String MIRROR_MANNEQUIN = PERM_ROOT + "mirror.mannequin";
 
     public final static String DISGUISE_REVEALING = PERM_ROOT + "disguise_revealing";
 

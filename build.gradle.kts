@@ -250,7 +250,9 @@ paper {
 
             permissionRoot + "can_fly.always",
 
-            permissionRoot + "disguise_use_real_uuid"
+            permissionRoot + "disguise_use_real_uuid",
+
+            permissionRoot + "mirror.mannequin"
     )
 
     defaultDenyPermissions.forEach {

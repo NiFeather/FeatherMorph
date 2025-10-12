@@ -1,6 +1,7 @@
 package xyz.nifeather.morph.events.mirror.impl;
 
 import io.papermc.paper.event.player.PlayerArmSwingEvent;
+import org.bukkit.entity.Mannequin;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.inventory.InventoryType;
@@ -14,6 +15,7 @@ import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.events.PlayerTracker;
 import xyz.nifeather.morph.events.mirror.ExecutorHub;
 import xyz.nifeather.morph.events.mirror.IExecutor;
+import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.misc.PlayerOperationSimulator;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 import xyz.nifeather.morph.network.server.MorphClientHandler;

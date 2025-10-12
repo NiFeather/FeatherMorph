@@ -2,7 +2,10 @@ package xyz.nifeather.morph.events;
 
 import io.papermc.paper.event.player.PlayerArmSwingEvent;
 import io.papermc.paper.event.player.PlayerStopUsingItemEvent;
+import org.bukkit.craftbukkit.entity.CraftMannequin;
+import org.bukkit.entity.Mannequin;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Pose;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -23,6 +26,7 @@ import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.events.mirror.ExecutorHub;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.misc.DisguiseTypes;
+import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
