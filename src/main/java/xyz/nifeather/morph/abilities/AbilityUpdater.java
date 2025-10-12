@@ -55,7 +55,19 @@ public class AbilityUpdater extends MorphPluginObject implements IAbilityConfigL
         return parentState.getPlayer();
     }
 
-    private void doUpdate()
+    private void disableAbility(Pair<IAbility<?>, Boolean> pair, Player player)
+    {
+        pair.left().revokeFromPlayer(player, parentState);
+        pair.right(false);
+    }
+
+    private void enableAbility(Pair<IAbility<?>, Boolean> pair, Player player)
+    {
+        pair.left().applyToPlayer(player, parentState);
+        pair.right(true);
+    }
+
+    public void update()
     {
         List<IAbility<?>> pending = new ObjectArrayList<>();
         var player = player();
@@ -112,33 +124,6 @@ public class AbilityUpdater extends MorphPluginObject implements IAbilityConfigL
 
             if (enabled)
                 ability.handle(player, parentState);
-        }
-    }
-
-    private void disableAbility(Pair<IAbility<?>, Boolean> pair, Player player)
-    {
-        pair.left().revokeFromPlayer(player, parentState);
-        pair.right(false);
-    }
-
-    private void enableAbility(Pair<IAbility<?>, Boolean> pair, Player player)
-    {
-        pair.left().applyToPlayer(player, parentState);
-        pair.right(true);
-    }
-
-    public boolean update()
-    {
-        try
-        {
-            doUpdate();
-
-            return true;
-        }
-        catch (Throwable t)
-        {
-            logger.error("Error occurred updating abilities", t);
-            return false;
         }
     }
 

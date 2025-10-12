@@ -779,13 +779,12 @@ public class DisguiseState extends MorphPluginObject
                 if (!this.getProvider().updateDisguise(player, this))
                     throw new UpdateFailedException("Failed executing provider update");
 
-                if (!this.selfUpdate())
-                    throw new UpdateFailedException("Failed executing self update");
+                this.selfUpdate();
             }
         }
-        catch (Exception e)
+        catch (Throwable t)
         {
-            handleException(e);
+            handleException(t);
         }
     }
 
@@ -806,16 +805,16 @@ public class DisguiseState extends MorphPluginObject
         }
     }
 
-    public boolean selfUpdate()
+    public void selfUpdate()
     {
         if (this.canPlayAmbient())
             this.getSoundHandler().update();
 
         this.animationSequence.update();
-        disguiseWaypointUpdater.tick();
-        skillUpdater.update();
-        disguiseWrapper.update();
-        return this.abilityUpdater.update();
+        this.disguiseWaypointUpdater.tick();
+        this.skillUpdater.update();
+        this.disguiseWrapper.update();
+        this.abilityUpdater.update();
     }
 
     //endregion Updating
