@@ -61,21 +61,20 @@ public class SpawnPacketHandler extends ProtocolListener
         if (packet.getData() == EntityWatcher.PACKET_MARK)
             return;
 
-        //if (uuid.equals(bindingWatcher.readEntry(CustomEntries.SPAWN_UUID)))
-        //    return;
-
-        packetEvent.setCancelled(true);
-        Player affectedPlayer = packetEvent.getPlayer();
-
         try
         {
             var disguisedPlayer = Bukkit.getPlayer(uuid);
             if (disguisedPlayer != null)
+            {
+                Player affectedPlayer = packetEvent.getPlayer();
                 backend.serverRenderer.refreshStateForPlayer(disguisedPlayer, List.of(affectedPlayer));
+                packetEvent.setCancelled(true);
+            }
         }
         catch (Throwable t)
         {
-            logger.error("Failed to spawn fake entity: " + t.getMessage());
+            var sourcePlayer = getPlayerFrom(packet.getEntityId());
+            handleException(sourcePlayer, bindingWatcher, t);
         }
     }
 }

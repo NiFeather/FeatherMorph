@@ -791,18 +791,18 @@ public class DisguiseState extends MorphPluginObject
 
     private volatile boolean exceptionOnce = false;
 
-    public void handleException(Exception e)
+    public void handleException(Throwable t)
     {
         if (!exceptionOnce)
         {
             exceptionOnce = true;
 
-            logger.error("Error occurred while updating disguise", e);
-            stateFuture.completeExceptionally(e);
+            logger.error("Error occurred with disguise", t);
+            stateFuture.completeExceptionally(t);
         }
         else
         {
-            logger.warn("Error occurred while updating disguise (Has earlier exception, not triggering)", e);
+            logger.warn("Error occurred with disguise (Has earlier exception, not triggering)", t);
         }
     }
 

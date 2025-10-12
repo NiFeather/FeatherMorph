@@ -62,27 +62,7 @@ public class MetaPacketListener extends ProtocolListener
         }
         catch (Exception e)
         {
-            boolean handled = false;
-            var api = FeatherMorphAPI.instance();
-
-            // Sometimes API would return NULL where I believe it shouldn't... D:
-            if (api != null)
-            {
-                var state = api.directAccess().morphManager().getDisguiseStateFor(sourcePlayer);
-                if (state != null)
-                {
-                    logger.info("Failed rebuilding server metadata packet, calling DisguiseState#handleException");
-                    state.handleException(e);
-                    handled = true;
-                }
-            }
-
-            if (!handled)
-            {
-                // If API is not ready (where it shouldn't), unregister from render registry to prevent future chaos
-                logger.error("Failed rebuilding server metadata packet", e);
-                registry.unregister(watcher.bindingUUID);
-            }
+            handleException(sourcePlayer, watcher, e);
         }
     }
 }
