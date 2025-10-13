@@ -132,7 +132,7 @@ public class SkillUpdater extends MorphPluginObject
         var player = state.getPlayer();
         var event = new PlayerExecuteSkillEvent(player, state);
 
-        if (event.isCancelled())
+        if (!event.callEvent())
         {
             player.sendMessage(MessageUtils.prefixes(player, MorphStrings.operationCancelledString()));
             this.setCooldown(5, true);
