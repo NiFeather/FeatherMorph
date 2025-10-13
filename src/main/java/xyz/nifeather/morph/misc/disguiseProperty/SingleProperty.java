@@ -122,4 +122,9 @@ public class SingleProperty<T>
     {
         return new SingleProperty<>(id, val, (Class<T>) val.getClass(), inputHandle, outputHandle, hideFromUserInput);
     }
+
+    public static <T> SingleProperty<T> of(String id, T val, Class<T> type, InputHandle<T> inputHandle, OutputHandle<T> outputHandle, boolean hideFromUserInput)
+    {
+        return new SingleProperty<>(id, val, type, inputHandle, outputHandle, hideFromUserInput);
+    }
 }

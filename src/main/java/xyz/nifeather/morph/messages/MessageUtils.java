@@ -1,7 +1,6 @@
 package xyz.nifeather.morph.messages;
 
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -17,7 +16,8 @@ import xyz.nifeather.morph.misc.NmsRecord;
 import xyz.nifeather.morph.platform.CurrentPlatform;
 import xyz.nifeather.morph.platform.entity.IPlatformPlayer;
 
-import java.util.Currency;
+import java.util.List;
+import java.util.function.Function;
 
 public class MessageUtils extends MorphPluginObject
 {
@@ -34,48 +34,61 @@ public class MessageUtils extends MorphPluginObject
     private static MorphConfigManager config;
     private static FeatherMorphMain plugin;
 
-    public static Component prefixes(IPlatformPlayer player, Component... c)
+    public static void send(CommandSender sender, String m)
     {
-        return prefixes(CurrentPlatform.instance().entityLookup().getNativePlayer(player), c);
+        var context = new FormattableMessage(FeatherMorphMain.getInstance(), "<content>")
+                .resolve("content", locale -> Component.text(m));
+
+        send(sender, context);
     }
 
-    public static Component prefixes(CommandSender sender, Component... c)
+    public static void send(CommandSender sender, Component... componentArray)
+    {
+        var finalComponent = Component.empty();
+
+        for (var subComponent : componentArray)
+            finalComponent = finalComponent.append(subComponent);
+
+        Component finalComponent1 = finalComponent;
+        var context = new FormattableMessage(FeatherMorphMain.getInstance(), "<content>")
+                .resolve("content", locale -> finalComponent1);
+
+        send(sender, context);
+    }
+
+    public static void send(CommandSender sender, FormattableMessage context)
+    {
+        send(sender, context, List.of());
+    }
+
+    public static void send(CommandSender sender, FormattableMessage context, Function<Component, Component> componentModifier)
+    {
+        send(sender, context, List.of(componentModifier));
+    }
+
+    public static void send(CommandSender sender, FormattableMessage context, List<Function<Component, Component>> componentModifiers)
     {
         if (config == null)
             setupConfigManager();
 
-        if (!(sender instanceof Player))
-            return Component.translatable("%s", c);
+        var rootMessage = new FormattableMessage(FeatherMorphMain.getInstance(), config.getOrDefault(String.class, ConfigOption.PLUGIN_PREFIX));
 
-        var finalComponent = Component.empty();
+        var inputComponent = context.createComponent();
+        if (inputComponent.equals(Component.empty()))
+        {
+            if (FeatherMorphMain.getInstance().debugOutputEnabled())
+                FeatherMorphMain.getInstance().getSLF4JLogger().info("[DEBUG] Ignoring empty message");
 
-        for (var cc : c)
-            finalComponent = finalComponent.append(cc);
+            return;
+        }
 
-        var prefix = new FormattableMessage(plugin, config.getOrDefault(String.class, ConfigOption.PLUGIN_PREFIX));
+        var outputComponent = rootMessage.resolve("message", context)
+                .createComponent(getLocale(sender));
 
-        return prefix
-                .withLocale(getLocale(sender))
-                .resolve("message", finalComponent)
-                .toComponent(null);
-    }
+        for (var componentModifier : componentModifiers)
+            outputComponent = componentModifier.apply(outputComponent);
 
-    public static Component prefixes(CommandSender sender, String str)
-    {
-        return prefixes(sender, Component.text(str));
-    }
-
-    public static Component prefixes(IPlatformPlayer player, FormattableMessage formattableMessage)
-    {
-        return prefixes(CurrentPlatform.instance().entityLookup().getNativePlayer(player), formattableMessage);
-    }
-
-    public static Component prefixes(CommandSender sender, FormattableMessage formattable)
-    {
-        if (formattable.getLocale() == null)
-            formattable.withLocale(getLocale(sender));
-
-        return prefixes(sender, formattable.toComponent(null));
+        sender.sendMessage(outputComponent);
     }
 
     @NotNull
@@ -92,6 +105,7 @@ public class MessageUtils extends MorphPluginObject
 
         var nmsLocale = NmsRecord.ofPlayer(player).language;
 
+        //     Yes this is nullable
         return nmsLocale == null ? getServerLocale() : nmsLocale.toLowerCase().replace('-', '_');
     }
 
@@ -144,13 +158,5 @@ public class MessageUtils extends MorphPluginObject
             return getLocale(player);
         else
             return getServerLocale();
-    }
-
-    public static String asParsedMiniMessageString(String locale, FormattableMessage formattable)
-    {
-        if (formattable.getLocale() == null)
-            formattable.withLocale(locale);
-
-        return MiniMessage.miniMessage().serialize(formattable.toComponent());
     }
 }

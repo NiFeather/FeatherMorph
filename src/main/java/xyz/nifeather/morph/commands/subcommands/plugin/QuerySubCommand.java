@@ -12,8 +12,8 @@ import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Messages.FormattableMessage;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.commands.brigadier.BrigadierCommand;
-import xyz.nifeather.morph.messages.CommandStrings;
-import xyz.nifeather.morph.messages.HelpStrings;
+import xyz.nifeather.morph.messages.strings.CommandStrings;
+import xyz.nifeather.morph.messages.strings.HelpStrings;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 
@@ -76,22 +76,21 @@ public class QuerySubCommand extends BrigadierCommand
 
             if (state != null)
             {
-                commandSender.sendMessage(MessageUtils.prefixes(commandSender,
+                MessageUtils.send(commandSender,
                         CommandStrings.qDisguisedString()
-                                .withLocale(locale)
                                 .resolve("who", targetPlayer.getName())
                                 .resolve("what", state.getDisguiseIdentifier())
                                 .resolve("storage_status",
                                         state.showingDisguisedItems()
                                                 ? CommandStrings.qaShowingDisguisedItemsString()
-                                                : CommandStrings.qaNotShowingDisguisedItemsString(),
-                                        null)
-                ));
+                                                : CommandStrings.qaNotShowingDisguisedItemsString()
+                                )
+                );
             }
             else
             {
-                commandSender.sendMessage(MessageUtils.prefixes(commandSender,
-                        CommandStrings.qNotDisguisedString().resolve("who", targetPlayer.getName())));
+                MessageUtils.send(commandSender,
+                        CommandStrings.qNotDisguisedString().resolve("who", targetPlayer.getName()));
             }
         }
 

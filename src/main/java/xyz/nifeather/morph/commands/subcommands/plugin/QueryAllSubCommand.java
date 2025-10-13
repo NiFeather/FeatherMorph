@@ -8,8 +8,8 @@ import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Messages.FormattableMessage;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.commands.brigadier.BrigadierCommand;
-import xyz.nifeather.morph.messages.CommandStrings;
-import xyz.nifeather.morph.messages.HelpStrings;
+import xyz.nifeather.morph.messages.strings.CommandStrings;
+import xyz.nifeather.morph.messages.strings.HelpStrings;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 
@@ -57,7 +57,7 @@ public class QueryAllSubCommand extends BrigadierCommand
 
         if (list.isEmpty() && offlineStates.isEmpty())
         {
-            commandSender.sendMessage(MessageUtils.prefixes(commandSender, CommandStrings.qaNoBodyDisguisingString()));
+            MessageUtils.send(commandSender, CommandStrings.qaNoBodyDisguisingString());
             return 1;
         }
 
@@ -67,27 +67,25 @@ public class QueryAllSubCommand extends BrigadierCommand
         for (var i : list)
         {
             var player = i.getPlayer();
-            msg.withLocale(locale)
-                    .resolve("who", player.getName())
+            msg.resolve("who", player.getName())
                     .resolve("status", player.isOnline()
                             ? CommandStrings.qaOnlineString()
-                            : CommandStrings.qaOfflineString(), null)
+                            : CommandStrings.qaOfflineString())
                     .resolve("what", i.getDisguiseIdentifier())
                     .resolve("storage_status", i.showingDisguisedItems()
                             ? CommandStrings.qaShowingDisguisedItemsString()
-                            : CommandStrings.qaNotShowingDisguisedItemsString(), null);
+                            : CommandStrings.qaNotShowingDisguisedItemsString());
 
-            commandSender.sendMessage(MessageUtils.prefixes(commandSender, msg));
+            MessageUtils.send(commandSender, msg);
         }
 
         for (var s : offlineStates)
         {
-            commandSender.sendMessage(MessageUtils.prefixes(commandSender,
-                    msg.withLocale(locale)
-                            .resolve("who", s.playerName)
-                            .resolve("status", CommandStrings.qaIsOfflineStoreString(), null)
+            MessageUtils.send(commandSender,
+                    msg.resolve("who", s.playerName)
+                            .resolve("status", CommandStrings.qaIsOfflineStoreString())
                             .resolve("storage_status", "")
-                            .resolve("what", s.disguiseID)));
+                            .resolve("what", s.disguiseID));
         }
 
         return 1;

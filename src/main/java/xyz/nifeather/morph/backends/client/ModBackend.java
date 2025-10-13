@@ -13,7 +13,7 @@ import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.backends.DisguiseBackend;
 import xyz.nifeather.morph.backends.DisguiseWrapper;
 import xyz.nifeather.morph.backends.WrapperProperties;
-import xyz.nifeather.morph.messages.BackendStrings;
+import xyz.nifeather.morph.messages.strings.BackendStrings;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.misc.ExecutionErrorException;
 import xyz.nifeather.morph.misc.ModNetworkingHelper;

@@ -13,8 +13,8 @@ import xyz.nifeather.morph.commands.subcommands.OptionSubCommands;
 import xyz.nifeather.morph.config.ConfigOption;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.events.InteractionMirrorProcessor;
-import xyz.nifeather.morph.messages.CommandNameStrings;
-import xyz.nifeather.morph.messages.HelpStrings;
+import xyz.nifeather.morph.messages.strings.CommandNameStrings;
+import xyz.nifeather.morph.messages.strings.HelpStrings;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 
 import java.util.List;

@@ -12,9 +12,8 @@ import org.bukkit.inventory.meta.SkullMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Annotations.Resolved;
-import xyz.nifeather.morph.backends.WrapperEvent;
 import xyz.nifeather.morph.messages.MessageUtils;
-import xyz.nifeather.morph.messages.MorphStrings;
+import xyz.nifeather.morph.messages.strings.MorphStrings;
 import xyz.nifeather.morph.misc.DisguiseMeta;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.misc.DisguiseTypes;
@@ -62,7 +61,7 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
     {
         if (getMorphManager().getBannedDisguises().contains("minecraft:player"))
         {
-            player.sendMessage(MessageUtils.prefixes(player, MorphStrings.disguiseBannedOrNotSupportedString()));
+            MessageUtils.send(player, MorphStrings.disguiseBannedOrNotSupportedString());
             return DisguiseResult.fail();
         }
 
@@ -115,7 +114,6 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
 
             if (gameProfile == null)
             {
-                player.sendMessage(MessageUtils.prefixes(player, MorphStrings.invalidSkinString()));
                 throw ParseErrorException.forProperty(PropertyNames.PLAYER_SKIN)
                         .withLocalizableMessage(MorphStrings.invalidSkinString())
                         .withMessage("Invalid GameProfile for the given player head")

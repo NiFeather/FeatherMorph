@@ -1,29 +1,21 @@
 package xyz.nifeather.morph.commands.subcommands.request;
 
 import com.mojang.brigadier.Command;
-import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.brigadier.suggestion.Suggestions;
-import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSelectorArgumentResolver;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Messages.FormattableMessage;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.commands.brigadier.IConvertibleBrigadier;
 import xyz.nifeather.morph.interfaces.IManageRequests;
-import xyz.nifeather.morph.messages.CommonStrings;
-import xyz.nifeather.morph.messages.HelpStrings;
+import xyz.nifeather.morph.messages.strings.HelpStrings;
 import xyz.nifeather.morph.messages.MessageUtils;
-import xyz.nifeather.morph.messages.RequestStrings;
+import xyz.nifeather.morph.messages.strings.RequestStrings;
 import xyz.nifeather.morph.misc.DisguiseTypes;
-
-import java.util.concurrent.CompletableFuture;
 
 public class SendSubCommand extends MorphPluginObject implements IConvertibleBrigadier
 {
@@ -47,7 +39,7 @@ public class SendSubCommand extends MorphPluginObject implements IConvertibleBri
         {
             if (targetPlayer.getUniqueId().equals(sourcePlayer.getUniqueId()))
             {
-                sourcePlayer.sendMessage(MessageUtils.prefixes(sender, RequestStrings.cantSendToSelfString()));
+                MessageUtils.send(sender, RequestStrings.cantSendToSelfString());
                 return;
             }
 
@@ -55,7 +47,7 @@ public class SendSubCommand extends MorphPluginObject implements IConvertibleBri
             if (morphs.getAvaliableDisguisesFor(sourcePlayer).stream()
                     .anyMatch(c -> c.rawIdentifier.equals(id)))
             {
-                sourcePlayer.sendMessage(MessageUtils.prefixes(sender, RequestStrings.alreadyHaveDisguiseString()));
+                MessageUtils.send(sender, RequestStrings.alreadyHaveDisguiseString());
                 return;
             }
 

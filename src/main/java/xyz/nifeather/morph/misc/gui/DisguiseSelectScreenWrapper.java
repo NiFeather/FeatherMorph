@@ -14,8 +14,8 @@ import xiamomc.pluginbase.Annotations.Resolved;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.config.ConfigOption;
 import xyz.nifeather.morph.config.MorphConfigManager;
-import xyz.nifeather.morph.messages.GuiStrings;
-import xyz.nifeather.morph.messages.MorphStrings;
+import xyz.nifeather.morph.messages.strings.GuiStrings;
+import xyz.nifeather.morph.messages.strings.MorphStrings;
 import xyz.nifeather.morph.misc.DisguiseMeta;
 import xyz.nifeather.morph.misc.DisguiseState;
 
@@ -140,7 +140,7 @@ public class DisguiseSelectScreenWrapper extends ScreenWrapper
         // Build page
         var array = rows.toArray(new String[]{});
 
-        var skel = new InventoryGui(plugin, GuiStrings.selectDisguise().toString(playerLocale), array);
+        var skel = new InventoryGui(plugin, GuiStrings.selectDisguise().createString(playerLocale), array);
 
         skel.setItemNameSetter(this::parseItemName);
         skel.setItemLoreSetter(this::parseItemLore);
@@ -204,7 +204,7 @@ public class DisguiseSelectScreenWrapper extends ScreenWrapper
                 ItemStack.of(Material.LIGHT_BLUE_STAINED_GLASS_PANE),
                 fallback,
                 GuiPageElement.PageAction.NEXT,
-                GuiStrings.nextPage().toString(playerLocale));
+                GuiStrings.nextPage().createString(playerLocale));
 
         guiInstance.addElement(nextPageElement);
 
@@ -212,7 +212,7 @@ public class DisguiseSelectScreenWrapper extends ScreenWrapper
                 ItemStack.of(Material.LIME_STAINED_GLASS_PANE),
                 fallback,
                 GuiPageElement.PageAction.PREVIOUS,
-                GuiStrings.prevPage().toString(playerLocale));
+                GuiStrings.prevPage().createString(playerLocale));
 
         guiInstance.addElement(lastPageElement);
 
@@ -236,7 +236,7 @@ public class DisguiseSelectScreenWrapper extends ScreenWrapper
                     this.guiInstance.close();
                     return true;
                 },
-                "<italic:false>" + GuiStrings.unDisguise().toString(playerLocale));
+                "<italic:false>" + GuiStrings.unDisguise().createString(playerLocale));
 
         guiInstance.addElement(unDisguiseButton);
 
@@ -244,7 +244,7 @@ public class DisguiseSelectScreenWrapper extends ScreenWrapper
         if (bindingState != null)
         {
             var name = "<italic:false>" + MorphStrings.disguisingAsString().resolve("what", bindingState.getPlayerDisplay())
-                    .toString(playerLocale);
+                    .createString(playerLocale);
 
             var currentDisguiseButton = new StaticGuiElement('C',
                     IconLookup.instance().lookup(bindingState.getDisguiseIdentifier()),

@@ -10,7 +10,7 @@ import xiamomc.pluginbase.Messages.FormattableMessage;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.commands.brigadier.BrigadierCommand;
 import xyz.nifeather.morph.interfaces.IManagePlayerData;
-import xyz.nifeather.morph.messages.HelpStrings;
+import xyz.nifeather.morph.messages.strings.HelpStrings;
 
 public class ToggleSelfSubCommand extends BrigadierCommand
 {

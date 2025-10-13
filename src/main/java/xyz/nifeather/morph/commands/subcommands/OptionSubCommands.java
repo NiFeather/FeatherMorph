@@ -15,7 +15,7 @@ import xiamomc.pluginbase.Messages.FormattableMessage;
 import xyz.nifeather.morph.commands.brigadier.BrigadierCommand;
 import xyz.nifeather.morph.config.ConfigOption;
 import xyz.nifeather.morph.config.MorphConfigManager;
-import xyz.nifeather.morph.messages.CommandStrings;
+import xyz.nifeather.morph.messages.strings.CommandStrings;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.utilities.BindableUtils;
 
@@ -42,20 +42,18 @@ public class OptionSubCommands
         {
             config.set(option, value);
 
-            sender.sendMessage(MessageUtils.prefixes(sender,
+            MessageUtils.send(sender,
                     CommandStrings.optionSetString()
-                            .withLocale(MessageUtils.getLocale(sender))
                             .resolve("what", name)
-                            .resolve("value", value + "")));
+                            .resolve("value", value + ""));
         }
 
         protected void lookupConfig(CommandSender sender, Class<?> type)
         {
-            sender.sendMessage(MessageUtils.prefixes(sender,
+            MessageUtils.send(sender,
                     CommandStrings.optionValueString()
-                            .withLocale(MessageUtils.getLocale(sender))
                             .resolve("what", name)
-                            .resolve("value", config.get(type, option) + "")));
+                            .resolve("value", config.get(type, option) + ""));
         }
 
         @Override
@@ -243,19 +241,17 @@ public class OptionSubCommands
 
             if (listChanged)
             {
-                sender.sendMessage(MessageUtils.prefixes(sender,
+                MessageUtils.send(sender,
                         CommandStrings.listRemoveSuccess()
-                                .withLocale(MessageUtils.getLocale(sender))
                                 .resolve("value", value)
-                                .resolve("option", optionName)));
+                                .resolve("option", optionName));
             }
             else
             {
-                sender.sendMessage(MessageUtils.prefixes(sender,
+                MessageUtils.send(sender,
                         CommandStrings.listRemoveFailUnknown()
-                                .withLocale(MessageUtils.getLocale(sender))
                                 .resolve("value", value)
-                                .resolve("option", optionName)));
+                                .resolve("option", optionName));
             }
 
             return 1;
@@ -314,28 +310,25 @@ public class OptionSubCommands
                 //workaround: List的add方法传入非null时永远返回true
                 if (bindableList.contains(value))
                 {
-                    sender.sendMessage(MessageUtils.prefixes(sender,
+                    MessageUtils.send(sender,
                             CommandStrings.listAddSuccess()
-                                    .withLocale(MessageUtils.getLocale(sender))
                                     .resolve("value", value)
-                                    .resolve("option", optionName)));
+                                    .resolve("option", optionName));
                 }
                 else
                 {
-                    sender.sendMessage(MessageUtils.prefixes(sender,
+                    MessageUtils.send(sender,
                             CommandStrings.listAddFailUnknown()
-                                    .withLocale(MessageUtils.getLocale(sender))
                                     .resolve("value", value)
-                                    .resolve("option", optionName)));
+                                    .resolve("option", optionName));
                 }
             }
             catch (Throwable t)
             {
-                sender.sendMessage(MessageUtils.prefixes(sender,
+                MessageUtils.send(sender,
                         CommandStrings.listAddFailUnknown()
-                                .withLocale(MessageUtils.getLocale(sender))
                                 .resolve("value", value)
-                                .resolve("option", optionName)));
+                                .resolve("option", optionName));
 
                 logger.error("Error adding option to bindable list: " + t.getMessage());
             }
@@ -386,11 +379,10 @@ public class OptionSubCommands
             var displayValue = BindableUtils.bindableListToString(bindableList);
 
             var sender = context.getSource().getSender();
-            sender.sendMessage(MessageUtils.prefixes(sender,
+            MessageUtils.send(sender,
                     CommandStrings.optionValueString()
-                            .withLocale(MessageUtils.getLocale(sender))
                             .resolve("what", optionName)
-                            .resolve("value", displayValue)));
+                            .resolve("value", displayValue));
 
             return 1;
         }

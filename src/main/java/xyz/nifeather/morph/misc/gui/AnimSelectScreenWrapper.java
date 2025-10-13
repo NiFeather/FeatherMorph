@@ -7,16 +7,12 @@ import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Material;
-import org.bukkit.block.data.Levelled;
 import org.bukkit.inventory.ItemRarity;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.BlockDataMeta;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Bindables.BindableList;
-import xyz.nifeather.morph.messages.EmoteStrings;
-import xyz.nifeather.morph.messages.GuiStrings;
-import xyz.nifeather.morph.messages.MorphStrings;
+import xyz.nifeather.morph.messages.strings.EmoteStrings;
+import xyz.nifeather.morph.messages.strings.GuiStrings;
 import xyz.nifeather.morph.misc.DisguiseState;
 
 import java.util.List;
@@ -123,7 +119,7 @@ public class AnimSelectScreenWrapper extends ScreenWrapper
         // Build page
         var array = rows.toArray(new String[]{});
 
-        var skel = new InventoryGui(plugin, GuiStrings.selectAnimation().toString(playerLocale), array);
+        var skel = new InventoryGui(plugin, GuiStrings.selectAnimation().createString(playerLocale), array);
 
         skel.setItemNameSetter(this::parseItemName);
         skel.setItemLoreSetter(this::parseItemLore);
@@ -145,7 +141,7 @@ public class AnimSelectScreenWrapper extends ScreenWrapper
         filler.editMeta(meta ->
         {
             var name = EmoteStrings.none()
-                    .toComponent(playerLocale)
+                    .createComponent(playerLocale)
                     .style(Style.style().decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE));
 
             meta.customName(name);
@@ -160,8 +156,7 @@ public class AnimSelectScreenWrapper extends ScreenWrapper
             icon.editMeta(meta ->
             {
                 var name = EmoteStrings.get(sequenceId)
-                        .withLocale(playerLocale)
-                        .toComponent()
+                        .createComponent()
                         .style(Style.style().decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE));
 
                 meta.setRarity(ItemRarity.COMMON);
@@ -206,6 +201,6 @@ public class AnimSelectScreenWrapper extends ScreenWrapper
                     guiInstance.close();
                     return true;
                 },
-                "<italic:false>" + GuiStrings.close().toString(playerLocale)));
+                "<italic:false>" + GuiStrings.close().createString(playerLocale)));
     }
 }

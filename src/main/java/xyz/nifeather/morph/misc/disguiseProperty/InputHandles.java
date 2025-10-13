@@ -22,7 +22,8 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;
 import org.bukkit.entity.*;
 import org.jetbrains.annotations.NotNull;
-import xyz.nifeather.morph.messages.ExceptionStrings;
+import xyz.nifeather.morph.messages.strings.ExceptionStrings;
+import xyz.nifeather.morph.messages.strings.TypesString;
 import xyz.nifeather.morph.misc.disguiseProperty.struct.MorphProfileProperty;
 import xyz.nifeather.morph.misc.disguiseProperty.struct.MorphResolvableProfileStruct;
 import xyz.nifeather.morph.misc.skins.PlayerSkinProvider;
@@ -116,7 +117,7 @@ public class InputHandles
         {
             throw ParseErrorException.forProperty(propertyName)
                     .byMethod("readInteger")
-                    .withLocalizableMessage(ExceptionStrings.failedParsingWhatFromInput().resolve("type", "Integer"))
+                    .withLocalizableMessage(ExceptionStrings.failedParsingWhatFromInput().resolve("type", TypesString.typeInteger()))
                     .withMessage("Can't parse integer from input '%s'".formatted(input))
                     .causedBy(t)
                     .create();
@@ -238,7 +239,7 @@ public class InputHandles
         {
             throw ParseErrorException.forProperty(propertyName)
                     .byMethod("readAdventureComponent")
-                    .withLocalizableMessage(ExceptionStrings.failedParsingWhatFromInput().resolve("type", "Text Component"))
+                    .withLocalizableMessage(ExceptionStrings.failedParsingWhatFromInput().resolve("type", TypesString.textComponent()))
                     .withMessage("Can't parse input to adventure component from value '%s'".formatted(input))
                     .causedBy(t)
                     .create();
@@ -271,7 +272,7 @@ public class InputHandles
         {
             throw ParseErrorException.forProperty(propertyName)
                     .byMethod("readRegistry")
-                    .withLocalizableMessage(ExceptionStrings.failedParsingWhatFromInput().resolve("type", "ResourceLocation"))
+                    .withLocalizableMessage(ExceptionStrings.failedParsingWhatFromInput().resolve("type", TypesString.resourceLocation()))
                     .withMessage("Invalid input for ResourceLocation: '%s'".formatted(input))
                     .create();
         }
@@ -364,7 +365,7 @@ public class InputHandles
         {
             throw ParseErrorException.forProperty(propertyName)
                     .byMethod("readFloatStrict")
-                    .withLocalizableMessage(ExceptionStrings.failedParsingWhatFromInput().resolve("type", "Float"))
+                    .withLocalizableMessage(ExceptionStrings.failedParsingWhatFromInput().resolve("type", TypesString.typeFloat()))
                     .withMessage("Can't parse float from input '%s': %s".formatted(input, e.getMessage()))
                     .causedBy(e)
                     .create();
@@ -418,7 +419,7 @@ public class InputHandles
         {
             throw ParseErrorException.forProperty(propertyName)
                     .byMethod("readRotations")
-                    .withLocalizableMessage(ExceptionStrings.failedParsingWhatFromInput().resolve("type", "Float array"))
+                    .withLocalizableMessage(ExceptionStrings.failedParsingWhatFromInput().resolve("type", TypesString.collectionOf().resolve("what", TypesString.typeFloat())))
                     .withMessage("readRotations: Failed to parse float array in JSON from input '%s'".formatted(value))
                     .causedBy(e)
                     .create();

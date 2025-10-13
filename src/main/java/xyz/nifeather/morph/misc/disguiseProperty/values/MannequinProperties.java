@@ -8,7 +8,7 @@ import org.bukkit.entity.Mannequin;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.nifeather.morph.messages.CommandStrings;
+import xyz.nifeather.morph.messages.strings.CommandStrings;
 import xyz.nifeather.morph.misc.disguiseProperty.*;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 import xyz.nifeather.morph.utilities.GameProfileUtils;

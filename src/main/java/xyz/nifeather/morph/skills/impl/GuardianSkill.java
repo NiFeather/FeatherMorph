@@ -12,7 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import xyz.nifeather.morph.abilities.ISkillAbilityOptionHandler;
 import xyz.nifeather.morph.api.morphs.skills.SkillNames;
 import xyz.nifeather.morph.messages.MessageUtils;
-import xyz.nifeather.morph.messages.SkillStrings;
+import xyz.nifeather.morph.messages.strings.SkillStrings;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.misc.ExecutionErrorException;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
@@ -50,18 +50,14 @@ public class GuardianSkill extends DelayedMorphSkill<NoOpConfiguration>
 
         if (targetEntity == null)
         {
-            sendDenyMessageToPlayer(player, SkillStrings.noTargetString()
-                    .withLocale(MessageUtils.getLocale(player))
-                    .resolve("distance", "" + distanceLimit)
-                    .toComponent());
+            sendDenyMessageToPlayer(player, SkillStrings.noTargetString().resolve("distance", "" + distanceLimit));
 
             return ExecuteResult.fail(20);
         }
 
         if (!(targetEntity instanceof LivingEntity living))
         {
-            var component = SkillStrings.targetNotSuitableString().withLocale(MessageUtils.getLocale(player)).toComponent();
-            sendDenyMessageToPlayer(player, component);
+            sendDenyMessageToPlayer(player, SkillStrings.targetNotSuitableString());
 
             return ExecuteResult.fail(20);
         }

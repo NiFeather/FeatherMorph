@@ -34,10 +34,10 @@ import xyz.nifeather.morph.backends.server.ServerBackend;
 import xyz.nifeather.morph.config.ConfigOption;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.interfaces.IManagePlayerData;
-import xyz.nifeather.morph.messages.CommandStrings;
-import xyz.nifeather.morph.messages.HintStrings;
+import xyz.nifeather.morph.messages.strings.CommandStrings;
+import xyz.nifeather.morph.messages.strings.HintStrings;
 import xyz.nifeather.morph.messages.MessageUtils;
-import xyz.nifeather.morph.messages.MorphStrings;
+import xyz.nifeather.morph.messages.strings.MorphStrings;
 import xyz.nifeather.morph.misc.*;
 import xyz.nifeather.morph.misc.disguiseProperty.*;
 import xyz.nifeather.morph.misc.disguiseProperty.values.OffTreeProperties;
@@ -431,22 +431,20 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         {
             if (!allowHeadMorph.get())
             {
-                //player.sendMessage(MessageUtils.prefixes(player, MorphStrings.headDisguiseDisabledString()));
+                //player.sendMessage(MessageUtils.send(player, MorphStrings.headDisguiseDisabledString()));
 
                 return true;
             }
 
             if (!player.hasPermission(CommonPermissions.HEAD_MORPH))
             {
-                player.sendMessage(MessageUtils.prefixes(player, CommandStrings.noPermissionMessage()));
-
+                MessageUtils.send(player, CommandStrings.noPermissionMessage());
                 return true;
             }
 
             if (!canMorph(player))
             {
-                player.sendMessage(MessageUtils.prefixes(player, MorphStrings.disguiseCoolingDownString()));
-
+                MessageUtils.send(player, MorphStrings.disguiseCoolingDownString());
                 return true;
             }
 
@@ -466,7 +464,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                     //忽略没有profile的玩家伪装
                     if (profile == null)
                     {
-                        player.sendMessage(MessageUtils.prefixes(player, MorphStrings.invalidSkinString()));
+                        MessageUtils.send(player, MorphStrings.invalidSkinString());
                         return true;
                     }
 
@@ -596,13 +594,13 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 case VALIDATE_NO_PROVIDER ->
                 {
                     logger.error("Unable to find any provider that matches the identifier '%s'".formatted(parameters.targetDisguiseIdentifier()));
-                    source.sendMessage(MessageUtils.prefixes(source, MorphStrings.disguiseBannedOrNotSupportedString()));
+                    MessageUtils.send(source, MorphStrings.disguiseBannedOrNotSupportedString());
                     return false;
                 }
 
                 case VALIDATE_PROVIDER_FAIL ->
                 {
-                    source.sendMessage(MessageUtils.prefixes(source, MorphStrings.invalidIdentityString()));
+                    MessageUtils.send(source, MorphStrings.invalidIdentityString());
                     return false;
                 }
 
@@ -629,17 +627,13 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             if (FeatherMorphMain.getInstance().debugOutputEnabled())
                 logger.warn("Unable to disguise player because a ParseErrorException has occurred", e);
 
-            var message = e.localizableMessage().orElseGet(() -> new FormattableMessage(plugin, e.getMessage()))
-                    .withLocale(MessageUtils.getLocale(source));
+            var message = e.localizableMessage().orElseGet(() -> new FormattableMessage(plugin, e.getMessage()));
 
             var msg = MorphStrings.errorWhileDisguisingUserFault()
                     .resolve("error", message)
                     .resolve("what", e.propertyName);
 
-            var component = MessageUtils.prefixes(source, msg)
-                    .hoverEvent(HoverEvent.showText(Component.text(e.underlyingMessage())));
-
-            source.sendMessage(component);
+            MessageUtils.send(source, msg, c -> c.hoverEvent(HoverEvent.showText(Component.text(e.underlyingMessage()))));
 
             return false;
         }
@@ -648,16 +642,12 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             if (FeatherMorphMain.getInstance().debugOutputEnabled())
                 logger.error("Failed to disguise player because a PropertyValidationException has occurred", e);
 
-            var message = e.localizableMessage().orElseGet(() -> new FormattableMessage(plugin, e.getMessage()))
-                    .withLocale(MessageUtils.getLocale(source));
+            var message = e.localizableMessage().orElseGet(() -> new FormattableMessage(plugin, e.getMessage()));
 
             var msg = MorphStrings.errorWhileDisguisingWithError()
                     .resolve("error", message);
 
-            var component = MessageUtils.prefixes(source, msg)
-                    .hoverEvent(HoverEvent.showText(Component.text(e.underlyingMessage())));
-
-            source.sendMessage(component);
+            MessageUtils.send(source, msg, c -> c.hoverEvent(HoverEvent.showText(Component.text(e.underlyingMessage()))));
 
             return false;
         }
@@ -665,23 +655,19 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         {
             logger.error("Failed to disguise player because an ExecutionErrorException has occurred", e);
 
-            var message = e.localizableMessage().orElseGet(() -> new FormattableMessage(plugin, e.getMessage()))
-                    .withLocale(MessageUtils.getLocale(source));
+            var message = e.localizableMessage().orElseGet(() -> new FormattableMessage(plugin, e.getMessage()));
 
             var msg = MorphStrings.errorWhileDisguisingWithError()
                     .resolve("error", message);
 
-            var component = MessageUtils.prefixes(source, msg)
-                    .hoverEvent(HoverEvent.showText(Component.text(e.underlyingMessage())));
-
-            source.sendMessage(component);
+            MessageUtils.send(source, msg, c -> c.hoverEvent(HoverEvent.showText(Component.text(e.underlyingMessage()))));
 
             return false;
         }
         catch (Exception e)
         {
             logger.error("Unable to disguise player", e);
-            source.sendMessage(MessageUtils.prefixes(source, MorphStrings.errorWhileDisguisingWithError().resolve("error", e.getMessage())));
+            MessageUtils.send(source, MorphStrings.errorWhileDisguisingWithError().resolve("error", e.getMessage()));
 
             unMorph(parameters.targetPlayer);
 
@@ -713,7 +699,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
             if (!hasPerm)
             {
-                source.sendMessage(MessageUtils.prefixes(source, CommandStrings.noPermissionMessage()));
+                MessageUtils.send(source, CommandStrings.noPermissionMessage());
 
                 return null;
             }
@@ -729,13 +715,13 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         // 检查是否禁用
         if (disguiseDisabled(disguiseIdentifier))
         {
-            source.sendMessage(MessageUtils.prefixes(source, MorphStrings.disguiseBannedOrNotSupportedString()));
+            MessageUtils.send(source, MorphStrings.disguiseBannedOrNotSupportedString());
             return null;
         }
 
         if (disguiseDisabledInWorld(player.getWorld()))
         {
-            source.sendMessage(MessageUtils.prefixes(source, MorphStrings.disguiseDisabledInWorldString()));
+            MessageUtils.send(source, MorphStrings.disguiseDisabledInWorldString());
             return null;
         }
 
@@ -746,7 +732,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         if (!parameters.forceExecute && !earlyEventPassed)
         {
-            source.sendMessage(MessageUtils.prefixes(source, MorphStrings.operationCancelledString()));
+            MessageUtils.send(source, MorphStrings.operationCancelledString());
             return null;
         }
 
@@ -766,7 +752,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         if (info == null)
         {
-            source.sendMessage(MessageUtils.prefixes(source, MorphStrings.morphNotOwnedString()));
+            MessageUtils.send(source, MorphStrings.morphNotOwnedString());
             return null;
         }
 
@@ -825,7 +811,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             {
                 if (!result.failSilent())
                 {
-                    source.sendMessage(MessageUtils.prefixes(source, MorphStrings.errorWhileDisguisingWithError().resolve("error", "Unable to build wrapper")));
+                    MessageUtils.send(source, MorphStrings.errorWhileDisguisingWithError().resolve("error", "Unable to build wrapper"));
                     logger.error("Unable to get disguise for player with provider {}", provider);
                 }
 
@@ -851,15 +837,14 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         }
         catch (IllegalArgumentException iae)
         {
-            source.sendMessage(MessageUtils.prefixes(source, MorphStrings.parseErrorString()
-                    .resolve("id", disguiseIdentifier)));
+            MessageUtils.send(source, MorphStrings.parseErrorString().resolve("id", disguiseIdentifier));
 
             logger.error("Unable to parse key " + disguiseIdentifier, iae);
             return DisguiseBuildResult.FAILED;
         }
         catch (Exception e)
         {
-            source.sendMessage(MessageUtils.prefixes(source, MorphStrings.errorWhileDisguisingWithError().resolve("error", e.getMessage())));
+            MessageUtils.send(source, MorphStrings.errorWhileDisguisingWithError().resolve("error", e.getMessage()));
             logger.error("Error while disguising", e);
 
             return DisguiseBuildResult.FAILED;
@@ -973,7 +958,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 {
                     scheduleOn(player, () ->
                     {
-                        player.sendMessage(MessageUtils.prefixes(player, MorphStrings.errorWhileUpdatingDisguise()));
+                        MessageUtils.send(player, MorphStrings.errorWhileUpdatingDisguise());
                         unMorph(nilCommandSource, player, true, true);
                     });
 
@@ -1065,11 +1050,10 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         var playerLocale = MessageUtils.getLocale(source);
 
         var morphSuccessMessage = (isDirect ? MorphStrings.morphSuccessString() : CommandStrings.morphedSomeoneString())
-                .withLocale(playerLocale)
                 .resolve("who", player.getName())
                 .resolve("what", disguiseMeta.asComponent(playerLocale));
 
-        source.sendMessage(MessageUtils.prefixes(source, morphSuccessMessage));
+        MessageUtils.send(source, morphSuccessMessage);
 
         // 显示粒子
         double cX, cY, cZ;
@@ -1124,7 +1108,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         {
             if (!playerOptions.shownClientSkillHint)
             {
-                player.sendMessage(MessageUtils.prefixes(player, HintStrings.clientSkillString()));
+                MessageUtils.send(player, HintStrings.clientSkillString());
                 playerOptions.shownClientSkillHint = true;
             }
         }
@@ -1132,7 +1116,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         {
             if (clientHandler.clientInitialized(player) && !playerOptions.shownDisplayToSelfHint)
             {
-                player.sendMessage(MessageUtils.prefixes(player, HintStrings.morphVisibleAfterCommandString()));
+                MessageUtils.send(player, HintStrings.morphVisibleAfterCommandString());
                 playerOptions.shownDisplayToSelfHint = true;
             }
         }
@@ -1285,7 +1269,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         // 检查玩家是否可以通过指令或客户端取消伪装
         if (!bypassPermission && !player.hasPermission(CommonPermissions.UNMORPH))
         {
-            source.sendMessage(MessageUtils.prefixes(player, CommandStrings.noPermissionMessage()));
+            MessageUtils.send(player, CommandStrings.noPermissionMessage());
             return;
         }
 
@@ -1303,8 +1287,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         var earlyEventPassed = new PlayerUnMorphEarlyEvent(player, state, forceUnmorph).callEvent();
         if (!earlyEventPassed && !forceUnmorph)
         {
-            source.sendMessage(MessageUtils.prefixes(source, MorphStrings.operationCancelledString()));
-
+            MessageUtils.send(source, MorphStrings.operationCancelledString());
             return;
         }
 
@@ -1340,7 +1323,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         clientHandler.sendCommand(player, new S2CSetMobRevealCommand(revLevel));
 
         //发送消息以及重置actionbar
-        source.sendMessage(MessageUtils.prefixes(player, MorphStrings.unMorphSuccessString().withLocale(MessageUtils.getLocale(player))));
+        MessageUtils.send(player, MorphStrings.unMorphSuccessString());
         player.sendActionBar(Component.empty());
 
         // 设置可用动作
@@ -1415,9 +1398,9 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         if (saveToConfig)
         {
-            player.sendMessage(MessageUtils.prefixes(player, value
+            MessageUtils.send(player, value
                     ? MorphStrings.selfVisibleOnString()
-                    : MorphStrings.selfVisibleOffString()));
+                    : MorphStrings.selfVisibleOffString());
 
             config.showDisguiseToSelf = value;
         }
@@ -1453,7 +1436,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         {
             var player = s.getPlayer();
 
-            player.sendMessage(MessageUtils.prefixes(player, MorphStrings.resetString()));
+            MessageUtils.send(player, MorphStrings.resetString());
+
             if (!player.isOnline())
                 offlineStorage.pushDisguiseState(s);
         });
@@ -1609,10 +1593,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         if (meta == null)
             return false;
 
-        var message = MessageUtils.prefixes(player, MorphStrings.morphUnlockedString()
-                .withLocale(locale)
+        MessageUtils.send(player, MorphStrings.morphUnlockedString()
                 .resolve("what", meta.asComponent(locale)));
-        player.sendMessage(message);
 
         //显示粒子
         player.getWorld().spawnParticle(Particle.TRIAL_SPAWNER_DETECTION_OMINOUS, player.getLocation(), //类型和位置
@@ -1624,13 +1606,13 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         {
             if (!config.shownMorphClientHint)
             {
-                player.sendMessage(MessageUtils.prefixes(player, HintStrings.firstGrantClientHintString()));
+                MessageUtils.send(player, HintStrings.firstGrantClientHintString());
                 config.shownMorphClientHint = true;
             }
         }
         else if (!config.shownMorphHint)
         {
-            player.sendMessage(MessageUtils.prefixes(player, HintStrings.firstGrantHintString()));
+            MessageUtils.send(player, HintStrings.firstGrantHintString());
             config.shownMorphHint = true;
         }
 
@@ -1653,7 +1635,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
             var message = MorphStrings.morphLockedString()
                     .resolve("what", meta.asComponent(locale))
-                    .toComponent(locale);
+                    .createComponent(locale);
             player.sendMessage(message);
 
             var disguiseState = this.getDisguiseStateFor(player);
@@ -1713,7 +1695,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 if (disguiseFromState(s))
                 {
                     refreshClientState(s);
-                    player.sendMessage(MessageUtils.prefixes(player, MorphStrings.recoverString()));
+                    MessageUtils.send(player, MorphStrings.recoverString());
                 }
                 else
                 {

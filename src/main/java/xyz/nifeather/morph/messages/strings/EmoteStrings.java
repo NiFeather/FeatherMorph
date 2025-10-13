@@ -1,4 +1,4 @@
-package xyz.nifeather.morph.messages;
+package xyz.nifeather.morph.messages.strings;
 
 import org.jetbrains.annotations.NotNull;
 import xiamomc.pluginbase.Messages.FormattableMessage;

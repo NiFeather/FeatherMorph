@@ -22,7 +22,7 @@ import xyz.nifeather.morph.backends.DisguiseWrapper;
 import xyz.nifeather.morph.config.ConfigOption;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.messages.MessageUtils;
-import xyz.nifeather.morph.messages.MorphStrings;
+import xyz.nifeather.morph.messages.strings.MorphStrings;
 import xyz.nifeather.morph.messages.vanilla.VanillaMessageStore;
 import xyz.nifeather.morph.misc.*;
 import xyz.nifeather.morph.misc.disguiseProperty.ParseErrorException;
@@ -139,7 +139,7 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
             var hasCollision = CollisionUtils.hasHardCollision(player.getWorld(), box);
             if (hasCollision)
             {
-                player.sendMessage(MessageUtils.prefixes(player, MorphStrings.noEnoughSpaceString()));
+                MessageUtils.send(player, MorphStrings.noEnoughSpaceString());
                 return DisguiseResult.FAIL_SILENT;
             }
         }

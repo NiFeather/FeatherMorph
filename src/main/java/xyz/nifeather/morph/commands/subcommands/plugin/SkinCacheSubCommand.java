@@ -25,9 +25,9 @@ import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.commands.brigadier.IConvertibleBrigadier;
 import xyz.nifeather.morph.config.ConfigOption;
 import xyz.nifeather.morph.config.MorphConfigManager;
-import xyz.nifeather.morph.messages.CommandStrings;
+import xyz.nifeather.morph.messages.strings.CommandStrings;
 import xyz.nifeather.morph.messages.MessageUtils;
-import xyz.nifeather.morph.messages.SkinCacheStrings;
+import xyz.nifeather.morph.messages.strings.SkinCacheStrings;
 import xyz.nifeather.morph.misc.CapeURL;
 import xyz.nifeather.morph.misc.DisguiseTypes;
 import xyz.nifeather.morph.misc.MorphParameters;
@@ -172,13 +172,13 @@ public class SkinCacheSubCommand extends MorphPluginObject implements IConvertib
             var skinCount = skinProvider.getAllSkins().size();
             skinProvider.dropAll();
 
-            sender.sendMessage(MessageUtils.prefixes(sender, SkinCacheStrings.droppedAllSkins().resolve("count", skinCount + "")));
+            MessageUtils.send(sender, SkinCacheStrings.droppedAllSkins().resolve("count", skinCount + ""));
         }
         else
         {
             skinProvider.dropSkin(targetName);
 
-            sender.sendMessage(MessageUtils.prefixes(sender, SkinCacheStrings.droppedSkin().resolve("name", targetName)));
+            MessageUtils.send(sender, SkinCacheStrings.droppedSkin().resolve("name", targetName));
         }
 
         return 1;
@@ -191,9 +191,7 @@ public class SkinCacheSubCommand extends MorphPluginObject implements IConvertib
         var skins = skinProvider.getAllSkins();
         var str = Component.empty();
 
-        sender.sendMessage(
-                MessageUtils.prefixes(sender, SkinCacheStrings.listHeader().resolve("count", skins.size() + ""))
-        );
+        MessageUtils.send(sender, SkinCacheStrings.listHeader().resolve("count", skins.size() + ""));
 
         int limit = 20;
 
@@ -216,7 +214,7 @@ public class SkinCacheSubCommand extends MorphPluginObject implements IConvertib
         var current = 0;
 
         var overallLine = SkinCacheStrings.skinInfoOverallLine();
-        var expiredString = SkinCacheStrings.skinExpired().toComponent(MessageUtils.getLocale(sender));
+        var expiredString = SkinCacheStrings.skinExpired().createComponent(MessageUtils.getLocale(sender));
 
         overallLine.resolve("x_more", Component.empty());
 
@@ -240,7 +238,7 @@ public class SkinCacheSubCommand extends MorphPluginObject implements IConvertib
                 overallLine.resolve("x_more",
                         SkinCacheStrings.andXMore()
                                 .resolve("count", remaining + "")
-                                .withLocale(MessageUtils.getLocale(sender)));
+                );
 
                 break;
             }
@@ -248,7 +246,7 @@ public class SkinCacheSubCommand extends MorphPluginObject implements IConvertib
 
         overallLine.resolve("info_line", str);
 
-        sender.sendMessage(MessageUtils.prefixes(sender, overallLine));
+        MessageUtils.send(sender, overallLine);
 
         return 1;
     }
@@ -259,14 +257,15 @@ public class SkinCacheSubCommand extends MorphPluginObject implements IConvertib
 
         var targetName = StringArgumentType.getString(context, "name");
 
-        sender.sendMessage(MessageUtils.prefixes(sender, SkinCacheStrings.fetchingSkin().resolve("name", targetName)));
+        MessageUtils.send(sender, SkinCacheStrings.fetchingSkin().resolve("name", targetName));
 
         skinProvider.invalidate(targetName);
         skinProvider.fetchSkin(targetName)
                 .thenAccept(optional ->
                 {
-                    optional.ifPresentOrElse(profile -> sender.sendMessage(MessageUtils.prefixes(sender, SkinCacheStrings.fetchSkinSuccess().resolve("name", targetName))),
-                            () -> sender.sendMessage(MessageUtils.prefixes(sender, SkinCacheStrings.targetSkinNotFound())));
+                    optional.ifPresentOrElse(profile -> MessageUtils.send(sender, SkinCacheStrings.fetchSkinSuccess().resolve("name", targetName)),
+                            () -> MessageUtils.send(sender, SkinCacheStrings.targetSkinNotFound())
+                    );
                 });
 
         return 1;
@@ -280,7 +279,7 @@ public class SkinCacheSubCommand extends MorphPluginObject implements IConvertib
 
         if (skinMatch == null)
         {
-            sender.sendMessage(MessageUtils.prefixes(sender, SkinCacheStrings.targetSkinNotFound()));
+            MessageUtils.send(sender, SkinCacheStrings.targetSkinNotFound());
             return 1;
         }
 
@@ -301,27 +300,23 @@ public class SkinCacheSubCommand extends MorphPluginObject implements IConvertib
                 capeDesc = capeURL.toString();
         }
 
-        sender.sendMessage(MessageUtils.prefixes(sender, SkinCacheStrings.infoLine().resolve("name", skinMatch.name())));
+        MessageUtils.send(sender, SkinCacheStrings.infoLine().resolve("name", skinMatch.name()));
 
-        sender.sendMessage(
-                MessageUtils.prefixes(
-                        sender,
-                        SkinCacheStrings.infoSkinLine().resolve(
-                                "url",
-                                Component.text(texDesc)
-                                        .clickEvent(ClickEvent.clickEvent(ClickEvent.Action.OPEN_URL, texDesc))
-                                        .decorate(TextDecoration.UNDERLINED)
-                        )
+        MessageUtils.send(
+                sender,
+                SkinCacheStrings.infoSkinLine().resolve(
+                        "url",
+                        Component.text(texDesc)
+                                .clickEvent(ClickEvent.clickEvent(ClickEvent.Action.OPEN_URL, texDesc))
+                                .decorate(TextDecoration.UNDERLINED)
                 )
         );
 
-        sender.sendMessage(
-                MessageUtils.prefixes(
-                        sender,
-                        SkinCacheStrings.infoCapeLine().resolve(
-                                "cape",
-                                CapeURL.findMatching(capeDesc).withLocale(MessageUtils.getLocale(sender))
-                        )
+        MessageUtils.send(
+                sender,
+                SkinCacheStrings.infoCapeLine().resolve(
+                        "cape",
+                        CapeURL.findMatching(capeDesc)
                 )
         );
 
@@ -337,11 +332,9 @@ public class SkinCacheSubCommand extends MorphPluginObject implements IConvertib
 
         if (!(sender instanceof Player player))
         {
-            sender.sendMessage(
-                    MessageUtils.prefixes(
-                            sender,
-                            CommandStrings.unknownOperation().resolve("operation", "disguise_from_skin_cache_in_console")
-                    )
+            MessageUtils.send(
+                    sender,
+                    CommandStrings.unknownOperation().resolve("operation", "disguise_from_skin_cache_in_console")
             );
 
             return 1;
@@ -352,7 +345,7 @@ public class SkinCacheSubCommand extends MorphPluginObject implements IConvertib
 
         if (skinMatch == null)
         {
-            sender.sendMessage(MessageUtils.prefixes(sender, SkinCacheStrings.targetSkinNotFound()));
+            MessageUtils.send(sender, SkinCacheStrings.targetSkinNotFound());
             return 1;
         }
 
@@ -416,8 +409,7 @@ public class SkinCacheSubCommand extends MorphPluginObject implements IConvertib
                 msg = new FormattableMessage(plugin, "Nil!");
             }
         }
-        sender.sendMessage(MessageUtils.prefixes(sender, msg));
-
+        MessageUtils.send(sender, msg);
     }
 
     private enum CopyMoveResult

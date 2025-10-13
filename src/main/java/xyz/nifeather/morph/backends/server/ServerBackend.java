@@ -11,7 +11,7 @@ import xyz.nifeather.morph.backends.DisguiseBackend;
 import xyz.nifeather.morph.backends.DisguiseWrapper;
 import xyz.nifeather.morph.backends.server.renderer.ServerRenderer;
 import xyz.nifeather.morph.backends.server.renderer.utilties.WatcherUtils;
-import xyz.nifeather.morph.messages.BackendStrings;
+import xyz.nifeather.morph.messages.strings.BackendStrings;
 import xyz.nifeather.morph.misc.BuildFailedException;
 import xyz.nifeather.morph.misc.ExecutionErrorException;
 

@@ -15,13 +15,12 @@ import net.minecraft.nbt.CompoundTag;
 import org.bukkit.Keyed;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
-import xyz.nifeather.morph.messages.ExceptionStrings;
+import xyz.nifeather.morph.messages.strings.ExceptionStrings;
 import xyz.nifeather.morph.misc.DisguiseEquipment;
 import xyz.nifeather.morph.misc.disguiseProperty.struct.MorphEquipmentStruct;
 import xyz.nifeather.morph.misc.disguiseProperty.struct.MorphProfileProperty;
 import xyz.nifeather.morph.misc.disguiseProperty.struct.MorphResolvableProfileStruct;
 import xyz.nifeather.morph.network.server.ServerSetEquipCommand;
-import xyz.nifeather.morph.utilities.GameProfileUtils;
 import xyz.nifeather.morph.utilities.ItemUtils;
 import xyz.nifeather.morph.utilities.NbtUtils;
 

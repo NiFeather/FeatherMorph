@@ -14,8 +14,8 @@ import xiamomc.pluginbase.Messages.FormattableMessage;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.commands.brigadier.IConvertibleBrigadier;
-import xyz.nifeather.morph.messages.CommandStrings;
-import xyz.nifeather.morph.messages.HelpStrings;
+import xyz.nifeather.morph.messages.strings.CommandStrings;
+import xyz.nifeather.morph.messages.strings.HelpStrings;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 
@@ -60,9 +60,8 @@ public class ForceUnmorphSubCommand extends MorphPluginObject implements IConver
 
             manager.unMorph(sender, player, true, true);
 
-            sender.sendMessage(MessageUtils.prefixes(sender, CommandStrings.unMorphedSomeoneString()
-                    .resolve("who", player.getName())));
-
+            MessageUtils.send(sender, CommandStrings.unMorphedSomeoneString()
+                    .resolve("who", player.getName()));
         });
 
         return 1;

@@ -1,6 +1,5 @@
 package xyz.nifeather.morph.misc;
 
-import com.mojang.authlib.GameProfile;
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
@@ -11,8 +10,6 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.EntityEquipment;
-import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -23,14 +20,13 @@ import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.abilities.AbilityUpdater;
 import xyz.nifeather.morph.api.morphs.skills.SkillNames;
 import xyz.nifeather.morph.backends.DisguiseWrapper;
-import xyz.nifeather.morph.messages.CommandStrings;
-import xyz.nifeather.morph.messages.EmoteStrings;
+import xyz.nifeather.morph.messages.strings.CommandStrings;
+import xyz.nifeather.morph.messages.strings.EmoteStrings;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 import xyz.nifeather.morph.misc.disguiseProperty.values.BaseLivingEntityProperties;
-import xyz.nifeather.morph.misc.disguiseProperty.values.PlayerProperties;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 import xyz.nifeather.morph.misc.waypoint.DisguiseWaypointUpdater;
 import xyz.nifeather.morph.network.PlayerOptions;
@@ -45,8 +41,6 @@ import xyz.nifeather.morph.skills.SkillUpdater;
 import xyz.nifeather.morph.skills.impl.NoneMorphSkill;
 import xyz.nifeather.morph.storage.playerdata.PlayerMeta;
 import xyz.nifeather.morph.storage.skill.ISkillAbilityOption;
-import xyz.nifeather.morph.utilities.GameProfileUtils;
-import xyz.nifeather.morph.utilities.ItemUtils;
 import xyz.nifeather.morph.utilities.NbtUtils;
 import xyz.nifeather.morph.utilities.PermissionUtils;
 
@@ -55,8 +49,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Function;
-
-import static xyz.nifeather.morph.utilities.DisguiseUtils.itemOrAir;
 
 public class DisguiseState extends MorphPluginObject
 {
@@ -287,23 +279,25 @@ public class DisguiseState extends MorphPluginObject
                                   boolean checkPermission,
                                   boolean persistent)
     {
+        var player = getPlayer();
+
         if (checkPermission && sequenceIdentifier.equals(AnimationNames.RESET)
                 || !PermissionUtils.hasPermission(
-                        getPlayer(),
+                        player,
                         CommonPermissions.animationPermissionOf(sequenceIdentifier, this.getDisguiseIdentifier()),
                         true))
         {
-            var player = getPlayer();
-            player.sendMessage(MessageUtils.prefixes(player, CommandStrings.noPermissionMessage()));
+            MessageUtils.send(player, CommandStrings.noPermissionMessage());
             return;
         }
 
         this.animationSequence.scheduleNext(sequenceIdentifier, sequence);
         this.sequencePersistent.set(persistent);
 
-        var player = getPlayer();
-        var animationString = CommandStrings.goingToPlayAnimation().resolve("what", EmoteStrings.get(sequenceIdentifier).withLocale(MessageUtils.getLocale(player)));
-        player.sendMessage(MessageUtils.prefixes(player, animationString));
+        var animationString = CommandStrings.goingToPlayAnimation()
+                .resolve("what", EmoteStrings.get(sequenceIdentifier));
+
+        MessageUtils.send(player, animationString);
     }
 
     public AnimationSequence getAnimationSequence()

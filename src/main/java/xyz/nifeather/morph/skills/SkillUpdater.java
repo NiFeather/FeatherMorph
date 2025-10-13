@@ -9,10 +9,10 @@ import org.jetbrains.annotations.NotNull;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.api.events.gameplay.PlayerExecuteSkillEvent;
-import xyz.nifeather.morph.messages.CommandStrings;
+import xyz.nifeather.morph.messages.strings.CommandStrings;
 import xyz.nifeather.morph.messages.MessageUtils;
-import xyz.nifeather.morph.messages.MorphStrings;
-import xyz.nifeather.morph.messages.SkillStrings;
+import xyz.nifeather.morph.messages.strings.MorphStrings;
+import xyz.nifeather.morph.messages.strings.SkillStrings;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.misc.ExecutionErrorException;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
@@ -73,19 +73,19 @@ public class SkillUpdater extends MorphPluginObject
         var player = state.getPlayer();
         if (!player.hasPermission(CommonPermissions.SKILL))
         {
-            player.sendMessage(MessageUtils.prefixes(player, CommandStrings.noPermissionMessage()));
+            MessageUtils.send(player, CommandStrings.noPermissionMessage());
             return false;
         }
 
         if (!state.canActivateSkill())
         {
-            player.sendMessage(MessageUtils.prefixes(player, SkillStrings.skillNotAvailableString()));
+            MessageUtils.send(player, SkillStrings.skillNotAvailableString());
             return false;
         }
 
         if (player.getGameMode() == GameMode.SPECTATOR || skill == NoneMorphSkill.instance)
         {
-            player.sendMessage(MessageUtils.prefixes(player, SkillStrings.skillNotAvaliableString()));
+            MessageUtils.send(player, SkillStrings.skillNotAvaliableString());
 
             player.playSound(Sound.sound(Key.key("minecraft", "entity.villager.no"),
                     Sound.Source.PLAYER, 1f, 1f));
@@ -98,7 +98,7 @@ public class SkillUpdater extends MorphPluginObject
 
         if (!hasSkillPerm)
         {
-            player.sendMessage(MessageUtils.prefixes(player, CommandStrings.noPermissionMessage()));
+            MessageUtils.send(player, CommandStrings.noPermissionMessage());
 
             player.playSound(Sound.sound(Key.key("minecraft", "entity.villager.no"),
                     Sound.Source.PLAYER, 1f, 1f));
@@ -111,8 +111,9 @@ public class SkillUpdater extends MorphPluginObject
         {
             var delta = availableAfter - plugin.getCurrentTick();
 
-            player.sendMessage(MessageUtils.prefixes(player,
-                    SkillStrings.skillPreparing().resolve("time", Math.round(delta / 20f) + "")));
+            MessageUtils.send(player,
+                    SkillStrings.skillPreparing().resolve("time", Math.round(delta / 20f))
+            );
 
             player.playSound(Sound.sound(Key.key("minecraft", "entity.villager.no"),
                     Sound.Source.PLAYER, 1f, 1f));
@@ -134,7 +135,7 @@ public class SkillUpdater extends MorphPluginObject
 
         if (event.isCancelled())
         {
-            player.sendMessage(MessageUtils.prefixes(player, MorphStrings.operationCancelledString()));
+            MessageUtils.send(player, MorphStrings.operationCancelledString());
             this.setCooldown(5, true);
             return false;
         }
@@ -150,13 +151,12 @@ public class SkillUpdater extends MorphPluginObject
         {
             logger.error("Error executing skill", e);
 
-            var component = MessageUtils.prefixes(player, SkillStrings.exceptionOccurredString())
-                    .hoverEvent(HoverEvent.showText(Component.text(e.getMessage())));
+            MessageUtils.send(player, SkillStrings.exceptionOccurredString(), c ->
+                    c.hoverEvent(HoverEvent.showText(Component.text(e.getMessage()))));
 
             player.playSound(Sound.sound(Key.key("minecraft", "entity.villager.no"),
                     Sound.Source.PLAYER, 1f, 1f));
 
-            player.sendMessage(component);
             cooldown = 20;
         }
 

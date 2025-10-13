@@ -4,16 +4,14 @@ import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.bukkit.block.Block;
-import org.bukkit.block.data.type.Fence;
-import org.bukkit.block.data.type.Gate;
-import org.bukkit.block.data.type.Wall;
 import org.bukkit.entity.*;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.jetbrains.annotations.Nullable;
+import xiamomc.pluginbase.Messages.FormattableMessage;
+import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.messages.MessageUtils;
-import xyz.nifeather.morph.messages.SkillStrings;
+import xyz.nifeather.morph.messages.strings.SkillStrings;
 import xyz.nifeather.morph.storage.skill.ISkillAbilityOption;
 import xyz.nifeather.morph.utilities.DisguiseUtils;
 
@@ -36,9 +34,18 @@ public abstract class MorphSkill<T extends ISkillAbilityOption> extends MorphPlu
         return DisguiseUtils.findNearbyPlayers(player, distance, false);
     }
 
+    @Deprecated(forRemoval = true)
     protected void sendDenyMessageToPlayer(Player player, Component text)
     {
-        player.sendMessage(MessageUtils.prefixes(player, text.color(NamedTextColor.RED)));
+        MessageUtils.send(player, text);
+
+        player.playSound(Sound.sound(Key.key("minecraft", "entity.villager.no"),
+                Sound.Source.PLAYER, 1f, 1f));
+    }
+
+    protected void sendDenyMessageToPlayer(Player player, FormattableMessage formattable)
+    {
+        MessageUtils.send(player, formattable);
 
         player.playSound(Sound.sound(Key.key("minecraft", "entity.villager.no"),
                 Sound.Source.PLAYER, 1f, 1f));
@@ -46,8 +53,7 @@ public abstract class MorphSkill<T extends ISkillAbilityOption> extends MorphPlu
 
     protected void notifyError(Player player)
     {
-        sendDenyMessageToPlayer(player, SkillStrings.exceptionOccurredString()
-                .withLocale(MessageUtils.getLocale(player)).toComponent(null));
+        sendDenyMessageToPlayer(player, SkillStrings.exceptionOccurredString());
     }
 
     /**

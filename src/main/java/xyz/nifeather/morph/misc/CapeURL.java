@@ -2,7 +2,7 @@ package xyz.nifeather.morph.misc;
 
 import xiamomc.pluginbase.Messages.FormattableMessage;
 import xyz.nifeather.morph.FeatherMorphMain;
-import xyz.nifeather.morph.messages.CapeStrings;
+import xyz.nifeather.morph.messages.strings.CapeStrings;
 
 public class CapeURL
 {

@@ -24,9 +24,9 @@ import xyz.nifeather.morph.api.networking.exceptions.ScheduleReconnectException;
 import xyz.nifeather.morph.config.ConfigOption;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.interfaces.IManageRequests;
-import xyz.nifeather.morph.messages.EmoteStrings;
+import xyz.nifeather.morph.messages.strings.EmoteStrings;
 import xyz.nifeather.morph.messages.MessageUtils;
-import xyz.nifeather.morph.messages.MorphStrings;
+import xyz.nifeather.morph.messages.strings.MorphStrings;
 import xyz.nifeather.morph.misc.ModNetworkingHelper;
 import xyz.nifeather.morph.misc.PlayerWaitingHandler;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
@@ -356,14 +356,13 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
             logger.info(logginMsg);
 
             var msg = forceTargetVersion.get() ? MorphStrings.clientVersionMismatchKickString() : MorphStrings.clientVersionMismatchString();
-            msg.withLocale(MessageUtils.getLocale(player))
-                    .resolve("minimum_version", Component.text(minimumApiVersion))
+            msg.resolve("minimum_version", Component.text(minimumApiVersion))
                     .resolve("player_version", Component.text(clientVersion));
 
             if (forceTargetVersion.get())
-                player.kick(msg.toComponent());
+                player.kick(msg.createComponent());
             else
-                player.sendMessage(msg.toComponent());
+                player.sendMessage(msg.createComponent());
 
             return;
         }
@@ -538,7 +537,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
     public void rejectPlayer(Player player)
     {
         logger.info("Rejecting player " + player.getName());
-        player.sendMessage(MessageUtils.prefixes(player, MorphStrings.unsupportedClientBehavior()));
+        MessageUtils.send(player, MorphStrings.unsupportedClientBehavior());
 
         this.disconnect(player, new PlayerRejectedException("Player has been rejected because of bad client behavior"));
     }
@@ -888,7 +887,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
         var sequencePair =  animationProvider.getAnimationSetFor(disguiseID).sequenceOf(animationID);
 
         if (!state.tryScheduleSequence(animationID, sequencePair.left(), sequencePair.right()))
-            player.sendMessage(MessageUtils.prefixes(player, EmoteStrings.notAvailable()));
+            MessageUtils.send(player, EmoteStrings.notAvailable());
     }
 
     //endregion C2S(Serverbound) commands

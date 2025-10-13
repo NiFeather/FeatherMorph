@@ -13,7 +13,7 @@ import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Messages.FormattableMessage;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.commands.brigadier.BrigadierCommand;
-import xyz.nifeather.morph.messages.CommandStrings;
+import xyz.nifeather.morph.messages.strings.CommandStrings;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 
@@ -102,7 +102,7 @@ public class LookupSubCommand extends BrigadierCommand
             matches = configuration.getUnlockedDisguiseIdentifiers();
         }
 
-        sender.sendMessage(MessageUtils.prefixes(sender, CommandStrings.lookupFilterCommand()));
-        matches.forEach(m -> sender.sendMessage(MessageUtils.prefixes(sender, m)));
+        MessageUtils.send(sender, CommandStrings.lookupFilterCommand());
+        matches.forEach(m -> MessageUtils.send(sender, m));
     }
 }

@@ -5,16 +5,15 @@ import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Messages.FormattableMessage;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.commands.brigadier.IConvertibleBrigadier;
 import xyz.nifeather.morph.commands.brigadier.arguments.DisguiseIdentifierArgumentType;
-import xyz.nifeather.morph.messages.CommandStrings;
-import xyz.nifeather.morph.messages.CommonStrings;
-import xyz.nifeather.morph.messages.HelpStrings;
+import xyz.nifeather.morph.messages.strings.CommandStrings;
+import xyz.nifeather.morph.messages.strings.CommonStrings;
+import xyz.nifeather.morph.messages.strings.HelpStrings;
 import xyz.nifeather.morph.messages.MessageUtils;
 
 public class DiscardMorphCommand extends MorphPluginObject implements IConvertibleBrigadier
@@ -49,8 +48,7 @@ public class DiscardMorphCommand extends MorphPluginObject implements IConvertib
         var sender = context.getSource().getSender();
         if (!(context.getSource().getExecutor() instanceof Player player))
         {
-            var msg = MessageUtils.prefixes(sender, CommonStrings.playerNotDefinedString());
-            sender.sendMessage(msg);
+            MessageUtils.send(sender, CommonStrings.playerNotDefinedString());
             return 0;
         }
 
@@ -59,8 +57,7 @@ public class DiscardMorphCommand extends MorphPluginObject implements IConvertib
                 ? CommandStrings.revokeSuccessString()
                 : CommandStrings.revokeFailString();
 
-        var msg = MessageUtils.prefixes(sender, formattable.resolve("what", targetID).resolve("who", player.getName()));
-        sender.sendMessage(msg);
+        MessageUtils.send(sender, formattable.resolve("what", targetID).resolve("who", player.getName()));
 
         return 1;
     }

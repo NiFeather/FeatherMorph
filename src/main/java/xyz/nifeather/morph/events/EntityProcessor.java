@@ -5,13 +5,10 @@ import org.bukkit.entity.Mob;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import xiamomc.pluginbase.Annotations.Resolved;
-import xiamomc.pluginbase.Bindables.Bindable;
-import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.MorphPluginObject;
-import xyz.nifeather.morph.RevealingHandler;
 import xyz.nifeather.morph.config.ConfigOption;
 import xyz.nifeather.morph.config.MorphConfigManager;
-import xyz.nifeather.morph.messages.CommandStrings;
+import xyz.nifeather.morph.messages.strings.CommandStrings;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.misc.mobs.goal.handles.EntityGoalHandles;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
@@ -47,8 +44,8 @@ public class EntityProcessor extends MorphPluginObject implements Listener
             {
                 if (player.hasPermission(CommonPermissions.ADMIN))
                 {
-                    player.sendMessage(MessageUtils.prefixes(player, CommandStrings.aiWarningPrimary()));
-                    player.sendMessage(MessageUtils.prefixes(player, CommandStrings.aiWarningSecondary()));
+                    MessageUtils.send(player, CommandStrings.aiWarningPrimary());
+                    MessageUtils.send(player, CommandStrings.aiWarningSecondary());
                 }
             }
         });

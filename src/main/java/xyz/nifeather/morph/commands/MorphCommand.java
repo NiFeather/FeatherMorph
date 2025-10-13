@@ -16,9 +16,9 @@ import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.commands.brigadier.IConvertibleBrigadier;
 import xyz.nifeather.morph.commands.brigadier.arguments.DisguiseIdentifierArgumentType;
 import xyz.nifeather.morph.commands.brigadier.arguments.ValueMapArgumentType;
-import xyz.nifeather.morph.messages.HelpStrings;
+import xyz.nifeather.morph.messages.strings.HelpStrings;
 import xyz.nifeather.morph.messages.MessageUtils;
-import xyz.nifeather.morph.messages.MorphStrings;
+import xyz.nifeather.morph.messages.strings.MorphStrings;
 import xyz.nifeather.morph.misc.MorphParameters;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
@@ -87,7 +87,7 @@ public class MorphCommand extends MorphPluginObject implements IConvertibleBriga
         //伪装冷却
         if (!morphManager.canMorph(player))
         {
-            sender.sendMessage(MessageUtils.prefixes(player, MorphStrings.disguiseCoolingDownString()));
+            MessageUtils.send(player, MorphStrings.disguiseCoolingDownString());
 
             return Command.SINGLE_SUCCESS;
         }
@@ -105,7 +105,7 @@ public class MorphCommand extends MorphPluginObject implements IConvertibleBriga
 
         if (!(executor instanceof Player player))
         {
-            sender.sendMessage(MessageUtils.prefixes(sender, "Only players can execute disguise command"));
+            MessageUtils.send(sender, "Only players can execute disguise command");
 
             return Command.SINGLE_SUCCESS;
         }
@@ -121,7 +121,7 @@ public class MorphCommand extends MorphPluginObject implements IConvertibleBriga
         //伪装冷却
         if (!morphManager.canMorph(who))
         {
-            sender.sendMessage(MessageUtils.prefixes(sender, MorphStrings.disguiseCoolingDownString()));
+            MessageUtils.send(sender, MorphStrings.disguiseCoolingDownString());
             return;
         }
 
@@ -142,7 +142,7 @@ public class MorphCommand extends MorphPluginObject implements IConvertibleBriga
 
         if (!(executor instanceof Player player))
         {
-            sender.sendMessage(MessageUtils.prefixes(sender, "Only players can execute disguise command"));
+            MessageUtils.send(sender, "Only players can execute disguise command");
 
             return Command.SINGLE_SUCCESS;
         }

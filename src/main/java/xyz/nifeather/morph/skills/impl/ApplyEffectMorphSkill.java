@@ -12,7 +12,7 @@ import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.abilities.ISkillAbilityOptionHandler;
 import xyz.nifeather.morph.api.morphs.skills.SkillNames;
 import xyz.nifeather.morph.messages.MessageUtils;
-import xyz.nifeather.morph.messages.SkillStrings;
+import xyz.nifeather.morph.messages.strings.SkillStrings;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.misc.ExecutionErrorException;
 import xyz.nifeather.morph.skills.MorphSkill;
@@ -36,9 +36,7 @@ public class ApplyEffectMorphSkill extends MorphSkill<EffectConfiguration>
 
         if (option.acquiresWater() && !player.isInWater())
         {
-            sendDenyMessageToPlayer(player, SkillStrings.notInWaterString()
-                    .withLocale(MessageUtils.getLocale(player))
-                    .toComponent(null));
+            sendDenyMessageToPlayer(player, SkillStrings.notInWaterString());
 
             return 20;
         }

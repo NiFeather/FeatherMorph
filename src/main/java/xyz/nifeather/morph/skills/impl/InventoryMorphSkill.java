@@ -4,14 +4,13 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.EntityEquipment;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.abilities.ISkillAbilityOptionHandler;
 import xyz.nifeather.morph.api.morphs.skills.SkillNames;
 import xyz.nifeather.morph.messages.MessageUtils;
-import xyz.nifeather.morph.messages.SkillStrings;
+import xyz.nifeather.morph.messages.strings.SkillStrings;
 import xyz.nifeather.morph.misc.DisguiseEquipment;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.misc.ExecutionErrorException;
@@ -46,9 +45,9 @@ public class InventoryMorphSkill extends MorphSkill<NoOpConfiguration>
         if (clientHandler.getPlayerVersion(player) < Constants.ApiLevel.EQUIPMENT_AND_SKIN_ARE_NOW_PROPERTY.protocolVersion)
             clientHandler.sendCommand(player, new S2CSetDisplayingFakeEquipCommand(defaultShown));
 
-        player.sendMessage(MessageUtils.prefixes(player, defaultShown
+        MessageUtils.send(player, defaultShown
                 ? SkillStrings.displayingDisguiseInventoryString()
-                : SkillStrings.displayingPlayerInventoryString()));
+                : SkillStrings.displayingPlayerInventoryString());
 
         return 0;
     }

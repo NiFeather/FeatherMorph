@@ -12,9 +12,8 @@ import xiamomc.pluginbase.Configuration.PluginConfigManager;
 import xiamomc.pluginbase.Managers.DependencyManager;
 import xiamomc.pluginbase.Messages.MessageStore;
 import xyz.nifeather.morph.FeatherMorphMain;
-import xyz.nifeather.morph.messages.CommonStrings;
+import xyz.nifeather.morph.messages.strings.CommonStrings;
 import xyz.nifeather.morph.messages.MessageUtils;
-import xyz.nifeather.morph.utilities.FoliaThreadUtils;
 
 import java.util.*;
 

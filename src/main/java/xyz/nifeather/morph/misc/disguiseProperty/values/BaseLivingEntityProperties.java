@@ -4,7 +4,7 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import xyz.nifeather.morph.messages.CommandStrings;
+import xyz.nifeather.morph.messages.strings.CommandStrings;
 import xyz.nifeather.morph.misc.DisguiseEquipment;
 import xyz.nifeather.morph.misc.disguiseProperty.*;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
@@ -16,7 +16,7 @@ public abstract class BaseLivingEntityProperties<E extends Entity> extends Abstr
 {
     protected SingleProperty<Component> createCustomNameProperty()
     {
-        return createProperty(PropertyNames.ENTITY_CUSTOM_NAME, Component.empty(), InputHandles::readComponentAny, OutputHandles::writeAdventureComponentJSON);
+        return SingleProperty.of(PropertyNames.ENTITY_CUSTOM_NAME, Component.empty(), Component.class, InputHandles::readComponentAny, OutputHandles::writeAdventureComponentJSON, false);
     }
 
     public final SingleProperty<Boolean> CUSTOM_NAME_VISIBLE = createProperty(PropertyNames.ENTITY_CUSTOM_NAME_VISIBLE, false, InputHandles::readBooleanRelaxed, OutputHandles::writeBoolean)

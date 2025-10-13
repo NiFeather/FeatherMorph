@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Messages.FormattableMessage;
 import xyz.nifeather.morph.commands.brigadier.BrigadierCommand;
-import xyz.nifeather.morph.messages.CommandStrings;
+import xyz.nifeather.morph.messages.strings.CommandStrings;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 import xyz.nifeather.morph.utilities.ItemUtils;
@@ -51,21 +51,21 @@ public class MakeSkillItemSubCommand extends BrigadierCommand
 
         if (!(sender instanceof Player player))
         {
-            sender.sendMessage(MessageUtils.prefixes(sender, CommandStrings.noPermissionMessage()));
+            MessageUtils.send(sender, CommandStrings.noPermissionMessage());
             return 1;
         }
 
         var item = player.getEquipment().getItemInMainHand();
         if (item.isEmpty() || item.getType().isAir())
         {
-            sender.sendMessage(MessageUtils.prefixes(sender, CommandStrings.illegalArgumentString().resolve("detail", "air... :(")));
+            MessageUtils.send(sender, CommandStrings.illegalArgumentString().resolve("detail", "air... :("));
             return 1;
         }
 
         item = ItemUtils.buildDisguiseToolFrom(item);
         player.getEquipment().setItemInMainHand(item);
 
-        sender.sendMessage(MessageUtils.prefixes(sender, CommandStrings.success()));
+        MessageUtils.send(sender, CommandStrings.success());
 
         return 1;
     }

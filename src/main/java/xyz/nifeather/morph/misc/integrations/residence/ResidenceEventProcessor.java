@@ -12,7 +12,7 @@ import xyz.nifeather.morph.abilities.impl.FlyAbility;
 import xyz.nifeather.morph.abilities.impl.SnowyAbility;
 import xyz.nifeather.morph.api.events.gameplay.PlayerExecuteSkillEvent;
 import xyz.nifeather.morph.messages.MessageUtils;
-import xyz.nifeather.morph.messages.MorphStrings;
+import xyz.nifeather.morph.messages.strings.MorphStrings;
 
 public class ResidenceEventProcessor extends MorphPluginObject implements Listener
 {
@@ -91,7 +91,7 @@ public class ResidenceEventProcessor extends MorphPluginObject implements Listen
         if (!residencePermissions.playerHas(player, Flags.use, false))
         {
             e.setCancelled(true);
-            player.sendMessage(MessageUtils.prefixes(player, MorphStrings.regionBlockedSkillString()));
+            MessageUtils.send(player, MorphStrings.regionBlockedSkillString());
         }
     }
 }

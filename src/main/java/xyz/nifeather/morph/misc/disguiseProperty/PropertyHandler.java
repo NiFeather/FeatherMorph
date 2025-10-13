@@ -98,7 +98,7 @@ public class PropertyHandler
 
     private void writeGeneric(SingleProperty<?> property, Object value)
     {
-        if (!property.defaultVal().getClass().isInstance(value))
+        if (!property.type().isInstance(value))
             throw new IllegalArgumentException("Incompatible value for id '%s', excepted for '%s', but got '%s'".formatted(property.id(), property.defaultVal().getClass(), value.getClass()));
 
         set((SingleProperty<Object>)property, value);

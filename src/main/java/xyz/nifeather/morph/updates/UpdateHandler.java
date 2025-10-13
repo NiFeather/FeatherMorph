@@ -16,7 +16,7 @@ import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.config.ConfigOption;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.messages.MessageUtils;
-import xyz.nifeather.morph.messages.UpdateStrings;
+import xyz.nifeather.morph.messages.strings.UpdateStrings;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 
 import java.net.URI;
@@ -295,17 +295,17 @@ public class UpdateHandler extends MorphPluginObject
     {
         if (!updateAvailable)
         {
-            sendTarget.sendMessage(MessageUtils.prefixes(sendTarget, noNewVersionAvailable));
+            MessageUtils.send(sendTarget, noNewVersionAvailable);
             return;
         }
 
         assert msgPrimary != null;
         assert msgSecondary != null;
 
-        sendTarget.sendMessage(MessageUtils.prefixes(sendTarget, messageHeaderFooter));
-        sendTarget.sendMessage(MessageUtils.prefixes(sendTarget, msgPrimary));
-        sendTarget.sendMessage(MessageUtils.prefixes(sendTarget, msgSecondary));
-        sendTarget.sendMessage(MessageUtils.prefixes(sendTarget, messageHeaderFooter));
+        MessageUtils.send(sendTarget, messageHeaderFooter);
+        MessageUtils.send(sendTarget, msgPrimary);
+        MessageUtils.send(sendTarget, msgSecondary);
+        MessageUtils.send(sendTarget, messageHeaderFooter);
     }
 
     private static class InvalidOperationException extends RuntimeException

@@ -19,6 +19,10 @@ import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.commands.brigadier.IConvertibleBrigadier;
 import xyz.nifeather.morph.commands.brigadier.arguments.DisguiseIdentifierArgumentType;
 import xyz.nifeather.morph.messages.*;
+import xyz.nifeather.morph.messages.strings.CommandStrings;
+import xyz.nifeather.morph.messages.strings.CommonStrings;
+import xyz.nifeather.morph.messages.strings.HelpStrings;
+import xyz.nifeather.morph.messages.strings.MorphStrings;
 import xyz.nifeather.morph.misc.DisguiseTypes;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 
@@ -70,7 +74,7 @@ public class GrantDisguiseSubCommand extends MorphPluginObject implements IConve
 
         if (players.isEmpty())
         {
-            commandSender.sendMessage(MessageUtils.prefixes(commandSender, CommonStrings.playerNotFoundString()));
+            MessageUtils.send(commandSender, CommonStrings.playerNotFoundString());
             return 1;
         }
 
@@ -97,7 +101,7 @@ public class GrantDisguiseSubCommand extends MorphPluginObject implements IConve
             }
             else if (!provider.isValid(targetName))
             {
-                commandSender.sendMessage(MessageUtils.prefixes(commandSender, MorphStrings.invalidIdentityString()));
+                MessageUtils.send(commandSender, MorphStrings.invalidIdentityString());
                 return;
             }
 
@@ -115,7 +119,7 @@ public class GrantDisguiseSubCommand extends MorphPluginObject implements IConve
 
         msg.resolve("what", Component.text(targetName)).resolve("who", who.getName());
 
-        commandSender.sendMessage(MessageUtils.prefixes(commandSender, msg));
+        MessageUtils.send(commandSender, msg);
 
     }
 }

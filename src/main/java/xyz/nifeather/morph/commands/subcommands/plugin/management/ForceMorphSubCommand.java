@@ -15,7 +15,7 @@ import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.commands.brigadier.IConvertibleBrigadier;
 import xyz.nifeather.morph.commands.brigadier.arguments.DisguiseIdentifierArgumentType;
-import xyz.nifeather.morph.messages.HelpStrings;
+import xyz.nifeather.morph.messages.strings.HelpStrings;
 import xyz.nifeather.morph.misc.MorphParameters;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 

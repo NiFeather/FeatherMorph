@@ -99,9 +99,8 @@ public class MorphChatRenderer extends MorphPluginObject implements ChatRenderer
         var locale = MessageUtils.getLocale(player);
 
         return new FormattableMessage(FeatherMorphMain.getMorphNameSpace(), formattable.getKey(), formattable.getDefaultString())
-                .withLocale(locale)
                 .resolve("who", displayName)
                 .resolve("message", msg)
-                .toComponent();
+                .createComponent();
     }
 }

@@ -13,7 +13,7 @@ import xiamomc.pluginbase.Messages.FormattableMessage;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.commands.brigadier.IConvertibleBrigadier;
 import xyz.nifeather.morph.messages.MessageUtils;
-import xyz.nifeather.morph.messages.UpdateStrings;
+import xyz.nifeather.morph.messages.strings.UpdateStrings;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 import xyz.nifeather.morph.updates.UpdateHandler;
 
@@ -45,7 +45,7 @@ public class CheckUpdateSubCommand extends MorphPluginObject implements IConvert
     {
         var sender = context.getSource().getSender();
 
-        sender.sendMessage(MessageUtils.prefixes(sender, UpdateStrings.checkingUpdate()));
+        MessageUtils.send(sender, UpdateStrings.checkingUpdate());
         handler.checkUpdate(true, sender)
                 .thenAcceptAsync(result -> this.onRequestFinish(result, sender));
 
@@ -73,25 +73,25 @@ public class CheckUpdateSubCommand extends MorphPluginObject implements IConvert
             case ALREADY_LATEST ->
             {
                 var msg = UpdateStrings.noNewVersionAvailable().resolve("mc_version", Bukkit.getMinecraftVersion());
-                sender.sendMessage(MessageUtils.prefixes(sender, msg));
+                MessageUtils.send(sender, msg);
             }
 
             case FAIL ->
             {
                 var msg = UpdateStrings.failed();
-                sender.sendMessage(MessageUtils.prefixes(sender, msg));
+                MessageUtils.send(sender, msg);
             }
 
             case NOT_LISTED_OR_UNSUPPORTED ->
             {
                 var msg = UpdateStrings.notListed().resolve("software", Bukkit.getName());
-                sender.sendMessage(MessageUtils.prefixes(sender, msg));
+                MessageUtils.send(sender, msg);
             }
 
             case CURRENT_IS_NEWER ->
             {
                 var msg = UpdateStrings.currentIsNewer().resolve("mc_version", Bukkit.getMinecraftVersion());
-                sender.sendMessage(MessageUtils.prefixes(sender, msg));
+                MessageUtils.send(sender, msg);
             }
         }
     }

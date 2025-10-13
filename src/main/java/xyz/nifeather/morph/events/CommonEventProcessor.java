@@ -30,7 +30,7 @@ import xyz.nifeather.morph.api.networking.exceptions.PlayerDisconnectedException
 import xyz.nifeather.morph.config.ConfigOption;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.messages.MessageUtils;
-import xyz.nifeather.morph.messages.MorphStrings;
+import xyz.nifeather.morph.messages.strings.MorphStrings;
 import xyz.nifeather.morph.messages.vanilla.VanillaMessageStore;
 import xyz.nifeather.morph.misc.DisguiseEquipment;
 import xyz.nifeather.morph.misc.DisguiseTypes;
@@ -119,7 +119,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
             {
                 if (!player.getWorld().equals(world)) return;
 
-                player.sendMessage(MessageUtils.prefixes(player, MorphStrings.disguiseDisabledInWorldString()));
+                MessageUtils.send(player, MorphStrings.disguiseDisabledInWorldString());
                 morphs.unMorph(player);
             });
         }
@@ -328,21 +328,23 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
 
         if (offlineState != null)
         {
-            player.sendMessage(MessageUtils.prefixes(player, MorphStrings.stateRecoverReasonString()));
+            MessageUtils.send(player, MorphStrings.stateRecoverReasonString());
 
             var result = morphs.disguiseFromOfflineState(player, offlineState);
 
             if (result == OfflineDisguiseResult.SUCCESS)
             {
-                player.sendMessage(MessageUtils.prefixes(player, MorphStrings.recoveringStateString()));
+                MessageUtils.send(player, MorphStrings.recoveringStateString());
             }
             else if (result == OfflineDisguiseResult.LIMITED)
             {
-                player.sendMessage(MessageUtils.prefixes(player, MorphStrings.recoveringStateLimitedString()));
-                player.sendMessage(MessageUtils.prefixes(player, MorphStrings.recoveringStateLimitedHintString()));
+                MessageUtils.send(player, MorphStrings.recoveringStateLimitedString());
+                MessageUtils.send(player, MorphStrings.recoveringStateLimitedHintString());
             }
             else
-                player.sendMessage(MessageUtils.prefixes(player, MorphStrings.recoveringFailedString()));
+            {
+                MessageUtils.send(player, MorphStrings.recoveringFailedString());
+            }
         }
     }
 

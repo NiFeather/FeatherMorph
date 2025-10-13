@@ -3,7 +3,6 @@ package xyz.nifeather.morph.messages;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Annotations.Initializer;
@@ -13,6 +12,7 @@ import xiamomc.pluginbase.Messages.MessageStore;
 import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.config.ConfigOption;
 import xyz.nifeather.morph.config.MorphConfigManager;
+import xyz.nifeather.morph.messages.strings.*;
 
 import java.io.File;
 import java.io.IOException;

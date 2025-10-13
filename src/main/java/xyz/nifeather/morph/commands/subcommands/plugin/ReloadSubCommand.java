@@ -17,8 +17,8 @@ import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.api.events.lifecycle.ConfigurationReloadEvent;
 import xyz.nifeather.morph.commands.brigadier.BrigadierCommand;
 import xyz.nifeather.morph.config.MorphConfigManager;
-import xyz.nifeather.morph.messages.CommandStrings;
-import xyz.nifeather.morph.messages.HelpStrings;
+import xyz.nifeather.morph.messages.strings.CommandStrings;
+import xyz.nifeather.morph.messages.strings.HelpStrings;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.MorphMessageStore;
 import xyz.nifeather.morph.messages.vanilla.VanillaMessageStore;
@@ -147,7 +147,7 @@ public class ReloadSubCommand extends BrigadierCommand
         event.callEvent();
 
         var sender = context.getSource().getSender();
-        sender.sendMessage(MessageUtils.prefixes(sender, CommandStrings.reloadCompleteMessage()));
+        MessageUtils.send(sender, CommandStrings.reloadCompleteMessage());
     }
 
     public int executes(CommandContext<CommandSourceStack> context)

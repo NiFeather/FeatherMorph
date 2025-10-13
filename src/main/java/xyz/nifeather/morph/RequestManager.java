@@ -6,9 +6,9 @@ import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xyz.nifeather.morph.interfaces.IManagePlayerData;
 import xyz.nifeather.morph.interfaces.IManageRequests;
-import xyz.nifeather.morph.messages.CommandStrings;
+import xyz.nifeather.morph.messages.strings.CommandStrings;
 import xyz.nifeather.morph.messages.MessageUtils;
-import xyz.nifeather.morph.messages.RequestStrings;
+import xyz.nifeather.morph.messages.strings.RequestStrings;
 import xyz.nifeather.morph.misc.DisguiseTypes;
 import xyz.nifeather.morph.misc.RequestInfo;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
@@ -65,7 +65,7 @@ public class RequestManager extends MorphPluginObject implements IManageRequests
     {
         if (!source.hasPermission(CommonPermissions.SEND_REQUEST))
         {
-            source.sendMessage(MessageUtils.prefixes(source, CommandStrings.noPermissionMessage()));
+            MessageUtils.send(source, CommandStrings.noPermissionMessage());
             return;
         }
 
@@ -73,8 +73,8 @@ public class RequestManager extends MorphPluginObject implements IManageRequests
                 .anyMatch(i -> i.sourcePlayer.getUniqueId().equals(source.getUniqueId())
                         && i.targetPlayer.getUniqueId().equals(target.getUniqueId())))
         {
-            source.sendMessage(MessageUtils.prefixes(source, RequestStrings.requestAlreadySentString()
-                    .resolve("who", target.getName())));
+            MessageUtils.send(source, RequestStrings.requestAlreadySentString()
+                    .resolve("who", target.getName()));
             return;
         }
 
@@ -85,17 +85,17 @@ public class RequestManager extends MorphPluginObject implements IManageRequests
 
         requests.add(req);
 
-        target.sendMessage(MessageUtils.prefixes(target, RequestStrings.requestReceivedString()
-                .resolve("who", source.getName())));
+        MessageUtils.send(target, RequestStrings.requestReceivedString()
+                .resolve("who", source.getName()));
 
-        target.sendMessage(MessageUtils.prefixes(target, RequestStrings.requestReceivedAcceptString()
-                .resolve("who", source.getName())));
+        MessageUtils.send(target, RequestStrings.requestReceivedAcceptString()
+                .resolve("who", source.getName()));
 
-        target.sendMessage(MessageUtils.prefixes(target, RequestStrings.requestReceivedDenyString()
-                .resolve("who", source.getName())));
+        MessageUtils.send(target, RequestStrings.requestReceivedDenyString()
+                .resolve("who", source.getName()));
 
-        source.sendMessage(MessageUtils.prefixes(source, RequestStrings.requestSendString()
-                .resolve("who", target.getName())));
+        MessageUtils.send(source, RequestStrings.requestSendString()
+                .resolve("who", target.getName()));
 
         clientHandler.sendCommand(target, new S2CUpdateRequestStatusCommand(S2CUpdateRequestStatusCommand.Type.NewRequest, source.getName()));
         clientHandler.sendCommand(source, new S2CUpdateRequestStatusCommand(S2CUpdateRequestStatusCommand.Type.RequestSend, target.getName()));
@@ -114,7 +114,7 @@ public class RequestManager extends MorphPluginObject implements IManageRequests
     {
         if (!source.hasPermission(CommonPermissions.ACCEPT_REQUEST))
         {
-            source.sendMessage(MessageUtils.prefixes(source, CommandStrings.noPermissionMessage()));
+            MessageUtils.send(source, CommandStrings.noPermissionMessage());
             return;
         }
 
@@ -124,7 +124,7 @@ public class RequestManager extends MorphPluginObject implements IManageRequests
 
         if (req == null)
         {
-            source.sendMessage(MessageUtils.prefixes(source, RequestStrings.requestNotFound()));
+            MessageUtils.send(source, RequestStrings.requestNotFound());
             return;
         }
 
@@ -133,8 +133,8 @@ public class RequestManager extends MorphPluginObject implements IManageRequests
         data.grantMorphToPlayer(target, DisguiseTypes.PLAYER.toId(source.getName()));
         data.grantMorphToPlayer(source, DisguiseTypes.PLAYER.toId(target.getName()));
 
-        target.sendMessage(MessageUtils.prefixes(target, RequestStrings.targetAcceptedString().resolve("who", source.getName())));
-        source.sendMessage(MessageUtils.prefixes(source, RequestStrings.sourceAcceptedString().resolve("who", target.getName())));
+        MessageUtils.send(target, RequestStrings.targetAcceptedString().resolve("who", source.getName()));
+        MessageUtils.send(source, RequestStrings.sourceAcceptedString().resolve("who", target.getName()));
 
         clientHandler.sendCommand(target, new S2CUpdateRequestStatusCommand(S2CUpdateRequestStatusCommand.Type.RequestAccepted, source.getName()));
         //clientHandler.sendCommand(source, new S2CRequestCommand(S2CRequestCommand.Type.RequestAccepted, target.getName()));
@@ -150,7 +150,7 @@ public class RequestManager extends MorphPluginObject implements IManageRequests
     {
         if (!source.hasPermission(CommonPermissions.DENY_REQUEST))
         {
-            source.sendMessage(MessageUtils.prefixes(source, CommandStrings.noPermissionMessage()));
+            MessageUtils.send(source, CommandStrings.noPermissionMessage());
             return;
         }
 
@@ -160,7 +160,7 @@ public class RequestManager extends MorphPluginObject implements IManageRequests
 
         if (req == null)
         {
-            source.sendMessage(MessageUtils.prefixes(source, RequestStrings.requestNotFound()));
+            MessageUtils.send(source, RequestStrings.requestNotFound());
 
             //"未找到目标请求，可能已经过期？"
             return;
@@ -168,8 +168,8 @@ public class RequestManager extends MorphPluginObject implements IManageRequests
 
         req.ticksRemain = -256;
 
-        target.sendMessage(MessageUtils.prefixes(target, RequestStrings.targetDeniedString().resolve("who", source.getName())));
-        source.sendMessage(MessageUtils.prefixes(source, RequestStrings.sourceDeniedString().resolve("who", target.getName())));
+        MessageUtils.send(target, RequestStrings.targetDeniedString().resolve("who", source.getName()));
+        MessageUtils.send(source, RequestStrings.sourceDeniedString().resolve("who", target.getName()));
 
         clientHandler.sendCommand(target, new S2CUpdateRequestStatusCommand(S2CUpdateRequestStatusCommand.Type.RequestDenied, source.getName()));
         //clientHandler.sendCommand(source, new S2CRequestCommand(S2CRequestCommand.Type.RequestDenied, target.getName()));

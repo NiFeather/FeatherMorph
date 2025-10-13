@@ -10,9 +10,9 @@ import xiamomc.pluginbase.Messages.FormattableMessage;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.abilities.AbilityManager;
 import xyz.nifeather.morph.commands.brigadier.BrigadierCommand;
-import xyz.nifeather.morph.messages.HelpStrings;
+import xyz.nifeather.morph.messages.strings.HelpStrings;
 import xyz.nifeather.morph.messages.MessageUtils;
-import xyz.nifeather.morph.messages.StatStrings;
+import xyz.nifeather.morph.messages.strings.StatStrings;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
 import xyz.nifeather.morph.skills.SkillManager;
@@ -84,12 +84,12 @@ public class StatSubCommand extends BrigadierCommand
             formattable.resolve("name", backend.getIdentifier())
                     .resolve("count", "" + instances.size());
 
-            var str = formattable.toString(locale);
+            var str = formattable.createString(locale);
             listString.append(str).append(" ");
         }
 
         if (listString.isEmpty())
-            listString.append(StatStrings.backendsNone().toString(locale));
+            listString.append(StatStrings.backendsNone().createString(locale));
 
         var defaultBackend = morphManager.getDefaultBackend();
         var defaultBackendString = "%s (%s)".formatted(defaultBackend.getIdentifier(), defaultBackend.getClass().getName());
@@ -132,7 +132,7 @@ public class StatSubCommand extends BrigadierCommand
                 };
 
         for (FormattableMessage formattableMessage : msg)
-            sender.sendMessage(MessageUtils.prefixes(sender, formattableMessage));
+            MessageUtils.send(sender, formattableMessage);
 
         return 1;
     }

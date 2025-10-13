@@ -36,7 +36,7 @@ import xyz.nifeather.morph.api.events.gameplay.PlayerMorphEvent;
 import xyz.nifeather.morph.config.ConfigOption;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.messages.MessageUtils;
-import xyz.nifeather.morph.messages.MorphStrings;
+import xyz.nifeather.morph.messages.strings.MorphStrings;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.misc.integrations.towny.commands.TownyIntegrationCommand;
 
@@ -214,7 +214,7 @@ public class TownyAdapter extends MorphPluginObject implements Listener
         if (outsidersSkilAllowed)
             return;
 
-        player.sendMessage(MessageUtils.prefixes(player, MorphStrings.regionBlockedSkillString()));
+        MessageUtils.send(player, MorphStrings.regionBlockedSkillString());
         event.setCancelled(true);
     }
 

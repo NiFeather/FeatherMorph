@@ -18,7 +18,7 @@ import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.abilities.ISkillAbilityOptionHandler;
 import xyz.nifeather.morph.api.morphs.skills.SkillNames;
 import xyz.nifeather.morph.messages.MessageUtils;
-import xyz.nifeather.morph.messages.SkillStrings;
+import xyz.nifeather.morph.messages.strings.SkillStrings;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.misc.ExecutionErrorException;
 import xyz.nifeather.morph.misc.NmsRecord;
@@ -159,9 +159,7 @@ public class EvokerMorphSkill extends DelayedMorphSkill<NoOpConfiguration>
 
         if (summonVex && player.getWorld().getDifficulty() == Difficulty.PEACEFUL)
         {
-            sendDenyMessageToPlayer(player, SkillStrings.difficultyIsPeacefulString()
-                    .withLocale(MessageUtils.getLocale(player))
-                    .toComponent(null));
+            sendDenyMessageToPlayer(player, SkillStrings.difficultyIsPeacefulString());
 
             return ExecuteResult.fail(10);
         }

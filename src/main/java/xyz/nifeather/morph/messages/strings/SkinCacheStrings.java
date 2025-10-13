@@ -1,4 +1,4 @@
-package xyz.nifeather.morph.messages;
+package xyz.nifeather.morph.messages.strings;
 
 import xiamomc.pluginbase.Messages.FormattableMessage;
 

@@ -12,7 +12,7 @@ import xiamomc.pluginbase.Annotations.Resolved;
 import xyz.nifeather.morph.abilities.ISkillAbilityOptionHandler;
 import xyz.nifeather.morph.api.morphs.skills.SkillNames;
 import xyz.nifeather.morph.messages.MessageUtils;
-import xyz.nifeather.morph.messages.SkillStrings;
+import xyz.nifeather.morph.messages.strings.SkillStrings;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.network.commands.S2C.set.S2CSetAggressiveCommand;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
@@ -64,11 +64,7 @@ public class LaunchProjectileMorphSkill extends DelayedMorphSkill<ProjectileConf
 
             if (target == null)
             {
-                sendDenyMessageToPlayer(player, SkillStrings.noTargetString()
-                        .withLocale(MessageUtils.getLocale(player))
-                        .resolve("distance", "" + distanceLimit)
-                        .toComponent(null));
-
+                sendDenyMessageToPlayer(player, SkillStrings.noTargetString().resolve("distance", "" + distanceLimit));
                 return;
             }
         }

@@ -227,6 +227,8 @@
   "types.int" : "整数",
   "types.string" : "字符串",
   "types.text_component": "文本组件",
+  "types.resource_location": "命名空间ID",
+  "types.collection_of": "<what>的集合",
   "update.checking_update" : "检查更新中...",
   "update.msg_header_footer" : "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-",
   "update.new_version_available" : "FeatherMorph有新版本辣！(<current> -> <origin>)",

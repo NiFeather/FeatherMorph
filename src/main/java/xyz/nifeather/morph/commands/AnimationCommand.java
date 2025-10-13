@@ -14,9 +14,9 @@ import xiamomc.pluginbase.Messages.FormattableMessage;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.commands.brigadier.IConvertibleBrigadier;
-import xyz.nifeather.morph.messages.CommandStrings;
-import xyz.nifeather.morph.messages.EmoteStrings;
-import xyz.nifeather.morph.messages.HelpStrings;
+import xyz.nifeather.morph.messages.strings.CommandStrings;
+import xyz.nifeather.morph.messages.strings.EmoteStrings;
+import xyz.nifeather.morph.messages.strings.HelpStrings;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.misc.gui.AnimSelectScreenWrapper;
 
@@ -92,7 +92,7 @@ public class AnimationCommand extends MorphPluginObject implements IConvertibleB
         var state = morphManager.getDisguiseStateFor(player);
         if (state == null)
         {
-            player.sendMessage(MessageUtils.prefixes(player, CommandStrings.notDisguised()));
+            MessageUtils.send(player, CommandStrings.notDisguised());
             return Command.SINGLE_SUCCESS;
         }
 
@@ -116,7 +116,7 @@ public class AnimationCommand extends MorphPluginObject implements IConvertibleB
         var state = morphManager.getDisguiseStateFor(player);
         if (state == null)
         {
-            player.sendMessage(MessageUtils.prefixes(player, CommandStrings.notDisguised()));
+            MessageUtils.send(player, CommandStrings.notDisguised());
             return Command.SINGLE_SUCCESS;
         }
 
@@ -130,13 +130,13 @@ public class AnimationCommand extends MorphPluginObject implements IConvertibleB
 
         if (!animations.contains(animationId))
         {
-            player.sendMessage(MessageUtils.prefixes(player, CommandStrings.noSuchAnimation()));
+            MessageUtils.send(player, CommandStrings.noSuchAnimation());
             return Command.SINGLE_SUCCESS;
         }
 
         var sequencePair = animationSet.sequenceOf(animationId);
         if (!state.tryScheduleSequence(animationId, sequencePair.left(), sequencePair.right()))
-            player.sendMessage(MessageUtils.prefixes(player, EmoteStrings.notAvailable()));
+            MessageUtils.send(player, EmoteStrings.notAvailable());
 
         return Command.SINGLE_SUCCESS;
     }

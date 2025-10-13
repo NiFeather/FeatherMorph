@@ -14,8 +14,8 @@ import xiamomc.pluginbase.Messages.FormattableMessage;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.commands.brigadier.IConvertibleBrigadier;
 import xyz.nifeather.morph.interfaces.IManageRequests;
-import xyz.nifeather.morph.messages.CommonStrings;
-import xyz.nifeather.morph.messages.HelpStrings;
+import xyz.nifeather.morph.messages.strings.CommonStrings;
+import xyz.nifeather.morph.messages.strings.HelpStrings;
 import xyz.nifeather.morph.messages.MessageUtils;
 
 import java.util.concurrent.CompletableFuture;
@@ -66,7 +66,7 @@ public class AcceptSubCommand extends MorphPluginObject implements IConvertibleB
 
         if (targetPlayer == null)
         {
-            sender.sendMessage(MessageUtils.prefixes(sender, CommonStrings.playerNotFoundString()));
+            MessageUtils.send(sender, CommonStrings.playerNotFoundString());
             return Command.SINGLE_SUCCESS;
         }
 

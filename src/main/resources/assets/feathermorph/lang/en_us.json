@@ -227,6 +227,8 @@
   "types.int": "Integer",
   "types.string": "String",
   "types.text_component": "Text Component",
+  "types.resource_location": "Resource location",
+  "types.collection_of": "Collection of <what>",
   "update.checking_update": "Checking update...",
   "update.msg_header_footer": "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-",
   "update.new_version_available": "A newer version of FeatherMorph has been released！(<current> -> <origin>)",

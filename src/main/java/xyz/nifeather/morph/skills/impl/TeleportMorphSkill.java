@@ -12,7 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import xyz.nifeather.morph.abilities.ISkillAbilityOptionHandler;
 import xyz.nifeather.morph.api.morphs.skills.SkillNames;
 import xyz.nifeather.morph.messages.MessageUtils;
-import xyz.nifeather.morph.messages.SkillStrings;
+import xyz.nifeather.morph.messages.strings.SkillStrings;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.misc.ExecutionErrorException;
 import xyz.nifeather.morph.skills.MorphSkill;
@@ -43,9 +43,7 @@ public class TeleportMorphSkill extends MorphSkill<TeleportConfiguration>
                 || targetBlock.getBlockData().getMaterial().isAir()
                 || targetBlock.getBlockData().getMaterial().equals(Material.WATER))
         {
-            sendDenyMessageToPlayer(player, SkillStrings.targetNotSuitableString()
-                    .withLocale(MessageUtils.getLocale(player))
-                    .toComponent(null));
+            sendDenyMessageToPlayer(player, SkillStrings.targetNotSuitableString());
 
             return 20;
         }

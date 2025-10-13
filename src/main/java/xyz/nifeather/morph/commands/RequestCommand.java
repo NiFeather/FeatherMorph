@@ -12,7 +12,7 @@ import xyz.nifeather.morph.commands.help.FormattableHelpContainer;
 import xyz.nifeather.morph.commands.subcommands.request.AcceptSubCommand;
 import xyz.nifeather.morph.commands.subcommands.request.DenySubCommand;
 import xyz.nifeather.morph.commands.subcommands.request.SendSubCommand;
-import xyz.nifeather.morph.messages.HelpStrings;
+import xyz.nifeather.morph.messages.strings.HelpStrings;
 
 import java.util.List;
 

@@ -16,9 +16,9 @@ import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.commands.brigadier.IConvertibleBrigadier;
 import xyz.nifeather.morph.commands.brigadier.arguments.DisguiseIdentifierArgumentType;
-import xyz.nifeather.morph.messages.CommandStrings;
-import xyz.nifeather.morph.messages.CommonStrings;
-import xyz.nifeather.morph.messages.HelpStrings;
+import xyz.nifeather.morph.messages.strings.CommandStrings;
+import xyz.nifeather.morph.messages.strings.CommonStrings;
+import xyz.nifeather.morph.messages.strings.HelpStrings;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 
@@ -73,7 +73,7 @@ public class RevokeDisguiseSubCommand extends MorphPluginObject implements IConv
             var commandSender = context.getSource().getSender();
             if (!who.isOnline())
             {
-                commandSender.sendMessage(MessageUtils.prefixes(commandSender, CommonStrings.playerNotFoundString()));
+                MessageUtils.send(commandSender, CommonStrings.playerNotFoundString());
                 return;
             }
 
@@ -92,7 +92,7 @@ public class RevokeDisguiseSubCommand extends MorphPluginObject implements IConv
 
             msg.resolve("what", Component.text(targetName)).resolve("who", who.getName());
 
-            commandSender.sendMessage(MessageUtils.prefixes(commandSender, msg));
+            MessageUtils.send(commandSender, msg);
         });
 
         return 1;

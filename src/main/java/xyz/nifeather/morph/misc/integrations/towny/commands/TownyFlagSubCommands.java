@@ -16,7 +16,7 @@ import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Messages.FormattableMessage;
 import xyz.nifeather.morph.api.events.gameplay.MorphTownBooleanFlagChangedEvent;
 import xyz.nifeather.morph.commands.brigadier.BrigadierCommand;
-import xyz.nifeather.morph.messages.CommandStrings;
+import xyz.nifeather.morph.messages.strings.CommandStrings;
 import xyz.nifeather.morph.messages.MessageUtils;
 
 public class TownyFlagSubCommands
@@ -57,19 +57,19 @@ public class TownyFlagSubCommands
 
             if (town == null)
             {
-                sender.sendMessage(MessageUtils.prefixes(sender, CommandStrings.townyDoesntHaveTown()));
+                MessageUtils.send(sender, CommandStrings.townyDoesntHaveTown());
                 return 0;
             }
 
             if (resident == null)
             {
-                sender.sendMessage(MessageUtils.prefixes(sender, CommandStrings.unknownError()));
+                MessageUtils.send(sender, CommandStrings.unknownError());
                 return 0;
             }
 
             if (!town.isMayor(resident))
             {
-                sender.sendMessage(MessageUtils.prefixes(sender, CommandStrings.townyPlayerNotMayor()));
+                MessageUtils.send(sender, CommandStrings.townyPlayerNotMayor());
                 return 0;
             }
 
@@ -82,7 +82,7 @@ public class TownyFlagSubCommands
                     .resolve("what", name())
                     .resolve("value", value);
 
-            sender.sendMessage(MessageUtils.prefixes(sender, message));
+            MessageUtils.send(sender, message);
 
             return 1;
         }
@@ -99,19 +99,19 @@ public class TownyFlagSubCommands
 
             if (town == null)
             {
-                sender.sendMessage(MessageUtils.prefixes(sender, CommandStrings.townyDoesntHaveTown()));
+                MessageUtils.send(sender, CommandStrings.townyDoesntHaveTown());
                 return 0;
             }
 
             if (resident == null)
             {
-                sender.sendMessage(MessageUtils.prefixes(sender, CommandStrings.unknownError()));
+                MessageUtils.send(sender, CommandStrings.unknownError());
                 return 0;
             }
 
             if (!town.isMayor(resident))
             {
-                sender.sendMessage(MessageUtils.prefixes(sender, CommandStrings.townyPlayerNotMayor()));
+                MessageUtils.send(sender, CommandStrings.townyPlayerNotMayor());
                 return 0;
             }
 
@@ -123,7 +123,7 @@ public class TownyFlagSubCommands
             else
                 message.resolve("value", MetaDataUtil.getBoolean(town, dataField));
 
-            sender.sendMessage(MessageUtils.prefixes(sender, message));
+            MessageUtils.send(sender, message);
 
             return 1;
         }

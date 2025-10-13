@@ -13,7 +13,7 @@ import xyz.nifeather.morph.commands.subcommands.plugin.management.ForceMorphSubC
 import xyz.nifeather.morph.commands.subcommands.plugin.management.ForceUnmorphSubCommand;
 import xyz.nifeather.morph.commands.subcommands.plugin.management.GrantDisguiseSubCommand;
 import xyz.nifeather.morph.commands.subcommands.plugin.management.RevokeDisguiseSubCommand;
-import xyz.nifeather.morph.messages.HelpStrings;
+import xyz.nifeather.morph.messages.strings.HelpStrings;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 
 import java.util.List;

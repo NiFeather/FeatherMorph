@@ -21,7 +21,7 @@ import xyz.nifeather.morph.abilities.AbilityManager;
 import xyz.nifeather.morph.api.morphs.skills.SkillNames;
 import xyz.nifeather.morph.backends.DisguiseBackend;
 import xyz.nifeather.morph.messages.MessageUtils;
-import xyz.nifeather.morph.messages.MorphStrings;
+import xyz.nifeather.morph.messages.strings.MorphStrings;
 import xyz.nifeather.morph.misc.DisguiseEquipment;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.misc.disguiseProperty.ParseErrorException;
@@ -139,11 +139,11 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
                 var display = disguiseRevealed
                         ? Component.empty()
                                 .append(state.getPlayerDisplay())
-                                .append((revLevel == RevealingHandler.RevealingLevel.REVEALED ? MorphStrings.revealed() : MorphStrings.partialRevealed()).toComponent(locale))
+                                .append((revLevel == RevealingHandler.RevealingLevel.REVEALED ? MorphStrings.revealed() : MorphStrings.partialRevealed()).createComponent(locale))
                         : state.getPlayerDisplay();
 
                 msgConfig = msgConfig
-                        .withDisplay(msg.resolve("what", display).toComponent(locale, messageStore))
+                        .withDisplay(msg.resolve("what", display).createComponent(locale, messageStore))
                         .withBit(bit)
                         .withLocale(locale);
 

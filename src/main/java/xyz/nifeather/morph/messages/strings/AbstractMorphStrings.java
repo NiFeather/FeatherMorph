@@ -1,4 +1,4 @@
-package xyz.nifeather.morph.messages;
+package xyz.nifeather.morph.messages.strings;
 
 import xiamomc.pluginbase.Messages.FormattableMessage;
 import xiamomc.pluginbase.Messages.IStrings;
@@ -10,6 +10,6 @@ public abstract class AbstractMorphStrings implements IStrings
 
     protected static FormattableMessage getFormattable(String key, String defaultValue)
     {
-        return new FormattableMessage(nameSpace, key, defaultValue);
+        return new FormattableMessage(nameSpace, key, "[fallback]" + defaultValue);
     }
 }
