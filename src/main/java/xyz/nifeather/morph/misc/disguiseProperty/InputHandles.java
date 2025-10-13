@@ -24,9 +24,12 @@ import org.bukkit.entity.*;
 import org.jetbrains.annotations.NotNull;
 import xyz.nifeather.morph.messages.strings.ExceptionStrings;
 import xyz.nifeather.morph.messages.strings.TypesString;
+import xyz.nifeather.morph.misc.DisguiseEquipment;
+import xyz.nifeather.morph.misc.disguiseProperty.struct.MorphEquipmentStruct;
 import xyz.nifeather.morph.misc.disguiseProperty.struct.MorphProfileProperty;
 import xyz.nifeather.morph.misc.disguiseProperty.struct.MorphResolvableProfileStruct;
 import xyz.nifeather.morph.misc.skins.PlayerSkinProvider;
+import xyz.nifeather.morph.network.utils.ProtocolEquipmentSlot;
 import xyz.nifeather.morph.utilities.GameProfileUtils;
 import xyz.nifeather.morph.utilities.NbtUtils;
 
@@ -523,6 +526,39 @@ public class InputHandles
 
         var profile = new GameProfile(record.id(), record.name(), new PropertyMap(propertiesBuilder.build()));
         return Optional.of(GameProfileUtils.asResolvableProfile(profile));
+    }
+
+    public static Optional<DisguiseEquipment> readEquipment(String propertyName, String input) throws ParseErrorException
+    {
+        var struct = gson.fromJson(input, MorphEquipmentStruct.class);
+        int dataVersion = struct.dataVersion();
+
+        var builder = DisguiseEquipment.builder(Map.of());
+
+        for (Map.Entry<String, String> entry : struct.equipmentData().entrySet())
+        {
+            String slotName = entry.getKey();
+            String snbt = entry.getValue();
+
+            var protocolSlot = ProtocolEquipmentSlot.valueOf(slotName.toUpperCase());
+            var item = NbtUtils.readItemStack(snbt, dataVersion);
+
+            org.bukkit.inventory.EquipmentSlot slot = switch (protocolSlot)
+            {
+                case MAINHAND -> org.bukkit.inventory.EquipmentSlot.HAND;
+                case OFF_HAND -> org.bukkit.inventory.EquipmentSlot.OFF_HAND;
+
+                case HELMET -> org.bukkit.inventory.EquipmentSlot.HEAD;
+                case CHESTPLATE -> org.bukkit.inventory.EquipmentSlot.CHEST;
+                case LEGGINGS ->  org.bukkit.inventory.EquipmentSlot.LEGS;
+                case BOOTS -> org.bukkit.inventory.EquipmentSlot.FEET;
+            };
+
+            if (item != null)
+                builder.forSlot(slot, item);
+        }
+
+        return Optional.of(builder.build());
     }
 
     public static void throwIfOutOfBounds(String propertyName, int value, int min, int max) throws ParseErrorException

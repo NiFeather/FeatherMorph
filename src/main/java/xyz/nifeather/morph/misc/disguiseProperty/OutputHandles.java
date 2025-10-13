@@ -9,7 +9,9 @@ import com.mojang.authlib.GameProfile;
 import io.papermc.paper.datacomponent.item.ResolvableProfile;
 import io.papermc.paper.math.Rotations;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
+import net.kyori.adventure.text.serializer.json.JSONOptions;
 import net.minecraft.SharedConstants;
 import net.minecraft.nbt.CompoundTag;
 import org.bukkit.Keyed;
@@ -33,6 +35,17 @@ import java.util.concurrent.ConcurrentHashMap;
 public class OutputHandles
 {
     private static final Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+
+    private static GsonComponentSerializer createComponentSerializer()
+    {
+        return GsonComponentSerializer.builder()
+                .editOptions(builder ->
+                {
+                    builder.value(JSONOptions.EMIT_COMPACT_TEXT_COMPONENT, false);
+                }).build();
+    }
+
+    private static final GsonComponentSerializer COMPONENT_SERIALIZER = createComponentSerializer();
 
     public static <X> String immediateException(String propertyName, X val) throws ParseErrorException
     {
@@ -83,7 +96,7 @@ public class OutputHandles
 
     public static String writeAdventureComponentJSON(String propertyName, Component component)
     {
-        return JSONComponentSerializer.json().serialize(component);
+        return COMPONENT_SERIALIZER.serialize(component);
     }
 
     public static String writeUUID(String propertyName, UUID uuid)

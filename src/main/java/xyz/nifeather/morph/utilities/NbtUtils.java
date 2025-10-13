@@ -5,12 +5,22 @@ import com.google.common.collect.Multimap;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
+import com.mojang.serialization.Dynamic;
+import net.minecraft.SharedConstants;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.nbt.*;
 import net.minecraft.server.commands.data.EntityDataAccessor;
+import net.minecraft.server.dedicated.DedicatedServer;
+import net.minecraft.util.datafix.fixes.References;
+import net.minecraft.world.item.Items;
+import org.bukkit.Bukkit;
+import org.bukkit.Material;
+import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.entity.CraftEntity;
+import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -252,6 +262,49 @@ public class NbtUtils
         {
             return null;
         }
+    }
+
+    public static ItemStack readItemStack(String compound, int dataVersion) throws ParseErrorException
+    {
+        var world = ((CraftWorld) Bukkit.getWorlds().getFirst()).getHandle();
+        if (world == null)
+        {
+            throw ParseErrorException.forProperty("anyItem")
+                    .byMethod("NbtUtils#readItemStack")
+                    .withMessage("Broken server implementation, no world is loaded")
+                    .create();
+        }
+
+        var registry = world.registryAccess();
+
+        CompoundTag tag = toCompoundTag(compound);
+
+        if (tag == null)
+        {
+            throw ParseErrorException.forProperty("anyItem")
+                    .byMethod("NbtUtils#readItemStack")
+                    .withMessage("Invalid compound")
+                    .create();
+        }
+
+        if (tag.getStringOr("id", "no").equals("minecraft:air"))
+            return ItemStack.of(Material.AIR, 1);
+
+        var ops = registry.createSerializationContext(NbtOps.INSTANCE);
+        int currentDataVersion = SharedConstants.getCurrentVersion().dataVersion().version();
+
+        if (dataVersion >= currentDataVersion)
+            dataVersion = currentDataVersion;
+
+        var fixer = DedicatedServer.getServer().getFixerUpper()
+                .update(References.ITEM_STACK, new Dynamic<>(ops, tag), dataVersion, currentDataVersion);
+
+        var item = net.minecraft.world.item.ItemStack.CODEC.decode(fixer);
+
+        if (item.result().isPresent())
+            return CraftItemStack.asBukkitCopy(item.result().get().getFirst());
+
+        return null;
     }
 
     @Nullable
