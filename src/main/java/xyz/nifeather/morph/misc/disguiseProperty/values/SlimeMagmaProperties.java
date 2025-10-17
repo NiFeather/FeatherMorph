@@ -44,7 +44,7 @@ public class SlimeMagmaProperties extends BaseLivingEntityProperties<Slime>
     @Override
     protected void setupDefaultProperties(PropertyHandler propertyHandler)
     {
-        propertyHandler.set(SIZE, ThreadLocalRandom.current().nextInt(0, 4));
+        propertyHandler.set(SIZE, ThreadLocalRandom.current().nextInt(1, 5));
     }
 
 }
