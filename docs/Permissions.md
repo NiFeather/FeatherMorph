@@ -12,6 +12,7 @@
 | feathermorph.chatoverride                           | Allows using ChatOverride                                                                                                                                                                                                                                                    | true                                           |
 | feathermorph.mirror                                 | Allows activating InteractionMirror                                                                                                                                                                                                                                          | true                                           |
 | feathermorph.mirror.immune                          | Make a player immunes from InteractionMirror                                                                                                                                                                                                                                 | *unset, `false` by default; `false` in 1.0.10* |
+| feathermorph.mirror.mannequin                       | Players with this permission are also able to mirror some operation to nearby mannequins                                                                                                                                                                                     | false                                          |
 | feathermorph.request.*<accept \| deny \| send>*     | Allows *accept/deny/send* exchange requests                                                                                                                                                                                                                                  | true                                           |
 | feathermorph.disguise_use_real_uuid                 | Whether player's disguise would use player's UUID for the virtual entity. Note that changing this permission doesn't affect players who is already disguising                                                                                                                | false                                          |
 
@@ -38,6 +39,8 @@
 | feathermorph.can_fly.in.\<world\> | Whether a player can use the fly ability in a world                      | *unset, `true` by default* |
 | feathermorph.magic_bottle.use     | Whether a player can use the Magic Bottle feature                        | true                       |
 | feathermorph.magic_bottle.exclude | Whether a player's disguise cannot be collected using a Magic Bottle     | false                      |
+| feathermorph.custom_skin          | Whether a player can customize their skin for Mannequin/Player disguise  | op                         |
+| feathermorph.custom_text          | Whether a player can customize texts for their disguise                  | true                       |
 
 ### Deprecated
 | Node                         | Description                                                                        | Default |
