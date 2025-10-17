@@ -39,7 +39,6 @@ import xyz.nifeather.morph.network.commands.S2C.query.QueryType;
 import xyz.nifeather.morph.network.commands.S2C.query.S2CQueryCommand;
 import xyz.nifeather.morph.network.commands.S2C.set.S2CSetModifyBoundingBoxCommand;
 import xyz.nifeather.morph.network.commands.S2C.set.S2CSetSelfViewingStatusCommand;
-import xyz.nifeather.morph.network.server.frog.C2SFrogMorphCommand;
 import xyz.nifeather.morph.network.server.handlers.ICommandPacketHandler;
 import xyz.nifeather.morph.network.server.handlers.V3ProtocolHandler;
 
@@ -195,7 +194,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
     private void load(FeatherMorphMain plugin, MorphConfigManager configManager)
     {
         registries.registerC2S(C2SCommandNames.RequestInitial, C2SRequestInitialCommand::fromArguments)
-                .registerC2S(C2SCommandNames.Morph, C2SFrogMorphCommand::fromArguments)
+                .registerC2S(C2SCommandNames.Morph, C2SMorphCommand::fromArguments)
                 .registerC2S(C2SCommandNames.ActivateSkill, C2SActivateSkillCommand::fromArguments)
                 .registerC2S(C2SCommandNames.SetSingleOption, C2SSetSingleOptionCommand::fromArguments)
                 .registerC2S(C2SCommandNames.ToggleSelf, C2SToggleSelfCommand::fromArguments)
@@ -770,10 +769,8 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
 
         MorphParameters parameters = MorphParameters.create(player, id)
                 .setTargetedEntity(player.getTargetEntity(5))
-                .setSource(player);
-
-        if (c2SMorphCommand instanceof C2SFrogMorphCommand frogMorphCommand)
-            parameters.withProperties(frogMorphCommand.propertyInputs());
+                .setSource(player)
+                .withProperties(c2SMorphCommand.propertyInputs());
 
         manager.morph(parameters);
     }
