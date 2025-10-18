@@ -63,6 +63,7 @@ public class CommonPermissions
 
     public final static String DISGUISE_CUSTOM_SKIN = PERM_ROOT + "custom_skin";
     public final static String DISGUISE_CUSTOM_TEXT = PERM_ROOT + "custom_text";
+    public final static String USE_DISGUISE_PROPERTY = PERM_ROOT + "disguise_properties" + ".use";
 
     public static String skillPermissionOf(String skillIdentifier, String disguiseIdentifier)
     {

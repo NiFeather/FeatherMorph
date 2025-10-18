@@ -238,7 +238,9 @@ paper {
 
             permissionRoot + "acquire_morph",
 
-            permissionRoot + "custom_text"
+            permissionRoot + "custom_text",
+
+            permissionRoot + "disguise_properties" + ".use"
     );
 
     defaultAvailablePermissions.forEach {
