@@ -12,6 +12,7 @@ import org.bukkit.inventory.meta.SkullMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Annotations.Resolved;
+import xyz.nifeather.morph.backends.DisguiseWrapper;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.strings.MorphStrings;
 import xyz.nifeather.morph.misc.DisguiseMeta;
@@ -29,6 +30,7 @@ import xyz.nifeather.morph.utilities.GameProfileUtils;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 public class PlayerDisguiseProvider extends DefaultDisguiseProvider
@@ -57,25 +59,21 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
     }
 
     @Override
-    public @NotNull DisguiseResult makeWrapper(Player player, DisguiseMeta disguiseMeta, @Nullable Entity targetEntity)
+    public @NotNull Optional<DisguiseWrapper<?>> makeWrapper(Player player, DisguiseMeta disguiseMeta, @Nullable Entity targetEntity)
     {
         if (getMorphManager().getBannedDisguises().contains("minecraft:player"))
         {
             MessageUtils.send(player, MorphStrings.disguiseBannedOrNotSupportedString());
-            return DisguiseResult.fail();
+            return Optional.empty();
         }
 
         var id = disguiseMeta.getIdentifier();
         var backend = getPreferredBackend();
 
         if (DisguiseTypes.fromId(id) != DisguiseTypes.PLAYER)
-            return DisguiseResult.fail();
+            return Optional.empty();
 
-        var wrapper = backend.createPlayerInstance(disguiseMeta.playerDisguiseTargetName);
-
-        Objects.requireNonNull(wrapper, "Null wrapper at where it shouldn't be?!");
-
-        return DisguiseResult.success(wrapper);
+        return Optional.ofNullable(backend.createPlayerInstance(disguiseMeta.playerDisguiseTargetName));
     }
 
     @Resolved(shouldSolveImmediately = true)

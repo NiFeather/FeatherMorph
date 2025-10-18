@@ -166,7 +166,7 @@ public class MorphStrings extends AbstractMorphStrings
     /**
      * @deprecated Please use {@link MorphStrings#errorWhileDisguisingWithError()} ASAP.
      */
-    @Deprecated
+    @Deprecated(forRemoval = true)
     public static FormattableMessage errorWhileDisguising()
     {
         return getFormattable(getKey("error_while_disguising"),

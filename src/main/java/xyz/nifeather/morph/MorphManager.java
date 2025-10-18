@@ -618,7 +618,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             if (!applyDisguise(parameters, buildResult.state(), playerMeta))
                 return false;
 
-            this.afterDisguise(buildResult, parameters, playerMeta);
+            this.afterDisguise(buildResult.state(), parameters, playerMeta);
 
             return true;
         }
@@ -790,6 +790,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
      */
     @NotNull
     private DisguiseBuildResult prepareDisguiseState(MorphParameters parameters, DisguiseMeta disguiseMeta)
+        throws ParseErrorException
     {
         // 确保source不为null
         var source = parameters.commandSource == null ? nilCommandSource : parameters.commandSource;
@@ -803,23 +804,18 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         {
             var provider = getProvider(disguiseIdentifier);
 
+            if (!provider.validateDisguise(player, disguiseMeta, targetEntity))
+                return DisguiseBuildResult.FAILED;
+
             // 从Provider获取此伪装的Wrapper
-            var result = provider.makeWrapper(player, disguiseMeta, targetEntity);
+            var wrapper = provider.makeWrapper(player, disguiseMeta, targetEntity).orElse(null);
 
             // 如果provider未能构建DisguiseWrapper
-            if (!result.success())
+            if (wrapper == null)
             {
-                if (!result.failSilent())
-                {
-                    MessageUtils.send(source, MorphStrings.errorWhileDisguisingWithError().resolve("error", "Unable to build wrapper"));
-                    logger.error("Unable to get disguise for player with provider {}", provider);
-                }
-
+                logger.error("Unable to create disguise wrapper for player with provider {}", provider);
                 return DisguiseBuildResult.FAILED;
             }
-
-            var wrapper = result.wrapperInstance();
-            assert wrapper != null;
 
             // 向Wrapper写入伪装ID
             wrapper.writeProperty(WrapperProperties.DISGUISE_ID, disguiseIdentifier);
@@ -833,7 +829,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                     wrapper, provider,
                     clientHandler.getPlayerOption(player, true), playerMorphConfig);
 
-            return DisguiseBuildResult.of(outComingState, provider, disguiseMeta);
+            return DisguiseBuildResult.of(outComingState, disguiseMeta);
         }
         catch (IllegalArgumentException iae)
         {
@@ -862,12 +858,11 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         // 确保source不为null
         var player = parameters.targetPlayer;
         var targetEntity = parameters.targetedEntity;
-        var provider = result.provider();
         var state = result.state();
+        var provider = state.getProvider();
         var wrapper = state.getDisguiseWrapper();
 
         // 设定形态属性
-
         UUID virtualEntityUUID;
 
         if (PermissionUtils.hasPermission(player, CommonPermissions.DISGUISE_USE_REAL_UUID, false))
@@ -897,6 +892,15 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         provider.buildDisguise(state, targetEntity);
         provider.setupProperties(state, targetEntity);
+
+        // Check property permission in prepare, before we execute anything
+        if (!parameters.propertiesInput.isEmpty() && !player.hasPermission(CommonPermissions.USE_DISGUISE_PROPERTY))
+        {
+            throw ParseErrorException.forProperty("any")
+                    .withLocalizableMessage(CommandStrings.noPermissionMessage())
+                    .withMessage("Player don't have permission for disguise property inputs")
+                    .create();
+        }
 
         // Then apply properties
         propertyHandler.updateFromPropertiesInput(parameters.propertiesInput, map -> properties.validateInput(map, player));
@@ -1028,37 +1032,27 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         return true;
     }
 
-    /**
-     *
-     * @param result
-     * @param parameters
-     * @param playerOptions
-     */
-    private void afterDisguise(DisguiseBuildResult result,
+    private void afterDisguise(DisguiseState state,
                                MorphParameters parameters,
                                PlayerMeta playerOptions)
     {
         // 确保source不为null
         var source = parameters.commandSource == null ? nilCommandSource : parameters.commandSource;
         var player = parameters.targetPlayer;
-        var disguiseMeta = result.meta();
 
         // 消息源是否为玩家自己
         var isDirect = source.equals(player);
 
-        // 返回消息
-        var playerLocale = MessageUtils.getLocale(source);
-
         var morphSuccessMessage = (isDirect ? MorphStrings.morphSuccessString() : CommandStrings.morphedSomeoneString())
                 .resolve("who", player.getName())
-                .resolve("what", disguiseMeta.asComponent(playerLocale));
+                .resolve("what", state.getPlayerDisplay());
 
         MessageUtils.send(source, morphSuccessMessage);
 
         // 显示粒子
         double cX, cY, cZ;
 
-        var box = BoundingBoxLookup.instance().getBoundboxOptional(result.state().getEntityType(), player.getLocation())
+        var box = BoundingBoxLookup.instance().getBoundboxOptional(state.getEntityType(), player.getLocation())
                 .orElse(BoundingBox.of(player.getLocation().getBlock()));
 
         cX = cZ = box.getWidthX();
@@ -1073,15 +1067,14 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 1, 1
         );
 
-        var newState = result.state();
-        var propertyHandler = newState.disguisePropertyHandler();
+        var propertyHandler = state.disguisePropertyHandler();
         var properties = propertyHandler.bindingProperties();
 
         if (properties != null)
         {
             propertyHandler.hookOnPropertyWrite((property, value) ->
             {
-                if (newState.disposed()) return;
+                if (state.disposed()) return;
 
                 if (!properties.equals(propertyHandler.bindingProperties())) return;
 
@@ -1463,7 +1456,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     public boolean disguiseFromState(DisguiseState state)
     {
         var meta = getDisguiseMeta(state.getDisguiseIdentifier());
-        var result = DisguiseBuildResult.of(state, state.getProvider(), meta);
+        var result = DisguiseBuildResult.of(state, meta);
         var playerMeta = getPlayerMeta(state.getPlayer());
         var parameters = MorphParameters.create(state.getPlayer(), state.getDisguiseIdentifier());
 
@@ -1481,7 +1474,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             return false;
         }
 
-        this.afterDisguise(result, parameters, playerMeta);
+        this.afterDisguise(state, parameters, playerMeta);
 
         return true;
     }

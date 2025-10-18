@@ -35,6 +35,7 @@ import xyz.nifeather.morph.utilities.*;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 public class VanillaDisguiseProvider extends DefaultDisguiseProvider
@@ -110,41 +111,39 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
     }
 
     @Override
-    @NotNull
-    public DisguiseResult makeWrapper(Player player, DisguiseMeta disguiseMeta, @Nullable Entity targetEntity)
+    public boolean validateDisguise(Player player, DisguiseMeta disguiseMeta, Entity targetEntity)
     {
-        var identifier = disguiseMeta.getIdentifier();
-
-        var backend = getPreferredBackend();
-
-        var entityType = EntityTypeUtils.fromString(identifier, true);
-
-        if (entityType == null || entityType == EntityType.PLAYER || !entityType.isAlive())
-        {
-            logger.error("Illegal mob type: " + identifier + "(" + entityType + ")");
-            return DisguiseResult.fail();
-        }
-
-        var newDisguise = backend.createInstance(entityType);
-
-        // Make IDE happy
-        Objects.requireNonNull(newDisguise);
+        var entityType = disguiseMeta.getEntityType();
 
         // 检查是否有足够的空间
         if (modifyBoundingBoxes.get() && checkSpaceBoundingBox.get())
         {
             var box = BoundingBoxLookup.instance()
-                    .getBoundingBoxAt(entityType, player.getLocation());
+                    .getBoundingBoxAt(disguiseMeta.getEntityType(), player.getLocation());
 
             var hasCollision = CollisionUtils.hasHardCollision(player.getWorld(), box);
             if (hasCollision)
             {
                 MessageUtils.send(player, MorphStrings.noEnoughSpaceString());
-                return DisguiseResult.FAIL_SILENT;
+                return false;
             }
         }
 
-        return DisguiseResult.success(newDisguise);
+        if (entityType == null || entityType == EntityType.PLAYER || !entityType.isAlive())
+        {
+            MessageUtils.send(player, MorphStrings.disguiseBannedOrNotSupportedString());
+            logger.error("Can't disguise player %s because someone is trying to use an illegal mob type: %s(%s)".formatted(player.getName(), disguiseMeta.getIdentifier(), entityType));
+            return false;
+        }
+
+        return super.validateDisguise(player, disguiseMeta, targetEntity);
+    }
+
+    @Override
+    public @NotNull Optional<DisguiseWrapper<?>> makeWrapper(Player player, DisguiseMeta disguiseMeta, @Nullable Entity targetEntity)
+    {
+        var backend = getPreferredBackend();
+        return Optional.ofNullable(backend.createInstance(disguiseMeta.getEntityType()));
     }
 
     @Override
@@ -155,6 +154,7 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
         var propertyHandler = state.disguisePropertyHandler();
         if (!(propertyHandler.bindingProperties() instanceof MannequinProperties mannequinProperties)) return;
 
+        // Resolve skin
         if (propertyHandler.contains(mannequinProperties.SKIN))
         {
             PlayerProfile placeHolder = GameProfileUtils.asPlayerProfile(new GameProfile(UUID.randomUUID(), "error_in_vdp"));

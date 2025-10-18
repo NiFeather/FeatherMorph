@@ -18,6 +18,7 @@ import xyz.nifeather.morph.network.commands.S2C.AbstractS2CCommand;
 import xyz.nifeather.morph.providers.animation.AnimationProvider;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * 负责提供伪装及其相关功能的组件。
@@ -56,12 +57,12 @@ public abstract class DisguiseProvider extends MorphPluginObject
     /**
      * 为目标玩家构建一个用于伪装的 {@link DisguiseWrapper}
      *
-     * @param player 目标玩家
+     * @param player       目标玩家
      * @param disguiseMeta 伪装ID
      * @param targetEntity 玩家的目标实体(如果有), 可用来判断是否要复制伪装
      */
     @NotNull
-    public abstract DisguiseResult makeWrapper(Player player, DisguiseMeta disguiseMeta, @Nullable Entity targetEntity);
+    public abstract Optional<DisguiseWrapper<?>> makeWrapper(Player player, DisguiseMeta disguiseMeta, @Nullable Entity targetEntity);
 
     /**
      * 更新某个伪装的状态
@@ -182,4 +183,13 @@ public abstract class DisguiseProvider extends MorphPluginObject
      * @return 显示名称
      */
     public abstract Component getDisplayName(String disguiseIdentifier, @Nullable String locale);
+
+    /**
+     * Validate if the given disguise can be used for player's situation
+     * @return TRUE if we can continue
+     */
+    public boolean validateDisguise(Player player, DisguiseMeta disguiseMeta, Entity targetEntity)
+    {
+        return true;
+    }
 }

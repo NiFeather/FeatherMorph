@@ -12,6 +12,7 @@ import xyz.nifeather.morph.providers.animation.AnimationProvider;
 import xyz.nifeather.morph.providers.animation.provider.FallbackAnimationProvider;
 
 import java.util.List;
+import java.util.Optional;
 
 public class FallbackDisguiseProvider extends DefaultDisguiseProvider
 {
@@ -45,9 +46,9 @@ public class FallbackDisguiseProvider extends DefaultDisguiseProvider
     }
 
     @Override
-    public @NotNull DisguiseResult makeWrapper(Player player, DisguiseMeta disguiseMeta, @Nullable Entity targetEntity)
+    public @NotNull Optional<DisguiseWrapper<?>> makeWrapper(Player player, DisguiseMeta disguiseMeta, @Nullable Entity targetEntity)
     {
-        return DisguiseResult.fail();
+        return Optional.empty();
     }
 
     private boolean canConstruct(DisguiseMeta info, Entity targetEntity, @Nullable DisguiseState theirState)
