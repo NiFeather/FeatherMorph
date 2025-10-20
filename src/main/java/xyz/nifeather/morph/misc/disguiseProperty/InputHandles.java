@@ -530,7 +530,20 @@ public class InputHandles
 
     public static Optional<DisguiseEquipment> readEquipment(String propertyName, String input) throws ParseErrorException
     {
-        var struct = gson.fromJson(input, MorphEquipmentStruct.class);
+        MorphEquipmentStruct struct = null;
+        try
+        {
+            struct = gson.fromJson(input, MorphEquipmentStruct.class);
+        }
+        catch (JsonParseException e)
+        {
+            throw ParseErrorException.forProperty(propertyName)
+                    .causedBy(e)
+                    .withLocalizableMessage(ExceptionStrings.malformedInput())
+                    .withMessage("Unable to decode JSON string")
+                    .create();
+        }
+
         int dataVersion = struct.dataVersion();
 
         var builder = DisguiseEquipment.builder(Map.of());
