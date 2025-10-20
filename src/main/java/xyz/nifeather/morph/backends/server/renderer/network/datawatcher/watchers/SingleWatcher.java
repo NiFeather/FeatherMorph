@@ -496,13 +496,10 @@ public abstract class SingleWatcher extends MorphPluginObject
             if (blockedValues.contains(index))
                 continue;
 
+            // 跳过无效的数据
             var sv = (SingleValue<Object>) this.getSingle(index);
             if (sv == null)
-            {
-                throw ExecutionErrorException.forMethod("handleEntityMetadata")
-                        .withMessage("Index %s not found for watcher of type %s(%s)".formatted(index, entityType, this.getClass().getSimpleName()))
-                        .create();
-            }
+                continue;
 
             if (!raw.getType().equals(sv.type()))
                 continue;

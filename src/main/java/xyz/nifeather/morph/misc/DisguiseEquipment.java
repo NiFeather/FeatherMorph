@@ -97,7 +97,7 @@ public class DisguiseEquipment implements ISupportDiffs<DisguiseEquipment>
     /**
      * Returns a builder that's pre-filled all slots with air
      */
-    public static DisguiseEquipmentBuilder builder()
+    public static DisguiseEquipmentBuilder prefilled()
     {
         return new DisguiseEquipmentBuilder();
     }
@@ -142,7 +142,7 @@ public class DisguiseEquipment implements ISupportDiffs<DisguiseEquipment>
      */
     public static DisguiseEquipment empty()
     {
-        return builder().build();
+        return prefilled().build();
     }
 
     @Override

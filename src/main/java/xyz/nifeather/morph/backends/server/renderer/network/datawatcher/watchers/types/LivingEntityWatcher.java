@@ -86,7 +86,7 @@ public class LivingEntityWatcher extends EntityWatcher
             var upcoming = (DisguiseEquipment) value;
             var existing = this.readEntry(CustomEntries.EQUIPMENT);
 
-            var newInstance = DisguiseEquipment.builder()
+            var newInstance = DisguiseEquipment.prefilled()
                     .mergeIfNotNull(existing)
                     .merge(upcoming)
                     .build();
