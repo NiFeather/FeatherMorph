@@ -2,8 +2,10 @@ package xyz.nifeather.morph.events.mirror.impl;
 
 import ca.spottedleaf.moonrise.common.util.TickThread;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.ComponentIteratorFlag;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Mannequin;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Pose;
@@ -104,6 +106,9 @@ public class ByNameExecutor extends AbstractExecutor
         var state = morphManager().getDisguiseStateFor(player);
         if (state == null) return;
 
+        if (state.getEntityType() != EntityType.MANNEQUIN)
+            return;
+
         var ourLocation = player.getLocation();
         var distance = executorHub.getControlDistance();
 
@@ -128,12 +133,16 @@ public class ByNameExecutor extends AbstractExecutor
             return false;
 
         var entityName = mannequin.customName();
-        var disguiseName = state.disguisePropertyHandler().getOr(PropertyNames.ENTITY_CUSTOM_NAME, Component.empty());
+        var entityDescription = mannequin.getDescription();
 
-        if (entityName == null)
-            return disguiseName.equals(Component.empty());
+        var disguiseName = state.disguisePropertyHandler().getOr(PropertyNames.ENTITY_CUSTOM_NAME, null);
+        var disguiseDescription = state.disguisePropertyHandler().getOr(PropertyNames.MANNEQUIN_NPC_DESCRIPTION, null);
 
-        return entityName.equals(disguiseName);
+        if (entityName == null && entityDescription == null)
+            return disguiseName == null && disguiseDescription == null;
+
+        return (entityName == null ? disguiseName == null : Objects.equals(entityName, disguiseName))
+                && (entityDescription == null ? disguiseDescription == null : Objects.equals(entityDescription, disguiseDescription));
     }
 
     @Override

@@ -1,6 +1,7 @@
 package xyz.nifeather.morph.events.mirror.impl;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Mannequin;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Pose;
@@ -9,7 +10,9 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.events.mirror.ExecutorHub;
+import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.misc.NmsRecord;
+import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 import xyz.nifeather.morph.network.commands.S2C.set.S2CSetSneakingCommand;
 import xyz.nifeather.morph.storage.mirrorlogging.OperationType;
@@ -140,9 +143,30 @@ public abstract class ChainedExecutor extends AbstractExecutor
         var state = morphManager().getDisguiseStateFor(player);
         if (state == null) return;
 
+        if (state.getEntityType() != EntityType.MANNEQUIN)
+            return;
+
         var distance = Math.max(executorHub.getControlDistance(), 5);
-        if (player.getTargetEntity(distance) instanceof Mannequin mannequin)
+        if (player.getTargetEntity(distance) instanceof Mannequin mannequin && filterMannequin(mannequin, state))
             consumer.accept(mannequin);
+    }
+
+    private boolean filterMannequin(@Nullable Mannequin mannequin, DisguiseState state)
+    {
+        if (mannequin == null || !FoliaThreadUtils.isTickThreadFor(mannequin))
+            return false;
+
+        var entityName = mannequin.customName();
+        var entityDescription = mannequin.getDescription();
+
+        var disguiseName = state.disguisePropertyHandler().getOr(PropertyNames.ENTITY_CUSTOM_NAME, null);
+        var disguiseDescription = state.disguisePropertyHandler().getOr(PropertyNames.MANNEQUIN_NPC_DESCRIPTION, null);
+
+        if (entityName == null && entityDescription == null)
+            return disguiseName == null && disguiseDescription == null;
+
+        return (entityName == null ? disguiseName == null : Objects.equals(entityName, disguiseName))
+                && (entityDescription == null ? disguiseDescription == null : Objects.equals(entityDescription, disguiseDescription));
     }
 
     @Override
