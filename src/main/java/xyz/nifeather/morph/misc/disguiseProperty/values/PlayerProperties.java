@@ -72,14 +72,16 @@ public class PlayerProperties extends BaseLivingEntityProperties<Player>
     }
 
     @Override
-    public void validateInput(Map<SingleProperty<?>, Object> result, Player player) throws PropertyValidationException
+    public void validateInput(Map<SingleProperty<?>, Object> result, Player player, boolean ignorePermissions) throws PropertyValidationException
     {
+        super.validateInput(result, player, ignorePermissions);
+
         if (result.containsKey(SKIN))
         {
             var skin = (GameProfile) result.get(SKIN);
             boolean skinMatchesCache = Objects.equals(PlayerSkinProvider.getInstance().getCachedProfile(skin.name()), skin);
 
-            if (!skinMatchesCache && !player.hasPermission(CommonPermissions.DISGUISE_CUSTOM_SKIN))
+            if (!ignorePermissions && !skinMatchesCache && !player.hasPermission(CommonPermissions.DISGUISE_CUSTOM_SKIN))
             {
                 throw PropertyValidationException.forProperty(PropertyNames.PLAYER_SKIN)
                         .byMethod("PlayerProperties#validateInput")
@@ -97,8 +99,6 @@ public class PlayerProperties extends BaseLivingEntityProperties<Player>
                         .create();
             }
         }
-
-        super.validateInput(result, player);
     }
 
     public enum MainHandStatus

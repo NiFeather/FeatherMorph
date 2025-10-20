@@ -894,7 +894,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         provider.setupProperties(state, targetEntity);
 
         // Check property permission in prepare, before we execute anything
-        if (!parameters.propertiesInput.isEmpty() && !player.hasPermission(CommonPermissions.USE_DISGUISE_PROPERTY))
+        if (!parameters.bypassPermission && !parameters.propertiesInput.isEmpty() && !player.hasPermission(CommonPermissions.USE_DISGUISE_PROPERTY))
         {
             throw ParseErrorException.forProperty("any")
                     .withLocalizableMessage(CommandStrings.noPermissionMessage())
@@ -903,7 +903,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         }
 
         // Then apply properties
-        propertyHandler.updateFromPropertiesInput(parameters.propertiesInput, map -> properties.validateInput(map, player));
+        propertyHandler.updateFromPropertiesInput(parameters.propertiesInput, map -> properties.validateInput(map, player, parameters.bypassPermission));
 
         propertyHandler.getAll().forEach((property, value) ->
                 wrapper.writeProperty((SingleProperty<Object>) property, value));

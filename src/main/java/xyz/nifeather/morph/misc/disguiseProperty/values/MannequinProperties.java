@@ -62,8 +62,12 @@ public class MannequinProperties extends BaseLivingEntityProperties<Mannequin>
     }
 
     @Override
-    public void validateInput(Map<SingleProperty<?>, Object> result, Player player) throws PropertyValidationException
+    public void validateInput(Map<SingleProperty<?>, Object> result, Player player, boolean ignorePermissions) throws PropertyValidationException
     {
+        super.validateInput(result, player, ignorePermissions);
+
+        if (ignorePermissions) return;
+
         if (result.containsKey(SKIN) && !player.hasPermission(CommonPermissions.DISGUISE_CUSTOM_SKIN))
         {
             throw PropertyValidationException.forProperty(PropertyNames.MANNEQUIN_SKIN)
@@ -91,7 +95,5 @@ public class MannequinProperties extends BaseLivingEntityProperties<Mannequin>
                     .withMessage("Player don't have permission for setting custom description")
                     .create();
         }
-
-        super.validateInput(result, player);
     }
 }

@@ -111,7 +111,7 @@ public abstract class AbstractProperties<E extends Entity>
         theirHandler.copyTo(ourHandler);
     }
 
-    public void validateInput(Map<SingleProperty<?>, Object> result, Player player) throws PropertyValidationException
+    public void validateInput(Map<SingleProperty<?>, Object> result, Player player, boolean ignorePermissions) throws PropertyValidationException
     {
     }
 }
