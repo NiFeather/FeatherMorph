@@ -64,6 +64,7 @@ public class DisguiseMeta
      * 不带"player:"的玩家伪装名称
      */
     @Expose
+    @Nullable
     public String playerDisguiseTargetName;
 
     public DisguiseMeta(@NotNull String rawIdentifier, DisguiseTypes disguiseType)

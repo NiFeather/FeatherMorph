@@ -4,6 +4,7 @@ import org.bukkit.entity.Axolotl;
 import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xyz.nifeather.morph.misc.DisguiseMeta;
 import xyz.nifeather.morph.misc.disguiseProperty.*;
 import xyz.nifeather.morph.utilities.DisguiseUtils;
 
@@ -44,7 +45,7 @@ public class AxolotlProperties extends BaseLivingEntityProperties<Axolotl>
     }
 
     @Override
-    public void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull Axolotl axolotl)
+    public void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull Axolotl axolotl)
     {
         propertyHandler.set(VARIANT, axolotl.getVariant());
     }

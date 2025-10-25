@@ -4,6 +4,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Zombie;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xyz.nifeather.morph.misc.DisguiseMeta;
 import xyz.nifeather.morph.misc.disguiseProperty.*;
 
 public class ZombieProperties extends BaseLivingEntityProperties<Zombie>
@@ -23,7 +24,7 @@ public class ZombieProperties extends BaseLivingEntityProperties<Zombie>
     }
 
     @Override
-    protected void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull Zombie targetEntity)
+    protected void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull Zombie targetEntity)
     {
         propertyHandler.set(IS_BABY, !targetEntity.isAdult());
     }

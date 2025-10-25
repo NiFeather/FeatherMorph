@@ -5,6 +5,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Villager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xyz.nifeather.morph.misc.DisguiseMeta;
 import xyz.nifeather.morph.misc.disguiseProperty.*;
 import xyz.nifeather.morph.utilities.DisguiseUtils;
 
@@ -51,7 +52,7 @@ public class VillagerProperties extends BaseLivingEntityProperties<Villager>
     }
 
     @Override
-    protected void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull Villager targetEntity)
+    protected void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull Villager targetEntity)
     {
         propertyHandler.set(TYPE, targetEntity.getVillagerType());
         propertyHandler.set(PROFESSION, targetEntity.getProfession());

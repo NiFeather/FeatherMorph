@@ -8,6 +8,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import xyz.nifeather.morph.messages.strings.CommandStrings;
 import xyz.nifeather.morph.misc.DisguiseEquipment;
+import xyz.nifeather.morph.misc.DisguiseMeta;
 import xyz.nifeather.morph.misc.disguiseProperty.*;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 
@@ -32,7 +33,7 @@ public abstract class BaseLivingEntityProperties<E extends Entity> extends Abstr
     public final SingleProperty<Boolean> DISPLAY_DISGUISE_EQUIPMENT = SingleProperty.of(PropertyNames.ENTITY_DISPLAY_DISGUISE_EQUIPMENT, false, InputHandles::readBooleanStrict, OutputHandles::writeBoolean, true);
 
     @Override
-    protected void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull E targetEntity)
+    protected void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull E targetEntity)
     {
         propertyHandler.set(CUSTOM_NAME_VISIBLE, targetEntity.isCustomNameVisible());
 

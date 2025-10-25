@@ -5,6 +5,7 @@ import org.bukkit.entity.Llama;
 import org.bukkit.entity.Llama.Color;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xyz.nifeather.morph.misc.DisguiseMeta;
 import xyz.nifeather.morph.misc.disguiseProperty.*;
 import xyz.nifeather.morph.utilities.DisguiseUtils;
 
@@ -45,7 +46,7 @@ public class LlamaProperties extends BaseLivingEntityProperties<Llama>
     }
 
     @Override
-    protected void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull Llama llama)
+    protected void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull Llama llama)
     {
         propertyHandler.set(COLOR, llama.getColor());
     }

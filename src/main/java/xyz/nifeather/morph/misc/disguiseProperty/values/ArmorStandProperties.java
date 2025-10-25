@@ -11,6 +11,7 @@ import xiamomc.pluginbase.Bindables.Bindable;
 import xyz.nifeather.morph.api.FeatherMorphAPI;
 import xyz.nifeather.morph.config.ConfigOption;
 import xyz.nifeather.morph.config.MorphConfigManager;
+import xyz.nifeather.morph.misc.DisguiseMeta;
 import xyz.nifeather.morph.misc.disguiseProperty.*;
 
 public class ArmorStandProperties extends BaseLivingEntityProperties<ArmorStand>
@@ -64,7 +65,7 @@ public class ArmorStandProperties extends BaseLivingEntityProperties<ArmorStand>
     }
 
     @Override
-    public void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull ArmorStand armorStand)
+    public void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull ArmorStand armorStand)
     {
         propertyHandler.set(SHOW_ARMS, armorStand.hasArms());
         propertyHandler.set(HAS_BASE_PLATE, armorStand.hasBasePlate());

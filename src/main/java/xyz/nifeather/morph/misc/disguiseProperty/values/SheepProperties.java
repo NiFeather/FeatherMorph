@@ -5,6 +5,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Sheep;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xyz.nifeather.morph.misc.DisguiseMeta;
 import xyz.nifeather.morph.misc.disguiseProperty.*;
 
 import java.util.Arrays;
@@ -26,7 +27,7 @@ public class SheepProperties extends BaseLivingEntityProperties<Sheep>
     }
 
     @Override
-    protected void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull Sheep targetEntity)
+    protected void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull Sheep targetEntity)
     {
         if (targetEntity.getColor() != null)
             propertyHandler.set(DYE_COLOR, targetEntity.getColor());

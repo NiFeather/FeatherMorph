@@ -5,6 +5,7 @@ import org.bukkit.entity.Panda;
 import org.bukkit.entity.Panda.Gene;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xyz.nifeather.morph.misc.DisguiseMeta;
 import xyz.nifeather.morph.misc.disguiseProperty.*;
 import xyz.nifeather.morph.utilities.DisguiseUtils;
 
@@ -50,7 +51,7 @@ public class PandaProperties extends BaseLivingEntityProperties<Panda>
     }
 
     @Override
-    protected void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull Panda targetEntity)
+    protected void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull Panda targetEntity)
     {
         propertyHandler.set(MAIN_GENE, targetEntity.getMainGene());
         propertyHandler.set(HIDDEN_GENE, targetEntity.getHiddenGene());

@@ -4,6 +4,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Goat;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xyz.nifeather.morph.misc.DisguiseMeta;
 import xyz.nifeather.morph.misc.disguiseProperty.*;
 import xyz.nifeather.morph.utilities.DisguiseUtils;
 
@@ -29,7 +30,7 @@ public class GoatProperties extends BaseLivingEntityProperties<Goat>
     }
 
     @Override
-    protected void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull Goat goat)
+    protected void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull Goat goat)
     {
         propertyHandler.set(HAS_LEFT_HORN, goat.hasLeftHorn());
         propertyHandler.set(HAS_RIGHT_HORN, goat.hasRightHorn());

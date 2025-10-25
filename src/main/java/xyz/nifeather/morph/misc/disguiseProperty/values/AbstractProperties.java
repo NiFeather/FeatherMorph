@@ -7,7 +7,9 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.api.FeatherMorphAPI;
+import xyz.nifeather.morph.misc.DisguiseMeta;
 import xyz.nifeather.morph.misc.DisguiseState;
+import xyz.nifeather.morph.misc.DisguiseTypes;
 import xyz.nifeather.morph.misc.disguiseProperty.*;
 
 import java.util.Map;
@@ -92,15 +94,23 @@ public abstract class AbstractProperties<E extends Entity>
             return;
         }
 
+        var disguiseMeta = new DisguiseMeta(state.getDisguiseIdentifier(), DisguiseTypes.fromId(state.getDisguiseIdentifier()));
+
         var cast = tryCastEntity(targetEntity);
 
         if (cast != null)
-            setupPropertiesFromEntity(state.disguisePropertyHandler(), cast);
+            setupPropertiesFromEntity(disguiseMeta, state.disguisePropertyHandler(), cast);
         else
             setupDefaultProperties(state.disguisePropertyHandler());
     }
 
-    protected abstract void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull E targetEntity);
+    /**
+     * Setup property for the given disguise from the given entity
+     * @param meta The matching {@link DisguiseMeta}
+     * @param propertyHandler The {@link PropertyHandler} for the given disguise
+     * @param targetEntity The targeted entity
+     */
+    protected abstract void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull E targetEntity);
     protected abstract void setupDefaultProperties(PropertyHandler propertyHandler);
 
     protected void setupFromOtherDisguise(DisguiseState ourState, DisguiseState theirState)

@@ -9,6 +9,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.messages.strings.CommandStrings;
+import xyz.nifeather.morph.misc.DisguiseMeta;
 import xyz.nifeather.morph.misc.disguiseProperty.*;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 import xyz.nifeather.morph.utilities.GameProfileUtils;
@@ -42,7 +43,7 @@ public class MannequinProperties extends BaseLivingEntityProperties<Mannequin>
     }
 
     @Override
-    protected void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull Mannequin targetEntity)
+    protected void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull Mannequin targetEntity)
     {
         propertyHandler.set(SKIN, targetEntity.getProfile());
 
@@ -52,7 +53,7 @@ public class MannequinProperties extends BaseLivingEntityProperties<Mannequin>
 
         //propertyHandler.set(IMMOVABLE, targetEntity.isImmovable());
 
-        super.setupPropertiesFromEntity(propertyHandler, targetEntity);
+        super.setupPropertiesFromEntity(meta, propertyHandler, targetEntity);
     }
 
     @Override

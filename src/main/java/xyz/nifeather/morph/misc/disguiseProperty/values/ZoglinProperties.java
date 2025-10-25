@@ -4,6 +4,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Zoglin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xyz.nifeather.morph.misc.DisguiseMeta;
 import xyz.nifeather.morph.misc.disguiseProperty.*;
 
 public class ZoglinProperties extends BaseLivingEntityProperties<Zoglin>
@@ -23,7 +24,7 @@ public class ZoglinProperties extends BaseLivingEntityProperties<Zoglin>
     }
 
     @Override
-    protected void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull Zoglin targetEntity)
+    protected void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull Zoglin targetEntity)
     {
         propertyHandler.set(IS_BABY, !targetEntity.isAdult());
     }

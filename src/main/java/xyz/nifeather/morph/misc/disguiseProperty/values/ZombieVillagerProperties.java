@@ -6,6 +6,7 @@ import org.bukkit.entity.Villager;
 import org.bukkit.entity.ZombieVillager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xyz.nifeather.morph.misc.DisguiseMeta;
 import xyz.nifeather.morph.misc.disguiseProperty.*;
 import xyz.nifeather.morph.utilities.DisguiseUtils;
 
@@ -53,7 +54,7 @@ public class ZombieVillagerProperties extends BaseLivingEntityProperties<ZombieV
     }
 
     @Override
-    protected void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull ZombieVillager targetEntity)
+    protected void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull ZombieVillager targetEntity)
     {
         propertyHandler.set(TYPE, targetEntity.getVillagerType());
         propertyHandler.set(PROFESSION, targetEntity.getVillagerProfession());

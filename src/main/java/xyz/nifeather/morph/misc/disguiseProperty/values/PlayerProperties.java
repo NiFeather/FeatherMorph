@@ -9,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.messages.strings.CommandStrings;
 import xyz.nifeather.morph.messages.strings.ExceptionStrings;
+import xyz.nifeather.morph.misc.DisguiseMeta;
 import xyz.nifeather.morph.misc.disguiseProperty.*;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 import xyz.nifeather.morph.misc.skins.PlayerSkinProvider;
@@ -59,11 +60,13 @@ public class PlayerProperties extends BaseLivingEntityProperties<Player>
     }
 
     @Override
-    protected void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull Player targetEntity)
+    protected void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull Player targetEntity)
     {
         propertyHandler.set(MAIN_HAND, MainHandStatus.fromBukkitHand(targetEntity.getMainHand()));
         propertyHandler.set(STUCKED_ARROWS, targetEntity.getArrowsInBody());
-        propertyHandler.set(SKIN, GameProfileUtils.convertPlayerProfile(targetEntity.getPlayerProfile()));
+
+        if (meta.playerDisguiseTargetName != null && meta.playerDisguiseTargetName.equalsIgnoreCase(targetEntity.getName()))
+            propertyHandler.set(SKIN, GameProfileUtils.convertPlayerProfile(targetEntity.getPlayerProfile()));
     }
 
     @Override

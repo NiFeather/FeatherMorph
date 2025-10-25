@@ -6,6 +6,7 @@ import org.bukkit.entity.Cow;
 import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xyz.nifeather.morph.misc.DisguiseMeta;
 import xyz.nifeather.morph.misc.disguiseProperty.*;
 import xyz.nifeather.morph.utilities.DisguiseUtils;
 
@@ -43,7 +44,7 @@ public class CowProperties extends BaseLivingEntityProperties<Cow>
     }
 
     @Override
-    protected void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull Cow cow)
+    protected void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull Cow cow)
     {
         propertyHandler.set(VARIANT, cow.getVariant());
     }

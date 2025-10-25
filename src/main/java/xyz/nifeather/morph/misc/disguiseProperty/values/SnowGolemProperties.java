@@ -4,6 +4,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Snowman;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xyz.nifeather.morph.misc.DisguiseMeta;
 import xyz.nifeather.morph.misc.disguiseProperty.*;
 
 public class SnowGolemProperties extends BaseLivingEntityProperties<Snowman>
@@ -23,7 +24,7 @@ public class SnowGolemProperties extends BaseLivingEntityProperties<Snowman>
     }
 
     @Override
-    protected void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull Snowman targetEntity)
+    protected void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull Snowman targetEntity)
     {
         propertyHandler.set(HAS_PUMPKIN, !targetEntity.isDerp());
     }

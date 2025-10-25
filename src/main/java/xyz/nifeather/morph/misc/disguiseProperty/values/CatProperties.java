@@ -7,6 +7,7 @@ import org.bukkit.entity.Cat;
 import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xyz.nifeather.morph.misc.DisguiseMeta;
 import xyz.nifeather.morph.misc.disguiseProperty.*;
 import xyz.nifeather.morph.utilities.DisguiseUtils;
 import xyz.nifeather.morph.utilities.Uuids;
@@ -57,7 +58,7 @@ public class CatProperties extends BaseLivingEntityProperties<Cat>
     }
 
     @Override
-    protected void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull Cat cat)
+    protected void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull Cat cat)
     {
         propertyHandler.set(CAT_VARIANT, cat.getCatType());
         propertyHandler.set(COLLAR_COLOR, cat.getCollarColor());

@@ -3,9 +3,8 @@ package xyz.nifeather.morph.misc.disguiseProperty.values;
 import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xyz.nifeather.morph.misc.DisguiseMeta;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
-
-import java.util.Map;
 
 public class FallbackProperties extends BaseLivingEntityProperties<Entity>
 {
@@ -16,9 +15,9 @@ public class FallbackProperties extends BaseLivingEntityProperties<Entity>
     }
 
     @Override
-    protected void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull Entity targetEntity)
+    protected void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull Entity targetEntity)
     {
-        super.setupPropertiesFromEntity(propertyHandler, targetEntity);
+        super.setupPropertiesFromEntity(meta, propertyHandler, targetEntity);
     }
 
     @Override
