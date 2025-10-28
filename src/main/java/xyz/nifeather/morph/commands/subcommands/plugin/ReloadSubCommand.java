@@ -21,7 +21,7 @@ import xyz.nifeather.morph.messages.strings.CommandStrings;
 import xyz.nifeather.morph.messages.strings.HelpStrings;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.MorphMessageStore;
-import xyz.nifeather.morph.messages.vanilla.VanillaMessageStore;
+import xyz.nifeather.morph.messages.vanilla.MasterVanillaMessageStore;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 import xyz.nifeather.morph.misc.skins.PlayerSkinProvider;
 import xyz.nifeather.morph.network.multiInstance.MultiInstanceService;
@@ -61,7 +61,7 @@ public class ReloadSubCommand extends BrigadierCommand
     private MessageStore<?> messageStore;
 
     @Resolved
-    private VanillaMessageStore vanillaMessageStore;
+    private MasterVanillaMessageStore masterVanillaMessageStore;
 
     @Resolved
     private SkillsConfigurationStoreNew skills;
@@ -140,7 +140,7 @@ public class ReloadSubCommand extends BrigadierCommand
             else
                 messageStore.reloadConfiguration();
 
-            vanillaMessageStore.reloadConfiguration();
+            masterVanillaMessageStore.reloadConfiguration();
         }
 
         var event = new ConfigurationReloadEvent(reloadsData, reloadsMessage);
