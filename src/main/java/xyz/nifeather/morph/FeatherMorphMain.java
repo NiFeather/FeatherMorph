@@ -25,7 +25,7 @@ import xyz.nifeather.morph.interfaces.IManagePlayerData;
 import xyz.nifeather.morph.interfaces.IManageRequests;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.MorphMessageStore;
-import xyz.nifeather.morph.messages.vanilla.VanillaMessageStore;
+import xyz.nifeather.morph.messages.vanilla.MasterVanillaMessageStore;
 import xyz.nifeather.morph.misc.ModNetworkingHelper;
 import xyz.nifeather.morph.misc.PlayerOperationSimulator;
 import xyz.nifeather.morph.misc.RecipeConfigHandle;
@@ -102,7 +102,7 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
 
     private AbilityManager abilityManager;
 
-    private VanillaMessageStore vanillaMessageStore;
+    private MasterVanillaMessageStore masterVanillaMessageStore;
 
     private MorphMessageStore messageStore;
 
@@ -258,7 +258,7 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
         dependencyManager.cache(abilityManager = new AbilityManager());
         dependencyManager.cache(new RevealingHandler());
 
-        dependencyManager.cache(vanillaMessageStore = new VanillaMessageStore());
+        dependencyManager.cache(masterVanillaMessageStore = new MasterVanillaMessageStore());
 
         MorphConfigManager config;
         dependencyManager.cacheAs(MessageStore.class, messageStore = new MorphMessageStore());

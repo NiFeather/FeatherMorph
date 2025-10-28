@@ -31,7 +31,7 @@ import xyz.nifeather.morph.config.ConfigOption;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.MorphStrings;
-import xyz.nifeather.morph.messages.vanilla.VanillaMessageStore;
+import xyz.nifeather.morph.messages.vanilla.MasterVanillaMessageStore;
 import xyz.nifeather.morph.misc.DisguiseTypes;
 import xyz.nifeather.morph.misc.ModNetworkingHelper;
 import xyz.nifeather.morph.misc.OfflineDisguiseResult;
@@ -60,7 +60,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
     private SkillManager skillHandler;
 
     @Resolved(shouldSolveImmediately = true)
-    private VanillaMessageStore vanillaMessageStore;
+    private MasterVanillaMessageStore masterVanillaMessageStore;
 
     @Resolved(shouldSolveImmediately = true)
     private RevealingHandler revealingHandler;
@@ -257,7 +257,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
     public void onClientOptionChanged(PlayerClientOptionsChangeEvent e)
     {
         var locale = e.getLocale();
-        vanillaMessageStore.getOrCreateSubStore(locale);
+        masterVanillaMessageStore.getOrCreateSubStore(locale);
 
         if (e.hasLocaleChanged())
         {

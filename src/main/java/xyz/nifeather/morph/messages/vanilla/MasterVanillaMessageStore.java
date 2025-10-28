@@ -9,12 +9,13 @@ import xiamomc.pluginbase.Bindables.Bindable;
 import xyz.nifeather.morph.config.ConfigOption;
 import xyz.nifeather.morph.config.MorphConfigManager;
 
+import java.util.Locale;
 import java.util.Map;
 
 /**
  * Minecraft语言相关
  */
-public class VanillaMessageStore extends BasicVanillaMessageStore
+public class MasterVanillaMessageStore extends BasicVanillaMessageStore //todo: MasterVanillaMessageStore should not extends BasicVanillaMessageStore
 {
     @Initializer
     private void load(MorphConfigManager config)
@@ -33,9 +34,13 @@ public class VanillaMessageStore extends BasicVanillaMessageStore
 
     private final Map<String, VanillaMessageSubStore> subStores = new Object2ObjectOpenHashMap<>();
 
+    @Nullable
     public synchronized BasicVanillaMessageStore getOrCreateSubStore(String locale)
     {
-        if (locale.equalsIgnoreCase("en_us")) return this;
+        locale = locale.toLowerCase(Locale.ROOT);
+
+        if (locale.equalsIgnoreCase("en_us"))
+            return this; //todo: return a real en_us substore, instead of the MasterVanillaMessageStore
 
         VanillaMessageSubStore store = null;
 
@@ -64,18 +69,23 @@ public class VanillaMessageStore extends BasicVanillaMessageStore
     @Override
     public String get(String key, @Nullable String defaultValue, @Nullable String locale)
     {
-        if (locale == null || locale.isBlank() || locale.isEmpty())
+        if (locale == null || locale.isBlank())
         {
             logger.warn("Resolving key " + key + " for null or empty locale");
             locale = "en_us";
         }
+
+        locale = locale.toLowerCase(Locale.ROOT);
 
         if (locale.equals("en_us"))
             return super.get(key, defaultValue, null);
 
         var store = this.getOrCreateSubStore(locale);
 
-        return store.get(key, defaultValue, locale);
+        if (store == null || store.equals(this))
+            return super.get(key, defaultValue, null);
+        else
+            return store.get(key, defaultValue, locale);
     }
 
     @Override

@@ -21,7 +21,7 @@ import xyz.nifeather.morph.config.ConfigOption;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.MorphStrings;
-import xyz.nifeather.morph.messages.vanilla.VanillaMessageStore;
+import xyz.nifeather.morph.messages.vanilla.MasterVanillaMessageStore;
 import xyz.nifeather.morph.misc.*;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.ParseErrorException;
@@ -394,7 +394,7 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
     }
 
     @Resolved
-    private VanillaMessageStore vanillaMessageStore;
+    private MasterVanillaMessageStore masterVanillaMessageStore;
 
     @Override
     public Component getDisplayName(String disguiseIdentifier, String locale)
@@ -404,6 +404,6 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
         if (type == null)
             return Component.text("???");
         else
-            return vanillaMessageStore.getComponent(type.translationKey(), null, locale);
+            return masterVanillaMessageStore.getComponent(type.translationKey(), null, locale);
     }
 }
