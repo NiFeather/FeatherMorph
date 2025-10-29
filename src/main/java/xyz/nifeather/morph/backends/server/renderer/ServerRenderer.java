@@ -172,7 +172,7 @@ public class ServerRenderer extends MorphPluginObject implements Listener
         }
         catch (BuildFailedException e)
         {
-            logger.error("PANIC! Can't undisguise player, BuildFailedException has been thrown!", e);
+            logger.error("Can't undisguise player, BuildFailedException has been thrown!", e);
             return;
         }
 

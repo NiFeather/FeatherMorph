@@ -10,6 +10,7 @@ import xyz.nifeather.morph.backends.server.ServerBackend;
 import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.types.EntityWatcher;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.RenderRegistry;
+import xyz.nifeather.morph.misc.BuildFailedException;
 
 import java.util.List;
 
@@ -70,6 +71,16 @@ public class SpawnPacketHandler extends ProtocolListener
                 backend.serverRenderer.refreshStateForPlayer(disguisedPlayer, List.of(affectedPlayer));
                 packetEvent.setCancelled(true);
             }
+        }
+        catch (BuildFailedException e)
+        {
+            if (!e.critical())
+            {
+                logger.warn("Renderer failed to build spawn packets, ignoring: " + e.getMessage());
+                return;
+            }
+
+            handleException(getPlayerFrom(packet.getEntityId()), bindingWatcher, e);
         }
         catch (Throwable t)
         {

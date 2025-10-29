@@ -179,7 +179,9 @@ public class EntityWatcher extends SingleWatcher
         }
         catch (TimeoutException e)
         {
-            throw new BuildFailedException("Waiting too long for player '%s'!".formatted(getBindingPlayer().getName()));
+            //仅仅是服务器太慢导致的等待超时，不要立马取消玩家的变形会话
+            throw new BuildFailedException("Waiting too long for server thread of player %s to respond!".formatted(getBindingPlayer().getName()), e)
+                    .critical(false);
         }
         catch (InterruptedException e)
         {

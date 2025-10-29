@@ -195,6 +195,12 @@ public class ServerBackend extends DisguiseBackend<ServerDisguise, ServerDisguis
         }
         catch (BuildFailedException e)
         {
+            if (!e.critical())
+            {
+                logger.warn("Renderer failed to build spawn packets, ignoring: " + e.getMessage());
+                return;
+            }
+
             throw ExecutionErrorException.forMethod("ServerBackend#disguise")
                     .causedBy(e)
                     .withMessage("Renderer failed to build spawn packets")

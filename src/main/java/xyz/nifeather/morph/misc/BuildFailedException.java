@@ -11,4 +11,18 @@ public class BuildFailedException extends Exception
     {
         super(msg, t);
     }
+
+    // Uhhh this might not be a good idea, as this exception should always trigger a panic or something?
+    private boolean critical;
+
+    public boolean critical()
+    {
+        return critical;
+    }
+
+    public BuildFailedException critical(boolean isCritical)
+    {
+        this.critical = isCritical;
+        return this;
+    }
 }
