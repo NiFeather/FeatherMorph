@@ -37,7 +37,6 @@ public class TropicalFishWatcher extends LivingEntityWatcher
 
         if (property.equals(tropicalProperties.BODY_COLOR))
         {
-            logger.info("WRITE BODY COLOR " + value);
             baseColor = (DyeColor) value;
             updatePackedData();
         }
