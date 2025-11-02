@@ -1,23 +1,16 @@
-package xyz.nifeather.morph.events.mirror.impl;
+package xyz.nifeather.morph.mirror.impl.executors;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Mannequin;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.Pose;
+import org.bukkit.entity.*;
 import org.bukkit.event.block.Action;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.FeatherMorphMain;
-import xyz.nifeather.morph.events.mirror.ExecutorHub;
+import xyz.nifeather.morph.mirror.ExecutorHub;
 import xyz.nifeather.morph.misc.DisguiseState;
-import xyz.nifeather.morph.misc.NmsRecord;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
-import xyz.nifeather.morph.misc.permissions.CommonPermissions;
-import xyz.nifeather.morph.network.commands.S2C.set.S2CSetSneakingCommand;
 import xyz.nifeather.morph.storage.mirrorlogging.OperationType;
 import xyz.nifeather.morph.utilities.FoliaThreadUtils;
-import xyz.nifeather.morph.utilities.ItemUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,21 +24,21 @@ public abstract class ChainedExecutor extends AbstractExecutor
         super(executorHub);
     }
 
-    protected final ThreadLocal<List<Player>> currentSimulateChain = ThreadLocal.withInitial(ArrayList::new);
+    protected final ThreadLocal<List<LivingEntity>> currentSimulateChain = ThreadLocal.withInitial(ArrayList::new);
 
-    protected boolean isInChain(Player source)
+    protected boolean isInChain(LivingEntity source)
     {
         var list = currentSimulateChain.get();
         return list != null && list.contains(source);
     }
 
-    protected boolean isLastInChain(Player player)
+    protected boolean isLastInChain(LivingEntity player)
     {
         var list = currentSimulateChain.get();
         return list != null && (list.indexOf(player) + 1 == list.size());
     }
 
-    protected void runIfChainable(Player source, Consumer<Player> chainConsumer)
+    protected void runIfChainable(Player source, Consumer<LivingEntity> chainConsumer)
     {
         var currentChain = currentSimulateChain.get();
 
@@ -78,10 +71,11 @@ public abstract class ChainedExecutor extends AbstractExecutor
 
     /**
      * 寻找给定玩家的下一个可控制目标
+     *
      * @param pendingChain 可以用来参考的模拟链，该链可能未完成
      */
     @Nullable
-    protected abstract Player findNextControllablePlayerFrom(Player source, List<Player> pendingChain);
+    protected abstract LivingEntity findNextControllableEntityFrom(Player source, List<LivingEntity> pendingChain);
 
     /**
      * 构建包含发起玩家在内的模拟链
@@ -90,16 +84,16 @@ public abstract class ChainedExecutor extends AbstractExecutor
      * @param source
      * @return
      */
-    protected List<Player> buildSimulateChain(Player source)
+    protected List<LivingEntity> buildSimulateChain(Player source)
     {
-        List<Player> chain = new ObjectArrayList<>();
+        List<LivingEntity> chain = new ObjectArrayList<>();
 
         chain.add(source);
 
         Player current = source;
         while (current != null)
         {
-            var next = findNextControllablePlayerFrom(current, chain);
+            var next = findNextControllableEntityFrom(current, chain);
 
             // 我们找到了调用链中的玩家！退出以防止死循环
             if (chain.contains(next))
@@ -108,7 +102,12 @@ public abstract class ChainedExecutor extends AbstractExecutor
             if (next != null)
             {
                 chain.add(next);
-                current = next;
+
+                // Only continue if current entity is player
+                if (next instanceof Player nextAsPlayer)
+                    current = nextAsPlayer;
+                else
+                    current = null;
             }
             else
             {
@@ -124,36 +123,16 @@ public abstract class ChainedExecutor extends AbstractExecutor
     @Override
     public void onSneak(Player source, boolean sneaking)
     {
-        applyToNearByMannequin(source, mannequin -> mannequin.setPose(sneaking ? Pose.SNEAKING : Pose.STANDING));
-
         this.runIfChainable(source, p ->
         {
-            p.setSneaking(sneaking);
-            clientHandler().sendCommand(p, new S2CSetSneakingCommand(sneaking));
-
+            executorHub.lookupOperationHandle(p).simulateSneak(p, sneaking);
             logOperation(source, p, OperationType.ToggleSneak);
         });
     }
 
-    protected void applyToNearByMannequin(Player player, Consumer<Mannequin> consumer)
+    protected boolean filterMannequin(@Nullable Mannequin mannequin, DisguiseState state)
     {
-        if (!player.hasPermission(CommonPermissions.MIRROR_MANNEQUIN))
-            return;
-
-        var state = morphManager().getDisguiseStateFor(player);
-        if (state == null) return;
-
-        if (state.getEntityType() != EntityType.MANNEQUIN)
-            return;
-
-        var distance = Math.max(executorHub.getControlDistance(), 5);
-        if (player.getTargetEntity(distance) instanceof Mannequin mannequin && filterMannequin(mannequin, state))
-            consumer.accept(mannequin);
-    }
-
-    private boolean filterMannequin(@Nullable Mannequin mannequin, DisguiseState state)
-    {
-        if (mannequin == null || !FoliaThreadUtils.isTickThreadFor(mannequin))
+        if (!FoliaThreadUtils.isTickThreadFor(mannequin))
             return false;
 
         var entityName = mannequin.customName();
@@ -174,14 +153,7 @@ public abstract class ChainedExecutor extends AbstractExecutor
     {
         this.runIfChainable(player, targetPlayer ->
         {
-            var equipment = targetPlayer.getEquipment();
-
-            var mainHandItem = equipment.getItemInMainHand();
-            var offhandItem = equipment.getItemInOffHand();
-
-            equipment.setItemInMainHand(offhandItem);
-            equipment.setItemInOffHand(mainHandItem);
-
+            executorHub.lookupOperationHandle(targetPlayer).simulateSwap(targetPlayer);
             logOperation(player, targetPlayer, OperationType.SwapHand);
         });
     }
@@ -191,7 +163,7 @@ public abstract class ChainedExecutor extends AbstractExecutor
     {
         this.runIfChainable(player, targetPlayer ->
         {
-            targetPlayer.getInventory().setHeldItemSlot(slot);
+            executorHub.lookupOperationHandle(targetPlayer).scrollHotbar(targetPlayer, slot);
             logOperation(player, targetPlayer, OperationType.HotbarChange);
         });
     }
@@ -199,21 +171,10 @@ public abstract class ChainedExecutor extends AbstractExecutor
     @Override
     public void onStopUsingItem(Player player, ItemStack itemStack)
     {
-        var ourHandItem = itemStack.getType();
-
         this.runIfChainable(player, targetPlayer ->
         {
-            //如果目标玩家正在使用的物品和我们当前释放的物品一样，并且释放的物品拥有使用动画，那么调用releaseUsingItem
-            var nmsPlayer = NmsRecord.ofPlayer(targetPlayer);
-
-            if (nmsPlayer.isUsingItem()
-                    && ItemUtils.isContinuousUsable(ourHandItem)
-                    && nmsPlayer.getUseItem().getBukkitStack().getType() == ourHandItem)
-            {
-                nmsPlayer.releaseUsingItem();
-
-                logOperation(player, targetPlayer, OperationType.ReleaseUsingItem);
-            }
+            executorHub.lookupOperationHandle(targetPlayer).releaseUsingItem(targetPlayer, itemStack);
+            logOperation(player, targetPlayer, OperationType.ReleaseUsingItem);
         });
     }
 

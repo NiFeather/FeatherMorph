@@ -1,13 +1,14 @@
-package xyz.nifeather.morph.events.mirror.impl;
+package xyz.nifeather.morph.mirror.impl.executors;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.world.level.GameType;
 import org.bukkit.GameMode;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.events.PlayerTracker;
-import xyz.nifeather.morph.events.mirror.ExecutorHub;
+import xyz.nifeather.morph.mirror.ExecutorHub;
 import xyz.nifeather.morph.misc.NmsRecord;
 import xyz.nifeather.morph.storage.mirrorlogging.OperationType;
 import xyz.nifeather.morph.utilities.FoliaThreadUtils;
@@ -26,7 +27,7 @@ public class ByRangeExecutor extends ChainedExecutor
     }
 
     @Override
-    protected @Nullable Player findNextControllablePlayerFrom(Player source, List<Player> pendingChain)
+    protected @Nullable LivingEntity findNextControllableEntityFrom(Player source, List<LivingEntity> pendingChain)
     {
         var index = pendingChain.indexOf(source);
 
@@ -37,10 +38,10 @@ public class ByRangeExecutor extends ChainedExecutor
     }
 
     @Override
-    protected List<Player> buildSimulateChain(Player source)
+    protected List<LivingEntity> buildSimulateChain(Player source)
     {
         // 获取控制目标
-        var targetName = getTargetControlFor(source);
+        var targetName = executorHub.getControl(source);
         if (targetName == null) // 没有目标 -> 没有伪装，我们要查找附近伪装为来源的玩家
             targetName = source.getName();
 
@@ -80,7 +81,7 @@ public class ByRangeExecutor extends ChainedExecutor
                 logger.error("Failed to build byRange simulate chain", e);
         }
 
-        var list = new ObjectArrayList<Player>();
+        var list = new ObjectArrayList<LivingEntity>();
 
         list.add(source);
         list.addAll(matchedPlayers);
@@ -129,7 +130,7 @@ public class ByRangeExecutor extends ChainedExecutor
     }
 
     @Override
-    public boolean onHurtEntity(Player damager, Player hurted)
+    public boolean onHurtEntity(Player damager, LivingEntity hurted)
     {
         return !isInChain(damager) || !isInChain(hurted);
     }

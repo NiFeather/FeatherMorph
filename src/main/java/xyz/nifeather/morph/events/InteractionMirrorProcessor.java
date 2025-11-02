@@ -2,18 +2,13 @@ package xyz.nifeather.morph.events;
 
 import io.papermc.paper.event.player.PlayerArmSwingEvent;
 import io.papermc.paper.event.player.PlayerStopUsingItemEvent;
-import org.bukkit.craftbukkit.entity.CraftMannequin;
-import org.bukkit.entity.Mannequin;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Pose;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.*;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
@@ -23,10 +18,9 @@ import xyz.nifeather.morph.api.events.gameplay.PlayerMorphEvent;
 import xyz.nifeather.morph.api.events.gameplay.PlayerUnMorphEvent;
 import xyz.nifeather.morph.config.ConfigOption;
 import xyz.nifeather.morph.config.MorphConfigManager;
-import xyz.nifeather.morph.events.mirror.ExecutorHub;
+import xyz.nifeather.morph.mirror.ExecutorHub;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.misc.DisguiseTypes;
-import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -177,11 +171,6 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
         {
             return values().stream().map(String::toLowerCase).toList();
         }
-    }
-
-    public record PlayerInfo(@Nullable Player target, @NotNull String targetName)
-    {
-        public static final String notSetStr = "~NOTSET";
     }
 
     //region Morph events

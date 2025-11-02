@@ -1,26 +1,29 @@
-package xyz.nifeather.morph.events.mirror;
+package xyz.nifeather.morph.mirror;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import org.bukkit.event.block.Action;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Bindables.Bindable;
+import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.config.ConfigOption;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.events.InteractionMirrorProcessor;
-import xyz.nifeather.morph.events.mirror.impl.ByNameExecutor;
-import xyz.nifeather.morph.events.mirror.impl.ByRangeExecutor;
-import xyz.nifeather.morph.events.mirror.impl.BySightExecutor;
+import xyz.nifeather.morph.mirror.impl.executors.ByNameExecutor;
+import xyz.nifeather.morph.mirror.impl.executors.ByRangeExecutor;
+import xyz.nifeather.morph.mirror.impl.executors.BySightExecutor;
+import xyz.nifeather.morph.mirror.impl.simulator.FallbackOperationHandle;
+import xyz.nifeather.morph.mirror.impl.simulator.MannequinOperationHandle;
+import xyz.nifeather.morph.mirror.impl.simulator.PlayerOperationHandle;
 import xyz.nifeather.morph.storage.DirectoryStorage;
 import xyz.nifeather.morph.storage.mirrorlogging.MirrorSingleEntry;
 import xyz.nifeather.morph.storage.mirrorlogging.OperationType;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.ParseException;
@@ -56,6 +59,8 @@ public class ExecutorHub extends MorphPluginObject
         config.bind(logOperations, ConfigOption.MIRROR_LOG_OPERATION);
         config.bind(cleanUpDate, ConfigOption.MIRROR_LOG_CLEANUP_DATE);
         config.bind(controlRange, ConfigOption.MIRROR_CONTROL_DISTANCE);
+
+        initOperationHandleMap();
     }
 
     private void update()
@@ -111,6 +116,36 @@ public class ExecutorHub extends MorphPluginObject
     {
         return controlRange.get();
     }
+
+    //region MirrorableEntity lookup
+
+    private final Map<EntityType, IOperationHandle<?>> operationHandleMap = new ConcurrentHashMap<>();
+
+    private void initOperationHandleMap()
+    {
+        operationHandleMap.put(EntityType.PLAYER, new PlayerOperationHandle());
+        operationHandleMap.put(EntityType.MANNEQUIN, new MannequinOperationHandle());
+    }
+
+    /**
+     * @return {@link FallbackOperationHandle} if no simulator matched for the giving entity
+     */
+    @NotNull
+    public <E extends LivingEntity> IOperationHandle<E> lookupOperationHandle(E mirrorableEntity)
+    {
+        for (Map.Entry<EntityType, IOperationHandle<?>> entry : operationHandleMap.entrySet())
+        {
+            if (entry.getKey().equals(mirrorableEntity.getType()))
+                return (IOperationHandle<E>) entry.getValue();
+        }
+
+        if (FeatherMorphMain.getInstance().debugOutputEnabled())
+            logger.error("No simulator found for entity %s".formatted(mirrorableEntity));
+
+        return (IOperationHandle<E>) FallbackOperationHandle.INSTANCE;
+    }
+
+    //endregion MirrorableEntity lookup
 
     //region Operation Logging
 
@@ -233,7 +268,7 @@ public class ExecutorHub extends MorphPluginObject
     }
 
     @NotNull
-    private MirrorSingleEntry getOrCreateEntryFor(Player player, Player targetPlayer, OperationType type)
+    private MirrorSingleEntry getOrCreateEntryFor(Player player, LivingEntity targetPlayer, OperationType type)
     {
         synchronized (tempEntries)
         {
@@ -267,7 +302,7 @@ public class ExecutorHub extends MorphPluginObject
         }
     }
 
-    public void logOperation(Player source, Player targetPlayer, OperationType type)
+    public void logOperation(Player source, LivingEntity targetPlayer, OperationType type)
     {
         if (!logOperations.get()) return;
 

@@ -1,13 +1,15 @@
-package xyz.nifeather.morph.events.mirror.impl;
+package xyz.nifeather.morph.mirror.impl.executors;
 
 import org.bukkit.GameMode;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Mannequin;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
-import xyz.nifeather.morph.events.InteractionMirrorProcessor;
 import xyz.nifeather.morph.events.PlayerTracker;
-import xyz.nifeather.morph.events.mirror.ExecutorHub;
+import xyz.nifeather.morph.mirror.ExecutorHub;
 import xyz.nifeather.morph.storage.mirrorlogging.OperationType;
-import xyz.nifeather.morph.utilities.NmsUtils;
+import xyz.nifeather.morph.utilities.FoliaThreadUtils;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -28,39 +30,40 @@ public class BySightExecutor extends ChainedExecutor
      * 寻找给定玩家的下一个可控制目标
      */
     @Override
-    protected @Nullable Player findNextControllablePlayerFrom(Player source, List<Player> pendingChain)
+    protected @Nullable LivingEntity findNextControllableEntityFrom(Player source, List<LivingEntity> pendingChain)
     {
-        var targetName = getTargetControlFor(source);
-        if (targetName == null)
-            return null;
+        var targetName = executorHub.getControl(source);
+        var state = morphManager().getDisguiseStateFor(source);
+        var lookingAt = source.getTargetEntity(5);
 
-        InteractionMirrorProcessor.PlayerInfo info;
+        LivingEntity targetEntity = null;
 
-        var targetEntity = source.getTargetEntity(5);
-
-        if (!(targetEntity instanceof Player targetPlayer))
-            return null;
-
-        if (!NmsUtils.isTickThreadFor(targetPlayer))
-            return null;
-
-        if  (!playerInDistance(source, targetPlayer))
-            return null;
-
-        var state = morphManager().getDisguiseStateFor(targetPlayer);
-
-        if (state != null && state.getDisguiseIdentifier().equals("player:" + targetName))
-            return targetPlayer;
-        else if (targetPlayer.getName().equals(targetName) && state == null)
-            return targetPlayer;
+        if (state != null && state.getEntityType() == EntityType.MANNEQUIN)
+        {
+            if (lookingAt instanceof Mannequin mannequin && filterMannequin(mannequin, state))
+                targetEntity = mannequin;
+        }
         else
+        {
+            if (!(lookingAt instanceof Player asPlayer) || targetName == null) return null;
+
+            if (asPlayer.getName().equals(targetName) && morphManager().getDisguiseStateFor(asPlayer) == null)
+                targetEntity = asPlayer;
+        }
+
+        if (!FoliaThreadUtils.isTickThreadFor(targetEntity))
             return null;
+
+        if  (!playerInDistance(source, targetEntity))
+            return null;
+
+        return targetEntity;
     }
 
     @Override
-    public boolean onHurtEntity(Player damager, Player hurted)
+    public boolean onHurtEntity(Player damager, LivingEntity hurted)
     {
-        var simulateTarget = findNextControllablePlayerFrom(damager, currentSimulateChain.get());
+        var simulateTarget = findNextControllableEntityFrom(damager, currentSimulateChain.get());
 
         if (simulateTarget == null)
             return false;

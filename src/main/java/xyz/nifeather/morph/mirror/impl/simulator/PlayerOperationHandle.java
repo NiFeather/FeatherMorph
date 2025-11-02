@@ -1,4 +1,4 @@
-package xyz.nifeather.morph.misc;
+package xyz.nifeather.morph.mirror.impl.simulator;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.core.Direction;
@@ -18,6 +18,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -27,15 +28,25 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 import xiamomc.pluginbase.Annotations.Initializer;
+import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.config.ConfigOption;
 import xyz.nifeather.morph.config.MorphConfigManager;
+import xyz.nifeather.morph.mirror.IOperationHandle;
+import xyz.nifeather.morph.mirror.SimulateResult;
+import xyz.nifeather.morph.misc.BlockDestroyHandler;
+import xyz.nifeather.morph.misc.NmsRecord;
+import xyz.nifeather.morph.misc.permissions.CommonPermissions;
+import xyz.nifeather.morph.network.commands.S2C.set.S2CSetSneakingCommand;
+import xyz.nifeather.morph.network.server.MorphClientHandler;
+import xyz.nifeather.morph.utilities.DisguiseUtils;
+import xyz.nifeather.morph.utilities.ItemUtils;
 
 import java.util.Map;
 import java.util.Objects;
 
-public class PlayerOperationSimulator extends MorphPluginObject
+public class PlayerOperationHandle extends MorphPluginObject implements IOperationHandle<Player>
 {
     private final Map<Player, BlockDestroyHandler> playerHandlerMap = new Object2ObjectOpenHashMap<>();
 
@@ -98,6 +109,7 @@ public class PlayerOperationSimulator extends MorphPluginObject
      * @param player 目标玩家
      * @return 操作执行结果
      */
+    @Override
     public SimulateResult simulateLeftClick(Player player)
     {
         //logger.warn("模拟左键！");
@@ -208,6 +220,7 @@ public class PlayerOperationSimulator extends MorphPluginObject
      * @param player 目标玩家
      * @return 操作是否成功
      */
+    @Override
     public SimulateResult simulateRightClick(Player player)
     {
         //logger.warn("正在模拟右键！");
@@ -288,6 +301,67 @@ public class PlayerOperationSimulator extends MorphPluginObject
             return SimulateResult.success(EquipmentSlot.OFF_HAND);
 
         return SimulateResult.fail();
+    }
+
+    @Resolved(shouldSolveImmediately = true)
+    private MorphClientHandler clientHandler;
+
+    @Override
+    public void simulateSneak(Player targetPlayer, boolean sneaking)
+    {
+        targetPlayer.setSneaking(sneaking);
+        clientHandler.sendCommand(targetPlayer, new S2CSetSneakingCommand(sneaking));
+    }
+
+    @Override
+    public void simulateSwap(Player entity)
+    {
+        var equipment = entity.getEquipment();
+
+        var mainHandItem = equipment.getItemInMainHand();
+        var offhandItem = equipment.getItemInOffHand();
+
+        equipment.setItemInMainHand(offhandItem);
+        equipment.setItemInOffHand(mainHandItem);
+    }
+
+    @Override
+    public void scrollHotbar(Player entity, int targetSlot)
+    {
+        entity.getInventory().setHeldItemSlot(targetSlot);
+    }
+
+    @Override
+    public void releaseUsingItem(Player targetPlayer, ItemStack referenceItem)
+    {
+        //如果目标玩家正在使用的物品和我们当前释放的物品一样，并且释放的物品拥有使用动画，那么调用releaseUsingItem
+        var ourHandItem = referenceItem.getType();
+        var nmsPlayer = NmsRecord.ofPlayer(targetPlayer);
+
+        if (nmsPlayer.isUsingItem()
+                && ItemUtils.isContinuousUsable(ourHandItem)
+                && nmsPlayer.getUseItem().getBukkitStack().getType() == ourHandItem)
+        {
+            nmsPlayer.releaseUsingItem();
+        }
+    }
+
+    @Override
+    public boolean operationAllowed(Player source)
+    {
+        return source.hasPermission(CommonPermissions.MIRROR);
+    }
+
+    @Override
+    public boolean affectedByMirror(Player entity)
+    {
+        boolean noMirror = entity.hasPermission(CommonPermissions.MIRROR_IMMUNE) //检查目标是否免疫操控
+                || entity.getOpenInventory().getType() != InventoryType.CRAFTING //检查目标是否正和容器互动
+                || entity.isSleeping() //检查目标是否正在睡觉
+                || entity.isDead() //检查目标是否已经死亡
+                || !DisguiseUtils.gameModeMirrorable(entity); //检查目标游戏模式是否满足操控条件
+
+        return !noMirror;
     }
 
     private final PluginManager pluginManager = Bukkit.getPluginManager();
@@ -379,38 +453,5 @@ public class PlayerOperationSimulator extends MorphPluginObject
         }
 
         return false;
-    }
-
-    /**
-     * 操作模拟结果
-     *
-     * @param success 是否成功
-     * @param hand 与 {@link InteractionHand} 对应的 {@link EquipmentSlot}
-     */
-    public record SimulateResult(boolean success, EquipmentSlot hand, boolean forceSwing)
-    {
-        public static SimulateResult success(EquipmentSlot hand)
-        {
-            return of(true, hand);
-        }
-        public static SimulateResult success(EquipmentSlot hand, boolean clickedOnBlock)
-        {
-            return of(true, hand, clickedOnBlock);
-        }
-
-        public static SimulateResult fail()
-        {
-            return of(false, null);
-        }
-
-        public static SimulateResult of(boolean success, EquipmentSlot hand)
-        {
-            return new SimulateResult(success, hand, false);
-        }
-
-        public static SimulateResult of(boolean success, EquipmentSlot hand, boolean clickedOnBlock)
-        {
-            return new SimulateResult(success, hand, clickedOnBlock);
-        }
     }
 }

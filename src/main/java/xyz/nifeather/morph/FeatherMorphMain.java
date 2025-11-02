@@ -20,14 +20,13 @@ import xyz.nifeather.morph.commands.MorphCommandManager;
 import xyz.nifeather.morph.config.ConfigOption;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.events.*;
-import xyz.nifeather.morph.events.mirror.ExecutorHub;
+import xyz.nifeather.morph.mirror.ExecutorHub;
 import xyz.nifeather.morph.interfaces.IManagePlayerData;
 import xyz.nifeather.morph.interfaces.IManageRequests;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.MorphMessageStore;
 import xyz.nifeather.morph.messages.vanilla.MasterVanillaMessageStore;
 import xyz.nifeather.morph.misc.ModNetworkingHelper;
-import xyz.nifeather.morph.misc.PlayerOperationSimulator;
 import xyz.nifeather.morph.misc.RecipeConfigHandle;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.gui.IconLookup;
@@ -276,8 +275,6 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
         dependencyManager.cache(new SkillsConfigurationStoreNew());
 
         dependencyManager.cache(new MessageUtils());
-
-        dependencyManager.cache(new PlayerOperationSimulator());
 
         var updateHandler = new UpdateHandler();
         dependencyManager.cache(updateHandler);

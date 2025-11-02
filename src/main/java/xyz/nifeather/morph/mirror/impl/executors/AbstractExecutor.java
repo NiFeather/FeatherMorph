@@ -1,10 +1,10 @@
-package xyz.nifeather.morph.events.mirror.impl;
+package xyz.nifeather.morph.mirror.impl.executors;
 
 import io.papermc.paper.event.player.PlayerArmSwingEvent;
-import org.bukkit.entity.Mannequin;
+import org.bukkit.Material;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
-import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -13,14 +13,10 @@ import xiamomc.pluginbase.Annotations.Resolved;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.events.PlayerTracker;
-import xyz.nifeather.morph.events.mirror.ExecutorHub;
-import xyz.nifeather.morph.events.mirror.IExecutor;
-import xyz.nifeather.morph.misc.DisguiseState;
-import xyz.nifeather.morph.misc.PlayerOperationSimulator;
-import xyz.nifeather.morph.misc.permissions.CommonPermissions;
+import xyz.nifeather.morph.mirror.ExecutorHub;
+import xyz.nifeather.morph.mirror.IExecutor;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
 import xyz.nifeather.morph.storage.mirrorlogging.OperationType;
-import xyz.nifeather.morph.utilities.DisguiseUtils;
 import xyz.nifeather.morph.utilities.ItemUtils;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -35,7 +31,7 @@ public abstract class AbstractExecutor extends MorphPluginObject implements IExe
         this.executorHub = executorHub;
     }
 
-    protected void logOperation(Player source, Player targetPlayer, OperationType type)
+    protected void logOperation(Player source, LivingEntity targetPlayer, OperationType type)
     {
         executorHub.logOperation(source, targetPlayer, type);
     }
@@ -48,14 +44,6 @@ public abstract class AbstractExecutor extends MorphPluginObject implements IExe
 
     @Resolved
     private PlayerTracker tracker;
-
-    @Resolved
-    private PlayerOperationSimulator operationSimulator;
-
-    protected PlayerOperationSimulator operationSimulator()
-    {
-        return operationSimulator;
-    }
 
     protected PlayerTracker tracker()
     {
@@ -78,25 +66,16 @@ public abstract class AbstractExecutor extends MorphPluginObject implements IExe
         return manager.getDisguiseStateFor(player) == null;
     }
 
-    @Nullable
-    protected String getTargetControlFor(Player source)
-    {
-        return executorHub.getControl(source);
-    }
-
     @Contract("_, null-> false; _, !null -> _")
-    protected boolean playerInDistance(@NotNull Player source, @Nullable Player target)
+    protected <E extends LivingEntity> boolean playerInDistance(@NotNull Player source, @Nullable E target)
     {
-        if (target == null
-                || !source.hasPermission(CommonPermissions.MIRROR) //检查来源是否有权限进行操控
-                || target.hasPermission(CommonPermissions.MIRROR_IMMUNE) //检查目标是否免疫操控
-                || target.getOpenInventory().getType() != InventoryType.CRAFTING //检查目标是否正和容器互动
-                || target.isSleeping() //检查目标是否正在睡觉
-                || target.isDead() //检查目标是否已经死亡
-                || !DisguiseUtils.gameModeMirrorable(target)) //检查目标游戏模式是否满足操控条件
-        {
+        if (target == null)
             return false;
-        }
+
+        var handle = executorHub.lookupOperationHandle(target);
+
+        if (!handle.operationAllowed(source) || !handle.affectedByMirror(target))
+            return false;
 
         var isInSameWorld = target.getWorld().equals(source.getWorld());
         var normalDistance = executorHub.getControlDistance();
@@ -106,12 +85,12 @@ public abstract class AbstractExecutor extends MorphPluginObject implements IExe
                 || (normalDistance != 0 && isInSameWorld && target.getLocation().distance(source.getLocation()) <= normalDistance);
     }
 
-    protected void simulateOperationAsync(Action action, Player targetPlayer, Player source, Consumer<Boolean> callback)
+    protected <E extends LivingEntity> void simulateOperationAsync(Action action, E target, Player source, Consumer<Boolean> callback)
     {
         AtomicBoolean success = new AtomicBoolean(false);
-        targetPlayer.getScheduler().run(plugin, task ->
+        target.getScheduler().run(plugin, task ->
         {
-            success.set(simulateOperation(action, targetPlayer, source));
+            success.set(simulateOperation(action, target, source));
             callback.accept(success.get());
         }, () -> { /* retired */ });
     }
@@ -120,32 +99,34 @@ public abstract class AbstractExecutor extends MorphPluginObject implements IExe
      * 模拟玩家操作
      *
      * @param action 操作类型
-     * @param targetPlayer 目标玩家
+     * @param target 目标玩家
      * @return 操作是否成功
      */
-    protected boolean simulateOperation(Action action, Player targetPlayer, Player source)
+    protected <E extends LivingEntity> boolean simulateOperation(Action action, E target, Player source)
     {
         // 如果栈内包含目标玩家，或者此玩家这个tick已经和环境互动过了一次，那么忽略此操作
-        if (tracker().interactingThisTick(targetPlayer))
+        if (target instanceof Player targetPlayer && tracker().interactingThisTick(targetPlayer))
             return false;
 
         var isRightClick = action.isRightClick();
+        var simulator = executorHub.lookupOperationHandle(target);
         var result = isRightClick
-                ? operationSimulator().simulateRightClick(targetPlayer)
-                : operationSimulator().simulateLeftClick(targetPlayer);
+                ? simulator.simulateRightClick(target)
+                : simulator.simulateLeftClick(target);
 
         boolean success = false;
 
         if (result.success())
         {
-            var itemInUse = targetPlayer.getEquipment().getItem(result.hand()).getType();
+            var equipment = target.getEquipment();
+            Material itemInUse = equipment == null ? Material.AIR : target.getEquipment().getItem(result.hand()).getType();
 
             if (!isRightClick || !ItemUtils.isContinuousUsable(itemInUse) || result.forceSwing())
             {
-                var allowed = new PlayerArmSwingEvent(targetPlayer, result.hand()).callEvent();
+                var allowed = !(target instanceof Player player) || new PlayerArmSwingEvent(player, result.hand()).callEvent();
 
                 if (allowed)
-                    targetPlayer.swingHand(result.hand());
+                    target.swingHand(result.hand());
             }
 
             success = true;
