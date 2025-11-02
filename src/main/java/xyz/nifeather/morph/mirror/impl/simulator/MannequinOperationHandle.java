@@ -25,7 +25,6 @@ public class MannequinOperationHandle implements IOperationHandle<Mannequin>
     @Override
     public void simulateSneak(Mannequin entity, boolean sneaking)
     {
-        System.out.println("SNeaking? " + sneaking);
         entity.setPose(sneaking ? Pose.SNEAKING : Pose.STANDING);
     }
 
