@@ -10,6 +10,7 @@ import org.bukkit.entity.Entity;
 import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.misc.EntityRetiredException;
 
+import javax.annotation.Nullable;
 import java.time.Duration;
 import java.util.concurrent.*;
 import java.util.function.Consumer;
@@ -95,8 +96,10 @@ public class FoliaThreadUtils
         return future;
     }
 
-    public static boolean isTickThreadFor(Entity bukkitEntity)
+    public static boolean isTickThreadFor(@Nullable Entity bukkitEntity)
     {
+        if (bukkitEntity == null) return false;
+
         var nmsEntity = ((CraftEntity) bukkitEntity).getHandle();
         return TickThread.isTickThreadFor(nmsEntity);
     }
