@@ -34,7 +34,11 @@ public class BySightExecutor extends ChainedExecutor
     {
         var targetName = executorHub.getControl(source);
         var state = morphManager().getDisguiseStateFor(source);
-        var lookingAt = source.getTargetEntity(5);
+
+        int lookupDistance = executorHub.getControlDistance();
+        if (lookupDistance <= 0) lookupDistance = 5;
+
+        var lookingAt = source.getTargetEntity(lookupDistance);
 
         LivingEntity targetEntity = null;
 
