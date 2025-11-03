@@ -51,6 +51,8 @@ public class FrogProperties extends BaseLivingEntityProperties<Frog>
     @Override
     protected void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull Frog frog)
     {
+        super.setupPropertiesFromEntity(meta, propertyHandler, frog);
+
         propertyHandler.set(VARIANT, frog.getVariant());
     }
 

@@ -26,6 +26,8 @@ public class HappyGhastProperties extends BaseLivingEntityProperties<HappyGhast>
     @Override
     protected void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull HappyGhast happyGhast)
     {
+        super.setupPropertiesFromEntity(meta, propertyHandler, happyGhast);
+
         propertyHandler.set(IS_GHASTLING, !happyGhast.isAdult());
     }
 

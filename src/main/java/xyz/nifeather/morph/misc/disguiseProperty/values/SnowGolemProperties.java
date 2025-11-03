@@ -26,6 +26,8 @@ public class SnowGolemProperties extends BaseLivingEntityProperties<Snowman>
     @Override
     protected void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull Snowman targetEntity)
     {
+        super.setupPropertiesFromEntity(meta, propertyHandler, targetEntity);
+
         propertyHandler.set(HAS_PUMPKIN, !targetEntity.isDerp());
     }
 

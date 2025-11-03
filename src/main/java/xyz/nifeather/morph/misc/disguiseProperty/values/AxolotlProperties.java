@@ -47,6 +47,8 @@ public class AxolotlProperties extends BaseLivingEntityProperties<Axolotl>
     @Override
     public void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull Axolotl axolotl)
     {
+        super.setupPropertiesFromEntity(meta, propertyHandler, axolotl);
+
         propertyHandler.set(VARIANT, axolotl.getVariant());
     }
 

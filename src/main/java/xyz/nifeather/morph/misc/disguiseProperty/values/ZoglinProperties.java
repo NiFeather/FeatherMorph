@@ -26,6 +26,8 @@ public class ZoglinProperties extends BaseLivingEntityProperties<Zoglin>
     @Override
     protected void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull Zoglin targetEntity)
     {
+        super.setupPropertiesFromEntity(meta, propertyHandler, targetEntity);
+
         propertyHandler.set(IS_BABY, !targetEntity.isAdult());
     }
 

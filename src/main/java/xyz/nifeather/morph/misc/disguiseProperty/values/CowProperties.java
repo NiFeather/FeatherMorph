@@ -46,6 +46,8 @@ public class CowProperties extends BaseLivingEntityProperties<Cow>
     @Override
     protected void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull Cow cow)
     {
+        super.setupPropertiesFromEntity(meta, propertyHandler, cow);
+
         propertyHandler.set(VARIANT, cow.getVariant());
     }
 

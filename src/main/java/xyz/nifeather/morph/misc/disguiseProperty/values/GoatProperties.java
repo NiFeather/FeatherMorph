@@ -32,6 +32,8 @@ public class GoatProperties extends BaseLivingEntityProperties<Goat>
     @Override
     protected void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull Goat goat)
     {
+        super.setupPropertiesFromEntity(meta, propertyHandler, goat);
+
         propertyHandler.set(HAS_LEFT_HORN, goat.hasLeftHorn());
         propertyHandler.set(HAS_RIGHT_HORN, goat.hasRightHorn());
     }

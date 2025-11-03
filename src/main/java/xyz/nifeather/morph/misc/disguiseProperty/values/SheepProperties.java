@@ -29,6 +29,8 @@ public class SheepProperties extends BaseLivingEntityProperties<Sheep>
     @Override
     protected void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull Sheep targetEntity)
     {
+        super.setupPropertiesFromEntity(meta, propertyHandler, targetEntity);
+
         if (targetEntity.getColor() != null)
             propertyHandler.set(DYE_COLOR, targetEntity.getColor());
     }

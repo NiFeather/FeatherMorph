@@ -51,6 +51,8 @@ public class ChickenProperties extends BaseLivingEntityProperties<Chicken>
     @Override
     protected void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull Chicken chicken)
     {
+        super.setupPropertiesFromEntity(meta, propertyHandler, chicken);
+
         propertyHandler.set(VARIANT, chicken.getVariant());
     }
 

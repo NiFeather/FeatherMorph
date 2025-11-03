@@ -62,6 +62,8 @@ public class WolfProperties extends BaseLivingEntityProperties<Wolf>
     @Override
     protected void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull Wolf targetEntity)
     {
+        super.setupPropertiesFromEntity(meta, propertyHandler, targetEntity);
+
         propertyHandler.set(VARIANT, targetEntity.getVariant());
         propertyHandler.set(COLLAR_COLOR, targetEntity.getCollarColor());
 

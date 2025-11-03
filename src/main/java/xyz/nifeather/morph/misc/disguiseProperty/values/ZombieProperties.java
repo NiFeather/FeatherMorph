@@ -26,6 +26,8 @@ public class ZombieProperties extends BaseLivingEntityProperties<Zombie>
     @Override
     protected void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull Zombie targetEntity)
     {
+        super.setupPropertiesFromEntity(meta, propertyHandler, targetEntity);
+
         propertyHandler.set(IS_BABY, !targetEntity.isAdult());
     }
 

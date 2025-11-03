@@ -48,6 +48,8 @@ public class ParrotProperties extends BaseLivingEntityProperties<Parrot>
     @Override
     protected void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull Parrot targetEntity)
     {
+        super.setupPropertiesFromEntity(meta, propertyHandler, targetEntity);
+
         propertyHandler.set(VARIANT, targetEntity.getVariant());
     }
 

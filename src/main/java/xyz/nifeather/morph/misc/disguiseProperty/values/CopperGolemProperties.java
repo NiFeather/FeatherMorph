@@ -43,6 +43,8 @@ public class CopperGolemProperties extends BaseLivingEntityProperties<CopperGole
     @Override
     public void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull CopperGolem copperGolem)
     {
+        super.setupPropertiesFromEntity(meta, propertyHandler, copperGolem);
+
         var nmsWeatherState = (((CraftCopperGolem)copperGolem).getHandle()).getWeatherState();
         WeatherState bukkitWeatherState = switch (nmsWeatherState)
         {

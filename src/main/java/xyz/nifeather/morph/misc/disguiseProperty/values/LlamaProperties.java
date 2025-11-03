@@ -48,6 +48,8 @@ public class LlamaProperties extends BaseLivingEntityProperties<Llama>
     @Override
     protected void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull Llama llama)
     {
+        super.setupPropertiesFromEntity(meta, propertyHandler, llama);
+
         propertyHandler.set(COLOR, llama.getColor());
     }
 

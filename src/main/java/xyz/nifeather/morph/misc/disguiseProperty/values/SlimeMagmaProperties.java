@@ -39,6 +39,8 @@ public class SlimeMagmaProperties extends BaseLivingEntityProperties<Slime>
     @Override
     protected void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull Slime targetEntity)
     {
+        super.setupPropertiesFromEntity(meta, propertyHandler, targetEntity);
+
         propertyHandler.set(SIZE, targetEntity.getSize());
     }
 
@@ -47,5 +49,4 @@ public class SlimeMagmaProperties extends BaseLivingEntityProperties<Slime>
     {
         propertyHandler.set(SIZE, ThreadLocalRandom.current().nextInt(1, 5));
     }
-
 }

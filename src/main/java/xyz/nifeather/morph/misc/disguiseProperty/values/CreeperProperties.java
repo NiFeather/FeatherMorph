@@ -28,6 +28,8 @@ public class CreeperProperties extends BaseLivingEntityProperties<Creeper>
     @Override
     protected void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull Creeper creeper)
     {
+        super.setupPropertiesFromEntity(meta, propertyHandler, creeper);
+
         propertyHandler.set(CHARGED, creeper.isPowered());
     }
 

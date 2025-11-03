@@ -60,6 +60,8 @@ public class CatProperties extends BaseLivingEntityProperties<Cat>
     @Override
     protected void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull Cat cat)
     {
+        super.setupPropertiesFromEntity(meta, propertyHandler, cat);
+
         propertyHandler.set(CAT_VARIANT, cat.getCatType());
         propertyHandler.set(COLLAR_COLOR, cat.getCollarColor());
 
