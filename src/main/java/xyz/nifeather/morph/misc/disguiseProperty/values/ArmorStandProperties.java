@@ -67,6 +67,8 @@ public class ArmorStandProperties extends BaseLivingEntityProperties<ArmorStand>
     @Override
     public void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull ArmorStand armorStand)
     {
+        super.setupPropertiesFromEntity(meta, propertyHandler, armorStand);
+
         propertyHandler.set(SHOW_ARMS, armorStand.hasArms());
         propertyHandler.set(HAS_BASE_PLATE, armorStand.hasBasePlate());
         propertyHandler.set(SMALL, armorStand.isSmall());

@@ -56,6 +56,8 @@ public class ZombieVillagerProperties extends BaseLivingEntityProperties<ZombieV
     @Override
     protected void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull ZombieVillager targetEntity)
     {
+        super.setupPropertiesFromEntity(meta, propertyHandler, targetEntity);
+
         propertyHandler.set(TYPE, targetEntity.getVillagerType());
         propertyHandler.set(PROFESSION, targetEntity.getVillagerProfession());
     }

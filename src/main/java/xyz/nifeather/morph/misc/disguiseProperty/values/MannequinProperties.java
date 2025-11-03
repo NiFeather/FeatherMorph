@@ -45,15 +45,13 @@ public class MannequinProperties extends BaseLivingEntityProperties<Mannequin>
     @Override
     protected void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull Mannequin targetEntity)
     {
+        super.setupPropertiesFromEntity(meta, propertyHandler, targetEntity);
+
         propertyHandler.set(SKIN, targetEntity.getProfile());
 
         var description = targetEntity.getDescription();
         if (description != null)
             propertyHandler.set(NPC_DESCRIPTION, description);
-
-        //propertyHandler.set(IMMOVABLE, targetEntity.isImmovable());
-
-        super.setupPropertiesFromEntity(meta, propertyHandler, targetEntity);
     }
 
     @Override

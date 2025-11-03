@@ -54,6 +54,8 @@ public class VillagerProperties extends BaseLivingEntityProperties<Villager>
     @Override
     protected void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull Villager targetEntity)
     {
+        super.setupPropertiesFromEntity(meta, propertyHandler, targetEntity);
+
         propertyHandler.set(TYPE, targetEntity.getVillagerType());
         propertyHandler.set(PROFESSION, targetEntity.getProfession());
         propertyHandler.set(LEVEL, targetEntity.getVillagerLevel());

@@ -29,6 +29,8 @@ public class ShulkerProperties extends BaseLivingEntityProperties<Shulker>
     @Override
     protected void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull Shulker targetEntity)
     {
+        super.setupPropertiesFromEntity(meta, propertyHandler, targetEntity);
+
         if (targetEntity.getColor() != null)
             propertyHandler.set(DYE_COLOR, targetEntity.getColor());
     }
@@ -37,5 +39,4 @@ public class ShulkerProperties extends BaseLivingEntityProperties<Shulker>
     protected void setupDefaultProperties(PropertyHandler propertyHandler)
     {
     }
-
 }

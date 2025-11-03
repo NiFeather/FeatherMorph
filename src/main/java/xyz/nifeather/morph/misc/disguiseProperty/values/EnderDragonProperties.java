@@ -36,13 +36,7 @@ public class EnderDragonProperties extends BaseLivingEntityProperties<EnderDrago
     }
 
     @Override
-    protected void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull EnderDragon dragon)
-    {
-    }
-
-    @Override
     protected void setupDefaultProperties(PropertyHandler propertyHandler)
     {
     }
-
 }

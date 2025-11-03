@@ -48,6 +48,8 @@ public class RabbitProperties extends BaseLivingEntityProperties<Rabbit>
     @Override
     protected void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull Rabbit targetEntity)
     {
+        super.setupPropertiesFromEntity(meta, propertyHandler, targetEntity);
+
         propertyHandler.set(VARIANT, targetEntity.getRabbitType());
     }
 

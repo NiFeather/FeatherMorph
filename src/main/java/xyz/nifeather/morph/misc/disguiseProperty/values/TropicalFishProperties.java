@@ -49,6 +49,8 @@ public class TropicalFishProperties extends BaseLivingEntityProperties<TropicalF
     @Override
     protected void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull TropicalFish targetEntity)
     {
+        super.setupPropertiesFromEntity(meta, propertyHandler, targetEntity);
+
         var bodyColor = targetEntity.getBodyColor();
         var patternColor = targetEntity.getPatternColor();
         var pattern = targetEntity.getPattern();

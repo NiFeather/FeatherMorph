@@ -23,11 +23,6 @@ public class GuardianProperties extends BaseLivingEntityProperties<Guardian>
     }
 
     @Override
-    protected void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull Guardian targetEntity)
-    {
-    }
-
-    @Override
     protected void setupDefaultProperties(PropertyHandler propertyHandler)
     {
     }

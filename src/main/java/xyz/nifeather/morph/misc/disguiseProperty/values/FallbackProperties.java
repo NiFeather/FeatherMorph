@@ -15,12 +15,6 @@ public class FallbackProperties extends BaseLivingEntityProperties<Entity>
     }
 
     @Override
-    protected void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull Entity targetEntity)
-    {
-        super.setupPropertiesFromEntity(meta, propertyHandler, targetEntity);
-    }
-
-    @Override
     protected void setupDefaultProperties(PropertyHandler propertyHandler)
     {
     }

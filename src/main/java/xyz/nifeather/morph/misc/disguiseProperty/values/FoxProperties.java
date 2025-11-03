@@ -35,6 +35,8 @@ public class FoxProperties extends BaseLivingEntityProperties<Fox>
     @Override
     protected void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull Fox fox)
     {
+        super.setupPropertiesFromEntity(meta, propertyHandler, fox);
+
         propertyHandler.set(VARIANT, fox.getFoxType());
     }
 

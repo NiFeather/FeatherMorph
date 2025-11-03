@@ -61,6 +61,8 @@ public class HorseProperties extends BaseLivingEntityProperties<Horse>
     @Override
     protected void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull Horse horse)
     {
+        super.setupPropertiesFromEntity(meta, propertyHandler, horse);
+
         propertyHandler.set(COLOR, horse.getColor());
         propertyHandler.set(STYLE, horse.getStyle());
     }

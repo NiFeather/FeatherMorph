@@ -35,6 +35,8 @@ public class MooshroomProperties extends BaseLivingEntityProperties<MushroomCow>
     @Override
     protected void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull MushroomCow targetEntity)
     {
+        super.setupPropertiesFromEntity(meta, propertyHandler, targetEntity);
+
         propertyHandler.set(VARIANT, targetEntity.getVariant());
     }
 

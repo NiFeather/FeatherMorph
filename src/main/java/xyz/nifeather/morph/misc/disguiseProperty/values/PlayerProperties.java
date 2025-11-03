@@ -62,6 +62,8 @@ public class PlayerProperties extends BaseLivingEntityProperties<Player>
     @Override
     protected void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull Player targetEntity)
     {
+        super.setupPropertiesFromEntity(meta, propertyHandler, targetEntity);
+
         propertyHandler.set(MAIN_HAND, MainHandStatus.fromBukkitHand(targetEntity.getMainHand()));
         propertyHandler.set(STUCKED_ARROWS, targetEntity.getArrowsInBody());
 

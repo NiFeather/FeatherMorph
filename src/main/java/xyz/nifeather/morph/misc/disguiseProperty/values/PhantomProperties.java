@@ -38,6 +38,8 @@ public class PhantomProperties extends BaseLivingEntityProperties<Phantom>
     @Override
     protected void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull Phantom targetEntity)
     {
+        super.setupPropertiesFromEntity(meta, propertyHandler, targetEntity);
+
         propertyHandler.set(SIZE, targetEntity.getSize());
     }
 

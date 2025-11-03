@@ -53,6 +53,8 @@ public class PandaProperties extends BaseLivingEntityProperties<Panda>
     @Override
     protected void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull Panda targetEntity)
     {
+        super.setupPropertiesFromEntity(meta, propertyHandler, targetEntity);
+
         propertyHandler.set(MAIN_GENE, targetEntity.getMainGene());
         propertyHandler.set(HIDDEN_GENE, targetEntity.getHiddenGene());
     }

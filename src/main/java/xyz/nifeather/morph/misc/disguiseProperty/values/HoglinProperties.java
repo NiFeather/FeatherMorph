@@ -26,6 +26,8 @@ public class HoglinProperties extends BaseLivingEntityProperties<Hoglin>
     @Override
     protected void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull Hoglin targetEntity)
     {
+        super.setupPropertiesFromEntity(meta, propertyHandler, targetEntity);
+
         propertyHandler.set(IS_BABY, !targetEntity.isAdult());
     }
 
