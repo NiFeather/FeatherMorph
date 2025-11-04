@@ -8,6 +8,7 @@ import com.google.gson.JsonParseException;
 import com.mojang.authlib.GameProfile;
 import io.papermc.paper.datacomponent.item.ResolvableProfile;
 import io.papermc.paper.math.Rotations;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
@@ -17,6 +18,7 @@ import net.minecraft.nbt.CompoundTag;
 import org.bukkit.Keyed;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.messages.strings.ExceptionStrings;
 import xyz.nifeather.morph.misc.DisguiseEquipment;
 import xyz.nifeather.morph.misc.disguiseProperty.struct.MorphEquipmentStruct;
@@ -26,10 +28,7 @@ import xyz.nifeather.morph.network.server.ServerSetEquipCommand;
 import xyz.nifeather.morph.utilities.ItemUtils;
 import xyz.nifeather.morph.utilities.NbtUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class OutputHandles
@@ -129,9 +128,24 @@ public class OutputHandles
             }
         }
 
-        var record = new MorphResolvableProfileStruct(resolvableProfile.uuid(), resolvableProfile.name(), properties.build());
+        var skinPatch = resolvableProfile.skinPatch();
+        var skinPatchModel = skinPatch.model();
+
+        var record = new MorphResolvableProfileStruct(resolvableProfile.uuid(), resolvableProfile.name(), properties.build(),
+                nullableKeyToString(skinPatch.cape()),
+                nullableKeyToString(skinPatch.elytra()),
+                skinPatchModel == null ? null : skinPatchModel.toString().toLowerCase(),
+                nullableKeyToString(skinPatch.body()),
+                resolvableProfile.dynamic());
 
         return gson.toJson(record);
+    }
+
+    public static @Nullable String nullableKeyToString(@Nullable Key key)
+    {
+        if (key == null) return null;
+
+        return key.asString();
     }
 
     public static String writeGameProfile(String propertyName, GameProfile profile)

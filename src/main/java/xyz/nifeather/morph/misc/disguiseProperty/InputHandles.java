@@ -1,17 +1,13 @@
 package xyz.nifeather.morph.misc.disguiseProperty;
 
-import com.google.common.collect.ImmutableMultimap;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonParseException;
-import com.google.gson.JsonSyntaxException;
+import com.destroystokyo.paper.profile.ProfileProperty;
+import com.google.gson.*;
 import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.properties.Property;
-import com.mojang.authlib.properties.PropertyMap;
 import io.papermc.paper.datacomponent.item.ResolvableProfile;
 import io.papermc.paper.math.Rotations;
 import io.papermc.paper.registry.RegistryAccess;
 import io.papermc.paper.registry.RegistryKey;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
@@ -21,7 +17,9 @@ import org.bukkit.Keyed;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;
 import org.bukkit.entity.*;
+import org.bukkit.profile.PlayerTextures;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.messages.strings.ExceptionStrings;
 import xyz.nifeather.morph.messages.strings.TypesString;
 import xyz.nifeather.morph.misc.DisguiseEquipment;
@@ -432,7 +430,9 @@ public class InputHandles
     public static Optional<ResolvableProfile> readResolvableSkinInput(String propertyName, String value) throws ParseErrorException
     {
         if (value.startsWith("{"))
+        {
             return readResolvableProfile(propertyName, value);
+        }
         else
         {
             if (value.length() > 16)
@@ -505,13 +505,20 @@ public class InputHandles
                     .create();
         }
 
-        ImmutableMultimap.Builder<String, Property> propertiesBuilder = ImmutableMultimap.builder();
+        var builder = ResolvableProfile.resolvableProfile();
+        builder.name(record.name());
+        builder.uuid(record.id());
+
+        var profilePropertiesBuilder = new ArrayList<ProfileProperty>();
+
+        // properties
+        //ImmutableMultimap.Builder<String, Property> propertiesBuilder = ImmutableMultimap.builder();
         for (String propertyJson : record.properties())
         {
             try
             {
                 var struct = gson.fromJson(propertyJson, MorphProfileProperty.class);
-                propertiesBuilder.put(struct.name(), new Property(struct.name(), struct.value(), struct.signature()));
+                profilePropertiesBuilder.add(new ProfileProperty(struct.name(), struct.value(), struct.signature()));
             }
             catch (JsonParseException e)
             {
@@ -524,8 +531,25 @@ public class InputHandles
             }
         }
 
-        var profile = new GameProfile(record.id(), record.name(), new PropertyMap(propertiesBuilder.build()));
-        return Optional.of(GameProfileUtils.asResolvableProfile(profile));
+        builder.addProperties(profilePropertiesBuilder);
+
+        //skin patch
+        var skinPatchBuilder = ResolvableProfile.SkinPatch.skinPatch();
+        nullableStringToKey(record.cape()).ifPresent(skinPatchBuilder::cape);
+        nullableStringToKey(record.bodyTexture()).ifPresent(skinPatchBuilder::body);
+        nullableStringToKey(record.elytra()).ifPresent(skinPatchBuilder::elytra);
+
+        if (record.model() != null)
+            readEnumNonNull(PlayerTextures.SkinModel.values(), "SkinModel", record.model()).ifPresent(skinPatchBuilder::model);
+
+        builder.skinPatch(skinPatchBuilder.build());
+
+        return Optional.of(builder.build());
+    }
+
+    public static Optional<Key> nullableStringToKey(@Nullable String str)
+    {
+        return str == null ? Optional.empty() : Optional.of(Key.key(str));
     }
 
     public static Optional<DisguiseEquipment> readEquipment(String propertyName, String input) throws ParseErrorException
