@@ -17,10 +17,10 @@ import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.api.events.lifecycle.ConfigurationReloadEvent;
 import xyz.nifeather.morph.commands.brigadier.BrigadierCommand;
 import xyz.nifeather.morph.config.MorphConfigManager;
+import xyz.nifeather.morph.messages.TranslateManager;
 import xyz.nifeather.morph.messages.strings.CommandStrings;
 import xyz.nifeather.morph.messages.strings.HelpStrings;
 import xyz.nifeather.morph.messages.MessageUtils;
-import xyz.nifeather.morph.messages.MorphMessageStore;
 import xyz.nifeather.morph.messages.vanilla.MasterVanillaMessageStore;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 import xyz.nifeather.morph.misc.skins.PlayerSkinProvider;
@@ -72,7 +72,7 @@ public class ReloadSubCommand extends BrigadierCommand
     //@Resolved
     //private RecipeManager recipeManager;
 
-    private final List<String> subcommands = ObjectImmutableList.of("data", "message", "update_message");
+    private final List<String> subcommands = ObjectImmutableList.of("data", "message");
 
     @Override
     public void registerAsChild(ArgumentBuilder<CommandSourceStack, ?> parentBuilder)
@@ -111,14 +111,13 @@ public class ReloadSubCommand extends BrigadierCommand
 
     private int execNoArg(CommandContext<CommandSourceStack> context)
     {
-        this.doReload(context, true, true, false);
+        this.doReload(context, true, true);
         return 1;
     }
 
     private void doReload(CommandContext<CommandSourceStack> context,
                           boolean reloadsData,
-                          boolean reloadsMessage,
-                          boolean reloadOverwriteNonDefMsg)
+                          boolean reloadsMessage)
     {
         if (reloadsData)
         {
@@ -135,10 +134,7 @@ public class ReloadSubCommand extends BrigadierCommand
 
         if (reloadsMessage)
         {
-            if (reloadOverwriteNonDefMsg && messageStore instanceof MorphMessageStore morphMessageStore)
-                morphMessageStore.reloadOverwriteNonDefault();
-            else
-                messageStore.reloadConfiguration();
+            TranslateManager.instance().reload();
 
             masterVanillaMessageStore.reloadConfiguration();
         }
@@ -154,18 +150,16 @@ public class ReloadSubCommand extends BrigadierCommand
     {
         var reloadsData = false;
         var reloadsMessage = false;
-        var reloadOverwriteNonDefMsg = false;
         String option = StringArgumentType.getString(context, "operation");
 
         switch (option)
         {
             case "data" -> reloadsData = true;
             case "message" -> reloadsMessage = true;
-            case "update_message" -> reloadsMessage = reloadOverwriteNonDefMsg = true;
             default -> reloadsMessage = reloadsData = true;
         }
 
-        this.doReload(context, reloadsData, reloadsMessage, reloadOverwriteNonDefMsg);
+        this.doReload(context, reloadsData, reloadsMessage);
 
         return 0;
     }

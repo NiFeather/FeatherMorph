@@ -20,11 +20,11 @@ import xyz.nifeather.morph.commands.MorphCommandManager;
 import xyz.nifeather.morph.config.ConfigOption;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.events.*;
+import xyz.nifeather.morph.messages.TranslateManager;
 import xyz.nifeather.morph.mirror.ExecutorHub;
 import xyz.nifeather.morph.interfaces.IManagePlayerData;
 import xyz.nifeather.morph.interfaces.IManageRequests;
 import xyz.nifeather.morph.messages.MessageUtils;
-import xyz.nifeather.morph.messages.MorphMessageStore;
 import xyz.nifeather.morph.messages.vanilla.MasterVanillaMessageStore;
 import xyz.nifeather.morph.misc.ModNetworkingHelper;
 import xyz.nifeather.morph.misc.RecipeConfigHandle;
@@ -102,8 +102,6 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
     private AbilityManager abilityManager;
 
     private MasterVanillaMessageStore masterVanillaMessageStore;
-
-    private MorphMessageStore messageStore;
 
     private PlaceholderIntegration placeholderIntegration;
 
@@ -260,7 +258,7 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
         dependencyManager.cache(masterVanillaMessageStore = new MasterVanillaMessageStore());
 
         MorphConfigManager config;
-        dependencyManager.cacheAs(MessageStore.class, messageStore = new MorphMessageStore());
+        dependencyManager.cacheAs(MessageStore.class, TranslateManager.instance().asFrameworkMessageStore());
         dependencyManager.cacheAs(MiniMessage.class, MiniMessage.miniMessage());
         dependencyManager.cacheAs(IManagePlayerData.class, morphManager);
         dependencyManager.cacheAs(IManageRequests.class, new RequestManager());

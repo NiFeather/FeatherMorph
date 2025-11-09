@@ -5,6 +5,7 @@ import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.FeatherMorphMain;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 
 public class PluginAssetUtils
 {
@@ -30,6 +31,20 @@ public class PluginAssetUtils
         }
 
         return null;
+    }
+
+    /**
+     * 以字符串的形式获取资源内容
+     * @param path 资源路径
+     * @return 文件资源内容，返回空则未找到或出现异常
+     */
+    public static Optional<String> getFileStringsOptional(String path)
+    {
+        var bytes = getFileBytes(path);
+
+        if (bytes == null) return Optional.empty();
+
+        return Optional.of(new String(bytes, StandardCharsets.UTF_8));
     }
 
     /**

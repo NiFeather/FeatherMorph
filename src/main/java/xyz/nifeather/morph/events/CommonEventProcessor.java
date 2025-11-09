@@ -1,5 +1,6 @@
 package xyz.nifeather.morph.events;
 
+import com.destroystokyo.paper.ClientOption;
 import com.destroystokyo.paper.event.entity.EntityAddToWorldEvent;
 import com.destroystokyo.paper.event.player.PlayerClientOptionsChangeEvent;
 import com.destroystokyo.paper.event.player.PlayerPostRespawnEvent;
@@ -30,6 +31,7 @@ import xyz.nifeather.morph.api.networking.exceptions.PlayerDisconnectedException
 import xyz.nifeather.morph.config.ConfigOption;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.messages.MessageUtils;
+import xyz.nifeather.morph.messages.TranslateManager;
 import xyz.nifeather.morph.messages.strings.MorphStrings;
 import xyz.nifeather.morph.messages.vanilla.MasterVanillaMessageStore;
 import xyz.nifeather.morph.misc.DisguiseEquipment;
@@ -48,6 +50,7 @@ import xyz.nifeather.morph.utilities.EntityTypeUtils;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
 import static xyz.nifeather.morph.utilities.DisguiseUtils.itemOrAir;
 
@@ -263,7 +266,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
     @EventHandler
     public void onClientOptionChanged(PlayerClientOptionsChangeEvent e)
     {
-        var locale = e.getLocale();
+        var locale = e.getLocale().toLowerCase(Locale.ROOT);
         masterVanillaMessageStore.getOrCreateSubStore(locale);
 
         if (e.hasLocaleChanged())

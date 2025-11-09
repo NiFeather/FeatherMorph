@@ -39,6 +39,11 @@ public class TypesString extends AbstractMorphStrings
         return getFormattable(getKey("text_component"), "文本组件");
     }
 
+    public static FormattableMessage localeFile()
+    {
+        return getFormattable(getKey("locale_file"), "[Fallback] 语言文件");
+    }
+
     private static String getKey(String key)
     {
         return "types." + key;
