@@ -306,6 +306,8 @@ java {
     withSourcesJar()
 }
 
+runPaper.folia.registerTask()
+
 // See https://github.com/jpenilla/run-task/wiki/Debugging#hot-swap
 tasks.withType(xyz.jpenilla.runtask.task.AbstractRun::class) {
     javaLauncher = javaToolchains.launcherFor {
