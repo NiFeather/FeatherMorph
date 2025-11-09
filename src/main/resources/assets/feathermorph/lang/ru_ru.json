@@ -32,7 +32,7 @@
   "help.stat": "Проверить статистику плагина",
   "morph.skill.target_not_suitable": "Цель слишком далеко или не подходит для телепортации",
   "help.cmdname_pattern": "/<basename>... -- <description>",
-  "morph.disguising_as_skill_avaliable": "<color:#8fe98d>Маскировка в <what>",
+  "morph.disguising_as_skill_avaliable": "<icon> <color:#8fe98d>Маскировка в <what>",
   "commands.grant_item_success": "Предмет выдан. Если его нет — проверь, не полон ли инвентарь.",
   "commands.option_get": "Параметр \"<what>\" установлен на: <value>",
   "chestui.prev_page": "Предыдущая страница",

@@ -137,6 +137,11 @@ public class PropertyHandler
         return propertyMap.containsKey(property);
     }
 
+    public boolean contains(String propertyName)
+    {
+        return propertyMap.keySet().stream().anyMatch(sp -> sp.id().equals(propertyName));
+    }
+
     @NotNull
     public <X> X get(SingleProperty<X> property)
     {

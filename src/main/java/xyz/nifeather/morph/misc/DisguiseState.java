@@ -5,6 +5,7 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -17,16 +18,19 @@ import xiamomc.pluginbase.Annotations.Resolved;
 import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.MorphPluginObject;
+import xyz.nifeather.morph.RevealingHandler;
 import xyz.nifeather.morph.abilities.AbilityUpdater;
 import xyz.nifeather.morph.api.morphs.skills.SkillNames;
 import xyz.nifeather.morph.backends.DisguiseWrapper;
 import xyz.nifeather.morph.messages.strings.CommandStrings;
 import xyz.nifeather.morph.messages.strings.EmoteStrings;
 import xyz.nifeather.morph.messages.MessageUtils;
+import xyz.nifeather.morph.messages.strings.MorphStrings;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 import xyz.nifeather.morph.misc.disguiseProperty.values.BaseLivingEntityProperties;
+import xyz.nifeather.morph.misc.gui.IconLookup;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 import xyz.nifeather.morph.misc.waypoint.DisguiseWaypointUpdater;
 import xyz.nifeather.morph.network.PlayerOptions;
@@ -130,6 +134,12 @@ public class DisguiseState extends MorphPluginObject
             {
                 var component = (Component) o;
                 this.setCustomDisplayName(component);
+                requestActionbarUpdate();
+            }
+
+            case PropertyNames.MANNEQUIN_SKIN, PropertyNames.PLAYER_SKIN ->
+            {
+                requestActionbarUpdate();
             }
         }
 
@@ -809,6 +819,83 @@ public class DisguiseState extends MorphPluginObject
         this.skillUpdater.update();
         this.disguiseWrapper.update();
         this.abilityUpdater.update();
+
+        if (playerOptions.displayDisguiseOnHUD && plugin.getCurrentTick() % (this.haveSkill() ? 2 : 5) == 0)
+            updateActionbarMessage();
+    }
+
+    @Resolved
+    private RevealingHandler revealingHandler;
+
+    @Nullable
+    private CachedMessageStatus cachedMessageStatus;
+
+    private volatile boolean requestedActionbarUpdate;
+
+    /**
+     * Request to update the actionbar message next time {@link DisguiseState#updateActionbarMessage()} is called.
+     */
+    public void requestActionbarUpdate()
+    {
+        requestedActionbarUpdate = true;
+    }
+
+    private void updateActionbarMessage()
+    {
+        var player = getPlayer();
+        var locale = MessageUtils.getLocale(player);
+        var haveSkill = this.haveSkill();
+
+        boolean updateAnyway = requestedActionbarUpdate;
+        requestedActionbarUpdate = false;
+
+        // If this mismatches, we will know that we should refresh the message component
+        short magicBit = 0;
+
+        if (haveSkill)
+            magicBit |= 1;
+
+        if (skillInCooldown())
+            magicBit |= 2;
+        else
+            magicBit |= 4;
+
+        var revLevel = revealingHandler.getRevealingLevel(player);
+        switch (revLevel)
+        {
+            case SAFE -> magicBit |= 8;
+            case SUSPECT -> magicBit |= 16;
+            case REVEALED -> magicBit |= 32;
+        }
+
+        magicBit |= (short) locale.hashCode();
+
+        var msgConfig = this.cachedMessageStatus;
+        if (msgConfig == null) msgConfig = CachedMessageStatus.DEFAULT;
+
+        short stateBit = msgConfig.statusBit();
+
+        if (stateBit != magicBit || updateAnyway)
+        {
+            //更新actionbar信息
+            var msg = haveSkill
+                    ? (!skillInCooldown()
+                    ? MorphStrings.disguisingWithSkillAvaliableString()
+                    : MorphStrings.disguisingWithSkillPreparingString())
+                    : MorphStrings.disguisingAsString();
+
+            var disguiseRevealed = revLevel == RevealingHandler.RevealingLevel.REVEALED || revLevel == RevealingHandler.RevealingLevel.SUSPECT;
+            var display = disguiseRevealed
+                    ? getPlayerDisplay().append((revLevel == RevealingHandler.RevealingLevel.REVEALED ? MorphStrings.revealed() : MorphStrings.partialRevealed()).createComponent(locale))
+                    : getPlayerDisplay();
+
+            msgConfig = new CachedMessageStatus(magicBit,
+                    msg.resolve("what", display).resolve("icon", IconLookup.instance().lookupDisguiseIcon(this)).createComponent(locale));
+
+            this.cachedMessageStatus = msgConfig;
+        }
+
+        player.sendActionBar(msgConfig.display());
     }
 
     //endregion Updating
