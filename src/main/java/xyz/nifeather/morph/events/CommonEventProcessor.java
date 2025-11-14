@@ -517,6 +517,9 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         if (!allowAcquireMorphs.get())
             return;
 
+        if (entity.getScoreboardTags().contains("feathermorph_nogrant"))
+            return;
+
         if (entity instanceof Player targetPlayer)
             morphs.grantMorphToPlayer(player, DisguiseTypes.PLAYER.toId(targetPlayer.getName()));
         else
