@@ -2,6 +2,7 @@ package xyz.nifeather.morph.misc.disguiseProperty;
 
 import com.destroystokyo.paper.profile.ProfileProperty;
 import com.google.gson.*;
+import com.google.gson.reflect.TypeToken;
 import com.mojang.authlib.GameProfile;
 import io.papermc.paper.datacomponent.item.ResolvableProfile;
 import io.papermc.paper.math.Rotations;
@@ -343,11 +344,11 @@ public class InputHandles
 
     public static class RotationStore
     {
-        private float x, y, z;
+        private double x, y, z;
 
-        public void x(float v) { x = v; }
-        public void y(float v) { y = v; }
-        public void z(float v) { z = v; }
+        public void x(double v) { x = v; }
+        public void y(double v) { y = v; }
+        public void z(double v) { z = v; }
 
         public Rotations toRotations()
         {
@@ -384,6 +385,24 @@ public class InputHandles
         return Optional.of(v);
     }
 
+    public static Optional<Double> validateDoubleNullable(String propertyName, @Nullable Double value)
+            throws ParseErrorException
+    {
+        if (value == null)
+            return Optional.empty();
+
+        if (!Double.isFinite(value))
+        {
+            throw ParseErrorException.forProperty(propertyName)
+                    .byMethod("validateDoubleNullable")
+                    .withLocalizableMessage(ExceptionStrings.nonFinite())
+                    .withMessage("Non-Finite value: %s".formatted(value))
+                    .create();
+        }
+
+        return Optional.of(value);
+    }
+
     public static Optional<Rotations> readRotations(String propertyName, String value) throws ParseErrorException
     {
         if (value.isBlank())
@@ -397,18 +416,18 @@ public class InputHandles
 
         try
         {
-            var list = gson.fromJson(value, List.class);
+            var list = gson.fromJson(value, new TypeToken<List<Double>>(){});
 
             RotationStore rotationStore = new RotationStore();
 
             if (!list.isEmpty())
-                readFloatStrict(propertyName, "" + list.get(0)).ifPresent(rotationStore::x);
+                validateDoubleNullable(propertyName, list.get(0)).ifPresent(rotationStore::x);
 
             if (list.size() > 1)
-                readFloatStrict(propertyName,"" + list.get(1)).ifPresent(rotationStore::y);
+                validateDoubleNullable(propertyName, list.get(1)).ifPresent(rotationStore::y);
 
             if (list.size() > 2)
-                readFloatStrict(propertyName,"" + list.get(2)).ifPresent(rotationStore::z);
+                validateDoubleNullable(propertyName, list.get(2)).ifPresent(rotationStore::z);
 
             return Optional.of(rotationStore.toRotations());
         }

@@ -1,6 +1,7 @@
 package xyz.nifeather.morph.updates;
 
 import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -170,15 +171,10 @@ public class UpdateHandler extends MorphPluginObject
             // 反序列化为Map
             // 之后看情况再考虑要不要反序列化成一个类
             var gson = new GsonBuilder().create();
-            var versionList = gson.fromJson(responseStr, ArrayList.class);
+            var versionList = gson.fromJson(responseStr, new TypeToken<ArrayList<Map<?, ?>>>(){});
             var metaList = new ObjectArrayList<SingleUpdateInfoMeta>();
-            for (Object o : versionList)
-            {
-                if (o instanceof Map<?,?> map)
-                    metaList.add(SingleUpdateInfoMeta.fromMap(map));
-                else
-                    logger.warn("Cant deserialize element to SingleUpdateInfoMeta: Not a map (" + o + ")");
-            }
+            for (var map : versionList)
+                metaList.add(SingleUpdateInfoMeta.fromMap(map));
 
             var matchMeta = metaList.stream()
                     .filter(m ->
