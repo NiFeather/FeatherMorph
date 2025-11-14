@@ -1,8 +1,8 @@
 package xyz.nifeather.morph.messages;
 
-import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import org.slf4j.Logger;
 import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.utilities.PluginAssetUtils;
@@ -56,6 +56,22 @@ public class OverlayingMessageStore
         }
     }
 
+    private void loadFromFileSystem(File i18nFile)
+    {
+        Map<String, String> fileI18nMap;
+        try
+        {
+            var str = Files.readString(i18nFile.toPath());
+            fileI18nMap = gson.fromJson(str, new TypeToken<>(){});
+
+            this.i18nMap.putAll(fileI18nMap);
+        }
+        catch (Exception e)
+        {
+            logger.error("Unable to read i18n for language %s from filesystem".formatted(targetLocale), e);
+        }
+    }
+
     public void clear()
     {
         this.i18nMap.clear();
@@ -70,23 +86,6 @@ public class OverlayingMessageStore
     public boolean isEmpty()
     {
         return this.i18nMap.isEmpty();
-    }
-
-    private void loadFromFileSystem(File i18nFile)
-    {
-        var typeToken = new TypeToken<Map<String, String>>(){}.getType();
-        Map<String, String> fileI18nMap;
-        try
-        {
-            var str = Files.readString(i18nFile.toPath());
-            fileI18nMap = gson.fromJson(str, typeToken);
-
-            this.i18nMap.putAll(fileI18nMap);
-        }
-        catch (Exception e)
-        {
-            logger.error("Unable to read i18n for language %s from filesystem".formatted(targetLocale), e);
-        }
     }
 
     private void loadFromPluginAsset()
