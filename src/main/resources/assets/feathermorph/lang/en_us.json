@@ -114,6 +114,7 @@
   "exceptions.input_too_long": "Input is too long!",
   "exceptions.input_not_allowed": "Given input is not allowed",
   "exceptions.malformed_input": "Incorrect format",
+  "exceptions.too_many_elements": "Too many elements! This property only takes up to <max>",
   "help.avaliable_cmd_header": "Available commands (Click to send/check)",
   "help.click_to_complete": "Click to complete",
   "help.click_to_view": "Click to check",

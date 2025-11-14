@@ -59,6 +59,11 @@ public class ExceptionStrings extends AbstractMorphStrings
         return getFormattable(getKey("input_too_long"), "[Fallback] 输入过长");
     }
 
+    public static FormattableMessage inputTooMany()
+    {
+        return getFormattable(getKey("too_many_elements"), "[Fallback] 输入包含的元素过多！该属性最多接受<max>个元素");
+    }
+
     public static FormattableMessage inputNotAllowed()
     {
         return getFormattable(getKey("input_not_allowed"), "[Fallback] 不接受此输入");

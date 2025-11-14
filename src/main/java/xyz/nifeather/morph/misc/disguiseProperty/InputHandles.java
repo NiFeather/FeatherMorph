@@ -420,6 +420,15 @@ public class InputHandles
 
             RotationStore rotationStore = new RotationStore();
 
+            if (list.size() > 3)
+            {
+                throw ParseErrorException.forProperty(propertyName)
+                        .byMethod("readRotations")
+                        .withLocalizableMessage(ExceptionStrings.inputTooMany().resolve("max", 3))
+                        .withMessage("Too many elements for reading a Rotation!")
+                        .create();
+            }
+
             if (!list.isEmpty())
                 validateDoubleNullable(propertyName, list.get(0)).ifPresent(rotationStore::x);
 
