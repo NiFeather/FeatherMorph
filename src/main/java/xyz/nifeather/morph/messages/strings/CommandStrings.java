@@ -284,6 +284,16 @@ public class CommandStrings extends AbstractMorphStrings
         return getFormattable(getKey("old_file_moved"), "[Fb] 磁盘上的旧文件已重命名为 <path>");
     }
 
+    public static FormattableMessage confirmationRequired()
+    {
+        return getFormattable(getKey("confirmation_required"), "[Fb] 请在<second>秒内再执行一次以确认<operation>的操作");
+    }
+
+    public static FormattableMessage confirmationExpired()
+    {
+        return getFormattable(getKey("confirmation_expired"), "[Fb] <operation>的确认请求已超时");
+    }
+
     private static String getKey(String key)
     {
         return "commands." + key;

@@ -74,59 +74,48 @@ public class PluginAssetUtils
         return assetPath + "/lang/" + languageCode + ".json";
     }
 
+    private static final List<String> allSupportedLanguages = List.of(
+            "zh_cn",
+            "en_us",
+            "ru_ru"
+    );
+
     public static List<String> allSupportedLanguages()
     {
-        return List.of(
-                "zh_cn",
-                "en_us",
-                "ru_ru"
-        );
+        return allSupportedLanguages;
     }
 
     //utils
-    public static File createBackupFile(File parent, String name, String ext)
-    {
-        String random = Long.toHexString(System.currentTimeMillis());
-        return new File(parent, "%s.old.%s.%s".formatted(name, random, ext));
-    }
-
     public static DumpResult extractLocaleFile(String targetLocale, File parentDirectory, boolean overwriteExistingIfExist)
             throws ExecutionErrorException
     {
         var targetFile = new File(parentDirectory, "%s.json".formatted(targetLocale));
-        File backupFile = null;
 
         if (targetFile.exists())
         {
-            if (!overwriteExistingIfExist)
-                return new DumpResult(targetFile, null);
-
-            // Let's try backup the original file
             try
             {
-                int retry = 0;
-                var backup = createBackupFile(parentDirectory, targetLocale, "json");
-                while (backup.exists())
+                if (overwriteExistingIfExist)
                 {
-                    retry++;
-                    backup = createBackupFile(parentDirectory, targetLocale, "json");
-
-                    if (retry > 10)
+                    if (!targetFile.delete())
                     {
-                        throw ExecutionErrorException.forMethod("dumpFromAssets")
-                                .withMessage("Too many retries for creating backup for an existing file!")
+                        throw ExecutionErrorException.forMethod("extractLocaleFile")
+                                .withMessage("Failed to delete the original file!")
                                 .create();
                     }
                 }
-
-                if (!targetFile.renameTo(backup))
+                else
                 {
-                    throw ExecutionErrorException.forMethod("dumpFromAssets")
-                            .withMessage("Failed to rename original file to the backup!")
-                            .create();
-                }
+                    var fileAsNew = new File(parentDirectory, "%s.fmnew.json".formatted(targetLocale));
+                    if (fileAsNew.exists() && !fileAsNew.delete())
+                    {
+                        throw ExecutionErrorException.forMethod("extractLocaleFile")
+                                .withMessage("Failed to delete the original fmnew file!")
+                                .create();
+                    }
 
-                backupFile = backup;
+                    targetFile = fileAsNew;
+                }
             }
             catch (SecurityException e)
             {
@@ -152,7 +141,7 @@ public class PluginAssetUtils
                 Files.createDirectory(parentDirectory.toPath());
 
             Files.writeString(targetFile.toPath(), asset.get(), StandardCharsets.UTF_8);
-            return new DumpResult(targetFile, backupFile);
+            return new DumpResult(targetFile);
         }
         catch (IOException e)
         {
