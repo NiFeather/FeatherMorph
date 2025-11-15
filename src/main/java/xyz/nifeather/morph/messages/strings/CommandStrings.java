@@ -279,6 +279,11 @@ public class CommandStrings extends AbstractMorphStrings
         return getFormattable(getKey("dump_success"), "[Fallback] 成功提取<what>的<type>到<path>");
     }
 
+    public static FormattableMessage oldFileRenamed()
+    {
+        return getFormattable(getKey("old_file_moved"), "[Fb] 磁盘上的旧文件已重命名为 <path>");
+    }
+
     private static String getKey(String key)
     {
         return "commands." + key;

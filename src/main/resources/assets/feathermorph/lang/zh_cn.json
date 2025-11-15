@@ -96,6 +96,7 @@
   "commands.target_already_exists": "位于<path>的目标文件已存在于文件系统！请先将其删除！",
   "commands.unable_to_write": "未能写入到 <path> ！请查看控制台来获得更多信息",
   "commands.dump_success": "成功提取 <what> 的<type>到 <path>",
+  "commands.old_file_moved": "磁盘上的旧文件已移动到 <path>",
   "common.command_not_found" : "<color:red>未找到此指令",
   "common.player_not_defined" : "<color:red>未指定玩家",
   "common.player_not_found" : "<color:red>未找到目标玩家或对方已离线",

@@ -96,6 +96,7 @@
   "commands.target_already_exists": "Target file at <path> already exists on the filesystem! Please delete it first!",
   "commands.unable_to_write": "Can't write contents to <path>! Check console for more information",
   "commands.dump_success": "Successfully dumped <type> of <what> to <path>",
+  "commands.old_file_moved": "The old file on the disk has been moved to <path>",
   "common.command_not_found": "<color:red>Command not found",
   "common.player_not_defined": "<color:red>No player specified",
   "common.player_not_found": "<color:red>No such player or they are offline",

@@ -12,8 +12,10 @@ import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Messages.FormattableMessage;
 import xyz.nifeather.morph.commands.brigadier.BrigadierCommand;
 import xyz.nifeather.morph.messages.MessageUtils;
+import xyz.nifeather.morph.messages.OverlayingMessageStore;
 import xyz.nifeather.morph.messages.strings.CommandStrings;
 import xyz.nifeather.morph.messages.strings.TypesString;
+import xyz.nifeather.morph.misc.ExecutionErrorException;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 import xyz.nifeather.morph.utilities.PluginAssetUtils;
 
@@ -74,34 +76,29 @@ public class DumpLanguageCommand extends BrigadierCommand
         }
 
         var messagesDirectory = new File(plugin.getDataFolder(), "messages");
-        var localeFile = new File(messagesDirectory, "%s.json".formatted(locale));
-        if (localeFile.exists())
-        {
-            MessageUtils.send(sender, CommandStrings.targetAlreadyExists().resolve("path", localeFile.getAbsolutePath()));
-            return 0;
-        }
 
         try
         {
-            if (!messagesDirectory.exists())
-                Files.createDirectory(messagesDirectory.toPath());
+            var result = PluginAssetUtils.extractLocaleFile(locale, messagesDirectory, true);
 
-            Files.writeString(localeFile.toPath(), stringOptional.get(), StandardCharsets.UTF_8);
+            var msg = CommandStrings.dumpSuccess()
+                    .resolve("what", locale)
+                    .resolve("type", TypesString.localeFile())
+                    .resolve("path", result.resultFile().getAbsolutePath());
+
+            if (result.backupFile() != null)
+                MessageUtils.send(sender, CommandStrings.oldFileRenamed().resolve("path", result.backupFile().getAbsolutePath()));
+
+            MessageUtils.send(sender, msg);
+
+            return 1;
         }
-        catch (IOException e)
+        catch (ExecutionErrorException e)
         {
-            MessageUtils.send(sender, CommandStrings.unableToWrite().resolve("path", localeFile.getAbsolutePath()));
-            logger.info("Failed to dump locale file", e);
+            logger.error("Unable to dump file", e);
+            MessageUtils.send(sender, CommandStrings.unableToWrite().resolve("path", messagesDirectory.getAbsolutePath()));
             return 0;
         }
-
-        var msg = CommandStrings.dumpSuccess()
-                .resolve("what", locale)
-                .resolve("type", TypesString.localeFile())
-                .resolve("path", localeFile.getAbsolutePath());
-        MessageUtils.send(sender, msg);
-
-        return 1;
     }
 
     private CompletableFuture<Suggestions> suggestLocale(CommandContext<CommandSourceStack> context, SuggestionsBuilder builder)
