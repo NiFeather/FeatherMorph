@@ -45,30 +45,27 @@ public class OverlayingMessageStore
         loadFromPluginAsset();
 
         var messagesDirectory = new File(plugin.getDataFolder(), "messages");
-        var overrideFile = new File(messagesDirectory, "%s.json".formatted(targetLocale));
-        if (overrideFile.exists())
-        {
-            this.loadFromFileSystem(overrideFile);
-        }
+        var languageFileOnDisk = new File(messagesDirectory, "%s.json".formatted(targetLocale));
+        if (languageFileOnDisk.exists())
+            this.loadFromFileSystem(languageFileOnDisk);
         else if (FeatherMorphMain.getInstance().debugOutputEnabled())
-        {
-            logger.info("Override file '%s' not exist".formatted(overrideFile.getAbsolutePath()));
-        }
+            logger.info("Override file '%s' not exist".formatted(languageFileOnDisk.getAbsolutePath()));
     }
 
     private void loadFromFileSystem(File i18nFile)
     {
-        Map<String, String> fileI18nMap;
         try
         {
             var str = Files.readString(i18nFile.toPath());
-            fileI18nMap = gson.fromJson(str, new TypeToken<>(){});
+            var fileI18nMap = gson.fromJson(str, new TypeToken<Map<String, String>>(){});
+            if (fileI18nMap == null) // empty file, ignore it
+                return;
 
             this.i18nMap.putAll(fileI18nMap);
         }
         catch (Exception e)
         {
-            logger.error("Unable to read i18n for language %s from filesystem".formatted(targetLocale), e);
+            logger.error("Unable to read i18n for language '%s' from file %s on disk".formatted(targetLocale, i18nFile.getName()), e);
         }
     }
 
@@ -94,7 +91,9 @@ public class OverlayingMessageStore
         var asset = PluginAssetUtils.getFileStringsOptional(path);
         if (asset.isEmpty())
         {
-            logger.info("Skipping %s from plugin assets because it doesn't exists".formatted(targetLocale));
+            if (FeatherMorphMain.getInstance().debugOutputEnabled())
+                logger.info("Skipping %s from plugin assets because it doesn't exists".formatted(targetLocale));
+
             return;
         }
 
@@ -107,7 +106,7 @@ public class OverlayingMessageStore
         }
         catch (Exception e)
         {
-            logger.error("Unable to read i18n for language %s from plugin assets".formatted(targetLocale), e);
+            logger.error("Unable to read i18n for language '%s' from plugin assets".formatted(targetLocale), e);
         }
     }
 }

@@ -75,16 +75,23 @@ public class TranslateManager
         return lookupTranslateStore(FALLBACK_LOCALE).orElseThrow(() -> new NullDependencyException("No"));
     }
 
+
     public Optional<String> lookupTranslate(String rawLocale, String messageKey)
+    {
+        return lookupTranslate(rawLocale, messageKey, true);
+    }
+
+    public Optional<String> lookupTranslate(String rawLocale, String messageKey, boolean allowFallback)
     {
         var locale = rawLocale.toLowerCase(Locale.ROOT);
 
         var translateStore = lookTranslateStoreOrCreate(rawLocale);
 
         var result = translateStore.lookup(messageKey);
-        if (result.isPresent()) return result;
+        if (result.isPresent()) return result; // 如果存在对应的语言文件，则返回
 
-        if (!translateStore.targetLocale().equals(FALLBACK_LOCALE))
+        // 不然，如果允许我们检查fallback，则再去检查 FALLBACK_LOCALE 里对应的存储
+        if (allowFallback && !translateStore.targetLocale().equals(FALLBACK_LOCALE))
         {
             var defaultResult = lookupTranslate(FALLBACK_LOCALE, messageKey);
             return defaultResult.or(() -> Optional.of("[%s:%s]".formatted(locale, messageKey)));
@@ -138,7 +145,8 @@ public class TranslateManager
         @Override
         public String get(String key, @Nullable String defaultValue, @Nullable String locale)
         {
-            return translate.lookupTranslate(locale == null ? FALLBACK_LOCALE : locale, key).orElse(key);
+            return translate.lookupTranslate("override", key, false)
+                    .orElseGet(() -> translate.lookupTranslate(locale == null ? FALLBACK_LOCALE : locale, key).orElse(key));
         }
     }
 }
