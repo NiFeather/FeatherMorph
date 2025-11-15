@@ -1,4 +1,4 @@
-package xyz.nifeather.morph.commands.subcommands.plugin;
+package xyz.nifeather.morph.commands.subcommands.plugin.extract;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
@@ -12,7 +12,6 @@ import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Messages.FormattableMessage;
 import xyz.nifeather.morph.commands.brigadier.BrigadierCommand;
 import xyz.nifeather.morph.messages.MessageUtils;
-import xyz.nifeather.morph.messages.OverlayingMessageStore;
 import xyz.nifeather.morph.messages.strings.CommandStrings;
 import xyz.nifeather.morph.messages.strings.TypesString;
 import xyz.nifeather.morph.misc.ExecutionErrorException;
@@ -20,9 +19,7 @@ import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 import xyz.nifeather.morph.utilities.PluginAssetUtils;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public class DumpLanguageCommand extends BrigadierCommand
@@ -36,7 +33,7 @@ public class DumpLanguageCommand extends BrigadierCommand
     @Override
     public @NotNull String name()
     {
-        return "dump_language";
+        return "language";
     }
 
     @Override
@@ -101,8 +98,20 @@ public class DumpLanguageCommand extends BrigadierCommand
         }
     }
 
+    private final List<String> validLocale = List.of(
+            "en_us",
+            "zh_cn",
+            "ru_ru"
+    );
+
     private CompletableFuture<Suggestions> suggestLocale(CommandContext<CommandSourceStack> context, SuggestionsBuilder builder)
     {
-        return builder.buildFuture();
+        return CompletableFuture.supplyAsync(() ->
+        {
+            var input = builder.getRemainingLowerCase();
+            validLocale.stream().filter(s -> s.contains(input)).forEach(builder::suggest);
+
+            return builder.build();
+        });
     }
 }

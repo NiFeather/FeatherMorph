@@ -7,6 +7,8 @@ import xiamomc.pluginbase.Messages.FormattableMessage;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.commands.brigadier.IConvertibleBrigadier;
 import xyz.nifeather.morph.commands.subcommands.plugin.*;
+import xyz.nifeather.morph.commands.subcommands.plugin.extract.DumpLanguageCommand;
+import xyz.nifeather.morph.commands.subcommands.plugin.extract.ExtractSubCommand;
 import xyz.nifeather.morph.messages.strings.HelpStrings;
 
 import java.util.List;
@@ -59,7 +61,7 @@ public class MorphPluginCommand extends MorphPluginObject implements IConvertibl
             new LookupSubCommand(),
             new SkinCacheSubCommand(),
             new MakeSkillItemSubCommand(),
-            new DumpLanguageCommand()
+            new ExtractSubCommand()
             //new ToolsSubCommand()
     );
 
