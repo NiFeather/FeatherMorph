@@ -127,7 +127,7 @@ public class DumpLanguageCommand extends BrigadierCommand
         {
             if (!confirmationHandler.confirm(sender))
             {
-                confirmationHandler.submit(sender, Duration.ofSeconds(2));
+                confirmationHandler.submit(sender, Duration.ofSeconds(15));
                 return 0;
             }
         }
