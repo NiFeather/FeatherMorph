@@ -8,6 +8,7 @@ import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Messages.FormattableMessage;
 import xyz.nifeather.morph.commands.brigadier.BrigadierCommand;
 import xyz.nifeather.morph.commands.brigadier.IConvertibleBrigadier;
+import xyz.nifeather.morph.messages.strings.HelpStrings;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 
 public class ExtractSubCommand extends BrigadierCommand
@@ -45,6 +46,6 @@ public class ExtractSubCommand extends BrigadierCommand
     @Override
     public FormattableMessage getHelpMessage()
     {
-        return null;
+        return HelpStrings.extractDescription();
     }
 }
