@@ -46,10 +46,11 @@ public class OverlayingMessageStore
 
         var messagesDirectory = new File(plugin.getDataFolder(), "messages");
         var languageFileOnDisk = new File(messagesDirectory, "%s.json".formatted(targetLocale));
+
         if (languageFileOnDisk.exists())
             this.loadFromFileSystem(languageFileOnDisk);
         else if (FeatherMorphMain.getInstance().debugOutputEnabled())
-            logger.info("Override file '%s' not exist".formatted(languageFileOnDisk.getAbsolutePath()));
+            logger.info("Skipping Override File for '%s' because '%s' not exist".formatted(targetLocale, languageFileOnDisk.getAbsolutePath()));
     }
 
     private void loadFromFileSystem(File i18nFile)

@@ -7,6 +7,7 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
+import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Messages.FormattableMessage;
@@ -49,7 +50,7 @@ public class DumpLanguageCommand extends BrigadierCommand
                 Commands.literal(name())
                         .requires(this::checkPermission)
                         .then(
-                                Commands.argument("locale", StringArgumentType.word())
+                                Commands.argument("locale", StringArgumentType.greedyString())
                                         .suggests(this::suggestLocale)
                                         .executes(this::dumpLocale)
                         )
@@ -60,11 +61,24 @@ public class DumpLanguageCommand extends BrigadierCommand
 
     private int dumpLocale(CommandContext<CommandSourceStack> context)
     {
+        var sender = context.getSource().getSender();
         var locale = StringArgumentType.getString(context, "locale");
+        if (locale.equals("*"))
+        {
+            int result = 0;
+            for (String s : this.validLocale)
+                result += doExtract(sender, s);
+
+            return result;
+        }
+
+        return doExtract(sender, locale);
+    }
+
+    private int doExtract(CommandSender sender, String locale)
+    {
         var path = PluginAssetUtils.langPath(locale);
         var stringOptional = PluginAssetUtils.getFileStringsOptional(path);
-
-        var sender = context.getSource().getSender();
 
         if (stringOptional.isEmpty())
         {
@@ -109,6 +123,7 @@ public class DumpLanguageCommand extends BrigadierCommand
         return CompletableFuture.supplyAsync(() ->
         {
             var input = builder.getRemainingLowerCase();
+            builder.suggest("*");
             validLocale.stream().filter(s -> s.contains(input)).forEach(builder::suggest);
 
             return builder.build();
