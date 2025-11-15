@@ -112,11 +112,7 @@ public class DumpLanguageCommand extends BrigadierCommand
         }
     }
 
-    private final List<String> validLocale = List.of(
-            "en_us",
-            "zh_cn",
-            "ru_ru"
-    );
+    private final List<String> validLocale =  PluginAssetUtils.allSupportedLanguages();
 
     private CompletableFuture<Suggestions> suggestLocale(CommandContext<CommandSourceStack> context, SuggestionsBuilder builder)
     {

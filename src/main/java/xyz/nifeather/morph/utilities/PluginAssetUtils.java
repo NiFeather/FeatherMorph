@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.List;
 import java.util.Optional;
 
 public class PluginAssetUtils
@@ -73,6 +74,15 @@ public class PluginAssetUtils
         return assetPath + "/lang/" + languageCode + ".json";
     }
 
+    public static List<String> allSupportedLanguages()
+    {
+        return List.of(
+                "zh_cn",
+                "en_us",
+                "ru_ru"
+        );
+    }
+
     //utils
     public static File createBackupFile(File parent, String name, String ext)
     {
@@ -80,7 +90,7 @@ public class PluginAssetUtils
         return new File(parent, "%s.old.%s.%s".formatted(name, random, ext));
     }
 
-    public static DumpResult extractLocaleFile(String targetLocale, File parentDirectory, boolean overwriteOldIfExist)
+    public static DumpResult extractLocaleFile(String targetLocale, File parentDirectory, boolean overwriteExistingIfExist)
             throws ExecutionErrorException
     {
         var targetFile = new File(parentDirectory, "%s.json".formatted(targetLocale));
@@ -88,7 +98,7 @@ public class PluginAssetUtils
 
         if (targetFile.exists())
         {
-            if (!overwriteOldIfExist)
+            if (!overwriteExistingIfExist)
                 return new DumpResult(targetFile, null);
 
             // Let's try backup the original file
