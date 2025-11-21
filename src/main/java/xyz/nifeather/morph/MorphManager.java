@@ -931,6 +931,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         long availableAfter = skillManager.getAvailableAfter(player.getUniqueId(), state.getDisguiseIdentifier());
         state.setAvailableAfter(Math.max(plugin.getCurrentTick() + 40, availableAfter), true);
 
+        new LateDisguiseBuildEvent(player, state).callEvent();
+
         state.removeSessionData(SESSIONKEY_TARGET_ENTITY);
     }
 
@@ -944,13 +946,14 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         var wrapper = newState.getDisguiseWrapper();
 
         // 玩家是否已有活跃的DisguiseState?
-        var currentState = getDisguiseStateFor(player);
+        var previousState = getDisguiseStateFor(player);
 
         // 重置上个State的伪装
-        if (currentState != null)
+        if (previousState != null)
         {
-            currentState.dispose();
-            activeDisguises.remove(currentState);
+            new PlayerSwitchMorphEvent(player, previousState, newState).callEvent();
+            previousState.dispose();
+            activeDisguises.remove(previousState);
         }
 
         wrapper.getBackend().disguise(player, wrapper);
