@@ -25,9 +25,12 @@ public class CowProperties extends BaseLivingEntityProperties<Cow>
         for (Cow.Variant variant : RegistryAccess.registryAccess().getRegistry(RegistryKey.COW_VARIANT))
             variantMap.put(variant.key().asString(), variant);
 
-        VARIANT = createProperty(PropertyNames.COW_VARIANT, Cow.Variant.TEMPERATE, this::readCowVariant, OutputHandles::writeKeyed)
+        VARIANT = SingleProperty.builder(PropertyNames.COW_VARIANT, Cow.Variant.TEMPERATE)
+                .withInputHandle(this::readCowVariant)
+                .withOutputHandle(OutputHandles::writeKeyed)
                 .withRandom(variantMap.values())
-                .withValidInput(variantMap.keySet());
+                .withValidInput(variantMap.keySet())
+                .build();
 
         registerSingle(VARIANT);
     }
@@ -54,7 +57,7 @@ public class CowProperties extends BaseLivingEntityProperties<Cow>
     @Override
     protected void setupDefaultProperties(PropertyHandler propertyHandler)
     {
-        propertyHandler.set(VARIANT, DisguiseUtils.pick(VARIANT.getRandomValues()));
+        propertyHandler.set(VARIANT, DisguiseUtils.pick(VARIANT.randomValues()));
     }
 
 }

@@ -2,14 +2,16 @@ package xyz.nifeather.morph.misc.disguiseProperty.values;
 
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Guardian;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.nifeather.morph.misc.DisguiseMeta;
 import xyz.nifeather.morph.misc.disguiseProperty.*;
 
 public class GuardianProperties extends BaseLivingEntityProperties<Guardian>
 {
-    public final SingleProperty<Integer> ATTACK_TARGET = SingleProperty.of(PropertyNames.GUARDIAN_ATTACK_TARGET, -1, InputHandles::reservedException, OutputHandles::writeInteger, true);
+    public final SingleProperty<Integer> ATTACK_TARGET = SingleProperty.builder(PropertyNames.GUARDIAN_ATTACK_TARGET, -1)
+            .withInputHandle(InputHandles::reservedException)
+            .withOutputHandle(OutputHandles::writeInteger)
+            .hideFromUserInput(true)
+            .build();
 
     public GuardianProperties()
     {

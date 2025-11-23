@@ -12,9 +12,12 @@ import java.util.Optional;
 
 public class FoxProperties extends BaseLivingEntityProperties<Fox>
 {
-    public final SingleProperty<Fox.Type> VARIANT = createProperty(PropertyNames.FOX_VARIANT, Fox.Type.RED, this::readFoxType, OutputHandles::writeEnum)
+    public final SingleProperty<Fox.Type> VARIANT = SingleProperty.builder(PropertyNames.FOX_VARIANT, Fox.Type.RED)
+            .withInputHandle(this::readFoxType)
+            .withOutputHandle(OutputHandles::writeEnum)
             .withRandom(Fox.Type.values())
-            .withValidInput("red", "snow");
+            .withValidInput("red", "snow")
+            .build();
 
     public Optional<Fox.Type> readFoxType(String propertyName, String input) throws ParseErrorException
     {
@@ -43,7 +46,7 @@ public class FoxProperties extends BaseLivingEntityProperties<Fox>
     @Override
     protected void setupDefaultProperties(PropertyHandler propertyHandler)
     {
-        propertyHandler.set(VARIANT, DisguiseUtils.pick(VARIANT.getRandomValues()));
+        propertyHandler.set(VARIANT, DisguiseUtils.pick(VARIANT.randomValues()));
     }
 
 }

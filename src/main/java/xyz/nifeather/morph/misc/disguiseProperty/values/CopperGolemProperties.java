@@ -13,8 +13,11 @@ import java.util.Optional;
 
 public class CopperGolemProperties extends BaseLivingEntityProperties<CopperGolem>
 {
-    public final SingleProperty<WeatherState> WEATHER_STATE = createProperty(PropertyNames.COPPER_GOLEM_WEATHER_STATE, WeatherState.UNAFFECTED, this::readWeatherState, OutputHandles::writeEnum)
-            .withValidInput(Arrays.stream(WeatherState.values()).map(ws -> ws.name().toLowerCase()).toList());
+    public final SingleProperty<WeatherState> WEATHER_STATE = SingleProperty.builder(PropertyNames.COPPER_GOLEM_WEATHER_STATE, WeatherState.UNAFFECTED)
+            .withInputHandle(this::readWeatherState)
+            .withOutputHandle(OutputHandles::writeEnum)
+            .withValidInput(Arrays.stream(WeatherState.values()).map(ws -> ws.name().toLowerCase()).toList())
+            .build();
 
     private Optional<WeatherState> readWeatherState(String propertyName, String input) throws ParseErrorException
     {

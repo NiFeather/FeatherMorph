@@ -22,8 +22,7 @@ public class AxolotlProperties extends BaseLivingEntityProperties<Axolotl>
             variantMap.put(variant.name().toLowerCase(), variant);
     }
 
-    public final SingleProperty<Axolotl.Variant> VARIANT = createProperty(PropertyNames.AXOLOTL_VARIANT, Axolotl.Variant.LUCY, this::readAxolotlVariant, OutputHandles::writeEnum)
-            .withRandom(Axolotl.Variant.values());
+    public final SingleProperty<Axolotl.Variant> VARIANT;
 
     public Optional<Axolotl.Variant> readAxolotlVariant(String propertyName, String input) throws ParseErrorException
     {
@@ -33,7 +32,13 @@ public class AxolotlProperties extends BaseLivingEntityProperties<Axolotl>
     public AxolotlProperties()
     {
         initVariantMap();
-        VARIANT.withValidInput(variantMap.keySet());
+
+        VARIANT = SingleProperty.builder(PropertyNames.AXOLOTL_VARIANT, Axolotl.Variant.LUCY)
+                .withInputHandle(this::readAxolotlVariant)
+                .withOutputHandle(OutputHandles::writeEnum)
+                .withRandom(Axolotl.Variant.values())
+                .withValidInput(variantMap.keySet())
+                .build();
 
         registerSingle(VARIANT);
     }
@@ -55,7 +60,7 @@ public class AxolotlProperties extends BaseLivingEntityProperties<Axolotl>
     @Override
     protected void setupDefaultProperties(PropertyHandler propertyHandler)
     {
-        propertyHandler.set(VARIANT, DisguiseUtils.pick(VARIANT.getRandomValues()));
+        propertyHandler.set(VARIANT, DisguiseUtils.pick(VARIANT.randomValues()));
     }
 
 }

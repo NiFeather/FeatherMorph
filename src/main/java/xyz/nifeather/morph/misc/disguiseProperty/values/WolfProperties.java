@@ -29,26 +29,35 @@ public class WolfProperties extends BaseLivingEntityProperties<Wolf>
             variantMap.put(variant.key().asString(), variant);
     }
 
-    public final SingleProperty<Wolf.Variant> VARIANT = createProperty(PropertyNames.WOLF_VARIANT, Variant.PALE, this::readWolfVariant, OutputHandles::writeKeyed)
-            .withRandom(
-                    RegistryAccess.registryAccess().getRegistry(RegistryKey.WOLF_VARIANT).stream().toList()
-            );
+    public final SingleProperty<Wolf.Variant> VARIANT;
 
     public Optional<Wolf.Variant> readWolfVariant(String propertyName, String string) throws ParseErrorException
     {
         return InputHandles.readRegistry(RegistryKey.WOLF_VARIANT, propertyName, string);
     }
 
-    public final SingleProperty<UUID> OWNER = createProperty(PropertyNames.WOLF_OWNER, Uuids.NIL_UUID, InputHandles::readUUID, OutputHandles::writeUUID);
+    public final SingleProperty<UUID> OWNER = SingleProperty.builder(PropertyNames.WOLF_OWNER, Uuids.NIL_UUID)
+            .withInputHandle(InputHandles::readUUID)
+            .withOutputHandle(OutputHandles::writeUUID)
+            .build();
 
-    public final SingleProperty<DyeColor> COLLAR_COLOR = createProperty(PropertyNames.WOLF_COLLAR_COLOR, DyeColor.RED, InputHandles::readDyeColor, OutputHandles::writeEnum);
+    public final SingleProperty<DyeColor> COLLAR_COLOR;
 
     public WolfProperties()
     {
         initMap();
-        VARIANT.withValidInput(variantMap.keySet());
+        VARIANT = SingleProperty.builder(PropertyNames.WOLF_VARIANT, Variant.PALE)
+                .withInputHandle(this::readWolfVariant)
+                .withOutputHandle(OutputHandles::writeKeyed)
+                .withRandom(RegistryAccess.registryAccess().getRegistry(RegistryKey.WOLF_VARIANT).stream().toList())
+                .withValidInput(variantMap.keySet())
+                .build();
 
-        COLLAR_COLOR.withValidInput(Arrays.stream(DyeColor.values()).map(c -> c.name().toLowerCase()).toList());
+        COLLAR_COLOR =  SingleProperty.builder(PropertyNames.WOLF_COLLAR_COLOR, DyeColor.RED)
+                .withInputHandle(InputHandles::readDyeColor)
+                .withOutputHandle(OutputHandles::writeEnum)
+                .withValidInput(Arrays.stream(DyeColor.values()).map(c -> c.name().toLowerCase()).toList())
+                .build();
 
         registerSingle(VARIANT, OWNER, COLLAR_COLOR);
     }
@@ -74,6 +83,6 @@ public class WolfProperties extends BaseLivingEntityProperties<Wolf>
     @Override
     protected void setupDefaultProperties(PropertyHandler propertyHandler)
     {
-        propertyHandler.set(VARIANT, DisguiseUtils.pick(VARIANT.getRandomValues()));
+        propertyHandler.set(VARIANT, DisguiseUtils.pick(VARIANT.randomValues()));
     }
 }

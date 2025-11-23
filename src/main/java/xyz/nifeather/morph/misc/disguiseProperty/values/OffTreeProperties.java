@@ -9,5 +9,9 @@ import java.util.UUID;
 
 public class OffTreeProperties
 {
-    public static final SingleProperty<UUID> VIRTUAL_ENTITY_UUID = SingleProperty.of("offtree/virtual_entity_uuid", UUID.randomUUID(), InputHandles::immediateException, OutputHandles::writeUUID);
+    public static final SingleProperty<UUID> VIRTUAL_ENTITY_UUID = SingleProperty.builder("offtree/virtual_entity_uuid", UUID.randomUUID())
+            .withInputHandle(InputHandles::immediateException)
+            .withOutputHandle(OutputHandles::writeUUID)
+            .build();
+
 }

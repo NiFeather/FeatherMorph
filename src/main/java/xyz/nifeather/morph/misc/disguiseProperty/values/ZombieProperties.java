@@ -9,8 +9,11 @@ import xyz.nifeather.morph.misc.disguiseProperty.*;
 
 public class ZombieProperties extends BaseLivingEntityProperties<Zombie>
 {
-    public final SingleProperty<Boolean> IS_BABY = createProperty(PropertyNames.ZOMBIE_IS_BABY, false, InputHandles::readBooleanRelaxed, OutputHandles::writeBoolean)
-            .withValidInput("true", "false");
+    public final SingleProperty<Boolean> IS_BABY = SingleProperty.builder(PropertyNames.ZOMBIE_IS_BABY, false)
+            .withInputHandle(InputHandles::readBooleanRelaxed)
+            .withOutputHandle(OutputHandles::writeBoolean)
+            .withValidInput("true", "false")
+            .build();
 
     public ZombieProperties()
     {

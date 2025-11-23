@@ -12,7 +12,10 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class SlimeMagmaProperties extends BaseLivingEntityProperties<Slime>
 {
-    public final SingleProperty<Integer> SIZE = createProperty(PropertyNames.SLIME_MAGMA_SIZE, 1, this::readSize, OutputHandles::writeInteger);
+    public final SingleProperty<Integer> SIZE = SingleProperty.builder(PropertyNames.SLIME_MAGMA_SIZE, 1)
+            .withInputHandle(this::readSize)
+            .withOutputHandle(OutputHandles::writeInteger)
+            .build();
 
     private Optional<Integer> readSize(String propertyName, String string) throws ParseErrorException
     {

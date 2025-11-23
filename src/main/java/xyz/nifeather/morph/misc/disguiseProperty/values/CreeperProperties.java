@@ -10,9 +10,12 @@ import xyz.nifeather.morph.utilities.DisguiseUtils;
 
 public class CreeperProperties extends BaseLivingEntityProperties<Creeper>
 {
-    public final SingleProperty<Boolean> CHARGED = createProperty(PropertyNames.CREEPER_CHARGED, false, InputHandles::readBooleanRelaxed, OutputHandles::writeBoolean)
+    public final SingleProperty<Boolean> CHARGED = SingleProperty.builder(PropertyNames.CREEPER_CHARGED, false)
+            .withInputHandle(InputHandles::readBooleanRelaxed)
+            .withOutputHandle(OutputHandles::writeBoolean)
             .withRandom(false, false, false, true)
-            .withValidInput("true", "false");
+            .withValidInput("true", "false")
+            .build();
 
     public CreeperProperties()
     {
@@ -36,7 +39,7 @@ public class CreeperProperties extends BaseLivingEntityProperties<Creeper>
     @Override
     protected void setupDefaultProperties(PropertyHandler propertyHandler)
     {
-        propertyHandler.set(CHARGED, DisguiseUtils.pick(CHARGED.getRandomValues()));
+        propertyHandler.set(CHARGED, DisguiseUtils.pick(CHARGED.randomValues()));
     }
 
 }

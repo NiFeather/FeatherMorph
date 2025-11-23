@@ -16,19 +16,53 @@ import xyz.nifeather.morph.misc.disguiseProperty.*;
 
 public class ArmorStandProperties extends BaseLivingEntityProperties<ArmorStand>
 {
-    public final SingleProperty<Boolean> SHOW_ARMS = createProperty(PropertyNames.ARMOR_STAND_SHOW_ARMS, false, InputHandles::readBooleanRelaxed, OutputHandles::writeBoolean)
-            .withValidInput("true", "false");
-    public final SingleProperty<Boolean> HAS_BASE_PLATE = createProperty(PropertyNames.ARMOR_STAND_HAS_BASE_PLATE, true, InputHandles::readBooleanRelaxed, OutputHandles::writeBoolean)
-            .withValidInput("true", "false");
-    public final SingleProperty<Boolean> SMALL = createProperty(PropertyNames.ARMOR_STAND_SMALL, false, InputHandles::readBooleanRelaxed, OutputHandles::writeBoolean)
-            .withValidInput("true", "false");
+    public final SingleProperty<Boolean> SHOW_ARMS = SingleProperty.builder(PropertyNames.ARMOR_STAND_SHOW_ARMS, false)
+            .withInputHandle(InputHandles::readBooleanRelaxed)
+            .withOutputHandle(OutputHandles::writeBoolean)
+            .withValidInput("true", "false")
+            .build();
 
-    public final SingleProperty<Rotations> HEAD_ROTATION = createProperty(PropertyNames.ARMOR_STAND_HEAD_ROTATION, Rotations.ZERO, InputHandles::readRotations, OutputHandles::writeRotations);
-    public final SingleProperty<Rotations> BODY_ROTATION = createProperty(PropertyNames.ARMOR_STAND_BODY_ROTATION, Rotations.ZERO, InputHandles::readRotations, OutputHandles::writeRotations);
-    public final SingleProperty<Rotations> RIGHT_ARM_ROTATION = createProperty(PropertyNames.ARMOR_STAND_RIGHT_ARM_ROTATION, Rotations.ZERO, InputHandles::readRotations, OutputHandles::writeRotations);
-    public final SingleProperty<Rotations> LEFT_ARM_ROTATION = createProperty(PropertyNames.ARMOR_STAND_LEFT_ARM_ROTATION, Rotations.ZERO, InputHandles::readRotations, OutputHandles::writeRotations);
-    public final SingleProperty<Rotations> RIGHT_LEG_ROTATION = createProperty(PropertyNames.ARMOR_STAND_RIGHT_LEG_ROTATION, Rotations.ZERO, InputHandles::readRotations, OutputHandles::writeRotations);
-    public final SingleProperty<Rotations> LEFT_LEG_ROTATION = createProperty(PropertyNames.ARMOR_STAND_LEFT_LEG_ROTATION, Rotations.ZERO, InputHandles::readRotations, OutputHandles::writeRotations);
+    public final SingleProperty<Boolean> HAS_BASE_PLATE = SingleProperty.builder(PropertyNames.ARMOR_STAND_HAS_BASE_PLATE, true)
+            .withInputHandle(InputHandles::readBooleanRelaxed)
+            .withOutputHandle(OutputHandles::writeBoolean)
+            .withValidInput("true", "false")
+            .build();
+
+    public final SingleProperty<Boolean> SMALL = SingleProperty.builder(PropertyNames.ARMOR_STAND_SMALL, false)
+            .withInputHandle(InputHandles::readBooleanRelaxed)
+            .withOutputHandle(OutputHandles::writeBoolean)
+            .withValidInput("true", "false")
+            .build();
+
+    public final SingleProperty<Rotations> HEAD_ROTATION = SingleProperty.builder(PropertyNames.ARMOR_STAND_HEAD_ROTATION, Rotations.ZERO)
+            .withInputHandle(InputHandles::readRotations)
+            .withOutputHandle(OutputHandles::writeRotations)
+            .build();
+
+    public final SingleProperty<Rotations> BODY_ROTATION = SingleProperty.builder(PropertyNames.ARMOR_STAND_BODY_ROTATION, Rotations.ZERO)
+            .withInputHandle(InputHandles::readRotations)
+            .withOutputHandle(OutputHandles::writeRotations)
+            .build();
+
+    public final SingleProperty<Rotations> RIGHT_ARM_ROTATION = SingleProperty.builder(PropertyNames.ARMOR_STAND_RIGHT_ARM_ROTATION, Rotations.ZERO)
+            .withInputHandle(InputHandles::readRotations)
+            .withOutputHandle(OutputHandles::writeRotations)
+            .build();
+
+    public final SingleProperty<Rotations> LEFT_ARM_ROTATION = SingleProperty.builder(PropertyNames.ARMOR_STAND_LEFT_ARM_ROTATION, Rotations.ZERO)
+            .withInputHandle(InputHandles::readRotations)
+            .withOutputHandle(OutputHandles::writeRotations)
+            .build();
+
+    public final SingleProperty<Rotations> RIGHT_LEG_ROTATION = SingleProperty.builder(PropertyNames.ARMOR_STAND_RIGHT_LEG_ROTATION, Rotations.ZERO)
+            .withInputHandle(InputHandles::readRotations)
+            .withOutputHandle(OutputHandles::writeRotations)
+            .build();
+
+    public final SingleProperty<Rotations> LEFT_LEG_ROTATION = SingleProperty.builder(PropertyNames.ARMOR_STAND_LEFT_LEG_ROTATION, Rotations.ZERO)
+            .withInputHandle(InputHandles::readRotations)
+            .withOutputHandle(OutputHandles::writeRotations)
+            .build();
 
     @Nullable
     private volatile MorphConfigManager config;

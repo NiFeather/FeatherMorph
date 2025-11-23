@@ -24,8 +24,7 @@ public class FrogProperties extends BaseLivingEntityProperties<Frog>
             variantMap.put(variant.key().asString(), variant);
     }
 
-    public final SingleProperty<Frog.Variant> VARIANT = createProperty(PropertyNames.FROG_VARIANT, Frog.Variant.TEMPERATE, this::readFrogVariant, OutputHandles::writeKeyed)
-            .withRandom(Frog.Variant.TEMPERATE, Frog.Variant.COLD, Frog.Variant.WARM);
+    public final SingleProperty<Frog.Variant> VARIANT;
 
     private Optional<Frog.Variant> readFrogVariant(String propertyName, String string) throws ParseErrorException
     {
@@ -35,7 +34,12 @@ public class FrogProperties extends BaseLivingEntityProperties<Frog>
     public FrogProperties()
     {
         initMap();
-        VARIANT.withValidInput(variantMap.keySet());
+        VARIANT = SingleProperty.builder(PropertyNames.FROG_VARIANT, Frog.Variant.TEMPERATE)
+                .withInputHandle(this::readFrogVariant)
+                .withOutputHandle(OutputHandles::writeKeyed)
+                .withRandom(Frog.Variant.TEMPERATE, Frog.Variant.COLD, Frog.Variant.WARM)
+                .withValidInput(variantMap.keySet())
+                .build();
 
         registerSingle(
                 VARIANT
@@ -59,7 +63,7 @@ public class FrogProperties extends BaseLivingEntityProperties<Frog>
     @Override
     protected void setupDefaultProperties(PropertyHandler propertyHandler)
     {
-        propertyHandler.set(VARIANT, DisguiseUtils.pick(VARIANT.getRandomValues()));
+        propertyHandler.set(VARIANT, DisguiseUtils.pick(VARIANT.randomValues()));
     }
 
 }

@@ -9,8 +9,11 @@ import xyz.nifeather.morph.misc.disguiseProperty.*;
 
 public class HappyGhastProperties extends BaseLivingEntityProperties<HappyGhast>
 {
-    public final SingleProperty<Boolean> IS_GHASTLING = createProperty(PropertyNames.HAPPY_GHAST_IS_GHASTLING, false, InputHandles::readBooleanRelaxed, OutputHandles::writeBoolean)
-            .withValidInput("true", "false");
+    public final SingleProperty<Boolean> IS_GHASTLING = SingleProperty.builder(PropertyNames.HAPPY_GHAST_IS_GHASTLING, false)
+            .withInputHandle(InputHandles::readBooleanRelaxed)
+            .withOutputHandle(OutputHandles::writeBoolean)
+            .withValidInput("true", "false")
+            .build();
 
     public HappyGhastProperties()
     {

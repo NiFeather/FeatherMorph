@@ -12,11 +12,14 @@ import java.util.Arrays;
 
 public class ShulkerProperties extends BaseLivingEntityProperties<Shulker>
 {
-    public final SingleProperty<DyeColor> DYE_COLOR = createProperty(PropertyNames.SHULKER_COLOR, DyeColor.getByWoolData((byte)15), InputHandles::readDyeColor, OutputHandles::writeEnum);
+    public final SingleProperty<DyeColor> DYE_COLOR = SingleProperty.builder(PropertyNames.SHULKER_COLOR, DyeColor.class, DyeColor.getByWoolData((byte) 15))
+            .withInputHandle(InputHandles::readDyeColor)
+            .withOutputHandle(OutputHandles::writeEnum)
+            .withValidInput(Arrays.stream(DyeColor.values()).map(c -> c.name().toLowerCase()).toList())
+            .build();
 
     public ShulkerProperties()
     {
-        DYE_COLOR.withValidInput(Arrays.stream(DyeColor.values()).map(c -> c.name().toLowerCase()).toList());
         registerSingle(DYE_COLOR);
     }
 

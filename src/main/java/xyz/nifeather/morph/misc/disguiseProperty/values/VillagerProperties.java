@@ -26,21 +26,34 @@ public class VillagerProperties extends BaseLivingEntityProperties<Villager>
             professionMap.put(profession.key().asString(), profession);
     }
 
-    public final SingleProperty<Villager.Type> TYPE = createProperty(PropertyNames.VILLAGER_TYPE, Villager.Type.PLAINS, InputHandles::readVillagerType, OutputHandles::writeKeyed)
-            .withRandom(Registry.VILLAGER_TYPE.stream().toList());
-
-    public final SingleProperty<Villager.Profession> PROFESSION = createProperty(PropertyNames.VILLAGER_PROFESSION, Villager.Profession.NONE, InputHandles::readVillagerProfession, OutputHandles::writeKeyed)
-            .withRandom(Registry.VILLAGER_PROFESSION.stream().toList());
-
-    public final SingleProperty<Integer> LEVEL = createProperty(PropertyNames.VILLAGER_LEVEL, 1, InputHandles::readVillagerLevel, OutputHandles::writeInteger)
-            .withRandom(1, 2, 3, 4, 5, 6);
+    public final SingleProperty<Villager.Type> TYPE;
+    public final SingleProperty<Villager.Profession> PROFESSION;
+    public final SingleProperty<Integer> LEVEL;
 
     public VillagerProperties()
     {
         initMaps();
-        TYPE.withValidInput(typeMap.keySet());
-        PROFESSION.withValidInput(professionMap.keySet());
-        LEVEL.withValidInput("1", "2", "3", "4", "5", "6");
+
+        TYPE = SingleProperty.builder(PropertyNames.VILLAGER_TYPE, Villager.Type.PLAINS)
+                .withInputHandle(InputHandles::readVillagerType)
+                .withOutputHandle(OutputHandles::writeKeyed)
+                .withRandom(Registry.VILLAGER_TYPE.stream().toList())
+                .withValidInput(typeMap.keySet())
+                .build();
+
+        PROFESSION = SingleProperty.builder(PropertyNames.VILLAGER_PROFESSION, Villager.Profession.NONE)
+                .withInputHandle(InputHandles::readVillagerProfession)
+                .withOutputHandle(OutputHandles::writeKeyed)
+                .withRandom(Registry.VILLAGER_PROFESSION.stream().toList())
+                .withValidInput(professionMap.keySet())
+                .build();
+
+        LEVEL = SingleProperty.builder(PropertyNames.VILLAGER_LEVEL, 1)
+                .withInputHandle(InputHandles::readInteger)
+                .withOutputHandle(OutputHandles::writeInteger)
+                .withRandom(1, 2, 3, 4, 5, 6)
+                .withValidInput("1", "2", "3", "4", "5", "6")
+                .build();
 
         registerSingle(TYPE, PROFESSION, LEVEL);
     }
@@ -64,9 +77,9 @@ public class VillagerProperties extends BaseLivingEntityProperties<Villager>
     @Override
     protected void setupDefaultProperties(PropertyHandler propertyHandler)
     {
-        propertyHandler.set(TYPE, DisguiseUtils.pick(TYPE.getRandomValues()));
-        propertyHandler.set(PROFESSION, DisguiseUtils.pick(PROFESSION.getRandomValues()));
-        propertyHandler.set(LEVEL, DisguiseUtils.pick(LEVEL.getRandomValues()));
+        propertyHandler.set(TYPE, DisguiseUtils.pick(TYPE.randomValues()));
+        propertyHandler.set(PROFESSION, DisguiseUtils.pick(PROFESSION.randomValues()));
+        propertyHandler.set(LEVEL, DisguiseUtils.pick(LEVEL.randomValues()));
     }
 
 }

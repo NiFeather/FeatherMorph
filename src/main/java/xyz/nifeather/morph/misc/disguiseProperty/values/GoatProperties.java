@@ -10,13 +10,19 @@ import xyz.nifeather.morph.utilities.DisguiseUtils;
 
 public class GoatProperties extends BaseLivingEntityProperties<Goat>
 {
-    public final SingleProperty<Boolean> HAS_LEFT_HORN = createProperty(PropertyNames.GOAT_HAS_LEFT_HORN, true, InputHandles::readBooleanRelaxed, OutputHandles::writeBoolean)
+    public final SingleProperty<Boolean> HAS_LEFT_HORN = SingleProperty.builder(PropertyNames.GOAT_HAS_LEFT_HORN, true)
+            .withInputHandle(InputHandles::readBooleanRelaxed)
+            .withOutputHandle(OutputHandles::writeBoolean)
             .withRandom(true, true, true, false)
-            .withValidInput("false", "true");
+            .withValidInput("false", "true")
+            .build();
 
-    public final SingleProperty<Boolean> HAS_RIGHT_HORN = createProperty(PropertyNames.GOAT_HAS_RIGHT_HORN, true, InputHandles::readBooleanRelaxed, OutputHandles::writeBoolean)
+    public final SingleProperty<Boolean> HAS_RIGHT_HORN = SingleProperty.builder(PropertyNames.GOAT_HAS_RIGHT_HORN, true)
+            .withInputHandle(InputHandles::readBooleanRelaxed)
+            .withOutputHandle(OutputHandles::writeBoolean)
             .withRandom(true, true, true, false)
-            .withValidInput("false", "true");
+            .withValidInput("false", "true")
+            .build();
 
     public GoatProperties()
     {
@@ -41,8 +47,8 @@ public class GoatProperties extends BaseLivingEntityProperties<Goat>
     @Override
     protected void setupDefaultProperties(PropertyHandler propertyHandler)
     {
-        propertyHandler.set(HAS_RIGHT_HORN, DisguiseUtils.pick(HAS_RIGHT_HORN.getRandomValues()));
-        propertyHandler.set(HAS_LEFT_HORN, DisguiseUtils.pick(HAS_LEFT_HORN.getRandomValues()));
+        propertyHandler.set(HAS_RIGHT_HORN, DisguiseUtils.pick(HAS_RIGHT_HORN.randomValues()));
+        propertyHandler.set(HAS_LEFT_HORN, DisguiseUtils.pick(HAS_LEFT_HORN.randomValues()));
     }
 
 }

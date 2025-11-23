@@ -17,14 +17,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class AbstractProperties<E extends Entity>
 {
-    protected <X> SingleProperty<X> createProperty(String name, X val, InputHandle<X> inputHandle, OutputHandle<X> outputHandle)
-    {
-        if (val == null)
-            throw new IllegalArgumentException("May not pass a null value to getSingle()");
-
-        return SingleProperty.of(name, val, inputHandle, outputHandle);
-    }
-
     protected final Logger logger = FeatherMorphMain.getInstance().getSLF4JLogger();
 
     protected final Map<String, SingleProperty<?>> values = new ConcurrentHashMap<>();

@@ -28,23 +28,35 @@ public class CatProperties extends BaseLivingEntityProperties<Cat>
             variantMap.put(variant.key().asString(), variant);
     }
 
-    public final SingleProperty<Cat.Type> CAT_VARIANT = createProperty(PropertyNames.CAT_VARIANT, Cat.Type.TABBY, this::readCatVariant, OutputHandles::writeKeyed);
+    public final SingleProperty<Cat.Type> CAT_VARIANT;
 
     private Optional<Cat.Type> readCatVariant(String propertyName, String string) throws ParseErrorException
     {
         return InputHandles.readRegistry(RegistryKey.CAT_VARIANT, propertyName, string);
     }
 
-    public final SingleProperty<UUID> OWNER = createProperty(PropertyNames.CAT_OWNER, Uuids.NIL_UUID, InputHandles::readUUID, OutputHandles::writeUUID);
-    public final SingleProperty<DyeColor> COLLAR_COLOR = createProperty(PropertyNames.CAT_COLLAR_COLOR, DyeColor.RED, InputHandles::readDyeColor, OutputHandles::writeEnum);
+    public final SingleProperty<UUID> OWNER = SingleProperty.builder(PropertyNames.CAT_OWNER, Uuids.NIL_UUID)
+            .withInputHandle(InputHandles::readUUID)
+            .withOutputHandle(OutputHandles::writeUUID)
+            .build();
+    public final SingleProperty<DyeColor> COLLAR_COLOR;
 
     public CatProperties()
     {
         initVariantMap();
-        CAT_VARIANT.withValidInput(variantMap.keySet())
-                .withRandom(variantMap.values());
 
-        COLLAR_COLOR.withValidInput(Arrays.stream(DyeColor.values()).map(c -> c.name().toLowerCase()).toList());
+        CAT_VARIANT = SingleProperty.builder(PropertyNames.CAT_VARIANT, Cat.Type.TABBY)
+                .withInputHandle(this::readCatVariant)
+                .withOutputHandle(OutputHandles::writeKeyed)
+                .withValidInput(variantMap.keySet())
+                .withRandom(variantMap.values())
+                .build();
+
+        COLLAR_COLOR = SingleProperty.builder(PropertyNames.CAT_COLLAR_COLOR, DyeColor.RED)
+                .withInputHandle(InputHandles::readDyeColor)
+                .withOutputHandle(OutputHandles::writeEnum)
+                .withValidInput(Arrays.stream(DyeColor.values()).map(c -> c.name().toLowerCase()).toList())
+                .build();
 
         registerSingle(
                 CAT_VARIANT, OWNER, COLLAR_COLOR
@@ -72,7 +84,7 @@ public class CatProperties extends BaseLivingEntityProperties<Cat>
     @Override
     protected void setupDefaultProperties(PropertyHandler propertyHandler)
     {
-        propertyHandler.set(CAT_VARIANT, DisguiseUtils.pick(CAT_VARIANT.getRandomValues()));
+        propertyHandler.set(CAT_VARIANT, DisguiseUtils.pick(CAT_VARIANT.randomValues()));
     }
 
 }

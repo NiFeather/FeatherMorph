@@ -12,9 +12,12 @@ import java.util.Optional;
 
 public class MooshroomProperties extends BaseLivingEntityProperties<MushroomCow>
 {
-    public final SingleProperty<MushroomCow.Variant> VARIANT = createProperty(PropertyNames.MOOSHROOM_VARIANT, MushroomCow.Variant.RED, this::readVariant, OutputHandles::writeEnum)
+    public final SingleProperty<MushroomCow.Variant> VARIANT = SingleProperty.builder(PropertyNames.MOOSHROOM_VARIANT, MushroomCow.Variant.RED)
+            .withInputHandle(this::readVariant)
+            .withOutputHandle(OutputHandles::writeEnum)
             .withRandom(MushroomCow.Variant.RED, MushroomCow.Variant.RED, MushroomCow.Variant.RED, MushroomCow.Variant.BROWN)
-            .withValidInput("red", "brown");
+            .withValidInput("red", "brown")
+            .build();
 
     private Optional<MushroomCow.Variant> readVariant(String propertyName, String string) throws ParseErrorException
     {
@@ -43,7 +46,7 @@ public class MooshroomProperties extends BaseLivingEntityProperties<MushroomCow>
     @Override
     protected void setupDefaultProperties(PropertyHandler propertyHandler)
     {
-        propertyHandler.set(VARIANT, DisguiseUtils.pick(VARIANT.getRandomValues()));
+        propertyHandler.set(VARIANT, DisguiseUtils.pick(VARIANT.randomValues()));
     }
 
 }

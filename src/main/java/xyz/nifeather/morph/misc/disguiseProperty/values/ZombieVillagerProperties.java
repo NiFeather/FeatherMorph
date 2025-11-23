@@ -27,22 +27,40 @@ public class ZombieVillagerProperties extends BaseLivingEntityProperties<ZombieV
             professionMap.put(profession.key().asString(), profession);
     }
 
-    public final SingleProperty<Villager.Type> TYPE = createProperty(PropertyNames.ZOMBIE_VILLAGER_TYPE, Villager.Type.PLAINS, InputHandles::readVillagerType, OutputHandles::writeKeyed)
-            .withRandom(Registry.VILLAGER_TYPE.stream().toList());
+    public final SingleProperty<Villager.Type> TYPE;
+    public final SingleProperty<Villager.Profession> PROFESSION;
+    public final SingleProperty<Integer> LEVEL;
 
-    public final SingleProperty<Villager.Profession> PROFESSION = createProperty(PropertyNames.ZOMBIE_VILLAGER_PROFESSION, Villager.Profession.NONE, InputHandles::readVillagerProfession, OutputHandles::writeKeyed)
-            .withRandom(Registry.VILLAGER_PROFESSION.stream().toList());
-
-    public final SingleProperty<Integer> LEVEL = createProperty(PropertyNames.ZOMBIE_VILLAGER_LEVEL, 1, InputHandles::readVillagerLevel, OutputHandles::writeInteger)
-            .withRandom(1, 2, 3, 4, 5, 6);
-
-    public final SingleProperty<Boolean> IS_BABY = createProperty(PropertyNames.ZOMBIE_VILLAGER_IS_BABY, false, InputHandles::readBooleanRelaxed, OutputHandles::writeBoolean);
+    public final SingleProperty<Boolean> IS_BABY = SingleProperty.builder(PropertyNames.ZOMBIE_VILLAGER_IS_BABY, false)
+            .withInputHandle(InputHandles::readBooleanRelaxed)
+            .withOutputHandle(OutputHandles::writeBoolean)
+            .withValidInput("true", "false")
+            .build();
 
     public ZombieVillagerProperties()
     {
         initMaps();
-        TYPE.withValidInput(typeMap.keySet());
-        PROFESSION.withValidInput(professionMap.keySet());
+
+        TYPE = SingleProperty.builder(PropertyNames.VILLAGER_TYPE, Villager.Type.PLAINS)
+                .withInputHandle(InputHandles::readVillagerType)
+                .withOutputHandle(OutputHandles::writeKeyed)
+                .withRandom(Registry.VILLAGER_TYPE.stream().toList())
+                .withValidInput(typeMap.keySet())
+                .build();
+
+        PROFESSION = SingleProperty.builder(PropertyNames.VILLAGER_PROFESSION, Villager.Profession.NONE)
+                .withInputHandle(InputHandles::readVillagerProfession)
+                .withOutputHandle(OutputHandles::writeKeyed)
+                .withRandom(Registry.VILLAGER_PROFESSION.stream().toList())
+                .withValidInput(professionMap.keySet())
+                .build();
+
+        LEVEL = SingleProperty.builder(PropertyNames.VILLAGER_LEVEL, 1)
+                .withInputHandle(InputHandles::readInteger)
+                .withOutputHandle(OutputHandles::writeInteger)
+                .withRandom(1, 2, 3, 4, 5, 6)
+                .withValidInput("1", "2", "3", "4", "5", "6")
+                .build();
 
         registerSingle(TYPE, PROFESSION, IS_BABY, LEVEL);
     }
@@ -59,14 +77,14 @@ public class ZombieVillagerProperties extends BaseLivingEntityProperties<ZombieV
         super.setupPropertiesFromEntity(meta, propertyHandler, targetEntity);
 
         propertyHandler.set(TYPE, targetEntity.getVillagerType());
-        propertyHandler.set(PROFESSION, targetEntity.getVillagerProfession());
+        propertyHandler.set(PROFESSION, targetEntity.getVillagerProfession()); // Why TF would this be nullable?
     }
 
     @Override
     protected void setupDefaultProperties(PropertyHandler propertyHandler)
     {
-        propertyHandler.set(TYPE, DisguiseUtils.pick(TYPE.getRandomValues()));
-        propertyHandler.set(PROFESSION, DisguiseUtils.pick(PROFESSION.getRandomValues()));
+        propertyHandler.set(TYPE, DisguiseUtils.pick(TYPE.randomValues()));
+        propertyHandler.set(PROFESSION, DisguiseUtils.pick(PROFESSION.randomValues()));
     }
 
 }

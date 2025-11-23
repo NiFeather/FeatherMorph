@@ -23,8 +23,7 @@ public class LlamaProperties extends BaseLivingEntityProperties<Llama>
             colorMap.put(value.name().toLowerCase(), value);
     }
 
-    public final SingleProperty<Llama.Color> COLOR = createProperty(PropertyNames.LLAMA_COLOR, Color.CREAMY, this::readLlamaColor, OutputHandles::writeEnum)
-            .withRandom(Color.values());
+    public final SingleProperty<Llama.Color> COLOR;
 
     private Optional<Color> readLlamaColor(String propertyName, String string) throws ParseErrorException
     {
@@ -34,7 +33,12 @@ public class LlamaProperties extends BaseLivingEntityProperties<Llama>
     public LlamaProperties()
     {
         initMaps();
-        COLOR.withValidInput(colorMap.keySet());
+        COLOR = SingleProperty.builder(PropertyNames.LLAMA_COLOR, Color.CREAMY)
+                .withInputHandle(this::readLlamaColor)
+                .withOutputHandle(OutputHandles::writeEnum)
+                .withRandom(Color.values())
+                .withValidInput(colorMap.keySet())
+                .build();
 
         registerSingle(COLOR);
     }
@@ -56,7 +60,7 @@ public class LlamaProperties extends BaseLivingEntityProperties<Llama>
     @Override
     protected void setupDefaultProperties(PropertyHandler propertyHandler)
     {
-        propertyHandler.set(COLOR, DisguiseUtils.pick(COLOR.getRandomValues()));
+        propertyHandler.set(COLOR, DisguiseUtils.pick(COLOR.randomValues()));
     }
 
 }

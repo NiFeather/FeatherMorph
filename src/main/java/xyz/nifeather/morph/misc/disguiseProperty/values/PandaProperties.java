@@ -23,23 +23,32 @@ public class PandaProperties extends BaseLivingEntityProperties<Panda>
             geneMap.put(gene.name().toLowerCase(), gene);
     }
 
-    public final SingleProperty<Panda.Gene> MAIN_GENE = createProperty(PropertyNames.PANDA_MAIN_GENE, Gene.NORMAL, this::readGene, OutputHandles::writeEnum)
-            .withRandom(Gene.values());
+    public final SingleProperty<Panda.Gene> MAIN_GENE;
 
     private Optional<Gene> readGene(String propertyName, String string) throws ParseErrorException
     {
         return InputHandles.readEnumNonNull(Gene.values(), propertyName, string);
     }
 
-    public final SingleProperty<Panda.Gene> HIDDEN_GENE = createProperty(PropertyNames.PANDA_HIDDEN_GENE, Gene.NORMAL, this::readGene, OutputHandles::writeEnum)
-            .withRandom(Gene.values());
+    public final SingleProperty<Panda.Gene> HIDDEN_GENE;
 
     public PandaProperties()
     {
         initMap();
 
-        MAIN_GENE.withValidInput(geneMap.keySet());
-        HIDDEN_GENE.withValidInput(geneMap.keySet());
+        MAIN_GENE = SingleProperty.builder(PropertyNames.PANDA_MAIN_GENE, Gene.NORMAL)
+                .withInputHandle(this::readGene)
+                .withOutputHandle(OutputHandles::writeEnum)
+                .withRandom(Gene.values())
+                .withValidInput(geneMap.keySet())
+                .build();
+
+        HIDDEN_GENE = SingleProperty.builder(PropertyNames.PANDA_HIDDEN_GENE, Gene.NORMAL)
+                .withInputHandle(this::readGene)
+                .withOutputHandle(OutputHandles::writeEnum)
+                .withRandom(Gene.values())
+                .withValidInput(geneMap.keySet())
+                .build();
 
         registerSingle(MAIN_GENE, HIDDEN_GENE);
     }
@@ -62,8 +71,8 @@ public class PandaProperties extends BaseLivingEntityProperties<Panda>
     @Override
     protected void setupDefaultProperties(PropertyHandler propertyHandler)
     {
-        propertyHandler.set(MAIN_GENE, DisguiseUtils.pick(MAIN_GENE.getRandomValues()));
-        propertyHandler.set(HIDDEN_GENE, DisguiseUtils.pick(HIDDEN_GENE.getRandomValues()));
+        propertyHandler.set(MAIN_GENE, DisguiseUtils.pick(MAIN_GENE.randomValues()));
+        propertyHandler.set(HIDDEN_GENE, DisguiseUtils.pick(HIDDEN_GENE.randomValues()));
     }
 
 }

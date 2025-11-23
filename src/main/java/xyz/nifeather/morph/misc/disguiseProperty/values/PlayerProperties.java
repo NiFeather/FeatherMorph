@@ -7,28 +7,26 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.MainHand;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.nifeather.morph.messages.strings.CommandStrings;
 import xyz.nifeather.morph.messages.strings.ExceptionStrings;
 import xyz.nifeather.morph.misc.DisguiseMeta;
 import xyz.nifeather.morph.misc.disguiseProperty.*;
-import xyz.nifeather.morph.misc.permissions.CommonPermissions;
-import xyz.nifeather.morph.misc.skins.PlayerSkinProvider;
 import xyz.nifeather.morph.utilities.GameProfileUtils;
 import xyz.nifeather.morph.utilities.Uuids;
 
-import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 
 public class PlayerProperties extends BaseLivingEntityProperties<Player>
 {
-    public final SingleProperty<MainHandStatus> MAIN_HAND = createProperty(PropertyNames.PLAYER_MAIN_HAND, MainHandStatus.NOTSET, this::readHand, OutputHandles::writeEnum)
-            .withValidInput("left", "right");
+    public final SingleProperty<MainHandStatus> MAIN_HAND = SingleProperty.builder(PropertyNames.PLAYER_MAIN_HAND, MainHandStatus.NOTSET)
+            .withInputHandle(this::readHand)
+            .withOutputHandle(OutputHandles::writeEnum)
+            .withValidInput("left", "right")
+            .build();
 
     public final SingleProperty<GameProfile> SKIN = SingleProperty.builder(PropertyNames.PLAYER_SKIN, GameProfile.class, new GameProfile(Uuids.NIL_UUID, "unknown"))
             .withInputHandle(InputHandles::readGameProfile)
             .withOutputHandle(OutputHandles::writeGameProfile)
-            .withHideFromUserInput(true)
+            .hideFromUserInput(true)
             .withValidator(PropertyValidations::validatePlayerSkin)
             .build();
 

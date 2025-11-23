@@ -20,10 +20,16 @@ public abstract class BaseLivingEntityProperties<E extends Entity> extends Abstr
                 .build();
     }
 
-    public final SingleProperty<Boolean> CUSTOM_NAME_VISIBLE = createProperty(PropertyNames.ENTITY_CUSTOM_NAME_VISIBLE, false, InputHandles::readBooleanRelaxed, OutputHandles::writeBoolean)
-            .withValidInput("true", "false");
+    public final SingleProperty<Boolean> CUSTOM_NAME_VISIBLE = SingleProperty.builder(PropertyNames.ENTITY_CUSTOM_NAME_VISIBLE, Boolean.class, false)
+            .withInputHandle(InputHandles::readBooleanRelaxed)
+            .withOutputHandle(OutputHandles::writeBoolean)
+            .withValidInput("true", "false")
+            .build();
 
-    public final SingleProperty<Integer> STUCKED_ARROWS = createProperty(PropertyNames.ENTITY_ARROW_COUNT, 0, this::readArrows, OutputHandles::writeInteger);
+    public final SingleProperty<Integer> STUCKED_ARROWS = SingleProperty.builder(PropertyNames.ENTITY_ARROW_COUNT, Integer.class, 0)
+            .withInputHandle(this::readArrows)
+            .withOutputHandle(OutputHandles::writeInteger)
+            .build();
 
     public final SingleProperty<Component> CUSTOM_NAME = createCustomNameProperty();
 
@@ -31,10 +37,13 @@ public abstract class BaseLivingEntityProperties<E extends Entity> extends Abstr
             .withInputHandle(InputHandles::readEquipment)
             .withOutputHandle(OutputHandles::writeEquipment)
             .withValidator(PropertyValidations::validateEquipment)
-            .withHideFromUserInput(true)
+            .hideFromUserInput(true)
             .build();
 
-    public final SingleProperty<Boolean> DISPLAY_DISGUISE_EQUIPMENT = SingleProperty.of(PropertyNames.ENTITY_DISPLAY_DISGUISE_EQUIPMENT, false, InputHandles::readBooleanStrict, OutputHandles::writeBoolean, true);
+    public final SingleProperty<Boolean> DISPLAY_DISGUISE_EQUIPMENT = SingleProperty.builder(PropertyNames.ENTITY_DISPLAY_DISGUISE_EQUIPMENT, false)
+            .withInputHandle(InputHandles::readBooleanStrict)
+            .withOutputHandle(OutputHandles::writeBoolean)
+            .build();
 
     @Override
     protected void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull E targetEntity)

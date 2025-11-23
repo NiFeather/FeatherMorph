@@ -9,8 +9,11 @@ import xyz.nifeather.morph.misc.disguiseProperty.*;
 
 public class HoglinProperties extends BaseLivingEntityProperties<Hoglin>
 {
-    public final SingleProperty<Boolean> IS_BABY = createProperty(PropertyNames.HOGLIN_IS_BABY, false, InputHandles::readBooleanRelaxed, OutputHandles::writeBoolean)
-            .withValidInput("true", "false");
+    public final SingleProperty<Boolean> IS_BABY = SingleProperty.builder(PropertyNames.HOGLIN_IS_BABY, false)
+            .withInputHandle(InputHandles::readBooleanRelaxed)
+            .withOutputHandle(OutputHandles::writeBoolean)
+            .withValidInput("true", "false")
+            .build();
 
     public HoglinProperties()
     {

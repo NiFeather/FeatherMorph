@@ -23,8 +23,7 @@ public class RabbitProperties extends BaseLivingEntityProperties<Rabbit>
             typeMap.put(type.name().toLowerCase(), type);
     }
 
-    public final SingleProperty<Rabbit.Type> VARIANT = createProperty(PropertyNames.RABBIT_VARIANT, Type.BROWN, this::readVariant, OutputHandles::writeEnum)
-            .withRandom(Type.values());
+    public final SingleProperty<Rabbit.Type> VARIANT;
 
     private Optional<Type> readVariant(String propertyName, String string) throws ParseErrorException
     {
@@ -34,7 +33,12 @@ public class RabbitProperties extends BaseLivingEntityProperties<Rabbit>
     public RabbitProperties()
     {
         initMap();
-        VARIANT.withValidInput(typeMap.keySet());
+        VARIANT = SingleProperty.builder(PropertyNames.RABBIT_VARIANT, Type.BROWN)
+                .withInputHandle(this::readVariant)
+                .withOutputHandle(OutputHandles::writeEnum)
+                .withRandom(Type.values())
+                .withValidInput(typeMap.keySet())
+                .build();
 
         registerSingle(VARIANT);
     }
@@ -56,7 +60,7 @@ public class RabbitProperties extends BaseLivingEntityProperties<Rabbit>
     @Override
     protected void setupDefaultProperties(PropertyHandler propertyHandler)
     {
-        propertyHandler.set(VARIANT, DisguiseUtils.pick(VARIANT.getRandomValues()));
+        propertyHandler.set(VARIANT, DisguiseUtils.pick(VARIANT.randomValues()));
     }
 
 }

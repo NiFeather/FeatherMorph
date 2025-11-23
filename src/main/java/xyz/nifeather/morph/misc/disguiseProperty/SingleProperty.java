@@ -1,41 +1,38 @@
 package xyz.nifeather.morph.misc.disguiseProperty;
 
+import com.google.common.collect.ImmutableList;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
 
-public class SingleProperty<T>
+public record SingleProperty<T>(String identifier, T defaultVal, Class<T> type, InputHandle<T> inputHandle,
+                                OutputHandle<T> outputHandle, IPropertyValidator<T> propertyValidator,
+                                List<T> randomValues, List<String> validValues, boolean hideFromUserInput)
 {
-    private final String identifier;
-    private final T defaultVal;
-    private final Class<T> type;
-    private final InputHandle<T> inputHandle;
-    private final OutputHandle<T> outputHandle;
-    private final IPropertyValidator<T> propertyValidator;
-    private final boolean hideFromUserInput;
+    public SingleProperty(String identifier, T defaultVal, Class<T> type,
+                          @NotNull InputHandle<T> inputHandle, @NotNull OutputHandle<T> outputHandle,
+                          @NotNull IPropertyValidator<T> propertyValidator,
+                          List<T> randomValues, List<String> validValues,
+                          boolean hideFromUserInput)
+    {
+        this.identifier = identifier;
+        this.defaultVal = defaultVal;
+        this.type = type;
+        this.inputHandle = inputHandle;
+        this.outputHandle = outputHandle;
+        this.propertyValidator = propertyValidator;
+        this.hideFromUserInput = hideFromUserInput;
+
+        this.randomValues = ImmutableList.copyOf(randomValues);
+        this.validValues = ImmutableList.copyOf(validValues);
+    }
 
     public String id()
     {
         return identifier;
-    }
-
-    public T defaultVal()
-    {
-        return defaultVal;
-    }
-
-    public Class<T> type()
-    {
-        return type;
-    }
-
-    public boolean hideFromUserInput()
-    {
-        return hideFromUserInput;
     }
 
     public Optional<T> forInput(String input) throws ParseErrorException
@@ -55,60 +52,17 @@ public class SingleProperty<T>
         this.propertyValidator.validate(value, player, validationFlags);
     }
 
-    public SingleProperty(String identifier, T defaultValue, Class<T> type,
-                          @NotNull InputHandle<T> inputHandle, @NotNull OutputHandle<T> outputHandle,
-                          @NotNull IPropertyValidator<T> validator,
-                          boolean hideFromUserInput)
-    {
-        this.identifier = identifier;
-        this.defaultVal = defaultValue;
-        this.type = type;
-        this.inputHandle = inputHandle;
-        this.outputHandle = outputHandle;
-        this.propertyValidator = validator;
-        this.hideFromUserInput = hideFromUserInput;
-    }
-
-    private final List<String> validValues = new CopyOnWriteArrayList<>();
-
     @Unmodifiable
     public List<String> validInputs()
     {
         return new ObjectArrayList<>(validValues);
     }
 
-    public SingleProperty<T> withValidInput(Collection<String> input)
-    {
-        this.validValues.addAll(input);
-
-        return this;
-    }
-    public SingleProperty<T> withValidInput(String... input)
-    {
-        this.validValues.addAll(Arrays.stream(input).toList());
-
-        return this;
-    }
-
-    private final List<T> randomValues = new CopyOnWriteArrayList<>();
-
+    @Override
     @Unmodifiable
-    public List<T> getRandomValues()
+    public List<T> randomValues()
     {
         return new ObjectArrayList<>(randomValues);
-    }
-
-    public SingleProperty<T> withRandom(Collection<T> values)
-    {
-        this.randomValues.clear();
-        this.randomValues.addAll(values);
-
-        return this;
-    }
-
-    public SingleProperty<T> withRandom(T... randomValues)
-    {
-        return withRandom(Arrays.stream(randomValues).toList());
     }
 
     @Override
@@ -120,30 +74,9 @@ public class SingleProperty<T>
         return this.identifier.equals(other.identifier) && this.type.equals(other.type);
     }
 
-    public static <T> SingleProperty<T> of(String id, T val, InputHandle<T> inputHandle, OutputHandle<T> outputHandle)
+    public static <X> SinglePropertyBuilder<X> builder(String id, X defaultVal)
     {
-        return SingleProperty.builder(id, (Class<T>) val.getClass(), val)
-                .withInputHandle(inputHandle)
-                .withOutputHandle(outputHandle)
-                .build();
-    }
-
-    public static <T> SingleProperty<T> of(String id, T val, InputHandle<T> inputHandle, OutputHandle<T> outputHandle, boolean hideFromUserInput)
-    {
-        return SingleProperty.builder(id, (Class<T>) val.getClass(), val)
-                .withInputHandle(inputHandle)
-                .withOutputHandle(outputHandle)
-                .withHideFromUserInput(hideFromUserInput)
-                .build();
-    }
-
-    public static <T> SingleProperty<T> of(String id, T val, Class<T> type, InputHandle<T> inputHandle, OutputHandle<T> outputHandle, boolean hideFromUserInput)
-    {
-        return SingleProperty.builder(id, type, val)
-                .withInputHandle(inputHandle)
-                .withOutputHandle(outputHandle)
-                .withHideFromUserInput(hideFromUserInput)
-                .build();
+        return new SinglePropertyBuilder<>(id, (Class<X>) defaultVal.getClass(), defaultVal);
     }
 
     public static <X> SinglePropertyBuilder<X> builder(String id, Class<X> type, X defaultVal)
@@ -186,15 +119,48 @@ public class SingleProperty<T>
             return this;
         }
 
-        public SinglePropertyBuilder<X> withHideFromUserInput(boolean hideFromUserInput)
+        public SinglePropertyBuilder<X> hideFromUserInput(boolean hideFromUserInput)
         {
             this.hideFromUserInput = hideFromUserInput;
             return this;
         }
 
+        private final List<X> randomValues = new ObjectArrayList<>();
+
+        @SafeVarargs
+        public final SinglePropertyBuilder<X> withRandom(X... values)
+        {
+            randomValues.addAll(Arrays.stream(values).toList());
+            return this;
+        }
+
+        public SinglePropertyBuilder<X> withRandom(Collection<X> values)
+        {
+            randomValues.addAll(values);
+            return this;
+        }
+
+        private final List<String> validInputs = new ObjectArrayList<>();
+
+        public SinglePropertyBuilder<X> withValidInput(String... values)
+        {
+            validInputs.addAll(Arrays.stream(values).toList());
+            return this;
+        }
+
+        public SinglePropertyBuilder<X> withValidInput(Collection<String> values)
+        {
+            validInputs.addAll(values);
+            return this;
+        }
+
         public SingleProperty<X> build()
         {
-            return new SingleProperty<>(this.identifier, this.defaultVal, this.type, inputHandle, outputHandle, validator, hideFromUserInput);
+            return new SingleProperty<>(this.identifier, this.defaultVal, this.type,
+                    inputHandle, outputHandle,
+                    validator,
+                    randomValues, validInputs,
+                    hideFromUserInput);
         }
     }
 }

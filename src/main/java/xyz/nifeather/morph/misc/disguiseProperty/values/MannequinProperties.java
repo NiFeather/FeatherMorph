@@ -25,18 +25,22 @@ public class MannequinProperties extends BaseLivingEntityProperties<Mannequin>
             .withValidator(PropertyValidations::validateCustomTextPermission)
             .build();
 
-    public final SingleProperty<Boolean> HIDE_DESCRIPTION = SingleProperty.builder(PropertyNames.MANNEQUIN_HIDE_DESCRIPTION, Boolean.class, false)
+    public final SingleProperty<Boolean> HIDE_DESCRIPTION = SingleProperty.builder(PropertyNames.MANNEQUIN_HIDE_DESCRIPTION, false)
             .withInputHandle(InputHandles::readBooleanRelaxed)
             .withOutputHandle(OutputHandles::writeBoolean)
             .withValidator(PropertyValidations::validateCustomTextPermission)
-            .build()
-            .withValidInput("true", "false");
+            .withValidInput("true", "false")
+            .build();
 
     /**
      * We don't suggest using this property, as it doesn't work for both Server and Mod renderer
      */
-    public final SingleProperty<Boolean> IMMOVABLE = SingleProperty.of(PropertyNames.MANNEQUIN_IMMOVABLE, false, InputHandles::immediateException, OutputHandles::writeBoolean, true)
-            .withValidInput("true", "false");
+    public final SingleProperty<Boolean> IMMOVABLE = SingleProperty.builder(PropertyNames.MANNEQUIN_IMMOVABLE, false)
+            .withInputHandle(InputHandles::immediateException)
+            .withOutputHandle(OutputHandles::writeBoolean)
+            .withValidator(PropertyValidations::validateCustomTextPermission)
+            .withValidInput("true", "false")
+            .build();
 
     public final SingleProperty<ResolvableProfile> SKIN = SingleProperty.builder(PropertyNames.MANNEQUIN_SKIN, ResolvableProfile.class, GameProfileUtils.asResolvableProfile(new GameProfile(Uuids.NIL_UUID, "notset")))
             .withInputHandle(InputHandles::readResolvableSkinInput)

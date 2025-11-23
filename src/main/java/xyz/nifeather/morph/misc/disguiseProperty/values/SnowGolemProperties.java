@@ -9,8 +9,11 @@ import xyz.nifeather.morph.misc.disguiseProperty.*;
 
 public class SnowGolemProperties extends BaseLivingEntityProperties<Snowman>
 {
-    public final SingleProperty<Boolean> HAS_PUMPKIN = createProperty(PropertyNames.SNOW_GOLEM_HAS_PUMPKIN, true, InputHandles::readBooleanRelaxed, OutputHandles::writeBoolean)
-            .withValidInput("true", "false");
+    public final SingleProperty<Boolean> HAS_PUMPKIN = SingleProperty.builder(PropertyNames.SNOW_GOLEM_HAS_PUMPKIN, true)
+            .withInputHandle(InputHandles::readBooleanRelaxed)
+            .withOutputHandle(OutputHandles::writeBoolean)
+            .withValidInput("true", "false")
+            .build();
 
     public SnowGolemProperties()
     {

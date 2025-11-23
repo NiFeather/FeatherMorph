@@ -24,7 +24,7 @@ public class ChickenProperties extends BaseLivingEntityProperties<Chicken>
             variantMap.put(variant.key().asString(), variant);
     }
 
-    public final SingleProperty<Chicken.Variant> VARIANT = createProperty(PropertyNames.CHICKEN_VARIANT, Chicken.Variant.TEMPERATE, this::readChickenVariant, OutputHandles::writeKeyed);
+    public final SingleProperty<Chicken.Variant> VARIANT;
 
     private Optional<Chicken.Variant> readChickenVariant(String propertyName, String string) throws ParseErrorException
     {
@@ -34,12 +34,13 @@ public class ChickenProperties extends BaseLivingEntityProperties<Chicken>
     public ChickenProperties()
     {
         initVariantMap();
-        VARIANT.withValidInput(variantMap.keySet())
-                .withRandom(variantMap.values());
+        VARIANT = SingleProperty.builder(PropertyNames.CHICKEN_VARIANT, Chicken.Variant.TEMPERATE)
+                .withInputHandle(this::readChickenVariant)
+                .withOutputHandle(OutputHandles::writeKeyed).withValidInput(variantMap.keySet())
+                .withRandom(variantMap.values())
+                .build();
 
-        registerSingle(
-                VARIANT
-        );
+        registerSingle(VARIANT);
     }
 
     @Override
@@ -59,7 +60,7 @@ public class ChickenProperties extends BaseLivingEntityProperties<Chicken>
     @Override
     protected void setupDefaultProperties(PropertyHandler propertyHandler)
     {
-        propertyHandler.set(VARIANT, DisguiseUtils.pick(VARIANT.getRandomValues()));
+        propertyHandler.set(VARIANT, DisguiseUtils.pick(VARIANT.randomValues()));
     }
 
 }

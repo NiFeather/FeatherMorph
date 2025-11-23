@@ -15,12 +15,11 @@ import java.util.Optional;
 
 public class TropicalFishProperties extends BaseLivingEntityProperties<TropicalFish>
 {
-    public final SingleProperty<DyeColor> BODY_COLOR = createProperty(PropertyNames.TROPICAL_FISH_BODY_COLOR, DyeColor.GREEN, InputHandles::readDyeColor, OutputHandles::writeEnum)
-            .withRandom(DyeColor.values());
-    public final SingleProperty<DyeColor> PATTERN_COLOR = createProperty(PropertyNames.TROPICAL_FISH_PATTERN_COLOR, DyeColor.BLACK, InputHandles::readDyeColor, OutputHandles::writeEnum)
-            .withRandom(DyeColor.values());
-    public final SingleProperty<TropicalFish.Pattern> PATTERN = createProperty(PropertyNames.TROPICAL_FISH_PATTERN, TropicalFish.Pattern.BLOCKFISH, this::readPattern, OutputHandles::writeEnum)
-            .withRandom(TropicalFish.Pattern.values());
+    public final SingleProperty<DyeColor> BODY_COLOR;
+
+    public final SingleProperty<DyeColor> PATTERN_COLOR;
+
+    public final SingleProperty<TropicalFish.Pattern> PATTERN;
 
     private Optional<TropicalFish.Pattern> readPattern(String propertyName, String string) throws ParseErrorException
     {
@@ -33,9 +32,26 @@ public class TropicalFishProperties extends BaseLivingEntityProperties<TropicalF
                 .map(c -> c.name().toLowerCase())
                 .toList();
 
-        BODY_COLOR.withValidInput(dyeColorInputs);
-        PATTERN_COLOR.withValidInput(dyeColorInputs);
-        PATTERN.withValidInput(Arrays.stream(TropicalFish.Pattern.values()).map(p -> p.name().toLowerCase()).toList());
+        BODY_COLOR = SingleProperty.builder(PropertyNames.TROPICAL_FISH_BODY_COLOR, DyeColor.GREEN)
+                .withInputHandle(InputHandles::readDyeColor)
+                .withOutputHandle(OutputHandles::writeEnum)
+                .withRandom(DyeColor.values())
+                .withValidInput(dyeColorInputs)
+                .build();
+
+        PATTERN_COLOR = SingleProperty.builder(PropertyNames.TROPICAL_FISH_PATTERN_COLOR, DyeColor.BLACK)
+                .withInputHandle(InputHandles::readDyeColor)
+                .withOutputHandle(OutputHandles::writeEnum)
+                .withRandom(DyeColor.values())
+                .withValidInput(dyeColorInputs)
+                .build();
+
+        PATTERN = SingleProperty.builder(PropertyNames.TROPICAL_FISH_PATTERN, TropicalFish.Pattern.BLOCKFISH)
+                .withInputHandle(this::readPattern)
+                .withOutputHandle(OutputHandles::writeEnum)
+                .withRandom(TropicalFish.Pattern.values())
+                .withValidInput(Arrays.stream(TropicalFish.Pattern.values()).map(p -> p.name().toLowerCase()).toList())
+                .build();
 
         registerSingle(BODY_COLOR, PATTERN_COLOR, PATTERN);
     }
@@ -63,9 +79,9 @@ public class TropicalFishProperties extends BaseLivingEntityProperties<TropicalF
     @Override
     protected void setupDefaultProperties(PropertyHandler propertyHandler)
     {
-        var bodyColor = DisguiseUtils.pick(BODY_COLOR.getRandomValues());
-        var patternColor = DisguiseUtils.pick(PATTERN_COLOR.getRandomValues());
-        var pattern = DisguiseUtils.pick(PATTERN.getRandomValues());
+        var bodyColor = DisguiseUtils.pick(BODY_COLOR.randomValues());
+        var patternColor = DisguiseUtils.pick(PATTERN_COLOR.randomValues());
+        var pattern = DisguiseUtils.pick(PATTERN.randomValues());
 
         propertyHandler.set(BODY_COLOR, bodyColor);
         propertyHandler.set(PATTERN_COLOR, patternColor);

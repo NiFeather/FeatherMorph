@@ -11,7 +11,10 @@ import java.util.Optional;
 
 public class PhantomProperties extends BaseLivingEntityProperties<Phantom>
 {
-    public final SingleProperty<Integer> SIZE = createProperty(PropertyNames.PHANTOM_SIZE, 1, this::readPhantomSize, OutputHandles::writeInteger);
+    public final SingleProperty<Integer> SIZE = SingleProperty.builder(PropertyNames.PHANTOM_SIZE, 1)
+            .withInputHandle(this::readPhantomSize)
+            .withOutputHandle(OutputHandles::writeInteger)
+            .build();
 
     private Optional<Integer> readPhantomSize(String propertyName, String string) throws ParseErrorException
     {

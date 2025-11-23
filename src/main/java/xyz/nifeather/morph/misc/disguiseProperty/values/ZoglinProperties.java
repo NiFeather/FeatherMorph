@@ -9,8 +9,11 @@ import xyz.nifeather.morph.misc.disguiseProperty.*;
 
 public class ZoglinProperties extends BaseLivingEntityProperties<Zoglin>
 {
-    public final SingleProperty<Boolean> IS_BABY = createProperty(PropertyNames.ZOGLIN_IS_BABY, false, InputHandles::readBooleanRelaxed, OutputHandles::writeBoolean)
-            .withValidInput("true", "false");
+    public final SingleProperty<Boolean> IS_BABY = SingleProperty.builder(PropertyNames.ZOGLIN_IS_BABY, false)
+            .withInputHandle(InputHandles::readBooleanRelaxed)
+            .withOutputHandle(OutputHandles::writeBoolean)
+            .withValidInput("true", "false")
+            .build();
 
     public ZoglinProperties()
     {

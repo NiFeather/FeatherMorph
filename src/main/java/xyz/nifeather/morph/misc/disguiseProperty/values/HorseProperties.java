@@ -26,16 +26,14 @@ public class HorseProperties extends BaseLivingEntityProperties<Horse>
             styleMap.put(style.name().toLowerCase(), style);
     }
 
-    public final SingleProperty<Horse.Color> COLOR = createProperty(PropertyNames.HORSE_COLOR, Horse.Color.WHITE, this::readHorseColor, OutputHandles::writeEnum)
-            .withRandom(Horse.Color.values());
+    public final SingleProperty<Horse.Color> COLOR;
 
     private Optional<Horse.Color> readHorseColor(String propertyName, String string) throws ParseErrorException
     {
         return InputHandles.readEnumNonNull(Horse.Color.values(), propertyName, string);
     }
 
-    public final SingleProperty<Horse.Style> STYLE = createProperty(PropertyNames.HORSE_STYLE, Horse.Style.NONE, this::readHorseStyle, OutputHandles::writeEnum)
-            .withRandom(Horse.Style.values());
+    public final SingleProperty<Horse.Style> STYLE;
 
     private Optional<Horse.Style> readHorseStyle(String propertyName, String string) throws ParseErrorException
     {
@@ -46,8 +44,19 @@ public class HorseProperties extends BaseLivingEntityProperties<Horse>
     {
         initMaps();
 
-        COLOR.withValidInput(colorMap.keySet());
-        STYLE.withValidInput(styleMap.keySet());
+        COLOR = SingleProperty.builder(PropertyNames.HORSE_COLOR, Horse.Color.WHITE)
+                .withInputHandle(this::readHorseColor)
+                .withOutputHandle(OutputHandles::writeEnum)
+                .withRandom(Horse.Color.values())
+                .withValidInput(colorMap.keySet())
+                .build();
+
+        STYLE = SingleProperty.builder(PropertyNames.HORSE_STYLE, Horse.Style.NONE)
+                .withInputHandle(this::readHorseStyle)
+                .withOutputHandle(OutputHandles::writeEnum)
+                .withRandom(Horse.Style.values())
+                .withValidInput(styleMap.keySet())
+                .build();
 
         registerSingle(COLOR, STYLE);
     }
@@ -70,8 +79,8 @@ public class HorseProperties extends BaseLivingEntityProperties<Horse>
     @Override
     protected void setupDefaultProperties(PropertyHandler propertyHandler)
     {
-        propertyHandler.set(COLOR, DisguiseUtils.pick(COLOR.getRandomValues()));
-        propertyHandler.set(STYLE, DisguiseUtils.pick(STYLE.getRandomValues()));
+        propertyHandler.set(COLOR, DisguiseUtils.pick(COLOR.randomValues()));
+        propertyHandler.set(STYLE, DisguiseUtils.pick(STYLE.randomValues()));
     }
 
 }

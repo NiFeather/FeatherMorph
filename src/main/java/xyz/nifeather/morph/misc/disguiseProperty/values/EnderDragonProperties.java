@@ -11,7 +11,10 @@ import java.util.Optional;
 
 public class EnderDragonProperties extends BaseLivingEntityProperties<EnderDragon>
 {
-    public final SingleProperty<Integer> DRAGON_PHASE = createProperty(PropertyNames.ENDER_DRAGON_DRAGON_PHASE, 10, this::readDragonPhase, OutputHandles::writeInteger);
+    public final SingleProperty<Integer> DRAGON_PHASE = SingleProperty.builder(PropertyNames.ENDER_DRAGON_DRAGON_PHASE, 10)
+            .withInputHandle(this::readDragonPhase)
+            .withOutputHandle(OutputHandles::writeInteger)
+            .build();
 
     private Optional<Integer> readDragonPhase(String propertyName, String str) throws ParseErrorException
     {
