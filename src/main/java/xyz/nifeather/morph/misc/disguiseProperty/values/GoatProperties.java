@@ -14,14 +14,14 @@ public class GoatProperties extends BaseLivingEntityProperties<Goat>
             .withInputHandle(InputHandles::readBooleanRelaxed)
             .withOutputHandle(OutputHandles::writeBoolean)
             .withRandom(true, true, true, false)
-            .withValidInput("false", "true")
+            .withSuggestions("false", "true")
             .build();
 
     public final SingleProperty<Boolean> HAS_RIGHT_HORN = SingleProperty.builder(PropertyNames.GOAT_HAS_RIGHT_HORN, true)
             .withInputHandle(InputHandles::readBooleanRelaxed)
             .withOutputHandle(OutputHandles::writeBoolean)
             .withRandom(true, true, true, false)
-            .withValidInput("false", "true")
+            .withSuggestions("false", "true")
             .build();
 
     public GoatProperties()

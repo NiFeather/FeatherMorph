@@ -12,7 +12,7 @@ public class HappyGhastProperties extends BaseLivingEntityProperties<HappyGhast>
     public final SingleProperty<Boolean> IS_GHASTLING = SingleProperty.builder(PropertyNames.HAPPY_GHAST_IS_GHASTLING, false)
             .withInputHandle(InputHandles::readBooleanRelaxed)
             .withOutputHandle(OutputHandles::writeBoolean)
-            .withValidInput("true", "false")
+            .withSuggestions("true", "false")
             .build();
 
     public HappyGhastProperties()

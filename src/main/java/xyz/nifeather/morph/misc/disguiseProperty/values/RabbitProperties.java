@@ -37,7 +37,7 @@ public class RabbitProperties extends BaseLivingEntityProperties<Rabbit>
                 .withInputHandle(this::readVariant)
                 .withOutputHandle(OutputHandles::writeEnum)
                 .withRandom(Type.values())
-                .withValidInput(typeMap.keySet())
+                .withSuggestions(typeMap.keySet())
                 .build();
 
         registerSingle(VARIANT);

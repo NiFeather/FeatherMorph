@@ -23,7 +23,7 @@ public abstract class BaseLivingEntityProperties<E extends Entity> extends Abstr
     public final SingleProperty<Boolean> CUSTOM_NAME_VISIBLE = SingleProperty.builder(PropertyNames.ENTITY_CUSTOM_NAME_VISIBLE, Boolean.class, false)
             .withInputHandle(InputHandles::readBooleanRelaxed)
             .withOutputHandle(OutputHandles::writeBoolean)
-            .withValidInput("true", "false")
+            .withSuggestions("true", "false")
             .build();
 
     public final SingleProperty<Integer> STUCKED_ARROWS = SingleProperty.builder(PropertyNames.ENTITY_ARROW_COUNT, Integer.class, 0)

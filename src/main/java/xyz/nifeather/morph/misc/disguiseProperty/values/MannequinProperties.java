@@ -5,17 +5,12 @@ import io.papermc.paper.datacomponent.item.ResolvableProfile;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Mannequin;
-import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.nifeather.morph.messages.strings.CommandStrings;
 import xyz.nifeather.morph.misc.DisguiseMeta;
 import xyz.nifeather.morph.misc.disguiseProperty.*;
-import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 import xyz.nifeather.morph.utilities.GameProfileUtils;
 import xyz.nifeather.morph.utilities.Uuids;
-
-import java.util.Map;
 
 public class MannequinProperties extends BaseLivingEntityProperties<Mannequin>
 {
@@ -29,7 +24,7 @@ public class MannequinProperties extends BaseLivingEntityProperties<Mannequin>
             .withInputHandle(InputHandles::readBooleanRelaxed)
             .withOutputHandle(OutputHandles::writeBoolean)
             .withValidator(PropertyValidations::validateCustomTextPermission)
-            .withValidInput("true", "false")
+            .withSuggestions("true", "false")
             .build();
 
     /**
@@ -39,7 +34,7 @@ public class MannequinProperties extends BaseLivingEntityProperties<Mannequin>
             .withInputHandle(InputHandles::immediateException)
             .withOutputHandle(OutputHandles::writeBoolean)
             .withValidator(PropertyValidations::validateCustomTextPermission)
-            .withValidInput("true", "false")
+            .withSuggestions("true", "false")
             .build();
 
     public final SingleProperty<ResolvableProfile> SKIN = SingleProperty.builder(PropertyNames.MANNEQUIN_SKIN, ResolvableProfile.class, GameProfileUtils.asResolvableProfile(new GameProfile(Uuids.NIL_UUID, "notset")))

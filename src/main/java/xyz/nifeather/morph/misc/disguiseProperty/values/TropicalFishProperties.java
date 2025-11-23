@@ -36,21 +36,21 @@ public class TropicalFishProperties extends BaseLivingEntityProperties<TropicalF
                 .withInputHandle(InputHandles::readDyeColor)
                 .withOutputHandle(OutputHandles::writeEnum)
                 .withRandom(DyeColor.values())
-                .withValidInput(dyeColorInputs)
+                .withSuggestions(dyeColorInputs)
                 .build();
 
         PATTERN_COLOR = SingleProperty.builder(PropertyNames.TROPICAL_FISH_PATTERN_COLOR, DyeColor.BLACK)
                 .withInputHandle(InputHandles::readDyeColor)
                 .withOutputHandle(OutputHandles::writeEnum)
                 .withRandom(DyeColor.values())
-                .withValidInput(dyeColorInputs)
+                .withSuggestions(dyeColorInputs)
                 .build();
 
         PATTERN = SingleProperty.builder(PropertyNames.TROPICAL_FISH_PATTERN, TropicalFish.Pattern.BLOCKFISH)
                 .withInputHandle(this::readPattern)
                 .withOutputHandle(OutputHandles::writeEnum)
                 .withRandom(TropicalFish.Pattern.values())
-                .withValidInput(Arrays.stream(TropicalFish.Pattern.values()).map(p -> p.name().toLowerCase()).toList())
+                .withSuggestions(Arrays.stream(TropicalFish.Pattern.values()).map(p -> p.name().toLowerCase()).toList())
                 .build();
 
         registerSingle(BODY_COLOR, PATTERN_COLOR, PATTERN);

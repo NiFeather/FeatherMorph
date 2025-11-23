@@ -38,7 +38,7 @@ public class FrogProperties extends BaseLivingEntityProperties<Frog>
                 .withInputHandle(this::readFrogVariant)
                 .withOutputHandle(OutputHandles::writeKeyed)
                 .withRandom(Frog.Variant.TEMPERATE, Frog.Variant.COLD, Frog.Variant.WARM)
-                .withValidInput(variantMap.keySet())
+                .withSuggestions(variantMap.keySet())
                 .build();
 
         registerSingle(

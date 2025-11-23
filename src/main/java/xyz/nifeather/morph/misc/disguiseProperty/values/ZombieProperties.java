@@ -12,7 +12,7 @@ public class ZombieProperties extends BaseLivingEntityProperties<Zombie>
     public final SingleProperty<Boolean> IS_BABY = SingleProperty.builder(PropertyNames.ZOMBIE_IS_BABY, false)
             .withInputHandle(InputHandles::readBooleanRelaxed)
             .withOutputHandle(OutputHandles::writeBoolean)
-            .withValidInput("true", "false")
+            .withSuggestions("true", "false")
             .build();
 
     public ZombieProperties()

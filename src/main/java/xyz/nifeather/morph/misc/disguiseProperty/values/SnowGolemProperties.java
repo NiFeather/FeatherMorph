@@ -12,7 +12,7 @@ public class SnowGolemProperties extends BaseLivingEntityProperties<Snowman>
     public final SingleProperty<Boolean> HAS_PUMPKIN = SingleProperty.builder(PropertyNames.SNOW_GOLEM_HAS_PUMPKIN, true)
             .withInputHandle(InputHandles::readBooleanRelaxed)
             .withOutputHandle(OutputHandles::writeBoolean)
-            .withValidInput("true", "false")
+            .withSuggestions("true", "false")
             .build();
 
     public SnowGolemProperties()

@@ -14,7 +14,7 @@ public class CreeperProperties extends BaseLivingEntityProperties<Creeper>
             .withInputHandle(InputHandles::readBooleanRelaxed)
             .withOutputHandle(OutputHandles::writeBoolean)
             .withRandom(false, false, false, true)
-            .withValidInput("true", "false")
+            .withSuggestions("true", "false")
             .build();
 
     public CreeperProperties()

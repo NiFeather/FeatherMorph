@@ -12,7 +12,7 @@ public class HoglinProperties extends BaseLivingEntityProperties<Hoglin>
     public final SingleProperty<Boolean> IS_BABY = SingleProperty.builder(PropertyNames.HOGLIN_IS_BABY, false)
             .withInputHandle(InputHandles::readBooleanRelaxed)
             .withOutputHandle(OutputHandles::writeBoolean)
-            .withValidInput("true", "false")
+            .withSuggestions("true", "false")
             .build();
 
     public HoglinProperties()

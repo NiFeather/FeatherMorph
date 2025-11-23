@@ -19,19 +19,19 @@ public class ArmorStandProperties extends BaseLivingEntityProperties<ArmorStand>
     public final SingleProperty<Boolean> SHOW_ARMS = SingleProperty.builder(PropertyNames.ARMOR_STAND_SHOW_ARMS, false)
             .withInputHandle(InputHandles::readBooleanRelaxed)
             .withOutputHandle(OutputHandles::writeBoolean)
-            .withValidInput("true", "false")
+            .withSuggestions("true", "false")
             .build();
 
     public final SingleProperty<Boolean> HAS_BASE_PLATE = SingleProperty.builder(PropertyNames.ARMOR_STAND_HAS_BASE_PLATE, true)
             .withInputHandle(InputHandles::readBooleanRelaxed)
             .withOutputHandle(OutputHandles::writeBoolean)
-            .withValidInput("true", "false")
+            .withSuggestions("true", "false")
             .build();
 
     public final SingleProperty<Boolean> SMALL = SingleProperty.builder(PropertyNames.ARMOR_STAND_SMALL, false)
             .withInputHandle(InputHandles::readBooleanRelaxed)
             .withOutputHandle(OutputHandles::writeBoolean)
-            .withValidInput("true", "false")
+            .withSuggestions("true", "false")
             .build();
 
     public final SingleProperty<Rotations> HEAD_ROTATION = SingleProperty.builder(PropertyNames.ARMOR_STAND_HEAD_ROTATION, Rotations.ZERO)

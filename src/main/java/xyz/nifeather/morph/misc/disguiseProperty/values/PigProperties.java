@@ -29,7 +29,7 @@ public class PigProperties extends BaseLivingEntityProperties<Pig>
                 .withInputHandle(this::readVariant)
                 .withOutputHandle(OutputHandles::writeKeyed)
                 .withRandom(Pig.Variant.TEMPERATE, Pig.Variant.COLD, Pig.Variant.WARM)
-                .withValidInput(variantMap.keySet())
+                .withSuggestions(variantMap.keySet())
                 .build();
 
         registerSingle(VARIANT);

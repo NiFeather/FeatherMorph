@@ -48,14 +48,14 @@ public class HorseProperties extends BaseLivingEntityProperties<Horse>
                 .withInputHandle(this::readHorseColor)
                 .withOutputHandle(OutputHandles::writeEnum)
                 .withRandom(Horse.Color.values())
-                .withValidInput(colorMap.keySet())
+                .withSuggestions(colorMap.keySet())
                 .build();
 
         STYLE = SingleProperty.builder(PropertyNames.HORSE_STYLE, Horse.Style.NONE)
                 .withInputHandle(this::readHorseStyle)
                 .withOutputHandle(OutputHandles::writeEnum)
                 .withRandom(Horse.Style.values())
-                .withValidInput(styleMap.keySet())
+                .withSuggestions(styleMap.keySet())
                 .build();
 
         registerSingle(COLOR, STYLE);

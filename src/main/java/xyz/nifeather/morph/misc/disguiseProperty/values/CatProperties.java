@@ -48,14 +48,14 @@ public class CatProperties extends BaseLivingEntityProperties<Cat>
         CAT_VARIANT = SingleProperty.builder(PropertyNames.CAT_VARIANT, Cat.Type.TABBY)
                 .withInputHandle(this::readCatVariant)
                 .withOutputHandle(OutputHandles::writeKeyed)
-                .withValidInput(variantMap.keySet())
+                .withSuggestions(variantMap.keySet())
                 .withRandom(variantMap.values())
                 .build();
 
         COLLAR_COLOR = SingleProperty.builder(PropertyNames.CAT_COLLAR_COLOR, DyeColor.RED)
                 .withInputHandle(InputHandles::readDyeColor)
                 .withOutputHandle(OutputHandles::writeEnum)
-                .withValidInput(Arrays.stream(DyeColor.values()).map(c -> c.name().toLowerCase()).toList())
+                .withSuggestions(Arrays.stream(DyeColor.values()).map(c -> c.name().toLowerCase()).toList())
                 .build();
 
         registerSingle(

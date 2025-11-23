@@ -16,7 +16,7 @@ public class CopperGolemProperties extends BaseLivingEntityProperties<CopperGole
     public final SingleProperty<WeatherState> WEATHER_STATE = SingleProperty.builder(PropertyNames.COPPER_GOLEM_WEATHER_STATE, WeatherState.UNAFFECTED)
             .withInputHandle(this::readWeatherState)
             .withOutputHandle(OutputHandles::writeEnum)
-            .withValidInput(Arrays.stream(WeatherState.values()).map(ws -> ws.name().toLowerCase()).toList())
+            .withSuggestions(Arrays.stream(WeatherState.values()).map(ws -> ws.name().toLowerCase()).toList())
             .build();
 
     private Optional<WeatherState> readWeatherState(String propertyName, String input) throws ParseErrorException

@@ -20,7 +20,7 @@ public class PlayerProperties extends BaseLivingEntityProperties<Player>
     public final SingleProperty<MainHandStatus> MAIN_HAND = SingleProperty.builder(PropertyNames.PLAYER_MAIN_HAND, MainHandStatus.NOTSET)
             .withInputHandle(this::readHand)
             .withOutputHandle(OutputHandles::writeEnum)
-            .withValidInput("left", "right")
+            .withSuggestions("left", "right")
             .build();
 
     public final SingleProperty<GameProfile> SKIN = SingleProperty.builder(PropertyNames.PLAYER_SKIN, GameProfile.class, new GameProfile(Uuids.NIL_UUID, "unknown"))

@@ -40,14 +40,14 @@ public class PandaProperties extends BaseLivingEntityProperties<Panda>
                 .withInputHandle(this::readGene)
                 .withOutputHandle(OutputHandles::writeEnum)
                 .withRandom(Gene.values())
-                .withValidInput(geneMap.keySet())
+                .withSuggestions(geneMap.keySet())
                 .build();
 
         HIDDEN_GENE = SingleProperty.builder(PropertyNames.PANDA_HIDDEN_GENE, Gene.NORMAL)
                 .withInputHandle(this::readGene)
                 .withOutputHandle(OutputHandles::writeEnum)
                 .withRandom(Gene.values())
-                .withValidInput(geneMap.keySet())
+                .withSuggestions(geneMap.keySet())
                 .build();
 
         registerSingle(MAIN_GENE, HIDDEN_GENE);

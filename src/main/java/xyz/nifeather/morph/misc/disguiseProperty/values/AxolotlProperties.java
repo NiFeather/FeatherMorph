@@ -37,7 +37,7 @@ public class AxolotlProperties extends BaseLivingEntityProperties<Axolotl>
                 .withInputHandle(this::readAxolotlVariant)
                 .withOutputHandle(OutputHandles::writeEnum)
                 .withRandom(Axolotl.Variant.values())
-                .withValidInput(variantMap.keySet())
+                .withSuggestions(variantMap.keySet())
                 .build();
 
         registerSingle(VARIANT);

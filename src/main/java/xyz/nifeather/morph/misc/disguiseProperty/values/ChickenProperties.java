@@ -36,7 +36,7 @@ public class ChickenProperties extends BaseLivingEntityProperties<Chicken>
         initVariantMap();
         VARIANT = SingleProperty.builder(PropertyNames.CHICKEN_VARIANT, Chicken.Variant.TEMPERATE)
                 .withInputHandle(this::readChickenVariant)
-                .withOutputHandle(OutputHandles::writeKeyed).withValidInput(variantMap.keySet())
+                .withOutputHandle(OutputHandles::writeKeyed).withSuggestions(variantMap.keySet())
                 .withRandom(variantMap.values())
                 .build();
 

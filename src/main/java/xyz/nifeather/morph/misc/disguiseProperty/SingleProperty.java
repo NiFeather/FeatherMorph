@@ -10,12 +10,12 @@ import java.util.*;
 
 public record SingleProperty<T>(String identifier, T defaultVal, Class<T> type, InputHandle<T> inputHandle,
                                 OutputHandle<T> outputHandle, IPropertyValidator<T> propertyValidator,
-                                List<T> randomValues, List<String> validValues, boolean hideFromUserInput)
+                                List<T> randomValues, List<String> suggestions, boolean hideFromUserInput)
 {
     public SingleProperty(String identifier, T defaultVal, Class<T> type,
                           @NotNull InputHandle<T> inputHandle, @NotNull OutputHandle<T> outputHandle,
                           @NotNull IPropertyValidator<T> propertyValidator,
-                          List<T> randomValues, List<String> validValues,
+                          List<T> randomValues, List<String> suggestions,
                           boolean hideFromUserInput)
     {
         this.identifier = identifier;
@@ -27,7 +27,7 @@ public record SingleProperty<T>(String identifier, T defaultVal, Class<T> type, 
         this.hideFromUserInput = hideFromUserInput;
 
         this.randomValues = ImmutableList.copyOf(randomValues);
-        this.validValues = ImmutableList.copyOf(validValues);
+        this.suggestions = ImmutableList.copyOf(suggestions);
     }
 
     public String id()
@@ -55,7 +55,7 @@ public record SingleProperty<T>(String identifier, T defaultVal, Class<T> type, 
     @Unmodifiable
     public List<String> validInputs()
     {
-        return new ObjectArrayList<>(validValues);
+        return new ObjectArrayList<>(suggestions);
     }
 
     @Override
@@ -140,17 +140,17 @@ public record SingleProperty<T>(String identifier, T defaultVal, Class<T> type, 
             return this;
         }
 
-        private final List<String> validInputs = new ObjectArrayList<>();
+        private final List<String> suggestions = new ObjectArrayList<>();
 
-        public SinglePropertyBuilder<X> withValidInput(String... values)
+        public SinglePropertyBuilder<X> withSuggestions(String... values)
         {
-            validInputs.addAll(Arrays.stream(values).toList());
+            suggestions.addAll(Arrays.stream(values).toList());
             return this;
         }
 
-        public SinglePropertyBuilder<X> withValidInput(Collection<String> values)
+        public SinglePropertyBuilder<X> withSuggestions(Collection<String> values)
         {
-            validInputs.addAll(values);
+            suggestions.addAll(values);
             return this;
         }
 
@@ -159,7 +159,7 @@ public record SingleProperty<T>(String identifier, T defaultVal, Class<T> type, 
             return new SingleProperty<>(this.identifier, this.defaultVal, this.type,
                     inputHandle, outputHandle,
                     validator,
-                    randomValues, validInputs,
+                    randomValues, suggestions,
                     hideFromUserInput);
         }
     }

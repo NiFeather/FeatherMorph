@@ -50,13 +50,13 @@ public class WolfProperties extends BaseLivingEntityProperties<Wolf>
                 .withInputHandle(this::readWolfVariant)
                 .withOutputHandle(OutputHandles::writeKeyed)
                 .withRandom(RegistryAccess.registryAccess().getRegistry(RegistryKey.WOLF_VARIANT).stream().toList())
-                .withValidInput(variantMap.keySet())
+                .withSuggestions(variantMap.keySet())
                 .build();
 
         COLLAR_COLOR =  SingleProperty.builder(PropertyNames.WOLF_COLLAR_COLOR, DyeColor.RED)
                 .withInputHandle(InputHandles::readDyeColor)
                 .withOutputHandle(OutputHandles::writeEnum)
-                .withValidInput(Arrays.stream(DyeColor.values()).map(c -> c.name().toLowerCase()).toList())
+                .withSuggestions(Arrays.stream(DyeColor.values()).map(c -> c.name().toLowerCase()).toList())
                 .build();
 
         registerSingle(VARIANT, OWNER, COLLAR_COLOR);

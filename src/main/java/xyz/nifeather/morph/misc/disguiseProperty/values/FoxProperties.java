@@ -16,7 +16,7 @@ public class FoxProperties extends BaseLivingEntityProperties<Fox>
             .withInputHandle(this::readFoxType)
             .withOutputHandle(OutputHandles::writeEnum)
             .withRandom(Fox.Type.values())
-            .withValidInput("red", "snow")
+            .withSuggestions("red", "snow")
             .build();
 
     public Optional<Fox.Type> readFoxType(String propertyName, String input) throws ParseErrorException

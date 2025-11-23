@@ -34,7 +34,7 @@ public class ZombieVillagerProperties extends BaseLivingEntityProperties<ZombieV
     public final SingleProperty<Boolean> IS_BABY = SingleProperty.builder(PropertyNames.ZOMBIE_VILLAGER_IS_BABY, false)
             .withInputHandle(InputHandles::readBooleanRelaxed)
             .withOutputHandle(OutputHandles::writeBoolean)
-            .withValidInput("true", "false")
+            .withSuggestions("true", "false")
             .build();
 
     public ZombieVillagerProperties()
@@ -45,21 +45,21 @@ public class ZombieVillagerProperties extends BaseLivingEntityProperties<ZombieV
                 .withInputHandle(InputHandles::readVillagerType)
                 .withOutputHandle(OutputHandles::writeKeyed)
                 .withRandom(Registry.VILLAGER_TYPE.stream().toList())
-                .withValidInput(typeMap.keySet())
+                .withSuggestions(typeMap.keySet())
                 .build();
 
         PROFESSION = SingleProperty.builder(PropertyNames.VILLAGER_PROFESSION, Villager.Profession.NONE)
                 .withInputHandle(InputHandles::readVillagerProfession)
                 .withOutputHandle(OutputHandles::writeKeyed)
                 .withRandom(Registry.VILLAGER_PROFESSION.stream().toList())
-                .withValidInput(professionMap.keySet())
+                .withSuggestions(professionMap.keySet())
                 .build();
 
         LEVEL = SingleProperty.builder(PropertyNames.VILLAGER_LEVEL, 1)
                 .withInputHandle(InputHandles::readInteger)
                 .withOutputHandle(OutputHandles::writeInteger)
                 .withRandom(1, 2, 3, 4, 5, 6)
-                .withValidInput("1", "2", "3", "4", "5", "6")
+                .withSuggestions("1", "2", "3", "4", "5", "6")
                 .build();
 
         registerSingle(TYPE, PROFESSION, IS_BABY, LEVEL);

@@ -29,7 +29,7 @@ public class CowProperties extends BaseLivingEntityProperties<Cow>
                 .withInputHandle(this::readCowVariant)
                 .withOutputHandle(OutputHandles::writeKeyed)
                 .withRandom(variantMap.values())
-                .withValidInput(variantMap.keySet())
+                .withSuggestions(variantMap.keySet())
                 .build();
 
         registerSingle(VARIANT);

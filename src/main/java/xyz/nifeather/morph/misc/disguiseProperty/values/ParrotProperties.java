@@ -37,7 +37,7 @@ public class ParrotProperties extends BaseLivingEntityProperties<Parrot>
                 .withInputHandle(this::readVariant)
                 .withOutputHandle(OutputHandles::writeEnum)
                 .withRandom(Variant.values())
-                .withValidInput(variantMap.keySet())
+                .withSuggestions(variantMap.keySet())
                 .build();
 
         registerSingle(VARIANT);

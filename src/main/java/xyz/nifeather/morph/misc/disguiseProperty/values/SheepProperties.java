@@ -19,7 +19,7 @@ public class SheepProperties extends BaseLivingEntityProperties<Sheep>
         DYE_COLOR = SingleProperty.builder(PropertyNames.SHEEP_COLOR, DyeColor.class, DyeColor.getByWoolData((byte) 15))
                 .withInputHandle(InputHandles::readDyeColor)
                 .withOutputHandle(OutputHandles::writeEnum)
-                .withValidInput(Arrays.stream(DyeColor.values()).map(c -> c.name().toLowerCase()).toList())
+                .withSuggestions(Arrays.stream(DyeColor.values()).map(c -> c.name().toLowerCase()).toList())
                 .build();
 
         registerSingle(DYE_COLOR);

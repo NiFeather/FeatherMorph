@@ -37,7 +37,7 @@ public class LlamaProperties extends BaseLivingEntityProperties<Llama>
                 .withInputHandle(this::readLlamaColor)
                 .withOutputHandle(OutputHandles::writeEnum)
                 .withRandom(Color.values())
-                .withValidInput(colorMap.keySet())
+                .withSuggestions(colorMap.keySet())
                 .build();
 
         registerSingle(COLOR);

@@ -16,7 +16,7 @@ public class MooshroomProperties extends BaseLivingEntityProperties<MushroomCow>
             .withInputHandle(this::readVariant)
             .withOutputHandle(OutputHandles::writeEnum)
             .withRandom(MushroomCow.Variant.RED, MushroomCow.Variant.RED, MushroomCow.Variant.RED, MushroomCow.Variant.BROWN)
-            .withValidInput("red", "brown")
+            .withSuggestions("red", "brown")
             .build();
 
     private Optional<MushroomCow.Variant> readVariant(String propertyName, String string) throws ParseErrorException
