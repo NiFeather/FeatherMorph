@@ -1,25 +1,23 @@
 package xyz.nifeather.morph.misc.disguiseProperty.values;
 
-import io.papermc.paper.datacomponent.DataComponentTypes;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import xyz.nifeather.morph.messages.strings.CommandStrings;
 import xyz.nifeather.morph.misc.DisguiseEquipment;
 import xyz.nifeather.morph.misc.DisguiseMeta;
 import xyz.nifeather.morph.misc.disguiseProperty.*;
-import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 
-import java.util.Map;
 import java.util.Optional;
 
 public abstract class BaseLivingEntityProperties<E extends Entity> extends AbstractProperties<E>
 {
     protected SingleProperty<Component> createCustomNameProperty()
     {
-        return SingleProperty.of(PropertyNames.ENTITY_CUSTOM_NAME, Component.empty(), Component.class, InputHandles::readComponentAny, OutputHandles::writeAdventureComponentJSON, false);
+        return SingleProperty.builder(PropertyNames.ENTITY_CUSTOM_NAME, Component.class, Component.empty())
+                .withInputHandle(InputHandles::readComponentAny)
+                .withOutputHandle(OutputHandles::writeAdventureComponentJSON)
+                .withValidator(PropertyValidations::validateCustomTextPermission)
+                .build();
     }
 
     public final SingleProperty<Boolean> CUSTOM_NAME_VISIBLE = createProperty(PropertyNames.ENTITY_CUSTOM_NAME_VISIBLE, false, InputHandles::readBooleanRelaxed, OutputHandles::writeBoolean)
@@ -29,7 +27,13 @@ public abstract class BaseLivingEntityProperties<E extends Entity> extends Abstr
 
     public final SingleProperty<Component> CUSTOM_NAME = createCustomNameProperty();
 
-    public final SingleProperty<DisguiseEquipment> EQUIPMENT = SingleProperty.of(PropertyNames.ENTITY_EQUIPMENT, DisguiseEquipment.empty(), InputHandles::readEquipment, OutputHandles::writeEquipment, true);
+    public final SingleProperty<DisguiseEquipment> EQUIPMENT = SingleProperty.builder(PropertyNames.ENTITY_EQUIPMENT, DisguiseEquipment.class, DisguiseEquipment.empty())
+            .withInputHandle(InputHandles::readEquipment)
+            .withOutputHandle(OutputHandles::writeEquipment)
+            .withValidator(PropertyValidations::validateEquipment)
+            .withHideFromUserInput(true)
+            .build();
+
     public final SingleProperty<Boolean> DISPLAY_DISGUISE_EQUIPMENT = SingleProperty.of(PropertyNames.ENTITY_DISPLAY_DISGUISE_EQUIPMENT, false, InputHandles::readBooleanStrict, OutputHandles::writeBoolean, true);
 
     @Override
@@ -62,38 +66,5 @@ public abstract class BaseLivingEntityProperties<E extends Entity> extends Abstr
     public BaseLivingEntityProperties()
     {
         registerSingle(CUSTOM_NAME, CUSTOM_NAME_VISIBLE, STUCKED_ARROWS, EQUIPMENT, DISPLAY_DISGUISE_EQUIPMENT);
-    }
-
-    @Override
-    public void validateInput(Map<SingleProperty<?>, Object> result, Player player, boolean ignorePermissions) throws PropertyValidationException
-    {
-        super.validateInput(result, player, ignorePermissions);
-
-        if (ignorePermissions) return;
-
-        if (result.containsKey(CUSTOM_NAME) && !player.hasPermission(CommonPermissions.DISGUISE_CUSTOM_TEXT))
-        {
-            throw PropertyValidationException.forProperty(PropertyNames.ENTITY_CUSTOM_NAME)
-                    .byMethod("BaseLivingEntityProperties#validateInput")
-                    .withLocalizableMessage(CommandStrings.noPermissionMessage())
-                    .withMessage("Player don't have permission setting custom name for disguise")
-                    .create();
-        }
-
-        if (result.getOrDefault(EQUIPMENT, null) instanceof DisguiseEquipment equipment)
-        {
-            for (ItemStack stack : equipment.contents().values())
-            {
-                var data = stack.getData(DataComponentTypes.PROFILE);
-                if (data != null && !player.hasPermission(CommonPermissions.CUSTOM_SKIN_ON_ITEMS))
-                {
-                    throw PropertyValidationException.forProperty(PropertyNames.ENTITY_EQUIPMENT)
-                            .byMethod("BaseLivingEntityProperties#validateInput")
-                            .withLocalizableMessage(CommandStrings.noPermissionMessage())
-                            .withMessage("Player don't have permission setting custom skin profile for items")
-                            .create();
-                }
-            }
-        }
     }
 }

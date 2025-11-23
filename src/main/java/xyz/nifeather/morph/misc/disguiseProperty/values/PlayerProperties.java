@@ -25,12 +25,21 @@ public class PlayerProperties extends BaseLivingEntityProperties<Player>
     public final SingleProperty<MainHandStatus> MAIN_HAND = createProperty(PropertyNames.PLAYER_MAIN_HAND, MainHandStatus.NOTSET, this::readHand, OutputHandles::writeEnum)
             .withValidInput("left", "right");
 
-    public final SingleProperty<GameProfile> SKIN = SingleProperty.of(PropertyNames.PLAYER_SKIN, new GameProfile(Uuids.NIL_UUID, "unknown"), InputHandles::readGameProfile, OutputHandles::writeGameProfile, true);
+    public final SingleProperty<GameProfile> SKIN = SingleProperty.builder(PropertyNames.PLAYER_SKIN, GameProfile.class, new GameProfile(Uuids.NIL_UUID, "unknown"))
+            .withInputHandle(InputHandles::readGameProfile)
+            .withOutputHandle(OutputHandles::writeGameProfile)
+            .withHideFromUserInput(true)
+            .withValidator(PropertyValidations::validatePlayerSkin)
+            .build();
 
     @Override
     protected SingleProperty<Component> createCustomNameProperty()
     {
-        return createProperty(PropertyNames.ENTITY_CUSTOM_NAME, Component.empty(), InputHandles::unsupported, OutputHandles::writeAdventureComponentJSON);
+        return SingleProperty.builder(PropertyNames.ENTITY_CUSTOM_NAME, Component.class, Component.empty())
+                .withInputHandle(InputHandles::unsupported)
+                .withOutputHandle(OutputHandles::writeAdventureComponentJSON)
+                .withValidator(PropertyValidations::validateCustomTextPermission)
+                .build();
     }
 
     private Optional<MainHandStatus> readHand(String propertyName, String string) throws ParseErrorException
@@ -74,36 +83,6 @@ public class PlayerProperties extends BaseLivingEntityProperties<Player>
     @Override
     protected void setupDefaultProperties(PropertyHandler propertyHandler)
     {
-    }
-
-    @Override
-    public void validateInput(Map<SingleProperty<?>, Object> result, Player player, boolean ignorePermissions) throws PropertyValidationException
-    {
-        super.validateInput(result, player, ignorePermissions);
-
-        if (result.containsKey(SKIN))
-        {
-            var skin = (GameProfile) result.get(SKIN);
-            boolean skinMatchesCache = Objects.equals(PlayerSkinProvider.getInstance().getCachedProfile(skin.name()), skin);
-
-            if (!ignorePermissions && !skinMatchesCache && !player.hasPermission(CommonPermissions.DISGUISE_CUSTOM_SKIN))
-            {
-                throw PropertyValidationException.forProperty(PropertyNames.PLAYER_SKIN)
-                        .byMethod("PlayerProperties#validateInput")
-                        .withLocalizableMessage(CommandStrings.noPermissionMessage())
-                        .withMessage("Player don't have permission for setting custom skin")
-                        .create();
-            }
-
-            if (skin.id().equals(Uuids.NIL_UUID))
-            {
-                throw PropertyValidationException.forProperty(PropertyNames.PLAYER_SKIN)
-                        .byMethod("PlayerProperties#validateInput")
-                        .withLocalizableMessage(ExceptionStrings.inputNotAllowed())
-                        .withMessage("UUID of the skin may not be ZERO")
-                        .create();
-            }
-        }
     }
 
     public enum MainHandStatus

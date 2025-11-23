@@ -1,14 +1,11 @@
 package xyz.nifeather.morph.misc.disguiseProperty;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class SingleProperty<T>
@@ -18,6 +15,7 @@ public class SingleProperty<T>
     private final Class<T> type;
     private final InputHandle<T> inputHandle;
     private final OutputHandle<T> outputHandle;
+    private final IPropertyValidator<T> propertyValidator;
     private final boolean hideFromUserInput;
 
     public String id()
@@ -51,14 +49,23 @@ public class SingleProperty<T>
         return outputHandle.handle(this.id(), value);
     }
 
+    public void validateInput(T value, Player player, EnumSet<ValidationFlag> validationFlags)
+            throws PropertyValidationException
+    {
+        this.propertyValidator.validate(value, player, validationFlags);
+    }
+
     public SingleProperty(String identifier, T defaultValue, Class<T> type,
-                          @NotNull InputHandle<T> inputHandle, @NotNull OutputHandle<T> outputHandle, boolean hideFromUserInput)
+                          @NotNull InputHandle<T> inputHandle, @NotNull OutputHandle<T> outputHandle,
+                          @NotNull IPropertyValidator<T> validator,
+                          boolean hideFromUserInput)
     {
         this.identifier = identifier;
         this.defaultVal = defaultValue;
         this.type = type;
         this.inputHandle = inputHandle;
         this.outputHandle = outputHandle;
+        this.propertyValidator = validator;
         this.hideFromUserInput = hideFromUserInput;
     }
 
@@ -115,16 +122,79 @@ public class SingleProperty<T>
 
     public static <T> SingleProperty<T> of(String id, T val, InputHandle<T> inputHandle, OutputHandle<T> outputHandle)
     {
-        return new SingleProperty<>(id, val, (Class<T>) val.getClass(), inputHandle, outputHandle, false);
+        return SingleProperty.builder(id, (Class<T>) val.getClass(), val)
+                .withInputHandle(inputHandle)
+                .withOutputHandle(outputHandle)
+                .build();
     }
 
     public static <T> SingleProperty<T> of(String id, T val, InputHandle<T> inputHandle, OutputHandle<T> outputHandle, boolean hideFromUserInput)
     {
-        return new SingleProperty<>(id, val, (Class<T>) val.getClass(), inputHandle, outputHandle, hideFromUserInput);
+        return SingleProperty.builder(id, (Class<T>) val.getClass(), val)
+                .withInputHandle(inputHandle)
+                .withOutputHandle(outputHandle)
+                .withHideFromUserInput(hideFromUserInput)
+                .build();
     }
 
     public static <T> SingleProperty<T> of(String id, T val, Class<T> type, InputHandle<T> inputHandle, OutputHandle<T> outputHandle, boolean hideFromUserInput)
     {
-        return new SingleProperty<>(id, val, type, inputHandle, outputHandle, hideFromUserInput);
+        return SingleProperty.builder(id, type, val)
+                .withInputHandle(inputHandle)
+                .withOutputHandle(outputHandle)
+                .withHideFromUserInput(hideFromUserInput)
+                .build();
+    }
+
+    public static <X> SinglePropertyBuilder<X> builder(String id, Class<X> type, X defaultVal)
+    {
+        return new SinglePropertyBuilder<>(id, type, defaultVal);
+    }
+
+    public static class SinglePropertyBuilder<X>
+    {
+        private final String identifier;
+        private final X defaultVal;
+        private final Class<X> type;
+        private InputHandle<X> inputHandle = InputHandles::empty;
+        private OutputHandle<X> outputHandle = OutputHandles::immediateException;
+        private IPropertyValidator<X> validator = PropertyValidations::noOp;
+        private boolean hideFromUserInput = false;
+
+        public SinglePropertyBuilder(String identifier, Class<X> type, X defaultVal)
+        {
+            this.identifier = identifier;
+            this.type = type;
+            this.defaultVal = defaultVal;
+        }
+
+        public SinglePropertyBuilder<X> withInputHandle(InputHandle<X> handle)
+        {
+            this.inputHandle = handle;
+            return this;
+        }
+
+        public SinglePropertyBuilder<X> withOutputHandle(OutputHandle<X> handle)
+        {
+            this.outputHandle = handle;
+            return this;
+        }
+
+        public SinglePropertyBuilder<X> withValidator(IPropertyValidator<X> validator)
+        {
+            this.validator = validator;
+            return this;
+        }
+
+        public SinglePropertyBuilder<X> withHideFromUserInput(boolean hideFromUserInput)
+        {
+            this.hideFromUserInput = hideFromUserInput;
+            return this;
+        }
+
+        public SingleProperty<X> build()
+        {
+            return new SingleProperty<>(this.identifier, this.defaultVal, this.type, inputHandle, outputHandle, validator, hideFromUserInput);
+        }
     }
 }

@@ -1,6 +1,7 @@
 package xyz.nifeather.morph.misc.disguiseProperty;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -72,12 +73,8 @@ public class PropertyHandler
         validProperties.put(property.id(), property);
     }
 
-    public void updateFromPropertiesInput(Map<String, String> input) throws ParseErrorException, PropertyValidationException
-    {
-        updateFromPropertiesInput(input, map -> {});
-    }
-
-    public void updateFromPropertiesInput(Map<String, String> input, IPropertyValidateHandle validateHandle) throws ParseErrorException, PropertyValidationException
+    public void updateFromPropertiesInput(Map<String, String> input, Player inputSource, EnumSet<ValidationFlag> validationFlags)
+            throws ParseErrorException, PropertyValidationException
     {
         if (this.bindingProperties == null)
         {
@@ -96,10 +93,12 @@ public class PropertyHandler
             if (property == null)
                 continue;
 
-            property.forInput(value).ifPresent(o -> parsedResults.put(property, o));
-        }
+            var val = property.forInput(value).orElse(null);
+            if (val == null) continue;
 
-        validateHandle.validate(parsedResults);
+            property.validateInput(val, inputSource, validationFlags);
+            parsedResults.put(property, val);
+        }
 
         parsedResults.forEach(this::writeGeneric);
     }

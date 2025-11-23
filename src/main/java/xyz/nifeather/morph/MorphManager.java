@@ -906,7 +906,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         }
 
         // Then apply properties
-        propertyHandler.updateFromPropertiesInput(parameters.propertiesInput, map -> properties.validateInput(map, player, parameters.bypassPermission));
+        propertyHandler.updateFromPropertiesInput(parameters.propertiesInput, player, parameters.bypassPermission ? EnumSet.of(ValidationFlag.SKIP_PERMISSIONS) : EnumSet.noneOf(ValidationFlag.class));
 
         propertyHandler.getAll().forEach((property, value) ->
                 wrapper.writeProperty((SingleProperty<Object>) property, value));
