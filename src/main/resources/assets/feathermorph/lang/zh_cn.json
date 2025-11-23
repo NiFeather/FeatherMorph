@@ -119,6 +119,7 @@
   "exceptions.input_not_allowed": "不接受此输入",
   "exceptions.malformed_input": "不正确的格式",
   "exceptions.too_many_elements": "元素过多！该属性最多只接受<max>个元素",
+  "exceptions.unknown_error": "因未知原因失败，我们也不知道为啥！",
   "help.avaliable_cmd_header" : "当前可用的指令（单击补全/查看）",
   "help.click_to_complete" : "点击补全",
   "help.click_to_view" : "点击查看",

@@ -23,6 +23,8 @@ import xiamomc.pluginbase.Bindables.Bindable;
 import xiamomc.pluginbase.Bindables.BindableList;
 import xiamomc.pluginbase.Messages.FormattableMessage;
 import xyz.nifeather.morph.api.events.gameplay.*;
+import xyz.nifeather.morph.api.events.lifecycle.LateDisguiseBuildEvent;
+import xyz.nifeather.morph.api.events.lifecycle.LateDisguisePropertiesSetupEvent;
 import xyz.nifeather.morph.api.events.lifecycle.ManagerFinishedInitializeEvent;
 import xyz.nifeather.morph.api.events.misc.DataStoreSwitchEvent;
 import xyz.nifeather.morph.api.morphs.skills.SkillNames;
@@ -35,6 +37,7 @@ import xyz.nifeather.morph.config.ConfigOption;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.interfaces.IManagePlayerData;
 import xyz.nifeather.morph.messages.strings.CommandStrings;
+import xyz.nifeather.morph.messages.strings.ExceptionStrings;
 import xyz.nifeather.morph.messages.strings.HintStrings;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.strings.MorphStrings;
@@ -850,7 +853,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     public static final String SESSIONKEY_TARGET_ENTITY = "MORPHMANAGER_TARGET_ENTITY";
 
     private void buildDisguise(DisguiseBuildResult result,
-                               MorphParameters parameters) throws ParseErrorException, PropertyValidationException, NullPointerException
+                               MorphParameters parameters) throws ParseErrorException, PropertyValidationException, ExecutionErrorException, NullPointerException
     {
         if (!result.success())
             throw new IllegalArgumentException("Passing a failed result to postDisguise() !");
@@ -908,6 +911,35 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         propertyHandler.getAll().forEach((property, value) ->
                 wrapper.writeProperty((SingleProperty<Object>) property, value));
 
+        // Call the event so that others can manipulate the disguise properties
+        var lateSetupEvent = new LateDisguisePropertiesSetupEvent(player, state);
+        lateSetupEvent.callEvent();
+
+        var failingException = lateSetupEvent.exception();
+        if (failingException instanceof ParseErrorException pee)
+        {
+            throw pee;
+        }
+        else if (failingException instanceof PropertyValidationException pve)
+        {
+            throw pve;
+        }
+        else if (failingException != null)
+        {
+            throw ExecutionErrorException.forMethod("MorphManager#buildDisguise")
+                    .withMessage("We have exception reported by other plugins!")
+                    .causedBy(failingException)
+                    .create();
+        }
+
+        if (lateSetupEvent.isCancelled())
+        {
+            throw ExecutionErrorException.forMethod("MorphManager#buildDisguise")
+                    .withMessage("LateDisguisePropertiesSetupEvent cancelled by a plugin, but we didn't got any exceptions!")
+                    .withLocalizableMessage(ExceptionStrings.unknownError())
+                    .create();
+        }
+
         provider.finalizeProperties(state);
 
         Component customName = propertyHandler.getOr(PropertyNames.ENTITY_CUSTOM_NAME, null);
@@ -931,6 +963,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         long availableAfter = skillManager.getAvailableAfter(player.getUniqueId(), state.getDisguiseIdentifier());
         state.setAvailableAfter(Math.max(plugin.getCurrentTick() + 40, availableAfter), true);
 
+        // Finally, we call the late disguise build event
         new LateDisguiseBuildEvent(player, state).callEvent();
 
         state.removeSessionData(SESSIONKEY_TARGET_ENTITY);

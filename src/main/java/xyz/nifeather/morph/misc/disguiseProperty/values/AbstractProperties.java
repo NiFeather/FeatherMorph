@@ -50,25 +50,6 @@ public abstract class AbstractProperties<E extends Entity>
         return Map.copyOf(this.values);
     }
 
-    public final Map<SingleProperty<?>, Object> readFromPropertiesInput(Map<String, String> propertiesInput) throws ParseErrorException
-    {
-        var map = new ConcurrentHashMap<SingleProperty<?>, Object>();
-
-        for (Map.Entry<String, String> entry : propertiesInput.entrySet())
-        {
-            var key = entry.getKey();
-            var value = entry.getValue();
-
-            var property = (SingleProperty<Object>) this.values.getOrDefault(key, null);
-            if (property == null)
-                continue;
-
-            property.forInput(value).ifPresent(o -> map.put(property, o));
-        }
-
-        return map;
-    }
-
     @Nullable
     protected abstract E tryCastEntity(@Nullable Entity targetEntity);
 

@@ -11,13 +11,12 @@ import xyz.nifeather.morph.misc.disguiseProperty.values.AbstractProperties;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.BiConsumer;
 
 public class PropertyHandler
 {
     private final Map<SingleProperty<?>, Object> propertyMap = new ConcurrentHashMap<>();
-    private final List<SingleProperty<?>> validProperties = new CopyOnWriteArrayList<>();
+    private final Map<String, SingleProperty<?>> validProperties = new ConcurrentHashMap<>();
 
     protected final BiConsumerActions<SingleProperty<?>, Object> actions = new BiConsumerActions<>();
     public <X> void hookOnPropertyWrite(BiConsumer<SingleProperty<X>, X> consumer)
@@ -62,7 +61,15 @@ public class PropertyHandler
         reset();
 
         this.bindingProperties = properties;
-        validProperties.addAll(properties.getRegisteredProperties().values());
+        validProperties.putAll(properties.getRegisteredProperties());
+    }
+
+    /**
+     * Kept for external use, so that if anyone wants to add their own property, they can call this method!
+     */
+    public void registerProperty(SingleProperty<?> property)
+    {
+        validProperties.put(property.id(), property);
     }
 
     public void updateFromPropertiesInput(Map<String, String> input) throws ParseErrorException, PropertyValidationException
@@ -78,10 +85,23 @@ public class PropertyHandler
             return;
         }
 
-        var results = this.bindingProperties.readFromPropertiesInput(input);
-        validateHandle.validate(results);
+        var parsedResults = new ConcurrentHashMap<SingleProperty<?>, Object>();
 
-        results.forEach(this::writeGeneric);
+        for (Map.Entry<String, String> entry : input.entrySet())
+        {
+            var key = entry.getKey();
+            var value = entry.getValue();
+
+            var property = (SingleProperty<Object>) this.validProperties.getOrDefault(key, null);
+            if (property == null)
+                continue;
+
+            property.forInput(value).ifPresent(o -> parsedResults.put(property, o));
+        }
+
+        validateHandle.validate(parsedResults);
+
+        parsedResults.forEach(this::writeGeneric);
     }
 
     public void reset()
@@ -109,7 +129,7 @@ public class PropertyHandler
      */
     public <X> void set(SingleProperty<X> property, @NotNull X value) throws NullPointerException
     {
-        if (!validProperties.contains(property))
+        if (!validProperties.containsKey(property.id()))
         {
             FeatherMorphMain.getInstance().getSLF4JLogger().warn("The given property '%s' doesn't exist in '%s'".formatted(property.id(), this.bindingProperties));
             return;
@@ -164,10 +184,7 @@ public class PropertyHandler
     @Contract("_, null -> _; _, !null -> !null")
     public <X> X getOr(String propertyName, @Nullable X defaultVal)
     {
-        var property = validProperties.stream().filter(p -> p.id().equals(propertyName))
-                .findFirst()
-                .orElse(null);
-
+        var property = validProperties.getOrDefault(propertyName, null);
         if (property == null) return defaultVal;
 
         return (X) getOr((SingleProperty<Object>) property, defaultVal);

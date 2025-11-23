@@ -74,6 +74,11 @@ public class ExceptionStrings extends AbstractMorphStrings
         return getFormattable(getKey("malformed_input"), "[Fallback] 不正确的格式");
     }
 
+    public static FormattableMessage unknownError()
+    {
+        return getFormattable(getKey("unknown_error"), "[Fallback] Failed for somehow, and we don't know!");
+    }
+
     private static String getKey(String key)
     {
         return "exceptions." + key;
