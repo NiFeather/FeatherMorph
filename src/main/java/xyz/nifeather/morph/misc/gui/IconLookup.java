@@ -20,8 +20,8 @@ import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.misc.DisguiseTypes;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
-import xyz.nifeather.morph.misc.disguiseProperty.values.MannequinProperties;
-import xyz.nifeather.morph.misc.disguiseProperty.values.PlayerProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.values.MannequinPropertyCollection;
+import xyz.nifeather.morph.misc.disguiseProperty.values.PlayerPropertyCollection;
 import xyz.nifeather.morph.misc.skins.PlayerSkinProvider;
 import xyz.nifeather.morph.utilities.GameProfileUtils;
 
@@ -269,7 +269,7 @@ public class IconLookup
 
     public Component lookupPlayerIcon(DisguiseState state)
     {
-        var properties = DisguiseProperties.INSTANCE.getOrThrow(PlayerProperties.class);
+        var properties = DisguiseProperties.INSTANCE.getOrThrow(PlayerPropertyCollection.class);
         var optional = state.disguisePropertyHandler().getOptional(properties.SKIN);
 
         return optional.map(skin -> (Component) Component.object(ObjectContents.playerHead(GameProfileUtils.asPlayerProfile(skin))))
@@ -278,7 +278,7 @@ public class IconLookup
 
     public Component lookupMannequinIcon(DisguiseState state)
     {
-        var properties = DisguiseProperties.INSTANCE.getOrThrow(MannequinProperties.class);
+        var properties = DisguiseProperties.INSTANCE.getOrThrow(MannequinPropertyCollection.class);
         var optional = state.disguisePropertyHandler().getOptional(properties.SKIN);
 
         return optional.map(skin -> skin.dynamic() ? null : (Component) Component.object(ObjectContents.playerHead(skin)))

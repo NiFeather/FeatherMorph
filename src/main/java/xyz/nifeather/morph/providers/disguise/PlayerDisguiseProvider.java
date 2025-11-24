@@ -21,7 +21,7 @@ import xyz.nifeather.morph.misc.DisguiseTypes;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.ParseErrorException;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
-import xyz.nifeather.morph.misc.disguiseProperty.values.PlayerProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.values.PlayerPropertyCollection;
 import xyz.nifeather.morph.misc.skins.PlayerSkinProvider;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
 import xyz.nifeather.morph.providers.animation.AnimationProvider;
@@ -29,7 +29,6 @@ import xyz.nifeather.morph.providers.animation.provider.PlayerAnimationProvider;
 import xyz.nifeather.morph.utilities.GameProfileUtils;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -93,7 +92,7 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
         var mainHandItem = player.getEquipment().getItemInMainHand();
         String id = state.getDisguiseIdentifier();
         var propertyHandler = state.disguisePropertyHandler();
-        var playerProperties = DisguiseProperties.INSTANCE.getOrThrow(PlayerProperties.class);
+        var playerProperties = DisguiseProperties.INSTANCE.getOrThrow(PlayerPropertyCollection.class);
 
         if (propertyHandler.contains(playerProperties.SKIN))
             return;

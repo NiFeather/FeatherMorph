@@ -19,7 +19,7 @@ import xyz.nifeather.morph.misc.AnimationNames;
 import xyz.nifeather.morph.misc.BuildFailedException;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
-import xyz.nifeather.morph.misc.disguiseProperty.values.PlayerProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.values.PlayerPropertyCollection;
 import xyz.nifeather.morph.utilities.GameProfileUtils;
 
 import java.util.EnumSet;
@@ -36,13 +36,13 @@ public class PlayerWatcher extends LivingEntityWatcher
         register(ValueIndex.PLAYER);
     }
 
-    private final PlayerProperties playerDisguiseProperties;
+    private final PlayerPropertyCollection playerDisguiseProperties;
 
     public PlayerWatcher(Player bindingPlayer)
     {
         super(bindingPlayer, EntityType.PLAYER);
 
-        this.playerDisguiseProperties = DisguiseProperties.INSTANCE.getOrThrow(PlayerProperties.class);
+        this.playerDisguiseProperties = DisguiseProperties.INSTANCE.getOrThrow(PlayerPropertyCollection.class);
     }
 
     @Override
@@ -62,8 +62,8 @@ public class PlayerWatcher extends LivingEntityWatcher
     {
         if (property.equals(playerDisguiseProperties.MAIN_HAND))
         {
-            var handStatus = (PlayerProperties.MainHandStatus) value;
-            if (handStatus == PlayerProperties.MainHandStatus.NOTSET)
+            var handStatus = (PlayerPropertyCollection.MainHandStatus) value;
+            if (handStatus == PlayerPropertyCollection.MainHandStatus.NOTSET)
                 return;
 
             var hand = handStatus.bindingHand;

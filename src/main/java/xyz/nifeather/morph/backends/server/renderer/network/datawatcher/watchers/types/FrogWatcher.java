@@ -15,7 +15,7 @@ import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueInde
 import xyz.nifeather.morph.misc.AnimationNames;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
-import xyz.nifeather.morph.misc.disguiseProperty.values.FrogProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.values.FrogPropertyCollection;
 
 import java.util.Objects;
 
@@ -45,7 +45,7 @@ public class FrogWatcher extends LivingEntityWatcher
     @Override
     protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
-        var properties = DisguiseProperties.INSTANCE.getOrThrow(FrogProperties.class);
+        var properties = DisguiseProperties.INSTANCE.getOrThrow(FrogPropertyCollection.class);
 
         if (property.equals(properties.VARIANT))
         {

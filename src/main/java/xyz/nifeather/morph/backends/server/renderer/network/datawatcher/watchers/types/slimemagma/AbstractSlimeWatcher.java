@@ -8,7 +8,7 @@ import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEnt
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
-import xyz.nifeather.morph.misc.disguiseProperty.values.SlimeMagmaProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.values.SlimeMagmaPropertyCollection;
 
 public class AbstractSlimeWatcher extends LivingEntityWatcher
 {
@@ -28,7 +28,7 @@ public class AbstractSlimeWatcher extends LivingEntityWatcher
     @Override
     protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
-        var properties = DisguiseProperties.INSTANCE.getOrThrow(SlimeMagmaProperties.class);
+        var properties = DisguiseProperties.INSTANCE.getOrThrow(SlimeMagmaPropertyCollection.class);
 
         if (property.equals(properties.SIZE))
         {

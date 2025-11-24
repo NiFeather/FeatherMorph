@@ -7,7 +7,7 @@ import org.bukkit.entity.Player;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
-import xyz.nifeather.morph.misc.disguiseProperty.values.HorseProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.values.HorsePropertyCollection;
 
 public class HorseWatcher extends AbstractHorseWatcher
 {
@@ -56,7 +56,7 @@ public class HorseWatcher extends AbstractHorseWatcher
     @Override
     protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
-        var properties = DisguiseProperties.INSTANCE.getOrThrow(HorseProperties.class);
+        var properties = DisguiseProperties.INSTANCE.getOrThrow(HorsePropertyCollection.class);
 
         if (property.equals(properties.COLOR))
         {

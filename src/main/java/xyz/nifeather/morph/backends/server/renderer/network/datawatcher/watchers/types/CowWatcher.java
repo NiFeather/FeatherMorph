@@ -8,19 +8,19 @@ import org.bukkit.entity.Player;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
-import xyz.nifeather.morph.misc.disguiseProperty.values.CowProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.values.CowPropertyCollection;
 
 import java.util.Objects;
 
 public class CowWatcher extends AgeableMobWatcher
 {
-    private final CowProperties cowProperties;
+    private final CowPropertyCollection cowProperties;
 
     public CowWatcher(Player bindingPlayer)
     {
         super(bindingPlayer, EntityType.COW);
 
-        cowProperties = DisguiseProperties.INSTANCE.getOrThrow(CowProperties.class);
+        cowProperties = DisguiseProperties.INSTANCE.getOrThrow(CowPropertyCollection.class);
     }
 
     @Override

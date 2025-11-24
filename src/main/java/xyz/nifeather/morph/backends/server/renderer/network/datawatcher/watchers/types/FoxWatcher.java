@@ -10,7 +10,7 @@ import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueInde
 import xyz.nifeather.morph.misc.AnimationNames;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
-import xyz.nifeather.morph.misc.disguiseProperty.values.FoxProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.values.FoxPropertyCollection;
 
 public class FoxWatcher extends AgeableMobWatcher
 {
@@ -30,7 +30,7 @@ public class FoxWatcher extends AgeableMobWatcher
     @Override
     protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
-        var properties = DisguiseProperties.INSTANCE.getOrThrow(FoxProperties.class);
+        var properties = DisguiseProperties.INSTANCE.getOrThrow(FoxPropertyCollection.class);
 
         if (property.equals(properties.VARIANT))
         {

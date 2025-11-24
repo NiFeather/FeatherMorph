@@ -7,7 +7,7 @@ import org.bukkit.entity.Rabbit;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
-import xyz.nifeather.morph.misc.disguiseProperty.values.RabbitProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.values.RabbitPropertyCollection;
 
 import java.util.Arrays;
 
@@ -34,7 +34,7 @@ public class RabbitWatcher extends LivingEntityWatcher
     @Override
     protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
-        var properties = DisguiseProperties.INSTANCE.getOrThrow(RabbitProperties.class);
+        var properties = DisguiseProperties.INSTANCE.getOrThrow(RabbitPropertyCollection.class);
 
         if (property.equals(properties.VARIANT))
         {

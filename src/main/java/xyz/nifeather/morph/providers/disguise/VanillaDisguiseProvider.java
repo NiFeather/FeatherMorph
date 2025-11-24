@@ -25,8 +25,9 @@ import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.strings.MorphStrings;
 import xyz.nifeather.morph.messages.vanilla.MasterVanillaMessageStore;
 import xyz.nifeather.morph.misc.*;
+import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.ParseErrorException;
-import xyz.nifeather.morph.misc.disguiseProperty.values.MannequinProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.values.MannequinPropertyCollection;
 import xyz.nifeather.morph.misc.skins.PlayerSkinProvider;
 import xyz.nifeather.morph.providers.animation.AnimationProvider;
 import xyz.nifeather.morph.providers.animation.provider.VanillaAnimationProvider;
@@ -152,9 +153,10 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
         super.finalizeProperties(state);
 
         var propertyHandler = state.disguisePropertyHandler();
-        if (!(propertyHandler.bindingProperties() instanceof MannequinProperties mannequinProperties)) return;
+        var mannequinProperties = DisguiseProperties.INSTANCE.getOrThrow(MannequinPropertyCollection.class);
 
         // Resolve skin
+        // todo: Make it so that we no longer resolve the skin by ourselves
         if (propertyHandler.contains(mannequinProperties.SKIN))
         {
             PlayerProfile placeHolder = GameProfileUtils.asPlayerProfile(new GameProfile(UUID.randomUUID(), "error_in_vdp"));

@@ -9,19 +9,19 @@ import org.bukkit.entity.Player;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
-import xyz.nifeather.morph.misc.disguiseProperty.values.ChickenProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.values.ChickenPropertyCollection;
 
 import java.util.Objects;
 
 public class ChickenWatcher extends AgeableMobWatcher
 {
-    private final ChickenProperties chickenProperties;
+    private final ChickenPropertyCollection chickenProperties;
 
     public ChickenWatcher(Player bindingPlayer)
     {
         super(bindingPlayer, EntityType.CHICKEN);
 
-        chickenProperties = DisguiseProperties.INSTANCE.getOrThrow(ChickenProperties.class);
+        chickenProperties = DisguiseProperties.INSTANCE.getOrThrow(ChickenPropertyCollection.class);
     }
 
     @Override

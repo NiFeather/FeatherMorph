@@ -13,7 +13,7 @@ import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueInde
 import xyz.nifeather.morph.misc.AnimationNames;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
-import xyz.nifeather.morph.misc.disguiseProperty.values.CatProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.values.CatPropertyCollection;
 import xyz.nifeather.morph.utilities.Uuids;
 
 import java.util.Objects;
@@ -44,7 +44,7 @@ public class CatWatcher extends TameableAnimalWatcher
     @Override
     protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
-        var properties = DisguiseProperties.INSTANCE.getOrThrow(CatProperties.class);
+        var properties = DisguiseProperties.INSTANCE.getOrThrow(CatPropertyCollection.class);
 
         if (property.equals(properties.CAT_VARIANT))
         {

@@ -8,7 +8,7 @@ import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEnt
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
-import xyz.nifeather.morph.misc.disguiseProperty.values.CreeperProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.values.CreeperPropertyCollection;
 
 public class CreeperWatcher extends LivingEntityWatcher
 {
@@ -28,7 +28,7 @@ public class CreeperWatcher extends LivingEntityWatcher
     @Override
     protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
-        var properties = DisguiseProperties.INSTANCE.getOrThrow(CreeperProperties.class);
+        var properties = DisguiseProperties.INSTANCE.getOrThrow(CreeperPropertyCollection.class);
 
         if (property.equals(properties.CHARGED))
         {

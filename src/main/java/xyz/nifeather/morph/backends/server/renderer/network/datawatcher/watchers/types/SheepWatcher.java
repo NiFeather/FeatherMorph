@@ -7,7 +7,7 @@ import org.bukkit.entity.Player;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
-import xyz.nifeather.morph.misc.disguiseProperty.values.SheepProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.values.SheepPropertyCollection;
 
 public class SheepWatcher extends LivingEntityWatcher
 {
@@ -27,7 +27,7 @@ public class SheepWatcher extends LivingEntityWatcher
     @Override
     protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
-        var sheepProperties = DisguiseProperties.INSTANCE.getOrThrow(SheepProperties.class);
+        var sheepProperties = DisguiseProperties.INSTANCE.getOrThrow(SheepPropertyCollection.class);
 
         if (property.equals(sheepProperties.DYE_COLOR))
         {

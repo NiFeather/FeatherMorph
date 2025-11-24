@@ -44,7 +44,7 @@ import xyz.nifeather.morph.messages.strings.MorphStrings;
 import xyz.nifeather.morph.misc.*;
 import xyz.nifeather.morph.misc.disguiseProperty.*;
 import xyz.nifeather.morph.misc.disguiseProperty.values.OffTreeProperties;
-import xyz.nifeather.morph.misc.disguiseProperty.values.PlayerProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.values.PlayerPropertyCollection;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 import xyz.nifeather.morph.network.Constants;
 import xyz.nifeather.morph.network.commands.S2C.S2CUpdatePropertiesCommand;
@@ -890,8 +890,12 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         // Properties
         var propertyHandler = state.disguisePropertyHandler();
-        var properties = disguiseProperties.get(state.getEntityType());
-        propertyHandler.initProperties(properties); // Make sure that disguise properties are always available for further disguise construct
+        var propertyCollection = disguiseProperties.get(state.getEntityType());
+
+        propertyHandler.reset();
+        propertyHandler.registerFromPropertyCollection(propertyCollection); // Make sure that disguise properties are always available for further disguise construct
+        disguiseProperties.lookupRange(parameters.propertiesInput.keySet())
+                .forEach(propertyHandler::addProperty);
 
         provider.buildDisguise(state, targetEntity);
         provider.setupProperties(state, targetEntity);
@@ -1043,7 +1047,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
             if (clientApiVersion < Constants.ApiLevel.EQUIPMENT_AND_SKIN_ARE_NOW_PROPERTY.protocolVersion)
             {
-                var properties = DisguiseProperties.INSTANCE.getOrThrow(PlayerProperties.class);
+                var properties = DisguiseProperties.INSTANCE.getOrThrow(PlayerPropertyCollection.class);
                 newState.disguisePropertyHandler().getOptional(properties.SKIN)
                         .ifPresent(profile ->
                         {
@@ -1104,32 +1108,26 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         );
 
         var propertyHandler = state.disguisePropertyHandler();
-        var properties = propertyHandler.bindingProperties();
 
-        if (properties != null)
+        propertyHandler.hookOnPropertyWrite((property, value) ->
         {
-            propertyHandler.hookOnPropertyWrite((property, value) ->
+            if (state.disposed()) return;
+
+            // fix command not sending when player rejoins
+            Player pl = player.isConnected() ? player : Bukkit.getPlayer(player.getUniqueId());
+            Map<String ,String> diffMap = new ConcurrentHashMap<>();
+            try
             {
-                if (state.disposed()) return;
+                diffMap.put(property.id(), property.forValue(value));
+            }
+            catch (ParseErrorException e)
+            {
+                logger.error("Can't generate output from value", e);
+                return;
+            }
 
-                if (!properties.equals(propertyHandler.bindingProperties())) return;
-
-                // fix command not sending when player rejoins
-                Player pl = player.isConnected() ? player : Bukkit.getPlayer(player.getUniqueId());
-                Map<String ,String> diffMap = new ConcurrentHashMap<>();
-                try
-                {
-                    diffMap.put(property.id(), property.forValue(value));
-                }
-                catch (ParseErrorException e)
-                {
-                    logger.error("Can't generate output from value", e);
-                    return;
-                }
-
-                clientHandler.sendCommand(pl, new S2CUpdatePropertiesCommand(diffMap));
-            });
-        }
+            clientHandler.sendCommand(pl, new S2CUpdatePropertiesCommand(diffMap));
+        });
 
         // 发送提示
         var isClientPlayer = clientHandler.clientConnected(player);
@@ -1226,7 +1224,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         if (playerApiVersion < Constants.ApiLevel.EQUIPMENT_AND_SKIN_ARE_NOW_PROPERTY.protocolVersion)
         {
-            var properties = DisguiseProperties.INSTANCE.getOrThrow(PlayerProperties.class);
+            var properties = DisguiseProperties.INSTANCE.getOrThrow(PlayerPropertyCollection.class);
             state.disguisePropertyHandler().getOptional(properties.SKIN)
                     .ifPresent(profile ->
                     {

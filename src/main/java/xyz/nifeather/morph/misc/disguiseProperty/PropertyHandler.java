@@ -8,7 +8,7 @@ import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.misc.ISupportDiffs;
 import xyz.nifeather.morph.misc.actions.BiConsumerActions;
-import xyz.nifeather.morph.misc.disguiseProperty.values.AbstractProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.values.PropertyCollection;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -48,27 +48,16 @@ public class PropertyHandler
         return map;
     }
 
-    @Nullable
-    private AbstractProperties<?> bindingProperties;
-
-    @Nullable
-    public AbstractProperties<?> bindingProperties()
+    public void registerFromPropertyCollection(PropertyCollection<?> properties)
     {
-        return bindingProperties;
-    }
-
-    public void initProperties(AbstractProperties<?> properties)
-    {
-        reset();
-
-        this.bindingProperties = properties;
         validProperties.putAll(properties.getRegisteredProperties());
     }
 
     /**
+     * Add property as a valid property for this handler
      * Kept for external use, so that if anyone wants to add their own property, they can call this method!
      */
-    public void registerProperty(SingleProperty<?> property)
+    public void addProperty(SingleProperty<?> property)
     {
         validProperties.put(property.id(), property);
     }
@@ -76,12 +65,6 @@ public class PropertyHandler
     public void updateFromPropertiesInput(Map<String, String> input, Player inputSource, EnumSet<ValidationFlag> validationFlags)
             throws ParseErrorException, PropertyValidationException
     {
-        if (this.bindingProperties == null)
-        {
-            FeatherMorphMain.getInstance().getSLF4JLogger().warn("Trying to update property input while a PropertyHandler has not been initialized?!");
-            return;
-        }
-
         var parsedResults = new ConcurrentHashMap<SingleProperty<?>, Object>();
 
         for (Map.Entry<String, String> entry : input.entrySet())
@@ -106,7 +89,6 @@ public class PropertyHandler
     public void reset()
     {
         this.validProperties.clear();
-        this.bindingProperties = null;
         clearProperties();
     }
 
@@ -130,7 +112,7 @@ public class PropertyHandler
     {
         if (!validProperties.containsKey(property.id()))
         {
-            FeatherMorphMain.getInstance().getSLF4JLogger().warn("The given property '%s' doesn't exist in '%s'".formatted(property.id(), this.bindingProperties));
+            FeatherMorphMain.getInstance().getSLF4JLogger().warn("The given property '%s' is not registered in propertyHandler".formatted(property.id()));
             return;
         }
 
@@ -198,26 +180,8 @@ public class PropertyHandler
      */
     public void copyTo(PropertyHandler other)
     {
-        this.propertyMap.forEach((k, v) ->
-        {
-            other.set((SingleProperty<Object>) k, v);
-        });
-    }
-
-    /**
-     * Check if the given PropertyHandler has been set up with the same properties of this handler
-     */
-    public boolean bindingPropertiesEquals(PropertyHandler other)
-    {
-        return other.bindingProperties != null && this.bindingPropertiesEquals(other.bindingProperties);
-    }
-
-    /**
-     * Check if the given Properties is same properties of this handler
-     */
-    public boolean bindingPropertiesEquals(AbstractProperties<?> other)
-    {
-        return this.bindingProperties != null && this.bindingProperties.equals(other);
+        other.validProperties.putAll(this.validProperties);
+        this.propertyMap.forEach((k, v) -> other.set((SingleProperty<Object>) k, v));
     }
 
     public void dispose()

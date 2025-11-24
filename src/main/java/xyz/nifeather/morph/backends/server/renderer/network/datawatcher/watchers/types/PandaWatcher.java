@@ -10,7 +10,7 @@ import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueInde
 import xyz.nifeather.morph.misc.AnimationNames;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
-import xyz.nifeather.morph.misc.disguiseProperty.values.PandaProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.values.PandaPropertyCollection;
 
 import java.util.Arrays;
 
@@ -42,7 +42,7 @@ public class PandaWatcher extends LivingEntityWatcher
     @Override
     protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
-        var properties = DisguiseProperties.INSTANCE.getOrThrow(PandaProperties.class);
+        var properties = DisguiseProperties.INSTANCE.getOrThrow(PandaPropertyCollection.class);
 
         if (property.equals(properties.MAIN_GENE))
         {

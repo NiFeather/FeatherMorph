@@ -5,7 +5,6 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -26,10 +25,11 @@ import xyz.nifeather.morph.messages.strings.CommandStrings;
 import xyz.nifeather.morph.messages.strings.EmoteStrings;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.strings.MorphStrings;
+import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
-import xyz.nifeather.morph.misc.disguiseProperty.values.BaseLivingEntityProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.values.BaseLivingEntityPropertyCollection;
 import xyz.nifeather.morph.misc.gui.IconLookup;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 import xyz.nifeather.morph.misc.waypoint.DisguiseWaypointUpdater;
@@ -906,50 +906,6 @@ public class DisguiseState extends MorphPluginObject
         setShowingDisguisedEquipment(!disguiseEquipment.filterAll(item -> item.getType() == Material.AIR));
     }
 
-    private <X> void consumeIfPropertiesSupported(Class<X> clazz, Consumer<X> consumer)
-    {
-        var bindingProperties = propertyHandler.bindingProperties();
-        if (bindingProperties == null)
-        {
-            if (FeatherMorphMain.getInstance().debugOutputEnabled())
-                logger.info("BindingProperties is NULL, not continuing...");
-
-            return;
-        }
-
-        if (!clazz.isInstance(bindingProperties))
-        {
-            if (FeatherMorphMain.getInstance().debugOutputEnabled())
-                logger.info("Expected %s but got %s, not continuing".formatted(clazz, bindingProperties.getClass()));
-
-            return;
-        }
-
-        consumer.accept((X) bindingProperties);
-    }
-
-    private <X, V> Optional<V> funcIfPropertiesSupported(Class<X> clazz, Function<X, Optional<V>> func)
-    {
-        var bindingProperties = propertyHandler.bindingProperties();
-        if (bindingProperties == null)
-        {
-            if (FeatherMorphMain.getInstance().debugOutputEnabled())
-                logger.info("BindingProperties is NULL, not continuing...");
-
-            return Optional.empty();
-        }
-
-        if (!clazz.isInstance(bindingProperties))
-        {
-            if (FeatherMorphMain.getInstance().debugOutputEnabled())
-                logger.info("Expected %s but got %s, not continuing".formatted(clazz, bindingProperties.getClass()));
-
-            return Optional.empty();
-        }
-
-        return func.apply((X) bindingProperties);
-    }
-
     /**
      * 此阶段是否正在显示伪装物品
      * @return 是否正在显示
@@ -969,7 +925,8 @@ public class DisguiseState extends MorphPluginObject
 
     public void setEquipment(DisguiseEquipment equipment)
     {
-        consumeIfPropertiesSupported(BaseLivingEntityProperties.class, p -> propertyHandler.set(p.EQUIPMENT, equipment));
+        var properties = DisguiseProperties.INSTANCE.getOrThrow(BaseLivingEntityPropertyCollection.class);
+        propertyHandler.set(properties.EQUIPMENT, equipment);
     }
 
     /**
@@ -978,8 +935,8 @@ public class DisguiseState extends MorphPluginObject
      */
     public void setShowingDisguisedEquipment(boolean value)
     {
-        consumeIfPropertiesSupported(BaseLivingEntityProperties.class, p ->
-                propertyHandler.set(p.DISPLAY_DISGUISE_EQUIPMENT, value));
+        var properties = DisguiseProperties.INSTANCE.getOrThrow(BaseLivingEntityPropertyCollection.class);
+        propertyHandler.set(properties.DISPLAY_DISGUISE_EQUIPMENT, value);
     }
 
     /**
@@ -988,10 +945,8 @@ public class DisguiseState extends MorphPluginObject
      */
     public DisguiseEquipment getDisguiseEquipment()
     {
-        return funcIfPropertiesSupported(BaseLivingEntityProperties.class, properties ->
-        {
-            return propertyHandler.getOptional((SingleProperty<DisguiseEquipment>) properties.EQUIPMENT);
-        }).orElseGet(DisguiseEquipment::empty);
+        var properties = DisguiseProperties.INSTANCE.getOrThrow(BaseLivingEntityPropertyCollection.class);
+        return propertyHandler.getOptional((SingleProperty<DisguiseEquipment>)properties.EQUIPMENT).orElseGet(DisguiseEquipment::empty);
     }
 
     /**

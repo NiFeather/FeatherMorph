@@ -1,6 +1,5 @@
 package xyz.nifeather.morph.events;
 
-import com.destroystokyo.paper.ClientOption;
 import com.destroystokyo.paper.event.entity.EntityAddToWorldEvent;
 import com.destroystokyo.paper.event.player.PlayerClientOptionsChangeEvent;
 import com.destroystokyo.paper.event.player.PlayerPostRespawnEvent;
@@ -31,14 +30,14 @@ import xyz.nifeather.morph.api.networking.exceptions.PlayerDisconnectedException
 import xyz.nifeather.morph.config.ConfigOption;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.messages.MessageUtils;
-import xyz.nifeather.morph.messages.TranslateManager;
 import xyz.nifeather.morph.messages.strings.MorphStrings;
 import xyz.nifeather.morph.messages.vanilla.MasterVanillaMessageStore;
 import xyz.nifeather.morph.misc.DisguiseEquipment;
 import xyz.nifeather.morph.misc.DisguiseTypes;
 import xyz.nifeather.morph.misc.ModNetworkingHelper;
 import xyz.nifeather.morph.misc.OfflineDisguiseResult;
-import xyz.nifeather.morph.misc.disguiseProperty.values.BaseLivingEntityProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.values.BaseLivingEntityPropertyCollection;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 import xyz.nifeather.morph.network.Constants;
 import xyz.nifeather.morph.network.commands.S2C.S2CSwapCommand;
@@ -252,15 +251,14 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         }
 
         var propertyHandler = state.disguisePropertyHandler();
-        if (propertyHandler.bindingProperties() instanceof BaseLivingEntityProperties<?> properties)
-        {
-            var newEquipment = DisguiseEquipment.builder(equip)
-                    .offHand(mainHand)
-                    .mainHand(offHand)
-                    .build();
+        var properties = DisguiseProperties.INSTANCE.getOrThrow(BaseLivingEntityPropertyCollection.class);
 
-            propertyHandler.set(properties.EQUIPMENT, newEquipment);
-        }
+        var newEquipment = DisguiseEquipment.builder(equip)
+                .offHand(mainHand)
+                .mainHand(offHand)
+                .build();
+
+        propertyHandler.set(properties.EQUIPMENT, newEquipment);
     }
 
     @EventHandler

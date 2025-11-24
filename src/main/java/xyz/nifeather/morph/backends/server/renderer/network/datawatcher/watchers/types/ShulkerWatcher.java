@@ -11,7 +11,7 @@ import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueInde
 import xyz.nifeather.morph.misc.AnimationNames;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
-import xyz.nifeather.morph.misc.disguiseProperty.values.ShulkerProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.values.ShulkerPropertyCollection;
 
 public class ShulkerWatcher extends LivingEntityWatcher
 {
@@ -31,7 +31,7 @@ public class ShulkerWatcher extends LivingEntityWatcher
     @Override
     protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
-        var properties = DisguiseProperties.INSTANCE.getOrThrow(ShulkerProperties.class);
+        var properties = DisguiseProperties.INSTANCE.getOrThrow(ShulkerPropertyCollection.class);
 
         if (properties.DYE_COLOR.equals(property))
         {

@@ -6,7 +6,7 @@ import org.bukkit.entity.Player;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
-import xyz.nifeather.morph.misc.disguiseProperty.values.GoatProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.values.GoatPropertyCollection;
 
 public class GoatWatcher extends LivingEntityWatcher
 {
@@ -26,7 +26,7 @@ public class GoatWatcher extends LivingEntityWatcher
     @Override
     protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
-        var properties = DisguiseProperties.INSTANCE.getOrThrow(GoatProperties.class);
+        var properties = DisguiseProperties.INSTANCE.getOrThrow(GoatPropertyCollection.class);
 
         if (property.equals(properties.HAS_LEFT_HORN))
             writePersistent(ValueIndex.GOAT.HAS_LEFT_HORN, (Boolean) value);
