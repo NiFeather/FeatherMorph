@@ -6,7 +6,6 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -14,7 +13,6 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Annotations.Resolved;
-import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.RevealingHandler;
@@ -52,7 +50,6 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 public class DisguiseState extends MorphPluginObject
 {
@@ -899,12 +896,6 @@ public class DisguiseState extends MorphPluginObject
     }
 
     //endregion Updating
-
-    public void refreshDisguiseItems(DisguiseEquipment disguiseEquipment)
-    {
-        setEquipment(disguiseEquipment);
-        setShowingDisguisedEquipment(!disguiseEquipment.filterAll(item -> item.getType() == Material.AIR));
-    }
 
     /**
      * 此阶段是否正在显示伪装物品
