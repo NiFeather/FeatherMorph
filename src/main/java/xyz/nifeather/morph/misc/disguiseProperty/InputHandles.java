@@ -596,9 +596,21 @@ public class InputHandles
                     .create();
         }
 
+        if (struct == null)
+        {
+            throw ParseErrorException.forProperty(propertyName)
+                    .withLocalizableMessage(ExceptionStrings.noEmptyInput())
+                    .withMessage("Empty input")
+                    .create();
+        }
+
         int dataVersion = struct.dataVersion();
 
         var builder = DisguiseEquipment.builder(Map.of());
+
+        // Let's treat this as empty map
+        if (struct.equipmentData() == null)
+            return Optional.of(builder.build());
 
         for (Map.Entry<String, String> entry : struct.equipmentData().entrySet())
         {
