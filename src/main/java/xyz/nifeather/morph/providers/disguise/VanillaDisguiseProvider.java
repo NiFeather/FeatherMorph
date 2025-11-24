@@ -148,39 +148,6 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
     }
 
     @Override
-    public void finalizeProperties(DisguiseState state) throws ParseErrorException
-    {
-        super.finalizeProperties(state);
-
-        var propertyHandler = state.disguisePropertyHandler();
-        var mannequinProperties = DisguiseProperties.INSTANCE.getOrThrow(MannequinPropertyCollection.class);
-
-        // Resolve skin
-        // todo: Make it so that we no longer resolve the skin by ourselves
-        if (propertyHandler.contains(mannequinProperties.SKIN))
-        {
-            PlayerProfile placeHolder = GameProfileUtils.asPlayerProfile(new GameProfile(UUID.randomUUID(), "error_in_vdp"));
-            var value = propertyHandler.get(mannequinProperties.SKIN);
-            var resolvedSkin = value.resolve().getNow(placeHolder);
-
-            if (!resolvedSkin.equals(placeHolder) && !value.dynamic()) return;
-
-            PlayerSkinProvider.getInstance().fetchSkin(value.name()).thenAccept(optional ->
-            {
-                if (optional.isEmpty()) return;
-
-                this.scheduleOn(state.getPlayer(), () ->
-                {
-                    if (state.disposed()) return;
-
-                    if (value.equals(propertyHandler.get(mannequinProperties.SKIN)))
-                        propertyHandler.set(mannequinProperties.SKIN, GameProfileUtils.asResolvableProfile(optional.get()));
-                });
-            });
-        }
-    }
-
-    @Override
     public boolean updateDisguise(Player player, DisguiseState state)
     {
         if (super.updateDisguise(player, state))

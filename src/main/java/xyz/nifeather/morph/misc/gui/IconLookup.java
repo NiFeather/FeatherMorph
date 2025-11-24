@@ -281,7 +281,7 @@ public class IconLookup
         var properties = DisguiseProperties.INSTANCE.getOrThrow(MannequinPropertyCollection.class);
         var optional = state.disguisePropertyHandler().getOptional(properties.SKIN);
 
-        return optional.map(skin -> skin.dynamic() ? null : (Component) Component.object(ObjectContents.playerHead(skin)))
+        return optional.map(skin -> (Component) Component.object(ObjectContents.playerHead(skin)))
                 .orElse(IconLookup.instance().fallbackTextIcon());
     }
 
