@@ -27,7 +27,7 @@ public class ParrotWatcher extends TameableAnimalWatcher
     @Override
     protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
-        var properties = DisguiseProperties.INSTANCE.getOrThrow(ParrotPropertyCollection.class);
+        var properties = DisguiseProperties.INSTANCE.getCollectionOrThrow(ParrotPropertyCollection.class);
 
         if (property.equals(properties.VARIANT))
         {

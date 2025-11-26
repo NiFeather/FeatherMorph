@@ -65,7 +65,7 @@ public class LivingEntityWatcher extends EntityWatcher
     @Override
     protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
-        var properties = DisguiseProperties.INSTANCE.getOrThrow(BaseLivingEntityPropertyCollection.class);
+        var properties = DisguiseProperties.INSTANCE.getCollectionOrThrow(BaseLivingEntityPropertyCollection.class);
         if (property.equals(properties.CUSTOM_NAME))
         {
             Component component = value instanceof Component component1 ? component1 : Component.empty();

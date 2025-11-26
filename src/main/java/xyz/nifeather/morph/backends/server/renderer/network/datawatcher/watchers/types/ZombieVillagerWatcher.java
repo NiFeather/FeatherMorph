@@ -50,7 +50,7 @@ public class ZombieVillagerWatcher extends ZombieWatcher
     @Override
     protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
-        var properties = DisguiseProperties.INSTANCE.getOrThrow(ZombieVillagerPropertyCollection.class);
+        var properties = DisguiseProperties.INSTANCE.getCollectionOrThrow(ZombieVillagerPropertyCollection.class);
 
         if (property.equals(properties.LEVEL))
         {

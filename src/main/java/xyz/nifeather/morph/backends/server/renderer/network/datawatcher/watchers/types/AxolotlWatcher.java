@@ -27,7 +27,7 @@ public class AxolotlWatcher extends LivingEntityWatcher
     @Override
     protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
-        var properties = DisguiseProperties.INSTANCE.getOrThrow(AxolotlPropertyCollection.class);
+        var properties = DisguiseProperties.INSTANCE.getCollectionOrThrow(AxolotlPropertyCollection.class);
 
         if (property.equals(properties.VARIANT))
         {

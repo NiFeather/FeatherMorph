@@ -92,7 +92,7 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
         var mainHandItem = player.getEquipment().getItemInMainHand();
         String id = state.getDisguiseIdentifier();
         var propertyHandler = state.disguisePropertyHandler();
-        var playerProperties = DisguiseProperties.INSTANCE.getOrThrow(PlayerPropertyCollection.class);
+        var playerProperties = DisguiseProperties.INSTANCE.getCollectionOrThrow(PlayerPropertyCollection.class);
 
         if (propertyHandler.contains(playerProperties.SKIN))
             return;

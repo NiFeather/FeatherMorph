@@ -21,7 +21,7 @@ public class ChickenWatcher extends AgeableMobWatcher
     {
         super(bindingPlayer, EntityType.CHICKEN);
 
-        chickenProperties = DisguiseProperties.INSTANCE.getOrThrow(ChickenPropertyCollection.class);
+        chickenProperties = DisguiseProperties.INSTANCE.getCollectionOrThrow(ChickenPropertyCollection.class);
     }
 
     @Override

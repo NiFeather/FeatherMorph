@@ -34,7 +34,7 @@ public class RabbitWatcher extends LivingEntityWatcher
     @Override
     protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
-        var properties = DisguiseProperties.INSTANCE.getOrThrow(RabbitPropertyCollection.class);
+        var properties = DisguiseProperties.INSTANCE.getCollectionOrThrow(RabbitPropertyCollection.class);
 
         if (property.equals(properties.VARIANT))
         {

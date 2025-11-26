@@ -27,7 +27,7 @@ public class SheepWatcher extends LivingEntityWatcher
     @Override
     protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
-        var sheepProperties = DisguiseProperties.INSTANCE.getOrThrow(SheepPropertyCollection.class);
+        var sheepProperties = DisguiseProperties.INSTANCE.getCollectionOrThrow(SheepPropertyCollection.class);
 
         if (property.equals(sheepProperties.DYE_COLOR))
         {

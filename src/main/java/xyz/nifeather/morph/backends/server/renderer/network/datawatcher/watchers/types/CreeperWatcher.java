@@ -28,7 +28,7 @@ public class CreeperWatcher extends LivingEntityWatcher
     @Override
     protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
-        var properties = DisguiseProperties.INSTANCE.getOrThrow(CreeperPropertyCollection.class);
+        var properties = DisguiseProperties.INSTANCE.getCollectionOrThrow(CreeperPropertyCollection.class);
 
         if (property.equals(properties.CHARGED))
         {

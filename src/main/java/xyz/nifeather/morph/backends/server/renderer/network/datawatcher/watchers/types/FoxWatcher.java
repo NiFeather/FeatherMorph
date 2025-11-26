@@ -30,7 +30,7 @@ public class FoxWatcher extends AgeableMobWatcher
     @Override
     protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
-        var properties = DisguiseProperties.INSTANCE.getOrThrow(FoxPropertyCollection.class);
+        var properties = DisguiseProperties.INSTANCE.getCollectionOrThrow(FoxPropertyCollection.class);
 
         if (property.equals(properties.VARIANT))
         {

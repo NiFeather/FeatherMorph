@@ -33,7 +33,7 @@ public class TropicalFishWatcher extends LivingEntityWatcher
     @Override
     protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
-        var tropicalProperties = DisguiseProperties.INSTANCE.getOrThrow(TropicalFishPropertyCollection.class);
+        var tropicalProperties = DisguiseProperties.INSTANCE.getCollectionOrThrow(TropicalFishPropertyCollection.class);
 
         if (property.equals(tropicalProperties.BODY_COLOR))
         {

@@ -24,7 +24,7 @@ public class GuardianSkill extends DelayedMorphSkill<NoOpConfiguration>
 
     public GuardianSkill()
     {
-        properties = DisguiseProperties.INSTANCE.getOrThrow(GuardianPropertyCollection.class);
+        properties = DisguiseProperties.INSTANCE.getCollectionOrThrow(GuardianPropertyCollection.class);
     }
 
     @Override
@@ -99,7 +99,7 @@ public class GuardianSkill extends DelayedMorphSkill<NoOpConfiguration>
     @Override
     protected void executeDelayedSkill(Player player, DisguiseState state, NoOpConfiguration option)
     {
-        var properties = DisguiseProperties.INSTANCE.getOrThrow(GuardianPropertyCollection.class);
+        var properties = DisguiseProperties.INSTANCE.getCollectionOrThrow(GuardianPropertyCollection.class);
         state.disguisePropertyHandler().set(properties.ATTACK_TARGET, 0);
         state.getDisguiseWrapper().writeProperty(properties.ATTACK_TARGET, 0);
 

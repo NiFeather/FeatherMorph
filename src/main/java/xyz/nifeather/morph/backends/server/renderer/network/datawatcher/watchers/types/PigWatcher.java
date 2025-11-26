@@ -21,7 +21,7 @@ public class PigWatcher extends AgeableMobWatcher
     {
         super(bindingPlayer, EntityType.PIG);
 
-        pigProperties = DisguiseProperties.INSTANCE.getOrThrow(PigPropertyCollection.class);
+        pigProperties = DisguiseProperties.INSTANCE.getCollectionOrThrow(PigPropertyCollection.class);
     }
 
     @Override

@@ -26,7 +26,7 @@ public class GoatWatcher extends LivingEntityWatcher
     @Override
     protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
-        var properties = DisguiseProperties.INSTANCE.getOrThrow(GoatPropertyCollection.class);
+        var properties = DisguiseProperties.INSTANCE.getCollectionOrThrow(GoatPropertyCollection.class);
 
         if (property.equals(properties.HAS_LEFT_HORN))
             writePersistent(ValueIndex.GOAT.HAS_LEFT_HORN, (Boolean) value);

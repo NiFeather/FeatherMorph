@@ -20,7 +20,7 @@ public class CowWatcher extends AgeableMobWatcher
     {
         super(bindingPlayer, EntityType.COW);
 
-        cowProperties = DisguiseProperties.INSTANCE.getOrThrow(CowPropertyCollection.class);
+        cowProperties = DisguiseProperties.INSTANCE.getCollectionOrThrow(CowPropertyCollection.class);
     }
 
     @Override

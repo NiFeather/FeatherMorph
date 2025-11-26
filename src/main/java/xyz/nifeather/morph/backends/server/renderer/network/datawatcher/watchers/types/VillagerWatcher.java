@@ -51,7 +51,7 @@ public class VillagerWatcher extends LivingEntityWatcher
     @Override
     protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
-        var properties = DisguiseProperties.INSTANCE.getOrThrow(VillagerPropertyCollection.class);
+        var properties = DisguiseProperties.INSTANCE.getCollectionOrThrow(VillagerPropertyCollection.class);
 
         if (property.equals(properties.LEVEL))
         {

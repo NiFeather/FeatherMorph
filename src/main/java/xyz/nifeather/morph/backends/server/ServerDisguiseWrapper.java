@@ -225,7 +225,7 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
 
         if (getEntityType() == EntityType.PLAYER)
         {
-            var properties = DisguiseProperties.INSTANCE.getOrThrow(PlayerPropertyCollection.class);
+            var properties = DisguiseProperties.INSTANCE.getCollectionOrThrow(PlayerPropertyCollection.class);
             var profileOptional = Optional.ofNullable(readPropertyOr(properties.SKIN, null));
             profileOptional.ifPresent(p -> bindingWatcher.writeEntry(CustomEntries.PROFILE, p));
         }

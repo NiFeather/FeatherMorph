@@ -19,7 +19,7 @@ public class EnderDragonWatcher extends LivingEntityWatcher
     {
         super(bindingPlayer, EntityType.ENDER_DRAGON);
 
-        this.properties = DisguiseProperties.INSTANCE.getOrThrow(EnderDragonPropertyCollection.class);
+        this.properties = DisguiseProperties.INSTANCE.getCollectionOrThrow(EnderDragonPropertyCollection.class);
     }
 
     private final EnderDragonPropertyCollection properties;

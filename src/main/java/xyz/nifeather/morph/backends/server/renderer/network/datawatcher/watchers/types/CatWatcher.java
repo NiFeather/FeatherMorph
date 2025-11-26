@@ -44,7 +44,7 @@ public class CatWatcher extends TameableAnimalWatcher
     @Override
     protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
-        var properties = DisguiseProperties.INSTANCE.getOrThrow(CatPropertyCollection.class);
+        var properties = DisguiseProperties.INSTANCE.getCollectionOrThrow(CatPropertyCollection.class);
 
         if (property.equals(properties.CAT_VARIANT))
         {

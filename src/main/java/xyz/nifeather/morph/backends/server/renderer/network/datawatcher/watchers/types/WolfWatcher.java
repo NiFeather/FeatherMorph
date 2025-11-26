@@ -44,7 +44,7 @@ public class WolfWatcher extends TameableAnimalWatcher
     @Override
     protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
-        var properties = DisguiseProperties.INSTANCE.getOrThrow(WolfPropertyCollection.class);
+        var properties = DisguiseProperties.INSTANCE.getCollectionOrThrow(WolfPropertyCollection.class);
 
         if (property.equals(properties.VARIANT))
         {

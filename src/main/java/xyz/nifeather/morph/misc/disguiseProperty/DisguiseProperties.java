@@ -65,53 +65,53 @@ public class DisguiseProperties
 
     private DisguiseProperties()
     {
-        register(EntityType.FROG, new FrogPropertyCollection());
-        register(EntityType.CAT, new CatPropertyCollection());
-        register(EntityType.AXOLOTL, new AxolotlPropertyCollection());
-        register(EntityType.FOX, new FoxPropertyCollection());
-        register(EntityType.GOAT, new GoatPropertyCollection());
-        register(EntityType.MOOSHROOM, new MooshroomPropertyCollection());
-        register(EntityType.PARROT, new ParrotPropertyCollection());
-        register(EntityType.RABBIT, new RabbitPropertyCollection());
-        register(EntityType.WOLF, new WolfPropertyCollection());
-        register(EntityType.LLAMA, new LlamaPropertyCollection());
-        register(EntityType.HORSE, new HorsePropertyCollection());
-        register(EntityType.PANDA, new PandaPropertyCollection());
-        register(EntityType.VILLAGER, new VillagerPropertyCollection());
-        register(EntityType.ZOMBIE_VILLAGER, new ZombieVillagerPropertyCollection());
-        register(EntityType.ARMOR_STAND, new ArmorStandPropertyCollection());
-        register(EntityType.CREEPER, new CreeperPropertyCollection());
+        registerCollection(EntityType.FROG, new FrogPropertyCollection());
+        registerCollection(EntityType.CAT, new CatPropertyCollection());
+        registerCollection(EntityType.AXOLOTL, new AxolotlPropertyCollection());
+        registerCollection(EntityType.FOX, new FoxPropertyCollection());
+        registerCollection(EntityType.GOAT, new GoatPropertyCollection());
+        registerCollection(EntityType.MOOSHROOM, new MooshroomPropertyCollection());
+        registerCollection(EntityType.PARROT, new ParrotPropertyCollection());
+        registerCollection(EntityType.RABBIT, new RabbitPropertyCollection());
+        registerCollection(EntityType.WOLF, new WolfPropertyCollection());
+        registerCollection(EntityType.LLAMA, new LlamaPropertyCollection());
+        registerCollection(EntityType.HORSE, new HorsePropertyCollection());
+        registerCollection(EntityType.PANDA, new PandaPropertyCollection());
+        registerCollection(EntityType.VILLAGER, new VillagerPropertyCollection());
+        registerCollection(EntityType.ZOMBIE_VILLAGER, new ZombieVillagerPropertyCollection());
+        registerCollection(EntityType.ARMOR_STAND, new ArmorStandPropertyCollection());
+        registerCollection(EntityType.CREEPER, new CreeperPropertyCollection());
 
-        register(EntityType.PIG, new PigPropertyCollection());
-        register(EntityType.COW, new CowPropertyCollection());
-        register(EntityType.CHICKEN, new ChickenPropertyCollection());
+        registerCollection(EntityType.PIG, new PigPropertyCollection());
+        registerCollection(EntityType.COW, new CowPropertyCollection());
+        registerCollection(EntityType.CHICKEN, new ChickenPropertyCollection());
 
-        register(EntityType.ENDER_DRAGON, new EnderDragonPropertyCollection());
-        register(EntityType.HAPPY_GHAST, new HappyGhastPropertyCollection());
+        registerCollection(EntityType.ENDER_DRAGON, new EnderDragonPropertyCollection());
+        registerCollection(EntityType.HAPPY_GHAST, new HappyGhastPropertyCollection());
 
-        register(EntityType.PLAYER, new PlayerPropertyCollection());
+        registerCollection(EntityType.PLAYER, new PlayerPropertyCollection());
 
         var slimeMagmaProperties = new SlimeMagmaPropertyCollection();
-        register(EntityType.SLIME, slimeMagmaProperties);
-        register(EntityType.MAGMA_CUBE, slimeMagmaProperties);
+        registerCollection(EntityType.SLIME, slimeMagmaProperties);
+        registerCollection(EntityType.MAGMA_CUBE, slimeMagmaProperties);
 
-        register(EntityType.SHULKER, new ShulkerPropertyCollection());
-        register(EntityType.TRADER_LLAMA, new TraderLlamaPropertyCollection());
-        register(EntityType.PHANTOM, new PhantomPropertyCollection());
-        register(EntityType.SHEEP, new SheepPropertyCollection());
-        register(EntityType.SNOW_GOLEM, new SnowGolemPropertyCollection());
-        register(EntityType.TROPICAL_FISH, new TropicalFishPropertyCollection());
+        registerCollection(EntityType.SHULKER, new ShulkerPropertyCollection());
+        registerCollection(EntityType.TRADER_LLAMA, new TraderLlamaPropertyCollection());
+        registerCollection(EntityType.PHANTOM, new PhantomPropertyCollection());
+        registerCollection(EntityType.SHEEP, new SheepPropertyCollection());
+        registerCollection(EntityType.SNOW_GOLEM, new SnowGolemPropertyCollection());
+        registerCollection(EntityType.TROPICAL_FISH, new TropicalFishPropertyCollection());
 
-        register(EntityType.HOGLIN, new HoglinPropertyCollection());
-        register(EntityType.ZOGLIN, new ZoglinPropertyCollection());
+        registerCollection(EntityType.HOGLIN, new HoglinPropertyCollection());
+        registerCollection(EntityType.ZOGLIN, new ZoglinPropertyCollection());
 
-        register(EntityType.ZOMBIE, new ZombiePropertyCollection());
+        registerCollection(EntityType.ZOMBIE, new ZombiePropertyCollection());
 
-        register(EntityType.GUARDIAN, new GuardianPropertyCollection());
-        register(EntityType.ELDER_GUARDIAN, new GuardianPropertyCollection());
+        registerCollection(EntityType.GUARDIAN, new GuardianPropertyCollection());
+        registerCollection(EntityType.ELDER_GUARDIAN, new GuardianPropertyCollection());
 
-        register(EntityType.MANNEQUIN, new MannequinPropertyCollection());
-        register(EntityType.COPPER_GOLEM, new CopperGolemPropertyCollection());
+        registerCollection(EntityType.MANNEQUIN, new MannequinPropertyCollection());
+        registerCollection(EntityType.COPPER_GOLEM, new CopperGolemPropertyCollection());
     }
 
     public Map<EntityType, PropertyCollection<?>> getAll()
@@ -119,7 +119,7 @@ public class DisguiseProperties
         return new Object2ObjectOpenHashMap<>(handlerMap);
     }
 
-    public void register(EntityType type, PropertyCollection<?> properties)
+    public void registerCollection(EntityType type, PropertyCollection<?> properties)
     {
         if (handlerMap.containsKey(type))
             throw new IllegalArgumentException("Already contains properties setup for type " + type);
@@ -130,7 +130,7 @@ public class DisguiseProperties
 
     private static final PropertyCollection<?> defaultProperties = new FallbackPropertyCollection();
 
-    public <X> X getOrThrow(Class<X> expectedClass)
+    public <X> X getCollectionOrThrow(Class<X> expectedClass)
     {
         var find = handlerMap.values().stream().filter(expectedClass::isInstance)
                 .findFirst()
@@ -143,9 +143,9 @@ public class DisguiseProperties
     }
 
     @NotNull
-    public <X> X getOrThrow(EntityType type, Class<X> expetedClass)
+    public <X> X getCollectionOrThrow(EntityType type, Class<X> expetedClass)
     {
-        var raw = get(type);
+        var raw = getCollection(type);
 
         if (!expetedClass.isInstance(raw))
             throw new NullDependencyException("Can't get disguise properties for type '%s', expected '%s' but got '%s'".formatted(type, expetedClass, raw.getClass()));
@@ -154,7 +154,7 @@ public class DisguiseProperties
     }
 
     @NotNull
-    public PropertyCollection<?> get(EntityType type)
+    public PropertyCollection<?> getCollection(EntityType type)
     {
         return handlerMap.getOrDefault(type, defaultProperties);
     }

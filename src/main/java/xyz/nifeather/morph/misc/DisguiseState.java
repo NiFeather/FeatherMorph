@@ -916,7 +916,7 @@ public class DisguiseState extends MorphPluginObject
 
     public void setEquipment(DisguiseEquipment equipment)
     {
-        var properties = DisguiseProperties.INSTANCE.getOrThrow(BaseLivingEntityPropertyCollection.class);
+        var properties = DisguiseProperties.INSTANCE.getCollectionOrThrow(BaseLivingEntityPropertyCollection.class);
         propertyHandler.set(properties.EQUIPMENT, equipment);
     }
 
@@ -926,7 +926,7 @@ public class DisguiseState extends MorphPluginObject
      */
     public void setShowingDisguisedEquipment(boolean value)
     {
-        var properties = DisguiseProperties.INSTANCE.getOrThrow(BaseLivingEntityPropertyCollection.class);
+        var properties = DisguiseProperties.INSTANCE.getCollectionOrThrow(BaseLivingEntityPropertyCollection.class);
         propertyHandler.set(properties.DISPLAY_DISGUISE_EQUIPMENT, value);
     }
 
@@ -936,7 +936,7 @@ public class DisguiseState extends MorphPluginObject
      */
     public DisguiseEquipment getDisguiseEquipment()
     {
-        var properties = DisguiseProperties.INSTANCE.getOrThrow(BaseLivingEntityPropertyCollection.class);
+        var properties = DisguiseProperties.INSTANCE.getCollectionOrThrow(BaseLivingEntityPropertyCollection.class);
         return propertyHandler.getOptional((SingleProperty<DisguiseEquipment>)properties.EQUIPMENT).orElseGet(DisguiseEquipment::empty);
     }
 

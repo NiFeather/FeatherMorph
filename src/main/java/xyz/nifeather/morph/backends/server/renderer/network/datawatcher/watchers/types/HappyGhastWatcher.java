@@ -16,7 +16,7 @@ public class HappyGhastWatcher extends LivingEntityWatcher
     {
         super(bindingPlayer, EntityType.HAPPY_GHAST);
 
-        properties = DisguiseProperties.INSTANCE.getOrThrow(HappyGhastPropertyCollection.class);
+        properties = DisguiseProperties.INSTANCE.getCollectionOrThrow(HappyGhastPropertyCollection.class);
     }
 
     @Override

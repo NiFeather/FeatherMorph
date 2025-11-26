@@ -31,7 +31,7 @@ public class PhantomWatcher extends LivingEntityWatcher
     @Override
     protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
-        var phantomProperties = DisguiseProperties.INSTANCE.getOrThrow(PhantomPropertyCollection.class);
+        var phantomProperties = DisguiseProperties.INSTANCE.getCollectionOrThrow(PhantomPropertyCollection.class);
 
         if (property.equals(phantomProperties.SIZE))
             this.writePersistent(ValueIndex.PHANTOM.SIZE, (Integer) value);

@@ -32,7 +32,7 @@ public class LlamaWatcher extends ChestedHorseWatcher
     @Override
     protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
-        var properties = DisguiseProperties.INSTANCE.getOrThrow(LlamaPropertyCollection.class);
+        var properties = DisguiseProperties.INSTANCE.getCollectionOrThrow(LlamaPropertyCollection.class);
 
         if (property.equals(properties.COLOR))
         {

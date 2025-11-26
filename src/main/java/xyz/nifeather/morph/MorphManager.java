@@ -890,7 +890,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         // Properties
         var propertyHandler = state.disguisePropertyHandler();
-        var propertyCollection = disguiseProperties.get(state.getEntityType());
+        var propertyCollection = disguiseProperties.getCollection(state.getEntityType());
 
         propertyHandler.reset();
         propertyHandler.registerFromPropertyCollection(propertyCollection); // Make sure that disguise properties are always available for further disguise construct
@@ -1047,7 +1047,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
             if (clientApiVersion < Constants.ApiLevel.EQUIPMENT_AND_SKIN_ARE_NOW_PROPERTY.protocolVersion)
             {
-                var properties = DisguiseProperties.INSTANCE.getOrThrow(PlayerPropertyCollection.class);
+                var properties = DisguiseProperties.INSTANCE.getCollectionOrThrow(PlayerPropertyCollection.class);
                 newState.disguisePropertyHandler().getOptional(properties.SKIN)
                         .ifPresent(profile ->
                         {
@@ -1224,7 +1224,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         if (playerApiVersion < Constants.ApiLevel.EQUIPMENT_AND_SKIN_ARE_NOW_PROPERTY.protocolVersion)
         {
-            var properties = DisguiseProperties.INSTANCE.getOrThrow(PlayerPropertyCollection.class);
+            var properties = DisguiseProperties.INSTANCE.getCollectionOrThrow(PlayerPropertyCollection.class);
             state.disguisePropertyHandler().getOptional(properties.SKIN)
                     .ifPresent(profile ->
                     {

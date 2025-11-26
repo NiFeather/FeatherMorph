@@ -17,7 +17,7 @@ public class HoglinWatcher extends EHasAttackAnimationWatcher
     @Override
     protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
-        var properties = DisguiseProperties.INSTANCE.getOrThrow(HoglinPropertyCollection.class);
+        var properties = DisguiseProperties.INSTANCE.getCollectionOrThrow(HoglinPropertyCollection.class);
 
         if (property.equals(properties.IS_BABY))
             this.writePersistent(ValueIndex.AGEABLE_MOB.IS_BABY, (Boolean) value);

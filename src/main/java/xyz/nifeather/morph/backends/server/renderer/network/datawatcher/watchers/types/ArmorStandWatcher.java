@@ -73,7 +73,7 @@ public class ArmorStandWatcher extends LivingEntityWatcher
     @Override
     protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
-        var properties = DisguiseProperties.INSTANCE.getOrThrow(ArmorStandPropertyCollection.class);
+        var properties = DisguiseProperties.INSTANCE.getCollectionOrThrow(ArmorStandPropertyCollection.class);
 
         if (property.equals(properties.SHOW_ARMS))
         {

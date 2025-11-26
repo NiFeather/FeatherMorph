@@ -45,7 +45,7 @@ public class FrogWatcher extends LivingEntityWatcher
     @Override
     protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
-        var properties = DisguiseProperties.INSTANCE.getOrThrow(FrogPropertyCollection.class);
+        var properties = DisguiseProperties.INSTANCE.getCollectionOrThrow(FrogPropertyCollection.class);
 
         if (property.equals(properties.VARIANT))
         {

@@ -27,7 +27,7 @@ public class SnowGolemWatcher extends LivingEntityWatcher
     @Override
     protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
-        var snowmanProperties = DisguiseProperties.INSTANCE.getOrThrow(SnowGolemPropertyCollection.class);
+        var snowmanProperties = DisguiseProperties.INSTANCE.getCollectionOrThrow(SnowGolemPropertyCollection.class);
 
         if (property.equals(snowmanProperties.HAS_PUMPKIN))
         {

@@ -25,7 +25,7 @@ public class GuardianWatcher extends LivingEntityWatcher
     @Override
     protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
-        var properties = DisguiseProperties.INSTANCE.getOrThrow(GuardianPropertyCollection.class);
+        var properties = DisguiseProperties.INSTANCE.getCollectionOrThrow(GuardianPropertyCollection.class);
 
         if (property.equals(properties.ATTACK_TARGET))
         {

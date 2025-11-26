@@ -251,7 +251,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         }
 
         var propertyHandler = state.disguisePropertyHandler();
-        var properties = DisguiseProperties.INSTANCE.getOrThrow(BaseLivingEntityPropertyCollection.class);
+        var properties = DisguiseProperties.INSTANCE.getCollectionOrThrow(BaseLivingEntityPropertyCollection.class);
 
         var newEquipment = DisguiseEquipment.builder(equip)
                 .offHand(mainHand)

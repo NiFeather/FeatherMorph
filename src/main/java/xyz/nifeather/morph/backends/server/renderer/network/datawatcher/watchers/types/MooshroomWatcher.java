@@ -28,7 +28,7 @@ public class MooshroomWatcher extends LivingEntityWatcher
     @Override
     protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
-        var properties = DisguiseProperties.INSTANCE.getOrThrow(MooshroomPropertyCollection.class);
+        var properties = DisguiseProperties.INSTANCE.getCollectionOrThrow(MooshroomPropertyCollection.class);
 
         if (property.equals(properties.VARIANT))
         {

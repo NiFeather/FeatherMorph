@@ -42,7 +42,7 @@ public class PlayerWatcher extends LivingEntityWatcher
     {
         super(bindingPlayer, EntityType.PLAYER);
 
-        this.playerDisguiseProperties = DisguiseProperties.INSTANCE.getOrThrow(PlayerPropertyCollection.class);
+        this.playerDisguiseProperties = DisguiseProperties.INSTANCE.getCollectionOrThrow(PlayerPropertyCollection.class);
     }
 
     @Override

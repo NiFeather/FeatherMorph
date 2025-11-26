@@ -31,7 +31,7 @@ public class ShulkerWatcher extends LivingEntityWatcher
     @Override
     protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
-        var properties = DisguiseProperties.INSTANCE.getOrThrow(ShulkerPropertyCollection.class);
+        var properties = DisguiseProperties.INSTANCE.getCollectionOrThrow(ShulkerPropertyCollection.class);
 
         if (properties.DYE_COLOR.equals(property))
         {

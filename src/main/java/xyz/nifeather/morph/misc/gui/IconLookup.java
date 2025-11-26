@@ -269,7 +269,7 @@ public class IconLookup
 
     public Component lookupPlayerIcon(DisguiseState state)
     {
-        var properties = DisguiseProperties.INSTANCE.getOrThrow(PlayerPropertyCollection.class);
+        var properties = DisguiseProperties.INSTANCE.getCollectionOrThrow(PlayerPropertyCollection.class);
         var optional = state.disguisePropertyHandler().getOptional(properties.SKIN);
 
         return optional.map(skin -> (Component) Component.object(ObjectContents.playerHead(GameProfileUtils.asPlayerProfile(skin))))
@@ -278,7 +278,7 @@ public class IconLookup
 
     public Component lookupMannequinIcon(DisguiseState state)
     {
-        var properties = DisguiseProperties.INSTANCE.getOrThrow(MannequinPropertyCollection.class);
+        var properties = DisguiseProperties.INSTANCE.getCollectionOrThrow(MannequinPropertyCollection.class);
         var optional = state.disguisePropertyHandler().getOptional(properties.SKIN);
 
         return optional.map(skin -> (Component) Component.object(ObjectContents.playerHead(skin)))
