@@ -14,6 +14,7 @@ import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xyz.nifeather.morph.backends.DisguiseWrapper;
 import xyz.nifeather.morph.messages.MessageUtils;
+import xyz.nifeather.morph.messages.strings.ExceptionStrings;
 import xyz.nifeather.morph.messages.strings.MorphStrings;
 import xyz.nifeather.morph.misc.DisguiseMeta;
 import xyz.nifeather.morph.misc.DisguiseState;
@@ -83,6 +84,15 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
     {
         super.finalizeProperties(state);
         setupSkinIfPossible(state);
+
+        if (state.disguisePropertyHandler().contains(PropertyNames.ENTITY_CUSTOM_NAME))
+        {
+            throw ParseErrorException.forProperty(PropertyNames.ENTITY_CUSTOM_NAME)
+                    .byMethod("PlayerDisguiseProvider#finalizeProperties")
+                    .withLocalizableMessage(ExceptionStrings.unsupported())
+                    .withMessage("Custom name is not available for player disguises")
+                    .create();
+        }
     }
 
     private void setupSkinIfPossible(DisguiseState state) throws ParseErrorException
