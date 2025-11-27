@@ -6,6 +6,9 @@ import org.bukkit.event.player.PlayerEvent;
 import org.jetbrains.annotations.NotNull;
 import xyz.nifeather.morph.misc.DisguiseState;
 
+/**
+ * Called when a player switches their current disguise (Use {@code /morph} command again while disguising)
+ */
 public class PlayerSwitchMorphEvent extends PlayerEvent
 {
     private static final HandlerList handlers = new HandlerList();
@@ -18,12 +21,20 @@ public class PlayerSwitchMorphEvent extends PlayerEvent
     }
 
     private final DisguiseState previousState;
+
+    /**
+     * The previous {@link DisguiseState} instance that's <b>currently</b> assigned to this player.
+     */
     public DisguiseState previousState()
     {
         return previousState;
     }
 
     private final DisguiseState nextState;
+
+    /**
+     * The next {@link DisguiseState} instance that will be assigned to this player later.
+     */
     public DisguiseState nextState()
     {
         return nextState;

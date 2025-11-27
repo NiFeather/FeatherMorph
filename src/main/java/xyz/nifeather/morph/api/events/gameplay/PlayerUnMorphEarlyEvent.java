@@ -5,9 +5,15 @@ import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.player.PlayerEvent;
 import org.jetbrains.annotations.NotNull;
+import xyz.nifeather.morph.api.events.AbstractDisguiseSessionRelatedEvent;
 import xyz.nifeather.morph.misc.DisguiseState;
 
-public class PlayerUnMorphEarlyEvent extends PlayerEvent implements Cancellable
+/**
+ * Called when a player tries to undisguise themselves.
+ * <br>
+ * @apiNote <b>This event is not called when a player switches the disguise, for such event, see {@link PlayerSwitchMorphEvent}</b>
+ */
+public class PlayerUnMorphEarlyEvent extends AbstractDisguiseSessionRelatedEvent implements Cancellable
 {
     private static final HandlerList handlers = new HandlerList();
 
@@ -18,7 +24,7 @@ public class PlayerUnMorphEarlyEvent extends PlayerEvent implements Cancellable
      */
     public PlayerUnMorphEarlyEvent(@NotNull Player who, @NotNull DisguiseState state, boolean isForceUnmorph)
     {
-        super(who);
+        super(who, state);
 
         this.state = state;
         this.isForceUnmorph = isForceUnmorph;
@@ -33,6 +39,10 @@ public class PlayerUnMorphEarlyEvent extends PlayerEvent implements Cancellable
         return state;
     }
 
+    /**
+     * Whether this is a forced operation
+     * @return {@code true} if FeatherMorph will ignore the cancellation state for this event, and continue the undisguise process
+     */
     public boolean isForceUnmorph()
     {
         return isForceUnmorph;

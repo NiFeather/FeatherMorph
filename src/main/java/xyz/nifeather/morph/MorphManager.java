@@ -1352,7 +1352,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         clientHandler.sendCommand(player, new S2CSetAvailableAnimationsCommand(List.of()));
 
         // 调用事件
-        new PlayerUnMorphEvent(player).callEvent();
+        new PlayerUnMorphEvent(player, state).callEvent();
 
         // 向管理员发送map移除指令
         modNetworkingHelper.sendCommandToRevealablePlayers(new S2CRemoveAdminRevealCommand(player.getEntityId()));
