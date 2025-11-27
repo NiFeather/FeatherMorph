@@ -63,8 +63,10 @@ public class DisguiseProperties
         return list;
     }
 
-    private DisguiseProperties()
+    public void loadBuiltin()
     {
+        defaultProperties = new FallbackPropertyCollection();
+
         registerCollection(EntityType.FROG, new FrogPropertyCollection());
         registerCollection(EntityType.CAT, new CatPropertyCollection());
         registerCollection(EntityType.AXOLOTL, new AxolotlPropertyCollection());
@@ -114,9 +116,14 @@ public class DisguiseProperties
         registerCollection(EntityType.COPPER_GOLEM, new CopperGolemPropertyCollection());
     }
 
-    public Map<EntityType, PropertyCollection<?>> getAll()
+    public Map<EntityType, PropertyCollection<?>> getAllCollections()
     {
         return new Object2ObjectOpenHashMap<>(handlerMap);
+    }
+
+    public List<SingleProperty<?>> getAllProperties()
+    {
+        return this.idPropertyMap.values().stream().toList();
     }
 
     public void registerCollection(EntityType type, PropertyCollection<?> properties)
@@ -128,7 +135,7 @@ public class DisguiseProperties
         properties.getRegisteredProperties().values().forEach(this::register);
     }
 
-    private static final PropertyCollection<?> defaultProperties = new FallbackPropertyCollection();
+    private volatile PropertyCollection<?> defaultProperties;
 
     public <X> X getCollectionOrThrow(Class<X> expectedClass)
     {
@@ -156,6 +163,6 @@ public class DisguiseProperties
     @NotNull
     public PropertyCollection<?> getCollection(EntityType type)
     {
-        return handlerMap.getOrDefault(type, defaultProperties);
+        return handlerMap.getOrDefault(type, Objects.requireNonNull(this.defaultProperties, "Bad implementation! Please report this bug to authors on our GitHub!"));
     }
 }

@@ -279,6 +279,7 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
 
         dependencyManager.cache(instanceService = new MultiInstanceService());
 
+        DisguiseProperties.INSTANCE.loadBuiltin();
         dependencyManager.cache(DisguiseProperties.INSTANCE);
 
         //dependencyManager.cache(new RecipeManager());
