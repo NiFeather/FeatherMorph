@@ -917,31 +917,26 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         // Call the event so that others can manipulate the disguise properties
         var lateSetupEvent = new LateDisguisePropertiesSetupEvent(player, state);
-        lateSetupEvent.callEvent();
+        if (!lateSetupEvent.callEvent())
+        {
+            var failingException = lateSetupEvent.exception();
+            switch (failingException)
+            {
+                case null -> throw ExecutionErrorException.forMethod("MorphManager#buildDisguise")
+                        .withMessage("LateDisguisePropertiesSetupEvent cancelled by a plugin, but we didn't got any exceptions!")
+                        .withLocalizableMessage(ExceptionStrings.unknownError())
+                        .create();
 
-        var failingException = lateSetupEvent.exception();
-        if (failingException instanceof ParseErrorException pee)
-        {
-            throw pee;
-        }
-        else if (failingException instanceof PropertyValidationException pve)
-        {
-            throw pve;
-        }
-        else if (failingException != null)
-        {
-            throw ExecutionErrorException.forMethod("MorphManager#buildDisguise")
-                    .withMessage("We have exception reported by other plugins!")
-                    .causedBy(failingException)
-                    .create();
-        }
+                case ParseErrorException pee -> throw pee;
 
-        if (lateSetupEvent.isCancelled())
-        {
-            throw ExecutionErrorException.forMethod("MorphManager#buildDisguise")
-                    .withMessage("LateDisguisePropertiesSetupEvent cancelled by a plugin, but we didn't got any exceptions!")
-                    .withLocalizableMessage(ExceptionStrings.unknownError())
-                    .create();
+                case PropertyValidationException pve -> throw pve;
+
+                default -> throw ExecutionErrorException.forMethod("MorphManager#buildDisguise")
+                        .withMessage("We have exception reported by other plugins!")
+                        .causedBy(failingException)
+                        .create();
+            }
+
         }
 
         provider.finalizeProperties(state);
