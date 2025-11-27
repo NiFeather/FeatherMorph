@@ -3,7 +3,7 @@ package xyz.nifeather.morph.skills.impl;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import org.bukkit.GameMode;
-import org.bukkit.GameRule;
+import org.bukkit.GameRules;
 import org.bukkit.NamespacedKey;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
@@ -61,7 +61,7 @@ public class ExplodeMorphSkill extends DelayedMorphSkill<ExplosionConfiguration>
         var killsSelf = option.killsSelf();
 
         if (!player.getWorld().createExplosion(player, strength, setsFire,
-                Boolean.TRUE.equals(player.getWorld().getGameRuleValue(GameRule.MOB_GRIEFING))))
+                Boolean.TRUE.equals(player.getWorld().getGameRuleValue(GameRules.MOB_GRIEFING))))
         {
             sendDenyMessageToPlayer(player, SkillStrings.explodeFailString());
 

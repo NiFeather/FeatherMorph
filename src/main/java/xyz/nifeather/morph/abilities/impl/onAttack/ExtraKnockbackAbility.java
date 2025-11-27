@@ -65,7 +65,6 @@ public class ExtraKnockbackAbility extends OnAttackAbility<ExtraKnockbackOption>
         nmsDamaged.setPos(nmsDamaged.position().add(0, 0.01D, 0));
         nmsDamaged.setOnGround(false);
         nmsDamaged.setDeltaMovement(movement);
-        nmsDamaged.hasImpulse = true;
     }
 
     private static final ExtraKnockbackOption defaultOption = ExtraKnockbackOption.from(0, 0.4D, 0);
