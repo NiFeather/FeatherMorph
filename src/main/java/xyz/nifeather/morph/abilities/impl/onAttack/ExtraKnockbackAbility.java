@@ -1,10 +1,10 @@
 package xyz.nifeather.morph.abilities.impl.onAttack;
 
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.ai.attributes.Attributes;
 import org.bukkit.NamespacedKey;
-import org.bukkit.craftbukkit.entity.CraftEntity;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.Player;
+import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xyz.nifeather.morph.MorphManager;
@@ -12,6 +12,8 @@ import xyz.nifeather.morph.abilities.ISkillAbilityOptionHandler;
 import xyz.nifeather.morph.abilities.impl.OnAttackAbility;
 import xyz.nifeather.morph.abilities.options.ExtraKnockbackOption;
 import xyz.nifeather.morph.api.morphs.abilities.AbilityNames;
+
+import java.util.Optional;
 
 public class ExtraKnockbackAbility extends OnAttackAbility<ExtraKnockbackOption>
 {
@@ -38,8 +40,6 @@ public class ExtraKnockbackAbility extends OnAttackAbility<ExtraKnockbackOption>
     @Override
     protected void onAttack(org.bukkit.entity.LivingEntity damaged, Player player)
     {
-        var nmsDamaged = ((CraftEntity)damaged).getHandle();
-
         var state = manager.getDisguiseStateFor(player);
 
         assert state != null;
@@ -48,24 +48,21 @@ public class ExtraKnockbackAbility extends OnAttackAbility<ExtraKnockbackOption>
         if (option == null) option = defaultOption;
 
         //var yDelta = 0.745584025D;
-        var yDelta = option.yMotion;
-        var baseYDelta = 0.345584025D;
 
-        if (nmsDamaged instanceof LivingEntity livingEntity)
-        {
-            var knockbackResistance = livingEntity.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE);
-            yDelta *= Math.max(0D, 1D - knockbackResistance);
-            baseYDelta *= Math.max(0D, 1D - knockbackResistance);
-        }
+        double knockbackResistance = Optional.ofNullable(damaged.getAttribute(Attribute.KNOCKBACK_RESISTANCE))
+                .map(AttributeInstance::getValue)
+                .orElse(0d);
 
-        yDelta = baseYDelta + yDelta;
+        double knockMultiplier = Math.max(0, 1d - knockbackResistance);
+
+        var yDelta = option.yMotion * knockMultiplier;
+        var xDelta = option.xMotion * knockMultiplier;
+        var zDelta = option.zMotion * knockMultiplier;
 
         //workaround: 需要让实体离地再设置Motion，否则不会起效
-        var movement = nmsDamaged.getDeltaMovement().add(option.xMotion, yDelta, option.zMotion);
-        nmsDamaged.setPos(nmsDamaged.position().add(0, 0.01D, 0));
-        nmsDamaged.setOnGround(false);
-        nmsDamaged.setDeltaMovement(movement);
-        nmsDamaged.hasImpulse = true;
+        var movement = damaged.getVelocity().clone().add(new Vector(xDelta, yDelta, zDelta));
+        damaged.teleportAsync(damaged.getLocation().clone().add(0, 0.01d, 0))
+                .thenRun(() -> damaged.setVelocity(movement));
     }
 
     private static final ExtraKnockbackOption defaultOption = ExtraKnockbackOption.from(0, 0.4D, 0);
