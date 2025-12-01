@@ -10,6 +10,7 @@ import xyz.nifeather.morph.misc.DisguiseMeta;
 import xyz.nifeather.morph.storage.playerdata.PlayerMeta;
 
 import java.util.List;
+import java.util.UUID;
 
 public class VoidDataHolder implements IManagePlayerData
 {
@@ -58,7 +59,12 @@ public class VoidDataHolder implements IManagePlayerData
     @Override
     public void shouldLoadAllData(boolean shouldLoadAllData)
     {
+    }
 
+    @Override
+    public List<PlayerMeta> getRange(List<UUID> list)
+    {
+        return List.of();
     }
 
     @Override

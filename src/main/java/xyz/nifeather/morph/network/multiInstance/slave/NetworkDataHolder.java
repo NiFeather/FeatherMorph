@@ -1,5 +1,8 @@
 package xyz.nifeather.morph.network.multiInstance.slave;
 
+import com.google.common.collect.ImmutableList;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -107,7 +110,12 @@ public class NetworkDataHolder extends MorphPluginObject implements IManagePlaye
         logger.info("[Slave@NetworkData] Dropping cached network player meta...");
 
         dropAll();
-        bindingSlave.requestDataSync();
+
+        var players = ImmutableList.copyOf(Bukkit.getOnlinePlayers())
+                        .stream().map(Player::getUniqueId)
+                        .toList();
+
+        bindingSlave.requestData(players);
 
         return true;
     }
@@ -126,6 +134,20 @@ public class NetworkDataHolder extends MorphPluginObject implements IManagePlaye
     @Override
     public void shouldLoadAllData(boolean shouldLoadAllData)
     {
+    }
+
+    @Override
+    public List<PlayerMeta> getRange(List<UUID> list)
+    {
+        List<PlayerMeta> metaList = new ObjectArrayList<>();
+
+        list.forEach(uuid ->
+        {
+            var existing = localMetaMap.getOrDefault(uuid, null);
+            if (existing != null) metaList.add(existing);
+        });
+
+        return metaList;
     }
 
     @Override

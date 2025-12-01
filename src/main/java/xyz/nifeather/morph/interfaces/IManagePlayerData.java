@@ -2,12 +2,14 @@ package xyz.nifeather.morph.interfaces;
 
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.misc.DisguiseMeta;
 import xyz.nifeather.morph.storage.playerdata.PlayerMeta;
 
 import java.util.List;
+import java.util.UUID;
 
 public interface IManagePlayerData
 {
@@ -66,4 +68,7 @@ public interface IManagePlayerData
      * @return All available PlayerMeta for this manager
      */
     List<PlayerMeta> listAll();
+
+    @ApiStatus.Internal
+    List<PlayerMeta> getRange(List<UUID> list);
 }

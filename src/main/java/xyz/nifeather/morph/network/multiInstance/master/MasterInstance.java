@@ -188,7 +188,7 @@ public class MasterInstance extends MorphPluginObject implements IInstanceServic
 
     private final CommandRegistriesCopy registries = new CommandRegistriesCopy();
 
-    private final ProtocolLevel level = ProtocolLevel.V3;
+    private final ProtocolLevel level = ProtocolLevel.V4;
 
     private final Map<WebSocket, ProtocolState> allowedSockets = new Object2ObjectArrayMap<>();
 
@@ -295,7 +295,15 @@ public class MasterInstance extends MorphPluginObject implements IInstanceServic
 
         var cmd = new MIS2CSyncMetaCommand();
 
-        var disguises = morphManager.listAllPlayerMeta();
+        var requestedUUIDs = command.requestedUUIDs;
+
+        if (FeatherMorphMain.getInstance().debugOutputEnabled())
+            logger.info("Client requesting %s UUIDs".formatted(requestedUUIDs.size()));
+
+        if (requestedUUIDs.isEmpty()) return;
+
+        var disguises = morphManager.getRange(requestedUUIDs);
+
         for (var meta : disguises)
             cmd.appendMeta(new SocketPlayerMeta(Operation.ADD_IF_ABSENT, meta.getUnlockedDisguiseIdentifiers(), meta.uniqueId));
 

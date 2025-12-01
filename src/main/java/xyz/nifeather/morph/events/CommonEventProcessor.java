@@ -3,6 +3,7 @@ package xyz.nifeather.morph.events;
 import com.destroystokyo.paper.event.entity.EntityAddToWorldEvent;
 import com.destroystokyo.paper.event.player.PlayerClientOptionsChangeEvent;
 import com.destroystokyo.paper.event.player.PlayerPostRespawnEvent;
+import io.papermc.paper.event.connection.configuration.AsyncPlayerConnectionConfigureEvent;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import org.bukkit.Material;
@@ -42,6 +43,7 @@ import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 import xyz.nifeather.morph.network.Constants;
 import xyz.nifeather.morph.network.commands.S2C.S2CSwapCommand;
 import xyz.nifeather.morph.network.commands.S2C.admin.reveal.S2CRemoveAdminRevealCommand;
+import xyz.nifeather.morph.network.multiInstance.MultiInstanceService;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
 import xyz.nifeather.morph.network.server.ServerSetEquipCommand;
 import xyz.nifeather.morph.skills.SkillManager;
@@ -50,6 +52,7 @@ import xyz.nifeather.morph.utilities.EntityTypeUtils;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 
 import static xyz.nifeather.morph.utilities.DisguiseUtils.itemOrAir;
 
@@ -86,6 +89,28 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         config.bind(unMorphOnDeath, ConfigOptions.UNMORPH_ON_DEATH);
 
         this.addSchedule(this::update);
+    }
+
+    @Resolved
+    private MultiInstanceService multiInstanceService;
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void postPlayerConfiguration(AsyncPlayerConnectionConfigureEvent e)
+    {
+        var uuid = e.getConnection().getProfile().getId();
+
+        if (uuid == null)
+        {
+            logger.warn("The server have an incoming player connection, but don't know their UUID! Not pulling disguise data...");
+            return;
+        }
+
+        Optional.ofNullable(multiInstanceService.slaveInstance()).ifPresent(slave ->
+        {
+            slave.requestData(uuid);
+            if (FeatherMorphMain.getInstance().debugOutputEnabled())
+                logger.info("Successfully pulled data for %s".formatted(uuid));
+        });
     }
 
     private void update()
@@ -287,6 +312,9 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
     public void onPlayerJoin(PlayerJoinEvent e)
     {
         var player = e.getPlayer();
+
+        PlayerFutures.complete(player);
+
         var state = morphs.getDisguiseStateFor(player);
 
         var effectivePermissions = new ObjectOpenHashSet<>(player.getEffectivePermissions());
