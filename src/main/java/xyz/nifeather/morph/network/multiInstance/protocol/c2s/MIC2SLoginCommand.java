@@ -2,6 +2,7 @@ package xyz.nifeather.morph.network.multiInstance.protocol.c2s;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.network.multiInstance.protocol.IInstanceClientHandler;
 import xyz.nifeather.morph.network.multiInstance.protocol.ProtocolLevel;
 import xyz.nifeather.morph.network.utils.Asserts;
@@ -35,7 +36,16 @@ public class MIC2SLoginCommand extends MIC2SCommand
         var protoLevel = Asserts.getStringOrThrow(arguments, "protocol");
         var secret = Asserts.getStringOrThrow(arguments, "secret");
 
-        var proto = ProtocolLevel.valueOf(protoLevel.toUpperCase());
+        ProtocolLevel proto = ProtocolLevel.UNKNOWN;
+        try
+        {
+            proto = ProtocolLevel.valueOf(protoLevel.toUpperCase());
+        }
+        catch (Throwable t)
+        {
+            FeatherMorphMain.getInstance().getSLF4JLogger().info("Unable to read protocol level from input %s, please check the relevant server setup!".formatted(protoLevel));
+        }
+
         return new MIC2SLoginCommand(proto, secret);
     }
 
