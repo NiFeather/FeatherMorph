@@ -21,7 +21,7 @@ import xyz.nifeather.morph.api.networking.exceptions.ClientAPIMismatchException;
 import xyz.nifeather.morph.api.networking.exceptions.ClientIntegrationDisabledException;
 import xyz.nifeather.morph.api.networking.exceptions.PlayerRejectedException;
 import xyz.nifeather.morph.api.networking.exceptions.ScheduleReconnectException;
-import xyz.nifeather.morph.config.ConfigOption;
+import xyz.nifeather.morph.config.ConfigOptions;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.interfaces.IManageRequests;
 import xyz.nifeather.morph.messages.strings.EmoteStrings;
@@ -211,17 +211,17 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
         messenger.registerIncomingPluginChannel(plugin, MessageChannel.commandChannelV3, this::handleCommandV3);
         messenger.registerOutgoingPluginChannel(plugin, MessageChannel.commandChannelV3);
 
-        configManager.bind(allowClient, ConfigOption.ALLOW_CLIENT);
-        configManager.bind(forceTargetVersion, ConfigOption.FORCE_TARGET_VERSION);
+        configManager.bind(allowClient, ConfigOptions.ALLOW_CLIENT);
+        configManager.bind(forceTargetVersion, ConfigOptions.FORCE_TARGET_VERSION);
 
-        configManager.bind(logInComingPackets, ConfigOption.LOG_INCOMING_PACKETS);
-        configManager.bind(logOutGoingPackets, ConfigOption.LOG_OUTGOING_PACKETS);
+        configManager.bind(logInComingPackets, ConfigOptions.LOG_INCOMING_PACKETS);
+        configManager.bind(logOutGoingPackets, ConfigOptions.LOG_OUTGOING_PACKETS);
 
-        configManager.bind(modifyBoundingBoxes, ConfigOption.MODIFY_BOUNDING_BOX);
+        configManager.bind(modifyBoundingBoxes, ConfigOptions.MODIFY_BOUNDING_BOX);
 
-        configManager.bind(useClientRenderer, ConfigOption.USE_CLIENT_RENDERER);
+        configManager.bind(useClientRenderer, ConfigOptions.USE_CLIENT_RENDERER);
 
-        configManager.bind(debugOutput, ConfigOption.DEBUG_OUTPUT);
+        configManager.bind(debugOutput, ConfigOptions.DEBUG_OUTPUT);
 
         forceTargetVersion.onValueChanged((o, n) -> scheduleReAuthPlayers());
         modifyBoundingBoxes.onValueChanged((o, n) -> scheduleReAuthPlayers());

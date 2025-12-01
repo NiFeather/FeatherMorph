@@ -33,7 +33,7 @@ import xyz.nifeather.morph.abilities.impl.FlyAbility;
 import xyz.nifeather.morph.api.events.gameplay.MorphTownBooleanFlagChangedEvent;
 import xyz.nifeather.morph.api.events.gameplay.PlayerExecuteSkillEvent;
 import xyz.nifeather.morph.api.events.gameplay.PlayerMorphEvent;
-import xyz.nifeather.morph.config.ConfigOption;
+import xyz.nifeather.morph.config.ConfigOptions;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.strings.MorphStrings;
@@ -61,7 +61,7 @@ public class TownyAdapter extends MorphPluginObject implements Listener
     @Initializer
     private void load(MorphConfigManager configManager)
     {
-        configManager.bind(allowFlyInWilderness, ConfigOption.TOWNY_ALLOW_FLY_IN_WILDERNESS);
+        configManager.bind(allowFlyInWilderness, ConfigOptions.TOWNY_ALLOW_FLY_IN_WILDERNESS);
 
         allowFlyInWilderness.onValueChanged((o, n) ->
         {

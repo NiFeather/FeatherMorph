@@ -19,7 +19,7 @@ import xyz.nifeather.morph.abilities.ISkillAbilityOptionHandler;
 import xyz.nifeather.morph.abilities.MorphAbility;
 import xyz.nifeather.morph.abilities.options.FlyOption;
 import xyz.nifeather.morph.api.morphs.abilities.AbilityNames;
-import xyz.nifeather.morph.config.ConfigOption;
+import xyz.nifeather.morph.config.ConfigOptions;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
@@ -66,20 +66,20 @@ public class FlyAbility extends MorphAbility<FlyOption>
     @Initializer
     private void load(MorphConfigManager configManager)
     {
-        configManager.getBindable(Double.class, ConfigOption.FLYABILITY_EXHAUSTION_BASE).onValueChanged((o, n) ->
+        configManager.getBindable(ConfigOptions.FLYABILITY_EXHAUSTION_BASE).onValueChanged((o, n) ->
         {
-            var scale = ((double)ConfigOption.FLYABILITY_EXHAUSTION_BASE.defaultValue / n);
+            var scale = ((double)ConfigOptions.FLYABILITY_EXHAUSTION_BASE.getDefault() / n);
             this.exhaustionScaled = exhaustionBase * scale;
         }, true);
 
-        configManager.bind(String.class, noFlyWorlds, ConfigOption.NOFLY_WORLDS);
+        configManager.bind(String.class, noFlyWorlds, ConfigOptions.NOFLY_WORLDS);
 
-        configManager.getBindable(Boolean.class, ConfigOption.FLYABILITY_IDLE_CONSUME).onValueChanged((o, n) ->
+        configManager.getBindable(ConfigOptions.FLYABILITY_IDLE_CONSUME).onValueChanged((o, n) ->
                 idleConsumption = n ? 0.1D : 0D, true);
 
-        configManager.bind(allowFlight, ConfigOption.ALLOW_FLIGHT);
-        configManager.bind(String.class, noFlyInLavaWorlds, ConfigOption.FLYABILITY_DISALLOW_FLY_IN_LAVA);
-        configManager.bind(String.class, noFlyInWaterWorlds, ConfigOption.FLYABILITY_DISALLOW_FLY_IN_WATER);
+        configManager.bind(allowFlight, ConfigOptions.ALLOW_FLIGHT);
+        configManager.bind(String.class, noFlyInLavaWorlds, ConfigOptions.FLYABILITY_DISALLOW_FLY_IN_LAVA);
+        configManager.bind(String.class, noFlyInWaterWorlds, ConfigOptions.FLYABILITY_DISALLOW_FLY_IN_WATER);
     }
 
     private final Bindable<Boolean> allowFlight = new Bindable<>(true);

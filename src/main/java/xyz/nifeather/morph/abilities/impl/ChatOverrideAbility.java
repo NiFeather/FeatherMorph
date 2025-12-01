@@ -16,7 +16,7 @@ import xyz.nifeather.morph.abilities.ISkillAbilityOptionHandler;
 import xyz.nifeather.morph.abilities.MorphAbility;
 import xyz.nifeather.morph.abilities.options.ChatOverrideOption;
 import xyz.nifeather.morph.api.morphs.abilities.AbilityNames;
-import xyz.nifeather.morph.config.ConfigOption;
+import xyz.nifeather.morph.config.ConfigOptions;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.misc.MorphChatRenderer;
@@ -41,8 +41,8 @@ public class ChatOverrideAbility extends MorphAbility<ChatOverrideOption>
     @Initializer
     private void load(MorphConfigManager config, MessageStore<?> messageStore)
     {
-        config.bind(allowChatOverride, ConfigOption.ALLOW_CHAT_OVERRIDE);
-        config.bind(useCustomRenderer, ConfigOption.CHAT_OVERRIDE_USE_CUSTOM_RENDERER);
+        config.bind(allowChatOverride, ConfigOptions.ALLOW_CHAT_OVERRIDE);
+        config.bind(useCustomRenderer, ConfigOptions.CHAT_OVERRIDE_USE_CUSTOM_RENDERER);
     }
 
     private final Bindable<Boolean> useCustomRenderer = new Bindable<>(false);

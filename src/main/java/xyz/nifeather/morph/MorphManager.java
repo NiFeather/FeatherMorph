@@ -33,7 +33,7 @@ import xyz.nifeather.morph.backends.DisguiseWrapper;
 import xyz.nifeather.morph.backends.WrapperProperties;
 import xyz.nifeather.morph.backends.client.ModBackend;
 import xyz.nifeather.morph.backends.server.ServerBackend;
-import xyz.nifeather.morph.config.ConfigOption;
+import xyz.nifeather.morph.config.ConfigOptions;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.interfaces.IManagePlayerData;
 import xyz.nifeather.morph.messages.strings.CommandStrings;
@@ -248,13 +248,13 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         logger.info("Default backend: %s".formatted(defaultBackend));
 
-        bannedDisguises = config.getBindableList(String.class, ConfigOption.BANNED_DISGUISES);
-        disabledWorlds = config.getBindableList(String.class, ConfigOption.DISGUISE_DISABLED_WORLDS);
+        bannedDisguises = config.getBindableList(String.class, ConfigOptions.BANNED_DISGUISES);
+        disabledWorlds = config.getBindableList(String.class, ConfigOptions.DISGUISE_DISABLED_WORLDS);
 
-        config.bind(allowHeadMorph, ConfigOption.ALLOW_HEAD_MORPH);
-        config.bind(allowAcquireMorph, ConfigOption.ALLOW_ACQUIRE_MORPHS);
-        config.bind(useClientRenderer, ConfigOption.USE_CLIENT_RENDERER);
-        config.bind(uuidRandomBaseString, ConfigOption.UUID_RANDOM_BASE);
+        config.bind(allowHeadMorph, ConfigOptions.ALLOW_HEAD_MORPH);
+        config.bind(allowAcquireMorph, ConfigOptions.ALLOW_ACQUIRE_MORPHS);
+        config.bind(useClientRenderer, ConfigOptions.USE_CLIENT_RENDERER);
+        config.bind(uuidRandomBaseString, ConfigOptions.UUID_RANDOM_BASE);
 
         registerProviders(ObjectList.of(
                 new VanillaDisguiseProvider(),
@@ -951,7 +951,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         {
             var disguiseID = parameters.targetDisguiseIdentifier();
             var playerDisplay = provider.getDisplayName(disguiseID, MessageUtils.getLocale(player));
-            var serverDisplay = provider.getDisplayName(disguiseID, config.get(String.class, ConfigOption.LANGUAGE_CODE));
+            var serverDisplay = provider.getDisplayName(disguiseID, config.get(ConfigOptions.LANGUAGE_CODE));
 
             state.setPlayerDisplay(playerDisplay);
             state.setServerDisplay(serverDisplay);

@@ -17,7 +17,7 @@ import xyz.nifeather.morph.abilities.AbilityManager;
 import xyz.nifeather.morph.api.FeatherMorphAPI;
 import xyz.nifeather.morph.api.networking.exceptions.PluginDisabledException;
 import xyz.nifeather.morph.commands.MorphCommandManager;
-import xyz.nifeather.morph.config.ConfigOption;
+import xyz.nifeather.morph.config.ConfigOptions;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.events.*;
 import xyz.nifeather.morph.messages.TranslateManager;
@@ -266,7 +266,7 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
         dependencyManager.cacheAs(MorphConfigManager.class, config = new MorphConfigManager(this));
         dependencyManager.cache(playerTracker);
 
-        config.bind(debugOutput, ConfigOption.DEBUG_OUTPUT);
+        config.bind(debugOutput, ConfigOptions.DEBUG_OUTPUT);
 
         dependencyManager.cache(cmdHelper = new MorphCommandManager());
 

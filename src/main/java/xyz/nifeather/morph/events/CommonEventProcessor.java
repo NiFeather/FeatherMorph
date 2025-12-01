@@ -27,7 +27,7 @@ import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.RevealingHandler;
 import xyz.nifeather.morph.api.events.gameplay.PlayerJoinedWithDisguiseEvent;
 import xyz.nifeather.morph.api.networking.exceptions.PlayerDisconnectedException;
-import xyz.nifeather.morph.config.ConfigOption;
+import xyz.nifeather.morph.config.ConfigOptions;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.strings.MorphStrings;
@@ -70,7 +70,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
     @Resolved(shouldSolveImmediately = true)
     private RevealingHandler revealingHandler;
 
-    private Bindable<Boolean> unMorphOnDeath;
+    private final Bindable<Boolean> unMorphOnDeath = new Bindable<>(true);
 
     private final Bindable<Boolean> doRevealing = new Bindable<>(true);
 
@@ -79,12 +79,12 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
     @Initializer
     private void load()
     {
-        config.bind(cooldownOnDamage, ConfigOption.SKILL_COOLDOWN_ON_DAMAGE);
-        config.bind(bruteIgnoreDisguises, ConfigOption.PIGLIN_BRUTE_IGNORE_DISGUISES);
-        config.bind(doRevealing, ConfigOption.REVEALING);
-        config.bind(allowAcquireMorphs, ConfigOption.ALLOW_ACQUIRE_MORPHS);
+        config.bind(cooldownOnDamage, ConfigOptions.SKILL_COOLDOWN_ON_DAMAGE);
+        config.bind(bruteIgnoreDisguises, ConfigOptions.PIGLIN_BRUTE_IGNORE_DISGUISES);
+        config.bind(doRevealing, ConfigOptions.REVEALING);
+        config.bind(allowAcquireMorphs, ConfigOptions.ALLOW_ACQUIRE_MORPHS);
+        config.bind(unMorphOnDeath, ConfigOptions.UNMORPH_ON_DEATH);
 
-        unMorphOnDeath = config.getBindable(Boolean.class, ConfigOption.UNMORPH_ON_DEATH);
         this.addSchedule(this::update);
     }
 

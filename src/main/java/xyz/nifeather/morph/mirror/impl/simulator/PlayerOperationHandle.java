@@ -31,7 +31,7 @@ import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
 import xyz.nifeather.morph.MorphPluginObject;
-import xyz.nifeather.morph.config.ConfigOption;
+import xyz.nifeather.morph.config.ConfigOptions;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.mirror.IOperationHandle;
 import xyz.nifeather.morph.mirror.SimulateResult;
@@ -55,7 +55,7 @@ public class PlayerOperationHandle extends MorphPluginObject implements IOperati
     {
         this.addSchedule(this::update);
 
-        config.bind(destroyTimeout, ConfigOption.MIRROR_DESTROY_TIMEOUT);
+        config.bind(destroyTimeout, ConfigOptions.MIRROR_DESTROY_TIMEOUT);
     }
 
     private final Bindable<Integer> destroyTimeout = new Bindable<>(40);

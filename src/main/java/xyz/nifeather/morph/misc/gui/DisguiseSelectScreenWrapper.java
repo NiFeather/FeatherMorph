@@ -12,7 +12,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xyz.nifeather.morph.MorphManager;
-import xyz.nifeather.morph.config.ConfigOption;
+import xyz.nifeather.morph.config.ConfigOptions;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.messages.strings.GuiStrings;
 import xyz.nifeather.morph.messages.strings.MorphStrings;
@@ -50,7 +50,7 @@ public class DisguiseSelectScreenWrapper extends ScreenWrapper
         this.playOpenSound = playOpenSound;
 
         this.template.clear();
-        this.template.addAll(config.getBindableList(String.class, ConfigOption.GUI_PATTERN));
+        this.template.addAll(config.getBindableList(String.class, ConfigOptions.GUI_PATTERN));
 
         this.guiInstance = this.preparePage();
         initElements(this.guiInstance);

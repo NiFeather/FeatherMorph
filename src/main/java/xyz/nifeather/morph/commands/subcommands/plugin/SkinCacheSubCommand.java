@@ -23,7 +23,7 @@ import xiamomc.pluginbase.Messages.FormattableMessage;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.commands.brigadier.IConvertibleBrigadier;
-import xyz.nifeather.morph.config.ConfigOption;
+import xyz.nifeather.morph.config.ConfigOptions;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.messages.strings.CommandStrings;
 import xyz.nifeather.morph.messages.MessageUtils;
@@ -474,6 +474,6 @@ public class SkinCacheSubCommand extends MorphPluginObject implements IConvertib
     @Initializer
     private void load(MorphConfigManager config)
     {
-        config.bind(debug, ConfigOption.DEBUG_OUTPUT);
+        config.bind(debug, ConfigOptions.DEBUG_OUTPUT);
     }
 }

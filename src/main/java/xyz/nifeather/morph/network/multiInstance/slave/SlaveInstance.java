@@ -13,7 +13,7 @@ import xiamomc.pluginbase.Exceptions.NullDependencyException;
 import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.MorphPluginObject;
-import xyz.nifeather.morph.config.ConfigOption;
+import xyz.nifeather.morph.config.ConfigOptions;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.network.multiInstance.IInstanceService;
 import xyz.nifeather.morph.network.multiInstance.protocol.*;
@@ -96,7 +96,7 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
 
         try
         {
-            var rawAddr = config.getOrDefault(String.class, ConfigOption.MASTER_ADDRESS);
+            var rawAddr = config.getOrDefault(ConfigOptions.MASTER_ADDRESS);
             var uri = URI.create("ws://" + rawAddr);
 
             var client = new InstanceClient(uri, plugin, this);
@@ -127,7 +127,7 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
     {
         logSlaveInfo("Preparing multi-instance client...");
 
-        config.bind(secret, ConfigOption.MASTER_SECRET);
+        config.bind(secret, ConfigOptions.MASTER_SECRET);
 
         registries.registerS2C("deny", MIS2CDisconnectCommand::fromArguments)
                 .registerS2C("dmeta", MIS2CUpdateMetaCommand::fromArguments)

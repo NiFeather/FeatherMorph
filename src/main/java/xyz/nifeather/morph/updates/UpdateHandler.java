@@ -14,7 +14,7 @@ import xiamomc.pluginbase.Bindables.Bindable;
 import xiamomc.pluginbase.Messages.FormattableMessage;
 import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.MorphPluginObject;
-import xyz.nifeather.morph.config.ConfigOption;
+import xyz.nifeather.morph.config.ConfigOptions;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.strings.UpdateStrings;
@@ -43,7 +43,7 @@ public class UpdateHandler extends MorphPluginObject
     @Initializer
     private void load(MorphConfigManager config)
     {
-        config.bind(checkUpdate, ConfigOption.CHECK_UPDATE);
+        config.bind(checkUpdate, ConfigOptions.CHECK_UPDATE);
 
         this.update();
     }

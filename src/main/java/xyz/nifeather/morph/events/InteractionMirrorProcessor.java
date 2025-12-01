@@ -16,7 +16,7 @@ import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.api.events.gameplay.PlayerJoinedWithDisguiseEvent;
 import xyz.nifeather.morph.api.events.gameplay.PlayerMorphEvent;
 import xyz.nifeather.morph.api.events.gameplay.PlayerUnMorphEvent;
-import xyz.nifeather.morph.config.ConfigOption;
+import xyz.nifeather.morph.config.ConfigOptions;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.mirror.ExecutorHub;
 import xyz.nifeather.morph.misc.DisguiseState;
@@ -39,16 +39,16 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
     @Initializer
     private void load(MorphConfigManager config)
     {
-        config.bind(allowSimulation, ConfigOption.MIRROR_BEHAVIOR_DO_SIMULATION);
-        config.bind(allowSneak, ConfigOption.MIRROR_BEHAVIOR_SNEAK);
-        config.bind(allowSwap, ConfigOption.MIRROR_BEHAVIOR_SWAP_HAND);
-        config.bind(allowDrop, ConfigOption.MIRROR_BEHAVIOR_DROP);
-        config.bind(allowHotBar, ConfigOption.MIRROR_BEHAVIOR_HOTBAR);
-        //config.bind(ignoreDisguised, ConfigOption.MIRROR_IGNORE_DISGUISED);
+        config.bind(allowSimulation, ConfigOptions.MIRROR_BEHAVIOR_DO_SIMULATION);
+        config.bind(allowSneak, ConfigOptions.MIRROR_BEHAVIOR_SNEAK);
+        config.bind(allowSwap, ConfigOptions.MIRROR_BEHAVIOR_SWAP_HAND);
+        config.bind(allowDrop, ConfigOptions.MIRROR_BEHAVIOR_DROP);
+        config.bind(allowHotBar, ConfigOptions.MIRROR_BEHAVIOR_HOTBAR);
+        //config.bind(ignoreDisguised, ConfigOptions.MIRROR_IGNORE_DISGUISED);
 
-        config.bind(selectionMode, ConfigOption.MIRROR_SELECTION_MODE);
+        config.bind(selectionMode, ConfigOptions.MIRROR_SELECTION_MODE);
 
-        config.bind(debugOutput, ConfigOption.DEBUG_OUTPUT);
+        config.bind(debugOutput, ConfigOptions.DEBUG_OUTPUT);
     }
 
     @Resolved(shouldSolveImmediately = true)

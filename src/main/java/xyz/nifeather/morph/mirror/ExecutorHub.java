@@ -10,7 +10,7 @@ import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Bindables.Bindable;
 import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.MorphPluginObject;
-import xyz.nifeather.morph.config.ConfigOption;
+import xyz.nifeather.morph.config.ConfigOptions;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.events.InteractionMirrorProcessor;
 import xyz.nifeather.morph.mirror.impl.executors.ByNameExecutor;
@@ -56,9 +56,9 @@ public class ExecutorHub extends MorphPluginObject
     {
         this.addSchedule(this::update);
 
-        config.bind(logOperations, ConfigOption.MIRROR_LOG_OPERATION);
-        config.bind(cleanUpDate, ConfigOption.MIRROR_LOG_CLEANUP_DATE);
-        config.bind(controlRange, ConfigOption.MIRROR_CONTROL_DISTANCE);
+        config.bind(logOperations, ConfigOptions.MIRROR_LOG_OPERATION);
+        config.bind(cleanUpDate, ConfigOptions.MIRROR_LOG_CLEANUP_DATE);
+        config.bind(controlRange, ConfigOptions.MIRROR_CONTROL_DISTANCE);
 
         initOperationHandleMap();
     }

@@ -151,10 +151,11 @@ dependencies {
     implementation("com.github.NiFeather:feathermorph-command-compat-layer:$compatLayerVersion")
 
     implementation("com.github.NiFeather:feathermorph-protocols:${protocolVersion}")
-    implementation("com.github.XiaMoZhiShi:PluginBase:${project.property("pluginbase_version")}")
-    {
-        exclude("com.google.code.gson", "gson")
-    }
+
+    //implementation("com.github.XiaMoZhiShi:PluginBase:${project.property("pluginbase_version")}")
+    //{
+    //    exclude("com.google.code.gson", "gson")
+    //}
 }
 
 group = "xyz.nifeather.morph"
