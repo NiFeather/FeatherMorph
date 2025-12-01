@@ -264,6 +264,8 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
         dependencyManager.cacheAs(IManageRequests.class, new RequestManager());
         dependencyManager.cacheAs(Scoreboard.class, Bukkit.getScoreboardManager().getMainScoreboard());
         dependencyManager.cacheAs(MorphConfigManager.class, config = new MorphConfigManager(this));
+        config.reload();
+
         dependencyManager.cache(playerTracker);
 
         config.bind(debugOutput, ConfigOptions.DEBUG_OUTPUT);
