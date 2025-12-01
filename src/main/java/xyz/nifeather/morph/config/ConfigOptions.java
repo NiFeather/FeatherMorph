@@ -46,6 +46,7 @@ public class ConfigOptions
     public static final ConfigOption<Boolean> ENABLE_SENTRY_LOGGER = ConfigOption.builder(Boolean.class)
             .node(ConfigNode.create().append("enable_sentry"))
             .defaultValue(false)
+            .excludeFromInit(true)
             .build();
 
     @Deprecated(forRemoval = true)
@@ -278,7 +279,7 @@ public class ConfigOptions
 
     public static final ConfigOption<String> UUID_RANDOM_BASE = ConfigOption.builder(String.class)
             .node(ConfigNode.create().append("uuid_random_base"))
-            .defaultValue(RandomStringUtils.secure().randomAlphabetic(8))
+            .defaultValue(RandomStringUtils.secure().nextAlphabetic(8))
             .build();
 
     public static final ConfigOption<Boolean> ENABLE_MULTIINSTANCE = ConfigOption.builder(Boolean.class)
@@ -298,7 +299,7 @@ public class ConfigOptions
 
     public static final ConfigOption<String> MASTER_SECRET = ConfigOption.builder(String.class)
             .node(multiInstanceNode().append("secret"))
-            .defaultValue(RandomStringUtils.randomAlphabetic(12))
+            .defaultValue(RandomStringUtils.secureStrong().nextAlphabetic(12))
             .build();
 
     public static final ConfigOption<Boolean> DO_CHECK_ABILITY_PERMISSIONS = ConfigOption.builder(Boolean.class)
