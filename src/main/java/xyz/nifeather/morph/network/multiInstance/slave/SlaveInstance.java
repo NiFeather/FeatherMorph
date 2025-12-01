@@ -1,12 +1,16 @@
 package xyz.nifeather.morph.network.multiInstance.slave;
 
+import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import it.unimi.dsi.fastutil.objects.ObjectLists;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Entity;
 import org.java_websocket.framing.CloseFrame;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Unmodifiable;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
 import xiamomc.pluginbase.Exceptions.NullDependencyException;
@@ -25,8 +29,11 @@ import xyz.nifeather.morph.network.server.MorphClientHandler;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 public class SlaveInstance extends MorphPluginObject implements IInstanceService, IMasterHandler
@@ -143,6 +150,8 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
             morphManager.setDataStore(new VoidDataHolder());
         else
             logSlaveWarn("Can't setup client, this instance will stay offline from the instance network!");
+
+        requestBatchLoop();
     }
 
     private final Bindable<String> secret = new Bindable<>(null);
@@ -186,17 +195,57 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
     @Nullable
     private volatile CompletableFuture<SlaveInstance> dataSyncFuture;
 
-    public CompletableFuture<SlaveInstance> requestDataSync()
+    //region Batch Requests
+
+    private final List<UUID> uuidsToRequest = ObjectLists.synchronize(new ObjectArrayList<>());
+
+    private synchronized void requestBatchLoop()
     {
-        if (dataSyncFuture != null)
-            return dataSyncFuture;
+        if (!uuidsToRequest.isEmpty())
+            batchRequests();
+
+        addSchedule(this::requestBatchLoop, 10);
+    }
+
+    private void batchRequests()
+    {
+        var list = ImmutableList.copyOf(uuidsToRequest);
 
         if (FeatherMorphMain.getInstance().debugOutputEnabled())
-            logSlaveInfo("Requesting data sync...");
+            logger.info("Batching %s lookup requests".formatted(list.size()));
 
-        this.sendCommand(new MIC2SRequestSyncCommand());
+        uuidsToRequest.clear();
 
-        return new CompletableFuture<>();
+        this.sendCommand(new MIC2SRequestSyncCommand(list));
+    }
+
+    //endregion Batch Requests
+
+    private final Map<UUID, CompletableFuture<UUID>> syncFutures = new ConcurrentHashMap<>();
+
+    public synchronized CompletableFuture<UUID> requestData(UUID uuid)
+    {
+        var future = getOrCreatePlayerFuture(uuid);
+        requestData(List.of(uuid));
+
+        return future;
+    }
+
+    public CompletableFuture<UUID> getOrCreatePlayerFuture(UUID uuid)
+    {
+        var existing = syncFutures.getOrDefault(uuid, null);
+        if (existing != null) return existing;
+
+        var newInstance = new CompletableFuture<UUID>();
+        syncFutures.put(uuid, newInstance);
+
+        return newInstance;
+    }
+
+    public synchronized void requestData(@Unmodifiable List<UUID> uuid)
+    {
+        uuid.forEach(this::getOrCreatePlayerFuture);
+        this.uuidsToRequest.addAll(uuid);
     }
 
     public boolean isOnline()
@@ -226,9 +275,19 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
 
                 playerMeta.addDisguise(disguiseMeta);
             }
+
+            var future = this.syncFutures.remove(socketMeta.getBindingUuid());
+            if (future != null)
+                future.complete(socketMeta.getBindingUuid());
         }
 
         morphManager.refreshDisguiseUnlockStateToAllPlayers();
+
+        var syncFuture = this.dataSyncFuture;
+        dataSyncFuture = null;
+
+        if (syncFuture != null)
+            syncFuture.complete(this);
     }
 
     @Override
@@ -342,7 +401,7 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
         currentState.set(newState);
     }
 
-    private final ProtocolLevel implementingLevel = ProtocolLevel.V3;
+    private final ProtocolLevel implementingLevel = ProtocolLevel.V4;
 
     @Override
     public void onConnectionOpen()

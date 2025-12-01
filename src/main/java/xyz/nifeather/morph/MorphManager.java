@@ -1713,6 +1713,12 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         return data.listAll();
     }
 
+    @Override
+    public List<PlayerMeta> getRange(List<UUID> list)
+    {
+        return data.getRange(list);
+    }
+
     //endregion Implementation of IManagePlayerData
 
     @ApiStatus.Internal

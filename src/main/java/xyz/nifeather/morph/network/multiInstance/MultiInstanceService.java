@@ -24,7 +24,19 @@ public class MultiInstanceService extends MorphPluginObject
     private MasterInstance masterInstance;
 
     @Nullable
+    public MasterInstance masterInstance()
+    {
+        return masterInstance;
+    }
+
+    @Nullable
     private SlaveInstance slaveInstance;
+
+    @Nullable
+    public SlaveInstance slaveInstance()
+    {
+        return slaveInstance;
+    }
 
     private void checkSanity()
     {
@@ -56,14 +68,9 @@ public class MultiInstanceService extends MorphPluginObject
         slaveInstance = null;
 
         if (isMaster)
-        {
             masterInstance = new MasterInstance();
-            masterInstance.loadInitialDisguises(manager.listAllPlayerMeta());
-        }
         else
-        {
             slaveInstance = new SlaveInstance(true);
-        }
     }
 
     @Resolved
