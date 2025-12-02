@@ -133,8 +133,6 @@ public class NetworkDataHolder extends MorphPluginObject implements IManagePlaye
     @Override
     public boolean reloadConfiguration()
     {
-        logger.info("[Slave@NetworkData] Dropping cached network player meta...");
-
         dropAll();
 
         var players = ImmutableList.copyOf(Bukkit.getOnlinePlayers())
@@ -148,6 +146,8 @@ public class NetworkDataHolder extends MorphPluginObject implements IManagePlaye
 
     public void dropAll()
     {
+        logger.info("[Slave@NetworkData] Dropping cached network player meta...");
+
         this.localMetaMap.clear();
     }
 
