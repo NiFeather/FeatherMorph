@@ -28,10 +28,7 @@ import xyz.nifeather.morph.network.multiInstance.protocol.s2c.*;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
 
 import java.net.URI;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
@@ -256,16 +253,16 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
     @Override
     public void onSyncMeta(MIS2CSyncMetaCommand command)
     {
-        logSlaveInfo("Received data sync for %s entries".formatted(command.data().size()));
+        if (FeatherMorphMain.getInstance().debugOutputEnabled())
+            logSlaveInfo("Received data sync for %s entries".formatted(command.data().size()));
 
-        playerDataHolder.dropAll();
         for (SocketPlayerMeta socketMeta : command.data())
         {
             if (!socketMeta.isValid())
                 continue;
 
             var offlinePlayer = Bukkit.getOfflinePlayer(Objects.requireNonNull(socketMeta.getBindingUuid(), "???"));
-            var playerMeta = playerDataHolder.getPlayerMeta(offlinePlayer);
+            var playerMeta = playerDataHolder.getOrCreatePlayerMeta(offlinePlayer);
 
             for (var identifier : socketMeta.getIdentifiers())
             {
