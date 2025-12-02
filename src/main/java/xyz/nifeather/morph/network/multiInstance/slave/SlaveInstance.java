@@ -6,7 +6,6 @@ import com.google.gson.GsonBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectLists;
 import org.bukkit.Bukkit;
-import org.bukkit.entity.Entity;
 import org.java_websocket.framing.CloseFrame;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -276,9 +275,12 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
             var future = this.syncFutures.remove(socketMeta.getBindingUuid());
             if (future != null)
                 future.complete(socketMeta.getBindingUuid());
-        }
 
-        morphManager.refreshDisguiseUnlockStateToAllPlayers();
+            var player = offlinePlayer.getPlayer();
+
+            if (player != null)
+                clientHandler.refreshPlayerClientMorphs(playerMeta.getUnlockedDisguiseIdentifiers(), player);
+        }
 
         var syncFuture = this.dataSyncFuture;
         dataSyncFuture = null;
@@ -303,10 +305,10 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
             return;
         }
 
-        this.onReceivePlayerMeta(socketMeta);
+        this.onReceivePlayerMetaUpdate(socketMeta);
     }
 
-    private void onReceivePlayerMeta(SocketPlayerMeta socketMeta)
+    private void onReceivePlayerMetaUpdate(SocketPlayerMeta socketMeta)
     {
         var operation = socketMeta.getOperation();
 
