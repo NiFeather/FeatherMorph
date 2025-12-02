@@ -55,6 +55,12 @@ public abstract class MorphBasicAvoidPlayerGoal<M extends Mob> extends Goal
         entityToAvoid = findEntityToAvoid();
         if (entityToAvoid == null) return false;
 
+        var mobLocation = mob.getLocation();
+        var avoidingLocation = entityToAvoid.getLocation();
+
+        if (!mobLocation.getWorld().equals(avoidingLocation.getWorld()))
+            return false;
+
         this.path = findEscapePath();
         return path != null;
     }
@@ -158,8 +164,14 @@ public abstract class MorphBasicAvoidPlayerGoal<M extends Mob> extends Goal
         // so let's not check for entities that's not on the same thread.
         if (entityToAvoid == null || path == null || !FoliaThreadUtils.isTickThreadFor(entityToAvoid)) return;
 
+        var mobLocation = mob.getLocation();
+        var avoidingLocation = entityToAvoid.getLocation();
+
+        if (!mobLocation.getWorld().equals(avoidingLocation.getWorld()))
+            return;
+
         var pathfinder = mob.getPathfinder();
-        if (mob.getLocation().distance(entityToAvoid.getLocation()) < 49)
+        if (mobLocation.distance(avoidingLocation) < 49)
             pathfinder.moveTo(path, sprintSpeed);
         else
             pathfinder.moveTo(path, walkSpeed);
