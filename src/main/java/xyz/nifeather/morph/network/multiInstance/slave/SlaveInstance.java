@@ -205,6 +205,9 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
 
     private void batchRequests()
     {
+        if (client == null)
+            return;
+
         var list = ImmutableList.copyOf(uuidsToRequest);
 
         if (FeatherMorphMain.getInstance().debugOutputEnabled())
