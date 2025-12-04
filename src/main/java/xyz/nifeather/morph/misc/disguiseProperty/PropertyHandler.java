@@ -6,9 +6,12 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.FeatherMorphMain;
+import xyz.nifeather.morph.messages.strings.ExceptionStrings;
+import xyz.nifeather.morph.misc.ExecutionErrorException;
 import xyz.nifeather.morph.misc.ISupportDiffs;
 import xyz.nifeather.morph.misc.actions.BiConsumerActions;
 import xyz.nifeather.morph.misc.disguiseProperty.values.PropertyCollection;
+import xyz.nifeather.morph.utilities.ExceptionUtils;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -26,6 +29,7 @@ public class PropertyHandler
     }
 
     public Map<String, String> toNetworkProperties()
+            throws ParseErrorException, ExecutionErrorException
     {
         Map<String, String> map = new ConcurrentHashMap<>();
 
@@ -43,11 +47,17 @@ public class PropertyHandler
 
                 map.put(property.id(), property.forValue(value));
             }
-
         }
         catch (ParseErrorException e)
         {
-            FeatherMorphMain.getInstance().getSLF4JLogger().error("Failed writing full network map, some properties may not be synced!", e);
+            throw e;
+        }
+        catch (Throwable t)
+        {
+            throw ExecutionErrorException.forMethod("PropertyHandler#toNetworkProperties")
+                    .withMessage("Unhandled exception.")
+                    .causedBy(t)
+                    .create();
         }
 
         return map;

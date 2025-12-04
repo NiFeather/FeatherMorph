@@ -64,6 +64,7 @@ import xyz.nifeather.morph.storage.offlinestore.OfflineStateStore;
 import xyz.nifeather.morph.storage.playerdata.PlayerDataStoreNew;
 import xyz.nifeather.morph.storage.playerdata.PlayerMeta;
 import xyz.nifeather.morph.utilities.DisguiseUtils;
+import xyz.nifeather.morph.utilities.ExceptionUtils;
 import xyz.nifeather.morph.utilities.NbtUtils;
 import xyz.nifeather.morph.utilities.PermissionUtils;
 
@@ -625,54 +626,28 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
             return true;
         }
-        catch (ParseErrorException e)
-        {
-            if (FeatherMorphMain.getInstance().debugOutputEnabled())
-                logger.warn("Unable to disguise player because a ParseErrorException has occurred", e);
-
-            var message = e.localizableMessage().orElseGet(() -> new FormattableMessage(plugin, e.getMessage()));
-
-            var msg = MorphStrings.errorWhileDisguisingUserFault()
-                    .resolve("error", message)
-                    .resolve("what", e.propertyName);
-
-            MessageUtils.send(source, msg, c -> c.hoverEvent(HoverEvent.showText(Component.text(e.underlyingMessage()))));
-
-            return false;
-        }
-        catch (PropertyValidationException e)
-        {
-            if (FeatherMorphMain.getInstance().debugOutputEnabled())
-                logger.error("Failed to disguise player because a PropertyValidationException has occurred", e);
-
-            var message = e.localizableMessage().orElseGet(() -> new FormattableMessage(plugin, e.getMessage()));
-
-            var msg = MorphStrings.errorWhileDisguisingWithError()
-                    .resolve("error", message);
-
-            MessageUtils.send(source, msg, c -> c.hoverEvent(HoverEvent.showText(Component.text(e.underlyingMessage()))));
-
-            return false;
-        }
-        catch (ExecutionErrorException e)
-        {
-            logger.error("Failed to disguise player because an ExecutionErrorException has occurred", e);
-
-            var message = e.localizableMessage().orElseGet(() -> new FormattableMessage(plugin, e.getMessage()));
-
-            var msg = MorphStrings.errorWhileDisguisingWithError()
-                    .resolve("error", message);
-
-            MessageUtils.send(source, msg, c -> c.hoverEvent(HoverEvent.showText(Component.text(e.underlyingMessage()))));
-
-            return false;
-        }
         catch (Exception e)
         {
-            logger.error("Unable to disguise player", e);
-            MessageUtils.send(source, MorphStrings.errorWhileDisguisingWithError().resolve("error", e.getMessage()));
+            if (FeatherMorphMain.getInstance().debugOutputEnabled())
+                logger.warn("Unable to disguise player because a(n) %s has occurred".formatted(e.getClass().getSimpleName()), e);
 
-            unMorph(parameters.targetPlayer);
+            if (!(e instanceof IUserFault))
+                logger.error("Unable to disguise player", e);
+
+            FormattableMessage message = switch (e)
+            {
+                case PropertyValidationException propertyValidationException ->
+                    MorphStrings.errorValidatingProperty().resolve("what", propertyValidationException.propertyName);
+
+                case ParseErrorException parseErrorException ->
+                    MorphStrings.errorParsingProperty().resolve("what", parseErrorException.propertyName);
+
+                default -> MorphStrings.errorWhileDisguisingWithError();
+            };
+
+            message.resolve("error", ExceptionUtils.getExceptionMessageShort(e));
+
+            MessageUtils.send(source, message, c -> c.hoverEvent(HoverEvent.showText(ExceptionUtils.getExceptionDetail(e))));
 
             return false;
         }
@@ -1034,9 +1009,21 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             // For legacy client compat
             //todo: Remove at 2026, or 1.22 comes out
             if (clientApiVersion < Constants.ApiLevel.NETWORK_DISGUISE_PROPERTIES.protocolVersion)
+            {
                 clientHandler.sendCommand(player, new S2CSetSNbtCommand(newState.getCulledNbtString()));
+            }
             else
-                clientHandler.sendCommand(player, new S2CUpdatePropertiesCommand(newState.disguisePropertyHandler().toNetworkProperties()));
+            {
+                try
+                {
+                    clientHandler.sendCommand(player, new S2CUpdatePropertiesCommand(newState.disguisePropertyHandler().toNetworkProperties()));
+                }
+                catch (ParseErrorException | ExecutionErrorException e)
+                {
+                    newState.handleException(e);
+                    return false;
+                }
+            }
 
             provider.getInitialSyncCommands(newState).forEach(s -> clientHandler.sendCommand(player, s));
 
@@ -1197,9 +1184,21 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         // For legacy client compat
         //todo: Remove at 2026, or 1.22 comes out
         if (playerApiVersion < Constants.ApiLevel.NETWORK_DISGUISE_PROPERTIES.protocolVersion)
+        {
             clientHandler.sendCommand(player, new S2CSetSNbtCommand(state.getCulledNbtString()));
+        }
         else
-            clientHandler.sendCommand(player, new S2CUpdatePropertiesCommand(state.disguisePropertyHandler().toNetworkProperties()));
+        {
+            try
+            {
+                clientHandler.sendCommand(player, new S2CUpdatePropertiesCommand(state.disguisePropertyHandler().toNetworkProperties()));
+            }
+            catch (ParseErrorException | ExecutionErrorException e)
+            {
+                state.handleException(e);
+                return;
+            }
+        }
 
         //刷新主动
         state.applyCooldownToClient();
