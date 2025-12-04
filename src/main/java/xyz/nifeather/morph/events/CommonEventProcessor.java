@@ -387,7 +387,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         if (state == null)
             return;
 
-        state.waypointUpdater().updateRealtimeConnections();
+        state.waypointTransmitter().updateRealtimeConnections();
     }
 
     @EventHandler
