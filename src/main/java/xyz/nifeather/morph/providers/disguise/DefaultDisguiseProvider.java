@@ -184,13 +184,13 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
 
     protected void enableDisguiseWaypoint(DisguiseState state)
     {
-        var disguiseWaypoint = state.waypointUpdater();
+        var disguiseWaypoint = state.waypointTransmitter();
         disguiseWaypoint.enabled(true);
     }
 
     public void disableDisguiseWaypoint(DisguiseState state)
     {
-        var disguiseWaypoint = state.waypointUpdater();
+        var disguiseWaypoint = state.waypointTransmitter();
         disguiseWaypoint.enabled(false);
     }
 

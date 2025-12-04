@@ -28,7 +28,7 @@ import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 import xyz.nifeather.morph.misc.disguiseProperty.values.BaseLivingEntityProperties;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
-import xyz.nifeather.morph.misc.waypoint.DisguiseWaypointUpdater;
+import xyz.nifeather.morph.misc.waypoint.DisguiseWaypointTransmitter;
 import xyz.nifeather.morph.network.PlayerOptions;
 import xyz.nifeather.morph.network.commands.S2C.S2CPlayAnimationCommand;
 import xyz.nifeather.morph.network.commands.S2C.set.S2CSetAnimationDisplayNameCommand;
@@ -71,7 +71,7 @@ public class DisguiseState extends MorphPluginObject
 
         this.soundHandler = new SoundHandler(player);
         this.abilityUpdater = new AbilityUpdater(this);
-        this.disguiseWaypointUpdater = new DisguiseWaypointUpdater(this);
+        this.disguiseWaypointTransmitter = new DisguiseWaypointTransmitter(this);
 
         this.disguiseWrapper = wrapper;
         this.disguiseIdentifier = identifier;
@@ -668,11 +668,11 @@ public class DisguiseState extends MorphPluginObject
 
     //region Waypoint
 
-    private final DisguiseWaypointUpdater disguiseWaypointUpdater;
+    private final DisguiseWaypointTransmitter disguiseWaypointTransmitter;
 
-    public DisguiseWaypointUpdater waypointUpdater()
+    public DisguiseWaypointTransmitter waypointTransmitter()
     {
-        return disguiseWaypointUpdater;
+        return disguiseWaypointTransmitter;
     }
 
     //endregion Waypoint
@@ -805,7 +805,7 @@ public class DisguiseState extends MorphPluginObject
             this.getSoundHandler().update();
 
         this.animationSequence.update();
-        this.disguiseWaypointUpdater.tick();
+        this.disguiseWaypointTransmitter.tick();
         this.skillUpdater.update();
         this.disguiseWrapper.update();
         this.abilityUpdater.update();
@@ -968,7 +968,7 @@ public class DisguiseState extends MorphPluginObject
 
         disposed.set(true);
 
-        this.waypointUpdater().dispose();
+        this.waypointTransmitter().dispose();
         this.disguiseWrapper.dispose();
         this.abilityUpdater.dispose();
         this.propertyHandler.dispose();

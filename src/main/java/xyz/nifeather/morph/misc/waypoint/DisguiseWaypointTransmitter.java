@@ -22,9 +22,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-public class DisguiseWaypointUpdater implements WaypointTransmitter
+public class DisguiseWaypointTransmitter implements WaypointTransmitter
 {
-    public DisguiseWaypointUpdater(DisguiseState state)
+    public DisguiseWaypointTransmitter(DisguiseState state)
     {
         this.bindingState = state;
     }
