@@ -157,6 +157,7 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
     public void onPlayerJoinWithDisguise(DisguiseState state)
     {
         mutePlayerWaypoint(state.getPlayer());
+        enableDisguiseWaypoint(state);
 
         super.onPlayerJoinWithDisguise(state);
     }
@@ -165,6 +166,7 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
     public void onPlayerQuitWithDisguise(DisguiseState state)
     {
         recoverPlayerWaypoint(state.getPlayer());
+        disableDisguiseWaypoint(state);
 
         super.onPlayerQuitWithDisguise(state);
     }
