@@ -188,9 +188,6 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
         client.send(cmd);
     }
 
-    @Nullable
-    private volatile CompletableFuture<SlaveInstance> dataSyncFuture;
-
     //region Batch Requests
 
     private final List<UUID> uuidsToRequest = ObjectLists.synchronize(new ObjectArrayList<>());
@@ -220,7 +217,7 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
 
     //endregion Batch Requests
 
-    private final Map<UUID, CompletableFuture<UUID>> syncFutures = new ConcurrentHashMap<>();
+    private final Map<UUID, CompletableFuture<UUID>> playerSyncFutures = new ConcurrentHashMap<>();
 
     public synchronized CompletableFuture<UUID> requestData(UUID uuid)
     {
@@ -230,13 +227,13 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
         return future;
     }
 
-    public CompletableFuture<UUID> getOrCreatePlayerFuture(UUID uuid)
+    public synchronized CompletableFuture<UUID> getOrCreatePlayerFuture(UUID uuid)
     {
-        var existing = syncFutures.getOrDefault(uuid, null);
+        var existing = playerSyncFutures.getOrDefault(uuid, null);
         if (existing != null) return existing;
 
         var newInstance = new CompletableFuture<UUID>();
-        syncFutures.put(uuid, newInstance);
+        playerSyncFutures.put(uuid, newInstance);
 
         return newInstance;
     }
@@ -275,21 +272,18 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
                 playerMeta.addDisguise(disguiseMeta);
             }
 
-            var future = this.syncFutures.remove(socketMeta.getBindingUuid());
-            if (future != null)
-                future.complete(socketMeta.getBindingUuid());
+            synchronized (this)
+            {
+                var future = this.playerSyncFutures.remove(socketMeta.getBindingUuid());
+                if (future != null)
+                    future.complete(socketMeta.getBindingUuid());
+            }
 
             var player = offlinePlayer.getPlayer();
 
             if (player != null)
                 clientHandler.refreshPlayerClientMorphs(playerMeta.getUnlockedDisguiseIdentifiers(), player);
         }
-
-        var syncFuture = this.dataSyncFuture;
-        dataSyncFuture = null;
-
-        if (syncFuture != null)
-            syncFuture.complete(this);
     }
 
     @Override
