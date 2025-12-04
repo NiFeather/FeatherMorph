@@ -34,6 +34,11 @@ public class PropertyHandler
             for (Map.Entry<SingleProperty<?>, Object> entry : this.propertyMap.entrySet())
             {
                 var property = (SingleProperty<Object>) entry.getKey();
+
+                // Skip properties that's not visible to client
+                if (property.hideFromClient())
+                    continue;
+
                 var value = entry.getValue();
 
                 map.put(property.id(), property.forValue(value));

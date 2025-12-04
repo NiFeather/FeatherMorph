@@ -10,13 +10,14 @@ import java.util.*;
 
 public record SingleProperty<T>(String identifier, T defaultVal, Class<T> type, InputHandle<T> inputHandle,
                                 OutputHandle<T> outputHandle, IPropertyValidator<T> propertyValidator,
-                                List<T> randomValues, List<String> suggestions, boolean hideFromUserInput)
+                                List<T> randomValues, List<String> suggestions,
+                                boolean hideFromUserInput, boolean hideFromClient)
 {
     public SingleProperty(String identifier, T defaultVal, Class<T> type,
                           @NotNull InputHandle<T> inputHandle, @NotNull OutputHandle<T> outputHandle,
                           @NotNull IPropertyValidator<T> propertyValidator,
                           List<T> randomValues, List<String> suggestions,
-                          boolean hideFromUserInput)
+                          boolean hideFromUserInput, boolean hideFromClient)
     {
         this.identifier = identifier;
         this.defaultVal = defaultVal;
@@ -25,6 +26,7 @@ public record SingleProperty<T>(String identifier, T defaultVal, Class<T> type, 
         this.outputHandle = outputHandle;
         this.propertyValidator = propertyValidator;
         this.hideFromUserInput = hideFromUserInput;
+        this.hideFromClient = hideFromClient;
 
         this.randomValues = ImmutableList.copyOf(randomValues);
         this.suggestions = ImmutableList.copyOf(suggestions);
@@ -93,6 +95,7 @@ public record SingleProperty<T>(String identifier, T defaultVal, Class<T> type, 
         private OutputHandle<X> outputHandle = OutputHandles::immediateException;
         private IPropertyValidator<X> validator = PropertyValidations::noOp;
         private boolean hideFromUserInput = false;
+        private boolean hideFromClient = false;
 
         public SinglePropertyBuilder(String identifier, Class<X> type, X defaultVal)
         {
@@ -113,15 +116,36 @@ public record SingleProperty<T>(String identifier, T defaultVal, Class<T> type, 
             return this;
         }
 
+        /**
+         * Sets the validation method for this property.
+         * @see IPropertyValidator
+         */
         public SinglePropertyBuilder<X> withValidator(IPropertyValidator<X> validator)
         {
             this.validator = validator;
             return this;
         }
 
+        /**
+         * Whether this property should not be visible for player input.
+         * @apiNote This flag doesn't prevent this property from being parsed, to achieve that, use {@link InputHandles#immediateException(String, String)} as the input handle
+         */
         public SinglePropertyBuilder<X> hideFromUserInput(boolean hideFromUserInput)
         {
             this.hideFromUserInput = hideFromUserInput;
+            return this;
+        }
+
+        /**
+         * Whether this property should not be visible to clients.
+         * <br>
+         * Properties with this flag would not get synced to clients via plugin message.
+         *
+         * @see PropertyHandler#toNetworkProperties()
+         */
+        public SinglePropertyBuilder<X> hideFromClient(boolean hideFromClient)
+        {
+            this.hideFromClient = hideFromClient;
             return this;
         }
 
@@ -160,7 +184,7 @@ public record SingleProperty<T>(String identifier, T defaultVal, Class<T> type, 
                     inputHandle, outputHandle,
                     validator,
                     randomValues, suggestions,
-                    hideFromUserInput);
+                    hideFromUserInput, hideFromClient);
         }
     }
 }
