@@ -73,6 +73,7 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MorphManager extends MorphPluginObject implements IManagePlayerData
@@ -1674,6 +1675,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         return data.getPlayerMeta(player);
     }
 
+    private volatile int reloadToken = 0;
+
     @Override
     public boolean reload()
     {
@@ -1721,8 +1724,13 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             });
         });
 
+        var currentToken = ThreadLocalRandom.current().nextInt();
+        this.reloadToken = currentToken;
+
         featherMorph().getPlatform().onlinePlayersNative().forEach(p ->
         {
+            if (this.reloadToken != currentToken) return;
+
             this.loadPlayerDataAsync(p.getUniqueId()).thenAccept(meta ->
             {
                 clientHandler.refreshPlayerClientMorphs(meta.getUnlockedDisguiseIdentifiers(), p);
