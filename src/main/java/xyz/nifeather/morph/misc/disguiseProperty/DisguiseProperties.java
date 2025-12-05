@@ -114,6 +114,9 @@ public class DisguiseProperties
 
         registerCollection(EntityType.MANNEQUIN, new MannequinPropertyCollection());
         registerCollection(EntityType.COPPER_GOLEM, new CopperGolemPropertyCollection());
+
+        registerCollection(EntityType.NAUTILUS, new NautilusPropertyCollection());
+        registerCollection(EntityType.ZOMBIE_NAUTILUS, new ZombieNautilusPropertyCollection());
     }
 
     public Map<EntityType, PropertyCollection<?>> getAllCollections()
