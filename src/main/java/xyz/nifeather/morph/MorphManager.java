@@ -1674,11 +1674,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         return data.getPlayerMeta(player);
     }
 
-    public void refreshDisguiseUnlockStateToAllPlayers()
-    {
-        featherMorph().getPlatform().onlinePlayersNative().forEach(p -> clientHandler.refreshPlayerClientMorphs(this.getPlayerMeta(p).getUnlockedDisguiseIdentifiers(), p));
-    }
-
     @Override
     public boolean reloadConfiguration()
     {
@@ -1726,7 +1721,13 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             });
         });
 
-        refreshDisguiseUnlockStateToAllPlayers();
+        featherMorph().getPlatform().onlinePlayersNative().forEach(p ->
+        {
+            this.loadPlayerDataAsync(p.getUniqueId()).thenAccept(meta ->
+            {
+                clientHandler.refreshPlayerClientMorphs(meta.getUnlockedDisguiseIdentifiers(), p);
+            });
+        });
 
         return success;
     }

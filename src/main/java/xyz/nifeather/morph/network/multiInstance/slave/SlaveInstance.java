@@ -278,11 +278,6 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
                 if (future != null)
                     future.complete(socketMeta.getBindingUuid());
             }
-
-            var player = offlinePlayer.getPlayer();
-
-            if (player != null)
-                clientHandler.refreshPlayerClientMorphs(playerMeta.getUnlockedDisguiseIdentifiers(), player);
         }
     }
 

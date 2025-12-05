@@ -306,7 +306,8 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
                         new ForcedDisguiseProcessor(),
                         new PlayerSkinProcessor(),
                         new WorkaroundProcessor(),
-                        entityProcessor = new EntityProcessor()
+                        entityProcessor = new EntityProcessor(),
+                        new PlayerConfigurator()
                 };
 
         //注册EventProcessor

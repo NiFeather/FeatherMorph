@@ -95,31 +95,6 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         this.addSchedule(this::update);
     }
 
-    protected IManagePlayerData playerdata()
-    {
-        return morphs;
-    }
-
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void postPlayerConfiguration(AsyncPlayerConnectionConfigureEvent e)
-    {
-        var uuid = e.getConnection().getProfile().getId();
-
-        if (uuid == null)
-        {
-            logger.warn("The server have an incoming player connection, but don't know their UUID! Not pulling disguise data...");
-            return;
-        }
-
-        try
-        {
-            playerdata().loadPlayerDataAsync(uuid).get(150, TimeUnit.MILLISECONDS);
-        }
-        catch (InterruptedException | ExecutionException | TimeoutException ignored)
-        {
-        }
-    }
-
     private void update()
     {
         this.addSchedule(this::update);
