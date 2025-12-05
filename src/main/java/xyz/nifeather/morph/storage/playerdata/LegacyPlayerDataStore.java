@@ -15,6 +15,7 @@ import java.io.File;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 @Deprecated(forRemoval = true)
@@ -240,6 +241,12 @@ public class LegacyPlayerDataStore extends MorphJsonBasedStorage<PlayerMetaConta
 
     @Override
     public List<PlayerMeta> getRange(List<UUID> list)
+    {
+        throw new NotImplementedException();
+    }
+
+    @Override
+    public CompletableFuture<PlayerMeta> loadPlayerDataAsync(UUID uuid)
     {
         throw new NotImplementedException();
     }

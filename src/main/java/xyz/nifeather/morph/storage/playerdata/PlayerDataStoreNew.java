@@ -18,6 +18,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -151,6 +152,13 @@ public class PlayerDataStoreNew extends DirectoryJsonBasedStorage<PlayerMeta> im
     public List<DisguiseMeta> getAvaliableDisguisesFor(Player player)
     {
         return getPlayerMeta(player).getUnlockedDisguises();
+    }
+
+    @Override
+    public CompletableFuture<PlayerMeta> loadPlayerDataAsync(UUID uuid)
+    {
+        var offline = Bukkit.getOfflinePlayer(uuid);
+        return CompletableFuture.completedFuture(this.getPlayerMeta(offline));
     }
 
     /**

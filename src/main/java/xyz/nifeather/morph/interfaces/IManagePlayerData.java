@@ -10,6 +10,7 @@ import xyz.nifeather.morph.storage.playerdata.PlayerMeta;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 public interface IManagePlayerData
 {
@@ -29,6 +30,14 @@ public interface IManagePlayerData
      * @return 目标玩家拥有的伪装
      */
     public List<DisguiseMeta> getAvaliableDisguisesFor(Player player);
+
+    /**
+     * Load the requested data async
+     * @param uuid The target player's UUID
+     * @return The matching {@link PlayerMeta}
+     * @apiNote The future throws {@link xiamomc.pluginbase.Exceptions.NullDependencyException} If data for the requested UUID cannot be found.
+     */
+    CompletableFuture<PlayerMeta> loadPlayerDataAsync(UUID uuid);
 
     /**
      * 将伪装授予某一玩家

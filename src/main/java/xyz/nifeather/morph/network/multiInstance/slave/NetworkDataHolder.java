@@ -7,6 +7,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xiamomc.pluginbase.Exceptions.NullDependencyException;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.interfaces.IManagePlayerData;
 import xyz.nifeather.morph.misc.DisguiseMeta;
@@ -18,6 +19,7 @@ import xyz.nifeather.morph.storage.playerdata.PlayerMeta;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class NetworkDataHolder extends MorphPluginObject implements IManagePlayerData
@@ -53,6 +55,24 @@ public class NetworkDataHolder extends MorphPluginObject implements IManagePlaye
         var playerMeta = getPlayerMeta(player);
 
         return playerMeta.getUnlockedDisguises();
+    }
+
+    @Override
+    public CompletableFuture<PlayerMeta> loadPlayerDataAsync(UUID uuid)
+    {
+        var future = new CompletableFuture<PlayerMeta>();
+
+        bindingSlave.requestData(uuid).thenAccept(u ->
+        {
+            var data = nullablePlayerMeta(Bukkit.getOfflinePlayer(u));
+
+            if (data != null)
+                future.complete(data);
+            else
+                future.completeExceptionally(new NullDependencyException("The future of the requested data has been finished, but we can't find a matching data in NetworkDataHolder!"));
+        });
+
+        return future;
     }
 
     @Override

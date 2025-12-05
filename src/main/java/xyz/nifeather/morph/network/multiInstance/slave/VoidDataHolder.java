@@ -5,12 +5,14 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xiamomc.pluginbase.Exceptions.NullDependencyException;
 import xyz.nifeather.morph.interfaces.IManagePlayerData;
 import xyz.nifeather.morph.misc.DisguiseMeta;
 import xyz.nifeather.morph.storage.playerdata.PlayerMeta;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 public class VoidDataHolder implements IManagePlayerData
 {
@@ -24,6 +26,12 @@ public class VoidDataHolder implements IManagePlayerData
     public ObjectArrayList<DisguiseMeta> getAvaliableDisguisesFor(Player player)
     {
         return new ObjectArrayList<>();
+    }
+
+    @Override
+    public CompletableFuture<PlayerMeta> loadPlayerDataAsync(UUID uuid)
+    {
+        return CompletableFuture.completedFuture(new PlayerMeta());
     }
 
     @Override

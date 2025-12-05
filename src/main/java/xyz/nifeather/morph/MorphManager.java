@@ -70,6 +70,7 @@ import xyz.nifeather.morph.utilities.PermissionUtils;
 
 import java.io.InvalidObjectException;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -1754,12 +1755,11 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         return data.getRange(list);
     }
 
-    //endregion Implementation of IManagePlayerData
-
-    @ApiStatus.Internal
-    public List<PlayerMeta> listAllPlayerMeta()
+    @Override
+    public CompletableFuture<PlayerMeta> loadPlayerDataAsync(UUID uuid)
     {
-        data.shouldLoadAllData(true);
-        return data.listAll();
+        return data.loadPlayerDataAsync(uuid);
     }
+
+    //endregion Implementation of IManagePlayerData
 }

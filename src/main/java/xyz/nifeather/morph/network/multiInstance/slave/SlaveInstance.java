@@ -197,7 +197,7 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
         if (!uuidsToRequest.isEmpty())
             batchRequests();
 
-        addSchedule(this::requestBatchLoop, 10);
+        addSchedule(this::requestBatchLoop, 2);
     }
 
     private void batchRequests()

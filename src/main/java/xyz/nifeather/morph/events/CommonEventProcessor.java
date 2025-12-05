@@ -30,6 +30,7 @@ import xyz.nifeather.morph.api.events.gameplay.PlayerJoinedWithDisguiseEvent;
 import xyz.nifeather.morph.api.networking.exceptions.PlayerDisconnectedException;
 import xyz.nifeather.morph.config.ConfigOptions;
 import xyz.nifeather.morph.config.MorphConfigManager;
+import xyz.nifeather.morph.interfaces.IManagePlayerData;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.strings.MorphStrings;
 import xyz.nifeather.morph.messages.vanilla.MasterVanillaMessageStore;
@@ -53,6 +54,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import static xyz.nifeather.morph.utilities.DisguiseUtils.itemOrAir;
 
@@ -91,8 +95,10 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         this.addSchedule(this::update);
     }
 
-    @Resolved
-    private MultiInstanceService multiInstanceService;
+    protected IManagePlayerData playerdata()
+    {
+        return morphs;
+    }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void postPlayerConfiguration(AsyncPlayerConnectionConfigureEvent e)
@@ -105,12 +111,13 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
             return;
         }
 
-        Optional.ofNullable(multiInstanceService.slaveInstance()).ifPresent(slave ->
+        try
         {
-            slave.requestData(uuid);
-            if (FeatherMorphMain.getInstance().debugOutputEnabled())
-                logger.info("Successfully pulled data for %s".formatted(uuid));
-        });
+            playerdata().loadPlayerDataAsync(uuid).get(150, TimeUnit.MILLISECONDS);
+        }
+        catch (InterruptedException | ExecutionException | TimeoutException ignored)
+        {
+        }
     }
 
     private void update()
