@@ -112,7 +112,8 @@ public class UpdateHandler extends MorphPluginObject
             urlString = urlString.formatted(Bukkit.getMinecraftVersion())
                     .replace("[", "%5B") // Make URI happy
                     .replace("]", "%5D")
-                    .replace("\"", "%22");
+                    .replace("\"", "%22")
+                    .replace(" ", "%20");
 
             var uri = new URI(urlString);
 
