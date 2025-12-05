@@ -8,7 +8,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.nifeather.morph.config.ConfigOption;
+import xyz.nifeather.morph.config.ConfigOptions;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.utilities.DisguiseUtils;
 import xyz.nifeather.morph.utilities.EntityTypeUtils;
@@ -111,7 +111,7 @@ public class SoundHandler
 
         this.entityType = entityType;
 
-        soundFrequency = MathUtils.clamp(0, 2, config.getBindable(Double.class, ConfigOption.AMBIENT_FREQUENCY).get());
+        soundFrequency = MathUtils.clamp(0, 2, config.getBindable(ConfigOptions.AMBIENT_FREQUENCY).get());
 
         var soundEvent = DisguiseUtils.getAmbientSound(bindingSession, entityType, this.bindingPlayer.getWorld(), this.bindingPlayer.getLocation());
 

@@ -11,7 +11,7 @@ import org.jetbrains.annotations.Unmodifiable;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Bindables.Bindable;
 import xyz.nifeather.morph.MorphPluginObject;
-import xyz.nifeather.morph.config.ConfigOption;
+import xyz.nifeather.morph.config.ConfigOptions;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
@@ -42,7 +42,7 @@ public class AbilityUpdater extends MorphPluginObject implements IAbilityConfigL
     @Initializer
     private void load(MorphConfigManager config)
     {
-        this.checkAbilityPermissions = config.getBindable(Boolean.class, ConfigOption.DO_CHECK_ABILITY_PERMISSIONS);
+        this.checkAbilityPermissions = config.getBindable(ConfigOptions.DO_CHECK_ABILITY_PERMISSIONS);
     }
 
     public AbilityUpdater(@NotNull DisguiseState parentState)

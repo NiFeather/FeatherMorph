@@ -1,6 +1,7 @@
 package xyz.nifeather.morph.storage.playerdata;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import org.apache.commons.lang3.NotImplementedException;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -13,6 +14,7 @@ import xyz.nifeather.morph.storage.MorphJsonBasedStorage;
 import java.io.File;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 @Deprecated(forRemoval = true)
@@ -234,6 +236,12 @@ public class LegacyPlayerDataStore extends MorphJsonBasedStorage<PlayerMetaConta
     public List<DisguiseMeta> getAvaliableDisguisesFor(Player player)
     {
         return getPlayerMeta(player).getUnlockedDisguises();
+    }
+
+    @Override
+    public List<PlayerMeta> getRange(List<UUID> list)
+    {
+        throw new NotImplementedException();
     }
 
     //endregion Implementation of IManagePlayerData

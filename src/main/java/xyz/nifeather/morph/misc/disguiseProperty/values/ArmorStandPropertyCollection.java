@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Bindables.Bindable;
 import xyz.nifeather.morph.api.FeatherMorphAPI;
-import xyz.nifeather.morph.config.ConfigOption;
+import xyz.nifeather.morph.config.ConfigOptions;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.misc.DisguiseMeta;
 import xyz.nifeather.morph.misc.disguiseProperty.*;
@@ -81,7 +81,7 @@ public class ArmorStandPropertyCollection extends BaseLivingEntityPropertyCollec
         if (configManager == null)
             return;
 
-        configManager.bind(showArms, ConfigOption.ARMORSTAND_SHOW_ARMS);
+        configManager.bind(showArms, ConfigOptions.ARMORSTAND_SHOW_ARMS);
         this.config = configManager;
     }
 

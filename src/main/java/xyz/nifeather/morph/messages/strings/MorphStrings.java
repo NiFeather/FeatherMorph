@@ -179,10 +179,16 @@ public class MorphStrings extends AbstractMorphStrings
                 "[Fallback] <color:red>变形时出现问题: <error>");
     }
 
-    public static FormattableMessage errorWhileDisguisingUserFault()
+    public static FormattableMessage errorParsingProperty()
     {
-        return getFormattable(getKey("error_while_disguising_user_fault"),
+        return getFormattable(getKey("error_parsing_property"),
                 "[Fallback] <color:red>未能解析属性 <what>: <error>");
+    }
+
+    public static FormattableMessage errorValidatingProperty()
+    {
+        return getFormattable(getKey("error_validating_property"),
+                "[Fallback] <color:red>未能验证属性 <what>: <error>");
     }
 
     public static FormattableMessage errorWhileUpdatingDisguise()

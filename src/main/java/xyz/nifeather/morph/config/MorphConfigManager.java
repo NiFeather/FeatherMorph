@@ -1,13 +1,15 @@
 package xyz.nifeather.morph.config;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.generator.WorldInfo;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import xiamomc.pluginbase.Bindables.Bindable;
+import org.slf4j.LoggerFactory;
 import xiamomc.pluginbase.Bindables.BindableList;
 import xiamomc.pluginbase.Configuration.ConfigNode;
+import xiamomc.pluginbase.Configuration.ConfigOption;
 import xiamomc.pluginbase.Configuration.PluginConfigManager;
 import xiamomc.pluginbase.Managers.DependencyManager;
 import xiamomc.pluginbase.Messages.MessageStore;
@@ -15,7 +17,10 @@ import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.messages.strings.CommonStrings;
 import xyz.nifeather.morph.messages.MessageUtils;
 
+import java.lang.reflect.Field;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
 public class MorphConfigManager extends PluginConfigManager
 {
@@ -24,6 +29,144 @@ public class MorphConfigManager extends PluginConfigManager
         super(plugin);
 
         instance = this;
+
+        var logger = FeatherMorphMain.getInstance().getSLF4JLogger();
+        for (Field field : ConfigOptions.class.getFields())
+        {
+            if (field.getType() != ConfigOption.class) continue;
+
+            try
+            {
+                var val = (ConfigOption<?>) field.get(null);
+                logger.debug("Discover field %s --> %s".formatted(field.getName(), val.node()));
+
+                options.put(val.node().toString(), val);
+            }
+            catch (Throwable t)
+            {
+                logger.warn("Failed to discover configuration %s, this don't seems right!".formatted(field.getName()), t);
+            }
+        }
+
+        registerUpdateMethods();
+    }
+
+    @SuppressWarnings("removal")
+    private void registerUpdateMethods()
+    {
+        var updateLogger = LoggerFactory.getLogger("FeatherMorph$ConfigUpdate");
+
+        addUpdateMethod(0, newConfig ->
+        {
+            updateLogger.info("#0: Determining language code to use.");
+            var locale = Locale.getDefault().toLanguageTag().replace('-', '_').toLowerCase();
+            newConfig.set(ConfigOptions.LANGUAGE_CODE.toString(), locale);
+            newConfig.set(ConfigOptions.VERSION.toString(), 1);
+        });
+
+        addUpdateMethod(14, newConfig ->
+        {
+            updateLogger.info("#14: Checking for old action item key.");
+
+            //skill item
+            var oldSkillItem = get(ConfigOptions.ACTION_ITEM);
+
+            //noinspection removal
+            this.remove(ConfigOptions.ACTION_ITEM);
+
+            if (oldSkillItem != null)
+            {
+                //noinspection removal
+                newConfig.set(ConfigOptions.SKILL_ITEM.toString(), oldSkillItem);
+            }
+        });
+
+        addUpdateMethod(20, newConfig ->
+        {
+            updateLogger.info("#20: ChatOverride configuration is now in config.yml.");
+
+            // ChatOverride消息的配置从messages迁移到config.yml中
+            var depMgr = DependencyManager.getInstance(plugin.getNamespace());
+            var messageStore = depMgr.get(MessageStore.class);
+            boolean requireCache = depMgr.get(this.getClass(), false) == null;
+
+            if (requireCache)
+                depMgr.cache(this);
+
+            var msg = messageStore.get(CommonStrings.chatOverrideDefaultPattern().getKey(), ConfigOptions.CHAT_OVERRIDE_DEFAULT_PATTERN.getDefault(), MessageUtils.getServerLocale());
+            newConfig.set(ConfigOptions.CHAT_OVERRIDE_DEFAULT_PATTERN.toString(), msg);
+
+            var pluginPrefix = messageStore.get(CommonStrings.pluginMessageString().getKey(), ConfigOptions.PLUGIN_PREFIX.getDefault(), MessageUtils.getServerLocale());
+            newConfig.set(ConfigOptions.PLUGIN_PREFIX.toString(), pluginPrefix);
+
+            if (requireCache)
+                depMgr.unCache(this);
+        });
+
+        addUpdateMethod(22, newConfig ->
+        {
+            updateLogger.info("#22: The old *Modify bounding boxes* config has moved to a new section");
+
+            //noinspection removal
+            var val = getOrDefault(ConfigOptions.MODIFY_BOUNDING_BOX_LEGACY, null);
+
+            //noinspection removal
+            this.remove(ConfigOptions.MODIFY_BOUNDING_BOX_LEGACY);
+
+            if (val != null)
+                newConfig.set(ConfigOptions.MODIFY_BOUNDING_BOX.toString(), val);
+        });
+
+        addUpdateMethod(33, newConfig ->
+        {
+            updateLogger.info("#33: Flying in water/lava has been changed from no_fly_in_liquid -> disallow_in_water/disallow_in_lava.");
+
+            //noinspection removal
+            var noFlyInLiquid = getOrDefault(ConfigOptions.FLYABILITY_NO_LIQUID, false);
+
+            //noinspection removal
+            this.remove(ConfigOptions.FLYABILITY_NO_LIQUID);
+
+            if (noFlyInLiquid)
+            {
+                var list = Bukkit.getWorlds().stream().map(WorldInfo::getName).toList();
+
+                newConfig.set(ConfigOptions.FLYABILITY_DISALLOW_FLY_IN_WATER.toString(), list);
+                newConfig.set(ConfigOptions.FLYABILITY_DISALLOW_FLY_IN_LAVA.toString(), list);
+            }
+        });
+
+        addUpdateMethod(36, newConfig ->
+        {
+            updateLogger.info("#36: Removing old skill item config.");
+
+            //noinspection removal
+            this.remove(ConfigOptions.SKILL_ITEM);
+        });
+
+        addUpdateMethod(39, newConfig ->
+        {
+            updateLogger.info("#39: Remove the 'show_player_disguises_in_tab' and 'hide_disguised_players_in_tab' options.");
+
+            //noinspection removal
+            this.remove(ConfigOptions.SR_SHOW_PLAYER_DISGUISES_IN_TAB);
+            this.remove(ConfigOptions.HIDE_DISGUISED_PLAYERS_IN_TAB);
+        });
+
+        addUpdateMethod(40, newConfig ->
+        {
+            updateLogger.info("#40: The sentry logger has been removed since it's not working right, and I don't like to bother about it as we lose 2 follows because of adding it D:");
+
+            this.remove(ConfigOptions.ENABLE_SENTRY_LOGGER);
+        });
+
+        addUpdateMethod(43, newConfig ->
+        {
+            updateLogger.info("#43: Blacklist patterns and tags have been removed as they are no longer being used.");
+
+            this.remove(ConfigOptions.BLACKLIST_PATTERNS);
+            this.remove(ConfigOptions.BLACKLIST_TAGS);
+        });
     }
 
     private static MorphConfigManager instance;
@@ -33,44 +176,19 @@ public class MorphConfigManager extends PluginConfigManager
         return instance;
     }
 
-    public <T> T getOrDefault(Class<T> type, ConfigOption option)
-    {
-        var val = get(type, option);
-
-        if (val == null)
-        {
-            set(option, option.defaultValue);
-            return (T) option.defaultValue;
-        }
-
-        return val;
-    }
-
-    public <T> T getOrDefault(Class<T> type, ConfigOption option, @Nullable T defaultValue)
-    {
-        var val = get(type, option);
-
-        if (val == null)
-        {
-            set(option, defaultValue);
-            return defaultValue;
-        }
-
-        return val;
-    }
+    private final Map<String, ConfigOption<?>> options = new ConcurrentHashMap<>();
 
     @NotNull
     @Override
     public Map<ConfigNode, Object> getAllNotDefault()
     {
-        var options = ConfigOption.values();
         var map = new Object2ObjectOpenHashMap<ConfigNode, Object>();
 
-        for (var o : options)
+        for (var o : options.values())
         {
-            var val = getOrDefault(o.defaultValue.getClass(), o);
+            var val = getOrDefault(o);
 
-            if (!val.equals(o.defaultValue)) map.put(o.node, val);
+            if (!val.equals(o.getDefault())) map.put(o.node(), val);
         }
 
         return map;
@@ -78,70 +196,28 @@ public class MorphConfigManager extends PluginConfigManager
 
     private Map<String, BindableList<?>> bindableLists;
 
-    public <T> BindableList<T> getBindableList(Class<T> clazz, ConfigOption option)
+    public <T> BindableList<T> getBindableStringList(ConfigOption<List<T>> option)
     {
         ensureBindableListNotNull();
 
-        //System.out.println("GET LIST " + option.toString());
-
         var val = bindableLists.getOrDefault(option.toString(), null);
-        if (val != null)
-        {
-            //System.out.println("FIND EXISTING LIST, RETURNING " + val);
-            return (BindableList<T>) val;
-        }
+        if (val != null) return (BindableList<T>) val;
 
         List<?> originalList = backendConfig.getList(option.toString(), new ArrayList<T>());
-        originalList.removeIf(listVal -> !clazz.isInstance(listVal)); //Don't work for somehow
+        originalList.removeIf(listVal -> !option.type().isInstance(listVal)); //Don't work for somehow
 
         var list = new BindableList<T>();
         list.addAll((List<T>)originalList);
 
         list.onListChanged((diffList, reason) ->
         {
-            //System.out.println("LIST CHANGED: " + diffList + " WITH REASON " + reason);
             backendConfig.set(option.toString(), new ArrayList<>(list));
             save();
         }, true);
 
         bindableLists.put(option.toString(), list);
 
-        //System.out.println("RETURN " + list);
-
         return list;
-    }
-
-    public <T> Bindable<T> getBindable(Class<T> type, ConfigOption option)
-    {
-        if (type.isInstance(option.defaultValue))
-            return getBindable(type, option, (T)option.defaultValue);
-
-        throw new IllegalArgumentException(option + "的类型和" + type + "不兼容");
-    }
-
-    public <T> void bind(Bindable<T> bindable, ConfigOption option)
-    {
-        var bb = this.getBindable(option.defaultValue.getClass(), option);
-
-        if (bindable.getClass().isInstance(bb))
-            bindable.bindTo((Bindable<T>) bb);
-        else
-            throw new IllegalArgumentException("尝试将一个Bindable绑定在不兼容的配置(" + option + ")上");
-    }
-
-    public <T> void bind(Class<T> clazz, BindableList<T> bindable, ConfigOption option)
-    {
-        var bb = this.getBindableList(clazz, option);
-
-        if (bindable.getClass().isInstance(bb))
-            bindable.bindTo(bb);
-        else
-            throw new IllegalArgumentException("尝试将一个Bindable绑定在不兼容的配置(" + option + ")上");
-    }
-
-    public <T> Bindable<T> getBindable(Class<T> type, ConfigOption path, T defaultValue)
-    {
-        return super.getBindable(type, path.node, defaultValue);
     }
 
     private void ensureBindableListNotNull()
@@ -150,7 +226,27 @@ public class MorphConfigManager extends PluginConfigManager
             bindableLists = new Object2ObjectOpenHashMap<>();
     }
 
-    @SuppressWarnings("removal")
+    private final Map<Integer, Consumer<FileConfiguration>> updateMethods = new ConcurrentHashMap<>();
+
+    private void addUpdateMethod(int startingAt, Consumer<FileConfiguration> runnable)
+    {
+        updateMethods.put(startingAt, runnable);
+    }
+
+    /**
+     * Update methods for version [startingFrom, ∞)
+     *
+     * @param startingFrom The version number to start applying update method.
+     */
+    public List<Consumer<FileConfiguration>> getUpdateMethods(int startingFrom)
+    {
+        return updateMethods.entrySet().stream()
+                .filter(entry -> entry.getKey() >= startingFrom)
+                .sorted(Comparator.comparingInt(Map.Entry::getKey))
+                .map(Map.Entry::getValue)
+                .toList();
+    }
+
     @Override
     public void reload()
     {
@@ -168,9 +264,9 @@ public class MorphConfigManager extends PluginConfigManager
         });
 
         //更新配置
-        int targetVersion = 44;
+        int targetVersion = 45;
 
-        var configVersion = getOrDefault(Integer.class, ConfigOption.VERSION);
+        var configVersion = getOrDefault(ConfigOptions.VERSION);
 
         if (configVersion < targetVersion)
         {
@@ -185,9 +281,7 @@ public class MorphConfigManager extends PluginConfigManager
 
             nonDefaults.forEach((n, v) ->
             {
-                var matching = Arrays.stream(ConfigOption.values())
-                        .filter(option -> option.node.toString().equals(n.toString()))
-                        .findFirst().orElse(null);
+                var matching = options.getOrDefault(n.toString(), null);
 
                 if (matching == null)
                 {
@@ -198,21 +292,21 @@ public class MorphConfigManager extends PluginConfigManager
                 //noinspection rawtypes
                 if (v instanceof Collection collection)
                 {
-                        Collection<?> defaultVal = null;
+                    Collection<?> defaultVal = null;
 
-                        if (matching.defaultValue instanceof Collection<?> c1)
-                            defaultVal = c1;
+                    if (matching.getDefault() instanceof Collection<?> c1)
+                        defaultVal = c1;
 
-                        if (defaultVal != null)
+                    if (defaultVal != null)
+                    {
+                        defaultVal.forEach(c ->
                         {
-                            defaultVal.forEach(c ->
-                            {
-                                if (!collection.contains(c))
-                                    collection.add(c);
-                            });
-                        }
+                            if (!collection.contains(c))
+                                collection.add(c);
+                        });
+                    }
 
-                        newConfig.set(n.toString(), v);
+                    newConfig.set(n.toString(), v);
                 }
                 else
                 {
@@ -220,136 +314,33 @@ public class MorphConfigManager extends PluginConfigManager
                 }
             });
 
-            // 初次加载
-            if (configVersion < 1)
-            {
-                var locale = Locale.getDefault().toLanguageTag().replace('-', '_').toLowerCase();
-                newConfig.set(ConfigOption.LANGUAGE_CODE.toString(), locale);
-            }
-
-            if (configVersion < 15)
-            {
-                //skill item
-                var oldSkillItem = get(String.class, ConfigOption.ACTION_ITEM);
-
-                //noinspection removal
-                this.remove(ConfigOption.ACTION_ITEM);
-
-                if (oldSkillItem != null)
-                {
-                    //noinspection removal
-                    newConfig.set(ConfigOption.SKILL_ITEM.toString(), oldSkillItem);
-                }
-            }
-
-            // ChatOverride消息的配置从messages迁移到config.yml中
-            if (configVersion < 21)
-            {
-                var depMgr = DependencyManager.getInstance(plugin.getNamespace());
-                var messageStore = depMgr.get(MessageStore.class);
-                boolean requireCache = depMgr.get(this.getClass(), false) == null;
-
-                if (requireCache)
-                    depMgr.cache(this);
-
-                var msg = messageStore.get(CommonStrings.chatOverrideDefaultPattern().getKey(), (String)ConfigOption.CHAT_OVERRIDE_DEFAULT_PATTERN.defaultValue, MessageUtils.getServerLocale());
-                newConfig.set(ConfigOption.CHAT_OVERRIDE_DEFAULT_PATTERN.toString(), msg);
-
-                var pluginPrefix = messageStore.get(CommonStrings.pluginMessageString().getKey(), (String)ConfigOption.PLUGIN_PREFIX.defaultValue, MessageUtils.getServerLocale());
-                newConfig.set(ConfigOption.PLUGIN_PREFIX.toString(), pluginPrefix);
-
-                if (requireCache)
-                    depMgr.unCache(this);
-            }
-
-            if (configVersion < 23)
-            {
-                //noinspection removal
-                var val = get(Boolean.class, ConfigOption.MODIFY_BOUNDING_BOX_LEGACY);
-
-                //noinspection removal
-                this.remove(ConfigOption.MODIFY_BOUNDING_BOX_LEGACY);
-
-                if (val != null)
-                    newConfig.set(ConfigOption.MODIFY_BOUNDING_BOX.toString(), val);
-            }
-
-            if (configVersion < 34)
-            {
-                //noinspection removal
-                var noFlyInLiquid = getOrDefault(Boolean.class, ConfigOption.FLYABILITY_NO_LIQUID, null);
-
-                //noinspection removal
-                this.remove(ConfigOption.FLYABILITY_NO_LIQUID);
-
-                if (noFlyInLiquid != null && noFlyInLiquid)
-                {
-                    var list = Bukkit.getWorlds().stream().map(WorldInfo::getName).toList();
-
-                    newConfig.set(ConfigOption.FLYABILITY_DISALLOW_FLY_IN_WATER.toString(), list);
-                    newConfig.set(ConfigOption.FLYABILITY_DISALLOW_FLY_IN_LAVA.toString(), list);
-                }
-            }
-
-            if (configVersion < 37)
-            {
-                //noinspection removal
-                this.remove(ConfigOption.SKILL_ITEM);
-            }
-
-            if (configVersion < 40)
-            {
-                //noinspection removal
-                this.remove(ConfigOption.SR_SHOW_PLAYER_DISGUISES_IN_TAB);
-                this.remove(ConfigOption.HIDE_DISGUISED_PLAYERS_IN_TAB);
-            }
-
-            if (configVersion < 41)
-            {
-                this.remove(ConfigOption.ENABLE_SENTRY_LOGGER);
-            }
-
-            /*if (configVersion < 43 && FoliaThreadUtils.isFolia())
-            {
-                newConfig.set(ConfigOption.DO_MODIFY_AI.node.toString(), false);
-                FeatherMorphMain.getInstance().getSLF4JLogger().info("AI Modification has been disabled due to having issue on Folia server");
-            }*/
-
-            if (configVersion < 44)
-            {
-                this.remove(ConfigOption.BLACKLIST_PATTERNS);
-                this.remove(ConfigOption.BLACKLIST_TAGS);
-            }
-
-            newConfig.set(ConfigOption.VERSION.toString(), targetVersion);
-
-            //todo: 将~UNSET作为留空的保留字符串写入PluginBase
-            if (((String)newConfig.get(ConfigOption.MASTER_SECRET.toString(), "~UNSET")).equalsIgnoreCase("~UNSET"))
-            {
-                var defVal = ConfigOption.MASTER_SECRET.defaultValue.toString();
-
-                getBindable(String.class, ConfigOption.MASTER_SECRET).set(defVal);
-                newConfig.set(ConfigOption.MASTER_SECRET.toString(), defVal);
-            }
+            this.getUpdateMethods(configVersion).forEach(c -> c.accept(newConfig));
+            newConfig.set(ConfigOptions.VERSION.toString(), targetVersion);
 
             plugin.saveConfig();
             reload();
         }
+
+        generateIfUnset(ConfigOptions.MASTER_SECRET);
+        generateIfUnset(ConfigOptions.UUID_RANDOM_BASE);
     }
 
-    public void remove(ConfigOption option)
+    private void generateIfUnset(ConfigOption<String> option)
+    {
+        if (!(getOrDefault(option, "~UNSET")).equalsIgnoreCase("~UNSET"))
+            return;
+
+        set(option, RandomStringUtils.secure().nextAlphabetic(20));
+    }
+
+    public void remove(ConfigOption<?> option)
     {
         this.set(option, null);
-        this.backendConfig.set(option.node.toString(), null);
+        this.backendConfig.set(option.node().toString(), null);
     }
 
-    public <T> T get(Class<T> type, ConfigOption option)
+    public <T> T get(ConfigOption<T> option)
     {
-        return get(type, option.node);
-    }
-
-    public void set(ConfigOption option, Object val)
-    {
-        this.set(option.node, val);
+        return get(option.type(), option.node());
     }
 }

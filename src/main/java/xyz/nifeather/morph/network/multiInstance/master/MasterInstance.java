@@ -16,7 +16,7 @@ import xiamomc.pluginbase.Bindables.Bindable;
 import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.MorphPluginObject;
-import xyz.nifeather.morph.config.ConfigOption;
+import xyz.nifeather.morph.config.ConfigOptions;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.network.multiInstance.IInstanceService;
 import xyz.nifeather.morph.network.multiInstance.protocol.*;
@@ -104,7 +104,7 @@ public class MasterInstance extends MorphPluginObject implements IInstanceServic
 
         try
         {
-            String[] configuredAddress = config.getOrDefault(String.class, ConfigOption.MASTER_ADDRESS).split(":");
+            String[] configuredAddress = config.getOrDefault(ConfigOptions.MASTER_ADDRESS).split(":");
 
             String host = configuredAddress[0];
             int port = Integer.parseInt( configuredAddress.length >= 2 ? configuredAddress[1] : "39210" );
@@ -130,7 +130,7 @@ public class MasterInstance extends MorphPluginObject implements IInstanceServic
     {
         logger.info("Preparing multi-instance server...");
 
-        config.bind(secret, ConfigOption.MASTER_SECRET);
+        config.bind(secret, ConfigOptions.MASTER_SECRET);
 
         registries.registerC2S("login", MIC2SLoginCommand::fromArguments)
                 .registerC2S("dmeta", MIC2SSyncDisguiseCommand::fromArguments)
@@ -188,7 +188,7 @@ public class MasterInstance extends MorphPluginObject implements IInstanceServic
 
     private final CommandRegistriesCopy registries = new CommandRegistriesCopy();
 
-    private final ProtocolLevel level = ProtocolLevel.V3;
+    private final ProtocolLevel level = ProtocolLevel.V4;
 
     private final Map<WebSocket, ProtocolState> allowedSockets = new Object2ObjectArrayMap<>();
 
@@ -295,7 +295,15 @@ public class MasterInstance extends MorphPluginObject implements IInstanceServic
 
         var cmd = new MIS2CSyncMetaCommand();
 
-        var disguises = morphManager.listAllPlayerMeta();
+        var requestedUUIDs = command.requestedUUIDs;
+
+        if (FeatherMorphMain.getInstance().debugOutputEnabled())
+            logger.info("Client requesting %s UUIDs".formatted(requestedUUIDs.size()));
+
+        if (requestedUUIDs.isEmpty()) return;
+
+        var disguises = morphManager.getRange(requestedUUIDs);
+
         for (var meta : disguises)
             cmd.appendMeta(new SocketPlayerMeta(Operation.ADD_IF_ABSENT, meta.getUnlockedDisguiseIdentifiers(), meta.uniqueId));
 

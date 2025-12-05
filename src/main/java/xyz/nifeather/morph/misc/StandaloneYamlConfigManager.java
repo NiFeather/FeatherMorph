@@ -23,7 +23,10 @@ public abstract class StandaloneYamlConfigManager extends MorphPluginObject
     @Nullable
     private final String internalResourceName;
 
-    public static final ConfigOption<Integer> CONFIG_VERSION = new ConfigOption<>(ConfigNode.create().append("version"), 0);
+    public static final ConfigOption<Integer> CONFIG_VERSION = ConfigOption.<Integer>builder()
+            .node(ConfigNode.create().append("version"))
+            .defaultValue(0)
+            .build();
 
     public StandaloneYamlConfigManager(@NotNull File file, @Nullable String internalResourceName)
     {

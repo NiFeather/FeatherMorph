@@ -302,5 +302,11 @@ root:
     # DO NOT SHARE THIS TO OTHERS! OR ANYONE WITH THE SECRET WILL BE ABLE TO CONNECT TO THE INSTANCE NETWORK!
     secret: "~UNSET"
 
+  # We use this as a part of generating virtual entities' UUID
+  uuid_random_base: "~UNSET"
+
+  # Enable debug output for FeatherMorph?
+  debug_output: false
+
   # Do not touch unless you know what you're doing!
-  version: 44
+  version: 45

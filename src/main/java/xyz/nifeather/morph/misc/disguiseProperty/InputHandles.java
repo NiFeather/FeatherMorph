@@ -109,6 +109,11 @@ public class InputHandles
         }
     }
 
+    public static Optional<String> readString(String propertyName, String input)
+    {
+        return Optional.of(input);
+    }
+
     public static Optional<Integer> readInteger(String propertyName, String input) throws ParseErrorException
     {
         try

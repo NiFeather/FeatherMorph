@@ -7,7 +7,6 @@ import org.bukkit.event.block.Action;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.FeatherMorphMain;
-import xyz.nifeather.morph.config.ConfigOption;
 import xyz.nifeather.morph.events.InteractionMirrorProcessor;
 import xyz.nifeather.morph.events.PlayerTracker;
 import xyz.nifeather.morph.mirror.ExecutorHub;
@@ -35,7 +34,7 @@ public class ByNameExecutor extends AbstractExecutor
      * Search for a player that matches the target name.
      * @param source The {@link Player} who triggered this operation
      * @return A player who matches the target name
-     * @apiNote If {@link ConfigOption#MIRROR_SELECTION_MODE} is set to {@link InteractionMirrorProcessor.InteractionMirrorSelectionMode#BY_SIGHT},
+     * @apiNote If {@link xyz.nifeather.morph.config.ConfigOptions#MIRROR_SELECTION_MODE} is set to {@link InteractionMirrorProcessor.InteractionMirrorSelectionMode#BY_SIGHT},
      *          the returned value might be a player who disguised as our searching target.
      */
     private Optional<LivingEntity> getMirrorTarget(Player source)

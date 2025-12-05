@@ -2,6 +2,7 @@ package xyz.nifeather.morph.storage.playerdata;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.apache.commons.io.FileUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -310,6 +311,20 @@ public class PlayerDataStoreNew extends DirectoryJsonBasedStorage<PlayerMeta> im
 
         if (val)
             loadAll();
+    }
+
+    @Override
+    public List<PlayerMeta> getRange(List<UUID> list)
+    {
+        List<PlayerMeta> metaList = new ObjectArrayList<>();
+
+        list.forEach(uuid ->
+        {
+            var existing = getPlayerMeta(Bukkit.getOfflinePlayer(uuid));
+            metaList.add(existing);
+        });
+
+        return metaList;
     }
 
     @Override

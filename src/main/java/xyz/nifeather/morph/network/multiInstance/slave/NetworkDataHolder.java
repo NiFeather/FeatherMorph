@@ -1,5 +1,8 @@
 package xyz.nifeather.morph.network.multiInstance.slave;
 
+import com.google.common.collect.ImmutableList;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -61,7 +64,12 @@ public class NetworkDataHolder extends MorphPluginObject implements IManagePlaye
             return false;
         }
 
-        if (this.getPlayerMeta(player).getUnlockedDisguiseIdentifiers().stream().anyMatch(str -> str.equals(disguiseIdentifier)))
+        // Don't continue if we don't have got the required metadata
+        var meta = nullablePlayerMeta(player);
+        if (meta == null)
+            return false;
+
+        if (meta.getUnlockedDisguiseIdentifiers().stream().anyMatch(str -> str.equals(disguiseIdentifier)))
             return false;
 
         bindingSlave.sendCommand(new MIC2SSyncDisguiseCommand(Operation.ADD_IF_ABSENT, List.of(disguiseIdentifier), player.getUniqueId()));
@@ -77,43 +85,69 @@ public class NetworkDataHolder extends MorphPluginObject implements IManagePlaye
             return false;
         }
 
-        if (this.getPlayerMeta(player).getUnlockedDisguiseIdentifiers().stream().noneMatch(str -> str.equals(disguiseIdentifier)))
+        // Don't continue if we don't have got the required metadata
+        var meta = nullablePlayerMeta(player);
+        if (meta == null)
+            return false;
+
+        if (meta.getUnlockedDisguiseIdentifiers().stream().noneMatch(str -> str.equals(disguiseIdentifier)))
             return false;
 
         bindingSlave.sendCommand(new MIC2SSyncDisguiseCommand(Operation.REMOVE, List.of(disguiseIdentifier), player.getUniqueId()));
         return true;
     }
 
-    @Override
-    public @NotNull PlayerMeta getPlayerMeta(OfflinePlayer player)
+    public @Nullable PlayerMeta nullablePlayerMeta(OfflinePlayer player)
     {
-        var uuid = player.getUniqueId();
+        return localMetaMap.getOrDefault(player.getUniqueId(), null);
+    }
 
-        var tracked = localMetaMap.getOrDefault(uuid, null);
+    public @NotNull PlayerMeta getOrCreatePlayerMeta(OfflinePlayer player)
+    {
+        var tracked = nullablePlayerMeta(player);
         if (tracked != null) return tracked;
 
         var metaInstance = new PlayerMeta();
         metaInstance.uniqueId = player.getUniqueId();
         metaInstance.playerName = player.getName();
 
-        localMetaMap.put(uuid, metaInstance);
+        localMetaMap.put(player.getUniqueId(), metaInstance);
 
         return metaInstance;
     }
 
     @Override
+    public @NotNull PlayerMeta getPlayerMeta(OfflinePlayer player)
+    {
+        var tracked = nullablePlayerMeta(player);
+        if (tracked != null) return tracked;
+
+        //todo: I don't know if this is good
+        var tempInstance = new PlayerMeta();
+        tempInstance.uniqueId = player.getUniqueId();
+        tempInstance.playerName = player.getName();
+
+        return tempInstance;
+    }
+
+    @Override
     public boolean reloadConfiguration()
     {
-        logger.info("[Slave@NetworkData] Dropping cached network player meta...");
-
         dropAll();
-        bindingSlave.requestDataSync();
+
+        var players = ImmutableList.copyOf(Bukkit.getOnlinePlayers())
+                        .stream().map(Player::getUniqueId)
+                        .toList();
+
+        bindingSlave.requestData(players);
 
         return true;
     }
 
     public void dropAll()
     {
+        logger.info("[Slave@NetworkData] Dropping cached network player meta...");
+
         this.localMetaMap.clear();
     }
 
@@ -126,6 +160,20 @@ public class NetworkDataHolder extends MorphPluginObject implements IManagePlaye
     @Override
     public void shouldLoadAllData(boolean shouldLoadAllData)
     {
+    }
+
+    @Override
+    public List<PlayerMeta> getRange(List<UUID> list)
+    {
+        List<PlayerMeta> metaList = new ObjectArrayList<>();
+
+        list.forEach(uuid ->
+        {
+            var existing = localMetaMap.getOrDefault(uuid, null);
+            if (existing != null) metaList.add(existing);
+        });
+
+        return metaList;
     }
 
     @Override
