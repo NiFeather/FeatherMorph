@@ -44,7 +44,7 @@ public class SendSubCommand extends MorphPluginObject implements IConvertibleBri
             }
 
             var id = DisguiseTypes.PLAYER.toId(targetPlayer.getName());
-            if (morphs.getAvaliableDisguisesFor(sourcePlayer).stream()
+            if (morphs.getAvailableDisguisesFor(sourcePlayer).stream()
                     .anyMatch(c -> c.rawIdentifier.equals(id)))
             {
                 MessageUtils.send(sender, RequestStrings.alreadyHaveDisguiseString());

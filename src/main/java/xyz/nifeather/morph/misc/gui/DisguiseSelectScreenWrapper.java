@@ -45,7 +45,7 @@ public class DisguiseSelectScreenWrapper extends ScreenWrapper
     {
         super(bindingPlayer);
 
-        this.disguises = manager.getAvaliableDisguisesFor(bindingPlayer);
+        this.disguises = manager.getAvailableDisguisesFor(bindingPlayer);
         this.bindingState = manager.getDisguiseStateFor(bindingPlayer);
         this.playOpenSound = playOpenSound;
 

@@ -95,7 +95,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         this.data = newDataStore == null ? defaultData : newDataStore;
         logger.info("Updating Player Data Store to %s".formatted(newDataStore));
 
-        reloadConfiguration();
+        reload();
 
         new DataStoreSwitchEvent(this, this.data).callEvent();
     }
@@ -720,7 +720,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         if (!parameters.bypassAvailableCheck)
         {
             String finalKey = disguiseIdentifier;
-            info = getAvaliableDisguisesFor(player).stream()
+            info = getAvailableDisguisesFor(player).stream()
                     .filter(i -> i.getIdentifier().equals(finalKey)).findFirst().orElse(null);
         }
         else if (!disguiseIdentifier.equals("minecraft:player")) // 禁止不带参数的玩家伪装
@@ -1464,7 +1464,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         });
 
         unMorphAll(false);
-        saveConfiguration();
+        save();
 
         offlineStorage.saveConfiguration();
 
@@ -1582,9 +1582,9 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     }
 
     @Override
-    public List<DisguiseMeta> getAvaliableDisguisesFor(Player player)
+    public List<DisguiseMeta> getAvailableDisguisesFor(Player player)
     {
-        var avail = data.getAvaliableDisguisesFor(player);
+        var avail = data.getAvailableDisguisesFor(player);
         return avail == null ? new ObjectArrayList<>() : avail;
     }
 
@@ -1679,7 +1679,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     }
 
     @Override
-    public boolean reloadConfiguration()
+    public boolean reload()
     {
         //重载完数据后要发到离线存储的人
         var stateToOfflineStore = new ObjectArrayList<DisguiseState>();
@@ -1698,7 +1698,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         unMorphAll(false);
 
-        var success = data.reloadConfiguration() && offlineStorage.reloadConfiguration();
+        var success = data.reload() && offlineStorage.reloadConfiguration();
 
         stateToOfflineStore.forEach(offlineStorage::pushDisguiseState);
 
@@ -1731,21 +1731,9 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     }
 
     @Override
-    public boolean saveConfiguration()
+    public boolean save()
     {
-        return data.saveConfiguration() && offlineStorage.saveConfiguration();
-    }
-
-    @Override
-    public void shouldLoadAllData(boolean shouldLoadAllData)
-    {
-        data.shouldLoadAllData(shouldLoadAllData);
-    }
-
-    @Override
-    public List<PlayerMeta> listAll()
-    {
-        return data.listAll();
+        return data.save() && offlineStorage.saveConfiguration();
     }
 
     @Override
@@ -1755,11 +1743,4 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     }
 
     //endregion Implementation of IManagePlayerData
-
-    @ApiStatus.Internal
-    public List<PlayerMeta> listAllPlayerMeta()
-    {
-        data.shouldLoadAllData(true);
-        return data.listAll();
-    }
 }

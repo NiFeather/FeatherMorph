@@ -28,7 +28,7 @@ public interface IManagePlayerData
      * @param player 目标玩家
      * @return 目标玩家拥有的伪装
      */
-    public List<DisguiseMeta> getAvaliableDisguisesFor(Player player);
+    public List<DisguiseMeta> getAvailableDisguisesFor(Player player);
 
     /**
      * 将伪装授予某一玩家
@@ -55,19 +55,9 @@ public interface IManagePlayerData
     @NotNull
     public PlayerMeta getPlayerMeta(OfflinePlayer player);
 
-    public boolean reloadConfiguration();
+    public boolean reload();
 
-    public boolean saveConfiguration();
-
-    /**
-     * @param shouldLoadAllData TRUE if this manager should load all data immediately
-     */
-    void shouldLoadAllData(boolean shouldLoadAllData);
-
-    /**
-     * @return All available PlayerMeta for this manager
-     */
-    List<PlayerMeta> listAll();
+    public boolean save();
 
     @ApiStatus.Internal
     List<PlayerMeta> getRange(List<UUID> list);

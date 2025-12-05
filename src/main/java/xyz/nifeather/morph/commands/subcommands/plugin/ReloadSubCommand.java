@@ -123,7 +123,7 @@ public class ReloadSubCommand extends BrigadierCommand
         {
             config.reload();
             skills.clearCache();
-            morphManager.reloadConfiguration();
+            morphManager.reload();
 
             PlayerSkinProvider.getInstance().reload();
 

@@ -48,7 +48,7 @@ public class NetworkDataHolder extends MorphPluginObject implements IManagePlaye
     }
 
     @Override
-    public List<DisguiseMeta> getAvaliableDisguisesFor(Player player)
+    public List<DisguiseMeta> getAvailableDisguisesFor(Player player)
     {
         var playerMeta = getPlayerMeta(player);
 
@@ -131,7 +131,7 @@ public class NetworkDataHolder extends MorphPluginObject implements IManagePlaye
     }
 
     @Override
-    public boolean reloadConfiguration()
+    public boolean reload()
     {
         dropAll();
 
@@ -152,14 +152,9 @@ public class NetworkDataHolder extends MorphPluginObject implements IManagePlaye
     }
 
     @Override
-    public boolean saveConfiguration()
+    public boolean save()
     {
         return true;
-    }
-
-    @Override
-    public void shouldLoadAllData(boolean shouldLoadAllData)
-    {
     }
 
     @Override
@@ -176,9 +171,4 @@ public class NetworkDataHolder extends MorphPluginObject implements IManagePlaye
         return metaList;
     }
 
-    @Override
-    public List<PlayerMeta> listAll()
-    {
-        return localMetaMap.values().stream().toList();
-    }
 }

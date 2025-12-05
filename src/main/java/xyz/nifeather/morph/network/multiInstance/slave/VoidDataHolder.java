@@ -21,7 +21,7 @@ public class VoidDataHolder implements IManagePlayerData
     }
 
     @Override
-    public ObjectArrayList<DisguiseMeta> getAvaliableDisguisesFor(Player player)
+    public ObjectArrayList<DisguiseMeta> getAvailableDisguisesFor(Player player)
     {
         return new ObjectArrayList<>();
     }
@@ -45,20 +45,15 @@ public class VoidDataHolder implements IManagePlayerData
     }
 
     @Override
-    public boolean reloadConfiguration()
+    public boolean reload()
     {
         return false;
     }
 
     @Override
-    public boolean saveConfiguration()
+    public boolean save()
     {
         return false;
-    }
-
-    @Override
-    public void shouldLoadAllData(boolean shouldLoadAllData)
-    {
     }
 
     @Override
@@ -67,9 +62,4 @@ public class VoidDataHolder implements IManagePlayerData
         return List.of();
     }
 
-    @Override
-    public List<PlayerMeta> listAll()
-    {
-        return List.of();
-    }
 }
