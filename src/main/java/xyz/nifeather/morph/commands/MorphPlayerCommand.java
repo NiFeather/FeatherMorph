@@ -65,7 +65,7 @@ public class MorphPlayerCommand extends MorphPluginObject implements IConvertibl
 
         var input = suggestionsBuilder.getRemainingLowerCase();
 
-        var availableDisguises = morphManager.getAvaliableDisguisesFor(player);
+        var availableDisguises = morphManager.getAvailableDisguisesFor(player);
 
         return CompletableFuture.supplyAsync(() ->
         {
