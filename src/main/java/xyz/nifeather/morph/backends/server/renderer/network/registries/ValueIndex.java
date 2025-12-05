@@ -60,6 +60,9 @@ public class ValueIndex
 
     public static final HappyGhastValues HAPPY_GHAST = new HappyGhastValues();
 
+    public static final ZombieNautilusValues ZOMBIE_NAUTILUS = new ZombieNautilusValues();
+    public static final NautilusValues NAUTILUS = new NautilusValues();
+
     /*
     private static final Map<EntityType, AbstractValues> valuesMap = new ConcurrentHashMap<>();
     private static void register(EntityType type, AbstractValues values)
