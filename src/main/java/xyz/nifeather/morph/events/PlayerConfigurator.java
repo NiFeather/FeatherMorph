@@ -36,11 +36,15 @@ public class PlayerConfigurator extends MorphPluginObject implements Listener
             return;
         }
 
+        long waitTime = 150;
+
         try
         {
             var future = morphManager.loadPlayerDataAsync(uuid);
             future.thenAccept(meta -> this.onPlayerMeta(uuid, meta));
-            future.get(150, TimeUnit.MILLISECONDS);
+
+            if (waitTime > 0)
+                future.get(waitTime, TimeUnit.MILLISECONDS);
         }
         catch (InterruptedException | ExecutionException | TimeoutException ignored)
         {
