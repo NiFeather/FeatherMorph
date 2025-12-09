@@ -25,7 +25,7 @@ public class AvaliableDisguisesProvider extends MorphPluginObject implements IPl
     public @Nullable String resolvePlaceholder(Player player, String param)
     {
         var builder = new StringBuilder();
-        var list = data.getAvaliableDisguisesFor(player);
+        var list = data.getAvailableDisguisesFor(player);
 
         var locale = MessageUtils.getServerLocale();
 

@@ -7,6 +7,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xiamomc.pluginbase.Exceptions.NullDependencyException;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.interfaces.IManagePlayerData;
 import xyz.nifeather.morph.misc.DisguiseMeta;
@@ -18,6 +19,7 @@ import xyz.nifeather.morph.storage.playerdata.PlayerMeta;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class NetworkDataHolder extends MorphPluginObject implements IManagePlayerData
@@ -48,11 +50,29 @@ public class NetworkDataHolder extends MorphPluginObject implements IManagePlaye
     }
 
     @Override
-    public List<DisguiseMeta> getAvaliableDisguisesFor(Player player)
+    public List<DisguiseMeta> getAvailableDisguisesFor(Player player)
     {
         var playerMeta = getPlayerMeta(player);
 
         return playerMeta.getUnlockedDisguises();
+    }
+
+    @Override
+    public CompletableFuture<PlayerMeta> loadPlayerDataAsync(UUID uuid)
+    {
+        var future = new CompletableFuture<PlayerMeta>();
+
+        bindingSlave.requestData(uuid).thenAccept(u ->
+        {
+            var data = nullablePlayerMeta(Bukkit.getOfflinePlayer(u));
+
+            if (data != null)
+                future.complete(data);
+            else
+                future.completeExceptionally(new NullDependencyException("The future of the requested data has been finished, but we can't find a matching data in NetworkDataHolder!"));
+        });
+
+        return future;
     }
 
     @Override
@@ -131,7 +151,7 @@ public class NetworkDataHolder extends MorphPluginObject implements IManagePlaye
     }
 
     @Override
-    public boolean reloadConfiguration()
+    public boolean reload()
     {
         dropAll();
 
@@ -152,14 +172,9 @@ public class NetworkDataHolder extends MorphPluginObject implements IManagePlaye
     }
 
     @Override
-    public boolean saveConfiguration()
+    public boolean save()
     {
         return true;
-    }
-
-    @Override
-    public void shouldLoadAllData(boolean shouldLoadAllData)
-    {
     }
 
     @Override
@@ -176,9 +191,4 @@ public class NetworkDataHolder extends MorphPluginObject implements IManagePlaye
         return metaList;
     }
 
-    @Override
-    public List<PlayerMeta> listAll()
-    {
-        return localMetaMap.values().stream().toList();
-    }
 }

@@ -161,6 +161,17 @@ public class V2ProtocolHandler extends AbstractCommandPacketHandler
 
     public void sendString(Player player, String channel, String message)
     {
+        //todo: This is a workaround for exception from Utf8String#write being thrown, when we have message that's longer than 32767
+        //      While it's possible for us to just raise the limit by calling another writeUtf,
+        //      I just don't want as it would require additional work on the client mod
+        if (message.length() > 32767)
+        {
+            if (FeatherMorphMain.getInstance().debugOutputEnabled())
+                logger.warn("Refusing to send command that's bigger than 32767");
+
+            return;
+        }
+
         var buffer = new FriendlyByteBuf(Unpooled.buffer()).writeUtf(message);
 
         sendPacketRaw(channel, player, buffer);

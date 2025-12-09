@@ -18,6 +18,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -148,9 +149,16 @@ public class PlayerDataStoreNew extends DirectoryJsonBasedStorage<PlayerMeta> im
      * @return 目标玩家拥有的伪装
      */
     @Override
-    public List<DisguiseMeta> getAvaliableDisguisesFor(Player player)
+    public List<DisguiseMeta> getAvailableDisguisesFor(Player player)
     {
         return getPlayerMeta(player).getUnlockedDisguises();
+    }
+
+    @Override
+    public CompletableFuture<PlayerMeta> loadPlayerDataAsync(UUID uuid)
+    {
+        var offline = Bukkit.getOfflinePlayer(uuid);
+        return CompletableFuture.completedFuture(this.getPlayerMeta(offline));
     }
 
     /**
@@ -281,7 +289,7 @@ public class PlayerDataStoreNew extends DirectoryJsonBasedStorage<PlayerMeta> im
     }
 
     @Override
-    public boolean reloadConfiguration()
+    public boolean reload()
     {
         clearCache();
         trackedPlayerMetaMap.clear();
@@ -293,7 +301,7 @@ public class PlayerDataStoreNew extends DirectoryJsonBasedStorage<PlayerMeta> im
     }
 
     @Override
-    public boolean saveConfiguration()
+    public boolean save()
     {
         this.trackedPlayerMetaMap.forEach((uuid, meta) -> this.save(meta));
 
@@ -303,15 +311,6 @@ public class PlayerDataStoreNew extends DirectoryJsonBasedStorage<PlayerMeta> im
     //endregion IManagePlayerData
 
     private final AtomicBoolean noLazyLoad = new AtomicBoolean(false);
-
-    @Override
-    public void shouldLoadAllData(boolean val)
-    {
-        noLazyLoad.set(val);
-
-        if (val)
-            loadAll();
-    }
 
     @Override
     public List<PlayerMeta> getRange(List<UUID> list)
@@ -325,12 +324,6 @@ public class PlayerDataStoreNew extends DirectoryJsonBasedStorage<PlayerMeta> im
         });
 
         return metaList;
-    }
-
-    @Override
-    public List<PlayerMeta> listAll()
-    {
-        return this.trackedPlayerMetaMap.values().stream().toList();
     }
 
     public void loadAll()

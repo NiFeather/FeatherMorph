@@ -197,7 +197,7 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
         if (!uuidsToRequest.isEmpty())
             batchRequests();
 
-        addSchedule(this::requestBatchLoop, 10);
+        addSchedule(this::requestBatchLoop, 2);
     }
 
     private void batchRequests()
@@ -278,11 +278,6 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
                 if (future != null)
                     future.complete(socketMeta.getBindingUuid());
             }
-
-            var player = offlinePlayer.getPlayer();
-
-            if (player != null)
-                clientHandler.refreshPlayerClientMorphs(playerMeta.getUnlockedDisguiseIdentifiers(), player);
         }
     }
 

@@ -15,6 +15,7 @@ import java.io.File;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 @Deprecated(forRemoval = true)
@@ -48,7 +49,7 @@ public class LegacyPlayerDataStore extends MorphJsonBasedStorage<PlayerMetaConta
     //region Implementation of IManagePlayerData
 
     @Override
-    public boolean reloadConfiguration()
+    public boolean reload()
     {
         var success = super.reloadConfiguration();
 
@@ -87,15 +88,9 @@ public class LegacyPlayerDataStore extends MorphJsonBasedStorage<PlayerMetaConta
     }
 
     @Override
-    public void shouldLoadAllData(boolean shouldLoadAllData)
+    public boolean save()
     {
-        throw new RuntimeException("Not implemented");
-    }
-
-    @Override
-    public List<PlayerMeta> listAll()
-    {
-        throw new RuntimeException("Not implemented");
+        return false;
     }
 
     private final int targetConfigurationVersion = 4;
@@ -209,7 +204,7 @@ public class LegacyPlayerDataStore extends MorphJsonBasedStorage<PlayerMetaConta
     @Override
     public boolean revokeMorphFromPlayer(Player player, String disguiseIdentifier)
     {
-        var avaliableDisguises = getAvaliableDisguisesFor(player);
+        var avaliableDisguises = getAvailableDisguisesFor(player);
 
         var meta = avaliableDisguises.stream().filter(d -> d.equals(disguiseIdentifier)).findFirst().orElse(null);
         if (meta == null) return false;
@@ -233,13 +228,19 @@ public class LegacyPlayerDataStore extends MorphJsonBasedStorage<PlayerMetaConta
     }
 
     @Override
-    public List<DisguiseMeta> getAvaliableDisguisesFor(Player player)
+    public List<DisguiseMeta> getAvailableDisguisesFor(Player player)
     {
         return getPlayerMeta(player).getUnlockedDisguises();
     }
 
     @Override
     public List<PlayerMeta> getRange(List<UUID> list)
+    {
+        throw new NotImplementedException();
+    }
+
+    @Override
+    public CompletableFuture<PlayerMeta> loadPlayerDataAsync(UUID uuid)
     {
         throw new NotImplementedException();
     }
