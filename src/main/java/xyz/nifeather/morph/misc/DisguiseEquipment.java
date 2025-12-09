@@ -188,7 +188,10 @@ public class DisguiseEquipment implements ISupportDiffs<DisguiseEquipment>
                     EquipmentSlot.FEET, ItemUtils.itemOrAir(entityEquipment.getBoots()).clone(),
 
                     EquipmentSlot.HAND, ItemUtils.itemOrAir(entityEquipment.getItemInMainHand()).clone(),
-                    EquipmentSlot.OFF_HAND, ItemUtils.itemOrAir(entityEquipment.getItemInOffHand()).clone()
+                    EquipmentSlot.OFF_HAND, ItemUtils.itemOrAir(entityEquipment.getItemInOffHand()).clone(),
+
+                    EquipmentSlot.BODY, ItemUtils.itemOrAir(entityEquipment.getItem(EquipmentSlot.BODY)).clone(),
+                    EquipmentSlot.SADDLE, ItemUtils.itemOrAir(entityEquipment.getItem(EquipmentSlot.SADDLE)).clone()
             ));
         }
 
