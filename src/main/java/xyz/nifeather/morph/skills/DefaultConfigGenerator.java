@@ -32,6 +32,14 @@ public class DefaultConfigGenerator
         return new DefaultConfigGenerator();
     }
 
+    public Map<String, SkillAbilityConfigContainer> generateConfiguration()
+    {
+        this.generateSkills();
+        this.generateAbilities();
+
+        return this.configurations;
+    }
+
     private Map<String, SkillAbilityConfigContainer> configurations = new Object2ObjectOpenHashMap<>();
 
     private SkillAbilityConfigContainer getConfiguration(String mobId)
@@ -53,20 +61,55 @@ public class DefaultConfigGenerator
         return getConfiguration(entityType.key().asString());
     }
 
-    public Map<String, SkillAbilityConfigContainer> generateConfiguration()
-    {
-        this.generateSkills();
-        this.generateAbilities();
-
-        return this.configurations;
-    }
-
-    public void generateSkills()
+    private void generateSkills()
     {
         // 伪装物品
-        this.getConfiguration(EntityType.ARMOR_STAND)
-                .setSkillIdentifier(SkillNames.FAKE_EQUIP)
-                .setSkillCooldown(20);
+        EntityType[] typesToApplyFakeEquip = new EntityType[]
+                {
+                        EntityType.ARMOR_STAND,
+                        EntityType.MANNEQUIN,
+
+                        EntityType.PIG,
+                        EntityType.STRIDER,
+
+                        EntityType.ZOMBIE,
+                        EntityType.DROWNED,
+                        EntityType.ZOMBIE_VILLAGER,
+                        EntityType.SKELETON,
+                        EntityType.STRAY,
+                        EntityType.WITHER_SKELETON,
+                        EntityType.ZOMBIE_VILLAGER,
+                        EntityType.BOGGED,
+
+                        EntityType.EVOKER,
+                        EntityType.PILLAGER,
+                        EntityType.VINDICATOR,
+
+                        EntityType.ZOMBIE_HORSE,
+                        EntityType.SKELETON_HORSE,
+
+                        EntityType.VEX,
+                        EntityType.ALLAY,
+
+                        EntityType.FOX,
+
+                        EntityType.HORSE,
+
+                        EntityType.PIGLIN,
+                        EntityType.PIGLIN_BRUTE,
+                        EntityType.ZOMBIFIED_PIGLIN,
+
+                        EntityType.VILLAGER,
+                        EntityType.WANDERING_TRADER,
+                        EntityType.WITCH
+                };
+
+        for (EntityType type : typesToApplyFakeEquip)
+        {
+            this.getConfiguration(type)
+                    .setSkillIdentifier(SkillNames.FAKE_EQUIP)
+                    .setSkillCooldown(20);
+        }
 
         this.getConfiguration("player:" + MorphManager.disguiseFallbackName)
                 .setSkillIdentifier(SkillNames.FAKE_EQUIP)
@@ -158,10 +201,6 @@ public class DefaultConfigGenerator
         this.getConfiguration(EntityType.GUARDIAN)
                 .setSkillIdentifier(SkillNames.GUARDIAN)
                 .setSkillCooldown(80);
-
-        this.getConfiguration(EntityType.MANNEQUIN)
-                .setSkillIdentifier(SkillNames.FAKE_EQUIP)
-                .setSkillCooldown(20);
     }
 
     private void setAbilityRange(Collection<EntityType> types, NamespacedKey abilityType)
@@ -170,7 +209,7 @@ public class DefaultConfigGenerator
             this.getConfiguration(type).addAbility(abilityType);
     }
 
-    public void generateAbilities()
+    private void generateAbilities()
     {
         for (var type : EntityTypeUtils.canFly())
         {
