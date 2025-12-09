@@ -191,8 +191,8 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
         pluginManager = Bukkit.getPluginManager();
         var bukkitVersion = Bukkit.getMinecraftVersion();
 
-        String primaryVersion = "1.21.11 Release Candidate 1";
-        String[] compatVersions = new String[] { primaryVersion };
+        String primaryVersion = "1.21.11";
+        String[] compatVersions = new String[] { primaryVersion, "1.21.11 Release Candidate 3" };
         if (Arrays.stream(compatVersions).noneMatch(bukkitVersion::equals))
         {
             printImportantWarning(
