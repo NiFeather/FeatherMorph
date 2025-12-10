@@ -188,7 +188,6 @@ public class IconLookup
         for (ITextIconProvider stringOptionalFunction : this.customComponentSupplier)
         {
             var result = stringOptionalFunction.resolve(disguiseIdentifier);
-            System.out.println("Text icon for %s is %s".formatted(disguiseIdentifier, result.orElse(null)));
             if (result.isPresent()) return result.get();
         }
 
