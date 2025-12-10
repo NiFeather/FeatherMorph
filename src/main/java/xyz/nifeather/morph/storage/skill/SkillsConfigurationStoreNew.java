@@ -44,7 +44,7 @@ public class SkillsConfigurationStoreNew extends DirectoryJsonBasedStorage<Skill
             logger.warn("The package version is newer than our implementation! Errors may occur!");
     }
 
-    private static final int TARGET_PACKAGE_VERSION = PackageVersions.EXTENDED_INVENTORY_SKILL;
+    private static final int TARGET_PACKAGE_VERSION = PackageVersions.ZOMBIE_NAUTILUS_ABILITY;
 
     private void update(int currentVersion)
     {
@@ -167,6 +167,12 @@ public class SkillsConfigurationStoreNew extends DirectoryJsonBasedStorage<Skill
                 migrator.accept(entityType);
 
             logger.info("Done adding fake_equip skill for several mobs");
+        }
+
+        if (currentVersion < PackageVersions.ZOMBIE_NAUTILUS_ABILITY)
+        {
+            saveEntityTypeConfiguration(generatedConfigurations, EntityType.ZOMBIE_NAUTILUS);
+            saveEntityTypeConfiguration(generatedConfigurations, EntityType.NAUTILUS);
         }
 
         setPackageVersion(TARGET_PACKAGE_VERSION);
@@ -469,5 +475,10 @@ public class SkillsConfigurationStoreNew extends DirectoryJsonBasedStorage<Skill
          * For all applicable types, see {@link DefaultConfigGenerator#generateSkills()}
          */
         public static final int EXTENDED_INVENTORY_SKILL = 10;
+
+        /**
+         * Zombie Nautilus should burn under sun
+         */
+        public static final int ZOMBIE_NAUTILUS_ABILITY = 11;
     }
 }

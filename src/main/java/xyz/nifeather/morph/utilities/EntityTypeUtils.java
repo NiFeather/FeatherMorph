@@ -261,7 +261,7 @@ public class EntityTypeUtils
         return ObjectSet.of(EntityType.COD, EntityType.SALMON, EntityType.PUFFERFISH, EntityType.TROPICAL_FISH,
                 EntityType.SQUID, EntityType.GLOW_SQUID,
                 EntityType.AXOLOTL, EntityType.GUARDIAN, EntityType.ELDER_GUARDIAN, EntityType.DOLPHIN,
-                EntityType.TADPOLE, EntityType.DROWNED);
+                EntityType.TADPOLE, EntityType.DROWNED, EntityType.ZOMBIE_NAUTILUS, EntityType.NAUTILUS);
     }
 
     public static Set<EntityType> dryOutInAir()
@@ -269,14 +269,14 @@ public class EntityTypeUtils
         return ObjectSet.of(EntityType.COD, EntityType.SALMON, EntityType.PUFFERFISH, EntityType.TROPICAL_FISH,
                 EntityType.SQUID, EntityType.GLOW_SQUID,
                 EntityType.AXOLOTL, EntityType.GUARDIAN, EntityType.ELDER_GUARDIAN, EntityType.DOLPHIN,
-                EntityType.TADPOLE);
+                EntityType.TADPOLE, EntityType.ZOMBIE_NAUTILUS, EntityType.NAUTILUS);
     }
 
     public static Set<EntityType> burnsUnderSun()
     {
         return ObjectSet.of(EntityType.ZOMBIE, EntityType.ZOMBIE_VILLAGER,
                 EntityType.SKELETON, EntityType.STRAY,
-                EntityType.DROWNED, EntityType.PHANTOM);
+                EntityType.DROWNED, EntityType.PHANTOM, EntityType.ZOMBIE_NAUTILUS);
     }
 
     public static Set<EntityType> spider()
