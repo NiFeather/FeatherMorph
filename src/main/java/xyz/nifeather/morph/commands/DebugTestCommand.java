@@ -1,12 +1,16 @@
 package xyz.nifeather.morph.commands;
 
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.suggestion.Suggestions;
+import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
 import io.papermc.paper.command.brigadier.argument.resolvers.selector.EntitySelectorArgumentResolver;
 import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSelectorArgumentResolver;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.EntityType;
@@ -17,12 +21,18 @@ import xiamomc.pluginbase.Messages.FormattableMessage;
 import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.api.FeatherMorphAPI;
+import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.values.AbstractValues;
+import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.values.SingleValue;
+import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.commands.brigadier.BrigadierCommand;
 import xyz.nifeather.morph.storage.skill.SkillAbilityConfigContainer;
 import xyz.nifeather.morph.storage.skill.SkillsConfigurationStoreNew;
 
+import java.lang.reflect.Field;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 public class DebugTestCommand extends BrigadierCommand
@@ -109,6 +119,16 @@ public class DebugTestCommand extends BrigadierCommand
         );
 
         dispatcher.register(
+                Commands.literal("debugForValue")
+                        .then(
+                                Commands.argument("value", StringArgumentType.greedyString())
+                                        .suggests(this::suggestValueIndex)
+                                        .executes(this::getDebugValue)
+                        )
+                        .build()
+        );
+
+        dispatcher.register(
                 Commands.literal("listProperties")
                         .then(
                                 Commands.argument("entity", ArgumentTypes.entity())
@@ -117,6 +137,56 @@ public class DebugTestCommand extends BrigadierCommand
         );
 
         return true;
+    }
+
+    private CompletableFuture<Suggestions> suggestValueIndex(CommandContext<CommandSourceStack> context, SuggestionsBuilder builder)
+    {
+        return CompletableFuture.supplyAsync(() ->
+        {
+            var remaining = builder.getRemainingLowerCase();
+            Arrays.stream(ValueIndex.class.getFields())
+                    .map(Field::getName)
+                    .filter(name -> name.toLowerCase().contains(remaining))
+                    .forEach(builder::suggest);
+
+            return builder.build();
+        });
+    }
+
+    private int getDebugValue(CommandContext<CommandSourceStack> context)
+    {
+        var filter = StringArgumentType.getString(context, "value");
+
+        var field = Arrays.stream(ValueIndex.class.getFields())
+                .filter(f -> f.getName().equalsIgnoreCase(filter))
+                .findFirst()
+                .orElse(null);
+
+        if (field == null)
+        {
+            context.getSource().getSender().sendMessage("No such field: " + filter);
+            return 0;
+        }
+
+        AbstractValues instance = null;
+        try
+        {
+            instance = (AbstractValues) field.get(null);
+        }
+        catch (IllegalAccessException e)
+        {
+            context.getSource().getSender().sendMessage("Failed to get: " + e.getMessage());
+            logger.error("Failed to get field", e);
+            return 0;
+        }
+        var list = new ObjectArrayList<>(instance.getValues());
+        list.sort(Comparator.comparingInt(SingleValue::index));
+        list.forEach(sv ->
+        {
+            context.getSource().getSender().sendMessage("%s 上的SV是 %s".formatted(sv.index(), sv.name()));
+        });
+
+        return 1;
     }
 
     private int listProperties(CommandContext<CommandSourceStack> context) throws CommandSyntaxException

@@ -4,6 +4,7 @@ import com.destroystokyo.paper.ClientOption;
 import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.protocol.entity.pose.EntityPose;
 import com.github.retrooper.packetevents.protocol.player.GameMode;
+import com.github.retrooper.packetevents.protocol.player.HumanoidArm;
 import com.github.retrooper.packetevents.util.Vector3i;
 import com.github.retrooper.packetevents.wrapper.PacketWrapper;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerPlayerInfoRemove;
@@ -12,6 +13,7 @@ import io.github.retrooper.packetevents.util.SpigotConversionUtil;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.MainHand;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntry;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
@@ -54,7 +56,7 @@ public class PlayerWatcher extends LivingEntityWatcher
         this.writeTemp(ValueIndex.PLAYER.SKIN_FLAGS, (byte)bindingPlayer.getClientOption(ClientOption.SKIN_PARTS).getRaw());
 
         if (!this.isValuePresent(ValueIndex.PLAYER.MAINHAND))
-            this.writeTemp(ValueIndex.PLAYER.MAINHAND, (byte)bindingPlayer.getMainHand().ordinal());
+            this.writeTemp(ValueIndex.PLAYER.MAINHAND, bindingPlayer.getMainHand() == MainHand.LEFT ? HumanoidArm.LEFT : HumanoidArm.RIGHT);
     }
 
     @Override
@@ -69,7 +71,7 @@ public class PlayerWatcher extends LivingEntityWatcher
             var hand = handStatus.bindingHand;
             assert hand != null;
 
-            this.writePersistent(ValueIndex.PLAYER.MAINHAND, (byte) hand.ordinal());
+            this.writePersistent(ValueIndex.PLAYER.MAINHAND, hand == MainHand.LEFT ? HumanoidArm.LEFT : HumanoidArm.RIGHT);
         }
 
         super.onPropertyWrite(property, value);
