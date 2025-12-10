@@ -30,4 +30,6 @@ public class SkillNames
 
     public static final NamespacedKey UNKNOWN = new NamespacedKey(nameSpace, "unknown");
     public static final NamespacedKey NONE = new NamespacedKey(nameSpace, "none");
+
+    public static final NamespacedKey DASH = new NamespacedKey(nameSpace, "dash");
 }

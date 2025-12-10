@@ -14,6 +14,7 @@ import xyz.nifeather.morph.api.morphs.abilities.AbilityNames;
 import xyz.nifeather.morph.api.morphs.skills.SkillNames;
 import xyz.nifeather.morph.misc.disguiseProperty.ParseErrorException;
 import xyz.nifeather.morph.skills.DefaultConfigGenerator;
+import xyz.nifeather.morph.skills.options.DashConfiguration;
 import xyz.nifeather.morph.storage.DirectoryJsonBasedStorage;
 import xyz.nifeather.morph.storage.MorphJsonBasedStorage;
 
@@ -44,7 +45,7 @@ public class SkillsConfigurationStoreNew extends DirectoryJsonBasedStorage<Skill
             logger.warn("The package version is newer than our implementation! Errors may occur!");
     }
 
-    private static final int TARGET_PACKAGE_VERSION = PackageVersions.ZOMBIE_NAUTILUS_ABILITY;
+    private static final int TARGET_PACKAGE_VERSION = PackageVersions.DASH;
 
     private void update(int currentVersion)
     {
@@ -173,6 +174,34 @@ public class SkillsConfigurationStoreNew extends DirectoryJsonBasedStorage<Skill
         {
             saveEntityTypeConfiguration(generatedConfigurations, EntityType.ZOMBIE_NAUTILUS);
             saveEntityTypeConfiguration(generatedConfigurations, EntityType.NAUTILUS);
+        }
+
+        if (currentVersion < PackageVersions.DASH)
+        {
+            saveEntityTypeConfiguration(generatedConfigurations, EntityType.CAMEL_HUSK);
+
+            Consumer<EntityType> migrator = type ->
+            {
+                var config = this.get(type.key().asString());
+
+                if (config == null)
+                {
+                    saveEntityTypeConfiguration(generatedConfigurations, type);
+                    return;
+                }
+
+                if (!config.getSkillIdentifier().equals(SkillNames.NONE))
+                    return;
+
+                config.setSkillIdentifier(SkillNames.DASH)
+                        .setOption(SkillNames.DASH, DashConfiguration.OPTION_HANDLER, new DashConfiguration(false, 1.023, "entity.camel.dash"))
+                        .setSkillCooldown(55);
+
+                config.legacy_MobID = type.key().asString();
+                save(config);
+            };
+
+            migrator.accept(EntityType.CAMEL);
         }
 
         setPackageVersion(TARGET_PACKAGE_VERSION);
@@ -480,5 +509,10 @@ public class SkillsConfigurationStoreNew extends DirectoryJsonBasedStorage<Skill
          * Zombie Nautilus should burn under sun
          */
         public static final int ZOMBIE_NAUTILUS_ABILITY = 11;
+
+        /**
+         * The `dash` skill is introduced for Nautilus / Zombie Nautilus / Camel / Camel Husk
+         */
+        public static final int DASH = 12;
     }
 }

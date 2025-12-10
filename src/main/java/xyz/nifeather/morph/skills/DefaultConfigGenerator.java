@@ -7,16 +7,11 @@ import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.EntityType;
 import org.bukkit.potion.PotionEffectType;
 import xyz.nifeather.morph.MorphManager;
-import xyz.nifeather.morph.abilities.AbilityManager;
-import xyz.nifeather.morph.abilities.impl.FlyAbility;
 import xyz.nifeather.morph.abilities.options.*;
 import xyz.nifeather.morph.api.morphs.abilities.AbilityNames;
 import xyz.nifeather.morph.api.morphs.skills.SkillNames;
 import xyz.nifeather.morph.skills.impl.SonicBoomMorphSkill;
-import xyz.nifeather.morph.skills.options.EffectConfiguration;
-import xyz.nifeather.morph.skills.options.ExplosionConfiguration;
-import xyz.nifeather.morph.skills.options.ProjectileConfiguration;
-import xyz.nifeather.morph.skills.options.TeleportConfiguration;
+import xyz.nifeather.morph.skills.options.*;
 import xyz.nifeather.morph.storage.skill.SkillAbilityConfigContainer;
 import xyz.nifeather.morph.utilities.DisguiseUtils;
 import xyz.nifeather.morph.utilities.EntityTypeUtils;
@@ -201,6 +196,26 @@ public class DefaultConfigGenerator
         this.getConfiguration(EntityType.GUARDIAN)
                 .setSkillIdentifier(SkillNames.GUARDIAN)
                 .setSkillCooldown(80);
+
+        this.getConfiguration(EntityType.NAUTILUS)
+                .setSkillIdentifier(SkillNames.DASH)
+                .setOption(SkillNames.DASH, DashConfiguration.OPTION_HANDLER, new DashConfiguration(true, 1.364, "entity.nautilus.dash"))
+                .setSkillCooldown(60);
+
+        this.getConfiguration(EntityType.ZOMBIE_NAUTILUS)
+                .setSkillIdentifier(SkillNames.DASH)
+                .setOption(SkillNames.DASH, DashConfiguration.OPTION_HANDLER, new DashConfiguration(true, 1.364, "entity.nautilus.dash"))
+                .setSkillCooldown(60);
+
+        this.getConfiguration(EntityType.CAMEL_HUSK)
+                .setSkillIdentifier(SkillNames.DASH)
+                .setOption(SkillNames.DASH, DashConfiguration.OPTION_HANDLER, new DashConfiguration(false, 1.023, "entity.camel_husk.dash"))
+                .setSkillCooldown(55);
+
+        this.getConfiguration(EntityType.CAMEL)
+                .setSkillIdentifier(SkillNames.DASH)
+                .setOption(SkillNames.DASH, DashConfiguration.OPTION_HANDLER, new DashConfiguration(false, 1.023, "entity.camel.dash"))
+                .setSkillCooldown(55);
     }
 
     private void setAbilityRange(Collection<EntityType> types, NamespacedKey abilityType)
