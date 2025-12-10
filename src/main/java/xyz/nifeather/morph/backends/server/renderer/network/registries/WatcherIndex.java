@@ -100,6 +100,9 @@ public class WatcherIndex
 
         setTypeWatcher(EntityType.MANNEQUIN, MannequinWatcher::new);
         setTypeWatcher(EntityType.COPPER_GOLEM, CopperGolemWatcher::new);
+
+        setTypeWatcher(EntityType.NAUTILUS, NautilusWatcher::new);
+        setTypeWatcher(EntityType.ZOMBIE_NAUTILUS, ZombieNautilusWatcher::new);
     }
 
     private void setTypeWatcher(EntityType type, Function<Player, SingleWatcher> func)
