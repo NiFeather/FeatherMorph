@@ -188,6 +188,7 @@ public class IconLookup
         for (ITextIconProvider stringOptionalFunction : this.customComponentSupplier)
         {
             var result = stringOptionalFunction.resolve(disguiseIdentifier);
+            System.out.println("Text icon for %s is %s".formatted(disguiseIdentifier, result.orElse(null)));
             if (result.isPresent()) return result.get();
         }
 
@@ -230,7 +231,7 @@ public class IconLookup
             if (model.asString().contains("skull") || model.asString().contains("head"))
                 return getSkullIcon(model);
 
-            return Optional.of(Component.object(ObjectContents.sprite(Key.key("item/" + model.value()))));
+            return Optional.of(Component.object(ObjectContents.sprite(Key.key("items"), Key.key("item/" + model.value()))));
         }
 
         return Optional.empty();
