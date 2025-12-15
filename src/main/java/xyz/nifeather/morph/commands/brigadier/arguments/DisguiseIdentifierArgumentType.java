@@ -19,6 +19,7 @@ import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.misc.DisguiseMeta;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -83,7 +84,8 @@ public class DisguiseIdentifierArgumentType extends MorphPluginObject implements
 
         String input = builder.getRemainingLowerCase();
 
-        var availableDisguises = morphs.getAvailableDisguisesFor(player);
+        var data = morphs.getDataStore().getIfLoaded(player.getUniqueId());
+        List<DisguiseMeta> availableDisguises = data != null ? data.getUnlockedDisguises() : Collections.emptyList();
 
         return CompletableFuture.supplyAsync(() ->
         {

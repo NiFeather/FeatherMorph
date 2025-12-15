@@ -14,8 +14,11 @@ import xiamomc.pluginbase.Annotations.Resolved;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.config.ConfigOptions;
 import xyz.nifeather.morph.config.MorphConfigManager;
+import xyz.nifeather.morph.messages.MessageUtils;
+import xyz.nifeather.morph.messages.strings.CommonStrings;
 import xyz.nifeather.morph.messages.strings.GuiStrings;
 import xyz.nifeather.morph.messages.strings.MorphStrings;
+import xyz.nifeather.morph.messages.strings.TypesString;
 import xyz.nifeather.morph.misc.DisguiseMeta;
 import xyz.nifeather.morph.misc.DisguiseState;
 
@@ -29,6 +32,8 @@ public class DisguiseSelectScreenWrapper extends ScreenWrapper
     private final List<DisguiseMeta> disguises;
 
     private final boolean playOpenSound;
+
+    private final boolean dataAvailable;
 
     @Resolved(shouldSolveImmediately = true)
     private MorphManager manager;
@@ -45,7 +50,10 @@ public class DisguiseSelectScreenWrapper extends ScreenWrapper
     {
         super(bindingPlayer);
 
-        this.disguises = manager.getAvailableDisguisesFor(bindingPlayer);
+        var data = manager.getDataStore().getIfLoaded(bindingPlayer.getUniqueId());
+        dataAvailable = data != null;
+
+        this.disguises = data != null ? data.getUnlockedDisguises() : List.of();
         this.bindingState = manager.getDisguiseStateFor(bindingPlayer);
         this.playOpenSound = playOpenSound;
 
@@ -140,7 +148,11 @@ public class DisguiseSelectScreenWrapper extends ScreenWrapper
         // Build page
         var array = rows.toArray(new String[]{});
 
-        var skel = new InventoryGui(plugin, GuiStrings.selectDisguise().createString(playerLocale), array);
+        String title = dataAvailable
+                ? GuiStrings.selectDisguise().createString(playerLocale)
+                : CommonStrings.dataNotLoaded().resolve("what", TypesString.playerData()).createString(playerLocale);
+
+        var skel = new InventoryGui(plugin, title, array);
 
         skel.setItemNameSetter(this::parseItemName);
         skel.setItemLoreSetter(this::parseItemLore);

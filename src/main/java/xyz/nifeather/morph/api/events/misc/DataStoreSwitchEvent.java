@@ -4,7 +4,7 @@ import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
 import xyz.nifeather.morph.MorphManager;
-import xyz.nifeather.morph.interfaces.IManagePlayerData;
+import xyz.nifeather.morph.storage.IPlayerDataBackend;
 
 public class DataStoreSwitchEvent extends Event
 {
@@ -17,9 +17,9 @@ public class DataStoreSwitchEvent extends Event
         return manager;
     }
 
-    private final IManagePlayerData dataStore;
+    private final IPlayerDataBackend dataStore;
 
-    public IManagePlayerData newDataStore()
+    public IPlayerDataBackend newDataStore()
     {
         return dataStore;
     }
@@ -35,7 +35,7 @@ public class DataStoreSwitchEvent extends Event
         return handlers;
     }
 
-    public DataStoreSwitchEvent(MorphManager manager, IManagePlayerData newDataStore)
+    public DataStoreSwitchEvent(MorphManager manager, IPlayerDataBackend newDataStore)
     {
         this.manager = manager;
         this.dataStore = newDataStore;

@@ -1,4 +1,4 @@
-package xyz.nifeather.morph.interfaces;
+package xyz.nifeather.morph.storage.playerdata.legacy;
 
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
@@ -12,7 +12,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-public interface IManagePlayerData
+@Deprecated(forRemoval = true)
+public interface LegacyPlayerDataInterface
 {
     /**
      * 获取伪装信息

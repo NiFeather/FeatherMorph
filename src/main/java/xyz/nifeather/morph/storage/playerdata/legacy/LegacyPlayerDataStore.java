@@ -1,4 +1,4 @@
-package xyz.nifeather.morph.storage.playerdata;
+package xyz.nifeather.morph.storage.playerdata.legacy;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.apache.commons.lang3.NotImplementedException;
@@ -6,10 +6,11 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.nifeather.morph.interfaces.IManagePlayerData;
 import xyz.nifeather.morph.misc.DisguiseMeta;
 import xyz.nifeather.morph.misc.DisguiseTypes;
 import xyz.nifeather.morph.storage.MorphJsonBasedStorage;
+import xyz.nifeather.morph.storage.playerdata.PlayerMeta;
+import xyz.nifeather.morph.storage.playerdata.PlayerMetaContainer;
 
 import java.io.File;
 import java.util.List;
@@ -18,8 +19,9 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+@SuppressWarnings("removal")
 @Deprecated(forRemoval = true)
-public class LegacyPlayerDataStore extends MorphJsonBasedStorage<PlayerMetaContainer> implements IManagePlayerData
+public class LegacyPlayerDataStore extends MorphJsonBasedStorage<PlayerMetaContainer> implements LegacyPlayerDataInterface
 {
     private final List<DisguiseMeta> cachedMetas = new CopyOnWriteArrayList<>();
 

@@ -15,6 +15,8 @@ import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.commands.brigadier.BrigadierCommand;
 import xyz.nifeather.morph.messages.strings.CommandStrings;
 import xyz.nifeather.morph.messages.MessageUtils;
+import xyz.nifeather.morph.messages.strings.CommonStrings;
+import xyz.nifeather.morph.messages.strings.TypesString;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 
 import java.util.List;
@@ -86,7 +88,13 @@ public class LookupSubCommand extends BrigadierCommand
     private void doLookup(CommandSender sender, String who, @Nullable String filterName)
     {
         var offlinePlayer = Bukkit.getOfflinePlayer(who);
-        var configuration = manager.getPlayerMeta(offlinePlayer);
+        var configuration = manager.getDataStore().getIfLoaded(offlinePlayer.getUniqueId());
+
+        if (configuration == null)
+        {
+            MessageUtils.send(sender, CommonStrings.dataNotLoaded().resolve("what", TypesString.playerData()));
+            return;
+        }
 
         List<String> matches;
 

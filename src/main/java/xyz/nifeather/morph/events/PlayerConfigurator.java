@@ -8,14 +8,10 @@ import org.bukkit.event.Listener;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.MorphPluginObject;
-import xyz.nifeather.morph.interfaces.IManagePlayerData;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
 import xyz.nifeather.morph.storage.playerdata.PlayerMeta;
 
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 public class PlayerConfigurator extends MorphPluginObject implements Listener
 {
@@ -36,19 +32,7 @@ public class PlayerConfigurator extends MorphPluginObject implements Listener
             return;
         }
 
-        long waitTime = 150;
-
-        try
-        {
-            var future = morphManager.loadPlayerDataAsync(uuid);
-            future.thenAccept(meta -> this.onPlayerMeta(uuid, meta));
-
-            if (waitTime > 0)
-                future.get(waitTime, TimeUnit.MILLISECONDS);
-        }
-        catch (InterruptedException | ExecutionException | TimeoutException ignored)
-        {
-        }
+        morphManager.getDataStore().getOrLoad(uuid).thenAccept(meta -> onPlayerMeta(uuid, meta));
     }
 
     private void onPlayerMeta(UUID uuid, PlayerMeta playerMeta)

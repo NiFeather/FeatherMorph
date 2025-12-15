@@ -5,8 +5,8 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Annotations.Resolved;
+import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.MorphPluginObject;
-import xyz.nifeather.morph.interfaces.IManagePlayerData;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.misc.integrations.placeholderapi.IPlaceholderProvider;
 
@@ -19,13 +19,18 @@ public class AvaliableDisguisesProvider extends MorphPluginObject implements IPl
     }
 
     @Resolved
-    private IManagePlayerData data;
+    private MorphManager morphManager;
 
     @Override
     public @Nullable String resolvePlaceholder(Player player, String param)
     {
         var builder = new StringBuilder();
-        var list = data.getAvailableDisguisesFor(player);
+
+        var data = morphManager.getDataStore().getIfLoaded(player.getUniqueId());
+        if (data == null)
+            return "Data not loaded";
+
+        var list = data.getUnlockedDisguises();
 
         var locale = MessageUtils.getServerLocale();
 

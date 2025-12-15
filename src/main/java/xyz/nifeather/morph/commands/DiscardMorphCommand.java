@@ -53,11 +53,18 @@ public class DiscardMorphCommand extends MorphPluginObject implements IConvertib
         }
 
         String targetID = DisguiseIdentifierArgumentType.getArgument(context, "discard-target");
-        var formattable = morphManager.revokeMorphFromPlayer(player, targetID)
-                ? CommandStrings.revokeSuccessString()
-                : CommandStrings.revokeFailString();
 
-        MessageUtils.send(sender, formattable.resolve("what", targetID).resolve("who", player.getName()));
+        MessageUtils.send(sender, CommonStrings.requestingRemote());
+
+        morphManager.revokeMorphFromPlayer(player, targetID)
+                .thenAccept(success ->
+                {
+                    var formattable = success
+                            ? CommandStrings.revokeSuccessString()
+                            : CommandStrings.revokeFailString();
+
+                    MessageUtils.send(sender, formattable.resolve("what", targetID).resolve("who", player.getName()));
+                });
 
         return 1;
     }

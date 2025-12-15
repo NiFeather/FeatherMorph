@@ -9,7 +9,7 @@ import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Messages.FormattableMessage;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.commands.brigadier.BrigadierCommand;
-import xyz.nifeather.morph.interfaces.IManagePlayerData;
+import xyz.nifeather.morph.storage.IPlayerDataBackend;
 import xyz.nifeather.morph.messages.strings.HelpStrings;
 
 public class ToggleSelfSubCommand extends BrigadierCommand
@@ -35,9 +35,6 @@ public class ToggleSelfSubCommand extends BrigadierCommand
     @Resolved
     private MorphManager manager;
 
-    @Resolved
-    private IManagePlayerData data;
-
     @Override
     public void registerAsChild(ArgumentBuilder<CommandSourceStack, ?> parentBuilder)
     {
@@ -55,7 +52,8 @@ public class ToggleSelfSubCommand extends BrigadierCommand
         if (!(context.getSource().getExecutor() instanceof Player player))
             return 1;
 
-        manager.setSelfDisguiseVisible(player, !data.getPlayerMeta(player).showDisguiseToSelf, true);
+        manager.getDataStore().getOrLoad(player.getUniqueId())
+                        .thenAccept(meta -> manager.setSelfDisguiseVisible(player, !meta.showDisguiseToSelf, true));
 
         return 1;
     }

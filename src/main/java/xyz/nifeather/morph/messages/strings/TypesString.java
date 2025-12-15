@@ -44,6 +44,11 @@ public class TypesString extends AbstractMorphStrings
         return getFormattable(getKey("locale_file"), "[Fallback] 语言文件");
     }
 
+    public static FormattableMessage playerData()
+    {
+        return getFormattable(getKey("player_data"), "[fallback] 玩家数据");
+    }
+
     private static String getKey(String key)
     {
         return "types." + key;

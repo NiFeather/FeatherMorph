@@ -35,12 +35,9 @@ import xyz.nifeather.morph.backends.client.ModBackend;
 import xyz.nifeather.morph.backends.server.ServerBackend;
 import xyz.nifeather.morph.config.ConfigOptions;
 import xyz.nifeather.morph.config.MorphConfigManager;
-import xyz.nifeather.morph.interfaces.IManagePlayerData;
-import xyz.nifeather.morph.messages.strings.CommandStrings;
-import xyz.nifeather.morph.messages.strings.ExceptionStrings;
-import xyz.nifeather.morph.messages.strings.HintStrings;
+import xyz.nifeather.morph.messages.strings.*;
+import xyz.nifeather.morph.storage.IPlayerDataBackend;
 import xyz.nifeather.morph.messages.MessageUtils;
-import xyz.nifeather.morph.messages.strings.MorphStrings;
 import xyz.nifeather.morph.misc.*;
 import xyz.nifeather.morph.misc.disguiseProperty.*;
 import xyz.nifeather.morph.misc.disguiseProperty.values.OffTreeProperties;
@@ -76,23 +73,23 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class MorphManager extends MorphPluginObject implements IManagePlayerData
+public class MorphManager extends MorphPluginObject
 {
     private final List<DisguiseState> activeDisguises = ObjectLists.synchronize(new ObjectArrayList<>());
 
-    private final IManagePlayerData defaultData = new PlayerDataStoreNew();
+    private final IPlayerDataBackend defaultData = new PlayerDataStoreNew();
 
     @NotNull
-    private volatile IManagePlayerData data = new PlayerDataStoreNew();
+    private volatile IPlayerDataBackend data = new PlayerDataStoreNew();
 
     private final OfflineStateStore offlineStorage = new OfflineStateStore();
 
-    public IManagePlayerData getDataStore()
+    public IPlayerDataBackend getDataStore()
     {
         return data;
     }
 
-    public void setDataStore(@Nullable IManagePlayerData newDataStore)
+    public void setDataStore(@Nullable IPlayerDataBackend newDataStore)
     {
         this.data = newDataStore == null ? defaultData : newDataStore;
         logger.info("Updating Player Data Store to %s".formatted(newDataStore));
@@ -585,7 +582,14 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         try
         {
-            var meta = prepareDisguiseMeta(parameters);
+            var playerMeta = data.getIfLoaded(parameters.targetPlayer.getUniqueId());
+            if (playerMeta == null)
+            {
+                MessageUtils.send(parameters.targetPlayer, CommonStrings.dataNotLoaded().resolve("what", TypesString.playerData()));
+                return false;
+            }
+
+            var meta = prepareDisguiseMeta(parameters, playerMeta);
             if (meta == null)
                 return false;
 
@@ -614,11 +618,10 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 default -> throw new InvalidObjectException("Invalid validate result: " + validateResult);
             }
 
-            var buildResult = prepareDisguiseState(parameters, meta);
+            var buildResult = prepareDisguiseState(parameters, meta, playerMeta);
             if (!buildResult.success())
                 return false;
 
-            var playerMeta = getPlayerMeta(parameters.targetPlayer);
             this.buildDisguise(buildResult, parameters);
 
             if (!applyDisguise(parameters, buildResult.state(), playerMeta))
@@ -661,7 +664,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
      * @return 一个DisguiseMeta，如果构建失败则返回Null
      */
     @Nullable
-    private DisguiseMeta prepareDisguiseMeta(MorphParameters parameters)
+    private DisguiseMeta prepareDisguiseMeta(MorphParameters parameters, PlayerMeta playerData)
     {
         // 确保source不为null
         var source = parameters.commandSource == null ? nilCommandSource : parameters.commandSource;
@@ -722,7 +725,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         if (!parameters.bypassAvailableCheck)
         {
             String finalKey = disguiseIdentifier;
-            info = getAvailableDisguisesFor(player).stream()
+            info = playerData.getUnlockedDisguises().stream()
                     .filter(i -> i.getIdentifier().equals(finalKey)).findFirst().orElse(null);
         }
         else if (!disguiseIdentifier.equals("minecraft:player")) // 禁止不带参数的玩家伪装
@@ -769,7 +772,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
      * @return {@link DisguiseBuildResult} ，如果不能进行下一步则返回null
      */
     @NotNull
-    private DisguiseBuildResult prepareDisguiseState(MorphParameters parameters, DisguiseMeta disguiseMeta)
+    private DisguiseBuildResult prepareDisguiseState(MorphParameters parameters, DisguiseMeta disguiseMeta, PlayerMeta playerData)
         throws ParseErrorException
     {
         // 确保source不为null
@@ -804,10 +807,9 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             var rawIdentifierHasSkill = skillManager.hasSkill(disguiseIdentifier) || skillManager.hasSpeficSkill(disguiseIdentifier, SkillNames.NONE);
             var targetSkillID = rawIdentifierHasSkill ? disguiseIdentifier : provider.getNameSpace() + ":" + MorphManager.disguiseFallbackName;
 
-            var playerMorphConfig = getPlayerMeta(player);
             outComingState = new DisguiseState(player, disguiseIdentifier, targetSkillID,
                     wrapper, provider,
-                    clientHandler.getPlayerOption(player, true), playerMorphConfig);
+                    clientHandler.getPlayerOption(player, true), playerData);
 
             return DisguiseBuildResult.of(outComingState, disguiseMeta);
         }
@@ -1407,26 +1409,28 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     public void setSelfDisguiseVisible(Player player, boolean value, boolean saveToConfig, boolean dontSetServerSide, boolean noClientCommand)
     {
         var state = getDisguiseStateFor(player);
-        var config = data.getPlayerMeta(player);
 
-        if (state != null)
+        data.getOrLoad(player.getUniqueId()).thenAccept(config ->
         {
-            //如果客户端预览启用，则不要调整服务端预览
-            if (!dontSetServerSide && !clientViewAvailable(player))
-                state.setServerSideSelfVisible(value);
-        }
+            if (state != null)
+            {
+                //如果客户端预览启用，则不要调整服务端预览
+                if (!dontSetServerSide && !clientViewAvailable(player))
+                    state.setServerSideSelfVisible(value);
+            }
 
-        if (!noClientCommand)
-            clientHandler.sendCommand(player, new S2CSetSelfViewingStatusCommand(value));
+            if (!noClientCommand)
+                clientHandler.sendCommand(player, new S2CSetSelfViewingStatusCommand(value));
 
-        if (saveToConfig)
-        {
-            MessageUtils.send(player, value
-                    ? MorphStrings.selfVisibleOnString()
-                    : MorphStrings.selfVisibleOffString());
+            if (saveToConfig)
+            {
+                MessageUtils.send(player, value
+                        ? MorphStrings.selfVisibleOnString()
+                        : MorphStrings.selfVisibleOffString());
 
-            config.showDisguiseToSelf = value;
-        }
+                config.showDisguiseToSelf = value;
+            }
+        });
     }
 
     /**
@@ -1487,10 +1491,17 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     {
         var meta = getDisguiseMeta(state.getDisguiseIdentifier());
         var result = DisguiseBuildResult.of(state, meta);
-        var playerMeta = getPlayerMeta(state.getPlayer());
+        var playerMeta = data.getIfLoaded(state.getPlayer().getUniqueId());
+
+        if (playerMeta == null)
+        {
+            MessageUtils.send(state.getPlayer(), CommonStrings.dataNotLoaded().resolve("what", TypesString.playerData()));
+            return false;
+        }
+
         var parameters = MorphParameters.create(state.getPlayer(), state.getDisguiseIdentifier());
 
-        if (this.prepareDisguiseMeta(parameters) == null)
+        if (this.prepareDisguiseMeta(parameters, playerMeta) == null)
             return false;
 
         try
@@ -1525,9 +1536,17 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 return OfflineDisguiseResult.FAIL;
             }
 
+            var playerMeta = data.getIfLoaded(player.getUniqueId());
+
+            if (playerMeta == null)
+            {
+                MessageUtils.send(player, CommonStrings.dataNotLoaded().resolve("what", TypesString.playerData()));
+                return OfflineDisguiseResult.FAIL;
+            }
+
             var key = offlineState.disguiseID;
 
-            if (disguiseDisabled(key) || !getPlayerMeta(player).getUnlockedDisguiseIdentifiers().contains(key))
+            if (disguiseDisabled(key) || !playerMeta.getUnlockedDisguiseIdentifiers().contains(key))
                 return OfflineDisguiseResult.FAIL;
 
             if (DisguiseTypes.fromId(key) == DisguiseTypes.UNKNOWN) return OfflineDisguiseResult.FAIL;
@@ -1535,7 +1554,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             var provider = getProvider(DisguiseTypes.fromId(key).getNameSpace());
 
             var state = DisguiseStateGenerator.fromOfflineState(offlineState,
-                    clientHandler.getPlayerOption(player, true), getPlayerMeta(player), skillManager, provider.getPreferredBackend());
+                    clientHandler.getPlayerOption(player, true), playerMeta, skillManager, provider.getPreferredBackend());
 
             if (state != null)
             {
@@ -1576,79 +1595,76 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
     //region Implementation of IManagePlayerData
 
-    @Override
     @Nullable
     public DisguiseMeta getDisguiseMeta(String rawString)
     {
         return data.getDisguiseMeta(rawString);
     }
 
-    @Override
-    public List<DisguiseMeta> getAvailableDisguisesFor(Player player)
-    {
-        var avail = data.getAvailableDisguisesFor(player);
-        return avail == null ? new ObjectArrayList<>() : avail;
-    }
-
-    @Override
-    public boolean grantMorphToPlayer(Player player, String disguiseIdentifier)
+    public CompletableFuture<Boolean> grantMorphToPlayer(Player player, String disguiseIdentifier)
     {
         return grantMorphToPlayer(player, disguiseIdentifier, false);
     }
 
-    public boolean grantMorphToPlayer(Player player, String disguiseIdentifier, boolean bypassPermission)
+    public CompletableFuture<Boolean> grantMorphToPlayer(Player player, String disguiseIdentifier, boolean bypassPermission)
     {
         if (!bypassPermission && !player.hasPermission(CommonPermissions.ACQUIRE_MORPH))
-            return false;
+            return CompletableFuture.completedFuture(false);
 
-        var success = data.grantMorphToPlayer(player, disguiseIdentifier);
+        var future = data.grantMorphToPlayerAsync(player.getUniqueId(), disguiseIdentifier);
 
-        if (!success)
-            return false;
-
-        clientHandler.sendDiff(List.of(disguiseIdentifier), null, player);
-        multiInstanceService.notifyDisguiseMetaChange(player.getUniqueId(), Operation.ADD_IF_ABSENT, disguiseIdentifier);
-
-        var config = data.getPlayerMeta(player);
-        var locale = MessageUtils.getLocale(player);
-
-        var meta = data.getDisguiseMeta(disguiseIdentifier);
-        if (meta == null)
-            return false;
-
-        MessageUtils.send(player, MorphStrings.morphUnlockedString()
-                .resolve("what", meta.asComponent(locale)));
-
-        //显示粒子
-        player.getWorld().spawnParticle(Particle.TRIAL_SPAWNER_DETECTION_OMINOUS, player.getLocation(), //类型和位置
-                100, //数量
-                0.8, 0.8, 0.8, //分布空间
-                0.05); //速度
-
-        if (clientHandler.clientConnected(player))
+        future.thenAccept(success ->
         {
-            if (!config.shownMorphClientHint)
+            if (!success) return;
+
+            clientHandler.sendDiff(List.of(disguiseIdentifier), null, player);
+            multiInstanceService.notifyDisguiseMetaChange(player.getUniqueId(), Operation.ADD_IF_ABSENT, disguiseIdentifier);
+
+            var config = data.getIfLoaded(player.getUniqueId());
+            if (config == null)
+                return;
+
+            var locale = MessageUtils.getLocale(player);
+
+            var meta = data.getDisguiseMeta(disguiseIdentifier);
+            if (meta == null)
+                return;
+
+            MessageUtils.send(player, MorphStrings.morphUnlockedString()
+                    .resolve("what", meta.asComponent(locale)));
+
+            //显示粒子
+            player.getWorld().spawnParticle(Particle.TRIAL_SPAWNER_DETECTION_OMINOUS, player.getLocation(), //类型和位置
+                    100, //数量
+                    0.8, 0.8, 0.8, //分布空间
+                    0.05); //速度
+
+            if (clientHandler.clientConnected(player))
             {
-                MessageUtils.send(player, HintStrings.firstGrantClientHintString());
-                config.shownMorphClientHint = true;
+                if (!config.shownMorphClientHint)
+                {
+                    MessageUtils.send(player, HintStrings.firstGrantClientHintString());
+                    config.shownMorphClientHint = true;
+                }
             }
-        }
-        else if (!config.shownMorphHint)
-        {
-            MessageUtils.send(player, HintStrings.firstGrantHintString());
-            config.shownMorphHint = true;
-        }
+            else if (!config.shownMorphHint)
+            {
+                MessageUtils.send(player, HintStrings.firstGrantHintString());
+                config.shownMorphHint = true;
+            }
+        });
 
-        return success;
+        return future;
     }
 
-    @Override
-    public boolean revokeMorphFromPlayer(Player player, String disguiseIdentifier)
+    public CompletableFuture<Boolean> revokeMorphFromPlayer(Player player, String disguiseIdentifier)
     {
-        var success = data.revokeMorphFromPlayer(player, disguiseIdentifier);
+        var future = data.revokeMorphFromPlayerAsync(player.getUniqueId(), disguiseIdentifier);
 
-        if (success)
+        future.thenAccept(success ->
         {
+            if (!success) return;
+
             clientHandler.sendDiff(null, List.of(disguiseIdentifier), player);
             multiInstanceService.notifyDisguiseMetaChange(player.getUniqueId(), Operation.REMOVE, disguiseIdentifier);
 
@@ -1664,20 +1680,13 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             var disguiseState = this.getDisguiseStateFor(player);
             if (disguiseState != null && disguiseState.getDisguiseIdentifier().equalsIgnoreCase(disguiseIdentifier))
                 this.unMorph(player, true);
-        }
+        });
 
-        return success;
-    }
-
-    @Override
-    public @NotNull PlayerMeta getPlayerMeta(OfflinePlayer player)
-    {
-        return data.getPlayerMeta(player);
+        return future;
     }
 
     private volatile int reloadToken = 0;
 
-    @Override
     public boolean reload()
     {
         //重载完数据后要发到离线存储的人
@@ -1708,8 +1717,16 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
             this.scheduleOn(player, () ->
             {
+                var playerMeta = data.getIfLoaded(player.getUniqueId());
+
+                if (playerMeta == null)
+                {
+                    MessageUtils.send(player, CommonStrings.dataNotLoaded().resolve("what", TypesString.playerData()));
+                    return;
+                }
+
                 var parameter = MorphParameters.create(player, s.getDisguiseIdentifier());
-                if (this.prepareDisguiseMeta(parameter) == null)
+                if (this.prepareDisguiseMeta(parameter, playerMeta) == null)
                     return;
 
                 if (disguiseFromState(s))
@@ -1731,7 +1748,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         {
             if (this.reloadToken != currentToken) return;
 
-            this.loadPlayerDataAsync(p.getUniqueId()).thenAccept(meta ->
+            data.getOrLoad(p.getUniqueId()).thenAccept(meta ->
             {
                 clientHandler.refreshPlayerClientMorphs(meta.getUnlockedDisguiseIdentifiers(), p);
             });
@@ -1740,22 +1757,9 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         return success;
     }
 
-    @Override
     public boolean save()
     {
         return data.save() && offlineStorage.saveConfiguration();
-    }
-
-    @Override
-    public List<PlayerMeta> getRange(List<UUID> list)
-    {
-        return data.getRange(list);
-    }
-
-    @Override
-    public CompletableFuture<PlayerMeta> loadPlayerDataAsync(UUID uuid)
-    {
-        return data.loadPlayerDataAsync(uuid);
     }
 
     //endregion Implementation of IManagePlayerData

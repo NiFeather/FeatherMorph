@@ -17,6 +17,8 @@ import xyz.nifeather.morph.messages.strings.HelpStrings;
 import xyz.nifeather.morph.misc.DisguiseMeta;
 import xyz.nifeather.morph.misc.DisguiseTypes;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public class MorphPlayerCommand extends MorphPluginObject implements IConvertibleBrigadier
@@ -65,7 +67,9 @@ public class MorphPlayerCommand extends MorphPluginObject implements IConvertibl
 
         var input = suggestionsBuilder.getRemainingLowerCase();
 
-        var availableDisguises = morphManager.getAvailableDisguisesFor(player);
+        var data = morphManager.getDataStore().getIfLoaded(player.getUniqueId());
+
+        List<DisguiseMeta> availableDisguises = data == null ? Collections.emptyList() : data.getUnlockedDisguises();
 
         return CompletableFuture.supplyAsync(() ->
         {

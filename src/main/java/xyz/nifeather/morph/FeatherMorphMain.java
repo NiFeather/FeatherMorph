@@ -22,7 +22,7 @@ import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.events.*;
 import xyz.nifeather.morph.messages.TranslateManager;
 import xyz.nifeather.morph.mirror.ExecutorHub;
-import xyz.nifeather.morph.interfaces.IManagePlayerData;
+import xyz.nifeather.morph.storage.IPlayerDataBackend;
 import xyz.nifeather.morph.interfaces.IManageRequests;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.vanilla.MasterVanillaMessageStore;
@@ -260,7 +260,6 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
         MorphConfigManager config;
         dependencyManager.cacheAs(MessageStore.class, TranslateManager.instance().asFrameworkMessageStore());
         dependencyManager.cacheAs(MiniMessage.class, MiniMessage.miniMessage());
-        dependencyManager.cacheAs(IManagePlayerData.class, morphManager);
         dependencyManager.cacheAs(IManageRequests.class, new RequestManager());
         dependencyManager.cacheAs(Scoreboard.class, Bukkit.getScoreboardManager().getMainScoreboard());
         dependencyManager.cacheAs(MorphConfigManager.class, config = new MorphConfigManager(this));
