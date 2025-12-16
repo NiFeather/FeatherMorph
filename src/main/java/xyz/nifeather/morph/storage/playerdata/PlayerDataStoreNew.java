@@ -190,9 +190,7 @@ public class PlayerDataStoreNew extends DirectoryJsonBasedStorage<PlayerMeta> im
     }
 
     /**
-     * Get or load data for the given UUID
-     *
-     * @param uuid
+     * Gets the existing data cached in this backend, otherwise call {@link IPlayerDataBackend#loadAsync(UUID)}
      */
     @Override
     public CompletableFuture<PlayerMeta> getOrLoad(UUID uuid)

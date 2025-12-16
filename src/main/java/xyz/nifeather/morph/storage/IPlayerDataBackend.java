@@ -1,5 +1,6 @@
 package xyz.nifeather.morph.storage;
 
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.misc.DisguiseMeta;
 import xyz.nifeather.morph.storage.playerdata.PlayerMeta;
@@ -28,7 +29,7 @@ public interface IPlayerDataBackend
     CompletableFuture<PlayerMeta> loadAsync(UUID uuid);
 
     /**
-     * Get or load data for the given UUID
+     * Gets the existing data cached in this backend, otherwise call {@link IPlayerDataBackend#loadAsync(UUID)}
      */
     CompletableFuture<PlayerMeta> getOrLoad(UUID uuid);
 
@@ -41,12 +42,14 @@ public interface IPlayerDataBackend
     /**
      * Ask the remote service to grant the given disguise to the given player
      * @return Whether this operation has finished successfully
+     * @apiNote In most situations you should use {@link xyz.nifeather.morph.MorphManager#grantMorphToPlayer(Player, String)}, as this function only operates on the data backend.
      */
     public CompletableFuture<Boolean> grantMorphToPlayerAsync(UUID player, String disguiseIdentifier);
 
     /**
      * Ask the remote service to revoke the given disguise to the given player
      * @return Whether this operation has finished successfully
+     * @apiNote In most situations you should use {@link xyz.nifeather.morph.MorphManager#revokeMorphFromPlayer(Player, String)}, as this function only operates on the data backend.
      */
     public CompletableFuture<Boolean> revokeMorphFromPlayerAsync(UUID player, String disguiseIdentifier);
 

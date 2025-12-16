@@ -66,9 +66,7 @@ public class NetworkDataHolder extends MorphPluginObject implements IPlayerDataB
     }
 
     /**
-     * Get or load data for the given UUID
-     *
-     * @param uuid
+     * Gets the existing data cached in this backend, otherwise call {@link IPlayerDataBackend#loadAsync(UUID)}
      */
     @Override
     public CompletableFuture<PlayerMeta> getOrLoad(UUID uuid)
@@ -77,19 +75,7 @@ public class NetworkDataHolder extends MorphPluginObject implements IPlayerDataB
         if (existing != null)
             return CompletableFuture.completedFuture(existing);
 
-        var future = new CompletableFuture<PlayerMeta>();
-
-        bindingSlave.requestData(uuid);
-        bindingSlave.getOrCreatePlayerFuture(uuid).thenAccept(u ->
-        {
-            var data = this.nullablePlayerMeta(u);
-            if (data != null)
-                future.complete(data);
-            else
-                future.completeExceptionally(new RuntimeException("Request for %s has been finished, but we can't find it in an instance of NetworkDataHolder".formatted(uuid)));
-        });
-
-        return future;
+        return loadAsync(uuid);
     }
 
     /**
