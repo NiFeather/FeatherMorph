@@ -58,9 +58,7 @@ public class FoliaThreadUtils
      */
     public static <X, E extends Entity> CompletableFuture<X> delegateEntity(E bukkitEntity, Function<E, X> func)
     {
-        var nmsEntity = ((CraftEntity)bukkitEntity).getHandleRaw();
-
-        if (TickThread.isTickThreadFor(nmsEntity))
+        if (isTickThreadFor(bukkitEntity))
             return CompletableFuture.completedFuture(func.apply(bukkitEntity));
 
         CompletableFuture<X> future = new CompletableFuture<>();
@@ -100,7 +98,7 @@ public class FoliaThreadUtils
     {
         if (bukkitEntity == null) return false;
 
-        var nmsEntity = ((CraftEntity) bukkitEntity).getHandle();
+        var nmsEntity = ((CraftEntity) bukkitEntity).getHandleRaw();
         return TickThread.isTickThreadFor(nmsEntity);
     }
 
