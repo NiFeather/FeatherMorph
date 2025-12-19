@@ -265,6 +265,10 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
 
             for (var identifier : socketMeta.getIdentifiers())
             {
+                // Avoid duplicate entries when the remote server synced data
+                if (playerMeta.getUnlockedDisguiseIdentifiers().contains(identifier))
+                    continue;
+
                 var disguiseMeta = playerDataHolder.getDisguiseMeta(identifier);
                 if (disguiseMeta == null)
                     continue;

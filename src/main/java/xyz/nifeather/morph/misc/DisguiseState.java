@@ -821,7 +821,7 @@ public class DisguiseState extends MorphPluginObject
             updateActionbarMessage();
     }
 
-    @Resolved
+    @Resolved(shouldSolveImmediately = true)
     private RevealingHandler revealingHandler;
 
     @Nullable
