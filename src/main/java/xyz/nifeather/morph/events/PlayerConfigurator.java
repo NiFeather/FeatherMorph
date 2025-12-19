@@ -32,7 +32,7 @@ public class PlayerConfigurator extends MorphPluginObject implements Listener
             return;
         }
 
-        morphManager.getDataStore().getOrLoad(uuid).thenAccept(meta -> onPlayerMeta(uuid, meta));
+        morphManager.getDataStore().loadAsync(uuid).thenAccept(meta -> onPlayerMeta(uuid, meta));
     }
 
     private void onPlayerMeta(UUID uuid, PlayerMeta playerMeta)
