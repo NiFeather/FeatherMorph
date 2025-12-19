@@ -164,6 +164,11 @@ public class NetworkDataHolder extends MorphPluginObject implements IManagePlaye
         return true;
     }
 
+    public void drop(UUID uuid)
+    {
+        localMetaMap.remove(uuid);
+    }
+
     public void dropAll()
     {
         logger.info("[Slave@NetworkData] Dropping cached network player meta...");
