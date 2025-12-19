@@ -1,5 +1,6 @@
 package xyz.nifeather.morph;
 
+import com.google.common.collect.ImmutableList;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
@@ -78,7 +79,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MorphManager extends MorphPluginObject implements IManagePlayerData
 {
-    private final List<DisguiseState> activeDisguises = ObjectLists.synchronize(new ObjectArrayList<>());
+    private final Map<UUID, DisguiseState> activeDisguises = new ConcurrentHashMap<>();
 
     private final IManagePlayerData defaultData = new PlayerDataStoreNew();
 
@@ -299,7 +300,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
      */
     public List<DisguiseState> getActiveDisguises()
     {
-        return new ObjectArrayList<>(activeDisguises);
+        return ImmutableList.copyOf(activeDisguises.values());
     }
 
     private final Map<UUID, Long> uuidMoprhTimeMap = new ConcurrentHashMap<>();
@@ -951,6 +952,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                                   PlayerMeta playerOptions) throws ExecutionErrorException
     {
         var player = parameters.targetPlayer;
+        var uuid = player.getUniqueId();
         var provider = getProvider(parameters.targetDisguiseIdentifier());
         var wrapper = newState.getDisguiseWrapper();
 
@@ -962,7 +964,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         {
             new PlayerSwitchMorphEvent(player, previousState, newState).callEvent();
             previousState.dispose();
-            activeDisguises.remove(previousState);
+            activeDisguises.remove(uuid, previousState);
         }
 
         wrapper.getBackend().disguise(player, wrapper);
@@ -979,11 +981,11 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                     });
 
                     return null;
-                }).thenAccept(activeDisguises::remove);
+                }).thenAccept(s -> activeDisguises.remove(uuid, s));
 
         newState.scheduleSelfUpdate();
 
-        this.activeDisguises.add(newState);
+        this.activeDisguises.put(player.getUniqueId(), newState);
 
         // 确保玩家可以根据设置看到自己的伪装
         newState.setServerSideSelfVisible(playerOptions.showDisguiseToSelf && !this.clientViewAvailable(player));
@@ -1143,7 +1145,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     public S2CSyncAdminRevealCommand genMapCommand()
     {
         var map = new HashMap<Integer, String>();
-        for (DisguiseState disguiseState : this.activeDisguises)
+        for (DisguiseState disguiseState : activeDisguises.values())
         {
             var player = disguiseState.getPlayer();
             map.put(player.getEntityId(), player.getName());
@@ -1239,12 +1241,11 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
      */
     public void unMorphAll(boolean ignoreOffline)
     {
-        var players = new ObjectArrayList<>(activeDisguises);
-        players.forEach(i ->
+        Map.copyOf(activeDisguises).forEach((uuid, state) ->
         {
-            if (ignoreOffline && !i.getPlayer().isOnline()) return;
+            if (ignoreOffline && !state.getPlayer().isOnline()) return;
 
-            unMorph(i.getPlayer(), i.getPlayer(), true, true);
+            unMorph(state.getPlayer(), state.getPlayer(), true, true);
         });
     }
 
@@ -1288,6 +1289,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     {
         // 确保source不为null
         source = source == null ? nilCommandSource : source;
+        var uuid = player.getUniqueId();
 
         // 检查玩家是否可以通过指令或客户端取消伪装
         if (!bypassPermission && !player.hasPermission(CommonPermissions.UNMORPH))
@@ -1297,10 +1299,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         }
 
         // 获取当前伪装状态
-        var state = activeDisguises.stream()
-                .filter(s -> s.getPlayer().getUniqueId().equals(player.getUniqueId()))
-                .findFirst()
-                .orElse(null);
+        var state = activeDisguises.getOrDefault(uuid, null);
 
         // 如果当前没有状态，则不做任何事
         if (state == null)
@@ -1331,7 +1330,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         }
 
         // 从disguiseStates里移除此状态
-        activeDisguises.remove(state);
+        activeDisguises.remove(uuid, state);
 
         // 更新最后操作时间
         updateLastPlayerMorphOperationTime(player);
@@ -1440,9 +1439,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     {
         if (player == null) return null;
 
-        return this.activeDisguises.stream()
-                .filter(i -> !i.disposed() && i.getPlayer().getUniqueId().equals(player.getUniqueId()))
-                .findFirst().orElse(null);
+        return this.activeDisguises.getOrDefault(player.getUniqueId(), null);
     }
 
     @Nullable
@@ -1683,13 +1680,15 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         //重载完数据后要发到离线存储的人
         var stateToOfflineStore = new ObjectArrayList<DisguiseState>();
 
-        activeDisguises.forEach(s ->
+        Map.copyOf(activeDisguises).forEach((uuid, state) ->
         {
-            if (!s.getPlayer().isOnline())
-                stateToOfflineStore.add(s);
+            if (!state.getPlayer().isOnline())
+            {
+                stateToOfflineStore.add(state);
+                activeDisguises.remove(uuid, state);
+            }
         });
 
-        activeDisguises.removeAll(stateToOfflineStore);
         var stateToRecover = getActiveDisguises();
         stateToRecover = stateToRecover.stream()
                 .map(oldState -> oldState.createCopy(oldState.getPlayer()))
