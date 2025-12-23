@@ -263,7 +263,7 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
             var offlinePlayer = Bukkit.getOfflinePlayer(Objects.requireNonNull(socketMeta.getBindingUuid(), "???"));
 
             playerDataHolder.drop(socketMeta.getBindingUuid());
-            var playerMeta = playerDataHolder.getOrCreatePlayerMeta(offlinePlayer);
+            var playerMeta = playerDataHolder.getOrCreatePlayerMeta(offlinePlayer.getUniqueId());
 
             for (var identifier : socketMeta.getIdentifiers())
             {
@@ -308,7 +308,9 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
 
         var offlinePlayer = Bukkit.getOfflinePlayer(Objects.requireNonNull(socketMeta.getBindingUuid(), "???"));
         var player = offlinePlayer.getPlayer();
-        var playerMeta = morphManager.getPlayerMeta(offlinePlayer);
+
+        // Only affect our data holder, don't mess with MorphManager's data store, in case the one there is not ours
+        var playerMeta = playerDataHolder.getOrCreatePlayerMeta(offlinePlayer.getUniqueId());
 
         if (operation == Operation.ADD_IF_ABSENT)
         {

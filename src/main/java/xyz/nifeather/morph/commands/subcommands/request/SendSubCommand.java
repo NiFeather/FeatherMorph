@@ -12,10 +12,13 @@ import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.commands.brigadier.IConvertibleBrigadier;
 import xyz.nifeather.morph.interfaces.IManageRequests;
+import xyz.nifeather.morph.messages.strings.CommonStrings;
 import xyz.nifeather.morph.messages.strings.HelpStrings;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.strings.RequestStrings;
+import xyz.nifeather.morph.messages.strings.TypesString;
 import xyz.nifeather.morph.misc.DisguiseTypes;
+import xyz.nifeather.morph.storage.playerdata.PlayerMeta;
 
 public class SendSubCommand extends MorphPluginObject implements IConvertibleBrigadier
 {
@@ -35,6 +38,13 @@ public class SendSubCommand extends MorphPluginObject implements IConvertibleBri
         var players = context.getArgument("who", PlayerSelectorArgumentResolver.class)
                 .resolve(context.getSource());
 
+        PlayerMeta sourcePlayerData = morphs.getDataStore().getIfLoaded(sourcePlayer.getUniqueId());
+        if (sourcePlayerData == null)
+        {
+            MessageUtils.send(sourcePlayer, CommonStrings.dataNotLoaded().resolve("what", TypesString.playerData()));
+            return 0;
+        }
+
         players.forEach(targetPlayer ->
         {
             if (targetPlayer.getUniqueId().equals(sourcePlayer.getUniqueId()))
@@ -44,8 +54,8 @@ public class SendSubCommand extends MorphPluginObject implements IConvertibleBri
             }
 
             var id = DisguiseTypes.PLAYER.toId(targetPlayer.getName());
-            if (morphs.getAvailableDisguisesFor(sourcePlayer).stream()
-                    .anyMatch(c -> c.rawIdentifier.equals(id)))
+            if (sourcePlayerData.getUnlockedDisguiseIdentifiers().stream()
+                    .anyMatch(s -> s.equals(id)))
             {
                 MessageUtils.send(sender, RequestStrings.alreadyHaveDisguiseString());
                 return;

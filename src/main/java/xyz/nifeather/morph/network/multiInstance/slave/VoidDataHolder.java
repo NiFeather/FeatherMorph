@@ -1,20 +1,14 @@
 package xyz.nifeather.morph.network.multiInstance.slave;
 
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xiamomc.pluginbase.Exceptions.NullDependencyException;
-import xyz.nifeather.morph.interfaces.IManagePlayerData;
+import xyz.nifeather.morph.storage.IPlayerDataBackend;
 import xyz.nifeather.morph.misc.DisguiseMeta;
 import xyz.nifeather.morph.storage.playerdata.PlayerMeta;
 
-import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-public class VoidDataHolder implements IManagePlayerData
+public class VoidDataHolder implements IPlayerDataBackend
 {
     @Override
     public @Nullable DisguiseMeta getDisguiseMeta(String rawString)
@@ -23,33 +17,48 @@ public class VoidDataHolder implements IManagePlayerData
     }
 
     @Override
-    public ObjectArrayList<DisguiseMeta> getAvailableDisguisesFor(Player player)
-    {
-        return new ObjectArrayList<>();
-    }
-
-    @Override
-    public CompletableFuture<PlayerMeta> loadPlayerDataAsync(UUID uuid)
+    public CompletableFuture<PlayerMeta> loadAsync(UUID uuid)
     {
         return CompletableFuture.completedFuture(new PlayerMeta());
     }
 
+    /**
+     * Gets the existing data cached in this backend, otherwise call {@link IPlayerDataBackend#loadAsync(UUID)}
+     */
     @Override
-    public boolean grantMorphToPlayer(Player player, String disguiseIdentifier)
+    public CompletableFuture<PlayerMeta> getOrLoad(UUID uuid)
     {
-        return false;
+        return CompletableFuture.completedFuture(new PlayerMeta());
+    }
+
+    /**
+     * Gets the target UUID's player meta, {@code null} if not loaded
+     *
+     * @param uuid
+     */
+    @Override
+    public @Nullable PlayerMeta getIfLoaded(UUID uuid)
+    {
+        return null;
+    }
+
+    /**
+     * WIP experimental
+     *
+     * @param player
+     * @param disguiseIdentifier
+     * @return
+     */
+    @Override
+    public CompletableFuture<Boolean> grantMorphToPlayerAsync(UUID player, String disguiseIdentifier)
+    {
+        return CompletableFuture.completedFuture(false);
     }
 
     @Override
-    public boolean revokeMorphFromPlayer(Player player, String disguiseIdentifier)
+    public CompletableFuture<Boolean> revokeMorphFromPlayerAsync(UUID player, String disguiseIdentifier)
     {
-        return false;
-    }
-
-    @Override
-    public @NotNull PlayerMeta getPlayerMeta(OfflinePlayer player)
-    {
-        return new PlayerMeta();
+        return CompletableFuture.completedFuture(false);
     }
 
     @Override
@@ -62,12 +71,6 @@ public class VoidDataHolder implements IManagePlayerData
     public boolean save()
     {
         return false;
-    }
-
-    @Override
-    public List<PlayerMeta> getRange(List<UUID> list)
-    {
-        return List.of();
     }
 
 }

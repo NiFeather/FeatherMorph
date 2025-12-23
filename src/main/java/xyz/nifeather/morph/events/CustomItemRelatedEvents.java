@@ -35,6 +35,9 @@ import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.api.events.gameplay.PlayerCollectMagicBottleEvent;
 import xyz.nifeather.morph.api.events.gameplay.PlayerConsumeMagicBottleEvent;
+import xyz.nifeather.morph.messages.MessageUtils;
+import xyz.nifeather.morph.messages.strings.CommonStrings;
+import xyz.nifeather.morph.messages.strings.TypesString;
 import xyz.nifeather.morph.misc.DisguiseTypes;
 import xyz.nifeather.morph.misc.gui.AnimSelectScreenWrapper;
 import xyz.nifeather.morph.misc.gui.DisguiseSelectScreenWrapper;
@@ -44,7 +47,10 @@ import xyz.nifeather.morph.utilities.PermissionUtils;
 
 import java.util.Collection;
 import java.util.Objects;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 public class CustomItemRelatedEvents extends MorphPluginObject implements Listener
 {
@@ -193,8 +199,32 @@ public class CustomItemRelatedEvents extends MorphPluginObject implements Listen
             return;
         }
 
-        if (!morphs.grantMorphToPlayer(player, id))
+        var data = morphs.getDataStore().getIfLoaded(player.getUniqueId());
+        if (data == null)
         {
+            MessageUtils.send(player, CommonStrings.dataNotLoaded().resolve("what", TypesString.playerData()));
+            player.playSound(player, Sound.ENTITY_VILLAGER_NO, 1, 1);
+            event.setCancelled(true);
+        }
+
+        // We have no other choice but to wait
+        try
+        {
+            if (!morphs.grantMorphToPlayer(player, id).get(200, TimeUnit.MILLISECONDS))
+            {
+                player.playSound(player, Sound.ENTITY_VILLAGER_NO, 1, 1);
+                event.setCancelled(true);
+            }
+        }
+        catch (TimeoutException e)
+        {
+            logger.warn("Failed to unlock disguise data for player in 200 milliseconds");
+            player.playSound(player, Sound.ENTITY_VILLAGER_NO, 1, 1);
+            event.setCancelled(true);
+        }
+        catch (InterruptedException | ExecutionException e)
+        {
+            logger.warn("Failed to unlock disguise data for player", e);
             player.playSound(player, Sound.ENTITY_VILLAGER_NO, 1, 1);
             event.setCancelled(true);
         }

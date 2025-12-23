@@ -4,7 +4,7 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.bukkit.entity.Player;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
-import xyz.nifeather.morph.interfaces.IManagePlayerData;
+import xyz.nifeather.morph.storage.IPlayerDataBackend;
 import xyz.nifeather.morph.interfaces.IManageRequests;
 import xyz.nifeather.morph.messages.strings.CommandStrings;
 import xyz.nifeather.morph.messages.MessageUtils;
@@ -23,7 +23,7 @@ public class RequestManager extends MorphPluginObject implements IManageRequests
     //region Implementation of IManageRequests
 
     @Resolved
-    private IManagePlayerData data;
+    private MorphManager morphManager;
 
     @Initializer
     private void load()
@@ -130,8 +130,8 @@ public class RequestManager extends MorphPluginObject implements IManageRequests
 
         req.ticksRemain = -256;
 
-        data.grantMorphToPlayer(target, DisguiseTypes.PLAYER.toId(source.getName()));
-        data.grantMorphToPlayer(source, DisguiseTypes.PLAYER.toId(target.getName()));
+        morphManager.grantMorphToPlayer(target, DisguiseTypes.PLAYER.toId(source.getName()));
+        morphManager.grantMorphToPlayer(source, DisguiseTypes.PLAYER.toId(target.getName()));
 
         MessageUtils.send(target, RequestStrings.targetAcceptedString().resolve("who", source.getName()));
         MessageUtils.send(source, RequestStrings.sourceAcceptedString().resolve("who", target.getName()));

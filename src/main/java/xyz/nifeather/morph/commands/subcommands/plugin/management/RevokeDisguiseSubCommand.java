@@ -12,6 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Messages.FormattableMessage;
+import xiamomc.pluginbase.Messages.MessageStore;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.commands.brigadier.IConvertibleBrigadier;
@@ -20,6 +21,7 @@ import xyz.nifeather.morph.messages.strings.CommandStrings;
 import xyz.nifeather.morph.messages.strings.CommonStrings;
 import xyz.nifeather.morph.messages.strings.HelpStrings;
 import xyz.nifeather.morph.messages.MessageUtils;
+import xyz.nifeather.morph.messages.strings.TypesString;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 
 public class RevokeDisguiseSubCommand extends MorphPluginObject implements IConvertibleBrigadier
@@ -81,18 +83,20 @@ public class RevokeDisguiseSubCommand extends MorphPluginObject implements IConv
                 targetName = "minecraft:" + targetName;
 
             String finalTargetName = targetName;
-            var info = morphs.getAvailableDisguisesFor(who)
-                    .stream().filter(i -> i.getKey().equals(finalTargetName)).findFirst().orElse(null);
 
-            var revokeSuccess = info != null && morphs.revokeMorphFromPlayer(who, info.getKey());
+            MessageUtils.send(commandSender, CommonStrings.requestingRemote());
 
-            var msg = revokeSuccess
-                    ? CommandStrings.revokeSuccessString()
-                    : CommandStrings.revokeFailString();
+            morphs.revokeMorphFromPlayer(who, finalTargetName).thenAccept(revokeSuccess ->
+            {
+                logger.info("Done with status " + revokeSuccess);
+                var msg = revokeSuccess
+                        ? CommandStrings.revokeSuccessString()
+                        : CommandStrings.revokeFailString();
 
-            msg.resolve("what", Component.text(targetName)).resolve("who", who.getName());
+                msg.resolve("what", Component.text(finalTargetName)).resolve("who", who.getName());
 
-            MessageUtils.send(commandSender, msg);
+                MessageUtils.send(commandSender, msg);
+            });
         });
 
         return 1;

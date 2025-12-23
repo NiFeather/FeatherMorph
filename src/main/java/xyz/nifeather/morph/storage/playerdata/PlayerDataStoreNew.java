@@ -2,27 +2,24 @@ package xyz.nifeather.morph.storage.playerdata;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.apache.commons.io.FileUtils;
-import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.FeatherMorphMain;
-import xyz.nifeather.morph.interfaces.IManagePlayerData;
+import xyz.nifeather.morph.storage.IPlayerDataBackend;
 import xyz.nifeather.morph.misc.DisguiseMeta;
 import xyz.nifeather.morph.misc.DisguiseTypes;
 import xyz.nifeather.morph.storage.DirectoryJsonBasedStorage;
+import xyz.nifeather.morph.storage.playerdata.legacy.LegacyPlayerDataStore;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class PlayerDataStoreNew extends DirectoryJsonBasedStorage<PlayerMeta> implements IManagePlayerData
+public class PlayerDataStoreNew extends DirectoryJsonBasedStorage<PlayerMeta> implements IPlayerDataBackend
 {
     private static final PlayerMeta defaultMeta = new PlayerMeta();
 
@@ -142,104 +139,14 @@ public class PlayerDataStoreNew extends DirectoryJsonBasedStorage<PlayerMeta> im
         cachedMetas.clear();
     }
 
-    /**
-     * 获取某一玩家所有可用的伪装
-     *
-     * @param player 目标玩家
-     * @return 目标玩家拥有的伪装
-     */
-    @Override
-    public List<DisguiseMeta> getAvailableDisguisesFor(Player player)
+    private @NotNull PlayerMeta loadAndCache(UUID uuid)
     {
-        return getPlayerMeta(player).getUnlockedDisguises();
-    }
-
-    @Override
-    public CompletableFuture<PlayerMeta> loadPlayerDataAsync(UUID uuid)
-    {
-        var offline = Bukkit.getOfflinePlayer(uuid);
-        return CompletableFuture.completedFuture(this.getPlayerMeta(offline));
-    }
-
-    /**
-     * 将伪装授予某一玩家
-     *
-     * @param player             要授予的玩家
-     * @param disguiseIdentifier 伪装ID
-     * @return 添加是否成功（伪装是否可用或玩家是否已经拥有目标伪装）
-     */
-    @Override
-    public boolean grantMorphToPlayer(Player player, String disguiseIdentifier)
-    {
-        var playerMeta = this.getPlayerMeta(player);
-        var disguiseMeta = this.getDisguiseMeta(disguiseIdentifier);
-
-        if (disguiseMeta == null) return false;
-
-        if (playerMeta.getUnlockedDisguiseIdentifiers()
-                .stream()
-                .anyMatch(str -> str.equalsIgnoreCase(disguiseIdentifier)))
-        {
-            return false;
-        }
-
-        playerMeta.addDisguise(disguiseMeta);
-        save(playerMeta);
-
-        return true;
-    }
-
-    /**
-     * 从某一玩家剥离伪装
-     *
-     * @param player             要授予的玩家
-     * @param disguiseIdentifier 伪装ID
-     * @return 添加是否成功（伪装是否可用或玩家是否已经拥有目标伪装）
-     */
-    @Override
-    public boolean revokeMorphFromPlayer(Player player, String disguiseIdentifier)
-    {
-        var playerMeta = getPlayerMeta(player);
-        var match = playerMeta.getUnlockedDisguises()
-                .stream()
-                .filter(meta -> meta.equals(disguiseIdentifier))
-                .findFirst()
-                .orElse(null);
-
-        if (match == null) return false;
-
-        playerMeta.removeDisguise(match);
-
-        return true;
-    }
-
-    private final Map<UUID, PlayerMeta> trackedPlayerMetaMap = new ConcurrentHashMap<>();
-
-    private boolean isDefaultMeta(@Nullable PlayerMeta meta)
-    {
-        return meta == null || meta.equals(defaultMeta);
-    }
-
-    /**
-     * 获取玩家的伪装配置
-     *
-     * @param player 目标玩家
-     * @return 伪装信息
-     */
-    @Override
-    public @NotNull PlayerMeta getPlayerMeta(OfflinePlayer player)
-    {
-        var uuid = player.getUniqueId();
-
-        var tracked = trackedPlayerMetaMap.getOrDefault(uuid, null);
-        if (tracked != null) return tracked;
-
         var storedMeta = this.get(uuid.toString());
 
         // Don't process default meta
         if (!isDefaultMeta(storedMeta))
         {
-            storedMeta.playerName = player.getName();
+            storedMeta.playerName = "Not available";
             initializePlayerMeta(storedMeta, uuid);
 
             trackedPlayerMetaMap.put(uuid, storedMeta);
@@ -248,13 +155,115 @@ public class PlayerDataStoreNew extends DirectoryJsonBasedStorage<PlayerMeta> im
         }
 
         var metaInstance = new PlayerMeta();
-        metaInstance.uniqueId = player.getUniqueId();
-        metaInstance.playerName = player.getName();
+        metaInstance.uniqueId = uuid;
+        metaInstance.playerName = "Not available";
         initializePlayerMeta(metaInstance, uuid);
 
         trackedPlayerMetaMap.put(uuid, metaInstance);
 
         return metaInstance;
+    }
+
+    private final Map<UUID, CompletableFuture<PlayerMeta>> loadTaskMap = new ConcurrentHashMap<>();
+
+    @Override
+    public CompletableFuture<PlayerMeta> loadAsync(UUID uuid)
+    {
+        var existing = loadTaskMap.getOrDefault(uuid, null);
+        if (existing != null)
+        {
+            logger.info("Already have a existing loading task! not creating new task");
+            return existing;
+        }
+
+        var future = CompletableFuture.supplyAsync(() -> loadAndCache(uuid));
+
+        loadTaskMap.put(uuid, future);
+
+        future.thenAccept(meta ->
+        {
+            var result = loadTaskMap.remove(uuid, future);
+            logger.info("Load complete! remove with result" + result);
+        });
+
+        return future;
+    }
+
+    /**
+     * Gets the existing data cached in this backend, otherwise call {@link IPlayerDataBackend#loadAsync(UUID)}
+     */
+    @Override
+    public CompletableFuture<PlayerMeta> getOrLoad(UUID uuid)
+    {
+        var existing = getIfLoaded(uuid);
+        if (existing != null) return CompletableFuture.completedFuture(existing);
+
+        return loadAsync(uuid);
+    }
+
+    /**
+     * Gets the target UUID's player meta, {@code null} if not loaded
+     *
+     * @param uuid
+     */
+    @Override
+    public @Nullable PlayerMeta getIfLoaded(UUID uuid)
+    {
+        return this.trackedPlayerMetaMap.getOrDefault(uuid, null);
+    }
+
+    /**
+     * WIP experimental
+     *
+     * @param uuid
+     * @param disguiseIdentifier
+     * @return
+     */
+    @Override
+    public CompletableFuture<Boolean> grantMorphToPlayerAsync(UUID uuid, String disguiseIdentifier)
+    {
+        return getOrLoad(uuid).thenApply(playerMeta ->
+        {
+            var disguiseMeta = this.getDisguiseMeta(disguiseIdentifier);
+
+            if (playerMeta.getUnlockedDisguiseIdentifiers()
+                    .stream()
+                    .anyMatch(str -> str.equalsIgnoreCase(disguiseIdentifier)))
+            {
+                return false;
+            }
+
+            playerMeta.addDisguise(disguiseMeta);
+            save(playerMeta);
+
+            return true;
+        });
+    }
+
+    @Override
+    public CompletableFuture<Boolean> revokeMorphFromPlayerAsync(UUID uuid, String disguiseIdentifier)
+    {
+        return getOrLoad(uuid).thenApply(playerMeta ->
+        {
+            var match = playerMeta.getUnlockedDisguises()
+                    .stream()
+                    .filter(meta -> meta.equals(disguiseIdentifier))
+                    .findFirst()
+                    .orElse(null);
+
+            if (match == null) return false;
+
+            playerMeta.removeDisguise(match);
+
+            return true;
+        });
+    }
+
+    private final Map<UUID, PlayerMeta> trackedPlayerMetaMap = new ConcurrentHashMap<>();
+
+    private boolean isDefaultMeta(@Nullable PlayerMeta meta)
+    {
+        return meta == null || meta.equals(defaultMeta);
     }
 
     private void initializePlayerMeta(PlayerMeta meta, UUID matchingUUID)
@@ -311,20 +320,6 @@ public class PlayerDataStoreNew extends DirectoryJsonBasedStorage<PlayerMeta> im
     //endregion IManagePlayerData
 
     private final AtomicBoolean noLazyLoad = new AtomicBoolean(false);
-
-    @Override
-    public List<PlayerMeta> getRange(List<UUID> list)
-    {
-        List<PlayerMeta> metaList = new ObjectArrayList<>();
-
-        list.forEach(uuid ->
-        {
-            var existing = getPlayerMeta(Bukkit.getOfflinePlayer(uuid));
-            metaList.add(existing);
-        });
-
-        return metaList;
-    }
 
     public void loadAll()
     {

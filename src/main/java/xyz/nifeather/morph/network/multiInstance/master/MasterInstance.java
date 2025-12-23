@@ -293,8 +293,6 @@ public class MasterInstance extends MorphPluginObject implements IInstanceServic
             return;
         }
 
-        var cmd = new MIS2CSyncMetaCommand();
-
         var requestedUUIDs = command.requestedUUIDs;
 
         if (FeatherMorphMain.getInstance().debugOutputEnabled())
@@ -302,14 +300,18 @@ public class MasterInstance extends MorphPluginObject implements IInstanceServic
 
         if (requestedUUIDs.isEmpty()) return;
 
-        var disguises = morphManager.getRange(requestedUUIDs);
+        var dataStore = morphManager.getDataStore();
+        requestedUUIDs.forEach(uuid ->
+        {
+            dataStore.getOrLoad(uuid).thenAccept(meta ->
+            {
+                var cmd = new MIS2CSyncMetaCommand();
+                cmd.appendMeta(new SocketPlayerMeta(Operation.ADD_IF_ABSENT, meta.getUnlockedDisguiseIdentifiers(), uuid));
 
-        for (var meta : disguises)
-            cmd.appendMeta(new SocketPlayerMeta(Operation.ADD_IF_ABSENT, meta.getUnlockedDisguiseIdentifiers(), meta.uniqueId));
-
-        this.sendCommand(socket, cmd);
-
-        logMasterInfo("Synced %s metadata(s) to socket '%s'".formatted(disguises.size(), socket.getRemoteSocketAddress()));
+                this.sendCommand(socket, cmd);
+                logMasterInfo("Synced metadata for %s to socket '%s'".formatted(uuid, socket.getRemoteSocketAddress()));
+            });
+        });
     }
 
     @Resolved
@@ -342,39 +344,40 @@ public class MasterInstance extends MorphPluginObject implements IInstanceServic
         var operation = socketMeta.getOperation();
         var identifiers = socketMeta.getIdentifiers();
 
-        var playerMeta = morphManager.getPlayerMeta(Bukkit.getOfflinePlayer(Objects.requireNonNull(socketMeta.getBindingUuid(), "???")));
-
-        if (operation == Operation.ADD_IF_ABSENT)
+        morphManager.getDataStore().getOrLoad(socketMeta.getBindingUuid()).thenAccept(playerMeta ->
         {
-            var unlocked = playerMeta.getUnlockedDisguiseIdentifiers();
-            socketMeta.getIdentifiers().forEach(str ->
+            if (operation == Operation.ADD_IF_ABSENT)
             {
-                if (unlocked.stream().anyMatch(s -> s.equals(str))) return;
+                var unlocked = playerMeta.getUnlockedDisguiseIdentifiers();
+                socketMeta.getIdentifiers().forEach(str ->
+                {
+                    if (unlocked.stream().anyMatch(s -> s.equals(str))) return;
 
-                var meta = morphManager.getDisguiseMeta(str);
-                if (meta != null)
-                    playerMeta.addDisguise(morphManager.getDisguiseMeta(str));
-                else
-                    playerMeta.addUnmanagedDisguise(str);
-            });
+                    var meta = morphManager.getDisguiseMeta(str);
+                    if (meta != null)
+                        playerMeta.addDisguise(morphManager.getDisguiseMeta(str));
+                    else
+                        playerMeta.addUnmanagedDisguise(str);
+                });
 
-            // Broadcast to all allowed sockets
-            for (var allowedSocket : this.allowedSockets.keySet())
-                this.sendCommand(allowedSocket, new MIS2CUpdateMetaCommand(socketMeta));
-        }
-        else if (operation == Operation.REMOVE)
-        {
-            identifiers.forEach(id ->
+                // Broadcast to all allowed sockets
+                for (var allowedSocket : this.allowedSockets.keySet())
+                    this.sendCommand(allowedSocket, new MIS2CUpdateMetaCommand(socketMeta));
+            }
+            else if (operation == Operation.REMOVE)
             {
-                var disguiseMeta = morphManager.getDisguiseMeta(id);
+                identifiers.forEach(id ->
+                {
+                    var disguiseMeta = morphManager.getDisguiseMeta(id);
 
-                playerMeta.removeDisguise(disguiseMeta);
-            });
+                    playerMeta.removeDisguise(disguiseMeta);
+                });
 
-            // Broadcast to all allowed sockets
-            for (var allowedSocket : this.allowedSockets.keySet())
-                this.sendCommand(allowedSocket, new MIS2CUpdateMetaCommand(socketMeta));
-        }
+                // Broadcast to all allowed sockets
+                for (var allowedSocket : this.allowedSockets.keySet())
+                    this.sendCommand(allowedSocket, new MIS2CUpdateMetaCommand(socketMeta));
+            }
+        });
     }
 
     @Override

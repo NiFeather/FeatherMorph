@@ -43,10 +43,7 @@ import xyz.nifeather.morph.network.server.handlers.ICommandPacketHandler;
 import xyz.nifeather.morph.network.server.handlers.V3ProtocolHandler;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Base64;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -144,7 +141,7 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
 
     public static void logPacket(boolean isOutGoingPacket, Player player, String channel, byte[] data, boolean isV1Proto)
     {
-        var clientHandlerInstance = FeatherMorphAPI.instance().directAccess().clientHandler();
+        var clientHandlerInstance = Objects.requireNonNull(FeatherMorphAPI.instance()).directAccess().clientHandler();
 
         if (isOutGoingPacket && !clientHandlerInstance.logOutGoingPackets.get())
             return;
@@ -697,11 +694,14 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
         playerLoginPendingFutures.discard(player, reason);
         playerConnectionFutures.discard(player, reason);
 
-        var playerConfig = manager.getPlayerMeta(player);
-
         var state = manager.getDisguiseStateFor(player);
         if (state != null)
-            state.setServerSideSelfVisible(playerConfig.showDisguiseToSelf);
+        {
+            var playerConfig = manager.getDataStore().getIfLoaded(player.getUniqueId());
+
+            if (playerConfig != null)
+                state.setServerSideSelfVisible(playerConfig.showDisguiseToSelf);
+        }
 
         if (getSession(player) != null)
             this.sendCommand(player, new S2CUnAuthCommand());
@@ -730,16 +730,20 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
         if (clientInitialized(player))
             return;
 
-        var config = manager.getPlayerMeta(player);
-        var list = config.getUnlockedDisguiseIdentifiers();
-        refreshPlayerClientMorphs(list, player);
+        var data = manager.getDataStore().getIfLoaded(player.getUniqueId());
+
+        if (data != null)
+        {
+            var list = data.getUnlockedDisguiseIdentifiers();
+            refreshPlayerClientMorphs(list, player);
+        }
 
         var state = manager.getDisguiseStateFor(player);
 
         if (state != null)
             manager.refreshClientState(state);
 
-        sendCommand(player, new S2CSetSelfViewingStatusCommand(config.showDisguiseToSelf));
+        sendCommand(player, new S2CSetSelfViewingStatusCommand(true));
         sendCommand(player, new S2CSetModifyBoundingBoxCommand(modifyBoundingBoxes.get()));
 
         if (player.hasPermission(CommonPermissions.DISGUISE_REVEALING))
@@ -814,42 +818,44 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
         Player player = c2SToggleSelfCommand.getOwner();
 
         var playerOption = this.getPlayerOptionOrThrow(player);
-        var playerConfig = manager.getPlayerMeta(player);
 
-        switch (c2SToggleSelfCommand.getSelfViewMode())
+        manager.getDataStore().getOrLoad(player.getUniqueId()).thenAccept(playerConfig ->
         {
-            case ON ->
+            switch (c2SToggleSelfCommand.getSelfViewMode())
             {
-                if (playerConfig.showDisguiseToSelf) return;
-                manager.setSelfDisguiseVisible(player, true, true, false, false);
+                case ON ->
+                {
+                    if (playerConfig.showDisguiseToSelf) return;
+                    manager.setSelfDisguiseVisible(player, true, true, false, false);
+                }
+
+                case OFF ->
+                {
+                    if (!playerConfig.showDisguiseToSelf) return;
+                    manager.setSelfDisguiseVisible(player, false, true, false, false);
+                }
+
+                case CLIENT_ON ->
+                {
+                    playerOption.setClientSideSelfView(true);
+
+                    var state = manager.getDisguiseStateFor(player);
+
+                    if (state != null)
+                        state.setServerSideSelfVisible(false);
+                }
+
+                case CLIENT_OFF ->
+                {
+                    playerOption.setClientSideSelfView(false);
+
+                    var state = manager.getDisguiseStateFor(player);
+
+                    if (state != null)
+                        state.setServerSideSelfVisible(true);
+                }
             }
-
-            case OFF ->
-            {
-                if (!playerConfig.showDisguiseToSelf) return;
-                manager.setSelfDisguiseVisible(player, false, true, false, false);
-            }
-
-            case CLIENT_ON ->
-            {
-                playerOption.setClientSideSelfView(true);
-
-                var state = manager.getDisguiseStateFor(player);
-
-                if (state != null)
-                    state.setServerSideSelfVisible(false);
-            }
-
-            case CLIENT_OFF ->
-            {
-                playerOption.setClientSideSelfView(false);
-
-                var state = manager.getDisguiseStateFor(player);
-
-                if (state != null)
-                    state.setServerSideSelfVisible(true);
-            }
-        }
+        });
     }
 
     @Override
