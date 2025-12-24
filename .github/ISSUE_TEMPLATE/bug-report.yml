@@ -2,7 +2,7 @@ name: "🐛 Bug Report / Bug反馈"
 description: |
   Report issues with FeatherMorph, like something is not working or appear to broken. 
   反馈一个FeatherMorph的问题，像是有东西不工作或者坏掉了
-title: "🐛 [BUG] - <title>"
+title: "🐛 [BUG] - <replace me please>"
 labels: [
   "bug"
 ]
@@ -33,15 +33,24 @@ body:
     attributes:
       label: "Log file / 日志文件"
       description: A log file that's related to this issue / 一个与此问题相关的日志
-      placeholder: We recommend using https://mclo.gs to paste the log file / 我们建议使用 https://mclo.gs 粘贴日志文件
+      placeholder: |
+        We recommend using https://mclo.gs to paste the log file / 我们建议使用 https://mclo.gs 粘贴日志文件
+        If there's an visual issue, client log is also required / 如果存在视觉效果上的问题，也需要提供客户端日志
     validations:
       required: true
+  - type: checkboxes
+    id: challenge-logs
+    attributes:
+      label: "Logs..."
+      options:
+          - label: I have uploaded the required logs / 我已上传需要的日志
+            required: true
   - type: textarea
     id: steps
     attributes:
       label: "Reproduction steps / 复现步骤"
       description: How can we reproduce this issue? 如何复现此问题？
-      value: |
+      placeholder: |
         1. ...
         2. ...
         3. ...
@@ -49,6 +58,13 @@ body:
       render: bash
     validations:
       required: true
+  - type: checkboxes
+    id: challenge-steps-to-reproduce
+    attributes:
+      label: "Steps to reproduce..."
+      options:
+          - label: I have filled steps to reproduce / 我已填写了复现步骤
+            required: true
   - type: dropdown
     id: server-software
     attributes:
@@ -62,8 +78,29 @@ body:
         - Other
     validations:
       required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: "Installed plugins / 安装的插件"
+      placeholder: "Output of the \"/pl\" command"
+    validations:
+      required: true
+  - type: textarea
+    id: server-version
+    attributes:
+      label: "Server version / 服务器版本"
+      description: "Output of the \"/version\" command"
+    validations:
+      required: true
   - type: markdown
     attributes:
       value: |
         Please note that we DON'T support hybrid servers like Mohist, issues about running on such servers would likely not get solved!
         请注意我们不支持Mohist这样的模组端，任何在模组端上运行出现的问题很可能不会得到解决！
+  - type: checkboxes
+    id: challenge-title
+    attributes:
+      label: "Please check the title"
+      options:
+          - label: I confirm that I forgot to change the title / 我确认我忘记了要更改标题
+            required: true
