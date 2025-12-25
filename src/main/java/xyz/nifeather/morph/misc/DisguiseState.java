@@ -723,7 +723,7 @@ public class DisguiseState extends MorphPluginObject
     /**
      * Get A {@link CompletableFuture} that binds to this state.<br>
      * Finishes when this state has been disposed.<br>
-     * Fail with exception if an error occurred while updating this state, or the state has been disposed without running {@link DisguiseState#doUpdate()} once
+     * Fail with exception if an error occurred while updating this state
      */
     public CompletableFuture<DisguiseState> getStateFuture()
     {
@@ -994,10 +994,7 @@ public class DisguiseState extends MorphPluginObject
         if (disposed())
             return;
 
-        if (selfUpdateBegan)
-            stateFuture.complete(this);
-        else
-            stateFuture.completeExceptionally(new EarlyDisposeException("The DisguiseState has been disposed before running once"));
+        stateFuture.complete(this);
 
         disposed.set(true);
 
