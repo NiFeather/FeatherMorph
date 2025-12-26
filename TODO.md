@@ -9,3 +9,7 @@ Some TODO for this project:
         - And this SingleWatcher will need to adapt both SingleValue and NBT
      4. Test and hope nothing is missed.
    - This was useful at that time, but now it kinda suck.
+3. Spilt out these features to a standalone plugin:
+   - AI Modification
+   - Interaction Mirror
+4. Fix Offline Disguise State Recover, make it store and use Disguise Property
