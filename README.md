@@ -1,3 +1,6 @@
+Archived, see [#63](https://github.com/NiFeather/FeatherMorph/issues/63)
+---
+
 ![cover](./assets/cover.png)
 
 <div align="center">
