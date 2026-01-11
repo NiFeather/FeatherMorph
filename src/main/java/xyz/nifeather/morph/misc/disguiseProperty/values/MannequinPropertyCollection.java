@@ -64,6 +64,8 @@ public class MannequinPropertyCollection extends BaseLivingEntityPropertyCollect
         var description = targetEntity.getDescription();
         if (description != null)
             propertyHandler.set(NPC_DESCRIPTION, description);
+
+        propertyHandler.set(HIDE_DESCRIPTION, description == null);
     }
 
     @Override
