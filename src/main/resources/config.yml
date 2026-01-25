@@ -20,12 +20,6 @@ root:
   # If an invalid ID is provided, this option may not take place.
   forced_disguise: "@none"
 
-  # Modify mobs' AI to make them react to disguises?
-  #
-  # PS: !!!This option requires a server restart to make changes!!!
-  # PS: Due to having issue on Folia server, this feature is disabled by default
-  modify_ai: false
-
   # The GUI pattern for the fallback disguise selection.
   # It's a bit limited
   #
@@ -198,56 +192,6 @@ root:
     # Set to 0 to disable
     frequency: 1.0
 
-  # InteractionMirror options
-  # This is a feature that's made for fun, it could make another player do the same thing as you did when disguising as them
-  # Disabled for default since 1.0.15
-  interactionMirror:
-    # Maximum affect distance
-    # How far should we find for the target player to mirror?
-    # Set to 0 to disable this feature, or -1 to disable the limit.
-    normalDistance: -1
-
-    # Should we ignore disguised players when finding a target?
-    ignore_disguised: true
-
-    # Block destroy timeout
-    # How many ticks should we wait to reset progress when simulating block destroy if there's no operation?
-    # Values that are too small may cause the progress to reset repeatedly with a bad network.
-    destroy_timeout: 20
-
-    # Selection mode
-    # How should we search for the target player to mirror?
-    # by_name: Search for the specific player who matches our disguised name.
-    # by_sight: Search for the nearest player who matches our disguise target within 5 blocks in sight.
-    #           A player disguised as our target can also be selected.
-    selection_mode: by_name
-
-    # Log operations
-    # Should we log any InteractionMirror operations performed by players?
-    # Logs can be found in mirror_history.log
-    log_operations: false
-
-    # Delete logs that are older than the configured days
-    # Set to 0 to disable this feature.
-    log_cleanup: 7
-
-    # Behavior options
-    behaviors:
-      # Should we enable interaction control?
-      simulate_interactions: false
-
-      # Should we enable sneaking control?
-      sneak: false
-
-      # Should we enable swapping control?
-      swap_hands: false
-
-      # Should we enable drop control?
-      allow_drop: false
-
-      # Should we enable hotbar control?
-      hotbar: false
-
   # Banned disguises
   # Disguises in this list won't be available in-game for anyone.w
   #
@@ -309,4 +253,4 @@ root:
   debug_output: false
 
   # Do not touch unless you know what you're doing!
-  version: 45
+  version: 46

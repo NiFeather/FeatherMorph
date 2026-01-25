@@ -4,7 +4,6 @@ import org.apache.commons.lang3.RandomStringUtils;
 import xiamomc.pluginbase.Configuration.ConfigNode;
 import xiamomc.pluginbase.Configuration.ConfigOption;
 import xyz.nifeather.morph.MorphManager;
-import xyz.nifeather.morph.events.InteractionMirrorProcessor;
 import xyz.nifeather.morph.utilities.NbtUtils;
 
 import java.util.ArrayList;
@@ -117,61 +116,6 @@ public class ConfigOptions
     public static final ConfigOption<Boolean> USE_CLIENT_RENDERER = ConfigOption.builder(Boolean.class)
             .node(clientNode().append("client_renderer"))
             .defaultValue(true)
-            .build();
-
-    public static final ConfigOption<Integer> MIRROR_CONTROL_DISTANCE = ConfigOption.builder(Integer.class)
-            .node(interactionMirrorNode().append("normalDistance"))
-            .defaultValue(-1)
-            .build();
-
-    public static final ConfigOption<Boolean> MIRROR_IGNORE_DISGUISED = ConfigOption.builder(Boolean.class)
-            .node(interactionMirrorNode().append("ignore_disguised"))
-            .defaultValue(true)
-            .build();
-
-    public static final ConfigOption<Integer> MIRROR_DESTROY_TIMEOUT = ConfigOption.builder(Integer.class)
-            .node(interactionMirrorNode().append("destroy_timeout"))
-            .defaultValue(40)
-            .build();
-
-    public static final ConfigOption<Boolean> MIRROR_BEHAVIOR_DO_SIMULATION = ConfigOption.builder(Boolean.class)
-            .node(interactionMirrorBehaviorNode().append("simulate_interactions"))
-            .defaultValue(false)
-            .build();
-
-    public static final ConfigOption<Boolean> MIRROR_BEHAVIOR_SNEAK = ConfigOption.builder(Boolean.class)
-            .node(interactionMirrorBehaviorNode().append("sneak"))
-            .defaultValue(false)
-            .build();
-
-    public static final ConfigOption<Boolean> MIRROR_BEHAVIOR_SWAP_HAND = ConfigOption.builder(Boolean.class)
-            .node(interactionMirrorBehaviorNode().append("swap_hands"))
-            .defaultValue(false)
-            .build();
-
-    public static final ConfigOption<Boolean> MIRROR_BEHAVIOR_DROP = ConfigOption.builder(Boolean.class)
-            .node(interactionMirrorBehaviorNode().append("allow_drop"))
-            .defaultValue(false)
-            .build();
-
-    public static final ConfigOption<Boolean> MIRROR_BEHAVIOR_HOTBAR = ConfigOption.builder(Boolean.class)
-            .node(interactionMirrorBehaviorNode().append("hotbar"))
-            .defaultValue(false)
-            .build();
-
-    public static final ConfigOption<Boolean> MIRROR_LOG_OPERATION = ConfigOption.builder(Boolean.class)
-            .node(interactionMirrorNode().append("log_operations"))
-            .defaultValue(false)
-            .build();
-
-    public static final ConfigOption<Integer> MIRROR_LOG_CLEANUP_DATE = ConfigOption.builder(Integer.class)
-            .node(interactionMirrorNode().append("log_cleanup"))
-            .defaultValue(7)
-            .build();
-
-    public static final ConfigOption<String> MIRROR_SELECTION_MODE = ConfigOption.builder(String.class)
-            .node(interactionMirrorNode().append("selection_mode"))
-            .defaultValue(InteractionMirrorProcessor.InteractionMirrorSelectionMode.BY_NAME)
             .build();
 
     public static final ConfigOption<List<String>> BANNED_DISGUISES = ConfigOption.<List<String>>builder()
@@ -307,17 +251,130 @@ public class ConfigOptions
             .defaultValue(true)
             .build();
 
-    public static final ConfigOption<Boolean> DO_MODIFY_AI = ConfigOption.builder(Boolean.class)
-            .node(ConfigNode.create().append("modify_ai"))
-            .defaultValue(false)
-            .build();
-
     public static final ConfigOption<List<String>> GUI_PATTERN = ConfigOption.<List<String>>builder()
             .node(ConfigNode.create().append("gui_pattern"))
             .defaultValue(new ArrayList<>())
             .build();
 
     //ANIM_SELECT_PATTERN(ConfigNode.create().append("anim_select_pattern"), new ArrayList<String>()),
+
+    public static final ConfigOption<Boolean> TOWNY_ALLOW_FLY_IN_WILDERNESS = ConfigOption.builder(Boolean.class)
+            .node(townyNode().append("allow_fly_in_wilderness"))
+            .defaultValue(false)
+            .build();
+
+    public static final ConfigOption<List<String>> DISGUISE_DISABLED_WORLDS = ConfigOption.<List<String>>builder()
+            .node(worldOptionNode().append("disabled_worlds"))
+            .defaultValue(new ArrayList<>())
+            .build();
+
+    /**
+     * @deprecated 2026/1/15: Interaction Mirror is now planned to implement in a separate project
+     */
+    @Deprecated(forRemoval = true)
+    public static final ConfigOption<Boolean> MIRROR_BEHAVIOR_DO_SIMULATION = ConfigOption.builder(Boolean.class)
+            .node(interactionMirrorBehaviorNode().append("simulate_interactions"))
+            .defaultValue(false)
+            .build();
+
+    /**
+     * @deprecated 2026/1/15: Interaction Mirror is now planned to implement in a separate project
+     */
+    @Deprecated(forRemoval = true)
+    public static final ConfigOption<Boolean> MIRROR_BEHAVIOR_SNEAK = ConfigOption.builder(Boolean.class)
+            .node(interactionMirrorBehaviorNode().append("sneak"))
+            .defaultValue(false)
+            .build();
+
+    /**
+     * @deprecated 2026/1/15: Interaction Mirror is now planned to implement in a separate project
+     */
+    @Deprecated(forRemoval = true)
+    public static final ConfigOption<Boolean> MIRROR_BEHAVIOR_SWAP_HAND = ConfigOption.builder(Boolean.class)
+            .node(interactionMirrorBehaviorNode().append("swap_hands"))
+            .defaultValue(false)
+            .build();
+
+    /**
+     * @deprecated 2026/1/15: Interaction Mirror is now planned to implement in a separate project
+     */
+    @Deprecated(forRemoval = true)
+    public static final ConfigOption<Boolean> MIRROR_BEHAVIOR_DROP = ConfigOption.builder(Boolean.class)
+            .node(interactionMirrorBehaviorNode().append("allow_drop"))
+            .defaultValue(false)
+            .build();
+
+    /**
+     * @deprecated 2026/1/15: Interaction Mirror is now planned to implement in a separate project
+     */
+    @Deprecated(forRemoval = true)
+    public static final ConfigOption<Boolean> MIRROR_BEHAVIOR_HOTBAR = ConfigOption.builder(Boolean.class)
+            .node(interactionMirrorBehaviorNode().append("hotbar"))
+            .defaultValue(false)
+            .build();
+
+    /**
+     * @deprecated 2026/1/15: Interaction Mirror is now planned to implement in a separate project
+     */
+    @Deprecated(forRemoval = true)
+    public static final ConfigOption<Integer> MIRROR_CONTROL_DISTANCE = ConfigOption.builder(Integer.class)
+            .node(interactionMirrorNode().append("normalDistance"))
+            .defaultValue(-1)
+            .build();
+
+    /**
+     * @deprecated 2026/1/15: Interaction Mirror is now planned to implement in a separate project
+     */
+    @Deprecated(forRemoval = true)
+    public static final ConfigOption<Boolean> MIRROR_IGNORE_DISGUISED = ConfigOption.builder(Boolean.class)
+            .node(interactionMirrorNode().append("ignore_disguised"))
+            .defaultValue(true)
+            .build();
+
+    /**
+     * @deprecated 2026/1/15: Interaction Mirror is now planned to implement in a separate project
+     */
+    @Deprecated(forRemoval = true)
+    public static final ConfigOption<Integer> MIRROR_DESTROY_TIMEOUT = ConfigOption.builder(Integer.class)
+            .node(interactionMirrorNode().append("destroy_timeout"))
+            .defaultValue(40)
+            .build();
+
+    /**
+     * @deprecated 2026/1/15: Interaction Mirror is now planned to implement in a separate project
+     */
+    @Deprecated(forRemoval = true)
+    public static final ConfigOption<Boolean> MIRROR_LOG_OPERATION = ConfigOption.builder(Boolean.class)
+            .node(interactionMirrorNode().append("log_operations"))
+            .defaultValue(false)
+            .build();
+
+    /**
+     * @deprecated 2026/1/15: Interaction Mirror is now planned to implement in a separate project
+     */
+    @Deprecated(forRemoval = true)
+    public static final ConfigOption<Integer> MIRROR_LOG_CLEANUP_DATE = ConfigOption.builder(Integer.class)
+            .node(interactionMirrorNode().append("log_cleanup"))
+            .defaultValue(7)
+            .build();
+
+    /**
+     * @deprecated 2026/1/15: Interaction Mirror is now planned to implement in a separate project
+     */
+    @Deprecated(forRemoval = true)
+    public static final ConfigOption<String> MIRROR_SELECTION_MODE = ConfigOption.builder(String.class)
+            .node(interactionMirrorNode().append("selection_mode"))
+            .defaultValue("by_name")
+            .build();
+
+    /**
+     * @deprecated 2026/1/15: AI Modification is now planned to implement in another separate project
+     */
+    @Deprecated(forRemoval = true)
+    public static final ConfigOption<Boolean> DO_MODIFY_AI = ConfigOption.builder(Boolean.class)
+            .node(ConfigNode.create().append("modify_ai"))
+            .defaultValue(false)
+            .build();
 
     @Deprecated(forRemoval = true)
     public static final ConfigOption<Boolean> HIDE_DISGUISED_PLAYERS_IN_TAB = ConfigOption.builder(Boolean.class)
@@ -330,16 +387,6 @@ public class ConfigOptions
     public static final ConfigOption<Boolean> SR_SHOW_PLAYER_DISGUISES_IN_TAB = ConfigOption.builder(Boolean.class)
             .node(serverRendererNode().append("show_player_disguises_in_tab"))
             .defaultValue(false)
-            .build();
-
-    public static final ConfigOption<Boolean> TOWNY_ALLOW_FLY_IN_WILDERNESS = ConfigOption.builder(Boolean.class)
-            .node(townyNode().append("allow_fly_in_wilderness"))
-            .defaultValue(false)
-            .build();
-
-    public static final ConfigOption<List<String>> DISGUISE_DISABLED_WORLDS = ConfigOption.<List<String>>builder()
-            .node(worldOptionNode().append("disabled_worlds"))
-            .defaultValue(new ArrayList<>())
             .build();
 
     @Deprecated(forRemoval = true, since = "2.5.0")
@@ -359,6 +406,7 @@ public class ConfigOptions
             .defaultValue(0)
             .build();
 
+    @Deprecated(forRemoval = true)
     public static ConfigNode interactionMirrorNode()
     {
         return ConfigNode.create().append("interactionMirror");

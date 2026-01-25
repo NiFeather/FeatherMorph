@@ -13,7 +13,6 @@ import xyz.nifeather.morph.commands.brigadier.IConvertibleBrigadier;
 import xyz.nifeather.morph.commands.subcommands.OptionSubCommands;
 import xyz.nifeather.morph.config.ConfigOptions;
 import xyz.nifeather.morph.config.MorphConfigManager;
-import xyz.nifeather.morph.events.InteractionMirrorProcessor;
 import xyz.nifeather.morph.messages.strings.CommandNameStrings;
 import xyz.nifeather.morph.messages.strings.HelpStrings;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
@@ -54,17 +53,6 @@ public class OptionSubCommand extends MorphPluginObject implements IConvertibleB
 
         subCommands.add(getToggle("armorstand_show_arms", ConfigOptions.ARMORSTAND_SHOW_ARMS));
 
-        subCommands.add(getMirrorMode("mirror_mode", ConfigOptions.MIRROR_SELECTION_MODE, null));
-        subCommands.add(getToggle("mirror_interaction", ConfigOptions.MIRROR_BEHAVIOR_DO_SIMULATION, CommandNameStrings.mirrorInteractionString()));
-        subCommands.add(getToggle("mirror_sneak", ConfigOptions.MIRROR_BEHAVIOR_SNEAK, CommandNameStrings.mirrorSneakString()));
-        subCommands.add(getToggle("mirror_swaphand", ConfigOptions.MIRROR_BEHAVIOR_SWAP_HAND, CommandNameStrings.mirrorSwapHandString()));
-        subCommands.add(getToggle("mirror_drop", ConfigOptions.MIRROR_BEHAVIOR_DROP, CommandNameStrings.mirrorDropString()));
-        subCommands.add(getToggle("mirror_hotbar", ConfigOptions.MIRROR_BEHAVIOR_HOTBAR, CommandNameStrings.mirrorHotbar()));
-        subCommands.add(getToggle("mirror_ignore_disguised", ConfigOptions.MIRROR_IGNORE_DISGUISED, CommandNameStrings.mirrorIgnoreDisguised()));
-        subCommands.add(getInteger("mirror_control_distance", ConfigOptions.MIRROR_CONTROL_DISTANCE));
-        subCommands.add(getToggle("mirror_log_operations", ConfigOptions.MIRROR_LOG_OPERATION));
-        subCommands.add(getInteger("mirror_log_cleanup", ConfigOptions.MIRROR_LOG_CLEANUP_DATE));
-
         subCommands.add(getToggle("debug_output", ConfigOptions.DEBUG_OUTPUT));
         subCommands.add(getToggle("revealing", ConfigOptions.REVEALING));
 
@@ -95,12 +83,6 @@ public class OptionSubCommand extends MorphPluginObject implements IConvertibleB
                                                                                  @Nullable FormattableMessage displayName)
     {
         return new OptionSubCommands.StringListOptionBaseCommand(optionName, config, option);
-    }
-
-    private IConvertibleBrigadier getMirrorMode(String name, ConfigOption<String> option, @Nullable FormattableMessage displayName)
-    {
-        return new OptionSubCommands.LimiterStringListOptionCommand(
-                name, config, option, InteractionMirrorProcessor.InteractionMirrorSelectionMode.valuesLowerCase());
     }
 
     private IConvertibleBrigadier getInteger(String name, ConfigOption<Integer> option)
