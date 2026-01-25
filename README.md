@@ -87,3 +87,10 @@ cd FeatherMorph
 ```
 
 生成的文件将位于`build/libs`中，`FeatherMorph-x.x.x-all.jar`就是构建出来的插件。
+
+### 特别鸣谢 Credits
+- [LibsDisguises](https://github.com/libraryaddict/LibsDisguises): For making this project possible, and for reference about how to make the server renderer
+- [VeinMiner](https://github.com/2008Choco/VeinMiner): For the reference about how to implement *Client <-> Server* communication.
+- [ProtocolLib](https://github.com/dmulloy2/ProtocolLib): For making server renderer possible in 1.x releases
+- [Paper docs](https://docs.papermc.io/): For how to make paper plugins
+- [PacketEvents](https://github.com/retrooper/packetevents): For making server renderer possible
