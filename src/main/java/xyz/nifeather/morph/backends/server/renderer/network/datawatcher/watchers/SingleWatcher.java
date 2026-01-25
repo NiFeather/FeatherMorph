@@ -31,7 +31,6 @@ import xyz.nifeather.morph.misc.disguiseProperty.values.OffTreeProperties;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -625,6 +624,8 @@ public abstract class SingleWatcher extends MorphPluginObject
     }
 
     public abstract List<PacketWrapper<?>> buildSpawnPackets() throws BuildFailedException;
+
+    public abstract List<PacketWrapper<?>> buildVirtualEntityDisposalPackets() throws BuildFailedException;
 
     private boolean disposed;
 

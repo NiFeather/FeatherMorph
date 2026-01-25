@@ -16,7 +16,6 @@ import net.minecraft.nbt.CompoundTag;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.EntityEquipment;
 import xyz.nifeather.morph.backends.server.renderer.network.PacketFactory;
 import xyz.nifeather.morph.backends.server.renderer.network.ProtocolEquipment;
 import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
@@ -152,6 +151,13 @@ public class EntityWatcher extends SingleWatcher
         // 属性交由 LivingEntityWatcher 添加
 
         return packets;
+    }
+
+    @Override
+    public List<PacketWrapper<?>> buildVirtualEntityDisposalPackets() throws BuildFailedException
+    {
+        var rmPacket = new WrapperPlayServerDestroyEntities(this.readEntryOrThrow(CustomEntries.SPAWN_ID));
+        return List.of(rmPacket);
     }
 
     @Override

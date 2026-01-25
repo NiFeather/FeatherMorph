@@ -139,11 +139,11 @@ public class PlayerWatcher extends LivingEntityWatcher
 
     public List<PacketWrapper<?>> buildPlayerInfoPackets()
     {
-        var spawnUUID = this.readEntryOrThrow(CustomEntries.SPAWN_UUID);
-        var infoRemove = new WrapperPlayServerPlayerInfoRemove(List.of(spawnUUID));
+        var virtualEntityUUID = this.readEntryOrThrow(CustomEntries.SPAWN_UUID);
+        var infoRemove = new WrapperPlayServerPlayerInfoRemove(List.of(virtualEntityUUID));
 
         var packetProfile = GameProfileUtils.toPacketEventsUserProfile(this.readEntryOrThrow(CustomEntries.PROFILE));
-        packetProfile.setUUID(spawnUUID);
+        packetProfile.setUUID(virtualEntityUUID);
         var infoUpdate = new WrapperPlayServerPlayerInfoUpdate(
                 EnumSet.of(
                         WrapperPlayServerPlayerInfoUpdate.Action.ADD_PLAYER,
@@ -159,8 +159,7 @@ public class PlayerWatcher extends LivingEntityWatcher
         return List.of(infoRemove, infoUpdate);
     }
 
-    @Override
-    public List<PacketWrapper<?>> buildSpawnPackets() throws BuildFailedException
+    public List<PacketWrapper<?>> buildSpawnPackets(boolean includePlayerInfo) throws BuildFailedException
     {
         var list = new ObjectArrayList<PacketWrapper<?>>();
 
@@ -169,26 +168,29 @@ public class PlayerWatcher extends LivingEntityWatcher
         if (gameProfile.name().isBlank())
             throw new IllegalArgumentException("GameProfile name is empty!");
 
-        list.addAll(this.buildPlayerInfoPackets());
+        if (includePlayerInfo)
+            list.addAll(this.buildPlayerInfoPackets());
+
         list.addAll(super.buildSpawnPackets());
-/*
-        var bindingPlayer = getBindingPlayer();
-        var nmsPlayer = NmsRecord.ofPlayer(bindingPlayer);
-        if (nmsPlayer.isTransmittingWaypoint() && Boolean.TRUE.equals(bindingPlayer.getWorld().getGameRuleValue(GameRule.LOCATOR_BAR)))
-        {
-            list.add(new WrapperPlayServerWaypoint(
-                    WrapperPlayServerWaypoint.Operation.TRACK,
-                    new TrackedWaypoint(
-                            Either.createLeft(this.readEntryOrThrow(CustomEntries.SPAWN_UUID)),
-                            new WaypointIcon(WaypointIcon.ICON_STYLE_DEFAULT, null),
-                            new Vec3iWaypointInfo(new Vector3i(
-                                    nmsPlayer.getBlockX(), nmsPlayer.getBlockY(), nmsPlayer.getBlockZ()
-                            ))
-                    )
-            ));
-        }*/
 
         return list;
+    }
+
+    @Override
+    public List<PacketWrapper<?>> buildVirtualEntityDisposalPackets() throws BuildFailedException
+    {
+        var list = new ObjectArrayList<>(super.buildVirtualEntityDisposalPackets());
+
+        var playerInfoRmPacket = new WrapperPlayServerPlayerInfoRemove(this.readEntryOrThrow(CustomEntries.SPAWN_UUID));
+        list.add(playerInfoRmPacket);
+
+        return list;
+    }
+
+    @Override
+    public List<PacketWrapper<?>> buildSpawnPackets() throws BuildFailedException
+    {
+        return buildSpawnPackets(true);
     }
 
     private void resetValues()
