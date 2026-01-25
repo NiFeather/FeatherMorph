@@ -844,21 +844,13 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         var wrapper = state.getDisguiseWrapper();
 
         // 设定形态属性
-        UUID virtualEntityUUID;
 
-        if (PermissionUtils.hasPermission(player, CommonPermissions.DISGUISE_USE_REAL_UUID, false))
-        {
-            virtualEntityUUID = player.getUniqueId();
-        }
-        else
-        {
-            // 设定初始UUID
-            var str = uuidRandomBaseString.get()
-                    + parameters.targetDisguiseIdentifier()
-                    + player.getName();
+        // 设定初始UUID
+        var str = uuidRandomBaseString.get()
+                + parameters.targetDisguiseIdentifier()
+                + player.getName();
 
-            virtualEntityUUID = UUID.nameUUIDFromBytes(str.getBytes());
-        }
+        UUID virtualEntityUUID = UUID.nameUUIDFromBytes(str.getBytes());
 
         wrapper.writeProperty(OffTreeProperties.VIRTUAL_ENTITY_UUID, virtualEntityUUID);
 
