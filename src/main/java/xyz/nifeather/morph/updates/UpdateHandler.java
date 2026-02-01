@@ -19,6 +19,7 @@ import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.strings.UpdateStrings;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
+import xyz.nifeather.morph.utilities.FoliaThreadUtils;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -177,6 +178,9 @@ public class UpdateHandler extends MorphPluginObject
             for (var map : versionList)
                 metaList.add(SingleUpdateInfoMeta.fromMap(map));
 
+            // Setup lookup brand here so that we don't create String every time we filter a SingleUpdateInfoMeta
+            // I'm not using `Bukkit.getName()` because this now can return downstream implements like Lophine, Luminol, Leaves, etc.
+            String lookupBrand = FoliaThreadUtils.isFolia() ? "Folia" : "Paper";
             var matchMeta = metaList.stream()
                     .filter(m ->
                     {
@@ -184,7 +188,7 @@ public class UpdateHandler extends MorphPluginObject
                         if (supportedLoaders == null) return false;
 
                         var isRelease = "Release".equalsIgnoreCase(m.versionType);
-                        var loaderMatch = supportedLoaders.stream().anyMatch(s -> s.equalsIgnoreCase(Platforms.fromName(Bukkit.getName()).getImplName()));
+                        var loaderMatch = supportedLoaders.stream().anyMatch(s -> s.equalsIgnoreCase(lookupBrand));
 
                         return isRelease && loaderMatch;
                     }).findFirst().orElse(null);
