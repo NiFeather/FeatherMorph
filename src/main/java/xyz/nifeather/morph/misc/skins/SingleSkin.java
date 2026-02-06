@@ -18,7 +18,7 @@ public class SingleSkin
 
     @Expose
     @SerializedName("expires_at")
-    public long expiresAt;
+    public long expiresAt = 0L;
 
     @Nullable
     public GameProfile cachedProfile;

@@ -3,6 +3,7 @@ package xyz.nifeather.morph.providers.disguise;
 import com.mojang.authlib.GameProfile;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.kyori.adventure.text.Component;
+import net.minecraft.util.StringUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
@@ -104,8 +105,20 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
         var propertyHandler = state.disguisePropertyHandler();
         var playerProperties = DisguiseProperties.INSTANCE.getCollectionOrThrow(PlayerPropertyCollection.class);
 
-        if (propertyHandler.contains(playerProperties.SKIN))
+        var existingSkin = propertyHandler.getOr(playerProperties.SKIN, null);
+
+        if (existingSkin != null)
+        {
+            if (!StringUtil.isValidPlayerName(existingSkin.name()))
+            {
+                throw ParseErrorException.forProperty(PropertyNames.PLAYER_SKIN)
+                        .withLocalizableMessage(ExceptionStrings.malformedInput())
+                        .withMessage("Invalid name for the existing skin profile")
+                        .create();
+            }
+
             return;
+        }
 
         var playerDisguiseTargetName = DisguiseTypes.PLAYER.toStrippedId(id);
 
@@ -131,6 +144,14 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
             //如果玩家头和目标伪装ID一致，那么设置伪装皮肤
             if (gameProfile.name().equals(playerDisguiseTargetName))
                 propertyHandler.set(playerProperties.SKIN, gameProfile);
+        }
+
+        if (!StringUtil.isValidPlayerName(playerDisguiseTargetName))
+        {
+            throw ParseErrorException.forProperty(PropertyNames.PLAYER_SKIN)
+                    .withLocalizableMessage(ExceptionStrings.malformedInput())
+                    .withMessage("Invalid name for the upcoming skin")
+                    .create();
         }
 
         PlayerSkinProvider.getInstance().fetchSkin(playerDisguiseTargetName)

@@ -13,6 +13,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import net.minecraft.util.StringUtil;
 import org.bukkit.DyeColor;
 import org.bukkit.Keyed;
 import org.bukkit.NamespacedKey;
@@ -474,6 +475,14 @@ public class InputHandles
                         .byMethod("readResolvableSkinInput")
                         .withMessage("Input name exceeds the limit of 16 characters")
                         .withLocalizableMessage(ExceptionStrings.inputTooLong())
+                        .create();
+            }
+            else if (!StringUtil.isValidPlayerName(value))
+            {
+                throw ParseErrorException.forProperty(propertyName)
+                        .byMethod("readResolvableSkinInput")
+                        .withMessage("Invalid skin name")
+                        .withLocalizableMessage(ExceptionStrings.malformedInput())
                         .create();
             }
 

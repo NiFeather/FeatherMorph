@@ -5,6 +5,8 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
@@ -12,6 +14,8 @@ import io.papermc.paper.command.brigadier.Commands;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.minecraft.util.StringUtil;
+import org.apache.commons.io.FilenameUtils;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -77,25 +81,7 @@ public class SkinCacheSubCommand extends MorphPluginObject implements IConvertib
                                 Commands.literal("drop")
                                         .then(
                                                 Commands.argument("skin", StringArgumentType.string())
-                                                        .suggests((ctx, builder) ->
-                                                        {
-                                                            var allSkin = skinProvider.getAllSkins();
-
-                                                            return CompletableFuture.supplyAsync(() ->
-                                                            {
-                                                                var input = builder.getRemainingLowerCase();
-
-                                                                allSkin.forEach(singleSkin ->
-                                                                {
-                                                                    var skinName = singleSkin.name;
-
-                                                                    if (skinName.toLowerCase().contains(input))
-                                                                        builder.suggest(skinName);
-                                                                });
-
-                                                                return builder.build();
-                                                            });
-                                                        })
+                                                        .suggests(this::filterSkinName)
                                                         .executes(this::executeDrop)
                                         )
                         ).then(
@@ -146,16 +132,14 @@ public class SkinCacheSubCommand extends MorphPluginObject implements IConvertib
     {
         var targetName = suggestionsBuilder.getRemainingLowerCase();
 
-        var allSkin = skinProvider.getAllSkins();
+        var allSkin = skinProvider.getAvailableNames();
 
         return CompletableFuture.supplyAsync(() ->
         {
-            allSkin.forEach(singleSkin ->
+            allSkin.forEach(name ->
             {
-                var skinName = singleSkin.name;
-
-                if (skinName.toLowerCase().contains(targetName))
-                    suggestionsBuilder.suggest(skinName);
+                if (name.toLowerCase().contains(targetName))
+                    suggestionsBuilder.suggest(name);
             });
 
             return suggestionsBuilder.build();
@@ -169,7 +153,7 @@ public class SkinCacheSubCommand extends MorphPluginObject implements IConvertib
 
         if (targetName.equals("*"))
         {
-            var skinCount = skinProvider.getAllSkins().size();
+            var skinCount = skinProvider.getAvailableNames().size();
             skinProvider.dropAll();
 
             MessageUtils.send(sender, SkinCacheStrings.droppedAllSkins().resolve("count", skinCount + ""));
@@ -188,7 +172,7 @@ public class SkinCacheSubCommand extends MorphPluginObject implements IConvertib
     {
         var sender = context.getSource().getSender();
         var currentTime = System.currentTimeMillis();
-        var skins = skinProvider.getAllSkins();
+        var skins = skinProvider.getAvailableNames();
         var str = Component.empty();
 
         MessageUtils.send(sender, SkinCacheStrings.listHeader().resolve("count", skins.size() + ""));
@@ -209,7 +193,7 @@ public class SkinCacheSubCommand extends MorphPluginObject implements IConvertib
             }
         }
 
-        limit = Math.min(1, limit);
+        limit = Math.max(10, limit);
 
         var current = 0;
 
@@ -224,10 +208,10 @@ public class SkinCacheSubCommand extends MorphPluginObject implements IConvertib
             current++;
 
             var next = it.next();
-            str = str.append(Component.text(next.name));
+            str = str.append(Component.text(FilenameUtils.getBaseName(next)));
 
-            if (currentTime > next.expiresAt)
-                str = str.append(expiredString);
+            //if (currentTime > next.expiresAt)
+            //    str = str.append(expiredString);
 
             if (it.hasNext() && !(current == limit))
                 str = str.append(Component.text(", "));
