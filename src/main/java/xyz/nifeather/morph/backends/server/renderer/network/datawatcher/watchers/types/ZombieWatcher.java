@@ -2,6 +2,7 @@ package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watcher
 
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.syncing.IBindTarget;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
@@ -9,14 +10,14 @@ import xyz.nifeather.morph.misc.disguiseProperty.values.ZombiePropertyCollection
 
 public class ZombieWatcher extends LivingEntityWatcher
 {
-    public ZombieWatcher(Player bindingPlayer)
+    public ZombieWatcher(IBindTarget bindTarget)
     {
-        super(bindingPlayer, EntityType.ZOMBIE);
+        super(bindTarget, EntityType.ZOMBIE);
     }
 
-    protected ZombieWatcher(Player bindingPlayer, EntityType entityType)
+    protected ZombieWatcher(IBindTarget bindTarget, EntityType entityType)
     {
-        super(bindingPlayer, entityType);
+        super(bindTarget, entityType);
     }
 
     @Override

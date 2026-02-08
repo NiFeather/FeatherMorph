@@ -29,7 +29,7 @@ public class CreeperPropertyCollection extends BaseLivingEntityPropertyCollectio
     }
 
     @Override
-    protected void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull Creeper creeper)
+    public void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull Creeper creeper)
     {
         super.setupPropertiesFromEntity(meta, propertyHandler, creeper);
 

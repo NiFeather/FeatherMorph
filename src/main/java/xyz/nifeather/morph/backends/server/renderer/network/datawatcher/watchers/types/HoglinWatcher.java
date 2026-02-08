@@ -2,6 +2,7 @@ package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watcher
 
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.syncing.IBindTarget;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
@@ -9,9 +10,9 @@ import xyz.nifeather.morph.misc.disguiseProperty.values.HoglinPropertyCollection
 
 public class HoglinWatcher extends EHasAttackAnimationWatcher
 {
-    public HoglinWatcher(Player bindingPlayer)
+    public HoglinWatcher(IBindTarget bindTarget)
     {
-        super(bindingPlayer, EntityType.HOGLIN);
+        super(bindTarget, EntityType.HOGLIN);
     }
 
     @Override

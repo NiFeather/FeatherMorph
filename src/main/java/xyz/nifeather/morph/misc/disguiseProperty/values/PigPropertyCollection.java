@@ -47,7 +47,7 @@ public class PigPropertyCollection extends BaseLivingEntityPropertyCollection<Pi
     }
 
     @Override
-    protected void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull Pig targetEntity)
+    public void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull Pig targetEntity)
     {
         super.setupPropertiesFromEntity(meta, propertyHandler, targetEntity);
 

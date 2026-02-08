@@ -12,6 +12,8 @@ import xyz.nifeather.morph.misc.EntityRetiredException;
 
 import javax.annotation.Nullable;
 import java.time.Duration;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalUnit;
 import java.util.concurrent.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -45,7 +47,8 @@ public class FoliaThreadUtils
     public static <X, E extends Entity> X runOnEntitySync(E bukkitEntity, Function<E, X> func, Duration timeout)
             throws CancellationException, ExecutionException, TimeoutException, InterruptedException
     {
-        return delegateEntity(bukkitEntity, func).get(timeout.getNano(), TimeUnit.NANOSECONDS);
+        var timeoutNanos = timeout.toNanos();
+        return delegateEntity(bukkitEntity, func).get(timeoutNanos, TimeUnit.NANOSECONDS);
     }
 
     /**

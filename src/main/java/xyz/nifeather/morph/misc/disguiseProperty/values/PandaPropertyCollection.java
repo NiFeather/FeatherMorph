@@ -60,7 +60,7 @@ public class PandaPropertyCollection extends BaseLivingEntityPropertyCollection<
     }
 
     @Override
-    protected void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull Panda targetEntity)
+    public void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull Panda targetEntity)
     {
         super.setupPropertiesFromEntity(meta, propertyHandler, targetEntity);
 

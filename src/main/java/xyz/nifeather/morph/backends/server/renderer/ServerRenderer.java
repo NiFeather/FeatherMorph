@@ -6,6 +6,7 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -15,21 +16,29 @@ import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Exceptions.NullDependencyException;
 import xyz.nifeather.morph.MorphPluginObject;
-import xyz.nifeather.morph.backends.server.renderer.network.DisplayParameters;
 import xyz.nifeather.morph.backends.server.renderer.network.ProtocolHandler;
-import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
+import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.VirtualEntity;
 import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.types.LivingEntityWatcher;
-import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.types.PlayerWatcher;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.RegisterParameters;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.RenderRegistry;
-import xyz.nifeather.morph.backends.server.renderer.utilties.WatcherUtils;
+import xyz.nifeather.morph.backends.server.renderer.network.registries.WatcherIndex;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.misc.BuildFailedException;
+import xyz.nifeather.morph.misc.DisguiseMeta;
+import xyz.nifeather.morph.misc.DisguiseTypes;
 import xyz.nifeather.morph.misc.ExecutionErrorException;
+import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
+import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
+import xyz.nifeather.morph.misc.disguiseProperty.values.PropertyCollection;
+import xyz.nifeather.morph.utilities.FoliaThreadUtils;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 public class ServerRenderer extends MorphPluginObject implements Listener
 {
@@ -44,11 +53,11 @@ public class ServerRenderer extends MorphPluginObject implements Listener
 
         registry.onUnRegister(this, parameters ->
         {
-            var player = parameters.player();
-            if (player == null)
+            var entity = parameters.entity();
+            if (entity == null)
                 return;
 
-            this.unDisguiseForPlayer(player, parameters.watcher(), WatcherUtils.getAffectedPlayers(player));
+            this.unDisguiseForEntity(entity, parameters.watcher());
         });
     }
 
@@ -72,17 +81,16 @@ public class ServerRenderer extends MorphPluginObject implements Listener
 
     /**
      * 向后端渲染器注册玩家
-     * @param player 目标玩家
      * @param entityType 目标类型
      * @param name 伪装名称
      * @throws ExecutionErrorException If there's an error while registering the player
      */
     @NotNull
-    public SingleWatcher registerEntity(Player player, EntityType entityType, String name) throws ExecutionErrorException
+    public VirtualEntity registerEntity(LivingEntity entity, EntityType entityType, String name) throws ExecutionErrorException
     {
         try
         {
-            return registry.register(player, new RegisterParameters(entityType, name), w ->
+            return registry.register(entity, new RegisterParameters(entityType, name), w ->
             {
                 if (w instanceof LivingEntityWatcher livingEntityWatcher)
                     livingEntityWatchers.add(livingEntityWatcher);
@@ -90,7 +98,7 @@ public class ServerRenderer extends MorphPluginObject implements Listener
         }
         catch (Exception e)
         {
-            unRegisterEntity(player);
+            unRegisterEntity(entity);
 
             throw ExecutionErrorException.forMethod("registerEntity")
                     .causedBy(e)
@@ -99,11 +107,11 @@ public class ServerRenderer extends MorphPluginObject implements Listener
         }
     }
 
-    public void unRegisterEntity(Player player)
+    public void unRegisterEntity(LivingEntity entity)
     {
         try
         {
-            var watcher = registry.unregister(player.getUniqueId());
+            var watcher = registry.unregister(entity.getUniqueId());
 
             if (watcher != null)
                 this.livingEntityWatchers.remove(watcher);
@@ -114,31 +122,26 @@ public class ServerRenderer extends MorphPluginObject implements Listener
         }
     }
 
-    public void refreshStateForPlayer(@NotNull Player player, List<Player> affectedPlayers)
+    public void spawnVirtualEntity(@NotNull UUID entityUUID)
             throws BuildFailedException, NullDependencyException
     {
-        var watcher = registry.getWatcher(player.getUniqueId());
+        var watcher = registry.getWatcher(entityUUID);
         if (watcher == null)
             throw new NullDependencyException("Null Watcher for a existing player?!");
 
-        refreshStateForPlayer(player,
-                new DisplayParameters(watcher),
-                affectedPlayers);
+        spawnVirtualEntity(watcher, watcher.getAffectedPlayers());
     }
 
     /**
      * 刷新玩家的伪装
-     * @param player 目标玩家
-     * @param displayParameters 和伪装对应的 {@link DisplayParameters}
      */
-    public void refreshStateForPlayer(@NotNull Player player, @NotNull DisplayParameters displayParameters, List<Player> affectedPlayers)
-        throws BuildFailedException
+    public void spawnVirtualEntity(@NotNull VirtualEntity virtualEntity, List<Player> affectedPlayers)
+            throws BuildFailedException
     {
         if (affectedPlayers.isEmpty()) return;
 
-        var watcher = displayParameters.getWatcher();
         var protocolManager = PacketEvents.getAPI().getPlayerManager();
-        var spawnPackets = watcher.buildSpawnPackets();
+        var spawnPackets = virtualEntity.buildSpawnPackets();
 
         affectedPlayers.forEach(p ->
         {
@@ -146,19 +149,43 @@ public class ServerRenderer extends MorphPluginObject implements Listener
         });
     }
 
-    public void unDisguiseForPlayer(@Nullable Player player,
-                                    SingleWatcher disguiseWatcher,
-                                    List<Player> affectedPlayers)
+    public void unDisguiseForEntity(@Nullable LivingEntity entity, VirtualEntity disguiseWatcher)
     {
-        if (player == null) return;
+        if (entity == null) return;
 
         var protocolManager = PacketEvents.getAPI().getPlayerManager();
-        PlayerWatcher watcher = new PlayerWatcher(player);
+
+        var watcher = WatcherIndex.getInstance().getWatcherForType(entity, entity.getType());
         watcher.markSilent(this);
 
-        watcher.writeEntry(CustomEntries.PROFILE, ((CraftPlayer) player).getProfile());
-        watcher.writeEntry(CustomEntries.SPAWN_UUID, player.getUniqueId());
-        watcher.writeEntry(CustomEntries.SPAWN_ID, player.getEntityId());
+        if (entity instanceof CraftPlayer player)
+            watcher.writeEntry(CustomEntries.PROFILE, (player).getProfile());
+
+        // Read properties from the entity
+        var propertyHandler = new PropertyHandler();
+        var properties = (PropertyCollection<LivingEntity>) DisguiseProperties.INSTANCE.getCollection(entity.getType());
+        propertyHandler.registerFromPropertyCollection(properties);
+        properties.setupPropertiesFromEntity(new DisguiseMeta("unused", DisguiseTypes.EXTERNAL), propertyHandler, entity);
+        propertyHandler.getAll().forEach((p, v) -> watcher.writeProperty((SingleProperty<Object>) p, v));
+
+        // Getting entity's ID need to be on their thread on Folia :D
+        int entityID;
+        try
+        {
+            entityID = FoliaThreadUtils.runOnEntitySync(entity, e ->
+            {
+                assert e != null; // 你哪里 nullable 了
+                return e.getEntityId();
+            }, FoliaThreadUtils.DEFAULT_WAIT_TIMEOUT);
+        }
+        catch (ExecutionException | TimeoutException | InterruptedException e)
+        {
+            logger.error("Can't get entity ID, aborting...", e);
+            return;
+        }
+
+        watcher.writeEntry(CustomEntries.SPAWN_ID, entityID);
+        watcher.writeEntry(CustomEntries.SPAWN_UUID, entity.getUniqueId());
         watcher.writeEntry(CustomEntries.PROFILE_LISTED, true);
         watcher.writeEntry(CustomEntries.DONT_INCLUDE_PACKET_IDENTIFIER, true);
 
@@ -166,7 +193,7 @@ public class ServerRenderer extends MorphPluginObject implements Listener
 
         try
         {
-            playerSpawnPackets = watcher.buildSpawnPackets(false);
+            playerSpawnPackets = watcher.buildSpawnPackets();
         }
         catch (BuildFailedException e)
         {
@@ -186,10 +213,10 @@ public class ServerRenderer extends MorphPluginObject implements Listener
 
         watcher.dispose();
 
-        for (Player p : affectedPlayers)
+        for (Player p : disguiseWatcher.getAffectedPlayers())
         {
-            for (PacketWrapper<?> removePacket : disposalPackets)
-                protocolManager.sendPacket(p, removePacket);
+            for (PacketWrapper<?> disposalPacket : disposalPackets)
+                protocolManager.sendPacket(p, disposalPacket);
 
             for (var packet : playerSpawnPackets)
                 protocolManager.sendPacket(p, packet);

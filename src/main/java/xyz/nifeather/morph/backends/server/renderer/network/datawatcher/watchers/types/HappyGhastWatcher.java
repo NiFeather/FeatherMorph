@@ -3,6 +3,7 @@ package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watcher
 import net.minecraft.nbt.CompoundTag;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.syncing.IBindTarget;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
@@ -12,9 +13,9 @@ public class HappyGhastWatcher extends LivingEntityWatcher
 {
     private final HappyGhastPropertyCollection properties;
 
-    public HappyGhastWatcher(Player bindingPlayer)
+    public HappyGhastWatcher(IBindTarget bindTarget)
     {
-        super(bindingPlayer, EntityType.HAPPY_GHAST);
+        super(bindTarget, EntityType.HAPPY_GHAST);
 
         properties = DisguiseProperties.INSTANCE.getCollectionOrThrow(HappyGhastPropertyCollection.class);
     }

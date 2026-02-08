@@ -3,12 +3,10 @@ package xyz.nifeather.morph.backends.server.renderer.network.listeners;
 import com.github.retrooper.packetevents.event.PacketSendEvent;
 import com.github.retrooper.packetevents.protocol.packettype.PacketType;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSpawnEntity;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xyz.nifeather.morph.backends.server.ServerBackend;
 import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.types.EntityWatcher;
-import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.RenderRegistry;
 import xyz.nifeather.morph.misc.BuildFailedException;
 
@@ -53,9 +51,9 @@ public class SpawnPacketHandler extends ProtocolListener
         if (uuid == null)
             return;
 
-        //忽略不在注册表中的玩家
-        var bindingWatcher = registry.getWatcher(uuid);
-        if (bindingWatcher == null)
+        //忽略不在注册表中的实体
+        var virtualEntity = registry.getWatcher(uuid);
+        if (virtualEntity == null)
             return;
 
         // todo: 不要二次处理来自我们自己的包
@@ -64,13 +62,9 @@ public class SpawnPacketHandler extends ProtocolListener
 
         try
         {
-            var disguisedPlayer = Bukkit.getPlayer(uuid);
-            if (disguisedPlayer != null)
-            {
-                Player affectedPlayer = packetEvent.getPlayer();
-                backend.serverRenderer.refreshStateForPlayer(disguisedPlayer, List.of(affectedPlayer));
-                packetEvent.setCancelled(true);
-            }
+            Player affectedPlayer = packetEvent.getPlayer();
+            backend.serverRenderer.spawnVirtualEntity(virtualEntity, List.of(affectedPlayer));
+            packetEvent.setCancelled(true);
         }
         catch (BuildFailedException e)
         {
@@ -80,12 +74,12 @@ public class SpawnPacketHandler extends ProtocolListener
                 return;
             }
 
-            handleException(getPlayerFrom(packet.getEntityId()), bindingWatcher, e);
+            handleException(getEntityFrom(packet.getEntityId(), packetEvent.getUser()), virtualEntity, e);
         }
         catch (Throwable t)
         {
-            var sourcePlayer = getPlayerFrom(packet.getEntityId());
-            handleException(sourcePlayer, bindingWatcher, t);
+            var sourcePlayer = getEntityFrom(packet.getEntityId(), packetEvent.getUser());
+            handleException(sourcePlayer, virtualEntity, t);
         }
     }
 }

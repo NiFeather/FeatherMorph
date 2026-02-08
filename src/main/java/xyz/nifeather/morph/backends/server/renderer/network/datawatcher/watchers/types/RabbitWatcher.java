@@ -4,6 +4,7 @@ import net.minecraft.nbt.CompoundTag;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Rabbit;
+import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.syncing.IBindTarget;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
@@ -13,9 +14,9 @@ import java.util.Arrays;
 
 public class RabbitWatcher extends LivingEntityWatcher
 {
-    public RabbitWatcher(Player bindingPlayer)
+    public RabbitWatcher(IBindTarget bindTarget)
     {
-        super(bindingPlayer, EntityType.RABBIT);
+        super(bindTarget, EntityType.RABBIT);
     }
 
     @Override

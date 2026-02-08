@@ -32,7 +32,7 @@ public class SheepPropertyCollection extends BaseLivingEntityPropertyCollection<
     }
 
     @Override
-    protected void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull Sheep targetEntity)
+    public void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull Sheep targetEntity)
     {
         super.setupPropertiesFromEntity(meta, propertyHandler, targetEntity);
 

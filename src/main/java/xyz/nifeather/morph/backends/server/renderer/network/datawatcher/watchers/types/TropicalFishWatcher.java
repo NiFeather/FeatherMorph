@@ -6,6 +6,7 @@ import org.bukkit.craftbukkit.entity.CraftTropicalFish;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.TropicalFish;
+import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.syncing.IBindTarget;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
@@ -13,9 +14,9 @@ import xyz.nifeather.morph.misc.disguiseProperty.values.TropicalFishPropertyColl
 
 public class TropicalFishWatcher extends LivingEntityWatcher
 {
-    public TropicalFishWatcher(Player bindingPlayer)
+    public TropicalFishWatcher(IBindTarget bindTarget)
     {
-        super(bindingPlayer, EntityType.TROPICAL_FISH);
+        super(bindTarget, EntityType.TROPICAL_FISH);
     }
 
     @Override

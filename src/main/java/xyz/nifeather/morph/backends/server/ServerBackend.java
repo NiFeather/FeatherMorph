@@ -3,14 +3,13 @@ package xyz.nifeather.morph.backends.server;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.LivingEntity;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.pluginbase.Exceptions.NullDependencyException;
 import xiamomc.pluginbase.Messages.FormattableMessage;
 import xyz.nifeather.morph.backends.DisguiseBackend;
 import xyz.nifeather.morph.backends.DisguiseWrapper;
 import xyz.nifeather.morph.backends.server.renderer.ServerRenderer;
-import xyz.nifeather.morph.backends.server.renderer.utilties.WatcherUtils;
 import xyz.nifeather.morph.messages.strings.BackendStrings;
 import xyz.nifeather.morph.misc.BuildFailedException;
 import xyz.nifeather.morph.misc.ExecutionErrorException;
@@ -155,13 +154,13 @@ public class ServerBackend extends DisguiseBackend<ServerDisguise, ServerDisguis
     /**
      * 将某一玩家伪装成给定Wrapper中的实例
      *
-     * @param player  目标玩家
+     * @param entity
      * @param wrapper 目标Wrapper
-     * @apiNote 传入的wrapper可能不是此后端产出的Wrapper，需要对其进行验证
      * @throws ExecutionErrorException If there's an error occurred while applying
+     * @apiNote 传入的wrapper可能不是此后端产出的Wrapper，需要对其进行验证
      */
     @Override
-    public void disguise(Player player, DisguiseWrapper<?> wrapper) throws ExecutionErrorException
+    public void disguise(LivingEntity entity, DisguiseWrapper<?> wrapper) throws ExecutionErrorException
     {
         if (!(wrapper instanceof ServerDisguiseWrapper serverDisguiseWrapper))
         {
@@ -170,34 +169,34 @@ public class ServerBackend extends DisguiseBackend<ServerDisguise, ServerDisguis
                     .create();
         }
 
-        if (disguiseWrapperMap.containsKey(player.getUniqueId()))
-            unDisguise(player, false);
+        if (disguiseWrapperMap.containsKey(entity.getUniqueId()))
+            unDisguise(entity, false);
 
-        disguiseWrapperMap.put(player.getUniqueId(), serverDisguiseWrapper);
+        disguiseWrapperMap.put(entity.getUniqueId(), serverDisguiseWrapper);
 
         var watcher = serverRenderer.registerEntity(
-                player, wrapper.getEntityType(), wrapper.getDisguiseName());
+                entity, wrapper.getEntityType(), wrapper.getDisguiseName());
 
         watcher.markSilent(this);
-        serverDisguiseWrapper.setRenderParameters(player, watcher);
+        serverDisguiseWrapper.setRenderParameters(entity, watcher);
         watcher.unmarkSilent(this);
 
         try
         {
-            serverRenderer.refreshStateForPlayer(player, WatcherUtils.getAffectedPlayers(player));
+            serverRenderer.spawnVirtualEntity(entity.getUniqueId());
         }
         catch (NullDependencyException e)
         {
             throw ExecutionErrorException.forMethod("ServerBackend#disguise")
                     .causedBy(e)
-                    .withMessage("Failed to refresh player state, watcher not registered in the renderer!")
+                    .withMessage("Failed to refresh entity state, watcher not registered in the renderer!")
                     .create();
         }
         catch (BuildFailedException e)
         {
             if (!e.critical())
             {
-                logger.warn("Renderer failed to build spawn packets, ignoring: " + e.getMessage());
+                logger.warn("Renderer failed to build spawn packets, ignoring: ", e);
                 return;
             }
 
@@ -215,12 +214,12 @@ public class ServerBackend extends DisguiseBackend<ServerDisguise, ServerDisguis
         }
     }
 
-    private boolean unDisguise(Player player, boolean unregisterFromRenderer)
+    private boolean unDisguise(LivingEntity entity, boolean unregisterFromRenderer)
     {
         if (unregisterFromRenderer)
-            serverRenderer.unRegisterEntity(player);
+            serverRenderer.unRegisterEntity(entity);
 
-        var uuid = player.getUniqueId();
+        var uuid = entity.getUniqueId();
         var wrapper = disguiseWrapperMap.getOrDefault(uuid, null);
         if (wrapper != null)
             wrapper.dispose();
@@ -232,13 +231,12 @@ public class ServerBackend extends DisguiseBackend<ServerDisguise, ServerDisguis
     /**
      * Undisguise a player
      *
-     * @param player The player to undisguise
-     * @return Whether the operation was successful
+     * @param entity@return Whether the operation was successful
      */
     @Override
-    public boolean unDisguise(Player player)
+    public boolean unDisguise(LivingEntity entity)
     {
-        return unDisguise(player, true);
+        return unDisguise(entity, true);
     }
 
     /**

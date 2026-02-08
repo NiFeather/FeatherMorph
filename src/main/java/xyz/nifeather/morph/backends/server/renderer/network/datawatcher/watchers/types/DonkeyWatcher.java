@@ -2,12 +2,13 @@ package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watcher
 
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.syncing.IBindTarget;
 import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.types.horses.ChestedHorseWatcher;
 
 public class DonkeyWatcher extends ChestedHorseWatcher
 {
-    public DonkeyWatcher(Player bindingPlayer)
+    public DonkeyWatcher(IBindTarget bindTarget)
     {
-        super(bindingPlayer, EntityType.DONKEY);
+        super(bindTarget, EntityType.DONKEY);
     }
 }

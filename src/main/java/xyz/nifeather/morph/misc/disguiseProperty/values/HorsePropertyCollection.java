@@ -68,7 +68,7 @@ public class HorsePropertyCollection extends BaseLivingEntityPropertyCollection<
     }
 
     @Override
-    protected void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull Horse horse)
+    public void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull Horse horse)
     {
         super.setupPropertiesFromEntity(meta, propertyHandler, horse);
 

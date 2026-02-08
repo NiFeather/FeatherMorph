@@ -4,6 +4,7 @@ import net.minecraft.nbt.CompoundTag;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
+import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.syncing.IBindTarget;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntry;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
@@ -15,9 +16,9 @@ import java.util.Objects;
 
 public class PhantomWatcher extends LivingEntityWatcher
 {
-    public PhantomWatcher(Player bindingPlayer)
+    public PhantomWatcher(IBindTarget bindTarget)
     {
-        super(bindingPlayer, EntityType.PHANTOM);
+        super(bindTarget, EntityType.PHANTOM);
     }
 
     @Override
@@ -43,7 +44,7 @@ public class PhantomWatcher extends LivingEntityWatcher
     public <X> @Nullable X readEntry(CustomEntry<X> entry)
     {
         if (Objects.equals(entry, CustomEntries.OVERLAYED_PITCH))
-            return (X) Float.valueOf(-getBindingPlayer().getPitch());
+            return (X) Float.valueOf(-location().getPitch());
 
         return super.readEntry(entry);
     }

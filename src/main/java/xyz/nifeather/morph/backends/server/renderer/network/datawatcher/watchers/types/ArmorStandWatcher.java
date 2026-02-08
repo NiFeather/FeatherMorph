@@ -7,6 +7,7 @@ import net.minecraft.nbt.FloatTag;
 import net.minecraft.nbt.ListTag;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.syncing.IBindTarget;
 import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.values.SingleValue;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
@@ -23,9 +24,9 @@ public class ArmorStandWatcher extends LivingEntityWatcher
         register(ValueIndex.ARMOR_STAND);
     }
 
-    public ArmorStandWatcher(Player bindingPlayer)
+    public ArmorStandWatcher(IBindTarget bindTarget)
     {
-        super(bindingPlayer, EntityType.ARMOR_STAND);
+        super(bindTarget, EntityType.ARMOR_STAND);
     }
 
     public byte getArmorStandFlags(boolean small, boolean showArms, boolean noBasePlate)

@@ -9,6 +9,7 @@ import net.minecraft.nbt.CompoundTag;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
+import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.syncing.IBindTarget;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
@@ -18,9 +19,9 @@ import java.util.Objects;
 
 public class ZombieVillagerWatcher extends ZombieWatcher
 {
-    public ZombieVillagerWatcher(Player bindingPlayer)
+    public ZombieVillagerWatcher(IBindTarget bindTarget)
     {
-        super(bindingPlayer, EntityType.ZOMBIE_VILLAGER);
+        super(bindTarget, EntityType.ZOMBIE_VILLAGER);
     }
 
     @Override

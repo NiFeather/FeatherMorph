@@ -2,11 +2,12 @@ package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watcher
 
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.syncing.IBindTarget;
 
 public class SkeletonHorseWatcher extends AbstractHorseWatcher
 {
-    public SkeletonHorseWatcher(Player bindingPlayer)
+    public SkeletonHorseWatcher(IBindTarget bindTarget)
     {
-        super(bindingPlayer, EntityType.SKELETON_HORSE);
+        super(bindTarget, EntityType.SKELETON_HORSE);
     }
 }

@@ -5,15 +5,16 @@ import com.github.retrooper.packetevents.resources.ResourceLocation;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.ZombieNautilus;
+import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.syncing.IBindTarget;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 
 public class ZombieNautilusWatcher extends AbstractNautilusWatcher
 {
-    public ZombieNautilusWatcher(Player bindingPlayer)
+    public ZombieNautilusWatcher(IBindTarget bindTarget)
     {
-        super(bindingPlayer, EntityType.ZOMBIE_NAUTILUS);
+        super(bindTarget, EntityType.ZOMBIE_NAUTILUS);
     }
 
     @Override

@@ -3,6 +3,7 @@ package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watcher
 import net.minecraft.nbt.CompoundTag;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.syncing.IBindTarget;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntry;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
@@ -12,9 +13,9 @@ import xyz.nifeather.morph.misc.disguiseProperty.values.CreeperPropertyCollectio
 
 public class CreeperWatcher extends LivingEntityWatcher
 {
-    public CreeperWatcher(Player bindingPlayer)
+    public CreeperWatcher(IBindTarget bindTarget)
     {
-        super(bindingPlayer, EntityType.CREEPER);
+        super(bindTarget, EntityType.CREEPER);
     }
 
     @Override

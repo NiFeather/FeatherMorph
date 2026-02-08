@@ -47,14 +47,14 @@ public class SoundListener extends ProtocolListener
             if (!w.isActive())
                 return false;
 
-            var playerLocation = w.getBindingPlayer().getLocation();
+            var location = w.location();
 
-            if (!Objects.equals(playerLocation.getWorld(), positionAsLocation.getWorld()))
+            if (!Objects.equals(location.getWorld(), positionAsLocation.getWorld()))
                 return false;
 
-            var locX = (int) (playerLocation.x() * 8);
-            var locY = (int) (playerLocation.y() * 8);
-            var locZ = (int) (playerLocation.z() * 8);
+            var locX = (int) (location.x() * 8);
+            var locY = (int) (location.y() * 8);
+            var locZ = (int) (location.z() * 8);
 
             return effectPosition.x == locX && effectPosition.y == locY && effectPosition.z == locZ;
         }).findFirst().orElse(null);

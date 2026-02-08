@@ -53,7 +53,7 @@ public class FrogPropertyCollection extends BaseLivingEntityPropertyCollection<F
     }
 
     @Override
-    protected void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull Frog frog)
+    public void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull Frog frog)
     {
         super.setupPropertiesFromEntity(meta, propertyHandler, frog);
 

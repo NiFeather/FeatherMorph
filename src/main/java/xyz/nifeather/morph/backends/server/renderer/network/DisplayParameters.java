@@ -1,22 +1,22 @@
 package xyz.nifeather.morph.backends.server.renderer.network;
 
-import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
+import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.VirtualEntity;
 
 public class DisplayParameters
 {
-    public SingleWatcher getWatcher()
+    public VirtualEntity getWatcher()
     {
-        return singleWatcher;
+        return virtualEntity;
     }
 
-    private final SingleWatcher singleWatcher;
+    private final VirtualEntity virtualEntity;
 
-    public DisplayParameters(SingleWatcher watcher)
+    public DisplayParameters(VirtualEntity watcher)
     {
-        this.singleWatcher = watcher;
+        this.virtualEntity = watcher;
     }
 
-    public static DisplayParameters fromWatcher(SingleWatcher watcher)
+    public static DisplayParameters fromWatcher(VirtualEntity watcher)
     {
         return new DisplayParameters(watcher);
     }

@@ -50,7 +50,7 @@ public class LlamaPropertyCollection extends BaseLivingEntityPropertyCollection<
     }
 
     @Override
-    protected void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull Llama llama)
+    public void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull Llama llama)
     {
         super.setupPropertiesFromEntity(meta, propertyHandler, llama);
 

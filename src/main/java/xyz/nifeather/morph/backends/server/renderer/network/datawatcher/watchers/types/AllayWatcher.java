@@ -2,6 +2,7 @@ package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watcher
 
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.syncing.IBindTarget;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntry;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
@@ -34,9 +35,9 @@ public class AllayWatcher extends LivingEntityWatcher
         }
     }
 
-    public AllayWatcher(Player bindingPlayer)
+    public AllayWatcher(IBindTarget bindTarget)
     {
-        super(bindingPlayer, EntityType.ALLAY);
+        super(bindTarget, EntityType.ALLAY);
     }
 
     @Override

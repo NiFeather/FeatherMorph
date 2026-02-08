@@ -2,6 +2,7 @@ package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watcher
 
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.syncing.IBindTarget;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 
 public class TraderLlamaWatcher extends LlamaWatcher
@@ -14,8 +15,8 @@ public class TraderLlamaWatcher extends LlamaWatcher
         register(ValueIndex.LLAMA);
     }
 
-    public TraderLlamaWatcher(Player bindingPlayer)
+    public TraderLlamaWatcher(IBindTarget bindTarget)
     {
-        super(bindingPlayer, EntityType.TRADER_LLAMA);
+        super(bindTarget, EntityType.TRADER_LLAMA);
     }
 }

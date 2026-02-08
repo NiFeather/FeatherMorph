@@ -4,6 +4,7 @@ import net.minecraft.nbt.CompoundTag;
 import org.bukkit.DyeColor;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.syncing.IBindTarget;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
@@ -11,9 +12,9 @@ import xyz.nifeather.morph.misc.disguiseProperty.values.SheepPropertyCollection;
 
 public class SheepWatcher extends LivingEntityWatcher
 {
-    public SheepWatcher(Player bindingPlayer)
+    public SheepWatcher(IBindTarget bindTarget)
     {
-        super(bindingPlayer, EntityType.SHEEP);
+        super(bindTarget, EntityType.SHEEP);
     }
 
     @Override

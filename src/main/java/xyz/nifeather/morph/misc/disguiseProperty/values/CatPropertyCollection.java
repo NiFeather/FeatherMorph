@@ -70,7 +70,7 @@ public class CatPropertyCollection extends BaseLivingEntityPropertyCollection<Ca
     }
 
     @Override
-    protected void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull Cat cat)
+    public void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull Cat cat)
     {
         super.setupPropertiesFromEntity(meta, propertyHandler, cat);
 

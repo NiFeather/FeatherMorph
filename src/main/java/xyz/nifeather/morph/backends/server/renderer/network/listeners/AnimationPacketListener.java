@@ -36,7 +36,7 @@ public class AnimationPacketListener extends ProtocolListener
             return;
 
         var sourceEntityId = packet.getEntityId();
-        var sourcePlayer = this.getPlayerFrom(sourceEntityId);
+        var sourcePlayer = this.getEntityFrom(sourceEntityId, event.getUser());
 
         if (sourcePlayer == null) return;
 

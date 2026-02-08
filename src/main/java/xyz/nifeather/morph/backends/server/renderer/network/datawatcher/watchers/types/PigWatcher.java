@@ -6,6 +6,7 @@ import net.minecraft.nbt.CompoundTag;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Pig;
 import org.bukkit.entity.Player;
+import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.syncing.IBindTarget;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
@@ -17,9 +18,9 @@ public class PigWatcher extends AgeableMobWatcher
 {
     private final PigPropertyCollection pigProperties;
 
-    public PigWatcher(Player bindingPlayer)
+    public PigWatcher(IBindTarget bindTarget)
     {
-        super(bindingPlayer, EntityType.PIG);
+        super(bindTarget, EntityType.PIG);
 
         pigProperties = DisguiseProperties.INSTANCE.getCollectionOrThrow(PigPropertyCollection.class);
     }

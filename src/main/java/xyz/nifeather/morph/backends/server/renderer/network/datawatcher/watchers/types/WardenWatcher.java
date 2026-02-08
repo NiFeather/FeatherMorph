@@ -10,6 +10,7 @@ import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.syncing.IBindTarget;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntry;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
@@ -20,9 +21,9 @@ import java.util.List;
 
 public class WardenWatcher extends EHasAttackAnimationWatcher
 {
-    public WardenWatcher(Player bindingPlayer)
+    public WardenWatcher(IBindTarget bindTarget)
     {
-        super(bindingPlayer, EntityType.WARDEN);
+        super(bindTarget, EntityType.WARDEN);
     }
 
     @Override
@@ -30,15 +31,13 @@ public class WardenWatcher extends EHasAttackAnimationWatcher
     {
         super.onEntryWrite(entry, oldVal, newVal);
 
-        var bindingPlayer = getBindingPlayer();
-
         if (entry.equals(CustomEntries.WARDEN_CHARGING_ATTACK) && Boolean.TRUE.equals(newVal))
-            sendPacketToAffectedPlayers(new WrapperPlayServerEntityStatus(getBindingPlayer().getEntityId(), 62));
+            sendPacketToAffectedPlayers(new WrapperPlayServerEntityStatus(this.readEntryOrThrow(CustomEntries.SPAWN_ID), 62));
 
         if (entry.equals(CustomEntries.ANIMATION))
         {
             var id = newVal.toString();
-            var world = bindingPlayer.getWorld();
+            var world = location().getWorld();
 
             switch (id)
             {
@@ -53,7 +52,7 @@ public class WardenWatcher extends EHasAttackAnimationWatcher
                 {
                     if (this.readEntryOrDefault(CustomEntries.WARDEN_VANISHED, false)) return;
 
-                    world.playSound(bindingPlayer.getLocation(), Sound.ENTITY_WARDEN_ROAR, SoundCategory.HOSTILE, 3, 1);
+                    world.playSound(location(), Sound.ENTITY_WARDEN_ROAR, SoundCategory.HOSTILE, 3, 1);
                 }
                 case AnimationNames.SNIFF ->
                 {
@@ -62,7 +61,7 @@ public class WardenWatcher extends EHasAttackAnimationWatcher
                     this.block(ValueIndex.BASE_LIVING.POSE);
                     this.writePersistent(ValueIndex.BASE_LIVING.POSE, EntityPose.SNIFFING);
 
-                    world.playSound(bindingPlayer.getLocation(), Sound.ENTITY_WARDEN_SNIFF, SoundCategory.HOSTILE, 5, 1);
+                    world.playSound(location(), Sound.ENTITY_WARDEN_SNIFF, SoundCategory.HOSTILE, 5, 1);
                 }
                 case AnimationNames.DIGDOWN ->
                 {
@@ -70,7 +69,7 @@ public class WardenWatcher extends EHasAttackAnimationWatcher
 
                     this.block(ValueIndex.BASE_LIVING.POSE);
                     this.writePersistent(ValueIndex.BASE_LIVING.POSE, EntityPose.DIGGING);
-                    world.playSound(bindingPlayer.getLocation(), Sound.ENTITY_WARDEN_DIG, 5, 1);
+                    world.playSound(location(), Sound.ENTITY_WARDEN_DIG, 5, 1);
                 }
                 case AnimationNames.VANISH ->
                 {
@@ -85,7 +84,7 @@ public class WardenWatcher extends EHasAttackAnimationWatcher
                     this.block(ValueIndex.BASE_LIVING.POSE);
                     this.remove(ValueIndex.BASE_ENTITY.GENERAL);
                     this.writePersistent(ValueIndex.BASE_LIVING.POSE, EntityPose.EMERGING);
-                    world.playSound(bindingPlayer.getLocation(), Sound.ENTITY_WARDEN_EMERGE, 5, 1);
+                    world.playSound(location(), Sound.ENTITY_WARDEN_EMERGE, 5, 1);
 
                     List<PacketWrapper<?>> packets;
 
@@ -101,8 +100,8 @@ public class WardenWatcher extends EHasAttackAnimationWatcher
                         return;
                     }
 
-                    var affectedPlayers = this.getAffectedPlayers(bindingPlayer);
-                    var despawnPacket = new WrapperPlayServerDestroyEntities(bindingPlayer.getEntityId());
+                    var affectedPlayers = this.getAffectedPlayers();
+                    var despawnPacket = new WrapperPlayServerDestroyEntities(this.readEntryOrThrow(CustomEntries.SPAWN_ID));
 
                     var protocol = PacketEvents.getAPI().getPlayerManager();
                     for (Player affectedPlayer : affectedPlayers)
@@ -135,10 +134,8 @@ public class WardenWatcher extends EHasAttackAnimationWatcher
 
     private void reset()
     {
-        var bindingPlayer = getBindingPlayer();
-
-        this.writePersistent(ValueIndex.BASE_ENTITY.GENERAL, this.getPlayerBitMask(bindingPlayer));
-        this.writePersistent(ValueIndex.BASE_LIVING.POSE, SpigotConversionUtil.fromBukkitPose(bindingPlayer.getPose()));
+        this.writePersistent(ValueIndex.BASE_ENTITY.GENERAL, this.getPlayerBitMask());
+        this.writePersistent(ValueIndex.BASE_LIVING.POSE, SpigotConversionUtil.fromBukkitPose(bindTarget.pose()));
         this.writePersistent(ValueIndex.BASE_LIVING.SILENT, false);
         this.remove(ValueIndex.BASE_LIVING.POSE);
         this.remove(ValueIndex.BASE_ENTITY.GENERAL);

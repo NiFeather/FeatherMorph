@@ -8,13 +8,12 @@ import com.google.common.collect.ImmutableList;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.nbt.CompoundTag;
-import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
-import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Exceptions.NullDependencyException;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.backends.server.renderer.network.PacketFactory;
@@ -23,7 +22,6 @@ import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.values.S
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntry;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.RenderRegistry;
-import xyz.nifeather.morph.backends.server.renderer.utilties.WatcherUtils;
 import xyz.nifeather.morph.misc.BuildFailedException;
 import xyz.nifeather.morph.misc.ExecutionErrorException;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
@@ -31,55 +29,15 @@ import xyz.nifeather.morph.misc.disguiseProperty.values.OffTreeProperties;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-public abstract class SingleWatcher extends MorphPluginObject
+public abstract class VirtualEntity extends MorphPluginObject
 {
     protected void initRegistry()
     {
     }
 
-    public final UUID bindingUUID;
-
-    private Player bindingPlayer;
-
-    public boolean isActive()
-    {
-        // 以目前的框架来看，似乎只能这样了 :(
-        if (bindingPlayer.isOnline())
-        {
-            return true;
-        }
-        else
-        {
-            var player = Bukkit.getPlayer(bindingUUID);
-            return player != null;
-        }
-    }
-
-    public boolean isPlayerOnline()
-    {
-        return Bukkit.getOfflinePlayer(bindingUUID).isOnline();
-    }
-
-    public Player getBindingPlayer()
-    {
-        if (!bindingPlayer.isConnected())
-        {
-            if (!Bukkit.getOfflinePlayer(bindingUUID).isOnline())
-            {
-                logger.warn("Calling getBindingPlayer for an offline player!");
-                Thread.dumpStack();
-            }
-            else
-            {
-                bindingPlayer = Bukkit.getPlayer(bindingUUID);
-            }
-        }
-
-        return bindingPlayer;
-    }
+    public abstract boolean isActive();
 
     private final EntityType entityType;
 
@@ -90,11 +48,10 @@ public abstract class SingleWatcher extends MorphPluginObject
 
     private boolean doingInitialization;
 
-    public SingleWatcher(Player bindingPlayer, EntityType entityType)
-    {
-        this.bindingUUID = bindingPlayer.getUniqueId();
-        this.bindingPlayer = bindingPlayer;
+    public abstract Location location();
 
+    public VirtualEntity(EntityType entityType)
+    {
         this.entityType = entityType;
 
         doingInitialization = true;
@@ -103,15 +60,6 @@ public abstract class SingleWatcher extends MorphPluginObject
         initRegistry();
         doingInitialization = false;
         unmarkSilent(this);
-    }
-
-    private final AtomicBoolean syncedOnce = new AtomicBoolean(false);
-
-    @Initializer
-    private void load()
-    {
-        if (!syncedOnce.get() && !disposed)
-            sync();
     }
 
     //region Disguise Property
@@ -226,7 +174,7 @@ public abstract class SingleWatcher extends MorphPluginObject
     }
 
     /**
-     * Values in this list shouldn't be included with meta packet processing in {@link SingleWatcher#handleEntityMetadataPacket(WrapperPlayServerEntityMetadata)}
+     * Values in this list shouldn't be included with meta packet processing in {@link VirtualEntity#handleEntityMetadataPacket(WrapperPlayServerEntityMetadata)}
      */
     private final List<Integer> blockedValues = Collections.synchronizedList(new ObjectArrayList<>());
 
@@ -300,11 +248,11 @@ public abstract class SingleWatcher extends MorphPluginObject
 
     /**
      * Write value to the temporary buffer (Dirty Singles) <br>
-     * Mostly used in {@link SingleWatcher#doSync()} function.
+     * Mostly used in {@link VirtualEntity#doSync()} function.
      *
      * @apiNote If the given SingleValue has an override value, this operation will not be performed
      *          <br>
-     *          If you wish to write a persistent value, use {@link SingleWatcher#writePersistent(SingleValue, Object)}
+     *          If you wish to write a persistent value, use {@link VirtualEntity#writePersistent(SingleValue, Object)}
      */
     public <X> void writeTemp(SingleValue<X> singleValue, @NotNull X value)
     {
@@ -441,7 +389,7 @@ public abstract class SingleWatcher extends MorphPluginObject
         return map;
     }
 
-    private final Map<SingleValue<?>, Object> dirtyValues = Collections.synchronizedMap(new Object2ObjectOpenHashMap<>());
+    protected final Map<SingleValue<?>, Object> dirtyValues = Collections.synchronizedMap(new Object2ObjectOpenHashMap<>());
 
     public Map<SingleValue<?>, Object> getDirty()
     {
@@ -454,8 +402,6 @@ public abstract class SingleWatcher extends MorphPluginObject
     }
 
     //endregion Value Registry
-
-    private static final Object syncSilentSource = new Object();
 
     // Let's just keep this for a while...
     public void update()
@@ -519,29 +465,6 @@ public abstract class SingleWatcher extends MorphPluginObject
         return currentData;
     }
 
-    public void sync()
-    {
-        markSilent(syncSilentSource);
-
-        syncedOnce.set(true);
-        dirtyValues.clear();
-
-        try
-        {
-            doSync();
-        }
-        catch (Throwable t)
-        {
-            logger.warn("Error occurred while syncing watcher", t);
-        }
-
-        unmarkSilent(syncSilentSource);
-    }
-
-    protected void doSync()
-    {
-    }
-
     // Kept for legacy client usage
     //@Deprecated(forRemoval = true)
     public void writeToCompound(CompoundTag nbt)
@@ -596,10 +519,7 @@ public abstract class SingleWatcher extends MorphPluginObject
 
     //endregion Networking
 
-    protected List<Player> getAffectedPlayers(Player sourcePlayer)
-    {
-        return WatcherUtils.getAffectedPlayers(sourcePlayer);
-    }
+    public abstract List<Player> getAffectedPlayers();
 
     protected void sendPacketToAffectedPlayers(PacketWrapper<?> packet)
     {
@@ -617,17 +537,17 @@ public abstract class SingleWatcher extends MorphPluginObject
             return;
         }
 
-        var players = getAffectedPlayers(getBindingPlayer());
+        var affectedPlayers = getAffectedPlayers();
 
         var protocol = PacketEvents.getAPI().getPlayerManager();
-        players.forEach(p -> protocol.sendPacket(p, packet));
+        affectedPlayers.forEach(p -> protocol.sendPacket(p, packet));
     }
 
     public abstract List<PacketWrapper<?>> buildSpawnPackets() throws BuildFailedException;
 
     public abstract List<PacketWrapper<?>> buildVirtualEntityDisposalPackets() throws BuildFailedException;
 
-    private boolean disposed;
+    protected boolean disposed;
 
     public boolean disposed()
     {

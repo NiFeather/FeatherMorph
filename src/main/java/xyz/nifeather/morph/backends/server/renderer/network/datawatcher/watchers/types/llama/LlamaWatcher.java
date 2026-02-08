@@ -3,6 +3,7 @@ package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watcher
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Llama;
 import org.bukkit.entity.Player;
+import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.syncing.IBindTarget;
 import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.types.horses.ChestedHorseWatcher;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
@@ -19,14 +20,14 @@ public class LlamaWatcher extends ChestedHorseWatcher
         register(ValueIndex.LLAMA);
     }
 
-    public LlamaWatcher(Player bindingPlayer, EntityType type)
+    public LlamaWatcher(IBindTarget bindTarget, EntityType type)
     {
-        super(bindingPlayer, type);
+        super(bindTarget, type);
     }
 
-    public LlamaWatcher(Player bindingPlayer)
+    public LlamaWatcher(IBindTarget bindTarget)
     {
-        super(bindingPlayer, EntityType.LLAMA);
+        super(bindTarget, EntityType.LLAMA);
     }
 
     @Override

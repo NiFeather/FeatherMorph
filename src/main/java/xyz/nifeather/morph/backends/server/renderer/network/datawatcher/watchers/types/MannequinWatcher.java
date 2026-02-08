@@ -7,6 +7,7 @@ import com.github.retrooper.packetevents.protocol.entity.pose.EntityPose;
 import com.github.retrooper.packetevents.protocol.player.PlayerModelType;
 import com.github.retrooper.packetevents.resources.ResourceLocation;
 import com.github.retrooper.packetevents.util.Vector3i;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityMetadata;
 import io.github.retrooper.packetevents.util.SpigotConversionUtil;
 import io.papermc.paper.datacomponent.item.ResolvableProfile;
 import net.kyori.adventure.key.Key;
@@ -15,6 +16,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.profile.PlayerTextures;
 import org.jetbrains.annotations.Unmodifiable;
+import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.syncing.IBindTarget;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntry;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
@@ -27,13 +29,12 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ThreadLocalRandom;
 
 public class MannequinWatcher extends LivingEntityWatcher
 {
-    public MannequinWatcher(Player bindingPlayer)
+    public MannequinWatcher(IBindTarget bindTarget)
     {
-        super(bindingPlayer, EntityType.MANNEQUIN);
+        super(bindTarget, EntityType.MANNEQUIN);
     }
 
     @Override
@@ -45,9 +46,9 @@ public class MannequinWatcher extends LivingEntityWatcher
     }
 
     @Override
-    protected byte getPlayerBitMask(Player player)
+    protected byte getPlayerBitMask()
     {
-        var bitMask = super.getPlayerBitMask(player);
+        var bitMask = super.getPlayerBitMask();
 
         if ((bitMask & 0x02) == 0x02)
             bitMask ^= (byte) 0x02;
@@ -64,7 +65,7 @@ public class MannequinWatcher extends LivingEntityWatcher
             currentData.add(new EntityData<>(
                     ValueIndex.MANNEQUIN.GENERAL.index(),
                     ValueIndex.MANNEQUIN.GENERAL.type(),
-                    getPlayerBitMask(getBindingPlayer()))
+                    getPlayerBitMask())
             );
         }
 
@@ -116,7 +117,7 @@ public class MannequinWatcher extends LivingEntityWatcher
                     this.remove(ValueIndex.MANNEQUIN.POSE);
                     this.writePersistent(ValueIndex.MANNEQUIN.POSE, EntityPose.SLEEPING);
 
-                    var playerPos = getBindingPlayer().getLocation();
+                    var playerPos = bindTarget.location();
                     var vec3i = new Vector3i(playerPos.getBlockX(), playerPos.getBlockY(), playerPos.getBlockZ());
                     this.writePersistent(ValueIndex.MANNEQUIN.BED_POS, Optional.of(vec3i));
                 }
@@ -127,7 +128,7 @@ public class MannequinWatcher extends LivingEntityWatcher
                 }
                 case AnimationNames.STANDUP, AnimationNames.RESET ->
                 {
-                    this.writePersistent(ValueIndex.MANNEQUIN.POSE, SpigotConversionUtil.fromBukkitPose(getBindingPlayer().getPose()));
+                    this.writePersistent(ValueIndex.MANNEQUIN.POSE, SpigotConversionUtil.fromBukkitPose(bindTarget.pose()));
                     resetValues();
                 }
             }

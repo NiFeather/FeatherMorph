@@ -27,7 +27,7 @@ public class HappyGhastPropertyCollection extends BaseLivingEntityPropertyCollec
     }
 
     @Override
-    protected void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull HappyGhast happyGhast)
+    public void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull HappyGhast happyGhast)
     {
         super.setupPropertiesFromEntity(meta, propertyHandler, happyGhast);
 

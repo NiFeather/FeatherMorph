@@ -36,7 +36,7 @@ public class FoxPropertyCollection extends BaseLivingEntityPropertyCollection<Fo
     }
 
     @Override
-    protected void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull Fox fox)
+    public void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull Fox fox)
     {
         super.setupPropertiesFromEntity(meta, propertyHandler, fox);
 

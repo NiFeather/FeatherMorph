@@ -46,7 +46,7 @@ public abstract class BaseLivingEntityPropertyCollection<E extends Entity> exten
             .build();
 
     @Override
-    protected void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull E targetEntity)
+    public void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull E targetEntity)
     {
         if (!meta.getEntityType().equals(targetEntity.getType()))
             return;

@@ -3,6 +3,7 @@ package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watcher
 import com.github.retrooper.packetevents.protocol.entity.data.struct.WeatheringCopperState;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.syncing.IBindTarget;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
@@ -10,9 +11,9 @@ import xyz.nifeather.morph.misc.disguiseProperty.values.CopperGolemPropertyColle
 
 public class CopperGolemWatcher extends LivingEntityWatcher
 {
-    public CopperGolemWatcher(Player bindingPlayer)
+    public CopperGolemWatcher(IBindTarget bindTarget)
     {
-        super(bindingPlayer, EntityType.COPPER_GOLEM);
+        super(bindTarget, EntityType.COPPER_GOLEM);
     }
 
     @Override
