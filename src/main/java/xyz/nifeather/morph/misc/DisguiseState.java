@@ -17,7 +17,6 @@ import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.RevealingHandler;
 import xyz.nifeather.morph.abilities.AbilityUpdater;
-import xyz.nifeather.morph.api.morphs.skills.SkillNames;
 import xyz.nifeather.morph.backends.DisguiseWrapper;
 import xyz.nifeather.morph.messages.strings.CommandStrings;
 import xyz.nifeather.morph.messages.strings.EmoteStrings;
@@ -68,7 +67,7 @@ public class DisguiseState extends MorphPluginObject
         this.playerUUID = player.getUniqueId();
         this.provider = provider;
         this.playerOptions = playerOptions;
-        this.morphConfiguration = playerMeta;
+        this.playerMeta = playerMeta;
 
         this.soundHandler = new SoundHandler(player);
         this.abilityUpdater = new AbilityUpdater(this);
@@ -76,10 +75,9 @@ public class DisguiseState extends MorphPluginObject
 
         this.disguiseWrapper = wrapper;
         this.disguiseIdentifier = identifier;
-        skillLookupIdentifier(skillIdentifier);
+        this.skillLookupIdentifier = skillIdentifier;
 
         disguiseType = DisguiseTypes.fromId(identifier);
-        this.provider = MorphManager.getProvider(identifier);
 
         //设置声音
         this.soundHandler.refreshSounds(this, wrapper.getEntityType(), wrapper.isBaby());
@@ -224,7 +222,7 @@ public class DisguiseState extends MorphPluginObject
 
     private final PlayerOptions<Player> playerOptions;
 
-    private final PlayerMeta morphConfiguration;
+    private final PlayerMeta playerMeta;
 
     private final AnimationSequence animationSequence = new AnimationSequence();
 
@@ -361,7 +359,7 @@ public class DisguiseState extends MorphPluginObject
 
     public boolean isSelfViewing()
     {
-        return playerOptions.isClientSideSelfView() ? morphConfiguration.showDisguiseToSelf : serverSideSelfVisible;
+        return playerOptions.isClientSideSelfView() ? playerMeta.showDisguiseToSelf : serverSideSelfVisible;
     }
 
     public void setServerSideSelfVisible(boolean val)
@@ -440,7 +438,7 @@ public class DisguiseState extends MorphPluginObject
     }
 
     // 伪装ID
-    private String disguiseIdentifier = SkillNames.UNKNOWN.asString();
+    private final String disguiseIdentifier;
 
     /**
      * 获取此伪装的ID
@@ -455,7 +453,7 @@ public class DisguiseState extends MorphPluginObject
         return disguiseWrapper.getEntityType();
     }
 
-    private DisguiseTypes disguiseType;
+    private final DisguiseTypes disguiseType;
 
     /**
      * 获取此伪装的{@link DisguiseTypes}
@@ -468,7 +466,7 @@ public class DisguiseState extends MorphPluginObject
     /**
      * 伪装的构建器（提供器）
      */
-    private DisguiseProvider provider;
+    private final DisguiseProvider provider;
 
     @NotNull
     public DisguiseProvider getProvider()
@@ -575,16 +573,6 @@ public class DisguiseState extends MorphPluginObject
         return skillLookupIdentifier == null ? DEFAULT_SKILL_LOOKUP : skillLookupIdentifier;
     }
 
-    /**
-     * 设置技能查询ID
-     *
-     * @param newSkillID 技能ID
-     */
-    public void skillLookupIdentifier(@NotNull String newSkillID)
-    {
-        this.skillLookupIdentifier = newSkillID;
-    }
-
     private final SkillUpdater skillUpdater = new SkillUpdater(this);
 
     private void postExecuteSkill()
@@ -607,6 +595,9 @@ public class DisguiseState extends MorphPluginObject
         return skillUpdater.defaultSkillCooldown;
     }
 
+    /**
+     * See {@link SkillUpdater#executeSkillCheckPermission()}
+     */
     public boolean executeSkillCheckPermission()
     {
         if (skillUpdater.executeSkillCheckPermission())
@@ -618,6 +609,9 @@ public class DisguiseState extends MorphPluginObject
         return false;
     }
 
+    /**
+     * See {@link SkillUpdater#executeSkill()}
+     */
     public boolean executeSkillDirect()
     {
         if (skillUpdater.executeSkill())
@@ -972,7 +966,7 @@ public class DisguiseState extends MorphPluginObject
         var wrapper = this.disguiseWrapper.clone();
 
         var newInstance = new DisguiseState(player, this.disguiseIdentifier, this.skillLookupIdentifier(),
-                wrapper, provider, this.playerOptions, morphConfiguration);
+                wrapper, provider, this.playerOptions, playerMeta);
 
         newInstance.playerDisplay = this.playerDisplay;
         newInstance.serverDisplay = this.serverDisplay;
