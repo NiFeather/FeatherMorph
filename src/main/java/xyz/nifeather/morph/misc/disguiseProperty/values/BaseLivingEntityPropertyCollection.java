@@ -48,9 +48,6 @@ public abstract class BaseLivingEntityPropertyCollection<E extends Entity> exten
     @Override
     protected void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull E targetEntity)
     {
-        if (!meta.getEntityType().equals(targetEntity.getType()))
-            return;
-
         propertyHandler.set(CUSTOM_NAME_VISIBLE, targetEntity.isCustomNameVisible());
 
         var entityCustomName = targetEntity.customName();
