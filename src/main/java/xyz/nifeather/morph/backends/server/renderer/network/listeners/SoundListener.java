@@ -33,9 +33,6 @@ public class SoundListener extends ProtocolListener
 
         var targetPlayer = (Player) event.getPlayer();
 
-        if (targetPlayer == null)
-            return;
-
         var wrapper = new WrapperPlayServerSoundEffect(event);
         var effectPosition = wrapper.getEffectPosition();
         var positionAsLocation = new Location(targetPlayer.getWorld(), effectPosition.x, effectPosition.y, effectPosition.z);
@@ -59,10 +56,8 @@ public class SoundListener extends ProtocolListener
             return effectPosition.x == locX && effectPosition.y == locY && effectPosition.z == locZ;
         }).findFirst().orElse(null);
 
-        if (matchingWatcher == null || matchingWatcher.getEntityType() == EntityType.PLAYER)
+        if (matchingWatcher == null)
             return;
-
-        event.markForReEncode(true);
 
         var sound = wrapper.getSound().getSoundId();
         var path = sound.toString();
@@ -76,9 +71,15 @@ public class SoundListener extends ProtocolListener
             var soundId = EntityTypeUtils.getDamageSoundKey(matchingWatcher.getEntityType());
             if (soundId == null) return;
 
+            event.markForReEncode(true);
+
             ResourceLocation rL = new ResourceLocation(soundId);
 
             wrapper.setSound(new StaticSound(rL, wrapper.getVolume()));
+        }
+        else
+        {
+            event.setCancelled(true);
         }
     }
 }

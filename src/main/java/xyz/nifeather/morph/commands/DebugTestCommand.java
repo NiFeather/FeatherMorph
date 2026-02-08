@@ -173,6 +173,14 @@ public class DebugTestCommand extends BrigadierCommand
         var srbd = morphManager.getBackend("server", ServerBackend.class);
         assert srbd != null;
 
+        if (srbd.isDisguised(entity))
+        {
+            Bukkit.broadcast(Component.text("Undisguise!"));
+            srbd.unDisguise(living);
+            Bukkit.broadcast(Component.text("Undisguise OK!"));
+            return 0;
+        }
+
         var ownerSession = morphManager.getDisguiseStateFor(context.getSource().getExecutor());
         if (ownerSession == null)
         {
@@ -200,13 +208,6 @@ public class DebugTestCommand extends BrigadierCommand
         {
             srbd.disguise(living, instance);
             Bukkit.broadcast(Component.text("OK!"));
-
-            this.addSchedule(() ->
-            {
-                Bukkit.broadcast(Component.text("Undisguise!"));
-                srbd.unDisguise(living);
-                Bukkit.broadcast(Component.text("Undisguise OK!"));
-            }, 1 * 20);
         }
         catch (ExecutionErrorException e)
         {
