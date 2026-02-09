@@ -67,15 +67,20 @@ public class PlayerPropertyCollection extends BaseLivingEntityPropertyCollection
     }
 
     @Override
-    public void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull Player targetEntity)
+    protected boolean validateEntity(DisguiseMeta meta, Player entityToSetup)
     {
-        super.setupPropertiesFromEntity(meta, propertyHandler, targetEntity);
+        return meta.playerDisguiseTargetName != null
+                && entityToSetup.getName().equalsIgnoreCase(meta.playerDisguiseTargetName);
+    }
+
+    @Override
+    protected void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull Player targetEntity)
+    {
+        super.setupPropertiesFromEntity(propertyHandler, targetEntity);
 
         propertyHandler.set(MAIN_HAND, MainHandStatus.fromBukkitHand(targetEntity.getMainHand()));
         propertyHandler.set(STUCKED_ARROWS, targetEntity.getArrowsInBody());
-
-        if (meta.playerDisguiseTargetName != null && meta.playerDisguiseTargetName.equalsIgnoreCase(targetEntity.getName()))
-            propertyHandler.set(SKIN, GameProfileUtils.convertPlayerProfile(targetEntity.getPlayerProfile()));
+        propertyHandler.set(SKIN, GameProfileUtils.convertPlayerProfile(targetEntity.getPlayerProfile()));
     }
 
     @Override

@@ -4,7 +4,6 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Slime;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.nifeather.morph.misc.DisguiseMeta;
 import xyz.nifeather.morph.misc.disguiseProperty.*;
 
 import java.util.Optional;
@@ -40,9 +39,9 @@ public class SlimeMagmaPropertyCollection extends BaseLivingEntityPropertyCollec
     }
 
     @Override
-    public void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull Slime targetEntity)
+    protected void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull Slime targetEntity)
     {
-        super.setupPropertiesFromEntity(meta, propertyHandler, targetEntity);
+        super.setupPropertiesFromEntity(propertyHandler, targetEntity);
 
         propertyHandler.set(SIZE, targetEntity.getSize());
     }

@@ -5,7 +5,6 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Shulker;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.nifeather.morph.misc.DisguiseMeta;
 import xyz.nifeather.morph.misc.disguiseProperty.*;
 
 import java.util.Arrays;
@@ -30,9 +29,9 @@ public class ShulkerPropertyCollection extends BaseLivingEntityPropertyCollectio
     }
 
     @Override
-    public void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull Shulker targetEntity)
+    protected void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull Shulker targetEntity)
     {
-        super.setupPropertiesFromEntity(meta, propertyHandler, targetEntity);
+        super.setupPropertiesFromEntity(propertyHandler, targetEntity);
 
         if (targetEntity.getColor() != null)
             propertyHandler.set(DYE_COLOR, targetEntity.getColor());

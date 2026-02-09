@@ -6,7 +6,6 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Frog;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.nifeather.morph.misc.DisguiseMeta;
 import xyz.nifeather.morph.misc.disguiseProperty.*;
 import xyz.nifeather.morph.utilities.DisguiseUtils;
 
@@ -53,9 +52,9 @@ public class FrogPropertyCollection extends BaseLivingEntityPropertyCollection<F
     }
 
     @Override
-    public void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull Frog frog)
+    protected void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull Frog frog)
     {
-        super.setupPropertiesFromEntity(meta, propertyHandler, frog);
+        super.setupPropertiesFromEntity(propertyHandler, frog);
 
         propertyHandler.set(VARIANT, frog.getVariant());
     }

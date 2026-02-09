@@ -4,7 +4,6 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import xyz.nifeather.morph.misc.DisguiseEquipment;
-import xyz.nifeather.morph.misc.DisguiseMeta;
 import xyz.nifeather.morph.misc.disguiseProperty.*;
 
 import java.util.Optional;
@@ -46,7 +45,7 @@ public abstract class BaseLivingEntityPropertyCollection<E extends Entity> exten
             .build();
 
     @Override
-    public void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull E targetEntity)
+    protected void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull E targetEntity)
     {
         propertyHandler.set(CUSTOM_NAME_VISIBLE, targetEntity.isCustomNameVisible());
 

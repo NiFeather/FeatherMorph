@@ -4,7 +4,6 @@ import org.bukkit.entity.Creeper;
 import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.nifeather.morph.misc.DisguiseMeta;
 import xyz.nifeather.morph.misc.disguiseProperty.*;
 import xyz.nifeather.morph.utilities.DisguiseUtils;
 
@@ -29,9 +28,9 @@ public class CreeperPropertyCollection extends BaseLivingEntityPropertyCollectio
     }
 
     @Override
-    public void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull Creeper creeper)
+    protected void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull Creeper creeper)
     {
-        super.setupPropertiesFromEntity(meta, propertyHandler, creeper);
+        super.setupPropertiesFromEntity(propertyHandler, creeper);
 
         propertyHandler.set(CHARGED, creeper.isPowered());
     }
