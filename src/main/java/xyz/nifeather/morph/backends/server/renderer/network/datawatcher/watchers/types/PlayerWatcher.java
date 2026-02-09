@@ -9,6 +9,7 @@ import com.github.retrooper.packetevents.util.Vector3i;
 import com.github.retrooper.packetevents.wrapper.PacketWrapper;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerPlayerInfoRemove;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerPlayerInfoUpdate;
+import com.mojang.authlib.GameProfile;
 import io.github.retrooper.packetevents.util.SpigotConversionUtil;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.bukkit.entity.EntityType;
@@ -72,6 +73,11 @@ public class PlayerWatcher extends LivingEntityWatcher
             assert hand != null;
 
             this.writePersistent(ValueIndex.PLAYER.MAINHAND, hand == MainHand.LEFT ? HumanoidArm.LEFT : HumanoidArm.RIGHT);
+        }
+        else if (property.equals(playerDisguiseProperties.SKIN))
+        {
+            var skin = (GameProfile) value;
+            this.writeEntry(CustomEntries.PROFILE, skin);
         }
 
         super.onPropertyWrite(property, value);
