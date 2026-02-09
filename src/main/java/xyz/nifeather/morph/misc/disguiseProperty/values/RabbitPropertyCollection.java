@@ -5,7 +5,6 @@ import org.bukkit.entity.Rabbit;
 import org.bukkit.entity.Rabbit.Type;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.nifeather.morph.misc.DisguiseMeta;
 import xyz.nifeather.morph.misc.disguiseProperty.*;
 import xyz.nifeather.morph.utilities.DisguiseUtils;
 
@@ -50,9 +49,9 @@ public class RabbitPropertyCollection extends BaseLivingEntityPropertyCollection
     }
 
     @Override
-    protected void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull Rabbit targetEntity)
+    protected void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull Rabbit targetEntity)
     {
-        super.setupPropertiesFromEntity(meta, propertyHandler, targetEntity);
+        super.setupPropertiesFromEntity(propertyHandler, targetEntity);
 
         propertyHandler.set(VARIANT, targetEntity.getRabbitType());
     }

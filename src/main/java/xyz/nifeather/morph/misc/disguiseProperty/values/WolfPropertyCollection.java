@@ -8,7 +8,6 @@ import org.bukkit.entity.Wolf;
 import org.bukkit.entity.Wolf.Variant;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.nifeather.morph.misc.DisguiseMeta;
 import xyz.nifeather.morph.misc.disguiseProperty.*;
 import xyz.nifeather.morph.utilities.DisguiseUtils;
 import xyz.nifeather.morph.utilities.Uuids;
@@ -69,9 +68,9 @@ public class WolfPropertyCollection extends BaseLivingEntityPropertyCollection<W
     }
 
     @Override
-    protected void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull Wolf targetEntity)
+    protected void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull Wolf targetEntity)
     {
-        super.setupPropertiesFromEntity(meta, propertyHandler, targetEntity);
+        super.setupPropertiesFromEntity(propertyHandler, targetEntity);
 
         propertyHandler.set(VARIANT, targetEntity.getVariant());
         propertyHandler.set(COLLAR_COLOR, targetEntity.getCollarColor());

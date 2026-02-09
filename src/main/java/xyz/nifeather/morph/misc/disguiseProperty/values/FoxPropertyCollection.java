@@ -4,7 +4,6 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Fox;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.nifeather.morph.misc.DisguiseMeta;
 import xyz.nifeather.morph.misc.disguiseProperty.*;
 import xyz.nifeather.morph.utilities.DisguiseUtils;
 
@@ -36,9 +35,9 @@ public class FoxPropertyCollection extends BaseLivingEntityPropertyCollection<Fo
     }
 
     @Override
-    protected void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull Fox fox)
+    protected void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull Fox fox)
     {
-        super.setupPropertiesFromEntity(meta, propertyHandler, fox);
+        super.setupPropertiesFromEntity(propertyHandler, fox);
 
         propertyHandler.set(VARIANT, fox.getFoxType());
     }

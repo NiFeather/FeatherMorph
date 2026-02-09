@@ -5,7 +5,6 @@ import org.bukkit.entity.CopperGolem;
 import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.nifeather.morph.misc.DisguiseMeta;
 import xyz.nifeather.morph.misc.disguiseProperty.*;
 
 import java.util.Arrays;
@@ -44,9 +43,9 @@ public class CopperGolemPropertyCollection extends BaseLivingEntityPropertyColle
     }
 
     @Override
-    public void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull CopperGolem copperGolem)
+    public void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull CopperGolem copperGolem)
     {
-        super.setupPropertiesFromEntity(meta, propertyHandler, copperGolem);
+        super.setupPropertiesFromEntity(propertyHandler, copperGolem);
 
         var nmsWeatherState = (((CraftCopperGolem)copperGolem).getHandle()).getWeatherState();
         WeatherState bukkitWeatherState = switch (nmsWeatherState)

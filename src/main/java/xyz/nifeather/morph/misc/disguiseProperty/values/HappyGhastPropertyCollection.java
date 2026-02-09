@@ -4,7 +4,6 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.HappyGhast;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.nifeather.morph.misc.DisguiseMeta;
 import xyz.nifeather.morph.misc.disguiseProperty.*;
 
 public class HappyGhastPropertyCollection extends BaseLivingEntityPropertyCollection<HappyGhast>
@@ -27,9 +26,9 @@ public class HappyGhastPropertyCollection extends BaseLivingEntityPropertyCollec
     }
 
     @Override
-    protected void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull HappyGhast happyGhast)
+    protected void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull HappyGhast happyGhast)
     {
-        super.setupPropertiesFromEntity(meta, propertyHandler, happyGhast);
+        super.setupPropertiesFromEntity(propertyHandler, happyGhast);
 
         propertyHandler.set(IS_GHASTLING, !happyGhast.isAdult());
     }

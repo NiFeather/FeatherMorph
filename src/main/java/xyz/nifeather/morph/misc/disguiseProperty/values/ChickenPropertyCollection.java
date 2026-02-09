@@ -6,7 +6,6 @@ import org.bukkit.entity.Chicken;
 import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.nifeather.morph.misc.DisguiseMeta;
 import xyz.nifeather.morph.misc.disguiseProperty.*;
 import xyz.nifeather.morph.utilities.DisguiseUtils;
 
@@ -50,9 +49,9 @@ public class ChickenPropertyCollection extends BaseLivingEntityPropertyCollectio
     }
 
     @Override
-    protected void setupPropertiesFromEntity(DisguiseMeta meta, PropertyHandler propertyHandler, @NotNull Chicken chicken)
+    protected void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull Chicken chicken)
     {
-        super.setupPropertiesFromEntity(meta, propertyHandler, chicken);
+        super.setupPropertiesFromEntity(propertyHandler, chicken);
 
         propertyHandler.set(VARIANT, chicken.getVariant());
     }
