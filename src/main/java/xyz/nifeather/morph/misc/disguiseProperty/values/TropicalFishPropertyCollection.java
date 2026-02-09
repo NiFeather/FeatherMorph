@@ -62,7 +62,7 @@ public class TropicalFishPropertyCollection extends BaseLivingEntityPropertyColl
     }
 
     @Override
-    protected void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull TropicalFish targetEntity)
+    public void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull TropicalFish targetEntity)
     {
         super.setupPropertiesFromEntity(propertyHandler, targetEntity);
 

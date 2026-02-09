@@ -111,7 +111,7 @@ public abstract class PropertyCollection<E extends Entity>
      * @param propertyHandler The {@link PropertyHandler} for the given disguise
      * @param targetEntity    The targeted entity
      */
-    protected abstract void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull E targetEntity);
+    public abstract void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull E targetEntity);
     protected abstract void setupDefaultProperties(PropertyHandler propertyHandler);
 
     protected void setupFromOtherDisguise(DisguiseState ourState, DisguiseState theirState)

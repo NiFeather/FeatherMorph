@@ -46,7 +46,7 @@ public class CowPropertyCollection extends BaseLivingEntityPropertyCollection<Co
     }
 
     @Override
-    protected void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull Cow cow)
+    public void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull Cow cow)
     {
         super.setupPropertiesFromEntity(propertyHandler, cow);
 

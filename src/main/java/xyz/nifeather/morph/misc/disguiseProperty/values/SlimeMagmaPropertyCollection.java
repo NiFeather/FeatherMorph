@@ -39,7 +39,7 @@ public class SlimeMagmaPropertyCollection extends BaseLivingEntityPropertyCollec
     }
 
     @Override
-    protected void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull Slime targetEntity)
+    public void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull Slime targetEntity)
     {
         super.setupPropertiesFromEntity(propertyHandler, targetEntity);
 

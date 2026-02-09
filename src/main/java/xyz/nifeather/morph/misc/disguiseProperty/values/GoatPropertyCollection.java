@@ -35,7 +35,7 @@ public class GoatPropertyCollection extends BaseLivingEntityPropertyCollection<G
     }
 
     @Override
-    protected void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull Goat goat)
+    public void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull Goat goat)
     {
         super.setupPropertiesFromEntity(propertyHandler, goat);
 

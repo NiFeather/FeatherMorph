@@ -35,7 +35,7 @@ public class MooshroomPropertyCollection extends BaseLivingEntityPropertyCollect
     }
 
     @Override
-    protected void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull MushroomCow targetEntity)
+    public void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull MushroomCow targetEntity)
     {
         super.setupPropertiesFromEntity(propertyHandler, targetEntity);
 

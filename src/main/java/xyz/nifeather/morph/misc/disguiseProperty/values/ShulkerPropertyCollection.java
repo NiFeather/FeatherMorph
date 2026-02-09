@@ -29,7 +29,7 @@ public class ShulkerPropertyCollection extends BaseLivingEntityPropertyCollectio
     }
 
     @Override
-    protected void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull Shulker targetEntity)
+    public void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull Shulker targetEntity)
     {
         super.setupPropertiesFromEntity(propertyHandler, targetEntity);
 

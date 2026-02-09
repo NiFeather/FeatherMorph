@@ -64,7 +64,7 @@ public class VillagerPropertyCollection extends BaseLivingEntityPropertyCollecti
     }
 
     @Override
-    protected void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull Villager targetEntity)
+    public void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull Villager targetEntity)
     {
         super.setupPropertiesFromEntity(propertyHandler, targetEntity);
 

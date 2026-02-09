@@ -74,7 +74,7 @@ public class PlayerPropertyCollection extends BaseLivingEntityPropertyCollection
     }
 
     @Override
-    protected void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull Player targetEntity)
+    public void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull Player targetEntity)
     {
         super.setupPropertiesFromEntity(propertyHandler, targetEntity);
 

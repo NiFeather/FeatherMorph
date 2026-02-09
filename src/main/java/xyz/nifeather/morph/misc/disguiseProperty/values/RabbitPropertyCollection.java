@@ -49,7 +49,7 @@ public class RabbitPropertyCollection extends BaseLivingEntityPropertyCollection
     }
 
     @Override
-    protected void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull Rabbit targetEntity)
+    public void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull Rabbit targetEntity)
     {
         super.setupPropertiesFromEntity(propertyHandler, targetEntity);
 

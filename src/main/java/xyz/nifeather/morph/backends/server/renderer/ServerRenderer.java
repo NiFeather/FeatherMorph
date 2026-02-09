@@ -163,9 +163,7 @@ public class ServerRenderer extends MorphPluginObject implements Listener
         var propertyHandler = new PropertyHandler();
         var properties = (PropertyCollection<LivingEntity>) DisguiseProperties.INSTANCE.getCollection(entity.getType());
         propertyHandler.registerFromPropertyCollection(properties);
-
-        String disguiseIdentifier = entity instanceof Player pl ? DisguiseTypes.PLAYER.toId(pl.getName()) : entity.getType().key().asString();
-        properties.setupPropertiesFromEntity(new DisguiseMeta(disguiseIdentifier, DisguiseTypes.fromId(disguiseIdentifier)), propertyHandler, entity);
+        properties.setupPropertiesFromEntity(propertyHandler, entity);
         propertyHandler.getAll().forEach((p, v) -> watcher.writeProperty((SingleProperty<Object>) p, v));
 
         // Getting entity's ID need to be on their thread on Folia :D
