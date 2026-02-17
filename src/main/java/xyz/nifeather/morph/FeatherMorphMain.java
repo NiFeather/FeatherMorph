@@ -21,6 +21,7 @@ import xyz.nifeather.morph.config.ConfigOptions;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.events.*;
 import xyz.nifeather.morph.messages.TranslateManager;
+import xyz.nifeather.morph.mirror.ExecutorHub;
 import xyz.nifeather.morph.interfaces.IManagePlayerData;
 import xyz.nifeather.morph.interfaces.IManageRequests;
 import xyz.nifeather.morph.messages.MessageUtils;
@@ -109,6 +110,11 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
     private Metrics metrics;
 
     private MultiInstanceService instanceService;
+
+    @Nullable
+    private EntityProcessor entityProcessor;
+
+    private ExecutorHub mirrorExecutorHub;
 
     public boolean isFolia()
     {
@@ -280,6 +286,10 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
 
         //dependencyManager.cache(new RecipeManager());
 
+        dependencyManager.cache(mirrorExecutorHub = new ExecutorHub());
+
+        var mirrorProcessor = new InteractionMirrorProcessor();
+
         // Commands
         var lifecycleManager = this.getLifecycleManager();
         lifecycleManager.registerEventHandler(LifecycleEvents.COMMANDS, event ->
@@ -288,6 +298,7 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
         var listeners = new Listener[]
                 {
                         playerTracker,
+                        mirrorProcessor,
                         new CommonEventProcessor(),
                         new CustomItemRelatedEvents(),
                         new RevealingEventProcessor(),
@@ -295,6 +306,7 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
                         new ForcedDisguiseProcessor(),
                         new PlayerSkinProcessor(),
                         new WorkaroundProcessor(),
+                        entityProcessor = new EntityProcessor(),
                         new PlayerConfigurator()
                 };
 
@@ -348,6 +360,16 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
         //需要在调用前先把一些东西处理好
         try
         {
+            if (entityProcessor != null
+                    && !serverStopping
+                    && entityProcessor.currentlyDoModifyAI()
+                    && pluginEnableDone.get())
+            {
+                printImportantWarning(true,
+                        "Disabling/reloading FeatherMorph while modifying AI is not supported",
+                        "Expect problems!");
+            }
+
             if (morphManager != null)
                 morphManager.onPluginDisable();
 
@@ -359,6 +381,9 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
 
             if (metrics != null)
                 metrics.shutdown();
+
+            if (mirrorExecutorHub != null)
+                mirrorExecutorHub.pushToLoggingBase();
 
             if (instanceService != null)
                 instanceService.onDisable();

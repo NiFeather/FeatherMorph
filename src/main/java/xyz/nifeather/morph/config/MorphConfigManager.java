@@ -167,27 +167,6 @@ public class MorphConfigManager extends PluginConfigManager
             this.remove(ConfigOptions.BLACKLIST_PATTERNS);
             this.remove(ConfigOptions.BLACKLIST_TAGS);
         });
-
-        addUpdateMethod(45, newConfig ->
-        {
-            updateLogger.info("#45: AI Modification and Interaction Mirror is now removed and planned to implement in a separate project");
-
-            //todo: Calling `remove` still leave non-default values in the config file, wtf
-            this.remove(ConfigOptions.DO_MODIFY_AI);
-
-            this.remove(ConfigOptions.MIRROR_CONTROL_DISTANCE);
-            this.remove(ConfigOptions.MIRROR_IGNORE_DISGUISED);
-            this.remove(ConfigOptions.MIRROR_DESTROY_TIMEOUT);
-            this.remove(ConfigOptions.MIRROR_LOG_OPERATION);
-            this.remove(ConfigOptions.MIRROR_LOG_CLEANUP_DATE);
-            this.remove(ConfigOptions.MIRROR_SELECTION_MODE);
-
-            this.remove(ConfigOptions.MIRROR_BEHAVIOR_DO_SIMULATION);
-            this.remove(ConfigOptions.MIRROR_BEHAVIOR_DROP);
-            this.remove(ConfigOptions.MIRROR_BEHAVIOR_HOTBAR);
-            this.remove(ConfigOptions.MIRROR_BEHAVIOR_SNEAK);
-            this.remove(ConfigOptions.MIRROR_BEHAVIOR_SWAP_HAND);
-        });
     }
 
     private static MorphConfigManager instance;
@@ -285,7 +264,7 @@ public class MorphConfigManager extends PluginConfigManager
         });
 
         //更新配置
-        int targetVersion = 46;
+        int targetVersion = 45;
 
         var configVersion = getOrDefault(ConfigOptions.VERSION);
 
@@ -354,15 +333,10 @@ public class MorphConfigManager extends PluginConfigManager
         set(option, RandomStringUtils.secure().nextAlphabetic(20));
     }
 
-    public void remove(ConfigOption<?> option, FileConfiguration backendConfig)
-    {
-        this.set(option, null);
-        backendConfig.set(option.node().toString(), null);
-    }
-
     public void remove(ConfigOption<?> option)
     {
-        remove(option, this.backendConfig);
+        this.set(option, null);
+        this.backendConfig.set(option.node().toString(), null);
     }
 
     public <T> T get(ConfigOption<T> option)
