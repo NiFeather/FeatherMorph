@@ -80,7 +80,7 @@ public class QueryAllSubCommand extends BrigadierCommand
         }
 
         msg = CommandStrings.listCount()
-                .resolve("what", TypesString.offlineDisguises())
+                .resolve("what", TypesString.savedDisguises())
                 .resolve("amount", offlineStates.size());
 
         MessageUtils.send(commandSender, msg);

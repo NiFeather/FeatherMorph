@@ -3,7 +3,7 @@ package xyz.nifeather.morph.storage.offlinestore;
 import com.google.gson.JsonSyntaxException;
 import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.Nullable;
-import xyz.nifeather.morph.interfaces.IManageOfflineStates;
+import xyz.nifeather.morph.interfaces.IManageSavedDisguise;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.storage.DirectoryJsonBasedStorage;
 
@@ -13,17 +13,17 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-public class OfflineStateStore extends DirectoryJsonBasedStorage<OfflineDisguise> implements IManageOfflineStates
+public class SavedDisguiseStore extends DirectoryJsonBasedStorage<SavedDisguise> implements IManageSavedDisguise
 {
-    public OfflineStateStore()
+    public SavedDisguiseStore()
     {
-        super("offline_disguises");
+        super("saved_disguises");
     }
 
     @Override
-    protected OfflineDisguise getDefault()
+    protected SavedDisguise getDefault()
     {
-        return new OfflineDisguise();
+        return new SavedDisguise();
     }
 
     /**
@@ -38,7 +38,7 @@ public class OfflineStateStore extends DirectoryJsonBasedStorage<OfflineDisguise
         var file = directoryStorage.getFile(uuidString + ".json", true);
         if (file == null) return false;
 
-        String json = gson.toJson(OfflineDisguise.fromState(state));
+        String json = gson.toJson(SavedDisguise.fromState(state));
 
         try
         {
@@ -46,7 +46,7 @@ public class OfflineStateStore extends DirectoryJsonBasedStorage<OfflineDisguise
         }
         catch (IOException e)
         {
-            logger.error("OfflineStateStore: Can't write content to disk", e);
+            logger.error("SavedDisguiseStore: Can't write content to disk", e);
             return false;
         }
 
@@ -67,7 +67,7 @@ public class OfflineStateStore extends DirectoryJsonBasedStorage<OfflineDisguise
      * @return 离线State
      */
     @Nullable
-    public OfflineDisguise read(UUID uuid)
+    public SavedDisguise read(UUID uuid)
     {
         var file = directoryStorage.getFile(uuid.toString() + ".json", false);
         if (file == null || !file.exists())
@@ -76,19 +76,19 @@ public class OfflineStateStore extends DirectoryJsonBasedStorage<OfflineDisguise
         try
         {
             var content = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
-            var instance = gson.fromJson(content, OfflineDisguise.class);
+            var instance = gson.fromJson(content, SavedDisguise.class);
 
             file.delete();
             return instance;
         }
         catch (JsonSyntaxException e)
         {
-            logger.error("OfflineStateStore: Failed to convert content to JSON string, malformed file!", e);
+            logger.error("SavedDisguiseStore: Failed to convert content to JSON string, malformed file!", e);
             return null;
         }
         catch (IOException e)
         {
-            logger.error("OfflineStateStore: Failed to read OfflineDisguise from disk", e);
+            logger.error("SavedDisguiseStore: Failed to read SavedDisguise from disk", e);
             return null;
         }
     }

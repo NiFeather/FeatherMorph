@@ -243,7 +243,7 @@
   "types.resource_location": "Resource Location",
   "types.collection_of": "Collection Of <what>",
   "types.locale_file": "Locale File",
-  "types.offline_disguises": "Offline Disguises",
+  "types.saved_disguises": "Saved Disguises",
   "update.checking_update": "Checking update...",
   "update.msg_header_footer": "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-",
   "update.new_version_available": "A newer version of FeatherMorph has been released！(<current> -> <origin>)",

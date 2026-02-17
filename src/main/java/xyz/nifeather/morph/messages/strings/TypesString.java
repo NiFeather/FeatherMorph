@@ -44,9 +44,9 @@ public class TypesString extends AbstractMorphStrings
         return getFormattable(getKey("locale_file"), "[Fallback] 语言文件");
     }
 
-    public static FormattableMessage offlineDisguises()
+    public static FormattableMessage savedDisguises()
     {
-        return getFormattable(getKey("offline_disguises"), "[Fallback] Offline Disguises");
+        return getFormattable(getKey("saved_disguises"), "[Fallback] Saved Disguises");
     }
 
     private static String getKey(String key)

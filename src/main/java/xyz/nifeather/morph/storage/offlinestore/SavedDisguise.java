@@ -10,7 +10,7 @@ import xyz.nifeather.morph.misc.disguiseProperty.ParseErrorException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class OfflineDisguise
+public class SavedDisguise
 {
     /**
      * 伪装ID<br>
@@ -31,9 +31,9 @@ public class OfflineDisguise
         return disguiseIdentifier != null;
     }
 
-    public static OfflineDisguise fromState(DisguiseState state)
+    public static SavedDisguise fromState(DisguiseState state)
     {
-        var instance = new OfflineDisguise();
+        var instance = new SavedDisguise();
 
         instance.disguiseIdentifier = state.getDisguiseIdentifier();
         try

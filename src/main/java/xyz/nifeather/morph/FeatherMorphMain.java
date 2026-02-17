@@ -371,7 +371,7 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
             }
 
             if (morphManager != null)
-                morphManager.onPluginDisable();
+                morphManager.onShutdown();
 
             if (placeholderIntegration != null)
                 placeholderIntegration.unregister();

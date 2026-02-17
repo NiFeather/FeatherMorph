@@ -18,6 +18,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+@SuppressWarnings("removal")
 @Deprecated(forRemoval = true)
 public class LegacyPlayerDataStore extends MorphJsonBasedStorage<PlayerMetaContainer> implements IManagePlayerData
 {

@@ -243,7 +243,7 @@
   "types.resource_location": "命名空间ID",
   "types.collection_of": "<what>的集合",
   "types.locale_file": "语言文件",
-  "types.offline_disguises": "离线变形",
+  "types.saved_disguises": "离线变形存储",
   "update.checking_update" : "检查更新中...",
   "update.msg_header_footer" : "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-",
   "update.new_version_available" : "FeatherMorph有新版本辣！(<current> -> <origin>)",

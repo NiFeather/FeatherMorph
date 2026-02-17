@@ -59,8 +59,8 @@ import xyz.nifeather.morph.providers.disguise.FallbackDisguiseProvider;
 import xyz.nifeather.morph.providers.disguise.PlayerDisguiseProvider;
 import xyz.nifeather.morph.providers.disguise.VanillaDisguiseProvider;
 import xyz.nifeather.morph.skills.SkillManager;
-import xyz.nifeather.morph.storage.offlinestore.OfflineDisguise;
-import xyz.nifeather.morph.storage.offlinestore.OfflineStateStore;
+import xyz.nifeather.morph.storage.offlinestore.SavedDisguise;
+import xyz.nifeather.morph.storage.offlinestore.SavedDisguiseStore;
 import xyz.nifeather.morph.storage.playerdata.PlayerDataStoreNew;
 import xyz.nifeather.morph.storage.playerdata.PlayerMeta;
 import xyz.nifeather.morph.utilities.DisguiseUtils;
@@ -83,23 +83,23 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     private final IManagePlayerData defaultData = new PlayerDataStoreNew();
 
     @NotNull
-    private volatile IManagePlayerData data = new PlayerDataStoreNew();
+    private volatile IManagePlayerData playerdata = new PlayerDataStoreNew();
 
-    private final OfflineStateStore offlineStorage = new OfflineStateStore();
+    private final SavedDisguiseStore savedDisguises = new SavedDisguiseStore();
 
     public IManagePlayerData getDataStore()
     {
-        return data;
+        return playerdata;
     }
 
     public void setDataStore(@Nullable IManagePlayerData newDataStore)
     {
-        this.data = newDataStore == null ? defaultData : newDataStore;
+        this.playerdata = newDataStore == null ? defaultData : newDataStore;
         logger.info("Updating Player Data Store to %s".formatted(newDataStore));
 
         reload();
 
-        new DataStoreSwitchEvent(this, this.data).callEvent();
+        new DataStoreSwitchEvent(this, this.playerdata).callEvent();
     }
 
     @Resolved
@@ -1396,7 +1396,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     public void setSelfDisguiseVisible(Player player, boolean value, boolean saveToConfig, boolean dontSetServerSide, boolean noClientCommand)
     {
         var state = getDisguiseStateFor(player);
-        var config = data.getPlayerMeta(player);
+        var config = playerdata.getPlayerMeta(player);
 
         if (state != null)
         {
@@ -1440,32 +1440,23 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         return getDisguiseStateFor(player);
     }
 
-    public void onPluginDisable()
+    public void onShutdown()
     {
-        getActiveDisguises().forEach(s ->
-        {
-            var player = s.getPlayer();
-
-            MessageUtils.send(player, MorphStrings.resetString());
-
-            if (!player.isOnline())
-                offlineStorage.save(s);
-        });
-
+        getActiveDisguises().forEach(savedDisguises::save);
         unMorphAll(false);
         save();
 
         providers.clear();
     }
 
-    public OfflineDisguise getOfflineState(Player player)
+    public SavedDisguise getOfflineState(Player player)
     {
-        return offlineStorage.read(player.getUniqueId());
+        return savedDisguises.read(player.getUniqueId());
     }
 
     public List<String> availableOfflineDisguises()
     {
-        return offlineStorage.listNames();
+        return savedDisguises.listNames();
     }
 
     public boolean disguiseFromState(DisguiseState state)
@@ -1500,7 +1491,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
      * @param offlineState
      * @return Disguise result
      */
-    public OfflineDisguiseResult disguiseFromOfflineState(Player player, OfflineDisguise offlineState)
+    public OfflineDisguiseResult disguiseFromOfflineState(Player player, SavedDisguise offlineState)
     {
         return morph(
                 MorphParameters.create(player, offlineState.disguiseIdentifier)
@@ -1516,13 +1507,13 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     @Nullable
     public DisguiseMeta getDisguiseMeta(String rawString)
     {
-        return data.getDisguiseMeta(rawString);
+        return playerdata.getDisguiseMeta(rawString);
     }
 
     @Override
     public List<DisguiseMeta> getAvailableDisguisesFor(Player player)
     {
-        var avail = data.getAvailableDisguisesFor(player);
+        var avail = playerdata.getAvailableDisguisesFor(player);
         return avail == null ? new ObjectArrayList<>() : avail;
     }
 
@@ -1537,7 +1528,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         if (!bypassPermission && !player.hasPermission(CommonPermissions.ACQUIRE_MORPH))
             return false;
 
-        var success = data.grantMorphToPlayer(player, disguiseIdentifier);
+        var success = playerdata.grantMorphToPlayer(player, disguiseIdentifier);
 
         if (!success)
             return false;
@@ -1545,10 +1536,10 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         clientHandler.sendDiff(List.of(disguiseIdentifier), null, player);
         multiInstanceService.notifyDisguiseMetaChange(player.getUniqueId(), Operation.ADD_IF_ABSENT, disguiseIdentifier);
 
-        var config = data.getPlayerMeta(player);
+        var config = playerdata.getPlayerMeta(player);
         var locale = MessageUtils.getLocale(player);
 
-        var meta = data.getDisguiseMeta(disguiseIdentifier);
+        var meta = playerdata.getDisguiseMeta(disguiseIdentifier);
         if (meta == null)
             return false;
 
@@ -1581,7 +1572,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     @Override
     public boolean revokeMorphFromPlayer(Player player, String disguiseIdentifier)
     {
-        var success = data.revokeMorphFromPlayer(player, disguiseIdentifier);
+        var success = playerdata.revokeMorphFromPlayer(player, disguiseIdentifier);
 
         if (success)
         {
@@ -1589,7 +1580,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             multiInstanceService.notifyDisguiseMetaChange(player.getUniqueId(), Operation.REMOVE, disguiseIdentifier);
 
             var locale = MessageUtils.getLocale(player);
-            var meta = data.getDisguiseMeta(disguiseIdentifier);
+            var meta = playerdata.getDisguiseMeta(disguiseIdentifier);
             assert meta != null; // 和上面一样
 
             var message = MorphStrings.morphLockedString()
@@ -1608,7 +1599,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     @Override
     public @NotNull PlayerMeta getPlayerMeta(OfflinePlayer player)
     {
-        return data.getPlayerMeta(player);
+        return playerdata.getPlayerMeta(player);
     }
 
     private volatile int reloadToken = 0;
@@ -1635,9 +1626,9 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         unMorphAll(false);
 
-        var success = data.reload();
+        var success = playerdata.reload();
 
-        stateToOfflineStore.forEach(offlineStorage::save);
+        stateToOfflineStore.forEach(savedDisguises::save);
 
         //重载完成后恢复玩家伪装
         stateToRecover.forEach(s ->
@@ -1681,19 +1672,19 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     @Override
     public boolean save()
     {
-        return data.save();
+        return playerdata.save();
     }
 
     @Override
     public List<PlayerMeta> getRange(List<UUID> list)
     {
-        return data.getRange(list);
+        return playerdata.getRange(list);
     }
 
     @Override
     public CompletableFuture<PlayerMeta> loadPlayerDataAsync(UUID uuid)
     {
-        return data.loadPlayerDataAsync(uuid);
+        return playerdata.loadPlayerDataAsync(uuid);
     }
 
     //endregion Implementation of IManagePlayerData
