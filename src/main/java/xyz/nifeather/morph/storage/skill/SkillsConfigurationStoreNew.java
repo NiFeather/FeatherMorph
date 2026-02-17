@@ -454,6 +454,7 @@ public class SkillsConfigurationStoreNew extends DirectoryJsonBasedStorage<Skill
         return defaultConfig;
     }
 
+    @SuppressWarnings("removal")
     private static class LegacyReadonlyConfigurationStorage extends MorphJsonBasedStorage<SkillAbilityConfigurationContainer>
     {
         @Override
