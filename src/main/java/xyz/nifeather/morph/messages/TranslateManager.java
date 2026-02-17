@@ -40,20 +40,20 @@ public class TranslateManager
 
         setupLanguage(FALLBACK_LOCALE);
 
+        logger.info("Extracting default locale files... (This won't affect existing files)");
         var messagesDirectory = new File(FeatherMorphMain.getInstance().getDataFolder(), "messages");
         for (String lang : PluginAssetUtils.allSupportedLanguages())
         {
             try
             {
-                logger.info("Extracting default locale files... (This won't affect existing files)");
                 PluginAssetUtils.extractLocaleFile(lang, messagesDirectory, false);
-                logger.info("Done Extracting default locale files");
             }
             catch (ExecutionErrorException e)
             {
                 logger.warn("Error occurred extracting default locale files, ignoring", e);
             }
         }
+        logger.info("Done Extracting default locale files");
 
         logger.info("Done initializing translate manager");
     }
