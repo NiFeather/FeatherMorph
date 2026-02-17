@@ -11,6 +11,7 @@ import xyz.nifeather.morph.commands.brigadier.BrigadierCommand;
 import xyz.nifeather.morph.messages.strings.CommandStrings;
 import xyz.nifeather.morph.messages.strings.HelpStrings;
 import xyz.nifeather.morph.messages.MessageUtils;
+import xyz.nifeather.morph.messages.strings.TypesString;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 
 public class QueryAllSubCommand extends BrigadierCommand
@@ -51,7 +52,7 @@ public class QueryAllSubCommand extends BrigadierCommand
     public int executes(CommandContext<CommandSourceStack> context)
     {
         var list = manager.getActiveDisguises();
-        var offlineStates = manager.getAvaliableOfflineStates();
+        var offlineStates = manager.availableOfflineDisguises();
 
         var commandSender = context.getSource().getSender();
 
@@ -62,7 +63,6 @@ public class QueryAllSubCommand extends BrigadierCommand
         }
 
         var msg = CommandStrings.qaDisguisedString();
-        var locale = MessageUtils.getLocale(commandSender);
 
         for (var i : list)
         {
@@ -79,14 +79,11 @@ public class QueryAllSubCommand extends BrigadierCommand
             MessageUtils.send(commandSender, msg);
         }
 
-        for (var s : offlineStates)
-        {
-            MessageUtils.send(commandSender,
-                    msg.resolve("who", s.playerName)
-                            .resolve("status", CommandStrings.qaIsOfflineStoreString())
-                            .resolve("storage_status", "")
-                            .resolve("what", s.disguiseID));
-        }
+        msg = CommandStrings.listCount()
+                .resolve("what", TypesString.offlineDisguises())
+                .resolve("amount", offlineStates.size());
+
+        MessageUtils.send(commandSender, msg);
 
         return 1;
     }

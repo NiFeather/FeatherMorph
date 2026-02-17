@@ -1,58 +1,64 @@
 package xyz.nifeather.morph.storage.offlinestore;
 
-import org.jetbrains.annotations.NotNull;
+import com.google.gson.JsonSyntaxException;
+import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.interfaces.IManageOfflineStates;
 import xyz.nifeather.morph.misc.DisguiseState;
-import xyz.nifeather.morph.misc.DisguiseStateGenerator;
-import xyz.nifeather.morph.storage.MorphJsonBasedStorage;
+import xyz.nifeather.morph.storage.DirectoryJsonBasedStorage;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-public class OfflineStateStore extends MorphJsonBasedStorage<OfflineStateContainer> implements IManageOfflineStates
+public class OfflineStateStore extends DirectoryJsonBasedStorage<OfflineDisguise> implements IManageOfflineStates
 {
-    @Override
-    protected @NotNull String getFileName()
+    public OfflineStateStore()
     {
-        return "offline_store.json";
+        super("offline_disguises");
     }
 
     @Override
-    protected @NotNull OfflineStateContainer createDefault()
+    protected OfflineDisguise getDefault()
     {
-        return new OfflineStateContainer();
-    }
-
-    @Override
-    protected @NotNull String getDisplayName()
-    {
-        return "离线存储";
+        return new OfflineDisguise();
     }
 
     /**
      * 将一个玩家的DisguiseState推到存储里
      * @param state DisguiseState
      */
-    public void pushDisguiseState(DisguiseState state)
+    public boolean save(DisguiseState state)
     {
         var uniqueId = state.getPlayer().getUniqueId();
-        if (storingObject.disguiseStates.stream().anyMatch(s -> s.playerUUID.equals(uniqueId)))
+        String uuidString = uniqueId.toString();
+
+        var file = directoryStorage.getFile(uuidString + ".json", true);
+        if (file == null) return false;
+
+        String json = gson.toJson(OfflineDisguise.fromState(state));
+
+        try
         {
-            logger.warn("将放弃存储中已有的" + uniqueId + "条目...");
-            storingObject.disguiseStates.removeIf(s -> s.playerUUID.equals(uniqueId));
+            FileUtils.writeStringToFile(file, json, StandardCharsets.UTF_8, false);
+        }
+        catch (IOException e)
+        {
+            logger.error("OfflineStateStore: Can't write content to disk", e);
+            return false;
         }
 
-        storingObject.disguiseStates.add(DisguiseStateGenerator.toOfflineState(state));
+        return true;
     }
 
-    /**
-     * 获取所有可用的离线伪装存储
-     * @return 存储列表
-     */
-    public List<OfflineDisguiseState> getAvaliableDisguiseStates()
+    @Override
+    public List<String> listNames()
     {
-        return storingObject.disguiseStates;
+        return Arrays.stream(directoryStorage.getFiles())
+                .map(f -> f.getName().replace(".json", ""))
+                .toList();
     }
 
     /**
@@ -61,20 +67,29 @@ public class OfflineStateStore extends MorphJsonBasedStorage<OfflineStateContain
      * @return 离线State
      */
     @Nullable
-    public OfflineDisguiseState popDisguiseState(UUID uuid)
+    public OfflineDisguise read(UUID uuid)
     {
-        var state = storingObject.disguiseStates.stream()
-                .filter(s -> s.playerUUID.equals(uuid)).findFirst().orElse(null);
+        var file = directoryStorage.getFile(uuid.toString() + ".json", false);
+        if (file == null || !file.exists())
+            return null;
 
-        if (state != null)
+        try
         {
-            storingObject.disguiseStates.remove(state);
+            var content = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
+            var instance = gson.fromJson(content, OfflineDisguise.class);
 
-            saveConfiguration();
-
-            return state;
+            file.delete();
+            return instance;
         }
-
-        return null;
+        catch (JsonSyntaxException e)
+        {
+            logger.error("OfflineStateStore: Failed to convert content to JSON string, malformed file!", e);
+            return null;
+        }
+        catch (IOException e)
+        {
+            logger.error("OfflineStateStore: Failed to read OfflineDisguise from disk", e);
+            return null;
+        }
     }
 }

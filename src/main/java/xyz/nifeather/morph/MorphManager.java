@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
-import it.unimi.dsi.fastutil.objects.ObjectLists;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.HoverEvent;
 import org.bukkit.*;
@@ -60,7 +59,7 @@ import xyz.nifeather.morph.providers.disguise.FallbackDisguiseProvider;
 import xyz.nifeather.morph.providers.disguise.PlayerDisguiseProvider;
 import xyz.nifeather.morph.providers.disguise.VanillaDisguiseProvider;
 import xyz.nifeather.morph.skills.SkillManager;
-import xyz.nifeather.morph.storage.offlinestore.OfflineDisguiseState;
+import xyz.nifeather.morph.storage.offlinestore.OfflineDisguise;
 import xyz.nifeather.morph.storage.offlinestore.OfflineStateStore;
 import xyz.nifeather.morph.storage.playerdata.PlayerDataStoreNew;
 import xyz.nifeather.morph.storage.playerdata.PlayerMeta;
@@ -126,7 +125,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
     public MorphManager()
     {
-        offlineStorage.initializeStorage();
     }
 
     //region Backends
@@ -1451,25 +1449,23 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             MessageUtils.send(player, MorphStrings.resetString());
 
             if (!player.isOnline())
-                offlineStorage.pushDisguiseState(s);
+                offlineStorage.save(s);
         });
 
         unMorphAll(false);
         save();
 
-        offlineStorage.saveConfiguration();
-
         providers.clear();
     }
 
-    public OfflineDisguiseState getOfflineState(Player player)
+    public OfflineDisguise getOfflineState(Player player)
     {
-        return offlineStorage.popDisguiseState(player.getUniqueId());
+        return offlineStorage.read(player.getUniqueId());
     }
 
-    public List<OfflineDisguiseState> getAvaliableOfflineStates()
+    public List<String> availableOfflineDisguises()
     {
-        return offlineStorage.getAvaliableDisguiseStates();
+        return offlineStorage.listNames();
     }
 
     public boolean disguiseFromState(DisguiseState state)
@@ -1504,61 +1500,12 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
      * @param offlineState
      * @return Disguise result
      */
-    public OfflineDisguiseResult disguiseFromOfflineState(Player player, OfflineDisguiseState offlineState)
+    public OfflineDisguiseResult disguiseFromOfflineState(Player player, OfflineDisguise offlineState)
     {
-        try
-        {
-            if (!player.getUniqueId().equals(offlineState.playerUUID))
-            {
-                logger.error("OfflineState UUID mismatch: %s <-> %s".formatted(player.getUniqueId(), offlineState.playerUUID));
-                return OfflineDisguiseResult.FAIL;
-            }
-
-            var key = offlineState.disguiseID;
-
-            if (disguiseDisabled(key) || !getPlayerMeta(player).getUnlockedDisguiseIdentifiers().contains(key))
-                return OfflineDisguiseResult.FAIL;
-
-            if (DisguiseTypes.fromId(key) == DisguiseTypes.UNKNOWN) return OfflineDisguiseResult.FAIL;
-
-            var provider = getProvider(DisguiseTypes.fromId(key).getNameSpace());
-
-            var state = DisguiseStateGenerator.fromOfflineState(offlineState,
-                    clientHandler.getPlayerOption(player, true), getPlayerMeta(player), skillManager, provider.getPreferredBackend());
-
-            if (state != null)
-            {
-                this.disguiseFromState(state);
-
-                // 向管理员发送map消息
-                modNetworkingHelper.sendCommandToRevealablePlayers(modNetworkingHelper.genPartialMapCommand(state));
-
-                new PlayerDisguisedFromOfflineStateEvent(player, state).callEvent();
-
-                return OfflineDisguiseResult.SUCCESS;
-            }
-
-            //有限还原
-            if (morph(player, player, key, null))
-            {
-                var newState = getDisguiseStateFor(player);
-
-                if (newState != null)
-                    new PlayerDisguisedFromOfflineStateEvent(player, newState).callEvent();
-
-                return OfflineDisguiseResult.LIMITED;
-            }
-            else
-            {
-                return OfflineDisguiseResult.FAIL;
-            }
-        }
-        catch (Throwable t)
-        {
-            logger.error("Unable to recover disguise from OfflineState", t);
-        }
-
-        return OfflineDisguiseResult.FAIL;
+        return morph(
+                MorphParameters.create(player, offlineState.disguiseIdentifier)
+                        .withProperties(offlineState.properties)
+            ) ? OfflineDisguiseResult.SUCCESS : OfflineDisguiseResult.FAIL;
     }
 
     //endregion 玩家伪装相关
@@ -1688,9 +1635,9 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         unMorphAll(false);
 
-        var success = data.reload() && offlineStorage.reloadConfiguration();
+        var success = data.reload();
 
-        stateToOfflineStore.forEach(offlineStorage::pushDisguiseState);
+        stateToOfflineStore.forEach(offlineStorage::save);
 
         //重载完成后恢复玩家伪装
         stateToRecover.forEach(s ->
@@ -1734,7 +1681,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     @Override
     public boolean save()
     {
-        return data.save() && offlineStorage.saveConfiguration();
+        return data.save();
     }
 
     @Override

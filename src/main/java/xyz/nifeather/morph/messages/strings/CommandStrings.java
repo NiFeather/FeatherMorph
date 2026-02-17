@@ -294,6 +294,12 @@ public class CommandStrings extends AbstractMorphStrings
         return getFormattable(getKey("confirmation_expired"), "[Fb] <operation>的确认请求已超时");
     }
 
+    public static FormattableMessage listCount()
+    {
+        return getFormattable(getKey("list_count"),
+                "[fallback] <what> contains <amount> element(s)");
+    }
+
     private static String getKey(String key)
     {
         return "commands." + key;

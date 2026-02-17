@@ -1,16 +1,24 @@
 package xyz.nifeather.morph.interfaces;
 
+import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.misc.DisguiseState;
-import xyz.nifeather.morph.storage.offlinestore.OfflineDisguiseState;
+import xyz.nifeather.morph.storage.offlinestore.OfflineDisguise;
 
 import java.util.List;
 import java.util.UUID;
 
 public interface IManageOfflineStates
 {
-    public void pushDisguiseState(DisguiseState state);
+    /**
+     * Save the giving DisguiseState to the disk.
+     */
+    public boolean save(DisguiseState state);
 
-    public List<OfflineDisguiseState> getAvaliableDisguiseStates();
+    /**
+     * Read an offline disguise from the disk, null if not available(failed/not found/inaccessible)
+     */
+    @Nullable
+    public OfflineDisguise read(UUID uuid);
 
-    public OfflineDisguiseState popDisguiseState(UUID uuid);
+    public List<String> listNames();
 }
