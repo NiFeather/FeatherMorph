@@ -309,4 +309,4 @@ root:
   debug_output: false
 
   # Do not touch unless you know what you're doing!
-  version: 45
+  version: 47
