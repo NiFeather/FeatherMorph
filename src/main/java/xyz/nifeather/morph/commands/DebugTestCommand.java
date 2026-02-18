@@ -136,7 +136,23 @@ public class DebugTestCommand extends BrigadierCommand
                         ).build()
         );
 
+        dispatcher.register(
+                Commands.literal("fail_disguise")
+                        .executes(this::execFailDisguise)
+                        .build()
+        );
+
         return true;
+    }
+
+    private int execFailDisguise(CommandContext<CommandSourceStack> context)
+    {
+        var state = morphManager.getDisguiseStateFor(context.getSource().getExecutor());
+        if (state == null) return 0;
+
+        CompletableFuture.runAsync(() -> state.handleException(new RuntimeException("ok!")));
+
+        return 0;
     }
 
     private CompletableFuture<Suggestions> suggestValueIndex(CommandContext<CommandSourceStack> context, SuggestionsBuilder builder)

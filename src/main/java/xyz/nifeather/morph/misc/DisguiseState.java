@@ -721,6 +721,8 @@ public class DisguiseState extends MorphPluginObject
      */
     public CompletableFuture<DisguiseState> getStateFuture()
     {
+        // Return a new CompletableFuture, so that folks calling this method can do their own things.
+        // Like MorphManager#applyDisguise
         var instance = new CompletableFuture<DisguiseState>();
         stateFuture.thenAccept(instance::complete);
         stateFuture.exceptionally(t ->
