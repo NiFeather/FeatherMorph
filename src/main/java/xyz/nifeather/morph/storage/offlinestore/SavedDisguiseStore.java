@@ -70,7 +70,7 @@ public class SavedDisguiseStore extends DirectoryJsonBasedStorage<SavedDisguise>
     @Nullable
     public SavedDisguise read(String name)
     {
-        var file = this.getFile(name, true);
+        var file = this.getFile(name, false);
         if (file == null || !file.exists())
             return null;
 
@@ -100,9 +100,9 @@ public class SavedDisguiseStore extends DirectoryJsonBasedStorage<SavedDisguise>
 
     public boolean drop(String name)
     {
-        var file = this.getFile(name, true);
+        var file = this.getFile(name, false);
         if (file == null || !file.exists())
-            return false;
+            return true;
 
         return file.delete();
     }
