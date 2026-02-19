@@ -964,8 +964,10 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
                     // Return the state so that `thenAccept` could run.
                     return newState;
-                }, runnable -> player.getScheduler().run(FeatherMorphMain.getInstance(), task -> runnable.run(), () -> {}))
-                .thenAccept(this::onStateDispose);
+                }, runnable -> player.getScheduler().run(FeatherMorphMain.getInstance(), task -> runnable.run(), () -> {}));
+
+        // Just found out that completing a CompletableFuture may won't trigger actions immediately...
+        newState.onDispose(this::onStateDispose);
 
         newState.scheduleSelfUpdate();
 
@@ -1044,7 +1046,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
     private void onStateDispose(DisguiseState s)
     {
-        logger.info("State disposal! on " + Thread.currentThread().getName());
         UUID uuid = s.getPlayerUUID();
         Player player = s.getPlayer();
 

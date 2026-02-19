@@ -22,6 +22,7 @@ import xyz.nifeather.morph.messages.strings.CommandStrings;
 import xyz.nifeather.morph.messages.strings.EmoteStrings;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.strings.MorphStrings;
+import xyz.nifeather.morph.misc.actions.ConsumerActions;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
@@ -288,9 +289,9 @@ public class DisguiseState extends MorphPluginObject
 
         if (checkPermission && sequenceIdentifier.equals(AnimationNames.RESET)
                 || !PermissionUtils.hasPermission(
-                        player,
-                        CommonPermissions.animationPermissionOf(sequenceIdentifier, this.getDisguiseIdentifier()),
-                        true))
+                player,
+                CommonPermissions.animationPermissionOf(sequenceIdentifier, this.getDisguiseIdentifier()),
+                true))
         {
             MessageUtils.send(player, CommandStrings.noPermissionMessage());
             return;
@@ -718,6 +719,7 @@ public class DisguiseState extends MorphPluginObject
      * Get A {@link CompletableFuture} that binds to this state.<br>
      * Finishes when this state has been disposed.<br>
      * Fail with exception if an error occurred while updating this state
+     * @apiNote If you wish to do something immediately on disposal, use {@link DisguiseState#onDispose(Consumer)}
      */
     public CompletableFuture<DisguiseState> getStateFuture()
     {
@@ -976,6 +978,13 @@ public class DisguiseState extends MorphPluginObject
         return newInstance;
     }
 
+    private final ConsumerActions<DisguiseState> onDisposeActions = new ConsumerActions<>();
+
+    public void onDispose(Consumer<DisguiseState> consumer)
+    {
+        onDisposeActions.hook(consumer);
+    }
+
     private final AtomicBoolean disposed = new AtomicBoolean(false);
 
     public boolean disposed()
@@ -991,6 +1000,7 @@ public class DisguiseState extends MorphPluginObject
             return;
 
         stateFuture.complete(this);
+        onDisposeActions.invoke(this);
 
         disposed.set(true);
 
