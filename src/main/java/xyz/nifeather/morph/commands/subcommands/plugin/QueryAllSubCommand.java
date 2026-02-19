@@ -52,11 +52,10 @@ public class QueryAllSubCommand extends BrigadierCommand
     public int executes(CommandContext<CommandSourceStack> context)
     {
         var list = manager.getActiveDisguises();
-        var offlineStates = manager.availableOfflineDisguises();
 
         var commandSender = context.getSource().getSender();
 
-        if (list.isEmpty() && offlineStates.isEmpty())
+        if (list.isEmpty())
         {
             MessageUtils.send(commandSender, CommandStrings.qaNoBodyDisguisingString());
             return 1;
@@ -78,12 +77,6 @@ public class QueryAllSubCommand extends BrigadierCommand
 
             MessageUtils.send(commandSender, msg);
         }
-
-        msg = CommandStrings.listCount()
-                .resolve("what", TypesString.savedDisguises())
-                .resolve("amount", offlineStates.size());
-
-        MessageUtils.send(commandSender, msg);
 
         return 1;
     }

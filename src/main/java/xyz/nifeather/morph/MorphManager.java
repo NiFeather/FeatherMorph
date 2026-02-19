@@ -939,7 +939,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                                   PlayerMeta playerOptions) throws ExecutionErrorException
     {
         var player = parameters.targetPlayer;
-        var uuid = player.getUniqueId();
         var provider = getProvider(parameters.targetDisguiseIdentifier());
         var wrapper = newState.getDisguiseWrapper();
 
@@ -951,7 +950,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         {
             new PlayerSwitchMorphEvent(player, previousState, newState).callEvent();
             previousState.dispose();
-            activeDisguises.remove(uuid, previousState);
         }
 
         wrapper.getBackend().disguise(player, wrapper);
@@ -1046,6 +1044,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
     private void onStateDispose(DisguiseState s)
     {
+        logger.info("State disposal! on " + Thread.currentThread().getName());
         UUID uuid = s.getPlayerUUID();
         Player player = s.getPlayer();
 
@@ -1452,56 +1451,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         providers.clear();
     }
 
-    public SavedDisguise getOfflineState(Player player)
-    {
-        return savedDisguises.read(player.getUniqueId());
-    }
-
-    public List<String> availableOfflineDisguises()
-    {
-        return savedDisguises.listNames();
-    }
-
-    public boolean disguiseFromState(DisguiseState state)
-    {
-        var meta = getDisguiseMeta(state.getDisguiseIdentifier());
-        var result = DisguiseBuildResult.of(state, meta);
-        var playerMeta = getPlayerMeta(state.getPlayer());
-        var parameters = MorphParameters.create(state.getPlayer(), state.getDisguiseIdentifier());
-
-        if (this.prepareDisguiseMeta(parameters) == null)
-            return false;
-
-        try
-        {
-            this.buildDisguise(result, parameters);
-            this.applyDisguise(parameters, state, playerMeta);
-        }
-        catch (Exception e) //todo: 或许之后能调整一下，让 ParseErrorException, ExecutionErrorException 单独提示
-        {
-            logger.error("Failed calling disguiseFromState", e);
-            return false;
-        }
-
-        this.afterDisguise(state, parameters, playerMeta);
-
-        return true;
-    }
-
-    /**
-     * 尝试从离线存储恢复伪装
-     * @param player
-     * @param offlineState
-     * @return Disguise result
-     */
-    public OfflineDisguiseResult disguiseFromOfflineState(Player player, SavedDisguise offlineState)
-    {
-        return morph(
-                MorphParameters.create(player, offlineState.disguiseIdentifier)
-                        .withProperties(offlineState.properties)
-            ) ? OfflineDisguiseResult.SUCCESS : OfflineDisguiseResult.FAIL;
-    }
-
     //endregion 玩家伪装相关
 
     //region Implementation of IManagePlayerData
@@ -1683,4 +1632,50 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     }
 
     //endregion Implementation of IManagePlayerData
+
+    //region Saved Disguises
+
+    @ApiStatus.Internal
+    public boolean saveDisguise(UUID uuid)
+    {
+        var state = activeDisguises.getOrDefault(uuid, null);
+        if (state == null) return false;
+
+        return savedDisguises.save(state);
+    }
+
+    public SavedDisguiseStore savedDisguiseStore()
+    {
+        return savedDisguises;
+    }
+
+    @Nullable
+    public SavedDisguise getSavedDisguise(String name)
+    {
+        return savedDisguises.read(name);
+    }
+
+    public List<String> availableSavedDisguises()
+    {
+        return savedDisguises.listNames();
+    }
+
+    /**
+     * 尝试从离线存储恢复伪装
+     * @param player
+     * @param offlineState
+     * @return Disguise result
+     */
+    public boolean disguiseFromSavedDisguise(Player player, SavedDisguise offlineState)
+    {
+        if (!canMorph(player))
+            return false;
+
+        return morph(
+                MorphParameters.create(player, offlineState.disguiseIdentifier)
+                        .withProperties(offlineState.properties)
+        );
+    }
+
+    //endregion Saved Disguises
 }

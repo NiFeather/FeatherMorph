@@ -107,13 +107,16 @@ public abstract class DirectoryJsonBasedStorage<T> extends MorphPluginObject
     /**
      * Gets the path to the key
      * @apiNote You may need to manually add the file extension after calling this
-     * @return NULL if the given identifier is illegal, for example, contains multiple ":"
      */
-    @Nullable
     public String getPath(String key)
     {
         return key.replace(":", "/")
                 .replaceAll("[^a-zA-Z0-9\\-]]", "_");
+    }
+
+    public File getFile(String key, boolean createIfNotExist)
+    {
+        return directoryStorage.getFile(getPath(key + ".json"), createIfNotExist);
     }
 
     @Nullable
