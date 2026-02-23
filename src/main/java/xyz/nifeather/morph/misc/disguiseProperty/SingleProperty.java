@@ -76,6 +76,14 @@ public record SingleProperty<T>(String identifier, T defaultVal, Class<T> type, 
         return this.identifier.equals(other.identifier) && this.type.equals(other.type);
     }
 
+    @Override
+    public int hashCode()
+    {
+        // There shouldn't be two properties having the same name but different types or any other.
+        // If that really happens, well... someone should blame the dev who made this happen.
+        return identifier.hashCode();
+    }
+
     public static <X> SinglePropertyBuilder<X> builder(String id, X defaultVal)
     {
         return new SinglePropertyBuilder<>(id, (Class<X>) defaultVal.getClass(), defaultVal);
