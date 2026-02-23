@@ -30,16 +30,6 @@ public class PlayerPropertyCollection extends BaseLivingEntityPropertyCollection
             .withValidator(PropertyValidations::validatePlayerSkin)
             .build();
 
-    @Override
-    protected SingleProperty<Component> createCustomNameProperty()
-    {
-        return SingleProperty.builder(PropertyNames.ENTITY_CUSTOM_NAME, Component.class, Component.empty())
-                .withInputHandle(InputHandles::unsupported)
-                .withOutputHandle(OutputHandles::writeAdventureComponentJSON)
-                .withValidator(PropertyValidations::validateCustomTextPermission)
-                .build();
-    }
-
     private Optional<MainHandStatus> readHand(String propertyName, String string) throws ParseErrorException
     {
         if (string.equalsIgnoreCase("notset"))
