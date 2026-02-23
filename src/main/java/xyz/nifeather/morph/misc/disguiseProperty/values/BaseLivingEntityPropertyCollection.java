@@ -10,15 +10,6 @@ import java.util.Optional;
 
 public abstract class BaseLivingEntityPropertyCollection<E extends Entity> extends PropertyCollection<E>
 {
-    protected SingleProperty<Component> createCustomNameProperty()
-    {
-        return SingleProperty.builder(PropertyNames.ENTITY_CUSTOM_NAME, Component.class, Component.empty())
-                .withInputHandle(InputHandles::readComponentAny)
-                .withOutputHandle(OutputHandles::writeAdventureComponentJSON)
-                .withValidator(PropertyValidations::validateCustomTextPermission)
-                .build();
-    }
-
     public final SingleProperty<Boolean> CUSTOM_NAME_VISIBLE = SingleProperty.builder(PropertyNames.ENTITY_CUSTOM_NAME_VISIBLE, Boolean.class, false)
             .withInputHandle(InputHandles::readBooleanRelaxed)
             .withOutputHandle(OutputHandles::writeBoolean)
@@ -30,7 +21,11 @@ public abstract class BaseLivingEntityPropertyCollection<E extends Entity> exten
             .withOutputHandle(OutputHandles::writeInteger)
             .build();
 
-    public final SingleProperty<Component> CUSTOM_NAME = createCustomNameProperty();
+    public final SingleProperty<Component> CUSTOM_NAME = SingleProperty.builder(PropertyNames.ENTITY_CUSTOM_NAME, Component.class, Component.empty())
+            .withInputHandle(InputHandles::readComponentAny)
+            .withOutputHandle(OutputHandles::writeAdventureComponentJSON)
+            .withValidator(PropertyValidations::validateCustomTextPermission)
+            .build();
 
     public final SingleProperty<DisguiseEquipment> EQUIPMENT = SingleProperty.builder(PropertyNames.ENTITY_EQUIPMENT, DisguiseEquipment.class, DisguiseEquipment.empty())
             .withInputHandle(InputHandles::readEquipment)

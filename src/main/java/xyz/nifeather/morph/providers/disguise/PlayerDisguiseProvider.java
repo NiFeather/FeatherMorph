@@ -77,9 +77,6 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
         return Optional.ofNullable(backend.createPlayerInstance(disguiseMeta.playerDisguiseTargetName));
     }
 
-    @Resolved(shouldSolveImmediately = true)
-    private MorphClientHandler clientHandler;
-
     @Override
     public void finalizeProperties(DisguiseState state) throws ParseErrorException
     {
