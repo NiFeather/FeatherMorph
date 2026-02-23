@@ -11,7 +11,6 @@ import io.papermc.paper.math.Rotations;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
-import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
 import net.kyori.adventure.text.serializer.json.JSONOptions;
 import net.minecraft.SharedConstants;
 import net.minecraft.nbt.CompoundTag;
@@ -163,12 +162,12 @@ public class OutputHandles
         Map<String, String> stringMap = new ConcurrentHashMap<>();
         for (EquipmentSlot slot : EquipmentSlot.values())
         {
-            if (slot == EquipmentSlot.BODY || slot == EquipmentSlot.SADDLE) continue;
-
             ItemStack item = equipment.getItemOrNull(slot);
 
-            if (item != null)
-                stringMap.put(ServerSetEquipCommand.toProtocolEquipment(slot).toString(), ItemUtils.itemToStr(item));
+            if (item == null)
+                continue;
+
+            stringMap.put(ServerSetEquipCommand.toProtocolEquipment(slot).toString(), ItemUtils.itemToStr(item));
         }
 
         var record = new MorphEquipmentStruct(SharedConstants.getCurrentVersion().dataVersion().version(), stringMap);

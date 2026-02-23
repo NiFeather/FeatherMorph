@@ -96,9 +96,16 @@ public class PropertyHandler
 
             property.validateInput(val, inputSource, validationFlags);
             parsedResults.put(property, val);
+            this.writeGeneric(property, val);
         }
 
-        parsedResults.forEach(this::writeGeneric);
+        for (Map.Entry<SingleProperty<?>, Object> entry : parsedResults.entrySet())
+        {
+            var property = (SingleProperty<Object>) entry.getKey();
+            var value = entry.getValue();
+
+            property.postProcessHandle().handle(value, this);
+        }
     }
 
     public void reset()

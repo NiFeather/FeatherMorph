@@ -9,22 +9,33 @@ import org.jetbrains.annotations.Unmodifiable;
 import java.util.*;
 
 public record SingleProperty<T>(String identifier, T defaultVal, Class<T> type, InputHandle<T> inputHandle,
-                                OutputHandle<T> outputHandle, IPropertyValidator<T> propertyValidator,
+                                OutputHandle<T> outputHandle, IPropertyValidator<T> propertyValidator, IPostProcessHandle<T> postProcessHandle,
                                 List<T> randomValues, List<String> suggestions,
                                 boolean hideFromUserInput, boolean hideFromClient)
 {
     public SingleProperty(String identifier, T defaultVal, Class<T> type,
                           @NotNull InputHandle<T> inputHandle, @NotNull OutputHandle<T> outputHandle,
-                          @NotNull IPropertyValidator<T> propertyValidator,
+                          @NotNull IPropertyValidator<T> propertyValidator, IPostProcessHandle<T> postProcessHandle,
                           List<T> randomValues, List<String> suggestions,
                           boolean hideFromUserInput, boolean hideFromClient)
     {
         this.identifier = identifier;
         this.defaultVal = defaultVal;
         this.type = type;
+
         this.inputHandle = inputHandle;
         this.outputHandle = outputHandle;
         this.propertyValidator = propertyValidator;
+
+        // Need to move this to another better place, as I don't want SingleProperty containing codes that can directly interact with PropertyHandler.
+        // But what else place should we move?
+        // - PropertyCollection is only for adding properties.
+        // - Adding to DisguiseProvider would just pollute them.
+        //
+        // Maybe the design of the Post Process Handle is bad, but I have no idea on how to make this better.
+        // Since we need to have a way to let players customize Happy Ghast Disguise's saddle. :(
+        this.postProcessHandle = postProcessHandle;
+
         this.hideFromUserInput = hideFromUserInput;
         this.hideFromClient = hideFromClient;
 
@@ -88,6 +99,7 @@ public record SingleProperty<T>(String identifier, T defaultVal, Class<T> type, 
 
     public static class SinglePropertyBuilder<X>
     {
+        private static final IPostProcessHandle<Object> defaultPostProcessHandle = (a, b) -> {};
         private final String identifier;
         private final X defaultVal;
         private final Class<X> type;
@@ -96,6 +108,7 @@ public record SingleProperty<T>(String identifier, T defaultVal, Class<T> type, 
         private IPropertyValidator<X> validator = PropertyValidations::noOp;
         private boolean hideFromUserInput = false;
         private boolean hideFromClient = false;
+        private IPostProcessHandle<X> postProcessHandle = (IPostProcessHandle<X>) defaultPostProcessHandle;
 
         public SinglePropertyBuilder(String identifier, Class<X> type, X defaultVal)
         {
@@ -123,6 +136,12 @@ public record SingleProperty<T>(String identifier, T defaultVal, Class<T> type, 
         public SinglePropertyBuilder<X> withValidator(IPropertyValidator<X> validator)
         {
             this.validator = validator;
+            return this;
+        }
+
+        public SinglePropertyBuilder<X> withPostProcess(IPostProcessHandle<X> postProcessHandle)
+        {
+            this.postProcessHandle = postProcessHandle;
             return this;
         }
 
@@ -182,7 +201,7 @@ public record SingleProperty<T>(String identifier, T defaultVal, Class<T> type, 
         {
             return new SingleProperty<>(this.identifier, this.defaultVal, this.type,
                     inputHandle, outputHandle,
-                    validator,
+                    validator, postProcessHandle,
                     randomValues, suggestions,
                     hideFromUserInput, hideFromClient);
         }

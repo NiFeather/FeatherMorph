@@ -45,12 +45,15 @@ public class PropertyNames
     public static final String GOAT_HAS_RIGHT_HORN = "goat/has_right_horn";
 
     public static final String HAPPY_GHAST_IS_GHASTLING = "happy_ghast/ghastling";
+    public static final String HAPPY_GHAST_HARNESS = "happy_ghast/harness";
 
     public static final String HOGLIN_IS_BABY = "hoglin/is_baby";
     public static final String ZOGLIN_IS_BABY = "zoglin/is_baby";
 
     public static final String HORSE_COLOR = "horse/color";
     public static final String HORSE_STYLE = "horse/style";
+    public static final String HORSE_SADDLED = "horse/saddled";
+    public static final String HORSE_ARMOR = "horse/armor";
 
     public static final String LLAMA_COLOR = "llama/color";
 

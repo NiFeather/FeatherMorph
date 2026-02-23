@@ -19,6 +19,7 @@ import org.bukkit.Keyed;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;
 import org.bukkit.entity.*;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.profile.PlayerTextures;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -643,6 +644,9 @@ public class InputHandles
                 case CHESTPLATE -> org.bukkit.inventory.EquipmentSlot.CHEST;
                 case LEGGINGS ->  org.bukkit.inventory.EquipmentSlot.LEGS;
                 case BOOTS -> org.bukkit.inventory.EquipmentSlot.FEET;
+
+                case BODY -> EquipmentSlot.BODY;
+                case SADDLE -> EquipmentSlot.SADDLE;
             };
 
             if (item != null)
