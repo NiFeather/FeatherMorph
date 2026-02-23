@@ -2,7 +2,10 @@ package xyz.nifeather.morph.backends.server.renderer;
 
 import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.wrapper.PacketWrapper;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import it.unimi.dsi.fastutil.objects.ObjectLists;
 import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.EntityType;
@@ -13,9 +16,8 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Annotations.Initializer;
-import xiamomc.pluginbase.Exceptions.NullDependencyException;
 import xyz.nifeather.morph.MorphPluginObject;
-import xyz.nifeather.morph.backends.server.renderer.network.DisplayParameters;
+import xyz.nifeather.morph.backends.server.ServerBackend;
 import xyz.nifeather.morph.backends.server.renderer.network.ProtocolHandler;
 import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
 import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.types.LivingEntityWatcher;
@@ -28,8 +30,8 @@ import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.misc.BuildFailedException;
 import xyz.nifeather.morph.misc.ExecutionErrorException;
 
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ServerRenderer extends MorphPluginObject implements Listener
 {
@@ -47,6 +49,11 @@ public class ServerRenderer extends MorphPluginObject implements Listener
             var player = parameters.player();
             if (player == null)
                 return;
+
+            synchronized (cachedPlayerAffects)
+            {
+                cachedPlayerAffects.remove(parameters.watcher());
+            }
 
             this.unDisguiseForPlayer(player, parameters.watcher(), WatcherUtils.getAffectedPlayers(player));
         });
@@ -114,29 +121,16 @@ public class ServerRenderer extends MorphPluginObject implements Listener
         }
     }
 
-    public void refreshStateForPlayer(@NotNull Player player, List<Player> affectedPlayers)
-            throws BuildFailedException, NullDependencyException
-    {
-        var watcher = registry.getWatcher(player.getUniqueId());
-        if (watcher == null)
-            throw new NullDependencyException("Null Watcher for a existing player?!");
-
-        refreshStateForPlayer(player,
-                new DisplayParameters(watcher),
-                affectedPlayers);
-    }
-
     /**
-     * 刷新玩家的伪装
-     * @param player 目标玩家
-     * @param displayParameters 和伪装对应的 {@link DisplayParameters}
+     * Send the disguise to the given affected players
+     *
+     * @param watcher
      */
-    public void refreshStateForPlayer(@NotNull Player player, @NotNull DisplayParameters displayParameters, List<Player> affectedPlayers)
+    public void sendDisguise(@NotNull SingleWatcher watcher, List<Player> affectedPlayers)
         throws BuildFailedException
     {
         if (affectedPlayers.isEmpty()) return;
 
-        var watcher = displayParameters.getWatcher();
         var protocolManager = PacketEvents.getAPI().getPlayerManager();
         var spawnPackets = watcher.buildSpawnPackets();
 
@@ -203,4 +197,67 @@ public class ServerRenderer extends MorphPluginObject implements Listener
 
         PlayerInteractEvent.getHandlerList().unregister(this);
     }
+
+    //region Scheduled disguising
+
+    private final Map<SingleWatcher, List<Player>> cachedPlayerAffects = new ConcurrentHashMap<>();
+
+    /**
+     * Schedule displaying disguise for the given player
+     * @return {@code true} if schedule success
+     */
+    public boolean scheduleDisguise(SingleWatcher watcher, List<Player> affectedPlayers)
+    {
+        var player = watcher.getBindingPlayer();
+        if (!player.isOnline()) return false;
+
+        // We cache affected players for the given watcher so that
+        synchronized (cachedPlayerAffects)
+        {
+            var list = cachedPlayerAffects.getOrDefault(watcher, null);
+            if (list != null) // List is not null: We already have task for refresh the disguise!
+            {
+                list.addAll(affectedPlayers);
+
+                return true;
+            }
+
+            list = ObjectLists.synchronize(new ObjectArrayList<>(affectedPlayers));
+            cachedPlayerAffects.put(watcher, list);
+        }
+
+        player.getScheduler().run(plugin, task ->
+        {
+            if (watcher.disposed() || task.isCancelled())
+                return;
+
+            List<Player> targetPlayers;
+            synchronized (cachedPlayerAffects)
+            {
+                var affect = cachedPlayerAffects.remove(watcher);
+                if (affect == null || affect.isEmpty())
+                    return;
+
+                targetPlayers = affect;
+            }
+
+            try
+            {
+                sendDisguise(watcher, targetPlayers);
+            }
+            catch (Exception e)
+            {
+                //todo: Make exception handling more gracefully
+                //      For example, let DisguiseState or MorphManager subscribe for exceptions thrown from the renderer, not letting renderer call DisguiseState#handleException
+                Objects.requireNonNull(ServerBackend.getInstance()).onDisguiseException(watcher, e);
+            }
+        }, () ->
+        {
+            // Should we do something if the entity is removed?
+        });
+
+        return true;
+    }
+
+    //endregion Scheduled disguising
 }

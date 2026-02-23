@@ -179,28 +179,11 @@ public class EntityWatcher extends SingleWatcher
             return result;
         }
 
-        try
-        {
-            return FoliaThreadUtils.runOnEntitySync(getBindingPlayer(), this::buildSpawnPacketsFor, FoliaThreadUtils.DEFAULT_WAIT_TIMEOUT);
-        }
-        catch (TimeoutException e)
-        {
-            //仅仅是服务器太慢导致的等待超时，不要立马取消玩家的变形会话
-            throw new BuildFailedException("Waiting too long for server thread of player %s to respond!".formatted(getBindingPlayer().getName()), e)
-                    .critical(false);
-        }
-        catch (InterruptedException e)
-        {
-            throw new BuildFailedException("Task has been interrupted, why?", e);
-        }
-        catch (CancellationException e)
-        {
-            throw new BuildFailedException("Task cancelled, why?", e);
-        }
-        catch (Throwable t)
-        {
-            throw new BuildFailedException("Unhandled exception while building packet for '%s'!", t);
-        }
+        var player = getBindingPlayer();
+        if (!FoliaThreadUtils.isTickThreadFor(player))
+            throw new BuildFailedException("Cannot build spawn packets while not on player's tick thread.");
+
+        return this.buildSpawnPacketsFor(player);
     }
 
     @Override
