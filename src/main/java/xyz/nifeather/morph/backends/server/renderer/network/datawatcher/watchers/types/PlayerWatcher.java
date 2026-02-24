@@ -15,6 +15,7 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.MainHand;
+import xyz.nifeather.morph.backends.server.ServerBackend;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntry;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
@@ -27,6 +28,7 @@ import xyz.nifeather.morph.utilities.GameProfileUtils;
 
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 public class PlayerWatcher extends LivingEntityWatcher
@@ -96,22 +98,7 @@ public class PlayerWatcher extends LivingEntityWatcher
             if (affected.isEmpty())
                 return;
 
-            List<PacketWrapper<?>> spawnPackets;
-
-            try
-            {
-                spawnPackets = this.buildSpawnPackets();
-            }
-            catch (BuildFailedException e)
-            {
-                logger.error("Build spawn packet FAILED for player skin update! not continuing", e);
-                return;
-            }
-
-            var protocol = PacketEvents.getAPI().getPlayerManager();
-
-            affected.forEach(p ->
-                    spawnPackets.forEach(packet -> protocol.sendPacket(p, packet)));
+            Objects.requireNonNull(ServerBackend.getInstance()).serverRenderer.scheduleDisguise(this, affected);
         }
 
         if (entry.equals(CustomEntries.ANIMATION))

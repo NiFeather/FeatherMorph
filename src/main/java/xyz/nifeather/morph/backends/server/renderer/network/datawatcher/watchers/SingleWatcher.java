@@ -370,7 +370,7 @@ public abstract class SingleWatcher extends MorphPluginObject
         onTrackerWrite(singleValue, prev, value);
 
         if (!isSilent() && isAlive())
-            sendPacketToAffectedPlayers(PacketFactory.buildDiffMetaPacket(this));
+            sendPacketToAffectedPlayers(PacketFactory.buildDiffMetaPacket(this), true);
     }
 
     protected <X> void onTrackerWrite(SingleValue<X> single, @Nullable X oldVal, @Nullable X newVal)
@@ -467,13 +467,6 @@ public abstract class SingleWatcher extends MorphPluginObject
     {
         //获取原Meta包中的数据
         var originalData = packetWrapper.getEntityMetadata();
-
-        // 如果Meta包里有咱的标记，那么移除标记并返回原包
-        if (originalData.removeIf(wrapped -> wrapped.getValue().equals(PacketFactory.MARK_DONT_PROCESS)))
-        {
-            packetWrapper.setEntityMetadata(originalData);
-            return;
-        }
 
         var overrideList = rebuildMetadata(originalData);
 
@@ -601,7 +594,10 @@ public abstract class SingleWatcher extends MorphPluginObject
         return WatcherUtils.getAffectedPlayers(sourcePlayer);
     }
 
-    protected void sendPacketToAffectedPlayers(PacketWrapper<?> packet)
+    /**
+     * @param skipOurListeners If set to {@code true}, our listener should not get triggered, see <a href="https://docs.packetevents.com/sending-and-simulating-packets/#sending-and-simulating-packets-silently">here</a>
+     */
+    protected void sendPacketToAffectedPlayers(PacketWrapper<?> packet, boolean skipOurListeners)
     {
         if (isSilent())
         {
@@ -620,7 +616,11 @@ public abstract class SingleWatcher extends MorphPluginObject
         var players = getAffectedPlayers(getBindingPlayer());
 
         var protocol = PacketEvents.getAPI().getPlayerManager();
-        players.forEach(p -> protocol.sendPacket(p, packet));
+
+        if (skipOurListeners)
+            players.forEach(p -> protocol.sendPacketSilently(p, packet));
+        else
+            players.forEach(p -> protocol.sendPacket(p, packet));
     }
 
     public abstract List<PacketWrapper<?>> buildSpawnPackets() throws BuildFailedException;

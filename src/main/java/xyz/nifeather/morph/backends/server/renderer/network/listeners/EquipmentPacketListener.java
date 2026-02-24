@@ -14,7 +14,6 @@ import java.util.Map;
 
 /**
  * Listener used to override the equipment so that we can display the disguise's equipment.
- * todo: This might catch packets sent by us? We probably don't want this to happen, as it will cause unnecessary performance cost.
  */
 public class EquipmentPacketListener extends ProtocolListener
 {
@@ -23,7 +22,6 @@ public class EquipmentPacketListener extends ProtocolListener
 
     public EquipmentPacketListener()
     {
-        registry.onUnRegister(this, parameters -> alreadyFake.remove(parameters.player()));
     }
 
     @Override
@@ -43,16 +41,8 @@ public class EquipmentPacketListener extends ProtocolListener
         onEquipmentPacket(wrapper, event);
     }
 
-    private final Map<Player, Boolean> alreadyFake = new Object2ObjectOpenHashMap<>();
-
     private void onEquipmentPacket(WrapperPlayServerEntityEquipment packet, PacketSendEvent event)
     {
-        if (PacketFactory.isEquipmentPacketOurs(packet))
-        {
-            packet.setEntityId(Math.abs(packet.getEntityId()));
-            return;
-        }
-
         //获取此包的来源实体
         var sourcePlayer = getPlayerFrom(packet.getEntityId());
         if (sourcePlayer == null)
@@ -63,23 +53,7 @@ public class EquipmentPacketListener extends ProtocolListener
         if (watcher == null)
             return;
 
-        if (!watcher.readEntryOrDefault(CustomEntries.DISPLAY_FAKE_EQUIPMENT, false))
-        {
-            alreadyFake.remove(sourcePlayer);
-            return;
-        }
-
-        if (alreadyFake.getOrDefault(sourcePlayer, false))
-        {
-            //如果已经在显示伪装物品，那么只取消此包
+        if (watcher.readEntryOrDefault(CustomEntries.DISPLAY_FAKE_EQUIPMENT, false))
             event.setCancelled(true);
-            return;
-        }
-
-        event.markForReEncode(true);
-        var equipments = PacketFactory.getPacketeventsEquipments(sourcePlayer, watcher);
-        packet.setEquipment(equipments);
-
-        alreadyFake.put(sourcePlayer, true);
     }
 }

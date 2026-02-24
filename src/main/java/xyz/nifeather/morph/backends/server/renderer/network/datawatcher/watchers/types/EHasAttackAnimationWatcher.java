@@ -20,6 +20,6 @@ public class EHasAttackAnimationWatcher extends LivingEntityWatcher
         super.onEntryWrite(entry, oldVal, newVal);
 
         if (entry.equals(CustomEntries.ATTACK_ANIMATION) && Boolean.TRUE.equals(newVal))
-            sendPacketToAffectedPlayers(new WrapperPlayServerEntityStatus(getBindingPlayer().getEntityId(), EntityEvent.START_ATTACKING));
+            sendPacketToAffectedPlayers(new WrapperPlayServerEntityStatus(getBindingPlayer().getEntityId(), EntityEvent.START_ATTACKING), false);
     }
 }

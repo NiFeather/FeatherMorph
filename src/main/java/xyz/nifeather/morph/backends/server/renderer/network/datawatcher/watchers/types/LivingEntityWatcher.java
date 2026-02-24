@@ -109,7 +109,7 @@ public class LivingEntityWatcher extends EntityWatcher
         if (entry.equals(CustomEntries.DISPLAY_FAKE_EQUIPMENT) || entry.equals(CustomEntries.EQUIPMENT))
         {
             if (!isSilent())
-                sendPacketToAffectedPlayers(this.getEquipmentPacket());
+                sendPacketToAffectedPlayers(this.getEquipmentPacket(), true);
         }
     }
 

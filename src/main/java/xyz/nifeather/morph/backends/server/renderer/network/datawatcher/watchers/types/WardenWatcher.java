@@ -10,6 +10,7 @@ import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import xyz.nifeather.morph.backends.server.ServerBackend;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntry;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
@@ -17,6 +18,7 @@ import xyz.nifeather.morph.misc.AnimationNames;
 import xyz.nifeather.morph.misc.BuildFailedException;
 
 import java.util.List;
+import java.util.Objects;
 
 public class WardenWatcher extends EHasAttackAnimationWatcher
 {
@@ -33,7 +35,7 @@ public class WardenWatcher extends EHasAttackAnimationWatcher
         var bindingPlayer = getBindingPlayer();
 
         if (entry.equals(CustomEntries.WARDEN_CHARGING_ATTACK) && Boolean.TRUE.equals(newVal))
-            sendPacketToAffectedPlayers(new WrapperPlayServerEntityStatus(getBindingPlayer().getEntityId(), 62));
+            sendPacketToAffectedPlayers(new WrapperPlayServerEntityStatus(getBindingPlayer().getEntityId(), 62), false);
 
         if (entry.equals(CustomEntries.ANIMATION))
         {
@@ -87,29 +89,10 @@ public class WardenWatcher extends EHasAttackAnimationWatcher
                     this.writePersistent(ValueIndex.BASE_LIVING.POSE, EntityPose.EMERGING);
                     world.playSound(bindingPlayer.getLocation(), Sound.ENTITY_WARDEN_EMERGE, 5, 1);
 
-                    List<PacketWrapper<?>> packets;
-
-                    try
-                    {
-                        packets = this.buildSpawnPackets();
-                    }
-                    catch (BuildFailedException e)
-                    {
-                        logger.error("Build spawn packet FAILED for Warden animate! not continuing", e);
-                        reset();
-
-                        return;
-                    }
-
                     var affectedPlayers = this.getAffectedPlayers(bindingPlayer);
-                    var despawnPacket = new WrapperPlayServerDestroyEntities(bindingPlayer.getEntityId());
 
-                    var protocol = PacketEvents.getAPI().getPlayerManager();
-                    for (Player affectedPlayer : affectedPlayers)
-                    {
-                        protocol.sendPacket(affectedPlayer, despawnPacket);
-                        packets.forEach(p -> protocol.sendPacket(affectedPlayer, p));
-                    }
+                    Objects.requireNonNull(ServerBackend.getInstance())
+                            .serverRenderer.scheduleDisguise(this, affectedPlayers);
                 }
                 case AnimationNames.TRY_RESET ->
                 {

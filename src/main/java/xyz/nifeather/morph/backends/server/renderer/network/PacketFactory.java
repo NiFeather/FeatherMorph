@@ -27,10 +27,6 @@ public class PacketFactory extends MorphPluginObject
         var valuesToSent = watcher.getDirty();
         watcher.clearDirty();
 
-        // Add our packet identifier!
-        if (!watcher.readEntryOrDefault(CustomEntries.DONT_INCLUDE_PACKET_IDENTIFIER, false))
-            wrappedDataValues.add(new EntityData<>(99, EntityDataTypes.STRING, MARK_DONT_PROCESS));
-
         valuesToSent.forEach((single, val) ->
         {
             var wrapped =  new EntityData(single.index(), single.type(), val);
@@ -40,17 +36,11 @@ public class PacketFactory extends MorphPluginObject
         return new WrapperPlayServerEntityMetadata(watcher.getBindingPlayer().getEntityId(), wrappedDataValues);
     }
 
-    public static final String MARK_DONT_PROCESS = "~FEATHERMORPH GENERATED METADATA, THIS MESSAGE SHOULD BE REMOVED, OR SOMETHING MAY GONE WRONG!";
-
     public static WrapperPlayServerEntityMetadata buildFullMetaPacket(Player player, SingleWatcher watcher)
     {
         watcher.sync();
 
         List<EntityData<?>> wrappedDataValues = new ObjectArrayList<>();
-
-        // Add our packet identifier!
-        if (!watcher.readEntryOrDefault(CustomEntries.DONT_INCLUDE_PACKET_IDENTIFIER, false))
-            wrappedDataValues.add(new EntityData<>(99, EntityDataTypes.STRING, MARK_DONT_PROCESS));
 
         var valuesToSent = watcher.getOverlayedRegistry();
         watcher.clearDirty();
@@ -77,28 +67,5 @@ public class PacketFactory extends MorphPluginObject
                 : DisguiseEquipment.copy(player.getEquipment());
 
         return ProtocolEquipment.toPEEquipmentList(equipment);
-    }
-
-    public static void markEquipmentPacket(WrapperPlayServerEntityEquipment wrapper)
-    {
-        wrapper.setEntityId(-wrapper.getEntityId());
-    }
-
-    public static boolean isEquipmentPacketOurs(WrapperPlayServerEntityEquipment wrapper)
-    {
-        if (wrapper.getEntityId() > 0)
-            return false;
-
-        var abs = Math.abs(wrapper.getEntityId());
-
-        var playerFound = FeatherMorphMain.getInstance()
-                .getPlatform()
-                .onlinePlayersNative()
-                .stream()
-                .filter(p -> p.getEntityId() == abs)
-                .findFirst()
-                .orElse(null);
-
-        return playerFound != null;
     }
 }

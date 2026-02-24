@@ -43,8 +43,6 @@ public class CustomEntries
 
     public static final CustomEntry<Boolean> WARDEN_VANISHED = CustomEntry.of("warden_vanished", false);
 
-    public static final CustomEntry<Boolean> DONT_INCLUDE_PACKET_IDENTIFIER = CustomEntry.of("dont_include_packet_identifier", false);
-
     /**
      * "Overlayed" means that this value is not stored in the watcher's registry,
      *  instead it will be generated on call.

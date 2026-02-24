@@ -85,14 +85,8 @@ public class EntityWatcher extends SingleWatcher
                 ? this.readEntryOrDefault(CustomEntries.EQUIPMENT, DisguiseEquipment.empty())
                 : DisguiseEquipment.copy(player.getEquipment());
 
-        var packet = new WrapperPlayServerEntityEquipment(player.getEntityId(), ProtocolEquipment.toPEEquipmentList(equipment));
-
-        PacketFactory.markEquipmentPacket(packet);
-
-        return packet;
+        return new WrapperPlayServerEntityEquipment(player.getEntityId(), ProtocolEquipment.toPEEquipmentList(equipment));
     }
-
-    public static final int PACKET_MARK = 10998;
 
     private List<PacketWrapper<?>> buildSpawnPacketsFor(Player player)
     {
@@ -119,7 +113,7 @@ public class EntityWatcher extends SingleWatcher
                 this.readEntryOrThrow(CustomEntries.SPAWN_ID), spawnUUID,
                 SpigotConversionUtil.fromBukkitEntityType(disguiseEntityType),
                 new Location(new Vector3d(player.getX(), player.getY(), player.getZ()), yaw, pitch),
-                nmsPlayer.getYHeadRot(), PACKET_MARK,
+                nmsPlayer.getYHeadRot(), 0,
                 new Vector3d(playerMotion.getX(), playerMotion.getY(), playerMotion.getZ())
         );
 
@@ -216,7 +210,7 @@ public class EntityWatcher extends SingleWatcher
         if (entry.equals(CustomEntries.VANISHED))
         {
             var packet = new WrapperPlayServerDestroyEntities(this.readEntryOrThrow(CustomEntries.SPAWN_ID));
-            this.sendPacketToAffectedPlayers(packet);
+            this.sendPacketToAffectedPlayers(packet, false);
         }
     }
 

@@ -58,14 +58,6 @@ public class SpawnPacketHandler extends ProtocolListener
         var backend = ServerBackend.getInstance();
         if (backend == null) return;
 
-        // And don't process out packet
-        // ...We have no way but this because PacketEvents don't have packet metadata like ProtocolLib
-        if (packet.getData() == EntityWatcher.PACKET_MARK)
-        {
-            packet.setData(0);
-            return;
-        }
-
         Player affectedPlayer = packetEvent.getPlayer();
         if (backend.serverRenderer.scheduleDisguise(bindingWatcher, List.of(affectedPlayer)))
             packetEvent.setCancelled(true);
