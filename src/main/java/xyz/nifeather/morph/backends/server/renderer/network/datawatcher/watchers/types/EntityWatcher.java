@@ -3,10 +3,7 @@ package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watcher
 import com.github.retrooper.packetevents.protocol.world.Location;
 import com.github.retrooper.packetevents.util.Vector3d;
 import com.github.retrooper.packetevents.wrapper.PacketWrapper;
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerDestroyEntities;
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityEquipment;
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSetPassengers;
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSpawnEntity;
+import com.github.retrooper.packetevents.wrapper.play.server.*;
 import io.github.retrooper.packetevents.util.SpigotConversionUtil;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.kyori.adventure.text.Component;
@@ -118,7 +115,6 @@ public class EntityWatcher extends SingleWatcher
         );
 
         packets.add(spawnPacket);
-        packets.add(getEquipmentPacket());
         packets.add(PacketFactory.buildFullMetaPacket(player, this));
 
         // 载具
@@ -222,5 +218,11 @@ public class EntityWatcher extends SingleWatcher
         customName.ifPresent(c -> nbt.putString("CustomName", JSONComponentSerializer.json().serialize(c)));
 
         nbt.putBoolean("CustomNameVisible", read(ValueIndex.BASE_ENTITY.CUSTOM_NAME_VISIBLE));
+    }
+
+    @Override
+    public boolean haveAnimation(WrapperPlayServerEntityAnimation.EntityAnimationType animationType)
+    {
+        return false;
     }
 }

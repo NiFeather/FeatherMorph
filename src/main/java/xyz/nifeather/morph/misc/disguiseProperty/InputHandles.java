@@ -13,16 +13,17 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import net.minecraft.SharedConstants;
+import net.minecraft.util.Brightness;
 import net.minecraft.util.StringUtil;
-import org.bukkit.DyeColor;
-import org.bukkit.Keyed;
-import org.bukkit.NamespacedKey;
-import org.bukkit.Registry;
+import org.bukkit.*;
 import org.bukkit.entity.*;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.profile.PlayerTextures;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector3f;
 import xyz.nifeather.morph.messages.strings.ExceptionStrings;
 import xyz.nifeather.morph.messages.strings.TypesString;
 import xyz.nifeather.morph.misc.DisguiseEquipment;
@@ -347,6 +348,239 @@ public class InputHandles
                 .orElseThrow(() -> new ParseErrorException(propertyName, "readVillagerLevel: Unable to parse villager level from input '%s'".formatted(string)));
 
         return Optional.of(Math.clamp(val, 1, 6));
+    }
+
+    public static Optional<ItemStack> readItemTypedOrStack(String propertyName, String input)
+            throws ParseErrorException
+    {
+        if (input.startsWith("{"))
+            return readItemStackJsonOrCompound(propertyName, input);
+
+        var type = Material.getMaterial(input.toUpperCase());
+        if (type == null)
+        {
+            throw ParseErrorException.forProperty(propertyName)
+                    .byMethod("readItemTypedOrStack")
+                    .withMessage("Cannot find Material with name: %s".formatted(input))
+                    .withLocalizableMessage(ExceptionStrings.noValueMatch())
+                    .create();
+        }
+
+        return Optional.of(ItemStack.of(type, 1));
+    }
+
+    public static Optional<ItemStack> readItemStackJsonOrCompound(String propertyName, String compound)
+            throws ParseErrorException
+    {
+        var record = gson.fromJson(compound, MorphEquipmentStruct.class);
+
+        // workaround: Since we don't know if the coming input is JSON or Compound
+        //             So if the data version is zero, we treat it as a Compound
+        if (record.dataVersion() == 0)
+            return readItemStackCompound(propertyName, compound);
+
+        if (record.equipmentData() == null)
+            return Optional.empty();
+
+        String itemCompound = record.equipmentData().getOrDefault("item", null);
+        if (itemCompound == null || itemCompound.isBlank())
+            return Optional.empty();
+
+        var item = NbtUtils.readItemStack(itemCompound, record.dataVersion());
+        if (item == null)
+            return Optional.empty();
+
+        return Optional.of(item);
+    }
+
+    public static Optional<ItemStack> readItemStackCompound(String propertyName, String compound)
+            throws ParseErrorException
+    {
+        var item = NbtUtils.readItemStack(compound, SharedConstants.getCurrentVersion().dataVersion().version());
+        if (item == null)
+            return Optional.empty();
+
+        return Optional.of(item);
+    }
+
+    public static Optional<Vector3f> readVector3fRelaxed(String propertyName, String input)
+            throws ParseErrorException
+    {
+        if (input.startsWith("["))
+            return readVector3fJson(propertyName, input);
+        else
+            return readVector3fHandwrite(propertyName, input);
+    }
+
+    public static Optional<Vector3f> readVector3fHandwrite(String propertyName, String input)
+        throws ParseErrorException
+    {
+        String[] split = input.split(",");
+
+        if (split.length == 1)
+        {
+            String size = split[0];
+            float floatSize = readFloatStrict(propertyName, size).orElseThrow();
+            return Optional.of(new Vector3f(floatSize));
+        }
+
+        if (split.length != 3)
+        {
+            throw ParseErrorException.forProperty(propertyName)
+                    .byMethod("readVector3fHandwrite")
+                    .withMessage("We don't know how to convert %s elements into a 3D Vector!".formatted(split.length))
+                    .withLocalizableMessage(ExceptionStrings.malformedInput())
+                    .create();
+        }
+
+        float x = readFloatStrict(propertyName, split[0]).orElseThrow();
+        float y = readFloatStrict(propertyName, split[1]).orElseThrow();
+        float z = readFloatStrict(propertyName, split[2]).orElseThrow();
+
+        return Optional.of(new Vector3f(x, y, z));
+    }
+
+    public static Optional<Vector3f> readVector3fJson(String propertyName, String input)
+            throws ParseErrorException
+    {
+        List<Float> list;
+
+        try
+        {
+            list = gson.fromJson(input, new TypeToken<List<Float>>(){});
+        }
+        catch (JsonParseException e)
+        {
+            throw ParseErrorException.forProperty(propertyName)
+                    .byMethod("readVector3fJson")
+                    .withLocalizableMessage(ExceptionStrings.malformedInput())
+                    .causedBy(e)
+                    .create();
+        }
+
+        if (list.size() == 1)
+        {
+            var value = list.getFirst();
+            return Optional.of(new Vector3f(value));
+        }
+
+        if (list.size() != 3)
+        {
+            throw ParseErrorException.forProperty(propertyName)
+                    .byMethod("readVector3fJson")
+                    .withMessage("We don't know how to convert %s elements into a 3D Vector!".formatted(list.size()))
+                    .withLocalizableMessage(ExceptionStrings.malformedInput())
+                    .create();
+        }
+
+        float x = list.getFirst();
+        float y = list.get(1);
+        float z = list.get(2);
+
+        return Optional.of(new Vector3f(x, y, z));
+    }
+
+    public static Optional<Color> readHexColorRGB(String propertyName, String input)
+        throws ParseErrorException
+    {
+        if (!input.startsWith("#"))
+            return readDyeColor(propertyName, input).map(DyeColor::getColor);
+
+        String colorCodeString = input.replaceFirst("#", "");
+        if (colorCodeString.length() > 6)
+        {
+            throw ParseErrorException.forProperty(propertyName)
+                    .byMethod("readHexColorRGB")
+                    .withLocalizableMessage(ExceptionStrings.inputTooLong())
+                    .withMessage("May only use in #RRGGBB format")
+                    .create();
+        }
+
+        int integerColor;
+        try
+        {
+            integerColor = Integer.parseInt(colorCodeString, 16);
+        }
+        catch (NumberFormatException e)
+        {
+            throw ParseErrorException.forProperty(propertyName)
+                    .byMethod("readColorARGB")
+                    .withLocalizableMessage(ExceptionStrings.malformedInput())
+                    .causedBy(e)
+                    .create();
+        }
+
+        return Optional.of(Color.fromARGB(integerColor));
+    }
+
+    public static Optional<Integer> readLight(String propertyName, String input)
+            throws ParseErrorException
+    {
+        int sky = 15;
+        int block = 15;
+
+        if (input.startsWith("["))
+        {
+            List<Integer> list;
+
+            try
+            {
+                list = gson.fromJson(input, new TypeToken<List<Integer>>(){});
+            }
+            catch (JsonParseException e)
+            {
+                throw ParseErrorException.forProperty(propertyName)
+                        .byMethod("readLight")
+                        .withMessage("Syntax: \"[block light, sky light]\"")
+                        .withLocalizableMessage(ExceptionStrings.malformedInput())
+                        .causedBy(e)
+                        .create();
+            }
+
+            if (!list.isEmpty())
+                block = list.getFirst();
+
+            if (list.size() >= 2)
+                sky = list.get(1);
+        }
+        else
+        {
+            try
+            {
+
+                block = Integer.parseInt(input);
+            }
+            catch (NumberFormatException e)
+            {
+                throw ParseErrorException.forProperty(propertyName)
+                        .byMethod("readLight")
+                        .withMessage("Not a integer number")
+                        .withLocalizableMessage(ExceptionStrings.failedParsingWhatFromInput().resolve("type", TypesString.typeInteger()))
+                        .causedBy(e)
+                        .create();
+            }
+        }
+
+        int light = Brightness.pack(block, sky);
+
+        return Optional.of(light);
+    }
+
+    public static Optional<Byte> readByte(String propertyName, String input)
+            throws ParseErrorException
+    {
+        try
+        {
+            return Optional.of(Byte.parseByte(input));
+        }
+        catch (NumberFormatException e)
+        {
+            throw ParseErrorException.forProperty(propertyName)
+                    .withLocalizableMessage(ExceptionStrings.malformedInput())
+                    .withMessage("Not a legal byte")
+                    .causedBy(e)
+                    .create();
+        }
     }
 
     public static class RotationStore

@@ -6,6 +6,7 @@ import com.github.retrooper.packetevents.protocol.particle.data.ParticleColorDat
 import com.github.retrooper.packetevents.resources.ResourceLocation;
 import com.github.retrooper.packetevents.util.Vector3i;
 import com.github.retrooper.packetevents.wrapper.PacketWrapper;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityAnimation;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerUpdateAttributes;
 import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
@@ -180,6 +181,7 @@ public class LivingEntityWatcher extends EntityWatcher
         var entityPackets = super.buildSpawnPackets();
 
         packets.addAll(entityPackets);
+        packets.add(getEquipmentPacket());
         packets.add(buildAttributePacket());
 
         return packets;
@@ -249,5 +251,11 @@ public class LivingEntityWatcher extends EntityWatcher
         }
 
         writeTemp(values.BED_POS, bedPos);
+    }
+
+    @Override
+    public boolean haveAnimation(WrapperPlayServerEntityAnimation.EntityAnimationType animationType)
+    {
+        return animationType != WrapperPlayServerEntityAnimation.EntityAnimationType.WAKE_UP;
     }
 }

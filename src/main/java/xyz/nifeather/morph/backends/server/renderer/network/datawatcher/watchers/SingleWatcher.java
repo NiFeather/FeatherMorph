@@ -3,6 +3,7 @@ package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watcher
 import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityData;
 import com.github.retrooper.packetevents.wrapper.PacketWrapper;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityAnimation;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityMetadata;
 import com.google.common.collect.ImmutableList;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
@@ -626,6 +627,12 @@ public abstract class SingleWatcher extends MorphPluginObject
     public abstract List<PacketWrapper<?>> buildSpawnPackets() throws BuildFailedException;
 
     public abstract List<PacketWrapper<?>> buildVirtualEntityDisposalPackets() throws BuildFailedException;
+
+    public abstract boolean haveAnimation(WrapperPlayServerEntityAnimation.EntityAnimationType animationType);
+
+    public void beginSelfUpdateIfAny()
+    {
+    }
 
     private boolean disposed;
 

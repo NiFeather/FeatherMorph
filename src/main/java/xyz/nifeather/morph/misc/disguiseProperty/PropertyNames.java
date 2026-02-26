@@ -107,4 +107,23 @@ public class PropertyNames
 
     public static final String NAUTILUS_DASHING = "nautilus/dashing";
     public static final String ZOMBIE_NAUTILUS_VARIANT = "zombie_nautilus/variant";
+
+    public static final String DISPLAY_WIDTH = "display/cullbox_width";
+    public static final String DISPLAY_HEIGHT = "display/cullbox_height";
+    public static final String DISPLAY_SCALE = "display/scale";
+    public static final String DISPLAY_GLOW_COLOR = "display/glow_color";
+    public static final String DISPLAY_SHADOW_RADIUS = "display/shadow_radius";
+    public static final String DISPLAY_SHADOW_STRENGTH = "display/shadow_strength";
+    public static final String DISPLAY_LIGHT_OVERRIDE = "display/light_override";
+    public static final String DISPLAY_TRANSLATION = "display/translation";
+    public static final String DISPLAY_BILLBOARD = "display/billboard";
+
+    public static final String ITEM_DISPLAY_DISPLAYING_ITEM = "item_display/displaying_item";
+    public static final String ITEM_DISPLAY_MODEL_TRANSFORM = "item_display/model_transform";
+
+    public static final String TEXT_DISPLAY_TEXT = "text_display/text";
+    public static final String TEXT_DISPLAY_LINE_WIDTH = "text_display/line_width";
+    public static final String TEXT_DISPLAY_BACKGROUND_COLOR = "text_display/background_color";
+    public static final String TEXT_DISPLAY_TEXT_OPACITY = "text_display/text_opacity";
+    public static final String TEXT_DISPLAY_ALIGNMENT = "text_display/alignment";
 }
