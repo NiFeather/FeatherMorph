@@ -287,7 +287,7 @@ public class PlayerSkinProvider extends MorphPluginObject
 
     public void invalidate(String name)
     {
-        var skin = skinStorage.getRaw(name);
+        var skin = skinStorage.get(name);
         if (skin == null) return;
 
         skin.expiresAt = 0;
