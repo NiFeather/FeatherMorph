@@ -192,4 +192,14 @@ public class PlayerWatcher extends LivingEntityWatcher
         this.writePersistent(ValueIndex.PLAYER.BED_POS, Optional.empty());
         this.remove(ValueIndex.PLAYER.BED_POS);
     }
+
+    @Override
+    public void onEntityDestroy(Player packetReceiver)
+    {
+        super.onEntityDestroy(packetReceiver);
+
+        var packet = new WrapperPlayServerPlayerInfoRemove(this.readEntryOrThrow(CustomEntries.SPAWN_UUID));
+        var protocol = PacketEvents.getAPI().getPlayerManager();
+        protocol.sendPacket(packetReceiver, packet);
+    }
 }

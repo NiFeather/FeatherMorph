@@ -655,4 +655,8 @@ public abstract class SingleWatcher extends MorphPluginObject
     protected void onDispose()
     {
     }
+
+    public void onEntityDestroy(Player packetReceiver)
+    {
+    }
 }
