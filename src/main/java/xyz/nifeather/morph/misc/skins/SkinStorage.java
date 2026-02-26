@@ -104,6 +104,7 @@ public class SkinStorage extends DirectoryJsonBasedStorage<SingleSkin>
         try
         {
             FileUtils.writeStringToFile(file, json, StandardCharsets.UTF_8);
+            dropCached(profile.name());
             return true;
         }
         catch (IOException e)
@@ -128,6 +129,8 @@ public class SkinStorage extends DirectoryJsonBasedStorage<SingleSkin>
 
         if (!file.delete())
             logger.warn("Failed to delete cached skin for unknown reason");
+
+        dropCached(name);
     }
 
     public synchronized void deleteAll()
@@ -137,22 +140,18 @@ public class SkinStorage extends DirectoryJsonBasedStorage<SingleSkin>
             if (file.getName().endsWith(".json"))
                 file.delete();
         }
+
+        this.clearCache();
     }
 
     public record SkinRecord(Optional<GameProfile> profileOptional, boolean expired)
     {
     }
 
-    @Nullable
-    SingleSkin getRaw(String name)
-    {
-        return get(name);
-    }
-
     @NotNull
     public SkinRecord getRecord(String name)
     {
-        var single = getRaw(name);
+        var single = get(name);
 
         if (single == null) return new SkinRecord(Optional.empty(), true);
 

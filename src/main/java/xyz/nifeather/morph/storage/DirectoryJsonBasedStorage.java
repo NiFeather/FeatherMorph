@@ -49,6 +49,11 @@ public abstract class DirectoryJsonBasedStorage<T> extends MorphPluginObject
         return this.instancesMap;
     }
 
+    public void dropCached(String name)
+    {
+        instancesMap.remove(getPath(name));
+    }
+
     public void clearCache()
     {
         this.instancesMap.clear();
