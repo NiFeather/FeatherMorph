@@ -2,6 +2,7 @@ package xyz.nifeather.morph.misc.disguiseProperty;
 
 import com.mojang.authlib.GameProfile;
 import io.papermc.paper.datacomponent.DataComponentTypes;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import xyz.nifeather.morph.messages.strings.CommandStrings;
@@ -16,11 +17,11 @@ import java.util.Objects;
 
 public class PropertyValidations
 {
-    public static void noOp(Object value, Player player, EnumSet<ValidationFlag> validationFlags)
+    public static void noOp(Object value, Entity player, EnumSet<ValidationFlag> validationFlags)
     {
     }
 
-    public static void validateCustomTextPermission(Object value, Player player, EnumSet<ValidationFlag> validationFlags)
+    public static void validateCustomTextPermission(Object value, Entity player, EnumSet<ValidationFlag> validationFlags)
             throws PropertyValidationException
     {
         if (validationFlags.contains(ValidationFlag.SKIP_PERMISSIONS)) return;
@@ -35,7 +36,7 @@ public class PropertyValidations
         }
     }
 
-    public static void validatePlayerSkin(GameProfile skin, Player player, EnumSet<ValidationFlag> validationFlags)
+    public static void validatePlayerSkin(GameProfile skin, Entity player, EnumSet<ValidationFlag> validationFlags)
             throws PropertyValidationException
     {
         if (!validationFlags.contains(ValidationFlag.SKIP_PERMISSIONS))
@@ -62,7 +63,7 @@ public class PropertyValidations
         }
     }
 
-    public static void validateMannequinCustomSkinPermission(Object any, Player player, EnumSet<ValidationFlag> validationFlags)
+    public static void validateMannequinCustomSkinPermission(Object any, Entity player, EnumSet<ValidationFlag> validationFlags)
             throws PropertyValidationException
     {
         if (validationFlags.contains(ValidationFlag.SKIP_PERMISSIONS)) return;
@@ -77,7 +78,7 @@ public class PropertyValidations
         }
     }
 
-    public static void validateEquipment(DisguiseEquipment equipment, Player player,  EnumSet<ValidationFlag> validationFlags)
+    public static void validateEquipment(DisguiseEquipment equipment, Entity player,  EnumSet<ValidationFlag> validationFlags)
             throws PropertyValidationException
     {
         if (validationFlags.contains(ValidationFlag.SKIP_PERMISSIONS)) return;

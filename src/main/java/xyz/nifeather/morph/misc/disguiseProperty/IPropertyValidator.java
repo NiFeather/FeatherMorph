@@ -1,5 +1,6 @@
 package xyz.nifeather.morph.misc.disguiseProperty;
 
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
 import java.util.EnumSet;
@@ -14,5 +15,5 @@ public interface IPropertyValidator<X>
      * @param validationFlags Validation flags, see {@link ValidationFlag}
      * @throws PropertyValidationException If the given input is invalid, or not legal, or malformed
      */
-    void validate(X value, Player player, EnumSet<ValidationFlag> validationFlags) throws PropertyValidationException;
+    void validate(X value, Entity player, EnumSet<ValidationFlag> validationFlags) throws PropertyValidationException;
 }

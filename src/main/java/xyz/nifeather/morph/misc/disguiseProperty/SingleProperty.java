@@ -2,6 +2,7 @@ package xyz.nifeather.morph.misc.disguiseProperty;
 
 import com.google.common.collect.ImmutableList;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
@@ -59,7 +60,7 @@ public record SingleProperty<T>(String identifier, T defaultVal, Class<T> type, 
         return outputHandle.handle(this.id(), value);
     }
 
-    public void validateInput(T value, Player player, EnumSet<ValidationFlag> validationFlags)
+    public void validateInput(T value, Entity player, EnumSet<ValidationFlag> validationFlags)
             throws PropertyValidationException
     {
         this.propertyValidator.validate(value, player, validationFlags);

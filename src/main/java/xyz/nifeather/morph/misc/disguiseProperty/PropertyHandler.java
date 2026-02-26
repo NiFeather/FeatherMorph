@@ -1,6 +1,7 @@
 package xyz.nifeather.morph.misc.disguiseProperty;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -77,7 +78,7 @@ public class PropertyHandler
         validProperties.put(property.id(), property);
     }
 
-    public void updateFromPropertiesInput(Map<String, String> input, Player inputSource, EnumSet<ValidationFlag> validationFlags)
+    public void updateFromPropertiesInput(Map<String, String> input, Entity inputSource, EnumSet<ValidationFlag> validationFlags)
             throws ParseErrorException, PropertyValidationException
     {
         var parsedResults = new ConcurrentHashMap<SingleProperty<?>, Object>();
