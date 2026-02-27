@@ -5,9 +5,6 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.ItemDisplay;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.Nullable;
-import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
-import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntry;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
@@ -56,9 +53,6 @@ public class ItemDisplayWatcher extends DisplayEntityWatcher
     {
         super.initRegistry();
         register(ValueIndex.ITEM_DISPLAY);
-
-        this.writePersistent(ValueIndex.ITEM_DISPLAY.CULLING_BOUNDINGBOX_WIDTH, 20f);
-        this.writePersistent(ValueIndex.ITEM_DISPLAY.CULLING_BOUNDINGBOX_HEIGHT, 20f);
     }
 
     @Override
@@ -83,17 +77,5 @@ public class ItemDisplayWatcher extends DisplayEntityWatcher
         }
 
         super.onPropertyWrite(property, value);
-    }
-
-    @Override
-    public <X> @Nullable X readEntry(CustomEntry<X> entry)
-    {
-        if (Objects.equals(entry, CustomEntries.OVERLAYED_YAW))
-            return (X) Float.valueOf(180 + getBindingPlayer().getYaw());
-
-        if (Objects.equals(entry, CustomEntries.OVERLAYED_PITCH))
-            return (X) Float.valueOf(-getBindingPlayer().getPitch());
-
-        return super.readEntry(entry);
     }
 }

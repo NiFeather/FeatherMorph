@@ -18,7 +18,7 @@ public class ItemDisplayPropertyCollection extends DisplayEntityPropertyCollecti
             .withOutputHandle(OutputHandles::writeItemStack)
             .build();
 
-    public final SingleProperty<ItemDisplay.ItemDisplayTransform> DISPLAY_MODEL = SingleProperty.builder(PropertyNames.ITEM_DISPLAY_MODEL_TRANSFORM, ItemDisplay.ItemDisplayTransform.NONE)
+    public final SingleProperty<ItemDisplay.ItemDisplayTransform> DISPLAY_MODEL = SingleProperty.builder(PropertyNames.ITEM_DISPLAY_MODEL_TRANSFORM, ItemDisplay.ItemDisplayTransform.FIXED)
             .withInputHandle(this::readItemDisplayTransform)
             .withOutputHandle(OutputHandles::writeEnum)
             .withSuggestions(Arrays.stream(ItemDisplay.ItemDisplayTransform.values()).map(e -> e.toString().toLowerCase()).toList())
@@ -50,11 +50,15 @@ public class ItemDisplayPropertyCollection extends DisplayEntityPropertyCollecti
     @Override
     public void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NonNull ItemDisplay targetEntity)
     {
+        super.setupPropertiesFromEntity(propertyHandler, targetEntity);
+
         propertyHandler.set(DISPLAYING_ITEM, targetEntity.getItemStack());
+        propertyHandler.set(DISPLAY_MODEL, targetEntity.getItemDisplayTransform());
     }
 
     @Override
     protected void setupDefaultProperties(PropertyHandler propertyHandler)
     {
+        propertyHandler.set(DISPLAY_MODEL, ItemDisplay.ItemDisplayTransform.FIXED);
     }
 }

@@ -4,6 +4,8 @@ import org.bukkit.Color;
 import org.bukkit.DyeColor;
 import org.bukkit.entity.Display;
 import org.joml.Vector3f;
+import org.jspecify.annotations.NonNull;
+import xyz.nifeather.morph.messages.strings.ExceptionStrings;
 import xyz.nifeather.morph.misc.disguiseProperty.*;
 
 import java.util.Arrays;
@@ -24,7 +26,7 @@ public abstract class DisplayEntityPropertyCollection<E extends Display> extends
             .build();
 
     public final SingleProperty<Vector3f> SCALE = SingleProperty.builder(PropertyNames.DISPLAY_SCALE, new Vector3f(1, 1, 1))
-            .withInputHandle(InputHandles::readVector3fRelaxed)
+            .withInputHandle(this::readScale)
             .withOutputHandle(OutputHandles::writeVector3f)
             .build();
 
@@ -61,6 +63,25 @@ public abstract class DisplayEntityPropertyCollection<E extends Display> extends
             .withSuggestions(Arrays.stream(Display.Billboard.values()).map(c -> c.name().toLowerCase()).toList())
             .build();
 
+    protected Optional<Vector3f> readScale(String propertyName, String input)
+            throws ParseErrorException
+    {
+        var scale = InputHandles.readVector3fRelaxed(propertyName, input);
+        if (scale.isEmpty()) return scale;
+
+        var value = scale.get();
+        if (Math.abs(value.x()) > 500 || Math.abs(value.y()) > 500 || Math.abs(value.z()) > 500)
+        {
+            throw ParseErrorException.forProperty(propertyName)
+                    .byMethod("throwIfOutOfBounds")
+                    .withLocalizableMessage(ExceptionStrings.outOfRangeClosedBracket().resolve("min", -500).resolve("max", 500))
+                    .withMessage("Input '%s' does not fit the required range of [%s, %s]".formatted(value, 500, -500))
+                    .create();
+        }
+
+        return scale;
+    }
+
     private Optional<Display.Billboard> readBillboard(String propertyName, String input)
             throws ParseErrorException
     {
@@ -70,5 +91,10 @@ public abstract class DisplayEntityPropertyCollection<E extends Display> extends
     public DisplayEntityPropertyCollection()
     {
         registerSingle(WIDTH, HEIGHT, SCALE, GLOW_COLOR, SHADOW_RADIUS, SHADOW_STRENGTH, LIGHT_OVERRIDE, TRANSLATION, BILLBOARD);
+    }
+
+    @Override
+    protected void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NonNull E targetEntity)
+    {
     }
 }
