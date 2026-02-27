@@ -64,13 +64,17 @@ public class EntityWatcher extends SingleWatcher
             case PropertyNames.ENTITY_STATIC_YAW ->
             {
                 lockedYaw = (Float) value;
-                sendPacketToAffectedPlayers(createRotationPackets(), true);
+
+                if (!isSilent())
+                    sendPacketToAffectedPlayers(createRotationPackets(), true);
             }
 
             case  PropertyNames.ENTITY_STATIC_PITCH ->
             {
                 lockedPitch = (Float) value;
-                sendPacketToAffectedPlayers(createRotationPackets(), true);
+
+                if (!isSilent())
+                    sendPacketToAffectedPlayers(createRotationPackets(), true);
             }
         }
     }
@@ -161,7 +165,7 @@ public class EntityWatcher extends SingleWatcher
                 this.readEntryOrThrow(CustomEntries.SPAWN_ID), spawnUUID,
                 SpigotConversionUtil.fromBukkitEntityType(disguiseEntityType),
                 new Location(new Vector3d(player.getX(), player.getY(), player.getZ()), yaw, pitch),
-                nmsPlayer.getYHeadRot(), 0,
+                yaw, 0, // I'll just assume using yaw as the "Head Yaw" is okay for us
                 new Vector3d(playerMotion.getX(), playerMotion.getY(), playerMotion.getZ())
         );
 
