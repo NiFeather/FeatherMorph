@@ -13,6 +13,7 @@ import net.minecraft.nbt.CompoundTag;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.backends.server.renderer.network.PacketFactory;
 import xyz.nifeather.morph.backends.server.renderer.network.ProtocolEquipment;
 import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
@@ -22,18 +23,23 @@ import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueInde
 import xyz.nifeather.morph.misc.BuildFailedException;
 import xyz.nifeather.morph.misc.DisguiseEquipment;
 import xyz.nifeather.morph.misc.NmsRecord;
+import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
+import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 import xyz.nifeather.morph.utilities.EntityTypeUtils;
 import xyz.nifeather.morph.utilities.FoliaThreadUtils;
 import xyz.nifeather.morph.utilities.Uuids;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.TimeoutException;
 
 public class EntityWatcher extends SingleWatcher
 {
+    public EntityWatcher(Player bindingPlayer, EntityType entityType)
+    {
+        super(bindingPlayer, entityType);
+    }
+
     @Override
     protected void initRegistry()
     {
@@ -42,9 +48,54 @@ public class EntityWatcher extends SingleWatcher
         register(ValueIndex.BASE_ENTITY);
     }
 
-    public EntityWatcher(Player bindingPlayer, EntityType entityType)
+    @Nullable
+    protected volatile Float lockedYaw;
+
+    @Nullable
+    protected volatile Float lockedPitch;
+
+    @Override
+    protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
-        super(bindingPlayer, entityType);
+        super.onPropertyWrite(property, value);
+
+        switch (property.id())
+        {
+            case PropertyNames.ENTITY_STATIC_YAW ->
+            {
+                lockedYaw = (Float) value;
+                sendPacketToAffectedPlayers(createRotationPackets(), true);
+            }
+
+            case  PropertyNames.ENTITY_STATIC_PITCH ->
+            {
+                lockedPitch = (Float) value;
+                sendPacketToAffectedPlayers(createRotationPackets(), true);
+            }
+        }
+    }
+
+    protected List<PacketWrapper<?>> createRotationPackets()
+    {
+        float yaw = this.readEntryOrDefault(CustomEntries.OVERLAYED_YAW, getBindingPlayer().getYaw());
+        float pitch = this.readEntryOrDefault(CustomEntries.OVERLAYED_PITCH, getBindingPlayer().getPitch());
+
+        return List.of(
+                new WrapperPlayServerEntityRotation(this.readEntryOrThrow(CustomEntries.SPAWN_ID), yaw, pitch, false),
+                new WrapperPlayServerEntityHeadLook(this.readEntryOrThrow(CustomEntries.SPAWN_ID), yaw)
+        );
+    }
+
+    @Override
+    public @org.jspecify.annotations.Nullable <X> X readEntry(CustomEntry<X> entry)
+    {
+        if (Objects.equals(entry, CustomEntries.OVERLAYED_PITCH) && lockedPitch != null)
+            return (X) lockedPitch;
+
+        if (Objects.equals(entry, CustomEntries.OVERLAYED_YAW) && lockedYaw != null)
+            return (X) lockedYaw;
+
+        return super.readEntry(entry);
     }
 
     protected byte getPlayerBitMask(Player player)

@@ -598,6 +598,41 @@ public abstract class SingleWatcher extends MorphPluginObject
     /**
      * @param skipOurListeners If set to {@code true}, our listener should not get triggered, see <a href="https://docs.packetevents.com/sending-and-simulating-packets/#sending-and-simulating-packets-silently">here</a>
      */
+    protected void sendPacketToAffectedPlayers(List<PacketWrapper<?>> packets, boolean skipOurListeners)
+    {
+        if (isSilent())
+        {
+            logger.warn("Not sending packets: Sending packets while we should be silent?!");
+            Thread.dumpStack();
+            return;
+        }
+
+        if (!isAlive())
+        {
+            logger.warn("Not sending packets: Sending packets while the watcher isn't alive!");
+            Thread.dumpStack();
+            return;
+        }
+
+        var players = getAffectedPlayers(getBindingPlayer());
+
+        var protocol = PacketEvents.getAPI().getPlayerManager();
+
+        players.forEach(player ->
+        {
+            for (PacketWrapper<?> packet : packets)
+            {
+                if (skipOurListeners)
+                    protocol.sendPacketSilently(player, packet);
+                else
+                    protocol.sendPacket(player, packet);
+            }
+        });
+    }
+
+    /**
+     * @param skipOurListeners If set to {@code true}, our listener should not get triggered, see <a href="https://docs.packetevents.com/sending-and-simulating-packets/#sending-and-simulating-packets-silently">here</a>
+     */
     protected void sendPacketToAffectedPlayers(PacketWrapper<?> packet, boolean skipOurListeners)
     {
         if (isSilent())

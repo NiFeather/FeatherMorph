@@ -8,7 +8,7 @@ import xyz.nifeather.morph.misc.disguiseProperty.*;
 
 import java.util.Optional;
 
-public abstract class BaseLivingEntityPropertyCollection<E extends Entity> extends PropertyCollection<E>
+public abstract class BaseLivingEntityPropertyCollection<E extends Entity> extends EntityPropertyCollection<E>
 {
     public final SingleProperty<Boolean> CUSTOM_NAME_VISIBLE = SingleProperty.builder(PropertyNames.ENTITY_CUSTOM_NAME_VISIBLE, Boolean.class, false)
             .withInputHandle(InputHandles::readBooleanRelaxed)
@@ -65,6 +65,8 @@ public abstract class BaseLivingEntityPropertyCollection<E extends Entity> exten
 
     public BaseLivingEntityPropertyCollection()
     {
+        super();
+
         registerSingle(CUSTOM_NAME, CUSTOM_NAME_VISIBLE, STUCKED_ARROWS, EQUIPMENT, DISPLAY_DISGUISE_EQUIPMENT);
     }
 }

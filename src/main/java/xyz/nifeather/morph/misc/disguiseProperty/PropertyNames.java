@@ -13,6 +13,9 @@ public class PropertyNames
     public static final String ENTITY_EQUIPMENT = "entity/equipment";
     public static final String ENTITY_DISPLAY_DISGUISE_EQUIPMENT = "entity/display_disguise_equipment";
 
+    public static final String ENTITY_STATIC_YAW = "entity/static_yaw";
+    public static final String ENTITY_STATIC_PITCH = "entity/static_pitch";
+
     public static final String AXOLOTL_VARIANT = "axolotl/variant";
 
     public static final String ARMOR_STAND_SHOW_ARMS = "armor_stand/show_arms";
