@@ -4,6 +4,8 @@ import com.destroystokyo.paper.profile.ProfileProperty;
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 import com.mojang.authlib.GameProfile;
+import io.netty.buffer.Unpooled;
+import io.papermc.paper.adventure.PaperAdventure;
 import io.papermc.paper.datacomponent.item.ResolvableProfile;
 import io.papermc.paper.math.Rotations;
 import io.papermc.paper.registry.RegistryAccess;
@@ -13,15 +15,21 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import net.minecraft.SharedConstants;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.chat.ComponentSerialization;
+import net.minecraft.server.dedicated.DedicatedServer;
+import net.minecraft.util.Brightness;
 import net.minecraft.util.StringUtil;
-import org.bukkit.DyeColor;
-import org.bukkit.Keyed;
-import org.bukkit.NamespacedKey;
-import org.bukkit.Registry;
+import org.bukkit.*;
 import org.bukkit.entity.*;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.profile.PlayerTextures;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector3f;
 import xyz.nifeather.morph.messages.strings.ExceptionStrings;
 import xyz.nifeather.morph.messages.strings.TypesString;
 import xyz.nifeather.morph.misc.DisguiseEquipment;
@@ -241,7 +249,14 @@ public class InputHandles
     {
         try
         {
-            return Optional.of(MiniMessage.miniMessage().deserialize(input));
+            var component = MiniMessage.miniMessage().deserialize(input);
+
+            // We have no way but call NMS to validate if the component is available for minecraft protocol.
+            // This will throw exception if the component contains any element that cannot get encoded.
+            var buf = new FriendlyByteBuf(Unpooled.buffer());
+            ComponentSerialization.STREAM_CODEC.encode(new RegistryFriendlyByteBuf(buf, DedicatedServer.getServer().registryAccess()), PaperAdventure.asVanilla(component));
+
+            return Optional.of(component);
         }
         catch (Throwable t)
         {
