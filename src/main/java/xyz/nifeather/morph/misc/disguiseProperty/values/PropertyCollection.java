@@ -59,9 +59,6 @@ public abstract class PropertyCollection<E extends Entity>
      */
     protected boolean validateOtherDisguise(DisguiseState our, DisguiseState other)
     {
-        if (other.getDisguiseType() == DisguiseTypes.PLAYER)
-            return our.getDisguiseType() == DisguiseTypes.PLAYER;
-
         return other.getDisguiseIdentifier().equals(our.getDisguiseIdentifier());
     }
 
