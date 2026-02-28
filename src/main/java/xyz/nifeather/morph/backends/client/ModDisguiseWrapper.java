@@ -63,6 +63,12 @@ public class ModDisguiseWrapper extends EventWrapper<TrackingClientDisguise>
     }
 
     @Override
+    public <X> void discardProperty(SingleProperty<X> property, X o)
+    {
+        this.instance.discardProperty(property);
+    }
+
+    @Override
     public <X> @NotNull X readProperty(SingleProperty<X> property)
     {
         return this.instance.readProperty(property);

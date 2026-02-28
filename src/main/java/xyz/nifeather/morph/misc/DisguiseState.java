@@ -120,6 +120,12 @@ public class DisguiseState extends MorphPluginObject
         });
 
         disguisePropertyHandler().hookOnPropertyWrite(this::onPropertyWrite);
+        disguisePropertyHandler().hookOnPropertyDiscard(this::onPropertyDiscard);
+    }
+
+    private void onPropertyDiscard(SingleProperty<Object> property, Object o)
+    {
+        disguiseWrapper.discardProperty(property, o);
     }
 
     private void onPropertyWrite(SingleProperty<?> singleProperty, Object o)

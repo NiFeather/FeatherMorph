@@ -69,7 +69,7 @@ public class EntityWatcher extends SingleWatcher
                     sendPacketToAffectedPlayers(createRotationPackets(), true);
             }
 
-            case  PropertyNames.ENTITY_STATIC_PITCH ->
+            case PropertyNames.ENTITY_STATIC_PITCH ->
             {
                 lockedPitch = (Float) value;
 
@@ -77,6 +77,31 @@ public class EntityWatcher extends SingleWatcher
                     sendPacketToAffectedPlayers(createRotationPackets(), true);
             }
         }
+    }
+
+    @Override
+    protected <X> void onPropertyDiscard(SingleProperty<X> property, X oldValue)
+    {
+        switch (property.id())
+        {
+            case PropertyNames.ENTITY_STATIC_YAW ->
+            {
+                lockedYaw = null;
+
+                if (!isSilent())
+                    sendPacketToAffectedPlayers(createRotationPackets(), true);
+            }
+
+            case PropertyNames.ENTITY_STATIC_PITCH ->
+            {
+                lockedPitch = null;
+
+                if (!isSilent())
+                    sendPacketToAffectedPlayers(createRotationPackets(), true);
+            }
+        }
+
+        super.onPropertyDiscard(property, oldValue);
     }
 
     protected List<PacketWrapper<?>> createRotationPackets()

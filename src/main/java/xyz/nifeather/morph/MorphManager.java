@@ -54,6 +54,7 @@ import xyz.nifeather.morph.network.commands.S2C.set.*;
 import xyz.nifeather.morph.network.multiInstance.MultiInstanceService;
 import xyz.nifeather.morph.network.multiInstance.protocol.Operation;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
+import xyz.nifeather.morph.network.server.S2CDiscardPropertiesCommand;
 import xyz.nifeather.morph.providers.disguise.DisguiseProvider;
 import xyz.nifeather.morph.providers.disguise.FallbackDisguiseProvider;
 import xyz.nifeather.morph.providers.disguise.PlayerDisguiseProvider;
@@ -1125,6 +1126,15 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             }
 
             clientHandler.sendCommand(pl, new S2CUpdatePropertiesCommand(diffMap));
+        });
+
+        propertyHandler.hookOnPropertyDiscard((property, value) ->
+        {
+            if (state.disposed()) return;
+
+            // fix command not sending when player rejoins
+            Player pl = player.isConnected() ? player : Bukkit.getPlayer(player.getUniqueId());
+            clientHandler.sendCommand(pl, new S2CDiscardPropertiesCommand(List.of(property.id())));
         });
 
         // 发送提示

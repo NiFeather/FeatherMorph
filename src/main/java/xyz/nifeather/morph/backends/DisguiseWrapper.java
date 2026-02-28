@@ -162,6 +162,15 @@ public abstract class DisguiseWrapper<TInstance>
     public abstract <X> void writeProperty(SingleProperty<X> property, X value);
 
     /**
+     * Discard a property if it has been set.<br>
+     * Server-side presentation implementations should reset the visual effect of the given property.
+     *
+     * @param property {@link SingleProperty} to discard
+     * @param oldValue The previously value
+     */
+    public abstract <X> void discardProperty(SingleProperty<X> property, X oldValue);
+
+    /**
      * @return 与此Property对应的值，如果没有设定则返回默认值
      */
     @NotNull

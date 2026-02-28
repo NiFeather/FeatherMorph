@@ -114,6 +114,15 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
     }
 
     @Override
+    public <X> void discardProperty(SingleProperty<X> property, X oldValue)
+    {
+        disguiseProperties.remove(property);
+
+        if (bindingWatcher == null) return;
+        bindingWatcher.discardProperty(property, oldValue);
+    }
+
+    @Override
     public <X> @NotNull X readProperty(SingleProperty<X> property)
     {
         return this.readPropertyOr(property, property.defaultVal());
