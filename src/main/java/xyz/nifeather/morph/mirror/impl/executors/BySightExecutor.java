@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.events.PlayerTracker;
 import xyz.nifeather.morph.mirror.ExecutorHub;
+import xyz.nifeather.morph.misc.DisguiseTypes;
 import xyz.nifeather.morph.storage.mirrorlogging.OperationType;
 import xyz.nifeather.morph.utilities.FoliaThreadUtils;
 
@@ -51,7 +52,11 @@ public class BySightExecutor extends ChainedExecutor
         {
             if (!(lookingAt instanceof Player asPlayer) || targetName == null) return null;
 
-            if (asPlayer.getName().equals(targetName) && morphManager().getDisguiseStateFor(asPlayer) == null)
+            var theirState = morphManager().getDisguiseStateFor(asPlayer);
+            boolean theirStateMatches = theirState != null
+                    && DisguiseTypes.PLAYER.toStrippedId(theirState.getDisguiseIdentifier()).equals(targetName);
+
+            if (asPlayer.getName().equals(targetName) || theirStateMatches)
                 targetEntity = asPlayer;
         }
 

@@ -57,7 +57,11 @@ public class ByNameExecutor extends AbstractExecutor
             if (targetName == null)
                 return Optional.empty();
 
-            return Optional.ofNullable(Bukkit.getPlayerExact(targetName));
+            var nullablePlayer = Bukkit.getPlayerExact(targetName);
+            if (morphManager().getDisguiseStateFor(nullablePlayer) != null)
+                return Optional.empty();
+            else
+                return Optional.ofNullable(Bukkit.getPlayerExact(targetName));
         }
     }
 
@@ -91,6 +95,7 @@ public class ByNameExecutor extends AbstractExecutor
     public void onSneak(Player player, boolean sneaking)
     {
         var targetEntity = getMirrorTarget(player).orElse(null);
+        logger.info("CCCC " + targetEntity);
         if (targetEntity == null) return;
 
         boolean targetSneaking = targetEntity.isSneaking() || targetEntity.getPose().equals(Pose.SNEAKING);
