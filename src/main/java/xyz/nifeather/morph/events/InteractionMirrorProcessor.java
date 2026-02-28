@@ -175,25 +175,26 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
 
     //region Morph events
 
-    @EventHandler
+    // Only the MONITOR priority can trigger these listener... why?
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerExit(PlayerQuitEvent e)
     {
         executorHub.unregisterControl(e.getPlayer());
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerMorph(PlayerMorphEvent e)
     {
         addOrRemoveFromMirrorMap(e.state, e.getPlayer());
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerUnMorph(PlayerUnMorphEvent e)
     {
         executorHub.unregisterControl(e.getPlayer());
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onJoinedWithState(PlayerJoinedWithDisguiseEvent e)
     {
         addOrRemoveFromMirrorMap(e.state, e.getPlayer());
