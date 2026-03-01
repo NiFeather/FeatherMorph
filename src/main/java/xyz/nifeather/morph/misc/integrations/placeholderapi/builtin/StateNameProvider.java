@@ -1,7 +1,7 @@
 package xyz.nifeather.morph.misc.integrations.placeholderapi.builtin;
 
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
-import org.bukkit.entity.Player;
+import org.bukkit.OfflinePlayer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Annotations.Resolved;
@@ -21,9 +21,9 @@ public class StateNameProvider extends MorphPluginObject implements IPlaceholder
     private MorphManager morphs;
 
     @Override
-    public @Nullable String resolvePlaceholder(Player player, String param)
+    public @Nullable String resolvePlaceholder(OfflinePlayer offlinePlayer, String param)
     {
-        var state = morphs.getDisguiseStateFor(player);
+        var state = morphs.getDisguiseStateFor(offlinePlayer.getUniqueId());
 
         switch (param)
         {

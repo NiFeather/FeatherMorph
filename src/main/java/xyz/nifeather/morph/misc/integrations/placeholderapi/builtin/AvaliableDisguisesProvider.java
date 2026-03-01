@@ -1,7 +1,7 @@
 package xyz.nifeather.morph.misc.integrations.placeholderapi.builtin;
 
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
-import org.bukkit.entity.Player;
+import org.bukkit.OfflinePlayer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Annotations.Resolved;
@@ -22,8 +22,12 @@ public class AvaliableDisguisesProvider extends MorphPluginObject implements IPl
     private IManagePlayerData data;
 
     @Override
-    public @Nullable String resolvePlaceholder(Player player, String param)
+    public @Nullable String resolvePlaceholder(OfflinePlayer offlinePlayer, String param)
     {
+        var player = offlinePlayer.getPlayer();
+        if (player == null)
+            return "err_not_online";
+
         var builder = new StringBuilder();
         var list = data.getAvailableDisguisesFor(player);
 
