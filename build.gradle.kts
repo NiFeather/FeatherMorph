@@ -300,7 +300,7 @@ publishing {
 
         // Workaround for no normal artifact present
         artifact("build/libs/${rootProject.name}-${version}-final.jar") {
-            classifier = "jar"
+            classifier = "jar" // In case I forgot why I fixed this, you can set classifier for the artifact: https://docs.gradle.org/current/dsl/org.gradle.api.publish.maven.MavenPublication.html#N1CFBA
         }
     }
 }
