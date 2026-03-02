@@ -1453,6 +1453,14 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         return getDisguiseStateFor(player);
     }
 
+    @Nullable
+    public DisguiseState getDisguiseStateFor(@Nullable UUID uuid)
+    {
+        if (uuid == null) return null;
+
+        return this.activeDisguises.getOrDefault(uuid, null);
+    }
+
     public void onShutdown()
     {
         getActiveDisguises().forEach(savedDisguises::save);
