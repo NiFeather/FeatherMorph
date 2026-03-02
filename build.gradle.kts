@@ -13,7 +13,7 @@ plugins {
     id("net.minecrell.plugin-yml.paper") version "0.6.0" // Generates plugin.yml
     id("io.papermc.paperweight.userdev") version "2.0.0-beta.17"
     id("xyz.jpenilla.run-paper") version "3.0.0" // Adds runServer and runMojangMappedServer tasks for testing
-    id("com.gradleup.shadow") version "9.1.0" // Shadow PluginBase
+    id("com.gradleup.shadow") version "9.3.2" // Shadow PluginBase
 }
 
 repositories {
@@ -295,11 +295,13 @@ paper {
 }
 
 publishing {
-    publications.create<MavenPublication>("maven") {
+    publications.create<MavenPublication>("mavenJava") {
         from(components["java"])
 
         // Workaround for no normal artifact present
-        artifact("build/libs/${rootProject.name}-${version}.jar")
+        artifact("build/libs/${rootProject.name}-${version}-final.jar") {
+            classifier = "jar"
+        }
     }
 }
 
@@ -338,6 +340,8 @@ tasks.build {
 
 tasks.shadowJar {
 
+    archiveClassifier.set("final")
+
     // This allows us to do hot-swap by setting `NO_RELOCATE` to `yes`
     // See https://github.com/jpenilla/run-task/wiki/Debugging#hot-swap
     //
@@ -357,8 +361,6 @@ tasks.shadowJar {
         relocate("de.tr7zw.changeme.nbtapi", "xyz.nifeather.morph.shaded.nbtapi")
         relocate("de.themoep.inventorygui", "xyz.nifeather.morph.shaded.inventorygui")
     }
-
-    archiveFileName = "feathermorph-${project.property("project_version")}-${project.property("mc_version")}-final.jar"
 }
 
 // https://stackoverflow.com/a/74848372
