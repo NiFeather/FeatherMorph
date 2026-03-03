@@ -15,6 +15,7 @@ public class PropertyNames
 
     public static final String ENTITY_STATIC_YAW = "entity/static_yaw";
     public static final String ENTITY_STATIC_PITCH = "entity/static_pitch";
+    public static final String ENTITY_STATIC_POSE = "entity/static_pose";
 
     public static final String AXOLOTL_VARIANT = "axolotl/variant";
 

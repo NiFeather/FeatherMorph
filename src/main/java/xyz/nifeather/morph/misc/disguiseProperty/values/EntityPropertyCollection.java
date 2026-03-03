@@ -1,6 +1,7 @@
 package xyz.nifeather.morph.misc.disguiseProperty.values;
 
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Pose;
 import xyz.nifeather.morph.messages.strings.ExceptionStrings;
 import xyz.nifeather.morph.misc.disguiseProperty.*;
 
@@ -17,6 +18,17 @@ public abstract class EntityPropertyCollection<E extends Entity> extends Propert
             .withInputHandle(this::readPitch)
             .withOutputHandle(OutputHandles::writeFloat)
             .build();
+
+    public final SingleProperty<Pose> STATIC_POSE = SingleProperty.builder(PropertyNames.ENTITY_STATIC_POSE, Pose.STANDING)
+            .withInputHandle(this::readPose)
+            .withOutputHandle(OutputHandles::writeEnum)
+            .build();
+
+    private Optional<Pose> readPose(String propertyName, String input)
+            throws ParseErrorException
+    {
+        return InputHandles.readEnumNonNull(Pose.values(), propertyName, input);
+    }
 
     private Optional<Float> readYaw(String propertyName, String input)
             throws ParseErrorException
@@ -56,6 +68,6 @@ public abstract class EntityPropertyCollection<E extends Entity> extends Propert
 
     public EntityPropertyCollection()
     {
-        registerSingle(STATIC_YAW, STATIC_PITCH);
+        registerSingle(STATIC_YAW, STATIC_PITCH, STATIC_POSE);
     }
 }

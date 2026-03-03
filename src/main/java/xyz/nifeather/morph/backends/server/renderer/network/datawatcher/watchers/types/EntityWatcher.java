@@ -1,5 +1,6 @@
 package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.types;
 
+import com.github.retrooper.packetevents.protocol.entity.pose.EntityPose;
 import com.github.retrooper.packetevents.protocol.world.Location;
 import com.github.retrooper.packetevents.util.Vector3d;
 import com.github.retrooper.packetevents.wrapper.PacketWrapper;
@@ -13,6 +14,7 @@ import net.minecraft.nbt.CompoundTag;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Pose;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.backends.server.renderer.network.PacketFactory;
 import xyz.nifeather.morph.backends.server.renderer.network.ProtocolEquipment;
@@ -76,6 +78,12 @@ public class EntityWatcher extends SingleWatcher
                 if (!isSilent())
                     sendPacketToAffectedPlayers(createRotationPackets(), true);
             }
+
+            case PropertyNames.ENTITY_STATIC_POSE ->
+            {
+                var bukkitPose = (Pose) value;
+                this.writePersistent(ValueIndex.BASE_ENTITY.POSE, SpigotConversionUtil.fromBukkitPose(bukkitPose));
+            }
         }
     }
 
@@ -98,6 +106,14 @@ public class EntityWatcher extends SingleWatcher
 
                 if (!isSilent())
                     sendPacketToAffectedPlayers(createRotationPackets(), true);
+            }
+
+            case PropertyNames.ENTITY_STATIC_POSE ->
+            {
+                var pose = getBindingPlayer().getPose();
+
+                this.writeTemp(ValueIndex.BASE_ENTITY.POSE, SpigotConversionUtil.fromBukkitPose(pose));
+                this.remove(ValueIndex.BASE_ENTITY.POSE);
             }
         }
 
