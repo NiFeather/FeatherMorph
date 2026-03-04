@@ -1,5 +1,7 @@
 package xyz.nifeather.morph.misc.disguiseProperty;
 
+import org.jetbrains.annotations.ApiStatus;
+
 public class PropertyNames
 {
     public static final String PLAYER_MAIN_HAND = "player/main_hand";
@@ -15,7 +17,12 @@ public class PropertyNames
 
     public static final String ENTITY_STATIC_YAW = "entity/static_yaw";
     public static final String ENTITY_STATIC_PITCH = "entity/static_pitch";
+
+    @ApiStatus.Experimental
     public static final String ENTITY_STATIC_POSE = "entity/static_pose";
+
+    @ApiStatus.Experimental
+    public static final String LIVING_ENTITY_STATIC_HEALTH = "living_entity/static_health";
 
     public static final String AXOLOTL_VARIANT = "axolotl/variant";
 

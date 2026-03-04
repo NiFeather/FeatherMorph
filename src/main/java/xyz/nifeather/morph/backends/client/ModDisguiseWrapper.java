@@ -2,6 +2,8 @@ package xyz.nifeather.morph.backends.client;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.nbt.CompoundTag;
+import org.bukkit.NamespacedKey;
+import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -45,6 +47,12 @@ public class ModDisguiseWrapper extends EventWrapper<TrackingClientDisguise>
     public Map<SingleProperty<?>, Object> getProperties()
     {
         return new Object2ObjectOpenHashMap<>(this.instance.disguiseProperties());
+    }
+
+    @Override
+    public void onDisguiseAttributeChange(NamespacedKey id, AttributeInstance attribute)
+    {
+        // attribute feature not implemented in client renderer yet.
     }
 
     @Override

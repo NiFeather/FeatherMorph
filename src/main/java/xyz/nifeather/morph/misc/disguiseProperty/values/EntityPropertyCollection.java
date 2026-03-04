@@ -2,6 +2,7 @@ package xyz.nifeather.morph.misc.disguiseProperty.values;
 
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Pose;
+import org.jetbrains.annotations.ApiStatus;
 import xyz.nifeather.morph.messages.strings.ExceptionStrings;
 import xyz.nifeather.morph.misc.disguiseProperty.*;
 
@@ -19,6 +20,7 @@ public abstract class EntityPropertyCollection<E extends Entity> extends Propert
             .withOutputHandle(OutputHandles::writeFloat)
             .build();
 
+    @ApiStatus.Experimental
     public final SingleProperty<Pose> STATIC_POSE = SingleProperty.builder(PropertyNames.ENTITY_STATIC_POSE, Pose.STANDING)
             .withInputHandle(this::readPose)
             .withOutputHandle(OutputHandles::writeEnum)

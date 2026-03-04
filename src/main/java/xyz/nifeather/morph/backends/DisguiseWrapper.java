@@ -1,6 +1,8 @@
 package xyz.nifeather.morph.backends;
 
 import net.minecraft.nbt.CompoundTag;
+import org.bukkit.NamespacedKey;
+import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -193,4 +195,6 @@ public abstract class DisguiseWrapper<TInstance>
     public abstract <T> void subscribeEvent(Object source, WrapperEvent<T> wrapperEvent, Consumer<T> c);
 
     public abstract void unSubscribeEvent(Object source, WrapperEvent<?> wrapperEvent);
+
+    public abstract void onDisguiseAttributeChange(NamespacedKey id, AttributeInstance attribute);
 }

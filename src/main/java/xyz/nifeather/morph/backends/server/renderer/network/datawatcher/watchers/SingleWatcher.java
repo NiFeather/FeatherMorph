@@ -10,6 +10,8 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.nbt.CompoundTag;
 import org.bukkit.Bukkit;
+import org.bukkit.NamespacedKey;
+import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -211,7 +213,7 @@ public abstract class SingleWatcher extends MorphPluginObject
 
     public void resetRegistries()
     {
-        Map<Integer, Object> registryCopy = new Object2ObjectOpenHashMap<>(registry);
+        Map<Integer, Object> registryCopy = new Object2ObjectOpenHashMap<>(writtenValues);
 
         registryCopy.forEach((id, val) ->
         {
@@ -219,7 +221,7 @@ public abstract class SingleWatcher extends MorphPluginObject
             if (sv != null)
                 this.writePersistent((SingleValue<Object>) sv, sv.defaultValue());
 
-            this.registry.remove(id);
+            this.writtenValues.remove(id);
         });
 
         Map<String, Object> crCopy = new Object2ObjectOpenHashMap<>(customRegistry);
@@ -228,7 +230,7 @@ public abstract class SingleWatcher extends MorphPluginObject
 
     //region Value Registry
 
-    protected final Map<Integer, Object> registry = new ConcurrentHashMap<>();
+    protected final Map<Integer, Object> writtenValues = new ConcurrentHashMap<>();
     private final Map<Integer, SingleValue<?>> knownValues = new ConcurrentHashMap<>();
 
     public Map<Integer, SingleValue<?>> getKnownValues()
@@ -306,7 +308,7 @@ public abstract class SingleWatcher extends MorphPluginObject
     public void remove(SingleValue<?> singleValue)
     {
         //commonRegistry.remove(singleValue.index());
-        registry.remove(singleValue.index());
+        writtenValues.remove(singleValue.index());
     }
 
     /**
@@ -319,7 +321,7 @@ public abstract class SingleWatcher extends MorphPluginObject
      */
     public <X> void writeTemp(SingleValue<X> singleValue, @NotNull X value)
     {
-        if (this.registry.containsKey(singleValue.index())) return;
+        if (this.writtenValues.containsKey(singleValue.index())) return;
 
         this.write(singleValue, value, false);
     }
@@ -366,11 +368,11 @@ public abstract class SingleWatcher extends MorphPluginObject
                 logger.warn(message + "You may want to use 'tryCast(...)' or 'getKnownValues()' to get the correct SV.");
         }
 
-        var prevOption = registry.getOrDefault(singleValue.index(), null);
+        var prevOption = writtenValues.getOrDefault(singleValue.index(), null);
         var prev = prevOption == null ? null : (X)prevOption;
 
         if (isPersistent)
-            registry.put(singleValue.index(), value);
+            writtenValues.put(singleValue.index(), value);
 
         if (doingInitialization)
             return;
@@ -417,7 +419,7 @@ public abstract class SingleWatcher extends MorphPluginObject
 
     public <X> X readOr(SingleValue<X> singleValue, X defaultVal)
     {
-        var option = this.registry.getOrDefault(singleValue.index(), null);
+        var option = this.writtenValues.getOrDefault(singleValue.index(), null);
         if (option == null) return defaultVal;
         else return (X) option;
     }
@@ -429,16 +431,16 @@ public abstract class SingleWatcher extends MorphPluginObject
 
     public boolean isValuePresent(int index)
     {
-        return this.registry.containsKey(index);
+        return this.writtenValues.containsKey(index);
     }
 
     /**
      * Gets the override values for this watcher
      * @apiNote This doesn't include values in the common registry!
      */
-    public Map<Integer, Object> getRegistry()
+    public Map<Integer, Object> getWrittenValues()
     {
-        return new Object2ObjectOpenHashMap<>(this.registry);
+        return new Object2ObjectOpenHashMap<>(this.writtenValues);
     }
 
     /**
@@ -446,7 +448,7 @@ public abstract class SingleWatcher extends MorphPluginObject
      */
     public Map<Integer, Object> getOverlayedRegistry()
     {
-        var map = this.getRegistry();
+        var map = this.getWrittenValues();
         this.getDirty().forEach((sv, option) -> map.putIfAbsent(sv.index(), option));
 
         return map;
@@ -711,4 +713,11 @@ public abstract class SingleWatcher extends MorphPluginObject
     public void onEntityDestroy(Player packetReceiver)
     {
     }
+
+    /**
+     * @implNote Do nothing if the entity does not support attributes.
+     * @param id
+     * @param attribute
+     */
+    public abstract void writeEntityAttribute(NamespacedKey id, AttributeInstance attribute);
 }

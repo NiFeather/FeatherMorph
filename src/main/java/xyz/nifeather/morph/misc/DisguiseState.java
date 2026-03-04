@@ -7,6 +7,7 @@ import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
+import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.ApiStatus;
@@ -23,6 +24,7 @@ import xyz.nifeather.morph.messages.strings.EmoteStrings;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.strings.MorphStrings;
 import xyz.nifeather.morph.misc.actions.ConsumerActions;
+import xyz.nifeather.morph.misc.attributes.DisguiseAttributeHandler;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
@@ -73,6 +75,7 @@ public class DisguiseState extends MorphPluginObject
         this.soundHandler = new SoundHandler(player);
         this.abilityUpdater = new AbilityUpdater(this);
         this.disguiseWaypointTransmitter = new DisguiseWaypointTransmitter(this);
+        this.disguiseAttributes = new DisguiseAttributeHandler();
 
         this.disguiseWrapper = wrapper;
         this.disguiseIdentifier = identifier;
@@ -84,6 +87,9 @@ public class DisguiseState extends MorphPluginObject
         this.soundHandler.refreshSounds(this, wrapper.getEntityType(), wrapper.isBaby());
 
         this.cachedPlayer = CacheWithDefault.of(player);
+
+        disguiseAttributes.initializeFor(getEntityType());
+        disguiseAttributes.hookOnAttributeChange(this::onDisguiseAttributeChange);
 
         animationSequence.setCooldown(10);
         animationSequence.onNewAnimation(anim ->
@@ -121,6 +127,11 @@ public class DisguiseState extends MorphPluginObject
 
         disguisePropertyHandler().hookOnPropertyWrite(this::onPropertyWrite);
         disguisePropertyHandler().hookOnPropertyDiscard(this::onPropertyDiscard);
+    }
+
+    private void onDisguiseAttributeChange(NamespacedKey id, AttributeInstance attribute)
+    {
+        disguiseWrapper.onDisguiseAttributeChange(id, attribute);
     }
 
     private void onPropertyDiscard(SingleProperty<Object> property, Object o)
@@ -500,6 +511,16 @@ public class DisguiseState extends MorphPluginObject
 
         this.bossbar = bossbar;
     }
+
+    //region Disguise Attribute
+
+    private final DisguiseAttributeHandler disguiseAttributes;
+    public DisguiseAttributeHandler disguiseAttributeHandler()
+    {
+        return disguiseAttributes;
+    }
+
+    //endregion Disguise Attribute
 
     //region Disguise Property
 
@@ -967,22 +988,6 @@ public class DisguiseState extends MorphPluginObject
     }
 
     //endregion Sound Handling
-
-    public DisguiseState createCopy(Player player)
-    {
-        if (disposed())
-            throw new RuntimeException("Can't create a copy of a disposed DisguiseState");
-
-        var wrapper = this.disguiseWrapper.clone();
-
-        var newInstance = new DisguiseState(player, this.disguiseIdentifier, this.skillLookupIdentifier(),
-                wrapper, provider, this.playerOptions, playerMeta);
-
-        newInstance.playerDisplay = this.playerDisplay;
-        newInstance.serverDisplay = this.serverDisplay;
-
-        return newInstance;
-    }
 
     private final ConsumerActions<DisguiseState> onDisposeActions = new ConsumerActions<>();
 

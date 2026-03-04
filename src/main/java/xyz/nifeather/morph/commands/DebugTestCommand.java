@@ -13,19 +13,21 @@ import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSele
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Mannequin;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Messages.FormattableMessage;
-import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.api.FeatherMorphAPI;
 import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.values.AbstractValues;
 import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.values.SingleValue;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.commands.brigadier.BrigadierCommand;
-import xyz.nifeather.morph.storage.skill.SkillAbilityConfigContainer;
+import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
+import xyz.nifeather.morph.misc.disguiseProperty.values.BaseLivingEntityPropertyCollection;
 import xyz.nifeather.morph.storage.skill.SkillsConfigurationStoreNew;
 
 import java.lang.reflect.Field;
@@ -139,6 +141,42 @@ public class DebugTestCommand extends BrigadierCommand
         dispatcher.register(
                 Commands.literal("fail_disguise")
                         .executes(this::execFailDisguise)
+                        .build()
+        );
+
+        dispatcher.register(
+                Commands.literal("disguise_attribute")
+                        .executes(ctx ->
+                        {
+                            var sender = ctx.getSource().getSender();
+                            var morph = morphManager.getDisguiseStateFor(ctx.getSource().getExecutor());
+                            if (morph == null)
+                            {
+                                sender.sendMessage("No morph!");
+                                return 1;
+                            }
+
+                            morph.disguiseAttributeHandler()
+                                    .editAttribute(Attribute.MAX_HEALTH, attributeInstance ->
+                                    {/*
+                                        var key = Objects.requireNonNull(NamespacedKey.fromString("fm:abab"));
+
+                                        attributeInstance.removeModifier(key);
+
+                                        attributeInstance.addModifier(
+                                                new AttributeModifier(key, 1, AttributeModifier.Operation.ADD_NUMBER)
+                                        );*/
+
+                                        attributeInstance.setBaseValue(80);
+                                    });
+
+                            var properties = DisguiseProperties.INSTANCE.getCollectionOrThrow(BaseLivingEntityPropertyCollection.class);
+                            morph.disguisePropertyHandler().set((SingleProperty<Float>)properties.STATIC_HEALTH, 80f);
+
+                            sender.sendMessage("Success!");
+
+                            return 0;
+                        })
                         .build()
         );
 

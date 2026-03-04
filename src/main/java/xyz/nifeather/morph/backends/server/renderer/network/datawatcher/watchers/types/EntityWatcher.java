@@ -11,6 +11,8 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
 import net.kyori.adventure.util.TriState;
 import net.minecraft.nbt.CompoundTag;
+import org.bukkit.NamespacedKey;
+import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -320,5 +322,11 @@ public class EntityWatcher extends SingleWatcher
     public boolean haveAnimation(WrapperPlayServerEntityAnimation.EntityAnimationType animationType)
     {
         return false;
+    }
+
+    @Override
+    public void writeEntityAttribute(NamespacedKey id, AttributeInstance attribute)
+    {
+        // do nothing.
     }
 }

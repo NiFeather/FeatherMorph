@@ -12,11 +12,12 @@ import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectObjectMutablePair;
 import net.kyori.adventure.text.Component;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.ai.attributes.AttributeInstance;
-import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import org.bukkit.Color;
+import org.bukkit.NamespacedKey;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeInstance;
+import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -31,11 +32,13 @@ import xyz.nifeather.morph.misc.NmsRecord;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 import xyz.nifeather.morph.misc.disguiseProperty.values.BaseLivingEntityPropertyCollection;
-import xyz.nifeather.morph.utilities.NmsUtils;
+import xyz.nifeather.morph.utilities.AttributeUtils;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class LivingEntityWatcher extends EntityWatcher
 {
@@ -63,10 +66,24 @@ public class LivingEntityWatcher extends EntityWatcher
         handPair.right(e.getHand());
     }
 
+    protected final Map<Attribute, AttributeInstance> entityAttributes = new ConcurrentHashMap<>();
+    protected final Map<Attribute, AttributeInstance> dirtyAttributes = new ConcurrentHashMap<>();
+
+    @Override
+    public void writeEntityAttribute(NamespacedKey id, org.bukkit.attribute.AttributeInstance attribute)
+    {
+        entityAttributes.put(attribute.getAttribute(), attribute);
+        dirtyAttributes.put(attribute.getAttribute(), attribute);
+
+        //todo: Maybe batch dirty values instead of sending them one by one
+        sendPacketToAffectedPlayers(buildPartialAttributePacket(), true);
+    }
+
     @Override
     protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
         var properties = DisguiseProperties.INSTANCE.getCollectionOrThrow(BaseLivingEntityPropertyCollection.class);
+
         if (property.equals(properties.CUSTOM_NAME))
         {
             Component component = value instanceof Component component1 ? component1 : Component.empty();
@@ -98,6 +115,10 @@ public class LivingEntityWatcher extends EntityWatcher
         {
             this.writeEntry(CustomEntries.DISPLAY_FAKE_EQUIPMENT, Boolean.TRUE.equals(value));
         }
+        else if (property.equals(properties.STATIC_HEALTH))
+        {
+            this.writePersistent(ValueIndex.BASE_LIVING.HEALTH, ((Number) value).floatValue());
+        }
 
         super.onPropertyWrite(property, value);
     }
@@ -114,33 +135,43 @@ public class LivingEntityWatcher extends EntityWatcher
         }
     }
 
-    protected WrapperPlayServerUpdateAttributes buildAttributePacket()
+    protected WrapperPlayServerUpdateAttributes buildFullAttributePacket()
+    {
+        var map = new ConcurrentHashMap<Attribute, AttributeInstance>();
+        var player = getBindingPlayer();
+
+        var syncableAttributes = AttributeUtils.syncableAttributesFor(getEntityType());
+        for (Attribute syncableAttribute : syncableAttributes)
+        {
+            var instance = this.entityAttributes.getOrDefault(syncableAttribute, null);
+            if (instance == null) instance = player.getAttribute(syncableAttribute);
+            if (instance == null) continue;
+
+            map.put(syncableAttribute, instance);
+        }
+
+        return buildAttributePacket(map);
+    }
+
+    protected WrapperPlayServerUpdateAttributes buildPartialAttributePacket()
+    {
+        var map = Map.copyOf(dirtyAttributes);
+        dirtyAttributes.clear();
+
+        return buildAttributePacket(map);
+    }
+
+    protected WrapperPlayServerUpdateAttributes buildAttributePacket(Map<Attribute, AttributeInstance> attributes)
     {
         var player = getBindingPlayer();
         List<WrapperPlayServerUpdateAttributes.Property> attributeProperties = new ObjectArrayList<>();
 
-        var nmsPlayer = NmsRecord.ofPlayer(player);
-
-        List<AttributeInstance> attributes = getEntityType() == EntityType.PLAYER
-                ? new ObjectArrayList<>(nmsPlayer.getAttributes().getSyncableAttributes())
-                : NmsUtils.getValidAttributes(getEntityType(), nmsPlayer.getAttributes());
-
-        attributes.forEach(instance ->
+        attributes.forEach((attribute, instance) ->
         {
-            // Still NMS :(
-            var nmsAttribute = BuiltInRegistries.ATTRIBUTE.getKey(instance.getAttribute().value());
-            if (nmsAttribute == null)
+            var packetAttribute = Attributes.getByName(attribute.key().asString());
+            if (packetAttribute == null) // Yes this is nullable.
             {
-                logger.warn("Unknown attribute from bukkit to NMS: " + instance.getAttribute().value());
-                return;
-            }
-
-            String id = nmsAttribute.toString();
-
-            var packetAttribute = Attributes.getByName(id);
-            if (packetAttribute == null)
-            {
-                logger.warn("Unknown attribute for packet: " + id);
+                logger.warn("Unknown attribute for packet: " + attribute.key().asString());
                 return;
             }
 
@@ -148,10 +179,10 @@ public class LivingEntityWatcher extends EntityWatcher
             for (AttributeModifier modifier : instance.getModifiers())
             {
                 var packetModifier = new WrapperPlayServerUpdateAttributes.PropertyModifier(
-                        new ResourceLocation(modifier.id().toString()),
+                        new ResourceLocation(modifier.getKey().asString()),
                         UUID.randomUUID(),
-                        modifier.amount(),
-                        fromNMSAttributeOperation(modifier.operation())
+                        modifier.getAmount(),
+                        fromBukkitOperation(modifier.getOperation())
                 );
 
                 modifiers.add(packetModifier);
@@ -164,13 +195,13 @@ public class LivingEntityWatcher extends EntityWatcher
         return new WrapperPlayServerUpdateAttributes(player.getEntityId(), attributeProperties);
     }
 
-    protected WrapperPlayServerUpdateAttributes.PropertyModifier.Operation fromNMSAttributeOperation(AttributeModifier.Operation nmsOperation)
+    protected WrapperPlayServerUpdateAttributes.PropertyModifier.Operation fromBukkitOperation(AttributeModifier.Operation bukkitOperation)
     {
-        return switch (nmsOperation)
+        return switch (bukkitOperation)
         {
-            case ADD_VALUE -> WrapperPlayServerUpdateAttributes.PropertyModifier.Operation.ADDITION;
-            case ADD_MULTIPLIED_BASE -> WrapperPlayServerUpdateAttributes.PropertyModifier.Operation.MULTIPLY_BASE;
-            case ADD_MULTIPLIED_TOTAL -> WrapperPlayServerUpdateAttributes.PropertyModifier.Operation.MULTIPLY_TOTAL;
+            case ADD_NUMBER -> WrapperPlayServerUpdateAttributes.PropertyModifier.Operation.ADDITION;
+            case ADD_SCALAR -> WrapperPlayServerUpdateAttributes.PropertyModifier.Operation.MULTIPLY_BASE;
+            case MULTIPLY_SCALAR_1 -> WrapperPlayServerUpdateAttributes.PropertyModifier.Operation.MULTIPLY_TOTAL;
         };
     }
 
@@ -182,7 +213,7 @@ public class LivingEntityWatcher extends EntityWatcher
 
         packets.addAll(entityPackets);
         packets.add(getEquipmentPacket());
-        packets.add(buildAttributePacket());
+        packets.add(buildFullAttributePacket());
 
         return packets;
     }

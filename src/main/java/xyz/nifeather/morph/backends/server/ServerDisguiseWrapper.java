@@ -3,6 +3,9 @@ package xyz.nifeather.morph.backends.server;
 import com.mojang.authlib.GameProfile;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.nbt.CompoundTag;
+import org.bukkit.NamespacedKey;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -261,5 +264,16 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
 
         if (bindingWatcher.readEntryOrDefault(CustomEntries.WARDEN_VANISHED, false))
             bindingWatcher.writeEntry(CustomEntries.ANIMATION, AnimationNames.APPEAR);
+    }
+
+    private final Map<NamespacedKey, AttributeInstance> cachedAttributes = new ConcurrentHashMap<>();
+
+    @Override
+    public void onDisguiseAttributeChange(NamespacedKey id, AttributeInstance attribute)
+    {
+        cachedAttributes.put(id, attribute);
+        if (bindingWatcher == null) return;
+
+        bindingWatcher.writeEntityAttribute(id, attribute);
     }
 }
