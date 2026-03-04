@@ -323,19 +323,6 @@ tasks.withType(xyz.jpenilla.runtask.task.AbstractRun::class) {
 
 tasks.build {
     dependsOn(tasks.shadowJar)
-
-    doLast {
-        if (System.getenv("JITPACK").toBoolean() || System.getenv("NO_DELETE").toBoolean()) {
-            System.out.println("Not deleting artifacts!")
-            return@doLast
-        }
-
-        var file = layout.buildDirectory.file("libs/feathermorph-${project.property("project_version")}.jar")
-
-        System.out.println("Will delete '${file.path}' to prevent anyone use the wrong jar.")
-
-        delete(file)
-    }
 }
 
 tasks.shadowJar {
