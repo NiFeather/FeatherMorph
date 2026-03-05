@@ -233,6 +233,7 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
 
     private void refreshRegistry(@NotNull SingleWatcher bindingWatcher)
     {
+        cachedAttributes.forEach(bindingWatcher::writeEntityAttribute);
         this.disguiseProperties.forEach((property, value) -> applyProperty((SingleProperty<Object>) property, value));
 
         if (getEntityType() == EntityType.PLAYER)
