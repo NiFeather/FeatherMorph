@@ -70,13 +70,19 @@ public class LivingEntityWatcher extends EntityWatcher
     protected final Map<Attribute, AttributeInstance> dirtyAttributes = new ConcurrentHashMap<>();
 
     @Override
+    public boolean containsEntityAttribute(NamespacedKey id)
+    {
+        return entityAttributes.keySet().stream().anyMatch(a -> a.key().equals(id));
+    }
+
+    @Override
     public void writeEntityAttribute(NamespacedKey id, org.bukkit.attribute.AttributeInstance attribute)
     {
         entityAttributes.put(attribute.getAttribute(), attribute);
         dirtyAttributes.put(attribute.getAttribute(), attribute);
 
-        //todo: Maybe batch dirty values instead of sending them one by one
-        sendPacketToAffectedPlayers(buildPartialAttributePacket(), true);
+        if (!isSilent())
+            sendPacketToAffectedPlayers(buildPartialAttributePacket(), true);
     }
 
     @Override
@@ -137,6 +143,8 @@ public class LivingEntityWatcher extends EntityWatcher
 
     protected WrapperPlayServerUpdateAttributes buildFullAttributePacket()
     {
+        dirtyAttributes.clear();
+
         var map = new ConcurrentHashMap<Attribute, AttributeInstance>();
         var player = getBindingPlayer();
 
@@ -155,7 +163,7 @@ public class LivingEntityWatcher extends EntityWatcher
 
     protected WrapperPlayServerUpdateAttributes buildPartialAttributePacket()
     {
-        var map = Map.copyOf(dirtyAttributes);
+        var map = new ConcurrentHashMap<>(dirtyAttributes);
         dirtyAttributes.clear();
 
         return buildAttributePacket(map);
@@ -163,7 +171,6 @@ public class LivingEntityWatcher extends EntityWatcher
 
     protected WrapperPlayServerUpdateAttributes buildAttributePacket(Map<Attribute, AttributeInstance> attributes)
     {
-        var player = getBindingPlayer();
         List<WrapperPlayServerUpdateAttributes.Property> attributeProperties = new ObjectArrayList<>();
 
         attributes.forEach((attribute, instance) ->
@@ -192,7 +199,7 @@ public class LivingEntityWatcher extends EntityWatcher
             attributeProperties.add(property);
         });
 
-        return new WrapperPlayServerUpdateAttributes(player.getEntityId(), attributeProperties);
+        return new WrapperPlayServerUpdateAttributes(this.readEntryOrThrow(CustomEntries.SPAWN_ID), attributeProperties);
     }
 
     protected WrapperPlayServerUpdateAttributes.PropertyModifier.Operation fromBukkitOperation(AttributeModifier.Operation bukkitOperation)
@@ -212,8 +219,8 @@ public class LivingEntityWatcher extends EntityWatcher
         var entityPackets = super.buildSpawnPackets();
 
         packets.addAll(entityPackets);
-        packets.add(getEquipmentPacket());
         packets.add(buildFullAttributePacket());
+        packets.add(getEquipmentPacket());
 
         return packets;
     }

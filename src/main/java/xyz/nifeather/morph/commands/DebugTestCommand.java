@@ -171,7 +171,7 @@ public class DebugTestCommand extends BrigadierCommand
                                     });
 
                             var properties = DisguiseProperties.INSTANCE.getCollectionOrThrow(BaseLivingEntityPropertyCollection.class);
-                            morph.disguisePropertyHandler().set((SingleProperty<Float>)properties.STATIC_HEALTH, 80f);
+                            //morph.disguisePropertyHandler().set((SingleProperty<Float>)properties.STATIC_HEALTH, 80f);
 
                             sender.sendMessage("Success!");
 

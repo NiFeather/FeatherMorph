@@ -325,6 +325,12 @@ public class EntityWatcher extends SingleWatcher
     }
 
     @Override
+    public boolean containsEntityAttribute(NamespacedKey id)
+    {
+        return false;
+    }
+
+    @Override
     public void writeEntityAttribute(NamespacedKey id, AttributeInstance attribute)
     {
         // do nothing.

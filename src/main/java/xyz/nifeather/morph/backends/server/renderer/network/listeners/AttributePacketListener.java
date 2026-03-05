@@ -3,8 +3,10 @@ package xyz.nifeather.morph.backends.server.renderer.network.listeners;
 import com.github.retrooper.packetevents.event.PacketSendEvent;
 import com.github.retrooper.packetevents.protocol.packettype.PacketType;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerUpdateAttributes;
+import org.bukkit.NamespacedKey;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.RenderRegistry;
+import xyz.nifeather.morph.utilities.AttributeUtils;
 import xyz.nifeather.morph.utilities.NmsUtils;
 
 /**
@@ -37,14 +39,15 @@ public class AttributePacketListener extends ProtocolListener
         if (watcher == null)
             return;
 
-        var syncableAttributes = NmsUtils.getSyncableAttributeListFor(watcher.getEntityType());
+        var syncableAttributes = AttributeUtils.syncableAttributesFor(watcher.getEntityType());
         var properties = wrapper.getProperties();
 
         properties.removeIf(property ->
         {
-            var id = property.getAttribute().getName().toString();
+            var keyed = NamespacedKey.fromString(property.getAttribute().getName().toString());
 
-            return syncableAttributes.stream().noneMatch(syncable -> syncable.equals(id));
+            return watcher.containsEntityAttribute(keyed)
+                    || syncableAttributes.stream().noneMatch(a -> a.key().equals(keyed));
         });
 
         if (properties.isEmpty())

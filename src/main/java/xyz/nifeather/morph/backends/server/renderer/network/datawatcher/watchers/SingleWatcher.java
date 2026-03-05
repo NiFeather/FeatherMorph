@@ -714,6 +714,8 @@ public abstract class SingleWatcher extends MorphPluginObject
     {
     }
 
+    public abstract boolean containsEntityAttribute(NamespacedKey id);
+
     /**
      * @implNote Do nothing if the entity does not support attributes.
      * @param id
