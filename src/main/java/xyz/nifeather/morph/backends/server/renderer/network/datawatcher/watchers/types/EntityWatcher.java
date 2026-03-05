@@ -124,11 +124,13 @@ public class EntityWatcher extends SingleWatcher
 
     protected List<PacketWrapper<?>> createRotationPackets()
     {
-        float yaw = this.readEntryOrDefault(CustomEntries.OVERLAYED_YAW, getBindingPlayer().getYaw());
-        float pitch = this.readEntryOrDefault(CustomEntries.OVERLAYED_PITCH, getBindingPlayer().getPitch());
+        var player = getBindingPlayer();
+
+        float yaw = this.readEntryOrDefault(CustomEntries.OVERLAYED_YAW, player.getYaw());
+        float pitch = this.readEntryOrDefault(CustomEntries.OVERLAYED_PITCH, player.getPitch());
 
         return List.of(
-                new WrapperPlayServerEntityRotation(this.readEntryOrThrow(CustomEntries.SPAWN_ID), yaw, pitch, false),
+                new WrapperPlayServerEntityRotation(this.readEntryOrThrow(CustomEntries.SPAWN_ID), yaw, pitch, player.isOnGround()), // Let's just use what the client assumes
                 new WrapperPlayServerEntityHeadLook(this.readEntryOrThrow(CustomEntries.SPAWN_ID), yaw)
         );
     }
