@@ -23,6 +23,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.potion.PotionEffect;
+import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntry;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
@@ -66,8 +67,8 @@ public class LivingEntityWatcher extends EntityWatcher
         handPair.right(e.getHand());
     }
 
-    protected final Map<Attribute, AttributeInstance> entityAttributes = new ConcurrentHashMap<>();
-    protected final Map<Attribute, AttributeInstance> dirtyAttributes = new ConcurrentHashMap<>();
+    protected final Map<NamespacedKey, AttributeInstance> entityAttributes = new ConcurrentHashMap<>();
+    protected final Map<NamespacedKey, AttributeInstance> dirtyAttributes = new ConcurrentHashMap<>();
 
     @Override
     public boolean containsEntityAttribute(NamespacedKey id)
@@ -76,13 +77,20 @@ public class LivingEntityWatcher extends EntityWatcher
     }
 
     @Override
+    @Nullable
+    public AttributeInstance readEntityAttribute(NamespacedKey key)
+    {
+        return entityAttributes.getOrDefault(key, null);
+    }
+
+    @Override
     public void writeEntityAttribute(NamespacedKey id, org.bukkit.attribute.AttributeInstance attribute)
     {
-        entityAttributes.put(attribute.getAttribute(), attribute);
-        dirtyAttributes.put(attribute.getAttribute(), attribute);
+        entityAttributes.put(id, attribute);
+        dirtyAttributes.put(id, attribute);
 
         if (!isSilent())
-            sendPacketToAffectedPlayers(buildPartialAttributePacket(), true);
+            sendPacketToAffectedPlayers(buildPartialAttributePacket());
     }
 
     @Override
@@ -145,17 +153,17 @@ public class LivingEntityWatcher extends EntityWatcher
     {
         dirtyAttributes.clear();
 
-        var map = new ConcurrentHashMap<Attribute, AttributeInstance>();
+        var map = new ConcurrentHashMap<NamespacedKey, AttributeInstance>();
         var player = getBindingPlayer();
 
         var syncableAttributes = AttributeUtils.syncableAttributesFor(getEntityType());
         for (Attribute syncableAttribute : syncableAttributes)
         {
-            var instance = this.entityAttributes.getOrDefault(syncableAttribute, null);
+            var instance = this.entityAttributes.getOrDefault(syncableAttribute.getKey(), null);
             if (instance == null) instance = player.getAttribute(syncableAttribute);
             if (instance == null) continue;
 
-            map.put(syncableAttribute, instance);
+            map.put(syncableAttribute.getKey(), instance);
         }
 
         return buildAttributePacket(map);
@@ -169,16 +177,16 @@ public class LivingEntityWatcher extends EntityWatcher
         return buildAttributePacket(map);
     }
 
-    protected WrapperPlayServerUpdateAttributes buildAttributePacket(Map<Attribute, AttributeInstance> attributes)
+    protected WrapperPlayServerUpdateAttributes buildAttributePacket(Map<NamespacedKey, AttributeInstance> attributes)
     {
         List<WrapperPlayServerUpdateAttributes.Property> attributeProperties = new ObjectArrayList<>();
 
-        attributes.forEach((attribute, instance) ->
+        attributes.forEach((id, instance) ->
         {
-            var packetAttribute = Attributes.getByName(attribute.key().asString());
+            var packetAttribute = Attributes.getByName(id.asString());
             if (packetAttribute == null) // Yes this is nullable.
             {
-                logger.warn("Unknown attribute for packet: " + attribute.key().asString());
+                logger.warn("Unknown attribute for packet: " + id.asString());
                 return;
             }
 

@@ -475,7 +475,7 @@ public abstract class SingleWatcher extends MorphPluginObject
     {
     }
 
-    public final void handleEntityMetadataPacket(WrapperPlayServerEntityMetadata packetWrapper)
+    public final boolean handleEntityMetadataPacket(WrapperPlayServerEntityMetadata packetWrapper)
             throws ExecutionErrorException
     {
         //获取原Meta包中的数据
@@ -485,7 +485,7 @@ public abstract class SingleWatcher extends MorphPluginObject
         if (originalData.removeIf(wrapped -> wrapped.getValue().equals(PacketFactory.MARK_DONT_PROCESS)))
         {
             packetWrapper.setEntityMetadata(originalData);
-            return;
+            return false;
         }
 
         var overrideList = rebuildMetadata(originalData);
@@ -493,6 +493,7 @@ public abstract class SingleWatcher extends MorphPluginObject
         // Then we ask the implementation if there's anything to modify
         overrideList = this.handleEntityMetadata(ImmutableList.copyOf(originalData), overrideList);
         packetWrapper.setEntityMetadata(new ArrayList<>(overrideList));
+        return true;
     }
 
     private List<EntityData<?>> rebuildMetadata(List<EntityData<?>> originalData) throws ExecutionErrorException
@@ -616,6 +617,11 @@ public abstract class SingleWatcher extends MorphPluginObject
 
     protected void sendPacketToAffectedPlayers(PacketWrapper<?> packet)
     {
+        sendPacketToAffectedPlayers(List.of(packet));
+    }
+
+    protected void sendPacketToAffectedPlayers(List<PacketWrapper<?>> packets)
+    {
         if (isSilent())
         {
             logger.warn("Not sending packets: Sending packets while we should be silent?!");
@@ -633,7 +639,8 @@ public abstract class SingleWatcher extends MorphPluginObject
         var players = getAffectedPlayers(getBindingPlayer());
 
         var protocol = PacketEvents.getAPI().getPlayerManager();
-        players.forEach(p -> protocol.sendPacket(p, packet));
+        for (PacketWrapper<?> packet : packets)
+            players.forEach(p -> protocol.sendPacket(p, packet));
     }
 
     public abstract List<PacketWrapper<?>> buildSpawnPackets() throws BuildFailedException;
@@ -680,6 +687,9 @@ public abstract class SingleWatcher extends MorphPluginObject
     }
 
     public abstract boolean containsEntityAttribute(NamespacedKey id);
+
+    @Nullable
+    public abstract AttributeInstance readEntityAttribute(NamespacedKey key);
 
     /**
      * @implNote Do nothing if the entity does not support attributes.

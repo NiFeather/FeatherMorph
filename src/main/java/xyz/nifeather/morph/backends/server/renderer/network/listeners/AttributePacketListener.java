@@ -41,18 +41,28 @@ public class AttributePacketListener extends ProtocolListener
 
         var syncableAttributes = AttributeUtils.syncableAttributesFor(watcher.getEntityType());
         var properties = wrapper.getProperties();
+        int size = properties.size();
 
         properties.removeIf(property ->
         {
             var keyed = NamespacedKey.fromString(property.getAttribute().getName().toString());
+            if (keyed == null)
+                return true;
 
-            return watcher.containsEntityAttribute(keyed)
-                    || syncableAttributes.stream().noneMatch(a -> a.key().equals(keyed));
+            if (syncableAttributes.stream().noneMatch(a -> a.key().equals(keyed)))
+                return true;
+
+            var instance = watcher.readEntityAttribute(keyed);
+            if (instance == null)
+                return false;
+
+            return property.getValue() != instance.getValue();
         });
+
+        if (size != properties.size())
+            event.markForReEncode(true);
 
         if (properties.isEmpty())
             event.setCancelled(true);
-
-        super.onPacketSend(event);
     }
 }

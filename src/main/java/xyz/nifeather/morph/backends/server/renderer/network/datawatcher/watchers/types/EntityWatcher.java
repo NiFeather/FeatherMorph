@@ -70,7 +70,7 @@ public class EntityWatcher extends SingleWatcher
                 lockedYaw = (Float) value;
 
                 if (!isSilent())
-                    sendPacketToAffectedPlayers(createRotationPackets(), true);
+                    sendPacketToAffectedPlayers(createRotationPackets());
             }
 
             case PropertyNames.ENTITY_STATIC_PITCH ->
@@ -78,7 +78,7 @@ public class EntityWatcher extends SingleWatcher
                 lockedPitch = (Float) value;
 
                 if (!isSilent())
-                    sendPacketToAffectedPlayers(createRotationPackets(), true);
+                    sendPacketToAffectedPlayers(createRotationPackets());
             }
 
             case PropertyNames.ENTITY_STATIC_POSE ->
@@ -99,7 +99,7 @@ public class EntityWatcher extends SingleWatcher
                 lockedYaw = null;
 
                 if (!isSilent())
-                    sendPacketToAffectedPlayers(createRotationPackets(), true);
+                    sendPacketToAffectedPlayers(createRotationPackets());
             }
 
             case PropertyNames.ENTITY_STATIC_PITCH ->
@@ -107,7 +107,7 @@ public class EntityWatcher extends SingleWatcher
                 lockedPitch = null;
 
                 if (!isSilent())
-                    sendPacketToAffectedPlayers(createRotationPackets(), true);
+                    sendPacketToAffectedPlayers(createRotationPackets());
             }
 
             case PropertyNames.ENTITY_STATIC_POSE ->
@@ -330,6 +330,12 @@ public class EntityWatcher extends SingleWatcher
     public boolean haveAnimation(WrapperPlayServerEntityAnimation.EntityAnimationType animationType)
     {
         return false;
+    }
+
+    @Override
+    public AttributeInstance readEntityAttribute(NamespacedKey key)
+    {
+        return null;
     }
 
     @Override
