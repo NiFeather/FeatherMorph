@@ -10,6 +10,7 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.misc.actions.BiConsumerActions;
+import xyz.nifeather.morph.utilities.AttributeUtils;
 import xyz.nifeather.morph.utilities.NmsUtils;
 
 import java.util.Map;
@@ -24,11 +25,7 @@ public class DisguiseAttributeHandler
 
     public void initializeFor(EntityType type)
     {
-        NmsUtils.getSyncableAttributeListFor(type)
-                .stream()
-                .map(s -> Registry.ATTRIBUTE.get(Objects.requireNonNull(NamespacedKey.fromString(s))))
-                .filter(Objects::nonNull)
-                .forEach(this::register);
+        AttributeUtils.syncableAttributesFor(type).forEach(this::register);
     }
 
     public boolean contains(Attribute attribute)
