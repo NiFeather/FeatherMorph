@@ -383,7 +383,7 @@ public abstract class SingleWatcher extends MorphPluginObject
         onTrackerWrite(singleValue, prev, value);
 
         if (!isSilent() && isAlive())
-            sendPacketToAffectedPlayers(PacketFactory.buildDiffMetaPacket(this), true);
+            sendPacketToAffectedPlayers(PacketFactory.buildDiffMetaPacket(this));
     }
 
     protected <X> void onTrackerWrite(SingleValue<X> single, @Nullable X oldVal, @Nullable X newVal)
@@ -480,6 +480,13 @@ public abstract class SingleWatcher extends MorphPluginObject
     {
         //获取原Meta包中的数据
         var originalData = packetWrapper.getEntityMetadata();
+
+        // 如果Meta包里有咱的标记，那么移除标记并返回原包
+        if (originalData.removeIf(wrapped -> wrapped.getValue().equals(PacketFactory.MARK_DONT_PROCESS)))
+        {
+            packetWrapper.setEntityMetadata(originalData);
+            return;
+        }
 
         var overrideList = rebuildMetadata(originalData);
 
@@ -607,10 +614,7 @@ public abstract class SingleWatcher extends MorphPluginObject
         return WatcherUtils.getAffectedPlayers(sourcePlayer);
     }
 
-    /**
-     * @param skipOurListeners If set to {@code true}, our listener should not get triggered, see <a href="https://docs.packetevents.com/sending-and-simulating-packets/#sending-and-simulating-packets-silently">here</a>
-     */
-    protected void sendPacketToAffectedPlayers(List<PacketWrapper<?>> packets, boolean skipOurListeners)
+    protected void sendPacketToAffectedPlayers(PacketWrapper<?> packet)
     {
         if (isSilent())
         {
@@ -629,46 +633,7 @@ public abstract class SingleWatcher extends MorphPluginObject
         var players = getAffectedPlayers(getBindingPlayer());
 
         var protocol = PacketEvents.getAPI().getPlayerManager();
-
-        players.forEach(player ->
-        {
-            for (PacketWrapper<?> packet : packets)
-            {
-                if (skipOurListeners)
-                    protocol.sendPacketSilently(player, packet);
-                else
-                    protocol.sendPacket(player, packet);
-            }
-        });
-    }
-
-    /**
-     * @param skipOurListeners If set to {@code true}, our listener should not get triggered, see <a href="https://docs.packetevents.com/sending-and-simulating-packets/#sending-and-simulating-packets-silently">here</a>
-     */
-    protected void sendPacketToAffectedPlayers(PacketWrapper<?> packet, boolean skipOurListeners)
-    {
-        if (isSilent())
-        {
-            logger.warn("Not sending packets: Sending packets while we should be silent?!");
-            Thread.dumpStack();
-            return;
-        }
-
-        if (!isAlive())
-        {
-            logger.warn("Not sending packets: Sending packets while the watcher isn't alive!");
-            Thread.dumpStack();
-            return;
-        }
-
-        var players = getAffectedPlayers(getBindingPlayer());
-
-        var protocol = PacketEvents.getAPI().getPlayerManager();
-
-        if (skipOurListeners)
-            players.forEach(p -> protocol.sendPacketSilently(p, packet));
-        else
-            players.forEach(p -> protocol.sendPacket(p, packet));
+        players.forEach(p -> protocol.sendPacket(p, packet));
     }
 
     public abstract List<PacketWrapper<?>> buildSpawnPackets() throws BuildFailedException;

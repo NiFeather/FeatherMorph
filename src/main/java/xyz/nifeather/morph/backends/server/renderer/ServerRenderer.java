@@ -2,6 +2,8 @@ package xyz.nifeather.morph.backends.server.renderer;
 
 import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.wrapper.PacketWrapper;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectLists;
 import org.bukkit.Bukkit;
@@ -134,9 +136,7 @@ public class ServerRenderer extends MorphPluginObject implements Listener
 
         affectedPlayers.forEach(p ->
         {
-            // Uhhh we may want to identity which packets should send silently, which packets should not.
-            // But we don't want our listeners to handle these packets anyway, so I think it is safe?
-            spawnPackets.forEach(packet -> protocolManager.sendPacketSilently(p, packet));
+            spawnPackets.forEach(packet -> protocolManager.sendPacket(p, packet));
         });
     }
 
@@ -147,19 +147,20 @@ public class ServerRenderer extends MorphPluginObject implements Listener
         if (player == null) return;
 
         var protocolManager = PacketEvents.getAPI().getPlayerManager();
-        PlayerWatcher recoveryWatcher = new PlayerWatcher(player);
-        recoveryWatcher.markSilent(this);
+        PlayerWatcher watcher = new PlayerWatcher(player);
+        watcher.markSilent(this);
 
-        recoveryWatcher.writeEntry(CustomEntries.PROFILE, ((CraftPlayer) player).getProfile());
-        recoveryWatcher.writeEntry(CustomEntries.SPAWN_UUID, player.getUniqueId());
-        recoveryWatcher.writeEntry(CustomEntries.SPAWN_ID, player.getEntityId());
-        recoveryWatcher.writeEntry(CustomEntries.PROFILE_LISTED, true);
+        watcher.writeEntry(CustomEntries.PROFILE, ((CraftPlayer) player).getProfile());
+        watcher.writeEntry(CustomEntries.SPAWN_UUID, player.getUniqueId());
+        watcher.writeEntry(CustomEntries.SPAWN_ID, player.getEntityId());
+        watcher.writeEntry(CustomEntries.PROFILE_LISTED, true);
+        watcher.writeEntry(CustomEntries.DONT_INCLUDE_PACKET_IDENTIFIER, true);
 
         List<PacketWrapper<?>> playerSpawnPackets;
 
         try
         {
-            playerSpawnPackets = recoveryWatcher.buildSpawnPackets(false);
+            playerSpawnPackets = watcher.buildSpawnPackets(false);
         }
         catch (BuildFailedException e)
         {
@@ -177,16 +178,15 @@ public class ServerRenderer extends MorphPluginObject implements Listener
             logger.error("Can't dispose virtual entity gracefully, BuildFailedException has been thrown!", e);
         }
 
-        recoveryWatcher.dispose();
+        watcher.dispose();
 
-        // We also don't want our listeners catch these packets.
         for (Player p : affectedPlayers)
         {
             for (PacketWrapper<?> removePacket : disposalPackets)
-                protocolManager.sendPacketSilently(p, removePacket);
+                protocolManager.sendPacket(p, removePacket);
 
             for (var packet : playerSpawnPackets)
-                protocolManager.sendPacketSilently(p, packet);
+                protocolManager.sendPacket(p, packet);
         }
     }
 
