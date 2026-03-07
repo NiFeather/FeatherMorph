@@ -22,8 +22,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-public class DisguiseWaypointTransmitter implements WaypointTransmitter
+public class DisguiseWaypointTransmitter implements IDisguiseWaypointTransmitter
 {
+    private final DisguiseState bindingState;
+
     public DisguiseWaypointTransmitter(DisguiseState state)
     {
         this.bindingState = state;
@@ -32,17 +34,10 @@ public class DisguiseWaypointTransmitter implements WaypointTransmitter
     private volatile boolean transmitting;
     private volatile boolean disposed;
 
-    public void dispose()
-    {
-        enabled(false);
-        tick();
-
-        disposed = true;
-    }
-
     @Nullable
     private ServerLevel lastWorld = null;
 
+    @Override
     public void tick()
     {
         var allowConnection = allowWaypointConnection();
@@ -116,16 +111,6 @@ public class DisguiseWaypointTransmitter implements WaypointTransmitter
         return true;
     }
 
-    public void enabled(boolean value)
-    {
-        if (disposed) return;
-
-        this.enabled = value;
-        tick();
-    }
-
-    private final DisguiseState bindingState;
-
     @NotNull
     public Player getPlayer()
     {
@@ -141,6 +126,7 @@ public class DisguiseWaypointTransmitter implements WaypointTransmitter
 
     private final List<IMorphRealtimeWaypointConnection> realtimeConnections = Collections.synchronizedList(new ObjectArrayList<>());
 
+    @Override
     public void updateRealtimeConnections()
     {
         if (!transmitting) return;
@@ -157,6 +143,15 @@ public class DisguiseWaypointTransmitter implements WaypointTransmitter
                     connection.internalUpdate(); // We emulate the behavior in Entity#setPosRaw(double x, double y, double z, boolean forceBoundingBoxUpdate)
             }
         }
+    }
+
+    @Override
+    public void setEnabled(boolean value)
+    {
+        if (disposed) return;
+
+        this.enabled = value;
+        tick();
     }
 
     @Override
@@ -206,6 +201,15 @@ public class DisguiseWaypointTransmitter implements WaypointTransmitter
     public Icon waypointIcon()
     {
         return waypointIcon;
+    }
+
+    @Override
+    public void dispose()
+    {
+        setEnabled(false);
+        tick();
+
+        disposed = true;
     }
 
     @Override

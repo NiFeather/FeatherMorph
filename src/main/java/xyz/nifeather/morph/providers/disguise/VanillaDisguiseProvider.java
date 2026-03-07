@@ -322,7 +322,9 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
     public void onPlayerJoinWithDisguise(DisguiseState state)
     {
         onDisguiseApply(state);
-        mutePlayerWaypoint(state.getPlayer());
+
+        if (allowDisguiseWaypoint.get())
+            mutePlayerWaypoint(state.getPlayer());
 
         super.onPlayerJoinWithDisguise(state);
     }
@@ -365,7 +367,8 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
         if (modifyBoundingBoxes.get())
             tryModifyPlayerDimensions(player, state.getDisguiseWrapper());
 
-        mutePlayerWaypoint(player);
+        if (allowDisguiseWaypoint.get())
+            mutePlayerWaypoint(player);
     }
 
     @Override

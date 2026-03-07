@@ -257,6 +257,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         config.bind(allowAcquireMorph, ConfigOptions.ALLOW_ACQUIRE_MORPHS);
         config.bind(useClientRenderer, ConfigOptions.USE_CLIENT_RENDERER);
         config.bind(uuidRandomBaseString, ConfigOptions.UUID_RANDOM_BASE);
+        config.bind(allowDisguiseWaypoint, ConfigOptions.ENABLE_DISGUISE_WAYPOINT);
 
         registerProviders(ObjectList.of(
                 new VanillaDisguiseProvider(),
@@ -419,6 +420,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     private final Bindable<Boolean> useClientRenderer = new Bindable<>(false);
 
     private final Bindable<String> uuidRandomBaseString = new Bindable<>("???");
+
+    private final Bindable<Boolean> allowDisguiseWaypoint = new Bindable<>(true);
 
     /**
      * 尝试调用快速伪装
@@ -806,7 +809,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             var playerMorphConfig = getPlayerMeta(player);
             outComingState = new DisguiseState(player, disguiseIdentifier, targetSkillID,
                     wrapper, provider,
-                    clientHandler.getPlayerOption(player, true), playerMorphConfig);
+                    clientHandler.getPlayerOption(player, true), playerMorphConfig, allowDisguiseWaypoint.get());
 
             return DisguiseBuildResult.of(outComingState, disguiseMeta);
         }
