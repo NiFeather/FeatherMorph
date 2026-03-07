@@ -354,6 +354,11 @@ public class ConfigOptions
             .defaultValue(new ArrayList<>(NbtUtils.defaultBlacklistedTags))
             .build();
 
+    public static final ConfigOption<Boolean> ENABLE_DISGUISE_WAYPOINT = ConfigOption.builder(Boolean.class)
+            .node(ConfigNode.create().append("enable_disguise_waypoint"))
+            .defaultValue(true)
+            .build();
+
     public static final ConfigOption<Integer> VERSION = ConfigOption.builder(Integer.class)
             .node(ConfigNode.create().append("version"))
             .defaultValue(0)

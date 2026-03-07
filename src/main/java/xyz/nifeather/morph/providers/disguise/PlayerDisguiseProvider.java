@@ -162,12 +162,19 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
                 });
     }
 
+    private void enableDisguiseWaypointIfAllowed(DisguiseState state)
+    {
+        if (!allowDisguiseWaypoint.get())
+            return;
+
+        mutePlayerWaypoint(state.getPlayer());
+        enableDisguiseWaypoint(state);
+    }
+
     @Override
     public void onDisguiseApply(DisguiseState state)
     {
-        mutePlayerWaypoint(state.getPlayer());
-        enableDisguiseWaypoint(state);
-
+        enableDisguiseWaypointIfAllowed(state);
         super.onDisguiseApply(state);
     }
 
@@ -183,9 +190,7 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
     @Override
     public void onPlayerJoinWithDisguise(DisguiseState state)
     {
-        mutePlayerWaypoint(state.getPlayer());
-        enableDisguiseWaypoint(state);
-
+        enableDisguiseWaypointIfAllowed(state);
         super.onPlayerJoinWithDisguise(state);
     }
 

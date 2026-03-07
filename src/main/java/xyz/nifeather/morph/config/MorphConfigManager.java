@@ -51,6 +51,8 @@ public class MorphConfigManager extends PluginConfigManager
         registerUpdateMethods();
     }
 
+    public static final int TARGET_VERSION = 48;
+
     @SuppressWarnings("removal")
     private void registerUpdateMethods()
     {
@@ -264,13 +266,11 @@ public class MorphConfigManager extends PluginConfigManager
         });
 
         //更新配置
-        int targetVersion = 47;
-
         var configVersion = getOrDefault(ConfigOptions.VERSION);
 
-        if (configVersion < targetVersion)
+        if (configVersion < TARGET_VERSION)
         {
-            FeatherMorphMain.getInstance().getSLF4JLogger().info("Migrating config from %s to %s".formatted(configVersion, targetVersion));
+            FeatherMorphMain.getInstance().getSLF4JLogger().info("Migrating config from %s to %s".formatted(configVersion, TARGET_VERSION));
 
             var nonDefaults = this.getAllNotDefault();
 
@@ -315,7 +315,7 @@ public class MorphConfigManager extends PluginConfigManager
             });
 
             this.getUpdateMethods(configVersion).forEach(c -> c.accept(newConfig));
-            newConfig.set(ConfigOptions.VERSION.toString(), targetVersion);
+            newConfig.set(ConfigOptions.VERSION.toString(), TARGET_VERSION);
 
             plugin.saveConfig();
             reload();

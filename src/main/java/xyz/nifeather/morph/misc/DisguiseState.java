@@ -33,6 +33,8 @@ import xyz.nifeather.morph.misc.disguiseProperty.values.BaseLivingEntityProperty
 import xyz.nifeather.morph.misc.gui.IconLookup;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 import xyz.nifeather.morph.misc.waypoint.DisguiseWaypointTransmitter;
+import xyz.nifeather.morph.misc.waypoint.DummyDisguiseWaypointTransmitter;
+import xyz.nifeather.morph.misc.waypoint.IDisguiseWaypointTransmitter;
 import xyz.nifeather.morph.network.PlayerOptions;
 import xyz.nifeather.morph.network.commands.S2C.S2CPlayAnimationCommand;
 import xyz.nifeather.morph.network.commands.S2C.set.S2CSetAnimationDisplayNameCommand;
@@ -58,7 +60,7 @@ public class DisguiseState extends MorphPluginObject
     public DisguiseState(@NotNull Player player, @NotNull String identifier, @NotNull String skillIdentifier,
                          @NotNull DisguiseWrapper<?> wrapper, @NotNull DisguiseProvider provider,
                          @NotNull PlayerOptions<Player> playerOptions,
-                         @NotNull PlayerMeta playerMeta)
+                         @NotNull PlayerMeta playerMeta, boolean transmitWaypoint)
     {
         Objects.requireNonNull(wrapper, "Wrapper cannot be null.");
         Objects.requireNonNull(identifier, "Disguise identifier cannot be null.");
@@ -74,8 +76,11 @@ public class DisguiseState extends MorphPluginObject
 
         this.soundHandler = new SoundHandler(player);
         this.abilityUpdater = new AbilityUpdater(this);
-        this.disguiseWaypointTransmitter = new DisguiseWaypointTransmitter(this);
         this.disguiseAttributes = new DisguiseAttributeHandler();
+
+        this.disguiseWaypointTransmitter = transmitWaypoint
+                ? new DisguiseWaypointTransmitter(this)
+                : new DummyDisguiseWaypointTransmitter(player.getName());
 
         this.disguiseWrapper = wrapper;
         this.disguiseIdentifier = identifier;
@@ -697,9 +702,9 @@ public class DisguiseState extends MorphPluginObject
 
     //region Waypoint
 
-    private final DisguiseWaypointTransmitter disguiseWaypointTransmitter;
+    private final IDisguiseWaypointTransmitter disguiseWaypointTransmitter;
 
-    public DisguiseWaypointTransmitter waypointTransmitter()
+    public IDisguiseWaypointTransmitter waypointTransmitter()
     {
         return disguiseWaypointTransmitter;
     }

@@ -11,11 +11,15 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.EquipmentSlot;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
+import xiamomc.pluginbase.Bindables.Bindable;
 import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.abilities.AbilityManager;
 import xyz.nifeather.morph.api.morphs.skills.SkillNames;
 import xyz.nifeather.morph.backends.DisguiseBackend;
+import xyz.nifeather.morph.config.ConfigOptions;
+import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.misc.DisguiseEquipment;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.misc.disguiseProperty.ParseErrorException;
@@ -44,6 +48,14 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
 
     @Resolved
     private MorphClientHandler clientHandler;
+
+    protected final Bindable<Boolean> allowDisguiseWaypoint = new Bindable<>(true);
+
+    @Initializer
+    private void load(MorphConfigManager config)
+    {
+        config.bind(allowDisguiseWaypoint, ConfigOptions.ENABLE_DISGUISE_WAYPOINT);
+    }
 
     @Override
     public @NotNull DisguiseBackend<?, ?> getPreferredBackend()
@@ -85,14 +97,12 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
 
     protected void enableDisguiseWaypoint(DisguiseState state)
     {
-        var disguiseWaypoint = state.waypointTransmitter();
-        disguiseWaypoint.enabled(true);
+        state.waypointTransmitter().setEnabled(true);
     }
 
     public void disableDisguiseWaypoint(DisguiseState state)
     {
-        var disguiseWaypoint = state.waypointTransmitter();
-        disguiseWaypoint.enabled(false);
+        state.waypointTransmitter().setEnabled(false);
     }
 
     @Override

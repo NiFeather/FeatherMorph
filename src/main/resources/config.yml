@@ -121,6 +121,11 @@ root:
   # Should piglin brutes ignore players' disguises?
   piglin_brute_ignore_disguises: true
 
+  # Should we enable disguise waypoints?
+  # Once enabled, players disguised as mob will not transmit waypoints, and transmit a fake waypoint when disguising as another player.
+  # However, once disabled, players' waypoint will look "laggy" when moving, since the virtual entity doesn't have the same UUID with them.
+  enable_disguise_waypoint: true
+
   # Health scale options
   health_scale:
     # Enable health scale?
@@ -309,4 +314,4 @@ root:
   debug_output: false
 
   # Do not touch unless you know what you're doing!
-  version: 47
+  version: 48
