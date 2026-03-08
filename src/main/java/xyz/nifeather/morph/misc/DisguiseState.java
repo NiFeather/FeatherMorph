@@ -963,7 +963,7 @@ public class DisguiseState extends MorphPluginObject
 
     //endregion Sound Handling
 
-    public DisguiseState createCopy(Player player)
+    public DisguiseState createCopy(Player player, boolean allowWaypoint)
     {
         if (disposed())
             throw new RuntimeException("Can't create a copy of a disposed DisguiseState");
@@ -971,7 +971,7 @@ public class DisguiseState extends MorphPluginObject
         var wrapper = this.disguiseWrapper.clone();
 
         var newInstance = new DisguiseState(player, this.disguiseIdentifier, this.skillLookupIdentifier(),
-                wrapper, provider, this.playerOptions, playerMeta, (disguiseWaypointTransmitter instanceof DisguiseWaypointTransmitter));
+                wrapper, provider, this.playerOptions, playerMeta, allowWaypoint);
 
         newInstance.playerDisplay = this.playerDisplay;
         newInstance.serverDisplay = this.serverDisplay;

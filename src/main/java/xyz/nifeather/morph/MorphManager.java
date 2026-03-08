@@ -1624,7 +1624,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         var stateToRecover = getActiveDisguises();
         stateToRecover = stateToRecover.stream()
-                .map(oldState -> oldState.createCopy(oldState.getPlayer()))
+                .map(oldState -> oldState.createCopy(oldState.getPlayer(), allowDisguiseWaypoint.get()))
                 .toList();
 
         unMorphAll(false);
