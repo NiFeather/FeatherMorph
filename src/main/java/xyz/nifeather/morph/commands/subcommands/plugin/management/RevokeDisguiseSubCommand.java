@@ -81,7 +81,7 @@ public class RevokeDisguiseSubCommand extends MorphPluginObject implements IConv
                 targetName = "minecraft:" + targetName;
 
             String finalTargetName = targetName;
-            var info = morphs.getAvaliableDisguisesFor(who)
+            var info = morphs.getAvailableDisguisesFor(who)
                     .stream().filter(i -> i.getKey().equals(finalTargetName)).findFirst().orElse(null);
 
             var revokeSuccess = info != null && morphs.revokeMorphFromPlayer(who, info.getKey());

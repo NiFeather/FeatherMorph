@@ -2,18 +2,13 @@ package xyz.nifeather.morph.events;
 
 import io.papermc.paper.event.player.PlayerArmSwingEvent;
 import io.papermc.paper.event.player.PlayerStopUsingItemEvent;
-import org.bukkit.craftbukkit.entity.CraftMannequin;
-import org.bukkit.entity.Mannequin;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Pose;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.*;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
@@ -21,12 +16,11 @@ import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.api.events.gameplay.PlayerJoinedWithDisguiseEvent;
 import xyz.nifeather.morph.api.events.gameplay.PlayerMorphEvent;
 import xyz.nifeather.morph.api.events.gameplay.PlayerUnMorphEvent;
-import xyz.nifeather.morph.config.ConfigOption;
+import xyz.nifeather.morph.config.ConfigOptions;
 import xyz.nifeather.morph.config.MorphConfigManager;
-import xyz.nifeather.morph.events.mirror.ExecutorHub;
+import xyz.nifeather.morph.mirror.ExecutorHub;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.misc.DisguiseTypes;
-import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -45,16 +39,16 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
     @Initializer
     private void load(MorphConfigManager config)
     {
-        config.bind(allowSimulation, ConfigOption.MIRROR_BEHAVIOR_DO_SIMULATION);
-        config.bind(allowSneak, ConfigOption.MIRROR_BEHAVIOR_SNEAK);
-        config.bind(allowSwap, ConfigOption.MIRROR_BEHAVIOR_SWAP_HAND);
-        config.bind(allowDrop, ConfigOption.MIRROR_BEHAVIOR_DROP);
-        config.bind(allowHotBar, ConfigOption.MIRROR_BEHAVIOR_HOTBAR);
-        //config.bind(ignoreDisguised, ConfigOption.MIRROR_IGNORE_DISGUISED);
+        config.bind(allowSimulation, ConfigOptions.MIRROR_BEHAVIOR_DO_SIMULATION);
+        config.bind(allowSneak, ConfigOptions.MIRROR_BEHAVIOR_SNEAK);
+        config.bind(allowSwap, ConfigOptions.MIRROR_BEHAVIOR_SWAP_HAND);
+        config.bind(allowDrop, ConfigOptions.MIRROR_BEHAVIOR_DROP);
+        config.bind(allowHotBar, ConfigOptions.MIRROR_BEHAVIOR_HOTBAR);
+        //config.bind(ignoreDisguised, ConfigOptions.MIRROR_IGNORE_DISGUISED);
 
-        config.bind(selectionMode, ConfigOption.MIRROR_SELECTION_MODE);
+        config.bind(selectionMode, ConfigOptions.MIRROR_SELECTION_MODE);
 
-        config.bind(debugOutput, ConfigOption.DEBUG_OUTPUT);
+        config.bind(debugOutput, ConfigOptions.DEBUG_OUTPUT);
     }
 
     @Resolved(shouldSolveImmediately = true)
@@ -179,32 +173,28 @@ public class InteractionMirrorProcessor extends MorphPluginObject implements Lis
         }
     }
 
-    public record PlayerInfo(@Nullable Player target, @NotNull String targetName)
-    {
-        public static final String notSetStr = "~NOTSET";
-    }
-
     //region Morph events
 
-    @EventHandler
+    // Only the MONITOR priority can trigger these listener... why?
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerExit(PlayerQuitEvent e)
     {
         executorHub.unregisterControl(e.getPlayer());
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerMorph(PlayerMorphEvent e)
     {
         addOrRemoveFromMirrorMap(e.state, e.getPlayer());
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerUnMorph(PlayerUnMorphEvent e)
     {
         executorHub.unregisterControl(e.getPlayer());
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onJoinedWithState(PlayerJoinedWithDisguiseEvent e)
     {
         addOrRemoveFromMirrorMap(e.state, e.getPlayer());

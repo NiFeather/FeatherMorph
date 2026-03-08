@@ -9,6 +9,7 @@ import com.github.retrooper.packetevents.util.Vector3i;
 import com.github.retrooper.packetevents.wrapper.PacketWrapper;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerPlayerInfoRemove;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerPlayerInfoUpdate;
+import com.mojang.authlib.GameProfile;
 import io.github.retrooper.packetevents.util.SpigotConversionUtil;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.bukkit.entity.EntityType;
@@ -21,7 +22,7 @@ import xyz.nifeather.morph.misc.AnimationNames;
 import xyz.nifeather.morph.misc.BuildFailedException;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
-import xyz.nifeather.morph.misc.disguiseProperty.values.PlayerProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.values.PlayerPropertyCollection;
 import xyz.nifeather.morph.utilities.GameProfileUtils;
 
 import java.util.EnumSet;
@@ -38,13 +39,13 @@ public class PlayerWatcher extends LivingEntityWatcher
         register(ValueIndex.PLAYER);
     }
 
-    private final PlayerProperties playerDisguiseProperties;
+    private final PlayerPropertyCollection playerDisguiseProperties;
 
     public PlayerWatcher(Player bindingPlayer)
     {
         super(bindingPlayer, EntityType.PLAYER);
 
-        this.playerDisguiseProperties = DisguiseProperties.INSTANCE.getOrThrow(PlayerProperties.class);
+        this.playerDisguiseProperties = DisguiseProperties.INSTANCE.getCollectionOrThrow(PlayerPropertyCollection.class);
     }
 
     @Override
@@ -64,14 +65,19 @@ public class PlayerWatcher extends LivingEntityWatcher
     {
         if (property.equals(playerDisguiseProperties.MAIN_HAND))
         {
-            var handStatus = (PlayerProperties.MainHandStatus) value;
-            if (handStatus == PlayerProperties.MainHandStatus.NOTSET)
+            var handStatus = (PlayerPropertyCollection.MainHandStatus) value;
+            if (handStatus == PlayerPropertyCollection.MainHandStatus.NOTSET)
                 return;
 
             var hand = handStatus.bindingHand;
             assert hand != null;
 
             this.writePersistent(ValueIndex.PLAYER.MAINHAND, hand == MainHand.LEFT ? HumanoidArm.LEFT : HumanoidArm.RIGHT);
+        }
+        else if (property.equals(playerDisguiseProperties.SKIN))
+        {
+            var skin = (GameProfile) value;
+            this.writeEntry(CustomEntries.PROFILE, skin);
         }
 
         super.onPropertyWrite(property, value);
@@ -139,11 +145,11 @@ public class PlayerWatcher extends LivingEntityWatcher
 
     public List<PacketWrapper<?>> buildPlayerInfoPackets()
     {
-        var spawnUUID = this.readEntryOrThrow(CustomEntries.SPAWN_UUID);
-        var infoRemove = new WrapperPlayServerPlayerInfoRemove(List.of(spawnUUID));
+        var virtualEntityUUID = this.readEntryOrThrow(CustomEntries.SPAWN_UUID);
+        var infoRemove = new WrapperPlayServerPlayerInfoRemove(List.of(virtualEntityUUID));
 
         var packetProfile = GameProfileUtils.toPacketEventsUserProfile(this.readEntryOrThrow(CustomEntries.PROFILE));
-        packetProfile.setUUID(spawnUUID);
+        packetProfile.setUUID(virtualEntityUUID);
         var infoUpdate = new WrapperPlayServerPlayerInfoUpdate(
                 EnumSet.of(
                         WrapperPlayServerPlayerInfoUpdate.Action.ADD_PLAYER,
@@ -159,8 +165,7 @@ public class PlayerWatcher extends LivingEntityWatcher
         return List.of(infoRemove, infoUpdate);
     }
 
-    @Override
-    public List<PacketWrapper<?>> buildSpawnPackets() throws BuildFailedException
+    public List<PacketWrapper<?>> buildSpawnPackets(boolean includePlayerInfo) throws BuildFailedException
     {
         var list = new ObjectArrayList<PacketWrapper<?>>();
 
@@ -169,26 +174,29 @@ public class PlayerWatcher extends LivingEntityWatcher
         if (gameProfile.name().isBlank())
             throw new IllegalArgumentException("GameProfile name is empty!");
 
-        list.addAll(this.buildPlayerInfoPackets());
+        if (includePlayerInfo)
+            list.addAll(this.buildPlayerInfoPackets());
+
         list.addAll(super.buildSpawnPackets());
-/*
-        var bindingPlayer = getBindingPlayer();
-        var nmsPlayer = NmsRecord.ofPlayer(bindingPlayer);
-        if (nmsPlayer.isTransmittingWaypoint() && Boolean.TRUE.equals(bindingPlayer.getWorld().getGameRuleValue(GameRule.LOCATOR_BAR)))
-        {
-            list.add(new WrapperPlayServerWaypoint(
-                    WrapperPlayServerWaypoint.Operation.TRACK,
-                    new TrackedWaypoint(
-                            Either.createLeft(this.readEntryOrThrow(CustomEntries.SPAWN_UUID)),
-                            new WaypointIcon(WaypointIcon.ICON_STYLE_DEFAULT, null),
-                            new Vec3iWaypointInfo(new Vector3i(
-                                    nmsPlayer.getBlockX(), nmsPlayer.getBlockY(), nmsPlayer.getBlockZ()
-                            ))
-                    )
-            ));
-        }*/
 
         return list;
+    }
+
+    @Override
+    public List<PacketWrapper<?>> buildVirtualEntityDisposalPackets() throws BuildFailedException
+    {
+        var list = new ObjectArrayList<>(super.buildVirtualEntityDisposalPackets());
+
+        var playerInfoRmPacket = new WrapperPlayServerPlayerInfoRemove(this.readEntryOrThrow(CustomEntries.SPAWN_UUID));
+        list.add(playerInfoRmPacket);
+
+        return list;
+    }
+
+    @Override
+    public List<PacketWrapper<?>> buildSpawnPackets() throws BuildFailedException
+    {
+        return buildSpawnPackets(true);
     }
 
     private void resetValues()

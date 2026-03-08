@@ -4,7 +4,8 @@ public enum ProtocolLevel
 {
     UNKNOWN(-1),
     V1(1),
-    V3(3);
+    V3(3),
+    V4(4);
 
     private final int version;
 

@@ -37,6 +37,9 @@ public class MorphParameters
     @Nullable
     public Entity targetedEntity;
 
+    /**
+     * ID <-> Input
+     */
     public final Map<String, String> propertiesInput = new ConcurrentHashMap<>();
 
     public MorphParameters setSource(CommandSender sender)

@@ -17,6 +17,7 @@ import org.bukkit.command.CommandSender;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Messages.FormattableMessage;
+import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.commands.MorphCommandManager;
 import xyz.nifeather.morph.commands.brigadier.IConvertibleBrigadier;
@@ -109,6 +110,7 @@ public class HelpSubCommand extends MorphPluginObject implements IConvertibleBri
                 HelpStrings.commandSectionHeaderString()
                         .resolve("basename", section.getCommandBaseName()).createComponent(locale));
 
+
         //build entry
         for (var entry : entries)
         {
@@ -117,10 +119,14 @@ public class HelpSubCommand extends MorphPluginObject implements IConvertibleBri
             //如果指令不要求权限或者sender拥有此权限，添加到列表里
             if (perm == null || sender.hasPermission(perm))
             {
+                var desc = entry.description();
+                if (desc == null)
+                    desc = new FormattableMessage(FeatherMorphMain.getInstance(), "???");
+
                 var msg = HelpStrings.commandEntryString()
                         .resolve("basename", entry.baseName())
-                        .resolve("description", entry.description())
-                        .createComponent(null)
+                        .resolve("description", desc)
+                        .createComponent(locale)
                         .decorate(TextDecoration.UNDERLINED)
                         .hoverEvent(HoverEvent.showText(HelpStrings.clickToCompleteString().createComponent(locale)))
                         .clickEvent(ClickEvent.suggestCommand(entry.suggestingCommand()));

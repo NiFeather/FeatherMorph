@@ -35,7 +35,7 @@ public class MorphCommandManager extends MorphPluginObject
             brigadierConvertable.register(registrar);
 
         var cmdDebugFile = new File(FeatherMorphMain.getInstance().getDataFolder(), "cmd_debug.txt");
-        if (cmdDebugFile.exists())
+        if (cmdDebugFile.exists() || "true".equalsIgnoreCase(System.getenv("FEATHERMORPH_CMD_DEBUG")))
         {
             logger.error("- x - x - x - x - x - x - x - x - x - x - x - x -");
             logger.error("MAY I HAVE YOUR ATTENTION PLEASE!");

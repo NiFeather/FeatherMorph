@@ -258,6 +258,47 @@ public class CommandStrings extends AbstractMorphStrings
         return getFormattable(getKey("towny_not_mayor"), "[Fallback] <red>此操作只适用于镇长");
     }
 
+    // dump file
+    public static FormattableMessage assetNotFound()
+    {
+        return getFormattable(getKey("asset_not_found"), "[Fallback]目标<type>不存在于插件资产中");
+    }
+
+    public static FormattableMessage targetAlreadyExists()
+    {
+        return getFormattable(getKey("target_already_exists"), "[Fallback] 位于<path>的目标文件已存在于文件系统！请先将其删除！");
+    }
+
+    public static FormattableMessage unableToWrite()
+    {
+        return getFormattable(getKey("unable_to_write"), "[Fallback] 未能写入到 <color:#dddddd><path></color>！请查看控制台来获得更多信息");
+    }
+
+    public static FormattableMessage dumpSuccess()
+    {
+        return getFormattable(getKey("dump_success"), "[Fallback] 成功提取<what>的<type>到<path>");
+    }
+
+    public static FormattableMessage oldFileRenamed()
+    {
+        return getFormattable(getKey("old_file_moved"), "[Fb] 磁盘上的旧文件已重命名为 <path>");
+    }
+
+    public static FormattableMessage confirmationRequired()
+    {
+        return getFormattable(getKey("confirmation_required"), "[Fb] 请在<second>秒内再执行一次以确认<operation>的操作");
+    }
+
+    public static FormattableMessage confirmationExpired()
+    {
+        return getFormattable(getKey("confirmation_expired"), "[Fb] <operation>的确认请求已超时");
+    }
+
+    public static FormattableMessage listCount()
+    {
+        return getFormattable(getKey("list_count"),
+                "[fallback] <what> contains <amount> element(s)");
+    }
 
     private static String getKey(String key)
     {

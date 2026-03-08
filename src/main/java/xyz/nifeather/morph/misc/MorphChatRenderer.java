@@ -11,7 +11,7 @@ import xiamomc.pluginbase.Messages.FormattableMessage;
 import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.MorphPluginObject;
-import xyz.nifeather.morph.config.ConfigOption;
+import xyz.nifeather.morph.config.ConfigOptions;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
@@ -42,9 +42,8 @@ public class MorphChatRenderer extends MorphPluginObject implements ChatRenderer
     {
         if (formattable == null)
         {
-            var option = ConfigOption.CHAT_OVERRIDE_DEFAULT_PATTERN;
-            formattable = new FormattableMessage(plugin,
-                    config.getOrDefault(String.class, option, (String)option.defaultValue));
+            var option = ConfigOptions.CHAT_OVERRIDE_DEFAULT_PATTERN;
+            formattable = new FormattableMessage(plugin, config.getOrDefault(option));
         }
 
         if (this.message == null)

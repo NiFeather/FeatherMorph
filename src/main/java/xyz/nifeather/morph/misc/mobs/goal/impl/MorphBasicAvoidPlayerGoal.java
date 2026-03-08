@@ -58,7 +58,7 @@ public abstract class MorphBasicAvoidPlayerGoal<M extends Mob> extends Goal
         var mobLocation = mob.getLocation();
         var avoidingLocation = entityToAvoid.getLocation();
 
-        if (!mobLocation.getWorld().equals(avoidingLocation.getWorld()))
+        if (FoliaThreadUtils.notInSameRegion(mobLocation, avoidingLocation))
             return false;
 
         this.path = findEscapePath();
@@ -71,6 +71,7 @@ public abstract class MorphBasicAvoidPlayerGoal<M extends Mob> extends Goal
         return !mob.getPathfinder().hasPath();
     }
 
+    @Nullable
     private Entity findEntityToAvoid()
     {
         var trackingDistance = (mob.getBoundingBox().getWidthX() / 2d) + detectDistance;
@@ -81,9 +82,9 @@ public abstract class MorphBasicAvoidPlayerGoal<M extends Mob> extends Goal
 
         Entity found = null;
         double currentDistance = Double.MAX_VALUE;
-        var catLocation = mob.getLocation();
+        var mobLocation = mob.getLocation();
 
-        boolean isDisguisePanicking = false;
+        boolean avoidPlayerByDefault = mobPanicFromPlayerByDefault();
 
         for (Player player : nearbyPlayers)
         {
@@ -91,22 +92,22 @@ public abstract class MorphBasicAvoidPlayerGoal<M extends Mob> extends Goal
             if (gamemode == GameMode.SPECTATOR || gamemode == GameMode.CREATIVE)
                 continue;
 
-            var distance = player.getLocation().distance(catLocation);
+            // Since we are in the same region, it should be safe to compare directly...
+            var distance = player.getLocation().distance(mobLocation);
             if (distance > currentDistance)
                 continue;
 
-            // 对于已经暴露的玩家，不要对他们进行检查
-            if (revealingHandler.shouldMobsAwareRevealed(player))
-                continue;
-
-            // 如果玩家有变形，检查玩家的变形形态是否会引起该生物逃跑行为
-            // 若没有，则直接选中
+            // Check if player's disguise is what this mob panic from.
+            // If not, since it's disguised, we should skip this player.
             var state = morphManager.getDisguiseStateFor(player);
             if (state != null)
             {
+                // Player already revealed, we should not panic from it anyway.
+                if (revealingHandler.shouldMobsAwareRevealed(player))
+                    continue;
+
                 if (EntityTypeUtils.panicsFrom(mob.getType(), state.getEntityType()))
                 {
-                    isDisguisePanicking = true;
                     found = player;
                     break;
                 }
@@ -114,13 +115,14 @@ public abstract class MorphBasicAvoidPlayerGoal<M extends Mob> extends Goal
                 continue;
             }
 
-            found = player;
+            if (avoidPlayerByDefault)
+            {
+                found = player;
+                currentDistance = distance;
+            }
         }
 
-        if (isDisguisePanicking || mobPanicFromPlayerByDefault())
-            return found;
-
-        return null;
+        return found;
     }
 
     protected boolean mobPanicFromPlayerByDefault()
@@ -137,9 +139,9 @@ public abstract class MorphBasicAvoidPlayerGoal<M extends Mob> extends Goal
         if (entityToAvoid == null)
             return null;
 
-        var nmsCat = (PathfinderMob) ((CraftMob) mob).getHandle();
+        var nmsMob = (PathfinderMob) ((CraftMob) mob).getHandle();
         var playerToAvoid = ((CraftEntity) entityToAvoid).getHandle();
-        Vec3 nmsTarget = DefaultRandomPos.getPosAway(nmsCat, 16, 7, playerToAvoid.position());
+        Vec3 nmsTarget = DefaultRandomPos.getPosAway(nmsMob, 16, 7, playerToAvoid.position());
 
         if (nmsTarget == null)
             return null;
@@ -162,12 +164,14 @@ public abstract class MorphBasicAvoidPlayerGoal<M extends Mob> extends Goal
     {
         // I'm just too lazy to check if comparing distance would trigger async catch,
         // so let's not check for entities that's not on the same thread.
+        //
+        // ⬇️ Let's keep this null check
         if (entityToAvoid == null || path == null || !FoliaThreadUtils.isTickThreadFor(entityToAvoid)) return;
 
         var mobLocation = mob.getLocation();
         var avoidingLocation = entityToAvoid.getLocation();
 
-        if (!mobLocation.getWorld().equals(avoidingLocation.getWorld()))
+        if (FoliaThreadUtils.notInSameRegion(mobLocation, avoidingLocation))
             return;
 
         var pathfinder = mob.getPathfinder();

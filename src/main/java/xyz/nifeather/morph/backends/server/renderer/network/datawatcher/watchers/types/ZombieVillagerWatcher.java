@@ -12,9 +12,7 @@ import org.bukkit.entity.Villager;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
-import xyz.nifeather.morph.misc.disguiseProperty.values.VillagerProperties;
-import xyz.nifeather.morph.misc.disguiseProperty.values.ZombieVillagerProperties;
-import xyz.nifeather.morph.utilities.MathUtils;
+import xyz.nifeather.morph.misc.disguiseProperty.values.ZombieVillagerPropertyCollection;
 
 import java.util.Objects;
 
@@ -52,7 +50,7 @@ public class ZombieVillagerWatcher extends ZombieWatcher
     @Override
     protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
-        var properties = DisguiseProperties.INSTANCE.getOrThrow(ZombieVillagerProperties.class);
+        var properties = DisguiseProperties.INSTANCE.getCollectionOrThrow(ZombieVillagerPropertyCollection.class);
 
         if (property.equals(properties.LEVEL))
         {

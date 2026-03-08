@@ -79,7 +79,8 @@ public class InventoryMorphSkill extends MorphSkill<NoOpConfiguration>
                     equipment = DisguiseEquipment.copy(((LivingEntity) targetEntity).getEquipment());
                 }
 
-                state.refreshDisguiseItems(equipment);
+                state.setEquipment(equipment);
+                state.setShowingDisguisedEquipment(true);
             }
         }
 

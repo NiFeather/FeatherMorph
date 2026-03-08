@@ -151,6 +151,7 @@ dependencies {
     implementation("com.github.NiFeather:feathermorph-command-compat-layer:$compatLayerVersion")
 
     implementation("com.github.NiFeather:feathermorph-protocols:${protocolVersion}")
+
     implementation("com.github.XiaMoZhiShi:PluginBase:${project.property("pluginbase_version")}")
     {
         exclude("com.google.code.gson", "gson")
@@ -305,6 +306,8 @@ publishing {
 java {
     withSourcesJar()
 }
+
+runPaper.folia.registerTask()
 
 // See https://github.com/jpenilla/run-task/wiki/Debugging#hot-swap
 tasks.withType(xyz.jpenilla.runtask.task.AbstractRun::class) {

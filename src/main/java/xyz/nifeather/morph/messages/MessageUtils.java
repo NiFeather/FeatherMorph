@@ -10,7 +10,7 @@ import xiamomc.pluginbase.Managers.DependencyManager;
 import xiamomc.pluginbase.Messages.FormattableMessage;
 import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.MorphPluginObject;
-import xyz.nifeather.morph.config.ConfigOption;
+import xyz.nifeather.morph.config.ConfigOptions;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.misc.NmsRecord;
 import xyz.nifeather.morph.platform.CurrentPlatform;
@@ -27,12 +27,10 @@ public class MessageUtils extends MorphPluginObject
             pluginDepMgr = DependencyManager.getInstance(FeatherMorphMain.getMorphNameSpace());
 
         config = pluginDepMgr.get(MorphConfigManager.class);
-        plugin = FeatherMorphMain.getInstance();
     }
 
     private static DependencyManager pluginDepMgr;
     private static MorphConfigManager config;
-    private static FeatherMorphMain plugin;
 
     public static void send(CommandSender sender, String m)
     {
@@ -71,7 +69,7 @@ public class MessageUtils extends MorphPluginObject
         if (config == null)
             setupConfigManager();
 
-        var rootMessage = new FormattableMessage(FeatherMorphMain.getInstance(), config.getOrDefault(String.class, ConfigOption.PLUGIN_PREFIX));
+        var rootMessage = new FormattableMessage(FeatherMorphMain.getInstance(), config.getOrDefault(ConfigOptions.PLUGIN_PREFIX));
 
         var inputComponent = context.createComponent();
         if (inputComponent.equals(Component.empty()))
@@ -127,8 +125,8 @@ public class MessageUtils extends MorphPluginObject
 
         if (config != null)
         {
-            config.bind(serverLocale, ConfigOption.LANGUAGE_CODE);
-            config.bind(singleLanguage, ConfigOption.SINGLE_LANGUAGE);
+            config.bind(serverLocale, ConfigOptions.LANGUAGE_CODE);
+            config.bind(singleLanguage, ConfigOptions.SINGLE_LANGUAGE);
         }
 
         configManager = config;

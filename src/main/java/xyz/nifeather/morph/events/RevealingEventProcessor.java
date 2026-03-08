@@ -19,7 +19,7 @@ import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.RevealingHandler;
 import xyz.nifeather.morph.api.events.gameplay.PlayerMorphEvent;
 import xyz.nifeather.morph.api.events.gameplay.PlayerUnMorphEvent;
-import xyz.nifeather.morph.config.ConfigOption;
+import xyz.nifeather.morph.config.ConfigOptions;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.misc.DisguiseTypes;
 import xyz.nifeather.morph.misc.NmsRecord;
@@ -37,7 +37,7 @@ public class RevealingEventProcessor extends MorphPluginObject implements Listen
     @Initializer
     private void load(MorphConfigManager configManager)
     {
-        configManager.bind(doRevealing, ConfigOption.REVEALING);
+        configManager.bind(doRevealing, ConfigOptions.REVEALING);
     }
 
     @EventHandler

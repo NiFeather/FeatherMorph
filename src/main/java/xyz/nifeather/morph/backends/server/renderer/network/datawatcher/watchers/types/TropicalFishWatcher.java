@@ -9,7 +9,7 @@ import org.bukkit.entity.TropicalFish;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
-import xyz.nifeather.morph.misc.disguiseProperty.values.TropicalFishProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.values.TropicalFishPropertyCollection;
 
 public class TropicalFishWatcher extends LivingEntityWatcher
 {
@@ -33,7 +33,7 @@ public class TropicalFishWatcher extends LivingEntityWatcher
     @Override
     protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
-        var tropicalProperties = DisguiseProperties.INSTANCE.getOrThrow(TropicalFishProperties.class);
+        var tropicalProperties = DisguiseProperties.INSTANCE.getCollectionOrThrow(TropicalFishPropertyCollection.class);
 
         if (property.equals(tropicalProperties.BODY_COLOR))
         {

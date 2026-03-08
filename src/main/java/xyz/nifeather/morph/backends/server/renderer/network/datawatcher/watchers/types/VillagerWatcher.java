@@ -12,7 +12,7 @@ import org.bukkit.entity.Villager;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
-import xyz.nifeather.morph.misc.disguiseProperty.values.VillagerProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.values.VillagerPropertyCollection;
 import xyz.nifeather.morph.utilities.MathUtils;
 
 import java.util.Objects;
@@ -51,7 +51,7 @@ public class VillagerWatcher extends LivingEntityWatcher
     @Override
     protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
-        var properties = DisguiseProperties.INSTANCE.getOrThrow(VillagerProperties.class);
+        var properties = DisguiseProperties.INSTANCE.getCollectionOrThrow(VillagerPropertyCollection.class);
 
         if (property.equals(properties.LEVEL))
         {

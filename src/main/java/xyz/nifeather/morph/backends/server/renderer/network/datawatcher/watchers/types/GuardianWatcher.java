@@ -5,7 +5,7 @@ import org.bukkit.entity.Player;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
-import xyz.nifeather.morph.misc.disguiseProperty.values.GuardianProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.values.GuardianPropertyCollection;
 
 public class GuardianWatcher extends LivingEntityWatcher
 {
@@ -25,7 +25,7 @@ public class GuardianWatcher extends LivingEntityWatcher
     @Override
     protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
-        var properties = DisguiseProperties.INSTANCE.getOrThrow(GuardianProperties.class);
+        var properties = DisguiseProperties.INSTANCE.getCollectionOrThrow(GuardianPropertyCollection.class);
 
         if (property.equals(properties.ATTACK_TARGET))
         {

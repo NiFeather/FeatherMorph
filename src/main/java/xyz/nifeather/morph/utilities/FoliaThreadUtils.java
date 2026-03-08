@@ -5,7 +5,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.craftbukkit.CraftWorld;
-import org.bukkit.craftbukkit.entity.CraftEntity;
 import org.bukkit.entity.Entity;
 import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.misc.EntityRetiredException;
@@ -96,10 +95,17 @@ public class FoliaThreadUtils
 
     public static boolean isTickThreadFor(@Nullable Entity bukkitEntity)
     {
-        if (bukkitEntity == null) return false;
+        return bukkitEntity != null && Bukkit.isOwnedByCurrentRegion(bukkitEntity);
+    }
 
-        var nmsEntity = ((CraftEntity) bukkitEntity).getHandleRaw();
-        return TickThread.isTickThreadFor(nmsEntity);
+    public static boolean isTickThreadFor(Location location)
+    {
+        return Bukkit.isOwnedByCurrentRegion(location);
+    }
+
+    public static boolean notInSameRegion(Location baseLocation, Location targetLocation)
+    {
+        return Bukkit.isOwnedByCurrentRegion(baseLocation) == Bukkit.isOwnedByCurrentRegion(targetLocation);
     }
 
     // https://docs.papermc.io/paper/dev/folia-support/#checking-for-folia

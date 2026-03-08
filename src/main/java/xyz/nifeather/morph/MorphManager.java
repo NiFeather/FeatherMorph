@@ -1,9 +1,9 @@
 package xyz.nifeather.morph;
 
+import com.google.common.collect.ImmutableList;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
-import it.unimi.dsi.fastutil.objects.ObjectLists;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.HoverEvent;
 import org.bukkit.*;
@@ -23,6 +23,8 @@ import xiamomc.pluginbase.Bindables.Bindable;
 import xiamomc.pluginbase.Bindables.BindableList;
 import xiamomc.pluginbase.Messages.FormattableMessage;
 import xyz.nifeather.morph.api.events.gameplay.*;
+import xyz.nifeather.morph.api.events.lifecycle.LateDisguiseBuildEvent;
+import xyz.nifeather.morph.api.events.lifecycle.LateDisguisePropertiesSetupEvent;
 import xyz.nifeather.morph.api.events.lifecycle.ManagerFinishedInitializeEvent;
 import xyz.nifeather.morph.api.events.misc.DataStoreSwitchEvent;
 import xyz.nifeather.morph.api.morphs.skills.SkillNames;
@@ -31,17 +33,18 @@ import xyz.nifeather.morph.backends.DisguiseWrapper;
 import xyz.nifeather.morph.backends.WrapperProperties;
 import xyz.nifeather.morph.backends.client.ModBackend;
 import xyz.nifeather.morph.backends.server.ServerBackend;
-import xyz.nifeather.morph.config.ConfigOption;
+import xyz.nifeather.morph.config.ConfigOptions;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.interfaces.IManagePlayerData;
 import xyz.nifeather.morph.messages.strings.CommandStrings;
+import xyz.nifeather.morph.messages.strings.ExceptionStrings;
 import xyz.nifeather.morph.messages.strings.HintStrings;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.strings.MorphStrings;
 import xyz.nifeather.morph.misc.*;
 import xyz.nifeather.morph.misc.disguiseProperty.*;
 import xyz.nifeather.morph.misc.disguiseProperty.values.OffTreeProperties;
-import xyz.nifeather.morph.misc.disguiseProperty.values.PlayerProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.values.PlayerPropertyCollection;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 import xyz.nifeather.morph.network.Constants;
 import xyz.nifeather.morph.network.commands.S2C.S2CUpdatePropertiesCommand;
@@ -56,44 +59,47 @@ import xyz.nifeather.morph.providers.disguise.FallbackDisguiseProvider;
 import xyz.nifeather.morph.providers.disguise.PlayerDisguiseProvider;
 import xyz.nifeather.morph.providers.disguise.VanillaDisguiseProvider;
 import xyz.nifeather.morph.skills.SkillManager;
-import xyz.nifeather.morph.storage.offlinestore.OfflineDisguiseState;
-import xyz.nifeather.morph.storage.offlinestore.OfflineStateStore;
+import xyz.nifeather.morph.storage.offlinestore.SavedDisguise;
+import xyz.nifeather.morph.storage.offlinestore.SavedDisguiseStore;
 import xyz.nifeather.morph.storage.playerdata.PlayerDataStoreNew;
 import xyz.nifeather.morph.storage.playerdata.PlayerMeta;
 import xyz.nifeather.morph.utilities.DisguiseUtils;
+import xyz.nifeather.morph.utilities.ExceptionUtils;
 import xyz.nifeather.morph.utilities.NbtUtils;
 import xyz.nifeather.morph.utilities.PermissionUtils;
 
 import java.io.InvalidObjectException;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MorphManager extends MorphPluginObject implements IManagePlayerData
 {
-    private final List<DisguiseState> activeDisguises = ObjectLists.synchronize(new ObjectArrayList<>());
+    private final Map<UUID, DisguiseState> activeDisguises = new ConcurrentHashMap<>();
 
     private final IManagePlayerData defaultData = new PlayerDataStoreNew();
 
     @NotNull
-    private volatile IManagePlayerData data = new PlayerDataStoreNew();
+    private volatile IManagePlayerData playerdata = new PlayerDataStoreNew();
 
-    private final OfflineStateStore offlineStorage = new OfflineStateStore();
+    private final SavedDisguiseStore savedDisguises = new SavedDisguiseStore();
 
     public IManagePlayerData getDataStore()
     {
-        return data;
+        return playerdata;
     }
 
     public void setDataStore(@Nullable IManagePlayerData newDataStore)
     {
-        this.data = newDataStore == null ? defaultData : newDataStore;
+        this.playerdata = newDataStore == null ? defaultData : newDataStore;
         logger.info("Updating Player Data Store to %s".formatted(newDataStore));
 
-        reloadConfiguration();
+        reload();
 
-        new DataStoreSwitchEvent(this, this.data).callEvent();
+        new DataStoreSwitchEvent(this, this.playerdata).callEvent();
     }
 
     @Resolved
@@ -119,7 +125,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
     public MorphManager()
     {
-        offlineStorage.initializeStorage();
     }
 
     //region Backends
@@ -245,13 +250,13 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         logger.info("Default backend: %s".formatted(defaultBackend));
 
-        bannedDisguises = config.getBindableList(String.class, ConfigOption.BANNED_DISGUISES);
-        disabledWorlds = config.getBindableList(String.class, ConfigOption.DISGUISE_DISABLED_WORLDS);
+        bannedDisguises = config.getBindableList(String.class, ConfigOptions.BANNED_DISGUISES);
+        disabledWorlds = config.getBindableList(String.class, ConfigOptions.DISGUISE_DISABLED_WORLDS);
 
-        config.bind(allowHeadMorph, ConfigOption.ALLOW_HEAD_MORPH);
-        config.bind(allowAcquireMorph, ConfigOption.ALLOW_ACQUIRE_MORPHS);
-        config.bind(useClientRenderer, ConfigOption.USE_CLIENT_RENDERER);
-        config.bind(uuidRandomBaseString, ConfigOption.UUID_RANDOM_BASE);
+        config.bind(allowHeadMorph, ConfigOptions.ALLOW_HEAD_MORPH);
+        config.bind(allowAcquireMorph, ConfigOptions.ALLOW_ACQUIRE_MORPHS);
+        config.bind(useClientRenderer, ConfigOptions.USE_CLIENT_RENDERER);
+        config.bind(uuidRandomBaseString, ConfigOptions.UUID_RANDOM_BASE);
 
         registerProviders(ObjectList.of(
                 new VanillaDisguiseProvider(),
@@ -293,7 +298,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
      */
     public List<DisguiseState> getActiveDisguises()
     {
-        return new ObjectArrayList<>(activeDisguises);
+        return ImmutableList.copyOf(activeDisguises.values());
     }
 
     private final Map<UUID, Long> uuidMoprhTimeMap = new ConcurrentHashMap<>();
@@ -622,54 +627,28 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
             return true;
         }
-        catch (ParseErrorException e)
-        {
-            if (FeatherMorphMain.getInstance().debugOutputEnabled())
-                logger.warn("Unable to disguise player because a ParseErrorException has occurred", e);
-
-            var message = e.localizableMessage().orElseGet(() -> new FormattableMessage(plugin, e.getMessage()));
-
-            var msg = MorphStrings.errorWhileDisguisingUserFault()
-                    .resolve("error", message)
-                    .resolve("what", e.propertyName);
-
-            MessageUtils.send(source, msg, c -> c.hoverEvent(HoverEvent.showText(Component.text(e.underlyingMessage()))));
-
-            return false;
-        }
-        catch (PropertyValidationException e)
-        {
-            if (FeatherMorphMain.getInstance().debugOutputEnabled())
-                logger.error("Failed to disguise player because a PropertyValidationException has occurred", e);
-
-            var message = e.localizableMessage().orElseGet(() -> new FormattableMessage(plugin, e.getMessage()));
-
-            var msg = MorphStrings.errorWhileDisguisingWithError()
-                    .resolve("error", message);
-
-            MessageUtils.send(source, msg, c -> c.hoverEvent(HoverEvent.showText(Component.text(e.underlyingMessage()))));
-
-            return false;
-        }
-        catch (ExecutionErrorException e)
-        {
-            logger.error("Failed to disguise player because an ExecutionErrorException has occurred", e);
-
-            var message = e.localizableMessage().orElseGet(() -> new FormattableMessage(plugin, e.getMessage()));
-
-            var msg = MorphStrings.errorWhileDisguisingWithError()
-                    .resolve("error", message);
-
-            MessageUtils.send(source, msg, c -> c.hoverEvent(HoverEvent.showText(Component.text(e.underlyingMessage()))));
-
-            return false;
-        }
         catch (Exception e)
         {
-            logger.error("Unable to disguise player", e);
-            MessageUtils.send(source, MorphStrings.errorWhileDisguisingWithError().resolve("error", e.getMessage()));
+            if (FeatherMorphMain.getInstance().debugOutputEnabled())
+                logger.warn("Unable to disguise player because a(n) %s has occurred".formatted(e.getClass().getSimpleName()), e);
 
-            unMorph(parameters.targetPlayer);
+            if (!(e instanceof IUserFault))
+                logger.error("Unable to disguise player", e);
+
+            FormattableMessage message = switch (e)
+            {
+                case PropertyValidationException propertyValidationException ->
+                    MorphStrings.errorValidatingProperty().resolve("what", propertyValidationException.propertyName);
+
+                case ParseErrorException parseErrorException ->
+                    MorphStrings.errorParsingProperty().resolve("what", parseErrorException.propertyName);
+
+                default -> MorphStrings.errorWhileDisguisingWithError();
+            };
+
+            message.resolve("error", ExceptionUtils.getExceptionMessageShort(e));
+
+            MessageUtils.send(source, message, c -> c.hoverEvent(HoverEvent.showText(ExceptionUtils.getExceptionDetail(e))));
 
             return false;
         }
@@ -742,7 +721,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         if (!parameters.bypassAvailableCheck)
         {
             String finalKey = disguiseIdentifier;
-            info = getAvaliableDisguisesFor(player).stream()
+            info = getAvailableDisguisesFor(player).stream()
                     .filter(i -> i.getIdentifier().equals(finalKey)).findFirst().orElse(null);
         }
         else if (!disguiseIdentifier.equals("minecraft:player")) // 禁止不带参数的玩家伪装
@@ -850,7 +829,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     public static final String SESSIONKEY_TARGET_ENTITY = "MORPHMANAGER_TARGET_ENTITY";
 
     private void buildDisguise(DisguiseBuildResult result,
-                               MorphParameters parameters) throws ParseErrorException, PropertyValidationException, NullPointerException
+                               MorphParameters parameters) throws ParseErrorException, PropertyValidationException, ExecutionErrorException, NullPointerException
     {
         if (!result.success())
             throw new IllegalArgumentException("Passing a failed result to postDisguise() !");
@@ -863,21 +842,13 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         var wrapper = state.getDisguiseWrapper();
 
         // 设定形态属性
-        UUID virtualEntityUUID;
 
-        if (PermissionUtils.hasPermission(player, CommonPermissions.DISGUISE_USE_REAL_UUID, false))
-        {
-            virtualEntityUUID = player.getUniqueId();
-        }
-        else
-        {
-            // 设定初始UUID
-            var str = uuidRandomBaseString.get()
-                    + parameters.targetDisguiseIdentifier()
-                    + player.getName();
+        // 设定初始UUID
+        var str = uuidRandomBaseString.get()
+                + parameters.targetDisguiseIdentifier()
+                + player.getName();
 
-            virtualEntityUUID = UUID.nameUUIDFromBytes(str.getBytes());
-        }
+        UUID virtualEntityUUID = UUID.nameUUIDFromBytes(str.getBytes());
 
         wrapper.writeProperty(OffTreeProperties.VIRTUAL_ENTITY_UUID, virtualEntityUUID);
 
@@ -887,8 +858,12 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         // Properties
         var propertyHandler = state.disguisePropertyHandler();
-        var properties = disguiseProperties.get(state.getEntityType());
-        propertyHandler.initProperties(properties); // Make sure that disguise properties are always available for further disguise construct
+        var propertyCollection = disguiseProperties.getCollection(state.getEntityType());
+
+        propertyHandler.reset();
+        propertyHandler.registerFromPropertyCollection(propertyCollection); // Make sure that disguise properties are always available for further disguise construct
+        disguiseProperties.lookupRange(parameters.propertiesInput.keySet())
+                .forEach(propertyHandler::addProperty);
 
         provider.buildDisguise(state, targetEntity);
         provider.setupProperties(state, targetEntity);
@@ -903,10 +878,34 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         }
 
         // Then apply properties
-        propertyHandler.updateFromPropertiesInput(parameters.propertiesInput, map -> properties.validateInput(map, player, parameters.bypassPermission));
+        propertyHandler.updateFromPropertiesInput(parameters.propertiesInput, player, parameters.bypassPermission ? EnumSet.of(ValidationFlag.SKIP_PERMISSIONS) : EnumSet.noneOf(ValidationFlag.class));
 
         propertyHandler.getAll().forEach((property, value) ->
                 wrapper.writeProperty((SingleProperty<Object>) property, value));
+
+        // Call the event so that others can manipulate the disguise properties
+        var lateSetupEvent = new LateDisguisePropertiesSetupEvent(player, state);
+        if (!lateSetupEvent.callEvent())
+        {
+            var failingException = lateSetupEvent.exception();
+            switch (failingException)
+            {
+                case null -> throw ExecutionErrorException.forMethod("MorphManager#buildDisguise")
+                        .withMessage("LateDisguisePropertiesSetupEvent cancelled by a plugin, but we didn't got any exceptions!")
+                        .withLocalizableMessage(ExceptionStrings.unknownError())
+                        .create();
+
+                case ParseErrorException pee -> throw pee;
+
+                case PropertyValidationException pve -> throw pve;
+
+                default -> throw ExecutionErrorException.forMethod("MorphManager#buildDisguise")
+                        .withMessage("We have exception reported by other plugins!")
+                        .causedBy(failingException)
+                        .create();
+            }
+
+        }
 
         provider.finalizeProperties(state);
 
@@ -920,7 +919,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         {
             var disguiseID = parameters.targetDisguiseIdentifier();
             var playerDisplay = provider.getDisplayName(disguiseID, MessageUtils.getLocale(player));
-            var serverDisplay = provider.getDisplayName(disguiseID, config.get(String.class, ConfigOption.LANGUAGE_CODE));
+            var serverDisplay = provider.getDisplayName(disguiseID, config.get(ConfigOptions.LANGUAGE_CODE));
 
             state.setPlayerDisplay(playerDisplay);
             state.setServerDisplay(serverDisplay);
@@ -931,6 +930,9 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         long availableAfter = skillManager.getAvailableAfter(player.getUniqueId(), state.getDisguiseIdentifier());
         state.setAvailableAfter(Math.max(plugin.getCurrentTick() + 40, availableAfter), true);
 
+        // Finally, we call the late disguise build event
+        new LateDisguiseBuildEvent(player, state).callEvent();
+
         state.removeSessionData(SESSIONKEY_TARGET_ENTITY);
     }
 
@@ -940,17 +942,19 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                                   PlayerMeta playerOptions) throws ExecutionErrorException
     {
         var player = parameters.targetPlayer;
+        var uuid = player.getUniqueId();
         var provider = getProvider(parameters.targetDisguiseIdentifier());
         var wrapper = newState.getDisguiseWrapper();
 
         // 玩家是否已有活跃的DisguiseState?
-        var currentState = getDisguiseStateFor(player);
+        var previousState = getDisguiseStateFor(player);
 
         // 重置上个State的伪装
-        if (currentState != null)
+        if (previousState != null)
         {
-            currentState.dispose();
-            activeDisguises.remove(currentState);
+            new PlayerSwitchMorphEvent(player, previousState, newState).callEvent();
+            previousState.dispose();
+            activeDisguises.remove(uuid, previousState);
         }
 
         wrapper.getBackend().disguise(player, wrapper);
@@ -967,11 +971,11 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                     });
 
                     return null;
-                }).thenAccept(activeDisguises::remove);
+                }).thenAccept(s -> activeDisguises.remove(uuid, s));
 
         newState.scheduleSelfUpdate();
 
-        this.activeDisguises.add(newState);
+        this.activeDisguises.put(player.getUniqueId(), newState);
 
         // 确保玩家可以根据设置看到自己的伪装
         newState.setServerSideSelfVisible(playerOptions.showDisguiseToSelf && !this.clientViewAvailable(player));
@@ -999,15 +1003,27 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             // For legacy client compat
             //todo: Remove at 2026, or 1.22 comes out
             if (clientApiVersion < Constants.ApiLevel.NETWORK_DISGUISE_PROPERTIES.protocolVersion)
+            {
                 clientHandler.sendCommand(player, new S2CSetSNbtCommand(newState.getCulledNbtString()));
+            }
             else
-                clientHandler.sendCommand(player, new S2CUpdatePropertiesCommand(newState.disguisePropertyHandler().toNetworkProperties()));
+            {
+                try
+                {
+                    clientHandler.sendCommand(player, new S2CUpdatePropertiesCommand(newState.disguisePropertyHandler().toNetworkProperties()));
+                }
+                catch (ParseErrorException | ExecutionErrorException e)
+                {
+                    newState.handleException(e);
+                    return false;
+                }
+            }
 
             provider.getInitialSyncCommands(newState).forEach(s -> clientHandler.sendCommand(player, s));
 
             if (clientApiVersion < Constants.ApiLevel.EQUIPMENT_AND_SKIN_ARE_NOW_PROPERTY.protocolVersion)
             {
-                var properties = DisguiseProperties.INSTANCE.getOrThrow(PlayerProperties.class);
+                var properties = DisguiseProperties.INSTANCE.getCollectionOrThrow(PlayerPropertyCollection.class);
                 newState.disguisePropertyHandler().getOptional(properties.SKIN)
                         .ifPresent(profile ->
                         {
@@ -1068,32 +1084,26 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         );
 
         var propertyHandler = state.disguisePropertyHandler();
-        var properties = propertyHandler.bindingProperties();
 
-        if (properties != null)
+        propertyHandler.hookOnPropertyWrite((property, value) ->
         {
-            propertyHandler.hookOnPropertyWrite((property, value) ->
+            if (state.disposed()) return;
+
+            // fix command not sending when player rejoins
+            Player pl = player.isConnected() ? player : Bukkit.getPlayer(player.getUniqueId());
+            Map<String ,String> diffMap = new ConcurrentHashMap<>();
+            try
             {
-                if (state.disposed()) return;
+                diffMap.put(property.id(), property.forValue(value));
+            }
+            catch (ParseErrorException e)
+            {
+                logger.error("Can't generate output from value", e);
+                return;
+            }
 
-                if (!properties.equals(propertyHandler.bindingProperties())) return;
-
-                // fix command not sending when player rejoins
-                Player pl = player.isConnected() ? player : Bukkit.getPlayer(player.getUniqueId());
-                Map<String ,String> diffMap = new ConcurrentHashMap<>();
-                try
-                {
-                    diffMap.put(property.id(), property.forValue(value));
-                }
-                catch (ParseErrorException e)
-                {
-                    logger.error("Can't generate output from value", e);
-                    return;
-                }
-
-                clientHandler.sendCommand(pl, new S2CUpdatePropertiesCommand(diffMap));
-            });
-        }
+            clientHandler.sendCommand(pl, new S2CUpdatePropertiesCommand(diffMap));
+        });
 
         // 发送提示
         var isClientPlayer = clientHandler.clientConnected(player);
@@ -1125,7 +1135,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     public S2CSyncAdminRevealCommand genMapCommand()
     {
         var map = new HashMap<Integer, String>();
-        for (DisguiseState disguiseState : this.activeDisguises)
+        for (DisguiseState disguiseState : activeDisguises.values())
         {
             var player = disguiseState.getPlayer();
             map.put(player.getEntityId(), player.getName());
@@ -1168,9 +1178,21 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         // For legacy client compat
         //todo: Remove at 2026, or 1.22 comes out
         if (playerApiVersion < Constants.ApiLevel.NETWORK_DISGUISE_PROPERTIES.protocolVersion)
+        {
             clientHandler.sendCommand(player, new S2CSetSNbtCommand(state.getCulledNbtString()));
+        }
         else
-            clientHandler.sendCommand(player, new S2CUpdatePropertiesCommand(state.disguisePropertyHandler().toNetworkProperties()));
+        {
+            try
+            {
+                clientHandler.sendCommand(player, new S2CUpdatePropertiesCommand(state.disguisePropertyHandler().toNetworkProperties()));
+            }
+            catch (ParseErrorException | ExecutionErrorException e)
+            {
+                state.handleException(e);
+                return;
+            }
+        }
 
         //刷新主动
         state.applyCooldownToClient();
@@ -1190,7 +1212,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         if (playerApiVersion < Constants.ApiLevel.EQUIPMENT_AND_SKIN_ARE_NOW_PROPERTY.protocolVersion)
         {
-            var properties = DisguiseProperties.INSTANCE.getOrThrow(PlayerProperties.class);
+            var properties = DisguiseProperties.INSTANCE.getCollectionOrThrow(PlayerPropertyCollection.class);
             state.disguisePropertyHandler().getOptional(properties.SKIN)
                     .ifPresent(profile ->
                     {
@@ -1209,12 +1231,11 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
      */
     public void unMorphAll(boolean ignoreOffline)
     {
-        var players = new ObjectArrayList<>(activeDisguises);
-        players.forEach(i ->
+        Map.copyOf(activeDisguises).forEach((uuid, state) ->
         {
-            if (ignoreOffline && !i.getPlayer().isOnline()) return;
+            if (ignoreOffline && !state.getPlayer().isOnline()) return;
 
-            unMorph(i.getPlayer(), i.getPlayer(), true, true);
+            unMorph(state.getPlayer(), state.getPlayer(), true, true);
         });
     }
 
@@ -1258,6 +1279,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     {
         // 确保source不为null
         source = source == null ? nilCommandSource : source;
+        var uuid = player.getUniqueId();
 
         // 检查玩家是否可以通过指令或客户端取消伪装
         if (!bypassPermission && !player.hasPermission(CommonPermissions.UNMORPH))
@@ -1267,10 +1289,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         }
 
         // 获取当前伪装状态
-        var state = activeDisguises.stream()
-                .filter(s -> s.getPlayer().getUniqueId().equals(player.getUniqueId()))
-                .findFirst()
-                .orElse(null);
+        var state = activeDisguises.getOrDefault(uuid, null);
 
         // 如果当前没有状态，则不做任何事
         if (state == null)
@@ -1301,7 +1320,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         }
 
         // 从disguiseStates里移除此状态
-        activeDisguises.remove(state);
+        activeDisguises.remove(uuid, state);
 
         // 更新最后操作时间
         updateLastPlayerMorphOperationTime(player);
@@ -1323,7 +1342,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         clientHandler.sendCommand(player, new S2CSetAvailableAnimationsCommand(List.of()));
 
         // 调用事件
-        new PlayerUnMorphEvent(player).callEvent();
+        new PlayerUnMorphEvent(player, state).callEvent();
 
         // 向管理员发送map移除指令
         modNetworkingHelper.sendCommandToRevealablePlayers(new S2CRemoveAdminRevealCommand(player.getEntityId()));
@@ -1377,7 +1396,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     public void setSelfDisguiseVisible(Player player, boolean value, boolean saveToConfig, boolean dontSetServerSide, boolean noClientCommand)
     {
         var state = getDisguiseStateFor(player);
-        var config = data.getPlayerMeta(player);
+        var config = playerdata.getPlayerMeta(player);
 
         if (state != null)
         {
@@ -1410,9 +1429,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     {
         if (player == null) return null;
 
-        return this.activeDisguises.stream()
-                .filter(i -> !i.disposed() && i.getPlayer().getUniqueId().equals(player.getUniqueId()))
-                .findFirst().orElse(null);
+        return this.activeDisguises.getOrDefault(player.getUniqueId(), null);
     }
 
     @Nullable
@@ -1423,34 +1440,23 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         return getDisguiseStateFor(player);
     }
 
-    public void onPluginDisable()
+    public void onShutdown()
     {
-        getActiveDisguises().forEach(s ->
-        {
-            var player = s.getPlayer();
-
-            MessageUtils.send(player, MorphStrings.resetString());
-
-            if (!player.isOnline())
-                offlineStorage.pushDisguiseState(s);
-        });
-
+        getActiveDisguises().forEach(savedDisguises::save);
         unMorphAll(false);
-        saveConfiguration();
-
-        offlineStorage.saveConfiguration();
+        save();
 
         providers.clear();
     }
 
-    public OfflineDisguiseState getOfflineState(Player player)
+    public SavedDisguise getOfflineState(Player player)
     {
-        return offlineStorage.popDisguiseState(player.getUniqueId());
+        return savedDisguises.read(player.getUniqueId());
     }
 
-    public List<OfflineDisguiseState> getAvaliableOfflineStates()
+    public List<String> availableOfflineDisguises()
     {
-        return offlineStorage.getAvaliableDisguiseStates();
+        return savedDisguises.listNames();
     }
 
     public boolean disguiseFromState(DisguiseState state)
@@ -1485,61 +1491,12 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
      * @param offlineState
      * @return Disguise result
      */
-    public OfflineDisguiseResult disguiseFromOfflineState(Player player, OfflineDisguiseState offlineState)
+    public OfflineDisguiseResult disguiseFromOfflineState(Player player, SavedDisguise offlineState)
     {
-        try
-        {
-            if (!player.getUniqueId().equals(offlineState.playerUUID))
-            {
-                logger.error("OfflineState UUID mismatch: %s <-> %s".formatted(player.getUniqueId(), offlineState.playerUUID));
-                return OfflineDisguiseResult.FAIL;
-            }
-
-            var key = offlineState.disguiseID;
-
-            if (disguiseDisabled(key) || !getPlayerMeta(player).getUnlockedDisguiseIdentifiers().contains(key))
-                return OfflineDisguiseResult.FAIL;
-
-            if (DisguiseTypes.fromId(key) == DisguiseTypes.UNKNOWN) return OfflineDisguiseResult.FAIL;
-
-            var provider = getProvider(DisguiseTypes.fromId(key).getNameSpace());
-
-            var state = DisguiseStateGenerator.fromOfflineState(offlineState,
-                    clientHandler.getPlayerOption(player, true), getPlayerMeta(player), skillManager, provider.getPreferredBackend());
-
-            if (state != null)
-            {
-                this.disguiseFromState(state);
-
-                // 向管理员发送map消息
-                modNetworkingHelper.sendCommandToRevealablePlayers(modNetworkingHelper.genPartialMapCommand(state));
-
-                new PlayerDisguisedFromOfflineStateEvent(player, state).callEvent();
-
-                return OfflineDisguiseResult.SUCCESS;
-            }
-
-            //有限还原
-            if (morph(player, player, key, null))
-            {
-                var newState = getDisguiseStateFor(player);
-
-                if (newState != null)
-                    new PlayerDisguisedFromOfflineStateEvent(player, newState).callEvent();
-
-                return OfflineDisguiseResult.LIMITED;
-            }
-            else
-            {
-                return OfflineDisguiseResult.FAIL;
-            }
-        }
-        catch (Throwable t)
-        {
-            logger.error("Unable to recover disguise from OfflineState", t);
-        }
-
-        return OfflineDisguiseResult.FAIL;
+        return morph(
+                MorphParameters.create(player, offlineState.disguiseIdentifier)
+                        .withProperties(offlineState.properties)
+            ) ? OfflineDisguiseResult.SUCCESS : OfflineDisguiseResult.FAIL;
     }
 
     //endregion 玩家伪装相关
@@ -1550,13 +1507,13 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     @Nullable
     public DisguiseMeta getDisguiseMeta(String rawString)
     {
-        return data.getDisguiseMeta(rawString);
+        return playerdata.getDisguiseMeta(rawString);
     }
 
     @Override
-    public List<DisguiseMeta> getAvaliableDisguisesFor(Player player)
+    public List<DisguiseMeta> getAvailableDisguisesFor(Player player)
     {
-        var avail = data.getAvaliableDisguisesFor(player);
+        var avail = playerdata.getAvailableDisguisesFor(player);
         return avail == null ? new ObjectArrayList<>() : avail;
     }
 
@@ -1571,7 +1528,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         if (!bypassPermission && !player.hasPermission(CommonPermissions.ACQUIRE_MORPH))
             return false;
 
-        var success = data.grantMorphToPlayer(player, disguiseIdentifier);
+        var success = playerdata.grantMorphToPlayer(player, disguiseIdentifier);
 
         if (!success)
             return false;
@@ -1579,10 +1536,10 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         clientHandler.sendDiff(List.of(disguiseIdentifier), null, player);
         multiInstanceService.notifyDisguiseMetaChange(player.getUniqueId(), Operation.ADD_IF_ABSENT, disguiseIdentifier);
 
-        var config = data.getPlayerMeta(player);
+        var config = playerdata.getPlayerMeta(player);
         var locale = MessageUtils.getLocale(player);
 
-        var meta = data.getDisguiseMeta(disguiseIdentifier);
+        var meta = playerdata.getDisguiseMeta(disguiseIdentifier);
         if (meta == null)
             return false;
 
@@ -1615,7 +1572,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     @Override
     public boolean revokeMorphFromPlayer(Player player, String disguiseIdentifier)
     {
-        var success = data.revokeMorphFromPlayer(player, disguiseIdentifier);
+        var success = playerdata.revokeMorphFromPlayer(player, disguiseIdentifier);
 
         if (success)
         {
@@ -1623,7 +1580,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             multiInstanceService.notifyDisguiseMetaChange(player.getUniqueId(), Operation.REMOVE, disguiseIdentifier);
 
             var locale = MessageUtils.getLocale(player);
-            var meta = data.getDisguiseMeta(disguiseIdentifier);
+            var meta = playerdata.getDisguiseMeta(disguiseIdentifier);
             assert meta != null; // 和上面一样
 
             var message = MorphStrings.morphLockedString()
@@ -1642,27 +1599,26 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     @Override
     public @NotNull PlayerMeta getPlayerMeta(OfflinePlayer player)
     {
-        return data.getPlayerMeta(player);
+        return playerdata.getPlayerMeta(player);
     }
 
-    public void refreshDisguiseUnlockStateToAllPlayers()
-    {
-        featherMorph().getPlatform().onlinePlayersNative().forEach(p -> clientHandler.refreshPlayerClientMorphs(this.getPlayerMeta(p).getUnlockedDisguiseIdentifiers(), p));
-    }
+    private volatile int reloadToken = 0;
 
     @Override
-    public boolean reloadConfiguration()
+    public boolean reload()
     {
         //重载完数据后要发到离线存储的人
         var stateToOfflineStore = new ObjectArrayList<DisguiseState>();
 
-        activeDisguises.forEach(s ->
+        Map.copyOf(activeDisguises).forEach((uuid, state) ->
         {
-            if (!s.getPlayer().isOnline())
-                stateToOfflineStore.add(s);
+            if (!state.getPlayer().isOnline())
+            {
+                stateToOfflineStore.add(state);
+                activeDisguises.remove(uuid, state);
+            }
         });
 
-        activeDisguises.removeAll(stateToOfflineStore);
         var stateToRecover = getActiveDisguises();
         stateToRecover = stateToRecover.stream()
                 .map(oldState -> oldState.createCopy(oldState.getPlayer()))
@@ -1670,9 +1626,9 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
 
         unMorphAll(false);
 
-        var success = data.reloadConfiguration() && offlineStorage.reloadConfiguration();
+        var success = playerdata.reload();
 
-        stateToOfflineStore.forEach(offlineStorage::pushDisguiseState);
+        stateToOfflineStore.forEach(savedDisguises::save);
 
         //重载完成后恢复玩家伪装
         stateToRecover.forEach(s ->
@@ -1697,35 +1653,39 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             });
         });
 
-        refreshDisguiseUnlockStateToAllPlayers();
+        var currentToken = ThreadLocalRandom.current().nextInt();
+        this.reloadToken = currentToken;
+
+        featherMorph().getPlatform().onlinePlayersNative().forEach(p ->
+        {
+            if (this.reloadToken != currentToken) return;
+
+            this.loadPlayerDataAsync(p.getUniqueId()).thenAccept(meta ->
+            {
+                clientHandler.refreshPlayerClientMorphs(meta.getUnlockedDisguiseIdentifiers(), p);
+            });
+        });
 
         return success;
     }
 
     @Override
-    public boolean saveConfiguration()
+    public boolean save()
     {
-        return data.saveConfiguration() && offlineStorage.saveConfiguration();
+        return playerdata.save();
     }
 
     @Override
-    public void shouldLoadAllData(boolean shouldLoadAllData)
+    public List<PlayerMeta> getRange(List<UUID> list)
     {
-        data.shouldLoadAllData(shouldLoadAllData);
+        return playerdata.getRange(list);
     }
 
     @Override
-    public List<PlayerMeta> listAll()
+    public CompletableFuture<PlayerMeta> loadPlayerDataAsync(UUID uuid)
     {
-        return data.listAll();
+        return playerdata.loadPlayerDataAsync(uuid);
     }
 
     //endregion Implementation of IManagePlayerData
-
-    @ApiStatus.Internal
-    public List<PlayerMeta> listAllPlayerMeta()
-    {
-        data.shouldLoadAllData(true);
-        return data.listAll();
-    }
 }

@@ -49,7 +49,7 @@ public class MorphNearestAttackableGoal extends Goal
             return false;
 
         if (targetedEntity != null)
-            return checkTargetEntity();
+            return targetStillValidForGoal();
 
         if (ThreadLocalRandom.current().nextInt(10) != 0)
             return false;
@@ -60,7 +60,7 @@ public class MorphNearestAttackableGoal extends Goal
         return newTarget != null;
     }
 
-    private boolean checkTargetEntity()
+    private boolean targetStillValidForGoal()
     {
         var target = targetedEntity;
         if (target == null) return false;
@@ -68,32 +68,35 @@ public class MorphNearestAttackableGoal extends Goal
         if (!FoliaThreadUtils.isTickThreadFor(target))
             return false;
 
-        boolean cancelTarget;
+        boolean shouldStopThisGoal;
 
         // 当满足以下任一条件时，取消仇恨：
         // 处于不同的世界
         // 目标超过跟随距离
         // 玩家不在线
         // 玩家不是生存模式
-        cancelTarget = !mob.getWorld().equals(target.getWorld());
-        cancelTarget = cancelTarget || target.getLocation().distance(mob.getLocation()) > getFollowRange();
+        shouldStopThisGoal = FoliaThreadUtils.notInSameRegion(mob.getLocation(), target.getLocation());
+        shouldStopThisGoal = shouldStopThisGoal || target.getLocation().distance(mob.getLocation()) > getFollowRange();
 
         if (target instanceof Player targetPlayer)
         {
             var gamemode = targetPlayer.getGameMode();
 
-            cancelTarget = cancelTarget || !targetPlayer.isOnline();
-            cancelTarget = cancelTarget || gamemode.isInvulnerable();
+            shouldStopThisGoal = shouldStopThisGoal
+                    || !targetPlayer.isOnline()
+                    || gamemode.isInvulnerable();
 
-            // 如果玩家后来变成了其他会导致恐慌的类型，也取消仇恨
+            // Check for cached DisguiseState:
+            // If the player has not changed their disguise, we can continue checking whether the mob should hostile to the disguise.
+            // If the player has changed their disguise, we should cancel and find other target next time `canUse` is called.
             var state = cachedTargetEntityState;
             if (state != null && !state.disposed())
-                cancelTarget = cancelTarget || EntityTypeUtils.panicsFrom(mob.getType(), state.getEntityType());
+                shouldStopThisGoal = shouldStopThisGoal || EntityTypeUtils.panicsFrom(mob.getType(), state.getEntityType());
             else
-                cancelTarget = true;
+                shouldStopThisGoal = true;
         }
 
-        return !cancelTarget;
+        return !shouldStopThisGoal;
     }
 
     private double getFollowRange()

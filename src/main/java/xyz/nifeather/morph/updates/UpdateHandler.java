@@ -1,6 +1,7 @@
 package xyz.nifeather.morph.updates;
 
 import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -13,11 +14,12 @@ import xiamomc.pluginbase.Bindables.Bindable;
 import xiamomc.pluginbase.Messages.FormattableMessage;
 import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.MorphPluginObject;
-import xyz.nifeather.morph.config.ConfigOption;
+import xyz.nifeather.morph.config.ConfigOptions;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.strings.UpdateStrings;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
+import xyz.nifeather.morph.utilities.FoliaThreadUtils;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -42,7 +44,7 @@ public class UpdateHandler extends MorphPluginObject
     @Initializer
     private void load(MorphConfigManager config)
     {
-        config.bind(checkUpdate, ConfigOption.CHECK_UPDATE);
+        config.bind(checkUpdate, ConfigOptions.CHECK_UPDATE);
 
         this.update();
     }
@@ -171,16 +173,14 @@ public class UpdateHandler extends MorphPluginObject
             // 反序列化为Map
             // 之后看情况再考虑要不要反序列化成一个类
             var gson = new GsonBuilder().create();
-            var versionList = gson.fromJson(responseStr, ArrayList.class);
+            var versionList = gson.fromJson(responseStr, new TypeToken<ArrayList<Map<?, ?>>>(){});
             var metaList = new ObjectArrayList<SingleUpdateInfoMeta>();
-            for (Object o : versionList)
-            {
-                if (o instanceof Map<?,?> map)
-                    metaList.add(SingleUpdateInfoMeta.fromMap(map));
-                else
-                    logger.warn("Cant deserialize element to SingleUpdateInfoMeta: Not a map (" + o + ")");
-            }
+            for (var map : versionList)
+                metaList.add(SingleUpdateInfoMeta.fromMap(map));
 
+            // Setup lookup brand here so that we don't create String every time we filter a SingleUpdateInfoMeta
+            // I'm not using `Bukkit.getName()` because this now can return downstream implements like Lophine, Luminol, Leaves, etc.
+            String lookupBrand = FoliaThreadUtils.isFolia() ? "Folia" : "Paper";
             var matchMeta = metaList.stream()
                     .filter(m ->
                     {
@@ -188,7 +188,7 @@ public class UpdateHandler extends MorphPluginObject
                         if (supportedLoaders == null) return false;
 
                         var isRelease = "Release".equalsIgnoreCase(m.versionType);
-                        var loaderMatch = supportedLoaders.stream().anyMatch(s -> s.equalsIgnoreCase(Platforms.fromName(Bukkit.getName()).getImplName()));
+                        var loaderMatch = supportedLoaders.stream().anyMatch(s -> s.equalsIgnoreCase(lookupBrand));
 
                         return isRelease && loaderMatch;
                     }).findFirst().orElse(null);

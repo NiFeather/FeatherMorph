@@ -14,12 +14,14 @@ import xyz.nifeather.morph.api.morphs.abilities.AbilityNames;
 import xyz.nifeather.morph.api.morphs.skills.SkillNames;
 import xyz.nifeather.morph.misc.disguiseProperty.ParseErrorException;
 import xyz.nifeather.morph.skills.DefaultConfigGenerator;
+import xyz.nifeather.morph.skills.options.DashConfiguration;
 import xyz.nifeather.morph.storage.DirectoryJsonBasedStorage;
 import xyz.nifeather.morph.storage.MorphJsonBasedStorage;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.function.Consumer;
 
 public class SkillsConfigurationStoreNew extends DirectoryJsonBasedStorage<SkillAbilityConfigContainer>
 {
@@ -34,13 +36,16 @@ public class SkillsConfigurationStoreNew extends DirectoryJsonBasedStorage<Skill
         var packageVersion = this.getPackageVersion();
 
         if (packageVersion < TARGET_PACKAGE_VERSION)
+        {
             update(packageVersion);
+            this.clearCache();
+        }
 
         if (packageVersion > TARGET_PACKAGE_VERSION)
             logger.warn("The package version is newer than our implementation! Errors may occur!");
     }
 
-    private static final int TARGET_PACKAGE_VERSION = PackageVersions.MANNEQUIN_SKILL;
+    private static final int TARGET_PACKAGE_VERSION = PackageVersions.DASH;
 
     private void update(int currentVersion)
     {
@@ -97,6 +102,106 @@ public class SkillsConfigurationStoreNew extends DirectoryJsonBasedStorage<Skill
         if (currentVersion < PackageVersions.MANNEQUIN_SKILL)
         {
             saveEntityTypeConfiguration(generatedConfigurations, EntityType.MANNEQUIN);
+        }
+
+        if (currentVersion < PackageVersions.EXTENDED_INVENTORY_SKILL)
+        {
+            logger.info("Started adding fake_equip skill for several mobs");
+            EntityType[] typesToMigrate = new EntityType[]
+                    {
+                            EntityType.PIG,
+                            EntityType.STRIDER,
+
+                            EntityType.ZOMBIE,
+                            EntityType.DROWNED,
+                            EntityType.ZOMBIE_VILLAGER,
+                            EntityType.SKELETON,
+                            EntityType.STRAY,
+                            EntityType.WITHER_SKELETON,
+                            EntityType.ZOMBIE_VILLAGER,
+                            EntityType.BOGGED,
+
+                            EntityType.EVOKER,
+                            EntityType.PILLAGER,
+                            EntityType.VINDICATOR,
+
+                            EntityType.ZOMBIE_HORSE,
+                            EntityType.SKELETON_HORSE,
+
+                            EntityType.VEX,
+                            EntityType.ALLAY,
+
+                            EntityType.FOX,
+
+                            EntityType.HORSE,
+
+                            EntityType.PIGLIN,
+                            EntityType.PIGLIN_BRUTE,
+                            EntityType.ZOMBIFIED_PIGLIN,
+
+                            EntityType.VILLAGER,
+                            EntityType.WANDERING_TRADER,
+                            EntityType.WITCH
+                    };
+
+            Consumer<EntityType> migrator = type ->
+            {
+                var config = this.get(type.key().asString());
+
+                if (config == null)
+                {
+                    saveEntityTypeConfiguration(generatedConfigurations, type);
+                    return;
+                }
+
+                if (!config.getSkillIdentifier().equals(SkillNames.NONE))
+                    return;
+
+                config.setSkillIdentifier(SkillNames.FAKE_EQUIP)
+                        .setSkillCooldown(20);
+
+                config.legacy_MobID = type.key().asString();
+                save(config);
+            };
+
+            for (EntityType entityType : typesToMigrate)
+                migrator.accept(entityType);
+
+            logger.info("Done adding fake_equip skill for several mobs");
+        }
+
+        if (currentVersion < PackageVersions.ZOMBIE_NAUTILUS_ABILITY)
+        {
+            saveEntityTypeConfiguration(generatedConfigurations, EntityType.ZOMBIE_NAUTILUS);
+            saveEntityTypeConfiguration(generatedConfigurations, EntityType.NAUTILUS);
+        }
+
+        if (currentVersion < PackageVersions.DASH)
+        {
+            saveEntityTypeConfiguration(generatedConfigurations, EntityType.CAMEL_HUSK);
+
+            Consumer<EntityType> migrator = type ->
+            {
+                var config = this.get(type.key().asString());
+
+                if (config == null)
+                {
+                    saveEntityTypeConfiguration(generatedConfigurations, type);
+                    return;
+                }
+
+                if (!config.getSkillIdentifier().equals(SkillNames.NONE))
+                    return;
+
+                config.setSkillIdentifier(SkillNames.DASH)
+                        .setOption(SkillNames.DASH, DashConfiguration.OPTION_HANDLER, new DashConfiguration(false, 1.023, "entity.camel.dash"))
+                        .setSkillCooldown(55);
+
+                config.legacy_MobID = type.key().asString();
+                save(config);
+            };
+
+            migrator.accept(EntityType.CAMEL);
         }
 
         setPackageVersion(TARGET_PACKAGE_VERSION);
@@ -349,6 +454,7 @@ public class SkillsConfigurationStoreNew extends DirectoryJsonBasedStorage<Skill
         return defaultConfig;
     }
 
+    @SuppressWarnings("removal")
     private static class LegacyReadonlyConfigurationStorage extends MorphJsonBasedStorage<SkillAbilityConfigurationContainer>
     {
         @Override
@@ -392,5 +498,22 @@ public class SkillsConfigurationStoreNew extends DirectoryJsonBasedStorage<Skill
         public static final int EXTRA_AIR_ABILITY = 7;
         public static final int POTION_MIGRATE = 8;
         public static final int MANNEQUIN_SKILL = 9;
+
+        /**
+         * Initial apply range for the {@link SkillNames#FAKE_EQUIP} skill has been extended to many entity types!
+         * <br>
+         * For all applicable types, see {@link DefaultConfigGenerator#generateSkills()}
+         */
+        public static final int EXTENDED_INVENTORY_SKILL = 10;
+
+        /**
+         * Zombie Nautilus should burn under sun
+         */
+        public static final int ZOMBIE_NAUTILUS_ABILITY = 11;
+
+        /**
+         * The `dash` skill is introduced for Nautilus / Zombie Nautilus / Camel / Camel Husk
+         */
+        public static final int DASH = 12;
     }
 }

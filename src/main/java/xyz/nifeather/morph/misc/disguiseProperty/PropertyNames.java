@@ -101,4 +101,7 @@ public class PropertyNames
     public static final String MANNEQUIN_HIDE_DESCRIPTION = "mannequin/hide_description";
     public static final String MANNEQUIN_SKIN = "mannequin/skin";
     public static final String MANNEQUIN_IMMOVABLE = "mannequin/immovable";
+
+    public static final String NAUTILUS_DASHING = "nautilus/dashing";
+    public static final String ZOMBIE_NAUTILUS_VARIANT = "zombie_nautilus/variant";
 }

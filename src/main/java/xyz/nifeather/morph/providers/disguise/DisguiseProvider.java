@@ -81,7 +81,7 @@ public abstract class DisguiseProvider extends MorphPluginObject
      */
     public void setupProperties(DisguiseState state, @Nullable Entity targetEntity)
     {
-        var matchingProperty = DisguiseProperties.INSTANCE.get(state.getEntityType());
+        var matchingProperty = DisguiseProperties.INSTANCE.getCollection(state.getEntityType());
         matchingProperty.setupProperties(state, targetEntity);
     }
 

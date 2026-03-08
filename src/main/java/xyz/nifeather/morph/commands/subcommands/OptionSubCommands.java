@@ -11,9 +11,9 @@ import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
+import xiamomc.pluginbase.Configuration.ConfigOption;
 import xiamomc.pluginbase.Messages.FormattableMessage;
 import xyz.nifeather.morph.commands.brigadier.BrigadierCommand;
-import xyz.nifeather.morph.config.ConfigOption;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.messages.strings.CommandStrings;
 import xyz.nifeather.morph.messages.MessageUtils;
@@ -29,9 +29,9 @@ public class OptionSubCommands
     {
         protected final String name;
         protected final MorphConfigManager config;
-        protected final ConfigOption option;
+        protected final ConfigOption<T> option;
 
-        protected BasicOptionCommand(String name, MorphConfigManager configManager, ConfigOption option)
+        protected BasicOptionCommand(String name, MorphConfigManager configManager, ConfigOption<T> option)
         {
             this.name = name;
             this.config = configManager;
@@ -48,12 +48,12 @@ public class OptionSubCommands
                             .resolve("value", value + ""));
         }
 
-        protected void lookupConfig(CommandSender sender, Class<?> type)
+        protected void lookupConfig(CommandSender sender)
         {
             MessageUtils.send(sender,
                     CommandStrings.optionValueString()
                             .resolve("what", name)
-                            .resolve("value", config.get(type, option) + ""));
+                            .resolve("value", config.get(option) + ""));
         }
 
         @Override
@@ -69,7 +69,7 @@ public class OptionSubCommands
 
         public LimiterStringListOptionCommand(String name,
                                             MorphConfigManager configManager,
-                                            ConfigOption option,
+                                            ConfigOption<String> option,
                                             List<String> knownValues)
         {
             super(name, configManager, option);
@@ -101,7 +101,7 @@ public class OptionSubCommands
 
         public int executesNoArg(CommandContext<CommandSourceStack> context)
         {
-            lookupConfig(context.getSource().getSender(), String.class);
+            lookupConfig(context.getSource().getSender());
             return 0;
         }
 
@@ -148,7 +148,7 @@ public class OptionSubCommands
 
     public static class StringListOptionBaseCommand extends BasicOptionCommand<List<String>>
     {
-        public StringListOptionBaseCommand(String name, MorphConfigManager configManager, ConfigOption option)
+        public StringListOptionBaseCommand(String name, MorphConfigManager configManager, ConfigOption<List<String>> option)
         {
             super(name, configManager, option);
         }
@@ -162,9 +162,9 @@ public class OptionSubCommands
         @Override
         public void registerAsChild(ArgumentBuilder<CommandSourceStack, ?> parentBuilder)
         {
-            var operationList = new OperationListCommand(config, option, name);
-            var operationAdd = new OperationAddCommand(config, option, name);
-            var operationRemove = new OperationRemoveCommand(config, option, name);
+            var operationList = new ListOperationListCommand(config, option, name);
+            var operationAdd = new ListOperationAddCommand(config, option, name);
+            var operationRemove = new ListOperationRemoveCommand(config, option, name);
 
             var thisBuilder = Commands.literal(name());
 
@@ -183,24 +183,23 @@ public class OptionSubCommands
         }
     }
 
-    private abstract static class OperationCommand extends BrigadierCommand
+    private abstract static class ListOperationCommand extends BrigadierCommand
     {
         protected final MorphConfigManager configManager;
-        protected final ConfigOption configOption;
+        protected final ConfigOption<List<String>> configOption;
         protected final String optionName;
 
-        public OperationCommand(MorphConfigManager configManager, ConfigOption option, String optionName)
+        public ListOperationCommand(MorphConfigManager configManager, ConfigOption<List<String>> option, String optionName)
         {
             this.configManager = configManager;
             this.configOption = option;
             this.optionName = optionName;
         }
-
     }
 
-    protected static class OperationRemoveCommand extends OperationCommand
+    protected static class ListOperationRemoveCommand extends ListOperationCommand
     {
-        public OperationRemoveCommand(MorphConfigManager configManager, ConfigOption option, String optionName)
+        public ListOperationRemoveCommand(MorphConfigManager configManager, ConfigOption<List<String>> option, String optionName)
         {
             super(configManager, option, optionName);
         }
@@ -264,9 +263,9 @@ public class OptionSubCommands
         }
     }
 
-    protected static class OperationAddCommand extends OperationCommand
+    protected static class ListOperationAddCommand extends ListOperationCommand
     {
-        public OperationAddCommand(MorphConfigManager configManager, ConfigOption option, String optionName)
+        public ListOperationAddCommand(MorphConfigManager configManager, ConfigOption<List<String>> option, String optionName)
         {
             super(configManager, option, optionName);
         }
@@ -343,9 +342,9 @@ public class OptionSubCommands
         }
     }
 
-    protected static class OperationListCommand extends OperationCommand
+    protected static class ListOperationListCommand extends ListOperationCommand
     {
-        public OperationListCommand(MorphConfigManager configManager, ConfigOption option, String optionName)
+        public ListOperationListCommand(MorphConfigManager configManager, ConfigOption<List<String>> option, String optionName)
         {
             super(configManager, option, optionName);
         }
@@ -396,7 +395,7 @@ public class OptionSubCommands
 
     public static class IntegerOptionCommand extends BasicOptionCommand<Integer>
     {
-        public IntegerOptionCommand(String name, MorphConfigManager configManager, ConfigOption option)
+        public IntegerOptionCommand(String name, MorphConfigManager configManager, ConfigOption<Integer> option)
         {
             super(name, configManager, option);
         }
@@ -453,7 +452,7 @@ public class OptionSubCommands
 
         public int executes(CommandContext<CommandSourceStack> context)
         {
-            lookupConfig(context.getSource().getSender(), Integer.class);
+            lookupConfig(context.getSource().getSender());
             return 1;
         }
 
@@ -475,7 +474,7 @@ public class OptionSubCommands
     {
         public BooleanOptionCommand(String name,
                                     MorphConfigManager config,
-                                    ConfigOption option)
+                                    ConfigOption<Boolean> option)
         {
             super(name, config, option);
         }
@@ -498,7 +497,7 @@ public class OptionSubCommands
 
         public int executes(CommandContext<CommandSourceStack> context)
         {
-            lookupConfig(context.getSource().getSender(), Boolean.class);
+            lookupConfig(context.getSource().getSender());
             return 1;
         }
 

@@ -2,6 +2,10 @@
 .idea/
 bin/
 
+# Custom framework
+# ... Yes I know excluding in this way is ugly
+src/main/java/xiamomc/pluginbase
+
 *.iml
 *.ipr
 *.iws

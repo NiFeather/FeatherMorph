@@ -9,19 +9,19 @@ import org.bukkit.entity.Player;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
-import xyz.nifeather.morph.misc.disguiseProperty.values.PigProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.values.PigPropertyCollection;
 
 import java.util.Objects;
 
 public class PigWatcher extends AgeableMobWatcher
 {
-    private final PigProperties pigProperties;
+    private final PigPropertyCollection pigProperties;
 
     public PigWatcher(Player bindingPlayer)
     {
         super(bindingPlayer, EntityType.PIG);
 
-        pigProperties = DisguiseProperties.INSTANCE.getOrThrow(PigProperties.class);
+        pigProperties = DisguiseProperties.INSTANCE.getCollectionOrThrow(PigPropertyCollection.class);
     }
 
     @Override

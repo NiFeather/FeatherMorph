@@ -6,11 +6,12 @@ import io.papermc.paper.command.brigadier.Commands;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Annotations.Resolved;
+import xiamomc.pluginbase.Configuration.ConfigOption;
 import xiamomc.pluginbase.Messages.FormattableMessage;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.commands.brigadier.IConvertibleBrigadier;
 import xyz.nifeather.morph.commands.subcommands.OptionSubCommands;
-import xyz.nifeather.morph.config.ConfigOption;
+import xyz.nifeather.morph.config.ConfigOptions;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.events.InteractionMirrorProcessor;
 import xyz.nifeather.morph.messages.strings.CommandNameStrings;
@@ -33,91 +34,91 @@ public class OptionSubCommand extends MorphPluginObject implements IConvertibleB
 
     public OptionSubCommand()
     {
-        subCommands.add(getToggle("bossbar", ConfigOption.DISPLAY_BOSSBAR, CommandNameStrings.bossbarString()));
+        subCommands.add(getToggle("bossbar", ConfigOptions.DISPLAY_BOSSBAR, CommandNameStrings.bossbarString()));
 
-        subCommands.add(getToggle("unmorph_on_death", ConfigOption.UNMORPH_ON_DEATH));
+        subCommands.add(getToggle("unmorph_on_death", ConfigOptions.UNMORPH_ON_DEATH));
 
-        //subCommands.with(getToggle("allow_local_disguise", ConfigOption.ALLOW_LD_DISGUISES, "ld", CommandNameStrings.allowLDDisguiseString()));
+        //subCommands.with(getToggle("allow_local_disguise", ConfigOptions.ALLOW_LD_DISGUISES, "ld", CommandNameStrings.allowLDDisguiseString()));
 
-        subCommands.add(getToggle("allow_client_mods", ConfigOption.ALLOW_CLIENT));
+        subCommands.add(getToggle("allow_client_mods", ConfigOptions.ALLOW_CLIENT));
 
-        subCommands.add(getToggle("piglin_brute_ignore_disguises", ConfigOption.PIGLIN_BRUTE_IGNORE_DISGUISES));
+        subCommands.add(getToggle("piglin_brute_ignore_disguises", ConfigOptions.PIGLIN_BRUTE_IGNORE_DISGUISES));
 
-        subCommands.add(getToggle("headmorph", ConfigOption.ALLOW_HEAD_MORPH, CommandNameStrings.headMorphString()));
+        subCommands.add(getToggle("headmorph", ConfigOptions.ALLOW_HEAD_MORPH, CommandNameStrings.headMorphString()));
 
-        subCommands.add(getToggle("chatoverride", ConfigOption.ALLOW_CHAT_OVERRIDE, CommandNameStrings.chatOverrideString()));
+        subCommands.add(getToggle("chatoverride", ConfigOptions.ALLOW_CHAT_OVERRIDE, CommandNameStrings.chatOverrideString()));
 
-        subCommands.add(getToggle("modify_bounding_boxes", ConfigOption.MODIFY_BOUNDING_BOX));
+        subCommands.add(getToggle("modify_bounding_boxes", ConfigOptions.MODIFY_BOUNDING_BOX));
 
-        subCommands.add(getToggle("force_protocol_version", ConfigOption.FORCE_TARGET_VERSION));
+        subCommands.add(getToggle("force_protocol_version", ConfigOptions.FORCE_TARGET_VERSION));
 
-        subCommands.add(getToggle("armorstand_show_arms", ConfigOption.ARMORSTAND_SHOW_ARMS));
+        subCommands.add(getToggle("armorstand_show_arms", ConfigOptions.ARMORSTAND_SHOW_ARMS));
 
-        subCommands.add(getMirrorMode("mirror_mode", ConfigOption.MIRROR_SELECTION_MODE, null));
-        subCommands.add(getToggle("mirror_interaction", ConfigOption.MIRROR_BEHAVIOR_DO_SIMULATION, CommandNameStrings.mirrorInteractionString()));
-        subCommands.add(getToggle("mirror_sneak", ConfigOption.MIRROR_BEHAVIOR_SNEAK, CommandNameStrings.mirrorSneakString()));
-        subCommands.add(getToggle("mirror_swaphand", ConfigOption.MIRROR_BEHAVIOR_SWAP_HAND, CommandNameStrings.mirrorSwapHandString()));
-        subCommands.add(getToggle("mirror_drop", ConfigOption.MIRROR_BEHAVIOR_DROP, CommandNameStrings.mirrorDropString()));
-        subCommands.add(getToggle("mirror_hotbar", ConfigOption.MIRROR_BEHAVIOR_HOTBAR, CommandNameStrings.mirrorHotbar()));
-        subCommands.add(getToggle("mirror_ignore_disguised", ConfigOption.MIRROR_IGNORE_DISGUISED, CommandNameStrings.mirrorIgnoreDisguised()));
-        subCommands.add(getInteger("mirror_control_distance", ConfigOption.MIRROR_CONTROL_DISTANCE));
-        subCommands.add(getToggle("mirror_log_operations", ConfigOption.MIRROR_LOG_OPERATION));
-        subCommands.add(getInteger("mirror_log_cleanup", ConfigOption.MIRROR_LOG_CLEANUP_DATE));
+        subCommands.add(getMirrorMode("mirror_mode", ConfigOptions.MIRROR_SELECTION_MODE, null));
+        subCommands.add(getToggle("mirror_interaction", ConfigOptions.MIRROR_BEHAVIOR_DO_SIMULATION, CommandNameStrings.mirrorInteractionString()));
+        subCommands.add(getToggle("mirror_sneak", ConfigOptions.MIRROR_BEHAVIOR_SNEAK, CommandNameStrings.mirrorSneakString()));
+        subCommands.add(getToggle("mirror_swaphand", ConfigOptions.MIRROR_BEHAVIOR_SWAP_HAND, CommandNameStrings.mirrorSwapHandString()));
+        subCommands.add(getToggle("mirror_drop", ConfigOptions.MIRROR_BEHAVIOR_DROP, CommandNameStrings.mirrorDropString()));
+        subCommands.add(getToggle("mirror_hotbar", ConfigOptions.MIRROR_BEHAVIOR_HOTBAR, CommandNameStrings.mirrorHotbar()));
+        subCommands.add(getToggle("mirror_ignore_disguised", ConfigOptions.MIRROR_IGNORE_DISGUISED, CommandNameStrings.mirrorIgnoreDisguised()));
+        subCommands.add(getInteger("mirror_control_distance", ConfigOptions.MIRROR_CONTROL_DISTANCE));
+        subCommands.add(getToggle("mirror_log_operations", ConfigOptions.MIRROR_LOG_OPERATION));
+        subCommands.add(getInteger("mirror_log_cleanup", ConfigOptions.MIRROR_LOG_CLEANUP_DATE));
 
-        subCommands.add(getToggle("debug_output", ConfigOption.DEBUG_OUTPUT));
-        subCommands.add(getToggle("revealing", ConfigOption.REVEALING));
+        subCommands.add(getToggle("debug_output", ConfigOptions.DEBUG_OUTPUT));
+        subCommands.add(getToggle("revealing", ConfigOptions.REVEALING));
 
-        subCommands.add(getToggle("check_update", ConfigOption.CHECK_UPDATE));
-        subCommands.add(getToggle("allow_acquire_morphs", ConfigOption.ALLOW_ACQUIRE_MORPHS));
+        subCommands.add(getToggle("check_update", ConfigOptions.CHECK_UPDATE));
+        subCommands.add(getToggle("allow_acquire_morphs", ConfigOptions.ALLOW_ACQUIRE_MORPHS));
 
-        subCommands.add(getToggle("log_outgoing_packets", ConfigOption.LOG_OUTGOING_PACKETS));
-        subCommands.add(getToggle("log_incoming_packets", ConfigOption.LOG_INCOMING_PACKETS));
+        subCommands.add(getToggle("log_outgoing_packets", ConfigOptions.LOG_OUTGOING_PACKETS));
+        subCommands.add(getToggle("log_incoming_packets", ConfigOptions.LOG_INCOMING_PACKETS));
 
-        subCommands.add(getToggle("allow_acquire_morphs", ConfigOption.ALLOW_ACQUIRE_MORPHS));
+        subCommands.add(getToggle("allow_acquire_morphs", ConfigOptions.ALLOW_ACQUIRE_MORPHS));
 
-        subCommands.add(getToggle("allow_flight", ConfigOption.ALLOW_FLIGHT));
+        subCommands.add(getToggle("allow_flight", ConfigOptions.ALLOW_FLIGHT));
 
-        subCommands.add(getToggle("client_renderer", ConfigOption.USE_CLIENT_RENDERER));
+        subCommands.add(getToggle("client_renderer", ConfigOptions.USE_CLIENT_RENDERER));
 
-        subCommands.add(getList("banned_disguises", ConfigOption.BANNED_DISGUISES, null));
-        subCommands.add(getList("nofly_worlds", ConfigOption.NOFLY_WORLDS, null));
-        //subCommands.add(getList("blacklist_tags", ConfigOption.BLACKLIST_TAGS, null));
-        //subCommands.add(getList("blacklist_nbt_pattern", ConfigOption.BLACKLIST_PATTERNS, null));
-        //subCommands.add(getList("disabled_worlds", ConfigOption.DISGUISE_DISABLED_WORLDS, null));
+        subCommands.add(getList("banned_disguises", ConfigOptions.BANNED_DISGUISES, null));
+        subCommands.add(getList("nofly_worlds", ConfigOptions.NOFLY_WORLDS, null));
+        //subCommands.add(getList("blacklist_tags", ConfigOptions.BLACKLIST_TAGS, null));
+        //subCommands.add(getList("blacklist_nbt_pattern", ConfigOptions.BLACKLIST_PATTERNS, null));
+        //subCommands.add(getList("disabled_worlds", ConfigOptions.DISGUISE_DISABLED_WORLDS, null));
 
-        subCommands.add(getToggle("ability_check_permissions", ConfigOption.DO_CHECK_ABILITY_PERMISSIONS, null));
+        subCommands.add(getToggle("ability_check_permissions", ConfigOptions.DO_CHECK_ABILITY_PERMISSIONS, null));
 
-        subCommands.add(getToggle("towny_allow_fly_in_wilderness", ConfigOption.TOWNY_ALLOW_FLY_IN_WILDERNESS));
+        subCommands.add(getToggle("towny_allow_fly_in_wilderness", ConfigOptions.TOWNY_ALLOW_FLY_IN_WILDERNESS));
     }
 
-    private IConvertibleBrigadier getList(String optionName, ConfigOption option,
+    private IConvertibleBrigadier getList(String optionName, ConfigOption<List<String>> option,
                                                                                  @Nullable FormattableMessage displayName)
     {
         return new OptionSubCommands.StringListOptionBaseCommand(optionName, config, option);
     }
 
-    private IConvertibleBrigadier getMirrorMode(String name, ConfigOption option, @Nullable FormattableMessage displayName)
+    private IConvertibleBrigadier getMirrorMode(String name, ConfigOption<String> option, @Nullable FormattableMessage displayName)
     {
         return new OptionSubCommands.LimiterStringListOptionCommand(
                 name, config, option, InteractionMirrorProcessor.InteractionMirrorSelectionMode.valuesLowerCase());
     }
 
-    private IConvertibleBrigadier getInteger(String name, ConfigOption option)
+    private IConvertibleBrigadier getInteger(String name, ConfigOption<Integer> option)
     {
         return getInteger(name, option, null);
     }
 
-    private IConvertibleBrigadier getInteger(String name, ConfigOption option, @Nullable FormattableMessage displayName)
+    private IConvertibleBrigadier getInteger(String name, ConfigOption<Integer> option, @Nullable FormattableMessage displayName)
     {
         return new OptionSubCommands.IntegerOptionCommand(name, config, option).min(-1);
     }
 
-    private IConvertibleBrigadier getToggle(String name, ConfigOption option)
+    private IConvertibleBrigadier getToggle(String name, ConfigOption<Boolean> option)
     {
         return getToggle(name, option, null);
     }
 
-    private IConvertibleBrigadier getToggle(String name, ConfigOption option, @Nullable FormattableMessage displayName)
+    private IConvertibleBrigadier getToggle(String name, ConfigOption<Boolean> option, @Nullable FormattableMessage displayName)
     {
         return new OptionSubCommands.BooleanOptionCommand(name, config, option);
     }

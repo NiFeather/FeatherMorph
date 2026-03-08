@@ -1,7 +1,5 @@
 package xyz.nifeather.morph.providers.disguise;
 
-import com.destroystokyo.paper.profile.PlayerProfile;
-import com.mojang.authlib.GameProfile;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.kyori.adventure.text.Component;
 import net.minecraft.world.entity.EntityDimensions;
@@ -19,15 +17,12 @@ import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
 import xyz.nifeather.morph.backends.DisguiseWrapper;
-import xyz.nifeather.morph.config.ConfigOption;
+import xyz.nifeather.morph.config.ConfigOptions;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.strings.MorphStrings;
 import xyz.nifeather.morph.messages.vanilla.MasterVanillaMessageStore;
 import xyz.nifeather.morph.misc.*;
-import xyz.nifeather.morph.misc.disguiseProperty.ParseErrorException;
-import xyz.nifeather.morph.misc.disguiseProperty.values.MannequinProperties;
-import xyz.nifeather.morph.misc.skins.PlayerSkinProvider;
 import xyz.nifeather.morph.providers.animation.AnimationProvider;
 import xyz.nifeather.morph.providers.animation.provider.VanillaAnimationProvider;
 import xyz.nifeather.morph.utilities.*;
@@ -36,7 +31,6 @@ import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.UUID;
 
 public class VanillaDisguiseProvider extends DefaultDisguiseProvider
 {
@@ -89,11 +83,11 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
     @Initializer
     private void load(MorphConfigManager configManager)
     {
-        configManager.bind(armorStandShowArms, ConfigOption.ARMORSTAND_SHOW_ARMS);
-        configManager.bind(doHealthScale, ConfigOption.HEALTH_SCALE);
-        configManager.bind(healthCap, ConfigOption.HEALTH_SCALE_MAX_HEALTH);
-        configManager.bind(modifyBoundingBoxes, ConfigOption.MODIFY_BOUNDING_BOX);
-        configManager.bind(checkSpaceBoundingBox, ConfigOption.CHECK_AVAILABLE_SPACE);
+        configManager.bind(armorStandShowArms, ConfigOptions.ARMORSTAND_SHOW_ARMS);
+        configManager.bind(doHealthScale, ConfigOptions.HEALTH_SCALE);
+        configManager.bind(healthCap, ConfigOptions.HEALTH_SCALE_MAX_HEALTH);
+        configManager.bind(modifyBoundingBoxes, ConfigOptions.MODIFY_BOUNDING_BOX);
+        configManager.bind(checkSpaceBoundingBox, ConfigOptions.CHECK_AVAILABLE_SPACE);
 
         modifyBoundingBoxes.onValueChanged((o, n) ->
         {
@@ -144,38 +138,6 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
     {
         var backend = getPreferredBackend();
         return Optional.ofNullable(backend.createInstance(disguiseMeta.getEntityType()));
-    }
-
-    @Override
-    public void finalizeProperties(DisguiseState state) throws ParseErrorException
-    {
-        super.finalizeProperties(state);
-
-        var propertyHandler = state.disguisePropertyHandler();
-        if (!(propertyHandler.bindingProperties() instanceof MannequinProperties mannequinProperties)) return;
-
-        // Resolve skin
-        if (propertyHandler.contains(mannequinProperties.SKIN))
-        {
-            PlayerProfile placeHolder = GameProfileUtils.asPlayerProfile(new GameProfile(UUID.randomUUID(), "error_in_vdp"));
-            var value = propertyHandler.get(mannequinProperties.SKIN);
-            var resolvedSkin = value.resolve().getNow(placeHolder);
-
-            if (!resolvedSkin.equals(placeHolder) && !value.dynamic()) return;
-
-            PlayerSkinProvider.getInstance().fetchSkin(value.name()).thenAccept(optional ->
-            {
-                if (optional.isEmpty()) return;
-
-                this.scheduleOn(state.getPlayer(), () ->
-                {
-                    if (state.disposed()) return;
-
-                    if (value.equals(propertyHandler.get(mannequinProperties.SKIN)))
-                        propertyHandler.set(mannequinProperties.SKIN, GameProfileUtils.asResolvableProfile(optional.get()));
-                });
-            });
-        }
     }
 
     @Override

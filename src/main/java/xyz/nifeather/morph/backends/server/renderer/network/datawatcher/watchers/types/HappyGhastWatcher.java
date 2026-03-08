@@ -6,17 +6,17 @@ import org.bukkit.entity.Player;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
-import xyz.nifeather.morph.misc.disguiseProperty.values.HappyGhastProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.values.HappyGhastPropertyCollection;
 
 public class HappyGhastWatcher extends LivingEntityWatcher
 {
-    private final HappyGhastProperties properties;
+    private final HappyGhastPropertyCollection properties;
 
     public HappyGhastWatcher(Player bindingPlayer)
     {
         super(bindingPlayer, EntityType.HAPPY_GHAST);
 
-        properties = DisguiseProperties.INSTANCE.getOrThrow(HappyGhastProperties.class);
+        properties = DisguiseProperties.INSTANCE.getCollectionOrThrow(HappyGhastPropertyCollection.class);
     }
 
     @Override

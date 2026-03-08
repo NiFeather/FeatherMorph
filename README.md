@@ -1,46 +1,40 @@
-Archived, see [#63](https://github.com/NiFeather/FeatherMorph/issues/63)
----
-
 ![cover](./assets/cover.png)
 
 <div align="center">
 
 ![Pic](https://cdn.modrinth.com/data/ydNDeiDX/images/9e71cabf14eb3c0ccaef48d7b81410d79dc04261.png)
 
-[客户端集成Mod](https://modrinth.com/mod/feathermorphclient) | [Wiki (施工中)](https://github.com/XiaMoZhiShi/FeatherMorph/wiki)
-
-<h3> ~ 72变，但是MC ~ </h3>
+[Client integration mod](https://modrinth.com/mod/feathermorphclient) | [Documents (WIP)](./docs)
 
 </div>
 
 ---
-![CI Status](https://github.com/XiaMoZhiShi/MorphPlugin/actions/workflows/build.yml/badge.svg)
-![Release](https://img.shields.io/github/release/XiaMoZhiShi/MorphPlugin.svg)
+![CI Status](https://github.com/NiFeather/FeatherMorph/actions/workflows/build.yml/badge.svg)
+![Release](https://img.shields.io/github/release/NiFeather/FeatherMorph.svg)
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/NiFeather/FeatherMorph)
 
-### 功能和特色
+### Features
 
-- 变形成游戏中的各种生物
+This plugin allows you and your friends to disguise as various mobs and players in-game. Several disguise forms also have their corresponding skills and abilities in addition.
 
-- 支持伪装为玩家！
+If also installed the Client integration mod, you can also have a GUI disguise selection screen and skill/actions hotkey.
 
-- [**能增强使用体验的客户端集成，例如伪装选择界面和技能快捷键**](https://modrinth.com/mod/feathermorphclient)
+We also support sending messages to players depending on their client language selection.
 
-- 多语言支持！根据玩家客户端语言自动切换！
+### Support
+You can seek support on our issues page by opening a new bug report or feature request.
 
-- **涵盖了绝大多数原版特性的技能和天赋实现**
+We may use NMS and new APIs introduced in various versions while developing FeatherMorph, making it hard to support all Minecraft versions at once.
 
-- 聊天覆盖 —— 在聊天中伪装自己的名称
+Therefore, we can only support the latest one or two Minecraft releases, sorry!
 
-- 交互镜像 —— 将你的操作镜像到别人的身上 （~~好像这两个都不太属于一个变形插件该有的功能~~）
+### Dependencies
 
-### 依赖
+FeatherMorph requires these things to work:
 
-此插件需要以下这些东西来正常运作：
+- A Paper or Paper-based server.
 
-- 一个Paper系（Paper或基于Paper）的服务端
-
-为了在服务端向其他人显示伪装，根据当前服务器安装的插件版本，我们需要以下这些插件：
+To display disguise server-side, we also need these plugins, depending on which plugin version you're on.
 
 #### 2.x
 - [PacketEvents 2.8.0](https://modrinth.com/plugin/packetevents)
@@ -52,41 +46,33 @@ Archived, see [#63](https://github.com/NiFeather/FeatherMorph/issues/63)
 - [ProtocolLib](https://ci.dmulloy2.net/job/ProtocolLib)
 - [LibsDisguises](https://www.spigotmc.org/resources/libs-disguises-free.81/)
 
-### 下载
+### Download
 
-[![Available on Modrinth](https://raw.githubusercontent.com/intergrav/devins-badges/v3/assets/cozy/available/modrinth_vector.svg)](https://modrinth.com/plugin/feathermorph/changelog) [![Available on GitHub](https://raw.githubusercontent.com/intergrav/devins-badges/v3/assets/cozy/available/github_vector.svg)](https://github.com/XiaMoZhiShi/FeatherMorph/releases)
+[![Available on Modrinth](https://raw.githubusercontent.com/intergrav/devins-badges/v3/assets/cozy/available/modrinth_vector.svg)](https://modrinth.com/plugin/feathermorph/changelog) [![Available on GitHub](https://raw.githubusercontent.com/intergrav/devins-badges/v3/assets/cozy/available/github_vector.svg)](https://github.com/NiFeather/FeatherMorph/releases)
 
-[Modrinth](https://modrinth.com/plugin/feathermorph/changelog) | [GitHub（中文更新日志可在这里查看）](https://github.com/XiaMoZhiShi/FeatherMorph/releases)
-
----
-
-### 快速上手
-
-1. 你可以通过 `/morph` 指令来使用变形功能，用 `/unmorph` 来变回自己
-
-2. 如果没有安装客户端集成，默认情况下使用技能的方法是***手持羽毛潜行+使用***
-
-3. 默认情况下，客户端集成打开选择界面的按键是 `N`，使用技能是 `V`，你可以在键位设置中了解更多
-
-4. 你可以用 `/request` 指令来管理交换请求，接受别人的交换请求后双方都可以变成对方的样子
-
-5. 插件的剩余指令均在 `/fm`（或 `/feathermorph`）中，你可以通过 `help` 子指令来查看更多信息
-
-6. **插件的大多数功能都可以通过指令配置，用法是 `/fm option <id> <值>`**
-
-### 注意！
-- 如果不安装ProtocolLib插件也能运行，但需要依赖客户端集成来向别人显示伪装
-
-- **若服务器安装了其他聊天插件，聊天覆盖功能可能会失效！**
+[Modrinth](https://modrinth.com/plugin/feathermorph/changelog) | [GitHub](https://github.com/NiFeather/FeatherMorph/releases)
 
 ---
-### 构建
+
+### Getting started
+
+See [Gameplay](./docs/Gameplay.md).
+
+---
+### Building
 ```bash
 #!/usr/bin/env bash
-git clone https://github.com/XiaMoZhiShi/FeatherMorph
+git clone https://github.com/NiFeather/FeatherMorph
 cd FeatherMorph
 
 ./gradlew build --no-daemon
 ```
 
-生成的文件将位于`build/libs`中，`FeatherMorph-x.x.x-all.jar`就是构建出来的插件。
+The file located at `build/libs` that ends with `-final` is the file that you should use.
+
+### Credits
+- [LibsDisguises](https://github.com/libraryaddict/LibsDisguises): For making this project possible, and for reference about how to make the server renderer
+- [VeinMiner](https://github.com/2008Choco/VeinMiner): For the reference about how to implement *Client <-> Server* communication.
+- [ProtocolLib](https://github.com/dmulloy2/ProtocolLib): For making server renderer possible in 1.x releases
+- [Paper docs](https://docs.papermc.io/): For how to make paper plugins
+- [PacketEvents](https://github.com/retrooper/packetevents): For making server renderer possible

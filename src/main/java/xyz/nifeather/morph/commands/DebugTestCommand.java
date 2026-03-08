@@ -128,6 +128,14 @@ public class DebugTestCommand extends BrigadierCommand
                         .build()
         );
 
+        dispatcher.register(
+                Commands.literal("listProperties")
+                        .then(
+                                Commands.argument("entity", ArgumentTypes.entity())
+                                        .executes(this::listProperties)
+                        ).build()
+        );
+
         return true;
     }
 
@@ -176,6 +184,37 @@ public class DebugTestCommand extends BrigadierCommand
         list.forEach(sv ->
         {
             context.getSource().getSender().sendMessage("%s 上的SV是 %s".formatted(sv.index(), sv.name()));
+        });
+
+        return 1;
+    }
+
+    private int listProperties(CommandContext<CommandSourceStack> context) throws CommandSyntaxException
+    {
+        var entity = context.getArgument("entity", EntitySelectorArgumentResolver.class)
+                .resolve(context.getSource());
+
+        var sender = context.getSource().getSender();
+
+        if (entity.isEmpty())
+        {
+            sender.sendMessage("No entities!");
+        }
+
+        entity.forEach(e ->
+        {
+            sender.sendMessage("Listing properties for %s".formatted(e.getName()));
+            var state = morphManager.getDisguiseStateFor(e);
+            if (state == null)
+            {
+                sender.sendMessage("No disguise for %s".formatted(e.getName()));
+                return;
+            }
+
+            state.disguisePropertyHandler().getAll().forEach((property, value) ->
+            {
+                sender.sendMessage(":: %s -> %s".formatted(property.identifier(), value));
+            });
         });
 
         return 1;

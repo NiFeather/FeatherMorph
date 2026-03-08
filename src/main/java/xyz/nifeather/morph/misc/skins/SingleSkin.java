@@ -6,6 +6,8 @@ import com.mojang.authlib.GameProfile;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.utilities.NbtUtils;
 
+import java.util.Objects;
+
 public class SingleSkin
 {
     @Expose
@@ -18,7 +20,7 @@ public class SingleSkin
 
     @Expose
     @SerializedName("expires_at")
-    public long expiresAt;
+    public long expiresAt = 0L;
 
     @Nullable
     public GameProfile cachedProfile;
@@ -47,5 +49,15 @@ public class SingleSkin
         cachedProfile = NbtUtils.readGameProfile(this.snbt);
 
         return cachedProfile;
+    }
+
+    @Override
+    public boolean equals(Object obj)
+    {
+        if (!(obj instanceof SingleSkin other)) return false;
+
+        return Objects.equals(this.name, other.name)
+                && Objects.equals(this.expiresAt, other.expiresAt)
+                && Objects.equals(this.snbt, other.snbt);
     }
 }

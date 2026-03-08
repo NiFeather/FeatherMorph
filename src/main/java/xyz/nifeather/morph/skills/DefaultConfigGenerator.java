@@ -7,16 +7,11 @@ import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.EntityType;
 import org.bukkit.potion.PotionEffectType;
 import xyz.nifeather.morph.MorphManager;
-import xyz.nifeather.morph.abilities.AbilityManager;
-import xyz.nifeather.morph.abilities.impl.FlyAbility;
 import xyz.nifeather.morph.abilities.options.*;
 import xyz.nifeather.morph.api.morphs.abilities.AbilityNames;
 import xyz.nifeather.morph.api.morphs.skills.SkillNames;
 import xyz.nifeather.morph.skills.impl.SonicBoomMorphSkill;
-import xyz.nifeather.morph.skills.options.EffectConfiguration;
-import xyz.nifeather.morph.skills.options.ExplosionConfiguration;
-import xyz.nifeather.morph.skills.options.ProjectileConfiguration;
-import xyz.nifeather.morph.skills.options.TeleportConfiguration;
+import xyz.nifeather.morph.skills.options.*;
 import xyz.nifeather.morph.storage.skill.SkillAbilityConfigContainer;
 import xyz.nifeather.morph.utilities.DisguiseUtils;
 import xyz.nifeather.morph.utilities.EntityTypeUtils;
@@ -30,6 +25,14 @@ public class DefaultConfigGenerator
     public static DefaultConfigGenerator createInstance()
     {
         return new DefaultConfigGenerator();
+    }
+
+    public Map<String, SkillAbilityConfigContainer> generateConfiguration()
+    {
+        this.generateSkills();
+        this.generateAbilities();
+
+        return this.configurations;
     }
 
     private Map<String, SkillAbilityConfigContainer> configurations = new Object2ObjectOpenHashMap<>();
@@ -53,20 +56,55 @@ public class DefaultConfigGenerator
         return getConfiguration(entityType.key().asString());
     }
 
-    public Map<String, SkillAbilityConfigContainer> generateConfiguration()
-    {
-        this.generateSkills();
-        this.generateAbilities();
-
-        return this.configurations;
-    }
-
-    public void generateSkills()
+    private void generateSkills()
     {
         // 伪装物品
-        this.getConfiguration(EntityType.ARMOR_STAND)
-                .setSkillIdentifier(SkillNames.FAKE_EQUIP)
-                .setSkillCooldown(20);
+        EntityType[] typesToApplyFakeEquip = new EntityType[]
+                {
+                        EntityType.ARMOR_STAND,
+                        EntityType.MANNEQUIN,
+
+                        EntityType.PIG,
+                        EntityType.STRIDER,
+
+                        EntityType.ZOMBIE,
+                        EntityType.DROWNED,
+                        EntityType.ZOMBIE_VILLAGER,
+                        EntityType.SKELETON,
+                        EntityType.STRAY,
+                        EntityType.WITHER_SKELETON,
+                        EntityType.ZOMBIE_VILLAGER,
+                        EntityType.BOGGED,
+
+                        EntityType.EVOKER,
+                        EntityType.PILLAGER,
+                        EntityType.VINDICATOR,
+
+                        EntityType.ZOMBIE_HORSE,
+                        EntityType.SKELETON_HORSE,
+
+                        EntityType.VEX,
+                        EntityType.ALLAY,
+
+                        EntityType.FOX,
+
+                        EntityType.HORSE,
+
+                        EntityType.PIGLIN,
+                        EntityType.PIGLIN_BRUTE,
+                        EntityType.ZOMBIFIED_PIGLIN,
+
+                        EntityType.VILLAGER,
+                        EntityType.WANDERING_TRADER,
+                        EntityType.WITCH
+                };
+
+        for (EntityType type : typesToApplyFakeEquip)
+        {
+            this.getConfiguration(type)
+                    .setSkillIdentifier(SkillNames.FAKE_EQUIP)
+                    .setSkillCooldown(20);
+        }
 
         this.getConfiguration("player:" + MorphManager.disguiseFallbackName)
                 .setSkillIdentifier(SkillNames.FAKE_EQUIP)
@@ -159,9 +197,25 @@ public class DefaultConfigGenerator
                 .setSkillIdentifier(SkillNames.GUARDIAN)
                 .setSkillCooldown(80);
 
-        this.getConfiguration(EntityType.MANNEQUIN)
-                .setSkillIdentifier(SkillNames.FAKE_EQUIP)
-                .setSkillCooldown(20);
+        this.getConfiguration(EntityType.NAUTILUS)
+                .setSkillIdentifier(SkillNames.DASH)
+                .setOption(SkillNames.DASH, DashConfiguration.OPTION_HANDLER, new DashConfiguration(true, 1.364, "entity.nautilus.dash"))
+                .setSkillCooldown(60);
+
+        this.getConfiguration(EntityType.ZOMBIE_NAUTILUS)
+                .setSkillIdentifier(SkillNames.DASH)
+                .setOption(SkillNames.DASH, DashConfiguration.OPTION_HANDLER, new DashConfiguration(true, 1.364, "entity.nautilus.dash"))
+                .setSkillCooldown(60);
+
+        this.getConfiguration(EntityType.CAMEL_HUSK)
+                .setSkillIdentifier(SkillNames.DASH)
+                .setOption(SkillNames.DASH, DashConfiguration.OPTION_HANDLER, new DashConfiguration(false, 1.023, "entity.camel_husk.dash"))
+                .setSkillCooldown(55);
+
+        this.getConfiguration(EntityType.CAMEL)
+                .setSkillIdentifier(SkillNames.DASH)
+                .setOption(SkillNames.DASH, DashConfiguration.OPTION_HANDLER, new DashConfiguration(false, 1.023, "entity.camel.dash"))
+                .setSkillCooldown(55);
     }
 
     private void setAbilityRange(Collection<EntityType> types, NamespacedKey abilityType)
@@ -170,7 +224,7 @@ public class DefaultConfigGenerator
             this.getConfiguration(type).addAbility(abilityType);
     }
 
-    public void generateAbilities()
+    private void generateAbilities()
     {
         for (var type : EntityTypeUtils.canFly())
         {

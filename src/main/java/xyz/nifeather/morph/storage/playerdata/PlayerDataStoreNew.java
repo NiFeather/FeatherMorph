@@ -2,6 +2,7 @@ package xyz.nifeather.morph.storage.playerdata;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.apache.commons.io.FileUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -17,6 +18,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -147,9 +149,16 @@ public class PlayerDataStoreNew extends DirectoryJsonBasedStorage<PlayerMeta> im
      * @return 目标玩家拥有的伪装
      */
     @Override
-    public List<DisguiseMeta> getAvaliableDisguisesFor(Player player)
+    public List<DisguiseMeta> getAvailableDisguisesFor(Player player)
     {
         return getPlayerMeta(player).getUnlockedDisguises();
+    }
+
+    @Override
+    public CompletableFuture<PlayerMeta> loadPlayerDataAsync(UUID uuid)
+    {
+        var offline = Bukkit.getOfflinePlayer(uuid);
+        return CompletableFuture.completedFuture(this.getPlayerMeta(offline));
     }
 
     /**
@@ -280,19 +289,16 @@ public class PlayerDataStoreNew extends DirectoryJsonBasedStorage<PlayerMeta> im
     }
 
     @Override
-    public boolean reloadConfiguration()
+    public boolean reload()
     {
         clearCache();
         trackedPlayerMetaMap.clear();
-
-        if (noLazyLoad.get())
-            loadAll();
 
         return true;
     }
 
     @Override
-    public boolean saveConfiguration()
+    public boolean save()
     {
         this.trackedPlayerMetaMap.forEach((uuid, meta) -> this.save(meta));
 
@@ -301,58 +307,18 @@ public class PlayerDataStoreNew extends DirectoryJsonBasedStorage<PlayerMeta> im
 
     //endregion IManagePlayerData
 
-    private final AtomicBoolean noLazyLoad = new AtomicBoolean(false);
-
     @Override
-    public void shouldLoadAllData(boolean val)
+    public List<PlayerMeta> getRange(List<UUID> list)
     {
-        noLazyLoad.set(val);
+        List<PlayerMeta> metaList = new ObjectArrayList<>();
 
-        if (val)
-            loadAll();
-    }
-
-    @Override
-    public List<PlayerMeta> listAll()
-    {
-        return this.trackedPlayerMetaMap.values().stream().toList();
-    }
-
-    public void loadAll()
-    {
-        logger.info("Force loading all player data...");
-        var files = this.directoryStorage.getFiles();
-
-        int count = 0;
-        for (File file : files)
+        list.forEach(uuid ->
         {
-            if (file.isDirectory()) continue;
+            var existing = getPlayerMeta(Bukkit.getOfflinePlayer(uuid));
+            metaList.add(existing);
+        });
 
-            var fileName = file.getName();
-            fileName = fileName.substring(0, fileName.lastIndexOf("."));
-
-            UUID uuid = null;
-
-            try
-            {
-                uuid = UUID.fromString(fileName);
-            }
-            catch (Throwable ignored)
-            {
-            }
-
-            if (uuid == null || this.trackedPlayerMetaMap.containsKey(uuid)) continue;
-
-            var meta = this.get(fileName);
-            if (isDefaultMeta(meta)) continue;
-
-            initializePlayerMeta(meta, uuid);
-
-            this.trackedPlayerMetaMap.put(uuid, meta);
-            count++;
-        }
-
-        logger.info("Loaded %s player data".formatted(count));
+        return metaList;
     }
 
     public static class PackageVersions

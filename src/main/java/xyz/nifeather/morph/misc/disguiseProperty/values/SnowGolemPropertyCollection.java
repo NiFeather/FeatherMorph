@@ -1,0 +1,41 @@
+package xyz.nifeather.morph.misc.disguiseProperty.values;
+
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Snowman;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import xyz.nifeather.morph.misc.disguiseProperty.*;
+
+public class SnowGolemPropertyCollection extends BaseLivingEntityPropertyCollection<Snowman>
+{
+    public final SingleProperty<Boolean> HAS_PUMPKIN = SingleProperty.builder(PropertyNames.SNOW_GOLEM_HAS_PUMPKIN, true)
+            .withInputHandle(InputHandles::readBooleanRelaxed)
+            .withOutputHandle(OutputHandles::writeBoolean)
+            .withSuggestions("true", "false")
+            .build();
+
+    public SnowGolemPropertyCollection()
+    {
+        registerSingle(HAS_PUMPKIN);
+    }
+
+    @Override
+    protected @Nullable Snowman tryCastEntity(@Nullable Entity targetEntity)
+    {
+        return targetEntity instanceof Snowman snowman ? snowman : null;
+    }
+
+    @Override
+    protected void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull Snowman targetEntity)
+    {
+        super.setupPropertiesFromEntity(propertyHandler, targetEntity);
+
+        propertyHandler.set(HAS_PUMPKIN, !targetEntity.isDerp());
+    }
+
+    @Override
+    protected void setupDefaultProperties(PropertyHandler propertyHandler)
+    {
+    }
+
+}

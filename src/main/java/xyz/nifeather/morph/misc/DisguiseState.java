@@ -6,7 +6,6 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -14,19 +13,21 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Annotations.Resolved;
-import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.MorphPluginObject;
+import xyz.nifeather.morph.RevealingHandler;
 import xyz.nifeather.morph.abilities.AbilityUpdater;
-import xyz.nifeather.morph.api.morphs.skills.SkillNames;
 import xyz.nifeather.morph.backends.DisguiseWrapper;
 import xyz.nifeather.morph.messages.strings.CommandStrings;
 import xyz.nifeather.morph.messages.strings.EmoteStrings;
 import xyz.nifeather.morph.messages.MessageUtils;
+import xyz.nifeather.morph.messages.strings.MorphStrings;
+import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
-import xyz.nifeather.morph.misc.disguiseProperty.values.BaseLivingEntityProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.values.BaseLivingEntityPropertyCollection;
+import xyz.nifeather.morph.misc.gui.IconLookup;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 import xyz.nifeather.morph.misc.waypoint.DisguiseWaypointTransmitter;
 import xyz.nifeather.morph.network.PlayerOptions;
@@ -48,7 +49,6 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 public class DisguiseState extends MorphPluginObject
 {
@@ -67,7 +67,7 @@ public class DisguiseState extends MorphPluginObject
         this.playerUUID = player.getUniqueId();
         this.provider = provider;
         this.playerOptions = playerOptions;
-        this.morphConfiguration = playerMeta;
+        this.playerMeta = playerMeta;
 
         this.soundHandler = new SoundHandler(player);
         this.abilityUpdater = new AbilityUpdater(this);
@@ -75,10 +75,9 @@ public class DisguiseState extends MorphPluginObject
 
         this.disguiseWrapper = wrapper;
         this.disguiseIdentifier = identifier;
-        skillLookupIdentifier(skillIdentifier);
+        this.skillLookupIdentifier = skillIdentifier;
 
         disguiseType = DisguiseTypes.fromId(identifier);
-        this.provider = MorphManager.getProvider(identifier);
 
         //设置声音
         this.soundHandler.refreshSounds(this, wrapper.getEntityType(), wrapper.isBaby());
@@ -130,6 +129,12 @@ public class DisguiseState extends MorphPluginObject
             {
                 var component = (Component) o;
                 this.setCustomDisplayName(component);
+                requestActionbarUpdate();
+            }
+
+            case PropertyNames.MANNEQUIN_SKIN, PropertyNames.PLAYER_SKIN ->
+            {
+                requestActionbarUpdate();
             }
         }
 
@@ -217,7 +222,7 @@ public class DisguiseState extends MorphPluginObject
 
     private final PlayerOptions<Player> playerOptions;
 
-    private final PlayerMeta morphConfiguration;
+    private final PlayerMeta playerMeta;
 
     private final AnimationSequence animationSequence = new AnimationSequence();
 
@@ -354,7 +359,7 @@ public class DisguiseState extends MorphPluginObject
 
     public boolean isSelfViewing()
     {
-        return playerOptions.isClientSideSelfView() ? morphConfiguration.showDisguiseToSelf : serverSideSelfVisible;
+        return playerOptions.isClientSideSelfView() ? playerMeta.showDisguiseToSelf : serverSideSelfVisible;
     }
 
     public void setServerSideSelfVisible(boolean val)
@@ -433,7 +438,7 @@ public class DisguiseState extends MorphPluginObject
     }
 
     // 伪装ID
-    private String disguiseIdentifier = SkillNames.UNKNOWN.asString();
+    private final String disguiseIdentifier;
 
     /**
      * 获取此伪装的ID
@@ -448,7 +453,7 @@ public class DisguiseState extends MorphPluginObject
         return disguiseWrapper.getEntityType();
     }
 
-    private DisguiseTypes disguiseType;
+    private final DisguiseTypes disguiseType;
 
     /**
      * 获取此伪装的{@link DisguiseTypes}
@@ -461,7 +466,7 @@ public class DisguiseState extends MorphPluginObject
     /**
      * 伪装的构建器（提供器）
      */
-    private DisguiseProvider provider;
+    private final DisguiseProvider provider;
 
     @NotNull
     public DisguiseProvider getProvider()
@@ -568,16 +573,6 @@ public class DisguiseState extends MorphPluginObject
         return skillLookupIdentifier == null ? DEFAULT_SKILL_LOOKUP : skillLookupIdentifier;
     }
 
-    /**
-     * 设置技能查询ID
-     *
-     * @param newSkillID 技能ID
-     */
-    public void skillLookupIdentifier(@NotNull String newSkillID)
-    {
-        this.skillLookupIdentifier = newSkillID;
-    }
-
     private final SkillUpdater skillUpdater = new SkillUpdater(this);
 
     private void postExecuteSkill()
@@ -600,6 +595,9 @@ public class DisguiseState extends MorphPluginObject
         return skillUpdater.defaultSkillCooldown;
     }
 
+    /**
+     * See {@link SkillUpdater#executeSkillCheckPermission()}
+     */
     public boolean executeSkillCheckPermission()
     {
         if (skillUpdater.executeSkillCheckPermission())
@@ -611,6 +609,9 @@ public class DisguiseState extends MorphPluginObject
         return false;
     }
 
+    /**
+     * See {@link SkillUpdater#executeSkill()}
+     */
     public boolean executeSkillDirect()
     {
         if (skillUpdater.executeSkill())
@@ -716,7 +717,7 @@ public class DisguiseState extends MorphPluginObject
     /**
      * Get A {@link CompletableFuture} that binds to this state.<br>
      * Finishes when this state has been disposed.<br>
-     * Fail with exception if an error occurred while updating this state, or the state has been disposed without running {@link DisguiseState#doUpdate()} once
+     * Fail with exception if an error occurred while updating this state
      */
     public CompletableFuture<DisguiseState> getStateFuture()
     {
@@ -809,59 +810,86 @@ public class DisguiseState extends MorphPluginObject
         this.skillUpdater.update();
         this.disguiseWrapper.update();
         this.abilityUpdater.update();
+
+        if (playerOptions.displayDisguiseOnHUD && plugin.getCurrentTick() % (this.haveSkill() ? 2 : 5) == 0)
+            updateActionbarMessage();
+    }
+
+    @Resolved(shouldSolveImmediately = true)
+    private RevealingHandler revealingHandler;
+
+    @Nullable
+    private CachedMessageStatus cachedMessageStatus;
+
+    private volatile boolean requestedActionbarUpdate;
+
+    /**
+     * Request to update the actionbar message next time {@link DisguiseState#updateActionbarMessage()} is called.
+     */
+    public void requestActionbarUpdate()
+    {
+        requestedActionbarUpdate = true;
+    }
+
+    private void updateActionbarMessage()
+    {
+        var player = getPlayer();
+        var locale = MessageUtils.getLocale(player);
+        var haveSkill = this.haveSkill();
+
+        boolean updateAnyway = requestedActionbarUpdate;
+        requestedActionbarUpdate = false;
+
+        // If this mismatches, we will know that we should refresh the message component
+        short magicBit = 0;
+
+        if (haveSkill)
+            magicBit |= 1;
+
+        if (skillInCooldown())
+            magicBit |= 2;
+        else
+            magicBit |= 4;
+
+        var revLevel = revealingHandler.getRevealingLevel(player);
+        switch (revLevel)
+        {
+            case SAFE -> magicBit |= 8;
+            case SUSPECT -> magicBit |= 16;
+            case REVEALED -> magicBit |= 32;
+        }
+
+        magicBit |= (short) locale.hashCode();
+
+        var msgConfig = this.cachedMessageStatus;
+        if (msgConfig == null) msgConfig = CachedMessageStatus.DEFAULT;
+
+        short stateBit = msgConfig.statusBit();
+
+        if (stateBit != magicBit || updateAnyway)
+        {
+            //更新actionbar信息
+            var msg = haveSkill
+                    ? (!skillInCooldown()
+                    ? MorphStrings.disguisingWithSkillAvaliableString()
+                    : MorphStrings.disguisingWithSkillPreparingString())
+                    : MorphStrings.disguisingAsString();
+
+            var disguiseRevealed = revLevel == RevealingHandler.RevealingLevel.REVEALED || revLevel == RevealingHandler.RevealingLevel.SUSPECT;
+            var display = disguiseRevealed
+                    ? getPlayerDisplay().append((revLevel == RevealingHandler.RevealingLevel.REVEALED ? MorphStrings.revealed() : MorphStrings.partialRevealed()).createComponent(locale))
+                    : getPlayerDisplay();
+
+            msgConfig = new CachedMessageStatus(magicBit,
+                    msg.resolve("what", display).resolve("icon", IconLookup.instance().lookupDisguiseIcon(this)).createComponent(locale));
+
+            this.cachedMessageStatus = msgConfig;
+        }
+
+        player.sendActionBar(msgConfig.display());
     }
 
     //endregion Updating
-
-    public void refreshDisguiseItems(DisguiseEquipment disguiseEquipment)
-    {
-        setEquipment(disguiseEquipment);
-        setShowingDisguisedEquipment(!disguiseEquipment.filterAll(item -> item.getType() == Material.AIR));
-    }
-
-    private <X> void consumeIfPropertiesSupported(Class<X> clazz, Consumer<X> consumer)
-    {
-        var bindingProperties = propertyHandler.bindingProperties();
-        if (bindingProperties == null)
-        {
-            if (FeatherMorphMain.getInstance().debugOutputEnabled())
-                logger.info("BindingProperties is NULL, not continuing...");
-
-            return;
-        }
-
-        if (!clazz.isInstance(bindingProperties))
-        {
-            if (FeatherMorphMain.getInstance().debugOutputEnabled())
-                logger.info("Expected %s but got %s, not continuing".formatted(clazz, bindingProperties.getClass()));
-
-            return;
-        }
-
-        consumer.accept((X) bindingProperties);
-    }
-
-    private <X, V> Optional<V> funcIfPropertiesSupported(Class<X> clazz, Function<X, Optional<V>> func)
-    {
-        var bindingProperties = propertyHandler.bindingProperties();
-        if (bindingProperties == null)
-        {
-            if (FeatherMorphMain.getInstance().debugOutputEnabled())
-                logger.info("BindingProperties is NULL, not continuing...");
-
-            return Optional.empty();
-        }
-
-        if (!clazz.isInstance(bindingProperties))
-        {
-            if (FeatherMorphMain.getInstance().debugOutputEnabled())
-                logger.info("Expected %s but got %s, not continuing".formatted(clazz, bindingProperties.getClass()));
-
-            return Optional.empty();
-        }
-
-        return func.apply((X) bindingProperties);
-    }
 
     /**
      * 此阶段是否正在显示伪装物品
@@ -882,7 +910,8 @@ public class DisguiseState extends MorphPluginObject
 
     public void setEquipment(DisguiseEquipment equipment)
     {
-        consumeIfPropertiesSupported(BaseLivingEntityProperties.class, p -> propertyHandler.set(p.EQUIPMENT, equipment));
+        var properties = DisguiseProperties.INSTANCE.getCollectionOrThrow(BaseLivingEntityPropertyCollection.class);
+        propertyHandler.set(properties.EQUIPMENT, equipment);
     }
 
     /**
@@ -891,8 +920,8 @@ public class DisguiseState extends MorphPluginObject
      */
     public void setShowingDisguisedEquipment(boolean value)
     {
-        consumeIfPropertiesSupported(BaseLivingEntityProperties.class, p ->
-                propertyHandler.set(p.DISPLAY_DISGUISE_EQUIPMENT, value));
+        var properties = DisguiseProperties.INSTANCE.getCollectionOrThrow(BaseLivingEntityPropertyCollection.class);
+        propertyHandler.set(properties.DISPLAY_DISGUISE_EQUIPMENT, value);
     }
 
     /**
@@ -901,10 +930,8 @@ public class DisguiseState extends MorphPluginObject
      */
     public DisguiseEquipment getDisguiseEquipment()
     {
-        return funcIfPropertiesSupported(BaseLivingEntityProperties.class, properties ->
-        {
-            return propertyHandler.getOptional((SingleProperty<DisguiseEquipment>) properties.EQUIPMENT);
-        }).orElseGet(DisguiseEquipment::empty);
+        var properties = DisguiseProperties.INSTANCE.getCollectionOrThrow(BaseLivingEntityPropertyCollection.class);
+        return propertyHandler.getOptional((SingleProperty<DisguiseEquipment>)properties.EQUIPMENT).orElseGet(DisguiseEquipment::empty);
     }
 
     /**
@@ -939,7 +966,7 @@ public class DisguiseState extends MorphPluginObject
         var wrapper = this.disguiseWrapper.clone();
 
         var newInstance = new DisguiseState(player, this.disguiseIdentifier, this.skillLookupIdentifier(),
-                wrapper, provider, this.playerOptions, morphConfiguration);
+                wrapper, provider, this.playerOptions, playerMeta);
 
         newInstance.playerDisplay = this.playerDisplay;
         newInstance.serverDisplay = this.serverDisplay;
@@ -961,10 +988,7 @@ public class DisguiseState extends MorphPluginObject
         if (disposed())
             return;
 
-        if (selfUpdateBegan)
-            stateFuture.complete(this);
-        else
-            stateFuture.completeExceptionally(new EarlyDisposeException("The DisguiseState has been disposed before running once"));
+        stateFuture.complete(this);
 
         disposed.set(true);
 

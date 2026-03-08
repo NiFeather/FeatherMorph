@@ -3,6 +3,7 @@ package xyz.nifeather.morph.providers.disguise;
 import com.mojang.authlib.GameProfile;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.kyori.adventure.text.Component;
+import net.minecraft.util.StringUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
@@ -14,6 +15,7 @@ import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xyz.nifeather.morph.backends.DisguiseWrapper;
 import xyz.nifeather.morph.messages.MessageUtils;
+import xyz.nifeather.morph.messages.strings.ExceptionStrings;
 import xyz.nifeather.morph.messages.strings.MorphStrings;
 import xyz.nifeather.morph.misc.DisguiseMeta;
 import xyz.nifeather.morph.misc.DisguiseState;
@@ -21,7 +23,7 @@ import xyz.nifeather.morph.misc.DisguiseTypes;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.ParseErrorException;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
-import xyz.nifeather.morph.misc.disguiseProperty.values.PlayerProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.values.PlayerPropertyCollection;
 import xyz.nifeather.morph.misc.skins.PlayerSkinProvider;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
 import xyz.nifeather.morph.providers.animation.AnimationProvider;
@@ -29,7 +31,6 @@ import xyz.nifeather.morph.providers.animation.provider.PlayerAnimationProvider;
 import xyz.nifeather.morph.utilities.GameProfileUtils;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -76,14 +77,20 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
         return Optional.ofNullable(backend.createPlayerInstance(disguiseMeta.playerDisguiseTargetName));
     }
 
-    @Resolved(shouldSolveImmediately = true)
-    private MorphClientHandler clientHandler;
-
     @Override
     public void finalizeProperties(DisguiseState state) throws ParseErrorException
     {
         super.finalizeProperties(state);
         setupSkinIfPossible(state);
+
+        if (state.disguisePropertyHandler().contains(PropertyNames.ENTITY_CUSTOM_NAME))
+        {
+            throw ParseErrorException.forProperty(PropertyNames.ENTITY_CUSTOM_NAME)
+                    .byMethod("PlayerDisguiseProvider#finalizeProperties")
+                    .withLocalizableMessage(ExceptionStrings.unsupported())
+                    .withMessage("Custom name is not available for player disguises")
+                    .create();
+        }
     }
 
     private void setupSkinIfPossible(DisguiseState state) throws ParseErrorException
@@ -93,10 +100,22 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
         var mainHandItem = player.getEquipment().getItemInMainHand();
         String id = state.getDisguiseIdentifier();
         var propertyHandler = state.disguisePropertyHandler();
-        var playerProperties = DisguiseProperties.INSTANCE.getOrThrow(PlayerProperties.class);
+        var playerProperties = DisguiseProperties.INSTANCE.getCollectionOrThrow(PlayerPropertyCollection.class);
 
-        if (propertyHandler.contains(playerProperties.SKIN))
+        var existingSkin = propertyHandler.getOr(playerProperties.SKIN, null);
+
+        if (existingSkin != null)
+        {
+            if (!StringUtil.isValidPlayerName(existingSkin.name()))
+            {
+                throw ParseErrorException.forProperty(PropertyNames.PLAYER_SKIN)
+                        .withLocalizableMessage(ExceptionStrings.malformedInput())
+                        .withMessage("Invalid name for the existing skin profile")
+                        .create();
+            }
+
             return;
+        }
 
         var playerDisguiseTargetName = DisguiseTypes.PLAYER.toStrippedId(id);
 
@@ -122,6 +141,14 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
             //如果玩家头和目标伪装ID一致，那么设置伪装皮肤
             if (gameProfile.name().equals(playerDisguiseTargetName))
                 propertyHandler.set(playerProperties.SKIN, gameProfile);
+        }
+
+        if (!StringUtil.isValidPlayerName(playerDisguiseTargetName))
+        {
+            throw ParseErrorException.forProperty(PropertyNames.PLAYER_SKIN)
+                    .withLocalizableMessage(ExceptionStrings.malformedInput())
+                    .withMessage("Invalid name for the upcoming skin")
+                    .create();
         }
 
         PlayerSkinProvider.getInstance().fetchSkin(playerDisguiseTargetName)

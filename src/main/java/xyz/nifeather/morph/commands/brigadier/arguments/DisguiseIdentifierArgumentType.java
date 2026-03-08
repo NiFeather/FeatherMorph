@@ -83,7 +83,7 @@ public class DisguiseIdentifierArgumentType extends MorphPluginObject implements
 
         String input = builder.getRemainingLowerCase();
 
-        var availableDisguises = morphs.getAvaliableDisguisesFor(player);
+        var availableDisguises = morphs.getAvailableDisguisesFor(player);
 
         return CompletableFuture.supplyAsync(() ->
         {

@@ -11,21 +11,20 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import xyz.nifeather.morph.abilities.ISkillAbilityOptionHandler;
 import xyz.nifeather.morph.api.morphs.skills.SkillNames;
-import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.strings.SkillStrings;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.misc.ExecutionErrorException;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
-import xyz.nifeather.morph.misc.disguiseProperty.values.GuardianProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.values.GuardianPropertyCollection;
 import xyz.nifeather.morph.skills.options.NoOpConfiguration;
 
 public class GuardianSkill extends DelayedMorphSkill<NoOpConfiguration>
 {
-    private final GuardianProperties properties;
+    private final GuardianPropertyCollection properties;
 
     public GuardianSkill()
     {
-        properties = DisguiseProperties.INSTANCE.getOrThrow(GuardianProperties.class);
+        properties = DisguiseProperties.INSTANCE.getCollectionOrThrow(GuardianPropertyCollection.class);
     }
 
     @Override
@@ -100,7 +99,7 @@ public class GuardianSkill extends DelayedMorphSkill<NoOpConfiguration>
     @Override
     protected void executeDelayedSkill(Player player, DisguiseState state, NoOpConfiguration option)
     {
-        var properties = DisguiseProperties.INSTANCE.getOrThrow(GuardianProperties.class);
+        var properties = DisguiseProperties.INSTANCE.getCollectionOrThrow(GuardianPropertyCollection.class);
         state.disguisePropertyHandler().set(properties.ATTACK_TARGET, 0);
         state.getDisguiseWrapper().writeProperty(properties.ATTACK_TARGET, 0);
 

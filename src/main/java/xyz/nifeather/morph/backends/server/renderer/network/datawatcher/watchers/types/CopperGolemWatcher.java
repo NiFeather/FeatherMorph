@@ -6,7 +6,7 @@ import org.bukkit.entity.Player;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
-import xyz.nifeather.morph.misc.disguiseProperty.values.CopperGolemProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.values.CopperGolemPropertyCollection;
 
 public class CopperGolemWatcher extends LivingEntityWatcher
 {
@@ -28,7 +28,7 @@ public class CopperGolemWatcher extends LivingEntityWatcher
     {
         if (property.id().equals(PropertyNames.COPPER_GOLEM_WEATHER_STATE))
         {
-            CopperGolemProperties.WeatherState bukkitState = (CopperGolemProperties.WeatherState) value;
+            CopperGolemPropertyCollection.WeatherState bukkitState = (CopperGolemPropertyCollection.WeatherState) value;
             WeatheringCopperState peState = switch (bukkitState)
             {
                 case UNAFFECTED -> WeatheringCopperState.UNAFFECTED;

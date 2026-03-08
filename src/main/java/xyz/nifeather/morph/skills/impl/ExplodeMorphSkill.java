@@ -3,7 +3,6 @@ package xyz.nifeather.morph.skills.impl;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import org.bukkit.GameMode;
-import org.bukkit.GameRule;
 import org.bukkit.GameRules;
 import org.bukkit.NamespacedKey;
 import org.bukkit.craftbukkit.CraftWorld;

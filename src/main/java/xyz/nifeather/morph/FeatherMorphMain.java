@@ -17,17 +17,16 @@ import xyz.nifeather.morph.abilities.AbilityManager;
 import xyz.nifeather.morph.api.FeatherMorphAPI;
 import xyz.nifeather.morph.api.networking.exceptions.PluginDisabledException;
 import xyz.nifeather.morph.commands.MorphCommandManager;
-import xyz.nifeather.morph.config.ConfigOption;
+import xyz.nifeather.morph.config.ConfigOptions;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.events.*;
-import xyz.nifeather.morph.events.mirror.ExecutorHub;
+import xyz.nifeather.morph.messages.TranslateManager;
+import xyz.nifeather.morph.mirror.ExecutorHub;
 import xyz.nifeather.morph.interfaces.IManagePlayerData;
 import xyz.nifeather.morph.interfaces.IManageRequests;
 import xyz.nifeather.morph.messages.MessageUtils;
-import xyz.nifeather.morph.messages.MorphMessageStore;
 import xyz.nifeather.morph.messages.vanilla.MasterVanillaMessageStore;
 import xyz.nifeather.morph.misc.ModNetworkingHelper;
-import xyz.nifeather.morph.misc.PlayerOperationSimulator;
 import xyz.nifeather.morph.misc.RecipeConfigHandle;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.gui.IconLookup;
@@ -103,8 +102,6 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
     private AbilityManager abilityManager;
 
     private MasterVanillaMessageStore masterVanillaMessageStore;
-
-    private MorphMessageStore messageStore;
 
     private PlaceholderIntegration placeholderIntegration;
 
@@ -261,15 +258,17 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
         dependencyManager.cache(masterVanillaMessageStore = new MasterVanillaMessageStore());
 
         MorphConfigManager config;
-        dependencyManager.cacheAs(MessageStore.class, messageStore = new MorphMessageStore());
+        dependencyManager.cacheAs(MessageStore.class, TranslateManager.instance().asFrameworkMessageStore());
         dependencyManager.cacheAs(MiniMessage.class, MiniMessage.miniMessage());
         dependencyManager.cacheAs(IManagePlayerData.class, morphManager);
         dependencyManager.cacheAs(IManageRequests.class, new RequestManager());
         dependencyManager.cacheAs(Scoreboard.class, Bukkit.getScoreboardManager().getMainScoreboard());
         dependencyManager.cacheAs(MorphConfigManager.class, config = new MorphConfigManager(this));
+        config.reload();
+
         dependencyManager.cache(playerTracker);
 
-        config.bind(debugOutput, ConfigOption.DEBUG_OUTPUT);
+        config.bind(debugOutput, ConfigOptions.DEBUG_OUTPUT);
 
         dependencyManager.cache(cmdHelper = new MorphCommandManager());
 
@@ -277,13 +276,12 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
 
         dependencyManager.cache(new MessageUtils());
 
-        dependencyManager.cache(new PlayerOperationSimulator());
-
         var updateHandler = new UpdateHandler();
         dependencyManager.cache(updateHandler);
 
         dependencyManager.cache(instanceService = new MultiInstanceService());
 
+        DisguiseProperties.INSTANCE.loadBuiltin();
         dependencyManager.cache(DisguiseProperties.INSTANCE);
 
         //dependencyManager.cache(new RecipeManager());
@@ -308,7 +306,8 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
                         new ForcedDisguiseProcessor(),
                         new PlayerSkinProcessor(),
                         new WorkaroundProcessor(),
-                        entityProcessor = new EntityProcessor()
+                        entityProcessor = new EntityProcessor(),
+                        new PlayerConfigurator()
                 };
 
         //注册EventProcessor
@@ -372,7 +371,7 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
             }
 
             if (morphManager != null)
-                morphManager.onPluginDisable();
+                morphManager.onShutdown();
 
             if (placeholderIntegration != null)
                 placeholderIntegration.unregister();

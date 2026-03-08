@@ -3,10 +3,11 @@ package xyz.nifeather.morph.misc.disguiseProperty;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Messages.FormattableMessage;
 import xyz.nifeather.morph.misc.IMaybeUserFriendlyException;
+import xyz.nifeather.morph.misc.IUserFault;
 
 import java.util.Optional;
 
-public class ParseErrorException extends Exception implements IMaybeUserFriendlyException
+public class ParseErrorException extends Exception implements IMaybeUserFriendlyException, IUserFault
 {
     public final String propertyName;
     public final String methodName;

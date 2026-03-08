@@ -29,7 +29,7 @@ import xyz.nifeather.morph.misc.DisguiseEquipment;
 import xyz.nifeather.morph.misc.NmsRecord;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
-import xyz.nifeather.morph.misc.disguiseProperty.values.BaseLivingEntityProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.values.BaseLivingEntityPropertyCollection;
 import xyz.nifeather.morph.utilities.NmsUtils;
 
 import java.util.List;
@@ -65,7 +65,7 @@ public class LivingEntityWatcher extends EntityWatcher
     @Override
     protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
-        var properties = DisguiseProperties.INSTANCE.getOrThrow(BaseLivingEntityProperties.class);
+        var properties = DisguiseProperties.INSTANCE.getCollectionOrThrow(BaseLivingEntityPropertyCollection.class);
         if (property.equals(properties.CUSTOM_NAME))
         {
             Component component = value instanceof Component component1 ? component1 : Component.empty();

@@ -21,7 +21,7 @@ import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
-import xyz.nifeather.morph.misc.disguiseProperty.values.PlayerProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.values.PlayerPropertyCollection;
 
 import java.util.Map;
 import java.util.Objects;
@@ -225,7 +225,7 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
 
         if (getEntityType() == EntityType.PLAYER)
         {
-            var properties = DisguiseProperties.INSTANCE.getOrThrow(PlayerProperties.class);
+            var properties = DisguiseProperties.INSTANCE.getCollectionOrThrow(PlayerPropertyCollection.class);
             var profileOptional = Optional.ofNullable(readPropertyOr(properties.SKIN, null));
             profileOptional.ifPresent(p -> bindingWatcher.writeEntry(CustomEntries.PROFILE, p));
         }

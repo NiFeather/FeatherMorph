@@ -7,7 +7,7 @@ import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.values.S
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
-import xyz.nifeather.morph.misc.disguiseProperty.values.SnowGolemProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.values.SnowGolemPropertyCollection;
 
 public class SnowGolemWatcher extends LivingEntityWatcher
 {
@@ -27,7 +27,7 @@ public class SnowGolemWatcher extends LivingEntityWatcher
     @Override
     protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
-        var snowmanProperties = DisguiseProperties.INSTANCE.getOrThrow(SnowGolemProperties.class);
+        var snowmanProperties = DisguiseProperties.INSTANCE.getCollectionOrThrow(SnowGolemPropertyCollection.class);
 
         if (property.equals(snowmanProperties.HAS_PUMPKIN))
         {

@@ -7,7 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Bindables.Bindable;
 import xyz.nifeather.morph.api.morphs.abilities.AbilityNames;
-import xyz.nifeather.morph.config.ConfigOption;
+import xyz.nifeather.morph.config.ConfigOptions;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.utilities.CollisionUtils;
@@ -19,7 +19,7 @@ public class SpiderAbility extends NoOpOptionAbility
     @Initializer
     private void load(MorphConfigManager config)
     {
-        config.bind(modifyBox, ConfigOption.MODIFY_BOUNDING_BOX);
+        config.bind(modifyBox, ConfigOptions.MODIFY_BOUNDING_BOX);
     }
 
     /**

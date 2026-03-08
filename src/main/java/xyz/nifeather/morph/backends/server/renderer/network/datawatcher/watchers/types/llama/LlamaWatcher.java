@@ -7,7 +7,7 @@ import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
-import xyz.nifeather.morph.misc.disguiseProperty.values.LlamaProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.values.LlamaPropertyCollection;
 
 public class LlamaWatcher extends ChestedHorseWatcher
 {
@@ -32,7 +32,7 @@ public class LlamaWatcher extends ChestedHorseWatcher
     @Override
     protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
-        var properties = DisguiseProperties.INSTANCE.getOrThrow(LlamaProperties.class);
+        var properties = DisguiseProperties.INSTANCE.getCollectionOrThrow(LlamaPropertyCollection.class);
 
         if (property.equals(properties.COLOR))
         {

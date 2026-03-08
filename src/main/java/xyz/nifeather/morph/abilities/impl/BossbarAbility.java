@@ -17,13 +17,11 @@ import xyz.nifeather.morph.abilities.ISkillAbilityOptionHandler;
 import xyz.nifeather.morph.abilities.MorphAbility;
 import xyz.nifeather.morph.abilities.options.BossbarOption;
 import xyz.nifeather.morph.api.morphs.abilities.AbilityNames;
-import xyz.nifeather.morph.config.ConfigOption;
+import xyz.nifeather.morph.config.ConfigOptions;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.misc.DisguiseState;
-import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
-import xyz.nifeather.morph.misc.disguiseProperty.values.BaseLivingEntityProperties;
 import xyz.nifeather.morph.utilities.DisguiseUtils;
 
 import java.util.List;
@@ -42,7 +40,7 @@ public class BossbarAbility extends MorphAbility<BossbarOption>
     @Initializer
     private void load(MorphConfigManager configManager)
     {
-        configManager.bind(allowBossbar, ConfigOption.DISPLAY_BOSSBAR);
+        configManager.bind(allowBossbar, ConfigOptions.DISPLAY_BOSSBAR);
     }
 
     @Override

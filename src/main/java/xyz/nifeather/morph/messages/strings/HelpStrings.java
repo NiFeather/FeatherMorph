@@ -206,6 +206,12 @@ public class HelpStrings extends AbstractMorphStrings
                 "播放伪装动画");
     }
 
+    public static FormattableMessage extractDescription()
+    {
+        return getFormattable(getKey("extract"),
+                "[Fb] 提取插件资源");
+    }
+
     private static String getKey(String key)
     {
         return "help." + key;

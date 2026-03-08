@@ -5,8 +5,7 @@ import org.bukkit.entity.Player;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
-import xyz.nifeather.morph.misc.disguiseProperty.values.HoglinProperties;
-import xyz.nifeather.morph.misc.disguiseProperty.values.ZoglinProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.values.ZoglinPropertyCollection;
 
 public class ZoglinWatcher extends EHasAttackAnimationWatcher
 {
@@ -18,7 +17,7 @@ public class ZoglinWatcher extends EHasAttackAnimationWatcher
     @Override
     protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
-        var properties = DisguiseProperties.INSTANCE.getOrThrow(ZoglinProperties.class);
+        var properties = DisguiseProperties.INSTANCE.getCollectionOrThrow(ZoglinPropertyCollection.class);
 
         if (property.equals(properties.IS_BABY))
             this.writePersistent(ValueIndex.AGEABLE_MOB.IS_BABY, (Boolean) value);

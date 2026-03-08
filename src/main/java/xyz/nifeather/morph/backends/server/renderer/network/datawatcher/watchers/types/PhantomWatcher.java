@@ -9,7 +9,7 @@ import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEnt
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
-import xyz.nifeather.morph.misc.disguiseProperty.values.PhantomProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.values.PhantomPropertyCollection;
 
 import java.util.Objects;
 
@@ -31,7 +31,7 @@ public class PhantomWatcher extends LivingEntityWatcher
     @Override
     protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
-        var phantomProperties = DisguiseProperties.INSTANCE.getOrThrow(PhantomProperties.class);
+        var phantomProperties = DisguiseProperties.INSTANCE.getCollectionOrThrow(PhantomPropertyCollection.class);
 
         if (property.equals(phantomProperties.SIZE))
             this.writePersistent(ValueIndex.PHANTOM.SIZE, (Integer) value);

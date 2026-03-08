@@ -2,8 +2,6 @@ package xyz.nifeather.morph.backends.server.renderer;
 
 import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.wrapper.PacketWrapper;
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerDestroyEntities;
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerPlayerInfoRemove;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
@@ -155,7 +153,7 @@ public class ServerRenderer extends MorphPluginObject implements Listener
         if (player == null) return;
 
         var protocolManager = PacketEvents.getAPI().getPlayerManager();
-        var watcher = new PlayerWatcher(player);
+        PlayerWatcher watcher = new PlayerWatcher(player);
         watcher.markSilent(this);
 
         watcher.writeEntry(CustomEntries.PROFILE, ((CraftPlayer) player).getProfile());
@@ -164,42 +162,38 @@ public class ServerRenderer extends MorphPluginObject implements Listener
         watcher.writeEntry(CustomEntries.PROFILE_LISTED, true);
         watcher.writeEntry(CustomEntries.DONT_INCLUDE_PACKET_IDENTIFIER, true);
 
-        List<PacketWrapper<?>> packets;
+        List<PacketWrapper<?>> playerSpawnPackets;
 
         try
         {
-            packets = watcher.buildSpawnPackets();
+            playerSpawnPackets = watcher.buildSpawnPackets(false);
         }
         catch (BuildFailedException e)
         {
-            logger.error("Can't undisguise player, BuildFailedException has been thrown!", e);
+            logger.error("Can't build recover packets for player, BuildFailedException has been thrown!", e);
             return;
         }
 
-        var removePacket = new WrapperPlayServerDestroyEntities(player.getEntityId());
-
-        if (disguiseWatcher.getEntityType() == org.bukkit.entity.EntityType.PLAYER)
+        List<PacketWrapper<?>> disposalPackets = Collections.emptyList();
+        try
         {
-            var disguiseUUID = disguiseWatcher.readEntryOrThrow(CustomEntries.SPAWN_UUID);
-            var packetRemoveInfo = new WrapperPlayServerPlayerInfoRemove(disguiseUUID);
-
-            var targetPlayers = new ObjectArrayList<>(featherMorph().getPlatform().onlinePlayersNative());
-
-            if (disguiseUUID.equals(watcher.bindingUUID))
-                targetPlayers.removeIf(p -> p.getUniqueId().equals(watcher.bindingUUID));
-
-            targetPlayers.forEach(p -> protocolManager.sendPacket(p, packetRemoveInfo));
+            disposalPackets = disguiseWatcher.buildVirtualEntityDisposalPackets();
+        }
+        catch (BuildFailedException e)
+        {
+            logger.error("Can't dispose virtual entity gracefully, BuildFailedException has been thrown!", e);
         }
 
         watcher.dispose();
 
-        affectedPlayers.forEach(p ->
+        for (Player p : affectedPlayers)
         {
-            protocolManager.sendPacket(p, removePacket);
+            for (PacketWrapper<?> removePacket : disposalPackets)
+                protocolManager.sendPacket(p, removePacket);
 
-            for (var packet : packets)
+            for (var packet : playerSpawnPackets)
                 protocolManager.sendPacket(p, packet);
-        });
+        }
     }
 
     public void dispose()

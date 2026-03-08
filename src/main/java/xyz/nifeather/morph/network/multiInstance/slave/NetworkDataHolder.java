@@ -1,9 +1,13 @@
 package xyz.nifeather.morph.network.multiInstance.slave;
 
+import com.google.common.collect.ImmutableList;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xiamomc.pluginbase.Exceptions.NullDependencyException;
 import xyz.nifeather.morph.MorphPluginObject;
 import xyz.nifeather.morph.interfaces.IManagePlayerData;
 import xyz.nifeather.morph.misc.DisguiseMeta;
@@ -15,6 +19,7 @@ import xyz.nifeather.morph.storage.playerdata.PlayerMeta;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class NetworkDataHolder extends MorphPluginObject implements IManagePlayerData
@@ -45,11 +50,29 @@ public class NetworkDataHolder extends MorphPluginObject implements IManagePlaye
     }
 
     @Override
-    public List<DisguiseMeta> getAvaliableDisguisesFor(Player player)
+    public List<DisguiseMeta> getAvailableDisguisesFor(Player player)
     {
         var playerMeta = getPlayerMeta(player);
 
         return playerMeta.getUnlockedDisguises();
+    }
+
+    @Override
+    public CompletableFuture<PlayerMeta> loadPlayerDataAsync(UUID uuid)
+    {
+        var future = new CompletableFuture<PlayerMeta>();
+
+        bindingSlave.requestData(uuid).thenAccept(u ->
+        {
+            var data = nullablePlayerMeta(Bukkit.getOfflinePlayer(u));
+
+            if (data != null)
+                future.complete(data);
+            else
+                future.completeExceptionally(new NullDependencyException("The future of the requested data has been finished, but we can't find a matching data in NetworkDataHolder!"));
+        });
+
+        return future;
     }
 
     @Override
@@ -61,7 +84,12 @@ public class NetworkDataHolder extends MorphPluginObject implements IManagePlaye
             return false;
         }
 
-        if (this.getPlayerMeta(player).getUnlockedDisguiseIdentifiers().stream().anyMatch(str -> str.equals(disguiseIdentifier)))
+        // Don't continue if we don't have got the required metadata
+        var meta = nullablePlayerMeta(player);
+        if (meta == null)
+            return false;
+
+        if (meta.getUnlockedDisguiseIdentifiers().stream().anyMatch(str -> str.equals(disguiseIdentifier)))
             return false;
 
         bindingSlave.sendCommand(new MIC2SSyncDisguiseCommand(Operation.ADD_IF_ABSENT, List.of(disguiseIdentifier), player.getUniqueId()));
@@ -77,60 +105,95 @@ public class NetworkDataHolder extends MorphPluginObject implements IManagePlaye
             return false;
         }
 
-        if (this.getPlayerMeta(player).getUnlockedDisguiseIdentifiers().stream().noneMatch(str -> str.equals(disguiseIdentifier)))
+        // Don't continue if we don't have got the required metadata
+        var meta = nullablePlayerMeta(player);
+        if (meta == null)
+            return false;
+
+        if (meta.getUnlockedDisguiseIdentifiers().stream().noneMatch(str -> str.equals(disguiseIdentifier)))
             return false;
 
         bindingSlave.sendCommand(new MIC2SSyncDisguiseCommand(Operation.REMOVE, List.of(disguiseIdentifier), player.getUniqueId()));
         return true;
     }
 
-    @Override
-    public @NotNull PlayerMeta getPlayerMeta(OfflinePlayer player)
+    public @Nullable PlayerMeta nullablePlayerMeta(OfflinePlayer player)
     {
-        var uuid = player.getUniqueId();
+        return localMetaMap.getOrDefault(player.getUniqueId(), null);
+    }
 
-        var tracked = localMetaMap.getOrDefault(uuid, null);
+    public @NotNull PlayerMeta getOrCreatePlayerMeta(OfflinePlayer player)
+    {
+        var tracked = nullablePlayerMeta(player);
         if (tracked != null) return tracked;
 
         var metaInstance = new PlayerMeta();
         metaInstance.uniqueId = player.getUniqueId();
         metaInstance.playerName = player.getName();
 
-        localMetaMap.put(uuid, metaInstance);
+        localMetaMap.put(player.getUniqueId(), metaInstance);
 
         return metaInstance;
     }
 
     @Override
-    public boolean reloadConfiguration()
+    public @NotNull PlayerMeta getPlayerMeta(OfflinePlayer player)
     {
-        logger.info("[Slave@NetworkData] Dropping cached network player meta...");
+        var tracked = nullablePlayerMeta(player);
+        if (tracked != null) return tracked;
 
+        //todo: I don't know if this is good
+        var tempInstance = new PlayerMeta();
+        tempInstance.uniqueId = player.getUniqueId();
+        tempInstance.playerName = player.getName();
+
+        return tempInstance;
+    }
+
+    @Override
+    public boolean reload()
+    {
         dropAll();
-        bindingSlave.requestDataSync();
+
+        var players = ImmutableList.copyOf(Bukkit.getOnlinePlayers())
+                        .stream().map(Player::getUniqueId)
+                        .toList();
+
+        bindingSlave.requestData(players);
 
         return true;
+    }
+
+    public void drop(UUID uuid)
+    {
+        localMetaMap.remove(uuid);
     }
 
     public void dropAll()
     {
+        logger.info("[Slave@NetworkData] Dropping cached network player meta...");
+
         this.localMetaMap.clear();
     }
 
     @Override
-    public boolean saveConfiguration()
+    public boolean save()
     {
         return true;
     }
 
     @Override
-    public void shouldLoadAllData(boolean shouldLoadAllData)
+    public List<PlayerMeta> getRange(List<UUID> list)
     {
+        List<PlayerMeta> metaList = new ObjectArrayList<>();
+
+        list.forEach(uuid ->
+        {
+            var existing = localMetaMap.getOrDefault(uuid, null);
+            if (existing != null) metaList.add(existing);
+        });
+
+        return metaList;
     }
 
-    @Override
-    public List<PlayerMeta> listAll()
-    {
-        return localMetaMap.values().stream().toList();
-    }
 }

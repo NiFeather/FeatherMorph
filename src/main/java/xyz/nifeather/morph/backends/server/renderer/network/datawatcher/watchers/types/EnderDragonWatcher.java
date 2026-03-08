@@ -9,7 +9,7 @@ import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEnt
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
-import xyz.nifeather.morph.misc.disguiseProperty.values.EnderDragonProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.values.EnderDragonPropertyCollection;
 
 import java.util.Objects;
 
@@ -19,10 +19,10 @@ public class EnderDragonWatcher extends LivingEntityWatcher
     {
         super(bindingPlayer, EntityType.ENDER_DRAGON);
 
-        this.properties = DisguiseProperties.INSTANCE.getOrThrow(EnderDragonProperties.class);
+        this.properties = DisguiseProperties.INSTANCE.getCollectionOrThrow(EnderDragonPropertyCollection.class);
     }
 
-    private final EnderDragonProperties properties;
+    private final EnderDragonPropertyCollection properties;
 
     @Override
     protected void initRegistry()

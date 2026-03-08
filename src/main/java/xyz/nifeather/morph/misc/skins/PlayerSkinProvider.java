@@ -9,6 +9,7 @@ import com.mojang.authlib.yggdrasil.ProfileNotFoundException;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.StringUtil;
 import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -41,7 +42,6 @@ public class PlayerSkinProvider extends MorphPluginObject
 
     public PlayerSkinProvider()
     {
-        this.skinCache.initializeStorage();
     }
 
     @Initializer
@@ -53,7 +53,7 @@ public class PlayerSkinProvider extends MorphPluginObject
                 TimeUnit.MILLISECONDS);
     }
 
-    private final SkinCache skinCache = new SkinCache();
+    private final SkinStorage skinStorage = new SkinStorage();
 
     // region Info Request Batching
 
@@ -157,18 +157,18 @@ public class PlayerSkinProvider extends MorphPluginObject
     @Nullable
     public GameProfile getCachedProfile(String name)
     {
-        return skinCache.get(name).profileOptional().orElse(null);
+        return skinStorage.getRecord(name).profileOptional().orElse(null);
     }
 
     public Optional<GameProfile> getCachedProfileOptional(String name)
     {
-        return skinCache.get(name).profileOptional();
+        return skinStorage.getRecord(name).profileOptional();
     }
 
     public void cacheProfile(@NotNull PlayerProfile playerProfile)
     {
         var gameProfile = GameProfileUtils.convertPlayerProfile(playerProfile);
-        skinCache.cache(gameProfile);
+        skinStorage.cache(gameProfile);
     }
 
     private final Map<String, CompletableFuture<Optional<GameProfile>>> onGoingRequests = new ConcurrentHashMap<>();
@@ -182,7 +182,7 @@ public class PlayerSkinProvider extends MorphPluginObject
         if (profile.properties().containsKey("textures"))
         {
             var optional = Optional.of(profile);
-            skinCache.cache(profile);
+            skinStorage.cache(profile);
 
             return CompletableFuture.completedFuture(optional);
         }
@@ -194,9 +194,9 @@ public class PlayerSkinProvider extends MorphPluginObject
                 var result = sessionService.fetchProfile(profile.id(), true);
 
                 if (result != null)
-                    skinCache.cache(result.profile());
+                    skinStorage.cache(result.profile());
                 else
-                    skinCache.cache(new GameProfile(Uuids.NIL_UUID, profile.name()));
+                    skinStorage.cache(new GameProfile(Uuids.NIL_UUID, profile.name()));
 
                 return result == null ? Optional.of(profile) : Optional.of(result.profile());
             });
@@ -214,12 +214,12 @@ public class PlayerSkinProvider extends MorphPluginObject
         if (player != null && player.getPlayerProfile().hasTextures())
         {
             var profile = NmsRecord.ofPlayer(player).gameProfile;
-            skinCache.cache(profile);
+            skinStorage.cache(profile);
 
             return CompletableFuture.completedFuture(Optional.of(profile));
         }
 
-        var cachedSkin = skinCache.get(profileName);
+        var cachedSkin = skinStorage.getRecord(profileName);
 
         //如果Record的皮肤没有过期并且有值，那么使用此Record
         //否则仍然进行获取流程
@@ -242,12 +242,12 @@ public class PlayerSkinProvider extends MorphPluginObject
                     {
                         //重新缓存让此皮肤脱离过期状态
                         //因为已经查无此人了，没有必要再短时间内重新查询此人的皮肤
-                        skinCache.cache(cachedSkin.profileOptional().get());
+                        skinStorage.cache(cachedSkin.profileOptional().get());
                         return CompletableFuture.completedFuture(cachedSkin.profileOptional());
                     }
                     else //本地没有缓存，则创建一个空Profile
                     {
-                        skinCache.cache(new GameProfile(Uuids.NIL_UUID, profileName));
+                        skinStorage.cache(new GameProfile(Uuids.NIL_UUID, profileName));
                         return CompletableFuture.completedFuture(Optional.empty());
                     }
                 });
@@ -266,30 +266,29 @@ public class PlayerSkinProvider extends MorphPluginObject
 
     //region Utils
 
-    public List<SingleSkin> getAllSkins()
+    public List<String> getAvailableNames()
     {
-        return skinCache.listAll();
+        return skinStorage.listAvailableNames();
     }
 
     public void dropSkin(String name)
     {
-        skinCache.drop(name);
+        skinStorage.delete(name);
     }
 
     public void dropAll()
     {
-        skinCache.dropAll();
+        skinStorage.deleteAll();
     }
 
     public void reload()
     {
-        skinCache.reloadConfiguration();
     }
 
     public void invalidate(String name)
     {
-        var skin = skinCache.getRaw(name);
-        if(skin == null) return;
+        var skin = skinStorage.get(name);
+        if (skin == null) return;
 
         skin.expiresAt = 0;
     }

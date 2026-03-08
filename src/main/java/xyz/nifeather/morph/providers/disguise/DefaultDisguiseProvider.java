@@ -1,8 +1,6 @@
 package xyz.nifeather.morph.providers.disguise;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
@@ -14,14 +12,10 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Annotations.Resolved;
-import xiamomc.pluginbase.Messages.MessageStore;
 import xyz.nifeather.morph.FeatherMorphMain;
-import xyz.nifeather.morph.RevealingHandler;
 import xyz.nifeather.morph.abilities.AbilityManager;
 import xyz.nifeather.morph.api.morphs.skills.SkillNames;
 import xyz.nifeather.morph.backends.DisguiseBackend;
-import xyz.nifeather.morph.messages.MessageUtils;
-import xyz.nifeather.morph.messages.strings.MorphStrings;
 import xyz.nifeather.morph.misc.DisguiseEquipment;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.misc.disguiseProperty.ParseErrorException;
@@ -51,108 +45,15 @@ public abstract class DefaultDisguiseProvider extends DisguiseProvider
     @Resolved
     private MorphClientHandler clientHandler;
 
-    @Resolved
-    private MessageStore<?> messageStore;
-
-    @Resolved
-    private RevealingHandler revealingHandler;
-
     @Override
     public @NotNull DisguiseBackend<?, ?> getPreferredBackend()
     {
         return getMorphManager().getDefaultBackend();
     }
 
-    private record MessageConfiguration(
-            short statusBit,
-            Component display,
-            String locale
-    )
-    {
-        public static final MessageConfiguration DEFAULT = new MessageConfiguration
-                (
-                        (short) -1,
-                        MiniMessage.miniMessage().deserialize("<yellow>missingno"),
-                        "missingno"
-                );
-
-        public MessageConfiguration withBit(short bit)
-        {
-            return new MessageConfiguration(bit, display, locale);
-        }
-
-        public MessageConfiguration withDisplay(Component display)
-        {
-            return new MessageConfiguration(statusBit, display, locale);
-        }
-
-        public MessageConfiguration withLocale(String newLocale)
-        {
-            return new MessageConfiguration(statusBit, display, newLocale);
-        }
-    }
-
     @Override
     public boolean updateDisguise(Player player, DisguiseState state)
     {
-        var option = clientHandler.getPlayerOption(player, true);
-
-        var haveSkill = state.haveSkill();
-
-        if (option.displayDisguiseOnHUD && plugin.getCurrentTick() % (haveSkill ? 2 : 5) == 0)
-        {
-            var locale = MessageUtils.getLocale(player);
-
-            short bit = 0;
-
-            if (haveSkill)
-                bit |= 1;
-
-            if (state.skillInCooldown())
-                bit |= 2;
-            else
-                bit |= 4;
-
-            var revLevel = revealingHandler.getRevealingLevel(player);
-            switch (revLevel)
-            {
-                case SAFE -> bit |= 8;
-                case SUSPECT -> bit |= 16;
-                case REVEALED -> bit |= 32;
-            }
-
-            var msgConfig = state.getSessionData("MESSAGE_CONFIG", MessageConfiguration.class);
-            if (msgConfig == null) msgConfig = MessageConfiguration.DEFAULT;
-
-            short stateBit = msgConfig.statusBit();
-
-            if (stateBit != bit || !msgConfig.locale.equals(locale))
-            {
-                //更新actionbar信息
-                var msg = haveSkill
-                        ? (!state.skillInCooldown()
-                            ? MorphStrings.disguisingWithSkillAvaliableString()
-                            : MorphStrings.disguisingWithSkillPreparingString())
-                        : MorphStrings.disguisingAsString();
-
-                var disguiseRevealed = revLevel == RevealingHandler.RevealingLevel.REVEALED || revLevel == RevealingHandler.RevealingLevel.SUSPECT;
-                var display = disguiseRevealed
-                        ? Component.empty()
-                                .append(state.getPlayerDisplay())
-                                .append((revLevel == RevealingHandler.RevealingLevel.REVEALED ? MorphStrings.revealed() : MorphStrings.partialRevealed()).createComponent(locale))
-                        : state.getPlayerDisplay();
-
-                msgConfig = msgConfig
-                        .withDisplay(msg.resolve("what", display).createComponent(locale, messageStore))
-                        .withBit(bit)
-                        .withLocale(locale);
-
-                state.setSessionData("MESSAGE_CONFIG", msgConfig);
-            }
-
-            player.sendActionBar(msgConfig.display);
-        }
-
         return true;
     }
 

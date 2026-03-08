@@ -6,7 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Bindables.Bindable;
-import xyz.nifeather.morph.config.ConfigOption;
+import xyz.nifeather.morph.config.ConfigOptions;
 import xyz.nifeather.morph.config.MorphConfigManager;
 
 import java.util.Locale;
@@ -20,7 +20,7 @@ public class MasterVanillaMessageStore extends BasicVanillaMessageStore //todo: 
     @Initializer
     private void load(MorphConfigManager config)
     {
-        config.bind(serverLocale, ConfigOption.LANGUAGE_CODE);
+        config.bind(serverLocale, ConfigOptions.LANGUAGE_CODE);
 
         serverLocale.onValueChanged((o, n) ->
         {

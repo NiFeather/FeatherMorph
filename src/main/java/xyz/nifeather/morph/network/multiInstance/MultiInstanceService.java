@@ -6,7 +6,7 @@ import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.MorphPluginObject;
-import xyz.nifeather.morph.config.ConfigOption;
+import xyz.nifeather.morph.config.ConfigOptions;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.network.multiInstance.master.MasterInstance;
 import xyz.nifeather.morph.network.multiInstance.protocol.Operation;
@@ -24,7 +24,19 @@ public class MultiInstanceService extends MorphPluginObject
     private MasterInstance masterInstance;
 
     @Nullable
+    public MasterInstance masterInstance()
+    {
+        return masterInstance;
+    }
+
+    @Nullable
     private SlaveInstance slaveInstance;
+
+    @Nullable
+    public SlaveInstance slaveInstance()
+    {
+        return slaveInstance;
+    }
 
     private void checkSanity()
     {
@@ -56,14 +68,9 @@ public class MultiInstanceService extends MorphPluginObject
         slaveInstance = null;
 
         if (isMaster)
-        {
             masterInstance = new MasterInstance();
-            masterInstance.loadInitialDisguises(manager.listAllPlayerMeta());
-        }
         else
-        {
             slaveInstance = new SlaveInstance(true);
-        }
     }
 
     @Resolved
@@ -75,8 +82,8 @@ public class MultiInstanceService extends MorphPluginObject
     @Initializer
     private void load(MorphConfigManager configManager)
     {
-        configManager.bind(enabled, ConfigOption.ENABLE_MULTIINSTANCE);
-        configManager.bind(isMaster, ConfigOption.IS_MASTER);
+        configManager.bind(enabled, ConfigOptions.ENABLE_MULTIINSTANCE);
+        configManager.bind(isMaster, ConfigOptions.IS_MASTER);
 
         isMaster.onValueChanged((o, n) ->
         {

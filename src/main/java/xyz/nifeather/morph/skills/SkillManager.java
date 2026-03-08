@@ -63,6 +63,7 @@ public class SkillManager extends MorphPluginObject
                 new SonicBoomMorphSkill(),
                 new SplashPotionSkill(),
                 new GuardianSkill(),
+                new DashMorphSkill(),
 
                 NoneMorphSkill.instance
         ));

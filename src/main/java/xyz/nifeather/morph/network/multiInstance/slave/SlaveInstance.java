@@ -1,19 +1,22 @@
 package xyz.nifeather.morph.network.multiInstance.slave;
 
+import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import it.unimi.dsi.fastutil.objects.ObjectLists;
 import org.bukkit.Bukkit;
 import org.java_websocket.framing.CloseFrame;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Unmodifiable;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
 import xiamomc.pluginbase.Exceptions.NullDependencyException;
 import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.MorphPluginObject;
-import xyz.nifeather.morph.config.ConfigOption;
+import xyz.nifeather.morph.config.ConfigOptions;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.network.multiInstance.IInstanceService;
 import xyz.nifeather.morph.network.multiInstance.protocol.*;
@@ -24,9 +27,9 @@ import xyz.nifeather.morph.network.multiInstance.protocol.s2c.*;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
 
 import java.net.URI;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 public class SlaveInstance extends MorphPluginObject implements IInstanceService, IMasterHandler
@@ -96,7 +99,7 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
 
         try
         {
-            var rawAddr = config.getOrDefault(String.class, ConfigOption.MASTER_ADDRESS);
+            var rawAddr = config.getOrDefault(ConfigOptions.MASTER_ADDRESS);
             var uri = URI.create("ws://" + rawAddr);
 
             var client = new InstanceClient(uri, plugin, this);
@@ -127,7 +130,7 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
     {
         logSlaveInfo("Preparing multi-instance client...");
 
-        config.bind(secret, ConfigOption.MASTER_SECRET);
+        config.bind(secret, ConfigOptions.MASTER_SECRET);
 
         registries.registerS2C("deny", MIS2CDisconnectCommand::fromArguments)
                 .registerS2C("dmeta", MIS2CUpdateMetaCommand::fromArguments)
@@ -143,6 +146,8 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
             morphManager.setDataStore(new VoidDataHolder());
         else
             logSlaveWarn("Can't setup client, this instance will stay offline from the instance network!");
+
+        requestBatchLoop();
     }
 
     private final Bindable<String> secret = new Bindable<>(null);
@@ -183,20 +188,60 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
         client.send(cmd);
     }
 
-    @Nullable
-    private volatile CompletableFuture<SlaveInstance> dataSyncFuture;
+    //region Batch Requests
 
-    public CompletableFuture<SlaveInstance> requestDataSync()
+    private final List<UUID> uuidsToRequest = ObjectLists.synchronize(new ObjectArrayList<>());
+
+    private synchronized void requestBatchLoop()
     {
-        if (dataSyncFuture != null)
-            return dataSyncFuture;
+        if (!uuidsToRequest.isEmpty())
+            batchRequests();
+
+        addSchedule(this::requestBatchLoop, 2);
+    }
+
+    private void batchRequests()
+    {
+        if (client == null)
+            return;
+
+        var list = ImmutableList.copyOf(uuidsToRequest);
 
         if (FeatherMorphMain.getInstance().debugOutputEnabled())
-            logSlaveInfo("Requesting data sync...");
+            logger.info("Batching %s lookup requests".formatted(list.size()));
 
-        this.sendCommand(new MIC2SRequestSyncCommand());
+        uuidsToRequest.clear();
 
-        return new CompletableFuture<>();
+        this.sendCommand(new MIC2SRequestSyncCommand(list));
+    }
+
+    //endregion Batch Requests
+
+    private final Map<UUID, CompletableFuture<UUID>> playerSyncFutures = new ConcurrentHashMap<>();
+
+    public synchronized CompletableFuture<UUID> requestData(UUID uuid)
+    {
+        var future = getOrCreatePlayerFuture(uuid);
+        requestData(List.of(uuid));
+
+        return future;
+    }
+
+    public synchronized CompletableFuture<UUID> getOrCreatePlayerFuture(UUID uuid)
+    {
+        var existing = playerSyncFutures.getOrDefault(uuid, null);
+        if (existing != null) return existing;
+
+        var newInstance = new CompletableFuture<UUID>();
+        playerSyncFutures.put(uuid, newInstance);
+
+        return newInstance;
+    }
+
+    public synchronized void requestData(@Unmodifiable List<UUID> uuid)
+    {
+        uuid.forEach(this::getOrCreatePlayerFuture);
+        this.uuidsToRequest.addAll(uuid);
     }
 
     public boolean isOnline()
@@ -207,16 +252,18 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
     @Override
     public void onSyncMeta(MIS2CSyncMetaCommand command)
     {
-        logSlaveInfo("Received data sync for %s entries".formatted(command.data().size()));
+        if (FeatherMorphMain.getInstance().debugOutputEnabled())
+            logSlaveInfo("Received data sync for %s entries".formatted(command.data().size()));
 
-        playerDataHolder.dropAll();
         for (SocketPlayerMeta socketMeta : command.data())
         {
             if (!socketMeta.isValid())
                 continue;
 
             var offlinePlayer = Bukkit.getOfflinePlayer(Objects.requireNonNull(socketMeta.getBindingUuid(), "???"));
-            var playerMeta = playerDataHolder.getPlayerMeta(offlinePlayer);
+
+            playerDataHolder.drop(socketMeta.getBindingUuid());
+            var playerMeta = playerDataHolder.getOrCreatePlayerMeta(offlinePlayer);
 
             for (var identifier : socketMeta.getIdentifiers())
             {
@@ -226,9 +273,14 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
 
                 playerMeta.addDisguise(disguiseMeta);
             }
-        }
 
-        morphManager.refreshDisguiseUnlockStateToAllPlayers();
+            synchronized (this)
+            {
+                var future = this.playerSyncFutures.remove(socketMeta.getBindingUuid());
+                if (future != null)
+                    future.complete(socketMeta.getBindingUuid());
+            }
+        }
     }
 
     @Override
@@ -247,10 +299,10 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
             return;
         }
 
-        this.onReceivePlayerMeta(socketMeta);
+        this.onReceivePlayerMetaUpdate(socketMeta);
     }
 
-    private void onReceivePlayerMeta(SocketPlayerMeta socketMeta)
+    private void onReceivePlayerMetaUpdate(SocketPlayerMeta socketMeta)
     {
         var operation = socketMeta.getOperation();
 
@@ -342,7 +394,7 @@ public class SlaveInstance extends MorphPluginObject implements IInstanceService
         currentState.set(newState);
     }
 
-    private final ProtocolLevel implementingLevel = ProtocolLevel.V3;
+    private final ProtocolLevel implementingLevel = ProtocolLevel.V4;
 
     @Override
     public void onConnectionOpen()

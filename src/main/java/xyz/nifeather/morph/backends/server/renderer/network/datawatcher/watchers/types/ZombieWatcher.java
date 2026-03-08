@@ -5,7 +5,7 @@ import org.bukkit.entity.Player;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
-import xyz.nifeather.morph.misc.disguiseProperty.values.ZombieProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.values.ZombiePropertyCollection;
 
 public class ZombieWatcher extends LivingEntityWatcher
 {
@@ -22,7 +22,7 @@ public class ZombieWatcher extends LivingEntityWatcher
     @Override
     protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
-        var properties = DisguiseProperties.INSTANCE.getOrThrow(ZombieProperties.class);
+        var properties = DisguiseProperties.INSTANCE.getCollectionOrThrow(ZombiePropertyCollection.class);
 
         if (property.equals(properties.IS_BABY))
             this.writePersistent(ValueIndex.ZOMBIE.IS_BABY, (Boolean) value);

@@ -6,7 +6,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xyz.nifeather.morph.MorphPluginObject;
-import xyz.nifeather.morph.config.ConfigOption;
+import xyz.nifeather.morph.config.ConfigOptions;
 import xyz.nifeather.morph.config.MorphConfigManager;
 import xyz.nifeather.morph.messages.strings.CommandStrings;
 import xyz.nifeather.morph.messages.MessageUtils;
@@ -27,9 +27,9 @@ public class EntityProcessor extends MorphPluginObject implements Listener
 
     public EntityProcessor()
     {
-        doModifyAI = config.get(Boolean.class, ConfigOption.DO_MODIFY_AI);
+        doModifyAI = config.get(ConfigOptions.DO_MODIFY_AI);
 
-        config.getBindable(Boolean.class, ConfigOption.DO_MODIFY_AI).onValueChanged((o, n) ->
+        config.getBindable(ConfigOptions.DO_MODIFY_AI).onValueChanged((o, n) ->
         {
             if (doModifyAI == n) return;
 
