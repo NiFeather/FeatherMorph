@@ -2,13 +2,14 @@ package xyz.nifeather.morph.misc.integrations.placeholderapi;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
-import org.bukkit.entity.Player;
+import org.bukkit.OfflinePlayer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import xiamomc.pluginbase.Managers.DependencyManager;
 import xyz.nifeather.morph.misc.integrations.placeholderapi.builtin.AvaliableDisguisesProvider;
+import xyz.nifeather.morph.misc.integrations.placeholderapi.builtin.RedirectPlaceholderProvider;
 import xyz.nifeather.morph.misc.integrations.placeholderapi.builtin.StateNameProvider;
 
 import java.util.List;
@@ -23,7 +24,8 @@ public class PlaceholderIntegration extends PlaceholderExpansion
     {
         addPlaceholders(ObjectArrayList.of(
                 new StateNameProvider(),
-                new AvaliableDisguisesProvider()
+                new AvaliableDisguisesProvider(),
+                new RedirectPlaceholderProvider()
         ));
     }
 
@@ -80,12 +82,10 @@ public class PlaceholderIntegration extends PlaceholderExpansion
     private static final String defaultString = "invalid_placeholder";
 
     @Override
-    public @Nullable String onPlaceholderRequest(Player player, @NotNull String param)
+    public @Nullable String onRequest(OfflinePlayer player, @NotNull String params)
     {
-        if (player == null) return defaultString;
-
-        param = param.replaceFirst(getIdentifier() + "_", "");
-        var paramSpilt = param.split("_", 2);
+        params = params.replaceFirst(getIdentifier() + "_", "");
+        var paramSpilt = params.split("_", 2);
 
         if (paramSpilt.length != 2)
             return null;

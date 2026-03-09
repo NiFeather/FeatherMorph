@@ -33,6 +33,7 @@ public class PlayerLookPacketListener extends ProtocolListener
                 if (rec == null)
                     return;
 
+                event.markForReEncode(true);
                 data.setYaw(rec.yaw);
                 data.setPitch(rec.pitch);
             }

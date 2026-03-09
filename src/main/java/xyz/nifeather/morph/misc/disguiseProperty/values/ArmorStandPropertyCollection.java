@@ -43,22 +43,22 @@ public class ArmorStandPropertyCollection extends BaseLivingEntityPropertyCollec
             .withOutputHandle(OutputHandles::writeRotations)
             .build();
 
-    public final SingleProperty<Rotations> RIGHT_ARM_ROTATION = SingleProperty.builder(PropertyNames.ARMOR_STAND_RIGHT_ARM_ROTATION, Rotations.ZERO)
+    public final SingleProperty<Rotations> RIGHT_ARM_ROTATION = SingleProperty.builder(PropertyNames.ARMOR_STAND_RIGHT_ARM_ROTATION, Rotations.ofDegrees(-15, 0, 10))
             .withInputHandle(InputHandles::readRotations)
             .withOutputHandle(OutputHandles::writeRotations)
             .build();
 
-    public final SingleProperty<Rotations> LEFT_ARM_ROTATION = SingleProperty.builder(PropertyNames.ARMOR_STAND_LEFT_ARM_ROTATION, Rotations.ZERO)
+    public final SingleProperty<Rotations> LEFT_ARM_ROTATION = SingleProperty.builder(PropertyNames.ARMOR_STAND_LEFT_ARM_ROTATION, Rotations.ofDegrees(-10, 0, -10))
             .withInputHandle(InputHandles::readRotations)
             .withOutputHandle(OutputHandles::writeRotations)
             .build();
 
-    public final SingleProperty<Rotations> RIGHT_LEG_ROTATION = SingleProperty.builder(PropertyNames.ARMOR_STAND_RIGHT_LEG_ROTATION, Rotations.ZERO)
+    public final SingleProperty<Rotations> RIGHT_LEG_ROTATION = SingleProperty.builder(PropertyNames.ARMOR_STAND_RIGHT_LEG_ROTATION, Rotations.ofDegrees(1, 0, 1))
             .withInputHandle(InputHandles::readRotations)
             .withOutputHandle(OutputHandles::writeRotations)
             .build();
 
-    public final SingleProperty<Rotations> LEFT_LEG_ROTATION = SingleProperty.builder(PropertyNames.ARMOR_STAND_LEFT_LEG_ROTATION, Rotations.ZERO)
+    public final SingleProperty<Rotations> LEFT_LEG_ROTATION = SingleProperty.builder(PropertyNames.ARMOR_STAND_LEFT_LEG_ROTATION, Rotations.ofDegrees(-1, 0, -1))
             .withInputHandle(InputHandles::readRotations)
             .withOutputHandle(OutputHandles::writeRotations)
             .build();

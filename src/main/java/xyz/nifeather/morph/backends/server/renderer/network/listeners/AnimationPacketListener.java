@@ -32,9 +32,6 @@ public class AnimationPacketListener extends ProtocolListener
 
     private void onAnimationPacket(PacketSendEvent event, WrapperPlayServerEntityAnimation packet)
     {
-        if (packet.getType() != WrapperPlayServerEntityAnimation.EntityAnimationType.WAKE_UP)
-            return;
-
         var sourceEntityId = packet.getEntityId();
         var sourcePlayer = this.getPlayerFrom(sourceEntityId);
 
@@ -48,6 +45,7 @@ public class AnimationPacketListener extends ProtocolListener
         // Don't cancel for the source
         if (event.getPlayer().equals(sourcePlayer)) return;
 
-        event.setCancelled(true);
+        if (!watcher.haveAnimation(packet.getType()))
+            event.setCancelled(true);
     }
 }

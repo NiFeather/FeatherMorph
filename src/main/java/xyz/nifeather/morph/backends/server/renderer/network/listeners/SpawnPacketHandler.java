@@ -45,47 +45,29 @@ public class SpawnPacketHandler extends ProtocolListener
 
     private void onEntityAddPacket(WrapperPlayServerSpawnEntity packet, PacketSendEvent packetEvent)
     {
-        var backend = ServerBackend.getInstance();
-        if (backend == null) return;
-
         var uuid = packet.getUUID().orElse(null);
 
         if (uuid == null)
             return;
 
-        //忽略不在注册表中的玩家
+        // Ignore players that's not in the registry
         var bindingWatcher = registry.getWatcher(uuid);
         if (bindingWatcher == null)
             return;
 
-        // todo: 不要二次处理来自我们自己的包
+        var backend = ServerBackend.getInstance();
+        if (backend == null) return;
+
+        // And don't process out packet
+        // ...We have no way but this because PacketEvents don't have packet metadata like ProtocolLib
         if (packet.getData() == EntityWatcher.PACKET_MARK)
+        {
+            packet.setData(0);
             return;
+        }
 
-        try
-        {
-            var disguisedPlayer = Bukkit.getPlayer(uuid);
-            if (disguisedPlayer != null)
-            {
-                Player affectedPlayer = packetEvent.getPlayer();
-                backend.serverRenderer.refreshStateForPlayer(disguisedPlayer, List.of(affectedPlayer));
-                packetEvent.setCancelled(true);
-            }
-        }
-        catch (BuildFailedException e)
-        {
-            if (!e.critical())
-            {
-                logger.warn("Renderer failed to build spawn packets, ignoring: " + e.getMessage());
-                return;
-            }
-
-            handleException(getPlayerFrom(packet.getEntityId()), bindingWatcher, e);
-        }
-        catch (Throwable t)
-        {
-            var sourcePlayer = getPlayerFrom(packet.getEntityId());
-            handleException(sourcePlayer, bindingWatcher, t);
-        }
+        Player affectedPlayer = packetEvent.getPlayer();
+        if (backend.serverRenderer.scheduleDisguise(bindingWatcher, List.of(affectedPlayer)))
+            packetEvent.setCancelled(true);
     }
 }

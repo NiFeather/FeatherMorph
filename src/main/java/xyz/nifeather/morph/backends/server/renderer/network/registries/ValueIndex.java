@@ -64,6 +64,10 @@ public class ValueIndex
     public static final NautilusValues NAUTILUS = new NautilusValues();
     public static final AbstractNautilusValues NAUTILUS_COMMON = new AbstractNautilusValues();
 
+    public static final DisplayEntityValues DISPLAY_ENTITY = new DisplayEntityValues();
+    public static final ItemDisplayValues ITEM_DISPLAY = new ItemDisplayValues();
+    public static final TextDisplayValues TEXT_DISPLAY = new TextDisplayValues();
+
     /*
     private static final Map<EntityType, AbstractValues> valuesMap = new ConcurrentHashMap<>();
     private static void register(EntityType type, AbstractValues values)

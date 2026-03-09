@@ -7,6 +7,7 @@ import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
+import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.ApiStatus;
@@ -22,6 +23,8 @@ import xyz.nifeather.morph.messages.strings.CommandStrings;
 import xyz.nifeather.morph.messages.strings.EmoteStrings;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.strings.MorphStrings;
+import xyz.nifeather.morph.misc.actions.ConsumerActions;
+import xyz.nifeather.morph.misc.attributes.DisguiseAttributeHandler;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
@@ -73,6 +76,7 @@ public class DisguiseState extends MorphPluginObject
 
         this.soundHandler = new SoundHandler(player);
         this.abilityUpdater = new AbilityUpdater(this);
+        this.disguiseAttributes = new DisguiseAttributeHandler();
 
         this.disguiseWaypointTransmitter = transmitWaypoint
                 ? new DisguiseWaypointTransmitter(this)
@@ -88,6 +92,9 @@ public class DisguiseState extends MorphPluginObject
         this.soundHandler.refreshSounds(this, wrapper.getEntityType(), wrapper.isBaby());
 
         this.cachedPlayer = CacheWithDefault.of(player);
+
+        disguiseAttributes.initializeFor(getEntityType());
+        disguiseAttributes.hookOnAttributeChange(this::onDisguiseAttributeChange);
 
         animationSequence.setCooldown(10);
         animationSequence.onNewAnimation(anim ->
@@ -124,6 +131,17 @@ public class DisguiseState extends MorphPluginObject
         });
 
         disguisePropertyHandler().hookOnPropertyWrite(this::onPropertyWrite);
+        disguisePropertyHandler().hookOnPropertyDiscard(this::onPropertyDiscard);
+    }
+
+    private void onDisguiseAttributeChange(NamespacedKey id, AttributeInstance attribute)
+    {
+        disguiseWrapper.onDisguiseAttributeChange(id, attribute);
+    }
+
+    private void onPropertyDiscard(SingleProperty<Object> property, Object o)
+    {
+        disguiseWrapper.discardProperty(property, o);
     }
 
     private void onPropertyWrite(SingleProperty<?> singleProperty, Object o)
@@ -293,9 +311,9 @@ public class DisguiseState extends MorphPluginObject
 
         if (checkPermission && sequenceIdentifier.equals(AnimationNames.RESET)
                 || !PermissionUtils.hasPermission(
-                        player,
-                        CommonPermissions.animationPermissionOf(sequenceIdentifier, this.getDisguiseIdentifier()),
-                        true))
+                player,
+                CommonPermissions.animationPermissionOf(sequenceIdentifier, this.getDisguiseIdentifier()),
+                true))
         {
             MessageUtils.send(player, CommandStrings.noPermissionMessage());
             return;
@@ -498,6 +516,16 @@ public class DisguiseState extends MorphPluginObject
 
         this.bossbar = bossbar;
     }
+
+    //region Disguise Attribute
+
+    private final DisguiseAttributeHandler disguiseAttributes;
+    public DisguiseAttributeHandler disguiseAttributeHandler()
+    {
+        return disguiseAttributes;
+    }
+
+    //endregion Disguise Attribute
 
     //region Disguise Property
 
@@ -723,9 +751,12 @@ public class DisguiseState extends MorphPluginObject
      * Get A {@link CompletableFuture} that binds to this state.<br>
      * Finishes when this state has been disposed.<br>
      * Fail with exception if an error occurred while updating this state
+     * @apiNote If you wish to do something immediately on disposal, use {@link DisguiseState#onDispose(Consumer)}
      */
     public CompletableFuture<DisguiseState> getStateFuture()
     {
+        // Return a new CompletableFuture, so that folks calling this method can do their own things.
+        // Like MorphManager#applyDisguise
         var instance = new CompletableFuture<DisguiseState>();
         stateFuture.thenAccept(instance::complete);
         stateFuture.exceptionally(t ->
@@ -963,20 +994,11 @@ public class DisguiseState extends MorphPluginObject
 
     //endregion Sound Handling
 
-    public DisguiseState createCopy(Player player, boolean allowWaypoint)
+    private final ConsumerActions<DisguiseState> onDisposeActions = new ConsumerActions<>();
+
+    public void onDispose(Consumer<DisguiseState> consumer)
     {
-        if (disposed())
-            throw new RuntimeException("Can't create a copy of a disposed DisguiseState");
-
-        var wrapper = this.disguiseWrapper.clone();
-
-        var newInstance = new DisguiseState(player, this.disguiseIdentifier, this.skillLookupIdentifier(),
-                wrapper, provider, this.playerOptions, playerMeta, allowWaypoint);
-
-        newInstance.playerDisplay = this.playerDisplay;
-        newInstance.serverDisplay = this.serverDisplay;
-
-        return newInstance;
+        onDisposeActions.hook(consumer);
     }
 
     private final AtomicBoolean disposed = new AtomicBoolean(false);
@@ -994,6 +1016,7 @@ public class DisguiseState extends MorphPluginObject
             return;
 
         stateFuture.complete(this);
+        onDisposeActions.invoke(this);
 
         disposed.set(true);
 

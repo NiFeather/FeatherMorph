@@ -3,6 +3,9 @@ package xyz.nifeather.morph.backends.server;
 import com.mojang.authlib.GameProfile;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.nbt.CompoundTag;
+import org.bukkit.NamespacedKey;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -114,6 +117,15 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
     }
 
     @Override
+    public <X> void discardProperty(SingleProperty<X> property, X oldValue)
+    {
+        disguiseProperties.remove(property);
+
+        if (bindingWatcher == null) return;
+        bindingWatcher.discardProperty(property, oldValue);
+    }
+
+    @Override
     public <X> @NotNull X readProperty(SingleProperty<X> property)
     {
         return this.readPropertyOr(property, property.defaultVal());
@@ -221,6 +233,7 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
 
     private void refreshRegistry(@NotNull SingleWatcher bindingWatcher)
     {
+        cachedAttributes.forEach(bindingWatcher::writeEntityAttribute);
         this.disguiseProperties.forEach((property, value) -> applyProperty((SingleProperty<Object>) property, value));
 
         if (getEntityType() == EntityType.PLAYER)
@@ -252,5 +265,16 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
 
         if (bindingWatcher.readEntryOrDefault(CustomEntries.WARDEN_VANISHED, false))
             bindingWatcher.writeEntry(CustomEntries.ANIMATION, AnimationNames.APPEAR);
+    }
+
+    private final Map<NamespacedKey, AttributeInstance> cachedAttributes = new ConcurrentHashMap<>();
+
+    @Override
+    public void onDisguiseAttributeChange(NamespacedKey id, AttributeInstance attribute)
+    {
+        cachedAttributes.put(id, attribute);
+        if (bindingWatcher == null) return;
+
+        bindingWatcher.writeEntityAttribute(id, attribute);
     }
 }

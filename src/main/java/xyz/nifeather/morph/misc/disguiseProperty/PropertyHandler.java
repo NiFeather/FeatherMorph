@@ -1,17 +1,17 @@
 package xyz.nifeather.morph.misc.disguiseProperty;
 
+import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
-import org.bukkit.entity.Player;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.FeatherMorphMain;
-import xyz.nifeather.morph.messages.strings.ExceptionStrings;
 import xyz.nifeather.morph.misc.ExecutionErrorException;
 import xyz.nifeather.morph.misc.ISupportDiffs;
 import xyz.nifeather.morph.misc.actions.BiConsumerActions;
 import xyz.nifeather.morph.misc.disguiseProperty.values.PropertyCollection;
-import xyz.nifeather.morph.utilities.ExceptionUtils;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -26,6 +26,12 @@ public class PropertyHandler
     public <X> void hookOnPropertyWrite(BiConsumer<SingleProperty<X>, X> consumer)
     {
         actions.hook((BiConsumer) consumer);
+    }
+
+    protected final BiConsumerActions<SingleProperty<?>, Object> discardHooks = new BiConsumerActions<>();
+    public <X> void hookOnPropertyDiscard(BiConsumer<SingleProperty<X>, X> consumer)
+    {
+        discardHooks.hook((BiConsumer) consumer);
     }
 
     public Map<String, String> toNetworkProperties()
@@ -77,10 +83,11 @@ public class PropertyHandler
         validProperties.put(property.id(), property);
     }
 
-    public void updateFromPropertiesInput(Map<String, String> input, Player inputSource, EnumSet<ValidationFlag> validationFlags)
+    public void updateFromPropertiesInput(Map<String, String> input, Entity inputSource, EnumSet<ValidationFlag> validationFlags)
             throws ParseErrorException, PropertyValidationException
     {
         var parsedResults = new ConcurrentHashMap<SingleProperty<?>, Object>();
+        var propertiesToRemove = new ObjectArrayList<SingleProperty<?>>();
 
         for (Map.Entry<String, String> entry : input.entrySet())
         {
@@ -91,14 +98,41 @@ public class PropertyHandler
             if (property == null)
                 continue;
 
+            if (value.equals("!"))
+            {
+                propertiesToRemove.add(property);
+                continue;
+            }
+
             var val = property.forInput(value).orElse(null);
             if (val == null) continue;
 
             property.validateInput(val, inputSource, validationFlags);
             parsedResults.put(property, val);
+            this.writeGeneric(property, val);
         }
 
-        parsedResults.forEach(this::writeGeneric);
+        propertiesToRemove.forEach(this::discardProperty);
+
+        for (Map.Entry<SingleProperty<?>, Object> entry : parsedResults.entrySet())
+        {
+            var property = (SingleProperty<Object>) entry.getKey();
+            var value = entry.getValue();
+
+            property.postProcessHandle().handle(value, this);
+        }
+    }
+
+    /**
+     * Discard the property, remove its value from this PropertyHandler
+     */
+    public void discardProperty(SingleProperty<?> property)
+    {
+        var existingValue = propertyMap.remove(property);
+        if (existingValue == null) // It doesn't even exist, don't trigger the action.
+            return;
+
+        discardHooks.invoke(Pair.of(property, null));
     }
 
     public void reset()

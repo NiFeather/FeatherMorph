@@ -54,6 +54,7 @@ import xyz.nifeather.morph.network.commands.S2C.set.*;
 import xyz.nifeather.morph.network.multiInstance.MultiInstanceService;
 import xyz.nifeather.morph.network.multiInstance.protocol.Operation;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
+import xyz.nifeather.morph.network.server.S2CDiscardPropertiesCommand;
 import xyz.nifeather.morph.providers.disguise.DisguiseProvider;
 import xyz.nifeather.morph.providers.disguise.FallbackDisguiseProvider;
 import xyz.nifeather.morph.providers.disguise.PlayerDisguiseProvider;
@@ -70,10 +71,7 @@ import xyz.nifeather.morph.utilities.PermissionUtils;
 
 import java.io.InvalidObjectException;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MorphManager extends MorphPluginObject implements IManagePlayerData
@@ -945,7 +943,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                                   PlayerMeta playerOptions) throws ExecutionErrorException
     {
         var player = parameters.targetPlayer;
-        var uuid = player.getUniqueId();
         var provider = getProvider(parameters.targetDisguiseIdentifier());
         var wrapper = newState.getDisguiseWrapper();
 
@@ -957,7 +954,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         {
             new PlayerSwitchMorphEvent(player, previousState, newState).callEvent();
             previousState.dispose();
-            activeDisguises.remove(uuid, previousState);
         }
 
         wrapper.getBackend().disguise(player, wrapper);
@@ -965,16 +961,17 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         provider.onDisguiseApply(newState);
 
         newState.getStateFuture()
-                .exceptionally(t ->
+                .exceptionallyAsync(t ->
                 {
-                    scheduleOn(player, () ->
-                    {
-                        MessageUtils.send(player, MorphStrings.errorWhileUpdatingDisguise());
-                        unMorph(nilCommandSource, player, true, true);
-                    });
+                    MessageUtils.send(player, MorphStrings.errorWhileUpdatingDisguise());
+                    newState.dispose();
 
-                    return null;
-                }).thenAccept(s -> activeDisguises.remove(uuid, s));
+                    // Return the state so that `thenAccept` could run.
+                    return newState;
+                }, runnable -> player.getScheduler().run(FeatherMorphMain.getInstance(), task -> runnable.run(), () -> {}));
+
+        // Just found out that completing a CompletableFuture may won't trigger actions immediately...
+        newState.onDispose(this::onStateDispose);
 
         newState.scheduleSelfUpdate();
 
@@ -1051,6 +1048,32 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         return true;
     }
 
+    private void onStateDispose(DisguiseState s)
+    {
+        UUID uuid = s.getPlayerUUID();
+        Player player = s.getPlayer();
+
+        // 从disguiseStates里移除此状态
+        activeDisguises.remove(uuid, s);
+
+        // 设置可用动作
+        clientHandler.sendCommand(player, new S2CSetAvailableAnimationsCommand(List.of()));
+
+        // 向管理员发送map移除指令
+        modNetworkingHelper.sendCommandToRevealablePlayers(new S2CRemoveAdminRevealCommand(player.getEntityId()));
+
+        // 向客户端同步伪装属性
+        clientHandler.updateCurrentIdentifier(player, null);
+
+        var revLevel = revealingHandler.getRevealingState(player).getBaseValue();
+        clientHandler.sendCommand(player, new S2CSetMobRevealCommand(revLevel));
+
+        // 移除Bossbar
+        s.setBossbar(null);
+
+        player.sendActionBar(Component.empty());
+    }
+
     private void afterDisguise(DisguiseState state,
                                MorphParameters parameters,
                                PlayerMeta playerOptions)
@@ -1106,6 +1129,15 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             }
 
             clientHandler.sendCommand(pl, new S2CUpdatePropertiesCommand(diffMap));
+        });
+
+        propertyHandler.hookOnPropertyDiscard((property, value) ->
+        {
+            if (state.disposed()) return;
+
+            // fix command not sending when player rejoins
+            Player pl = player.isConnected() ? player : Bukkit.getPlayer(player.getUniqueId());
+            clientHandler.sendCommand(pl, new S2CDiscardPropertiesCommand(List.of(property.id())));
         });
 
         // 发送提示
@@ -1322,33 +1354,14 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             );
         }
 
-        // 从disguiseStates里移除此状态
-        activeDisguises.remove(uuid, state);
-
         // 更新最后操作时间
         updateLastPlayerMorphOperationTime(player);
 
-        // 移除Bossbar
-        state.setBossbar(null);
-
-        // 向客户端同步伪装属性
-        clientHandler.updateCurrentIdentifier(player, null);
-
-        var revLevel = revealingHandler.getRevealingState(player).getBaseValue();
-        clientHandler.sendCommand(player, new S2CSetMobRevealCommand(revLevel));
-
         //发送消息以及重置actionbar
         MessageUtils.send(player, MorphStrings.unMorphSuccessString());
-        player.sendActionBar(Component.empty());
-
-        // 设置可用动作
-        clientHandler.sendCommand(player, new S2CSetAvailableAnimationsCommand(List.of()));
 
         // 调用事件
         new PlayerUnMorphEvent(player, state).callEvent();
-
-        // 向管理员发送map移除指令
-        modNetworkingHelper.sendCommandToRevealablePlayers(new S2CRemoveAdminRevealCommand(player.getEntityId()));
 
         state.dispose();
     }
@@ -1443,6 +1456,14 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         return getDisguiseStateFor(player);
     }
 
+    @Nullable
+    public DisguiseState getDisguiseStateFor(@Nullable UUID uuid)
+    {
+        if (uuid == null) return null;
+
+        return this.activeDisguises.getOrDefault(uuid, null);
+    }
+
     public void onShutdown()
     {
         getActiveDisguises().forEach(savedDisguises::save);
@@ -1450,56 +1471,6 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         save();
 
         providers.clear();
-    }
-
-    public SavedDisguise getOfflineState(Player player)
-    {
-        return savedDisguises.read(player.getUniqueId());
-    }
-
-    public List<String> availableOfflineDisguises()
-    {
-        return savedDisguises.listNames();
-    }
-
-    public boolean disguiseFromState(DisguiseState state)
-    {
-        var meta = getDisguiseMeta(state.getDisguiseIdentifier());
-        var result = DisguiseBuildResult.of(state, meta);
-        var playerMeta = getPlayerMeta(state.getPlayer());
-        var parameters = MorphParameters.create(state.getPlayer(), state.getDisguiseIdentifier());
-
-        if (this.prepareDisguiseMeta(parameters) == null)
-            return false;
-
-        try
-        {
-            this.buildDisguise(result, parameters);
-            this.applyDisguise(parameters, state, playerMeta);
-        }
-        catch (Exception e) //todo: 或许之后能调整一下，让 ParseErrorException, ExecutionErrorException 单独提示
-        {
-            logger.error("Failed calling disguiseFromState", e);
-            return false;
-        }
-
-        this.afterDisguise(state, parameters, playerMeta);
-
-        return true;
-    }
-
-    /**
-     * 尝试从离线存储恢复伪装
-     * @param player
-     * @param offlineState
-     * @return Disguise result
-     */
-    public OfflineDisguiseResult disguiseFromOfflineState(Player player, SavedDisguise offlineState)
-    {
-        return morph(
-                MorphParameters.create(player, offlineState.disguiseIdentifier)
-                        .withProperties(offlineState.properties)
-            ) ? OfflineDisguiseResult.SUCCESS : OfflineDisguiseResult.FAIL;
     }
 
     //endregion 玩家伪装相关
@@ -1610,50 +1581,42 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     @Override
     public boolean reload()
     {
-        //重载完数据后要发到离线存储的人
-        var stateToOfflineStore = new ObjectArrayList<DisguiseState>();
+        Map<Player, MorphParameters> statesToRecover = new Object2ObjectArrayMap<>(activeDisguises.size());
+        Map.copyOf(activeDisguises)
+                .forEach((uuid, state) ->
+                {
+                    var player = Bukkit.getPlayer(uuid);
+                    if (player == null)
+                    {
+                        savedDisguises.save(state);
+                    }
+                    else
+                    {
+                        var parameter = MorphParameters.create(player, state.getDisguiseIdentifier());
+                        try
+                        {
+                            parameter.withProperties(state.disguisePropertyHandler().toNetworkProperties());
+                        }
+                        catch (ParseErrorException | ExecutionErrorException e)
+                        {
+                            logger.warn("MorphManager#reload: Failed to save disguise properties", e);
+                        }
 
-        Map.copyOf(activeDisguises).forEach((uuid, state) ->
-        {
-            if (!state.getPlayer().isOnline())
-            {
-                stateToOfflineStore.add(state);
-                activeDisguises.remove(uuid, state);
-            }
-        });
+                        statesToRecover.put(player, parameter);
+                    }
 
-        var stateToRecover = getActiveDisguises();
-        stateToRecover = stateToRecover.stream()
-                .map(oldState -> oldState.createCopy(oldState.getPlayer(), allowDisguiseWaypoint.get()))
-                .toList();
+                    // We used to call unMorph before, but now we use dispose instead...
+                    state.dispose();
+                });
 
         unMorphAll(false);
 
         var success = playerdata.reload();
 
-        stateToOfflineStore.forEach(savedDisguises::save);
-
-        //重载完成后恢复玩家伪装
-        stateToRecover.forEach(s ->
+        statesToRecover.forEach((player, savedDisguise) ->
         {
-            var player = s.getPlayer();
-
-            this.scheduleOn(player, () ->
-            {
-                var parameter = MorphParameters.create(player, s.getDisguiseIdentifier());
-                if (this.prepareDisguiseMeta(parameter) == null)
-                    return;
-
-                if (disguiseFromState(s))
-                {
-                    refreshClientState(s);
-                    MessageUtils.send(player, MorphStrings.recoverString());
-                }
-                else
-                {
-                    unMorph(nilCommandSource, player, true, true);
-                }
-            });
+            if (this.morph(savedDisguise))
+                MessageUtils.send(player, MorphStrings.recoverString());
         });
 
         var currentToken = ThreadLocalRandom.current().nextInt();
@@ -1691,4 +1654,50 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
     }
 
     //endregion Implementation of IManagePlayerData
+
+    //region Saved Disguises
+
+    @ApiStatus.Internal
+    public boolean saveDisguise(UUID uuid)
+    {
+        var state = activeDisguises.getOrDefault(uuid, null);
+        if (state == null) return false;
+
+        return savedDisguises.save(state);
+    }
+
+    public SavedDisguiseStore savedDisguiseStore()
+    {
+        return savedDisguises;
+    }
+
+    @Nullable
+    public SavedDisguise getSavedDisguise(String name)
+    {
+        return savedDisguises.read(name);
+    }
+
+    public List<String> availableSavedDisguises()
+    {
+        return savedDisguises.listNames();
+    }
+
+    /**
+     * 尝试从离线存储恢复伪装
+     * @param player
+     * @param offlineState
+     * @return Disguise result
+     */
+    public boolean disguiseFromSavedDisguise(Player player, SavedDisguise offlineState)
+    {
+        if (!canMorph(player))
+            return false;
+
+        return morph(
+                MorphParameters.create(player, offlineState.disguiseIdentifier)
+                        .withProperties(offlineState.properties)
+        );
+    }
+
+    //endregion Saved Disguises
 }

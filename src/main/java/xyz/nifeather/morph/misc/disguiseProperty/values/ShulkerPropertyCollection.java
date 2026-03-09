@@ -11,7 +11,7 @@ import java.util.Arrays;
 
 public class ShulkerPropertyCollection extends BaseLivingEntityPropertyCollection<Shulker>
 {
-    public final SingleProperty<DyeColor> DYE_COLOR = SingleProperty.builder(PropertyNames.SHULKER_COLOR, DyeColor.class, DyeColor.getByWoolData((byte) 15))
+    public final SingleProperty<DyeColor> DYE_COLOR = SingleProperty.builder(PropertyNames.SHULKER_COLOR, DyeColor.class, DyeColor.BLACK)
             .withInputHandle(InputHandles::readDyeColor)
             .withOutputHandle(OutputHandles::writeEnum)
             .withSuggestions(Arrays.stream(DyeColor.values()).map(c -> c.name().toLowerCase()).toList())

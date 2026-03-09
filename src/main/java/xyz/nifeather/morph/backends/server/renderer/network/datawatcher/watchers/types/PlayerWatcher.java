@@ -7,8 +7,7 @@ import com.github.retrooper.packetevents.protocol.player.GameMode;
 import com.github.retrooper.packetevents.protocol.player.HumanoidArm;
 import com.github.retrooper.packetevents.util.Vector3i;
 import com.github.retrooper.packetevents.wrapper.PacketWrapper;
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerPlayerInfoRemove;
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerPlayerInfoUpdate;
+import com.github.retrooper.packetevents.wrapper.play.server.*;
 import com.mojang.authlib.GameProfile;
 import io.github.retrooper.packetevents.util.SpigotConversionUtil;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
@@ -204,5 +203,21 @@ public class PlayerWatcher extends LivingEntityWatcher
         this.remove(ValueIndex.PLAYER.POSE);
         this.writePersistent(ValueIndex.PLAYER.BED_POS, Optional.empty());
         this.remove(ValueIndex.PLAYER.BED_POS);
+    }
+
+    @Override
+    public void onEntityDestroy(Player packetReceiver)
+    {
+        super.onEntityDestroy(packetReceiver);
+
+        var packet = new WrapperPlayServerPlayerInfoRemove(this.readEntryOrThrow(CustomEntries.SPAWN_UUID));
+        var protocol = PacketEvents.getAPI().getPlayerManager();
+        protocol.sendPacket(packetReceiver, packet);
+    }
+
+    @Override
+    public boolean haveAnimation(WrapperPlayServerEntityAnimation.EntityAnimationType animationType)
+    {
+        return true;
     }
 }

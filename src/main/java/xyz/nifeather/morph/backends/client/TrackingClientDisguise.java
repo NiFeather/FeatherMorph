@@ -34,6 +34,11 @@ public class TrackingClientDisguise implements Cloneable
         this.disguiseProperties.put(property, value);
     }
 
+    public <X> void discardProperty(SingleProperty<X> property)
+    {
+        this.disguiseProperties.remove(property);
+    }
+
     public <X> @NotNull X readProperty(SingleProperty<X> property)
     {
         return this.readPropertyOr(property, property.defaultVal());

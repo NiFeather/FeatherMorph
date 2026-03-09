@@ -3,7 +3,6 @@ package xyz.nifeather.morph.events;
 import com.destroystokyo.paper.event.entity.EntityAddToWorldEvent;
 import com.destroystokyo.paper.event.player.PlayerClientOptionsChangeEvent;
 import com.destroystokyo.paper.event.player.PlayerPostRespawnEvent;
-import io.papermc.paper.event.connection.configuration.AsyncPlayerConnectionConfigureEvent;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import org.bukkit.Material;
@@ -30,21 +29,18 @@ import xyz.nifeather.morph.api.events.gameplay.PlayerJoinedWithDisguiseEvent;
 import xyz.nifeather.morph.api.networking.exceptions.PlayerDisconnectedException;
 import xyz.nifeather.morph.config.ConfigOptions;
 import xyz.nifeather.morph.config.MorphConfigManager;
-import xyz.nifeather.morph.interfaces.IManagePlayerData;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.strings.MorphStrings;
 import xyz.nifeather.morph.messages.vanilla.MasterVanillaMessageStore;
 import xyz.nifeather.morph.misc.DisguiseEquipment;
 import xyz.nifeather.morph.misc.DisguiseTypes;
 import xyz.nifeather.morph.misc.ModNetworkingHelper;
-import xyz.nifeather.morph.misc.OfflineDisguiseResult;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.values.BaseLivingEntityPropertyCollection;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 import xyz.nifeather.morph.network.Constants;
 import xyz.nifeather.morph.network.commands.S2C.S2CSwapCommand;
 import xyz.nifeather.morph.network.commands.S2C.admin.reveal.S2CRemoveAdminRevealCommand;
-import xyz.nifeather.morph.network.multiInstance.MultiInstanceService;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
 import xyz.nifeather.morph.network.server.ServerSetEquipCommand;
 import xyz.nifeather.morph.skills.SkillManager;
@@ -53,10 +49,6 @@ import xyz.nifeather.morph.utilities.EntityTypeUtils;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-import java.util.Optional;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import static xyz.nifeather.morph.utilities.DisguiseUtils.itemOrAir;
 
@@ -335,22 +327,16 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
             return;
         }
 
-        var offlineState = morphs.getOfflineState(player);
+        var offlineState = morphs.savedDisguiseStore().read(player.getUniqueId());
 
         if (offlineState != null)
         {
+            morphs.savedDisguiseStore().drop(player.getUniqueId());
             MessageUtils.send(player, MorphStrings.stateRecoverReasonString());
 
-            var result = morphs.disguiseFromOfflineState(player, offlineState);
-
-            if (result == OfflineDisguiseResult.SUCCESS)
+            if (morphs.disguiseFromSavedDisguise(player, offlineState))
             {
                 MessageUtils.send(player, MorphStrings.recoveringStateString());
-            }
-            else if (result == OfflineDisguiseResult.LIMITED)
-            {
-                MessageUtils.send(player, MorphStrings.recoveringStateLimitedString());
-                MessageUtils.send(player, MorphStrings.recoveringStateLimitedHintString());
             }
             else
             {

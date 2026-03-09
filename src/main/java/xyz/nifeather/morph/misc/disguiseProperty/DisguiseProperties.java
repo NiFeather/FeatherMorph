@@ -117,6 +117,9 @@ public class DisguiseProperties
 
         registerCollection(EntityType.NAUTILUS, new NautilusPropertyCollection());
         registerCollection(EntityType.ZOMBIE_NAUTILUS, new ZombieNautilusPropertyCollection());
+
+        registerCollection(EntityType.ITEM_DISPLAY, new ItemDisplayPropertyCollection());
+        registerCollection(EntityType.TEXT_DISPLAY, new TextDisplayPropertyCollection());
     }
 
     public Map<EntityType, PropertyCollection<?>> getAllCollections()

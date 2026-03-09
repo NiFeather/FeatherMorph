@@ -95,7 +95,6 @@ public class ByNameExecutor extends AbstractExecutor
     public void onSneak(Player player, boolean sneaking)
     {
         var targetEntity = getMirrorTarget(player).orElse(null);
-        logger.info("CCCC " + targetEntity);
         if (targetEntity == null) return;
 
         boolean targetSneaking = targetEntity.isSneaking() || targetEntity.getPose().equals(Pose.SNEAKING);

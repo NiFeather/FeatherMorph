@@ -1,6 +1,8 @@
 package xyz.nifeather.morph.backends;
 
 import net.minecraft.nbt.CompoundTag;
+import org.bukkit.NamespacedKey;
+import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -162,6 +164,15 @@ public abstract class DisguiseWrapper<TInstance>
     public abstract <X> void writeProperty(SingleProperty<X> property, X value);
 
     /**
+     * Discard a property if it has been set.<br>
+     * Server-side presentation implementations should reset the visual effect of the given property.
+     *
+     * @param property {@link SingleProperty} to discard
+     * @param oldValue The previously value
+     */
+    public abstract <X> void discardProperty(SingleProperty<X> property, X oldValue);
+
+    /**
      * @return 与此Property对应的值，如果没有设定则返回默认值
      */
     @NotNull
@@ -184,4 +195,6 @@ public abstract class DisguiseWrapper<TInstance>
     public abstract <T> void subscribeEvent(Object source, WrapperEvent<T> wrapperEvent, Consumer<T> c);
 
     public abstract void unSubscribeEvent(Object source, WrapperEvent<?> wrapperEvent);
+
+    public abstract void onDisguiseAttributeChange(NamespacedKey id, AttributeInstance attribute);
 }

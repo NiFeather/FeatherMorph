@@ -2,13 +2,14 @@ package xyz.nifeather.morph.misc.disguiseProperty.values;
 
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Entity;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import xyz.nifeather.morph.misc.DisguiseEquipment;
 import xyz.nifeather.morph.misc.disguiseProperty.*;
 
 import java.util.Optional;
 
-public abstract class BaseLivingEntityPropertyCollection<E extends Entity> extends PropertyCollection<E>
+public abstract class BaseLivingEntityPropertyCollection<E extends Entity> extends EntityPropertyCollection<E>
 {
     public final SingleProperty<Boolean> CUSTOM_NAME_VISIBLE = SingleProperty.builder(PropertyNames.ENTITY_CUSTOM_NAME_VISIBLE, Boolean.class, false)
             .withInputHandle(InputHandles::readBooleanRelaxed)
@@ -39,6 +40,13 @@ public abstract class BaseLivingEntityPropertyCollection<E extends Entity> exten
             .withOutputHandle(OutputHandles::writeBoolean)
             .build();
 
+    @ApiStatus.Experimental
+    public final SingleProperty<Float> STATIC_HEALTH = SingleProperty.builder(PropertyNames.LIVING_ENTITY_STATIC_HEALTH, 1f)
+            .withInputHandle(InputHandles::readFloatStrict)
+            .withOutputHandle(OutputHandles::writeFloat)
+            .hideFromUserInput(true)
+            .build();
+
     @Override
     protected void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull E targetEntity)
     {
@@ -65,6 +73,8 @@ public abstract class BaseLivingEntityPropertyCollection<E extends Entity> exten
 
     public BaseLivingEntityPropertyCollection()
     {
-        registerSingle(CUSTOM_NAME, CUSTOM_NAME_VISIBLE, STUCKED_ARROWS, EQUIPMENT, DISPLAY_DISGUISE_EQUIPMENT);
+        super();
+
+        registerSingle(CUSTOM_NAME, CUSTOM_NAME_VISIBLE, STUCKED_ARROWS, EQUIPMENT, DISPLAY_DISGUISE_EQUIPMENT, STATIC_HEALTH);
     }
 }

@@ -1,5 +1,7 @@
 package xyz.nifeather.morph.misc.disguiseProperty;
 
+import org.jetbrains.annotations.ApiStatus;
+
 public class PropertyNames
 {
     public static final String PLAYER_MAIN_HAND = "player/main_hand";
@@ -12,6 +14,15 @@ public class PropertyNames
     public static final String ENTITY_CUSTOM_NAME_VISIBLE = "entity/custom_name_visible";
     public static final String ENTITY_EQUIPMENT = "entity/equipment";
     public static final String ENTITY_DISPLAY_DISGUISE_EQUIPMENT = "entity/display_disguise_equipment";
+
+    public static final String ENTITY_STATIC_YAW = "entity/static_yaw";
+    public static final String ENTITY_STATIC_PITCH = "entity/static_pitch";
+
+    @ApiStatus.Experimental
+    public static final String ENTITY_STATIC_POSE = "entity/static_pose";
+
+    @ApiStatus.Experimental
+    public static final String LIVING_ENTITY_STATIC_HEALTH = "living_entity/static_health";
 
     public static final String AXOLOTL_VARIANT = "axolotl/variant";
 
@@ -45,12 +56,15 @@ public class PropertyNames
     public static final String GOAT_HAS_RIGHT_HORN = "goat/has_right_horn";
 
     public static final String HAPPY_GHAST_IS_GHASTLING = "happy_ghast/ghastling";
+    public static final String HAPPY_GHAST_HARNESS = "happy_ghast/harness";
 
     public static final String HOGLIN_IS_BABY = "hoglin/is_baby";
     public static final String ZOGLIN_IS_BABY = "zoglin/is_baby";
 
     public static final String HORSE_COLOR = "horse/color";
     public static final String HORSE_STYLE = "horse/style";
+    public static final String HORSE_SADDLED = "horse/saddled";
+    public static final String HORSE_ARMOR = "horse/armor";
 
     public static final String LLAMA_COLOR = "llama/color";
 
@@ -104,4 +118,23 @@ public class PropertyNames
 
     public static final String NAUTILUS_DASHING = "nautilus/dashing";
     public static final String ZOMBIE_NAUTILUS_VARIANT = "zombie_nautilus/variant";
+
+    public static final String DISPLAY_WIDTH = "display/cullbox_width";
+    public static final String DISPLAY_HEIGHT = "display/cullbox_height";
+    public static final String DISPLAY_SCALE = "display/scale";
+    public static final String DISPLAY_GLOW_COLOR = "display/glow_color";
+    public static final String DISPLAY_SHADOW_RADIUS = "display/shadow_radius";
+    public static final String DISPLAY_SHADOW_STRENGTH = "display/shadow_strength";
+    public static final String DISPLAY_LIGHT_OVERRIDE = "display/light_override";
+    public static final String DISPLAY_TRANSLATION = "display/translation";
+    public static final String DISPLAY_BILLBOARD = "display/billboard";
+
+    public static final String ITEM_DISPLAY_DISPLAYING_ITEM = "item_display/displaying_item";
+    public static final String ITEM_DISPLAY_MODEL_TRANSFORM = "item_display/model_transform";
+
+    public static final String TEXT_DISPLAY_TEXT = "text_display/text";
+    public static final String TEXT_DISPLAY_LINE_WIDTH = "text_display/line_width";
+    public static final String TEXT_DISPLAY_BACKGROUND_COLOR = "text_display/background_color";
+    public static final String TEXT_DISPLAY_TEXT_OPACITY = "text_display/text_opacity";
+    public static final String TEXT_DISPLAY_ALIGNMENT = "text_display/alignment";
 }

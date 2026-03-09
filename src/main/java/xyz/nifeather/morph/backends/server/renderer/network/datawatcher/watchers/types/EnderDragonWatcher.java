@@ -52,9 +52,13 @@ public class EnderDragonWatcher extends LivingEntityWatcher
     @Override
     public <X> @Nullable X readEntry(CustomEntry<X> entry)
     {
+        var existing = super.readEntry(entry);
+        if (existing != null)
+            return existing;
+
         if (Objects.equals(entry, CustomEntries.OVERLAYED_YAW))
             return (X) Float.valueOf(180f + getBindingPlayer().getYaw());
 
-        return super.readEntry(entry);
+        return null;
     }
 }
