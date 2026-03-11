@@ -98,7 +98,7 @@ public class ModifyDisguiseCommand extends BrigadierCommand
         var propertiesInput = ValueMapArgumentType.get("properties", context);
         try
         {
-            state.disguisePropertyHandler().updateFromPropertiesInput(propertiesInput, context.getSource().getExecutor(), EnumSet.allOf(ValidationFlag.class));
+            state.disguisePropertyHandler().updateFromPropertiesInput(propertiesInput, context.getSource().getExecutor(), EnumSet.noneOf(ValidationFlag.class));
         }
         catch (ParseErrorException | PropertyValidationException e)
         {
