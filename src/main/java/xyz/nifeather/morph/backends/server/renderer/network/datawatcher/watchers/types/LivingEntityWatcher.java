@@ -31,6 +31,7 @@ import xyz.nifeather.morph.misc.BuildFailedException;
 import xyz.nifeather.morph.misc.DisguiseEquipment;
 import xyz.nifeather.morph.misc.NmsRecord;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 import xyz.nifeather.morph.misc.disguiseProperty.values.BaseLivingEntityPropertyCollection;
 import xyz.nifeather.morph.utilities.AttributeUtils;
@@ -98,43 +99,84 @@ public class LivingEntityWatcher extends EntityWatcher
     {
         var properties = DisguiseProperties.INSTANCE.getCollectionOrThrow(BaseLivingEntityPropertyCollection.class);
 
-        if (property.equals(properties.CUSTOM_NAME))
+        switch (property.id())
         {
-            Component component = value instanceof Component component1 ? component1 : Component.empty();
-            this.writePersistent(ValueIndex.BASE_LIVING.CUSTOM_NAME, component.equals(Component.empty()) ? Optional.empty() : Optional.of(component));
-        }
-        else if (property.equals(properties.CUSTOM_NAME_VISIBLE))
-        {
-            Boolean bool = value instanceof Boolean b ? b : Boolean.parseBoolean(value.toString());
-            this.writePersistent(ValueIndex.BASE_LIVING.CUSTOM_NAME_VISIBLE, bool);
-        }
-        else if (property.equals(properties.STUCKED_ARROWS))
-        {
-            int count = (Integer) value;
-            this.writePersistent(ValueIndex.BASE_LIVING.STUCKED_ARROWS, count);
-        }
-        else if (property.equals(properties.EQUIPMENT))
-        {
-            var upcoming = (DisguiseEquipment) value;
-            var existing = this.readEntry(CustomEntries.EQUIPMENT);
+            case PropertyNames.ENTITY_CUSTOM_NAME ->
+            {
+                Component component = value instanceof Component component1 ? component1 : Component.empty();
+                this.writePersistent(ValueIndex.BASE_LIVING.CUSTOM_NAME, component.equals(Component.empty()) ? Optional.empty() : Optional.of(component));
+            }
 
-            var newInstance = DisguiseEquipment.prefilled()
-                    .mergeIfNotNull(existing)
-                    .merge(upcoming)
-                    .build();
+            case PropertyNames.ENTITY_CUSTOM_NAME_VISIBLE ->
+            {
+                Boolean bool = value instanceof Boolean b ? b : Boolean.parseBoolean(value.toString());
+                this.writePersistent(ValueIndex.BASE_LIVING.CUSTOM_NAME_VISIBLE, bool);
+            }
 
-            this.writeEntry(CustomEntries.EQUIPMENT, newInstance);
-        }
-        else if (property.equals(properties.DISPLAY_DISGUISE_EQUIPMENT))
-        {
-            this.writeEntry(CustomEntries.DISPLAY_FAKE_EQUIPMENT, Boolean.TRUE.equals(value));
-        }
-        else if (property.equals(properties.STATIC_HEALTH))
-        {
-            this.writePersistent(ValueIndex.BASE_LIVING.HEALTH, ((Number) value).floatValue());
+            case PropertyNames.ENTITY_ARROW_COUNT ->
+            {
+                int count = (Integer) value;
+                this.writePersistent(ValueIndex.BASE_LIVING.STUCKED_ARROWS, count);
+            }
+
+            case PropertyNames.ENTITY_EQUIPMENT ->
+            {
+                var upcoming = (DisguiseEquipment) value;
+                var existing = this.readEntry(CustomEntries.EQUIPMENT);
+
+                var newInstance = DisguiseEquipment.prefilled()
+                        .mergeIfNotNull(existing)
+                        .merge(upcoming)
+                        .build();
+
+                this.writeEntry(CustomEntries.EQUIPMENT, newInstance);
+            }
+
+            case PropertyNames.ENTITY_DISPLAY_DISGUISE_EQUIPMENT ->
+            {
+                this.writeEntry(CustomEntries.DISPLAY_FAKE_EQUIPMENT, Boolean.TRUE.equals(value));
+            }
+
+            case PropertyNames.LIVING_ENTITY_STATIC_HEALTH ->
+            {
+                this.writePersistent(ValueIndex.BASE_LIVING.HEALTH, ((Number) value).floatValue());
+            }
+
+            case PropertyNames.LIVING_ENTITY_BED_POS ->
+            {
+                var jomlVector = (org.joml.Vector3i) value;
+
+                var peVec3i = new Vector3i(jomlVector.x(), jomlVector.y(), jomlVector.z());
+                this.writePersistent(ValueIndex.BASE_LIVING.BED_POS, Optional.of(peVec3i));
+            }
+
+            case PropertyNames.LIVING_ENTITY_INVISIBLE ->
+            {
+                var invisible = (Boolean) value;
+                int flag = this.read(ValueIndex.BASE_ENTITY.GENERAL);
+
+                if (invisible)
+                    flag |= 0x20;
+                else if ((flag & 0x20) == 0x20)
+                    flag ^= 0x20;
+
+                this.writePersistent(ValueIndex.BASE_ENTITY.GENERAL, (byte) flag);
+            }
         }
 
         super.onPropertyWrite(property, value);
+    }
+
+    @Override
+    protected <X> void onPropertyDiscard(SingleProperty<X> property, X oldValue)
+    {
+        super.onPropertyDiscard(property, oldValue);
+
+        if (property.id().equals(PropertyNames.LIVING_ENTITY_BED_POS))
+        {
+            this.writePersistent(ValueIndex.BASE_LIVING.BED_POS, Optional.empty());
+            this.remove(ValueIndex.BASE_LIVING.BED_POS);
+        }
     }
 
     @Override

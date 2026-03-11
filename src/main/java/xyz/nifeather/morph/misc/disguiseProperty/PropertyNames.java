@@ -24,6 +24,11 @@ public class PropertyNames
     @ApiStatus.Experimental
     public static final String LIVING_ENTITY_STATIC_HEALTH = "living_entity/static_health";
 
+    @ApiStatus.Experimental
+    public static final String LIVING_ENTITY_BED_POS = "living_entity/bed_pos";
+
+    public static final String LIVING_ENTITY_INVISIBLE = "living_entity/invisible";
+
     public static final String AXOLOTL_VARIANT = "axolotl/variant";
 
     public static final String ARMOR_STAND_SHOW_ARMS = "armor_stand/show_arms";
@@ -39,6 +44,8 @@ public class PropertyNames
     public static final String CAT_VARIANT = "cat/variant";
     public static final String CAT_OWNER = "cat/owner";
     public static final String CAT_COLLAR_COLOR = "cat/collar_color";
+    public static final String CAT_LYING = "cat/lying";
+    public static final String CAT_SITTING = "cat/sitting";
 
     public static final String CHICKEN_VARIANT = "chicken/variant";
 
@@ -49,6 +56,7 @@ public class PropertyNames
     public static final String ENDER_DRAGON_DRAGON_PHASE = "ender_dragon/dragon_phase";
 
     public static final String FOX_VARIANT = "fox/variant";
+    public static final String FOX_STATUS = "fox/status";
 
     public static final String FROG_VARIANT = "frog/variant";
 
@@ -72,6 +80,7 @@ public class PropertyNames
 
     public static final String PANDA_MAIN_GENE = "panda/main_gene";
     public static final String PANDA_HIDDEN_GENE = "panda/hidden_gene";
+    public static final String PANDA_SITTING = "panda/sitting";
 
     public static final String PARROT_VARIANT = "parrot/variant";
 
@@ -84,6 +93,7 @@ public class PropertyNames
     public static final String SHEEP_COLOR = "sheep/color";
 
     public static final String SHULKER_COLOR = "shulker/color";
+    public static final String SHULKER_SHELL_HEIGHT = "shulker/shell_height";
 
     public static final String SLIME_MAGMA_SIZE = "slime_magma/size";
 
@@ -100,6 +110,7 @@ public class PropertyNames
     public static final String WOLF_OWNER = "wolf/owner";
     public static final String WOLF_VARIANT = "wolf/variant";
     public static final String WOLF_COLLAR_COLOR = "wolf/collar_color";
+    public static final String WOLF_SITTING = "wolf/sitting";
 
     public static final String ZOMBIE_IS_BABY = "zombie/is_baby";
 
@@ -137,4 +148,16 @@ public class PropertyNames
     public static final String TEXT_DISPLAY_BACKGROUND_COLOR = "text_display/background_color";
     public static final String TEXT_DISPLAY_TEXT_OPACITY = "text_display/text_opacity";
     public static final String TEXT_DISPLAY_ALIGNMENT = "text_display/alignment";
+
+    public static final String ALLAY_DANCING = "allay/dancing";
+
+    public static final String ARMADILLO_STATE = "armadillo/state";
+
+    public static final String CREAKING_EYES_GLOWING = "creaking/eyes_glowing";
+
+    public static final String PIGLIN_DANCING = "piglin/dancing";
+
+    public static final String PUFFERFISH_PUFF_STATE = "pufferfish/puff_state";
+
+    public static final String SNIFFER_STATE = "sniffer/state";
 }

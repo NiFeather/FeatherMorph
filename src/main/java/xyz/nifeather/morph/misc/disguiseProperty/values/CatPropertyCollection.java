@@ -17,7 +17,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class CatPropertyCollection extends BaseLivingEntityPropertyCollection<Cat>
+public class CatPropertyCollection extends TameablePropertyCollection<Cat>
 {
     private final Map<String, Cat.Type> variantMap = new ConcurrentHashMap<>();
 
@@ -38,7 +38,20 @@ public class CatPropertyCollection extends BaseLivingEntityPropertyCollection<Ca
             .withInputHandle(InputHandles::readUUID)
             .withOutputHandle(OutputHandles::writeUUID)
             .build();
+
     public final SingleProperty<DyeColor> COLLAR_COLOR;
+
+    public final SingleProperty<Boolean> LYING = SingleProperty.builder(PropertyNames.CAT_LYING, false)
+            .withInputHandle(InputHandles::readBooleanRelaxed)
+            .withOutputHandle(OutputHandles::writeBoolean)
+            .withSuggestions("true", "false")
+            .build();
+
+    public final SingleProperty<Boolean> SITTING = SingleProperty.builder(PropertyNames.CAT_SITTING, false)
+            .withInputHandle(InputHandles::readBooleanRelaxed)
+            .withOutputHandle(OutputHandles::writeBoolean)
+            .withSuggestions("true", "false")
+            .build();
 
     public CatPropertyCollection()
     {
@@ -58,7 +71,7 @@ public class CatPropertyCollection extends BaseLivingEntityPropertyCollection<Ca
                 .build();
 
         registerSingle(
-                CAT_VARIANT, OWNER, COLLAR_COLOR
+                CAT_VARIANT, OWNER, COLLAR_COLOR, LYING, SITTING
         );
     }
 

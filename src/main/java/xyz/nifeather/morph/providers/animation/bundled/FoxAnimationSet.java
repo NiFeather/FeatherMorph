@@ -1,22 +1,46 @@
 package xyz.nifeather.morph.providers.animation.bundled;
 
 import xyz.nifeather.morph.misc.AnimationNames;
+import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.values.FoxPropertyCollection;
 import xyz.nifeather.morph.providers.animation.AnimationSet;
-import xyz.nifeather.morph.providers.animation.SingleAnimation;
-
-import java.util.List;
+import xyz.nifeather.morph.providers.animation.PlayableAction;
 
 public class FoxAnimationSet extends AnimationSet
 {
-    public final SingleAnimation SLEEP_START = new SingleAnimation(AnimationNames.SLEEP, 5, true);
-    public final SingleAnimation SIT_START = new SingleAnimation(AnimationNames.SIT, 5, true);
-    public final SingleAnimation STANDUP = new SingleAnimation(AnimationNames.STANDUP, 5, true);
+    private static FoxPropertyCollection properties()
+    {
+        return DisguiseProperties.INSTANCE.getCollectionOrThrow(FoxPropertyCollection.class);
+    }
+
+    public final PlayableAction SLEEP = PlayableAction.builder()
+            .addStage(b ->
+                    b.duration(5)
+                            .legacyName(AnimationNames.SLEEP)
+                            .onPlay(state -> state.disguisePropertyHandler().set(properties().STATUS, FoxPropertyCollection.FoxStatus.SLEEPING)))
+            .build();
+    
+    public final PlayableAction SIT = PlayableAction.builder()
+            .addStage(b ->
+                    b.duration(5)
+                            .legacyName(AnimationNames.SIT)
+                            .onPlay(state -> state.disguisePropertyHandler().set(properties().STATUS, FoxPropertyCollection.FoxStatus.SITTING)))
+            .build();
+    
+    public final PlayableAction STAND = PlayableAction.builder()
+            .addStage(b ->
+                    b.duration(5)
+                            .legacyName(AnimationNames.STANDUP)
+                            .onPlay(state -> state.disguisePropertyHandler().set(properties().STATUS, FoxPropertyCollection.FoxStatus.STANDING)))
+            .addStage(b ->
+                    b.duration(0)
+                            .legacyName(AnimationNames.RESET))
+            .build();
 
     public FoxAnimationSet()
     {
-        registerPersistent(AnimationNames.SLEEP, List.of(SLEEP_START));
-        registerPersistent(AnimationNames.SIT, List.of(SIT_START));
-
-        registerCommon(AnimationNames.STANDUP, List.of(STANDUP, RESET));
+        register(AnimationNames.SLEEP, SLEEP);
+        register(AnimationNames.SIT, SIT);
+        register(AnimationNames.STANDUP, STAND);
     }
 }

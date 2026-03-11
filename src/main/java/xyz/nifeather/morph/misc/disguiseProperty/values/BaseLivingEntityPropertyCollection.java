@@ -4,9 +4,13 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
+import org.joml.Vector3i;
+import xyz.nifeather.morph.messages.strings.CommandStrings;
 import xyz.nifeather.morph.misc.DisguiseEquipment;
 import xyz.nifeather.morph.misc.disguiseProperty.*;
+import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 
+import java.util.EnumSet;
 import java.util.Optional;
 
 public abstract class BaseLivingEntityPropertyCollection<E extends Entity> extends EntityPropertyCollection<E>
@@ -47,6 +51,37 @@ public abstract class BaseLivingEntityPropertyCollection<E extends Entity> exten
             .hideFromUserInput(true)
             .build();
 
+    @ApiStatus.Experimental
+    public final SingleProperty<Vector3i> BED_POS = SingleProperty.builder(PropertyNames.LIVING_ENTITY_BED_POS, new Vector3i(0))
+            .withInputHandle(InputHandles::empty)
+            .withOutputHandle(OutputHandles::writeVector3i)
+            .restoreDefaultsBeforeDiscard(false)
+            .hideFromUserInput(true)
+            .build();
+    
+    @ApiStatus.Experimental
+    public final SingleProperty<Boolean> INVISIBLE = SingleProperty.builder(PropertyNames.LIVING_ENTITY_INVISIBLE, false)
+            .withInputHandle(InputHandles::readBooleanRelaxed)
+            .withOutputHandle(OutputHandles::writeBoolean)
+            .withValidator(this::validateInvisibility)
+            .withSuggestions("true", "false")
+            .build();
+
+    private void validateInvisibility(Boolean isInvisible, Entity entity, EnumSet<ValidationFlag> validationFlags)
+            throws PropertyValidationException
+    {
+        if (validationFlags.contains(ValidationFlag.SKIP_PERMISSIONS))
+            return;
+
+        if (!entity.hasPermission(CommonPermissions.MAKE_INVISIBLE))
+        {
+            throw PropertyValidationException.forProperty(PropertyNames.LIVING_ENTITY_INVISIBLE)
+                    .withLocalizableMessage(CommandStrings.noPermissionMessage())
+                    .withMessage("Player don't have permission to make themselves invisible.")
+                    .create();
+        }
+    }
+
     @Override
     protected void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull E targetEntity)
     {
@@ -75,6 +110,7 @@ public abstract class BaseLivingEntityPropertyCollection<E extends Entity> exten
     {
         super();
 
-        registerSingle(CUSTOM_NAME, CUSTOM_NAME_VISIBLE, STUCKED_ARROWS, EQUIPMENT, DISPLAY_DISGUISE_EQUIPMENT, STATIC_HEALTH);
+        registerSingle(CUSTOM_NAME, CUSTOM_NAME_VISIBLE, STUCKED_ARROWS, EQUIPMENT, DISPLAY_DISGUISE_EQUIPMENT,
+                STATIC_HEALTH, BED_POS, INVISIBLE);
     }
 }

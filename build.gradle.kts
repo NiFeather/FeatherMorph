@@ -286,7 +286,8 @@ paper {
 
             permissionRoot + "admin",
             permissionRoot + "custom_skin",
-            permissionRoot + "disguise_properties" + ".custom_skin_on_items"
+            permissionRoot + "disguise_properties" + ".custom_skin_on_items",
+            permissionRoot + "disguise_properties" + ".make_invisible"
     );
 
     opPermissions.forEach {

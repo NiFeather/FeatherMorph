@@ -3,6 +3,7 @@ package xyz.nifeather.morph.misc.disguiseProperty.values;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Panda;
 import org.bukkit.entity.Panda.Gene;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.misc.disguiseProperty.*;
@@ -31,6 +32,13 @@ public class PandaPropertyCollection extends BaseLivingEntityPropertyCollection<
 
     public final SingleProperty<Panda.Gene> HIDDEN_GENE;
 
+    @ApiStatus.Experimental
+    public final SingleProperty<Boolean> SITTING = SingleProperty.builder(PropertyNames.PANDA_SITTING, false)
+            .withInputHandle(InputHandles::readBooleanRelaxed)
+            .withOutputHandle(OutputHandles::writeBoolean)
+            .withSuggestions("true", "false")
+            .build();
+
     public PandaPropertyCollection()
     {
         initMap();
@@ -49,7 +57,7 @@ public class PandaPropertyCollection extends BaseLivingEntityPropertyCollection<
                 .withSuggestions(geneMap.keySet())
                 .build();
 
-        registerSingle(MAIN_GENE, HIDDEN_GENE);
+        registerSingle(MAIN_GENE, HIDDEN_GENE, SITTING);
     }
 
     @Override

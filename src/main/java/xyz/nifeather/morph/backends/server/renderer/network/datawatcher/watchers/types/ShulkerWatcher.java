@@ -10,6 +10,7 @@ import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEnt
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.misc.AnimationNames;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 import xyz.nifeather.morph.misc.disguiseProperty.values.ShulkerPropertyCollection;
 
@@ -31,53 +32,21 @@ public class ShulkerWatcher extends LivingEntityWatcher
     @Override
     protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
-        var properties = DisguiseProperties.INSTANCE.getCollectionOrThrow(ShulkerPropertyCollection.class);
-
-        if (properties.DYE_COLOR.equals(property))
+        switch (property.id())
         {
-            var val = (DyeColor) value;
-            this.writePersistent(ValueIndex.SHULKER.COLOR_ID, val.getWoolData());
+            case PropertyNames.SHULKER_COLOR ->
+            {
+                var val = (DyeColor) value;
+                this.writePersistent(ValueIndex.SHULKER.COLOR_ID, val.getWoolData());
+            }
+
+            case PropertyNames.SHULKER_SHELL_HEIGHT ->
+            {
+                var val = (Byte) value;
+                this.writePersistent(ValueIndex.SHULKER.PEEK_ID, val);
+            }
         }
 
         super.onPropertyWrite(property, value);
-    }
-
-    @Override
-    protected <X> void onEntryWrite(CustomEntry<X> entry, X oldVal, X newVal)
-    {
-        super.onEntryWrite(entry, oldVal, newVal);
-
-        if (entry.equals(CustomEntries.ANIMATION))
-        {
-            var animId = newVal.toString();
-
-            var world = this.getBindingPlayer().getWorld();
-            switch (animId)
-            {
-                case AnimationNames.PEEK_START ->
-                {
-                    this.writePersistent(ValueIndex.SHULKER.PEEK_ID, (byte)30);
-                    world.playSound(getBindingPlayer().getLocation(), Sound.ENTITY_SHULKER_OPEN, SoundCategory.HOSTILE, 1, 1);
-                }
-
-                case AnimationNames.OPEN_START ->
-                {
-                    this.writePersistent(ValueIndex.SHULKER.PEEK_ID, (byte)100);
-                    world.playSound(getBindingPlayer().getLocation(), Sound.ENTITY_SHULKER_OPEN, SoundCategory.HOSTILE, 1, 1);
-                }
-
-                case AnimationNames.PEEK_STOP, AnimationNames.OPEN_STOP ->
-                {
-                    this.writePersistent(ValueIndex.SHULKER.PEEK_ID, (byte)0);
-                    world.playSound(getBindingPlayer().getLocation(), Sound.ENTITY_SHULKER_CLOSE, SoundCategory.HOSTILE, 1, 1);
-                }
-
-                case AnimationNames.RESET ->
-                {
-                    this.writePersistent(ValueIndex.SHULKER.PEEK_ID, (byte)0);
-                    this.remove(ValueIndex.SHULKER.PEEK_ID);
-                }
-            }
-        }
     }
 }

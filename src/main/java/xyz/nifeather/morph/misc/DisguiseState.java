@@ -39,7 +39,7 @@ import xyz.nifeather.morph.network.PlayerOptions;
 import xyz.nifeather.morph.network.commands.S2C.S2CPlayAnimationCommand;
 import xyz.nifeather.morph.network.commands.S2C.set.S2CSetAnimationDisplayNameCommand;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
-import xyz.nifeather.morph.providers.animation.SingleAnimation;
+import xyz.nifeather.morph.providers.animation.PlayableAction;
 import xyz.nifeather.morph.providers.disguise.DisguiseProvider;
 import xyz.nifeather.morph.skills.ISkill;
 import xyz.nifeather.morph.skills.SkillManager;
@@ -96,39 +96,20 @@ public class DisguiseState extends MorphPluginObject
         disguiseAttributes.initializeFor(getEntityType());
         disguiseAttributes.hookOnAttributeChange(this::onDisguiseAttributeChange);
 
-        animationSequence.setCooldown(10);
-        animationSequence.onNewAnimation(anim ->
+        actionHandler.setCooldown(10);
+        actionHandler.onNewStage(anim ->
         {
-            var animSubId = anim.subId();
+            anim.onPlay().accept(this);
 
-            if (anim.availableForClient())
-                clientHandler.sendCommand(getPlayer(), new S2CPlayAnimationCommand(animSubId));
-
-            this.getDisguiseWrapper().playAnimation(animSubId);
-
-            if (animSubId.startsWith("exec_"))
-                handleInternalExec(animSubId);
+            var legacyName = anim.legacyName();
+            if (legacyName != null)
+                clientHandler.sendCommand(getPlayer(), new S2CPlayAnimationCommand(legacyName));
         });
-        animationSequence.onNewAnimationSequence(newAnimSeqId ->
-        {
-            clientHandler.sendCommand(getPlayer(), new S2CSetAnimationDisplayNameCommand(newAnimSeqId));
 
-            // Not done yet...
-            /*
-            if (newAnimSeqId.equals(AnimationNames.NONE))
-            {
-                var isPersistent = this.sequencePersistent.get();
-                this.sequencePersistent.set(false);
+        actionHandler.onStageFinish(stage -> stage.onFinish().accept(this));
 
-                if (!isPersistent)
-                    clientHandler.sendCommand(getPlayer(), new S2CSetAnimationDisplayNameCommand(newAnimSeqId));
-            }
-            else
-            {
-                clientHandler.sendCommand(getPlayer(), new S2CSetAnimationDisplayNameCommand(newAnimSeqId));
-            }
-            */
-        });
+        actionHandler.onNewAction(name ->
+                clientHandler.sendCommand(getPlayer(), new S2CSetAnimationDisplayNameCommand(name)));
 
         disguisePropertyHandler().hookOnPropertyWrite(this::onPropertyWrite);
         disguisePropertyHandler().hookOnPropertyDiscard(this::onPropertyDiscard);
@@ -163,8 +144,6 @@ public class DisguiseState extends MorphPluginObject
 
         disguiseWrapper.writeProperty((SingleProperty<Object>) singleProperty, o);
     }
-
-    private final AtomicBoolean sequencePersistent = new AtomicBoolean(false);
 
     @Resolved(shouldSolveImmediately = true)
     private SkillManager skillManager;
@@ -247,11 +226,11 @@ public class DisguiseState extends MorphPluginObject
 
     private final PlayerMeta playerMeta;
 
-    private final AnimationSequence animationSequence = new AnimationSequence();
+    private final AnimationHandler actionHandler = new AnimationHandler();
 
     public void stopAnimations()
     {
-        animationSequence.reset();
+        actionHandler.reset();
     }
 
     public void onPlayerQuit()
@@ -285,52 +264,41 @@ public class DisguiseState extends MorphPluginObject
     /**
      * @return Whether success.
      */
-    public boolean tryScheduleSequence(@NotNull String sequenceIdentifier,
-                                       List<SingleAnimation> sequence,
-                                       boolean persistent)
+    public boolean tryScheduleAction(@NotNull String name, PlayableAction action)
     {
         if (!canScheduleSequence()) return false;
-        this.scheduleSequence(sequenceIdentifier, sequence, persistent);
+        this.scheduleAction(name, action);
 
         return true;
     }
 
-    public void scheduleSequence(String sequenceIdentifier,
-                                 List<SingleAnimation> sequence,
-                                 boolean persistent)
+    public void scheduleAction(String name, PlayableAction action)
     {
-        this.scheduleSequence(sequenceIdentifier, sequence, true, persistent);
+        this.scheduleAction(name, action, true);
     }
 
-    private void scheduleSequence(String sequenceIdentifier,
-                                  List<SingleAnimation> sequence,
-                                  boolean checkPermission,
-                                  boolean persistent)
+    private void scheduleAction(String name, PlayableAction action, boolean checkPermission)
     {
         var player = getPlayer();
 
-        if (checkPermission && sequenceIdentifier.equals(AnimationNames.RESET)
-                || !PermissionUtils.hasPermission(
-                player,
-                CommonPermissions.animationPermissionOf(sequenceIdentifier, this.getDisguiseIdentifier()),
-                true))
+        if (checkPermission
+                && !PermissionUtils.hasPermission(player, CommonPermissions.animationPermissionOf(name, this.getDisguiseIdentifier()), true))
         {
             MessageUtils.send(player, CommandStrings.noPermissionMessage());
             return;
         }
 
-        this.animationSequence.scheduleNext(sequenceIdentifier, sequence);
-        this.sequencePersistent.set(persistent);
+        this.actionHandler.scheduleNext(name, action);
 
         var animationString = CommandStrings.goingToPlayAnimation()
-                .resolve("what", EmoteStrings.get(sequenceIdentifier));
+                .resolve("what", EmoteStrings.get(name));
 
         MessageUtils.send(player, animationString);
     }
 
-    public AnimationSequence getAnimationSequence()
+    public AnimationHandler getActionHandler()
     {
-        return animationSequence;
+        return actionHandler;
     }
 
     /**
@@ -841,7 +809,7 @@ public class DisguiseState extends MorphPluginObject
         if (this.canPlayAmbient())
             this.getSoundHandler().update();
 
-        this.animationSequence.update();
+        this.actionHandler.update();
         this.disguiseWaypointTransmitter.tick();
         this.skillUpdater.update();
         this.disguiseWrapper.update();

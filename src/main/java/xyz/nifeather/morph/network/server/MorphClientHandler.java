@@ -896,9 +896,9 @@ public class MorphClientHandler extends MorphPluginObject implements BasicClient
         var animationProvider = state.getProvider().getAnimationProvider();
         var disguiseID = state.getDisguiseIdentifier();
         var animationID = c2SAnimationCommand.getAnimationId();
-        var sequencePair =  animationProvider.getAnimationSetFor(disguiseID).sequenceOf(animationID);
+        var action = animationProvider.getAnimationSetFor(disguiseID).getAction(animationID);
 
-        if (!state.tryScheduleSequence(animationID, sequencePair.left(), sequencePair.right()))
+        if (action == null || !state.tryScheduleAction(animationID, action))
             MessageUtils.send(player, EmoteStrings.notAvailable());
     }
 

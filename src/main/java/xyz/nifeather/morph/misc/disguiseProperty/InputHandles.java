@@ -30,6 +30,7 @@ import org.bukkit.profile.PlayerTextures;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
+import org.joml.Vector3i;
 import xyz.nifeather.morph.messages.strings.ExceptionStrings;
 import xyz.nifeather.morph.messages.strings.TypesString;
 import xyz.nifeather.morph.misc.DisguiseEquipment;
@@ -414,6 +415,35 @@ public class InputHandles
             return Optional.empty();
 
         return Optional.of(item);
+    }
+
+    public static Optional<Vector3i> readVector3iRelaxed(String propertyName, String input)
+            throws ParseErrorException
+    {
+        if (input.startsWith("["))
+            return readVector3iJson(propertyName, input);
+        else
+            return readVector3iHandwrite(propertyName, input);
+    }
+
+    private static Optional<Vector3i> mapVector3fTo3i(Optional<Vector3f> v3f)
+    {
+        if (v3f.isEmpty()) return Optional.empty();
+
+        var value = v3f.orElseThrow();
+        return Optional.of(new Vector3i((int)value.x, (int)value.y, (int)value.z));
+    }
+
+    private static Optional<Vector3i> readVector3iHandwrite(String propertyName, String input)
+            throws ParseErrorException
+    {
+        return mapVector3fTo3i(readVector3fHandwrite(propertyName, input));
+    }
+
+    private static Optional<Vector3i> readVector3iJson(String propertyName, String input)
+            throws ParseErrorException
+    {
+        return mapVector3fTo3i(readVector3fJson(propertyName, input));
     }
 
     public static Optional<Vector3f> readVector3fRelaxed(String propertyName, String input)

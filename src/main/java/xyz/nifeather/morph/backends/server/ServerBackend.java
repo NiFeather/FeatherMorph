@@ -7,6 +7,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.pluginbase.Exceptions.NullDependencyException;
 import xiamomc.pluginbase.Messages.FormattableMessage;
+import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.api.FeatherMorphAPI;
 import xyz.nifeather.morph.backends.DisguiseBackend;
 import xyz.nifeather.morph.backends.DisguiseWrapper;
@@ -199,6 +200,25 @@ public class ServerBackend extends DisguiseBackend<ServerDisguise, ServerDisguis
                     .withMessage("Unknown error")
                     .create();
         }
+    }
+
+    @Override
+    public void respawnDisguise(DisguiseWrapper<?> wrapper)
+    {
+        if (!(wrapper instanceof ServerDisguiseWrapper serverDisguiseWrapper))
+        {
+            logger.warn("The given disguise wrapper to respawn is not an instance of ServerDisguiseWrapper, enable debug output to see stacktrace");
+
+            if (FeatherMorphMain.getInstance().debugOutputEnabled())
+                Thread.dumpStack();
+
+            return;
+        }
+
+        var watcher = serverDisguiseWrapper.getBindingWatcher();
+        if (watcher == null) return;
+
+        serverRenderer.scheduleDisguise(watcher, WatcherUtils.getAffectedPlayers(watcher.getBindingPlayer()));
     }
 
     private boolean unDisguise(Player player, boolean unregisterFromRenderer)

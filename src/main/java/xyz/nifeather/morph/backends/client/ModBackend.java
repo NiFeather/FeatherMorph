@@ -178,6 +178,11 @@ public class ModBackend extends DisguiseBackend<TrackingClientDisguise, ModDisgu
     private MorphClientHandler clientHandler;
 
     @Override
+    public void respawnDisguise(DisguiseWrapper<?> wrapper)
+    {
+    }
+
+    @Override
     public boolean unDisguise(Player player)
     {
         var wrapper = playerFallbackWrapperMap.getOrDefault(player, null);

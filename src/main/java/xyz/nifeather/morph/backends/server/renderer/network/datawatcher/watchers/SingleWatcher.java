@@ -121,7 +121,9 @@ public abstract class SingleWatcher extends MorphPluginObject
 
     public final <X> void discardProperty(SingleProperty<X> property, X oldValue)
     {
-        writeProperty(property, property.defaultVal());
+        if (property.restoreDefaultsBeforeDiscard())
+            writeProperty(property, property.defaultVal());
+
         onPropertyDiscard(property, oldValue);
     }
 

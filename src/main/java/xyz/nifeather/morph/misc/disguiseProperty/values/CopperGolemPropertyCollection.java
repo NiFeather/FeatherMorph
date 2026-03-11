@@ -1,5 +1,6 @@
 package xyz.nifeather.morph.misc.disguiseProperty.values;
 
+import io.papermc.paper.world.WeatheringCopperState;
 import org.bukkit.craftbukkit.entity.CraftCopperGolem;
 import org.bukkit.entity.CopperGolem;
 import org.bukkit.entity.Entity;

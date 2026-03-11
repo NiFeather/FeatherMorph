@@ -2,12 +2,15 @@ package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watcher
 
 import com.github.retrooper.packetevents.protocol.entity.armadillo.ArmadilloState;
 import org.bukkit.Sound;
+import org.bukkit.entity.Armadillo;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntry;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.misc.AnimationNames;
+import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
+import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 
 public class ArmadilloWatcher extends LivingEntityWatcher
 {
@@ -25,40 +28,22 @@ public class ArmadilloWatcher extends LivingEntityWatcher
     }
 
     @Override
-    protected <X> void onEntryWrite(CustomEntry<X> entry, X oldVal, X newVal)
+    protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
-        super.onEntryWrite(entry, oldVal, newVal);
+        super.onPropertyWrite(property, value);
 
-        if (entry.equals(CustomEntries.ANIMATION))
+        if (property.id().equals(PropertyNames.ARMADILLO_STATE))
         {
-            var animId = newVal.toString();
-            var player = getBindingPlayer();
-            var world = player.getWorld();
-            switch (animId)
+            var state = (Armadillo.State) value;
+            var peState = switch (state)
             {
-                case AnimationNames.PANIC_ROLLING ->
-                {
-                    writePersistent(ValueIndex.ARMADILLO.STATE, ArmadilloState.ROLLING);
-                    world.playSound(player.getLocation(), Sound.ENTITY_ARMADILLO_ROLL, 1, 1);
-                }
-                case AnimationNames.PANIC_SCARED ->
-                {
-                    writePersistent(ValueIndex.ARMADILLO.STATE, ArmadilloState.SCARED);
-                    world.playSound(player.getLocation(), Sound.ENTITY_ARMADILLO_LAND, 1, 1);
-                }
-                case AnimationNames.PANIC_UNROLLING ->
-                {
-                    writePersistent(ValueIndex.ARMADILLO.STATE, ArmadilloState.UNROLLING);
-                    world.playSound(player.getLocation(), Sound.ENTITY_ARMADILLO_UNROLL_START, 1, 1);
-                }
-                case AnimationNames.PANIC_IDLE, AnimationNames.RESET ->
-                {
-                    writePersistent(ValueIndex.ARMADILLO.STATE, ArmadilloState.IDLE);
+                case IDLE -> ArmadilloState.IDLE;
+                case ROLLING -> ArmadilloState.ROLLING;
+                case SCARED -> ArmadilloState.SCARED;
+                case UNROLLING -> ArmadilloState.UNROLLING;
+            };
 
-                    if (animId.equals(AnimationNames.PANIC_IDLE))
-                        world.playSound(player.getLocation(), Sound.ENTITY_ARMADILLO_UNROLL_FINISH, 1, 1);
-                }
-            }
+            this.writePersistent(ValueIndex.ARMADILLO.STATE, peState);
         }
     }
 }

@@ -165,7 +165,7 @@ public abstract class DisguiseWrapper<TInstance>
 
     /**
      * Discard a property if it has been set.<br>
-     * Server-side presentation implementations should reset the visual effect of the given property.
+     * Depending on {@link SingleProperty#restoreDefaultsBeforeDiscard()}, server-side presentation implementations may need reset the visual effect of the given property.
      *
      * @param property {@link SingleProperty} to discard
      * @param oldValue The previously value
@@ -183,10 +183,6 @@ public abstract class DisguiseWrapper<TInstance>
     public abstract <X> X readPropertyOrThrow(SingleProperty<X> property);
 
     public abstract Map<SingleProperty<?>, Object> getProperties();
-
-    public void playAnimation(String animationId)
-    {
-    }
 
     public void onPlayerJoin(Player newInstance)
     {

@@ -12,6 +12,7 @@ import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEnt
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.misc.AnimationNames;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 import xyz.nifeather.morph.misc.disguiseProperty.values.WolfPropertyCollection;
 import xyz.nifeather.morph.utilities.Uuids;
@@ -44,49 +45,52 @@ public class WolfWatcher extends TameableAnimalWatcher
     @Override
     protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
-        var properties = DisguiseProperties.INSTANCE.getCollectionOrThrow(WolfPropertyCollection.class);
-
-        if (property.equals(properties.VARIANT))
+        switch (property.id())
         {
-            var val = (Wolf.Variant) value;
-            this.writePersistent(ValueIndex.WOLF.WOLF_VARIANT, getWolfVariant(val.key().asString()));
-        }
-        else if (property.equals(properties.OWNER))
-        {
-            var uuid = (UUID) value;
-            if (Uuids.NIL_UUID.equals(uuid))
-                uuid = null;
+            case PropertyNames.WOLF_VARIANT ->
+            {
+                var val = (Wolf.Variant) value;
+                this.writePersistent(ValueIndex.WOLF.WOLF_VARIANT, getWolfVariant(val.key().asString()));
+            }
 
-            writePersistent(ValueIndex.WOLF.OWNER, Optional.ofNullable(uuid));
-            this.writeTamed(uuid != null && !Uuids.NIL_UUID.equals(uuid));
-        }
-        else if (property.equals(properties.COLLAR_COLOR))
-        {
-            var dyeColor = (DyeColor) value;
-            writePersistent(ValueIndex.WOLF.COLLAR_COLOR, (int)dyeColor.getWoolData());
+            case PropertyNames.WOLF_OWNER ->
+            {
+                var uuid = (UUID) value;
+                if (Uuids.NIL_UUID.equals(uuid))
+                    uuid = null;
 
-            this.readOr(ValueIndex.CAT.OWNER, Optional.empty())
-                    .ifPresentOrElse(uuid -> {}, () -> this.writeProperty(properties.OWNER, UUID.randomUUID()));
+                writePersistent(ValueIndex.WOLF.OWNER, Optional.ofNullable(uuid));
+                this.writeTamed(uuid != null && !Uuids.NIL_UUID.equals(uuid));
+            }
+
+            case PropertyNames.WOLF_COLLAR_COLOR ->
+            {
+                var dyeColor = (DyeColor) value;
+                writePersistent(ValueIndex.WOLF.COLLAR_COLOR, (int)dyeColor.getWoolData());
+
+                this.readOr(ValueIndex.WOLF.OWNER, Optional.empty())
+                        .ifPresentOrElse(uuid -> {}, () ->
+                        {
+                            var properties = DisguiseProperties.INSTANCE.getCollectionOrThrow(WolfPropertyCollection.class);
+                            this.writeProperty(properties.OWNER, UUID.randomUUID());
+                        });
+            }
+
+            case PropertyNames.WOLF_SITTING ->
+            {
+                var sitting = (Boolean) value;
+                int flag = this.read(ValueIndex.WOLF.TAMEABLE_FLAGS);
+
+                if (sitting)
+                    flag |= 0x01;
+                else if ((flag & 0x01) == 0x01)
+                    flag ^= 0x01;
+
+                this.writePersistent(ValueIndex.WOLF.TAMEABLE_FLAGS, (byte) flag);
+            }
         }
 
         super.onPropertyWrite(property, value);
-    }
-
-    @Override
-    protected <X> void onEntryWrite(CustomEntry<X> entry, X oldVal, X newVal)
-    {
-        super.onEntryWrite(entry, oldVal, newVal);
-
-        if (entry.equals(CustomEntries.ANIMATION))
-        {
-            var animId = newVal.toString();
-
-            switch (animId)
-            {
-                case AnimationNames.SIT -> this.writePersistent(ValueIndex.WOLF.TAMEABLE_FLAGS, (byte)0x01);
-                case AnimationNames.STANDUP -> this.writePersistent(ValueIndex.WOLF.TAMEABLE_FLAGS, (byte)0x00);
-            }
-        }
     }
 
     @Override

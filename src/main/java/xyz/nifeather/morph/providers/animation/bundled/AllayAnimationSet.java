@@ -1,20 +1,38 @@
 package xyz.nifeather.morph.providers.animation.bundled;
 
 import xyz.nifeather.morph.misc.AnimationNames;
+import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.values.AllayPropertyCollection;
 import xyz.nifeather.morph.providers.animation.AnimationSet;
-import xyz.nifeather.morph.providers.animation.SingleAnimation;
-
-import java.util.List;
+import xyz.nifeather.morph.providers.animation.PlayableAction;
 
 public class AllayAnimationSet extends AnimationSet
 {
-    public final SingleAnimation ROLL_START = new SingleAnimation(AnimationNames.DANCE_START, 0, true);
-    public final SingleAnimation ROLL_STOP = new SingleAnimation(AnimationNames.STOP, 0, true);
+    public final PlayableAction ROLL_START = PlayableAction.builder()
+            .addStage(b ->
+            {
+                var properties = DisguiseProperties.INSTANCE.getCollectionOrThrow(AllayPropertyCollection.class);
+
+                b.legacyName(AnimationNames.DANCE_START)
+                        .onPlay(s -> s.disguisePropertyHandler().set(properties.DANCING, true));
+            })
+            .build();
+
+    public final PlayableAction ROLL_STOP = PlayableAction.builder()
+            .addStage(b ->
+            {
+                var properties = DisguiseProperties.INSTANCE.getCollectionOrThrow(AllayPropertyCollection.class);
+
+                b.legacyName(AnimationNames.STOP)
+                        .onPlay(s -> s.disguisePropertyHandler().set(properties.DANCING, false));
+            })
+            .addStage(b ->
+                    b.duration(0).legacyName(AnimationNames.RESET))
+            .build();
 
     public AllayAnimationSet()
     {
-        registerPersistent(AnimationNames.DANCE, List.of(ROLL_START));
-
-        registerCommon(AnimationNames.STOP, List.of(ROLL_STOP, RESET));
+        register(AnimationNames.DANCE, ROLL_START);
+        register(AnimationNames.STOP, ROLL_STOP);
     }
 }

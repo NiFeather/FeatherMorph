@@ -1,9 +1,9 @@
 package xyz.nifeather.morph.providers.animation;
 
-import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
-import xyz.nifeather.morph.misc.AnimationNames;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Map;
@@ -12,65 +12,38 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 public abstract class AnimationSet
 {
-    public static final SingleAnimation RESET = new SingleAnimation(AnimationNames.RESET, 1, true);
-    public static final SingleAnimation TRY_RESET = new SingleAnimation(AnimationNames.TRY_RESET, 1, true);
-
-    public static final SingleAnimation EXEC_DISABLE_SKILL = new SingleAnimation(AnimationNames.INTERNAL_DISABLE_SKILL, 0, false);
-    public static final SingleAnimation EXEC_ENABLE_SKILL = new SingleAnimation(AnimationNames.INTERNAL_ENABLE_SKILL, 0, false);
-    public static final SingleAnimation EXEC_DISABLE_AMBIENT = new SingleAnimation(AnimationNames.INTERNAL_DISABLE_AMBIENT, 0, false);
-    public static final SingleAnimation EXEC_ENABLE_AMBIENT = new SingleAnimation(AnimationNames.INTERNAL_ENABLE_AMBIENT, 0, false);
-    public static final SingleAnimation EXEC_DISABLE_BOSSBAR = new SingleAnimation(AnimationNames.INTERNAL_DISABLE_BOSSBAR, 0, false);
-    public static final SingleAnimation EXEC_ENABLE_BOSSBAR = new SingleAnimation(AnimationNames.INTERNAL_ENABLE_BOSSBAR, 0, false);
+    /**
+     * For internal use, so that we can notify clients using the S2CSetAnimationDisplayNameCommand can aware that the current action has finished playing.
+     */
+    @ApiStatus.Internal
+    public static final ActionStage FINISH = new PlayableAction.ActionStageBuilder().legacyName("reset").build();
 
     // SequenceId <-> <Sequence, IsPersistent>
-    private final Map<String, Pair<List<SingleAnimation>, Boolean>> animationMap = new ConcurrentHashMap<>();
+    private final Map<String, PlayableAction> animationMap = new ConcurrentHashMap<>();
 
     private final List<String> registeredAnimations = new CopyOnWriteArrayList<>();
 
     /**
-     * Register an non-persistent sequence<br>
-     * Also see {@link AnimationSet#register(String, List, boolean)}
-     * @param sequenceID
-     * @param sequence
+     * Register a {@link PlayableAction} to this AnimationSet.
+     * @param actionName Name of the action, is used to determine whether a player has the permission to run the action.
+     * @param action The {@link PlayableAction}
      */
-    protected void registerCommon(String sequenceID, List<SingleAnimation> sequence)
+    protected void register(String actionName, PlayableAction action)
     {
-        this.register(sequenceID, sequence, false);
-    }
-
-    /**
-     * Register a persistent sequence<br>
-     * Also see {@link AnimationSet#register(String, List, boolean)}
-     * @param sequenceID
-     * @param sequence
-     */
-    protected void registerPersistent(String sequenceID, List<SingleAnimation> sequence)
-    {
-        this.register(sequenceID, sequence, true);
-    }
-
-    /**
-     * Register sequence
-     * @param sequenceID The identifier of this sequence
-     * @param sequence The sequence of {@link SingleAnimation} instances
-     * @param isPersistent Whether this sequence result in persistent effects.
-     *                     If True, the server won't send the packet to tell the client to clear the name displayed on GUI after the sequence finished playing.
-     */
-    protected void register(String sequenceID, List<SingleAnimation> sequence, boolean isPersistent)
-    {
-        animationMap.put(sequenceID, Pair.of(sequence, isPersistent));
-        registeredAnimations.add(sequenceID);
+        animationMap.put(actionName, action);
+        registeredAnimations.add(actionName);
     }
 
     /**
      * Gets the animation sequence for the given ID(Name)
+     *
      * @param animationId The animation ID(Name) to lookup
      * @return A pair, left is the sequence, right is whether the sequence is persistent
      */
-    @NotNull
-    public Pair<List<SingleAnimation>, Boolean> sequenceOf(@NotNull String animationId)
+    @Nullable
+    public PlayableAction getAction(@NotNull String animationId)
     {
-        return animationMap.getOrDefault(animationId, Pair.of(List.of(), false));
+        return animationMap.getOrDefault(animationId, null);
     }
 
     /**

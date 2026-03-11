@@ -21,18 +21,19 @@ import java.util.function.Function;
  * @param postProcessHandle An {@link IPostProcessHandle}, used to make changes to the {@link PropertyHandler} for properties that has difficult to directly apply to the disguise. For example: {@link xyz.nifeather.morph.misc.disguiseProperty.values.HappyGhastPropertyCollection#HARNESS}
  * @param randomValues Available random values for this property. Mostly used by PropertyCollections. For example: {@link xyz.nifeather.morph.misc.disguiseProperty.values.AxolotlPropertyCollection#setupDefaultProperties(PropertyHandler)}
  * @param suggestions Available suggestions for this property.
+ * @param restoreDefaultsBeforeDiscard Whether we should restore the default value before we discard the property.
  * @param hideFromUserInput {@code true} if this property should be hidden in places like Command Suggestions.
  * @param hideFromClient {@code true} if this property should not be sent to the client when syncing properties.
  */
 public record SingleProperty<T>(String identifier, T defaultVal, Class<T> type, InputHandle<T> inputHandle,
                                 OutputHandle<T> outputHandle, IPropertyValidator<T> propertyValidator, IPostProcessHandle<T> postProcessHandle,
-                                List<T> randomValues, List<String> suggestions,
+                                List<T> randomValues, List<String> suggestions, boolean restoreDefaultsBeforeDiscard,
                                 boolean hideFromUserInput, boolean hideFromClient)
 {
     public SingleProperty(String identifier, T defaultVal, Class<T> type,
                           @NotNull InputHandle<T> inputHandle, @NotNull OutputHandle<T> outputHandle,
                           @NotNull IPropertyValidator<T> propertyValidator, IPostProcessHandle<T> postProcessHandle,
-                          List<T> randomValues, List<String> suggestions,
+                          List<T> randomValues, List<String> suggestions, boolean restoreDefaultsBeforeDiscard,
                           boolean hideFromUserInput, boolean hideFromClient)
     {
         this.identifier = identifier;
@@ -52,6 +53,7 @@ public record SingleProperty<T>(String identifier, T defaultVal, Class<T> type, 
         // Since we need to have a way to let players customize Happy Ghast Disguise's saddle. :(
         this.postProcessHandle = postProcessHandle;
 
+        this.restoreDefaultsBeforeDiscard = restoreDefaultsBeforeDiscard;
         this.hideFromUserInput = hideFromUserInput;
         this.hideFromClient = hideFromClient;
 
@@ -134,6 +136,7 @@ public record SingleProperty<T>(String identifier, T defaultVal, Class<T> type, 
         private boolean hideFromUserInput = false;
         private boolean hideFromClient = false;
         private IPostProcessHandle<X> postProcessHandle = (IPostProcessHandle<X>) defaultPostProcessHandle;
+        private boolean restoreDefaultsBeforeDiscard = true;
 
         public SinglePropertyBuilder(String identifier, Class<X> type, X defaultVal)
         {
@@ -222,12 +225,18 @@ public record SingleProperty<T>(String identifier, T defaultVal, Class<T> type, 
             return this;
         }
 
+        public SinglePropertyBuilder<X> restoreDefaultsBeforeDiscard(boolean v)
+        {
+            this.restoreDefaultsBeforeDiscard = v;
+            return this;
+        }
+
         public SingleProperty<X> build()
         {
             return new SingleProperty<>(this.identifier, this.defaultVal, this.type,
                     inputHandle, outputHandle,
                     validator, postProcessHandle,
-                    randomValues, suggestions,
+                    randomValues, suggestions, restoreDefaultsBeforeDiscard,
                     hideFromUserInput, hideFromClient);
         }
     }

@@ -1,21 +1,71 @@
 package xyz.nifeather.morph.providers.animation.bundled;
 
+import org.bukkit.Sound;
+import org.bukkit.entity.Armadillo;
 import xyz.nifeather.morph.misc.AnimationNames;
+import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.values.ArmadilloPropertyCollection;
 import xyz.nifeather.morph.providers.animation.AnimationSet;
-import xyz.nifeather.morph.providers.animation.SingleAnimation;
+import xyz.nifeather.morph.providers.animation.PlayableAction;
 
 import java.util.List;
 
 public class ArmadilloAnimationSet extends AnimationSet
 {
-    public final SingleAnimation PANIC_ROLLING = new SingleAnimation(AnimationNames.PANIC_ROLLING, 10, true);
-    public final SingleAnimation PANIC_SCARED = new SingleAnimation(AnimationNames.PANIC_SCARED, 50, true);
-    public final SingleAnimation PANIC_UNROLLING = new SingleAnimation(AnimationNames.PANIC_UNROLLING, 30, true);
-    public final SingleAnimation PANIC_IDLE = new SingleAnimation(AnimationNames.PANIC_IDLE, 0, true);
+    private static ArmadilloPropertyCollection properties()
+    {
+        return DisguiseProperties.INSTANCE.getCollectionOrThrow(ArmadilloPropertyCollection.class);
+    }
+
+    public final PlayableAction PANIC_ROLLING = PlayableAction.builder()
+            .addStage(b ->
+                    b.duration(10)
+                            .legacyName(AnimationNames.PANIC_ROLLING)
+                            .onPlay(state ->
+                            {
+                                state.disguisePropertyHandler().set(properties().STATE, Armadillo.State.ROLLING);
+
+                                var player = state.getPlayer();
+                                player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ARMADILLO_ROLL, 1, 1);
+                            }))
+            .addStage(b ->
+                    b.duration(50)
+                            .legacyName(AnimationNames.PANIC_SCARED)
+                            .onPlay(state ->
+                            {
+                                state.disguisePropertyHandler().set(properties().STATE, Armadillo.State.SCARED);
+
+                                var player = state.getPlayer();
+                                player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ARMADILLO_LAND, 1, 1);
+                            }))
+            .addStage(b ->
+                    b.duration(30)
+                            .legacyName(AnimationNames.PANIC_UNROLLING)
+                            .onPlay(state ->
+                            {
+                                state.disguisePropertyHandler().set(properties().STATE, Armadillo.State.UNROLLING);
+
+                                var player = state.getPlayer();
+                                player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ARMADILLO_UNROLL_START, 1, 1);
+                            }))
+            .addStage(b ->
+                    b.duration(0)
+                            .legacyName(AnimationNames.PANIC_IDLE)
+                            .onPlay(state ->
+                            {
+                                state.disguisePropertyHandler().set(properties().STATE, Armadillo.State.IDLE);
+
+                                var player = state.getPlayer();
+                                player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ARMADILLO_UNROLL_FINISH, 1, 1);
+                            }))
+            .addStage(b ->
+                    b.duration(0)
+                            .legacyName(AnimationNames.RESET))
+            .build();
 
     public ArmadilloAnimationSet()
     {
-        registerCommon(AnimationNames.PANIC, List.of(PANIC_ROLLING, PANIC_SCARED, PANIC_UNROLLING, PANIC_IDLE, RESET));
+        register(AnimationNames.PANIC, PANIC_ROLLING);
     }
 
     @Override

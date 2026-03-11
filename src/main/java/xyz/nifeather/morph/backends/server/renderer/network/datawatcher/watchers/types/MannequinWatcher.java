@@ -100,47 +100,6 @@ public class MannequinWatcher extends LivingEntityWatcher
         super.onPropertyWrite(property, value);
     }
 
-    @Override
-    protected <X> void onEntryWrite(CustomEntry<X> entry, X oldVal, X newVal)
-    {
-        super.onEntryWrite(entry, oldVal, newVal);
-
-        if (entry.equals(CustomEntries.ANIMATION))
-        {
-            var animId = newVal + "";
-
-            switch (animId)
-            {
-                case AnimationNames.LAY ->
-                {
-                    this.remove(ValueIndex.MANNEQUIN.POSE);
-                    this.writePersistent(ValueIndex.MANNEQUIN.POSE, EntityPose.SLEEPING);
-
-                    var playerPos = getBindingPlayer().getLocation();
-                    var vec3i = new Vector3i(playerPos.getBlockX(), playerPos.getBlockY(), playerPos.getBlockZ());
-                    this.writePersistent(ValueIndex.MANNEQUIN.BED_POS, Optional.of(vec3i));
-                }
-                case AnimationNames.CRAWL ->
-                {
-                    resetValues();
-                    this.writePersistent(ValueIndex.MANNEQUIN.POSE, EntityPose.SWIMMING);
-                }
-                case AnimationNames.STANDUP, AnimationNames.RESET ->
-                {
-                    this.writePersistent(ValueIndex.MANNEQUIN.POSE, SpigotConversionUtil.fromBukkitPose(getBindingPlayer().getPose()));
-                    resetValues();
-                }
-            }
-        }
-    }
-
-    private void resetValues()
-    {
-        this.remove(ValueIndex.MANNEQUIN.POSE);
-        this.writePersistent(ValueIndex.MANNEQUIN.BED_POS, Optional.empty());
-        this.remove(ValueIndex.MANNEQUIN.BED_POS);
-    }
-
     public void updateDescription(boolean hideDescription, @Nullable Component description)
     {
         this.writePersistent(ValueIndex.MANNEQUIN.DESCRIPTION, hideDescription ? Optional.empty() : Optional.ofNullable(description));

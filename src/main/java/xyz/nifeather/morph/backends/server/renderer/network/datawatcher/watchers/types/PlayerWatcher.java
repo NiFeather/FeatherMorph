@@ -112,34 +112,6 @@ public class PlayerWatcher extends LivingEntityWatcher
             affected.forEach(p ->
                     spawnPackets.forEach(packet -> protocol.sendPacket(p, packet)));
         }
-
-        if (entry.equals(CustomEntries.ANIMATION))
-        {
-            var animId = newVal + "";
-
-            switch (animId)
-            {
-                case AnimationNames.LAY ->
-                {
-                    this.remove(ValueIndex.PLAYER.POSE);
-                    this.writePersistent(ValueIndex.PLAYER.POSE, EntityPose.SLEEPING);
-
-                    var playerPos = getBindingPlayer().getLocation();
-                    var vec3i = new Vector3i(playerPos.getBlockX(), playerPos.getBlockY(), playerPos.getBlockZ());
-                    this.writePersistent(ValueIndex.PLAYER.BED_POS, Optional.of(vec3i));
-                }
-                case AnimationNames.CRAWL ->
-                {
-                    resetValues();
-                    this.writePersistent(ValueIndex.PLAYER.POSE, EntityPose.SWIMMING);
-                }
-                case AnimationNames.STANDUP, AnimationNames.RESET ->
-                {
-                    this.writePersistent(ValueIndex.PLAYER.POSE, SpigotConversionUtil.fromBukkitPose(getBindingPlayer().getPose()));
-                    resetValues();
-                }
-            }
-        }
     }
 
     public List<PacketWrapper<?>> buildPlayerInfoPackets()
@@ -196,13 +168,6 @@ public class PlayerWatcher extends LivingEntityWatcher
     public List<PacketWrapper<?>> buildSpawnPackets() throws BuildFailedException
     {
         return buildSpawnPackets(true);
-    }
-
-    private void resetValues()
-    {
-        this.remove(ValueIndex.PLAYER.POSE);
-        this.writePersistent(ValueIndex.PLAYER.BED_POS, Optional.empty());
-        this.remove(ValueIndex.PLAYER.BED_POS);
     }
 
     @Override

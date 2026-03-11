@@ -4,7 +4,6 @@ import com.mojang.authlib.GameProfile;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.nbt.CompoundTag;
 import org.bukkit.NamespacedKey;
-import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -248,13 +247,6 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
     }
 
     @Override
-    public void playAnimation(String animationId)
-    {
-        if (bindingWatcher != null)
-            bindingWatcher.writeEntry(CustomEntries.ANIMATION, animationId);
-    }
-
-    @Override
     public void onPlayerJoin(Player newInstance)
     {
         if (bindingWatcher == null)
@@ -263,8 +255,9 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
         this.bindingWatcher.writeEntry(CustomEntries.SPAWN_ID, newInstance.getEntityId());
         this.bindingPlayer = newInstance;
 
-        if (bindingWatcher.readEntryOrDefault(CustomEntries.WARDEN_VANISHED, false))
-            bindingWatcher.writeEntry(CustomEntries.ANIMATION, AnimationNames.APPEAR);
+        //todo: revisit to check if this is still required
+        //if (bindingWatcher.readEntryOrDefault(CustomEntries.WARDEN_VANISHED, false))
+        //    bindingWatcher.writeEntry(CustomEntries.ANIMATION, AnimationNames.APPEAR);
     }
 
     private final Map<NamespacedKey, AttributeInstance> cachedAttributes = new ConcurrentHashMap<>();

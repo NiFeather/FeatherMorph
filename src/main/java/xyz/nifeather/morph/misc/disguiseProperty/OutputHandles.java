@@ -22,6 +22,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
+import org.joml.Vector3i;
 import xyz.nifeather.morph.messages.strings.ExceptionStrings;
 import xyz.nifeather.morph.misc.DisguiseEquipment;
 import xyz.nifeather.morph.misc.disguiseProperty.struct.MorphEquipmentStruct;
@@ -97,6 +98,16 @@ public class OutputHandles
         list.add(vector3f.x());
         list.add(vector3f.y());
         list.add(vector3f.z());
+
+        return gson.toJson(list);
+    }
+
+    public static String writeVector3i(String propertyName, Vector3i vector3i)
+    {
+        List<Integer> list = new ArrayList<>();
+        list.add(vector3i.x());
+        list.add(vector3i.y());
+        list.add(vector3i.z());
 
         return gson.toJson(list);
     }
@@ -215,5 +226,10 @@ public class OutputHandles
     public static @NotNull String writeByte(String propertyName, Byte value)
     {
         return "" + value;
+    }
+
+    public static @NotNull String empty(String propertyName, Object val)
+    {
+        return "";
     }
 }
