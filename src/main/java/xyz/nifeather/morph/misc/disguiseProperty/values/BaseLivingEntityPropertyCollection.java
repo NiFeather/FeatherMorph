@@ -67,10 +67,10 @@ public abstract class BaseLivingEntityPropertyCollection<E extends Entity> exten
             .withSuggestions("true", "false")
             .build();
 
-    private void validateInvisibility(Boolean isInvisible, Entity entity, EnumSet<ValidationFlag> validationFlags)
+    private void validateInvisibility(Boolean isInvisible, Entity entity, EnumSet<ValidationSkipFlag> validationSkipFlags)
             throws PropertyValidationException
     {
-        if (validationFlags.contains(ValidationFlag.SKIP_PERMISSIONS))
+        if (validationSkipFlags.contains(ValidationSkipFlag.SKIP_PERMISSIONS))
             return;
 
         if (!entity.hasPermission(CommonPermissions.MAKE_INVISIBLE))

@@ -3,12 +3,10 @@ package xyz.nifeather.morph.misc.disguiseProperty;
 import com.google.common.collect.ImmutableList;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.*;
-import java.util.function.Function;
 
 /**
  * A disguise property
@@ -77,10 +75,10 @@ public record SingleProperty<T>(String identifier, T defaultVal, Class<T> type, 
         return outputHandle.handle(this.id(), value);
     }
 
-    public void validateInput(T value, Entity player, EnumSet<ValidationFlag> validationFlags)
+    public void validateInput(T value, Entity player, EnumSet<ValidationSkipFlag> validationSkipFlags)
             throws PropertyValidationException
     {
-        this.propertyValidator.validate(value, player, validationFlags);
+        this.propertyValidator.validate(value, player, validationSkipFlags);
     }
 
     @Unmodifiable

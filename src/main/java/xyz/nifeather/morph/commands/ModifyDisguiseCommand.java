@@ -22,9 +22,8 @@ import xyz.nifeather.morph.misc.BoundingBoxLookup;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.ParseErrorException;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyValidationException;
-import xyz.nifeather.morph.misc.disguiseProperty.ValidationFlag;
+import xyz.nifeather.morph.misc.disguiseProperty.ValidationSkipFlag;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
-import xyz.nifeather.morph.skills.MorphSkill;
 import xyz.nifeather.morph.utilities.ExceptionUtils;
 
 import java.util.EnumSet;
@@ -98,7 +97,7 @@ public class ModifyDisguiseCommand extends BrigadierCommand
         var propertiesInput = ValueMapArgumentType.get("properties", context);
         try
         {
-            state.disguisePropertyHandler().updateFromPropertiesInput(propertiesInput, context.getSource().getExecutor(), EnumSet.noneOf(ValidationFlag.class));
+            state.disguisePropertyHandler().updateFromPropertiesInput(propertiesInput, context.getSource().getExecutor(), EnumSet.noneOf(ValidationSkipFlag.class));
         }
         catch (ParseErrorException | PropertyValidationException e)
         {

@@ -83,7 +83,7 @@ public class PropertyHandler
         validProperties.put(property.id(), property);
     }
 
-    public void updateFromPropertiesInput(Map<String, String> input, Entity inputSource, EnumSet<ValidationFlag> validationFlags)
+    public void updateFromPropertiesInput(Map<String, String> input, Entity inputSource, EnumSet<ValidationSkipFlag> validationSkipFlags)
             throws ParseErrorException, PropertyValidationException
     {
         var parsedResults = new ConcurrentHashMap<SingleProperty<?>, Object>();
@@ -107,7 +107,7 @@ public class PropertyHandler
             var val = property.forInput(value).orElse(null);
             if (val == null) continue;
 
-            property.validateInput(val, inputSource, validationFlags);
+            property.validateInput(val, inputSource, validationSkipFlags);
             parsedResults.put(property, val);
             this.writeGeneric(property, val);
         }
