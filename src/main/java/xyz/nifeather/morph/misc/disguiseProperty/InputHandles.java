@@ -501,6 +501,8 @@ public class InputHandles
                     .create();
         }
 
+        list.removeIf(Objects::isNull);
+
         if (list.size() == 1)
         {
             var value = list.getFirst();
@@ -579,6 +581,8 @@ public class InputHandles
                         .causedBy(e)
                         .create();
             }
+
+            list.removeIf(Objects::isNull);
 
             if (!list.isEmpty())
                 block = list.getFirst();
@@ -701,6 +705,7 @@ public class InputHandles
         try
         {
             var list = gson.fromJson(value, new TypeToken<List<Double>>(){});
+            list.removeIf(Objects::isNull);
 
             RotationStore rotationStore = new RotationStore();
 
